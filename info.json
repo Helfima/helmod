@@ -1,0 +1,12 @@
+
+{
+  "name": "helmod",
+  "version": "0.1.4",
+  "title": "Helfima Mod",
+  "author": "Helfima",
+  "contact": "",
+  "homepage": "",
+  "description": "Helfima mod with some utility.",
+  "dependencies": ["base >= 0.13"],
+  "factorio_version": "0.13"
+}
