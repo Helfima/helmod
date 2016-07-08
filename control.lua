@@ -4,6 +4,7 @@ end)
 require "core.class"
 require "core.defines"
 require "core.logging"
+require "core.elementGui"
 require "player.playerController"
 helmod = {}
 
@@ -14,7 +15,7 @@ helmod = {}
 -- info=2
 -- erro=1
 -- nothing=0
-Logging:new(0)
+Logging:new(1)
 Logging.console = true
 Logging.force = true
 --===========================

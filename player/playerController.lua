@@ -171,7 +171,7 @@ end
 function PlayerController.methods:getRecipeIconType(recipe)
 	local item = self:getItemPrototype(recipe.name)
 	if item ~= nil then
-		return item.type
+		return "item"
 	end
 	local fluid = self:getFluidPrototype(recipe.name)
 	if fluid ~= nil then

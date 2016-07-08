@@ -76,10 +76,6 @@ end
 --===========================
 function PlannerRecipeEdition.methods:on_event(element, action, item, item2)
 	Logging:debug("on_event:",action, item, item2)
-	if action == "OPEN" then
-		element.state = true
-	end
-
 	if action == "recipe-active" then
 		self.model:setActiveRecipe(item)
 		self.model:update()

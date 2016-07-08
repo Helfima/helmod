@@ -7,23 +7,23 @@ require "planner/plannerRecipeEdition"
 require "planner/plannerFactorySelector"
 require "planner/plannerBeaconSelector"
 
-PLANNER_COMMAND = "planner-command"
-PLANNER_PANEL_MAIN = "planner_main"
-PLANNER_PANEL_INFO = "planner-info"
-PLANNER_PANEL_DATA = "planner-data"
-PLANNER_PANEL_DIALOGUE = "planner-dialogue"
-PLANNER_PANEL_RESULT = "planner-result"
-PLANNER_PANEL_MENU = "planner-menu"
-PLANNER_PANEL_RECIPE_LIST = "planner-list-recipes"
-PLANNER_TABLE_RESULT = "planner-result-table"
-PLANNER_TABLE_SUMMARY = "planner-summary-table"
+PLANNER_COMMAND = "helmod_planner-command"
+PLANNER_PANEL_MAIN = "helmod_planner_main"
+PLANNER_PANEL_INFO = "helmod_planner-info"
+PLANNER_PANEL_DATA = "helmod_planner-data"
+PLANNER_PANEL_DIALOGUE = "helmod_planner-dialogue"
+PLANNER_PANEL_RESULT = "helmod_planner-result"
+PLANNER_PANEL_MENU = "helmod_planner-menu"
+PLANNER_PANEL_RECIPE_LIST = "helmod_planner-list-recipes"
+PLANNER_TABLE_RESULT = "helmod_planner-result-table"
+PLANNER_TABLE_SUMMARY = "helmod_planner-summary-table"
 
-PLANNER_ACTION_SAVE_MODEL = "planner-save-model"
+PLANNER_ACTION_SAVE_MODEL = "helmod_planner-save-model"
 
-PLANNER_ACTION_INGREDIENT_INFO_OPEN = "ingredient-info-open"
-PLANNER_ACTION_PRODUCT_INFO_OPEN = "product-info-open"
+PLANNER_ACTION_INGREDIENT_INFO_OPEN = "helmod_ingredient-info-open"
+PLANNER_ACTION_PRODUCT_INFO_OPEN = "helmod_product-info-open"
 
-PlannerController = setclass("HMPlannerController")
+PlannerController = setclass("HMPlannerController", ElementGui)
 
 function PlannerController.methods:init(parent)
 	self.parent = parent
@@ -35,18 +35,14 @@ function PlannerController.methods:init(parent)
 	self.items = PlannerBuilder:new(self)
 end
 
-function PlannerController.methods:getPrefix()
-	return self.parent.prefix
-end
-
 function PlannerController.methods:cleanController()
-	if self.parent.player.gui.left[self:getGuiName(PLANNER_PANEL_MAIN)] ~= nil then
-		self.parent.player.gui.left[self:getGuiName(PLANNER_PANEL_MAIN)].destroy()
+	if self.parent.player.gui.left[PLANNER_PANEL_MAIN] ~= nil then
+		self.parent.player.gui.left[PLANNER_PANEL_MAIN].destroy()
 	end
 end
 function PlannerController.methods:bindController()
 	if self.parent.gui ~= nil then
-		self.parent.gui.add({type="button", name=self:getGuiName(PLANNER_COMMAND), caption=({PLANNER_COMMAND}), style="helmod_button-small-bold"})
+		self.parent.gui.add({type="button", name=PLANNER_COMMAND, caption=({PLANNER_COMMAND}), style="helmod_button-small-bold"})
 	end
 end
 ----------------------------------------------------------------
@@ -58,7 +54,7 @@ function PlannerController.methods:on_gui_click(event)
 	end
 
 	if event.element.valid then
-		if event.element.name == self:getGuiName(PLANNER_COMMAND) then
+		if event.element.name == PLANNER_COMMAND then
 			self:main()
 		elseif string.find(event.element.name, self:classname()) then
 			local patternAction = self:classname().."([^_]*)"
@@ -164,7 +160,7 @@ function PlannerController.methods:updateListRecipes()
 	self.guiRecipeList = self:addGuiFlowH(self.guiMenu, PLANNER_PANEL_RECIPE_LIST)
 	if self.model.input ~= nil then
 		for r, recipe in pairs(self.model.input) do
-			self:addIconButton(self.guiRecipeList, "HMPlannerRecipeUpdate_OPEN_ID_", self.parent:getRecipeIconType(recipe), recipe.name, recipe.count)
+			self:addSpriteButton(self.guiRecipeList, "HMPlannerRecipeUpdate_OPEN_ID_", self.parent:getRecipeIconType(recipe), recipe.name, recipe.count)
 		end
 	end
 end
@@ -217,16 +213,17 @@ end
 --------------------------------------------------------------------------------------
 function PlannerController.methods:addRow(guiTable, recipe)
 	-- col recipe
-	self:addIconCheckbox(guiTable, "HMPlannerRecipeEdition_OPEN_ID_", "recipe", recipe.name, true)
+	local guiRecipe = self:addGuiFlowH(guiTable,"recipe"..recipe.name)
+	self:addSpriteButton(guiRecipe, "HMPlannerRecipeEdition_OPEN_ID_", self.parent:getRecipeIconType(recipe), recipe.name)
 	-- col factory
 	local guiFactory = self:addGuiFlowH(guiTable,"factory"..recipe.name)
 	local factory = recipe.factory
-	self:addIconCheckbox(guiFactory, "HMPlannerFactorySelector_OPEN_ID_"..recipe.name.."_", "item", factory.name, true)
+	self:addSpriteButton(guiFactory, "HMPlannerFactorySelector_OPEN_ID_"..recipe.name.."_", self.parent:getRecipeIconType(factory), factory.name)
 	self:addGuiLabel(guiFactory, factory.name, factory.count)
 	-- col beacon
 	local guiBeacon = self:addGuiFlowH(guiTable,"beacon"..recipe.name)
 	local beacon = recipe.beacon
-	self:addIconCheckbox(guiBeacon, "HMPlannerBeaconSelector_OPEN_ID_"..recipe.name.."_", "item", beacon.name, true)
+	self:addSpriteButton(guiBeacon, "HMPlannerBeaconSelector_OPEN_ID_"..recipe.name.."_", self.parent:getRecipeIconType(beacon), beacon.name)
 	self:addGuiLabel(guiBeacon, beacon.name, beacon.count)
 	-- ingredient
 	local tProducts = self:addGuiFlowH(guiTable,"products_"..recipe.name)
@@ -287,138 +284,12 @@ function PlannerController.methods:updateValue()
 end
 
 --------------------------------------------------------------------------------------
-function PlannerController.methods:getGuiName(key)
-	--self.index = self.index+1
-	return key
-end
-
---------------------------------------------------------------------------------------
-function PlannerController.methods:addGuiLabel(parent, key, caption)
-	return parent.add({type="label", name=self:getGuiName(key), caption=caption})
-end
-
---------------------------------------------------------------------------------------
-function PlannerController.methods:addGuiText(parent, key, text)
-	return parent.add({type="textfield", name=self:getGuiName(key), text=text})
-end
-
---------------------------------------------------------------------------------------
-function PlannerController.methods:addGuiButton(parent, action, key, style, caption)
-	local options = {}
-	options.type = "button"
-	if key ~= nil then
-		options.name = self:getGuiName(action..key)
-	else
-		options.name = self:getGuiName(action)
-	end
-	if style ~= nil then
-		options.style = style
-	end
-	if caption ~= nil then
-		options.caption = caption
-	end
-
-	local button = nil
-	local ok , err = pcall(function()
-		button = parent.add(options)
-	end)
-	if not ok then
-		options.style = "helmod_button-default"
-		if caption ~= nil then
-			options.caption = key.."("..caption..")"
-		else
-			options.caption = key
-		end
-		button = parent.add(options)
-	end
-	return button
-end
-
---------------------------------------------------------------------------------------
-function PlannerController.methods:addGuiCheckbox(parent, key, state, style)
-	return parent.add({type="checkbox", name=self:getGuiName(key), state=state, style=style})
-end
-
---------------------------------------------------------------------------------------
-function PlannerController.methods:addItemButton(parent, action, key, caption)
-	return self:addGuiButton(parent, action, key, self:getGuiName(key), caption)
-end
-
---------------------------------------------------------------------------------------
-function PlannerController.methods:addIconButton(parent, action, type, key, caption)
-	return self:addGuiButton(parent, action, key, "helmod_button_"..type.."_"..key, caption)
-end
-
---------------------------------------------------------------------------------------
-function PlannerController.methods:addIconCheckbox(parent, action, type, key, state , caption)
-	local controller = self
-	local checkbox = nil
-	local ok , err = pcall(function()
-		checkbox = controller:addGuiCheckbox(parent, action..key, state, "helmod_checkbox_"..type.."_"..key)
-	end)
-	if not ok then
-		Logging:debug(err)
-		if caption ~= nil then
-			checkbox = self:addGuiButton(parent, action, key, "helmod_button-default", key.."("..caption..")")
-		else
-			checkbox = self:addGuiButton(parent, action, key, "helmod_button-default", key)
-		end
-	end
-	return checkbox
-end
---------------------------------------------------------------------------------------
-function PlannerController.methods:addGuiFlowH(parent, key)
-	return parent.add{type="flow", name=self:getGuiName(key), direction="horizontal"}
-end
-
---------------------------------------------------------------------------------------
-function PlannerController.methods:addGuiFlowV(parent, key)
-	return parent.add{type="flow", name=self:getGuiName(key), direction="vertical"}
-end
-
---------------------------------------------------------------------------------------
-function PlannerController.methods:addGuiFrameH(parent, key, style, caption)
-	local options = {}
-	options.type = "frame"
-	options.direction = "horizontal"
-	options.name = self:getGuiName(key)
-	if style ~= nil then
-		options.style = style
-	end
-	if caption ~= nil then
-		options.caption = caption
-	end
-	return parent.add(options)
-end
-
---------------------------------------------------------------------------------------
-function PlannerController.methods:addGuiFrameV(parent, key, style, caption)
-	local options = {}
-	options.type = "frame"
-	options.direction = "vertical"
-	options.name = self:getGuiName(key)
-	if style ~= nil then
-		options.style = style
-	end
-	if caption ~= nil then
-		options.caption = caption
-	end
-	return parent.add(options)
-end
-
---------------------------------------------------------------------------------------
-function PlannerController.methods:addGuiTable(parent, key, colspan)
-	return parent.add{type="table", name=self:getGuiName(key), colspan=colspan}
-end
-
-function PlannerController.methods:formatNumber(n)
-	return tostring(math.floor(n)):reverse():gsub("(%d%d%d)","%1 "):gsub(" (%-?)$","%1"):reverse()
-end
-
 function PlannerController.methods:saveData(data)
 	local content = serpent.dump(data)
 	game.write_file(self.modelFilename, content)
 end
+
+
 
 
 

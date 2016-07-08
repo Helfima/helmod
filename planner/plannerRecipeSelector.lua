@@ -19,7 +19,7 @@ function PlannerRecipeSelector.methods:after_open(element, action, item, item2)
 		-- set le groupe
 		if self.recipeGroupSelected == nil then self.recipeGroupSelected = group end
 		-- ajoute les icons de groupe
-		local action = self:addIconCheckbox(self.guiRecipeSelectorGroups, self:classname().."_recipe-group_ID_", "item-group", group, true)
+		local action = self:addXxlSpriteButton(self.guiRecipeSelectorGroups, self:classname().."_recipe-group_ID_", "item-group", group)
 	end
 end
 
@@ -28,7 +28,6 @@ function PlannerRecipeSelector.methods:on_event(element, action, item, item2)
 	Logging:debug("on_event:",action, item, item2)
 	if action == "recipe-group" then
 		self.recipeGroupSelected = item
-		element.state = true
 		self:on_update(element, action, item, item2)
 	end
 	
@@ -50,7 +49,8 @@ function PlannerRecipeSelector.methods:on_update(element, action, item, item2)
 	self.guiRecipeSelectorTable = self:addGuiTable(self.gui, "recipe-table", 10)
 	for key, recipe in pairs(self.player:getRecipes()) do
 		if recipe.group.name == self.recipeGroupSelected then
-			self:addIconCheckbox(self.guiRecipeSelectorTable, self:classname().."_recipe-select_ID_", self.player:getRecipeIconType(recipe), recipe.name, true)
+			Logging:debug("PlannerRecipeSelector:on_update",recipe.name)
+			self:addSpriteButton(self.guiRecipeSelectorTable, self:classname().."_recipe-select_ID_", self.player:getRecipeIconType(recipe), recipe.name)
 		end
 	end
 

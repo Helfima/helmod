@@ -1,4 +1,97 @@
+--
+-- @see https://forums.factorio.com/viewtopic.php?f=28&t=24292
+--
+
+function sprite(filename, size, scale, shift, position)
+	return {
+		filename = filename,
+		priority = "extra-high-no-scale",
+		align = "center",
+		width = size,
+		height = size,
+		scale = scale,
+		shift = shift,
+		x = position.x,
+		y = position.y
+	}
+end
+
+function spriteIcon(filename, size, scale, shift, position)
+	return {
+		type = "sprite",
+		sprite = sprite(filename, size, scale, shift, position)
+	}
+end
+
+function monolithIcon(filename, size, scale, shift, position)
+	return {
+		type = "monolith",
+		monolith_image = sprite(filename, size, scale, shift, position)
+	}
+end
+
+--
+-- @see https://forums.factorio.com/viewtopic.php?f=28&t=24294
+--
+function layeredIcon (filename, size, scale, shift, position)
+	return {
+		type = "layered",
+		layers = {
+			{ -- the border and background are a composition
+				type = "composition",
+				filename = "__core__/graphics/gui.png",
+				corner_size = {3, 3},
+				position = {0, 0}
+			},
+			{
+				type = "monolith",
+				monolith_image = sprite(filename, size, scale, shift, position)
+			}
+		}
+	}
+end
+
+
 local default_gui = data.raw["gui-style"].default
+
+default_gui["helmod_button-item"] = {
+	type = "button_style",
+	parent = "button_style",
+	width = 35,
+	height = 35,
+	
+	top_padding = 4,
+	right_padding = 4,
+	bottom_padding = 4,
+	left_padding = 4,
+	
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 35/36, {0,0}, {x=111,y=0}),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 35/36, {0,0}, {x=148,y=0}),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 35/36, {0,0}, {x=184,y=0}),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 35/36, {0,0}, {x=111,y=0})
+}
+
+default_gui["helmod_button-item-small"] = {
+	type = "button_style",
+	parent = "button_style",
+	width = 24,
+	height = 24,
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 24/36, {0,0}, {x=111,y=0}),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 24/36, {0,0}, {x=148,y=0}),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 24/36, {0,0}, {x=184,y=0}),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 24/36, {0,0}, {x=111,y=0})
+}
+
+default_gui["helmod_button-item-xxl"] = {
+	type = "button_style",
+	parent = "button_style",
+	width = 64,
+	height = 64,
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 64/36, {0,0}, {x=111,y=0}),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 64/36, {0,0}, {x=148,y=0}),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 64/36, {0,0}, {x=184,y=0}),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 64/36, {0,0}, {x=111,y=0})
+}
 
 default_gui["helmod_button-default"] = {
 	type = "button_style",
@@ -48,6 +141,7 @@ default_gui["helmod_button-default"] = {
 	},
 	pie_progress_color = {r=1, g=1, b=1}
 }
+
 default_gui["helmod_button-small-bold"] = {
 	type = "button_style",
 	parent = "helmod_button-default",
@@ -61,6 +155,7 @@ default_gui["helmod_button-small-bold"] = {
 	bottom_padding = 2,
 	left_padding = 2
 }
+
 default_gui["helmod_button-small-bold-start"] = {
 	type = "button_style",
 	parent = "helmod_button-default",
@@ -74,6 +169,7 @@ default_gui["helmod_button-small-bold-start"] = {
 	bottom_padding = 2,
 	left_padding = 2
 }
+
 default_gui["helmod_button-small-bold-middle"] = {
 	type = "button_style",
 	parent = "helmod_button-default",
@@ -87,6 +183,7 @@ default_gui["helmod_button-small-bold-middle"] = {
 	bottom_padding = 2,
 	left_padding = 0
 }
+
 default_gui["helmod_button-small-bold-end"] = {
 	type = "button_style",
 	parent = "helmod_button-default",
