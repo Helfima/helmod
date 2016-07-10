@@ -15,7 +15,7 @@ helmod = {}
 -- info=2
 -- erro=1
 -- nothing=0
-Logging:new(1)
+Logging:new(0)
 Logging.console = true
 Logging.force = true
 --===========================
@@ -25,14 +25,6 @@ function helmod:on_init(event)
 	self.loaded = false;
 
 	self.playerControllers = {}
-	
-	if global.beacon == nil then
-		global.beacon = helmod_defines.beacon
-	end
-
-	if global.factory == nil then
-		global.factory = helmod_defines.factory
-	end
 
 end
 
@@ -60,7 +52,6 @@ function helmod:on_tick(event)
 		if self.loaded ~= true then
 			self:init_playerController()
 			self.loaded = true;
-			Logging:debug("global=",global)
 		end
 	end
 	if game.tick % 300 == 0 then

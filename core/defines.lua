@@ -72,8 +72,8 @@ helmod_defines.items["crude-oil"]= {
 
 -- parametre des factories
 helmod_defines.beacon = {}
-helmod_defines.beacon["basic-beacon"]={
-	name = "basic-beacon",
+helmod_defines.beacon["beacon"]={
+	name = "beacon",
 	energy_nominal = 480,
 	combo = 3,
 	factory = 2,

@@ -53,22 +53,28 @@ end
 
 
 local default_gui = data.raw["gui-style"].default
-
-default_gui["helmod_button-item"] = {
+local normal_icon_size=36
+default_gui["helmod_button-icon"] = {
 	type = "button_style",
 	parent = "button_style",
-	width = 35,
-	height = 35,
+	width = normal_icon_size,
+	height = normal_icon_size,
 	
-	top_padding = 4,
-	right_padding = 4,
-	bottom_padding = 4,
-	left_padding = 4,
+	scalable = false,
 	
-	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 35/36, {0,0}, {x=111,y=0}),
-	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 35/36, {0,0}, {x=148,y=0}),
-	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 35/36, {0,0}, {x=184,y=0}),
-	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 35/36, {0,0}, {x=111,y=0})
+	top_padding = 2,
+	right_padding = 2,
+	bottom_padding = 2,
+	left_padding = 2,
+}
+
+default_gui["helmod_select-button-icon"] = {
+	type = "button_style",
+	parent = "helmod_button-icon",
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=0}),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=148,y=0}),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=184,y=0}),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=0})
 }
 
 default_gui["helmod_button-item-small"] = {
@@ -156,6 +162,17 @@ default_gui["helmod_button-small-bold"] = {
 	left_padding = 2
 }
 
+default_gui["helmod_page-label"] = {
+	type = "label_style",
+      parent = "label_style",
+	top_padding = 6,
+	right_padding = 2,
+	bottom_padding = 2,
+	left_padding = 2
+}
+
+
+      
 default_gui["helmod_button-small-bold-start"] = {
 	type = "button_style",
 	parent = "helmod_button-default",
@@ -210,20 +227,44 @@ default_gui["helmod_frame_style"] = {
 default_gui["helmod_menu_frame_style"] = {
 	type = "frame_style",
 	parent = "frame_style",
-	minimal_width = 400,
+	minimal_width = 600,
 	resize_row_to_width = true
 }
 
 
-default_gui["helmod_result-scroll"] = {
+default_gui["helmod_page-result-flow"] = {
+	type = "flow_style",
+	parent = "flow_style",
+	minimal_width = 500
+}
+
+default_gui["helmod_result"] = {
 	type = "frame_style",
 	parent = "frame_style",
-	minimal_width = 400,
-	minimal_height = 500,
+	minimal_width = 600,
+	minimal_height = 500
+}
+
+default_gui["helmod_align-right-flow"] = {
+	type = "flow_style",
+	parent = "flow_style",
+	align = "right"
 }
 
 default_gui["helmod_summary-frame"] = {
 	type = "frame_style",
 	parent = "frame_style",
-	minimal_width = 150,
+	minimal_width = 150
+}
+
+default_gui["helmod_module-table-frame"] = {
+	type = "frame_style",
+	parent = "frame_style",
+	minimal_width = 300
+}
+
+default_gui["helmod_recipe-table-frame"] = {
+	type = "frame_style",
+	parent = "frame_style",
+	minimal_width = 150
 }

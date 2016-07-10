@@ -1,12 +1,37 @@
+-------------------------------------------------------------------------------
+-- Classe to build recipe edition dialog
+--
+-- @module PlannerRecipeEdition
+-- @extends #PlannerDialog
+--
+
 PlannerRecipeEdition = setclass("HMPlannerRecipeEdition", PlannerDialog)
 
+-------------------------------------------------------------------------------
+-- On initialization
+--
+-- @function [parent=#PlannerRecipeEdition] on_init
+--
+-- @param #PlannerController parent parent controller
+--
 function PlannerRecipeEdition.methods:on_init(parent)
 	self.panelCaption = "Recipe"
 	self.player = self.parent.parent
 	self.model = self.parent.model
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- On open
+--
+-- @function [parent=#PlannerRecipeEdition] on_open
+--
+-- @param #LuaGuiElement element button
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item second item name
+--
+-- @return #boolean if true the next call close dialog
+--
 function PlannerRecipeEdition.methods:on_open(element, action, item, item2)
 	local close = true
 	if self.guiRecipeLast == nil or self.guiRecipeLast ~= item then
@@ -16,21 +41,48 @@ function PlannerRecipeEdition.methods:on_open(element, action, item, item2)
 	return close
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- On close dialog
+--
+-- @function [parent=#PlannerRecipeEdition] on_close
+--
+-- @param #LuaGuiElement element button
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item second item name
+--
 function PlannerRecipeEdition.methods:on_close(element, action, item, item2)
 	self.guiRecipeLast = nil
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- After open
+--
+-- @function [parent=#PlannerRecipeEdition] after_open
+--
+-- @param #LuaGuiElement element button
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item second item name
+--
 function PlannerRecipeEdition.methods:after_open(element, action, item, item2)
 	self.guiInfo = self:addGuiFlowV(self.gui, "info")
-	self.guiIngredients = self:addGuiFrameV(self.gui, "ingredients", nil, "Ingredients")
-	self.guiProducts = self:addGuiFrameV(self.gui, "products", nil, "Products")
+	self.guiIngredients = self:addGuiFrameV(self.gui, "ingredients", "helmod_recipe-table-frame", "Ingredients")
+	self.guiProducts = self:addGuiFrameV(self.gui, "products", "helmod_recipe-table-frame", "Products")
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- On update
+--
+-- @function [parent=#PlannerRecipeEdition] on_update
+--
+-- @param #LuaGuiElement element button
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item second item name
+--
 function PlannerRecipeEdition.methods:on_update(element, action, item, item2)
-	self.recipe = self.model.recipes[item]
+	self.recipe = self.player:getRecipe(item)
 	if self.recipe ~= nil then
 		self:updateInfo(element, action, item, item2)
 		self:updateIngredients(element, action, item, item2)
@@ -38,18 +90,46 @@ function PlannerRecipeEdition.methods:on_update(element, action, item, item2)
 	end
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Update information
+--
+-- @function [parent=#PlannerRecipeEdition] updateInfo
+--
+-- @param #LuaGuiElement element button
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item second item name
+--
 function PlannerRecipeEdition.methods:updateInfo(element, action, item, item2)
 	for k,guiName in pairs(self.guiInfo.children_names) do
 		self.guiInfo[guiName].destroy()
 	end
-	self:addIconButton(self.guiInfo, "recipe", "recipe", self.recipe.name)
+	local guiTableHeader = self:addGuiTable(self.guiInfo,"table-header",2)
+	self:addIconButton(guiTableHeader, "recipe", "recipe", self.recipe.name)
+	self:addGuiLabel(guiTableHeader, "label", self.recipe.name)
+
 	local guiTable= self:addGuiTable(self.guiInfo, "table-recipe", 2)
 	self:addGuiLabel(guiTable, "label-active", "Active")
-	self:addGuiCheckbox(guiTable, self:classname().."_recipe-active_ID_"..self.recipe.name, self.recipe.valid)
+
+	local actived = true
+	if self.model.recipes[item] ~= nil then
+		actived = self.model.recipes[item].active
+	elseif self.model.global.recipes[item] ~= nil then
+		actived = self.model.global.recipes[item].active
+	end
+	self:addGuiCheckbox(guiTable, self:classname().."_recipe-active_ID_"..self.recipe.name, actived)
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Update ingredients information
+--
+-- @function [parent=#PlannerRecipeEdition] updateIngredients
+--
+-- @param #LuaGuiElement element button
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item second item name
+--
 function PlannerRecipeEdition.methods:updateIngredients(element, action, item, item2)
 	for k,guiName in pairs(self.guiIngredients.children_names) do
 		self.guiIngredients[guiName].destroy()
@@ -61,7 +141,16 @@ function PlannerRecipeEdition.methods:updateIngredients(element, action, item, i
 	end
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Update products information
+--
+-- @function [parent=#PlannerRecipeEdition] updateProducts
+--
+-- @param #LuaGuiElement element button
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item second item name
+--
 function PlannerRecipeEdition.methods:updateProducts(element, action, item, item2)
 	for k,guiName in pairs(self.guiProducts.children_names) do
 		self.guiProducts[guiName].destroy()
@@ -73,7 +162,16 @@ function PlannerRecipeEdition.methods:updateProducts(element, action, item, item
 	end
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- On event
+--
+-- @function [parent=#PlannerRecipeEdition] on_event
+--
+-- @param #LuaGuiElement element button
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item second item name
+--
 function PlannerRecipeEdition.methods:on_event(element, action, item, item2)
 	Logging:debug("on_event:",action, item, item2)
 	if action == "recipe-active" then
@@ -83,147 +181,3 @@ function PlannerRecipeEdition.methods:on_event(element, action, item, item2)
 		self:close()
 	end
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

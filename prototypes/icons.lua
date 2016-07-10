@@ -37,6 +37,7 @@ function sprite(filename, size, scale, shift, position)
 	return {
 		filename = filename,
 		priority = "extra-high-no-scale",
+		--priority = "extra-high",
 		align = "center",
 		width = size,
 		height = size,
@@ -133,6 +134,9 @@ local function addButtonStyleX32(name,icon)
 			right_padding = 0,
 			bottom_padding = 0,
 			left_padding = 0,
+			
+			scalable = false,
+			
 			width = iconSize,
 			height = iconSize,
 			default_graphical_set = monolithIcon(icon, iconSize, 1, {0,0}, {x=0,y=0}),

@@ -9,11 +9,10 @@ function ModelBeacon.methods:init(name, count)
 	self.type = "item"
 	self.count = count
 	self.valid = true
-	self.active = false
-	self.energy_nominal = 0
+	self.energy_nominal = 480
 	self.energy = 0
 	self.energy_total = 0
-	self.combo = 1
+	self.combo = 3
 	self.factory = 2
 	self.efficiency = 0.5
 	self.module_slots = 2

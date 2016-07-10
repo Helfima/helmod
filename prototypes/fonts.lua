@@ -4,13 +4,13 @@ data:extend(
     type = "font",
     name = "helmod_font-small",
     from = "default",
-    size = 8
+    size = 10
   },
   {
     type = "font",
     name = "helmod_font-normal",
     from = "default",
-    size = 10
+    size = 12
   },
   {
     type = "font",
@@ -22,13 +22,13 @@ data:extend(
     type = "font",
     name = "helmod_font-small-bold",
     from = "default-bold",
-    size = 8
+    size = 10
   },
   {
     type = "font",
     name = "helmod_font-small-bold-border",
     from = "default-bold",
-    size = 8,
+    size = 10,
     border = true,
     border_color = {}
   },
@@ -36,7 +36,7 @@ data:extend(
     type = "font",
     name = "helmod_font-normal-bold",
     from = "default-bold",
-    size = 10
+    size = 12
   },
   {
     type = "font",

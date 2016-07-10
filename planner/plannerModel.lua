@@ -1,3 +1,4 @@
+require "planner/plannerModelGlobal"
 require "planner/plannerModelRecipe"
 require "planner/plannerModelFactory"
 require "planner/plannerModelBeacon"
@@ -12,32 +13,61 @@ function PlannerIngredient.methods:init(name, count)
 	self.count = count
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Classe model
+--
+-- @module PlannerModel
+--
 PlannerModel = setclass("HMModel")
 
---===========================
--- initialisation
------------------------------
--- @param parent
+-------------------------------------------------------------------------------
+-- Initialize model
+--
+-- @function [parent=#PlannerModel] init
+--
+-- @param #PlannerController parent parent
+--
 function PlannerModel.methods:init(parent)
 	self.parent = parent
 	self.player = self.parent.parent
-	
+
 	self.index = 1
-	-- input des recipes (la selection)
+	-- table of inputs
 	self.input = {}
-	-- data des recipes
+	-- table of recipes
 	self.recipes = {}
-	-- table des ingredients (le resultat)
+	-- table of ingredients (le resultat)
 	self.ingredients = {}
+
+	-- table of global for saving
+	self.global = ModelGlobal:new()
+
 	self.needPrepare = false
 	self.time = 60
 end
 
---===========================
--- ajoute un recipe dans l'input
------------------------------
--- @param key - nom du recipe
+-------------------------------------------------------------------------------
+-- Count recipes
+--
+-- @function [parent=#PlannerModel] countRepices
+--
+-- @return #number
+--
+function PlannerModel.methods:countRepices()
+	local count = 0
+	for key, recipe in pairs(self.recipes) do
+		count = count + 1
+	end
+	return count
+end
+
+-------------------------------------------------------------------------------
+-- Add a recipe
+--
+-- @function [parent=#PlannerModel] addInput
+--
+-- @param #string key recipe name
+--
 function PlannerModel.methods:addInput(key)
 	if self.input[key] == nil then
 		local recipe = self:getRecipe(key);
@@ -57,13 +87,16 @@ function PlannerModel.methods:addInput(key)
 end
 
 
---===========================
--- update un recipe de l'input
------------------------------
--- @param key - nom du recipe
--- @param products - map product/count
+-------------------------------------------------------------------------------
+-- Update a recipe
+--
+-- @function [parent=#PlannerModel] updateInput
+--
+-- @param #string key recipe name
+-- @param #table products products of recipe (map product/count)
+--
 function PlannerModel.methods:updateInput(key, products)
-	Logging:debug("updateInput:",products)
+	Logging:trace("updateInput:",products)
 	if self.input[key] ~= nil then
 		for index, product in pairs(self.input[key].products) do
 			product.count = products[product.name]
@@ -72,10 +105,13 @@ function PlannerModel.methods:updateInput(key, products)
 	end
 end
 
---===========================
--- supprime un recipe
------------------------------
--- @param key - nom du recipe
+-------------------------------------------------------------------------------
+-- Remove a recipe
+--
+-- @function [parent=#PlannerModel] removeInput
+--
+-- @param #string key recipe name
+--
 function PlannerModel.methods:removeInput(key)
 	local newInput = {}
 	for k, recipe in pairs(self.input) do
@@ -85,45 +121,61 @@ function PlannerModel.methods:removeInput(key)
 	self.needPrepare = true
 end
 
---===========================
--- active/desactive un recipe
------------------------------
--- @param key - nom du recipe
+-------------------------------------------------------------------------------
+-- Active/desactive a recipe
+--
+-- @function [parent=#PlannerModel] setActiveRecipe
+--
+-- @param #string key recipe name
+--
 function PlannerModel.methods:setActiveRecipe(key)
-	if self.recipes[key] ~= nil then
-		self.recipes[key].valid = not(self.recipes[key].valid)
+	local recipe = self.recipes[key]
+	if recipe ~= nil then
+		recipe.active = not(recipe.active)
 	end
+	self.global:setActiveRecipe(key)
 	self.needPrepare = true
 end
 
---===========================
--- affecte un beacon
------------------------------
--- @param key - nom du recipe
--- @param name - nom de la factory
+-------------------------------------------------------------------------------
+-- Set the beacon
+--
+-- @function [parent=#PlannerModel] setBeacon
+--
+-- @param #string key recipe name
+-- @param #string key beacon name
+--
 function PlannerModel.methods:setBeacon(key, name)
 	if self.recipes[key] ~= nil then
 		local beacon = self:getEntityPrototype(name)
 		if beacon ~= nil then
+			-- set global default
+			self.global:setBeaconRecipe(key, beacon.name)
+
 			self.recipes[key].beacon.name = beacon.name
 			self.recipes[key].beacon.type = beacon.type
-			if global.beacon[name] ~= nil then
-				self.recipes[key].beacon.energy_nominal = global.beacon[name].energy_nominal
-				self.recipes[key].beacon.combo = global.beacon[name].combo
-				self.recipes[key].beacon.factory = global.beacon[name].factory
-				self.recipes[key].beacon.efficiency = global.beacon[name].efficiency
-				self.recipes[key].beacon.module_slots = global.beacon[name].module_slots
+			-- copy the default parameters
+			local defaultBeacon = self.global:getBeacon(beacon.name)
+			if defaultBeacon ~= nil then
+				self.recipes[key].beacon.energy_nominal = defaultBeacon.energy_nominal
+				self.recipes[key].beacon.combo = defaultBeacon.combo
+				self.recipes[key].beacon.factory = defaultBeacon.factory
+				self.recipes[key].beacon.efficiency = defaultBeacon.efficiency
+				self.recipes[key].beacon.module_slots = defaultBeacon.module_slots
 			end
 		end
 		self.needPrepare = true
 	end
 end
 
---===========================
--- update un beacon
------------------------------
--- @param key - nom du recipe
--- @param options - map attribute/valeur
+-------------------------------------------------------------------------------
+-- Update a beacon
+--
+-- @function [parent=#PlannerModel] updateBeacon
+--
+-- @param #string key recipe name
+-- @param #table options map attribute/valeur
+--
 function PlannerModel.methods:updateBeacon(key, options)
 	if self.recipes[key] ~= nil then
 		if options.energy_nominal ~= nil then
@@ -145,11 +197,14 @@ function PlannerModel.methods:updateBeacon(key, options)
 	end
 end
 
---===========================
--- ajoute un module
------------------------------
--- @param key - nom du recipe
--- @param name - nom du module
+-------------------------------------------------------------------------------
+-- Add a module in beacon
+--
+-- @function [parent=#PlannerModel] addBeaconModule
+--
+-- @param #string key recipe name
+-- @param #string key module name
+--
 function PlannerModel.methods:addBeaconModule(key, name)
 	if self.recipes[key] ~= nil then
 		local beacon = self.recipes[key].beacon
@@ -158,11 +213,14 @@ function PlannerModel.methods:addBeaconModule(key, name)
 	end
 end
 
---===========================
--- supprime un module
------------------------------
--- @param key - nom du recipe
--- @param name - nom du module
+-------------------------------------------------------------------------------
+-- Remove a module in beacon
+--
+-- @function [parent=#PlannerModel] removeBeaconModule
+--
+-- @param #string key recipe name
+-- @param #string key module name
+--
 function PlannerModel.methods:removeBeaconModule(key, name)
 	if self.recipes[key] ~= nil then
 		local beacon = self.recipes[key].beacon
@@ -171,32 +229,42 @@ function PlannerModel.methods:removeBeaconModule(key, name)
 	end
 end
 
---===========================
--- affecte une factory
------------------------------
--- @param key - nom du recipe
--- @param name - nom de la factory
+-------------------------------------------------------------------------------
+-- Set a factory
+--
+-- @function [parent=#PlannerModel] setFactory
+--
+-- @param #string key recipe name
+-- @param #string key factory name
+--
 function PlannerModel.methods:setFactory(key, name)
 	if self.recipes[key] ~= nil then
 		local factory = self:getEntityPrototype(name)
 		if factory ~= nil then
+			-- set global default
+			self.global:setFactoryRecipe(key, factory.name)
+
 			self.recipes[key].factory.name = factory.name
 			self.recipes[key].factory.type = factory.type
-			if global.factory[name] ~= nil then
-				self.recipes[key].factory.energy_nominal = global.factory[name].energy_nominal
-				self.recipes[key].factory.speed_nominal = global.factory[name].speed_nominal
-				self.recipes[key].factory.module_slots = global.factory[name].module_slots
+			local defaultFactory = self.global:getFactory(factory.name)
+			if defaultFactory ~= nil then
+				self.recipes[key].factory.energy_nominal = defaultFactory.energy_nominal
+				self.recipes[key].factory.speed_nominal = defaultFactory.speed_nominal
+				self.recipes[key].factory.module_slots = defaultFactory.module_slots
 			end
 		end
 		self.needPrepare = true
 	end
 end
 
---===========================
--- update une factory
------------------------------
--- @param key - nom du recipe
--- @param options - map attribute/valeur
+-------------------------------------------------------------------------------
+-- Update a factory
+--
+-- @function [parent=#PlannerModel] updateFactory
+--
+-- @param #string key recipe name
+-- @param #table options
+--
 function PlannerModel.methods:updateFactory(key, options)
 	if self.recipes[key] ~= nil then
 		if options.energy_nominal ~= nil then
@@ -212,11 +280,14 @@ function PlannerModel.methods:updateFactory(key, options)
 	end
 end
 
---===========================
--- ajoute un module
------------------------------
--- @param key - nom du recipe
--- @param name - nom du module
+-------------------------------------------------------------------------------
+-- Add a module in factory
+--
+-- @function [parent=#PlannerModel] addFactoryModule
+--
+-- @param #string key recipe name
+-- @param #string key module name
+--
 function PlannerModel.methods:addFactoryModule(key, name)
 	if self.recipes[key] ~= nil then
 		local factory = self.recipes[key].factory
@@ -225,11 +296,14 @@ function PlannerModel.methods:addFactoryModule(key, name)
 	end
 end
 
---===========================
--- supprime un module
------------------------------
--- @param key - nom du recipe
--- @param name - nom du module
+-------------------------------------------------------------------------------
+-- Remove a module from factory
+--
+-- @function [parent=#PlannerModel] removeFactoryModule
+--
+-- @param #string key recipe name
+-- @param #string key module name
+--
 function PlannerModel.methods:removeFactoryModule(key, name)
 	if self.recipes[key] ~= nil then
 		local factory = self.recipes[key].factory
@@ -237,8 +311,12 @@ function PlannerModel.methods:removeFactoryModule(key, name)
 		self.needPrepare = true
 	end
 end
---===========================
--- initialise les compteurs
+
+-------------------------------------------------------------------------------
+-- Reset recipes
+--
+-- @function [parent=#PlannerModel] recipesReset
+--
 function PlannerModel.methods:recipesReset()
 	Logging:trace("PlannerModel:recipesReset")
 	for key, recipe in pairs(self.recipes) do
@@ -246,8 +324,13 @@ function PlannerModel.methods:recipesReset()
 	end
 end
 
---===========================
--- initialise les compteurs
+-------------------------------------------------------------------------------
+-- Reset recipe
+--
+-- @function [parent=#PlannerModel] recipeReset
+--
+-- @param #ModelRecipe recipe
+--
 function PlannerModel.methods:recipeReset(recipe)
 	Logging:trace("PlannerModel:recipeReset=",recipe)
 	for index, product in pairs(recipe.products) do
@@ -258,8 +341,11 @@ function PlannerModel.methods:recipeReset(recipe)
 	end
 end
 
---===========================
--- initialise les compteurs
+-------------------------------------------------------------------------------
+-- Reset ingredients
+--
+-- @function [parent=#PlannerModel] ingredientsReset
+--
 function PlannerModel.methods:ingredientsReset()
 	Logging:trace("PlannerModel:ingredientsReset")
 	for k, ingredient in pairs(self.ingredients) do
@@ -267,10 +353,13 @@ function PlannerModel.methods:ingredientsReset()
 	end
 end
 
---===========================
--- sequence de mise a jour
+-------------------------------------------------------------------------------
+-- Update model
+--
+-- @function [parent=#PlannerModel] update
+--
 function PlannerModel.methods:update()
-	Logging:debug("PlannerModel:update")
+	Logging:trace("PlannerModel:update")
 	if self.needPrepare then
 		self.index = 1
 		-- initialisation des donnees
@@ -281,6 +370,19 @@ function PlannerModel.methods:update()
 			self:prepare(item)
 		end
 		self.recipes = self.temp
+
+		-- set the default factory and beacon for recipe
+		for k, recipe in pairs(self.recipes) do
+			local globalFactory = self.global:getFactoryRecipe(recipe.name)
+			if globalFactory ~= nil then
+				self:setFactory(recipe.name, globalFactory)
+			end
+			local globalBeacon = self.global:getBeaconRecipe(recipe.name)
+			if globalBeacon ~= nil then
+				self:setBeacon(recipe.name, globalBeacon)
+			end
+		end
+
 		self.needPrepare = false
 	end
 	-- initialise les totaux
@@ -297,22 +399,21 @@ function PlannerModel.methods:update()
 	for k, recipe in pairs(self.recipes) do
 		self:factoryCompute(recipe)
 	end
-	--	for k, recipe in pairs(self.recipes) do
-	--		self:craft(recipe.name, recipe.count)
-	--	end
-	--	-- consolide les donnees comme l'energie
-	--	self:factory()
+
 	--	-- genere un bilan
-	--	self:createSummary()
+	self:createSummary()
 end
 
---===========================
--- boucle reccursive sur chaque recipe
------------------------------
--- @param element - recipe
--- @param level - profondeur
+-------------------------------------------------------------------------------
+-- Prepare model
+--
+-- @function [parent=#PlannerModel] prepare
+--
+-- @param #ModelRecipe recipe
+-- @param #number level
+--
 function PlannerModel.methods:prepare(element, level)
-	Logging:debug("PlannerModel:prepare=",element)
+	Logging:trace("PlannerModel:prepare=",element)
 	-- incremente l'index
 	self.index = self.index + 1
 	if level == nil then
@@ -321,26 +422,30 @@ function PlannerModel.methods:prepare(element, level)
 	local recipes = self:searchRecipe(element.name)
 	if recipes ~= nil then
 		for r, recipe in pairs(recipes) do
-			if self.recipes[recipe.name] ~= nil then
-				-- le recipe existe deja on le copie
-				self.temp[recipe.name] = self.recipes[recipe.name]
-			else
-				-- le recipe n'existe pas on le cree
-				local ModelRecipe = ModelRecipe:new(recipe.name)
-				ModelRecipe.energy = recipe.energy
-				ModelRecipe.category = recipe.category
-				ModelRecipe.group = recipe.group.name
-				ModelRecipe.ingredients = recipe.ingredients
-				ModelRecipe.products = recipe.products
+			-- ok if recipe is active
+			if self.global:isActiveRecipe(recipe.name) then
+				if self.recipes[recipe.name] ~= nil then
+					-- le recipe existe deja on le copie
+					self.temp[recipe.name] = self.recipes[recipe.name]
+				else
+					-- le recipe n'existe pas on le cree
+					local ModelRecipe = ModelRecipe:new(recipe.name)
+					ModelRecipe.energy = recipe.energy
+					ModelRecipe.category = recipe.category
+					ModelRecipe.group = recipe.group.name
+					ModelRecipe.ingredients = recipe.ingredients
+					ModelRecipe.products = recipe.products
 
-				self.temp[recipe.name] = ModelRecipe
-			end
-			if self.temp[recipe.name].ingredients ~= nil and self.temp[recipe.name].valid then
-				Logging:trace("ingredients:",self.temp[recipe.name].ingredients)
-				for k, ingredient in pairs(self.temp[recipe.name].ingredients) do
-					if self.ingredients[ingredient.name] == nil then
-						self.ingredients[ingredient.name] = PlannerIngredient:new(ingredient.name)
-						self:prepare(ingredient, level)
+					self.temp[recipe.name] = ModelRecipe
+
+				end
+				if self.temp[recipe.name].ingredients ~= nil then
+					Logging:trace("ingredients:",self.temp[recipe.name].ingredients)
+					for k, ingredient in pairs(self.temp[recipe.name].ingredients) do
+						if self.ingredients[ingredient.name] == nil then
+							self.ingredients[ingredient.name] = PlannerIngredient:new(ingredient.name)
+							self:prepare(ingredient, level)
+						end
 					end
 				end
 			end
@@ -348,8 +453,15 @@ function PlannerModel.methods:prepare(element, level)
 	end
 end
 
---===========================
--- Retourne la liste des recipe des production
+-------------------------------------------------------------------------------
+-- Get productions list
+--
+-- @function [parent=#PlannerModel] getRecipeByProduct
+--
+-- @param #ModelRecipe recipe
+--
+-- @return #table
+-- 
 function PlannerModel.methods:getRecipeByProduct(element)
 	Logging:trace("PlannerModel:getRecipeByProduct=",element)
 	local recipes = {}
@@ -362,10 +474,18 @@ function PlannerModel.methods:getRecipeByProduct(element)
 	end
 	return recipes
 end
---===========================
--- boucle reccursive sur chaque item et calcul les parametres
+
+-------------------------------------------------------------------------------
+-- Compute the model for recipes
+--
+-- @function [parent=#PlannerModel] craft
+--
+-- @param #ModelRecipe recipe
+-- @param #number count number of item
+-- @param #string path path of the recursive run, necessary for no infite loop
+--
 function PlannerModel.methods:craft(element, count, path)
-	Logging:debug("PlannerModel:craft=",element, path)
+	Logging:trace("PlannerModel:craft=",element, path)
 	if path == nil then path = "_" end
 	local recipes = self:getRecipeByProduct(element)
 	local pCount = count;
@@ -373,10 +493,11 @@ function PlannerModel.methods:craft(element, count, path)
 	if rawlen(recipes) > 0 then
 		pCount = math.ceil(count/rawlen(recipes))
 	end
+
 	for key, recipe in pairs(recipes) do
 		Logging:trace("recipe.index=",recipe.index)
-		Logging:debug("recipe=",recipe)
-		if recipe.valid and not(string.find(path, "_"..recipe.index.."_")) then
+		Logging:trace("recipe=",recipe)
+		if not(string.find(path, "_"..recipe.index.."_")) then
 			local currentProduct = nil
 			-- met a jour le produit
 			for index, product in pairs(recipe.products) do
@@ -394,7 +515,7 @@ function PlannerModel.methods:craft(element, count, path)
 				for module, value in pairs(recipe.factory.modules) do
 					productUsage = productUsage + productNominal * value * helmod_defines.modules[module].productivity
 				end
-				if recipe.beacon.active then
+				if recipe.beacon.valid then
 					for module, value in pairs(recipe.beacon.modules) do
 						productUsage = productUsage + productNominal * value * helmod_defines.modules[module].productivity * recipe.beacon.efficiency * recipe.beacon.combo
 					end
@@ -406,18 +527,24 @@ function PlannerModel.methods:craft(element, count, path)
 		end
 	end
 end
---===========================
------------------------------
--- @param key - nom du prototype
+
+-------------------------------------------------------------------------------
+-- Compute energy, speed, number of factory for recipes
+--
+-- @function [parent=#PlannerModel] factoryCompute
+--
+-- @param #ModelRecipe recipe
+--
 function PlannerModel.methods:factoryCompute(recipe)
-	Logging:debug("PlannerModel:factoryCompute=",recipe)
+	Logging:trace("PlannerModel:factoryCompute=",recipe)
+
 	recipe.factory.speed = recipe.factory.speed_nominal
 	-- effet module factory
 	for module, value in pairs(recipe.factory.modules) do
 		recipe.factory.speed = recipe.factory.speed + recipe.factory.speed_nominal * value * helmod_defines.modules[module].speed
 	end
 	-- effet module beacon
-	if recipe.beacon.active then
+	if recipe.beacon.valid then
 		for module, value in pairs(recipe.beacon.modules) do
 			recipe.factory.speed = recipe.factory.speed + recipe.factory.speed_nominal * value * helmod_defines.modules[module].speed * recipe.beacon.efficiency * recipe.beacon.combo
 		end
@@ -429,8 +556,8 @@ function PlannerModel.methods:factoryCompute(recipe)
 		recipe.factory.energy = recipe.factory.energy + recipe.factory.energy_nominal * value * helmod_defines.modules[module].consumption
 	end
 	-- effet module beacon
-	if recipe.beacon.active then
-		for module, value in pairs(recipe.factory.modules) do
+	if recipe.beacon.valid then
+		for module, value in pairs(recipe.beacon.modules) do
 			recipe.factory.energy = recipe.factory.energy + recipe.factory.energy_nominal * value * helmod_defines.modules[module].consumption * recipe.beacon.efficiency * recipe.beacon.combo
 		end
 	end
@@ -442,27 +569,77 @@ function PlannerModel.methods:factoryCompute(recipe)
 	for k, element in pairs(recipe.products) do
 		if element.count > 0 then product = element end
 	end
-	Logging:debug("product=",product)
+	--Logging:trace("product=",product)
 	if product ~= nil then
 		-- [nombre d'item] * [effort necessaire du recipe] / ([la vitesse de la factory] * [nombre produit par le recipe] * [le temps en second])
 		local count = math.ceil(product.count*recipe.energy/(recipe.factory.speed*product.amount*self.time))
 		recipe.factory.count = count
 		if recipe.beacon.active then
-			recipe.beacon.count = count/recipe.beacon.factory
+			recipe.beacon.count = math.ceil(count/recipe.beacon.factory)
 		else
 			recipe.beacon.count = 0
 		end
 	end
-	--	-- calcul des totaux
-	--	idata.factory.energy_total = math.ceil(idata.factory.count*idata.factory.energy)
-	--	idata.beacon.energy_total = math.ceil(idata.factory.count*idata.beacon.energy)
-	--	idata.energy_total = idata.factory.energy_total + idata.beacon.energy_total
-	--	-- arrondi des valeurs
-	--	idata.factory.speed = math.ceil(idata.factory.speed*100)/100
-	--	idata.factory.energy = math.ceil(idata.factory.energy)
-	--	idata.beacon.energy = math.ceil(idata.beacon.energy)
+	-- calcul des totaux
+	recipe.factory.energy_total = math.ceil(recipe.factory.count*recipe.factory.energy)
+	recipe.beacon.energy_total = math.ceil(recipe.factory.count*recipe.beacon.energy)
+	recipe.energy_total = recipe.factory.energy_total + recipe.beacon.energy_total
+	-- arrondi des valeurs
+	recipe.factory.speed = math.ceil(recipe.factory.speed*100)/100
+	recipe.factory.energy = math.ceil(recipe.factory.energy)
+	recipe.beacon.energy = math.ceil(recipe.beacon.energy)
 end
 
+-------------------------------------------------------------------------------
+-- Compute energy, speed, number total
+--
+-- @function [parent=#PlannerModel] createSummary
+--
+function PlannerModel.methods:createSummary()
+	self.summary = {}
+
+	local energy = 0
+
+	for k, recipe in pairs(self.recipes) do
+		-- cumul de l'energie
+		energy = energy + recipe.energy_total
+		if recipe.name == "coal" then
+			self.summary["coal"] = self:format(recipe.count)
+		elseif recipe.name == "copper-ore" then
+			self.summary["copper-ore"] = self:format(recipe.count)
+		elseif recipe.name == "iron-ore" then
+			self.summary["iron-ore"] = self:format(recipe.count)
+		elseif recipe.name == "water" then
+			self.summary["water"] = self:format(recipe.count)
+		elseif recipe.name == "crude-oil" then
+			self.summary["crude-oil"] = self:format(recipe.count)
+		end
+		if self.summary[recipe.factory.name] == nil then
+			self.summary[recipe.factory.name] = 0
+		end
+		self.summary[recipe.factory.name] = self.summary[recipe.factory.name] + recipe.factory.count
+	end
+	if energy < 1000 then
+		self.summary.energy = energy .. " KW"
+	elseif (energy / 1000) < 1000 then
+		self.summary.energy = math.ceil(energy*10 / 1000)/10 .. " MW"
+	else
+		self.summary.energy = math.ceil(energy*10 / (1000*1000))/10 .. " GW"
+	end
+	self.summary["solar-panel"] = self:format(math.ceil(energy/60))
+	self.summary["steam-engine"] = self:format(math.ceil(energy/510))
+
+end
+
+function PlannerModel.methods:format(value)
+	if value < 1000 then
+		return value
+	elseif (value / 1000) < 1000 then
+		return math.ceil(value*10 / 1000)/10 .. " K"
+	else
+		return math.ceil(value*10 / (1000*1000))/10 .. " M"
+	end
+end
 --===========================
 -----------------------------
 -- @param key - nom du prototype

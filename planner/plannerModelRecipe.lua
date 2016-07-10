@@ -8,7 +8,7 @@ function ModelRecipe.methods:init(name, count)
 	self.index = ModelRecipeIndex
 	self.name = name
 	self.count = count
-	self.valid = true
+	self.active = true
 	self.energy = 0.5
 	self.ingredients = {}
 	self.products = {}

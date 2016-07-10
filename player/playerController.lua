@@ -1,8 +1,21 @@
 require "speed.speedController"
 require "planner.plannerController"
 
+-------------------------------------------------------------------------------
+-- Classe de player
+--
+-- @module PlayerController
+--
+
 PlayerController = setclass("HMPlayerController")
 
+-------------------------------------------------------------------------------
+-- Initialization
+--
+-- @function [parent=#PlayerController] init
+--
+-- @param #LuaPlayer player the player
+--
 function PlayerController.methods:init(player)
 	self.player = player
 	self.gui = nil
@@ -13,11 +26,13 @@ function PlayerController.methods:init(player)
 	self.controllers = {}
 	self.controllers["speed-controller"] = SpeedController:new(self)
 	self.controllers["planner-controller"] = PlannerController:new(self)
-
-
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Bind all controllers
+--
+-- @function [parent=#PlayerController] bindController
+--
 function PlayerController.methods:bindController()
 	self:resetGui()
 	if self.gui == nil then
@@ -31,7 +46,11 @@ function PlayerController.methods:bindController()
 	end
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Initialize gui
+--
+-- @function [parent=#PlayerController] resetGui
+--
 function PlayerController.methods:resetGui()
 	if self.gui ~= nil then
 		self.gui.destroy()
@@ -41,7 +60,13 @@ function PlayerController.methods:resetGui()
 	end
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Initialize gui
+--
+-- @function [parent=#PlayerController] on_gui_click
+--
+-- @param event
+--
 function PlayerController.methods:on_gui_click(event)
 	if self.controllers ~= nil then
 		for r, controller in pairs(self.controllers) do
@@ -50,17 +75,60 @@ function PlayerController.methods:on_gui_click(event)
 	end
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Return force's player
+--
+-- @function [parent=#PlayerController] getForce
+--
+-- @return #table force
+--
 function PlayerController.methods:getForce()
 	return self.player.force
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Get global variable for player
+--
+-- @function [parent=#PlayerController] getGlobal
+--
+-- @param key
+--
+-- @return #table global
+--
+function PlayerController.methods:getGlobal(key)
+	if global[self.player.name] == nil then
+		global[self.player.name] = {}
+	end
+	if global[self.player.name]["HMModel"] == nil then
+		global[self.player.name]["HMModel"] = {}
+	end
+	if global[self.player.name]["HMModel"][key] == nil then
+		global[self.player.name]["HMModel"][key] = {}
+	end
+	if key ~= nil then
+		return global[self.player.name]["HMModel"][key]
+	end
+	return global[self.player.name]["HMModel"]
+end
+
+-------------------------------------------------------------------------------
+-- Return recipes
+--
+-- @function [parent=#PlayerController] getRecipes
+--
+-- @return #table recipes
+--
 function PlayerController.methods:getRecipes()
 	return self:getForce().recipes
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Return recipe groups
+--
+-- @function [parent=#PlayerController] getRecipeGroups
+--
+-- @return #table recipe groups
+--
 function PlayerController.methods:getRecipeGroups()
 	if self.recipeGroups ~= nil then return self.recipeGroups end
 	-- recuperation des groupes avec les recipes
@@ -74,7 +142,15 @@ function PlayerController.methods:getRecipeGroups()
 	return self.recipeGroups
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Return list of productions
+--
+-- @function [parent=#PlayerController] getProductionGroups
+--
+-- @param #string category filter
+--
+-- @return #table list of productions
+--
 function PlayerController.methods:getProductionGroups(category)
 	if category == nil then return helmod_defines.production_groups end
 	local groups = {}
@@ -90,7 +166,13 @@ function PlayerController.methods:getProductionGroups(category)
 	return groups
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Return list of productions
+--
+-- @function [parent=#PlayerController] getProductions
+--
+-- @return #table list of productions
+--
 function PlayerController.methods:getProductions()
 	if self.productions ~= nil then return self.productions end
 	-- recuperation des groupes
@@ -103,7 +185,13 @@ function PlayerController.methods:getProductions()
 	return self.productions
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Return list of modules
+--
+-- @function [parent=#PlayerController] getModules
+--
+-- @return #table list of modules
+--
 function PlayerController.methods:getModules()
 	if self.modules ~= nil then return self.modules end
 	-- recuperation des groupes
@@ -116,12 +204,28 @@ function PlayerController.methods:getModules()
 	return self.modules
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Return recipe
+--
+-- @function [parent=#PlayerController] getRecipe
+--
+-- @param #string recipe name
+--
+-- @return #LuaRecipe recipe
+--
 function PlayerController.methods:getRecipe(name)
 	return self:getForce().recipes[name]
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Return list of recipes
+--
+-- @function [parent=#PlayerController] searchRecipe
+--
+-- @param #string recipe name
+--
+-- @return #table list of recipes
+--
 function PlayerController.methods:searchRecipe(name)
 	local recipes = {}
 	-- le recipe porte le meme nom que l'item
@@ -141,33 +245,73 @@ function PlayerController.methods:searchRecipe(name)
 	return recipes
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Return entity prototype
+--
+-- @function [parent=#PlayerController] getEntityPrototype
+--
+-- @param #string entity name
+--
+-- @return #LuaEntityPrototype entity prototype
+--
 function PlayerController.methods:getEntityPrototype(name)
 	return game.entity_prototypes[name]
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Return item prototype
+--
+-- @function [parent=#PlayerController] getItemPrototype
+--
+-- @param #string item name
+--
+-- @return #LuaItemPrototype item prototype
+--
 function PlayerController.methods:getItemPrototype(name)
 	return game.item_prototypes[name]
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Return fluid prototype
+--
+-- @function [parent=#PlayerController] getFluidPrototype
+--
+-- @param #string fluid name
+--
+-- @return #LuaFluidPrototype fluid prototype
+--
 function PlayerController.methods:getFluidPrototype(name)
 	--Logging:debug("getFluidPrototype:",name)
 	return game.fluid_prototypes[name]
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Unlock Recipes
+--
+-- @function [parent=#PlayerController] unlockRecipes
+--
 function PlayerController.methods:unlockRecipes()
 	self:getForce().enable_all_recipes()
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Lock Recipes
+--
+-- @function [parent=#PlayerController] lockRecipes
+--
 function PlayerController.methods:lockRecipes()
 	self:getForce().reset_recipes()
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Return recipe type
+--
+-- @function [parent=#PlayerController] getRecipeIconType
+--
+-- @param #ModelRecipe recipe
+--
+-- @return #string recipe type
+--
 function PlayerController.methods:getRecipeIconType(recipe)
 	local item = self:getItemPrototype(recipe.name)
 	if item ~= nil then
@@ -181,7 +325,15 @@ function PlayerController.methods:getRecipeIconType(recipe)
 	end
 end
 
---===========================
+-------------------------------------------------------------------------------
+-- Return item type
+--
+-- @function [parent=#PlayerController] getItemIconType
+--
+-- @param #table factorio prototype
+--
+-- @return #string item type
+--
 function PlayerController.methods:getItemIconType(element)
 	local item = self:getItemPrototype(element.name)
 	if item ~= nil then
@@ -194,32 +346,3 @@ function PlayerController.methods:getItemIconType(element)
 		return "item"
 	end
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
