@@ -23,24 +23,64 @@ function PlannerResult.methods:init(parent)
 	self.ENERGY_TAB = "energy"
 	self.RESOURCES_TAB = "resources"
 	self.RECIPES_TAB = "disable-recipe"
-
-	self.currentTab = self.DATA_TAB
-
-	self.page = 0
-	self.step = 10
 end
 
 -------------------------------------------------------------------------------
--- Bind the parent panel
+-- Get the parent panel
 --
--- @function [parent=#PlannerResult] bindPanel
+-- @function [parent=#PlannerResult] getParentPanel
+-- 
+-- @param #LuaPlayer player
+-- 
+-- @return #LuaGuiElement
+-- 
+function PlannerResult.methods:getParentPanel(player)
+	return self.parent:getDataPanel(player)
+end
+
+-------------------------------------------------------------------------------
+-- Get or create data panel
 --
--- @param #LuaGuiElement gui parent element
+-- @function [parent=#PlannerResult] getDataPanel
 --
-function PlannerResult.methods:bindPanel(gui)
-	if gui ~= nil then
-		self.guiPanel = gui
+-- @param #LuaPlayer player
+--
+function PlannerResult.methods:getDataPanel(player)
+	local parentPanel = self:getParentPanel(player)
+	if parentPanel["data"] ~= nil and parentPanel["data"].valid then
+		return parentPanel["data"]
 	end
+	return self:addGuiFlowV(parentPanel, "data")
+end
+
+-------------------------------------------------------------------------------
+-- Get or create result panel
+--
+-- @function [parent=#PlannerResult] getResultPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerResult.methods:getResultPanel(player, caption)
+	local dataPanel = self:getDataPanel(player)
+	if dataPanel["result"] ~= nil and dataPanel["result"].valid then
+		return dataPanel["result"]
+	end
+	return self:addGuiFrameV(dataPanel, "result", "helmod_result", caption)
+end
+
+-------------------------------------------------------------------------------
+-- Get or create selector panel
+--
+-- @function [parent=#PlannerResult] getSelectorPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerResult.methods:getSelectorPanel(player)
+	local parentPanel = self:getParentPanel(player)
+	if parentPanel["selector"] ~= nil and parentPanel["selector"].valid then
+		return parentPanel["selector"]
+	end
+	return self:addGuiFrameH(parentPanel, "selector", "helmod_menu_frame_style")
 end
 
 -------------------------------------------------------------------------------
@@ -48,20 +88,28 @@ end
 --
 -- @function [parent=#PlannerResult] buildPanel
 --
-function PlannerResult.methods:buildPanel()
-	if self.guiPanel ~= nil then
-		self.guiSelector = self:addGuiFrameH(self.guiPanel, "selector", "helmod_menu_frame_style")
-		self:addGuiButton(self.guiSelector, self:classname().."_change-tab_ID_", self.DATA_TAB, "helmod_button-default", "Data")
-		self:addGuiButton(self.guiSelector, self:classname().."_change-tab_ID_", self.ENERGY_TAB, "helmod_button-default", "Energy")
-		self:addGuiButton(self.guiSelector, self:classname().."_change-tab_ID_", self.RESOURCES_TAB, "helmod_button-default", "Resources")
+-- @param #LuaPlayer player
+-- 
+function PlannerResult.methods:buildPanel(player)
+	Logging:debug("PlannerResult:buildPanel():",player)
 
+	local model = self.model:getModel(player)
+	model.page = 0
+	model.step = 15
+	model.currentTab = self.DATA_TAB
+	
+	local parentPanel = self:getParentPanel(player)
+	
+	if parentPanel ~= nil then
+		local selectorPanel = self:getSelectorPanel(player)
+		self:addGuiButton(selectorPanel, self:classname().."_change-tab_ID_", self.DATA_TAB, "helmod_button-default", "Data")
+		self:addGuiButton(selectorPanel, self:classname().."_change-tab_ID_", self.ENERGY_TAB, "helmod_button-default", "Energy")
+		self:addGuiButton(selectorPanel, self:classname().."_change-tab_ID_", self.RESOURCES_TAB, "helmod_button-default", "Resources")
+		self:addGuiButton(selectorPanel, self:classname().."_change-tab_ID_", self.RECIPES_TAB, "helmod_button-default", "Disable recipes")
 
-		local count = self.model.global:countDisabledRecipes()
-		self.guiRecipesButton = self:addGuiButton(self.guiSelector, self:classname().."_change-tab_ID_", self.RECIPES_TAB, "helmod_button-default", "Disable recipes")
+		self:getDataPanel(player)
 
-		self.guiData = self:addGuiFlowV(self.guiPanel, "data")
-
-		self:update()
+		self:update(player)
 	end
 end
 
@@ -74,7 +122,10 @@ end
 -- @param #string label displayed text
 --
 function PlannerResult.methods:on_gui_click(event)
+	Logging:debug("PlannerResult:on_gui_click():",event)
 	if event.element.valid and string.find(event.element.name, self:classname()) then
+		local player = game.players[event.player_index]
+		
 		local patternAction = self:classname().."_([^_]*)"
 		local patternItem = self:classname()..".*_ID_([^_]*)"
 		local patternRecipe = self:classname()..".*_ID_[^_]*_([^_]*)"
@@ -82,7 +133,7 @@ function PlannerResult.methods:on_gui_click(event)
 		local item = string.match(event.element.name,patternItem,1)
 		local item2 = string.match(event.element.name,patternRecipe,1)
 
-		self:on_event(event.element, action, item, item2)
+		self:on_event(player, event.element, action, item, item2)
 	end
 end
 
@@ -90,21 +141,24 @@ end
 -- On event
 --
 -- @function [parent=#PlannerResult] on_event
---
+-- 
+-- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item second item name
 --
-function PlannerResult.methods:on_event(element, action, item, item2)
-	Logging:debug("on_event:",action, item, item2)
+function PlannerResult.methods:on_event(player, element, action, item, item2)
+	Logging:debug("PlannerResult:on_event():",player, element, action, item, item2)
+	local model = self.model:getModel(player)
+	
 	if action == "change-tab" then
-		self.currentTab = item
-		self:update()
+		model.currentTab = item
+		self:update(player)
 	end
 	if action == "change-page" then
-		self:updatePage(item, item2)
-		self:update()
+		self:updatePage(player, item, item2)
+		self:update(player)
 	end
 end
 
@@ -112,23 +166,26 @@ end
 -- Update page
 --
 -- @function [parent=#PlannerResult] updatePage
+-- 
+-- @param #LuaPlayer player
 --
-function PlannerResult.methods:updatePage(item, item2)
-	Logging:debug("PlannerResult:updatePage", item)
+function PlannerResult.methods:updatePage(player, item, item2)
+	Logging:debug("PlannerResult:updatePage():",item, item2)
+	local model = self.model:getModel(player)
 	if item == "down" then
-		if self.page > 0 then
-			self.page = self.page - 1
+		if model.page > 0 then
+			model.page = model.page - 1
 		end
 	end
 	if item == "up" then
-		Logging:debug("PlannerResult:updatePage, rawlen", rawlen(self.model.recipes))
-		local maxPage = math.floor(self.model:countRepices()/self.step)
-		if self.page < maxPage then
-			self.page = self.page + 1
+		Logging:debug("PlannerResult:updatePage, rawlen", rawlen(model.recipes))
+		local maxPage = math.floor(self.model:countRepices(player)/model.step)
+		if model.page < maxPage then
+			model.page = model.page + 1
 		end
 	end
 	if item == "direct" then
-		self.page = tonumber(item2)
+		model.page = tonumber(item2)
 	end
 end
 
@@ -136,29 +193,34 @@ end
 -- Update
 --
 -- @function [parent=#PlannerResult] update
+-- 
+-- @param #LuaPlayer player
 --
-function PlannerResult.methods:update()
-	if self.guiPanelResult ~= nil then
-		self.guiPanelResult.destroy()
-		self.guiPanelResult = nil
+function PlannerResult.methods:update(player)
+	Logging:debug("PlannerResult:update():", player)
+	local model = self.model:getModel(player)
+	
+	if self:getResultPanel(player) ~= nil then
+		self:getResultPanel(player).destroy()
 	end
 
-	local count = self.model.global:countDisabledRecipes()
-	if self.guiRecipesButton ~= nil and self.guiRecipesButton.valid then
-		self.guiRecipesButton.caption = "Disable recipes ("..count..")"
+	local count = self.model:countDisabledRecipes(player)
+	local button = self:getSelectorPanel(player)[self:classname().."_change-tab_ID_"..self.RECIPES_TAB]
+	if button ~= nil and button.valid then
+		button.caption = "Disable recipes ("..count..")"
 	end
 
-	if self.currentTab == self.DATA_TAB then
-		self:updateData()
+	if model.currentTab == self.DATA_TAB then
+		self:updateData(player)
 	end
-	if self.currentTab == self.ENERGY_TAB then
-		self:updateEnergy()
+	if model.currentTab == self.ENERGY_TAB then
+		self:updateEnergy(player)
 	end
-	if self.currentTab == self.RESOURCES_TAB then
-		self:updateResources()
+	if model.currentTab == self.RESOURCES_TAB then
+		self:updateResources(player)
 	end
-	if self.currentTab == self.RECIPES_TAB then
-		self:updateRecipes()
+	if model.currentTab == self.RECIPES_TAB then
+		self:updateRecipes(player)
 	end
 end
 
@@ -167,9 +229,13 @@ end
 --
 -- @function [parent=#PlannerResult] updateData
 --
-function PlannerResult.methods:updateData()
+-- @param #LuaPlayer player
+-- 
+function PlannerResult.methods:updateData(player)
+	Logging:debug("PlannerResult:updateData():", player)
+	local model = self.model:getModel(player)
 	-- data
-	self.guiPanelResult = self:addGuiFrameV(self.guiData, PLANNER_PANEL_RESULT, "helmod_result", "Data")
+	local resultPanel = self:getResultPanel(player, "Data")
 	--	-- summary
 	--	self.guiSummaryFrame = self.guidata.add{type="frame", name=self.names.summary.."frame", direction="vertical", caption="Summary", style="helmod_summary-frame"}
 	--	self.guiSummary = self.guiSummaryFrame.add{type="table", name=self.names.summary, colspan=2}
@@ -184,28 +250,28 @@ function PlannerResult.methods:updateData()
 	--		end
 	--	end
 	-- result
-	self:addPagination(self.guiPanelResult)
+	self:addPagination(player, resultPanel)
 
-	self.guiTableResult = self:addGuiTable(self.guiPanelResult,PLANNER_TABLE_RESULT,6)
+	local resultTable = self:addGuiTable(resultPanel,PLANNER_TABLE_RESULT,6)
 
-	self:addHeader(self.guiTableResult)
+	self:addHeader(player, resultTable)
 
-	local indexBegin = self.page * self.step
-	local indexEnd = (self.page + 1) * self.step
-	Logging:debug("pagination:", {page = self.page, step = self.step, indexBegin = indexBegin, indexEnd = indexEnd})
+	local indexBegin = model.page * model.step
+	local indexEnd = (model.page + 1) * model.step
+	Logging:debug("pagination:", {page = model.page, step = model.step, indexBegin = indexBegin, indexEnd = indexEnd})
 	local i = 0
-	for _, recipe in pairs(self.model.recipes) do
+	for _, recipe in pairs(model.recipes) do
 		if i >= indexBegin and i < indexEnd then
-			self:addRow(self.guiTableResult, recipe)
+			self:addRow(player, resultTable, recipe)
 		end
 		i = i + 1
 	end
 
-	self:addGuiLabel(self.guiTableResult, "foot-1", "Total")
-	self:addGuiLabel(self.guiTableResult, "blank-1", "")
-	self:addGuiLabel(self.guiTableResult, "blank-2", "")
-	if self.model.summary ~= nil then
-		self:addGuiLabel(self.guiTableResult, "energy", self.model.summary.energy)
+	self:addGuiLabel(resultTable, "foot-1", "Total")
+	self:addGuiLabel(resultTable, "blank-1", "")
+	self:addGuiLabel(resultTable, "blank-2", "")
+	if model.summary ~= nil then
+		self:addGuiLabel(resultTable, "energy", model.summary.energy)
 	end
 end
 
@@ -213,15 +279,19 @@ end
 -- Add pagination data tab
 --
 -- @function [parent=#PlannerResult] addPagination
+-- 
+-- @param #LuaPlayer player
 --
-function PlannerResult.methods:addPagination(itable)
+function PlannerResult.methods:addPagination(player, itable)
+	Logging:debug("PlannerResult:addPagination():", player, itable)
+	local model = self.model:getModel(player)
 	local guiPagination = self:addGuiFlowH(itable,"pagination", "helmod_page-result-flow")
 
 	self:addGuiButton(guiPagination, self:classname().."_change-page_ID_", "down", "helmod_button-default", "<")
 
-	local maxPage = math.floor(self.model:countRepices()/self.step)
+	local maxPage = math.floor(self.model:countRepices(player)/model.step)
 	for page = 0, maxPage, 1 do
-		if page == self.page then
+		if page == model.page then
 			self:addGuiLabel(guiPagination, self:classname().."_change-page_ID_", page + 1, "helmod_page-label")
 		else
 			self:addGuiButton(guiPagination, self:classname().."_change-page_ID_direct_", page, "helmod_button-default", page + 1)
@@ -235,8 +305,11 @@ end
 -- Add header data tab
 --
 -- @function [parent=#PlannerResult] addHeader
+-- 
+-- @param #LuaPlayer player
 --
-function PlannerResult.methods:addHeader(itable)
+function PlannerResult.methods:addHeader(player, itable)
+	Logging:debug("PlannerResult:addHeader():", player, itable)
 	self:addGuiLabel(itable, "header-recipes", "Recipes")
 	self:addGuiLabel(itable, "header-factory", "Factory")
 	self:addGuiLabel(itable, "header-beacon", "Beacon")
@@ -249,16 +322,20 @@ end
 -- Add row data tab
 --
 -- @function [parent=#PlannerResult] addRow
+-- 
+-- @param #LuaPlayer player
 --
-function PlannerResult.methods:addRow(guiTable, recipe)
+function PlannerResult.methods:addRow(player, guiTable, recipe)
+	Logging:debug("PlannerResult:addRow():", player, guiTable, recipe)
+	local model = self.model:getModel(player)
 	-- col recipe
 	local guiRecipe = self:addGuiFlowH(guiTable,"recipe"..recipe.name)
-	self:addSelectSpriteIconButton(guiRecipe, "HMPlannerRecipeEdition_OPEN_ID_", self.player:getRecipeIconType(recipe), recipe.name)
+	self:addSelectSpriteIconButton(guiRecipe, "HMPlannerRecipeEdition_OPEN_ID_", self.player:getIconType(recipe), recipe.name)
 
 	-- col factory
 	local guiFactory = self:addGuiFlowH(guiTable,"factory"..recipe.name)
 	local factory = recipe.factory
-	self:addSelectSpriteIconButton(guiFactory, "HMPlannerFactorySelector_OPEN_ID_"..recipe.name.."_", self.player:getItemIconType(factory), factory.name)
+	self:addSelectSpriteIconButton(guiFactory, "HMPlannerFactorySelector_OPEN_ID_"..recipe.name.."_", self.player:getIconType(factory), factory.name)
 	local guiFactoryModule = self:addGuiFlowV(guiFactory,"factory-modules"..recipe.name)
 	-- modules
 --	for name, count in pairs(factory.modules) do
@@ -272,7 +349,7 @@ function PlannerResult.methods:addRow(guiTable, recipe)
 	-- col beacon
 	local guiBeacon = self:addGuiFlowH(guiTable,"beacon"..recipe.name)
 	local beacon = recipe.beacon
-	self:addSelectSpriteIconButton(guiBeacon, "HMPlannerBeaconSelector_OPEN_ID_"..recipe.name.."_", self.player:getItemIconType(beacon), beacon.name)
+	self:addSelectSpriteIconButton(guiBeacon, "HMPlannerBeaconSelector_OPEN_ID_"..recipe.name.."_", self.player:getIconType(beacon), beacon.name)
 	self:addGuiLabel(guiBeacon, beacon.name, beacon.count)
 
 	-- col energy
@@ -284,7 +361,7 @@ function PlannerResult.methods:addRow(guiTable, recipe)
 	if recipe.products ~= nil then
 		for r, product in pairs(recipe.products) do
 			-- product = {type="item", name="steel-plate", amount=8}
-			self:addSpriteIconButton(tProducts, PLANNER_ACTION_PRODUCT_INFO_OPEN.."_ID_"..recipe.name.."_"..product.name.."_", self.player:getItemIconType(product), product.name, "X"..product.amount)
+			self:addSpriteIconButton(tProducts, "HMPlannerResourceInfo_OPEN_ID_"..recipe.name.."_"..product.name.."_", self.player:getIconType(product), product.name, "X"..product.amount)
 
 			self:addGuiLabel(tProducts, product.name, product.count)
 		end
@@ -294,7 +371,7 @@ function PlannerResult.methods:addRow(guiTable, recipe)
 	if recipe.ingredients ~= nil then
 		for r, ingredient in pairs(recipe.ingredients) do
 			-- ingredient = {type="item", name="steel-plate", amount=8}
-			self:addSpriteIconButton(tIngredient, PLANNER_ACTION_INGREDIENT_INFO_OPEN.."_ID_"..recipe.name.."_"..ingredient.name.."_", self.player:getItemIconType(ingredient), ingredient.name, "X"..ingredient.amount)
+			self:addSpriteIconButton(tIngredient, "HMPlannerResourceInfo_OPEN_ID_"..recipe.name.."_"..ingredient.name.."_", self.player:getIconType(ingredient), ingredient.name, "X"..ingredient.amount)
 
 			self:addGuiLabel(tIngredient, ingredient.name, ingredient.count)
 		end
@@ -306,7 +383,8 @@ end
 --
 -- @function [parent=#PlannerResult] updateValue
 --
-function PlannerResult.methods:updateValue()
+function PlannerResult.methods:updateValue(player)
+	Logging:debug("PlannerResult:updateValue():", player)
 	self.guiSummary.destroy()
 	self.guiSummary = self:addGuiTable(self.guiSummaryFrame, PLANNER_TABLE_SUMMARY, 2)
 	if self.items.summary ~= nil then
@@ -346,14 +424,19 @@ end
 -- Update recipes tab
 --
 -- @function [parent=#PlannerResult] updateRecipes
+-- 
+-- @param #LuaPlayer player
 --
-function PlannerResult.methods:updateRecipes()
+function PlannerResult.methods:updateRecipes(player)
+	Logging:debug("PlannerResult:updateRecipes():", player)
+	local default = self.model:getDefault(player)
+	Logging:debug("PlannerResult:updateRecipes():default=", default)
 	-- data
-	self.guiPanelResult = self:addGuiFrameV(self.guiData, PLANNER_PANEL_RESULT, "helmod_result", "Disable recipes")
+	local resultPanel = self:getResultPanel(player, "Disable recipes")
 
-	for r, recipe in pairs(self.model.global.recipes) do
+	for r, recipe in pairs(default.recipes) do
 		if not(recipe.active) then
-			self:addSelectSpriteIconButton(self.guiPanelResult, "HMPlannerRecipeEdition_OPEN_ID_", self.player:getRecipeIconType(recipe), recipe.name)
+			self:addSelectSpriteIconButton(resultPanel, "HMPlannerRecipeEdition_OPEN_ID_", self.player:getRecipeIconType(player, recipe), recipe.name)
 		end
 	end
 end
@@ -363,19 +446,38 @@ end
 --
 -- @function [parent=#PlannerResult] updateResources
 --
-function PlannerResult.methods:updateResources()
+-- @param #LuaPlayer player
+-- 
+function PlannerResult.methods:updateResources(player)
+	Logging:debug("PlannerResult:updateResources():", player)
+	local model = self.model:getModel(player)
 	-- data
-	self.guiPanelResult = self:addGuiFrameV(self.guiData, PLANNER_PANEL_RESULT, "helmod_result", "Resources")
+	local resultPanel = self:getResultPanel(player, "Resources")
+	
+	local resultTable = self:addGuiTable(resultPanel,"table-resources",6)
+	
+	for r, ingredient in pairs(model.ingredients) do
+			-- ingredient = {type="item", name="steel-plate", amount=8}
+			self:addSpriteIconButton(resultTable, "HMPlannerResourceInfo_OPEN_ID_"..ingredient.name.."_", self.player:getIconType(ingredient), ingredient.name)
+
+			self:addGuiLabel(resultTable, ingredient.name, ingredient.count)
+			self:addGuiLabel(resultTable, ingredient.name.."type", ingredient.resource_category)
+		end
 end
 
 -------------------------------------------------------------------------------
 -- Update energy tab
 --
 -- @function [parent=#PlannerResult] updateEnergy
---
-function PlannerResult.methods:updateEnergy()
+-- 
+-- @param #LuaPlayer player
+-- 
+function PlannerResult.methods:updateEnergy(player)
+	Logging:debug("PlannerResult:updateEnergy():", player)
+	local model = self.model:getModel(player)
+	local dataPanel = self:getDataPanel(player)
 	-- data
-	self.guiPanelResult = self:addGuiFrameV(self.guiData, PLANNER_PANEL_RESULT, "helmod_result", "Energy")
+	local resultPanel = self:getResultPanel(player, "Energy")
 end
 
 

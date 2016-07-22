@@ -14,12 +14,7 @@ PlayerController = setclass("HMPlayerController")
 --
 -- @function [parent=#PlayerController] init
 --
--- @param #LuaPlayer player the player
---
-function PlayerController.methods:init(player)
-	self.player = player
-	self.gui = nil
-
+function PlayerController.methods:init()
 	self.prefix = "helmod_"
 
 	-- list des controllers
@@ -33,15 +28,16 @@ end
 --
 -- @function [parent=#PlayerController] bindController
 --
-function PlayerController.methods:bindController()
-	self:resetGui()
-	if self.gui == nil then
-		self.gui = self.player.gui.top.add{type="flow", name="helmod_menu-main", direction="horizontal"}
-		if self.controllers ~= nil then
-			for r, controller in pairs(self.controllers) do
-				controller:cleanController()
-				controller:bindController()
-			end
+-- @param #LuaPlayer player
+--
+function PlayerController.methods:bindController(player)
+	Logging:debug("PlayerController:bindController(player)")
+	-- reset GUI
+	self:resetGui(player)
+	if self.controllers ~= nil then
+		for r, controller in pairs(self.controllers) do
+			controller:cleanController(player)
+			controller:bindController(player)
 		end
 	end
 end
@@ -51,17 +47,29 @@ end
 --
 -- @function [parent=#PlayerController] resetGui
 --
-function PlayerController.methods:resetGui()
-	if self.gui ~= nil then
-		self.gui.destroy()
+-- @param #LuaPlayer player
+--
+function PlayerController.methods:resetGui(player)
+	Logging:debug("PlayerController:resetGui(player)")
+	if player.gui.top["helmod_menu-main"] ~= nil then
+		player.gui.top["helmod_menu-main"].destroy()
 	end
-	if self.player.gui.top["helmod_menu-main"] ~= nil then
-		self.player.gui.top["helmod_menu-main"].destroy()
-	end
+	player.gui.top.add{type="flow", name="helmod_menu-main", direction="horizontal"}
 end
 
 -------------------------------------------------------------------------------
--- Initialize gui
+-- Get gui
+--
+-- @function [parent=#PlayerController] getGui
+--
+-- @param #LuaPlayer player
+--
+function PlayerController.methods:getGui(player)
+	return player.gui.top["helmod_menu-main"]
+end
+
+-------------------------------------------------------------------------------
+-- On click event
 --
 -- @function [parent=#PlayerController] on_gui_click
 --
@@ -80,10 +88,13 @@ end
 --
 -- @function [parent=#PlayerController] getForce
 --
+-- @param #LuaPlayer player
+--
 -- @return #table force
 --
-function PlayerController.methods:getForce()
-	return self.player.force
+function PlayerController.methods:getForce(player)
+	if player == nil then Logging:error("PlayerController:getRecipes(player): player can not be nil") end
+	return player.force
 end
 
 -------------------------------------------------------------------------------
@@ -91,24 +102,25 @@ end
 --
 -- @function [parent=#PlayerController] getGlobal
 --
--- @param key
+-- @param #LuaPlayer player
+-- @param #string key
 --
 -- @return #table global
 --
-function PlayerController.methods:getGlobal(key)
-	if global[self.player.name] == nil then
-		global[self.player.name] = {}
+function PlayerController.methods:getGlobal(player, key)
+	if global["HMModel"] == nil then
+		global["HMModel"] = {}
 	end
-	if global[self.player.name]["HMModel"] == nil then
-		global[self.player.name]["HMModel"] = {}
-	end
-	if global[self.player.name]["HMModel"][key] == nil then
-		global[self.player.name]["HMModel"][key] = {}
+	if global["HMModel"][player.name] == nil then
+		global["HMModel"][player.name] = {}
 	end
 	if key ~= nil then
-		return global[self.player.name]["HMModel"][key]
+		if global["HMModel"][player.name][key] == nil then
+			global["HMModel"][player.name][key] = {}
+		end
+		return global["HMModel"][player.name][key]
 	end
-	return global[self.player.name]["HMModel"]
+	return global["HMModel"][player.name]
 end
 
 -------------------------------------------------------------------------------
@@ -116,10 +128,13 @@ end
 --
 -- @function [parent=#PlayerController] getRecipes
 --
+-- @param #LuaPlayer player
+--
 -- @return #table recipes
 --
-function PlayerController.methods:getRecipes()
-	return self:getForce().recipes
+function PlayerController.methods:getRecipes(player)
+	if player == nil then Logging:error("PlayerController:getRecipes(player): player can not be nil") end
+	return self:getForce(player).recipes
 end
 
 -------------------------------------------------------------------------------
@@ -127,19 +142,20 @@ end
 --
 -- @function [parent=#PlayerController] getRecipeGroups
 --
+-- @param #LuaPlayer player
+--
 -- @return #table recipe groups
 --
-function PlayerController.methods:getRecipeGroups()
-	if self.recipeGroups ~= nil then return self.recipeGroups end
+function PlayerController.methods:getRecipeGroups(player)
 	-- recuperation des groupes avec les recipes
-	self.recipeGroups = {}
-	for key, recipe in pairs(self:getRecipes()) do
+	local recipeGroups = {}
+	for key, recipe in pairs(self:getRecipes(player)) do
 		if recipe.group ~= nil then
-			if self.recipeGroups[recipe.group.name] == nil then self.recipeGroups[recipe.group.name] = {} end
-			table.insert(self.recipeGroups[recipe.group.name], recipe.name)
+			if recipeGroups[recipe.group.name] == nil then recipeGroups[recipe.group.name] = {} end
+			table.insert(recipeGroups[recipe.group.name], recipe.name)
 		end
 	end
-	return self.recipeGroups
+	return recipeGroups
 end
 
 -------------------------------------------------------------------------------
@@ -174,15 +190,13 @@ end
 -- @return #table list of productions
 --
 function PlayerController.methods:getProductions()
-	if self.productions ~= nil then return self.productions end
-	-- recuperation des groupes
-	self.productions = {}
+	local productions = {}
 	for key, item in pairs(game.entity_prototypes) do
 		if item.type ~= nil and helmod_defines.production_groups[item.type] ~= nil then
-			self.productions[item.name] = item
+			productions[item.name] = item
 		end
 	end
-	return self.productions
+	return productions
 end
 
 -------------------------------------------------------------------------------
@@ -193,15 +207,14 @@ end
 -- @return #table list of modules
 --
 function PlayerController.methods:getModules()
-	if self.modules ~= nil then return self.modules end
 	-- recuperation des groupes
-	self.modules = {}
+	local modules = {}
 	for key, item in pairs(game.item_prototypes) do
 		if item.type ~= nil and item.type == "module" then
-			self.modules[item.name] = item
+			modules[item.name] = item
 		end
 	end
-	return self.modules
+	return modules
 end
 
 -------------------------------------------------------------------------------
@@ -209,12 +222,13 @@ end
 --
 -- @function [parent=#PlayerController] getRecipe
 --
+-- @param #LuaPlayer player
 -- @param #string recipe name
 --
 -- @return #LuaRecipe recipe
 --
-function PlayerController.methods:getRecipe(name)
-	return self:getForce().recipes[name]
+function PlayerController.methods:getRecipe(player, name)
+	return self:getForce(player).recipes[name]
 end
 
 -------------------------------------------------------------------------------
@@ -222,17 +236,18 @@ end
 --
 -- @function [parent=#PlayerController] searchRecipe
 --
+-- @param #LuaPlayer player
 -- @param #string recipe name
 --
 -- @return #table list of recipes
 --
-function PlayerController.methods:searchRecipe(name)
+function PlayerController.methods:searchRecipe(player, name)
 	local recipes = {}
 	-- le recipe porte le meme nom que l'item
-	local recipe = self:getRecipe(name)
+	local recipe = self:getRecipe(player, name)
 	-- recherche dans les produits des recipes
 	if recipe == nil then
-		for key, recipe in pairs(self:getRecipes()) do
+		for key, recipe in pairs(self:getRecipes(player)) do
 			for k, product in pairs(recipe.products) do
 				if product.name == name then
 					recipes[recipe.name] = recipe
@@ -290,8 +305,10 @@ end
 --
 -- @function [parent=#PlayerController] unlockRecipes
 --
-function PlayerController.methods:unlockRecipes()
-	self:getForce().enable_all_recipes()
+-- @param #LuaPlayer player
+--
+function PlayerController.methods:unlockRecipes(player)
+	self:getForce(player).enable_all_recipes()
 end
 
 -------------------------------------------------------------------------------
@@ -299,8 +316,35 @@ end
 --
 -- @function [parent=#PlayerController] lockRecipes
 --
-function PlayerController.methods:lockRecipes()
-	self:getForce().reset_recipes()
+-- @param #LuaPlayer player
+--
+function PlayerController.methods:lockRecipes(player)
+	self:getForce(player).reset_recipes()
+end
+
+-------------------------------------------------------------------------------
+-- Return icon type
+--
+-- @function [parent=#PlayerController] getIconType
+--
+-- @param #ModelRecipe element
+--
+-- @return #string recipe type
+--
+function PlayerController.methods:getIconType(element)
+	local item = self:getItemPrototype(element.name)
+	if item ~= nil then
+		return "item"
+	end
+	local fluid = self:getFluidPrototype(element.name)
+	if fluid ~= nil then
+		return "fluid"
+	end
+	local entity = self:getEntityPrototype(element.name)
+	if entity ~= nil then
+		return "entity"
+	end
+	return "recipe"
 end
 
 -------------------------------------------------------------------------------
@@ -312,17 +356,12 @@ end
 --
 -- @return #string recipe type
 --
-function PlayerController.methods:getRecipeIconType(recipe)
-	local item = self:getItemPrototype(recipe.name)
-	if item ~= nil then
-		return "item"
-	end
-	local fluid = self:getFluidPrototype(recipe.name)
-	if fluid ~= nil then
-		return "fluid"
-	else
+function PlayerController.methods:getRecipeIconType(player, recipe)
+	local recipe = self:getRecipe(player, recipe.name)
+	if recipe ~= nil then
 		return "recipe"
 	end
+	return self:getIconType(recipe);
 end
 
 -------------------------------------------------------------------------------

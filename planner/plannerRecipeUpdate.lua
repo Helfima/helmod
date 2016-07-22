@@ -21,10 +21,24 @@ function PlannerRecipeUpdate.methods:on_init(parent)
 end
 
 -------------------------------------------------------------------------------
+-- Get the parent panel
+--
+-- @function [parent=#PlannerRecipeUpdate] getParentPanel
+--
+-- @param #LuaPlayer player
+--
+-- @return #LuaGuiElement
+--
+function PlannerRecipeUpdate.methods:getParentPanel(player)
+	return self.parent:getDialogPanel(player)
+end
+
+-------------------------------------------------------------------------------
 -- On open
 --
 -- @function [parent=#PlannerRecipeUpdate] on_open
 --
+-- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
@@ -32,12 +46,13 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function PlannerRecipeUpdate.methods:on_open(element, action, item, item2)
+function PlannerRecipeUpdate.methods:on_open(player, element, action, item, item2)
+	local model = self.model:getModel(player)
 	local close = true
-	if self.guiRecipeLast == nil or self.guiRecipeLast ~= item then
+	if model.guiRecipeLast == nil or model.guiRecipeLast ~= item then
 		close = false
 	end
-	self.guiRecipeLast = item
+	model.guiRecipeLast = item
 	return close
 end
 
@@ -46,31 +61,45 @@ end
 --
 -- @function [parent=#PlannerRecipeUpdate] on_close
 --
+-- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item second item name
 --
-function PlannerRecipeUpdate.methods:on_close(element, action, item, item2)
-	self.guiRecipeLast = nil
-	self:clearGuiInput()
+function PlannerRecipeUpdate.methods:on_close(player, element, action, item, item2)
+	local model = self.model:getModel(player)
+	model.guiRecipeLast = nil
 end
 
 -------------------------------------------------------------------------------
--- Clear all input fields
+-- Get or create info panel
 --
--- @function [parent=#PlannerRecipeUpdate] clearGuiInput
+-- @function [parent=#PlannerRecipeUpdate] getInfoPanel
 --
-function PlannerRecipeUpdate.methods:clearGuiInput()
-	if self.guiInputs ~= nil then
-		for key, gui in pairs(self.guiInputs) do
-			if self.guiInputs[key] ~= nil then
-				if self.guiInputs[key].valid then self.guiInputs[key].destroy() end
-				self.guiInputs[key] = nil;
-			end
-		end
-		self.guiInputs = {}
+-- @param #LuaPlayer player
+--
+function PlannerRecipeUpdate.methods:getInfoPanel(player)
+	local panel = self:getPanel(player)
+	if panel["info"] ~= nil and panel["info"].valid then
+		return panel["info"]
 	end
+	return self:addGuiFrameV(panel, "info", "helmod_module-table-frame")
+end
+
+-------------------------------------------------------------------------------
+-- Get or create products panel
+--
+-- @function [parent=#PlannerRecipeUpdate] getProductsPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerRecipeUpdate.methods:getProductsPanel(player)
+	local panel = self:getPanel(player)
+	if panel["products"] ~= nil and panel["products"].valid then
+		return panel["products"]
+	end
+	return self:addGuiFrameV(panel, "products", "helmod_module-table-frame", "Products")
 end
 
 -------------------------------------------------------------------------------
@@ -78,14 +107,15 @@ end
 --
 -- @function [parent=#PlannerRecipeUpdate] after_open
 --
+-- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item second item name
 --
-function PlannerRecipeUpdate.methods:after_open(element, action, item, item2)
-	self.guiInfo = self:addGuiFlowV(self.gui, "info")
-	self.guiProducts = self:addGuiFrameV(self.gui, "products", "helmod_recipe-table-frame", "Products")
+function PlannerRecipeUpdate.methods:after_open(player, element, action, item, item2)
+	self:getInfoPanel(player)
+	self:getProductsPanel(player)
 end
 
 -------------------------------------------------------------------------------
@@ -93,17 +123,15 @@ end
 --
 -- @function [parent=#PlannerRecipeUpdate] on_update
 --
+-- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item second item name
 --
-function PlannerRecipeUpdate.methods:on_update(element, action, item, item2)
-	self.recipe = self.model.recipes[item]
-	if self.recipe ~= nil then
-		self:updateInfo(element, action, item, item2)
-		self:updateProducts(element, action, item, item2)
-	end
+function PlannerRecipeUpdate.methods:on_update(player, element, action, item, item2)
+	self:updateInfo(player, element, action, item, item2)
+	self:updateProducts(player, element, action, item, item2)
 end
 
 -------------------------------------------------------------------------------
@@ -111,18 +139,28 @@ end
 --
 -- @function [parent=#PlannerRecipeUpdate] updateInfo
 --
+-- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item second item name
 --
-function PlannerRecipeUpdate.methods:updateInfo(element, action, item, item2)
-	for k,guiName in pairs(self.guiInfo.children_names) do
-		self.guiInfo[guiName].destroy()
+function PlannerRecipeUpdate.methods:updateInfo(player, element, action, item, item2)
+	Logging:debug("PlannerRecipeUpdate:updateInfo():",player, element, action, item, item2)
+	local infoPanel = self:getInfoPanel(player)
+	local model = self.model:getModel(player)
+	local recipe = model.recipes[item]
+
+	if recipe ~= nil then
+
+		for k,guiName in pairs(infoPanel.children_names) do
+			infoPanel[guiName].destroy()
+		end
+
+		local headerPanel = self:addGuiTable(infoPanel,"table-header",2)
+		self:addIconButton(headerPanel, "recipe", "recipe", recipe.name)
+		self:addGuiLabel(headerPanel, "label", recipe.name)
 	end
-	local guiTableHeader = self:addGuiTable(self.guiInfo,"table-header",2)
-	self:addIconButton(guiTableHeader, "recipe", "recipe", self.recipe.name)
-	self:addGuiLabel(guiTableHeader, "label", self.recipe.name)
 end
 
 -------------------------------------------------------------------------------
@@ -130,23 +168,34 @@ end
 --
 -- @function [parent=#PlannerRecipeUpdate] updateProducts
 --
+-- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item second item name
 --
-function PlannerRecipeUpdate.methods:updateProducts(element, action, item, item2)
-	for k,guiName in pairs(self.guiProducts.children_names) do
-		self.guiProducts[guiName].destroy()
-	end
-	local guiTable= self:addGuiTable(self.guiProducts, "table-products", 2)
-	for key, product in pairs(self.recipe.products) do
-		self:addIconButton(guiTable, "item_ID_", self.player:getItemIconType(product), product.name)
-		self.guiInputs[product.name] = self:addGuiText(guiTable, product.name, product.count)
-	end
+function PlannerRecipeUpdate.methods:updateProducts(player, element, action, item, item2)
+	Logging:debug("PlannerRecipeUpdate:updateProducts():",player, element, action, item, item2)
+	local panel = self:getPanel(player)
+	local productsPanel = self:getProductsPanel(player)
+	local model = self.model:getModel(player)
+	local recipe = model.recipes[item]
 
-	self:addGuiButton(self.gui, self:classname().."_recipe-update_ID_", self.recipe.name, "helmod_button-default", "Update")
-	self:addGuiButton(self.gui, self:classname().."_recipe-remove_ID_", self.recipe.name, "helmod_button-default", "Delete")
+	if recipe ~= nil then
+
+		for k,guiName in pairs(productsPanel.children_names) do
+			productsPanel[guiName].destroy()
+		end
+
+		local inputPanel= self:addGuiTable(productsPanel, "table-products", 2)
+		for key, product in pairs(recipe.products) do
+			self:addIconButton(inputPanel, "item_ID_", self.player:getItemIconType(product), product.name)
+			self:addGuiText(inputPanel, product.name, product.count)
+		end
+
+		self:addGuiButton(panel, self:classname().."_recipe-update_ID_", recipe.name, "helmod_button-default", "Update")
+		self:addGuiButton(panel, self:classname().."_recipe-remove_ID_", recipe.name, "helmod_button-default", "Delete")
+	end
 end
 
 -------------------------------------------------------------------------------
@@ -154,38 +203,41 @@ end
 --
 -- @function [parent=#PlannerRecipeUpdate] on_event
 --
+-- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item second item name
 --
-function PlannerRecipeUpdate.methods:on_event(element, action, item, item2)
-	Logging:debug("on_event:",action, item, item2)
-	if action == "OPEN" then
-	--element.state = true
-	end
+function PlannerRecipeUpdate.methods:on_event(player, element, action, item, item2)
+	Logging:debug("PlannerRecipeUpdate:on_event():",player, element, action, item, item2)
 
 	if action == "recipe-update" then
 		local products = {}
-		for key, gui in pairs(self.guiInputs) do
-			if self.guiInputs[key] ~= nil then
-				local count = 0
-				local tempCount=tonumber(self.guiInputs[key].text)
-				if type(tempCount) == "number" then count = tempCount end
-				products[key] = count
-			end
-		end
 
-		self.model:updateInput(item, products)
-		self.model:update()
-		self.parent:refreshDisplayData()
-		self:close()
+		local model = self.model:getModel(player)
+		local recipe = model.recipes[item]
+
+		if recipe ~= nil then
+			local inputPanel = self:getProductsPanel(player)["table-products"]
+			
+			for key, product in pairs(recipe.products) do
+				if inputPanel[product.name] ~= nil then
+					products[product.name] = self:getInputNumber(inputPanel[product.name])
+				end
+			end
+
+			self.model:updateInput(player, item, products)
+			self.model:update(player)
+			self.parent:refreshDisplayData(player)
+			self:close(player)
+		end
 	end
 
 	if action == "recipe-remove" then
-		self.model:removeInput(item)
-		self.model:update()
-		self.parent:refreshDisplayData()
-		self:close()
+		self.model:removeInput(player, item)
+		self.model:update(player)
+		self.parent:refreshDisplayData(player)
+		self:close(player)
 	end
 end

@@ -6,7 +6,7 @@
   "author": "Helfima",
   "contact": "",
   "homepage": "",
-  "description": "Helfima mod with some utility.",
-  "dependencies": ["base >= 0.13"],
+  "description": "Helfima's mod.",
+  "dependencies": ["base >= 0.13.8"],
   "factorio_version": "0.13"
 }

@@ -1,5 +1,4 @@
 require "planner/plannerModel"
-require "planner/plannerBuilder"
 require "planner/plannerDialog"
 require "planner/plannerResult"
 require "planner/plannerRecipeSelector"
@@ -9,44 +8,65 @@ require "planner/plannerFactorySelector"
 require "planner/plannerBeaconSelector"
 
 PLANNER_COMMAND = "helmod_planner-command"
-PLANNER_PANEL_MAIN = "helmod_planner_main"
-PLANNER_PANEL_INFO = "helmod_planner-info"
-PLANNER_PANEL_DATA = "helmod_planner-data"
-PLANNER_PANEL_DIALOGUE = "helmod_planner-dialogue"
-PLANNER_PANEL_RESULT = "helmod_planner-result"
-PLANNER_PANEL_MENU = "helmod_planner-menu"
-PLANNER_PANEL_RECIPE_LIST = "helmod_planner-list-recipes"
-PLANNER_TABLE_RESULT = "helmod_planner-result-table"
-PLANNER_TABLE_SUMMARY = "helmod_planner-summary-table"
 
-PLANNER_ACTION_SAVE_MODEL = "helmod_planner-save-model"
-
-PLANNER_ACTION_INGREDIENT_INFO_OPEN = "helmod_ingredient-info-open"
-PLANNER_ACTION_PRODUCT_INFO_OPEN = "helmod_product-info-open"
+-------------------------------------------------------------------------------
+-- Classe de player
+--
+-- @module PlannerController
+--
 
 PlannerController = setclass("HMPlannerController", ElementGui)
 
+-------------------------------------------------------------------------------
+-- Initialization
+--
+-- @function [parent=#PlayerController] init
+--
+-- @param #PlayerController parent controller parent
+--
 function PlannerController.methods:init(parent)
 	self.parent = parent
-	self.index = 0
 	self.controllers = {}
-	self.guiInputs = {}
 	self.modelFilename = "helmod-planner-model.data"
 	self.model = PlannerModel:new(self)
-	self.items = PlannerBuilder:new(self)
 end
 
-function PlannerController.methods:cleanController()
-	if self.parent.player.gui.left[PLANNER_PANEL_MAIN] ~= nil then
-		self.parent.player.gui.left[PLANNER_PANEL_MAIN].destroy()
+-------------------------------------------------------------------------------
+-- Cleanup
+--
+-- @function [parent=#PlannerController] cleanController
+--
+-- @param #LuaPlayer player
+--
+function PlannerController.methods:cleanController(player)
+	Logging:trace("PlannerController:cleanController(player)")
+	if player.gui.left["helmod_planner_main"] ~= nil then
+		player.gui.left["helmod_planner_main"].destroy()
 	end
 end
-function PlannerController.methods:bindController()
-	if self.parent.gui ~= nil then
-		self.parent.gui.add({type="button", name=PLANNER_COMMAND, caption=({PLANNER_COMMAND}), style="helmod_button-small-bold"})
+
+-------------------------------------------------------------------------------
+-- Bind all controllers
+--
+-- @function [parent=#PlannerController] bindController
+--
+-- @param #LuaPlayer player
+--
+function PlannerController.methods:bindController(player)
+	Logging:trace("PlannerController:bindController(player)")
+	local parentGui = self.parent:getGui(player)
+	if parentGui ~= nil then
+		parentGui.add({type="button", name=PLANNER_COMMAND, caption=({PLANNER_COMMAND}), style="helmod_button-small-bold"})
 	end
 end
-----------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+-- On click event
+--
+-- @function [parent=#PlannerController] on_gui_click
+--
+-- @param event
+--
 function PlannerController.methods:on_gui_click(event)
 	if self.controllers ~= nil then
 		for r, controller in pairs(self.controllers) do
@@ -56,98 +76,167 @@ function PlannerController.methods:on_gui_click(event)
 
 	if event.element.valid then
 		if event.element.name == PLANNER_COMMAND then
-			self:main()
-		elseif string.find(event.element.name, self:classname()) then
-			local patternAction = self:classname().."([^_]*)"
-			local patternItem = self:classname()..".*_ID_([^_]*)"
-			local patternRecipe = self:classname()..".*_ID_[^_]*_([^_]*)"
-			local action = string.match(event.element.name,patternAction,1)
-			local item = string.match(event.element.name,patternItem,1)
-			local item2 = string.match(event.element.name,patternRecipe,1)
-
-			--Logging:debug(event.element.name)
-			--Logging:debug(action)
-			--Logging:debug(item)
-			if action ~= nil and action == PLANNER_ACTION_SAVE_MODEL then
-				self:saveData(self.model)
-			end
+			local player = game.players[event.player_index]
+			self:main(player)
 		end
 	end
 end
 
---===========================
-function PlannerController.methods:main()
-	if self.guiMain ~= nil then
-		self.guiMain.destroy()
-		self.guiMain = nil
-		self.guiRecipeInfo = nil
-		self.guiRecipeList = nil
-		self.guiInputs = {}
-		self.guiPanelResult = nil
-		self.guiTableResult = nil
-		self.guiSummary = nil
+-------------------------------------------------------------------------------
+-- Prepare main display
+--
+-- @function [parent=#PlannerController] main
+--
+-- @param #LuaPlayer player
+--
+function PlannerController.methods:main(player)
+	Logging:trace("PlannerController:main(player)")
+	if player.gui.left["helmod_planner_main"] ~= nil and player.gui.left["helmod_planner_main"].valid then
+		player.gui.left["helmod_planner_main"].destroy()
 	else
-		self.captions = {}
 		-- main panel
-		self.guiMain = self:addGuiFlowH(self.parent.player.gui.left, PLANNER_PANEL_MAIN)
+		Logging:debug("Create main panel")
+		local mainPanel = self:getMainPanel(player)
 		-- info
-		self.guiInfo = self:addGuiFlowV(self.guiMain, PLANNER_PANEL_INFO)
+		Logging:debug("Create info panel")
+		local infoPanel = self:getInfoPanel(player)
 		-- menu
-		self.guiMenu =self:addGuiFrameH(self.guiInfo, PLANNER_PANEL_MENU, "helmod_menu_frame_style")
-		--self:addGuiButton(self.guiMenu, PLANNER_ACTION_SAVE_MODEL, nil , "helmod_button-default", ({"helmod_planner-save-model"}))
+		Logging:debug("Create menu panel")
+		local menuPanel = self:getMenuPanel(player)
 		-- data
-		self.guiData =self:addGuiFlowV(self.guiInfo, PLANNER_PANEL_DATA)
+		Logging:debug("Create data panel")
+		local dataPanel = self:getDataPanel(player)
 		-- dialogue
-		self.guiPanelDialogue = self:addGuiFlowH(self.guiMain, PLANNER_PANEL_DIALOGUE)
-		self:updateListRecipes()
-		--self:updateData()
+		Logging:debug("Create dialog panel")
+		local dialogPanel = self:getDialogPanel(player)
+
 		-- menu
 
 		self.controllers["result"] = PlannerResult:new(self)
-		self.controllers["result"]:bindPanel(self.guiData)
-		self.controllers["result"]:buildPanel()
+		self.controllers["result"]:buildPanel(player)
 
 		self.controllers["recipe-selector"] = PlannerRecipeSelector:new(self)
-		self.controllers["recipe-selector"]:bindPanel(self.guiPanelDialogue)
-		self.controllers["recipe-selector"]:bindButton(self.guiMenu, ({"helmod_planner-add-item"}))
+		self.controllers["recipe-selector"]:bindButton(menuPanel, ({"helmod_planner-add-item"}))
 
 		self.controllers["factory-selector"] = PlannerFactorySelector:new(self)
-		self.controllers["factory-selector"]:bindPanel(self.guiPanelDialogue)
 
 		self.controllers["beacon-selector"] = PlannerBeaconSelector:new(self)
-		self.controllers["beacon-selector"]:bindPanel(self.guiPanelDialogue)
 
 		self.controllers["recipe-update"] = PlannerRecipeUpdate:new(self)
-		self.controllers["recipe-update"]:bindPanel(self.guiPanelDialogue)
 
 		self.controllers["recipe-edition"] = PlannerRecipeEdition:new(self)
-		self.controllers["recipe-edition"]:bindPanel(self.guiPanelDialogue)
 
+		self:updateListRecipes(player)
 	end
 end
 
---===========================
-function PlannerController.methods:refreshDisplayData()
-	self:updateListRecipes()
-	self.controllers["result"]:update()
+-------------------------------------------------------------------------------
+-- Get or create main panel
+--
+-- @function [parent=#PlannerController] getMainPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerController.methods:getMainPanel(player)
+	if player.gui.left["helmod_planner_main"] ~= nil and player.gui.left["helmod_planner_main"].valid then
+		return player.gui.left["helmod_planner_main"]
+	end
+	return self:addGuiFlowH(player.gui.left, "helmod_planner_main")
 end
 
---===========================
-function PlannerController.methods:updateListRecipes()
-	if self.guiRecipeList ~= nil then
-		self.guiRecipeList.destroy()
-		self.guiRecipeList = nil
+-------------------------------------------------------------------------------
+-- Get or create info panel
+--
+-- @function [parent=#PlannerController] getInfoPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerController.methods:getInfoPanel(player)
+	local mainPanel = self:getMainPanel(player)
+	if mainPanel["helmod_planner_info"] ~= nil and mainPanel["helmod_planner_info"].valid then
+		return mainPanel["helmod_planner_info"]
 	end
-	self.guiRecipeList = self:addGuiFlowH(self.guiMenu, PLANNER_PANEL_RECIPE_LIST)
-	if self.model.input ~= nil then
-		for r, recipe in pairs(self.model.input) do
-			self:addSelectSpriteIconButton(self.guiRecipeList, "HMPlannerRecipeUpdate_OPEN_ID_", self.parent:getRecipeIconType(recipe), recipe.name, recipe.count)
+	return self:addGuiFlowV(mainPanel, "helmod_planner_info")
+end
+
+-------------------------------------------------------------------------------
+-- Get or create dialog panel
+--
+-- @function [parent=#PlannerController] getDialogPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerController.methods:getDialogPanel(player)
+	local mainPanel = self:getMainPanel(player)
+	if mainPanel["helmod_planner_dialog"] ~= nil and mainPanel["helmod_planner_dialog"].valid then
+		return mainPanel["helmod_planner_dialog"]
+	end
+	return self:addGuiFlowH(mainPanel, "helmod_planner_dialog")
+end
+
+-------------------------------------------------------------------------------
+-- Get or create menu panel
+--
+-- @function [parent=#PlannerController] getMenuPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerController.methods:getMenuPanel(player)
+	local infoPanel = self:getInfoPanel(player)
+	if infoPanel["helmod_planner_menu"] ~= nil and infoPanel["helmod_planner_menu"].valid then
+		return infoPanel["helmod_planner_menu"]
+	end
+	return self:addGuiFrameH(infoPanel, "helmod_planner_menu", "helmod_menu_frame_style")
+end
+
+-------------------------------------------------------------------------------
+-- Get or create data panel
+--
+-- @function [parent=#PlannerController] getDataPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerController.methods:getDataPanel(player)
+	local infoPanel = self:getInfoPanel(player)
+	if infoPanel["helmod_planner_data"] ~= nil and infoPanel["helmod_planner_data"].valid then
+		return infoPanel["helmod_planner_data"]
+	end
+	return self:addGuiFlowV(infoPanel, "helmod_planner_data")
+end
+
+-------------------------------------------------------------------------------
+-- Refresh display data
+--
+-- @function [parent=#PlannerController] refreshDisplayData
+--
+-- @param #LuaPlayer player
+--
+function PlannerController.methods:refreshDisplayData(player)
+	Logging:debug("PlannerController:refreshDisplayData():",player)
+	self:updateListRecipes(player)
+	self.controllers["result"]:update(player)
+end
+
+-------------------------------------------------------------------------------
+-- Update recipes list
+--
+-- @function [parent=#PlannerController] updateListRecipes
+--
+-- @param #LuaPlayer player
+--
+function PlannerController.methods:updateListRecipes(player)
+	Logging:debug("PlannerController:updateListRecipes():",player)
+	local model = self.model:getModel(player)
+
+	local menuPanel = self:getMenuPanel(player)
+
+	if menuPanel["helmod_planner-recipes-list"] ~= nil and menuPanel["helmod_planner-recipes-list"].valid then
+		menuPanel["helmod_planner-recipes-list"].destroy()
+	end
+	local recipeListPanel = self:addGuiFlowH(menuPanel, "helmod_planner-recipes-list")
+	if model.input ~= nil then
+		for r, recipe in pairs(model.input) do
+			self:addSelectSpriteIconButton(recipeListPanel, "HMPlannerRecipeUpdate_OPEN_ID_", self.parent:getRecipeIconType(player, recipe), recipe.name, recipe.count)
 		end
 	end
-end
-
---------------------------------------------------------------------------------------
-function PlannerController.methods:saveData(data)
-	local content = serpent.dump(data)
-	game.write_file(self.modelFilename, content)
 end

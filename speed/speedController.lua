@@ -2,31 +2,31 @@ SpeedController = setclass("HMSpeedController")
 
 function SpeedController.methods:init(parent)
 	self.parent = parent
-	self.index = 0
-	
+
 	self.names = {}
 	self.names.command = "helmod_speed-menu-command"
 	self.names.speedDown = "helmod_speed-menu-down"
 	self.names.speed = "helmod_speed-menu"
 	self.names.speedUp = "helmod_speed-menu-up"
-	
+
 	self.default = {}
 	self.default.speed = {}
 	self.default.speed.max = 32
 	self.default.speed.min = 1
-	
-	self.gui = nil
+
 end
 
-function SpeedController.methods:cleanController()
+function SpeedController.methods:cleanController(player)
 end
 
-function SpeedController.methods:bindController()
-	if self.parent.gui ~= nil then
-		self.gui = self.parent.gui.add({type="flow", name=self.names.command, direction="horizontal"})
-		self.gui.add({type="button", name=self.names.speedDown, caption=({self.names.speedDown}), style="helmod_button-small-bold-start"})
-		self.gui.add({type="button", name=self.names.speed, caption=({self.names.speed}), style="helmod_button-small-bold-middle"})
-		self.gui.add({type="button", name=self.names.speedUp, caption=({self.names.speedUp}), style="helmod_button-small-bold-end"})
+function SpeedController.methods:bindController(player)
+	Logging:trace("SpeedController:bindController(player)")
+	local parentGui = self.parent:getGui(player)
+	if parentGui ~= nil then
+		local gui = parentGui.add({type="flow", name=self.names.command, direction="horizontal"})
+		gui.add({type="button", name=self.names.speedDown, caption=({self.names.speedDown}), style="helmod_button-small-bold-start"})
+		gui.add({type="button", name=self.names.speed, caption=({self.names.speed}), style="helmod_button-small-bold-middle"})
+		gui.add({type="button", name=self.names.speedUp, caption=({self.names.speedUp}), style="helmod_button-small-bold-end"})
 	end
 end
 
@@ -46,8 +46,15 @@ function SpeedController.methods:on_speed(option)
 			game.speed = speed
 		end
 	end
-
-	self.gui[self.names.speed].caption = string.format("x%1.0f", game.speed)
+	for key, player in pairs(game.players) do
+		local parentGui = self.parent:getGui(player)
+		if parentGui ~= nil then
+			local gui = parentGui[self.names.command]
+			if gui[self.names.speed] ~= nil and gui[self.names.speed].valid then
+				gui[self.names.speed].caption = string.format("x%1.0f", game.speed)
+			end
+		end
+	end
 end
 
 function SpeedController.methods:on_gui_click(event)
@@ -59,4 +66,3 @@ function SpeedController.methods:on_gui_click(event)
 		self:on_speed("+")
 	end
 end
-

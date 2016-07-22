@@ -77,27 +77,30 @@ default_gui["helmod_select-button-icon"] = {
 	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=0})
 }
 
-default_gui["helmod_button-item-small"] = {
+local xxl_icon_size=68
+default_gui["helmod_xxl-button-icon"] = {
 	type = "button_style",
 	parent = "button_style",
-	width = 24,
-	height = 24,
-	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 24/36, {0,0}, {x=111,y=0}),
-	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 24/36, {0,0}, {x=148,y=0}),
-	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 24/36, {0,0}, {x=184,y=0}),
-	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 24/36, {0,0}, {x=111,y=0})
+	width = xxl_icon_size,
+	height = xxl_icon_size,
+	
+	scalable = false,
+	
+	top_padding = 2,
+	right_padding = 2,
+	bottom_padding = 2,
+	left_padding = 2,
 }
 
-default_gui["helmod_button-item-xxl"] = {
+default_gui["helmod_xxl-select-button-icon"] = {
 	type = "button_style",
-	parent = "button_style",
-	width = 64,
-	height = 64,
-	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 64/36, {0,0}, {x=111,y=0}),
-	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 64/36, {0,0}, {x=148,y=0}),
-	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 64/36, {0,0}, {x=184,y=0}),
-	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, 64/36, {0,0}, {x=111,y=0})
+	parent = "helmod_xxl-button-icon",
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=0}),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=148,y=0}),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=184,y=0}),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=0})
 }
+
 
 default_gui["helmod_button-default"] = {
 	type = "button_style",
@@ -153,7 +156,7 @@ default_gui["helmod_button-small-bold"] = {
 	parent = "helmod_button-default",
 	font = "helmod_font-normal-bold",
 
-	width = 24,
+	minimal_width = 24,
 	height = 24,
 
 	top_padding = 2,

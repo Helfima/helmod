@@ -291,7 +291,7 @@ end
 -- 
 function ElementGui.methods:addXxlSpriteIconButton(parent, action, type, key, caption)
 	Logging:trace("ElementGui:addXxlSpriteButton",action, type, key, caption)
-	return self:addStyledSpriteButton(parent, "helmod_button-item-xxl", action, type, key, caption)
+	return self:addStyledSpriteButton(parent, "helmod_xxl-button-icon", action, type, key, caption)
 end
 
 -------------------------------------------------------------------------------
@@ -308,8 +308,8 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 -- 
 function ElementGui.methods:addXxlSelectSpriteIconButton(parent, action, type, key, caption)
-	Logging:trace("ElementGui:addXxlSpriteButton",action, type, key, caption)
-	return self:addStyledSpriteButton(parent, "helmod_button-item-xxl", action, type, key, caption)
+	Logging:trace("ElementGui:addXxlSelectSpriteIconButton",action, type, key, caption)
+	return self:addStyledSpriteButton(parent, "helmod_xxl-select-button-icon", action, type, key, caption)
 end
 
 -------------------------------------------------------------------------------
