@@ -1,6 +1,7 @@
 require "planner/plannerModel"
 require "planner/plannerDialog"
 require "planner/plannerResult"
+require "planner/plannerSettings"
 require "planner/plannerRecipeSelector"
 require "planner/plannerRecipeUpdate"
 require "planner/plannerRecipeEdition"
@@ -101,6 +102,9 @@ function PlannerController.methods:main(player)
 		Logging:debug("Create info panel")
 		local infoPanel = self:getInfoPanel(player)
 		-- menu
+		Logging:debug("Create settings panel")
+		local settingsPanel = self:getSettingsPanel(player)
+		-- menu
 		Logging:debug("Create menu panel")
 		local menuPanel = self:getMenuPanel(player)
 		-- data
@@ -114,6 +118,9 @@ function PlannerController.methods:main(player)
 
 		self.controllers["result"] = PlannerResult:new(self)
 		self.controllers["result"]:buildPanel(player)
+
+		self.controllers["settings"] = PlannerSettings:new(self)
+		self.controllers["settings"]:buildPanel(player)
 
 		self.controllers["recipe-selector"] = PlannerRecipeSelector:new(self)
 		self.controllers["recipe-selector"]:bindButton(menuPanel, ({"helmod_planner-add-item"}))
@@ -172,6 +179,21 @@ function PlannerController.methods:getDialogPanel(player)
 		return mainPanel["helmod_planner_dialog"]
 	end
 	return self:addGuiFlowH(mainPanel, "helmod_planner_dialog")
+end
+
+-------------------------------------------------------------------------------
+-- Get or create settings panel
+--
+-- @function [parent=#PlannerController] getSettingsPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerController.methods:getSettingsPanel(player)
+	local infoPanel = self:getInfoPanel(player)
+	if infoPanel["helmod_planner_settings"] ~= nil and infoPanel["helmod_planner_settings"].valid then
+		return infoPanel["helmod_planner_settings"]
+	end
+	return self:addGuiFrameH(infoPanel, "helmod_planner_settings", "helmod_menu_frame_style")
 end
 
 -------------------------------------------------------------------------------
