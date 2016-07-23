@@ -13,7 +13,7 @@ helmod = {}
 -- info=2
 -- erro=1
 -- nothing=0
-Logging:new(0)
+Logging:new(3)
 Logging.console = true
 Logging.force = true
 --===========================

@@ -84,6 +84,27 @@ function PlannerController.methods:on_gui_click(event)
 end
 
 -------------------------------------------------------------------------------
+-- Send event dialog
+--
+-- @function [parent=#PlannerController] send_event
+--
+-- @param #LuaPlayer player
+-- @param #string classname controller name
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item second item name
+--
+function PlannerController.methods:send_event(player, classname, action, item, item2)
+	if self.controllers ~= nil then
+		for r, controller in pairs(self.controllers) do
+			if controller:classname() == classname then
+				controller:send_event(player, nil, action, item, item2)
+			end
+		end
+	end
+end
+
+-------------------------------------------------------------------------------
 -- Prepare main display
 --
 -- @function [parent=#PlannerController] main
@@ -258,7 +279,7 @@ function PlannerController.methods:updateListRecipes(player)
 	local recipeListPanel = self:addGuiFlowH(menuPanel, "helmod_planner-recipes-list")
 	if model.input ~= nil then
 		for r, recipe in pairs(model.input) do
-			self:addSelectSpriteIconButton(recipeListPanel, "HMPlannerRecipeUpdate_OPEN_ID_", self.parent:getRecipeIconType(player, recipe), recipe.name, recipe.count)
+			self:addSelectSpriteIconButton(recipeListPanel, "HMPlannerRecipeUpdate=OPEN=ID=", self.parent:getRecipeIconType(player, recipe), recipe.name, recipe.count)
 		end
 	end
 end

@@ -16,9 +16,9 @@ PlannerDialog = setclass("HMPlannerDialog", ElementGui)
 function PlannerDialog.methods:init(parent)
 	self.parent = parent
 	
-	self.ACTION_OPEN = self:classname().."_OPEN"
-	self.ACTION_UPDATE =  self:classname().."_UPDATE"
-	self.ACTION_CLOSE =  self:classname().."_CLOSE"
+	self.ACTION_OPEN = self:classname().."=OPEN"
+	self.ACTION_UPDATE =  self:classname().."=UPDATE"
+	self.ACTION_CLOSE =  self:classname().."=CLOSE"
 	self:on_init(parent)
 end
 
@@ -87,26 +87,14 @@ function PlannerDialog.methods:on_gui_click(event)
 	if event.element.valid and string.find(event.element.name, self:classname()) then
 		local player = game.players[event.player_index]
 		
-		local patternAction = self:classname().."_([^_]*)"
-		local patternItem = self:classname()..".*_ID_([^_]*)"
-		local patternRecipe = self:classname()..".*_ID_[^_]*_([^_]*)"
+		local patternAction = self:classname().."=([^=]*)"
+		local patternItem = self:classname()..".*=ID=([^=]*)"
+		local patternRecipe = self:classname()..".*=ID=[^=]*=([^=]*)"
 		local action = string.match(event.element.name,patternAction,1)
 		local item = string.match(event.element.name,patternItem,1)
 		local item2 = string.match(event.element.name,patternRecipe,1)
 
-		if string.find(event.element.name, self.ACTION_OPEN) then
-			self:open(player, event.element, action, item, item2)
-		end
-
-		if string.find(event.element.name, self.ACTION_UPDATE) then
-			self:update(player, event.element, action, item, item2)
-		end
-
-		if string.find(event.element.name, self.ACTION_CLOSE) then
-			self:close(player, event.element, action, item, item2)
-		end
-
-		self:on_event(player, event.element, action, item, item2)
+		self:send_event(player, event.element, action, item, item2)
 	end
 end
 
@@ -144,6 +132,34 @@ function PlannerDialog.methods:open(player, element, action, item, item2)
 		self:after_open(player, element, action, item, item2)
 		self:update(player, element, action, item, item2)
 	end
+end
+
+-------------------------------------------------------------------------------
+-- Send event
+--
+-- @function [parent=#PlannerDialog] send_event
+-- 
+-- @param #LuaPlayer player
+-- @param #LuaGuiElement element button
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item second item name
+-- 
+function PlannerDialog.methods:send_event(player, element, action, item, item2)
+		Logging:debug("PlannerDialog:send_event():",player, element, action, item, item2)
+		if action == "OPEN" then
+			self:open(player, element, action, item, item2)
+		end
+
+		if action == "UPDATE" then
+			self:update(player, element, action, item, item2)
+		end
+
+		if action == "CLOSE" then
+			self:close(player, element, action, item, item2)
+		end
+
+		self:on_event(player, element, action, item, item2)
 end
 
 -------------------------------------------------------------------------------

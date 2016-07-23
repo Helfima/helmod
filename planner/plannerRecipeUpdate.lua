@@ -189,12 +189,12 @@ function PlannerRecipeUpdate.methods:updateProducts(player, element, action, ite
 
 		local inputPanel= self:addGuiTable(productsPanel, "table-products", 2)
 		for key, product in pairs(recipe.products) do
-			self:addIconButton(inputPanel, "item_ID_", self.player:getItemIconType(product), product.name)
+			self:addIconButton(inputPanel, "item=ID=", self.player:getItemIconType(product), product.name)
 			self:addGuiText(inputPanel, product.name, product.count)
 		end
 
-		self:addGuiButton(panel, self:classname().."_recipe-update_ID_", recipe.name, "helmod_button-default", "Update")
-		self:addGuiButton(panel, self:classname().."_recipe-remove_ID_", recipe.name, "helmod_button-default", "Delete")
+		self:addGuiButton(panel, self:classname().."=recipe-update=ID=", recipe.name, "helmod_button-default", "Update")
+		self:addGuiButton(panel, self:classname().."=recipe-remove=ID=", recipe.name, "helmod_button-default", "Delete")
 	end
 end
 

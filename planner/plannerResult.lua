@@ -102,10 +102,10 @@ function PlannerResult.methods:buildPanel(player)
 	
 	if parentPanel ~= nil then
 		local selectorPanel = self:getSelectorPanel(player)
-		self:addGuiButton(selectorPanel, self:classname().."_change-tab_ID_", self.DATA_TAB, "helmod_button-default", "Data")
-		self:addGuiButton(selectorPanel, self:classname().."_change-tab_ID_", self.ENERGY_TAB, "helmod_button-default", "Energy")
-		self:addGuiButton(selectorPanel, self:classname().."_change-tab_ID_", self.RESOURCES_TAB, "helmod_button-default", "Resources")
-		self:addGuiButton(selectorPanel, self:classname().."_change-tab_ID_", self.RECIPES_TAB, "helmod_button-default", "Disable recipes")
+		self:addGuiButton(selectorPanel, self:classname().."=change-tab=ID=", self.DATA_TAB, "helmod_button-default", "Data")
+		self:addGuiButton(selectorPanel, self:classname().."=change-tab=ID=", self.ENERGY_TAB, "helmod_button-default", "Energy")
+		self:addGuiButton(selectorPanel, self:classname().."=change-tab=ID=", self.RESOURCES_TAB, "helmod_button-default", "Resources")
+		self:addGuiButton(selectorPanel, self:classname().."=change-tab=ID=", self.RECIPES_TAB, "helmod_button-default", "Disable recipes")
 
 		self:getDataPanel(player)
 
@@ -126,9 +126,9 @@ function PlannerResult.methods:on_gui_click(event)
 	if event.element.valid and string.find(event.element.name, self:classname()) then
 		local player = game.players[event.player_index]
 		
-		local patternAction = self:classname().."_([^_]*)"
-		local patternItem = self:classname()..".*_ID_([^_]*)"
-		local patternRecipe = self:classname()..".*_ID_[^_]*_([^_]*)"
+		local patternAction = self:classname().."=([^=]*)"
+		local patternItem = self:classname()..".*=ID=([^=]*)"
+		local patternRecipe = self:classname()..".*=ID=[^=]*=([^=]*)"
 		local action = string.match(event.element.name,patternAction,1)
 		local item = string.match(event.element.name,patternItem,1)
 		local item2 = string.match(event.element.name,patternRecipe,1)
@@ -205,7 +205,7 @@ function PlannerResult.methods:update(player)
 	end
 
 	local count = self.model:countDisabledRecipes(player)
-	local button = self:getSelectorPanel(player)[self:classname().."_change-tab_ID_"..self.RECIPES_TAB]
+	local button = self:getSelectorPanel(player)[self:classname().."=change-tab=ID="..self.RECIPES_TAB]
 	if button ~= nil and button.valid then
 		button.caption = "Disable recipes ("..count..")"
 	end
@@ -287,18 +287,18 @@ function PlannerResult.methods:addPagination(player, itable)
 	local model = self.model:getModel(player)
 	local guiPagination = self:addGuiFlowH(itable,"pagination", "helmod_page-result-flow")
 
-	self:addGuiButton(guiPagination, self:classname().."_change-page_ID_", "down", "helmod_button-default", "<")
+	self:addGuiButton(guiPagination, self:classname().."=change-page=ID=", "down", "helmod_button-default", "<")
 
 	local maxPage = math.floor(self.model:countRepices(player)/model.step)
 	for page = 0, maxPage, 1 do
 		if page == model.page then
-			self:addGuiLabel(guiPagination, self:classname().."_change-page_ID_", page + 1, "helmod_page-label")
+			self:addGuiLabel(guiPagination, self:classname().."=change-page=ID=", page + 1, "helmod_page-label")
 		else
-			self:addGuiButton(guiPagination, self:classname().."_change-page_ID_direct_", page, "helmod_button-default", page + 1)
+			self:addGuiButton(guiPagination, self:classname().."=change-page=ID=direct=", page, "helmod_button-default", page + 1)
 		end
 	end
 
-	self:addGuiButton(guiPagination, self:classname().."_change-page_ID_", "up", "helmod_button-default", ">")
+	self:addGuiButton(guiPagination, self:classname().."=change-page=ID=", "up", "helmod_button-default", ">")
 end
 
 -------------------------------------------------------------------------------
@@ -330,12 +330,12 @@ function PlannerResult.methods:addRow(player, guiTable, recipe)
 	local model = self.model:getModel(player)
 	-- col recipe
 	local guiRecipe = self:addGuiFlowH(guiTable,"recipe"..recipe.name)
-	self:addSelectSpriteIconButton(guiRecipe, "HMPlannerRecipeEdition_OPEN_ID_", self.player:getIconType(recipe), recipe.name)
+	self:addSelectSpriteIconButton(guiRecipe, "HMPlannerRecipeEdition=OPEN=ID=", self.player:getIconType(recipe), recipe.name)
 
 	-- col factory
 	local guiFactory = self:addGuiFlowH(guiTable,"factory"..recipe.name)
 	local factory = recipe.factory
-	self:addSelectSpriteIconButton(guiFactory, "HMPlannerFactorySelector_OPEN_ID_"..recipe.name.."_", self.player:getIconType(factory), factory.name)
+	self:addSelectSpriteIconButton(guiFactory, "HMPlannerFactorySelector=OPEN=ID="..recipe.name.."=", self.player:getIconType(factory), factory.name)
 	local guiFactoryModule = self:addGuiFlowV(guiFactory,"factory-modules"..recipe.name)
 	-- modules
 --	for name, count in pairs(factory.modules) do
@@ -349,7 +349,7 @@ function PlannerResult.methods:addRow(player, guiTable, recipe)
 	-- col beacon
 	local guiBeacon = self:addGuiFlowH(guiTable,"beacon"..recipe.name)
 	local beacon = recipe.beacon
-	self:addSelectSpriteIconButton(guiBeacon, "HMPlannerBeaconSelector_OPEN_ID_"..recipe.name.."_", self.player:getIconType(beacon), beacon.name)
+	self:addSelectSpriteIconButton(guiBeacon, "HMPlannerBeaconSelector=OPEN=ID="..recipe.name.."=", self.player:getIconType(beacon), beacon.name)
 	self:addGuiLabel(guiBeacon, beacon.name, beacon.count)
 
 	-- col energy
@@ -361,7 +361,7 @@ function PlannerResult.methods:addRow(player, guiTable, recipe)
 	if recipe.products ~= nil then
 		for r, product in pairs(recipe.products) do
 			-- product = {type="item", name="steel-plate", amount=8}
-			self:addSpriteIconButton(tProducts, "HMPlannerResourceInfo_OPEN_ID_"..recipe.name.."_"..product.name.."_", self.player:getIconType(product), product.name, "X"..product.amount)
+			self:addSpriteIconButton(tProducts, "HMPlannerResourceInfo=OPEN=ID="..recipe.name.."=", self.player:getIconType(product), product.name, "X"..product.amount)
 
 			self:addGuiLabel(tProducts, product.name, product.count)
 		end
@@ -371,7 +371,7 @@ function PlannerResult.methods:addRow(player, guiTable, recipe)
 	if recipe.ingredients ~= nil then
 		for r, ingredient in pairs(recipe.ingredients) do
 			-- ingredient = {type="item", name="steel-plate", amount=8}
-			self:addSpriteIconButton(tIngredient, "HMPlannerResourceInfo_OPEN_ID_"..recipe.name.."_"..ingredient.name.."_", self.player:getIconType(ingredient), ingredient.name, "X"..ingredient.amount)
+			self:addSpriteIconButton(tIngredient, "HMPlannerResourceInfo=OPEN=ID="..recipe.name.."=", self.player:getIconType(ingredient), ingredient.name, "X"..ingredient.amount)
 
 			self:addGuiLabel(tIngredient, ingredient.name, ingredient.count)
 		end
@@ -436,7 +436,7 @@ function PlannerResult.methods:updateRecipes(player)
 
 	for r, recipe in pairs(default.recipes) do
 		if not(recipe.active) then
-			self:addSelectSpriteIconButton(resultPanel, "HMPlannerRecipeEdition_OPEN_ID_", self.player:getRecipeIconType(player, recipe), recipe.name)
+			self:addSelectSpriteIconButton(resultPanel, "HMPlannerRecipeEdition=OPEN=ID=", self.player:getRecipeIconType(player, recipe), recipe.name)
 		end
 	end
 end
@@ -454,11 +454,11 @@ function PlannerResult.methods:updateResources(player)
 	-- data
 	local resultPanel = self:getResultPanel(player, "Resources")
 	
-	local resultTable = self:addGuiTable(resultPanel,"table-resources",6)
+	local resultTable = self:addGuiTable(resultPanel,"table-resources",9)
 	
 	for r, ingredient in pairs(model.ingredients) do
 			-- ingredient = {type="item", name="steel-plate", amount=8}
-			self:addSpriteIconButton(resultTable, "HMPlannerResourceInfo_OPEN_ID_"..ingredient.name.."_", self.player:getIconType(ingredient), ingredient.name)
+			self:addSpriteIconButton(resultTable, "HMPlannerResourceInfo=OPEN=ID="..ingredient.name.."=", self.player:getIconType(ingredient), ingredient.name)
 
 			self:addGuiLabel(resultTable, ingredient.name, ingredient.count)
 			self:addGuiLabel(resultTable, ingredient.name.."type", ingredient.resource_category)

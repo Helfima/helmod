@@ -69,7 +69,7 @@ function PlannerRecipeSelector.methods:after_open(player, element, action, item,
 		-- set le groupe
 		if globalPlayer.recipeGroupSelected == nil then globalPlayer.recipeGroupSelected = group end
 		-- ajoute les icons de groupe
-		local action = self:addXxlSelectSpriteIconButton(guiRecipeSelectorGroups, self:classname().."_recipe-group_ID_", "item-group", group)
+		local action = self:addXxlSelectSpriteIconButton(guiRecipeSelectorGroups, self:classname().."=recipe-group=ID=", "item-group", group)
 	end
 end
 
@@ -96,6 +96,7 @@ function PlannerRecipeSelector.methods:on_event(player, element, action, item, i
 		self.parent.model:addInput(player, item)
 		self.parent.model:update(player)
 		self.parent:refreshDisplayData(player)
+		self.parent:send_event(player, "HMPlannerRecipeUpdate", "OPEN", item, nil)
 		self:close(player)
 	end
 	
@@ -125,7 +126,7 @@ function PlannerRecipeSelector.methods:on_update(player, element, action, item, 
 	for key, recipe in pairs(self.player:getRecipes(player)) do
 		if recipe.group.name == globalPlayer.recipeGroupSelected then
 			Logging:trace("PlannerRecipeSelector:on_update",recipe.name)
-			self:addSelectSpriteIconButton(guiRecipeSelectorTable, self:classname().."_recipe-select_ID_", self.player:getRecipeIconType(player, recipe), recipe.name)
+			self:addSelectSpriteIconButton(guiRecipeSelectorTable, self:classname().."=recipe-select=ID=", self.player:getRecipeIconType(player, recipe), recipe.name)
 		end
 	end
 

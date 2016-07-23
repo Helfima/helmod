@@ -188,7 +188,7 @@ function PlannerRecipeEdition.methods:updateInfo(player, element, action, item, 
 		elseif default.recipes[item] ~= nil then
 			actived = default.recipes[item].active
 		end
-		self:addGuiCheckbox(tablePanel, self:classname().."_recipe-active_ID_"..recipe.name, actived)
+		self:addGuiCheckbox(tablePanel, self:classname().."=recipe-active=ID="..recipe.name, actived)
 	end
 end
 
@@ -215,7 +215,7 @@ function PlannerRecipeEdition.methods:updateIngredients(player, element, action,
 		end
 		local tablePanel= self:addGuiTable(ingredientsPanel, "table-ingredients", 2)
 		for key, ingredient in pairs(recipe.ingredients) do
-			self:addIconButton(tablePanel, "item_ID_", self.player:getItemIconType(ingredient), ingredient.name)
+			self:addIconButton(tablePanel, "item=ID=", self.player:getItemIconType(ingredient), ingredient.name)
 			self:addGuiLabel(tablePanel, ingredient.name, ingredient.amount)
 		end
 	end
@@ -244,7 +244,7 @@ function PlannerRecipeEdition.methods:updateProducts(player, element, action, it
 		end
 		local tablePanel= self:addGuiTable(productsPanel, "table-products", 2)
 		for key, product in pairs(recipe.products) do
-			self:addIconButton(tablePanel, "item_ID_", self.player:getItemIconType(product), product.name)
+			self:addIconButton(tablePanel, "item=ID=", self.player:getItemIconType(product), product.name)
 			self:addGuiLabel(tablePanel, product.name, product.amount)
 		end
 	end

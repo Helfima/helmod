@@ -38,7 +38,22 @@ helmod_defines.production_groups["rocket-silo"] = {
 	categories = {"rocket-building"}
 }
 
-
+-- vanilla name
+helmod_defines.production_group_categories = {
+	"crafting",
+	"advanced-crafting",
+	"crafting-with-fluid",
+	"oil-processing",
+	"chemistry",
+	"basic-fluid",
+	"basic-solid",
+	"energy",
+	"energy-solar",
+	"energy-accumulator",
+	"smelting",
+	"module",
+	"rocket-building"
+}
 -- items comme les ressources
 helmod_defines.items = {}
 helmod_defines.items["sulfuric-acid"]= {

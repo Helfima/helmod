@@ -177,7 +177,9 @@ function PlayerController.methods:getProductionGroups(category)
 				if category == value then check = true end
 			end
 		end
-		if check then groups[group.name] = group end
+		if check then
+			groups[group.name] = group
+		end
 	end
 	return groups
 end

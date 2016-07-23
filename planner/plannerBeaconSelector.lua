@@ -193,7 +193,7 @@ function PlannerBeaconSelector.methods:updateInfo(player, item)
 		self:addGuiLabel(inputPanel, "label-module-slots", "Module Slots")
 		self:addGuiText(inputPanel, "module-slots", beacon.module_slots)
 
-		self:addGuiButton(infoPanel, self:classname().."_beacon-update_ID_", recipe.name, "helmod_button-default", "Update")
+		self:addGuiButton(infoPanel, self:classname().."=beacon-update=ID=", recipe.name, "helmod_button-default", "Update")
 	end
 end
 
@@ -219,9 +219,9 @@ function PlannerBeaconSelector.methods:updateModulesInfo(player, item)
 	for k, module in pairs(self.player:getModules()) do
 		local count = 0
 		if beacon.modules[module.name] ~= nil then count = beacon.modules[module.name] end
-		self:addIconButton(tableModulesPanel, self:classname().."_module_ID_"..recipe.name.."_", module.type, module.name, count)
-		self:addGuiButton(tableModulesPanel, self:classname().."_module-add_ID_"..recipe.name.."_", module.name, "helmod_button-small-bold", "+")
-		self:addGuiButton(tableModulesPanel, self:classname().."_module-remove_ID_"..recipe.name.."_", module.name, "helmod_button-small-bold", "-")
+		self:addIconButton(tableModulesPanel, self:classname().."=module=ID="..recipe.name.."=", module.type, module.name, count)
+		self:addGuiButton(tableModulesPanel, self:classname().."=module-add=ID="..recipe.name.."=", module.name, "helmod_button-small-bold", "+")
+		self:addGuiButton(tableModulesPanel, self:classname().."=module-remove=ID="..recipe.name.."=", module.name, "helmod_button-small-bold", "-")
 	end
 end
 
@@ -249,7 +249,7 @@ function PlannerBeaconSelector.methods:updateSelector(player, item)
 		-- set le groupe
 		if model.beaconGroupSelected == nil then model.beaconGroupSelected = group end
 		-- ajoute les icons de groupe
-		local action = self:addItemButton(groupsPanel, self:classname().."_beacon-group_ID_"..recipe.name.."_", group)
+		local action = self:addItemButton(groupsPanel, self:classname().."=beacon-group=ID="..recipe.name.."=", group)
 	end
 
 	if selectorPanel["beacon-table"] ~= nil and selectorPanel["beacon-table"].valid then
@@ -260,7 +260,7 @@ function PlannerBeaconSelector.methods:updateSelector(player, item)
 	--Logging:debug("factories:",self.player:getProductions())
 	for key, beacon in pairs(self.player:getProductions()) do
 		if beacon.type == model.beaconGroupSelected then
-			self:addSpriteIconButton(tablePanel, self:classname().."_beacon-select_ID_"..recipe.name.."_", "item", beacon.name, true)
+			self:addSpriteIconButton(tablePanel, self:classname().."=beacon-select=ID="..recipe.name.."=", "item", beacon.name, true)
 		end
 	end
 end

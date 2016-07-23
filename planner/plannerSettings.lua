@@ -82,9 +82,9 @@ function PlannerSettings.methods:on_gui_click(event)
 	if event.element.valid and string.find(event.element.name, self:classname()) then
 		local player = game.players[event.player_index]
 
-		local patternAction = self:classname().."_([^_]*)"
-		local patternItem = self:classname()..".*_ID_([^_]*)"
-		local patternRecipe = self:classname()..".*_ID_[^_]*_([^_]*)"
+		local patternAction = self:classname().."=([^=]*)"
+		local patternItem = self:classname()..".*=ID=([^=]*)"
+		local patternRecipe = self:classname()..".*=ID=[^=]*=([^=]*)"
 		local action = string.match(event.element.name,patternAction,1)
 		local item = string.match(event.element.name,patternItem,1)
 		local item2 = string.match(event.element.name,patternRecipe,1)
@@ -132,7 +132,7 @@ function PlannerSettings.methods:update(player)
 		timePanel[guiName].destroy()
 	end
 
-	self:addGuiLabel(timePanel, self:classname().."_base-time", "Base time:", "helmod_page-label")
+	self:addGuiLabel(timePanel, self:classname().."=base-time", "Base time:", "helmod_page-label")
 
 	local times = {
 		{ value = 60, name = "1m"},
@@ -143,9 +143,9 @@ function PlannerSettings.methods:update(player)
 	}
 	for _,time in pairs(times) do
 		if model.time == time.value then
-			self:addGuiLabel(timePanel, self:classname().."_change-time"..time.value, time.name, "helmod_page-label")
+			self:addGuiLabel(timePanel, self:classname().."=change-time="..time.value, time.name, "helmod_page-label")
 		else
-			self:addGuiButton(timePanel, self:classname().."_change-time_ID_", time.value, "helmod_button-default", time.name)
+			self:addGuiButton(timePanel, self:classname().."=change-time=ID=", time.value, "helmod_button-default", time.name)
 		end
 	end
 end

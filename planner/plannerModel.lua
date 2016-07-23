@@ -155,12 +155,12 @@ function PlannerModel.methods:createIngredientModel(player, name, type, count)
 	ingredientModel.type = type
 	ingredientModel.count = count
 	ingredientModel.resource_category = nil
-	
+
 	local entity = self.player:getEntityPrototype(name)
 	if entity ~= nil then
 		ingredientModel.resource_category = entity.resource_category
 	end
-	
+
 	return ingredientModel
 end
 
@@ -633,6 +633,8 @@ function PlannerModel.methods:update(player)
 	self:ingredientsReset(player)
 	self:recipesReset(player)
 	Logging:debug("PlannerModel:update():","Reset OK")
+	model.temp = {}
+	Logging:debug("model:",model)
 	-- boucle recursive de calcul
 	for k, input in pairs(model.input) do
 		for index, product in pairs(input.products) do
@@ -664,6 +666,7 @@ end
 function PlannerModel.methods:prepare(player, element, level)
 	Logging:debug("PlannerModel:prepare():",player, element, level)
 	local model = self:getModel(player)
+	if path == nil then path = "_" end
 
 	if level == nil then
 		level = 1
@@ -674,29 +677,36 @@ function PlannerModel.methods:prepare(player, element, level)
 	local recipes = self.player:searchRecipe(player, element.name)
 	if recipes ~= nil then
 		for r, recipe in pairs(recipes) do
-			-- ok if recipe is active
-			if self:isDefaultActiveRecipe(player, recipe.name) then
-				if model.recipes[recipe.name] ~= nil then
-					-- le recipe existe deja on le copie
-					model.temp[recipe.name] = model.recipes[recipe.name]
-				else
-					-- le recipe n'existe pas on le cree
-					local ModelRecipe = self:createRecipeModel(player, recipe.name)
-					ModelRecipe.energy = recipe.energy
-					ModelRecipe.category = recipe.category
-					ModelRecipe.group = recipe.group.name
-					ModelRecipe.ingredients = recipe.ingredients
-					ModelRecipe.products = recipe.products
-					ModelRecipe.index = model.index
-					model.temp[recipe.name] = ModelRecipe
-				end
-				model.index = model.index + 1
-				if model.temp[recipe.name].ingredients ~= nil then
-					Logging:trace("ingredients:",model.temp[recipe.name].ingredients)
-					for k, ingredient in pairs(model.temp[recipe.name].ingredients) do
-						if model.ingredients[ingredient.name] == nil then
-							model.ingredients[ingredient.name] = self:createIngredientModel(player, ingredient.name, ingredient.type)
-							self:prepare(player, ingredient, level)
+			if model.temp[recipe.name] == nil then
+				-- ok if recipe is active
+				if self:isDefaultActiveRecipe(player, recipe.name) then
+					if model.recipes[recipe.name] ~= nil then
+						-- le recipe existe deja on le copie
+						model.temp[recipe.name] = model.recipes[recipe.name]
+					else
+						-- le recipe n'existe pas on le cree
+						local ModelRecipe = self:createRecipeModel(player, recipe.name)
+						ModelRecipe.energy = recipe.energy
+						ModelRecipe.category = recipe.category
+						ModelRecipe.group = recipe.group.name
+						ModelRecipe.ingredients = recipe.ingredients
+						ModelRecipe.products = recipe.products
+						ModelRecipe.index = model.index
+						model.temp[recipe.name] = ModelRecipe
+					end
+					model.index = model.index + 1
+
+
+					if model.temp[recipe.name].ingredients ~= nil then
+						Logging:debug("ingredients:",model.temp[recipe.name].ingredients)
+						for k, ingredient in pairs(model.temp[recipe.name].ingredients) do
+							if model.ingredients[ingredient.name] == nil then
+								model.ingredients[ingredient.name] = self:createIngredientModel(player, ingredient.name, ingredient.type)
+								-- stop la recursion sur les ressources pour eviter la boucle infini
+								if model.ingredients[ingredient.name].resource_category == nil then
+									self:prepare(player, ingredient, level)
+								end
+							end
 						end
 					end
 				end
@@ -739,7 +749,9 @@ end
 -- @param #string path path of the recursive run, necessary for no infite loop
 --
 function PlannerModel.methods:craft(player, element, count, path)
-	Logging:trace("PlannerModel:craft=",element, path)
+	Logging:debug("PlannerModel:craft=",element, path)
+	local model = self:getModel(player)
+	
 	if path == nil then path = "_" end
 	local recipes = self:getRecipeByProduct(player, element)
 	local pCount = count;
@@ -749,8 +761,8 @@ function PlannerModel.methods:craft(player, element, count, path)
 	end
 
 	for key, recipe in pairs(recipes) do
-		Logging:trace("recipe.index=",recipe.index)
-		Logging:trace("recipe=",recipe)
+		Logging:debug("recipe.index=",recipe.index)
+		Logging:debug("recipe=",recipe)
 		if not(string.find(path, "_"..recipe.index.."_")) then
 			local currentProduct = nil
 			-- met a jour le produit
@@ -776,6 +788,7 @@ function PlannerModel.methods:craft(player, element, count, path)
 				end
 				local nextCount = math.ceil(pCount*(ingredient.amount/productUsage))
 				ingredient.count = ingredient.count + nextCount
+				model.ingredients[ingredient.name].count = model.ingredients[ingredient.name].count + nextCount
 				self:craft(player, ingredient, nextCount, path)
 			end
 		end

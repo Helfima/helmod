@@ -193,7 +193,7 @@ function PlannerFactorySelector.methods:updateInfo(player, item)
 		self:addGuiLabel(inputPanel, "label-speed", ({"helmod_label-speed"}))
 		self:addGuiLabel(inputPanel, "speed", factory.speed)
 		
-		self:addGuiButton(infoPanel, self:classname().."_factory-update_ID_", recipe.name, "helmod_button-default", ({"helmod_button-update"}))
+		self:addGuiButton(infoPanel, self:classname().."=factory-update=ID=", recipe.name, "helmod_button-default", ({"helmod_button-update"}))
 	end
 end
 
@@ -219,9 +219,9 @@ function PlannerFactorySelector.methods:updateModulesInfo(player, item)
 	for k, module in pairs(self.player:getModules()) do
 		local count = 0
 		if factory.modules[module.name] ~= nil then count = factory.modules[module.name] end
-		self:addIconButton(tableModulesPanel, self:classname().."_module_ID_"..recipe.name.."_", module.type, module.name, count)
-		self:addGuiButton(tableModulesPanel, self:classname().."_module-add_ID_"..recipe.name.."_", module.name, "helmod_button-small-bold", "+")
-		self:addGuiButton(tableModulesPanel, self:classname().."_module-remove_ID_"..recipe.name.."_", module.name, "helmod_button-small-bold", "-")
+		self:addIconButton(tableModulesPanel, self:classname().."=module=ID="..recipe.name.."=", module.type, module.name, count)
+		self:addGuiButton(tableModulesPanel, self:classname().."=module-add=ID="..recipe.name.."=", module.name, "helmod_button-small-bold", "+")
+		self:addGuiButton(tableModulesPanel, self:classname().."=module-remove=ID="..recipe.name.."=", module.name, "helmod_button-small-bold", "-")
 	end
 end
 
@@ -245,11 +245,12 @@ function PlannerFactorySelector.methods:updateSelector(player, item)
 
 	-- ajouter de la table des groupes de recipe
 	local groupsPanel = self:addGuiTable(selectorPanel, "factory-groups", 5)
+	Logging:debug("PlannerFactorySelector:updateSelector(): group category=",recipe.category)
 	for group, name in pairs(self.player:getProductionGroups(recipe.category)) do
 		-- set le groupe
 		if model.factoryGroupSelected == nil then model.factoryGroupSelected = group end
 		-- ajoute les icons de groupe
-		local action = self:addItemButton(groupsPanel, self:classname().."_factory-group_ID_"..recipe.name.."_", group)
+		local action = self:addItemButton(groupsPanel, self:classname().."=factory-group=ID="..recipe.name.."=", group)
 	end
 
 	if selectorPanel["factory-table"] ~= nil and selectorPanel["factory-table"].valid then
@@ -257,10 +258,10 @@ function PlannerFactorySelector.methods:updateSelector(player, item)
 	end
 
 	local tablePanel = self:addGuiTable(selectorPanel, "factory-table", 10)
-	--Logging:debug("factories:",self.player:getProductions())
+	Logging:debug("factories:",self.player:getProductions())
 	for key, factory in pairs(self.player:getProductions()) do
 		if factory.type == model.factoryGroupSelected then
-			self:addSpriteIconButton(tablePanel, self:classname().."_factory-select_ID_"..recipe.name.."_", "item", factory.name, true)
+			self:addSpriteIconButton(tablePanel, self:classname().."=factory-select=ID="..recipe.name.."=", "item", factory.name, true)
 		end
 	end
 end
