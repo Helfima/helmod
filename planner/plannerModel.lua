@@ -35,6 +35,7 @@ function PlannerModel.methods:getModel(player)
 	if model.input == nil then model.input = {} end
 	if model.recipes == nil then model.recipes = {} end
 	if model.ingredients == nil then model.ingredients = {} end
+	if model.products == nil then model.products = {} end
 
 	if model.time == nil then model.time = 60 end
 	if model.needPrepare == nil then model.needPrepare = true end
@@ -152,8 +153,10 @@ function PlannerModel.methods:createIngredientModel(player, name, type, count)
 
 	local ingredientModel = {}
 	ingredientModel.name = name
+	ingredientModel.weight = 0
 	ingredientModel.type = type
 	ingredientModel.count = count
+	ingredientModel.recipes = {}
 	ingredientModel.resource_category = nil
 
 	local entity = self.player:getEntityPrototype(name)
@@ -224,9 +227,16 @@ end
 --
 function PlannerModel.methods:createRecipeModel(player, name, count)
 	Logging:debug("PlannerModel:createRecipeModel():",player, name, count)
+	local model = self:getModel(player)
+	if model.recipe_id == nil then model.recipe_id = 0 end
+	model.recipe_id = model.recipe_id + 1
+
 	if count == nil then count = 1 end
 
 	local recipeModel = {}
+	recipeModel.id = model.recipe_id
+	recipeModel.index = 1
+	recipeModel.weight = 0
 	recipeModel.name = name
 	recipeModel.count = count
 	recipeModel.active = true
@@ -604,15 +614,32 @@ end
 --
 function PlannerModel.methods:update(player)
 	Logging:debug("PlannerModel:update():",player)
+
 	local model = self:getModel(player)
+	local globalSettings = self.player:getGlobal(player, "settings")
+	local defaultSettings = self.player:getDefaultSettings()
+
+	local maxLoop = defaultSettings.model_loop_limit
+	if globalSettings.model_loop_limit ~= nil then
+		maxLoop = globalSettings.model_loop_limit
+	end
+
+
 	if model.needPrepare then
 		-- initialisation des donnees
 		model.temp = {}
+		-- initialisation ingredients pour les boucles
+		model.ingredients = {}
+		model.products = {}
+		model.index = 1
+
 		-- boucle recursive sur chaque recipe
 		for k, item in pairs(model.input) do
-			self:prepare(player, item)
+			self:computeRecipes(player, item, maxLoop)
 		end
 		model.recipes = model.temp
+
+		self:computeIngredients(player)
 
 		-- set the default factory and beacon for recipe
 		for k, recipe in pairs(model.recipes) do
@@ -657,55 +684,73 @@ end
 -------------------------------------------------------------------------------
 -- Prepare model
 --
--- @function [parent=#PlannerModel] prepare
+-- @function [parent=#PlannerModel] computeRecipes
 --
 -- @param #LuaPlayer player
 -- @param #ModelRecipe recipe
+-- @param #number maxLoop
 -- @param #number level
+-- @param #string path
 --
-function PlannerModel.methods:prepare(player, element, level)
-	Logging:debug("PlannerModel:prepare():",player, element, level)
+function PlannerModel.methods:computeRecipes(player, element, maxLoop, level, path)
+	Logging:debug("PlannerModel:prepare():",player, element, maxLoop, level, path)
 	local model = self:getModel(player)
+	-- stop la boucle pour les recherche trop longue
+	if model.index > maxLoop then return end
+
 	if path == nil then path = "_" end
 
 	if level == nil then
 		level = 1
-		-- initialisation ingredients pour les boucles
-		model.ingredients = {}
-		model.index = 1
 	end
+	-- recherche le recipe par le nom
 	local recipes = self.player:searchRecipe(player, element.name)
+	Logging:debug("PlannerModel:prepare():number recipes=",#recipes)
 	if recipes ~= nil then
-		for r, recipe in pairs(recipes) do
-			if model.temp[recipe.name] == nil then
-				-- ok if recipe is active
-				if self:isDefaultActiveRecipe(player, recipe.name) then
-					if model.recipes[recipe.name] ~= nil then
-						-- le recipe existe deja on le copie
-						model.temp[recipe.name] = model.recipes[recipe.name]
-					else
-						-- le recipe n'existe pas on le cree
-						local ModelRecipe = self:createRecipeModel(player, recipe.name)
-						ModelRecipe.energy = recipe.energy
-						ModelRecipe.category = recipe.category
-						ModelRecipe.group = recipe.group.name
-						ModelRecipe.ingredients = recipe.ingredients
-						ModelRecipe.products = recipe.products
-						ModelRecipe.index = model.index
-						model.temp[recipe.name] = ModelRecipe
-					end
-					model.index = model.index + 1
+		Logging:debug("model.temp:",model.temp)
+		for _, recipe in pairs(recipes) do
+			-- ok if recipe is active
+			if self:isDefaultActiveRecipe(player, recipe.name) then
+				local ModelRecipe = nil
+				if model.recipes[recipe.name] ~= nil then
+					-- le recipe existe deja on le copie
+					ModelRecipe = model.recipes[recipe.name]
+				elseif model.temp[recipe.name] == nil then
+					-- le recipe n'existe pas on le cree
+					ModelRecipe = self:createRecipeModel(player, recipe.name)
+					ModelRecipe.energy = recipe.energy
+					ModelRecipe.category = recipe.category
+					ModelRecipe.group = recipe.group.name
+					ModelRecipe.ingredients = recipe.ingredients
+					ModelRecipe.products = recipe.products
+					ModelRecipe.index = model.index
+				else
+					ModelRecipe = model.temp[recipe.name]
+				end
 
+				-- incrementation de l'index pour pousser au plus loin le recipe
+				model.index = model.index + 1
+				ModelRecipe.level = level
+				--ModelRecipe.index = model.index
+				Logging:debug("modelRecipe reindex:",ModelRecipe)
 
-					if model.temp[recipe.name].ingredients ~= nil then
-						Logging:debug("ingredients:",model.temp[recipe.name].ingredients)
-						for k, ingredient in pairs(model.temp[recipe.name].ingredients) do
-							if model.ingredients[ingredient.name] == nil then
-								model.ingredients[ingredient.name] = self:createIngredientModel(player, ingredient.name, ingredient.type)
-								-- stop la recursion sur les ressources pour eviter la boucle infini
-								if model.ingredients[ingredient.name].resource_category == nil then
-									self:prepare(player, ingredient, level)
-								end
+				-- stop la boucle pour les recherche trop longue
+				if model.index > maxLoop then break end
+
+				model.temp[recipe.name] = ModelRecipe
+				Logging:debug("modelRecipe:",ModelRecipe)
+				-- controle dans le chemin qu'on ne boucle pas a l'infini
+				-- chaque noeud de la branche creer un chemin different
+				if not(string.find(path, "_"..ModelRecipe.id.."_")) then
+
+					path = path..ModelRecipe.id.."_"
+
+					if ModelRecipe.ingredients ~= nil then
+						Logging:debug("ingredients:",ModelRecipe.ingredients)
+						for k, ingredient in pairs(ModelRecipe.ingredients) do
+							local entity = self.player:getEntityPrototype(ingredient.name)
+							if entity == nil or entity.resource_category == nil then
+								self:computeRecipes(player, ingredient, maxLoop, level + 1, path)
 							end
 						end
 					end
@@ -715,6 +760,56 @@ function PlannerModel.methods:prepare(player, element, level)
 	end
 end
 
+-------------------------------------------------------------------------------
+-- Prepare model
+--
+-- @function [parent=#PlannerModel] computeIngredients
+--
+-- @param #LuaPlayer player
+-- @param #ModelRecipe recipe
+-- @param #number maxLoop
+-- @param #number level
+-- @param #string path
+--
+function PlannerModel.methods:computeIngredients(player)
+	Logging:debug("PlannerModel:prepare():",player, element, maxLoop, level, path)
+	local model = self:getModel(player)
+
+	for _, recipe in spairs(model.recipes, function(t,a,b) return t[b].level > t[a].level end) do
+		for _, ingredient in pairs(recipe.ingredients) do
+			if model.ingredients[ingredient.name] == nil then
+				model.ingredients[ingredient.name] = self:createIngredientModel(player, ingredient.name, ingredient.type)
+			end
+			local weight = recipe.level * recipe.level
+			if weight > model.ingredients[ingredient.name].weight then
+				model.ingredients[ingredient.name].weight = weight
+			end
+			table.insert(model.ingredients[ingredient.name].recipes,recipe.name)
+		end
+		for _, product in pairs(recipe.products) do
+			if model.products[product.name] == nil then
+				model.products[product.name] = self:createIngredientModel(player, product.name, product.type)
+			end
+			--model.products[product.name].weight = model.products[product.name].weight + recipe.level * recipe.index
+			table.insert(model.products[product.name].recipes,recipe.name)
+		end
+	end
+	--	for _, ingredient in pairs(model.ingredients) do
+	--		for _, recipe in pairs(ingredient.recipes) do
+	--			model.recipes[recipe].weight = model.recipes[recipe].weight + ingredient.weight
+	--		end
+	--	end
+	for _, product in pairs(model.products) do
+		if  model.ingredients[product.name] then
+			product.weight = model.ingredients[product.name].weight
+		end
+		for _, recipe in pairs(product.recipes) do
+			if product.weight > model.recipes[recipe].weight then
+				model.recipes[recipe].weight = product.weight
+			end
+		end
+	end
+end
 -------------------------------------------------------------------------------
 -- Get productions list
 --
@@ -751,7 +846,7 @@ end
 function PlannerModel.methods:craft(player, element, count, path)
 	Logging:debug("PlannerModel:craft=",element, path)
 	local model = self:getModel(player)
-	
+
 	if path == nil then path = "_" end
 	local recipes = self:getRecipeByProduct(player, element)
 	local pCount = count;
@@ -788,6 +883,9 @@ function PlannerModel.methods:craft(player, element, count, path)
 				end
 				local nextCount = math.ceil(pCount*(ingredient.amount/productUsage))
 				ingredient.count = ingredient.count + nextCount
+				if model.ingredients[ingredient.name] == nil or model.ingredients[ingredient.name].count == nil then
+					Logging:error("ingredient not found=", ingredient, "_", model.ingredients)
+				end
 				model.ingredients[ingredient.name].count = model.ingredients[ingredient.name].count + nextCount
 				self:craft(player, ingredient, nextCount, path)
 			end

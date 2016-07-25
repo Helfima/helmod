@@ -33,12 +33,12 @@ function Logging:objectToString(object, level)
 	if level == nil then level = 0 end
 	local message = ""
 	if type(object) == "nil" then
-		message = message.."nil"
+		message = message.." nil"
 	elseif type(object) == "boolean" then
-		if object then message = message.."true"
-		else message = message.."false" end
+		if object then message = message.." true"
+		else message = message.." false" end
 	elseif type(object) == "number" then
-		message = message..object end
+		message = message.." "..object end
 	if type(object) == "string" then
 		message = message.."\""..object.."\"" end
 	if type(object) == "function" then

@@ -103,6 +103,21 @@ function PlannerRecipeUpdate.methods:getProductsPanel(player)
 end
 
 -------------------------------------------------------------------------------
+-- Get or create buttons panel
+--
+-- @function [parent=#PlannerRecipeUpdate] getButtonsPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerRecipeUpdate.methods:getButtonsPanel(player)
+	local panel = self:getPanel(player)
+	if panel["buttons"] ~= nil and panel["buttons"].valid then
+		return panel["buttons"]
+	end
+	return self:addGuiFlowH(panel, "buttons")
+end
+
+-------------------------------------------------------------------------------
 -- After open
 --
 -- @function [parent=#PlannerRecipeUpdate] after_open
@@ -178,6 +193,7 @@ function PlannerRecipeUpdate.methods:updateProducts(player, element, action, ite
 	Logging:debug("PlannerRecipeUpdate:updateProducts():",player, element, action, item, item2)
 	local panel = self:getPanel(player)
 	local productsPanel = self:getProductsPanel(player)
+	local buttonsPanel = self:getButtonsPanel(player)
 	local model = self.model:getModel(player)
 	local recipe = model.recipes[item]
 
@@ -193,8 +209,12 @@ function PlannerRecipeUpdate.methods:updateProducts(player, element, action, ite
 			self:addGuiText(inputPanel, product.name, product.count)
 		end
 
-		self:addGuiButton(panel, self:classname().."=recipe-update=ID=", recipe.name, "helmod_button-default", "Update")
-		self:addGuiButton(panel, self:classname().."=recipe-remove=ID=", recipe.name, "helmod_button-default", "Delete")
+		for k,guiName in pairs(buttonsPanel.children_names) do
+			buttonsPanel[guiName].destroy()
+		end
+
+		self:addGuiButton(buttonsPanel, self:classname().."=recipe-update=ID=", recipe.name, "helmod_button-default", "Update")
+		self:addGuiButton(buttonsPanel, self:classname().."=recipe-remove=ID=", recipe.name, "helmod_button-default", "Delete")
 	end
 end
 

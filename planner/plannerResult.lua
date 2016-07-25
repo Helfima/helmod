@@ -29,11 +29,11 @@ end
 -- Get the parent panel
 --
 -- @function [parent=#PlannerResult] getParentPanel
--- 
+--
 -- @param #LuaPlayer player
--- 
+--
 -- @return #LuaGuiElement
--- 
+--
 function PlannerResult.methods:getParentPanel(player)
 	return self.parent:getDataPanel(player)
 end
@@ -89,7 +89,7 @@ end
 -- @function [parent=#PlannerResult] buildPanel
 --
 -- @param #LuaPlayer player
--- 
+--
 function PlannerResult.methods:buildPanel(player)
 	Logging:debug("PlannerResult:buildPanel():",player)
 
@@ -97,15 +97,19 @@ function PlannerResult.methods:buildPanel(player)
 	model.page = 0
 	model.step = 15
 	model.currentTab = self.DATA_TAB
-	
+
+	if model.order == nil then
+		model.order = {name="index", ascendant=true}
+	end
+
 	local parentPanel = self:getParentPanel(player)
-	
+
 	if parentPanel ~= nil then
 		local selectorPanel = self:getSelectorPanel(player)
-		self:addGuiButton(selectorPanel, self:classname().."=change-tab=ID=", self.DATA_TAB, "helmod_button-default", "Data")
-		self:addGuiButton(selectorPanel, self:classname().."=change-tab=ID=", self.ENERGY_TAB, "helmod_button-default", "Energy")
-		self:addGuiButton(selectorPanel, self:classname().."=change-tab=ID=", self.RESOURCES_TAB, "helmod_button-default", "Resources")
-		self:addGuiButton(selectorPanel, self:classname().."=change-tab=ID=", self.RECIPES_TAB, "helmod_button-default", "Disable recipes")
+		self:addGuiButton(selectorPanel, self:classname().."=change-tab=ID=", self.DATA_TAB, "helmod_button-default", ({"helmod_result-panel.tab-button-data"}))
+		self:addGuiButton(selectorPanel, self:classname().."=change-tab=ID=", self.ENERGY_TAB, "helmod_button-default", ({"helmod_result-panel.tab-button-energy"}))
+		self:addGuiButton(selectorPanel, self:classname().."=change-tab=ID=", self.RESOURCES_TAB, "helmod_button-default", ({"helmod_result-panel.tab-button-resources"}))
+		self:addGuiButton(selectorPanel, self:classname().."=change-tab=ID=", self.RECIPES_TAB, "helmod_button-default", ({"helmod_result-panel.tab-button-disabled-recipes", 0}))
 
 		self:getDataPanel(player)
 
@@ -125,7 +129,7 @@ function PlannerResult.methods:on_gui_click(event)
 	Logging:debug("PlannerResult:on_gui_click():",event)
 	if event.element.valid and string.find(event.element.name, self:classname()) then
 		local player = game.players[event.player_index]
-		
+
 		local patternAction = self:classname().."=([^=]*)"
 		local patternItem = self:classname()..".*=ID=([^=]*)"
 		local patternRecipe = self:classname()..".*=ID=[^=]*=([^=]*)"
@@ -141,7 +145,7 @@ end
 -- On event
 --
 -- @function [parent=#PlannerResult] on_event
--- 
+--
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
 -- @param #string action action name
@@ -151,7 +155,7 @@ end
 function PlannerResult.methods:on_event(player, element, action, item, item2)
 	Logging:debug("PlannerResult:on_event():",player, element, action, item, item2)
 	local model = self.model:getModel(player)
-	
+
 	if action == "change-tab" then
 		model.currentTab = item
 		self:update(player)
@@ -160,13 +164,21 @@ function PlannerResult.methods:on_event(player, element, action, item, item2)
 		self:updatePage(player, item, item2)
 		self:update(player)
 	end
+	if action == "change-sort" then
+		if model.order.name == item then
+			model.order.ascendant = not(model.order.ascendant)
+		else
+			model.order = {name=item, ascendant=true}
+		end
+		self:update(player)
+	end
 end
 
 -------------------------------------------------------------------------------
 -- Update page
 --
 -- @function [parent=#PlannerResult] updatePage
--- 
+--
 -- @param #LuaPlayer player
 --
 function PlannerResult.methods:updatePage(player, item, item2)
@@ -193,13 +205,13 @@ end
 -- Update
 --
 -- @function [parent=#PlannerResult] update
--- 
+--
 -- @param #LuaPlayer player
 --
 function PlannerResult.methods:update(player)
 	Logging:debug("PlannerResult:update():", player)
 	local model = self.model:getModel(player)
-	
+
 	if self:getResultPanel(player) ~= nil then
 		self:getResultPanel(player).destroy()
 	end
@@ -207,7 +219,7 @@ function PlannerResult.methods:update(player)
 	local count = self.model:countDisabledRecipes(player)
 	local button = self:getSelectorPanel(player)[self:classname().."=change-tab=ID="..self.RECIPES_TAB]
 	if button ~= nil and button.valid then
-		button.caption = "Disable recipes ("..count..")"
+		button.caption = ({"helmod_result-panel.tab-button-disabled-recipes", count})
 	end
 
 	if model.currentTab == self.DATA_TAB then
@@ -230,12 +242,12 @@ end
 -- @function [parent=#PlannerResult] updateData
 --
 -- @param #LuaPlayer player
--- 
+--
 function PlannerResult.methods:updateData(player)
 	Logging:debug("PlannerResult:updateData():", player)
 	local model = self.model:getModel(player)
 	-- data
-	local resultPanel = self:getResultPanel(player, "Data")
+	local resultPanel = self:getResultPanel(player, ({"helmod_result-panel.tab-title-data"}))
 	--	-- summary
 	--	self.guiSummaryFrame = self.guidata.add{type="frame", name=self.names.summary.."frame", direction="vertical", caption="Summary", style="helmod_summary-frame"}
 	--	self.guiSummary = self.guiSummaryFrame.add{type="table", name=self.names.summary, colspan=2}
@@ -252,7 +264,25 @@ function PlannerResult.methods:updateData(player)
 	-- result
 	self:addPagination(player, resultPanel)
 
-	local resultTable = self:addGuiTable(resultPanel,PLANNER_TABLE_RESULT,6)
+	local globalSettings = self.player:getGlobal(player, "settings")
+
+	local cols = 6
+	if globalSettings.display_data_col_name then
+		cols = cols + 1
+	end
+	if globalSettings.display_data_col_id then
+		cols = cols + 1
+	end
+	if globalSettings.display_data_col_index then
+		cols = cols + 1
+	end
+	if globalSettings.display_data_col_level then
+		cols = cols + 1
+	end
+	if globalSettings.display_data_col_weight then
+		cols = cols + 1
+	end
+	local resultTable = self:addGuiTable(resultPanel,PLANNER_TABLE_RESULT,cols)
 
 	self:addHeader(player, resultTable)
 
@@ -260,14 +290,14 @@ function PlannerResult.methods:updateData(player)
 	local indexEnd = (model.page + 1) * model.step
 	Logging:debug("pagination:", {page = model.page, step = model.step, indexBegin = indexBegin, indexEnd = indexEnd})
 	local i = 0
-	for _, recipe in pairs(model.recipes) do
+	for _, recipe in spairs(model.recipes, function(t,a,b) if model.order.ascendant then return t[b][model.order.name] > t[a][model.order.name] else return t[b][model.order.name] < t[a][model.order.name] end end) do
 		if i >= indexBegin and i < indexEnd then
 			self:addRow(player, resultTable, recipe)
 		end
 		i = i + 1
 	end
 
-	self:addGuiLabel(resultTable, "foot-1", "Total")
+	self:addGuiLabel(resultTable, "foot-1", ({"helmod_result-panel.col-header-total"}))
 	self:addGuiLabel(resultTable, "blank-1", "")
 	self:addGuiLabel(resultTable, "blank-2", "")
 	if model.summary ~= nil then
@@ -279,7 +309,7 @@ end
 -- Add pagination data tab
 --
 -- @function [parent=#PlannerResult] addPagination
--- 
+--
 -- @param #LuaPlayer player
 --
 function PlannerResult.methods:addPagination(player, itable)
@@ -305,29 +335,123 @@ end
 -- Add header data tab
 --
 -- @function [parent=#PlannerResult] addHeader
--- 
+--
 -- @param #LuaPlayer player
 --
 function PlannerResult.methods:addHeader(player, itable)
 	Logging:debug("PlannerResult:addHeader():", player, itable)
-	self:addGuiLabel(itable, "header-recipes", "Recipes")
-	self:addGuiLabel(itable, "header-factory", "Factory")
-	self:addGuiLabel(itable, "header-beacon", "Beacon")
-	self:addGuiLabel(itable, "header-kw", "Energy KW")
-	self:addGuiLabel(itable, "header-products", "Products")
-	self:addGuiLabel(itable, "header-ingredients", "Ingredients")
+	local model = self.model:getModel(player)
+	local globalSettings = self.player:getGlobal(player, "settings")
+	if globalSettings.display_data_col_index then
+		local guiIndex = self:addGuiFlowH(itable,"header-index")
+		self:addGuiLabel(guiIndex, "label", ({"helmod_result-panel.col-header-index"}))
+		local style = "helmod_button-sorted-none"
+		if model.order.name == "index" and model.order.ascendant then style = "helmod_button-sorted-up" end
+		if model.order.name == "index" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
+		self:addGuiButton(guiIndex, self:classname().."=change-sort=ID=", "index", style)
+	end
+	if globalSettings.display_data_col_level then
+		local guiLevel = self:addGuiFlowH(itable,"header-level")
+		self:addGuiLabel(guiLevel, "label", ({"helmod_result-panel.col-header-level"}))
+		local style = "helmod_button-sorted-none"
+		if model.order.name == "level" and model.order.ascendant then style = "helmod_button-sorted-up" end
+		if model.order.name == "level" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
+		self:addGuiButton(guiLevel, self:classname().."=change-sort=ID=", "level", style)
+	end
+	if globalSettings.display_data_col_weight then
+		local guiLevel = self:addGuiFlowH(itable,"header-weight")
+		self:addGuiLabel(guiLevel, "label", ({"helmod_result-panel.col-header-weight"}))
+		local style = "helmod_button-sorted-none"
+		if model.order.name == "weight" and model.order.ascendant then style = "helmod_button-sorted-up" end
+		if model.order.name == "weight" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
+		self:addGuiButton(guiLevel, self:classname().."=change-sort=ID=", "weight", style)
+	end
+	
+	if globalSettings.display_data_col_id then
+		local guiId = self:addGuiFlowH(itable,"header-id")
+		self:addGuiLabel(guiId, "label", ({"helmod_result-panel.col-header-id"}))
+		local style = "helmod_button-sorted-none"
+		if model.order.name == "id" and model.order.ascendant then style = "helmod_button-sorted-up" end
+		if model.order.name == "id" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
+		self:addGuiButton(guiId, self:classname().."=change-sort=ID=", "id", style)
+
+	end
+	if globalSettings.display_data_col_name then
+		local guiName = self:addGuiFlowH(itable,"header-name")
+		self:addGuiLabel(guiName, "label", ({"helmod_result-panel.col-header-name"}))
+		local style = "helmod_button-sorted-none"
+		if model.order.name == "name" and model.order.ascendant then style = "helmod_button-sorted-up" end
+		if model.order.name == "name" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
+		self:addGuiButton(guiName, self:classname().."=change-sort=ID=", "name", style)
+
+	end
+
+	local guiRecipe = self:addGuiFlowH(itable,"header-recipe")
+	self:addGuiLabel(guiRecipe, "header-recipe", ({"helmod_result-panel.col-header-recipe"}))
+	local style = "helmod_button-sorted-none"
+	if model.order.name == "name" and model.order.ascendant then style = "helmod_button-sorted-up" end
+	if model.order.name == "name" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
+	self:addGuiButton(guiRecipe, self:classname().."=change-sort=ID=", "name", style)
+
+	local guiFactory = self:addGuiFlowH(itable,"header-factory")
+	self:addGuiLabel(guiFactory, "header-factory", ({"helmod_result-panel.col-header-factory"}))
+
+
+	local guiBeacon = self:addGuiFlowH(itable,"header-beacon")
+	self:addGuiLabel(guiBeacon, "header-beacon", ({"helmod_result-panel.col-header-beacon"}))
+
+	local guiEnergy = self:addGuiFlowH(itable,"header-energy")
+	self:addGuiLabel(guiEnergy, "header-energy", ({"helmod_result-panel.col-header-energy"}))
+	local style = "helmod_button-sorted-none"
+	if model.order.name == "energy_total" and model.order.ascendant then style = "helmod_button-sorted-up" end
+	if model.order.name == "energy_total" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
+	self:addGuiButton(guiEnergy, self:classname().."=change-sort=ID=", "energy_total", style)
+
+
+	local guiProducts = self:addGuiFlowH(itable,"header-products")
+	self:addGuiLabel(guiProducts, "header-products", ({"helmod_result-panel.col-header-products"}))
+
+	local guiIngredients = self:addGuiFlowH(itable,"header-ingredients")
+	self:addGuiLabel(guiIngredients, "header-ingredients", ({"helmod_result-panel.col-header-ingredients"}))
 end
 
 -------------------------------------------------------------------------------
 -- Add row data tab
 --
 -- @function [parent=#PlannerResult] addRow
--- 
+--
 -- @param #LuaPlayer player
 --
 function PlannerResult.methods:addRow(player, guiTable, recipe)
 	Logging:debug("PlannerResult:addRow():", player, guiTable, recipe)
 	local model = self.model:getModel(player)
+
+	local globalSettings = self.player:getGlobal(player, "settings")
+	-- col index
+	if globalSettings.display_data_col_index then
+		local guiIndex = self:addGuiFlowH(guiTable,"index"..recipe.name)
+		self:addGuiLabel(guiIndex, "index", recipe.index)
+	end
+	-- col level
+	if globalSettings.display_data_col_level then
+		local guiLevel = self:addGuiFlowH(guiTable,"level"..recipe.name)
+		self:addGuiLabel(guiLevel, "level", recipe.level)
+	end
+	-- col weight
+	if globalSettings.display_data_col_weight then
+		local guiLevel = self:addGuiFlowH(guiTable,"weight"..recipe.name)
+		self:addGuiLabel(guiLevel, "weight", recipe.weight)
+	end
+	-- col id
+	if globalSettings.display_data_col_id then
+		local guiId = self:addGuiFlowH(guiTable,"id"..recipe.name)
+		self:addGuiLabel(guiId, "id", recipe.id)
+	end
+	-- col name
+	if globalSettings.display_data_col_name then
+		local guiName = self:addGuiFlowH(guiTable,"name"..recipe.name)
+		self:addGuiLabel(guiName, "name", recipe.name)
+	end
 	-- col recipe
 	local guiRecipe = self:addGuiFlowH(guiTable,"recipe"..recipe.name)
 	self:addSelectSpriteIconButton(guiRecipe, "HMPlannerRecipeEdition=OPEN=ID=", self.player:getIconType(recipe), recipe.name)
@@ -338,12 +462,12 @@ function PlannerResult.methods:addRow(player, guiTable, recipe)
 	self:addSelectSpriteIconButton(guiFactory, "HMPlannerFactorySelector=OPEN=ID="..recipe.name.."=", self.player:getIconType(factory), factory.name)
 	local guiFactoryModule = self:addGuiFlowV(guiFactory,"factory-modules"..recipe.name)
 	-- modules
---	for name, count in pairs(factory.modules) do
---		for index = 1, count, 1 do
---			self:addMiniIconButton(guiFactoryModule, "HMPlannerFactorySelector_factory-module_"..name.."_"..index, "module", name)
---			index = index + 1
---		end
---	end
+	--	for name, count in pairs(factory.modules) do
+	--		for index = 1, count, 1 do
+	--			self:addMiniIconButton(guiFactoryModule, "HMPlannerFactorySelector_factory-module_"..name.."_"..index, "module", name)
+	--			index = index + 1
+	--		end
+	--	end
 	self:addGuiLabel(guiFactory, factory.name, factory.count)
 
 	-- col beacon
@@ -424,7 +548,7 @@ end
 -- Update recipes tab
 --
 -- @function [parent=#PlannerResult] updateRecipes
--- 
+--
 -- @param #LuaPlayer player
 --
 function PlannerResult.methods:updateRecipes(player)
@@ -432,7 +556,7 @@ function PlannerResult.methods:updateRecipes(player)
 	local default = self.model:getDefault(player)
 	Logging:debug("PlannerResult:updateRecipes():default=", default)
 	-- data
-	local resultPanel = self:getResultPanel(player, "Disable recipes")
+	local resultPanel = self:getResultPanel(player, ({"helmod_result-panel.tab-title-disabled-recipes"}))
 
 	for r, recipe in pairs(default.recipes) do
 		if not(recipe.active) then
@@ -447,38 +571,97 @@ end
 -- @function [parent=#PlannerResult] updateResources
 --
 -- @param #LuaPlayer player
--- 
+--
 function PlannerResult.methods:updateResources(player)
 	Logging:debug("PlannerResult:updateResources():", player)
 	local model = self.model:getModel(player)
 	-- data
-	local resultPanel = self:getResultPanel(player, "Resources")
-	
-	local resultTable = self:addGuiTable(resultPanel,"table-resources",9)
-	
-	for r, ingredient in pairs(model.ingredients) do
-			-- ingredient = {type="item", name="steel-plate", amount=8}
-			self:addSpriteIconButton(resultTable, "HMPlannerResourceInfo=OPEN=ID="..ingredient.name.."=", self.player:getIconType(ingredient), ingredient.name)
+	local resultPanel = self:getResultPanel(player, ({"helmod_result-panel.tab-title-resources"}))
 
-			self:addGuiLabel(resultTable, ingredient.name, ingredient.count)
-			self:addGuiLabel(resultTable, ingredient.name.."type", ingredient.resource_category)
-		end
+	local resultTable = self:addGuiTable(resultPanel,"table-resources",12)
+
+	for r, ingredient in spairs(model.ingredients, function(t,a,b) return t[b].weight > t[a].weight end) do
+		-- ingredient = {type="item", name="steel-plate", amount=8}
+		self:addSpriteIconButton(resultTable, "HMPlannerResourceInfo=OPEN=ID="..ingredient.name.."=", self.player:getIconType(ingredient), ingredient.name)
+
+		self:addGuiLabel(resultTable, ingredient.name, ingredient.count)
+		self:addGuiLabel(resultTable, ingredient.name.."type", ingredient.resource_category)
+		self:addGuiLabel(resultTable, ingredient.name.."weight", ingredient.weight)
+	end
 end
 
 -------------------------------------------------------------------------------
 -- Update energy tab
 --
 -- @function [parent=#PlannerResult] updateEnergy
--- 
+--
 -- @param #LuaPlayer player
--- 
+--
 function PlannerResult.methods:updateEnergy(player)
 	Logging:debug("PlannerResult:updateEnergy():", player)
 	local model = self.model:getModel(player)
 	local dataPanel = self:getDataPanel(player)
 	-- data
-	local resultPanel = self:getResultPanel(player, "Energy")
+	local resultPanel = self:getResultPanel(player, ({"helmod_result-panel.tab-title-energy"}))
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

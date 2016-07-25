@@ -114,6 +114,11 @@ function PlayerController.methods:getGlobal(player, key)
 	if global["HMModel"][player.name] == nil then
 		global["HMModel"][player.name] = {}
 	end
+	
+	if global["HMModel"][player.name].settings == nil then
+		self:initGlobalSettings(player)
+	end
+	
 	if key ~= nil then
 		if global["HMModel"][player.name][key] == nil then
 			global["HMModel"][player.name][key] = {}
@@ -121,6 +126,36 @@ function PlayerController.methods:getGlobal(player, key)
 		return global["HMModel"][player.name][key]
 	end
 	return global["HMModel"][player.name]
+end
+
+-------------------------------------------------------------------------------
+-- Init global settings
+--
+-- @function [parent=#PlayerController] initGlobalSettings
+--
+-- @param #LuaPlayer player
+--
+function PlayerController.methods:initGlobalSettings(player)
+	global["HMModel"][player.name].settings = self:getDefaultSettings()
+end
+
+-------------------------------------------------------------------------------
+-- Get default settings
+--
+-- @function [parent=#PlayerController] getDefaultSettings
+--
+-- @param #LuaPlayer player
+--
+function PlayerController.methods:getDefaultSettings()
+	return {
+		display_data_col_name = false,
+		display_data_col_id = false,
+		display_data_col_index = false,
+		display_data_col_level = false,
+		display_data_col_weight = false,
+		model_auto_compute = false,
+		model_loop_limit = 1000
+	}
 end
 
 -------------------------------------------------------------------------------
@@ -252,12 +287,12 @@ function PlayerController.methods:searchRecipe(player, name)
 		for key, recipe in pairs(self:getRecipes(player)) do
 			for k, product in pairs(recipe.products) do
 				if product.name == name then
-					recipes[recipe.name] = recipe
+					table.insert(recipes,recipe)
 				end
 			end
 		end
 	else
-		recipes[recipe.name] = recipe
+		table.insert(recipes,recipe)
 	end
 	return recipes
 end

@@ -1,3 +1,4 @@
+require "core.global"
 require "core.class"
 require "core.defines"
 require "core.logging"
@@ -13,9 +14,9 @@ helmod = {}
 -- info=2
 -- erro=1
 -- nothing=0
-Logging:new(3)
-Logging.console = true
-Logging.force = true
+Logging:new(0)
+Logging.console = false
+Logging.force = false
 --===========================
 function helmod:on_init(event)
 	self.name = "helmod"

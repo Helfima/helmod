@@ -144,7 +144,7 @@ function PlannerController.methods:main(player)
 		self.controllers["settings"]:buildPanel(player)
 
 		self.controllers["recipe-selector"] = PlannerRecipeSelector:new(self)
-		self.controllers["recipe-selector"]:bindButton(menuPanel, ({"helmod_planner-add-item"}))
+		self.controllers["recipe-selector"]:bindButton(menuPanel, ({"helmod_button.add"}))
 
 		self.controllers["factory-selector"] = PlannerFactorySelector:new(self)
 
