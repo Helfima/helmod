@@ -65,6 +65,7 @@ function PlannerSettings.methods:on_open(player, element, action, item, item2)
 	-- close si nouvel appel
 	return true
 end
+
 -------------------------------------------------------------------------------
 -- Get or create time panel
 --
@@ -78,6 +79,21 @@ function PlannerSettings.methods:getTimePanel(player)
 		return parentPanel["time"]
 	end
 	return self:addGuiFlowH(parentPanel, "time")
+end
+
+-------------------------------------------------------------------------------
+-- Get or create about settings panel
+--
+-- @function [parent=#PlannerSettings] getAboutSettingsPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerSettings.methods:getAboutSettingsPanel(player)
+	local panel = self:getPanel(player)
+	if panel["about-settings"] ~= nil and panel["about-settings"].valid then
+		return panel["about-settings"]
+	end
+	return self:addGuiFrameV(panel, "about-settings", "helmod_module-table-frame", ({"helmod_settings-panel.about-section"}))
 end
 
 -------------------------------------------------------------------------------
@@ -180,6 +196,7 @@ end
 -- @param #string item second item name
 --
 function PlannerSettings.methods:after_open(player, element, action, item, item2)
+	self:updateAboutSettings(player, element, action, item, item2)
 	self:updateDataSettings(player, element, action, item, item2)
 	self:updateModelSettings(player, element, action, item, item2)
 end
@@ -219,9 +236,35 @@ function PlannerSettings.methods:update(player)
 end
 
 -------------------------------------------------------------------------------
+-- Update about settings
+--
+-- @function [parent=#PlannerSettings] updateAboutSettings
+--
+-- @param #LuaPlayer player
+-- @param #LuaGuiElement element button
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item second item name
+--
+function PlannerSettings.methods:updateAboutSettings(player, element, action, item, item2)
+	Logging:debug("PlannerSettings:updateAboutSettings():",player, element, action, item, item2)
+
+	local globalSettings = self.player:getGlobal(player, "settings")
+	local defaultSettings = self.player:getDefaultSettings()
+
+	local dataSettingsPanel = self:getAboutSettingsPanel(player)
+
+	local dataSettingsTable = self:addGuiTable(dataSettingsPanel, "settings", 2)
+
+	self:addGuiLabel(dataSettingsTable, self:classname().."=version-label", ({"helmod_settings-panel.mod-version"}))
+	self:addGuiLabel(dataSettingsTable, self:classname().."=version", helmod.version)
+
+end
+
+-------------------------------------------------------------------------------
 -- Update data settings
 --
--- @function [parent=#PlannerRecipeEdition] updateDataSettings
+-- @function [parent=#PlannerSettings] updateDataSettings
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -269,7 +312,7 @@ end
 -------------------------------------------------------------------------------
 -- Update model settings
 --
--- @function [parent=#PlannerRecipeEdition] updateModelSettings
+-- @function [parent=#PlannerSettings] updateModelSettings
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button

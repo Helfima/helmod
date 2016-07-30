@@ -5,8 +5,7 @@ require "planner/plannerSettings"
 require "planner/plannerRecipeSelector"
 require "planner/plannerRecipeUpdate"
 require "planner/plannerRecipeEdition"
-require "planner/plannerFactorySelector"
-require "planner/plannerBeaconSelector"
+
 
 PLANNER_COMMAND = "helmod_planner-command"
 
@@ -145,10 +144,6 @@ function PlannerController.methods:main(player)
 
 		self.controllers["recipe-selector"] = PlannerRecipeSelector:new(self)
 		self.controllers["recipe-selector"]:bindButton(menuPanel, ({"helmod_button.add"}))
-
-		self.controllers["factory-selector"] = PlannerFactorySelector:new(self)
-
-		self.controllers["beacon-selector"] = PlannerBeaconSelector:new(self)
 
 		self.controllers["recipe-update"] = PlannerRecipeUpdate:new(self)
 

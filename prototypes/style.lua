@@ -27,24 +27,21 @@ function monolithIcon(filename, size, scale, shift, position, border, stretch)
 	return {
 		type = "monolith",
 		top_monolith_border = border.top,
-        right_monolith_border = border.right,
-        bottom_monolith_border = border.bottom,
-        left_monolith_border = border.left,
+		right_monolith_border = border.right,
+		bottom_monolith_border = border.bottom,
+		left_monolith_border = border.left,
 		monolith_image = sprite(filename, size, scale, shift, position),
 		stretch_monolith_image_to_size = stretch
 	}
 end
 
-function compositionIcon(filename, size, scale, shift, position)
+function compositionIcon(filename, corner_size, position)
 	return {
 		type = "composition",
 		filename = filename,
-		width = size,
-		height = size,
-		scale = scale,
-		shift = shift,
-		corner_size = {3, 3},
-		position = {position.x, position.y}
+		priority = "extra-high-no-scale",
+		corner_size = corner_size,
+		position = position
 	}
 end
 
@@ -68,22 +65,45 @@ function layeredIcon (filename, size, scale, shift, position)
 		}
 	}
 end
-
-
+local corner_size = {3, 3}
 local default_gui = data.raw["gui-style"].default
-local normal_icon_size=36
-default_gui["helmod_button-icon"] = {
+default_gui["helmod_button-default"] = {
 	type = "button_style",
-	parent = "button_style",
-	width = normal_icon_size,
-	height = normal_icon_size,
-	
-	scalable = false,
-	
+	font = "helmod_font-normal",
+	default_font_color={r=1, g=1, b=1},
+	align = "center",
 	top_padding = 2,
 	right_padding = 2,
 	bottom_padding = 2,
 	left_padding = 2,
+	default_graphical_set = compositionIcon("__core__/graphics/gui.png", corner_size, {0, 0}),
+	hovered_font_color={r=1, g=1, b=1},
+	hovered_graphical_set = compositionIcon("__core__/graphics/gui.png", corner_size, {0, 8}),
+	clicked_font_color={r=1, g=1, b=1},
+	clicked_graphical_set = compositionIcon("__core__/graphics/gui.png", corner_size, {0, 40}),
+	disabled_font_color={r=0.5, g=0.5, b=0.5},
+	disabled_graphical_set = compositionIcon("__core__/graphics/gui.png", corner_size, {0, 16}),
+	pie_progress_color = {r=1, g=1, b=1}
+}
+
+local icon_corner_size = 0
+default_gui["helmod_button-icon-default"] = {
+	type = "button_style",
+	parent = "helmod_button-default",
+	default_graphical_set = compositionIcon("__core__/graphics/gui.png", {icon_corner_size, icon_corner_size}, {3 - icon_corner_size, 3 - icon_corner_size}),
+	hovered_graphical_set = compositionIcon("__core__/graphics/gui.png", {icon_corner_size, icon_corner_size}, {3 - icon_corner_size, 11 - icon_corner_size}),
+	clicked_graphical_set = compositionIcon("__core__/graphics/gui.png", {icon_corner_size, icon_corner_size}, {3 - icon_corner_size, 43 - icon_corner_size}),
+	disabled_graphical_set = compositionIcon("__core__/graphics/gui.png", {icon_corner_size, icon_corner_size}, {3 - icon_corner_size, 19 - icon_corner_size}),
+}
+
+local normal_icon_size=36
+default_gui["helmod_button-icon"] = {
+	type = "button_style",
+	parent = "helmod_button-icon-default",
+	width = normal_icon_size,
+	height = normal_icon_size,
+
+	scalable = false,
 }
 
 default_gui["helmod_select-button-icon"] = {
@@ -98,16 +118,11 @@ default_gui["helmod_select-button-icon"] = {
 local xxl_icon_size=68
 default_gui["helmod_xxl-button-icon"] = {
 	type = "button_style",
-	parent = "button_style",
+	parent = "helmod_button-icon-default",
 	width = xxl_icon_size,
 	height = xxl_icon_size,
-	
+
 	scalable = false,
-	
-	top_padding = 2,
-	right_padding = 2,
-	bottom_padding = 2,
-	left_padding = 2,
 }
 
 default_gui["helmod_xxl-select-button-icon"] = {
@@ -119,55 +134,28 @@ default_gui["helmod_xxl-select-button-icon"] = {
 	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=0}, {top=0,right=0,bottom=0,left=0}, true)
 }
 
-
-default_gui["helmod_button-default"] = {
+local sm_icon_size=18
+default_gui["helmod_sm-button-icon"] = {
 	type = "button_style",
-	font = "helmod_font-normal",
-	default_font_color={r=1, g=1, b=1},
-	align = "center",
-	top_padding = 5,
-	right_padding = 5,
-	bottom_padding = 5,
-	left_padding = 5,
-	minimal_width = 24,
-	minimal_height = 24,
-	default_graphical_set =
-	{
-		type = "composition",
-		filename = "__core__/graphics/gui.png",
-		priority = "extra-high-no-scale",
-		corner_size = {3, 3},
-		position = {0, 0}
-	},
-	hovered_font_color={r=1, g=1, b=1},
-	hovered_graphical_set =
-	{
-		type = "composition",
-		filename = "__core__/graphics/gui.png",
-		priority = "extra-high-no-scale",
-		corner_size = {3, 3},
-		position = {0, 8}
-	},
-	clicked_font_color={r=1, g=1, b=1},
-	clicked_graphical_set =
-	{
-		type = "composition",
-		filename = "__core__/graphics/gui.png",
-		priority = "extra-high-no-scale",
-		corner_size = {3, 3},
-		position = {0, 16}
-	},
-	disabled_font_color={r=0.5, g=0.5, b=0.5},
-	disabled_graphical_set =
-	{
-		type = "composition",
-		filename = "__core__/graphics/gui.png",
-		priority = "extra-high-no-scale",
-		corner_size = {3, 3},
-		position = {0, 0}
-	},
-	pie_progress_color = {r=1, g=1, b=1}
+	parent = "helmod_button-icon-default",
+	width = sm_icon_size,
+	height = sm_icon_size,
+	top_padding = 0,
+	right_padding = 0,
+	bottom_padding = 0,
+	left_padding = 0,
+	scalable = false,
 }
+
+default_gui["helmod_sm-select-button-icon"] = {
+	type = "button_style",
+	parent = "helmod_sm-button-icon",
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=148,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=184,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=0}, {top=0,right=0,bottom=0,left=0}, true)
+}
+
 
 default_gui["helmod_button-small-bold"] = {
 	type = "button_style",
@@ -185,15 +173,15 @@ default_gui["helmod_button-small-bold"] = {
 
 default_gui["helmod_page-label"] = {
 	type = "label_style",
-      parent = "label_style",
-	top_padding = 6,
+	parent = "label_style",
+	top_padding = 4,
 	right_padding = 2,
 	bottom_padding = 2,
 	left_padding = 2
 }
 
 
-      
+
 default_gui["helmod_button-small-bold-start"] = {
 	type = "button_style",
 	parent = "helmod_button-default",
@@ -236,13 +224,11 @@ default_gui["helmod_button-small-bold-end"] = {
 	left_padding = 0
 }
 
-default_gui["helmod_frame_style"] = {
-	type = "frame_style",
-	parent = "outer_frame_style",
-	flow_style=
-	{
-		maximal_height = 500
-	}
+default_gui["helmod_textfield"] = {
+	type = "textfield_style",
+	parent = "textfield_style",
+	minimal_width = 100,
+	maximal_width = 100
 }
 
 default_gui["helmod_menu_frame_style"] = {
@@ -259,6 +245,47 @@ default_gui["helmod_page-result-flow"] = {
 	minimal_width = 500
 }
 
+default_gui["helmod_module-flow"] = {
+	type = "flow_style",
+	parent = "flow_style",
+	minimal_width = 25,
+	horizontal_spacing = 0,
+	vertical_spacing = 0,
+	top_padding = 0,
+	right_padding = 0,
+	bottom_padding = 0,
+	left_padding = 0
+
+}
+
+default_gui["helmod_table"] = {
+	type = "table_style",
+	horizontal_spacing = 0,
+	vertical_spacing = 0,
+	top_padding = 0,
+	right_padding = 0,
+	bottom_padding = 0,
+	left_padding = 0
+}
+
+default_gui["helmod_factory-modules"] = {
+	type = "table_style",
+	parent = "helmod_table",
+	minimal_width = 36
+}
+
+default_gui["helmod_beacon-modules"] = {
+	type = "table_style",
+	parent = "helmod_table",
+	minimal_width = 18
+}
+
+default_gui["helmod_recipe-modules"] = {
+	type = "table_style",
+	parent = "table_style",
+	minimal_height = 36
+}
+
 default_gui["helmod_result"] = {
 	type = "frame_style",
 	parent = "frame_style",
@@ -270,6 +297,18 @@ default_gui["helmod_align-right-flow"] = {
 	type = "flow_style",
 	parent = "flow_style",
 	align = "right"
+}
+
+default_gui["helmod_recipe-section-frame"] = {
+	type = "frame_style",
+	parent = "frame_style",
+	minimal_width = 750
+}
+
+default_gui["helmod_recipe-cell-frame"] = {
+	type = "frame_style",
+	parent = "frame_style",
+	minimal_width = 250
 }
 
 default_gui["helmod_summary-frame"] = {
@@ -291,46 +330,46 @@ default_gui["helmod_recipe-table-frame"] = {
 }
 
 default_gui["helmod_button-sorted-none"] = {
-      type = "button_style",
-      parent = "button_style",
-      scalable = false,
-      width = 22,
-      height = 22,
-      top_padding = 1,
-      right_padding = 1,
-      bottom_padding = 1,
-      left_padding = 1,
-      default_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 1, {0,0}, {x=0,y=0}, {top=1,right=1,bottom=1,left=1}, false),
-      hovered_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 1, {0,0}, {x=72,y=0}, {top=1,right=1,bottom=1,left=1}, false),
-      clicked_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 1, {0,0}, {x=0,y=0}, {top=1,right=1,bottom=1,left=1}, false)
+	type = "button_style",
+	parent = "button_style",
+	scalable = false,
+	width = 22,
+	height = 22,
+	top_padding = 1,
+	right_padding = 1,
+	bottom_padding = 1,
+	left_padding = 1,
+	default_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 1, {0,0}, {x=0,y=0}, {top=1,right=1,bottom=1,left=1}, false),
+	hovered_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 1, {0,0}, {x=72,y=0}, {top=1,right=1,bottom=1,left=1}, false),
+	clicked_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 1, {0,0}, {x=0,y=0}, {top=1,right=1,bottom=1,left=1}, false)
 }
 
 default_gui["helmod_button-sorted-down"] = {
-      type = "button_style",
-      parent = "button_style",
-      scalable = false,
-      width = 22,
-      height = 22,
-      top_padding = 1,
-      right_padding = 1,
-      bottom_padding = 1,
-      left_padding = 1,
-      default_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 22/24, {0,0}, {x=48,y=0}, {top=1,right=1,bottom=1,left=1}, false),
-      hovered_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 22/24, {0,0}, {x=24,y=0}, {top=1,right=1,bottom=1,left=1}, false),
-      clicked_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 22/24, {0,0}, {x=72,y=0}, {top=1,right=1,bottom=1,left=1}, false)
+	type = "button_style",
+	parent = "button_style",
+	scalable = false,
+	width = 22,
+	height = 22,
+	top_padding = 1,
+	right_padding = 1,
+	bottom_padding = 1,
+	left_padding = 1,
+	default_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 22/24, {0,0}, {x=48,y=0}, {top=1,right=1,bottom=1,left=1}, false),
+	hovered_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 22/24, {0,0}, {x=24,y=0}, {top=1,right=1,bottom=1,left=1}, false),
+	clicked_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 22/24, {0,0}, {x=72,y=0}, {top=1,right=1,bottom=1,left=1}, false)
 }
 
 default_gui["helmod_button-sorted-up"] = {
-      type = "button_style",
-      parent = "button_style",
-      scalable = false,
-      width = 22,
-      height = 22,
-      top_padding = 1,
-      right_padding = 1,
-      bottom_padding = 1,
-      left_padding = 1,
-      default_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 1, {0,0}, {x=24,y=0}, {top=1,right=1,bottom=1,left=1}, false),
-      hovered_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 1, {0,0}, {x=48,y=0}, {top=1,right=1,bottom=1,left=1}, false),
-      clicked_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 1, {0,0}, {x=72,y=0}, {top=1,right=1,bottom=1,left=1}, false)
+	type = "button_style",
+	parent = "button_style",
+	scalable = false,
+	width = 22,
+	height = 22,
+	top_padding = 1,
+	right_padding = 1,
+	bottom_padding = 1,
+	left_padding = 1,
+	default_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 1, {0,0}, {x=24,y=0}, {top=1,right=1,bottom=1,left=1}, false),
+	hovered_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 1, {0,0}, {x=48,y=0}, {top=1,right=1,bottom=1,left=1}, false),
+	clicked_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 1, {0,0}, {x=72,y=0}, {top=1,right=1,bottom=1,left=1}, false)
 }
