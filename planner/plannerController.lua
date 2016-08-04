@@ -3,8 +3,8 @@ require "planner/plannerDialog"
 require "planner/plannerResult"
 require "planner/plannerSettings"
 require "planner/plannerRecipeSelector"
-require "planner/plannerRecipeUpdate"
 require "planner/plannerRecipeEdition"
+require "planner/plannerProductEdition"
 
 
 PLANNER_COMMAND = "helmod_planner-command"
@@ -91,13 +91,14 @@ end
 -- @param #string classname controller name
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
-function PlannerController.methods:send_event(player, classname, action, item, item2)
+function PlannerController.methods:send_event(player, classname, action, item, item2, item3)
 	if self.controllers ~= nil then
 		for r, controller in pairs(self.controllers) do
 			if controller:classname() == classname then
-				controller:send_event(player, nil, action, item, item2)
+				controller:send_event(player, nil, action, item, item2, item3)
 			end
 		end
 	end
@@ -124,9 +125,6 @@ function PlannerController.methods:main(player)
 		-- menu
 		Logging:debug("Create settings panel")
 		local settingsPanel = self:getSettingsPanel(player)
-		-- menu
-		Logging:debug("Create menu panel")
-		local menuPanel = self:getMenuPanel(player)
 		-- data
 		Logging:debug("Create data panel")
 		local dataPanel = self:getDataPanel(player)
@@ -143,13 +141,11 @@ function PlannerController.methods:main(player)
 		self.controllers["settings"]:buildPanel(player)
 
 		self.controllers["recipe-selector"] = PlannerRecipeSelector:new(self)
-		self.controllers["recipe-selector"]:bindButton(menuPanel, ({"helmod_button.add"}))
-
-		self.controllers["recipe-update"] = PlannerRecipeUpdate:new(self)
 
 		self.controllers["recipe-edition"] = PlannerRecipeEdition:new(self)
 
-		self:updateListRecipes(player)
+		self.controllers["product-edition"] = PlannerProductEdition:new(self)
+
 	end
 end
 
@@ -213,21 +209,6 @@ function PlannerController.methods:getSettingsPanel(player)
 end
 
 -------------------------------------------------------------------------------
--- Get or create menu panel
---
--- @function [parent=#PlannerController] getMenuPanel
---
--- @param #LuaPlayer player
---
-function PlannerController.methods:getMenuPanel(player)
-	local infoPanel = self:getInfoPanel(player)
-	if infoPanel["helmod_planner_menu"] ~= nil and infoPanel["helmod_planner_menu"].valid then
-		return infoPanel["helmod_planner_menu"]
-	end
-	return self:addGuiFrameH(infoPanel, "helmod_planner_menu", "helmod_menu_frame_style")
-end
-
--------------------------------------------------------------------------------
 -- Get or create data panel
 --
 -- @function [parent=#PlannerController] getDataPanel
@@ -248,33 +229,11 @@ end
 -- @function [parent=#PlannerController] refreshDisplayData
 --
 -- @param #LuaPlayer player
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
-function PlannerController.methods:refreshDisplayData(player)
-	Logging:debug("PlannerController:refreshDisplayData():",player)
-	self:updateListRecipes(player)
-	self.controllers["result"]:update(player)
-end
-
--------------------------------------------------------------------------------
--- Update recipes list
---
--- @function [parent=#PlannerController] updateListRecipes
---
--- @param #LuaPlayer player
---
-function PlannerController.methods:updateListRecipes(player)
-	Logging:debug("PlannerController:updateListRecipes():",player)
-	local model = self.model:getModel(player)
-
-	local menuPanel = self:getMenuPanel(player)
-
-	if menuPanel["helmod_planner-recipes-list"] ~= nil and menuPanel["helmod_planner-recipes-list"].valid then
-		menuPanel["helmod_planner-recipes-list"].destroy()
-	end
-	local recipeListPanel = self:addGuiFlowH(menuPanel, "helmod_planner-recipes-list")
-	if model.input ~= nil then
-		for r, recipe in pairs(model.input) do
-			self:addSelectSpriteIconButton(recipeListPanel, "HMPlannerRecipeUpdate=OPEN=ID=", self.parent:getRecipeIconType(player, recipe), recipe.name, recipe.count)
-		end
-	end
+function PlannerController.methods:refreshDisplayData(player, item, item2, item3)
+	Logging:debug("PlannerController:refreshDisplayData():",player, item, item2, item3)
+	self.controllers["result"]:update(player, item, item2, item3)
 end

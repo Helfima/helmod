@@ -14,13 +14,14 @@ helmod = {}
 -- info=2
 -- erro=1
 -- nothing=0
+
 Logging:new(0)
-Logging.console = true
-Logging.force = true
+Logging.console = false
+
 --===========================
 function helmod:on_init(event)
 	self.name = "helmod"
-	self.version = "0.1.6"
+	self.version = "0.2.0"
 	self.loaded = false;
 
 	self.playerController = PlayerController:new()
@@ -55,9 +56,6 @@ function helmod:on_tick(event)
 		for key, player in pairs(game.players) do
 			self:init_playerController(player)
 		end
-	end
-	if game.tick % 300 == 0 then
-		Logging:write()
 	end
 end
 

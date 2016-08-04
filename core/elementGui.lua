@@ -297,12 +297,17 @@ end
 -- @param #string type type of item
 -- @param #string key name of item
 -- @param #string caption displayed text
+-- @param #string color background color
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addSelectSpriteIconButton(parent, action, type, key, caption)
-	Logging:trace("ElementGui:addSelectSpriteIconButton",action, type, key, caption)
-	return self:addStyledSpriteButton(parent, "helmod_select-button-icon", action, type, key, caption)
+function ElementGui.methods:addSelectSpriteIconButton(parent, action, type, key, caption, color)
+	Logging:trace("ElementGui:addSelectSpriteIconButton",action, type, key, caption, color)
+	local style = "helmod_select-button-icon"
+	if color == "red" then style = "helmod_select-button-icon-red" end
+	if color == "yellow" then style = "helmod_select-button-icon-yellow" end
+	if color == "green" then style = "helmod_select-button-icon-green" end
+	return self:addStyledSpriteButton(parent, style, action, type, key, caption)
 end
 
 -------------------------------------------------------------------------------
@@ -485,7 +490,9 @@ end
 --
 function ElementGui.methods:formatNumberKilo(value, suffix)
 	if suffix == nil then suffix = "" end
-	if value < 1000 then
+	if value == nil then
+		return 0
+	elseif value < 1000 then
 		return value
 	elseif (value / 1000) < 1000 then
 		return math.ceil(value*10 / 1000)/10 .. " K"..suffix

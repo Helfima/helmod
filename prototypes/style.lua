@@ -115,6 +115,33 @@ default_gui["helmod_select-button-icon"] = {
 	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=0}, {top=0,right=0,bottom=0,left=0}, true)
 }
 
+default_gui["helmod_select-button-icon-red"] = {
+	type = "button_style",
+	parent = "helmod_button-icon",
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=36}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=148,y=36}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=184,y=36}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=36}, {top=0,right=0,bottom=0,left=0}, true)
+}
+
+default_gui["helmod_select-button-icon-yellow"] = {
+	type = "button_style",
+	parent = "helmod_button-icon",
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=72}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=148,y=72}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=184,y=72}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=72}, {top=0,right=0,bottom=0,left=0}, true)
+}
+
+default_gui["helmod_select-button-icon-green"] = {
+	type = "button_style",
+	parent = "helmod_button-icon",
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=108}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=148,y=108}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=184,y=108}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=108}, {top=0,right=0,bottom=0,left=0}, true)
+}
+
 local xxl_icon_size=68
 default_gui["helmod_xxl-button-icon"] = {
 	type = "button_style",
@@ -154,6 +181,43 @@ default_gui["helmod_sm-select-button-icon"] = {
 	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=148,y=0}, {top=0,right=0,bottom=0,left=0}, true),
 	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=184,y=0}, {top=0,right=0,bottom=0,left=0}, true),
 	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=0}, {top=0,right=0,bottom=0,left=0}, true)
+}
+
+local filename_arrow_up = "__helmod__/graphics/arrow-up.png"
+local filename_arrow_down = "__helmod__/graphics/arrow-down.png"
+local filename_arrow_cross = "__helmod__/graphics/arrow-cross.png"
+default_gui["helmod_button-arrow-up"] = {
+	type = "button_style",
+	parent = "button_style",
+	width = normal_icon_size,
+	height = normal_icon_size,
+	default_graphical_set = monolithIcon(filename_arrow_up, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon(filename_arrow_up, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon(filename_arrow_up, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon(filename_arrow_up, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true)
+}
+
+
+default_gui["helmod_button-arrow-down"] = {
+	type = "button_style",
+	parent = "button_style",
+	width = normal_icon_size,
+	height = normal_icon_size,
+	default_graphical_set = monolithIcon(filename_arrow_down, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon(filename_arrow_down, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon(filename_arrow_down, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon(filename_arrow_down, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true)
+}
+
+default_gui["helmod_button-arrow-cross"] = {
+	type = "button_style",
+	parent = "button_style",
+	width = normal_icon_size,
+	height = normal_icon_size,
+	default_graphical_set = monolithIcon(filename_arrow_cross, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon(filename_arrow_cross, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon(filename_arrow_cross, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon(filename_arrow_cross, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true)
 }
 
 
@@ -293,6 +357,12 @@ default_gui["helmod_result"] = {
 	minimal_height = 500
 }
 
+default_gui["helmod_result-menu-flow"] = {
+	type = "flow_style",
+	parent = "flow_style",
+	minimal_width = 550
+}
+
 default_gui["helmod_align-right-flow"] = {
 	type = "flow_style",
 	parent = "flow_style",
@@ -309,6 +379,12 @@ default_gui["helmod_recipe-cell-frame"] = {
 	type = "frame_style",
 	parent = "frame_style",
 	minimal_width = 250
+}
+
+default_gui["helmod_recipe-cell-flow"] = {
+	type = "flow_style",
+	parent = "flow_style",
+	manimal_width = 250
 }
 
 default_gui["helmod_summary-frame"] = {

@@ -40,11 +40,12 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 -- 
 -- @return #boolean if true the next call close dialog
 --  
-function PlannerRecipeSelector.methods:on_open(player, element, action, item, item2)
+function PlannerRecipeSelector.methods:on_open(player, element, action, item, item2, item3)
 	-- close si nouvel appel
 	return true
 end
@@ -58,9 +59,10 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 -- 
-function PlannerRecipeSelector.methods:after_open(player, element, action, item, item2)
+function PlannerRecipeSelector.methods:after_open(player, element, action, item, item2, item3)
 	local globalPlayer = self.player:getGlobal(player)
 	-- ajouter de la table des groupes de recipe
 	local panel = self:getPanel(player)
@@ -82,21 +84,22 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 -- 
-function PlannerRecipeSelector.methods:on_event(player, element, action, item, item2)
-	Logging:debug("PlannerRecipeSelector:on_event():",player, element, action, item, item2)
+function PlannerRecipeSelector.methods:on_event(player, element, action, item, item2, item3)
+	Logging:debug("PlannerRecipeSelector:on_event():",player, element, action, item, item2, item3)
 	local globalPlayer = self.player:getGlobal(player)
 	if action == "recipe-group" then
 		globalPlayer.recipeGroupSelected = item
-		self:on_update(player, element, action, item, item2)
+		self:on_update(player, element, action, item, item2, item3)
 	end
 	
 	if action == "recipe-select" then
-		self.parent.model:addInput(player, item)
+		local productionBlock = self.parent.model:addRecipeIntoProductionBlock(player, item, item2)
 		self.parent.model:update(player)
-		self.parent:refreshDisplayData(player)
-		self.parent:send_event(player, "HMPlannerRecipeUpdate", "OPEN", item, nil)
+		self.parent:refreshDisplayData(player, nil, productionBlock.id)
+		--self.parent:send_event(player, "HMPlannerRecipeUpdate", "OPEN", item, nil)
 		self:close(player)
 	end
 	
@@ -111,10 +114,11 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 -- 
-function PlannerRecipeSelector.methods:on_update(player, element, action, item, item2)
-	Logging:trace("PlannerRecipeSelector:on_update():",player, element, action, item, item2)
+function PlannerRecipeSelector.methods:on_update(player, element, action, item, item2, item3)
+	Logging:trace("PlannerRecipeSelector:on_update():",player, element, action, item, item2, item3)
 	local globalPlayer = self.player:getGlobal(player)
 	local panel = self:getPanel(player)
 	
@@ -126,7 +130,7 @@ function PlannerRecipeSelector.methods:on_update(player, element, action, item, 
 	for key, recipe in pairs(self.player:getRecipes(player)) do
 		if recipe.group.name == globalPlayer.recipeGroupSelected then
 			Logging:trace("PlannerRecipeSelector:on_update",recipe.name)
-			self:addSelectSpriteIconButton(guiRecipeSelectorTable, self:classname().."=recipe-select=ID=", self.player:getRecipeIconType(player, recipe), recipe.name)
+			self:addSelectSpriteIconButton(guiRecipeSelectorTable, self:classname().."=recipe-select=ID="..item.."=", self.player:getRecipeIconType(player, recipe), recipe.name)
 		end
 	end
 

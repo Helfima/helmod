@@ -57,11 +57,12 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
 -- @return #boolean if true the next call close dialog
 --
-function PlannerSettings.methods:on_open(player, element, action, item, item2)
+function PlannerSettings.methods:on_open(player, element, action, item, item2, item3)
 	-- close si nouvel appel
 	return true
 end
@@ -158,10 +159,11 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
-function PlannerSettings.methods:on_event(player, element, action, item, item2)
-	Logging:debug("PlannerSettings:on_event():",player, element, action, item, item2)
+function PlannerSettings.methods:on_event(player, element, action, item, item2, item3)
+	Logging:debug("PlannerSettings:on_event():",player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 	local globalSettings = self.player:getGlobal(player, "settings")
 
@@ -193,12 +195,13 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
-function PlannerSettings.methods:after_open(player, element, action, item, item2)
-	self:updateAboutSettings(player, element, action, item, item2)
-	self:updateDataSettings(player, element, action, item, item2)
-	self:updateModelSettings(player, element, action, item, item2)
+function PlannerSettings.methods:after_open(player, element, action, item, item2, item3)
+	self:updateAboutSettings(player, element, action, item, item2, item3)
+	self:updateDataSettings(player, element, action, item, item2, item3)
+	self:updateModelSettings(player, element, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -244,10 +247,11 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
-function PlannerSettings.methods:updateAboutSettings(player, element, action, item, item2)
-	Logging:debug("PlannerSettings:updateAboutSettings():",player, element, action, item, item2)
+function PlannerSettings.methods:updateAboutSettings(player, element, action, item, item2, item3)
+	Logging:debug("PlannerSettings:updateAboutSettings():",player, element, action, item, item2, item3)
 
 	local globalSettings = self.player:getGlobal(player, "settings")
 	local defaultSettings = self.player:getDefaultSettings()
@@ -270,10 +274,11 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
-function PlannerSettings.methods:updateDataSettings(player, element, action, item, item2)
-	Logging:debug("PlannerSettings:updateDataSettings():",player, element, action, item, item2)
+function PlannerSettings.methods:updateDataSettings(player, element, action, item, item2, item3)
+	Logging:debug("PlannerSettings:updateDataSettings():",player, element, action, item, item2, item3)
 
 	local globalSettings = self.player:getGlobal(player, "settings")
 	local defaultSettings = self.player:getDefaultSettings()
@@ -318,10 +323,11 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
-function PlannerSettings.methods:updateModelSettings(player, element, action, item, item2)
-	Logging:debug("PlannerSettings:updateModelSettings():",player, element, action, item, item2)
+function PlannerSettings.methods:updateModelSettings(player, element, action, item, item2, item3)
+	Logging:debug("PlannerSettings:updateModelSettings():",player, element, action, item, item2, item3)
 
 	local globalSettings = self.player:getGlobal(player, "settings")
 	local defaultSettings = self.player:getDefaultSettings()

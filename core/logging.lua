@@ -68,18 +68,9 @@ function Logging:logging(tag, level, ...)
 		for key, object in pairs(arg) do
 			message = message..self:objectToString(object);
 		end
-		self.content = self.content..tag..message.."\n"
 		if self.console then
 			game.players[1].print(tag..message)
 		end
-	end
-	if self.force then
-		self:write()
-	end
-end
-
-function Logging:write()
-	if self.log > 0 then
-		game.write_file(self.name, self.content)
+		log(tag..message)
 	end
 end

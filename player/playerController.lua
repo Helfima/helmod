@@ -114,11 +114,11 @@ function PlayerController.methods:getGlobal(player, key)
 	if global["HMModel"][player.name] == nil then
 		global["HMModel"][player.name] = {}
 	end
-	
+
 	if global["HMModel"][player.name].settings == nil then
 		self:initGlobalSettings(player)
 	end
-	
+
 	if key ~= nil then
 		if global["HMModel"][player.name][key] == nil then
 			global["HMModel"][player.name][key] = {}
@@ -280,19 +280,13 @@ end
 --
 function PlayerController.methods:searchRecipe(player, name)
 	local recipes = {}
-	-- le recipe porte le meme nom que l'item
-	local recipe = self:getRecipe(player, name)
 	-- recherche dans les produits des recipes
-	if recipe == nil then
-		for key, recipe in pairs(self:getRecipes(player)) do
-			for k, product in pairs(recipe.products) do
-				if product.name == name then
-					table.insert(recipes,recipe)
-				end
+	for key, recipe in pairs(self:getRecipes(player)) do
+		for k, product in pairs(recipe.products) do
+			if product.name == name then
+				table.insert(recipes,recipe)
 			end
 		end
-	else
-		table.insert(recipes,recipe)
 	end
 	return recipes
 end

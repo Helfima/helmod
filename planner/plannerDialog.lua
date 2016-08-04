@@ -89,12 +89,14 @@ function PlannerDialog.methods:on_gui_click(event)
 		
 		local patternAction = self:classname().."=([^=]*)"
 		local patternItem = self:classname()..".*=ID=([^=]*)"
-		local patternRecipe = self:classname()..".*=ID=[^=]*=([^=]*)"
+		local patternItem2 = self:classname()..".*=ID=[^=]*=([^=]*)"
+		local patternItem3 = self:classname()..".*=ID=[^=]*=[^=]*=([^=]*)"
 		local action = string.match(event.element.name,patternAction,1)
 		local item = string.match(event.element.name,patternItem,1)
-		local item2 = string.match(event.element.name,patternRecipe,1)
+		local item2 = string.match(event.element.name,patternItem2,1)
+		local item3 = string.match(event.element.name,patternItem3,1)
 
-		self:send_event(player, event.element, action, item, item2)
+		self:send_event(player, event.element, action, item, item2, item3)
 	end
 end
 
@@ -107,18 +109,19 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 -- 
-function PlannerDialog.methods:open(player, element, action, item, item2)
-	Logging:debug("PlannerDialog:open():",player, element, action, item, item2)
+function PlannerDialog.methods:open(player, element, action, item, item2, item3)
+	Logging:debug("PlannerDialog:open():",player, element, action, item, item2, item3)
 	local parentPanel = self:getParentPanel(player)
 	if parentPanel[self:classname()] ~= nil and parentPanel[self:classname()].valid then
-		local close = self:on_open(player, element, action, item, item2)
+		local close = self:on_open(player, element, action, item, item2, item3)
 		--Logging:debug("must close:",close)
 		if close then
-			self:close(player, element, action, item, item2)
+			self:close(player, element, action, item, item2, item3)
 		else
-			self:update(player, element, action, item, item2)
+			self:update(player, element, action, item, item2, item3)
 		end
 		
 	else
@@ -128,9 +131,9 @@ function PlannerDialog.methods:open(player, element, action, item, item2)
 
 		self:addGuiFrameV(parentPanel, self:classname(), nil, caption)
 		
-		self:on_open(player, element, action, item, item2)
-		self:after_open(player, element, action, item, item2)
-		self:update(player, element, action, item, item2)
+		self:on_open(player, element, action, item, item2, item3)
+		self:after_open(player, element, action, item, item2, item3)
+		self:update(player, element, action, item, item2, item3)
 	end
 end
 
@@ -143,23 +146,24 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 -- 
-function PlannerDialog.methods:send_event(player, element, action, item, item2)
-		Logging:debug("PlannerDialog:send_event():",player, element, action, item, item2)
+function PlannerDialog.methods:send_event(player, element, action, item, item2, item3)
+		Logging:debug("PlannerDialog:send_event():",player, element, action, item, item2, item3)
 		if action == "OPEN" then
-			self:open(player, element, action, item, item2)
+			self:open(player, element, action, item, item2, item3)
 		end
 
 		if action == "UPDATE" then
-			self:update(player, element, action, item, item2)
+			self:update(player, element, action, item, item2, item3)
 		end
 
 		if action == "CLOSE" then
-			self:close(player, element, action, item, item2)
+			self:close(player, element, action, item, item2, item3)
 		end
 
-		self:on_event(player, element, action, item, item2)
+		self:on_event(player, element, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -171,9 +175,10 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 -- 
-function PlannerDialog.methods:on_event(player, element, action, item, item2)
+function PlannerDialog.methods:on_event(player, element, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -185,9 +190,10 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 -- 
-function PlannerDialog.methods:on_open(player, element, action, item, item2)
+function PlannerDialog.methods:on_open(player, element, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -199,9 +205,10 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 -- 
-function PlannerDialog.methods:after_open(player, element, action, item, item2)
+function PlannerDialog.methods:after_open(player, element, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -213,10 +220,11 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 -- 
-function PlannerDialog.methods:update(player, element, action, item, item2)
-	self:on_update(player, element, action, item, item2)
+function PlannerDialog.methods:update(player, element, action, item, item2, item3)
+	self:on_update(player, element, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -228,9 +236,10 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 -- 
-function PlannerDialog.methods:on_update(player, element, action, item, item2)
+function PlannerDialog.methods:on_update(player, element, action, item, item2, item3)
 
 end
 
@@ -243,10 +252,11 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 -- 
-function PlannerDialog.methods:close(player, element, action, item, item2)
-	self:on_close(player, element, action, item, item2)
+function PlannerDialog.methods:close(player, element, action, item, item2, item3)
+	self:on_close(player, element, action, item, item2, item3)
 	local parentPanel = self:getParentPanel(player)
 	if parentPanel[self:classname()] ~= nil and parentPanel[self:classname()].valid then
 		parentPanel[self:classname()].destroy()
@@ -262,9 +272,10 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 -- 
 -- @return #boolean if true the next call close dialog
 -- 
-function PlannerDialog.methods:on_close(player, element, action, item, item2)
+function PlannerDialog.methods:on_close(player, element, action, item, item2, item3)
 end

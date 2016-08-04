@@ -44,19 +44,20 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
 -- @return #boolean if true the next call close dialog
 --
-function PlannerRecipeEdition.methods:on_open(player, element, action, item, item2)
+function PlannerRecipeEdition.methods:on_open(player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 	local close = true
-	if model.guiRecipeLast == nil or model.guiRecipeLast ~= item then
+	if model.guiRecipeLast == nil or model.guiRecipeLast ~= item..item2 then
 		close = false
 		model.factoryGroupSelected = nil
 		model.beaconGroupSelected = nil
 	end
-	model.guiRecipeLast = item
+	model.guiRecipeLast = item..item2
 	return close
 end
 
@@ -69,9 +70,10 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
-function PlannerRecipeEdition.methods:on_close(player, element, action, item, item2)
+function PlannerRecipeEdition.methods:on_close(player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 	model.guiRecipeLast = nil
 end
@@ -265,15 +267,16 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
-function PlannerRecipeEdition.methods:after_open(player, element, action, item, item2)
+function PlannerRecipeEdition.methods:after_open(player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 	-- recipe
 	self:getRecipeInfoPanel(player)
 	self:getRecipeIngredientsPanel(player)
 	self:getRecipeProductsPanel(player)
-	if model.recipes[item] ~= nil then
+	if model.blocks[item] ~= nil and model.blocks[item].recipes[item2] then
 		-- factory
 		self:getFactorySelectorPanel(player)
 		self:getFactoryInfoPanel(player)
@@ -294,24 +297,25 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
-function PlannerRecipeEdition.methods:on_update(player, element, action, item, item2)
-	Logging:debug("PlannerRecipeEdition:on_update():",player, element, action, item, item2)
+function PlannerRecipeEdition.methods:on_update(player, element, action, item, item2, item3)
+	Logging:debug("PlannerRecipeEdition:on_update():",player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 	-- recipe
-	self:updateRecipeInfo(player, element, action, item, item2)
-	self:updateRecipeIngredients(player, element, action, item, item2)
-	self:updateRecipeProducts(player, element, action, item, item2)
-	if model.recipes[item] ~= nil then
+	self:updateRecipeInfo(player, element, action, item, item2, item3)
+	self:updateRecipeIngredients(player, element, action, item, item2, item3)
+	self:updateRecipeProducts(player, element, action, item, item2, item3)
+	if model.blocks[item] ~= nil and model.blocks[item].recipes[item2] then
 		-- factory
-		self:updateFactorySelector(player, element, action, item, item2)
-		self:updateFactoryInfo(player, element, action, item, item2)
-		self:updateFactoryModules(player, element, action, item, item2)
+		self:updateFactorySelector(player, element, action, item, item2, item3)
+		self:updateFactoryInfo(player, element, action, item, item2, item3)
+		self:updateFactoryModules(player, element, action, item, item2, item3)
 		-- beacon
-		self:updateBeaconSelector(player, element, action, item, item2)
-		self:updateBeaconInfo(player, element, action, item, item2)
-		self:updateBeaconModules(player, element, action, item, item2)
+		self:updateBeaconSelector(player, element, action, item, item2, item3)
+		self:updateBeaconInfo(player, element, action, item, item2, item3)
+		self:updateBeaconModules(player, element, action, item, item2, item3)
 	end
 end
 
@@ -324,14 +328,15 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
-function PlannerRecipeEdition.methods:updateRecipeInfo(player, element, action, item, item2)
-	Logging:debug("PlannerRecipeEdition:updateRecipeInfo():",player, element, action, item, item2)
+function PlannerRecipeEdition.methods:updateRecipeInfo(player, element, action, item, item2, item3)
+	Logging:debug("PlannerRecipeEdition:updateRecipeInfo():",player, element, action, item, item2, item3)
 	local infoPanel = self:getRecipeInfoPanel(player)
 	local model = self.model:getModel(player)
 	local default = self.model:getDefault(player)
-	local recipe = self.player:getRecipe(player, item)
+	local recipe = self.player:getRecipe(player, item2)
 
 	if recipe ~= nil then
 		Logging:debug("PlannerRecipeEdition:updateRecipeInfo():recipe=",recipe)
@@ -343,15 +348,15 @@ function PlannerRecipeEdition.methods:updateRecipeInfo(player, element, action, 
 		self:addIconButton(tablePanel, "recipe", "recipe", recipe.name)
 		self:addGuiLabel(tablePanel, "label", recipe.name)
 
-		self:addGuiLabel(tablePanel, "label-active", "Active")
-
-		local actived = true
-		if model.recipes[item] ~= nil then
-			actived = model.recipes[item].active
-		elseif default.recipes[item] ~= nil then
-			actived = default.recipes[item].active
-		end
-		self:addGuiCheckbox(tablePanel, self:classname().."=recipe-active=ID="..recipe.name, actived)
+--		self:addGuiLabel(tablePanel, "label-active", "Active")
+		--
+		--		local actived = true
+		--		if model.blocks[item].recipes[item2] ~= nil then
+		--			actived = model.blocks[item].recipes[item2].active
+		--		elseif default.recipes[item] ~= nil then
+		--			actived = default.recipes[item].active
+		--		end
+		--		self:addGuiCheckbox(tablePanel, self:classname().."=recipe-active=ID="..item.."="..recipe.name, actived)
 	end
 end
 
@@ -364,12 +369,13 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
-function PlannerRecipeEdition.methods:updateRecipeIngredients(player, element, action, item, item2)
+function PlannerRecipeEdition.methods:updateRecipeIngredients(player, element, action, item, item2, item3)
 	local ingredientsPanel = self:getRecipeIngredientsPanel(player)
 	local model = self.model:getModel(player)
-	local recipe = self.player:getRecipe(player, item)
+	local recipe = self.player:getRecipe(player, item2)
 
 	if recipe ~= nil then
 
@@ -393,12 +399,13 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
-function PlannerRecipeEdition.methods:updateRecipeProducts(player, element, action, item, item2)
+function PlannerRecipeEdition.methods:updateRecipeProducts(player, element, action, item, item2, item3)
 	local productsPanel = self:getRecipeProductsPanel(player)
 	local model = self.model:getModel(player)
-	local recipe = self.player:getRecipe(player, item)
+	local recipe = self.player:getRecipe(player, item2)
 
 	if recipe ~= nil then
 
@@ -422,41 +429,44 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
-function PlannerRecipeEdition.methods:updateFactoryInfo(player, element, action, item, item2)
+function PlannerRecipeEdition.methods:updateFactoryInfo(player, element, action, item, item2, item3)
 	local infoPanel = self:getFactoryInfoPanel(player)
 	local model = self.model:getModel(player)
-	local recipe = model.recipes[item]
-	if recipe ~= nil then
-		local factory = recipe.factory
+	if  model.blocks[item] ~= nil then
+		local recipe = model.blocks[item].recipes[item2]
+		if recipe ~= nil then
+			local factory = recipe.factory
 
-		for k,guiName in pairs(infoPanel.children_names) do
-			infoPanel[guiName].destroy()
+			for k,guiName in pairs(infoPanel.children_names) do
+				infoPanel[guiName].destroy()
+			end
+
+			local headerPanel = self:addGuiTable(infoPanel,"table-header",2)
+			self:addIconButton(headerPanel, "icon", factory.type, factory.name)
+			self:addGuiLabel(headerPanel, "label", factory.name)
+
+			local inputPanel = self:addGuiTable(infoPanel,"table-input",2)
+
+			self:addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy-nominal"}))
+			self:addGuiText(inputPanel, "energy-nominal", factory.energy_nominal, "helmod_textfield")
+
+			self:addGuiLabel(inputPanel, "label-speed-nominal", ({"helmod_label.speed-nominal"}))
+			self:addGuiText(inputPanel, "speed-nominal", factory.speed_nominal, "helmod_textfield")
+
+			self:addGuiLabel(inputPanel, "label-module-slots", ({"helmod_label.module-slots"}))
+			self:addGuiText(inputPanel, "module-slots", factory.module_slots, "helmod_textfield")
+
+			self:addGuiLabel(inputPanel, "label-energy", ({"helmod_label.energy"}))
+			self:addGuiLabel(inputPanel, "energy", factory.energy)
+
+			self:addGuiLabel(inputPanel, "label-speed", ({"helmod_label.speed"}))
+			self:addGuiLabel(inputPanel, "speed", factory.speed)
+
+			self:addGuiButton(infoPanel, self:classname().."=factory-update=ID="..item.."=", recipe.name, "helmod_button-default", ({"helmod_button.update"}))
 		end
-
-		local headerPanel = self:addGuiTable(infoPanel,"table-header",2)
-		self:addIconButton(headerPanel, "icon", factory.type, factory.name)
-		self:addGuiLabel(headerPanel, "label", factory.name)
-
-		local inputPanel = self:addGuiTable(infoPanel,"table-input",2)
-
-		self:addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy-nominal"}))
-		self:addGuiText(inputPanel, "energy-nominal", factory.energy_nominal, "helmod_textfield")
-
-		self:addGuiLabel(inputPanel, "label-speed-nominal", ({"helmod_label.speed-nominal"}))
-		self:addGuiText(inputPanel, "speed-nominal", factory.speed_nominal, "helmod_textfield")
-
-		self:addGuiLabel(inputPanel, "label-module-slots", ({"helmod_label.module-slots"}))
-		self:addGuiText(inputPanel, "module-slots", factory.module_slots, "helmod_textfield")
-
-		self:addGuiLabel(inputPanel, "label-energy", ({"helmod_label.energy"}))
-		self:addGuiLabel(inputPanel, "energy", factory.energy)
-
-		self:addGuiLabel(inputPanel, "label-speed", ({"helmod_label.speed"}))
-		self:addGuiLabel(inputPanel, "speed", factory.speed)
-
-		self:addGuiButton(infoPanel, self:classname().."=factory-update=ID=", recipe.name, "helmod_button-default", ({"helmod_button.update"}))
 	end
 end
 
@@ -469,13 +479,14 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
-function PlannerRecipeEdition.methods:updateFactoryModules(player, element, action, item, item2)
+function PlannerRecipeEdition.methods:updateFactoryModules(player, element, action, item, item2, item3)
 	local modulesPanel = self:getFactoryModulesPanel(player)
 	local model = self.model:getModel(player)
 
-	local recipe = model.recipes[item]
+	local recipe = model.blocks[item].recipes[item2]
 	local factory = recipe.factory
 
 	for k,guiName in pairs(modulesPanel.children_names) do
@@ -486,14 +497,14 @@ function PlannerRecipeEdition.methods:updateFactoryModules(player, element, acti
 	local currentTableModulesPanel = self:addGuiTable(currentModulesPanel,"modules",4,"helmod_recipe-modules")
 	for module, count in pairs(factory.modules) do
 		for i = 1, count, 1 do
-			self:addSpriteIconButton(currentTableModulesPanel, self:classname().."=factory-module-remove=ID="..recipe.name.."="..module.."="..i, "item", module)
+			self:addSpriteIconButton(currentTableModulesPanel, self:classname().."=factory-module-remove=ID="..item.."="..recipe.name.."="..module.."="..i, "item", module)
 		end
 	end
 
 	local selectionModulesPanel = self:addGuiFrameV(modulesPanel, "selection-modules", self.cellStyle, ({"helmod_recipe-edition-panel.selection-modules"}))
 	local tableModulesPanel = self:addGuiTable(selectionModulesPanel,"modules",3)
 	for k, module in pairs(self.player:getModules()) do
-		self:addSpriteIconButton(tableModulesPanel, self:classname().."=factory-module-add=ID="..recipe.name.."=", "item", module.name)
+		self:addSpriteIconButton(tableModulesPanel, self:classname().."=factory-module-add=ID="..item.."="..recipe.name.."=", "item", module.name)
 	end
 end
 
@@ -506,27 +517,28 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
-function PlannerRecipeEdition.methods:updateFactorySelector(player, element, action, item, item2)
-	Logging:debug("PlannerFactorySelector:updateFactorySelector():",player, element, action, item, item2)
+function PlannerRecipeEdition.methods:updateFactorySelector(player, element, action, item, item2, item3)
+	Logging:debug("PlannerFactorySelector:updateFactorySelector():",player, element, action, item, item2, item3)
 	local selectorPanel = self:getFactorySelectorPanel(player)
 	local model = self.model:getModel(player)
 
-	local recipe = model.recipes[item]
+	local recipe = model.blocks[item].recipes[item2]
 
 	if selectorPanel["factory-groups"] ~= nil and selectorPanel["factory-groups"].valid then
 		selectorPanel["factory-groups"].destroy()
 	end
 
 	-- ajouter de la table des groupes de recipe
-	local groupsPanel = self:addGuiTable(selectorPanel, "factory-groups", 5)
+	local groupsPanel = self:addGuiTable(selectorPanel, "factory-groups", 3)
 	Logging:debug("PlannerFactorySelector:updateFactorySelector(): group category=",recipe.category)
 	for group, name in pairs(self.player:getProductionGroups(recipe.category)) do
 		-- set le groupe
 		if model.factoryGroupSelected == nil then model.factoryGroupSelected = group end
 		-- ajoute les icons de groupe
-		local action = self:addItemButton(groupsPanel, self:classname().."=factory-group=ID="..recipe.name.."=", group)
+		local action = self:addItemButton(groupsPanel, self:classname().."=factory-group=ID="..item.."="..recipe.name.."=", group)
 	end
 
 	if selectorPanel["factory-table"] ~= nil and selectorPanel["factory-table"].valid then
@@ -537,7 +549,7 @@ function PlannerRecipeEdition.methods:updateFactorySelector(player, element, act
 	Logging:debug("factories:",self.player:getProductions())
 	for key, factory in pairs(self.player:getProductions()) do
 		if factory.type == model.factoryGroupSelected then
-			self:addSpriteIconButton(tablePanel, self:classname().."=factory-select=ID="..recipe.name.."=", "item", factory.name, true)
+			self:addSpriteIconButton(tablePanel, self:classname().."=factory-select=ID="..item.."="..recipe.name.."=", "item", factory.name, true)
 		end
 	end
 end
@@ -551,12 +563,13 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
-function PlannerRecipeEdition.methods:updateBeaconInfo(player, element, action, item, item2)
+function PlannerRecipeEdition.methods:updateBeaconInfo(player, element, action, item, item2, item3)
 	local infoPanel = self:getBeaconInfoPanel(player)
 	local model = self.model:getModel(player)
-	local recipe = model.recipes[item]
+	local recipe = model.blocks[item].recipes[item2]
 	if recipe ~= nil then
 		local beacon = recipe.beacon
 
@@ -585,7 +598,7 @@ function PlannerRecipeEdition.methods:updateBeaconInfo(player, element, action, 
 		self:addGuiLabel(inputPanel, "label-module-slots", "Module Slots")
 		self:addGuiText(inputPanel, "module-slots", beacon.module_slots, "helmod_textfield")
 
-		self:addGuiButton(infoPanel, self:classname().."=beacon-update=ID=", recipe.name, "helmod_button-default", "Update")
+		self:addGuiButton(infoPanel, self:classname().."=beacon-update=ID="..item.."=", recipe.name, "helmod_button-default", "Update")
 	end
 end
 
@@ -598,13 +611,14 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
-function PlannerRecipeEdition.methods:updateBeaconModules(player, element, action, item, item2)
+function PlannerRecipeEdition.methods:updateBeaconModules(player, element, action, item, item2, item3)
 	local modulesPanel = self:getBeaconModulesPanel(player)
 	local model = self.model:getModel(player)
 
-	local recipe = model.recipes[item]
+	local recipe = model.blocks[item].recipes[item2]
 	local beacon = recipe.beacon
 
 	for k,guiName in pairs(modulesPanel.children_names) do
@@ -615,14 +629,14 @@ function PlannerRecipeEdition.methods:updateBeaconModules(player, element, actio
 	local currentTableModulesPanel = self:addGuiTable(currentModulesPanel,"modules",4, "helmod_recipe-modules")
 	for module, count in pairs(beacon.modules) do
 		for i = 1, count, 1 do
-			self:addSpriteIconButton(currentTableModulesPanel, self:classname().."=beacon-module-remove=ID="..recipe.name.."="..module.."="..i, "item", module)
+			self:addSpriteIconButton(currentTableModulesPanel, self:classname().."=beacon-module-remove=ID="..item.."="..recipe.name.."="..module.."="..i, "item", module)
 		end
 	end
 
 	local selectionModulesPanel = self:addGuiFrameV(modulesPanel, "selection-modules", self.cellStyle, ({"helmod_recipe-edition-panel.selection-modules"}))
 	local tableModulesPanel = self:addGuiTable(selectionModulesPanel,"modules",3)
 	for k, module in pairs(self.player:getModules()) do
-		self:addSpriteIconButton(tableModulesPanel, self:classname().."=beacon-module-add=ID="..recipe.name.."=", "item", module.name)
+		self:addSpriteIconButton(tableModulesPanel, self:classname().."=beacon-module-add=ID="..item.."="..recipe.name.."=", "item", module.name)
 	end
 end
 
@@ -635,25 +649,26 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
-function PlannerRecipeEdition.methods:updateBeaconSelector(player, element, action, item, item2)
+function PlannerRecipeEdition.methods:updateBeaconSelector(player, element, action, item, item2, item3)
 	local selectorPanel = self:getBeaconSelectorPanel(player)
 	local model = self.model:getModel(player)
 
-	local recipe = model.recipes[item]
+	local recipe = model.blocks[item].recipes[item2]
 
 	if selectorPanel["beacon-groups"] ~= nil and selectorPanel["beacon-groups"].valid then
 		selectorPanel["beacon-groups"].destroy()
 	end
 
 	-- ajouter de la table des groupes de recipe
-	local groupsPanel = self:addGuiTable(selectorPanel, "beacon-groups", 5)
+	local groupsPanel = self:addGuiTable(selectorPanel, "beacon-groups", 3)
 	for group, name in pairs(self.player:getProductionGroups("module")) do
 		-- set le groupe
 		if model.beaconGroupSelected == nil then model.beaconGroupSelected = group end
 		-- ajoute les icons de groupe
-		local action = self:addItemButton(groupsPanel, self:classname().."=beacon-group=ID="..recipe.name.."=", group)
+		local action = self:addItemButton(groupsPanel, self:classname().."=beacon-group=ID="..item.."="..recipe.name.."=", group)
 	end
 
 	if selectorPanel["beacon-table"] ~= nil and selectorPanel["beacon-table"].valid then
@@ -664,7 +679,7 @@ function PlannerRecipeEdition.methods:updateBeaconSelector(player, element, acti
 	--Logging:debug("factories:",self.player:getProductions())
 	for key, beacon in pairs(self.player:getProductions()) do
 		if beacon.type == model.beaconGroupSelected then
-			self:addSpriteIconButton(tablePanel, self:classname().."=beacon-select=ID="..recipe.name.."=", "item", beacon.name, true)
+			self:addSpriteIconButton(tablePanel, self:classname().."=beacon-select=ID="..item.."="..recipe.name.."=", "item", beacon.name, true)
 		end
 	end
 end
@@ -678,31 +693,32 @@ end
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
--- @param #string item second item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
 --
-function PlannerRecipeEdition.methods:on_event(player, element, action, item, item2)
-	Logging:debug("PlannerRecipeEdition:on_event():",player, element, action, item, item2)
+function PlannerRecipeEdition.methods:on_event(player, element, action, item, item2, item3)
+	Logging:debug("PlannerRecipeEdition:on_event():",player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
-	if action == "recipe-active" then
-		self.model:setActiveRecipe(player, item)
-		self.model:update(player)
-		self.parent:refreshDisplayData(player)
-		self:close(player)
-	end
+--	if action == "recipe-active" then
+--		self.model:setActiveRecipe(player, item, item2)
+--		self.model:update(player)
+--		self.parent:refreshDisplayData(player, nil, item, item2)
+--		self:close(player)
+--	end
 
 	if action == "factory-group" then
-		model.factoryGroupSelected = item2
-		self:updateFactorySelector(player, element, action, item, item2)
+		model.factoryGroupSelected = item3
+		self:updateFactorySelector(player, element, action, item, item2, item3)
 	end
 
 	if action == "factory-select" then
 		--element.state = true
 		-- item=recipe item2=factory
-		self.model:setFactory(player, item, item2)
+		self.model:setFactory(player, item, item2, item3)
 		self.model:update(player)
-		self:updateFactoryInfo(player, element, action, item, item2)
-		self:updateFactoryModules(player, element, action, item, item2)
-		self.parent:refreshDisplayData(player)
+		self:updateFactoryInfo(player, element, action, item, item2, item3)
+		self:updateFactoryModules(player, element, action, item, item2, item3)
+		self.parent:refreshDisplayData(player, nil, item, item2)
 	end
 
 	if action == "factory-update" then
@@ -721,42 +737,42 @@ function PlannerRecipeEdition.methods:on_event(player, element, action, item, it
 			options["module_slots"] = self:getInputNumber(inputPanel["module-slots"])
 		end
 
-		self.model:updateFactory(player, item, options)
+		self.model:updateFactory(player, item, item2, options)
 		self.model:update(player)
-		self:updateFactoryInfo(player, element, action, item, item2)
-		self:updateFactoryModules(player, element, action, item, item2)
-		self.parent:refreshDisplayData(player)
+		self:updateFactoryInfo(player, element, action, item, item2, item3)
+		self:updateFactoryModules(player, element, action, item, item2, item3)
+		self.parent:refreshDisplayData(player, nil, item, item2)
 	end
 
 	if action == "factory-module-add" then
-		self.model:addFactoryModule(player, item, item2)
+		self.model:addFactoryModule(player, item, item2, item3)
 		self.model:update(player)
-		self:updateFactoryInfo(player, element, action, item, item2)
-		self:updateFactoryModules(player, element, action, item, item2)
-		self:updateBeaconInfo(player, element, action, item, item2)
-		self.parent:refreshDisplayData(player)
+		self:updateFactoryInfo(player, element, action, item, item2, item3)
+		self:updateFactoryModules(player, element, action, item, item2, item3)
+		self:updateBeaconInfo(player, element, action, item, item2, item3)
+		self.parent:refreshDisplayData(player, nil, item, item2)
 	end
 
 	if action == "factory-module-remove" then
-		self.model:removeFactoryModule(player, item, item2)
+		self.model:removeFactoryModule(player, item, item2, item3)
 		self.model:update(player)
-		self:updateFactoryInfo(player, element, action, item, item2)
-		self:updateFactoryModules(player, element, action, item, item2)
-		self:updateBeaconInfo(player, element, action, item, item2)
-		self.parent:refreshDisplayData(player)
+		self:updateFactoryInfo(player, element, action, item, item2, item3)
+		self:updateFactoryModules(player, element, action, item, item2, item3)
+		self:updateBeaconInfo(player, element, action, item, item2, item3)
+		self.parent:refreshDisplayData(player, nil, item, item2)
 	end
 
 	if action == "beacon-group" then
-		model.beaconGroupSelected = item2
-		self:updateBeaconSelector(player, element, action, item, item2)
+		model.beaconGroupSelected = item3
+		self:updateBeaconSelector(player, element, action, item, item2, item3)
 	end
 
 	if action == "beacon-select" then
-		self.model:setBeacon(player, item, item2)
+		self.model:setBeacon(player, item, item2, item3)
 		self.model:update(player)
-		self:updateBeaconInfo(player, element, action, item, item2)
-		self:updateBeaconModules(player, element, action, item, item2)
-		self.parent:refreshDisplayData(player)
+		self:updateBeaconInfo(player, element, action, item, item2, item3)
+		self:updateBeaconModules(player, element, action, item, item2, item3)
+		self.parent:refreshDisplayData(player, nil, item, item2)
 	end
 
 	if action == "beacon-update" then
@@ -783,28 +799,28 @@ function PlannerRecipeEdition.methods:on_event(player, element, action, item, it
 			options["module_slots"] = self:getInputNumber(inputPanel["module-slots"])
 		end
 
-		self.model:updateBeacon(player, item, options)
+		self.model:updateBeacon(player, item, item2, options)
 		self.model:update(player)
-		self:updateBeaconInfo(player, element, action, item, item2)
-		self:updateBeaconModules(player, element, action, item, item2)
-		self.parent:refreshDisplayData(player)
+		self:updateBeaconInfo(player, element, action, item, item2, item3)
+		self:updateBeaconModules(player, element, action, item, item2, item3)
+		self.parent:refreshDisplayData(player, nil, item, item2)
 	end
 
 	if action == "beacon-module-add" then
-		self.model:addBeaconModule(player, item, item2)
+		self.model:addBeaconModule(player, item, item2, item3)
 		self.model:update(player)
-		self:updateBeaconInfo(player, element, action, item, item2)
-		self:updateBeaconModules(player, element, action, item, item2)
-		self:updateFactoryInfo(player, element, action, item, item2)
-		self.parent:refreshDisplayData(player)
+		self:updateBeaconInfo(player, element, action, item, item2, item3)
+		self:updateBeaconModules(player, element, action, item, item2, item3)
+		self:updateFactoryInfo(player, element, action, item, item2, item3)
+		self.parent:refreshDisplayData(player, nil, item, item2)
 	end
 
 	if action == "beacon-module-remove" then
-		self.model:removeBeaconModule(player, item, item2)
+		self.model:removeBeaconModule(player, item, item2, item3)
 		self.model:update(player)
-		self:updateBeaconInfo(player, element, action, item, item2)
-		self:updateBeaconModules(player, element, action, item, item2)
-		self:updateFactoryInfo(player, element, action, item, item2)
-		self.parent:refreshDisplayData(player)
+		self:updateBeaconInfo(player, element, action, item, item2, item3)
+		self:updateBeaconModules(player, element, action, item, item2, item3)
+		self:updateFactoryInfo(player, element, action, item, item2, item3)
+		self.parent:refreshDisplayData(player, nil, item, item2)
 	end
 end
