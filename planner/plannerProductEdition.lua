@@ -117,6 +117,9 @@ end
 -- @param #string item3 third item name
 --
 function PlannerProductEdition.methods:after_open(player, element, action, item, item2, item3)
+	self.parent:send_event(player, "HMPlannerRecipeEdition", "CLOSE")
+	self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
+	self.parent:send_event(player, "HMPlannerSettings", "CLOSE")
 	self:getInfoPanel(player)
 end
 

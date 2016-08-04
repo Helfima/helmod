@@ -166,6 +166,7 @@ function PlannerSettings.methods:on_event(player, element, action, item, item2, 
 	Logging:debug("PlannerSettings:on_event():",player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 	local globalSettings = self.player:getGlobal(player, "settings")
+	local defaultSettings = self.player:getDefaultSettings()
 
 	if action == "change-time" then
 		model.time = tonumber(item)
@@ -175,6 +176,7 @@ function PlannerSettings.methods:on_event(player, element, action, item, item2, 
 	end
 
 	if action == "change-boolean-settings" then
+		if globalSettings[item] == nil then globalSettings[item] = defaultSettings[item] end
 		globalSettings[item] = not(globalSettings[item])
 		self.parent:refreshDisplayData(player)
 	end
@@ -199,6 +201,11 @@ end
 -- @param #string item3 third item name
 --
 function PlannerSettings.methods:after_open(player, element, action, item, item2, item3)
+	self.parent:send_event(player, "HMPlannerRecipeEdition", "CLOSE")
+	self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
+	self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
+	self.parent:send_event(player, "HMPlannerResult", "change-tab", "product-line")
+
 	self:updateAboutSettings(player, element, action, item, item2, item3)
 	self:updateDataSettings(player, element, action, item, item2, item3)
 	self:updateModelSettings(player, element, action, item, item2, item3)
@@ -302,16 +309,16 @@ function PlannerSettings.methods:updateDataSettings(player, element, action, ite
 	self:addGuiLabel(dataSettingsTable, self:classname().."=display_data_col_index", ({"helmod_settings-panel.data-col-index"}))
 	self:addGuiCheckbox(dataSettingsTable, self:classname().."=change-boolean-settings=ID=display_data_col_index", display_data_col_index)
 
-	local display_data_col_level = defaultSettings.display_data_col_level
-	if globalSettings.display_data_col_level ~= nil then display_data_col_level = globalSettings.display_data_col_level end
-	self:addGuiLabel(dataSettingsTable, self:classname().."=display_data_col_level", ({"helmod_settings-panel.data-col-level"}))
-	self:addGuiCheckbox(dataSettingsTable, self:classname().."=change-boolean-settings=ID=display_data_col_level", display_data_col_level)
-
-	local display_data_col_weight = defaultSettings.display_data_col_weight
-	if globalSettings.display_data_col_weight ~= nil then display_data_col_weight = globalSettings.display_data_col_weight end
-	self:addGuiLabel(dataSettingsTable, self:classname().."=display_data_col_weight", ({"helmod_settings-panel.data-col-weight"}))
-	self:addGuiCheckbox(dataSettingsTable, self:classname().."=change-boolean-settings=ID=display_data_col_weight", display_data_col_weight)
-
+	--	local display_data_col_level = defaultSettings.display_data_col_level
+	--	if globalSettings.display_data_col_level ~= nil then display_data_col_level = globalSettings.display_data_col_level end
+	--	self:addGuiLabel(dataSettingsTable, self:classname().."=display_data_col_level", ({"helmod_settings-panel.data-col-level"}))
+	--	self:addGuiCheckbox(dataSettingsTable, self:classname().."=change-boolean-settings=ID=display_data_col_level", display_data_col_level)
+	--
+	--	local display_data_col_weight = defaultSettings.display_data_col_weight
+	--	if globalSettings.display_data_col_weight ~= nil then display_data_col_weight = globalSettings.display_data_col_weight end
+	--	self:addGuiLabel(dataSettingsTable, self:classname().."=display_data_col_weight", ({"helmod_settings-panel.data-col-weight"}))
+	--	self:addGuiCheckbox(dataSettingsTable, self:classname().."=change-boolean-settings=ID=display_data_col_weight", display_data_col_weight)
+	--
 end
 
 -------------------------------------------------------------------------------
@@ -336,19 +343,37 @@ function PlannerSettings.methods:updateModelSettings(player, element, action, it
 
 	local modelSettingsTable = self:addGuiTable(modelSettingsPanel, "settings", 3)
 
-	self:addGuiLabel(modelSettingsTable, self:classname().."=model_auto_compute", ({"helmod_settings-panel.model-auto-compute"}))
-
-	local model_auto_compute = defaultSettings.model_auto_compute
-	if globalSettings.model_auto_compute ~= nil then model_auto_compute = globalSettings.model_auto_compute end
-	self:addGuiCheckbox(modelSettingsTable, self:classname().."=change-boolean-settings=ID=model_auto_compute", model_auto_compute)
-	self:addGuiLabel(modelSettingsTable, self:classname().."=change-number-settings=ID=model-settings", "")
-
-	self:addGuiLabel(modelSettingsTable, self:classname().."=model_loop_limit_label", ({"helmod_settings-panel.model-loop-limit"}))
+	-- model_filter_factory
+	self:addGuiLabel(modelSettingsTable, self:classname().."=model_filter_factory", ({"helmod_settings-panel.model-filter-factory"}))
 	
-	local model_loop_limit = defaultSettings.model_loop_limit
-	if globalSettings.model_loop_limit ~= nil then model_loop_limit = globalSettings.model_loop_limit end
-	self:addGuiText(modelSettingsTable, "model_loop_limit", model_loop_limit)
-	self:addGuiButton(modelSettingsTable, self:classname().."=change-number-settings=ID=model-settings=", "model_loop_limit", "helmod_button-default", ({"helmod_button.apply"}))
+	local model_filter_factory = defaultSettings.model_filter_factory
+	if globalSettings.model_filter_factory ~= nil then model_filter_factory = globalSettings.model_filter_factory end
+	self:addGuiCheckbox(modelSettingsTable, self:classname().."=change-boolean-settings=ID=model_filter_factory", model_filter_factory)
+	self:addGuiLabel(modelSettingsTable, self:classname().."=blank=ID=model_filter_factory", "")
+
+	-- model_filter_factory
+	self:addGuiLabel(modelSettingsTable, self:classname().."=model_filter_beacon", ({"helmod_settings-panel.model-filter-beacon"}))
+
+	local model_filter_beacon = defaultSettings.model_filter_beacon
+	if globalSettings.model_filter_beacon ~= nil then model_filter_beacon = globalSettings.model_filter_beacon end
+	self:addGuiCheckbox(modelSettingsTable, self:classname().."=change-boolean-settings=ID=model_filter_beacon", model_filter_beacon)
+	self:addGuiLabel(modelSettingsTable, self:classname().."=blank=ID=model_filter_beacon", "")
+
+--	-- model_auto_compute
+--	self:addGuiLabel(modelSettingsTable, self:classname().."=model_auto_compute", ({"helmod_settings-panel.model-auto-compute"}))
+--
+--	local model_auto_compute = defaultSettings.model_auto_compute
+--	if globalSettings.model_auto_compute ~= nil then model_auto_compute = globalSettings.model_auto_compute end
+--	self:addGuiCheckbox(modelSettingsTable, self:classname().."=change-boolean-settings=ID=model_auto_compute", model_auto_compute)
+--	self:addGuiLabel(modelSettingsTable, self:classname().."=change-number-settings=ID=model-settings", "")
+--
+--	--model_loop_limit_label
+--	self:addGuiLabel(modelSettingsTable, self:classname().."=model_loop_limit_label", ({"helmod_settings-panel.model-loop-limit"}))
+--
+--	local model_loop_limit = defaultSettings.model_loop_limit
+--	if globalSettings.model_loop_limit ~= nil then model_loop_limit = globalSettings.model_loop_limit end
+--	self:addGuiText(modelSettingsTable, "model_loop_limit", model_loop_limit)
+--	self:addGuiButton(modelSettingsTable, self:classname().."=change-number-settings=ID=model-settings=", "model_loop_limit", "helmod_button-default", ({"helmod_button.apply"}))
 
 
 end

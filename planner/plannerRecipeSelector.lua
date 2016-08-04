@@ -63,6 +63,9 @@ end
 -- @param #string item3 third item name
 -- 
 function PlannerRecipeSelector.methods:after_open(player, element, action, item, item2, item3)
+	self.parent:send_event(player, "HMPlannerRecipeEdition", "CLOSE")
+	self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
+	self.parent:send_event(player, "HMPlannerSettings", "CLOSE")
 	local globalPlayer = self.player:getGlobal(player)
 	-- ajouter de la table des groupes de recipe
 	local panel = self:getPanel(player)

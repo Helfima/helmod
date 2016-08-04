@@ -154,7 +154,9 @@ function PlayerController.methods:getDefaultSettings()
 		display_data_col_level = false,
 		display_data_col_weight = false,
 		model_auto_compute = false,
-		model_loop_limit = 1000
+		model_loop_limit = 1000,
+		model_filter_factory = true,
+		model_filter_beacon = true
 	}
 end
 

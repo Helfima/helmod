@@ -295,10 +295,79 @@ default_gui["helmod_textfield"] = {
 	maximal_width = 100
 }
 
+default_gui["helmod_label-right"] = {
+	type = "label_style",
+	font = "default",
+	align = "right"
+}
+
+default_gui["helmod_label-right-20"] = {
+	type = "label_style",
+	font = "default",
+	align = "right",
+	minimal_width = 20
+}
+
+default_gui["helmod_label-right-30"] = {
+	type = "label_style",
+	font = "default",
+	align = "right",
+	minimal_width = 30
+}
+
+default_gui["helmod_label-right-40"] = {
+	type = "label_style",
+	font = "default",
+	align = "right",
+	minimal_width = 40
+}
+
+default_gui["helmod_label-right-50"] = {
+	type = "label_style",
+	font = "default",
+	align = "right",
+	minimal_width = 50
+}
+
+default_gui["helmod_label-right-60"] = {
+	type = "label_style",
+	font = "default",
+	align = "right",
+	minimal_width = 60
+}
+
+default_gui["helmod_label-right-70"] = {
+	type = "label_style",
+	font = "default",
+	align = "right",
+	minimal_width = 70
+}
+
+default_gui["helmod_label-right-80"] = {
+	type = "label_style",
+	font = "default",
+	align = "right",
+	minimal_width = 80
+}
+
+default_gui["helmod_label-right-90"] = {
+	type = "label_style",
+	font = "default",
+	align = "right",
+	minimal_width = 90
+}
+
+default_gui["helmod_label-right-100"] = {
+	type = "label_style",
+	font = "default",
+	align = "right",
+	minimal_width = 100
+}
+
 default_gui["helmod_menu_frame_style"] = {
 	type = "frame_style",
 	parent = "frame_style",
-	minimal_width = 600,
+	minimal_width = 850,
 	resize_row_to_width = true
 }
 
@@ -332,6 +401,25 @@ default_gui["helmod_table"] = {
 	left_padding = 0
 }
 
+default_gui["helmod_table-odd"] = {
+	type = "table_style",
+	-- default orange with alfa
+	hovered_row_color = {r=0.98, g=0.66, b=0.22, a=0.7},
+	cell_padding = 1,
+	horizontal_spacing = 10,
+	vertical_spacing = 2,
+	horizontal_padding = 1,
+	vertical_padding = 1,
+	odd_row_graphical_set =
+	{
+		type = "composition",
+		filename = "__core__/graphics/gui.png",
+		priority = "extra-high-no-scale",
+		corner_size = {0, 0},
+		position = {78, 18},
+		opacity = 0.7
+	}
+}
 default_gui["helmod_factory-modules"] = {
 	type = "table_style",
 	parent = "helmod_table",
@@ -353,14 +441,22 @@ default_gui["helmod_recipe-modules"] = {
 default_gui["helmod_result"] = {
 	type = "frame_style",
 	parent = "frame_style",
-	minimal_width = 600,
-	minimal_height = 500
+	minimal_width = 850,
+	minimal_height = 500,
+	flow_style = {
+		horizontal_spacing = 0,
+		vertical_spacing = 0,
+		resize_row_to_width = true
+	}
 }
 
 default_gui["helmod_result-menu-flow"] = {
 	type = "flow_style",
 	parent = "flow_style",
-	minimal_width = 550
+	minimal_width = 850,
+	horizontal_spacing = 0,
+	vertical_spacing = 0,
+	resize_row_to_width = true
 }
 
 default_gui["helmod_align-right-flow"] = {
@@ -372,19 +468,19 @@ default_gui["helmod_align-right-flow"] = {
 default_gui["helmod_recipe-section-frame"] = {
 	type = "frame_style",
 	parent = "frame_style",
-	minimal_width = 750
+	minimal_width = 690
 }
 
 default_gui["helmod_recipe-cell-frame"] = {
 	type = "frame_style",
 	parent = "frame_style",
-	minimal_width = 250
+	minimal_width = 230
 }
 
 default_gui["helmod_recipe-cell-flow"] = {
 	type = "flow_style",
 	parent = "flow_style",
-	manimal_width = 250
+	manimal_width = 230
 }
 
 default_gui["helmod_summary-frame"] = {

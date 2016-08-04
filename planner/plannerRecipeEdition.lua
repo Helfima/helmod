@@ -271,6 +271,9 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeEdition.methods:after_open(player, element, action, item, item2, item3)
+	self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
+	self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
+	self.parent:send_event(player, "HMPlannerSettings", "CLOSE")
 	local model = self.model:getModel(player)
 	-- recipe
 	self:getRecipeInfoPanel(player)
@@ -522,6 +525,8 @@ end
 --
 function PlannerRecipeEdition.methods:updateFactorySelector(player, element, action, item, item2, item3)
 	Logging:debug("PlannerFactorySelector:updateFactorySelector():",player, element, action, item, item2, item3)
+	local globalSettings = self.player:getGlobal(player, "settings")
+	
 	local selectorPanel = self:getFactorySelectorPanel(player)
 	local model = self.model:getModel(player)
 
@@ -532,9 +537,13 @@ function PlannerRecipeEdition.methods:updateFactorySelector(player, element, act
 	end
 
 	-- ajouter de la table des groupes de recipe
-	local groupsPanel = self:addGuiTable(selectorPanel, "factory-groups", 3)
+	local groupsPanel = self:addGuiTable(selectorPanel, "factory-groups", 2)
 	Logging:debug("PlannerFactorySelector:updateFactorySelector(): group category=",recipe.category)
-	for group, name in pairs(self.player:getProductionGroups(recipe.category)) do
+	
+	local category = recipe.category
+	if globalSettings.model_filter_factory ~= nil and globalSettings.model_filter_factory == false then category = nil end
+
+	for group, name in pairs(self.player:getProductionGroups(category)) do
 		-- set le groupe
 		if model.factoryGroupSelected == nil then model.factoryGroupSelected = group end
 		-- ajoute les icons de groupe
@@ -653,6 +662,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeEdition.methods:updateBeaconSelector(player, element, action, item, item2, item3)
+	local globalSettings = self.player:getGlobal(player, "settings")
 	local selectorPanel = self:getBeaconSelectorPanel(player)
 	local model = self.model:getModel(player)
 
@@ -663,8 +673,10 @@ function PlannerRecipeEdition.methods:updateBeaconSelector(player, element, acti
 	end
 
 	-- ajouter de la table des groupes de recipe
-	local groupsPanel = self:addGuiTable(selectorPanel, "beacon-groups", 3)
-	for group, name in pairs(self.player:getProductionGroups("module")) do
+	local groupsPanel = self:addGuiTable(selectorPanel, "beacon-groups", 2)
+	local category = "module"
+	if globalSettings.model_filter_beacon ~= nil and globalSettings.model_filter_beacon == false then category = nil end
+	for group, name in pairs(self.player:getProductionGroups(category)) do
 		-- set le groupe
 		if model.beaconGroupSelected == nil then model.beaconGroupSelected = group end
 		-- ajoute les icons de groupe

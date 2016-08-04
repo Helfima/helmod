@@ -141,10 +141,26 @@ function PlannerResult.methods:on_gui_click(event)
 		local item2 = string.match(event.element.name,patternItem2,1)
 		local item3 = string.match(event.element.name,patternItem3,1)
 
-		self:on_event(player, event.element, action, item, item2, item3)
+		self:send_event(player, event.element, action, item, item2, item3)
 	end
 end
 
+-------------------------------------------------------------------------------
+-- Send event
+--
+-- @function [parent=#PlannerResult] send_event
+-- 
+-- @param #LuaPlayer player
+-- @param #LuaGuiElement element button
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+-- 
+function PlannerResult.methods:send_event(player, element, action, item, item2, item3)
+		Logging:debug("PlannerDialog:send_event():",player, element, action, item, item2, item3)
+		self:on_event(player, element, action, item, item2, item3)
+end
 -------------------------------------------------------------------------------
 -- On event
 --
@@ -359,7 +375,7 @@ function PlannerResult.methods:updateProductionLine(player, item, item2, item3)
 		if globalSettings.display_data_col_weight then
 			extra_cols = extra_cols + 1
 		end
-		local resultTable = self:addGuiTable(resultPanel,PLANNER_TABLE_RESULT,5 + extra_cols)
+		local resultTable = self:addGuiTable(resultPanel,PLANNER_TABLE_RESULT,5 + extra_cols, "helmod_table-odd")
 
 		self:addProductionLineHeader(player, resultTable)
 
@@ -379,7 +395,7 @@ function PlannerResult.methods:updateProductionLine(player, item, item2, item3)
 		end
 		self:addGuiLabel(resultTable, "foot-1", ({"helmod_result-panel.col-header-total"}))
 		if model.summary ~= nil then
-			self:addGuiLabel(resultTable, "energy", self:formatNumberKilo(model.summary.energy, "W"))
+			self:addGuiLabel(resultTable, "energy", self:formatNumberKilo(model.summary.energy, "W"),"helmod_label-right-70")
 		end
 		self:addGuiLabel(resultTable, "blank-pro", "")
 		self:addGuiLabel(resultTable, "blank-ing", "")
@@ -486,7 +502,7 @@ function PlannerResult.methods:updateProductionBlock(player, item, item2, item3)
 		end
 		self:addGuiLabel(resultTable, "foot-1", ({"helmod_result-panel.col-header-total"}))
 		if model.summary ~= nil then
-			self:addGuiLabel(resultTable, "energy", self:formatNumberKilo(element.power, "W"))
+			self:addGuiLabel(resultTable, "energy", self:formatNumberKilo(element.power, "W"),"helmod_label-right-70")
 		end
 		self:addGuiLabel(resultTable, "blank-pro", "")
 		self:addGuiLabel(resultTable, "blank-ing", "")
@@ -506,7 +522,7 @@ end
 function PlannerResult.methods:addPagination(player, itable, blockId, maxPage)
 	Logging:debug("PlannerResult:addPagination():", player, itable, blockId, maxPage)
 	local model = self.model:getModel(player)
-	local guiPagination = self:addGuiFlowH(itable,"pagination", "helmod_page-result-flow")
+	local guiPagination = self:addGuiFlowH(itable,"pagination", "helmod_result-menu-flow")
 
 	self:addGuiButton(guiPagination, self:classname().."=change-page=ID="..blockId.."=", "down", "helmod_button-default", "<")
 
@@ -690,7 +706,7 @@ function PlannerResult.methods:addProductionLineHeader(player, itable)
 	local style = "helmod_button-sorted-none"
 	if model.order.name == "energy_total" and model.order.ascendant then style = "helmod_button-sorted-up" end
 	if model.order.name == "energy_total" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-	self:addGuiButton(guiEnergy, self:classname().."=change-sort=ID=", "energy_total", style)
+	self:addGuiButton(guiEnergy, self:classname().."=change-sort=ID=", "power", style)
 
 
 	local guiProducts = self:addGuiFlowH(itable,"header-products")
@@ -807,7 +823,7 @@ function PlannerResult.methods:addProductionBlockRow(player, guiTable, blockId, 
 	-- col index
 	if globalSettings.display_data_col_index then
 		local guiIndex = self:addGuiFlowH(guiTable,"index"..recipe.name)
-		self:addGuiLabel(guiIndex, "index", recipe.index)
+		self:addGuiLabel(guiIndex, "index", recipe.index, "helmod_label-right-40")
 	end
 	-- col level
 	if globalSettings.display_data_col_level then
@@ -845,7 +861,7 @@ function PlannerResult.methods:addProductionBlockRow(player, guiTable, blockId, 
 			index = index + 1
 		end
 	end
-	self:addGuiLabel(guiFactory, factory.name, self:formatNumber(factory.count))
+	self:addGuiLabel(guiFactory, factory.name, self:formatNumber(factory.count), "helmod_label-right")
 
 	-- col beacon
 	local guiBeacon = self:addGuiFlowH(guiTable,"beacon"..recipe.name)
@@ -859,11 +875,11 @@ function PlannerResult.methods:addProductionBlockRow(player, guiTable, blockId, 
 			index = index + 1
 		end
 	end
-	self:addGuiLabel(guiBeacon, beacon.name, beacon.count)
+	self:addGuiLabel(guiBeacon, beacon.name, beacon.count, "helmod_label-right")
 
 	-- col energy
 	local guiEnergy = self:addGuiFlowH(guiTable,"energy"..recipe.name, "helmod_align-right-flow")
-	self:addGuiLabel(guiEnergy, recipe.name, self:formatNumberKilo(recipe.energy_total, "W"))
+	self:addGuiLabel(guiEnergy, recipe.name, self:formatNumberKilo(recipe.energy_total, "W"), "helmod_label-right-70")
 
 	-- products
 	local tProducts = self:addGuiFlowH(guiTable,"products_"..recipe.name)
@@ -872,7 +888,7 @@ function PlannerResult.methods:addProductionBlockRow(player, guiTable, blockId, 
 			-- product = {type="item", name="steel-plate", amount=8}
 			self:addSpriteIconButton(tProducts, "HMPlannerResourceInfo=OPEN=ID="..blockId.."="..recipe.name.."=", self.player:getIconType(product), product.name, "X"..product.amount)
 
-			self:addGuiLabel(tProducts, product.name, self:formatNumber(product.count))
+			self:addGuiLabel(tProducts, product.name, self:formatNumber(product.count), "helmod_label-right-60")
 		end
 	end
 	-- ingredients
@@ -882,7 +898,7 @@ function PlannerResult.methods:addProductionBlockRow(player, guiTable, blockId, 
 			-- ingredient = {type="item", name="steel-plate", amount=8}
 			self:addSelectSpriteIconButton(tIngredient, self:classname().."=production-recipe-add=ID="..blockId.."="..recipe.name.."=", self.player:getIconType(ingredient), ingredient.name, "X"..ingredient.amount, "yellow")
 
-			self:addGuiLabel(tIngredient, ingredient.name, self:formatNumber(ingredient.count))
+			self:addGuiLabel(tIngredient, ingredient.name, self:formatNumber(ingredient.count), "helmod_label-right-60")
 		end
 	end
 end
@@ -910,7 +926,7 @@ function PlannerResult.methods:addProductionLineRow(player, guiTable, element)
 	-- col index
 	if globalSettings.display_data_col_index then
 		local guiIndex = self:addGuiFlowH(guiTable,"index"..element.id)
-		self:addGuiLabel(guiIndex, "index", element.index)
+		self:addGuiLabel(guiIndex, "index", element.index, "helmod_label-right-40")
 	end
 	-- col level
 	if globalSettings.display_data_col_level then
@@ -966,7 +982,7 @@ function PlannerResult.methods:addProductionLineRow(player, guiTable, element)
 
 	-- col energy
 	local guiEnergy = self:addGuiFlowH(guiTable,"energy"..element.id, "helmod_align-right-flow")
-	self:addGuiLabel(guiEnergy, element.id, self:formatNumberKilo(element.power, "W"))
+	self:addGuiLabel(guiEnergy, element.id, self:formatNumberKilo(element.power, "W"), "helmod_label-right-70")
 
 	-- products
 	local tProducts = self:addGuiFlowH(guiTable,"products_"..element.id)
@@ -976,7 +992,7 @@ function PlannerResult.methods:addProductionLineRow(player, guiTable, element)
 			Logging:debug("product addSpriteIconButton:", product)
 			self:addSelectSpriteIconButton(tProducts, "HMPlannerProductEdition=OPEN=ID="..element.id.."=", self.player:getIconType(product), product.name, "X"..product.amount)
 
-			self:addGuiLabel(tProducts, product.name, self:formatNumber(product.count))
+			self:addGuiLabel(tProducts, product.name, self:formatNumber(product.count), "helmod_label-right-60")
 		end
 	end
 	-- ingredients
@@ -987,7 +1003,7 @@ function PlannerResult.methods:addProductionLineRow(player, guiTable, element)
 			Logging:debug("ingredient addSpriteIconButton:", ingredient)
 			self:addSelectSpriteIconButton(tIngredient, self:classname().."=production-block-add=ID="..element.id.."=", self.player:getIconType(ingredient), ingredient.name, "X"..ingredient.amount, "yellow")
 
-			self:addGuiLabel(tIngredient, ingredient.name, self:formatNumber(ingredient.count))
+			self:addGuiLabel(tIngredient, ingredient.name, self:formatNumber(ingredient.count), "helmod_label-right-60")
 		end
 	end
 end
