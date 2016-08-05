@@ -74,7 +74,7 @@ function PlannerRecipeSelector.methods:after_open(player, element, action, item,
 		-- set le groupe
 		if globalPlayer.recipeGroupSelected == nil then globalPlayer.recipeGroupSelected = group end
 		-- ajoute les icons de groupe
-		local action = self:addXxlSelectSpriteIconButton(guiRecipeSelectorGroups, self:classname().."=recipe-group=ID=", "item-group", group)
+		local action = self:addXxlSelectSpriteIconButton(guiRecipeSelectorGroups, self:classname().."=recipe-group=ID="..item.."=", "item-group", group)
 	end
 end
 
@@ -94,7 +94,7 @@ function PlannerRecipeSelector.methods:on_event(player, element, action, item, i
 	Logging:debug("PlannerRecipeSelector:on_event():",player, element, action, item, item2, item3)
 	local globalPlayer = self.player:getGlobal(player)
 	if action == "recipe-group" then
-		globalPlayer.recipeGroupSelected = item
+		globalPlayer.recipeGroupSelected = item2
 		self:on_update(player, element, action, item, item2, item3)
 	end
 	

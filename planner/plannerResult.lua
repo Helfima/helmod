@@ -381,7 +381,7 @@ function PlannerResult.methods:updateProductionLine(player, item, item2, item3)
 
 		local indexBegin = model.page * model.step
 		local indexEnd = (model.page + 1) * model.step
-		Logging:debug("pagination:", {page = model.page, step = model.step, indexBegin = indexBegin, indexEnd = indexEnd})
+		Logging:trace("pagination:", {page = model.page, step = model.step, indexBegin = indexBegin, indexEnd = indexEnd})
 		local i = 0
 		for _, element in spairs(model.blocks, function(t,a,b) if model.order.ascendant then return t[b][model.order.name] > t[a][model.order.name] else return t[b][model.order.name] < t[a][model.order.name] end end) do
 			if i >= indexBegin and i < indexEnd then
@@ -482,13 +482,13 @@ function PlannerResult.methods:updateProductionBlock(player, item, item2, item3)
 		if globalSettings.display_data_col_weight then
 			extra_cols = extra_cols + 1
 		end
-		local resultTable = self:addGuiTable(resultPanel,PLANNER_TABLE_RESULT,7 + extra_cols)
+		local resultTable = self:addGuiTable(resultPanel,PLANNER_TABLE_RESULT,7 + extra_cols, "helmod_table-odd")
 
 		self:addProductionBlockHeader(player, resultTable)
 
 		local indexBegin = model.page * model.step
 		local indexEnd = (model.page + 1) * model.step
-		Logging:debug("pagination:", {page = model.page, step = model.step, indexBegin = indexBegin, indexEnd = indexEnd})
+		Logging:trace("pagination:", {page = model.page, step = model.step, indexBegin = indexBegin, indexEnd = indexEnd})
 		local i = 0
 		for _, recipe in spairs(model.blocks[blockId].recipes, function(t,a,b) if model.order.ascendant then return t[b][model.order.name] > t[a][model.order.name] else return t[b][model.order.name] < t[a][model.order.name] end end) do
 			if i >= indexBegin and i < indexEnd then
@@ -1157,7 +1157,7 @@ function PlannerResult.methods:updateSummary(player)
 	for _, item in pairs(model.generators) do
 		-- col generator
 		local guiIngredient = self:addGuiFlowH(resultTable,"item"..item.name)
-		self:addSelectSpriteIconButton(guiIngredient, "HMPlannerGenerator=OPEN=ID=", "item", item.name)
+		self:addSpriteIconButton(guiIngredient, "HMPlannerGenerator=OPEN=ID=", "item", item.name)
 
 		-- col energy
 		local guiEnergy = self:addGuiFlowH(resultTable,"energy"..item.name)

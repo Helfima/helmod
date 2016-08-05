@@ -21,7 +21,7 @@ Logging.console = false
 --===========================
 function helmod:on_init(event)
 	self.name = "helmod"
-	self.version = "0.2.1"
+	self.version = "0.2.2"
 	self.loaded = false;
 
 	self.playerController = PlayerController:new()
