@@ -110,7 +110,9 @@ function ElementGui.methods:addGuiButton(parent, action, key, style, caption)
 	if not ok then
 		Logging:error("ElementGui:addGuiButton", action, key, style, err)
 		options.style = "helmod_button-default"
-		if caption ~= nil then
+		if (type(caption) == "boolean") then
+			Logging:error("ElementGui:addGuiButton - caption is a boolean")
+		elseif caption ~= nil then
 			options.caption = key.."("..caption..")"
 		else
 			options.caption = key
