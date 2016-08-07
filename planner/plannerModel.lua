@@ -1087,11 +1087,15 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 					local productUsage = product.amount
 					-- calcul production module factory
 					for module, value in pairs(recipe.factory.modules) do
-						productUsage = productUsage + productNominal * value * helmod_defines.modules[module].productivity
+						if (self:isModuleDefined(module)) then
+							productUsage = productUsage + productNominal * value * helmod_defines.modules[module].productivity
+						end
 					end
 					if recipe.beacon.active then
 						for module, value in pairs(recipe.beacon.modules) do
-							productUsage = productUsage + productNominal * value * helmod_defines.modules[module].productivity * recipe.beacon.efficiency * recipe.beacon.combo
+							if (self:isModuleDefined(module)) then
+								productUsage = productUsage + productNominal * value * helmod_defines.modules[module].productivity * recipe.beacon.efficiency * recipe.beacon.combo
+							end	
 						end
 					end
 					local nextCount = math.ceil(pCount*(ingredient.amount/productUsage))
@@ -1339,11 +1343,15 @@ function PlannerModel.methods:computeProducts(player, element, count, path)
 				local productUsage = currentProduct.amount
 				-- calcul production module factory
 				for module, value in pairs(recipe.factory.modules) do
-					productUsage = productUsage + productNominal * value * helmod_defines.modules[module].productivity
+					if (self:isModuleDefined(module)) then
+						productUsage = productUsage + productNominal * value * helmod_defines.modules[module].productivity
+					end
 				end
 				if recipe.beacon.active then
 					for module, value in pairs(recipe.beacon.modules) do
-						productUsage = productUsage + productNominal * value * helmod_defines.modules[module].productivity * recipe.beacon.efficiency * recipe.beacon.combo
+						if (self:isModuleDefined(module)) then
+							productUsage = productUsage + productNominal * value * helmod_defines.modules[module].productivity * recipe.beacon.efficiency * recipe.beacon.combo
+						end	
 					end
 				end
 				local nextCount = math.ceil(pCount*(ingredient.amount/productUsage))
@@ -1372,24 +1380,32 @@ function PlannerModel.methods:computeFactory(player, recipe)
 	recipe.factory.speed = recipe.factory.speed_nominal
 	-- effet module factory
 	for module, value in pairs(recipe.factory.modules) do
-		recipe.factory.speed = recipe.factory.speed + recipe.factory.speed_nominal * value * helmod_defines.modules[module].speed
+		if (self:isModuleDefined(module)) then
+			recipe.factory.speed = recipe.factory.speed + recipe.factory.speed_nominal * value * helmod_defines.modules[module].speed
+		end	
 	end
 	-- effet module beacon
 	if recipe.beacon.active then
 		for module, value in pairs(recipe.beacon.modules) do
-			recipe.factory.speed = recipe.factory.speed + recipe.factory.speed_nominal * value * helmod_defines.modules[module].speed * recipe.beacon.efficiency * recipe.beacon.combo
+			if (self:isModuleDefined(module)) then
+				recipe.factory.speed = recipe.factory.speed + recipe.factory.speed_nominal * value * helmod_defines.modules[module].speed * recipe.beacon.efficiency * recipe.beacon.combo
+			end
 		end
 	end
 
 	-- effet module factory
 	recipe.factory.energy = recipe.factory.energy_nominal
 	for module, value in pairs(recipe.factory.modules) do
-		recipe.factory.energy = recipe.factory.energy + recipe.factory.energy_nominal * value * helmod_defines.modules[module].consumption
+		if (self:isModuleDefined(module)) then
+			recipe.factory.energy = recipe.factory.energy + recipe.factory.energy_nominal * value * helmod_defines.modules[module].consumption
+		end
 	end
 	if recipe.beacon.active then
 		-- effet module beacon
 		for module, value in pairs(recipe.beacon.modules) do
-			recipe.factory.energy = recipe.factory.energy + recipe.factory.energy_nominal * value * helmod_defines.modules[module].consumption * recipe.beacon.efficiency * recipe.beacon.combo
+			if (self:isModuleDefined(module)) then
+				recipe.factory.energy = recipe.factory.energy + recipe.factory.energy_nominal * value * helmod_defines.modules[module].consumption * recipe.beacon.efficiency * recipe.beacon.combo
+			end	
 		end
 	end
 
@@ -1626,4 +1642,23 @@ function PlannerModel.methods:getDefaultRecipeBeacon(player, key)
 		return nil
 	end
 	return default.recipes[key].beacon
+end
+
+
+------------------------------------------------
+-- Test, if the module is defined in defines, otherwise logs error and return false
+--
+-- @function [parent=#PlannerModel] isModuleDefined
+--
+-- @param #string module module name
+-- @return boolean true if is defined
+-- 
+
+
+function PlannerModel.methods:isModuleDefined(module)
+  if (helmod_defines.modules[module] == nil) then
+		Logging:error("PlannerModel:isModuleDefined(): missing module configuration: ",module)
+		return false
+	end
+	return true
 end
