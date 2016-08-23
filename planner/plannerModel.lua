@@ -66,7 +66,7 @@ function PlannerModel.methods:createProductionBlockModel(player, recipe)
 	local inputModel = {}
 	inputModel.id = "block_"..model.block_id
 	inputModel.name = recipe.name
-	inputModel.count = 0
+	inputModel.count = 1
 	inputModel.active = true
 	inputModel.power = 0
 	inputModel.ingredients = {}
@@ -136,6 +136,9 @@ function PlannerModel.methods:createFactoryModel(player, name, count)
 	factoryModel.speed_nominal = 0.5
 	factoryModel.speed = 0
 	factoryModel.module_slots = 2
+	-- limit infini = 0
+	factoryModel.limit = 0
+	factoryModel.limit_count = count
 	-- modules
 	factoryModel.modules = {}
 
@@ -611,6 +614,9 @@ function PlannerModel.methods:updateFactory(player, blockId, key, options)
 		if options.module_slots ~= nil then
 			recipe.factory.module_slots = options.module_slots
 		end
+		if options.limit ~= nil then
+			recipe.factory.limit = options.limit
+		end
 		model.needPrepare = true
 	end
 end
@@ -1073,6 +1079,9 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 			end
 		end
 
+		-- ratio pour le calcul du nombre de block
+		local ratio = 1
+		local ratioRecipe = nil
 		-- calcul ordonnee sur les recipes du block
 		local ingredients = nil
 		for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
@@ -1111,6 +1120,22 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 			self:computeFactory(player, recipe)
 
 			element.power = element.power + recipe.energy_total
+			
+			if type(recipe.factory.limit) == "number" and recipe.factory.limit > 0 then
+				local currentRatio = recipe.factory.limit/recipe.factory.count
+				if currentRatio < ratio then
+					ratio = currentRatio
+					ratioRecipe = recipe.index
+					-- block number
+					element.count = math.ceil(recipe.factory.count/recipe.factory.limit)
+				end
+			end
+		end
+		
+		-- calcul ratio
+		for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
+			recipe.factory.limit_count = math.ceil(recipe.factory.count*ratio)
+			if ratioRecipe ~= nil and ratioRecipe == recipe.index then recipe.factory.limit_count = recipe.factory.limit end
 		end
 	end
 end

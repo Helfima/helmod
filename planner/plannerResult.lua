@@ -24,8 +24,12 @@ function PlannerResult.methods:init(parent)
 	self.SUMMARY_TAB = "summary"
 	self.RESOURCES_TAB = "resources"
 	
-	self.sectionItemStyle = "helmod_block-item-section-frame"
-	self.scrollItemStyle = "helmod_block-item-scroll"
+	self.sectionItemStyle1 = "helmod_block-item-section-frame1"
+	self.scrollItemStyle1 = "helmod_block-item-scroll1"
+	
+	self.sectionItemStyle2 = "helmod_block-item-section-frame2"
+	self.scrollItemStyle2 = "helmod_block-item-scroll2"
+	
 	self.scrollDataStyle = "helmod_block-list-scroll"
 end
 
@@ -434,10 +438,27 @@ function PlannerResult.methods:updateProductionBlock(player, item, item2, item3)
 	if countRecipes > 0 then
 
 		local element = model.blocks[blockId]
+
+		local firstRow = self:addGuiFlowH(resultPanel, "first-row")
+		-- info panel
+		local blockPanel = self:addGuiFrameV(firstRow, "block", self.sectionItemStyle1, ({"helmod_common.block"}))
+		local blockScroll = self:addGuiScrollPane(blockPanel, "block-scroll", self.scrollItemStyle1, "auto", "auto")
+		local blockTable = self:addGuiTable(blockScroll,"output-table",4)
+		
+		self:addGuiLabel(blockTable, "label-power", ({"helmod_label.electrical-consumption"}))
+		if model.summary ~= nil then
+			self:addGuiLabel(blockTable, "power", self:formatNumberKilo(element.power, "W"),"helmod_label-right-70")
+		end
+		
+		self:addGuiLabel(blockTable, "label-count", ({"helmod_label.block-number"}))
+		if model.summary ~= nil then
+			self:addGuiLabel(blockTable, "count", element.count,"helmod_label-right-70")
+		end
+		
 		-- ouput panel
-		local outputPanel = self:addGuiFrameV(resultPanel, "output", self.sectionItemStyle, ({"helmod_common.output"}))
-		local outputScroll = self:addGuiScrollPane(outputPanel, "output-scroll", self.scrollItemStyle, "auto", "auto")
-		local outputTable = self:addGuiTable(outputScroll,"output-table",8)
+		local outputPanel = self:addGuiFrameV(firstRow, "output", self.sectionItemStyle1, ({"helmod_common.output"}))
+		local outputScroll = self:addGuiScrollPane(outputPanel, "output-scroll", self.scrollItemStyle1, "auto", "auto")
+		local outputTable = self:addGuiTable(outputScroll,"output-table",4)
 		if element.products ~= nil then
 			for r, product in pairs(element.products) do
 				-- product = {type="item", name="steel-plate", amount=8}
@@ -448,8 +469,8 @@ function PlannerResult.methods:updateProductionBlock(player, item, item2, item3)
 		end
 		
 		-- input panel
-		local inputPanel = self:addGuiFrameV(resultPanel, "input", self.sectionItemStyle, ({"helmod_common.input"}))
-		local outputScroll = self:addGuiScrollPane(inputPanel, "output-scroll", self.scrollItemStyle, "auto", "auto")
+		local inputPanel = self:addGuiFrameV(resultPanel, "input", self.sectionItemStyle2, ({"helmod_common.input"}))
+		local outputScroll = self:addGuiScrollPane(inputPanel, "output-scroll", self.scrollItemStyle2, "auto", "auto")
 		local inputTable = self:addGuiTable(outputScroll,"input-table",8)
 		if element.ingredients ~= nil then
 			for r, ingredient in pairs(element.ingredients) do
@@ -489,16 +510,6 @@ function PlannerResult.methods:updateProductionBlock(player, item, item2, item3)
 		for _, recipe in spairs(model.blocks[blockId].recipes, function(t,a,b) if model.order.ascendant then return t[b][model.order.name] > t[a][model.order.name] else return t[b][model.order.name] < t[a][model.order.name] end end) do
 			self:addProductionBlockRow(player, resultTable, blockId, recipe)
 		end
-
-		for i = 1, 3 + extra_cols, 1 do
-			self:addGuiLabel(resultTable, "blank-"..i, "")
-		end
-		self:addGuiLabel(resultTable, "foot-1", ({"helmod_result-panel.col-header-total"}))
-		if model.summary ~= nil then
-			self:addGuiLabel(resultTable, "energy", self:formatNumberKilo(element.power, "W"),"helmod_label-right-70")
-		end
-		self:addGuiLabel(resultTable, "blank-pro", "")
-		self:addGuiLabel(resultTable, "blank-ing", "")
 	end
 end
 
@@ -854,7 +865,7 @@ function PlannerResult.methods:addProductionBlockRow(player, guiTable, blockId, 
 			index = index + 1
 		end
 	end
-	self:addGuiLabel(guiFactory, factory.name, self:formatNumber(factory.count), "helmod_label-right")
+	self:addGuiLabel(guiFactory, factory.name, self:formatNumber(factory.limit_count).."/"..self:formatNumber(factory.count), "helmod_label-right")
 
 	-- col beacon
 	local guiBeacon = self:addGuiFlowH(guiTable,"beacon"..recipe.name)
@@ -868,7 +879,7 @@ function PlannerResult.methods:addProductionBlockRow(player, guiTable, blockId, 
 			index = index + 1
 		end
 	end
-	self:addGuiLabel(guiBeacon, beacon.name, beacon.count, "helmod_label-right")
+	self:addGuiLabel(guiBeacon, beacon.name, self:formatNumber(beacon.count), "helmod_label-right")
 
 	-- col energy
 	local guiEnergy = self:addGuiFlowH(guiTable,"energy"..recipe.name, "helmod_align-right-flow")

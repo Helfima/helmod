@@ -329,7 +329,7 @@ default_gui["helmod_label-right-100"] = {
 default_gui["helmod_menu_frame_style"] = {
 	type = "frame_style",
 	parent = "frame_style",
-	minimal_width = 900,
+	minimal_width = 940,
 	resize_row_to_width = true
 }
 
@@ -407,8 +407,7 @@ default_gui["helmod_result"] = {
 	minimal_height = 500,
 	flow_style = {
 		horizontal_spacing = 0,
-		vertical_spacing = 0,
-		resize_row_to_width = true
+		vertical_spacing = 0
 	}
 }
 
@@ -427,18 +426,34 @@ default_gui["helmod_align-right-flow"] = {
 	align = "right"
 }
 
-default_gui["helmod_block-item-section-frame"] = {
+default_gui["helmod_block-item-section-frame1"] = {
 	type = "frame_style",
 	parent = "frame_style",
-	minimal_width = 920,
-	maximal_width = 920
+	minimal_width = 465,
+	maximal_width = 465
 }
 
-default_gui["helmod_block-item-scroll"] = {
+default_gui["helmod_block-item-scroll1"] = {
 	type = "scroll_pane_style",
 	parent = "scroll_pane_style",
-	minimal_width = 898,
-	maximal_width = 898,
+	minimal_width = 438,
+	maximal_width = 438,
+	minimal_height = 36,
+	maximal_height = 72
+}
+
+default_gui["helmod_block-item-section-frame2"] = {
+	type = "frame_style",
+	parent = "frame_style",
+	minimal_width = 940,
+	maximal_width = 940
+}
+
+default_gui["helmod_block-item-scroll2"] = {
+	type = "scroll_pane_style",
+	parent = "scroll_pane_style",
+	minimal_width = 918,
+	maximal_width = 918,
 	minimal_height = 36,
 	maximal_height = 72
 }
@@ -446,15 +461,15 @@ default_gui["helmod_block-item-scroll"] = {
 default_gui["helmod_block-list-section-frame"] = {
 	type = "frame_style",
 	parent = "frame_style",
-	minimal_width = 920,
-	maximal_width = 920
+	minimal_width = 940,
+	maximal_width = 940
 }
 
 default_gui["helmod_block-list-scroll"] = {
 	type = "scroll_pane_style",
 	parent = "scroll_pane_style",
-	minimal_width = 898,
-	maximal_width = 898,
+	minimal_width = 918,
+	maximal_width = 918,
 	minimal_height = 516,
 	maximal_height = 516
 }

@@ -430,7 +430,7 @@ function PlannerRecipeEdition.methods:updateRecipeInfo(player, element, action, 
 		end
 
 		local tablePanel = self:addGuiTable(infoPanel,"table-info",2)
-		self:addIconButton(tablePanel, "recipe", "recipe", recipe.name)
+		self:addSpriteIconButton(tablePanel, "recipe", "recipe", recipe.name)
 		self:addGuiLabel(tablePanel, "label", recipe.name)
 
 		--		self:addGuiLabel(tablePanel, "label-active", "Active")
@@ -469,7 +469,7 @@ function PlannerRecipeEdition.methods:updateRecipeIngredients(player, element, a
 		end
 		local tablePanel= self:addGuiTable(ingredientsPanel, "table-ingredients", 6)
 		for key, ingredient in pairs(recipe.ingredients) do
-			self:addIconButton(tablePanel, "item=ID=", self.player:getItemIconType(ingredient), ingredient.name)
+			self:addSpriteIconButton(tablePanel, "item=ID=", self.player:getIconType(ingredient), ingredient.name)
 			self:addGuiLabel(tablePanel, ingredient.name, ingredient.amount)
 		end
 	end
@@ -499,7 +499,7 @@ function PlannerRecipeEdition.methods:updateRecipeProducts(player, element, acti
 		end
 		local tablePanel= self:addGuiTable(productsPanel, "table-products", 6)
 		for key, product in pairs(recipe.products) do
-			self:addIconButton(tablePanel, "item=ID=", self.player:getItemIconType(product), product.name)
+			self:addSpriteIconButton(tablePanel, "item=ID=", self.player:getIconType(product), product.name)
 			self:addGuiLabel(tablePanel, product.name, product.amount)
 		end
 	end
@@ -530,7 +530,7 @@ function PlannerRecipeEdition.methods:updateFactoryInfo(player, element, action,
 			end
 
 			local headerPanel = self:addGuiTable(infoPanel,"table-header",2)
-			self:addIconButton(headerPanel, "icon", factory.type, factory.name)
+			self:addSpriteIconButton(headerPanel, "icon", self.player:getIconType(factory), factory.name)
 			self:addGuiLabel(headerPanel, "label", factory.name)
 
 			local inputPanel = self:addGuiTable(infoPanel,"table-input",2)
@@ -543,6 +543,9 @@ function PlannerRecipeEdition.methods:updateFactoryInfo(player, element, action,
 
 			self:addGuiLabel(inputPanel, "label-module-slots", ({"helmod_label.module-slots"}))
 			self:addGuiText(inputPanel, "module-slots", factory.module_slots, "helmod_textfield")
+
+			self:addGuiLabel(inputPanel, "label-limit", ({"helmod_label.limit"}))
+			self:addGuiText(inputPanel, "limit", factory.limit, "helmod_textfield")
 
 			self:addGuiLabel(inputPanel, "label-energy", ({"helmod_label.energy"}))
 			self:addGuiLabel(inputPanel, "energy", factory.energy)
@@ -569,13 +572,15 @@ end
 --
 function PlannerRecipeEdition.methods:updateFactoryModulesSelector(player, element, action, item, item2, item3)
 	local selectorPanel = self:getFactoryModulesSelectorPanel(player)
-	local model = self.model:getModel(player)
+	if selectorPanel["modules"] == nil then
+		local model = self.model:getModel(player)
 
-	local recipe = model.blocks[item].recipes[item2]
+		local recipe = model.blocks[item].recipes[item2]
 
-	local tableModulesPanel = self:addGuiTable(selectorPanel,"modules",4)
-	for k, module in pairs(self.player:getModules()) do
-		self:addSpriteIconButton(tableModulesPanel, self:classname().."=factory-module-add=ID="..item.."="..recipe.name.."=", "item", module.name)
+		local tableModulesPanel = self:addGuiTable(selectorPanel,"modules",4)
+		for k, module in pairs(self.player:getModules()) do
+			self:addSpriteIconButton(tableModulesPanel, self:classname().."=factory-module-add=ID="..item.."="..recipe.name.."=", "item", module.name)
+		end
 	end
 end
 
@@ -689,7 +694,7 @@ function PlannerRecipeEdition.methods:updateBeaconInfo(player, element, action, 
 		end
 
 		local headerPanel = self:addGuiTable(infoPanel,"table-header",2)
-		self:addIconButton(headerPanel, "icon", beacon.type, beacon.name)
+		self:addSpriteIconButton(headerPanel, "icon", self.player:getIconType(beacon), beacon.name)
 		self:addGuiLabel(headerPanel, "label", beacon.name)
 
 		local inputPanel = self:addGuiTable(infoPanel,"table-input",2)
@@ -759,13 +764,15 @@ end
 --
 function PlannerRecipeEdition.methods:updateBeaconModulesSelector(player, element, action, item, item2, item3)
 	local selectorPanel = self:getBeaconModulesSelectorPanel(player)
-	local model = self.model:getModel(player)
+	if selectorPanel["modules"] == nil then
+		local model = self.model:getModel(player)
 
-	local recipe = model.blocks[item].recipes[item2]
-	
-	local tableModulesPanel = self:addGuiTable(selectorPanel,"modules",4)
-	for k, module in pairs(self.player:getModules()) do
-		self:addSpriteIconButton(tableModulesPanel, self:classname().."=beacon-module-add=ID="..item.."="..recipe.name.."=", "item", module.name)
+		local recipe = model.blocks[item].recipes[item2]
+
+		local tableModulesPanel = self:addGuiTable(selectorPanel,"modules",4)
+		for k, module in pairs(self.player:getModules()) do
+			self:addSpriteIconButton(tableModulesPanel, self:classname().."=beacon-module-add=ID="..item.."="..recipe.name.."=", "item", module.name)
+		end
 	end
 end
 
@@ -863,6 +870,10 @@ function PlannerRecipeEdition.methods:on_event(player, element, action, item, it
 
 		if inputPanel["module-slots"] ~= nil then
 			options["module_slots"] = self:getInputNumber(inputPanel["module-slots"])
+		end
+
+		if inputPanel["limit"] ~= nil then
+			options["limit"] = self:getInputNumber(inputPanel["limit"])
 		end
 
 		self.model:updateFactory(player, item, item2, options)
