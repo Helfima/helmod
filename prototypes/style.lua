@@ -183,44 +183,6 @@ default_gui["helmod_sm-select-button-icon"] = {
 	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=0}, {top=0,right=0,bottom=0,left=0}, true)
 }
 
---local filename_arrow_up = "__helmod__/graphics/arrow-up.png"
---local filename_arrow_down = "__helmod__/graphics/arrow-down.png"
---local filename_arrow_cross = "__helmod__/graphics/arrow-cross.png"
---default_gui["helmod_button-arrow-up"] = {
---	type = "button_style",
---	parent = "button_style",
---	width = normal_icon_size,
---	height = normal_icon_size,
---	default_graphical_set = monolithIcon(filename_arrow_up, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
---	hovered_graphical_set = monolithIcon(filename_arrow_up, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
---	clicked_graphical_set = monolithIcon(filename_arrow_up, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
---	disabled_graphical_set = monolithIcon(filename_arrow_up, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true)
---}
---
---
---default_gui["helmod_button-arrow-down"] = {
---	type = "button_style",
---	parent = "button_style",
---	width = normal_icon_size,
---	height = normal_icon_size,
---	default_graphical_set = monolithIcon(filename_arrow_down, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
---	hovered_graphical_set = monolithIcon(filename_arrow_down, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
---	clicked_graphical_set = monolithIcon(filename_arrow_down, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
---	disabled_graphical_set = monolithIcon(filename_arrow_down, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true)
---}
---
---default_gui["helmod_button-arrow-cross"] = {
---	type = "button_style",
---	parent = "button_style",
---	width = normal_icon_size,
---	height = normal_icon_size,
---	default_graphical_set = monolithIcon(filename_arrow_cross, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
---	hovered_graphical_set = monolithIcon(filename_arrow_cross, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
---	clicked_graphical_set = monolithIcon(filename_arrow_cross, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
---	disabled_graphical_set = monolithIcon(filename_arrow_cross, 36, normal_icon_size/36, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true)
---}
---
---
 default_gui["helmod_button-small-bold"] = {
 	type = "button_style",
 	parent = "helmod_button-default",
@@ -291,8 +253,8 @@ default_gui["helmod_button-small-bold-end"] = {
 default_gui["helmod_textfield"] = {
 	type = "textfield_style",
 	parent = "textfield_style",
-	minimal_width = 100,
-	maximal_width = 100
+	minimal_width = 70,
+	maximal_width = 70
 }
 
 default_gui["helmod_label-right"] = {
@@ -367,7 +329,7 @@ default_gui["helmod_label-right-100"] = {
 default_gui["helmod_menu_frame_style"] = {
 	type = "frame_style",
 	parent = "frame_style",
-	minimal_width = 850,
+	minimal_width = 900,
 	resize_row_to_width = true
 }
 
@@ -441,7 +403,7 @@ default_gui["helmod_recipe-modules"] = {
 default_gui["helmod_result"] = {
 	type = "frame_style",
 	parent = "frame_style",
-	minimal_width = 850,
+	minimal_width = 800,
 	minimal_height = 500,
 	flow_style = {
 		horizontal_spacing = 0,
@@ -453,7 +415,7 @@ default_gui["helmod_result"] = {
 default_gui["helmod_result-menu-flow"] = {
 	type = "flow_style",
 	parent = "flow_style",
-	minimal_width = 850,
+	minimal_width = 800,
 	horizontal_spacing = 0,
 	vertical_spacing = 0,
 	resize_row_to_width = true
@@ -465,16 +427,99 @@ default_gui["helmod_align-right-flow"] = {
 	align = "right"
 }
 
+default_gui["helmod_block-item-section-frame"] = {
+	type = "frame_style",
+	parent = "frame_style",
+	minimal_width = 920,
+	maximal_width = 920
+}
+
+default_gui["helmod_block-item-scroll"] = {
+	type = "scroll_pane_style",
+	parent = "scroll_pane_style",
+	minimal_width = 898,
+	maximal_width = 898,
+	minimal_height = 36,
+	maximal_height = 72
+}
+
+default_gui["helmod_block-list-section-frame"] = {
+	type = "frame_style",
+	parent = "frame_style",
+	minimal_width = 920,
+	maximal_width = 920
+}
+
+default_gui["helmod_block-list-scroll"] = {
+	type = "scroll_pane_style",
+	parent = "scroll_pane_style",
+	minimal_width = 898,
+	maximal_width = 898,
+	minimal_height = 516,
+	maximal_height = 516
+}
+
+default_gui["helmod_block-input-section-frame"] = {
+	type = "frame_style",
+	parent = "frame_style",
+	minimal_width = 630
+}
+
 default_gui["helmod_recipe-section-frame"] = {
 	type = "frame_style",
 	parent = "frame_style",
-	minimal_width = 690
+	minimal_width = 630
 }
 
 default_gui["helmod_recipe-cell-frame"] = {
 	type = "frame_style",
 	parent = "frame_style",
 	minimal_width = 230
+}
+
+default_gui["helmod_recipe-cell-frame1"] = {
+	type = "frame_style",
+	parent = "frame_style",
+	minimal_width = 230
+}
+
+default_gui["helmod_recipe-cell-frame2"] = {
+	type = "frame_style",
+	parent = "frame_style",
+	minimal_width = 200
+}
+
+default_gui["helmod_recipe-cell-frame3"] = {
+	type = "frame_style",
+	parent = "frame_style",
+	minimal_width = 200
+}
+
+default_gui["helmod_recipe-cell-scroll"] = {
+	type = "scroll_pane_style",
+	parent = "scroll_pane_style",
+	minimal_width = 210,
+	maximal_width = 210,
+	minimal_height = 60,
+	maximal_height = 60
+}
+
+default_gui["helmod_recipe-cell-scroll1"] = {
+	type = "scroll_pane_style",
+	parent = "scroll_pane_style",
+	minimal_width = 210,
+	maximal_width = 210,
+	minimal_height = 210,
+	maximal_height = 210
+}
+
+default_gui["helmod_recipe-cell-scroll3"] = {
+	type = "scroll_pane_style",
+	parent = "scroll_pane_style",
+	minimal_width = 180,
+	maximal_width = 180,
+	minimal_height = 145,
+	maximal_height = 145
 }
 
 default_gui["helmod_recipe-cell-flow"] = {

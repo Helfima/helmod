@@ -34,9 +34,9 @@ function PlannerModel.methods:getModel(player)
 	if model.blocks == nil then model.blocks = {} end
 
 	if model.ingredients == nil then model.ingredients = {} end
-	
+
 	if model.time == nil then model.time = 60 end
-	
+
 	-- delete the old version item
 	if model.products ~= nil then model.products = nil end
 	if model.input ~= nil then model.input = nil end
@@ -1087,11 +1087,13 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 					local productUsage = product.amount
 					-- calcul production module factory
 					for module, value in pairs(recipe.factory.modules) do
-						productUsage = productUsage + productNominal * value * helmod_defines.modules[module].productivity
+						local bonus = self.player:getModuleBonus(module, "productivity")
+						productUsage = productUsage + productNominal * value * bonus
 					end
 					if recipe.beacon.active then
 						for module, value in pairs(recipe.beacon.modules) do
-							productUsage = productUsage + productNominal * value * helmod_defines.modules[module].productivity * recipe.beacon.efficiency * recipe.beacon.combo
+							local bonus = self.player:getModuleBonus(module, "productivity")
+							productUsage = productUsage + productNominal * value * bonus * recipe.beacon.efficiency * recipe.beacon.combo
 						end
 					end
 					local nextCount = math.ceil(pCount*(ingredient.amount/productUsage))
@@ -1339,11 +1341,13 @@ function PlannerModel.methods:computeProducts(player, element, count, path)
 				local productUsage = currentProduct.amount
 				-- calcul production module factory
 				for module, value in pairs(recipe.factory.modules) do
-					productUsage = productUsage + productNominal * value * helmod_defines.modules[module].productivity
+					local bonus = self.player:getModuleBonus(module, "productivity")
+					productUsage = productUsage + productNominal * value * bonus
 				end
 				if recipe.beacon.active then
 					for module, value in pairs(recipe.beacon.modules) do
-						productUsage = productUsage + productNominal * value * helmod_defines.modules[module].productivity * recipe.beacon.efficiency * recipe.beacon.combo
+						local bonus = self.player:getModuleBonus(module, "productivity")
+						productUsage = productUsage + productNominal * value * bonus * recipe.beacon.efficiency * recipe.beacon.combo
 					end
 				end
 				local nextCount = math.ceil(pCount*(ingredient.amount/productUsage))
@@ -1372,24 +1376,28 @@ function PlannerModel.methods:computeFactory(player, recipe)
 	recipe.factory.speed = recipe.factory.speed_nominal
 	-- effet module factory
 	for module, value in pairs(recipe.factory.modules) do
-		recipe.factory.speed = recipe.factory.speed + recipe.factory.speed_nominal * value * helmod_defines.modules[module].speed
+		local bonus = self.player:getModuleBonus(module, "speed")
+		recipe.factory.speed = recipe.factory.speed + recipe.factory.speed_nominal * value * bonus
 	end
 	-- effet module beacon
 	if recipe.beacon.active then
 		for module, value in pairs(recipe.beacon.modules) do
-			recipe.factory.speed = recipe.factory.speed + recipe.factory.speed_nominal * value * helmod_defines.modules[module].speed * recipe.beacon.efficiency * recipe.beacon.combo
+			local bonus = self.player:getModuleBonus(module, "speed")
+			recipe.factory.speed = recipe.factory.speed + recipe.factory.speed_nominal * value * bonus * recipe.beacon.efficiency * recipe.beacon.combo
 		end
 	end
 
 	-- effet module factory
 	recipe.factory.energy = recipe.factory.energy_nominal
 	for module, value in pairs(recipe.factory.modules) do
-		recipe.factory.energy = recipe.factory.energy + recipe.factory.energy_nominal * value * helmod_defines.modules[module].consumption
+		local bonus = self.player:getModuleBonus(module, "consumption")
+		recipe.factory.energy = recipe.factory.energy + recipe.factory.energy_nominal * value * bonus
 	end
 	if recipe.beacon.active then
 		-- effet module beacon
 		for module, value in pairs(recipe.beacon.modules) do
-			recipe.factory.energy = recipe.factory.energy + recipe.factory.energy_nominal * value * helmod_defines.modules[module].consumption * recipe.beacon.efficiency * recipe.beacon.combo
+			local bonus = self.player:getModuleBonus(module, "consumption")
+			recipe.factory.energy = recipe.factory.energy + recipe.factory.energy_nominal * value * bonus * recipe.beacon.efficiency * recipe.beacon.combo
 		end
 	end
 
@@ -1433,12 +1441,35 @@ end
 function PlannerModel.methods:createSummary(player)
 	local model = self:getModel(player)
 	model.summary = {}
+	model.summary.factories = {}
+	model.summary.beacons = {}
+	model.summary.modules = {}
 
 	local energy = 0
 
-	for k, element in pairs(model.blocks) do
+	for _, block in pairs(model.blocks) do
 		-- cumul de l'energie
-		energy = energy + element.power
+		energy = energy + block.power
+		for _, recipe in pairs(block.recipes) do
+			-- calcul nombre factory
+			local factory = recipe.factory
+			if model.summary.factories[factory.name] == nil then model.summary.factories[factory.name] = {name = factory.name, count = 0} end
+			model.summary.factories[factory.name].count = model.summary.factories[factory.name].count + factory.count
+			-- calcul nombre de module factory
+			for module, value in pairs(factory.modules) do
+				if model.summary.modules[module] == nil then model.summary.modules[module] = {name = module, count = 0} end
+				model.summary.modules[module].count = model.summary.modules[module].count + value * factory.count
+			end
+			-- calcul nombre beacon
+			local beacon = recipe.beacon
+			if model.summary.beacons[beacon.name] == nil then model.summary.beacons[beacon.name] = {name = beacon.name, count = 0} end
+			model.summary.beacons[beacon.name].count = model.summary.beacons[beacon.name].count + beacon.count
+			-- calcul nombre de module beacon
+			for module, value in pairs(beacon.modules) do
+				if model.summary.modules[module] == nil then model.summary.modules[module] = {name = module, count = 0} end
+				model.summary.modules[module].count = model.summary.modules[module].count + value * beacon.count
+			end
+		end
 	end
 
 	-- calcul minig-drill
@@ -1450,6 +1481,8 @@ function PlannerModel.methods:createSummary(player)
 
 
 	model.summary.energy = energy
+
+
 
 	model.generators = {}
 	model.generators["solar-panel"] = {name = "solar-panel", count = math.ceil(energy/(60*1000))}

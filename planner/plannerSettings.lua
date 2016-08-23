@@ -36,16 +36,16 @@ function PlannerSettings.methods:getParentPanel(player)
 end
 
 -------------------------------------------------------------------------------
--- Get the parent panel
+-- Get the menu panel
 --
--- @function [parent=#PlannerSettings] getParentPanel
+-- @function [parent=#PlannerSettings] getMenuPanel
 --
 -- @param #LuaPlayer player
 --
 -- @return #LuaGuiElement
 --
 function PlannerSettings.methods:getMenuPanel(player)
-	return self.parent:getSettingsPanel(player)
+	return self.parent:getMenuPanel(player)
 end
 
 -------------------------------------------------------------------------------
@@ -75,11 +75,11 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerSettings.methods:getTimePanel(player)
-	local parentPanel = self:getMenuPanel(player)
-	if parentPanel["time"] ~= nil and parentPanel["time"].valid then
-		return parentPanel["time"]
+	local menuPanel = self:getMenuPanel(player)
+	if menuPanel["time"] ~= nil and menuPanel["time"].valid then
+		return menuPanel["time"]
 	end
-	return self:addGuiFlowH(parentPanel, "time")
+	return self:addGuiFlowH(menuPanel, "time")
 end
 
 -------------------------------------------------------------------------------

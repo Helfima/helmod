@@ -418,3 +418,23 @@ function PlayerController.methods:getItemIconType(element)
 		return "item"
 	end
 end
+
+-------------------------------------------------------------------------------
+-- Return module bonus (default return: bonus = 0 )
+--
+-- @function [parent=#PlayerController] getModuleBonus
+--
+-- @param #string module module name
+-- @param #string effect effect name
+--
+-- @return #number
+--
+function PlayerController.methods:getModuleBonus(module, effect)
+	local bonus = 0
+	-- search module
+	local module = self:getItemPrototype(module)
+	if module ~= nil and module.module_effects[effect] ~= nil then
+		bonus = module.module_effects[effect].bonus
+	end
+	return bonus
+end

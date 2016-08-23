@@ -110,7 +110,9 @@ function ElementGui.methods:addGuiButton(parent, action, key, style, caption)
 	if not ok then
 		Logging:error("ElementGui:addGuiButton", action, key, style, err)
 		options.style = "helmod_button-default"
-		if caption ~= nil then
+		if (type(caption) == "boolean") then
+			Logging:error("ElementGui:addGuiButton - caption is a boolean")
+		elseif caption ~= nil then
 			options.caption = key.."("..caption..")"
 		else
 			options.caption = key
@@ -386,6 +388,37 @@ function ElementGui.methods:addGuiFlowV(parent, key, style)
 	options.name = key
 	if style ~= nil then
 		options.style = style
+	end
+	return parent.add(options)
+end
+
+-------------------------------------------------------------------------------
+-- Add a scroll pane
+--
+-- @function [parent=#ElementGui] addGuiFlowV
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #string key unique id
+-- @param #string style style of frame
+-- @param #string horizontal horizontal scroll policy
+-- @param #string vertical vertical scroll policy
+--
+-- @return #LuaGuiElement the LuaGuiElement added
+--
+function ElementGui.methods:addGuiScrollPane(parent, key, style, horizontal, vertical)
+	local options = {}
+	options.type = "scroll-pane"
+	options.horizontal_scroll_policy = "auto"
+	options.vertical_scroll_policy = "auto"
+	options.name = key
+	if style ~= nil then
+		options.style = style
+	end
+	if horizontal ~= nil then
+		options.horizontal_scroll_policy = horizontal
+	end
+	if vertical ~= nil then
+		options.vertical_scroll_policy = vertical
 	end
 	return parent.add(options)
 end

@@ -123,8 +123,8 @@ function PlannerController.methods:main(player)
 		Logging:debug("Create info panel")
 		local infoPanel = self:getInfoPanel(player)
 		-- menu
-		Logging:debug("Create settings panel")
-		local settingsPanel = self:getSettingsPanel(player)
+		Logging:debug("Create menu panel")
+		local settingsPanel = self:getMenuPanel(player)
 		-- data
 		Logging:debug("Create data panel")
 		local dataPanel = self:getDataPanel(player)
@@ -194,13 +194,13 @@ function PlannerController.methods:getDialogPanel(player)
 end
 
 -------------------------------------------------------------------------------
--- Get or create settings panel
+-- Get or create menu panel
 --
--- @function [parent=#PlannerController] getSettingsPanel
+-- @function [parent=#PlannerController] getMenuPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerController.methods:getSettingsPanel(player)
+function PlannerController.methods:getMenuPanel(player)
 	local infoPanel = self:getInfoPanel(player)
 	if infoPanel["helmod_planner_settings"] ~= nil and infoPanel["helmod_planner_settings"].valid then
 		return infoPanel["helmod_planner_settings"]
