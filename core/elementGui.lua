@@ -84,11 +84,12 @@ end
 -- @param #string key unique id
 -- @param #string style style of button
 -- @param #string caption container for element
+-- @param #string tooltip displayed text
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addGuiButton(parent, action, key, style, caption)
-	Logging:trace("ElementGui:addGuiButton", parent, action, key, style, caption)
+function ElementGui.methods:addGuiButton(parent, action, key, style, caption, tooltip)
+	Logging:trace("ElementGui:addGuiButton", parent, action, key, style, caption, tooltip)
 	local options = {}
 	options.type = "button"
 	if key ~= nil then
@@ -101,6 +102,9 @@ function ElementGui.methods:addGuiButton(parent, action, key, style, caption)
 	end
 	if caption ~= nil then
 		options.caption = caption
+	end
+	if tooltip ~= nil then
+		options.tooltip = tooltip
 	end
 
 	local button = nil
@@ -203,11 +207,12 @@ end
 -- @param #string type type of item
 -- @param #string key name of item
 -- @param #string caption displayed text
+-- @param #string tooltip displayed text
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addStyledSpriteButton(parent, style, action, type, key, caption)
-	Logging:trace("ElementGui:addStyledSpriteButton", style,action, type, key, caption)
+function ElementGui.methods:addStyledSpriteButton(parent, style, action, type, key, caption, tooltip)
+	Logging:trace("ElementGui:addStyledSpriteButton", style,action, type, key, caption, tooltip)
 	local options = {}
 	options.type = "sprite-button"
 	if key ~= nil then
@@ -217,6 +222,9 @@ function ElementGui.methods:addStyledSpriteButton(parent, style, action, type, k
 	end
 	if caption ~= nil then
 		options.caption = caption
+	end
+	if tooltip ~= nil then
+		options.tooltip = tooltip
 	end
 	options.style = style
 	options.sprite = type.."/"..key
@@ -245,12 +253,13 @@ end
 -- @param #string type type of item
 -- @param #string key name of item
 -- @param #string caption displayed text
+-- @param #string tooltip displayed text
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addSmSpriteButton(parent, action, type, key, caption)
-	Logging:trace("ElementGui:addSmSpriteButton",action, type, key, caption)
-	return self:addStyledSpriteButton(parent, "helmod_sm-button-icon", action, type, key, caption)
+function ElementGui.methods:addSmSpriteButton(parent, action, type, key, caption, tooltip)
+	Logging:trace("ElementGui:addSmSpriteButton",action, type, key, caption, tooltip)
+	return self:addStyledSpriteButton(parent, "helmod_sm-button-icon", action, type, key, caption, tooltip)
 end
 
 -------------------------------------------------------------------------------
@@ -263,12 +272,13 @@ end
 -- @param #string type type of item
 -- @param #string key name of item
 -- @param #string caption displayed text
+-- @param #string tooltip displayed text
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addSelectSmSpriteButton(parent, action, type, key, caption)
-	Logging:trace("ElementGui:addSmSpriteButton",action, type, key, caption)
-	return self:addStyledSpriteButton(parent, "helmod_sm-select-button-icon", action, type, key, caption)
+function ElementGui.methods:addSelectSmSpriteButton(parent, action, type, key, caption, tooltip)
+	Logging:trace("ElementGui:addSmSpriteButton",action, type, key, caption, tooltip)
+	return self:addStyledSpriteButton(parent, "helmod_sm-select-button-icon", action, type, key, caption, tooltip)
 end
 
 -------------------------------------------------------------------------------
@@ -281,12 +291,13 @@ end
 -- @param #string type type of item
 -- @param #string key name of item
 -- @param #string caption displayed text
+-- @param #string tooltip displayed text
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addSpriteIconButton(parent, action, type, key, caption)
-	Logging:trace("ElementGui:addSelectSpriteIconButton",action, type, key, caption)
-	return self:addStyledSpriteButton(parent, "helmod_button-icon", action, type, key, caption)
+function ElementGui.methods:addSpriteIconButton(parent, action, type, key, caption, tooltip)
+	Logging:trace("ElementGui:addSelectSpriteIconButton",action, type, key, caption, tooltip)
+	return self:addStyledSpriteButton(parent, "helmod_button-icon", action, type, key, caption, tooltip)
 end
 
 -------------------------------------------------------------------------------
@@ -300,16 +311,17 @@ end
 -- @param #string key name of item
 -- @param #string caption displayed text
 -- @param #string color background color
+-- @param #string tooltip displayed text
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addSelectSpriteIconButton(parent, action, type, key, caption, color)
-	Logging:trace("ElementGui:addSelectSpriteIconButton",action, type, key, caption, color)
+function ElementGui.methods:addSelectSpriteIconButton(parent, action, type, key, caption, color, tooltip)
+	Logging:trace("ElementGui:addSelectSpriteIconButton",action, type, key, caption, color, tooltip)
 	local style = "helmod_select-button-icon"
 	if color == "red" then style = "helmod_select-button-icon-red" end
 	if color == "yellow" then style = "helmod_select-button-icon-yellow" end
 	if color == "green" then style = "helmod_select-button-icon-green" end
-	return self:addStyledSpriteButton(parent, style, action, type, key, caption)
+	return self:addStyledSpriteButton(parent, style, action, type, key, caption, tooltip)
 end
 
 -------------------------------------------------------------------------------
@@ -322,12 +334,13 @@ end
 -- @param #string type type of item
 -- @param #string key name of item
 -- @param #string caption displayed text
+-- @param #string tooltip displayed text
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addXxlSpriteIconButton(parent, action, type, key, caption)
-	Logging:trace("ElementGui:addXxlSpriteButton",action, type, key, caption)
-	return self:addStyledSpriteButton(parent, "helmod_xxl-button-icon", action, type, key, caption)
+function ElementGui.methods:addXxlSpriteIconButton(parent, action, type, key, caption, tooltip)
+	Logging:trace("ElementGui:addXxlSpriteButton",action, type, key, caption, tooltip)
+	return self:addStyledSpriteButton(parent, "helmod_xxl-button-icon", action, type, key, caption, tooltip)
 end
 
 -------------------------------------------------------------------------------
@@ -340,12 +353,13 @@ end
 -- @param #string type type of item
 -- @param #string key name of item
 -- @param #string caption displayed text
+-- @param #string tooltip displayed text
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addXxlSelectSpriteIconButton(parent, action, type, key, caption)
-	Logging:trace("ElementGui:addXxlSelectSpriteIconButton",action, type, key, caption)
-	return self:addStyledSpriteButton(parent, "helmod_xxl-select-button-icon", action, type, key, caption)
+function ElementGui.methods:addXxlSelectSpriteIconButton(parent, action, type, key, caption, tooltip)
+	Logging:trace("ElementGui:addXxlSelectSpriteIconButton",action, type, key, caption, tooltip)
+	return self:addStyledSpriteButton(parent, "helmod_xxl-select-button-icon", action, type, key, caption, tooltip)
 end
 
 -------------------------------------------------------------------------------
@@ -395,7 +409,7 @@ end
 -------------------------------------------------------------------------------
 -- Add a scroll pane
 --
--- @function [parent=#ElementGui] addGuiFlowV
+-- @function [parent=#ElementGui] addGuiScrollPane
 --
 -- @param #LuaGuiElement parent container for element
 -- @param #string key unique id
@@ -534,4 +548,33 @@ function ElementGui.methods:formatNumberKilo(value, suffix)
 	else
 		return math.ceil(value*10 / (1000*1000*1000))/10 .. " G"..suffix
 	end
+end
+
+-------------------------------------------------------------------------------
+-- Format the number
+--
+-- @function [parent=#ElementGui] formatRound
+--
+-- @param #number n the number
+--
+-- @return #number the formated number
+--
+function ElementGui.methods:formatRound(num, idp)
+  local mult = 10^(idp or 0)
+  return math.floor(num * mult + 0.5) / mult
+end
+
+
+-------------------------------------------------------------------------------
+-- Format the number
+--
+-- @function [parent=#ElementGui] formatPercent
+--
+-- @param #number n the number
+--
+-- @return #number the formated number
+--
+function ElementGui.methods:formatPercent(num)
+  local mult = 10^3
+  return math.floor(num * mult + 0.5) / 10
 end

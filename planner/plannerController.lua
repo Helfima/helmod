@@ -79,6 +79,13 @@ function PlannerController.methods:on_gui_click(event)
 			local player = game.players[event.player_index]
 			self:main(player)
 		end
+
+		if event.element.name == self:classname().."=CLOSE" then
+			local player = game.players[event.player_index]
+			if player.gui.left["helmod_planner_main"] ~= nil and player.gui.left["helmod_planner_main"].valid then
+				player.gui.left["helmod_planner_main"].destroy()
+			end
+		end
 	end
 end
 
@@ -125,6 +132,7 @@ function PlannerController.methods:main(player)
 		-- menu
 		Logging:debug("Create menu panel")
 		local settingsPanel = self:getMenuPanel(player)
+		self:addGuiButton(settingsPanel, self:classname().."=CLOSE", nil, "helmod_button-default", ({"helmod_button.close"}))
 		-- data
 		Logging:debug("Create data panel")
 		local dataPanel = self:getDataPanel(player)
@@ -157,10 +165,11 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerController.methods:getMainPanel(player)
-	if player.gui.left["helmod_planner_main"] ~= nil and player.gui.left["helmod_planner_main"].valid then
-		return player.gui.left["helmod_planner_main"]
+	local guiMain = player.gui.left
+	if guiMain["helmod_planner_main"] ~= nil and guiMain["helmod_planner_main"].valid then
+		return guiMain["helmod_planner_main"]
 	end
-	return self:addGuiFlowH(player.gui.left, "helmod_planner_main")
+	return self:addGuiFlowH(guiMain, "helmod_planner_main", "helmod_main-flow")
 end
 
 -------------------------------------------------------------------------------
@@ -236,4 +245,15 @@ end
 function PlannerController.methods:refreshDisplayData(player, item, item2, item3)
 	Logging:debug("PlannerController:refreshDisplayData():",player, item, item2, item3)
 	self.controllers["result"]:update(player, item, item2, item3)
+	if item == "other_speed_panel" then
+		local globalSettings = self.parent:getGlobal(player, "settings")
+		local controller = self.parent.controllers["speed-controller"]
+		if globalSettings.other_speed_panel == true then
+			controller:cleanController(player)
+			controller:bindController(player)
+		else
+			controller:cleanController(player)
+			game.speed = 1
+		end
+	end
 end

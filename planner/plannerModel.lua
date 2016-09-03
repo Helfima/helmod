@@ -253,6 +253,7 @@ function PlannerModel.methods:createRecipeModel(player, name, count)
 	recipeModel.count = count
 	recipeModel.active = true
 	recipeModel.energy = 0.5
+	recipeModel.production = 1
 	recipeModel.ingredients = {}
 	recipeModel.products = {}
 	recipeModel.factory = self:createFactoryModel(player)
@@ -591,6 +592,28 @@ function PlannerModel.methods:setFactory(player, blockId, key, name)
 end
 
 -------------------------------------------------------------------------------
+-- Update a recipe
+--
+-- @function [parent=#PlannerModel] updateRecipe
+--
+-- @param #LuaPlayer player
+-- @param #string blockId
+-- @param #string key recipe name
+-- @param #table options
+--
+function PlannerModel.methods:updateRecipe(player, blockId, key, options)
+	Logging:debug("PlannerModel:updateRecipe():",player, blockId, key, options)
+	local model = self:getModel(player)
+	if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
+		local recipe = model.blocks[blockId].recipes[key]
+		if options.production ~= nil then
+			recipe.production = options.production
+		end
+		model.needPrepare = true
+	end
+end
+
+-------------------------------------------------------------------------------
 -- Update a factory
 --
 -- @function [parent=#PlannerModel] updateFactory
@@ -873,113 +896,6 @@ end
 -------------------------------------------------------------------------------
 -- Update model
 --
--- @function [parent=#PlannerModel] update2
---
--- @param #LuaPlayer player
--- @param #boolean force
---
-function PlannerModel.methods:update2(player, force)
-	Logging:debug("PlannerModel:update():",player)
-
-	local model = self:getModel(player)
-	local globalSettings = self.player:getGlobal(player, "settings")
-	local defaultSettings = self.player:getDefaultSettings()
-
-	if force ~= nil and force == true then
-		model.needPrepare = true
-	end
-
-	local maxLoop = defaultSettings.model_loop_limit
-	if globalSettings.model_loop_limit ~= nil then
-		maxLoop = globalSettings.model_loop_limit
-	end
-
-
-	if model.needPrepare then
-		model.version = helmod.version
-		-- initialisation des donnees
-		model.temp = {}
-		-- initialisation ingredients pour les boucles
-		model.ingredients = {}
-		model.products = {}
-		model.index = 1
-
-		-- boucle recursive sur chaque recipe
-		for k, item in pairs(model.input) do
-			self:computePrepare(player, item, maxLoop)
-		end
-		model.recipes = model.temp
-
-		self:computeIngredients(player)
-
-		-- set the default factory and beacon for recipe
-		for k, recipe in pairs(model.recipes) do
-			local defaultFactory = self:getDefaultRecipeFactory(player, recipe.name)
-			if defaultFactory ~= nil then
-				self:setFactory(player, recipe.name, defaultFactory)
-			end
-			local defaultBeacon = self:getDefaultRecipeBeacon(player, recipe.name)
-			if defaultBeacon ~= nil then
-				self:setBeacon(player, recipe.name, defaultBeacon)
-			end
-		end
-
-		model.needPrepare = false
-	end
-	Logging:debug("PlannerModel:update():","Prepare OK")
-	-- initialise les totaux
-	self:ingredientsReset(player)
-	self:recipesReset(player)
-	Logging:debug("PlannerModel:update():","Reset OK")
-	model.temp = {}
-	Logging:debug("model:",model)
-	-- boucle recursive de calcul
-	for k, input in pairs(model.input) do
-		for index, product in pairs(input.products) do
-			self:computeProducts(player, product, product.count)
-		end
-	end
-
-	Logging:debug("PlannerModel:update():","Craft OK")
-	-- calcul factory
-	for k, recipe in pairs(model.recipes) do
-		self:computeFactory(player, recipe)
-	end
-
-	-- calcul minig-drill
-	for k, ingredient in pairs(model.ingredients) do
-		if ingredient.resource_category ~= nil or ingredient.name == "water" then
-			local extractor = {}
-			if ingredient.resource_category == "basic-solid" then
-				extractor.name = "electric-mining-drill"
-				extractor.speed = 0.5
-				extractor.energy = 90
-			end
-			if ingredient.name == "water" then
-				extractor.name = "offshore-pump"
-				extractor.speed = 10
-				extractor.energy = 0
-			end
-			if ingredient.name == "crude-oil" then
-				extractor.name = "pumpjack"
-				extractor.speed = 1
-				extractor.energy = 90
-			end
-			extractor.count = math.ceil(ingredient.count / (model.time * extractor.speed))
-			extractor.energy_total = extractor.energy * extractor.count
-			ingredient.extractor = extractor
-		end
-	end
-
-	Logging:debug("PlannerModel:update():","Factory compute OK")
-	-- genere un bilan
-	self:createSummary(player)
-	Logging:debug("PlannerModel:update():","Summary OK")
-end
-
--------------------------------------------------------------------------------
--- Update model
---
 -- @function [parent=#PlannerModel] update
 --
 -- @param #LuaPlayer player
@@ -1085,42 +1001,65 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 		-- calcul ordonnee sur les recipes du block
 		local ingredients = nil
 		for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
+			local mainProduct = nil
+			local production = 1
+			if recipe.efficiency ~= nil then production = recipe.production end
+			-- prepare les produits
 			for _, product in pairs(recipe.products) do
-				local pCount = 0
 				if ingredients ~= nil and ingredients[product.name] ~= nil then
-					product.count = ingredients[product.name]
+					product.count = ingredients[product.name]*production
 				end
-				pCount = product.count;
-				for k, ingredient in pairs(recipe.ingredients) do
-					local productNominal = product.amount
-					local productUsage = product.amount
-					-- calcul production module factory
-					for module, value in pairs(recipe.factory.modules) do
-						local bonus = self.player:getModuleBonus(module, "productivity")
-						productUsage = productUsage + productNominal * value * bonus
-					end
-					if recipe.beacon.active then
-						for module, value in pairs(recipe.beacon.modules) do
-							local bonus = self.player:getModuleBonus(module, "productivity")
-							productUsage = productUsage + productNominal * value * bonus * recipe.beacon.efficiency * recipe.beacon.combo
-						end
-					end
-					local nextCount = math.ceil(pCount*(ingredient.amount/productUsage))
-					ingredient.count = nextCount
-
-					if ingredients == nil then ingredients = {} end
-					if ingredients[ingredient.name] == nil then
-						ingredients[ingredient.name] = nextCount
-					else
-						ingredients[ingredient.name] = ingredients[ingredient.name] + nextCount
+			end
+			-- check produit pilotant
+			for _, product in pairs(recipe.products) do
+				if mainProduct == nil then
+					mainProduct = product
+				elseif product.count/product.amount > mainProduct.count/mainProduct.amount then
+					mainProduct = product
+				end
+			end
+			-- consolide les produits
+			if #recipe.products > 1 then
+				-- met a jour le produit
+				for index, product in pairs(recipe.products) do
+					if product.name ~= mainProduct.name then
+						product.count = (mainProduct.count*product.amount/mainProduct.amount)
 					end
 				end
 			end
 
+
+			local pCount = mainProduct.count;
+			for k, ingredient in pairs(recipe.ingredients) do
+				local productNominal = mainProduct.amount
+				local productUsage = mainProduct.amount
+				-- calcul production module factory
+				for module, value in pairs(recipe.factory.modules) do
+					local bonus = self.player:getModuleBonus(module, "productivity")
+					productUsage = productUsage + productNominal * value * bonus
+				end
+				if recipe.beacon.active then
+					for module, value in pairs(recipe.beacon.modules) do
+						local bonus = self.player:getModuleBonus(module, "productivity")
+						productUsage = productUsage + productNominal * value * bonus * recipe.beacon.efficiency * recipe.beacon.combo
+					end
+				end
+				local nextCount = math.ceil(pCount*(ingredient.amount/productUsage))
+				ingredient.count = nextCount
+
+				if ingredients == nil then ingredients = {} end
+				if ingredients[ingredient.name] == nil then
+					ingredients[ingredient.name] = nextCount
+				else
+					ingredients[ingredient.name] = ingredients[ingredient.name] + nextCount
+				end
+			end
+
+
 			self:computeFactory(player, recipe)
 
 			element.power = element.power + recipe.energy_total
-			
+
 			if type(recipe.factory.limit) == "number" and recipe.factory.limit > 0 then
 				local currentRatio = recipe.factory.limit/recipe.factory.count
 				if currentRatio < ratio then
@@ -1130,92 +1069,19 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 					element.count = math.ceil(recipe.factory.count/recipe.factory.limit)
 				end
 			end
+			
+			-- consomme les produits
+			for _, product in pairs(recipe.products) do
+				if ingredients ~= nil and ingredients[product.name] ~= nil then
+					ingredients[product.name] = ingredients[product.name] - product.count
+				end
+			end
 		end
-		
+
 		-- calcul ratio
 		for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
 			recipe.factory.limit_count = math.ceil(recipe.factory.count*ratio)
 			if ratioRecipe ~= nil and ratioRecipe == recipe.index then recipe.factory.limit_count = recipe.factory.limit end
-		end
-	end
-end
-
-
--------------------------------------------------------------------------------
--- Prepare model
---
--- @function [parent=#PlannerModel] computePrepare
---
--- @param #LuaPlayer player
--- @param #ModelRecipe recipe
--- @param #number maxLoop
--- @param #number level
--- @param #string path
---
-function PlannerModel.methods:computePrepare(player, element, maxLoop, level, path)
-	Logging:debug("PlannerModel:computePrepare():",player, element, maxLoop, level, path)
-	local model = self:getModel(player)
-	-- stop la boucle pour les recherche trop longue
-	if model.index > maxLoop then return end
-
-	if path == nil then path = "_" end
-
-	if level == nil then
-		level = 1
-	end
-	-- recherche le recipe par le nom
-	local recipes = self.player:searchRecipe(player, element.name)
-	Logging:debug("PlannerModel:computePrepare():number recipes=",#recipes)
-	if recipes ~= nil then
-		Logging:debug("model.temp:",model.temp)
-		for _, recipe in pairs(recipes) do
-			-- ok if recipe is active
-			if self:isDefaultActiveRecipe(player, recipe.name) then
-				local ModelRecipe = nil
-				if model.recipes[recipe.name] ~= nil then
-					-- le recipe existe deja on le copie
-					ModelRecipe = model.recipes[recipe.name]
-				elseif model.temp[recipe.name] == nil then
-					-- le recipe n'existe pas on le cree
-					ModelRecipe = self:createRecipeModel(player, recipe.name)
-					ModelRecipe.energy = recipe.energy
-					ModelRecipe.category = recipe.category
-					ModelRecipe.group = recipe.group.name
-					ModelRecipe.ingredients = recipe.ingredients
-					ModelRecipe.products = recipe.products
-					ModelRecipe.index = model.index
-				else
-					ModelRecipe = model.temp[recipe.name]
-				end
-
-				-- incrementation de l'index pour pousser au plus loin le recipe
-				model.index = model.index + 1
-				ModelRecipe.level = level
-				--ModelRecipe.index = model.index
-				Logging:debug("modelRecipe reindex:",ModelRecipe)
-
-				-- stop la boucle pour les recherche trop longue
-				if model.index > maxLoop then break end
-
-				model.temp[recipe.name] = ModelRecipe
-				Logging:debug("modelRecipe:",ModelRecipe)
-				-- controle dans le chemin qu'on ne boucle pas a l'infini
-				-- chaque noeud de la branche creer un chemin different
-				if not(string.find(path, "_"..ModelRecipe.id.."_")) then
-
-					path = path..ModelRecipe.id.."_"
-
-					if ModelRecipe.ingredients ~= nil then
-						Logging:debug("ingredients:",ModelRecipe.ingredients)
-						for k, ingredient in pairs(ModelRecipe.ingredients) do
-							local entity = self.player:getEntityPrototype(ingredient.name)
-							if entity == nil or entity.resource_category == nil then
-								self:computePrepare(player, ingredient, maxLoop, level + 1, path)
-							end
-						end
-					end
-				end
-			end
 		end
 	end
 end
@@ -1296,96 +1162,7 @@ function PlannerModel.methods:getRecipeByProduct(player, element)
 	return recipes
 end
 
--------------------------------------------------------------------------------
--- Compute the model for recipes
---
--- @function [parent=#PlannerModel] computeProducts
---
--- @param #LuaPlayer player
--- @param #ModelRecipe recipe
--- @param #number count number of item
--- @param #string path path of the recursive run, necessary for no infite loop
---
-function PlannerModel.methods:computeProducts(player, element, count, path)
-	Logging:debug("PlannerModel:computeRecipes():",element, path)
-	local model = self:getModel(player)
 
-	if path == nil then path = "_" end
-	local recipes = self:getRecipeByProduct(player, element)
-	local pCount = count;
-	Logging:trace("rawlen(recipes)=",rawlen(recipes))
-	if rawlen(recipes) > 0 then
-		pCount = math.ceil(count/rawlen(recipes))
-	end
-
-	for key, recipe in pairs(recipes) do
-		Logging:debug("recipe.index=",recipe.index)
-		Logging:debug("recipe=",recipe)
-		if not(string.find(path, "_"..recipe.index.."_")) then
-			local currentProduct = nil
-			if #recipe.products > 1 then
-				-- met a jour le produit
-				local productCount = 0
-				-- precalul
-				for index, product in pairs(recipe.products) do
-					if product.name == element.name then
-						productCount = product.count + pCount
-						currentProduct = product
-					end
-				end
-				-- check les autres produits
-				local check = false
-				for index, product in pairs(recipe.products) do
-					if product.name ~= element.name then
-						if product.count < productCount*product.amount/currentProduct.amount then check = true end
-					end
-				end
-				-- applique les valeurs si ok
-				if check == true then
-					for index, product in pairs(recipe.products) do
-						if product.name == element.name then
-							product.count = productCount
-						else
-							product.count = productCount*product.amount/currentProduct.amount
-						end
-					end
-				end
-			else
-				for index, product in pairs(recipe.products) do
-					if product.name == element.name then
-						product.count = product.count + pCount
-						currentProduct = product
-					end
-				end
-			end
-
-			path = path..recipe.index.."_"
-
-			for k, ingredient in pairs(recipe.ingredients) do
-				local productNominal = currentProduct.amount
-				local productUsage = currentProduct.amount
-				-- calcul production module factory
-				for module, value in pairs(recipe.factory.modules) do
-					local bonus = self.player:getModuleBonus(module, "productivity")
-					productUsage = productUsage + productNominal * value * bonus
-				end
-				if recipe.beacon.active then
-					for module, value in pairs(recipe.beacon.modules) do
-						local bonus = self.player:getModuleBonus(module, "productivity")
-						productUsage = productUsage + productNominal * value * bonus * recipe.beacon.efficiency * recipe.beacon.combo
-					end
-				end
-				local nextCount = math.ceil(pCount*(ingredient.amount/productUsage))
-				ingredient.count = ingredient.count + nextCount
-				if model.ingredients[ingredient.name] == nil or model.ingredients[ingredient.name].count == nil then
-					Logging:error("ingredient not found=", ingredient, "_", model.ingredients)
-				end
-				model.ingredients[ingredient.name].count = model.ingredients[ingredient.name].count + nextCount
-				self:computeProducts(player, ingredient, nextCount, path)
-			end
-		end
-	end
-end
 
 -------------------------------------------------------------------------------
 -- Compute energy, speed, number of factory for recipes

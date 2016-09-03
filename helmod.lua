@@ -15,13 +15,13 @@ helmod = {}
 -- erro=1
 -- nothing=0
 
-Logging:new(3)
+Logging:new(0)
 Logging.console = false
 
 --===========================
 function helmod:on_init(event)
 	self.name = "helmod"
-	self.version = "0.2.3"
+	self.version = "0.2.7"
 	self.loaded = false;
 
 	self.playerController = PlayerController:new()

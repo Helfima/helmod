@@ -60,10 +60,12 @@ end
 function PlannerRecipeEdition.methods:on_open(player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 	local close = true
+	model.moduleListRefresh = false
 	if model.guiRecipeLast == nil or model.guiRecipeLast ~= item..item2 then
 		close = false
 		model.factoryGroupSelected = nil
 		model.beaconGroupSelected = nil
+		model.moduleListRefresh = true
 	end
 	model.guiRecipeLast = item..item2
 	return close
@@ -84,6 +86,7 @@ end
 function PlannerRecipeEdition.methods:on_close(player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 	model.guiRecipeLast = nil
+	model.moduleListRefresh = false
 end
 
 -------------------------------------------------------------------------------
@@ -351,6 +354,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeEdition.methods:after_open(player, element, action, item, item2, item3)
+	Logging:debug("PlannerRecipeEdition:after_open():",player, element, action, item, item2, item3)
 	self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
 	self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
 	self.parent:send_event(player, "HMPlannerSettings", "CLOSE")
@@ -421,27 +425,34 @@ function PlannerRecipeEdition.methods:updateRecipeInfo(player, element, action, 
 	local infoPanel = self:getRecipeInfoPanel(player)
 	local model = self.model:getModel(player)
 	local default = self.model:getDefault(player)
-	local recipe = self.player:getRecipe(player, item2)
+	local _recipe = self.player:getRecipe(player, item2)
 
-	if recipe ~= nil then
-		Logging:debug("PlannerRecipeEdition:updateRecipeInfo():recipe=",recipe)
-		for k,guiName in pairs(infoPanel.children_names) do
-			infoPanel[guiName].destroy()
+	local model = self.model:getModel(player)
+	if  model.blocks[item] ~= nil then
+		local recipe = model.blocks[item].recipes[item2]
+		if recipe ~= nil then
+			Logging:debug("PlannerRecipeEdition:updateRecipeInfo():recipe=",recipe)
+			for k,guiName in pairs(infoPanel.children_names) do
+				infoPanel[guiName].destroy()
+			end
+
+			local tablePanel = self:addGuiTable(infoPanel,"table-input",2)
+			self:addSpriteIconButton(tablePanel, "recipe", "recipe", recipe.name)
+			if _recipe == nil then
+				self:addGuiLabel(tablePanel, "label", recipe.name)
+			else
+				self:addGuiLabel(tablePanel, "label", _recipe.localised_name)
+			end
+
+
+			self:addGuiLabel(tablePanel, "label-energy", ({"helmod_common.energy"}))
+			self:addGuiLabel(tablePanel, "energy", recipe.energy)
+
+			self:addGuiLabel(tablePanel, "label-production", ({"helmod_common.production"}))
+			self:addGuiText(tablePanel, "production", recipe.production, "helmod_textfield")
+
+			self:addGuiButton(tablePanel, self:classname().."=recipe-update=ID="..item.."=", recipe.name, "helmod_button-default", ({"helmod_button.update"}))		--
 		end
-
-		local tablePanel = self:addGuiTable(infoPanel,"table-info",2)
-		self:addSpriteIconButton(tablePanel, "recipe", "recipe", recipe.name)
-		self:addGuiLabel(tablePanel, "label", recipe.name)
-
-		--		self:addGuiLabel(tablePanel, "label-active", "Active")
-		--
-		--		local actived = true
-		--		if model.blocks[item].recipes[item2] ~= nil then
-		--			actived = model.blocks[item].recipes[item2].active
-		--		elseif default.recipes[item] ~= nil then
-		--			actived = default.recipes[item].active
-		--		end
-		--		self:addGuiCheckbox(tablePanel, self:classname().."=recipe-active=ID="..item.."="..recipe.name, actived)
 	end
 end
 
@@ -458,6 +469,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeEdition.methods:updateRecipeIngredients(player, element, action, item, item2, item3)
+	Logging:debug("PlannerRecipeEdition:updateRecipeIngredients():",player, element, action, item, item2, item3)
 	local ingredientsPanel = self:getRecipeIngredientsPanel(player)
 	local model = self.model:getModel(player)
 	local recipe = self.player:getRecipe(player, item2)
@@ -488,6 +500,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeEdition.methods:updateRecipeProducts(player, element, action, item, item2, item3)
+	Logging:debug("PlannerRecipeEdition:updateRecipeProducts():",player, element, action, item, item2, item3)
 	local productsPanel = self:getRecipeProductsPanel(player)
 	local model = self.model:getModel(player)
 	local recipe = self.player:getRecipe(player, item2)
@@ -518,12 +531,14 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeEdition.methods:updateFactoryInfo(player, element, action, item, item2, item3)
+	Logging:debug("PlannerRecipeEdition:updateFactoryInfo():",player, element, action, item, item2, item3)
 	local infoPanel = self:getFactoryInfoPanel(player)
 	local model = self.model:getModel(player)
 	if  model.blocks[item] ~= nil then
 		local recipe = model.blocks[item].recipes[item2]
 		if recipe ~= nil then
 			local factory = recipe.factory
+			local _factory = self.player:getItemPrototype(factory.name)
 
 			for k,guiName in pairs(infoPanel.children_names) do
 				infoPanel[guiName].destroy()
@@ -531,7 +546,11 @@ function PlannerRecipeEdition.methods:updateFactoryInfo(player, element, action,
 
 			local headerPanel = self:addGuiTable(infoPanel,"table-header",2)
 			self:addSpriteIconButton(headerPanel, "icon", self.player:getIconType(factory), factory.name)
-			self:addGuiLabel(headerPanel, "label", factory.name)
+			if _factory == nil then
+				self:addGuiLabel(headerPanel, "label", factory.name)
+			else
+				self:addGuiLabel(headerPanel, "label", _factory.localised_name)
+			end
 
 			local inputPanel = self:addGuiTable(infoPanel,"table-input",2)
 
@@ -571,15 +590,24 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeEdition.methods:updateFactoryModulesSelector(player, element, action, item, item2, item3)
+	Logging:debug("PlannerRecipeEdition:updateFactoryModulesSelector():",player, element, action, item, item2, item3)
 	local selectorPanel = self:getFactoryModulesSelectorPanel(player)
+	local model = self.model:getModel(player)
+	local recipe = model.blocks[item].recipes[item2]
+
+	if selectorPanel["modules"] ~= nil and selectorPanel["modules"].valid and model.moduleListRefresh == true then
+		selectorPanel["modules"].destroy()
+	end
+
 	if selectorPanel["modules"] == nil then
-		local model = self.model:getModel(player)
-
-		local recipe = model.blocks[item].recipes[item2]
-
 		local tableModulesPanel = self:addGuiTable(selectorPanel,"modules",4)
 		for k, module in pairs(self.player:getModules()) do
-			self:addSpriteIconButton(tableModulesPanel, self:classname().."=factory-module-add=ID="..item.."="..recipe.name.."=", "item", module.name)
+			local consumption = self:formatPercent(self.player:getModuleBonus(module.name, "consumption"))
+			local speed = self:formatPercent(self.player:getModuleBonus(module.name, "speed"))
+			local productivity = self:formatPercent(self.player:getModuleBonus(module.name, "productivity"))
+			local pollution = self:formatPercent(self.player:getModuleBonus(module.name, "pollution"))
+			local tooltip = ({"tooltip.module-description" , module.localised_name, consumption, speed, productivity, pollution})
+			self:addSpriteIconButton(tableModulesPanel, self:classname().."=factory-module-add=ID="..item.."="..recipe.name.."=", "item", module.name, module.name, tooltip)
 		end
 	end
 end
@@ -597,6 +625,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeEdition.methods:updateFactoryActivedModules(player, element, action, item, item2, item3)
+	Logging:debug("PlannerRecipeEdition:updateFactoryActivedModules():",player, element, action, item, item2, item3)
 	local activedModulesPanel = self:getFactoryActivedModulesPanel(player)
 	local model = self.model:getModel(player)
 
@@ -610,8 +639,17 @@ function PlannerRecipeEdition.methods:updateFactoryActivedModules(player, elemen
 	-- actived modules panel
 	local currentTableModulesPanel = self:addGuiTable(activedModulesPanel,"modules",4,"helmod_recipe-modules")
 	for module, count in pairs(factory.modules) do
+		local tooltip = module
+		local _module = self.player:getItemPrototype(module)
+		if _module ~= nil then
+			local consumption = self:formatPercent(self.player:getModuleBonus(_module.name, "consumption"))
+			local speed = self:formatPercent(self.player:getModuleBonus(_module.name, "speed"))
+			local productivity = self:formatPercent(self.player:getModuleBonus(_module.name, "productivity"))
+			local pollution = self:formatPercent(self.player:getModuleBonus(_module.name, "pollution"))
+			tooltip = ({"tooltip.module-description" , _module.localised_name, consumption, speed, productivity, pollution})
+		end
 		for i = 1, count, 1 do
-			self:addSpriteIconButton(currentTableModulesPanel, self:classname().."=factory-module-remove=ID="..item.."="..recipe.name.."="..module.."="..i, "item", module)
+			self:addSpriteIconButton(currentTableModulesPanel, self:classname().."=factory-module-remove=ID="..item.."="..recipe.name.."="..module.."="..i, "item", module, module, tooltip)
 		end
 	end
 end
@@ -653,7 +691,7 @@ function PlannerRecipeEdition.methods:updateFactorySelector(player, element, act
 		-- set le groupe
 		if model.factoryGroupSelected == nil then model.factoryGroupSelected = group end
 		-- ajoute les icons de groupe
-		local action = self:addItemButton(groupsPanel, self:classname().."=factory-group=ID="..item.."="..recipe.name.."=", group)
+		local action = self:addGuiButton(groupsPanel, self:classname().."=factory-group=ID="..item.."="..recipe.name.."=", group, "helmod_button-default", group)
 	end
 
 	if selectorPanel["scroll-factory"] ~= nil and selectorPanel["scroll-factory"].valid then
@@ -683,11 +721,13 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeEdition.methods:updateBeaconInfo(player, element, action, item, item2, item3)
+	Logging:debug("PlannerRecipeEdition:updateBeaconInfo():",player, element, action, item, item2, item3)
 	local infoPanel = self:getBeaconInfoPanel(player)
 	local model = self.model:getModel(player)
 	local recipe = model.blocks[item].recipes[item2]
 	if recipe ~= nil then
 		local beacon = recipe.beacon
+		local _beacon = self.player:getItemPrototype(beacon.name)
 
 		for k,guiName in pairs(infoPanel.children_names) do
 			infoPanel[guiName].destroy()
@@ -695,7 +735,11 @@ function PlannerRecipeEdition.methods:updateBeaconInfo(player, element, action, 
 
 		local headerPanel = self:addGuiTable(infoPanel,"table-header",2)
 		self:addSpriteIconButton(headerPanel, "icon", self.player:getIconType(beacon), beacon.name)
-		self:addGuiLabel(headerPanel, "label", beacon.name)
+		if _beacon == nil then
+			self:addGuiLabel(headerPanel, "label", beacon.name)
+		else
+			self:addGuiLabel(headerPanel, "label", _beacon.localised_name)
+		end
 
 		local inputPanel = self:addGuiTable(infoPanel,"table-input",2)
 
@@ -731,6 +775,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeEdition.methods:updateBeaconActivedModules(player, element, action, item, item2, item3)
+	Logging:debug("PlannerRecipeEdition:updateBeaconActivedModules():",player, element, action, item, item2, item3)
 	local activedModulesPanel = self:getBeaconActivedModulesPanel(player)
 	local model = self.model:getModel(player)
 
@@ -744,8 +789,18 @@ function PlannerRecipeEdition.methods:updateBeaconActivedModules(player, element
 	-- actived modules panel
 	local currentTableModulesPanel = self:addGuiTable(activedModulesPanel,"modules",4, "helmod_recipe-modules")
 	for module, count in pairs(beacon.modules) do
+		local tooltip = module
+		local _module = self.player:getItemPrototype(module)
+		if _module ~= nil then
+			local consumption = self:formatPercent(self.player:getModuleBonus(_module.name, "consumption"))
+			local speed = self:formatPercent(self.player:getModuleBonus(_module.name, "speed"))
+			local productivity = self:formatPercent(self.player:getModuleBonus(_module.name, "productivity"))
+			local pollution = self:formatPercent(self.player:getModuleBonus(_module.name, "pollution"))
+			tooltip = ({"tooltip.module-description" , _module.localised_name, consumption, speed, productivity, pollution})
+		end
+		
 		for i = 1, count, 1 do
-			self:addSpriteIconButton(currentTableModulesPanel, self:classname().."=beacon-module-remove=ID="..item.."="..recipe.name.."="..module.."="..i, "item", module)
+			self:addSpriteIconButton(currentTableModulesPanel, self:classname().."=beacon-module-remove=ID="..item.."="..recipe.name.."="..module.."="..i, "item", module, module, tooltip)
 		end
 	end
 end
@@ -763,6 +818,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeEdition.methods:updateBeaconModulesSelector(player, element, action, item, item2, item3)
+	Logging:debug("PlannerRecipeEdition:updateBeaconModulesSelector():",player, element, action, item, item2, item3)
 	local selectorPanel = self:getBeaconModulesSelectorPanel(player)
 	if selectorPanel["modules"] == nil then
 		local model = self.model:getModel(player)
@@ -771,7 +827,12 @@ function PlannerRecipeEdition.methods:updateBeaconModulesSelector(player, elemen
 
 		local tableModulesPanel = self:addGuiTable(selectorPanel,"modules",4)
 		for k, module in pairs(self.player:getModules()) do
-			self:addSpriteIconButton(tableModulesPanel, self:classname().."=beacon-module-add=ID="..item.."="..recipe.name.."=", "item", module.name)
+			local consumption = self:formatPercent(self.player:getModuleBonus(module.name, "consumption"))
+			local speed = self:formatPercent(self.player:getModuleBonus(module.name, "speed"))
+			local productivity = self:formatPercent(self.player:getModuleBonus(module.name, "productivity"))
+			local pollution = self:formatPercent(self.player:getModuleBonus(module.name, "pollution"))
+			local tooltip = ({"tooltip.module-description" , module.localised_name, consumption, speed, productivity, pollution})
+			self:addSpriteIconButton(tableModulesPanel, self:classname().."=beacon-module-add=ID="..item.."="..recipe.name.."=", "item", module.name, module.name, tooltip)
 		end
 	end
 end
@@ -789,6 +850,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeEdition.methods:updateBeaconSelector(player, element, action, item, item2, item3)
+	Logging:debug("PlannerRecipeEdition:updateBeaconSelector():",player, element, action, item, item2, item3)
 	local globalSettings = self.player:getGlobal(player, "settings")
 	local selectorPanel = self:getBeaconSelectorPanel(player)
 	local model = self.model:getModel(player)
@@ -808,7 +870,7 @@ function PlannerRecipeEdition.methods:updateBeaconSelector(player, element, acti
 		-- set le groupe
 		if model.beaconGroupSelected == nil then model.beaconGroupSelected = group end
 		-- ajoute les icons de groupe
-		local action = self:addItemButton(groupsPanel, self:classname().."=beacon-group=ID="..item.."="..recipe.name.."=", group)
+		local action = self:addGuiButton(groupsPanel, self:classname().."=beacon-group=ID="..item.."="..recipe.name.."=", group, "helmod_button-default", group)
 	end
 
 	if selectorPanel["scroll-beacon"] ~= nil and selectorPanel["scroll-beacon"].valid then
@@ -840,6 +902,20 @@ end
 function PlannerRecipeEdition.methods:on_event(player, element, action, item, item2, item3)
 	Logging:debug("PlannerRecipeEdition:on_event():",player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
+
+	if action == "recipe-update" then
+		local inputPanel = self:getRecipeInfoPanel(player)["table-input"]
+		local options = {}
+
+		if inputPanel["production"] ~= nil then
+			options["production"] = self:getInputNumber(inputPanel["production"])
+		end
+
+		self.model:updateRecipe(player, item, item2, options)
+		self.model:update(player)
+		self:updateRecipeInfo(player, element, action, item, item2, item3)
+		self.parent:refreshDisplayData(player, nil, item, item2)
+	end
 
 	if action == "factory-group" then
 		model.factoryGroupSelected = item3

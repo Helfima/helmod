@@ -128,6 +128,21 @@ function PlannerSettings.methods:getModelSettingsPanel(player)
 end
 
 -------------------------------------------------------------------------------
+-- Get or create other settings panel
+--
+-- @function [parent=#PlannerSettings] getOtherSettingsPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerSettings.methods:getOtherSettingsPanel(player)
+	local panel = self:getPanel(player)
+	if panel["other-settings"] ~= nil and panel["other-settings"].valid then
+		return panel["other-settings"]
+	end
+	return self:addGuiFrameV(panel, "other-settings", "helmod_module-table-frame", ({"helmod_settings-panel.other-section"}))
+end
+
+-------------------------------------------------------------------------------
 -- Build the parent panel
 --
 -- @function [parent=#PlannerSettings] buildPanel
@@ -172,19 +187,19 @@ function PlannerSettings.methods:on_event(player, element, action, item, item2, 
 		model.time = tonumber(item)
 		self.model:update(player)
 		self:update(player)
-		self.parent:refreshDisplayData(player)
+		self.parent:refreshDisplayData(player, item, item2, item3)
 	end
 
 	if action == "change-boolean-settings" then
 		if globalSettings[item] == nil then globalSettings[item] = defaultSettings[item] end
 		globalSettings[item] = not(globalSettings[item])
-		self.parent:refreshDisplayData(player)
+		self.parent:refreshDisplayData(player, item, item2, item3)
 	end
 
 	if action == "change-number-settings" then
 		local panel = self:getPanel(player)[item]["settings"]
 		globalSettings[item2] = self:getInputNumber(panel[item2])
-		self.parent:refreshDisplayData(player)
+		self.parent:refreshDisplayData(player, item, item2, item3)
 	end
 end
 
@@ -209,6 +224,7 @@ function PlannerSettings.methods:after_open(player, element, action, item, item2
 	self:updateAboutSettings(player, element, action, item, item2, item3)
 	self:updateDataSettings(player, element, action, item, item2, item3)
 	self:updateModelSettings(player, element, action, item, item2, item3)
+	self:updateOtherSettings(player, element, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -309,16 +325,6 @@ function PlannerSettings.methods:updateDataSettings(player, element, action, ite
 	self:addGuiLabel(dataSettingsTable, self:classname().."=display_data_col_index", ({"helmod_settings-panel.data-col-index"}))
 	self:addGuiCheckbox(dataSettingsTable, self:classname().."=change-boolean-settings=ID=display_data_col_index", display_data_col_index)
 
-	--	local display_data_col_level = defaultSettings.display_data_col_level
-	--	if globalSettings.display_data_col_level ~= nil then display_data_col_level = globalSettings.display_data_col_level end
-	--	self:addGuiLabel(dataSettingsTable, self:classname().."=display_data_col_level", ({"helmod_settings-panel.data-col-level"}))
-	--	self:addGuiCheckbox(dataSettingsTable, self:classname().."=change-boolean-settings=ID=display_data_col_level", display_data_col_level)
-	--
-	--	local display_data_col_weight = defaultSettings.display_data_col_weight
-	--	if globalSettings.display_data_col_weight ~= nil then display_data_col_weight = globalSettings.display_data_col_weight end
-	--	self:addGuiLabel(dataSettingsTable, self:classname().."=display_data_col_weight", ({"helmod_settings-panel.data-col-weight"}))
-	--	self:addGuiCheckbox(dataSettingsTable, self:classname().."=change-boolean-settings=ID=display_data_col_weight", display_data_col_weight)
-	--
 end
 
 -------------------------------------------------------------------------------
@@ -359,21 +365,37 @@ function PlannerSettings.methods:updateModelSettings(player, element, action, it
 	self:addGuiCheckbox(modelSettingsTable, self:classname().."=change-boolean-settings=ID=model_filter_beacon", model_filter_beacon)
 	self:addGuiLabel(modelSettingsTable, self:classname().."=blank=ID=model_filter_beacon", "")
 
---	-- model_auto_compute
---	self:addGuiLabel(modelSettingsTable, self:classname().."=model_auto_compute", ({"helmod_settings-panel.model-auto-compute"}))
---
---	local model_auto_compute = defaultSettings.model_auto_compute
---	if globalSettings.model_auto_compute ~= nil then model_auto_compute = globalSettings.model_auto_compute end
---	self:addGuiCheckbox(modelSettingsTable, self:classname().."=change-boolean-settings=ID=model_auto_compute", model_auto_compute)
---	self:addGuiLabel(modelSettingsTable, self:classname().."=change-number-settings=ID=model-settings", "")
---
---	--model_loop_limit_label
---	self:addGuiLabel(modelSettingsTable, self:classname().."=model_loop_limit_label", ({"helmod_settings-panel.model-loop-limit"}))
---
---	local model_loop_limit = defaultSettings.model_loop_limit
---	if globalSettings.model_loop_limit ~= nil then model_loop_limit = globalSettings.model_loop_limit end
---	self:addGuiText(modelSettingsTable, "model_loop_limit", model_loop_limit)
---	self:addGuiButton(modelSettingsTable, self:classname().."=change-number-settings=ID=model-settings=", "model_loop_limit", "helmod_button-default", ({"helmod_button.apply"}))
+end
 
+-------------------------------------------------------------------------------
+-- Update other settings
+--
+-- @function [parent=#PlannerSettings] updateOtherSettings
+--
+-- @param #LuaPlayer player
+-- @param #LuaGuiElement element button
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function PlannerSettings.methods:updateOtherSettings(player, element, action, item, item2, item3)
+	Logging:debug("PlannerSettings:updateOtherSettings():",player, element, action, item, item2, item3)
+
+	local globalSettings = self.player:getGlobal(player, "settings")
+	local defaultSettings = self.player:getDefaultSettings()
+
+	local otherSettingsPanel = self:getOtherSettingsPanel(player)
+
+	local otherSettingsTable = self:addGuiTable(otherSettingsPanel, "settings", 3)
+
+	-- other_speed_panel
+	self:addGuiLabel(otherSettingsTable, self:classname().."=other_speed_panel", ({"helmod_settings-panel.other-speed-panel"}))
+	
+	local other_speed_panel = defaultSettings.other_speed_panel
+	if globalSettings.other_speed_panel ~= nil then other_speed_panel = globalSettings.other_speed_panel end
+	self:addGuiCheckbox(otherSettingsTable, self:classname().."=change-boolean-settings=ID=other_speed_panel", other_speed_panel)
+	self:addGuiLabel(otherSettingsTable, self:classname().."=blank=ID=other_speed_panel", "")
 
 end
+

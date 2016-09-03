@@ -189,6 +189,7 @@ function PlannerResult.methods:on_event(player, element, action, item, item2, it
 		model.currentTab = item
 		model.page = 0
 		self:update(player, item, item2, item3)
+		self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
 	end
 
 	if action == "change-page" then
@@ -214,6 +215,9 @@ function PlannerResult.methods:on_event(player, element, action, item, item2, it
 				self.parent.model:update(player)
 				model.currentTab = self.PRODUCTION_BLOCK_TAB
 				self:update(player, self.PRODUCTION_BLOCK_TAB, productionBlock.id, recipes[1].name)
+			else
+				model.currentTab = self.PRODUCTION_BLOCK_TAB
+				self.parent:send_event(player, "HMPlannerRecipeSelector", "OPEN", "new")
 			end
 		end
 	end
@@ -251,6 +255,8 @@ function PlannerResult.methods:on_event(player, element, action, item, item2, it
 				local productionBlock = self.parent.model:addRecipeIntoProductionBlock(player, item, recipes[1].name)
 				self.parent.model:update(player)
 				self:update(player, self.PRODUCTION_LINE_TAB, productionBlock.id, recipes[1].name)
+			else
+				self.parent:send_event(player, "HMPlannerRecipeSelector", "OPEN", item)
 			end
 		end
 	end
@@ -463,7 +469,7 @@ function PlannerResult.methods:updateProductionBlock(player, item, item2, item3)
 			for r, product in pairs(element.products) do
 				-- product = {type="item", name="steel-plate", amount=8}
 				local cell = self:addGuiFlowH(outputTable,"cell_"..product.name)
-				self:addSelectSpriteIconButton(cell, "HMPlannerProductEdition=OPEN=ID="..element.id.."=", self.player:getIconType(product), product.name, "X"..product.amount)
+				self:addSelectSpriteIconButton(cell, "HMPlannerProductEdition=OPEN=ID="..element.id.."=", self.player:getIconType(product), product.name, "X"..product.amount, nil, ({"tooltip.edit-product"}))
 				self:addGuiLabel(cell, product.name, self:formatNumber(product.count), "helmod_label-right-60")
 			end
 		end
@@ -818,11 +824,11 @@ function PlannerResult.methods:addProductionBlockRow(player, guiTable, blockId, 
 	-- col action
 	local guiAction = self:addGuiFlowH(guiTable,"action"..recipe.name)
 	if recipe.index ~= 0 then
-		self:addGuiButton(guiAction, self:classname().."=production-recipe-remove=ID="..blockId.."=", recipe.name, "helmod_button-default", ({"helmod_result-panel.row-button-delete"}))
-		self:addGuiButton(guiAction, self:classname().."=production-recipe-down=ID="..blockId.."=", recipe.name, "helmod_button-default", ({"helmod_result-panel.row-button-down"}))
+		self:addGuiButton(guiAction, self:classname().."=production-recipe-remove=ID="..blockId.."=", recipe.name, "helmod_button-default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
+		self:addGuiButton(guiAction, self:classname().."=production-recipe-down=ID="..blockId.."=", recipe.name, "helmod_button-default", ({"helmod_result-panel.row-button-down"}), ({"tooltip.down-element"}))
 	end
 	if recipe.index > 1 then
-		self:addGuiButton(guiAction, self:classname().."=production-recipe-up=ID="..blockId.."=", recipe.name, "helmod_button-default", ({"helmod_result-panel.row-button-up"}))
+		self:addGuiButton(guiAction, self:classname().."=production-recipe-up=ID="..blockId.."=", recipe.name, "helmod_button-default", ({"helmod_result-panel.row-button-up"}), ({"tooltip.up-element"}))
 	end
 	-- col index
 	if globalSettings.display_data_col_index then
@@ -851,12 +857,12 @@ function PlannerResult.methods:addProductionBlockRow(player, guiTable, blockId, 
 	end
 	-- col recipe
 	local guiRecipe = self:addGuiFlowH(guiTable,"recipe"..recipe.name)
-	self:addSelectSpriteIconButton(guiRecipe, "HMPlannerRecipeEdition=OPEN=ID="..blockId.."=", self.player:getIconType(recipe), recipe.name)
+	self:addSelectSpriteIconButton(guiRecipe, "HMPlannerRecipeEdition=OPEN=ID="..blockId.."=", self.player:getIconType(recipe), recipe.name, recipe.name, nil, ({"tooltip.edit-recipe"}))
 
 	-- col factory
 	local guiFactory = self:addGuiFlowH(guiTable,"factory"..recipe.name)
 	local factory = recipe.factory
-	self:addSelectSpriteIconButton(guiFactory, "HMPlannerRecipeEdition=OPEN=ID="..blockId.."="..recipe.name.."=", self.player:getIconType(factory), factory.name)
+	self:addSelectSpriteIconButton(guiFactory, "HMPlannerRecipeEdition=OPEN=ID="..blockId.."="..recipe.name.."=", self.player:getIconType(factory), factory.name, factory.name, nil, ({"tooltip.edit-recipe"}))
 	local guiFactoryModule = self:addGuiTable(guiFactory,"factory-modules"..recipe.name, 2, "helmod_factory-modules")
 	-- modules
 	for name, count in pairs(factory.modules) do
@@ -870,7 +876,7 @@ function PlannerResult.methods:addProductionBlockRow(player, guiTable, blockId, 
 	-- col beacon
 	local guiBeacon = self:addGuiFlowH(guiTable,"beacon"..recipe.name)
 	local beacon = recipe.beacon
-	self:addSelectSpriteIconButton(guiBeacon, "HMPlannerRecipeEdition=OPEN=ID="..blockId.."="..recipe.name.."=", self.player:getIconType(beacon), beacon.name)
+	self:addSelectSpriteIconButton(guiBeacon, "HMPlannerRecipeEdition=OPEN=ID="..blockId.."="..recipe.name.."=", self.player:getIconType(beacon), beacon.name, beacon.name, nil, ({"tooltip.edit-recipe"}))
 	local guiBeaconModule = self:addGuiTable(guiBeacon,"beacon-modules"..recipe.name, 1, "helmod_beacon-modules")
 	-- modules
 	for name, count in pairs(beacon.modules) do
@@ -902,7 +908,7 @@ function PlannerResult.methods:addProductionBlockRow(player, guiTable, blockId, 
 		for r, ingredient in pairs(recipe.ingredients) do
 			local cell = self:addGuiFlowH(tIngredient,"cell_"..ingredient.name)
 			-- ingredient = {type="item", name="steel-plate", amount=8}
-			self:addSelectSpriteIconButton(cell, self:classname().."=production-recipe-add=ID="..blockId.."="..recipe.name.."=", self.player:getIconType(ingredient), ingredient.name, "X"..ingredient.amount, "yellow")
+			self:addSelectSpriteIconButton(cell, self:classname().."=production-recipe-add=ID="..blockId.."="..recipe.name.."=", self.player:getIconType(ingredient), ingredient.name, "X"..ingredient.amount, "yellow", ({"tooltip.add-recipe"}))
 
 			self:addGuiLabel(cell, ingredient.name, self:formatNumber(ingredient.count), "helmod_label-right-60")
 		end
@@ -926,9 +932,9 @@ function PlannerResult.methods:addProductionLineRow(player, guiTable, element)
 
 	-- col action
 	local guiAction = self:addGuiFlowH(guiTable,"action"..element.id)
-	self:addGuiButton(guiAction, self:classname().."=production-block-remove=ID=", element.id, "helmod_button-default", ({"helmod_result-panel.row-button-delete"}))
-	self:addGuiButton(guiAction, self:classname().."=production-block-down=ID=", element.id, "helmod_button-default", ({"helmod_result-panel.row-button-down"}))
-	self:addGuiButton(guiAction, self:classname().."=production-block-up=ID=", element.id, "helmod_button-default", ({"helmod_result-panel.row-button-up"}))
+	self:addGuiButton(guiAction, self:classname().."=production-block-remove=ID=", element.id, "helmod_button-default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
+	self:addGuiButton(guiAction, self:classname().."=production-block-down=ID=", element.id, "helmod_button-default", ({"helmod_result-panel.row-button-down"}), ({"tooltip.down-element"}))
+	self:addGuiButton(guiAction, self:classname().."=production-block-up=ID=", element.id, "helmod_button-default", ({"helmod_result-panel.row-button-up"}), ({"tooltip.up-element"}))
 	-- col index
 	if globalSettings.display_data_col_index then
 		local guiIndex = self:addGuiFlowH(guiTable,"index"..element.id)
@@ -956,7 +962,7 @@ function PlannerResult.methods:addProductionLineRow(player, guiTable, element)
 	end
 	-- col recipe
 	local guiRecipe = self:addGuiFlowH(guiTable,"recipe"..element.id)
-	self:addSelectSpriteIconButton(guiRecipe, self:classname().."=change-tab=ID="..self.PRODUCTION_BLOCK_TAB.."="..element.id.."=", "recipe", element.name)
+	self:addSelectSpriteIconButton(guiRecipe, self:classname().."=change-tab=ID="..self.PRODUCTION_BLOCK_TAB.."="..element.id.."=", "recipe", element.name, element.name, nil, ({"tooltip.edit-block"}))
 
 	-- col energy
 	local guiEnergy = self:addGuiFlowH(guiTable,"energy"..element.id, "helmod_align-right-flow")
@@ -968,7 +974,7 @@ function PlannerResult.methods:addProductionLineRow(player, guiTable, element)
 		for r, product in pairs(element.products) do
 			-- product = {type="item", name="steel-plate", amount=8}
 			local cell = self:addGuiFlowH(tProducts,"cell_"..product.name)
-			self:addSelectSpriteIconButton(cell, "HMPlannerProductEdition=OPEN=ID="..element.id.."=", self.player:getIconType(product), product.name, "X"..product.amount)
+			self:addSelectSpriteIconButton(cell, "HMPlannerProductEdition=OPEN=ID="..element.id.."=", self.player:getIconType(product), product.name, "X"..product.amount, nil, ({"tooltip.edit-product"}))
 
 			self:addGuiLabel(cell, product.name, self:formatNumber(product.count), "helmod_label-right-60")
 		end
@@ -979,7 +985,7 @@ function PlannerResult.methods:addProductionLineRow(player, guiTable, element)
 		for r, ingredient in pairs(element.ingredients) do
 			-- ingredient = {type="item", name="steel-plate", amount=8}
 			local cell = self:addGuiFlowH(tIngredient,"cell_"..ingredient.name)
-			self:addSelectSpriteIconButton(cell, self:classname().."=production-block-add=ID="..element.id.."=", self.player:getIconType(ingredient), ingredient.name, "X"..ingredient.amount, "yellow")
+			self:addSelectSpriteIconButton(cell, self:classname().."=production-block-add=ID="..element.id.."=", self.player:getIconType(ingredient), ingredient.name, "X"..ingredient.amount, "yellow", ({"tooltip.add-recipe"}))
 
 			self:addGuiLabel(cell, ingredient.name, self:formatNumber(ingredient.count), "helmod_label-right-60")
 		end

@@ -133,7 +133,7 @@ function PlannerRecipeSelector.methods:on_update(player, element, action, item, 
 	for key, recipe in pairs(self.player:getRecipes(player)) do
 		if recipe.group.name == globalPlayer.recipeGroupSelected then
 			Logging:trace("PlannerRecipeSelector:on_update",recipe.name)
-			self:addSelectSpriteIconButton(guiRecipeSelectorTable, self:classname().."=recipe-select=ID="..item.."=", self.player:getRecipeIconType(player, recipe), recipe.name)
+			self:addSelectSpriteIconButton(guiRecipeSelectorTable, self:classname().."=recipe-select=ID="..item.."=", self.player:getRecipeIconType(player, recipe), recipe.name, recipe.name, nil, recipe.localised_name)
 		end
 	end
 

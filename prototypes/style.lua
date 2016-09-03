@@ -411,6 +411,11 @@ default_gui["helmod_result"] = {
 	}
 }
 
+default_gui["helmod_main-flow"] = {
+	type = "flow_style",
+	parent = "flow_style"
+}
+
 default_gui["helmod_result-menu-flow"] = {
 	type = "flow_style",
 	parent = "flow_style",
@@ -489,25 +494,29 @@ default_gui["helmod_recipe-section-frame"] = {
 default_gui["helmod_recipe-cell-frame"] = {
 	type = "frame_style",
 	parent = "frame_style",
-	minimal_width = 230
+	minimal_width = 230,
+	maximal_width = 230
 }
 
 default_gui["helmod_recipe-cell-frame1"] = {
 	type = "frame_style",
 	parent = "frame_style",
-	minimal_width = 230
+	minimal_width = 230,
+	maximal_width = 230
 }
 
 default_gui["helmod_recipe-cell-frame2"] = {
 	type = "frame_style",
 	parent = "frame_style",
-	minimal_width = 200
+	minimal_width = 200,
+	maximal_width = 200
 }
 
 default_gui["helmod_recipe-cell-frame3"] = {
 	type = "frame_style",
 	parent = "frame_style",
-	minimal_width = 200
+	minimal_width = 200,
+	maximal_width = 200
 }
 
 default_gui["helmod_recipe-cell-scroll"] = {

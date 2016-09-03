@@ -16,11 +16,10 @@ PlayerController = setclass("HMPlayerController")
 --
 function PlayerController.methods:init()
 	self.prefix = "helmod_"
-
 	-- list des controllers
 	self.controllers = {}
-	self.controllers["speed-controller"] = SpeedController:new(self)
 	self.controllers["planner-controller"] = PlannerController:new(self)
+	self.controllers["speed-controller"] = SpeedController:new(self)
 end
 
 -------------------------------------------------------------------------------
@@ -156,7 +155,8 @@ function PlayerController.methods:getDefaultSettings()
 		model_auto_compute = false,
 		model_loop_limit = 1000,
 		model_filter_factory = true,
-		model_filter_beacon = true
+		model_filter_beacon = true,
+		other_speed_panel=false
 	}
 end
 

@@ -170,7 +170,7 @@ function PlannerProductEdition.methods:updateInfo(player, element, action, item,
 			end
 
 			local headerPanel = self:addGuiTable(infoPanel,"table-header",2)
-			self:addSpriteIconButton(headerPanel, "product", "item", product.name)
+			self:addSpriteIconButton(headerPanel, "product", self.player:getIconType(player, product), product.name)
 			self:addGuiLabel(headerPanel, "product-label", product.name)
 			
 			self:addGuiLabel(headerPanel, "quantity-label", ({"helmod_common.quantity"}))
