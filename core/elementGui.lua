@@ -353,13 +353,18 @@ end
 -- @param #string type type of item
 -- @param #string key name of item
 -- @param #string caption displayed text
+-- @param #string color background color
 -- @param #string tooltip displayed text
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addXxlSelectSpriteIconButton(parent, action, type, key, caption, tooltip)
-	Logging:trace("ElementGui:addXxlSelectSpriteIconButton",action, type, key, caption, tooltip)
-	return self:addStyledSpriteButton(parent, "helmod_xxl-select-button-icon", action, type, key, caption, tooltip)
+function ElementGui.methods:addXxlSelectSpriteIconButton(parent, action, type, key, caption, color, tooltip)
+	Logging:trace("ElementGui:addXxlSelectSpriteIconButton",action, type, key, caption, color, tooltip)
+	local style = "helmod_xxl-select-button-icon"
+	if color == "red" then style = "helmod_xxl-select-button-icon-red" end
+	if color == "yellow" then style = "helmod_xxl-select-button-icon-yellow" end
+	if color == "green" then style = "helmod_xxl-select-button-icon-green" end
+	return self:addStyledSpriteButton(parent, style, action, type, key, caption, tooltip)
 end
 
 -------------------------------------------------------------------------------

@@ -798,7 +798,7 @@ function PlannerRecipeEdition.methods:updateBeaconActivedModules(player, element
 			local pollution = self:formatPercent(self.player:getModuleBonus(_module.name, "pollution"))
 			tooltip = ({"tooltip.module-description" , _module.localised_name, consumption, speed, productivity, pollution})
 		end
-		
+
 		for i = 1, count, 1 do
 			self:addSpriteIconButton(currentTableModulesPanel, self:classname().."=beacon-module-remove=ID="..item.."="..recipe.name.."="..module.."="..i, "item", module, module, tooltip)
 		end
@@ -820,11 +820,14 @@ end
 function PlannerRecipeEdition.methods:updateBeaconModulesSelector(player, element, action, item, item2, item3)
 	Logging:debug("PlannerRecipeEdition:updateBeaconModulesSelector():",player, element, action, item, item2, item3)
 	local selectorPanel = self:getBeaconModulesSelectorPanel(player)
+	local model = self.model:getModel(player)
+	local recipe = model.blocks[item].recipes[item2]
+
+	if selectorPanel["modules"] ~= nil and selectorPanel["modules"].valid and model.moduleListRefresh == true then
+		selectorPanel["modules"].destroy()
+	end
+
 	if selectorPanel["modules"] == nil then
-		local model = self.model:getModel(player)
-
-		local recipe = model.blocks[item].recipes[item2]
-
 		local tableModulesPanel = self:addGuiTable(selectorPanel,"modules",4)
 		for k, module in pairs(self.player:getModules()) do
 			local consumption = self:formatPercent(self.player:getModuleBonus(module.name, "consumption"))

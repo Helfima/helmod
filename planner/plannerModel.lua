@@ -1003,7 +1003,7 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 		for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
 			local mainProduct = nil
 			local production = 1
-			if recipe.efficiency ~= nil then production = recipe.production end
+			if recipe.production ~= nil then production = recipe.production end
 			-- prepare les produits
 			for _, product in pairs(recipe.products) do
 				if ingredients ~= nil and ingredients[product.name] ~= nil then
