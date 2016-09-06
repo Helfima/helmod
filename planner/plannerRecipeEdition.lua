@@ -743,22 +743,22 @@ function PlannerRecipeEdition.methods:updateBeaconInfo(player, element, action, 
 
 		local inputPanel = self:addGuiTable(infoPanel,"table-input",2)
 
-		self:addGuiLabel(inputPanel, "label-energy-nominal", "Nominal energy")
+		self:addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy-nominal"}))
 		self:addGuiText(inputPanel, "energy-nominal", beacon.energy_nominal, "helmod_textfield")
 
-		self:addGuiLabel(inputPanel, "label-combo", "Combo")
+		self:addGuiLabel(inputPanel, "label-combo", ({"helmod_label.combo"}))
 		self:addGuiText(inputPanel, "combo", beacon.combo, "helmod_textfield")
 
-		self:addGuiLabel(inputPanel, "label-factory", "Factory")
+		self:addGuiLabel(inputPanel, "label-factory", ({"helmod_label.factory"}))
 		self:addGuiText(inputPanel, "factory", beacon.factory, "helmod_textfield")
 
-		self:addGuiLabel(inputPanel, "label-efficiency", "Efficiency")
+		self:addGuiLabel(inputPanel, "label-efficiency", ({"helmod_label.efficiency"}))
 		self:addGuiText(inputPanel, "efficiency", beacon.efficiency, "helmod_textfield")
 
-		self:addGuiLabel(inputPanel, "label-module-slots", "Module Slots")
+		self:addGuiLabel(inputPanel, "label-module-slots", ({"helmod_label.module-slots"}))
 		self:addGuiText(inputPanel, "module-slots", beacon.module_slots, "helmod_textfield")
 
-		self:addGuiButton(infoPanel, self:classname().."=beacon-update=ID="..item.."=", recipe.name, "helmod_button-default", "Update")
+		self:addGuiButton(infoPanel, self:classname().."=beacon-update=ID="..item.."=", recipe.name, "helmod_button-default", ({"helmod_button.update"}))
 	end
 end
 
