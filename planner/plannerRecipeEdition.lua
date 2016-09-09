@@ -481,7 +481,7 @@ function PlannerRecipeEdition.methods:updateRecipeIngredients(player, element, a
 		end
 		local tablePanel= self:addGuiTable(ingredientsPanel, "table-ingredients", 6)
 		for key, ingredient in pairs(recipe.ingredients) do
-			self:addSpriteIconButton(tablePanel, "item=ID=", self.player:getIconType(ingredient), ingredient.name)
+			self:addSpriteIconButton(tablePanel, "item=ID=", self.player:getIconType(ingredient), ingredient.name, ingredient.name, ({"tooltip.element-amount", ingredient.amount}))
 			self:addGuiLabel(tablePanel, ingredient.name, ingredient.amount)
 		end
 	end
@@ -512,8 +512,12 @@ function PlannerRecipeEdition.methods:updateRecipeProducts(player, element, acti
 		end
 		local tablePanel= self:addGuiTable(productsPanel, "table-products", 6)
 		for key, product in pairs(recipe.products) do
-			self:addSpriteIconButton(tablePanel, "item=ID=", self.player:getIconType(product), product.name)
-			self:addGuiLabel(tablePanel, product.name, product.amount)
+			if product.amount ~= nil then
+				self:addSpriteIconButton(tablePanel, "item=ID=", self.player:getIconType(product), product.name, product.name, ({"tooltip.element-amount", product.amount}))
+			else
+				self:addSpriteIconButton(tablePanel, "item=ID=", self.player:getIconType(product), product.name, product.name, ({"tooltip.element-amount-probability", product.amount_min, product.amount_max, product.probability}))
+			end
+			self:addGuiLabel(tablePanel, product.name, self.model:getElementAmount(product))
 		end
 	end
 end

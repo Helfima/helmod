@@ -16,6 +16,9 @@ function PlannerModel.methods:init(parent)
 	self.parent = parent
 	self.player = self.parent.parent
 
+	self.capSpeed = 0.2
+	self.capEnergy = 0.2
+	self.capProductivity = 0.2
 end
 
 -------------------------------------------------------------------------------
@@ -946,6 +949,28 @@ function PlannerModel.methods:update(player, force)
 end
 
 -------------------------------------------------------------------------------
+-- Get amount of element
+--
+-- @function [parent=#PlannerModel] getElementAmount
+--
+-- @param #table element
+--
+-- @return #number
+--
+-- @see http://lua-api.factorio.com/latest/Concepts.html#Product
+--
+function PlannerModel.methods:getElementAmount(element)
+	if element.amount ~= nil then
+		return element.amount
+	end
+	
+	if element.probability ~= nil and element.amount_min ~= nil and  element.amount_max ~= nil then
+		return ((element.amount_min + element.amount_max) * element.probability / 2)
+	end
+
+	return 0
+end
+-------------------------------------------------------------------------------
 -- Prepare model
 --
 -- @function [parent=#PlannerModel] computeProductionBlock
@@ -1011,10 +1036,11 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 				end
 			end
 			-- check produit pilotant
+			-- @see http://lua-api.factorio.com/latest/Concepts.html#Product
 			for _, product in pairs(recipe.products) do
 				if mainProduct == nil then
 					mainProduct = product
-				elseif product.count/product.amount > mainProduct.count/mainProduct.amount then
+				elseif product.count/self:getElementAmount(product) > mainProduct.count/self:getElementAmount(mainProduct) then
 					mainProduct = product
 				end
 			end
@@ -1023,7 +1049,7 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 				-- met a jour le produit
 				for index, product in pairs(recipe.products) do
 					if product.name ~= mainProduct.name then
-						product.count = (mainProduct.count*product.amount/mainProduct.amount)
+						product.count = (mainProduct.count*self:getElementAmount(product)/self:getElementAmount(mainProduct))
 					end
 				end
 			end
@@ -1031,8 +1057,8 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 
 			local pCount = mainProduct.count;
 			for k, ingredient in pairs(recipe.ingredients) do
-				local productNominal = mainProduct.amount
-				local productUsage = mainProduct.amount
+				local productNominal = self:getElementAmount(mainProduct)
+				local productUsage = self:getElementAmount(mainProduct)
 				-- calcul production module factory
 				for module, value in pairs(recipe.factory.modules) do
 					local bonus = self.player:getModuleBonus(module, "productivity")
@@ -1044,6 +1070,9 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 						productUsage = productUsage + productNominal * value * bonus * recipe.beacon.efficiency * recipe.beacon.combo
 					end
 				end
+				-- cap le productivity a self.capProductivity
+				if productUsage < productNominal*self.capProductivity  then productUsage = productNominal*self.capProductivity end
+				
 				local nextCount = math.ceil(pCount*(ingredient.amount/productUsage))
 				ingredient.count = nextCount
 
@@ -1069,7 +1098,7 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 					element.count = math.ceil(recipe.factory.count/recipe.factory.limit)
 				end
 			end
-			
+
 			-- consomme les produits
 			for _, product in pairs(recipe.products) do
 				if ingredients ~= nil and ingredients[product.name] ~= nil then
@@ -1203,8 +1232,10 @@ function PlannerModel.methods:computeFactory(player, recipe)
 		end
 	end
 
-	-- cap l'energy a 20%
-	if recipe.factory.energy < recipe.factory.energy_nominal*0.2  then recipe.factory.energy = recipe.factory.energy_nominal*0.2 end
+	-- cap le speed a self.capSpeed
+	if recipe.factory.speed < recipe.factory.speed_nominal*self.capSpeed  then recipe.factory.speed = recipe.factory.speed_nominal*self.capSpeed end
+	-- cap l'energy a self.capEnergy
+	if recipe.factory.energy < recipe.factory.energy_nominal*self.capEnergy  then recipe.factory.energy = recipe.factory.energy_nominal*self.capEnergy end
 	-- compte le nombre de machines necessaires
 	local product = nil
 	for k, element in pairs(recipe.products) do
@@ -1214,7 +1245,7 @@ function PlannerModel.methods:computeFactory(player, recipe)
 	if product ~= nil then
 		local model = self:getModel(player)
 		-- [nombre d'item] * [effort necessaire du recipe] / ([la vitesse de la factory] * [nombre produit par le recipe] * [le temps en second])
-		local count = math.ceil(product.count*recipe.energy/(recipe.factory.speed*product.amount*model.time))
+		local count = math.ceil(product.count*recipe.energy/(recipe.factory.speed*self:getElementAmount(product)*model.time))
 		recipe.factory.count = count
 		if recipe.beacon.active then
 			recipe.beacon.count = math.ceil(count/recipe.beacon.factory)

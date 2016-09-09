@@ -469,7 +469,7 @@ function PlannerResult.methods:updateProductionBlock(player, item, item2, item3)
 			for r, product in pairs(element.products) do
 				-- product = {type="item", name="steel-plate", amount=8}
 				local cell = self:addGuiFlowH(outputTable,"cell_"..product.name)
-				self:addSelectSpriteIconButton(cell, "HMPlannerProductEdition=OPEN=ID="..element.id.."=", self.player:getIconType(product), product.name, "X"..product.amount, nil, ({"tooltip.edit-product"}))
+				self:addSelectSpriteIconButton(cell, "HMPlannerProductEdition=OPEN=ID="..element.id.."=", self.player:getIconType(product), product.name, "X"..self.model:getElementAmount(product), nil, ({"tooltip.edit-product"}))
 				self:addGuiLabel(cell, product.name, self:formatNumber(product.count), "helmod_label-right-60")
 			end
 		end
@@ -897,7 +897,7 @@ function PlannerResult.methods:addProductionBlockRow(player, guiTable, blockId, 
 		for r, product in pairs(recipe.products) do
 			local cell = self:addGuiFlowH(tProducts,"cell_"..product.name)
 			-- product = {type="item", name="steel-plate", amount=8}
-			self:addSpriteIconButton(cell, "HMPlannerResourceInfo=OPEN=ID="..blockId.."="..recipe.name.."=", self.player:getIconType(product), product.name, "X"..product.amount)
+			self:addSpriteIconButton(cell, "HMPlannerResourceInfo=OPEN=ID="..blockId.."="..recipe.name.."=", self.player:getIconType(product), product.name, "X"..self.model:getElementAmount(product))
 
 			self:addGuiLabel(cell, product.name, self:formatNumber(product.count), "helmod_label-right-60")
 		end
@@ -974,7 +974,7 @@ function PlannerResult.methods:addProductionLineRow(player, guiTable, element)
 		for r, product in pairs(element.products) do
 			-- product = {type="item", name="steel-plate", amount=8}
 			local cell = self:addGuiFlowH(tProducts,"cell_"..product.name)
-			self:addSelectSpriteIconButton(cell, "HMPlannerProductEdition=OPEN=ID="..element.id.."=", self.player:getIconType(product), product.name, "X"..product.amount, nil, ({"tooltip.edit-product"}))
+			self:addSelectSpriteIconButton(cell, "HMPlannerProductEdition=OPEN=ID="..element.id.."=", self.player:getIconType(product), product.name, "X"..self.model:getElementAmount(product), nil, ({"tooltip.edit-product"}))
 
 			self:addGuiLabel(cell, product.name, self:formatNumber(product.count), "helmod_label-right-60")
 		end
