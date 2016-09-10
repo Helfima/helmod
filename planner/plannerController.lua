@@ -169,7 +169,7 @@ function PlannerController.methods:getMainPanel(player)
 	if guiMain["helmod_planner_main"] ~= nil and guiMain["helmod_planner_main"].valid then
 		return guiMain["helmod_planner_main"]
 	end
-	return self:addGuiFlowH(guiMain, "helmod_planner_main", "helmod_main-flow")
+	return self:addGuiFlowH(guiMain, "helmod_planner_main", "helmod_flow_main")
 end
 
 -------------------------------------------------------------------------------
@@ -184,7 +184,7 @@ function PlannerController.methods:getInfoPanel(player)
 	if mainPanel["helmod_planner_info"] ~= nil and mainPanel["helmod_planner_info"].valid then
 		return mainPanel["helmod_planner_info"]
 	end
-	return self:addGuiFlowV(mainPanel, "helmod_planner_info")
+	return self:addGuiFlowV(mainPanel, "helmod_planner_info", "helmod_flow_info")
 end
 
 -------------------------------------------------------------------------------
@@ -199,7 +199,7 @@ function PlannerController.methods:getDialogPanel(player)
 	if mainPanel["helmod_planner_dialog"] ~= nil and mainPanel["helmod_planner_dialog"].valid then
 		return mainPanel["helmod_planner_dialog"]
 	end
-	return self:addGuiFlowH(mainPanel, "helmod_planner_dialog")
+	return self:addGuiFlowH(mainPanel, "helmod_planner_dialog", "helmod_flow_dialog")
 end
 
 -------------------------------------------------------------------------------
@@ -214,7 +214,7 @@ function PlannerController.methods:getMenuPanel(player)
 	if infoPanel["helmod_planner_settings"] ~= nil and infoPanel["helmod_planner_settings"].valid then
 		return infoPanel["helmod_planner_settings"]
 	end
-	return self:addGuiFrameH(infoPanel, "helmod_planner_settings", "helmod_menu_frame_style")
+	return self:addGuiFrameH(infoPanel, "helmod_planner_settings", "helmod_frame_main_menu")
 end
 
 -------------------------------------------------------------------------------
@@ -229,7 +229,7 @@ function PlannerController.methods:getDataPanel(player)
 	if infoPanel["helmod_planner_data"] ~= nil and infoPanel["helmod_planner_data"].valid then
 		return infoPanel["helmod_planner_data"]
 	end
-	return self:addGuiFlowV(infoPanel, "helmod_planner_data")
+	return self:addGuiFlowV(infoPanel, "helmod_planner_data", "helmod_flow_data")
 end
 
 -------------------------------------------------------------------------------

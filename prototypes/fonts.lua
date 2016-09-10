@@ -2,6 +2,27 @@ data:extend(
 {
   {
     type = "font",
+    name = "helmod_font_default",
+    from = "default",
+    size = 10
+  },
+  {
+    type = "font",
+    name = "helmod_font_bold",
+    from = "default-bold",
+    size = 10
+  },
+  {
+    type = "font",
+    name = "helmod_font_title_frame",
+    from = "default-bold",
+    size = 16
+  },
+  
+  
+  
+  {
+    type = "font",
     name = "helmod_font-small",
     from = "default",
     size = 10

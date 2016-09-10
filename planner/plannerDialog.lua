@@ -56,7 +56,11 @@ end
 -- @return #LuaGuiElement
 --  
 function PlannerDialog.methods:getPanel(player)
-	return self:getParentPanel(player)[self:classname()]
+	local panel = self:getParentPanel(player)
+	if panel[self:classname()] ~= nil and panel[self:classname()].valid then
+		return panel[self:classname()]
+	end
+	return self:addGuiFlowV(panel, self:classname(), "helmod_flow_resize_row_width")
 end
 
 -------------------------------------------------------------------------------
@@ -129,7 +133,9 @@ function PlannerDialog.methods:open(player, element, action, item, item2, item3)
 		local caption = self:classname()
 		if self.panelCaption ~= nil then caption = self.panelCaption end
 
-		self:addGuiFrameV(parentPanel, self:classname(), nil, caption)
+		local panel = self:getPanel(player)
+		local headerPanel = self:addGuiFrameH(panel, "header-panel", "helmod_frame_resize_row_width")
+		self:addGuiLabel(headerPanel, "title", caption, "helmod_label_title_frame")
 		
 		self:on_open(player, element, action, item, item2, item3)
 		self:after_open(player, element, action, item, item2, item3)

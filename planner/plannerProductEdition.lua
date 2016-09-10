@@ -86,7 +86,7 @@ function PlannerProductEdition.methods:getInfoPanel(player)
 	if panel["info"] ~= nil and panel["info"].valid then
 		return panel["info"]
 	end
-	return self:addGuiFrameV(panel, "info", "helmod_module-table-frame")
+	return self:addGuiFrameV(panel, "info", "helmod_frame_resize_row_width")
 end
 
 -------------------------------------------------------------------------------
@@ -169,19 +169,15 @@ function PlannerProductEdition.methods:updateInfo(player, element, action, item,
 				infoPanel[guiName].destroy()
 			end
 
-			local headerPanel = self:addGuiTable(infoPanel,"table-header",2)
-			self:addSpriteIconButton(headerPanel, "product", self.player:getIconType(player, product), product.name)
-			self:addGuiLabel(headerPanel, "product-label", product.name)
+			local tablePanel = self:addGuiTable(infoPanel,"table-header",2)
+			self:addSpriteIconButton(tablePanel, "product", self.player:getIconType(player, product), product.name)
+			self:addGuiLabel(tablePanel, "product-label", product.name)
 			
-			self:addGuiLabel(headerPanel, "quantity-label", ({"helmod_common.quantity"}))
-			self:addGuiText(headerPanel, "quantity", product.count)
+			self:addGuiLabel(tablePanel, "quantity-label", ({"helmod_common.quantity"}))
+			self:addGuiText(tablePanel, "quantity", product.count)
 
-			local buttonsPanel = self:getButtonsPanel(player)
-			for k,guiName in pairs(buttonsPanel.children_names) do
-				buttonsPanel[guiName].destroy()
-			end
-			self:addGuiButton(buttonsPanel, self:classname().."=product-update=ID="..item.."=", product.name, "helmod_button-default", ({"helmod_button.save"}))
-			self:addGuiButton(buttonsPanel, self:classname().."=CLOSE=ID="..item.."=", product.name, "helmod_button-default", ({"helmod_button.close"}))
+			self:addGuiButton(tablePanel, self:classname().."=product-update=ID="..item.."=", product.name, "helmod_button-default", ({"helmod_button.save"}))
+			self:addGuiButton(tablePanel, self:classname().."=CLOSE=ID="..item.."=", product.name, "helmod_button-default", ({"helmod_button.close"}))
 		end
 	end
 end

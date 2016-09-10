@@ -89,7 +89,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButton(parent, action, key, style, caption, tooltip)
-	Logging:trace("ElementGui:addGuiButton", parent, action, key, style, caption, tooltip)
+	Logging:debug("ElementGui:addGuiButton", parent, action, key, style, caption, tooltip)
 	local options = {}
 	options.type = "button"
 	if key ~= nil then

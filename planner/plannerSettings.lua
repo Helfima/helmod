@@ -94,7 +94,7 @@ function PlannerSettings.methods:getAboutSettingsPanel(player)
 	if panel["about-settings"] ~= nil and panel["about-settings"].valid then
 		return panel["about-settings"]
 	end
-	return self:addGuiFrameV(panel, "about-settings", "helmod_module-table-frame", ({"helmod_settings-panel.about-section"}))
+	return self:addGuiFrameV(panel, "about-settings", "helmod_frame_resize_row_width", ({"helmod_settings-panel.about-section"}))
 end
 
 -------------------------------------------------------------------------------
@@ -109,7 +109,7 @@ function PlannerSettings.methods:getDataSettingsPanel(player)
 	if panel["data-settings"] ~= nil and panel["data-settings"].valid then
 		return panel["data-settings"]
 	end
-	return self:addGuiFrameV(panel, "data-settings", "helmod_module-table-frame", ({"helmod_settings-panel.data-section"}))
+	return self:addGuiFrameV(panel, "data-settings", "helmod_frame_resize_row_width", ({"helmod_settings-panel.data-section"}))
 end
 
 -------------------------------------------------------------------------------
@@ -124,7 +124,7 @@ function PlannerSettings.methods:getModelSettingsPanel(player)
 	if panel["model-settings"] ~= nil and panel["model-settings"].valid then
 		return panel["model-settings"]
 	end
-	return self:addGuiFrameV(panel, "model-settings", "helmod_module-table-frame", ({"helmod_settings-panel.model-section"}))
+	return self:addGuiFrameV(panel, "model-settings", "helmod_frame_resize_row_width", ({"helmod_settings-panel.model-section"}))
 end
 
 -------------------------------------------------------------------------------
@@ -139,7 +139,7 @@ function PlannerSettings.methods:getOtherSettingsPanel(player)
 	if panel["other-settings"] ~= nil and panel["other-settings"].valid then
 		return panel["other-settings"]
 	end
-	return self:addGuiFrameV(panel, "other-settings", "helmod_module-table-frame", ({"helmod_settings-panel.other-section"}))
+	return self:addGuiFrameV(panel, "other-settings", "helmod_frame_resize_row_width", ({"helmod_settings-panel.other-section"}))
 end
 
 -------------------------------------------------------------------------------
@@ -243,7 +243,7 @@ function PlannerSettings.methods:update(player)
 		timePanel[guiName].destroy()
 	end
 
-	self:addGuiLabel(timePanel, self:classname().."=base-time", ({"helmod_settings-panel.base-time"}), "helmod_page-label")
+	self:addGuiLabel(timePanel, self:classname().."=base-time", ({"helmod_settings-panel.base-time"}), "helmod_label_time")
 
 	local times = {
 		{ value = 60, name = "1m"},
@@ -254,7 +254,7 @@ function PlannerSettings.methods:update(player)
 	}
 	for _,time in pairs(times) do
 		if model.time == time.value then
-			self:addGuiLabel(timePanel, self:classname().."=change-time="..time.value, time.name, "helmod_page-label")
+			self:addGuiLabel(timePanel, self:classname().."=change-time="..time.value, time.name, "helmod_label_time")
 		else
 			self:addGuiButton(timePanel, self:classname().."=change-time=ID=", time.value, "helmod_button-default", time.name)
 		end

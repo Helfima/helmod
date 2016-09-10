@@ -31,6 +31,37 @@ end
 function PlannerRecipeSelector.methods:getParentPanel(player)
 	return self.parent:getDialogPanel(player)
 end
+
+-------------------------------------------------------------------------------
+-- Get or create groups panel
+--
+-- @function [parent=#PlannerRecipeSelector] getGroupsPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerRecipeSelector.methods:getGroupsPanel(player)
+	local panel = self:getPanel(player)
+	if panel["groups-panel"] ~= nil and panel["groups-panel"].valid then
+		return panel["groups-panel"]
+	end
+	return self:addGuiFrameV(panel, "groups-panel", "helmod_frame_resize_row_width")
+end
+
+-------------------------------------------------------------------------------
+-- Get or create item list panel
+--
+-- @function [parent=#PlannerRecipeSelector] getItemListPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerRecipeSelector.methods:getItemListPanel(player)
+	local panel = self:getPanel(player)
+	if panel["item-list-panel"] ~= nil and panel["item-list-panel"].valid then
+		return panel["item-list-panel"]
+	end
+	return self:addGuiFrameV(panel, "item-list-panel", "helmod_frame_resize_row_width")
+end
+
 -------------------------------------------------------------------------------
 -- On open
 --
@@ -131,7 +162,7 @@ end
 function PlannerRecipeSelector.methods:updateItemList(player, element, action, item, item2, item3)
 	Logging:trace("PlannerRecipeSelector:updateItemList():",player, element, action, item, item2, item3)
 	local globalPlayer = self.player:getGlobal(player)
-	local panel = self:getPanel(player)
+	local panel = self:getItemListPanel(player)
 	
 	if panel["recipe-table"] ~= nil  and panel["recipe-table"].valid then
 		panel["recipe-table"].destroy()
@@ -162,7 +193,7 @@ end
 function PlannerRecipeSelector.methods:updateGroupSelector(player, element, action, item, item2, item3)
 	Logging:trace("PlannerRecipeSelector:updateGroupSelector():",player, element, action, item, item2, item3)
 	local globalPlayer = self.player:getGlobal(player)
-	local panel = self:getPanel(player)
+	local panel = self:getGroupsPanel(player)
 	
 	if panel["recipe-groups"] ~= nil  and panel["recipe-groups"].valid then
 		panel["recipe-groups"].destroy()

@@ -16,16 +16,6 @@ PlannerRecipeEdition = setclass("HMPlannerRecipeEdition", PlannerDialog)
 --
 function PlannerRecipeEdition.methods:on_init(parent)
 	self.panelCaption = ({"helmod_recipe-edition-panel.title"})
-	self.sectionStyle = "helmod_recipe-section-frame"
-	-- colonne 1
-	self.cellStyle1 = "helmod_recipe-cell-frame1"
-	self.scrollStyle = "helmod_recipe-cell-scroll"
-	self.scrollStyle1 = "helmod_recipe-cell-scroll1"
-	-- colonne 2
-	self.cellStyle2 = "helmod_recipe-cell-frame2"
-	-- colonne 3
-	self.cellStyle3 = "helmod_recipe-cell-frame3"
-	self.scrollStyle3 = "helmod_recipe-cell-scroll3"
 	self.player = self.parent.parent
 	self.model = self.parent.model
 end
@@ -101,7 +91,7 @@ function PlannerRecipeEdition.methods:getRecipePanel(player)
 	if panel["recipe"] ~= nil and panel["recipe"].valid then
 		return panel["recipe"]
 	end
-	return self:addGuiFrameH(panel, "recipe", self.sectionStyle, ({"helmod_common.recipe"}))
+	return self:addGuiFrameH(panel, "recipe", "helmod_frame_resize_row_width", ({"helmod_common.recipe"}))
 end
 
 -------------------------------------------------------------------------------
@@ -116,7 +106,7 @@ function PlannerRecipeEdition.methods:getRecipeInfoPanel(player)
 	if panel["info"] ~= nil and panel["info"].valid then
 		return panel["info"]
 	end
-	return self:addGuiFrameH(panel, "info", self.cellStyle1)
+	return self:addGuiFrameH(panel, "info", "helmod_frame_recipe_info")
 end
 
 -------------------------------------------------------------------------------
@@ -131,7 +121,7 @@ function PlannerRecipeEdition.methods:getRecipeIngredientsPanel(player)
 	if panel["ingredients"] ~= nil and panel["ingredients"].valid then
 		return panel["ingredients"]
 	end
-	return self:addGuiFrameV(panel, "ingredients", self.cellStyle2, ({"helmod_common.ingredients"}))
+	return self:addGuiFrameV(panel, "ingredients", "helmod_frame_recipe_ingredients", ({"helmod_common.ingredients"}))
 end
 
 -------------------------------------------------------------------------------
@@ -146,7 +136,7 @@ function PlannerRecipeEdition.methods:getRecipeProductsPanel(player)
 	if panel["products"] ~= nil and panel["products"].valid then
 		return panel["products"]
 	end
-	return self:addGuiFrameV(panel, "products", self.cellStyle3, ({"helmod_common.products"}))
+	return self:addGuiFrameV(panel, "products", "helmod_frame_recipe_products", ({"helmod_common.products"}))
 end
 
 -------------------------------------------------------------------------------
@@ -161,7 +151,7 @@ function PlannerRecipeEdition.methods:getFactoryPanel(player)
 	if panel["factory"] ~= nil and panel["factory"].valid then
 		return panel["factory"]
 	end
-	return self:addGuiFrameH(panel, "factory", self.sectionStyle, ({"helmod_common.factory"}))
+	return self:addGuiFrameH(panel, "factory", "helmod_frame_resize_row_width", ({"helmod_common.factory"}))
 end
 
 -------------------------------------------------------------------------------
@@ -176,7 +166,7 @@ function PlannerRecipeEdition.methods:getFactorySelectorPanel(player)
 	if panel["selector"] ~= nil and panel["selector"].valid then
 		return panel["selector"]
 	end
-	return self:addGuiFrameV(panel, "selector", self.cellStyle1)
+	return self:addGuiFrameV(panel, "selector", "helmod_frame_default")
 end
 
 -------------------------------------------------------------------------------
@@ -191,7 +181,7 @@ function PlannerRecipeEdition.methods:getFactoryInfoPanel(player)
 	if panel["info"] ~= nil and panel["info"].valid then
 		return panel["info"]
 	end
-	return self:addGuiFrameV(panel, "info", self.cellStyle2)
+	return self:addGuiFrameV(panel, "info", "helmod_frame_recipe_info")
 end
 
 -------------------------------------------------------------------------------
@@ -220,12 +210,12 @@ function PlannerRecipeEdition.methods:getFactoryModulesSelectorPanel(player)
 	local modulesPanel = self:getFactoryModulesPanel(player)
 	local selectionModulesPanel = modulesPanel["selection-modules"]
 	if selectionModulesPanel == nil then
-		selectionModulesPanel = self:addGuiFrameV(modulesPanel, "selection-modules", self.cellStyle3, ({"helmod_recipe-edition-panel.selection-modules"}))
+		selectionModulesPanel = self:addGuiFrameV(modulesPanel, "selection-modules", "helmod_frame_recipe_modules", ({"helmod_recipe-edition-panel.selection-modules"}))
 	end
 
 	local scrollModulesPanel = selectionModulesPanel["scroll-modules"]
 	if scrollModulesPanel == nil then
-		scrollModulesPanel = self:addGuiScrollPane(selectionModulesPanel, "scroll-modules", self.scrollStyle3, "auto", "auto")
+		scrollModulesPanel = self:addGuiScrollPane(selectionModulesPanel, "scroll-modules", "helmod_scroll_recipe_module_list", "auto", "auto")
 	end
 	return scrollModulesPanel
 end
@@ -242,7 +232,7 @@ function PlannerRecipeEdition.methods:getFactoryActivedModulesPanel(player)
 	if modulesPanel["current-modules"] ~= nil and modulesPanel["current-modules"].valid then
 		return modulesPanel["current-modules"]
 	end
-	return self:addGuiFrameV(modulesPanel, "current-modules", self.cellStyle3, ({"helmod_recipe-edition-panel.current-modules"}))
+	return self:addGuiFrameV(modulesPanel, "current-modules", "helmod_frame_recipe_modules", ({"helmod_recipe-edition-panel.current-modules"}))
 end
 
 -------------------------------------------------------------------------------
@@ -257,7 +247,7 @@ function PlannerRecipeEdition.methods:getBeaconPanel(player)
 	if panel["beacon"] ~= nil and panel["beacon"].valid then
 		return panel["beacon"]
 	end
-	return self:addGuiFrameH(panel, "beacon", self.sectionStyle, ({"helmod_common.beacon"}))
+	return self:addGuiFrameH(panel, "beacon", "helmod_frame_resize_row_width", ({"helmod_common.beacon"}))
 end
 
 -------------------------------------------------------------------------------
@@ -272,7 +262,7 @@ function PlannerRecipeEdition.methods:getBeaconSelectorPanel(player)
 	if panel["selector"] ~= nil and panel["selector"].valid then
 		return panel["selector"]
 	end
-	return self:addGuiFrameV(panel, "selector", self.cellStyle1)
+	return self:addGuiFrameV(panel, "selector", "helmod_frame_default")
 end
 
 -------------------------------------------------------------------------------
@@ -287,7 +277,7 @@ function PlannerRecipeEdition.methods:getBeaconInfoPanel(player)
 	if panel["info"] ~= nil and panel["info"].valid then
 		return panel["info"]
 	end
-	return self:addGuiFrameV(panel, "info", self.cellStyle2)
+	return self:addGuiFrameV(panel, "info", "helmod_frame_recipe_info")
 end
 
 -------------------------------------------------------------------------------
@@ -316,12 +306,12 @@ function PlannerRecipeEdition.methods:getBeaconModulesSelectorPanel(player)
 	local modulesPanel = self:getBeaconModulesPanel(player)
 	local selectionModulesPanel = modulesPanel["selection-modules"]
 	if selectionModulesPanel == nil then
-		selectionModulesPanel = self:addGuiFrameV(modulesPanel, "selection-modules", self.cellStyle3, ({"helmod_recipe-edition-panel.selection-modules"}))
+		selectionModulesPanel = self:addGuiFrameV(modulesPanel, "selection-modules", "helmod_frame_recipe_modules", ({"helmod_recipe-edition-panel.selection-modules"}))
 	end
 
 	local scrollModulesPanel = selectionModulesPanel["scroll-modules"]
 	if scrollModulesPanel == nil then
-		scrollModulesPanel = self:addGuiScrollPane(selectionModulesPanel, "scroll-modules", self.scrollStyle3, "auto", "auto")
+		scrollModulesPanel = self:addGuiScrollPane(selectionModulesPanel, "scroll-modules", "helmod_scroll_recipe_module_list", "auto", "auto")
 	end
 	return scrollModulesPanel
 end
@@ -338,7 +328,7 @@ function PlannerRecipeEdition.methods:getBeaconActivedModulesPanel(player)
 	if modulesPanel["current-modules"] ~= nil and modulesPanel["current-modules"].valid then
 		return modulesPanel["current-modules"]
 	end
-	return self:addGuiFrameV(modulesPanel, "current-modules", self.cellStyle3, ({"helmod_recipe-edition-panel.current-modules"}))
+	return self:addGuiFrameV(modulesPanel, "current-modules", "helmod_frame_recipe_modules", ({"helmod_recipe-edition-panel.current-modules"}))
 end
 
 -------------------------------------------------------------------------------
@@ -365,13 +355,13 @@ function PlannerRecipeEdition.methods:after_open(player, element, action, item, 
 	self:getRecipeProductsPanel(player)
 	if model.blocks[item] ~= nil and model.blocks[item].recipes[item2] then
 		-- factory
-		self:getFactorySelectorPanel(player)
 		self:getFactoryInfoPanel(player)
 		self:getFactoryModulesPanel(player)
+		self:getFactorySelectorPanel(player)
 		-- beacon
-		self:getBeaconSelectorPanel(player)
 		self:getBeaconInfoPanel(player)
 		self:getBeaconModulesPanel(player)
+		self:getBeaconSelectorPanel(player)
 	end
 end
 
@@ -396,15 +386,15 @@ function PlannerRecipeEdition.methods:on_update(player, element, action, item, i
 	self:updateRecipeProducts(player, element, action, item, item2, item3)
 	if model.blocks[item] ~= nil and model.blocks[item].recipes[item2] then
 		-- factory
-		self:updateFactorySelector(player, element, action, item, item2, item3)
 		self:updateFactoryInfo(player, element, action, item, item2, item3)
 		self:updateFactoryActivedModules(player, element, action, item, item2, item3)
 		self:updateFactoryModulesSelector(player, element, action, item, item2, item3)
+		self:updateFactorySelector(player, element, action, item, item2, item3)
 		-- beacon
-		self:updateBeaconSelector(player, element, action, item, item2, item3)
 		self:updateBeaconInfo(player, element, action, item, item2, item3)
 		self:updateBeaconActivedModules(player, element, action, item, item2, item3)
 		self:updateBeaconModulesSelector(player, element, action, item, item2, item3)
+		self:updateBeaconSelector(player, element, action, item, item2, item3)
 	end
 end
 
@@ -641,7 +631,7 @@ function PlannerRecipeEdition.methods:updateFactoryActivedModules(player, elemen
 	end
 
 	-- actived modules panel
-	local currentTableModulesPanel = self:addGuiTable(activedModulesPanel,"modules",4,"helmod_recipe-modules")
+	local currentTableModulesPanel = self:addGuiTable(activedModulesPanel,"modules",4,"helmod_table_recipe_modules")
 	for module, count in pairs(factory.modules) do
 		local tooltip = module
 		local _module = self.player:getItemPrototype(module)
@@ -684,7 +674,7 @@ function PlannerRecipeEdition.methods:updateFactorySelector(player, element, act
 	end
 
 	-- ajouter de la table des groupes de recipe
-	local scrollGroups = self:addGuiScrollPane(selectorPanel, "scroll-groups", self.scrollStyle, "auto", "auto")
+	local scrollGroups = self:addGuiScrollPane(selectorPanel, "scroll-groups", "helmod_scroll_recipe_factory_group", "auto", "auto")
 	local groupsPanel = self:addGuiTable(scrollGroups, "factory-groups", 2)
 	Logging:debug("PlannerFactorySelector:updateFactorySelector(): group category=",recipe.category)
 
@@ -702,7 +692,7 @@ function PlannerRecipeEdition.methods:updateFactorySelector(player, element, act
 		selectorPanel["scroll-factory"].destroy()
 	end
 
-	local scrollTable = self:addGuiScrollPane(selectorPanel, "scroll-factory", self.scrollStyle1, "auto", "auto")
+	local scrollTable = self:addGuiScrollPane(selectorPanel, "scroll-factory", "helmod_scroll_recipe_factories", "auto", "auto")
 	local tablePanel = self:addGuiTable(scrollTable, "factory-table", 5)
 	Logging:debug("factories:",self.player:getProductions())
 	for key, factory in pairs(self.player:getProductions()) do
@@ -791,7 +781,7 @@ function PlannerRecipeEdition.methods:updateBeaconActivedModules(player, element
 	end
 
 	-- actived modules panel
-	local currentTableModulesPanel = self:addGuiTable(activedModulesPanel,"modules",4, "helmod_recipe-modules")
+	local currentTableModulesPanel = self:addGuiTable(activedModulesPanel,"modules",4, "helmod_table_recipe_modules")
 	for module, count in pairs(beacon.modules) do
 		local tooltip = module
 		local _module = self.player:getItemPrototype(module)
@@ -869,7 +859,7 @@ function PlannerRecipeEdition.methods:updateBeaconSelector(player, element, acti
 	end
 
 	-- ajouter de la table des groupes de recipe
-	local scrollGroups = self:addGuiScrollPane(selectorPanel, "scroll-groups", self.scrollStyle, "auto", "auto")
+	local scrollGroups = self:addGuiScrollPane(selectorPanel, "scroll-groups", "helmod_scroll_recipe_factory_group", "auto", "auto")
 	local groupsPanel = self:addGuiTable(scrollGroups, "beacon-groups", 2)
 	local category = "module"
 	if globalSettings.model_filter_beacon ~= nil and globalSettings.model_filter_beacon == false then category = nil end
@@ -884,7 +874,7 @@ function PlannerRecipeEdition.methods:updateBeaconSelector(player, element, acti
 		selectorPanel["scroll-beacon"].destroy()
 	end
 
-	local scrollTable = self:addGuiScrollPane(selectorPanel, "scroll-beacon", self.scrollStyle1, "auto", "auto")
+	local scrollTable = self:addGuiScrollPane(selectorPanel, "scroll-beacon", "helmod_scroll_recipe_factories", "auto", "auto")
 	local tablePanel = self:addGuiTable(scrollTable, "beacon-table", 5)
 	--Logging:debug("factories:",self.player:getProductions())
 	for key, beacon in pairs(self.player:getProductions()) do
