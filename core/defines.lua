@@ -99,6 +99,34 @@ helmod_defines.beacon["beacon"]={
 
 -- parametre des factories
 helmod_defines.factory = {}
+helmod_defines.factory["burner-mining-drill"]={
+	name = "mining-drill",
+	energy_nominal = 0,
+	speed_nominal = 0.35,
+	module_slots = 0
+}
+
+helmod_defines.factory["electric-mining-drill"]={
+	name = "electric-mining-drill",
+	energy_nominal = 90,
+	speed_nominal = 0.5,
+	module_slots = 2
+}
+
+helmod_defines.factory["offshore-pump"]={
+	name = "offshore-pump",
+	energy_nominal = 0,
+	speed_nominal = 10,
+	module_slots = 0
+}
+
+helmod_defines.factory["pumpjack"]={
+	name = "pumpjack",
+	energy_nominal = 90,
+	speed_nominal = 1,
+	module_slots = 2
+}
+
 helmod_defines.factory["stone-furnace"]={
 	name = "stone-furnace",
 	energy_nominal = 0,

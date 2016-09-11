@@ -5,6 +5,7 @@ require "planner/plannerSettings"
 require "planner/plannerRecipeSelector"
 require "planner/plannerRecipeEdition"
 require "planner/plannerProductEdition"
+require "planner/plannerResourceEdition"
 
 
 PLANNER_COMMAND = "helmod_planner-command"
@@ -151,6 +152,8 @@ function PlannerController.methods:main(player)
 		self.controllers["recipe-selector"] = PlannerRecipeSelector:new(self)
 
 		self.controllers["recipe-edition"] = PlannerRecipeEdition:new(self)
+
+		self.controllers["resource-edition"] = PlannerResourceEdition:new(self)
 
 		self.controllers["product-edition"] = PlannerProductEdition:new(self)
 

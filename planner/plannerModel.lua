@@ -38,6 +38,8 @@ function PlannerModel.methods:getModel(player)
 
 	if model.ingredients == nil then model.ingredients = {} end
 
+	if model.resources == nil then model.resources = {} end
+
 	if model.time == nil then model.time = 60 end
 
 	-- delete the old version item
@@ -48,6 +50,31 @@ function PlannerModel.methods:getModel(player)
 
 	return model
 end
+
+-------------------------------------------------------------------------------
+-- Get Object
+--
+-- @function [parent=#PlannerModel] getObject
+--
+-- @param #LuaPlayer player
+-- @param #string item
+-- @param #string key object name
+--
+-- @return #table
+--
+function PlannerModel.methods:getObject(player, item, key)
+	Logging:trace("PlannerModel:getObject():",player, item, key)
+	local object = nil
+	local model = self:getModel(player)
+	if item == "resource" then
+		object = model.resources[key]
+	elseif model.blocks[item] ~= nil and model.blocks[item].recipes[key] ~= nil then
+		object = model.blocks[item].recipes[key]
+	end
+	return object
+end
+
+
 
 -------------------------------------------------------------------------------
 -- Create Production Block model
@@ -155,6 +182,7 @@ end
 --
 -- @param #LuaPlayer player
 -- @param #string name
+-- @param #string type
 -- @param #number count
 --
 -- @return #table
@@ -263,6 +291,38 @@ function PlannerModel.methods:createRecipeModel(player, name, count)
 	recipeModel.beacon = self:createBeaconModel(player)
 
 	return recipeModel
+end
+
+-------------------------------------------------------------------------------
+-- Create resource model
+--
+-- @function [parent=#PlannerModel] createResourceModel
+--
+-- @param #LuaPlayer player
+-- @param #string name
+-- @param #number count
+--
+-- @return #table
+--
+function PlannerModel.methods:createResourceModel(player, name, type, count)
+	Logging:debug("PlannerModel:createResourceModel():",player, name, type, count)
+	local model = self:getModel(player)
+	if model.resource_id == nil then model.resource_id = 0 end
+	model.resource_id = model.resource_id + 1
+
+	if count == nil then count = 1 end
+
+	local resourceModel = {}
+	resourceModel.id = model.resource_id
+	resourceModel.index = 1
+	resourceModel.weight = 0
+	resourceModel.type = type
+	resourceModel.name = name
+	resourceModel.count = count
+	resourceModel.factory = self:createFactoryModel(player)
+	resourceModel.beacon = self:createBeaconModel(player)
+
+	return resourceModel
 end
 
 -------------------------------------------------------------------------------
@@ -453,7 +513,6 @@ function PlannerModel.methods:setActiveRecipe(player, key)
 		recipe.active = not(recipe.active)
 	end
 	self:setDefaultActiveRecipe(player, key)
-	model.needPrepare = true
 end
 
 -------------------------------------------------------------------------------
@@ -462,32 +521,30 @@ end
 -- @function [parent=#PlannerModel] setBeacon
 --
 -- @param #LuaPlayer player
--- @param #string blockId
--- @param #string key recipe name
+-- @param #string item
+-- @param #string key object name
 -- @param #string name beacon name
 --
-function PlannerModel.methods:setBeacon(player, blockId, key, name)
-	local model = self:getModel(player)
-	if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
-		local recipe = model.blocks[blockId].recipes[key]
+function PlannerModel.methods:setBeacon(player, item, key, name)
+	local object = self:getObject(player, item, key)
+	if object ~= nil then
 		local beacon = self.player:getEntityPrototype(name)
 		if beacon ~= nil then
 			-- set global default
 			self:setDefaultRecipeBeacon(player, key, beacon.name)
 
-			recipe.beacon.name = beacon.name
-			recipe.beacon.type = beacon.type
+			object.beacon.name = beacon.name
+			object.beacon.type = beacon.type
 			-- copy the default parameters
 			local defaultBeacon = self:getDefaultBeacon(player, beacon.name)
 			if defaultBeacon ~= nil then
-				recipe.beacon.energy_nominal = defaultBeacon.energy_nominal
-				recipe.beacon.combo = defaultBeacon.combo
-				recipe.beacon.factory = defaultBeacon.factory
-				recipe.beacon.efficiency = defaultBeacon.efficiency
-				recipe.beacon.module_slots = defaultBeacon.module_slots
+				object.beacon.energy_nominal = defaultBeacon.energy_nominal
+				object.beacon.combo = defaultBeacon.combo
+				object.beacon.factory = defaultBeacon.factory
+				object.beacon.efficiency = defaultBeacon.efficiency
+				object.beacon.module_slots = defaultBeacon.module_slots
 			end
 		end
-		model.needPrepare = true
 	end
 end
 
@@ -497,30 +554,28 @@ end
 -- @function [parent=#PlannerModel] updateBeacon
 --
 -- @param #LuaPlayer player
--- @param #string blockId
--- @param #string key recipe name
+-- @param #string item
+-- @param #string key object name
 -- @param #table options map attribute/valeur
 --
-function PlannerModel.methods:updateBeacon(player, blockId, key, options)
-	local model = self:getModel(player)
-	if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
-		local recipe = model.blocks[blockId].recipes[key]
+function PlannerModel.methods:updateBeacon(player, item, key, options)
+	local object = self:getObject(player, item, key)
+	if object ~= nil then
 		if options.energy_nominal ~= nil then
-			recipe.beacon.energy_nominal = options.energy_nominal
+			object.beacon.energy_nominal = options.energy_nominal
 		end
 		if options.combo ~= nil then
-			recipe.beacon.combo = options.combo
+			object.beacon.combo = options.combo
 		end
 		if options.factory ~= nil then
-			recipe.beacon.factory = options.factory
+			object.beacon.factory = options.factory
 		end
 		if options.efficiency ~= nil then
-			recipe.beacon.efficiency = options.efficiency
+			object.beacon.efficiency = options.efficiency
 		end
 		if options.module_slots ~= nil then
-			recipe.beacon.module_slots = options.module_slots
+			object.beacon.module_slots = options.module_slots
 		end
-		model.needPrepare = true
 	end
 end
 
@@ -530,16 +585,14 @@ end
 -- @function [parent=#PlannerModel] addBeaconModule
 --
 -- @param #LuaPlayer player
--- @param #string blockId
--- @param #string key recipe name
+-- @param #string item
+-- @param #string key object name
 -- @param #string name module name
 --
-function PlannerModel.methods:addBeaconModule(player, blockId, key, name)
-	local model = self:getModel(player)
-	if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
-		local recipe = model.blocks[blockId].recipes[key]
-		self:addModuleModel(recipe.beacon, name)
-		model.needPrepare = true
+function PlannerModel.methods:addBeaconModule(player, item, key, name)
+	local object = self:getObject(player, item, key)
+	if object ~= nil then
+		self:addModuleModel(object.beacon, name)
 	end
 end
 
@@ -549,16 +602,14 @@ end
 -- @function [parent=#PlannerModel] removeBeaconModule
 --
 -- @param #LuaPlayer player
--- @param #string blockId
--- @param #string key recipe name
+-- @param #string item
+-- @param #string key object name
 -- @param #string name module name
 --
-function PlannerModel.methods:removeBeaconModule(player, blockId, key, name)
-	local model = self:getModel(player)
-	if model.blocks[blockId].recipes[key] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
-		local recipe = model.blocks[blockId].recipes[key]
-		self:removeModuleModel(recipe.beacon, name)
-		model.needPrepare = true
+function PlannerModel.methods:removeBeaconModule(player, item, key, name)
+	local object = self:getObject(player, item, key)
+	if object ~= nil then
+		self:removeModuleModel(object.beacon, name)
 	end
 end
 
@@ -568,51 +619,48 @@ end
 -- @function [parent=#PlannerModel] setFactory
 --
 -- @param #LuaPlayer player
--- @param #string blockId
--- @param #string key recipe name
+-- @param #string item
+-- @param #string key object name
 -- @param #string name factory name
 --
-function PlannerModel.methods:setFactory(player, blockId, key, name)
-	local model = self:getModel(player)
-	if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
-		local recipe = model.blocks[blockId].recipes[key]
+function PlannerModel.methods:setFactory(player, item, key, name)
+	Logging:debug("PlannerModel:setFactory():",player, item, key, options)
+	local object = self:getObject(player, item, key)
+	if object ~= nil then
 		local factory = self.player:getEntityPrototype(name)
 		if factory ~= nil then
 			-- set global default
 			self:setDefaultRecipeFactory(player, key, factory.name)
 
-			recipe.factory.name = factory.name
-			recipe.factory.type = factory.type
+			object.factory.name = factory.name
+			object.factory.type = factory.type
 			local defaultFactory = self:getDefaultFactory(player, factory.name)
 			if defaultFactory ~= nil then
-				recipe.factory.energy_nominal = defaultFactory.energy_nominal
-				recipe.factory.speed_nominal = defaultFactory.speed_nominal
-				recipe.factory.module_slots = defaultFactory.module_slots
+				object.factory.energy_nominal = defaultFactory.energy_nominal
+				object.factory.speed_nominal = defaultFactory.speed_nominal
+				object.factory.module_slots = defaultFactory.module_slots
 			end
 		end
-		model.needPrepare = true
 	end
 end
 
 -------------------------------------------------------------------------------
--- Update a recipe
+-- Update a object
 --
--- @function [parent=#PlannerModel] updateRecipe
+-- @function [parent=#PlannerModel] updateObject
 --
 -- @param #LuaPlayer player
--- @param #string blockId
--- @param #string key recipe name
+-- @param #string item
+-- @param #string key object name
 -- @param #table options
 --
-function PlannerModel.methods:updateRecipe(player, blockId, key, options)
-	Logging:debug("PlannerModel:updateRecipe():",player, blockId, key, options)
-	local model = self:getModel(player)
-	if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
-		local recipe = model.blocks[blockId].recipes[key]
+function PlannerModel.methods:updateObject(player, item, key, options)
+	Logging:debug("PlannerModel:updateObject():",player, item, key, options)
+	local object = self:getObject(player, item, key)
+	if object ~= nil then
 		if options.production ~= nil then
-			recipe.production = options.production
+			object.production = options.production
 		end
-		model.needPrepare = true
 	end
 end
 
@@ -622,28 +670,26 @@ end
 -- @function [parent=#PlannerModel] updateFactory
 --
 -- @param #LuaPlayer player
--- @param #string blockId
--- @param #string key recipe name
+-- @param #string item
+-- @param #string key object name
 -- @param #table options
 --
-function PlannerModel.methods:updateFactory(player, blockId, key, options)
-	Logging:debug("PlannerModel:updateFactory():",player, blockId, key, options)
-	local model = self:getModel(player)
-	if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
-		local recipe = model.blocks[blockId].recipes[key]
+function PlannerModel.methods:updateFactory(player, item, key, options)
+	Logging:debug("PlannerModel:updateFactory():",player, item, key, options)
+	local object = self:getObject(player, item, key)
+	if object ~= nil then
 		if options.energy_nominal ~= nil then
-			recipe.factory.energy_nominal = options.energy_nominal
+			object.factory.energy_nominal = options.energy_nominal
 		end
 		if options.speed_nominal ~= nil then
-			recipe.factory.speed_nominal = options.speed_nominal
+			object.factory.speed_nominal = options.speed_nominal
 		end
 		if options.module_slots ~= nil then
-			recipe.factory.module_slots = options.module_slots
+			object.factory.module_slots = options.module_slots
 		end
 		if options.limit ~= nil then
-			recipe.factory.limit = options.limit
+			object.factory.limit = options.limit
 		end
-		model.needPrepare = true
 	end
 end
 
@@ -653,16 +699,14 @@ end
 -- @function [parent=#PlannerModel] addFactoryModule
 --
 -- @param #LuaPlayer player
--- @param #string blockId
--- @param #string key recipe name
+-- @param #string item
+-- @param #string key object name
 -- @param #string name module name
 --
-function PlannerModel.methods:addFactoryModule(player, blockId, key, name)
-	local model = self:getModel(player)
-	if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
-		local recipe = model.blocks[blockId].recipes[key]
-		self:addModuleModel(recipe.factory, name)
-		model.needPrepare = true
+function PlannerModel.methods:addFactoryModule(player, item, key, name)
+	local object = self:getObject(player, item, key)
+	if object ~= nil then
+		self:addModuleModel(object.factory, name)
 	end
 end
 
@@ -672,16 +716,14 @@ end
 -- @function [parent=#PlannerModel] removeFactoryModule
 --
 -- @param #LuaPlayer player
--- @param #string blockId
--- @param #string key recipe name
+-- @param #string item
+-- @param #string key object name
 -- @param #string name module name
 --
-function PlannerModel.methods:removeFactoryModule(player, blockId, key, name)
-	local model = self:getModel(player)
-	if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
-		local recipe = model.blocks[blockId].recipes[key]
-		self:removeModuleModel(recipe.factory, name)
-		model.needPrepare = true
+function PlannerModel.methods:removeFactoryModule(player, item, key, name)
+	local object = self:getObject(player, item, key)
+	if object ~= nil then
+		self:removeModuleModel(object.factory, name)
 	end
 end
 
@@ -915,8 +957,6 @@ function PlannerModel.methods:update(player, force)
 		-- calcul les blocks
 		local input = {}
 		for _, productBlock in spairs(model.blocks, function(t,a,b) return t[b].index > t[a].index end) do
-			Logging:debug("**********PlannerModel:update():",input)
-			Logging:debug("**********PlannerModel:update():",productBlock.products)
 			for _,product in pairs(productBlock.products) do
 				if input[product.name] ~= nil then
 					product.count = input[product.name]
@@ -937,13 +977,14 @@ function PlannerModel.methods:update(player, force)
 
 		self:computeIngredients(player)
 
-
+		self:computeResources(player)
 
 		Logging:debug("PlannerModel:update():","Factory compute OK")
 		-- genere un bilan
 		self:createSummary(player)
 		Logging:debug("PlannerModel:update():","Summary OK")
 
+		Logging:debug("**********model updated:",model)
 	end
 
 end
@@ -963,7 +1004,7 @@ function PlannerModel.methods:getElementAmount(element)
 	if element.amount ~= nil then
 		return element.amount
 	end
-	
+
 	if element.probability ~= nil and element.amount_min ~= nil and  element.amount_max ~= nil then
 		return ((element.amount_min + element.amount_max) * element.probability / 2)
 	end
@@ -971,7 +1012,7 @@ function PlannerModel.methods:getElementAmount(element)
 	return 0
 end
 -------------------------------------------------------------------------------
--- Prepare model
+-- Compute production block
 --
 -- @function [parent=#PlannerModel] computeProductionBlock
 --
@@ -1072,7 +1113,7 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 				end
 				-- cap le productivity a self.capProductivity
 				if productUsage < productNominal*self.capProductivity  then productUsage = productNominal*self.capProductivity end
-				
+
 				local nextCount = math.ceil(pCount*(ingredient.amount/productUsage))
 				ingredient.count = nextCount
 
@@ -1116,7 +1157,7 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 end
 
 -------------------------------------------------------------------------------
--- Prepare model
+-- Compute ingredients
 --
 -- @function [parent=#PlannerModel] computeIngredients
 --
@@ -1127,7 +1168,7 @@ end
 -- @param #string path
 --
 function PlannerModel.methods:computeIngredients(player)
-	Logging:debug("PlannerModel:prepare():",player, element, maxLoop, level, path)
+	Logging:debug("PlannerModel:computeIngredients():",player)
 	local model = self:getModel(player)
 	model.ingredients = {}
 
@@ -1142,32 +1183,66 @@ function PlannerModel.methods:computeIngredients(player)
 			model.ingredients[ingredient.name].count = model.ingredients[ingredient.name].count + ingredient.count
 		end
 	end
+end
 
-	-- calcul minig-drill
+-------------------------------------------------------------------------------
+-- Compute resources
+--
+-- @function [parent=#PlannerModel] computeResources
+--
+-- @param #LuaPlayer player
+-- @param #ModelRecipe recipe
+-- @param #number maxLoop
+-- @param #number level
+-- @param #string path
+--
+function PlannerModel.methods:computeResources(player)
+	Logging:debug("PlannerModel:computeResources():",player)
+	local model = self:getModel(player)
+	local resources = {}
+
+	-- calcul resource
 	for k, ingredient in pairs(model.ingredients) do
 		if ingredient.resource_category ~= nil or ingredient.name == "water" then
-			local extractor = {}
-			if ingredient.resource_category == "basic-solid" then
-				extractor.name = "electric-mining-drill"
-				extractor.speed = 0.5
-				extractor.energy = 90
+			local resource = model.resources[ingredient.name]
+			if resource ~= nil then
+				resource.count = ingredient.count
+			else
+				resource = self:createResourceModel(player, ingredient.name, ingredient.type, ingredient.count)
+				if ingredient.resource_category == "basic-solid" then
+					resource.factory.name = "electric-mining-drill"
+					resource.category = "basic-solid"
+					resource.factory.speed = 0.5
+					resource.factory.energy = 90
+				end
+				if ingredient.name == "water" then
+					resource.factory.name = "offshore-pump"
+					resource.category = "basic-fluid"
+					resource.factory.speed = 10
+					resource.factory.energy = 0
+				end
+				if ingredient.name == "crude-oil" then
+					resource.factory.name = "pumpjack"
+					resource.category = "basic-fluid"
+					resource.factory.speed = 1
+					resource.factory.energy = 90
+				end
 			end
-			if ingredient.name == "water" then
-				extractor.name = "offshore-pump"
-				extractor.speed = 10
-				extractor.energy = 0
+			self:computeFactory(player, resource)
+			
+			resource.factory.limit_count = resource.factory.count
+			resource.blocks = 1
+			if resource.factory.limit ~= nil and resource.factory.limit ~= 0 then
+				resource.factory.limit_count = resource.factory.limit
+				resource.blocks = math.ceil(resource.factory.count/resource.factory.limit)
 			end
-			if ingredient.name == "crude-oil" then
-				extractor.name = "pumpjack"
-				extractor.speed = 1
-				extractor.energy = 90
-			end
-			extractor.count = math.ceil(ingredient.count / (model.time * extractor.speed))
-			extractor.energy_total = extractor.energy * extractor.count * 1000
-			ingredient.extractor = extractor
+			
+			resources[resource.name] = resource
 		end
 	end
+	model.resources = resources
 end
+
 -------------------------------------------------------------------------------
 -- Get productions list
 --
@@ -1199,77 +1274,91 @@ end
 -- @function [parent=#PlannerModel] computeFactory
 --
 -- @param #LuaPlayer player
--- @param #ModelRecipe recipe
+-- @param #ModelObject object
 --
-function PlannerModel.methods:computeFactory(player, recipe)
-	Logging:trace("PlannerModel:computeFactory()",recipe)
+function PlannerModel.methods:computeFactory(player, object)
+	Logging:debug("PlannerModel:computeFactory()",object)
 
-	recipe.factory.speed = recipe.factory.speed_nominal
+	object.factory.speed = object.factory.speed_nominal
 	-- effet module factory
-	for module, value in pairs(recipe.factory.modules) do
+	for module, value in pairs(object.factory.modules) do
 		local bonus = self.player:getModuleBonus(module, "speed")
-		recipe.factory.speed = recipe.factory.speed + recipe.factory.speed_nominal * value * bonus
+		object.factory.speed = object.factory.speed + object.factory.speed_nominal * value * bonus
 	end
 	-- effet module beacon
-	if recipe.beacon.active then
-		for module, value in pairs(recipe.beacon.modules) do
+	if object.beacon.active then
+		for module, value in pairs(object.beacon.modules) do
 			local bonus = self.player:getModuleBonus(module, "speed")
-			recipe.factory.speed = recipe.factory.speed + recipe.factory.speed_nominal * value * bonus * recipe.beacon.efficiency * recipe.beacon.combo
+			object.factory.speed = object.factory.speed + object.factory.speed_nominal * value * bonus * object.beacon.efficiency * object.beacon.combo
 		end
 	end
 
 	-- effet module factory
-	recipe.factory.energy = recipe.factory.energy_nominal
-	for module, value in pairs(recipe.factory.modules) do
+	object.factory.energy = object.factory.energy_nominal
+	for module, value in pairs(object.factory.modules) do
 		local bonus = self.player:getModuleBonus(module, "consumption")
-		recipe.factory.energy = recipe.factory.energy + recipe.factory.energy_nominal * value * bonus
+		object.factory.energy = object.factory.energy + object.factory.energy_nominal * value * bonus
 	end
-	if recipe.beacon.active then
+	if object.beacon.active then
 		-- effet module beacon
-		for module, value in pairs(recipe.beacon.modules) do
+		for module, value in pairs(object.beacon.modules) do
 			local bonus = self.player:getModuleBonus(module, "consumption")
-			recipe.factory.energy = recipe.factory.energy + recipe.factory.energy_nominal * value * bonus * recipe.beacon.efficiency * recipe.beacon.combo
+			object.factory.energy = object.factory.energy + object.factory.energy_nominal * value * bonus * object.beacon.efficiency * object.beacon.combo
 		end
 	end
 
 	-- cap le speed a self.capSpeed
-	if recipe.factory.speed < recipe.factory.speed_nominal*self.capSpeed  then recipe.factory.speed = recipe.factory.speed_nominal*self.capSpeed end
+	if object.factory.speed < object.factory.speed_nominal*self.capSpeed  then object.factory.speed = object.factory.speed_nominal*self.capSpeed end
 	-- cap l'energy a self.capEnergy
-	if recipe.factory.energy < recipe.factory.energy_nominal*self.capEnergy  then recipe.factory.energy = recipe.factory.energy_nominal*self.capEnergy end
+	if object.factory.energy < object.factory.energy_nominal*self.capEnergy  then object.factory.energy = object.factory.energy_nominal*self.capEnergy end
 	-- compte le nombre de machines necessaires
-	local product = nil
-	for k, element in pairs(recipe.products) do
-		product = element
-	end
-	--Logging:trace("product=",product)
-	if product ~= nil then
+	if object.products ~= nil then
+		local product = nil
+		for k, element in pairs(object.products) do
+			product = element
+		end
+		--Logging:trace("product=",product)
+		if product ~= nil then
+			local model = self:getModel(player)
+			-- [nombre d'item] * [effort necessaire du recipe] / ([la vitesse de la factory] * [nombre produit par le recipe] * [le temps en second])
+			local count = math.ceil(product.count*object.energy/(object.factory.speed*self:getElementAmount(product)*model.time))
+			object.factory.count = count
+			if object.beacon.active then
+				object.beacon.count = math.ceil(count/object.beacon.factory)
+			else
+				object.beacon.count = 0
+			end
+		end
+	else
+		local product = object
 		local model = self:getModel(player)
-		-- [nombre d'item] * [effort necessaire du recipe] / ([la vitesse de la factory] * [nombre produit par le recipe] * [le temps en second])
-		local count = math.ceil(product.count*recipe.energy/(recipe.factory.speed*self:getElementAmount(product)*model.time))
-		recipe.factory.count = count
-		if recipe.beacon.active then
-			recipe.beacon.count = math.ceil(count/recipe.beacon.factory)
+		-- [nombre d'item] / ([la vitesse de la factory] * [le temps en second])
+		local count = math.ceil(product.count/(object.factory.speed*model.time))
+		object.factory.count = count
+		if object.beacon.active then
+			object.beacon.count = math.ceil(count/object.beacon.factory)
 		else
-			recipe.beacon.count = 0
+			object.beacon.count = 0
 		end
 	end
 
-	recipe.beacon.energy = recipe.beacon.energy_nominal
+	object.beacon.energy = object.beacon.energy_nominal
 	-- calcul des totaux
-	recipe.factory.energy_total = math.ceil(recipe.factory.count*recipe.factory.energy)*1000
-	recipe.beacon.energy_total = math.ceil(recipe.beacon.count*recipe.beacon.energy)*1000
-	recipe.energy_total = recipe.factory.energy_total + recipe.beacon.energy_total
+	object.factory.energy_total = math.ceil(object.factory.count*object.factory.energy)*1000
+	object.beacon.energy_total = math.ceil(object.beacon.count*object.beacon.energy)*1000
+	object.energy_total = object.factory.energy_total + object.beacon.energy_total
 	-- arrondi des valeurs
-	recipe.factory.speed = math.ceil(recipe.factory.speed*100)/100
-	recipe.factory.energy = math.ceil(recipe.factory.energy)
-	recipe.beacon.energy = math.ceil(recipe.beacon.energy)
+	object.factory.speed = math.ceil(object.factory.speed*100)/100
+	object.factory.energy = math.ceil(object.factory.energy)
+	object.beacon.energy = math.ceil(object.beacon.energy)
 end
 
 -------------------------------------------------------------------------------
 -- Compute energy, speed, number total
 --
--- @param #LuaPlayer player
 -- @function [parent=#PlannerModel] createSummary
+--
+-- @param #LuaPlayer player
 --
 function PlannerModel.methods:createSummary(player)
 	local model = self:getModel(player)
@@ -1280,42 +1369,24 @@ function PlannerModel.methods:createSummary(player)
 
 	local energy = 0
 
+	-- cumul de l'energie des blocks
 	for _, block in pairs(model.blocks) do
-		-- cumul de l'energie
 		energy = energy + block.power
 		for _, recipe in pairs(block.recipes) do
-			-- calcul nombre factory
-			local factory = recipe.factory
-			if model.summary.factories[factory.name] == nil then model.summary.factories[factory.name] = {name = factory.name, count = 0} end
-			model.summary.factories[factory.name].count = model.summary.factories[factory.name].count + factory.count
-			-- calcul nombre de module factory
-			for module, value in pairs(factory.modules) do
-				if model.summary.modules[module] == nil then model.summary.modules[module] = {name = module, count = 0} end
-				model.summary.modules[module].count = model.summary.modules[module].count + value * factory.count
-			end
-			-- calcul nombre beacon
-			local beacon = recipe.beacon
-			if model.summary.beacons[beacon.name] == nil then model.summary.beacons[beacon.name] = {name = beacon.name, count = 0} end
-			model.summary.beacons[beacon.name].count = model.summary.beacons[beacon.name].count + beacon.count
-			-- calcul nombre de module beacon
-			for module, value in pairs(beacon.modules) do
-				if model.summary.modules[module] == nil then model.summary.modules[module] = {name = module, count = 0} end
-				model.summary.modules[module].count = model.summary.modules[module].count + value * beacon.count
-			end
+			self:computeSummaryFactory(player, recipe)
 		end
 	end
 
-	-- calcul minig-drill
-	for k, ingredient in pairs(model.ingredients) do
-		if ingredient.extractor ~= nil then
-			energy = energy + ingredient.extractor.energy_total
+	-- cumul de l'energie des resources
+	for k, resource in pairs(model.resources) do
+		if resource.energy_total ~= nil then
+			energy = energy + resource.energy_total
+			self:computeSummaryFactory(player, resource)
 		end
 	end
 
 
 	model.summary.energy = energy
-
-
 
 	model.generators = {}
 	model.generators["solar-panel"] = {name = "solar-panel", count = math.ceil(energy/(60*1000))}
@@ -1323,6 +1394,35 @@ function PlannerModel.methods:createSummary(player)
 
 end
 
+-------------------------------------------------------------------------------
+-- Compute summary factory
+--
+-- @function [parent=#PlannerModel] computeSummaryFactory
+--
+-- @param #LuaPlayer player
+-- @param object object
+--
+function PlannerModel.methods:computeSummaryFactory(player, object)
+	local model = self:getModel(player)
+	-- calcul nombre factory
+	local factory = object.factory
+	if model.summary.factories[factory.name] == nil then model.summary.factories[factory.name] = {name = factory.name, count = 0} end
+	model.summary.factories[factory.name].count = model.summary.factories[factory.name].count + factory.count
+	-- calcul nombre de module factory
+	for module, value in pairs(factory.modules) do
+		if model.summary.modules[module] == nil then model.summary.modules[module] = {name = module, count = 0} end
+		model.summary.modules[module].count = model.summary.modules[module].count + value * factory.count
+	end
+	-- calcul nombre beacon
+	local beacon = object.beacon
+	if model.summary.beacons[beacon.name] == nil then model.summary.beacons[beacon.name] = {name = beacon.name, count = 0} end
+	model.summary.beacons[beacon.name].count = model.summary.beacons[beacon.name].count + beacon.count
+	-- calcul nombre de module beacon
+	for module, value in pairs(beacon.modules) do
+		if model.summary.modules[module] == nil then model.summary.modules[module] = {name = module, count = 0} end
+		model.summary.modules[module].count = model.summary.modules[module].count + value * beacon.count
+	end
+end
 -------------------------------------------------------------------------------
 -- Get and initialize the default
 --
@@ -1361,37 +1461,6 @@ function PlannerModel.methods:getDefaultRecipe(player, key)
 		}
 	end
 	return default.recipes[key]
-end
-
--------------------------------------------------------------------------------
--- Active/desactive a recipe
---
--- @function [parent=#PlannerModel] setDefaultActiveRecipe
---
--- @param #LuaPlayer player
--- @param #string key recipe name
---
-function PlannerModel.methods:setDefaultActiveRecipe(player, key)
-	local recipe = self:getDefaultRecipe(player, key)
-	recipe.active = not(recipe.active)
-end
-
--------------------------------------------------------------------------------
--- Check is active recipe
---
--- @function [parent=#PlannerModel] isDefaultActiveRecipe
---
--- @param #LuaPlayer player
--- @param #string key recipe name
---
--- @return #boolean
---
-function PlannerModel.methods:isDefaultActiveRecipe(player, key)
-	local default = self:getDefault(player)
-	if default.recipes[key] == nil then
-		return true
-	end
-	return default.recipes[key].active
 end
 
 -------------------------------------------------------------------------------

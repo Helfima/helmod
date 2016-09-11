@@ -23,7 +23,7 @@ function PlannerResult.methods:init(parent)
 	self.PRODUCTION_LINE_TAB = "product-line"
 	self.SUMMARY_TAB = "summary"
 	self.RESOURCES_TAB = "resources"
-	
+
 end
 
 -------------------------------------------------------------------------------
@@ -179,17 +179,17 @@ end
 -- Send event
 --
 -- @function [parent=#PlannerResult] send_event
--- 
+--
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
--- 
+--
 function PlannerResult.methods:send_event(player, element, action, item, item2, item3)
-		Logging:debug("PlannerDialog:send_event():",player, element, action, item, item2, item3)
-		self:on_event(player, element, action, item, item2, item3)
+	Logging:debug("PlannerDialog:send_event():",player, element, action, item, item2, item3)
+	self:on_event(player, element, action, item, item2, item3)
 end
 -------------------------------------------------------------------------------
 -- On event
@@ -211,6 +211,10 @@ function PlannerResult.methods:on_event(player, element, action, item, item2, it
 		model.currentTab = item
 		self:update(player, item, item2, item3)
 		self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
+		self.parent:send_event(player, "HMPlannerResourceEdition", "CLOSE")
+		self.parent:send_event(player, "HMPlannerRecipeEdition", "CLOSE")
+		self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
+		self.parent:send_event(player, "HMPlannerSettings", "CLOSE")
 	end
 
 	if action == "change-sort" then
@@ -362,7 +366,7 @@ function PlannerResult.methods:updateProductionLine(player, item, item2, item3)
 		local resultPanel = self:getResultPanel(player, ({"helmod_common.blocks"}))
 		-- data panel
 		local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "helmod_scroll_block_list", "auto", "auto")
-		
+
 		local globalSettings = self.player:getGlobal(player, "settings")
 
 		local extra_cols = 0
@@ -418,7 +422,7 @@ function PlannerResult.methods:updateProductionBlock(player, item, item2, item3)
 	Logging:debug("model:", model)
 	-- data
 	local menuPanel = self:getMenuPanel(player, ({"helmod_result-panel.tab-title-production-block"}))
-	
+
 	local blockId = "new"
 	if item2 ~= nil then
 		blockId = item2
@@ -438,17 +442,17 @@ function PlannerResult.methods:updateProductionBlock(player, item, item2, item3)
 		local blockPanel = self:addGuiFrameV(infoPanel, "block", "helmod_frame_default", ({"helmod_common.block"}))
 		local blockScroll = self:addGuiScrollPane(blockPanel, "output-scroll", "helmod_scroll_block_info", "auto", "auto")
 		local blockTable = self:addGuiTable(blockScroll,"output-table",2)
-		
+
 		self:addGuiLabel(blockTable, "label-power", ({"helmod_label.electrical-consumption"}))
 		if model.summary ~= nil then
 			self:addGuiLabel(blockTable, "power", self:formatNumberKilo(element.power, "W"),"helmod_label-right-70")
 		end
-		
+
 		self:addGuiLabel(blockTable, "label-count", ({"helmod_label.block-number"}))
 		if model.summary ~= nil then
 			self:addGuiLabel(blockTable, "count", element.count,"helmod_label-right-70")
 		end
-		
+
 		local elementPanel = self:addGuiFlowV(infoPanel, "elements", "helmod_flow_default")
 		-- ouput panel
 		local outputPanel = self:addGuiFrameV(elementPanel, "output", "helmod_frame_resize_row_width", ({"helmod_common.output"}))
@@ -462,7 +466,7 @@ function PlannerResult.methods:updateProductionBlock(player, item, item2, item3)
 				self:addGuiLabel(cell, product.name, self:formatNumber(product.count), "helmod_label-right-60")
 			end
 		end
-		
+
 		-- input panel
 		local inputPanel = self:addGuiFrameV(elementPanel, "input", "helmod_frame_resize_row_width", ({"helmod_common.input"}))
 		local outputScroll = self:addGuiScrollPane(inputPanel, "output-scroll", "helmod_scroll_block_element", "auto", "auto")
@@ -479,7 +483,7 @@ function PlannerResult.methods:updateProductionBlock(player, item, item2, item3)
 		local resultPanel = self:getResultPanel(player, ({"helmod_common.recipes"}))
 		-- data panel
 		local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "helmod_scroll_block_list", "auto", "auto")
-		
+
 		local globalSettings = self.player:getGlobal(player, "settings")
 
 		local extra_cols = 0
@@ -1016,7 +1020,7 @@ function PlannerResult.methods:updateResources(player)
 	-- data
 	local resultPanel = self:getResultPanel(player, ({"helmod_result-panel.tab-title-resources"}))
 	local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "helmod_scroll_block_list", "auto", "auto")
-		
+
 	local globalSettings = self.player:getGlobal(player, "settings")
 
 	local extra_cols = 0
@@ -1061,31 +1065,62 @@ function PlannerResult.methods:updateSummary(player)
 
 	-- resources
 	local resourcesPanel = self:addGuiFrameV(dataPanel, "ressources", "helmod_frame_default", ({"helmod_common.resources"}))
-	local resourcesTable = self:addGuiTable(resourcesPanel,"table-resources",3)
+	local resourcesTable = self:addGuiTable(resourcesPanel,"table-resources",5)
 	self:addGuiLabel(resourcesTable, "header-ingredient", ({"helmod_result-panel.col-header-ingredient"}))
+	self:addGuiLabel(resourcesTable, "header-block", ({"helmod_result-panel.col-header-production-block"}))
 	self:addGuiLabel(resourcesTable, "header-extrator", ({"helmod_result-panel.col-header-extractor"}))
+	self:addGuiLabel(resourcesTable, "header-beacon", ({"helmod_result-panel.col-header-beacon"}))
 	self:addGuiLabel(resourcesTable, "header-energy", ({"helmod_result-panel.col-header-energy"}))
 
-	for _, ingredient in pairs(model.ingredients) do
-		if ingredient.resource_category ~= nil then
-			-- ingredient
-			local guiIngredient = self:addGuiFlowH(resourcesTable,"ingredient"..ingredient.name)
-			self:addSpriteIconButton(guiIngredient, "HMPlannerIngredient=OPEN=ID=", self.player:getItemIconType(ingredient), ingredient.name)
-			self:addGuiLabel(guiIngredient, "count", self:formatNumber(ingredient.count), "helmod_label-right-50")
-			
-			-- extractor
-			local guiExtractor = self:addGuiFlowH(resourcesTable,"extractor"..ingredient.name)
-			if ingredient.extractor ~= nil then
-				self:addSpriteIconButton(guiExtractor, "HMPlannerIngredient=OPEN=ID=", "item", ingredient.extractor.name)
-				self:addGuiLabel(guiExtractor, "extractor", self:formatNumberKilo(ingredient.extractor.count), "helmod_label-right-50")
-			else
-				self:addGuiLabel(guiExtractor, "extractor", "Data need update")
-			end
+	for _, resource in pairs(model.resources) do
+		-- ingredient
+		local guiIngredient = self:addGuiFlowH(resourcesTable,"ingredient"..resource.name)
+		self:addSpriteIconButton(guiIngredient, "HMPlannerIngredient=OPEN=ID=", self.player:getItemIconType(resource), resource.name)
+		self:addGuiLabel(guiIngredient, "count", self:formatNumber(resource.count), "helmod_label-right-50")
 
-			-- col energy
-			local guiEnergy = self:addGuiFlowH(resourcesTable,"energy"..ingredient.name)
-			self:addGuiLabel(guiEnergy, ingredient.name, self:formatNumberKilo(ingredient.extractor.energy_total, "W"), "helmod_label-right-70")
+		-- col block
+		local guiBlock = self:addGuiFlowH(resourcesTable,"block"..resource.name)
+		self:addGuiLabel(guiBlock, "count", self:formatNumber(resource.blocks), "helmod_label-right-50")
+
+		-- factory
+		local guiFactory = self:addGuiFlowH(resourcesTable,"extractor"..resource.name)
+		local factory = resource.factory
+		if factory ~= nil then
+			self:addSelectSpriteIconButton(guiFactory, "HMPlannerResourceEdition=OPEN=ID=resource="..resource.name.."=", self.player:getIconType(factory), factory.name, factory.name, nil, ({"tooltip.edit-resource"}))
+			local guiFactoryModule = self:addGuiTable(guiFactory,"factory-modules"..resource.name, 2, "helmod_factory_modules")
+			-- modules
+			for name, count in pairs(factory.modules) do
+				for index = 1, count, 1 do
+					self:addSmSpriteButton(guiFactoryModule, "HMPlannerFactorySelector_factory-module_"..name.."_"..index, "item", name)
+					index = index + 1
+				end
+			end
+			self:addGuiLabel(guiFactory, "factory", self:formatNumber(factory.limit_count).."/"..self:formatNumber(factory.count), "helmod_label-right-50")
+		else
+			self:addGuiLabel(guiFactory, "factory", "Data need update")
 		end
+
+		-- beacon
+		local guiBeacon = self:addGuiFlowH(resourcesTable,"beacon"..resource.name)
+		local beacon = resource.beacon
+		if beacon ~= nil then
+			self:addSelectSpriteIconButton(guiBeacon, "HMPlannerResourceEdition=OPEN=ID=resource="..resource.name.."=", self.player:getIconType(beacon), beacon.name, beacon.name, nil, ({"tooltip.edit-resouce"}))
+			local guiBeaconModule = self:addGuiTable(guiBeacon,"beacon-modules"..resource.name, 1, "helmod_beacon_modules")
+			-- modules
+			for name, count in pairs(beacon.modules) do
+				for index = 1, count, 1 do
+					self:addSmSpriteButton(guiBeaconModule, "HMPlannerFactorySelector_beacon-module_"..name.."_"..index, "item", name)
+					index = index + 1
+				end
+			end
+			self:addGuiLabel(guiBeacon, "beacon", self:formatNumberKilo(resource.beacon.count), "helmod_label-right-50")
+		else
+			self:addGuiLabel(guiBeacon, "beacon", "Data need update")
+		end
+
+		-- col energy
+		local guiEnergy = self:addGuiFlowH(resourcesTable,"energy"..resource.name)
+		self:addGuiLabel(guiEnergy, resource.name, self:formatNumberKilo(resource.energy_total, "W"), "helmod_label-right-70")
 	end
 
 	local energyPanel = self:addGuiFrameV(dataPanel, "energy", "helmod_frame_default", ({"helmod_common.generators"}))
@@ -1106,7 +1141,7 @@ function PlannerResult.methods:updateSummary(player)
 		self:addSpriteIconButton(guiCell, "HMPlannerFactories=OPEN=ID=", "item", element.name)
 		self:addGuiLabel(guiCell, element.name, self:formatNumberKilo(element.count), "helmod_label-right-50")
 	end
-	
+
 	-- beacons
 	local beaconPanel = self:addGuiFrameV(dataPanel, "beacon", "helmod_frame_default", ({"helmod_common.beacons"}))
 	local resultTable = self:addGuiTable(beaconPanel,"table-beacon",10)
@@ -1116,7 +1151,7 @@ function PlannerResult.methods:updateSummary(player)
 		self:addSpriteIconButton(guiCell, "HMPlannerBeacons=OPEN=ID=", "item", element.name)
 		self:addGuiLabel(guiCell, element.name, self:formatNumberKilo(element.count), "helmod_label-right-50")
 	end
-	
+
 	-- modules
 	local modulesPanel = self:addGuiFrameV(dataPanel, "modules", "helmod_frame_default", ({"helmod_common.modules"}))
 	local resultTable = self:addGuiTable(modulesPanel,"table-modules",10)
