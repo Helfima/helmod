@@ -78,7 +78,22 @@ function PlannerAbstractEdition.methods:getFactoryPanel(player)
 	if panel["factory"] ~= nil and panel["factory"].valid then
 		return panel["factory"]
 	end
-	return self:addGuiFrameH(panel, "factory", "helmod_frame_resize_row_width", ({"helmod_common.factory"}))
+	return self:addGuiFlowH(panel, "factory", "helmod_flow_resize_row_width")
+end
+
+-------------------------------------------------------------------------------
+-- Get or create other info panel
+--
+-- @function [parent=#PlannerAbstractEdition] getFactoryOtherInfoPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerAbstractEdition.methods:getFactoryOtherInfoPanel(player)
+	local panel = self:getFactoryPanel(player)
+	if panel["other-info"] ~= nil and panel["other-info"].valid then
+		return panel["other-info"]
+	end
+	return self:addGuiFlowV(panel, "other-info", "helmod_flow_default")
 end
 
 -------------------------------------------------------------------------------
@@ -89,11 +104,11 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerAbstractEdition.methods:getFactorySelectorPanel(player)
-	local panel = self:getFactoryPanel(player)
+	local panel = self:getFactoryOtherInfoPanel(player)
 	if panel["selector"] ~= nil and panel["selector"].valid then
 		return panel["selector"]
 	end
-	return self:addGuiFrameV(panel, "selector", "helmod_frame_default")
+	return self:addGuiFrameV(panel, "selector", "helmod_frame_recipe_factory", ({"helmod_common.factory"}))
 end
 
 -------------------------------------------------------------------------------
@@ -108,22 +123,7 @@ function PlannerAbstractEdition.methods:getFactoryInfoPanel(player)
 	if panel["info"] ~= nil and panel["info"].valid then
 		return panel["info"]
 	end
-	return self:addGuiFrameV(panel, "info", "helmod_frame_recipe_info")
-end
-
--------------------------------------------------------------------------------
--- Get or create factory modules panel
---
--- @function [parent=#PlannerAbstractEdition] getFactoryModulesPanel
---
--- @param #LuaPlayer player
---
-function PlannerAbstractEdition.methods:getFactoryModulesPanel(player)
-	local panel = self:getFactoryPanel(player)
-	if panel["modules"] ~= nil and panel["modules"].valid then
-		return panel["modules"]
-	end
-	return self:addGuiFlowV(panel, "modules")
+	return self:addGuiFrameV(panel, "info", "helmod_frame_recipe_factory", ({"helmod_common.factory"}))
 end
 
 -------------------------------------------------------------------------------
@@ -134,7 +134,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerAbstractEdition.methods:getFactoryModulesSelectorPanel(player)
-	local modulesPanel = self:getFactoryModulesPanel(player)
+	local modulesPanel = self:getFactoryOtherInfoPanel(player)
 	local selectionModulesPanel = modulesPanel["selection-modules"]
 	if selectionModulesPanel == nil then
 		selectionModulesPanel = self:addGuiFrameV(modulesPanel, "selection-modules", "helmod_frame_recipe_modules", ({"helmod_recipe-edition-panel.selection-modules"}))
@@ -155,7 +155,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerAbstractEdition.methods:getFactoryActivedModulesPanel(player)
-	local modulesPanel = self:getFactoryModulesPanel(player)
+	local modulesPanel = self:getFactoryOtherInfoPanel(player)
 	if modulesPanel["current-modules"] ~= nil and modulesPanel["current-modules"].valid then
 		return modulesPanel["current-modules"]
 	end
@@ -174,7 +174,22 @@ function PlannerAbstractEdition.methods:getBeaconPanel(player)
 	if panel["beacon"] ~= nil and panel["beacon"].valid then
 		return panel["beacon"]
 	end
-	return self:addGuiFrameH(panel, "beacon", "helmod_frame_resize_row_width", ({"helmod_common.beacon"}))
+	return self:addGuiFlowH(panel, "beacon", "helmod_flow_resize_row_width")
+end
+
+-------------------------------------------------------------------------------
+-- Get or create other info panel
+--
+-- @function [parent=#PlannerAbstractEdition] getBeaconOtherInfoPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerAbstractEdition.methods:getBeaconOtherInfoPanel(player)
+	local panel = self:getBeaconPanel(player)
+	if panel["selector"] ~= nil and panel["selector"].valid then
+		return panel["selector"]
+	end
+	return self:addGuiFlowV(panel, "selector", "helmod_flow_default")
 end
 
 -------------------------------------------------------------------------------
@@ -185,11 +200,11 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerAbstractEdition.methods:getBeaconSelectorPanel(player)
-	local panel = self:getBeaconPanel(player)
+	local panel = self:getBeaconOtherInfoPanel(player)
 	if panel["selector"] ~= nil and panel["selector"].valid then
 		return panel["selector"]
 	end
-	return self:addGuiFrameV(panel, "selector", "helmod_frame_default")
+	return self:addGuiFrameV(panel, "selector", "helmod_frame_recipe_factory", ({"helmod_common.beacon"}))
 end
 
 -------------------------------------------------------------------------------
@@ -204,22 +219,7 @@ function PlannerAbstractEdition.methods:getBeaconInfoPanel(player)
 	if panel["info"] ~= nil and panel["info"].valid then
 		return panel["info"]
 	end
-	return self:addGuiFrameV(panel, "info", "helmod_frame_recipe_info")
-end
-
--------------------------------------------------------------------------------
--- Get or create modules panel
---
--- @function [parent=#PlannerAbstractEdition] getBeaconModulesPanel
---
--- @param #LuaPlayer player
---
-function PlannerAbstractEdition.methods:getBeaconModulesPanel(player)
-	local panel = self:getBeaconPanel(player)
-	if panel["modules"] ~= nil and panel["modules"].valid then
-		return panel["modules"]
-	end
-	return self:addGuiFlowV(panel, "modules")
+	return self:addGuiFrameV(panel, "info", "helmod_frame_recipe_factory", ({"helmod_common.beacon"}))
 end
 
 -------------------------------------------------------------------------------
@@ -230,7 +230,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerAbstractEdition.methods:getBeaconModulesSelectorPanel(player)
-	local modulesPanel = self:getBeaconModulesPanel(player)
+	local modulesPanel = self:getBeaconOtherInfoPanel(player)
 	local selectionModulesPanel = modulesPanel["selection-modules"]
 	if selectionModulesPanel == nil then
 		selectionModulesPanel = self:addGuiFrameV(modulesPanel, "selection-modules", "helmod_frame_recipe_modules", ({"helmod_recipe-edition-panel.selection-modules"}))
@@ -251,7 +251,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerAbstractEdition.methods:getBeaconActivedModulesPanel(player)
-	local modulesPanel = self:getBeaconModulesPanel(player)
+	local modulesPanel = self:getBeaconOtherInfoPanel(player)
 	if modulesPanel["current-modules"] ~= nil and modulesPanel["current-modules"].valid then
 		return modulesPanel["current-modules"]
 	end
@@ -276,7 +276,12 @@ function PlannerAbstractEdition.methods:after_open(player, element, action, item
 	self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
 	self.parent:send_event(player, "HMPlannerSettings", "CLOSE")
 	local object = self:getObject(player, element, action, item, item2, item3)
-	
+
+	local model = self.model:getModel(player)
+	if model.module_panel == nil then
+		model.module_panel = true
+	end
+
 	self:buildHeaderPanel(player)
 	if object ~= nil then
 		-- factory
@@ -308,8 +313,7 @@ end
 function PlannerAbstractEdition.methods:buildFactoryPanel(player)
 	Logging:debug("PlannerAbstractEdition:buildFactoryPanel():",player)
 	self:getFactoryInfoPanel(player)
-	self:getFactoryModulesPanel(player)
-	self:getFactorySelectorPanel(player)
+	self:getFactoryOtherInfoPanel(player)
 end
 
 -------------------------------------------------------------------------------
@@ -322,8 +326,7 @@ end
 function PlannerAbstractEdition.methods:buildBeaconPanel(player)
 	Logging:debug("PlannerAbstractEdition:buildBeaconPanel():",player)
 	self:getBeaconInfoPanel(player)
-	self:getBeaconModulesPanel(player)
-	self:getBeaconSelectorPanel(player)
+	self:getBeaconOtherInfoPanel(player)
 end
 
 -------------------------------------------------------------------------------
@@ -382,10 +385,15 @@ end
 --
 function PlannerAbstractEdition.methods:updateFactory(player, element, action, item, item2, item3)
 	Logging:debug("PlannerAbstractEdition:updateFactory():",player, element, action, item, item2, item3)
+	local model = self.model:getModel(player)
+
 	self:updateFactoryInfo(player, element, action, item, item2, item3)
-	self:updateFactoryActivedModules(player, element, action, item, item2, item3)
-	self:updateFactoryModulesSelector(player, element, action, item, item2, item3)
-	self:updateFactorySelector(player, element, action, item, item2, item3)
+	if model.module_panel == true then
+		self:updateFactoryActivedModules(player, element, action, item, item2, item3)
+		self:updateFactoryModulesSelector(player, element, action, item, item2, item3)
+	else
+		self:updateFactorySelector(player, element, action, item, item2, item3)
+	end
 end
 
 -------------------------------------------------------------------------------
@@ -402,10 +410,15 @@ end
 --
 function PlannerAbstractEdition.methods:updateBeacon(player, element, action, item, item2, item3)
 	Logging:debug("PlannerAbstractEdition:updateBeacon():",player, element, action, item, item2, item3)
+	local model = self.model:getModel(player)
+
 	self:updateBeaconInfo(player, element, action, item, item2, item3)
-	self:updateBeaconActivedModules(player, element, action, item, item2, item3)
-	self:updateBeaconModulesSelector(player, element, action, item, item2, item3)
-	self:updateBeaconSelector(player, element, action, item, item2, item3)
+	if model.module_panel == true then
+		self:updateBeaconActivedModules(player, element, action, item, item2, item3)
+		self:updateBeaconModulesSelector(player, element, action, item, item2, item3)
+	else
+		self:updateBeaconSelector(player, element, action, item, item2, item3)
+	end
 end
 
 -------------------------------------------------------------------------------
@@ -440,6 +453,7 @@ function PlannerAbstractEdition.methods:updateFactoryInfo(player, element, actio
 	Logging:debug("PlannerAbstractEdition:updateFactoryInfo():",player, element, action, item, item2, item3)
 	local infoPanel = self:getFactoryInfoPanel(player)
 	local object = self:getObject(player, element, action, item, item2, item3)
+	local model = self.model:getModel(player)
 	if object ~= nil then
 		Logging:debug("PlannerAbstractEdition:updateFactoryInfo():object:",object)
 		local factory = object.factory
@@ -450,7 +464,9 @@ function PlannerAbstractEdition.methods:updateFactoryInfo(player, element, actio
 		end
 
 		local headerPanel = self:addGuiTable(infoPanel,"table-header",2)
-		self:addSpriteIconButton(headerPanel, "icon", self.player:getIconType(factory), factory.name)
+		local tooltip = ({"tooltip.selector-module"})
+		if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
+		self:addSelectSpriteIconButton(headerPanel, self:classname().."=change-panel=ID="..item.."="..object.name.."=", self.player:getIconType(factory), factory.name, factory.name, nil, tooltip)
 		if _factory == nil then
 			self:addGuiLabel(headerPanel, "label", factory.name)
 		else
@@ -506,12 +522,21 @@ function PlannerAbstractEdition.methods:updateFactoryModulesSelector(player, ele
 	if selectorPanel["modules"] == nil then
 		local tableModulesPanel = self:addGuiTable(selectorPanel,"modules",4)
 		for k, module in pairs(self.player:getModules()) do
+			local allowed = true
 			local consumption = self:formatPercent(self.player:getModuleBonus(module.name, "consumption"))
 			local speed = self:formatPercent(self.player:getModuleBonus(module.name, "speed"))
 			local productivity = self:formatPercent(self.player:getModuleBonus(module.name, "productivity"))
 			local pollution = self:formatPercent(self.player:getModuleBonus(module.name, "pollution"))
+			if productivity > 0 then
+				if module.limitations[object.name] == nil then allowed = false end
+			end
 			local tooltip = ({"tooltip.module-description" , module.localised_name, consumption, speed, productivity, pollution})
-			self:addSpriteIconButton(tableModulesPanel, self:classname().."=factory-module-add=ID="..item.."="..object.name.."=", "item", module.name, module.name, tooltip)
+			if allowed == false then
+				tooltip = ({"item-limitation."..module.limitation_message_key})
+				self:addSelectSpriteIconButton(tableModulesPanel, self:classname().."=do-nothing=ID="..item.."="..object.name.."=", "item", module.name, module.name, "red", tooltip)
+			else
+				self:addSelectSpriteIconButton(tableModulesPanel, self:classname().."=factory-module-add=ID="..item.."="..object.name.."=", "item", module.name, module.name, nil, tooltip)
+			end
 		end
 	end
 end
@@ -551,7 +576,7 @@ function PlannerAbstractEdition.methods:updateFactoryActivedModules(player, elem
 			tooltip = ({"tooltip.module-description" , _module.localised_name, consumption, speed, productivity, pollution})
 		end
 		for i = 1, count, 1 do
-			self:addSpriteIconButton(currentTableModulesPanel, self:classname().."=factory-module-remove=ID="..item.."="..object.name.."="..module.."="..i, "item", module, module, tooltip)
+			self:addSelectSpriteIconButton(currentTableModulesPanel, self:classname().."=factory-module-remove=ID="..item.."="..object.name.."="..module.."="..i, "item", module, module, nil, tooltip)
 		end
 	end
 end
@@ -626,7 +651,8 @@ function PlannerAbstractEdition.methods:updateBeaconInfo(player, element, action
 	Logging:debug("PlannerAbstractEdition:updateBeaconInfo():",player, element, action, item, item2, item3)
 	local infoPanel = self:getBeaconInfoPanel(player)
 	local object = self:getObject(player, element, action, item, item2, item3)
-	
+	local model = self.model:getModel(player)
+
 	if object ~= nil then
 		local beacon = object.beacon
 		local _beacon = self.player:getItemPrototype(beacon.name)
@@ -636,7 +662,9 @@ function PlannerAbstractEdition.methods:updateBeaconInfo(player, element, action
 		end
 
 		local headerPanel = self:addGuiTable(infoPanel,"table-header",2)
-		self:addSpriteIconButton(headerPanel, "icon", self.player:getIconType(beacon), beacon.name)
+		local tooltip = ({"tooltip.selector-module"})
+		if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
+		self:addSelectSpriteIconButton(headerPanel, self:classname().."=change-panel=ID="..item.."="..object.name.."=", self.player:getIconType(beacon), beacon.name, beacon.name, nil, tooltip)
 		if _beacon == nil then
 			self:addGuiLabel(headerPanel, "label", beacon.name)
 		else
@@ -679,7 +707,7 @@ end
 function PlannerAbstractEdition.methods:updateBeaconActivedModules(player, element, action, item, item2, item3)
 	Logging:debug("PlannerAbstractEdition:updateBeaconActivedModules():",player, element, action, item, item2, item3)
 	local activedModulesPanel = self:getBeaconActivedModulesPanel(player)
-	
+
 	local object = self:getObject(player, element, action, item, item2, item3)
 	local beacon = object.beacon
 
@@ -701,7 +729,7 @@ function PlannerAbstractEdition.methods:updateBeaconActivedModules(player, eleme
 		end
 
 		for i = 1, count, 1 do
-			self:addSpriteIconButton(currentTableModulesPanel, self:classname().."=beacon-module-remove=ID="..item.."="..object.name.."="..module.."="..i, "item", module, module, tooltip)
+			self:addSelectSpriteIconButton(currentTableModulesPanel, self:classname().."=beacon-module-remove=ID="..item.."="..object.name.."="..module.."="..i, "item", module, module, nil, tooltip)
 		end
 	end
 end
@@ -731,12 +759,21 @@ function PlannerAbstractEdition.methods:updateBeaconModulesSelector(player, elem
 	if selectorPanel["modules"] == nil then
 		local tableModulesPanel = self:addGuiTable(selectorPanel,"modules",4)
 		for k, module in pairs(self.player:getModules()) do
+			local allowed = true
 			local consumption = self:formatPercent(self.player:getModuleBonus(module.name, "consumption"))
 			local speed = self:formatPercent(self.player:getModuleBonus(module.name, "speed"))
 			local productivity = self:formatPercent(self.player:getModuleBonus(module.name, "productivity"))
 			local pollution = self:formatPercent(self.player:getModuleBonus(module.name, "pollution"))
+			if productivity > 0 then
+				allowed = false
+			end
 			local tooltip = ({"tooltip.module-description" , module.localised_name, consumption, speed, productivity, pollution})
-			self:addSpriteIconButton(tableModulesPanel, self:classname().."=beacon-module-add=ID="..item.."="..object.name.."=", "item", module.name, module.name, tooltip)
+			if allowed == false then
+				tooltip = ({"item-limitation.item-not-allowed-in-this-container-item"})
+				self:addSelectSpriteIconButton(tableModulesPanel, self:classname().."=do-nothing=ID="..item.."="..object.name.."=", "item", module.name, module.name, "red", tooltip)
+			else
+				self:addSelectSpriteIconButton(tableModulesPanel, self:classname().."=beacon-module-add=ID="..item.."="..object.name.."=", "item", module.name, module.name, nil, tooltip)
+			end
 		end
 	end
 end
@@ -807,6 +844,12 @@ function PlannerAbstractEdition.methods:on_event(player, element, action, item, 
 	Logging:debug("PlannerAbstractEdition:on_event():",player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 
+	if action == "change-panel" then
+		model.module_panel = not(model.module_panel)
+		self:send_event(player, element, "CLOSE", item, item2, item3)
+		self:send_event(player, element, "OPEN", item, item2, item3)
+	end
+
 	if action == "object-update" then
 		local inputPanel = self:getObjectInfoPanel(player)["table-input"]
 		local options = {}
@@ -832,7 +875,6 @@ function PlannerAbstractEdition.methods:on_event(player, element, action, item, 
 		self.model:setFactory(player, item, item2, item3)
 		self.model:update(player)
 		self:updateFactoryInfo(player, element, action, item, item2, item3)
-		self:updateFactoryActivedModules(player, element, action, item, item2, item3)
 		self.parent:refreshDisplayData(player, nil, item, item2)
 	end
 
@@ -859,7 +901,6 @@ function PlannerAbstractEdition.methods:on_event(player, element, action, item, 
 		self.model:updateFactory(player, item, item2, options)
 		self.model:update(player)
 		self:updateFactoryInfo(player, element, action, item, item2, item3)
-		self:updateFactoryActivedModules(player, element, action, item, item2, item3)
 		self.parent:refreshDisplayData(player, nil, item, item2)
 	end
 
@@ -890,7 +931,6 @@ function PlannerAbstractEdition.methods:on_event(player, element, action, item, 
 		self.model:setBeacon(player, item, item2, item3)
 		self.model:update(player)
 		self:updateBeaconInfo(player, element, action, item, item2, item3)
-		self:updateBeaconActivedModules(player, element, action, item, item2, item3)
 		self.parent:refreshDisplayData(player, nil, item, item2)
 	end
 
@@ -921,7 +961,6 @@ function PlannerAbstractEdition.methods:on_event(player, element, action, item, 
 		self.model:updateBeacon(player, item, item2, options)
 		self.model:update(player)
 		self:updateBeaconInfo(player, element, action, item, item2, item3)
-		self:updateBeaconActivedModules(player, element, action, item, item2, item3)
 		self:updateFactoryInfo(player, element, action, item, item2, item3)
 		self.parent:refreshDisplayData(player, nil, item, item2)
 	end

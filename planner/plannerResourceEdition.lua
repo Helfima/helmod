@@ -82,21 +82,6 @@ function PlannerResourceEdition.methods:on_close(player, element, action, item, 
 end
 
 -------------------------------------------------------------------------------
--- Get or create resource panel
---
--- @function [parent=#PlannerResourceEdition] getResourcePanel
---
--- @param #LuaPlayer player
---
-function PlannerResourceEdition.methods:getResourcePanel(player)
-	local panel = self:getPanel(player)
-	if panel["resource"] ~= nil and panel["resource"].valid then
-		return panel["resource"]
-	end
-	return self:addGuiFrameH(panel, "resource", "helmod_frame_resize_row_width", ({"helmod_common.resource"}))
-end
-
--------------------------------------------------------------------------------
 -- Get or create resource info panel
 --
 -- @function [parent=#PlannerResourceEdition] getObjectInfoPanel
@@ -104,11 +89,11 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerResourceEdition.methods:getObjectInfoPanel(player)
-	local panel = self:getResourcePanel(player)
+	local panel = self:getPanel(player)
 	if panel["info"] ~= nil and panel["info"].valid then
 		return panel["info"]
 	end
-	return self:addGuiFrameH(panel, "info", "helmod_frame_recipe_info")
+	return self:addGuiFrameH(panel, "info", "helmod_frame_resize_row_width", ({"helmod_common.resource"}))
 end
 
 -------------------------------------------------------------------------------
@@ -189,7 +174,7 @@ function PlannerResourceEdition.methods:updateObjectInfo(player, element, action
 		end
 
 		local tablePanel = self:addGuiTable(infoPanel,"table-input",2)
-		self:addSpriteIconButton(tablePanel, "item", "item", resource.name)
+		self:addSpriteIconButton(tablePanel, "item", self.player:getIconType(resource), resource.name)
 		if _resource == nil then
 			self:addGuiLabel(tablePanel, "label", resource.name)
 		else

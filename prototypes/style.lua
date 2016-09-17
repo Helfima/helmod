@@ -87,6 +87,18 @@ default_gui["helmod_button-default"] = {
 }
 
 local icon_corner_size = 0
+default_gui["helmod_icon"] = {
+	type = "button_style",
+	parent = "helmod_button-default",
+	width = 32,
+	height = 32,
+	scalable = false,
+	default_graphical_set = monolithIcon("__helmod__/graphics/icons/helmod_icon.png", 32, 1, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon("__helmod__/graphics/icons/helmod_icon.png", 32, 1, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon("__helmod__/graphics/icons/helmod_icon.png", 32, 1, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon("__helmod__/graphics/icons/helmod_icon.png", 32, 1, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true)
+}
+
 default_gui["helmod_button-icon-default"] = {
 	type = "button_style",
 	parent = "helmod_button-default",
@@ -412,7 +424,7 @@ default_gui["helmod_beacon_modules"] = {
 
 default_gui["helmod_table_recipe_modules"] = {
 	type = "table_style",
-	parent = "helmod_table_default",
+	parent = "table_style",
 	minimal_height = 36
 }
 
@@ -538,9 +550,7 @@ default_gui["helmod_flow_resize_row_width"] = {
 
 default_gui["helmod_flow_info"] = {
 	type = "flow_style",
-	parent = "helmod_flow_resize_row_width",
-	minimal_width = 940,
-	maximal_width = 940
+	parent = "helmod_flow_resize_row_width"
 }
 
 -------------------------------------------------------------------------------
@@ -561,9 +571,9 @@ default_gui["helmod_flow_dialog"] = {
 default_gui["helmod_flow_data"] = {
 	type = "flow_style",
 	parent = "helmod_flow_resize_row_width",
-	minimal_width = 940,
-	maximal_width = 940,
-	minimal_height = 800
+	minimal_width = 1140,
+	maximal_width = 1140,
+	minimal_height = 600
 }
 
 -------------------------------------------------------------------------------
@@ -621,8 +631,28 @@ default_gui["helmod_frame_main_menu"] = {
 default_gui["helmod_frame_resize_row_width"] = {
 	type = "frame_style",
 	parent = "helmod_frame_default",
+	resize_row_to_width = true,
 	flow_style = {
 		resize_row_to_width = true,
+		horizontal_spacing = 0,
+		vertical_spacing = 0
+	}
+}
+
+-------------------------------------------------------------------------------
+-- Style of resize full row panel
+--
+-- @field [parent=#Frame] full_resize_row
+-- 
+
+default_gui["helmod_frame_full_resize_row"] = {
+	type = "frame_style",
+	parent = "helmod_frame_default",
+	resize_row_to_width = true,
+	resize_to_row_height = true,
+	flow_style = {
+		resize_row_to_width = true,
+		resize_to_row_height = true,
 		horizontal_spacing = 0,
 		vertical_spacing = 0
 	}
@@ -637,8 +667,8 @@ default_gui["helmod_frame_resize_row_width"] = {
 default_gui["helmod_frame_data"] = {
 	type = "frame_style",
 	parent = "helmod_frame_resize_row_width",
-	minimal_width = 940,
-	maximal_width = 940
+	minimal_width = 1140,
+	maximal_width = 1140
 }
 
 -------------------------------------------------------------------------------
@@ -650,8 +680,8 @@ default_gui["helmod_frame_data"] = {
 default_gui["helmod_frame_recipe_modules"] = {
 	type = "frame_style",
 	parent = "helmod_frame_default",
-	minimal_width = 195,
-	maximal_width = 195
+	minimal_width = 230,
+	maximal_width = 230
 }
 
 -------------------------------------------------------------------------------
@@ -663,10 +693,10 @@ default_gui["helmod_frame_recipe_modules"] = {
 default_gui["helmod_frame_recipe_ingredients"] = {
 	type = "frame_style",
 	parent = "helmod_frame_default",
-	minimal_width = 195,
-	maximal_width = 195,
-	minimal_height = 135,
-	maximal_height = 135
+	minimal_width = 230,
+	maximal_width = 230,
+	minimal_height = 76,
+	maximal_height = 76
 }
 
 -------------------------------------------------------------------------------
@@ -678,10 +708,10 @@ default_gui["helmod_frame_recipe_ingredients"] = {
 default_gui["helmod_frame_recipe_products"] = {
 	type = "frame_style",
 	parent = "helmod_frame_default",
-	minimal_width = 220,
-	maximal_width = 220,
-	minimal_height = 135,
-	maximal_height = 135
+	minimal_width = 230,
+	maximal_width = 230,
+	minimal_height = 77,
+	maximal_height = 77
 }
 
 -------------------------------------------------------------------------------
@@ -692,9 +722,24 @@ default_gui["helmod_frame_recipe_products"] = {
 
 default_gui["helmod_frame_recipe_info"] = {
 	type = "frame_style",
-	parent = "frame_style",
+	parent = "helmod_frame_default",
 	minimal_width = 230,
 	maximal_width = 230
+}
+
+-------------------------------------------------------------------------------
+-- Style of recipe factory panel
+--
+-- @field [parent=#Frame] recipe_factory
+-- 
+
+default_gui["helmod_frame_recipe_factory"] = {
+	type = "frame_style",
+	parent = "helmod_frame_default",
+	minimal_width = 230,
+	maximal_width = 230,
+	minimal_height = 280,
+	maximal_height = 280
 }
 
 -------------------------------------------------------------------------------
@@ -711,8 +756,8 @@ default_gui["helmod_frame_recipe_info"] = {
 default_gui["helmod_scroll_block_list"] = {
 	type = "scroll_pane_style",
 	parent = "scroll_pane_style",
-	minimal_width = 932,
-	maximal_width = 932,
+	minimal_width = 1132,
+	maximal_width = 1132,
 	minimal_height = 516,
 	maximal_height = 516
 }
@@ -739,8 +784,8 @@ default_gui["helmod_scroll_block_info"] = {
 default_gui["helmod_scroll_block_element"] = {
 	type = "scroll_pane_style",
 	parent = "scroll_pane_style",
-	minimal_width = 632,
-	maximal_width = 632,
+	minimal_width = 833,
+	maximal_width = 833,
 	minimal_height = 72,
 	maximal_height = 72
 }
@@ -755,8 +800,8 @@ default_gui["helmod_scroll_recipe_module_list"] = {
 	parent = "scroll_pane_style",
 	minimal_width = 180,
 	maximal_width = 180,
-	minimal_height = 145,
-	maximal_height = 145
+	minimal_height = 172,
+	maximal_height = 172
 }
 
 -------------------------------------------------------------------------------

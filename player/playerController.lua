@@ -385,6 +385,7 @@ end
 --
 -- @function [parent=#PlayerController] getRecipeIconType
 --
+-- @param #LuaPlayer player
 -- @param #ModelRecipe recipe
 --
 -- @return #string recipe type
@@ -438,3 +439,50 @@ function PlayerController.methods:getModuleBonus(module, effect)
 	end
 	return bonus
 end
+
+-------------------------------------------------------------------------------
+-- Return localised name
+--
+-- @function [parent=#PlayerController] getLocalisedName
+--
+-- @param #table element factorio prototype
+--
+-- @return #string localised name
+--
+function PlayerController.methods:getLocalisedName(element)
+	local localisedName = element.name
+	if element.type ~= nil then
+		if element.type == 0 or element.type == "item" then
+			local item = self:getItemPrototype(element.name)
+			if item ~= nil then
+				localisedName = item.localised_name
+			end
+		end
+		if element.type == 1 or element.type == "fluid" then
+			local item = self:getFluidPrototype(element.name)
+			if item ~= nil then
+				localisedName = item.localised_name
+			end
+		end
+	end
+	return localisedName
+end
+
+-------------------------------------------------------------------------------
+-- Return localised name
+--
+-- @function [parent=#PlayerController] getRecipeLocalisedName
+--
+-- @param #LuaPlayer player
+-- @param #table element factorio prototype
+--
+-- @return #string localised name
+--
+function PlayerController.methods:getRecipeLocalisedName(player, recipe)
+	local _recipe = self:getRecipe(player, recipe.name)
+	if _recipe ~= nil then
+		return _recipe.localised_name
+	end
+	return recipe.name
+end
+

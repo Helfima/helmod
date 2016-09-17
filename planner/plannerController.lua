@@ -57,7 +57,8 @@ function PlannerController.methods:bindController(player)
 	Logging:trace("PlannerController:bindController(player)")
 	local parentGui = self.parent:getGui(player)
 	if parentGui ~= nil then
-		parentGui.add({type="button", name=PLANNER_COMMAND, caption=({PLANNER_COMMAND}), style="helmod_button-small-bold"})
+		local guiButton = self:addGuiFrameH(parentGui, PLANNER_COMMAND, "helmod_frame_default")
+		guiButton.add({type="button", name=PLANNER_COMMAND, tooltip=({PLANNER_COMMAND}), style="helmod_icon"})
 	end
 end
 
@@ -121,6 +122,7 @@ end
 --
 function PlannerController.methods:main(player)
 	Logging:trace("PlannerController:main(player)")
+	
 	if player.gui.left["helmod_planner_main"] ~= nil and player.gui.left["helmod_planner_main"].valid then
 		player.gui.left["helmod_planner_main"].destroy()
 	else

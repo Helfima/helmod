@@ -93,7 +93,7 @@ function PlannerRecipeEdition.methods:getRecipePanel(player)
 	if panel["recipe"] ~= nil and panel["recipe"].valid then
 		return panel["recipe"]
 	end
-	return self:addGuiFrameH(panel, "recipe", "helmod_frame_resize_row_width", ({"helmod_common.recipe"}))
+	return self:addGuiFlowH(panel, "recipe", "helmod_flow_resize_row_width")
 end
 
 -------------------------------------------------------------------------------
@@ -108,7 +108,22 @@ function PlannerRecipeEdition.methods:getObjectInfoPanel(player)
 	if panel["info"] ~= nil and panel["info"].valid then
 		return panel["info"]
 	end
-	return self:addGuiFrameH(panel, "info", "helmod_frame_recipe_info")
+	return self:addGuiFrameH(panel, "info", "helmod_frame_recipe_info", ({"helmod_common.recipe"}))
+end
+
+-------------------------------------------------------------------------------
+-- Get or create other info panel
+--
+-- @function [parent=#PlannerRecipeEdition] getOtherInfoPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerRecipeEdition.methods:getOtherInfoPanel(player)
+	local panel = self:getRecipePanel(player)
+	if panel["other-info"] ~= nil and panel["other-info"].valid then
+		return panel["other-info"]
+	end
+	return self:addGuiFlowV(panel, "other-info", "helmod_flow_resize_row_width")
 end
 
 -------------------------------------------------------------------------------
@@ -119,7 +134,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerRecipeEdition.methods:getRecipeIngredientsPanel(player)
-	local panel = self:getRecipePanel(player)
+	local panel = self:getOtherInfoPanel(player)
 	if panel["ingredients"] ~= nil and panel["ingredients"].valid then
 		return panel["ingredients"]
 	end
@@ -134,7 +149,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerRecipeEdition.methods:getRecipeProductsPanel(player)
-	local panel = self:getRecipePanel(player)
+	local panel = self:getOtherInfoPanel(player)
 	if panel["products"] ~= nil and panel["products"].valid then
 		return panel["products"]
 	end

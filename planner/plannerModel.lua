@@ -134,6 +134,9 @@ function PlannerModel.methods:createBeaconModel(player, name, count)
 	beaconModel.factory = 2
 	beaconModel.efficiency = 0.5
 	beaconModel.module_slots = 2
+	-- limit infini = 0
+	beaconModel.limit = 0
+	beaconModel.limit_count = count
 	-- modules
 	beaconModel.modules = {}
 
@@ -1028,36 +1031,48 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 
 	local recipes = element.recipes
 	if recipes ~= nil then
+		local oldProducts = element.products
 		-- initialisation
 		element.products = {}
 		element.ingredients = {}
 		element.power = 0
 
+		local initProduct = false
 		-- preparation produits et ingredients du block
-		local products = {}
-		local ingredients = {}
 		for _, recipe in pairs(recipes) do
 			-- construit la list des produits
 			for _, product in pairs(recipe.products) do
-				products[product.name] = product
+				element.products[product.name] = {
+					name = product.name,
+					type = product.type,
+					count = 0,
+					state = 0,
+					amount = self:getElementAmount(product)
+				}
+				if initProduct == false then
+					if oldProducts[product.name] ~= nil and oldProducts[product.name].count > 0 then
+						product.count = oldProducts[product.name].count
+					else
+						product.count = 0
+					end
+					element.products[product.name].count = product.count
+					element.products[product.name].state = 1
+				else
+					product.count = 0
+				end
 			end
+			-- limit les produits au premier recipe
+			initProduct = true
 			-- construit la list des ingredients
 			for _, ingredient in pairs(recipe.ingredients) do
-				ingredients[ingredient.name] = ingredient
-			end
-		end
-
-		-- ajoute les produits du block
-		for _, product in pairs(products) do
-			if ingredients[product.name] == nil then
-				element.products[product.name] = product
-			end
-		end
-
-		-- ajoute les ingredients du block
-		for _, ingredient in pairs(ingredients) do
-			if products[ingredient.name] == nil then
-				element.ingredients[ingredient.name] = ingredient
+				element.ingredients[ingredient.name] = {
+					name = ingredient.name,
+					type = ingredient.type,
+					amount = ingredient.amount,
+					count = 0
+				}
+				-- initialise ingredient
+				ingredient.count = 0
 			end
 		end
 
@@ -1065,15 +1080,14 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 		local ratio = 1
 		local ratioRecipe = nil
 		-- calcul ordonnee sur les recipes du block
-		local ingredients = nil
 		for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
 			local mainProduct = nil
 			local production = 1
 			if recipe.production ~= nil then production = recipe.production end
 			-- prepare les produits
 			for _, product in pairs(recipe.products) do
-				if ingredients ~= nil and ingredients[product.name] ~= nil then
-					product.count = ingredients[product.name]*production
+				if element.ingredients[product.name] ~= nil then
+					product.count = element.ingredients[product.name].count*production
 				end
 			end
 			-- check produit pilotant
@@ -1117,12 +1131,7 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 				local nextCount = math.ceil(pCount*(ingredient.amount/productUsage))
 				ingredient.count = nextCount
 
-				if ingredients == nil then ingredients = {} end
-				if ingredients[ingredient.name] == nil then
-					ingredients[ingredient.name] = nextCount
-				else
-					ingredients[ingredient.name] = ingredients[ingredient.name] + nextCount
-				end
+				element.ingredients[ingredient.name].count = element.ingredients[ingredient.name].count + nextCount
 			end
 
 
@@ -1140,18 +1149,51 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 				end
 			end
 
-			-- consomme les produits
 			for _, product in pairs(recipe.products) do
-				if ingredients ~= nil and ingredients[product.name] ~= nil then
-					ingredients[product.name] = ingredients[product.name] - product.count
+				-- compte les produits
+				if element.products[product.name] ~= nil and element.products[product.name].state == 0 then
+					element.products[product.name].count = element.products[product.name].count + product.count
 				end
+				-- consomme les produits
+				if element.ingredients[product.name] ~= nil then
+					element.ingredients[product.name].count = element.ingredients[product.name].count - product.count
+				end
+			end
+
+		end
+		for _, recipe in pairs(recipes) do
+			for _, ingredient in pairs(recipe.ingredients) do
+				-- consomme les ingredients
+				if element.products[ingredient.name] ~= nil then
+					element.products[ingredient.name].count = element.products[ingredient.name].count - ingredient.count
+				end
+			end
+		end
+
+		-- reduit les produits du block
+		for _, product in pairs(element.products) do
+			if element.ingredients[product.name] ~= nil then
+				product.state = product.state + 2
+			end
+			if element.products[product.name].count < 0.9 and not(bit32.band(product.state, 1) > 0) then
+				element.products[product.name] = nil
+			end
+		end
+
+		-- reduit les ingredients du block
+		for _, ingredient in pairs(element.ingredients) do
+			if element.ingredients[ingredient.name].count < 0.9 then
+				element.ingredients[ingredient.name] = nil
 			end
 		end
 
 		-- calcul ratio
 		for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
 			recipe.factory.limit_count = math.ceil(recipe.factory.count*ratio)
-			if ratioRecipe ~= nil and ratioRecipe == recipe.index then recipe.factory.limit_count = recipe.factory.limit end
+			recipe.beacon.limit_count = math.ceil(recipe.beacon.count*ratio)
+			if ratioRecipe ~= nil and ratioRecipe == recipe.index then 
+				recipe.factory.limit_count = recipe.factory.limit
+			end
 		end
 	end
 end
@@ -1229,14 +1271,14 @@ function PlannerModel.methods:computeResources(player)
 				end
 			end
 			self:computeFactory(player, resource)
-			
+
 			resource.factory.limit_count = resource.factory.count
 			resource.blocks = 1
 			if resource.factory.limit ~= nil and resource.factory.limit ~= 0 then
 				resource.factory.limit_count = resource.factory.limit
 				resource.blocks = math.ceil(resource.factory.count/resource.factory.limit)
 			end
-			
+
 			resources[resource.name] = resource
 		end
 	end
@@ -1389,8 +1431,8 @@ function PlannerModel.methods:createSummary(player)
 	model.summary.energy = energy
 
 	model.generators = {}
-	model.generators["solar-panel"] = {name = "solar-panel", count = math.ceil(energy/(60*1000))}
-	model.generators["steam-engine"] = {name = "steam-engine", count = math.ceil(energy/(510*1000))}
+	model.generators["solar-panel"] = {name = "solar-panel", type = "item", count = math.ceil(energy/(60*1000))}
+	model.generators["steam-engine"] = {name = "steam-engine", type = "item", count = math.ceil(energy/(510*1000))}
 
 end
 
@@ -1406,20 +1448,20 @@ function PlannerModel.methods:computeSummaryFactory(player, object)
 	local model = self:getModel(player)
 	-- calcul nombre factory
 	local factory = object.factory
-	if model.summary.factories[factory.name] == nil then model.summary.factories[factory.name] = {name = factory.name, count = 0} end
+	if model.summary.factories[factory.name] == nil then model.summary.factories[factory.name] = {name = factory.name, type = "item", count = 0} end
 	model.summary.factories[factory.name].count = model.summary.factories[factory.name].count + factory.count
 	-- calcul nombre de module factory
 	for module, value in pairs(factory.modules) do
-		if model.summary.modules[module] == nil then model.summary.modules[module] = {name = module, count = 0} end
+		if model.summary.modules[module] == nil then model.summary.modules[module] = {name = module, type = "item", count = 0} end
 		model.summary.modules[module].count = model.summary.modules[module].count + value * factory.count
 	end
 	-- calcul nombre beacon
 	local beacon = object.beacon
-	if model.summary.beacons[beacon.name] == nil then model.summary.beacons[beacon.name] = {name = beacon.name, count = 0} end
+	if model.summary.beacons[beacon.name] == nil then model.summary.beacons[beacon.name] = {name = beacon.name, type = "item", count = 0} end
 	model.summary.beacons[beacon.name].count = model.summary.beacons[beacon.name].count + beacon.count
 	-- calcul nombre de module beacon
 	for module, value in pairs(beacon.modules) do
-		if model.summary.modules[module] == nil then model.summary.modules[module] = {name = module, count = 0} end
+		if model.summary.modules[module] == nil then model.summary.modules[module] = {name = module, type = "item", count = 0} end
 		model.summary.modules[module].count = model.summary.modules[module].count + value * beacon.count
 	end
 end
