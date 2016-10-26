@@ -246,6 +246,7 @@ function PlannerSettings.methods:update(player)
 	self:addGuiLabel(timePanel, self:classname().."=base-time", ({"helmod_settings-panel.base-time"}), "helmod_label_time")
 
 	local times = {
+		{ value = 1, name = "1s"},
 		{ value = 60, name = "1m"},
 		{ value = 300, name = "5m"},
 		{ value = 600, name = "10m"},

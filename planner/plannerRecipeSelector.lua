@@ -42,9 +42,10 @@ end
 function PlannerRecipeSelector.methods:getGroupsPanel(player)
 	local panel = self:getPanel(player)
 	if panel["groups-panel"] ~= nil and panel["groups-panel"].valid then
-		return panel["groups-panel"]
+		return panel["groups-panel"]["scroll-groups"]
 	end
-	return self:addGuiFrameV(panel, "groups-panel", "helmod_frame_resize_row_width")
+	local groupsPanel = self:addGuiFrameV(panel, "groups-panel", "helmod_frame_resize_row_width")
+	return self:addGuiScrollPane(groupsPanel, "scroll-groups", "helmod_scroll_recipe_selector_group", "auto", "auto")
 end
 
 -------------------------------------------------------------------------------
@@ -57,9 +58,10 @@ end
 function PlannerRecipeSelector.methods:getItemListPanel(player)
 	local panel = self:getPanel(player)
 	if panel["item-list-panel"] ~= nil and panel["item-list-panel"].valid then
-		return panel["item-list-panel"]
+		return panel["item-list-panel"]["scroll-list"]
 	end
-	return self:addGuiFrameV(panel, "item-list-panel", "helmod_frame_resize_row_width")
+	local listPanel = self:addGuiFrameV(panel, "item-list-panel", "helmod_frame_resize_row_width")
+	return self:addGuiScrollPane(listPanel, "scroll-list", "helmod_scroll_recipe_selector_list", "auto", "auto")
 end
 
 -------------------------------------------------------------------------------

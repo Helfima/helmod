@@ -517,7 +517,9 @@ default_gui["helmod_flow_default"] = {
 
 default_gui["helmod_flow_main"] = {
 	type = "flow_style",
-	parent = "helmod_flow_default"
+	parent = "helmod_flow_default",
+	minimal_width = 1600,
+	minimal_height = 900
 }
 
 -------------------------------------------------------------------------------
@@ -802,6 +804,34 @@ default_gui["helmod_scroll_recipe_module_list"] = {
 	maximal_width = 180,
 	minimal_height = 172,
 	maximal_height = 172
+}
+
+-------------------------------------------------------------------------------
+-- Style of recipe selector group
+--
+-- @field [parent=#Scroll] recipe_selector_group
+
+default_gui["helmod_scroll_recipe_selector_group"] = {
+	type = "scroll_pane_style",
+	parent = "scroll_pane_style",
+	minimal_width = 400,
+	maximal_width = 400,
+	minimal_height = 60,
+	maximal_height = 134
+}
+
+-------------------------------------------------------------------------------
+-- Style of recipe selector list
+--
+-- @field [parent=#Scroll] recipe_selector_list
+
+default_gui["helmod_scroll_recipe_selector_list"] = {
+	type = "scroll_pane_style",
+	parent = "scroll_pane_style",
+	minimal_width = 400,
+	maximal_width = 400,
+	minimal_height = 200,
+	maximal_height = 600
 }
 
 -------------------------------------------------------------------------------

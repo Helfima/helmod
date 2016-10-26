@@ -30,6 +30,8 @@ function PlannerController.methods:init(parent)
 	self.controllers = {}
 	self.modelFilename = "helmod-planner-model.data"
 	self.model = PlannerModel:new(self)
+	
+	self.locate = "center"
 end
 
 -------------------------------------------------------------------------------
@@ -43,6 +45,9 @@ function PlannerController.methods:cleanController(player)
 	Logging:trace("PlannerController:cleanController(player)")
 	if player.gui.left["helmod_planner_main"] ~= nil then
 		player.gui.left["helmod_planner_main"].destroy()
+	end
+	if player.gui.center["helmod_planner_main"] ~= nil then
+		player.gui.center["helmod_planner_main"].destroy()
 	end
 end
 
@@ -84,9 +89,7 @@ function PlannerController.methods:on_gui_click(event)
 
 		if event.element.name == self:classname().."=CLOSE" then
 			local player = game.players[event.player_index]
-			if player.gui.left["helmod_planner_main"] ~= nil and player.gui.left["helmod_planner_main"].valid then
-				player.gui.left["helmod_planner_main"].destroy()
-			end
+			self:cleanController(player)
 		end
 	end
 end
@@ -122,9 +125,9 @@ end
 --
 function PlannerController.methods:main(player)
 	Logging:trace("PlannerController:main(player)")
-	
-	if player.gui.left["helmod_planner_main"] ~= nil and player.gui.left["helmod_planner_main"].valid then
-		player.gui.left["helmod_planner_main"].destroy()
+	local guiMain = player.gui[self.locate]
+	if guiMain["helmod_planner_main"] ~= nil and guiMain["helmod_planner_main"].valid then
+		guiMain["helmod_planner_main"].destroy()
 	else
 		-- main panel
 		Logging:debug("Create main panel")
@@ -170,7 +173,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerController.methods:getMainPanel(player)
-	local guiMain = player.gui.left
+	local guiMain = player.gui[self.locate]
 	if guiMain["helmod_planner_main"] ~= nil and guiMain["helmod_planner_main"].valid then
 		return guiMain["helmod_planner_main"]
 	end
