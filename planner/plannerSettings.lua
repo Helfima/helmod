@@ -398,5 +398,13 @@ function PlannerSettings.methods:updateOtherSettings(player, element, action, it
 	self:addGuiCheckbox(otherSettingsTable, self:classname().."=change-boolean-settings=ID=other_speed_panel", other_speed_panel)
 	self:addGuiLabel(otherSettingsTable, self:classname().."=blank=ID=other_speed_panel", "")
 
+	-- real_name
+	self:addGuiLabel(otherSettingsTable, self:classname().."=real_name", ({"helmod_settings-panel.real-name"}))
+	
+	local real_name = defaultSettings.real_name
+	if globalSettings.real_name ~= nil then real_name = globalSettings.real_name end
+	self:addGuiCheckbox(otherSettingsTable, self:classname().."=change-boolean-settings=ID=real_name", real_name)
+	self:addGuiLabel(otherSettingsTable, self:classname().."=blank=ID=real_name", "")
+
 end
 

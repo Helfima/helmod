@@ -165,6 +165,7 @@ function PlannerRecipeSelector.methods:updateItemList(player, element, action, i
 	Logging:trace("PlannerRecipeSelector:updateItemList():",player, element, action, item, item2, item3)
 	local globalPlayer = self.player:getGlobal(player)
 	local panel = self:getItemListPanel(player)
+	local globalSettings = self.player:getGlobal(player, "settings")
 	
 	if panel["recipe-table"] ~= nil  and panel["recipe-table"].valid then
 		panel["recipe-table"].destroy()
@@ -173,8 +174,12 @@ function PlannerRecipeSelector.methods:updateItemList(player, element, action, i
 	local guiRecipeSelectorTable = self:addGuiTable(panel, "recipe-table", 10)
 	for key, recipe in pairs(self.player:getRecipes(player)) do
 		if recipe.group.name == globalPlayer.recipeGroupSelected then
+			local localised_name = recipe.localised_name
+			if globalSettings.real_name == true then
+				localised_name = recipe.name
+			end
 			Logging:trace("PlannerRecipeSelector:on_update",recipe.name)
-			self:addSelectSpriteIconButton(guiRecipeSelectorTable, self:classname().."=recipe-select=ID="..item.."=", self.player:getRecipeIconType(player, recipe), recipe.name, recipe.name, nil, recipe.localised_name)
+			self:addSelectSpriteIconButton(guiRecipeSelectorTable, self:classname().."=recipe-select=ID="..item.."=", self.player:getRecipeIconType(player, recipe), recipe.name, recipe.name, nil, localised_name)
 		end
 	end
 

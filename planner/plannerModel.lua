@@ -1,4 +1,4 @@
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 -- Classe model
 --
 -- @module PlannerModel
@@ -121,19 +121,19 @@ function PlannerModel.methods:createBeaconModel(player, name, count)
 	Logging:debug("PlannerModel:createFactoryModel():",player, name, count)
 	if name == nil then name = "beacon" end
 	if count == nil then count = 0 end
-
+	local defaultBeacon = self:getDefaultBeacon(player, "beacon")
 	local beaconModel = {}
 	beaconModel.name = name
 	beaconModel.type = "item"
 	beaconModel.active = false
 	beaconModel.count = count
-	beaconModel.energy_nominal = 480
+	beaconModel.energy_nominal = defaultBeacon.energy_nominal
 	beaconModel.energy = 0
 	beaconModel.energy_total = 0
-	beaconModel.combo = 3
-	beaconModel.factory = 2
-	beaconModel.efficiency = 0.5
-	beaconModel.module_slots = 2
+	beaconModel.combo = defaultBeacon.combo
+	beaconModel.factory = defaultBeacon.factory
+	beaconModel.efficiency = defaultBeacon.efficiency
+	beaconModel.module_slots = defaultBeacon.module_slots
 	-- limit infini = 0
 	beaconModel.limit = 0
 	beaconModel.limit_count = count
@@ -1036,6 +1036,7 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 		element.products = {}
 		element.ingredients = {}
 		element.power = 0
+		element.count = 1
 
 		local initProduct = false
 		-- preparation produits et ingredients du block
@@ -1161,6 +1162,10 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 			end
 
 		end
+		if element.count < 1 then
+			element.count = 1
+		end
+
 		for _, recipe in pairs(recipes) do
 			for _, ingredient in pairs(recipe.ingredients) do
 				-- consomme les ingredients
@@ -1191,7 +1196,7 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 		for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
 			recipe.factory.limit_count = math.ceil(recipe.factory.count*ratio)
 			recipe.beacon.limit_count = math.ceil(recipe.beacon.count*ratio)
-			if ratioRecipe ~= nil and ratioRecipe == recipe.index then 
+			if ratioRecipe ~= nil and ratioRecipe == recipe.index then
 				recipe.factory.limit_count = recipe.factory.limit
 			end
 		end
@@ -1270,13 +1275,41 @@ function PlannerModel.methods:computeResources(player)
 					resource.factory.energy = 90
 				end
 			end
+
 			self:computeFactory(player, resource)
 
 			resource.factory.limit_count = resource.factory.count
 			resource.blocks = 1
+			resource.wagon = nil
+			resource.storage = nil
+			
+			local ratio = 1
 			if resource.factory.limit ~= nil and resource.factory.limit ~= 0 then
-				resource.factory.limit_count = resource.factory.limit
+				if resource.factory.limit < resource.factory.count then
+					resource.factory.limit_count = resource.factory.limit
+				else
+					resource.factory.limit_count = resource.factory.count
+				end
 				resource.blocks = math.ceil(resource.factory.count/resource.factory.limit)
+				ratio = 1/resource.blocks
+			end
+
+			-- compute storage
+			if resource.category == "basic-solid" then
+				resource.wagon = {type="item", name="cargo-wagon"}
+				resource.wagon.count = math.ceil(resource.count/2000)
+				resource.wagon.limit_count = math.ceil(resource.wagon.count * ratio)
+				
+				resource.storage = {type="item", name="steel-chest"}
+				resource.storage.count = math.ceil(resource.count/(48*50))
+				resource.storage.limit_count = math.ceil(resource.storage.count * ratio)
+			elseif resource.category == "basic-fluid" then
+				--resource.wagon = {type="item", name="cargo-wagon"}
+				--resource.wagon.count = math.ceil(resource.count/2000)
+
+				resource.storage = {type="item", name="storage-tank"}
+				resource.storage.count = math.ceil(resource.count/2400)
+				resource.storage.limit_count = math.ceil(resource.storage.count * ratio)
 			end
 
 			resources[resource.name] = resource
@@ -1431,7 +1464,9 @@ function PlannerModel.methods:createSummary(player)
 	model.summary.energy = energy
 
 	model.generators = {}
-	model.generators["solar-panel"] = {name = "solar-panel", type = "item", count = math.ceil(energy/(60*1000))}
+	-- formule 20 accumulateur /24 panneau solaire/1 MW
+	model.generators["accumulator"] = {name = "accumulator", type = "item", count = 20*math.ceil(energy/(1000*1000))}
+	model.generators["solar-panel"] = {name = "solar-panel", type = "item", count = 24*math.ceil(energy/(1000*1000))}
 	model.generators["steam-engine"] = {name = "steam-engine", type = "item", count = math.ceil(energy/(510*1000))}
 
 end

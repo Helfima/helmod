@@ -156,7 +156,8 @@ function PlayerController.methods:getDefaultSettings()
 		model_loop_limit = 1000,
 		model_filter_factory = true,
 		model_filter_beacon = true,
-		other_speed_panel=false
+		other_speed_panel=false,
+		real_name=false
 	}
 end
 
@@ -445,11 +446,16 @@ end
 --
 -- @function [parent=#PlayerController] getLocalisedName
 --
+-- @param #LuaPlayer player
 -- @param #table element factorio prototype
 --
 -- @return #string localised name
 --
-function PlayerController.methods:getLocalisedName(element)
+function PlayerController.methods:getLocalisedName(player, element)
+	local globalSettings = self:getGlobal(player, "settings")
+	if globalSettings.real_name == true then
+		return element.name
+	end
 	local localisedName = element.name
 	if element.type ~= nil then
 		if element.type == 0 or element.type == "item" then

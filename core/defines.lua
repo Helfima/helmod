@@ -91,7 +91,7 @@ helmod_defines.beacon["beacon"]={
 	name = "beacon",
 	energy_nominal = 480,
 	combo = 4,
-	factory = 2,
+	factory = 1.2,
 	efficiency = 0.5,
 	module_slots = 2
 }
