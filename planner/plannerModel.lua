@@ -16,9 +16,7 @@ function PlannerModel.methods:init(parent)
 	self.parent = parent
 	self.player = self.parent.parent
 
-	self.capSpeed = 0.2
-	self.capEnergy = 0.2
-	self.capProductivity = 0.2
+	self.capEnergy = -0.8
 end
 
 -------------------------------------------------------------------------------
@@ -1110,25 +1108,15 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 				end
 			end
 
+			self:computeModuleEffects(player, recipe)
 
 			local pCount = mainProduct.count;
 			for k, ingredient in pairs(recipe.ingredients) do
 				local productNominal = self:getElementAmount(mainProduct)
 				local productUsage = self:getElementAmount(mainProduct)
-				-- calcul production module factory
-				for module, value in pairs(recipe.factory.modules) do
-					local bonus = self.player:getModuleBonus(module, "productivity")
-					productUsage = productUsage + productNominal * value * bonus
-				end
-				if recipe.beacon.active then
-					for module, value in pairs(recipe.beacon.modules) do
-						local bonus = self.player:getModuleBonus(module, "productivity")
-						productUsage = productUsage + productNominal * value * bonus * recipe.beacon.efficiency * recipe.beacon.combo
-					end
-				end
-				-- cap le productivity a self.capProductivity
-				if productUsage < productNominal*self.capProductivity  then productUsage = productNominal*self.capProductivity end
-
+				-- calcul factory productivity effect
+				productUsage = productUsage + productNominal * recipe.factory.effects.productivity
+				
 				local nextCount = math.ceil(pCount*(ingredient.amount/productUsage))
 				ingredient.count = nextCount
 
@@ -1276,13 +1264,14 @@ function PlannerModel.methods:computeResources(player)
 				end
 			end
 
+			self:computeModuleEffects(player, resource)
 			self:computeFactory(player, resource)
 
 			resource.factory.limit_count = resource.factory.count
 			resource.blocks = 1
 			resource.wagon = nil
 			resource.storage = nil
-			
+
 			local ratio = 1
 			if resource.factory.limit ~= nil and resource.factory.limit ~= 0 then
 				if resource.factory.limit < resource.factory.count then
@@ -1299,7 +1288,7 @@ function PlannerModel.methods:computeResources(player)
 				resource.wagon = {type="item", name="cargo-wagon"}
 				resource.wagon.count = math.ceil(resource.count/2000)
 				resource.wagon.limit_count = math.ceil(resource.wagon.count * ratio)
-				
+
 				resource.storage = {type="item", name="steel-chest"}
 				resource.storage.count = math.ceil(resource.count/(48*50))
 				resource.storage.limit_count = math.ceil(resource.storage.count * ratio)
@@ -1341,7 +1330,44 @@ function PlannerModel.methods:getRecipeByProduct(player, element)
 	return recipes
 end
 
+-------------------------------------------------------------------------------
+-- Compute module effects of factory
+--
+-- @function [parent=#PlannerModel] computeModuleEffects
+--
+-- @param #LuaPlayer player
+-- @param #ModelObject object
+--
+function PlannerModel.methods:computeModuleEffects(player, object)
+	Logging:debug("PlannerModel:computeModuleEffects()",object)
 
+	local factory = object.factory
+	factory.effects = {speed = 0, productivity = 0, consumption = 0}
+	-- effet module factory
+	for module, value in pairs(factory.modules) do
+		local speed_bonus = self.player:getModuleBonus(module, "speed")
+		local productivity_bonus = self.player:getModuleBonus(module, "productivity")
+		local consumption_bonus = self.player:getModuleBonus(module, "consumption")
+		factory.effects.speed = factory.effects.speed + value * speed_bonus
+		factory.effects.productivity = factory.effects.productivity + value * productivity_bonus
+		factory.effects.consumption = factory.effects.consumption + value * consumption_bonus
+	end
+	-- effet module beacon
+	if object.beacon.active then
+		for module, value in pairs(object.beacon.modules) do
+			local speed_bonus = self.player:getModuleBonus(module, "speed")
+			local productivity_bonus = self.player:getModuleBonus(module, "productivity")
+			local consumption_bonus = self.player:getModuleBonus(module, "consumption")
+			factory.effects.speed = factory.effects.speed + value * speed_bonus * object.beacon.efficiency * object.beacon.combo
+			factory.effects.productivity = factory.effects.productivity + value * productivity_bonus * object.beacon.efficiency * object.beacon.combo
+			factory.effects.consumption = factory.effects.consumption + value * consumption_bonus * object.beacon.efficiency * object.beacon.combo
+		end
+	end
+
+	-- cap l'energy a self.capEnergy
+	if factory.effects.consumption < self.capEnergy  then factory.effects.consumption = self.capEnergy end
+
+end
 
 -------------------------------------------------------------------------------
 -- Compute energy, speed, number of factory for recipes
@@ -1354,38 +1380,11 @@ end
 function PlannerModel.methods:computeFactory(player, object)
 	Logging:debug("PlannerModel:computeFactory()",object)
 
-	object.factory.speed = object.factory.speed_nominal
-	-- effet module factory
-	for module, value in pairs(object.factory.modules) do
-		local bonus = self.player:getModuleBonus(module, "speed")
-		object.factory.speed = object.factory.speed + object.factory.speed_nominal * value * bonus
-	end
-	-- effet module beacon
-	if object.beacon.active then
-		for module, value in pairs(object.beacon.modules) do
-			local bonus = self.player:getModuleBonus(module, "speed")
-			object.factory.speed = object.factory.speed + object.factory.speed_nominal * value * bonus * object.beacon.efficiency * object.beacon.combo
-		end
-	end
-
-	-- effet module factory
-	object.factory.energy = object.factory.energy_nominal
-	for module, value in pairs(object.factory.modules) do
-		local bonus = self.player:getModuleBonus(module, "consumption")
-		object.factory.energy = object.factory.energy + object.factory.energy_nominal * value * bonus
-	end
-	if object.beacon.active then
-		-- effet module beacon
-		for module, value in pairs(object.beacon.modules) do
-			local bonus = self.player:getModuleBonus(module, "consumption")
-			object.factory.energy = object.factory.energy + object.factory.energy_nominal * value * bonus * object.beacon.efficiency * object.beacon.combo
-		end
-	end
-
-	-- cap le speed a self.capSpeed
-	if object.factory.speed < object.factory.speed_nominal*self.capSpeed  then object.factory.speed = object.factory.speed_nominal*self.capSpeed end
-	-- cap l'energy a self.capEnergy
-	if object.factory.energy < object.factory.energy_nominal*self.capEnergy  then object.factory.energy = object.factory.energy_nominal*self.capEnergy end
+	-- effet speed
+	object.factory.speed = object.factory.speed_nominal * (1 + object.factory.effects.speed)
+	-- effet consumption
+	object.factory.energy = object.factory.energy_nominal * (1 + object.factory.effects.consumption)
+	
 	-- compte le nombre de machines necessaires
 	if object.products ~= nil then
 		local product = nil
@@ -1396,7 +1395,7 @@ function PlannerModel.methods:computeFactory(player, object)
 		if product ~= nil then
 			local model = self:getModel(player)
 			-- [nombre d'item] * [effort necessaire du recipe] / ([la vitesse de la factory] * [nombre produit par le recipe] * [le temps en second])
-			local count = math.ceil(product.count*object.energy/(object.factory.speed*self:getElementAmount(product)*model.time))
+			local count = math.ceil(product.count*object.energy/(object.factory.speed*self:getElementAmount(product)*(1 + object.factory.effects.productivity)*model.time))
 			object.factory.count = count
 			if object.beacon.active then
 				object.beacon.count = math.ceil(count/object.beacon.factory)

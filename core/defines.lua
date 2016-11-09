@@ -184,6 +184,13 @@ helmod_defines.factory["chemical-plant"]={
 	module_slots = 2
 }
 
+helmod_defines.factory["rocket-silo"]={
+	name = "rocket-silo",
+	energy_nominal = 4000,
+	speed_nominal = 1,
+	module_slots = 4
+}
+
 helmod_icons = {}
 helmod_icons["unknown-assembling-machine"]="__helmod__/graphics/icons/unknown-assembling-machine.png"
 helmod_icons["default-assembling-machine"]="__helmod__/graphics/icons/unknown-assembling-machine.png"

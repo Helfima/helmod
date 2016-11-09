@@ -853,7 +853,17 @@ function PlannerResult.methods:addProductionBlockRow(player, guiTable, blockId, 
 	-- modules
 	for name, count in pairs(factory.modules) do
 		for index = 1, count, 1 do
-			self:addSmSpriteButton(guiFactoryModule, "HMPlannerFactorySelector_factory-module_"..name.."_"..index, "item", name)
+			local module = self.player:getItemPrototype(name)
+			if module ~= nil then
+				local consumption = self:formatPercent(self.player:getModuleBonus(module.name, "consumption"))
+				local speed = self:formatPercent(self.player:getModuleBonus(module.name, "speed"))
+				local productivity = self:formatPercent(self.player:getModuleBonus(module.name, "productivity"))
+				local pollution = self:formatPercent(self.player:getModuleBonus(module.name, "pollution"))
+				local tooltip = ({"tooltip.module-description" , module.localised_name, consumption, speed, productivity, pollution})
+				self:addSmSpriteButton(guiFactoryModule, "HMPlannerFactorySelector_factory-module_"..name.."_"..index, "item", name, nil, tooltip)
+			else
+				self:addSmSpriteButton(guiFactoryModule, "HMPlannerFactorySelector_factory-module_"..name.."_"..index, "item", name)
+			end
 			index = index + 1
 		end
 	end
@@ -867,7 +877,17 @@ function PlannerResult.methods:addProductionBlockRow(player, guiTable, blockId, 
 	-- modules
 	for name, count in pairs(beacon.modules) do
 		for index = 1, count, 1 do
-			self:addSmSpriteButton(guiBeaconModule, "HMPlannerFactorySelector_beacon-module_"..name.."_"..index, "item", name)
+			local module = self.player:getItemPrototype(name)
+			if module ~= nil then
+				local consumption = self:formatPercent(self.player:getModuleBonus(module.name, "consumption"))
+				local speed = self:formatPercent(self.player:getModuleBonus(module.name, "speed"))
+				local productivity = self:formatPercent(self.player:getModuleBonus(module.name, "productivity"))
+				local pollution = self:formatPercent(self.player:getModuleBonus(module.name, "pollution"))
+				local tooltip = ({"tooltip.module-description" , module.localised_name, consumption, speed, productivity, pollution})
+				self:addSmSpriteButton(guiBeaconModule, "HMPlannerFactorySelector_beacon-module_"..name.."_"..index, "item", name, nil, tooltip)
+			else
+				self:addSmSpriteButton(guiBeaconModule, "HMPlannerFactorySelector_beacon-module_"..name.."_"..index, "item", name)
+			end
 			index = index + 1
 		end
 	end
@@ -1126,7 +1146,7 @@ function PlannerResult.methods:updateSummary(player)
 			self:addGuiLabel(guiWagon, "count", self:formatNumber(wagon.limit_count).."/"..self:formatNumber(wagon.count), "helmod_label-right-70")
 			self:addSpriteIconButton(guiWagon, "HMPlannerWagon=OPEN=ID=", self.player:getIconType(wagon), wagon.name, wagon.name, self.player:getLocalisedName(player, wagon))
 		end
-		
+
 		-- col storage
 		local storage = resource.storage
 		local guiStorage = self:addGuiFlowH(resourcesTable,"storage"..resource.name)
@@ -1145,7 +1165,17 @@ function PlannerResult.methods:updateSummary(player)
 			-- modules
 			for name, count in pairs(factory.modules) do
 				for index = 1, count, 1 do
-					self:addSmSpriteButton(guiFactoryModule, "HMPlannerFactorySelector_factory-module_"..name.."_"..index, "item", name)
+					local module = self.player:getItemPrototype(name)
+					if module ~= nil then
+						local consumption = self:formatPercent(self.player:getModuleBonus(module.name, "consumption"))
+						local speed = self:formatPercent(self.player:getModuleBonus(module.name, "speed"))
+						local productivity = self:formatPercent(self.player:getModuleBonus(module.name, "productivity"))
+						local pollution = self:formatPercent(self.player:getModuleBonus(module.name, "pollution"))
+						local tooltip = ({"tooltip.module-description" , module.localised_name, consumption, speed, productivity, pollution})
+						self:addSmSpriteButton(guiFactoryModule, "HMPlannerFactorySelector_factory-module_"..name.."_"..index, "item", name, nil, tooltip)
+					else
+						self:addSmSpriteButton(guiFactoryModule, "HMPlannerFactorySelector_factory-module_"..name.."_"..index, "item", name)
+					end
 					index = index + 1
 				end
 			end
@@ -1163,7 +1193,17 @@ function PlannerResult.methods:updateSummary(player)
 			-- modules
 			for name, count in pairs(beacon.modules) do
 				for index = 1, count, 1 do
-					self:addSmSpriteButton(guiBeaconModule, "HMPlannerFactorySelector_beacon-module_"..name.."_"..index, "item", name)
+					local module = self.player:getItemPrototype(name)
+					if module ~= nil then
+						local consumption = self:formatPercent(self.player:getModuleBonus(module.name, "consumption"))
+						local speed = self:formatPercent(self.player:getModuleBonus(module.name, "speed"))
+						local productivity = self:formatPercent(self.player:getModuleBonus(module.name, "productivity"))
+						local pollution = self:formatPercent(self.player:getModuleBonus(module.name, "pollution"))
+						local tooltip = ({"tooltip.module-description" , module.localised_name, consumption, speed, productivity, pollution})
+						self:addSmSpriteButton(guiBeaconModule, "HMPlannerFactorySelector_beacon-module_"..name.."_"..index, "item", name, nil, tooltip)
+					else
+						self:addSmSpriteButton(guiBeaconModule, "HMPlannerFactorySelector_beacon-module_"..name.."_"..index, "item", name)
+					end
 					index = index + 1
 				end
 			end

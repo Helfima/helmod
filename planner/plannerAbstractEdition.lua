@@ -488,10 +488,19 @@ function PlannerAbstractEdition.methods:updateFactoryInfo(player, element, actio
 		self:addGuiText(inputPanel, "limit", factory.limit, "helmod_textfield")
 
 		self:addGuiLabel(inputPanel, "label-energy", ({"helmod_label.energy"}))
-		self:addGuiLabel(inputPanel, "energy", factory.energy)
+		local sign = "+"
+		if factory.effects.consumption < 0 then sign = "-" end
+		self:addGuiLabel(inputPanel, "energy", factory.energy.." ("..sign..self:formatPercent(factory.effects.consumption).."%)")
 
+		local sign = "+"
+		if factory.effects.speed < 0 then sign = "-" end
 		self:addGuiLabel(inputPanel, "label-speed", ({"helmod_label.speed"}))
-		self:addGuiLabel(inputPanel, "speed", factory.speed)
+		self:addGuiLabel(inputPanel, "speed", factory.speed.." ("..sign..self:formatPercent(factory.effects.speed).."%)")
+
+		local sign = "+"
+		if factory.effects.productivity < 0 then sign = "-" end
+		self:addGuiLabel(inputPanel, "label-productivity", ({"helmod_label.productivity"}))
+		self:addGuiLabel(inputPanel, "productivity", sign..self:formatPercent(factory.effects.productivity).."%")
 
 		self:addGuiButton(infoPanel, self:classname().."=factory-update=ID="..item.."=", object.name, "helmod_button-default", ({"helmod_button.update"}))
 	end

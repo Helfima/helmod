@@ -740,8 +740,8 @@ default_gui["helmod_frame_recipe_factory"] = {
 	parent = "helmod_frame_default",
 	minimal_width = 230,
 	maximal_width = 230,
-	minimal_height = 280,
-	maximal_height = 280
+	minimal_height = 305,
+	maximal_height = 305
 }
 
 -------------------------------------------------------------------------------
@@ -802,8 +802,8 @@ default_gui["helmod_scroll_recipe_module_list"] = {
 	parent = "scroll_pane_style",
 	minimal_width = 180,
 	maximal_width = 180,
-	minimal_height = 172,
-	maximal_height = 172
+	minimal_height = 197,
+	maximal_height = 197
 }
 
 -------------------------------------------------------------------------------
