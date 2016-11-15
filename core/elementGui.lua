@@ -565,8 +565,8 @@ end
 -- @return #number the formated number
 --
 function ElementGui.methods:formatRound(num, idp)
-  local mult = 10^(idp or 0)
-  return math.floor(num * mult + 0.5) / mult
+	local mult = 10^(idp or 0)
+	return math.floor(num * mult + 0.5) / mult
 end
 
 
@@ -580,6 +580,6 @@ end
 -- @return #number the formated number
 --
 function ElementGui.methods:formatPercent(num)
-  local mult = 10^3
-  return math.floor(num * mult + 0.5) / 10
+	local mult = 10^3
+	return math.floor(num * mult + 0.5) / 10
 end

@@ -40,12 +40,6 @@ function PlannerModel.methods:getModel(player)
 
 	if model.time == nil then model.time = 60 end
 
-	-- delete the old version item
-	if model.products ~= nil then model.products = nil end
-	if model.input ~= nil then model.input = nil end
-	if model.recipes ~= nil then model.recipes = nil end
-	if model.needPrepare ~= nil then model.needPrepare = nil end
-
 	return model
 end
 
@@ -95,7 +89,6 @@ function PlannerModel.methods:createProductionBlockModel(player, recipe)
 	inputModel.id = "block_"..model.block_id
 	inputModel.name = recipe.name
 	inputModel.count = 1
-	inputModel.active = true
 	inputModel.power = 0
 	inputModel.ingredients = {}
 	inputModel.products = {}
@@ -283,7 +276,6 @@ function PlannerModel.methods:createRecipeModel(player, name, count)
 	recipeModel.weight = 0
 	recipeModel.name = name
 	recipeModel.count = count
-	recipeModel.active = true
 	recipeModel.energy = 0.5
 	recipeModel.production = 1
 	recipeModel.ingredients = {}
@@ -316,7 +308,6 @@ function PlannerModel.methods:createResourceModel(player, name, type, count)
 	local resourceModel = {}
 	resourceModel.id = model.resource_id
 	resourceModel.index = 1
-	resourceModel.weight = 0
 	resourceModel.type = type
 	resourceModel.name = name
 	resourceModel.count = count
@@ -496,24 +487,6 @@ function PlannerModel.methods:updateProduct(player, blockId, key, quantity)
 			end
 		end
 	end
-end
-
--------------------------------------------------------------------------------
--- Active/desactive a recipe
---
--- @function [parent=#PlannerModel] setActiveRecipe
---
--- @param #string key recipe name
---
-function PlannerModel.methods:setActiveRecipe(player, key)
-	Logging:debug("PlannerModel:setActiveRecipe():",player, key)
-	local model = self:getModel(player)
-
-	local recipe = model.recipes[key]
-	if recipe ~= nil then
-		recipe.active = not(recipe.active)
-	end
-	self:setDefaultActiveRecipe(player, key)
 end
 
 -------------------------------------------------------------------------------
@@ -1531,7 +1504,6 @@ function PlannerModel.methods:getDefaultRecipe(player, key)
 	if default.recipes[key] == nil then
 		default.recipes[key] = {
 			name = key,
-			active = true,
 			factory = nil,
 			beacon = nil
 		}

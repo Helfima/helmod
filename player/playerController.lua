@@ -162,6 +162,35 @@ function PlayerController.methods:getDefaultSettings()
 end
 
 -------------------------------------------------------------------------------
+-- Get global gui
+--
+-- @function [parent=#PlayerController] getGlobalGui
+--
+-- @param #LuaPlayer player
+--
+function PlayerController.methods:getGlobalGui(player)
+	return self:getGlobal(player, "gui")
+end
+
+-------------------------------------------------------------------------------
+-- Get sorted style
+--
+-- @function [parent=#PlayerController] getSortedStyle
+--
+-- @param #LuaPlayer player
+-- @param #string key
+--
+-- @return #string style
+--
+function PlayerController.methods:getSortedStyle(player, key)
+	local globalGui = self:getGlobalGui(player, key)
+	local style = "helmod_button-sorted-none"
+	if globalGui.order.name == key and globalGui.order.ascendant then style = "helmod_button-sorted-up" end
+	if globalGui.order.name == key and not(globalGui.order.ascendant) then style = "helmod_button-sorted-down" end
+	return style
+end
+
+-------------------------------------------------------------------------------
 -- Return recipes
 --
 -- @function [parent=#PlayerController] getRecipes

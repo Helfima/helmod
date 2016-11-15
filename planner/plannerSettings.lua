@@ -219,7 +219,6 @@ function PlannerSettings.methods:after_open(player, element, action, item, item2
 	self.parent:send_event(player, "HMPlannerRecipeEdition", "CLOSE")
 	self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
 	self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
-	self.parent:send_event(player, "HMPlannerResult", "change-tab", "product-line")
 
 	self:updateAboutSettings(player, element, action, item, item2, item3)
 	self:updateDataSettings(player, element, action, item, item2, item3)

@@ -124,7 +124,10 @@ function PlannerRecipeSelector.methods:on_event(player, element, action, item, i
 	if action == "recipe-select" then
 		local productionBlock = self.parent.model:addRecipeIntoProductionBlock(player, item, item2)
 		self.parent.model:update(player)
-		self.parent:refreshDisplayData(player, nil, productionBlock.id)
+		local globalGui = self.player:getGlobalGui(player)
+		globalGui.currentBlock = productionBlock.id
+		
+		self.parent:refreshDisplayData(player)
 		--self.parent:send_event(player, "HMPlannerRecipeUpdate", "OPEN", item, nil)
 		self:close(player)
 	end

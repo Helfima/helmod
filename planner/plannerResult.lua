@@ -124,16 +124,20 @@ end
 --
 function PlannerResult.methods:buildPanel(player)
 	Logging:debug("PlannerResult:buildPanel():",player)
-
 	local model = self.model:getModel(player)
-	model.currentTab = self.PRODUCTION_LINE_TAB
+
+	local globalGui = self.player:getGlobalGui(player)
+	if globalGui.currentTab == nil then
+		globalGui.currentTab = self.PRODUCTION_LINE_TAB
+	end
+	if globalGui.currentTab == nil then
+		globalGui.order = {name="index", ascendant=true}
+	end
 
 	Logging:debug("test version:", model.version, helmod.version)
 	if model.version == nil or model.version ~= helmod.version then
 		self.model:update(player, true)
 	end
-
-	model.order = {name="index", ascendant=true}
 
 	local parentPanel = self:getParentPanel(player)
 
@@ -207,8 +211,11 @@ function PlannerResult.methods:on_event(player, element, action, item, item2, it
 	Logging:debug("PlannerResult:on_event():",player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 
+	local globalGui = self.player:getGlobalGui(player)
+
 	if action == "change-tab" then
-		model.currentTab = item
+		globalGui.currentTab = item
+		globalGui.currentBlock = item2
 		self:update(player, item, item2, item3)
 		self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
 		self.parent:send_event(player, "HMPlannerResourceEdition", "CLOSE")
@@ -218,32 +225,34 @@ function PlannerResult.methods:on_event(player, element, action, item, item2, it
 	end
 
 	if action == "change-sort" then
-		if model.order.name == item then
-			model.order.ascendant = not(model.order.ascendant)
+		if globalGui.order.name == item then
+			globalGui.order.ascendant = not(globalGui.order.ascendant)
 		else
-			model.order = {name=item, ascendant=true}
+			globalGui.order = {name=item, ascendant=true}
 		end
 		self:update(player, item, item2, item3)
 	end
 
 	if action == "production-block-add" then
-		if model.currentTab == self.PRODUCTION_LINE_TAB then
+		if globalGui.currentTab == self.PRODUCTION_LINE_TAB then
 			local recipes = self.player:searchRecipe(player, item2)
 			Logging:debug("line recipes:",recipes)
 			if #recipes == 1 then
 				local productionBlock = self.parent.model:addRecipeIntoProductionBlock(player, "new", recipes[1].name)
 				self.parent.model:update(player)
-				model.currentTab = self.PRODUCTION_BLOCK_TAB
+				globalGui.currentTab = self.PRODUCTION_BLOCK_TAB
+				globalGui.currentBlock = productionBlock.id
 				self:update(player, self.PRODUCTION_BLOCK_TAB, productionBlock.id, recipes[1].name)
 			else
-				model.currentTab = self.PRODUCTION_BLOCK_TAB
+				globalGui.currentTab = self.PRODUCTION_BLOCK_TAB
+				globalGui.currentBlock = "new"
 				self.parent:send_event(player, "HMPlannerRecipeSelector", "OPEN", "new")
 			end
 		end
 	end
 
 	if action == "production-block-remove" then
-		if model.currentTab == self.PRODUCTION_LINE_TAB then
+		if globalGui.currentTab == self.PRODUCTION_LINE_TAB then
 			self.parent.model:removeProductionBlock(player, item)
 			self.parent.model:update(player)
 			self:update(player, self.PRODUCTION_LINE_TAB, item, item2, item3)
@@ -251,7 +260,7 @@ function PlannerResult.methods:on_event(player, element, action, item, item2, it
 	end
 
 	if action == "production-block-up" then
-		if model.currentTab == self.PRODUCTION_LINE_TAB then
+		if globalGui.currentTab == self.PRODUCTION_LINE_TAB then
 			self.parent.model:upProductionBlock(player, item)
 			self.parent.model:update(player)
 			self:update(player, self.PRODUCTION_LINE_TAB, item, item2, item3)
@@ -259,7 +268,7 @@ function PlannerResult.methods:on_event(player, element, action, item, item2, it
 	end
 
 	if action == "production-block-down" then
-		if model.currentTab == self.PRODUCTION_LINE_TAB then
+		if globalGui.currentTab == self.PRODUCTION_LINE_TAB then
 			self.parent.model:downProductionBlock(player, item)
 			self.parent.model:update(player)
 			self:update(player, self.PRODUCTION_LINE_TAB, item, item2, item3)
@@ -267,7 +276,7 @@ function PlannerResult.methods:on_event(player, element, action, item, item2, it
 	end
 
 	if action == "production-recipe-add" then
-		if model.currentTab == self.PRODUCTION_BLOCK_TAB then
+		if globalGui.currentTab == self.PRODUCTION_BLOCK_TAB then
 			local recipes = self.player:searchRecipe(player, item3)
 			Logging:debug("block recipes:",recipes)
 			if #recipes == 1 then
@@ -282,7 +291,7 @@ function PlannerResult.methods:on_event(player, element, action, item, item2, it
 	end
 
 	if action == "production-recipe-remove" then
-		if model.currentTab == self.PRODUCTION_BLOCK_TAB then
+		if globalGui.currentTab == self.PRODUCTION_BLOCK_TAB then
 			self.parent.model:removeProductionRecipe(player, item, item2)
 			self.parent.model:update(player)
 			self:update(player, self.PRODUCTION_BLOCK_TAB, item, item2, item3)
@@ -290,7 +299,7 @@ function PlannerResult.methods:on_event(player, element, action, item, item2, it
 	end
 
 	if action == "production-recipe-up" then
-		if model.currentTab == self.PRODUCTION_BLOCK_TAB then
+		if globalGui.currentTab == self.PRODUCTION_BLOCK_TAB then
 			self.parent.model:upProductionRecipe(player, item, item2)
 			self.parent.model:update(player)
 			self:update(player, self.PRODUCTION_BLOCK_TAB, item, item2, item3)
@@ -298,7 +307,7 @@ function PlannerResult.methods:on_event(player, element, action, item, item2, it
 	end
 
 	if action == "production-recipe-down" then
-		if model.currentTab == self.PRODUCTION_BLOCK_TAB then
+		if globalGui.currentTab == self.PRODUCTION_BLOCK_TAB then
 			self.parent.model:downProductionRecipe(player, item, item2)
 			self.parent.model:update(player)
 			self:update(player, self.PRODUCTION_BLOCK_TAB, item, item2, item3)
@@ -318,26 +327,26 @@ end
 --
 function PlannerResult.methods:update(player, item, item2, item3)
 	Logging:debug("PlannerResult:update():", player, item, item2, item3)
-	local model = self.model:getModel(player)
+	local globalGui = self.player:getGlobalGui(player)
 	local dataPanel = self:getDataPanel(player)
 
 	for k,guiName in pairs(dataPanel.children_names) do
 		dataPanel[guiName].destroy()
 	end
 
-	if model.currentTab == self.PRODUCTION_LINE_TAB then
+	if globalGui.currentTab == self.PRODUCTION_LINE_TAB then
 		self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
 		self.parent:send_event(player, "HMPlannerRecipeEdition", "CLOSE")
 		self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
 		self:updateProductionLine(player, item, item2, item3)
 	end
-	if model.currentTab == self.PRODUCTION_BLOCK_TAB then
+	if globalGui.currentTab == self.PRODUCTION_BLOCK_TAB then
 		self:updateProductionBlock(player, item, item2, item3)
 	end
-	if model.currentTab == self.SUMMARY_TAB then
+	if globalGui.currentTab == self.SUMMARY_TAB then
 		self:updateSummary(player, item, item2, item3)
 	end
-	if model.currentTab == self.RESOURCES_TAB then
+	if globalGui.currentTab == self.RESOURCES_TAB then
 		self:updateResources(player, item, item2, item3)
 	end
 end
@@ -355,6 +364,7 @@ end
 function PlannerResult.methods:updateProductionLine(player, item, item2, item3)
 	Logging:debug("PlannerResult:updateLine():", player, item, item2, item3)
 	local model = self.model:getModel(player)
+	local globalGui = self.player:getGlobalGui(player)
 	-- data
 	local menuPanel = self:getMenuPanel(player, ({"helmod_result-panel.tab-title-production-line"}))
 
@@ -390,7 +400,7 @@ function PlannerResult.methods:updateProductionLine(player, item, item2, item3)
 		self:addProductionLineHeader(player, resultTable)
 
 		local i = 0
-		for _, element in spairs(model.blocks, function(t,a,b) if model.order.ascendant then return t[b][model.order.name] > t[a][model.order.name] else return t[b][model.order.name] < t[a][model.order.name] end end) do
+		for _, element in spairs(model.blocks, function(t,a,b) if globalGui.order.ascendant then return t[b][globalGui.order.name] > t[a][globalGui.order.name] else return t[b][globalGui.order.name] < t[a][globalGui.order.name] end end) do
 			self:addProductionLineRow(player, resultTable, element)
 		end
 
@@ -419,13 +429,14 @@ end
 function PlannerResult.methods:updateProductionBlock(player, item, item2, item3)
 	Logging:debug("PlannerResult:updateProductionBlock():", player, item, item2, item3)
 	local model = self.model:getModel(player)
+	local globalGui = self.player:getGlobalGui(player)
 	Logging:debug("model:", model)
 	-- data
 	local menuPanel = self:getMenuPanel(player, ({"helmod_result-panel.tab-title-production-block"}))
 
 	local blockId = "new"
-	if item2 ~= nil then
-		blockId = item2
+	if globalGui.currentBlock ~= nil then
+		blockId = globalGui.currentBlock
 	end
 	self:addGuiButton(menuPanel, "HMPlannerRecipeSelector=OPEN=ID=", blockId, "helmod_button-default", ({"helmod_result-panel.add-button-recipe"}))
 	self:addGuiButton(menuPanel, self:classname().."=change-tab=ID=", self.PRODUCTION_LINE_TAB, "helmod_button-default", ({"helmod_result-panel.back-button-production-line"}))
@@ -524,7 +535,7 @@ function PlannerResult.methods:updateProductionBlock(player, item, item2, item3)
 
 		self:addProductionBlockHeader(player, resultTable)
 
-		for _, recipe in spairs(model.blocks[blockId].recipes, function(t,a,b) if model.order.ascendant then return t[b][model.order.name] > t[a][model.order.name] else return t[b][model.order.name] < t[a][model.order.name] end end) do
+		for _, recipe in spairs(model.blocks[blockId].recipes, function(t,a,b) if globalGui.order.ascendant then return t[b][globalGui.order.name] > t[a][globalGui.order.name] else return t[b][globalGui.order.name] < t[a][globalGui.order.name] end end) do
 			self:addProductionBlockRow(player, resultTable, blockId, recipe)
 		end
 	end
@@ -549,53 +560,25 @@ function PlannerResult.methods:addProductionBlockHeader(player, itable)
 	if globalSettings.display_data_col_index then
 		local guiIndex = self:addGuiFlowH(itable,"header-index")
 		self:addGuiLabel(guiIndex, "label", ({"helmod_result-panel.col-header-index"}))
-		local style = "helmod_button-sorted-none"
-		if model.order.name == "index" and model.order.ascendant then style = "helmod_button-sorted-up" end
-		if model.order.name == "index" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-		self:addGuiButton(guiIndex, self:classname().."=change-sort=ID=", "index", style)
-	end
-	if globalSettings.display_data_col_level then
-		local guiLevel = self:addGuiFlowH(itable,"header-level")
-		self:addGuiLabel(guiLevel, "label", ({"helmod_result-panel.col-header-level"}))
-		local style = "helmod_button-sorted-none"
-		if model.order.name == "level" and model.order.ascendant then style = "helmod_button-sorted-up" end
-		if model.order.name == "level" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-		self:addGuiButton(guiLevel, self:classname().."=change-sort=ID=", "level", style)
-	end
-	if globalSettings.display_data_col_weight then
-		local guiLevel = self:addGuiFlowH(itable,"header-weight")
-		self:addGuiLabel(guiLevel, "label", ({"helmod_result-panel.col-header-weight"}))
-		local style = "helmod_button-sorted-none"
-		if model.order.name == "weight" and model.order.ascendant then style = "helmod_button-sorted-up" end
-		if model.order.name == "weight" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-		self:addGuiButton(guiLevel, self:classname().."=change-sort=ID=", "weight", style)
+		self:addGuiButton(guiIndex, self:classname().."=change-sort=ID=", "index", self.player:getSortedStyle(player, "index"))
 	end
 
 	if globalSettings.display_data_col_id then
 		local guiId = self:addGuiFlowH(itable,"header-id")
 		self:addGuiLabel(guiId, "label", ({"helmod_result-panel.col-header-id"}))
-		local style = "helmod_button-sorted-none"
-		if model.order.name == "id" and model.order.ascendant then style = "helmod_button-sorted-up" end
-		if model.order.name == "id" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-		self:addGuiButton(guiId, self:classname().."=change-sort=ID=", "id", style)
+		self:addGuiButton(guiId, self:classname().."=change-sort=ID=", "id", self.player:getSortedStyle(player, "id"))
 
 	end
 	if globalSettings.display_data_col_name then
 		local guiName = self:addGuiFlowH(itable,"header-name")
 		self:addGuiLabel(guiName, "label", ({"helmod_result-panel.col-header-name"}))
-		local style = "helmod_button-sorted-none"
-		if model.order.name == "name" and model.order.ascendant then style = "helmod_button-sorted-up" end
-		if model.order.name == "name" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-		self:addGuiButton(guiName, self:classname().."=change-sort=ID=", "name", style)
+		self:addGuiButton(guiName, self:classname().."=change-sort=ID=", "name", self.player:getSortedStyle(player, "name"))
 
 	end
 
 	local guiRecipe = self:addGuiFlowH(itable,"header-recipe")
 	self:addGuiLabel(guiRecipe, "header-recipe", ({"helmod_result-panel.col-header-recipe"}))
-	local style = "helmod_button-sorted-none"
-	if model.order.name == "index" and model.order.ascendant then style = "helmod_button-sorted-up" end
-	if model.order.name == "index" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-	self:addGuiButton(guiRecipe, self:classname().."=change-sort=ID=", "index", style)
+	self:addGuiButton(guiRecipe, self:classname().."=change-sort=ID=", "index", self.player:getSortedStyle(player, "index"))
 
 	local guiFactory = self:addGuiFlowH(itable,"header-factory")
 	self:addGuiLabel(guiFactory, "header-factory", ({"helmod_result-panel.col-header-factory"}))
@@ -606,10 +589,7 @@ function PlannerResult.methods:addProductionBlockHeader(player, itable)
 
 	local guiEnergy = self:addGuiFlowH(itable,"header-energy")
 	self:addGuiLabel(guiEnergy, "header-energy", ({"helmod_result-panel.col-header-energy"}))
-	local style = "helmod_button-sorted-none"
-	if model.order.name == "energy_total" and model.order.ascendant then style = "helmod_button-sorted-up" end
-	if model.order.name == "energy_total" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-	self:addGuiButton(guiEnergy, self:classname().."=change-sort=ID=", "energy_total", style)
+	self:addGuiButton(guiEnergy, self:classname().."=change-sort=ID=", "energy_total", self.player:getSortedStyle(player, "energy_total"))
 
 
 	local guiProducts = self:addGuiFlowH(itable,"header-products")
@@ -638,68 +618,29 @@ function PlannerResult.methods:addProductionLineHeader(player, itable)
 	if globalSettings.display_data_col_index then
 		local guiIndex = self:addGuiFlowH(itable,"header-index")
 		self:addGuiLabel(guiIndex, "label", ({"helmod_result-panel.col-header-index"}))
-		local style = "helmod_button-sorted-none"
-		if model.order.name == "index" and model.order.ascendant then style = "helmod_button-sorted-up" end
-		if model.order.name == "index" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-		self:addGuiButton(guiIndex, self:classname().."=change-sort=ID=", "index", style)
-	end
-	if globalSettings.display_data_col_level then
-		local guiLevel = self:addGuiFlowH(itable,"header-level")
-		self:addGuiLabel(guiLevel, "label", ({"helmod_result-panel.col-header-level"}))
-		local style = "helmod_button-sorted-none"
-		if model.order.name == "level" and model.order.ascendant then style = "helmod_button-sorted-up" end
-		if model.order.name == "level" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-		self:addGuiButton(guiLevel, self:classname().."=change-sort=ID=", "level", style)
-	end
-	if globalSettings.display_data_col_weight then
-		local guiLevel = self:addGuiFlowH(itable,"header-weight")
-		self:addGuiLabel(guiLevel, "label", ({"helmod_result-panel.col-header-weight"}))
-		local style = "helmod_button-sorted-none"
-		if model.order.name == "weight" and model.order.ascendant then style = "helmod_button-sorted-up" end
-		if model.order.name == "weight" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-		self:addGuiButton(guiLevel, self:classname().."=change-sort=ID=", "weight", style)
+		self:addGuiButton(guiIndex, self:classname().."=change-sort=ID=", "index", self.player:getSortedStyle(player, "index"))
 	end
 
 	if globalSettings.display_data_col_id then
 		local guiId = self:addGuiFlowH(itable,"header-id")
 		self:addGuiLabel(guiId, "label", ({"helmod_result-panel.col-header-id"}))
-		local style = "helmod_button-sorted-none"
-		if model.order.name == "id" and model.order.ascendant then style = "helmod_button-sorted-up" end
-		if model.order.name == "id" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-		self:addGuiButton(guiId, self:classname().."=change-sort=ID=", "id", style)
+		self:addGuiButton(guiId, self:classname().."=change-sort=ID=", "id", self.player:getSortedStyle(player, "id"))
 
 	end
 	if globalSettings.display_data_col_name then
 		local guiName = self:addGuiFlowH(itable,"header-name")
 		self:addGuiLabel(guiName, "label", ({"helmod_result-panel.col-header-name"}))
-		local style = "helmod_button-sorted-none"
-		if model.order.name == "name" and model.order.ascendant then style = "helmod_button-sorted-up" end
-		if model.order.name == "name" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-		self:addGuiButton(guiName, self:classname().."=change-sort=ID=", "name", style)
+		self:addGuiButton(guiName, self:classname().."=change-sort=ID=", "name", self.player:getSortedStyle(player, "name"))
 
 	end
 
 	local guiRecipe = self:addGuiFlowH(itable,"header-recipe")
 	self:addGuiLabel(guiRecipe, "header-recipe", ({"helmod_result-panel.col-header-production-block"}))
-	local style = "helmod_button-sorted-none"
-	if model.order.name == "index" and model.order.ascendant then style = "helmod_button-sorted-up" end
-	if model.order.name == "index" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-	self:addGuiButton(guiRecipe, self:classname().."=change-sort=ID=", "index", style)
+	self:addGuiButton(guiRecipe, self:classname().."=change-sort=ID=", "index", self.player:getSortedStyle(player, "index"))
 
-	--	local guiFactory = self:addGuiFlowH(itable,"header-factory")
-	--	self:addGuiLabel(guiFactory, "header-factory", ({"helmod_result-panel.col-header-factory"}))
-	--
-	--
-	--	local guiBeacon = self:addGuiFlowH(itable,"header-beacon")
-	--	self:addGuiLabel(guiBeacon, "header-beacon", ({"helmod_result-panel.col-header-beacon"}))
-	--
 	local guiEnergy = self:addGuiFlowH(itable,"header-energy")
 	self:addGuiLabel(guiEnergy, "header-energy", ({"helmod_result-panel.col-header-energy"}))
-	local style = "helmod_button-sorted-none"
-	if model.order.name == "energy_total" and model.order.ascendant then style = "helmod_button-sorted-up" end
-	if model.order.name == "energy_total" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-	self:addGuiButton(guiEnergy, self:classname().."=change-sort=ID=", "power", style)
-
+	self:addGuiButton(guiEnergy, self:classname().."=change-sort=ID=", "power", self.player:getSortedStyle(player, "power"))
 
 	local guiProducts = self:addGuiFlowH(itable,"header-products")
 	self:addGuiLabel(guiProducts, "header-products", ({"helmod_result-panel.col-header-output"}))
@@ -723,67 +664,33 @@ function PlannerResult.methods:addResourcesHeader(player, itable)
 	if globalSettings.display_data_col_index then
 		local guiIndex = self:addGuiFlowH(itable,"header-index")
 		self:addGuiLabel(guiIndex, "label", ({"helmod_result-panel.col-header-index"}))
-		local style = "helmod_button-sorted-none"
-		if model.order.name == "index" and model.order.ascendant then style = "helmod_button-sorted-up" end
-		if model.order.name == "index" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-		self:addGuiButton(guiIndex, self:classname().."=change-sort=ID=", "index", style)
-	end
-	if globalSettings.display_data_col_level then
-		local guiLevel = self:addGuiFlowH(itable,"header-level")
-		self:addGuiLabel(guiLevel, "label", ({"helmod_result-panel.col-header-level"}))
-		local style = "helmod_button-sorted-none"
-		if model.order.name == "level" and model.order.ascendant then style = "helmod_button-sorted-up" end
-		if model.order.name == "level" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-		self:addGuiButton(guiLevel, self:classname().."=change-sort=ID=", "level", style)
-	end
-	if globalSettings.display_data_col_weight then
-		local guiLevel = self:addGuiFlowH(itable,"header-weight")
-		self:addGuiLabel(guiLevel, "label", ({"helmod_result-panel.col-header-weight"}))
-		local style = "helmod_button-sorted-none"
-		if model.order.name == "weight" and model.order.ascendant then style = "helmod_button-sorted-up" end
-		if model.order.name == "weight" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-		self:addGuiButton(guiLevel, self:classname().."=change-sort=ID=", "weight", style)
+		self:addGuiButton(guiIndex, self:classname().."=change-sort=ID=", "index", self.player:getSortedStyle(player, "index"))
 	end
 
 	if globalSettings.display_data_col_id then
 		local guiId = self:addGuiFlowH(itable,"header-id")
 		self:addGuiLabel(guiId, "label", ({"helmod_result-panel.col-header-id"}))
-		local style = "helmod_button-sorted-none"
-		if model.order.name == "id" and model.order.ascendant then style = "helmod_button-sorted-up" end
-		if model.order.name == "id" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-		self:addGuiButton(guiId, self:classname().."=change-sort=ID=", "id", style)
+		self:addGuiButton(guiId, self:classname().."=change-sort=ID=", "id", self.player:getSortedStyle(player, "id"))
 
 	end
 	if globalSettings.display_data_col_name then
 		local guiName = self:addGuiFlowH(itable,"header-name")
 		self:addGuiLabel(guiName, "label", ({"helmod_result-panel.col-header-name"}))
-		local style = "helmod_button-sorted-none"
-		if model.order.name == "name" and model.order.ascendant then style = "helmod_button-sorted-up" end
-		if model.order.name == "name" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-		self:addGuiButton(guiName, self:classname().."=change-sort=ID=", "name", style)
+		self:addGuiButton(guiName, self:classname().."=change-sort=ID=", "name", self.player:getSortedStyle(player, "name"))
 
 	end
 
 	local guiCount = self:addGuiFlowH(itable,"header-count")
 	self:addGuiLabel(guiCount, "header-count", ({"helmod_result-panel.col-header-total"}))
-	local style = "helmod_button-sorted-none"
-	if model.order.name == "count" and model.order.ascendant then style = "helmod_button-sorted-up" end
-	if model.order.name == "count" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-	self:addGuiButton(guiCount, self:classname().."=change-sort=ID=", "count", style)
+	self:addGuiButton(guiCount, self:classname().."=change-sort=ID=", "count", self.player:getSortedStyle(player, "count"))
 
 	local guiIngredient = self:addGuiFlowH(itable,"header-ingredient")
 	self:addGuiLabel(guiIngredient, "header-ingredient", ({"helmod_result-panel.col-header-ingredient"}))
-	local style = "helmod_button-sorted-none"
-	if model.order.name == "index" and model.order.ascendant then style = "helmod_button-sorted-up" end
-	if model.order.name == "index" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-	self:addGuiButton(guiIngredient, self:classname().."=change-sort=ID=", "index", style)
+	self:addGuiButton(guiIngredient, self:classname().."=change-sort=ID=", "index", self.player:getSortedStyle(player, "index"))
 
 	local guiType = self:addGuiFlowH(itable,"header-type")
 	self:addGuiLabel(guiType, "header-type", ({"helmod_result-panel.col-header-type"}))
-	local style = "helmod_button-sorted-none"
-	if model.order.name == "resource_category" and model.order.ascendant then style = "helmod_button-sorted-up" end
-	if model.order.name == "resource_category" and not(model.order.ascendant) then style = "helmod_button-sorted-down" end
-	self:addGuiButton(guiType, self:classname().."=change-sort=ID=", "resource_category", style)
+	self:addGuiButton(guiType, self:classname().."=change-sort=ID=", "resource_category", self.player:getSortedStyle(player, "resource_category"))
 
 end
 
@@ -800,7 +707,7 @@ end
 function PlannerResult.methods:addProductionBlockRow(player, guiTable, blockId, recipe)
 	Logging:debug("PlannerResult:addProductionBlockRow():", player, guiTable, blockId, recipe)
 	local model = self.model:getModel(player)
-
+	
 	local globalSettings = self.player:getGlobal(player, "settings")
 
 	-- col action
@@ -1072,6 +979,7 @@ end
 function PlannerResult.methods:updateResources(player)
 	Logging:debug("PlannerResult:updateResources():", player)
 	local model = self.model:getModel(player)
+	local globalGui = self.player:getGlobalGui(player)
 	-- data
 	local resultPanel = self:getResultPanel(player, ({"helmod_result-panel.tab-title-resources"}))
 	local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "helmod_scroll_block_list", "auto", "auto")
@@ -1099,7 +1007,7 @@ function PlannerResult.methods:updateResources(player)
 	self:addResourcesHeader(player, resultTable)
 
 
-	for _, recipe in spairs(model.ingredients, function(t,a,b) if model.order.ascendant then return t[b][model.order.name] > t[a][model.order.name] else return t[b][model.order.name] < t[a][model.order.name] end end) do
+	for _, recipe in spairs(model.ingredients, function(t,a,b) if globalGui.order.ascendant then return t[b][globalGui.order.name] > t[a][globalGui.order.name] else return t[b][globalGui.order.name] < t[a][globalGui.order.name] end end) do
 		self:addResourcesRow(player, resultTable, recipe)
 	end
 end
