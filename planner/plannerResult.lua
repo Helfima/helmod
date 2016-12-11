@@ -967,11 +967,12 @@ end
 --
 function PlannerResult.methods:updateResources(player)
 	Logging:debug("PlannerResult:updateResources():", player)
+	local displaySize = self.player:getGlobalSettings(player, "display_size")
 	local model = self.model:getModel(player)
 	local globalGui = self.player:getGlobalGui(player)
 	-- data
 	local resultPanel = self:getResultPanel(player, ({"helmod_result-panel.tab-title-resources"}))
-	local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "helmod_scroll_block_list", "auto", "auto")
+	local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "helmod_scroll_block_list_"..displaySize, "auto", "auto")
 
 	local globalSettings = self.player:getGlobal(player, "settings")
 
@@ -1010,13 +1011,14 @@ end
 --
 function PlannerResult.methods:updateSummary(player)
 	Logging:debug("PlannerResult:updateSummary():", player)
+	local displaySize = self.player:getGlobalSettings(player, "display_size")
 	local model = self.model:getModel(player)
 	-- data
 	local menuPanel = self:getMenuPanel(player, ({"helmod_result-panel.tab-title-summary"}))
 	local dataPanel = self:getDataPanel(player)
 
 	-- resources
-	local resourcesPanel = self:addGuiFrameV(dataPanel, "ressources", "helmod_frame_default", ({"helmod_common.resources"}))
+	local resourcesPanel = self:addGuiFrameV(dataPanel, "ressources", "helmod_frame_data_menu_"..displaySize, ({"helmod_common.resources"}))
 	local resourcesTable = self:addGuiTable(resourcesPanel,"table-resources",7)
 	self:addGuiLabel(resourcesTable, "header-ingredient", ({"helmod_result-panel.col-header-ingredient"}))
 	self:addGuiLabel(resourcesTable, "header-block", ({"helmod_result-panel.col-header-production-block"}))
@@ -1113,7 +1115,7 @@ function PlannerResult.methods:updateSummary(player)
 		self:addGuiLabel(guiEnergy, resource.name, self:formatNumberKilo(resource.energy_total, "W"), "helmod_label-right-70")
 	end
 
-	local energyPanel = self:addGuiFrameV(dataPanel, "energy", "helmod_frame_default", ({"helmod_common.generators"}))
+	local energyPanel = self:addGuiFrameV(dataPanel, "energy", "helmod_frame_data_menu_"..displaySize, ({"helmod_common.generators"}))
 	local resultTable = self:addGuiTable(energyPanel,"table-energy",2)
 
 	for _, item in pairs(model.generators) do
@@ -1123,7 +1125,7 @@ function PlannerResult.methods:updateSummary(player)
 	end
 
 	-- factories
-	local factoryPanel = self:addGuiFrameV(dataPanel, "factory", "helmod_frame_default", ({"helmod_common.factories"}))
+	local factoryPanel = self:addGuiFrameV(dataPanel, "factory", "helmod_frame_data_menu_"..displaySize, ({"helmod_common.factories"}))
 	local resultTable = self:addGuiTable(factoryPanel,"table-factory",10)
 
 	for _, element in pairs(model.summary.factories) do
@@ -1133,7 +1135,7 @@ function PlannerResult.methods:updateSummary(player)
 	end
 
 	-- beacons
-	local beaconPanel = self:addGuiFrameV(dataPanel, "beacon", "helmod_frame_default", ({"helmod_common.beacons"}))
+	local beaconPanel = self:addGuiFrameV(dataPanel, "beacon", "helmod_frame_data_menu_"..displaySize, ({"helmod_common.beacons"}))
 	local resultTable = self:addGuiTable(beaconPanel,"table-beacon",10)
 
 	for _, element in pairs(model.summary.beacons) do
@@ -1143,7 +1145,7 @@ function PlannerResult.methods:updateSummary(player)
 	end
 
 	-- modules
-	local modulesPanel = self:addGuiFrameV(dataPanel, "modules", "helmod_frame_default", ({"helmod_common.modules"}))
+	local modulesPanel = self:addGuiFrameV(dataPanel, "modules", "helmod_frame_data_menu_"..displaySize, ({"helmod_common.modules"}))
 	local resultTable = self:addGuiTable(modulesPanel,"table-modules",10)
 
 	for _, element in pairs(model.summary.modules) do
