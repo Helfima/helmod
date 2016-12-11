@@ -85,7 +85,6 @@ end
 -- @function [parent=#PlannerDialog] on_gui_click
 -- 
 -- @param #table event
--- @param #string label displayed text
 -- 
 function PlannerDialog.methods:on_gui_click(event)
 	if event.element.valid and string.find(event.element.name, self:classname()) then

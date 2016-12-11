@@ -81,3 +81,7 @@ function SpeedController.methods:on_gui_click(event)
 		end
 	end
 end
+
+function SpeedController.methods:on_gui_text_changed(event)
+	
+end

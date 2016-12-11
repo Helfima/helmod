@@ -7,6 +7,7 @@
 
 PlannerRecipeSelector = setclass("HMPlannerRecipeSelector", PlannerDialog)
 
+local recipeGroups = {}
 -------------------------------------------------------------------------------
 -- On initialization
 --
@@ -33,6 +34,38 @@ function PlannerRecipeSelector.methods:getParentPanel(player)
 end
 
 -------------------------------------------------------------------------------
+-- Get or create filter panel
+--
+-- @function [parent=#PlannerRecipeSelector] getFilterPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerRecipeSelector.methods:getFilterPanel(player)
+	local panel = self:getPanel(player)
+	if panel["filter-panel"] ~= nil and panel["filter-panel"].valid then
+		return panel["filter-panel"]
+	end
+	return self:addGuiFrameH(panel, "filter-panel", "helmod_frame_resize_row_width", ({"helmod_common.filter"}))
+end
+
+-------------------------------------------------------------------------------
+-- Get or create scroll panel
+--
+-- @function [parent=#PlannerRecipeSelector] getSrollPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerRecipeSelector.methods:getSrollPanel(player)
+	local displaySize = self.player:getGlobalSettings(player, "display_size")
+	local panel = self:getPanel(player)
+	if panel["main-panel"] ~= nil and panel["main-panel"].valid then
+		return panel["main-panel"]["scroll-panel"]
+	end
+	local mainPanel = self:addGuiFrameV(panel, "main-panel", "helmod_frame_resize_row_width")
+	return self:addGuiScrollPane(mainPanel, "scroll-panel", "helmod_scroll_recipe_selector_"..displaySize, "auto", "auto")
+end
+
+-------------------------------------------------------------------------------
 -- Get or create groups panel
 --
 -- @function [parent=#PlannerRecipeSelector] getGroupsPanel
@@ -40,12 +73,11 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerRecipeSelector.methods:getGroupsPanel(player)
-	local panel = self:getPanel(player)
+	local panel = self:getSrollPanel(player)
 	if panel["groups-panel"] ~= nil and panel["groups-panel"].valid then
-		return panel["groups-panel"]["scroll-groups"]
+		return panel["groups-panel"]
 	end
-	local groupsPanel = self:addGuiFrameV(panel, "groups-panel", "helmod_frame_resize_row_width")
-	return self:addGuiScrollPane(groupsPanel, "scroll-groups", "helmod_scroll_recipe_selector_group", "auto", "auto")
+	return self:addGuiFlowV(panel, "groups-panel", "helmod_flow_resize_row_width")
 end
 
 -------------------------------------------------------------------------------
@@ -56,12 +88,11 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerRecipeSelector.methods:getItemListPanel(player)
-	local panel = self:getPanel(player)
+	local panel = self:getSrollPanel(player)
 	if panel["item-list-panel"] ~= nil and panel["item-list-panel"].valid then
-		return panel["item-list-panel"]["scroll-list"]
+		return panel["item-list-panel"]
 	end
-	local listPanel = self:addGuiFrameV(panel, "item-list-panel", "helmod_frame_resize_row_width")
-	return self:addGuiScrollPane(listPanel, "scroll-list", "helmod_scroll_recipe_selector_list", "auto", "auto")
+	return self:addGuiFlowV(panel, "item-list-panel", "helmod_flow_resize_row_width")
 end
 
 -------------------------------------------------------------------------------
@@ -79,6 +110,13 @@ end
 -- @return #boolean if true the next call close dialog
 --  
 function PlannerRecipeSelector.methods:on_open(player, element, action, item, item2, item3)
+	Logging:debug("PlannerRecipeSelector:on_open():",player, element, action, item, item2, item3)
+	local globalPlayer = self.player:getGlobal(player)
+	if item3 ~= nil then
+		globalPlayer.recipeFilterProduct = item3:lower():gsub("[-]"," ")
+	else
+		globalPlayer.recipeFilterProduct = nil
+	end
 	-- close si nouvel appel
 	return true
 end
@@ -117,19 +155,20 @@ function PlannerRecipeSelector.methods:on_event(player, element, action, item, i
 	Logging:debug("PlannerRecipeSelector:on_event():",player, element, action, item, item2, item3)
 	local globalPlayer = self.player:getGlobal(player)
 	if action == "recipe-group" then
-		globalPlayer.recipeGroupSelected = item2
+		globalPlayer.recipeGroupSelected = item
 		self:on_update(player, element, action, item, item2, item3)
 	end
 	
 	if action == "recipe-select" then
-		local productionBlock = self.parent.model:addRecipeIntoProductionBlock(player, item, item2)
+		local productionBlock = self.parent.model:addRecipeIntoProductionBlock(player, item)
 		self.parent.model:update(player)
-		local globalGui = self.player:getGlobalGui(player)
-		globalGui.currentBlock = productionBlock.id
-		
 		self.parent:refreshDisplayData(player)
-		--self.parent:send_event(player, "HMPlannerRecipeUpdate", "OPEN", item, nil)
 		self:close(player)
+	end
+	
+	if action == "recipe-filter" then
+		globalPlayer.recipeFilterProduct = element.text
+		self:on_update(player, element, action, item, item2, item3)
 	end
 	
 end
@@ -148,8 +187,62 @@ end
 -- 
 function PlannerRecipeSelector.methods:on_update(player, element, action, item, item2, item3)
 	Logging:trace("PlannerRecipeSelector:on_update():",player, element, action, item, item2, item3)
+	local globalPlayer = self.player:getGlobal(player)
+	-- recuperation recipes
+	recipeGroups = {}
+	local firstGroup = nil
+	for key, recipe in pairs(self.player:getRecipes(player)) do
+		local find = false
+		if globalPlayer.recipeFilterProduct ~= nil and globalPlayer.recipeFilterProduct ~= "" then
+			for key, product in pairs(recipe.products) do
+				local search = product.name:lower():gsub("[-]"," ")
+				if string.find(search, globalPlayer.recipeFilterProduct) then
+					find = true
+				end
+			end
+		else
+			find = true
+		end
+		
+		if find == true and recipe.enabled == true then
+			if firstGroup == nil then firstGroup = recipe.group.name end
+			if recipeGroups[recipe.group.name] == nil then recipeGroups[recipe.group.name] = {} end
+			if recipeGroups[recipe.group.name][recipe.subgroup.name] == nil then recipeGroups[recipe.group.name][recipe.subgroup.name] = {} end
+			table.insert(recipeGroups[recipe.group.name][recipe.subgroup.name], recipe)
+		end
+	end
+	
+	if recipeGroups[globalPlayer.recipeGroupSelected] == nil then
+		globalPlayer.recipeGroupSelected = firstGroup
+	end
+	self:updateFilter(player, element, action, item, item2, item3)
 	self:updateGroupSelector(player, element, action, item, item2, item3)
 	self:updateItemList(player, element, action, item, item2, item3)
+end
+
+-------------------------------------------------------------------------------
+-- Update filter
+--
+-- @function [parent=#PlannerRecipeSelector] updateFilter
+-- 
+-- @param #LuaPlayer player
+-- @param #LuaGuiElement element button
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+-- 
+function PlannerRecipeSelector.methods:updateFilter(player, element, action, item, item2, item3)
+	Logging:trace("PlannerRecipeSelector:updateFilter():",player, element, action, item, item2, item3)
+	local globalPlayer = self.player:getGlobal(player)
+	local panel = self:getFilterPanel(player)
+	local globalSettings = self.player:getGlobal(player, "settings")
+	
+	if panel["filter-label"] == nil then
+		self:addGuiLabel(panel, "filter-label", ({"helmod_common.product"}))
+		self:addGuiText(panel, self:classname().."=recipe-filter=ID=product", globalPlayer.recipeFilterProduct)
+	end
+
 end
 
 -------------------------------------------------------------------------------
@@ -170,19 +263,27 @@ function PlannerRecipeSelector.methods:updateItemList(player, element, action, i
 	local panel = self:getItemListPanel(player)
 	local globalSettings = self.player:getGlobal(player, "settings")
 	
-	if panel["recipe-table"] ~= nil  and panel["recipe-table"].valid then
-		panel["recipe-table"].destroy()
+	if panel["recipe-list"] ~= nil  and panel["recipe-list"].valid then
+		panel["recipe-list"].destroy()
 	end
 
-	local guiRecipeSelectorTable = self:addGuiTable(panel, "recipe-table", 10)
-	for key, recipe in pairs(self.player:getRecipes(player)) do
-		if recipe.group.name == globalPlayer.recipeGroupSelected then
+	-- recuperation recipes et subgroupes
+	local recipeSubgroups = {}
+	if recipeGroups[globalPlayer.recipeGroupSelected] ~= nil then
+		recipeSubgroups = recipeGroups[globalPlayer.recipeGroupSelected]
+	end
+	--local guiRecipeSelectorTable = self:addGuiTable(panel, "recipe-table", 10)
+	local guiRecipeSelectorList = self:addGuiFlowV(panel, "recipe-list", "helmod_flow_recipe_selector")
+	for key, subgroup in pairs(recipeSubgroups) do
+		-- boucle subgroup
+		local guiRecipeSubgroup = self:addGuiTable(guiRecipeSelectorList, "recipe-table-"..key, 10, "helmod_table_recipe_selector")
+		for key, recipe in spairs(subgroup,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
 			local localised_name = recipe.localised_name
 			if globalSettings.real_name == true then
 				localised_name = recipe.name
 			end
 			Logging:trace("PlannerRecipeSelector:on_update",recipe.name)
-			self:addSelectSpriteIconButton(guiRecipeSelectorTable, self:classname().."=recipe-select=ID="..item.."=", self.player:getRecipeIconType(player, recipe), recipe.name, recipe.name, nil, localised_name)
+			self:addSelectSpriteIconButton(guiRecipeSubgroup, self:classname().."=recipe-select=ID=", self.player:getRecipeIconType(player, recipe), recipe.name, recipe.name, nil, localised_name)
 		end
 	end
 
@@ -210,8 +311,8 @@ function PlannerRecipeSelector.methods:updateGroupSelector(player, element, acti
 	end
 
 	-- ajouter de la table des groupes de recipe
-	local guiRecipeSelectorGroups = self:addGuiTable(panel, "recipe-groups", 6)
-	for group, name in pairs(self.player:getRecipeGroups(player)) do
+	local guiRecipeSelectorGroups = self:addGuiTable(panel, "recipe-groups", 6, "helmod_table_recipe_selector")
+	for group, element in pairs(recipeGroups) do
 		-- set le groupe
 		if globalPlayer.recipeGroupSelected == nil then globalPlayer.recipeGroupSelected = group end
 		local color = nil
@@ -220,7 +321,7 @@ function PlannerRecipeSelector.methods:updateGroupSelector(player, element, acti
 		end
 		local tooltip = group
 		-- ajoute les icons de groupe
-		local action = self:addXxlSelectSpriteIconButton(guiRecipeSelectorGroups, self:classname().."=recipe-group=ID="..item.."=", "item-group", group, group, color, tooltip)
+		local action = self:addXxlSelectSpriteIconButton(guiRecipeSelectorGroups, self:classname().."=recipe-group=ID=", "item-group", group, group, color, tooltip)
 	end
 
 end

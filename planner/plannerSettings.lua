@@ -98,6 +98,21 @@ function PlannerSettings.methods:getAboutSettingsPanel(player)
 end
 
 -------------------------------------------------------------------------------
+-- Get or create display settings panel
+--
+-- @function [parent=#PlannerSettings] getDisplaySettingsPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerSettings.methods:getDisplaySettingsPanel(player)
+  local panel = self:getPanel(player)
+  if panel["display-settings"] ~= nil and panel["display-settings"].valid then
+    return panel["display-settings"]
+  end
+  return self:addGuiFrameV(panel, "display-settings", "helmod_frame_resize_row_width", ({"helmod_settings-panel.display-section"}))
+end
+
+-------------------------------------------------------------------------------
 -- Get or create data settings panel
 --
 -- @function [parent=#PlannerSettings] getDataSettingsPanel
@@ -105,11 +120,11 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerSettings.methods:getDataSettingsPanel(player)
-	local panel = self:getPanel(player)
-	if panel["data-settings"] ~= nil and panel["data-settings"].valid then
-		return panel["data-settings"]
-	end
-	return self:addGuiFrameV(panel, "data-settings", "helmod_frame_resize_row_width", ({"helmod_settings-panel.data-section"}))
+  local panel = self:getPanel(player)
+  if panel["data-settings"] ~= nil and panel["data-settings"].valid then
+    return panel["data-settings"]
+  end
+  return self:addGuiFrameV(panel, "data-settings", "helmod_frame_resize_row_width", ({"helmod_settings-panel.data-section"}))
 end
 
 -------------------------------------------------------------------------------
@@ -196,11 +211,25 @@ function PlannerSettings.methods:on_event(player, element, action, item, item2, 
 		self.parent:refreshDisplayData(player, item, item2, item3)
 	end
 
-	if action == "change-number-settings" then
-		local panel = self:getPanel(player)[item]["settings"]
-		globalSettings[item2] = self:getInputNumber(panel[item2])
-		self.parent:refreshDisplayData(player, item, item2, item3)
-	end
+  if action == "change-number-settings" then
+    local panel = self:getPanel(player)[item]["settings"]
+    globalSettings[item2] = self:getInputNumber(panel[item2])
+    self.parent:refreshDisplayData(player, item, item2, item3)
+  end
+
+  if action == "change-display-settings" then
+    if globalSettings[item] == nil then globalSettings[item] = defaultSettings[item] end
+    globalSettings[item] = item2
+    self:updateDisplaySettings(player, element, action, item, item2, item3)
+    self.parent:refreshDisplay(player, item, item2, item3)
+  end
+
+  if action == "change-column-settings" then
+    if globalSettings[item] == nil then globalSettings[item] = defaultSettings[item] end
+    globalSettings[item] = tonumber(item2)
+    self:updateDisplaySettings(player, element, action, item, item2, item3)
+    self.parent:refreshDisplayData(player, item, item2, item3)
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -221,7 +250,8 @@ function PlannerSettings.methods:after_open(player, element, action, item, item2
 	self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
 
 	self:updateAboutSettings(player, element, action, item, item2, item3)
-	self:updateDataSettings(player, element, action, item, item2, item3)
+  self:updateDisplaySettings(player, element, action, item, item2, item3)
+  self:updateDataSettings(player, element, action, item, item2, item3)
 	self:updateModelSettings(player, element, action, item, item2, item3)
 	self:updateOtherSettings(player, element, action, item, item2, item3)
 end
@@ -289,6 +319,75 @@ function PlannerSettings.methods:updateAboutSettings(player, element, action, it
 end
 
 -------------------------------------------------------------------------------
+-- Update display settings
+--
+-- @function [parent=#PlannerSettings] updateDisplaySettings
+--
+-- @param #LuaPlayer player
+-- @param #LuaGuiElement element button
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function PlannerSettings.methods:updateDisplaySettings(player, element, action, item, item2, item3)
+  Logging:debug("PlannerSettings:updateDisplaySettings():",player, element, action, item, item2, item3)
+
+  local globalSettings = self.player:getGlobal(player, "settings")
+  local defaultSettings = self.player:getDefaultSettings()
+
+  local displaySettingsPanel = self:getDisplaySettingsPanel(player)
+
+  for k,guiName in pairs(displaySettingsPanel.children_names) do
+    displaySettingsPanel[guiName].destroy()
+  end
+
+
+  local sizeSettingsTable = self:addGuiTable(displaySettingsPanel, "size", 3)
+
+  local display_size = defaultSettings.display_size
+  if globalSettings.display_size ~= nil then display_size = globalSettings.display_size end
+  self:addGuiLabel(sizeSettingsTable, self:classname().."=display_size", ({"helmod_settings-panel.display-size"}))
+  
+  local display_size = defaultSettings.display_size
+  if globalSettings.display_size ~= nil then display_size = globalSettings.display_size end
+  if display_size == "1920x1200" then
+    self:addGuiLabel(sizeSettingsTable, self:classname().."=change-display-settings=ID=display_size=", "1920x1200", "helmod_label_time")
+  else
+    self:addGuiButton(sizeSettingsTable, self:classname().."=change-display-settings=ID=display_size=", "1920x1200", "helmod_button-default", "1920x1200")
+  end
+  if display_size == "1680x1050" then
+    self:addGuiLabel(sizeSettingsTable, self:classname().."=change-display-settings=ID=display_size=", "1680x1050", "helmod_label_time")
+  else
+    self:addGuiButton(sizeSettingsTable, self:classname().."=change-display-settings=ID=display_size=", "1680x1050", "helmod_button-default", "1680x1050")
+  end
+
+  local columnSettingsTable = self:addGuiTable(displaySettingsPanel, "column", 5)
+  self:addGuiLabel(columnSettingsTable, self:classname().."=display_product_cols", ({"helmod_settings-panel.display-product-cols"}))
+  local display_product_cols = defaultSettings.display_product_cols
+  if globalSettings.display_product_cols ~= nil then display_product_cols = globalSettings.display_product_cols end
+  for i = 2, 5, 1 do
+    if display_product_cols == i then
+      self:addGuiLabel(columnSettingsTable, self:classname().."=change-column-settings=ID=display_product_cols=", i, "helmod_label_time")
+    else
+      self:addGuiButton(columnSettingsTable, self:classname().."=change-column-settings=ID=display_product_cols=", i, "helmod_button-default", i)
+    end
+  end
+
+  self:addGuiLabel(columnSettingsTable, self:classname().."=display_ingredient_cols", ({"helmod_settings-panel.display-ingredient-cols"}))
+  local display_ingredient_cols = defaultSettings.display_ingredient_cols
+  if globalSettings.display_ingredient_cols ~= nil then display_ingredient_cols = globalSettings.display_ingredient_cols end
+  for i = 2, 5, 1 do
+    if display_ingredient_cols == i then
+      self:addGuiLabel(columnSettingsTable, self:classname().."=change-column-settings=ID=display_ingredient_cols=", i, "helmod_label_time")
+    else
+      self:addGuiButton(columnSettingsTable, self:classname().."=change-column-settings=ID=display_ingredient_cols=", i, "helmod_button-default", i)
+    end
+  end
+
+end
+
+-------------------------------------------------------------------------------
 -- Update data settings
 --
 -- @function [parent=#PlannerSettings] updateDataSettings
@@ -301,29 +400,29 @@ end
 -- @param #string item3 third item name
 --
 function PlannerSettings.methods:updateDataSettings(player, element, action, item, item2, item3)
-	Logging:debug("PlannerSettings:updateDataSettings():",player, element, action, item, item2, item3)
+  Logging:debug("PlannerSettings:updateDataSettings():",player, element, action, item, item2, item3)
 
-	local globalSettings = self.player:getGlobal(player, "settings")
-	local defaultSettings = self.player:getDefaultSettings()
+  local globalSettings = self.player:getGlobal(player, "settings")
+  local defaultSettings = self.player:getDefaultSettings()
 
-	local dataSettingsPanel = self:getDataSettingsPanel(player)
+  local dataSettingsPanel = self:getDataSettingsPanel(player)
 
-	local dataSettingsTable = self:addGuiTable(dataSettingsPanel, "settings", 2)
+  local dataSettingsTable = self:addGuiTable(dataSettingsPanel, "settings", 2)
 
-	local display_data_col_name = defaultSettings.display_data_col_name
-	if globalSettings.display_data_col_name ~= nil then display_data_col_name = globalSettings.display_data_col_name end
-	self:addGuiLabel(dataSettingsTable, self:classname().."=display_data_col_name", ({"helmod_settings-panel.data-col-name"}))
-	self:addGuiCheckbox(dataSettingsTable, self:classname().."=change-boolean-settings=ID=display_data_col_name", display_data_col_name)
+  local display_data_col_name = defaultSettings.display_data_col_name
+  if globalSettings.display_data_col_name ~= nil then display_data_col_name = globalSettings.display_data_col_name end
+  self:addGuiLabel(dataSettingsTable, self:classname().."=display_data_col_name", ({"helmod_settings-panel.data-col-name"}))
+  self:addGuiCheckbox(dataSettingsTable, self:classname().."=change-boolean-settings=ID=display_data_col_name", display_data_col_name)
 
-	local display_data_col_id = defaultSettings.display_data_col_id
-	if globalSettings.display_data_col_id ~= nil then display_data_col_id = globalSettings.display_data_col_id end
-	self:addGuiLabel(dataSettingsTable, self:classname().."=display_data_col_id", ({"helmod_settings-panel.data-col-id"}))
-	self:addGuiCheckbox(dataSettingsTable, self:classname().."=change-boolean-settings=ID=display_data_col_id", display_data_col_id)
+  local display_data_col_id = defaultSettings.display_data_col_id
+  if globalSettings.display_data_col_id ~= nil then display_data_col_id = globalSettings.display_data_col_id end
+  self:addGuiLabel(dataSettingsTable, self:classname().."=display_data_col_id", ({"helmod_settings-panel.data-col-id"}))
+  self:addGuiCheckbox(dataSettingsTable, self:classname().."=change-boolean-settings=ID=display_data_col_id", display_data_col_id)
 
-	local display_data_col_index = defaultSettings.display_data_col_index
-	if globalSettings.display_data_col_index ~= nil then display_data_col_index = globalSettings.display_data_col_index end
-	self:addGuiLabel(dataSettingsTable, self:classname().."=display_data_col_index", ({"helmod_settings-panel.data-col-index"}))
-	self:addGuiCheckbox(dataSettingsTable, self:classname().."=change-boolean-settings=ID=display_data_col_index", display_data_col_index)
+  local display_data_col_index = defaultSettings.display_data_col_index
+  if globalSettings.display_data_col_index ~= nil then display_data_col_index = globalSettings.display_data_col_index end
+  self:addGuiLabel(dataSettingsTable, self:classname().."=display_data_col_index", ({"helmod_settings-panel.data-col-index"}))
+  self:addGuiCheckbox(dataSettingsTable, self:classname().."=change-boolean-settings=ID=display_data_col_index", display_data_col_index)
 
 end
 

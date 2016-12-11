@@ -83,6 +83,21 @@ function PlayerController.methods:on_gui_click(event)
 end
 
 -------------------------------------------------------------------------------
+-- On text change event
+--
+-- @function [parent=#PlayerController] on_gui_text_changed
+--
+-- @param event
+--
+function PlayerController.methods:on_gui_text_changed(event)
+	if self.controllers ~= nil then
+		for r, controller in pairs(self.controllers) do
+			controller:on_gui_text_changed(event)
+		end
+	end
+end
+
+-------------------------------------------------------------------------------
 -- Return force's player
 --
 -- @function [parent=#PlayerController] getForce
@@ -147,6 +162,9 @@ end
 --
 function PlayerController.methods:getDefaultSettings()
 	return {
+		display_size = "1680x1050",
+		display_product_cols = 2,
+		display_ingredient_cols = 2,
 		display_data_col_name = false,
 		display_data_col_id = false,
 		display_data_col_index = false,
@@ -173,6 +191,25 @@ function PlayerController.methods:getGlobalGui(player)
 end
 
 -------------------------------------------------------------------------------
+-- Get global settings
+--
+-- @function [parent=#PlayerController] getGlobalSettings
+--
+-- @param #LuaPlayer player
+--
+function PlayerController.methods:getGlobalSettings(player, property)
+	local settings = self:getGlobal(player, "settings")
+	if settings ~= nil and property ~= nil then
+		local guiProperty = settings[property]
+		if guiProperty == nil then
+			guiProperty = self:getDefaultSettings()[property]
+		end
+		return guiProperty
+	end
+	return settings
+end
+
+-------------------------------------------------------------------------------
 -- Get sorted style
 --
 -- @function [parent=#PlayerController] getSortedStyle
@@ -183,7 +220,8 @@ end
 -- @return #string style
 --
 function PlayerController.methods:getSortedStyle(player, key)
-	local globalGui = self:getGlobalGui(player, key)
+	local globalGui = self:getGlobalGui(player)
+	if globalGui.order == nil then globalGui.order = {name="index",ascendant="true"} end
 	local style = "helmod_button-sorted-none"
 	if globalGui.order.name == key and globalGui.order.ascendant then style = "helmod_button-sorted-up" end
 	if globalGui.order.name == key and not(globalGui.order.ascendant) then style = "helmod_button-sorted-down" end
@@ -223,6 +261,27 @@ function PlayerController.methods:getRecipeGroups(player)
 		end
 	end
 	return recipeGroups
+end
+
+-------------------------------------------------------------------------------
+-- Return recipe subgroups
+--
+-- @function [parent=#PlayerController] getRecipeSubgroups
+--
+-- @param #LuaPlayer player
+--
+-- @return #table recipe subgroups
+--
+function PlayerController.methods:getRecipeSubgroups(player)
+	-- recuperation des groupes avec les recipes
+	local recipeSubgroups = {}
+	for key, recipe in pairs(self:getRecipes(player)) do
+		if recipe.subgroup ~= nil then
+			if recipeSubgroups[recipe.subgroup.name] == nil then recipeSubgroups[recipe.subgroup.name] = {} end
+			table.insert(recipeSubgroups[recipe.subgroup.name], recipe.name)
+		end
+	end
+	return recipeSubgroups
 end
 
 -------------------------------------------------------------------------------
@@ -520,4 +579,5 @@ function PlayerController.methods:getRecipeLocalisedName(player, recipe)
 	end
 	return recipe.name
 end
+
 

@@ -56,11 +56,12 @@ end
 -- @param #string key unique id
 -- @param #string text input text
 -- @param #string style style of text
+-- @param #string tooltip displayed text
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addGuiText(parent, key, text, style)
-	Logging:trace("ElementGui:addGuiText", parent, key, text, style)
+function ElementGui.methods:addGuiText(parent, key, text, style, tooltip)
+	Logging:trace("ElementGui:addGuiText", parent, key, text, style, tooltip)
 	local options = {}
 	options.type = "textfield"
 	options.name = key
@@ -70,6 +71,9 @@ function ElementGui.methods:addGuiText(parent, key, text, style)
 	end
 	if style ~= nil then
 		options.style = style
+	end
+	if tooltip ~= nil then
+		options.tooltip = tooltip
 	end
 	return parent.add(options)
 end

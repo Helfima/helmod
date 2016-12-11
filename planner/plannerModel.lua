@@ -38,7 +38,7 @@ function PlannerModel.methods:getModel(player)
 
 	if model.resources == nil then model.resources = {} end
 
-	if model.time == nil then model.time = 60 end
+	if model.time == nil then model.time = 1 end
 
 	return model
 end
@@ -419,9 +419,11 @@ end
 -- @param #string blockId production block id
 -- @param #string key recipe name
 --
-function PlannerModel.methods:addRecipeIntoProductionBlock(player, blockId, key)
-	Logging:debug("PlannerModel:addRecipeIntoProductionBlock():",player, blockId, key)
+function PlannerModel.methods:addRecipeIntoProductionBlock(player, key)
+	Logging:debug("PlannerModel:addRecipeIntoProductionBlock():",player, key)
 	local model = self:getModel(player)
+	local globalGui = self.player:getGlobalGui(player)
+	local blockId = globalGui.currentBlock
 	local recipe = self.player:getRecipe(player, key);
 
 	if model.blocks[blockId] == nil then
@@ -430,6 +432,7 @@ function PlannerModel.methods:addRecipeIntoProductionBlock(player, blockId, key)
 		modelBlock.index = index
 		model.blocks[modelBlock.id] = modelBlock
 		blockId = modelBlock.id
+		globalGui.currentBlock = blockId
 	end
 
 	if model.blocks[blockId].recipes[key] == nil then

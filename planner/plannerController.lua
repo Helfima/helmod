@@ -30,7 +30,7 @@ function PlannerController.methods:init(parent)
 	self.controllers = {}
 	self.modelFilename = "helmod-planner-model.data"
 	self.model = PlannerModel:new(self)
-	
+
 	self.locate = "center"
 end
 
@@ -90,6 +90,22 @@ function PlannerController.methods:on_gui_click(event)
 		if event.element.name == self:classname().."=CLOSE" then
 			local player = game.players[event.player_index]
 			self:cleanController(player)
+		end
+	end
+end
+
+
+-------------------------------------------------------------------------------
+-- On text changed event
+--
+-- @function [parent=#PlannerController] on_gui_text_changed
+--
+-- @param event
+--
+function PlannerController.methods:on_gui_text_changed(event)
+	if self.controllers ~= nil then
+		for r, controller in pairs(self.controllers) do
+			controller:on_gui_click(event)
 		end
 	end
 end
@@ -173,11 +189,14 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerController.methods:getMainPanel(player)
+	local displaySize = self.parent:getGlobalSettings(player, "display_size")
+	Logging:debug("PlannerController:getMainPanel():",displaySize)
 	local guiMain = player.gui[self.locate]
 	if guiMain["helmod_planner_main"] ~= nil and guiMain["helmod_planner_main"].valid then
 		return guiMain["helmod_planner_main"]
 	end
-	return self:addGuiFlowH(guiMain, "helmod_planner_main", "helmod_flow_main")
+	return self:addGuiFlowH(guiMain, "helmod_planner_main", "helmod_flow_main_"..displaySize)
+	--return self:addGuiFrameH(guiMain, "helmod_planner_main", "helmod_frame_main_"..displaySize)
 end
 
 -------------------------------------------------------------------------------
@@ -233,11 +252,12 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerController.methods:getDataPanel(player)
+	local displaySize = self.parent:getGlobalSettings(player, "display_size")
 	local infoPanel = self:getInfoPanel(player)
 	if infoPanel["helmod_planner_data"] ~= nil and infoPanel["helmod_planner_data"].valid then
 		return infoPanel["helmod_planner_data"]
 	end
-	return self:addGuiFlowV(infoPanel, "helmod_planner_data", "helmod_flow_data")
+	return self:addGuiFlowV(infoPanel, "helmod_planner_data", "helmod_flow_data_"..displaySize)
 end
 
 -------------------------------------------------------------------------------
@@ -264,4 +284,20 @@ function PlannerController.methods:refreshDisplayData(player, item, item2, item3
 			game.speed = 1
 		end
 	end
+end
+
+-------------------------------------------------------------------------------
+-- Refresh display
+--
+-- @function [parent=#PlannerController] refreshDisplay
+--
+-- @param #LuaPlayer player
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function PlannerController.methods:refreshDisplay(player, item, item2, item3)
+	Logging:debug("PlannerController:refreshDisplayData():",player, item, item2, item3)
+	self:main(player)
+	self:main(player)
 end

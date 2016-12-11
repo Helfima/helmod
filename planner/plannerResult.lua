@@ -51,7 +51,7 @@ function PlannerResult.methods:getDataPanel(player)
 	if parentPanel["data"] ~= nil and parentPanel["data"].valid then
 		return parentPanel["data"]
 	end
-	return self:addGuiFlowV(parentPanel, "data", "helmod_flow_resize_row_width")
+	return self:addGuiFlowV(parentPanel, "data", "helmod_flow_default")
 end
 
 -------------------------------------------------------------------------------
@@ -62,11 +62,12 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerResult.methods:getMenuPanel(player, caption)
+	local displaySize = self.player:getGlobalSettings(player, "display_size")
 	local dataPanel = self:getDataPanel(player)
 	if dataPanel["menu"] ~= nil and dataPanel["menu"].valid then
 		return dataPanel["menu"]
 	end
-	return self:addGuiFrameH(dataPanel, "menu", "helmod_frame_data", caption)
+	return self:addGuiFrameH(dataPanel, "menu", "helmod_frame_data_menu_"..displaySize, caption)
 end
 
 -------------------------------------------------------------------------------
@@ -93,11 +94,12 @@ end
 -- @param #string caption
 --
 function PlannerResult.methods:getResultPanel(player, caption)
+	local displaySize = self.player:getGlobalSettings(player, "display_size")
 	local dataPanel = self:getDataPanel(player)
 	if dataPanel["result"] ~= nil and dataPanel["result"].valid then
 		return dataPanel["result"]
 	end
-	return self:addGuiFrameV(dataPanel, "result", "helmod_frame_data", caption)
+	return self:addGuiFrameV(dataPanel, "result", "helmod_frame_data_"..displaySize, caption)
 end
 
 -------------------------------------------------------------------------------
@@ -215,6 +217,9 @@ function PlannerResult.methods:on_event(player, element, action, item, item2, it
 
 	if action == "change-tab" then
 		globalGui.currentTab = item
+		if globalGui.currentTab == self.PRODUCTION_LINE_TAB then
+			globalGui.currentBlock = "new"
+		end
 		globalGui.currentBlock = item2
 		self:update(player, item, item2, item3)
 		self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
@@ -238,15 +243,13 @@ function PlannerResult.methods:on_event(player, element, action, item, item2, it
 			local recipes = self.player:searchRecipe(player, item2)
 			Logging:debug("line recipes:",recipes)
 			if #recipes == 1 then
-				local productionBlock = self.parent.model:addRecipeIntoProductionBlock(player, "new", recipes[1].name)
+				local productionBlock = self.parent.model:addRecipeIntoProductionBlock(player, recipes[1].name)
 				self.parent.model:update(player)
 				globalGui.currentTab = self.PRODUCTION_BLOCK_TAB
-				globalGui.currentBlock = productionBlock.id
-				self:update(player, self.PRODUCTION_BLOCK_TAB, productionBlock.id, recipes[1].name)
+				self:update(player, self.PRODUCTION_BLOCK_TAB)
 			else
 				globalGui.currentTab = self.PRODUCTION_BLOCK_TAB
-				globalGui.currentBlock = "new"
-				self.parent:send_event(player, "HMPlannerRecipeSelector", "OPEN", "new")
+				self.parent:send_event(player, "HMPlannerRecipeSelector", "OPEN", item, item2, item3)
 			end
 		end
 	end
@@ -281,11 +284,11 @@ function PlannerResult.methods:on_event(player, element, action, item, item2, it
 			Logging:debug("block recipes:",recipes)
 			if #recipes == 1 then
 				Logging:debug("recipe name:", recipes[1].name)
-				local productionBlock = self.parent.model:addRecipeIntoProductionBlock(player, item, recipes[1].name)
+				local productionBlock = self.parent.model:addRecipeIntoProductionBlock(player, recipes[1].name)
 				self.parent.model:update(player)
-				self:update(player, self.PRODUCTION_LINE_TAB, productionBlock.id, recipes[1].name)
+				self:update(player, self.PRODUCTION_LINE_TAB)
 			else
-				self.parent:send_event(player, "HMPlannerRecipeSelector", "OPEN", item)
+				self.parent:send_event(player, "HMPlannerRecipeSelector", "OPEN", item, item2, item3)
 			end
 		end
 	end
@@ -363,6 +366,7 @@ end
 --
 function PlannerResult.methods:updateProductionLine(player, item, item2, item3)
 	Logging:debug("PlannerResult:updateLine():", player, item, item2, item3)
+	local displaySize = self.player:getGlobalSettings(player, "display_size")
 	local model = self.model:getModel(player)
 	local globalGui = self.player:getGlobalGui(player)
 	-- data
@@ -375,7 +379,7 @@ function PlannerResult.methods:updateProductionLine(player, item, item2, item3)
 	if countBlock > 0 then
 		local resultPanel = self:getResultPanel(player, ({"helmod_common.blocks"}))
 		-- data panel
-		local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "helmod_scroll_block_list", "auto", "auto")
+		local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "helmod_scroll_block_list_"..displaySize, "auto", "auto")
 
 		local globalSettings = self.player:getGlobal(player, "settings")
 
@@ -428,6 +432,7 @@ end
 --
 function PlannerResult.methods:updateProductionBlock(player, item, item2, item3)
 	Logging:debug("PlannerResult:updateProductionBlock():", player, item, item2, item3)
+	local displaySize = self.player:getGlobalSettings(player, "display_size")
 	local model = self.model:getModel(player)
 	local globalGui = self.player:getGlobalGui(player)
 	Logging:debug("model:", model)
@@ -467,7 +472,7 @@ function PlannerResult.methods:updateProductionBlock(player, item, item2, item3)
 		local elementPanel = self:addGuiFlowV(infoPanel, "elements", "helmod_flow_default")
 		-- ouput panel
 		local outputPanel = self:addGuiFrameV(elementPanel, "output", "helmod_frame_resize_row_width", ({"helmod_common.output"}))
-		local outputScroll = self:addGuiScrollPane(outputPanel, "output-scroll", "helmod_scroll_block_element", "auto", "auto")
+		local outputScroll = self:addGuiScrollPane(outputPanel, "output-scroll", "helmod_scroll_block_element_"..displaySize, "auto", "auto")
 		local outputTable = self:addGuiTable(outputScroll,"output-table",6)
 		if element.products ~= nil then
 			for r, product in pairs(element.products) do
@@ -498,7 +503,7 @@ function PlannerResult.methods:updateProductionBlock(player, item, item2, item3)
 
 		-- input panel
 		local inputPanel = self:addGuiFrameV(elementPanel, "input", "helmod_frame_resize_row_width", ({"helmod_common.input"}))
-		local outputScroll = self:addGuiScrollPane(inputPanel, "output-scroll", "helmod_scroll_block_element", "auto", "auto")
+		local outputScroll = self:addGuiScrollPane(inputPanel, "output-scroll", "helmod_scroll_block_element_"..displaySize, "auto", "auto")
 		local inputTable = self:addGuiTable(outputScroll,"input-table",6)
 		if element.ingredients ~= nil then
 			for r, ingredient in pairs(element.ingredients) do
@@ -511,7 +516,7 @@ function PlannerResult.methods:updateProductionBlock(player, item, item2, item3)
 
 		local resultPanel = self:getResultPanel(player, ({"helmod_common.recipes"}))
 		-- data panel
-		local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "helmod_scroll_block_list", "auto", "auto")
+		local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "helmod_scroll_block_list_"..displaySize, "auto", "auto")
 
 		local globalSettings = self.player:getGlobal(player, "settings")
 
@@ -724,16 +729,6 @@ function PlannerResult.methods:addProductionBlockRow(player, guiTable, blockId, 
 		local guiIndex = self:addGuiFlowH(guiTable,"index"..recipe.name)
 		self:addGuiLabel(guiIndex, "index", recipe.index, "helmod_label-right-40")
 	end
-	-- col level
-	if globalSettings.display_data_col_level then
-		local guiLevel = self:addGuiFlowH(guiTable,"level"..recipe.name)
-		self:addGuiLabel(guiLevel, "level", recipe.level)
-	end
-	-- col weight
-	if globalSettings.display_data_col_weight then
-		local guiLevel = self:addGuiFlowH(guiTable,"weight"..recipe.name)
-		self:addGuiLabel(guiLevel, "weight", recipe.weight)
-	end
 	-- col id
 	if globalSettings.display_data_col_id then
 		local guiId = self:addGuiFlowH(guiTable,"id"..recipe.name)
@@ -804,7 +799,8 @@ function PlannerResult.methods:addProductionBlockRow(player, guiTable, blockId, 
 	self:addGuiLabel(guiEnergy, recipe.name, self:formatNumberKilo(recipe.energy_total, "W"), "helmod_label-right-70")
 
 	-- products
-	local tProducts = self:addGuiTable(guiTable,"products_"..recipe.name, 3)
+	local display_product_cols = self.player:getGlobalSettings(player, "display_product_cols")
+	local tProducts = self:addGuiTable(guiTable,"products_"..recipe.name, display_product_cols)
 	if recipe.products ~= nil then
 		for r, product in pairs(recipe.products) do
 			local cell = self:addGuiFlowH(tProducts,"cell_"..product.name, "helmod_flow_default")
@@ -814,7 +810,8 @@ function PlannerResult.methods:addProductionBlockRow(player, guiTable, blockId, 
 		end
 	end
 	-- ingredients
-	local tIngredient = self:addGuiTable(guiTable,"ingredients_"..recipe.name, 3)
+	local display_ingredient_cols = self.player:getGlobalSettings(player, "display_ingredient_cols")
+	local tIngredient = self:addGuiTable(guiTable,"ingredients_"..recipe.name, display_ingredient_cols)
 	if recipe.ingredients ~= nil then
 		for r, ingredient in pairs(recipe.ingredients) do
 			local cell = self:addGuiFlowH(tIngredient,"cell_"..ingredient.name, "helmod_flow_default")
@@ -850,16 +847,6 @@ function PlannerResult.methods:addProductionLineRow(player, guiTable, element)
 		local guiIndex = self:addGuiFlowH(guiTable,"index"..element.id)
 		self:addGuiLabel(guiIndex, "index", element.index, "helmod_label-right-40")
 	end
-	-- col level
-	if globalSettings.display_data_col_level then
-		local guiLevel = self:addGuiFlowH(guiTable,"level"..element.id)
-		self:addGuiLabel(guiLevel, "level", element.level)
-	end
-	-- col weight
-	if globalSettings.display_data_col_weight then
-		local guiLevel = self:addGuiFlowH(guiTable,"weight"..element.id)
-		self:addGuiLabel(guiLevel, "weight", element.weight)
-	end
 	-- col id
 	if globalSettings.display_data_col_id then
 		local guiId = self:addGuiFlowH(guiTable,"id"..element.id)
@@ -879,7 +866,8 @@ function PlannerResult.methods:addProductionLineRow(player, guiTable, element)
 	self:addGuiLabel(guiEnergy, element.id, self:formatNumberKilo(element.power, "W"), "helmod_label-right-70")
 
 	-- products
-	local tProducts = self:addGuiTable(guiTable,"products_"..element.id, 4)
+	local display_product_cols = self.player:getGlobalSettings(player, "display_product_cols") + 1
+	local tProducts = self:addGuiTable(guiTable,"products_"..element.id, display_product_cols)
 	if element.products ~= nil then
 		for r, product in pairs(element.products) do
 			if bit32.band(product.state, 1) > 0 then
@@ -907,7 +895,8 @@ function PlannerResult.methods:addProductionLineRow(player, guiTable, element)
 		end
 	end
 	-- ingredients
-	local tIngredient = self:addGuiTable(guiTable,"ingredients_"..element.id, 5)
+	local display_ingredient_cols = self.player:getGlobalSettings(player, "display_ingredient_cols") + 2
+	local tIngredient = self:addGuiTable(guiTable,"ingredients_"..element.id, display_ingredient_cols)
 	if element.ingredients ~= nil then
 		for r, ingredient in pairs(element.ingredients) do
 			-- ingredient = {type="item", name="steel-plate", amount=8}

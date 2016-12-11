@@ -28,6 +28,10 @@ function proxy_gui_click(event)
 	helmod:on_gui_click(event)
 end
 
+function proxy_gui_text_changed(event)
+	helmod:on_gui_text_changed(event)
+end
+
 
 script.on_init(proxy_init)
 script.on_load(proxy_load)
@@ -35,3 +39,5 @@ script.on_configuration_changed(proxy_configuration_changed)
 script.on_event(defines.events.on_tick, proxy_tick)
 script.on_event(defines.events.on_player_created, proxy_player_created)
 script.on_event(defines.events.on_gui_click,proxy_gui_click)
+script.on_event(defines.events.on_gui_text_changed,proxy_gui_text_changed)
+

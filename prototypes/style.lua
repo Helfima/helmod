@@ -429,6 +429,21 @@ default_gui["helmod_table_recipe_modules"] = {
 }
 
 -------------------------------------------------------------------------------
+-- Style of recipe selector
+--
+-- @field [parent=#Table] recipe_selector
+
+default_gui["helmod_table_recipe_selector"] = {
+	type = "table_style",
+	horizontal_spacing = 2,
+	vertical_spacing = 2,
+	top_padding = 1,
+	right_padding = 0,
+	bottom_padding = 1,
+	left_padding = 0
+}
+
+-------------------------------------------------------------------------------
 -- Style label
 --
 -- @type Label
@@ -492,6 +507,18 @@ default_gui["helmod_label_time"] = {
 -- |--------------------------------------------------|
 --
 
+local width_info=492
+local width_scroll=8
+local width_block_info=290
+local height_block_header = 400
+local height_selector_header = 149
+
+local width_1920 = math.ceil(1920*0.85) -- 1632
+local height_1200 = math.ceil(1200*0.85) -- 1020
+local width_1680 = math.ceil(1680*0.85) -- 1388
+local height_1050 = math.ceil(1050*0.85) -- 893
+
+
 -------------------------------------------------------------------------------
 -- Style flow
 --
@@ -512,16 +539,41 @@ default_gui["helmod_flow_default"] = {
 
 -------------------------------------------------------------------------------
 -- Style of main panel
---
--- @field [parent=#Flow] main
+-- minimal_width = screen width * 85%
+-- minimal_height = screen height * 85%
+-- @field [parent=#Flow] main_1920x1200
 
-default_gui["helmod_flow_main"] = {
+default_gui["helmod_flow_main_1920x1200"] = {
 	type = "flow_style",
 	parent = "helmod_flow_default",
-	minimal_width = 1600,
-	minimal_height = 900
+	minimal_width = width_1920,
+	minimal_height = height_1200
 }
 
+-------------------------------------------------------------------------------
+-- Style of main panel
+-- minimal_width = screen width * 85%
+-- minimal_height = screen height * 85%
+-- @field [parent=#Flow] main_1680x1050
+
+default_gui["helmod_flow_main_1680x1050"] = {
+  type = "flow_style",
+  parent = "helmod_flow_default",
+  minimal_width = width_1680,
+  minimal_height = height_1050,
+}
+-------------------------------------------------------------------------------
+-- Style of main panel
+-- minimal_width = screen width * 85%
+-- minimal_height = screen height * 85%
+-- @field [parent=#Flow] main_1440x900
+
+default_gui["helmod_flow_main_1440x900"] = {
+  type = "frame_style",
+  parent = "frame_style",
+  minimal_width = 1224,
+  minimal_height = 765,
+}
 -------------------------------------------------------------------------------
 -- Style of full resize row panel
 --
@@ -568,14 +620,39 @@ default_gui["helmod_flow_dialog"] = {
 -------------------------------------------------------------------------------
 -- Style of data panel
 --
--- @field [parent=#Flow] data
+-- @field [parent=#Flow] data_1920x1200
 
-default_gui["helmod_flow_data"] = {
+default_gui["helmod_flow_data_1920x1200"] = {
 	type = "flow_style",
 	parent = "helmod_flow_resize_row_width",
-	minimal_width = 1140,
-	maximal_width = 1140,
+	minimal_width = width_1920 - width_info,
+	maximal_width = width_1920 - width_info,
 	minimal_height = 600
+}
+
+-------------------------------------------------------------------------------
+-- Style of data panel
+--
+-- @field [parent=#Flow] data_1680x1050
+
+default_gui["helmod_flow_data_1680x1050"] = {
+	type = "flow_style",
+	parent = "helmod_flow_resize_row_width",
+	minimal_width = width_1680 - width_info,
+	maximal_width = width_1680 - width_info,
+	minimal_height = 600
+}
+
+-------------------------------------------------------------------------------
+-- Style of recipe selector
+--
+-- @field [parent=#Flow] recipe_selector
+
+default_gui["helmod_flow_recipe_selector"] = {
+	type = "flow_style",
+	parent = "flow_style",
+	horizontal_spacing = 0,
+	vertical_spacing = 0
 }
 
 -------------------------------------------------------------------------------
@@ -611,6 +688,108 @@ default_gui["helmod_frame_default"] = {
 		horizontal_spacing = 0,
 		vertical_spacing = 0
 	}
+}
+
+-------------------------------------------------------------------------------
+-- Style of main panel (only testing)
+-- minimal_width = screen width * 85%
+-- minimal_height = screen height * 85%
+-- @field [parent=#Frame] main_1920x1200
+
+default_gui["helmod_frame_main_1920x1200"] = {
+  type = "frame_style",
+  parent = "frame_style",
+  minimal_width = width_1920,
+  minimal_height = height_1200,
+  -- marge interieure
+  top_padding  = 0,
+  right_padding = 0,
+  bottom_padding = 0,
+  left_padding = 0,
+    
+  -- padding title
+  title_top_padding = 0,
+  title_left_padding = 0,
+  title_bottom_padding = 0,
+  title_right_padding = 0
+}
+
+-------------------------------------------------------------------------------
+-- Style of main panel (only testing)
+-- minimal_width = screen width * 85%
+-- minimal_height = screen height * 85%
+-- @field [parent=#Frame] main_1680x1050
+
+default_gui["helmod_frame_main_1680x1050"] = {
+  type = "frame_style",
+  parent = "frame_style",
+  minimal_width = width_1680,
+  minimal_height = height_1050,
+  -- marge interieure
+  top_padding  = 0,
+  right_padding = 0,
+  bottom_padding = 0,
+  left_padding = 0,
+    
+  -- padding title
+  title_top_padding = 0,
+  title_left_padding = 0,
+  title_bottom_padding = 0,
+  title_right_padding = 0
+}
+
+-------------------------------------------------------------------------------
+-- Style of main panel
+-- minimal_width = screen width * 85%
+-- minimal_height = screen height * 85%
+-- @field [parent=#Frame] main_1440x900
+
+default_gui["helmod_frame_main_1440x900"] = {
+  type = "frame_style",
+  parent = "frame_style",
+  minimal_width = 1224,
+  minimal_height = 765,
+  -- marge interieure
+  top_padding  = 0,
+  right_padding = 0,
+  bottom_padding = 0,
+  left_padding = 0,
+    
+  -- padding title
+  title_top_padding = 0,
+  title_left_padding = 0,
+  title_bottom_padding = 0,
+  title_right_padding = 0
+}
+
+-------------------------------------------------------------------------------
+-- Style of main panel (only testing)
+-- @field [parent=#Frame] data_menu_1920x1200
+
+default_gui["helmod_frame_data_menu_1920x1200"] = {
+  type = "frame_style",
+  parent = "frame_style",
+  minimal_width = width_1920 - width_info,
+  -- marge interieure
+  top_padding  = 0,
+  right_padding = 0,
+  bottom_padding = 0,
+  left_padding = 0,
+}
+
+-------------------------------------------------------------------------------
+-- Style of main panel (only testing)
+-- @field [parent=#Frame] data_menu_1680x1050
+
+default_gui["helmod_frame_data_menu_1680x1050"] = {
+  type = "frame_style",
+  parent = "frame_style",
+  minimal_width = width_1680 - width_info,
+  -- marge interieure
+  top_padding  = 0,
+  right_padding = 0,
+  bottom_padding = 0,
+  left_padding = 0,
 }
 
 -------------------------------------------------------------------------------
@@ -663,14 +842,27 @@ default_gui["helmod_frame_full_resize_row"] = {
 -------------------------------------------------------------------------------
 -- Style of data panel
 --
--- @field [parent=#Frame] data
+-- @field [parent=#Frame] data_1920x1200
 -- 
 
-default_gui["helmod_frame_data"] = {
+default_gui["helmod_frame_data_1920x1200"] = {
 	type = "frame_style",
 	parent = "helmod_frame_resize_row_width",
-	minimal_width = 1140,
-	maximal_width = 1140
+	minimal_width = width_1920 - width_info,
+	maximal_width = width_1920 - width_info
+}
+
+-------------------------------------------------------------------------------
+-- Style of data panel
+--
+-- @field [parent=#Frame] data_1680x1050
+-- 
+
+default_gui["helmod_frame_data_1680x1050"] = {
+	type = "frame_style",
+	parent = "helmod_frame_resize_row_width",
+	minimal_width = width_1680 - width_info,
+	maximal_width = width_1680 - width_info
 }
 
 -------------------------------------------------------------------------------
@@ -752,16 +944,30 @@ default_gui["helmod_frame_recipe_factory"] = {
 
 -------------------------------------------------------------------------------
 -- Style of block list
---
--- @field [parent=#Scroll] block_list
+-- 
+-- @field [parent=#Scroll] block_list_1920x1200
 
-default_gui["helmod_scroll_block_list"] = {
+default_gui["helmod_scroll_block_list_1920x1200"] = {
 	type = "scroll_pane_style",
 	parent = "scroll_pane_style",
-	minimal_width = 1132,
-	maximal_width = 1132,
-	minimal_height = 516,
-	maximal_height = 516
+	minimal_width = width_1920 - width_info - width_scroll,
+	maximal_width = width_1920 - width_info - width_scroll,
+	minimal_height = height_1200 - height_block_header,
+	maximal_height = height_1200 - height_block_header
+}
+
+-------------------------------------------------------------------------------
+-- Style of block list
+-- 
+-- @field [parent=#Scroll] block_list_1680x1050
+
+default_gui["helmod_scroll_block_list_1680x1050"] = {
+	type = "scroll_pane_style",
+	parent = "scroll_pane_style",
+	minimal_width = width_1680 - width_info - width_scroll,
+	maximal_width = width_1680 - width_info - width_scroll,
+	minimal_height = height_1050 - height_block_header,
+	maximal_height = height_1050 - height_block_header
 }
 
 -------------------------------------------------------------------------------
@@ -772,8 +978,8 @@ default_gui["helmod_scroll_block_list"] = {
 default_gui["helmod_scroll_block_info"] = {
 	type = "scroll_pane_style",
 	parent = "scroll_pane_style",
-	minimal_width = 290,
-	maximal_width = 290,
+	minimal_width = width_block_info,
+	maximal_width = width_block_info,
 	minimal_height = 72,
 	maximal_height = 150
 }
@@ -781,13 +987,27 @@ default_gui["helmod_scroll_block_info"] = {
 -------------------------------------------------------------------------------
 -- Style of block element
 --
--- @field [parent=#Scroll] block_element
+-- @field [parent=#Scroll] block_element_1920x1200
 
-default_gui["helmod_scroll_block_element"] = {
+default_gui["helmod_scroll_block_element_1920x1200"] = {
 	type = "scroll_pane_style",
 	parent = "scroll_pane_style",
-	minimal_width = 833,
-	maximal_width = 833,
+	minimal_width = width_1920 - width_info - width_block_info - width_scroll - 10,
+	maximal_width = width_1920 - width_info - width_block_info - width_scroll - 10,
+	minimal_height = 72,
+	maximal_height = 72
+}
+
+-------------------------------------------------------------------------------
+-- Style of block element
+--
+-- @field [parent=#Scroll] block_element_1680x1050
+
+default_gui["helmod_scroll_block_element_1680x1050"] = {
+	type = "scroll_pane_style",
+	parent = "scroll_pane_style",
+	minimal_width = width_1680 - width_info - width_block_info - width_scroll - 9,
+	maximal_width = width_1680 - width_info - width_block_info - width_scroll - 9,
 	minimal_height = 72,
 	maximal_height = 72
 }
@@ -807,31 +1027,31 @@ default_gui["helmod_scroll_recipe_module_list"] = {
 }
 
 -------------------------------------------------------------------------------
--- Style of recipe selector group
+-- Style of recipe selector
 --
--- @field [parent=#Scroll] recipe_selector_group
+-- @field [parent=#Scroll] recipe_selector_1920x1200
 
-default_gui["helmod_scroll_recipe_selector_group"] = {
+default_gui["helmod_scroll_recipe_selector_1920x1200"] = {
 	type = "scroll_pane_style",
 	parent = "scroll_pane_style",
 	minimal_width = 400,
 	maximal_width = 400,
-	minimal_height = 60,
-	maximal_height = 134
+	minimal_height = height_1200 - height_selector_header,
+	maximal_height = height_1200 - height_selector_header
 }
 
 -------------------------------------------------------------------------------
--- Style of recipe selector list
+-- Style of recipe selector
 --
--- @field [parent=#Scroll] recipe_selector_list
+-- @field [parent=#Scroll] recipe_selector_1680x1050
 
-default_gui["helmod_scroll_recipe_selector_list"] = {
+default_gui["helmod_scroll_recipe_selector_1680x1050"] = {
 	type = "scroll_pane_style",
 	parent = "scroll_pane_style",
 	minimal_width = 400,
 	maximal_width = 400,
-	minimal_height = 200,
-	maximal_height = 600
+	minimal_height = height_1050 - height_selector_header,
+	maximal_height = height_1050 - height_selector_header
 }
 
 -------------------------------------------------------------------------------

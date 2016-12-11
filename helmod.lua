@@ -21,11 +21,14 @@ Logging.console = false
 -- @module helmod
 --
 
-helmod = {}
+helmod = {
+  name = "helmod",
+  version = "0.2.17"
+  }
 
 
 -------------------------------------------------------------------------------
--- On configuration changed
+-- On init
 --
 -- @function [parent=#helmod] on_init
 --
@@ -33,10 +36,6 @@ helmod = {}
 --
 function helmod:on_init(event)
 	Logging:trace("helmod:on_init(event)", event)
-	Logging:debug("helmod_data", global)
-	self.name = "helmod"
-	self.version = "0.2.16"
-
 	self.playerController = PlayerController:new()
 end
 
@@ -66,6 +65,7 @@ function helmod:on_configuration_changed(data)
 		-- Upgrade 0.2.17
 		if old_version ~= nil and old_version < "0.2.17" then
 			helmod:upgrade_0_2_17()
+			Logging:debug("helmod_data after upgrade_0_2_17", global)
 		end
 
 		if global["HMModel"] ~= nil then
@@ -78,7 +78,7 @@ function helmod:on_configuration_changed(data)
 end
 
 -------------------------------------------------------------------------------
--- On configuration changed
+-- On load
 --
 -- @function [parent=#helmod] on_load
 --
@@ -89,7 +89,7 @@ function helmod:on_load(event)
 end
 
 -------------------------------------------------------------------------------
--- On configuration changed
+-- On tick
 --
 -- @function [parent=#helmod] on_tick
 --
@@ -104,7 +104,7 @@ function helmod:on_tick(event)
 end
 
 -------------------------------------------------------------------------------
--- On configuration changed
+-- Init player controller
 --
 -- @function [parent=#helmod] init_playerController
 --
@@ -112,6 +112,9 @@ end
 --
 function helmod:init_playerController(player)
 	Logging:trace("helmod:init_playerController(player)")
+	if self.playerController == nil then
+		self.playerController = PlayerController:new()
+	end
 	local globalPlayer = self.playerController:getGlobal(player)
 	if globalPlayer.isActive == nil or globalPlayer.isActive == false then
 		if player.valid then
@@ -123,7 +126,7 @@ function helmod:init_playerController(player)
 end
 
 -------------------------------------------------------------------------------
--- On configuration changed
+-- On click event
 --
 -- @function [parent=#helmod] on_gui_click
 --
@@ -139,7 +142,23 @@ function helmod:on_gui_click(event)
 end
 
 -------------------------------------------------------------------------------
--- On configuration changed
+-- On text changed
+--
+-- @function [parent=#helmod] on_gui_text_changed
+--
+-- @param #table event
+--
+function helmod:on_gui_text_changed(event)
+	if self.playerController ~= nil then
+		local player = game.players[event.player_index]
+		if self.playerController ~= nil then
+			self.playerController:on_gui_text_changed(event)
+		end
+	end
+end
+
+-------------------------------------------------------------------------------
+-- On player created
 --
 -- @function [parent=#helmod] on_player_created
 --
@@ -168,22 +187,25 @@ function helmod:upgrade_0_2_17()
 			data.model.products = nil
 			data.model.input = nil
 			data.model.recipes = nil
+			data.model.currentTab = nil
 			-- move gui value
 			data.gui = {}
+			data.gui.currentTab = "product-line"
 			if data.model.order ~= nil then
 				data.gui.order = data.model.order
-			end
-			if data.model.currentTab ~= nil then
-				data.gui.currentTab = data.model.currentTab
+				data.model.order = nil
 			end
 			if data.model.moduleListRefresh ~= nil then
 				data.gui.moduleListRefresh = data.model.moduleListRefresh
+				data.model.moduleListRefresh = nil
 			end
 			if data.model.module_panel ~= nil then
 				data.gui.module_panel = data.model.module_panel
+				data.model.module_panel = nil
 			end
 			if data.recipeGroupSelected ~= nil then
 				data.gui.recipeGroupSelected = data.recipeGroupSelected
+				data.recipeGroupSelected = nil
 			end
 		end
 	end
