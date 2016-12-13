@@ -274,7 +274,7 @@ function PlannerRecipeSelector.methods:updateFilter(player, element, action, ite
 		self:addGuiLabel(guiFilter, "filter-ingredient", ({"helmod_recipe-edition-panel.filter-by-ingredient"}))
 		
 		self:addGuiLabel(guiFilter, "filter-value", ({"helmod_common.filter"}))
-		self:addGuiText(guiFilter, self:classname().."=recipe-filter=ID=filter-value", recipeFilter, nil, ({"tooltip.recipe-filter"}))
+		self:addGuiText(guiFilter, self:classname().."=recipe-filter=ID=filter-value", recipeFilter)
 		
 		self:addGuiLabel(panel, "message", ({"helmod_recipe-edition-panel.message"}))
 	else

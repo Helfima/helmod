@@ -23,7 +23,7 @@ Logging.console = false
 
 helmod = {
 	name = "helmod",
-	version = "0.2.19"
+	version = "0.2.20"
 }
 
 
