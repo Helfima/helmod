@@ -902,7 +902,7 @@ function PlannerResult.methods:addProductionLineRow(player, guiTable, element)
 			-- ingredient = {type="item", name="steel-plate", amount=8}
 			local cell = self:addGuiFlowH(tIngredient,"cell_"..ingredient.name, "helmod_flow_default")
 			self:addGuiLabel(cell, ingredient.name, self:formatNumber(ingredient.count), "helmod_label-right-60")
-			self:addSelectSpriteIconButton(cell, self:classname().."=production-block-add=ID="..element.id.."=", self.player:getIconType(ingredient), ingredient.name, "X"..ingredient.amount, "yellow", ({"tooltip.add-recipe", self.player:getLocalisedName(player, ingredient)}))
+			self:addSelectSpriteIconButton(cell, self:classname().."=production-block-add=ID="..element.id.."="..ingredient.name.."=", self.player:getIconType(ingredient), ingredient.name, "X"..ingredient.amount, "yellow", ({"tooltip.add-recipe", self.player:getLocalisedName(player, ingredient)}))
 		end
 	end
 end

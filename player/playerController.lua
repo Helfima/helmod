@@ -175,7 +175,8 @@ function PlayerController.methods:getDefaultSettings()
 		model_filter_factory = true,
 		model_filter_beacon = true,
 		other_speed_panel=false,
-		real_name=false
+		real_name=false,
+		filter_show_hidden=false
 	}
 end
 

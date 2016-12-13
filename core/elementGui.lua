@@ -131,6 +131,23 @@ function ElementGui.methods:addGuiButton(parent, action, key, style, caption, to
 end
 
 -------------------------------------------------------------------------------
+-- Add a radio-button element
+--
+-- @function [parent=#ElementGui] addGuiRadioButton
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #string key unique id
+-- @param #boolean state state of radio-button
+-- @param #string style style of radio-button
+--
+-- @return #LuaGuiElement the LuaGuiElement added
+--
+function ElementGui.methods:addGuiRadioButton(parent, key, state, style)
+	Logging:trace("ElementGui:addGuiRadioButton", parent, key, state, style)
+	return parent.add({type="radiobutton", name=key, state=state, style=style})
+end
+
+-------------------------------------------------------------------------------
 -- Add a checkbox element
 --
 -- @function [parent=#ElementGui] addGuiCheckbox

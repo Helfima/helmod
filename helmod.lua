@@ -22,9 +22,9 @@ Logging.console = false
 --
 
 helmod = {
-  name = "helmod",
-  version = "0.2.18"
-  }
+	name = "helmod",
+	version = "0.2.19"
+}
 
 
 -------------------------------------------------------------------------------
@@ -179,33 +179,35 @@ end
 function helmod:upgrade_0_2_17()
 	if global["HMModel"] ~= nil then
 		for _,data in pairs(global["HMModel"]) do
-			-- remove old field
-			data.model.page = nil
-			data.model.step = nil
-			data.model.maxPage = nil
-			data.model.needPrepare = nil
-			data.model.products = nil
-			data.model.input = nil
-			data.model.recipes = nil
-			data.model.currentTab = nil
-			-- move gui value
-			data.gui = {}
-			data.gui.currentTab = "product-line"
-			if data.model.order ~= nil then
-				data.gui.order = data.model.order
-				data.model.order = nil
-			end
-			if data.model.moduleListRefresh ~= nil then
-				data.gui.moduleListRefresh = data.model.moduleListRefresh
-				data.model.moduleListRefresh = nil
-			end
-			if data.model.module_panel ~= nil then
-				data.gui.module_panel = data.model.module_panel
-				data.model.module_panel = nil
-			end
-			if data.recipeGroupSelected ~= nil then
-				data.gui.recipeGroupSelected = data.recipeGroupSelected
-				data.recipeGroupSelected = nil
+			if data.model ~= nil then
+				-- remove old field
+				data.model.page = nil
+				data.model.step = nil
+				data.model.maxPage = nil
+				data.model.needPrepare = nil
+				data.model.products = nil
+				data.model.input = nil
+				data.model.recipes = nil
+				data.model.currentTab = nil
+				-- move gui value
+				data.gui = {}
+				data.gui.currentTab = "product-line"
+				if data.model.order ~= nil then
+					data.gui.order = data.model.order
+					data.model.order = nil
+				end
+				if data.model.moduleListRefresh ~= nil then
+					data.gui.moduleListRefresh = data.model.moduleListRefresh
+					data.model.moduleListRefresh = nil
+				end
+				if data.model.module_panel ~= nil then
+					data.gui.module_panel = data.model.module_panel
+					data.model.module_panel = nil
+				end
+				if data.recipeGroupSelected ~= nil then
+					data.gui.recipeGroupSelected = data.recipeGroupSelected
+					data.recipeGroupSelected = nil
+				end
 			end
 		end
 	end

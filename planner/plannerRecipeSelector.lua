@@ -1,20 +1,22 @@
 -------------------------------------------------------------------------------
 -- Classe to build recipe dialog
--- 
+--
 -- @module PlannerRecipeSelector
--- @extends #PlannerDialog 
--- 
+-- @extends #PlannerDialog
+--
 
 PlannerRecipeSelector = setclass("HMPlannerRecipeSelector", PlannerDialog)
 
 local recipeGroups = {}
+local recipeFilter = nil
+local recipeFilterProduct = true
 -------------------------------------------------------------------------------
 -- On initialization
 --
 -- @function [parent=#PlannerRecipeSelector] on_init
--- 
+--
 -- @param #PlannerController parent parent controller
--- 
+--
 function PlannerRecipeSelector.methods:on_init(parent)
 	self.panelCaption = "Recipe Selector"
 	self.player = self.parent.parent
@@ -24,11 +26,11 @@ end
 -- Get the parent panel
 --
 -- @function [parent=#PlannerRecipeSelector] getParentPanel
--- 
+--
 -- @param #LuaPlayer player
--- 
+--
 -- @return #LuaGuiElement
--- 
+--
 function PlannerRecipeSelector.methods:getParentPanel(player)
 	return self.parent:getDialogPanel(player)
 end
@@ -45,7 +47,7 @@ function PlannerRecipeSelector.methods:getFilterPanel(player)
 	if panel["filter-panel"] ~= nil and panel["filter-panel"].valid then
 		return panel["filter-panel"]
 	end
-	return self:addGuiFrameH(panel, "filter-panel", "helmod_frame_resize_row_width", ({"helmod_common.filter"}))
+	return self:addGuiFrameV(panel, "filter-panel", "helmod_frame_resize_row_width", ({"helmod_common.filter"}))
 end
 
 -------------------------------------------------------------------------------
@@ -99,24 +101,25 @@ end
 -- On open
 --
 -- @function [parent=#PlannerRecipeSelector] on_open
--- 
+--
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
--- 
+--
 -- @return #boolean if true the next call close dialog
---  
+--
 function PlannerRecipeSelector.methods:on_open(player, element, action, item, item2, item3)
 	Logging:debug("PlannerRecipeSelector:on_open():",player, element, action, item, item2, item3)
 	local globalPlayer = self.player:getGlobal(player)
 	if item3 ~= nil then
-		globalPlayer.recipeFilterProduct = item3:lower():gsub("[-]"," ")
+		recipeFilter = item3:lower():gsub("[-]"," ")
 	else
-		globalPlayer.recipeFilterProduct = nil
+		recipeFilter = nil
 	end
+	recipeFilterProduct = true
 	-- close si nouvel appel
 	return true
 end
@@ -125,14 +128,14 @@ end
 -- After open
 --
 -- @function [parent=#PlannerRecipeSelector] after_open
--- 
+--
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
--- 
+--
 function PlannerRecipeSelector.methods:after_open(player, element, action, item, item2, item3)
 	self.parent:send_event(player, "HMPlannerRecipeEdition", "CLOSE")
 	self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
@@ -143,48 +146,62 @@ end
 -- On event
 --
 -- @function [parent=#PlannerRecipeSelector] on_event
--- 
+--
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
--- 
+--
 function PlannerRecipeSelector.methods:on_event(player, element, action, item, item2, item3)
 	Logging:debug("PlannerRecipeSelector:on_event():",player, element, action, item, item2, item3)
 	local globalPlayer = self.player:getGlobal(player)
+	local globalSettings = self.player:getGlobal(player, "settings")
+	local defaultSettings = self.player:getDefaultSettings()
+	
 	if action == "recipe-group" then
 		globalPlayer.recipeGroupSelected = item
 		self:on_update(player, element, action, item, item2, item3)
 	end
-	
+
 	if action == "recipe-select" then
 		local productionBlock = self.parent.model:addRecipeIntoProductionBlock(player, item)
 		self.parent.model:update(player)
 		self.parent:refreshDisplayData(player)
 		self:close(player)
 	end
-	
-	if action == "recipe-filter" then
-		globalPlayer.recipeFilterProduct = element.text
+
+	if action == "change-boolean-settings" then
+		if globalSettings[item] == nil then globalSettings[item] = defaultSettings[item] end
+		globalSettings[item] = not(globalSettings[item])
+		self:on_update(player, item, item2, item3)
+	end
+
+	if action == "recipe-filter-switch" then
+		recipeFilterProduct = not(recipeFilterProduct)
 		self:on_update(player, element, action, item, item2, item3)
 	end
-	
+
+	if action == "recipe-filter" then
+		recipeFilter = element.text
+		self:on_update(player, element, action, item, item2, item3)
+	end
+
 end
 
 -------------------------------------------------------------------------------
 -- On update
 --
 -- @function [parent=#PlannerRecipeSelector] on_update
--- 
+--
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
--- 
+--
 function PlannerRecipeSelector.methods:on_update(player, element, action, item, item2, item3)
 	Logging:trace("PlannerRecipeSelector:on_update():",player, element, action, item, item2, item3)
 	local globalPlayer = self.player:getGlobal(player)
@@ -193,25 +210,31 @@ function PlannerRecipeSelector.methods:on_update(player, element, action, item, 
 	local firstGroup = nil
 	for key, recipe in pairs(self.player:getRecipes(player)) do
 		local find = false
-		if globalPlayer.recipeFilterProduct ~= nil and globalPlayer.recipeFilterProduct ~= "" then
-			for key, product in pairs(recipe.products) do
-				local search = product.name:lower():gsub("[-]"," ")
-				if string.find(search, globalPlayer.recipeFilterProduct) then
+		if recipeFilter ~= nil and recipeFilter ~= "" then
+			local elements = recipe.products
+			if recipeFilterProduct ~= true then
+				elements = recipe.ingredients
+			end
+			
+			for key, element in pairs(elements) do
+				local search = element.name:lower():gsub("[-]"," ")
+				if string.find(search, recipeFilter) then
 					find = true
 				end
 			end
 		else
 			find = true
 		end
-		
-		if find == true and recipe.enabled == true then
+
+		local filter_show_hidden = self.player:getGlobalSettings(player, "filter_show_hidden")
+		if find == true and (recipe.enabled == true or filter_show_hidden == true) then
 			if firstGroup == nil then firstGroup = recipe.group.name end
 			if recipeGroups[recipe.group.name] == nil then recipeGroups[recipe.group.name] = {} end
 			if recipeGroups[recipe.group.name][recipe.subgroup.name] == nil then recipeGroups[recipe.group.name][recipe.subgroup.name] = {} end
 			table.insert(recipeGroups[recipe.group.name][recipe.subgroup.name], recipe)
 		end
 	end
-	
+
 	if recipeGroups[globalPlayer.recipeGroupSelected] == nil then
 		globalPlayer.recipeGroupSelected = firstGroup
 	end
@@ -224,23 +247,39 @@ end
 -- Update filter
 --
 -- @function [parent=#PlannerRecipeSelector] updateFilter
--- 
+--
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
--- 
+--
 function PlannerRecipeSelector.methods:updateFilter(player, element, action, item, item2, item3)
 	Logging:trace("PlannerRecipeSelector:updateFilter():",player, element, action, item, item2, item3)
 	local globalPlayer = self.player:getGlobal(player)
 	local panel = self:getFilterPanel(player)
 	local globalSettings = self.player:getGlobal(player, "settings")
-	
-	if panel["filter-label"] == nil then
-		self:addGuiLabel(panel, "filter-label", ({"helmod_common.product"}))
-		self:addGuiText(panel, self:classname().."=recipe-filter=ID=product", globalPlayer.recipeFilterProduct)
+
+	if panel["filter"] == nil then
+		local guiFilter = self:addGuiTable(panel, "filter", 2)
+		local filter_show_hidden = self.player:getGlobalSettings(player, "filter_show_hidden")
+		self:addGuiCheckbox(guiFilter, self:classname().."=change-boolean-settings=ID=filter_show_hidden", filter_show_hidden)
+		self:addGuiLabel(guiFilter, "filter_show_hidden", ({"helmod_recipe-edition-panel.filter-show-hidden"}))
+		
+		self:addGuiCheckbox(guiFilter, self:classname().."=recipe-filter-switch=ID=filter-product", recipeFilterProduct)
+		self:addGuiLabel(guiFilter, "filter-product", ({"helmod_recipe-edition-panel.filter-by-product"}))
+		
+		self:addGuiCheckbox(guiFilter, self:classname().."=recipe-filter-switch=ID=filter-ingredient", not(recipeFilterProduct))
+		self:addGuiLabel(guiFilter, "filter-ingredient", ({"helmod_recipe-edition-panel.filter-by-ingredient"}))
+		
+		self:addGuiLabel(guiFilter, "filter-value", ({"helmod_common.filter"}))
+		self:addGuiText(guiFilter, self:classname().."=recipe-filter=ID=filter-value", recipeFilter, nil, ({"tooltip.recipe-filter"}))
+		
+		self:addGuiLabel(panel, "message", ({"helmod_recipe-edition-panel.message"}))
+	else
+		panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-product"].state = recipeFilterProduct
+		panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-ingredient"].state = not(recipeFilterProduct)
 	end
 
 end
@@ -249,20 +288,20 @@ end
 -- Update item list
 --
 -- @function [parent=#PlannerRecipeSelector] updateItemList
--- 
+--
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
--- 
+--
 function PlannerRecipeSelector.methods:updateItemList(player, element, action, item, item2, item3)
 	Logging:trace("PlannerRecipeSelector:updateItemList():",player, element, action, item, item2, item3)
 	local globalPlayer = self.player:getGlobal(player)
 	local panel = self:getItemListPanel(player)
 	local globalSettings = self.player:getGlobal(player, "settings")
-	
+
 	if panel["recipe-list"] ~= nil  and panel["recipe-list"].valid then
 		panel["recipe-list"].destroy()
 	end
@@ -293,19 +332,19 @@ end
 -- Update group selector
 --
 -- @function [parent=#PlannerRecipeSelector] updateGroupSelector
--- 
+--
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
--- 
+--
 function PlannerRecipeSelector.methods:updateGroupSelector(player, element, action, item, item2, item3)
 	Logging:trace("PlannerRecipeSelector:updateGroupSelector():",player, element, action, item, item2, item3)
 	local globalPlayer = self.player:getGlobal(player)
 	local panel = self:getGroupsPanel(player)
-	
+
 	if panel["recipe-groups"] ~= nil  and panel["recipe-groups"].valid then
 		panel["recipe-groups"].destroy()
 	end

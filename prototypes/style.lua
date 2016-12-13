@@ -511,7 +511,7 @@ local width_info=492
 local width_scroll=8
 local width_block_info=290
 local height_block_header = 400
-local height_selector_header = 149
+local height_selector_header = 255
 
 local width_1920 = math.ceil(1920*0.85) -- 1632
 local height_1200 = math.ceil(1200*0.85) -- 1020
