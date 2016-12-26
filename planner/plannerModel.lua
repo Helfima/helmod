@@ -513,14 +513,11 @@ function PlannerModel.methods:setBeacon(player, item, key, name)
 			object.beacon.name = beacon.name
 			object.beacon.type = beacon.type
 			-- copy the default parameters
-			local defaultBeacon = self:getDefaultBeacon(player, beacon.name)
-			if defaultBeacon ~= nil then
-				object.beacon.energy_nominal = defaultBeacon.energy_nominal
-				object.beacon.combo = defaultBeacon.combo
-				object.beacon.factory = defaultBeacon.factory
-				object.beacon.efficiency = defaultBeacon.efficiency
-				object.beacon.module_slots = defaultBeacon.module_slots
-			end
+			object.beacon.energy_nominal = self.player:getItemProperty(beacon.name, "energy_usage")
+			object.beacon.module_slots = self.player:getItemProperty(beacon.name, "module_slots")
+			object.beacon.efficiency = self.player:getItemProperty(beacon.name, "efficiency")
+			object.beacon.combo = 4
+			object.beacon.factory = 1.2
 		end
 	end
 end
@@ -611,12 +608,16 @@ function PlannerModel.methods:setFactory(player, item, key, name)
 
 			object.factory.name = factory.name
 			object.factory.type = factory.type
-			local defaultFactory = self:getDefaultFactory(player, factory.name)
-			if defaultFactory ~= nil then
-				object.factory.energy_nominal = defaultFactory.energy_nominal
-				object.factory.speed_nominal = defaultFactory.speed_nominal
-				object.factory.module_slots = defaultFactory.module_slots
+			object.factory.energy_nominal = self.player:getItemProperty(factory.name, "energy_usage")
+			
+			object.factory.module_slots = self.player:getItemProperty(factory.name, "module_slots")
+			local speed_nominal = self.player:getItemProperty(factory.name, "crafting_speed")
+			local mining_speed = self.player:getItemProperty(factory.name, "mining_speed")
+			local mining_power = self.player:getItemProperty(factory.name, "mining_power")
+			if mining_speed ~= 0 then
+				speed_nominal = mining_power * mining_speed
 			end
+			object.factory.speed_nominal = speed_nominal
 		end
 	end
 end
@@ -1223,19 +1224,19 @@ function PlannerModel.methods:computeResources(player)
 				if ingredient.resource_category == "basic-solid" then
 					resource.factory.name = "electric-mining-drill"
 					resource.category = "basic-solid"
-					resource.factory.speed = 0.5
+					resource.factory.speed = 1
 					resource.factory.energy = 90
 				end
 				if ingredient.name == "water" then
 					resource.factory.name = "offshore-pump"
 					resource.category = "basic-fluid"
-					resource.factory.speed = 10
+					resource.factory.speed = 1
 					resource.factory.energy = 0
 				end
 				if ingredient.name == "crude-oil" then
 					resource.factory.name = "pumpjack"
 					resource.category = "basic-fluid"
-					resource.factory.speed = 1
+					resource.factory.speed = 2
 					resource.factory.energy = 90
 				end
 			end

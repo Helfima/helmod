@@ -23,9 +23,8 @@ Logging.console = false
 
 helmod = {
 	name = "helmod",
-	version = "0.2.20"
+	version = "0.2.21"
 }
-
 
 -------------------------------------------------------------------------------
 -- On init
@@ -65,7 +64,11 @@ function helmod:on_configuration_changed(data)
 		-- Upgrade 0.2.17
 		if old_version ~= nil and old_version < "0.2.17" then
 			helmod:upgrade_0_2_17()
-			Logging:debug("helmod_data after upgrade_0_2_17", global)
+			Logging:trace("helmod_data after upgrade_0_2_17", global)
+		end
+		-- Upgrade 0.2.21
+		if old_version ~= nil and old_version < "0.2.21" then
+			helmod:upgrade_0_2_21()
 		end
 
 		if global["HMModel"] ~= nil then
@@ -179,6 +182,7 @@ end
 function helmod:upgrade_0_2_17()
 	if global["HMModel"] ~= nil then
 		for _,data in pairs(global["HMModel"]) do
+			-- boucle sur chaque player
 			if data.model ~= nil then
 				-- remove old field
 				data.model.page = nil
@@ -208,6 +212,25 @@ function helmod:upgrade_0_2_17()
 					data.gui.recipeGroupSelected = data.recipeGroupSelected
 					data.recipeGroupSelected = nil
 				end
+			end
+		end
+	end
+end
+
+-------------------------------------------------------------------------------
+-- Upgrade 0.2.21
+--
+-- @function [parent=#helmod] upgrade_0_2_21
+--
+-- @param #table event
+--
+function helmod:upgrade_0_2_21()
+	if global["HMModel"] ~= nil then
+		for _,data in pairs(global["HMModel"]) do
+			-- boucle sur chaque player
+			if data.settings ~= nil then
+				data.settings.model_filter_factory = true
+				data.settings.model_filter_beacon = true
 			end
 		end
 	end

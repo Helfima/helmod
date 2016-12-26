@@ -1,6 +1,8 @@
 require "speed.speedController"
 require "planner.plannerController"
 
+local data_entity = nil
+
 -------------------------------------------------------------------------------
 -- Classe de player
 --
@@ -329,6 +331,78 @@ function PlayerController.methods:getProductions()
 end
 
 -------------------------------------------------------------------------------
+-- Return list of productions
+--
+-- @function [parent=#PlayerController] getProductionsCrafting
+--
+-- @param #string category filter
+--
+-- @return #table list of productions
+--
+function PlayerController.methods:getProductionsCrafting(category)
+	Logging:trace("PlayerController:getProductionsCrafting(category)", category)
+	local productions = {}
+	for key, item in pairs(game.entity_prototypes) do
+		if item.type ~= nil then
+			Logging:trace("PlayerController:getProductionsCrafting(category):item", item.name, item.type, item.group.name, item.subgroup.name)
+			local check = false
+			if category ~= nil then
+				local categories = self:getItemProperty(item.name, "crafting_categories")
+				if categories ~= nil then
+					for c, value in pairs(categories) do
+						if category == value then check = true end
+					end
+				end
+			else
+				if item.group ~= nil and item.group.name == "production" then
+					check = true
+				end
+			end
+			if check then
+				productions[item.name] = item
+			end
+		end
+	end
+	return productions
+end
+
+-------------------------------------------------------------------------------
+-- Return list of productions
+--
+-- @function [parent=#PlayerController] getProductionsRessource
+--
+-- @param #string category filter
+--
+-- @return #table list of productions
+--
+function PlayerController.methods:getProductionsRessource(category)
+	Logging:trace("PlayerController:getProductionsRessource(category)", category)
+	local productions = {}
+	for key, item in pairs(game.entity_prototypes) do
+		if item.type ~= nil then
+			Logging:trace("PlayerController:getProductionsRessource(category):item", item.name, item.type, item.group.name, item.subgroup.name)
+			local check = false
+			if category ~= nil then
+				local categories = self:getItemProperty(item.name, "resource_categories")
+				if categories ~= nil then
+					for c, value in pairs(categories) do
+						if category == value then check = true end
+					end
+				end
+			else
+				if item.group ~= nil and item.group.name == "production" then
+					check = true
+				end
+			end
+			if check then
+				productions[item.name] = item
+			end
+		end
+	end
+	return productions
+end
+
+-------------------------------------------------------------------------------
 -- Return list of modules
 --
 -- @function [parent=#PlayerController] getModules
@@ -580,5 +654,65 @@ function PlayerController.methods:getRecipeLocalisedName(player, recipe)
 	end
 	return recipe.name
 end
+
+-------------------------------------------------------------------------------
+-- Return item property
+--
+-- @function [parent=#PlayerController] getItemProperty
+--
+-- @param #string name
+-- @param #string property
+--
+function PlayerController.methods:getItemProperty(name, property)
+	Logging:trace("PlayerController:getItemProperty(name, property)", name, property)
+	if data_entity == nil then
+		data_entity = loadstring(game.entity_prototypes["data_entity"].order)()
+		Logging:trace("PlayerController:getItemProperty(name, property):data_entity", data_entity)
+	end
+	if data_entity[name] then
+		if property == "energy_usage" then
+			if data_entity[name]["energy_usage"] ~= nil then
+				local value = string.match(data_entity[name]["energy_usage"],"[0-9.]*",1)
+				return tonumber(value)
+			else
+				return 0
+			end
+		elseif property == "module_slots" then
+			if data_entity[name]["module_specification"] ~= nil then
+				return tonumber(data_entity[name]["module_specification"]["module_slots"])
+			else
+				return 0
+			end
+		elseif property == "crafting_speed" then
+			if data_entity[name]["crafting_speed"] ~= nil then
+				return tonumber(data_entity[name]["crafting_speed"])
+			else
+				return 0
+			end
+		elseif property == "mining_speed" then
+			if data_entity[name]["mining_speed"] ~= nil then
+				return tonumber(data_entity[name]["mining_speed"])
+			else
+				return 0
+			end
+		elseif property == "mining_power" then
+			if data_entity[name]["mining_power"] ~= nil then
+				return tonumber(data_entity[name]["mining_power"])
+			else
+				return 0
+			end
+		else
+			return data_entity[name][property]
+		end
+	end
+	return nil
+end
+
+
+
+
+
+	
+
 
 

@@ -476,16 +476,13 @@ function PlannerAbstractEdition.methods:updateFactoryInfo(player, element, actio
 		local inputPanel = self:addGuiTable(infoPanel,"table-input",2)
 
 		self:addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy-nominal"}))
-		self:addGuiText(inputPanel, "energy-nominal", factory.energy_nominal, "helmod_textfield")
+		self:addGuiLabel(inputPanel, "energy-nominal", factory.energy_nominal)
 
 		self:addGuiLabel(inputPanel, "label-speed-nominal", ({"helmod_label.speed-nominal"}))
-		self:addGuiText(inputPanel, "speed-nominal", factory.speed_nominal, "helmod_textfield")
+		self:addGuiLabel(inputPanel, "speed-nominal", factory.speed_nominal)
 
 		self:addGuiLabel(inputPanel, "label-module-slots", ({"helmod_label.module-slots"}))
-		self:addGuiText(inputPanel, "module-slots", factory.module_slots, "helmod_textfield")
-
-		self:addGuiLabel(inputPanel, "label-limit", ({"helmod_label.limit"}))
-		self:addGuiText(inputPanel, "limit", factory.limit, "helmod_textfield")
+		self:addGuiLabel(inputPanel, "module-slots", factory.module_slots)
 
 		self:addGuiLabel(inputPanel, "label-energy", ({"helmod_label.energy"}))
 		local sign = "+"
@@ -501,6 +498,9 @@ function PlannerAbstractEdition.methods:updateFactoryInfo(player, element, actio
 		if factory.effects.productivity < 0 then sign = "-" end
 		self:addGuiLabel(inputPanel, "label-productivity", ({"helmod_label.productivity"}))
 		self:addGuiLabel(inputPanel, "productivity", sign..self:formatPercent(factory.effects.productivity).."%")
+
+		self:addGuiLabel(inputPanel, "label-limit", ({"helmod_label.limit"}))
+		self:addGuiText(inputPanel, "limit", factory.limit, "helmod_textfield")
 
 		self:addGuiButton(infoPanel, self:classname().."=factory-update=ID="..item.."=", object.name, "helmod_button-default", ({"helmod_button.update"}))
 	end
@@ -530,14 +530,18 @@ function PlannerAbstractEdition.methods:updateFactoryModulesSelector(player, ele
 
 	if selectorPanel["modules"] == nil then
 		local tableModulesPanel = self:addGuiTable(selectorPanel,"modules",4)
+		local factory = object.factory
 		for k, module in pairs(self.player:getModules()) do
 			local allowed = true
 			local consumption = self:formatPercent(self.player:getModuleBonus(module.name, "consumption"))
 			local speed = self:formatPercent(self.player:getModuleBonus(module.name, "speed"))
 			local productivity = self:formatPercent(self.player:getModuleBonus(module.name, "productivity"))
 			local pollution = self:formatPercent(self.player:getModuleBonus(module.name, "pollution"))
-			if productivity > 0 then
+			if productivity > 0 and item ~= "resource" then
 				if module.limitations[object.name] == nil then allowed = false end
+			end
+			if factory.module_slots ==  0 then
+				allowed = false
 			end
 			local tooltip = ({"tooltip.module-description" , module.localised_name, consumption, speed, productivity, pollution})
 			if allowed == false then
@@ -607,39 +611,67 @@ function PlannerAbstractEdition.methods:updateFactorySelector(player, element, a
 	local globalSettings = self.player:getGlobal(player, "settings")
 
 	local selectorPanel = self:getFactorySelectorPanel(player)
+
+	if selectorPanel["scroll-factory"] ~= nil and selectorPanel["scroll-factory"].valid then
+		selectorPanel["scroll-factory"].destroy()
+	end
+	local scrollPanel = self:addGuiScrollPane(selectorPanel, "scroll-factory", "helmod_scroll_recipe_factories", "auto", "auto")
+
 	local model = self.model:getModel(player)
 
 	local object = self:getObject(player, element, action, item, item2, item3)
 
-	if selectorPanel["scroll-groups"] ~= nil and selectorPanel["scroll-groups"].valid then
-		selectorPanel["scroll-groups"].destroy()
-	end
-
 	-- ajouter de la table des groupes de recipe
-	local scrollGroups = self:addGuiScrollPane(selectorPanel, "scroll-groups", "helmod_scroll_recipe_factory_group", "auto", "auto")
-	local groupsPanel = self:addGuiTable(scrollGroups, "factory-groups", 2)
+	local groupsPanel = self:addGuiTable(scrollPanel, "factory-groups", 2)
 	Logging:debug("PlannerFactorySelector:updateFactorySelector(): group category=",object.category)
 
 	local category = object.category
 	if globalSettings.model_filter_factory ~= nil and globalSettings.model_filter_factory == false then category = nil end
 
-	for group, name in pairs(self.player:getProductionGroups(category)) do
-		-- set le groupe
-		if model.factoryGroupSelected == nil then model.factoryGroupSelected = group end
-		-- ajoute les icons de groupe
-		local action = self:addGuiButton(groupsPanel, self:classname().."=factory-group=ID="..item.."="..object.name.."=", group, "helmod_button-default", group)
+	local factories = {}
+	if item == "resource" then
+		Logging:debug("PlannerFactorySelector:updateFactorySelector(): resource=",object)
+		if object.name == "water" then
+			factories = self.player:getProductionsRessource("offshore-pump")
+		else
+			factories = self.player:getProductionsRessource(category)
+		end
+
+	else
+		factories = self.player:getProductionsCrafting(category)
+	end
+	Logging:debug("factories:",factories)
+
+
+	if category == nil then
+		local subgroups = {}
+		for key, factory in pairs(factories) do
+			local subgroup = factory.subgroup.name
+			if subgroup ~= nil then
+				if subgroups[subgroup] == nil then
+					subgroups[subgroup] = 1
+				else
+					subgroups[subgroup] = subgroups[subgroup] + 1
+				end
+			end
+		end
+
+		for group, count in pairs(subgroups) do
+			-- set le groupe
+			if model.factoryGroupSelected == nil then model.factoryGroupSelected = group end
+			-- ajoute les icons de groupe
+			local action = self:addGuiButton(groupsPanel, self:classname().."=factory-group=ID="..item.."="..object.name.."=", group, "helmod_button-default", group)
+		end
 	end
 
-	if selectorPanel["scroll-factory"] ~= nil and selectorPanel["scroll-factory"].valid then
-		selectorPanel["scroll-factory"].destroy()
-	end
-
-	local scrollTable = self:addGuiScrollPane(selectorPanel, "scroll-factory", "helmod_scroll_recipe_factories", "auto", "auto")
-	local tablePanel = self:addGuiTable(scrollTable, "factory-table", 5)
-	Logging:debug("factories:",self.player:getProductions())
-	for key, factory in pairs(self.player:getProductions()) do
-		if factory.type == model.factoryGroupSelected then
-			self:addSpriteIconButton(tablePanel, self:classname().."=factory-select=ID="..item.."="..object.name.."=", "item", factory.name, true)
+	local tablePanel = self:addGuiTable(scrollPanel, "factory-table", 5)
+	for key, factory in pairs(factories) do
+		if category ~= nil or (factory.subgroup ~= nil and factory.subgroup.name == model.factoryGroupSelected) then
+			local localised_name = factory.localised_name
+			if globalSettings.real_name == true then
+				localised_name = factory.name
+			end
+			self:addSpriteIconButton(tablePanel, self:classname().."=factory-select=ID="..item.."="..object.name.."=", "item", factory.name, factory.name, localised_name)
 		end
 	end
 end
@@ -683,19 +715,19 @@ function PlannerAbstractEdition.methods:updateBeaconInfo(player, element, action
 		local inputPanel = self:addGuiTable(infoPanel,"table-input",2)
 
 		self:addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy-nominal"}))
-		self:addGuiText(inputPanel, "energy-nominal", beacon.energy_nominal, "helmod_textfield")
+		self:addGuiLabel(inputPanel, "energy-nominal", beacon.energy_nominal)
+
+		self:addGuiLabel(inputPanel, "label-efficiency", ({"helmod_label.efficiency"}))
+		self:addGuiLabel(inputPanel, "efficiency", beacon.efficiency)
+
+		self:addGuiLabel(inputPanel, "label-module-slots", ({"helmod_label.module-slots"}))
+		self:addGuiLabel(inputPanel, "module-slots", beacon.module_slots)
 
 		self:addGuiLabel(inputPanel, "label-combo", ({"helmod_label.combo"}))
 		self:addGuiText(inputPanel, "combo", beacon.combo, "helmod_textfield")
 
 		self:addGuiLabel(inputPanel, "label-factory", ({"helmod_label.factory"}))
 		self:addGuiText(inputPanel, "factory", beacon.factory, "helmod_textfield")
-
-		self:addGuiLabel(inputPanel, "label-efficiency", ({"helmod_label.efficiency"}))
-		self:addGuiText(inputPanel, "efficiency", beacon.efficiency, "helmod_textfield")
-
-		self:addGuiLabel(inputPanel, "label-module-slots", ({"helmod_label.module-slots"}))
-		self:addGuiText(inputPanel, "module-slots", beacon.module_slots, "helmod_textfield")
 
 		self:addGuiButton(infoPanel, self:classname().."=beacon-update=ID="..item.."=", object.name, "helmod_button-default", ({"helmod_button.update"}))
 	end
@@ -805,15 +837,15 @@ function PlannerAbstractEdition.methods:updateBeaconSelector(player, element, ac
 	local selectorPanel = self:getBeaconSelectorPanel(player)
 	local model = self.model:getModel(player)
 
+	if selectorPanel["scroll-beacon"] ~= nil and selectorPanel["scroll-beacon"].valid then
+		selectorPanel["scroll-beacon"].destroy()
+	end
+	local scrollPanel = self:addGuiScrollPane(selectorPanel, "scroll-beacon", "helmod_scroll_recipe_factories", "auto", "auto")
+
 	local object = self:getObject(player, element, action, item, item2, item3)
 
-	if selectorPanel["scroll-groups"] ~= nil and selectorPanel["scroll-groups"].valid then
-		selectorPanel["scroll-groups"].destroy()
-	end
-
 	-- ajouter de la table des groupes de recipe
-	local scrollGroups = self:addGuiScrollPane(selectorPanel, "scroll-groups", "helmod_scroll_recipe_factory_group", "auto", "auto")
-	local groupsPanel = self:addGuiTable(scrollGroups, "beacon-groups", 2)
+	local groupsPanel = self:addGuiTable(scrollPanel, "beacon-groups", 2)
 	local category = "module"
 	if globalSettings.model_filter_beacon ~= nil and globalSettings.model_filter_beacon == false then category = nil end
 	for group, name in pairs(self.player:getProductionGroups(category)) do
@@ -823,16 +855,15 @@ function PlannerAbstractEdition.methods:updateBeaconSelector(player, element, ac
 		local action = self:addGuiButton(groupsPanel, self:classname().."=beacon-group=ID="..item.."="..object.name.."=", group, "helmod_button-default", group)
 	end
 
-	if selectorPanel["scroll-beacon"] ~= nil and selectorPanel["scroll-beacon"].valid then
-		selectorPanel["scroll-beacon"].destroy()
-	end
-
-	local scrollTable = self:addGuiScrollPane(selectorPanel, "scroll-beacon", "helmod_scroll_recipe_factories", "auto", "auto")
-	local tablePanel = self:addGuiTable(scrollTable, "beacon-table", 5)
+	local tablePanel = self:addGuiTable(scrollPanel, "beacon-table", 5)
 	--Logging:debug("factories:",self.player:getProductions())
 	for key, beacon in pairs(self.player:getProductions()) do
 		if beacon.type == model.beaconGroupSelected then
-			self:addSpriteIconButton(tablePanel, self:classname().."=beacon-select=ID="..item.."="..object.name.."=", "item", beacon.name, true)
+			local localised_name = beacon.localised_name
+			if globalSettings.real_name == true then
+				localised_name = beacon.name
+			end
+			self:addSpriteIconButton(tablePanel, self:classname().."=beacon-select=ID="..item.."="..object.name.."=", "item", beacon.name, beacon.name, localised_name)
 		end
 	end
 end
@@ -891,18 +922,6 @@ function PlannerAbstractEdition.methods:on_event(player, element, action, item, 
 		local inputPanel = self:getFactoryInfoPanel(player)["table-input"]
 		local options = {}
 
-		if inputPanel["energy-nominal"] ~= nil then
-			options["energy_nominal"] = self:getInputNumber(inputPanel["energy-nominal"])
-		end
-
-		if inputPanel["speed-nominal"] ~= nil then
-			options["speed_nominal"] = self:getInputNumber(inputPanel["speed-nominal"])
-		end
-
-		if inputPanel["module-slots"] ~= nil then
-			options["module_slots"] = self:getInputNumber(inputPanel["module-slots"])
-		end
-
 		if inputPanel["limit"] ~= nil then
 			options["limit"] = self:getInputNumber(inputPanel["limit"])
 		end
@@ -947,24 +966,12 @@ function PlannerAbstractEdition.methods:on_event(player, element, action, item, 
 		local inputPanel = self:getBeaconInfoPanel(player)["table-input"]
 		local options = {}
 
-		if inputPanel["energy-nominal"] ~= nil then
-			options["energy_nominal"] = self:getInputNumber(inputPanel["energy-nominal"])
-		end
-
 		if inputPanel["combo"] ~= nil then
 			options["combo"] = self:getInputNumber(inputPanel["combo"])
 		end
 
 		if inputPanel["factory"] ~= nil then
 			options["factory"] = self:getInputNumber(inputPanel["factory"])
-		end
-
-		if inputPanel["efficiency"] ~= nil then
-			options["efficiency"] = self:getInputNumber(inputPanel["efficiency"])
-		end
-
-		if inputPanel["module-slots"] ~= nil then
-			options["module_slots"] = self:getInputNumber(inputPanel["module-slots"])
 		end
 
 		self.model:updateBeacon(player, item, item2, options)

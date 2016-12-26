@@ -1064,24 +1064,9 @@ default_gui["helmod_scroll_recipe_factories"] = {
 	parent = "scroll_pane_style",
 	minimal_width = 210,
 	maximal_width = 210,
-	minimal_height = 210,
-	maximal_height = 210
+	minimal_height = 270,
+	maximal_height = 270
 }
-
--------------------------------------------------------------------------------
--- Style of recipe factory group
---
--- @field [parent=#Scroll] recipe_factory_group
-
-default_gui["helmod_scroll_recipe_factory_group"] = {
-	type = "scroll_pane_style",
-	parent = "scroll_pane_style",
-	minimal_width = 210,
-	maximal_width = 210,
-	minimal_height = 60,
-	maximal_height = 60
-}
-
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------

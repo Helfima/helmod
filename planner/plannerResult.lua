@@ -741,7 +741,7 @@ function PlannerResult.methods:addProductionBlockRow(player, guiTable, blockId, 
 	end
 	-- col recipe
 	local guiRecipe = self:addGuiFlowH(guiTable,"recipe"..recipe.name, "helmod_flow_default")
-	self:addSelectSpriteIconButton(guiRecipe, "HMPlannerRecipeEdition=OPEN=ID="..blockId.."=", self.player:getIconType(recipe), recipe.name, recipe.name, nil, ({"tooltip.edit-recipe", self.player:getRecipeLocalisedName(player, recipe)}))
+	self:addSelectSpriteIconButton(guiRecipe, "HMPlannerRecipeEdition=OPEN=ID="..blockId.."=", self.player:getRecipeIconType(player, recipe), recipe.name, recipe.name, nil, ({"tooltip.edit-recipe", self.player:getRecipeLocalisedName(player, recipe)}))
 	local production = 1
 	if recipe.production ~= nil then production = recipe.production end
 	self:addGuiLabel(guiRecipe, "production", self:formatPercent(production).."%", "helmod_label-right-40")
@@ -859,7 +859,7 @@ function PlannerResult.methods:addProductionLineRow(player, guiTable, element)
 	end
 	-- col recipe
 	local guiRecipe = self:addGuiFlowH(guiTable,"recipe"..element.id)
-	self:addSelectSpriteIconButton(guiRecipe, self:classname().."=change-tab=ID="..self.PRODUCTION_BLOCK_TAB.."="..element.id.."=", "recipe", element.name, element.name, nil, ({"tooltip.edit-block"}))
+	self:addSelectSpriteIconButton(guiRecipe, self:classname().."=change-tab=ID="..self.PRODUCTION_BLOCK_TAB.."="..element.id.."=", self.player:getRecipeIconType(player, element), element.name, element.name, nil, ({"tooltip.edit-block"}))
 
 	-- col energy
 	local guiEnergy = self:addGuiFlowH(guiTable,"energy"..element.id)
