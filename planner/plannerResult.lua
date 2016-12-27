@@ -445,7 +445,8 @@ function PlannerResult.methods:updateProductionBlock(player, item, item2, item3)
 	end
 	self:addGuiButton(menuPanel, "HMPlannerRecipeSelector=OPEN=ID=", blockId, "helmod_button-default", ({"helmod_result-panel.add-button-recipe"}))
 	self:addGuiButton(menuPanel, self:classname().."=change-tab=ID=", self.PRODUCTION_LINE_TAB, "helmod_button-default", ({"helmod_result-panel.back-button-production-line"}))
-
+	self:addGuiButton(menuPanel, "HMPlannerPinTab=OPEN=ID=", blockId, "helmod_button-default", ({"helmod_result-panel.tab-button-pin"}))
+	
 	local countRecipes = self.model:countBlockRecipes(player, blockId)
 	-- production block result
 	if countRecipes > 0 then

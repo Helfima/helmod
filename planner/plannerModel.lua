@@ -511,7 +511,7 @@ function PlannerModel.methods:setBeacon(player, item, key, name)
 			self:setDefaultRecipeBeacon(player, key, beacon.name)
 
 			object.beacon.name = beacon.name
-			object.beacon.type = beacon.type
+			--object.beacon.type = beacon.type
 			-- copy the default parameters
 			object.beacon.energy_nominal = self.player:getItemProperty(beacon.name, "energy_usage")
 			object.beacon.module_slots = self.player:getItemProperty(beacon.name, "module_slots")
@@ -607,7 +607,7 @@ function PlannerModel.methods:setFactory(player, item, key, name)
 			self:setDefaultRecipeFactory(player, key, factory.name)
 
 			object.factory.name = factory.name
-			object.factory.type = factory.type
+			--object.factory.type = factory.type
 			object.factory.energy_nominal = self.player:getItemProperty(factory.name, "energy_usage")
 			
 			object.factory.module_slots = self.player:getItemProperty(factory.name, "module_slots")

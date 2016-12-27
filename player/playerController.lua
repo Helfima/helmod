@@ -615,6 +615,7 @@ end
 -- @return #string localised name
 --
 function PlayerController.methods:getLocalisedName(player, element)
+	Logging:debug("PlayerController:getLocalisedName(player, element)", player, element)
 	local globalSettings = self:getGlobal(player, "settings")
 	if globalSettings.real_name == true then
 		return element.name
@@ -648,8 +649,9 @@ end
 -- @return #string localised name
 --
 function PlayerController.methods:getRecipeLocalisedName(player, recipe)
+	local globalSettings = self:getGlobal(player, "settings")
 	local _recipe = self:getRecipe(player, recipe.name)
-	if _recipe ~= nil then
+	if _recipe ~= nil and globalSettings.real_name ~= true then
 		return _recipe.localised_name
 	end
 	return recipe.name

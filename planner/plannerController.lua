@@ -6,6 +6,7 @@ require "planner/plannerRecipeSelector"
 require "planner/plannerRecipeEdition"
 require "planner/plannerProductEdition"
 require "planner/plannerResourceEdition"
+require "planner/plannerPinTab"
 
 
 PLANNER_COMMAND = "helmod_planner-command"
@@ -32,6 +33,7 @@ function PlannerController.methods:init(parent)
 	self.model = PlannerModel:new(self)
 
 	self.locate = "center"
+	self.pinLocate = "left"
 end
 
 -------------------------------------------------------------------------------
@@ -178,6 +180,8 @@ function PlannerController.methods:main(player)
 
 		self.controllers["product-edition"] = PlannerProductEdition:new(self)
 
+		self.controllers["pin-tab"] = PlannerPinTab:new(self)
+
 	end
 end
 
@@ -197,6 +201,22 @@ function PlannerController.methods:getMainPanel(player)
 	end
 	return self:addGuiFlowH(guiMain, "helmod_planner_main", "helmod_flow_main_"..displaySize)
 	--return self:addGuiFrameH(guiMain, "helmod_planner_main", "helmod_frame_main_"..displaySize)
+end
+
+-------------------------------------------------------------------------------
+-- Get or create pin tab panel
+--
+-- @function [parent=#PlannerController] getPinTabPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerController.methods:getPinTabPanel(player)
+	Logging:debug("PlannerController:getPinTabPanel():",displaySize)
+	local guiMain = player.gui[self.pinLocate]
+	if guiMain["helmod_planner_pin_tab"] ~= nil and guiMain["helmod_planner_pin_tab"].valid then
+		return guiMain["helmod_planner_pin_tab"]
+	end
+	return self:addGuiFlowH(guiMain, "helmod_planner_pin_tab", "helmod_flow_resize_row_width")
 end
 
 -------------------------------------------------------------------------------

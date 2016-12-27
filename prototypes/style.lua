@@ -1013,6 +1013,20 @@ default_gui["helmod_scroll_block_element_1680x1050"] = {
 }
 
 -------------------------------------------------------------------------------
+-- Style of block pin tab
+--
+-- @field [parent=#Scroll] block__pin_tab
+
+default_gui["helmod_scroll_block_pin_tab"] = {
+	type = "scroll_pane_style",
+	parent = "scroll_pane_style",
+	minimal_width = 350,
+	maximal_width = 350,
+	minimal_height = 72,
+	maximal_height = 500
+}
+
+-------------------------------------------------------------------------------
 -- Style of recipe module list
 --
 -- @field [parent=#Scroll] recipe_module_list

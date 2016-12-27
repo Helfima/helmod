@@ -12,7 +12,7 @@ require "player.playerController"
 -- erro=1
 -- nothing=0
 
-Logging:new(0)
+Logging:new(3)
 Logging.console = false
 
 -------------------------------------------------------------------------------
@@ -23,7 +23,7 @@ Logging.console = false
 
 helmod = {
 	name = "helmod",
-	version = "0.2.21"
+	version = "0.2.22"
 }
 
 -------------------------------------------------------------------------------
@@ -69,6 +69,11 @@ function helmod:on_configuration_changed(data)
 		-- Upgrade 0.2.21
 		if old_version ~= nil and old_version < "0.2.21" then
 			helmod:upgrade_0_2_21()
+		end
+
+		-- Upgrade 0.2.22
+		if old_version ~= nil and old_version < "0.2.22" then
+			helmod:upgrade_0_2_22()
 		end
 
 		if global["HMModel"] ~= nil then
@@ -217,6 +222,7 @@ function helmod:upgrade_0_2_17()
 	end
 end
 
+
 -------------------------------------------------------------------------------
 -- Upgrade 0.2.21
 --
@@ -231,6 +237,32 @@ function helmod:upgrade_0_2_21()
 			if data.settings ~= nil then
 				data.settings.model_filter_factory = true
 				data.settings.model_filter_beacon = true
+			end
+		end
+	end
+end
+
+-------------------------------------------------------------------------------
+-- Upgrade 0.2.22
+--
+-- @function [parent=#helmod] upgrade_0_2_22
+--
+-- @param #table event
+--
+function helmod:upgrade_0_2_22()
+	if global["HMModel"] ~= nil then
+		for _,data in pairs(global["HMModel"]) do
+			-- boucle sur chaque player
+			if data.model ~= nil and data.model.blocks ~= nil then
+				--Logging:trace("helmod:upgrade_0_2_22()", data.model.blocks)
+				for _,block in pairs(data.model.blocks) do
+					for _,recipe in pairs(block.recipes) do
+						local factory = recipe.factory
+						if factory ~= nil then factory.type = "item" end
+						local beacon = recipe.beacon
+						if beacon ~= nil then beacon.type = "item" end
+					end
+				end
 			end
 		end
 	end
