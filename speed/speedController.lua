@@ -35,9 +35,9 @@ function SpeedController.methods:bindController(player)
 		local parentGui = self.parent:getGui(player)
 		if parentGui ~= nil then
 			local gui = parentGui.add({type="flow", name=self.names.command, direction="horizontal"})
-			gui.add({type="button", name=self.names.speedDown, caption=({self.names.speedDown}), style="helmod_button-small-bold-start"})
-			gui.add({type="button", name=self.names.speed, caption=({self.names.speed}), style="helmod_button-small-bold-middle"})
-			gui.add({type="button", name=self.names.speedUp, caption=({self.names.speedUp}), style="helmod_button-small-bold-end"})
+			gui.add({type="button", name=self.names.speedDown, caption=({self.names.speedDown}), style="helmod_button_small_bold_start"})
+			gui.add({type="button", name=self.names.speed, caption=({self.names.speed}), style="helmod_button_small_bold_middle"})
+			gui.add({type="button", name=self.names.speedUp, caption=({self.names.speedUp}), style="helmod_button_small_bold_end"})
 		end
 	end
 end

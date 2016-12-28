@@ -174,7 +174,7 @@ function PlannerResourceEdition.methods:updateObjectInfo(player, element, action
 		end
 
 		local tablePanel = self:addGuiTable(infoPanel,"table-input",2)
-		self:addSpriteIconButton(tablePanel, "item", self.player:getIconType(resource), resource.name)
+		self:addGuiButtonSprite(tablePanel, "item", self.player:getIconType(resource), resource.name)
 		if _resource == nil then
 			self:addGuiLabel(tablePanel, "label", resource.name)
 		else

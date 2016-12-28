@@ -117,11 +117,11 @@ function ElementGui.methods:addGuiButton(parent, action, key, style, caption, to
 	end)
 	if not ok then
 		Logging:error("ElementGui:addGuiButton", action, key, style, err)
-		options.style = "helmod_button-default"
+		options.style = "helmod_button_default"
 		if (type(caption) == "boolean") then
 			Logging:error("ElementGui:addGuiButton - caption is a boolean")
 		elseif caption ~= nil then
-			options.caption = key.."("..caption..")"
+			options.caption = caption
 		else
 			options.caption = key
 		end
@@ -167,7 +167,7 @@ end
 -------------------------------------------------------------------------------
 -- Add a button element for item
 --
--- @function [parent=#ElementGui] addItemButton
+-- @function [parent=#ElementGui] addGuiButtonItem
 --
 -- @param #LuaGuiElement parent container for element
 -- @param #string action action name
@@ -176,15 +176,15 @@ end
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addItemButton(parent, action, key, caption)
-	Logging:trace("ElementGui:addItemButton", parent, action, key, caption)
+function ElementGui.methods:addGuiButtonItem(parent, action, key, caption)
+	Logging:trace("ElementGui:addGuiButtonItem", parent, action, key, caption)
 	return self:addGuiButton(parent, action, key, key, caption)
 end
 
 -------------------------------------------------------------------------------
 -- Add a icon button element for item
 --
--- @function [parent=#ElementGui] addIconButton
+-- @function [parent=#ElementGui] addGuiButtonIcon
 --
 -- @param #LuaGuiElement parent container for element
 -- @param #string action action name
@@ -194,33 +194,15 @@ end
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addIconButton(parent, action, type, key, caption)
-	Logging:trace("ElementGui:addIconButton", parent, action, type, key, caption)
+function ElementGui.methods:addGuiButtonIcon(parent, action, type, key, caption)
+	Logging:trace("ElementGui:addGuiButtonIcon", parent, action, type, key, caption)
 	return self:addGuiButton(parent, action, key, "helmod_button_"..type.."_"..key, caption)
-end
-
--------------------------------------------------------------------------------
--- Add a icon button element for item
---
--- @function [parent=#ElementGui] addMiniIconButton
---
--- @param #LuaGuiElement parent container for element
--- @param #string action action name
--- @param #string type type of item
--- @param #string key name of item
--- @param #string caption displayed text
---
--- @return #LuaGuiElement the LuaGuiElement added
---
-function ElementGui.methods:addMiniIconButton(parent, action, type, key, caption)
-	Logging:trace("ElementGui:addIconButton", parent, action, type, key, caption)
-	return self:addGuiButton(parent, action, key, "helmod_16_button_"..type.."_"..key, caption)
 end
 
 -------------------------------------------------------------------------------
 -- Add a sprite button element for item
 --
--- @function [parent=#ElementGui] addStyledSpriteButton
+-- @function [parent=#ElementGui] addGuiButtonSpriteStyled
 --
 -- @param #LuaGuiElement parent container for element
 -- @param #string style style of button
@@ -232,8 +214,8 @@ end
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addStyledSpriteButton(parent, style, action, type, key, caption, tooltip)
-	Logging:trace("ElementGui:addStyledSpriteButton", style,action, type, key, caption, tooltip)
+function ElementGui.methods:addGuiButtonSpriteStyled(parent, style, action, type, key, caption, tooltip)
+	Logging:trace("ElementGui:addGuiButtonSpriteStyled", style,action, type, key, caption, tooltip)
 	local options = {}
 	options.type = "sprite-button"
 	if key ~= nil then
@@ -255,11 +237,11 @@ function ElementGui.methods:addStyledSpriteButton(parent, style, action, type, k
 		button = parent.add(options)
 	end)
 	if not ok then
-		Logging:error("ElementGui:addStyledSpriteButton", action, type, key, err)
+		Logging:error("ElementGui:addGuiButtonSpriteStyled", action, type, key, err)
 		if parent[options.name] and parent[options.name].valid then
 			parent[options.name].destroy()
 		end
-		self:addIconButton(parent, action, type, key, caption)
+		self:addGuiButtonIcon(parent, action, type, key, caption)
 	end
 	return button
 end
@@ -267,7 +249,7 @@ end
 -------------------------------------------------------------------------------
 -- Add a smal sprite button element for item
 --
--- @function [parent=#ElementGui] addSmSpriteButton
+-- @function [parent=#ElementGui] addGuiButtonSpriteSm
 --
 -- @param #LuaGuiElement parent container for element
 -- @param #string action action name
@@ -278,15 +260,15 @@ end
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addSmSpriteButton(parent, action, type, key, caption, tooltip)
-	Logging:trace("ElementGui:addSmSpriteButton",action, type, key, caption, tooltip)
-	return self:addStyledSpriteButton(parent, "helmod_sm-button-icon", action, type, key, caption, tooltip)
+function ElementGui.methods:addGuiButtonSpriteSm(parent, action, type, key, caption, tooltip)
+	Logging:trace("ElementGui:addGuiButtonSpriteSm",action, type, key, caption, tooltip)
+	return self:addGuiButtonSpriteStyled(parent, "helmod_button_icon_sm", action, type, key, caption, tooltip)
 end
 
 -------------------------------------------------------------------------------
 -- Add a smal sprite button element for item selection
 --
--- @function [parent=#ElementGui] addSelectSmSpriteButton
+-- @function [parent=#ElementGui] addGuiButtonSelectSpriteSm
 --
 -- @param #LuaGuiElement parent container for element
 -- @param #string action action name
@@ -294,18 +276,23 @@ end
 -- @param #string key name of item
 -- @param #string caption displayed text
 -- @param #string tooltip displayed text
+-- @param #string color background color
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addSelectSmSpriteButton(parent, action, type, key, caption, tooltip)
-	Logging:trace("ElementGui:addSmSpriteButton",action, type, key, caption, tooltip)
-	return self:addStyledSpriteButton(parent, "helmod_sm-select-button-icon", action, type, key, caption, tooltip)
+function ElementGui.methods:addGuiButtonSelectSpriteSm(parent, action, type, key, caption, tooltip, color)
+	Logging:trace("ElementGui:addGuiButtonSelectSpriteSm",action, type, key, caption, tooltip, color)
+	local style = "helmod_button_select_icon_sm"
+	if color == "red" then style = "helmod_button_select_icon_sm_red" end
+	if color == "yellow" then style = "helmod_button_select_icon_sm_yellow" end
+	if color == "green" then style = "helmod_button_select_icon_sm_green" end
+	return self:addGuiButtonSpriteStyled(parent, "helmod_button_select_icon_sm", action, type, key, caption, tooltip, color)
 end
 
 -------------------------------------------------------------------------------
 -- Add a normal sprite button element for item
 --
--- @function [parent=#ElementGui] addSpriteIconButton
+-- @function [parent=#ElementGui] addGuiButtonSprite
 --
 -- @param #LuaGuiElement parent container for element
 -- @param #string action action name
@@ -316,39 +303,39 @@ end
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addSpriteIconButton(parent, action, type, key, caption, tooltip)
-	Logging:trace("ElementGui:addSelectSpriteIconButton",action, type, key, caption, tooltip)
-	return self:addStyledSpriteButton(parent, "helmod_button-icon", action, type, key, caption, tooltip)
+function ElementGui.methods:addGuiButtonSprite(parent, action, type, key, caption, tooltip)
+	Logging:debug("ElementGui:addGuiButtonSprite",action, type, key, caption, tooltip)
+	return self:addGuiButtonSpriteStyled(parent, "helmod_button_icon", action, type, key, caption, tooltip)
 end
 
 -------------------------------------------------------------------------------
 -- Add a sprite button element for item selection
 --
--- @function [parent=#ElementGui] addSelectSpriteIconButton
+-- @function [parent=#ElementGui] addGuiButtonSelectSprite
 --
 -- @param #LuaGuiElement parent container for element
 -- @param #string action action name
 -- @param #string type type of item
 -- @param #string key name of item
 -- @param #string caption displayed text
--- @param #string color background color
 -- @param #string tooltip displayed text
+-- @param #string color background color
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addSelectSpriteIconButton(parent, action, type, key, caption, color, tooltip)
-	Logging:trace("ElementGui:addSelectSpriteIconButton",action, type, key, caption, color, tooltip)
-	local style = "helmod_select-button-icon"
-	if color == "red" then style = "helmod_select-button-icon-red" end
-	if color == "yellow" then style = "helmod_select-button-icon-yellow" end
-	if color == "green" then style = "helmod_select-button-icon-green" end
-	return self:addStyledSpriteButton(parent, style, action, type, key, caption, tooltip)
+function ElementGui.methods:addGuiButtonSelectSprite(parent, action, type, key, caption, tooltip, color)
+	Logging:trace("ElementGui:addGuiButtonSelectSprite",action, type, key, caption, tooltip, color)
+	local style = "helmod_button_select_icon"
+	if color == "red" then style = "helmod_button_select_icon_red" end
+	if color == "yellow" then style = "helmod_button_select_icon_yellow" end
+	if color == "green" then style = "helmod_button_select_icon_green" end
+	return self:addGuiButtonSpriteStyled(parent, style, action, type, key, caption, tooltip)
 end
 
 -------------------------------------------------------------------------------
 -- Add a big sprite button element for item
 --
--- @function [parent=#ElementGui] addXxlSpriteIconButton
+-- @function [parent=#ElementGui] addGuiButtonSpriteXxl
 --
 -- @param #LuaGuiElement parent container for element
 -- @param #string action action name
@@ -359,33 +346,33 @@ end
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addXxlSpriteIconButton(parent, action, type, key, caption, tooltip)
-	Logging:trace("ElementGui:addXxlSpriteButton",action, type, key, caption, tooltip)
-	return self:addStyledSpriteButton(parent, "helmod_xxl-button-icon", action, type, key, caption, tooltip)
+function ElementGui.methods:addGuiButtonSpriteXxl(parent, action, type, key, caption, tooltip)
+	Logging:trace("ElementGui:addGuiButtonSpriteXxl",action, type, key, caption, tooltip)
+	return self:addGuiButtonSpriteStyled(parent, "helmod_button_icon_xxl", action, type, key, caption, tooltip)
 end
 
 -------------------------------------------------------------------------------
 -- Add a big sprite button element for item selection
 --
--- @function [parent=#ElementGui] addXxlSelectSpriteIconButton
+-- @function [parent=#ElementGui] addGuiButtonSelectSpriteXxl
 --
 -- @param #LuaGuiElement parent container for element
 -- @param #string action action name
 -- @param #string type type of item
 -- @param #string key name of item
 -- @param #string caption displayed text
--- @param #string color background color
 -- @param #string tooltip displayed text
+-- @param #string color background color
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addXxlSelectSpriteIconButton(parent, action, type, key, caption, color, tooltip)
-	Logging:trace("ElementGui:addXxlSelectSpriteIconButton",action, type, key, caption, color, tooltip)
-	local style = "helmod_xxl-select-button-icon"
-	if color == "red" then style = "helmod_xxl-select-button-icon-red" end
-	if color == "yellow" then style = "helmod_xxl-select-button-icon-yellow" end
-	if color == "green" then style = "helmod_xxl-select-button-icon-green" end
-	return self:addStyledSpriteButton(parent, style, action, type, key, caption, tooltip)
+function ElementGui.methods:addGuiButtonSelectSpriteXxl(parent, action, type, key, caption, tooltip, color)
+	Logging:trace("ElementGui:addGuiButtonSelectSpriteXxl",action, type, key, caption, tooltip, color)
+	local style = "helmod_button_select_icon_xxl"
+	if color == "red" then style = "helmod_button_select_icon_xxl_red" end
+	if color == "yellow" then style = "helmod_button_select_icon_xxl_yellow" end
+	if color == "green" then style = "helmod_button_select_icon_xxl_green" end
+	return self:addGuiButtonSpriteStyled(parent, style, action, type, key, caption, tooltip)
 end
 
 -------------------------------------------------------------------------------

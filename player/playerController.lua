@@ -172,6 +172,7 @@ function PlayerController.methods:getDefaultSettings()
 		display_data_col_index = false,
 		display_data_col_level = false,
 		display_data_col_weight = false,
+		display_pin_beacon = false,
 		model_auto_compute = false,
 		model_loop_limit = 1000,
 		model_filter_factory = true,
@@ -199,6 +200,7 @@ end
 -- @function [parent=#PlayerController] getGlobalSettings
 --
 -- @param #LuaPlayer player
+-- @param #string property
 --
 function PlayerController.methods:getGlobalSettings(player, property)
 	local settings = self:getGlobal(player, "settings")
@@ -529,6 +531,7 @@ end
 -- @return #string recipe type
 --
 function PlayerController.methods:getIconType(element)
+	Logging:debug("PlayerController:getIconType(element)", element)
 	local item = self:getItemPrototype(element.name)
 	if item ~= nil then
 		return "item"

@@ -158,9 +158,9 @@ function PlannerProductEdition.methods:updateInfo(player, element, action, item,
 
 	if model.blocks[item] ~= nil then
 		local product = nil
-		for _, elment in pairs(model.blocks[item].products) do
-			if elment.name == item2 then
-				product = elment
+		for _, element in pairs(model.blocks[item].products) do
+			if element.name == item2 then
+				product = element
 			end
 		end
 
@@ -170,14 +170,14 @@ function PlannerProductEdition.methods:updateInfo(player, element, action, item,
 			end
 
 			local tablePanel = self:addGuiTable(infoPanel,"table-header",2)
-			self:addSpriteIconButton(tablePanel, "product", self.player:getIconType(player, product), product.name)
-			self:addGuiLabel(tablePanel, "product-label", product.name)
+			self:addGuiButtonSprite(tablePanel, "product", self.player:getIconType(product), product.name)
+			self:addGuiLabel(tablePanel, "product-label", self.player:getLocalisedName(player, product))
 			
 			self:addGuiLabel(tablePanel, "quantity-label", ({"helmod_common.quantity"}))
 			self:addGuiText(tablePanel, "quantity", product.count)
 
-			self:addGuiButton(tablePanel, self:classname().."=product-update=ID="..item.."=", product.name, "helmod_button-default", ({"helmod_button.save"}))
-			self:addGuiButton(tablePanel, self:classname().."=CLOSE=ID="..item.."=", product.name, "helmod_button-default", ({"helmod_button.close"}))
+			self:addGuiButton(tablePanel, self:classname().."=product-update=ID="..item.."=", product.name, "helmod_button_default", ({"helmod_button.save"}))
+			self:addGuiButton(tablePanel, self:classname().."=CLOSE=ID="..item.."=", product.name, "helmod_button_default", ({"helmod_button.close"}))
 		end
 	end
 end

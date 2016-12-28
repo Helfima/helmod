@@ -466,7 +466,7 @@ function PlannerAbstractEdition.methods:updateFactoryInfo(player, element, actio
 		local headerPanel = self:addGuiTable(infoPanel,"table-header",2)
 		local tooltip = ({"tooltip.selector-module"})
 		if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
-		self:addSelectSpriteIconButton(headerPanel, self:classname().."=change-panel=ID="..item.."="..object.name.."=", self.player:getIconType(factory), factory.name, factory.name, nil, tooltip)
+		self:addGuiButtonSelectSprite(headerPanel, self:classname().."=change-panel=ID="..item.."="..object.name.."=", self.player:getIconType(factory), factory.name, factory.name, tooltip)
 		if _factory == nil then
 			self:addGuiLabel(headerPanel, "label", factory.name)
 		else
@@ -529,7 +529,7 @@ function PlannerAbstractEdition.methods:updateFactoryModulesSelector(player, ele
 	end
 
 	if selectorPanel["modules"] == nil then
-		local tableModulesPanel = self:addGuiTable(selectorPanel,"modules",4)
+		local tableModulesPanel = self:addGuiTable(selectorPanel,"modules",5)
 		local factory = object.factory
 		for k, module in pairs(self.player:getModules()) do
 			local allowed = true
@@ -546,9 +546,9 @@ function PlannerAbstractEdition.methods:updateFactoryModulesSelector(player, ele
 			local tooltip = ({"tooltip.module-description" , module.localised_name, consumption, speed, productivity, pollution})
 			if allowed == false then
 				tooltip = ({"item-limitation."..module.limitation_message_key})
-				self:addSelectSpriteIconButton(tableModulesPanel, self:classname().."=do-nothing=ID="..item.."="..object.name.."=", "item", module.name, module.name, "red", tooltip)
+				self:addGuiButtonSelectSprite(tableModulesPanel, self:classname().."=do-nothing=ID="..item.."="..object.name.."=", "item", module.name, module.name, tooltip, "red")
 			else
-				self:addSelectSpriteIconButton(tableModulesPanel, self:classname().."=factory-module-add=ID="..item.."="..object.name.."=", "item", module.name, module.name, nil, tooltip)
+				self:addGuiButtonSelectSprite(tableModulesPanel, self:classname().."=factory-module-add=ID="..item.."="..object.name.."=", "item", module.name, module.name, tooltip)
 			end
 		end
 	end
@@ -589,7 +589,7 @@ function PlannerAbstractEdition.methods:updateFactoryActivedModules(player, elem
 			tooltip = ({"tooltip.module-description" , _module.localised_name, consumption, speed, productivity, pollution})
 		end
 		for i = 1, count, 1 do
-			self:addSelectSpriteIconButton(currentTableModulesPanel, self:classname().."=factory-module-remove=ID="..item.."="..object.name.."="..module.."="..i, "item", module, module, nil, tooltip)
+			self:addGuiButtonSelectSprite(currentTableModulesPanel, self:classname().."=factory-module-remove=ID="..item.."="..object.name.."="..module.."="..i, "item", module, module, tooltip)
 		end
 	end
 end
@@ -671,7 +671,7 @@ function PlannerAbstractEdition.methods:updateFactorySelector(player, element, a
 			if globalSettings.real_name == true then
 				localised_name = factory.name
 			end
-			self:addSpriteIconButton(tablePanel, self:classname().."=factory-select=ID="..item.."="..object.name.."=", "item", factory.name, factory.name, localised_name)
+			self:addGuiButtonSelectSprite(tablePanel, self:classname().."=factory-select=ID="..item.."="..object.name.."=", "item", factory.name, factory.name, localised_name)
 		end
 	end
 end
@@ -705,7 +705,7 @@ function PlannerAbstractEdition.methods:updateBeaconInfo(player, element, action
 		local headerPanel = self:addGuiTable(infoPanel,"table-header",2)
 		local tooltip = ({"tooltip.selector-module"})
 		if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
-		self:addSelectSpriteIconButton(headerPanel, self:classname().."=change-panel=ID="..item.."="..object.name.."=", self.player:getIconType(beacon), beacon.name, beacon.name, nil, tooltip)
+		self:addGuiButtonSelectSprite(headerPanel, self:classname().."=change-panel=ID="..item.."="..object.name.."=", self.player:getIconType(beacon), beacon.name, beacon.name, tooltip)
 		if _beacon == nil then
 			self:addGuiLabel(headerPanel, "label", beacon.name)
 		else
@@ -770,7 +770,7 @@ function PlannerAbstractEdition.methods:updateBeaconActivedModules(player, eleme
 		end
 
 		for i = 1, count, 1 do
-			self:addSelectSpriteIconButton(currentTableModulesPanel, self:classname().."=beacon-module-remove=ID="..item.."="..object.name.."="..module.."="..i, "item", module, module, nil, tooltip)
+			self:addGuiButtonSelectSprite(currentTableModulesPanel, self:classname().."=beacon-module-remove=ID="..item.."="..object.name.."="..module.."="..i, "item", module, module, tooltip)
 		end
 	end
 end
@@ -798,7 +798,7 @@ function PlannerAbstractEdition.methods:updateBeaconModulesSelector(player, elem
 	end
 
 	if selectorPanel["modules"] == nil then
-		local tableModulesPanel = self:addGuiTable(selectorPanel,"modules",4)
+		local tableModulesPanel = self:addGuiTable(selectorPanel,"modules",5)
 		for k, module in pairs(self.player:getModules()) do
 			local allowed = true
 			local consumption = self:formatPercent(self.player:getModuleBonus(module.name, "consumption"))
@@ -811,9 +811,9 @@ function PlannerAbstractEdition.methods:updateBeaconModulesSelector(player, elem
 			local tooltip = ({"tooltip.module-description" , module.localised_name, consumption, speed, productivity, pollution})
 			if allowed == false then
 				tooltip = ({"item-limitation.item-not-allowed-in-this-container-item"})
-				self:addSelectSpriteIconButton(tableModulesPanel, self:classname().."=do-nothing=ID="..item.."="..object.name.."=", "item", module.name, module.name, "red", tooltip)
+				self:addGuiButtonSelectSprite(tableModulesPanel, self:classname().."=do-nothing=ID="..item.."="..object.name.."=", "item", module.name, module.name, tooltip, "red")
 			else
-				self:addSelectSpriteIconButton(tableModulesPanel, self:classname().."=beacon-module-add=ID="..item.."="..object.name.."=", "item", module.name, module.name, nil, tooltip)
+				self:addGuiButtonSelectSprite(tableModulesPanel, self:classname().."=beacon-module-add=ID="..item.."="..object.name.."=", "item", module.name, module.name, tooltip)
 			end
 		end
 	end
@@ -863,7 +863,7 @@ function PlannerAbstractEdition.methods:updateBeaconSelector(player, element, ac
 			if globalSettings.real_name == true then
 				localised_name = beacon.name
 			end
-			self:addSpriteIconButton(tablePanel, self:classname().."=beacon-select=ID="..item.."="..object.name.."=", "item", beacon.name, beacon.name, localised_name)
+			self:addGuiButtonSelectSprite(tablePanel, self:classname().."=beacon-select=ID="..item.."="..object.name.."=", "item", beacon.name, beacon.name, localised_name)
 		end
 	end
 end

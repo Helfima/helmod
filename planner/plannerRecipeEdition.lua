@@ -239,7 +239,7 @@ function PlannerRecipeEdition.methods:updateObjectInfo(player, element, action, 
 			end
 
 			local tablePanel = self:addGuiTable(infoPanel,"table-input",2)
-			self:addSpriteIconButton(tablePanel, "recipe", "recipe", recipe.name)
+			self:addGuiButtonSprite(tablePanel, "recipe", "recipe", recipe.name)
 			if _recipe == nil then
 				self:addGuiLabel(tablePanel, "label", recipe.name)
 			else
@@ -283,8 +283,15 @@ function PlannerRecipeEdition.methods:updateRecipeIngredients(player, element, a
 		end
 		local tablePanel= self:addGuiTable(ingredientsPanel, "table-ingredients", 6)
 		for key, ingredient in pairs(recipe.ingredients) do
-			self:addSpriteIconButton(tablePanel, "item=ID=", self.player:getIconType(ingredient), ingredient.name, ingredient.name, ({"tooltip.element-amount", ingredient.amount}))
-			self:addGuiLabel(tablePanel, ingredient.name, ingredient.amount)
+			local tooltip = nil
+			local localisedName = self.player:getLocalisedName(player, ingredient)
+			if ingredient.amount ~= nil then
+				tooltip = ({"tooltip.element-amount", localisedName, ingredient.amount})
+			else
+				tooltip = ({"tooltip.element-amount-probability", localisedName, ingredient.amount_min, ingredient.amount_max, ingredient.probability})
+			end
+			self:addGuiButtonSpriteSm(tablePanel, "item=ID=", self.player:getIconType(ingredient), ingredient.name, ingredient.name, tooltip)
+			self:addGuiLabel(tablePanel, ingredient.name, self.model:getElementAmount(ingredient), "helmod_label_sm")
 		end
 	end
 end
@@ -314,12 +321,15 @@ function PlannerRecipeEdition.methods:updateRecipeProducts(player, element, acti
 		end
 		local tablePanel= self:addGuiTable(productsPanel, "table-products", 6)
 		for key, product in pairs(recipe.products) do
+			local tooltip = nil
+			local localisedName = self.player:getLocalisedName(player, product)
 			if product.amount ~= nil then
-				self:addSpriteIconButton(tablePanel, "item=ID=", self.player:getIconType(product), product.name, product.name, ({"tooltip.element-amount", product.amount}))
+				tooltip = ({"tooltip.element-amount", localisedName, product.amount})
 			else
-				self:addSpriteIconButton(tablePanel, "item=ID=", self.player:getIconType(product), product.name, product.name, ({"tooltip.element-amount-probability", product.amount_min, product.amount_max, product.probability}))
+				tooltip = ({"tooltip.element-amount-probability", localisedName, product.amount_min, product.amount_max, product.probability})
 			end
-			self:addGuiLabel(tablePanel, product.name, self.model:getElementAmount(product))
+			self:addGuiButtonSpriteSm(tablePanel, "item=ID=", self.player:getIconType(product), product.name, product.name, tooltip)
+			self:addGuiLabel(tablePanel, product.name, self.model:getElementAmount(product), "helmod_label_sm")
 		end
 	end
 end

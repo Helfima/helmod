@@ -65,11 +65,42 @@ function layeredIcon (filename, size, scale, shift, position)
 		}
 	}
 end
-local corner_size = {3, 3}
+
 local default_gui = data.raw["gui-style"].default
-default_gui["helmod_button-default"] = {
+
+-------------------------------------------------------------------------------
+-- Style Textfield
+--
+-- @type Textfield
+--
+
+-------------------------------------------------------------------------------
+-- Style of default
+--
+-- @field [parent=#Textfield] default
+default_gui["helmod_textfield"] = {
+	type = "textfield_style",
+	parent = "textfield_style",
+	minimal_width = 70,
+	maximal_width = 70
+}
+
+
+-------------------------------------------------------------------------------
+-- Style Button
+--
+-- @type Button
+--
+
+-------------------------------------------------------------------------------
+-- Style of default
+--
+-- @field [parent=#Button] default
+
+local corner_size = {3, 3}
+default_gui["helmod_button_default"] = {
 	type = "button_style",
-	font = "helmod_font-normal",
+	font = "helmod_font_normal",
 	default_font_color={r=1, g=1, b=1},
 	align = "center",
 	top_padding = 2,
@@ -86,10 +117,15 @@ default_gui["helmod_button-default"] = {
 	pie_progress_color = {r=1, g=1, b=1}
 }
 
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] favicon
+
 local icon_corner_size = 0
 default_gui["helmod_icon"] = {
 	type = "button_style",
-	parent = "helmod_button-default",
+	parent = "helmod_button_default",
 	width = 32,
 	height = 32,
 	scalable = false,
@@ -99,133 +135,263 @@ default_gui["helmod_icon"] = {
 	disabled_graphical_set = monolithIcon("__helmod__/graphics/icons/helmod_icon.png", 32, 1, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true)
 }
 
-default_gui["helmod_button-icon-default"] = {
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] icon_default
+
+default_gui["helmod_button_icon_default"] = {
 	type = "button_style",
-	parent = "helmod_button-default",
+	parent = "helmod_button_default",
 	default_graphical_set = compositionIcon("__core__/graphics/gui.png", {icon_corner_size, icon_corner_size}, {3 - icon_corner_size, 3 - icon_corner_size}),
 	hovered_graphical_set = compositionIcon("__core__/graphics/gui.png", {icon_corner_size, icon_corner_size}, {3 - icon_corner_size, 11 - icon_corner_size}),
 	clicked_graphical_set = compositionIcon("__core__/graphics/gui.png", {icon_corner_size, icon_corner_size}, {3 - icon_corner_size, 43 - icon_corner_size}),
 	disabled_graphical_set = compositionIcon("__core__/graphics/gui.png", {icon_corner_size, icon_corner_size}, {3 - icon_corner_size, 19 - icon_corner_size}),
 }
 
-local normal_icon_size=36
-default_gui["helmod_button-icon"] = {
-	type = "button_style",
-	parent = "helmod_button-icon-default",
-	width = normal_icon_size,
-	height = normal_icon_size,
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] icon
 
-	scalable = false,
+local icon_sm_size=16
+local icon_sm_padding=1
+
+local icon_size=32
+local icon_padding=2
+
+local icon_xxl_size=64
+local icon_xxl_padding=2
+
+local monolith_size=36
+local monolith_scale=1
+
+default_gui["helmod_button_icon"] = {
+	type = "button_style",
+	parent = "helmod_button_icon_default",
+	width = icon_size + 2*icon_padding,
+	height = icon_size + 2*icon_padding,
+	top_padding = icon_padding,
+	right_padding = icon_padding,
+	bottom_padding = icon_padding,
+	left_padding = icon_padding,
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=0,y=60}, {top=0,right=0,bottom=0,left=0}, true),
+	scalable = false
 }
 
-default_gui["helmod_select-button-icon"] = {
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] select_icon
+
+default_gui["helmod_button_select_icon"] = {
 	type = "button_style",
-	parent = "helmod_button-icon",
-	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=0}, {top=0,right=0,bottom=0,left=0}, true),
-	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=148,y=0}, {top=0,right=0,bottom=0,left=0}, true),
-	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=184,y=0}, {top=0,right=0,bottom=0,left=0}, true),
-	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=0}, {top=0,right=0,bottom=0,left=0}, true)
+	parent = "helmod_button_icon",
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=0}, {top=0,right=0,bottom=0,left=0}, true)
 }
 
-default_gui["helmod_select-button-icon-red"] = {
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] select_icon_red
+
+default_gui["helmod_button_select_icon_red"] = {
 	type = "button_style",
-	parent = "helmod_button-icon",
-	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=36}, {top=0,right=0,bottom=0,left=0}, true),
-	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=148,y=36}, {top=0,right=0,bottom=0,left=0}, true),
-	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=184,y=36}, {top=0,right=0,bottom=0,left=0}, true),
-	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=36}, {top=0,right=0,bottom=0,left=0}, true)
+	parent = "helmod_button_icon",
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=36}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=36}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=36}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=36}, {top=0,right=0,bottom=0,left=0}, true)
 }
 
-default_gui["helmod_select-button-icon-yellow"] = {
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] select_icon_yellow
+
+default_gui["helmod_button_select_icon_yellow"] = {
 	type = "button_style",
-	parent = "helmod_button-icon",
-	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=72}, {top=0,right=0,bottom=0,left=0}, true),
-	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=148,y=72}, {top=0,right=0,bottom=0,left=0}, true),
-	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=184,y=72}, {top=0,right=0,bottom=0,left=0}, true),
-	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=72}, {top=0,right=0,bottom=0,left=0}, true)
+	parent = "helmod_button_icon",
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=72}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=72}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=72}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=72}, {top=0,right=0,bottom=0,left=0}, true)
 }
 
-default_gui["helmod_select-button-icon-green"] = {
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] select_icon_green
+
+default_gui["helmod_button_select_icon_green"] = {
 	type = "button_style",
-	parent = "helmod_button-icon",
-	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=108}, {top=0,right=0,bottom=0,left=0}, true),
-	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=148,y=108}, {top=0,right=0,bottom=0,left=0}, true),
-	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=184,y=108}, {top=0,right=0,bottom=0,left=0}, true),
-	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=108}, {top=0,right=0,bottom=0,left=0}, true)
+	parent = "helmod_button_icon",
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=108}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=108}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=108}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=108}, {top=0,right=0,bottom=0,left=0}, true)
 }
 
-local xxl_icon_size=68
-default_gui["helmod_xxl-button-icon"] = {
-	type = "button_style",
-	parent = "helmod_button-icon-default",
-	width = xxl_icon_size,
-	height = xxl_icon_size,
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] icon_xxl
 
-	scalable = false,
+default_gui["helmod_button_icon_xxl"] = {
+	type = "button_style",
+	parent = "helmod_button_icon_default",
+	width = icon_xxl_size + 2*icon_xxl_padding,
+	height = icon_xxl_size + 2*icon_xxl_padding,
+	top_padding = icon_xxl_padding,
+	right_padding = icon_xxl_padding,
+	bottom_padding = icon_xxl_padding,
+	left_padding = icon_xxl_padding,
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=0,y=60}, {top=0,right=0,bottom=0,left=0}, true),
+	scalable = false
 }
 
-default_gui["helmod_xxl-select-button-icon"] = {
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] select_icon_xxl
+
+default_gui["helmod_button_select_icon_xxl"] = {
 	type = "button_style",
-	parent = "helmod_xxl-button-icon",
-	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=0}, {top=0,right=0,bottom=0,left=0}, true),
-	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=148,y=0}, {top=0,right=0,bottom=0,left=0}, true),
-	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=184,y=0}, {top=0,right=0,bottom=0,left=0}, true),
-	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=0}, {top=0,right=0,bottom=0,left=0}, true)
+	parent = "helmod_button_icon_xxl",
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=0}, {top=0,right=0,bottom=0,left=0}, true)
 }
 
-default_gui["helmod_xxl-select-button-icon-red"] = {
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] select_icon_xxl_red
+
+default_gui["helmod_button_select_icon_xxl_red"] = {
 	type = "button_style",
-	parent = "helmod_xxl-button-icon",
-	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=36}, {top=0,right=0,bottom=0,left=0}, true),
-	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=148,y=36}, {top=0,right=0,bottom=0,left=0}, true),
-	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=184,y=36}, {top=0,right=0,bottom=0,left=0}, true),
-	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=36}, {top=0,right=0,bottom=0,left=0}, true)
+	parent = "helmod_button_icon_xxl",
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=36}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=36}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=36}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=36}, {top=0,right=0,bottom=0,left=0}, true)
 }
 
-default_gui["helmod_xxl-select-button-icon-yellow"] = {
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] select_icon_xxl_yellow
+
+default_gui["helmod_button_select_icon_xxl_yellow"] = {
 	type = "button_style",
-	parent = "helmod_xxl-button-icon",
-	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=72}, {top=0,right=0,bottom=0,left=0}, true),
-	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=148,y=72}, {top=0,right=0,bottom=0,left=0}, true),
-	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=184,y=72}, {top=0,right=0,bottom=0,left=0}, true),
-	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=72}, {top=0,right=0,bottom=0,left=0}, true)
+	parent = "helmod_button_icon_xxl",
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=72}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=72}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=72}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=72}, {top=0,right=0,bottom=0,left=0}, true)
 }
 
-default_gui["helmod_xxl-select-button-icon-green"] = {
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] select_icon_xxl_green
+
+default_gui["helmod_button_select_icon_xxl_green"] = {
 	type = "button_style",
-	parent = "helmod_xxl-button-icon",
-	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=108}, {top=0,right=0,bottom=0,left=0}, true),
-	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=148,y=108}, {top=0,right=0,bottom=0,left=0}, true),
-	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=184,y=108}, {top=0,right=0,bottom=0,left=0}, true),
-	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=108}, {top=0,right=0,bottom=0,left=0}, true)
+	parent = "helmod_button_icon_xxl",
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=108}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=108}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=108}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=108}, {top=0,right=0,bottom=0,left=0}, true)
 }
 
-local sm_icon_size=18
-default_gui["helmod_sm-button-icon"] = {
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] icon_sm
+
+default_gui["helmod_button_icon_sm"] = {
 	type = "button_style",
-	parent = "helmod_button-icon-default",
-	width = sm_icon_size,
-	height = sm_icon_size,
-	top_padding = 0,
-	right_padding = 0,
-	bottom_padding = 0,
-	left_padding = 0,
-	scalable = false,
+	parent = "helmod_button_icon_default",
+	width = icon_sm_size + 2*icon_sm_padding,
+	height = icon_sm_size + 2*icon_sm_padding,
+	top_padding = icon_sm_padding,
+	right_padding = icon_sm_padding,
+	bottom_padding = icon_sm_padding,
+	left_padding = icon_sm_padding,
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=0,y=60}, {top=0,right=0,bottom=0,left=0}, true),
+	scalable = false
 }
 
-default_gui["helmod_sm-select-button-icon"] = {
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] select_icon_sm
+
+default_gui["helmod_button_select_icon_sm"] = {
 	type = "button_style",
-	parent = "helmod_sm-button-icon",
-	default_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=0}, {top=0,right=0,bottom=0,left=0}, true),
-	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=148,y=0}, {top=0,right=0,bottom=0,left=0}, true),
-	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=184,y=0}, {top=0,right=0,bottom=0,left=0}, true),
-	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", 36, normal_icon_size/36, {0,0}, {x=111,y=0}, {top=0,right=0,bottom=0,left=0}, true)
+	parent = "helmod_button_icon_sm",
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=0}, {top=0,right=0,bottom=0,left=0}, true)
 }
 
-default_gui["helmod_button-small-bold"] = {
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] select_icon_sm_red
+
+default_gui["helmod_button_select_icon_sm_red"] = {
 	type = "button_style",
-	parent = "helmod_button-default",
-	font = "helmod_font-normal-bold",
+	parent = "helmod_button_icon_sm",
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=36}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=36}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=36}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=36}, {top=0,right=0,bottom=0,left=0}, true)
+}
+
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] select_icon_sm_yellow
+
+default_gui["helmod_button_select_icon_sm_yellow"] = {
+	type = "button_style",
+	parent = "helmod_button_icon_sm",
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=72}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=72}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=72}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=72}, {top=0,right=0,bottom=0,left=0}, true)
+}
+
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] select_icon_sm_green
+
+default_gui["helmod_button_select_icon_sm_green"] = {
+	type = "button_style",
+	parent = "helmod_button_icon_sm",
+	default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=108}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=108}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=108}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=108}, {top=0,right=0,bottom=0,left=0}, true)
+}
+
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] small_bold
+
+default_gui["helmod_button_small_bold"] = {
+	type = "button_style",
+	parent = "helmod_button_default",
+	font = "helmod_font_normal_bold",
 
 	minimal_width = 24,
 	height = 24,
@@ -236,10 +402,15 @@ default_gui["helmod_button-small-bold"] = {
 	left_padding = 2
 }
 
-default_gui["helmod_button-small-bold-start"] = {
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] small-bold-start
+
+default_gui["helmod_button_small_bold_start"] = {
 	type = "button_style",
-	parent = "helmod_button-default",
-	font = "helmod_font-normal-bold",
+	parent = "helmod_button_default",
+	font = "helmod_font_normal_bold",
 
 	width = 24,
 	height = 24,
@@ -250,10 +421,15 @@ default_gui["helmod_button-small-bold-start"] = {
 	left_padding = 2
 }
 
-default_gui["helmod_button-small-bold-middle"] = {
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] small-bold-middle
+
+default_gui["helmod_button_small_bold_middle"] = {
 	type = "button_style",
-	parent = "helmod_button-default",
-	font = "helmod_font-normal-bold",
+	parent = "helmod_button_default",
+	font = "helmod_font_normal_bold",
 
 	width = 24,
 	height = 24,
@@ -264,10 +440,10 @@ default_gui["helmod_button-small-bold-middle"] = {
 	left_padding = 0
 }
 
-default_gui["helmod_button-small-bold-end"] = {
+default_gui["helmod_button_small_bold_end"] = {
 	type = "button_style",
-	parent = "helmod_button-default",
-	font = "helmod_font-normal-bold",
+	parent = "helmod_button_default",
+	font = "helmod_font_normal_bold",
 
 	width = 24,
 	height = 24,
@@ -278,101 +454,89 @@ default_gui["helmod_button-small-bold-end"] = {
 	left_padding = 0
 }
 
-default_gui["helmod_textfield"] = {
-	type = "textfield_style",
-	parent = "textfield_style",
-	minimal_width = 70,
-	maximal_width = 70
+-------------------------------------------------------------------------------
+-- Style label
+--
+-- @type Label
+--
+
+-------------------------------------------------------------------------------
+-- Style of default
+--
+-- @field [parent=#Label] default
+
+default_gui["helmod_label_default"] = {
+	type = "label_style",
+	parent = "label_style",
+	top_padding = 2,
+	right_padding = 2,
+	bottom_padding = 2,
+	left_padding = 2
 }
 
-default_gui["helmod_label-right"] = {
+-------------------------------------------------------------------------------
+-- Style of title frame
+--
+-- @field [parent=#Label] title_frame
+
+default_gui["helmod_label_title_frame"] = {
+	type = "label_style",
+	parent = "helmod_label_default",
+	font = "helmod_font_title_frame"
+}
+
+-------------------------------------------------------------------------------
+-- Style of time
+--
+-- @field [parent=#Label] time
+
+default_gui["helmod_label_time"] = {
+	type = "label_style",
+	parent = "label_style",
+	top_padding = 4,
+	right_padding = 2,
+	bottom_padding = 2,
+	left_padding = 2
+}
+
+-------------------------------------------------------------------------------
+-- Style of label
+--
+-- @field [parent=#Label] sm
+
+default_gui["helmod_label_sm"] = {
+	type = "label_style",
+	font = "helmod_font_normal",
+	align = "right",
+	top_padding = 0,
+	right_padding = 1,
+	bottom_padding = 1,
+	left_padding = 0
+}
+
+-------------------------------------------------------------------------------
+-- Style of label
+--
+-- @field [parent=#Label] right
+
+default_gui["helmod_label_right"] = {
 	type = "label_style",
 	font = "default",
 	align = "right"
 }
 
-default_gui["helmod_label-right-20"] = {
-	type = "label_style",
-	font = "default",
-	align = "right",
-	minimal_width = 20
-}
+-------------------------------------------------------------------------------
+-- Style of default
+--
+-- @field [parent=#Label] right_xx
 
-default_gui["helmod_label-right-30"] = {
-	type = "label_style",
-	font = "default",
-	align = "right",
-	minimal_width = 30
-}
-
-default_gui["helmod_label-right-40"] = {
-	type = "label_style",
-	font = "default",
-	align = "right",
-	minimal_width = 40
-}
-
-default_gui["helmod_label-right-50"] = {
-	type = "label_style",
-	font = "default",
-	align = "right",
-	minimal_width = 50
-}
-
-default_gui["helmod_label-right-60"] = {
-	type = "label_style",
-	font = "default",
-	align = "right",
-	minimal_width = 60
-}
-
-default_gui["helmod_label-right-70"] = {
-	type = "label_style",
-	font = "default",
-	align = "right",
-	minimal_width = 70
-}
-
-default_gui["helmod_label-right-80"] = {
-	type = "label_style",
-	font = "default",
-	align = "right",
-	minimal_width = 80
-}
-
-default_gui["helmod_label-right-90"] = {
-	type = "label_style",
-	font = "default",
-	align = "right",
-	minimal_width = 90
-}
-
-default_gui["helmod_label-right-100"] = {
-	type = "label_style",
-	font = "default",
-	align = "right",
-	minimal_width = 100
-}
-
-default_gui["helmod_table-odd"] = {
-	type = "table_style",
-	-- default orange with alfa
-	hovered_row_color = {r=0.98, g=0.66, b=0.22, a=0.7},
-	cell_padding = 1,
-	horizontal_spacing = 10,
-	vertical_spacing = 2,
-	horizontal_padding = 1,
-	vertical_padding = 1,
-	odd_row_graphical_set =
-	{
-		type = "composition",
-		filename = "__core__/graphics/gui.png",
-		priority = "extra-high-no-scale",
-		corner_size = {0, 0},
-		position = {78, 18},
-		opacity = 0.7
+for w=20, 100, 10 do
+	default_gui["helmod_label_right_"..w] = {
+		type = "label_style",
+		parent = "helmod_label_right",
+		minimal_width = w
 	}
-}
+end
 
 -------------------------------------------------------------------------------
 -- Style table
@@ -444,48 +608,28 @@ default_gui["helmod_table_recipe_selector"] = {
 }
 
 -------------------------------------------------------------------------------
--- Style label
+-- Style of recipe selector
 --
--- @type Label
---
+-- @field [parent=#Table] odd
 
--------------------------------------------------------------------------------
--- Style of default
---
--- @field [parent=#Label] default
-
-default_gui["helmod_label_default"] = {
-	type = "label_style",
-	parent = "label_style",
-	top_padding = 2,
-	right_padding = 2,
-	bottom_padding = 2,
-	left_padding = 2
-}
-
--------------------------------------------------------------------------------
--- Style of title frame
---
--- @field [parent=#Label] title_frame
-
-default_gui["helmod_label_title_frame"] = {
-	type = "label_style",
-	parent = "helmod_label_default",
-	font = "helmod_font_title_frame"
-}
-
--------------------------------------------------------------------------------
--- Style of time
---
--- @field [parent=#Label] time
-
-default_gui["helmod_label_time"] = {
-	type = "label_style",
-	parent = "label_style",
-	top_padding = 4,
-	right_padding = 2,
-	bottom_padding = 2,
-	left_padding = 2
+default_gui["helmod_table-odd"] = {
+	type = "table_style",
+	-- default orange with alfa
+	hovered_row_color = {r=0.98, g=0.66, b=0.22, a=0.7},
+	cell_padding = 1,
+	horizontal_spacing = 3,
+	vertical_spacing = 2,
+	horizontal_padding = 1,
+	vertical_padding = 1,
+	odd_row_graphical_set =
+	{
+		type = "composition",
+		filename = "__core__/graphics/gui.png",
+		priority = "extra-high-no-scale",
+		corner_size = {0, 0},
+		position = {78, 18},
+		opacity = 0.7
+	}
 }
 
 -------------------------------------------------------------------------------
@@ -1015,13 +1159,13 @@ default_gui["helmod_scroll_block_element_1680x1050"] = {
 -------------------------------------------------------------------------------
 -- Style of block pin tab
 --
--- @field [parent=#Scroll] block__pin_tab
+-- @field [parent=#Scroll] block_pin_tab
 
 default_gui["helmod_scroll_block_pin_tab"] = {
 	type = "scroll_pane_style",
 	parent = "scroll_pane_style",
-	minimal_width = 350,
-	maximal_width = 350,
+	minimal_width = 220,
+	maximal_width = 450,
 	minimal_height = 72,
 	maximal_height = 500
 }
@@ -1034,8 +1178,8 @@ default_gui["helmod_scroll_block_pin_tab"] = {
 default_gui["helmod_scroll_recipe_module_list"] = {
 	type = "scroll_pane_style",
 	parent = "scroll_pane_style",
-	minimal_width = 180,
-	maximal_width = 180,
+	minimal_width = 210,
+	maximal_width = 210,
 	minimal_height = 197,
 	maximal_height = 197
 }

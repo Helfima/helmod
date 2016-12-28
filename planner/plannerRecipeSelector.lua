@@ -317,12 +317,8 @@ function PlannerRecipeSelector.methods:updateItemList(player, element, action, i
 		-- boucle subgroup
 		local guiRecipeSubgroup = self:addGuiTable(guiRecipeSelectorList, "recipe-table-"..key, 10, "helmod_table_recipe_selector")
 		for key, recipe in spairs(subgroup,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
-			local localised_name = recipe.localised_name
-			if globalSettings.real_name == true then
-				localised_name = recipe.name
-			end
 			Logging:trace("PlannerRecipeSelector:on_update",recipe.name)
-			self:addSelectSpriteIconButton(guiRecipeSubgroup, self:classname().."=recipe-select=ID=", self.player:getRecipeIconType(player, recipe), recipe.name, recipe.name, nil, localised_name)
+			self:addGuiButtonSelectSprite(guiRecipeSubgroup, self:classname().."=recipe-select=ID=", self.player:getRecipeIconType(player, recipe), recipe.name, recipe.name, self.player:getRecipeLocalisedName(player, recipe))
 		end
 	end
 
@@ -360,7 +356,7 @@ function PlannerRecipeSelector.methods:updateGroupSelector(player, element, acti
 		end
 		local tooltip = group
 		-- ajoute les icons de groupe
-		local action = self:addXxlSelectSpriteIconButton(guiRecipeSelectorGroups, self:classname().."=recipe-group=ID=", "item-group", group, group, color, tooltip)
+		local action = self:addGuiButtonSelectSpriteXxl(guiRecipeSelectorGroups, self:classname().."=recipe-group=ID=", "item-group", group, group, tooltip, color)
 	end
 
 end

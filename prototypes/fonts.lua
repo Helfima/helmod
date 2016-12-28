@@ -10,7 +10,7 @@ data:extend(
     type = "font",
     name = "helmod_font_bold",
     from = "default-bold",
-    size = 10
+    size = 12
   },
   {
     type = "font",
@@ -23,31 +23,31 @@ data:extend(
   
   {
     type = "font",
-    name = "helmod_font-small",
+    name = "helmod_font_small",
     from = "default",
     size = 10
   },
   {
     type = "font",
-    name = "helmod_font-normal",
+    name = "helmod_font_normal",
     from = "default",
     size = 12
   },
   {
     type = "font",
-    name = "helmod_font-big",
+    name = "helmod_font_big",
     from = "default",
     size = 14
   },
   {
     type = "font",
-    name = "helmod_font-small-bold",
+    name = "helmod_font_small_bold",
     from = "default-bold",
     size = 10
   },
   {
     type = "font",
-    name = "helmod_font-small-bold-border",
+    name = "helmod_font_small_bold_border",
     from = "default-bold",
     size = 10,
     border = true,
@@ -55,13 +55,13 @@ data:extend(
   },
   {
     type = "font",
-    name = "helmod_font-normal-bold",
+    name = "helmod_font_normal_bold",
     from = "default-bold",
     size = 12
   },
   {
     type = "font",
-    name = "helmod_font-icon",
+    name = "helmod_font_icon",
     from = "default-bold",
     size = 12,
     border = true,
@@ -69,7 +69,7 @@ data:extend(
   },
   {
     type = "font",
-    name = "helmod_font-big-bold",
+    name = "helmod_font_big_bold",
     from = "default-bold",
     size = 14
   }
