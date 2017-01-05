@@ -1,12 +1,13 @@
 require "planner/plannerModel"
 require "planner/plannerDialog"
+require "planner/plannerData"
 require "planner/plannerResult"
 require "planner/plannerSettings"
 require "planner/plannerRecipeSelector"
 require "planner/plannerRecipeEdition"
 require "planner/plannerProductEdition"
 require "planner/plannerResourceEdition"
-require "planner/plannerPinTab"
+require "planner/plannerPinPanel"
 
 
 PLANNER_COMMAND = "helmod_planner-command"
@@ -27,9 +28,9 @@ PlannerController = setclass("HMPlannerController", ElementGui)
 -- @param #PlayerController parent controller parent
 --
 function PlannerController.methods:init(parent)
+	Logging:debug("PlannerController.methods:init(parent)", global)
 	self.parent = parent
 	self.controllers = {}
-	self.modelFilename = "helmod-planner-model.data"
 	self.model = PlannerModel:new(self)
 
 	self.locate = "center"
@@ -77,12 +78,7 @@ end
 -- @param event
 --
 function PlannerController.methods:on_gui_click(event)
-	if self.controllers ~= nil then
-		for r, controller in pairs(self.controllers) do
-			controller:on_gui_click(event)
-		end
-	end
-
+	Logging:debug("PlannerController:on_gui_click(event)")
 	if event.element.valid then
 		if event.element.name == PLANNER_COMMAND then
 			local player = game.players[event.player_index]
@@ -93,6 +89,7 @@ function PlannerController.methods:on_gui_click(event)
 			local player = game.players[event.player_index]
 			self:cleanController(player)
 		end
+		self:parse_event(event)
 	end
 end
 
@@ -105,11 +102,38 @@ end
 -- @param event
 --
 function PlannerController.methods:on_gui_text_changed(event)
-	if self.controllers ~= nil then
-		for r, controller in pairs(self.controllers) do
-			controller:on_gui_click(event)
+	self:parse_event(event)
+end
+
+-------------------------------------------------------------------------------
+-- Parse event
+--
+-- @function [parent=#PlannerController] parse_event
+--
+-- @param event
+--
+function PlannerController.methods:parse_event(event)
+	if self.controllers ~= nil and event.element.valid then
+		local eventController = nil
+		for _, controller in pairs(self.controllers) do
+			if string.find(event.element.name, controller:classname()) then
+				eventController = controller
+			end
+		end
+		if eventController ~= nil then
+			local player = game.players[event.player_index]
+			local patternAction = eventController:classname().."=([^=]*)"
+			local patternItem = eventController:classname()..".*=ID=([^=]*)"
+			local patternItem2 = eventController:classname()..".*=ID=[^=]*=([^=]*)"
+			local patternItem3 = eventController:classname()..".*=ID=[^=]*=[^=]*=([^=]*)"
+			local action = string.match(event.element.name,patternAction,1)
+			local item = string.match(event.element.name,patternItem,1)
+			local item2 = string.match(event.element.name,patternItem2,1)
+			local item3 = string.match(event.element.name,patternItem3,1)
+			eventController:send_event(player, event.element, action, item, item2, item3)
 		end
 	end
+
 end
 
 -------------------------------------------------------------------------------
@@ -156,7 +180,8 @@ function PlannerController.methods:main(player)
 		-- menu
 		Logging:debug("Create menu panel")
 		local settingsPanel = self:getMenuPanel(player)
-		self:addGuiButton(settingsPanel, self:classname().."=CLOSE", nil, "helmod_button-default", ({"helmod_button.close"}))
+		self:addGuiButton(settingsPanel, self:classname().."=CLOSE", nil, "helmod_button_default", ({"helmod_button.close"}))
+		self:addGuiButton(settingsPanel, "HMPlannerSettings=OPEN", nil, "helmod_button_default", ({"helmod_button.options"}))
 		-- data
 		Logging:debug("Create data panel")
 		local dataPanel = self:getDataPanel(player)
@@ -166,11 +191,10 @@ function PlannerController.methods:main(player)
 
 		-- menu
 
-		self.controllers["result"] = PlannerResult:new(self)
-		self.controllers["result"]:buildPanel(player)
+		self.controllers["data"] = PlannerData:new(self)
+		self.controllers["data"]:buildPanel(player)
 
 		self.controllers["settings"] = PlannerSettings:new(self)
-		self.controllers["settings"]:buildPanel(player)
 
 		self.controllers["recipe-selector"] = PlannerRecipeSelector:new(self)
 
@@ -180,7 +204,7 @@ function PlannerController.methods:main(player)
 
 		self.controllers["product-edition"] = PlannerProductEdition:new(self)
 
-		self.controllers["pin-tab"] = PlannerPinTab:new(self)
+		self.controllers["pin-panel"] = PlannerPinPanel:new(self)
 
 	end
 end
@@ -200,7 +224,7 @@ function PlannerController.methods:getMainPanel(player)
 		return guiMain["helmod_planner_main"]
 	end
 	return self:addGuiFlowH(guiMain, "helmod_planner_main", "helmod_flow_main_"..displaySize)
-	--return self:addGuiFrameH(guiMain, "helmod_planner_main", "helmod_frame_main_"..displaySize)
+		--return self:addGuiFrameH(guiMain, "helmod_planner_main", "helmod_frame_main_"..displaySize)
 end
 
 -------------------------------------------------------------------------------
@@ -292,7 +316,7 @@ end
 --
 function PlannerController.methods:refreshDisplayData(player, item, item2, item3)
 	Logging:debug("PlannerController:refreshDisplayData():",player, item, item2, item3)
-	self.controllers["result"]:update(player, item, item2, item3)
+	self.controllers["data"]:update(player, item, item2, item3)
 	if item == "other_speed_panel" then
 		local globalSettings = self.parent:getGlobal(player, "settings")
 		local controller = self.parent.controllers["speed-controller"]

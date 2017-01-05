@@ -654,7 +654,7 @@ default_gui["helmod_table-odd"] = {
 local width_info=492
 local width_scroll=8
 local width_block_info=290
-local height_block_header = 400
+local height_block_header = 600
 local height_selector_header = 255
 
 local width_1920 = math.ceil(1920*0.85) -- 1632
@@ -718,6 +718,18 @@ default_gui["helmod_flow_main_1440x900"] = {
   minimal_width = 1224,
   minimal_height = 765,
 }
+
+-------------------------------------------------------------------------------
+-- Style of data tab panel
+--
+-- @field [parent=#Flow] data_tab
+
+default_gui["helmod_flow_data_tab"] = {
+	type = "flow_style",
+	parent = "helmod_flow_default",
+	minimal_width = width_1680 - width_info - 400
+}
+
 -------------------------------------------------------------------------------
 -- Style of full resize row panel
 --

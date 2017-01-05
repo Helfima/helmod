@@ -1,20 +1,20 @@
 -------------------------------------------------------------------------------
 -- Classe to build pin tab dialog
 --
--- @module PlannerPinTab
+-- @module PlannerPinPanel
 -- @extends #PlannerDialog
 --
 
-PlannerPinTab = setclass("HMPlannerPinTab", PlannerDialog)
+PlannerPinPanel = setclass("HMPlannerPinPanel", PlannerDialog)
 
 -------------------------------------------------------------------------------
 -- On initialization
 --
--- @function [parent=#PlannerPinTab] on_init
+-- @function [parent=#PlannerPinPanel] on_init
 --
 -- @param #PlannerController parent parent controller
 --
-function PlannerPinTab.methods:on_init(parent)
+function PlannerPinPanel.methods:on_init(parent)
 	self.panelCaption = ({"helmod_pin-tab-panel.title"})
 	self.player = self.parent.parent
 	self.model = self.parent.model
@@ -23,20 +23,20 @@ end
 -------------------------------------------------------------------------------
 -- Get the parent panel
 --
--- @function [parent=#PlannerPinTab] getParentPanel
+-- @function [parent=#PlannerPinPanel] getParentPanel
 --
 -- @param #LuaPlayer player
 --
 -- @return #LuaGuiElement
 --
-function PlannerPinTab.methods:getParentPanel(player)
+function PlannerPinPanel.methods:getParentPanel(player)
 	return self.parent:getPinTabPanel(player)
 end
 
 -------------------------------------------------------------------------------
 -- On open
 --
--- @function [parent=#PlannerPinTab] on_open
+-- @function [parent=#PlannerPinPanel] on_open
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -47,7 +47,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function PlannerPinTab.methods:on_open(player, element, action, item, item2, item3)
+function PlannerPinPanel.methods:on_open(player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 	local close = true
 	if model.guiPinBlock == nil or model.guiPinBlock ~= item then
@@ -60,7 +60,7 @@ end
 -------------------------------------------------------------------------------
 -- On close dialog
 --
--- @function [parent=#PlannerPinTab] on_close
+-- @function [parent=#PlannerPinPanel] on_close
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -69,7 +69,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerPinTab.methods:on_close(player, element, action, item, item2, item3)
+function PlannerPinPanel.methods:on_close(player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 	model.guiPinBlock = nil
 end
@@ -77,11 +77,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create info panel
 --
--- @function [parent=#PlannerPinTab] getInfoPanel
+-- @function [parent=#PlannerPinPanel] getInfoPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerPinTab.methods:getInfoPanel(player)
+function PlannerPinPanel.methods:getInfoPanel(player)
 	local panel = self:getPanel(player)
 	if panel["info-panel"] ~= nil and panel["info-panel"].valid then
 		return panel["info-panel"]["scroll-panel"]
@@ -93,11 +93,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create header panel
 --
--- @function [parent=#PlannerPinTab] getHeaderPanel
+-- @function [parent=#PlannerPinPanel] getHeaderPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerPinTab.methods:getHeaderPanel(player)
+function PlannerPinPanel.methods:getHeaderPanel(player)
 	local panel = self:getPanel(player)
 	if panel["header"] ~= nil and panel["header"].valid then
 		return panel["header"]
@@ -108,7 +108,7 @@ end
 -------------------------------------------------------------------------------
 -- After open
 --
--- @function [parent=#PlannerPinTab] after_open
+-- @function [parent=#PlannerPinPanel] after_open
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -117,7 +117,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerPinTab.methods:after_open(player, element, action, item, item2, item3)
+function PlannerPinPanel.methods:after_open(player, element, action, item, item2, item3)
 	self:updateHeader(player, element, action, item, item2, item3)
 	self:getInfoPanel(player)
 end
@@ -125,7 +125,7 @@ end
 -------------------------------------------------------------------------------
 -- On update
 --
--- @function [parent=#PlannerPinTab] on_update
+-- @function [parent=#PlannerPinPanel] on_update
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -134,14 +134,14 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerPinTab.methods:on_update(player, element, action, item, item2, item3)
+function PlannerPinPanel.methods:on_update(player, element, action, item, item2, item3)
 	self:updateInfo(player, element, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
 -- Update information
 --
--- @function [parent=#PlannerPinTab] updateInfo
+-- @function [parent=#PlannerPinPanel] updateInfo
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -150,14 +150,14 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerPinTab.methods:updateHeader(player, element, action, item, item2, item3)
-	Logging:debug("PlannerPinTab:updateHeader():",player, element, action, item, item2, item3)
+function PlannerPinPanel.methods:updateHeader(player, element, action, item, item2, item3)
+	Logging:debug("PlannerPinPanel:updateHeader():",player, element, action, item, item2, item3)
 	local headerPanel = self:getHeaderPanel(player)
 	local model = self.model:getModel(player)
 
 	local settingsTable = self:addGuiTable(headerPanel, "settings", 2)
 
-	self:addGuiButton(settingsTable, self:classname().."=CLOSE", nil, "helmod_button-default", ({"helmod_button.close"}))
+	self:addGuiButton(settingsTable, self:classname().."=CLOSE", nil, "helmod_button_default", ({"helmod_button.close"}))
 	self:addGuiLabel(settingsTable, "blank_1", "")
 
 	local display_pin_beacon = self.player:getGlobalSettings(player,"display_pin_beacon")
@@ -168,7 +168,7 @@ end
 -------------------------------------------------------------------------------
 -- Update information
 --
--- @function [parent=#PlannerPinTab] updateInfo
+-- @function [parent=#PlannerPinPanel] updateInfo
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -177,8 +177,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerPinTab.methods:updateInfo(player, element, action, item, item2, item3)
-	Logging:debug("PlannerPinTab:updateInfo():",player, element, action, item, item2, item3)
+function PlannerPinPanel.methods:updateInfo(player, element, action, item, item2, item3)
+	Logging:debug("PlannerPinPanel:updateInfo():",player, element, action, item, item2, item3)
 	local infoPanel = self:getInfoPanel(player)
 	local model = self.model:getModel(player)
 	local globalGui = self.player:getGlobalGui(player)
@@ -207,13 +207,13 @@ end
 -------------------------------------------------------------------------------
 -- Add header data tab
 --
--- @function [parent=#PlannerPinTab] addProductionBlockHeader
+-- @function [parent=#PlannerPinPanel] addProductionBlockHeader
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement itable container for element
 --
-function PlannerPinTab.methods:addProductionBlockHeader(player, itable)
-	Logging:debug("PlannerPinTab:addProductionBlockHeader():", player, itable)
+function PlannerPinPanel.methods:addProductionBlockHeader(player, itable)
+	Logging:debug("PlannerPinPanel:addProductionBlockHeader():", player, itable)
 	local model = self.model:getModel(player)
 	local globalSettings = self.player:getGlobal(player, "settings")
 
@@ -239,22 +239,22 @@ end
 -------------------------------------------------------------------------------
 -- Add row data tab
 --
--- @function [parent=#PlannerPinTab] addProductionBlockRow
+-- @function [parent=#PlannerPinPanel] addProductionBlockRow
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement guiTable
 -- @param #string blockId
 -- @param #table element production recipe
 --
-function PlannerPinTab.methods:addProductionBlockRow(player, guiTable, blockId, recipe)
-	Logging:debug("PlannerPinTab:addProductionBlockRow():", player, guiTable, blockId, recipe)
+function PlannerPinPanel.methods:addProductionBlockRow(player, guiTable, blockId, recipe)
+	Logging:debug("PlannerPinPanel:addProductionBlockRow():", player, guiTable, blockId, recipe)
 	local model = self.model:getModel(player)
 
 	local globalSettings = self.player:getGlobal(player, "settings")
 
 	-- col recipe
 	local guiRecipe = self:addGuiFlowH(guiTable,"recipe"..recipe.name, "helmod_flow_default")
-	self:addGuiButtonSprite(guiRecipe, "PlannerPinTab_recipe_"..blockId.."=", self.player:getRecipeIconType(player, recipe), recipe.name, recipe.name, self.player:getRecipeLocalisedName(player, recipe))
+	self:addGuiButtonSprite(guiRecipe, "PlannerPinPanel_recipe_"..blockId.."=", self.player:getRecipeIconType(player, recipe), recipe.name, recipe.name, self.player:getRecipeLocalisedName(player, recipe))
 
 	-- products
 	local tProducts = self:addGuiTable(guiTable,"products_"..recipe.name, 3)
@@ -272,7 +272,7 @@ function PlannerPinTab.methods:addProductionBlockRow(player, guiTable, blockId, 
 	local guiFactory = self:addGuiFlowH(guiTable,"factory"..recipe.name, "helmod_flow_default")
 	local factory = recipe.factory
 	self:addGuiLabel(guiFactory, factory.name, self:formatNumber(factory.limit_count), "helmod_label_right_30")
-	self:addGuiButtonSprite(guiFactory, "PlannerPinTab_recipe_"..blockId.."="..recipe.name.."=", self.player:getIconType(factory), factory.name, factory.name, self.player:getLocalisedName(player, factory))
+	self:addGuiButtonSprite(guiFactory, "PlannerPinPanel_recipe_"..blockId.."="..recipe.name.."=", self.player:getIconType(factory), factory.name, factory.name, self.player:getLocalisedName(player, factory))
 	local guiFactoryModule = self:addGuiTable(guiFactory,"factory-modules"..recipe.name, 2, "helmod_factory_modules")
 	-- modules
 	for name, count in pairs(factory.modules) do
@@ -310,7 +310,7 @@ function PlannerPinTab.methods:addProductionBlockRow(player, guiTable, blockId, 
 		local guiBeacon = self:addGuiFlowH(guiTable,"beacon"..recipe.name, "helmod_flow_default")
 		local beacon = recipe.beacon
 		self:addGuiLabel(guiBeacon, beacon.name, self:formatNumber(beacon.limit_count), "helmod_label_right_30")
-		self:addGuiButtonSprite(guiBeacon, "PlannerPinTab_recipe_"..blockId.."="..recipe.name.."=", self.player:getIconType(beacon), beacon.name, beacon.name, self.player:getLocalisedName(player, beacon))
+		self:addGuiButtonSprite(guiBeacon, "PlannerPinPanel_recipe_"..blockId.."="..recipe.name.."=", self.player:getIconType(beacon), beacon.name, beacon.name, self.player:getLocalisedName(player, beacon))
 		local guiBeaconModule = self:addGuiTable(guiBeacon,"beacon-modules"..recipe.name, 1, "helmod_beacon_modules")
 		-- modules
 		for name, count in pairs(beacon.modules) do
@@ -336,7 +336,7 @@ end
 -------------------------------------------------------------------------------
 -- On event
 --
--- @function [parent=#PlannerPinTab] on_event
+-- @function [parent=#PlannerPinPanel] on_event
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -345,8 +345,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerPinTab.methods:on_event(player, element, action, item, item2, item3)
-	Logging:debug("PlannerPinTab:on_event():",player, element, action, item, item2, item3)
+function PlannerPinPanel.methods:on_event(player, element, action, item, item2, item3)
+	Logging:debug("PlannerPinPanel:on_event():",player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 	local globalSettings = self.player:getGlobal(player, "settings")
 	local defaultSettings = self.player:getDefaultSettings()

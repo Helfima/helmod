@@ -12,7 +12,7 @@ require "player.playerController"
 -- erro=1
 -- nothing=0
 
-Logging:new(0)
+Logging:new(3)
 Logging.console = false
 
 -------------------------------------------------------------------------------
@@ -56,6 +56,7 @@ end
 --
 function helmod:on_configuration_changed(data)
 	Logging:trace("helmod:on_configuration_changed(data)", data)
+	Logging:trace("helmod_data after upgrade_0_2_17", global)
 	if not data or not data.mod_changes then
 		return
 	end
@@ -64,7 +65,6 @@ function helmod:on_configuration_changed(data)
 		-- Upgrade 0.2.17
 		if old_version ~= nil and old_version < "0.2.17" then
 			helmod:upgrade_0_2_17()
-			Logging:trace("helmod_data after upgrade_0_2_17", global)
 		end
 		-- Upgrade 0.2.21
 		if old_version ~= nil and old_version < "0.2.21" then

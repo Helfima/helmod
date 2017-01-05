@@ -502,7 +502,7 @@ function PlannerAbstractEdition.methods:updateFactoryInfo(player, element, actio
 		self:addGuiLabel(inputPanel, "label-limit", ({"helmod_label.limit"}))
 		self:addGuiText(inputPanel, "limit", factory.limit, "helmod_textfield")
 
-		self:addGuiButton(infoPanel, self:classname().."=factory-update=ID="..item.."=", object.name, "helmod_button-default", ({"helmod_button.update"}))
+		self:addGuiButton(infoPanel, self:classname().."=factory-update=ID="..item.."=", object.name, "helmod_button_default", ({"helmod_button.update"}))
 	end
 end
 
@@ -660,7 +660,7 @@ function PlannerAbstractEdition.methods:updateFactorySelector(player, element, a
 			-- set le groupe
 			if model.factoryGroupSelected == nil then model.factoryGroupSelected = group end
 			-- ajoute les icons de groupe
-			local action = self:addGuiButton(groupsPanel, self:classname().."=factory-group=ID="..item.."="..object.name.."=", group, "helmod_button-default", group)
+			local action = self:addGuiButton(groupsPanel, self:classname().."=factory-group=ID="..item.."="..object.name.."=", group, "helmod_button_default", group)
 		end
 	end
 
@@ -729,7 +729,7 @@ function PlannerAbstractEdition.methods:updateBeaconInfo(player, element, action
 		self:addGuiLabel(inputPanel, "label-factory", ({"helmod_label.factory"}))
 		self:addGuiText(inputPanel, "factory", beacon.factory, "helmod_textfield")
 
-		self:addGuiButton(infoPanel, self:classname().."=beacon-update=ID="..item.."=", object.name, "helmod_button-default", ({"helmod_button.update"}))
+		self:addGuiButton(infoPanel, self:classname().."=beacon-update=ID="..item.."=", object.name, "helmod_button_default", ({"helmod_button.update"}))
 	end
 end
 
@@ -852,7 +852,7 @@ function PlannerAbstractEdition.methods:updateBeaconSelector(player, element, ac
 		-- set le groupe
 		if model.beaconGroupSelected == nil then model.beaconGroupSelected = group end
 		-- ajoute les icons de groupe
-		local action = self:addGuiButton(groupsPanel, self:classname().."=beacon-group=ID="..item.."="..object.name.."=", group, "helmod_button-default", group)
+		local action = self:addGuiButton(groupsPanel, self:classname().."=beacon-group=ID="..item.."="..object.name.."=", group, "helmod_button_default", group)
 	end
 
 	local tablePanel = self:addGuiTable(scrollPanel, "beacon-table", 5)

@@ -1,20 +1,20 @@
 -------------------------------------------------------------------------------
 -- Classe to build result dialog
 --
--- @module PlannerResult
+-- @module PlannerData
 -- @extends #ElementGui
 --
 
-PlannerResult = setclass("HMPlannerResult", ElementGui)
+PlannerData = setclass("HMPlannerData", ElementGui)
 
 -------------------------------------------------------------------------------
 -- Initialization
 --
--- @function [parent=#PlannerResult] init
+-- @function [parent=#PlannerData] init
 --
 -- @param #PlannerController parent parent controller
 --
-function PlannerResult.methods:init(parent)
+function PlannerData.methods:init(parent)
 	self.parent = parent
 	self.player = self.parent.parent
 	self.model = self.parent.model
@@ -29,24 +29,24 @@ end
 -------------------------------------------------------------------------------
 -- Get the parent panel
 --
--- @function [parent=#PlannerResult] getParentPanel
+-- @function [parent=#PlannerData] getParentPanel
 --
 -- @param #LuaPlayer player
 --
 -- @return #LuaGuiElement
 --
-function PlannerResult.methods:getParentPanel(player)
+function PlannerData.methods:getParentPanel(player)
 	return self.parent:getDataPanel(player)
 end
 
 -------------------------------------------------------------------------------
 -- Get or create data panel
 --
--- @function [parent=#PlannerResult] getDataPanel
+-- @function [parent=#PlannerData] getDataPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerResult.methods:getDataPanel(player)
+function PlannerData.methods:getDataPanel(player)
 	local parentPanel = self:getParentPanel(player)
 	if parentPanel["data"] ~= nil and parentPanel["data"].valid then
 		return parentPanel["data"]
@@ -55,13 +55,29 @@ function PlannerResult.methods:getDataPanel(player)
 end
 
 -------------------------------------------------------------------------------
--- Get or create menu panel
+-- Get or create model panel
 --
--- @function [parent=#PlannerResult] getMenuPanel
+-- @function [parent=#PlannerData] getModelPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerResult.methods:getMenuPanel(player, caption)
+function PlannerData.methods:getModelPanel(player)
+	local displaySize = self.player:getGlobalSettings(player, "display_size")
+	local dataPanel = self:getDataPanel(player)
+	if dataPanel["model"] ~= nil and dataPanel["model"].valid then
+		return dataPanel["model"]
+	end
+	return self:addGuiFrameH(dataPanel, "model", "helmod_frame_data_menu_"..displaySize, ({"helmod_data-panel.title"}))
+end
+
+-------------------------------------------------------------------------------
+-- Get or create menu panel
+--
+-- @function [parent=#PlannerData] getMenuPanel
+--
+-- @param #LuaPlayer player
+--
+function PlannerData.methods:getMenuPanel(player, caption)
 	local displaySize = self.player:getGlobalSettings(player, "display_size")
 	local dataPanel = self:getDataPanel(player)
 	if dataPanel["menu"] ~= nil and dataPanel["menu"].valid then
@@ -73,11 +89,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create info panel
 --
--- @function [parent=#PlannerResult] getInfoPanel
+-- @function [parent=#PlannerData] getInfoPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerResult.methods:getInfoPanel(player)
+function PlannerData.methods:getInfoPanel(player)
 	local dataPanel = self:getDataPanel(player)
 	if dataPanel["info"] ~= nil and dataPanel["info"].valid then
 		return dataPanel["info"]
@@ -88,12 +104,12 @@ end
 -------------------------------------------------------------------------------
 -- Get or create result panel
 --
--- @function [parent=#PlannerResult] getResultPanel
+-- @function [parent=#PlannerData] getResultPanel
 --
 -- @param #LuaPlayer player
 -- @param #string caption
 --
-function PlannerResult.methods:getResultPanel(player, caption)
+function PlannerData.methods:getResultPanel(player, caption)
 	local displaySize = self.player:getGlobalSettings(player, "display_size")
 	local dataPanel = self:getDataPanel(player)
 	if dataPanel["result"] ~= nil and dataPanel["result"].valid then
@@ -103,29 +119,14 @@ function PlannerResult.methods:getResultPanel(player, caption)
 end
 
 -------------------------------------------------------------------------------
--- Get or create selector panel
---
--- @function [parent=#PlannerResult] getSelectorPanel
---
--- @param #LuaPlayer player
---
-function PlannerResult.methods:getSelectorPanel(player)
-	local menuPanel = self.parent:getMenuPanel(player)
-	if menuPanel["selector"] ~= nil and menuPanel["selector"].valid then
-		return menuPanel["selector"]
-	end
-	return self:addGuiFlowH(menuPanel, "selector")
-end
-
--------------------------------------------------------------------------------
 -- Build the parent panel
 --
--- @function [parent=#PlannerResult] buildPanel
+-- @function [parent=#PlannerData] buildPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerResult.methods:buildPanel(player)
-	Logging:debug("PlannerResult:buildPanel():",player)
+function PlannerData.methods:buildPanel(player)
+	Logging:debug("PlannerData:buildPanel():",player)
 	local model = self.model:getModel(player)
 
 	local globalGui = self.player:getGlobalGui(player)
@@ -144,13 +145,7 @@ function PlannerResult.methods:buildPanel(player)
 	local parentPanel = self:getParentPanel(player)
 
 	if parentPanel ~= nil then
-		local selectorPanel = self:getSelectorPanel(player)
-		self:addGuiButton(selectorPanel, self:classname().."=change-tab=ID=", self.PRODUCTION_LINE_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-production-line"}))
-		self:addGuiButton(selectorPanel, self:classname().."=change-tab=ID=", self.SUMMARY_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-summary"}))
-		self:addGuiButton(selectorPanel, self:classname().."=change-tab=ID=", self.RESOURCES_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-resources"}))
-
 		self:getDataPanel(player)
-
 		self:update(player)
 	end
 end
@@ -158,7 +153,7 @@ end
 -------------------------------------------------------------------------------
 -- Send event
 --
--- @function [parent=#PlannerResult] send_event
+-- @function [parent=#PlannerData] send_event
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -167,14 +162,14 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerResult.methods:send_event(player, element, action, item, item2, item3)
+function PlannerData.methods:send_event(player, element, action, item, item2, item3)
 	Logging:debug("PlannerDialog:send_event():",player, element, action, item, item2, item3)
 	self:on_event(player, element, action, item, item2, item3)
 end
 -------------------------------------------------------------------------------
 -- On event
 --
--- @function [parent=#PlannerResult] on_event
+-- @function [parent=#PlannerData] on_event
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -183,11 +178,17 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerResult.methods:on_event(player, element, action, item, item2, item3)
-	Logging:debug("PlannerResult:on_event():",player, element, action, item, item2, item3)
+function PlannerData.methods:on_event(player, element, action, item, item2, item3)
+	Logging:debug("PlannerData:on_event():",player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 
 	local globalGui = self.player:getGlobalGui(player)
+
+	if action == "change-time" then
+		model.time = tonumber(item)
+		self.model:update(player)
+		self:update(player, item, item2, item3)
+	end
 
 	if action == "change-tab" then
 		globalGui.currentTab = item
@@ -295,21 +296,23 @@ end
 -------------------------------------------------------------------------------
 -- Update
 --
--- @function [parent=#PlannerResult] update
+-- @function [parent=#PlannerData] update
 --
 -- @param #LuaPlayer player
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerResult.methods:update(player, item, item2, item3)
-	Logging:debug("PlannerResult:update():", player, item, item2, item3)
+function PlannerData.methods:update(player, item, item2, item3)
+	Logging:debug("PlannerData:update():", player, item, item2, item3)
 	local globalGui = self.player:getGlobalGui(player)
 	local dataPanel = self:getDataPanel(player)
 
 	for k,guiName in pairs(dataPanel.children_names) do
 		dataPanel[guiName].destroy()
 	end
+
+	self:updateModelPanel(player, item, item2, item3)
 
 	if globalGui.currentTab == self.PRODUCTION_LINE_TAB then
 		self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
@@ -329,17 +332,63 @@ function PlannerResult.methods:update(player, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
--- Update production line tab
+-- Update model panel
 --
--- @function [parent=#PlannerResult] updateProductionLine
+-- @function [parent=#PlannerData] updateModelPanel
 --
 -- @param #LuaPlayer player
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerResult.methods:updateProductionLine(player, item, item2, item3)
-	Logging:debug("PlannerResult:updateLine():", player, item, item2, item3)
+function PlannerData.methods:updateModelPanel(player, item, item2, item3)
+	Logging:debug("PlannerData:updateModelPanel():", player, item, item2, item3)
+	local modelPanel = self:getModelPanel(player)
+	local model = self.model:getModel(player)
+
+	for k,guiName in pairs(modelPanel.children_names) do
+		modelPanel[guiName].destroy()
+	end
+
+	-- tab panel
+	local tabPanel = self:addGuiFlowH(modelPanel, "tab", "helmod_flow_data_tab")
+	self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.PRODUCTION_LINE_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-production-line"}))
+	self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.SUMMARY_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-summary"}))
+	self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.RESOURCES_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-resources"}))
+
+	-- time panel
+	local timePanel = self:addGuiFlowH(modelPanel, "time", "helmod_flow_default")
+	self:addGuiLabel(timePanel, self:classname().."=base-time", ({"helmod_data-panel.base-time"}), "helmod_label_time")
+
+	local times = {
+		{ value = 1, name = "1s"},
+		{ value = 60, name = "1m"},
+		{ value = 300, name = "5m"},
+		{ value = 600, name = "10m"},
+		{ value = 1800, name = "30m"},
+		{ value = 3600, name = "1h"}
+	}
+	for _,time in pairs(times) do
+		if model.time == time.value then
+			self:addGuiLabel(timePanel, self:classname().."=change-time="..time.value, time.name, "helmod_label_time")
+		else
+			self:addGuiButton(timePanel, self:classname().."=change-time=ID=", time.value, "helmod_button_default", time.name)
+		end
+	end
+
+end
+-------------------------------------------------------------------------------
+-- Update production line tab
+--
+-- @function [parent=#PlannerData] updateProductionLine
+--
+-- @param #LuaPlayer player
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function PlannerData.methods:updateProductionLine(player, item, item2, item3)
+	Logging:debug("PlannerData:updateLine():", player, item, item2, item3)
 	local displaySize = self.player:getGlobalSettings(player, "display_size")
 	local model = self.model:getModel(player)
 	local globalGui = self.player:getGlobalGui(player)
@@ -397,15 +446,15 @@ end
 -------------------------------------------------------------------------------
 -- Update production block tab
 --
--- @function [parent=#PlannerResult] updateProductionBlock
+-- @function [parent=#PlannerData] updateProductionBlock
 --
 -- @param #LuaPlayer player
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerResult.methods:updateProductionBlock(player, item, item2, item3)
-	Logging:debug("PlannerResult:updateProductionBlock():", player, item, item2, item3)
+function PlannerData.methods:updateProductionBlock(player, item, item2, item3)
+	Logging:debug("PlannerData:updateProductionBlock():", player, item, item2, item3)
 	local displaySize = self.player:getGlobalSettings(player, "display_size")
 	local model = self.model:getModel(player)
 	local globalGui = self.player:getGlobalGui(player)
@@ -420,7 +469,7 @@ function PlannerResult.methods:updateProductionBlock(player, item, item2, item3)
 	self:addGuiButton(menuPanel, "HMPlannerRecipeSelector=OPEN=ID=", blockId, "helmod_button_default", ({"helmod_result-panel.add-button-recipe"}))
 	self:addGuiButton(menuPanel, self:classname().."=change-tab=ID=", self.PRODUCTION_LINE_TAB, "helmod_button_default", ({"helmod_result-panel.back-button-production-line"}))
 	self:addGuiButton(menuPanel, "HMPlannerPinPanel=OPEN=ID=", blockId, "helmod_button_default", ({"helmod_result-panel.tab-button-pin"}))
-	
+
 	local countRecipes = self.model:countBlockRecipes(player, blockId)
 	-- production block result
 	if countRecipes > 0 then
@@ -524,13 +573,13 @@ end
 -------------------------------------------------------------------------------
 -- Add header data tab
 --
--- @function [parent=#PlannerResult] addProductionBlockHeader
+-- @function [parent=#PlannerData] addProductionBlockHeader
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement itable container for element
 --
-function PlannerResult.methods:addProductionBlockHeader(player, itable)
-	Logging:debug("PlannerResult:addHeader():", player, itable)
+function PlannerData.methods:addProductionBlockHeader(player, itable)
+	Logging:debug("PlannerData:addHeader():", player, itable)
 	local model = self.model:getModel(player)
 	local globalSettings = self.player:getGlobal(player, "settings")
 
@@ -582,13 +631,13 @@ end
 -------------------------------------------------------------------------------
 -- Add header data tab
 --
--- @function [parent=#PlannerResult] addProductionLineHeader
+-- @function [parent=#PlannerData] addProductionLineHeader
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement itable container for element
 --
-function PlannerResult.methods:addProductionLineHeader(player, itable)
-	Logging:debug("PlannerResult:addHeader():", player, itable)
+function PlannerData.methods:addProductionLineHeader(player, itable)
+	Logging:debug("PlannerData:addHeader():", player, itable)
 	local model = self.model:getModel(player)
 	local globalSettings = self.player:getGlobal(player, "settings")
 
@@ -632,13 +681,13 @@ end
 -------------------------------------------------------------------------------
 -- Add header resources tab
 --
--- @function [parent=#PlannerResult] addResourcesHeader
+-- @function [parent=#PlannerData] addResourcesHeader
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement itable container for element
 --
-function PlannerResult.methods:addResourcesHeader(player, itable)
-	Logging:debug("PlannerResult:addHeader():", player, itable)
+function PlannerData.methods:addResourcesHeader(player, itable)
+	Logging:debug("PlannerData:addHeader():", player, itable)
 	local model = self.model:getModel(player)
 	local globalSettings = self.player:getGlobal(player, "settings")
 	if globalSettings.display_data_col_index then
@@ -677,17 +726,17 @@ end
 -------------------------------------------------------------------------------
 -- Add row data tab
 --
--- @function [parent=#PlannerResult] addProductionBlockRow
+-- @function [parent=#PlannerData] addProductionBlockRow
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement guiTable
 -- @param #string blockId
 -- @param #table element production recipe
 --
-function PlannerResult.methods:addProductionBlockRow(player, guiTable, blockId, recipe)
-	Logging:debug("PlannerResult:addProductionBlockRow():", player, guiTable, blockId, recipe)
+function PlannerData.methods:addProductionBlockRow(player, guiTable, blockId, recipe)
+	Logging:debug("PlannerData:addProductionBlockRow():", player, guiTable, blockId, recipe)
 	local model = self.model:getModel(player)
-	
+
 	local globalSettings = self.player:getGlobal(player, "settings")
 
 	-- col action
@@ -800,14 +849,14 @@ end
 -------------------------------------------------------------------------------
 -- Add row data tab
 --
--- @function [parent=#PlannerResult] addProductionLineRow
+-- @function [parent=#PlannerData] addProductionLineRow
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement guiTable
 -- @param #table element production block
 --
-function PlannerResult.methods:addProductionLineRow(player, guiTable, element)
-	Logging:debug("PlannerResult:addProductionLineRow():", player, guiTable, element)
+function PlannerData.methods:addProductionLineRow(player, guiTable, element)
+	Logging:debug("PlannerData:addProductionLineRow():", player, guiTable, element)
 	local model = self.model:getModel(player)
 
 	local globalSettings = self.player:getGlobal(player, "settings")
@@ -885,12 +934,12 @@ end
 -------------------------------------------------------------------------------
 -- Add row resources tab
 --
--- @function [parent=#PlannerResult] addResourcesRow
+-- @function [parent=#PlannerData] addResourcesRow
 --
 -- @param #LuaPlayer player
 --
-function PlannerResult.methods:addResourcesRow(player, guiTable, ingredient)
-	Logging:debug("PlannerResult:addRow():", player, guiTable, ingredient)
+function PlannerData.methods:addResourcesRow(player, guiTable, ingredient)
+	Logging:debug("PlannerData:addRow():", player, guiTable, ingredient)
 	local model = self.model:getModel(player)
 
 	local globalSettings = self.player:getGlobal(player, "settings")
@@ -936,12 +985,12 @@ end
 -------------------------------------------------------------------------------
 -- Update resources tab
 --
--- @function [parent=#PlannerResult] updateResources
+-- @function [parent=#PlannerData] updateResources
 --
 -- @param #LuaPlayer player
 --
-function PlannerResult.methods:updateResources(player)
-	Logging:debug("PlannerResult:updateResources():", player)
+function PlannerData.methods:updateResources(player)
+	Logging:debug("PlannerData:updateResources():", player)
 	local displaySize = self.player:getGlobalSettings(player, "display_size")
 	local model = self.model:getModel(player)
 	local globalGui = self.player:getGlobalGui(player)
@@ -980,12 +1029,12 @@ end
 -------------------------------------------------------------------------------
 -- Update summary tab
 --
--- @function [parent=#PlannerResult] updateSummary
+-- @function [parent=#PlannerData] updateSummary
 --
 -- @param #LuaPlayer player
 --
-function PlannerResult.methods:updateSummary(player)
-	Logging:debug("PlannerResult:updateSummary():", player)
+function PlannerData.methods:updateSummary(player)
+	Logging:debug("PlannerData:updateSummary():", player)
 	local displaySize = self.player:getGlobalSettings(player, "display_size")
 	local model = self.model:getModel(player)
 	-- data

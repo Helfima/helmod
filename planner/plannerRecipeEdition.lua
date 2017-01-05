@@ -253,7 +253,7 @@ function PlannerRecipeEdition.methods:updateObjectInfo(player, element, action, 
 			self:addGuiLabel(tablePanel, "label-production", ({"helmod_common.production"}))
 			self:addGuiText(tablePanel, "production", recipe.production, "helmod_textfield")
 
-			self:addGuiButton(tablePanel, self:classname().."=object-update=ID="..item.."=", recipe.name, "helmod_button-default", ({"helmod_button.update"}))		--
+			self:addGuiButton(tablePanel, self:classname().."=object-update=ID="..item.."=", recipe.name, "helmod_button_default", ({"helmod_button.update"}))		--
 		end
 	end
 end

@@ -75,31 +75,7 @@ function PlannerDialog.methods:bindButton(gui, label)
 	local caption = ({self.ACTION_OPEN})
 	if label ~= nil then caption = label end
 	if gui ~= nil then
-		gui.add({type="button", name=self.ACTION_OPEN, caption=caption, style="helmod_button-default"})
-	end
-end
-
--------------------------------------------------------------------------------
--- On gui click
---
--- @function [parent=#PlannerDialog] on_gui_click
--- 
--- @param #table event
--- 
-function PlannerDialog.methods:on_gui_click(event)
-	if event.element.valid and string.find(event.element.name, self:classname()) then
-		local player = game.players[event.player_index]
-		
-		local patternAction = self:classname().."=([^=]*)"
-		local patternItem = self:classname()..".*=ID=([^=]*)"
-		local patternItem2 = self:classname()..".*=ID=[^=]*=([^=]*)"
-		local patternItem3 = self:classname()..".*=ID=[^=]*=[^=]*=([^=]*)"
-		local action = string.match(event.element.name,patternAction,1)
-		local item = string.match(event.element.name,patternItem,1)
-		local item2 = string.match(event.element.name,patternItem2,1)
-		local item3 = string.match(event.element.name,patternItem3,1)
-
-		self:send_event(player, event.element, action, item, item2, item3)
+		gui.add({type="button", name=self.ACTION_OPEN, caption=caption, style="helmod_button_default"})
 	end
 end
 

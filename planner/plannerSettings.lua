@@ -36,19 +36,6 @@ function PlannerSettings.methods:getParentPanel(player)
 end
 
 -------------------------------------------------------------------------------
--- Get the menu panel
---
--- @function [parent=#PlannerSettings] getMenuPanel
---
--- @param #LuaPlayer player
---
--- @return #LuaGuiElement
---
-function PlannerSettings.methods:getMenuPanel(player)
-	return self.parent:getMenuPanel(player)
-end
-
--------------------------------------------------------------------------------
 -- On open
 --
 -- @function [parent=#PlannerSettings] on_open
@@ -65,21 +52,6 @@ end
 function PlannerSettings.methods:on_open(player, element, action, item, item2, item3)
 	-- close si nouvel appel
 	return true
-end
-
--------------------------------------------------------------------------------
--- Get or create time panel
---
--- @function [parent=#PlannerSettings] getTimePanel
---
--- @param #LuaPlayer player
---
-function PlannerSettings.methods:getTimePanel(player)
-	local menuPanel = self:getMenuPanel(player)
-	if menuPanel["time"] ~= nil and menuPanel["time"].valid then
-		return menuPanel["time"]
-	end
-	return self:addGuiFlowH(menuPanel, "time")
 end
 
 -------------------------------------------------------------------------------
@@ -158,29 +130,6 @@ function PlannerSettings.methods:getOtherSettingsPanel(player)
 end
 
 -------------------------------------------------------------------------------
--- Build the parent panel
---
--- @function [parent=#PlannerSettings] buildPanel
---
--- @param #LuaPlayer player
---
-function PlannerSettings.methods:buildPanel(player)
-	Logging:debug("PlannerSettings:buildPanel():",player)
-
-	local model = self.model:getModel(player)
-
-	local parentPanel = self:getMenuPanel(player)
-
-	if parentPanel ~= nil then
-		self:addGuiButton(parentPanel, self:classname().."=OPEN", nil, "helmod_button-default", ({"helmod_button.options"}))
-
-		self:getTimePanel(player)
-
-		self:update(player)
-	end
-end
-
--------------------------------------------------------------------------------
 -- On event
 --
 -- @function [parent=#PlannerSettings] on_event
@@ -197,13 +146,6 @@ function PlannerSettings.methods:on_event(player, element, action, item, item2, 
 	local model = self.model:getModel(player)
 	local globalSettings = self.player:getGlobal(player, "settings")
 	local defaultSettings = self.player:getDefaultSettings()
-
-	if action == "change-time" then
-		model.time = tonumber(item)
-		self.model:update(player)
-		self:update(player)
-		self.parent:refreshDisplayData(player, item, item2, item3)
-	end
 
 	if action == "change-boolean-settings" then
 		if globalSettings[item] == nil then globalSettings[item] = defaultSettings[item] end
@@ -254,41 +196,6 @@ function PlannerSettings.methods:after_open(player, element, action, item, item2
 	self:updateDataSettings(player, element, action, item, item2, item3)
 	self:updateModelSettings(player, element, action, item, item2, item3)
 	self:updateOtherSettings(player, element, action, item, item2, item3)
-end
-
--------------------------------------------------------------------------------
--- Update
---
--- @function [parent=#PlannerSettings] update
---
--- @param #LuaPlayer player
---
-function PlannerSettings.methods:update(player)
-	Logging:debug("PlannerResult:update():", player)
-	local model = self.model:getModel(player)
-	local timePanel = self:getTimePanel(player)
-
-	for k,guiName in pairs(timePanel.children_names) do
-		timePanel[guiName].destroy()
-	end
-
-	self:addGuiLabel(timePanel, self:classname().."=base-time", ({"helmod_settings-panel.base-time"}), "helmod_label_time")
-
-	local times = {
-		{ value = 1, name = "1s"},
-		{ value = 60, name = "1m"},
-		{ value = 300, name = "5m"},
-		{ value = 600, name = "10m"},
-		{ value = 1800, name = "30m"},
-		{ value = 3600, name = "1h"}
-	}
-	for _,time in pairs(times) do
-		if model.time == time.value then
-			self:addGuiLabel(timePanel, self:classname().."=change-time="..time.value, time.name, "helmod_label_time")
-		else
-			self:addGuiButton(timePanel, self:classname().."=change-time=ID=", time.value, "helmod_button-default", time.name)
-		end
-	end
 end
 
 -------------------------------------------------------------------------------
@@ -354,12 +261,12 @@ function PlannerSettings.methods:updateDisplaySettings(player, element, action, 
 	if display_size == "1920x1200" then
 		self:addGuiLabel(sizeSettingsTable, self:classname().."=change-display-settings=ID=display_size=", "1920x1200", "helmod_label_time")
 	else
-		self:addGuiButton(sizeSettingsTable, self:classname().."=change-display-settings=ID=display_size=", "1920x1200", "helmod_button-default", "1920x1200")
+		self:addGuiButton(sizeSettingsTable, self:classname().."=change-display-settings=ID=display_size=", "1920x1200", "helmod_button_default", "1920x1200")
 	end
 	if display_size == "1680x1050" then
 		self:addGuiLabel(sizeSettingsTable, self:classname().."=change-display-settings=ID=display_size=", "1680x1050", "helmod_label_time")
 	else
-		self:addGuiButton(sizeSettingsTable, self:classname().."=change-display-settings=ID=display_size=", "1680x1050", "helmod_button-default", "1680x1050")
+		self:addGuiButton(sizeSettingsTable, self:classname().."=change-display-settings=ID=display_size=", "1680x1050", "helmod_button_default", "1680x1050")
 	end
 
 	local columnSettingsTable = self:addGuiTable(displaySettingsPanel, "column", 5)
@@ -370,7 +277,7 @@ function PlannerSettings.methods:updateDisplaySettings(player, element, action, 
 		if display_product_cols == i then
 			self:addGuiLabel(columnSettingsTable, self:classname().."=change-column-settings=ID=display_product_cols=", i, "helmod_label_time")
 		else
-			self:addGuiButton(columnSettingsTable, self:classname().."=change-column-settings=ID=display_product_cols=", i, "helmod_button-default", i)
+			self:addGuiButton(columnSettingsTable, self:classname().."=change-column-settings=ID=display_product_cols=", i, "helmod_button_default", i)
 		end
 	end
 
@@ -381,7 +288,7 @@ function PlannerSettings.methods:updateDisplaySettings(player, element, action, 
 		if display_ingredient_cols == i then
 			self:addGuiLabel(columnSettingsTable, self:classname().."=change-column-settings=ID=display_ingredient_cols=", i, "helmod_label_time")
 		else
-			self:addGuiButton(columnSettingsTable, self:classname().."=change-column-settings=ID=display_ingredient_cols=", i, "helmod_button-default", i)
+			self:addGuiButton(columnSettingsTable, self:classname().."=change-column-settings=ID=display_ingredient_cols=", i, "helmod_button_default", i)
 		end
 	end
 
