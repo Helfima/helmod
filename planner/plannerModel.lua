@@ -20,6 +20,23 @@ function PlannerModel.methods:init(parent)
 end
 
 -------------------------------------------------------------------------------
+-- Get models
+--
+-- @function [parent=#PlannerModel] getModels
+--
+-- @param #LuaPlayer player
+--
+-- @return #table
+--
+function PlannerModel.methods:getModels(player)
+	Logging:trace("PlannerModel:getModels():",player)
+	local models = self.player:getGlobal(player, "model")
+	Logging:debug("PlannerModel:getModels():models:",models)
+	if #models == 0 then table.insert(models, {}) end
+	return models
+end
+
+-------------------------------------------------------------------------------
 -- Get and initialize the model
 --
 -- @function [parent=#PlannerModel] getModel
@@ -30,8 +47,17 @@ end
 --
 function PlannerModel.methods:getModel(player)
 	Logging:trace("PlannerModel:getModel():",player)
-	local model = self.player:getGlobal(player, "model")
-
+	local model_index = self.player:getGlobalGui(player, "model_index")
+	if model_index == nil then model_index = 1 end
+	
+	local models = self:getModels(player)
+	local model = models[model_index]
+	
+	if model == nil then
+		model = {}
+		models[model_index] = model
+	end
+	
 	if model.blocks == nil then model.blocks = {} end
 
 	if model.ingredients == nil then model.ingredients = {} end
@@ -41,6 +67,24 @@ function PlannerModel.methods:getModel(player)
 	if model.time == nil then model.time = 1 end
 
 	return model
+end
+
+-------------------------------------------------------------------------------
+-- Get and initialize the model
+--
+-- @function [parent=#PlannerModel] getModel
+--
+-- @param #LuaPlayer player
+-- @param #number model_index
+--
+function PlannerModel.methods:removeModel(player,model_index)
+	Logging:trace("PlannerModel:getModel():",player)
+	local globalGui = self.player:getGlobalGui(player)
+	globalGui.model_index = 1
+	
+	local models = self:getModels(player)
+	table.remove(models, model_index)
+	
 end
 
 -------------------------------------------------------------------------------
@@ -112,19 +156,18 @@ function PlannerModel.methods:createBeaconModel(player, name, count)
 	Logging:debug("PlannerModel:createFactoryModel():",player, name, count)
 	if name == nil then name = "beacon" end
 	if count == nil then count = 0 end
-	local defaultBeacon = self:getDefaultBeacon(player, "beacon")
 	local beaconModel = {}
-	beaconModel.name = name
+	beaconModel.name = "beacon"
 	beaconModel.type = "item"
 	beaconModel.active = false
 	beaconModel.count = count
-	beaconModel.energy_nominal = defaultBeacon.energy_nominal
+	beaconModel.energy_nominal = "480"
 	beaconModel.energy = 0
 	beaconModel.energy_total = 0
-	beaconModel.combo = defaultBeacon.combo
-	beaconModel.factory = defaultBeacon.factory
-	beaconModel.efficiency = defaultBeacon.efficiency
-	beaconModel.module_slots = defaultBeacon.module_slots
+	beaconModel.combo = 4
+	beaconModel.factory = 1.2
+	beaconModel.efficiency = 0.5
+	beaconModel.module_slots = 2
 	-- limit infini = 0
 	beaconModel.limit = 0
 	beaconModel.limit_count = count
@@ -1488,8 +1531,6 @@ end
 function PlannerModel.methods:getDefault(player)
 	local default = self.player:getGlobal(player, "default")
 
-	if default.factories == nil then default.factories = {} end
-	if default.beacons == nil then default.beacons = {} end
 	if default.recipes == nil then default.recipes = {} end
 
 	return default
@@ -1513,42 +1554,6 @@ function PlannerModel.methods:getDefaultRecipe(player, key)
 		}
 	end
 	return default.recipes[key]
-end
-
--------------------------------------------------------------------------------
--- Get default beacon
---
--- @function [parent=#PlannerModel] getDefaultBeacon
---
--- @param #LuaPlayer player
--- @param #string key recipe name
---
--- @return #table
---
-function PlannerModel.methods:getDefaultBeacon(player, name)
-	local default = self:getDefault(player)
-	if default.beacons[name] == nil then
-		default.beacons = helmod_defines.beacon
-	end
-	return default.beacons[name]
-end
-
--------------------------------------------------------------------------------
--- Get default factory
---
--- @function [parent=#PlannerModel] getDefaultFactory
---
--- @param #LuaPlayer player
--- @param #string key recipe name
---
--- @return #table
---
-function PlannerModel.methods:getDefaultFactory(player, name)
-	local default = self:getDefault(player)
-	if default.factories[name] == nil then
-		default.factories = helmod_defines.factory
-	end
-	return default.factories[name]
 end
 
 -------------------------------------------------------------------------------

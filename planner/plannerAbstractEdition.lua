@@ -844,21 +844,40 @@ function PlannerAbstractEdition.methods:updateBeaconSelector(player, element, ac
 
 	local object = self:getObject(player, element, action, item, item2, item3)
 
-	-- ajouter de la table des groupes de recipe
 	local groupsPanel = self:addGuiTable(scrollPanel, "beacon-groups", 2)
-	local category = "module"
+	
+	local category = "module-beacon"
 	if globalSettings.model_filter_beacon ~= nil and globalSettings.model_filter_beacon == false then category = nil end
-	for group, name in pairs(self.player:getProductionGroups(category)) do
-		-- set le groupe
-		if model.beaconGroupSelected == nil then model.beaconGroupSelected = group end
-		-- ajoute les icons de groupe
-		local action = self:addGuiButton(groupsPanel, self:classname().."=beacon-group=ID="..item.."="..object.name.."=", group, "helmod_button_default", group)
+	-- ajouter de la table des groupes de recipe
+	local factories = self.player:getProductionsBeacon()
+	Logging:debug("factories:",factories)
+
+
+	if category == nil then
+		local subgroups = {}
+		for key, factory in pairs(factories) do
+			local subgroup = factory.subgroup.name
+			if subgroup ~= nil then
+				if subgroups[subgroup] == nil then
+					subgroups[subgroup] = 1
+				else
+					subgroups[subgroup] = subgroups[subgroup] + 1
+				end
+			end
+		end
+
+		for group, count in pairs(subgroups) do
+			-- set le groupe
+			if model.beaconGroupSelected == nil then model.beaconGroupSelected = group end
+			-- ajoute les icons de groupe
+			local action = self:addGuiButton(groupsPanel, self:classname().."=beacon-group=ID="..item.."="..object.name.."=", group, "helmod_button_default", group)
+		end
 	end
 
 	local tablePanel = self:addGuiTable(scrollPanel, "beacon-table", 5)
 	--Logging:debug("factories:",self.player:getProductions())
-	for key, beacon in pairs(self.player:getProductions()) do
-		if beacon.type == model.beaconGroupSelected then
+	for key, beacon in pairs(factories) do
+		if category ~= nil or (beacon.subgroup ~= nil and beacon.subgroup.name == model.beaconGroupSelected) then
 			local localised_name = beacon.localised_name
 			if globalSettings.real_name == true then
 				localised_name = beacon.name

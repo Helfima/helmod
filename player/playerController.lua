@@ -189,9 +189,14 @@ end
 -- @function [parent=#PlayerController] getGlobalGui
 --
 -- @param #LuaPlayer player
+-- @param #string property
 --
-function PlayerController.methods:getGlobalGui(player)
-	return self:getGlobal(player, "gui")
+function PlayerController.methods:getGlobalGui(player, property)
+	local settings = self:getGlobal(player, "gui")
+	if settings ~= nil and property ~= nil then
+		return settings[property]
+	end
+	return settings
 end
 
 -------------------------------------------------------------------------------
@@ -287,49 +292,6 @@ function PlayerController.methods:getRecipeSubgroups(player)
 		end
 	end
 	return recipeSubgroups
-end
-
--------------------------------------------------------------------------------
--- Return list of productions
---
--- @function [parent=#PlayerController] getProductionGroups
---
--- @param #string category filter
---
--- @return #table list of productions
---
-function PlayerController.methods:getProductionGroups(category)
-	if category == nil then return helmod_defines.production_groups end
-	local groups = {}
-	for k, group in pairs(helmod_defines.production_groups) do
-		local check = false
-		if group.categories ~= nil then
-			for c, value in pairs(group.categories) do
-				if category == value then check = true end
-			end
-		end
-		if check then
-			groups[group.name] = group
-		end
-	end
-	return groups
-end
-
--------------------------------------------------------------------------------
--- Return list of productions
---
--- @function [parent=#PlayerController] getProductions
---
--- @return #table list of productions
---
-function PlayerController.methods:getProductions()
-	local productions = {}
-	for key, item in pairs(game.entity_prototypes) do
-		if item.type ~= nil and helmod_defines.production_groups[item.type] ~= nil then
-			productions[item.name] = item
-		end
-	end
-	return productions
 end
 
 -------------------------------------------------------------------------------
@@ -470,6 +432,28 @@ end
 --
 function PlayerController.methods:getEntityPrototype(name)
 	return game.entity_prototypes[name]
+end
+
+-------------------------------------------------------------------------------
+-- Return item prototype
+--
+-- @function [parent=#PlayerController] getItemsPrototype
+--
+-- @return #table items prototype
+--
+function PlayerController.methods:getProductionsBeacon()
+	local items = {}
+	for _,item in pairs(game.item_prototypes) do
+		--Logging:debug("PlayerController:getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
+		if item.name ~= nil then
+			local efficiency = self:getItemProperty(item.name, "efficiency")
+			Logging:debug("PlayerController:getProductionsBeacon(type):", item.name, efficiency)
+			if efficiency ~= nil then
+				table.insert(items,item)
+			end
+		end
+	end
+	return items
 end
 
 -------------------------------------------------------------------------------
@@ -717,7 +701,22 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
 	
+
+
+
+
+
 
 
 

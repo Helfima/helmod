@@ -23,7 +23,7 @@ Logging.console = false
 
 helmod = {
 	name = "helmod",
-	version = "0.2.22"
+	version = "0.2.23"
 }
 
 -------------------------------------------------------------------------------
@@ -74,6 +74,11 @@ function helmod:on_configuration_changed(data)
 		-- Upgrade 0.2.22
 		if old_version ~= nil and old_version < "0.2.22" then
 			helmod:upgrade_0_2_22()
+		end
+
+		-- Upgrade 0.2.23
+		if old_version ~= nil and old_version < "0.2.23" then
+			helmod:upgrade_0_2_23()
 		end
 
 		if global["HMModel"] ~= nil then
@@ -182,8 +187,6 @@ end
 --
 -- @function [parent=#helmod] upgrade_0_2_17
 --
--- @param #table event
---
 function helmod:upgrade_0_2_17()
 	if global["HMModel"] ~= nil then
 		for _,data in pairs(global["HMModel"]) do
@@ -228,8 +231,6 @@ end
 --
 -- @function [parent=#helmod] upgrade_0_2_21
 --
--- @param #table event
---
 function helmod:upgrade_0_2_21()
 	if global["HMModel"] ~= nil then
 		for _,data in pairs(global["HMModel"]) do
@@ -247,8 +248,6 @@ end
 --
 -- @function [parent=#helmod] upgrade_0_2_22
 --
--- @param #table event
---
 function helmod:upgrade_0_2_22()
 	if global["HMModel"] ~= nil then
 		for _,data in pairs(global["HMModel"]) do
@@ -264,6 +263,34 @@ function helmod:upgrade_0_2_22()
 					end
 				end
 			end
+		end
+	end
+end
+
+-------------------------------------------------------------------------------
+-- Upgrade 0.2.23
+--
+-- @function [parent=#helmod] upgrade_0_2_23
+--
+function helmod:upgrade_0_2_23()
+	if global["HMModel"] ~= nil then
+		for _,data in pairs(global["HMModel"]) do
+			-- boucle sur chaque player
+			if data.default ~= nil then
+				-- clean defaut
+				data.default.factories = nil
+				data.default.beacons = nil
+			end
+			
+			if data.model ~= nil then
+				-- move model
+				local model = data.model
+				data.model = {}
+				table.insert(data.model, model)
+			end
+			
+			if data.gui == nil then data.gui = {} end
+			data.gui["model_index"] = 1
 		end
 	end
 end
