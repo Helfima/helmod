@@ -62,12 +62,11 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerData.methods:getModelPanel(player)
-	local displaySize = self.player:getGlobalSettings(player, "display_size")
-	local dataPanel = self:getDataPanel(player)
-	if dataPanel["model"] ~= nil and dataPanel["model"].valid then
-		return dataPanel["model"]
+	local menuPanel = self.parent:getMenuPanel(player)
+	if menuPanel["model"] ~= nil and menuPanel["model"].valid then
+		return menuPanel["model"]
 	end
-	return self:addGuiFrameV(dataPanel, "model", "helmod_frame_data_menu_"..displaySize, ({"helmod_data-panel.title"}))
+	return self:addGuiFrameV(menuPanel, "model", "helmod_frame_default")
 end
 
 -------------------------------------------------------------------------------
@@ -83,7 +82,7 @@ function PlannerData.methods:getMenuPanel(player, caption)
 	if dataPanel["menu"] ~= nil and dataPanel["menu"].valid then
 		return dataPanel["menu"]
 	end
-	return self:addGuiFrameH(dataPanel, "menu", "helmod_frame_data_menu_"..displaySize, caption)
+	return self:addGuiFrameV(dataPanel, "menu", "helmod_frame_data_menu_"..displaySize, caption)
 end
 
 -------------------------------------------------------------------------------
@@ -186,9 +185,9 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
 
 	if action == "change-model-index" then
 		globalGui.model_index = tonumber(item)
-		if globalGui.currentTab == self.PRODUCTION_LINE_TAB then
-			globalGui.currentBlock = "new"
-		end
+		globalGui.currentTab = self.PRODUCTION_LINE_TAB
+		globalGui.currentBlock = "new"
+		
 		self:update(player, item, item2, item3)
 		self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
 		self.parent:send_event(player, "HMPlannerResourceEdition", "CLOSE")
@@ -200,9 +199,9 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
 	if action == "remove-model-index" then
 		local model_index = tonumber(item)
 		self.model:removeModel(player, model_index)
-		if globalGui.currentTab == self.PRODUCTION_LINE_TAB then
-			globalGui.currentBlock = "new"
-		end
+		globalGui.currentTab = self.PRODUCTION_LINE_TAB
+		globalGui.currentBlock = "new"
+		
 		self:update(player, item, item2, item3)
 		self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
 		self.parent:send_event(player, "HMPlannerResourceEdition", "CLOSE")
@@ -340,7 +339,11 @@ function PlannerData.methods:update(player, item, item2, item3)
 	end
 
 	self:updateModelPanel(player, item, item2, item3)
-
+	
+	if globalGui.currentTab ~= self.PRODUCTION_BLOCK_TAB then
+		self:updateProductionHeader(player, item, item2, item3)
+	end
+	
 	if globalGui.currentTab == self.PRODUCTION_LINE_TAB then
 		self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
 		self.parent:send_event(player, "HMPlannerRecipeEdition", "CLOSE")
@@ -371,38 +374,14 @@ end
 function PlannerData.methods:updateModelPanel(player, item, item2, item3)
 	Logging:debug("PlannerData:updateModelPanel():", player, item, item2, item3)
 	local modelPanel = self:getModelPanel(player)
-	local models = self.model:getModels(player)
 	local model = self.model:getModel(player)
-	local model_index = self.player:getGlobalGui(player, "model_index")
-	if model_index == nil then model_index = 1 end
-
+	
 	for k,guiName in pairs(modelPanel.children_names) do
 		modelPanel[guiName].destroy()
 	end
 
-	-- index panel
-	local indexPanel = self:addGuiFlowH(modelPanel, "index", "helmod_flow_data_tab")
-	if #models > 0 then
-		for i,model in ipairs(models) do
-			if i == model_index then
-				self:addGuiLabel(indexPanel, self:classname().."=change-model-index="..i, i, "helmod_label_time")
-			else
-				self:addGuiButton(indexPanel, self:classname().."=change-model-index=ID=", i, "helmod_button_default", i)
-			end
-		end
-	end
-	self:addGuiButton(indexPanel, self:classname().."=change-model-index=ID=", (#models + 1), "helmod_button_default", "+")
-	
-	local menuPanel = self:addGuiFlowH(modelPanel, "menu", "helmod_flow_default")
-	-- tab panel
-	local tabPanel = self:addGuiFlowH(menuPanel, "tab", "helmod_flow_data_tab")
-	self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.PRODUCTION_LINE_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-production-line"}))
-	self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.SUMMARY_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-summary"}))
-	self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.RESOURCES_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-resources"}))
-
 	-- time panel
-	local timePanel = self:addGuiFlowH(menuPanel, "time", "helmod_flow_default")
-	self:addGuiLabel(timePanel, self:classname().."=base-time", ({"helmod_data-panel.base-time"}), "helmod_label_time")
+	self:addGuiButton(modelPanel, self:classname().."=base-time", nil, "helmod_button_icon_time", nil, ({"helmod_data-panel.base-time"}))
 
 	local times = {
 		{ value = 1, name = "1s"},
@@ -414,12 +393,55 @@ function PlannerData.methods:updateModelPanel(player, item, item2, item3)
 	}
 	for _,time in pairs(times) do
 		if model.time == time.value then
-			self:addGuiLabel(timePanel, self:classname().."=change-time="..time.value, time.name, "helmod_label_time")
+			self:addGuiLabel(modelPanel, self:classname().."=change-time="..time.value, time.name, "helmod_label_time")
 		else
-			self:addGuiButton(timePanel, self:classname().."=change-time=ID=", time.value, "helmod_button_default", time.name)
+			self:addGuiButton(modelPanel, self:classname().."=change-time=ID=", time.value, "helmod_button_time", time.name)
 		end
 	end
 
+end
+
+-------------------------------------------------------------------------------
+-- Update production header
+--
+-- @function [parent=#PlannerData] updateProductionHeader
+--
+-- @param #LuaPlayer player
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function PlannerData.methods:updateProductionHeader(player, item, item2, item3)
+	Logging:debug("PlannerData:updateLine():", player, item, item2, item3)
+	local displaySize = self.player:getGlobalSettings(player, "display_size")
+	local models = self.model:getModels(player)
+	local model_index = self.player:getGlobalGui(player, "model_index")
+	if model_index == nil then model_index = 1 end
+	-- data
+	local menuPanel = self:getMenuPanel(player, ({"helmod_result-panel.tab-title-production-line"}))
+
+	-- index panel
+	local indexPanel = self:addGuiFlowH(menuPanel, "index", "helmod_flow_data_menu_"..displaySize)
+	if #models > 0 then
+		for i,model in ipairs(models) do
+			if i == model_index then
+				self:addGuiLabel(indexPanel, self:classname().."=change-model-index="..i, i, "helmod_label_time")
+			else
+				self:addGuiButton(indexPanel, self:classname().."=change-model-index=ID=", i, "helmod_button_default", i)
+			end
+		end
+	end
+	self:addGuiButton(indexPanel, self:classname().."=change-model-index=ID=", (#models + 1), "helmod_button_default", "+")
+	
+	-- action panel 
+	local actionPanel = self:addGuiFlowH(menuPanel, "action", "helmod_flow_data_menu_"..displaySize)
+	local tabPanel = self:addGuiFlowH(actionPanel, "tab", "helmod_flow_data_tab")
+	self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.PRODUCTION_BLOCK_TAB, "helmod_button_default", ({"helmod_result-panel.add-button-production-block"}))
+	self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.PRODUCTION_LINE_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-production-line"}))
+	self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.SUMMARY_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-summary"}))
+	self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.RESOURCES_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-resources"}))
+	local deletePanel = self:addGuiFlowH(actionPanel, "delete", "helmod_flow_default")
+	self:addGuiButton(deletePanel, self:classname().."=remove-model-index=ID=", model_index, "helmod_button_default", ({"helmod_result-panel.remove-button-production-line"}))
 end
 -------------------------------------------------------------------------------
 -- Update production line tab
@@ -434,24 +456,16 @@ end
 function PlannerData.methods:updateProductionLine(player, item, item2, item3)
 	Logging:debug("PlannerData:updateLine():", player, item, item2, item3)
 	local displaySize = self.player:getGlobalSettings(player, "display_size")
-	local model = self.model:getModel(player)
 	local globalGui = self.player:getGlobalGui(player)
-	local model_index = self.player:getGlobalGui(player, "model_index")
-	-- data
-	local menuPanel = self:getMenuPanel(player, ({"helmod_result-panel.tab-title-production-line"}))
-
-	local tabPanel = self:addGuiFlowH(menuPanel, "tab", "helmod_flow_data_tab")
-	self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.PRODUCTION_BLOCK_TAB, "helmod_button_default", ({"helmod_result-panel.add-button-production-block"}))
-	local deletePanel = self:addGuiFlowH(menuPanel, "delete", "helmod_flow_default")
-	self:addGuiButton(deletePanel, self:classname().."=remove-model-index=ID=", model_index, "helmod_button_default", ({"helmod_result-panel.remove-button-production-line"}))
+	local model = self.model:getModel(player)
 
 	-- production line result
+	local resultPanel = self:getResultPanel(player, ({"helmod_common.blocks"}))
+	-- data panel
+	local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "helmod_scroll_block_list_"..displaySize, "auto", "auto")
+
 	local countBlock = self.model:countBlocks(player)
 	if countBlock > 0 then
-		local resultPanel = self:getResultPanel(player, ({"helmod_common.blocks"}))
-		-- data panel
-		local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "helmod_scroll_block_list_"..displaySize, "auto", "auto")
-
 		local globalSettings = self.player:getGlobal(player, "settings")
 
 		local extra_cols = 0

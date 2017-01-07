@@ -120,6 +120,19 @@ default_gui["helmod_button_default"] = {
 -------------------------------------------------------------------------------
 -- Style of button
 --
+-- @field [parent=#Button] time
+
+local icon_corner_size = 0
+default_gui["helmod_button_time"] = {
+	type = "button_style",
+	parent = "helmod_button_default",
+	font = "helmod_font_small_bold",
+	width = 28
+}
+
+-------------------------------------------------------------------------------
+-- Style of button
+--
 -- @field [parent=#Button] favicon
 
 local icon_corner_size = 0
@@ -133,6 +146,60 @@ default_gui["helmod_icon"] = {
 	hovered_graphical_set = monolithIcon("__helmod__/graphics/icons/helmod_icon.png", 32, 1, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
 	clicked_graphical_set = monolithIcon("__helmod__/graphics/icons/helmod_icon.png", 32, 1, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
 	disabled_graphical_set = monolithIcon("__helmod__/graphics/icons/helmod_icon.png", 32, 1, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true)
+}
+
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] icon_options
+
+local icon_corner_size = 0
+default_gui["helmod_button_icon_options"] = {
+	type = "button_style",
+	parent = "helmod_button_default",
+	width = 32,
+	height = 32,
+	scalable = false,
+	default_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=32,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true)
+}
+
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] icon_time
+
+local icon_corner_size = 0
+default_gui["helmod_button_icon_time"] = {
+	type = "button_style",
+	parent = "helmod_button_default",
+	width = 32,
+	height = 32,
+	scalable = false,
+	default_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=32}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=32,y=32}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=32}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=32}, {top=0,right=0,bottom=0,left=0}, true)
+}
+
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] icon_cancel
+
+local icon_corner_size = 0
+default_gui["helmod_button_icon_cancel"] = {
+	type = "button_style",
+	parent = "helmod_button_default",
+	width = 32,
+	height = 32,
+	scalable = false,
+	default_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=64}, {top=0,right=0,bottom=0,left=0}, true),
+	hovered_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=32,y=64}, {top=0,right=0,bottom=0,left=0}, true),
+	clicked_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=64}, {top=0,right=0,bottom=0,left=0}, true),
+	disabled_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=64}, {top=0,right=0,bottom=0,left=0}, true)
 }
 
 -------------------------------------------------------------------------------
@@ -651,11 +718,12 @@ default_gui["helmod_table-odd"] = {
 -- |--------------------------------------------------|
 --
 
-local width_info=492
+local width_info=480
 local width_scroll=8
 local width_block_info=290
-local height_block_header = 400
-local height_selector_header = 255
+local width_recipe_column=220
+local height_block_header = 450
+local height_selector_header = 350
 
 local width_1920 = math.ceil(1920*0.85) -- 1632
 local height_1200 = math.ceil(1200*0.85) -- 1020
@@ -679,6 +747,20 @@ default_gui["helmod_flow_default"] = {
 	parent = "flow_style",
 	horizontal_spacing = 1,
 	vertical_spacing = 1
+}
+
+-------------------------------------------------------------------------------
+-- Style of left menu panel
+--
+-- @field [parent=#Flow] left_menu
+-- 
+
+default_gui["helmod_flow_left_menu"] = {
+	type = "flow_style",
+	parent = "helmod_flow_default",
+	minimal_width = 38,
+	maximal_width = 38,
+	maximal_height = height_1050
 }
 
 -------------------------------------------------------------------------------
@@ -790,6 +872,18 @@ default_gui["helmod_flow_data_1920x1200"] = {
 -------------------------------------------------------------------------------
 -- Style of data panel
 --
+-- @field [parent=#Flow] data_menu_1920x1200
+
+default_gui["helmod_flow_data_menu_1920x1200"] = {
+	type = "flow_style",
+	parent = "helmod_flow_resize_row_width",
+	minimal_width = width_1920 - width_info,
+	maximal_width = width_1920 - width_info
+}
+
+-------------------------------------------------------------------------------
+-- Style of data panel
+--
 -- @field [parent=#Flow] data_1680x1050
 
 default_gui["helmod_flow_data_1680x1050"] = {
@@ -798,6 +892,18 @@ default_gui["helmod_flow_data_1680x1050"] = {
 	minimal_width = width_1680 - width_info,
 	maximal_width = width_1680 - width_info,
 	minimal_height = 600
+}
+
+-------------------------------------------------------------------------------
+-- Style of data panel
+--
+-- @field [parent=#Flow] data_menu_1680x1050
+
+default_gui["helmod_flow_data_menu_1680x1050"] = {
+	type = "flow_style",
+	parent = "helmod_flow_resize_row_width",
+	minimal_width = width_1680 - width_info,
+	maximal_width = width_1680 - width_info
 }
 
 -------------------------------------------------------------------------------
@@ -1018,8 +1124,8 @@ default_gui["helmod_frame_data_1680x1050"] = {
 default_gui["helmod_frame_recipe_modules"] = {
 	type = "frame_style",
 	parent = "helmod_frame_default",
-	minimal_width = 230,
-	maximal_width = 230
+	minimal_width = width_recipe_column,
+	maximal_width = width_recipe_column
 }
 
 -------------------------------------------------------------------------------
@@ -1031,8 +1137,8 @@ default_gui["helmod_frame_recipe_modules"] = {
 default_gui["helmod_frame_recipe_ingredients"] = {
 	type = "frame_style",
 	parent = "helmod_frame_default",
-	minimal_width = 230,
-	maximal_width = 230,
+	minimal_width = width_recipe_column,
+	maximal_width = width_recipe_column,
 	minimal_height = 76,
 	maximal_height = 76
 }
@@ -1046,8 +1152,8 @@ default_gui["helmod_frame_recipe_ingredients"] = {
 default_gui["helmod_frame_recipe_products"] = {
 	type = "frame_style",
 	parent = "helmod_frame_default",
-	minimal_width = 230,
-	maximal_width = 230,
+	minimal_width = width_recipe_column,
+	maximal_width = width_recipe_column,
 	minimal_height = 77,
 	maximal_height = 77
 }
@@ -1061,8 +1167,8 @@ default_gui["helmod_frame_recipe_products"] = {
 default_gui["helmod_frame_recipe_info"] = {
 	type = "frame_style",
 	parent = "helmod_frame_default",
-	minimal_width = 230,
-	maximal_width = 230
+	minimal_width = width_recipe_column,
+	maximal_width = width_recipe_column
 }
 
 -------------------------------------------------------------------------------
@@ -1074,8 +1180,8 @@ default_gui["helmod_frame_recipe_info"] = {
 default_gui["helmod_frame_recipe_factory"] = {
 	type = "frame_style",
 	parent = "helmod_frame_default",
-	minimal_width = 230,
-	maximal_width = 230,
+	minimal_width = width_recipe_column,
+	maximal_width = width_recipe_column,
 	minimal_height = 305,
 	maximal_height = 305
 }
@@ -1136,8 +1242,8 @@ default_gui["helmod_scroll_block_info"] = {
 default_gui["helmod_scroll_block_element"] = {
 	type = "scroll_pane_style",
 	parent = "scroll_pane_style",
-	minimal_height = 36,
-	maximal_height = 36
+	minimal_height = 72,
+	maximal_height = 72
 }
 
 -------------------------------------------------------------------------------
@@ -1186,8 +1292,8 @@ default_gui["helmod_scroll_block_pin_tab"] = {
 default_gui["helmod_scroll_recipe_module_list"] = {
 	type = "scroll_pane_style",
 	parent = "scroll_pane_style",
-	minimal_width = 210,
-	maximal_width = 210,
+	minimal_width = width_recipe_column - width_scroll,
+	maximal_width = width_recipe_column - width_scroll,
 	minimal_height = 197,
 	maximal_height = 197
 }
@@ -1228,8 +1334,8 @@ default_gui["helmod_scroll_recipe_selector_1680x1050"] = {
 default_gui["helmod_scroll_recipe_factories"] = {
 	type = "scroll_pane_style",
 	parent = "scroll_pane_style",
-	minimal_width = 210,
-	maximal_width = 210,
+	minimal_width = width_recipe_column - width_scroll,
+	maximal_width = width_recipe_column - width_scroll,
 	minimal_height = 270,
 	maximal_height = 270
 }

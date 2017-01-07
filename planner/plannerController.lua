@@ -1,7 +1,6 @@
 require "planner/plannerModel"
 require "planner/plannerDialog"
 require "planner/plannerData"
-require "planner/plannerResult"
 require "planner/plannerSettings"
 require "planner/plannerRecipeSelector"
 require "planner/plannerRecipeEdition"
@@ -174,14 +173,15 @@ function PlannerController.methods:main(player)
 		-- main panel
 		Logging:debug("Create main panel")
 		local mainPanel = self:getMainPanel(player)
+		-- menu
+		Logging:debug("Create menu panel")
+		local menuPanel = self:getMenuPanel(player)
+		local actionPanel = self:addGuiFrameV(menuPanel, "settings", "helmod_frame_default")
+		self:addGuiButton(actionPanel, self:classname().."=CLOSE", nil, "helmod_button_icon_cancel", nil, ({"helmod_button.close"}))
+		self:addGuiButton(actionPanel, "HMPlannerSettings=OPEN", nil, "helmod_button_icon_options", nil, ({"helmod_button.options"}))
 		-- info
 		Logging:debug("Create info panel")
 		local infoPanel = self:getInfoPanel(player)
-		-- menu
-		Logging:debug("Create menu panel")
-		local settingsPanel = self:getMenuPanel(player)
-		self:addGuiButton(settingsPanel, self:classname().."=CLOSE", nil, "helmod_button_default", ({"helmod_button.close"}))
-		self:addGuiButton(settingsPanel, "HMPlannerSettings=OPEN", nil, "helmod_button_default", ({"helmod_button.options"}))
 		-- data
 		Logging:debug("Create data panel")
 		local dataPanel = self:getDataPanel(player)
@@ -281,11 +281,11 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerController.methods:getMenuPanel(player)
-	local infoPanel = self:getInfoPanel(player)
-	if infoPanel["helmod_planner_settings"] ~= nil and infoPanel["helmod_planner_settings"].valid then
-		return infoPanel["helmod_planner_settings"]
+	local menuPanel = self:getMainPanel(player)
+	if menuPanel["helmod_planner_settings"] ~= nil and menuPanel["helmod_planner_settings"].valid then
+		return menuPanel["helmod_planner_settings"]
 	end
-	return self:addGuiFrameH(infoPanel, "helmod_planner_settings", "helmod_frame_main_menu")
+	return self:addGuiFlowV(menuPanel, "helmod_planner_settings", "helmod_flow_left_menu")
 end
 
 -------------------------------------------------------------------------------
