@@ -22,7 +22,8 @@ function PlannerData.methods:init(parent)
 	self.PRODUCTION_BLOCK_TAB = "product-block"
 	self.PRODUCTION_LINE_TAB = "product-line"
 	self.SUMMARY_TAB = "summary"
-	self.RESOURCES_TAB = "resources"
+  self.RESOURCES_TAB = "resources"
+  self.POWER_TAB = "power"
 
 end
 
@@ -193,6 +194,7 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
 		self.parent:send_event(player, "HMPlannerResourceEdition", "CLOSE")
 		self.parent:send_event(player, "HMPlannerRecipeEdition", "CLOSE")
 		self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
+    self.parent:send_event(player, "HMPlannerEnergyEdition", "CLOSE")
 		self.parent:send_event(player, "HMPlannerSettings", "CLOSE")
 	end
 
@@ -207,6 +209,7 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
 		self.parent:send_event(player, "HMPlannerResourceEdition", "CLOSE")
 		self.parent:send_event(player, "HMPlannerRecipeEdition", "CLOSE")
 		self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
+    self.parent:send_event(player, "HMPlannerEnergyEdition", "CLOSE")
 		self.parent:send_event(player, "HMPlannerSettings", "CLOSE")
 	end
 
@@ -226,7 +229,8 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
 		self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
 		self.parent:send_event(player, "HMPlannerResourceEdition", "CLOSE")
 		self.parent:send_event(player, "HMPlannerRecipeEdition", "CLOSE")
-		self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
+    self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
+    self.parent:send_event(player, "HMPlannerEnergyEdition", "CLOSE")
 		self.parent:send_event(player, "HMPlannerSettings", "CLOSE")
 	end
 
@@ -356,9 +360,12 @@ function PlannerData.methods:update(player, item, item2, item3)
 	if globalGui.currentTab == self.SUMMARY_TAB then
 		self:updateSummary(player, item, item2, item3)
 	end
-	if globalGui.currentTab == self.RESOURCES_TAB then
-		self:updateResources(player, item, item2, item3)
-	end
+  if globalGui.currentTab == self.RESOURCES_TAB then
+    self:updateResources(player, item, item2, item3)
+  end
+  if globalGui.currentTab == self.POWER_TAB then
+    self:updatePower(player, item, item2, item3)
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -439,7 +446,8 @@ function PlannerData.methods:updateProductionHeader(player, item, item2, item3)
 	self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.PRODUCTION_BLOCK_TAB, "helmod_button_default", ({"helmod_result-panel.add-button-production-block"}))
 	self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.PRODUCTION_LINE_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-production-line"}))
 	self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.SUMMARY_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-summary"}))
-	self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.RESOURCES_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-resources"}))
+  self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.RESOURCES_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-resources"}))
+  self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.POWER_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-energy"}))
 	local deletePanel = self:addGuiFlowH(actionPanel, "delete", "helmod_flow_default")
 	self:addGuiButton(deletePanel, self:classname().."=remove-model-index=ID=", model_index, "helmod_button_default", ({"helmod_result-panel.remove-button-production-line"}))
 end
@@ -1105,13 +1113,13 @@ function PlannerData.methods:updateSummary(player)
 	local dataPanel = self:getDataPanel(player)
 
 	-- resources
-	local resourcesPanel = self:addGuiFrameV(dataPanel, "ressources", "helmod_frame_data_menu_"..displaySize, ({"helmod_common.resources"}))
+	local resourcesPanel = self:addGuiFrameV(dataPanel, "resources", "helmod_frame_data_menu_"..displaySize, ({"helmod_common.resources"}))
 	local resourcesTable = self:addGuiTable(resourcesPanel,"table-resources",7)
 	self:addGuiLabel(resourcesTable, "header-ingredient", ({"helmod_result-panel.col-header-ingredient"}))
 	self:addGuiLabel(resourcesTable, "header-block", ({"helmod_result-panel.col-header-production-block"}))
 	self:addGuiLabel(resourcesTable, "header-cargo-wagon", ({"helmod_result-panel.col-header-wagon"}))
 	self:addGuiLabel(resourcesTable, "header-chest", ({"helmod_result-panel.col-header-storage"}))
-	self:addGuiLabel(resourcesTable, "header-extrator", ({"helmod_result-panel.col-header-extractor"}))
+	self:addGuiLabel(resourcesTable, "header-extractor", ({"helmod_result-panel.col-header-extractor"}))
 	self:addGuiLabel(resourcesTable, "header-beacon", ({"helmod_result-panel.col-header-beacon"}))
 	self:addGuiLabel(resourcesTable, "header-energy", ({"helmod_result-panel.col-header-energy"}))
 
@@ -1241,4 +1249,29 @@ function PlannerData.methods:updateSummary(player)
 		self:addGuiLabel(guiCell, element.name, self:formatNumberKilo(element.count), "helmod_label_right_50")
 		self:addGuiButtonSprite(guiCell, "HMPlannerModules=OPEN=ID=", "item", element.name, element.name, self.player:getLocalisedName(player, element))
 	end
+end
+
+
+-------------------------------------------------------------------------------
+-- Update power tab
+--
+-- @function [parent=#PlannerData] updatePower
+--
+-- @param #LuaPlayer player
+--
+function PlannerData.methods:updatePower(player)
+  Logging:debug("PlannerData:updateSummary():", player)
+  local displaySize = self.player:getGlobalSettings(player, "display_size")
+  local model = self.model:getModel(player)
+  
+  -- data
+  local resultPanel = self:getResultPanel(player, ({"helmod_result-panel.tab-title-energy"}))
+  
+  local menuPanel = self:addGuiFlowH(resultPanel,"menu")
+  self:addGuiButton(menuPanel, "HMPlannerEnergyEdition=OPEN=", nil, "helmod_button_default", ({"helmod_result-panel.add-button-power"}))
+  
+  
+  local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "helmod_scroll_block_list_"..displaySize, "auto", "auto")
+  
+
 end

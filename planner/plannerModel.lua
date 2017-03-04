@@ -1158,12 +1158,15 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 				end
 			end
 
+      -- state = 0 => produit
+      -- state = 1 => produit pilotant
+      -- state = 2 => produit restant
 			for _, product in pairs(recipe.products) do
 				-- compte les produits
-				if element.products[product.name] ~= nil and element.products[product.name].state == 0 then
-					element.products[product.name].count = element.products[product.name].count + product.count
-				end
-				-- consomme les produits
+        if element.products[product.name] ~= nil and element.products[product.name].state == 0 then
+          element.products[product.name].count = element.products[product.name].count + product.count
+        end
+        -- consomme les produits
 				if element.ingredients[product.name] ~= nil then
 					element.ingredients[product.name].count = element.ingredients[product.name].count - product.count
 				end

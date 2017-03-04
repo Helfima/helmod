@@ -1,5 +1,6 @@
 local data_entity = {}
 
+-- recherche tout les types item
 for type,elements in pairs(data.raw) do
 	if type =="item" then
 		for _,element in pairs(elements) do
@@ -9,13 +10,19 @@ for type,elements in pairs(data.raw) do
 		end
 	end
 end
-
+-- recherche des attributs non visible pour les items precedents
 for type,elements in pairs(data.raw) do
 	if type ~="item" then
 		for _,element in pairs(elements) do
 			if element.name ~= nil and element.type ~= "recipe" then
 				local entity = data_entity[element.name]
 				if entity ~= nil then
+					-- util pour le generation de list
+					if element.type == "generator" then entity.classification = "generator" end
+          if element.type == "boiler" then entity.classification = "boiler" end
+          if element.type == "accumulator" then entity.classification = "accumulator" end
+          if element.type == "solar-panel" then entity.classification = "solar-panel" end
+          -- proprietes pour les usines
 					if element.crafting_categories ~= nil then entity.crafting_categories = element.crafting_categories end
 					if element.resource_categories ~= nil then entity.resource_categories = element.resource_categories end
 					if element.crafting_speed ~= nil then entity.crafting_speed = element.crafting_speed end

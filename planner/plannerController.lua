@@ -6,6 +6,7 @@ require "planner/plannerRecipeSelector"
 require "planner/plannerRecipeEdition"
 require "planner/plannerProductEdition"
 require "planner/plannerResourceEdition"
+require "planner/plannerEnergyEdition"
 require "planner/plannerPinPanel"
 
 
@@ -202,9 +203,12 @@ function PlannerController.methods:main(player)
 
 		self.controllers["resource-edition"] = PlannerResourceEdition:new(self)
 
-		self.controllers["product-edition"] = PlannerProductEdition:new(self)
+    self.controllers["product-edition"] = PlannerProductEdition:new(self)
 
-		self.controllers["pin-panel"] = PlannerPinPanel:new(self)
+    self.controllers["energy-edition"] = PlannerEnergyEdition:new(self)
+
+    self.controllers["pin-panel"] = PlannerPinPanel:new(self)
+
 
 	end
 end

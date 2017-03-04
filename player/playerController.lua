@@ -435,25 +435,49 @@ function PlayerController.methods:getEntityPrototype(name)
 end
 
 -------------------------------------------------------------------------------
--- Return item prototype
+-- Return beacon production
 --
--- @function [parent=#PlayerController] getItemsPrototype
+-- @function [parent=#PlayerController] getProductionsBeacon
 --
 -- @return #table items prototype
 --
 function PlayerController.methods:getProductionsBeacon()
-	local items = {}
-	for _,item in pairs(game.item_prototypes) do
-		--Logging:debug("PlayerController:getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
-		if item.name ~= nil then
-			local efficiency = self:getItemProperty(item.name, "efficiency")
-			Logging:debug("PlayerController:getProductionsBeacon(type):", item.name, efficiency)
-			if efficiency ~= nil then
-				table.insert(items,item)
-			end
-		end
-	end
-	return items
+  local items = {}
+  for _,item in pairs(game.item_prototypes) do
+    --Logging:debug("PlayerController:getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
+    if item.name ~= nil then
+      local efficiency = self:getItemProperty(item.name, "efficiency")
+      Logging:debug("PlayerController:getProductionsBeacon(type):", item.name, efficiency)
+      if efficiency ~= nil then
+        table.insert(items,item)
+      end
+    end
+  end
+  return items
+end
+
+-------------------------------------------------------------------------------
+-- Return generators
+--
+-- @function [parent=#PlayerController] getGenerators
+--
+-- @return #table items prototype
+--
+function PlayerController.methods:getGenerators()
+  local items = {}
+  for _,item in pairs(game.item_prototypes) do
+    --Logging:debug("PlayerController:getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
+    if item.name ~= nil then
+      local classification = self:getItemProperty(item.name, "classification")
+      if item.group.name == "production" then
+        Logging:debug("PlayerController:getGenerators():", item.name, item.type, item.group.name, item.subgroup.name)
+      end
+      if classification == "generator" or classification == "solar-panel" then
+        table.insert(items,item)
+      end
+    end
+  end
+  return items
 end
 
 -------------------------------------------------------------------------------
@@ -516,6 +540,7 @@ end
 --
 function PlayerController.methods:getIconType(element)
 	Logging:debug("PlayerController:getIconType(element)", element)
+	if element == nil then return "unknown" end
 	local item = self:getItemPrototype(element.name)
 	if item ~= nil then
 		return "item"
@@ -653,10 +678,10 @@ end
 -- @param #string property
 --
 function PlayerController.methods:getItemProperty(name, property)
-	Logging:trace("PlayerController:getItemProperty(name, property)", name, property)
+	Logging:debug("PlayerController:getItemProperty(name, property)", name, property)
 	if data_entity == nil then
 		data_entity = loadstring(game.entity_prototypes["data_entity"].order)()
-		Logging:trace("PlayerController:getItemProperty(name, property):data_entity", data_entity)
+		Logging:debug("PlayerController:getItemProperty(name, property):data_entity", data_entity)
 	end
 	if data_entity[name] then
 		if property == "energy_usage" then

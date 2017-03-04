@@ -31,7 +31,7 @@ function SpeedController.methods:bindController(player)
 	local other_speed_panel = defaultSettings.other_speed_panel
 	if globalSettings.other_speed_panel ~= nil then other_speed_panel = globalSettings.other_speed_panel end
 
-	if other_speed_panel == true then
+	if other_speed_panel == true and player.admin == true then
 		local parentGui = self.parent:getGui(player)
 		if parentGui ~= nil then
 			local gui = parentGui.add({type="flow", name=self.names.command, direction="horizontal"})
