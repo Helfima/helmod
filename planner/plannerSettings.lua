@@ -189,7 +189,8 @@ end
 function PlannerSettings.methods:after_open(player, element, action, item, item2, item3)
 	self.parent:send_event(player, "HMPlannerRecipeEdition", "CLOSE")
 	self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
-	self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
+  self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
+  self.parent:send_event(player, "HMPlannerEnergyEdition", "CLOSE")
 
 	self:updateAboutSettings(player, element, action, item, item2, item3)
 	self:updateDisplaySettings(player, element, action, item, item2, item3)
@@ -363,13 +364,20 @@ function PlannerSettings.methods:updateModelSettings(player, element, action, it
 	self:addGuiCheckbox(modelSettingsTable, self:classname().."=change-boolean-settings=ID=model_filter_factory", model_filter_factory)
 	self:addGuiLabel(modelSettingsTable, self:classname().."=blank=ID=model_filter_factory", "")
 
-	-- model_filter_factory
-	self:addGuiLabel(modelSettingsTable, self:classname().."=model_filter_beacon", ({"helmod_settings-panel.model-filter-beacon"}))
+  -- model_filter_factory
+  self:addGuiLabel(modelSettingsTable, self:classname().."=model_filter_beacon", ({"helmod_settings-panel.model-filter-beacon"}))
 
-	local model_filter_beacon = defaultSettings.model_filter_beacon
-	if globalSettings.model_filter_beacon ~= nil then model_filter_beacon = globalSettings.model_filter_beacon end
-	self:addGuiCheckbox(modelSettingsTable, self:classname().."=change-boolean-settings=ID=model_filter_beacon", model_filter_beacon)
-	self:addGuiLabel(modelSettingsTable, self:classname().."=blank=ID=model_filter_beacon", "")
+  local model_filter_beacon = defaultSettings.model_filter_beacon
+  if globalSettings.model_filter_beacon ~= nil then model_filter_beacon = globalSettings.model_filter_beacon end
+  self:addGuiCheckbox(modelSettingsTable, self:classname().."=change-boolean-settings=ID=model_filter_beacon", model_filter_beacon)
+  self:addGuiLabel(modelSettingsTable, self:classname().."=blank=ID=model_filter_beacon", "")
+
+  -- model_filter_generator
+  self:addGuiLabel(modelSettingsTable, self:classname().."=model_filter_generator", ({"helmod_settings-panel.model-filter-generator"}))
+
+  local model_filter_generator = self.player:getGlobalSettings(player, "model_filter_generator")
+  self:addGuiCheckbox(modelSettingsTable, self:classname().."=change-boolean-settings=ID=model_filter_generator", model_filter_generator)
+  self:addGuiLabel(modelSettingsTable, self:classname().."=blank=ID=model_filter_generator", "")
 
 end
 

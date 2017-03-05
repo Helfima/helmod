@@ -177,6 +177,7 @@ function PlayerController.methods:getDefaultSettings()
 		model_loop_limit = 1000,
 		model_filter_factory = true,
 		model_filter_beacon = true,
+		model_filter_generator = true,
 		other_speed_panel=false,
 		real_name=false,
 		filter_show_hidden=false
@@ -470,7 +471,7 @@ function PlayerController.methods:getGenerators()
     if item.name ~= nil then
       local classification = self:getItemProperty(item.name, "classification")
       if item.group.name == "production" then
-        Logging:debug("PlayerController:getGenerators():", item.name, item.type, item.group.name, item.subgroup.name)
+        Logging:trace("PlayerController:getGenerators():", item.name, item.type, item.group.name, item.subgroup.name)
       end
       if classification == "generator" or classification == "solar-panel" then
         table.insert(items,item)
@@ -678,13 +679,22 @@ end
 -- @param #string property
 --
 function PlayerController.methods:getItemProperty(name, property)
-	Logging:debug("PlayerController:getItemProperty(name, property)", name, property)
+	Logging:trace("PlayerController:getItemProperty(name, property)", name, property)
 	if data_entity == nil then
 		data_entity = loadstring(game.entity_prototypes["data_entity"].order)()
-		Logging:debug("PlayerController:getItemProperty(name, property):data_entity", data_entity)
+		Logging:trace("PlayerController:getItemProperty(name, property):data_entity", data_entity)
 	end
 	if data_entity[name] then
-		if property == "energy_usage" then
+		
+		
+    if property == "production" then
+      if data_entity[name]["production"] ~= nil then
+        local value = string.match(data_entity[name]["production"],"[0-9.]*",1)
+        return tonumber(value)
+      else
+        return 0
+      end
+    elseif property == "energy_usage" then
 			if data_entity[name]["energy_usage"] ~= nil then
 				local value = string.match(data_entity[name]["energy_usage"],"[0-9.]*",1)
 				return tonumber(value)

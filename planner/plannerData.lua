@@ -364,7 +364,7 @@ function PlannerData.methods:update(player, item, item2, item3)
     self:updateResources(player, item, item2, item3)
   end
   if globalGui.currentTab == self.POWER_TAB then
-    self:updatePower(player, item, item2, item3)
+    self:updatePowers(player, item, item2, item3)
   end
 end
 
@@ -462,7 +462,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerData.methods:updateProductionLine(player, item, item2, item3)
-	Logging:debug("PlannerData:updateLine():", player, item, item2, item3)
+	Logging:debug("PlannerData:updateProductionLine():", player, item, item2, item3)
 	local displaySize = self.player:getGlobalSettings(player, "display_size")
 	local globalGui = self.player:getGlobalGui(player)
 	local model = self.model:getModel(player)
@@ -1255,11 +1255,11 @@ end
 -------------------------------------------------------------------------------
 -- Update power tab
 --
--- @function [parent=#PlannerData] updatePower
+-- @function [parent=#PlannerData] updatePowers
 --
 -- @param #LuaPlayer player
 --
-function PlannerData.methods:updatePower(player)
+function PlannerData.methods:updatePowers(player)
   Logging:debug("PlannerData:updateSummary():", player)
   local displaySize = self.player:getGlobalSettings(player, "display_size")
   local model = self.model:getModel(player)
@@ -1268,10 +1268,87 @@ function PlannerData.methods:updatePower(player)
   local resultPanel = self:getResultPanel(player, ({"helmod_result-panel.tab-title-energy"}))
   
   local menuPanel = self:addGuiFlowH(resultPanel,"menu")
-  self:addGuiButton(menuPanel, "HMPlannerEnergyEdition=OPEN=", nil, "helmod_button_default", ({"helmod_result-panel.add-button-power"}))
+  self:addGuiButton(menuPanel, "HMPlannerEnergyEdition=OPEN=ID=", "new", "helmod_button_default", ({"helmod_result-panel.add-button-power"}))
   
   
   local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "helmod_scroll_block_list_"..displaySize, "auto", "auto")
   
+
+  local countBlock = self.model:countPowers(player)
+  if countBlock > 0 then
+    local globalSettings = self.player:getGlobal(player, "settings")
+
+    local extra_cols = 0
+    if globalSettings.display_data_col_id then
+      extra_cols = extra_cols + 1
+    end
+    local resultTable = self:addGuiTable(scrollPanel,"list-data",2 + extra_cols, "helmod_table-odd")
+
+    self:addPowersHeader(player, resultTable)
+
+    local i = 0
+    for _, element in spairs(model.powers, function(t,a,b) if globalGui.order.ascendant then return t[b][globalGui.order.name] > t[a][globalGui.order.name] else return t[b][globalGui.order.name] < t[a][globalGui.order.name] end end) do
+      self:addPowersRow(player, resultTable, element)
+    end
+
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Add header powers tab
+--
+-- @function [parent=#PlannerData] addPowersHeader
+--
+-- @param #LuaPlayer player
+-- @param #LuaGuiElement itable container for element
+--
+function PlannerData.methods:addPowersHeader(player, itable)
+  Logging:debug("PlannerData:addHeader():", player, itable)
+  local model = self.model:getModel(player)
+  local globalSettings = self.player:getGlobal(player, "settings")
+
+  if globalSettings.display_data_col_id then
+    local guiId = self:addGuiFlowH(itable,"header-id")
+    self:addGuiLabel(guiId, "label", ({"helmod_result-panel.col-header-id"}))
+    self:addGuiButton(guiId, self:classname().."=change-sort=ID=", "id", self.player:getSortedStyle(player, "id"))
+
+  end
+  
+  -- col power
+  local guiPower = self:addGuiFlowH(itable,"header-power")
+  self:addGuiLabel(guiPower, "header-power", ({"helmod_result-panel.col-header-energy"}))
+  
+  -- col primary
+  local guiCount = self:addGuiFlowH(itable,"header-primary")
+  self:addGuiLabel(guiCount, "header-primary", ({"helmod_result-panel.col-header-primary"}))
+
+end
+
+-------------------------------------------------------------------------------
+-- Add row powers tab
+--
+-- @function [parent=#PlannerData] addPowersRow
+--
+-- @param #LuaPlayer player
+--
+function PlannerData.methods:addPowersRow(player, guiTable, power)
+  Logging:debug("PlannerData:addRow():", player, guiTable, power)
+  local model = self.model:getModel(player)
+
+  local globalSettings = self.player:getGlobal(player, "settings")
+  -- col id
+  if globalSettings.display_data_col_id then
+    local guiId = self:addGuiFlowH(guiTable,"id"..power.id)
+    self:addGuiLabel(guiId, "id", power.id)
+  end
+  -- col power
+  local guiPower = self:addGuiFlowH(guiTable,"power"..power.id)
+  self:addGuiLabel(guiPower, power.id, self:formatNumberKilo(power.power, "W"), "helmod_label_right_70")
+  
+  -- col primary
+  local guiPrimary = self:addGuiFlowH(guiTable,"primary"..power.id)
+  local primary = power.primary
+  self:addGuiLabel(guiPrimary, primary.name, self:formatNumber(primary.count), "helmod_label_right_60")
+  self:addGuiButtonSelectSprite(guiPrimary, "HMPlannerEnergyEdition=OPEN=ID="..power.id.."=", self.player:getIconType(primary), primary.name, "X"..primary.count, ({"tooltip.edit-energy", self.player:getLocalisedName(player, primary)}))
 
 end

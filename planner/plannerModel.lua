@@ -62,7 +62,9 @@ function PlannerModel.methods:getModel(player)
 
 	if model.ingredients == nil then model.ingredients = {} end
 
-	if model.resources == nil then model.resources = {} end
+  if model.resources == nil then model.resources = {} end
+  
+  if model.powers == nil then model.powers = {} end
 
 	if model.time == nil then model.time = 1 end
 
@@ -99,15 +101,35 @@ end
 -- @return #table
 --
 function PlannerModel.methods:getObject(player, item, key)
-	Logging:trace("PlannerModel:getObject():",player, item, key)
-	local object = nil
-	local model = self:getModel(player)
-	if item == "resource" then
-		object = model.resources[key]
-	elseif model.blocks[item] ~= nil and model.blocks[item].recipes[key] ~= nil then
-		object = model.blocks[item].recipes[key]
-	end
-	return object
+  Logging:trace("PlannerModel:getObject():",player, item, key)
+  local object = nil
+  local model = self:getModel(player)
+  if item == "resource" then
+    object = model.resources[key]
+  elseif model.blocks[item] ~= nil and model.blocks[item].recipes[key] ~= nil then
+    object = model.blocks[item].recipes[key]
+  end
+  return object
+end
+
+-------------------------------------------------------------------------------
+-- Get power
+--
+-- @function [parent=#PlannerModel] getPower
+--
+-- @param #LuaPlayer player
+-- @param #string key power id
+--
+-- @return #table
+--
+function PlannerModel.methods:getPower(player, key)
+  Logging:trace("PlannerModel:getPower():",player, key)
+  local object = nil
+  local model = self:getModel(player)
+  if model.powers[key] ~= nil then
+    object = model.powers[key]
+  end
+  return object
 end
 
 
@@ -153,7 +175,7 @@ end
 -- @return #table
 --
 function PlannerModel.methods:createBeaconModel(player, name, count)
-	Logging:debug("PlannerModel:createFactoryModel():",player, name, count)
+	Logging:debug("PlannerModel:createBeaconModel():",player, name, count)
 	if name == nil then name = "beacon" end
 	if count == nil then count = 0 end
 	local beaconModel = {}
@@ -189,27 +211,86 @@ end
 -- @return #table
 --
 function PlannerModel.methods:createFactoryModel(player, name, count)
-	Logging:debug("PlannerModel:createFactoryModel():",player, name, count)
-	if name == nil then name = "assembling-machine-1" end
-	if count == nil then count = 0 end
+  Logging:debug("PlannerModel:createFactoryModel():",player, name, count)
+  if name == nil then name = "assembling-machine-1" end
+  if count == nil then count = 0 end
 
-	local factoryModel = {}
-	factoryModel.name = name
-	factoryModel.type = "item"
-	factoryModel.count = count
-	factoryModel.energy_nominal = 90
-	factoryModel.energy = 0
-	factoryModel.energy_total = 0
-	factoryModel.speed_nominal = 0.5
-	factoryModel.speed = 0
-	factoryModel.module_slots = 2
-	-- limit infini = 0
-	factoryModel.limit = 0
-	factoryModel.limit_count = count
-	-- modules
-	factoryModel.modules = {}
+  local factoryModel = {}
+  factoryModel.name = name
+  factoryModel.type = "item"
+  factoryModel.count = count
+  factoryModel.energy_nominal = 90
+  factoryModel.energy = 0
+  factoryModel.energy_total = 0
+  factoryModel.speed_nominal = 0.5
+  factoryModel.speed = 0
+  factoryModel.module_slots = 2
+  -- limit infini = 0
+  factoryModel.limit = 0
+  factoryModel.limit_count = count
+  -- modules
+  factoryModel.modules = {}
 
-	return factoryModel
+  return factoryModel
+end
+
+-------------------------------------------------------------------------------
+-- Create Power model
+--
+-- @function [parent=#PlannerModel] createPowerModel
+--
+-- @param #LuaPlayer player
+--
+-- @return #table
+--
+function PlannerModel.methods:createPowerModel(player)
+  Logging:debug("PlannerModel:createProductionBlockModel():",player)
+  local model = self.player:getGlobal(player, "model")
+
+  if model.power_id == nil then model.power_id = 0 end
+  model.power_id = model.power_id + 1
+
+  local inputModel = {}
+  inputModel.id = "power_"..model.power_id
+  inputModel.power = 0
+  inputModel.primary = {}
+  inputModel.secondary = {}
+
+  return inputModel
+end
+
+-------------------------------------------------------------------------------
+-- Create generator model
+--
+-- @function [parent=#PlannerModel] createGeneratorModel
+--
+-- @param #LuaPlayer player
+-- @param #string name
+-- @param #number count
+--
+-- @return #table
+--
+function PlannerModel.methods:createGeneratorModel(player, name, count)
+  Logging:debug("PlannerModel:createGeneratorModel():",player, name, count)
+  if name == nil then name = "steam-engine" end
+  if count == nil then count = 0 end
+
+  local itemModel = {}
+  itemModel.name = name
+  itemModel.type = "item"
+  itemModel.count = count
+  itemModel.fluid_usage = 0.1
+  itemModel.effectivity = 1
+  
+  itemModel.energy_nominal = 90
+  itemModel.energy = 0
+  itemModel.energy_total = 0
+  
+  -- limit infini = 0
+  itemModel.limit = 0
+  itemModel.limit_count = count
+  
+  return itemModel
 end
 
 -------------------------------------------------------------------------------
@@ -406,12 +487,30 @@ end
 -- @return #number
 --
 function PlannerModel.methods:countBlocks(player)
-	local model = self:getModel(player)
-	local count = 0
-	for key, recipe in pairs(model.blocks) do
-		count = count + 1
-	end
-	return count
+  local model = self:getModel(player)
+  local count = 0
+  for key, recipe in pairs(model.blocks) do
+    count = count + 1
+  end
+  return count
+end
+
+-------------------------------------------------------------------------------
+-- Count powers
+--
+-- @function [parent=#PlannerModel] countPowers
+--
+-- @param #LuaPlayer player
+--
+-- @return #number
+--
+function PlannerModel.methods:countPowers(player)
+  local model = self:getModel(player)
+  local count = 0
+  for key, recipe in pairs(model.powers) do
+    count = count + 1
+  end
+  return count
 end
 
 -------------------------------------------------------------------------------
@@ -459,7 +558,6 @@ end
 -- @function [parent=#PlannerModel] addRecipeIntoProductionBlock
 --
 -- @param #LuaPlayer player
--- @param #string blockId production block id
 -- @param #string key recipe name
 --
 function PlannerModel.methods:addRecipeIntoProductionBlock(player, key)
@@ -511,6 +609,52 @@ function PlannerModel.methods:addRecipeIntoProductionBlock(player, key)
 	return model.blocks[blockId]
 end
 
+-------------------------------------------------------------------------------
+-- Add a primary power
+--
+-- @function [parent=#PlannerModel] addPrimaryPower
+--
+-- @param #LuaPlayer player
+-- @param #string power_id power id
+-- @param #string key generator name
+--
+function PlannerModel.methods:addPrimaryPower(player, power_id, key)
+  Logging:debug("PlannerModel:addPrimaryPower():",player, key)
+  local model = self:getModel(player)
+  local power = model.powers[power_id]
+  if power == nil then
+    power = self:createPowerModel(player)
+    power_id = power.id
+    power.primary = self:createGeneratorModel(player, key, 1)
+    model.powers[power_id] = power
+  end
+  
+    -- ajuste les donnees
+    -- @see https://wiki.factorio.com/Power_production
+  local classification = self.player:getItemProperty(key, "classification")
+  if classification == "generator" then
+    local fluid_usage = self.player:getItemProperty(key, "fluid_usage") or 0.1
+    local effectivity = self.player:getItemProperty(key, "effectivity") or 1
+    power.primary.name = key
+    power.primary.fluid_usage = fluid_usage
+    power.primary.effectivity = effectivity
+    -- formula energy_nominal = fluid_usage * 60_tick * effectivity * (current_temp - nominal_temp)
+    -- @see https://wiki.factorio.com/Liquids/Hot
+    power.primary.energy_nominal = fluid_usage*60*effectivity*(100-15)
+  end
+
+  if classification == "solar-panel" then
+    local production = self.player:getItemProperty(key, "production") or 60
+    local effectivity = 1
+    power.primary.name = key
+    power.primary.fluid_usage = 0
+    power.primary.effectivity = effectivity
+    power.primary.energy_nominal = production
+  end
+
+  
+  return power
+end
 -------------------------------------------------------------------------------
 -- Update a product
 --
@@ -676,13 +820,33 @@ end
 -- @param #table options
 --
 function PlannerModel.methods:updateObject(player, item, key, options)
-	Logging:debug("PlannerModel:updateObject():",player, item, key, options)
-	local object = self:getObject(player, item, key)
-	if object ~= nil then
-		if options.production ~= nil then
-			object.production = options.production
-		end
-	end
+  Logging:debug("PlannerModel:updateObject():",player, item, key, options)
+  local object = self:getObject(player, item, key)
+  if object ~= nil then
+    if options.production ~= nil then
+      object.production = options.production
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update a power
+--
+-- @function [parent=#PlannerModel] updatePower
+--
+-- @param #LuaPlayer player
+-- @param #string key power id
+-- @param #table options
+--
+function PlannerModel.methods:updatePower(player, key, options)
+  Logging:debug("PlannerModel:updatePower():",player, options)
+  local object = self:getPower(player, key)
+  if object ~= nil then
+    if options.power ~= nil then
+      object.power = options.power*1000000
+      self:computePower(player, key)
+    end
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -1502,25 +1666,43 @@ end
 -- @param object object
 --
 function PlannerModel.methods:computeSummaryFactory(player, object)
-	local model = self:getModel(player)
-	-- calcul nombre factory
-	local factory = object.factory
-	if model.summary.factories[factory.name] == nil then model.summary.factories[factory.name] = {name = factory.name, type = "item", count = 0} end
-	model.summary.factories[factory.name].count = model.summary.factories[factory.name].count + factory.count
-	-- calcul nombre de module factory
-	for module, value in pairs(factory.modules) do
-		if model.summary.modules[module] == nil then model.summary.modules[module] = {name = module, type = "item", count = 0} end
-		model.summary.modules[module].count = model.summary.modules[module].count + value * factory.count
-	end
-	-- calcul nombre beacon
-	local beacon = object.beacon
-	if model.summary.beacons[beacon.name] == nil then model.summary.beacons[beacon.name] = {name = beacon.name, type = "item", count = 0} end
-	model.summary.beacons[beacon.name].count = model.summary.beacons[beacon.name].count + beacon.count
-	-- calcul nombre de module beacon
-	for module, value in pairs(beacon.modules) do
-		if model.summary.modules[module] == nil then model.summary.modules[module] = {name = module, type = "item", count = 0} end
-		model.summary.modules[module].count = model.summary.modules[module].count + value * beacon.count
-	end
+  local model = self:getModel(player)
+  -- calcul nombre factory
+  local factory = object.factory
+  if model.summary.factories[factory.name] == nil then model.summary.factories[factory.name] = {name = factory.name, type = "item", count = 0} end
+  model.summary.factories[factory.name].count = model.summary.factories[factory.name].count + factory.count
+  -- calcul nombre de module factory
+  for module, value in pairs(factory.modules) do
+    if model.summary.modules[module] == nil then model.summary.modules[module] = {name = module, type = "item", count = 0} end
+    model.summary.modules[module].count = model.summary.modules[module].count + value * factory.count
+  end
+  -- calcul nombre beacon
+  local beacon = object.beacon
+  if model.summary.beacons[beacon.name] == nil then model.summary.beacons[beacon.name] = {name = beacon.name, type = "item", count = 0} end
+  model.summary.beacons[beacon.name].count = model.summary.beacons[beacon.name].count + beacon.count
+  -- calcul nombre de module beacon
+  for module, value in pairs(beacon.modules) do
+    if model.summary.modules[module] == nil then model.summary.modules[module] = {name = module, type = "item", count = 0} end
+    model.summary.modules[module].count = model.summary.modules[module].count + value * beacon.count
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Compute power
+--
+-- @function [parent=#PlannerModel] computePower
+--
+-- @param #LuaPlayer player
+-- @param key power id
+--
+function PlannerModel.methods:computePower(player, key)
+  local power = self:getPower(player, key)
+  Logging:trace("PlannerModel:computePower():", key, power)
+  if power ~= nil then
+    -- calcul primary
+    local count = math.ceil(power.power/(power.primary.energy_nominal*1000))
+    power.primary.count = count
+  end
 end
 -------------------------------------------------------------------------------
 -- Get and initialize the default

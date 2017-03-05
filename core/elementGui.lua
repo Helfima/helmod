@@ -553,13 +553,13 @@ function ElementGui.methods:formatNumberKilo(value, suffix)
 	if value == nil then
 		return 0
 	elseif value < 1000 then
-		return value
+		return value.." "..suffix
 	elseif (value / 1000) < 1000 then
-		return math.ceil(value*10 / 1000)/10 .. " K"..suffix
+		return math.ceil(value*10 / 1000)/10 .. " K" ..suffix
 	elseif (value / (1000*1000)) < 1000 then
-		return math.ceil(value*10 / (1000*1000))/10 .. " M"..suffix
+		return math.ceil(value*10 / (1000*1000))/10 .. " M" ..suffix
 	else
-		return math.ceil(value*10 / (1000*1000*1000))/10 .. " G"..suffix
+		return math.ceil(value*10 / (1000*1000*1000))/10 .. " G" ..suffix
 	end
 end
 
