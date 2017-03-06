@@ -27,8 +27,18 @@ for type,elements in pairs(data.raw) do
             entity.classification = "solar-panel"
             if element.production ~= nil then entity.production = element.production end
           end
-          if element.type == "boiler" then entity.classification = "boiler" end
-          if element.type == "accumulator" then entity.classification = "accumulator" end
+          if element.type == "boiler" then
+            entity.classification = "boiler"
+            if element.energy_consumption ~= nil then entity.energy_consumption = element.energy_consumption end
+            if element.burner ~= nil and element.burner.effectivity ~= nil then entity.effectivity = element.burner.effectivity end
+          end
+          
+          if element.type == "accumulator" then
+            entity.classification = "accumulator"
+            if element.energy_source ~= nil and element.energy_source.buffer_capacity ~= nil then entity.buffer_capacity = element.energy_source.buffer_capacity end
+            if element.energy_source ~= nil and element.energy_source.input_flow_limit ~= nil then entity.input_flow_limit = element.energy_source.input_flow_limit end
+            if element.energy_source ~= nil and element.energy_source.output_flow_limit ~= nil then entity.output_flow_limit = element.energy_source.output_flow_limit end
+          end
           -- proprietes pour les usines
           if element.crafting_categories ~= nil then entity.crafting_categories = element.crafting_categories end
           if element.resource_categories ~= nil then entity.resource_categories = element.resource_categories end

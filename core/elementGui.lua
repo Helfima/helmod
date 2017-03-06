@@ -535,6 +535,7 @@ end
 -- @return #number the formated number
 --
 function ElementGui.methods:formatNumber(n)
+	if n == nil then return 0 end
 	return tostring(math.floor(n)):reverse():gsub("(%d%d%d)","%1 "):gsub(" (%-?)$","%1"):reverse()
 end
 

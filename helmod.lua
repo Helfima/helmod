@@ -12,7 +12,7 @@ require "player.playerController"
 -- erro=1
 -- nothing=0
 
-Logging:new(3)
+Logging:new(0)
 Logging.console = false
 --Logging.force = true
 
@@ -24,7 +24,7 @@ Logging.console = false
 
 helmod = {
 	name = "helmod",
-	version = "0.2.23"
+	version = "0.2.24"
 }
 
 -------------------------------------------------------------------------------

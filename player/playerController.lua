@@ -462,9 +462,12 @@ end
 --
 -- @function [parent=#PlayerController] getGenerators
 --
+-- @param #string type type primary or secondary
+--
 -- @return #table items prototype
 --
-function PlayerController.methods:getGenerators()
+function PlayerController.methods:getGenerators(type)
+  if type == nil then type = "primary" end
   local items = {}
   for _,item in pairs(game.item_prototypes) do
     --Logging:debug("PlayerController:getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
@@ -473,7 +476,10 @@ function PlayerController.methods:getGenerators()
       if item.group.name == "production" then
         Logging:trace("PlayerController:getGenerators():", item.name, item.type, item.group.name, item.subgroup.name)
       end
-      if classification == "generator" or classification == "solar-panel" then
+      if type == "primary" and (classification == "generator" or classification == "solar-panel") then
+        table.insert(items,item)
+      end
+      if type == "secondary" and (classification == "boiler" or classification == "accumulator") then
         table.insert(items,item)
       end
     end
@@ -541,7 +547,7 @@ end
 --
 function PlayerController.methods:getIconType(element)
 	Logging:debug("PlayerController:getIconType(element)", element)
-	if element == nil then return "unknown" end
+	if element == nil or element.name == nil then return "unknown" end
 	local item = self:getItemPrototype(element.name)
 	if item ~= nil then
 		return "item"
@@ -671,6 +677,36 @@ function PlayerController.methods:getRecipeLocalisedName(player, recipe)
 end
 
 -------------------------------------------------------------------------------
+-- Return number
+--
+-- @function [parent=#PlayerController] parseNumber
+--
+-- @param #string name
+-- @param #string property
+--
+function PlayerController.methods:parseNumber(number)
+  Logging:debug("PlayerController:parseNumber(number)", number)
+  if number == nil then return 0 end
+  local value = string.match(number,"[0-9.]*",1)
+  local power = string.match(number,"[0-9.]*([a-zA-Z]*)",1)
+  Logging:debug("PlayerController:parseNumber(number)", number, value, power)
+  if power == nil then
+    return tonumber(value)
+  elseif string.lower(power) == "kw" then
+    return tonumber(value)
+  elseif string.lower(power) == "mw" then
+    return tonumber(value)*1000
+  elseif string.lower(power) == "gw" then
+    return tonumber(value)*1000*1000
+  elseif string.lower(power) == "kj" then
+    return tonumber(value)
+  elseif string.lower(power) == "mj" then
+    return tonumber(value)*1000
+  elseif string.lower(power) == "gj" then
+    return tonumber(value)*1000*1000
+  end
+end
+-------------------------------------------------------------------------------
 -- Return item property
 --
 -- @function [parent=#PlayerController] getItemProperty
@@ -685,19 +721,39 @@ function PlayerController.methods:getItemProperty(name, property)
 		Logging:trace("PlayerController:getItemProperty(name, property):data_entity", data_entity)
 	end
 	if data_entity[name] then
-		
-		
-    if property == "production" then
+    if property == "energy_consumption" then
+      if data_entity[name]["energy_consumption"] ~= nil then
+        return self:parseNumber(data_entity[name]["energy_consumption"])
+      else
+        return 0
+      end
+    elseif property == "production" then
       if data_entity[name]["production"] ~= nil then
-        local value = string.match(data_entity[name]["production"],"[0-9.]*",1)
-        return tonumber(value)
+        return self:parseNumber(data_entity[name]["production"])
+      else
+        return 0
+      end
+    elseif property == "buffer_capacity" then
+      if data_entity[name]["buffer_capacity"] ~= nil then
+        return self:parseNumber(data_entity[name]["buffer_capacity"])
+      else
+        return 0
+      end
+    elseif property == "input_flow_limit" then
+      if data_entity[name]["input_flow_limit"] ~= nil then
+        return self:parseNumber(data_entity[name]["input_flow_limit"])
+      else
+        return 0
+      end
+    elseif property == "output_flow_limit" then
+      if data_entity[name]["output_flow_limit"] ~= nil then
+        return self:parseNumber(data_entity[name]["output_flow_limit"])
       else
         return 0
       end
     elseif property == "energy_usage" then
 			if data_entity[name]["energy_usage"] ~= nil then
-				local value = string.match(data_entity[name]["energy_usage"],"[0-9.]*",1)
-				return tonumber(value)
+        return self:parseNumber(data_entity[name]["energy_usage"])
 			else
 				return 0
 			end
