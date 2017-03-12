@@ -1353,13 +1353,13 @@ function PlannerData.methods:addPowersRow(player, guiTable, power)
   local guiPrimary = self:addGuiFlowH(guiTable,"primary"..power.id)
   local primary = power.primary
   self:addGuiLabel(guiPrimary, primary.name, self:formatNumber(primary.count), "helmod_label_right_60")
-  self:addGuiButtonSelectSprite(guiPrimary, "HMPlannerEnergyEdition=OPEN=ID="..power.id.."=", self.player:getIconType(primary), primary.name, "X"..primary.count, ({"tooltip.edit-energy", self.player:getLocalisedName(player, primary)}))
+  self:addGuiButtonSelectSprite(guiPrimary, "HMPlannerEnergyEdition=OPEN=ID="..power.id.."=", self.player:getIconType(primary), primary.name, "X"..self:formatNumber(primary.count), ({"tooltip.edit-energy", self.player:getLocalisedName(player, primary)}))
 
   -- col secondary
   local guiSecondary = self:addGuiFlowH(guiTable,"secondary"..power.id)
   local secondary = power.secondary
   if secondary.name ~= nil then
     self:addGuiLabel(guiSecondary, secondary.name, self:formatNumber(secondary.count), "helmod_label_right_60")
-    self:addGuiButtonSelectSprite(guiSecondary, "HMPlannerEnergyEdition=OPEN=ID="..power.id.."=", self.player:getIconType(secondary), secondary.name, "X"..secondary.count, ({"tooltip.edit-energy", self.player:getLocalisedName(player, secondary)}))
+    self:addGuiButtonSelectSprite(guiSecondary, "HMPlannerEnergyEdition=OPEN=ID="..power.id.."=", self.player:getIconType(secondary), secondary.name, "X"..self:formatNumber(secondary.count), ({"tooltip.edit-energy", self.player:getLocalisedName(player, secondary)}))
   end
 end

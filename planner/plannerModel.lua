@@ -1757,11 +1757,11 @@ function PlannerModel.methods:computePower(player, key)
     if primary_classification == "generator" then
       -- calcul primary
       local count = math.ceil(power.power/(power.primary.energy_nominal*1000))
-      power.primary.count = count
+      power.primary.count = count or 0
       -- calcul secondary
       if secondary_classification ~= nil and secondary_classification == "boiler" then
         local count = math.ceil(power.power/(power.secondary.energy_nominal*1000))
-        power.secondary.count = count
+        power.secondary.count = count or 0
       else
         power.secondary.count = 0
       end
@@ -1769,7 +1769,7 @@ function PlannerModel.methods:computePower(player, key)
     if primary_classification == "solar-panel" then
       -- calcul primary
       local count = math.ceil(power.power/(power.primary.energy_nominal*1000))
-      power.primary.count = count
+      power.primary.count = count or 0
       -- calcul secondary
       if secondary_classification ~= nil and secondary_classification == "accumulator" then
         local factor = 2
@@ -1785,11 +1785,11 @@ function PlannerModel.methods:computePower(player, key)
         
         Logging:debug("computePower result:", accu, count1, count2)
         if count1 > count2 then
-          power.secondary.count = count1
+          power.secondary.count = count1 or 0
         else
-          power.secondary.count = count2
+          power.secondary.count = count2 or 0
         end
-        power.primary.count = count*(1+accu)
+        power.primary.count = count*(1+accu) or 0
       else
         power.secondary.count = 0
       end

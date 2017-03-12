@@ -209,15 +209,68 @@ end
 -- @param #string property
 --
 function PlayerController.methods:getGlobalSettings(player, property)
-	local settings = self:getGlobal(player, "settings")
-	if settings ~= nil and property ~= nil then
-		local guiProperty = settings[property]
-		if guiProperty == nil then
-			guiProperty = self:getDefaultSettings()[property]
-		end
-		return guiProperty
-	end
-	return settings
+  local settings = self:getGlobal(player, "display_size")
+  if settings ~= nil and property ~= nil then
+    local guiProperty = settings[property]
+    if guiProperty == nil then
+      guiProperty = self:getDefaultSettings()[property]
+    end
+    return guiProperty
+  end
+  return settings
+end
+
+-------------------------------------------------------------------------------
+-- Get style sizes
+--
+-- @function [parent=#PlayerController] getStyleSizes
+--
+-- @param #LuaPlayer player
+--
+function PlayerController.methods:getStyleSizes(player)
+  Logging:debug("PlayerController:getStyleSizes(player)")
+  local display_size = self:getGlobalSettings(player, "display_size")
+  Logging:debug("PlayerController:getStyleSizes(player):display_size", display_size)
+  local style_sizes = {}
+  if display_size ~= nil then
+    local string_width = string.match(display_size,"([0-9]*)x[0-9]*",1)
+    local string_height = string.match(display_size,"[0-9]*x([0-9]*)",1)
+    Logging:debug("PlayerController:getStyleSizes(player):parse", string_width, string_height)
+    local width = math.ceil(1920*0.85)
+    local height = math.ceil(1680*0.85)
+    if string_width ~= nil then width = math.ceil(tonumber(string_width)*0.85) end
+    if string_height ~= nil then height = math.ceil(tonumber(string_height)*0.85) end
+    
+    style_sizes.main = {}
+    style_sizes.main.minimal_width = width
+    style_sizes.main.minimal_height = height
+  end
+  Logging:debug("PlayerController:getStyleSizes(player)", style_sizes)
+  return style_sizes
+end
+
+-------------------------------------------------------------------------------
+-- Set style
+--
+-- @function [parent=#PlayerController] setStyle
+--
+-- @param #LuaPlayer player
+-- @param #LuaGuiElement element
+-- @param #string style
+-- @param #string property
+--
+function PlayerController.methods:setStyle(player, element, style, property)
+  Logging:debug("PlayerController:setStyle(player, element, style, property)", player, element, style, property)
+  local style_sizes = self:getStyleSizes(player)
+  if element.style ~= nil and style_sizes[style] ~= nil and style_sizes[style][property] ~= nil then
+    Logging:debug("PlayerController:setStyle(player, element, style, property)", style_sizes[style][property])
+    if property == "minimal_width" then
+      element.style.minimal_width = style_sizes[style][property]
+    end
+    if property == "minimal_height" then
+      element.style.minimal_height = style_sizes[style][property]
+    end
+  end
 end
 
 -------------------------------------------------------------------------------
