@@ -259,15 +259,13 @@ function PlannerSettings.methods:updateDisplaySettings(player, element, action, 
 
 	local display_size = defaultSettings.display_size
 	if globalSettings.display_size ~= nil then display_size = globalSettings.display_size end
-	if display_size == "1920x1200" then
-		self:addGuiLabel(sizeSettingsTable, self:classname().."=change-display-settings=ID=display_size=", "1920x1200", "helmod_label_time")
-	else
-		self:addGuiButton(sizeSettingsTable, self:classname().."=change-display-settings=ID=display_size=", "1920x1200", "helmod_button_default", "1920x1200")
-	end
-	if display_size == "1680x1050" then
-		self:addGuiLabel(sizeSettingsTable, self:classname().."=change-display-settings=ID=display_size=", "1680x1050", "helmod_label_time")
-	else
-		self:addGuiButton(sizeSettingsTable, self:classname().."=change-display-settings=ID=display_size=", "1680x1050", "helmod_button_default", "1680x1050")
+	
+	for _,current_size in ipairs(helmod_display_sizes) do
+		if display_size == current_size then
+      self:addGuiLabel(sizeSettingsTable, self:classname().."=change-display-settings=ID=display_size=", current_size, "helmod_label_time")
+    else
+      self:addGuiButton(sizeSettingsTable, self:classname().."=change-display-settings=ID=display_size=", current_size, "helmod_button_default", current_size)
+    end
 	end
 
 	local columnSettingsTable = self:addGuiTable(displaySettingsPanel, "column", 5)

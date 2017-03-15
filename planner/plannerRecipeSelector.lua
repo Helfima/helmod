@@ -58,13 +58,15 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerRecipeSelector.methods:getSrollPanel(player)
-	local displaySize = self.player:getGlobalSettings(player, "display_size")
 	local panel = self:getPanel(player)
 	if panel["main-panel"] ~= nil and panel["main-panel"].valid then
 		return panel["main-panel"]["scroll-panel"]
 	end
 	local mainPanel = self:addGuiFrameV(panel, "main-panel", "helmod_frame_resize_row_width")
-	return self:addGuiScrollPane(mainPanel, "scroll-panel", "helmod_scroll_recipe_selector_"..displaySize, "auto", "auto")
+	local panel = self:addGuiScrollPane(mainPanel, "scroll-panel", "helmod_scroll_recipe_selector", "auto", "auto")
+  self.player:setStyle(player, panel, "scroll_recipe_selector", "minimal_height")
+  self.player:setStyle(player, panel, "scroll_recipe_selector", "maximal_height")
+  return panel
 end
 
 -------------------------------------------------------------------------------

@@ -209,7 +209,7 @@ end
 -- @param #string property
 --
 function PlayerController.methods:getGlobalSettings(player, property)
-  local settings = self:getGlobal(player, "display_size")
+  local settings = self:getGlobal(player, "settings")
   if settings ~= nil and property ~= nil then
     local guiProperty = settings[property]
     if guiProperty == nil then
@@ -233,6 +233,13 @@ function PlayerController.methods:getStyleSizes(player)
   Logging:debug("PlayerController:getStyleSizes(player):display_size", display_size)
   local style_sizes = {}
   if display_size ~= nil then
+    local width_info=480
+    local width_scroll=8
+    local width_block_info=290
+    local width_recipe_column=220
+    local height_block_header = 450
+    local height_selector_header = 350
+
     local string_width = string.match(display_size,"([0-9]*)x[0-9]*",1)
     local string_height = string.match(display_size,"[0-9]*x([0-9]*)",1)
     Logging:debug("PlayerController:getStyleSizes(player):parse", string_width, string_height)
@@ -244,6 +251,26 @@ function PlayerController.methods:getStyleSizes(player)
     style_sizes.main = {}
     style_sizes.main.minimal_width = width
     style_sizes.main.minimal_height = height
+    
+    style_sizes.data = {}
+    style_sizes.data.minimal_width = width - width_info
+    style_sizes.data.maximal_width = width - width_info
+    
+    style_sizes.scroll_recipe_selector = {}
+    style_sizes.scroll_recipe_selector.minimal_height = height - height_selector_header
+    style_sizes.scroll_recipe_selector.maximal_height = height - height_selector_header
+    
+    style_sizes.scroll_block_element = {}
+    style_sizes.scroll_block_element.minimal_width = width - width_info - width_block_info - width_scroll - 10
+    style_sizes.scroll_block_element.maximal_width = width - width_info - width_block_info - width_scroll - 10
+    
+    style_sizes.scroll_block_list = {}
+    style_sizes.scroll_block_list.minimal_width = width - width_info - width_scroll
+    style_sizes.scroll_block_list.maximal_width = width - width_info - width_scroll
+    style_sizes.scroll_block_list.minimal_height = height - height_block_header
+    style_sizes.scroll_block_list.maximal_height = height - height_block_header
+    
+    
   end
   Logging:debug("PlayerController:getStyleSizes(player)", style_sizes)
   return style_sizes
@@ -264,12 +291,7 @@ function PlayerController.methods:setStyle(player, element, style, property)
   local style_sizes = self:getStyleSizes(player)
   if element.style ~= nil and style_sizes[style] ~= nil and style_sizes[style][property] ~= nil then
     Logging:debug("PlayerController:setStyle(player, element, style, property)", style_sizes[style][property])
-    if property == "minimal_width" then
-      element.style.minimal_width = style_sizes[style][property]
-    end
-    if property == "minimal_height" then
-      element.style.minimal_height = style_sizes[style][property]
-    end
+    element.style[property] = style_sizes[style][property]
   end
 end
 

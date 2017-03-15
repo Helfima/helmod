@@ -78,12 +78,13 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerData.methods:getMenuPanel(player, caption)
-  local displaySize = self.player:getGlobalSettings(player, "display_size")
   local dataPanel = self:getDataPanel(player)
   if dataPanel["menu"] ~= nil and dataPanel["menu"].valid then
     return dataPanel["menu"]
   end
-  return self:addGuiFrameV(dataPanel, "menu", "helmod_frame_data_menu_"..displaySize, caption)
+  local panel = self:addGuiFrameV(dataPanel, "menu", "helmod_frame_data_menu", caption)
+  self.player:setStyle(player, panel, "data", "minimal_width")
+  return panel
 end
 
 -------------------------------------------------------------------------------
@@ -110,12 +111,14 @@ end
 -- @param #string caption
 --
 function PlannerData.methods:getResultPanel(player, caption)
-  local displaySize = self.player:getGlobalSettings(player, "display_size")
   local dataPanel = self:getDataPanel(player)
   if dataPanel["result"] ~= nil and dataPanel["result"].valid then
     return dataPanel["result"]
   end
-  return self:addGuiFrameV(dataPanel, "result", "helmod_frame_data_"..displaySize, caption)
+  local panel = self:addGuiFrameV(dataPanel, "result", "helmod_frame_resize_row_width", caption)
+  self.player:setStyle(player, panel, "data", "minimal_width")
+  self.player:setStyle(player, panel, "data", "maximal_width")
+  return panel
 end
 
 -------------------------------------------------------------------------------
@@ -420,7 +423,6 @@ end
 --
 function PlannerData.methods:updateProductionHeader(player, item, item2, item3)
   Logging:debug("PlannerData:updateLine():", player, item, item2, item3)
-  local displaySize = self.player:getGlobalSettings(player, "display_size")
   local models = self.model:getModels(player)
   local model_index = self.player:getGlobalGui(player, "model_index")
   if model_index == nil then model_index = 1 end
@@ -428,7 +430,10 @@ function PlannerData.methods:updateProductionHeader(player, item, item2, item3)
   local menuPanel = self:getMenuPanel(player, ({"helmod_result-panel.tab-title-production-line"}))
 
   -- index panel
-  local indexPanel = self:addGuiFlowH(menuPanel, "index", "helmod_flow_data_menu_"..displaySize)
+  local indexPanel = self:addGuiFlowH(menuPanel, "index", "helmod_flow_resize_row_width")
+  self.player:setStyle(player, indexPanel, "data", "minimal_width")
+  self.player:setStyle(player, indexPanel, "data", "maximal_width")
+
   if #models > 0 then
     for i,model in ipairs(models) do
       if i == model_index then
@@ -441,7 +446,9 @@ function PlannerData.methods:updateProductionHeader(player, item, item2, item3)
   self:addGuiButton(indexPanel, self:classname().."=change-model-index=ID=", (#models + 1), "helmod_button_default", "+")
 
   -- action panel
-  local actionPanel = self:addGuiFlowH(menuPanel, "action", "helmod_flow_data_menu_"..displaySize)
+  local actionPanel = self:addGuiFlowH(menuPanel, "action", "helmod_flow_resize_row_width")
+  self.player:setStyle(player, actionPanel, "data", "minimal_width")
+  self.player:setStyle(player, actionPanel, "data", "maximal_width")
   local tabPanel = self:addGuiFlowH(actionPanel, "tab", "helmod_flow_data_tab")
   self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.PRODUCTION_BLOCK_TAB, "helmod_button_default", ({"helmod_result-panel.add-button-production-block"}))
   self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.PRODUCTION_LINE_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-production-line"}))
@@ -463,14 +470,17 @@ end
 --
 function PlannerData.methods:updateProductionLine(player, item, item2, item3)
   Logging:debug("PlannerData:updateProductionLine():", player, item, item2, item3)
-  local displaySize = self.player:getGlobalSettings(player, "display_size")
   local globalGui = self.player:getGlobalGui(player)
   local model = self.model:getModel(player)
 
   -- production line result
   local resultPanel = self:getResultPanel(player, ({"helmod_common.blocks"}))
   -- data panel
-  local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "helmod_scroll_block_list_"..displaySize, "auto", "auto")
+  local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "scroll_pane_style", "auto", "auto")
+  self.player:setStyle(player, scrollPanel, "scroll_block_list", "minimal_width")
+  self.player:setStyle(player, scrollPanel, "scroll_block_list", "maximal_width")
+  self.player:setStyle(player, scrollPanel, "scroll_block_list", "minimal_height")
+  self.player:setStyle(player, scrollPanel, "scroll_block_list", "maximal_height")
 
   local countBlock = self.model:countBlocks(player)
   if countBlock > 0 then
@@ -525,7 +535,6 @@ end
 --
 function PlannerData.methods:updateProductionBlock(player, item, item2, item3)
   Logging:debug("PlannerData:updateProductionBlock():", player, item, item2, item3)
-  local displaySize = self.player:getGlobalSettings(player, "display_size")
   local model = self.model:getModel(player)
   local globalGui = self.player:getGlobalGui(player)
   Logging:debug("model:", model)
@@ -567,7 +576,10 @@ function PlannerData.methods:updateProductionBlock(player, item, item2, item3)
     local elementPanel = self:addGuiFlowV(infoPanel, "elements", "helmod_flow_default")
     -- ouput panel
     local outputPanel = self:addGuiFrameV(elementPanel, "output", "helmod_frame_resize_row_width", ({"helmod_common.output"}))
-    local outputScroll = self:addGuiScrollPane(outputPanel, "output-scroll", "helmod_scroll_block_element_"..displaySize, "auto", "auto")
+    local outputScroll = self:addGuiScrollPane(outputPanel, "output-scroll", "helmod_scroll_block_element", "auto", "auto")
+    self.player:setStyle(player, outputScroll, "scroll_block_element", "minimal_width")
+    self.player:setStyle(player, outputScroll, "scroll_block_element", "maximal_width")
+
     local outputTable = self:addGuiTable(outputScroll,"output-table",6)
     if element.products ~= nil then
       for r, product in pairs(element.products) do
@@ -598,7 +610,10 @@ function PlannerData.methods:updateProductionBlock(player, item, item2, item3)
 
     -- input panel
     local inputPanel = self:addGuiFrameV(elementPanel, "input", "helmod_frame_resize_row_width", ({"helmod_common.input"}))
-    local outputScroll = self:addGuiScrollPane(inputPanel, "output-scroll", "helmod_scroll_block_element_"..displaySize, "auto", "auto")
+    local outputScroll = self:addGuiScrollPane(inputPanel, "output-scroll", "helmod_scroll_block_element", "auto", "auto")
+    self.player:setStyle(player, outputScroll, "scroll_block_element", "minimal_width")
+    self.player:setStyle(player, outputScroll, "scroll_block_element", "maximal_width")
+
     local inputTable = self:addGuiTable(outputScroll,"input-table",6)
     if element.ingredients ~= nil then
       for r, ingredient in pairs(element.ingredients) do
@@ -611,7 +626,11 @@ function PlannerData.methods:updateProductionBlock(player, item, item2, item3)
 
     local resultPanel = self:getResultPanel(player, ({"helmod_common.recipes"}))
     -- data panel
-    local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "helmod_scroll_block_list_"..displaySize, "auto", "auto")
+    local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "scroll_pane_style", "auto", "auto")
+    self.player:setStyle(player, scrollPanel, "scroll_block_list", "minimal_width")
+    self.player:setStyle(player, scrollPanel, "scroll_block_list", "maximal_width")
+    self.player:setStyle(player, scrollPanel, "scroll_block_list", "minimal_height")
+    self.player:setStyle(player, scrollPanel, "scroll_block_list", "maximal_height")
 
     local globalSettings = self.player:getGlobal(player, "settings")
 
@@ -1062,12 +1081,16 @@ end
 --
 function PlannerData.methods:updateResources(player)
   Logging:debug("PlannerData:updateResources():", player)
-  local displaySize = self.player:getGlobalSettings(player, "display_size")
   local model = self.model:getModel(player)
   local globalGui = self.player:getGlobalGui(player)
   -- data
   local resultPanel = self:getResultPanel(player, ({"helmod_result-panel.tab-title-resources"}))
-  local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "helmod_scroll_block_list_"..displaySize, "auto", "auto")
+  local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "scroll_pane_style", "auto", "auto")
+  self.player:setStyle(player, scrollPanel, "scroll_block_list", "minimal_width")
+  self.player:setStyle(player, scrollPanel, "scroll_block_list", "maximal_width")
+  self.player:setStyle(player, scrollPanel, "scroll_block_list", "minimal_height")
+  self.player:setStyle(player, scrollPanel, "scroll_block_list", "maximal_height")
+
 
   local globalSettings = self.player:getGlobal(player, "settings")
 
@@ -1106,14 +1129,16 @@ end
 --
 function PlannerData.methods:updateSummary(player)
   Logging:debug("PlannerData:updateSummary():", player)
-  local displaySize = self.player:getGlobalSettings(player, "display_size")
   local model = self.model:getModel(player)
   -- data
   local menuPanel = self:getMenuPanel(player, ({"helmod_result-panel.tab-title-summary"}))
   local dataPanel = self:getDataPanel(player)
 
   -- resources
-  local resourcesPanel = self:addGuiFrameV(dataPanel, "resources", "helmod_frame_data_menu_"..displaySize, ({"helmod_common.resources"}))
+  local resourcesPanel = self:addGuiFrameV(dataPanel, "resources", "helmod_frame_resize_row_width", ({"helmod_common.resources"}))
+  self.player:setStyle(player, resourcesPanel, "data", "minimal_width")
+  self.player:setStyle(player, resourcesPanel, "data", "maximal_width")
+
   local resourcesTable = self:addGuiTable(resourcesPanel,"table-resources",7)
   self:addGuiLabel(resourcesTable, "header-ingredient", ({"helmod_result-panel.col-header-ingredient"}))
   self:addGuiLabel(resourcesTable, "header-block", ({"helmod_result-panel.col-header-production-block"}))
@@ -1210,7 +1235,10 @@ function PlannerData.methods:updateSummary(player)
     self:addGuiLabel(guiEnergy, resource.name, self:formatNumberKilo(resource.energy_total, "W"), "helmod_label_right_70")
   end
 
-  local energyPanel = self:addGuiFrameV(dataPanel, "energy", "helmod_frame_data_menu_"..displaySize, ({"helmod_common.generators"}))
+  local energyPanel = self:addGuiFrameV(dataPanel, "energy", "helmod_frame_resize_row_width", ({"helmod_common.generators"}))
+  self.player:setStyle(player, energyPanel, "data", "minimal_width")
+  self.player:setStyle(player, energyPanel, "data", "maximal_width")
+
   local resultTable = self:addGuiTable(energyPanel,"table-energy",2)
 
   for _, item in pairs(model.generators) do
@@ -1220,7 +1248,10 @@ function PlannerData.methods:updateSummary(player)
   end
 
   -- factories
-  local factoryPanel = self:addGuiFrameV(dataPanel, "factory", "helmod_frame_data_menu_"..displaySize, ({"helmod_common.factories"}))
+  local factoryPanel = self:addGuiFrameV(dataPanel, "factory", "helmod_frame_resize_row_width", ({"helmod_common.factories"}))
+  self.player:setStyle(player, factoryPanel, "data", "minimal_width")
+  self.player:setStyle(player, factoryPanel, "data", "maximal_width")
+
   local resultTable = self:addGuiTable(factoryPanel,"table-factory",10)
 
   for _, element in pairs(model.summary.factories) do
@@ -1230,7 +1261,10 @@ function PlannerData.methods:updateSummary(player)
   end
 
   -- beacons
-  local beaconPanel = self:addGuiFrameV(dataPanel, "beacon", "helmod_frame_data_menu_"..displaySize, ({"helmod_common.beacons"}))
+  local beaconPanel = self:addGuiFrameV(dataPanel, "beacon", "helmod_frame_resize_row_width", ({"helmod_common.beacons"}))
+  self.player:setStyle(player, beaconPanel, "data", "minimal_width")
+  self.player:setStyle(player, beaconPanel, "data", "maximal_width")
+
   local resultTable = self:addGuiTable(beaconPanel,"table-beacon",10)
 
   for _, element in pairs(model.summary.beacons) do
@@ -1240,7 +1274,10 @@ function PlannerData.methods:updateSummary(player)
   end
 
   -- modules
-  local modulesPanel = self:addGuiFrameV(dataPanel, "modules", "helmod_frame_data_menu_"..displaySize, ({"helmod_common.modules"}))
+  local modulesPanel = self:addGuiFrameV(dataPanel, "modules", "helmod_frame_resize_row_width", ({"helmod_common.modules"}))
+  self.player:setStyle(player, modulesPanel, "data", "minimal_width")
+  self.player:setStyle(player, modulesPanel, "data", "maximal_width")
+
   local resultTable = self:addGuiTable(modulesPanel,"table-modules",10)
 
   for _, element in pairs(model.summary.modules) do
@@ -1261,7 +1298,6 @@ end
 --
 function PlannerData.methods:updatePowers(player)
   Logging:debug("PlannerData:updateSummary():", player)
-  local displaySize = self.player:getGlobalSettings(player, "display_size")
   local model = self.model:getModel(player)
 
   -- data
@@ -1271,8 +1307,11 @@ function PlannerData.methods:updatePowers(player)
   self:addGuiButton(menuPanel, "HMPlannerEnergyEdition=OPEN=ID=", "new", "helmod_button_default", ({"helmod_result-panel.add-button-power"}))
 
 
-  local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "helmod_scroll_block_list_"..displaySize, "auto", "auto")
-
+  local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "scroll_pane_style", "auto", "auto")
+  self.player:setStyle(player, scrollPanel, "scroll_block_list", "minimal_width")
+  self.player:setStyle(player, scrollPanel, "scroll_block_list", "maximal_width")
+  self.player:setStyle(player, scrollPanel, "scroll_block_list", "minimal_height")
+  self.player:setStyle(player, scrollPanel, "scroll_block_list", "maximal_height")
 
   local countBlock = self.model:countPowers(player)
   if countBlock > 0 then

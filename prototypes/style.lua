@@ -764,44 +764,6 @@ default_gui["helmod_flow_left_menu"] = {
 }
 
 -------------------------------------------------------------------------------
--- Style of main panel
--- minimal_width = screen width * 85%
--- minimal_height = screen height * 85%
--- @field [parent=#Flow] main_1920x1200
-
-default_gui["helmod_flow_main_1920x1200"] = {
-	type = "flow_style",
-	parent = "helmod_flow_default",
-	minimal_width = width_1920,
-	minimal_height = height_1200
-}
-
--------------------------------------------------------------------------------
--- Style of main panel
--- minimal_width = screen width * 85%
--- minimal_height = screen height * 85%
--- @field [parent=#Flow] main_1680x1050
-
-default_gui["helmod_flow_main_1680x1050"] = {
-  type = "flow_style",
-  parent = "helmod_flow_default",
-  minimal_width = width_1680,
-  minimal_height = height_1050,
-}
--------------------------------------------------------------------------------
--- Style of main panel
--- minimal_width = screen width * 85%
--- minimal_height = screen height * 85%
--- @field [parent=#Flow] main_1440x900
-
-default_gui["helmod_flow_main_1440x900"] = {
-  type = "frame_style",
-  parent = "frame_style",
-  minimal_width = 1224,
-  minimal_height = 765,
-}
-
--------------------------------------------------------------------------------
 -- Style of data tab panel
 --
 -- @field [parent=#Flow] data_tab
@@ -976,32 +938,6 @@ default_gui["helmod_frame_main"] = {
 }
 
 -------------------------------------------------------------------------------
--- Style of main panel (only testing)
--- minimal_width = screen width * 85%
--- minimal_height = screen height * 85%
--- @field [parent=#Frame] main_1920x1200
-
-default_gui["helmod_frame_main_1920x1200"] = {
-  type = "frame_style",
-  parent = "helmod_frame_main",
-  minimal_width = width_1920,
-  minimal_height = height_1200
-}
-
--------------------------------------------------------------------------------
--- Style of main panel (only testing)
--- minimal_width = screen width * 85%
--- minimal_height = screen height * 85%
--- @field [parent=#Frame] main_1680x1050
-
-default_gui["helmod_frame_main_1680x1050"] = {
-  type = "frame_style",
-  parent = "helmod_frame_main",
-  minimal_width = width_1680,
-  minimal_height = height_1050
-}
-
--------------------------------------------------------------------------------
 -- Style of data menu
 -- @field [parent=#Frame] data_menu
 
@@ -1087,32 +1023,6 @@ default_gui["helmod_frame_full_resize_row"] = {
 		horizontal_spacing = 0,
 		vertical_spacing = 0
 	}
-}
-
--------------------------------------------------------------------------------
--- Style of data panel
---
--- @field [parent=#Frame] data_1920x1200
--- 
-
-default_gui["helmod_frame_data_1920x1200"] = {
-	type = "frame_style",
-	parent = "helmod_frame_resize_row_width",
-	minimal_width = width_1920 - width_info,
-	maximal_width = width_1920 - width_info
-}
-
--------------------------------------------------------------------------------
--- Style of data panel
---
--- @field [parent=#Frame] data_1680x1050
--- 
-
-default_gui["helmod_frame_data_1680x1050"] = {
-	type = "frame_style",
-	parent = "helmod_frame_resize_row_width",
-	minimal_width = width_1680 - width_info,
-	maximal_width = width_1680 - width_info
 }
 
 -------------------------------------------------------------------------------
@@ -1301,15 +1211,27 @@ default_gui["helmod_scroll_recipe_module_list"] = {
 -------------------------------------------------------------------------------
 -- Style of recipe selector
 --
+-- @field [parent=#Scroll] recipe_selector
+
+default_gui["helmod_scroll_recipe_selector"] = {
+  type = "scroll_pane_style",
+  parent = "scroll_pane_style",
+  minimal_width = 400,
+  maximal_width = 400
+}
+
+-------------------------------------------------------------------------------
+-- Style of recipe selector
+--
 -- @field [parent=#Scroll] recipe_selector_1920x1200
 
 default_gui["helmod_scroll_recipe_selector_1920x1200"] = {
-	type = "scroll_pane_style",
-	parent = "scroll_pane_style",
-	minimal_width = 400,
-	maximal_width = 400,
-	minimal_height = height_1200 - height_selector_header,
-	maximal_height = height_1200 - height_selector_header
+  type = "scroll_pane_style",
+  parent = "scroll_pane_style",
+  minimal_width = 400,
+  maximal_width = 400,
+  minimal_height = height_1200 - height_selector_header,
+  maximal_height = height_1200 - height_selector_header
 }
 
 -------------------------------------------------------------------------------

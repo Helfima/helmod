@@ -24,7 +24,7 @@ Logging.console = false
 
 helmod = {
 	name = "helmod",
-	version = "0.2.24"
+	version = "0.2.25"
 }
 
 -------------------------------------------------------------------------------
@@ -295,3 +295,16 @@ function helmod:upgrade_0_2_23()
 		end
 	end
 end
+
+
+remote.add_interface("helmod", {
+  close = function()
+    if game.player.admin then
+      proxy_gui_click({player_index=game.player.index, element = {valid=true, name="HMPlannerController=CLOSE"}})
+    end
+  end,
+  display_size = function(value)
+    global["HMModel"][game.player.name].settings["display_size"] = value
+  end
+})
+  

@@ -35,6 +35,7 @@ function PlannerController.methods:init(parent)
 
 	self.locate = "center"
 	self.pinLocate = "left"
+	
 end
 
 -------------------------------------------------------------------------------
@@ -221,14 +222,16 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerController.methods:getMainPanel(player)
-	local displaySize = self.parent:getGlobalSettings(player, "display_size")
-	Logging:debug("PlannerController:getMainPanel():",displaySize)
+	Logging:debug("PlannerController:getMainPanel(player):",player)
 	local guiMain = player.gui[self.locate]
 	if guiMain["helmod_planner_main"] ~= nil and guiMain["helmod_planner_main"].valid then
 		return guiMain["helmod_planner_main"]
 	end
-	return self:addGuiFlowH(guiMain, "helmod_planner_main", "helmod_flow_main_"..displaySize)
-		--return self:addGuiFrameH(guiMain, "helmod_planner_main", "helmod_frame_main_"..displaySize)
+	local panel = self:addGuiFlowH(guiMain, "helmod_planner_main", "helmod_flow_resize_row_width")
+	--local panel = self:addGuiFrameH(guiMain, "helmod_planner_main", "helmod_frame_main")
+  self.parent:setStyle(player, panel, "main", "minimal_width")
+  self.parent:setStyle(player, panel, "main", "minimal_height")
+	return panel
 end
 
 -------------------------------------------------------------------------------
@@ -239,7 +242,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerController.methods:getPinTabPanel(player)
-	Logging:debug("PlannerController:getPinTabPanel():",displaySize)
+	Logging:debug("PlannerController:getPinTabPanel(player):",player)
 	local guiMain = player.gui[self.pinLocate]
 	if guiMain["helmod_planner_pin_tab"] ~= nil and guiMain["helmod_planner_pin_tab"].valid then
 		return guiMain["helmod_planner_pin_tab"]
@@ -305,7 +308,10 @@ function PlannerController.methods:getDataPanel(player)
 	if infoPanel["helmod_planner_data"] ~= nil and infoPanel["helmod_planner_data"].valid then
 		return infoPanel["helmod_planner_data"]
 	end
-	return self:addGuiFlowV(infoPanel, "helmod_planner_data", "helmod_flow_data_"..displaySize)
+	local panel = self:addGuiFlowV(infoPanel, "helmod_planner_data", "helmod_flow_resize_row_width")
+	self.parent:setStyle(player, panel, "data", "minimal_width")
+  self.parent:setStyle(player, panel, "data", "maximal_width")
+  return panel
 end
 
 -------------------------------------------------------------------------------
