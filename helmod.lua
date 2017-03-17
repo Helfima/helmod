@@ -24,7 +24,7 @@ Logging.console = false
 
 helmod = {
 	name = "helmod",
-	version = "0.2.25"
+	version = "0.3.0"
 }
 
 -------------------------------------------------------------------------------
@@ -77,13 +77,18 @@ function helmod:on_configuration_changed(data)
 			helmod:upgrade_0_2_22()
 		end
 
-		-- Upgrade 0.2.23
-		if old_version ~= nil and old_version < "0.2.23" then
-			helmod:upgrade_0_2_23()
-		end
+    -- Upgrade 0.2.23
+    if old_version ~= nil and old_version < "0.2.23" then
+      helmod:upgrade_0_2_23()
+    end
 
-		if global["HMModel"] ~= nil then
-			for _,player in pairs(global["HMModel"]) do
+    -- Upgrade 0.3.0
+    if old_version ~= nil and old_version < "0.3.0" then
+      helmod:upgrade_0_3_0()
+    end
+
+		if global["users"] ~= nil then
+			for _,player in pairs(global["users"]) do
 				player.isActive = false;
 			end
 		end
@@ -274,26 +279,61 @@ end
 -- @function [parent=#helmod] upgrade_0_2_23
 --
 function helmod:upgrade_0_2_23()
-	if global["HMModel"] ~= nil then
-		for _,data in pairs(global["HMModel"]) do
-			-- boucle sur chaque player
-			if data.default ~= nil then
-				-- clean defaut
-				data.default.factories = nil
-				data.default.beacons = nil
-			end
-			
-			if data.model ~= nil then
-				-- move model
-				local model = data.model
-				data.model = {}
-				table.insert(data.model, model)
-			end
-			
-			if data.gui == nil then data.gui = {} end
-			data.gui["model_index"] = 1
-		end
-	end
+  if global["HMModel"] ~= nil then
+    for _,data in pairs(global["HMModel"]) do
+      -- boucle sur chaque player
+      if data.default ~= nil then
+        -- clean defaut
+        data.default.factories = nil
+        data.default.beacons = nil
+      end
+      
+      if data.model ~= nil then
+        -- move model
+        local model = data.model
+        data.model = {}
+        table.insert(data.model, model)
+      end
+      
+      if data.gui == nil then data.gui = {} end
+      data.gui["model_index"] = 1
+    end
+  end
+end
+
+
+-------------------------------------------------------------------------------
+-- Upgrade 0.3.0
+--
+-- @function [parent=#helmod] upgrade_0_3_0
+--
+function helmod:upgrade_0_3_0()
+  if global["HMModel"] ~= nil then
+    Logging:debug("upgrade_0_3_0():before", global)
+    global.models = {}
+    global.model_id = 0
+    for user,data in pairs(global["HMModel"]) do
+      -- boucle sur chaque player
+      if data.model ~= nil then
+        local block_id = data.model.block_id
+        data.model.block_id = nil
+        -- move model
+        for _,model in pairs(data.model) do
+          global.model_id = global.model_id + 1
+          model.id = "model_"..global.model_id
+          model.temp = nil
+          model.version = nil
+          model.owner = user
+          model.block_id = block_id
+          global.models[model.id] = model
+        end
+        data.model = nil
+      end
+    end
+    global["users"] = global["HMModel"]
+    global["HMModel"] = nil
+    Logging:debug("upgrade_0_3_0():after", global)
+  end
 end
 
 

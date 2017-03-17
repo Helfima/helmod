@@ -140,8 +140,7 @@ function PlannerData.methods:buildPanel(player)
     globalGui.order = {name="index", ascendant=true}
   end
 
-  Logging:debug("test version:", model.version, helmod.version)
-  if model.version == nil or model.version ~= helmod.version then
+  if model ~= nil and model.version ~= nil and model.version ~= helmod.version then
     self.model:update(player, true)
   end
 
@@ -187,8 +186,8 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
 
   local globalGui = self.player:getGlobalGui(player)
 
-  if action == "change-model-index" then
-    globalGui.model_index = tonumber(item)
+  if action == "change-model" then
+    globalGui.model_id = item
     globalGui.currentTab = self.PRODUCTION_LINE_TAB
     globalGui.currentBlock = "new"
 
@@ -201,9 +200,8 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
     self.parent:send_event(player, "HMPlannerSettings", "CLOSE")
   end
 
-  if action == "remove-model-index" then
-    local model_index = tonumber(item)
-    self.model:removeModel(player, model_index)
+  if action == "remove-model" then
+    self.model:removeModel(player, item)
     globalGui.currentTab = self.PRODUCTION_LINE_TAB
     globalGui.currentBlock = "new"
 
@@ -422,10 +420,10 @@ end
 -- @param #string item3 third item name
 --
 function PlannerData.methods:updateProductionHeader(player, item, item2, item3)
-  Logging:debug("PlannerData:updateLine():", player, item, item2, item3)
+  Logging:debug("PlannerData:updateProductionHeader():", player, item, item2, item3)
   local models = self.model:getModels(player)
-  local model_index = self.player:getGlobalGui(player, "model_index")
-  if model_index == nil then model_index = 1 end
+  local model = self.model:getModel(player)
+  local model_id = self.player:getGlobalGui(player, "model_id")
   -- data
   local menuPanel = self:getMenuPanel(player, ({"helmod_result-panel.tab-title-production-line"}))
 
@@ -434,17 +432,46 @@ function PlannerData.methods:updateProductionHeader(player, item, item2, item3)
   self.player:setStyle(player, indexPanel, "data", "minimal_width")
   self.player:setStyle(player, indexPanel, "data", "maximal_width")
 
-  if #models > 0 then
-    for i,model in ipairs(models) do
-      if i == model_index then
-        self:addGuiLabel(indexPanel, self:classname().."=change-model-index="..i, i, "helmod_label_time")
+  Logging:debug("PlannerData:updateProductionHeader():countModel", self.model:countModel())
+  if self.model:countModel() > 0 then
+    local i = 0
+    for _,imodel in pairs(models) do
+      i = i + 1
+      if imodel.id == model_id then
+        self:addGuiLabel(indexPanel, self:classname().."=change-model="..imodel.id, i, "helmod_label_time")
       else
-        self:addGuiButton(indexPanel, self:classname().."=change-model-index=ID=", i, "helmod_button_default", i)
+        self:addGuiButton(indexPanel, self:classname().."=change-model=ID=", imodel.id, "helmod_button_default", i)
       end
     end
   end
-  self:addGuiButton(indexPanel, self:classname().."=change-model-index=ID=", (#models + 1), "helmod_button_default", "+")
+  self:addGuiButton(indexPanel, self:classname().."=change-model=ID=", "new", "helmod_button_default", "+")
 
+  -- admin panel
+  local adminPanel = self:addGuiFlowH(menuPanel, "admin", "helmod_flow_resize_row_width")
+  self.player:setStyle(player, adminPanel, "data", "minimal_width")
+  self.player:setStyle(player, adminPanel, "data", "maximal_width")
+  
+  local tableAdminPanel = self:addGuiTable(adminPanel, "table" , 9)
+  self:addGuiLabel(tableAdminPanel, "label-owner", ({"helmod_result-panel.owner"}))
+  self:addGuiLabel(tableAdminPanel, "value-owner", model.owner)
+  
+  self:addGuiLabel(tableAdminPanel, "label-share", ({"helmod_result-panel.share"}))
+  
+  local model_read = false
+  if model.share ~= nil and  bit32.band(model.share, 1) > 0 then model_read = true end
+  self:addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID="..model.id.."=read", model_read)
+  self:addGuiLabel(tableAdminPanel, self:classname().."=share-model-read", "read")
+  
+  local model_write = false
+  if model.share ~= nil and  bit32.band(model.share, 2) > 0 then model_write = true end
+  self:addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID="..model.id.."=write", model_write)
+  self:addGuiLabel(tableAdminPanel, self:classname().."=share-model-write", "write")
+  
+  local model_delete = false
+  if model.share ~= nil and bit32.band(model.share, 4) > 0 then model_delete = true end
+  self:addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID="..model.id.."=delete", model_delete)
+  self:addGuiLabel(tableAdminPanel, self:classname().."=share-model-delete", "delete")
+  
   -- action panel
   local actionPanel = self:addGuiFlowH(menuPanel, "action", "helmod_flow_resize_row_width")
   self.player:setStyle(player, actionPanel, "data", "minimal_width")
@@ -456,7 +483,7 @@ function PlannerData.methods:updateProductionHeader(player, item, item2, item3)
   self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.RESOURCES_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-resources"}))
   self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.POWER_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-energy"}))
   local deletePanel = self:addGuiFlowH(actionPanel, "delete", "helmod_flow_default")
-  self:addGuiButton(deletePanel, self:classname().."=remove-model-index=ID=", model_index, "helmod_button_default", ({"helmod_result-panel.remove-button-production-line"}))
+  self:addGuiButton(deletePanel, self:classname().."=remove-model=ID=", model.id, "helmod_button_default", ({"helmod_result-panel.remove-button-production-line"}))
 end
 -------------------------------------------------------------------------------
 -- Update production line tab
@@ -1391,9 +1418,10 @@ function PlannerData.methods:addPowersRow(player, guiTable, power)
   -- col primary
   local guiPrimary = self:addGuiFlowH(guiTable,"primary"..power.id)
   local primary = power.primary
-  self:addGuiLabel(guiPrimary, primary.name, self:formatNumber(primary.count), "helmod_label_right_60")
-  self:addGuiButtonSelectSprite(guiPrimary, "HMPlannerEnergyEdition=OPEN=ID="..power.id.."=", self.player:getIconType(primary), primary.name, "X"..self:formatNumber(primary.count), ({"tooltip.edit-energy", self.player:getLocalisedName(player, primary)}))
-
+  if primary.name ~= nil then
+    self:addGuiLabel(guiPrimary, primary.name, self:formatNumber(primary.count), "helmod_label_right_60")
+    self:addGuiButtonSelectSprite(guiPrimary, "HMPlannerEnergyEdition=OPEN=ID="..power.id.."=", self.player:getIconType(primary), primary.name, "X"..self:formatNumber(primary.count), ({"tooltip.edit-energy", self.player:getLocalisedName(player, primary)}))
+  end
   -- col secondary
   local guiSecondary = self:addGuiFlowH(guiTable,"secondary"..power.id)
   local secondary = power.secondary

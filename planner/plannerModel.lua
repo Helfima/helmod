@@ -30,10 +30,57 @@ end
 --
 function PlannerModel.methods:getModels(player)
   Logging:trace("PlannerModel:getModels():",player)
-  local models = self.player:getGlobal(player, "model")
-  Logging:debug("PlannerModel:getModels():models:",models)
-  if #models == 0 then table.insert(models, {}) end
+  Logging:debug("PlannerModel:getModels():global.models:",global.models)
+  local model_id = self.player:getGlobalGui(player, "model_id")
+  local first_id = nil
+  local reset_model_id = true
+  local models = {}
+  local global_models = global.models
+  if self:countModel() > 0 then
+    for _,model in pairs(global.models) do
+      if player.admin == true then
+        models[model.id] = model
+        if first_id == nil then first_id = model.id end
+        if model_id == model.id then reset_model_id = false end
+      elseif model.owner == player.name or model.shared == true then
+        models[model.id] = model
+        if first_id == nil then first_id = model.id end
+        if model_id == model.id then reset_model_id = false end
+      end
+    end
+  end
+  if reset_model_id == true then
+    self.player:getGlobalGui(player)["model_id"] = first_id
+  end
   return models
+end
+
+-------------------------------------------------------------------------------
+-- Get and initialize the model
+--
+-- @function [parent=#PlannerModel] newModel
+--
+-- @param #LuaPlayer player
+--
+-- @return #table
+--
+function PlannerModel.methods:newModel(player)
+  Logging:trace("PlannerModel:getModel():",player)
+  if global.model_id == nil then global.model_id = 1 end
+  if global.models == nil then global.models = {} end
+
+  global.model_id = global.model_id + 1
+  local model = {}
+  model.id = "model_"..global.model_id
+  model.blocks = {}
+  model.ingredients = {}
+  model.resources = {}
+  model.powers = {}
+  model.time = 1
+  global.models[model.id] = model
+
+  self.player:getGlobalGui(player)["model_id"] = model.id
+  return model
 end
 
 -------------------------------------------------------------------------------
@@ -47,46 +94,29 @@ end
 --
 function PlannerModel.methods:getModel(player)
   Logging:trace("PlannerModel:getModel():",player)
-  local model_index = self.player:getGlobalGui(player, "model_index")
-  if model_index == nil then model_index = 1 end
-
-  local models = self:getModels(player)
-  local model = models[model_index]
-
-  if model == nil then
-    model = {}
-    models[model_index] = model
+  local model_id = self.player:getGlobalGui(player, "model_id")
+  if model_id == "new" then
+    self:newModel(player)
   end
 
-  if model.blocks == nil then model.blocks = {} end
-
-  if model.ingredients == nil then model.ingredients = {} end
-
-  if model.resources == nil then model.resources = {} end
-
-  if model.powers == nil then model.powers = {} end
-
-  if model.time == nil then model.time = 1 end
-
+  model_id = self.player:getGlobalGui(player, "model_id")
+  local models = self:getModels(player)
+  local model = models[model_id]
+  if model == nil then return self:newModel(player) end
   return model
 end
 
 -------------------------------------------------------------------------------
--- Get and initialize the model
+-- Remove a model
 --
--- @function [parent=#PlannerModel] getModel
+-- @function [parent=#PlannerModel] removeModel
 --
 -- @param #LuaPlayer player
--- @param #number model_index
+-- @param #number model_id
 --
-function PlannerModel.methods:removeModel(player,model_index)
-  Logging:trace("PlannerModel:getModel():",player)
-  local globalGui = self.player:getGlobalGui(player)
-  globalGui.model_index = 1
-
-  local models = self:getModels(player)
-  table.remove(models, model_index)
-
+function PlannerModel.methods:removeModel(player,model_id)
+  Logging:trace("PlannerModel:removeModel():",player,model_id)
+  global.models[model_id] = nil
 end
 
 -------------------------------------------------------------------------------
@@ -146,7 +176,7 @@ end
 --
 function PlannerModel.methods:createProductionBlockModel(player, recipe)
   Logging:debug("PlannerModel:createProductionBlockModel():",player, recipe)
-  local model = self.player:getGlobal(player, "model")
+  local model = self:getModel(player)
 
   if model.block_id == nil then model.block_id = 0 end
   model.block_id = model.block_id + 1
@@ -154,6 +184,7 @@ function PlannerModel.methods:createProductionBlockModel(player, recipe)
   local inputModel = {}
   inputModel.id = "block_"..model.block_id
   inputModel.name = recipe.name
+  inputModel.owner = player.name
   inputModel.count = 1
   inputModel.power = 0
   inputModel.ingredients = {}
@@ -538,6 +569,23 @@ end
 -------------------------------------------------------------------------------
 -- Count in list
 --
+-- @function [parent=#PlannerModel] countModel
+--
+-- @return #number
+--
+function PlannerModel.methods:countModel()
+  local count = 0
+  if global.models ~= nil then
+    for key, element in pairs(global.models) do
+      count = count + 1
+    end
+  end
+  return count
+end
+
+-------------------------------------------------------------------------------
+-- Count in list
+--
 -- @function [parent=#PlannerModel] countList
 --
 -- @param #table list
@@ -546,7 +594,7 @@ end
 --
 function PlannerModel.methods:countList(list)
   local count = 0
-  for key, recipe in pairs(list) do
+  for key, element in pairs(list) do
     count = count + 1
   end
   return count
@@ -1782,7 +1830,7 @@ function PlannerModel.methods:computePower(player, key)
         -- puissance durant la penombre
         -- formula (puissance*durree_penombre)/(60s*capacite)
         local count2 = power.power*(gameDay.dust/factor+gameDay.night+gameDay.dawn/factor)/(60*power.secondary.buffer_capacity*1000)
-        
+
         Logging:debug("computePower result:", accu, count1, count2)
         if count1 > count2 then
           power.secondary.count = count1 or 0

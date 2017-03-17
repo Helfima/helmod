@@ -124,24 +124,24 @@ end
 -- @return #table global
 --
 function PlayerController.methods:getGlobal(player, key)
-	if global["HMModel"] == nil then
-		global["HMModel"] = {}
+	if global["users"] == nil then
+		global["users"] = {}
 	end
-	if global["HMModel"][player.name] == nil then
-		global["HMModel"][player.name] = {}
+	if global["users"][player.name] == nil then
+		global["users"][player.name] = {}
 	end
 
-	if global["HMModel"][player.name].settings == nil then
+	if global["users"][player.name].settings == nil then
 		self:initGlobalSettings(player)
 	end
 
 	if key ~= nil then
-		if global["HMModel"][player.name][key] == nil then
-			global["HMModel"][player.name][key] = {}
+		if global["users"][player.name][key] == nil then
+			global["users"][player.name][key] = {}
 		end
-		return global["HMModel"][player.name][key]
+		return global["users"][player.name][key]
 	end
-	return global["HMModel"][player.name]
+	return global["users"][player.name]
 end
 
 -------------------------------------------------------------------------------
@@ -152,7 +152,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlayerController.methods:initGlobalSettings(player)
-	global["HMModel"][player.name].settings = self:getDefaultSettings()
+	global["users"][player.name].settings = self:getDefaultSettings()
 end
 
 -------------------------------------------------------------------------------
