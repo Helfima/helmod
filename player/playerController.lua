@@ -66,7 +66,18 @@ end
 -- @param #LuaPlayer player
 --
 function PlayerController.methods:getGui(player)
-	return player.gui.top["helmod_menu-main"]
+  return player.gui.top["helmod_menu-main"]
+end
+
+-------------------------------------------------------------------------------
+-- Get gui
+--
+-- @function [parent=#PlayerController] isAdmin
+--
+-- @param #LuaPlayer player
+--
+function PlayerController.methods:isAdmin(player)
+  return false --player.admin
 end
 
 -------------------------------------------------------------------------------

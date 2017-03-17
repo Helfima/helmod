@@ -280,36 +280,9 @@ function PlannerEnergyEdition.methods:on_event(player, element, action, item, it
   Logging:debug("PlannerEnergyEdition:on_event():",player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
 
-  if action == "power-update" then
-    local inputPanel = self:getPowerPanel(player)["table-input"]
-    local options = {}
-
-    if inputPanel["power"] ~= nil then
-      options["power"] = self:getInputNumber(inputPanel["power"])
-    end
-
-    self.model:updatePower(player, item, options)
-    self:updatePowerInfo(player, element, action, item, item2, item3)
-    self.parent:refreshDisplayData(player, nil, item, item2)
-  end
-
   if action == "primary-group" then
     model.primaryGroupSelected = item2
     self:updatePrimarySelector(player, element, action, item, item2, item3)
-  end
-
-  if action == "primary-select" then
-    local object = self:getObject(player, element, action, item, item2, item3)
-    if object ~= nil then
-      local power = self.model:addPrimaryPower(player, item, item2)
-    else
-      local power = self.model:addPrimaryPower(player, nil, item2)
-      item = power.id
-    end
-    self.model:computePower(player, item)
-    self.parent:refreshDisplayData(player)
-    self:send_event(player, element, "CLOSE", item, item2, item3)
-    self:send_event(player, element, "OPEN", item, item2, item3)
   end
 
   if action == "secondary-group" then
@@ -317,18 +290,47 @@ function PlannerEnergyEdition.methods:on_event(player, element, action, item, it
     self:updateSecondarySelector(player, element, action, item, item2, item3)
   end
 
-  if action == "secondary-select" then
-    local object = self:getObject(player, element, action, item, item2, item3)
-    if object ~= nil then
-      local power = self.model:addSecondaryPower(player, item, item2)
-    else
-      local power = self.model:addSecondaryPower(player, nil, item2)
-      item = power.id
+  if self.player:isAdmin(player) or model.owner == player.name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
+    if action == "power-update" then
+      local inputPanel = self:getPowerPanel(player)["table-input"]
+      local options = {}
+
+      if inputPanel["power"] ~= nil then
+        options["power"] = self:getInputNumber(inputPanel["power"])
+      end
+
+      self.model:updatePower(player, item, options)
+      self:updatePowerInfo(player, element, action, item, item2, item3)
+      self.parent:refreshDisplayData(player, nil, item, item2)
     end
-    self.model:computePower(player, item)
-    self.parent:refreshDisplayData(player)
-    self:send_event(player, element, "CLOSE", item, item2, item3)
-    self:send_event(player, element, "OPEN", item, item2, item3)
+
+    if action == "primary-select" then
+      local object = self:getObject(player, element, action, item, item2, item3)
+      if object ~= nil then
+        local power = self.model:addPrimaryPower(player, item, item2)
+      else
+        local power = self.model:addPrimaryPower(player, nil, item2)
+        item = power.id
+      end
+      self.model:computePower(player, item)
+      self.parent:refreshDisplayData(player)
+      self:send_event(player, element, "CLOSE", item, item2, item3)
+      self:send_event(player, element, "OPEN", item, item2, item3)
+    end
+
+    if action == "secondary-select" then
+      local object = self:getObject(player, element, action, item, item2, item3)
+      if object ~= nil then
+        local power = self.model:addSecondaryPower(player, item, item2)
+      else
+        local power = self.model:addSecondaryPower(player, nil, item2)
+        item = power.id
+      end
+      self.model:computePower(player, item)
+      self.parent:refreshDisplayData(player)
+      self:send_event(player, element, "CLOSE", item, item2, item3)
+      self:send_event(player, element, "OPEN", item, item2, item3)
+    end
   end
 end
 

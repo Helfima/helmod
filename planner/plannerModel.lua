@@ -38,11 +38,11 @@ function PlannerModel.methods:getModels(player)
   local global_models = global.models
   if self:countModel() > 0 then
     for _,model in pairs(global.models) do
-      if player.admin == true then
+      if self.player:isAdmin(player) then
         models[model.id] = model
         if first_id == nil then first_id = model.id end
         if model_id == model.id then reset_model_id = false end
-      elseif model.owner == player.name or model.shared == true then
+      elseif model.owner == player.name or (model.share ~= nil and model.share > 0) then
         models[model.id] = model
         if first_id == nil then first_id = model.id end
         if model_id == model.id then reset_model_id = false end
@@ -771,12 +771,10 @@ function PlannerModel.methods:updateProduct(player, blockId, key, quantity)
   local model = self:getModel(player)
 
   if model.blocks[blockId] ~= nil then
-    local product = nil
-    for _, product in pairs(model.blocks[blockId].products) do
-      if product.name == key then
-        product.count = quantity
-      end
-    end
+    local block = model.blocks[blockId]
+    if block.input == nil then block.input = {} end
+    block.input.key = key
+    block.input.quantity = quantity
   end
 end
 
@@ -1243,9 +1241,14 @@ function PlannerModel.methods:update(player, force)
     -- calcul les blocks
     local input = {}
     for _, productBlock in spairs(model.blocks, function(t,a,b) return t[b].index > t[a].index end) do
-      for _,product in pairs(productBlock.products) do
+      -- premiere recette
+      local _,recipe = next(productBlock.recipes)
+      for _,product in pairs(recipe.products) do
         if input[product.name] ~= nil then
-          product.count = input[product.name]
+          -- hors premier tour
+          productBlock.input = {}
+          productBlock.input.key = product.name
+          productBlock.input.quantity = input[product.name]
         end
       end
 
@@ -1314,7 +1317,6 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 
   local recipes = element.recipes
   if recipes ~= nil then
-    local oldProducts = element.products
     -- initialisation
     element.products = {}
     element.ingredients = {}
@@ -1326,22 +1328,18 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
     for _, recipe in pairs(recipes) do
       -- construit la list des produits
       for _, product in pairs(recipe.products) do
-        element.products[product.name] = {
-          name = product.name,
-          type = product.type,
-          count = 0,
-          state = 0,
-          amount = self:getElementAmount(product)
-        }
-        if initProduct == false then
-          if oldProducts[product.name] ~= nil and oldProducts[product.name].count > 0 then
-            product.count = oldProducts[product.name].count
-          else
-            product.count = 0
+        if element.products[product.name] == nil then
+          element.products[product.name] = {
+            name = product.name,
+            type = product.type,
+            count = 0,
+            state = 0,
+            amount = self:getElementAmount(product)
+          }
+          if initProduct == false then
+            element.products[product.name].state = 1
           end
-          element.products[product.name].count = product.count
-          element.products[product.name].state = 1
-        else
+          -- initialise product
           product.count = 0
         end
       end
@@ -1349,14 +1347,25 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
       initProduct = true
       -- construit la list des ingredients
       for _, ingredient in pairs(recipe.ingredients) do
-        element.ingredients[ingredient.name] = {
-          name = ingredient.name,
-          type = ingredient.type,
-          amount = ingredient.amount,
-          count = 0
-        }
-        -- initialise ingredient
-        ingredient.count = 0
+        if element.ingredients[ingredient.name] == nil then
+          element.ingredients[ingredient.name] = {
+            name = ingredient.name,
+            type = ingredient.type,
+            amount = ingredient.amount,
+            count = 0
+          }
+          -- initialise ingredient
+          ingredient.count = 0
+        end
+      end
+    end
+    -- initialise la premiere recette avec le input
+    local _,first_recipe = next(recipes)
+    if first_recipe ~= nil and element.input ~= nil then
+      for _, product in pairs(first_recipe.products) do
+        if product.name == element.input.key then
+          product.count = element.input.quantity
+        end
       end
     end
 
@@ -1408,6 +1417,7 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
         element.ingredients[ingredient.name].count = element.ingredients[ingredient.name].count + nextCount
       end
 
+      --Logging:debug("Compute before clean:", element)
 
       self:computeFactory(player, recipe)
 
@@ -1428,7 +1438,7 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
       -- state = 2 => produit restant
       for _, product in pairs(recipe.products) do
         -- compte les produits
-        if element.products[product.name] ~= nil and element.products[product.name].state == 0 then
+        if element.products[product.name] ~= nil then
           element.products[product.name].count = element.products[product.name].count + product.count
         end
         -- consomme les produits
@@ -1436,8 +1446,9 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
           element.ingredients[product.name].count = element.ingredients[product.name].count - product.count
         end
       end
-
+      --Logging:debug("Compute after clean:", element)
     end
+    
     if element.count < 1 then
       element.count = 1
     end

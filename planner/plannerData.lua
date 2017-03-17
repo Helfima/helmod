@@ -186,6 +186,123 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
 
   local globalGui = self.player:getGlobalGui(player)
 
+  if self.player:isAdmin(player) or model.owner == player.name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
+    if action == "change-time" then
+      model.time = tonumber(item)
+      self.model:update(player)
+      self:update(player, item, item2, item3)
+    end
+
+    if action == "production-block-add" then
+      if globalGui.currentTab == self.PRODUCTION_LINE_TAB then
+        local recipes = self.player:searchRecipe(player, item2)
+        Logging:debug("line recipes:",recipes)
+        if #recipes == 1 then
+          local productionBlock = self.parent.model:addRecipeIntoProductionBlock(player, recipes[1].name)
+          self.parent.model:update(player)
+          globalGui.currentTab = self.PRODUCTION_BLOCK_TAB
+          self:update(player, self.PRODUCTION_BLOCK_TAB)
+        else
+          globalGui.currentTab = self.PRODUCTION_BLOCK_TAB
+          self.parent:send_event(player, "HMPlannerRecipeSelector", "OPEN", item, item2, item3)
+        end
+      end
+    end
+
+    if action == "production-block-remove" then
+      if globalGui.currentTab == self.PRODUCTION_LINE_TAB then
+        self.parent.model:removeProductionBlock(player, item)
+        self.parent.model:update(player)
+        self:update(player, self.PRODUCTION_LINE_TAB, item, item2, item3)
+      end
+    end
+
+    if action == "production-block-up" then
+      if globalGui.currentTab == self.PRODUCTION_LINE_TAB then
+        self.parent.model:upProductionBlock(player, item)
+        self.parent.model:update(player)
+        self:update(player, self.PRODUCTION_LINE_TAB, item, item2, item3)
+      end
+    end
+
+    if action == "production-block-down" then
+      if globalGui.currentTab == self.PRODUCTION_LINE_TAB then
+        self.parent.model:downProductionBlock(player, item)
+        self.parent.model:update(player)
+        self:update(player, self.PRODUCTION_LINE_TAB, item, item2, item3)
+      end
+    end
+
+    if action == "production-recipe-remove" then
+      if globalGui.currentTab == self.PRODUCTION_BLOCK_TAB then
+        self.parent.model:removeProductionRecipe(player, item, item2)
+        self.parent.model:update(player)
+        self:update(player, self.PRODUCTION_BLOCK_TAB, item, item2, item3)
+      end
+    end
+
+    if action == "production-recipe-up" then
+      if globalGui.currentTab == self.PRODUCTION_BLOCK_TAB then
+        self.parent.model:upProductionRecipe(player, item, item2)
+        self.parent.model:update(player)
+        self:update(player, self.PRODUCTION_BLOCK_TAB, item, item2, item3)
+      end
+    end
+
+    if action == "production-recipe-down" then
+      if globalGui.currentTab == self.PRODUCTION_BLOCK_TAB then
+        self.parent.model:downProductionRecipe(player, item, item2)
+        self.parent.model:update(player)
+        self:update(player, self.PRODUCTION_BLOCK_TAB, item, item2, item3)
+      end
+    end
+  end
+
+  if action == "share-model" then
+    if model ~= nil then
+      if self.player:isAdmin(player) or model.owner == player.name then
+        if item == "read" then
+          if model.share == nil or not(bit32.band(model.share, 1) > 0) then
+            model.share = 1
+          else
+            model.share = 0
+          end
+        end
+        if item == "write" then
+          if model.share == nil or not(bit32.band(model.share, 2) > 0) then
+            model.share = 3
+          else
+            model.share = 1
+          end
+        end
+        if item == "delete" then
+          if model.share == nil or not(bit32.band(model.share, 4) > 0) then
+            model.share = 7
+          else
+            model.share = 3
+          end
+        end
+      end
+      self:update(player, item, item2, item3)
+    end
+  end
+
+  if self.player:isAdmin(player) or model.owner == player.name or (model.share ~= nil and bit32.band(model.share, 4) > 0) then
+    if action == "remove-model" then
+      self.model:removeModel(player, item)
+      globalGui.currentTab = self.PRODUCTION_LINE_TAB
+      globalGui.currentBlock = "new"
+
+      self:update(player, item, item2, item3)
+      self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
+      self.parent:send_event(player, "HMPlannerResourceEdition", "CLOSE")
+      self.parent:send_event(player, "HMPlannerRecipeEdition", "CLOSE")
+      self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
+      self.parent:send_event(player, "HMPlannerEnergyEdition", "CLOSE")
+      self.parent:send_event(player, "HMPlannerSettings", "CLOSE")
+    end
+  end
+
   if action == "change-model" then
     globalGui.model_id = item
     globalGui.currentTab = self.PRODUCTION_LINE_TAB
@@ -198,26 +315,6 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
     self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
     self.parent:send_event(player, "HMPlannerEnergyEdition", "CLOSE")
     self.parent:send_event(player, "HMPlannerSettings", "CLOSE")
-  end
-
-  if action == "remove-model" then
-    self.model:removeModel(player, item)
-    globalGui.currentTab = self.PRODUCTION_LINE_TAB
-    globalGui.currentBlock = "new"
-
-    self:update(player, item, item2, item3)
-    self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
-    self.parent:send_event(player, "HMPlannerResourceEdition", "CLOSE")
-    self.parent:send_event(player, "HMPlannerRecipeEdition", "CLOSE")
-    self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
-    self.parent:send_event(player, "HMPlannerEnergyEdition", "CLOSE")
-    self.parent:send_event(player, "HMPlannerSettings", "CLOSE")
-  end
-
-  if action == "change-time" then
-    model.time = tonumber(item)
-    self.model:update(player)
-    self:update(player, item, item2, item3)
   end
 
   if action == "change-tab" then
@@ -244,46 +341,6 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
     self:update(player, item, item2, item3)
   end
 
-  if action == "production-block-add" then
-    if globalGui.currentTab == self.PRODUCTION_LINE_TAB then
-      local recipes = self.player:searchRecipe(player, item2)
-      Logging:debug("line recipes:",recipes)
-      if #recipes == 1 then
-        local productionBlock = self.parent.model:addRecipeIntoProductionBlock(player, recipes[1].name)
-        self.parent.model:update(player)
-        globalGui.currentTab = self.PRODUCTION_BLOCK_TAB
-        self:update(player, self.PRODUCTION_BLOCK_TAB)
-      else
-        globalGui.currentTab = self.PRODUCTION_BLOCK_TAB
-        self.parent:send_event(player, "HMPlannerRecipeSelector", "OPEN", item, item2, item3)
-      end
-    end
-  end
-
-  if action == "production-block-remove" then
-    if globalGui.currentTab == self.PRODUCTION_LINE_TAB then
-      self.parent.model:removeProductionBlock(player, item)
-      self.parent.model:update(player)
-      self:update(player, self.PRODUCTION_LINE_TAB, item, item2, item3)
-    end
-  end
-
-  if action == "production-block-up" then
-    if globalGui.currentTab == self.PRODUCTION_LINE_TAB then
-      self.parent.model:upProductionBlock(player, item)
-      self.parent.model:update(player)
-      self:update(player, self.PRODUCTION_LINE_TAB, item, item2, item3)
-    end
-  end
-
-  if action == "production-block-down" then
-    if globalGui.currentTab == self.PRODUCTION_LINE_TAB then
-      self.parent.model:downProductionBlock(player, item)
-      self.parent.model:update(player)
-      self:update(player, self.PRODUCTION_LINE_TAB, item, item2, item3)
-    end
-  end
-
   if action == "production-recipe-add" then
     if globalGui.currentTab == self.PRODUCTION_BLOCK_TAB then
       local recipes = self.player:searchRecipe(player, item3)
@@ -299,29 +356,6 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
     end
   end
 
-  if action == "production-recipe-remove" then
-    if globalGui.currentTab == self.PRODUCTION_BLOCK_TAB then
-      self.parent.model:removeProductionRecipe(player, item, item2)
-      self.parent.model:update(player)
-      self:update(player, self.PRODUCTION_BLOCK_TAB, item, item2, item3)
-    end
-  end
-
-  if action == "production-recipe-up" then
-    if globalGui.currentTab == self.PRODUCTION_BLOCK_TAB then
-      self.parent.model:upProductionRecipe(player, item, item2)
-      self.parent.model:update(player)
-      self:update(player, self.PRODUCTION_BLOCK_TAB, item, item2, item3)
-    end
-  end
-
-  if action == "production-recipe-down" then
-    if globalGui.currentTab == self.PRODUCTION_BLOCK_TAB then
-      self.parent.model:downProductionRecipe(player, item, item2)
-      self.parent.model:update(player)
-      self:update(player, self.PRODUCTION_BLOCK_TAB, item, item2, item3)
-    end
-  end
 end
 
 -------------------------------------------------------------------------------
@@ -336,6 +370,7 @@ end
 --
 function PlannerData.methods:update(player, item, item2, item3)
   Logging:debug("PlannerData:update():", player, item, item2, item3)
+  Logging:debug("PlannerData:update():global", global)
   local globalGui = self.player:getGlobalGui(player)
   local dataPanel = self:getDataPanel(player)
 
@@ -450,28 +485,28 @@ function PlannerData.methods:updateProductionHeader(player, item, item2, item3)
   local adminPanel = self:addGuiFlowH(menuPanel, "admin", "helmod_flow_resize_row_width")
   self.player:setStyle(player, adminPanel, "data", "minimal_width")
   self.player:setStyle(player, adminPanel, "data", "maximal_width")
-  
+
   local tableAdminPanel = self:addGuiTable(adminPanel, "table" , 9)
   self:addGuiLabel(tableAdminPanel, "label-owner", ({"helmod_result-panel.owner"}))
   self:addGuiLabel(tableAdminPanel, "value-owner", model.owner)
-  
+
   self:addGuiLabel(tableAdminPanel, "label-share", ({"helmod_result-panel.share"}))
-  
+
   local model_read = false
   if model.share ~= nil and  bit32.band(model.share, 1) > 0 then model_read = true end
-  self:addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID="..model.id.."=read", model_read)
+  self:addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID=read="..model.id, model_read)
   self:addGuiLabel(tableAdminPanel, self:classname().."=share-model-read", "read")
-  
+
   local model_write = false
   if model.share ~= nil and  bit32.band(model.share, 2) > 0 then model_write = true end
-  self:addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID="..model.id.."=write", model_write)
+  self:addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID=write="..model.id, model_write)
   self:addGuiLabel(tableAdminPanel, self:classname().."=share-model-write", "write")
-  
+
   local model_delete = false
   if model.share ~= nil and bit32.band(model.share, 4) > 0 then model_delete = true end
-  self:addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID="..model.id.."=delete", model_delete)
+  self:addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID=delete="..model.id, model_delete)
   self:addGuiLabel(tableAdminPanel, self:classname().."=share-model-delete", "delete")
-  
+
   -- action panel
   local actionPanel = self:addGuiFlowH(menuPanel, "action", "helmod_flow_resize_row_width")
   self.player:setStyle(player, actionPanel, "data", "minimal_width")
@@ -483,7 +518,9 @@ function PlannerData.methods:updateProductionHeader(player, item, item2, item3)
   self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.RESOURCES_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-resources"}))
   self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.POWER_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-energy"}))
   local deletePanel = self:addGuiFlowH(actionPanel, "delete", "helmod_flow_default")
-  self:addGuiButton(deletePanel, self:classname().."=remove-model=ID=", model.id, "helmod_button_default", ({"helmod_result-panel.remove-button-production-line"}))
+  if self.player:isAdmin(player) or model.owner == player.name or (model.share ~= nil and bit32.band(model.share, 4) > 0) then
+    self:addGuiButton(deletePanel, self:classname().."=remove-model=ID=", model.id, "helmod_button_default", ({"helmod_result-panel.remove-button-production-line"}))
+  end
 end
 -------------------------------------------------------------------------------
 -- Update production line tab
