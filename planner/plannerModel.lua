@@ -68,10 +68,12 @@ function PlannerModel.methods:newModel(player)
   Logging:trace("PlannerModel:getModel():",player)
   if global.model_id == nil then global.model_id = 1 end
   if global.models == nil then global.models = {} end
-
+  local owner = player.name
+  if owner == nil or owner == "" then owner = "admin" end
   global.model_id = global.model_id + 1
   local model = {}
   model.id = "model_"..global.model_id
+  model.owner = owner
   model.blocks = {}
   model.ingredients = {}
   model.resources = {}
@@ -117,6 +119,13 @@ end
 function PlannerModel.methods:removeModel(player,model_id)
   Logging:trace("PlannerModel:removeModel():",player,model_id)
   global.models[model_id] = nil
+  local models = self:getModels(player)
+  local _,model = next(models)
+  if model ~= nil then
+    self.player:getGlobalGui(player)["model_id"] = model.id
+  else
+    self:newModel(player)
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -1411,7 +1420,8 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
         -- calcul factory productivity effect
         productUsage = productUsage + productNominal * recipe.factory.effects.productivity
 
-        local nextCount = math.ceil(pCount*(ingredient.amount/productUsage))
+        --local nextCount = math.ceil(pCount*(ingredient.amount/productUsage))
+        local nextCount = pCount*(ingredient.amount/productUsage)
         ingredient.count = nextCount
 
         element.ingredients[ingredient.name].count = element.ingredients[ingredient.name].count + nextCount

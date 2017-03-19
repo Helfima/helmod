@@ -77,7 +77,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlayerController.methods:isAdmin(player)
-  return false --player.admin
+  return player.admin
 end
 
 -------------------------------------------------------------------------------

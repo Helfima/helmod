@@ -535,10 +535,34 @@ end
 -- @return #number the formated number
 --
 function ElementGui.methods:formatNumber(n)
+	local separator = " "
 	if n == nil then return 0 end
-	return tostring(math.floor(n)):reverse():gsub("(%d%d%d)","%1 "):gsub(" (%-?)$","%1"):reverse()
+	--return tostring(math.floor(n)):reverse():gsub("(%d%d%d)","%1 "):gsub(" (%-?)$","%1"):reverse()
+	local decimal = 2
+  if n > 10 then decimal = 1 end
+	local left,num,right = string.match(self:round(n, decimal),'^([^%d]*%d)(%d*)(.-)$')
+  return left..(num:reverse():gsub('(%d%d%d)','%1'..separator):reverse())..right
 end
 
+-------------------------------------------------------------------------------
+-- Format the number
+--
+-- @see http://lua-users.org/wiki/FormattingNumbers
+-- 
+-- @function [parent=#ElementGui] formatNumber
+--
+-- @param #number val the number
+-- @param #number decimal the number
+--
+-- @return #number the formated number
+--
+function ElementGui.methods:round(val, decimal)
+  if (decimal) then
+    return math.floor( (val * 10^decimal) + 0.5) / (10^decimal)
+  else
+    return math.floor(val+0.5)
+  end
+end
 -------------------------------------------------------------------------------
 -- Format the number
 --

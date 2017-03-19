@@ -303,6 +303,10 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
     end
   end
 
+  if action == "refresh-model" then
+    self:update(player, item, item2, item3)
+  end
+
   if action == "change-model" then
     globalGui.model_id = item
     globalGui.currentTab = self.PRODUCTION_LINE_TAB
@@ -517,6 +521,8 @@ function PlannerData.methods:updateProductionHeader(player, item, item2, item3)
   self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.SUMMARY_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-summary"}))
   self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.RESOURCES_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-resources"}))
   self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.POWER_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-energy"}))
+  self:addGuiButton(tabPanel, self:classname().."=refresh-model=ID=", model.id, "helmod_button_default", ({"helmod_result-panel.refresh-button"}))
+
   local deletePanel = self:addGuiFlowH(actionPanel, "delete", "helmod_flow_default")
   if self.player:isAdmin(player) or model.owner == player.name or (model.share ~= nil and bit32.band(model.share, 4) > 0) then
     self:addGuiButton(deletePanel, self:classname().."=remove-model=ID=", model.id, "helmod_button_default", ({"helmod_result-panel.remove-button-production-line"}))
@@ -613,6 +619,7 @@ function PlannerData.methods:updateProductionBlock(player, item, item2, item3)
   self:addGuiButton(tabPanel, "HMPlannerRecipeSelector=OPEN=ID=", blockId, "helmod_button_default", ({"helmod_result-panel.add-button-recipe"}))
   self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.PRODUCTION_LINE_TAB, "helmod_button_default", ({"helmod_result-panel.back-button-production-line"}))
   self:addGuiButton(tabPanel, "HMPlannerPinPanel=OPEN=ID=", blockId, "helmod_button_default", ({"helmod_result-panel.tab-button-pin"}))
+  self:addGuiButton(tabPanel, self:classname().."=refresh-model=ID=", model.id, "helmod_button_default", ({"helmod_result-panel.refresh-button"}))
 
   local countRecipes = self.model:countBlockRecipes(player, blockId)
   -- production block result
@@ -1305,10 +1312,12 @@ function PlannerData.methods:updateSummary(player)
 
   local resultTable = self:addGuiTable(energyPanel,"table-energy",2)
 
-  for _, item in pairs(model.generators) do
-    local guiCell = self:addGuiFlowH(resultTable,"cell_"..item.name)
-    self:addGuiLabel(guiCell, item.name, self:formatNumberKilo(item.count), "helmod_label_right_50")
-    self:addGuiButtonSprite(guiCell, "HMPlannerGenerator=OPEN=ID=", "item", item.name, item.name, self.player:getLocalisedName(player, item))
+  if model.generators ~= nil then
+    for _, item in pairs(model.generators) do
+      local guiCell = self:addGuiFlowH(resultTable,"cell_"..item.name)
+      self:addGuiLabel(guiCell, item.name, self:formatNumberKilo(item.count), "helmod_label_right_50")
+      self:addGuiButtonSprite(guiCell, "HMPlannerGenerator=OPEN=ID=", "item", item.name, item.name, self.player:getLocalisedName(player, item))
+    end
   end
 
   -- factories
@@ -1316,39 +1325,41 @@ function PlannerData.methods:updateSummary(player)
   self.player:setStyle(player, factoryPanel, "data", "minimal_width")
   self.player:setStyle(player, factoryPanel, "data", "maximal_width")
 
-  local resultTable = self:addGuiTable(factoryPanel,"table-factory",10)
+  if model.summary ~= nil then
+    local resultTable = self:addGuiTable(factoryPanel,"table-factory",10)
 
-  for _, element in pairs(model.summary.factories) do
-    local guiCell = self:addGuiFlowH(resultTable,"cell_"..element.name)
-    self:addGuiLabel(guiCell, element.name, self:formatNumberKilo(element.count), "helmod_label_right_50")
-    self:addGuiButtonSprite(guiCell, "HMPlannerFactories=OPEN=ID=", "item", element.name, element.name, self.player:getLocalisedName(player, element))
-  end
+    for _, element in pairs(model.summary.factories) do
+      local guiCell = self:addGuiFlowH(resultTable,"cell_"..element.name)
+      self:addGuiLabel(guiCell, element.name, self:formatNumberKilo(element.count), "helmod_label_right_50")
+      self:addGuiButtonSprite(guiCell, "HMPlannerFactories=OPEN=ID=", "item", element.name, element.name, self.player:getLocalisedName(player, element))
+    end
 
-  -- beacons
-  local beaconPanel = self:addGuiFrameV(dataPanel, "beacon", "helmod_frame_resize_row_width", ({"helmod_common.beacons"}))
-  self.player:setStyle(player, beaconPanel, "data", "minimal_width")
-  self.player:setStyle(player, beaconPanel, "data", "maximal_width")
+    -- beacons
+    local beaconPanel = self:addGuiFrameV(dataPanel, "beacon", "helmod_frame_resize_row_width", ({"helmod_common.beacons"}))
+    self.player:setStyle(player, beaconPanel, "data", "minimal_width")
+    self.player:setStyle(player, beaconPanel, "data", "maximal_width")
 
-  local resultTable = self:addGuiTable(beaconPanel,"table-beacon",10)
+    local resultTable = self:addGuiTable(beaconPanel,"table-beacon",10)
 
-  for _, element in pairs(model.summary.beacons) do
-    local guiCell = self:addGuiFlowH(resultTable,"cell_"..element.name)
-    self:addGuiLabel(guiCell, element.name, self:formatNumberKilo(element.count), "helmod_label_right_50")
-    self:addGuiButtonSprite(guiCell, "HMPlannerBeacons=OPEN=ID=", "item", element.name, element.name, self.player:getLocalisedName(player, element))
-  end
+    for _, element in pairs(model.summary.beacons) do
+      local guiCell = self:addGuiFlowH(resultTable,"cell_"..element.name)
+      self:addGuiLabel(guiCell, element.name, self:formatNumberKilo(element.count), "helmod_label_right_50")
+      self:addGuiButtonSprite(guiCell, "HMPlannerBeacons=OPEN=ID=", "item", element.name, element.name, self.player:getLocalisedName(player, element))
+    end
 
-  -- modules
-  local modulesPanel = self:addGuiFrameV(dataPanel, "modules", "helmod_frame_resize_row_width", ({"helmod_common.modules"}))
-  self.player:setStyle(player, modulesPanel, "data", "minimal_width")
-  self.player:setStyle(player, modulesPanel, "data", "maximal_width")
+    -- modules
+    local modulesPanel = self:addGuiFrameV(dataPanel, "modules", "helmod_frame_resize_row_width", ({"helmod_common.modules"}))
+    self.player:setStyle(player, modulesPanel, "data", "minimal_width")
+    self.player:setStyle(player, modulesPanel, "data", "maximal_width")
 
-  local resultTable = self:addGuiTable(modulesPanel,"table-modules",10)
+    local resultTable = self:addGuiTable(modulesPanel,"table-modules",10)
 
-  for _, element in pairs(model.summary.modules) do
-    -- col icon
-    local guiCell = self:addGuiFlowH(resultTable,"cell_"..element.name)
-    self:addGuiLabel(guiCell, element.name, self:formatNumberKilo(element.count), "helmod_label_right_50")
-    self:addGuiButtonSprite(guiCell, "HMPlannerModules=OPEN=ID=", "item", element.name, element.name, self.player:getLocalisedName(player, element))
+    for _, element in pairs(model.summary.modules) do
+      -- col icon
+      local guiCell = self:addGuiFlowH(resultTable,"cell_"..element.name)
+      self:addGuiLabel(guiCell, element.name, self:formatNumberKilo(element.count), "helmod_label_right_50")
+      self:addGuiButtonSprite(guiCell, "HMPlannerModules=OPEN=ID=", "item", element.name, element.name, self.player:getLocalisedName(player, element))
+    end
   end
 end
 
