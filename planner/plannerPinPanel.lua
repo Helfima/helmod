@@ -48,12 +48,12 @@ end
 -- @return #boolean if true the next call close dialog
 --
 function PlannerPinPanel.methods:on_open(player, element, action, item, item2, item3)
-	local model = self.model:getModel(player)
+	local globalGui = self.player:getGlobalGui(player)
 	local close = true
-	if model.guiPinBlock == nil or model.guiPinBlock ~= item then
+	if globalGui.pinBlock == nil or globalGui.pinBlock ~= item then
 		close = false
 	end
-	model.guiPinBlock = item
+	globalGui.pinBlock = item
 	return close
 end
 
@@ -70,8 +70,8 @@ end
 -- @param #string item3 third item name
 --
 function PlannerPinPanel.methods:on_close(player, element, action, item, item2, item3)
-	local model = self.model:getModel(player)
-	model.guiPinBlock = nil
+	local globalGui = self.player:getGlobalGui(player)
+	globalGui.pinBlock = nil
 end
 
 -------------------------------------------------------------------------------
@@ -191,14 +191,14 @@ function PlannerPinPanel.methods:updateInfo(player, element, action, item, item2
 	local display_pin_beacon = self.player:getGlobalSettings(player,"display_pin_beacon")
 	if display_pin_beacon == true then column = column + 1 end
 
-	if model.guiPinBlock ~= nil and model.blocks[model.guiPinBlock] ~= nil then
-		local block = model.blocks[model.guiPinBlock]
+	if globalGui.pinBlock ~= nil and model.blocks[globalGui.pinBlock] ~= nil then
+		local block = model.blocks[globalGui.pinBlock]
 
 		local resultTable = self:addGuiTable(infoPanel,"list-data",column, "helmod_table-odd")
 
 		self:addProductionBlockHeader(player, resultTable)
 		for _, recipe in spairs(block.recipes, function(t,a,b) if globalGui.order.ascendant then return t[b][globalGui.order.name] > t[a][globalGui.order.name] else return t[b][globalGui.order.name] < t[a][globalGui.order.name] end end) do
-			self:addProductionBlockRow(player, resultTable, model.guiPinBlock, recipe)
+			self:addProductionBlockRow(player, resultTable, globalGui.pinBlock, recipe)
 		end
 
 	end
@@ -350,10 +350,11 @@ function PlannerPinPanel.methods:on_event(player, element, action, item, item2, 
 	local model = self.model:getModel(player)
 	local globalSettings = self.player:getGlobal(player, "settings")
 	local defaultSettings = self.player:getDefaultSettings()
+  local globalGui = self.player:getGlobalGui(player)
 
 	if action == "change-boolean-settings" then
 		if globalSettings[item] == nil then globalSettings[item] = defaultSettings[item] end
 		globalSettings[item] = not(globalSettings[item])
-		self:updateInfo(player, element, action, model.guiPinBlock, item2, item3)
+		self:updateInfo(player, element, action, globalGui.pinBlock, item2, item3)
 	end
 end

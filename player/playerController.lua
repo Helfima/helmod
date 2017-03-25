@@ -188,7 +188,9 @@ function PlayerController.methods:getDefaultSettings()
 		model_loop_limit = 1000,
 		model_filter_factory = true,
 		model_filter_beacon = true,
-		model_filter_generator = true,
+    model_filter_generator = true,
+    model_filter_factory_module = true,
+    model_filter_beacon_module = true,
 		other_speed_panel=false,
 		real_name=false,
 		filter_show_hidden=false

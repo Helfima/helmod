@@ -188,7 +188,7 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
 
   if self.player:isAdmin(player) or model.owner == player.name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
     if action == "change-time" then
-      model.time = tonumber(item)
+      model.time = tonumber(item) or 1
       self.model:update(player)
       self:update(player, item, item2, item3)
     end
@@ -440,7 +440,7 @@ function PlannerData.methods:updateModelPanel(player, item, item2, item3)
   }
   for _,time in pairs(times) do
     if model.time == time.value then
-      self:addGuiLabel(modelPanel, self:classname().."=change-time="..time.value, time.name, "helmod_label_time")
+      self:addGuiLabel(modelPanel, self:classname().."=do-nothing="..time.value, time.name, "helmod_label_time")
     else
       self:addGuiButton(modelPanel, self:classname().."=change-time=ID=", time.value, "helmod_button_time", time.name)
     end

@@ -541,6 +541,9 @@ function ElementGui.methods:formatNumber(n)
 	local decimal = 2
   if n > 10 then decimal = 1 end
 	local left,num,right = string.match(self:round(n, decimal),'^([^%d]*%d)(%d*)(.-)$')
+  if num == nil then return 0 end
+  if left == nil then left = "" end
+  if right == nil then right = "" end
   return left..(num:reverse():gsub('(%d%d%d)','%1'..separator):reverse())..right
 end
 

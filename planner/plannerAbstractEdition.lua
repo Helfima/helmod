@@ -523,6 +523,7 @@ function PlannerAbstractEdition.methods:updateFactoryModulesSelector(player, ele
   local selectorPanel = self:getFactoryModulesSelectorPanel(player)
   local model = self.model:getModel(player)
   local object = self:getObject(player, element, action, item, item2, item3)
+  local model_filter_factory_module = self.player:getGlobalSettings(player, "model_filter_factory_module")
 
   if selectorPanel["modules"] ~= nil and selectorPanel["modules"].valid and model.moduleListRefresh == true then
     selectorPanel["modules"].destroy()
@@ -537,7 +538,7 @@ function PlannerAbstractEdition.methods:updateFactoryModulesSelector(player, ele
       local speed = self:formatPercent(self.player:getModuleBonus(module.name, "speed"))
       local productivity = self:formatPercent(self.player:getModuleBonus(module.name, "productivity"))
       local pollution = self:formatPercent(self.player:getModuleBonus(module.name, "pollution"))
-      if productivity > 0 and item ~= "resource" then
+      if productivity > 0 and item ~= "resource" and model_filter_factory_module == true then
         if module.limitations[object.name] == nil then allowed = false end
       end
       if factory.module_slots ==  0 then
@@ -792,6 +793,7 @@ function PlannerAbstractEdition.methods:updateBeaconModulesSelector(player, elem
   local selectorPanel = self:getBeaconModulesSelectorPanel(player)
   local model = self.model:getModel(player)
   local object = self:getObject(player, element, action, item, item2, item3)
+  local model_filter_beacon_module = self.player:getGlobalSettings(player, "model_filter_beacon_module")
 
   if selectorPanel["modules"] ~= nil and selectorPanel["modules"].valid and model.moduleListRefresh == true then
     selectorPanel["modules"].destroy()
@@ -805,7 +807,7 @@ function PlannerAbstractEdition.methods:updateBeaconModulesSelector(player, elem
       local speed = self:formatPercent(self.player:getModuleBonus(module.name, "speed"))
       local productivity = self:formatPercent(self.player:getModuleBonus(module.name, "productivity"))
       local pollution = self:formatPercent(self.player:getModuleBonus(module.name, "pollution"))
-      if productivity > 0 then
+      if productivity > 0 and model_filter_beacon_module == true then
         allowed = false
       end
       local tooltip = ({"tooltip.module-description" , module.localised_name, consumption, speed, productivity, pollution})

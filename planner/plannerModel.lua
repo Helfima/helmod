@@ -1477,14 +1477,14 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
       if element.ingredients[product.name] ~= nil then
         product.state = product.state + 2
       end
-      if element.products[product.name].count < 0.9 and not(bit32.band(product.state, 1) > 0) then
+      if element.products[product.name].count < 0.01 and not(bit32.band(product.state, 1) > 0) then
         element.products[product.name] = nil
       end
     end
 
     -- reduit les ingredients du block
     for _, ingredient in pairs(element.ingredients) do
-      if element.ingredients[ingredient.name].count < 0.9 then
+      if element.ingredients[ingredient.name].count < 0.01 then
         element.ingredients[ingredient.name] = nil
       end
     end
@@ -1703,6 +1703,7 @@ function PlannerModel.methods:computeFactory(player, object)
     --Logging:trace("product=",product)
     if product ~= nil then
       local model = self:getModel(player)
+      Logging:debug("PlannerModel:computeFactory()",model)
       -- [nombre d'item] * [effort necessaire du recipe] / ([la vitesse de la factory] * [nombre produit par le recipe] * [le temps en second])
       local count = math.ceil(product.count*object.energy/(object.factory.speed*self:getElementAmount(product)*(1 + object.factory.effects.productivity)*model.time))
       object.factory.count = count

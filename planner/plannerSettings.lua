@@ -377,6 +377,20 @@ function PlannerSettings.methods:updateModelSettings(player, element, action, it
   self:addGuiCheckbox(modelSettingsTable, self:classname().."=change-boolean-settings=ID=model_filter_generator", model_filter_generator)
   self:addGuiLabel(modelSettingsTable, self:classname().."=blank=ID=model_filter_generator", "")
 
+  -- model_filter_factory_module
+  self:addGuiLabel(modelSettingsTable, self:classname().."=model_filter_factory_module", ({"helmod_settings-panel.model-filter-factory-module"}))
+
+  local model_filter_factory_module = self.player:getGlobalSettings(player, "model_filter_factory_module")
+  self:addGuiCheckbox(modelSettingsTable, self:classname().."=change-boolean-settings=ID=model_filter_factory_module", model_filter_factory_module)
+  self:addGuiLabel(modelSettingsTable, self:classname().."=blank=ID=model_filter_factory_module", "")
+
+  -- model_filter_beacon_module
+  self:addGuiLabel(modelSettingsTable, self:classname().."=model_filter_beacon_module", ({"helmod_settings-panel.model-filter-beacon-module"}))
+
+  local model_filter_beacon_module = self.player:getGlobalSettings(player, "model_filter_beacon_module")
+  self:addGuiCheckbox(modelSettingsTable, self:classname().."=change-boolean-settings=ID=model_filter_beacon_module", model_filter_beacon_module)
+  self:addGuiLabel(modelSettingsTable, self:classname().."=blank=ID=model_filter_beacon_module", "")
+
 end
 
 -------------------------------------------------------------------------------
