@@ -1348,9 +1348,9 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
           if initProduct == false then
             element.products[product.name].state = 1
           end
-          -- initialise product
-          product.count = 0
         end
+        -- initialise product
+        product.count = 0
       end
       -- limit les produits au premier recipe
       initProduct = true
@@ -1363,9 +1363,9 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
             amount = ingredient.amount,
             count = 0
           }
-          -- initialise ingredient
-          ingredient.count = 0
         end
+        -- initialise ingredient
+        ingredient.count = 0
       end
     end
     -- initialise la premiere recette avec le input
@@ -1458,7 +1458,7 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
       end
       --Logging:debug("Compute after clean:", element)
     end
-    
+
     if element.count < 1 then
       element.count = 1
     end
