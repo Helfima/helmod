@@ -899,7 +899,7 @@ function PlannerData.methods:addProductionBlockRow(player, guiTable, blockId, re
   local model = self.model:getModel(player)
 
   local globalSettings = self.player:getGlobal(player, "settings")
-
+  
   -- col action
   local guiAction = self:addGuiFlowH(guiTable,"action"..recipe.name, "helmod_flow_default")
   if recipe.index ~= 0 then

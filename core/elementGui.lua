@@ -223,9 +223,6 @@ function ElementGui.methods:addGuiButtonSpriteStyled(parent, style, action, type
 	else
 		options.name = action
 	end
-	if caption ~= nil then
-		options.caption = caption
-	end
 	if tooltip ~= nil then
 		options.tooltip = tooltip
 	end
@@ -241,6 +238,10 @@ function ElementGui.methods:addGuiButtonSpriteStyled(parent, style, action, type
 		if parent[options.name] and parent[options.name].valid then
 			parent[options.name].destroy()
 		end
+		if caption ~= nil then
+      options.caption = caption
+    end
+		
 		self:addGuiButtonIcon(parent, action, type, key, caption)
 	end
 	return button

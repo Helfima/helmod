@@ -416,6 +416,7 @@ function PlayerController.methods:getProductionsCrafting(category)
 			end
 		end
 	end
+	Logging:debug("PlayerController:getProductionsCrafting(category)", category, productions)
 	return productions
 end
 
@@ -805,7 +806,7 @@ end
 function PlayerController.methods:getItemProperty(name, property)
 	Logging:trace("PlayerController:getItemProperty(name, property)", name, property)
 	if data_entity == nil then
-		data_entity = loadstring(game.entity_prototypes["data_entity"].order)()
+		data_entity = self:getChunkedData("data_entity")
 		Logging:trace("PlayerController:getItemProperty(name, property):data_entity", data_entity)
 	end
 	if data_entity[name] then
@@ -876,26 +877,25 @@ function PlayerController.methods:getItemProperty(name, property)
 	return nil
 end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	
-
-
-
-
-
-
-
-
+-------------------------------------------------------------------------------
+-- Return chunked data
+--
+-- @function [parent=#PlayerController] getChunkedData
+--
+-- @param #string name
+--
+function PlayerController.methods:getChunkedData(name)
+    local chunk_suffix = "_"
+    local string = ""
+    if game then
+        local i = 1
+        while game.entity_prototypes[name .. chunk_suffix .. i] do
+            string = string..game.entity_prototypes[name .. chunk_suffix .. i].order
+            i = i + 1
+        end
+    end
+    if #string > 0 then
+        return loadstring(string)()
+    end
+    return nil
+end

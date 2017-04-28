@@ -264,7 +264,7 @@ function PlannerModel.methods:createFactoryModel(player, name, count)
   factoryModel.energy_total = 0
   factoryModel.speed_nominal = 0.5
   factoryModel.speed = 0
-  factoryModel.module_slots = 2
+  factoryModel.module_slots = 0
   -- limit infini = 0
   factoryModel.limit = 0
   factoryModel.limit_count = count

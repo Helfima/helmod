@@ -24,7 +24,7 @@ Logging.console = false
 
 helmod = {
 	name = "helmod",
-	version = "0.3.2"
+	version = "0.4.0"
 }
 
 -------------------------------------------------------------------------------
@@ -344,6 +344,18 @@ remote.add_interface("helmod", {
   end,
   display_size = function(value)
     global["HMModel"][game.player.name].settings["display_size"] = value
+  end,
+  cheat = function()
+    if game.player.admin and Logging.log > 0 then
+      game.player.force.enable_all_recipes()
+      game.player.force.enable_all_technologies()
+      game.player.force.manual_mining_speed_modifier=100
+      game.player.force.manual_crafting_speed_modifier=100
+      game.player.cheat_mode=true
+      game.player.print("cheat mod!")
+    else
+      game.player.print("not allowed cheat mod!")
+    end
   end
 })
   
