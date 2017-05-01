@@ -476,7 +476,7 @@ function PlannerAbstractEdition.methods:updateFactoryInfo(player, element, actio
     local inputPanel = self:addGuiTable(infoPanel,"table-input",2)
 
     self:addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy-nominal"}))
-    self:addGuiLabel(inputPanel, "energy-nominal", factory.energy_nominal)
+    self:addGuiLabel(inputPanel, "energy-nominal", self:formatNumberKilo(factory.energy_nominal, "W"))
 
     self:addGuiLabel(inputPanel, "label-speed-nominal", ({"helmod_label.speed-nominal"}))
     self:addGuiLabel(inputPanel, "speed-nominal", factory.speed_nominal)
@@ -487,7 +487,7 @@ function PlannerAbstractEdition.methods:updateFactoryInfo(player, element, actio
     self:addGuiLabel(inputPanel, "label-energy", ({"helmod_label.energy"}))
     local sign = "+"
     if factory.effects.consumption < 0 then sign = "-" end
-    self:addGuiLabel(inputPanel, "energy", factory.energy.." ("..sign..self:formatPercent(factory.effects.consumption).."%)")
+    self:addGuiLabel(inputPanel, "energy", self:formatNumberKilo(factory.energy, "W").." ("..sign..self:formatPercent(factory.effects.consumption).."%)")
 
     local sign = "+"
     if factory.effects.speed < 0 then sign = "-" end
@@ -716,7 +716,7 @@ function PlannerAbstractEdition.methods:updateBeaconInfo(player, element, action
     local inputPanel = self:addGuiTable(infoPanel,"table-input",2)
 
     self:addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy-nominal"}))
-    self:addGuiLabel(inputPanel, "energy-nominal", beacon.energy_nominal)
+    self:addGuiLabel(inputPanel, "energy-nominal", self:formatNumberKilo(beacon.energy_nominal, "W"))
 
     self:addGuiLabel(inputPanel, "label-efficiency", ({"helmod_label.efficiency"}))
     self:addGuiLabel(inputPanel, "efficiency", beacon.efficiency)

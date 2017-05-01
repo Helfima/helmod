@@ -17,6 +17,8 @@ function PlannerModel.methods:init(parent)
   self.player = self.parent.parent
 
   self.capEnergy = -0.8
+  
+  self.version = "0.3.0"
 end
 
 -------------------------------------------------------------------------------
@@ -79,6 +81,7 @@ function PlannerModel.methods:newModel(player)
   model.resources = {}
   model.powers = {}
   model.time = 1
+  model.version = self.version
   global.models[model.id] = model
 
   self.player:getGlobalGui(player)["model_id"] = model.id
@@ -105,6 +108,7 @@ function PlannerModel.methods:getModel(player)
   local models = self:getModels(player)
   local model = models[model_id]
   if model == nil then return self:newModel(player) end
+  
   return model
 end
 
@@ -129,12 +133,28 @@ function PlannerModel.methods:removeModel(player,model_id)
 end
 
 -------------------------------------------------------------------------------
+-- Remove a power
+--
+-- @function [parent=#PlannerModel] removePower
+--
+-- @param #LuaPlayer player
+-- @param #number power_id
+--
+function PlannerModel.methods:removePower(player, power_id)
+  Logging:trace("PlannerModel:removePower():",player, power_id)
+  local model = self:getModel(player)
+  if model.powers ~= nil then
+    model.powers[power_id] = nil
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Get Object
 --
 -- @function [parent=#PlannerModel] getObject
 --
 -- @param #LuaPlayer player
--- @param #string item
+-- @param #string item block_id or resource
 -- @param #string key object name
 --
 -- @return #table
@@ -165,7 +185,7 @@ function PlannerModel.methods:getPower(player, key)
   Logging:trace("PlannerModel:getPower():",player, key)
   local object = nil
   local model = self:getModel(player)
-  if model.powers[key] ~= nil then
+  if model.powers ~= nil and model.powers[key] ~= nil then
     object = model.powers[key]
   end
   return object
@@ -223,7 +243,7 @@ function PlannerModel.methods:createBeaconModel(player, name, count)
   beaconModel.type = "item"
   beaconModel.active = false
   beaconModel.count = count
-  beaconModel.energy_nominal = "480"
+  beaconModel.energy_nominal = 480000
   beaconModel.energy = 0
   beaconModel.energy_total = 0
   beaconModel.combo = 4
@@ -259,7 +279,7 @@ function PlannerModel.methods:createFactoryModel(player, name, count)
   factoryModel.name = name
   factoryModel.type = "item"
   factoryModel.count = count
-  factoryModel.energy_nominal = 90
+  factoryModel.energy_nominal = 90000
   factoryModel.energy = 0
   factoryModel.energy_total = 0
   factoryModel.speed_nominal = 0.5
@@ -547,8 +567,10 @@ end
 function PlannerModel.methods:countPowers(player)
   local model = self:getModel(player)
   local count = 0
-  for key, recipe in pairs(model.powers) do
-    count = count + 1
+  if model.powers ~= nil then
+    for key, recipe in pairs(model.powers) do
+      count = count + 1
+    end
   end
   return count
 end
@@ -678,6 +700,7 @@ end
 function PlannerModel.methods:addPrimaryPower(player, power_id, key)
   Logging:debug("PlannerModel:addPrimaryPower():",player, key)
   local model = self:getModel(player)
+  if model.powers == nil then model.powers = {} end
   local power = model.powers[power_id]
   if power == nil then
     power = self:createPowerModel(player)
@@ -692,12 +715,14 @@ function PlannerModel.methods:addPrimaryPower(player, power_id, key)
   if classification == "generator" then
     local fluid_usage = self.player:getItemProperty(key, "fluid_usage") or 0.1
     local effectivity = self.player:getItemProperty(key, "effectivity") or 1
+    local maximum_temperature = self.player:getItemProperty(key, "maximum_temperature") or 165
     power.primary.name = key
     power.primary.fluid_usage = fluid_usage
     power.primary.effectivity = effectivity
-    -- formula energy_nominal = fluid_usage * 60_tick * effectivity * (current_temp - nominal_temp)
+    power.primary.maximum_temperature = maximum_temperature
+    -- formula energy_nominal = fluid_usage * 60_tick * effectivity * (target_temperature - nominal_temp) * 1000 / 5
     -- @see https://wiki.factorio.com/Liquids/Hot
-    power.primary.energy_nominal = fluid_usage*60*effectivity*(100-15)
+    power.primary.energy_nominal = fluid_usage*60*effectivity*(maximum_temperature-15)*1000/5
   end
 
   if classification == "solar-panel" then
@@ -725,6 +750,7 @@ end
 function PlannerModel.methods:addSecondaryPower(player, power_id, key)
   Logging:debug("PlannerModel:addSecondaryPower():",player, key)
   local model = self:getModel(player)
+  if model.powers == nil then model.powers = {} end
   local power = model.powers[power_id]
   if power == nil then
     power = self:createPowerModel(player)
@@ -793,7 +819,7 @@ end
 -- @function [parent=#PlannerModel] setBeacon
 --
 -- @param #LuaPlayer player
--- @param #string item
+-- @param #string item block_id or resource
 -- @param #string key object name
 -- @param #string name beacon name
 --
@@ -811,8 +837,8 @@ function PlannerModel.methods:setBeacon(player, item, key, name)
       object.beacon.energy_nominal = self.player:getItemProperty(beacon.name, "energy_usage")
       object.beacon.module_slots = self.player:getItemProperty(beacon.name, "module_slots")
       object.beacon.efficiency = self.player:getItemProperty(beacon.name, "efficiency")
-      object.beacon.combo = 4
-      object.beacon.factory = 1.2
+      --object.beacon.combo = 4
+      --object.beacon.factory = 1.2
     end
   end
 end
@@ -823,7 +849,7 @@ end
 -- @function [parent=#PlannerModel] updateBeacon
 --
 -- @param #LuaPlayer player
--- @param #string item
+-- @param #string item block_id or resource
 -- @param #string key object name
 -- @param #table options map attribute/valeur
 --
@@ -888,12 +914,12 @@ end
 -- @function [parent=#PlannerModel] setFactory
 --
 -- @param #LuaPlayer player
--- @param #string item
+-- @param #string item block_id or resource
 -- @param #string key object name
 -- @param #string name factory name
 --
 function PlannerModel.methods:setFactory(player, item, key, name)
-  Logging:debug("PlannerModel:setFactory():",player, item, key, options)
+  Logging:debug("PlannerModel:setFactory():",player, item, key, name)
   local object = self:getObject(player, item, key)
   if object ~= nil then
     local factory = self.player:getEntityPrototype(name)
@@ -903,6 +929,7 @@ function PlannerModel.methods:setFactory(player, item, key, name)
 
       object.factory.name = factory.name
       --object.factory.type = factory.type
+      
       object.factory.energy_nominal = self.player:getItemProperty(factory.name, "energy_usage")
 
       object.factory.module_slots = self.player:getItemProperty(factory.name, "module_slots")
@@ -923,7 +950,7 @@ end
 -- @function [parent=#PlannerModel] updateObject
 --
 -- @param #LuaPlayer player
--- @param #string item
+-- @param #string item block_id or resource
 -- @param #string key object name
 -- @param #table options
 --
@@ -963,7 +990,7 @@ end
 -- @function [parent=#PlannerModel] updateFactory
 --
 -- @param #LuaPlayer player
--- @param #string item
+-- @param #string item block_id or resource
 -- @param #string key object name
 -- @param #table options
 --
@@ -1237,14 +1264,36 @@ end
 -- @function [parent=#PlannerModel] update
 --
 -- @param #LuaPlayer player
--- @param #boolean force
 --
-function PlannerModel.methods:update(player, force)
+function PlannerModel.methods:update(player)
   Logging:debug("**********PlannerModel:update():",player)
 
   local model = self:getModel(player)
   local globalSettings = self.player:getGlobal(player, "settings")
   local defaultSettings = self.player:getDefaultSettings()
+
+  -- reset all factories
+  if model ~= nil and (model.version == nil or model.version ~= self.version) then
+    Logging:debug("**********PlannerModel:update():version",self.version)
+    if model.blocks ~= nil then
+      for _, productBlock in pairs(model.blocks) do
+        for _, recipe in pairs(productBlock.recipes) do
+          local factory = recipe.factory
+          local beacon = recipe.beacon
+          self:setFactory(player, productBlock.id, recipe.name, factory.name)
+          self:setBeacon(player, productBlock.id, recipe.name, beacon.name)
+        end
+      end
+    end
+    if model.resources ~= nil then
+      for _, resource in pairs(model.resources) do
+        local factory = resource.factory
+        local beacon = resource.beacon
+        self:setFactory(player, "resource", resource.name, factory.name)
+        self:setBeacon(player, "resource", resource.name, beacon.name)
+      end
+    end
+  end
 
   if model.blocks ~= nil then
     -- calcul les blocks
@@ -1284,7 +1333,7 @@ function PlannerModel.methods:update(player, force)
 
     Logging:debug("**********model updated:",model)
   end
-
+  model.version = self.version
 end
 
 -------------------------------------------------------------------------------
@@ -1557,7 +1606,7 @@ function PlannerModel.methods:computeResources(player)
           resource.factory.name = "electric-mining-drill"
           resource.category = "basic-solid"
           resource.factory.speed = 1
-          resource.factory.energy = 90
+          resource.factory.energy = 90000
         end
         if ingredient.name == "water" then
           resource.factory.name = "offshore-pump"
@@ -1569,8 +1618,11 @@ function PlannerModel.methods:computeResources(player)
           resource.factory.name = "pumpjack"
           resource.category = "basic-fluid"
           resource.factory.speed = 2
-          resource.factory.energy = 90
+          resource.factory.energy = 90000
         end
+        resources[resource.name] = resource
+        model.resources = resources
+        self:setFactory(player, "resource", resource.name, resource.factory.name)
       end
 
       self:computeModuleEffects(player, resource)
@@ -1609,7 +1661,6 @@ function PlannerModel.methods:computeResources(player)
         resource.storage.count = math.ceil(resource.count/2400)
         resource.storage.limit_count = math.ceil(resource.storage.count * ratio)
       end
-
       resources[resource.name] = resource
     end
   end
@@ -1691,8 +1742,14 @@ function PlannerModel.methods:computeFactory(player, object)
 
   -- effet speed
   object.factory.speed = object.factory.speed_nominal * (1 + object.factory.effects.speed)
+  
   -- effet consumption
-  object.factory.energy = object.factory.energy_nominal * (1 + object.factory.effects.consumption)
+  local energy_type = self.player:getItemProperty(object.factory.name, "energy_type")
+  if energy_type ~= "burner" then
+    object.factory.energy = object.factory.energy_nominal * (1 + object.factory.effects.consumption)
+  else
+    object.factory.energy = 0
+  end
 
   -- compte le nombre de machines necessaires
   if object.products ~= nil then
@@ -1728,8 +1785,8 @@ function PlannerModel.methods:computeFactory(player, object)
 
   object.beacon.energy = object.beacon.energy_nominal
   -- calcul des totaux
-  object.factory.energy_total = math.ceil(object.factory.count*object.factory.energy)*1000
-  object.beacon.energy_total = math.ceil(object.beacon.count*object.beacon.energy)*1000
+  object.factory.energy_total = math.ceil(object.factory.count*object.factory.energy)
+  object.beacon.energy_total = math.ceil(object.beacon.count*object.beacon.energy)
   object.energy_total = object.factory.energy_total + object.beacon.energy_total
   -- arrondi des valeurs
   object.factory.speed = math.ceil(object.factory.speed*100)/100
@@ -1826,11 +1883,11 @@ function PlannerModel.methods:computePower(player, key)
     local secondary_classification = self.player:getItemProperty(power.secondary.name, "classification")
     if primary_classification == "generator" then
       -- calcul primary
-      local count = math.ceil(power.power/(power.primary.energy_nominal*1000))
+      local count = math.ceil(power.power/(power.primary.energy_nominal))
       power.primary.count = count or 0
       -- calcul secondary
       if secondary_classification ~= nil and secondary_classification == "boiler" then
-        local count = math.ceil(power.power/(power.secondary.energy_nominal*1000))
+        local count = math.ceil(power.power/(power.secondary.energy_nominal))
         power.secondary.count = count or 0
       else
         power.secondary.count = 0
@@ -1838,7 +1895,7 @@ function PlannerModel.methods:computePower(player, key)
     end
     if primary_classification == "solar-panel" then
       -- calcul primary
-      local count = math.ceil(power.power/(power.primary.energy_nominal*1000))
+      local count = math.ceil(power.power/(power.primary.energy_nominal))
       power.primary.count = count or 0
       -- calcul secondary
       if secondary_classification ~= nil and secondary_classification == "accumulator" then
@@ -1848,10 +1905,10 @@ function PlannerModel.methods:computePower(player, key)
         -- selon les aires il faut de l'accu en dehors du jour selon le trapese journalier
         local accu=(gameDay.dust/factor+gameDay.night+gameDay.dawn/factor)/(gameDay.day)
         -- puissance nominale la nuit
-        local count1 = power.power/(power.secondary.output_flow_limit*1000)
+        local count1 = power.power/(power.secondary.output_flow_limit)
         -- puissance durant la penombre
         -- formula (puissance*durree_penombre)/(60s*capacite)
-        local count2 = power.power*(gameDay.dust/factor+gameDay.night+gameDay.dawn/factor)/(60*power.secondary.buffer_capacity*1000)
+        local count2 = power.power*(gameDay.dust/factor+gameDay.night+gameDay.dawn/factor)/(60*power.secondary.buffer_capacity)
 
         Logging:debug("computePower result:", accu, count1, count2)
         if count1 > count2 then

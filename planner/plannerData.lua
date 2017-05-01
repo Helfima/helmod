@@ -140,10 +140,6 @@ function PlannerData.methods:buildPanel(player)
     globalGui.order = {name="index", ascendant=true}
   end
 
-  if model ~= nil and model.version ~= nil and model.version ~= helmod.version then
-    self.model:update(player, true)
-  end
-
   local parentPanel = self:getParentPanel(player)
 
   if parentPanel ~= nil then
@@ -185,6 +181,10 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
   local model = self.model:getModel(player)
 
   local globalGui = self.player:getGlobalGui(player)
+
+  -- *******************************
+  -- access admin or owner or write
+  -- *******************************
 
   if self.player:isAdmin(player) or model.owner == player.name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
     if action == "change-time" then
@@ -256,7 +256,18 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
         self:update(player, self.PRODUCTION_BLOCK_TAB, item, item2, item3)
       end
     end
+
+    if action == "power-remove" then
+      if globalGui.currentTab == self.POWER_TAB then
+        self.parent.model:removePower(player, item)
+        self:update(player, self.POWER_TAB, item, item2, item3)
+      end
+    end
   end
+
+  -- ***************************
+  -- access admin or owner
+  -- ***************************
 
   if action == "share-model" then
     if model ~= nil then
@@ -287,6 +298,10 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
     end
   end
 
+  -- ********************************
+  -- access admin or owner or delete
+  -- ********************************
+
   if self.player:isAdmin(player) or model.owner == player.name or (model.share ~= nil and bit32.band(model.share, 4) > 0) then
     if action == "remove-model" then
       self.model:removeModel(player, item)
@@ -303,6 +318,9 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
     end
   end
 
+  -- ***************************
+  -- access for all
+  -- ***************************
   if action == "refresh-model" then
     self:update(player, item, item2, item3)
   end
@@ -422,6 +440,10 @@ function PlannerData.methods:updateModelPanel(player, item, item2, item3)
   Logging:debug("PlannerData:updateModelPanel():", player, item, item2, item3)
   local modelPanel = self:getModelPanel(player)
   local model = self.model:getModel(player)
+
+  if model ~= nil and (model.version == nil or model.version ~= self.model.version) then
+    self.model:update(player, true)
+  end
 
   for k,guiName in pairs(modelPanel.children_names) do
     modelPanel[guiName].destroy()
@@ -1389,14 +1411,14 @@ function PlannerData.methods:updatePowers(player)
   self.player:setStyle(player, scrollPanel, "scroll_block_list", "maximal_height")
 
   local countBlock = self.model:countPowers(player)
-  if countBlock > 0 then
+  if model.powers ~= nil and countBlock > 0 then
     local globalSettings = self.player:getGlobal(player, "settings")
 
     local extra_cols = 0
     if globalSettings.display_data_col_id then
       extra_cols = extra_cols + 1
     end
-    local resultTable = self:addGuiTable(scrollPanel,"list-data",3 + extra_cols, "helmod_table-odd")
+    local resultTable = self:addGuiTable(scrollPanel,"list-data",4 + extra_cols, "helmod_table-odd")
 
     self:addPowersHeader(player, resultTable)
 
@@ -1420,6 +1442,9 @@ function PlannerData.methods:addPowersHeader(player, itable)
   Logging:debug("PlannerData:addHeader():", player, itable)
   local model = self.model:getModel(player)
   local globalSettings = self.player:getGlobal(player, "settings")
+
+  local guiAction = self:addGuiFlowH(itable,"header-action")
+  self:addGuiLabel(guiAction, "label", ({"helmod_result-panel.col-header-action"}))
 
   if globalSettings.display_data_col_id then
     local guiId = self:addGuiFlowH(itable,"header-id")
@@ -1454,6 +1479,11 @@ function PlannerData.methods:addPowersRow(player, guiTable, power)
   local model = self.model:getModel(player)
 
   local globalSettings = self.player:getGlobal(player, "settings")
+
+  -- col action
+  local guiAction = self:addGuiFlowH(guiTable,"action"..power.id, "helmod_flow_default")
+  self:addGuiButton(guiAction, self:classname().."=power-remove=ID=", power.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
+
   -- col id
   if globalSettings.display_data_col_id then
     local guiId = self:addGuiFlowH(guiTable,"id"..power.id)

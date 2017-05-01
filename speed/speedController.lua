@@ -85,3 +85,7 @@ end
 function SpeedController.methods:on_gui_text_changed(event)
 	
 end
+
+function SpeedController.methods:on_gui_hotkey(event)
+  
+end

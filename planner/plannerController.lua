@@ -28,7 +28,7 @@ PlannerController = setclass("HMPlannerController", ElementGui)
 -- @param #PlayerController parent controller parent
 --
 function PlannerController.methods:init(parent)
-	Logging:debug("PlannerController.methods:init(parent)", global)
+	Logging:debug("PlannerController.methods:init(parent):global=", global)
 	self.parent = parent
 	self.controllers = {}
 	self.model = PlannerModel:new(self)
@@ -94,7 +94,6 @@ function PlannerController.methods:on_gui_click(event)
 	end
 end
 
-
 -------------------------------------------------------------------------------
 -- On text changed event
 --
@@ -103,7 +102,18 @@ end
 -- @param event
 --
 function PlannerController.methods:on_gui_text_changed(event)
-	self:parse_event(event)
+  self:parse_event(event)
+end
+
+-------------------------------------------------------------------------------
+-- On hotkey event
+--
+-- @function [parent=#PlannerController] on_gui_hotkey
+--
+-- @param event
+--
+function PlannerController.methods:on_gui_hotkey(event)
+  self:parse_event(event)
 end
 
 -------------------------------------------------------------------------------
@@ -114,7 +124,39 @@ end
 -- @param event
 --
 function PlannerController.methods:parse_event(event)
-	if self.controllers ~= nil and event.element.valid then
+	Logging:trace("PlannerController:parse_event(event)")
+	-- hotkey action
+	if self.controllers ~= nil and event.element == nil then
+      Logging:debug("PlannerController:parse_event(event): hotkey=", event.name)
+      local player = game.players[event.player_index]
+      if event.name == "helmod-open-close" then
+        self:main(player)
+      end
+      if event.name == "helmod-settings-open" then
+        self:send_event(player, "HMPlannerSettings", "OPEN")
+      end
+      if event.name == "helmod-settings-display-next" then
+        local globalSettings = self.parent:getGlobal(player, "settings")
+        local display_size = self.parent:getGlobalSettings(player,"display_size")
+        local i = 1
+        while helmod_display_sizes[i] and helmod_display_sizes[i] ~= display_size do
+          i = i + 1
+        end
+        if #helmod_display_sizes > i then
+          globalSettings["display_size"] = helmod_display_sizes[i+1]
+        else
+          globalSettings["display_size"] = helmod_display_sizes[1]
+        end
+        
+        -- refresh
+        self:main(player)
+        self:main(player)
+        
+        Logging:debug("PlannerController:parse_event(event): display_size=", display_size, #helmod_display_sizes, i, globalSettings[display_size])
+      end
+	end
+	-- button action
+	if self.controllers ~= nil and event.element ~= nil and event.element.valid then
 		local eventController = nil
 		for _, controller in pairs(self.controllers) do
 			if string.find(event.element.name, controller:classname()) then

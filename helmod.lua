@@ -24,7 +24,7 @@ Logging.console = false
 
 helmod = {
 	name = "helmod",
-	version = "0.4.0"
+	version = "0.4.1"
 }
 
 -------------------------------------------------------------------------------
@@ -176,6 +176,22 @@ function helmod:on_gui_text_changed(event)
 end
 
 -------------------------------------------------------------------------------
+-- On hotkey event
+--
+-- @function [parent=#helmod] on_gui_hotkey
+--
+-- @param #table event
+--
+function helmod:on_gui_hotkey(event)
+  if self.playerController ~= nil then
+    local player = game.players[event.player_index]
+    if self.playerController ~= nil then
+      self.playerController:on_gui_hotkey(event)
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
 -- On player created
 --
 -- @function [parent=#helmod] on_player_created
@@ -318,13 +334,15 @@ function helmod:upgrade_0_3_0()
         data.model.block_id = nil
         -- move model
         for _,model in pairs(data.model) do
-          global.model_id = global.model_id + 1
-          model.id = "model_"..global.model_id
-          model.temp = nil
-          model.version = nil
-          model.owner = user
-          model.block_id = block_id
-          global.models[model.id] = model
+          if type(model) == "table" then
+            global.model_id = global.model_id + 1
+            model.id = "model_"..global.model_id
+            model.temp = nil
+            model.version = nil
+            model.owner = user
+            model.block_id = block_id
+            global.models[model.id] = model
+          end
         end
         data.model = nil
       end
@@ -343,7 +361,9 @@ remote.add_interface("helmod", {
     end
   end,
   display_size = function(value)
-    global["HMModel"][game.player.name].settings["display_size"] = value
+    local playerController = PlayerController:new()
+    local globalSettings = playerController:getGlobal(game.player, "settings")
+    globalSettings["display_size"] = value
   end,
   cheat = function()
     if game.player.admin and Logging.log > 0 then

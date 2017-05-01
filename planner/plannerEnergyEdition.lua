@@ -190,7 +190,7 @@ end
 --
 function PlannerEnergyEdition.methods:getObject(player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
-  if  model.powers[item] ~= nil then
+  if model.powers ~= nil and model.powers[item] ~= nil then
     -- return power
     return model.powers[item]
   end
@@ -371,7 +371,7 @@ function PlannerEnergyEdition.methods:updatePowerInfo(player, element, action, i
   local default = self.model:getDefault(player)
 
   local model = self.model:getModel(player)
-  if  model.powers[item] ~= nil then
+  if model.powers ~= nil and model.powers[item] ~= nil then
     local power = self:getObject(player, element, action, item, item2, item3)
     if power ~= nil then
       Logging:debug("PlannerEnergyEdition:updatePowerInfo():power=",power)
@@ -451,14 +451,17 @@ function PlannerEnergyEdition.methods:updatePrimaryInfo(player, element, action,
       local inputPanel = self:addGuiTable(infoPanel,"table-input",2)
 
       self:addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy-nominal"}))
-      self:addGuiLabel(inputPanel, "energy-nominal", primary.energy_nominal.."kW")
+      self:addGuiLabel(inputPanel, "energy-nominal", self:formatNumberKilo(primary.energy_nominal, "W"))
 
       if primary_classification == "generator" then
+        self:addGuiLabel(inputPanel, "label-maximum-temperature", ({"helmod_label.maximum-temperature"}))
+        self:addGuiLabel(inputPanel, "maximum-temperature", primary.maximum_temperature or "NAN")
+
         self:addGuiLabel(inputPanel, "label-fluid-usage", ({"helmod_label.fluid-usage"}))
-        self:addGuiLabel(inputPanel, "fluid-usage", primary.fluid_usage)
+        self:addGuiLabel(inputPanel, "fluid-usage", primary.fluid_usage or "NAN")
 
         self:addGuiLabel(inputPanel, "label-effectivity", ({"helmod_label.effectivity"}))
-        self:addGuiLabel(inputPanel, "effectivity", primary.effectivity)
+        self:addGuiLabel(inputPanel, "effectivity", primary.effectivity or "NAN")
       end
     end
   end
@@ -596,7 +599,7 @@ function PlannerEnergyEdition.methods:updateSecondaryInfo(player, element, actio
 
       if secondary_classification == "boiler" then
         self:addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy-nominal"}))
-        self:addGuiLabel(inputPanel, "energy-nominal", secondary.energy_nominal.."kW")
+        self:addGuiLabel(inputPanel, "energy-nominal", self:formatNumberKilo(secondary.energy_nominal, "W"))
 
         self:addGuiLabel(inputPanel, "label-effectivity", ({"helmod_label.effectivity"}))
         self:addGuiLabel(inputPanel, "effectivity", secondary.effectivity)
@@ -604,13 +607,13 @@ function PlannerEnergyEdition.methods:updateSecondaryInfo(player, element, actio
 
       if secondary_classification == "accumulator" then
         self:addGuiLabel(inputPanel, "label-buffer-capacity", ({"helmod_label.buffer-capacity"}))
-        self:addGuiLabel(inputPanel, "buffer-capacity", (secondary.buffer_capacity/1000).."MJ")
+        self:addGuiLabel(inputPanel, "buffer-capacity", self:formatNumberKilo(secondary.buffer_capacity, "J"))
 
         self:addGuiLabel(inputPanel, "label-input_flow_limit", ({"helmod_label.input-flow-limit"}))
-        self:addGuiLabel(inputPanel, "input-flow-limit", secondary.input_flow_limit.."kW")
+        self:addGuiLabel(inputPanel, "input-flow-limit", self:formatNumberKilo(secondary.input_flow_limit, "W"))
 
         self:addGuiLabel(inputPanel, "label-output-flow-limit", ({"helmod_label.output-flow-limit"}))
-        self:addGuiLabel(inputPanel, "output-flow-limit", secondary.output_flow_limit.."kW")
+        self:addGuiLabel(inputPanel, "output-flow-limit", self:formatNumberKilo(secondary.output_flow_limit, "W"))
       end
 
     end

@@ -22,6 +22,7 @@ for type,elements in pairs(data.raw) do
             entity.classification = "generator"
             if element.fluid_usage_per_tick ~= nil then entity.fluid_usage = element.fluid_usage_per_tick end
             if element.effectivity ~= nil then entity.effectivity = element.effectivity end
+            if element.maximum_temperature ~= nil then entity.maximum_temperature = element.maximum_temperature end
           end
           if element.type == "solar-panel" then 
             entity.classification = "solar-panel"
@@ -30,7 +31,9 @@ for type,elements in pairs(data.raw) do
           if element.type == "boiler" then
             entity.classification = "boiler"
             if element.energy_consumption ~= nil then entity.energy_consumption = element.energy_consumption end
-            if element.burner ~= nil and element.burner.effectivity ~= nil then entity.effectivity = element.burner.effectivity end
+            -- necessaire pour le calcul de puissance
+            if element.target_temperature ~= nil then entity.target_temperature = element.target_temperature end
+            if element.energy_source ~= nil and element.energy_source.effectivity ~= nil then entity.effectivity = element.energy_source.effectivity end
           end
           
           if element.type == "accumulator" then
@@ -44,6 +47,7 @@ for type,elements in pairs(data.raw) do
           if element.resource_categories ~= nil then entity.resource_categories = element.resource_categories end
           if element.crafting_speed ~= nil then entity.crafting_speed = element.crafting_speed end
           if element.energy_usage ~= nil then entity.energy_usage = element.energy_usage end
+          if element.energy_source ~= nil and element.energy_source.type ~= nil then entity.energy_type = element.energy_source.type end
           if element.ingredient_count ~= nil then entity.ingredient_count = element.ingredient_count end
           if element.module_specification ~= nil then entity.module_specification = element.module_specification end
           if element.mining_power ~= nil then entity.mining_power = element.mining_power end

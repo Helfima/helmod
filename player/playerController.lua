@@ -103,11 +103,26 @@ end
 -- @param event
 --
 function PlayerController.methods:on_gui_text_changed(event)
-	if self.controllers ~= nil then
-		for r, controller in pairs(self.controllers) do
-			controller:on_gui_text_changed(event)
-		end
-	end
+  if self.controllers ~= nil then
+    for r, controller in pairs(self.controllers) do
+      controller:on_gui_text_changed(event)
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- On hotkey event
+--
+-- @function [parent=#PlayerController] on_gui_hotkey
+--
+-- @param event
+--
+function PlayerController.methods:on_gui_hotkey(event)
+  if self.controllers ~= nil then
+    for r, controller in pairs(self.controllers) do
+      controller:on_gui_hotkey(event)
+    end
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -537,7 +552,7 @@ function PlayerController.methods:getProductionsBeacon()
     --Logging:debug("PlayerController:getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
     if item.name ~= nil then
       local efficiency = self:getItemProperty(item.name, "efficiency")
-      Logging:debug("PlayerController:getProductionsBeacon(type):", item.name, efficiency)
+      Logging:trace("PlayerController:getProductionsBeacon(type):", item.name, efficiency)
       if efficiency ~= nil then
         table.insert(items,item)
       end
@@ -782,17 +797,17 @@ function PlayerController.methods:parseNumber(number)
   if power == nil then
     return tonumber(value)
   elseif string.lower(power) == "kw" then
-    return tonumber(value)
+    return tonumber(value)*1000
   elseif string.lower(power) == "mw" then
-    return tonumber(value)*1000
+    return tonumber(value)*1000*1000
   elseif string.lower(power) == "gw" then
-    return tonumber(value)*1000*1000
+    return tonumber(value)*1000*1000*1000
   elseif string.lower(power) == "kj" then
-    return tonumber(value)
-  elseif string.lower(power) == "mj" then
     return tonumber(value)*1000
-  elseif string.lower(power) == "gj" then
+  elseif string.lower(power) == "mj" then
     return tonumber(value)*1000*1000
+  elseif string.lower(power) == "gj" then
+    return tonumber(value)*1000*1000*1000
   end
 end
 -------------------------------------------------------------------------------
@@ -864,12 +879,24 @@ function PlayerController.methods:getItemProperty(name, property)
 			else
 				return 0
 			end
-		elseif property == "mining_power" then
-			if data_entity[name]["mining_power"] ~= nil then
-				return tonumber(data_entity[name]["mining_power"])
-			else
-				return 0
-			end
+    elseif property == "mining_power" then
+      if data_entity[name]["mining_power"] ~= nil then
+        return tonumber(data_entity[name]["mining_power"])
+      else
+        return 0
+      end
+    elseif property == "target_temperature" then
+      if data_entity[name]["target_temperature"] ~= nil then
+        return tonumber(data_entity[name]["target_temperature"])
+      else
+        return 0
+      end
+    elseif property == "maximum_temperature" then
+      if data_entity[name]["maximum_temperature"] ~= nil then
+        return tonumber(data_entity[name]["maximum_temperature"])
+      else
+        return 0
+      end
 		else
 			return data_entity[name][property]
 		end
