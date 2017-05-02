@@ -7,6 +7,7 @@
 
 PlannerRecipeSelector = setclass("HMPlannerRecipeSelector", PlannerDialog)
 
+local groupList = {}
 local recipeGroups = {}
 local recipeFilter = nil
 local recipeFilterProduct = true
@@ -212,8 +213,9 @@ function PlannerRecipeSelector.methods:on_update(player, element, action, item, 
   local globalPlayer = self.player:getGlobal(player)
   -- recuperation recipes
   recipeGroups = {}
+  groupList = {}
   local firstGroup = nil
-  for key, recipe in pairs(self.player:getRecipes(player)) do
+  for key, recipe in spairs(self.player:getRecipes(player),function(t,a,b) return t[b]["subgroup"]["order"] > t[a]["subgroup"]["order"] end) do
     local find = false
     if recipeFilter ~= nil and recipeFilter ~= "" then
       local elements = recipe.products
@@ -234,6 +236,7 @@ function PlannerRecipeSelector.methods:on_update(player, element, action, item, 
     local filter_show_hidden = self.player:getGlobalSettings(player, "filter_show_hidden")
     if find == true and (recipe.enabled == true or filter_show_hidden == true) then
       if firstGroup == nil then firstGroup = recipe.group.name end
+      groupList[recipe.group.name] = recipe.group
       if recipeGroups[recipe.group.name] == nil then recipeGroups[recipe.group.name] = {} end
       if recipeGroups[recipe.group.name][recipe.subgroup.name] == nil then recipeGroups[recipe.group.name][recipe.subgroup.name] = {} end
       table.insert(recipeGroups[recipe.group.name][recipe.subgroup.name], recipe)
@@ -322,11 +325,56 @@ function PlannerRecipeSelector.methods:updateItemList(player, element, action, i
     -- boucle subgroup
     local guiRecipeSubgroup = self:addGuiTable(guiRecipeSelectorList, "recipe-table-"..key, 10, "helmod_table_recipe_selector")
     for key, recipe in spairs(subgroup,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
-      Logging:trace("PlannerRecipeSelector:on_update",recipe.name)
-      self:addGuiButtonSelectSprite(guiRecipeSubgroup, self:classname().."=recipe-select=ID=", self.player:getRecipeIconType(player, recipe), recipe.name, recipe.name, self.player:getRecipeLocalisedName(player, recipe))
+      Logging:trace("PlannerRecipeSelector:updateItemList():recipe", recipe.name, recipe.category, recipe.group.name, recipe.group.order, recipe.subgroup.name, recipe.subgroup.order, recipe.order)
+
+      local tooltip = self:buildRecipeTooltip(player, recipe)
+
+      self:addGuiButtonSelectSprite(guiRecipeSubgroup, self:classname().."=recipe-select=ID=", self.player:getRecipeIconType(player, recipe), recipe.name, recipe.name, tooltip)
     end
   end
 
+end
+
+-------------------------------------------------------------------------------
+-- Build recipe tooltip
+--
+-- @function [parent=#PlannerRecipeSelector] buildRecipeTooltip
+--
+-- @param #LuaPlayer player
+--
+function PlannerRecipeSelector.methods:buildRecipeTooltip(player, recipe)
+  Logging:trace("PlannerRecipeSelector:buildRecipeTooltip(player, element):",player, recipe)
+  -- initalize tooltip
+  local tooltip = {"tooltip.recipe-info"}
+  -- insert __1__ value
+  table.insert(tooltip, self.player:getRecipeLocalisedName(player, recipe))
+
+  -- insert __2__ value
+  local lastTooltip = tooltip
+  for _,element in pairs(recipe.products) do
+    local count = self.model:getElementAmount(element)
+    local name = self.player:getLocalisedName(player,element)
+    local currentTooltip = {"tooltip.recipe-info-element", count, name}
+    -- insert le dernier tooltip dans le precedent
+    table.insert(lastTooltip, currentTooltip)
+    lastTooltip = currentTooltip
+  end
+  -- finalise la derniere valeur
+  table.insert(lastTooltip, "")
+  
+  -- insert __3__ value
+  local lastTooltip = tooltip
+  for _,element in pairs(recipe.ingredients) do
+    local count = self.model:getElementAmount(element)
+    local name = self.player:getLocalisedName(player,element)
+    local currentTooltip = {"tooltip.recipe-info-element", count, name}
+    -- insert le dernier tooltip dans le precedent
+    table.insert(lastTooltip, currentTooltip)
+    lastTooltip = currentTooltip
+  end
+  -- finalise la derniere valeur
+  table.insert(lastTooltip, "")
+  return tooltip
 end
 
 -------------------------------------------------------------------------------
@@ -352,16 +400,16 @@ function PlannerRecipeSelector.methods:updateGroupSelector(player, element, acti
 
   -- ajouter de la table des groupes de recipe
   local guiRecipeSelectorGroups = self:addGuiTable(panel, "recipe-groups", 6, "helmod_table_recipe_selector")
-  for group, element in pairs(recipeGroups) do
+  for _, group in spairs(groupList,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
     -- set le groupe
-    if globalPlayer.recipeGroupSelected == nil then globalPlayer.recipeGroupSelected = group end
+    if globalPlayer.recipeGroupSelected == nil then globalPlayer.recipeGroupSelected = group.name end
     local color = nil
-    if globalPlayer.recipeGroupSelected == group then
+    if globalPlayer.recipeGroupSelected == group.name then
       color = "yellow"
     end
-    local tooltip = group
+    local tooltip = "item-group-name."..group.name
     -- ajoute les icons de groupe
-    local action = self:addGuiButtonSelectSpriteXxl(guiRecipeSelectorGroups, self:classname().."=recipe-group=ID=", "item-group", group, group, tooltip, color)
+    local action = self:addGuiButtonSelectSpriteXxl(guiRecipeSelectorGroups, self:classname().."=recipe-group=ID=", "item-group", group.name, group.name, ({tooltip}), color)
   end
 
 end

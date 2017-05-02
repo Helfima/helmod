@@ -644,17 +644,40 @@ function PlannerData.methods:updateProductionBlock(player, item, item2, item3)
   self:addGuiButton(tabPanel, self:classname().."=refresh-model=ID=", model.id, "helmod_button_default", ({"helmod_result-panel.refresh-button"}))
 
   local countRecipes = self.model:countBlockRecipes(player, blockId)
+
+  local infoPanel = self:getInfoPanel(player)
+  -- info panel
+  local blockPanel = self:addGuiFrameV(infoPanel, "block", "helmod_frame_default", ({"helmod_common.block"}))
+  local blockScroll = self:addGuiScrollPane(blockPanel, "output-scroll", "helmod_scroll_block_info", "auto", "auto")
+  local blockTable = self:addGuiTable(blockScroll,"output-table",2)
+
+
+  local elementPanel = self:addGuiFlowV(infoPanel, "elements", "helmod_flow_default")
+  -- ouput panel
+  local outputPanel = self:addGuiFrameV(elementPanel, "output", "helmod_frame_resize_row_width", ({"helmod_common.output"}))
+  local outputScroll = self:addGuiScrollPane(outputPanel, "output-scroll", "helmod_scroll_block_element", "auto", "auto")
+  self.player:setStyle(player, outputScroll, "scroll_block_element", "minimal_width")
+  self.player:setStyle(player, outputScroll, "scroll_block_element", "maximal_width")
+
+  -- input panel
+  local inputPanel = self:addGuiFrameV(elementPanel, "input", "helmod_frame_resize_row_width", ({"helmod_common.input"}))
+  local outputScroll = self:addGuiScrollPane(inputPanel, "output-scroll", "helmod_scroll_block_element", "auto", "auto")
+  self.player:setStyle(player, outputScroll, "scroll_block_element", "minimal_width")
+  self.player:setStyle(player, outputScroll, "scroll_block_element", "maximal_width")
+
+  local resultPanel = self:getResultPanel(player, ({"helmod_common.recipes"}))
+  -- data panel
+  local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "scroll_pane_style", "auto", "auto")
+  self.player:setStyle(player, scrollPanel, "scroll_block_list", "minimal_width")
+  self.player:setStyle(player, scrollPanel, "scroll_block_list", "maximal_width")
+  self.player:setStyle(player, scrollPanel, "scroll_block_list", "minimal_height")
+  self.player:setStyle(player, scrollPanel, "scroll_block_list", "maximal_height")
+
   -- production block result
   if countRecipes > 0 then
 
     local element = model.blocks[blockId]
 
-    local infoPanel = self:getInfoPanel(player)
-
-    -- info panel
-    local blockPanel = self:addGuiFrameV(infoPanel, "block", "helmod_frame_default", ({"helmod_common.block"}))
-    local blockScroll = self:addGuiScrollPane(blockPanel, "output-scroll", "helmod_scroll_block_info", "auto", "auto")
-    local blockTable = self:addGuiTable(blockScroll,"output-table",2)
 
     self:addGuiLabel(blockTable, "label-power", ({"helmod_label.electrical-consumption"}))
     if model.summary ~= nil then
@@ -666,13 +689,7 @@ function PlannerData.methods:updateProductionBlock(player, item, item2, item3)
       self:addGuiLabel(blockTable, "count", element.count,"helmod_label_right_70")
     end
 
-    local elementPanel = self:addGuiFlowV(infoPanel, "elements", "helmod_flow_default")
     -- ouput panel
-    local outputPanel = self:addGuiFrameV(elementPanel, "output", "helmod_frame_resize_row_width", ({"helmod_common.output"}))
-    local outputScroll = self:addGuiScrollPane(outputPanel, "output-scroll", "helmod_scroll_block_element", "auto", "auto")
-    self.player:setStyle(player, outputScroll, "scroll_block_element", "minimal_width")
-    self.player:setStyle(player, outputScroll, "scroll_block_element", "maximal_width")
-
     local outputTable = self:addGuiTable(outputScroll,"output-table",6)
     if element.products ~= nil then
       for r, product in pairs(element.products) do
@@ -702,10 +719,6 @@ function PlannerData.methods:updateProductionBlock(player, item, item2, item3)
     end
 
     -- input panel
-    local inputPanel = self:addGuiFrameV(elementPanel, "input", "helmod_frame_resize_row_width", ({"helmod_common.input"}))
-    local outputScroll = self:addGuiScrollPane(inputPanel, "output-scroll", "helmod_scroll_block_element", "auto", "auto")
-    self.player:setStyle(player, outputScroll, "scroll_block_element", "minimal_width")
-    self.player:setStyle(player, outputScroll, "scroll_block_element", "maximal_width")
 
     local inputTable = self:addGuiTable(outputScroll,"input-table",6)
     if element.ingredients ~= nil then
@@ -717,13 +730,7 @@ function PlannerData.methods:updateProductionBlock(player, item, item2, item3)
       end
     end
 
-    local resultPanel = self:getResultPanel(player, ({"helmod_common.recipes"}))
     -- data panel
-    local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "scroll_pane_style", "auto", "auto")
-    self.player:setStyle(player, scrollPanel, "scroll_block_list", "minimal_width")
-    self.player:setStyle(player, scrollPanel, "scroll_block_list", "maximal_width")
-    self.player:setStyle(player, scrollPanel, "scroll_block_list", "minimal_height")
-    self.player:setStyle(player, scrollPanel, "scroll_block_list", "maximal_height")
 
     local globalSettings = self.player:getGlobal(player, "settings")
 
@@ -921,7 +928,7 @@ function PlannerData.methods:addProductionBlockRow(player, guiTable, blockId, re
   local model = self.model:getModel(player)
 
   local globalSettings = self.player:getGlobal(player, "settings")
-  
+
   -- col action
   local guiAction = self:addGuiFlowH(guiTable,"action"..recipe.name, "helmod_flow_default")
   if recipe.index ~= 0 then
@@ -944,7 +951,7 @@ function PlannerData.methods:addProductionBlockRow(player, guiTable, blockId, re
   -- col name
   if globalSettings.display_data_col_name then
     local guiName = self:addGuiFlowH(guiTable,"name"..recipe.name)
-    self:addGuiLabel(guiName, "name", recipe.name)
+    self:addGuiLabel(guiName, "name_", recipe.name)
   end
   -- col recipe
   local guiRecipe = self:addGuiFlowH(guiTable,"recipe"..recipe.name, "helmod_flow_default")
@@ -1062,7 +1069,7 @@ function PlannerData.methods:addProductionLineRow(player, guiTable, element)
   -- col name
   if globalSettings.display_data_col_name then
     local guiName = self:addGuiFlowH(guiTable,"name"..element.id)
-    self:addGuiLabel(guiName, "name", element.id)
+    self:addGuiLabel(guiName, "name_", element.id)
   end
   -- col recipe
   local guiRecipe = self:addGuiFlowH(guiTable,"recipe"..element.id)
