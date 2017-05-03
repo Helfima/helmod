@@ -661,9 +661,9 @@ function PlannerData.methods:updateProductionBlock(player, item, item2, item3)
 
   -- input panel
   local inputPanel = self:addGuiFrameV(elementPanel, "input", "helmod_frame_resize_row_width", ({"helmod_common.input"}))
-  local outputScroll = self:addGuiScrollPane(inputPanel, "output-scroll", "helmod_scroll_block_element", "auto", "auto")
-  self.player:setStyle(player, outputScroll, "scroll_block_element", "minimal_width")
-  self.player:setStyle(player, outputScroll, "scroll_block_element", "maximal_width")
+  local inputScroll = self:addGuiScrollPane(inputPanel, "output-scroll", "helmod_scroll_block_element", "auto", "auto")
+  self.player:setStyle(player, inputScroll, "scroll_block_element", "minimal_width")
+  self.player:setStyle(player, inputScroll, "scroll_block_element", "maximal_width")
 
   local resultPanel = self:getResultPanel(player, ({"helmod_common.recipes"}))
   -- data panel
@@ -720,7 +720,7 @@ function PlannerData.methods:updateProductionBlock(player, item, item2, item3)
 
     -- input panel
 
-    local inputTable = self:addGuiTable(outputScroll,"input-table",6)
+    local inputTable = self:addGuiTable(inputScroll,"input-table",6)
     if element.ingredients ~= nil then
       for r, ingredient in pairs(element.ingredients) do
         -- ingredient = {type="item", name="steel-plate", amount=8}
