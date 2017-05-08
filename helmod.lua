@@ -14,7 +14,21 @@ require "player.playerController"
 
 Logging:new(0)
 Logging.console = false
---Logging.force = true
+Logging.logClass["helmod"] = false
+Logging.logClass["HMElementGui"] = false
+Logging.logClass["HMPlannerAbstractEdition"] = false
+Logging.logClass["HMPlannerController"] = false
+Logging.logClass["HMPlannerData"] = true
+Logging.logClass["HMPlannerDialog"] = false
+Logging.logClass["HMPlannerEnergyEdition"] = false
+Logging.logClass["HMModel"] = false
+Logging.logClass["HMPlannerPinPanel"] = false
+Logging.logClass["HMPlannerProductEdition"] = false
+Logging.logClass["HMPlannerRecipeEdition"] = false
+Logging.logClass["HMPlannerRecipeSelector"] = false
+Logging.logClass["HMPlannerResourceEdition"] = false
+Logging.logClass["HMPlannerSettings"] = false
+Logging.logClass["HMPlayerController"] = true
 
 -------------------------------------------------------------------------------
 -- Classe de mod
@@ -23,10 +37,11 @@ Logging.console = false
 --
 
 helmod = {
-	name = "helmod",
-	version = "0.4.3"
+  name = "helmod",
+  version = "0.4.3"
 }
 
+local helmod_clear=false
 -------------------------------------------------------------------------------
 -- On init
 --
@@ -35,8 +50,8 @@ helmod = {
 -- @param  #table event
 --
 function helmod:on_init(event)
-	Logging:trace("helmod:on_init(event)", event)
-	self.playerController = PlayerController:new()
+  Logging:trace("helmod", "helmod:on_init(event)", event)
+  self.playerController = PlayerController:new()
 end
 
 -------------------------------------------------------------------------------
@@ -56,25 +71,25 @@ end
 -- }
 --
 function helmod:on_configuration_changed(data)
-	Logging:trace("helmod:on_configuration_changed(data)", data)
-	if not data or not data.mod_changes then
-		return
-	end
-	if data.mod_changes["helmod"] then
-		local old_version = data.mod_changes["helmod"].old_version
-		-- Upgrade 0.2.17
-		if old_version ~= nil and old_version < "0.2.17" then
-			helmod:upgrade_0_2_17()
-		end
-		-- Upgrade 0.2.21
-		if old_version ~= nil and old_version < "0.2.21" then
-			helmod:upgrade_0_2_21()
-		end
+  Logging:trace("helmod", "helmod:on_configuration_changed(data)", data)
+  if not data or not data.mod_changes then
+    return
+  end
+  if data.mod_changes["helmod"] then
+    local old_version = data.mod_changes["helmod"].old_version
+    -- Upgrade 0.2.17
+    if old_version ~= nil and old_version < "0.2.17" then
+      helmod:upgrade_0_2_17()
+    end
+    -- Upgrade 0.2.21
+    if old_version ~= nil and old_version < "0.2.21" then
+      helmod:upgrade_0_2_21()
+    end
 
-		-- Upgrade 0.2.22
-		if old_version ~= nil and old_version < "0.2.22" then
-			helmod:upgrade_0_2_22()
-		end
+    -- Upgrade 0.2.22
+    if old_version ~= nil and old_version < "0.2.22" then
+      helmod:upgrade_0_2_22()
+    end
 
     -- Upgrade 0.2.23
     if old_version ~= nil and old_version < "0.2.23" then
@@ -86,13 +101,13 @@ function helmod:on_configuration_changed(data)
       helmod:upgrade_0_3_0()
     end
 
-		if global["users"] ~= nil then
-			for _,player in pairs(global["users"]) do
-				player.isActive = false;
-			end
-		end
-		self:on_init()
-	end
+    if global["users"] ~= nil then
+      for _,player in pairs(global["users"]) do
+        player.isActive = false;
+      end
+    end
+    self:on_init()
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -114,11 +129,16 @@ end
 -- @param #table event
 --
 function helmod:on_tick(event)
-	if game.tick ~= 0 and game.tick % 60 == 0 then
-		for key, player in pairs(game.players) do
-			self:init_playerController(player)
-		end
-	end
+  if game.tick ~= 0 and game.tick%60 == 0 and helmod_clear == false then
+    for _,player in pairs(game.players) do
+      if player ~= nil then
+        local globalPlayer = global["users"][player.name]
+        globalPlayer.isActive = false
+        self:init_playerController(player)
+      end
+    end
+    helmod_clear = true
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -129,18 +149,18 @@ end
 -- @param #LuaPlayer player
 --
 function helmod:init_playerController(player)
-	Logging:trace("helmod:init_playerController(player)")
-	if self.playerController == nil then
-		self.playerController = PlayerController:new()
-	end
-	local globalPlayer = self.playerController:getGlobal(player)
-	if globalPlayer.isActive == nil or globalPlayer.isActive == false then
-		if player.valid then
-			Logging:trace("bindController(player)")
-			self.playerController:bindController(player)
-		end
-		globalPlayer.isActive = true;
-	end
+  Logging:trace("helmod", "helmod:init_playerController(player)")
+  if self.playerController == nil then
+    self.playerController = PlayerController:new()
+  end
+  local globalPlayer = self.playerController:getGlobal(player)
+  if globalPlayer.isActive == nil or globalPlayer.isActive == false then
+    if player.valid then
+      Logging:trace("helmod", "bindController(player)")
+      self.playerController:bindController(player)
+    end
+    globalPlayer.isActive = true
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -151,12 +171,12 @@ end
 -- @param #table event
 --
 function helmod:on_gui_click(event)
-	if self.playerController ~= nil then
-		local player = game.players[event.player_index]
-		if self.playerController ~= nil then
-			self.playerController:on_gui_click(event)
-		end
-	end
+  if self.playerController ~= nil then
+    local player = game.players[event.player_index]
+    if self.playerController ~= nil then
+      self.playerController:on_gui_click(event)
+    end
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -167,12 +187,12 @@ end
 -- @param #table event
 --
 function helmod:on_gui_text_changed(event)
-	if self.playerController ~= nil then
-		local player = game.players[event.player_index]
-		if self.playerController ~= nil then
-			self.playerController:on_gui_text_changed(event)
-		end
-	end
+  if self.playerController ~= nil then
+    local player = game.players[event.player_index]
+    if self.playerController ~= nil then
+      self.playerController:on_gui_text_changed(event)
+    end
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -199,8 +219,8 @@ end
 -- @param #table event
 --
 function helmod:on_player_created(event)
-	local player = game.players[event.player_index]
-	self:init_playerController(player)
+  local player = game.players[event.player_index]
+  self:init_playerController(player)
 end
 
 -------------------------------------------------------------------------------
@@ -209,41 +229,41 @@ end
 -- @function [parent=#helmod] upgrade_0_2_17
 --
 function helmod:upgrade_0_2_17()
-	if global["HMModel"] ~= nil then
-		for _,data in pairs(global["HMModel"]) do
-			-- boucle sur chaque player
-			if data.model ~= nil then
-				-- remove old field
-				data.model.page = nil
-				data.model.step = nil
-				data.model.maxPage = nil
-				data.model.needPrepare = nil
-				data.model.products = nil
-				data.model.input = nil
-				data.model.recipes = nil
-				data.model.currentTab = nil
-				-- move gui value
-				data.gui = {}
-				data.gui.currentTab = "product-line"
-				if data.model.order ~= nil then
-					data.gui.order = data.model.order
-					data.model.order = nil
-				end
-				if data.model.moduleListRefresh ~= nil then
-					data.gui.moduleListRefresh = data.model.moduleListRefresh
-					data.model.moduleListRefresh = nil
-				end
-				if data.model.module_panel ~= nil then
-					data.gui.module_panel = data.model.module_panel
-					data.model.module_panel = nil
-				end
-				if data.recipeGroupSelected ~= nil then
-					data.gui.recipeGroupSelected = data.recipeGroupSelected
-					data.recipeGroupSelected = nil
-				end
-			end
-		end
-	end
+  if global["HMModel"] ~= nil then
+    for _,data in pairs(global["HMModel"]) do
+      -- boucle sur chaque player
+      if data.model ~= nil then
+        -- remove old field
+        data.model.page = nil
+        data.model.step = nil
+        data.model.maxPage = nil
+        data.model.needPrepare = nil
+        data.model.products = nil
+        data.model.input = nil
+        data.model.recipes = nil
+        data.model.currentTab = nil
+        -- move gui value
+        data.gui = {}
+        data.gui.currentTab = "product-line"
+        if data.model.order ~= nil then
+          data.gui.order = data.model.order
+          data.model.order = nil
+        end
+        if data.model.moduleListRefresh ~= nil then
+          data.gui.moduleListRefresh = data.model.moduleListRefresh
+          data.model.moduleListRefresh = nil
+        end
+        if data.model.module_panel ~= nil then
+          data.gui.module_panel = data.model.module_panel
+          data.model.module_panel = nil
+        end
+        if data.recipeGroupSelected ~= nil then
+          data.gui.recipeGroupSelected = data.recipeGroupSelected
+          data.recipeGroupSelected = nil
+        end
+      end
+    end
+  end
 end
 
 
@@ -253,15 +273,15 @@ end
 -- @function [parent=#helmod] upgrade_0_2_21
 --
 function helmod:upgrade_0_2_21()
-	if global["HMModel"] ~= nil then
-		for _,data in pairs(global["HMModel"]) do
-			-- boucle sur chaque player
-			if data.settings ~= nil then
-				data.settings.model_filter_factory = true
-				data.settings.model_filter_beacon = true
-			end
-		end
-	end
+  if global["HMModel"] ~= nil then
+    for _,data in pairs(global["HMModel"]) do
+      -- boucle sur chaque player
+      if data.settings ~= nil then
+        data.settings.model_filter_factory = true
+        data.settings.model_filter_beacon = true
+      end
+    end
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -270,22 +290,21 @@ end
 -- @function [parent=#helmod] upgrade_0_2_22
 --
 function helmod:upgrade_0_2_22()
-	if global["HMModel"] ~= nil then
-		for _,data in pairs(global["HMModel"]) do
-			-- boucle sur chaque player
-			if data.model ~= nil and data.model.blocks ~= nil then
-				--Logging:trace("helmod:upgrade_0_2_22()", data.model.blocks)
-				for _,block in pairs(data.model.blocks) do
-					for _,recipe in pairs(block.recipes) do
-						local factory = recipe.factory
-						if factory ~= nil then factory.type = "item" end
-						local beacon = recipe.beacon
-						if beacon ~= nil then beacon.type = "item" end
-					end
-				end
-			end
-		end
-	end
+  if global["HMModel"] ~= nil then
+    for _,data in pairs(global["HMModel"]) do
+      -- boucle sur chaque player
+      if data.model ~= nil and data.model.blocks ~= nil then
+        for _,block in pairs(data.model.blocks) do
+          for _,recipe in pairs(block.recipes) do
+            local factory = recipe.factory
+            if factory ~= nil then factory.type = "item" end
+            local beacon = recipe.beacon
+            if beacon ~= nil then beacon.type = "item" end
+          end
+        end
+      end
+    end
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -302,14 +321,14 @@ function helmod:upgrade_0_2_23()
         data.default.factories = nil
         data.default.beacons = nil
       end
-      
+
       if data.model ~= nil then
         -- move model
         local model = data.model
         data.model = {}
         table.insert(data.model, model)
       end
-      
+
       if data.gui == nil then data.gui = {} end
       data.gui["model_index"] = 1
     end
@@ -324,7 +343,7 @@ end
 --
 function helmod:upgrade_0_3_0()
   if global["HMModel"] ~= nil then
-    Logging:debug("upgrade_0_3_0():before", global)
+    Logging:debug("helmod", "upgrade_0_3_0():before", global)
     global.models = {}
     global.model_id = 0
     for user,data in pairs(global["HMModel"]) do
@@ -349,7 +368,7 @@ function helmod:upgrade_0_3_0()
     end
     global["users"] = global["HMModel"]
     global["HMModel"] = nil
-    Logging:debug("upgrade_0_3_0():after", global)
+    Logging:debug("helmod", "upgrade_0_3_0():after", global)
   end
 end
 
@@ -378,4 +397,5 @@ remote.add_interface("helmod", {
     end
   end
 })
+
   

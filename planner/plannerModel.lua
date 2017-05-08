@@ -17,8 +17,8 @@ function PlannerModel.methods:init(parent)
   self.player = self.parent.parent
 
   self.capEnergy = -0.8
-  
-  self.version = "0.3.0"
+
+  self.version = "0.4.4"
 end
 
 -------------------------------------------------------------------------------
@@ -31,8 +31,7 @@ end
 -- @return #table
 --
 function PlannerModel.methods:getModels(player)
-  Logging:trace("PlannerModel:getModels():",player)
-  Logging:debug("PlannerModel:getModels():global.models:",global.models)
+  Logging:trace("HMModel", "getModels():global.models:",global.models)
   local model_id = self.player:getGlobalGui(player, "model_id")
   local first_id = nil
   local reset_model_id = true
@@ -67,7 +66,7 @@ end
 -- @return #table
 --
 function PlannerModel.methods:newModel(player)
-  Logging:trace("PlannerModel:getModel():",player)
+  Logging:trace("HMModel", "getModel():",player)
   if global.model_id == nil then global.model_id = 1 end
   if global.models == nil then global.models = {} end
   local owner = player.name
@@ -98,7 +97,7 @@ end
 -- @return #table
 --
 function PlannerModel.methods:getModel(player)
-  Logging:trace("PlannerModel:getModel():",player)
+  Logging:trace("HMModel", "getModel():",player)
   local model_id = self.player:getGlobalGui(player, "model_id")
   if model_id == "new" then
     self:newModel(player)
@@ -108,7 +107,7 @@ function PlannerModel.methods:getModel(player)
   local models = self:getModels(player)
   local model = models[model_id]
   if model == nil then return self:newModel(player) end
-  
+
   return model
 end
 
@@ -121,7 +120,7 @@ end
 -- @param #number model_id
 --
 function PlannerModel.methods:removeModel(player,model_id)
-  Logging:trace("PlannerModel:removeModel():",player,model_id)
+  Logging:trace("HMModel", "removeModel():",player,model_id)
   global.models[model_id] = nil
   local models = self:getModels(player)
   local _,model = next(models)
@@ -141,7 +140,7 @@ end
 -- @param #number power_id
 --
 function PlannerModel.methods:removePower(player, power_id)
-  Logging:trace("PlannerModel:removePower():",player, power_id)
+  Logging:trace("HMModel", "removePower():",player, power_id)
   local model = self:getModel(player)
   if model.powers ~= nil then
     model.powers[power_id] = nil
@@ -160,7 +159,7 @@ end
 -- @return #table
 --
 function PlannerModel.methods:getObject(player, item, key)
-  Logging:trace("PlannerModel:getObject():",player, item, key)
+  Logging:trace("HMModel", "getObject():",player, item, key)
   local object = nil
   local model = self:getModel(player)
   if item == "resource" then
@@ -182,7 +181,7 @@ end
 -- @return #table
 --
 function PlannerModel.methods:getPower(player, key)
-  Logging:trace("PlannerModel:getPower():",player, key)
+  Logging:trace("HMModel", "getPower():",player, key)
   local object = nil
   local model = self:getModel(player)
   if model.powers ~= nil and model.powers[key] ~= nil then
@@ -204,7 +203,7 @@ end
 -- @return #table
 --
 function PlannerModel.methods:createProductionBlockModel(player, recipe)
-  Logging:debug("PlannerModel:createProductionBlockModel():",player, recipe)
+  Logging:debug("HMModel", "createProductionBlockModel():",player, recipe)
   local model = self:getModel(player)
 
   if model.block_id == nil then model.block_id = 0 end
@@ -235,7 +234,7 @@ end
 -- @return #table
 --
 function PlannerModel.methods:createBeaconModel(player, name, count)
-  Logging:debug("PlannerModel:createBeaconModel():",player, name, count)
+  Logging:debug("HMModel", "createBeaconModel():",player, name, count)
   if name == nil then name = "beacon" end
   if count == nil then count = 0 end
   local beaconModel = {}
@@ -271,7 +270,7 @@ end
 -- @return #table
 --
 function PlannerModel.methods:createFactoryModel(player, name, count)
-  Logging:debug("PlannerModel:createFactoryModel():",player, name, count)
+  Logging:debug("HMModel", "createFactoryModel():",player, name, count)
   if name == nil then name = "assembling-machine-1" end
   if count == nil then count = 0 end
 
@@ -304,7 +303,7 @@ end
 -- @return #table
 --
 function PlannerModel.methods:createPowerModel(player)
-  Logging:debug("PlannerModel:createProductionBlockModel():",player)
+  Logging:debug("HMModel", "createProductionBlockModel():",player)
   local model = self.player:getGlobal(player, "model")
 
   if model.power_id == nil then model.power_id = 0 end
@@ -331,7 +330,7 @@ end
 -- @return #table
 --
 function PlannerModel.methods:createGeneratorModel(player, name, count)
-  Logging:debug("PlannerModel:createGeneratorModel():",player, name, count)
+  Logging:debug("HMModel", "createGeneratorModel():",player, name, count)
   if name == nil then name = "steam-engine" end
   if count == nil then count = 0 end
 
@@ -366,7 +365,7 @@ end
 -- @return #table
 --
 function PlannerModel.methods:createIngredientModel(player, name, type, count)
-  Logging:debug("PlannerModel:createIngredientModel():",player, name, count)
+  Logging:debug("HMModel", "createIngredientModel():",player, name, count)
   if count == nil then count = 0 end
 
   local ingredientModel = {}
@@ -447,7 +446,7 @@ end
 -- @return #table
 --
 function PlannerModel.methods:createRecipeModel(player, name, count)
-  Logging:debug("PlannerModel:createRecipeModel():",player, name, count)
+  Logging:debug("HMModel", "createRecipeModel():",player, name, count)
   local model = self:getModel(player)
   if model.recipe_id == nil then model.recipe_id = 0 end
   model.recipe_id = model.recipe_id + 1
@@ -482,7 +481,7 @@ end
 -- @return #table
 --
 function PlannerModel.methods:createResourceModel(player, name, type, count)
-  Logging:debug("PlannerModel:createResourceModel():",player, name, type, count)
+  Logging:debug("HMModel", "createResourceModel():",player, name, type, count)
   local model = self:getModel(player)
   if model.resource_id == nil then model.resource_id = 0 end
   model.resource_id = model.resource_id + 1
@@ -586,7 +585,7 @@ end
 -- @return #number
 --
 function PlannerModel.methods:countBlockRecipes(player, blockId)
-  Logging:debug("PlannerModel:countBlockRecipes():",player, blockId)
+  Logging:debug("HMModel", "countBlockRecipes():",player, blockId)
   local model = self:getModel(player)
   local count = 0
   if model.blocks[blockId] ~= nil then
@@ -640,7 +639,7 @@ end
 -- @param #string key recipe name
 --
 function PlannerModel.methods:addRecipeIntoProductionBlock(player, key)
-  Logging:debug("PlannerModel:addRecipeIntoProductionBlock():",player, key)
+  Logging:debug("HMModel", "addRecipeIntoProductionBlock():",player, key)
   local model = self:getModel(player)
   local globalGui = self.player:getGlobalGui(player)
   local blockId = globalGui.currentBlock
@@ -658,6 +657,7 @@ function PlannerModel.methods:addRecipeIntoProductionBlock(player, key)
   if model.blocks[blockId].recipes[key] == nil then
     local ModelRecipe = self:createRecipeModel(player, recipe.name, 0)
     local index = self:countBlockRecipes(player, blockId)
+    ModelRecipe.is_resource = not(recipe.force)
     ModelRecipe.energy = recipe.energy
     ModelRecipe.category = recipe.category
     ModelRecipe.group = recipe.group.name
@@ -698,7 +698,7 @@ end
 -- @param #string key generator name
 --
 function PlannerModel.methods:addPrimaryPower(player, power_id, key)
-  Logging:debug("PlannerModel:addPrimaryPower():",player, key)
+  Logging:debug("HMModel", "addPrimaryPower():",player, key)
   local model = self:getModel(player)
   if model.powers == nil then model.powers = {} end
   local power = model.powers[power_id]
@@ -748,7 +748,7 @@ end
 -- @param #string key generator name
 --
 function PlannerModel.methods:addSecondaryPower(player, power_id, key)
-  Logging:debug("PlannerModel:addSecondaryPower():",player, key)
+  Logging:debug("HMModel", "addSecondaryPower():",player, key)
   local model = self:getModel(player)
   if model.powers == nil then model.powers = {} end
   local power = model.powers[power_id]
@@ -802,7 +802,7 @@ end
 -- @param #number quantity
 --
 function PlannerModel.methods:updateProduct(player, blockId, key, quantity)
-  Logging:debug("PlannerModel:updateProduct():",player, blockId, key, quantity)
+  Logging:debug("HMModel", "updateProduct():",player, blockId, key, quantity)
   local model = self:getModel(player)
 
   if model.blocks[blockId] ~= nil then
@@ -810,6 +810,26 @@ function PlannerModel.methods:updateProduct(player, blockId, key, quantity)
     if block.input == nil then block.input = {} end
     block.input.key = key
     block.input.quantity = quantity
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update a production block option
+--
+-- @function [parent=#PlannerModel] updateProductionBlockOption
+--
+-- @param #LuaPlayer player
+-- @param #string blockId production block id
+-- @param #string option
+-- @param #number value
+--
+function PlannerModel.methods:updateProductionBlockOption(player, blockId, option, value)
+  Logging:debug("HMModel", "updateProductionBlockOption():",player, blockId, option, value)
+  local model = self:getModel(player)
+
+  if model.blocks[blockId] ~= nil then
+    local block = model.blocks[blockId]
+    block[option] = value
   end
 end
 
@@ -919,7 +939,7 @@ end
 -- @param #string name factory name
 --
 function PlannerModel.methods:setFactory(player, item, key, name)
-  Logging:debug("PlannerModel:setFactory():",player, item, key, name)
+  Logging:debug("HMModel", "setFactory():", item, key, name)
   local object = self:getObject(player, item, key)
   if object ~= nil then
     local factory = self.player:getEntityPrototype(name)
@@ -929,7 +949,7 @@ function PlannerModel.methods:setFactory(player, item, key, name)
 
       object.factory.name = factory.name
       --object.factory.type = factory.type
-      
+
       object.factory.energy_nominal = self.player:getItemProperty(factory.name, "energy_usage")
 
       object.factory.module_slots = self.player:getItemProperty(factory.name, "module_slots")
@@ -955,7 +975,7 @@ end
 -- @param #table options
 --
 function PlannerModel.methods:updateObject(player, item, key, options)
-  Logging:debug("PlannerModel:updateObject():",player, item, key, options)
+  Logging:debug("HMModel", "updateObject():",player, item, key, options)
   local object = self:getObject(player, item, key)
   if object ~= nil then
     if options.production ~= nil then
@@ -974,7 +994,7 @@ end
 -- @param #table options
 --
 function PlannerModel.methods:updatePower(player, key, options)
-  Logging:debug("PlannerModel:updatePower():",player, options)
+  Logging:debug("HMModel", "updatePower():",player, options)
   local object = self:getPower(player, key)
   if object ~= nil then
     if options.power ~= nil then
@@ -995,7 +1015,7 @@ end
 -- @param #table options
 --
 function PlannerModel.methods:updateFactory(player, item, key, options)
-  Logging:debug("PlannerModel:updateFactory():",player, item, key, options)
+  Logging:debug("HMModel", "updateFactory():",player, item, key, options)
   local object = self:getObject(player, item, key)
   if object ~= nil then
     if options.energy_nominal ~= nil then
@@ -1056,7 +1076,7 @@ end
 -- @param #string blockId
 --
 function PlannerModel.methods:removeProductionBlock(player, blockId)
-  Logging:debug("PlannerModel:removeProductionBlock()",player, blockId)
+  Logging:debug("HMModel", "removeProductionBlock()",player, blockId)
   local model = self:getModel(player)
   if model.blocks[blockId] ~= nil then
     model.blocks[blockId] = nil
@@ -1074,7 +1094,7 @@ end
 -- @param #string key
 --
 function PlannerModel.methods:removeProductionRecipe(player, blockId, key)
-  Logging:debug("PlannerModel:removeProductionRecipe()",player, blockId, key)
+  Logging:debug("HMModel", "removeProductionRecipe()",player, blockId, key)
   local model = self:getModel(player)
   if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
     model.blocks[blockId].recipes[key] = nil
@@ -1090,7 +1110,7 @@ end
 -- @param #table list
 --
 function PlannerModel.methods:reIndexList(list)
-  Logging:debug("PlannerModel:reIndexList()",list)
+  Logging:debug("HMModel", "reIndexList()",list)
   local index = 0
   for _,element in spairs(list,function(t,a,b) return t[b].index > t[a].index end) do
     element.index = index
@@ -1107,7 +1127,7 @@ end
 -- @param #string blockId
 --
 function PlannerModel.methods:upProductionBlock(player, blockId)
-  Logging:debug("PlannerModel:upProductionBlock()",player, blockId)
+  Logging:debug("HMModel", "upProductionBlock()",player, blockId)
   local model = self:getModel(player)
   if model.blocks[blockId] ~= nil then
     self:upProductionList(player, model.blocks, model.blocks[blockId].index)
@@ -1124,7 +1144,7 @@ end
 -- @param #string key
 --
 function PlannerModel.methods:upProductionRecipe(player, blockId, key)
-  Logging:debug("PlannerModel:upProductionRecipe()",player, blockId, key)
+  Logging:debug("HMModel", "upProductionRecipe()",player, blockId, key)
   local model = self:getModel(player)
   if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
     self:upProductionList(player, model.blocks[blockId].recipes, model.blocks[blockId].recipes[key].index)
@@ -1141,7 +1161,7 @@ end
 -- @param #number index
 --
 function PlannerModel.methods:upProductionList(player, list, index)
-  Logging:debug("PlannerModel:upProductionList()",player, list, index)
+  Logging:debug("HMModel", "upProductionList()",player, list, index)
   local model = self:getModel(player)
   if list ~= nil and index > 0 then
     for _,element in pairs(list) do
@@ -1163,7 +1183,7 @@ end
 -- @param #string blockId
 --
 function PlannerModel.methods:downProductionBlock(player, blockId)
-  Logging:debug("PlannerModel:downProductionBlock()",player, blockId)
+  Logging:debug("HMModel", "downProductionBlock()",player, blockId)
   local model = self:getModel(player)
   if model.blocks[blockId] ~= nil then
     self:downProductionList(player, model.blocks, model.blocks[blockId].index)
@@ -1180,7 +1200,7 @@ end
 -- @param #string key
 --
 function PlannerModel.methods:downProductionRecipe(player, blockId, key)
-  Logging:debug("PlannerModel:downProductionRecipe()",player, blockId, key)
+  Logging:debug("HMModel", "downProductionRecipe()",player, blockId, key)
   local model = self:getModel(player)
   if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
     self:downProductionList(player, model.blocks[blockId].recipes, model.blocks[blockId].recipes[key].index)
@@ -1197,9 +1217,9 @@ end
 -- @param #number index
 --
 function PlannerModel.methods:downProductionList(player, list, index)
-  Logging:debug("PlannerModel:downProductionList()",player, list, index)
+  Logging:debug("HMModel", "downProductionList()",player, list, index)
   local model = self:getModel(player)
-  Logging:debug("PlannerModel:downProductionList()",self:countList(list))
+  Logging:debug("HMModel", "downProductionList()",self:countList(list))
   if list ~= nil and index + 1 < self:countList(list) then
     for _,element in pairs(list) do
       if element.index == index then
@@ -1219,7 +1239,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerModel.methods:recipesReset(player)
-  Logging:debug("PlannerModel:recipesReset")
+  Logging:debug("HMModel", "recipesReset")
   local model = self:getModel(player)
   for key, recipe in pairs(model.recipes) do
     self:recipeReset(recipe)
@@ -1234,7 +1254,7 @@ end
 -- @param #ModelRecipe recipe
 --
 function PlannerModel.methods:recipeReset(recipe)
-  Logging:debug("PlannerModel:recipeReset=",recipe)
+  Logging:debug("HMModel", "recipeReset=",recipe)
   for index, product in pairs(recipe.products) do
     product.count = 0
   end
@@ -1251,7 +1271,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerModel.methods:ingredientsReset(player)
-  Logging:debug("PlannerModel:ingredientsReset()", player)
+  Logging:debug("HMModel", "ingredientsReset()", player)
   local model = self:getModel(player)
   for k, ingredient in pairs(model.ingredients) do
     model.ingredients[ingredient.name].count = 0;
@@ -1266,7 +1286,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerModel.methods:update(player)
-  Logging:debug("**********PlannerModel:update():",player)
+  Logging:debug("HMModel" , "********** update():",player)
 
   local model = self:getModel(player)
   local globalSettings = self.player:getGlobal(player, "settings")
@@ -1274,23 +1294,22 @@ function PlannerModel.methods:update(player)
 
   -- reset all factories
   if model ~= nil and (model.version == nil or model.version ~= self.version) then
-    Logging:debug("**********PlannerModel:update():version",self.version)
+    Logging:debug("HMModel" , "********** version",self.version)
+    if model.version == nil or model.version < "0.4.4" then
+      model.resources = {}
+    end
     if model.blocks ~= nil then
       for _, productBlock in pairs(model.blocks) do
         for _, recipe in pairs(productBlock.recipes) do
           local factory = recipe.factory
           local beacon = recipe.beacon
+          local _recipe = self.player:getRecipe(player, recipe.name)
           self:setFactory(player, productBlock.id, recipe.name, factory.name)
           self:setBeacon(player, productBlock.id, recipe.name, beacon.name)
+          if _recipe ~= nil then
+            recipe.is_resource = not(_recipe.force)
+          end
         end
-      end
-    end
-    if model.resources ~= nil then
-      for _, resource in pairs(model.resources) do
-        local factory = resource.factory
-        local beacon = resource.beacon
-        self:setFactory(player, "resource", resource.name, factory.name)
-        self:setBeacon(player, "resource", resource.name, beacon.name)
       end
     end
   end
@@ -1322,16 +1341,16 @@ function PlannerModel.methods:update(player)
     end
 
 
-    self:computeIngredients(player)
+    self:computeInputOutput(player)
 
     self:computeResources(player)
 
-    Logging:debug("PlannerModel:update():","Factory compute OK")
+    Logging:debug("HMModel", "update():","Factory compute OK")
     -- genere un bilan
     self:createSummary(player)
-    Logging:debug("PlannerModel:update():","Summary OK")
+    Logging:debug("HMModel", "update():","Summary OK")
 
-    Logging:debug("**********model updated:",model)
+    Logging:debug("HMModel" , "********** model updated:",model)
   end
   model.version = self.version
 end
@@ -1370,7 +1389,7 @@ end
 -- @param #string path
 --
 function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, level, path)
-  Logging:debug("PlannerModel:computeProductionBlock():",player, element, maxLoop, level, path)
+  Logging:debug("HMModel", "computeProductionBlock():", element.name, maxLoop, level, path)
   local model = self:getModel(player)
 
   local recipes = element.recipes
@@ -1417,30 +1436,66 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
         ingredient.count = 0
       end
     end
+
+
+
+    if element.by_factory == true then
+      -- initialise la premiere recette avec le nombre d'usine
+      local first_recipe = self:firstRecipe(recipes)
+      Logging:debug("HMModel", "first_recipe",first_recipe)
+      first_recipe.factory.count = element.factory_number
+      self:computeModuleEffects(player, first_recipe)
+      self:computeFactory(player, first_recipe)
+      local _,first_product = next(first_recipe.products)
+      element.input = {}
+      -- formula [product amount]*[assembly speed]*[time]/[recipe energy]
+      element.input.key = first_product.name
+      element.input.quantity = first_product.amount * ( element.factory_number or 0 ) * first_recipe.factory.speed * model.time / first_recipe.energy
+    end
+
     -- initialise la premiere recette avec le input
-    local _,first_recipe = next(recipes)
+    local first_recipe = self:firstRecipe(recipes)
     if first_recipe ~= nil and element.input ~= nil then
       for _, product in pairs(first_recipe.products) do
         if product.name == element.input.key then
-          product.count = element.input.quantity
+          local p_amount = self:getElementAmount(product)
+          local i_amount = 0
+
+          -- consolide product.count
+          if first_recipe.is_resource ~= true then
+            for k, ingredient in pairs(first_recipe.ingredients) do
+              if ingredient.name == product.name then
+                i_amount = self:getElementAmount(ingredient)
+              end
+            end
+          end
+
+          product.count = element.input.quantity * (p_amount/(p_amount-i_amount))
         end
       end
     end
+    Logging:debug("HMModel", "first_recipe",first_recipe)
+
+    Logging:debug("HMModel" , "********** initialized:", element)
 
     -- ratio pour le calcul du nombre de block
     local ratio = 1
     local ratioRecipe = nil
+    local first = true
     -- calcul ordonnee sur les recipes du block
     for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
       local mainProduct = nil
       local production = 1
       if recipe.production ~= nil then production = recipe.production end
-      -- prepare les produits
-      for _, product in pairs(recipe.products) do
-        if element.ingredients[product.name] ~= nil then
-          product.count = element.ingredients[product.name].count*production
+      if first ~= true then
+        -- prepare les produits
+        for _, product in pairs(recipe.products) do
+          if element.ingredients[product.name] ~= nil then
+            product.count = element.ingredients[product.name].count*production
+          end
         end
       end
+      first = false
       -- check produit pilotant
       -- @see http://lua-api.factorio.com/latest/Concepts.html#Product
       for _, product in pairs(recipe.products) do
@@ -1462,21 +1517,26 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 
       self:computeModuleEffects(player, recipe)
 
+      -- compute ingredients
       local pCount = mainProduct.count;
       for k, ingredient in pairs(recipe.ingredients) do
         local productNominal = self:getElementAmount(mainProduct)
         local productUsage = self:getElementAmount(mainProduct)
         -- calcul factory productivity effect
         productUsage = productUsage + productNominal * recipe.factory.effects.productivity
-
+        -- consolide la production
+        local amount = ingredient.amount
+        for k, product in pairs(recipe.products) do
+          if ingredient.name == product.name then
+            amount = amount - self:getElementAmount(product)
+          end
+        end
         --local nextCount = math.ceil(pCount*(ingredient.amount/productUsage))
         local nextCount = pCount*(ingredient.amount/productUsage)
         ingredient.count = nextCount
 
         element.ingredients[ingredient.name].count = element.ingredients[ingredient.name].count + nextCount
       end
-
-      --Logging:debug("Compute before clean:", element)
 
       self:computeFactory(player, recipe)
 
@@ -1492,6 +1552,8 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
         end
       end
 
+      Logging:debug("HMModel" , "********** Compute before clean:", element)
+
       -- state = 0 => produit
       -- state = 1 => produit pilotant
       -- state = 2 => produit restant
@@ -1505,7 +1567,7 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
           element.ingredients[product.name].count = element.ingredients[product.name].count - product.count
         end
       end
-      --Logging:debug("Compute after clean:", element)
+      Logging:debug("HMModel" , "********** Compute after clean:", element)
     end
 
     if element.count < 1 then
@@ -1515,7 +1577,7 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
     for _, recipe in pairs(recipes) do
       for _, ingredient in pairs(recipe.ingredients) do
         -- consomme les ingredients
-        if element.products[ingredient.name] ~= nil then
+        if recipe.is_resource ~= true and element.products[ingredient.name] ~= nil then
           element.products[ingredient.name].count = element.products[ingredient.name].count - ingredient.count
         end
       end
@@ -1550,9 +1612,22 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 end
 
 -------------------------------------------------------------------------------
--- Compute ingredients
+-- Return first recipe of block
 --
--- @function [parent=#PlannerModel] computeIngredients
+-- @function [parent=#PlannerModel] firstRecipe
+--
+-- @param #table recipes
+--
+function PlannerModel.methods:firstRecipe(recipes)
+  for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
+    return recipe
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Compute input and output
+--
+-- @function [parent=#PlannerModel] computeInputOutput
 --
 -- @param #LuaPlayer player
 -- @param #ModelRecipe recipe
@@ -1560,13 +1635,24 @@ end
 -- @param #number level
 -- @param #string path
 --
-function PlannerModel.methods:computeIngredients(player)
-  Logging:debug("PlannerModel:computeIngredients():",player)
+function PlannerModel.methods:computeInputOutput(player)
+  Logging:debug("HMModel", "computeInputOutput():",player)
   local model = self:getModel(player)
+  model.products = {}
   model.ingredients = {}
 
   local index = 1
   for _, element in spairs(model.blocks, function(t,a,b) return t[b].index > t[a].index end) do
+    -- count product
+    for _, product in pairs(element.products) do
+      if model.products[product.name] == nil then
+        model.products[product.name] = self:createIngredientModel(player, product.name, product.type)
+        model.products[product.name].index = index
+        index = index + 1
+      end
+      model.products[product.name].count = model.products[product.name].count + product.count
+    end
+    -- count ingredient
     for _, ingredient in pairs(element.ingredients) do
       if model.ingredients[ingredient.name] == nil then
         model.ingredients[ingredient.name] = self:createIngredientModel(player, ingredient.name, ingredient.type)
@@ -1574,6 +1660,23 @@ function PlannerModel.methods:computeIngredients(player)
         index = index + 1
       end
       model.ingredients[ingredient.name].count = model.ingredients[ingredient.name].count + ingredient.count
+    end
+  end
+
+  for _, element in spairs(model.blocks, function(t,a,b) return t[b].index > t[a].index end) do
+    -- consomme les produits
+    for _, ingredient in pairs(element.ingredients) do
+      if model.products[ingredient.name] ~= nil then
+        model.products[ingredient.name].count = model.products[ingredient.name].count - ingredient.count
+        if model.products[ingredient.name].count < 0.01 then model.products[ingredient.name] = nil end
+      end
+    end
+    -- consomme les ingredients
+    for _, product in pairs(element.products) do
+      if model.ingredients[product.name] ~= nil then
+        model.ingredients[product.name].count = model.ingredients[product.name].count - product.count
+        if model.ingredients[product.name].count < 0.01 then model.ingredients[product.name] = nil end
+      end
     end
   end
 end
@@ -1590,7 +1693,7 @@ end
 -- @param #string path
 --
 function PlannerModel.methods:computeResources(player)
-  Logging:debug("PlannerModel:computeResources():",player)
+  Logging:debug("HMModel", "computeResources():",player)
   local model = self:getModel(player)
   local resources = {}
 
@@ -1602,47 +1705,22 @@ function PlannerModel.methods:computeResources(player)
         resource.count = ingredient.count
       else
         resource = self:createResourceModel(player, ingredient.name, ingredient.type, ingredient.count)
-        if ingredient.resource_category == "basic-solid" then
-          resource.factory.name = "electric-mining-drill"
-          resource.category = "basic-solid"
-          resource.factory.speed = 1
-          resource.factory.energy = 90000
-        end
-        if ingredient.name == "water" then
-          resource.factory.name = "offshore-pump"
-          resource.category = "basic-fluid"
-          resource.factory.speed = 1
-          resource.factory.energy = 0
-        end
-        if ingredient.name == "crude-oil" then
-          resource.factory.name = "pumpjack"
-          resource.category = "basic-fluid"
-          resource.factory.speed = 2
-          resource.factory.energy = 90000
-        end
-        resources[resource.name] = resource
-        model.resources = resources
-        self:setFactory(player, "resource", resource.name, resource.factory.name)
       end
 
-      self:computeModuleEffects(player, resource)
-      self:computeFactory(player, resource)
+      if ingredient.resource_category == "basic-solid" then
+        resource.category = "basic-solid"
+      end
+      if ingredient.name == "water" then
+        resource.category = "basic-fluid"
+      end
+      if ingredient.name == "crude-oil" then
+        resource.category = "basic-fluid"
+      end
 
-      resource.factory.limit_count = resource.factory.count
       resource.blocks = 1
       resource.wagon = nil
       resource.storage = nil
-
       local ratio = 1
-      if resource.factory.limit ~= nil and resource.factory.limit ~= 0 then
-        if resource.factory.limit < resource.factory.count then
-          resource.factory.limit_count = resource.factory.limit
-        else
-          resource.factory.limit_count = resource.factory.count
-        end
-        resource.blocks = math.ceil(resource.factory.count/resource.factory.limit)
-        ratio = 1/resource.blocks
-      end
 
       -- compute storage
       if resource.category == "basic-solid" then
@@ -1677,7 +1755,7 @@ end
 -- @return #table
 --
 function PlannerModel.methods:getRecipeByProduct(player, element)
-  Logging:trace("PlannerModel:getRecipeByProduct=",element)
+  Logging:trace("HMModel", "getRecipeByProduct=",element)
   local model = self:getModel(player)
   local recipes = {}
   for key, recipe in pairs(model.recipes) do
@@ -1699,7 +1777,7 @@ end
 -- @param #ModelObject object
 --
 function PlannerModel.methods:computeModuleEffects(player, object)
-  Logging:debug("PlannerModel:computeModuleEffects()",object)
+  Logging:debug("HMModel", "computeModuleEffects()",object.name)
 
   local factory = object.factory
   factory.effects = {speed = 0, productivity = 0, consumption = 0}
@@ -1738,11 +1816,11 @@ end
 -- @param #ModelObject object
 --
 function PlannerModel.methods:computeFactory(player, object)
-  Logging:debug("PlannerModel:computeFactory()",object)
+  Logging:debug("HMModel", "computeFactory()",object.name)
 
   -- effet speed
   object.factory.speed = object.factory.speed_nominal * (1 + object.factory.effects.speed)
-  
+
   -- effet consumption
   local energy_type = self.player:getItemProperty(object.factory.name, "energy_type")
   if energy_type ~= "burner" then
@@ -1757,10 +1835,9 @@ function PlannerModel.methods:computeFactory(player, object)
     for k, element in pairs(object.products) do
       product = element
     end
-    --Logging:trace("product=",product)
+    --Logging:trace("HMModel" , "********** product=",product)
     if product ~= nil then
       local model = self:getModel(player)
-      Logging:debug("PlannerModel:computeFactory()",model)
       -- [nombre d'item] * [effort necessaire du recipe] / ([la vitesse de la factory] * [nombre produit par le recipe] * [le temps en second])
       local count = math.ceil(product.count*object.energy/(object.factory.speed*self:getElementAmount(product)*(1 + object.factory.effects.productivity)*model.time))
       object.factory.count = count
@@ -1818,15 +1895,6 @@ function PlannerModel.methods:createSummary(player)
     end
   end
 
-  -- cumul de l'energie des resources
-  for k, resource in pairs(model.resources) do
-    if resource.energy_total ~= nil then
-      energy = energy + resource.energy_total
-      self:computeSummaryFactory(player, resource)
-    end
-  end
-
-
   model.summary.energy = energy
 
   model.generators = {}
@@ -1877,7 +1945,7 @@ end
 --
 function PlannerModel.methods:computePower(player, key)
   local power = self:getPower(player, key)
-  Logging:trace("PlannerModel:computePower():", key, power)
+  Logging:trace("HMModel", "computePower():", key, power)
   if power ~= nil then
     local primary_classification = self.player:getItemProperty(power.primary.name, "classification")
     local secondary_classification = self.player:getItemProperty(power.secondary.name, "classification")
@@ -1910,7 +1978,7 @@ function PlannerModel.methods:computePower(player, key)
         -- formula (puissance*durree_penombre)/(60s*capacite)
         local count2 = power.power*(gameDay.dust/factor+gameDay.night+gameDay.dawn/factor)/(60*power.secondary.buffer_capacity)
 
-        Logging:debug("computePower result:", accu, count1, count2)
+        Logging:debug("HMModel" , "********** computePower result:", accu, count1, count2)
         if count1 > count2 then
           power.secondary.count = count1 or 0
         else

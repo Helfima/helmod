@@ -152,7 +152,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerProductEdition.methods:updateInfo(player, element, action, item, item2, item3)
-  Logging:debug("PlannerProductEdition:updateInfo():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerProductEdition", "updateInfo():",player, element, action, item, item2, item3)
   local infoPanel = self:getInfoPanel(player)
   local model = self.model:getModel(player)
 
@@ -195,7 +195,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerProductEdition.methods:on_event(player, element, action, item, item2, item3)
-  Logging:debug("PlannerProductEdition:on_event():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerProductEdition", "on_event():",player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
   if self.player:isAdmin(player) or model.owner == player.name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
     if action == "product-update" then

@@ -271,7 +271,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerAbstractEdition.methods:after_open(player, element, action, item, item2, item3)
-  Logging:debug("PlannerAbstractEdition:after_open():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerAbstractEdition", "after_open():",player, element, action, item, item2, item3)
   self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
   self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
   self.parent:send_event(player, "HMPlannerSettings", "CLOSE")
@@ -299,7 +299,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerAbstractEdition.methods:buildHeaderPanel(player)
-  Logging:debug("PlannerAbstractEdition:buildHeaderPanel():",player)
+  Logging:debug("HMPlannerAbstractEdition", "buildHeaderPanel():",player)
   -- TODO something
 end
 
@@ -311,7 +311,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerAbstractEdition.methods:buildFactoryPanel(player)
-  Logging:debug("PlannerAbstractEdition:buildFactoryPanel():",player)
+  Logging:debug("HMPlannerAbstractEdition", "buildFactoryPanel():",player)
   self:getFactoryInfoPanel(player)
   self:getFactoryOtherInfoPanel(player)
 end
@@ -324,7 +324,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerAbstractEdition.methods:buildBeaconPanel(player)
-  Logging:debug("PlannerAbstractEdition:buildBeaconPanel():",player)
+  Logging:debug("HMPlannerAbstractEdition", "buildBeaconPanel():",player)
   self:getBeaconInfoPanel(player)
   self:getBeaconOtherInfoPanel(player)
 end
@@ -342,7 +342,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerAbstractEdition.methods:on_update(player, element, action, item, item2, item3)
-  Logging:debug("PlannerAbstractEdition:on_update():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerAbstractEdition", "on_update():",player, element, action, item, item2, item3)
   local object = self:getObject(player, element, action, item, item2, item3)
   -- header
   self:updateHeader(player, element, action, item, item2, item3)
@@ -367,7 +367,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerAbstractEdition.methods:updateHeader(player, element, action, item, item2, item3)
-  Logging:debug("PlannerAbstractEdition:updateHeader():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerAbstractEdition", "updateHeader():",player, element, action, item, item2, item3)
   -- TODO something
 end
 
@@ -384,7 +384,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerAbstractEdition.methods:updateFactory(player, element, action, item, item2, item3)
-  Logging:debug("PlannerAbstractEdition:updateFactory():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerAbstractEdition", "updateFactory():",player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
 
   self:updateFactoryInfo(player, element, action, item, item2, item3)
@@ -409,7 +409,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerAbstractEdition.methods:updateBeacon(player, element, action, item, item2, item3)
-  Logging:debug("PlannerAbstractEdition:updateBeacon():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerAbstractEdition", "updateBeacon():",player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
 
   self:updateBeaconInfo(player, element, action, item, item2, item3)
@@ -450,12 +450,12 @@ end
 -- @param #string item3 third item name
 --
 function PlannerAbstractEdition.methods:updateFactoryInfo(player, element, action, item, item2, item3)
-  Logging:debug("PlannerAbstractEdition:updateFactoryInfo():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerAbstractEdition", "updateFactoryInfo():",player, element, action, item, item2, item3)
   local infoPanel = self:getFactoryInfoPanel(player)
   local object = self:getObject(player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
   if object ~= nil then
-    Logging:debug("PlannerAbstractEdition:updateFactoryInfo():object:",object)
+    Logging:debug("HMPlannerAbstractEdition", "updateFactoryInfo():object:",object)
     local factory = object.factory
     local _factory = self.player:getItemPrototype(factory.name)
 
@@ -485,17 +485,18 @@ function PlannerAbstractEdition.methods:updateFactoryInfo(player, element, actio
     self:addGuiLabel(inputPanel, "module-slots", factory.module_slots)
 
     self:addGuiLabel(inputPanel, "label-energy", ({"helmod_label.energy"}))
-    local sign = "+"
-    if factory.effects.consumption < 0 then sign = "-" end
+    
+    local sign = ""
+    if factory.effects.consumption > 0 then sign = "+" end
     self:addGuiLabel(inputPanel, "energy", self:formatNumberKilo(factory.energy, "W").." ("..sign..self:formatPercent(factory.effects.consumption).."%)")
 
     local sign = "+"
-    if factory.effects.speed < 0 then sign = "-" end
+    if factory.effects.speed > 0 then sign = "+" end
     self:addGuiLabel(inputPanel, "label-speed", ({"helmod_label.speed"}))
     self:addGuiLabel(inputPanel, "speed", factory.speed.." ("..sign..self:formatPercent(factory.effects.speed).."%)")
 
     local sign = "+"
-    if factory.effects.productivity < 0 then sign = "-" end
+    if factory.effects.productivity > 0 then sign = "+" end
     self:addGuiLabel(inputPanel, "label-productivity", ({"helmod_label.productivity"}))
     self:addGuiLabel(inputPanel, "productivity", sign..self:formatPercent(factory.effects.productivity).."%")
 
@@ -519,7 +520,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerAbstractEdition.methods:updateFactoryModulesSelector(player, element, action, item, item2, item3)
-  Logging:debug("PlannerAbstractEdition:updateFactoryModulesSelector():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerAbstractEdition", "updateFactoryModulesSelector():",player, element, action, item, item2, item3)
   local selectorPanel = self:getFactoryModulesSelectorPanel(player)
   local model = self.model:getModel(player)
   local object = self:getObject(player, element, action, item, item2, item3)
@@ -568,7 +569,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerAbstractEdition.methods:updateFactoryActivedModules(player, element, action, item, item2, item3)
-  Logging:debug("PlannerAbstractEdition:updateFactoryActivedModules():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerAbstractEdition", "updateFactoryActivedModules():",player, element, action, item, item2, item3)
   local activedModulesPanel = self:getFactoryActivedModulesPanel(player)
   local object = self:getObject(player, element, action, item, item2, item3)
   local factory = object.factory
@@ -608,7 +609,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerAbstractEdition.methods:updateFactorySelector(player, element, action, item, item2, item3)
-  Logging:debug("PlannerFactorySelector:updateFactorySelector():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerAbstractEdition", "updateFactorySelector():",player, element, action, item, item2, item3)
   local globalSettings = self.player:getGlobal(player, "settings")
 
   local selectorPanel = self:getFactorySelectorPanel(player)
@@ -624,14 +625,14 @@ function PlannerAbstractEdition.methods:updateFactorySelector(player, element, a
 
   -- ajouter de la table des groupes de recipe
   local groupsPanel = self:addGuiTable(scrollPanel, "factory-groups", 2)
-  Logging:debug("PlannerFactorySelector:updateFactorySelector(): group category=",object.category)
+  Logging:debug("HMPlannerAbstractEdition", "updateFactorySelector(): group category=",object.category)
 
   local category = object.category
   if globalSettings.model_filter_factory ~= nil and globalSettings.model_filter_factory == false then category = nil end
 
   local factories = {}
   if item == "resource" then
-    Logging:debug("PlannerFactorySelector:updateFactorySelector(): resource=",object)
+    Logging:debug("HMPlannerAbstractEdition", "updateFactorySelector(): resource=",object)
     if object.name == "water" then
       factories = self.player:getProductionsRessource("offshore-pump")
     else
@@ -641,7 +642,7 @@ function PlannerAbstractEdition.methods:updateFactorySelector(player, element, a
   else
     factories = self.player:getProductionsCrafting(category)
   end
-  Logging:debug("factories:",factories)
+  Logging:debug("HMPlannerAbstractEdition", "factories:",factories)
 
 
   if category == nil then
@@ -690,7 +691,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerAbstractEdition.methods:updateBeaconInfo(player, element, action, item, item2, item3)
-  Logging:debug("PlannerAbstractEdition:updateBeaconInfo():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerAbstractEdition", "updateBeaconInfo():",player, element, action, item, item2, item3)
   local infoPanel = self:getBeaconInfoPanel(player)
   local object = self:getObject(player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
@@ -747,7 +748,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerAbstractEdition.methods:updateBeaconActivedModules(player, element, action, item, item2, item3)
-  Logging:debug("PlannerAbstractEdition:updateBeaconActivedModules():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerAbstractEdition", "updateBeaconActivedModules():",player, element, action, item, item2, item3)
   local activedModulesPanel = self:getBeaconActivedModulesPanel(player)
 
   local object = self:getObject(player, element, action, item, item2, item3)
@@ -789,7 +790,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerAbstractEdition.methods:updateBeaconModulesSelector(player, element, action, item, item2, item3)
-  Logging:debug("PlannerAbstractEdition:updateBeaconModulesSelector():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerAbstractEdition", "updateBeaconModulesSelector():",player, element, action, item, item2, item3)
   local selectorPanel = self:getBeaconModulesSelectorPanel(player)
   local model = self.model:getModel(player)
   local object = self:getObject(player, element, action, item, item2, item3)
@@ -834,7 +835,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerAbstractEdition.methods:updateBeaconSelector(player, element, action, item, item2, item3)
-  Logging:debug("PlannerAbstractEdition:updateBeaconSelector():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerAbstractEdition", "updateBeaconSelector():",player, element, action, item, item2, item3)
   local globalSettings = self.player:getGlobal(player, "settings")
   local selectorPanel = self:getBeaconSelectorPanel(player)
   local model = self.model:getModel(player)
@@ -852,7 +853,7 @@ function PlannerAbstractEdition.methods:updateBeaconSelector(player, element, ac
   if globalSettings.model_filter_beacon ~= nil and globalSettings.model_filter_beacon == false then category = nil end
   -- ajouter de la table des groupes de recipe
   local factories = self.player:getProductionsBeacon()
-  Logging:debug("factories:",factories)
+  Logging:debug("HMPlannerAbstractEdition", "factories:",factories)
 
 
   if category == nil then
@@ -877,7 +878,7 @@ function PlannerAbstractEdition.methods:updateBeaconSelector(player, element, ac
   end
 
   local tablePanel = self:addGuiTable(scrollPanel, "beacon-table", 5)
-  --Logging:debug("factories:",self.player:getProductions())
+  --Logging:debug("HMPlannerAbstractEdition", "factories:",self.player:getProductions())
   for key, beacon in pairs(factories) do
     if category ~= nil or (beacon.subgroup ~= nil and beacon.subgroup.name == model.beaconGroupSelected) then
       local localised_name = beacon.localised_name
@@ -902,7 +903,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerAbstractEdition.methods:on_event(player, element, action, item, item2, item3)
-  Logging:debug("PlannerAbstractEdition:on_event():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerAbstractEdition", "on_event():",player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
 
   if action == "change-panel" then

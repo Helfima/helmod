@@ -116,7 +116,7 @@ end
 -- @return #boolean if true the next call close dialog
 --
 function PlannerRecipeSelector.methods:on_open(player, element, action, item, item2, item3)
-  Logging:debug("PlannerRecipeSelector:on_open():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerRecipeSelector", "on_open():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   if item3 ~= nil then
     recipeFilter = item3:lower():gsub("[-]"," ")
@@ -159,7 +159,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeSelector.methods:on_event(player, element, action, item, item2, item3)
-  Logging:debug("PlannerRecipeSelector:on_event():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerRecipeSelector", "on_event():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local globalSettings = self.player:getGlobal(player, "settings")
   local defaultSettings = self.player:getDefaultSettings()
@@ -209,13 +209,13 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeSelector.methods:on_update(player, element, action, item, item2, item3)
-  Logging:trace("PlannerRecipeSelector:on_update():",player, element, action, item, item2, item3)
+  Logging:trace("HMPlannerRecipeSelector", "on_update():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   -- recuperation recipes
   recipeGroups = {}
   groupList = {}
   local firstGroup = nil
-  for key, recipe in spairs(self.player:getRecipes(player),function(t,a,b) return t[b]["subgroup"]["order"] > t[a]["subgroup"]["order"] end) do
+  for key, recipe in spairs(self.player:getRecipes(player, true),function(t,a,b) return t[b]["subgroup"]["order"] > t[a]["subgroup"]["order"] end) do
     local find = false
     if recipeFilter ~= nil and recipeFilter ~= "" then
       local elements = recipe.products
@@ -264,7 +264,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeSelector.methods:updateFilter(player, element, action, item, item2, item3)
-  Logging:trace("PlannerRecipeSelector:updateFilter():",player, element, action, item, item2, item3)
+  Logging:trace("HMPlannerRecipeSelector", "updateFilter():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local panel = self:getFilterPanel(player)
   local globalSettings = self.player:getGlobal(player, "settings")
@@ -305,7 +305,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeSelector.methods:updateItemList(player, element, action, item, item2, item3)
-  Logging:trace("PlannerRecipeSelector:updateItemList():",player, element, action, item, item2, item3)
+  Logging:trace("HMPlannerRecipeSelector", "updateItemList():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local panel = self:getItemListPanel(player)
   local globalSettings = self.player:getGlobal(player, "settings")
@@ -325,7 +325,7 @@ function PlannerRecipeSelector.methods:updateItemList(player, element, action, i
     -- boucle subgroup
     local guiRecipeSubgroup = self:addGuiTable(guiRecipeSelectorList, "recipe-table-"..key, 10, "helmod_table_recipe_selector")
     for key, recipe in spairs(subgroup,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
-      Logging:trace("PlannerRecipeSelector:updateItemList():recipe", recipe.name, recipe.category, recipe.group.name, recipe.group.order, recipe.subgroup.name, recipe.subgroup.order, recipe.order)
+      Logging:trace("HMPlannerRecipeSelector", "updateItemList():recipe", recipe.name, recipe.category, recipe.group.name, recipe.group.order, recipe.subgroup.name, recipe.subgroup.order, recipe.order)
 
       local tooltip = self:buildRecipeTooltip(player, recipe)
 
@@ -343,7 +343,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerRecipeSelector.methods:buildRecipeTooltip(player, recipe)
-  Logging:trace("PlannerRecipeSelector:buildRecipeTooltip(player, element):",player, recipe)
+  Logging:trace("HMPlannerRecipeSelector", "buildRecipeTooltip(player, element):",player, recipe)
   -- initalize tooltip
   local tooltip = {"tooltip.recipe-info"}
   -- insert __1__ value
@@ -390,7 +390,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeSelector.methods:updateGroupSelector(player, element, action, item, item2, item3)
-  Logging:trace("PlannerRecipeSelector:updateGroupSelector():",player, element, action, item, item2, item3)
+  Logging:trace("HMPlannerRecipeSelector", "updateGroupSelector():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local panel = self:getGroupsPanel(player)
 

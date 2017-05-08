@@ -125,7 +125,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerResourceEdition.methods:buildHeaderPanel(player)
-	Logging:debug("PlannerResourceEdition:buildHeaderPanel():",player)
+	Logging:debug("HMPlannerResourceEdition", "buildHeaderPanel():",player)
 	self:getObjectInfoPanel(player)
 end
 
@@ -142,7 +142,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerResourceEdition.methods:updateHeader(player, element, action, item, item2, item3)
-	Logging:debug("PlannerResourceEdition:updateHeader():",player, element, action, item, item2, item3)
+	Logging:debug("HMPlannerResourceEdition", "updateHeader():",player, element, action, item, item2, item3)
 	self:updateObjectInfo(player, element, action, item, item2, item3)
 end
 
@@ -159,7 +159,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerResourceEdition.methods:updateObjectInfo(player, element, action, item, item2, item3)
-	Logging:debug("PlannerResourceEdition:updateObjectInfo():",player, element, action, item, item2, item3)
+	Logging:debug("HMPlannerResourceEdition", "updateObjectInfo():",player, element, action, item, item2, item3)
 	local infoPanel = self:getObjectInfoPanel(player)
 	local model = self.model:getModel(player)
 	local default = self.model:getDefault(player)
@@ -168,7 +168,7 @@ function PlannerResourceEdition.methods:updateObjectInfo(player, element, action
 	local model = self.model:getModel(player)
 	if  model.ingredients[item2] ~= nil then
 		local resource = self:getObject(player, element, action, item, item2, item3)
-		Logging:debug("PlannerResourceEdition:updateResourceInfo():resource=",resource)
+		Logging:debug("HMPlannerResourceEdition", "updateResourceInfo():resource=",resource)
 		for k,guiName in pairs(infoPanel.children_names) do
 			infoPanel[guiName].destroy()
 		end

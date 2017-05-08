@@ -101,7 +101,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerEnergyEdition.methods:buildPrimaryPanel(player)
-  Logging:debug("PlannerEnergyEdition:buildPrimaryPanel():",player)
+  Logging:debug("HMPlannerEnergyEdition", "buildPrimaryPanel():",player)
   self:getPrimaryInfoPanel(player)
   self:getPrimarySelectorPanel(player)
 end
@@ -159,7 +159,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerEnergyEdition.methods:buildSecondaryPanel(player)
-  Logging:debug("PlannerEnergyEdition:buildSecondaryPanel():",player)
+  Logging:debug("HMPlannerEnergyEdition", "buildSecondaryPanel():",player)
   self:getSecondaryInfoPanel(player)
   self:getSecondarySelectorPanel(player)
 end
@@ -172,7 +172,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerEnergyEdition.methods:buildHeaderPanel(player)
-  Logging:debug("PlannerEnergyEdition:buildHeaderPanel():",player)
+  Logging:debug("HMPlannerEnergyEdition", "buildHeaderPanel():",player)
   self:getPowerPanel(player)
 end
 
@@ -212,7 +212,7 @@ end
 -- @return #boolean if true the next call close dialog
 --
 function PlannerEnergyEdition.methods:on_open(player, element, action, item, item2, item3)
-  Logging:debug("PlannerRecipeSelector:on_open():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerEnergyEdition", "on_open():",player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
   local close = true
   if model.guiPowerLast == nil or model.guiPowerLast ~= item then
@@ -254,7 +254,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerEnergyEdition.methods:after_open(player, element, action, item, item2, item3)
-  Logging:debug("PlannerEnergyEdition:after_open():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerEnergyEdition", "after_open():",player, element, action, item, item2, item3)
   self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
   self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
   self.parent:send_event(player, "HMPlannerSettings", "CLOSE")
@@ -277,7 +277,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerEnergyEdition.methods:on_event(player, element, action, item, item2, item3)
-  Logging:debug("PlannerEnergyEdition:on_event():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerEnergyEdition", "on_event():",player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
 
   if action == "primary-group" then
@@ -365,7 +365,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerEnergyEdition.methods:updatePowerInfo(player, element, action, item, item2, item3)
-  Logging:debug("PlannerEnergyEdition:updatePowerInfo():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerEnergyEdition", "updatePowerInfo():",player, element, action, item, item2, item3)
   local infoPanel = self:getPowerPanel(player)
   local model = self.model:getModel(player)
   local default = self.model:getDefault(player)
@@ -374,7 +374,7 @@ function PlannerEnergyEdition.methods:updatePowerInfo(player, element, action, i
   if model.powers ~= nil and model.powers[item] ~= nil then
     local power = self:getObject(player, element, action, item, item2, item3)
     if power ~= nil then
-      Logging:debug("PlannerEnergyEdition:updatePowerInfo():power=",power)
+      Logging:debug("HMPlannerEnergyEdition", "updatePowerInfo():power=",power)
       for k,guiName in pairs(infoPanel.children_names) do
         infoPanel[guiName].destroy()
       end
@@ -401,7 +401,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerEnergyEdition.methods:updatePrimary(player, element, action, item, item2, item3)
-  Logging:debug("PlannerEnergyEdition:updatePrimary():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerEnergyEdition", "updatePrimary():",player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
 
   self:updatePrimaryInfo(player, element, action, item, item2, item3)
@@ -421,7 +421,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerEnergyEdition.methods:updatePrimaryInfo(player, element, action, item, item2, item3)
-  Logging:debug("PlannerEnergyEdition:updatePrimaryInfo():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerEnergyEdition", "updatePrimaryInfo():",player, element, action, item, item2, item3)
   local infoPanel = self:getPrimaryInfoPanel(player)
   local object = self:getObject(player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
@@ -431,7 +431,7 @@ function PlannerEnergyEdition.methods:updatePrimaryInfo(player, element, action,
   end
 
   if object ~= nil then
-    Logging:debug("PlannerEnergyEdition:updatePrimaryInfo():object:",object)
+    Logging:debug("HMPlannerEnergyEdition", "updatePrimaryInfo():object:",object)
     local primary = object.primary
     if primary.name ~= nil then
       local _generator = self.player:getItemPrototype(primary.name)
@@ -480,7 +480,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerEnergyEdition.methods:updatePrimarySelector(player, element, action, item, item2, item3)
-  Logging:debug("PlannerEnergyEdition:updatePrimarySelector():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerEnergyEdition", "updatePrimarySelector():",player, element, action, item, item2, item3)
   local globalSettings = self.player:getGlobal(player, "settings")
   local selectorPanel = self:getPrimarySelectorPanel(player)
   local model = self.model:getModel(player)
@@ -498,7 +498,7 @@ function PlannerEnergyEdition.methods:updatePrimarySelector(player, element, act
   if globalSettings.model_filter_generator ~= nil and globalSettings.model_filter_generator == false then category = nil end
   -- ajouter de la table des groupes de recipe
   local factories = self.player:getGenerators("primary")
-  Logging:debug("factories:",factories)
+  Logging:debug("HMPlannerEnergyEdition", "factories:",factories)
 
 
   if category == nil then
@@ -523,7 +523,7 @@ function PlannerEnergyEdition.methods:updatePrimarySelector(player, element, act
   end
 
   local tablePanel = self:addGuiTable(scrollPanel, "primary-table", 5)
-  --Logging:debug("factories:",self.player:getProductions())
+  --Logging:debug(("HMPlannerEnergyEdition", "factories:",self.player:getProductions())
   for key, element in pairs(factories) do
     if category ~= nil or (element.subgroup ~= nil and element.subgroup.name == model.primaryGroupSelected) then
       local localised_name = element.localised_name
@@ -548,7 +548,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerEnergyEdition.methods:updateSecondary(player, element, action, item, item2, item3)
-  Logging:debug("PlannerEnergyEdition:updateSecondary():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerEnergyEdition", "updateSecondary():",player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
 
   self:updateSecondaryInfo(player, element, action, item, item2, item3)
@@ -568,7 +568,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerEnergyEdition.methods:updateSecondaryInfo(player, element, action, item, item2, item3)
-  Logging:debug("PlannerEnergyEdition:updateSecondaryInfo():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerEnergyEdition", "updateSecondaryInfo():",player, element, action, item, item2, item3)
   local infoPanel = self:getSecondaryInfoPanel(player)
   local object = self:getObject(player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
@@ -578,7 +578,7 @@ function PlannerEnergyEdition.methods:updateSecondaryInfo(player, element, actio
   end
 
   if object ~= nil then
-    Logging:debug("PlannerEnergyEdition:updateSecondaryInfo():object:",object)
+    Logging:debug("HMPlannerEnergyEdition", "updateSecondaryInfo():object:",object)
     local secondary = object.secondary
     if secondary.name ~= nil then
       local _generator = self.player:getItemPrototype(secondary.name)
@@ -633,7 +633,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerEnergyEdition.methods:updateSecondarySelector(player, element, action, item, item2, item3)
-  Logging:debug("PlannerEnergyEdition:updateSecondarySelector():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerEnergyEdition", "updateSecondarySelector():",player, element, action, item, item2, item3)
   local globalSettings = self.player:getGlobal(player, "settings")
   local selectorPanel = self:getSecondarySelectorPanel(player)
   local model = self.model:getModel(player)
@@ -651,7 +651,7 @@ function PlannerEnergyEdition.methods:updateSecondarySelector(player, element, a
   if globalSettings.model_filter_generator ~= nil and globalSettings.model_filter_generator == false then category = nil end
   -- ajouter de la table des groupes de recipe
   local factories = self.player:getGenerators("secondary")
-  Logging:debug("factories:",factories)
+  Logging:debug("HMPlannerEnergyEdition", "factories:",factories)
 
 
   if category == nil then
@@ -676,7 +676,7 @@ function PlannerEnergyEdition.methods:updateSecondarySelector(player, element, a
   end
 
   local tablePanel = self:addGuiTable(scrollPanel, "secondary-table", 5)
-  --Logging:debug("factories:",self.player:getProductions())
+  --Logging:debug("HMPlannerEnergyEdition", "factories:",self.player:getProductions())
   for key, element in pairs(factories) do
     if category ~= nil or (element.subgroup ~= nil and element.subgroup.name == model.secondaryGroupSelected) then
       local localised_name = element.localised_name

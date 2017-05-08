@@ -185,7 +185,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerRecipeEdition.methods:buildHeaderPanel(player)
-	Logging:debug("PlannerRecipeEdition:buildHeaderPanel():",player)
+	Logging:debug("HMPlannerRecipeEdition", "buildHeaderPanel():",player)
 	self:getObjectInfoPanel(player)
 	self:getRecipeIngredientsPanel(player)
 	self:getRecipeProductsPanel(player)
@@ -204,7 +204,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeEdition.methods:updateHeader(player, element, action, item, item2, item3)
-	Logging:debug("PlannerRecipeEdition:updateHeader():",player, element, action, item, item2, item3)
+	Logging:debug("HMPlannerRecipeEdition", "updateHeader():",player, element, action, item, item2, item3)
 	self:updateObjectInfo(player, element, action, item, item2, item3)
 	self:updateRecipeIngredients(player, element, action, item, item2, item3)
 	self:updateRecipeProducts(player, element, action, item, item2, item3)
@@ -223,7 +223,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeEdition.methods:updateObjectInfo(player, element, action, item, item2, item3)
-	Logging:debug("PlannerRecipeEdition:updateObjectInfo():",player, element, action, item, item2, item3)
+	Logging:debug("HMPlannerRecipeEdition", "updateObjectInfo():",player, element, action, item, item2, item3)
 	local infoPanel = self:getObjectInfoPanel(player)
 	local model = self.model:getModel(player)
 	local default = self.model:getDefault(player)
@@ -233,13 +233,13 @@ function PlannerRecipeEdition.methods:updateObjectInfo(player, element, action, 
 	if  model.blocks[item] ~= nil then
 		local recipe = self:getObject(player, element, action, item, item2, item3)
 		if recipe ~= nil then
-			Logging:debug("PlannerRecipeEdition:updateObjectInfo():recipe=",recipe)
+			Logging:debug("HMPlannerRecipeEdition", "updateObjectInfo():recipe=",recipe)
 			for k,guiName in pairs(infoPanel.children_names) do
 				infoPanel[guiName].destroy()
 			end
 
 			local tablePanel = self:addGuiTable(infoPanel,"table-input",2)
-			self:addGuiButtonSprite(tablePanel, "recipe", "recipe", recipe.name)
+			self:addGuiButtonSprite(tablePanel, "recipe", self.player:getRecipeIconType(player, recipe), recipe.name)
 			if _recipe == nil then
 				self:addGuiLabel(tablePanel, "label", recipe.name)
 			else
@@ -271,7 +271,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeEdition.methods:updateRecipeIngredients(player, element, action, item, item2, item3)
-	Logging:debug("PlannerRecipeEdition:updateRecipeIngredients():",player, element, action, item, item2, item3)
+	Logging:debug("HMPlannerRecipeEdition", "updateRecipeIngredients():",player, element, action, item, item2, item3)
 	local ingredientsPanel = self:getRecipeIngredientsPanel(player)
 	local model = self.model:getModel(player)
 	local recipe = self.player:getRecipe(player, item2)
@@ -309,7 +309,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerRecipeEdition.methods:updateRecipeProducts(player, element, action, item, item2, item3)
-	Logging:debug("PlannerRecipeEdition:updateRecipeProducts():",player, element, action, item, item2, item3)
+	Logging:debug("HMPlannerRecipeEdition", "updateRecipeProducts():",player, element, action, item, item2, item3)
 	local productsPanel = self:getRecipeProductsPanel(player)
 	local model = self.model:getModel(player)
 	local recipe = self.player:getRecipe(player, item2)

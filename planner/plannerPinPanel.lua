@@ -151,7 +151,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerPinPanel.methods:updateHeader(player, element, action, item, item2, item3)
-	Logging:debug("PlannerPinPanel:updateHeader():",player, element, action, item, item2, item3)
+	Logging:debug("HMPlannerPinPanel", "updateHeader():",player, element, action, item, item2, item3)
 	local headerPanel = self:getHeaderPanel(player)
 	local model = self.model:getModel(player)
 
@@ -178,7 +178,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerPinPanel.methods:updateInfo(player, element, action, item, item2, item3)
-	Logging:debug("PlannerPinPanel:updateInfo():",player, element, action, item, item2, item3)
+	Logging:debug("HMPlannerPinPanel", "updateInfo():",player, element, action, item, item2, item3)
 	local infoPanel = self:getInfoPanel(player)
 	local model = self.model:getModel(player)
 	local globalGui = self.player:getGlobalGui(player)
@@ -213,7 +213,7 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function PlannerPinPanel.methods:addProductionBlockHeader(player, itable)
-	Logging:debug("PlannerPinPanel:addProductionBlockHeader():", player, itable)
+	Logging:debug("HMPlannerPinPanel", "addProductionBlockHeader():", player, itable)
 	local model = self.model:getModel(player)
 	local globalSettings = self.player:getGlobal(player, "settings")
 
@@ -247,7 +247,7 @@ end
 -- @param #table element production recipe
 --
 function PlannerPinPanel.methods:addProductionBlockRow(player, guiTable, blockId, recipe)
-	Logging:debug("PlannerPinPanel:addProductionBlockRow():", player, guiTable, blockId, recipe)
+	Logging:debug("HMPlannerPinPanel", "addProductionBlockRow():", player, guiTable, blockId, recipe)
 	local model = self.model:getModel(player)
 
 	local globalSettings = self.player:getGlobal(player, "settings")
@@ -346,7 +346,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerPinPanel.methods:on_event(player, element, action, item, item2, item3)
-	Logging:debug("PlannerPinPanel:on_event():",player, element, action, item, item2, item3)
+	Logging:debug("HMPlannerPinPanel", "on_event():",player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 	local globalSettings = self.player:getGlobal(player, "settings")
 	local defaultSettings = self.player:getDefaultSettings()

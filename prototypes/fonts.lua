@@ -55,6 +55,26 @@ data:extend(
   },
   {
     type = "font",
+    name = "helmod_font_icon",
+    from = "default-bold",
+    size = 12,
+    border = true,
+    border_color = {}
+  },
+  {
+    type = "font",
+    name = "helmod_font_icon_3",
+    from = "default-bold",
+    size = 12
+  },
+  {
+    type = "font",
+    name = "helmod_font_icon_4",
+    from = "default",
+    size = 12
+  },
+  {
+    type = "font",
     name = "helmod_font_normal_bold",
     from = "default-bold",
     size = 12

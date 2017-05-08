@@ -1,17 +1,22 @@
 Logging = {}
 
+local append_log=false
+
 function Logging:new(log)
-	self.name = "helmod.log"
 	self.log = log
-	self.content = "Helfima Mod logging\n"
-	self.console = false
-	self.force = false
 	self.limit = 5
+	self.filename="helmod\\helmod.log"
+	self.logClass = {}
+end
+
+function Logging:checkClass(logClass)
+  if self.logClass[logClass] ~= nil then return self.logClass[logClass] end
+  return false
 end
 
 function Logging:trace(...)
-	local arg = {...}
-	self:logging("[TRACE]", 4, unpack(arg))
+  local arg = {...}
+  self:logging("[TRACE]", 4, unpack(arg))
 end
 
 function Logging:debug(...)
@@ -60,17 +65,15 @@ function Logging:objectToString(object, level)
 	return message
 end
 
-function Logging:logging(tag, level, ...)
+function Logging:logging(tag, level, logClass, ...)
 	local arg = {...}
 	if arg == nil then arg = "nil" end
-	if level <= self.log then
+	if self:checkClass(logClass) and level <= self.log then
 		local message = "";
 		for key, object in pairs(arg) do
-			message = message..self:objectToString(object);
+			message = message..self:objectToString(object)
 		end
-		if self.console then
-			game.players[1].print(tag..message)
-		end
-		log(tag..message)
+		game.write_file(self.filename, tag.."|"..logClass.."|"..message.."\n", append_log)
+		if append_log == false then append_log = true end
 	end
 end

@@ -17,7 +17,7 @@ function SpeedController.methods:init(parent)
 end
 
 function SpeedController.methods:cleanController(player)
-	Logging:debug("SpeedController:cleanController(player)")
+	Logging:debug("HMSpeedController", "cleanController(player)")
 	local parentGui = self.parent:getGui(player)
 	if parentGui ~= nil and parentGui[self.names.command] ~= nil then
 		parentGui[self.names.command].destroy()
@@ -25,7 +25,7 @@ function SpeedController.methods:cleanController(player)
 end
 
 function SpeedController.methods:bindController(player)
-	Logging:debug("SpeedController:bindController(player)")
+	Logging:debug("HMSpeedController", "bindController(player)")
 	local globalSettings = self.parent:getGlobal(player, "settings")
 	local defaultSettings = self.parent:getDefaultSettings()
 	local other_speed_panel = defaultSettings.other_speed_panel
@@ -44,7 +44,7 @@ end
 
 --------------------------------------------------------------------------------------
 function SpeedController.methods:on_speed(option)
-	Logging:trace("SpeedController:on_speed()", option)
+	Logging:trace("HMSpeedController", "on_speed()", option)
 	local speed = game.speed
 	if option == nil then
 		game.speed = 1

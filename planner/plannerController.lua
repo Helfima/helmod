@@ -28,7 +28,7 @@ PlannerController = setclass("HMPlannerController", ElementGui)
 -- @param #PlayerController parent controller parent
 --
 function PlannerController.methods:init(parent)
-	Logging:debug("PlannerController.methods:init(parent):global=", global)
+	Logging:debug("HMPlannerController", "init(parent):global=", global)
 	self.parent = parent
 	self.controllers = {}
 	self.model = PlannerModel:new(self)
@@ -46,7 +46,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerController.methods:cleanController(player)
-	Logging:trace("PlannerController:cleanController(player)")
+	Logging:trace("HMPlannerController", "cleanController(player)")
 	if player.gui.left["helmod_planner_main"] ~= nil then
 		player.gui.left["helmod_planner_main"].destroy()
 	end
@@ -63,7 +63,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerController.methods:bindController(player)
-	Logging:trace("PlannerController:bindController(player)")
+	Logging:trace("HMPlannerController", "bindController(player)")
 	local parentGui = self.parent:getGui(player)
 	if parentGui ~= nil then
 		local guiButton = self:addGuiFrameH(parentGui, PLANNER_COMMAND, "helmod_frame_default")
@@ -79,7 +79,7 @@ end
 -- @param event
 --
 function PlannerController.methods:on_gui_click(event)
-	Logging:debug("PlannerController:on_gui_click(event)")
+	Logging:debug("HMPlannerController", "on_gui_click(event)")
 	if event.element.valid then
 		if event.element.name == PLANNER_COMMAND then
 			local player = game.players[event.player_index]
@@ -124,10 +124,10 @@ end
 -- @param event
 --
 function PlannerController.methods:parse_event(event)
-	Logging:trace("PlannerController:parse_event(event)")
+	Logging:trace("HMPlannerController", "parse_event(event)")
 	-- hotkey action
 	if self.controllers ~= nil and event.element == nil then
-      Logging:debug("PlannerController:parse_event(event): hotkey=", event.name)
+      Logging:debug("HMPlannerController", "parse_event(event): hotkey=", event.name)
       local player = game.players[event.player_index]
       if event.name == "helmod-open-close" then
         self:main(player)
@@ -152,7 +152,7 @@ function PlannerController.methods:parse_event(event)
         self:main(player)
         self:main(player)
         
-        Logging:debug("PlannerController:parse_event(event): display_size=", display_size, #helmod_display_sizes, i, globalSettings[display_size])
+        Logging:debug("HMPlannerController", "parse_event(event): display_size=", display_size, #helmod_display_sizes, i, globalSettings[display_size])
       end
 	end
 	-- button action
@@ -192,6 +192,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerController.methods:send_event(player, classname, action, item, item2, item3)
+	Logging:debug("HMPlannerController", "send_event(player, classname, action, item, item2, item3)", player, classname, action, item, item2, item3)
 	if self.controllers ~= nil then
 		for r, controller in pairs(self.controllers) do
 			if controller:classname() == classname then
@@ -209,28 +210,28 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerController.methods:main(player)
-	Logging:trace("PlannerController:main(player)")
+	Logging:trace("HMPlannerController", "main(player)")
 	local guiMain = player.gui[self.locate]
 	if guiMain["helmod_planner_main"] ~= nil and guiMain["helmod_planner_main"].valid then
 		guiMain["helmod_planner_main"].destroy()
 	else
 		-- main panel
-		Logging:debug("Create main panel")
+		Logging:debug("HMPlannerController", "Create main panel")
 		local mainPanel = self:getMainPanel(player)
 		-- menu
-		Logging:debug("Create menu panel")
+		Logging:debug("HMPlannerController", "Create menu panel")
 		local menuPanel = self:getMenuPanel(player)
 		local actionPanel = self:addGuiFrameV(menuPanel, "settings", "helmod_frame_default")
 		self:addGuiButton(actionPanel, self:classname().."=CLOSE", nil, "helmod_button_icon_cancel", nil, ({"helmod_button.close"}))
 		self:addGuiButton(actionPanel, "HMPlannerSettings=OPEN", nil, "helmod_button_icon_options", nil, ({"helmod_button.options"}))
 		-- info
-		Logging:debug("Create info panel")
+		Logging:debug("HMPlannerController", "Create info panel")
 		local infoPanel = self:getInfoPanel(player)
 		-- data
-		Logging:debug("Create data panel")
+		Logging:debug("HMPlannerController", "Create data panel")
 		local dataPanel = self:getDataPanel(player)
 		-- dialogue
-		Logging:debug("Create dialog panel")
+		Logging:debug("HMPlannerController", "Create dialog panel")
 		local dialogPanel = self:getDialogPanel(player)
 
 		-- menu
@@ -264,7 +265,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerController.methods:getMainPanel(player)
-	Logging:debug("PlannerController:getMainPanel(player):",player)
+	Logging:debug("HMPlannerController", "getMainPanel(player):",player)
 	local guiMain = player.gui[self.locate]
 	if guiMain["helmod_planner_main"] ~= nil and guiMain["helmod_planner_main"].valid then
 		return guiMain["helmod_planner_main"]
@@ -284,7 +285,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerController.methods:getPinTabPanel(player)
-	Logging:debug("PlannerController:getPinTabPanel(player):",player)
+	Logging:debug("HMPlannerController", "getPinTabPanel(player):",player)
 	local guiMain = player.gui[self.pinLocate]
 	if guiMain["helmod_planner_pin_tab"] ~= nil and guiMain["helmod_planner_pin_tab"].valid then
 		return guiMain["helmod_planner_pin_tab"]
@@ -367,7 +368,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerController.methods:refreshDisplayData(player, item, item2, item3)
-	Logging:debug("PlannerController:refreshDisplayData():",player, item, item2, item3)
+	Logging:debug("HMPlannerController", "refreshDisplayData():",player, item, item2, item3)
 	self.controllers["data"]:update(player, item, item2, item3)
 	if item == "other_speed_panel" then
 		local globalSettings = self.parent:getGlobal(player, "settings")
@@ -393,7 +394,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerController.methods:refreshDisplay(player, item, item2, item3)
-	Logging:debug("PlannerController:refreshDisplayData():",player, item, item2, item3)
+	Logging:debug("HMPlannerController", "refreshDisplay():",player, item, item2, item3)
 	self:main(player)
 	self:main(player)
 end

@@ -129,7 +129,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerData.methods:buildPanel(player)
-  Logging:debug("PlannerData:buildPanel():",player)
+  Logging:debug("HMPlannerData", "buildPanel():",player)
   local model = self.model:getModel(player)
 
   local globalGui = self.player:getGlobalGui(player)
@@ -161,7 +161,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerData.methods:send_event(player, element, action, item, item2, item3)
-  Logging:debug("PlannerDialog:send_event():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerData", "send_event():",player, element, action, item, item2, item3)
   self:on_event(player, element, action, item, item2, item3)
 end
 -------------------------------------------------------------------------------
@@ -177,7 +177,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerData.methods:on_event(player, element, action, item, item2, item3)
-  Logging:debug("PlannerData:on_event():",player, element, action, item, item2, item3)
+  Logging:debug("HMPlannerData", "on_event():",player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
 
   local globalGui = self.player:getGlobalGui(player)
@@ -187,6 +187,24 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
   -- *******************************
 
   if self.player:isAdmin(player) or model.owner == player.name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
+
+    if action == "change-boolean-option" and model.blocks ~= nil and model.blocks[globalGui.currentBlock] ~= nil then
+      local element = model.blocks[globalGui.currentBlock]
+      self.model:updateProductionBlockOption(player, globalGui.currentBlock, item, not(element[item]))
+      self.model:update(player)
+      self:update(player, item, item2, item3)
+    end
+
+    if action == "change-number-option" and model.blocks ~= nil and model.blocks[globalGui.currentBlock] ~= nil then
+      local panel = self:getInfoPanel(player)["block"]["output-scroll"]["output-table"]
+      if panel[item] ~= nil then
+        local value = self:getInputNumber(panel[item])
+        self.model:updateProductionBlockOption(player, globalGui.currentBlock, item, value)
+        self.model:update(player)
+        self:update(player, item, item2, item3)
+      end
+    end
+
     if action == "change-time" then
       model.time = tonumber(item) or 1
       self.model:update(player)
@@ -196,7 +214,7 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
     if action == "production-block-add" then
       if globalGui.currentTab == self.PRODUCTION_LINE_TAB then
         local recipes = self.player:searchRecipe(player, item2)
-        Logging:debug("line recipes:",recipes)
+        Logging:debug("HMPlannerData", "line recipes:",recipes)
         if #recipes == 1 then
           local productionBlock = self.parent.model:addRecipeIntoProductionBlock(player, recipes[1].name)
           self.parent.model:update(player)
@@ -340,13 +358,18 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
   end
 
   if action == "change-tab" then
+    local panel_recipe = "CLOSE"
     globalGui.currentTab = item
     if globalGui.currentTab == self.PRODUCTION_LINE_TAB then
       globalGui.currentBlock = "new"
     end
     globalGui.currentBlock = item2
     self:update(player, item, item2, item3)
-    self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
+    if globalGui.currentTab == self.PRODUCTION_BLOCK_TAB and globalGui.currentBlock == nil then
+      self.parent:send_event(player, "HMPlannerRecipeSelector", "OPEN", item2)
+    else
+      self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
+    end
     self.parent:send_event(player, "HMPlannerResourceEdition", "CLOSE")
     self.parent:send_event(player, "HMPlannerRecipeEdition", "CLOSE")
     self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
@@ -366,9 +389,9 @@ function PlannerData.methods:on_event(player, element, action, item, item2, item
   if action == "production-recipe-add" then
     if globalGui.currentTab == self.PRODUCTION_BLOCK_TAB then
       local recipes = self.player:searchRecipe(player, item3)
-      Logging:debug("block recipes:",recipes)
+      Logging:debug("HMPlannerData", "block recipes:",recipes)
       if #recipes == 1 then
-        Logging:debug("recipe name:", recipes[1].name)
+        Logging:debug("HMPlannerData", "recipe name:", recipes[1].name)
         local productionBlock = self.parent.model:addRecipeIntoProductionBlock(player, recipes[1].name)
         self.parent.model:update(player)
         self:update(player, self.PRODUCTION_LINE_TAB)
@@ -391,14 +414,12 @@ end
 -- @param #string item3 third item name
 --
 function PlannerData.methods:update(player, item, item2, item3)
-  Logging:debug("PlannerData:update():", player, item, item2, item3)
-  Logging:debug("PlannerData:update():global", global)
+  Logging:debug("HMPlannerData", "update():", player, item, item2, item3)
+  Logging:debug("HMPlannerData", "update():global", global)
   local globalGui = self.player:getGlobalGui(player)
   local dataPanel = self:getDataPanel(player)
 
-  for k,guiName in pairs(dataPanel.children_names) do
-    dataPanel[guiName].destroy()
-  end
+  dataPanel.clear()
 
   self:updateModelPanel(player, item, item2, item3)
 
@@ -437,7 +458,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerData.methods:updateModelPanel(player, item, item2, item3)
-  Logging:debug("PlannerData:updateModelPanel():", player, item, item2, item3)
+  Logging:debug("HMPlannerData", "updateModelPanel():", player, item, item2, item3)
   local modelPanel = self:getModelPanel(player)
   local model = self.model:getModel(player)
 
@@ -454,18 +475,19 @@ function PlannerData.methods:updateModelPanel(player, item, item2, item3)
 
   local times = {
     { value = 1, name = "1s"},
-    { value = 60, name = "1m"},
-    { value = 300, name = "5m"},
-    { value = 600, name = "10m"},
-    { value = 1800, name = "30m"},
-    { value = 3600, name = "1h"}
+    { value = 60, name = "1mn"},
+    { value = 300, name = "5mn"},
+    { value = 600, name = "10mn"},
+    { value = 1800, name = "30mn"},
+    { value = 3600, name = "1h"},
+    { value = 3600*6, name = "6h"},
+    { value = 3600*12, name = "12h"},
+    { value = 3600*24, name = "24h"}
   }
   for _,time in pairs(times) do
-    if model.time == time.value then
-      self:addGuiLabel(modelPanel, self:classname().."=do-nothing="..time.value, time.name, "helmod_label_time")
-    else
-      self:addGuiButton(modelPanel, self:classname().."=change-time=ID=", time.value, "helmod_button_time", time.name)
-    end
+    local style = "helmod_button_time"
+    if model.time == time.value then style = "helmod_button_time_selected" end
+    self:addGuiButton(modelPanel, self:classname().."=change-time=ID=", time.value, style, time.name)
   end
 
 end
@@ -481,7 +503,7 @@ end
 -- @param #string item3 third item name
 --
 function PlannerData.methods:updateProductionHeader(player, item, item2, item3)
-  Logging:debug("PlannerData:updateProductionHeader():", player, item, item2, item3)
+  Logging:debug("HMPlannerData", "updateProductionHeader():", player, item, item2, item3)
   local models = self.model:getModels(player)
   local model = self.model:getModel(player)
   local model_id = self.player:getGlobalGui(player, "model_id")
@@ -493,16 +515,14 @@ function PlannerData.methods:updateProductionHeader(player, item, item2, item3)
   self.player:setStyle(player, indexPanel, "data", "minimal_width")
   self.player:setStyle(player, indexPanel, "data", "maximal_width")
 
-  Logging:debug("PlannerData:updateProductionHeader():countModel", self.model:countModel())
+  Logging:debug("HMPlannerData", "updateProductionHeader():countModel", self.model:countModel())
   if self.model:countModel() > 0 then
     local i = 0
     for _,imodel in pairs(models) do
       i = i + 1
-      if imodel.id == model_id then
-        self:addGuiLabel(indexPanel, self:classname().."=change-model="..imodel.id, i, "helmod_label_time")
-      else
-        self:addGuiButton(indexPanel, self:classname().."=change-model=ID=", imodel.id, "helmod_button_default", i)
-      end
+      local style = "helmod_button_default"
+      if imodel.id == model_id then style = "helmod_button_selected" end
+      self:addGuiButton(indexPanel, self:classname().."=change-model=ID=", imodel.id, style, i)
     end
   end
   self:addGuiButton(indexPanel, self:classname().."=change-model=ID=", "new", "helmod_button_default", "+")
@@ -561,9 +581,29 @@ end
 -- @param #string item3 third item name
 --
 function PlannerData.methods:updateProductionLine(player, item, item2, item3)
-  Logging:debug("PlannerData:updateProductionLine():", player, item, item2, item3)
+  Logging:debug("HMPlannerData", "updateProductionLine():", player, item, item2, item3)
   local globalGui = self.player:getGlobalGui(player)
   local model = self.model:getModel(player)
+
+  local infoPanel = self:getInfoPanel(player)
+  -- info panel
+  local blockPanel = self:addGuiFrameH(infoPanel, "block", "helmod_frame_default", ({"helmod_common.production"}))
+  local blockScroll = self:addGuiScrollPane(blockPanel, "output-scroll", "helmod_scroll_block_info", "auto", "auto")
+  local blockTable = self:addGuiTable(blockScroll,"output-table",2)
+
+
+  local elementPanel = self:addGuiFlowV(infoPanel, "elements", "helmod_flow_default")
+  -- ouput panel
+  local outputPanel = self:addGuiFrameV(elementPanel, "output", "helmod_frame_resize_row_width", ({"helmod_common.output"}))
+  local outputScroll = self:addGuiScrollPane(outputPanel, "output-scroll", "helmod_scroll_block_element", "auto", "auto")
+  self.player:setStyle(player, outputScroll, "scroll_block_element", "minimal_width")
+  self.player:setStyle(player, outputScroll, "scroll_block_element", "maximal_width")
+
+  -- input panel
+  local inputPanel = self:addGuiFrameV(elementPanel, "input", "helmod_frame_resize_row_width", ({"helmod_common.input"}))
+  local inputScroll = self:addGuiScrollPane(inputPanel, "output-scroll", "helmod_scroll_block_element", "auto", "auto")
+  self.player:setStyle(player, inputScroll, "scroll_block_element", "minimal_width")
+  self.player:setStyle(player, inputScroll, "scroll_block_element", "maximal_width")
 
   -- production line result
   local resultPanel = self:getResultPanel(player, ({"helmod_common.blocks"}))
@@ -578,6 +618,29 @@ function PlannerData.methods:updateProductionLine(player, item, item2, item3)
   if countBlock > 0 then
     local globalSettings = self.player:getGlobal(player, "settings")
 
+    -- info panel
+    self:addGuiLabel(blockTable, "label-power", ({"helmod_label.electrical-consumption"}))
+    if model.summary ~= nil then
+      self:addGuiLabel(blockTable, "power", self:formatNumberKilo(model.summary.energy or 0, "W"),"helmod_label_right_70")
+    end
+
+    -- ouput panel
+    local inputTable = self:addGuiTable(outputScroll,"output-table",6)
+    if model.products ~= nil then
+      for r, element in pairs(model.products) do
+        self:addCellElement(player, inputTable, element, "HMPlannerIngredient=OPEN=ID="..element.name.."=", false, "tooltip.ingredient", nil)
+      end
+    end
+
+    -- input panel
+    local inputTable = self:addGuiTable(inputScroll,"input-table",6)
+    if model.ingredients ~= nil then
+      for r, element in pairs(model.ingredients) do
+        self:addCellElement(player, inputTable, element, "HMPlannerIngredient=OPEN=ID="..element.name.."=", false, "tooltip.ingredient", nil)
+      end
+    end
+
+    -- data panel
     local extra_cols = 0
     if globalSettings.display_data_col_name then
       extra_cols = extra_cols + 1
@@ -602,16 +665,6 @@ function PlannerData.methods:updateProductionLine(player, item, item2, item3)
     for _, element in spairs(model.blocks, function(t,a,b) if globalGui.order.ascendant then return t[b][globalGui.order.name] > t[a][globalGui.order.name] else return t[b][globalGui.order.name] < t[a][globalGui.order.name] end end) do
       self:addProductionLineRow(player, resultTable, element)
     end
-
-    for i = 1, 1 + extra_cols, 1 do
-      self:addGuiLabel(resultTable, "blank-"..i, "")
-    end
-    self:addGuiLabel(resultTable, "foot-1", ({"helmod_result-panel.col-header-total"}))
-    if model.summary ~= nil then
-      self:addGuiLabel(resultTable, "energy", self:formatNumberKilo(model.summary.energy, "W"),"helmod_label_right_70")
-    end
-    self:addGuiLabel(resultTable, "blank-pro", "")
-    self:addGuiLabel(resultTable, "blank-ing", "")
   end
 end
 
@@ -626,10 +679,10 @@ end
 -- @param #string item3 third item name
 --
 function PlannerData.methods:updateProductionBlock(player, item, item2, item3)
-  Logging:debug("PlannerData:updateProductionBlock():", player, item, item2, item3)
+  Logging:debug("HMPlannerData", "updateProductionBlock():", player, item, item2, item3)
   local model = self.model:getModel(player)
   local globalGui = self.player:getGlobalGui(player)
-  Logging:debug("model:", model)
+  Logging:debug("HMPlannerData", "model:", model)
   -- data
   local menuPanel = self:getMenuPanel(player, ({"helmod_result-panel.tab-title-production-block"}))
 
@@ -651,20 +704,23 @@ function PlannerData.methods:updateProductionBlock(player, item, item2, item3)
   local blockScroll = self:addGuiScrollPane(blockPanel, "output-scroll", "helmod_scroll_block_info", "auto", "auto")
   local blockTable = self:addGuiTable(blockScroll,"output-table",2)
 
-
   local elementPanel = self:addGuiFlowV(infoPanel, "elements", "helmod_flow_default")
   -- ouput panel
   local outputPanel = self:addGuiFrameV(elementPanel, "output", "helmod_frame_resize_row_width", ({"helmod_common.output"}))
   local outputScroll = self:addGuiScrollPane(outputPanel, "output-scroll", "helmod_scroll_block_element", "auto", "auto")
   self.player:setStyle(player, outputScroll, "scroll_block_element", "minimal_width")
   self.player:setStyle(player, outputScroll, "scroll_block_element", "maximal_width")
-
+  self.player:setStyle(player, outputScroll, "scroll_block_element", "minimal_height")
+  self.player:setStyle(player, outputScroll, "scroll_block_element", "maximal_height")
+  
   -- input panel
   local inputPanel = self:addGuiFrameV(elementPanel, "input", "helmod_frame_resize_row_width", ({"helmod_common.input"}))
   local inputScroll = self:addGuiScrollPane(inputPanel, "output-scroll", "helmod_scroll_block_element", "auto", "auto")
   self.player:setStyle(player, inputScroll, "scroll_block_element", "minimal_width")
   self.player:setStyle(player, inputScroll, "scroll_block_element", "maximal_width")
-
+  self.player:setStyle(player, inputScroll, "scroll_block_element", "minimal_height")
+  self.player:setStyle(player, inputScroll, "scroll_block_element", "maximal_height")
+  
   local resultPanel = self:getResultPanel(player, ({"helmod_common.recipes"}))
   -- data panel
   local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "scroll_pane_style", "auto", "auto")
@@ -678,15 +734,30 @@ function PlannerData.methods:updateProductionBlock(player, item, item2, item3)
 
     local element = model.blocks[blockId]
 
-
+    -- block panel
     self:addGuiLabel(blockTable, "label-power", ({"helmod_label.electrical-consumption"}))
-    if model.summary ~= nil then
+    if element.power ~= nil then
       self:addGuiLabel(blockTable, "power", self:formatNumberKilo(element.power, "W"),"helmod_label_right_70")
     end
 
     self:addGuiLabel(blockTable, "label-count", ({"helmod_label.block-number"}))
-    if model.summary ~= nil then
+    if element.count ~= nil then
       self:addGuiLabel(blockTable, "count", element.count,"helmod_label_right_70")
+    end
+
+    self:addGuiLabel(blockTable, "options-linked", ({"helmod_label.block-unlinked"}))
+    local unlinked = element.unlinked and true or false
+    self:addGuiCheckbox(blockTable, self:classname().."=change-boolean-option=ID=unlinked", unlinked)
+
+    self:addGuiLabel(blockTable, "options-by-factory", ({"helmod_label.compute-by-factory"}))
+    local by_factory = element.by_factory and true or false
+    self:addGuiCheckbox(blockTable, self:classname().."=change-boolean-option=ID=by_factory", by_factory)
+
+    if element.by_factory == true then
+      local factory_number = element.factory_number or 0
+      self:addGuiLabel(blockTable, "label-factory_number", ({"helmod_label.factory-number"}))
+      self:addGuiText(blockTable, "factory_number", factory_number, "helmod_textfield")
+      self:addGuiButton(blockTable, self:classname().."=change-number-option=ID=", "factory_number", "helmod_button_default", ({"helmod_button.update"}))
     end
 
     -- ouput panel
@@ -694,26 +765,17 @@ function PlannerData.methods:updateProductionBlock(player, item, item2, item3)
     if element.products ~= nil then
       for r, product in pairs(element.products) do
         if bit32.band(product.state, 1) > 0 then
-          -- product = {type="item", name="steel-plate", amount=8}
-          local cell = self:addGuiFlowH(outputTable,"production_cell_"..product.name)
-          self:addGuiLabel(cell, product.name, self:formatNumber(product.count), "helmod_label_right_60")
-          self:addGuiButtonSelectSprite(cell, "HMPlannerProductEdition=OPEN=ID="..element.id.."=", self.player:getIconType(product), product.name, "X"..self.model:getElementAmount(product), ({"tooltip.edit-product", self.player:getLocalisedName(player, product)}))
+          if element.by_factory == true then
+            self:addCellElement(player, outputTable, product, "HMPlannerProduct=OPEN=ID="..element.id.."=", false, "tooltip.product", nil)
+          else
+            self:addCellElement(player, outputTable, product, "HMPlannerProductEdition=OPEN=ID="..element.id.."=", true, "tooltip.edit-product", nil)
+          end
         end
-      end
-      for r, product in pairs(element.products) do
         if bit32.band(product.state, 2) > 0 and bit32.band(product.state, 1) == 0 then
-          -- product = {type="item", name="steel-plate", amount=8}
-          local cell = self:addGuiFlowH(outputTable,"rest_cell_"..product.name)
-          self:addGuiLabel(cell, product.name, self:formatNumber(product.count), "helmod_label_right_60")
-          self:addGuiButtonSelectSprite(cell, "HMPlannerProduct=OPEN=ID="..element.id.."=", self.player:getIconType(product), product.name, "X"..self.model:getElementAmount(product), ({"tooltip.rest-product", self.player:getLocalisedName(player, product)}), "red")
+          self:addCellElement(player, outputTable, product, "HMPlannerProduct=OPEN=ID="..element.id.."=", false, "tooltip.rest-product", "red")
         end
-      end
-      for r, product in pairs(element.products) do
         if product.state == 0 then
-          -- product = {type="item", name="steel-plate", amount=8}
-          local cell = self:addGuiFlowH(outputTable,"other_cell_"..product.name)
-          self:addGuiLabel(cell, product.name, self:formatNumber(product.count), "helmod_label_right_60")
-          self:addGuiButtonSprite(cell, "HMPlannerProduct=OPEN=ID="..element.id.."=", self.player:getIconType(product), product.name, "X"..self.model:getElementAmount(product), ({"tooltip.other-product", self.player:getLocalisedName(player, product)}))
+          self:addCellElement(player, outputTable, product, "HMPlannerProduct=OPEN=ID="..element.id.."=", false, "tooltip.other-product", nil)
         end
       end
     end
@@ -723,10 +785,7 @@ function PlannerData.methods:updateProductionBlock(player, item, item2, item3)
     local inputTable = self:addGuiTable(inputScroll,"input-table",6)
     if element.ingredients ~= nil then
       for r, ingredient in pairs(element.ingredients) do
-        -- ingredient = {type="item", name="steel-plate", amount=8}
-        local cell = self:addGuiFlowH(inputTable,"cell_"..ingredient.name)
-        self:addGuiLabel(cell, ingredient.name, self:formatNumber(ingredient.count), "helmod_label_right_60")
-        self:addGuiButtonSprite(cell, "HMPlannerResourceInfo=OPEN=ID="..element.id.."=", self.player:getIconType(ingredient), ingredient.name, "X"..ingredient.amount, self.player:getLocalisedName(player, ingredient))
+        self:addCellElement(player, inputTable, ingredient, "HMPlannerIngredient=OPEN=ID="..element.id.."=", false, "tooltip.ingredient", nil)
       end
     end
 
@@ -755,7 +814,7 @@ function PlannerData.methods:updateProductionBlock(player, item, item2, item3)
     self:addProductionBlockHeader(player, resultTable)
 
     for _, recipe in spairs(model.blocks[blockId].recipes, function(t,a,b) if globalGui.order.ascendant then return t[b][globalGui.order.name] > t[a][globalGui.order.name] else return t[b][globalGui.order.name] < t[a][globalGui.order.name] end end) do
-      self:addProductionBlockRow(player, resultTable, blockId, recipe)
+      self:addProductionBlockRow(player, resultTable, element, recipe)
     end
   end
 end
@@ -769,7 +828,7 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function PlannerData.methods:addProductionBlockHeader(player, itable)
-  Logging:debug("PlannerData:addHeader():", player, itable)
+  Logging:debug("HMPlannerData", "addHeader():", player, itable)
   local model = self.model:getModel(player)
   local globalSettings = self.player:getGlobal(player, "settings")
 
@@ -799,17 +858,15 @@ function PlannerData.methods:addProductionBlockHeader(player, itable)
   self:addGuiLabel(guiRecipe, "header-recipe", ({"helmod_result-panel.col-header-recipe"}))
   self:addGuiButton(guiRecipe, self:classname().."=change-sort=ID=", "index", self.player:getSortedStyle(player, "index"))
 
-  local guiFactory = self:addGuiFlowH(itable,"header-factory")
-  self:addGuiLabel(guiFactory, "header-factory", ({"helmod_result-panel.col-header-factory"}))
-
-
-  local guiBeacon = self:addGuiFlowH(itable,"header-beacon")
-  self:addGuiLabel(guiBeacon, "header-beacon", ({"helmod_result-panel.col-header-beacon"}))
-
   local guiEnergy = self:addGuiFlowH(itable,"header-energy")
   self:addGuiLabel(guiEnergy, "header-energy", ({"helmod_result-panel.col-header-energy"}))
   self:addGuiButton(guiEnergy, self:classname().."=change-sort=ID=", "energy_total", self.player:getSortedStyle(player, "energy_total"))
 
+  local guiFactory = self:addGuiFlowH(itable,"header-factory")
+  self:addGuiLabel(guiFactory, "header-factory", ({"helmod_result-panel.col-header-factory"}))
+
+  local guiBeacon = self:addGuiFlowH(itable,"header-beacon")
+  self:addGuiLabel(guiBeacon, "header-beacon", ({"helmod_result-panel.col-header-beacon"}))
 
   local guiProducts = self:addGuiFlowH(itable,"header-products")
   self:addGuiLabel(guiProducts, "header-products", ({"helmod_result-panel.col-header-products"}))
@@ -827,7 +884,7 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function PlannerData.methods:addProductionLineHeader(player, itable)
-  Logging:debug("PlannerData:addHeader():", player, itable)
+  Logging:debug("HMPlannerData", "addHeader():", player, itable)
   local model = self.model:getModel(player)
   local globalSettings = self.player:getGlobal(player, "settings")
 
@@ -877,7 +934,7 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function PlannerData.methods:addResourcesHeader(player, itable)
-  Logging:debug("PlannerData:addHeader():", player, itable)
+  Logging:debug("HMPlannerData", "addHeader():", player, itable)
   local model = self.model:getModel(player)
   local globalSettings = self.player:getGlobal(player, "settings")
   if globalSettings.display_data_col_index then
@@ -923,25 +980,26 @@ end
 -- @param #string blockId
 -- @param #table element production recipe
 --
-function PlannerData.methods:addProductionBlockRow(player, guiTable, blockId, recipe)
-  Logging:debug("PlannerData:addProductionBlockRow():", player, guiTable, blockId, recipe)
+function PlannerData.methods:addProductionBlockRow(player, guiTable, block, recipe)
+  Logging:debug("HMPlannerData", "addProductionBlockRow():", player, guiTable, block, recipe)
   local model = self.model:getModel(player)
 
   local globalSettings = self.player:getGlobal(player, "settings")
+  local display_cell_mod = self.player:getGlobalSettings(player, "display_cell_mod") or "default"
 
   -- col action
   local guiAction = self:addGuiFlowH(guiTable,"action"..recipe.name, "helmod_flow_default")
   if recipe.index ~= 0 then
-    self:addGuiButton(guiAction, self:classname().."=production-recipe-remove=ID="..blockId.."=", recipe.name, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
-    self:addGuiButton(guiAction, self:classname().."=production-recipe-down=ID="..blockId.."=", recipe.name, "helmod_button_default", ({"helmod_result-panel.row-button-down"}), ({"tooltip.down-element"}))
+    self:addGuiButton(guiAction, self:classname().."=production-recipe-remove=ID="..block.id.."=", recipe.name, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
+    self:addGuiButton(guiAction, self:classname().."=production-recipe-down=ID="..block.id.."=", recipe.name, "helmod_button_default", ({"helmod_result-panel.row-button-down"}), ({"tooltip.down-element"}))
   end
   if recipe.index > 1 then
-    self:addGuiButton(guiAction, self:classname().."=production-recipe-up=ID="..blockId.."=", recipe.name, "helmod_button_default", ({"helmod_result-panel.row-button-up"}), ({"tooltip.up-element"}))
+    self:addGuiButton(guiAction, self:classname().."=production-recipe-up=ID="..block.id.."=", recipe.name, "helmod_button_default", ({"helmod_result-panel.row-button-up"}), ({"tooltip.up-element"}))
   end
   -- col index
   if globalSettings.display_data_col_index then
     local guiIndex = self:addGuiFlowH(guiTable,"index"..recipe.name)
-    self:addGuiLabel(guiIndex, "index", recipe.index, "helmod_label_right_40")
+    self:addGuiLabel(guiIndex, "index", recipe.index, "helmod_label_row_right_40")
   end
   -- col id
   if globalSettings.display_data_col_id then
@@ -954,18 +1012,21 @@ function PlannerData.methods:addProductionBlockRow(player, guiTable, blockId, re
     self:addGuiLabel(guiName, "name_", recipe.name)
   end
   -- col recipe
-  local guiRecipe = self:addGuiFlowH(guiTable,"recipe"..recipe.name, "helmod_flow_default")
-  self:addGuiButtonSelectSprite(guiRecipe, "HMPlannerRecipeEdition=OPEN=ID="..blockId.."=", self.player:getRecipeIconType(player, recipe), recipe.name, recipe.name, ({"tooltip.edit-recipe", self.player:getRecipeLocalisedName(player, recipe)}))
-  local production = 1
-  if recipe.production ~= nil then production = recipe.production end
-  self:addGuiLabel(guiRecipe, "production", self:formatPercent(production).."%", "helmod_label_right_40")
+  local production = recipe.production or 1
+  local guiRecipe = self:addCellLabel(player, guiTable, "recipe-"..recipe.name, self:formatPercent(production).."%", 30)
+  self:addIconRecipeCell(player, guiRecipe, recipe, "HMPlannerRecipeEdition=OPEN=ID="..block.id.."=", true, "tooltip.edit-recipe", nil)
+  --self:addGuiButtonSelectSprite(guiRecipe, "HMPlannerRecipeEdition=OPEN=ID="..block.id.."=", self.player:getRecipeIconType(player, recipe), recipe.name, recipe.name, ({"tooltip.edit-recipe", self.player:getRecipeLocalisedName(player, recipe)}))
+
+  -- col energy
+  local guiEnergy = self:addCellLabel(player, guiTable, "energy-"..recipe.name, self:formatNumberKilo(recipe.energy_total, "W"), 50)
 
   -- col factory
-  local guiFactory = self:addGuiFlowH(guiTable,"factory"..recipe.name, "helmod_flow_default")
   local factory = recipe.factory
-  self:addGuiLabel(guiFactory, factory.name, self:formatNumber(factory.limit_count).."/"..self:formatNumber(factory.count), "helmod_label_right_70")
-  self:addGuiButtonSelectSprite(guiFactory, "HMPlannerRecipeEdition=OPEN=ID="..blockId.."="..recipe.name.."=", self.player:getIconType(factory), factory.name, factory.name, ({"tooltip.edit-recipe", self.player:getRecipeLocalisedName(player, recipe)}))
-  local guiFactoryModule = self:addGuiTable(guiFactory,"factory-modules"..recipe.name, 2, "helmod_factory_modules")
+  local guiFactory = self:addCellLabel(player, guiTable, "factory-"..recipe.name, self:formatNumber(factory.limit_count).."/"..self:formatNumber(factory.count))
+  self:addIconCell(player, guiFactory, factory, "HMPlannerRecipeEdition=OPEN=ID="..block.id.."="..recipe.name.."=", true, "tooltip.edit-recipe", nil)
+  local col_size = 2
+  if display_cell_mod == "small-icon" then col_size = 5 end
+  local guiFactoryModule = self:addGuiTable(guiFactory,"factory-modules"..recipe.name, col_size, "helmod_factory_modules")
   -- modules
   for name, count in pairs(factory.modules) do
     for index = 1, count, 1 do
@@ -985,11 +1046,12 @@ function PlannerData.methods:addProductionBlockRow(player, guiTable, blockId, re
   end
 
   -- col beacon
-  local guiBeacon = self:addGuiFlowH(guiTable,"beacon"..recipe.name, "helmod_flow_default")
   local beacon = recipe.beacon
-  self:addGuiLabel(guiBeacon, beacon.name, self:formatNumber(beacon.limit_count).."/"..self:formatNumber(beacon.count), "helmod_label_right_70")
-  self:addGuiButtonSelectSprite(guiBeacon, "HMPlannerRecipeEdition=OPEN=ID="..blockId.."="..recipe.name.."=", self.player:getIconType(beacon), beacon.name, beacon.name, ({"tooltip.edit-recipe", self.player:getRecipeLocalisedName(player, recipe)}))
-  local guiBeaconModule = self:addGuiTable(guiBeacon,"beacon-modules"..recipe.name, 1, "helmod_beacon_modules")
+  local guiBeacon = self:addCellLabel(player, guiTable, "beacon-"..recipe.name, self:formatNumber(beacon.limit_count).."/"..self:formatNumber(beacon.count))
+  self:addIconCell(player, guiBeacon, beacon, "HMPlannerRecipeEdition=OPEN=ID="..block.id.."="..recipe.name.."=", true, "tooltip.edit-recipe", nil)
+  local col_size = 1
+  if display_cell_mod == "small-icon" then col_size = 5 end
+  local guiBeaconModule = self:addGuiTable(guiBeacon,"beacon-modules"..recipe.name, col_size, "helmod_beacon_modules")
   -- modules
   for name, count in pairs(beacon.modules) do
     for index = 1, count, 1 do
@@ -1008,19 +1070,12 @@ function PlannerData.methods:addProductionBlockRow(player, guiTable, blockId, re
     end
   end
 
-  -- col energy
-  local guiEnergy = self:addGuiFlowH(guiTable,"energy"..recipe.name)
-  self:addGuiLabel(guiEnergy, recipe.name, self:formatNumberKilo(recipe.energy_total, "W"), "helmod_label_right_70")
-
   -- products
   local display_product_cols = self.player:getGlobalSettings(player, "display_product_cols")
   local tProducts = self:addGuiTable(guiTable,"products_"..recipe.name, display_product_cols)
   if recipe.products ~= nil then
     for r, product in pairs(recipe.products) do
-      local cell = self:addGuiFlowH(tProducts,"cell_"..product.name, "helmod_flow_default")
-      self:addGuiLabel(cell, product.name, self:formatNumber(product.count), "helmod_label_right_60")
-      -- product = {type="item", name="steel-plate", amount=8}
-      self:addGuiButtonSprite(cell, "HMPlannerResourceInfo=OPEN=ID="..blockId.."="..recipe.name.."=", self.player:getIconType(product), product.name, "X"..self.model:getElementAmount(product), self.player:getLocalisedName(player, product))
+      self:addCellElement(player, tProducts, product, "HMPlannerProduct=OPEN=ID="..block.id.."="..recipe.name.."=", false, "tooltip.product", nil)
     end
   end
   -- ingredients
@@ -1028,10 +1083,7 @@ function PlannerData.methods:addProductionBlockRow(player, guiTable, blockId, re
   local tIngredient = self:addGuiTable(guiTable,"ingredients_"..recipe.name, display_ingredient_cols)
   if recipe.ingredients ~= nil then
     for r, ingredient in pairs(recipe.ingredients) do
-      local cell = self:addGuiFlowH(tIngredient,"cell_"..ingredient.name, "helmod_flow_default")
-      self:addGuiLabel(cell, ingredient.name, self:formatNumber(ingredient.count), "helmod_label_right_60")
-      -- ingredient = {type="item", name="steel-plate", amount=8}
-      self:addGuiButtonSelectSprite(cell, self:classname().."=production-recipe-add=ID="..blockId.."="..recipe.name.."=", self.player:getIconType(ingredient), ingredient.name, "X"..ingredient.amount, ({"tooltip.add-recipe", self.player:getLocalisedName(player, ingredient)}), "yellow")
+      self:addCellElement(player, tIngredient, ingredient, "=production-recipe-add=ID="..block.id.."="..recipe.name.."=", true, "tooltip.add-recipe", "yellow")
     end
   end
 end
@@ -1043,82 +1095,190 @@ end
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement guiTable
--- @param #table element production block
+-- @param #table block production block
 --
-function PlannerData.methods:addProductionLineRow(player, guiTable, element)
-  Logging:debug("PlannerData:addProductionLineRow():", player, guiTable, element)
+function PlannerData.methods:addProductionLineRow(player, guiTable, block)
+  Logging:debug("HMPlannerData", "addProductionLineRow():", player, guiTable, block)
   local model = self.model:getModel(player)
 
   local globalSettings = self.player:getGlobal(player, "settings")
 
   -- col action
-  local guiAction = self:addGuiFlowH(guiTable,"action"..element.id, "helmod_flow_default")
-  self:addGuiButton(guiAction, self:classname().."=production-block-remove=ID=", element.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
-  self:addGuiButton(guiAction, self:classname().."=production-block-down=ID=", element.id, "helmod_button_default", ({"helmod_result-panel.row-button-down"}), ({"tooltip.down-element"}))
-  self:addGuiButton(guiAction, self:classname().."=production-block-up=ID=", element.id, "helmod_button_default", ({"helmod_result-panel.row-button-up"}), ({"tooltip.up-element"}))
+  local guiAction = self:addGuiFlowH(guiTable,"action"..block.id, "helmod_flow_default")
+  self:addGuiButton(guiAction, self:classname().."=production-block-remove=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
+  self:addGuiButton(guiAction, self:classname().."=production-block-down=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-down"}), ({"tooltip.down-element"}))
+  self:addGuiButton(guiAction, self:classname().."=production-block-up=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-up"}), ({"tooltip.up-element"}))
   -- col index
   if globalSettings.display_data_col_index then
-    local guiIndex = self:addGuiFlowH(guiTable,"index"..element.id)
-    self:addGuiLabel(guiIndex, "index", element.index, "helmod_label_right_40")
+    local guiIndex = self:addGuiFlowH(guiTable,"index"..block.id)
+    self:addGuiLabel(guiIndex, "index", block.index, "helmod_label_row_right_40")
   end
   -- col id
   if globalSettings.display_data_col_id then
-    local guiId = self:addGuiFlowH(guiTable,"id"..element.id)
-    self:addGuiLabel(guiId, "id", element.id)
+    local guiId = self:addGuiFlowH(guiTable,"id"..block.id)
+    self:addGuiLabel(guiId, "id", block.id)
   end
   -- col name
   if globalSettings.display_data_col_name then
-    local guiName = self:addGuiFlowH(guiTable,"name"..element.id)
-    self:addGuiLabel(guiName, "name_", element.id)
+    local guiName = self:addGuiFlowH(guiTable,"name"..block.id)
+    self:addGuiLabel(guiName, "name_", block.id)
   end
   -- col recipe
-  local guiRecipe = self:addGuiFlowH(guiTable,"recipe"..element.id)
-  self:addGuiButtonSelectSprite(guiRecipe, self:classname().."=change-tab=ID="..self.PRODUCTION_BLOCK_TAB.."="..element.id.."=", self.player:getRecipeIconType(player, element), element.name, element.name, ({"tooltip.edit-block"}))
+  local guiRecipe = self:addGuiFlowH(guiTable,"recipe"..block.id)
+  self:addIconRecipeCell(player, guiRecipe, block, self:classname().."=change-tab=ID="..self.PRODUCTION_BLOCK_TAB.."="..block.id.."=", true, "tooltip.edit-block", nil)
 
   -- col energy
-  local guiEnergy = self:addGuiFlowH(guiTable,"energy"..element.id)
-  self:addGuiLabel(guiEnergy, element.id, self:formatNumberKilo(element.power, "W"), "helmod_label_right_70")
+  local guiEnergy = self:addCellLabel(player, guiTable, block.id, self:formatNumberKilo(block.power, "W"), 60)
 
   -- products
   local display_product_cols = self.player:getGlobalSettings(player, "display_product_cols") + 1
-  local tProducts = self:addGuiTable(guiTable,"products_"..element.id, display_product_cols)
-  if element.products ~= nil then
-    for r, product in pairs(element.products) do
+  local tProducts = self:addGuiTable(guiTable,"products_"..block.id, display_product_cols)
+  if block.products ~= nil then
+    for r, product in pairs(block.products) do
       if bit32.band(product.state, 1) > 0 then
-        -- product = {type="item", name="steel-plate", amount=8}
-        local cell = self:addGuiFlowH(tProducts,"production_cell_"..product.name, "helmod_flow_default")
-        self:addGuiLabel(cell, product.name, self:formatNumber(product.count), "helmod_label_right_60")
-        self:addGuiButtonSelectSprite(cell, "HMPlannerProductEdition=OPEN=ID="..element.id.."=", self.player:getIconType(product), product.name, "X"..self.model:getElementAmount(product), ({"tooltip.edit-product", self.player:getLocalisedName(player, product)}))
+        self:addCellElement(player, tProducts, product, "HMPlannerProductEdition=OPEN=ID="..block.id.."=", true, "tooltip.edit-product", nil)
       end
-    end
-    for r, product in pairs(element.products) do
       if bit32.band(product.state, 2) > 0 and bit32.band(product.state, 1) == 0 then
-        -- product = {type="item", name="steel-plate", amount=8}
-        local cell = self:addGuiFlowH(tProducts,"rest_cell_"..product.name, "helmod_flow_default")
-        self:addGuiLabel(cell, product.name, self:formatNumber(product.count), "helmod_label_right_60")
-        self:addGuiButtonSelectSprite(cell, "HMPlannerProduct=OPEN=ID="..element.id.."=", self.player:getIconType(product), product.name, "X"..self.model:getElementAmount(product), ({"tooltip.rest-product", self.player:getLocalisedName(player, product)}), "red")
+        self:addCellElement(player, tProducts, product, "HMPlannerProduct=OPEN=ID=", false, "tooltip.rest-product", "red")
       end
-    end
-    for r, product in pairs(element.products) do
       if product.state == 0 then
-        -- product = {type="item", name="steel-plate", amount=8}
-        local cell = self:addGuiFlowH(tProducts,"other_cell_"..product.name, "helmod_flow_default")
-        self:addGuiLabel(cell, product.name, self:formatNumber(product.count), "helmod_label_right_60")
-        self:addGuiButtonSprite(cell, "HMPlannerProduct=OPEN=ID="..element.id.."=", self.player:getIconType(product), product.name, "X"..self.model:getElementAmount(product), ({"tooltip.other-product", self.player:getLocalisedName(player, product)}))
+        self:addCellElement(player, tProducts, product, "HMPlannerProduct=OPEN=ID=", false, "tooltip.other-product", nil)
       end
     end
   end
   -- ingredients
   local display_ingredient_cols = self.player:getGlobalSettings(player, "display_ingredient_cols") + 2
-  local tIngredient = self:addGuiTable(guiTable,"ingredients_"..element.id, display_ingredient_cols)
-  if element.ingredients ~= nil then
-    for r, ingredient in pairs(element.ingredients) do
-      -- ingredient = {type="item", name="steel-plate", amount=8}
-      local cell = self:addGuiFlowH(tIngredient,"cell_"..ingredient.name, "helmod_flow_default")
-      self:addGuiLabel(cell, ingredient.name, self:formatNumber(ingredient.count), "helmod_label_right_60")
-      self:addGuiButtonSelectSprite(cell, self:classname().."=production-block-add=ID="..element.id.."="..ingredient.name.."=", self.player:getIconType(ingredient), ingredient.name, "X"..ingredient.amount, ({"tooltip.add-recipe", self.player:getLocalisedName(player, ingredient)}), "yellow")
+  local tIngredient = self:addGuiTable(guiTable,"ingredients_"..block.id, display_ingredient_cols)
+  if block.ingredients ~= nil then
+    for r, ingredient in pairs(block.ingredients) do
+      self:addCellElement(player, tIngredient, ingredient, "=production-block-add=ID="..block.id.."="..ingredient.name.."=", true, "tooltip.add-recipe", "yellow")
     end
   end
+end
+
+-------------------------------------------------------------------------------
+-- Add cell element
+--
+-- @function [parent=#PlannerData] addCellElement
+--
+-- @param #LuaPlayer player
+-- @param #LuaGuiElement guiTable
+-- @param #table element production block
+--
+function PlannerData.methods:addCellElement(player, guiTable, element, action, select, tooltip_name, color)
+  Logging:debug("HMPlannerData", "addCellElement():", player, guiTable, element, action, select, tooltip_name, color)
+  local display_cell_mod = self.player:getGlobalSettings(player, "display_cell_mod") or "default"
+  -- ingredient = {type="item", name="steel-plate", amount=8}
+  local cell = nil
+  local button = nil
+
+  if display_cell_mod == "by-kilo" then
+    -- by-kilo
+    cell = self:addCellLabel(player, guiTable, element.name, self:formatNumberKilo(element.count))
+  else
+    cell = self:addCellLabel(player, guiTable, element.name, self:formatNumber(element.count))
+  end
+
+  self:addIconCell(player, cell, element, action, select, tooltip_name, color)
+end
+
+-------------------------------------------------------------------------------
+-- Add icon in cell element
+--
+-- @function [parent=#PlannerData] addIconRecipeCell
+--
+-- @param #LuaPlayer player
+-- @param #LuaGuiElement cell
+-- @param #table element production block
+-- @param #string action
+-- @param #boolean select
+-- @param #string tooltip_name
+-- @param #string color
+--
+function PlannerData.methods:addIconRecipeCell(player, cell, element, action, select, tooltip_name, color)
+  Logging:debug("HMPlannerData", "addIconRecipeCell():", element, action, select, tooltip_name, color)
+  local display_cell_mod = self.player:getGlobalSettings(player, "display_cell_mod") or "default"
+  -- ingredient = {type="item", name="steel-plate", amount=8}
+  if display_cell_mod == "small-icon" then
+    if cell ~= nil and select == true then
+      self:addGuiButtonSelectSpriteM(cell, self:classname()..action, self.player:getRecipeIconType(player, element), element.name, element.name, ({tooltip_name, self.player:getLocalisedName(player, element)}), color)
+    else
+      self:addGuiButtonSpriteM(cell, self:classname()..action, self.player:getRecipeIconType(player, element), element.name, element.name, ({tooltip_name, self.player:getLocalisedName(player, element)}), color)
+    end
+  else
+    if cell ~= nil and select == true then
+      self:addGuiButtonSelectSprite(cell, self:classname()..action, self.player:getRecipeIconType(player, element), element.name, element.name, ({tooltip_name, self.player:getLocalisedName(player, element)}), color)
+    else
+      self:addGuiButtonSprite(cell, self:classname()..action, self.player:getRecipeIconType(player, element), element.name, element.name, ({tooltip_name, self.player:getLocalisedName(player, element)}), color)
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Add icon in cell element
+--
+-- @function [parent=#PlannerData] addIconCell
+--
+-- @param #LuaPlayer player
+-- @param #LuaGuiElement cell
+-- @param #table element production block
+-- @param #string action
+-- @param #boolean select
+-- @param #string tooltip_name
+-- @param #string color
+--
+function PlannerData.methods:addIconCell(player, cell, element, action, select, tooltip_name, color)
+  Logging:debug("HMPlannerData", "addIconCell():", player, cell, element, action, select, tooltip_name, color)
+  local display_cell_mod = self.player:getGlobalSettings(player, "display_cell_mod") or "default"
+  -- ingredient = {type="item", name="steel-plate", amount=8}
+  if display_cell_mod == "small-icon" then
+    if cell ~= nil and select == true then
+      self:addGuiButtonSelectSpriteM(cell, self:classname()..action, self.player:getIconType(element), element.name, "X"..self.model:getElementAmount(element), ({tooltip_name, self.player:getLocalisedName(player, element)}), color)
+    else
+      self:addGuiButtonSpriteM(cell, self:classname()..action, self.player:getIconType(element), element.name, "X"..self.model:getElementAmount(element), ({tooltip_name, self.player:getLocalisedName(player, element)}), color)
+    end
+  else
+    if cell ~= nil and select == true then
+      self:addGuiButtonSelectSprite(cell, self:classname()..action, self.player:getIconType(element), element.name, "X"..self.model:getElementAmount(element), ({tooltip_name, self.player:getLocalisedName(player, element)}), color)
+    else
+      self:addGuiButtonSprite(cell, self:classname()..action, self.player:getIconType(element), element.name, "X"..self.model:getElementAmount(element), ({tooltip_name, self.player:getLocalisedName(player, element)}), color)
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Add cell label
+--
+-- @function [parent=#PlannerData] addCellLabel
+--
+-- @param #LuaPlayer player
+-- @param #string name
+-- @param #string label
+--
+function PlannerData.methods:addCellLabel(player, guiTable, name, label, minimal_width)
+  Logging:debug("HMPlannerData", "addCellLabel():", guiTable, name, label)
+  local display_cell_mod = self.player:getGlobalSettings(player, "display_cell_mod") or "default"
+  local cell = nil
+
+  if display_cell_mod == "small-text"then
+    -- small
+    cell = self:addGuiFlowH(guiTable,"cell_"..name, "helmod_flow_cell")
+    self:addGuiLabel(cell, name, label, "helmod_label_icon_text_sm").style["minimal_width"] = minimal_width or 45
+  elseif display_cell_mod == "small-icon" then
+    -- small
+    cell = self:addGuiFlowH(guiTable,"cell_"..name, "helmod_flow_cell")
+    self:addGuiLabel(cell, name, label, "helmod_label_icon_sm").style["minimal_width"] = minimal_width or 45
+  elseif display_cell_mod == "by-kilo" then
+    -- by-kilo
+    cell = self:addGuiFlowH(guiTable,"cell_"..name, "helmod_flow_cell")
+    self:addGuiLabel(cell, name, label, "helmod_label_row_right").style["minimal_width"] = minimal_width or 50
+  else
+    -- default
+    cell = self:addGuiFlowH(guiTable,"cell_"..name, "helmod_flow_cell")
+    self:addGuiLabel(cell, name, label, "helmod_label_row_right").style["minimal_width"] = minimal_width or 60
+
+  end
+  return cell
 end
 
 -------------------------------------------------------------------------------
@@ -1129,7 +1289,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerData.methods:addResourcesRow(player, guiTable, ingredient)
-  Logging:debug("PlannerData:addRow():", player, guiTable, ingredient)
+  Logging:debug("HMPlannerData", "addRow():", player, guiTable, ingredient)
   local model = self.model:getModel(player)
 
   local globalSettings = self.player:getGlobal(player, "settings")
@@ -1180,7 +1340,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerData.methods:updateResources(player)
-  Logging:debug("PlannerData:updateResources():", player)
+  Logging:debug("HMPlannerData", "updateResources():", player)
   local model = self.model:getModel(player)
   local globalGui = self.player:getGlobalGui(player)
   -- data
@@ -1228,7 +1388,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerData.methods:updateSummary(player)
-  Logging:debug("PlannerData:updateSummary():", player)
+  Logging:debug("HMPlannerData", "updateSummary():", player)
   local model = self.model:getModel(player)
   -- data
   local menuPanel = self:getMenuPanel(player, ({"helmod_result-panel.tab-title-summary"}))
@@ -1239,14 +1399,14 @@ function PlannerData.methods:updateSummary(player)
   self.player:setStyle(player, resourcesPanel, "data", "minimal_width")
   self.player:setStyle(player, resourcesPanel, "data", "maximal_width")
 
-  local resourcesTable = self:addGuiTable(resourcesPanel,"table-resources",7)
+  local resourcesTable = self:addGuiTable(resourcesPanel,"table-resources",4)
   self:addGuiLabel(resourcesTable, "header-ingredient", ({"helmod_result-panel.col-header-ingredient"}))
   self:addGuiLabel(resourcesTable, "header-block", ({"helmod_result-panel.col-header-production-block"}))
   self:addGuiLabel(resourcesTable, "header-cargo-wagon", ({"helmod_result-panel.col-header-wagon"}))
   self:addGuiLabel(resourcesTable, "header-chest", ({"helmod_result-panel.col-header-storage"}))
-  self:addGuiLabel(resourcesTable, "header-extractor", ({"helmod_result-panel.col-header-extractor"}))
-  self:addGuiLabel(resourcesTable, "header-beacon", ({"helmod_result-panel.col-header-beacon"}))
-  self:addGuiLabel(resourcesTable, "header-energy", ({"helmod_result-panel.col-header-energy"}))
+  --  self:addGuiLabel(resourcesTable, "header-extractor", ({"helmod_result-panel.col-header-extractor"}))
+  --  self:addGuiLabel(resourcesTable, "header-beacon", ({"helmod_result-panel.col-header-beacon"}))
+  --  self:addGuiLabel(resourcesTable, "header-energy", ({"helmod_result-panel.col-header-energy"}))
 
   for _, resource in pairs(model.resources) do
     -- ingredient
@@ -1274,65 +1434,65 @@ function PlannerData.methods:updateSummary(player)
       self:addGuiButtonSprite(guiStorage, "HMPlannerStorage=OPEN=ID=", self.player:getIconType(storage), storage.name, storage.name, self.player:getLocalisedName(player, storage))
     end
 
-    -- factory
-    local guiFactory = self:addGuiFlowH(resourcesTable,"extractor"..resource.name)
-    local factory = resource.factory
-    if factory ~= nil then
-      self:addGuiLabel(guiFactory, "factory", self:formatNumber(factory.limit_count).."/"..self:formatNumber(factory.count), "helmod_label_right_70")
-      self:addGuiButtonSelectSprite(guiFactory, "HMPlannerResourceEdition=OPEN=ID=resource="..resource.name.."=", self.player:getIconType(factory), factory.name, factory.name, ({"tooltip.edit-resource", self.player:getLocalisedName(player, resource)}))
-      local guiFactoryModule = self:addGuiTable(guiFactory,"factory-modules"..resource.name, 2, "helmod_factory_modules")
-      -- modules
-      for name, count in pairs(factory.modules) do
-        for index = 1, count, 1 do
-          local module = self.player:getItemPrototype(name)
-          if module ~= nil then
-            local consumption = self:formatPercent(self.player:getModuleBonus(module.name, "consumption"))
-            local speed = self:formatPercent(self.player:getModuleBonus(module.name, "speed"))
-            local productivity = self:formatPercent(self.player:getModuleBonus(module.name, "productivity"))
-            local pollution = self:formatPercent(self.player:getModuleBonus(module.name, "pollution"))
-            local tooltip = ({"tooltip.module-description" , module.localised_name, consumption, speed, productivity, pollution})
-            self:addGuiButtonSpriteSm(guiFactoryModule, "HMPlannerFactorySelector_factory-module_"..name.."_"..index, "item", name, nil, tooltip)
-          else
-            self:addGuiButtonSpriteSm(guiFactoryModule, "HMPlannerFactorySelector_factory-module_"..name.."_"..index, "item", name)
-          end
-          index = index + 1
-        end
-      end
-    else
-      self:addGuiLabel(guiFactory, "factory", "Data need update")
-    end
-
-    -- beacon
-    local guiBeacon = self:addGuiFlowH(resourcesTable,"beacon"..resource.name)
-    local beacon = resource.beacon
-    if beacon ~= nil then
-      self:addGuiLabel(guiBeacon, "beacon", self:formatNumberKilo(resource.beacon.count), "helmod_label_right_70")
-      self:addGuiButtonSelectSprite(guiBeacon, "HMPlannerResourceEdition=OPEN=ID=resource="..resource.name.."=", self.player:getIconType(beacon), beacon.name, beacon.name, ({"tooltip.edit-resource", self.player:getLocalisedName(player, resource)}))
-      local guiBeaconModule = self:addGuiTable(guiBeacon,"beacon-modules"..resource.name, 1, "helmod_beacon_modules")
-      -- modules
-      for name, count in pairs(beacon.modules) do
-        for index = 1, count, 1 do
-          local module = self.player:getItemPrototype(name)
-          if module ~= nil then
-            local consumption = self:formatPercent(self.player:getModuleBonus(module.name, "consumption"))
-            local speed = self:formatPercent(self.player:getModuleBonus(module.name, "speed"))
-            local productivity = self:formatPercent(self.player:getModuleBonus(module.name, "productivity"))
-            local pollution = self:formatPercent(self.player:getModuleBonus(module.name, "pollution"))
-            local tooltip = ({"tooltip.module-description" , module.localised_name, consumption, speed, productivity, pollution})
-            self:addGuiButtonSpriteSm(guiBeaconModule, "HMPlannerFactorySelector_beacon-module_"..name.."_"..index, "item", name, nil, tooltip)
-          else
-            self:addGuiButtonSpriteSm(guiBeaconModule, "HMPlannerFactorySelector_beacon-module_"..name.."_"..index, "item", name)
-          end
-          index = index + 1
-        end
-      end
-    else
-      self:addGuiLabel(guiBeacon, "beacon", "Data need update")
-    end
-
-    -- col energy
-    local guiEnergy = self:addGuiFlowH(resourcesTable,"energy"..resource.name)
-    self:addGuiLabel(guiEnergy, resource.name, self:formatNumberKilo(resource.energy_total, "W"), "helmod_label_right_70")
+    --    -- factory
+    --    local guiFactory = self:addGuiFlowH(resourcesTable,"extractor"..resource.name)
+    --    local factory = resource.factory
+    --    if factory ~= nil then
+    --      self:addGuiLabel(guiFactory, "factory", self:formatNumber(factory.limit_count).."/"..self:formatNumber(factory.count), "helmod_label_right_70")
+    --      self:addGuiButtonSelectSprite(guiFactory, "HMPlannerResourceEdition=OPEN=ID=resource="..resource.name.."=", self.player:getIconType(factory), factory.name, factory.name, ({"tooltip.edit-resource", self.player:getLocalisedName(player, resource)}))
+    --      local guiFactoryModule = self:addGuiTable(guiFactory,"factory-modules"..resource.name, 2, "helmod_factory_modules")
+    --      -- modules
+    --      for name, count in pairs(factory.modules) do
+    --        for index = 1, count, 1 do
+    --          local module = self.player:getItemPrototype(name)
+    --          if module ~= nil then
+    --            local consumption = self:formatPercent(self.player:getModuleBonus(module.name, "consumption"))
+    --            local speed = self:formatPercent(self.player:getModuleBonus(module.name, "speed"))
+    --            local productivity = self:formatPercent(self.player:getModuleBonus(module.name, "productivity"))
+    --            local pollution = self:formatPercent(self.player:getModuleBonus(module.name, "pollution"))
+    --            local tooltip = ({"tooltip.module-description" , module.localised_name, consumption, speed, productivity, pollution})
+    --            self:addGuiButtonSpriteSm(guiFactoryModule, "HMPlannerFactorySelector_factory-module_"..name.."_"..index, "item", name, nil, tooltip)
+    --          else
+    --            self:addGuiButtonSpriteSm(guiFactoryModule, "HMPlannerFactorySelector_factory-module_"..name.."_"..index, "item", name)
+    --          end
+    --          index = index + 1
+    --        end
+    --      end
+    --    else
+    --      self:addGuiLabel(guiFactory, "factory", "Data need update")
+    --    end
+    --
+    --    -- beacon
+    --    local guiBeacon = self:addGuiFlowH(resourcesTable,"beacon"..resource.name)
+    --    local beacon = resource.beacon
+    --    if beacon ~= nil then
+    --      self:addGuiLabel(guiBeacon, "beacon", self:formatNumberKilo(resource.beacon.count), "helmod_label_right_70")
+    --      self:addGuiButtonSelectSprite(guiBeacon, "HMPlannerResourceEdition=OPEN=ID=resource="..resource.name.."=", self.player:getIconType(beacon), beacon.name, beacon.name, ({"tooltip.edit-resource", self.player:getLocalisedName(player, resource)}))
+    --      local guiBeaconModule = self:addGuiTable(guiBeacon,"beacon-modules"..resource.name, 1, "helmod_beacon_modules")
+    --      -- modules
+    --      for name, count in pairs(beacon.modules) do
+    --        for index = 1, count, 1 do
+    --          local module = self.player:getItemPrototype(name)
+    --          if module ~= nil then
+    --            local consumption = self:formatPercent(self.player:getModuleBonus(module.name, "consumption"))
+    --            local speed = self:formatPercent(self.player:getModuleBonus(module.name, "speed"))
+    --            local productivity = self:formatPercent(self.player:getModuleBonus(module.name, "productivity"))
+    --            local pollution = self:formatPercent(self.player:getModuleBonus(module.name, "pollution"))
+    --            local tooltip = ({"tooltip.module-description" , module.localised_name, consumption, speed, productivity, pollution})
+    --            self:addGuiButtonSpriteSm(guiBeaconModule, "HMPlannerFactorySelector_beacon-module_"..name.."_"..index, "item", name, nil, tooltip)
+    --          else
+    --            self:addGuiButtonSpriteSm(guiBeaconModule, "HMPlannerFactorySelector_beacon-module_"..name.."_"..index, "item", name)
+    --          end
+    --          index = index + 1
+    --        end
+    --      end
+    --    else
+    --      self:addGuiLabel(guiBeacon, "beacon", "Data need update")
+    --    end
+    --
+    --    -- col energy
+    --    local guiEnergy = self:addGuiFlowH(resourcesTable,"energy"..resource.name)
+    --    self:addGuiLabel(guiEnergy, resource.name, self:formatNumberKilo(resource.energy_total, "W"), "helmod_label_right_70")
   end
 
   local energyPanel = self:addGuiFrameV(dataPanel, "energy", "helmod_frame_resize_row_width", ({"helmod_common.generators"}))
@@ -1401,7 +1561,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerData.methods:updatePowers(player)
-  Logging:debug("PlannerData:updateSummary():", player)
+  Logging:debug("HMPlannerData", "updateSummary():", player)
   local model = self.model:getModel(player)
 
   -- data
@@ -1446,7 +1606,7 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function PlannerData.methods:addPowersHeader(player, itable)
-  Logging:debug("PlannerData:addHeader():", player, itable)
+  Logging:debug("HMPlannerData", "addHeader():", player, itable)
   local model = self.model:getModel(player)
   local globalSettings = self.player:getGlobal(player, "settings")
 
@@ -1482,7 +1642,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerData.methods:addPowersRow(player, guiTable, power)
-  Logging:debug("PlannerData:addRow():", player, guiTable, power)
+  Logging:debug("HMPlannerData", "addRow():", player, guiTable, power)
   local model = self.model:getModel(player)
 
   local globalSettings = self.player:getGlobal(player, "settings")

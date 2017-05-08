@@ -92,11 +92,11 @@ end
 -- @param #string item3 third item name
 -- 
 function PlannerDialog.methods:open(player, element, action, item, item2, item3)
-	Logging:debug("PlannerDialog:open():",player, element, action, item, item2, item3)
+	Logging:debug("HMPlannerDialog", "open():",player, element, action, item, item2, item3)
 	local parentPanel = self:getParentPanel(player)
 	if parentPanel[self:classname()] ~= nil and parentPanel[self:classname()].valid then
 		local close = self:on_open(player, element, action, item, item2, item3)
-		--Logging:debug("must close:",close)
+		--Logging:debug("HMPlannerDialog" , "must close:",close)
 		if close then
 			self:close(player, element, action, item, item2, item3)
 		else
@@ -131,7 +131,7 @@ end
 -- @param #string item3 third item name
 -- 
 function PlannerDialog.methods:send_event(player, element, action, item, item2, item3)
-		Logging:debug("PlannerDialog:send_event():",player, element, action, item, item2, item3)
+		Logging:debug("HMPlannerDialog", "send_event():",player, element, action, item, item2, item3)
 		if action == "OPEN" then
 			self:open(player, element, action, item, item2, item3)
 		end

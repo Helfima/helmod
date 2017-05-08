@@ -14,13 +14,13 @@ ElementGui = setclass("HMElementGui")
 -- @return #number number of textfield input
 --
 function ElementGui.methods:getInputNumber(element)
-	Logging:trace("ElementGui:getInputNumber", element)
-	local count = 0
-	if element ~= nil then
-		local tempCount=tonumber(element.text)
-		if type(tempCount) == "number" then count = tempCount end
-	end
-	return count
+  Logging:trace("HMElementGui", "getInputNumber", element)
+  local count = 0
+  if element ~= nil then
+    local tempCount=tonumber(element.text)
+    if type(tempCount) == "number" then count = tempCount end
+  end
+  return count
 end
 
 -------------------------------------------------------------------------------
@@ -32,19 +32,23 @@ end
 -- @param #string key unique id
 -- @param #string caption displayed text
 -- @param #string style style of label
+-- @param #string tooltip displayed text
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addGuiLabel(parent, key, caption, style)
-	Logging:trace("ElementGui:addGuiLabel", parent, key, caption)
-	local options = {}
-	options.type = "label"
-	options.name = key
-	options.caption = caption
-	if style ~= nil then
-		options.style = style
-	end
-	return parent.add(options)
+function ElementGui.methods:addGuiLabel(parent, key, caption, style, tooltip)
+  Logging:trace("HMElementGui", "addGuiLabel", parent, key, caption, style, tooltip)
+  local options = {}
+  options.type = "label"
+  options.name = key
+  options.caption = caption
+  if style ~= nil then
+    options.style = style
+  end
+  if tooltip ~= nil then
+    options.tooltip = tooltip
+  end
+  return parent.add(options)
 end
 
 -------------------------------------------------------------------------------
@@ -61,21 +65,21 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiText(parent, key, text, style, tooltip)
-	Logging:trace("ElementGui:addGuiText", parent, key, text, style, tooltip)
-	local options = {}
-	options.type = "textfield"
-	options.name = key
-	options.text = ""
-	if text ~= nil then
-		options.text = text
-	end
-	if style ~= nil then
-		options.style = style
-	end
-	if tooltip ~= nil then
-		options.tooltip = tooltip
-	end
-	return parent.add(options)
+  Logging:trace("HMElementGui", "addGuiText", parent, key, text, style, tooltip)
+  local options = {}
+  options.type = "textfield"
+  options.name = key
+  options.text = ""
+  if text ~= nil then
+    options.text = text
+  end
+  if style ~= nil then
+    options.style = style
+  end
+  if tooltip ~= nil then
+    options.tooltip = tooltip
+  end
+  return parent.add(options)
 end
 
 -------------------------------------------------------------------------------
@@ -93,41 +97,41 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButton(parent, action, key, style, caption, tooltip)
-	Logging:debug("ElementGui:addGuiButton", parent, action, key, style, caption, tooltip)
-	local options = {}
-	options.type = "button"
-	if key ~= nil then
-		options.name = action..key
-	else
-		options.name = action
-	end
-	if style ~= nil then
-		options.style = style
-	end
-	if caption ~= nil then
-		options.caption = caption
-	end
-	if tooltip ~= nil then
-		options.tooltip = tooltip
-	end
+  Logging:trace("HMElementGui", "addGuiButton", parent, action, key, style, caption, tooltip)
+  local options = {}
+  options.type = "button"
+  if key ~= nil then
+    options.name = action..key
+  else
+    options.name = action
+  end
+  if style ~= nil then
+    options.style = style
+  end
+  if caption ~= nil then
+    options.caption = caption
+  end
+  if tooltip ~= nil then
+    options.tooltip = tooltip
+  end
 
-	local button = nil
-	local ok , err = pcall(function()
-		button = parent.add(options)
-	end)
-	if not ok then
-		Logging:error("ElementGui:addGuiButton", action, key, style, err)
-		options.style = "helmod_button_default"
-		if (type(caption) == "boolean") then
-			Logging:error("ElementGui:addGuiButton - caption is a boolean")
-		elseif caption ~= nil then
-			options.caption = caption
-		else
-			options.caption = key
-		end
-		button = parent.add(options)
-	end
-	return button
+  local button = nil
+  local ok , err = pcall(function()
+    button = parent.add(options)
+  end)
+  if not ok then
+    Logging:trace("HMElementGui", "addGuiButton", action, key, style, err)
+    options.style = "helmod_button_default"
+    if (type(caption) == "boolean") then
+      Logging:error("HMElementGui", "addGuiButton - caption is a boolean")
+    elseif caption ~= nil then
+      options.caption = caption
+    else
+      options.caption = key
+    end
+    button = parent.add(options)
+  end
+  return button
 end
 
 -------------------------------------------------------------------------------
@@ -143,8 +147,8 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiRadioButton(parent, key, state, style)
-	Logging:trace("ElementGui:addGuiRadioButton", parent, key, state, style)
-	return parent.add({type="radiobutton", name=key, state=state, style=style})
+  Logging:trace("HMElementGui", "addGuiRadioButton", parent, key, state, style)
+  return parent.add({type="radiobutton", name=key, state=state, style=style})
 end
 
 -------------------------------------------------------------------------------
@@ -160,8 +164,62 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiCheckbox(parent, key, state, style)
-	Logging:trace("ElementGui:addGuiCheckbox", parent, key, state, style)
-	return parent.add({type="checkbox", name=key, state=state, style=style})
+  Logging:trace("HMElementGui", "addGuiCheckbox", parent, key, state, style)
+  return parent.add({type="checkbox", name=key, state=state, style=style})
+end
+
+-------------------------------------------------------------------------------
+-- Add a dropdown element
+--
+-- @function [parent=#ElementGui] addGuiDropDown
+--
+-- @param #string action action name
+-- @param #string key unique id
+-- @param #table items list of element
+-- @param #string selected selected element
+-- @param #string style style of button
+-- @param #string caption container for element
+-- @param #string tooltip displayed text
+--
+-- @return #LuaGuiElement the LuaGuiElement added
+--
+function ElementGui.methods:addGuiDropDown(parent, action, key, items, selected, style, caption, tooltip)
+  Logging:trace("HMElementGui", "addGuiDropDown", parent, action, key, items, selected, style, caption, tooltip)
+  local options = {}
+  options.type = "drop-down"
+  if key ~= nil then
+    options.name = action..key
+  else
+    options.name = action
+  end
+  if style ~= nil then
+    options.style = style
+  end
+  if caption ~= nil then
+    options.caption = caption
+  end
+  if tooltip ~= nil then
+    options.tooltip = tooltip
+  end
+
+  local selected_index = nil
+  if items ~= nil then
+    options.items = items
+    for index,item in ipairs(items) do
+      if item == selected then
+        selected_index = index
+      end
+    end
+  end
+  if selected_index ~= nil and selected ~= nil then
+    options.selected_index = selected_index
+  end
+
+  local element = nil
+  local ok , err = pcall(function()
+    element = parent.add(options)
+  end)
+  return element
 end
 
 -------------------------------------------------------------------------------
@@ -177,8 +235,8 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButtonItem(parent, action, key, caption)
-	Logging:trace("ElementGui:addGuiButtonItem", parent, action, key, caption)
-	return self:addGuiButton(parent, action, key, key, caption)
+  Logging:trace("HMElementGui", "addGuiButtonItem", parent, action, key, caption)
+  return self:addGuiButton(parent, action, key, key, caption)
 end
 
 -------------------------------------------------------------------------------
@@ -195,8 +253,8 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButtonIcon(parent, action, type, key, caption)
-	Logging:trace("ElementGui:addGuiButtonIcon", parent, action, type, key, caption)
-	return self:addGuiButton(parent, action, key, "helmod_button_"..type.."_"..key, caption)
+  Logging:trace("HMElementGui", "addGuiButtonIcon", parent, action, type, key, caption)
+  return self:addGuiButton(parent, action, key, "helmod_button_"..type.."_"..key, caption)
 end
 
 -------------------------------------------------------------------------------
@@ -215,36 +273,36 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButtonSpriteStyled(parent, style, action, type, key, caption, tooltip)
-	Logging:trace("ElementGui:addGuiButtonSpriteStyled", style,action, type, key, caption, tooltip)
-	local options = {}
-	options.type = "sprite-button"
-	if key ~= nil then
-		options.name = action..key
-	else
-		options.name = action
-	end
-	if tooltip ~= nil then
-		options.tooltip = tooltip
-	end
-	options.style = style
-	options.sprite = type.."/"..key
+  Logging:trace("HMElementGui", "addGuiButtonSpriteStyled", style,action, type, key, caption, tooltip)
+  local options = {}
+  options.type = "sprite-button"
+  if key ~= nil then
+    options.name = action..key
+  else
+    options.name = action
+  end
+  if tooltip ~= nil then
+    options.tooltip = tooltip
+  end
+  options.style = style
+  options.sprite = type.."/"..key
 
-	local button = nil
-	local ok , err = pcall(function()
-		button = parent.add(options)
-	end)
-	if not ok then
-		Logging:error("ElementGui:addGuiButtonSpriteStyled", action, type, key, err)
-		if parent[options.name] and parent[options.name].valid then
-			parent[options.name].destroy()
-		end
-		if caption ~= nil then
+  local button = nil
+  local ok , err = pcall(function()
+    button = parent.add(options)
+  end)
+  if not ok then
+    Logging:error("HMElementGui", "addGuiButtonSpriteStyled", action, type, key, err)
+    if parent[options.name] and parent[options.name].valid then
+      parent[options.name].destroy()
+    end
+    if caption ~= nil then
       options.caption = caption
     end
-		
-		self:addGuiButtonIcon(parent, action, type, key, caption)
-	end
-	return button
+
+    self:addGuiButtonIcon(parent, action, type, key, caption)
+  end
+  return button
 end
 
 -------------------------------------------------------------------------------
@@ -262,8 +320,8 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButtonSpriteSm(parent, action, type, key, caption, tooltip)
-	Logging:trace("ElementGui:addGuiButtonSpriteSm",action, type, key, caption, tooltip)
-	return self:addGuiButtonSpriteStyled(parent, "helmod_button_icon_sm", action, type, key, caption, tooltip)
+  Logging:trace("HMElementGui", "addGuiButtonSpriteSm",action, type, key, caption, tooltip)
+  return self:addGuiButtonSpriteStyled(parent, "helmod_button_icon_sm", action, type, key, caption, tooltip)
 end
 
 -------------------------------------------------------------------------------
@@ -282,12 +340,55 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButtonSelectSpriteSm(parent, action, type, key, caption, tooltip, color)
-	Logging:trace("ElementGui:addGuiButtonSelectSpriteSm",action, type, key, caption, tooltip, color)
-	local style = "helmod_button_select_icon_sm"
-	if color == "red" then style = "helmod_button_select_icon_sm_red" end
-	if color == "yellow" then style = "helmod_button_select_icon_sm_yellow" end
-	if color == "green" then style = "helmod_button_select_icon_sm_green" end
-	return self:addGuiButtonSpriteStyled(parent, "helmod_button_select_icon_sm", action, type, key, caption, tooltip, color)
+  Logging:trace("HMElementGui", "addGuiButtonSelectSpriteSm",action, type, key, caption, tooltip, color)
+  local style = "helmod_button_select_icon_sm"
+  if color == "red" then style = "helmod_button_select_icon_sm_red" end
+  if color == "yellow" then style = "helmod_button_select_icon_sm_yellow" end
+  if color == "green" then style = "helmod_button_select_icon_sm_green" end
+  return self:addGuiButtonSpriteStyled(parent, "helmod_button_select_icon_sm", action, type, key, caption, tooltip, color)
+end
+
+-------------------------------------------------------------------------------
+-- Add a smal sprite button element for item
+--
+-- @function [parent=#ElementGui] addGuiButtonSpriteM
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #string action action name
+-- @param #string type type of item
+-- @param #string key name of item
+-- @param #string caption displayed text
+-- @param #string tooltip displayed text
+--
+-- @return #LuaGuiElement the LuaGuiElement added
+--
+function ElementGui.methods:addGuiButtonSpriteM(parent, action, type, key, caption, tooltip)
+  Logging:trace("HMElementGui", "addGuiButtonSpriteM",action, type, key, caption, tooltip)
+  return self:addGuiButtonSpriteStyled(parent, "helmod_button_icon_m", action, type, key, caption, tooltip)
+end
+
+-------------------------------------------------------------------------------
+-- Add a smal sprite button element for item selection
+--
+-- @function [parent=#ElementGui] addGuiButtonSelectSpriteM
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #string action action name
+-- @param #string type type of item
+-- @param #string key name of item
+-- @param #string caption displayed text
+-- @param #string tooltip displayed text
+-- @param #string color background color
+--
+-- @return #LuaGuiElement the LuaGuiElement added
+--
+function ElementGui.methods:addGuiButtonSelectSpriteM(parent, action, type, key, caption, tooltip, color)
+  Logging:trace("HMElementGui", "addGuiButtonSelectSpriteM",action, type, key, caption, tooltip, color)
+  local style = "helmod_button_select_icon_m"
+  if color == "red" then style = "helmod_button_select_icon_m_red" end
+  if color == "yellow" then style = "helmod_button_select_icon_m_yellow" end
+  if color == "green" then style = "helmod_button_select_icon_m_green" end
+  return self:addGuiButtonSpriteStyled(parent, "helmod_button_select_icon_m", action, type, key, caption, tooltip, color)
 end
 
 -------------------------------------------------------------------------------
@@ -305,8 +406,8 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButtonSprite(parent, action, type, key, caption, tooltip)
-	Logging:debug("ElementGui:addGuiButtonSprite",action, type, key, caption, tooltip)
-	return self:addGuiButtonSpriteStyled(parent, "helmod_button_icon", action, type, key, caption, tooltip)
+  Logging:trace("HMElementGui", ":addGuiButtonSprite",action, type, key, caption, tooltip)
+  return self:addGuiButtonSpriteStyled(parent, "helmod_button_icon", action, type, key, caption, tooltip)
 end
 
 -------------------------------------------------------------------------------
@@ -325,12 +426,12 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButtonSelectSprite(parent, action, type, key, caption, tooltip, color)
-	Logging:trace("ElementGui:addGuiButtonSelectSprite",action, type, key, caption, tooltip, color)
-	local style = "helmod_button_select_icon"
-	if color == "red" then style = "helmod_button_select_icon_red" end
-	if color == "yellow" then style = "helmod_button_select_icon_yellow" end
-	if color == "green" then style = "helmod_button_select_icon_green" end
-	return self:addGuiButtonSpriteStyled(parent, style, action, type, key, caption, tooltip)
+  Logging:trace("HMElementGui", "addGuiButtonSelectSprite",action, type, key, caption, tooltip, color)
+  local style = "helmod_button_select_icon"
+  if color == "red" then style = "helmod_button_select_icon_red" end
+  if color == "yellow" then style = "helmod_button_select_icon_yellow" end
+  if color == "green" then style = "helmod_button_select_icon_green" end
+  return self:addGuiButtonSpriteStyled(parent, style, action, type, key, caption, tooltip)
 end
 
 -------------------------------------------------------------------------------
@@ -348,8 +449,8 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButtonSpriteXxl(parent, action, type, key, caption, tooltip)
-	Logging:trace("ElementGui:addGuiButtonSpriteXxl",action, type, key, caption, tooltip)
-	return self:addGuiButtonSpriteStyled(parent, "helmod_button_icon_xxl", action, type, key, caption, tooltip)
+  Logging:trace("HMElementGui", "addGuiButtonSpriteXxl",action, type, key, caption, tooltip)
+  return self:addGuiButtonSpriteStyled(parent, "helmod_button_icon_xxl", action, type, key, caption, tooltip)
 end
 
 -------------------------------------------------------------------------------
@@ -368,12 +469,12 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButtonSelectSpriteXxl(parent, action, type, key, caption, tooltip, color)
-	Logging:trace("ElementGui:addGuiButtonSelectSpriteXxl",action, type, key, caption, tooltip, color)
-	local style = "helmod_button_select_icon_xxl"
-	if color == "red" then style = "helmod_button_select_icon_xxl_red" end
-	if color == "yellow" then style = "helmod_button_select_icon_xxl_yellow" end
-	if color == "green" then style = "helmod_button_select_icon_xxl_green" end
-	return self:addGuiButtonSpriteStyled(parent, style, action, type, key, caption, tooltip)
+  Logging:trace("HMElementGui", "addGuiButtonSelectSpriteXxl",action, type, key, caption, tooltip, color)
+  local style = "helmod_button_select_icon_xxl"
+  if color == "red" then style = "helmod_button_select_icon_xxl_red" end
+  if color == "yellow" then style = "helmod_button_select_icon_xxl_yellow" end
+  if color == "green" then style = "helmod_button_select_icon_xxl_green" end
+  return self:addGuiButtonSpriteStyled(parent, style, action, type, key, caption, tooltip)
 end
 
 -------------------------------------------------------------------------------
@@ -388,14 +489,14 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiFlowH(parent, key, style)
-	local options = {}
-	options.type = "flow"
-	options.direction = "horizontal"
-	options.name = key
-	if style ~= nil then
-		options.style = style
-	end
-	return parent.add(options)
+  local options = {}
+  options.type = "flow"
+  options.direction = "horizontal"
+  options.name = key
+  if style ~= nil then
+    options.style = style
+  end
+  return parent.add(options)
 end
 
 -------------------------------------------------------------------------------
@@ -410,14 +511,14 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiFlowV(parent, key, style)
-	local options = {}
-	options.type = "flow"
-	options.direction = "vertical"
-	options.name = key
-	if style ~= nil then
-		options.style = style
-	end
-	return parent.add(options)
+  local options = {}
+  options.type = "flow"
+  options.direction = "vertical"
+  options.name = key
+  if style ~= nil then
+    options.style = style
+  end
+  return parent.add(options)
 end
 
 -------------------------------------------------------------------------------
@@ -434,21 +535,21 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiScrollPane(parent, key, style, horizontal, vertical)
-	local options = {}
-	options.type = "scroll-pane"
-	options.horizontal_scroll_policy = "auto"
-	options.vertical_scroll_policy = "auto"
-	options.name = key
-	if style ~= nil then
-		options.style = style
-	end
-	if horizontal ~= nil then
-		options.horizontal_scroll_policy = horizontal
-	end
-	if vertical ~= nil then
-		options.vertical_scroll_policy = vertical
-	end
-	return parent.add(options)
+  local options = {}
+  options.type = "scroll-pane"
+  options.horizontal_scroll_policy = "auto"
+  options.vertical_scroll_policy = "auto"
+  options.name = key
+  if style ~= nil then
+    options.style = style
+  end
+  if horizontal ~= nil then
+    options.horizontal_scroll_policy = horizontal
+  end
+  if vertical ~= nil then
+    options.vertical_scroll_policy = vertical
+  end
+  return parent.add(options)
 end
 
 -------------------------------------------------------------------------------
@@ -464,17 +565,17 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiFrameH(parent, key, style, caption)
-	local options = {}
-	options.type = "frame"
-	options.direction = "horizontal"
-	options.name = key
-	if style ~= nil then
-		options.style = style
-	end
-	if caption ~= nil then
-		options.caption = caption
-	end
-	return parent.add(options)
+  local options = {}
+  options.type = "frame"
+  options.direction = "horizontal"
+  options.name = key
+  if style ~= nil then
+    options.style = style
+  end
+  if caption ~= nil then
+    options.caption = caption
+  end
+  return parent.add(options)
 end
 
 -------------------------------------------------------------------------------
@@ -490,17 +591,17 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiFrameV(parent, key, style, caption)
-	local options = {}
-	options.type = "frame"
-	options.direction = "vertical"
-	options.name = key
-	if style ~= nil then
-		options.style = style
-	end
-	if caption ~= nil then
-		options.caption = caption
-	end
-	return parent.add(options)
+  local options = {}
+  options.type = "frame"
+  options.direction = "vertical"
+  options.name = key
+  if style ~= nil then
+    options.style = style
+  end
+  if caption ~= nil then
+    options.caption = caption
+  end
+  return parent.add(options)
 end
 
 -------------------------------------------------------------------------------
@@ -516,14 +617,14 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiTable(parent, key, colspan, style)
-	local options = {}
-	options.type = "table"
-	options.colspan = colspan
-	options.name = key
-	if style ~= nil then
-		options.style = style
-	end
-	return parent.add(options)
+  local options = {}
+  options.type = "table"
+  options.colspan = colspan
+  options.name = key
+  if style ~= nil then
+    options.style = style
+  end
+  return parent.add(options)
 end
 
 -------------------------------------------------------------------------------
@@ -536,12 +637,12 @@ end
 -- @return #number the formated number
 --
 function ElementGui.methods:formatNumber(n)
-	local separator = " "
-	if n == nil then return 0 end
-	--return tostring(math.floor(n)):reverse():gsub("(%d%d%d)","%1 "):gsub(" (%-?)$","%1"):reverse()
-	local decimal = 2
+  local separator = " "
+  if n == nil then return 0 end
+  --return tostring(math.floor(n)):reverse():gsub("(%d%d%d)","%1 "):gsub(" (%-?)$","%1"):reverse()
+  local decimal = 2
   if n > 10 then decimal = 1 end
-	local left,num,right = string.match(self:round(n, decimal),'^([^%d]*%d)(%d*)(.-)$')
+  local left,num,right = string.match(self:round(n, decimal),'^([^%d]*%d)(%d*)(.-)$')
   if num == nil then return 0 end
   if left == nil then left = "" end
   if right == nil then right = "" end
@@ -552,7 +653,7 @@ end
 -- Format the number
 --
 -- @see http://lua-users.org/wiki/FormattingNumbers
--- 
+--
 -- @function [parent=#ElementGui] formatNumber
 --
 -- @param #number val the number
@@ -578,18 +679,18 @@ end
 -- @return #number the formated number
 --
 function ElementGui.methods:formatNumberKilo(value, suffix)
-	if suffix == nil then suffix = "" end
-	if value == nil then
-		return 0
-	elseif value < 1000 then
-		return value.." "..suffix
-	elseif (value / 1000) < 1000 then
-		return math.ceil(value*10 / 1000)/10 .. " K" ..suffix
-	elseif (value / (1000*1000)) < 1000 then
-		return math.ceil(value*10 / (1000*1000))/10 .. " M" ..suffix
-	else
-		return math.ceil(value*10 / (1000*1000*1000))/10 .. " G" ..suffix
-	end
+  if suffix == nil then suffix = "" end
+  if value == nil then
+    return 0
+  elseif value < 1000 then
+    return self:formatNumber(value).." "..suffix
+  elseif (value / 1000) < 1000 then
+    return math.ceil(value*10 / 1000)/10 .. " k" ..suffix
+  elseif (value / (1000*1000)) < 1000 then
+    return math.ceil(value*10 / (1000*1000))/10 .. " M" ..suffix
+  else
+    return math.ceil(value*10 / (1000*1000*1000))/10 .. " G" ..suffix
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -602,8 +703,8 @@ end
 -- @return #number the formated number
 --
 function ElementGui.methods:formatRound(num, idp)
-	local mult = 10^(idp or 0)
-	return math.floor(num * mult + 0.5) / mult
+  local mult = 10^(idp or 0)
+  return math.floor(num * mult + 0.5) / mult
 end
 
 
@@ -617,6 +718,6 @@ end
 -- @return #number the formated number
 --
 function ElementGui.methods:formatPercent(num)
-	local mult = 10^3
-	return math.floor(num * mult + 0.5) / 10
+  local mult = 10^3
+  return math.floor(num * mult + 0.5) / 10
 end
