@@ -18,7 +18,7 @@ function PlannerModel.methods:init(parent)
 
   self.capEnergy = -0.8
 
-  self.version = "0.4.4"
+  self.version = "0.4.5"
 end
 
 -------------------------------------------------------------------------------
@@ -957,7 +957,13 @@ function PlannerModel.methods:setFactory(player, item, key, name)
       local mining_speed = self.player:getItemProperty(factory.name, "mining_speed")
       local mining_power = self.player:getItemProperty(factory.name, "mining_power")
       if mining_speed ~= 0 then
-        speed_nominal = mining_power * mining_speed
+        local entity_ore = self.player:getEntityPrototype(object.name)
+        local hardness = 1
+        local miningtime = 0.5
+        if entity_ore ~= nil and entity_ore.mineable_properties ~= nil and entity_ore.mineable_properties.hardness ~= nil then hardness = entity_ore.mineable_properties.hardness end
+        if entity_ore ~= nil and entity_ore.mineable_properties ~= nil and entity_ore.mineable_properties.miningtime ~= nil then miningtime = entity_ore.mineable_properties.miningtime end
+        -- (mining power - ore mining hardness) * mining speed
+        speed_nominal = (mining_power - hardness) * mining_speed / miningtime
       end
       object.factory.speed_nominal = speed_nominal
     end

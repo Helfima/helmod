@@ -38,7 +38,7 @@ Logging.logClass["HMPlayerController"] = true
 
 helmod = {
   name = "helmod",
-  version = "0.4.3"
+  version = "0.4.5"
 }
 
 local helmod_clear=false
@@ -132,6 +132,8 @@ function helmod:on_tick(event)
   if game.tick ~= 0 and game.tick%60 == 0 and helmod_clear == false then
     for _,player in pairs(game.players) do
       if player ~= nil then
+        if global["users"] == nil then global["users"] = {} end
+        if global["users"][player.name] == nil then global["users"][player.name] = {} end
         local globalPlayer = global["users"][player.name]
         globalPlayer.isActive = false
         self:init_playerController(player)
@@ -383,6 +385,10 @@ remote.add_interface("helmod", {
     local playerController = PlayerController:new()
     local globalSettings = playerController:getGlobal(game.player, "settings")
     globalSettings["display_size"] = value
+  end,
+  export_data = function(level)
+    Logging.limit = level or 10
+    game.write_file("helmod\\data.json", Logging:objectToString(global), false)
   end,
   cheat = function()
     if game.player.admin and Logging.log > 0 then
