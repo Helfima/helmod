@@ -151,7 +151,7 @@ default_gui["helmod_button_time"] = {
   type = "button_style",
   parent = "helmod_button_default",
   font = "helmod_font_small_bold",
-  width = 28
+  width = 36
 }
 
 -------------------------------------------------------------------------------
@@ -164,7 +164,7 @@ default_gui["helmod_button_time_selected"] = {
   type = "button_style",
   parent = "helmod_button_selected",
   font = "helmod_font_small_bold",
-  width = 28
+  width = 36
 }
 
 -------------------------------------------------------------------------------
@@ -237,6 +237,24 @@ default_gui["helmod_button_icon_cancel"] = {
   hovered_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=32,y=64}, {top=0,right=0,bottom=0,left=0}, true),
   clicked_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=64}, {top=0,right=0,bottom=0,left=0}, true),
   disabled_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=64}, {top=0,right=0,bottom=0,left=0}, true)
+}
+
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] icon_help
+
+local icon_corner_size = 0
+default_gui["helmod_button_icon_help"] = {
+  type = "button_style",
+  parent = "helmod_button_default",
+  width = 32,
+  height = 32,
+  scalable = false,
+  default_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=96}, {top=0,right=0,bottom=0,left=0}, true),
+  hovered_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=32,y=96}, {top=0,right=0,bottom=0,left=0}, true),
+  clicked_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=96}, {top=0,right=0,bottom=0,left=0}, true),
+  disabled_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=96}, {top=0,right=0,bottom=0,left=0}, true)
 }
 
 -------------------------------------------------------------------------------
@@ -501,6 +519,17 @@ default_gui["helmod_label_default"] = {
   right_padding = 2,
   bottom_padding = 2,
   left_padding = 2
+}
+
+-------------------------------------------------------------------------------
+-- Style of text
+--
+-- @field [parent=#Label] help
+
+default_gui["helmod_label_help"] = {
+  type = "label_style",
+  parent = "helmod_label_default",
+  maximal_width = 50
 }
 
 -------------------------------------------------------------------------------
@@ -805,8 +834,8 @@ default_gui["helmod_flow_cell"] = {
 default_gui["helmod_flow_left_menu"] = {
   type = "flow_style",
   parent = "helmod_flow_default",
-  minimal_width = 38,
-  maximal_width = 38,
+  minimal_width = 46,
+  maximal_width = 46,
   maximal_height = height_1050
 }
 
@@ -910,6 +939,19 @@ default_gui["helmod_frame_default"] = {
     horizontal_spacing = 0,
     vertical_spacing = 0
   }
+}
+
+-------------------------------------------------------------------------------
+-- Style of left menu panel
+--
+-- @field [parent=#Frame] left_menu
+--
+
+default_gui["helmod_frame_left_menu"] = {
+  type = "frame_style",
+  parent = "helmod_frame_default",
+  minimal_width = 46,
+  maximal_width = 46
 }
 
 -------------------------------------------------------------------------------

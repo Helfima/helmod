@@ -466,7 +466,7 @@ function PlannerAbstractEdition.methods:updateFactoryInfo(player, element, actio
     local headerPanel = self:addGuiTable(infoPanel,"table-header",2)
     local tooltip = ({"tooltip.selector-module"})
     if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
-    self:addGuiButtonSelectSprite(headerPanel, self:classname().."=change-panel=ID="..item.."="..object.name.."=", self.player:getIconType(factory), factory.name, factory.name, tooltip)
+    self:addGuiButtonSelectSprite(headerPanel, self:classname().."=change-panel=ID="..item.."="..object.name.."=", self.player:getIconType(factory), factory.name, factory.name, tooltip, self.color_button_edit)
     if _factory == nil then
       self:addGuiLabel(headerPanel, "label", factory.name)
     else
@@ -500,8 +500,8 @@ function PlannerAbstractEdition.methods:updateFactoryInfo(player, element, actio
     self:addGuiLabel(inputPanel, "label-productivity", ({"helmod_label.productivity"}))
     self:addGuiLabel(inputPanel, "productivity", sign..self:formatPercent(factory.effects.productivity).."%")
 
-    self:addGuiLabel(inputPanel, "label-limit", ({"helmod_label.limit"}))
-    self:addGuiText(inputPanel, "limit", factory.limit, "helmod_textfield")
+    self:addGuiLabel(inputPanel, "label-limit", ({"helmod_label.limit"}), nil, {"tooltip.factory-limit"})
+    self:addGuiText(inputPanel, "limit", factory.limit, "helmod_textfield", {"tooltip.factory-limit"})
 
     self:addGuiButton(infoPanel, self:classname().."=factory-update=ID="..item.."=", object.name, "helmod_button_default", ({"helmod_button.update"}))
   end
@@ -707,7 +707,7 @@ function PlannerAbstractEdition.methods:updateBeaconInfo(player, element, action
     local headerPanel = self:addGuiTable(infoPanel,"table-header",2)
     local tooltip = ({"tooltip.selector-module"})
     if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
-    self:addGuiButtonSelectSprite(headerPanel, self:classname().."=change-panel=ID="..item.."="..object.name.."=", self.player:getIconType(beacon), beacon.name, beacon.name, tooltip)
+    self:addGuiButtonSelectSprite(headerPanel, self:classname().."=change-panel=ID="..item.."="..object.name.."=", self.player:getIconType(beacon), beacon.name, beacon.name, tooltip, self.color_button_edit)
     if _beacon == nil then
       self:addGuiLabel(headerPanel, "label", beacon.name)
     else
@@ -725,11 +725,11 @@ function PlannerAbstractEdition.methods:updateBeaconInfo(player, element, action
     self:addGuiLabel(inputPanel, "label-module-slots", ({"helmod_label.module-slots"}))
     self:addGuiLabel(inputPanel, "module-slots", beacon.module_slots)
 
-    self:addGuiLabel(inputPanel, "label-combo", ({"helmod_label.combo"}))
-    self:addGuiText(inputPanel, "combo", beacon.combo, "helmod_textfield")
+    self:addGuiLabel(inputPanel, "label-combo", ({"helmod_label.beacon-on-factory"}), nil, {"tooltip.beacon-on-factory"})
+    self:addGuiText(inputPanel, "combo", beacon.combo, "helmod_textfield", {"tooltip.beacon-on-factory"})
 
-    self:addGuiLabel(inputPanel, "label-factory", ({"helmod_label.factory"}))
-    self:addGuiText(inputPanel, "factory", beacon.factory, "helmod_textfield")
+    self:addGuiLabel(inputPanel, "label-factory", ({"helmod_label.factory-per-beacon"}), nil, {"tooltip.factory-per-beacon"})
+    self:addGuiText(inputPanel, "factory", beacon.factory, "helmod_textfield", {"tooltip.factory-per-beacon"})
 
     self:addGuiButton(infoPanel, self:classname().."=beacon-update=ID="..item.."=", object.name, "helmod_button_default", ({"helmod_button.update"}))
   end

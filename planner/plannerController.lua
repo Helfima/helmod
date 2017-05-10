@@ -117,6 +117,17 @@ function PlannerController.methods:on_gui_hotkey(event)
 end
 
 -------------------------------------------------------------------------------
+-- On dropdown event
+--
+-- @function [parent=#PlannerController] on_gui_selection_state_changed
+--
+-- @param event
+--
+function PlannerController.methods:on_gui_selection_state_changed(event)
+  self:parse_event(event)
+end
+
+-------------------------------------------------------------------------------
 -- Parse event
 --
 -- @function [parent=#PlannerController] parse_event
@@ -218,12 +229,13 @@ function PlannerController.methods:main(player)
 		-- main panel
 		Logging:debug("HMPlannerController", "Create main panel")
 		local mainPanel = self:getMainPanel(player)
+		Logging:debug("HMPlannerController", "Style of main panel", mainPanel.style.help())
 		-- menu
 		Logging:debug("HMPlannerController", "Create menu panel")
 		local menuPanel = self:getMenuPanel(player)
-		local actionPanel = self:addGuiFrameV(menuPanel, "settings", "helmod_frame_default")
+		local actionPanel = self:addGuiFrameV(menuPanel, "settings", "helmod_frame_left_menu")
 		self:addGuiButton(actionPanel, self:classname().."=CLOSE", nil, "helmod_button_icon_cancel", nil, ({"helmod_button.close"}))
-		self:addGuiButton(actionPanel, "HMPlannerSettings=OPEN", nil, "helmod_button_icon_options", nil, ({"helmod_button.options"}))
+    self:addGuiButton(actionPanel, "HMPlannerSettings=OPEN", nil, "helmod_button_icon_options", nil, ({"helmod_button.options"}))
 		-- info
 		Logging:debug("HMPlannerController", "Create info panel")
 		local infoPanel = self:getInfoPanel(player)
@@ -252,6 +264,7 @@ function PlannerController.methods:main(player)
     self.controllers["energy-edition"] = PlannerEnergyEdition:new(self)
 
     self.controllers["pin-panel"] = PlannerPinPanel:new(self)
+
 
 
 	end

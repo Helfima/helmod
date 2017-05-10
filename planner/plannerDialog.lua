@@ -20,6 +20,11 @@ function PlannerDialog.methods:init(parent)
 	self.ACTION_UPDATE =  self:classname().."=UPDATE"
 	self.ACTION_CLOSE =  self:classname().."=CLOSE"
 	self:on_init(parent)
+	
+	self.color_button_edit="green"
+  self.color_button_add="yellow"
+  self.color_button_rest="red"
+	
 end
 
 -------------------------------------------------------------------------------

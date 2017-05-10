@@ -143,12 +143,13 @@ end
 -- @param #string key unique id
 -- @param #boolean state state of radio-button
 -- @param #string style style of radio-button
+-- @param #string tooltip displayed text
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addGuiRadioButton(parent, key, state, style)
-  Logging:trace("HMElementGui", "addGuiRadioButton", parent, key, state, style)
-  return parent.add({type="radiobutton", name=key, state=state, style=style})
+function ElementGui.methods:addGuiRadioButton(parent, key, state, style, tooltip)
+  Logging:trace("HMElementGui", "addGuiRadioButton", parent, key, state, style, tooltip)
+  return parent.add({type="radiobutton", name=key, state=state, style=style, tooltip=tooltip})
 end
 
 -------------------------------------------------------------------------------
@@ -160,12 +161,13 @@ end
 -- @param #string key unique id
 -- @param #boolean state state of checkbox
 -- @param #string style style of checkbox
+-- @param #string tooltip displayed text
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addGuiCheckbox(parent, key, state, style)
-  Logging:trace("HMElementGui", "addGuiCheckbox", parent, key, state, style)
-  return parent.add({type="checkbox", name=key, state=state, style=style})
+function ElementGui.methods:addGuiCheckbox(parent, key, state, style, tooltip)
+  Logging:trace("HMElementGui", "addGuiCheckbox", parent, key, state, style, tooltip)
+  return parent.add({type="checkbox", name=key, state=state, style=style, tooltip=tooltip})
 end
 
 -------------------------------------------------------------------------------
@@ -173,6 +175,7 @@ end
 --
 -- @function [parent=#ElementGui] addGuiDropDown
 --
+-- @param #LuaGuiElement parent container for element
 -- @param #string action action name
 -- @param #string key unique id
 -- @param #table items list of element
@@ -184,7 +187,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiDropDown(parent, action, key, items, selected, style, caption, tooltip)
-  Logging:trace("HMElementGui", "addGuiDropDown", parent, action, key, items, selected, style, caption, tooltip)
+  Logging:debug("HMElementGui", "addGuiDropDown", parent, action, key, items, selected, style, caption, tooltip)
   local options = {}
   options.type = "drop-down"
   if key ~= nil then
@@ -202,7 +205,7 @@ function ElementGui.methods:addGuiDropDown(parent, action, key, items, selected,
     options.tooltip = tooltip
   end
 
-  local selected_index = nil
+  local selected_index = 1
   if items ~= nil then
     options.items = items
     for index,item in ipairs(items) do
@@ -211,6 +214,7 @@ function ElementGui.methods:addGuiDropDown(parent, action, key, items, selected,
       end
     end
   end
+  options.selected_index = 1
   if selected_index ~= nil and selected ~= nil then
     options.selected_index = selected_index
   end
@@ -219,6 +223,7 @@ function ElementGui.methods:addGuiDropDown(parent, action, key, items, selected,
   local ok , err = pcall(function()
     element = parent.add(options)
   end)
+  if not(ok) then Logging:error("HMElementGui", "addGuiDropDown", options, ok , err) end
   return element
 end
 

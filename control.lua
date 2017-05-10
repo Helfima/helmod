@@ -32,6 +32,10 @@ function proxy_gui_text_changed(event)
   helmod:on_gui_text_changed(event)
 end
 
+function proxy_gui_selection_state_changed(event)
+  helmod:on_gui_selection_state_changed(event)
+end
+
 function proxy_close_open(event)
   local new_event = {name="helmod-open-close", player_index = event.player_index}
   helmod:on_gui_hotkey(new_event)
@@ -55,6 +59,7 @@ script.on_event(defines.events.on_tick, proxy_tick)
 script.on_event(defines.events.on_player_created, proxy_player_created)
 script.on_event(defines.events.on_gui_click,proxy_gui_click)
 script.on_event(defines.events.on_gui_text_changed,proxy_gui_text_changed)
+script.on_event(defines.events.on_gui_selection_state_changed,proxy_gui_selection_state_changed)
 
 -- event hotkey
 script.on_event("helmod-open-close",proxy_close_open)

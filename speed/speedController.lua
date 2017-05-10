@@ -89,3 +89,9 @@ end
 function SpeedController.methods:on_gui_hotkey(event)
   
 end
+
+function SpeedController.methods:on_gui_selection_state_changed(event)
+  
+end
+
+

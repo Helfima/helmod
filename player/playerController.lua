@@ -132,6 +132,21 @@ function PlayerController.methods:on_gui_hotkey(event)
 end
 
 -------------------------------------------------------------------------------
+-- On dropdown event
+--
+-- @function [parent=#PlayerController] on_gui_selection_state_changed
+--
+-- @param event
+--
+function PlayerController.methods:on_gui_selection_state_changed(event)
+  if self.controllers ~= nil then
+    for r, controller in pairs(self.controllers) do
+      controller:on_gui_selection_state_changed(event)
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Return force's player
 --
 -- @function [parent=#PlayerController] getForce
@@ -268,7 +283,7 @@ function PlayerController.methods:getStyleSizes(player)
   Logging:trace("HMPlayerController", "getStyleSizes(player):display_size", display_size)
   local style_sizes = {}
   if display_size ~= nil then
-    local width_info=480
+    local width_info=490
     local width_scroll=8
     local width_block_info=290
     local width_recipe_column=220
@@ -438,12 +453,16 @@ function PlayerController.methods:getProductionsCrafting(category)
     if item.type ~= nil then
       Logging:trace("HMPlayerController", "getProductionsCrafting(category):item", item.name, item.type, item.group.name, item.subgroup.name)
       local check = false
-      if category ~= nil then
+      if category ~= nil and category ~= "extraction-machine" then
         local categories = self:getItemProperty(item.name, "crafting_categories")
         if categories ~= nil then
           for c, value in pairs(categories) do
             if category == value then check = true end
           end
+        end
+      elseif category ~= nil and category == "extraction-machine" then
+        if item.subgroup ~= nil and item.subgroup.name == "extraction-machine" then
+          check = true
         end
       else
         if item.group ~= nil and item.group.name == "production" then
@@ -538,7 +557,8 @@ function PlayerController.methods:getRecipe(player, name)
         products = {{type="item", name=entity.name, amount=1}},
         ingredients = {{type="item", name=entity.name, amount=1}},
         enabled = true,
-        resource_category = entity.resource_category
+        resource_category = entity.resource_category,
+        category = "extraction-machine"
       }
     end
   end

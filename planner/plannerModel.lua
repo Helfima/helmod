@@ -18,7 +18,7 @@ function PlannerModel.methods:init(parent)
 
   self.capEnergy = -0.8
 
-  self.version = "0.4.5"
+  self.version = "0.4.6"
 end
 
 -------------------------------------------------------------------------------
@@ -1197,6 +1197,22 @@ function PlannerModel.methods:downProductionBlock(player, blockId)
 end
 
 -------------------------------------------------------------------------------
+-- Unlink a production block
+--
+-- @function [parent=#PlannerModel] unlinkProductionBlock
+--
+-- @param #LuaPlayer player
+-- @param #string blockId
+--
+function PlannerModel.methods:unlinkProductionBlock(player, blockId)
+  Logging:debug("HMModel", "unlinkProductionBlock()",player, blockId)
+  local model = self:getModel(player)
+  if model.blocks[blockId] ~= nil then
+    model.blocks[blockId].unlinked = not(model.blocks[blockId].unlinked)
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Down a production recipe
 --
 -- @function [parent=#PlannerModel] downProductionRecipe
@@ -1314,6 +1330,7 @@ function PlannerModel.methods:update(player)
           self:setBeacon(player, productBlock.id, recipe.name, beacon.name)
           if _recipe ~= nil then
             recipe.is_resource = not(_recipe.force)
+            if recipe.is_resource then recipe.category = "extraction-machine" end
           end
         end
       end
@@ -1326,12 +1343,14 @@ function PlannerModel.methods:update(player)
     for _, productBlock in spairs(model.blocks, function(t,a,b) return t[b].index > t[a].index end) do
       -- premiere recette
       local _,recipe = next(productBlock.recipes)
-      for _,product in pairs(recipe.products) do
-        if input[product.name] ~= nil then
-          -- hors premier tour
-          productBlock.input = {}
-          productBlock.input.key = product.name
-          productBlock.input.quantity = input[product.name]
+      if not(productBlock.unlinked) then
+        for _,product in pairs(recipe.products) do
+          if input[product.name] ~= nil then
+            -- hors premier tour
+            productBlock.input = {}
+            productBlock.input.key = product.name
+            productBlock.input.quantity = input[product.name]
+          end
         end
       end
 
@@ -1555,6 +1574,11 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
           ratioRecipe = recipe.index
           -- block number
           element.count = math.ceil(recipe.factory.count/recipe.factory.limit)
+          -- subblock energy
+          element.sub_power = 0
+          if element.count ~= nil and element.count > 0 then
+          element.sub_power = math.ceil(element.power/element.count)
+          end
         end
       end
 

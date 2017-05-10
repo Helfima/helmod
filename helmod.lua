@@ -15,7 +15,7 @@ require "player.playerController"
 Logging:new(0)
 Logging.console = false
 Logging.logClass["helmod"] = false
-Logging.logClass["HMElementGui"] = false
+Logging.logClass["HMElementGui"] = true
 Logging.logClass["HMPlannerAbstractEdition"] = false
 Logging.logClass["HMPlannerController"] = false
 Logging.logClass["HMPlannerData"] = true
@@ -28,7 +28,9 @@ Logging.logClass["HMPlannerRecipeEdition"] = false
 Logging.logClass["HMPlannerRecipeSelector"] = false
 Logging.logClass["HMPlannerResourceEdition"] = false
 Logging.logClass["HMPlannerSettings"] = false
-Logging.logClass["HMPlayerController"] = true
+Logging.logClass["HMPlayerController"] = false
+--Logging.logClass["HMPlannerHelp"] = true
+
 
 -------------------------------------------------------------------------------
 -- Classe de mod
@@ -173,7 +175,11 @@ end
 -- @param #table event
 --
 function helmod:on_gui_click(event)
-  if self.playerController ~= nil then
+  local allowed = true
+  if event.element ~= nil and event.element.type == "drop-down" then
+    allowed = false
+  end
+  if self.playerController ~= nil and allowed then
     local player = game.players[event.player_index]
     if self.playerController ~= nil then
       self.playerController:on_gui_click(event)
@@ -212,6 +218,23 @@ function helmod:on_gui_hotkey(event)
     end
   end
 end
+
+-------------------------------------------------------------------------------
+-- On dropdown event
+--
+-- @function [parent=#helmod] on_gui_selection_state_changed
+--
+-- @param event
+--
+function helmod:on_gui_selection_state_changed(event)
+  if self.playerController ~= nil then
+    local player = game.players[event.player_index]
+    if self.playerController ~= nil then
+      self.playerController:on_gui_hotkey(event)
+    end
+  end
+end
+
 
 -------------------------------------------------------------------------------
 -- On player created
