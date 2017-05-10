@@ -14,14 +14,14 @@ require "player.playerController"
 
 Logging:new(0)
 Logging.console = false
-Logging.logClass["helmod"] = true
+Logging.logClass["helmod"] = false
 Logging.logClass["HMElementGui"] = false
 Logging.logClass["HMPlannerAbstractEdition"] = false
 Logging.logClass["HMPlannerController"] = false
-Logging.logClass["HMPlannerData"] = true
+Logging.logClass["HMPlannerData"] = false
 Logging.logClass["HMPlannerDialog"] = false
 Logging.logClass["HMPlannerEnergyEdition"] = false
-Logging.logClass["HMModel"] = false
+Logging.logClass["HMModel"] = true
 Logging.logClass["HMPlannerPinPanel"] = false
 Logging.logClass["HMPlannerProductEdition"] = false
 Logging.logClass["HMPlannerRecipeEdition"] = false

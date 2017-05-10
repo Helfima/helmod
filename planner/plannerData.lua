@@ -634,7 +634,7 @@ function PlannerData.methods:updateProductionLine(player, item, item2, item3)
     local inputTable = self:addGuiTable(outputScroll,"output-table",6)
     if model.products ~= nil then
       for r, element in pairs(model.products) do
-        self:addCellElement(player, inputTable, element, "HMPlannerIngredient=OPEN=ID="..element.name.."=", false, "tooltip.ingredient", nil)
+        self:addCellElement(player, inputTable, element, "HMPlannerIngredient=OPEN=ID="..element.name.."=", false, "tooltip.product", nil)
       end
     end
 

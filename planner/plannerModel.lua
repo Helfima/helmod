@@ -18,7 +18,7 @@ function PlannerModel.methods:init(parent)
 
   self.capEnergy = -0.8
 
-  self.version = "0.4.6"
+  self.version = "0.4.6.1"
 end
 
 -------------------------------------------------------------------------------
@@ -631,6 +631,55 @@ function PlannerModel.methods:countList(list)
 end
 
 -------------------------------------------------------------------------------
+-- Check and valid unlinked all blocks
+--
+-- @function [parent=#PlannerModel] checkUnlinkedBlocks
+--
+-- @param #LuaPlayer player
+--
+function PlannerModel.methods:checkUnlinkedBlocks(player)
+  Logging:debug("HMModel", "checkUnlinkedBlocks():",player)
+  local model = self:getModel(player)
+  if model.blocks ~= nil then
+    for _,block in spairs(model.blocks,function(t,a,b) return t[b].index > t[a].index end) do
+      self:checkUnlinkedBlock(player, block)
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Check and valid unlinked block
+--
+-- @function [parent=#PlannerModel] checkUnlinkedBlock
+--
+-- @param #LuaPlayer player
+-- @param #table block
+--
+function PlannerModel.methods:checkUnlinkedBlock(player, block)
+  Logging:debug("HMModel", "checkUnlinkedBlock():",player, block)
+  local model = self:getModel(player)
+  local unlinked = true
+  local recipe = self.player:getRecipe(player, block.name)
+  if recipe ~= nil then
+    if model.blocks ~= nil then
+      for _, current_block in spairs(model.blocks,function(t,a,b) return t[b].index > t[a].index end) do
+        if current_block.id == block.id then
+          Logging:debug("HMModel", "checkUnlinkedBlock():break",block.id)
+          break
+        end
+        for _,ingredient in pairs(current_block.ingredients) do
+          for _,product in pairs(recipe.products) do
+            if product.name == ingredient.name then
+              unlinked = false
+            end
+          end
+        end
+      end
+    end
+    block.unlinked = unlinked
+  end
+end
+-------------------------------------------------------------------------------
 -- Add a recipe into production block
 --
 -- @function [parent=#PlannerModel] addRecipeIntoProductionBlock
@@ -645,62 +694,54 @@ function PlannerModel.methods:addRecipeIntoProductionBlock(player, key)
   local blockId = globalGui.currentBlock
   local recipe = self.player:getRecipe(player, key);
 
-  -- ajoute le bloc si il n'existe pas
-  if model.blocks[blockId] == nil then
-    -- check si le block est independant
-    local unlinked = true
-    for _,block in pairs(model.blocks) do
-      for _,ingredient in pairs(block.ingredients) do
-        for _,product in pairs(recipe.products) do
-          if product.name == ingredient.name then
-            unlinked = false
-          end
-        end
+  if recipe ~= nil then
+    -- ajoute le bloc si il n'existe pas
+    if model.blocks[blockId] == nil then
+     local modelBlock = self:createProductionBlockModel(player, recipe)
+      local index = self:countBlocks(player)
+      modelBlock.index = index
+      modelBlock.unlinked = unlinked
+      model.blocks[modelBlock.id] = modelBlock
+      blockId = modelBlock.id
+      globalGui.currentBlock = blockId
+      -- check si le block est independant
+      self:checkUnlinkedBlock(player, modelBlock)
+    end
+
+    -- ajoute le recipe si il n'existe pas
+    if model.blocks[blockId].recipes[key] == nil then
+      local ModelRecipe = self:createRecipeModel(player, recipe.name, 0)
+      local index = self:countBlockRecipes(player, blockId)
+      ModelRecipe.is_resource = not(recipe.force)
+      ModelRecipe.energy = recipe.energy
+      ModelRecipe.category = recipe.category
+      ModelRecipe.group = recipe.group.name
+      ModelRecipe.ingredients = recipe.ingredients
+      ModelRecipe.products = recipe.products
+      ModelRecipe.index = index
+      self:recipeReset(ModelRecipe)
+      -- ajoute les produits du block
+      for _, product in pairs(ModelRecipe.products) do
+        model.blocks[blockId].products[product.name] = product
       end
-    end
-    
-    local modelBlock = self:createProductionBlockModel(player, recipe)
-    local index = self:countBlocks(player)
-    modelBlock.index = index
-    modelBlock.unlinked = unlinked
-    model.blocks[modelBlock.id] = modelBlock
-    blockId = modelBlock.id
-    globalGui.currentBlock = blockId
-  end
-  
-  -- ajoute le recipe si il n'existe pas
-  if model.blocks[blockId].recipes[key] == nil then
-    local ModelRecipe = self:createRecipeModel(player, recipe.name, 0)
-    local index = self:countBlockRecipes(player, blockId)
-    ModelRecipe.is_resource = not(recipe.force)
-    ModelRecipe.energy = recipe.energy
-    ModelRecipe.category = recipe.category
-    ModelRecipe.group = recipe.group.name
-    ModelRecipe.ingredients = recipe.ingredients
-    ModelRecipe.products = recipe.products
-    ModelRecipe.index = index
-    self:recipeReset(ModelRecipe)
-    -- ajoute les produits du block
-    for _, product in pairs(ModelRecipe.products) do
-      model.blocks[blockId].products[product.name] = product
+
+      -- ajoute les ingredients du block
+      for _, ingredient in pairs(ModelRecipe.ingredients) do
+        model.blocks[blockId].ingredients[ingredient.name] = ingredient
+      end
+      model.blocks[blockId].recipes[key] = ModelRecipe
     end
 
-    -- ajoute les ingredients du block
-    for _, ingredient in pairs(ModelRecipe.ingredients) do
-      model.blocks[blockId].ingredients[ingredient.name] = ingredient
+    local defaultFactory = self:getDefaultRecipeFactory(player, recipe.name)
+    if defaultFactory ~= nil then
+      self:setFactory(player, blockId, recipe.name, defaultFactory)
     end
-    model.blocks[blockId].recipes[key] = ModelRecipe
+    local defaultBeacon = self:getDefaultRecipeBeacon(player, recipe.name)
+    if defaultBeacon ~= nil then
+      self:setBeacon(player, blockId, recipe.name, defaultBeacon)
+    end
+    return model.blocks[blockId]
   end
-
-  local defaultFactory = self:getDefaultRecipeFactory(player, recipe.name)
-  if defaultFactory ~= nil then
-    self:setFactory(player, blockId, recipe.name, defaultFactory)
-  end
-  local defaultBeacon = self:getDefaultRecipeBeacon(player, recipe.name)
-  if defaultBeacon ~= nil then
-    self:setBeacon(player, blockId, recipe.name, defaultBeacon)
-  end
-  return model.blocks[blockId]
 end
 
 -------------------------------------------------------------------------------
@@ -1334,6 +1375,11 @@ function PlannerModel.methods:update(player)
     Logging:debug("HMModel" , "********** version",self.version)
     if model.version == nil or model.version < "0.4.4" then
       model.resources = {}
+      Logging:debug("HMModel" , "********** updated version 0.4.4")
+    end
+    if model.version == nil or model.version < "0.4.6.1" then
+      self:checkUnlinkedBlocks(player)
+      Logging:debug("HMModel" , "********** updated version 0.4.6.1")
     end
     if model.blocks ~= nil then
       for _, productBlock in pairs(model.blocks) do
@@ -1592,7 +1638,7 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
           -- subblock energy
           element.sub_power = 0
           if element.count ~= nil and element.count > 0 then
-          element.sub_power = math.ceil(element.power/element.count)
+            element.sub_power = math.ceil(element.power/element.count)
           end
         end
       end
