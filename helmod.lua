@@ -14,8 +14,8 @@ require "player.playerController"
 
 Logging:new(0)
 Logging.console = false
-Logging.logClass["helmod"] = false
-Logging.logClass["HMElementGui"] = true
+Logging.logClass["helmod"] = true
+Logging.logClass["HMElementGui"] = false
 Logging.logClass["HMPlannerAbstractEdition"] = false
 Logging.logClass["HMPlannerController"] = false
 Logging.logClass["HMPlannerData"] = true
@@ -40,10 +40,9 @@ Logging.logClass["HMPlayerController"] = false
 
 helmod = {
   name = "helmod",
-  version = "0.4.5"
+  version = "0.4.6"
 }
 
-local helmod_clear=false
 -------------------------------------------------------------------------------
 -- On init
 --
@@ -120,7 +119,6 @@ end
 -- @param #table event
 --
 function helmod:on_load(event)
-
 end
 
 -------------------------------------------------------------------------------
@@ -131,18 +129,6 @@ end
 -- @param #table event
 --
 function helmod:on_tick(event)
-  if game.tick ~= 0 and game.tick%60 == 0 and helmod_clear == false then
-    for _,player in pairs(game.players) do
-      if player ~= nil then
-        if global["users"] == nil then global["users"] = {} end
-        if global["users"][player.name] == nil then global["users"][player.name] = {} end
-        local globalPlayer = global["users"][player.name]
-        globalPlayer.isActive = false
-        self:init_playerController(player)
-      end
-    end
-    helmod_clear = true
-  end
 end
 
 -------------------------------------------------------------------------------
@@ -175,12 +161,15 @@ end
 -- @param #table event
 --
 function helmod:on_gui_click(event)
+  local player = game.players[event.player_index]
+  if self.playerController == nil then
+    self:init_playerController(player)
+  end
   local allowed = true
   if event.element ~= nil and event.element.type == "drop-down" then
     allowed = false
   end
   if self.playerController ~= nil and allowed then
-    local player = game.players[event.player_index]
     if self.playerController ~= nil then
       self.playerController:on_gui_click(event)
     end
@@ -426,5 +415,8 @@ remote.add_interface("helmod", {
     end
   end
 })
+
+
+
 
   

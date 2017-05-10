@@ -645,15 +645,30 @@ function PlannerModel.methods:addRecipeIntoProductionBlock(player, key)
   local blockId = globalGui.currentBlock
   local recipe = self.player:getRecipe(player, key);
 
+  -- ajoute le bloc si il n'existe pas
   if model.blocks[blockId] == nil then
+    -- check si le block est independant
+    local unlinked = true
+    for _,block in pairs(model.blocks) do
+      for _,ingredient in pairs(block.ingredients) do
+        for _,product in pairs(recipe.products) do
+          if product.name == ingredient.name then
+            unlinked = false
+          end
+        end
+      end
+    end
+    
     local modelBlock = self:createProductionBlockModel(player, recipe)
     local index = self:countBlocks(player)
     modelBlock.index = index
+    modelBlock.unlinked = unlinked
     model.blocks[modelBlock.id] = modelBlock
     blockId = modelBlock.id
     globalGui.currentBlock = blockId
   end
-
+  
+  -- ajoute le recipe si il n'existe pas
   if model.blocks[blockId].recipes[key] == nil then
     local ModelRecipe = self:createRecipeModel(player, recipe.name, 0)
     local index = self:countBlockRecipes(player, blockId)
