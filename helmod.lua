@@ -52,7 +52,6 @@ helmod = {
 --
 function helmod:on_init(event)
   Logging:trace("helmod", "helmod:on_init(event)", event)
-  self.playerController = PlayerController:new()
 end
 
 -------------------------------------------------------------------------------
@@ -107,7 +106,6 @@ function helmod:on_configuration_changed(data)
         player.isActive = false;
       end
     end
-    self:on_init()
   end
 end
 
@@ -129,6 +127,13 @@ end
 -- @param #table event
 --
 function helmod:on_tick(event)
+  if game.tick ~= 0 and game.tick%60 == 0 then
+    if self.playerController == nil then
+      for _,player in pairs(game.players) do
+        self:init_playerController(player)
+      end
+    end
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -166,7 +171,7 @@ function helmod:on_gui_click(event)
     self:init_playerController(player)
   end
   local allowed = true
-  if event.element ~= nil and event.element.type == "drop-down" then
+  if event.element ~= nil and event.element.valid and event.element.type == "drop-down" then
     allowed = false
   end
   if self.playerController ~= nil and allowed then
@@ -233,6 +238,7 @@ end
 -- @param #table event
 --
 function helmod:on_player_created(event)
+  Logging:trace("helmod", "helmod:on_player_created(event)", event)
   local player = game.players[event.player_index]
   self:init_playerController(player)
 end
@@ -419,4 +425,4 @@ remote.add_interface("helmod", {
 
 
 
-  
+
