@@ -29,7 +29,7 @@ PlannerController = setclass("HMPlannerController", ElementGui)
 --
 function PlannerController.methods:init(parent)
   Logging:debug("HMPlannerController", "init(parent):global=", global)
-  self.parent = parent
+  self.player = parent
   self.controllers = {}
   self.model = PlannerModel:new(self)
 
@@ -63,11 +63,10 @@ end
 --
 function PlannerController.methods:cleanController(player)
   Logging:trace("HMPlannerController", "cleanController(player)")
-  if player.gui.left["helmod_planner_main"] ~= nil then
-    player.gui.left["helmod_planner_main"].destroy()
-  end
-  if player.gui.center["helmod_planner_main"] ~= nil then
-    player.gui.center["helmod_planner_main"].destroy()
+    for _,location in pairs(helmod_settings_mod.display_location.allowed_values) do
+    if player.gui[location]["helmod_planner_main"] ~= nil then
+      player.gui[location]["helmod_planner_main"].destroy()
+    end
   end
 end
 
@@ -80,7 +79,7 @@ end
 --
 function PlannerController.methods:bindController(player)
   Logging:trace("HMPlannerController", "bindController(player)")
-  local parentGui = self.parent:getGui(player)
+  local parentGui = self.player:getGui(player)
   if parentGui ~= nil then
     local guiButton = self:addGuiFrameH(parentGui, PLANNER_COMMAND, "helmod_frame_default")
     guiButton.add({type="button", name=PLANNER_COMMAND, tooltip=({PLANNER_COMMAND}), style="helmod_icon"})
@@ -144,6 +143,17 @@ function PlannerController.methods:on_gui_selection_state_changed(event)
 end
 
 -------------------------------------------------------------------------------
+-- On runtime mod settings
+--
+-- @function [parent=#PlannerController] on_runtime_mod_setting_changed
+--
+-- @param event
+--
+function PlannerController.methods:on_runtime_mod_setting_changed(event)
+  --self:parse_event(event)
+end
+
+-------------------------------------------------------------------------------
 -- Parse event
 --
 -- @function [parent=#PlannerController] parse_event
@@ -161,25 +171,6 @@ function PlannerController.methods:parse_event(event)
     end
     if event.name == "helmod-settings-open" then
       self:send_event(player, "HMPlannerSettings", "OPEN")
-    end
-    if event.name == "helmod-settings-display-next" then
-      local globalSettings = self.parent:getGlobal(player, "settings")
-      local display_size = self.parent:getGlobalSettings(player,"display_size")
-      local i = 1
-      while helmod_display_sizes[i] and helmod_display_sizes[i] ~= display_size do
-        i = i + 1
-      end
-      if #helmod_display_sizes > i then
-        globalSettings["display_size"] = helmod_display_sizes[i+1]
-      else
-        globalSettings["display_size"] = helmod_display_sizes[1]
-      end
-
-      -- refresh
-      self:main(player)
-      self:main(player)
-
-      Logging:debug("HMPlannerController", "parse_event(event): display_size=", display_size, #helmod_display_sizes, i, globalSettings[display_size])
     end
   end
   -- button action
@@ -238,7 +229,8 @@ end
 --
 function PlannerController.methods:main(player)
   Logging:trace("HMPlannerController", "main(player)")
-  local guiMain = player.gui[self.locate]
+  local location = self.player:getSettings(player, "display_location")
+  local guiMain = player.gui[location]
   if guiMain["helmod_planner_main"] ~= nil and guiMain["helmod_planner_main"].valid then
     guiMain["helmod_planner_main"].destroy()
   else
@@ -277,14 +269,15 @@ end
 --
 function PlannerController.methods:getMainPanel(player)
   Logging:debug("HMPlannerController", "getMainPanel(player):",player)
-  local guiMain = player.gui[self.locate]
+  local location = self.player:getSettings(player, "display_location")
+  local guiMain = player.gui[location]
   if guiMain["helmod_planner_main"] ~= nil and guiMain["helmod_planner_main"].valid then
     return guiMain["helmod_planner_main"]
   end
   local panel = self:addGuiFlowH(guiMain, "helmod_planner_main", "helmod_flow_resize_row_width")
   --local panel = self:addGuiFrameH(guiMain, "helmod_planner_main", "helmod_frame_main")
-  self.parent:setStyle(player, panel, "main", "minimal_width")
-  self.parent:setStyle(player, panel, "main", "minimal_height")
+  self.player:setStyle(player, panel, "main", "minimal_width")
+  self.player:setStyle(player, panel, "main", "minimal_height")
   return panel
 end
 
@@ -357,14 +350,13 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerController.methods:getDataPanel(player)
-  local displaySize = self.parent:getGlobalSettings(player, "display_size")
   local infoPanel = self:getInfoPanel(player)
   if infoPanel["helmod_planner_data"] ~= nil and infoPanel["helmod_planner_data"].valid then
     return infoPanel["helmod_planner_data"]
   end
   local panel = self:addGuiFlowV(infoPanel, "helmod_planner_data", "helmod_flow_resize_row_width")
-  self.parent:setStyle(player, panel, "data", "minimal_width")
-  self.parent:setStyle(player, panel, "data", "maximal_width")
+  self.player:setStyle(player, panel, "data", "minimal_width")
+  self.player:setStyle(player, panel, "data", "maximal_width")
   return panel
 end
 
@@ -382,9 +374,9 @@ function PlannerController.methods:refreshDisplayData(player, item, item2, item3
   Logging:debug("HMPlannerController", "refreshDisplayData():",player, item, item2, item3)
   self.controllers["data"]:update(player, item, item2, item3)
   if item == "other_speed_panel" then
-    local globalSettings = self.parent:getGlobal(player, "settings")
-    local controller = self.parent.controllers["speed-controller"]
-    if globalSettings.other_speed_panel == true then
+    local speed_panel = self.player:getSettings(player, "speed_panel", true)
+    local controller = self.player.controllers["speed-controller"]
+    if speed_panel == true then
       controller:cleanController(player)
       controller:bindController(player)
     else

@@ -94,4 +94,14 @@ function SpeedController.methods:on_gui_selection_state_changed(event)
   
 end
 
+-------------------------------------------------------------------------------
+-- On runtime mod settings
+--
+-- @function [parent=#PlannerController] on_runtime_mod_setting_changed
+--
+-- @param event
+--
+function SpeedController.methods:on_runtime_mod_setting_changed(event)
+  --self:parse_event(event)
+end
 

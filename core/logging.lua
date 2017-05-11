@@ -3,14 +3,16 @@ Logging = {}
 local append_log=false
 
 function Logging:new(log)
-	self.log = log
 	self.limit = 5
 	self.filename="helmod\\helmod.log"
 	self.logClass = {}
+	
+	self.debug_values = {none=0,info=1,error=2,debug=3,trace=4}
 end
 
 function Logging:checkClass(logClass)
-  if self.logClass[logClass] ~= nil then return self.logClass[logClass] end
+  local name = settings.global["helmod_debug_filter"].value
+  if name == "all" or name == logClass then return true end
   return false
 end
 
@@ -66,14 +68,16 @@ function Logging:objectToString(object, level)
 end
 
 function Logging:logging(tag, level, logClass, ...)
-	local arg = {...}
+  local debug_level = self.debug_values[settings.global["helmod_debug"].value] or 0
+  local arg = {...}
 	if arg == nil then arg = "nil" end
-	if self:checkClass(logClass) and level <= self.log then
+	if self:checkClass(logClass) and level <= debug_level then
 		local message = "";
 		for key, object in pairs(arg) do
 			message = message..self:objectToString(object)
 		end
 		game.write_file(self.filename, tag.."|"..logClass.."|"..message.."\n", append_log)
+  
 		if append_log == false then append_log = true end
 	end
 end

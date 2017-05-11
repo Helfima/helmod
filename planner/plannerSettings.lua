@@ -20,7 +20,7 @@ function PlannerSettings.methods:init(parent)
   self.panelCaption = ({"helmod_settings-panel.title"})
 
   self.parent = parent
-  self.player = self.parent.parent
+  self.player = self.parent.player
   self.model = self.parent.model
 end
 

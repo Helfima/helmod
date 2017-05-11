@@ -18,7 +18,7 @@ PlannerResourceEdition = setclass("HMPlannerResourceEdition", PlannerAbstractEdi
 --
 function PlannerResourceEdition.methods:on_init(parent)
 	self.panelCaption = ({"helmod_resource-edition-panel.title"})
-	self.player = self.parent.parent
+	self.player = self.parent.player
 	self.model = self.parent.model
 end
 

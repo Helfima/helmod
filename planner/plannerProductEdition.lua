@@ -16,7 +16,7 @@ PlannerProductEdition = setclass("HMPlannerProductEdition", PlannerDialog)
 --
 function PlannerProductEdition.methods:on_init(parent)
   self.panelCaption = ({"helmod_product-edition-panel.title"})
-  self.player = self.parent.parent
+  self.player = self.parent.player
   self.model = self.parent.model
 end
 

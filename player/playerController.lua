@@ -55,11 +55,10 @@ function PlayerController.methods:resetGui(player)
   if player.gui.top["helmod_menu-main"] ~= nil then
     player.gui.top["helmod_menu-main"].destroy()
   end
-  if player.gui.left["helmod_planner_main"] ~= nil then
-    player.gui.left["helmod_planner_main"].destroy()
-  end
-  if player.gui.center["helmod_planner_main"] ~= nil then
-    player.gui.center["helmod_planner_main"].destroy()
+  for _,location in pairs(helmod_settings_mod.display_location.allowed_values) do
+    if player.gui[location]["helmod_planner_main"] ~= nil then
+      player.gui[location]["helmod_planner_main"].destroy()
+    end
   end
   player.gui.top.add{type="flow", name="helmod_menu-main", direction="horizontal"}
 end
@@ -142,6 +141,21 @@ function PlayerController.methods:on_gui_selection_state_changed(event)
   if self.controllers ~= nil then
     for r, controller in pairs(self.controllers) do
       controller:on_gui_selection_state_changed(event)
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- On runtime mod settings
+--
+-- @function [parent=#PlayerController] on_runtime_mod_setting_changed
+--
+-- @param event
+--
+function PlayerController.methods:on_runtime_mod_setting_changed(event)
+  if self.controllers ~= nil then
+    for r, controller in pairs(self.controllers) do
+      controller:on_runtime_mod_setting_changed(event)
     end
   end
 end
@@ -271,6 +285,33 @@ function PlayerController.methods:getGlobalSettings(player, property)
 end
 
 -------------------------------------------------------------------------------
+-- Get settings
+--
+-- @function [parent=#PlayerController] getSettings
+--
+-- @param #LuaPlayer player
+-- @param #string name
+--
+function PlayerController.methods:getSettings(player, name, global)
+  Logging:debug("HMPlayerController", "getSettings(player, name)", name, global)
+  local property = nil
+  local prefixe = "helmod_"
+  if not(global) then
+    property = player.mod_settings[prefixe..name]
+    Logging:debug("HMPlayerController", "connected settings:", player.mod_settings)
+  else
+    property = settings.global[prefixe..name]
+    Logging:debug("HMPlayerController", "global settings:", settings.global)
+  end
+  if property ~= nil then
+    return property.value
+  else
+    Logging:error("HMPlayerController", "settings property not found:", name)
+    return helmod_settings_mod[name].default_value
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Get style sizes
 --
 -- @function [parent=#PlayerController] getStyleSizes
@@ -279,7 +320,11 @@ end
 --
 function PlayerController.methods:getStyleSizes(player)
   Logging:trace("HMPlayerController", "getStyleSizes(player)")
-  local display_size = self:getGlobalSettings(player, "display_size")
+  local display_size = self:getSettings(player, "display_size")
+  local display_size_free = self:getSettings(player, "display_size_free")
+  if string.match(display_size_free, "([0-9]*x[0-9]*)", 1) then
+    display_size = display_size_free
+  end
   Logging:trace("HMPlayerController", "getStyleSizes(player):display_size", display_size)
   local style_sizes = {}
   if display_size ~= nil then
@@ -460,6 +505,7 @@ function PlayerController.methods:getProductionsCrafting(category)
             if category == value then check = true end
           end
         end
+        --if item.crafting_categories ~= nil and item.crafting_categories[category] then check = true end
       elseif category ~= nil and category == "extraction-machine" then
         if item.subgroup ~= nil and item.subgroup.name == "extraction-machine" then
           check = true
@@ -821,8 +867,7 @@ end
 --
 function PlayerController.methods:getLocalisedName(player, element)
   Logging:trace("HMPlayerController", "getLocalisedName(player, element)", player, element)
-  local globalSettings = self:getGlobal(player, "settings")
-  if globalSettings.real_name == true then
+  if self:getSettings(player, "display_real_name", true) then
     return element.name
   end
   local localisedName = element.name
@@ -856,7 +901,7 @@ end
 function PlayerController.methods:getRecipeLocalisedName(player, recipe)
   local globalSettings = self:getGlobal(player, "settings")
   local _recipe = self:getRecipe(player, recipe.name)
-  if _recipe ~= nil and globalSettings.real_name ~= true then
+  if _recipe ~= nil and self:getSettings(player, "display_real_name", true) then
     return _recipe.localised_name
   end
   return recipe.name

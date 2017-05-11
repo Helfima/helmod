@@ -16,7 +16,7 @@ PlannerPinPanel = setclass("HMPlannerPinPanel", PlannerDialog)
 --
 function PlannerPinPanel.methods:on_init(parent)
 	self.panelCaption = ({"helmod_pin-tab-panel.title"})
-	self.player = self.parent.parent
+	self.player = self.parent.player
 	self.model = self.parent.model
 end
 
@@ -215,7 +215,6 @@ end
 function PlannerPinPanel.methods:addProductionBlockHeader(player, itable)
 	Logging:debug("HMPlannerPinPanel", "addProductionBlockHeader():", player, itable)
 	local model = self.model:getModel(player)
-	local globalSettings = self.player:getGlobal(player, "settings")
 
 	local guiRecipe = self:addGuiFlowH(itable,"header-recipe")
 	self:addGuiLabel(guiRecipe, "header-recipe", ({"helmod_result-panel.col-header-recipe"}))
@@ -249,8 +248,6 @@ end
 function PlannerPinPanel.methods:addProductionBlockRow(player, guiTable, blockId, recipe)
 	Logging:debug("HMPlannerPinPanel", "addProductionBlockRow():", player, guiTable, blockId, recipe)
 	local model = self.model:getModel(player)
-
-	local globalSettings = self.player:getGlobal(player, "settings")
 
 	-- col recipe
 	local guiRecipe = self:addGuiFlowH(guiTable,"recipe"..recipe.name, "helmod_flow_default")

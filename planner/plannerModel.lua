@@ -14,7 +14,7 @@ PlannerModel = setclass("HMModel")
 --
 function PlannerModel.methods:init(parent)
   self.parent = parent
-  self.player = self.parent.parent
+  self.player = self.parent.player
 
   self.capEnergy = -0.8
 
@@ -1367,8 +1367,6 @@ function PlannerModel.methods:update(player)
   Logging:debug("HMModel" , "********** update():",player)
 
   local model = self:getModel(player)
-  local globalSettings = self.player:getGlobal(player, "settings")
-  local defaultSettings = self.player:getDefaultSettings()
 
   -- reset all factories
   if model ~= nil and (model.version == nil or model.version ~= self.version) then
@@ -1524,7 +1522,7 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
     end
 
 
-
+    -- calcul selon la factory
     if element.by_factory == true then
       -- initialise la premiere recette avec le nombre d'usine
       local first_recipe = self:firstRecipe(recipes)
@@ -1534,9 +1532,9 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
       self:computeFactory(player, first_recipe)
       local _,first_product = next(first_recipe.products)
       element.input = {}
-      -- formula [product amount]*[assembly speed]*[time]/[recipe energy]
+      -- formula [product amount] * (1 + [productivity]) *[assembly speed]*[time]/[recipe energy]
       element.input.key = first_product.name
-      element.input.quantity = first_product.amount * ( element.factory_number or 0 ) * first_recipe.factory.speed * model.time / first_recipe.energy
+      element.input.quantity = first_product.amount * (1 + first_recipe.factory.effects.productivity) * ( element.factory_number or 0 ) * first_recipe.factory.speed * model.time / first_recipe.energy
     end
 
     -- initialise la premiere recette avec le input
@@ -1634,7 +1632,7 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
           ratio = currentRatio
           ratioRecipe = recipe.index
           -- block number
-          element.count = math.ceil(recipe.factory.count/recipe.factory.limit)
+          element.count = recipe.factory.count/recipe.factory.limit
           -- subblock energy
           element.sub_power = 0
           if element.count ~= nil and element.count > 0 then
@@ -1693,8 +1691,8 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
 
     -- calcul ratio
     for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
-      recipe.factory.limit_count = math.ceil(recipe.factory.count*ratio)
-      recipe.beacon.limit_count = math.ceil(recipe.beacon.count*ratio)
+      recipe.factory.limit_count = recipe.factory.count*ratio
+      recipe.beacon.limit_count = recipe.beacon.count*ratio
       if ratioRecipe ~= nil and ratioRecipe == recipe.index then
         recipe.factory.limit_count = recipe.factory.limit
       end
@@ -1930,10 +1928,10 @@ function PlannerModel.methods:computeFactory(player, object)
     if product ~= nil then
       local model = self:getModel(player)
       -- [nombre d'item] * [effort necessaire du recipe] / ([la vitesse de la factory] * [nombre produit par le recipe] * [le temps en second])
-      local count = math.ceil(product.count*object.energy/(object.factory.speed*self:getElementAmount(product)*(1 + object.factory.effects.productivity)*model.time))
+      local count = product.count*object.energy/(object.factory.speed*self:getElementAmount(product)*(1 + object.factory.effects.productivity)*model.time)
       object.factory.count = count
       if object.beacon.active then
-        object.beacon.count = math.ceil(count/object.beacon.factory)
+        object.beacon.count = count/object.beacon.factory
       else
         object.beacon.count = 0
       end
@@ -1942,10 +1940,10 @@ function PlannerModel.methods:computeFactory(player, object)
     local product = object
     local model = self:getModel(player)
     -- [nombre d'item] / ([la vitesse de la factory] * [le temps en second])
-    local count = math.ceil(product.count/(object.factory.speed*model.time))
+    local count = product.count/(object.factory.speed*model.time)
     object.factory.count = count
     if object.beacon.active then
-      object.beacon.count = math.ceil(count/object.beacon.factory)
+      object.beacon.count = count/object.beacon.factory
     else
       object.beacon.count = 0
     end
@@ -1957,7 +1955,7 @@ function PlannerModel.methods:computeFactory(player, object)
   object.beacon.energy_total = math.ceil(object.beacon.count*object.beacon.energy)
   object.energy_total = object.factory.energy_total + object.beacon.energy_total
   -- arrondi des valeurs
-  object.factory.speed = math.ceil(object.factory.speed*100)/100
+  object.factory.speed = object.factory.speed
   object.factory.energy = math.ceil(object.factory.energy)
   object.beacon.energy = math.ceil(object.beacon.energy)
 end

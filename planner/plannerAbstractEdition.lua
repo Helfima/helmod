@@ -493,7 +493,7 @@ function PlannerAbstractEdition.methods:updateFactoryInfo(player, element, actio
     local sign = "+"
     if factory.effects.speed > 0 then sign = "+" end
     self:addGuiLabel(inputPanel, "label-speed", ({"helmod_label.speed"}))
-    self:addGuiLabel(inputPanel, "speed", factory.speed.." ("..sign..self:formatPercent(factory.effects.speed).."%)")
+    self:addGuiLabel(inputPanel, "speed", self:formatNumber(factory.speed).." ("..sign..self:formatPercent(factory.effects.speed).."%)")
 
     local sign = "+"
     if factory.effects.productivity > 0 then sign = "+" end
@@ -524,7 +524,8 @@ function PlannerAbstractEdition.methods:updateFactoryModulesSelector(player, ele
   local selectorPanel = self:getFactoryModulesSelectorPanel(player)
   local model = self.model:getModel(player)
   local object = self:getObject(player, element, action, item, item2, item3)
-  local model_filter_factory_module = self.player:getGlobalSettings(player, "model_filter_factory_module")
+  local model_filter_factory_module = self.player:getSettings(player, "model_filter_factory_module", true)
+
 
   if selectorPanel["modules"] ~= nil and selectorPanel["modules"].valid and model.moduleListRefresh == true then
     selectorPanel["modules"].destroy()
@@ -545,7 +546,8 @@ function PlannerAbstractEdition.methods:updateFactoryModulesSelector(player, ele
       if factory.module_slots ==  0 then
         allowed = false
       end
-      local tooltip = ({"tooltip.module-description" , module.localised_name, consumption, speed, productivity, pollution})
+      local localised_name = self.player:getLocalisedName(player, module)
+      local tooltip = ({"tooltip.module-description" , localised_name, consumption, speed, productivity, pollution})
       if allowed == false then
         tooltip = ({"item-limitation."..module.limitation_message_key})
         self:addGuiButtonSelectSprite(tableModulesPanel, self:classname().."=do-nothing=ID="..item.."="..object.name.."=", "item", module.name, module.name, tooltip, "red")
@@ -610,8 +612,6 @@ end
 --
 function PlannerAbstractEdition.methods:updateFactorySelector(player, element, action, item, item2, item3)
   Logging:debug("HMPlannerAbstractEdition", "updateFactorySelector():",player, element, action, item, item2, item3)
-  local globalSettings = self.player:getGlobal(player, "settings")
-
   local selectorPanel = self:getFactorySelectorPanel(player)
 
   if selectorPanel["scroll-factory"] ~= nil and selectorPanel["scroll-factory"].valid then
@@ -628,7 +628,7 @@ function PlannerAbstractEdition.methods:updateFactorySelector(player, element, a
   Logging:debug("HMPlannerAbstractEdition", "updateFactorySelector(): group category=",object.category)
 
   local category = object.category
-  if globalSettings.model_filter_factory ~= nil and globalSettings.model_filter_factory == false then category = nil end
+  if not(self.player:getSettings(player, "model_filter_factory", true)) then category = nil end
 
   local factories = {}
   if item == "resource" then
@@ -669,10 +669,7 @@ function PlannerAbstractEdition.methods:updateFactorySelector(player, element, a
   local tablePanel = self:addGuiTable(scrollPanel, "factory-table", 5)
   for key, factory in pairs(factories) do
     if category ~= nil or (factory.subgroup ~= nil and factory.subgroup.name == model.factoryGroupSelected) then
-      local localised_name = factory.localised_name
-      if globalSettings.real_name == true then
-        localised_name = factory.name
-      end
+      local localised_name = self.player:getLocalisedName(player, factory)
       self:addGuiButtonSelectSprite(tablePanel, self:classname().."=factory-select=ID="..item.."="..object.name.."=", "item", factory.name, factory.name, localised_name)
     end
   end
@@ -794,7 +791,7 @@ function PlannerAbstractEdition.methods:updateBeaconModulesSelector(player, elem
   local selectorPanel = self:getBeaconModulesSelectorPanel(player)
   local model = self.model:getModel(player)
   local object = self:getObject(player, element, action, item, item2, item3)
-  local model_filter_beacon_module = self.player:getGlobalSettings(player, "model_filter_beacon_module")
+  local model_filter_beacon_module = self.player:getSettings(player, "model_filter_beacon_module", true)
 
   if selectorPanel["modules"] ~= nil and selectorPanel["modules"].valid and model.moduleListRefresh == true then
     selectorPanel["modules"].destroy()
@@ -811,7 +808,8 @@ function PlannerAbstractEdition.methods:updateBeaconModulesSelector(player, elem
       if productivity > 0 and model_filter_beacon_module == true then
         allowed = false
       end
-      local tooltip = ({"tooltip.module-description" , module.localised_name, consumption, speed, productivity, pollution})
+      local localised_name = self.player:getLocalisedName(player, module)
+      local tooltip = ({"tooltip.module-description" , localised_name, consumption, speed, productivity, pollution})
       if allowed == false then
         tooltip = ({"item-limitation.item-not-allowed-in-this-container-item"})
         self:addGuiButtonSelectSprite(tableModulesPanel, self:classname().."=do-nothing=ID="..item.."="..object.name.."=", "item", module.name, module.name, tooltip, "red")
@@ -836,7 +834,6 @@ end
 --
 function PlannerAbstractEdition.methods:updateBeaconSelector(player, element, action, item, item2, item3)
   Logging:debug("HMPlannerAbstractEdition", "updateBeaconSelector():",player, element, action, item, item2, item3)
-  local globalSettings = self.player:getGlobal(player, "settings")
   local selectorPanel = self:getBeaconSelectorPanel(player)
   local model = self.model:getModel(player)
 
@@ -850,7 +847,7 @@ function PlannerAbstractEdition.methods:updateBeaconSelector(player, element, ac
   local groupsPanel = self:addGuiTable(scrollPanel, "beacon-groups", 2)
 
   local category = "module-beacon"
-  if globalSettings.model_filter_beacon ~= nil and globalSettings.model_filter_beacon == false then category = nil end
+  if not(self.player:getSettings(player, "model_filter_beacon", true)) then category = nil end
   -- ajouter de la table des groupes de recipe
   local factories = self.player:getProductionsBeacon()
   Logging:debug("HMPlannerAbstractEdition", "factories:",factories)
@@ -881,10 +878,7 @@ function PlannerAbstractEdition.methods:updateBeaconSelector(player, element, ac
   --Logging:debug("HMPlannerAbstractEdition", "factories:",self.player:getProductions())
   for key, beacon in pairs(factories) do
     if category ~= nil or (beacon.subgroup ~= nil and beacon.subgroup.name == model.beaconGroupSelected) then
-      local localised_name = beacon.localised_name
-      if globalSettings.real_name == true then
-        localised_name = beacon.name
-      end
+      local localised_name = self.player:getLocalisedName(player, beacon)
       self:addGuiButtonSelectSprite(tablePanel, self:classname().."=beacon-select=ID="..item.."="..object.name.."=", "item", beacon.name, beacon.name, localised_name)
     end
   end

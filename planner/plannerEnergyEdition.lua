@@ -16,7 +16,7 @@ PlannerEnergyEdition = setclass("HMPlannerEnergyEdition", PlannerDialog)
 --
 function PlannerEnergyEdition.methods:on_init(parent)
   self.panelCaption = ({"helmod_energy-edition-panel.title"})
-  self.player = self.parent.parent
+  self.player = self.parent.player
   self.model = self.parent.model
 end
 
@@ -481,7 +481,6 @@ end
 --
 function PlannerEnergyEdition.methods:updatePrimarySelector(player, element, action, item, item2, item3)
   Logging:debug("HMPlannerEnergyEdition", "updatePrimarySelector():",player, element, action, item, item2, item3)
-  local globalSettings = self.player:getGlobal(player, "settings")
   local selectorPanel = self:getPrimarySelectorPanel(player)
   local model = self.model:getModel(player)
 
@@ -495,7 +494,7 @@ function PlannerEnergyEdition.methods:updatePrimarySelector(player, element, act
   local groupsPanel = self:addGuiTable(scrollPanel, "primary-groups", 1)
 
   local category = "primary"
-  if globalSettings.model_filter_generator ~= nil and globalSettings.model_filter_generator == false then category = nil end
+  if not(self.player:getSettings(player, "model_filter_generator", true)) then category = nil end
   -- ajouter de la table des groupes de recipe
   local factories = self.player:getGenerators("primary")
   Logging:debug("HMPlannerEnergyEdition", "factories:",factories)
@@ -526,10 +525,7 @@ function PlannerEnergyEdition.methods:updatePrimarySelector(player, element, act
   --Logging:debug(("HMPlannerEnergyEdition", "factories:",self.player:getProductions())
   for key, element in pairs(factories) do
     if category ~= nil or (element.subgroup ~= nil and element.subgroup.name == model.primaryGroupSelected) then
-      local localised_name = element.localised_name
-      if globalSettings.real_name == true then
-        localised_name = element.name
-      end
+      local localised_name = self.player:getLocalisedName(player, element)
       self:addGuiButtonSelectSprite(tablePanel, self:classname().."=primary-select=ID="..item.."=", "item", element.name, element.name, localised_name)
     end
   end
@@ -634,7 +630,6 @@ end
 --
 function PlannerEnergyEdition.methods:updateSecondarySelector(player, element, action, item, item2, item3)
   Logging:debug("HMPlannerEnergyEdition", "updateSecondarySelector():",player, element, action, item, item2, item3)
-  local globalSettings = self.player:getGlobal(player, "settings")
   local selectorPanel = self:getSecondarySelectorPanel(player)
   local model = self.model:getModel(player)
 
@@ -648,7 +643,7 @@ function PlannerEnergyEdition.methods:updateSecondarySelector(player, element, a
   local groupsPanel = self:addGuiTable(scrollPanel, "secondary-groups", 1)
 
   local category = "secondary"
-  if globalSettings.model_filter_generator ~= nil and globalSettings.model_filter_generator == false then category = nil end
+  if not(self.player:getSettings(player, "model_filter_generator", true)) then category = nil end
   -- ajouter de la table des groupes de recipe
   local factories = self.player:getGenerators("secondary")
   Logging:debug("HMPlannerEnergyEdition", "factories:",factories)
@@ -679,10 +674,7 @@ function PlannerEnergyEdition.methods:updateSecondarySelector(player, element, a
   --Logging:debug("HMPlannerEnergyEdition", "factories:",self.player:getProductions())
   for key, element in pairs(factories) do
     if category ~= nil or (element.subgroup ~= nil and element.subgroup.name == model.secondaryGroupSelected) then
-      local localised_name = element.localised_name
-      if globalSettings.real_name == true then
-        localised_name = element.name
-      end
+      local localised_name = self.player:getLocalisedName(player, element)
       self:addGuiButtonSelectSprite(tablePanel, self:classname().."=secondary-select=ID="..item.."=", "item", element.name, element.name, localised_name)
     end
   end

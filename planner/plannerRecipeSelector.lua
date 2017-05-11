@@ -20,7 +20,7 @@ local recipeFilterProduct = true
 --
 function PlannerRecipeSelector.methods:on_init(parent)
   self.panelCaption = "Recipe Selector"
-  self.player = self.parent.parent
+  self.player = self.parent.player
   self.model = self.parent.model
 end
 
@@ -308,7 +308,6 @@ function PlannerRecipeSelector.methods:updateItemList(player, element, action, i
   Logging:trace("HMPlannerRecipeSelector", "updateItemList():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local panel = self:getItemListPanel(player)
-  local globalSettings = self.player:getGlobal(player, "settings")
 
   if panel["recipe-list"] ~= nil  and panel["recipe-list"].valid then
     panel["recipe-list"].destroy()

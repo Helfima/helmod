@@ -50,7 +50,6 @@ for type,elements in pairs(data.raw) do
           if element.energy_source ~= nil and element.energy_source.type ~= nil then entity.energy_type = element.energy_source.type end
           if element.ingredient_count ~= nil then entity.ingredient_count = element.ingredient_count end
           if element.module_specification ~= nil then entity.module_specification = element.module_specification end
-          if element.mining_power ~= nil then entity.mining_power = element.mining_power end
           if element.distribution_effectivity ~= nil then entity.efficiency = element.distribution_effectivity end
           if element.mining_speed ~= nil then entity.mining_speed = element.mining_speed end
           if element.mining_power ~= nil then entity.mining_power = element.mining_power end

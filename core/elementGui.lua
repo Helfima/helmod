@@ -638,15 +638,17 @@ end
 -- @function [parent=#ElementGui] formatNumber
 --
 -- @param #number n the number
+-- @param #number decimal
 --
 -- @return #number the formated number
 --
-function ElementGui.methods:formatNumber(n)
+function ElementGui.methods:formatNumber(n, decimal)
   local separator = " "
   if n == nil then return 0 end
   --return tostring(math.floor(n)):reverse():gsub("(%d%d%d)","%1 "):gsub(" (%-?)$","%1"):reverse()
-  local decimal = 2
-  if n > 10 then decimal = 1 end
+  if decimal == nil then decimal = 2 end
+  if n > 100 and decimal > 1 then decimal = 1 end
+  if n > 1000 then decimal = 0 end
   local left,num,right = string.match(self:round(n, decimal),'^([^%d]*%d)(%d*)(.-)$')
   if num == nil then return 0 end
   if left == nil then left = "" end
@@ -659,7 +661,7 @@ end
 --
 -- @see http://lua-users.org/wiki/FormattingNumbers
 --
--- @function [parent=#ElementGui] formatNumber
+-- @function [parent=#ElementGui] round
 --
 -- @param #number val the number
 -- @param #number decimal the number
@@ -668,9 +670,9 @@ end
 --
 function ElementGui.methods:round(val, decimal)
   if (decimal) then
-    return math.floor( (val * 10^decimal) + 0.5) / (10^decimal)
+    return math.ceil( (val * 10^decimal)) / (10^decimal)
   else
-    return math.floor(val+0.5)
+    return math.ceil(val)
   end
 end
 -------------------------------------------------------------------------------

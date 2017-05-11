@@ -18,7 +18,7 @@ PlannerRecipeEdition = setclass("HMPlannerRecipeEdition", PlannerAbstractEdition
 --
 function PlannerRecipeEdition.methods:on_init(parent)
 	self.panelCaption = ({"helmod_recipe-edition-panel.title"})
-	self.player = self.parent.parent
+	self.player = self.parent.player
 	self.model = self.parent.model
 end
 

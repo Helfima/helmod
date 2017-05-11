@@ -12,23 +12,23 @@ require "player.playerController"
 -- erro=1
 -- nothing=0
 
-Logging:new(0)
+Logging:new()
 Logging.console = false
 Logging.logClass["helmod"] = false
 Logging.logClass["HMElementGui"] = false
-Logging.logClass["HMPlannerAbstractEdition"] = false
+Logging.logClass["HMPlannerAbstractEdition"] = true
 Logging.logClass["HMPlannerController"] = false
 Logging.logClass["HMPlannerData"] = false
 Logging.logClass["HMPlannerDialog"] = false
 Logging.logClass["HMPlannerEnergyEdition"] = false
-Logging.logClass["HMModel"] = true
+Logging.logClass["HMModel"] = false
 Logging.logClass["HMPlannerPinPanel"] = false
 Logging.logClass["HMPlannerProductEdition"] = false
 Logging.logClass["HMPlannerRecipeEdition"] = false
 Logging.logClass["HMPlannerRecipeSelector"] = false
 Logging.logClass["HMPlannerResourceEdition"] = false
 Logging.logClass["HMPlannerSettings"] = false
-Logging.logClass["HMPlayerController"] = false
+Logging.logClass["HMPlayerController"] = true
 --Logging.logClass["HMPlannerHelp"] = true
 
 
@@ -229,6 +229,21 @@ function helmod:on_gui_selection_state_changed(event)
   end
 end
 
+-------------------------------------------------------------------------------
+-- On runtime mod settings
+--
+-- @function [parent=#helmod] on_runtime_mod_setting_changed
+--
+-- @param event
+--
+function helmod:on_runtime_mod_setting_changed(event)
+  if self.playerController ~= nil then
+    local player = game.players[event.player_index]
+    if self.playerController ~= nil then
+      self.playerController:on_runtime_mod_setting_changed(event)
+    end
+  end
+end
 
 -------------------------------------------------------------------------------
 -- On player created
