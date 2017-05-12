@@ -14,23 +14,6 @@ require "player.playerController"
 
 Logging:new()
 Logging.console = false
-Logging.logClass["helmod"] = false
-Logging.logClass["HMElementGui"] = false
-Logging.logClass["HMPlannerAbstractEdition"] = true
-Logging.logClass["HMPlannerController"] = false
-Logging.logClass["HMPlannerData"] = false
-Logging.logClass["HMPlannerDialog"] = false
-Logging.logClass["HMPlannerEnergyEdition"] = false
-Logging.logClass["HMModel"] = false
-Logging.logClass["HMPlannerPinPanel"] = false
-Logging.logClass["HMPlannerProductEdition"] = false
-Logging.logClass["HMPlannerRecipeEdition"] = false
-Logging.logClass["HMPlannerRecipeSelector"] = false
-Logging.logClass["HMPlannerResourceEdition"] = false
-Logging.logClass["HMPlannerSettings"] = false
-Logging.logClass["HMPlayerController"] = true
---Logging.logClass["HMPlannerHelp"] = true
-
 
 -------------------------------------------------------------------------------
 -- Classe de mod
@@ -39,8 +22,7 @@ Logging.logClass["HMPlayerController"] = true
 --
 
 helmod = {
-  name = "helmod",
-  version = "0.4.6"
+  name = "helmod"
 }
 
 -------------------------------------------------------------------------------
@@ -100,11 +82,10 @@ function helmod:on_configuration_changed(data)
     if old_version ~= nil and old_version < "0.3.0" then
       helmod:upgrade_0_3_0()
     end
-
-    if global["users"] ~= nil then
-      for _,player in pairs(global["users"]) do
-        player.isActive = false;
-      end
+    
+    --initialise au chargement d'une partie existante
+    for _,player in pairs(game.players) do
+      self:init_playerController(player)
     end
   end
 end
@@ -127,13 +108,13 @@ end
 -- @param #table event
 --
 function helmod:on_tick(event)
-  if game.tick ~= 0 and game.tick%60 == 0 then
-    if self.playerController == nil then
-      for _,player in pairs(game.players) do
-        self:init_playerController(player)
-      end
-    end
-  end
+--  if game.tick ~= 0 and game.tick%60 == 0 then
+--    if self.playerController == nil then
+--      for _,player in pairs(game.players) do
+--        self:init_playerController(player)
+--      end
+--    end
+--  end
 end
 
 -------------------------------------------------------------------------------
@@ -205,8 +186,11 @@ end
 -- @param #table event
 --
 function helmod:on_gui_hotkey(event)
+  local player = game.players[event.player_index]
+  if self.playerController == nil then
+    self:init_playerController(player)
+  end
   if self.playerController ~= nil then
-    local player = game.players[event.player_index]
     if self.playerController ~= nil then
       self.playerController:on_gui_hotkey(event)
     end
@@ -221,10 +205,13 @@ end
 -- @param event
 --
 function helmod:on_gui_selection_state_changed(event)
+  local player = game.players[event.player_index]
+  if self.playerController == nil then
+    self:init_playerController(player)
+  end
   if self.playerController ~= nil then
-    local player = game.players[event.player_index]
     if self.playerController ~= nil then
-      self.playerController:on_gui_hotkey(event)
+      self.playerController:on_gui_selection_state_changed(event)
     end
   end
 end
@@ -237,8 +224,11 @@ end
 -- @param event
 --
 function helmod:on_runtime_mod_setting_changed(event)
+  local player = game.players[event.player_index]
+  if self.playerController == nil then
+    self:init_playerController(player)
+  end
   if self.playerController ~= nil then
-    local player = game.players[event.player_index]
     if self.playerController ~= nil then
       self.playerController:on_runtime_mod_setting_changed(event)
     end
@@ -254,6 +244,19 @@ end
 --
 function helmod:on_player_created(event)
   Logging:trace("helmod", "helmod:on_player_created(event)", event)
+  local player = game.players[event.player_index]
+  self:init_playerController(player)
+end
+
+-------------------------------------------------------------------------------
+-- On player join game
+--
+-- @function [parent=#helmod] on_player_joined_game
+--
+-- @param #table event
+--
+function helmod:on_player_joined_game(event)
+  Logging:trace("helmod", "helmod:on_player_joined_game(event)", event)
   local player = game.players[event.player_index]
   self:init_playerController(player)
 end

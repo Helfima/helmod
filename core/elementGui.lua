@@ -36,12 +36,15 @@ end
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.methods:addGuiLabel(parent, key, caption, style, tooltip)
-  Logging:trace("HMElementGui", "addGuiLabel", parent, key, caption, style, tooltip)
+function ElementGui.methods:addGuiLabel(parent, key, caption, style, tooltip, single_line)
+  Logging:trace("HMElementGui", "addGuiLabel", parent, key, caption, style, tooltip, single_line)
   local options = {}
   options.type = "label"
   options.name = key
   options.caption = caption
+  if single_line ~= nil then
+    options.single_line = single_line
+  end
   if style ~= nil then
     options.style = style
   end

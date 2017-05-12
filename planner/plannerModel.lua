@@ -18,7 +18,7 @@ function PlannerModel.methods:init(parent)
 
   self.capEnergy = -0.8
 
-  self.version = "0.4.6.1"
+  self.version = "0.4.7"
 end
 
 -------------------------------------------------------------------------------
@@ -674,6 +674,9 @@ function PlannerModel.methods:checkUnlinkedBlock(player, block)
             end
           end
         end
+        if current_block.id ~= block.id and current_block.name == block.name then
+          unlinked = true
+        end
       end
     end
     block.unlinked = unlinked
@@ -1019,6 +1022,7 @@ function PlannerModel.methods:setFactory(player, item, key, name)
         if entity_ore ~= nil and entity_ore.mineable_properties ~= nil and entity_ore.mineable_properties.hardness ~= nil then hardness = entity_ore.mineable_properties.hardness end
         if entity_ore ~= nil and entity_ore.mineable_properties ~= nil and entity_ore.mineable_properties.miningtime ~= nil then miningtime = entity_ore.mineable_properties.miningtime end
         -- (mining power - ore mining hardness) * mining speed
+        -- @see https://wiki.factorio.com/Mining
         speed_nominal = (mining_power - hardness) * mining_speed / miningtime
       end
       object.factory.speed_nominal = speed_nominal
@@ -1929,6 +1933,7 @@ function PlannerModel.methods:computeFactory(player, object)
       local model = self:getModel(player)
       -- [nombre d'item] * [effort necessaire du recipe] / ([la vitesse de la factory] * [nombre produit par le recipe] * [le temps en second])
       local count = product.count*object.energy/(object.factory.speed*self:getElementAmount(product)*(1 + object.factory.effects.productivity)*model.time)
+      if object.factory.speed == 0 then count = 0 end
       object.factory.count = count
       if object.beacon.active then
         object.beacon.count = count/object.beacon.factory
@@ -1941,6 +1946,7 @@ function PlannerModel.methods:computeFactory(player, object)
     local model = self:getModel(player)
     -- [nombre d'item] / ([la vitesse de la factory] * [le temps en second])
     local count = product.count/(object.factory.speed*model.time)
+    if object.factory.speed == 0 then count = 0 end
     object.factory.count = count
     if object.beacon.active then
       object.beacon.count = count/object.beacon.factory

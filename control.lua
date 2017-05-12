@@ -21,7 +21,11 @@ function proxy_tick(event)
 end
 
 function proxy_player_created(event)
-	helmod:on_player_created(event)
+  helmod:on_player_created(event)
+end
+
+function proxy_player_joined_game(event)
+  helmod:on_player_joined_game(event)
 end
 
 function proxy_gui_click(event)
@@ -45,13 +49,13 @@ function proxy_close_open(event)
   helmod:on_gui_hotkey(new_event)
 end
 
-function proxy_settings_open(event)
-  local new_event = {name="helmod-settings-open", player_index = event.player_index}
+function proxy_recipe_selector_open(event)
+  local new_event = {name="helmod-recipe-selector-open", player_index = event.player_index}
   helmod:on_gui_hotkey(new_event)
 end
 
-function proxy_settings_display_next(event)
-  local new_event = {name="helmod-settings-display-next", player_index = event.player_index}
+function proxy_production_line_open(event)
+  local new_event = {name="helmod-production-line-open", player_index = event.player_index}
   helmod:on_gui_hotkey(new_event)
 end
 
@@ -66,8 +70,9 @@ script.on_event(defines.events.on_gui_text_changed,proxy_gui_text_changed)
 script.on_event(defines.events.on_gui_selection_state_changed,proxy_gui_selection_state_changed)
 script.on_event(defines.events.on_runtime_mod_setting_changed,proxy_runtime_mod_setting_changed)
 
+script.on_event(defines.events.on_player_joined_game, proxy_player_joined_game)
 
 -- event hotkey
 script.on_event("helmod-open-close",proxy_close_open)
-script.on_event("helmod-settings-open",proxy_settings_open)
-script.on_event("helmod-settings-display-next",proxy_settings_display_next)
+script.on_event("helmod-recipe-selector-open",proxy_recipe_selector_open)
+script.on_event("helmod-production-line-open",proxy_production_line_open)

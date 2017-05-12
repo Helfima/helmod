@@ -215,10 +215,10 @@ function PlannerSettings.methods:after_open(player, element, action, item, item2
   self.parent:send_event(player, "HMPlannerEnergyEdition", "CLOSE")
 
   self:updateAboutSettings(player, element, action, item, item2, item3)
-  self:updateDisplaySettings(player, element, action, item, item2, item3)
-  self:updateDataSettings(player, element, action, item, item2, item3)
-  self:updateModelSettings(player, element, action, item, item2, item3)
-  self:updateOtherSettings(player, element, action, item, item2, item3)
+--  self:updateDisplaySettings(player, element, action, item, item2, item3)
+--  self:updateDataSettings(player, element, action, item, item2, item3)
+--  self:updateModelSettings(player, element, action, item, item2, item3)
+--  self:updateOtherSettings(player, element, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -236,16 +236,14 @@ end
 function PlannerSettings.methods:updateAboutSettings(player, element, action, item, item2, item3)
   Logging:debug("HMPlannerSettings", "updateAboutSettings():",player, element, action, item, item2, item3)
 
-  local globalSettings = self.player:getGlobal(player, "settings")
-  local defaultSettings = self.player:getDefaultSettings()
+  local aboutSettingsPanel = self:getAboutSettingsPanel(player)
 
-  local dataSettingsPanel = self:getAboutSettingsPanel(player)
+  local dataSettingsTable = self:addGuiTable(aboutSettingsPanel, "settings", 2)
 
-  local dataSettingsTable = self:addGuiTable(dataSettingsPanel, "settings", 2)
+  self:addGuiLabel(dataSettingsTable, self:classname().."=version-label", {"helmod_settings-panel.mod-version"})
+  self:addGuiLabel(dataSettingsTable, self:classname().."=version", game.active_mods["helmod"])
 
-  self:addGuiLabel(dataSettingsTable, self:classname().."=version-label", ({"helmod_settings-panel.mod-version"}))
-  self:addGuiLabel(dataSettingsTable, self:classname().."=version", helmod.version)
-
+  self:addGuiLabel(aboutSettingsPanel, self:classname().."=info", {"helmod_settings-panel.mod-info"}, "helmod_label_max_250", nil, false)
 end
 
 -------------------------------------------------------------------------------

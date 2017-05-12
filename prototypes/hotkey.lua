@@ -9,14 +9,14 @@ data:extend(
     },
     {
       type = "custom-input",
-      name = "helmod-settings-open",
+      name = "helmod-production-line-open",
       key_sequence = "I",
       consuming = "script-only"
 
     },
     {
       type = "custom-input",
-      name = "helmod-settings-display-next",
+      name = "helmod-recipe-selector-open",
       key_sequence = "O",
       consuming = "script-only"
 

@@ -19,7 +19,7 @@ local recipeFilterProduct = true
 -- @param #PlannerController parent parent controller
 --
 function PlannerRecipeSelector.methods:on_init(parent)
-  self.panelCaption = "Recipe Selector"
+  self.panelCaption = ({"helmod_recipe-selector-panel.title"})
   self.player = self.parent.player
   self.model = self.parent.model
 end

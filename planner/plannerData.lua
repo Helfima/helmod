@@ -986,17 +986,17 @@ function PlannerData.methods:addProductionBlockRow(player, guiTable, block, reci
   end
   -- col index
   if self.player:getSettings(player, "display_data_col_index", true) then
-    local guiIndex = self:addGuiFlowH(guiTable,"index"..recipe.name)
+    local guiIndex = self:addGuiFlowH(guiTable,"index"..recipe.id)
     self:addGuiLabel(guiIndex, "index", recipe.index, "helmod_label_row_right_40")
   end
   -- col id
   if self.player:getSettings(player, "display_data_col_id", true) then
-    local guiId = self:addGuiFlowH(guiTable,"id"..recipe.name)
+    local guiId = self:addGuiFlowH(guiTable,"id"..recipe.id)
     self:addGuiLabel(guiId, "id", recipe.id)
   end
   -- col name
   if self.player:getSettings(player, "display_data_col_name", true) then
-    local guiName = self:addGuiFlowH(guiTable,"name"..recipe.name)
+    local guiName = self:addGuiFlowH(guiTable,"name"..recipe.id)
     self:addGuiLabel(guiName, "name_", recipe.name)
   end
   -- col recipe
@@ -1010,7 +1010,7 @@ function PlannerData.methods:addProductionBlockRow(player, guiTable, block, reci
 
   -- col factory
   local factory = recipe.factory
-  local guiFactory = self:addCellLabel(player, guiTable, "factory-"..recipe.name, self:formatNumberFactory(factory.limit_count).."/"..self:formatNumberFactory(factory.count))
+  local guiFactory = self:addCellLabel(player, guiTable, "factory-"..recipe.name, self:formatNumberFactory(factory.limit_count).."/"..self:formatNumberFactory(factory.count), 50)
   self:addIconCell(player, guiFactory, factory, "HMPlannerRecipeEdition=OPEN=ID="..block.id.."="..recipe.name.."=", true, "tooltip.edit-recipe", self.color_button_edit)
   local col_size = 2
   if display_cell_mod == "small-icon" then col_size = 5 end
@@ -1035,7 +1035,7 @@ function PlannerData.methods:addProductionBlockRow(player, guiTable, block, reci
 
   -- col beacon
   local beacon = recipe.beacon
-  local guiBeacon = self:addCellLabel(player, guiTable, "beacon-"..recipe.name, self:formatNumberFactory(beacon.limit_count).."/"..self:formatNumberFactory(beacon.count))
+  local guiBeacon = self:addCellLabel(player, guiTable, "beacon-"..recipe.name, self:formatNumberFactory(beacon.limit_count).."/"..self:formatNumberFactory(beacon.count), 50)
   self:addIconCell(player, guiBeacon, beacon, "HMPlannerRecipeEdition=OPEN=ID="..block.id.."="..recipe.name.."=", true, "tooltip.edit-recipe", self.color_button_edit)
   local col_size = 1
   if display_cell_mod == "small-icon" then col_size = 5 end
@@ -1107,17 +1107,17 @@ function PlannerData.methods:addProductionLineRow(player, guiTable, block)
 
   -- col index
   if self.player:getSettings(player, "display_data_col_index", true) then
-    local guiIndex = self:addGuiFlowH(guiTable,"index"..block.name)
+    local guiIndex = self:addGuiFlowH(guiTable,"index"..block.id)
     self:addGuiLabel(guiIndex, "index", block.index, "helmod_label_row_right_40")
   end
   -- col id
   if self.player:getSettings(player, "display_data_col_id", true) then
-    local guiId = self:addGuiFlowH(guiTable,"id"..block.name)
+    local guiId = self:addGuiFlowH(guiTable,"id"..block.id)
     self:addGuiLabel(guiId, "id", block.id)
   end
   -- col name
   if self.player:getSettings(player, "display_data_col_name", true) then
-    local guiName = self:addGuiFlowH(guiTable,"name"..block.name)
+    local guiName = self:addGuiFlowH(guiTable,"name"..block.id)
     self:addGuiLabel(guiName, "name_", block.name)
   end
 
@@ -1203,15 +1203,15 @@ function PlannerData.methods:addIconRecipeCell(player, cell, element, action, se
   -- ingredient = {type="item", name="steel-plate", amount=8}
   if display_cell_mod == "small-icon" then
     if cell ~= nil and select == true then
-      self:addGuiButtonSelectSpriteM(cell, self:classname()..action, self.player:getRecipeIconType(player, element), element.name, element.name, ({tooltip_name, self.player:getLocalisedName(player, element)}), color)
+      self:addGuiButtonSelectSpriteM(cell, self:classname()..action, self.player:getRecipeIconType(player, element), element.name, element.name, ({tooltip_name, self.player:getRecipeLocalisedName(player, element)}), color)
     else
-      self:addGuiButtonSpriteM(cell, self:classname()..action, self.player:getRecipeIconType(player, element), element.name, element.name, ({tooltip_name, self.player:getLocalisedName(player, element)}), color)
+      self:addGuiButtonSpriteM(cell, self:classname()..action, self.player:getRecipeIconType(player, element), element.name, element.name, ({tooltip_name, self.player:getRecipeLocalisedName(player, element)}), color)
     end
   else
     if cell ~= nil and select == true then
-      self:addGuiButtonSelectSprite(cell, self:classname()..action, self.player:getRecipeIconType(player, element), element.name, element.name, ({tooltip_name, self.player:getLocalisedName(player, element)}), color)
+      self:addGuiButtonSelectSprite(cell, self:classname()..action, self.player:getRecipeIconType(player, element), element.name, element.name, ({tooltip_name, self.player:getRecipeLocalisedName(player, element)}), color)
     else
-      self:addGuiButtonSprite(cell, self:classname()..action, self.player:getRecipeIconType(player, element), element.name, element.name, ({tooltip_name, self.player:getLocalisedName(player, element)}), color)
+      self:addGuiButtonSprite(cell, self:classname()..action, self.player:getRecipeIconType(player, element), element.name, element.name, ({tooltip_name, self.player:getRecipeLocalisedName(player, element)}), color)
     end
   end
 end
@@ -1296,17 +1296,17 @@ function PlannerData.methods:addResourcesRow(player, guiTable, ingredient)
 
   -- col index
   if self.player:getSettings(player, "display_data_col_index", true) then
-    local guiIndex = self:addGuiFlowH(guiTable,"index"..ingredient.name)
+    local guiIndex = self:addGuiFlowH(guiTable,"index"..ingredient.id)
     self:addGuiLabel(guiIndex, "index", ingredient.index, "helmod_label_row_right_40")
   end
   -- col id
   if self.player:getSettings(player, "display_data_col_id", true) then
-    local guiId = self:addGuiFlowH(guiTable,"id"..ingredient.name)
+    local guiId = self:addGuiFlowH(guiTable,"id"..ingredient.id)
     self:addGuiLabel(guiId, "id", ingredient.id)
   end
   -- col name
   if self.player:getSettings(player, "display_data_col_name", true) then
-    local guiName = self:addGuiFlowH(guiTable,"name"..ingredient.name)
+    local guiName = self:addGuiFlowH(guiTable,"name"..ingredient.id)
     self:addGuiLabel(guiName, "name_", ingredient.name)
   end
   -- col count

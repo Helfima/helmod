@@ -63,7 +63,7 @@ end
 --
 function PlannerController.methods:cleanController(player)
   Logging:trace("HMPlannerController", "cleanController(player)")
-    for _,location in pairs(helmod_settings_mod.display_location.allowed_values) do
+  for _,location in pairs(helmod_settings_mod.display_location.allowed_values) do
     if player.gui[location]["helmod_planner_main"] ~= nil then
       player.gui[location]["helmod_planner_main"].destroy()
     end
@@ -128,7 +128,7 @@ end
 -- @param event
 --
 function PlannerController.methods:on_gui_hotkey(event)
-  self:parse_event(event)
+  self:parse_event(event, "hotkey")
 end
 
 -------------------------------------------------------------------------------
@@ -139,7 +139,7 @@ end
 -- @param event
 --
 function PlannerController.methods:on_gui_selection_state_changed(event)
-  self:parse_event(event)
+  self:parse_event(event, "dropdown")
 end
 
 -------------------------------------------------------------------------------
@@ -150,7 +150,7 @@ end
 -- @param event
 --
 function PlannerController.methods:on_runtime_mod_setting_changed(event)
-  --self:parse_event(event)
+  self:parse_event(event, "settings")
 end
 
 -------------------------------------------------------------------------------
@@ -159,42 +159,62 @@ end
 -- @function [parent=#PlannerController] parse_event
 --
 -- @param event
+-- @param type event type
 --
-function PlannerController.methods:parse_event(event)
+function PlannerController.methods:parse_event(event, type)
   Logging:trace("HMPlannerController", "parse_event(event)")
-  -- hotkey action
-  if self.controllers ~= nil and event.element == nil then
-    Logging:debug("HMPlannerController", "parse_event(event): hotkey=", event.name)
-    local player = game.players[event.player_index]
-    if event.name == "helmod-open-close" then
-      self:main(player)
-    end
-    if event.name == "helmod-settings-open" then
-      self:send_event(player, "HMPlannerSettings", "OPEN")
-    end
-  end
-  -- button action
-  if self.controllers ~= nil and event.element ~= nil and event.element.valid then
-    local eventController = nil
-    for _, controller in pairs(self.controllers) do
-      if string.find(event.element.name, controller:classname()) then
-        eventController = controller
+  if self.controllers ~= nil then
+    -- settings action
+    if type == "settings" and event.element == nil then
+      Logging:debug("HMPlannerController", "parse_event(event): settings=", event.name)
+      local player = game.players[event.player_index]
+      if self:isOpened(player) then
+        self:main(player)
+        self:main(player)
       end
     end
-    if eventController ~= nil then
+    -- hotkey action
+    if type == "hotkey" and event.element == nil then
+      Logging:debug("HMPlannerController", "parse_event(event): hotkey=", event.name)
       local player = game.players[event.player_index]
-      local patternAction = eventController:classname().."=([^=]*)"
-      local patternItem = eventController:classname()..".*=ID=([^=]*)"
-      local patternItem2 = eventController:classname()..".*=ID=[^=]*=([^=]*)"
-      local patternItem3 = eventController:classname()..".*=ID=[^=]*=[^=]*=([^=]*)"
-      local action = string.match(event.element.name,patternAction,1)
-      local item = string.match(event.element.name,patternItem,1)
-      local item2 = string.match(event.element.name,patternItem2,1)
-      local item3 = string.match(event.element.name,patternItem3,1)
-      eventController:send_event(player, event.element, action, item, item2, item3)
+      if event.name == "helmod-open-close" then
+        self:main(player)
+      end
+      if event.name == "helmod-production-line-open" then
+        if not(self:isOpened(player)) then
+          self:main(player)
+        end
+        self:send_event(player, "HMPlannerData", "change-tab", "product-line")
+      end
+      if event.name == "helmod-recipe-selector-open" then
+        if not(self:isOpened(player)) then
+          self:main(player)
+        end
+        self:send_event(player, "HMPlannerRecipeSelector", "OPEN")
+      end
+    end
+    -- button action
+    if type == nil and event.element ~= nil and event.element.valid then
+      local eventController = nil
+      for _, controller in pairs(self.controllers) do
+        if string.find(event.element.name, controller:classname()) then
+          eventController = controller
+        end
+      end
+      if eventController ~= nil then
+        local player = game.players[event.player_index]
+        local patternAction = eventController:classname().."=([^=]*)"
+        local patternItem = eventController:classname()..".*=ID=([^=]*)"
+        local patternItem2 = eventController:classname()..".*=ID=[^=]*=([^=]*)"
+        local patternItem3 = eventController:classname()..".*=ID=[^=]*=[^=]*=([^=]*)"
+        local action = string.match(event.element.name,patternAction,1)
+        local item = string.match(event.element.name,patternItem,1)
+        local item2 = string.match(event.element.name,patternItem2,1)
+        local item3 = string.match(event.element.name,patternItem3,1)
+        eventController:send_event(player, event.element, action, item, item2, item3)
+      end
     end
   end
-
 end
 
 -------------------------------------------------------------------------------
@@ -279,6 +299,23 @@ function PlannerController.methods:getMainPanel(player)
   self.player:setStyle(player, panel, "main", "minimal_width")
   self.player:setStyle(player, panel, "main", "minimal_height")
   return panel
+end
+
+-------------------------------------------------------------------------------
+-- Is opened main panel
+--
+-- @function [parent=#PlannerController] isOpened
+--
+-- @param #LuaPlayer player
+--
+function PlannerController.methods:isOpened(player)
+  Logging:debug("HMPlannerController", "isOpened(player):",player)
+  local location = self.player:getSettings(player, "display_location")
+  local guiMain = player.gui[location]
+  if guiMain["helmod_planner_main"] ~= nil then
+    return true
+  end
+  return false
 end
 
 -------------------------------------------------------------------------------

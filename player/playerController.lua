@@ -436,6 +436,12 @@ function PlayerController.methods:getRecipes(player, with_resource)
         recipes[resource.name] = self:getRecipe(player, resource.name)
       end
     end
+    local fluids = self:getFluidPrototypes()
+    if fluids ~= nil then
+      for _,fluid in pairs(fluids) do
+        recipes[fluid.name] = self:getRecipe(player, fluid.name)
+      end
+    end
   end
   return recipes
 end
@@ -498,7 +504,7 @@ function PlayerController.methods:getProductionsCrafting(category)
     if item.type ~= nil then
       Logging:trace("HMPlayerController", "getProductionsCrafting(category):item", item.name, item.type, item.group.name, item.subgroup.name)
       local check = false
-      if category ~= nil and category ~= "extraction-machine" then
+      if category ~= nil and category ~= "extraction-machine" and category ~= "energy" then
         local categories = self:getItemProperty(item.name, "crafting_categories")
         if categories ~= nil then
           for c, value in pairs(categories) do
@@ -508,6 +514,10 @@ function PlayerController.methods:getProductionsCrafting(category)
         --if item.crafting_categories ~= nil and item.crafting_categories[category] then check = true end
       elseif category ~= nil and category == "extraction-machine" then
         if item.subgroup ~= nil and item.subgroup.name == "extraction-machine" then
+          check = true
+        end
+      elseif category ~= nil and category == "energy" then
+        if item.subgroup ~= nil and item.subgroup.name == "energy" then
           check = true
         end
       else
@@ -592,21 +602,54 @@ function PlayerController.methods:getRecipe(player, name)
   local recipe = self:getForce(player).recipes[name]
   if recipe == nil then
     local entity = game.entity_prototypes[name]
-    if entity ~= nil and entity.resource_category ~= nil then
-      -- build a fake recipe for resource
-      recipe = {
+    if entity ~= nil then
+      if entity.resource_category ~= nil then
+        -- build a fake recipe for resource
+        recipe = self:createFakeRecipe(player, entity, "resource")
+      end
+    else
+      local fluid = game.fluid_prototypes[name]
+      if fluid ~= nil then
+        -- build a fake recipe for resource
+        recipe = self:createFakeRecipe(player, fluid, "fluid")
+      end
+    end
+  end
+  return recipe
+end
+
+-------------------------------------------------------------------------------
+-- Create a fake recipe
+--
+-- @function [parent=#PlayerController] createFakeRecipe
+--
+-- @param #LuaPlayer player
+-- @param #LuaPrototype entity
+-- @param #string type
+--
+-- @return #LuaRecipe recipe
+--
+function PlayerController.methods:createFakeRecipe(player, entity, type)
+   -- build a fake recipe
+   local recipe = {
         name = entity.name,
-        localised_name = {"entity-name."..entity.name},
         group = entity.group,
         subgroup = entity.subgroup,
         energy = 1,
-        products = {{type="item", name=entity.name, amount=1}},
-        ingredients = {{type="item", name=entity.name, amount=1}},
-        enabled = true,
-        resource_category = entity.resource_category,
-        category = "extraction-machine"
+        enabled = true
       }
-    end
+  if type == "resource" and entity.resource_category ~= nil then
+    recipe.localised_name = {"entity-name."..entity.name}
+    recipe.products = {{type="item", name=entity.name, amount=1}}
+    recipe.ingredients = {{type="item", name=entity.name, amount=1}}
+    recipe.resource_category = entity.resource_category
+    recipe.category = "extraction-machine"
+  end
+  if type == "fluid" then
+    recipe.localised_name = {"fluid-name."..entity.name}
+    recipe.products = {{type="fluid", name=entity.name, amount=1}}
+    recipe.ingredients = {{type="fluid", name=entity.name, amount=1}}
+    recipe.category = "energy"
   end
   return recipe
 end
@@ -728,6 +771,17 @@ end
 --
 function PlayerController.methods:getItemPrototype(name)
   return game.item_prototypes[name]
+end
+
+-------------------------------------------------------------------------------
+-- Return fluid prototypes
+--
+-- @function [parent=#PlayerController] getFluidPrototypes
+--
+-- @return #LuaFluidPrototype fluid prototype
+--
+function PlayerController.methods:getFluidPrototypes()
+  return game.fluid_prototypes
 end
 
 -------------------------------------------------------------------------------
@@ -901,7 +955,7 @@ end
 function PlayerController.methods:getRecipeLocalisedName(player, recipe)
   local globalSettings = self:getGlobal(player, "settings")
   local _recipe = self:getRecipe(player, recipe.name)
-  if _recipe ~= nil and self:getSettings(player, "display_real_name", true) then
+  if _recipe ~= nil and not(self:getSettings(player, "display_real_name", true)) then
     return _recipe.localised_name
   end
   return recipe.name
