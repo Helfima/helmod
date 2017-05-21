@@ -59,20 +59,28 @@ function proxy_production_line_open(event)
   helmod:on_gui_hotkey(new_event)
 end
 
+function pcall_event(name, event, callback)
+  local ok , err = pcall(function()
+    script.on_event(event,callback)
+  end)
+  if not(ok) then
+    log("Helmod: defined event "..name.." is not valid!")
+    log(err)
+  end
+end
 
 script.on_init(proxy_init)
 script.on_load(proxy_load)
 script.on_configuration_changed(proxy_configuration_changed)
-script.on_event(defines.events.on_tick, proxy_tick)
-script.on_event(defines.events.on_player_created, proxy_player_created)
-script.on_event(defines.events.on_gui_click,proxy_gui_click)
-script.on_event(defines.events.on_gui_text_changed,proxy_gui_text_changed)
-script.on_event(defines.events.on_gui_selection_state_changed,proxy_gui_selection_state_changed)
-script.on_event(defines.events.on_runtime_mod_setting_changed,proxy_runtime_mod_setting_changed)
-
-script.on_event(defines.events.on_player_joined_game, proxy_player_joined_game)
+pcall_event("on_tick", defines.events.on_tick, proxy_tick)
+pcall_event("on_player_created", defines.events.on_player_created, proxy_player_created)
+pcall_event("on_gui_click", defines.events.on_gui_click, proxy_gui_click)
+pcall_event("on_gui_text_changed", defines.events.on_gui_text_changed, proxy_gui_text_changed)
+pcall_event("on_gui_selection_state_changed", defines.events.on_gui_selection_state_changed, proxy_gui_selection_state_changed)
+pcall_event("on_runtime_mod_setting_changed", defines.events.on_runtime_mod_setting_changed, proxy_runtime_mod_setting_changed)
+pcall_event("on_player_joined_game", defines.events.on_player_joined_game, proxy_player_joined_game)
 
 -- event hotkey
-script.on_event("helmod-open-close",proxy_close_open)
-script.on_event("helmod-recipe-selector-open",proxy_recipe_selector_open)
-script.on_event("helmod-production-line-open",proxy_production_line_open)
+pcall_event("helmod-open-close", "helmod-open-close", proxy_close_open)
+pcall_event("helmod-recipe-selector-open", "helmod-recipe-selector-open", proxy_recipe_selector_open)
+pcall_event("helmod-production-line-open", "helmod-production-line-open", proxy_production_line_open)

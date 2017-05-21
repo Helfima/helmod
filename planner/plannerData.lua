@@ -24,6 +24,7 @@ function PlannerData.methods:init(parent)
   self.SUMMARY_TAB = "summary"
   self.RESOURCES_TAB = "resources"
   self.POWER_TAB = "power"
+  self.PROPERTIES_TAB = "properties"
 
   self.color_button_edit="green"
   self.color_button_add="yellow"
@@ -454,6 +455,9 @@ function PlannerData.methods:update(player, item, item2, item3)
   if globalGui.currentTab == self.POWER_TAB then
     self:updatePowers(player, item, item2, item3)
   end
+  if globalGui.currentTab == self.PROPERTIES_TAB then
+    self:updateProperties(player, item, item2, item3)
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -529,6 +533,7 @@ function PlannerData.methods:updateProductionHeader(player, item, item2, item3)
   self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.SUMMARY_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-summary"}))
   self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.RESOURCES_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-resources"}))
   self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.POWER_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-energy"}))
+  --self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.PROPERTIES_TAB, "helmod_button_default", ({"helmod_result-panel.tab-button-properties"}))
   self:addGuiButton(tabPanel, self:classname().."=refresh-model=ID=", model.id, "helmod_button_default", ({"helmod_result-panel.refresh-button"}))
 
   local deletePanel = self:addGuiFlowH(actionPanel, "delete", "helmod_flow_default")
@@ -692,6 +697,7 @@ function PlannerData.methods:updateProductionBlock(player, item, item2, item3)
   end
   local tabPanel = self:addGuiFlowH(menuPanel, "tab", "helmod_flow_data_tab")
   self:addGuiButton(tabPanel, "HMPlannerRecipeSelector=OPEN=ID=", blockId, "helmod_button_default", ({"helmod_result-panel.add-button-recipe"}))
+  self:addGuiButton(tabPanel, "HMPlannerTechnologySelector=OPEN=ID=", blockId, "helmod_button_default", ({"helmod_result-panel.add-button-technology"}))
   self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", self.PRODUCTION_LINE_TAB, "helmod_button_default", ({"helmod_result-panel.back-button-production-line"}))
   self:addGuiButton(tabPanel, "HMPlannerPinPanel=OPEN=ID=", blockId, "helmod_button_default", ({"helmod_result-panel.tab-button-pin"}))
   self:addGuiButton(tabPanel, self:classname().."=refresh-model=ID=", model.id, "helmod_button_default", ({"helmod_result-panel.refresh-button"}))
@@ -1010,7 +1016,7 @@ function PlannerData.methods:addProductionBlockRow(player, guiTable, block, reci
 
   -- col factory
   local factory = recipe.factory
-  local guiFactory = self:addCellLabel(player, guiTable, "factory-"..recipe.name, self:formatNumberFactory(factory.limit_count).."/"..self:formatNumberFactory(factory.count), 50)
+  local guiFactory = self:addCellLabel(player, guiTable, "factory-"..recipe.name, self:formatNumberFactory(factory.limit_count).."/"..self:formatNumberFactory(factory.count), 60)
   self:addIconCell(player, guiFactory, factory, "HMPlannerRecipeEdition=OPEN=ID="..block.id.."="..recipe.name.."=", true, "tooltip.edit-recipe", self.color_button_edit)
   local col_size = 2
   if display_cell_mod == "small-icon" then col_size = 5 end
@@ -1035,7 +1041,7 @@ function PlannerData.methods:addProductionBlockRow(player, guiTable, block, reci
 
   -- col beacon
   local beacon = recipe.beacon
-  local guiBeacon = self:addCellLabel(player, guiTable, "beacon-"..recipe.name, self:formatNumberFactory(beacon.limit_count).."/"..self:formatNumberFactory(beacon.count), 50)
+  local guiBeacon = self:addCellLabel(player, guiTable, "beacon-"..recipe.name, self:formatNumberFactory(beacon.limit_count).."/"..self:formatNumberFactory(beacon.count), 60)
   self:addIconCell(player, guiBeacon, beacon, "HMPlannerRecipeEdition=OPEN=ID="..block.id.."="..recipe.name.."=", true, "tooltip.edit-recipe", self.color_button_edit)
   local col_size = 1
   if display_cell_mod == "small-icon" then col_size = 5 end
@@ -1544,7 +1550,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerData.methods:updatePowers(player)
-  Logging:debug("HMPlannerData", "updateSummary():", player)
+  Logging:debug("HMPlannerData", "updatePowers():", player)
   local model = self.model:getModel(player)
   local globalGui = self.player:getGlobalGui(player)
 
@@ -1590,7 +1596,7 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function PlannerData.methods:addPowersHeader(player, itable)
-  Logging:debug("HMPlannerData", "addHeader():", player, itable)
+  Logging:debug("HMPlannerData", "addPowersHeader():", player, itable)
   local model = self.model:getModel(player)
 
   local guiAction = self:addGuiFlowH(itable,"header-action")
@@ -1625,7 +1631,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlannerData.methods:addPowersRow(player, guiTable, power)
-  Logging:debug("HMPlannerData", "addRow():", player, guiTable, power)
+  Logging:debug("HMPlannerData", "addPowersRow():", player, guiTable, power)
   local model = self.model:getModel(player)
 
   -- col action
@@ -1655,6 +1661,34 @@ function PlannerData.methods:addPowersRow(player, guiTable, power)
     self:addGuiLabel(guiSecondary, secondary.name, self:formatNumberFactory(secondary.count), "helmod_label_right_60")
     self:addGuiButtonSelectSprite(guiSecondary, "HMPlannerEnergyEdition=OPEN=ID="..power.id.."=", self.player:getIconType(secondary), secondary.name, "X"..self:formatNumberFactory(secondary.count), ({"tooltip.edit-energy", self.player:getLocalisedName(player, secondary)}))
   end
+end
+
+-------------------------------------------------------------------------------
+-- Update properties tab
+--
+-- @function [parent=#PlannerData] updateProperties
+--
+-- @param #LuaPlayer player
+--
+function PlannerData.methods:updateProperties(player)
+  Logging:debug("HMPlannerData", "updateProperties():", player)
+  local model = self.model:getModel(player)
+  local globalGui = self.player:getGlobalGui(player)
+
+  -- data
+  local resultPanel = self:getResultPanel(player, ({"helmod_result-panel.tab-title-properties"}))
+
+  local menuPanel = self:addGuiFlowH(resultPanel,"menu")
+  self:addGuiButton(menuPanel, "HMPlannerEntitySelector=OPEN=ID=", "new", "helmod_button_default", ({"helmod_result-panel.select-button-entity"}))
+  self:addGuiButton(menuPanel, "HMPlannerItemSelector=OPEN=ID=", "new", "helmod_button_default", ({"helmod_result-panel.select-button-item"}))
+
+
+  local scrollPanel = self:addGuiScrollPane(resultPanel, "scroll-data", "scroll_pane_style", "auto", "auto")
+  self.player:setStyle(player, scrollPanel, "scroll_block_list", "minimal_width")
+  self.player:setStyle(player, scrollPanel, "scroll_block_list", "maximal_width")
+  self.player:setStyle(player, scrollPanel, "scroll_block_list", "minimal_height")
+  self.player:setStyle(player, scrollPanel, "scroll_block_list", "maximal_height")
+
 end
 
 -------------------------------------------------------------------------------

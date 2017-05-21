@@ -36,7 +36,9 @@ helmod_settings_mod = {
       "HMPlannerPinPanel",
       "HMPlannerProductEdition",
       "HMPlannerRecipeEdition",
+      "HMPlannerAbstractSelector",
       "HMPlannerRecipeSelector",
+      "HMPlannerTechnologySelector",
       "HMPlannerResourceEdition",
       "HMPlayerController"},
     order = "a1"

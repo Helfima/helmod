@@ -18,7 +18,7 @@ function PlannerModel.methods:init(parent)
 
   self.capEnergy = -0.8
 
-  self.version = "0.4.7"
+  self.version = "0.4.7.1"
 end
 
 -------------------------------------------------------------------------------
@@ -911,13 +911,10 @@ function PlannerModel.methods:setBeacon(player, item, key, name)
       self:setDefaultRecipeBeacon(player, key, beacon.name)
 
       object.beacon.name = beacon.name
-      --object.beacon.type = beacon.type
       -- copy the default parameters
-      object.beacon.energy_nominal = self.player:getItemProperty(beacon.name, "energy_usage")
-      object.beacon.module_slots = self.player:getItemProperty(beacon.name, "module_slots")
+      object.beacon.energy_nominal = self.player:getEntityProperty(beacon.name, "energy_usage")
+      object.beacon.module_slots = self.player:getEntityProperty(beacon.name, "module_slots")
       object.beacon.efficiency = self.player:getItemProperty(beacon.name, "efficiency")
-      --object.beacon.combo = 4
-      --object.beacon.factory = 1.2
     end
   end
 end
@@ -1009,21 +1006,20 @@ function PlannerModel.methods:setFactory(player, item, key, name)
       object.factory.name = factory.name
       --object.factory.type = factory.type
 
-      object.factory.energy_nominal = self.player:getItemProperty(factory.name, "energy_usage")
+      object.factory.energy_nominal = self.player:getEntityProperty(factory.name, "energy_usage")
 
-      object.factory.module_slots = self.player:getItemProperty(factory.name, "module_slots")
-      local speed_nominal = self.player:getItemProperty(factory.name, "crafting_speed")
-      local mining_speed = self.player:getItemProperty(factory.name, "mining_speed")
-      local mining_power = self.player:getItemProperty(factory.name, "mining_power")
-      if mining_speed ~= 0 then
-        local entity_ore = self.player:getEntityPrototype(object.name)
-        local hardness = 1
-        local miningtime = 0.5
-        if entity_ore ~= nil and entity_ore.mineable_properties ~= nil and entity_ore.mineable_properties.hardness ~= nil then hardness = entity_ore.mineable_properties.hardness end
-        if entity_ore ~= nil and entity_ore.mineable_properties ~= nil and entity_ore.mineable_properties.miningtime ~= nil then miningtime = entity_ore.mineable_properties.miningtime end
+      object.factory.module_slots = self.player:getEntityProperty(factory.name, "module_slots")
+      local speed_nominal = self.player:getEntityProperty(factory.name, "crafting_speed")
+      local mining_speed = self.player:getEntityProperty(factory.name, "mining_speed")
+      local mining_power = self.player:getEntityProperty(factory.name, "mining_power")
+      if mining_speed ~= 0 and mining_power ~= 0 then
+        local hardness = self.player:getEntityProperty(object.name, "mineable_properties.hardness")
+        local mining_time = self.player:getEntityProperty(object.name, "mineable_properties.mining_time")
         -- (mining power - ore mining hardness) * mining speed
         -- @see https://wiki.factorio.com/Mining
-        speed_nominal = (mining_power - hardness) * mining_speed / miningtime
+        if mining_time ~= 0 then
+          speed_nominal = (mining_power - hardness) * mining_speed / mining_time
+        end
       end
       object.factory.speed_nominal = speed_nominal
     end
@@ -1419,11 +1415,18 @@ function PlannerModel.methods:update(player)
 
       self:computeProductionBlock(player, productBlock)
 
+      -- compte les ingredients
       for _,ingredient in pairs(productBlock.ingredients) do
         if input[ingredient.name] == nil then
           input[ingredient.name] = ingredient.count
         else
           input[ingredient.name] = input[ingredient.name] + ingredient.count
+        end
+      end
+      -- consomme les ingredients
+      for _,product in pairs(productBlock.products) do
+        if input[product.name] ~= nil then
+          input[product.name] = input[product.name] - product.count
         end
       end
     end
@@ -1660,6 +1663,12 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
           element.ingredients[product.name].count = element.ingredients[product.name].count - product.count
         end
       end
+      for _, ingredient in pairs(recipe.ingredients) do
+        -- consomme les ingredients
+        if recipe.is_resource ~= true and element.products[ingredient.name] ~= nil then
+          element.products[ingredient.name].count = element.products[ingredient.name].count - ingredient.count
+        end
+      end
       Logging:debug("HMModel" , "********** Compute after clean:", element)
     end
 
@@ -1667,14 +1676,14 @@ function PlannerModel.methods:computeProductionBlock(player, element, maxLoop, l
       element.count = 1
     end
 
-    for _, recipe in pairs(recipes) do
-      for _, ingredient in pairs(recipe.ingredients) do
-        -- consomme les ingredients
-        if recipe.is_resource ~= true and element.products[ingredient.name] ~= nil then
-          element.products[ingredient.name].count = element.products[ingredient.name].count - ingredient.count
-        end
-      end
-    end
+--    for _, recipe in pairs(recipes) do
+--      for _, ingredient in pairs(recipe.ingredients) do
+--        -- consomme les ingredients
+--        if recipe.is_resource ~= true and element.products[ingredient.name] ~= nil then
+--          element.products[ingredient.name].count = element.products[ingredient.name].count - ingredient.count
+--        end
+--      end
+--    end
 
     -- reduit les produits du block
     for _, product in pairs(element.products) do
@@ -1915,7 +1924,7 @@ function PlannerModel.methods:computeFactory(player, object)
   object.factory.speed = object.factory.speed_nominal * (1 + object.factory.effects.speed)
 
   -- effet consumption
-  local energy_type = self.player:getItemProperty(object.factory.name, "energy_type")
+  local energy_type = self.player:getEntityProperty(object.factory.name, "energy_type")
   if energy_type ~= "burner" then
     object.factory.energy = object.factory.energy_nominal * (1 + object.factory.effects.consumption)
   else

@@ -630,18 +630,7 @@ function PlannerAbstractEdition.methods:updateFactorySelector(player, element, a
   local category = object.category
   if not(self.player:getSettings(player, "model_filter_factory", true)) then category = nil end
 
-  local factories = {}
-  if item == "resource" then
-    Logging:debug("HMPlannerAbstractEdition", "updateFactorySelector(): resource=",object)
-    if object.name == "water" then
-      factories = self.player:getProductionsRessource("offshore-pump")
-    else
-      factories = self.player:getProductionsRessource(category)
-    end
-
-  else
-    factories = self.player:getProductionsCrafting(category)
-  end
+  local factories = self.player:getProductionsCrafting(category)
   Logging:debug("HMPlannerAbstractEdition", "factories:",factories)
 
 

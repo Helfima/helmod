@@ -8,6 +8,7 @@ require "planner/plannerProductEdition"
 require "planner/plannerResourceEdition"
 require "planner/plannerEnergyEdition"
 require "planner/plannerPinPanel"
+require "planner/plannerTechnologySelector"
 
 
 PLANNER_COMMAND = "helmod_planner-command"
@@ -51,6 +52,8 @@ function PlannerController.methods:init(parent)
   self.controllers["energy-edition"] = PlannerEnergyEdition:new(self)
 
   self.controllers["pin-panel"] = PlannerPinPanel:new(self)
+
+  self.controllers["technology-selector"] = PlannerTechnologySelector:new(self)
 
 end
 

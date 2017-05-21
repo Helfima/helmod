@@ -489,6 +489,39 @@ function PlayerController.methods:getRecipeSubgroups(player)
 end
 
 -------------------------------------------------------------------------------
+-- Return technologies
+--
+-- @function [parent=#PlayerController] getTechnologies
+--
+-- @param #LuaPlayer player
+--
+-- @return #table technologies
+--
+function PlayerController.methods:getTechnologies(player)
+  if player == nil then Logging:error("HMPlayerController", "getTechnologies(player): player can not be nil") end
+  local technologies = {}
+  for _,technology in pairs(self:getForce(player).technologies) do
+    technologies[technology.name] = technology
+  end
+  return technologies
+end
+
+-------------------------------------------------------------------------------
+-- Return technology
+--
+-- @function [parent=#PlayerController] getTechnology
+--
+-- @param #LuaPlayer player
+--
+-- @return #LuaPrototype factorio prototype
+--
+function PlayerController.methods:getTechnology(player, name)
+  if player == nil then Logging:error("HMPlayerController", "getTechnology(player, name): player can not be nil") end
+  local technology = self:getForce(player).technologies[name]
+  return technology
+end
+
+-------------------------------------------------------------------------------
 -- Return list of productions
 --
 -- @function [parent=#PlayerController] getProductionsCrafting
@@ -501,17 +534,13 @@ function PlayerController.methods:getProductionsCrafting(category)
   Logging:trace("HMPlayerController", "getProductionsCrafting(category)", category)
   local productions = {}
   for key, item in pairs(game.entity_prototypes) do
-    if item.type ~= nil then
-      Logging:trace("HMPlayerController", "getProductionsCrafting(category):item", item.name, item.type, item.group.name, item.subgroup.name)
+    if item.type ~= nil and item.name ~= nil and item.name ~= "player" then
+      Logging:trace("HMPlayerController", "getProductionsCrafting(category):item", item.name, item.type, item.group.name, item.subgroup.name, item.crafting_categories)
       local check = false
       if category ~= nil and category ~= "extraction-machine" and category ~= "energy" then
-        local categories = self:getItemProperty(item.name, "crafting_categories")
-        if categories ~= nil then
-          for c, value in pairs(categories) do
-            if category == value then check = true end
-          end
+        if item.crafting_categories ~= nil and item.crafting_categories[category] then
+          check = true
         end
-        --if item.crafting_categories ~= nil and item.crafting_categories[category] then check = true end
       elseif category ~= nil and category == "extraction-machine" then
         if item.subgroup ~= nil and item.subgroup.name == "extraction-machine" then
           check = true
@@ -531,42 +560,6 @@ function PlayerController.methods:getProductionsCrafting(category)
     end
   end
   Logging:debug("HMPlayerController", "getProductionsCrafting(category)", category, productions)
-  return productions
-end
-
--------------------------------------------------------------------------------
--- Return list of productions
---
--- @function [parent=#PlayerController] getProductionsRessource
---
--- @param #string category filter
---
--- @return #table list of productions
---
-function PlayerController.methods:getProductionsRessource(category)
-  Logging:trace("HMPlayerController", "getProductionsRessource(category)", category)
-  local productions = {}
-  for key, item in pairs(game.entity_prototypes) do
-    if item.type ~= nil then
-      Logging:trace("HMPlayerController", "getProductionsRessource(category):item", item.name, item.type, item.group.name, item.subgroup.name)
-      local check = false
-      if category ~= nil then
-        local categories = self:getItemProperty(item.name, "resource_categories")
-        if categories ~= nil then
-          for c, value in pairs(categories) do
-            if category == value then check = true end
-          end
-        end
-      else
-        if item.group ~= nil and item.group.name == "production" then
-          check = true
-        end
-      end
-      if check then
-        productions[item.name] = item
-      end
-    end
-  end
   return productions
 end
 
@@ -630,14 +623,14 @@ end
 -- @return #LuaRecipe recipe
 --
 function PlayerController.methods:createFakeRecipe(player, entity, type)
-   -- build a fake recipe
-   local recipe = {
-        name = entity.name,
-        group = entity.group,
-        subgroup = entity.subgroup,
-        energy = 1,
-        enabled = true
-      }
+  -- build a fake recipe
+  local recipe = {
+    name = entity.name,
+    group = entity.group,
+    subgroup = entity.subgroup,
+    energy = 1,
+    enabled = true
+  }
   if type == "resource" and entity.resource_category ~= nil then
     recipe.localised_name = {"entity-name."..entity.name}
     recipe.products = {{type="item", name=entity.name, amount=1}}
@@ -948,17 +941,36 @@ end
 -- @function [parent=#PlayerController] getRecipeLocalisedName
 --
 -- @param #LuaPlayer player
--- @param #table element factorio prototype
+-- @param #LuaPrototype prototype factorio prototype
 --
 -- @return #string localised name
 --
-function PlayerController.methods:getRecipeLocalisedName(player, recipe)
+function PlayerController.methods:getRecipeLocalisedName(player, prototype)
   local globalSettings = self:getGlobal(player, "settings")
-  local _recipe = self:getRecipe(player, recipe.name)
-  if _recipe ~= nil and not(self:getSettings(player, "display_real_name", true)) then
-    return _recipe.localised_name
+  local element = self:getRecipe(player, prototype.name)
+  if element ~= nil and not(self:getSettings(player, "display_real_name", true)) then
+    return element.localised_name
   end
-  return recipe.name
+  return prototype.name
+end
+
+-------------------------------------------------------------------------------
+-- Return localised name
+--
+-- @function [parent=#PlayerController] getTechnologyLocalisedName
+--
+-- @param #LuaPlayer player
+-- @param #LuaPrototype prototype factorio prototype
+--
+-- @return #string localised name
+--
+function PlayerController.methods:getTechnologyLocalisedName(player, prototype)
+  local globalSettings = self:getGlobal(player, "settings")
+  local element = self:getTechnology(player, prototype.name)
+  if element ~= nil and not(self:getSettings(player, "display_real_name", true)) then
+    return element.localised_name
+  end
+  return element.name
 end
 
 -------------------------------------------------------------------------------
@@ -991,6 +1003,58 @@ function PlayerController.methods:parseNumber(number)
     return tonumber(value)*1000*1000*1000
   end
 end
+
+
+-------------------------------------------------------------------------------
+-- Return entity property
+--
+-- @function [parent=#PlayerController] getEntityProperty
+--
+-- @param #string name
+-- @param #string property
+--
+function PlayerController.methods:getEntityProperty(name, property)
+  local entity = self:getEntityPrototype(name)
+  if entity ~= nil then
+    if property == "energy_usage" then
+      -- energie par seconde
+      if entity.energy_usage ~= nil then
+        return entity.energy_usage*60
+      end
+      return 0
+    end
+    if property == "module_slots" then
+      return entity.module_inventory_size or 0
+    end
+    if property == "crafting_speed" then
+      return entity.crafting_speed or 0
+    end
+    if property == "mining_speed" then
+      return entity.mining_speed or 0
+    end
+    if property == "mining_power" then
+      return entity.mining_power or 0
+    end
+    if property == "energy_type" then
+      if entity.burner_prototype ~= nil then return "burner" end
+      return "electrical"
+    end
+    if property == "mineable_properties.hardness" then
+      if entity.mineable_properties ~= nil then
+        return entity.mineable_properties.hardness or 1
+      end
+      return 1
+    end
+    if property == "mineable_properties.mining_time" then
+      if entity.mineable_properties ~= nil then
+        return entity.mineable_properties.mining_time or 0.5
+      end
+      return 0.5
+    end
+    
+  end
+end
+
 -------------------------------------------------------------------------------
 -- Return item property
 --
@@ -1033,36 +1097,6 @@ function PlayerController.methods:getItemProperty(name, property)
     elseif property == "output_flow_limit" then
       if data_entity[name]["output_flow_limit"] ~= nil then
         return self:parseNumber(data_entity[name]["output_flow_limit"])
-      else
-        return 0
-      end
-    elseif property == "energy_usage" then
-      if data_entity[name]["energy_usage"] ~= nil then
-        return self:parseNumber(data_entity[name]["energy_usage"])
-      else
-        return 0
-      end
-    elseif property == "module_slots" then
-      if data_entity[name]["module_specification"] ~= nil then
-        return tonumber(data_entity[name]["module_specification"]["module_slots"])
-      else
-        return 0
-      end
-    elseif property == "crafting_speed" then
-      if data_entity[name]["crafting_speed"] ~= nil then
-        return tonumber(data_entity[name]["crafting_speed"])
-      else
-        return 0
-      end
-    elseif property == "mining_speed" then
-      if data_entity[name]["mining_speed"] ~= nil then
-        return tonumber(data_entity[name]["mining_speed"])
-      else
-        return 0
-      end
-    elseif property == "mining_power" then
-      if data_entity[name]["mining_power"] ~= nil then
-        return tonumber(data_entity[name]["mining_power"])
       else
         return 0
       end

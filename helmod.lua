@@ -170,8 +170,11 @@ end
 -- @param #table event
 --
 function helmod:on_gui_text_changed(event)
+  local player = game.players[event.player_index]
+  if self.playerController == nil then
+    self:init_playerController(player)
+  end
   if self.playerController ~= nil then
-    local player = game.players[event.player_index]
     if self.playerController ~= nil then
       self.playerController:on_gui_text_changed(event)
     end
