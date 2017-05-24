@@ -1,9 +1,9 @@
-require "tab/EnergyTab"
-require "tab/ProductionBlockTab"
-require "tab/ProductionLineTab"
-require "tab/ResourceTab"
-require "tab/SummaryTab"
-require "tab/PropertiesTab"
+require "tab.EnergyTab"
+require "tab.ProductionBlockTab"
+require "tab.ProductionLineTab"
+require "tab.ResourceTab"
+require "tab.SummaryTab"
+require "tab.PropertiesTab"
 -------------------------------------------------------------------------------
 -- Class to build tab
 --

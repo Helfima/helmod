@@ -1,4 +1,4 @@
-require "selector/AbstractSelector"
+require "selector.AbstractSelector"
 -------------------------------------------------------------------------------
 -- Class to build recipe selector
 --

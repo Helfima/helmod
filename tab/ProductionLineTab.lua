@@ -1,4 +1,4 @@
-require "tab/AbstractTab"
+require "tab.AbstractTab"
 -------------------------------------------------------------------------------
 -- Class to build tab
 --

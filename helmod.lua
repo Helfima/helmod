@@ -3,7 +3,7 @@ require "core.class"
 require "core.defines"
 require "core.logging"
 require "core.elementGui"
-require "controller.playerController"
+require "controller.PlayerController"
 
 --===========================
 -- trace=4

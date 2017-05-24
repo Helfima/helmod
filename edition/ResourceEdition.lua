@@ -1,4 +1,4 @@
-require "edition/AbstractEdition"
+require "edition.AbstractEdition"
 
 -------------------------------------------------------------------------------
 -- Class to build resource edition dialog
