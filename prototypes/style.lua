@@ -537,7 +537,7 @@ default_gui["helmod_label_help"] = {
 --
 -- @field [parent=#Label] max_xx
 
-for w=50, 300, 50 do
+for w=50, 600, 50 do
   default_gui["helmod_label_max_"..w] = {
     type = "label_style",
     parent = "helmod_label_default",

@@ -1,10 +1,9 @@
-require "speed.speedController"
-require "planner.plannerController"
+require "controller.Controller"
 
 local data_entity = nil
 
 -------------------------------------------------------------------------------
--- Classe de player
+-- Class of player controller
 --
 -- @module PlayerController
 --
@@ -20,8 +19,7 @@ function PlayerController.methods:init()
   self.prefix = "helmod_"
   -- list des controllers
   self.controllers = {}
-  self.controllers["planner-controller"] = PlannerController:new(self)
-  self.controllers["speed-controller"] = SpeedController:new(self)
+  self.controllers["controller"] = Controller:new(self)
 end
 
 -------------------------------------------------------------------------------
@@ -32,7 +30,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlayerController.methods:bindController(player)
-  Logging:debug("HMPlayerController", "bindController(player)")
+  Logging:debug(self:classname(), "bindController(player)")
   -- reset GUI
   self:resetGui(player)
   if self.controllers ~= nil then
@@ -51,7 +49,7 @@ end
 -- @param #LuaPlayer player
 --
 function PlayerController.methods:resetGui(player)
-  Logging:debug("HMPlayerController", "resetGui(player)")
+  Logging:debug(self:classname(), "resetGui(player)")
   if player.gui.top["helmod_menu-main"] ~= nil then
     player.gui.top["helmod_menu-main"].destroy()
   end
@@ -170,7 +168,7 @@ end
 -- @return #table force
 --
 function PlayerController.methods:getForce(player)
-  if player == nil then Logging:error("HMPlayerController", "getRecipes(player): player can not be nil") end
+  if player == nil then Logging:error(self:classname(), "getRecipes(player): player can not be nil") end
   return player.force
 end
 
@@ -293,20 +291,18 @@ end
 -- @param #string name
 --
 function PlayerController.methods:getSettings(player, name, global)
-  Logging:debug("HMPlayerController", "getSettings(player, name)", name, global)
+  Logging:trace(self:classname(), "getSettings(player, name)", name, global)
   local property = nil
   local prefixe = "helmod_"
   if not(global) then
     property = player.mod_settings[prefixe..name]
-    Logging:debug("HMPlayerController", "connected settings:", player.mod_settings)
   else
     property = settings.global[prefixe..name]
-    Logging:debug("HMPlayerController", "global settings:", settings.global)
   end
   if property ~= nil then
     return property.value
   else
-    Logging:error("HMPlayerController", "settings property not found:", name)
+    Logging:error(self:classname(), "settings property not found:", name)
     return helmod_settings_mod[name].default_value
   end
 end
@@ -319,13 +315,13 @@ end
 -- @param #LuaPlayer player
 --
 function PlayerController.methods:getStyleSizes(player)
-  Logging:trace("HMPlayerController", "getStyleSizes(player)")
+  Logging:trace(self:classname(), "getStyleSizes(player)")
   local display_size = self:getSettings(player, "display_size")
   local display_size_free = self:getSettings(player, "display_size_free")
   if string.match(display_size_free, "([0-9]*x[0-9]*)", 1) then
     display_size = display_size_free
   end
-  Logging:trace("HMPlayerController", "getStyleSizes(player):display_size", display_size)
+  Logging:trace(self:classname(), "getStyleSizes(player):display_size", display_size)
   local style_sizes = {}
   if display_size ~= nil then
     local width_info=490
@@ -338,7 +334,7 @@ function PlayerController.methods:getStyleSizes(player)
 
     local string_width = string.match(display_size,"([0-9]*)x[0-9]*",1)
     local string_height = string.match(display_size,"[0-9]*x([0-9]*)",1)
-    Logging:trace("HMPlayerController", "getStyleSizes(player):parse", string_width, string_height)
+    Logging:trace(self:classname(), "getStyleSizes(player):parse", string_width, string_height)
     local width = math.ceil(1920*0.85)
     local height = math.ceil(1680*0.85)
     if string_width ~= nil then width = math.ceil(tonumber(string_width)*0.85) end
@@ -372,7 +368,7 @@ function PlayerController.methods:getStyleSizes(player)
 
 
   end
-  Logging:trace("HMPlayerController", "getStyleSizes(player)", style_sizes)
+  Logging:trace(self:classname(), "getStyleSizes(player)", style_sizes)
   return style_sizes
 end
 
@@ -387,10 +383,10 @@ end
 -- @param #string property
 --
 function PlayerController.methods:setStyle(player, element, style, property)
-  Logging:trace("HMPlayerController", "setStyle(player, element, style, property)", player, element, style, property)
+  Logging:trace(self:classname(), "setStyle(player, element, style, property)", player, element, style, property)
   local style_sizes = self:getStyleSizes(player)
   if element.style ~= nil and style_sizes[style] ~= nil and style_sizes[style][property] ~= nil then
-    Logging:trace("HMPlayerController", "setStyle(player, element, style, property)", style_sizes[style][property])
+    Logging:trace(self:classname(), "setStyle(player, element, style, property)", style_sizes[style][property])
     element.style[property] = style_sizes[style][property]
   end
 end
@@ -424,7 +420,7 @@ end
 -- @return #table recipes
 --
 function PlayerController.methods:getRecipes(player, with_resource)
-  if player == nil then Logging:error("HMPlayerController", "getRecipes(player): player can not be nil") end
+  if player == nil then Logging:error(self:classname(), "getRecipes(player): player can not be nil") end
   local recipes = {}
   for _,recipe in pairs(self:getForce(player).recipes) do
     recipes[recipe.name] = recipe
@@ -498,7 +494,7 @@ end
 -- @return #table technologies
 --
 function PlayerController.methods:getTechnologies(player)
-  if player == nil then Logging:error("HMPlayerController", "getTechnologies(player): player can not be nil") end
+  if player == nil then Logging:error(self:classname(), "getTechnologies(player): player can not be nil") end
   local technologies = {}
   for _,technology in pairs(self:getForce(player).technologies) do
     technologies[technology.name] = technology
@@ -516,7 +512,7 @@ end
 -- @return #LuaPrototype factorio prototype
 --
 function PlayerController.methods:getTechnology(player, name)
-  if player == nil then Logging:error("HMPlayerController", "getTechnology(player, name): player can not be nil") end
+  if player == nil then Logging:error(self:classname(), "getTechnology(player, name): player can not be nil") end
   local technology = self:getForce(player).technologies[name]
   return technology
 end
@@ -531,11 +527,11 @@ end
 -- @return #table list of productions
 --
 function PlayerController.methods:getProductionsCrafting(category)
-  Logging:trace("HMPlayerController", "getProductionsCrafting(category)", category)
+  Logging:trace(self:classname(), "getProductionsCrafting(category)", category)
   local productions = {}
   for key, item in pairs(game.entity_prototypes) do
     if item.type ~= nil and item.name ~= nil and item.name ~= "player" then
-      Logging:trace("HMPlayerController", "getProductionsCrafting(category):item", item.name, item.type, item.group.name, item.subgroup.name, item.crafting_categories)
+      Logging:trace(self:classname(), "getProductionsCrafting(category):item", item.name, item.type, item.group.name, item.subgroup.name, item.crafting_categories)
       local check = false
       if category ~= nil and category ~= "extraction-machine" and category ~= "energy" then
         if item.crafting_categories ~= nil and item.crafting_categories[category] then
@@ -559,7 +555,7 @@ function PlayerController.methods:getProductionsCrafting(category)
       end
     end
   end
-  Logging:debug("HMPlayerController", "getProductionsCrafting(category)", category, productions)
+  Logging:debug(self:classname(), "getProductionsCrafting(category)", category, productions)
   return productions
 end
 
@@ -671,6 +667,19 @@ function PlayerController.methods:searchRecipe(player, name)
 end
 
 -------------------------------------------------------------------------------
+-- Return entity prototypes
+--
+-- @function [parent=#PlayerController] getEntityPrototypes
+--
+-- @param #string entity name
+--
+-- @return #LuaEntityPrototype entity prototype
+--
+function PlayerController.methods:getEntityPrototypes()
+  return game.entity_prototypes
+end
+
+-------------------------------------------------------------------------------
 -- Return entity prototype
 --
 -- @function [parent=#PlayerController] getEntityPrototype
@@ -693,10 +702,10 @@ end
 function PlayerController.methods:getProductionsBeacon()
   local items = {}
   for _,item in pairs(game.item_prototypes) do
-    --Logging:debug("HMPlayerController", "getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
+    --Logging:debug(self:classname(), "getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
     if item.name ~= nil then
       local efficiency = self:getItemProperty(item.name, "efficiency")
-      Logging:trace("HMPlayerController", "getProductionsBeacon(type):", item.name, efficiency)
+      Logging:trace(self:classname(), "getProductionsBeacon(type):", item.name, efficiency)
       if efficiency ~= nil then
         table.insert(items,item)
       end
@@ -718,11 +727,11 @@ function PlayerController.methods:getGenerators(type)
   if type == nil then type = "primary" end
   local items = {}
   for _,item in pairs(game.item_prototypes) do
-    --Logging:debug("HMPlayerController", "getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
+    --Logging:debug(self:classname(), "getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
     if item.name ~= nil then
-      local classification = self:getItemProperty(item.name, "classification")
+      local classification = self:getEntityProperty(item.name, "type")
       if item.group.name == "production" then
-        Logging:trace("HMPlayerController", "getGenerators():", item.name, item.type, item.group.name, item.subgroup.name)
+        Logging:trace(self:classname(), "getGenerators():", item.name, item.type, item.group.name, item.subgroup.name)
       end
       if type == "primary" and (classification == "generator" or classification == "solar-panel") then
         table.insert(items,item)
@@ -745,7 +754,7 @@ end
 function PlayerController.methods:getResources()
   local items = {}
   for _,item in pairs(game.entity_prototypes) do
-    --Logging:debug("HMPlayerController", "getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
+    --Logging:debug(self:classname(), "getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
     if item.name ~= nil and item.resource_category ~= nil then
       table.insert(items,item)
     end
@@ -787,7 +796,7 @@ end
 -- @return #LuaFluidPrototype fluid prototype
 --
 function PlayerController.methods:getFluidPrototype(name)
-  --Logging:debug("getFluidPrototype:",name)
+  --Logging:debug(self:classname(), "getFluidPrototype:",name)
   return game.fluid_prototypes[name]
 end
 
@@ -823,7 +832,7 @@ end
 -- @return #string recipe type
 --
 function PlayerController.methods:getIconType(element)
-  Logging:debug("HMPlayerController", "getIconType(element)", element)
+  Logging:trace(self:classname(), "getIconType(element)", element)
   if element == nil or element.name == nil then return "unknown" end
   local item = self:getItemPrototype(element.name)
   if item ~= nil then
@@ -851,8 +860,8 @@ end
 -- @return #string recipe type
 --
 function PlayerController.methods:getRecipeIconType(player, element)
-  Logging:debug("HMPlayerController", "getRecipeIconType(element)", element)
-  if element == nil then Logging:error("HMPlayerController", "getRecipeIconType(element): missing player") end
+  Logging:trace(self:classname(), "getRecipeIconType(element)", element)
+  if element == nil then Logging:error(self:classname(), "getRecipeIconType(element): missing player") end
   local recipe = self:getRecipe(player, element.name)
   if recipe ~= nil and recipe.force ~= nil then
     return "recipe"
@@ -880,6 +889,23 @@ function PlayerController.methods:getItemIconType(element)
   else
     return "item"
   end
+end
+
+-------------------------------------------------------------------------------
+-- Return entity type
+--
+-- @function [parent=#PlayerController] getEntityIconType
+--
+-- @param #table factorio prototype
+--
+-- @return #string item type
+--
+function PlayerController.methods:getEntityIconType(element)
+  local item = self:getEntityPrototype(element.name)
+  if item ~= nil then
+    return "entity"
+  end
+  return self:getItemIconType(element)
 end
 
 -------------------------------------------------------------------------------
@@ -913,7 +939,7 @@ end
 -- @return #string localised name
 --
 function PlayerController.methods:getLocalisedName(player, element)
-  Logging:trace("HMPlayerController", "getLocalisedName(player, element)", player, element)
+  Logging:trace(self:classname(), "getLocalisedName(player, element)", player, element)
   if self:getSettings(player, "display_real_name", true) then
     return element.name
   end
@@ -982,11 +1008,11 @@ end
 -- @param #string property
 --
 function PlayerController.methods:parseNumber(number)
-  Logging:debug("HMPlayerController", "parseNumber(number)", number)
+  Logging:trace(self:classname(), "parseNumber(number)", number)
   if number == nil then return 0 end
   local value = string.match(number,"[0-9.]*",1)
   local power = string.match(number,"[0-9.]*([a-zA-Z]*)",1)
-  Logging:debug("HMPlayerController", "parseNumber(number)", number, value, power)
+  Logging:trace(self:classname(), "parseNumber(number)", number, value, power)
   if power == nil then
     return tonumber(value)
   elseif string.lower(power) == "kw" then
@@ -1016,12 +1042,33 @@ end
 function PlayerController.methods:getEntityProperty(name, property)
   local entity = self:getEntityPrototype(name)
   if entity ~= nil then
+    if property == "type" then
+      return entity.type
+    end
     if property == "energy_usage" then
       -- energie par seconde
       if entity.energy_usage ~= nil then
         return entity.energy_usage*60
       end
       return 0
+    end
+    
+    if property == "max_energy_usage" then
+      -- energie par seconde
+      if entity.max_energy_usage ~= nil then
+        return entity.max_energy_usage*60
+      end
+      return 0
+    end
+    
+    if property == "effectivity" then
+      return entity.effectivity or 1
+    end
+    if property == "maximum_temperature" then
+      return entity.maximum_temperature or 0
+    end
+    if property == "fluid_usage_per_tick" then
+      return entity.fluid_usage_per_tick or 0
     end
     if property == "module_slots" then
       return entity.module_inventory_size or 0
@@ -1051,6 +1098,36 @@ function PlayerController.methods:getEntityProperty(name, property)
       end
       return 0.5
     end
+    if property == "electric_energy_source_prototype.buffer_capacity" then
+      if entity.electric_energy_source_prototype ~= nil then
+        return entity.electric_energy_source_prototype.buffer_capacity or 0
+      end
+      return 0
+    end
+    if property == "electric_energy_source_prototype.input_flow_limit" then
+      if entity.electric_energy_source_prototype ~= nil then
+        return entity.electric_energy_source_prototype.input_flow_limit or 0
+      end
+      return 0
+    end
+    if property == "electric_energy_source_prototype.output_flow_limit" then
+      if entity.electric_energy_source_prototype ~= nil then
+        return entity.electric_energy_source_prototype.output_flow_limit or 0
+      end
+      return 0
+    end
+    if property == "electric_energy_source_prototype.emissions" then
+      if entity.electric_energy_source_prototype ~= nil then
+        return entity.electric_energy_source_prototype.emissions or 0
+      end
+      return 0
+    end
+    if property == "electric_energy_source_prototype.effectivity" then
+      if entity.electric_energy_source_prototype ~= nil then
+        return entity.electric_energy_source_prototype.effectivity or 1
+      end
+      return 1
+    end
     
   end
 end
@@ -1064,10 +1141,10 @@ end
 -- @param #string property
 --
 function PlayerController.methods:getItemProperty(name, property)
-  Logging:trace("HMPlayerController", "getItemProperty(name, property)", name, property)
+  Logging:trace(self:classname(), "getItemProperty(name, property)", name, property)
   if data_entity == nil then
     data_entity = self:getChunkedData("data_entity")
-    Logging:trace("HMPlayerController", "getItemProperty(name, property):data_entity", data_entity)
+    Logging:trace(self:classname(), "getItemProperty(name, property):data_entity", data_entity)
   end
   if data_entity[name] then
     if property == "energy_consumption" then
@@ -1079,36 +1156,6 @@ function PlayerController.methods:getItemProperty(name, property)
     elseif property == "production" then
       if data_entity[name]["production"] ~= nil then
         return self:parseNumber(data_entity[name]["production"])
-      else
-        return 0
-      end
-    elseif property == "buffer_capacity" then
-      if data_entity[name]["buffer_capacity"] ~= nil then
-        return self:parseNumber(data_entity[name]["buffer_capacity"])
-      else
-        return 0
-      end
-    elseif property == "input_flow_limit" then
-      if data_entity[name]["input_flow_limit"] ~= nil then
-        return self:parseNumber(data_entity[name]["input_flow_limit"])
-      else
-        return 0
-      end
-    elseif property == "output_flow_limit" then
-      if data_entity[name]["output_flow_limit"] ~= nil then
-        return self:parseNumber(data_entity[name]["output_flow_limit"])
-      else
-        return 0
-      end
-    elseif property == "target_temperature" then
-      if data_entity[name]["target_temperature"] ~= nil then
-        return tonumber(data_entity[name]["target_temperature"])
-      else
-        return 0
-      end
-    elseif property == "maximum_temperature" then
-      if data_entity[name]["maximum_temperature"] ~= nil then
-        return tonumber(data_entity[name]["maximum_temperature"])
       else
         return 0
       end

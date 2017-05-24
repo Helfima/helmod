@@ -1,28 +1,28 @@
-require "planner/plannerAbstractSelector"
+require "selector/AbstractSelector"
 -------------------------------------------------------------------------------
--- Classe to build selector dialog
+-- Class to build technology selector
 --
--- @module PlannerTechnologySelector
--- @extends #PlannerDialog
+-- @module TechnologySelector
+-- @extends #AbstractSelector
 --
 
-PlannerTechnologySelector = setclass("HMPlannerTechnologySelector", PlannerAbstractSelector)
+TechnologySelector = setclass("HMTechnologySelector", AbstractSelector)
 
 -------------------------------------------------------------------------------
 -- Return caption
 --
--- @function [parent=#PlannerTechnologySelector] getCaption
+-- @function [parent=#TechnologySelector] getCaption
 --
--- @param #PlannerController parent parent controller
+-- @param #Controller parent parent controller
 --
-function PlannerTechnologySelector.methods:getCaption(parent)
+function TechnologySelector.methods:getCaption(parent)
   return {"helmod_selector-panel.technology-title"}
 end
 
 -------------------------------------------------------------------------------
 -- Update groups
 --
--- @function [parent=#PlannerTechnologySelector] updateGroups
+-- @function [parent=#TechnologySelector] updateGroups
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -33,8 +33,8 @@ end
 --
 -- @return {groupList, prototypeGroups}
 --
-function PlannerTechnologySelector.methods:updateGroups(player, element, action, item, item2, item3)
-  Logging:trace("HMPlannerTechnologySelector", "on_update():",player, element, action, item, item2, item3)
+function TechnologySelector.methods:updateGroups(player, element, action, item, item2, item3)
+  Logging:trace(self:classname(), "on_update():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   -- recuperation recipes
   local prototypeGroups = {}
@@ -85,7 +85,7 @@ end
 -------------------------------------------------------------------------------
 -- Get item list
 --
--- @function [parent=#PlannerTechnologySelector] getItemList
+-- @function [parent=#TechnologySelector] getItemList
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -94,8 +94,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerTechnologySelector.methods:getItemList(player, element, action, item, item2, item3)
-  Logging:trace("HMPlannerTechnologySelector", "getItemList():",player, element, action, item, item2, item3)
+function TechnologySelector.methods:getItemList(player, element, action, item, item2, item3)
+  Logging:trace(self:classname(), "getItemList():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local list = {}
   local prototypeGroups = self:getPrototypeGroups()
@@ -108,13 +108,13 @@ end
 -------------------------------------------------------------------------------
 -- Build prototype tooltip
 --
--- @function [parent=#PlannerTechnologySelector] buildPrototypeTooltip
+-- @function [parent=#TechnologySelector] buildPrototypeTooltip
 --
 -- @param #LuaPlayer player
 -- @param #LuaPrototype prototype
 --
-function PlannerTechnologySelector.methods:buildPrototypeTooltip(player, prototype)
-  Logging:trace("HMPlannerTechnologySelector", "buildPrototypeTooltip(player, prototype):",player, prototype)
+function TechnologySelector.methods:buildPrototypeTooltip(player, prototype)
+  Logging:trace(self:classname(), "buildPrototypeTooltip(player, prototype):",player, prototype)
   -- initalize tooltip
   local tooltip = {"tooltip.technology-info"}
   -- insert __1__ value
@@ -144,12 +144,12 @@ end
 -------------------------------------------------------------------------------
 -- Build prototype icon
 --
--- @function [parent=#PlannerTechnologySelector] buildPrototypeIcon
+-- @function [parent=#TechnologySelector] buildPrototypeIcon
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractSelector.methods:buildPrototypeIcon(player, guiElement, prototype, tooltip)
-  Logging:trace("HMPlannerTechnologySelector", "buildPrototypeIcon(player, guiElement, prototype, tooltip:",player, guiElement, prototype, tooltip)
+function TechnologySelector.methods:buildPrototypeIcon(player, guiElement, prototype, tooltip)
+  Logging:trace(self:classname(), "buildPrototypeIcon(player, guiElement, prototype, tooltip:",player, guiElement, prototype, tooltip)
   self:addGuiButtonSelectSprite(guiElement, self:classname().."=technology-select=ID=", "technology", prototype.name, prototype.name, tooltip)
 end
 

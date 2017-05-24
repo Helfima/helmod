@@ -1,22 +1,22 @@
-require "planner/plannerAbstractEdition"
+require "edition/AbstractEdition"
 
 -------------------------------------------------------------------------------
--- Classe to build recipe edition dialog
+-- Class to build recipe edition dialog
 --
--- @module PlannerRecipeEdition
--- @extends #PlannerDialog
+-- @module RecipeEdition
+-- @extends #AbstractEdition
 --
 
-PlannerRecipeEdition = setclass("HMPlannerRecipeEdition", PlannerAbstractEdition)
+RecipeEdition = setclass("HMRecipeEdition", AbstractEdition)
 
 -------------------------------------------------------------------------------
 -- On initialization
 --
--- @function [parent=#PlannerRecipeEdition] on_init
+-- @function [parent=#RecipeEdition] on_init
 --
--- @param #PlannerController parent parent controller
+-- @param #Controller parent parent controller
 --
-function PlannerRecipeEdition.methods:on_init(parent)
+function RecipeEdition.methods:on_init(parent)
 	self.panelCaption = ({"helmod_recipe-edition-panel.title"})
 	self.player = self.parent.player
 	self.model = self.parent.model
@@ -25,20 +25,20 @@ end
 -------------------------------------------------------------------------------
 -- Get the parent panel
 --
--- @function [parent=#PlannerRecipeEdition] getParentPanel
+-- @function [parent=#RecipeEdition] getParentPanel
 --
 -- @param #LuaPlayer player
 --
 -- @return #LuaGuiElement
 --
-function PlannerRecipeEdition.methods:getParentPanel(player)
+function RecipeEdition.methods:getParentPanel(player)
 	return self.parent:getDialogPanel(player)
 end
 
 -------------------------------------------------------------------------------
 -- On open
 --
--- @function [parent=#PlannerRecipeEdition] on_open
+-- @function [parent=#RecipeEdition] on_open
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -49,7 +49,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function PlannerRecipeEdition.methods:on_open(player, element, action, item, item2, item3)
+function RecipeEdition.methods:on_open(player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 	local close = true
 	model.moduleListRefresh = false
@@ -66,7 +66,7 @@ end
 -------------------------------------------------------------------------------
 -- On close dialog
 --
--- @function [parent=#PlannerRecipeEdition] on_close
+-- @function [parent=#RecipeEdition] on_close
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -75,7 +75,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerRecipeEdition.methods:on_close(player, element, action, item, item2, item3)
+function RecipeEdition.methods:on_close(player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 	model.guiRecipeLast = nil
 	model.moduleListRefresh = false
@@ -84,11 +84,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create recipe panel
 --
--- @function [parent=#PlannerRecipeEdition] getRecipePanel
+-- @function [parent=#RecipeEdition] getRecipePanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerRecipeEdition.methods:getRecipePanel(player)
+function RecipeEdition.methods:getRecipePanel(player)
 	local panel = self:getPanel(player)
 	if panel["recipe"] ~= nil and panel["recipe"].valid then
 		return panel["recipe"]
@@ -99,11 +99,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create recipe info panel
 --
--- @function [parent=#PlannerRecipeEdition] getObjectInfoPanel
+-- @function [parent=#RecipeEdition] getObjectInfoPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerRecipeEdition.methods:getObjectInfoPanel(player)
+function RecipeEdition.methods:getObjectInfoPanel(player)
 	local panel = self:getRecipePanel(player)
 	if panel["info"] ~= nil and panel["info"].valid then
 		return panel["info"]
@@ -114,11 +114,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create other info panel
 --
--- @function [parent=#PlannerRecipeEdition] getOtherInfoPanel
+-- @function [parent=#RecipeEdition] getOtherInfoPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerRecipeEdition.methods:getOtherInfoPanel(player)
+function RecipeEdition.methods:getOtherInfoPanel(player)
 	local panel = self:getRecipePanel(player)
 	if panel["other-info"] ~= nil and panel["other-info"].valid then
 		return panel["other-info"]
@@ -129,11 +129,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create ingredients recipe panel
 --
--- @function [parent=#PlannerRecipeEdition] getRecipeIngredientsPanel
+-- @function [parent=#RecipeEdition] getRecipeIngredientsPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerRecipeEdition.methods:getRecipeIngredientsPanel(player)
+function RecipeEdition.methods:getRecipeIngredientsPanel(player)
 	local panel = self:getOtherInfoPanel(player)
 	if panel["ingredients"] ~= nil and panel["ingredients"].valid then
 		return panel["ingredients"]
@@ -144,11 +144,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create products recipe panel
 --
--- @function [parent=#PlannerRecipeEdition] getRecipeProductsPanel
+-- @function [parent=#RecipeEdition] getRecipeProductsPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerRecipeEdition.methods:getRecipeProductsPanel(player)
+function RecipeEdition.methods:getRecipeProductsPanel(player)
 	local panel = self:getOtherInfoPanel(player)
 	if panel["products"] ~= nil and panel["products"].valid then
 		return panel["products"]
@@ -159,7 +159,7 @@ end
 -------------------------------------------------------------------------------
 -- Get object
 --
--- @function [parent=#PlannerRecipeEdition] getObject
+-- @function [parent=#RecipeEdition] getObject
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -168,7 +168,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerRecipeEdition.methods:getObject(player, element, action, item, item2, item3)
+function RecipeEdition.methods:getObject(player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 	if  model.blocks[item] ~= nil and model.blocks[item].recipes[item2] ~= nil then
 		-- return recipe
@@ -180,12 +180,12 @@ end
 -------------------------------------------------------------------------------
 -- Build header panel
 --
--- @function [parent=#PlannerRecipeEdition] buildHeaderPanel
+-- @function [parent=#RecipeEdition] buildHeaderPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerRecipeEdition.methods:buildHeaderPanel(player)
-	Logging:debug("HMPlannerRecipeEdition", "buildHeaderPanel():",player)
+function RecipeEdition.methods:buildHeaderPanel(player)
+	Logging:debug(self:classname(), "buildHeaderPanel():",player)
 	self:getObjectInfoPanel(player)
 	self:getRecipeIngredientsPanel(player)
 	self:getRecipeProductsPanel(player)
@@ -194,7 +194,7 @@ end
 -------------------------------------------------------------------------------
 -- Update header
 --
--- @function [parent=#PlannerRecipeEdition] updateHeader
+-- @function [parent=#RecipeEdition] updateHeader
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -203,8 +203,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerRecipeEdition.methods:updateHeader(player, element, action, item, item2, item3)
-	Logging:debug("HMPlannerRecipeEdition", "updateHeader():",player, element, action, item, item2, item3)
+function RecipeEdition.methods:updateHeader(player, element, action, item, item2, item3)
+	Logging:debug(self:classname(), "updateHeader():",player, element, action, item, item2, item3)
 	self:updateObjectInfo(player, element, action, item, item2, item3)
 	self:updateRecipeIngredients(player, element, action, item, item2, item3)
 	self:updateRecipeProducts(player, element, action, item, item2, item3)
@@ -213,7 +213,7 @@ end
 -------------------------------------------------------------------------------
 -- Update information
 --
--- @function [parent=#PlannerRecipeEdition] updateObjectInfo
+-- @function [parent=#RecipeEdition] updateObjectInfo
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -222,8 +222,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerRecipeEdition.methods:updateObjectInfo(player, element, action, item, item2, item3)
-	Logging:debug("HMPlannerRecipeEdition", "updateObjectInfo():",player, element, action, item, item2, item3)
+function RecipeEdition.methods:updateObjectInfo(player, element, action, item, item2, item3)
+	Logging:debug(self:classname(), "updateObjectInfo():",player, element, action, item, item2, item3)
 	local infoPanel = self:getObjectInfoPanel(player)
 	local model = self.model:getModel(player)
 	local default = self.model:getDefault(player)
@@ -233,7 +233,7 @@ function PlannerRecipeEdition.methods:updateObjectInfo(player, element, action, 
 	if  model.blocks[item] ~= nil then
 		local recipe = self:getObject(player, element, action, item, item2, item3)
 		if recipe ~= nil then
-			Logging:debug("HMPlannerRecipeEdition", "updateObjectInfo():recipe=",recipe)
+			Logging:debug(self:classname(), "updateObjectInfo():recipe=",recipe)
 			for k,guiName in pairs(infoPanel.children_names) do
 				infoPanel[guiName].destroy()
 			end
@@ -261,7 +261,7 @@ end
 -------------------------------------------------------------------------------
 -- Update ingredients information
 --
--- @function [parent=#PlannerRecipeEdition] updateRecipeIngredients
+-- @function [parent=#RecipeEdition] updateRecipeIngredients
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -270,8 +270,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerRecipeEdition.methods:updateRecipeIngredients(player, element, action, item, item2, item3)
-	Logging:debug("HMPlannerRecipeEdition", "updateRecipeIngredients():",player, element, action, item, item2, item3)
+function RecipeEdition.methods:updateRecipeIngredients(player, element, action, item, item2, item3)
+	Logging:debug(self:classname(), "updateRecipeIngredients():",player, element, action, item, item2, item3)
 	local ingredientsPanel = self:getRecipeIngredientsPanel(player)
 	local model = self.model:getModel(player)
 	local recipe = self.player:getRecipe(player, item2)
@@ -299,7 +299,7 @@ end
 -------------------------------------------------------------------------------
 -- Update products information
 --
--- @function [parent=#PlannerRecipeEdition] updateRecipeProducts
+-- @function [parent=#RecipeEdition] updateRecipeProducts
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -308,8 +308,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerRecipeEdition.methods:updateRecipeProducts(player, element, action, item, item2, item3)
-	Logging:debug("HMPlannerRecipeEdition", "updateRecipeProducts():",player, element, action, item, item2, item3)
+function RecipeEdition.methods:updateRecipeProducts(player, element, action, item, item2, item3)
+	Logging:debug(self:classname(), "updateRecipeProducts():",player, element, action, item, item2, item3)
 	local productsPanel = self:getRecipeProductsPanel(player)
 	local model = self.model:getModel(player)
 	local recipe = self.player:getRecipe(player, item2)

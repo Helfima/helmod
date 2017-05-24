@@ -1,19 +1,19 @@
 -------------------------------------------------------------------------------
--- Classe to help to build dialog
+-- Class to help to build dialog
 -- 
--- @module PlannerDialog
+-- @module Dialog
 -- @extends #ElementGui 
 -- 
-PlannerDialog = setclass("HMPlannerDialog", ElementGui)
+Dialog = setclass("HMDialog", ElementGui)
 
 -------------------------------------------------------------------------------
 -- Initialization
 --
--- @function [parent=#PlannerDialog] init
+-- @function [parent=#Dialog] init
 -- 
--- @param #PlannerController parent parent controller
+-- @param #Controller parent parent controller
 -- 
-function PlannerDialog.methods:init(parent)
+function Dialog.methods:init(parent)
 	self.parent = parent
 	
 	self.ACTION_OPEN = self:classname().."=OPEN"
@@ -30,37 +30,37 @@ end
 -------------------------------------------------------------------------------
 -- On initialization
 --
--- @function [parent=#PlannerDialog] on_init
+-- @function [parent=#Dialog] on_init
 -- 
--- @param #PlannerController parent parent controller
+-- @param #Controller parent parent controller
 -- 
-function PlannerDialog.methods:on_init(parent)
+function Dialog.methods:on_init(parent)
 
 end
 
 -------------------------------------------------------------------------------
 -- Get the parent panel
 --
--- @function [parent=#PlannerDialog] getParentPanel
+-- @function [parent=#Dialog] getParentPanel
 -- 
 -- @param #LuaPlayer player
 -- 
 -- @return #LuaGuiElement
 --  
-function PlannerDialog.methods:getParentPanel(player)
+function Dialog.methods:getParentPanel(player)
 	
 end
 
 -------------------------------------------------------------------------------
 -- Get the parent panel
 --
--- @function [parent=#PlannerDialog] getPanel
+-- @function [parent=#Dialog] getPanel
 -- 
 -- @param #LuaPlayer player
 -- 
 -- @return #LuaGuiElement
 --  
-function PlannerDialog.methods:getPanel(player)
+function Dialog.methods:getPanel(player)
 	local panel = self:getParentPanel(player)
 	if panel[self:classname()] ~= nil and panel[self:classname()].valid then
 		return panel[self:classname()]
@@ -71,12 +71,12 @@ end
 -------------------------------------------------------------------------------
 -- Bind the button
 --
--- @function [parent=#PlannerDialog] bindButton
+-- @function [parent=#Dialog] bindButton
 -- 
 -- @param #LuaGuiElement gui parent element
 -- @param #string label displayed text
 -- 
-function PlannerDialog.methods:bindButton(gui, label)
+function Dialog.methods:bindButton(gui, label)
 	local caption = ({self.ACTION_OPEN})
 	if label ~= nil then caption = label end
 	if gui ~= nil then
@@ -87,7 +87,7 @@ end
 -------------------------------------------------------------------------------
 -- Build first container
 --
--- @function [parent=#PlannerDialog] open
+-- @function [parent=#Dialog] open
 -- 
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -96,12 +96,12 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 -- 
-function PlannerDialog.methods:open(player, element, action, item, item2, item3)
-	Logging:debug("HMPlannerDialog", "open():",player, element, action, item, item2, item3)
+function Dialog.methods:open(player, element, action, item, item2, item3)
+	Logging:debug(self:classname(), "open():",player, element, action, item, item2, item3)
 	local parentPanel = self:getParentPanel(player)
 	if parentPanel[self:classname()] ~= nil and parentPanel[self:classname()].valid then
 		local close = self:on_open(player, element, action, item, item2, item3)
-		--Logging:debug("HMPlannerDialog" , "must close:",close)
+		--Logging:debug(self:classname() , "must close:",close)
 		if close then
 			self:close(player, element, action, item, item2, item3)
 		else
@@ -126,7 +126,7 @@ end
 -------------------------------------------------------------------------------
 -- Send event
 --
--- @function [parent=#PlannerDialog] send_event
+-- @function [parent=#Dialog] send_event
 -- 
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -135,8 +135,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 -- 
-function PlannerDialog.methods:send_event(player, element, action, item, item2, item3)
-		Logging:debug("HMPlannerDialog", "send_event():",player, element, action, item, item2, item3)
+function Dialog.methods:send_event(player, element, action, item, item2, item3)
+		Logging:debug(self:classname(), "send_event():",player, element, action, item, item2, item3)
 		if action == "OPEN" then
 			self:open(player, element, action, item, item2, item3)
 		end
@@ -155,7 +155,7 @@ end
 -------------------------------------------------------------------------------
 -- On event
 --
--- @function [parent=#PlannerDialog] on_event
+-- @function [parent=#Dialog] on_event
 -- 
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -164,13 +164,13 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 -- 
-function PlannerDialog.methods:on_event(player, element, action, item, item2, item3)
+function Dialog.methods:on_event(player, element, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
 -- On open
 --
--- @function [parent=#PlannerDialog] on_open
+-- @function [parent=#Dialog] on_open
 -- 
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -179,13 +179,13 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 -- 
-function PlannerDialog.methods:on_open(player, element, action, item, item2, item3)
+function Dialog.methods:on_open(player, element, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
 -- After open
 --
--- @function [parent=#PlannerDialog] after_open
+-- @function [parent=#Dialog] after_open
 -- 
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -194,13 +194,13 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 -- 
-function PlannerDialog.methods:after_open(player, element, action, item, item2, item3)
+function Dialog.methods:after_open(player, element, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
 -- Update
 --
--- @function [parent=#PlannerDialog] update
+-- @function [parent=#Dialog] update
 -- 
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -209,14 +209,14 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 -- 
-function PlannerDialog.methods:update(player, element, action, item, item2, item3)
+function Dialog.methods:update(player, element, action, item, item2, item3)
 	self:on_update(player, element, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
 -- On update
 --
--- @function [parent=#PlannerDialog] on_update
+-- @function [parent=#Dialog] on_update
 -- 
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -225,14 +225,14 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 -- 
-function PlannerDialog.methods:on_update(player, element, action, item, item2, item3)
+function Dialog.methods:on_update(player, element, action, item, item2, item3)
 
 end
 
 -------------------------------------------------------------------------------
 -- Close dialog
 --
--- @function [parent=#PlannerDialog] close
+-- @function [parent=#Dialog] close
 -- 
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -241,7 +241,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 -- 
-function PlannerDialog.methods:close(player, element, action, item, item2, item3)
+function Dialog.methods:close(player, element, action, item, item2, item3)
 	self:on_close(player, element, action, item, item2, item3)
 	local parentPanel = self:getParentPanel(player)
 	if parentPanel[self:classname()] ~= nil and parentPanel[self:classname()].valid then
@@ -252,7 +252,7 @@ end
 -------------------------------------------------------------------------------
 -- On close dialog
 --
--- @function [parent=#PlannerDialog] on_close
+-- @function [parent=#Dialog] on_close
 -- 
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -263,5 +263,5 @@ end
 -- 
 -- @return #boolean if true the next call close dialog
 -- 
-function PlannerDialog.methods:on_close(player, element, action, item, item2, item3)
+function Dialog.methods:on_close(player, element, action, item, item2, item3)
 end

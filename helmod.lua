@@ -3,7 +3,7 @@ require "core.class"
 require "core.defines"
 require "core.logging"
 require "core.elementGui"
-require "player.playerController"
+require "controller.playerController"
 
 --===========================
 -- trace=4
@@ -417,7 +417,7 @@ end
 remote.add_interface("helmod", {
   close = function()
     if game.player.admin then
-      proxy_gui_click({player_index=game.player.index, element = {valid=true, name="HMPlannerController=CLOSE"}})
+      proxy_gui_click({player_index=game.player.index, element = {valid=true, name="HMController=CLOSE"}})
     end
   end,
   display_size = function(value)

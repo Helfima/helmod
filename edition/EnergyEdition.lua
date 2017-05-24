@@ -1,20 +1,20 @@
 -------------------------------------------------------------------------------
--- Classe to build power edition dialog
+-- Class to build power edition dialog
 --
--- @module PlannerEnergyEdition
--- @extends #PlannerDialog
+-- @module EnergyEdition
+-- @extends #Dialog
 --
 
-PlannerEnergyEdition = setclass("HMPlannerEnergyEdition", PlannerDialog)
+EnergyEdition = setclass("HMEnergyEdition", Dialog)
 
 -------------------------------------------------------------------------------
 -- On initialization
 --
--- @function [parent=#PlannerEnergyEdition] on_init
+-- @function [parent=#EnergyEdition] on_init
 --
--- @param #PlannerController parent parent controller
+-- @param #Controller parent parent controller
 --
-function PlannerEnergyEdition.methods:on_init(parent)
+function EnergyEdition.methods:on_init(parent)
   self.panelCaption = ({"helmod_energy-edition-panel.title"})
   self.player = self.parent.player
   self.model = self.parent.model
@@ -23,24 +23,24 @@ end
 -------------------------------------------------------------------------------
 -- Get the parent panel
 --
--- @function [parent=#PlannerEnergyEdition] getParentPanel
+-- @function [parent=#EnergyEdition] getParentPanel
 --
 -- @param #LuaPlayer player
 --
 -- @return #LuaGuiElement
 --
-function PlannerEnergyEdition.methods:getParentPanel(player)
+function EnergyEdition.methods:getParentPanel(player)
   return self.parent:getDialogPanel(player)
 end
 
 -------------------------------------------------------------------------------
 -- Get or create panel
 --
--- @function [parent=#PlannerEnergyEdition] getPowerPanel
+-- @function [parent=#EnergyEdition] getPowerPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerEnergyEdition.methods:getPowerPanel(player)
+function EnergyEdition.methods:getPowerPanel(player)
   local panel = self:getPanel(player)
   if panel["power"] ~= nil and panel["power"].valid then
     return panel["power"]
@@ -51,11 +51,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create generator panel
 --
--- @function [parent=#PlannerEnergyEdition] getPrimaryPanel
+-- @function [parent=#EnergyEdition] getPrimaryPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerEnergyEdition.methods:getPrimaryPanel(player)
+function EnergyEdition.methods:getPrimaryPanel(player)
   local panel = self:getPanel(player)
   if panel["Primary"] ~= nil and panel["Primary"].valid then
     return panel["Primary"]
@@ -66,11 +66,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create info panel
 --
--- @function [parent=#PlannerEnergyEdition] getPrimaryInfoPanel
+-- @function [parent=#EnergyEdition] getPrimaryInfoPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerEnergyEdition.methods:getPrimaryInfoPanel(player)
+function EnergyEdition.methods:getPrimaryInfoPanel(player)
   local panel = self:getPrimaryPanel(player)
   if panel["info"] ~= nil and panel["info"].valid then
     return panel["info"]
@@ -81,11 +81,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create selector panel
 --
--- @function [parent=#PlannerEnergyEdition] getPrimarySelectorPanel
+-- @function [parent=#EnergyEdition] getPrimarySelectorPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerEnergyEdition.methods:getPrimarySelectorPanel(player)
+function EnergyEdition.methods:getPrimarySelectorPanel(player)
   local panel = self:getPrimaryPanel(player)
   if panel["selector"] ~= nil and panel["selector"].valid then
     return panel["selector"]
@@ -96,12 +96,12 @@ end
 -------------------------------------------------------------------------------
 -- Build primary panel
 --
--- @function [parent=#PlannerEnergyEdition] buildPrimaryPanel
+-- @function [parent=#EnergyEdition] buildPrimaryPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerEnergyEdition.methods:buildPrimaryPanel(player)
-  Logging:debug("HMPlannerEnergyEdition", "buildPrimaryPanel():",player)
+function EnergyEdition.methods:buildPrimaryPanel(player)
+  Logging:debug(self:classname(), "buildPrimaryPanel():",player)
   self:getPrimaryInfoPanel(player)
   self:getPrimarySelectorPanel(player)
 end
@@ -109,11 +109,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create generator panel
 --
--- @function [parent=#PlannerEnergyEdition] getSecondaryPanel
+-- @function [parent=#EnergyEdition] getSecondaryPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerEnergyEdition.methods:getSecondaryPanel(player)
+function EnergyEdition.methods:getSecondaryPanel(player)
   local panel = self:getPanel(player)
   if panel["Secondary"] ~= nil and panel["Secondary"].valid then
     return panel["Secondary"]
@@ -124,11 +124,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create info panel
 --
--- @function [parent=#PlannerEnergyEdition] getSecondaryInfoPanel
+-- @function [parent=#EnergyEdition] getSecondaryInfoPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerEnergyEdition.methods:getSecondaryInfoPanel(player)
+function EnergyEdition.methods:getSecondaryInfoPanel(player)
   local panel = self:getSecondaryPanel(player)
   if panel["info"] ~= nil and panel["info"].valid then
     return panel["info"]
@@ -139,11 +139,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create selector panel
 --
--- @function [parent=#PlannerEnergyEdition] getSecondarySelectorPanel
+-- @function [parent=#EnergyEdition] getSecondarySelectorPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerEnergyEdition.methods:getSecondarySelectorPanel(player)
+function EnergyEdition.methods:getSecondarySelectorPanel(player)
   local panel = self:getSecondaryPanel(player)
   if panel["selector"] ~= nil and panel["selector"].valid then
     return panel["selector"]
@@ -154,12 +154,12 @@ end
 -------------------------------------------------------------------------------
 -- Build Secondary panel
 --
--- @function [parent=#PlannerEnergyEdition] buildSecondaryPanel
+-- @function [parent=#EnergyEdition] buildSecondaryPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerEnergyEdition.methods:buildSecondaryPanel(player)
-  Logging:debug("HMPlannerEnergyEdition", "buildSecondaryPanel():",player)
+function EnergyEdition.methods:buildSecondaryPanel(player)
+  Logging:debug(self:classname(), "buildSecondaryPanel():",player)
   self:getSecondaryInfoPanel(player)
   self:getSecondarySelectorPanel(player)
 end
@@ -167,19 +167,19 @@ end
 -------------------------------------------------------------------------------
 -- Build header panel
 --
--- @function [parent=#PlannerEnergyEdition] buildHeaderPanel
+-- @function [parent=#EnergyEdition] buildHeaderPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerEnergyEdition.methods:buildHeaderPanel(player)
-  Logging:debug("HMPlannerEnergyEdition", "buildHeaderPanel():",player)
+function EnergyEdition.methods:buildHeaderPanel(player)
+  Logging:debug(self:classname(), "buildHeaderPanel():",player)
   self:getPowerPanel(player)
 end
 
 -------------------------------------------------------------------------------
 -- Get object
 --
--- @function [parent=#PlannerEnergyEdition] getObject
+-- @function [parent=#EnergyEdition] getObject
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -188,7 +188,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerEnergyEdition.methods:getObject(player, element, action, item, item2, item3)
+function EnergyEdition.methods:getObject(player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
   if model.powers ~= nil and model.powers[item] ~= nil then
     -- return power
@@ -200,7 +200,7 @@ end
 -------------------------------------------------------------------------------
 -- On open
 --
--- @function [parent=#PlannerEnergyEdition] on_open
+-- @function [parent=#EnergyEdition] on_open
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -211,8 +211,8 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function PlannerEnergyEdition.methods:on_open(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerEnergyEdition", "on_open():",player, element, action, item, item2, item3)
+function EnergyEdition.methods:on_open(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "on_open():",player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
   local close = true
   if model.guiPowerLast == nil or model.guiPowerLast ~= item then
@@ -228,7 +228,7 @@ end
 -------------------------------------------------------------------------------
 -- On close dialog
 --
--- @function [parent=#PlannerEnergyEdition] on_close
+-- @function [parent=#EnergyEdition] on_close
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -237,14 +237,14 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerEnergyEdition.methods:on_close(player, element, action, item, item2, item3)
+function EnergyEdition.methods:on_close(player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
 end
 
 -------------------------------------------------------------------------------
 -- After open
 --
--- @function [parent=#PlannerEnergyEdition] after_open
+-- @function [parent=#EnergyEdition] after_open
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -253,11 +253,11 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerEnergyEdition.methods:after_open(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerEnergyEdition", "after_open():",player, element, action, item, item2, item3)
-  self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
-  self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
-  self.parent:send_event(player, "HMPlannerSettings", "CLOSE")
+function EnergyEdition.methods:after_open(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "after_open():",player, element, action, item, item2, item3)
+  self.parent:send_event(player, "HMProductEdition", "CLOSE")
+  self.parent:send_event(player, "HMRecipeSelector", "CLOSE")
+  self.parent:send_event(player, "HMSettings", "CLOSE")
 
   self:buildHeaderPanel(player)
   self:buildPrimaryPanel(player)
@@ -267,7 +267,7 @@ end
 -------------------------------------------------------------------------------
 -- On event
 --
--- @function [parent=#PlannerEnergyEdition] on_event
+-- @function [parent=#EnergyEdition] on_event
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -276,8 +276,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerEnergyEdition.methods:on_event(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerEnergyEdition", "on_event():",player, element, action, item, item2, item3)
+function EnergyEdition.methods:on_event(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "on_event():",player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
 
   if action == "primary-group" then
@@ -337,7 +337,7 @@ end
 -------------------------------------------------------------------------------
 -- On update
 --
--- @function [parent=#PlannerEnergyEdition] on_update
+-- @function [parent=#EnergyEdition] on_update
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -346,7 +346,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerEnergyEdition.methods:on_update(player, element, action, item, item2, item3)
+function EnergyEdition.methods:on_update(player, element, action, item, item2, item3)
   self:updatePowerInfo(player, element, action, item, item2, item3)
   self:updatePrimary(player, element, action, item, item2, item3)
   self:updateSecondary(player, element, action, item, item2, item3)
@@ -355,7 +355,7 @@ end
 -------------------------------------------------------------------------------
 -- Update information
 --
--- @function [parent=#PlannerEnergyEdition] updatePowerInfo
+-- @function [parent=#EnergyEdition] updatePowerInfo
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -364,8 +364,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerEnergyEdition.methods:updatePowerInfo(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerEnergyEdition", "updatePowerInfo():",player, element, action, item, item2, item3)
+function EnergyEdition.methods:updatePowerInfo(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updatePowerInfo():",player, element, action, item, item2, item3)
   local infoPanel = self:getPowerPanel(player)
   local model = self.model:getModel(player)
   local default = self.model:getDefault(player)
@@ -374,7 +374,7 @@ function PlannerEnergyEdition.methods:updatePowerInfo(player, element, action, i
   if model.powers ~= nil and model.powers[item] ~= nil then
     local power = self:getObject(player, element, action, item, item2, item3)
     if power ~= nil then
-      Logging:debug("HMPlannerEnergyEdition", "updatePowerInfo():power=",power)
+      Logging:debug(self:classname(), "updatePowerInfo():power=",power)
       for k,guiName in pairs(infoPanel.children_names) do
         infoPanel[guiName].destroy()
       end
@@ -391,7 +391,7 @@ end
 -------------------------------------------------------------------------------
 -- Update Primary
 --
--- @function [parent=#PlannerEnergyEdition] updatePrimary
+-- @function [parent=#EnergyEdition] updatePrimary
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -400,8 +400,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerEnergyEdition.methods:updatePrimary(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerEnergyEdition", "updatePrimary():",player, element, action, item, item2, item3)
+function EnergyEdition.methods:updatePrimary(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updatePrimary():",player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
 
   self:updatePrimaryInfo(player, element, action, item, item2, item3)
@@ -411,7 +411,7 @@ end
 -------------------------------------------------------------------------------
 -- Update information
 --
--- @function [parent=#PlannerEnergyEdition] updatePrimaryInfo
+-- @function [parent=#EnergyEdition] updatePrimaryInfo
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -420,8 +420,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerEnergyEdition.methods:updatePrimaryInfo(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerEnergyEdition", "updatePrimaryInfo():",player, element, action, item, item2, item3)
+function EnergyEdition.methods:updatePrimaryInfo(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updatePrimaryInfo():",player, element, action, item, item2, item3)
   local infoPanel = self:getPrimaryInfoPanel(player)
   local object = self:getObject(player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
@@ -431,7 +431,7 @@ function PlannerEnergyEdition.methods:updatePrimaryInfo(player, element, action,
   end
 
   if object ~= nil then
-    Logging:debug("HMPlannerEnergyEdition", "updatePrimaryInfo():object:",object)
+    Logging:debug(self:classname(), "updatePrimaryInfo():object:",object)
     local primary = object.primary
     if primary.name ~= nil then
       local _generator = self.player:getItemPrototype(primary.name)
@@ -470,7 +470,7 @@ end
 -------------------------------------------------------------------------------
 -- Update selector
 --
--- @function [parent=#PlannerEnergyEdition] updatePrimarySelector
+-- @function [parent=#EnergyEdition] updatePrimarySelector
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -479,8 +479,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerEnergyEdition.methods:updatePrimarySelector(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerEnergyEdition", "updatePrimarySelector():",player, element, action, item, item2, item3)
+function EnergyEdition.methods:updatePrimarySelector(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updatePrimarySelector():",player, element, action, item, item2, item3)
   local selectorPanel = self:getPrimarySelectorPanel(player)
   local model = self.model:getModel(player)
 
@@ -497,7 +497,7 @@ function PlannerEnergyEdition.methods:updatePrimarySelector(player, element, act
   if not(self.player:getSettings(player, "model_filter_generator", true)) then category = nil end
   -- ajouter de la table des groupes de recipe
   local factories = self.player:getGenerators("primary")
-  Logging:debug("HMPlannerEnergyEdition", "factories:",factories)
+  Logging:debug(self:classname(), "factories:",factories)
 
 
   if category == nil then
@@ -522,7 +522,7 @@ function PlannerEnergyEdition.methods:updatePrimarySelector(player, element, act
   end
 
   local tablePanel = self:addGuiTable(scrollPanel, "primary-table", 5)
-  --Logging:debug(("HMPlannerEnergyEdition", "factories:",self.player:getProductions())
+  --Logging:debug(self:classname(), "factories:",self.player:getProductions())
   for key, element in pairs(factories) do
     if category ~= nil or (element.subgroup ~= nil and element.subgroup.name == model.primaryGroupSelected) then
       local localised_name = self.player:getLocalisedName(player, element)
@@ -534,7 +534,7 @@ end
 -------------------------------------------------------------------------------
 -- Update Secondary
 --
--- @function [parent=#PlannerEnergyEdition] updateSecondary
+-- @function [parent=#EnergyEdition] updateSecondary
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -543,8 +543,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerEnergyEdition.methods:updateSecondary(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerEnergyEdition", "updateSecondary():",player, element, action, item, item2, item3)
+function EnergyEdition.methods:updateSecondary(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateSecondary():",player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
 
   self:updateSecondaryInfo(player, element, action, item, item2, item3)
@@ -554,7 +554,7 @@ end
 -------------------------------------------------------------------------------
 -- Update information
 --
--- @function [parent=#PlannerEnergyEdition] updateSecondaryInfo
+-- @function [parent=#EnergyEdition] updateSecondaryInfo
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -563,8 +563,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerEnergyEdition.methods:updateSecondaryInfo(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerEnergyEdition", "updateSecondaryInfo():",player, element, action, item, item2, item3)
+function EnergyEdition.methods:updateSecondaryInfo(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateSecondaryInfo():",player, element, action, item, item2, item3)
   local infoPanel = self:getSecondaryInfoPanel(player)
   local object = self:getObject(player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
@@ -574,7 +574,7 @@ function PlannerEnergyEdition.methods:updateSecondaryInfo(player, element, actio
   end
 
   if object ~= nil then
-    Logging:debug("HMPlannerEnergyEdition", "updateSecondaryInfo():object:",object)
+    Logging:debug(self:classname(), "updateSecondaryInfo():object:",object)
     local secondary = object.secondary
     if secondary.name ~= nil then
       local _generator = self.player:getItemPrototype(secondary.name)
@@ -619,7 +619,7 @@ end
 -------------------------------------------------------------------------------
 -- Update selector
 --
--- @function [parent=#PlannerEnergyEdition] updateSecondarySelector
+-- @function [parent=#EnergyEdition] updateSecondarySelector
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -628,8 +628,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerEnergyEdition.methods:updateSecondarySelector(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerEnergyEdition", "updateSecondarySelector():",player, element, action, item, item2, item3)
+function EnergyEdition.methods:updateSecondarySelector(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateSecondarySelector():",player, element, action, item, item2, item3)
   local selectorPanel = self:getSecondarySelectorPanel(player)
   local model = self.model:getModel(player)
 
@@ -646,7 +646,7 @@ function PlannerEnergyEdition.methods:updateSecondarySelector(player, element, a
   if not(self.player:getSettings(player, "model_filter_generator", true)) then category = nil end
   -- ajouter de la table des groupes de recipe
   local factories = self.player:getGenerators("secondary")
-  Logging:debug("HMPlannerEnergyEdition", "factories:",factories)
+  Logging:debug(self:classname(), "factories:",factories)
 
 
   if category == nil then
@@ -671,7 +671,7 @@ function PlannerEnergyEdition.methods:updateSecondarySelector(player, element, a
   end
 
   local tablePanel = self:addGuiTable(scrollPanel, "secondary-table", 5)
-  --Logging:debug("HMPlannerEnergyEdition", "factories:",self.player:getProductions())
+  --Logging:debug(self:classname(), "factories:",self.player:getProductions())
   for key, element in pairs(factories) do
     if category ~= nil or (element.subgroup ~= nil and element.subgroup.name == model.secondaryGroupSelected) then
       local localised_name = self.player:getLocalisedName(player, element)

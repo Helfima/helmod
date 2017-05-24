@@ -1,11 +1,11 @@
 -------------------------------------------------------------------------------
 -- Classe to build selector dialog
 --
--- @module PlannerAbstractSelector
--- @extends #PlannerDialog
+-- @module AbstractSelector
+-- @extends #Dialog
 --
 
-PlannerAbstractSelector = setclass("HMPlannerAbstractSelector", PlannerDialog)
+AbstractSelector = setclass("HMAbstractSelector", Dialog)
 
 local groupList = {}
 local prototypeGroups = {}
@@ -15,92 +15,92 @@ local prototypeFilterProduct = true
 -------------------------------------------------------------------------------
 -- Return filter - filtre sur les prototypes
 --
--- @function [parent=#PlannerAbstractSelector] getProductFilter
+-- @function [parent=#AbstractSelector] getProductFilter
 --
 -- @return #table
 --
-function PlannerAbstractSelector.methods:getProductFilter()
+function AbstractSelector.methods:getProductFilter()
   return prototypeFilterProduct
 end
 
 -------------------------------------------------------------------------------
 -- Return filter - filtre sur les prototypes
 --
--- @function [parent=#PlannerAbstractSelector] getFilter
+-- @function [parent=#AbstractSelector] getFilter
 --
 -- @return #table
 --
-function PlannerAbstractSelector.methods:getFilter()
+function AbstractSelector.methods:getFilter()
   return prototypeFilter
 end
 
 -------------------------------------------------------------------------------
 -- Return groups
 --
--- @function [parent=#PlannerAbstractSelector] getGroups
+-- @function [parent=#AbstractSelector] getGroups
 --
 -- @return #table
 --
-function PlannerAbstractSelector.methods:getGroups()
+function AbstractSelector.methods:getGroups()
   return groupList
 end
 
 -------------------------------------------------------------------------------
 -- Set groups
 --
--- @function [parent=#PlannerAbstractSelector] getGroups
+-- @function [parent=#AbstractSelector] getGroups
 --
 -- @param #table list
 --
 -- @return #table
 --
-function PlannerAbstractSelector.methods:setGroups(list)
+function AbstractSelector.methods:setGroups(list)
   groupList = list
 end
 
 -------------------------------------------------------------------------------
 -- Return prototype groups
 --
--- @function [parent=#PlannerAbstractSelector] getPrototypeGroups
+-- @function [parent=#AbstractSelector] getPrototypeGroups
 --
 -- @return #table
 --
-function PlannerAbstractSelector.methods:getPrototypeGroups()
+function AbstractSelector.methods:getPrototypeGroups()
   return prototypeGroups
 end
 
 -------------------------------------------------------------------------------
 -- Set prototype groups
 --
--- @function [parent=#PlannerAbstractSelector] getPrototypeGroups
+-- @function [parent=#AbstractSelector] getPrototypeGroups
 --
 -- @param #table list
 --
 -- @return #table
 --
-function PlannerAbstractSelector.methods:setPrototypeGroups(list)
+function AbstractSelector.methods:setPrototypeGroups(list)
   prototypeGroups = list
 end
 
 -------------------------------------------------------------------------------
 -- Return caption
 --
--- @function [parent=#PlannerAbstractSelector] getCaption
+-- @function [parent=#AbstractSelector] getCaption
 --
--- @param #PlannerController parent parent controller
+-- @param #Controller parent parent controller
 --
-function PlannerAbstractSelector.methods:getCaption(parent)
+function AbstractSelector.methods:getCaption(parent)
   return {"helmod_selector-panel.recipe-title"}
 end
 
 -------------------------------------------------------------------------------
 -- On initialization
 --
--- @function [parent=#PlannerAbstractSelector] on_init
+-- @function [parent=#AbstractSelector] on_init
 --
--- @param #PlannerController parent parent controller
+-- @param #Controller parent parent controller
 --
-function PlannerAbstractSelector.methods:on_init(parent)
+function AbstractSelector.methods:on_init(parent)
   self.panelCaption = self:getCaption(parent)
   self.player = self.parent.player
   self.model = self.parent.model
@@ -109,24 +109,24 @@ end
 -------------------------------------------------------------------------------
 -- Get the parent panel
 --
--- @function [parent=#PlannerAbstractSelector] getParentPanel
+-- @function [parent=#AbstractSelector] getParentPanel
 --
 -- @param #LuaPlayer player
 --
 -- @return #LuaGuiElement
 --
-function PlannerAbstractSelector.methods:getParentPanel(player)
+function AbstractSelector.methods:getParentPanel(player)
   return self.parent:getDialogPanel(player)
 end
 
 -------------------------------------------------------------------------------
 -- Get or create filter panel
 --
--- @function [parent=#PlannerAbstractSelector] getFilterPanel
+-- @function [parent=#AbstractSelector] getFilterPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractSelector.methods:getFilterPanel(player)
+function AbstractSelector.methods:getFilterPanel(player)
   local panel = self:getPanel(player)
   if panel["filter-panel"] ~= nil and panel["filter-panel"].valid then
     return panel["filter-panel"]
@@ -137,11 +137,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create scroll panel
 --
--- @function [parent=#PlannerAbstractSelector] getSrollPanel
+-- @function [parent=#AbstractSelector] getSrollPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractSelector.methods:getSrollPanel(player)
+function AbstractSelector.methods:getSrollPanel(player)
   local panel = self:getPanel(player)
   if panel["main-panel"] ~= nil and panel["main-panel"].valid then
     return panel["main-panel"]["scroll-panel"]
@@ -156,11 +156,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create groups panel
 --
--- @function [parent=#PlannerAbstractSelector] getGroupsPanel
+-- @function [parent=#AbstractSelector] getGroupsPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractSelector.methods:getGroupsPanel(player)
+function AbstractSelector.methods:getGroupsPanel(player)
   local panel = self:getSrollPanel(player)
   if panel["groups-panel"] ~= nil and panel["groups-panel"].valid then
     return panel["groups-panel"]
@@ -171,11 +171,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create item list panel
 --
--- @function [parent=#PlannerAbstractSelector] getItemListPanel
+-- @function [parent=#AbstractSelector] getItemListPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractSelector.methods:getItemListPanel(player)
+function AbstractSelector.methods:getItemListPanel(player)
   local panel = self:getSrollPanel(player)
   if panel["item-list-panel"] ~= nil and panel["item-list-panel"].valid then
     return panel["item-list-panel"]
@@ -186,7 +186,7 @@ end
 -------------------------------------------------------------------------------
 -- On open
 --
--- @function [parent=#PlannerAbstractSelector] on_open
+-- @function [parent=#AbstractSelector] on_open
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -197,8 +197,8 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function PlannerAbstractSelector.methods:on_open(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerAbstractSelector", "on_open():",player, element, action, item, item2, item3)
+function AbstractSelector.methods:on_open(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "on_open():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   if item3 ~= nil then
     prototypeFilter = item3:lower():gsub("[-]"," ")
@@ -213,7 +213,7 @@ end
 -------------------------------------------------------------------------------
 -- After open
 --
--- @function [parent=#PlannerAbstractSelector] after_open
+-- @function [parent=#AbstractSelector] after_open
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -222,18 +222,18 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractSelector.methods:after_open(player, element, action, item, item2, item3)
-  self.parent:send_event(player, "HMPlannerRecipeEdition", "CLOSE")
-  self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
-  self.parent:send_event(player, "HMPlannerSettings", "CLOSE")
-  if self:classname() ~= "HMPlannerRecipeSelector" then self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE") end
-  if self:classname() ~= "HMPlannerTechnologySelector" then self.parent:send_event(player, "HMPlannerTechnologySelector", "CLOSE") end
+function AbstractSelector.methods:after_open(player, element, action, item, item2, item3)
+  self.parent:send_event(player, "HMRecipeEdition", "CLOSE")
+  self.parent:send_event(player, "HMProductEdition", "CLOSE")
+  self.parent:send_event(player, "HMSettings", "CLOSE")
+  if self:classname() ~= "HMRecipeSelector" then self.parent:send_event(player, "HMRecipeSelector", "CLOSE") end
+  if self:classname() ~= "HMTechnologySelector" then self.parent:send_event(player, "HMTechnologySelector", "CLOSE") end
 end
 
 -------------------------------------------------------------------------------
 -- On event
 --
--- @function [parent=#PlannerAbstractSelector] on_event
+-- @function [parent=#AbstractSelector] on_event
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -242,8 +242,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractSelector.methods:on_event(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerAbstractSelector", "on_event():",player, element, action, item, item2, item3)
+function AbstractSelector.methods:on_event(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "on_event():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local globalSettings = self.player:getGlobal(player, "settings")
   local defaultSettings = self.player:getDefaultSettings()
@@ -253,6 +253,11 @@ function PlannerAbstractSelector.methods:on_event(player, element, action, item,
     if action == "recipe-select" then
       local productionBlock = self.parent.model:addRecipeIntoProductionBlock(player, item)
       self.parent.model:update(player)
+      self.parent:refreshDisplayData(player)
+      self:close(player)
+    end
+    if action == "entity-select" then
+      globalPlayer["entity-properties"] = item
       self.parent:refreshDisplayData(player)
       self:close(player)
     end
@@ -283,7 +288,7 @@ end
 -------------------------------------------------------------------------------
 -- Update groups
 --
--- @function [parent=#PlannerAbstractSelector] updateGroups
+-- @function [parent=#AbstractSelector] updateGroups
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -294,15 +299,15 @@ end
 --
 -- @return {groupList, prototypeGroups}
 --
-function PlannerAbstractSelector.methods:updateGroups(player, element, action, item, item2, item3)
-  Logging:trace("HMPlannerAbstractSelector", "updateGroups():",player, element, action, item, item2, item3)
+function AbstractSelector.methods:updateGroups(player, element, action, item, item2, item3)
+  Logging:trace(self:classname(), "updateGroups():",player, element, action, item, item2, item3)
   return {},{}
 end
 
 -------------------------------------------------------------------------------
 -- On update
 --
--- @function [parent=#PlannerAbstractSelector] on_update
+-- @function [parent=#AbstractSelector] on_update
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -311,8 +316,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractSelector.methods:on_update(player, element, action, item, item2, item3)
-  Logging:trace("HMPlannerAbstractSelector", "on_update():",player, element, action, item, item2, item3)
+function AbstractSelector.methods:on_update(player, element, action, item, item2, item3)
+  Logging:trace(self:classname(), "on_update():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   -- recuperation recipes
   groupList , prototypeGroups = self:updateGroups(player, element, action, item, item2, item3)
@@ -325,7 +330,7 @@ end
 -------------------------------------------------------------------------------
 -- Update filter
 --
--- @function [parent=#PlannerAbstractSelector] updateFilter
+-- @function [parent=#AbstractSelector] updateFilter
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -334,8 +339,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractSelector.methods:updateFilter(player, element, action, item, item2, item3)
-  Logging:trace("HMPlannerAbstractSelector", "updateFilter():",player, element, action, item, item2, item3)
+function AbstractSelector.methods:updateFilter(player, element, action, item, item2, item3)
+  Logging:trace(self:classname(), "updateFilter():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local panel = self:getFilterPanel(player)
   local globalSettings = self.player:getGlobal(player, "settings")
@@ -366,7 +371,7 @@ end
 -------------------------------------------------------------------------------
 -- Update item list
 --
--- @function [parent=#PlannerAbstractSelector] updateItemList
+-- @function [parent=#AbstractSelector] updateItemList
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -375,8 +380,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractSelector.methods:updateItemList(player, element, action, item, item2, item3)
-  Logging:trace("HMPlannerAbstractSelector", "updateItemList():",player, element, action, item, item2, item3)
+function AbstractSelector.methods:updateItemList(player, element, action, item, item2, item3)
+  Logging:trace(self:classname(), "updateItemList():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local panel = self:getItemListPanel(player)
 
@@ -393,7 +398,7 @@ function PlannerAbstractSelector.methods:updateItemList(player, element, action,
     -- boucle subgroup
     local guiRecipeSubgroup = self:addGuiTable(guiRecipeSelectorList, "recipe-table-"..key, 10, "helmod_table_recipe_selector")
     for key, prototype in spairs(subgroup,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
-      --Logging:trace("HMPlannerAbstractSelector", "updateItemList():recipe", recipe.name, recipe.category, recipe.group.name, recipe.group.order, recipe.subgroup.name, recipe.subgroup.order, recipe.order)
+      --Logging:trace(self:classname(), "updateItemList():recipe", recipe.name, recipe.category, recipe.group.name, recipe.group.order, recipe.subgroup.name, recipe.subgroup.order, recipe.order)
 
       local tooltip = self:buildPrototypeTooltip(player, prototype)
       self:buildPrototypeIcon(player, guiRecipeSubgroup, prototype, tooltip)
@@ -405,7 +410,7 @@ end
 -------------------------------------------------------------------------------
 -- Get item list
 --
--- @function [parent=#PlannerAbstractSelector] getItemList
+-- @function [parent=#AbstractSelector] getItemList
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -414,8 +419,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractSelector.methods:getItemList(player, element, action, item, item2, item3)
-  Logging:trace("HMPlannerAbstractSelector", "getItemList():",player, element, action, item, item2, item3)
+function AbstractSelector.methods:getItemList(player, element, action, item, item2, item3)
+  Logging:trace(self:classname(), "getItemList():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local list = {}
   if prototypeGroups[globalPlayer.recipeGroupSelected] ~= nil then
@@ -427,12 +432,12 @@ end
 -------------------------------------------------------------------------------
 -- Build prototype tooltip
 --
--- @function [parent=#PlannerAbstractSelector] buildPrototypeTooltip
+-- @function [parent=#AbstractSelector] buildPrototypeTooltip
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractSelector.methods:buildPrototypeTooltip(player, prototype)
-  Logging:trace("HMPlannerAbstractSelector", "buildPrototypeTooltip(player, element):",player, prototype)
+function AbstractSelector.methods:buildPrototypeTooltip(player, prototype)
+  Logging:trace(self:classname(), "buildPrototypeTooltip(player, element):",player, prototype)
   -- initalize tooltip
   local tooltip = ""
   return tooltip
@@ -441,19 +446,19 @@ end
 -------------------------------------------------------------------------------
 -- Build prototype icon
 --
--- @function [parent=#PlannerAbstractSelector] buildPrototypeIcon
+-- @function [parent=#AbstractSelector] buildPrototypeIcon
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractSelector.methods:buildPrototypeIcon(player, guiElement, prototype, tooltip)
-  Logging:trace("HMPlannerAbstractSelector", "buildPrototypeIcon(player, guiElement, prototype, tooltip:",player, guiElement, prototype, tooltip)
+function AbstractSelector.methods:buildPrototypeIcon(player, guiElement, prototype, tooltip)
+  Logging:trace(self:classname(), "buildPrototypeIcon(player, guiElement, prototype, tooltip:",player, guiElement, prototype, tooltip)
   self:addGuiButtonSelectSprite(guiElement, self:classname().."=recipe-select=ID=", self.player:getRecipeIconType(player, prototype), prototype.name, prototype.name, tooltip)
 end
 
 -------------------------------------------------------------------------------
 -- Update group selector
 --
--- @function [parent=#PlannerAbstractSelector] updateGroupSelector
+-- @function [parent=#AbstractSelector] updateGroupSelector
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -462,8 +467,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractSelector.methods:updateGroupSelector(player, element, action, item, item2, item3)
-  Logging:trace("HMPlannerAbstractSelector", "updateGroupSelector():",player, element, action, item, item2, item3)
+function AbstractSelector.methods:updateGroupSelector(player, element, action, item, item2, item3)
+  Logging:trace(self:classname(), "updateGroupSelector():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local panel = self:getGroupsPanel(player)
 
@@ -471,7 +476,7 @@ function PlannerAbstractSelector.methods:updateGroupSelector(player, element, ac
     panel["recipe-groups"].destroy()
   end
 
-  Logging:debug("HMPlannerAbstractSelector", "groupList:",groupList)
+  Logging:debug(self:classname(), "groupList:",groupList)
 
   -- ajouter de la table des groupes de recipe
   local guiRecipeSelectorGroups = self:addGuiTable(panel, "recipe-groups", 6, "helmod_table_recipe_selector")

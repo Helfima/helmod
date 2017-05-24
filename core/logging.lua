@@ -76,8 +76,8 @@ function Logging:logging(tag, level, logClass, ...)
 		for key, object in pairs(arg) do
 			message = message..self:objectToString(object)
 		end
-		game.write_file(self.filename, tag.."|"..logClass.."|"..message.."\n", append_log)
-  
+		--game.write_file(self.filename, tag.."|"..logClass.."|"..message.."\n", append_log)
+    log(tag.."|"..logClass.."|"..message)
 		if append_log == false then append_log = true end
 	end
 end

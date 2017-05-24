@@ -1,22 +1,22 @@
-require "planner/plannerAbstractEdition"
+require "edition/AbstractEdition"
 
 -------------------------------------------------------------------------------
--- Classe to build resource edition dialog
+-- Class to build resource edition dialog
 --
--- @module PlannerResourceEdition
--- @extends #PlannerDialog
+-- @module ResourceEdition
+-- @extends #AbstractEdition
 --
 
-PlannerResourceEdition = setclass("HMPlannerResourceEdition", PlannerAbstractEdition)
+ResourceEdition = setclass("HMResourceEdition", AbstractEdition)
 
 -------------------------------------------------------------------------------
 -- On initialization
 --
--- @function [parent=#PlannerResourceEdition] on_init
+-- @function [parent=#ResourceEdition] on_init
 --
--- @param #PlannerController parent parent controller
+-- @param #Controller parent parent controller
 --
-function PlannerResourceEdition.methods:on_init(parent)
+function ResourceEdition.methods:on_init(parent)
 	self.panelCaption = ({"helmod_resource-edition-panel.title"})
 	self.player = self.parent.player
 	self.model = self.parent.model
@@ -25,20 +25,20 @@ end
 -------------------------------------------------------------------------------
 -- Get the parent panel
 --
--- @function [parent=#PlannerResourceEdition] getParentPanel
+-- @function [parent=#ResourceEdition] getParentPanel
 --
 -- @param #LuaPlayer player
 --
 -- @return #LuaGuiElement
 --
-function PlannerResourceEdition.methods:getParentPanel(player)
+function ResourceEdition.methods:getParentPanel(player)
 	return self.parent:getDialogPanel(player)
 end
 
 -------------------------------------------------------------------------------
 -- On open
 --
--- @function [parent=#PlannerResourceEdition] on_open
+-- @function [parent=#ResourceEdition] on_open
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -49,7 +49,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function PlannerResourceEdition.methods:on_open(player, element, action, item, item2, item3)
+function ResourceEdition.methods:on_open(player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 	local close = true
 	model.moduleListRefresh = false
@@ -66,7 +66,7 @@ end
 -------------------------------------------------------------------------------
 -- On close dialog
 --
--- @function [parent=#PlannerResourceEdition] on_close
+-- @function [parent=#ResourceEdition] on_close
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -75,7 +75,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerResourceEdition.methods:on_close(player, element, action, item, item2, item3)
+function ResourceEdition.methods:on_close(player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 	model.guiRecipeLast = nil
 	model.moduleListRefresh = false
@@ -84,11 +84,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create resource info panel
 --
--- @function [parent=#PlannerResourceEdition] getObjectInfoPanel
+-- @function [parent=#ResourceEdition] getObjectInfoPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerResourceEdition.methods:getObjectInfoPanel(player)
+function ResourceEdition.methods:getObjectInfoPanel(player)
 	local panel = self:getPanel(player)
 	if panel["info"] ~= nil and panel["info"].valid then
 		return panel["info"]
@@ -99,7 +99,7 @@ end
 -------------------------------------------------------------------------------
 -- Get object
 --
--- @function [parent=#PlannerResourceEdition] getObject
+-- @function [parent=#ResourceEdition] getObject
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -108,7 +108,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerResourceEdition.methods:getObject(player, element, action, item, item2, item3)
+function ResourceEdition.methods:getObject(player, element, action, item, item2, item3)
 	local model = self.model:getModel(player)
 	if  model.resources[item2] ~= nil then
 		-- return resource
@@ -120,19 +120,19 @@ end
 -------------------------------------------------------------------------------
 -- Build header panel
 --
--- @function [parent=#PlannerResourceEdition] buildHeaderPanel
+-- @function [parent=#ResourceEdition] buildHeaderPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerResourceEdition.methods:buildHeaderPanel(player)
-	Logging:debug("HMPlannerResourceEdition", "buildHeaderPanel():",player)
+function ResourceEdition.methods:buildHeaderPanel(player)
+	Logging:debug(self:classname(), "buildHeaderPanel():",player)
 	self:getObjectInfoPanel(player)
 end
 
 -------------------------------------------------------------------------------
 -- Update header
 --
--- @function [parent=#PlannerResourceEdition] updateHeader
+-- @function [parent=#ResourceEdition] updateHeader
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -141,15 +141,15 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerResourceEdition.methods:updateHeader(player, element, action, item, item2, item3)
-	Logging:debug("HMPlannerResourceEdition", "updateHeader():",player, element, action, item, item2, item3)
+function ResourceEdition.methods:updateHeader(player, element, action, item, item2, item3)
+	Logging:debug(self:classname(), "updateHeader():",player, element, action, item, item2, item3)
 	self:updateObjectInfo(player, element, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
 -- Update information
 --
--- @function [parent=#PlannerResourceEdition] updateObjectInfo
+-- @function [parent=#ResourceEdition] updateObjectInfo
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -158,8 +158,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerResourceEdition.methods:updateObjectInfo(player, element, action, item, item2, item3)
-	Logging:debug("HMPlannerResourceEdition", "updateObjectInfo():",player, element, action, item, item2, item3)
+function ResourceEdition.methods:updateObjectInfo(player, element, action, item, item2, item3)
+	Logging:debug(self:classname(), "updateObjectInfo():",player, element, action, item, item2, item3)
 	local infoPanel = self:getObjectInfoPanel(player)
 	local model = self.model:getModel(player)
 	local default = self.model:getDefault(player)
@@ -168,7 +168,7 @@ function PlannerResourceEdition.methods:updateObjectInfo(player, element, action
 	local model = self.model:getModel(player)
 	if  model.ingredients[item2] ~= nil then
 		local resource = self:getObject(player, element, action, item, item2, item3)
-		Logging:debug("HMPlannerResourceEdition", "updateResourceInfo():resource=",resource)
+		Logging:debug(self:classname(), "updateResourceInfo():resource=",resource)
 		for k,guiName in pairs(infoPanel.children_names) do
 			infoPanel[guiName].destroy()
 		end

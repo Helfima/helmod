@@ -1,20 +1,20 @@
 -------------------------------------------------------------------------------
--- Classe to build product edition dialog
+-- Class to build product edition dialog
 --
--- @module PlannerProductEdition
--- @extends #PlannerDialog
+-- @module ProductEdition
+-- @extends #Dialog
 --
 
-PlannerProductEdition = setclass("HMPlannerProductEdition", PlannerDialog)
+ProductEdition = setclass("HMProductEdition", Dialog)
 
 -------------------------------------------------------------------------------
 -- On initialization
 --
--- @function [parent=#PlannerProductEdition] on_init
+-- @function [parent=#ProductEdition] on_init
 --
--- @param #PlannerController parent parent controller
+-- @param #Controller parent parent controller
 --
-function PlannerProductEdition.methods:on_init(parent)
+function ProductEdition.methods:on_init(parent)
   self.panelCaption = ({"helmod_product-edition-panel.title"})
   self.player = self.parent.player
   self.model = self.parent.model
@@ -23,20 +23,20 @@ end
 -------------------------------------------------------------------------------
 -- Get the parent panel
 --
--- @function [parent=#PlannerProductEdition] getParentPanel
+-- @function [parent=#ProductEdition] getParentPanel
 --
 -- @param #LuaPlayer player
 --
 -- @return #LuaGuiElement
 --
-function PlannerProductEdition.methods:getParentPanel(player)
+function ProductEdition.methods:getParentPanel(player)
   return self.parent:getDialogPanel(player)
 end
 
 -------------------------------------------------------------------------------
 -- On open
 --
--- @function [parent=#PlannerProductEdition] on_open
+-- @function [parent=#ProductEdition] on_open
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -47,7 +47,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function PlannerProductEdition.methods:on_open(player, element, action, item, item2, item3)
+function ProductEdition.methods:on_open(player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
   local close = true
   if model.guiProductLast == nil or model.guiProductLast ~= item then
@@ -60,7 +60,7 @@ end
 -------------------------------------------------------------------------------
 -- On close dialog
 --
--- @function [parent=#PlannerProductEdition] on_close
+-- @function [parent=#ProductEdition] on_close
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -69,7 +69,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerProductEdition.methods:on_close(player, element, action, item, item2, item3)
+function ProductEdition.methods:on_close(player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
   model.guiProductLast = nil
 end
@@ -77,11 +77,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create info panel
 --
--- @function [parent=#PlannerProductEdition] getInfoPanel
+-- @function [parent=#ProductEdition] getInfoPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerProductEdition.methods:getInfoPanel(player)
+function ProductEdition.methods:getInfoPanel(player)
   local panel = self:getPanel(player)
   if panel["info"] ~= nil and panel["info"].valid then
     return panel["info"]
@@ -92,11 +92,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create buttons panel
 --
--- @function [parent=#PlannerProductEdition] getButtonsPanel
+-- @function [parent=#ProductEdition] getButtonsPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerProductEdition.methods:getButtonsPanel(player)
+function ProductEdition.methods:getButtonsPanel(player)
   local panel = self:getPanel(player)
   if panel["buttons"] ~= nil and panel["buttons"].valid then
     return panel["buttons"]
@@ -107,7 +107,7 @@ end
 -------------------------------------------------------------------------------
 -- After open
 --
--- @function [parent=#PlannerProductEdition] after_open
+-- @function [parent=#ProductEdition] after_open
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -116,17 +116,17 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerProductEdition.methods:after_open(player, element, action, item, item2, item3)
-  self.parent:send_event(player, "HMPlannerRecipeEdition", "CLOSE")
-  self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
-  self.parent:send_event(player, "HMPlannerSettings", "CLOSE")
+function ProductEdition.methods:after_open(player, element, action, item, item2, item3)
+  self.parent:send_event(player, "HMRecipeEdition", "CLOSE")
+  self.parent:send_event(player, "HMRecipeSelector", "CLOSE")
+  self.parent:send_event(player, "HMSettings", "CLOSE")
   self:getInfoPanel(player)
 end
 
 -------------------------------------------------------------------------------
 -- On update
 --
--- @function [parent=#PlannerProductEdition] on_update
+-- @function [parent=#ProductEdition] on_update
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -135,14 +135,14 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerProductEdition.methods:on_update(player, element, action, item, item2, item3)
+function ProductEdition.methods:on_update(player, element, action, item, item2, item3)
   self:updateInfo(player, element, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
 -- Update information
 --
--- @function [parent=#PlannerProductEdition] updateInfo
+-- @function [parent=#ProductEdition] updateInfo
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -151,8 +151,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerProductEdition.methods:updateInfo(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerProductEdition", "updateInfo():",player, element, action, item, item2, item3)
+function ProductEdition.methods:updateInfo(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateInfo():",player, element, action, item, item2, item3)
   local infoPanel = self:getInfoPanel(player)
   local model = self.model:getModel(player)
 
@@ -185,7 +185,7 @@ end
 -------------------------------------------------------------------------------
 -- On event
 --
--- @function [parent=#PlannerProductEdition] on_event
+-- @function [parent=#ProductEdition] on_event
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -194,8 +194,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerProductEdition.methods:on_event(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerProductEdition", "on_event():",player, element, action, item, item2, item3)
+function ProductEdition.methods:on_event(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "on_event():",player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
   if self.player:isAdmin(player) or model.owner == player.name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
     if action == "product-update" then

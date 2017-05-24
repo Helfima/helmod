@@ -14,7 +14,7 @@ ElementGui = setclass("HMElementGui")
 -- @return #number number of textfield input
 --
 function ElementGui.methods:getInputNumber(element)
-  Logging:trace("HMElementGui", "getInputNumber", element)
+  Logging:trace(self:classname(), "getInputNumber", element)
   local count = 0
   if element ~= nil then
     local tempCount=tonumber(element.text)
@@ -37,7 +37,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiLabel(parent, key, caption, style, tooltip, single_line)
-  Logging:trace("HMElementGui", "addGuiLabel", parent, key, caption, style, tooltip, single_line)
+  Logging:trace(self:classname(), "addGuiLabel", parent, key, caption, style, tooltip, single_line)
   local options = {}
   options.type = "label"
   options.name = key
@@ -68,7 +68,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiText(parent, key, text, style, tooltip)
-  Logging:trace("HMElementGui", "addGuiText", parent, key, text, style, tooltip)
+  Logging:trace(self:classname(), "addGuiText", parent, key, text, style, tooltip)
   local options = {}
   options.type = "textfield"
   options.name = key
@@ -100,7 +100,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButton(parent, action, key, style, caption, tooltip)
-  Logging:trace("HMElementGui", "addGuiButton", parent, action, key, style, caption, tooltip)
+  Logging:trace(self:classname(), "addGuiButton", parent, action, key, style, caption, tooltip)
   local options = {}
   options.type = "button"
   if key ~= nil then
@@ -123,10 +123,10 @@ function ElementGui.methods:addGuiButton(parent, action, key, style, caption, to
     button = parent.add(options)
   end)
   if not ok then
-    Logging:trace("HMElementGui", "addGuiButton", action, key, style, err)
+    Logging:trace(self:classname(), "addGuiButton", action, key, style, err)
     options.style = "helmod_button_default"
     if (type(caption) == "boolean") then
-      Logging:error("HMElementGui", "addGuiButton - caption is a boolean")
+      Logging:error(self:classname(), "addGuiButton - caption is a boolean")
     elseif caption ~= nil then
       options.caption = caption
     else
@@ -151,7 +151,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiRadioButton(parent, key, state, style, tooltip)
-  Logging:trace("HMElementGui", "addGuiRadioButton", parent, key, state, style, tooltip)
+  Logging:trace(self:classname(), "addGuiRadioButton", parent, key, state, style, tooltip)
   return parent.add({type="radiobutton", name=key, state=state, style=style, tooltip=tooltip})
 end
 
@@ -169,7 +169,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiCheckbox(parent, key, state, style, tooltip)
-  Logging:trace("HMElementGui", "addGuiCheckbox", parent, key, state, style, tooltip)
+  Logging:trace(self:classname(), "addGuiCheckbox", parent, key, state, style, tooltip)
   return parent.add({type="checkbox", name=key, state=state, style=style, tooltip=tooltip})
 end
 
@@ -190,7 +190,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiDropDown(parent, action, key, items, selected, style, caption, tooltip)
-  Logging:debug("HMElementGui", "addGuiDropDown", parent, action, key, items, selected, style, caption, tooltip)
+  Logging:debug(self:classname(), "addGuiDropDown", parent, action, key, items, selected, style, caption, tooltip)
   local options = {}
   options.type = "drop-down"
   if key ~= nil then
@@ -226,7 +226,7 @@ function ElementGui.methods:addGuiDropDown(parent, action, key, items, selected,
   local ok , err = pcall(function()
     element = parent.add(options)
   end)
-  if not(ok) then Logging:error("HMElementGui", "addGuiDropDown", options, ok , err) end
+  if not(ok) then Logging:error(self:classname(), "addGuiDropDown", options, ok , err) end
   return element
 end
 
@@ -243,7 +243,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButtonItem(parent, action, key, caption)
-  Logging:trace("HMElementGui", "addGuiButtonItem", parent, action, key, caption)
+  Logging:trace(self:classname(), "addGuiButtonItem", parent, action, key, caption)
   return self:addGuiButton(parent, action, key, key, caption)
 end
 
@@ -261,7 +261,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButtonIcon(parent, action, type, key, caption)
-  Logging:trace("HMElementGui", "addGuiButtonIcon", parent, action, type, key, caption)
+  Logging:trace(self:classname(), "addGuiButtonIcon", parent, action, type, key, caption)
   return self:addGuiButton(parent, action, key, "helmod_button_"..type.."_"..key, caption)
 end
 
@@ -281,7 +281,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButtonSpriteStyled(parent, style, action, type, key, caption, tooltip)
-  Logging:trace("HMElementGui", "addGuiButtonSpriteStyled", style,action, type, key, caption, tooltip)
+  Logging:trace(self:classname(), "addGuiButtonSpriteStyled", style,action, type, key, caption, tooltip)
   local options = {}
   options.type = "sprite-button"
   if key ~= nil then
@@ -300,7 +300,7 @@ function ElementGui.methods:addGuiButtonSpriteStyled(parent, style, action, type
     button = parent.add(options)
   end)
   if not ok then
-    Logging:error("HMElementGui", "addGuiButtonSpriteStyled", action, type, key, err)
+    Logging:error(self:classname(), "addGuiButtonSpriteStyled", action, type, key, err)
     if parent[options.name] and parent[options.name].valid then
       parent[options.name].destroy()
     end
@@ -328,7 +328,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButtonSpriteSm(parent, action, type, key, caption, tooltip)
-  Logging:trace("HMElementGui", "addGuiButtonSpriteSm",action, type, key, caption, tooltip)
+  Logging:trace(self:classname(), "addGuiButtonSpriteSm",action, type, key, caption, tooltip)
   return self:addGuiButtonSpriteStyled(parent, "helmod_button_icon_sm", action, type, key, caption, tooltip)
 end
 
@@ -348,7 +348,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButtonSelectSpriteSm(parent, action, type, key, caption, tooltip, color)
-  Logging:trace("HMElementGui", "addGuiButtonSelectSpriteSm",action, type, key, caption, tooltip, color)
+  Logging:trace(self:classname(), "addGuiButtonSelectSpriteSm",action, type, key, caption, tooltip, color)
   local style = "helmod_button_select_icon_sm"
   if color == "red" then style = "helmod_button_select_icon_sm_red" end
   if color == "yellow" then style = "helmod_button_select_icon_sm_yellow" end
@@ -371,7 +371,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButtonSpriteM(parent, action, type, key, caption, tooltip)
-  Logging:trace("HMElementGui", "addGuiButtonSpriteM",action, type, key, caption, tooltip)
+  Logging:trace(self:classname(), "addGuiButtonSpriteM",action, type, key, caption, tooltip)
   return self:addGuiButtonSpriteStyled(parent, "helmod_button_icon_m", action, type, key, caption, tooltip)
 end
 
@@ -391,7 +391,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButtonSelectSpriteM(parent, action, type, key, caption, tooltip, color)
-  Logging:trace("HMElementGui", "addGuiButtonSelectSpriteM",action, type, key, caption, tooltip, color)
+  Logging:trace(self:classname(), "addGuiButtonSelectSpriteM",action, type, key, caption, tooltip, color)
   local style = "helmod_button_select_icon_m"
   if color == "red" then style = "helmod_button_select_icon_m_red" end
   if color == "yellow" then style = "helmod_button_select_icon_m_yellow" end
@@ -414,7 +414,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButtonSprite(parent, action, type, key, caption, tooltip)
-  Logging:trace("HMElementGui", ":addGuiButtonSprite",action, type, key, caption, tooltip)
+  Logging:trace(self:classname(), ":addGuiButtonSprite",action, type, key, caption, tooltip)
   return self:addGuiButtonSpriteStyled(parent, "helmod_button_icon", action, type, key, caption, tooltip)
 end
 
@@ -434,7 +434,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButtonSelectSprite(parent, action, type, key, caption, tooltip, color)
-  Logging:trace("HMElementGui", "addGuiButtonSelectSprite",action, type, key, caption, tooltip, color)
+  Logging:trace(self:classname(), "addGuiButtonSelectSprite",action, type, key, caption, tooltip, color)
   local style = "helmod_button_select_icon"
   if color == "red" then style = "helmod_button_select_icon_red" end
   if color == "yellow" then style = "helmod_button_select_icon_yellow" end
@@ -457,7 +457,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButtonSpriteXxl(parent, action, type, key, caption, tooltip)
-  Logging:trace("HMElementGui", "addGuiButtonSpriteXxl",action, type, key, caption, tooltip)
+  Logging:trace(self:classname(), "addGuiButtonSpriteXxl",action, type, key, caption, tooltip)
   return self:addGuiButtonSpriteStyled(parent, "helmod_button_icon_xxl", action, type, key, caption, tooltip)
 end
 
@@ -477,7 +477,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.methods:addGuiButtonSelectSpriteXxl(parent, action, type, key, caption, tooltip, color)
-  Logging:trace("HMElementGui", "addGuiButtonSelectSpriteXxl",action, type, key, caption, tooltip, color)
+  Logging:trace(self:classname(), "addGuiButtonSelectSpriteXxl",action, type, key, caption, tooltip, color)
   local style = "helmod_button_select_icon_xxl"
   if color == "red" then style = "helmod_button_select_icon_xxl_red" end
   if color == "yellow" then style = "helmod_button_select_icon_xxl_yellow" end

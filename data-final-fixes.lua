@@ -18,29 +18,8 @@ for type,elements in pairs(data.raw) do
         local entity = data_entity[element.name]
         if entity ~= nil then
           -- util pour le generation de list
-          if element.type == "generator" then
-            entity.classification = "generator"
-            if element.fluid_usage_per_tick ~= nil then entity.fluid_usage = element.fluid_usage_per_tick end
-            if element.effectivity ~= nil then entity.effectivity = element.effectivity end
-            if element.maximum_temperature ~= nil then entity.maximum_temperature = element.maximum_temperature end
-          end
           if element.type == "solar-panel" then 
-            entity.classification = "solar-panel"
             if element.production ~= nil then entity.production = element.production end
-          end
-          if element.type == "boiler" then
-            entity.classification = "boiler"
-            if element.energy_consumption ~= nil then entity.energy_consumption = element.energy_consumption end
-            -- necessaire pour le calcul de puissance
-            if element.target_temperature ~= nil then entity.target_temperature = element.target_temperature end
-            if element.energy_source ~= nil and element.energy_source.effectivity ~= nil then entity.effectivity = element.energy_source.effectivity end
-          end
-          
-          if element.type == "accumulator" then
-            entity.classification = "accumulator"
-            if element.energy_source ~= nil and element.energy_source.buffer_capacity ~= nil then entity.buffer_capacity = element.energy_source.buffer_capacity end
-            if element.energy_source ~= nil and element.energy_source.input_flow_limit ~= nil then entity.input_flow_limit = element.energy_source.input_flow_limit end
-            if element.energy_source ~= nil and element.energy_source.output_flow_limit ~= nil then entity.output_flow_limit = element.energy_source.output_flow_limit end
           end
           -- proprietes pour les usines
           if element.distribution_effectivity ~= nil then entity.efficiency = element.distribution_effectivity end

@@ -26,21 +26,30 @@ helmod_settings_mod = {
     default_value = "all",
     allowed_values = {"all",
       "helmod",
+      "HMAbstractEdition",
+      "HMAbstractSelector",
+      "HMAbstractTab",
+      "HMController",
+      "HMDialog",
       "HMElementGui",
-      "HMPlannerAbstractEdition",
-      "HMPlannerController",
-      "HMPlannerData",
-      "HMPlannerDialog",
-      "HMPlannerEnergyEdition",
+      "HMEnergyEdition",
+      "HMEnergyTab",
+      "HMMainTab",
       "HMModel",
-      "HMPlannerPinPanel",
-      "HMPlannerProductEdition",
-      "HMPlannerRecipeEdition",
-      "HMPlannerAbstractSelector",
-      "HMPlannerRecipeSelector",
-      "HMPlannerTechnologySelector",
-      "HMPlannerResourceEdition",
-      "HMPlayerController"},
+      "HMPinPanel",
+      "HMPlayerController",
+      "HMProductEdition",
+      "HMProductionBlockTab",
+      "HMProductionLineTab",
+      "HMProductEdition",
+      "HMPropertiesTab",
+      "HMRecipeEdition",
+      "HMRecipeSelector",
+      "HMResourceEdition",
+      "HMResourceTab",
+      "HMSummaryTab",
+      "HMTechnologySelector"
+    },
     order = "a1"
   },
   -- format number factory
@@ -206,13 +215,13 @@ helmod_settings_mod = {
     default_value = true,
     order = "d4"
   },
-  --speed-panel
-  speed_panel = {
+  --properties-tab
+  properties_tab = {
     type = "bool-setting",
     setting_type = "runtime-global",
-    localised_name = {"helmod_settings.speed-panel"},
-    localised_description = {"helmod_settings.speed-panel-desc"},
+    localised_name = {"helmod_settings.properties-tab"},
+    localised_description = {"helmod_settings.properties-tab-desc"},
     default_value = false,
-    order = "e"
+    order = "e1"
   }
 }

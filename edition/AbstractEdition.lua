@@ -1,29 +1,29 @@
 -------------------------------------------------------------------------------
--- Classe to build abstract edition dialog
+-- Class to build abstract edition dialog
 --
--- @module PlannerAbstractEdition
--- @extends #PlannerDialog
+-- @module AbstractEdition
+-- @extends #Dialog
 --
 
-PlannerAbstractEdition = setclass("HMPlannerAbstractEdition", PlannerDialog)
+AbstractEdition = setclass("HMAbstractEdition", Dialog)
 
 -------------------------------------------------------------------------------
 -- Get the parent panel
 --
--- @function [parent=#PlannerAbstractEdition] getParentPanel
+-- @function [parent=#AbstractEdition] getParentPanel
 --
 -- @param #LuaPlayer player
 --
 -- @return #LuaGuiElement
 --
-function PlannerAbstractEdition.methods:getParentPanel(player)
+function AbstractEdition.methods:getParentPanel(player)
   return self.parent:getDialogPanel(player)
 end
 
 -------------------------------------------------------------------------------
 -- On open
 --
--- @function [parent=#PlannerAbstractEdition] on_open
+-- @function [parent=#AbstractEdition] on_open
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -34,7 +34,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function PlannerAbstractEdition.methods:on_open(player, element, action, item, item2, item3)
+function AbstractEdition.methods:on_open(player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
   local close = true
   model.moduleListRefresh = false
@@ -51,7 +51,7 @@ end
 -------------------------------------------------------------------------------
 -- On close dialog
 --
--- @function [parent=#PlannerAbstractEdition] on_close
+-- @function [parent=#AbstractEdition] on_close
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -60,7 +60,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractEdition.methods:on_close(player, element, action, item, item2, item3)
+function AbstractEdition.methods:on_close(player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
   model.guiElementLast = nil
   model.moduleListRefresh = false
@@ -69,11 +69,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create factory panel
 --
--- @function [parent=#PlannerAbstractEdition] getFactoryPanel
+-- @function [parent=#AbstractEdition] getFactoryPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractEdition.methods:getFactoryPanel(player)
+function AbstractEdition.methods:getFactoryPanel(player)
   local panel = self:getPanel(player)
   if panel["factory"] ~= nil and panel["factory"].valid then
     return panel["factory"]
@@ -84,11 +84,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create other info panel
 --
--- @function [parent=#PlannerAbstractEdition] getFactoryOtherInfoPanel
+-- @function [parent=#AbstractEdition] getFactoryOtherInfoPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractEdition.methods:getFactoryOtherInfoPanel(player)
+function AbstractEdition.methods:getFactoryOtherInfoPanel(player)
   local panel = self:getFactoryPanel(player)
   if panel["other-info"] ~= nil and panel["other-info"].valid then
     return panel["other-info"]
@@ -99,11 +99,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create factory selector panel
 --
--- @function [parent=#PlannerAbstractEdition] getFactorySelectorPanel
+-- @function [parent=#AbstractEdition] getFactorySelectorPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractEdition.methods:getFactorySelectorPanel(player)
+function AbstractEdition.methods:getFactorySelectorPanel(player)
   local panel = self:getFactoryOtherInfoPanel(player)
   if panel["selector"] ~= nil and panel["selector"].valid then
     return panel["selector"]
@@ -114,11 +114,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create factory info panel
 --
--- @function [parent=#PlannerAbstractEdition] getFactoryInfoPanel
+-- @function [parent=#AbstractEdition] getFactoryInfoPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractEdition.methods:getFactoryInfoPanel(player)
+function AbstractEdition.methods:getFactoryInfoPanel(player)
   local panel = self:getFactoryPanel(player)
   if panel["info"] ~= nil and panel["info"].valid then
     return panel["info"]
@@ -129,11 +129,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create factory modules selector panel
 --
--- @function [parent=#PlannerAbstractEdition] getFactoryModulesSelectorPanel
+-- @function [parent=#AbstractEdition] getFactoryModulesSelectorPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractEdition.methods:getFactoryModulesSelectorPanel(player)
+function AbstractEdition.methods:getFactoryModulesSelectorPanel(player)
   local modulesPanel = self:getFactoryOtherInfoPanel(player)
   local selectionModulesPanel = modulesPanel["selection-modules"]
   if selectionModulesPanel == nil then
@@ -150,11 +150,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create factory actived modules panel
 --
--- @function [parent=#PlannerAbstractEdition] getFactoryActivedModulesPanel
+-- @function [parent=#AbstractEdition] getFactoryActivedModulesPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractEdition.methods:getFactoryActivedModulesPanel(player)
+function AbstractEdition.methods:getFactoryActivedModulesPanel(player)
   local modulesPanel = self:getFactoryOtherInfoPanel(player)
   if modulesPanel["current-modules"] ~= nil and modulesPanel["current-modules"].valid then
     return modulesPanel["current-modules"]
@@ -165,11 +165,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create beacon panel
 --
--- @function [parent=#PlannerAbstractEdition] getBeaconPanel
+-- @function [parent=#AbstractEdition] getBeaconPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractEdition.methods:getBeaconPanel(player)
+function AbstractEdition.methods:getBeaconPanel(player)
   local panel = self:getPanel(player)
   if panel["beacon"] ~= nil and panel["beacon"].valid then
     return panel["beacon"]
@@ -180,11 +180,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create other info panel
 --
--- @function [parent=#PlannerAbstractEdition] getBeaconOtherInfoPanel
+-- @function [parent=#AbstractEdition] getBeaconOtherInfoPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractEdition.methods:getBeaconOtherInfoPanel(player)
+function AbstractEdition.methods:getBeaconOtherInfoPanel(player)
   local panel = self:getBeaconPanel(player)
   if panel["selector"] ~= nil and panel["selector"].valid then
     return panel["selector"]
@@ -195,11 +195,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create selector panel
 --
--- @function [parent=#PlannerAbstractEdition] getBeaconSelectorPanel
+-- @function [parent=#AbstractEdition] getBeaconSelectorPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractEdition.methods:getBeaconSelectorPanel(player)
+function AbstractEdition.methods:getBeaconSelectorPanel(player)
   local panel = self:getBeaconOtherInfoPanel(player)
   if panel["selector"] ~= nil and panel["selector"].valid then
     return panel["selector"]
@@ -210,11 +210,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create info panel
 --
--- @function [parent=#PlannerAbstractEdition] getBeaconInfoPanel
+-- @function [parent=#AbstractEdition] getBeaconInfoPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractEdition.methods:getBeaconInfoPanel(player)
+function AbstractEdition.methods:getBeaconInfoPanel(player)
   local panel = self:getBeaconPanel(player)
   if panel["info"] ~= nil and panel["info"].valid then
     return panel["info"]
@@ -225,11 +225,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create beacon modules selector panel
 --
--- @function [parent=#PlannerAbstractEdition] getBeaconModulesSelectorPanel
+-- @function [parent=#AbstractEdition] getBeaconModulesSelectorPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractEdition.methods:getBeaconModulesSelectorPanel(player)
+function AbstractEdition.methods:getBeaconModulesSelectorPanel(player)
   local modulesPanel = self:getBeaconOtherInfoPanel(player)
   local selectionModulesPanel = modulesPanel["selection-modules"]
   if selectionModulesPanel == nil then
@@ -246,11 +246,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create beacon actived modules panel
 --
--- @function [parent=#PlannerAbstractEdition] getBeaconActivedModulesPanel
+-- @function [parent=#AbstractEdition] getBeaconActivedModulesPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractEdition.methods:getBeaconActivedModulesPanel(player)
+function AbstractEdition.methods:getBeaconActivedModulesPanel(player)
   local modulesPanel = self:getBeaconOtherInfoPanel(player)
   if modulesPanel["current-modules"] ~= nil and modulesPanel["current-modules"].valid then
     return modulesPanel["current-modules"]
@@ -261,7 +261,7 @@ end
 -------------------------------------------------------------------------------
 -- After open
 --
--- @function [parent=#PlannerAbstractEdition] after_open
+-- @function [parent=#AbstractEdition] after_open
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -270,11 +270,11 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractEdition.methods:after_open(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerAbstractEdition", "after_open():",player, element, action, item, item2, item3)
-  self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
-  self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
-  self.parent:send_event(player, "HMPlannerSettings", "CLOSE")
+function AbstractEdition.methods:after_open(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "after_open():",player, element, action, item, item2, item3)
+  self.parent:send_event(player, "HMProductEdition", "CLOSE")
+  self.parent:send_event(player, "HMRecipeSelector", "CLOSE")
+  self.parent:send_event(player, "HMSettings", "CLOSE")
   local object = self:getObject(player, element, action, item, item2, item3)
 
   local model = self.model:getModel(player)
@@ -294,24 +294,24 @@ end
 -------------------------------------------------------------------------------
 -- Build header panel
 --
--- @function [parent=#PlannerAbstractEdition] buildHeaderPanel
+-- @function [parent=#AbstractEdition] buildHeaderPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractEdition.methods:buildHeaderPanel(player)
-  Logging:debug("HMPlannerAbstractEdition", "buildHeaderPanel():",player)
+function AbstractEdition.methods:buildHeaderPanel(player)
+  Logging:debug(self:classname(), "buildHeaderPanel():",player)
   -- TODO something
 end
 
 -------------------------------------------------------------------------------
 -- Build factory panel
 --
--- @function [parent=#PlannerAbstractEdition] buildFactoryPanel
+-- @function [parent=#AbstractEdition] buildFactoryPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractEdition.methods:buildFactoryPanel(player)
-  Logging:debug("HMPlannerAbstractEdition", "buildFactoryPanel():",player)
+function AbstractEdition.methods:buildFactoryPanel(player)
+  Logging:debug(self:classname(), "buildFactoryPanel():",player)
   self:getFactoryInfoPanel(player)
   self:getFactoryOtherInfoPanel(player)
 end
@@ -319,12 +319,12 @@ end
 -------------------------------------------------------------------------------
 -- Build beacon panel
 --
--- @function [parent=#PlannerAbstractEdition] buildBeaconPanel
+-- @function [parent=#AbstractEdition] buildBeaconPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerAbstractEdition.methods:buildBeaconPanel(player)
-  Logging:debug("HMPlannerAbstractEdition", "buildBeaconPanel():",player)
+function AbstractEdition.methods:buildBeaconPanel(player)
+  Logging:debug(self:classname(), "buildBeaconPanel():",player)
   self:getBeaconInfoPanel(player)
   self:getBeaconOtherInfoPanel(player)
 end
@@ -332,7 +332,7 @@ end
 -------------------------------------------------------------------------------
 -- On update
 --
--- @function [parent=#PlannerAbstractEdition] on_update
+-- @function [parent=#AbstractEdition] on_update
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -341,8 +341,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractEdition.methods:on_update(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerAbstractEdition", "on_update():",player, element, action, item, item2, item3)
+function AbstractEdition.methods:on_update(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "on_update():",player, element, action, item, item2, item3)
   local object = self:getObject(player, element, action, item, item2, item3)
   -- header
   self:updateHeader(player, element, action, item, item2, item3)
@@ -357,7 +357,7 @@ end
 -------------------------------------------------------------------------------
 -- Update header
 --
--- @function [parent=#PlannerAbstractEdition] updateHeader
+-- @function [parent=#AbstractEdition] updateHeader
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -366,15 +366,15 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractEdition.methods:updateHeader(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerAbstractEdition", "updateHeader():",player, element, action, item, item2, item3)
+function AbstractEdition.methods:updateHeader(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateHeader():",player, element, action, item, item2, item3)
   -- TODO something
 end
 
 -------------------------------------------------------------------------------
 -- Update factory
 --
--- @function [parent=#PlannerAbstractEdition] updateFactory
+-- @function [parent=#AbstractEdition] updateFactory
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -383,8 +383,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractEdition.methods:updateFactory(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerAbstractEdition", "updateFactory():",player, element, action, item, item2, item3)
+function AbstractEdition.methods:updateFactory(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateFactory():",player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
 
   self:updateFactoryInfo(player, element, action, item, item2, item3)
@@ -399,7 +399,7 @@ end
 -------------------------------------------------------------------------------
 -- Update beacon
 --
--- @function [parent=#PlannerAbstractEdition] updateBeacon
+-- @function [parent=#AbstractEdition] updateBeacon
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -408,8 +408,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractEdition.methods:updateBeacon(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerAbstractEdition", "updateBeacon():",player, element, action, item, item2, item3)
+function AbstractEdition.methods:updateBeacon(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateBeacon():",player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
 
   self:updateBeaconInfo(player, element, action, item, item2, item3)
@@ -424,7 +424,7 @@ end
 -------------------------------------------------------------------------------
 -- Get element
 --
--- @function [parent=#PlannerAbstractEdition] getElement
+-- @function [parent=#AbstractEdition] getElement
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -433,14 +433,14 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractEdition.methods:getObject(player, element, action, item, item2, item3)
+function AbstractEdition.methods:getObject(player, element, action, item, item2, item3)
   -- TODO something
   return nil
 end
 -------------------------------------------------------------------------------
 -- Update information
 --
--- @function [parent=#PlannerAbstractEdition] updateFactoryInfo
+-- @function [parent=#AbstractEdition] updateFactoryInfo
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -449,13 +449,13 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractEdition.methods:updateFactoryInfo(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerAbstractEdition", "updateFactoryInfo():",player, element, action, item, item2, item3)
+function AbstractEdition.methods:updateFactoryInfo(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateFactoryInfo():",player, element, action, item, item2, item3)
   local infoPanel = self:getFactoryInfoPanel(player)
   local object = self:getObject(player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
   if object ~= nil then
-    Logging:debug("HMPlannerAbstractEdition", "updateFactoryInfo():object:",object)
+    Logging:debug(self:classname(), "updateFactoryInfo():object:",object)
     local factory = object.factory
     local _factory = self.player:getItemPrototype(factory.name)
 
@@ -510,7 +510,7 @@ end
 -------------------------------------------------------------------------------
 -- Update module selector
 --
--- @function [parent=#PlannerAbstractEdition] updateFactoryModulesSelector
+-- @function [parent=#AbstractEdition] updateFactoryModulesSelector
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -519,8 +519,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractEdition.methods:updateFactoryModulesSelector(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerAbstractEdition", "updateFactoryModulesSelector():",player, element, action, item, item2, item3)
+function AbstractEdition.methods:updateFactoryModulesSelector(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateFactoryModulesSelector():",player, element, action, item, item2, item3)
   local selectorPanel = self:getFactoryModulesSelectorPanel(player)
   local model = self.model:getModel(player)
   local object = self:getObject(player, element, action, item, item2, item3)
@@ -561,7 +561,7 @@ end
 -------------------------------------------------------------------------------
 -- Update actived modules information
 --
--- @function [parent=#PlannerAbstractEdition] updateFactoryActivedModules
+-- @function [parent=#AbstractEdition] updateFactoryActivedModules
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -570,8 +570,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractEdition.methods:updateFactoryActivedModules(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerAbstractEdition", "updateFactoryActivedModules():",player, element, action, item, item2, item3)
+function AbstractEdition.methods:updateFactoryActivedModules(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateFactoryActivedModules():",player, element, action, item, item2, item3)
   local activedModulesPanel = self:getFactoryActivedModulesPanel(player)
   local object = self:getObject(player, element, action, item, item2, item3)
   local factory = object.factory
@@ -601,7 +601,7 @@ end
 -------------------------------------------------------------------------------
 -- Update factory group
 --
--- @function [parent=#PlannerAbstractEdition] updateFactorySelector
+-- @function [parent=#AbstractEdition] updateFactorySelector
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -610,8 +610,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractEdition.methods:updateFactorySelector(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerAbstractEdition", "updateFactorySelector():",player, element, action, item, item2, item3)
+function AbstractEdition.methods:updateFactorySelector(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateFactorySelector():",player, element, action, item, item2, item3)
   local selectorPanel = self:getFactorySelectorPanel(player)
 
   if selectorPanel["scroll-factory"] ~= nil and selectorPanel["scroll-factory"].valid then
@@ -625,13 +625,13 @@ function PlannerAbstractEdition.methods:updateFactorySelector(player, element, a
 
   -- ajouter de la table des groupes de recipe
   local groupsPanel = self:addGuiTable(scrollPanel, "factory-groups", 2)
-  Logging:debug("HMPlannerAbstractEdition", "updateFactorySelector(): group category=",object.category)
+  Logging:debug(self:classname(), "updateFactorySelector(): group category=",object.category)
 
   local category = object.category
   if not(self.player:getSettings(player, "model_filter_factory", true)) then category = nil end
 
   local factories = self.player:getProductionsCrafting(category)
-  Logging:debug("HMPlannerAbstractEdition", "factories:",factories)
+  Logging:debug(self:classname(), "factories:",factories)
 
 
   if category == nil then
@@ -667,7 +667,7 @@ end
 -------------------------------------------------------------------------------
 -- Update information
 --
--- @function [parent=#PlannerAbstractEdition] updateBeaconInfo
+-- @function [parent=#AbstractEdition] updateBeaconInfo
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -676,8 +676,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractEdition.methods:updateBeaconInfo(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerAbstractEdition", "updateBeaconInfo():",player, element, action, item, item2, item3)
+function AbstractEdition.methods:updateBeaconInfo(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateBeaconInfo():",player, element, action, item, item2, item3)
   local infoPanel = self:getBeaconInfoPanel(player)
   local object = self:getObject(player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
@@ -724,7 +724,7 @@ end
 -------------------------------------------------------------------------------
 -- Update actived modules information
 --
--- @function [parent=#PlannerAbstractEdition] updateBeaconActivedModules
+-- @function [parent=#AbstractEdition] updateBeaconActivedModules
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -733,8 +733,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractEdition.methods:updateBeaconActivedModules(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerAbstractEdition", "updateBeaconActivedModules():",player, element, action, item, item2, item3)
+function AbstractEdition.methods:updateBeaconActivedModules(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateBeaconActivedModules():",player, element, action, item, item2, item3)
   local activedModulesPanel = self:getBeaconActivedModulesPanel(player)
 
   local object = self:getObject(player, element, action, item, item2, item3)
@@ -766,7 +766,7 @@ end
 -------------------------------------------------------------------------------
 -- Update modules selector
 --
--- @function [parent=#PlannerAbstractEdition] updateBeaconModulesSelector
+-- @function [parent=#AbstractEdition] updateBeaconModulesSelector
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -775,8 +775,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractEdition.methods:updateBeaconModulesSelector(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerAbstractEdition", "updateBeaconModulesSelector():",player, element, action, item, item2, item3)
+function AbstractEdition.methods:updateBeaconModulesSelector(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateBeaconModulesSelector():",player, element, action, item, item2, item3)
   local selectorPanel = self:getBeaconModulesSelectorPanel(player)
   local model = self.model:getModel(player)
   local object = self:getObject(player, element, action, item, item2, item3)
@@ -812,7 +812,7 @@ end
 -------------------------------------------------------------------------------
 -- Update factory group
 --
--- @function [parent=#PlannerAbstractEdition] updateBeaconSelector
+-- @function [parent=#AbstractEdition] updateBeaconSelector
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -821,8 +821,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractEdition.methods:updateBeaconSelector(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerAbstractEdition", "updateBeaconSelector():",player, element, action, item, item2, item3)
+function AbstractEdition.methods:updateBeaconSelector(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateBeaconSelector():",player, element, action, item, item2, item3)
   local selectorPanel = self:getBeaconSelectorPanel(player)
   local model = self.model:getModel(player)
 
@@ -839,7 +839,7 @@ function PlannerAbstractEdition.methods:updateBeaconSelector(player, element, ac
   if not(self.player:getSettings(player, "model_filter_beacon", true)) then category = nil end
   -- ajouter de la table des groupes de recipe
   local factories = self.player:getProductionsBeacon()
-  Logging:debug("HMPlannerAbstractEdition", "factories:",factories)
+  Logging:debug(self:classname(), "factories:",factories)
 
 
   if category == nil then
@@ -864,7 +864,7 @@ function PlannerAbstractEdition.methods:updateBeaconSelector(player, element, ac
   end
 
   local tablePanel = self:addGuiTable(scrollPanel, "beacon-table", 5)
-  --Logging:debug("HMPlannerAbstractEdition", "factories:",self.player:getProductions())
+  --Logging:debug(self:classname(), "factories:",self.player:getProductions())
   for key, beacon in pairs(factories) do
     if category ~= nil or (beacon.subgroup ~= nil and beacon.subgroup.name == model.beaconGroupSelected) then
       local localised_name = self.player:getLocalisedName(player, beacon)
@@ -876,7 +876,7 @@ end
 -------------------------------------------------------------------------------
 -- On event
 --
--- @function [parent=#PlannerAbstractEdition] on_event
+-- @function [parent=#AbstractEdition] on_event
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -885,8 +885,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerAbstractEdition.methods:on_event(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerAbstractEdition", "on_event():",player, element, action, item, item2, item3)
+function AbstractEdition.methods:on_event(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "on_event():",player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
 
   if action == "change-panel" then

@@ -1,22 +1,22 @@
 -------------------------------------------------------------------------------
--- Classe to build settings panel
+-- Class to build settings panel
 --
--- @module PlannerSettings
--- @extends #ElementGui
+-- @module Settings
+-- @extends #Dialog
 --
 
-PlannerSettings = setclass("HMPlannerSettings", PlannerDialog)
+Settings = setclass("HMSettings", Dialog)
 
 local dropdown = {}
 
 -------------------------------------------------------------------------------
 -- Initialization
 --
--- @function [parent=#PlannerSettings] init
+-- @function [parent=#Settings] init
 --
--- @param #PlannerController parent parent controller
+-- @param #Controller parent parent controller
 --
-function PlannerSettings.methods:init(parent)
+function Settings.methods:init(parent)
   self.panelCaption = ({"helmod_settings-panel.title"})
 
   self.parent = parent
@@ -27,20 +27,20 @@ end
 -------------------------------------------------------------------------------
 -- Get the parent panel
 --
--- @function [parent=#PlannerSettings] getParentPanel
+-- @function [parent=#Settings] getParentPanel
 --
 -- @param #LuaPlayer player
 --
 -- @return #LuaGuiElement
 --
-function PlannerSettings.methods:getParentPanel(player)
+function Settings.methods:getParentPanel(player)
   return self.parent:getDialogPanel(player)
 end
 
 -------------------------------------------------------------------------------
 -- On open
 --
--- @function [parent=#PlannerSettings] on_open
+-- @function [parent=#Settings] on_open
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -51,7 +51,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function PlannerSettings.methods:on_open(player, element, action, item, item2, item3)
+function Settings.methods:on_open(player, element, action, item, item2, item3)
   -- close si nouvel appel
   return true
 end
@@ -59,11 +59,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create about settings panel
 --
--- @function [parent=#PlannerSettings] getAboutSettingsPanel
+-- @function [parent=#Settings] getAboutSettingsPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerSettings.methods:getAboutSettingsPanel(player)
+function Settings.methods:getAboutSettingsPanel(player)
   local panel = self:getPanel(player)
   if panel["about-settings"] ~= nil and panel["about-settings"].valid then
     return panel["about-settings"]
@@ -74,11 +74,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create display settings panel
 --
--- @function [parent=#PlannerSettings] getDisplaySettingsPanel
+-- @function [parent=#Settings] getDisplaySettingsPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerSettings.methods:getDisplaySettingsPanel(player)
+function Settings.methods:getDisplaySettingsPanel(player)
   local panel = self:getPanel(player)
   if panel["display-settings"] ~= nil and panel["display-settings"].valid then
     return panel["display-settings"]
@@ -89,11 +89,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create data settings panel
 --
--- @function [parent=#PlannerSettings] getDataSettingsPanel
+-- @function [parent=#Settings] getDataSettingsPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerSettings.methods:getDataSettingsPanel(player)
+function Settings.methods:getDataSettingsPanel(player)
   local panel = self:getPanel(player)
   if panel["data-settings"] ~= nil and panel["data-settings"].valid then
     return panel["data-settings"]
@@ -104,11 +104,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create model settings panel
 --
--- @function [parent=#PlannerSettings] getModelSettingsPanel
+-- @function [parent=#Settings] getModelSettingsPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerSettings.methods:getModelSettingsPanel(player)
+function Settings.methods:getModelSettingsPanel(player)
   local panel = self:getPanel(player)
   if panel["model-settings"] ~= nil and panel["model-settings"].valid then
     return panel["model-settings"]
@@ -119,11 +119,11 @@ end
 -------------------------------------------------------------------------------
 -- Get or create other settings panel
 --
--- @function [parent=#PlannerSettings] getOtherSettingsPanel
+-- @function [parent=#Settings] getOtherSettingsPanel
 --
 -- @param #LuaPlayer player
 --
-function PlannerSettings.methods:getOtherSettingsPanel(player)
+function Settings.methods:getOtherSettingsPanel(player)
   local panel = self:getPanel(player)
   if panel["other-settings"] ~= nil and panel["other-settings"].valid then
     return panel["other-settings"]
@@ -134,7 +134,7 @@ end
 -------------------------------------------------------------------------------
 -- On event
 --
--- @function [parent=#PlannerSettings] on_event
+-- @function [parent=#Settings] on_event
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -143,8 +143,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerSettings.methods:on_event(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerSettings", "on_event():",player, element, action, item, item2, item3)
+function Settings.methods:on_event(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "on_event():",player, element, action, item, item2, item3)
   local model = self.model:getModel(player)
   local globalSettings = self.player:getGlobal(player, "settings")
   local defaultSettings = self.player:getDefaultSettings()
@@ -199,7 +199,7 @@ end
 -------------------------------------------------------------------------------
 -- After open
 --
--- @function [parent=#PlannerSettings] after_open
+-- @function [parent=#Settings] after_open
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -208,11 +208,11 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerSettings.methods:after_open(player, element, action, item, item2, item3)
-  self.parent:send_event(player, "HMPlannerRecipeEdition", "CLOSE")
-  self.parent:send_event(player, "HMPlannerRecipeSelector", "CLOSE")
-  self.parent:send_event(player, "HMPlannerProductEdition", "CLOSE")
-  self.parent:send_event(player, "HMPlannerEnergyEdition", "CLOSE")
+function Settings.methods:after_open(player, element, action, item, item2, item3)
+  self.parent:send_event(player, "HMRecipeEdition", "CLOSE")
+  self.parent:send_event(player, "HMRecipeSelector", "CLOSE")
+  self.parent:send_event(player, "HMProductEdition", "CLOSE")
+  self.parent:send_event(player, "HMEnergyEdition", "CLOSE")
 
   self:updateAboutSettings(player, element, action, item, item2, item3)
 --  self:updateDisplaySettings(player, element, action, item, item2, item3)
@@ -224,7 +224,7 @@ end
 -------------------------------------------------------------------------------
 -- Update about settings
 --
--- @function [parent=#PlannerSettings] updateAboutSettings
+-- @function [parent=#Settings] updateAboutSettings
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -233,8 +233,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerSettings.methods:updateAboutSettings(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerSettings", "updateAboutSettings():",player, element, action, item, item2, item3)
+function Settings.methods:updateAboutSettings(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateAboutSettings():",player, element, action, item, item2, item3)
 
   local aboutSettingsPanel = self:getAboutSettingsPanel(player)
 
@@ -249,7 +249,7 @@ end
 -------------------------------------------------------------------------------
 -- Update display settings
 --
--- @function [parent=#PlannerSettings] updateDisplaySettings
+-- @function [parent=#Settings] updateDisplaySettings
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -258,8 +258,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerSettings.methods:updateDisplaySettings(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerSettings", "updateDisplaySettings():",player, element, action, item, item2, item3)
+function Settings.methods:updateDisplaySettings(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateDisplaySettings():",player, element, action, item, item2, item3)
 
   local globalSettings = self.player:getGlobal(player, "settings")
   local defaultSettings = self.player:getDefaultSettings()
@@ -322,7 +322,7 @@ end
 -------------------------------------------------------------------------------
 -- Update data settings
 --
--- @function [parent=#PlannerSettings] updateDataSettings
+-- @function [parent=#Settings] updateDataSettings
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -331,8 +331,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerSettings.methods:updateDataSettings(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerSettings", "updateDataSettings():",player, element, action, item, item2, item3)
+function Settings.methods:updateDataSettings(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateDataSettings():",player, element, action, item, item2, item3)
 
   local globalSettings = self.player:getGlobal(player, "settings")
   local defaultSettings = self.player:getDefaultSettings()
@@ -361,7 +361,7 @@ end
 -------------------------------------------------------------------------------
 -- Update model settings
 --
--- @function [parent=#PlannerSettings] updateModelSettings
+-- @function [parent=#Settings] updateModelSettings
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -370,8 +370,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerSettings.methods:updateModelSettings(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerSettings", "updateModelSettings():",player, element, action, item, item2, item3)
+function Settings.methods:updateModelSettings(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateModelSettings():",player, element, action, item, item2, item3)
 
   local globalSettings = self.player:getGlobal(player, "settings")
   local defaultSettings = self.player:getDefaultSettings()
@@ -422,7 +422,7 @@ end
 -------------------------------------------------------------------------------
 -- Update other settings
 --
--- @function [parent=#PlannerSettings] updateOtherSettings
+-- @function [parent=#Settings] updateOtherSettings
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -431,8 +431,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerSettings.methods:updateOtherSettings(player, element, action, item, item2, item3)
-  Logging:debug("HMPlannerSettings", "updateOtherSettings():",player, element, action, item, item2, item3)
+function Settings.methods:updateOtherSettings(player, element, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateOtherSettings():",player, element, action, item, item2, item3)
 
   local globalSettings = self.player:getGlobal(player, "settings")
   local defaultSettings = self.player:getDefaultSettings()

@@ -1,28 +1,28 @@
-require "planner/plannerAbstractSelector"
+require "selector/AbstractSelector"
 -------------------------------------------------------------------------------
--- Classe to build recipe dialog
+-- Class to build recipe selector
 --
--- @module PlannerRecipeSelector
--- @extends #PlannerDialog
+-- @module RecipeSelector
+-- @extends #AbstractSelector
 --
 
-PlannerRecipeSelector = setclass("HMPlannerRecipeSelector", PlannerAbstractSelector)
+RecipeSelector = setclass("HMRecipeSelector", AbstractSelector)
 
 -------------------------------------------------------------------------------
 -- Return caption
 --
--- @function [parent=#PlannerRecipeSelector] getCaption
+-- @function [parent=#RecipeSelector] getCaption
 --
--- @param #PlannerController parent parent controller
+-- @param #Controller parent parent controller
 --
-function PlannerRecipeSelector.methods:getCaption(parent)
+function RecipeSelector.methods:getCaption(parent)
   return {"helmod_selector-panel.recipe-title"}
 end
 
 -------------------------------------------------------------------------------
 -- Update groups
 --
--- @function [parent=#PlannerRecipeSelector] updateGroups
+-- @function [parent=#RecipeSelector] updateGroups
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -33,8 +33,8 @@ end
 -- 
 -- @return groupList, prototypeGroups
 --
-function PlannerRecipeSelector.methods:updateGroups(player, element, action, item, item2, item3)
-  Logging:trace("HMPlannerRecipeSelector", "updateGroups():",player, element, action, item, item2, item3)
+function RecipeSelector.methods:updateGroups(player, element, action, item, item2, item3)
+  Logging:trace(self:classname(), "updateGroups():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   -- recuperation recipes
   local prototypeGroups = {}
@@ -80,7 +80,7 @@ end
 -------------------------------------------------------------------------------
 -- Get item list
 --
--- @function [parent=#PlannerRecipeSelector] getItemList
+-- @function [parent=#RecipeSelector] getItemList
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -89,8 +89,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PlannerRecipeSelector.methods:getItemList(player, element, action, item, item2, item3)
-  Logging:trace("HMPlannerRecipeSelector", "getItemList():",player, element, action, item, item2, item3)
+function RecipeSelector.methods:getItemList(player, element, action, item, item2, item3)
+  Logging:trace(self:classname(), "getItemList():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local list = {}
   local prototypeGroups = self:getPrototypeGroups()
@@ -103,12 +103,12 @@ end
 -------------------------------------------------------------------------------
 -- Build recipe tooltip
 --
--- @function [parent=#PlannerRecipeSelector] buildPrototypeTooltip
+-- @function [parent=#RecipeSelector] buildPrototypeTooltip
 --
 -- @param #LuaPlayer player
 --
-function PlannerRecipeSelector.methods:buildPrototypeTooltip(player, recipe)
-  Logging:trace("HMPlannerRecipeSelector", "buildRecipeTooltip(player, element):",player, recipe)
+function RecipeSelector.methods:buildPrototypeTooltip(player, recipe)
+  Logging:trace(self:classname(), "buildRecipeTooltip(player, element):",player, recipe)
   -- initalize tooltip
   local tooltip = {"tooltip.recipe-info"}
   -- insert __1__ value
@@ -145,11 +145,11 @@ end
 -------------------------------------------------------------------------------
 -- Build prototype icon
 --
--- @function [parent=#PlannerRecipeSelector] buildPrototypeIcon
+-- @function [parent=#RecipeSelector] buildPrototypeIcon
 --
 -- @param #LuaPlayer player
 --
-function PlannerRecipeSelector.methods:buildPrototypeIcon(player, guiElement, prototype, tooltip)
-      Logging:trace("HMPlannerRecipeSelector", "buildPrototypeIcon(player, guiElement, prototype, tooltip:",player, guiElement, prototype, tooltip)
+function RecipeSelector.methods:buildPrototypeIcon(player, guiElement, prototype, tooltip)
+      Logging:trace(self:classname(), "buildPrototypeIcon(player, guiElement, prototype, tooltip:",player, guiElement, prototype, tooltip)
       self:addGuiButtonSelectSprite(guiElement, self:classname().."=recipe-select=ID=", self.player:getRecipeIconType(player, prototype), prototype.name, prototype.name, tooltip)
 end
