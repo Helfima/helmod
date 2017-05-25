@@ -50,12 +50,11 @@ end
 --
 function PlayerController.methods:resetGui(player)
   Logging:debug(self:classname(), "resetGui(player)")
-  if player.gui.top["helmod_menu-main"] ~= nil then
-    player.gui.top["helmod_menu-main"].destroy()
-  end
-  for _,location in pairs(helmod_settings_mod.display_location.allowed_values) do
-    if player.gui[location]["helmod_planner_main"] ~= nil then
-      player.gui[location]["helmod_planner_main"].destroy()
+  for _,locate in pairs({"left","top","center"}) do
+    for name, panel in pairs(player.gui[locate].children) do
+      if string.match(panel.name,"helmod") then
+        panel.destroy()
+      end
     end
   end
   player.gui.top.add{type="flow", name="helmod_menu-main", direction="horizontal"}
@@ -1052,7 +1051,7 @@ function PlayerController.methods:getEntityProperty(name, property)
       end
       return 0
     end
-    
+
     if property == "max_energy_usage" then
       -- energie par seconde
       if entity.max_energy_usage ~= nil then
@@ -1060,7 +1059,7 @@ function PlayerController.methods:getEntityProperty(name, property)
       end
       return 0
     end
-    
+
     if property == "effectivity" then
       return entity.effectivity or 1
     end
@@ -1128,7 +1127,7 @@ function PlayerController.methods:getEntityProperty(name, property)
       end
       return 1
     end
-    
+
   end
 end
 

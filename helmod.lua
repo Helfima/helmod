@@ -82,10 +82,11 @@ function helmod:on_configuration_changed(data)
     if old_version ~= nil and old_version < "0.3.0" then
       helmod:upgrade_0_3_0()
     end
-    
+
     --initialise au chargement d'une partie existante
     for _,player in pairs(game.players) do
-      self:init_playerController(player)
+      self.playerController = PlayerController:new()
+      self.playerController:bindController(player)
     end
   end
 end
@@ -108,13 +109,6 @@ end
 -- @param #table event
 --
 function helmod:on_tick(event)
---  if game.tick ~= 0 and game.tick%60 == 0 then
---    if self.playerController == nil then
---      for _,player in pairs(game.players) do
---        self:init_playerController(player)
---      end
---    end
---  end
 end
 
 -------------------------------------------------------------------------------
@@ -420,6 +414,13 @@ remote.add_interface("helmod", {
       proxy_gui_click({player_index=game.player.index, element = {valid=true, name="HMController=CLOSE"}})
     end
   end,
+  clear = function()
+    if game.player.admin then
+      for _,player in pairs(game.players) do
+        helmod:clear_panel(player)
+      end
+    end
+  end,
   display_size = function(value)
     local playerController = PlayerController:new()
     local globalSettings = playerController:getGlobal(game.player, "settings")
@@ -442,6 +443,9 @@ remote.add_interface("helmod", {
     end
   end
 })
+
+
+
 
 
 
