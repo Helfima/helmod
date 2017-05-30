@@ -9,6 +9,7 @@ require "edition.EnergyEdition"
 require "selector.EntitySelector"
 require "selector.RecipeSelector"
 require "selector.TechnologySelector"
+require "selector.ItemSelector"
 require "tab.MainTab"
 
 
@@ -49,6 +50,7 @@ function Controller.methods:init(parent)
   table.insert(controllers, EnergyEdition:new(self))
   table.insert(controllers, PinPanel:new(self))
   table.insert(controllers, TechnologySelector:new(self))
+  table.insert(controllers, ItemSelector:new(self))
   
   for _,controller in pairs(controllers) do
     self.controllers[controller:classname()] = controller
@@ -97,7 +99,7 @@ end
 --
 function Controller.methods:on_gui_click(event)
   Logging:debug(self:classname(), "on_gui_click(event)")
-  if event.element then
+  if event.element and event.element.valid then
     if event.element.name == PLANNER_COMMAND then
       local player = game.players[event.player_index]
       self:main(player)

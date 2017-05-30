@@ -36,6 +36,7 @@ end
 function RecipeSelector.methods:updateGroups(player, element, action, item, item2, item3)
   Logging:trace(self:classname(), "updateGroups():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
+  local globalGui = self.player:getGlobalGui(player)
   -- recuperation recipes
   local prototypeGroups = {}
   local groupList = {}
@@ -43,7 +44,9 @@ function RecipeSelector.methods:updateGroups(player, element, action, item, item
   local prototypeFilterProduct = self:getProductFilter()
   
   local firstGroup = nil
-  for key, prototype in spairs(self.player:getRecipes(player, true),function(t,a,b) return t[b]["subgroup"]["order"] > t[a]["subgroup"]["order"] end) do
+  local fake_recipe = true
+  if globalGui.currentTab == "HMPropertiesTab" then fake_recipe = false end
+  for key, prototype in spairs(self.player:getRecipes(player, fake_recipe),function(t,a,b) return t[b]["subgroup"]["order"] > t[a]["subgroup"]["order"] end) do
     local find = false
     if prototypeFilter ~= nil and prototypeFilter ~= "" then
       local elements = prototype.products

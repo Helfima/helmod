@@ -607,7 +607,10 @@ function MainTab.methods:updateHeaderPanel(player, item, item2, item3)
     self:addGuiButton(tabPanel, self:classname().."=refresh-model=ID=", model.id, "helmod_button_default", ({"helmod_result-panel.refresh-button"}))
   elseif globalGui.currentTab == "HMPropertiesTab" then
     local tabPanel = self:addGuiFlowH(menuPanel, "tab", "helmod_flow_data_tab")
-    self:addGuiButton(tabPanel, "HMEntitySelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.add-button-entity"}))
+    self:addGuiButton(tabPanel, "HMEntitySelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-entity"}))
+    self:addGuiButton(tabPanel, "HMItemSelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-item"}))
+    self:addGuiButton(tabPanel, "HMRecipeSelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-recipe"}))
+    self:addGuiButton(tabPanel, "HMTechnologySelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-technology"}))
     self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", "HMProductionLineTab", "helmod_button_default", ({"helmod_result-panel.back-button-production-line"}))
   else
     -- action panel

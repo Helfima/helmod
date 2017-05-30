@@ -226,6 +226,8 @@ function AbstractSelector.methods:after_open(player, element, action, item, item
   self.parent:send_event(player, "HMRecipeEdition", "CLOSE")
   self.parent:send_event(player, "HMProductEdition", "CLOSE")
   self.parent:send_event(player, "HMSettings", "CLOSE")
+  if self:classname() ~= "HMItemSelector" then self.parent:send_event(player, "HMItemSelector", "CLOSE") end
+  if self:classname() ~= "HMEntitySelector" then self.parent:send_event(player, "HMEntitySelector", "CLOSE") end
   if self:classname() ~= "HMRecipeSelector" then self.parent:send_event(player, "HMRecipeSelector", "CLOSE") end
   if self:classname() ~= "HMTechnologySelector" then self.parent:send_event(player, "HMTechnologySelector", "CLOSE") end
 end
@@ -247,21 +249,41 @@ function AbstractSelector.methods:on_event(player, element, action, item, item2,
   local globalPlayer = self.player:getGlobal(player)
   local globalSettings = self.player:getGlobal(player, "settings")
   local defaultSettings = self.player:getDefaultSettings()
+  local globalGui = self.player:getGlobalGui(player)
 
   local model = self.model:getModel(player)
   if self.player:isAdmin(player) or model.owner == player.name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
-    if action == "recipe-select" then
-      local productionBlock = self.parent.model:addRecipeIntoProductionBlock(player, item)
-      self.parent.model:update(player)
-      self.parent:refreshDisplayData(player)
-      self:close(player)
-    end
-    if action == "entity-select" then
-      globalPlayer["entity-properties"] = item
-      self.parent:refreshDisplayData(player)
-      self:close(player)
+    if globalGui.currentTab == "HMPropertiesTab" then
+      if action == "recipe-select" then
+        globalPlayer["prototype-properties"] = {name = item, type = "recipe" }
+        self.parent:refreshDisplayData(player)
+        self:close(player)
+      end
+      if action == "entity-select" then
+        globalPlayer["prototype-properties"] = {name = item, type = "entity" }
+        self.parent:refreshDisplayData(player)
+        self:close(player)
+      end
+      if action == "item-select" then
+        globalPlayer["prototype-properties"] = {name = item, type = "item" }
+        self.parent:refreshDisplayData(player)
+        self:close(player)
+      end
+      if action == "technology-select" then
+        globalPlayer["prototype-properties"] = {name = item, type = "technology" }
+        self.parent:refreshDisplayData(player)
+        self:close(player)
+      end
+    else
+      if action == "recipe-select" then
+        local productionBlock = self.parent.model:addRecipeIntoProductionBlock(player, item)
+        self.parent.model:update(player)
+        self.parent:refreshDisplayData(player)
+        self:close(player)
+      end
     end
   end
+
   if action == "recipe-group" then
     globalPlayer.recipeGroupSelected = item
     self:on_update(player, element, action, item, item2, item3)

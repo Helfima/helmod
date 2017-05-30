@@ -762,6 +762,19 @@ function PlayerController.methods:getResources()
 end
 
 -------------------------------------------------------------------------------
+-- Return item prototypes
+--
+-- @function [parent=#PlayerController] getItemPrototypes
+--
+-- @param #string item name
+--
+-- @return #LuaItemPrototype item prototype
+--
+function PlayerController.methods:getItemPrototypes()
+  return game.item_prototypes
+end
+
+-------------------------------------------------------------------------------
 -- Return item prototype
 --
 -- @function [parent=#PlayerController] getItemPrototype
@@ -880,7 +893,7 @@ end
 function PlayerController.methods:getItemIconType(element)
   local item = self:getItemPrototype(element.name)
   if item ~= nil then
-    return item.type
+    return "item"
   end
   local fluid = self:getFluidPrototype(element.name)
   if fluid ~= nil then

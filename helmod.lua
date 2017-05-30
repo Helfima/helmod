@@ -53,6 +53,7 @@ end
 -- }
 --
 function helmod:on_configuration_changed(data)
+  log("helmod:on_configuration_changed(data)")
   Logging:trace("helmod", "helmod:on_configuration_changed(data)", data)
   if not data or not data.mod_changes then
     return

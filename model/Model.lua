@@ -1458,6 +1458,9 @@ end
 -- @see http://lua-api.factorio.com/latest/Concepts.html#Product
 --
 function Model.methods:getElementAmount(element)
+  Logging:debug(self:classname(), "getElementAmount",element)
+  if element == nil then return 0 end
+  
   if element.amount ~= nil then
     return element.amount
   end
@@ -1541,7 +1544,7 @@ function Model.methods:computeProductionBlock(player, element, maxLoop, level, p
       element.input = {}
       -- formula [product amount] * (1 + [productivity]) *[assembly speed]*[time]/[recipe energy]
       element.input.key = first_product.name
-      element.input.quantity = first_product.amount * (1 + first_recipe.factory.effects.productivity) * ( element.factory_number or 0 ) * first_recipe.factory.speed * model.time / first_recipe.energy
+      element.input.quantity = self:getElementAmount(first_product) * (1 + first_recipe.factory.effects.productivity) * ( element.factory_number or 0 ) * first_recipe.factory.speed * model.time / first_recipe.energy
     end
 
     -- initialise la premiere recette avec le input

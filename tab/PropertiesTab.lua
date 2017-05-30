@@ -68,19 +68,43 @@ function PropertiesTab.methods:updateData(player)
   local model = self.model:getModel(player)
   local globalGui = self.player:getGlobalGui(player)
   -- data
-  local scrollPanel = self.parent:getResultScrollPanel(player, {"helmod_result-panel.tab-title-properties"})
+  local resultPanel = self.parent:getResultPanel(player, {"helmod_result-panel.tab-title-properties"})
+  local listPanel = self:addGuiFlowH(resultPanel, "list-element", "helmod_flow_full_resize_row")
+  local scrollPanel = self.parent:getResultScrollPanel(player)
 
   local globalPlayer = self.player:getGlobal(player)
-  if globalPlayer["entity-properties"] ~= nil then
-    local prototype = self.player:getEntityPrototype(globalPlayer["entity-properties"])
+  if globalPlayer["prototype-properties"] ~= nil and globalPlayer["prototype-properties"].name ~= nil then
+    local prototype_name = globalPlayer["prototype-properties"].name
+    local prototype_type = globalPlayer["prototype-properties"].type
+    local prototype = nil
+    if prototype_type == "entity" then
+      prototype = self.player:getEntityPrototype(prototype_name)
+      if prototype ~= nil then
+        self:addGuiButtonSprite(listPanel, self:classname().."=entity-select=ID=", self.player:getEntityIconType(prototype), prototype.name, prototype.name, self.player:getLocalisedName(player, prototype))
+      end
+    elseif prototype_type == "item" then
+      prototype = self.player:getItemPrototype(prototype_name)
+      if prototype ~= nil then
+        self:addGuiButtonSprite(listPanel, self:classname().."=item-select=ID=", self.player:getItemIconType(prototype), prototype.name, prototype.name, self.player:getLocalisedName(player, prototype))
+      end
+    elseif prototype_type == "recipe" then
+      prototype = self.player:getRecipe(player, prototype_name)
+      if prototype ~= nil then
+        self:addGuiButtonSprite(listPanel, self:classname().."=recipe-select=ID=", self.player:getRecipeIconType(player, prototype), prototype.name, prototype.name, self.player:getRecipeLocalisedName(player, prototype))
+      end
+    elseif prototype_type == "technology" then
+      prototype = self.player:getTechnology(player, prototype_name)
+      if prototype ~= nil then
+        self:addGuiButtonSprite(listPanel, self:classname().."=technology-select=ID=", "technology", prototype.name, prototype.name, self.player:getTechnologyLocalisedName(player, prototype))
+      end
+    end
     if prototype ~= nil then
-      self:addGuiButtonSprite(scrollPanel, self:classname().."=entity-select=ID=", self.player:getEntityIconType(prototype), prototype.name, prototype.name, self.player:getLocalisedName(player, prototype))
-
+      self:addGuiLabel(listPanel, "type-label", prototype_type, "helmod_label_right_100")
       local resultTable = self:addGuiTable(scrollPanel,"table-resources",2)
 
       self:addTableHeader(player, resultTable)
 
-      local properties = self:parseProperties(prototype)
+      local properties = self:parseProperties(prototype, 0)
 
       for _, property in pairs(properties) do
         self:addTableRow(player, resultTable, property.name, property.value)
@@ -96,7 +120,7 @@ end
 --
 -- @param #LuaObject prototype
 --
-function PropertiesTab.methods:parseProperties(prototype)
+function PropertiesTab.methods:parseProperties(prototype, level)
   local properties = {}
 
   local help_string = string.gmatch(prototype:help(),"(%S+) [[]R[]]")
@@ -107,8 +131,8 @@ function PropertiesTab.methods:parseProperties(prototype)
       local type = type(prototype[i])
       local value = tostring(prototype[i])
       if type == "table" then
-        if pcall(function() prototype[i]:help() end) then
-          local result = PropertiesTab.methods:parseProperties(prototype[i])
+        if level < 2 and pcall(function() prototype[i]:help() end) then
+          local result = PropertiesTab.methods:parseProperties(prototype[i], level + 1)
           value = ""
           for _, property in pairs(result) do
             value = value .. property.name .. " = " .. property.value .. "\n"

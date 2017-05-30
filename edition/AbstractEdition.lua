@@ -536,11 +536,12 @@ function AbstractEdition.methods:updateFactoryModulesSelector(player, element, a
     local factory = object.factory
     for k, module in pairs(self.player:getModules()) do
       local allowed = true
+      local factory_type = self.player:getEntityProperty(factory.name, "type")
       local consumption = self:formatPercent(self.player:getModuleBonus(module.name, "consumption"))
       local speed = self:formatPercent(self.player:getModuleBonus(module.name, "speed"))
       local productivity = self:formatPercent(self.player:getModuleBonus(module.name, "productivity"))
       local pollution = self:formatPercent(self.player:getModuleBonus(module.name, "pollution"))
-      if productivity > 0 and item ~= "resource" and model_filter_factory_module == true then
+      if productivity > 0 and factory_type ~= "mining-drill" and model_filter_factory_module == true then
         if module.limitations[object.name] == nil then allowed = false end
       end
       if factory.module_slots ==  0 then

@@ -2,27 +2,27 @@ require "selector.AbstractSelector"
 -------------------------------------------------------------------------------
 -- Class to build technology selector
 --
--- @module EntitySelector
+-- @module ItemSelector
 -- @extends #AbstractSelector
 --
 
-EntitySelector = setclass("HMEntitySelector", AbstractSelector)
+ItemSelector = setclass("HMItemSelector", AbstractSelector)
 
 -------------------------------------------------------------------------------
 -- Return caption
 --
--- @function [parent=#EntitySelector] getCaption
+-- @function [parent=#ItemSelector] getCaption
 --
 -- @param #Controller parent parent controller
 --
-function EntitySelector.methods:getCaption(parent)
-  return {"helmod_selector-panel.entity-title"}
+function ItemSelector.methods:getCaption(parent)
+  return {"helmod_selector-panel.item-title"}
 end
 
 -------------------------------------------------------------------------------
 -- Update groups
 --
--- @function [parent=#EntitySelector] updateGroups
+-- @function [parent=#ItemSelector] updateGroups
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -33,7 +33,7 @@ end
 --
 -- @return {groupList, prototypeGroups}
 --
-function EntitySelector.methods:updateGroups(player, element, action, item, item2, item3)
+function ItemSelector.methods:updateGroups(player, element, action, item, item2, item3)
   Logging:trace(self:classname(), "on_update():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   -- recuperation recipes
@@ -43,7 +43,7 @@ function EntitySelector.methods:updateGroups(player, element, action, item, item
   local prototypeFilterProduct = self:getProductFilter()
 
   local firstGroup = nil
-  for key, prototype in spairs(self.player:getEntityPrototypes(),function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
+  for key, prototype in spairs(self.player:getItemPrototypes(),function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
     -- ne traite pas les entity sans name
     if prototype.name ~= nil then
       local find = false
@@ -78,7 +78,7 @@ end
 -------------------------------------------------------------------------------
 -- Get item list
 --
--- @function [parent=#EntitySelector] getItemList
+-- @function [parent=#ItemSelector] getItemList
 --
 -- @param #LuaPlayer player
 -- @param #LuaGuiElement element button
@@ -87,7 +87,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function EntitySelector.methods:getItemList(player, element, action, item, item2, item3)
+function ItemSelector.methods:getItemList(player, element, action, item, item2, item3)
   Logging:trace(self:classname(), "getItemList():",player, element, action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local list = {}
@@ -101,12 +101,12 @@ end
 -------------------------------------------------------------------------------
 -- Build prototype tooltip
 --
--- @function [parent=#EntitySelector] buildPrototypeTooltip
+-- @function [parent=#ItemSelector] buildPrototypeTooltip
 --
 -- @param #LuaPlayer player
 -- @param #LuaPrototype prototype
 --
-function EntitySelector.methods:buildPrototypeTooltip(player, prototype)
+function ItemSelector.methods:buildPrototypeTooltip(player, prototype)
   Logging:trace(self:classname(), "buildPrototypeTooltip(player, prototype):",player, prototype)
   -- initalize tooltip
   local tooltip = self.player:getLocalisedName(player, prototype)
@@ -116,13 +116,13 @@ end
 -------------------------------------------------------------------------------
 -- Build prototype icon
 --
--- @function [parent=#EntitySelector] buildPrototypeIcon
+-- @function [parent=#ItemSelector] buildPrototypeIcon
 --
 -- @param #LuaPlayer player
 --
-function EntitySelector.methods:buildPrototypeIcon(player, guiElement, prototype, tooltip)
+function ItemSelector.methods:buildPrototypeIcon(player, guiElement, prototype, tooltip)
   Logging:trace(self:classname(), "buildPrototypeIcon(player, guiElement, prototype, tooltip:",player, guiElement, prototype, tooltip)
-  self:addGuiButtonSelectSprite(guiElement, self:classname().."=entity-select=ID=", self.player:getEntityIconType(prototype), prototype.name, prototype.name, tooltip)
+  self:addGuiButtonSelectSprite(guiElement, self:classname().."=item-select=ID=", self.player:getItemIconType(prototype), prototype.name, prototype.name, tooltip)
 end
 
 
