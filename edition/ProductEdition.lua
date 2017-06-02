@@ -39,7 +39,7 @@ end
 -- @function [parent=#ProductEdition] on_open
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
@@ -47,7 +47,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function ProductEdition.methods:on_open(player, element, action, item, item2, item3)
+function ProductEdition.methods:on_open(player, event, action, item, item2, item3)
   local model = self.model:getModel(player)
   local close = true
   if model.guiProductLast == nil or model.guiProductLast ~= item then
@@ -63,13 +63,13 @@ end
 -- @function [parent=#ProductEdition] on_close
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductEdition.methods:on_close(player, element, action, item, item2, item3)
+function ProductEdition.methods:on_close(player, event, action, item, item2, item3)
   local model = self.model:getModel(player)
   model.guiProductLast = nil
 end
@@ -110,13 +110,13 @@ end
 -- @function [parent=#ProductEdition] after_open
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductEdition.methods:after_open(player, element, action, item, item2, item3)
+function ProductEdition.methods:after_open(player, event, action, item, item2, item3)
   self.parent:send_event(player, "HMRecipeEdition", "CLOSE")
   self.parent:send_event(player, "HMRecipeSelector", "CLOSE")
   self.parent:send_event(player, "HMSettings", "CLOSE")
@@ -129,14 +129,14 @@ end
 -- @function [parent=#ProductEdition] on_update
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductEdition.methods:on_update(player, element, action, item, item2, item3)
-  self:updateInfo(player, element, action, item, item2, item3)
+function ProductEdition.methods:on_update(player, event, action, item, item2, item3)
+  self:updateInfo(player, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -145,14 +145,12 @@ end
 -- @function [parent=#ProductEdition] updateInfo
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductEdition.methods:updateInfo(player, element, action, item, item2, item3)
-  Logging:debug(self:classname(), "updateInfo():",player, element, action, item, item2, item3)
+function ProductEdition.methods:updateInfo(player, item, item2, item3)
+  Logging:debug(self:classname(), "updateInfo():", item, item2, item3)
   local infoPanel = self:getInfoPanel(player)
   local model = self.model:getModel(player)
 
@@ -188,14 +186,14 @@ end
 -- @function [parent=#ProductEdition] on_event
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductEdition.methods:on_event(player, element, action, item, item2, item3)
-  Logging:debug(self:classname(), "on_event():",player, element, action, item, item2, item3)
+function ProductEdition.methods:on_event(player, event, action, item, item2, item3)
+  Logging:debug(self:classname(), "on_event():", action, item, item2, item3)
   local model = self.model:getModel(player)
   if self.player:isAdmin(player) or model.owner == player.name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
     if action == "product-update" then

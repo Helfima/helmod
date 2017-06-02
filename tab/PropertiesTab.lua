@@ -32,6 +32,7 @@ function PropertiesTab.methods:addTableHeader(player, itable)
 
   -- data columns
   self:addCellHeader(player, itable, "property", {"helmod_result-panel.col-header-name"})
+  self:addCellHeader(player, itable, "chmod", {"helmod_result-panel.col-header-chmod"})
   self:addCellHeader(player, itable, "value", {"helmod_result-panel.col-header-value"})
 end
 
@@ -42,17 +43,21 @@ end
 --
 -- @param #LuaPlayer player
 --
-function PropertiesTab.methods:addTableRow(player, guiTable, property, value)
-  Logging:debug(self:classname(), "addTableRow():", player, guiTable, property, value)
+function PropertiesTab.methods:addTableRow(player, guiTable, property)
+  Logging:debug(self:classname(), "addTableRow():", player, guiTable, property)
   local model = self.model:getModel(player)
 
   -- col property
-  local guiCount = self:addGuiFlowH(guiTable,property.."_name")
-  self:addGuiLabel(guiCount, "label", property)
+  local guiCount = self:addGuiFlowH(guiTable,property.name.."_name")
+  self:addGuiLabel(guiCount, "label", property.name)
+
+  -- col chmod
+  local guiCount = self:addGuiFlowH(guiTable,property.name.."_chmod")
+  self:addGuiLabel(guiCount, "label", property.chmod or "")
 
   -- col value
-  local guiType = self:addGuiFlowH(guiTable,property.."_value")
-  self:addGuiLabel(guiType, "label", value, "helmod_label_max_600", nil, false)
+  local guiType = self:addGuiFlowH(guiTable,property.name.."_value")
+  self:addGuiLabel(guiType, "label", property.value, "helmod_label_max_600", nil, false)
 
 end
 
@@ -100,14 +105,14 @@ function PropertiesTab.methods:updateData(player)
     end
     if prototype ~= nil then
       self:addGuiLabel(listPanel, "type-label", prototype_type, "helmod_label_right_100")
-      local resultTable = self:addGuiTable(scrollPanel,"table-resources",2)
+      local resultTable = self:addGuiTable(scrollPanel,"table-resources",3)
 
       self:addTableHeader(player, resultTable)
 
       local properties = self:parseProperties(prototype, 0)
 
       for _, property in pairs(properties) do
-        self:addTableRow(player, resultTable, property.name, property.value)
+        self:addTableRow(player, resultTable, property)
       end
     end
   end
@@ -123,25 +128,25 @@ end
 function PropertiesTab.methods:parseProperties(prototype, level)
   local properties = {}
 
-  local help_string = string.gmatch(prototype:help(),"(%S+) [[]R[]]")
+  local help_string = string.gmatch(prototype:help(),"(%S+) [[](RW?)[]]")
 
-  for i in help_string do
+  for key, chmod in help_string do
     --Logging:debug(self:classname(), "help_string:", i)
     pcall(function()
-      local type = type(prototype[i])
-      local value = tostring(prototype[i])
+      local type = type(prototype[key])
+      local value = tostring(prototype[key])
       if type == "table" then
-        if level < 2 and pcall(function() prototype[i]:help() end) then
-          local result = PropertiesTab.methods:parseProperties(prototype[i], level + 1)
+        if level < 2 and pcall(function() prototype[key]:help() end) then
+          local result = PropertiesTab.methods:parseProperties(prototype[key], level + 1)
           value = ""
           for _, property in pairs(result) do
             value = value .. property.name .. " = " .. property.value .. "\n"
           end
         else
-          value = string.match(serpent.dump(prototype[i]),"do local _=(.*);return _;end")
+          value = string.match(serpent.dump(prototype[key]),"do local _=(.*);return _;end")
         end
       end
-      table.insert(properties, {name = i, value = value})
+      table.insert(properties, {name = key, chmod = chmod, value = value})
       --Logging:debug(self:classname(), "help_string:", i, type, value)
     end)
   end

@@ -25,16 +25,14 @@ end
 -- @function [parent=#ItemSelector] updateGroups
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
 -- @return {groupList, prototypeGroups}
 --
-function ItemSelector.methods:updateGroups(player, element, action, item, item2, item3)
-  Logging:trace(self:classname(), "on_update():",player, element, action, item, item2, item3)
+function ItemSelector.methods:updateGroups(player, item, item2, item3)
+  Logging:trace(self:classname(), "on_update():", item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   -- recuperation recipes
   local prototypeGroups = {}
@@ -81,14 +79,12 @@ end
 -- @function [parent=#ItemSelector] getItemList
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ItemSelector.methods:getItemList(player, element, action, item, item2, item3)
-  Logging:trace(self:classname(), "getItemList():",player, element, action, item, item2, item3)
+function ItemSelector.methods:getItemList(player, item, item2, item3)
+  Logging:trace(self:classname(), "getItemList():", item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local list = {}
   local prototypeGroups = self:getPrototypeGroups()

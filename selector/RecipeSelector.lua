@@ -9,6 +9,17 @@ require "selector.AbstractSelector"
 RecipeSelector = setclass("HMRecipeSelector", AbstractSelector)
 
 -------------------------------------------------------------------------------
+-- After initialization
+--
+-- @function [parent=#RecipeSelector] after_init
+--
+function RecipeSelector.methods:after_init()
+  self.disable_option = true
+  self.hidden_option = true
+  self.product_option = true
+end
+
+-------------------------------------------------------------------------------
 -- Return caption
 --
 -- @function [parent=#RecipeSelector] getCaption
@@ -25,16 +36,14 @@ end
 -- @function [parent=#RecipeSelector] updateGroups
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 -- 
 -- @return groupList, prototypeGroups
 --
-function RecipeSelector.methods:updateGroups(player, element, action, item, item2, item3)
-  Logging:trace(self:classname(), "updateGroups():",player, element, action, item, item2, item3)
+function RecipeSelector.methods:updateGroups(player, item, item2, item3)
+  Logging:trace(self:classname(), "updateGroups():", item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local globalGui = self.player:getGlobalGui(player)
   -- recuperation recipes
@@ -64,8 +73,9 @@ function RecipeSelector.methods:updateGroups(player, element, action, item, item
       find = true
     end
 
+    local filter_show_disable = self.player:getGlobalSettings(player, "filter_show_disable")
     local filter_show_hidden = self.player:getGlobalSettings(player, "filter_show_hidden")
-    if find == true and (prototype.enabled == true or filter_show_hidden == true) then
+    if find == true and (prototype.enabled == true or filter_show_disable == true) and (prototype.hidden == false or filter_show_hidden == true) then
       if firstGroup == nil then firstGroup = prototype.group.name end
       groupList[prototype.group.name] = prototype.group
       if prototypeGroups[prototype.group.name] == nil then prototypeGroups[prototype.group.name] = {} end
@@ -86,14 +96,12 @@ end
 -- @function [parent=#RecipeSelector] getItemList
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function RecipeSelector.methods:getItemList(player, element, action, item, item2, item3)
-  Logging:trace(self:classname(), "getItemList():",player, element, action, item, item2, item3)
+function RecipeSelector.methods:getItemList(player, item, item2, item3)
+  Logging:trace(self:classname(), "getItemList():", item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local list = {}
   local prototypeGroups = self:getPrototypeGroups()

@@ -20,78 +20,6 @@ function EnergyTab.methods:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#EnergyTab] on_event_access_all
---
--- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function EnergyTab.methods:on_event_access_all(player, element, action, item, item2, item3)
-  Logging:debug(self:classname(), "on_event_access_all():",player, element, action, item, item2, item3)
-  local globalGui = self.player:getGlobalGui(player)
-end
-
--------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#EnergyTab] on_event_access_read
---
--- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function EnergyTab.methods:on_event_access_read(player, element, action, item, item2, item3)
-  Logging:debug(self:classname(), "on_event_access_read():",player, element, action, item, item2, item3)
-  local globalGui = self.player:getGlobalGui(player)
-end
-
--------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#EnergyTab] on_event_access_write
---
--- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function EnergyTab.methods:on_event_access_write(player, element, action, item, item2, item3)
-  Logging:debug(self:classname(), "on_event_access_write():",player, element, action, item, item2, item3)
-  local globalGui = self.player:getGlobalGui(player)
-  if action == "power-remove" then
-    self.parent.model:removePower(player, item)
-    self:update(player, self.POWER_TAB, item, item2, item3)
-  end
-end
-
--------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#EnergyTab] on_event_access_delete
---
--- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function EnergyTab.methods:on_event_access_delete(player, element, action, item, item2, item3)
-  Logging:debug(self:classname(), "on_event_access_delete():",player, element, action, item, item2, item3)
-  local globalGui = self.player:getGlobalGui(player)
-end
-
--------------------------------------------------------------------------------
 -- Update data
 --
 -- @function [parent=#EnergyTab] updateData
@@ -162,7 +90,7 @@ function EnergyTab.methods:addTableRow(player, guiTable, power)
 
   -- col action
   local guiAction = self:addGuiFlowH(guiTable,"action"..power.id, "helmod_flow_default")
-  self:addGuiButton(guiAction, self:classname().."=power-remove=ID=", power.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
+  self:addGuiButton(guiAction, self.parent:classname().."=power-remove=ID=", power.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
 
   -- col id
   if self.player:getSettings(player, "display_data_col_id", true) then

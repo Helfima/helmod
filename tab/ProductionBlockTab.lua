@@ -219,14 +219,11 @@ function ProductionBlockTab.methods:addTableRow(player, guiTable, block, recipe)
   local display_cell_mod = self.player:getSettings(player, "display_cell_mod")
 
   -- col action
-  local guiAction = self:addGuiFlowH(guiTable,"action"..recipe.name, "helmod_flow_default")
-  if recipe.index ~= 0 then
-    self:addGuiButton(guiAction, self.parent:classname().."=production-recipe-remove=ID="..block.id.."=", recipe.name, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
-    self:addGuiButton(guiAction, self.parent:classname().."=production-recipe-down=ID="..block.id.."=", recipe.name, "helmod_button_default", ({"helmod_result-panel.row-button-down"}), ({"tooltip.down-element"}))
-  end
-  if recipe.index > 1 then
-    self:addGuiButton(guiAction, self.parent:classname().."=production-recipe-up=ID="..block.id.."=", recipe.name, "helmod_button_default", ({"helmod_result-panel.row-button-up"}), ({"tooltip.up-element"}))
-  end
+  local guiAction = self:addGuiFlowH(guiTable,"action"..recipe.id, "helmod_flow_default")
+  self:addGuiButton(guiAction, self.parent:classname().."=production-recipe-remove=ID="..block.id.."=", recipe.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
+  self:addGuiButton(guiAction, self.parent:classname().."=production-recipe-down=ID="..block.id.."=", recipe.id, "helmod_button_default", ({"helmod_result-panel.row-button-down"}), ({"tooltip.down-element"}))
+  self:addGuiButton(guiAction, self.parent:classname().."=production-recipe-up=ID="..block.id.."=", recipe.id, "helmod_button_default", ({"helmod_result-panel.row-button-up"}), ({"tooltip.up-element"}))
+  
   -- col index
   if self.player:getSettings(player, "display_data_col_index", true) then
     local guiIndex = self:addGuiFlowH(guiTable,"index"..recipe.id)
@@ -244,16 +241,16 @@ function ProductionBlockTab.methods:addTableRow(player, guiTable, block, recipe)
   end
   -- col recipe
   local production = recipe.production or 1
-  local guiRecipe = self:addCellLabel(player, guiTable, "recipe-"..recipe.name, self:formatPercent(production).."%", 35)
-  self:addIconRecipeCell(player, guiRecipe, recipe, "HMRecipeEdition=OPEN=ID="..block.id.."=", true, "tooltip.edit-recipe", self.color_button_edit)
+  local guiRecipe = self:addCellLabel(player, guiTable, "recipe-"..recipe.id, self:formatPercent(production).."%", 35)
+  self:addIconRecipeCell(player, guiRecipe, recipe, "HMRecipeEdition=OPEN=ID="..block.id.."="..recipe.id.."=", true, "tooltip.edit-recipe", self.color_button_edit)
 
   -- col energy
-  local guiEnergy = self:addCellLabel(player, guiTable, "energy-"..recipe.name, self:formatNumberKilo(recipe.energy_total, "W"), 50)
+  local guiEnergy = self:addCellLabel(player, guiTable, "energy-"..recipe.id, self:formatNumberKilo(recipe.energy_total, "W"), 50)
 
   -- col factory
   local factory = recipe.factory
-  local guiFactory = self:addCellLabel(player, guiTable, "factory-"..recipe.name, self:formatNumberFactory(factory.limit_count).."/"..self:formatNumberFactory(factory.count), 60)
-  self:addIconCell(player, guiFactory, factory, "HMRecipeEdition=OPEN=ID="..block.id.."="..recipe.name.."=", true, "tooltip.edit-recipe", self.color_button_edit)
+  local guiFactory = self:addCellLabel(player, guiTable, "factory-"..recipe.id, self:formatNumberFactory(factory.limit_count).."/"..self:formatNumberFactory(factory.count), 60)
+  self:addIconCell(player, guiFactory, factory, "HMRecipeEdition=OPEN=ID="..block.id.."="..recipe.id.."=", true, "tooltip.edit-recipe", self.color_button_edit)
   local col_size = 2
   if display_cell_mod == "small-icon" then col_size = 5 end
   local guiFactoryModule = self:addGuiTable(guiFactory,"factory-modules"..recipe.name, col_size, "helmod_factory_modules")
@@ -277,8 +274,8 @@ function ProductionBlockTab.methods:addTableRow(player, guiTable, block, recipe)
 
   -- col beacon
   local beacon = recipe.beacon
-  local guiBeacon = self:addCellLabel(player, guiTable, "beacon-"..recipe.name, self:formatNumberFactory(beacon.limit_count).."/"..self:formatNumberFactory(beacon.count), 60)
-  self:addIconCell(player, guiBeacon, beacon, "HMRecipeEdition=OPEN=ID="..block.id.."="..recipe.name.."=", true, "tooltip.edit-recipe", self.color_button_edit)
+  local guiBeacon = self:addCellLabel(player, guiTable, "beacon-"..recipe.id, self:formatNumberFactory(beacon.limit_count).."/"..self:formatNumberFactory(beacon.count), 60)
+  self:addIconCell(player, guiBeacon, beacon, "HMRecipeEdition=OPEN=ID="..block.id.."="..recipe.id.."=", true, "tooltip.edit-recipe", self.color_button_edit)
   local col_size = 1
   if display_cell_mod == "small-icon" then col_size = 5 end
   local guiBeaconModule = self:addGuiTable(guiBeacon,"beacon-modules"..recipe.name, col_size, "helmod_beacon_modules")
@@ -302,7 +299,7 @@ function ProductionBlockTab.methods:addTableRow(player, guiTable, block, recipe)
 
   -- products
   local display_product_cols = self.player:getSettings(player, "display_product_cols")
-  local tProducts = self:addGuiTable(guiTable,"products_"..recipe.name, display_product_cols)
+  local tProducts = self:addGuiTable(guiTable,"products_"..recipe.id, display_product_cols)
   if recipe.products ~= nil then
     for r, product in pairs(recipe.products) do
       self:addCellElement(player, tProducts, product, "HMProduct=OPEN=ID="..block.id.."="..recipe.name.."=", false, "tooltip.product", nil)
@@ -311,7 +308,7 @@ function ProductionBlockTab.methods:addTableRow(player, guiTable, block, recipe)
   end
   -- ingredients
   local display_ingredient_cols = self.player:getSettings(player, "display_ingredient_cols")
-  local tIngredient = self:addGuiTable(guiTable,"ingredients_"..recipe.name, display_ingredient_cols)
+  local tIngredient = self:addGuiTable(guiTable,"ingredients_"..recipe.id, display_ingredient_cols)
   if recipe.ingredients ~= nil then
     for r, ingredient in pairs(recipe.ingredients) do
       self:addCellElement(player, tIngredient, ingredient, self.parent:classname().."=production-recipe-add=ID="..block.id.."="..recipe.name.."=", true, "tooltip.add-recipe", self.color_button_add)

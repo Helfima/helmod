@@ -188,15 +188,15 @@ end
 -- @function [parent=#MainTab] send_event
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function MainTab.methods:send_event(player, element, action, item, item2, item3)
-  Logging:debug("MainTab", "send_event():",player, element, action, item, item2, item3)
-  self:on_event(player, element, action, item, item2, item3)
+function MainTab.methods:send_event(player, event, action, item, item2, item3)
+  Logging:debug("MainTab", "send_event():", action, item, item2, item3)
+  self:on_event(player, event, action, item, item2, item3)
 end
 -------------------------------------------------------------------------------
 -- On event
@@ -204,13 +204,13 @@ end
 -- @function [parent=#MainTab] on_event
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function MainTab.methods:on_event(player, element, action, item, item2, item3)
+function MainTab.methods:on_event(player, event, action, item, item2, item3)
   Logging:debug(self:classname(), "on_event():", action, item, item2, item3)
 
   local globalGui = self.player:getGlobalGui(player)
@@ -223,7 +223,7 @@ function MainTab.methods:on_event(player, element, action, item, item2, item3)
     -- *******************************
 
     if self.player:isAdmin(player) or model.owner == player.name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
-      self:on_event_access_write(player, element, action, item, item2, item3)
+      self:on_event_access_write(player, event, action, item, item2, item3)
     end
 
     -- ***************************
@@ -231,7 +231,7 @@ function MainTab.methods:on_event(player, element, action, item, item2, item3)
     -- ***************************
 
     if self.player:isAdmin(player) or model.owner == player.name then
-      self:on_event_access_read(player, element, action, item, item2, item3)
+      self:on_event_access_read(player, event, action, item, item2, item3)
     end
 
     -- ********************************
@@ -239,13 +239,13 @@ function MainTab.methods:on_event(player, element, action, item, item2, item3)
     -- ********************************
 
     if self.player:isAdmin(player) or model.owner == player.name or (model.share ~= nil and bit32.band(model.share, 4) > 0) then
-      self:on_event_access_delete(player, element, action, item, item2, item3)
+      self:on_event_access_delete(player, event, action, item, item2, item3)
     end
 
     -- ***************************
     -- access for all
     -- ***************************
-    self:on_event_access_all(player, element, action, item, item2, item3)
+    self:on_event_access_all(player, event, action, item, item2, item3)
   end
 end
 
@@ -255,13 +255,13 @@ end
 -- @function [parent=#MainTab] on_event_access_all
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function MainTab.methods:on_event_access_all(player, element, action, item, item2, item3)
+function MainTab.methods:on_event_access_all(player, event, action, item, item2, item3)
   Logging:debug(self:classname(), "on_event_access_all():", action, item, item2, item3)
   local globalGui = self.player:getGlobalGui(player)
   if action == "refresh-model" then
@@ -334,13 +334,13 @@ end
 -- @function [parent=#MainTab] on_event_access_read
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function MainTab.methods:on_event_access_read(player, element, action, item, item2, item3)
+function MainTab.methods:on_event_access_read(player, event, action, item, item2, item3)
   Logging:debug(self:classname(), "on_event_access_read():", action, item, item2, item3)
   local model = self.model:getModel(player)
   if action == "share-model" then
@@ -377,13 +377,13 @@ end
 -- @function [parent=#MainTab] on_event_access_write
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function MainTab.methods:on_event_access_write(player, element, action, item, item2, item3)
+function MainTab.methods:on_event_access_write(player, event, action, item, item2, item3)
   Logging:debug(self:classname(), "on_event_access_write():", action, item, item2, item3)
   local globalGui = self.player:getGlobalGui(player)
   local model = self.model:getModel(player)
@@ -470,6 +470,12 @@ function MainTab.methods:on_event_access_write(player, element, action, item, it
     end
   end
 
+  if globalGui.currentTab == "HMEnergyTab" then
+    if action == "power-remove" then
+      self.parent.model:removePower(player, item)
+      self:update(player, item, item2, item3)
+    end
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -478,13 +484,13 @@ end
 -- @function [parent=#MainTab] on_event_access_delete
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function MainTab.methods:on_event_access_delete(player, element, action, item, item2, item3)
+function MainTab.methods:on_event_access_delete(player, event, action, item, item2, item3)
   Logging:debug(self:classname(), "on_event_access_delete():", action, item, item2, item3)
   local globalGui = self.player:getGlobalGui(player)
   if action == "remove-model" then

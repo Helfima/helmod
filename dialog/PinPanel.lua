@@ -39,7 +39,7 @@ end
 -- @function [parent=#PinPanel] on_open
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
@@ -47,7 +47,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function PinPanel.methods:on_open(player, element, action, item, item2, item3)
+function PinPanel.methods:on_open(player, event, action, item, item2, item3)
 	local globalGui = self.player:getGlobalGui(player)
 	local close = true
 	if globalGui.pinBlock == nil or globalGui.pinBlock ~= item then
@@ -63,13 +63,13 @@ end
 -- @function [parent=#PinPanel] on_close
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PinPanel.methods:on_close(player, element, action, item, item2, item3)
+function PinPanel.methods:on_close(player, event, action, item, item2, item3)
 	local globalGui = self.player:getGlobalGui(player)
 	globalGui.pinBlock = nil
 end
@@ -111,14 +111,14 @@ end
 -- @function [parent=#PinPanel] after_open
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PinPanel.methods:after_open(player, element, action, item, item2, item3)
-	self:updateHeader(player, element, action, item, item2, item3)
+function PinPanel.methods:after_open(player, event, action, item, item2, item3)
+	self:updateHeader(player, event, action, item, item2, item3)
 	self:getInfoPanel(player)
 end
 
@@ -128,14 +128,14 @@ end
 -- @function [parent=#PinPanel] on_update
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PinPanel.methods:on_update(player, element, action, item, item2, item3)
-	self:updateInfo(player, element, action, item, item2, item3)
+function PinPanel.methods:on_update(player, event, action, item, item2, item3)
+	self:updateInfo(player, event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -144,14 +144,14 @@ end
 -- @function [parent=#PinPanel] updateInfo
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PinPanel.methods:updateHeader(player, element, action, item, item2, item3)
-	Logging:debug(self:classname(), "updateHeader():",player, element, action, item, item2, item3)
+function PinPanel.methods:updateHeader(player, event, action, item, item2, item3)
+	Logging:debug(self:classname(), "updateHeader():", action, item, item2, item3)
 	local headerPanel = self:getHeaderPanel(player)
 	local model = self.model:getModel(player)
 
@@ -171,14 +171,14 @@ end
 -- @function [parent=#PinPanel] updateInfo
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PinPanel.methods:updateInfo(player, element, action, item, item2, item3)
-	Logging:debug(self:classname(), "updateInfo():",player, element, action, item, item2, item3)
+function PinPanel.methods:updateInfo(player, event, action, item, item2, item3)
+	Logging:debug(self:classname(), "updateInfo():", action, item, item2, item3)
 	local infoPanel = self:getInfoPanel(player)
 	local model = self.model:getModel(player)
 	local globalGui = self.player:getGlobalGui(player)
@@ -336,14 +336,14 @@ end
 -- @function [parent=#PinPanel] on_event
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PinPanel.methods:on_event(player, element, action, item, item2, item3)
-	Logging:debug(self:classname(), "on_event():",player, element, action, item, item2, item3)
+function PinPanel.methods:on_event(player, event, action, item, item2, item3)
+	Logging:debug(self:classname(), "on_event():", action, item, item2, item3)
 	local model = self.model:getModel(player)
 	local globalSettings = self.player:getGlobal(player, "settings")
 	local defaultSettings = self.player:getDefaultSettings()
@@ -352,6 +352,6 @@ function PinPanel.methods:on_event(player, element, action, item, item2, item3)
 	if action == "change-boolean-settings" then
 		if globalSettings[item] == nil then globalSettings[item] = defaultSettings[item] end
 		globalSettings[item] = not(globalSettings[item])
-		self:updateInfo(player, element, action, globalGui.pinBlock, item2, item3)
+		self:updateInfo(player, event, action, globalGui.pinBlock, item2, item3)
 	end
 end

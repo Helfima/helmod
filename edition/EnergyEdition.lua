@@ -182,13 +182,11 @@ end
 -- @function [parent=#EnergyEdition] getObject
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function EnergyEdition.methods:getObject(player, element, action, item, item2, item3)
+function EnergyEdition.methods:getObject(player, item, item2, item3)
   local model = self.model:getModel(player)
   if model.powers ~= nil and model.powers[item] ~= nil then
     -- return power
@@ -203,7 +201,7 @@ end
 -- @function [parent=#EnergyEdition] on_open
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
@@ -211,8 +209,8 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function EnergyEdition.methods:on_open(player, element, action, item, item2, item3)
-  Logging:debug(self:classname(), "on_open():",player, element, action, item, item2, item3)
+function EnergyEdition.methods:on_open(player, event, action, item, item2, item3)
+  Logging:debug(self:classname(), "on_open():", action, item, item2, item3)
   local model = self.model:getModel(player)
   local close = true
   if model.guiPowerLast == nil or model.guiPowerLast ~= item then
@@ -231,13 +229,13 @@ end
 -- @function [parent=#EnergyEdition] on_close
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function EnergyEdition.methods:on_close(player, element, action, item, item2, item3)
+function EnergyEdition.methods:on_close(player, event, action, item, item2, item3)
   local model = self.model:getModel(player)
 end
 
@@ -247,14 +245,14 @@ end
 -- @function [parent=#EnergyEdition] after_open
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function EnergyEdition.methods:after_open(player, element, action, item, item2, item3)
-  Logging:debug(self:classname(), "after_open():",player, element, action, item, item2, item3)
+function EnergyEdition.methods:after_open(player, event, action, item, item2, item3)
+  Logging:debug(self:classname(), "after_open():", action, item, item2, item3)
   self.parent:send_event(player, "HMProductEdition", "CLOSE")
   self.parent:send_event(player, "HMRecipeSelector", "CLOSE")
   self.parent:send_event(player, "HMSettings", "CLOSE")
@@ -270,24 +268,24 @@ end
 -- @function [parent=#EnergyEdition] on_event
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function EnergyEdition.methods:on_event(player, element, action, item, item2, item3)
-  Logging:debug(self:classname(), "on_event():",player, element, action, item, item2, item3)
+function EnergyEdition.methods:on_event(player, event, action, item, item2, item3)
+  Logging:debug(self:classname(), "on_event():", action, item, item2, item3)
   local model = self.model:getModel(player)
 
   if action == "primary-group" then
     model.primaryGroupSelected = item2
-    self:updatePrimarySelector(player, element, action, item, item2, item3)
+    self:updatePrimarySelector(player, item, item2, item3)
   end
 
   if action == "secondary-group" then
     model.secondaryGroupSelected = item2
-    self:updateSecondarySelector(player, element, action, item, item2, item3)
+    self:updateSecondarySelector(player, item, item2, item3)
   end
 
   if self.player:isAdmin(player) or model.owner == player.name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
@@ -300,12 +298,12 @@ function EnergyEdition.methods:on_event(player, element, action, item, item2, it
       end
 
       self.model:updatePower(player, item, options)
-      self:updatePowerInfo(player, element, action, item, item2, item3)
+      self:updatePowerInfo(player, item, item2, item3)
       self.parent:refreshDisplayData(player, nil, item, item2)
     end
 
     if action == "primary-select" then
-      local object = self:getObject(player, element, action, item, item2, item3)
+      local object = self:getObject(player, item, item2, item3)
       if object ~= nil then
         local power = self.model:addPrimaryPower(player, item, item2)
       else
@@ -314,12 +312,12 @@ function EnergyEdition.methods:on_event(player, element, action, item, item2, it
       end
       self.model:computePower(player, item)
       self.parent:refreshDisplayData(player)
-      self:send_event(player, element, "CLOSE", item, item2, item3)
-      self:send_event(player, element, "OPEN", item, item2, item3)
+      self:send_event(player, event, "CLOSE", item, item2, item3)
+      self:send_event(player, event, "OPEN", item, item2, item3)
     end
 
     if action == "secondary-select" then
-      local object = self:getObject(player, element, action, item, item2, item3)
+      local object = self:getObject(player, item, item2, item3)
       if object ~= nil then
         local power = self.model:addSecondaryPower(player, item, item2)
       else
@@ -328,8 +326,8 @@ function EnergyEdition.methods:on_event(player, element, action, item, item2, it
       end
       self.model:computePower(player, item)
       self.parent:refreshDisplayData(player)
-      self:send_event(player, element, "CLOSE", item, item2, item3)
-      self:send_event(player, element, "OPEN", item, item2, item3)
+      self:send_event(player, event, "CLOSE", item, item2, item3)
+      self:send_event(player, event, "OPEN", item, item2, item3)
     end
   end
 end
@@ -340,16 +338,16 @@ end
 -- @function [parent=#EnergyEdition] on_update
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function EnergyEdition.methods:on_update(player, element, action, item, item2, item3)
-  self:updatePowerInfo(player, element, action, item, item2, item3)
-  self:updatePrimary(player, element, action, item, item2, item3)
-  self:updateSecondary(player, element, action, item, item2, item3)
+function EnergyEdition.methods:on_update(player, event, action, item, item2, item3)
+  self:updatePowerInfo(player, item, item2, item3)
+  self:updatePrimary(player, item, item2, item3)
+  self:updateSecondary(player, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -358,21 +356,19 @@ end
 -- @function [parent=#EnergyEdition] updatePowerInfo
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function EnergyEdition.methods:updatePowerInfo(player, element, action, item, item2, item3)
-  Logging:debug(self:classname(), "updatePowerInfo():",player, element, action, item, item2, item3)
+function EnergyEdition.methods:updatePowerInfo(player, item, item2, item3)
+  Logging:debug(self:classname(), "updatePowerInfo():", item, item2, item3)
   local infoPanel = self:getPowerPanel(player)
   local model = self.model:getModel(player)
   local default = self.model:getDefault(player)
 
   local model = self.model:getModel(player)
   if model.powers ~= nil and model.powers[item] ~= nil then
-    local power = self:getObject(player, element, action, item, item2, item3)
+    local power = self:getObject(player, item, item2, item3)
     if power ~= nil then
       Logging:debug(self:classname(), "updatePowerInfo():power=",power)
       for k,guiName in pairs(infoPanel.children_names) do
@@ -394,18 +390,16 @@ end
 -- @function [parent=#EnergyEdition] updatePrimary
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function EnergyEdition.methods:updatePrimary(player, element, action, item, item2, item3)
-  Logging:debug(self:classname(), "updatePrimary():",player, element, action, item, item2, item3)
+function EnergyEdition.methods:updatePrimary(player, item, item2, item3)
+  Logging:debug(self:classname(), "updatePrimary():", item, item2, item3)
   local model = self.model:getModel(player)
 
-  self:updatePrimaryInfo(player, element, action, item, item2, item3)
-  self:updatePrimarySelector(player, element, action, item, item2, item3)
+  self:updatePrimaryInfo(player, item, item2, item3)
+  self:updatePrimarySelector(player, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -414,16 +408,14 @@ end
 -- @function [parent=#EnergyEdition] updatePrimaryInfo
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function EnergyEdition.methods:updatePrimaryInfo(player, element, action, item, item2, item3)
-  Logging:debug(self:classname(), "updatePrimaryInfo():",player, element, action, item, item2, item3)
+function EnergyEdition.methods:updatePrimaryInfo(player, item, item2, item3)
+  Logging:debug(self:classname(), "updatePrimaryInfo():", item, item2, item3)
   local infoPanel = self:getPrimaryInfoPanel(player)
-  local object = self:getObject(player, element, action, item, item2, item3)
+  local object = self:getObject(player, item, item2, item3)
   local model = self.model:getModel(player)
 
   for k,guiName in pairs(infoPanel.children_names) do
@@ -446,7 +438,7 @@ function EnergyEdition.methods:updatePrimaryInfo(player, element, action, item, 
         self:addGuiLabel(headerPanel, "label", _generator.localised_name)
       end
 
-      local primary_classification = self.player:getItemProperty(primary.name, "classification")
+      local primary_classification = self.player:getEntityProperty(primary.name, "type")
 
       local inputPanel = self:addGuiTable(infoPanel,"table-input",2)
 
@@ -473,14 +465,12 @@ end
 -- @function [parent=#EnergyEdition] updatePrimarySelector
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function EnergyEdition.methods:updatePrimarySelector(player, element, action, item, item2, item3)
-  Logging:debug(self:classname(), "updatePrimarySelector():",player, element, action, item, item2, item3)
+function EnergyEdition.methods:updatePrimarySelector(player, item, item2, item3)
+  Logging:debug(self:classname(), "updatePrimarySelector():", item, item2, item3)
   local selectorPanel = self:getPrimarySelectorPanel(player)
   local model = self.model:getModel(player)
 
@@ -489,7 +479,7 @@ function EnergyEdition.methods:updatePrimarySelector(player, element, action, it
   end
   local scrollPanel = self:addGuiScrollPane(selectorPanel, "scroll-primary", "helmod_scroll_recipe_factories", "auto", "auto")
 
-  local object = self:getObject(player, element, action, item, item2, item3)
+  local object = self:getObject(player, item, item2, item3)
 
   local groupsPanel = self:addGuiTable(scrollPanel, "primary-groups", 1)
 
@@ -537,18 +527,16 @@ end
 -- @function [parent=#EnergyEdition] updateSecondary
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function EnergyEdition.methods:updateSecondary(player, element, action, item, item2, item3)
-  Logging:debug(self:classname(), "updateSecondary():",player, element, action, item, item2, item3)
+function EnergyEdition.methods:updateSecondary(player, item, item2, item3)
+  Logging:debug(self:classname(), "updateSecondary():", item, item2, item3)
   local model = self.model:getModel(player)
 
-  self:updateSecondaryInfo(player, element, action, item, item2, item3)
-  self:updateSecondarySelector(player, element, action, item, item2, item3)
+  self:updateSecondaryInfo(player, item, item2, item3)
+  self:updateSecondarySelector(player, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -557,16 +545,14 @@ end
 -- @function [parent=#EnergyEdition] updateSecondaryInfo
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function EnergyEdition.methods:updateSecondaryInfo(player, element, action, item, item2, item3)
-  Logging:debug(self:classname(), "updateSecondaryInfo():",player, element, action, item, item2, item3)
+function EnergyEdition.methods:updateSecondaryInfo(player, item, item2, item3)
+  Logging:debug(self:classname(), "updateSecondaryInfo():", item, item2, item3)
   local infoPanel = self:getSecondaryInfoPanel(player)
-  local object = self:getObject(player, element, action, item, item2, item3)
+  local object = self:getObject(player, item, item2, item3)
   local model = self.model:getModel(player)
 
   for k,guiName in pairs(infoPanel.children_names) do
@@ -591,7 +577,7 @@ function EnergyEdition.methods:updateSecondaryInfo(player, element, action, item
 
       local inputPanel = self:addGuiTable(infoPanel,"table-input",2)
 
-      local secondary_classification = self.player:getItemProperty(secondary.name, "classification")
+      local secondary_classification = self.player:getEntityProperty(secondary.name, "type")
 
       if secondary_classification == "boiler" then
         self:addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy-nominal"}))
@@ -622,14 +608,12 @@ end
 -- @function [parent=#EnergyEdition] updateSecondarySelector
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function EnergyEdition.methods:updateSecondarySelector(player, element, action, item, item2, item3)
-  Logging:debug(self:classname(), "updateSecondarySelector():",player, element, action, item, item2, item3)
+function EnergyEdition.methods:updateSecondarySelector(player, item, item2, item3)
+  Logging:debug(self:classname(), "updateSecondarySelector():", item, item2, item3)
   local selectorPanel = self:getSecondarySelectorPanel(player)
   local model = self.model:getModel(player)
 
@@ -638,7 +622,7 @@ function EnergyEdition.methods:updateSecondarySelector(player, element, action, 
   end
   local scrollPanel = self:addGuiScrollPane(selectorPanel, "scroll-secondary", "helmod_scroll_recipe_factories", "auto", "auto")
 
-  local object = self:getObject(player, element, action, item, item2, item3)
+  local object = self:getObject(player, item, item2, item3)
 
   local groupsPanel = self:addGuiTable(scrollPanel, "secondary-groups", 1)
 

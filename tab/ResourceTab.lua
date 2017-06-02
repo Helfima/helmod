@@ -32,7 +32,6 @@ function ResourceTab.methods:addTableHeader(player, itable)
   
   -- optionnal columns
   self:addCellHeader(player, itable, "index", {"helmod_result-panel.col-header-index"},"index")
-  self:addCellHeader(player, itable, "id", {"helmod_result-panel.col-header-id"},"id")
   self:addCellHeader(player, itable, "name", {"helmod_result-panel.col-header-name"},"name")
   -- data columns
   self:addCellHeader(player, itable, "count", {"helmod_result-panel.col-header-total"},"count")
@@ -53,17 +52,12 @@ function ResourceTab.methods:addTableRow(player, guiTable, ingredient)
 
   -- col index
   if self.player:getSettings(player, "display_data_col_index", true) then
-    local guiIndex = self:addGuiFlowH(guiTable,"index"..ingredient.id)
+    local guiIndex = self:addGuiFlowH(guiTable,"index"..ingredient.name)
     self:addGuiLabel(guiIndex, "index", ingredient.index, "helmod_label_row_right_40")
-  end
-  -- col id
-  if self.player:getSettings(player, "display_data_col_id", true) then
-    local guiId = self:addGuiFlowH(guiTable,"id"..ingredient.id)
-    self:addGuiLabel(guiId, "id", ingredient.id)
   end
   -- col name
   if self.player:getSettings(player, "display_data_col_name", true) then
-    local guiName = self:addGuiFlowH(guiTable,"name"..ingredient.id)
+    local guiName = self:addGuiFlowH(guiTable,"name"..ingredient.name)
     self:addGuiLabel(guiName, "name_", ingredient.name)
   end
   -- col count
@@ -97,9 +91,6 @@ function ResourceTab.methods:updateData(player)
 
   local extra_cols = 0
   if self.player:getSettings(player, "display_data_col_index", true) then
-    extra_cols = extra_cols + 1
-  end
-  if self.player:getSettings(player, "display_data_col_id", true) then
     extra_cols = extra_cols + 1
   end
   if self.player:getSettings(player, "display_data_col_name", true) then

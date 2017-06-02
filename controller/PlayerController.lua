@@ -241,6 +241,7 @@ function PlayerController.methods:getDefaultSettings()
     model_filter_beacon_module = true,
     other_speed_panel=false,
     real_name=false,
+    filter_show_disable=false,
     filter_show_hidden=false
   }
 end
@@ -624,7 +625,8 @@ function PlayerController.methods:createFakeRecipe(player, entity, type)
     group = entity.group,
     subgroup = entity.subgroup,
     energy = 1,
-    enabled = true
+    enabled = true,
+    hidden = false
   }
   if type == "resource" and entity.resource_category ~= nil then
     recipe.localised_name = {"entity-name."..entity.name}
@@ -688,6 +690,7 @@ end
 -- @return #LuaEntityPrototype entity prototype
 --
 function PlayerController.methods:getEntityPrototype(name)
+  if name == nil then return nil end
   return game.entity_prototypes[name]
 end
 
@@ -1052,6 +1055,7 @@ end
 -- @param #string property
 --
 function PlayerController.methods:getEntityProperty(name, property)
+  Logging:trace(self:classname(), "getEntityProperty(name, property)", name, property)
   local entity = self:getEntityPrototype(name)
   if entity ~= nil then
     if property == "type" then

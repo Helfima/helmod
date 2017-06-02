@@ -9,6 +9,15 @@ require "selector.AbstractSelector"
 TechnologySelector = setclass("HMTechnologySelector", AbstractSelector)
 
 -------------------------------------------------------------------------------
+-- After initialization
+--
+-- @function [parent=#TechnologySelector] after_init
+--
+function TechnologySelector.methods:after_init()
+  self.disable_option = true
+end
+
+-------------------------------------------------------------------------------
 -- Return caption
 --
 -- @function [parent=#TechnologySelector] getCaption
@@ -25,16 +34,14 @@ end
 -- @function [parent=#TechnologySelector] updateGroups
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
 -- @return {groupList, prototypeGroups}
 --
-function TechnologySelector.methods:updateGroups(player, element, action, item, item2, item3)
-  Logging:trace(self:classname(), "on_update():",player, element, action, item, item2, item3)
+function TechnologySelector.methods:updateGroups(player, item, item2, item3)
+  Logging:trace(self:classname(), "on_update():", item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   -- recuperation recipes
   local prototypeGroups = {}
@@ -88,14 +95,12 @@ end
 -- @function [parent=#TechnologySelector] getItemList
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function TechnologySelector.methods:getItemList(player, element, action, item, item2, item3)
-  Logging:trace(self:classname(), "getItemList():",player, element, action, item, item2, item3)
+function TechnologySelector.methods:getItemList(player, item, item2, item3)
+  Logging:trace(self:classname(), "getItemList():",player, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local list = {}
   local prototypeGroups = self:getPrototypeGroups()

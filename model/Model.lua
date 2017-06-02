@@ -17,8 +17,9 @@ function Model.methods:init(parent)
   self.player = self.parent.player
 
   self.capEnergy = -0.8
+  self.capSpeed = -0.8
 
-  self.version = "0.4.7.1"
+  self.version = "0.5.4"
 end
 
 -------------------------------------------------------------------------------
@@ -303,7 +304,7 @@ end
 -- @return #table
 --
 function Model.methods:createPowerModel(player)
-  Logging:debug(self:classname(), "createProductionBlockModel():",player)
+  Logging:debug(self:classname(), "createPowerModel():")
   local model = self.player:getGlobal(player, "model")
 
   if model.power_id == nil then model.power_id = 0 end
@@ -330,7 +331,7 @@ end
 -- @return #table
 --
 function Model.methods:createGeneratorModel(player, name, count)
-  Logging:debug(self:classname(), "createGeneratorModel():",player, name, count)
+  Logging:debug(self:classname(), "createGeneratorModel():", name, count)
   if name == nil then name = "steam-engine" end
   if count == nil then count = 0 end
 
@@ -454,7 +455,7 @@ function Model.methods:createRecipeModel(player, name, count)
   if count == nil then count = 1 end
 
   local recipeModel = {}
-  recipeModel.id = model.recipe_id
+  recipeModel.id = "R"..model.recipe_id
   recipeModel.index = 1
   recipeModel.weight = 0
   recipeModel.name = name
@@ -700,7 +701,7 @@ function Model.methods:addRecipeIntoProductionBlock(player, key)
   if recipe ~= nil then
     -- ajoute le bloc si il n'existe pas
     if model.blocks[blockId] == nil then
-     local modelBlock = self:createProductionBlockModel(player, recipe)
+      local modelBlock = self:createProductionBlockModel(player, recipe)
       local index = self:countBlocks(player)
       modelBlock.index = index
       modelBlock.unlinked = unlinked
@@ -712,28 +713,26 @@ function Model.methods:addRecipeIntoProductionBlock(player, key)
     end
 
     -- ajoute le recipe si il n'existe pas
-    if model.blocks[blockId].recipes[key] == nil then
-      local ModelRecipe = self:createRecipeModel(player, recipe.name, 0)
-      local index = self:countBlockRecipes(player, blockId)
-      ModelRecipe.is_resource = not(recipe.force)
-      ModelRecipe.energy = recipe.energy
-      ModelRecipe.category = recipe.category
-      ModelRecipe.group = recipe.group.name
-      ModelRecipe.ingredients = recipe.ingredients
-      ModelRecipe.products = recipe.products
-      ModelRecipe.index = index
-      self:recipeReset(ModelRecipe)
-      -- ajoute les produits du block
-      for _, product in pairs(ModelRecipe.products) do
-        model.blocks[blockId].products[product.name] = product
-      end
-
-      -- ajoute les ingredients du block
-      for _, ingredient in pairs(ModelRecipe.ingredients) do
-        model.blocks[blockId].ingredients[ingredient.name] = ingredient
-      end
-      model.blocks[blockId].recipes[key] = ModelRecipe
+    local ModelRecipe = self:createRecipeModel(player, recipe.name, 0)
+    local index = self:countBlockRecipes(player, blockId)
+    ModelRecipe.is_resource = not(recipe.force)
+    ModelRecipe.energy = recipe.energy
+    ModelRecipe.category = recipe.category
+    ModelRecipe.group = recipe.group.name
+    ModelRecipe.ingredients = recipe.ingredients
+    ModelRecipe.products = recipe.products
+    ModelRecipe.index = index
+    self:recipeReset(ModelRecipe)
+    -- ajoute les produits du block
+    for _, product in pairs(ModelRecipe.products) do
+      model.blocks[blockId].products[product.name] = product
     end
+
+    -- ajoute les ingredients du block
+    for _, ingredient in pairs(ModelRecipe.ingredients) do
+      model.blocks[blockId].ingredients[ingredient.name] = ingredient
+    end
+    model.blocks[blockId].recipes[ModelRecipe.id] = ModelRecipe
 
     local defaultFactory = self:getDefaultRecipeFactory(player, recipe.name)
     if defaultFactory ~= nil then
@@ -757,7 +756,7 @@ end
 -- @param #string key generator name
 --
 function Model.methods:addPrimaryPower(player, power_id, key)
-  Logging:debug(self:classname(), "addPrimaryPower():",player, key)
+  Logging:debug(self:classname(), "addPrimaryPower():", power_id, key)
   local model = self:getModel(player)
   if model.powers == nil then model.powers = {} end
   local power = model.powers[power_id]
@@ -867,8 +866,7 @@ function Model.methods:updateProduct(player, blockId, key, quantity)
   if model.blocks[blockId] ~= nil then
     local block = model.blocks[blockId]
     if block.input == nil then block.input = {} end
-    block.input.key = key
-    block.input.quantity = quantity
+    block.input[key] = quantity
   end
 end
 
@@ -1161,6 +1159,11 @@ function Model.methods:removeProductionRecipe(player, blockId, key)
   if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
     model.blocks[blockId].recipes[key] = nil
     self:reIndexList(model.blocks[blockId].recipes)
+    -- change block name
+    local first_recipe = self:firstRecipe(model.blocks[blockId].recipes)
+    if first_recipe ~= nil then
+      model.blocks[blockId].name = first_recipe.name
+    end
   end
 end
 
@@ -1210,6 +1213,11 @@ function Model.methods:upProductionRecipe(player, blockId, key)
   local model = self:getModel(player)
   if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
     self:upProductionList(player, model.blocks[blockId].recipes, model.blocks[blockId].recipes[key].index)
+    -- change block name
+    local first_recipe = self:firstRecipe(model.blocks[blockId].recipes)
+    if first_recipe ~= nil then
+      model.blocks[blockId].name = first_recipe.name
+    end
   end
 end
 
@@ -1282,6 +1290,11 @@ function Model.methods:downProductionRecipe(player, blockId, key)
   local model = self:getModel(player)
   if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
     self:downProductionList(player, model.blocks[blockId].recipes, model.blocks[blockId].recipes[key].index)
+    -- change block name
+    local first_recipe = self:firstRecipe(model.blocks[blockId].recipes)
+    if first_recipe ~= nil then
+      model.blocks[blockId].name = first_recipe.name
+    end
   end
 end
 
@@ -1379,6 +1392,25 @@ function Model.methods:update(player)
       self:checkUnlinkedBlocks(player)
       Logging:debug(self:classname() , "********** updated version 0.4.6.1")
     end
+    if model.version == nil or model.version < "0.5.4" then
+      for _, productBlock in pairs(model.blocks) do
+        -- modify recipe id
+        local recipes = {}
+        for _, recipe in pairs(productBlock.recipes) do
+          recipe.id = "R"..recipe.id
+          recipes[recipe.id] = recipe
+        end
+        productBlock.recipes = recipes
+        -- modify input
+        if productBlock.input ~= nil and productBlock.input.key ~= nil then
+          local key = productBlock.input.key
+          local quantity = productBlock.input.quantity
+          productBlock.input = {}
+          productBlock.input[key] = quantity or 0
+        end
+      end
+      Logging:debug(self:classname() , "********** updated version 0.5.4")
+    end
     if model.blocks ~= nil then
       for _, productBlock in pairs(model.blocks) do
         for _, recipe in pairs(productBlock.recipes) do
@@ -1405,10 +1437,9 @@ function Model.methods:update(player)
       if not(productBlock.unlinked) then
         for _,product in pairs(recipe.products) do
           if input[product.name] ~= nil then
-            -- hors premier tour
-            productBlock.input = {}
-            productBlock.input.key = product.name
-            productBlock.input.quantity = input[product.name]
+            -- block linked
+            if productBlock.input == nil then productBlock.input = {} end
+            productBlock.input[product.name] = input[product.name]
           end
         end
       end
@@ -1460,7 +1491,7 @@ end
 function Model.methods:getElementAmount(element)
   Logging:debug(self:classname(), "getElementAmount",element)
   if element == nil then return 0 end
-  
+
   if element.amount ~= nil then
     return element.amount
   end
@@ -1496,26 +1527,7 @@ function Model.methods:computeProductionBlock(player, element, maxLoop, level, p
 
     local initProduct = false
     -- preparation produits et ingredients du block
-    for _, recipe in pairs(recipes) do
-      -- construit la list des produits
-      for _, product in pairs(recipe.products) do
-        if element.products[product.name] == nil then
-          element.products[product.name] = {
-            name = product.name,
-            type = product.type,
-            count = 0,
-            state = 0,
-            amount = self:getElementAmount(product)
-          }
-          if initProduct == false then
-            element.products[product.name].state = 1
-          end
-        end
-        -- initialise product
-        product.count = 0
-      end
-      -- limit les produits au premier recipe
-      initProduct = true
+    for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
       -- construit la list des ingredients
       for _, ingredient in pairs(recipe.ingredients) do
         if element.ingredients[ingredient.name] == nil then
@@ -1529,6 +1541,27 @@ function Model.methods:computeProductionBlock(player, element, maxLoop, level, p
         -- initialise ingredient
         ingredient.count = 0
       end
+      end
+    for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
+      -- construit la list des produits
+      for _, product in pairs(recipe.products) do
+        if element.products[product.name] == nil then
+          element.products[product.name] = {
+            name = product.name,
+            type = product.type,
+            count = 0,
+            state = 0,
+            amount = self:getElementAmount(product)
+          }
+          if not(element.ingredients[product.name]) then
+            element.products[product.name].state = 1
+          end
+        end
+        -- initialise product
+        product.count = 0
+      end
+      -- limit les produits au premier recipe
+      initProduct = true
     end
 
 
@@ -1541,34 +1574,33 @@ function Model.methods:computeProductionBlock(player, element, maxLoop, level, p
       self:computeModuleEffects(player, first_recipe)
       self:computeFactory(player, first_recipe)
       local _,first_product = next(first_recipe.products)
-      element.input = {}
+      if element.input == nil then element.input = {} end
       -- formula [product amount] * (1 + [productivity]) *[assembly speed]*[time]/[recipe energy]
-      element.input.key = first_product.name
-      element.input.quantity = self:getElementAmount(first_product) * (1 + first_recipe.factory.effects.productivity) * ( element.factory_number or 0 ) * first_recipe.factory.speed * model.time / first_recipe.energy
+      element.input[first_product.name] = self:getElementAmount(first_product) * (1 + first_recipe.factory.effects.productivity) * ( element.factory_number or 0 ) * first_recipe.factory.speed * model.time / first_recipe.energy
     end
 
-    -- initialise la premiere recette avec le input
-    local first_recipe = self:firstRecipe(recipes)
-    if first_recipe ~= nil and element.input ~= nil then
-      for _, product in pairs(first_recipe.products) do
-        if product.name == element.input.key then
-          local p_amount = self:getElementAmount(product)
-          local i_amount = 0
+    if element.input ~= nil then
+      for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
+        -- initialise la premiere recette avec le input
+        for _, product in pairs(recipe.products) do
+          if element.input[product.name] ~= nil then
+            local p_amount = self:getElementAmount(product)
+            local i_amount = 0
 
-          -- consolide product.count
-          if first_recipe.is_resource ~= true then
-            for k, ingredient in pairs(first_recipe.ingredients) do
-              if ingredient.name == product.name then
-                i_amount = self:getElementAmount(ingredient)
+            -- consolide product.count
+            if recipe.is_resource ~= true then
+              for k, ingredient in pairs(recipe.ingredients) do
+                if ingredient.name == product.name then
+                  i_amount = self:getElementAmount(ingredient)
+                end
               end
             end
-          end
 
-          product.count = element.input.quantity * (p_amount/(p_amount-i_amount))
+            product.count = element.input[product.name] * (p_amount/(p_amount-i_amount))
+          end
         end
       end
     end
-    Logging:debug(self:classname(), "first_recipe",first_recipe)
 
     Logging:debug(self:classname() , "********** initialized:", element)
 
@@ -1679,14 +1711,14 @@ function Model.methods:computeProductionBlock(player, element, maxLoop, level, p
       element.count = 1
     end
 
---    for _, recipe in pairs(recipes) do
---      for _, ingredient in pairs(recipe.ingredients) do
---        -- consomme les ingredients
---        if recipe.is_resource ~= true and element.products[ingredient.name] ~= nil then
---          element.products[ingredient.name].count = element.products[ingredient.name].count - ingredient.count
---        end
---      end
---    end
+    --    for _, recipe in pairs(recipes) do
+    --      for _, ingredient in pairs(recipe.ingredients) do
+    --        -- consomme les ingredients
+    --        if recipe.is_resource ~= true and element.products[ingredient.name] ~= nil then
+    --          element.products[ingredient.name].count = element.products[ingredient.name].count - ingredient.count
+    --        end
+    --      end
+    --    end
 
     -- reduit les produits du block
     for _, product in pairs(element.products) do
@@ -1907,6 +1939,9 @@ function Model.methods:computeModuleEffects(player, object)
     end
   end
 
+  -- cap la vitesse a self.capSpeed
+  if factory.effects.speed < self.capSpeed  then factory.effects.speed = self.capSpeed end
+
   -- cap l'energy a self.capEnergy
   if factory.effects.consumption < self.capEnergy  then factory.effects.consumption = self.capEnergy end
 
@@ -2052,10 +2087,10 @@ end
 --
 function Model.methods:computePower(player, key)
   local power = self:getPower(player, key)
-  Logging:trace(self:classname(), "computePower():", key, power)
+  Logging:debug(self:classname(), "computePower():", key, power)
   if power ~= nil then
-    local primary_classification = self.player:getItemProperty(power.primary.name, "classification")
-    local secondary_classification = self.player:getItemProperty(power.secondary.name, "classification")
+    local primary_classification = self.player:getEntityProperty(power.primary.name, "type")
+    local secondary_classification = self.player:getEntityProperty(power.secondary.name, "type")
     if primary_classification == "generator" then
       -- calcul primary
       local count = math.ceil(power.power/(power.primary.energy_nominal))

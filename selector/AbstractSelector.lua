@@ -104,6 +104,18 @@ function AbstractSelector.methods:on_init(parent)
   self.panelCaption = self:getCaption(parent)
   self.player = self.parent.player
   self.model = self.parent.model
+  self:after_init()
+end
+
+-------------------------------------------------------------------------------
+-- After initialization
+--
+-- @function [parent=#AbstractSelector] after_init
+--
+function AbstractSelector.methods:after_init()
+  self.disable_option = false
+  self.hidden_option = false
+  self.product_option = false
 end
 
 -------------------------------------------------------------------------------
@@ -189,7 +201,7 @@ end
 -- @function [parent=#AbstractSelector] on_open
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
@@ -197,8 +209,8 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function AbstractSelector.methods:on_open(player, element, action, item, item2, item3)
-  Logging:debug(self:classname(), "on_open():",player, element, action, item, item2, item3)
+function AbstractSelector.methods:on_open(player, event, action, item, item2, item3)
+  Logging:debug(self:classname(), "on_open():", action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   if item3 ~= nil then
     prototypeFilter = item3:lower():gsub("[-]"," ")
@@ -216,13 +228,13 @@ end
 -- @function [parent=#AbstractSelector] after_open
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractSelector.methods:after_open(player, element, action, item, item2, item3)
+function AbstractSelector.methods:after_open(player, event, action, item, item2, item3)
   self.parent:send_event(player, "HMRecipeEdition", "CLOSE")
   self.parent:send_event(player, "HMProductEdition", "CLOSE")
   self.parent:send_event(player, "HMSettings", "CLOSE")
@@ -238,14 +250,14 @@ end
 -- @function [parent=#AbstractSelector] on_event
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
+-- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractSelector.methods:on_event(player, element, action, item, item2, item3)
-  Logging:debug(self:classname(), "on_event():",player, element, action, item, item2, item3)
+function AbstractSelector.methods:on_event(player, event, action, item, item2, item3)
+  Logging:debug(self:classname(), "on_event():", action, item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local globalSettings = self.player:getGlobal(player, "settings")
   local defaultSettings = self.player:getDefaultSettings()
@@ -286,7 +298,7 @@ function AbstractSelector.methods:on_event(player, element, action, item, item2,
 
   if action == "recipe-group" then
     globalPlayer.recipeGroupSelected = item
-    self:on_update(player, element, action, item, item2, item3)
+    self:on_update(player, item, item2, item3)
   end
 
   if action == "change-boolean-settings" then
@@ -297,12 +309,12 @@ function AbstractSelector.methods:on_event(player, element, action, item, item2,
 
   if action == "recipe-filter-switch" then
     prototypeFilterProduct = not(prototypeFilterProduct)
-    self:on_update(player, element, action, item, item2, item3)
+    self:on_update(player, item, item2, item3)
   end
 
   if action == "recipe-filter" then
-    prototypeFilter = element.text
-    self:on_update(player, element, action, item, item2, item3)
+    prototypeFilter = event.element.text
+    self:on_update(player, item, item2, item3)
   end
 
 end
@@ -313,16 +325,14 @@ end
 -- @function [parent=#AbstractSelector] updateGroups
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
 -- @return {groupList, prototypeGroups}
 --
-function AbstractSelector.methods:updateGroups(player, element, action, item, item2, item3)
-  Logging:trace(self:classname(), "updateGroups():",player, element, action, item, item2, item3)
+function AbstractSelector.methods:updateGroups(player, item, item2, item3)
+  Logging:trace(self:classname(), "updateGroups():", item, item2, item3)
   return {},{}
 end
 
@@ -332,21 +342,19 @@ end
 -- @function [parent=#AbstractSelector] on_update
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractSelector.methods:on_update(player, element, action, item, item2, item3)
-  Logging:trace(self:classname(), "on_update():",player, element, action, item, item2, item3)
+function AbstractSelector.methods:on_update(player, item, item2, item3)
+  Logging:trace(self:classname(), "on_update():",item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   -- recuperation recipes
-  groupList , prototypeGroups = self:updateGroups(player, element, action, item, item2, item3)
+  groupList , prototypeGroups = self:updateGroups(player, item, item2, item3)
 
-  self:updateFilter(player, element, action, item, item2, item3)
-  self:updateGroupSelector(player, element, action, item, item2, item3)
-  self:updateItemList(player, element, action, item, item2, item3)
+  self:updateFilter(player, item, item2, item3)
+  self:updateGroupSelector(player, item, item2, item3)
+  self:updateItemList(player, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -355,37 +363,47 @@ end
 -- @function [parent=#AbstractSelector] updateFilter
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractSelector.methods:updateFilter(player, element, action, item, item2, item3)
-  Logging:trace(self:classname(), "updateFilter():",player, element, action, item, item2, item3)
+function AbstractSelector.methods:updateFilter(player,item, item2, item3)
+  Logging:trace(self:classname(), "updateFilter():", item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local panel = self:getFilterPanel(player)
   local globalSettings = self.player:getGlobal(player, "settings")
 
   if panel["filter"] == nil then
     local guiFilter = self:addGuiTable(panel, "filter", 2)
-    local filter_show_hidden = self.player:getGlobalSettings(player, "filter_show_hidden")
-    self:addGuiCheckbox(guiFilter, self:classname().."=change-boolean-settings=ID=filter_show_hidden", filter_show_hidden)
-    self:addGuiLabel(guiFilter, "filter_show_hidden", ({"helmod_recipe-edition-panel.filter-show-hidden"}))
+    if self.disable_option then
+      local filter_show_disable = self.player:getGlobalSettings(player, "filter_show_disable")
+      self:addGuiCheckbox(guiFilter, self:classname().."=change-boolean-settings=ID=filter_show_disable", filter_show_disable)
+      self:addGuiLabel(guiFilter, "filter_show_disable", ({"helmod_recipe-edition-panel.filter-show-disable"}))
+    end
+    
+    if self.hidden_option then
+      local filter_show_hidden = self.player:getGlobalSettings(player, "filter_show_hidden")
+      self:addGuiCheckbox(guiFilter, self:classname().."=change-boolean-settings=ID=filter_show_hidden", filter_show_hidden)
+      self:addGuiLabel(guiFilter, "filter_show_hidden", ({"helmod_recipe-edition-panel.filter-show-hidden"}))
+    end
 
-    self:addGuiCheckbox(guiFilter, self:classname().."=recipe-filter-switch=ID=filter-product", prototypeFilterProduct)
-    self:addGuiLabel(guiFilter, "filter-product", ({"helmod_recipe-edition-panel.filter-by-product"}))
-
-    self:addGuiCheckbox(guiFilter, self:classname().."=recipe-filter-switch=ID=filter-ingredient", not(prototypeFilterProduct))
-    self:addGuiLabel(guiFilter, "filter-ingredient", ({"helmod_recipe-edition-panel.filter-by-ingredient"}))
+    if self.product_option then
+      self:addGuiCheckbox(guiFilter, self:classname().."=recipe-filter-switch=ID=filter-product", prototypeFilterProduct)
+      self:addGuiLabel(guiFilter, "filter-product", ({"helmod_recipe-edition-panel.filter-by-product"}))
+  
+      self:addGuiCheckbox(guiFilter, self:classname().."=recipe-filter-switch=ID=filter-ingredient", not(prototypeFilterProduct))
+      self:addGuiLabel(guiFilter, "filter-ingredient", ({"helmod_recipe-edition-panel.filter-by-ingredient"}))
+    end
 
     self:addGuiLabel(guiFilter, "filter-value", ({"helmod_common.filter"}))
     self:addGuiText(guiFilter, self:classname().."=recipe-filter=ID=filter-value", prototypeFilter)
 
     self:addGuiLabel(panel, "message", ({"helmod_recipe-edition-panel.message"}))
   else
-    panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-product"].state = prototypeFilterProduct
-    panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-ingredient"].state = not(prototypeFilterProduct)
+    if self.product_option then
+      panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-product"].state = prototypeFilterProduct
+      panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-ingredient"].state = not(prototypeFilterProduct)
+    end
   end
 
 end
@@ -396,14 +414,12 @@ end
 -- @function [parent=#AbstractSelector] updateItemList
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractSelector.methods:updateItemList(player, element, action, item, item2, item3)
-  Logging:trace(self:classname(), "updateItemList():",player, element, action, item, item2, item3)
+function AbstractSelector.methods:updateItemList(player, item, item2, item3)
+  Logging:trace(self:classname(), "updateItemList():", item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local panel = self:getItemListPanel(player)
 
@@ -412,7 +428,7 @@ function AbstractSelector.methods:updateItemList(player, element, action, item, 
   end
 
   -- recuperation recipes et subgroupes
-  local list = self:getItemList(player, element, action, item, item2, item3)
+  local list = self:getItemList(player, item, item2, item3)
 
   --local guiRecipeSelectorTable = self:addGuiTable(panel, "recipe-table", 10)
   local guiRecipeSelectorList = self:addGuiFlowV(panel, "recipe-list", "helmod_flow_recipe_selector")
@@ -435,14 +451,12 @@ end
 -- @function [parent=#AbstractSelector] getItemList
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractSelector.methods:getItemList(player, element, action, item, item2, item3)
-  Logging:trace(self:classname(), "getItemList():",player, element, action, item, item2, item3)
+function AbstractSelector.methods:getItemList(player, item, item2, item3)
+  Logging:trace(self:classname(), "getItemList():", item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local list = {}
   if prototypeGroups[globalPlayer.recipeGroupSelected] ~= nil then
@@ -483,14 +497,12 @@ end
 -- @function [parent=#AbstractSelector] updateGroupSelector
 --
 -- @param #LuaPlayer player
--- @param #LuaGuiElement element button
--- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractSelector.methods:updateGroupSelector(player, element, action, item, item2, item3)
-  Logging:trace(self:classname(), "updateGroupSelector():",player, element, action, item, item2, item3)
+function AbstractSelector.methods:updateGroupSelector(player, item, item2, item3)
+  Logging:trace(self:classname(), "updateGroupSelector():", item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local panel = self:getGroupsPanel(player)
 

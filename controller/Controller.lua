@@ -221,7 +221,7 @@ function Controller.methods:parse_event(event, type)
         local item2 = string.match(event.element.name,patternItem2,1)
         local item3 = string.match(event.element.name,patternItem3,1)
         Logging:debug(self:classname(), "parse_event:", event.element.name, action, item, item2, item3)
-        eventController:send_event(player, event.element, action, item, item2, item3)
+        eventController:send_event(player, event, action, item, item2, item3)
       end
     end
   end
