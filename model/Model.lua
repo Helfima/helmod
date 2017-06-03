@@ -696,12 +696,12 @@ function Model.methods:addRecipeIntoProductionBlock(player, key)
   local model = self:getModel(player)
   local globalGui = self.player:getGlobalGui(player)
   local blockId = globalGui.currentBlock
-  local recipe = self.player:getRecipe(player, key);
+  local lua_recipe = self.player:getRecipe(player, key);
 
-  if recipe ~= nil then
+  if lua_recipe ~= nil then
     -- ajoute le bloc si il n'existe pas
     if model.blocks[blockId] == nil then
-      local modelBlock = self:createProductionBlockModel(player, recipe)
+      local modelBlock = self:createProductionBlockModel(player, lua_recipe)
       local index = self:countBlocks(player)
       modelBlock.index = index
       modelBlock.unlinked = unlinked
@@ -713,14 +713,14 @@ function Model.methods:addRecipeIntoProductionBlock(player, key)
     end
 
     -- ajoute le recipe si il n'existe pas
-    local ModelRecipe = self:createRecipeModel(player, recipe.name, 0)
+    local ModelRecipe = self:createRecipeModel(player, lua_recipe.name, 0)
     local index = self:countBlockRecipes(player, blockId)
-    ModelRecipe.is_resource = not(recipe.force)
-    ModelRecipe.energy = recipe.energy
-    ModelRecipe.category = recipe.category
-    ModelRecipe.group = recipe.group.name
-    ModelRecipe.ingredients = recipe.ingredients
-    ModelRecipe.products = recipe.products
+    ModelRecipe.is_resource = not(lua_recipe.force)
+    ModelRecipe.energy = lua_recipe.energy
+    ModelRecipe.category = lua_recipe.category
+    ModelRecipe.group = lua_recipe.group.name
+    ModelRecipe.ingredients = lua_recipe.ingredients
+    ModelRecipe.products = lua_recipe.products
     ModelRecipe.index = index
     self:recipeReset(ModelRecipe)
     -- ajoute les produits du block
@@ -734,13 +734,13 @@ function Model.methods:addRecipeIntoProductionBlock(player, key)
     end
     model.blocks[blockId].recipes[ModelRecipe.id] = ModelRecipe
 
-    local defaultFactory = self:getDefaultRecipeFactory(player, recipe.name)
+    local defaultFactory = self:getDefaultRecipeFactory(player, lua_recipe.name)
     if defaultFactory ~= nil then
-      self:setFactory(player, blockId, recipe.name, defaultFactory)
+      self:setFactory(player, blockId, ModelRecipe.id, defaultFactory)
     end
-    local defaultBeacon = self:getDefaultRecipeBeacon(player, recipe.name)
+    local defaultBeacon = self:getDefaultRecipeBeacon(player, lua_recipe.name)
     if defaultBeacon ~= nil then
-      self:setBeacon(player, blockId, recipe.name, defaultBeacon)
+      self:setBeacon(player, blockId, ModelRecipe.id, defaultBeacon)
     end
     return model.blocks[blockId]
   end
@@ -906,7 +906,7 @@ function Model.methods:setBeacon(player, item, key, name)
     local beacon = self.player:getEntityPrototype(name)
     if beacon ~= nil then
       -- set global default
-      self:setDefaultRecipeBeacon(player, key, beacon.name)
+      self:setDefaultRecipeBeacon(player, item, key, beacon.name)
 
       object.beacon.name = beacon.name
       -- copy the default parameters
@@ -999,7 +999,7 @@ function Model.methods:setFactory(player, item, key, name)
     local factory = self.player:getEntityPrototype(name)
     if factory ~= nil then
       -- set global default
-      self:setDefaultRecipeFactory(player, key, factory.name)
+      self:setDefaultRecipeFactory(player, item, key, factory.name)
 
       object.factory.name = factory.name
       --object.factory.type = factory.type
@@ -2176,11 +2176,13 @@ end
 -- @function [parent=#Model] setDefaultRecipeFactory
 --
 -- @param #LuaPlayer player
+-- @param #string item block_id or resource
 -- @param #string key recipe name
 -- @param #string name factory name
 --
-function Model.methods:setDefaultRecipeFactory(player, key, name)
-  local recipe = self:getDefaultRecipe(player, key)
+function Model.methods:setDefaultRecipeFactory(player, item, key, name)
+  local object = self:getObject(player, item, key)
+  local recipe = self:getDefaultRecipe(player, object.name)
   recipe.factory = name
 end
 
@@ -2208,11 +2210,13 @@ end
 -- @function [parent=#Model] setDefaultRecipeBeacon
 --
 -- @param #LuaPlayer player
+-- @param #string item block_id or resource
 -- @param #string key recipe name
 -- @param #string name factory name
 --
-function Model.methods:setDefaultRecipeBeacon(player, key, name)
-  local recipe = self:getDefaultRecipe(player, key)
+function Model.methods:setDefaultRecipeBeacon(player, item, key, name)
+  local object = self:getObject(player, item, key)
+  local recipe = self:getDefaultRecipe(player, object.name)
   recipe.beacon = name
 end
 

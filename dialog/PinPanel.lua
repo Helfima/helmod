@@ -250,11 +250,11 @@ function PinPanel.methods:addProductionBlockRow(player, guiTable, blockId, recip
 	local model = self.model:getModel(player)
 
 	-- col recipe
-	local guiRecipe = self:addGuiFlowH(guiTable,"recipe"..recipe.name, "helmod_flow_default")
+	local guiRecipe = self:addGuiFlowH(guiTable,"recipe"..recipe.id, "helmod_flow_default")
 	self:addGuiButtonSprite(guiRecipe, "PinPanel_recipe_"..blockId.."=", self.player:getRecipeIconType(player, recipe), recipe.name, recipe.name, self.player:getRecipeLocalisedName(player, recipe))
 
 	-- products
-	local tProducts = self:addGuiTable(guiTable,"products_"..recipe.name, 3)
+	local tProducts = self:addGuiTable(guiTable,"products_"..recipe.id, 3)
 	if recipe.products ~= nil then
 		for r, product in pairs(recipe.products) do
 			local cell = self:addGuiFlowH(tProducts,"cell_"..product.name, "helmod_flow_default")
@@ -266,9 +266,9 @@ function PinPanel.methods:addProductionBlockRow(player, guiTable, blockId, recip
 	end
 
 	-- col factory
-	local guiFactory = self:addGuiFlowH(guiTable,"factory"..recipe.name, "helmod_flow_default")
+	local guiFactory = self:addGuiFlowH(guiTable,"factory"..recipe.id, "helmod_flow_default")
 	local factory = recipe.factory
-	self:addGuiLabel(guiFactory, factory.name, self:formatNumber(factory.limit_count), "helmod_label_right_30")
+	self:addGuiLabel(guiFactory, factory.name, self:formatNumberFactory(factory.limit_count), "helmod_label_right_30")
 	self:addGuiButtonSprite(guiFactory, "PinPanel_recipe_"..blockId.."="..recipe.name.."=", self.player:getIconType(factory), factory.name, factory.name, self.player:getLocalisedName(player, factory))
 	local guiFactoryModule = self:addGuiTable(guiFactory,"factory-modules"..recipe.name, 2, "helmod_factory_modules")
 	-- modules
@@ -290,7 +290,7 @@ function PinPanel.methods:addProductionBlockRow(player, guiTable, blockId, recip
 	end
 
 	-- ingredients
-	local tIngredient = self:addGuiTable(guiTable,"ingredients_"..recipe.name, 3)
+	local tIngredient = self:addGuiTable(guiTable,"ingredients_"..recipe.id, 3)
 	if recipe.ingredients ~= nil then
 		for r, ingredient in pairs(recipe.ingredients) do
 			local cell = self:addGuiFlowH(tIngredient,"cell_"..ingredient.name, "helmod_flow_default")
@@ -304,9 +304,9 @@ function PinPanel.methods:addProductionBlockRow(player, guiTable, blockId, recip
 	local display_pin_beacon = self.player:getGlobalSettings(player,"display_pin_beacon")
 	if display_pin_beacon == true then
 		-- col beacon
-		local guiBeacon = self:addGuiFlowH(guiTable,"beacon"..recipe.name, "helmod_flow_default")
+		local guiBeacon = self:addGuiFlowH(guiTable,"beacon"..recipe.id, "helmod_flow_default")
 		local beacon = recipe.beacon
-		self:addGuiLabel(guiBeacon, beacon.name, self:formatNumber(beacon.limit_count), "helmod_label_right_30")
+		self:addGuiLabel(guiBeacon, beacon.name, self:formatNumberFactory(beacon.limit_count), "helmod_label_right_30")
 		self:addGuiButtonSprite(guiBeacon, "PinPanel_recipe_"..blockId.."="..recipe.name.."=", self.player:getIconType(beacon), beacon.name, beacon.name, self.player:getLocalisedName(player, beacon))
 		local guiBeaconModule = self:addGuiTable(guiBeacon,"beacon-modules"..recipe.name, 1, "helmod_beacon_modules")
 		-- modules
@@ -354,4 +354,20 @@ function PinPanel.methods:on_event(player, event, action, item, item2, item3)
 		globalSettings[item] = not(globalSettings[item])
 		self:updateInfo(player, event, action, globalGui.pinBlock, item2, item3)
 	end
+end
+
+-------------------------------------------------------------------------------
+-- Format number for factory
+--
+-- @function [parent=#PinPanel] formatNumberFactory
+--
+-- @param #number number
+--
+function PinPanel.methods:formatNumberFactory(number)
+  local decimal = 2
+  local format_number = self.player:getSettings(nil, "format_number_factory", true)
+  if format_number == "0" then decimal = 0 end
+  if format_number == "0.0" then decimal = 1 end
+  if format_number == "0.00" then decimal = 2 end
+  return self:formatNumber(number, decimal)
 end
