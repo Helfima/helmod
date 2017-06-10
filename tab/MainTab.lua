@@ -438,13 +438,19 @@ function MainTab.methods:on_event_access_write(player, event, action, item, item
     end
 
     if action == "production-block-up" then
-      self.parent.model:upProductionBlock(player, item)
+      local step = 1
+      if event.shift then step = self.player:getSettings(player, "row_move_step") end
+      if event.control then step = 1000 end
+      self.parent.model:upProductionBlock(player, item, step)
       self.parent.model:update(player)
       self:update(player, item, item2, item3)
     end
 
     if action == "production-block-down" then
-      self.parent.model:downProductionBlock(player, item)
+      local step = 1
+      if event.shift then step = self.player:getSettings(player, "row_move_step") end
+      if event.control then step = 1000 end
+      self.parent.model:downProductionBlock(player, item, step)
       self.parent.model:update(player)
       self:update(player, item, item2, item3)
     end
@@ -458,13 +464,19 @@ function MainTab.methods:on_event_access_write(player, event, action, item, item
     end
 
     if action == "production-recipe-up" then
-      self.parent.model:upProductionRecipe(player, item, item2)
+      local step = 1
+      if event.shift then step = self.player:getSettings(player, "row_move_step") end
+      if event.control then step = 1000 end
+      self.parent.model:upProductionRecipe(player, item, item2, step)
       self.parent.model:update(player)
       self:update(player, item, item2, item3)
     end
 
     if action == "production-recipe-down" then
-      self.parent.model:downProductionRecipe(player, item, item2)
+      local step = 1
+      if event.shift then step = self.player:getSettings(player, "row_move_step") end
+      if event.control then step = 1000 end
+      self.parent.model:downProductionRecipe(player, item, item2, step)
       self.parent.model:update(player)
       self:update(player, item, item2, item3)
     end
@@ -615,6 +627,7 @@ function MainTab.methods:updateHeaderPanel(player, item, item2, item3)
     local tabPanel = self:addGuiFlowH(menuPanel, "tab", "helmod_flow_data_tab")
     self:addGuiButton(tabPanel, "HMEntitySelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-entity"}))
     self:addGuiButton(tabPanel, "HMItemSelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-item"}))
+    self:addGuiButton(tabPanel, "HMFluidSelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-fluid"}))
     self:addGuiButton(tabPanel, "HMRecipeSelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-recipe"}))
     self:addGuiButton(tabPanel, "HMTechnologySelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-technology"}))
     self:addGuiButton(tabPanel, self:classname().."=change-tab=ID=", "HMProductionLineTab", "helmod_button_default", ({"helmod_result-panel.back-button-production-line"}))

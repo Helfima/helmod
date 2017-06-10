@@ -281,6 +281,11 @@ function AbstractSelector.methods:on_event(player, event, action, item, item2, i
         self.parent:refreshDisplayData(player)
         self:close(player)
       end
+      if action == "fluid-select" then
+        globalPlayer["prototype-properties"] = {name = item, type = "fluid" }
+        self.parent:refreshDisplayData(player)
+        self:close(player)
+      end
       if action == "technology-select" then
         globalPlayer["prototype-properties"] = {name = item, type = "technology" }
         self.parent:refreshDisplayData(player)

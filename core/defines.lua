@@ -92,6 +92,15 @@ helmod_settings_mod = {
     allow_blank = true,
     order = "b1"
   },
+  -- display main icon
+  display_main_icon = {
+    type = "bool-setting",
+    setting_type = "runtime-per-user",
+    localised_name = {"helmod_settings.display-main-icon"},
+    localised_description = {"helmod_settings.display-main-icon-desc"},
+    default_value = true,
+    order = "b2"
+  },
   -- display location
   display_location = {
     type = "string-setting",
@@ -100,7 +109,7 @@ helmod_settings_mod = {
     localised_description = {"helmod_settings.display-location-desc"},
     default_value = "center",
     allowed_values = {"center", "left", "top"},
-    order = "b2"
+    order = "b3"
   },
   --display-cell-mod
   display_cell_mod = {
@@ -110,7 +119,7 @@ helmod_settings_mod = {
     localised_description = {"helmod_settings.display-cell-mod-desc"},
     default_value = "default",
     allowed_values = {"default","small-text","small-icon","by-kilo"},
-    order = "b3"
+    order = "b4"
   },
   --display product cols
   display_product_cols = {
@@ -121,7 +130,7 @@ helmod_settings_mod = {
     default_value = 5,
     minimum_value = 2,
     maximum_value = 10,
-    order = "b4"
+    order = "b5"
   },
   --display-ingredient-cols
   display_ingredient_cols = {
@@ -132,7 +141,37 @@ helmod_settings_mod = {
     default_value = 5,
     minimum_value = 2,
     maximum_value = 10,
-    order = "b5"
+    order = "b6"
+  },
+  --row_move_step
+  row_move_step = {
+    type = "int-setting",
+    setting_type = "runtime-per-user",
+    localised_name = {"helmod_settings.row-move-step"},
+    localised_description = {"helmod_settings.row-move-step-desc"},
+    default_value = 5,
+    minimum_value = 2,
+    maximum_value = 10,
+    order = "c0"
+  },
+  -- format number element
+  default_factory_level = {
+    type = "string-setting",
+    setting_type = "runtime-per-user",
+    localised_name = {"helmod_settings.default-factory-level"},
+    localised_description = {"helmod_settings.default-factory-level-desc"},
+    default_value = "last",
+    allowed_values = {"1","2","3","4","last"},
+    order = "a2"
+  },
+  --display_all_sheet
+  display_all_sheet = {
+    type = "bool-setting",
+    setting_type = "runtime-global",
+    localised_name = {"helmod_settings.display-all-sheet"},
+    localised_description = {"helmod_settings.display-all-sheet-desc"},
+    default_value = false,
+    order = "c0"
   },
   --display-real-name
   display_real_name = {
@@ -141,7 +180,7 @@ helmod_settings_mod = {
     localised_name = {"helmod_settings.display-real-name"},
     localised_description = {"helmod_settings.display-real-name-desc"},
     default_value = false,
-    order = "c0"
+    order = "c1"
   },
   --data-col-index
   display_data_col_index = {
@@ -150,7 +189,7 @@ helmod_settings_mod = {
     localised_name = {"helmod_settings.display-data-col-index"},
     localised_description = {"helmod_settings.display-data-col-index-desc"},
     default_value = false,
-    order = "c1"
+    order = "c2"
   },
   --data-col-id
   display_data_col_id = {
@@ -159,7 +198,7 @@ helmod_settings_mod = {
     localised_name = {"helmod_settings.display-data-col-id"},
     localised_description = {"helmod_settings.display-data-col-id-desc"},
     default_value = false,
-    order = "c2"
+    order = "c3"
   },
   --data-col-name
   display_data_col_name = {
@@ -168,7 +207,7 @@ helmod_settings_mod = {
     localised_name = {"helmod_settings.display-data-col-name"},
     localised_description = {"helmod_settings.display-data-col-name-desc"},
     default_value = false,
-    order = "c3"
+    order = "c4"
   },
   --model-filter-factory
   model_filter_factory = {

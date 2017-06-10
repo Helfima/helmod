@@ -209,8 +209,8 @@ function ProductionLineTab.methods:addTableRow(player, guiTable, block)
   -- col action
   local guiAction = self:addGuiFlowH(guiTable,"action"..block.id, "helmod_flow_default")
   self:addGuiButton(guiAction, self.parent:classname().."=production-block-remove=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
-  self:addGuiButton(guiAction, self.parent:classname().."=production-block-down=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-down"}), ({"tooltip.down-element"}))
-  self:addGuiButton(guiAction, self.parent:classname().."=production-block-up=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-up"}), ({"tooltip.up-element"}))
+  self:addGuiButton(guiAction, self.parent:classname().."=production-block-down=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-down"}), ({"tooltip.down-element", self.player:getSettings(player, "row_move_step")}))
+  self:addGuiButton(guiAction, self.parent:classname().."=production-block-up=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-up"}), ({"tooltip.up-element", self.player:getSettings(player, "row_move_step")}))
   if unlinked then
     self:addGuiButton(guiAction, self.parent:classname().."=production-block-unlink=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-unlink"}), ({"tooltip.unlink-element"}))
   else

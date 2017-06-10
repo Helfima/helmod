@@ -92,6 +92,11 @@ function PropertiesTab.methods:updateData(player)
       if prototype ~= nil then
         self:addGuiButtonSprite(listPanel, self:classname().."=item-select=ID=", self.player:getItemIconType(prototype), prototype.name, prototype.name, self.player:getLocalisedName(player, prototype))
       end
+    elseif prototype_type == "fluid" then
+      prototype = self.player:getFluidPrototype(prototype_name)
+      if prototype ~= nil then
+        self:addGuiButtonSprite(listPanel, self:classname().."=fluid-select=ID=", self.player:getItemIconType(prototype), prototype.name, prototype.name, self.player:getLocalisedName(player, prototype))
+      end
     elseif prototype_type == "recipe" then
       prototype = self.player:getRecipe(player, prototype_name)
       if prototype ~= nil then

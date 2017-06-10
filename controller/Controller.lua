@@ -10,6 +10,7 @@ require "selector.EntitySelector"
 require "selector.RecipeSelector"
 require "selector.TechnologySelector"
 require "selector.ItemSelector"
+require "selector.FluidSelector"
 require "tab.MainTab"
 
 
@@ -51,6 +52,7 @@ function Controller.methods:init(parent)
   table.insert(controllers, PinPanel:new(self))
   table.insert(controllers, TechnologySelector:new(self))
   table.insert(controllers, ItemSelector:new(self))
+  table.insert(controllers, FluidSelector:new(self))
   
   for _,controller in pairs(controllers) do
     self.controllers[controller:classname()] = controller

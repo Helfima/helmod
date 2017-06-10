@@ -221,8 +221,8 @@ function ProductionBlockTab.methods:addTableRow(player, guiTable, block, recipe)
   -- col action
   local guiAction = self:addGuiFlowH(guiTable,"action"..recipe.id, "helmod_flow_default")
   self:addGuiButton(guiAction, self.parent:classname().."=production-recipe-remove=ID="..block.id.."=", recipe.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
-  self:addGuiButton(guiAction, self.parent:classname().."=production-recipe-down=ID="..block.id.."=", recipe.id, "helmod_button_default", ({"helmod_result-panel.row-button-down"}), ({"tooltip.down-element"}))
-  self:addGuiButton(guiAction, self.parent:classname().."=production-recipe-up=ID="..block.id.."=", recipe.id, "helmod_button_default", ({"helmod_result-panel.row-button-up"}), ({"tooltip.up-element"}))
+  self:addGuiButton(guiAction, self.parent:classname().."=production-recipe-down=ID="..block.id.."=", recipe.id, "helmod_button_default", ({"helmod_result-panel.row-button-down"}), ({"tooltip.down-element", self.player:getSettings(player, "row_move_step")}))
+  self:addGuiButton(guiAction, self.parent:classname().."=production-recipe-up=ID="..block.id.."=", recipe.id, "helmod_button_default", ({"helmod_result-panel.row-button-up"}), ({"tooltip.up-element", self.player:getSettings(player, "row_move_step")}))
   
   -- col index
   if self.player:getSettings(player, "display_data_col_index", true) then

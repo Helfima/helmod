@@ -57,7 +57,10 @@ function PlayerController.methods:resetGui(player)
       end
     end
   end
-  player.gui.top.add{type="flow", name="helmod_menu-main", direction="horizontal"}
+  local display_main_icon = self:getSettings(player, "display_main_icon")
+  if display_main_icon then
+    player.gui.top.add{type="flow", name="helmod_menu-main", direction="horizontal"}
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -150,7 +153,14 @@ end
 -- @param event
 --
 function PlayerController.methods:on_runtime_mod_setting_changed(event)
-  if self.controllers ~= nil then
+  Logging:debug(self:classname(), "on_runtime_mod_setting_changed(event)", event.player_index, event.setting)
+  if event.setting == "helmod_display_main_icon" and self.controllers ~= nil and self.controllers["controller"] ~= nil then
+    local player = game.players[event.player_index]
+    self:resetGui(player)
+    local controller = self.controllers["controller"]
+    controller:bindController(player)
+  end
+  if event.setting ~= "helmod_display_main_icon" and self.controllers ~= nil then
     for r, controller in pairs(self.controllers) do
       controller:on_runtime_mod_setting_changed(event)
     end
@@ -289,6 +299,7 @@ end
 --
 -- @param #LuaPlayer player
 -- @param #string name
+-- @param #boolean global
 --
 function PlayerController.methods:getSettings(player, name, global)
   Logging:trace(self:classname(), "getSettings(player, name)", name, global)
@@ -523,35 +534,57 @@ end
 -- @function [parent=#PlayerController] getProductionsCrafting
 --
 -- @param #string category filter
+-- @param #string name entity filter
 --
 -- @return #table list of productions
 --
-function PlayerController.methods:getProductionsCrafting(category)
-  Logging:trace(self:classname(), "getProductionsCrafting(category)", category)
+function PlayerController.methods:getProductionsCrafting(category, entity_name)
+  Logging:trace(self:classname(), "getProductionsCrafting(category)", category, entity_name)
   local productions = {}
-  for key, item in pairs(game.entity_prototypes) do
-    if item.type ~= nil and item.name ~= nil and item.name ~= "player" then
-      Logging:trace(self:classname(), "getProductionsCrafting(category):item", item.name, item.type, item.group.name, item.subgroup.name, item.crafting_categories)
-      local check = false
-      if category ~= nil and category ~= "extraction-machine" and category ~= "energy" then
-        if item.crafting_categories ~= nil and item.crafting_categories[category] then
-          check = true
-        end
-      elseif category ~= nil and category == "extraction-machine" then
-        if item.subgroup ~= nil and item.subgroup.name == "extraction-machine" then
-          check = true
-        end
-      elseif category ~= nil and category == "energy" then
-        if item.subgroup ~= nil and item.subgroup.name == "energy" then
-          check = true
-        end
-      else
-        if item.group ~= nil and item.group.name == "production" then
-          check = true
-        end
+  if entity_name ~= nil and entity_name == "water" then
+    for key, lua_entity in pairs(game.entity_prototypes) do
+      if lua_entity.type ~= nil and lua_entity.name ~= nil and lua_entity.name ~= "player" then
+        if lua_entity.type == "offshore-pump" then
+          productions[lua_entity.name] = lua_entity
+        end 
       end
-      if check then
-        productions[item.name] = item
+    end
+  else
+    for key, lua_entity in pairs(game.entity_prototypes) do
+      if lua_entity.type ~= nil and lua_entity.type ~= "offshore-pump" and lua_entity.name ~= nil and lua_entity.name ~= "player" then
+        Logging:trace(self:classname(), "getProductionsCrafting(category):item", lua_entity.name, lua_entity.type, lua_entity.group.name, lua_entity.subgroup.name, lua_entity.crafting_categories)
+        local check = false
+        if category ~= nil and category ~= "extraction-machine" and category ~= "energy" then
+          -- standard recipe
+          if lua_entity.crafting_categories ~= nil and lua_entity.crafting_categories[category] then
+            check = true
+          end
+        elseif category ~= nil and category == "extraction-machine" then
+          if lua_entity.subgroup ~= nil and lua_entity.subgroup.name == "extraction-machine" then
+            check = true
+          end
+        elseif category ~= nil and category == "energy" then
+          if lua_entity.subgroup ~= nil and lua_entity.subgroup.name == "energy" then
+            check = true
+          end
+        else
+          if lua_entity.group ~= nil and lua_entity.group.name == "production" then
+            check = true
+          end
+        end
+        -- resource filter
+        if check then
+          if entity_name ~= nil then
+            local lua_entity_filter = self:getEntityPrototype(entity_name)
+            if lua_entity_filter ~= nil and lua_entity.resource_categories ~= nil and not(lua_entity.resource_categories[lua_entity_filter.resource_category]) then
+              check = false
+            end
+          end
+        end
+        -- ok to add entity
+        if check then
+          productions[lua_entity.name] = lua_entity
+        end
       end
     end
   end

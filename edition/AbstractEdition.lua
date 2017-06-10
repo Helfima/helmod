@@ -274,6 +274,10 @@ function AbstractEdition.methods:after_open(player, event, action, item, item2, 
   Logging:debug(self:classname(), "after_open():", action, item, item2, item3)
   self.parent:send_event(player, "HMProductEdition", "CLOSE")
   self.parent:send_event(player, "HMRecipeSelector", "CLOSE")
+  self.parent:send_event(player, "HMItemSelector", "CLOSE")
+  self.parent:send_event(player, "HMEntitySelector", "CLOSE")
+  self.parent:send_event(player, "HMFluidSelector", "CLOSE")
+  self.parent:send_event(player, "HMTechnologySelector", "CLOSE")
   self.parent:send_event(player, "HMSettings", "CLOSE")
   local object = self:getObject(player, event, action, item, item2, item3)
 
@@ -617,7 +621,7 @@ function AbstractEdition.methods:updateFactorySelector(player, item, item2, item
   local category = object.category
   if not(self.player:getSettings(player, "model_filter_factory", true)) then category = nil end
 
-  local factories = self.player:getProductionsCrafting(category)
+  local factories = self.player:getProductionsCrafting(category, object.name)
   Logging:debug(self:classname(), "factories:",factories)
 
 
