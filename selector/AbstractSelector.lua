@@ -318,7 +318,13 @@ function AbstractSelector.methods:on_event(player, event, action, item, item2, i
   end
 
   if action == "recipe-filter" then
-    prototypeFilter = event.element.text
+    if self.player:getSettings(player, "filter_on_text_changed", true) then
+      prototypeFilter = event.element.text
+    else
+      if event.element.parent ~= nil and event.element.parent["filter-text"] ~= nil then
+        prototypeFilter = event.element.parent["filter-text"].text
+      end
+    end
     self:on_update(player, item, item2, item3)
   end
 
@@ -376,7 +382,6 @@ function AbstractSelector.methods:updateFilter(player,item, item2, item3)
   Logging:trace(self:classname(), "updateFilter():", item, item2, item3)
   local globalPlayer = self.player:getGlobal(player)
   local panel = self:getFilterPanel(player)
-  local globalSettings = self.player:getGlobal(player, "settings")
 
   if panel["filter"] == nil then
     local guiFilter = self:addGuiTable(panel, "filter", 2)
@@ -401,7 +406,13 @@ function AbstractSelector.methods:updateFilter(player,item, item2, item3)
     end
 
     self:addGuiLabel(guiFilter, "filter-value", ({"helmod_common.filter"}))
-    self:addGuiText(guiFilter, self:classname().."=recipe-filter=ID=filter-value", prototypeFilter)
+    local cellFilter = self:addGuiFlowH(guiFilter,"text-filter")
+    if self.player:getSettings(player, "filter_on_text_changed", true) then
+      self:addGuiText(cellFilter, self:classname().."=recipe-filter=ID=filter-value", prototypeFilter)
+    else
+      self:addGuiText(cellFilter, "filter-text", prototypeFilter)
+      self:addGuiButton(cellFilter, self:classname().."=recipe-filter=ID=", "filter-value", "helmod_button_default", ({"helmod_button.apply"}))
+    end
 
     self:addGuiLabel(panel, "message", ({"helmod_recipe-edition-panel.message"}))
   else

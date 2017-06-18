@@ -209,6 +209,14 @@ helmod_settings_mod = {
     default_value = false,
     order = "c4"
   },
+  filter_on_text_changed = {
+    type = "bool-setting",
+    setting_type = "runtime-global",
+    localised_name = {"helmod_settings.filter-on-text-changed"},
+    localised_description = {"helmod_settings.filter-on-text-changed-desc"},
+    default_value = false,
+    order = "d0"
+  },
   --model-filter-factory
   model_filter_factory = {
     type = "bool-setting",
@@ -216,7 +224,7 @@ helmod_settings_mod = {
     localised_name = {"helmod_settings.model-filter-factory"},
     localised_description = {"helmod_settings.model-filter-factory-desc"},
     default_value = true,
-    order = "d0"
+    order = "d1"
   },
   --model-filter-beacon
   model_filter_beacon = {
@@ -225,7 +233,7 @@ helmod_settings_mod = {
     localised_name = {"helmod_settings.model-filter-beacon"},
     localised_description = {"helmod_settings.model-filter-beacon-desc"},
     default_value = true,
-    order = "d1"
+    order = "d2"
   },
   --model-filter-factory-module
   model_filter_factory_module = {
@@ -234,7 +242,7 @@ helmod_settings_mod = {
     localised_name = {"helmod_settings.model-filter-factory-module"},
     localised_description = {"helmod_settings.model-filter-factory-module-desc"},
     default_value = true,
-    order = "d2"
+    order = "d3"
   },
   --model-filter-beacon-module
   model_filter_beacon_module = {
@@ -243,7 +251,7 @@ helmod_settings_mod = {
     localised_name = {"helmod_settings.model-filter-beacon-module"},
     localised_description = {"helmod_settings.model-filter-beacon-module-desc"},
     default_value = true,
-    order = "d3"
+    order = "d4"
   },
   --model-filter-generator
   model_filter_generator = {
@@ -252,7 +260,7 @@ helmod_settings_mod = {
     localised_name = {"helmod_settings.model-filter-generator"},
     localised_description = {"helmod_settings.model-filter-generator-desc"},
     default_value = true,
-    order = "d4"
+    order = "d5"
   },
   --properties-tab
   properties_tab = {

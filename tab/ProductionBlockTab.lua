@@ -195,8 +195,8 @@ function ProductionBlockTab.methods:addTableHeader(player, itable)
   self:addCellHeader(player, itable, "name", {"helmod_result-panel.col-header-name"},"name")
   -- data columns
   self:addCellHeader(player, itable, "recipe", {"helmod_result-panel.col-header-recipe"},"index")
-  self:addCellHeader(player, itable, "energy", {"helmod_result-panel.col-header-factory"},"energy_total")
-  self:addCellHeader(player, itable, "factory", {"helmod_result-panel.col-header-output"})
+  self:addCellHeader(player, itable, "energy", {"helmod_result-panel.col-header-energy"},"energy_total")
+  self:addCellHeader(player, itable, "factory", {"helmod_result-panel.col-header-factory"})
   self:addCellHeader(player, itable, "beacon", {"helmod_result-panel.col-header-beacon"})
   self:addCellHeader(player, itable, "products", {"helmod_result-panel.col-header-products"})
   self:addCellHeader(player, itable, "ingredients", {"helmod_result-panel.col-header-ingredients"})
@@ -245,7 +245,7 @@ function ProductionBlockTab.methods:addTableRow(player, guiTable, block, recipe)
   self:addIconRecipeCell(player, guiRecipe, recipe, "HMRecipeEdition=OPEN=ID="..block.id.."="..recipe.id.."=", true, "tooltip.edit-recipe", self.color_button_edit)
 
   -- col energy
-  local guiEnergy = self:addCellLabel(player, guiTable, "energy-"..recipe.id, self:formatNumberKilo(recipe.energy_total, "W"), 50)
+  local guiEnergy = self:addCellLabel(player, guiTable, "energy-"..recipe.id, self:formatNumberKilo(recipe.energy_total, "W"), 55)
 
   -- col factory
   local factory = recipe.factory
