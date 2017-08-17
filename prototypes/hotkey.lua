@@ -2,6 +2,13 @@ data:extend(
   {
     {
       type = "custom-input",
+      name = "helmod-input-valid",
+      key_sequence = "ENTER",
+      consuming = "script-only"
+
+    },
+    {
+      type = "custom-input",
       name = "helmod-open-close",
       key_sequence = "U",
       consuming = "script-only"

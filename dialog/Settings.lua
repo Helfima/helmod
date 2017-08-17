@@ -18,10 +18,7 @@ local dropdown = {}
 --
 function Settings.methods:init(parent)
   self.panelCaption = ({"helmod_settings-panel.title"})
-
   self.parent = parent
-  self.player = self.parent.player
-  self.model = self.parent.model
 end
 
 -------------------------------------------------------------------------------
@@ -29,20 +26,17 @@ end
 --
 -- @function [parent=#Settings] getParentPanel
 --
--- @param #LuaPlayer player
---
 -- @return #LuaGuiElement
 --
-function Settings.methods:getParentPanel(player)
-  return self.parent:getDialogPanel(player)
+function Settings.methods:getParentPanel()
+  return self.parent:getDialogPanel()
 end
 
 -------------------------------------------------------------------------------
 -- On open
 --
--- @function [parent=#Settings] on_open
+-- @function [parent=#Settings] onOpen
 --
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
@@ -51,7 +45,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function Settings.methods:on_open(player, event, action, item, item2, item3)
+function Settings.methods:onOpen(event, action, item, item2, item3)
   -- close si nouvel appel
   return true
 end
@@ -61,14 +55,12 @@ end
 --
 -- @function [parent=#Settings] getAboutSettingsPanel
 --
--- @param #LuaPlayer player
---
-function Settings.methods:getAboutSettingsPanel(player)
-  local panel = self:getPanel(player)
+function Settings.methods:getAboutSettingsPanel()
+  local panel = self:getPanel()
   if panel["about-settings"] ~= nil and panel["about-settings"].valid then
     return panel["about-settings"]
   end
-  return self:addGuiFrameV(panel, "about-settings", "helmod_frame_resize_row_width", ({"helmod_settings-panel.about-section"}))
+  return ElementGui.addGuiFrameV(panel, "about-settings", "helmod_frame_resize_row_width", ({"helmod_settings-panel.about-section"}))
 end
 
 -------------------------------------------------------------------------------
@@ -76,14 +68,12 @@ end
 --
 -- @function [parent=#Settings] getDisplaySettingsPanel
 --
--- @param #LuaPlayer player
---
-function Settings.methods:getDisplaySettingsPanel(player)
-  local panel = self:getPanel(player)
+function Settings.methods:getDisplaySettingsPanel()
+  local panel = self:getPanel()
   if panel["display-settings"] ~= nil and panel["display-settings"].valid then
     return panel["display-settings"]
   end
-  return self:addGuiFrameV(panel, "display-settings", "helmod_frame_resize_row_width", ({"helmod_settings-panel.display-section"}))
+  return ElementGui.addGuiFrameV(panel, "display-settings", "helmod_frame_resize_row_width", ({"helmod_settings-panel.display-section"}))
 end
 
 -------------------------------------------------------------------------------
@@ -91,14 +81,12 @@ end
 --
 -- @function [parent=#Settings] getDataSettingsPanel
 --
--- @param #LuaPlayer player
---
-function Settings.methods:getDataSettingsPanel(player)
-  local panel = self:getPanel(player)
+function Settings.methods:getDataSettingsPanel()
+  local panel = self:getPanel()
   if panel["data-settings"] ~= nil and panel["data-settings"].valid then
     return panel["data-settings"]
   end
-  return self:addGuiFrameV(panel, "data-settings", "helmod_frame_resize_row_width", ({"helmod_settings-panel.data-section"}))
+  return ElementGui.addGuiFrameV(panel, "data-settings", "helmod_frame_resize_row_width", ({"helmod_settings-panel.data-section"}))
 end
 
 -------------------------------------------------------------------------------
@@ -106,14 +94,12 @@ end
 --
 -- @function [parent=#Settings] getModelSettingsPanel
 --
--- @param #LuaPlayer player
---
-function Settings.methods:getModelSettingsPanel(player)
-  local panel = self:getPanel(player)
+function Settings.methods:getModelSettingsPanel()
+  local panel = self:getPanel()
   if panel["model-settings"] ~= nil and panel["model-settings"].valid then
     return panel["model-settings"]
   end
-  return self:addGuiFrameV(panel, "model-settings", "helmod_frame_resize_row_width", ({"helmod_settings-panel.model-section"}))
+  return ElementGui.addGuiFrameV(panel, "model-settings", "helmod_frame_resize_row_width", ({"helmod_settings-panel.model-section"}))
 end
 
 -------------------------------------------------------------------------------
@@ -121,46 +107,43 @@ end
 --
 -- @function [parent=#Settings] getOtherSettingsPanel
 --
--- @param #LuaPlayer player
---
-function Settings.methods:getOtherSettingsPanel(player)
-  local panel = self:getPanel(player)
+function Settings.methods:getOtherSettingsPanel()
+  local panel = self:getPanel()
   if panel["other-settings"] ~= nil and panel["other-settings"].valid then
     return panel["other-settings"]
   end
-  return self:addGuiFrameV(panel, "other-settings", "helmod_frame_resize_row_width", ({"helmod_settings-panel.other-section"}))
+  return ElementGui.addGuiFrameV(panel, "other-settings", "helmod_frame_resize_row_width", ({"helmod_settings-panel.other-section"}))
 end
 
 -------------------------------------------------------------------------------
 -- On event
 --
--- @function [parent=#Settings] on_event
+-- @function [parent=#Settings] onEvent
 --
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Settings.methods:on_event(player, event, action, item, item2, item3)
-  Logging:debug(self:classname(), "on_event():", action, item, item2, item3)
-  local model = self.model:getModel(player)
-  local globalSettings = self.player:getGlobal(player, "settings")
-  local defaultSettings = self.player:getDefaultSettings()
+function Settings.methods:onEvent(event, action, item, item2, item3)
+  Logging:debug(self:classname(), "onEvent():", action, item, item2, item3)
+  local model = Model.getModel()
+  local globalSettings = Player.getGlobal("settings")
+  local defaultSettings = Player.getDefaultSettings()
 
   if action == "change-boolean-settings" then
     if globalSettings[item] == nil then globalSettings[item] = defaultSettings[item] end
     globalSettings[item] = not(globalSettings[item])
-    self.parent:refreshDisplayData(player, item, item2, item3)
+    self.parent:refreshDisplayData(item, item2, item3)
   end
 
   if action == "change-number-settings" then
-    local panel = self:getPanel(player)[item]["settings"]
-    local value = self:getInputNumber(panel[item2])
+    local panel = self:getPanel()[item]["settings"]
+    local value = ElementGui.getInputNumber(panel[item2])
     if globalSettings[item2] ~= value then
       globalSettings[item2] = value
-      self.parent:refreshDisplayData(player, item, item2, item3)
+      self.parent:refreshDisplayData(item, item2, item3)
     end
   end
 
@@ -169,8 +152,8 @@ function Settings.methods:on_event(player, event, action, item, item2, item3)
     if globalSettings[item] == nil then globalSettings[item] = defaultSettings[item] end
     if globalSettings[item] ~= value then
       globalSettings[item] = value
-      self:updateDisplaySettings(player, element, action, item, item2, item3)
-      self.parent:refreshDisplay(player, item, item2, item3)
+      self:updateDisplaySettings(element, action, item, item2, item3)
+      self.parent:refreshDisplay(item, item2, item3)
     end
   end
 
@@ -179,8 +162,8 @@ function Settings.methods:on_event(player, event, action, item, item2, item3)
     if globalSettings[item] == nil then globalSettings[item] = defaultSettings[item] end
     if globalSettings[item] ~= value then
       globalSettings[item] = value
-      self:updateDisplaySettings(player, element, action, item, item2, item3)
-      self.parent:refreshDisplayData(player, item, item2, item3)
+      self:updateDisplaySettings(element, action, item, item2, item3)
+      self.parent:refreshDisplayData(item, item2, item3)
     end
   end
 
@@ -189,8 +172,8 @@ function Settings.methods:on_event(player, event, action, item, item2, item3)
     if globalSettings[item] == nil then globalSettings[item] = defaultSettings[item] end
     if globalSettings[item] ~= value then
       globalSettings[item] = value
-      self:updateDisplaySettings(player, element, action, item, item2, item3)
-      self.parent:refreshDisplayData(player, item, item2, item3)
+      self:updateDisplaySettings(element, action, item, item2, item3)
+      self.parent:refreshDisplayData(item, item2, item3)
     end
   end
 
@@ -199,22 +182,21 @@ end
 -------------------------------------------------------------------------------
 -- After open
 --
--- @function [parent=#Settings] after_open
+-- @function [parent=#Settings] afterOpen
 --
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Settings.methods:after_open(player, event, action, item, item2, item3)
-  self.parent:send_event(player, "HMRecipeEdition", "CLOSE")
-  self.parent:send_event(player, "HMRecipeSelector", "CLOSE")
-  self.parent:send_event(player, "HMProductEdition", "CLOSE")
-  self.parent:send_event(player, "HMEnergyEdition", "CLOSE")
+function Settings.methods:afterOpen(event, action, item, item2, item3)
+  Controller.sendEvent(nil, "HMRecipeEdition", "CLOSE")
+  Controller.sendEvent(nil, "HMRecipeSelector", "CLOSE")
+  Controller.sendEvent(nil, "HMProductEdition", "CLOSE")
+  Controller.sendEvent(nil, "HMEnergyEdition", "CLOSE")
 
-  self:updateAboutSettings(player, event, action, item, item2, item3)
+  self:updateAboutSettings(event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -222,22 +204,21 @@ end
 --
 -- @function [parent=#Settings] updateAboutSettings
 --
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Settings.methods:updateAboutSettings(player, event, action, item, item2, item3)
+function Settings.methods:updateAboutSettings(event, action, item, item2, item3)
   Logging:debug(self:classname(), "updateAboutSettings():", action, item, item2, item3)
 
-  local aboutSettingsPanel = self:getAboutSettingsPanel(player)
+  local aboutSettingsPanel = self:getAboutSettingsPanel()
 
-  local dataSettingsTable = self:addGuiTable(aboutSettingsPanel, "settings", 2)
+  local dataSettingsTable = ElementGui.addGuiTable(aboutSettingsPanel, "settings", 2)
 
-  self:addGuiLabel(dataSettingsTable, self:classname().."=version-label", {"helmod_settings-panel.mod-version"})
-  self:addGuiLabel(dataSettingsTable, self:classname().."=version", game.active_mods["helmod"])
+  ElementGui.addGuiLabel(dataSettingsTable, self:classname().."=version-label", {"helmod_settings-panel.mod-version"})
+  ElementGui.addGuiLabel(dataSettingsTable, self:classname().."=version", game.active_mods["helmod"])
 
-  self:addGuiLabel(aboutSettingsPanel, self:classname().."=info", {"helmod_settings-panel.mod-info"}, "helmod_label_max_250", nil, false)
+  ElementGui.addGuiLabel(aboutSettingsPanel, self:classname().."=info", {"helmod_settings-panel.mod-info"}, "helmod_label_max_250", nil, false)
 end

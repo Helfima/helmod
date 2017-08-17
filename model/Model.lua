@@ -1,51 +1,37 @@
 ------------------------------------------------------------------------------
--- Classe model
---
+-- Description of the module.
 -- @module Model
 --
-Model = setclass("HMModel")
-
--------------------------------------------------------------------------------
--- Initialize model
---
--- @function [parent=#Model] init
---
--- @param #Controller parent parent
---
-function Model.methods:init(parent)
-  self.parent = parent
-  self.player = self.parent.player
-
-  self.capEnergy = -0.8
-  self.capSpeed = -0.8
-
-  self.version = "0.5.4"
-end
+local Model = {
+  -- single-line comment
+  classname = "HMModel",
+  version = "0.5.4",
+  capEnergy = -0.8,
+  capSpeed = -0.8
+}
 
 -------------------------------------------------------------------------------
 -- Get models
 --
 -- @function [parent=#Model] getModels
 --
--- @param #LuaPlayer player
---
 -- @return #table
 --
-function Model.methods:getModels(player)
-  Logging:trace(self:classname(), "getModels():global.models:",global.models)
-  local model_id = self.player:getGlobalGui(player, "model_id")
-  local display_all_sheet = self.player:getSettings(nil, "display_all_sheet", true)
+function Model.getModels()
+  Logging:trace(Model.classname, "getModels():global.models:",global.models)
+  local model_id = Player.getGlobalGui("model_id")
+  local display_all_sheet = Player.getSettings("display_all_sheet", true)
   local first_id = nil
   local reset_model_id = true
   local models = {}
   local global_models = global.models
-  if self:countModel() > 0 then
+  if Model.countModel() > 0 then
     for _,model in pairs(global.models) do
-      if self.player:isAdmin(player) and ( display_all_sheet or model.owner == "admin" ) then
+      if Player.isAdmin() and ( display_all_sheet or model.owner == "admin" ) then
         models[model.id] = model
         if first_id == nil then first_id = model.id end
         if model_id == model.id then reset_model_id = false end
-      elseif model.owner == player.name or (model.share ~= nil and model.share > 0) then
+      elseif model.owner == Player.native().name or (model.share ~= nil and model.share > 0) then
         models[model.id] = model
         if first_id == nil then first_id = model.id end
         if model_id == model.id then reset_model_id = false end
@@ -53,7 +39,7 @@ function Model.methods:getModels(player)
     end
   end
   if reset_model_id == true then
-    self.player:getGlobalGui(player)["model_id"] = first_id
+    Player.getGlobalGui()["model_id"] = first_id
   end
   return models
 end
@@ -63,15 +49,13 @@ end
 --
 -- @function [parent=#Model] newModel
 --
--- @param #LuaPlayer player
---
 -- @return #table
 --
-function Model.methods:newModel(player)
-  Logging:trace(self:classname(), "getModel():",player)
+function Model.newModel()
+  Logging:trace(Model.classname, "getModel()")
   if global.model_id == nil then global.model_id = 1 end
   if global.models == nil then global.models = {} end
-  local owner = player.name
+  local owner = Player.native().name
   if owner == nil or owner == "" then owner = "admin" end
   global.model_id = global.model_id + 1
   local model = {}
@@ -82,10 +66,10 @@ function Model.methods:newModel(player)
   model.resources = {}
   model.powers = {}
   model.time = 1
-  model.version = self.version
+  model.version = Model.version
   global.models[model.id] = model
 
-  self.player:getGlobalGui(player)["model_id"] = model.id
+  Player.getGlobalGui()["model_id"] = model.id
   return model
 end
 
@@ -94,21 +78,19 @@ end
 --
 -- @function [parent=#Model] getModel
 --
--- @param #LuaPlayer player
---
 -- @return #table
 --
-function Model.methods:getModel(player)
-  Logging:trace(self:classname(), "getModel():",player)
-  local model_id = self.player:getGlobalGui(player, "model_id")
+function Model.getModel()
+  Logging:trace(Model.classname, "getModel()")
+  local model_id = Player.getGlobalGui("model_id")
   if model_id == "new" then
-    self:newModel(player)
+    Model.newModel()
   end
 
-  model_id = self.player:getGlobalGui(player, "model_id")
-  local models = self:getModels(player)
+  model_id = Player.getGlobalGui("model_id")
+  local models = Model.getModels()
   local model = models[model_id]
-  if model == nil then return self:newModel(player) end
+  if model == nil then return Model.newModel() end
 
   return model
 end
@@ -118,18 +100,17 @@ end
 --
 -- @function [parent=#Model] removeModel
 --
--- @param #LuaPlayer player
 -- @param #number model_id
 --
-function Model.methods:removeModel(player,model_id)
-  Logging:trace(self:classname(), "removeModel():",player,model_id)
+function Model.removeModel(model_id)
+  Logging:trace(Model.classname, "removeModel():", model_id)
   global.models[model_id] = nil
-  local models = self:getModels(player)
+  local models = Model.getModels()
   local _,model = next(models)
   if model ~= nil then
-    self.player:getGlobalGui(player)["model_id"] = model.id
+    Player.getGlobalGui()["model_id"] = model.id
   else
-    self:newModel(player)
+    Model.newModel()
   end
 end
 
@@ -138,12 +119,11 @@ end
 --
 -- @function [parent=#Model] removePower
 --
--- @param #LuaPlayer player
 -- @param #number power_id
 --
-function Model.methods:removePower(player, power_id)
-  Logging:trace(self:classname(), "removePower():",player, power_id)
-  local model = self:getModel(player)
+function Model.removePower(power_id)
+  Logging:trace(Model.classname, "removePower():", power_id)
+  local model = Model.getModel()
   if model.powers ~= nil then
     model.powers[power_id] = nil
   end
@@ -154,16 +134,15 @@ end
 --
 -- @function [parent=#Model] getObject
 --
--- @param #LuaPlayer player
 -- @param #string item block_id or resource
 -- @param #string key object name
 --
 -- @return #table
 --
-function Model.methods:getObject(player, item, key)
-  Logging:trace(self:classname(), "getObject():",player, item, key)
+function Model.getObject(item, key)
+  Logging:trace(Model.classname, "getObject():", item, key)
   local object = nil
-  local model = self:getModel(player)
+  local model = Model.getModel()
   if item == "resource" then
     object = model.resources[key]
   elseif model.blocks[item] ~= nil and model.blocks[item].recipes[key] ~= nil then
@@ -173,19 +152,38 @@ function Model.methods:getObject(player, item, key)
 end
 
 -------------------------------------------------------------------------------
+-- Get Object
+--
+-- @function [parent=#Model] getObject
+--
+-- @param #string block_id block id
+-- @param #string key object name
+--
+-- @return #Prototype
+--
+function Model.getRecipe(block_id, key)
+  Logging:trace(Model.classname, "getRecipe()", block_id, key)
+  local object = nil
+  local model = Model.getModel()
+  if model.blocks[block_id] ~= nil and model.blocks[block_id].recipes[key] ~= nil then
+    object = model.blocks[block_id].recipes[key]
+  end
+  return RecipePrototype.load(object)
+end
+
+-------------------------------------------------------------------------------
 -- Get power
 --
 -- @function [parent=#Model] getPower
 --
--- @param #LuaPlayer player
 -- @param #string key power id
 --
 -- @return #table
 --
-function Model.methods:getPower(player, key)
-  Logging:trace(self:classname(), "getPower():",player, key)
+function Model.getPower(key)
+  Logging:trace(Model.classname, "getPower():", key)
   local object = nil
-  local model = self:getModel(player)
+  local model = Model.getModel()
   if model.powers ~= nil and model.powers[key] ~= nil then
     object = model.powers[key]
   end
@@ -199,14 +197,13 @@ end
 --
 -- @function [parent=#Model] createProductionBlockModel
 --
--- @param #LuaPlayer player
 -- @param #LuaRecipePrototype recipe
 --
 -- @return #table
 --
-function Model.methods:createProductionBlockModel(player, recipe)
-  Logging:debug(self:classname(), "createProductionBlockModel():",player, recipe)
-  local model = self:getModel(player)
+function Model.createProductionBlockModel(recipe)
+  Logging:debug(Model.classname, "createProductionBlockModel():", recipe)
+  local model = Model.getModel()
 
   if model.block_id == nil then model.block_id = 0 end
   model.block_id = model.block_id + 1
@@ -214,7 +211,7 @@ function Model.methods:createProductionBlockModel(player, recipe)
   local inputModel = {}
   inputModel.id = "block_"..model.block_id
   inputModel.name = recipe.name
-  inputModel.owner = player.name
+  inputModel.owner = Player.native().name
   inputModel.count = 1
   inputModel.power = 0
   inputModel.ingredients = {}
@@ -229,34 +226,24 @@ end
 --
 -- @function [parent=#Model] createBeaconModel
 --
--- @param #LuaPlayer player
 -- @param #string name
 -- @param #number count
 --
 -- @return #table
 --
-function Model.methods:createBeaconModel(player, name, count)
-  Logging:debug(self:classname(), "createBeaconModel():",player, name, count)
-  if name == nil then name = "beacon" end
-  if count == nil then count = 0 end
+function Model.createBeaconModel(name, count)
+  Logging:debug(Model.classname, "createBeaconModel():", name, count)
   local beaconModel = {}
-  beaconModel.name = "beacon"
+  beaconModel.name = name or "beacon"
   beaconModel.type = "item"
-  beaconModel.active = false
-  beaconModel.count = count
-  beaconModel.energy_nominal = 480000
+  beaconModel.count = count or 0
   beaconModel.energy = 0
-  beaconModel.energy_total = 0
   beaconModel.combo = 4
   beaconModel.factory = 1.2
-  beaconModel.efficiency = 0.5
-  beaconModel.module_slots = 2
   -- limit infini = 0
   beaconModel.limit = 0
-  beaconModel.limit_count = count
   -- modules
   beaconModel.modules = {}
-
   return beaconModel
 end
 
@@ -265,33 +252,23 @@ end
 --
 -- @function [parent=#Model] createFactoryModel
 --
--- @param #LuaPlayer player
 -- @param #string name
 -- @param #number count
 --
 -- @return #table
 --
-function Model.methods:createFactoryModel(player, name, count)
-  Logging:debug(self:classname(), "createFactoryModel():",player, name, count)
-  if name == nil then name = "assembling-machine-1" end
-  if count == nil then count = 0 end
-
+function Model.createFactoryModel(name, count)
+  Logging:debug(Model.classname, "createFactoryModel():", name, count)
   local factoryModel = {}
-  factoryModel.name = name
+  factoryModel.name = name or "assembling-machine-1"
   factoryModel.type = "item"
-  factoryModel.count = count
-  factoryModel.energy_nominal = 90000
+  factoryModel.count = count or 0
   factoryModel.energy = 0
-  factoryModel.energy_total = 0
-  factoryModel.speed_nominal = 0.5
   factoryModel.speed = 0
-  factoryModel.module_slots = 0
   -- limit infini = 0
   factoryModel.limit = 0
-  factoryModel.limit_count = count
   -- modules
   factoryModel.modules = {}
-
   return factoryModel
 end
 
@@ -300,13 +277,11 @@ end
 --
 -- @function [parent=#Model] createPowerModel
 --
--- @param #LuaPlayer player
---
 -- @return #table
 --
-function Model.methods:createPowerModel(player)
-  Logging:debug(self:classname(), "createPowerModel():")
-  local model = self.player:getGlobal(player, "model")
+function Model.createPowerModel()
+  Logging:debug(Model.classname, "createPowerModel():")
+  local model = Player.getGlobal("model")
 
   if model.power_id == nil then model.power_id = 0 end
   model.power_id = model.power_id + 1
@@ -325,14 +300,13 @@ end
 --
 -- @function [parent=#Model] createGeneratorModel
 --
--- @param #LuaPlayer player
 -- @param #string name
 -- @param #number count
 --
 -- @return #table
 --
-function Model.methods:createGeneratorModel(player, name, count)
-  Logging:debug(self:classname(), "createGeneratorModel():", name, count)
+function Model.createGeneratorModel(name, count)
+  Logging:debug(Model.classname, "createGeneratorModel():", name, count)
   if name == nil then name = "steam-engine" end
   if count == nil then count = 0 end
 
@@ -359,15 +333,14 @@ end
 --
 -- @function [parent=#Model] createIngredientModel
 --
--- @param #LuaPlayer player
 -- @param #string name
 -- @param #string type
 -- @param #number count
 --
 -- @return #table
 --
-function Model.methods:createIngredientModel(player, name, type, count)
-  Logging:debug(self:classname(), "createIngredientModel():",player, name, count)
+function Model.createIngredientModel(name, type, count)
+  Logging:debug(Model.classname, "createIngredientModel():", name, count)
   if count == nil then count = 0 end
 
   local ingredientModel = {}
@@ -379,7 +352,7 @@ function Model.methods:createIngredientModel(player, name, type, count)
   ingredientModel.recipes = {}
   ingredientModel.resource_category = nil
 
-  local entity = self.player:getEntityPrototype(name)
+  local entity = Player.getEntityPrototype(name)
   if entity ~= nil then
     ingredientModel.resource_category = entity.resource_category
   end
@@ -396,7 +369,7 @@ end
 --
 -- @return #number
 --
-function Model.methods:countModulesModel(element)
+function Model.countModulesModel(element)
   local count = 0
   for name,value in pairs(element.modules) do
     count = count + value
@@ -412,12 +385,12 @@ end
 -- @param #table element
 -- @param #string name
 --
-function Model.methods:addModuleModel(element, name)
+function Model.addModuleModel(element, name)
+  local factory_prototype = EntityPrototype.load(element)
   if element.modules[name] == nil then element.modules[name] = 0 end
-  if self:countModulesModel(element) < element.module_slots then
+  if Model.countModulesModel(element) < factory_prototype.moduleInventorySize() then
     element.modules[name] = element.modules[name] + 1
   end
-  if self:countModulesModel(element) > 0 then element.active = true end
 end
 
 -------------------------------------------------------------------------------
@@ -428,12 +401,11 @@ end
 -- @param #table element
 -- @param #string name
 --
-function Model.methods:removeModuleModel(element, name)
+function Model.removeModuleModel(element, name)
   if element.modules[name] == nil then element.modules[name] = 0 end
   if element.modules[name] > 0 then
     element.modules[name] = element.modules[name] - 1
   end
-  if self:countModulesModel(element) == 0 then element.active = false end
 end
 
 -------------------------------------------------------------------------------
@@ -441,32 +413,26 @@ end
 --
 -- @function [parent=#Model] createRecipeModel
 --
--- @param #LuaPlayer player
 -- @param #string name
--- @param #number count
+-- @param #string type
 --
 -- @return #table
 --
-function Model.methods:createRecipeModel(player, name, count)
-  Logging:debug(self:classname(), "createRecipeModel():",player, name, count)
-  local model = self:getModel(player)
+function Model.createRecipeModel(name, type)
+  Logging:debug(Model.classname, "createRecipeModel():", name, type)
+  local model = Model.getModel()
   if model.recipe_id == nil then model.recipe_id = 0 end
   model.recipe_id = model.recipe_id + 1
-
-  if count == nil then count = 1 end
 
   local recipeModel = {}
   recipeModel.id = "R"..model.recipe_id
   recipeModel.index = 1
-  recipeModel.weight = 0
   recipeModel.name = name
-  recipeModel.count = count
-  recipeModel.energy = 0.5
+  recipeModel.type = type or "recipe"
+  recipeModel.count = 0
   recipeModel.production = 1
-  recipeModel.ingredients = {}
-  recipeModel.products = {}
-  recipeModel.factory = self:createFactoryModel(player)
-  recipeModel.beacon = self:createBeaconModel(player)
+  recipeModel.factory = Model.createFactoryModel()
+  recipeModel.beacon = Model.createBeaconModel()
 
   return recipeModel
 end
@@ -476,15 +442,14 @@ end
 --
 -- @function [parent=#Model] createResourceModel
 --
--- @param #LuaPlayer player
 -- @param #string name
 -- @param #number count
 --
 -- @return #table
 --
-function Model.methods:createResourceModel(player, name, type, count)
-  Logging:debug(self:classname(), "createResourceModel():",player, name, type, count)
-  local model = self:getModel(player)
+function Model.createResourceModel(name, type, count)
+  Logging:debug(Model.classname, "createResourceModel():", name, type, count)
+  local model = Model.getModel()
   if model.resource_id == nil then model.resource_id = 0 end
   model.resource_id = model.resource_id + 1
 
@@ -496,8 +461,8 @@ function Model.methods:createResourceModel(player, name, type, count)
   resourceModel.type = type
   resourceModel.name = name
   resourceModel.count = count
-  resourceModel.factory = self:createFactoryModel(player)
-  resourceModel.beacon = self:createBeaconModel(player)
+  resourceModel.factory = Model.createFactoryModel()
+  resourceModel.beacon = Model.createBeaconModel()
 
   return resourceModel
 end
@@ -507,12 +472,10 @@ end
 --
 -- @function [parent=#Model] countRepices
 --
--- @param #LuaPlayer player
---
 -- @return #number
 --
-function Model.methods:countRepices(player)
-  local model = self:getModel(player)
+function Model.countRepices()
+  local model = Model.getModel()
   local count = 0
   for key, recipe in pairs(model.recipes) do
     count = count + 1
@@ -525,12 +488,10 @@ end
 --
 -- @function [parent=#Model] countIngredients
 --
--- @param #LuaPlayer player
---
 -- @return #number
 --
-function Model.methods:countIngredients(player)
-  local model = self:getModel(player)
+function Model.countIngredients()
+  local model = Model.getModel()
   local count = 0
   for key, recipe in pairs(model.ingredients) do
     count = count + 1
@@ -543,12 +504,10 @@ end
 --
 -- @function [parent=#Model] countBlocks
 --
--- @param #LuaPlayer player
---
 -- @return #number
 --
-function Model.methods:countBlocks(player)
-  local model = self:getModel(player)
+function Model.countBlocks()
+  local model = Model.getModel()
   local count = 0
   for key, recipe in pairs(model.blocks) do
     count = count + 1
@@ -561,12 +520,10 @@ end
 --
 -- @function [parent=#Model] countPowers
 --
--- @param #LuaPlayer player
---
 -- @return #number
 --
-function Model.methods:countPowers(player)
-  local model = self:getModel(player)
+function Model.countPowers()
+  local model = Model.getModel()
   local count = 0
   if model.powers ~= nil then
     for key, recipe in pairs(model.powers) do
@@ -581,14 +538,13 @@ end
 --
 -- @function [parent=#Model] countBlockRecipes
 --
--- @param #LuaPlayer player
 -- @param #string blockId
 --
 -- @return #number
 --
-function Model.methods:countBlockRecipes(player, blockId)
-  Logging:debug(self:classname(), "countBlockRecipes():",player, blockId)
-  local model = self:getModel(player)
+function Model.countBlockRecipes( blockId)
+  Logging:debug(Model.classname, "countBlockRecipes():", blockId)
+  local model = Model.getModel()
   local count = 0
   if model.blocks[blockId] ~= nil then
     for key, recipe in pairs(model.blocks[blockId].recipes) do
@@ -605,7 +561,7 @@ end
 --
 -- @return #number
 --
-function Model.methods:countModel()
+function Model.countModel()
   local count = 0
   if global.models ~= nil then
     for key, element in pairs(global.models) do
@@ -624,7 +580,7 @@ end
 --
 -- @return #number
 --
-function Model.methods:countList(list)
+function Model.countList(list)
   local count = 0
   for key, element in pairs(list) do
     count = count + 1
@@ -637,14 +593,12 @@ end
 --
 -- @function [parent=#Model] checkUnlinkedBlocks
 --
--- @param #LuaPlayer player
---
-function Model.methods:checkUnlinkedBlocks(player)
-  Logging:debug(self:classname(), "checkUnlinkedBlocks():",player)
-  local model = self:getModel(player)
+function Model.checkUnlinkedBlocks()
+  Logging:debug(Model.classname, "checkUnlinkedBlocks()")
+  local model = Model.getModel()
   if model.blocks ~= nil then
     for _,block in spairs(model.blocks,function(t,a,b) return t[b].index > t[a].index end) do
-      self:checkUnlinkedBlock(player, block)
+      Model.checkUnlinkedBlock( block)
     end
   end
 end
@@ -654,19 +608,18 @@ end
 --
 -- @function [parent=#Model] checkUnlinkedBlock
 --
--- @param #LuaPlayer player
 -- @param #table block
 --
-function Model.methods:checkUnlinkedBlock(player, block)
-  Logging:debug(self:classname(), "checkUnlinkedBlock():",player, block)
-  local model = self:getModel(player)
+function Model.checkUnlinkedBlock(block)
+  Logging:debug(Model.classname, "checkUnlinkedBlock():", block)
+  local model = Model.getModel()
   local unlinked = true
-  local recipe = self.player:getRecipe(player, block.name)
+  local recipe = Player.getRecipe(block.name)
   if recipe ~= nil then
     if model.blocks ~= nil then
       for _, current_block in spairs(model.blocks,function(t,a,b) return t[b].index > t[a].index end) do
         if current_block.id == block.id then
-          Logging:debug(self:classname(), "checkUnlinkedBlock():break",block.id)
+          Logging:debug(Model.classname, "checkUnlinkedBlock():break",block.id)
           break
         end
         for _,ingredient in pairs(current_block.ingredients) do
@@ -684,65 +637,63 @@ function Model.methods:checkUnlinkedBlock(player, block)
     block.unlinked = unlinked
   end
 end
+
 -------------------------------------------------------------------------------
 -- Add a recipe into production block
 --
 -- @function [parent=#Model] addRecipeIntoProductionBlock
 --
--- @param #LuaPlayer player
 -- @param #string key recipe name
+-- @param #string type recipe type
 --
-function Model.methods:addRecipeIntoProductionBlock(player, key)
-  Logging:debug(self:classname(), "addRecipeIntoProductionBlock():",player, key)
-  local model = self:getModel(player)
-  local globalGui = self.player:getGlobalGui(player)
+function Model.addRecipeIntoProductionBlock(key, type)
+  Logging:debug(Model.classname, "addRecipeIntoProductionBlock():", key, type)
+  local model = Model.getModel()
+  local globalGui = Player.getGlobalGui()
   local blockId = globalGui.currentBlock
-  local lua_recipe = self.player:getRecipe(player, key)
+  local lua_recipe = RecipePrototype.load(key, type).native()
 
   if lua_recipe ~= nil then
     -- ajoute le bloc si il n'existe pas
     if model.blocks[blockId] == nil then
-      local modelBlock = self:createProductionBlockModel(player, lua_recipe)
-      local index = self:countBlocks(player)
+      local modelBlock = Model.createProductionBlockModel(lua_recipe)
+      local index = Model.countBlocks()
       modelBlock.index = index
-      modelBlock.unlinked = unlinked
+      modelBlock.unlinked = false
       model.blocks[modelBlock.id] = modelBlock
       blockId = modelBlock.id
       globalGui.currentBlock = blockId
       -- check si le block est independant
-      self:checkUnlinkedBlock(player, modelBlock)
+      Model.checkUnlinkedBlock(modelBlock)
     end
 
     -- ajoute le recipe si il n'existe pas
-    local ModelRecipe = self:createRecipeModel(player, lua_recipe.name, 0)
-    local index = self:countBlockRecipes(player, blockId)
-    ModelRecipe.is_resource = not(lua_recipe.force)
-    ModelRecipe.energy = lua_recipe.energy
-    ModelRecipe.category = lua_recipe.category
-    ModelRecipe.group = lua_recipe.group.name
-    ModelRecipe.ingredients = lua_recipe.ingredients
-    ModelRecipe.products = lua_recipe.products
+    local ModelRecipe = Model.createRecipeModel(lua_recipe.name, type)
+    local index = Model.countBlockRecipes(blockId)
     ModelRecipe.index = index
-    self:recipeReset(ModelRecipe)
+    ModelRecipe.count = 1
     -- ajoute les produits du block
-    for _, product in pairs(ModelRecipe.products) do
-      model.blocks[blockId].products[product.name] = product
+    for _, lua_product in pairs(RecipePrototype.getProducts()) do
+      local product = Product.load(lua_product).new()
+      model.blocks[blockId].products[lua_product.name] = product
     end
 
     -- ajoute les ingredients du block
-    for _, ingredient in pairs(ModelRecipe.ingredients) do
-      model.blocks[blockId].ingredients[ingredient.name] = ingredient
+    for _, lua_ingredient in pairs(RecipePrototype.getIngredients()) do
+      local ingredient = Product.load(lua_ingredient).new()
+      model.blocks[blockId].ingredients[lua_ingredient.name] = ingredient
     end
     model.blocks[blockId].recipes[ModelRecipe.id] = ModelRecipe
 
-    local defaultFactory = self:getDefaultRecipeFactory(player, lua_recipe.name)
+    local defaultFactory = Model.getDefaultPrototypeFactory(RecipePrototype.getCategory(), lua_recipe.name)
     if defaultFactory ~= nil then
-      self:setFactory(player, blockId, ModelRecipe.id, defaultFactory)
+      Model.setFactory(blockId, ModelRecipe.id, defaultFactory)
     end
-    local defaultBeacon = self:getDefaultRecipeBeacon(player, lua_recipe.name)
+    local defaultBeacon = Model.getDefaultRecipeBeacon(lua_recipe.name)
     if defaultBeacon ~= nil then
-      self:setBeacon(player, blockId, ModelRecipe.id, defaultBeacon)
+      Model.setBeacon(blockId, ModelRecipe.id, defaultBeacon)
     end
+    Logging:debug(Model.classname, "addRecipeIntoProductionBlock()", model.blocks[blockId])
     return model.blocks[blockId]
   end
 end
@@ -752,29 +703,28 @@ end
 --
 -- @function [parent=#Model] addPrimaryPower
 --
--- @param #LuaPlayer player
 -- @param #string power_id power id
 -- @param #string key generator name
 --
-function Model.methods:addPrimaryPower(player, power_id, key)
-  Logging:debug(self:classname(), "addPrimaryPower():", power_id, key)
-  local model = self:getModel(player)
+function Model.addPrimaryPower(power_id, key)
+  Logging:debug(Model.classname, "addPrimaryPower():", power_id, key)
+  local model = Model.getModel()
   if model.powers == nil then model.powers = {} end
   local power = model.powers[power_id]
   if power == nil then
-    power = self:createPowerModel(player)
+    power = Model.createPowerModel()
     power_id = power.id
-    power.primary = self:createGeneratorModel(player, key, 1)
+    power.primary = Model.createGeneratorModel(key, 1)
     model.powers[power_id] = power
   end
 
   -- ajuste les donnees
   -- @see https://wiki.factorio.com/Power_production
-  local classification = self.player:getEntityProperty(key, "type")
+  local classification = Player.getEntityProperty(key, "type")
   if classification == "generator" then
-    local fluid_usage = self.player:getEntityProperty(key, "fluid_usage_per_tick") or 0.1
-    local effectivity = self.player:getEntityProperty(key, "effectivity") or 1
-    local maximum_temperature = self.player:getEntityProperty(key, "maximum_temperature") or 165
+    local fluid_usage = Player.getEntityProperty(key, "fluid_usage_per_tick") or 0.1
+    local effectivity = Player.getEntityProperty(key, "effectivity") or 1
+    local maximum_temperature = Player.getEntityProperty(key, "maximum_temperature") or 165
     power.primary.name = key
     power.primary.fluid_usage = fluid_usage
     power.primary.effectivity = effectivity
@@ -785,7 +735,7 @@ function Model.methods:addPrimaryPower(player, power_id, key)
   end
 
   if classification == "solar-panel" then
-    local production = self.player:getItemProperty(key, "production") or 60*1000
+    local production = Player.getItemProperty(key, "production") or 60*1000
     local effectivity = 1
     power.primary.name = key
     power.primary.fluid_usage = 0
@@ -802,29 +752,28 @@ end
 --
 -- @function [parent=#Model] addSecondaryPower
 --
--- @param #LuaPlayer player
 -- @param #string power_id power id
 -- @param #string key generator name
 --
-function Model.methods:addSecondaryPower(player, power_id, key)
-  Logging:debug(self:classname(), "addSecondaryPower():",player, key)
-  local model = self:getModel(player)
+function Model.addSecondaryPower(power_id, key)
+  Logging:debug(Model.classname, "addSecondaryPower():", key)
+  local model = Model.getModel()
   if model.powers == nil then model.powers = {} end
   local power = model.powers[power_id]
   if power == nil then
-    power = self:createPowerModel(player)
+    power = Model.createPowerModel()
     power_id = power.id
     model.powers[power_id] = power
   end
   if power.secondary == nil or power.secondary.name == nil then
-    power.secondary = self:createGeneratorModel(player, key, 1)
+    power.secondary = Model.createGeneratorModel(key, 1)
   end
   -- ajuste les donnees
   -- @see https://wiki.factorio.com/Power_production
-  local classification = self.player:getEntityProperty(key, "type")
+  local classification = Player.getEntityProperty(key, "type")
   if classification == "boiler" then
-    local energy_consumption = self.player:getEntityProperty(key, "max_energy_usage") or 0
-    local effectivity = self.player:getEntityProperty(key, "electric_energy_source_prototype.effectivity") or 0.5
+    local energy_consumption = Player.getEntityProperty(key, "max_energy_usage") or 0
+    local effectivity = Player.getEntityProperty(key, "electric_energy_source_prototype.effectivity") or 0.5
     power.secondary.name = key
     power.secondary.fluid_usage = 0
     power.secondary.energy_nominal = energy_consumption
@@ -835,9 +784,9 @@ function Model.methods:addSecondaryPower(player, power_id, key)
   end
 
   if classification == "accumulator" then
-    local buffer_capacity = self.player:getEntityProperty(key, "electric_energy_source_prototype.buffer_capacity") or 5*1000*1000
-    local input_flow_limit = self.player:getEntityProperty(key, "electric_energy_source_prototype.input_flow_limit") or 5*1000
-    local output_flow_limit = self.player:getEntityProperty(key, "electric_energy_source_prototype.output_flow_limit") or 5*1000
+    local buffer_capacity = Player.getEntityProperty(key, "electric_energy_source_prototype.buffer_capacity") or 5*1000*1000
+    local input_flow_limit = Player.getEntityProperty(key, "electric_energy_source_prototype.input_flow_limit") or 5*1000
+    local output_flow_limit = Player.getEntityProperty(key, "electric_energy_source_prototype.output_flow_limit") or 5*1000
     power.secondary.name = key
     power.secondary.fluid_usage = 0
     power.secondary.effectivity = nil
@@ -855,14 +804,13 @@ end
 --
 -- @function [parent=#Model] updateProduct
 --
--- @param #LuaPlayer player
 -- @param #string blockId production block id
 -- @param #string key product name
 -- @param #number quantity
 --
-function Model.methods:updateProduct(player, blockId, key, quantity)
-  Logging:debug(self:classname(), "updateProduct():",player, blockId, key, quantity)
-  local model = self:getModel(player)
+function Model.updateProduct(blockId, key, quantity)
+  Logging:debug(Model.classname, "updateProduct():", blockId, key, quantity)
+  local model = Model.getModel()
 
   if model.blocks[blockId] ~= nil then
     local block = model.blocks[blockId]
@@ -876,14 +824,13 @@ end
 --
 -- @function [parent=#Model] updateProductionBlockOption
 --
--- @param #LuaPlayer player
 -- @param #string blockId production block id
 -- @param #string option
 -- @param #number value
 --
-function Model.methods:updateProductionBlockOption(player, blockId, option, value)
-  Logging:debug(self:classname(), "updateProductionBlockOption():",player, blockId, option, value)
-  local model = self:getModel(player)
+function Model.updateProductionBlockOption(blockId, option, value)
+  Logging:debug(Model.classname, "updateProductionBlockOption():", blockId, option, value)
+  local model = Model.getModel()
 
   if model.blocks[blockId] ~= nil then
     local block = model.blocks[blockId]
@@ -896,24 +843,18 @@ end
 --
 -- @function [parent=#Model] setBeacon
 --
--- @param #LuaPlayer player
 -- @param #string item block_id or resource
 -- @param #string key object name
 -- @param #string name beacon name
 --
-function Model.methods:setBeacon(player, item, key, name)
-  local object = self:getObject(player, item, key)
+function Model.setBeacon(item, key, name)
+  local object = Model.getObject(item, key)
   if object ~= nil then
-    local beacon = self.player:getEntityPrototype(name)
+    local beacon = Player.getEntityPrototype(name)
     if beacon ~= nil then
       -- set global default
-      self:setDefaultRecipeBeacon(player, item, key, beacon.name)
-
+      Model.setDefaultRecipeBeacon(item, key, beacon.name)
       object.beacon.name = beacon.name
-      -- copy the default parameters
-      object.beacon.energy_nominal = self.player:getEntityProperty(beacon.name, "energy_usage")
-      object.beacon.module_slots = self.player:getEntityProperty(beacon.name, "module_slots")
-      object.beacon.efficiency = self.player:getItemProperty(beacon.name, "efficiency")
     end
   end
 end
@@ -923,28 +864,18 @@ end
 --
 -- @function [parent=#Model] updateBeacon
 --
--- @param #LuaPlayer player
 -- @param #string item block_id or resource
 -- @param #string key object name
 -- @param #table options map attribute/valeur
 --
-function Model.methods:updateBeacon(player, item, key, options)
-  local object = self:getObject(player, item, key)
+function Model.updateBeacon(item, key, options)
+  local object = Model.getObject(item, key)
   if object ~= nil then
-    if options.energy_nominal ~= nil then
-      object.beacon.energy_nominal = options.energy_nominal
-    end
     if options.combo ~= nil then
       object.beacon.combo = options.combo
     end
     if options.factory ~= nil then
       object.beacon.factory = options.factory
-    end
-    if options.efficiency ~= nil then
-      object.beacon.efficiency = options.efficiency
-    end
-    if options.module_slots ~= nil then
-      object.beacon.module_slots = options.module_slots
     end
   end
 end
@@ -954,15 +885,14 @@ end
 --
 -- @function [parent=#Model] addBeaconModule
 --
--- @param #LuaPlayer player
 -- @param #string item
 -- @param #string key object name
 -- @param #string name module name
 --
-function Model.methods:addBeaconModule(player, item, key, name)
-  local object = self:getObject(player, item, key)
+function Model.addBeaconModule(item, key, name)
+  local object = Model.getObject(item, key)
   if object ~= nil then
-    self:addModuleModel(object.beacon, name)
+    Model.addModuleModel(object.beacon, name)
   end
 end
 
@@ -971,15 +901,14 @@ end
 --
 -- @function [parent=#Model] removeBeaconModule
 --
--- @param #LuaPlayer player
 -- @param #string item
 -- @param #string key object name
 -- @param #string name module name
 --
-function Model.methods:removeBeaconModule(player, item, key, name)
-  local object = self:getObject(player, item, key)
+function Model.removeBeaconModule(item, key, name)
+  local object = Model.getObject(item, key)
   if object ~= nil then
-    self:removeModuleModel(object.beacon, name)
+    Model.removeModuleModel(object.beacon, name)
   end
 end
 
@@ -988,37 +917,17 @@ end
 --
 -- @function [parent=#Model] setFactory
 --
--- @param #LuaPlayer player
 -- @param #string item block_id or resource
 -- @param #string key object name
 -- @param #string name factory name
 --
-function Model.methods:setFactory(player, item, key, name)
-  Logging:debug(self:classname(), "setFactory():", item, key, name)
-  local object = self:getObject(player, item, key)
+function Model.setFactory(item, key, name)
+  Logging:debug(Model.classname, "setFactory():", item, key, name)
+  local object = Model.getObject(item, key)
   if object ~= nil then
-    local factory = self.player:getEntityPrototype(name)
+    local factory = Player.getEntityPrototype(name)
     if factory ~= nil then
-
       object.factory.name = factory.name
-      --object.factory.type = factory.type
-
-      object.factory.energy_nominal = self.player:getEntityProperty(factory.name, "energy_usage")
-
-      object.factory.module_slots = self.player:getEntityProperty(factory.name, "module_slots")
-      local speed_nominal = self.player:getEntityProperty(factory.name, "crafting_speed")
-      local mining_speed = self.player:getEntityProperty(factory.name, "mining_speed")
-      local mining_power = self.player:getEntityProperty(factory.name, "mining_power")
-      if mining_speed ~= 0 and mining_power ~= 0 then
-        local hardness = self.player:getEntityProperty(object.name, "mineable_properties.hardness")
-        local mining_time = self.player:getEntityProperty(object.name, "mineable_properties.mining_time")
-        -- (mining power - ore mining hardness) * mining speed
-        -- @see https://wiki.factorio.com/Mining
-        if mining_time ~= 0 then
-          speed_nominal = (mining_power - hardness) * mining_speed / mining_time
-        end
-      end
-      object.factory.speed_nominal = speed_nominal
     end
   end
 end
@@ -1028,14 +937,13 @@ end
 --
 -- @function [parent=#Model] updateObject
 --
--- @param #LuaPlayer player
 -- @param #string item block_id or resource
 -- @param #string key object name
 -- @param #table options
 --
-function Model.methods:updateObject(player, item, key, options)
-  Logging:debug(self:classname(), "updateObject():",player, item, key, options)
-  local object = self:getObject(player, item, key)
+function Model.updateObject(item, key, options)
+  Logging:debug(Model.classname, "updateObject():", item, key, options)
+  local object = Model.getObject(item, key)
   if object ~= nil then
     if options.production ~= nil then
       object.production = options.production
@@ -1048,17 +956,16 @@ end
 --
 -- @function [parent=#Model] updatePower
 --
--- @param #LuaPlayer player
 -- @param #string key power id
 -- @param #table options
 --
-function Model.methods:updatePower(player, key, options)
-  Logging:debug(self:classname(), "updatePower():",player, options)
-  local object = self:getPower(player, key)
+function Model.updatePower(key, options)
+  Logging:debug(Model.classname, "updatePower():", options)
+  local object = Model.getPower(key)
   if object ~= nil then
     if options.power ~= nil then
       object.power = options.power*1000000
-      self:computePower(player, key)
+      Model.computePower(key)
     end
   end
 end
@@ -1068,27 +975,15 @@ end
 --
 -- @function [parent=#Model] updateFactory
 --
--- @param #LuaPlayer player
 -- @param #string item block_id or resource
 -- @param #string key object name
 -- @param #table options
 --
-function Model.methods:updateFactory(player, item, key, options)
-  Logging:debug(self:classname(), "updateFactory():",player, item, key, options)
-  local object = self:getObject(player, item, key)
+function Model.updateFactory(item, key, options)
+  Logging:debug(Model.classname, "updateFactory():", item, key, options)
+  local object = Model.getObject(item, key)
   if object ~= nil then
-    if options.energy_nominal ~= nil then
-      object.factory.energy_nominal = options.energy_nominal
-    end
-    if options.speed_nominal ~= nil then
-      object.factory.speed_nominal = options.speed_nominal
-    end
-    if options.module_slots ~= nil then
-      object.factory.module_slots = options.module_slots
-    end
-    if options.limit ~= nil then
-      object.factory.limit = options.limit
-    end
+    object.factory.limit = options.limit or 0
   end
 end
 
@@ -1097,15 +992,14 @@ end
 --
 -- @function [parent=#Model] addFactoryModule
 --
--- @param #LuaPlayer player
 -- @param #string item
 -- @param #string key object name
 -- @param #string name module name
 --
-function Model.methods:addFactoryModule(player, item, key, name)
-  local object = self:getObject(player, item, key)
+function Model.addFactoryModule(item, key, name)
+  local object = Model.getObject(item, key)
   if object ~= nil then
-    self:addModuleModel(object.factory, name)
+    Model.addModuleModel(object.factory, name)
   end
 end
 
@@ -1114,15 +1008,14 @@ end
 --
 -- @function [parent=#Model] removeFactoryModule
 --
--- @param #LuaPlayer player
 -- @param #string item
 -- @param #string key object name
 -- @param #string name module name
 --
-function Model.methods:removeFactoryModule(player, item, key, name)
-  local object = self:getObject(player, item, key)
+function Model.removeFactoryModule(item, key, name)
+  local object = Model.getObject(item, key)
   if object ~= nil then
-    self:removeModuleModel(object.factory, name)
+    Model.removeModuleModel(object.factory, name)
   end
 end
 
@@ -1131,15 +1024,14 @@ end
 --
 -- @function [parent=#Model] removeProductionBlock
 --
--- @param #LuaPlayer player
 -- @param #string blockId
 --
-function Model.methods:removeProductionBlock(player, blockId)
-  Logging:debug(self:classname(), "removeProductionBlock()",player, blockId)
-  local model = self:getModel(player)
+function Model.removeProductionBlock(blockId)
+  Logging:debug(Model.classname, "removeProductionBlock()", blockId)
+  local model = Model.getModel()
   if model.blocks[blockId] ~= nil then
     model.blocks[blockId] = nil
-    self:reIndexList(model.blocks)
+    Model.reIndexList(model.blocks)
   end
 end
 
@@ -1148,18 +1040,17 @@ end
 --
 -- @function [parent=#Model] removeProductionRecipe
 --
--- @param #LuaPlayer player
 -- @param #string blockId
 -- @param #string key
 --
-function Model.methods:removeProductionRecipe(player, blockId, key)
-  Logging:debug(self:classname(), "removeProductionRecipe()",player, blockId, key)
-  local model = self:getModel(player)
+function Model.removeProductionRecipe(blockId, key)
+  Logging:debug(Model.classname, "removeProductionRecipe()", blockId, key)
+  local model = Model.getModel()
   if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
     model.blocks[blockId].recipes[key] = nil
-    self:reIndexList(model.blocks[blockId].recipes)
+    Model.reIndexList(model.blocks[blockId].recipes)
     -- change block name
-    local first_recipe = self:firstRecipe(model.blocks[blockId].recipes)
+    local first_recipe = Model.firstRecipe(model.blocks[blockId].recipes)
     if first_recipe ~= nil then
       model.blocks[blockId].name = first_recipe.name
     end
@@ -1173,8 +1064,8 @@ end
 --
 -- @param #table list
 --
-function Model.methods:reIndexList(list)
-  Logging:debug(self:classname(), "reIndexList()",list)
+function Model.reIndexList(list)
+  Logging:debug(Model.classname, "reIndexList()",list)
   local index = 0
   for _,element in spairs(list,function(t,a,b) return t[b].index > t[a].index end) do
     element.index = index
@@ -1187,12 +1078,11 @@ end
 --
 -- @function [parent=#Model] unlinkProductionBlock
 --
--- @param #LuaPlayer player
 -- @param #string blockId
 --
-function Model.methods:unlinkProductionBlock(player, blockId)
-  Logging:debug(self:classname(), "unlinkProductionBlock()",player, blockId)
-  local model = self:getModel(player)
+function Model.unlinkProductionBlock(blockId)
+  Logging:debug(Model.classname, "unlinkProductionBlock()", blockId)
+  local model = Model.getModel()
   if model.blocks[blockId] ~= nil then
     model.blocks[blockId].unlinked = not(model.blocks[blockId].unlinked)
   end
@@ -1203,15 +1093,14 @@ end
 --
 -- @function [parent=#Model] upProductionBlock
 --
--- @param #LuaPlayer player
 -- @param #string blockId
 -- @param #number step
 --
-function Model.methods:upProductionBlock(player, blockId, step)
-  Logging:debug(self:classname(), "upProductionBlock()", blockId, step)
-  local model = self:getModel(player)
+function Model.upProductionBlock(blockId, step)
+  Logging:debug(Model.classname, "upProductionBlock()", blockId, step)
+  local model = Model.getModel()
   if model.blocks[blockId] ~= nil then
-    self:upProductionList(player, model.blocks, model.blocks[blockId].index, step)
+    Model.upProductionList(model.blocks, model.blocks[blockId].index, step)
   end
 end
 
@@ -1220,18 +1109,17 @@ end
 --
 -- @function [parent=#Model] upProductionRecipe
 --
--- @param #LuaPlayer player
 -- @param #string blockId
 -- @param #string key
 -- @param #number step
 --
-function Model.methods:upProductionRecipe(player, blockId, key, step)
-  Logging:debug(self:classname(), "upProductionRecipe()", blockId, key, step)
-  local model = self:getModel(player)
+function Model.upProductionRecipe(blockId, key, step)
+  Logging:debug(Model.classname, "upProductionRecipe()", blockId, key, step)
+  local model = Model.getModel()
   if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
-    self:upProductionList(player, model.blocks[blockId].recipes, model.blocks[blockId].recipes[key].index, step)
+    Model.upProductionList(model.blocks[blockId].recipes, model.blocks[blockId].recipes[key].index, step)
     -- change block name
-    local first_recipe = self:firstRecipe(model.blocks[blockId].recipes)
+    local first_recipe = Model.firstRecipe(model.blocks[blockId].recipes)
     if first_recipe ~= nil then
       model.blocks[blockId].name = first_recipe.name
     end
@@ -1243,14 +1131,13 @@ end
 --
 -- @function [parent=#Model] upProductionList
 --
--- @param #LuaPlayer player
 -- @param #table list
 -- @param #number index
 -- @param #number step
 --
-function Model.methods:upProductionList(player, list, index, step)
-  Logging:debug(self:classname(), "upProductionList()", list, index, step)
-  local model = self:getModel(player)
+function Model.upProductionList(list, index, step)
+  Logging:debug(Model.classname, "upProductionList()", list, index, step)
+  local model = Model.getModel()
   if list ~= nil and index > 0 then
     -- defaut step
     if step == nil then step = 1 end
@@ -1273,15 +1160,14 @@ end
 --
 -- @function [parent=#Model] downProductionBlock
 --
--- @param #LuaPlayer player
 -- @param #string blockId
 -- @param #number step
 --
-function Model.methods:downProductionBlock(player, blockId, step)
-  Logging:debug(self:classname(), "downProductionBlock()", blockId, step)
-  local model = self:getModel(player)
+function Model.downProductionBlock(blockId, step)
+  Logging:debug(Model.classname, "downProductionBlock()", blockId, step)
+  local model = Model.getModel()
   if model.blocks[blockId] ~= nil then
-    self:downProductionList(player, model.blocks, model.blocks[blockId].index, step)
+    Model.downProductionList(model.blocks, model.blocks[blockId].index, step)
   end
 end
 
@@ -1290,18 +1176,17 @@ end
 --
 -- @function [parent=#Model] downProductionRecipe
 --
--- @param #LuaPlayer player
 -- @param #string blockId
 -- @param #string key
 -- @param #number step
 --
-function Model.methods:downProductionRecipe(player, blockId, key, step)
-  Logging:debug(self:classname(), "downProductionRecipe()", blockId, key, step)
-  local model = self:getModel(player)
+function Model.downProductionRecipe(blockId, key, step)
+  Logging:debug(Model.classname, "downProductionRecipe()", blockId, key, step)
+  local model = Model.getModel()
   if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
-    self:downProductionList(player, model.blocks[blockId].recipes, model.blocks[blockId].recipes[key].index, step)
+    Model.downProductionList(model.blocks[blockId].recipes, model.blocks[blockId].recipes[key].index, step)
     -- change block name
-    local first_recipe = self:firstRecipe(model.blocks[blockId].recipes)
+    local first_recipe = Model.firstRecipe(model.blocks[blockId].recipes)
     if first_recipe ~= nil then
       model.blocks[blockId].name = first_recipe.name
     end
@@ -1313,17 +1198,16 @@ end
 --
 -- @function [parent=#Model] downProductionList
 --
--- @param #LuaPlayer player
 -- @param #table list
 -- @param #number index
 -- @param #number step
 --
-function Model.methods:downProductionList(player, list, index, step)
-  Logging:debug(self:classname(), "downProductionList()", list, index, step)
-  local model = self:getModel(player)
-  local list_count = self:countList(list)
-  Logging:debug(self:classname(), "downProductionList()", list_count)
-  if list ~= nil and index + 1 < self:countList(list) then
+function Model.downProductionList(list, index, step)
+  Logging:debug(Model.classname, "downProductionList()", list, index, step)
+  local model = Model.getModel()
+  local list_count = Model.countList(list)
+  Logging:debug(Model.classname, "downProductionList()", list_count)
+  if list ~= nil and index + 1 < Model.countList(list) then
     -- defaut step
     if step == nil then step = 1 end
     -- cap le step
@@ -1332,7 +1216,7 @@ function Model.methods:downProductionList(player, list, index, step)
       if element.index == index then
         -- change l'index de l'element cible
         element.index = element.index + step
-        Logging:debug(self:classname(), "index element", element.index, element.index + step)
+        Logging:debug(Model.classname, "index element", element.index, element.index + step)
       elseif element.index > index and element.index <= index + step then
         -- change les index compris entre index et la fin
         element.index = element.index - 1
@@ -1346,13 +1230,11 @@ end
 --
 -- @function [parent=#Model] recipesReset
 --
--- @param #LuaPlayer player
---
-function Model.methods:recipesReset(player)
-  Logging:debug(self:classname(), "recipesReset")
-  local model = self:getModel(player)
+function Model.recipesReset()
+  Logging:debug(Model.classname, "recipesReset")
+  local model = Model.getModel()
   for key, recipe in pairs(model.recipes) do
-    self:recipeReset(recipe)
+    Model.recipeReset(recipe)
   end
 end
 
@@ -1363,13 +1245,17 @@ end
 --
 -- @param #ModelRecipe recipe
 --
-function Model.methods:recipeReset(recipe)
-  Logging:debug(self:classname(), "recipeReset=",recipe)
-  for index, product in pairs(recipe.products) do
-    product.count = 0
+function Model.recipeReset(recipe)
+  Logging:debug(Model.classname, "recipeReset=",recipe)
+  if recipe.products ~= nil then
+    for index, product in pairs(recipe.products) do
+      product.count = 0
+    end
   end
-  for index, ingredient in pairs(recipe.ingredients) do
-    ingredient.count = 0
+  if recipe.ingredients ~= nil then
+    for index, ingredient in pairs(recipe.ingredients) do
+      ingredient.count = 0
+    end
   end
 end
 
@@ -1378,11 +1264,9 @@ end
 --
 -- @function [parent=#Model] ingredientsReset
 --
--- @param #LuaPlayer player
---
-function Model.methods:ingredientsReset(player)
-  Logging:debug(self:classname(), "ingredientsReset()", player)
-  local model = self:getModel(player)
+function Model.ingredientsReset()
+  Logging:debug(Model.classname, "ingredientsReset()", player)
+  local model = Model.getModel()
   for k, ingredient in pairs(model.ingredients) do
     model.ingredients[ingredient.name].count = 0;
   end
@@ -1393,23 +1277,21 @@ end
 --
 -- @function [parent=#Model] update
 --
--- @param #LuaPlayer player
---
-function Model.methods:update(player)
-  Logging:debug(self:classname() , "********** update():",player)
+function Model.update()
+  Logging:debug(Model.classname , "********** update()")
 
-  local model = self:getModel(player)
+  local model = Model.getModel()
 
   -- reset all factories
-  if model ~= nil and (model.version == nil or model.version ~= self.version) then
-    Logging:debug(self:classname() , "********** version",self.version)
+  if model ~= nil and (model.version == nil or model.version ~= Model.version) then
+    Logging:debug(Model.classname , "********** version",Model.version)
     if model.version == nil or model.version < "0.4.4" then
       model.resources = {}
-      Logging:debug(self:classname() , "********** updated version 0.4.4")
+      Logging:debug(Model.classname , "********** updated version 0.4.4")
     end
     if model.version == nil or model.version < "0.4.6.1" then
-      self:checkUnlinkedBlocks(player)
-      Logging:debug(self:classname() , "********** updated version 0.4.6.1")
+      Model.checkUnlinkedBlocks()
+      Logging:debug(Model.classname , "********** updated version 0.4.6.1")
     end
     if model.version == nil or model.version < "0.5.4" then
       for _, productBlock in pairs(model.blocks) do
@@ -1428,16 +1310,16 @@ function Model.methods:update(player)
           productBlock.input[key] = quantity or 0
         end
       end
-      Logging:debug(self:classname() , "********** updated version 0.5.4")
+      Logging:debug(Model.classname , "********** updated version 0.5.4")
     end
     if model.blocks ~= nil then
       for _, productBlock in pairs(model.blocks) do
         for _, recipe in pairs(productBlock.recipes) do
           local factory = recipe.factory
           local beacon = recipe.beacon
-          local _recipe = self.player:getRecipe(player, recipe.name)
-          self:setFactory(player, productBlock.id, recipe.name, factory.name)
-          self:setBeacon(player, productBlock.id, recipe.name, beacon.name)
+          local _recipe = Player.getRecipe(recipe.name)
+          Model.setFactory(productBlock.id, recipe.name, factory.name)
+          Model.setBeacon(productBlock.id, recipe.name, beacon.name)
           if _recipe ~= nil then
             recipe.is_resource = not(_recipe.force)
             if recipe.is_resource then recipe.category = "extraction-machine" end
@@ -1450,24 +1332,25 @@ function Model.methods:update(player)
   if model.blocks ~= nil then
     -- calcul les blocks
     local input = {}
-    for _, productBlock in spairs(model.blocks, function(t,a,b) return t[b].index > t[a].index end) do
+    for _, block in spairs(model.blocks, function(t,a,b) return t[b].index > t[a].index end) do
       -- premiere recette
-      local _,recipe = next(productBlock.recipes)
+      local _,recipe = next(block.recipes)
       if recipe ~= nil then
-        if not(productBlock.unlinked) then
-          for _,product in pairs(recipe.products) do
+        local lua_recipe = RecipePrototype.load(recipe).native()
+        if not(block.unlinked) and RecipePrototype.getProducts() ~= nil then
+          for _,product in pairs(RecipePrototype.getProducts()) do
             if input[product.name] ~= nil then
               -- block linked
-              if productBlock.input == nil then productBlock.input = {} end
-              productBlock.input[product.name] = input[product.name]
+              if block.input == nil then block.input = {} end
+              block.input[product.name] = input[product.name]
             end
           end
         end
 
-        self:computeProductionBlock(player, productBlock)
+        Model.computeBlock(block)
 
         -- compte les ingredients
-        for _,ingredient in pairs(productBlock.ingredients) do
+        for _,ingredient in pairs(block.ingredients) do
           if input[ingredient.name] == nil then
             input[ingredient.name] = ingredient.count
           else
@@ -1475,7 +1358,7 @@ function Model.methods:update(player)
           end
         end
         -- consomme les ingredients
-        for _,product in pairs(productBlock.products) do
+        for _,product in pairs(block.products) do
           if input[product.name] ~= nil then
             input[product.name] = input[product.name] - product.count
           end
@@ -1484,220 +1367,223 @@ function Model.methods:update(player)
     end
 
 
-    self:computeInputOutput(player)
+    Model.computeInputOutput()
 
-    self:computeResources(player)
+    Model.computeResources()
 
-    Logging:debug(self:classname(), "update():","Factory compute OK")
+    Logging:debug(Model.classname, "update():","Factory compute OK")
     -- genere un bilan
-    self:createSummary(player)
-    Logging:debug(self:classname(), "update():","Summary OK")
+    Model.createSummary()
+    Logging:debug(Model.classname, "update():","Summary OK")
 
-    Logging:debug(self:classname() , "********** model updated:",model)
+    Logging:debug(Model.classname , "********** model updated:",model)
   end
-  model.version = self.version
+  model.version = Model.version
 end
 
 -------------------------------------------------------------------------------
--- Get amount of element
+-- Compute recipe block
 --
--- @function [parent=#Model] getElementAmount
+-- @function [parent=#Model] computeBlockRecipe
 --
--- @param #table element
+-- @param #table element production block model
 --
--- @return #number
---
--- @see http://lua-api.factorio.com/latest/Concepts.html#Product
---
-function Model.methods:getElementAmount(element)
-  Logging:debug(self:classname(), "getElementAmount",element)
-  if element == nil then return 0 end
+function Model.computeBlockRecipe(block, recipe)
+  Logging:debug(Model.classname, "computeBlockRecipe()", block.name, recipe.name, recipe.type)
+  if recipe ~= nil then
+    local lua_recipe = RecipePrototype.load(recipe).native()
 
-  if element.amount ~= nil then
-    return element.amount
+    local production = 1
+    if recipe.production ~= nil then production = recipe.production end
+
+    -- recipe classique
+    -- prepare le recipe
+    for _, lua_product in pairs(RecipePrototype.getProducts()) do
+      if block.ingredients[lua_product.name] ~= nil then
+        local product = Product.load(lua_product).new()
+        local p_amount = Product.getAmount(recipe)
+        local count = block.ingredients[lua_recipe.name].count*production / p_amount
+        if recipe.count < count then recipe.count = count end
+      end
+    end
+    Logging:debug(Model.classname, "recipe.count=", recipe.count)
+
+    -- compute ingredients
+    for k, lua_ingredient in pairs(RecipePrototype.getIngredients()) do
+      local ingredient = Product.load(lua_ingredient).new()
+      -- consolide la production
+      local i_amount = ingredient.amount
+      -- exclus le type ressource ou fluid
+      if recipe.type ~= "resource" and recipe.type ~= "fluid" then
+        for k, lua_product in pairs(RecipePrototype.getProducts()) do
+          if lua_ingredient.name == lua_product.name then
+            local product = Product.load(lua_product).new()
+            i_amount = i_amount - product.amount
+          end
+        end
+      end
+
+      local nextCount = i_amount * recipe.count
+      block.ingredients[lua_ingredient.name].count = block.ingredients[lua_ingredient.name].count + nextCount
+      Logging:debug(Model.classname, "lua_ingredient.name", lua_ingredient.name, "nextCount=", nextCount)
+    end
+    Logging:debug(Model.classname, "block.ingredients=", block.ingredients)
   end
+end
 
-  if element.probability ~= nil and element.amount_min ~= nil and  element.amount_max ~= nil then
-    return ((element.amount_min + element.amount_max) * element.probability / 2)
+-------------------------------------------------------------------------------
+-- Compute recipe block
+--
+-- @function [parent=#Model] computeBlockTechnology
+--
+-- @param #table element production block model
+--
+function Model.computeBlockTechnology(block, recipe)
+  Logging:debug(Model.classname, "computeBlockTechnology()", block.name)
+  local lua_recipe = RecipePrototype.load(recipe).native()
+  local production = 1
+  if recipe.production ~= nil then production = recipe.production end
+
+  local productNominal = lua_recipe.research_unit_count
+  if recipe.research_unit_count_formula ~= nil then
+    productNominal = loadstring("local L = " .. lua_recipe.level .. " return " .. recipe.research_unit_count_formula)()
   end
+  -- calcul factory productivity effect
+  recipe.count = (productNominal - productNominal * recipe.factory.effects.productivity)*production
 
-  return 0
+  -- compute ingredients
+  for k, lua_ingredient in pairs(RecipePrototype.getIngredients()) do
+    local ingredient = Product.load(lua_ingredient).new()
+    local i_amount = ingredient.amount
+    local nextCount = i_amount * recipe.count
+    block.ingredients[ingredient.name].count = block.ingredients[ingredient.name].count + nextCount
+  end
 end
 -------------------------------------------------------------------------------
 -- Compute production block
 --
--- @function [parent=#Model] computeProductionBlock
+-- @function [parent=#Model] computeBlock
 --
--- @param #LuaPlayer player
 -- @param #table element production block model
--- @param #number maxLoop
--- @param #number level
--- @param #string path
 --
-function Model.methods:computeProductionBlock(player, element, maxLoop, level, path)
-  Logging:debug(self:classname(), "computeProductionBlock():", element.name, maxLoop, level, path)
-  local model = self:getModel(player)
+function Model.computeBlock(block)
+  Logging:debug(Model.classname, "computeBlock():", block.name)
+  local model = Model.getModel()
 
-  local recipes = element.recipes
+  local recipes = block.recipes
   if recipes ~= nil then
     -- initialisation
-    element.products = {}
-    element.ingredients = {}
-    element.power = 0
-    element.count = 1
+    block.products = {}
+    block.ingredients = {}
+    block.power = 0
+    block.count = 1
 
-    local initProduct = false
     -- preparation produits et ingredients du block
     for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
+      local lua_recipe = RecipePrototype.load(recipe).native()
       -- construit la list des ingredients
-      for _, ingredient in pairs(recipe.ingredients) do
-        if element.ingredients[ingredient.name] == nil then
-          element.ingredients[ingredient.name] = {
-            name = ingredient.name,
-            type = ingredient.type,
-            amount = ingredient.amount,
-            count = 0
-          }
+      for _, lua_ingredient in pairs(RecipePrototype.getIngredients()) do
+        if block.ingredients[lua_ingredient.name] == nil then
+          block.ingredients[lua_ingredient.name] = Product.load(lua_ingredient).new()
         end
-        -- initialise ingredient
-        ingredient.count = 0
+        block.ingredients[lua_ingredient.name].count = 0
       end
-    end
-    for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
       -- construit la list des produits
-      for _, product in pairs(recipe.products) do
-        if element.products[product.name] == nil then
-          element.products[product.name] = {
-            name = product.name,
-            type = product.type,
-            count = 0,
-            state = 0,
-            amount = self:getElementAmount(product)
-          }
-          if not(element.ingredients[product.name]) then
-            element.products[product.name].state = 1
+      for _, lua_product in pairs(RecipePrototype.getProducts()) do
+        if block.products[lua_product.name] == nil then
+          block.products[lua_product.name] = Product.load(lua_product).new()
+          if not(block.ingredients[lua_product.name]) then
+            block.products[lua_product.name].state = 1
+          else
+            block.products[lua_product.name].state = 0
           end
         end
-        -- initialise product
-        product.count = 0
+        block.products[lua_product.name].count = 0
       end
-      -- limit les produits au premier recipe
-      initProduct = true
+      -- initialise le recipe
+      recipe.count = 0
     end
 
 
     -- calcul selon la factory
-    if element.by_factory == true then
+    if block.by_factory == true then
       -- initialise la premiere recette avec le nombre d'usine
-      local first_recipe = self:firstRecipe(recipes)
+      local first_recipe = Model.firstRecipe(recipes)
       if first_recipe ~= nil then
-        Logging:debug(self:classname(), "first_recipe",first_recipe)
-        first_recipe.factory.count = element.factory_number
-        self:computeModuleEffects(player, first_recipe)
-        self:computeFactory(player, first_recipe)
-        local _,first_product = next(first_recipe.products)
-        if element.input == nil then element.input = {} end
-        -- formula [product amount] * (1 + [productivity]) *[assembly speed]*[time]/[recipe energy]
-        element.input[first_product.name] = self:getElementAmount(first_product) * (1 + first_recipe.factory.effects.productivity) * ( element.factory_number or 0 ) * first_recipe.factory.speed * model.time / first_recipe.energy
+        Logging:debug(Model.classname, "first_recipe",first_recipe)
+        first_recipe.factory.count = block.factory_number
+        Model.computeModuleEffects(first_recipe)
+        Model.computeFactory(first_recipe)
+
+        if first_recipe.type == "technology" then
+          first_recipe.count = 1
+        else
+          local _,lua_product = next(RecipePrototype.load(first_recipe).getProducts())
+          if block.input == nil then block.input = {} end
+          -- formula [product amount] * (1 + [productivity]) *[assembly speed]*[time]/[recipe energy]
+          block.input[lua_product.name] = Product.load(lua_product).getAmount(first_recipe) * (1 + first_recipe.factory.effects.productivity) * ( block.factory_number or 0 ) * first_recipe.factory.speed * model.time / RecipePrototype.getEnergy()
+        end
       end
     end
 
-    if element.input ~= nil then
+    if block.input ~= nil then
       local input_computed = {}
       for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
+        local lua_recipe = RecipePrototype.load(recipe).native()
+        -- prepare le taux de production
         local production = 1
         if recipe.production ~= nil then production = recipe.production end
         -- initialise la premiere recette avec le input
-        for _, product in pairs(recipe.products) do
-          if input_computed[product.name] == nil and element.input[product.name] ~= nil then
-            local p_amount = self:getElementAmount(product)
+        for _, lua_product in pairs(RecipePrototype.getProducts()) do
+          local product = Product.load(lua_product).new()
+          if input_computed[product.name] == nil and block.input[product.name] ~= nil then
+            local p_amount = product.amount
             local i_amount = 0
 
             -- consolide product.count
-            if recipe.is_resource ~= true then
-              for k, ingredient in pairs(recipe.ingredients) do
-                if ingredient.name == product.name then
-                  i_amount = self:getElementAmount(ingredient)
+            -- exclus le type ressource ou fluid
+            if recipe.type ~= "resource" and recipe.type ~= "fluid" then
+              for k, lua_ingredient in pairs(RecipePrototype.getIngredients()) do
+                if lua_ingredient.name == product.name then
+                  local ingredient = Product.load(lua_ingredient).new()
+                  i_amount = ingredient.amount
                 end
               end
             end
 
-            if element.ingredients[product.name] == nil then
-              element.ingredients[product.name] = {
+            if block.ingredients[product.name] == nil then
+              block.ingredients[product.name] = {
                 name = product.name,
                 type = "fake",
                 amount = 0,
                 count = 0
               }
             end
-            element.ingredients[product.name].count = element.input[product.name] * (p_amount/(p_amount-i_amount))
-            if product.count > 0 then input_computed[product.name] = true end
+            block.ingredients[product.name].count = block.input[product.name] * (p_amount/(p_amount-i_amount))
+            input_computed[product.name] = true
           end
         end
       end
     end
 
-    Logging:debug(self:classname() , "********** initialized:", element)
+    Logging:debug(Model.classname , "********** initialized:", block)
 
     -- ratio pour le calcul du nombre de block
     local ratio = 1
     local ratioRecipe = nil
     -- calcul ordonnee sur les recipes du block
     for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
-      local mainProduct = nil
-      local production = 1
-      if recipe.production ~= nil then production = recipe.production end
-      -- prepare les produits
-      for _, product in pairs(recipe.products) do
-        if element.ingredients[product.name] ~= nil then
-          product.count = element.ingredients[product.name].count*production
-        end
-      end
-      -- check produit pilotant
-      -- @see http://lua-api.factorio.com/latest/Concepts.html#Product
-      for _, product in pairs(recipe.products) do
-        if mainProduct == nil then
-          mainProduct = product
-        elseif product.count/self:getElementAmount(product) > mainProduct.count/self:getElementAmount(mainProduct) then
-          mainProduct = product
-        end
-      end
-      -- consolide les produits
-      if #recipe.products > 1 then
-        -- met a jour le produit
-        for index, product in pairs(recipe.products) do
-          if product.name ~= mainProduct.name then
-            product.count = (mainProduct.count*self:getElementAmount(product)/self:getElementAmount(mainProduct))
-          end
-        end
+      Model.computeModuleEffects(recipe)
+
+      if recipe.type == "technology" then
+        Model.computeBlockTechnology(block, recipe)
+      else
+        Model.computeBlockRecipe(block, recipe)
       end
 
-      self:computeModuleEffects(player, recipe)
+      Model.computeFactory(recipe)
 
-      -- compute ingredients
-      local pCount = mainProduct.count;
-      for k, ingredient in pairs(recipe.ingredients) do
-        local productNominal = self:getElementAmount(mainProduct)
-        local productUsage = self:getElementAmount(mainProduct)
-        -- calcul factory productivity effect
-        productUsage = productUsage + productNominal * recipe.factory.effects.productivity
-        -- consolide la production
-        local amount = ingredient.amount
-        for k, product in pairs(recipe.products) do
-          if ingredient.name == product.name then
-            amount = amount - self:getElementAmount(product)
-          end
-        end
-        --local nextCount = math.ceil(pCount*(ingredient.amount/productUsage))
-        local nextCount = pCount*(ingredient.amount/productUsage)
-        ingredient.count = nextCount
-
-        element.ingredients[ingredient.name].count = element.ingredients[ingredient.name].count + nextCount
-      end
-
-      self:computeFactory(player, recipe)
-
-      element.power = element.power + recipe.energy_total
+      block.power = block.power + recipe.energy_total
 
       if type(recipe.factory.limit) == "number" and recipe.factory.limit > 0 then
         local currentRatio = recipe.factory.limit/recipe.factory.count
@@ -1705,63 +1591,68 @@ function Model.methods:computeProductionBlock(player, element, maxLoop, level, p
           ratio = currentRatio
           ratioRecipe = recipe.index
           -- block number
-          element.count = recipe.factory.count/recipe.factory.limit
+          block.count = recipe.factory.count/recipe.factory.limit
           -- subblock energy
-          element.sub_power = 0
-          if element.count ~= nil and element.count > 0 then
-            element.sub_power = math.ceil(element.power/element.count)
+          block.sub_power = 0
+          if block.count ~= nil and block.count > 0 then
+            block.sub_power = math.ceil(block.power/block.count)
           end
         end
       end
 
-      Logging:debug(self:classname() , "********** Compute before clean:", element)
+      Logging:debug(Model.classname , "********** Compute before clean:", block)
 
+      local lua_recipe = RecipePrototype.load(recipe).native()
       -- reduit les produits du block
       -- state = 0 => produit
       -- state = 1 => produit pilotant
       -- state = 2 => produit restant
-      for _, product in pairs(recipe.products) do
+      for _, lua_product in pairs(RecipePrototype.getProducts()) do
+        local count = Product.load(lua_product).countProduct(recipe)
         -- compte les produits
-        if element.products[product.name] ~= nil then
-          element.products[product.name].count = element.products[product.name].count + product.count
+        if block.products[lua_product.name] ~= nil then
+          block.products[lua_product.name].count = block.products[lua_product.name].count + count
         end
         -- consomme les produits
-        if element.ingredients[product.name] ~= nil then
-          element.ingredients[product.name].count = element.ingredients[product.name].count - product.count
+        if block.ingredients[lua_product.name] ~= nil then
+          block.ingredients[lua_product.name].count = block.ingredients[lua_product.name].count - count
         end
       end
-      for _, ingredient in pairs(recipe.ingredients) do
+      Logging:debug(Model.classname , "********** Compute after clean product:", block)
+      for _, lua_ingredient in pairs(RecipePrototype.getIngredients()) do
+        local count = Product.load(lua_ingredient).countIngredient(recipe)
         -- consomme les ingredients
-        if recipe.is_resource ~= true and element.products[ingredient.name] ~= nil then
-          element.products[ingredient.name].count = element.products[ingredient.name].count - ingredient.count
+        -- exclus le type ressource ou fluid
+        if recipe.type ~= "resource" and recipe.type ~= "fluid" and block.products[lua_ingredient.name] ~= nil then
+          block.products[lua_ingredient.name].count = block.products[lua_ingredient.name].count - count
         end
       end
-      Logging:debug(self:classname() , "********** Compute after clean:", element)
+      Logging:debug(Model.classname , "********** Compute after clean ingredient:", block)
     end
 
-    if element.count < 1 then
-      element.count = 1
+    if block.count < 1 then
+      block.count = 1
     end
 
     -- reduit les engredients fake du block
-    for _, ingredient in pairs(element.ingredients) do
-      if ingredient.type == "fake" then element.ingredients[ingredient.name] = nil end
+    for _, ingredient in pairs(block.ingredients) do
+      if ingredient.type == "fake" then block.ingredients[ingredient.name] = nil end
     end
 
     -- reduit les produits du block
-    for _, product in pairs(element.products) do
-      if element.ingredients[product.name] ~= nil then
+    for _, product in pairs(block.products) do
+      if block.ingredients[product.name] ~= nil then
         product.state = product.state + 2
       end
-      if element.products[product.name].count < 0.01 and not(bit32.band(product.state, 1) > 0) then
-        element.products[product.name] = nil
+      if block.products[product.name].count < 0.01 and not(bit32.band(product.state, 1) > 0) then
+        block.products[product.name] = nil
       end
     end
 
     -- reduit les ingredients du block
-    for _, ingredient in pairs(element.ingredients) do
-      if element.ingredients[ingredient.name].count < 0.01 then
-        element.ingredients[ingredient.name] = nil
+    for _, ingredient in pairs(block.ingredients) do
+      if block.ingredients[ingredient.name].count < 0.01 then
+        block.ingredients[ingredient.name] = nil
       end
     end
 
@@ -1783,7 +1674,7 @@ end
 --
 -- @param #table recipes
 --
-function Model.methods:firstRecipe(recipes)
+function Model.firstRecipe(recipes)
   for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
     return recipe
   end
@@ -1794,15 +1685,14 @@ end
 --
 -- @function [parent=#Model] computeInputOutput
 --
--- @param #LuaPlayer player
 -- @param #ModelRecipe recipe
 -- @param #number maxLoop
 -- @param #number level
 -- @param #string path
 --
-function Model.methods:computeInputOutput(player)
-  Logging:debug(self:classname(), "computeInputOutput():",player)
-  local model = self:getModel(player)
+function Model.computeInputOutput()
+  Logging:debug(Model.classname, "computeInputOutput()")
+  local model = Model.getModel()
   model.products = {}
   model.ingredients = {}
 
@@ -1811,7 +1701,7 @@ function Model.methods:computeInputOutput(player)
     -- count product
     for _, product in pairs(element.products) do
       if model.products[product.name] == nil then
-        model.products[product.name] = self:createIngredientModel(player, product.name, product.type)
+        model.products[product.name] = Model.createIngredientModel(product.name, product.type)
         model.products[product.name].index = index
         index = index + 1
       end
@@ -1820,7 +1710,7 @@ function Model.methods:computeInputOutput(player)
     -- count ingredient
     for _, ingredient in pairs(element.ingredients) do
       if model.ingredients[ingredient.name] == nil then
-        model.ingredients[ingredient.name] = self:createIngredientModel(player, ingredient.name, ingredient.type)
+        model.ingredients[ingredient.name] = Model.createIngredientModel(ingredient.name, ingredient.type)
         model.ingredients[ingredient.name].index = index
         index = index + 1
       end
@@ -1851,15 +1741,14 @@ end
 --
 -- @function [parent=#Model] computeResources
 --
--- @param #LuaPlayer player
 -- @param #ModelRecipe recipe
 -- @param #number maxLoop
 -- @param #number level
 -- @param #string path
 --
-function Model.methods:computeResources(player)
-  Logging:debug(self:classname(), "computeResources():",player)
-  local model = self:getModel(player)
+function Model.computeResources()
+  Logging:debug(Model.classname, "computeResources()")
+  local model = Model.getModel()
   local resources = {}
 
   -- calcul resource
@@ -1869,7 +1758,7 @@ function Model.methods:computeResources(player)
       if resource ~= nil then
         resource.count = ingredient.count
       else
-        resource = self:createResourceModel(player, ingredient.name, ingredient.type, ingredient.count)
+        resource = Model.createResourceModel(ingredient.name, ingredient.type, ingredient.count)
       end
 
       if ingredient.resource_category == "basic-solid" then
@@ -1919,9 +1808,9 @@ end
 --
 -- @return #table
 --
-function Model.methods:getRecipeByProduct(player, element)
-  Logging:trace(self:classname(), "getRecipeByProduct=",element)
-  local model = self:getModel(player)
+function Model.getRecipeByProduct(player, element)
+  Logging:trace(Model.classname, "getRecipeByProduct=",element)
+  local model = Model.getModel(player)
   local recipes = {}
   for key, recipe in pairs(model.recipes) do
     for index, product in pairs(recipe.products) do
@@ -1938,41 +1827,67 @@ end
 --
 -- @function [parent=#Model] computeModuleEffects
 --
--- @param #LuaPlayer player
--- @param #ModelObject object
+-- @param #table recipe
 --
-function Model.methods:computeModuleEffects(player, object)
-  Logging:debug(self:classname(), "computeModuleEffects()",object.name)
+function Model.computeModuleEffects(recipe)
+  Logging:debug(Model.classname, "computeModuleEffects()",recipe.name)
 
-  local factory = object.factory
+  local factory = recipe.factory
   factory.effects = {speed = 0, productivity = 0, consumption = 0}
   -- effet module factory
-  for module, value in pairs(factory.modules) do
-    local speed_bonus = self.player:getModuleBonus(module, "speed")
-    local productivity_bonus = self.player:getModuleBonus(module, "productivity")
-    local consumption_bonus = self.player:getModuleBonus(module, "consumption")
-    factory.effects.speed = factory.effects.speed + value * speed_bonus
-    factory.effects.productivity = factory.effects.productivity + value * productivity_bonus
-    factory.effects.consumption = factory.effects.consumption + value * consumption_bonus
+  if factory.modules ~= nil then
+    for module, value in pairs(factory.modules) do
+      local speed_bonus = Player.getModuleBonus(module, "speed")
+      local productivity_bonus = Player.getModuleBonus(module, "productivity")
+      local consumption_bonus = Player.getModuleBonus(module, "consumption")
+      factory.effects.speed = factory.effects.speed + value * speed_bonus
+      factory.effects.productivity = factory.effects.productivity + value * productivity_bonus
+      factory.effects.consumption = factory.effects.consumption + value * consumption_bonus
+    end
   end
   -- effet module beacon
-  if object.beacon.active then
-    for module, value in pairs(object.beacon.modules) do
-      local speed_bonus = self.player:getModuleBonus(module, "speed")
-      local productivity_bonus = self.player:getModuleBonus(module, "productivity")
-      local consumption_bonus = self.player:getModuleBonus(module, "consumption")
-      factory.effects.speed = factory.effects.speed + value * speed_bonus * object.beacon.efficiency * object.beacon.combo
-      factory.effects.productivity = factory.effects.productivity + value * productivity_bonus * object.beacon.efficiency * object.beacon.combo
-      factory.effects.consumption = factory.effects.consumption + value * consumption_bonus * object.beacon.efficiency * object.beacon.combo
+  local beacon = recipe.beacon
+  if beacon.modules ~= nil then
+    for module, value in pairs(beacon.modules) do
+      local speed_bonus = Player.getModuleBonus(module, "speed")
+      local productivity_bonus = Player.getModuleBonus(module, "productivity")
+      local consumption_bonus = Player.getModuleBonus(module, "consumption")
+      local distribution_effectivity = EntityPrototype.load(beacon).distributionEffectivity()
+      factory.effects.speed = factory.effects.speed + value * speed_bonus * distribution_effectivity * beacon.combo
+      factory.effects.productivity = factory.effects.productivity + value * productivity_bonus * distribution_effectivity * beacon.combo
+      factory.effects.consumption = factory.effects.consumption + value * consumption_bonus * distribution_effectivity * beacon.combo
     end
   end
 
   -- cap la vitesse a self.capSpeed
-  if factory.effects.speed < self.capSpeed  then factory.effects.speed = self.capSpeed end
+  if factory.effects.speed < Model.capSpeed  then factory.effects.speed = Model.capSpeed end
 
   -- cap l'energy a self.capEnergy
-  if factory.effects.consumption < self.capEnergy  then factory.effects.consumption = self.capEnergy end
+  if factory.effects.consumption < Model.capEnergy  then factory.effects.consumption = Model.capEnergy end
 
+end
+
+-------------------------------------------------------------------------------
+-- Return spped factory for recipe
+--
+-- @function [parent=#Model] speedFactory
+--
+-- @param #table recipe
+--
+function Model.speedFactory(recipe)
+  Logging:debug(Model.classname, "speedFactory()", recipe.name)
+  if recipe.type == "resource" then
+    -- (mining power - ore mining hardness) * mining speed
+    -- @see https://wiki.factorio.com/Mining
+    local mining_speed = EntityPrototype.load(recipe.factory).miningSpeed()
+    local mining_power = EntityPrototype.load(recipe.factory).miningPower()
+    local hardness = EntityPrototype.load(recipe.name).mineableHardness()
+    local mining_time = EntityPrototype.load(recipe.name).mineableMiningTime()
+    local bonus = Player.getForce().mining_drill_productivity_bonus
+    return (mining_power - hardness) * mining_speed * (1 + bonus) / mining_time
+  else
+    return EntityPrototype.load(recipe.factory).craftingSpeed()
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -1980,65 +1895,46 @@ end
 --
 -- @function [parent=#Model] computeFactory
 --
--- @param #LuaPlayer player
--- @param #ModelObject object
+-- @param #table recipe
 --
-function Model.methods:computeFactory(player, object)
-  Logging:debug(self:classname(), "computeFactory()",object.name)
-
+function Model.computeFactory(recipe)
+  Logging:debug(Model.classname, "computeFactory()", recipe.name)
+  local recipe_energy = RecipePrototype.load(recipe).getEnergy()
   -- effet speed
-  object.factory.speed = object.factory.speed_nominal * (1 + object.factory.effects.speed)
+  recipe.factory.speed = Model.speedFactory(recipe) * (1 + recipe.factory.effects.speed)
+  -- cap speed creation maximum de 1 cycle par tick
+  if recipe_energy/recipe.factory.speed < 1/60 then recipe.factory.speed = 60*recipe_energy end
 
   -- effet consumption
-  local energy_type = self.player:getEntityProperty(object.factory.name, "energy_type")
+  local energy_type = EntityPrototype.load(recipe.factory).energyType()
   if energy_type ~= "burner" then
-    object.factory.energy = object.factory.energy_nominal * (1 + object.factory.effects.consumption)
+    recipe.factory.energy = EntityPrototype.load(recipe.factory).energyUsage() * (1 + recipe.factory.effects.consumption)
   else
-    object.factory.energy = 0
+    recipe.factory.energy = 0
   end
 
   -- compte le nombre de machines necessaires
-  if object.products ~= nil then
-    local product = nil
-    for k, element in pairs(object.products) do
-      product = element
-    end
-    --Logging:trace(self:classname() , "********** product=",product)
-    if product ~= nil then
-      local model = self:getModel(player)
-      -- [nombre d'item] * [effort necessaire du recipe] / ([la vitesse de la factory] * [nombre produit par le recipe] * [le temps en second])
-      local count = product.count*object.energy/(object.factory.speed*self:getElementAmount(product)*(1 + object.factory.effects.productivity)*model.time)
-      if object.factory.speed == 0 then count = 0 end
-      object.factory.count = count
-      if object.beacon.active then
-        object.beacon.count = count/object.beacon.factory
-      else
-        object.beacon.count = 0
-      end
-    end
+  local model = Model.getModel()
+  -- [ratio recipe] * [effort necessaire du recipe] / ([la vitesse de la factory] * [le temps en second])
+  local count = recipe.count*recipe_energy/(recipe.factory.speed * model.time)
+  Logging:debug(Model.classname, "computeFactory()", "recipe.count=" , recipe.count, "lua_recipe.energy=", recipe_energy, "recipe.factory.speed=", recipe.factory.speed, "model.time=", model.time)
+  if recipe.factory.speed == 0 then count = 0 end
+  recipe.factory.count = count
+  if Model.countModulesModel(recipe.beacon) > 0 then
+    recipe.beacon.count = count/recipe.beacon.factory
   else
-    local product = object
-    local model = self:getModel(player)
-    -- [nombre d'item] / ([la vitesse de la factory] * [le temps en second])
-    local count = product.count/(object.factory.speed*model.time)
-    if object.factory.speed == 0 then count = 0 end
-    object.factory.count = count
-    if object.beacon.active then
-      object.beacon.count = count/object.beacon.factory
-    else
-      object.beacon.count = 0
-    end
+    recipe.beacon.count = 0
   end
 
-  object.beacon.energy = object.beacon.energy_nominal
+  recipe.beacon.energy = EntityPrototype.load(recipe.beacon).energyUsage()
   -- calcul des totaux
-  object.factory.energy_total = math.ceil(object.factory.count*object.factory.energy)
-  object.beacon.energy_total = math.ceil(object.beacon.count*object.beacon.energy)
-  object.energy_total = object.factory.energy_total + object.beacon.energy_total
+  recipe.factory.energy_total = math.ceil(recipe.factory.count*recipe.factory.energy)
+  recipe.beacon.energy_total = math.ceil(recipe.beacon.count*recipe.beacon.energy)
+  recipe.energy_total = recipe.factory.energy_total + recipe.beacon.energy_total
   -- arrondi des valeurs
-  object.factory.speed = object.factory.speed
-  object.factory.energy = math.ceil(object.factory.energy)
-  object.beacon.energy = math.ceil(object.beacon.energy)
+  recipe.factory.speed = recipe.factory.speed
+  recipe.factory.energy = math.ceil(recipe.factory.energy)
+  recipe.beacon.energy = math.ceil(recipe.beacon.energy)
 end
 
 -------------------------------------------------------------------------------
@@ -2046,10 +1942,8 @@ end
 --
 -- @function [parent=#Model] createSummary
 --
--- @param #LuaPlayer player
---
-function Model.methods:createSummary(player)
-  local model = self:getModel(player)
+function Model.createSummary()
+  local model = Model.getModel()
   model.summary = {}
   model.summary.factories = {}
   model.summary.beacons = {}
@@ -2061,7 +1955,7 @@ function Model.methods:createSummary(player)
   for _, block in pairs(model.blocks) do
     energy = energy + block.power
     for _, recipe in pairs(block.recipes) do
-      self:computeSummaryFactory(player, recipe)
+      Model.computeSummaryFactory(recipe)
     end
   end
 
@@ -2080,11 +1974,10 @@ end
 --
 -- @function [parent=#Model] computeSummaryFactory
 --
--- @param #LuaPlayer player
 -- @param object object
 --
-function Model.methods:computeSummaryFactory(player, object)
-  local model = self:getModel(player)
+function Model.computeSummaryFactory(object)
+  local model = Model.getModel()
   -- calcul nombre factory
   local factory = object.factory
   if model.summary.factories[factory.name] == nil then model.summary.factories[factory.name] = {name = factory.name, type = "item", count = 0} end
@@ -2110,15 +2003,14 @@ end
 --
 -- @function [parent=#Model] computePower
 --
--- @param #LuaPlayer player
 -- @param key power id
 --
-function Model.methods:computePower(player, key)
-  local power = self:getPower(player, key)
-  Logging:debug(self:classname(), "computePower():", key, power)
+function Model.computePower(key)
+  local power = Model.getPower(key)
+  Logging:debug(Model.classname, "computePower():", key, power)
   if power ~= nil then
-    local primary_classification = self.player:getEntityProperty(power.primary.name, "type")
-    local secondary_classification = self.player:getEntityProperty(power.secondary.name, "type")
+    local primary_classification = Player.getEntityProperty(power.primary.name, "type")
+    local secondary_classification = Player.getEntityProperty(power.secondary.name, "type")
     if primary_classification == "generator" then
       -- calcul primary
       local count = math.ceil(power.power/(power.primary.energy_nominal))
@@ -2148,7 +2040,7 @@ function Model.methods:computePower(player, key)
         -- formula (puissance*durree_penombre)/(60s*capacite)
         local count2 = power.power*(gameDay.dust/factor+gameDay.night+gameDay.dawn/factor)/(60*power.secondary.buffer_capacity)
 
-        Logging:debug(self:classname() , "********** computePower result:", accu, count1, count2)
+        Logging:debug(Model.classname , "********** computePower result:", accu, count1, count2)
         if count1 > count2 then
           power.secondary.count = count1 or 0
         else
@@ -2166,12 +2058,10 @@ end
 --
 -- @function [parent=#Model] getDefault
 --
--- @param #LuaPlayer player
---
 -- @return #table
 --
-function Model.methods:getDefault(player)
-  local default = self.player:getGlobal(player, "default")
+function Model.getDefault()
+  local default = Player.getGlobal("default")
 
   if default.recipes == nil then default.recipes = {} end
 
@@ -2183,11 +2073,10 @@ end
 --
 -- @function [parent=#Model] getDefaultRecipe
 --
--- @param #LuaPlayer player
 -- @param #string key recipe name
 --
-function Model.methods:getDefaultRecipe(player, key)
-  local default = self:getDefault(player)
+function Model.getDefaultRecipe(key)
+  local default = Model.getDefault()
   if default.recipes[key] == nil then
     default.recipes[key] = {
       name = key,
@@ -2203,35 +2092,33 @@ end
 --
 -- @function [parent=#Model] getSpeedFactory
 --
--- @param #LuaPlayer player
 -- @param #string key factory name
 --
 -- @return #string
 --
-function Model.methods:getSpeedFactory(player, key)
-      local crafting_speed = self.player:getEntityProperty(key, "crafting_speed")
-      if crafting_speed ~= 0 then return crafting_speed end
-      local mining_speed = self.player:getEntityProperty(key, "mining_speed")
-      local mining_power = self.player:getEntityProperty(key, "mining_power")
-      if mining_speed ~= 0 and mining_power ~= 0 then return mining_speed * mining_power end
-      return 0
+function Model.getSpeedFactory(key)
+  local crafting_speed = Player.getEntityProperty(key, "crafting_speed")
+  if crafting_speed ~= 0 then return crafting_speed end
+  local mining_speed = Player.getEntityProperty(key, "mining_speed")
+  local mining_power = Player.getEntityProperty(key, "mining_power")
+  if mining_speed ~= 0 and mining_power ~= 0 then return mining_speed * mining_power end
+  return 1
 end
+
 -------------------------------------------------------------------------------
--- Get the factory of recipe
+-- Get the factory of prototype
 --
--- @function [parent=#Model] getDefaultRecipeFactory
+-- @function [parent=#Model] getDefaultPrototypeFactory
 --
--- @param #LuaPlayer player
--- @param #string key recipe name
+-- @param #string category
+-- @param #string name
 --
 -- @return #string
 --
-function Model.methods:getDefaultRecipeFactory(player, key)
-  local default = self:getDefault(player)
-  local lua_recipe = self.player:getRecipe(player, key)
-  if lua_recipe ~= nil then
-    local factories = self.player:getProductionsCrafting(lua_recipe.category, lua_recipe.name)
-    local default_factory_level = self.player:getSettings(player, "default_factory_level")
+function Model.getDefaultPrototypeFactory(category, name)
+  if category ~= nil then
+    local factories = Player.getProductionsCrafting(category, name)
+    local default_factory_level = Player.getSettings("default_factory_level")
     local factory_level = 1
     if default_factory_level == "fast" then
       factory_level = 100
@@ -2241,11 +2128,11 @@ function Model.methods:getDefaultRecipeFactory(player, key)
     local level = 1
     local lua_factory = nil
     local last_factory = nil
-    for _, factory in spairs(factories, function(t,a,b) return self:getSpeedFactory(player, t[b].name) > self:getSpeedFactory(player, t[a].name) end) do
+    for _, factory in spairs(factories, function(t,a,b) return Model.getSpeedFactory(t[b].name) > Model.getSpeedFactory(t[a].name) end) do
       if level == factory_level then lua_factory = factory end
       last_factory = factory
       level = level + 1
-      Logging:debug(self:classname(), "default factory:", last_factory.name, self:getSpeedFactory(player, last_factory.name))
+      Logging:debug(Model.classname, "default factory:", last_factory.name, Model.getSpeedFactory(last_factory.name))
     end
     if lua_factory ~= nil then return lua_factory.name end
     if last_factory ~= nil then return last_factory.name end
@@ -2258,14 +2145,13 @@ end
 --
 -- @function [parent=#Model] setDefaultRecipeBeacon
 --
--- @param #LuaPlayer player
 -- @param #string item block_id or resource
 -- @param #string key recipe name
 -- @param #string name factory name
 --
-function Model.methods:setDefaultRecipeBeacon(player, item, key, name)
-  local object = self:getObject(player, item, key)
-  local recipe = self:getDefaultRecipe(player, object.name)
+function Model.setDefaultRecipeBeacon(item, key, name)
+  local object = Model.getObject(item, key)
+  local recipe = Model.getDefaultRecipe(object.name)
   recipe.beacon = name
 end
 
@@ -2274,15 +2160,16 @@ end
 --
 -- @function [parent=#Model] getDefaultRecipeBeacon
 --
--- @param #LuaPlayer player
 -- @param #string key recipe name
 --
 -- @return #string
 --
-function Model.methods:getDefaultRecipeBeacon(player, key)
-  local default = self:getDefault(player)
+function Model.getDefaultRecipeBeacon(key)
+  local default = Model.getDefault()
   if default.recipes[key] == nil then
     return nil
   end
   return default.recipes[key].beacon
 end
+
+return Model

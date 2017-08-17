@@ -33,16 +33,15 @@ end
 --
 -- @function [parent=#TechnologySelector] updateGroups
 --
--- @param #LuaPlayer player
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
 -- @return {groupList, prototypeGroups}
 --
-function TechnologySelector.methods:updateGroups(player, item, item2, item3)
+function TechnologySelector.methods:updateGroups(item, item2, item3)
   Logging:trace(self:classname(), "on_update():", item, item2, item3)
-  local globalPlayer = self.player:getGlobal(player)
+  local globalPlayer = Player.getGlobal()
   -- recuperation recipes
   local prototypeGroups = {}
   local groupList = {}
@@ -50,7 +49,7 @@ function TechnologySelector.methods:updateGroups(player, item, item2, item3)
   local prototypeFilterProduct = self:getProductFilter()
 
   local firstGroup = nil
-  for key, prototype in spairs(self.player:getTechnologies(player),function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
+  for key, prototype in spairs(Player.getTechnologies(),function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
     local find = false
     if prototypeFilter ~= nil and prototypeFilter ~= "" then
       if prototypeFilterProduct == true then
@@ -71,7 +70,7 @@ function TechnologySelector.methods:updateGroups(player, item, item2, item3)
       find = true
     end
 
-   local filter_show_hidden = self.player:getGlobalSettings(player, "filter_show_hidden")
+   local filter_show_hidden = Player.getGlobalSettings("filter_show_hidden")
     if find == true and (prototype.enabled == true or filter_show_hidden == true) then
       local group_name = "normal"
       if prototype.research_unit_count_formula ~= nil then group_name = "infinite" end
@@ -94,14 +93,13 @@ end
 --
 -- @function [parent=#TechnologySelector] getItemList
 --
--- @param #LuaPlayer player
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function TechnologySelector.methods:getItemList(player, item, item2, item3)
-  Logging:trace(self:classname(), "getItemList():",player, item, item2, item3)
-  local globalPlayer = self.player:getGlobal(player)
+function TechnologySelector.methods:getItemList(item, item2, item3)
+  Logging:trace(self:classname(), "getItemList():",item, item2, item3)
+  local globalPlayer = Player.getGlobal()
   local list = {}
   local prototypeGroups = self:getPrototypeGroups()
   if prototypeGroups[globalPlayer.recipeGroupSelected] ~= nil then
@@ -115,15 +113,14 @@ end
 --
 -- @function [parent=#TechnologySelector] buildPrototypeTooltip
 --
--- @param #LuaPlayer player
 -- @param #LuaPrototype prototype
 --
-function TechnologySelector.methods:buildPrototypeTooltip(player, prototype)
-  Logging:trace(self:classname(), "buildPrototypeTooltip(player, prototype):",player, prototype)
+function TechnologySelector.methods:buildPrototypeTooltip(prototype)
+  Logging:trace(self:classname(), "buildPrototypeTooltip(prototype):", prototype)
   -- initalize tooltip
   local tooltip = {"tooltip.technology-info"}
   -- insert __1__ value
-  table.insert(tooltip, self.player:getTechnologyLocalisedName(player, prototype))
+  table.insert(tooltip, Player.getTechnologyLocalisedName(prototype))
 
   -- insert __2__ value
   table.insert(tooltip, prototype.level)
@@ -134,8 +131,8 @@ function TechnologySelector.methods:buildPrototypeTooltip(player, prototype)
   -- insert __4__ value
   local lastTooltip = tooltip
   for _,element in pairs(prototype.research_unit_ingredients) do
-    local count = self.model:getElementAmount(element)
-    local name = self.player:getLocalisedName(player,element)
+    local count = Product.getElementAmount(element)
+    local name = Player.getLocalisedName(element)
     local currentTooltip = {"tooltip.recipe-info-element", count, name}
     -- insert le dernier tooltip dans le precedent
     table.insert(lastTooltip, currentTooltip)
@@ -151,11 +148,9 @@ end
 --
 -- @function [parent=#TechnologySelector] buildPrototypeIcon
 --
--- @param #LuaPlayer player
---
-function TechnologySelector.methods:buildPrototypeIcon(player, guiElement, prototype, tooltip)
-  Logging:trace(self:classname(), "buildPrototypeIcon(player, guiElement, prototype, tooltip:",player, guiElement, prototype, tooltip)
-  self:addGuiButtonSelectSprite(guiElement, self:classname().."=technology-select=ID=", "technology", prototype.name, prototype.name, tooltip)
+function TechnologySelector.methods:buildPrototypeIcon(guiElement, prototype, tooltip)
+  Logging:trace(self:classname(), "buildPrototypeIcon(guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
+  ElementGui.addGuiButtonSelectSprite(guiElement, self:classname().."=element-select=ID=technology=", "technology", prototype.name, prototype.name, tooltip)
 end
 
 

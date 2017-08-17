@@ -2,10 +2,9 @@
 -- Class to build tab
 --
 -- @module AbstractTab
--- @extends #ElementGui
 --
 
-AbstractTab = setclass("HMAbstractTab", ElementGui)
+AbstractTab = setclass("HMAbstractTab")
 
 -------------------------------------------------------------------------------
 -- Initialization
@@ -16,8 +15,6 @@ AbstractTab = setclass("HMAbstractTab", ElementGui)
 --
 function AbstractTab.methods:init(parent)
   self.parent = parent
-  self.player = self.parent.player
-  self.model = self.parent.model
 
   self.color_button_edit="green"
   self.color_button_add="yellow"
@@ -29,13 +26,12 @@ end
 --
 -- @function [parent=#AbstractTab] beforeUpdate
 --
--- @param #LuaPlayer player
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractTab.methods:beforeUpdate(player, item, item2, item3)
-  Logging:trace(self:classname(), "beforeUpdate():", player, item, item2, item3)
+function AbstractTab.methods:beforeUpdate(item, item2, item3)
+  Logging:trace(self:classname(), "beforeUpdate():", item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -43,7 +39,6 @@ end
 --
 -- @function [parent=#AbstractTab] addCellElement
 --
--- @param #LuaPlayer player
 -- @param #LuaGuiElement guiTable
 -- @param #table element production block
 -- @param #string action
@@ -51,21 +46,21 @@ end
 -- @param #string tooltip_name tooltip name
 -- @param #string color button color
 --
-function AbstractTab.methods:addCellElement(player, guiTable, element, action, select, tooltip_name, color)
-  Logging:trace(self:classname(), "addCellElement():", player, guiTable, element, action, select, tooltip_name, color)
-  local display_cell_mod = self.player:getSettings(player, "display_cell_mod")
+function AbstractTab.methods:addCellElement(guiTable, element, action, select, tooltip_name, color)
+  Logging:trace(self:classname(), "addCellElement():", guiTable, element, action, select, tooltip_name, color)
+  local display_cell_mod = Player.getSettings("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local cell = nil
   local button = nil
 
   if display_cell_mod == "by-kilo" then
     -- by-kilo
-    cell = self:addCellLabel(player, guiTable, element.name, self:formatNumberKilo(element.count))
+    cell = self:addCellLabel(guiTable, element.name, Format.formatNumberKilo(element.count))
   else
-    cell = self:addCellLabel(player, guiTable, element.name, self:formatNumberElement(element.count))
+    cell = self:addCellLabel(guiTable, element.name, Format.formatNumberElement(element.count))
   end
 
-  self:addIconCell(player, cell, element, action, select, tooltip_name, color)
+  self:addIconCell(cell, element, action, select, tooltip_name, color)
 end
 
 -------------------------------------------------------------------------------
@@ -73,20 +68,19 @@ end
 --
 -- @function [parent=#AbstractTab] addCellHeader
 --
--- @param #LuaPlayer player
 -- @param #LuaGuiElement guiTable
 -- @param #string name
 -- @param #string caption
 -- @param #string sorted
 --
-function AbstractTab.methods:addCellHeader(player, guiTable, name, caption, sorted)
-  Logging:trace(self:classname(), "addCellHeader():", player, guiTable, name, caption, sorted)
+function AbstractTab.methods:addCellHeader(guiTable, name, caption, sorted)
+  Logging:trace(self:classname(), "addCellHeader():", guiTable, name, caption, sorted)
 
-  if (name ~= "index" and name ~= "id" and name ~= "name") or self.player:getSettings(player, "display_data_col_"..name, true) then
-    local cell = self:addGuiFlowH(guiTable,"header-"..name)
-    self:addGuiLabel(cell, "label", caption)
+  if (name ~= "index" and name ~= "id" and name ~= "name" and name ~= "type") or Player.getSettings("display_data_col_"..name, true) then
+    local cell = ElementGui.addGuiFlowH(guiTable,"header-"..name)
+    ElementGui.addGuiLabel(cell, "label", caption)
     if sorted ~= nil then
-      self:addGuiButton(cell, self.parent:classname().."=change-sort=ID=", sorted, self.player:getSortedStyle(player, sorted))
+      ElementGui.addGuiButton(cell, self.parent:classname().."=change-sort=ID=", sorted, Player.getSortedStyle(sorted))
     end
   end
 end
@@ -96,7 +90,6 @@ end
 --
 -- @function [parent=#AbstractTab] addIconRecipeCell
 --
--- @param #LuaPlayer player
 -- @param #LuaGuiElement cell
 -- @param #table element production block
 -- @param #string action
@@ -104,21 +97,21 @@ end
 -- @param #string tooltip_name
 -- @param #string color
 --
-function AbstractTab.methods:addIconRecipeCell(player, cell, element, action, select, tooltip_name, color)
+function AbstractTab.methods:addIconRecipeCell(cell, element, action, select, tooltip_name, color)
   Logging:trace(self:classname(), "addIconRecipeCell():", element, action, select, tooltip_name, color)
-  local display_cell_mod = self.player:getSettings(player, "display_cell_mod")
+  local display_cell_mod = Player.getSettings("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   if display_cell_mod == "small-icon" then
     if cell ~= nil and select == true then
-      self:addGuiButtonSelectSpriteM(cell, action, self.player:getRecipeIconType(player, element), element.name, element.name, ({tooltip_name, self.player:getRecipeLocalisedName(player, element)}), color)
+      ElementGui.addGuiButtonSelectSpriteM(cell, action, Player.getRecipeIconType(element), element.name, element.name, ({tooltip_name, Player.getRecipeLocalisedName(element)}), color)
     else
-      self:addGuiButtonSpriteM(cell, action, self.player:getRecipeIconType(player, element), element.name, element.name, ({tooltip_name, self.player:getRecipeLocalisedName(player, element)}), color)
+      ElementGui.addGuiButtonSpriteM(cell, action, Player.getRecipeIconType(element), element.name, element.name, ({tooltip_name, Player.getRecipeLocalisedName(element)}), color)
     end
   else
     if cell ~= nil and select == true then
-      self:addGuiButtonSelectSprite(cell, action, self.player:getRecipeIconType(player, element), element.name, element.name, ({tooltip_name, self.player:getRecipeLocalisedName(player, element)}), color)
+      ElementGui.addGuiButtonSelectSprite(cell, action, Player.getRecipeIconType(element), element.name, element.name, ({tooltip_name, Player.getRecipeLocalisedName(element)}), color)
     else
-      self:addGuiButtonSprite(cell, action, self.player:getRecipeIconType(player, element), element.name, element.name, ({tooltip_name, self.player:getRecipeLocalisedName(player, element)}), color)
+      ElementGui.addGuiButtonSprite(cell, action, Player.getRecipeIconType(element), element.name, element.name, ({tooltip_name, Player.getRecipeLocalisedName(element)}), color)
     end
   end
 end
@@ -128,7 +121,6 @@ end
 --
 -- @function [parent=#AbstractTab] addIconCell
 --
--- @param #LuaPlayer player
 -- @param #LuaGuiElement cell
 -- @param #table element production block
 -- @param #string action
@@ -136,21 +128,21 @@ end
 -- @param #string tooltip_name
 -- @param #string color
 --
-function AbstractTab.methods:addIconCell(player, cell, element, action, select, tooltip_name, color)
-  Logging:trace(self:classname(), "addIconCell():", player, cell, element, action, select, tooltip_name, color)
-  local display_cell_mod = self.player:getSettings(player, "display_cell_mod")
+function AbstractTab.methods:addIconCell(cell, element, action, select, tooltip_name, color)
+  Logging:trace(self:classname(), "addIconCell():", cell, element, action, select, tooltip_name, color)
+  local display_cell_mod = Player.getSettings("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   if display_cell_mod == "small-icon" then
     if cell ~= nil and select == true then
-      self:addGuiButtonSelectSpriteM(cell, action, self.player:getIconType(element), element.name, "X"..self.model:getElementAmount(element), ({tooltip_name, self.player:getLocalisedName(player, element)}), color)
+      ElementGui.addGuiButtonSelectSpriteM(cell, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}), color)
     else
-      self:addGuiButtonSpriteM(cell, action, self.player:getIconType(element), element.name, "X"..self.model:getElementAmount(element), ({tooltip_name, self.player:getLocalisedName(player, element)}), color)
+      ElementGui.addGuiButtonSpriteM(cell, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}), color)
     end
   else
     if cell ~= nil and select == true then
-      self:addGuiButtonSelectSprite(cell, action, self.player:getIconType(element), element.name, "X"..self.model:getElementAmount(element), ({tooltip_name, self.player:getLocalisedName(player, element)}), color)
+      ElementGui.addGuiButtonSelectSprite(cell, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}), color)
     else
-      self:addGuiButtonSprite(cell, action, self.player:getIconType(element), element.name, "X"..self.model:getElementAmount(element), ({tooltip_name, self.player:getLocalisedName(player, element)}), color)
+      ElementGui.addGuiButtonSprite(cell, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}), color)
     end
   end
 end
@@ -160,31 +152,30 @@ end
 --
 -- @function [parent=#AbstractTab] addCellLabel
 --
--- @param #LuaPlayer player
 -- @param #string name
 -- @param #string label
 --
-function AbstractTab.methods:addCellLabel(player, guiTable, name, label, minimal_width)
+function AbstractTab.methods:addCellLabel(guiTable, name, label, minimal_width)
   Logging:trace(self:classname(), "addCellLabel():", guiTable, name, label)
-  local display_cell_mod = self.player:getSettings(player, "display_cell_mod")
+  local display_cell_mod = Player.getSettings("display_cell_mod")
   local cell = nil
 
   if display_cell_mod == "small-text"then
     -- small
-    cell = self:addGuiFlowH(guiTable,"cell_"..name, "helmod_flow_cell")
-    self:addGuiLabel(cell, name, label, "helmod_label_icon_text_sm").style["minimal_width"] = minimal_width or 45
+    cell = ElementGui.addGuiFlowH(guiTable,"cell_"..name, "helmod_flow_cell")
+    ElementGui.addGuiLabel(cell, name, label, "helmod_label_icon_text_sm").style["minimal_width"] = minimal_width or 45
   elseif display_cell_mod == "small-icon" then
     -- small
-    cell = self:addGuiFlowH(guiTable,"cell_"..name, "helmod_flow_cell")
-    self:addGuiLabel(cell, name, label, "helmod_label_icon_sm").style["minimal_width"] = minimal_width or 45
+    cell = ElementGui.addGuiFlowH(guiTable,"cell_"..name, "helmod_flow_cell")
+    ElementGui.addGuiLabel(cell, name, label, "helmod_label_icon_sm").style["minimal_width"] = minimal_width or 45
   elseif display_cell_mod == "by-kilo" then
     -- by-kilo
-    cell = self:addGuiFlowH(guiTable,"cell_"..name, "helmod_flow_cell")
-    self:addGuiLabel(cell, name, label, "helmod_label_row_right").style["minimal_width"] = minimal_width or 50
+    cell = ElementGui.addGuiFlowH(guiTable,"cell_"..name, "helmod_flow_cell")
+    ElementGui.addGuiLabel(cell, name, label, "helmod_label_row_right").style["minimal_width"] = minimal_width or 50
   else
     -- default
-    cell = self:addGuiFlowH(guiTable,"cell_"..name, "helmod_flow_cell")
-    self:addGuiLabel(cell, name, label, "helmod_label_row_right").style["minimal_width"] = minimal_width or 60
+    cell = ElementGui.addGuiFlowH(guiTable,"cell_"..name, "helmod_flow_cell")
+    ElementGui.addGuiLabel(cell, name, label, "helmod_label_row_right").style["minimal_width"] = minimal_width or 60
 
   end
   return cell
@@ -195,57 +186,22 @@ end
 --
 -- @function [parent=#AbstractTab] updateHeader
 --
--- @param #LuaPlayer player
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractTab.methods:updateHeader(player, item, item2, item3)
-  Logging:debug("AbstractTab", "updateHeader():", player, item, item2, item3)
+function AbstractTab.methods:updateHeader(item, item2, item3)
+  Logging:debug("AbstractTab", "updateHeader():", item, item2, item3)
 end
 -------------------------------------------------------------------------------
 -- Update data
 --
 -- @function [parent=#AbstractTab] updateData
 --
--- @param #LuaPlayer player
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractTab.methods:updateData(player, item, item2, item3)
-  Logging:debug("AbstractTab", "updateData():", player, item, item2, item3)
-end
-
--------------------------------------------------------------------------------
--- Format number for factory
---
--- @function [parent=#AbstractTab] formatNumberFactory
---
--- @param #number number
---
-function AbstractTab.methods:formatNumberFactory(number)
-  local decimal = 2
-  local format_number = self.player:getSettings(nil, "format_number_factory", true)
-  if format_number == "0" then decimal = 0 end
-  if format_number == "0.0" then decimal = 1 end
-  if format_number == "0.00" then decimal = 2 end
-  return self:formatNumber(number, decimal)
-end
-
-
--------------------------------------------------------------------------------
--- Format number for element product or ingredient
---
--- @function [parent=#AbstractTab] formatNumberElement
---
--- @param #number number
---
-function AbstractTab.methods:formatNumberElement(number)
-  local decimal = 2
-  local format_number = self.player:getSettings(nil, "format_number_element", true)
-  if format_number == "0" then decimal = 0 end
-  if format_number == "0.0" then decimal = 1 end
-  if format_number == "0.00" then decimal = 2 end
-  return self:formatNumber(number, decimal)
+function AbstractTab.methods:updateData(item, item2, item3)
+  Logging:debug("AbstractTab", "updateData():", item, item2, item3)
 end

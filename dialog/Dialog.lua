@@ -2,9 +2,8 @@
 -- Class to help to build dialog
 -- 
 -- @module Dialog
--- @extends #ElementGui 
 -- 
-Dialog = setclass("HMDialog", ElementGui)
+Dialog = setclass("HMDialog")
 
 -------------------------------------------------------------------------------
 -- Initialization
@@ -19,7 +18,7 @@ function Dialog.methods:init(parent)
 	self.ACTION_OPEN = self:classname().."=OPEN"
 	self.ACTION_UPDATE =  self:classname().."=UPDATE"
 	self.ACTION_CLOSE =  self:classname().."=CLOSE"
-	self:on_init(parent)
+	self:onInit(parent)
 	
 	self.color_button_edit="green"
   self.color_button_add="yellow"
@@ -30,11 +29,11 @@ end
 -------------------------------------------------------------------------------
 -- On initialization
 --
--- @function [parent=#Dialog] on_init
+-- @function [parent=#Dialog] onInit
 -- 
 -- @param #Controller parent parent controller
 -- 
-function Dialog.methods:on_init(parent)
+function Dialog.methods:onInit(parent)
 
 end
 
@@ -43,11 +42,9 @@ end
 --
 -- @function [parent=#Dialog] getParentPanel
 -- 
--- @param #LuaPlayer player
--- 
 -- @return #LuaGuiElement
 --  
-function Dialog.methods:getParentPanel(player)
+function Dialog.methods:getParentPanel()
 	
 end
 
@@ -56,16 +53,14 @@ end
 --
 -- @function [parent=#Dialog] getPanel
 -- 
--- @param #LuaPlayer player
--- 
 -- @return #LuaGuiElement
 --  
-function Dialog.methods:getPanel(player)
-	local panel = self:getParentPanel(player)
+function Dialog.methods:getPanel()
+	local panel = self:getParentPanel()
 	if panel[self:classname()] ~= nil and panel[self:classname()].valid then
 		return panel[self:classname()]
 	end
-	return self:addGuiFlowV(panel, self:classname(), "helmod_flow_resize_row_width")
+	return ElementGui.addGuiFlowV(panel, self:classname(), "helmod_flow_resize_row_width")
 end
 
 -------------------------------------------------------------------------------
@@ -89,23 +84,22 @@ end
 --
 -- @function [parent=#Dialog] open
 -- 
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 -- 
-function Dialog.methods:open(player, event, action, item, item2, item3)
+function Dialog.methods:open(event, action, item, item2, item3)
 	Logging:debug(self:classname(), "open():", action, item, item2, item3)
-	local parentPanel = self:getParentPanel(player)
+	local parentPanel = self:getParentPanel()
 	if parentPanel[self:classname()] ~= nil and parentPanel[self:classname()].valid then
-		local close = self:on_open(player, event, action, item, item2, item3)
+		local close = self:onOpen(event, action, item, item2, item3)
 		--Logging:debug(self:classname() , "must close:",close)
 		if close then
-			self:close(player, event, action, item, item2, item3)
+			self:close(event, action, item, item2, item3)
 		else
-			self:update(player, event, action, item, item2, item3)
+			self:update(event, action, item, item2, item3)
 		end
 		
 	else
@@ -113,88 +107,84 @@ function Dialog.methods:open(player, event, action, item, item2, item3)
 		local caption = self:classname()
 		if self.panelCaption ~= nil then caption = self.panelCaption end
 
-		local panel = self:getPanel(player)
-		local headerPanel = self:addGuiFrameH(panel, "header-panel", "helmod_frame_resize_row_width")
-		self:addGuiLabel(headerPanel, "title", caption, "helmod_label_title_frame")
+		local panel = self:getPanel()
+		local headerPanel = ElementGui.addGuiFrameH(panel, "header-panel", "helmod_frame_resize_row_width")
+		ElementGui.addGuiLabel(headerPanel, "title", caption, "helmod_label_title_frame")
 		
-		self:on_open(player, event, action, item, item2, item3)
-		self:after_open(player, event, action, item, item2, item3)
-		self:update(player, event, action, item, item2, item3)
+		self:onOpen(event, action, item, item2, item3)
+		self:afterOpen(event, action, item, item2, item3)
+		self:update(event, action, item, item2, item3)
 	end
 end
 
 -------------------------------------------------------------------------------
 -- Send event
 --
--- @function [parent=#Dialog] send_event
+-- @function [parent=#Dialog] sendEvent
 -- 
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 -- 
-function Dialog.methods:send_event(player, event, action, item, item2, item3)
-		Logging:debug(self:classname(), "send_event():", action, item, item2, item3)
+function Dialog.methods:sendEvent(event, action, item, item2, item3)
+		Logging:debug(self:classname(), "sendEvent():", action, item, item2, item3)
 		if action == "OPEN" then
-			self:open(player, event, action, item, item2, item3)
+			self:open(event, action, item, item2, item3)
 		end
 
 		if action == "UPDATE" then
-			self:update(player, event, action, item, item2, item3)
+			self:update(event, action, item, item2, item3)
 		end
 
 		if action == "CLOSE" then
-			self:close(player, event, action, item, item2, item3)
+			self:close(event, action, item, item2, item3)
 		end
 
-		self:on_event(player, event, action, item, item2, item3)
+		self:onEvent(event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
 -- On event
 --
--- @function [parent=#Dialog] on_event
+-- @function [parent=#Dialog] onEvent
 -- 
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 -- 
-function Dialog.methods:on_event(player, event, action, item, item2, item3)
+function Dialog.methods:onEvent(event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
 -- On open
 --
--- @function [parent=#Dialog] on_open
+-- @function [parent=#Dialog] onOpen
 -- 
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 -- 
-function Dialog.methods:on_open(player, event, action, item, item2, item3)
+function Dialog.methods:onOpen(event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
 -- After open
 --
--- @function [parent=#Dialog] after_open
+-- @function [parent=#Dialog] afterOpen
 -- 
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 -- 
-function Dialog.methods:after_open(player, event, action, item, item2, item3)
+function Dialog.methods:afterOpen(event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -202,30 +192,28 @@ end
 --
 -- @function [parent=#Dialog] update
 -- 
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 -- 
-function Dialog.methods:update(player, event, action, item, item2, item3)
-	self:on_update(player, event, action, item, item2, item3)
+function Dialog.methods:update(event, action, item, item2, item3)
+	self:onUpdate(event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
 -- On update
 --
--- @function [parent=#Dialog] on_update
+-- @function [parent=#Dialog] onUpdate
 -- 
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 -- 
-function Dialog.methods:on_update(player, event, action, item, item2, item3)
+function Dialog.methods:onUpdate(event, action, item, item2, item3)
 
 end
 
@@ -234,16 +222,15 @@ end
 --
 -- @function [parent=#Dialog] close
 -- 
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 -- 
-function Dialog.methods:close(player, event, action, item, item2, item3)
-	self:on_close(player, event, action, item, item2, item3)
-	local parentPanel = self:getParentPanel(player)
+function Dialog.methods:close(event, action, item, item2, item3)
+	self:onClose(event, action, item, item2, item3)
+	local parentPanel = self:getParentPanel()
 	if parentPanel[self:classname()] ~= nil and parentPanel[self:classname()].valid then
 		parentPanel[self:classname()].destroy()
 	end
@@ -252,9 +239,8 @@ end
 -------------------------------------------------------------------------------
 -- On close dialog
 --
--- @function [parent=#Dialog] on_close
+-- @function [parent=#Dialog] onClose
 -- 
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
@@ -263,5 +249,5 @@ end
 -- 
 -- @return #boolean if true the next call close dialog
 -- 
-function Dialog.methods:on_close(player, event, action, item, item2, item3)
+function Dialog.methods:onClose(event, action, item, item2, item3)
 end

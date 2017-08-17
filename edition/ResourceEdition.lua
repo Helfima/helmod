@@ -12,14 +12,12 @@ ResourceEdition = setclass("HMResourceEdition", AbstractEdition)
 -------------------------------------------------------------------------------
 -- On initialization
 --
--- @function [parent=#ResourceEdition] on_init
+-- @function [parent=#ResourceEdition] onInit
 --
 -- @param #Controller parent parent controller
 --
-function ResourceEdition.methods:on_init(parent)
+function ResourceEdition.methods:onInit(parent)
 	self.panelCaption = ({"helmod_resource-edition-panel.title"})
-	self.player = self.parent.player
-	self.model = self.parent.model
 end
 
 -------------------------------------------------------------------------------
@@ -27,20 +25,17 @@ end
 --
 -- @function [parent=#ResourceEdition] getParentPanel
 --
--- @param #LuaPlayer player
---
 -- @return #LuaGuiElement
 --
-function ResourceEdition.methods:getParentPanel(player)
-	return self.parent:getDialogPanel(player)
+function ResourceEdition.methods:getParentPanel()
+	return self.parent:getDialogPanel()
 end
 
 -------------------------------------------------------------------------------
 -- On open
 --
--- @function [parent=#ResourceEdition] on_open
+-- @function [parent=#ResourceEdition] onOpen
 --
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
@@ -49,8 +44,8 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function ResourceEdition.methods:on_open(player, event, action, item, item2, item3)
-	local model = self.model:getModel(player)
+function ResourceEdition.methods:onOpen(event, action, item, item2, item3)
+	local model = Model.getModel()
 	local close = true
 	model.moduleListRefresh = false
 	if model.guiRecipeLast == nil or model.guiRecipeLast ~= item..item2 then
@@ -66,17 +61,16 @@ end
 -------------------------------------------------------------------------------
 -- On close dialog
 --
--- @function [parent=#ResourceEdition] on_close
+-- @function [parent=#ResourceEdition] onClose
 --
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ResourceEdition.methods:on_close(player, event, action, item, item2, item3)
-	local model = self.model:getModel(player)
+function ResourceEdition.methods:onClose(event, action, item, item2, item3)
+	local model = Model.getModel()
 	model.guiRecipeLast = nil
 	model.moduleListRefresh = false
 end
@@ -86,14 +80,12 @@ end
 --
 -- @function [parent=#ResourceEdition] getObjectInfoPanel
 --
--- @param #LuaPlayer player
---
-function ResourceEdition.methods:getObjectInfoPanel(player)
-	local panel = self:getPanel(player)
+function ResourceEdition.methods:getObjectInfoPanel()
+	local panel = self:getPanel()
 	if panel["info"] ~= nil and panel["info"].valid then
 		return panel["info"]
 	end
-	return self:addGuiFrameH(panel, "info", "helmod_frame_resize_row_width", ({"helmod_common.resource"}))
+	return ElementGui.addGuiFrameH(panel, "info", "helmod_frame_resize_row_width", ({"helmod_common.resource"}))
 end
 
 -------------------------------------------------------------------------------
@@ -101,13 +93,12 @@ end
 --
 -- @function [parent=#ResourceEdition] getObject
 --
--- @param #LuaPlayer player
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ResourceEdition.methods:getObject(player, item, item2, item3)
-	local model = self.model:getModel(player)
+function ResourceEdition.methods:getObject(item, item2, item3)
+	local model = Model.getModel()
 	if  model.resources[item2] ~= nil then
 		-- return resource
 		return model.resources[item2]
@@ -120,11 +111,9 @@ end
 --
 -- @function [parent=#ResourceEdition] buildHeaderPanel
 --
--- @param #LuaPlayer player
---
-function ResourceEdition.methods:buildHeaderPanel(player)
-	Logging:debug(self:classname(), "buildHeaderPanel():",player)
-	self:getObjectInfoPanel(player)
+function ResourceEdition.methods:buildHeaderPanel()
+	Logging:debug(self:classname(), "buildHeaderPanel()")
+	self:getObjectInfoPanel()
 end
 
 -------------------------------------------------------------------------------
@@ -132,14 +121,13 @@ end
 --
 -- @function [parent=#ResourceEdition] updateHeader
 --
--- @param #LuaPlayer player
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ResourceEdition.methods:updateHeader(player, item, item2, item3)
+function ResourceEdition.methods:updateHeader(item, item2, item3)
 	Logging:debug(self:classname(), "updateHeader():", item, item2, item3)
-	self:updateObjectInfo(player,item, item2, item3)
+	self:updateObjectInfo(item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -147,32 +135,30 @@ end
 --
 -- @function [parent=#ResourceEdition] updateObjectInfo
 --
--- @param #LuaPlayer player
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ResourceEdition.methods:updateObjectInfo(player, item, item2, item3)
+function ResourceEdition.methods:updateObjectInfo(item, item2, item3)
 	Logging:debug(self:classname(), "updateObjectInfo():", item, item2, item3)
-	local infoPanel = self:getObjectInfoPanel(player)
-	local model = self.model:getModel(player)
-	local default = self.model:getDefault(player)
-	local _resource = self.player:getItemPrototype(item2)
+	local infoPanel = self:getObjectInfoPanel()
+	local model = Model.getModel()
+	local _resource = Player.getItemPrototype(item2)
 
-	local model = self.model:getModel(player)
+	local model = Model.getModel()
 	if  model.ingredients[item2] ~= nil then
-		local resource = self:getObject(player, item, item2, item3)
+		local resource = self:getObject(item, item2, item3)
 		Logging:debug(self:classname(), "updateResourceInfo():resource=",resource)
 		for k,guiName in pairs(infoPanel.children_names) do
 			infoPanel[guiName].destroy()
 		end
 
-		local tablePanel = self:addGuiTable(infoPanel,"table-input",2)
-		self:addGuiButtonSprite(tablePanel, "item", self.player:getIconType(resource), resource.name)
+		local tablePanel = ElementGui.addGuiTable(infoPanel,"table-input",2)
+		ElementGui.addGuiButtonSprite(tablePanel, "item", Player.getIconType(resource), resource.name)
 		if _resource == nil then
-			self:addGuiLabel(tablePanel, "label", resource.name)
+			ElementGui.addGuiLabel(tablePanel, "label", resource.name)
 		else
-			self:addGuiLabel(tablePanel, "label", _resource.localised_name)
+			ElementGui.addGuiLabel(tablePanel, "label", _resource.localised_name)
 		end
 	end
 end

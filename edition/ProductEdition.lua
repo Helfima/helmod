@@ -10,22 +10,18 @@ ProductEdition = setclass("HMProductEdition", Dialog)
 -------------------------------------------------------------------------------
 -- On initialization
 --
--- @function [parent=#ProductEdition] on_init
+-- @function [parent=#ProductEdition] onInit
 --
 -- @param #Controller parent parent controller
 --
-function ProductEdition.methods:on_init(parent)
+function ProductEdition.methods:onInit(parent)
   self.panelCaption = ({"helmod_product-edition-panel.title"})
-  self.player = self.parent.player
-  self.model = self.parent.model
 end
 
 -------------------------------------------------------------------------------
 -- Get the parent panel
 --
 -- @function [parent=#ProductEdition] getParentPanel
---
--- @param #LuaPlayer player
 --
 -- @return #LuaGuiElement
 --
@@ -36,9 +32,8 @@ end
 -------------------------------------------------------------------------------
 -- On open
 --
--- @function [parent=#ProductEdition] on_open
+-- @function [parent=#ProductEdition] onOpen
 --
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
@@ -47,8 +42,8 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function ProductEdition.methods:on_open(player, event, action, item, item2, item3)
-  local model = self.model:getModel(player)
+function ProductEdition.methods:onOpen(event, action, item, item2, item3)
+  local model = Model.getModel()
   local close = true
   if model.guiProductLast == nil or model.guiProductLast ~= item then
     close = false
@@ -60,17 +55,16 @@ end
 -------------------------------------------------------------------------------
 -- On close dialog
 --
--- @function [parent=#ProductEdition] on_close
+-- @function [parent=#ProductEdition] onClose
 --
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductEdition.methods:on_close(player, event, action, item, item2, item3)
-  local model = self.model:getModel(player)
+function ProductEdition.methods:onClose(event, action, item, item2, item3)
+  local model = Model.getModel()
   model.guiProductLast = nil
 end
 
@@ -79,14 +73,12 @@ end
 --
 -- @function [parent=#ProductEdition] getInfoPanel
 --
--- @param #LuaPlayer player
---
-function ProductEdition.methods:getInfoPanel(player)
-  local panel = self:getPanel(player)
+function ProductEdition.methods:getInfoPanel()
+  local panel = self:getPanel()
   if panel["info"] ~= nil and panel["info"].valid then
     return panel["info"]
   end
-  return self:addGuiFrameV(panel, "info", "helmod_frame_resize_row_width")
+  return ElementGui.addGuiFrameV(panel, "info", "helmod_frame_resize_row_width")
 end
 
 -------------------------------------------------------------------------------
@@ -94,14 +86,12 @@ end
 --
 -- @function [parent=#ProductEdition] getButtonsPanel
 --
--- @param #LuaPlayer player
---
-function ProductEdition.methods:getButtonsPanel(player)
-  local panel = self:getPanel(player)
+function ProductEdition.methods:getButtonsPanel()
+  local panel = self:getPanel()
   if panel["buttons"] ~= nil and panel["buttons"].valid then
     return panel["buttons"]
   end
-  return self:addGuiFlowH(panel, "buttons")
+  return ElementGui.addGuiFlowH(panel, "buttons")
 end
 
 -------------------------------------------------------------------------------
@@ -109,34 +99,32 @@ end
 --
 -- @function [parent=#ProductEdition] after_open
 --
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductEdition.methods:after_open(player, event, action, item, item2, item3)
-  self.parent:send_event(player, "HMRecipeEdition", "CLOSE")
-  self.parent:send_event(player, "HMRecipeSelector", "CLOSE")
-  self.parent:send_event(player, "HMSettings", "CLOSE")
-  self:getInfoPanel(player)
+function ProductEdition.methods:after_open(event, action, item, item2, item3)
+  Controller.sendEvent(nil, "HMRecipeEdition", "CLOSE")
+  Controller.sendEvent(nil, "HMRecipeSelector", "CLOSE")
+  Controller.sendEvent(nil, "HMSettings", "CLOSE")
+  self:getInfoPanel()
 end
 
 -------------------------------------------------------------------------------
 -- On update
 --
--- @function [parent=#ProductEdition] on_update
+-- @function [parent=#ProductEdition] onUpdate
 --
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductEdition.methods:on_update(player, event, action, item, item2, item3)
-  self:updateInfo(player, item, item2, item3)
+function ProductEdition.methods:onUpdate(event, action, item, item2, item3)
+  self:updateInfo(item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -144,15 +132,14 @@ end
 --
 -- @function [parent=#ProductEdition] updateInfo
 --
--- @param #LuaPlayer player
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductEdition.methods:updateInfo(player, item, item2, item3)
+function ProductEdition.methods:updateInfo(item, item2, item3)
   Logging:debug(self:classname(), "updateInfo():", item, item2, item3)
-  local infoPanel = self:getInfoPanel(player)
-  local model = self.model:getModel(player)
+  local infoPanel = self:getInfoPanel()
+  local model = Model.getModel()
 
   if model.blocks[item] ~= nil then
     local product = nil
@@ -167,15 +154,15 @@ function ProductEdition.methods:updateInfo(player, item, item2, item3)
         infoPanel[guiName].destroy()
       end
 
-      local tablePanel = self:addGuiTable(infoPanel,"table-header",2)
-      self:addGuiButtonSprite(tablePanel, "product", self.player:getIconType(product), product.name)
-      self:addGuiLabel(tablePanel, "product-label", self.player:getLocalisedName(player, product))
+      local tablePanel = ElementGui.addGuiTable(infoPanel,"table-header",2)
+      ElementGui.addGuiButtonSprite(tablePanel, "product", Player.getIconType(product), product.name)
+      ElementGui.addGuiLabel(tablePanel, "product-label", Player.getLocalisedName(product))
 
-      self:addGuiLabel(tablePanel, "quantity-label", ({"helmod_common.quantity"}))
-      self:addGuiText(tablePanel, "quantity", product.count)
+      ElementGui.addGuiLabel(tablePanel, "quantity-label", ({"helmod_common.quantity"}))
+      ElementGui.addGuiText(tablePanel, "quantity", product.count)
 
-      self:addGuiButton(tablePanel, self:classname().."=product-update=ID="..item.."=", product.name, "helmod_button_default", ({"helmod_button.save"}))
-      self:addGuiButton(tablePanel, self:classname().."=CLOSE=ID="..item.."=", product.name, "helmod_button_default", ({"helmod_button.close"}))
+      ElementGui.addGuiButton(tablePanel, self:classname().."=product-update=ID="..item.."=", product.name, "helmod_button_default", ({"helmod_button.save"}))
+      ElementGui.addGuiButton(tablePanel, self:classname().."=CLOSE=ID="..item.."=", product.name, "helmod_button_default", ({"helmod_button.close"}))
     end
   end
 end
@@ -183,29 +170,28 @@ end
 -------------------------------------------------------------------------------
 -- On event
 --
--- @function [parent=#ProductEdition] on_event
+-- @function [parent=#ProductEdition] onEvent
 --
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductEdition.methods:on_event(player, event, action, item, item2, item3)
-  Logging:debug(self:classname(), "on_event():", action, item, item2, item3)
-  local model = self.model:getModel(player)
-  if self.player:isAdmin(player) or model.owner == player.name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
+function ProductEdition.methods:onEvent(event, action, item, item2, item3)
+  Logging:debug(self:classname(), "onEvent():", action, item, item2, item3)
+  local model = Model.getModel()
+  if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
     if action == "product-update" then
       local products = {}
-      local inputPanel = self:getInfoPanel(player)["table-header"]
+      local inputPanel = self:getInfoPanel()["table-header"]
 
-      local quantity = self:getInputNumber(inputPanel["quantity"])
+      local quantity = ElementGui.getInputNumber(inputPanel["quantity"])
 
-      self.model:updateProduct(player, item, item2, quantity)
-      self.model:update(player)
-      self.parent:refreshDisplayData(player, nil, item, item2)
-      self:close(player)
+      Model.updateProduct(item, item2, quantity)
+      Model.update()
+      self.parent:refreshDisplayData(nil, item, item2)
+      self:close()
     end
   end
 end

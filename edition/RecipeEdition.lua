@@ -12,14 +12,12 @@ RecipeEdition = setclass("HMRecipeEdition", AbstractEdition)
 -------------------------------------------------------------------------------
 -- On initialization
 --
--- @function [parent=#RecipeEdition] on_init
+-- @function [parent=#RecipeEdition] onInit
 --
 -- @param #Controller parent parent controller
 --
-function RecipeEdition.methods:on_init(parent)
+function RecipeEdition.methods:onInit(parent)
   self.panelCaption = ({"helmod_recipe-edition-panel.title"})
-  self.player = self.parent.player
-  self.model = self.parent.model
 end
 
 -------------------------------------------------------------------------------
@@ -27,20 +25,17 @@ end
 --
 -- @function [parent=#RecipeEdition] getParentPanel
 --
--- @param #LuaPlayer player
---
 -- @return #LuaGuiElement
 --
-function RecipeEdition.methods:getParentPanel(player)
-  return self.parent:getDialogPanel(player)
+function RecipeEdition.methods:getParentPanel()
+  return self.parent:getDialogPanel()
 end
 
 -------------------------------------------------------------------------------
 -- On open
 --
--- @function [parent=#RecipeEdition] on_open
+-- @function [parent=#RecipeEdition] onOpen
 --
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
@@ -49,8 +44,8 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function RecipeEdition.methods:on_open(player, event, action, item, item2, item3)
-  local model = self.model:getModel(player)
+function RecipeEdition.methods:onOpen(event, action, item, item2, item3)
+  local model = Model.getModel()
   local close = true
   model.moduleListRefresh = false
   if model.guiRecipeLast == nil or model.guiRecipeLast ~= item..item2 then
@@ -66,17 +61,16 @@ end
 -------------------------------------------------------------------------------
 -- On close dialog
 --
--- @function [parent=#RecipeEdition] on_close
+-- @function [parent=#RecipeEdition] onClose
 --
--- @param #LuaPlayer player
 -- @param #LuaEvent event
 -- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function RecipeEdition.methods:on_close(player, event, action, item, item2, item3)
-  local model = self.model:getModel(player)
+function RecipeEdition.methods:onClose(event, action, item, item2, item3)
+  local model = Model.getModel()
   model.guiRecipeLast = nil
   model.moduleListRefresh = false
 end
@@ -86,14 +80,14 @@ end
 --
 -- @function [parent=#RecipeEdition] getRecipePanel
 --
--- @param #LuaPlayer player
+-- @return #LuaGuiElement
 --
-function RecipeEdition.methods:getRecipePanel(player)
-  local panel = self:getPanel(player)
+function RecipeEdition.methods:getRecipePanel()
+  local panel = self:getPanel()
   if panel["recipe"] ~= nil and panel["recipe"].valid then
     return panel["recipe"]
   end
-  return self:addGuiFlowH(panel, "recipe", "helmod_flow_resize_row_width")
+  return ElementGui.addGuiFlowH(panel, "recipe", "helmod_flow_resize_row_width")
 end
 
 -------------------------------------------------------------------------------
@@ -101,14 +95,14 @@ end
 --
 -- @function [parent=#RecipeEdition] getObjectInfoPanel
 --
--- @param #LuaPlayer player
+-- @return #LuaGuiElement
 --
-function RecipeEdition.methods:getObjectInfoPanel(player)
-  local panel = self:getRecipePanel(player)
+function RecipeEdition.methods:getObjectInfoPanel()
+  local panel = self:getRecipePanel()
   if panel["info"] ~= nil and panel["info"].valid then
     return panel["info"]
   end
-  return self:addGuiFrameH(panel, "info", "helmod_frame_recipe_info", ({"helmod_common.recipe"}))
+  return ElementGui.addGuiFrameH(panel, "info", "helmod_frame_recipe_info", ({"helmod_common.recipe"}))
 end
 
 -------------------------------------------------------------------------------
@@ -116,14 +110,14 @@ end
 --
 -- @function [parent=#RecipeEdition] getOtherInfoPanel
 --
--- @param #LuaPlayer player
+-- @return #LuaGuiElement
 --
-function RecipeEdition.methods:getOtherInfoPanel(player)
-  local panel = self:getRecipePanel(player)
+function RecipeEdition.methods:getOtherInfoPanel()
+  local panel = self:getRecipePanel()
   if panel["other-info"] ~= nil and panel["other-info"].valid then
     return panel["other-info"]
   end
-  return self:addGuiFlowV(panel, "other-info", "helmod_flow_resize_row_width")
+  return ElementGui.addGuiFlowV(panel, "other-info", "helmod_flow_resize_row_width")
 end
 
 -------------------------------------------------------------------------------
@@ -131,14 +125,14 @@ end
 --
 -- @function [parent=#RecipeEdition] getRecipeIngredientsPanel
 --
--- @param #LuaPlayer player
+-- @return #LuaGuiElement
 --
-function RecipeEdition.methods:getRecipeIngredientsPanel(player)
-  local panel = self:getOtherInfoPanel(player)
+function RecipeEdition.methods:getRecipeIngredientsPanel()
+  local panel = self:getOtherInfoPanel()
   if panel["ingredients"] ~= nil and panel["ingredients"].valid then
     return panel["ingredients"]
   end
-  return self:addGuiFrameV(panel, "ingredients", "helmod_frame_recipe_ingredients", ({"helmod_common.ingredients"}))
+  return ElementGui.addGuiFrameV(panel, "ingredients", "helmod_frame_recipe_ingredients", ({"helmod_common.ingredients"}))
 end
 
 -------------------------------------------------------------------------------
@@ -146,14 +140,14 @@ end
 --
 -- @function [parent=#RecipeEdition] getRecipeProductsPanel
 --
--- @param #LuaPlayer player
+-- @return #LuaGuiElement
 --
-function RecipeEdition.methods:getRecipeProductsPanel(player)
-  local panel = self:getOtherInfoPanel(player)
+function RecipeEdition.methods:getRecipeProductsPanel()
+  local panel = self:getOtherInfoPanel()
   if panel["products"] ~= nil and panel["products"].valid then
     return panel["products"]
   end
-  return self:addGuiFrameV(panel, "products", "helmod_frame_recipe_products", ({"helmod_common.products"}))
+  return ElementGui.addGuiFrameV(panel, "products", "helmod_frame_recipe_products", ({"helmod_common.products"}))
 end
 
 -------------------------------------------------------------------------------
@@ -161,14 +155,13 @@ end
 --
 -- @function [parent=#RecipeEdition] getObject
 --
--- @param #LuaPlayer player
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function RecipeEdition.methods:getObject(player, item, item2, item3)
+function RecipeEdition.methods:getObject(item, item2, item3)
   Logging:debug(self:classname(), "getObject():", item, item2, item3)
-  local model = self.model:getModel(player)
+  local model = Model.getModel()
   if  model.blocks[item] ~= nil and model.blocks[item].recipes[item2] ~= nil then
     -- return recipe
     return model.blocks[item].recipes[item2]
@@ -181,13 +174,11 @@ end
 --
 -- @function [parent=#RecipeEdition] buildHeaderPanel
 --
--- @param #LuaPlayer player
---
-function RecipeEdition.methods:buildHeaderPanel(player)
-  Logging:debug(self:classname(), "buildHeaderPanel():",player)
-  self:getObjectInfoPanel(player)
-  self:getRecipeIngredientsPanel(player)
-  self:getRecipeProductsPanel(player)
+function RecipeEdition.methods:buildHeaderPanel()
+  Logging:debug(self:classname(), "buildHeaderPanel()")
+  self:getObjectInfoPanel()
+  self:getRecipeIngredientsPanel()
+  self:getRecipeProductsPanel()
 end
 
 -------------------------------------------------------------------------------
@@ -195,16 +186,15 @@ end
 --
 -- @function [parent=#RecipeEdition] updateHeader
 --
--- @param #LuaPlayer player
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function RecipeEdition.methods:updateHeader(player, item, item2, item3)
+function RecipeEdition.methods:updateHeader(item, item2, item3)
   Logging:debug(self:classname(), "updateHeader():", item, item2, item3)
-  self:updateObjectInfo(player, item, item2, item3)
-  self:updateRecipeIngredients(player, item, item2, item3)
-  self:updateRecipeProducts(player, item, item2, item3)
+  self:updateObjectInfo(item, item2, item3)
+  self:updateRecipeIngredients(item, item2, item3)
+  self:updateRecipeProducts(item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -212,45 +202,40 @@ end
 --
 -- @function [parent=#RecipeEdition] updateObjectInfo
 --
--- @param #LuaPlayer player
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function RecipeEdition.methods:updateObjectInfo(player, item, item2, item3)
+function RecipeEdition.methods:updateObjectInfo(item, item2, item3)
   Logging:debug(self:classname(), "updateObjectInfo():", item, item2, item3)
-  local infoPanel = self:getObjectInfoPanel(player)
-  local model = self.model:getModel(player)
-  local default = self.model:getDefault(player)
-
-
-  local model = self.model:getModel(player)
+  local infoPanel = self:getObjectInfoPanel()
+  local model = Model.getModel()
   if  model.blocks[item] ~= nil then
-    local recipe = self:getObject(player, item, item2, item3)
+    local recipe = self:getObject(item, item2, item3)
     if recipe ~= nil then
       Logging:debug(self:classname(), "updateObjectInfo():recipe=",recipe)
       for k,guiName in pairs(infoPanel.children_names) do
         infoPanel[guiName].destroy()
       end
 
-      local tablePanel = self:addGuiTable(infoPanel,"table-input",2)
-      self:addGuiButtonSprite(tablePanel, "recipe", self.player:getRecipeIconType(player, recipe), recipe.name)
+      local tablePanel = ElementGui.addGuiTable(infoPanel,"table-input",2)
+      ElementGui.addGuiButtonSprite(tablePanel, "recipe", Player.getRecipeIconType(recipe), recipe.name)
 
-      local lua_recipe = self.player:getRecipe(player, recipe.name)
+      local lua_recipe = RecipePrototype.load(recipe).native()
       if lua_recipe == nil then
-        self:addGuiLabel(tablePanel, "label", recipe.name)
+        ElementGui.addGuiLabel(tablePanel, "label", lua_recipe.name)
       else
-        self:addGuiLabel(tablePanel, "label", lua_recipe.localised_name)
+        ElementGui.addGuiLabel(tablePanel, "label", lua_recipe.localised_name)
       end
 
 
-      self:addGuiLabel(tablePanel, "label-energy", ({"helmod_common.energy"}))
-      self:addGuiLabel(tablePanel, "energy", recipe.energy)
+      ElementGui.addGuiLabel(tablePanel, "label-energy", ({"helmod_common.energy"}))
+      ElementGui.addGuiLabel(tablePanel, "energy", RecipePrototype.getEnergy())
 
-      self:addGuiLabel(tablePanel, "label-production", ({"helmod_common.production"}))
-      self:addGuiText(tablePanel, "production", recipe.production, "helmod_textfield")
+      ElementGui.addGuiLabel(tablePanel, "label-production", ({"helmod_common.production"}))
+      ElementGui.addGuiText(tablePanel, "production", recipe.production, "helmod_textfield")
 
-      self:addGuiButton(tablePanel, self:classname().."=object-update=ID="..item.."=", recipe.id, "helmod_button_default", ({"helmod_button.update"}))		--
+      ElementGui.addGuiButton(tablePanel, self:classname().."=object-update=ID="..item.."=", recipe.id, "helmod_button_default", ({"helmod_button.update"}))
     end
   end
 end
@@ -260,36 +245,33 @@ end
 --
 -- @function [parent=#RecipeEdition] updateRecipeIngredients
 --
--- @param #LuaPlayer player
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function RecipeEdition.methods:updateRecipeIngredients(player, item, item2, item3)
+function RecipeEdition.methods:updateRecipeIngredients(item, item2, item3)
   Logging:debug(self:classname(), "updateRecipeIngredients():", item, item2, item3)
-  local ingredientsPanel = self:getRecipeIngredientsPanel(player)
-  local model = self.model:getModel(player)
-  local recipe = self:getObject(player, item, item2, item3)
+  local ingredientsPanel = self:getRecipeIngredientsPanel()
+  local recipe = self:getObject(item, item2, item3)
 
   if recipe ~= nil then
-    local lua_recipe = self.player:getRecipe(player, recipe.name)
-    if lua_recipe ~= nil then
+    local lua_recipe = RecipePrototype.load(recipe).native()
 
-      for k,guiName in pairs(ingredientsPanel.children_names) do
-        ingredientsPanel[guiName].destroy()
+    for k,guiName in pairs(ingredientsPanel.children_names) do
+      ingredientsPanel[guiName].destroy()
+    end
+    local tablePanel= ElementGui.addGuiTable(ingredientsPanel, "table-ingredients", 6)
+
+    for key, ingredient in pairs(RecipePrototype.getIngredients()) do
+      local tooltip = nil
+      local localisedName = Player.getLocalisedName(ingredient)
+      if ingredient.amount ~= nil then
+        tooltip = ({"tooltip.element-amount", localisedName, ingredient.amount})
+      else
+        tooltip = ({"tooltip.element-amount-probability", localisedName, ingredient.amount_min, ingredient.amount_max, ingredient.probability})
       end
-      local tablePanel= self:addGuiTable(ingredientsPanel, "table-ingredients", 6)
-      for key, ingredient in pairs(lua_recipe.ingredients) do
-        local tooltip = nil
-        local localisedName = self.player:getLocalisedName(player, ingredient)
-        if ingredient.amount ~= nil then
-          tooltip = ({"tooltip.element-amount", localisedName, ingredient.amount})
-        else
-          tooltip = ({"tooltip.element-amount-probability", localisedName, ingredient.amount_min, ingredient.amount_max, ingredient.probability})
-        end
-        self:addGuiButtonSpriteSm(tablePanel, "item=ID=", self.player:getIconType(ingredient), ingredient.name, ingredient.name, tooltip)
-        self:addGuiLabel(tablePanel, ingredient.name, self.model:getElementAmount(ingredient), "helmod_label_sm")
-      end
+      ElementGui.addGuiButtonSpriteSm(tablePanel, "item=ID=", Player.getIconType(ingredient), ingredient.name, ingredient.name, tooltip)
+      ElementGui.addGuiLabel(tablePanel, ingredient.name, Product.getElementAmount(ingredient), "helmod_label_sm")
     end
   end
 end
@@ -299,35 +281,33 @@ end
 --
 -- @function [parent=#RecipeEdition] updateRecipeProducts
 --
--- @param #LuaPlayer player
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function RecipeEdition.methods:updateRecipeProducts(player, item, item2, item3)
+function RecipeEdition.methods:updateRecipeProducts(item, item2, item3)
   Logging:debug(self:classname(), "updateRecipeProducts():", item, item2, item3)
-  local productsPanel = self:getRecipeProductsPanel(player)
-  local model = self.model:getModel(player)
-  local recipe = self:getObject(player, item, item2, item3)
+  local productsPanel = self:getRecipeProductsPanel()
+  local recipe = self:getObject(item, item2, item3)
 
   if recipe ~= nil then
-    local lua_recipe = self.player:getRecipe(player, recipe.name)
+    local lua_recipe = RecipePrototype.load(recipe).native()
     if lua_recipe ~= nil then
 
       for k,guiName in pairs(productsPanel.children_names) do
         productsPanel[guiName].destroy()
       end
-      local tablePanel= self:addGuiTable(productsPanel, "table-products", 6)
-      for key, product in pairs(lua_recipe.products) do
+      local tablePanel= ElementGui.addGuiTable(productsPanel, "table-products", 6)
+      for key, product in pairs(RecipePrototype.getProducts()) do
         local tooltip = nil
-        local localisedName = self.player:getLocalisedName(player, product)
+        local localisedName = Player.getLocalisedName(product)
         if product.amount ~= nil then
           tooltip = ({"tooltip.element-amount", localisedName, product.amount})
         else
           tooltip = ({"tooltip.element-amount-probability", localisedName, product.amount_min, product.amount_max, product.probability})
         end
-        self:addGuiButtonSpriteSm(tablePanel, "item=ID=", self.player:getIconType(product), product.name, product.name, tooltip)
-        self:addGuiLabel(tablePanel, product.name, self.model:getElementAmount(product), "helmod_label_sm")
+        ElementGui.addGuiButtonSpriteSm(tablePanel, "item=ID=", Player.getIconType(product), product.name, product.name, tooltip)
+        ElementGui.addGuiLabel(tablePanel, product.name, Product.getElementAmount(product), "helmod_label_sm")
       end
     end
   end

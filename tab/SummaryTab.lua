@@ -3,7 +3,7 @@ require "tab.AbstractTab"
 -- Class to build tab
 --
 -- @module SummaryTab
--- @extends #ElementGui
+-- @extends #AbstractTab
 --
 
 SummaryTab = setclass("HMSummaryTab", AbstractTab)
@@ -24,108 +24,106 @@ end
 --
 -- @function [parent=#SummaryTab] updateData
 --
--- @param #LuaPlayer player
---
-function SummaryTab.methods:updateData(player)
-  Logging:debug(self:classname(), "updateSummary():", player)
-  local model = self.model:getModel(player)
+function SummaryTab.methods:updateData()
+  Logging:debug(self:classname(), "updateSummary()")
+  local model = Model.getModel()
   -- data
-  local scrollPanel = self.parent:getResultScrollPanel(player, {"helmod_result-panel.tab-title-summary"})
+  local scrollPanel = self.parent:getResultScrollPanel({"helmod_result-panel.tab-title-summary"})
   
   -- resources
-  local resourcesPanel = self:addGuiFrameV(scrollPanel, "resources", "helmod_frame_resize_row_width", ({"helmod_common.resources"}))
-  self.player:setStyle(player, resourcesPanel, "data", "minimal_width")
-  self.player:setStyle(player, resourcesPanel, "data", "maximal_width")
+  local resourcesPanel = ElementGui.addGuiFrameV(scrollPanel, "resources", "helmod_frame_resize_row_width", ({"helmod_common.resources"}))
+  Player.setStyle(resourcesPanel, "data", "minimal_width")
+  Player.setStyle(resourcesPanel, "data", "maximal_width")
 
-  local resourcesTable = self:addGuiTable(resourcesPanel,"table-resources",4)
-  self:addGuiLabel(resourcesTable, "header-ingredient", ({"helmod_result-panel.col-header-ingredient"}))
-  self:addGuiLabel(resourcesTable, "header-block", ({"helmod_result-panel.col-header-production-block"}))
-  self:addGuiLabel(resourcesTable, "header-cargo-wagon", ({"helmod_result-panel.col-header-wagon"}))
-  self:addGuiLabel(resourcesTable, "header-chest", ({"helmod_result-panel.col-header-storage"}))
-  --  self:addGuiLabel(resourcesTable, "header-extractor", ({"helmod_result-panel.col-header-extractor"}))
-  --  self:addGuiLabel(resourcesTable, "header-beacon", ({"helmod_result-panel.col-header-beacon"}))
-  --  self:addGuiLabel(resourcesTable, "header-energy", ({"helmod_result-panel.col-header-energy"}))
+  local resourcesTable = ElementGui.addGuiTable(resourcesPanel,"table-resources",4)
+  ElementGui.addGuiLabel(resourcesTable, "header-ingredient", ({"helmod_result-panel.col-header-ingredient"}))
+  ElementGui.addGuiLabel(resourcesTable, "header-block", ({"helmod_result-panel.col-header-production-block"}))
+  ElementGui.addGuiLabel(resourcesTable, "header-cargo-wagon", ({"helmod_result-panel.col-header-wagon"}))
+  ElementGui.addGuiLabel(resourcesTable, "header-chest", ({"helmod_result-panel.col-header-storage"}))
+  --  ElementGui.addGuiLabel(resourcesTable, "header-extractor", ({"helmod_result-panel.col-header-extractor"}))
+  --  ElementGui.addGuiLabel(resourcesTable, "header-beacon", ({"helmod_result-panel.col-header-beacon"}))
+  --  ElementGui.addGuiLabel(resourcesTable, "header-energy", ({"helmod_result-panel.col-header-energy"}))
 
   for _, resource in pairs(model.resources) do
     -- ingredient
-    local guiIngredient = self:addGuiFlowH(resourcesTable,"ingredient"..resource.name)
-    self:addGuiLabel(guiIngredient, "count", self:formatNumberElement(resource.count), "helmod_label_right_60")
-    self:addGuiButtonSprite(guiIngredient, "HMIngredient=OPEN=ID=", self.player:getItemIconType(resource), resource.name, resource.name, self.player:getLocalisedName(player, resource))
+    local guiIngredient = ElementGui.addGuiFlowH(resourcesTable,"ingredient"..resource.name)
+    ElementGui.addGuiLabel(guiIngredient, "count", Format.formatNumberElement(resource.count), "helmod_label_right_60")
+    ElementGui.addGuiButtonSprite(guiIngredient, "HMIngredient=OPEN=ID=", Player.getItemIconType(resource), resource.name, resource.name, Player.getLocalisedName(resource))
 
     -- col block
-    local guiBlock = self:addGuiFlowH(resourcesTable,"block"..resource.name)
-    self:addGuiLabel(guiBlock, "count", self:formatNumberElement(resource.blocks), "helmod_label_right_50")
+    local guiBlock = ElementGui.addGuiFlowH(resourcesTable,"block"..resource.name)
+    ElementGui.addGuiLabel(guiBlock, "count", Format.formatNumberElement(resource.blocks), "helmod_label_right_50")
 
     -- col wagon
     local wagon = resource.wagon
-    local guiWagon = self:addGuiFlowH(resourcesTable,"wagon"..resource.name)
+    local guiWagon = ElementGui.addGuiFlowH(resourcesTable,"wagon"..resource.name)
     if wagon ~= nil then
-      self:addGuiLabel(guiWagon, "count", self:formatNumberElement(wagon.limit_count).."/"..self:formatNumberElement(wagon.count), "helmod_label_right_70")
-      self:addGuiButtonSprite(guiWagon, "HMWagon=OPEN=ID=", self.player:getIconType(wagon), wagon.name, wagon.name, self.player:getLocalisedName(player, wagon))
+      ElementGui.addGuiLabel(guiWagon, "count", Format.formatNumberElement(wagon.limit_count).."/"..Format.formatNumberElement(wagon.count), "helmod_label_right_70")
+      ElementGui.addGuiButtonSprite(guiWagon, "HMWagon=OPEN=ID=", Player.getIconType(wagon), wagon.name, wagon.name, Player.getLocalisedName(wagon))
     end
 
     -- col storage
     local storage = resource.storage
-    local guiStorage = self:addGuiFlowH(resourcesTable,"storage"..resource.name)
+    local guiStorage = ElementGui.addGuiFlowH(resourcesTable,"storage"..resource.name)
     if storage ~= nil then
-      self:addGuiLabel(guiStorage, "count", self:formatNumberElement(storage.limit_count).."/"..self:formatNumberElement(storage.count), "helmod_label_right_70")
-      self:addGuiButtonSprite(guiStorage, "HMStorage=OPEN=ID=", self.player:getIconType(storage), storage.name, storage.name, self.player:getLocalisedName(player, storage))
+      ElementGui.addGuiLabel(guiStorage, "count", Format.formatNumberElement(storage.limit_count).."/"..Format.formatNumberElement(storage.count), "helmod_label_right_70")
+      ElementGui.addGuiButtonSprite(guiStorage, "HMStorage=OPEN=ID=", Player.getIconType(storage), storage.name, storage.name, Player.getLocalisedName(storage))
     end
   end
 
-  local energyPanel = self:addGuiFrameV(scrollPanel, "energy", "helmod_frame_resize_row_width", ({"helmod_common.generators"}))
-  self.player:setStyle(player, energyPanel, "data", "minimal_width")
-  self.player:setStyle(player, energyPanel, "data", "maximal_width")
+  local energyPanel = ElementGui.addGuiFrameV(scrollPanel, "energy", "helmod_frame_resize_row_width", ({"helmod_common.generators"}))
+  Player.setStyle(energyPanel, "data", "minimal_width")
+  Player.setStyle(energyPanel, "data", "maximal_width")
 
-  local resultTable = self:addGuiTable(energyPanel,"table-energy",2)
+  local resultTable = ElementGui.addGuiTable(energyPanel,"table-energy",2)
 
   if model.generators ~= nil then
     for _, item in pairs(model.generators) do
-      local guiCell = self:addGuiFlowH(resultTable,"cell_"..item.name)
-      self:addGuiLabel(guiCell, item.name, self:formatNumberKilo(item.count), "helmod_label_right_50")
-      self:addGuiButtonSprite(guiCell, "HMGenerator=OPEN=ID=", "item", item.name, item.name, self.player:getLocalisedName(player, item))
+      local guiCell = ElementGui.addGuiFlowH(resultTable,"cell_"..item.name)
+      ElementGui.addGuiLabel(guiCell, item.name, Format.formatNumberKilo(item.count), "helmod_label_right_50")
+      ElementGui.addGuiButtonSprite(guiCell, "HMGenerator=OPEN=ID=", "item", item.name, item.name, Player.getLocalisedName(item))
     end
   end
 
   -- factories
-  local factoryPanel = self:addGuiFrameV(scrollPanel, "factory", "helmod_frame_resize_row_width", ({"helmod_common.factories"}))
-  self.player:setStyle(player, factoryPanel, "data", "minimal_width")
-  self.player:setStyle(player, factoryPanel, "data", "maximal_width")
+  local factoryPanel = ElementGui.addGuiFrameV(scrollPanel, "factory", "helmod_frame_resize_row_width", ({"helmod_common.factories"}))
+  Player.setStyle(factoryPanel, "data", "minimal_width")
+  Player.setStyle(factoryPanel, "data", "maximal_width")
 
   if model.summary ~= nil then
-    local resultTable = self:addGuiTable(factoryPanel,"table-factory",10)
+    local resultTable = ElementGui.addGuiTable(factoryPanel,"table-factory",10)
 
     for _, element in pairs(model.summary.factories) do
-      local guiCell = self:addGuiFlowH(resultTable,"cell_"..element.name)
-      self:addGuiLabel(guiCell, element.name, self:formatNumberKilo(element.count), "helmod_label_right_50")
-      self:addGuiButtonSprite(guiCell, "HMFactories=OPEN=ID=", "item", element.name, element.name, self.player:getLocalisedName(player, element))
+      local guiCell = ElementGui.addGuiFlowH(resultTable,"cell_"..element.name)
+      ElementGui.addGuiLabel(guiCell, element.name, Format.formatNumberKilo(element.count), "helmod_label_right_50")
+      ElementGui.addGuiButtonSprite(guiCell, "HMFactories=OPEN=ID=", "item", element.name, element.name, Player.getLocalisedName(element))
     end
 
     -- beacons
-    local beaconPanel = self:addGuiFrameV(scrollPanel, "beacon", "helmod_frame_resize_row_width", ({"helmod_common.beacons"}))
-    self.player:setStyle(player, beaconPanel, "data", "minimal_width")
-    self.player:setStyle(player, beaconPanel, "data", "maximal_width")
+    local beaconPanel = ElementGui.addGuiFrameV(scrollPanel, "beacon", "helmod_frame_resize_row_width", ({"helmod_common.beacons"}))
+    Player.setStyle(beaconPanel, "data", "minimal_width")
+    Player.setStyle(beaconPanel, "data", "maximal_width")
 
-    local resultTable = self:addGuiTable(beaconPanel,"table-beacon",10)
+    local resultTable = ElementGui.addGuiTable(beaconPanel,"table-beacon",10)
 
     for _, element in pairs(model.summary.beacons) do
-      local guiCell = self:addGuiFlowH(resultTable,"cell_"..element.name)
-      self:addGuiLabel(guiCell, element.name, self:formatNumberKilo(element.count), "helmod_label_right_50")
-      self:addGuiButtonSprite(guiCell, "HMBeacons=OPEN=ID=", "item", element.name, element.name, self.player:getLocalisedName(player, element))
+      local guiCell = ElementGui.addGuiFlowH(resultTable,"cell_"..element.name)
+      ElementGui.addGuiLabel(guiCell, element.name, Format.formatNumberKilo(element.count), "helmod_label_right_50")
+      ElementGui.addGuiButtonSprite(guiCell, "HMBeacons=OPEN=ID=", "item", element.name, element.name, Player.getLocalisedName(element))
     end
 
     -- modules
-    local modulesPanel = self:addGuiFrameV(scrollPanel, "modules", "helmod_frame_resize_row_width", ({"helmod_common.modules"}))
-    self.player:setStyle(player, modulesPanel, "data", "minimal_width")
-    self.player:setStyle(player, modulesPanel, "data", "maximal_width")
+    local modulesPanel = ElementGui.addGuiFrameV(scrollPanel, "modules", "helmod_frame_resize_row_width", ({"helmod_common.modules"}))
+    Player.setStyle(modulesPanel, "data", "minimal_width")
+    Player.setStyle(modulesPanel, "data", "maximal_width")
 
-    local resultTable = self:addGuiTable(modulesPanel,"table-modules",10)
+    local resultTable = ElementGui.addGuiTable(modulesPanel,"table-modules",10)
 
     for _, element in pairs(model.summary.modules) do
       -- col icon
-      local guiCell = self:addGuiFlowH(resultTable,"cell_"..element.name)
-      self:addGuiLabel(guiCell, element.name, self:formatNumberKilo(element.count), "helmod_label_right_50")
-      self:addGuiButtonSprite(guiCell, "HMModules=OPEN=ID=", "item", element.name, element.name, self.player:getLocalisedName(player, element))
+      local guiCell = ElementGui.addGuiFlowH(resultTable,"cell_"..element.name)
+      ElementGui.addGuiLabel(guiCell, element.name, Format.formatNumberKilo(element.count), "helmod_label_right_50")
+      ElementGui.addGuiButtonSprite(guiCell, "HMModules=OPEN=ID=", "item", element.name, element.name, Player.getLocalisedName(element))
     end
   end
 end

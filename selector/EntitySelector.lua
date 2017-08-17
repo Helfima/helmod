@@ -24,16 +24,15 @@ end
 --
 -- @function [parent=#EntitySelector] updateGroups
 --
--- @param #LuaPlayer player
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
 -- @return {groupList, prototypeGroups}
 --
-function EntitySelector.methods:updateGroups(player, item, item2, item3)
+function EntitySelector.methods:updateGroups(item, item2, item3)
   Logging:trace(self:classname(), "on_update():", item, item2, item3)
-  local globalPlayer = self.player:getGlobal(player)
+  local globalPlayer = Player.getGlobal()
   -- recuperation recipes
   local prototypeGroups = {}
   local groupList = {}
@@ -41,7 +40,7 @@ function EntitySelector.methods:updateGroups(player, item, item2, item3)
   local prototypeFilterProduct = self:getProductFilter()
 
   local firstGroup = nil
-  for key, prototype in spairs(self.player:getEntityPrototypes(),function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
+  for key, prototype in spairs(Player.getEntityPrototypes(),function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
     -- ne traite pas les entity sans name
     if prototype.name ~= nil then
       local find = false
@@ -56,7 +55,7 @@ function EntitySelector.methods:updateGroups(player, item, item2, item3)
         find = true
       end
 
-      local filter_show_hidden = self.player:getGlobalSettings(player, "filter_show_hidden")
+      local filter_show_hidden = Player.getGlobalSettings("filter_show_hidden")
       if find == true and (prototype.valid == true or filter_show_hidden == true) then
         if firstGroup == nil then firstGroup = prototype.group.name end
         groupList[prototype.group.name] = prototype.group
@@ -78,14 +77,13 @@ end
 --
 -- @function [parent=#EntitySelector] getItemList
 --
--- @param #LuaPlayer player
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function EntitySelector.methods:getItemList(player, item, item2, item3)
+function EntitySelector.methods:getItemList(item, item2, item3)
   Logging:trace(self:classname(), "getItemList():", item, item2, item3)
-  local globalPlayer = self.player:getGlobal(player)
+  local globalPlayer = Player.getGlobal()
   local list = {}
   local prototypeGroups = self:getPrototypeGroups()
   if prototypeGroups[globalPlayer.recipeGroupSelected] ~= nil then
@@ -99,13 +97,12 @@ end
 --
 -- @function [parent=#EntitySelector] buildPrototypeTooltip
 --
--- @param #LuaPlayer player
 -- @param #LuaPrototype prototype
 --
-function EntitySelector.methods:buildPrototypeTooltip(player, prototype)
-  Logging:trace(self:classname(), "buildPrototypeTooltip(player, prototype):",player, prototype)
+function EntitySelector.methods:buildPrototypeTooltip(prototype)
+  Logging:trace(self:classname(), "buildPrototypeTooltip(player, prototype):", prototype)
   -- initalize tooltip
-  local tooltip = self.player:getLocalisedName(player, prototype)
+  local tooltip = Player.getLocalisedName(prototype)
   return tooltip
 end
 
@@ -114,11 +111,9 @@ end
 --
 -- @function [parent=#EntitySelector] buildPrototypeIcon
 --
--- @param #LuaPlayer player
---
-function EntitySelector.methods:buildPrototypeIcon(player, guiElement, prototype, tooltip)
+function EntitySelector.methods:buildPrototypeIcon(guiElement, prototype, tooltip)
   Logging:trace(self:classname(), "buildPrototypeIcon(player, guiElement, prototype, tooltip:",player, guiElement, prototype, tooltip)
-  self:addGuiButtonSelectSprite(guiElement, self:classname().."=entity-select=ID=", self.player:getEntityIconType(prototype), prototype.name, prototype.name, tooltip)
+  ElementGui.addGuiButtonSelectSprite(guiElement, self:classname().."=element-select=ID=entity=", Player.getEntityIconType(prototype), prototype.name, prototype.name, tooltip)
 end
 
 

@@ -26,6 +26,7 @@ helmod_settings_mod = {
     default_value = "all",
     allowed_values = {"all",
       "helmod",
+      "HMController",
       "HMAbstractEdition",
       "HMAbstractSelector",
       "HMAbstractTab",
@@ -208,6 +209,15 @@ helmod_settings_mod = {
     localised_description = {"helmod_settings.display-data-col-name-desc"},
     default_value = false,
     order = "c4"
+  },
+  --data-col-name
+  display_data_col_type = {
+    type = "bool-setting",
+    setting_type = "runtime-global",
+    localised_name = {"helmod_settings.display-data-col-type"},
+    localised_description = {"helmod_settings.display-data-col-type-desc"},
+    default_value = false,
+    order = "c5"
   },
   filter_on_text_changed = {
     type = "bool-setting",
