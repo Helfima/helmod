@@ -394,34 +394,31 @@ function EnergyEdition.methods:updatePrimaryInfo(item, item2, item3)
     Logging:debug(self:classname(), "updatePrimaryInfo():object:",object)
     local primary = object.primary
     if primary.name ~= nil then
-      local _generator = Player.getItemPrototype(primary.name)
 
       local headerPanel = ElementGui.addGuiTable(infoPanel,"table-header",2)
       local tooltip = ({"tooltip.selector-module"})
       if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
       ElementGui.addGuiButtonSprite(headerPanel, self:classname().."=do-nothing=ID=", Player.getIconType(primary), primary.name, primary.name, tooltip)
-      if _generator == nil then
-        ElementGui.addGuiLabel(headerPanel, "label", primary.name)
+      if EntityPrototype.load(primary.name).native() ~= nil then
+        ElementGui.addGuiLabel(headerPanel, "label", EntityPrototype.getLocalisedName())
       else
-        ElementGui.addGuiLabel(headerPanel, "label", _generator.localised_name)
+        ElementGui.addGuiLabel(headerPanel, "label", primary.name)
       end
-
-      local primary_classification = Player.getEntityProperty(primary.name, "type")
 
       local inputPanel = ElementGui.addGuiTable(infoPanel,"table-input",2)
 
       ElementGui.addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy-nominal"}))
-      ElementGui.addGuiLabel(inputPanel, "energy-nominal", Format.formatNumberKilo(primary.energy_nominal, "W"))
+      ElementGui.addGuiLabel(inputPanel, "energy-nominal", Format.formatNumberKilo(EntityPrototype.getEnergyNominal(), "W"))
 
-      if primary_classification == "generator" then
+      if EntityPrototype.type() == "generator" then
         ElementGui.addGuiLabel(inputPanel, "label-maximum-temperature", ({"helmod_label.maximum-temperature"}))
-        ElementGui.addGuiLabel(inputPanel, "maximum-temperature", primary.maximum_temperature or "NAN")
+        ElementGui.addGuiLabel(inputPanel, "maximum-temperature", EntityPrototype.maximumTemperature() or "NAN")
 
         ElementGui.addGuiLabel(inputPanel, "label-fluid-usage", ({"helmod_label.fluid-usage"}))
-        ElementGui.addGuiLabel(inputPanel, "fluid-usage", primary.fluid_usage or "NAN")
+        ElementGui.addGuiLabel(inputPanel, "fluid-usage", EntityPrototype.fluidUsagePerTick() or "NAN")
 
         ElementGui.addGuiLabel(inputPanel, "label-effectivity", ({"helmod_label.effectivity"}))
-        ElementGui.addGuiLabel(inputPanel, "effectivity", primary.effectivity or "NAN")
+        ElementGui.addGuiLabel(inputPanel, "effectivity", EntityPrototype.effectivity() or "NAN")
       end
     end
   end
@@ -528,39 +525,36 @@ function EnergyEdition.methods:updateSecondaryInfo(item, item2, item3)
     Logging:debug(self:classname(), "updateSecondaryInfo():object:",object)
     local secondary = object.secondary
     if secondary.name ~= nil then
-      local _generator = Player.getItemPrototype(secondary.name)
 
       local headerPanel = ElementGui.addGuiTable(infoPanel,"table-header",2)
       local tooltip = ({"tooltip.selector-module"})
       if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
       ElementGui.addGuiButtonSprite(headerPanel, self:classname().."=do-nothing=ID=", Player.getIconType(secondary), secondary.name, secondary.name, tooltip)
-      if _generator == nil then
-        ElementGui.addGuiLabel(headerPanel, "label", secondary.name)
+      if EntityPrototype.load(secondary.name).native() ~= nil then
+        ElementGui.addGuiLabel(headerPanel, "label", EntityPrototype.getLocalisedName())
       else
-        ElementGui.addGuiLabel(headerPanel, "label", _generator.localised_name)
+        ElementGui.addGuiLabel(headerPanel, "label", secondary.name)
       end
 
       local inputPanel = ElementGui.addGuiTable(infoPanel,"table-input",2)
 
-      local secondary_classification = Player.getEntityProperty(secondary.name, "type")
-
-      if secondary_classification == "boiler" then
+      if EntityPrototype.type() == EntityType.boiler then
         ElementGui.addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy-nominal"}))
-        ElementGui.addGuiLabel(inputPanel, "energy-nominal", Format.formatNumberKilo(secondary.energy_nominal, "W"))
+        ElementGui.addGuiLabel(inputPanel, "energy-nominal", Format.formatNumberKilo(EntityPrototype.getEnergyNominal(), "W"))
 
         ElementGui.addGuiLabel(inputPanel, "label-effectivity", ({"helmod_label.effectivity"}))
-        ElementGui.addGuiLabel(inputPanel, "effectivity", secondary.effectivity)
+        ElementGui.addGuiLabel(inputPanel, "effectivity", EntityPrototype.effectivity())
       end
 
-      if secondary_classification == "accumulator" then
+      if EntityPrototype.type() == EntityType.accumulator then
         ElementGui.addGuiLabel(inputPanel, "label-buffer-capacity", ({"helmod_label.buffer-capacity"}))
-        ElementGui.addGuiLabel(inputPanel, "buffer-capacity", Format.formatNumberKilo(secondary.buffer_capacity, "J"))
+        ElementGui.addGuiLabel(inputPanel, "buffer-capacity", Format.formatNumberKilo(EntityPrototype.electricBufferCapacity(), "J"))
 
         ElementGui.addGuiLabel(inputPanel, "label-input_flow_limit", ({"helmod_label.input-flow-limit"}))
-        ElementGui.addGuiLabel(inputPanel, "input-flow-limit", Format.formatNumberKilo(secondary.input_flow_limit, "W"))
+        ElementGui.addGuiLabel(inputPanel, "input-flow-limit", Format.formatNumberKilo(EntityPrototype.electricInputFlowLimit(), "W"))
 
         ElementGui.addGuiLabel(inputPanel, "label-output-flow-limit", ({"helmod_label.output-flow-limit"}))
-        ElementGui.addGuiLabel(inputPanel, "output-flow-limit", Format.formatNumberKilo(secondary.output_flow_limit, "W"))
+        ElementGui.addGuiLabel(inputPanel, "output-flow-limit", Format.formatNumberKilo(EntityPrototype.electricOutputFlowLimit(), "W"))
       end
 
     end

@@ -14,6 +14,7 @@ require "selector.FluidSelector"
 require "tab.MainTab"
 
 Model = require "model.Model"
+EntityType = require "model.EntityType"
 EntityPrototype = require "model.EntityPrototype"
 FluidPrototype = require "model.FluidPrototype"
 ItemPrototype = require "model.ItemPrototype"

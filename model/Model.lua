@@ -5,7 +5,7 @@
 local Model = {
   -- single-line comment
   classname = "HMModel",
-  version = "0.5.4",
+  version = "0.6.0",
   capEnergy = -0.8,
   capSpeed = -0.8
 }
@@ -307,24 +307,10 @@ end
 --
 function Model.createGeneratorModel(name, count)
   Logging:debug(Model.classname, "createGeneratorModel():", name, count)
-  if name == nil then name = "steam-engine" end
-  if count == nil then count = 0 end
-
   local itemModel = {}
-  itemModel.name = name
+  itemModel.name = name or "steam-engine"
   itemModel.type = "item"
-  itemModel.count = count
-  itemModel.fluid_usage = 0.1
-  itemModel.effectivity = 1
-
-  itemModel.energy_nominal = 90
-  itemModel.energy = 0
-  itemModel.energy_total = 0
-
-  -- limit infini = 0
-  itemModel.limit = 0
-  itemModel.limit_count = count
-
+  itemModel.count = count or 0
   return itemModel
 end
 
@@ -346,16 +332,8 @@ function Model.createIngredientModel(name, type, count)
   local ingredientModel = {}
   ingredientModel.index = 1
   ingredientModel.name = name
-  ingredientModel.weight = 0
   ingredientModel.type = type
   ingredientModel.count = count
-  ingredientModel.recipes = {}
-  ingredientModel.resource_category = nil
-
-  local entity = Player.getEntityPrototype(name)
-  if entity ~= nil then
-    ingredientModel.resource_category = entity.resource_category
-  end
 
   return ingredientModel
 end
@@ -717,33 +695,7 @@ function Model.addPrimaryPower(power_id, key)
     power.primary = Model.createGeneratorModel(key, 1)
     model.powers[power_id] = power
   end
-
-  -- ajuste les donnees
-  -- @see https://wiki.factorio.com/Power_production
-  local classification = Player.getEntityProperty(key, "type")
-  if classification == "generator" then
-    local fluid_usage = Player.getEntityProperty(key, "fluid_usage_per_tick") or 0.1
-    local effectivity = Player.getEntityProperty(key, "effectivity") or 1
-    local maximum_temperature = Player.getEntityProperty(key, "maximum_temperature") or 165
-    power.primary.name = key
-    power.primary.fluid_usage = fluid_usage
-    power.primary.effectivity = effectivity
-    power.primary.maximum_temperature = maximum_temperature
-    -- formula energy_nominal = fluid_usage * 60_tick * effectivity * (target_temperature - nominal_temp) * 1000 / 5
-    -- @see https://wiki.factorio.com/Liquids/Hot
-    power.primary.energy_nominal = fluid_usage*60*effectivity*(maximum_temperature-15)*1000/5
-  end
-
-  if classification == "solar-panel" then
-    local production = Player.getItemProperty(key, "production") or 60*1000
-    local effectivity = 1
-    power.primary.name = key
-    power.primary.fluid_usage = 0
-    power.primary.effectivity = effectivity
-    power.primary.energy_nominal = production
-  end
-
-
+  power.primary.name = key
   return power
 end
 
@@ -768,35 +720,7 @@ function Model.addSecondaryPower(power_id, key)
   if power.secondary == nil or power.secondary.name == nil then
     power.secondary = Model.createGeneratorModel(key, 1)
   end
-  -- ajuste les donnees
-  -- @see https://wiki.factorio.com/Power_production
-  local classification = Player.getEntityProperty(key, "type")
-  if classification == "boiler" then
-    local energy_consumption = Player.getEntityProperty(key, "max_energy_usage") or 0
-    local effectivity = Player.getEntityProperty(key, "electric_energy_source_prototype.effectivity") or 0.5
-    power.secondary.name = key
-    power.secondary.fluid_usage = 0
-    power.secondary.energy_nominal = energy_consumption
-    power.secondary.effectivity = effectivity
-    power.secondary.buffer_capacity = nil
-    power.secondary.input_flow_limit = nil
-    power.secondary.output_flow_limit = nil
-  end
-
-  if classification == "accumulator" then
-    local buffer_capacity = Player.getEntityProperty(key, "electric_energy_source_prototype.buffer_capacity") or 5*1000*1000
-    local input_flow_limit = Player.getEntityProperty(key, "electric_energy_source_prototype.input_flow_limit") or 5*1000
-    local output_flow_limit = Player.getEntityProperty(key, "electric_energy_source_prototype.output_flow_limit") or 5*1000
-    power.secondary.name = key
-    power.secondary.fluid_usage = 0
-    power.secondary.effectivity = nil
-    power.secondary.energy_nominal = nil
-    power.secondary.buffer_capacity = buffer_capacity
-    power.secondary.input_flow_limit = input_flow_limit * 60
-    power.secondary.output_flow_limit = output_flow_limit * 60
-  end
-
-
+  power.secondary.name = key
   return power
 end
 -------------------------------------------------------------------------------
@@ -1279,39 +1203,15 @@ end
 --
 function Model.update()
   Logging:debug(Model.classname , "********** update()")
+  Model.updateVersion_0_5_4()
+  Model.updateVersion_0_6_0()
 
   local model = Model.getModel()
 
   -- reset all factories
   if model ~= nil and (model.version == nil or model.version ~= Model.version) then
     Logging:debug(Model.classname , "********** version",Model.version)
-    if model.version == nil or model.version < "0.4.4" then
-      model.resources = {}
-      Logging:debug(Model.classname , "********** updated version 0.4.4")
-    end
-    if model.version == nil or model.version < "0.4.6.1" then
-      Model.checkUnlinkedBlocks()
-      Logging:debug(Model.classname , "********** updated version 0.4.6.1")
-    end
-    if model.version == nil or model.version < "0.5.4" then
-      for _, productBlock in pairs(model.blocks) do
-        -- modify recipe id
-        local recipes = {}
-        for _, recipe in pairs(productBlock.recipes) do
-          recipe.id = "R"..recipe.id
-          recipes[recipe.id] = recipe
-        end
-        productBlock.recipes = recipes
-        -- modify input
-        if productBlock.input ~= nil and productBlock.input.key ~= nil then
-          local key = productBlock.input.key
-          local quantity = productBlock.input.quantity
-          productBlock.input = {}
-          productBlock.input[key] = quantity or 0
-        end
-      end
-      Logging:debug(Model.classname , "********** updated version 0.5.4")
-    end
+
     if model.blocks ~= nil then
       for _, productBlock in pairs(model.blocks) do
         for _, recipe in pairs(productBlock.recipes) do
@@ -1382,6 +1282,72 @@ function Model.update()
 end
 
 -------------------------------------------------------------------------------
+-- Update model
+--
+-- @function [parent=#Model] updateVersion_0_6_0
+--
+function Model.updateVersion_0_6_0()
+  local model = Model.getModel()
+  if model.version == nil or model.version < "0.6.0" then
+    Logging:debug(Model.classname , "********** updating version 0.6.0")
+    local globalGui = Player.getGlobalGui()
+    for _, block in pairs(model.blocks) do
+      globalGui.currentBlock = block.id
+      for _, recipe in pairs(block.recipes) do
+        local recipe_type = "recipe"
+        if recipe.is_resource then recipe_type = "resource" end
+
+        local recipeModel = {}
+        recipeModel.id = recipe.id
+        recipeModel.index = recipe.index
+        recipeModel.name = recipe.name
+        recipeModel.type = recipe_type
+        recipeModel.count = 0
+        recipeModel.production = 1
+        recipeModel.factory = Model.createFactoryModel(recipe.factory.name)
+        recipeModel.factory.limit = recipe.factory.limit
+        recipeModel.factory.modules = recipe.factory.modules
+        recipeModel.beacon = Model.createBeaconModel(recipe.beacon.name)
+        recipeModel.beacon.modules = recipe.beacon.modules
+        block.recipes[recipe.id] = recipeModel
+      end
+    end
+    Model.checkUnlinkedBlocks()
+    Logging:debug(Model.classname , "********** updated version 0.6.0")
+    Player.print("Helmod information: Model is updated to version 0.6.0")
+  end
+end
+-------------------------------------------------------------------------------
+-- Update model
+--
+-- @function [parent=#Model] updateVersion_0_5_4
+--
+function Model.updateVersion_0_5_4()
+  local model = Model.getModel()
+  if model.version == nil or model.version < "0.5.4" then
+    Logging:debug(Model.classname , "********** updating version 0.5.4")
+    model.resources = {}
+    for _, productBlock in pairs(model.blocks) do
+      -- modify recipe id
+      local recipes = {}
+      for _, recipe in pairs(productBlock.recipes) do
+        recipe.id = "R"..recipe.id
+        recipes[recipe.id] = recipe
+      end
+      productBlock.recipes = recipes
+      -- modify input
+      if productBlock.input ~= nil and productBlock.input.key ~= nil then
+        local key = productBlock.input.key
+        local quantity = productBlock.input.quantity
+        productBlock.input = {}
+        productBlock.input[key] = quantity or 0
+      end
+    end
+    Model.checkUnlinkedBlocks()
+    Logging:debug(Model.classname , "********** updated version 0.5.4")
+  end
+end
+-------------------------------------------------------------------------------
 -- Compute recipe block
 --
 -- @function [parent=#Model] computeBlockRecipe
@@ -1402,7 +1368,7 @@ function Model.computeBlockRecipe(block, recipe)
       if block.ingredients[lua_product.name] ~= nil then
         local product = Product.load(lua_product).new()
         local p_amount = Product.getAmount(recipe)
-        local count = block.ingredients[lua_recipe.name].count*production / p_amount
+        local count = block.ingredients[lua_product.name].count*production / p_amount
         if recipe.count < count then recipe.count = count end
       end
     end
@@ -1876,7 +1842,10 @@ end
 --
 function Model.speedFactory(recipe)
   Logging:debug(Model.classname, "speedFactory()", recipe.name)
-  if recipe.type == "resource" then
+  if recipe.name == "steam" then
+    -- @see https://wiki.factorio.com/Boiler
+    return 60
+  elseif recipe.type == "resource" then
     -- (mining power - ore mining hardness) * mining speed
     -- @see https://wiki.factorio.com/Mining
     local mining_speed = EntityPrototype.load(recipe.factory).miningSpeed()
@@ -2009,36 +1978,34 @@ function Model.computePower(key)
   local power = Model.getPower(key)
   Logging:debug(Model.classname, "computePower():", key, power)
   if power ~= nil then
-    local primary_classification = Player.getEntityProperty(power.primary.name, "type")
-    local secondary_classification = Player.getEntityProperty(power.secondary.name, "type")
-    if primary_classification == "generator" then
+    if EntityPrototype.load(power.primary.name).type() == EntityType.generator then
       -- calcul primary
-      local count = math.ceil(power.power/(power.primary.energy_nominal))
+      local count = math.ceil( power.power / EntityPrototype.load(power.primary.name).getEnergyNominal() )
       power.primary.count = count or 0
       -- calcul secondary
-      if secondary_classification ~= nil and secondary_classification == "boiler" then
-        local count = math.ceil(power.power/(power.secondary.energy_nominal))
+      if EntityPrototype.load(power.secondary.name).native() ~= nil and EntityPrototype.load(power.secondary.name).type() == EntityType.boiler then
+        local count = math.ceil( power.power / EntityPrototype.load(power.secondary.name).getEnergyNominal() )
         power.secondary.count = count or 0
       else
         power.secondary.count = 0
       end
     end
-    if primary_classification == "solar-panel" then
+    if EntityPrototype.load(power.primary.name).type() == EntityType.solar_panel then
       -- calcul primary
-      local count = math.ceil(power.power/(power.primary.energy_nominal))
+      local count = math.ceil( power.power / EntityPrototype.load(power.primary.name).getEnergyNominal() )
       power.primary.count = count or 0
       -- calcul secondary
-      if secondary_classification ~= nil and secondary_classification == "accumulator" then
+      if EntityPrototype.load(power.secondary.name).native() ~= nil and EntityPrototype.load(power.secondary.name).type() == EntityType.accumulator then
         local factor = 2
         -- ajout energy pour accumulateur
         local gameDay = {day=12500,dust=5000,night=2500,dawn=2500}
         -- selon les aires il faut de l'accu en dehors du jour selon le trapese journalier
-        local accu=(gameDay.dust/factor+gameDay.night+gameDay.dawn/factor)/(gameDay.day)
+        local accu= (gameDay.dust/factor + gameDay.night + gameDay.dawn / factor ) / ( gameDay.day )
         -- puissance nominale la nuit
-        local count1 = power.power/(power.secondary.output_flow_limit)
+        local count1 = power.power/ EntityPrototype.load(power.secondary.name).electricOutputFlowLimit()
         -- puissance durant la penombre
         -- formula (puissance*durree_penombre)/(60s*capacite)
-        local count2 = power.power*(gameDay.dust/factor+gameDay.night+gameDay.dawn/factor)/(60*power.secondary.buffer_capacity)
+        local count2 = power.power*( gameDay.dust / factor + gameDay.night + gameDay.dawn / factor ) / ( 60 * EntityPrototype.load(power.secondary.name).electricBufferCapacity() )
 
         Logging:debug(Model.classname , "********** computePower result:", accu, count1, count2)
         if count1 > count2 then
@@ -2097,10 +2064,10 @@ end
 -- @return #string
 --
 function Model.getSpeedFactory(key)
-  local crafting_speed = Player.getEntityProperty(key, "crafting_speed")
+  local crafting_speed = EntityPrototype.load(key).craftingSpeed()
   if crafting_speed ~= 0 then return crafting_speed end
-  local mining_speed = Player.getEntityProperty(key, "mining_speed")
-  local mining_power = Player.getEntityProperty(key, "mining_power")
+  local mining_speed = EntityPrototype.load(key).miningSpeed()
+  local mining_power = EntityPrototype.load(key).miningPower()
   if mining_speed ~= 0 and mining_power ~= 0 then return mining_speed * mining_power end
   return 1
 end

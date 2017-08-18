@@ -1,17 +1,25 @@
 ---
 -- Description of the module.
 -- @module Player
--- 
+--
 local Player = {
   -- single-line comment
   classname = "HMPlayer"
 }
 
 local Lua_player = nil
-local data_entity = nil
 
-function Player.test()
-  log("Player test")
+-------------------------------------------------------------------------------
+-- Print message
+--
+-- @function [parent=#Player] print
+--
+-- @param #string message
+--
+function Player.print(message)
+  if Lua_player ~= nil then
+    Lua_player.print(message)
+  end
 end
 -------------------------------------------------------------------------------
 -- Load factorio player
@@ -19,7 +27,7 @@ end
 -- @function [parent=#Player] load
 --
 -- @param #LuaEvent event
--- 
+--
 -- @return #Player
 --
 function Player.load(event)
@@ -56,7 +64,7 @@ end
 -- @function [parent=#Player] getGuiTop
 --
 -- @param player
--- 
+--
 function Player.getGuiTop(player)
   return player.gui.top["helmod_menu-main"]
 end
@@ -543,9 +551,17 @@ function Player.getProductionsCrafting(category, entity_name)
   if entity_name ~= nil and entity_name == "water" then
     for key, lua_entity in pairs(game.entity_prototypes) do
       if lua_entity.type ~= nil and lua_entity.name ~= nil and lua_entity.name ~= "player" then
-        if lua_entity.type == "offshore-pump" then
+        if lua_entity.type == EntityType.offshore_pump then
           productions[lua_entity.name] = lua_entity
-        end 
+        end
+      end
+    end
+  elseif entity_name ~= nil and entity_name == "steam" then
+    for key, lua_entity in pairs(game.entity_prototypes) do
+      if lua_entity.type ~= nil and lua_entity.name ~= nil and lua_entity.name ~= "player" then
+        if lua_entity.type == EntityType.boiler then
+          productions[lua_entity.name] = lua_entity
+        end
       end
     end
   else
@@ -643,59 +659,7 @@ end
 -- @return #LuaRecipe recipe
 --
 function Player.getRecipe(name)
-  local recipe = Player.getForce().recipes[name]
-  if recipe == nil then
-    local entity = game.entity_prototypes[name]
-    if entity ~= nil then
-      if entity.resource_category ~= nil then
-        -- build a fake recipe for resource
-        recipe = Player.createFakeRecipe(entity, "resource")
-      end
-    else
-      local fluid = game.fluid_prototypes[name]
-      if fluid ~= nil then
-        -- build a fake recipe for resource
-        recipe = Player.createFakeRecipe(fluid, "fluid")
-      end
-    end
-  end
-  return recipe
-end
-
--------------------------------------------------------------------------------
--- Create a fake recipe
---
--- @function [parent=#Player] createFakeRecipe
---
--- @param #LuaPrototype entity
--- @param #string type
---
--- @return #LuaRecipe recipe
---
-function Player.createFakeRecipe(entity, type)
-  -- build a fake recipe
-  local recipe = {
-    name = entity.name,
-    group = entity.group,
-    subgroup = entity.subgroup,
-    energy = 1,
-    enabled = true,
-    hidden = false
-  }
-  if type == "resource" and entity.resource_category ~= nil then
-    recipe.localised_name = {"entity-name."..entity.name}
-    recipe.products = {{type="item", name=entity.name, amount=1}}
-    recipe.ingredients = {{type="item", name=entity.name, amount=1}}
-    recipe.resource_category = entity.resource_category
-    recipe.category = "extraction-machine"
-  end
-  if type == "fluid" then
-    recipe.localised_name = {"fluid-name."..entity.name}
-    recipe.products = {{type="fluid", name=entity.name, amount=1}}
-    recipe.ingredients = {{type="fluid", name=entity.name, amount=1}}
-    recipe.category = "energy"
-  end
-  return recipe
+  return Player.getForce().recipes[name]
 end
 
 -------------------------------------------------------------------------------
@@ -760,142 +724,6 @@ function Player.getEntityPrototype(name)
 end
 
 -------------------------------------------------------------------------------
--- Return entity property
---
--- @function [parent=#Player] getEntityProperty
---
--- @param #string name
--- @param #string property
---
-function Player.getEntityProperty(name, property)
-  Logging:trace(Player.classname, "getEntityProperty(name, property)", name, property)
-  local entity = Player.getEntityPrototype(name)
-  if entity ~= nil then
-    if property == "type" then
-      return entity.type
-    end
-    if property == "energy_usage" then
-      -- energie par seconde
-      if entity.energy_usage ~= nil then
-        return entity.energy_usage*60
-      end
-      return 0
-    end
-
-    if property == "max_energy_usage" then
-      -- energie par seconde
-      if entity.max_energy_usage ~= nil then
-        return entity.max_energy_usage*60
-      end
-      return 0
-    end
-
-    if property == "effectivity" then
-      return entity.effectivity or 1
-    end
-    if property == "maximum_temperature" then
-      return entity.maximum_temperature or 0
-    end
-    if property == "fluid_usage_per_tick" then
-      return entity.fluid_usage_per_tick or 0
-    end
-    if property == "module_slots" then
-      return entity.module_inventory_size or 0
-    end
-    if property == "crafting_speed" then
-      return entity.crafting_speed or 0
-    end
-    if property == "mining_speed" then
-      return entity.mining_speed or 0
-    end
-    if property == "mining_power" then
-      return entity.mining_power or 0
-    end
-    if property == "energy_type" then
-      if entity.burner_prototype ~= nil then return "burner" end
-      return "electrical"
-    end
-    if property == "mineable_properties.hardness" then
-      if entity.mineable_properties ~= nil then
-        return entity.mineable_properties.hardness or 1
-      end
-      return 1
-    end
-    if property == "mineable_properties.mining_time" then
-      if entity.mineable_properties ~= nil then
-        return entity.mineable_properties.mining_time or 0.5
-      end
-      return 0.5
-    end
-    if property == "electric_energy_source_prototype.buffer_capacity" then
-      if entity.electric_energy_source_prototype ~= nil then
-        return entity.electric_energy_source_prototype.buffer_capacity or 0
-      end
-      return 0
-    end
-    if property == "electric_energy_source_prototype.input_flow_limit" then
-      if entity.electric_energy_source_prototype ~= nil then
-        return entity.electric_energy_source_prototype.input_flow_limit or 0
-      end
-      return 0
-    end
-    if property == "electric_energy_source_prototype.output_flow_limit" then
-      if entity.electric_energy_source_prototype ~= nil then
-        return entity.electric_energy_source_prototype.output_flow_limit or 0
-      end
-      return 0
-    end
-    if property == "electric_energy_source_prototype.emissions" then
-      if entity.electric_energy_source_prototype ~= nil then
-        return entity.electric_energy_source_prototype.emissions or 0
-      end
-      return 0
-    end
-    if property == "electric_energy_source_prototype.effectivity" then
-      if entity.electric_energy_source_prototype ~= nil then
-        return entity.electric_energy_source_prototype.effectivity or 1
-      end
-      return 1
-    end
-
-  end
-end
-
--------------------------------------------------------------------------------
--- Return item property
---
--- @function [parent=#Player] getItemProperty
---
--- @param #string name
--- @param #string property
---
-function Player.getItemProperty(name, property)
-  Logging:trace(Player.classname, "getItemProperty(name, property)", name, property)
-  if data_entity == nil then
-    data_entity = Player.getChunkedData("data_entity")
-    Logging:trace(Player.classname, "getItemProperty(name, property):data_entity", data_entity)
-  end
-  if data_entity[name] then
-    if property == "energy_consumption" then
-      if data_entity[name]["energy_consumption"] ~= nil then
-        return Player.parseNumber(data_entity[name]["energy_consumption"])
-      else
-        return 0
-      end
-    elseif property == "production" then
-      if data_entity[name]["production"] ~= nil then
-        return Player.parseNumber(data_entity[name]["production"])
-      else
-        return 0
-      end
-    else
-      return data_entity[name][property]
-    end
-  end
-  return nil
-end
-
--------------------------------------------------------------------------------
 -- Return beacon production
 --
 -- @function [parent=#Player] getProductionsBeacon
@@ -904,10 +732,10 @@ end
 --
 function Player.getProductionsBeacon()
   local items = {}
-  for _,item in pairs(game.item_prototypes) do
+  for _,item in pairs(game.entity_prototypes) do
     --Logging:debug(Player.classname, "getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
-    if item.name ~= nil then
-      local efficiency = Player.getItemProperty(item.name, "efficiency")
+    if item.name ~= nil and item.type == EntityType.beacon then
+      local efficiency = EntityPrototype.load(item.name).electricEffectivity()
       Logging:trace(Player.classname, "getProductionsBeacon(type):", item.name, efficiency)
       if efficiency ~= nil then
         table.insert(items,item)
@@ -929,17 +757,17 @@ end
 function Player.getGenerators(type)
   if type == nil then type = "primary" end
   local items = {}
-  for _,item in pairs(game.item_prototypes) do
+  for _,item in pairs(game.entity_prototypes) do
     --Logging:debug(Player.classname, "getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
     if item.name ~= nil then
-      local classification = Player.getEntityProperty(item.name, "type")
+      local entity_type = EntityPrototype.load(item).type()
       if item.group.name == "production" then
         Logging:trace(Player.classname, "getGenerators():", item.name, item.type, item.group.name, item.subgroup.name)
       end
-      if type == "primary" and (classification == "generator" or classification == "solar-panel") then
+      if type == "primary" and (entity_type == EntityType.generator or entity_type == EntityType.solar_panel) then
         table.insert(items,item)
       end
-      if type == "secondary" and (classification == "boiler" or classification == "accumulator") then
+      if type == "secondary" and (entity_type == EntityType.boiler or entity_type == EntityType.accumulator) then
         table.insert(items,item)
       end
     end
@@ -1046,26 +874,4 @@ function Player.parseNumber(number)
   end
 end
 
--------------------------------------------------------------------------------
--- Return chunked data
---
--- @function [parent=#Player] getChunkedData
---
--- @param #string name
---
-function Player.getChunkedData(name)
-  local chunk_suffix = "_"
-  local string = ""
-  if game then
-    local i = 1
-    while game.entity_prototypes[name .. chunk_suffix .. i] do
-      string = string..game.entity_prototypes[name .. chunk_suffix .. i].order
-      i = i + 1
-    end
-  end
-  if #string > 0 then
-    return loadstring(string)()
-  end
-  return nil
-end
 return Player

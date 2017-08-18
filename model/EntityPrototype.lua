@@ -19,9 +19,9 @@ local lua_entity_prototype = nil
 -- @return #EntityPrototype
 --
 function EntityPrototype.load(object)
-  if type(object) == "string" then
+  if object ~= nil and type(object) == "string" then
     lua_entity_prototype = Player.getEntityPrototype(object)
-  elseif object.name ~= nil then
+  elseif object ~= nil and object.name ~= nil then
     lua_entity_prototype = Player.getEntityPrototype(object.name)
   end
   return EntityPrototype
@@ -46,6 +46,7 @@ end
 -- @return #string
 --
 function EntityPrototype.type()
+  if lua_entity_prototype == nil then return nil end
   return lua_entity_prototype.type
 end
 
@@ -54,7 +55,7 @@ end
 --
 -- @function [parent=#EntityPrototype] energyUsage
 --
--- @return #number
+-- @return #number default 0
 --
 function EntityPrototype.energyUsage()
   if lua_entity_prototype.energy_usage ~= nil then
@@ -68,7 +69,7 @@ end
 --
 -- @function [parent=#EntityPrototype] maxEnergyUsage
 --
--- @return #number
+-- @return #number default 0
 --
 function EntityPrototype.maxEnergyUsage()
   if lua_entity_prototype.max_energy_usage ~= nil then
@@ -78,11 +79,61 @@ function EntityPrototype.maxEnergyUsage()
 end
 
 -------------------------------------------------------------------------------
+-- Return nominal energy for generator
+-- @see https://wiki.factorio.com/Power_production
+-- @see https://wiki.factorio.com/Liquids/Hot
+-- 
+-- @function [parent=#EntityPrototype] getEnergyNominal
+--
+-- @return #number default 0
+--
+function EntityPrototype.getEnergyNominal()
+  if lua_entity_prototype.type == EntityType.generator then
+    local fluid_usage = EntityPrototype.fluidUsagePerTick()
+    local effectivity = EntityPrototype.effectivity()
+    local maximum_temperature = EntityPrototype.maximumTemperature()
+    -- formula energy_nominal = fluid_usage * 60_tick * effectivity * (target_temperature - nominal_temp) * 1000 / 5
+    -- @see https://wiki.factorio.com/Liquids/Hot
+    return fluid_usage*60*effectivity*(maximum_temperature-15)*1000/5
+  end
+  if lua_entity_prototype.type == EntityType.boiler then
+    return EntityPrototype.maxEnergyUsage()
+  end
+  if lua_entity_prototype.type == EntityType.solar_panel then
+    return lua_entity_prototype.production or 0
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
+-- Return localised name
+-- 
+-- @function [parent=#EntityPrototype] getLocalisedName
+--
+-- @return #number default 0
+--
+function EntityPrototype.getLocalisedName()
+  return Player.getLocalisedName({name=lua_entity_prototype.name, EntityType.type})
+end
+
+
+-------------------------------------------------------------------------------
+-- Return effectivity
+--
+-- @function [parent=#EntityPrototype] effectivity
+-- 
+-- @return #number default 1
+--
+function EntityPrototype.effectivity()
+  return lua_entity_prototype.effectivity or 1
+end
+
+-------------------------------------------------------------------------------
 -- Return distribution effectivity
 --
 -- @function [parent=#EntityPrototype] distributionEffectivity
 --
--- @return #number
+-- @return #number default 1
 --
 function EntityPrototype.distributionEffectivity()
   return lua_entity_prototype.distribution_effectivity or 1
@@ -93,7 +144,7 @@ end
 --
 -- @function [parent=#EntityPrototype] maximumTemperature
 --
--- @return #number
+-- @return #number default 0
 --
 function EntityPrototype.maximumTemperature()
   return lua_entity_prototype.maximum_temperature or 0
@@ -104,7 +155,7 @@ end
 --
 -- @function [parent=#EntityPrototype] fluidUsagePerTick
 --
--- @return #number
+-- @return #number default 0
 --
 function EntityPrototype.fluidUsagePerTick()
   return lua_entity_prototype.fluid_usage_per_tick or 0
@@ -115,7 +166,7 @@ end
 --
 -- @function [parent=#EntityPrototype] moduleInventorySize
 --
--- @return #number
+-- @return #number default 0
 --
 function EntityPrototype.moduleInventorySize()
   return lua_entity_prototype.module_inventory_size or 0
@@ -126,7 +177,7 @@ end
 --
 -- @function [parent=#EntityPrototype] craftingSpeed
 --
--- @return #number
+-- @return #number default 0
 --
 function EntityPrototype.craftingSpeed()
   return lua_entity_prototype.crafting_speed or 0
@@ -137,7 +188,7 @@ end
 --
 -- @function [parent=#EntityPrototype] miningSpeed
 --
--- @return #number
+-- @return #number default 0
 --
 function EntityPrototype.miningSpeed()
   return lua_entity_prototype.mining_speed or 0
@@ -148,7 +199,7 @@ end
 --
 -- @function [parent=#EntityPrototype] miningPower
 --
--- @return #number
+-- @return #number default 0
 --
 function EntityPrototype.miningPower()
   return lua_entity_prototype.mining_power or 0
@@ -159,7 +210,7 @@ end
 --
 -- @function [parent=#EntityPrototype] energyType
 --
--- @return #string
+-- @return #string default electrical
 --
 function EntityPrototype.energyType()
   if lua_entity_prototype.burner_prototype ~= nil then return "burner" end
@@ -171,7 +222,7 @@ end
 --
 -- @function [parent=#EntityPrototype] mineableHardness
 --
--- @return #number
+-- @return #number default 1
 --
 function EntityPrototype.mineableHardness()
   if lua_entity_prototype.mineable_properties ~= nil then
@@ -185,7 +236,7 @@ end
 --
 -- @function [parent=#EntityPrototype] mineableMiningTime
 --
--- @return #number
+-- @return #number default 0.5
 --
 function EntityPrototype.mineableMiningTime()
   if lua_entity_prototype.mineable_properties ~= nil then
@@ -199,7 +250,7 @@ end
 --
 -- @function [parent=#EntityPrototype] electricBufferCapacity
 --
--- @return #number
+-- @return #number default 0
 --
 function EntityPrototype.electricBufferCapacity()
   if lua_entity_prototype.electric_energy_source_prototype ~= nil then
@@ -213,7 +264,7 @@ end
 --
 -- @function [parent=#EntityPrototype] electricInputFlowLimit
 --
--- @return #number
+-- @return #number default 0
 --
 function EntityPrototype.electricInputFlowLimit()
   if lua_entity_prototype.electric_energy_source_prototype ~= nil then
@@ -227,7 +278,7 @@ end
 --
 -- @function [parent=#EntityPrototype] electricOutputFlowLimit
 --
--- @return #number
+-- @return #number default 0
 --
 function EntityPrototype.electricOutputFlowLimit()
   if lua_entity_prototype.electric_energy_source_prototype ~= nil then
@@ -241,7 +292,7 @@ end
 --
 -- @function [parent=#EntityPrototype] electricEmissions
 --
--- @return #number
+-- @return #number default 0
 --
 function EntityPrototype.electricEmissions()
   if lua_entity_prototype.electric_energy_source_prototype ~= nil then
@@ -255,7 +306,7 @@ end
 --
 -- @function [parent=#EntityPrototype] electricEffectivity
 --
--- @return #number
+-- @return #number default 0
 --
 function EntityPrototype.electricEffectivity()
   if lua_entity_prototype.electric_energy_source_prototype ~= nil then

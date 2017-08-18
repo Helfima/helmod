@@ -162,6 +162,9 @@ function RecipePrototype.getIngredients()
   elseif lua_type == "resource" then
     return {{name=lua_prototype.name, type="item", amount=1}}
   elseif lua_type == "fluid" then
+    if lua_prototype.name == "steam" then
+    return {{name="water", type="fluid", amount=1},{name="coal", type="item", amount=0.0076}}
+    end
     return {{name=lua_prototype.name, type="fluid", amount=1}}
   elseif lua_type == "technology" then
     return lua_prototype.research_unit_ingredients

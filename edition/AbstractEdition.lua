@@ -422,16 +422,16 @@ function AbstractEdition.methods:updateFactoryInfo(item, item2, item3)
     local tooltip = ({"tooltip.selector-module"})
     if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
     ElementGui.addGuiButtonSelectSprite(headerPanel, self:classname().."=change-panel=ID="..item.."="..object.id.."=", Player.getIconType(factory), factory.name, factory.name, tooltip, self.color_button_edit)
-    if factory_prototype.native() == nil then
+    if EntityPrototype.native() == nil then
       ElementGui.addGuiLabel(headerPanel, "label", factory.name)
     else
-      ElementGui.addGuiLabel(headerPanel, "label", factory_prototype.native().localised_name)
+      ElementGui.addGuiLabel(headerPanel, "label", EntityPrototype.getLocalisedName())
     end
 
     local inputPanel = ElementGui.addGuiTable(infoPanel,"table-input",2)
 
     ElementGui.addGuiLabel(inputPanel, "label-module-slots", ({"helmod_label.module-slots"}))
-    ElementGui.addGuiLabel(inputPanel, "module-slots", factory_prototype.moduleInventorySize())
+    ElementGui.addGuiLabel(inputPanel, "module-slots", EntityPrototype.moduleInventorySize())
 
     ElementGui.addGuiLabel(inputPanel, "label-energy", ({"helmod_label.energy"}))
     
@@ -482,7 +482,7 @@ function AbstractEdition.methods:updateFactoryModulesSelector(item, item2, item3
     local factory = object.factory
     for k, module in pairs(Player.getModules()) do
       local allowed = true
-      local factory_type = Player.getEntityProperty(factory.name, "type")
+      local factory_type = EntityPrototype.load(factory.name).type()
       local consumption = Format.formatPercent(Player.getModuleBonus(module.name, "consumption"))
       local speed = Format.formatPercent(Player.getModuleBonus(module.name, "speed"))
       local productivity = Format.formatPercent(Player.getModuleBonus(module.name, "productivity"))
@@ -636,19 +636,19 @@ function AbstractEdition.methods:updateBeaconInfo(item, item2, item3)
     if beacon_prototype.native() == nil then
       ElementGui.addGuiLabel(headerPanel, "label", beacon.name)
     else
-      ElementGui.addGuiLabel(headerPanel, "label", beacon_prototype.native().localised_name)
+      ElementGui.addGuiLabel(headerPanel, "label", EntityPrototype.getLocalisedName())
     end
 
     local inputPanel = ElementGui.addGuiTable(infoPanel,"table-input",2)
 
     ElementGui.addGuiLabel(inputPanel, "label-module-slots", ({"helmod_label.module-slots"}))
-    ElementGui.addGuiLabel(inputPanel, "module-slots", beacon_prototype.moduleInventorySize())
+    ElementGui.addGuiLabel(inputPanel, "module-slots", EntityPrototype.moduleInventorySize())
 
     ElementGui.addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy"}))
-    ElementGui.addGuiLabel(inputPanel, "energy", Format.formatNumberKilo(beacon_prototype.energyUsage(), "W"))
+    ElementGui.addGuiLabel(inputPanel, "energy", Format.formatNumberKilo(EntityPrototype.energyUsage(), "W"))
 
     ElementGui.addGuiLabel(inputPanel, "label-efficiency", ({"helmod_label.efficiency"}))
-    ElementGui.addGuiLabel(inputPanel, "efficiency", beacon_prototype.distributionEffectivity())
+    ElementGui.addGuiLabel(inputPanel, "efficiency", EntityPrototype.distributionEffectivity())
 
     ElementGui.addGuiLabel(inputPanel, "label-combo", ({"helmod_label.beacon-on-factory"}), nil, {"tooltip.beacon-on-factory"})
     ElementGui.addGuiText(inputPanel, "combo", beacon.combo, "helmod_textfield", {"tooltip.beacon-on-factory"})
