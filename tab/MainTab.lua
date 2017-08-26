@@ -23,8 +23,8 @@ function MainTab.methods:init(parent)
   self.parent = parent
 
   local tabs = {}
-  table.insert(tabs, ProductionBlockTab:new(self))
   table.insert(tabs, ProductionLineTab:new(self))
+  table.insert(tabs, ProductionBlockTab:new(self))
   table.insert(tabs, EnergyTab:new(self))
   table.insert(tabs, ResourceTab:new(self))
   table.insert(tabs, SummaryTab:new(self))
@@ -75,6 +75,21 @@ function MainTab.methods:getModelPanel()
     return menuPanel["model"]
   end
   return ElementGui.addGuiFrameV(menuPanel, "model", "helmod_frame_default")
+end
+
+-------------------------------------------------------------------------------
+-- Get or create menu panel
+--
+-- @function [parent=#MainTab] getTabMenuPanel
+--
+function MainTab.methods:getTabMenuPanel(caption)
+  local dataPanel = self:getDataPanel()
+  if dataPanel["tab-menu"] ~= nil and dataPanel["tab-menu"].valid then
+    return dataPanel["tab-menu"]
+  end
+  local panel = ElementGui.addGuiFrameV(dataPanel, "tab-menu", "helmod_frame_data_menu", caption)
+  Player.setStyle(panel, "data", "minimal_width")
+  return panel
 end
 
 -------------------------------------------------------------------------------
@@ -245,6 +260,7 @@ function MainTab.methods:onEventAccessAll(event, action, item, item2, item3)
   Logging:debug(self:classname(), "onEventAccessAll():", action, item, item2, item3)
   local globalGui = Player.getGlobalGui()
   if action == "refresh-model" then
+    Model.update()
     self:update(item, item2, item3)
   end
 
@@ -252,14 +268,6 @@ function MainTab.methods:onEventAccessAll(event, action, item, item2, item3)
     globalGui.model_id = item
     globalGui.currentTab = "HMProductionLineTab"
     globalGui.currentBlock = "new"
-
-    Controller.sendEvent(nil, "HMRecipeSelector", "CLOSE")
-    Controller.sendEvent(nil, "HMResourceEdition", "CLOSE")
-    Controller.sendEvent(nil, "HMRecipeEdition", "CLOSE")
-    Controller.sendEvent(nil, "HMProductEdition", "CLOSE")
-    Controller.sendEvent(nil, "HMEnergyEdition", "CLOSE")
-    Controller.sendEvent(nil, "HMSettings", "CLOSE")
-
     Controller.refreshDisplay()
   end
 
@@ -275,12 +283,6 @@ function MainTab.methods:onEventAccessAll(event, action, item, item2, item3)
     else
       Controller.sendEvent(nil, "HMRecipeSelector", "CLOSE")
     end
-    Controller.sendEvent(nil, "HMResourceEdition", "CLOSE")
-    Controller.sendEvent(nil, "HMRecipeEdition", "CLOSE")
-    Controller.sendEvent(nil, "HMProductEdition", "CLOSE")
-    Controller.sendEvent(nil, "HMEnergyEdition", "CLOSE")
-    Controller.sendEvent(nil, "HMSettings", "CLOSE")
-
     self.parent:refreshDisplayData()
   end
 
@@ -394,6 +396,13 @@ function MainTab.methods:onEventAccessWrite(event, action, item, item2, item3)
     end
   end
 
+  if action == "production-block-remove" then
+    Model.removeProductionBlock(item)
+    Model.update()
+    self:update(item, item2, item3)
+    globalGui.currentBlock = "new"
+  end
+
   if globalGui.currentTab == "HMProductionLineTab" then
     if action == "production-block-add" then
       local recipes = Player.searchRecipe(item2)
@@ -408,12 +417,6 @@ function MainTab.methods:onEventAccessWrite(event, action, item, item2, item3)
         globalGui.currentTab = "HMProductionBlockTab"
         Controller.sendEvent(nil, "HMRecipeSelector", "OPEN", item, item2, item3)
       end
-    end
-
-    if action == "production-block-remove" then
-      Model.removeProductionBlock(item)
-      Model.update()
-      self:update(item, item2, item3)
     end
 
     if action == "production-block-up" then
@@ -489,12 +492,6 @@ function MainTab.methods:onEventAccessDelete(event, action, item, item2, item3)
     globalGui.currentBlock = "new"
 
     self:update(item, item2, item3)
-    Controller.sendEvent(nil, "HMRecipeSelector", "CLOSE")
-    Controller.sendEvent(nil, "HMResourceEdition", "CLOSE")
-    Controller.sendEvent(nil, "HMRecipeEdition", "CLOSE")
-    Controller.sendEvent(nil, "HMProductEdition", "CLOSE")
-    Controller.sendEvent(nil, "HMEnergyEdition", "CLOSE")
-    Controller.sendEvent(nil, "HMSettings", "CLOSE")
   end
 end
 
@@ -550,23 +547,21 @@ function MainTab.methods:updateModelPanel(item, item2, item3)
   end
 
   -- time panel
-  ElementGui.addGuiButton(modelPanel, self:classname().."=base-time", nil, "helmod_button_icon_time", nil, ({"helmod_data-panel.base-time"}))
-
   local times = {
-    { value = 1, name = "1s"},
-    { value = 60, name = "1mn"},
-    { value = 300, name = "5mn"},
-    { value = 600, name = "10mn"},
-    { value = 1800, name = "30mn"},
-    { value = 3600, name = "1h"},
-    { value = 3600*6, name = "6h"},
-    { value = 3600*12, name = "12h"},
-    { value = 3600*24, name = "24h"}
+    { value = 1, caption = "1s", tooltip="1s"},
+    { value = 60, caption = "1", tooltip="1mn"},
+    { value = 300, caption = "5", tooltip="5mn"},
+    { value = 600, caption = "10", tooltip="10mn"},
+    { value = 1800, caption = "30", tooltip="30mn"},
+    { value = 3600, caption = "1h", tooltip="1h"},
+    { value = 3600*6, caption = "6h", tooltip="6h"},
+    { value = 3600*12, caption = "12h", tooltip="12h"},
+    { value = 3600*24, caption = "24h", tooltip="24h"}
   }
   for _,time in pairs(times) do
-    local style = "helmod_button_time"
-    if model.time == time.value then style = "helmod_button_time_selected" end
-    ElementGui.addGuiButton(modelPanel, self:classname().."=change-time=ID=", time.value, style, time.name)
+    local style = "helmod_button_icon_time"
+    if model.time == time.value then style = "helmod_button_icon_time_selected" end
+    ElementGui.addGuiButton(modelPanel, self:classname().."=change-time=ID=", time.value, style, time.caption, {"helmod_data-panel.base-time", time.tooltip})
   end
 
 end
@@ -587,41 +582,50 @@ function MainTab.methods:updateHeaderPanel(item, item2, item3)
   local model_id = Player.getGlobalGui("model_id")
   local globalGui = Player.getGlobalGui()
 
-  -- data
+  -- tab menu panel
+  local tab_menu_panel = self:getTabMenuPanel()
+  local tab_panel = ElementGui.addGuiFlowH(tab_menu_panel, "tab", "helmod_flow_data_tab")
+  for _, tab in pairs(self.tabs) do
+    if tab:classname() ~= "HMPropertiesTab" or Player.getSettings("properties_tab", true) then
+      local style = "helmod_button_default"
+      if tab:classname() == globalGui.currentTab then style = "helmod_button_selected" end
+      ElementGui.addGuiButton(tab_panel, self:classname().."=change-tab=ID=", tab:classname(), style, tab:getButtonCaption())
+    end
+  end
+  -- menu panel
   local menuPanel = self:getMenuPanel()
 
-  if globalGui.currentTab == "HMProductionBlockTab" then
-    local blockId = globalGui.currentBlock or "new"
-    local tabPanel = ElementGui.addGuiFlowH(menuPanel, "tab", "helmod_flow_data_tab")
-    ElementGui.addGuiButton(tabPanel, "HMRecipeSelector=OPEN=ID=", blockId, "helmod_button_default", ({"helmod_result-panel.add-button-recipe"}))
-    ElementGui.addGuiButton(tabPanel, "HMTechnologySelector=OPEN=ID=", blockId, "helmod_button_default", ({"helmod_result-panel.add-button-technology"}))
-    ElementGui.addGuiButton(tabPanel, self:classname().."=change-tab=ID=", "HMProductionLineTab", "helmod_button_default", ({"helmod_result-panel.back-button-production-line"}))
-    ElementGui.addGuiButton(tabPanel, "HMPinPanel=OPEN=ID=", blockId, "helmod_button_default", ({"helmod_result-panel.tab-button-pin"}))
-    ElementGui.addGuiButton(tabPanel, self:classname().."=refresh-model=ID=", model.id, "helmod_button_default", ({"helmod_result-panel.refresh-button"}))
-  elseif globalGui.currentTab == "HMPropertiesTab" then
-    local tabPanel = ElementGui.addGuiFlowH(menuPanel, "tab", "helmod_flow_data_tab")
-    ElementGui.addGuiButton(tabPanel, "HMEntitySelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-entity"}))
-    ElementGui.addGuiButton(tabPanel, "HMItemSelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-item"}))
-    ElementGui.addGuiButton(tabPanel, "HMFluidSelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-fluid"}))
-    ElementGui.addGuiButton(tabPanel, "HMRecipeSelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-recipe"}))
-    ElementGui.addGuiButton(tabPanel, "HMTechnologySelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-technology"}))
-    ElementGui.addGuiButton(tabPanel, self:classname().."=change-tab=ID=", "HMProductionLineTab", "helmod_button_default", ({"helmod_result-panel.back-button-production-line"}))
+  if globalGui.currentTab == "HMPropertiesTab" then
+    local tab_panel = ElementGui.addGuiFlowH(menuPanel, "tab", "helmod_flow_data_tab")
+    ElementGui.addGuiButton(tab_panel, "HMEntitySelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-entity"}))
+    ElementGui.addGuiButton(tab_panel, "HMItemSelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-item"}))
+    ElementGui.addGuiButton(tab_panel, "HMFluidSelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-fluid"}))
+    ElementGui.addGuiButton(tab_panel, "HMRecipeSelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-recipe"}))
+    ElementGui.addGuiButton(tab_panel, "HMTechnologySelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-technology"}))
   else
     -- action panel
     local actionPanel = ElementGui.addGuiFlowH(menuPanel, "action", "helmod_flow_resize_row_width")
     Player.setStyle(actionPanel, "data", "minimal_width")
     Player.setStyle(actionPanel, "data", "maximal_width")
-    local tabPanel = ElementGui.addGuiFlowH(actionPanel, "tab", "helmod_flow_data_tab")
-    for _, tab in pairs(self.tabs) do
-      if tab:classname() ~= "HMPropertiesTab" or Player.getSettings("properties_tab", true) then
-        ElementGui.addGuiButton(tabPanel, self:classname().."=change-tab=ID=", tab:classname(), "helmod_button_default", tab:getButtonCaption())
-      end
-    end
-    ElementGui.addGuiButton(tabPanel, self:classname().."=refresh-model=ID=", model.id, "helmod_button_default", ({"helmod_result-panel.refresh-button"}))
-
-    local deletePanel = ElementGui.addGuiFlowH(actionPanel, "delete", "helmod_flow_default")
+    local tab_panel = ElementGui.addGuiFlowH(actionPanel, "tab", "helmod_flow_data_tab")
+    -- add recipe
+    local block_id = globalGui.currentBlock or "new"
+    ElementGui.addGuiButton(tab_panel, "HMRecipeSelector=OPEN=ID=", block_id, "helmod_button_default", ({"helmod_result-panel.add-button-recipe"}))
+    ElementGui.addGuiButton(tab_panel, "HMTechnologySelector=OPEN=ID=", block_id, "helmod_button_default", ({"helmod_result-panel.add-button-technology"}))
+    -- delete control
     if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 4) > 0) then
-      ElementGui.addGuiButton(deletePanel, self:classname().."=remove-model=ID=", model.id, "helmod_button_default", ({"helmod_result-panel.remove-button-production-line"}))
+    if globalGui.currentTab == "HMProductionLineTab" then
+      ElementGui.addGuiButton(tab_panel, self:classname().."=remove-model=ID=", model.id, "helmod_button_icon_delete_red", nil, ({"helmod_result-panel.remove-button-production-line"}))
+    end
+    if globalGui.currentTab == "HMProductionBlockTab" then
+      ElementGui.addGuiButton(tab_panel, self:classname().."=production-block-remove=ID=", block_id, "helmod_button_icon_delete_red", nil, ({"helmod_result-panel.remove-button-production-block"}))
+    end
+    end
+    -- refresh control
+    ElementGui.addGuiButton(tab_panel, self:classname().."=refresh-model=ID=", model.id, "helmod_button_icon_refresh", nil, ({"helmod_result-panel.refresh-button"}))
+    -- pin control
+    if globalGui.currentTab == "HMProductionBlockTab" then
+        ElementGui.addGuiButton(tab_panel, "HMPinPanel=OPEN=ID=", block_id, "helmod_button_icon_pin", nil, ({"helmod_result-panel.tab-button-pin"}))
     end
 
     -- index panel

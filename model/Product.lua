@@ -4,7 +4,7 @@
 --
 local Product = {
   -- single-line comment
-  classname = "Product"
+  classname = "HMProduct"
 }
 
 local lua_product = nil
@@ -151,6 +151,31 @@ function Product.countIngredient(recipe)
   Logging:debug(Product.classname, "countIngredient",lua_product)
   local amount = Product.getElementAmount(lua_product)
   return amount * recipe.count
+end
+
+-------------------------------------------------------------------------------
+-- Count container
+--
+-- @function [parent=#Product] countContainer
+--
+-- @param #number count
+-- @param #string container name
+--
+-- @return #number
+--
+function Product.countContainer(count, container)
+  Logging:debug(Product.classname, "countContainer",lua_product)
+  if lua_product.type == 0 or lua_product.type == "item" then
+  local cargo_wagon_size = EntityPrototype.load(container).getInventorySize()
+    local stack_size = ItemPrototype.load(lua_product.name).stackSize()
+    if cargo_wagon_size * stack_size == 0 then return 0 end
+    return count / (cargo_wagon_size * stack_size)
+  end
+  if lua_product.type == 1 or lua_product.type == "fluid" then
+    local cargo_wagon_size = EntityPrototype.load(container).getFluidCapacity()
+    if cargo_wagon_size == 0 then return 0 end
+    return count / cargo_wagon_size
+  end
 end
 
 return Product

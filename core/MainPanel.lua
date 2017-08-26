@@ -68,9 +68,9 @@ function MainPanel.methods:main()
     local mainPanel = self:getMainPanel()
     -- menu
     local menuPanel = self:getMenuPanel()
-    local actionPanel = ElementGui.addGuiFrameV(menuPanel, "settings", "helmod_frame_left_menu")
-    ElementGui.addGuiButton(actionPanel, self:classname().."=CLOSE", nil, "helmod_button_icon_cancel", nil, ({"helmod_button.close"}))
-    ElementGui.addGuiButton(actionPanel, "HMSettings=OPEN", nil, "helmod_button_icon_options", nil, ({"helmod_button.options"}))
+    local actionPanel = ElementGui.addGuiFrameV(menuPanel, "settings", "helmod_frame_default")
+    ElementGui.addGuiButton(actionPanel, self:classname().."=CLOSE", nil, "helmod_button_icon_close_red", nil, ({"helmod_button.close"}))
+    ElementGui.addGuiButton(actionPanel, "HMSettings=OPEN", nil, "helmod_button_icon_menu", nil, ({"helmod_button.options"}))
     -- info
     local infoPanel = self:getInfoPanel()
     -- data
@@ -170,7 +170,7 @@ function MainPanel.methods:getMenuPanel()
   if menuPanel["helmod_planner_settings"] ~= nil and menuPanel["helmod_planner_settings"].valid then
     return menuPanel["helmod_planner_settings"]
   end
-  return ElementGui.addGuiFlowV(menuPanel, "helmod_planner_settings", "helmod_flow_left_menu")
+  return ElementGui.addGuiFlowV(menuPanel, "helmod_planner_settings", "helmod_flow_resize_row_width")
 end
 
 -------------------------------------------------------------------------------

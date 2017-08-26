@@ -66,7 +66,7 @@ end
 -- @param player
 --
 function Player.getGuiTop(player)
-  return player.gui.top["helmod_menu-main"]
+  return player.gui.top
 end
 
 -------------------------------------------------------------------------------
@@ -403,6 +403,12 @@ function Player.getLocalisedName(element)
   end
   local localisedName = element.name
   if element.type ~= nil then
+    if element.type == "entity" then
+      local item = Player.getEntityPrototype(element.name)
+      if item ~= nil then
+        localisedName = item.localised_name
+      end
+    end
     if element.type == 0 or element.type == "item" then
       local item = Player.getItemPrototype(element.name)
       if item ~= nil then
@@ -640,10 +646,11 @@ end
 -- @return #number
 --
 function Player.getModuleBonus(module, effect)
+  if module == nil then return 0 end
   local bonus = 0
   -- search module
   local module = Player.getItemPrototype(module)
-  if module ~= nil and module.module_effects[effect] ~= nil then
+  if module ~= nil and module.module_effects ~= nil and module.module_effects[effect] ~= nil then
     bonus = module.module_effects[effect].bonus
   end
   return bonus
@@ -714,7 +721,7 @@ end
 --
 -- @function [parent=#Player] getEntityPrototype
 --
--- @param #string entity name
+-- @param #string name entity name
 --
 -- @return #LuaEntityPrototype entity prototype
 --
@@ -735,7 +742,7 @@ function Player.getProductionsBeacon()
   for _,item in pairs(game.entity_prototypes) do
     --Logging:debug(Player.classname, "getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
     if item.name ~= nil and item.type == EntityType.beacon then
-      local efficiency = EntityPrototype.load(item.name).electricEffectivity()
+      local efficiency = EntityPrototype.load(item.name).getElectricEffectivity()
       Logging:trace(Player.classname, "getProductionsBeacon(type):", item.name, efficiency)
       if efficiency ~= nil then
         table.insert(items,item)
@@ -760,7 +767,7 @@ function Player.getGenerators(type)
   for _,item in pairs(game.entity_prototypes) do
     --Logging:debug(Player.classname, "getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
     if item.name ~= nil then
-      local entity_type = EntityPrototype.load(item).type()
+      local entity_type = EntityPrototype.load(item).getType()
       if item.group.name == "production" then
         Logging:trace(Player.classname, "getGenerators():", item.name, item.type, item.group.name, item.subgroup.name)
       end
@@ -816,6 +823,7 @@ end
 -- @return #LuaItemPrototype item prototype
 --
 function Player.getItemPrototype(name)
+  if name == nil then return nil end
   return game.item_prototypes[name]
 end
 
@@ -840,6 +848,7 @@ end
 -- @return #LuaFluidPrototype fluid prototype
 --
 function Player.getFluidPrototype(name)
+  if name == nil then return nil end
   return game.fluid_prototypes[name]
 end
 

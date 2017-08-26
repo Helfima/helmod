@@ -16,7 +16,6 @@ EnergyEdition = setclass("HMEnergyEdition", Dialog)
 --
 function EnergyEdition.methods:onInit(parent)
   self.panelCaption = ({"helmod_energy-edition-panel.title"})
-  self.player = self.parent.player
 end
 
 -------------------------------------------------------------------------------
@@ -226,10 +225,6 @@ end
 --
 function EnergyEdition.methods:afterOpen(event, action, item, item2, item3)
   Logging:debug(self:classname(), "afterOpen():", action, item, item2, item3)
-  Controller.sendEvent(nil, "HMProductEdition", "CLOSE")
-  Controller.sendEvent(nil, "HMRecipeSelector", "CLOSE")
-  Controller.sendEvent(nil, "HMSettings", "CLOSE")
-
   self:buildHeaderPanel()
   self:buildPrimaryPanel()
   self:buildSecondaryPanel()
@@ -410,15 +405,15 @@ function EnergyEdition.methods:updatePrimaryInfo(item, item2, item3)
       ElementGui.addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy-nominal"}))
       ElementGui.addGuiLabel(inputPanel, "energy-nominal", Format.formatNumberKilo(EntityPrototype.getEnergyNominal(), "W"))
 
-      if EntityPrototype.type() == "generator" then
+      if EntityPrototype.getType() == "generator" then
         ElementGui.addGuiLabel(inputPanel, "label-maximum-temperature", ({"helmod_label.maximum-temperature"}))
-        ElementGui.addGuiLabel(inputPanel, "maximum-temperature", EntityPrototype.maximumTemperature() or "NAN")
+        ElementGui.addGuiLabel(inputPanel, "maximum-temperature", EntityPrototype.getMaximumTemperature() or "NAN")
 
         ElementGui.addGuiLabel(inputPanel, "label-fluid-usage", ({"helmod_label.fluid-usage"}))
-        ElementGui.addGuiLabel(inputPanel, "fluid-usage", EntityPrototype.fluidUsagePerTick() or "NAN")
+        ElementGui.addGuiLabel(inputPanel, "fluid-usage", EntityPrototype.getFluidUsagePerTick() or "NAN")
 
         ElementGui.addGuiLabel(inputPanel, "label-effectivity", ({"helmod_label.effectivity"}))
-        ElementGui.addGuiLabel(inputPanel, "effectivity", EntityPrototype.effectivity() or "NAN")
+        ElementGui.addGuiLabel(inputPanel, "effectivity", EntityPrototype.getEffectivity() or "NAN")
       end
     end
   end
@@ -476,7 +471,6 @@ function EnergyEdition.methods:updatePrimarySelector(item, item2, item3)
   end
 
   local tablePanel = ElementGui.addGuiTable(scrollPanel, "primary-table", 5)
-  --Logging:debug(self:classname(), "factories:",self.player:getProductions())
   for key, element in pairs(factories) do
     if category ~= nil or (element.subgroup ~= nil and element.subgroup.name == model.primaryGroupSelected) then
       local localised_name = Player.getLocalisedName(element)
@@ -538,23 +532,23 @@ function EnergyEdition.methods:updateSecondaryInfo(item, item2, item3)
 
       local inputPanel = ElementGui.addGuiTable(infoPanel,"table-input",2)
 
-      if EntityPrototype.type() == EntityType.boiler then
+      if EntityPrototype.getType() == EntityType.boiler then
         ElementGui.addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy-nominal"}))
         ElementGui.addGuiLabel(inputPanel, "energy-nominal", Format.formatNumberKilo(EntityPrototype.getEnergyNominal(), "W"))
 
         ElementGui.addGuiLabel(inputPanel, "label-effectivity", ({"helmod_label.effectivity"}))
-        ElementGui.addGuiLabel(inputPanel, "effectivity", EntityPrototype.effectivity())
+        ElementGui.addGuiLabel(inputPanel, "effectivity", EntityPrototype.getEffectivity())
       end
 
-      if EntityPrototype.type() == EntityType.accumulator then
+      if EntityPrototype.getType() == EntityType.accumulator then
         ElementGui.addGuiLabel(inputPanel, "label-buffer-capacity", ({"helmod_label.buffer-capacity"}))
-        ElementGui.addGuiLabel(inputPanel, "buffer-capacity", Format.formatNumberKilo(EntityPrototype.electricBufferCapacity(), "J"))
+        ElementGui.addGuiLabel(inputPanel, "buffer-capacity", Format.formatNumberKilo(EntityPrototype.getElectricBufferCapacity(), "J"))
 
         ElementGui.addGuiLabel(inputPanel, "label-input_flow_limit", ({"helmod_label.input-flow-limit"}))
-        ElementGui.addGuiLabel(inputPanel, "input-flow-limit", Format.formatNumberKilo(EntityPrototype.electricInputFlowLimit(), "W"))
+        ElementGui.addGuiLabel(inputPanel, "input-flow-limit", Format.formatNumberKilo(EntityPrototype.getElectricInputFlowLimit(), "W"))
 
         ElementGui.addGuiLabel(inputPanel, "label-output-flow-limit", ({"helmod_label.output-flow-limit"}))
-        ElementGui.addGuiLabel(inputPanel, "output-flow-limit", Format.formatNumberKilo(EntityPrototype.electricOutputFlowLimit(), "W"))
+        ElementGui.addGuiLabel(inputPanel, "output-flow-limit", Format.formatNumberKilo(EntityPrototype.getElectricOutputFlowLimit(), "W"))
       end
 
     end
@@ -613,7 +607,6 @@ function EnergyEdition.methods:updateSecondarySelector(item, item2, item3)
   end
 
   local tablePanel = ElementGui.addGuiTable(scrollPanel, "secondary-table", 5)
-  --Logging:debug(self:classname(), "factories:",self.player:getProductions())
   for key, element in pairs(factories) do
     if category ~= nil or (element.subgroup ~= nil and element.subgroup.name == model.secondaryGroupSelected) then
       local localised_name = Player.getLocalisedName(element)

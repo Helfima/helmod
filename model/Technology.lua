@@ -4,7 +4,7 @@
 -- 
 local Technology = {
   -- single-line comment
-  classname = "Technology"
+  classname = "HMTechnology"
 }
 
 local lua_technology = nil

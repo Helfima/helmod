@@ -1,3 +1,5 @@
+local default_gui = data.raw["gui-style"].default
+
 --
 -- @see https://forums.factorio.com/viewtopic.php?f=28&t=24292
 --
@@ -66,7 +68,54 @@ function layeredIcon (filename, size, scale, shift, position)
   }
 end
 
-local default_gui = data.raw["gui-style"].default
+-------------------------------------------------------------------------------
+-- Menu icon type
+--
+-- @function menuIconType
+--
+-- @param #string name
+-- @param #number icon_row
+-- @param #table icon_col
+-- @param #string suffix
+-- @param #string font
+-- @param #table hovered_font_color
+--
+function menuIconType(name, icon_row, icon_col, suffix, font, hovered_font_color)
+  local style_name = "helmod_button_icon_"..name
+  if suffix ~= nil then style_name = style_name.."_"..suffix end
+  default_gui[style_name] = {
+    type = "button_style",
+    parent = "helmod_button_default",
+    width = 32,
+    height = 32,
+    scalable = false,
+    default_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=icon_col[1],y=(icon_row-1)*32}, {top=0,right=0,bottom=0,left=0}, true),
+    hovered_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=icon_col[2],y=(icon_row-1)*32}, {top=0,right=0,bottom=0,left=0}, true),
+    hovered_font_color = hovered_font_color,
+    clicked_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=icon_col[3],y=(icon_row-1)*32}, {top=0,right=0,bottom=0,left=0}, true),
+    disabled_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=icon_col[4],y=(icon_row-1)*32}, {top=0,right=0,bottom=0,left=0}, true)
+  }
+  if font ~= nil then
+    default_gui[style_name].font = font
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Menu icons
+--
+-- @function menuIcons
+--
+-- @param #string name
+-- @param #number icon_row
+-- @param #string font
+--
+function menuIcons(name, icon_row, font)
+  menuIconType(name, icon_row, {0,32,0,0}, nil, font, {r=0, g=0, b=0})
+  menuIconType(name, icon_row, {0,64,0,0}, "red", font, {r=0, g=0, b=0})
+  menuIconType(name, icon_row, {96,96,96,96}, "selected", font, {r=1, g=1, b=1})
+  menuIconType(name, icon_row, {128,128,128,128}, "selected_yellow", font, {r=0, g=0, b=0})
+  menuIconType(name, icon_row, {160,160,160,160}, "selected_red", font, {r=0, g=0, b=0})
+end
 
 -------------------------------------------------------------------------------
 -- Style Textfield
@@ -107,8 +156,9 @@ default_gui["helmod_button_default"] = {
   right_padding = 2,
   bottom_padding = 2,
   left_padding = 2,
+  height = 28,
   default_graphical_set = compositionIcon("__core__/graphics/gui.png", corner_size, {0, 0}),
-  hovered_font_color={r=1, g=1, b=1},
+  hovered_font_color={r=0, g=0, b=0},
   hovered_graphical_set = compositionIcon("__core__/graphics/gui.png", corner_size, {0, 8}),
   clicked_font_color={r=1, g=1, b=1},
   clicked_graphical_set = compositionIcon("__core__/graphics/gui.png", corner_size, {0, 40}),
@@ -131,6 +181,7 @@ default_gui["helmod_button_selected"] = {
   right_padding = 2,
   bottom_padding = 2,
   left_padding = 2,
+  height = 28,
   default_graphical_set = compositionIcon("__core__/graphics/gui.png", corner_size, {0, 40}),
   hovered_font_color={r=1, g=1, b=1},
   hovered_graphical_set = compositionIcon("__core__/graphics/gui.png", corner_size, {0, 40}),
@@ -139,32 +190,6 @@ default_gui["helmod_button_selected"] = {
   disabled_font_color={r=0.5, g=0.5, b=0.5},
   disabled_graphical_set = compositionIcon("__core__/graphics/gui.png", corner_size, {0, 16}),
   pie_progress_color = {r=1, g=1, b=1}
-}
-
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] time
-
-local icon_corner_size = 0
-default_gui["helmod_button_time"] = {
-  type = "button_style",
-  parent = "helmod_button_default",
-  font = "helmod_font_small_bold",
-  width = 36
-}
-
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] time_selected
-
-local icon_corner_size = 0
-default_gui["helmod_button_time_selected"] = {
-  type = "button_style",
-  parent = "helmod_button_selected",
-  font = "helmod_font_small_bold",
-  width = 36
 }
 
 -------------------------------------------------------------------------------
@@ -188,78 +213,6 @@ default_gui["helmod_icon"] = {
 -------------------------------------------------------------------------------
 -- Style of button
 --
--- @field [parent=#Button] icon_options
-
-local icon_corner_size = 0
-default_gui["helmod_button_icon_options"] = {
-  type = "button_style",
-  parent = "helmod_button_default",
-  width = 32,
-  height = 32,
-  scalable = false,
-  default_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
-  hovered_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=32,y=0}, {top=0,right=0,bottom=0,left=0}, true),
-  clicked_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
-  disabled_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true)
-}
-
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] icon_time
-
-local icon_corner_size = 0
-default_gui["helmod_button_icon_time"] = {
-  type = "button_style",
-  parent = "helmod_button_default",
-  width = 32,
-  height = 32,
-  scalable = false,
-  default_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=32}, {top=0,right=0,bottom=0,left=0}, true),
-  hovered_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=32,y=32}, {top=0,right=0,bottom=0,left=0}, true),
-  clicked_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=32}, {top=0,right=0,bottom=0,left=0}, true),
-  disabled_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=32}, {top=0,right=0,bottom=0,left=0}, true)
-}
-
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] icon_cancel
-
-local icon_corner_size = 0
-default_gui["helmod_button_icon_cancel"] = {
-  type = "button_style",
-  parent = "helmod_button_default",
-  width = 32,
-  height = 32,
-  scalable = false,
-  default_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=64}, {top=0,right=0,bottom=0,left=0}, true),
-  hovered_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=32,y=64}, {top=0,right=0,bottom=0,left=0}, true),
-  clicked_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=64}, {top=0,right=0,bottom=0,left=0}, true),
-  disabled_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=64}, {top=0,right=0,bottom=0,left=0}, true)
-}
-
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] icon_help
-
-local icon_corner_size = 0
-default_gui["helmod_button_icon_help"] = {
-  type = "button_style",
-  parent = "helmod_button_default",
-  width = 32,
-  height = 32,
-  scalable = false,
-  default_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=96}, {top=0,right=0,bottom=0,left=0}, true),
-  hovered_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=32,y=96}, {top=0,right=0,bottom=0,left=0}, true),
-  clicked_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=96}, {top=0,right=0,bottom=0,left=0}, true),
-  disabled_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=0,y=96}, {top=0,right=0,bottom=0,left=0}, true)
-}
-
--------------------------------------------------------------------------------
--- Style of button
---
 -- @field [parent=#Button] icon_default
 
 default_gui["helmod_button_icon_default"] = {
@@ -270,6 +223,38 @@ default_gui["helmod_button_icon_default"] = {
   clicked_graphical_set = compositionIcon("__core__/graphics/gui.png", {icon_corner_size, icon_corner_size}, {3 - icon_corner_size, 43 - icon_corner_size}),
   disabled_graphical_set = compositionIcon("__core__/graphics/gui.png", {icon_corner_size, icon_corner_size}, {3 - icon_corner_size, 19 - icon_corner_size}),
 }
+
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] icon_yyy
+
+local list = {
+  {name="arrow_down"},
+  {name="arrow_right"},
+  {name="arrow_top"},
+  {name="arrow_left"},
+  {name="download"},
+  {name="upload"},
+  {name="refresh"},
+  {name="clock"},
+  {name="close"},
+  {name="copy"},
+  {name="help"},
+  {name="info"},
+  {name="maximize"},
+  {name="minimize"},
+  {name="menu"},
+  {name="past"},
+  {name="pin"},
+  {name="delete"},
+  {name="edit"},
+  {name="settings"},
+  {name="time", font="helmod_font_small2_bold"}
+}
+for icon_row,icon in pairs(list) do
+  menuIcons(icon.name, icon_row, icon.font)
+end
 
 -------------------------------------------------------------------------------
 -- Style of button
@@ -634,6 +619,62 @@ for w=20, 100, 10 do
 end
 
 -------------------------------------------------------------------------------
+-- Style of default
+--
+-- @field [parent=#Label] row2_right
+
+  default_gui["helmod_label_row2_right"] = {
+    type = "label_style",
+    parent = "helmod_label_right",
+    font = "helmod_font_normal",
+    top_padding = 0,
+    right_padding = 1,
+    bottom_padding = 1,
+    left_padding = 0
+  }
+
+-------------------------------------------------------------------------------
+-- Style of default
+--
+-- @field [parent=#Label] row2_right_xx
+
+for w=20, 100, 10 do
+  default_gui["helmod_label_row2_right_"..w] = {
+    type = "label_style",
+    parent = "helmod_label_row2_right",
+    minimal_width = w
+  }
+end
+
+-------------------------------------------------------------------------------
+-- Style of default
+--
+-- @field [parent=#Label] row2_right_sm
+
+  default_gui["helmod_label_row2_right_sm"] = {
+    type = "label_style",
+    parent = "helmod_label_right",
+    font = "helmod_font_small",
+    top_padding = 0,
+    right_padding = 1,
+    bottom_padding = 0,
+    left_padding = 0
+  }
+
+-------------------------------------------------------------------------------
+-- Style of default
+--
+-- @field [parent=#Label] row2_right_sm_xx
+
+for w=20, 100, 10 do
+  default_gui["helmod_label_row2_right_sm_"..w] = {
+    type = "label_style",
+    parent = "helmod_label_row2_right_sm",
+    minimal_width = w
+  }
+end
+
+-------------------------------------------------------------------------------
 -- Style of label
 --
 -- @field [parent=#Label] icon
@@ -833,7 +874,6 @@ default_gui["helmod_flow_default"] = {
 default_gui["helmod_flow_cell"] = {
   type = "flow_style",
   parent = "helmod_flow_default",
-  minimal_width = 64,
   horizontal_spacing = 0,
   vertical_spacing = 0
 }

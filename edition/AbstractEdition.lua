@@ -243,13 +243,6 @@ end
 --
 function AbstractEdition.methods:afterOpen(event, action, item, item2, item3)
   Logging:debug(self:classname(), "afterOpen():", action, item, item2, item3)
-  Controller.sendEvent(nil, "HMProductEdition", "CLOSE")
-  Controller.sendEvent(nil, "HMRecipeSelector", "CLOSE")
-  Controller.sendEvent(nil, "HMItemSelector", "CLOSE")
-  Controller.sendEvent(nil, "HMEntitySelector", "CLOSE")
-  Controller.sendEvent(nil, "HMFluidSelector", "CLOSE")
-  Controller.sendEvent(nil, "HMTechnologySelector", "CLOSE")
-  Controller.sendEvent(nil, "HMSettings", "CLOSE")
   local object = self:getObject(event, action, item, item2, item3)
 
   local model = Model.getModel()
@@ -431,7 +424,7 @@ function AbstractEdition.methods:updateFactoryInfo(item, item2, item3)
     local inputPanel = ElementGui.addGuiTable(infoPanel,"table-input",2)
 
     ElementGui.addGuiLabel(inputPanel, "label-module-slots", ({"helmod_label.module-slots"}))
-    ElementGui.addGuiLabel(inputPanel, "module-slots", EntityPrototype.moduleInventorySize())
+    ElementGui.addGuiLabel(inputPanel, "module-slots", EntityPrototype.getModuleInventorySize())
 
     ElementGui.addGuiLabel(inputPanel, "label-energy", ({"helmod_label.energy"}))
     
@@ -482,19 +475,14 @@ function AbstractEdition.methods:updateFactoryModulesSelector(item, item2, item3
     local factory = object.factory
     for k, module in pairs(Player.getModules()) do
       local allowed = true
-      local factory_type = EntityPrototype.load(factory.name).type()
-      local consumption = Format.formatPercent(Player.getModuleBonus(module.name, "consumption"))
-      local speed = Format.formatPercent(Player.getModuleBonus(module.name, "speed"))
-      local productivity = Format.formatPercent(Player.getModuleBonus(module.name, "productivity"))
-      local pollution = Format.formatPercent(Player.getModuleBonus(module.name, "pollution"))
-      if productivity > 0 and factory_type ~= "mining-drill" and factory_type ~= "lab" and model_filter_factory_module == true then
+      local factory_type = EntityPrototype.load(factory.name).getType()
+      if Player.getModuleBonus(module.name, "productivity") > 0 and factory_type ~= "mining-drill" and factory_type ~= "lab" and model_filter_factory_module == true then
         if module.limitations[object.name] == nil then allowed = false end
       end
       if factory.module_slots ==  0 then
         allowed = false
       end
-      local localised_name = Player.getLocalisedName(module)
-      local tooltip = ({"tooltip.module-description" , localised_name, consumption, speed, productivity, pollution})
+      local tooltip = ElementGui.getTooltipModule(module.name)
       if allowed == false then
         tooltip = ({"item-limitation."..module.limitation_message_key})
         ElementGui.addGuiButtonSelectSprite(tableModulesPanel, self:classname().."=do-nothing=ID="..item.."="..object.id.."=", "item", module.name, module.name, tooltip, "red")
@@ -527,17 +515,8 @@ function AbstractEdition.methods:updateFactoryActivedModules(item, item2, item3)
   -- actived modules panel
   local currentTableModulesPanel = ElementGui.addGuiTable(activedModulesPanel,"modules",4,"helmod_table_recipe_modules")
   for module, count in pairs(factory.modules) do
-    local tooltip = module
-    local _module = Player.getItemPrototype(module)
-    if _module ~= nil then
-      local consumption = Format.formatPercent(Player.getModuleBonus(_module.name, "consumption"))
-      local speed = Format.formatPercent(Player.getModuleBonus(_module.name, "speed"))
-      local productivity = Format.formatPercent(Player.getModuleBonus(_module.name, "productivity"))
-      local pollution = Format.formatPercent(Player.getModuleBonus(_module.name, "pollution"))
-      tooltip = ({"tooltip.module-description" , _module.localised_name, consumption, speed, productivity, pollution})
-    end
     for i = 1, count, 1 do
-      ElementGui.addGuiButtonSelectSprite(currentTableModulesPanel, self:classname().."=factory-module-remove=ID="..item.."="..object.id.."="..module.."="..i, "item", module, module, tooltip)
+      ElementGui.addGuiButtonSelectSprite(currentTableModulesPanel, self:classname().."=factory-module-remove=ID="..item.."="..object.id.."="..module.."="..i, "item", module, module, ElementGui.getTooltipModule(module.name))
     end
   end
 end
@@ -642,13 +621,13 @@ function AbstractEdition.methods:updateBeaconInfo(item, item2, item3)
     local inputPanel = ElementGui.addGuiTable(infoPanel,"table-input",2)
 
     ElementGui.addGuiLabel(inputPanel, "label-module-slots", ({"helmod_label.module-slots"}))
-    ElementGui.addGuiLabel(inputPanel, "module-slots", EntityPrototype.moduleInventorySize())
+    ElementGui.addGuiLabel(inputPanel, "module-slots", EntityPrototype.getModuleInventorySize())
 
     ElementGui.addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy"}))
-    ElementGui.addGuiLabel(inputPanel, "energy", Format.formatNumberKilo(EntityPrototype.energyUsage(), "W"))
+    ElementGui.addGuiLabel(inputPanel, "energy", Format.formatNumberKilo(EntityPrototype.getEnergyUsage(), "W"))
 
     ElementGui.addGuiLabel(inputPanel, "label-efficiency", ({"helmod_label.efficiency"}))
-    ElementGui.addGuiLabel(inputPanel, "efficiency", EntityPrototype.distributionEffectivity())
+    ElementGui.addGuiLabel(inputPanel, "efficiency", EntityPrototype.getDistributionEffectivity())
 
     ElementGui.addGuiLabel(inputPanel, "label-combo", ({"helmod_label.beacon-on-factory"}), nil, {"tooltip.beacon-on-factory"})
     ElementGui.addGuiText(inputPanel, "combo", beacon.combo, "helmod_textfield", {"tooltip.beacon-on-factory"})
@@ -683,18 +662,8 @@ function AbstractEdition.methods:updateBeaconActivedModules(item, item2, item3)
   -- actived modules panel
   local currentTableModulesPanel = ElementGui.addGuiTable(activedModulesPanel,"modules",4, "helmod_table_recipe_modules")
   for module, count in pairs(beacon.modules) do
-    local tooltip = module
-    local _module = Player.getItemPrototype(module)
-    if _module ~= nil then
-      local consumption = Format.formatPercent(Player.getModuleBonus(_module.name, "consumption"))
-      local speed = Format.formatPercent(Player.getModuleBonus(_module.name, "speed"))
-      local productivity = Format.formatPercent(Player.getModuleBonus(_module.name, "productivity"))
-      local pollution = Format.formatPercent(Player.getModuleBonus(_module.name, "pollution"))
-      tooltip = ({"tooltip.module-description" , _module.localised_name, consumption, speed, productivity, pollution})
-    end
-
     for i = 1, count, 1 do
-      ElementGui.addGuiButtonSelectSprite(currentTableModulesPanel, self:classname().."=beacon-module-remove=ID="..item.."="..object.id.."="..module.."="..i, "item", module, module, tooltip)
+      ElementGui.addGuiButtonSelectSprite(currentTableModulesPanel, self:classname().."=beacon-module-remove=ID="..item.."="..object.id.."="..module.."="..i, "item", module, module, ElementGui.getTooltipModule(module.name))
     end
   end
 end
@@ -723,15 +692,10 @@ function AbstractEdition.methods:updateBeaconModulesSelector(item, item2, item3)
     local tableModulesPanel = ElementGui.addGuiTable(selectorPanel,"modules",5)
     for k, module in pairs(Player.getModules()) do
       local allowed = true
-      local consumption = Format.formatPercent(Player.getModuleBonus(module.name, "consumption"))
-      local speed = Format.formatPercent(Player.getModuleBonus(module.name, "speed"))
-      local productivity = Format.formatPercent(Player.getModuleBonus(module.name, "productivity"))
-      local pollution = Format.formatPercent(Player.getModuleBonus(module.name, "pollution"))
-      if productivity > 0 and model_filter_beacon_module == true then
+      if Player.getModuleBonus(module.name, "productivity") > 0 and model_filter_beacon_module == true then
         allowed = false
       end
-      local localised_name = Player.getLocalisedName(module)
-      local tooltip = ({"tooltip.module-description" , localised_name, consumption, speed, productivity, pollution})
+      local tooltip = ElementGui.getTooltipModule(module.name)
       if allowed == false then
         tooltip = ({"item-limitation.item-not-allowed-in-this-container-item"})
         ElementGui.addGuiButtonSelectSprite(tableModulesPanel, self:classname().."=do-nothing=ID="..item.."="..object.id.."=", "item", module.name, module.name, tooltip, "red")
@@ -794,7 +758,6 @@ function AbstractEdition.methods:updateBeaconSelector(item, item2, item3)
   end
 
   local tablePanel = ElementGui.addGuiTable(scrollPanel, "beacon-table", 5)
-  --Logging:debug(self:classname(), "factories:",self.player:getProductions())
   for key, beacon in pairs(factories) do
     if category ~= nil or (beacon.subgroup ~= nil and beacon.subgroup.name == model.beaconGroupSelected) then
       local localised_name = Player.getLocalisedName(beacon)

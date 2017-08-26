@@ -29,6 +29,12 @@ data:extend(
   },
   {
     type = "font",
+    name = "helmod_font_medium",
+    from = "default",
+    size = 11
+  },
+  {
+    type = "font",
     name = "helmod_font_normal",
     from = "default",
     size = 12
@@ -44,6 +50,12 @@ data:extend(
     name = "helmod_font_small_bold",
     from = "default-bold",
     size = 10
+  },
+  {
+    type = "font",
+    name = "helmod_font_small2_bold",
+    from = "default-bold",
+    size = 8
   },
   {
     type = "font",

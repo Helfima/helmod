@@ -4,7 +4,7 @@
 -- 
 local ItemPrototype = {
   -- single-line comment
-  classname = "ItemPrototype"
+  classname = "HMItemPrototype"
 }
 
 local lua_item_prototype = nil
@@ -36,6 +36,37 @@ end
 --
 function ItemPrototype.native()
   return lua_item_prototype
+end
+
+-------------------------------------------------------------------------------
+-- Return localised name
+--
+-- @function [parent=#ItemPrototype] getLocalisedName
+--
+-- @return #number default 0
+--
+function ItemPrototype.getLocalisedName()
+  if lua_item_prototype ~= nil then
+    if Player.getSettings("display_real_name", true) then
+      return lua_item_prototype.name
+    end
+    return lua_item_prototype.localised_name
+  end
+  return "unknow"
+end
+
+-------------------------------------------------------------------------------
+-- Return stack size
+--
+-- @function [parent=#ItemPrototype] stackSize
+--
+-- @return #number default 0
+--
+function ItemPrototype.stackSize(index)
+  if lua_item_prototype ~= nil then
+    return lua_item_prototype.stack_size or 0
+  end
+  return 0
 end
 
 return ItemPrototype

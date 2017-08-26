@@ -191,11 +191,6 @@ end
 -- @param #string item3 third item name
 --
 function Settings.methods:afterOpen(event, action, item, item2, item3)
-  Controller.sendEvent(nil, "HMRecipeEdition", "CLOSE")
-  Controller.sendEvent(nil, "HMRecipeSelector", "CLOSE")
-  Controller.sendEvent(nil, "HMProductEdition", "CLOSE")
-  Controller.sendEvent(nil, "HMEnergyEdition", "CLOSE")
-
   self:updateAboutSettings(event, action, item, item2, item3)
 end
 

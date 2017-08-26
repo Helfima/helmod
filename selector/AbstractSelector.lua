@@ -210,28 +210,6 @@ function AbstractSelector.methods:onOpen(event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
--- After open
---
--- @function [parent=#AbstractSelector] afterOpen
---
--- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function AbstractSelector.methods:afterOpen(event, action, item, item2, item3)
-  Controller.sendEvent(nil, "HMRecipeEdition", "CLOSE")
-  Controller.sendEvent(nil, "HMProductEdition", "CLOSE")
-  Controller.sendEvent(nil, "HMSettings", "CLOSE")
-  if self:classname() ~= "HMEntitySelector" then Controller.sendEvent(nil, "HMEntitySelector", "CLOSE") end
-  if self:classname() ~= "HMFluidSelector" then Controller.sendEvent(nil, "HMFluidSelector", "CLOSE") end
-  if self:classname() ~= "HMItemSelector" then Controller.sendEvent(nil, "HMItemSelector", "CLOSE") end
-  if self:classname() ~= "HMRecipeSelector" then Controller.sendEvent(nil, "HMRecipeSelector", "CLOSE") end
-  if self:classname() ~= "HMTechnologySelector" then Controller.sendEvent(nil, "HMTechnologySelector", "CLOSE") end
-end
-
--------------------------------------------------------------------------------
 -- On event
 --
 -- @function [parent=#AbstractSelector] onEvent

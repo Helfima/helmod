@@ -4,7 +4,7 @@
 -- 
 local FluidPrototype = {
   -- single-line comment
-  classname = "FluidPrototype"
+  classname = "HMFluidPrototype"
 }
 
 local lua_fluid_prototype = nil
@@ -36,6 +36,23 @@ end
 --
 function FluidPrototype.native()
   return lua_fluid_prototype
+end
+
+-------------------------------------------------------------------------------
+-- Return localised name
+--
+-- @function [parent=#FluidPrototype] getLocalisedName
+--
+-- @return #number default 0
+--
+function FluidPrototype.getLocalisedName()
+  if lua_fluid_prototype ~= nil then
+    if Player.getSettings("display_real_name", true) then
+      return lua_fluid_prototype.name
+    end
+    return lua_fluid_prototype.localised_name
+  end
+  return "unknow"
 end
 
 return FluidPrototype

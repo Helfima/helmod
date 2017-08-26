@@ -4,7 +4,7 @@
 -- 
 local Prototype = {
   -- single-line comment
-  classname = "Prototype"
+  classname = "HMPrototype"
 }
 
 local lua_prototype = nil

@@ -638,4 +638,229 @@ function ElementGui.addGuiTable(parent, key, colspan, style)
   return parent.add(options)
 end
 
+-------------------------------------------------------------------------------
+-- Add cell
+--
+-- @function [parent=#ElementGui] addCell
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #string name
+--
+function ElementGui.addCell(parent, name)
+  Logging:trace(ElementGui.classname, "addCell()", name)
+  local cell = ElementGui.addGuiFlowH(parent,"cell_"..name, "helmod_flow_cell")
+  return cell
+end
+
+-------------------------------------------------------------------------------
+-- Add cell label
+--
+-- @function [parent=#ElementGui] addCellLabel
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #string name
+-- @param #string label
+-- @param #number minimal_width
+--
+function ElementGui.addCellLabel(parent, name, label, minimal_width)
+  Logging:trace(ElementGui.classname, "addCellLabel()", name, label, minimal_width)
+  local display_cell_mod = Player.getSettings("display_cell_mod")
+  local cell = ElementGui.addGuiFlowV(parent,"cell_"..name, "helmod_flow_cell")
+
+  if display_cell_mod == "small-text"then
+    -- small
+    ElementGui.addGuiLabel(cell, "label1_"..name, label, "helmod_label_icon_text_sm", {"helmod_common.total"}).style["minimal_width"] = minimal_width or 45
+  elseif display_cell_mod == "small-icon" then
+    -- small
+    ElementGui.addGuiLabel(cell, "label1_"..name, label, "helmod_label_icon_sm", {"helmod_common.total"}).style["minimal_width"] = minimal_width or 45
+  elseif display_cell_mod == "by-kilo" then
+    -- by-kilo
+    ElementGui.addGuiLabel(cell, "label1_"..name, label, "helmod_label_row_right", {"helmod_common.total"}).style["minimal_width"] = minimal_width or 50
+  else
+    -- default
+    ElementGui.addGuiLabel(cell, "label1_"..name, label, "helmod_label_row_right", {"helmod_common.total"}).style["minimal_width"] = minimal_width or 60
+
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Add cell label
+--
+-- @function [parent=#ElementGui] addCellLabel2
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #string name
+-- @param #string label1
+-- @param #string label2
+-- @param #number minimal_width
+--
+function ElementGui.addCellLabel2(parent, name, label1, label2, minimal_width)
+  Logging:trace(ElementGui.classname, "addCellLabel()", name, label1, label2, minimal_width)
+  local display_cell_mod = Player.getSettings("display_cell_mod")
+  local cell = ElementGui.addGuiFlowV(parent,"cell_"..name, "helmod_flow_cell")
+
+  if display_cell_mod == "small-text"then
+    -- small
+    ElementGui.addGuiLabel(cell, "label1_"..name, label1, "helmod_label_row2_right_sm", {"helmod_common.per-sub-block"}).style["minimal_width"] = minimal_width or 45
+    ElementGui.addGuiLabel(cell, "label2_"..name, label2, "helmod_label_row2_right_sm", {"helmod_common.total"}).style["minimal_width"] = minimal_width or 45
+  elseif display_cell_mod == "small-icon" then
+    -- small
+    ElementGui.addGuiLabel(cell, "label1_"..name, label1, "helmod_label_row2_right_sm", {"helmod_common.per-sub-block"}).style["minimal_width"] = minimal_width or 45
+    ElementGui.addGuiLabel(cell, "label2_"..name, label2, "helmod_label_row2_right_sm", {"helmod_common.total"}).style["minimal_width"] = minimal_width or 45
+  elseif display_cell_mod == "by-kilo" then
+    -- by-kilo
+    ElementGui.addGuiLabel(cell, "label1_"..name, label1, "helmod_label_row2_right", {"helmod_common.per-sub-block"}).style["minimal_width"] = minimal_width or 45
+    ElementGui.addGuiLabel(cell, "label2_"..name, label2, "helmod_label_row2_right", {"helmod_common.total"}).style["minimal_width"] = minimal_width or 45
+  else
+    -- default
+    ElementGui.addGuiLabel(cell, "label1_"..name, label1, "helmod_label_row2_right", {"helmod_common.per-sub-block"}).style["minimal_width"] = minimal_width or 45
+    ElementGui.addGuiLabel(cell, "label2_"..name, label2, "helmod_label_row2_right", {"helmod_common.total"}).style["minimal_width"] = minimal_width or 45
+
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Add icon in cell element
+--
+-- @function [parent=#AbstractTab] addCellIcon
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #table element production block
+-- @param #string action
+-- @param #boolean select
+-- @param #string tooltip_name
+-- @param #string color
+--
+function ElementGui.addCellIcon(parent, element, action, select, tooltip_name, color)
+  Logging:trace(ElementGui.classname, "addCellIcon()", element, action, select, tooltip_name, color)
+  local display_cell_mod = Player.getSettings("display_cell_mod")
+  -- ingredient = {type="item", name="steel-plate", amount=8}
+  if display_cell_mod == "small-icon" then
+    if parent ~= nil and select == true then
+      ElementGui.addGuiButtonSelectSpriteM(parent, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}), color)
+    else
+      ElementGui.addGuiButtonSpriteM(parent, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}), color)
+    end
+  else
+    if parent ~= nil and select == true then
+      ElementGui.addGuiButtonSelectSprite(parent, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}), color)
+    else
+      ElementGui.addGuiButtonSprite(parent, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}), color)
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Add cell element
+--
+-- @function [parent=#ElementGui] addCellElement
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #table element production block
+-- @param #string action
+-- @param #boolean select true if select button
+-- @param #string tooltip_name tooltip name
+-- @param #string color button color
+--
+function ElementGui.addCellElement(parent, element, action, select, tooltip_name, color)
+  Logging:trace(ElementGui.classname, "addCellElement():", element, action, select, tooltip_name, color)
+  local display_cell_mod = Player.getSettings("display_cell_mod")
+  -- ingredient = {type="item", name="steel-plate", amount=8}
+  local cell = nil
+  local button = nil
+  local cell = ElementGui.addCell(parent, element.name)
+  if display_cell_mod == "by-kilo" then
+    -- by-kilo
+    if element.limit_count ~= nil then
+      ElementGui.addCellLabel2(cell, element.name, Format.formatNumberKilo(element.limit_count), Format.formatNumberKilo(element.count))
+    else
+      ElementGui.addCellLabel(cell, element.name, Format.formatNumberKilo(element.count))
+    end
+  else
+    if element.limit_count ~= nil then
+      ElementGui.addCellLabel2(cell, element.name, Format.formatNumberElement(element.limit_count), Format.formatNumberElement(element.count))
+    else
+      ElementGui.addCellLabel(cell, element.name, Format.formatNumberElement(element.count))
+    end
+  end
+
+  ElementGui.addCellIcon(cell, element, action, select, tooltip_name, color)
+  ElementGui.addCellCargoInfo(cell, element)
+  return cell
+end
+
+-------------------------------------------------------------------------------
+-- Add cell element
+--
+-- @function [parent=#ElementGui] addCellCargoInfo
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #table element production block
+--
+function ElementGui.addCellCargoInfo(parent, element)
+  Logging:debug(ElementGui.classname, "addCellCargoInfo():", element)
+  Product.load(element)
+  if Product.native() ~= nil then
+    local table_cargo = ElementGui.addGuiTable(parent,"element_cargo", 1, "helmod_beacon_modules")
+    if element.type == 0 or element.type == "item" then
+      ElementGui.addGuiButtonSpriteSm(table_cargo, "steel-chest", "item", "steel-chest", nil, ElementGui.getTooltipProduct(element, "steel-chest"))
+      ElementGui.addGuiButtonSpriteSm(table_cargo, "cargo-wagon", "item", "cargo-wagon", nil, ElementGui.getTooltipProduct(element, "cargo-wagon"))
+    end
+  
+    if element.type == 1 or element.type == "fluid" then
+      ElementGui.addGuiButtonSpriteSm(table_cargo, "storage-tank", "item", "storage-tank", nil, ElementGui.getTooltipProduct(element, "storage-tank"))
+      ElementGui.addGuiButtonSpriteSm(table_cargo, "fluid-wagon", "item", "fluid-wagon", nil, ElementGui.getTooltipProduct(element, "fluid-wagon"))
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Get tooltip for product
+--
+-- @function [parent=#ElementGui] getTooltipProduct
+--
+-- @param #lua_product element
+-- @param #string container name
+--
+-- @return #number
+--
+function ElementGui.getTooltipProduct(element, container)
+  Logging:debug(ElementGui.classname, "getTooltip", element, container)
+  local tooltip = {"tooltip.cargo-info", EntityPrototype.load(container).getLocalisedName()}
+  local total_tooltip = {"tooltip.cargo-info-element", {"helmod_common.total"}, Format.formatNumberElement(Product.countContainer(element.count, container))}
+  if element.limit_count ~= nil then
+    local limit_tooltip = {"tooltip.cargo-info-element", {"helmod_common.per-sub-block"}, Format.formatNumberElement(Product.countContainer(element.limit_count, container))}
+    table.insert(tooltip, limit_tooltip)
+    table.insert(tooltip, total_tooltip)
+  else
+    table.insert(tooltip, total_tooltip)
+    table.insert(tooltip, "")
+  end
+  return tooltip
+end
+
+-------------------------------------------------------------------------------
+-- Get tooltip for module
+--
+-- @function [parent=#ElementGui] getTooltipModule
+--
+-- @param #string module_name
+--
+-- @return #number
+--
+function ElementGui.getTooltipModule(module_name)
+  Logging:debug(ElementGui.classname, "getTooltip", module_name)
+  local tooltip = nil
+  if module_name == nil then return nil end
+  local module = ItemPrototype.load(module_name).native()
+  if module ~= nil then
+    local consumption = Format.formatPercent(Player.getModuleBonus(module.name, "consumption"))
+    local speed = Format.formatPercent(Player.getModuleBonus(module.name, "speed"))
+    local productivity = Format.formatPercent(Player.getModuleBonus(module.name, "productivity"))
+    local pollution = Format.formatPercent(Player.getModuleBonus(module.name, "pollution"))
+    tooltip = ({"tooltip.module-description" , ItemPrototype.getLocalisedName(), consumption, speed, productivity, pollution})
+  end
+  return tooltip
+end
+
 return ElementGui

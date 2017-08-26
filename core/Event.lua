@@ -208,6 +208,7 @@ end
 -- @param #table event
 --
 function Event.onPlayerCreated(event)
+  --log("Event.onPlayerCreated(event)")
   Logging:trace(Event.classname, "onPlayerCreated(event)", event)
   local player = Player.load(event).native()
   Controller.bindController(player)
@@ -221,6 +222,7 @@ end
 -- @param #table event
 --
 function Event.onPlayerJoinedGame(event)
+  --log("Event.onPlayerJoinedGame(event)")
   Logging:trace(Event.classname, "onPlayerJoinedGame(event)", event)
   local player = Player.load(event).native()
   Controller.bindController(player)

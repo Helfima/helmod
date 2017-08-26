@@ -92,6 +92,13 @@ end
 -- 
 function Dialog.methods:open(event, action, item, item2, item3)
 	Logging:debug(self:classname(), "open():", action, item, item2, item3)
+	
+	for view_name,view in pairs(Controller.getViews()) do
+	  if string.find(view_name, "Edition") or string.find(view_name, "Selector") or string.find(view_name, "Settings") then
+	    if view_name ~= self:classname() then Controller.sendEvent(nil, view_name, "CLOSE") end
+	  end
+	end
+	
 	local parentPanel = self:getParentPanel()
 	if parentPanel[self:classname()] ~= nil and parentPanel[self:classname()].valid then
 		local close = self:onOpen(event, action, item, item2, item3)

@@ -366,7 +366,7 @@ end
 function Model.addModuleModel(element, name)
   local factory_prototype = EntityPrototype.load(element)
   if element.modules[name] == nil then element.modules[name] = 0 end
-  if Model.countModulesModel(element) < factory_prototype.moduleInventorySize() then
+  if Model.countModulesModel(element) < factory_prototype.getModuleInventorySize() then
     element.modules[name] = element.modules[name] + 1
   end
 end
@@ -1294,7 +1294,7 @@ function Model.updateVersion_0_6_0()
     for _, block in pairs(model.blocks) do
       globalGui.currentBlock = block.id
       for _, recipe in pairs(block.recipes) do
-        local recipe_type = "recipe"
+        local recipe_type = RecipePrototype.find(recipe).type()
         if recipe.is_resource then recipe_type = "resource" end
 
         local recipeModel = {}
@@ -1303,7 +1303,7 @@ function Model.updateVersion_0_6_0()
         recipeModel.name = recipe.name
         recipeModel.type = recipe_type
         recipeModel.count = 0
-        recipeModel.production = 1
+        recipeModel.production = recipe.production or 1
         recipeModel.factory = Model.createFactoryModel(recipe.factory.name)
         recipeModel.factory.limit = recipe.factory.limit
         recipeModel.factory.modules = recipe.factory.modules
@@ -1345,6 +1345,7 @@ function Model.updateVersion_0_5_4()
     end
     Model.checkUnlinkedBlocks()
     Logging:debug(Model.classname , "********** updated version 0.5.4")
+    Player.print("Helmod information: Model is updated to version 0.5.4")
   end
 end
 -------------------------------------------------------------------------------
@@ -1818,7 +1819,7 @@ function Model.computeModuleEffects(recipe)
       local speed_bonus = Player.getModuleBonus(module, "speed")
       local productivity_bonus = Player.getModuleBonus(module, "productivity")
       local consumption_bonus = Player.getModuleBonus(module, "consumption")
-      local distribution_effectivity = EntityPrototype.load(beacon).distributionEffectivity()
+      local distribution_effectivity = EntityPrototype.load(beacon).getDistributionEffectivity()
       factory.effects.speed = factory.effects.speed + value * speed_bonus * distribution_effectivity * beacon.combo
       factory.effects.productivity = factory.effects.productivity + value * productivity_bonus * distribution_effectivity * beacon.combo
       factory.effects.consumption = factory.effects.consumption + value * consumption_bonus * distribution_effectivity * beacon.combo
@@ -1848,14 +1849,14 @@ function Model.speedFactory(recipe)
   elseif recipe.type == "resource" then
     -- (mining power - ore mining hardness) * mining speed
     -- @see https://wiki.factorio.com/Mining
-    local mining_speed = EntityPrototype.load(recipe.factory).miningSpeed()
-    local mining_power = EntityPrototype.load(recipe.factory).miningPower()
-    local hardness = EntityPrototype.load(recipe.name).mineableHardness()
-    local mining_time = EntityPrototype.load(recipe.name).mineableMiningTime()
+    local mining_speed = EntityPrototype.load(recipe.factory).getMiningSpeed()
+    local mining_power = EntityPrototype.load(recipe.factory).getMiningPower()
+    local hardness = EntityPrototype.load(recipe.name).getMineableHardness()
+    local mining_time = EntityPrototype.load(recipe.name).getMineableMiningTime()
     local bonus = Player.getForce().mining_drill_productivity_bonus
     return (mining_power - hardness) * mining_speed * (1 + bonus) / mining_time
   else
-    return EntityPrototype.load(recipe.factory).craftingSpeed()
+    return EntityPrototype.load(recipe.factory).getCraftingSpeed()
   end
 end
 
@@ -1875,9 +1876,9 @@ function Model.computeFactory(recipe)
   if recipe_energy/recipe.factory.speed < 1/60 then recipe.factory.speed = 60*recipe_energy end
 
   -- effet consumption
-  local energy_type = EntityPrototype.load(recipe.factory).energyType()
+  local energy_type = EntityPrototype.load(recipe.factory).getEnergyType()
   if energy_type ~= "burner" then
-    recipe.factory.energy = EntityPrototype.load(recipe.factory).energyUsage() * (1 + recipe.factory.effects.consumption)
+    recipe.factory.energy = EntityPrototype.load(recipe.factory).getEnergyUsage() * (1 + recipe.factory.effects.consumption)
   else
     recipe.factory.energy = 0
   end
@@ -1895,7 +1896,7 @@ function Model.computeFactory(recipe)
     recipe.beacon.count = 0
   end
 
-  recipe.beacon.energy = EntityPrototype.load(recipe.beacon).energyUsage()
+  recipe.beacon.energy = EntityPrototype.load(recipe.beacon).getEnergyUsage()
   -- calcul des totaux
   recipe.factory.energy_total = math.ceil(recipe.factory.count*recipe.factory.energy)
   recipe.beacon.energy_total = math.ceil(recipe.beacon.count*recipe.beacon.energy)
@@ -1978,34 +1979,34 @@ function Model.computePower(key)
   local power = Model.getPower(key)
   Logging:debug(Model.classname, "computePower():", key, power)
   if power ~= nil then
-    if EntityPrototype.load(power.primary.name).type() == EntityType.generator then
+    if EntityPrototype.load(power.primary.name).getType() == EntityType.generator then
       -- calcul primary
       local count = math.ceil( power.power / EntityPrototype.load(power.primary.name).getEnergyNominal() )
       power.primary.count = count or 0
       -- calcul secondary
-      if EntityPrototype.load(power.secondary.name).native() ~= nil and EntityPrototype.load(power.secondary.name).type() == EntityType.boiler then
+      if EntityPrototype.load(power.secondary.name).native() ~= nil and EntityPrototype.load(power.secondary.name).getType() == EntityType.boiler then
         local count = math.ceil( power.power / EntityPrototype.load(power.secondary.name).getEnergyNominal() )
         power.secondary.count = count or 0
       else
         power.secondary.count = 0
       end
     end
-    if EntityPrototype.load(power.primary.name).type() == EntityType.solar_panel then
+    if EntityPrototype.load(power.primary.name).getType() == EntityType.solar_panel then
       -- calcul primary
       local count = math.ceil( power.power / EntityPrototype.load(power.primary.name).getEnergyNominal() )
       power.primary.count = count or 0
       -- calcul secondary
-      if EntityPrototype.load(power.secondary.name).native() ~= nil and EntityPrototype.load(power.secondary.name).type() == EntityType.accumulator then
+      if EntityPrototype.load(power.secondary.name).native() ~= nil and EntityPrototype.load(power.secondary.name).getType() == EntityType.accumulator then
         local factor = 2
         -- ajout energy pour accumulateur
         local gameDay = {day=12500,dust=5000,night=2500,dawn=2500}
         -- selon les aires il faut de l'accu en dehors du jour selon le trapese journalier
         local accu= (gameDay.dust/factor + gameDay.night + gameDay.dawn / factor ) / ( gameDay.day )
         -- puissance nominale la nuit
-        local count1 = power.power/ EntityPrototype.load(power.secondary.name).electricOutputFlowLimit()
+        local count1 = power.power/ EntityPrototype.load(power.secondary.name).getElectricOutputFlowLimit()
         -- puissance durant la penombre
         -- formula (puissance*durree_penombre)/(60s*capacite)
-        local count2 = power.power*( gameDay.dust / factor + gameDay.night + gameDay.dawn / factor ) / ( 60 * EntityPrototype.load(power.secondary.name).electricBufferCapacity() )
+        local count2 = power.power*( gameDay.dust / factor + gameDay.night + gameDay.dawn / factor ) / ( 60 * EntityPrototype.load(power.secondary.name).getElectricBufferCapacity() )
 
         Logging:debug(Model.classname , "********** computePower result:", accu, count1, count2)
         if count1 > count2 then
@@ -2064,10 +2065,10 @@ end
 -- @return #string
 --
 function Model.getSpeedFactory(key)
-  local crafting_speed = EntityPrototype.load(key).craftingSpeed()
+  local crafting_speed = EntityPrototype.load(key).getCraftingSpeed()
   if crafting_speed ~= 0 then return crafting_speed end
-  local mining_speed = EntityPrototype.load(key).miningSpeed()
-  local mining_power = EntityPrototype.load(key).miningPower()
+  local mining_speed = EntityPrototype.load(key).getMiningSpeed()
+  local mining_power = EntityPrototype.load(key).getMiningPower()
   if mining_speed ~= 0 and mining_power ~= 0 then return mining_speed * mining_power end
   return 1
 end

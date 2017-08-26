@@ -106,9 +106,6 @@ end
 -- @param #string item3 third item name
 --
 function ProductEdition.methods:after_open(event, action, item, item2, item3)
-  Controller.sendEvent(nil, "HMRecipeEdition", "CLOSE")
-  Controller.sendEvent(nil, "HMRecipeSelector", "CLOSE")
-  Controller.sendEvent(nil, "HMSettings", "CLOSE")
   self:getInfoPanel()
 end
 

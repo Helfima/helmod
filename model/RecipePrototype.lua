@@ -4,7 +4,7 @@
 --
 local RecipePrototype = {
   -- single-line comment
-  classname = "RecipePrototype"
+  classname = "HMRecipePrototype"
 }
 
 local lua_prototype = nil
@@ -43,6 +43,43 @@ function RecipePrototype.load(object, object_type)
   elseif lua_type == "technology" then
     lua_prototype = Player.getTechnology(object_name)
     lua_type = "technology"
+  end
+  if lua_prototype == nil then
+    RecipePrototype.find(object)
+  end
+  return RecipePrototype
+end
+
+-------------------------------------------------------------------------------
+-- Try to find prototype
+--
+-- @function [parent=#RecipePrototype] find
+--
+-- @param #object object prototype
+--
+-- @return #RecipePrototype
+--
+function RecipePrototype.find(object)
+  Logging:debug(RecipePrototype.classname, "find(object)", object)
+  local object_name = nil
+  if type(object) == "string" then
+    object_name = object
+  elseif object.name ~= nil then
+    object_name = object.name
+  end
+  lua_prototype = Player.getRecipe(object_name)
+  lua_type = "recipe"
+  if lua_prototype == nil then
+    lua_prototype = Player.getTechnology(object_name)
+    lua_type = "technology"
+  end
+  if lua_prototype == nil then
+    lua_prototype = Player.getEntityPrototype(object_name)
+    lua_type = "resource"
+  end
+  if lua_prototype == nil then
+    lua_prototype = Player.getFluidPrototype(object_name)
+    lua_type = "fluid"
   end
   return RecipePrototype
 end
@@ -163,7 +200,7 @@ function RecipePrototype.getIngredients()
     return {{name=lua_prototype.name, type="item", amount=1}}
   elseif lua_type == "fluid" then
     if lua_prototype.name == "steam" then
-    return {{name="water", type="fluid", amount=1},{name="coal", type="item", amount=0.0076}}
+      return {{name="water", type="fluid", amount=1},{name="coal", type="item", amount=0.0076}}
     end
     return {{name=lua_prototype.name, type="fluid", amount=1}}
   elseif lua_type == "technology" then

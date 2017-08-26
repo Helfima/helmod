@@ -4,7 +4,7 @@
 --
 local EntityType = {
   -- class
-  classname = "EntityType",
+  classname = "HMEntityType",
   type = "entity",
   -- types
   accumulator = "accumulator",

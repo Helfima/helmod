@@ -258,17 +258,7 @@ function PinPanel.methods:addProductionBlockRow(guiTable, blockId, recipe)
 	-- modules
 	for name, count in pairs(factory.modules) do
 		for index = 1, count, 1 do
-			local module = self.player:getItemPrototype(name)
-			if module ~= nil then
-				local consumption = Format.formatPercent(Player.getModuleBonus(module.name, "consumption"))
-				local speed = Format.formatPercent(Player.getModuleBonus(module.name, "speed"))
-				local productivity = Format.formatPercent(Player.getModuleBonus(module.name, "productivity"))
-				local pollution = Format.formatPercent(Player.getModuleBonus(module.name, "pollution"))
-				local tooltip = ({"tooltip.module-description" , module.localised_name, consumption, speed, productivity, pollution})
-				ElementGui.addGuiButtonSpriteSm(guiFactoryModule, "HMFactorySelector_factory-module_"..name.."_"..index, "item", name, nil, tooltip)
-			else
-				ElementGui.addGuiButtonSpriteSm(guiFactoryModule, "HMFactorySelector_factory-module_"..name.."_"..index, "item", name)
-			end
+			ElementGui.addGuiButtonSpriteSm(guiFactoryModule, "HMFactorySelector_factory-module_"..name.."_"..index, "item", name, nil, ElementGui.getTooltipModule(name))
 			index = index + 1
 		end
 	end
@@ -296,17 +286,7 @@ function PinPanel.methods:addProductionBlockRow(guiTable, blockId, recipe)
 		-- modules
 		for name, count in pairs(beacon.modules) do
 			for index = 1, count, 1 do
-				local module = self.player:getItemPrototype(name)
-				if module ~= nil then
-					local consumption = Format.formatPercent(Player.getModuleBonus(module.name, "consumption"))
-					local speed = Format.formatPercent(Player.getModuleBonus(module.name, "speed"))
-					local productivity = Format.formatPercent(Player.getModuleBonus(module.name, "productivity"))
-					local pollution = Format.formatPercent(Player.getModuleBonus(module.name, "pollution"))
-					local tooltip = ({"tooltip.module-description" , module.localised_name, consumption, speed, productivity, pollution})
-					ElementGui.addGuiButtonSpriteSm(guiBeaconModule, "HMFactorySelector_beacon-module_"..name.."_"..index, "item", name, nil, tooltip)
-				else
-					ElementGui.addGuiButtonSpriteSm(guiBeaconModule, "HMFactorySelector_beacon-module_"..name.."_"..index, "item", name)
-				end
+				ElementGui.addGuiButtonSpriteSm(guiBeaconModule, "HMFactorySelector_beacon-module_"..name.."_"..index, "item", name, nil, ElementGui.getTooltipModule(name))
 				index = index + 1
 			end
 		end
