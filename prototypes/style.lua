@@ -134,6 +134,25 @@ default_gui["helmod_textfield"] = {
   maximal_width = 70
 }
 
+-------------------------------------------------------------------------------
+-- Style Textbox
+--
+-- @type Textbox
+--
+
+-------------------------------------------------------------------------------
+-- Style of default
+--
+-- @field [parent=#Textbox] default
+default_gui["helmod_textbox_default"] = {
+  type = "textbox_style",
+  parent = "textbox_style",
+  minimal_width = 300,
+  maximal_width = 300,
+  minimal_height = 300,
+  maximal_height = 200
+}
+
 
 -------------------------------------------------------------------------------
 -- Style Button

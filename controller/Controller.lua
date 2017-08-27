@@ -2,6 +2,7 @@ require "core.MainPanel"
 require "dialog.Dialog"
 require "dialog.PinPanel"
 require "dialog.Settings"
+require "dialog.Download"
 require "edition.RecipeEdition"
 require "edition.ProductEdition"
 require "edition.ResourceEdition"
@@ -22,6 +23,7 @@ Product = require "model.Product"
 RecipePrototype = require "model.RecipePrototype"
 Technology = require "model.Technology"
 Prototype = require "model.Prototype"
+Converter = require "core.Converter"
 
 ---
 -- Description of the module.
@@ -50,6 +52,7 @@ function Controller.init()
   table.insert(controllers, main_panel)
   table.insert(controllers, MainTab:new(main_panel))
   table.insert(controllers, Settings:new(main_panel))
+  table.insert(controllers, Download:new(main_panel))
   table.insert(controllers, EntitySelector:new(main_panel))
   table.insert(controllers, RecipeSelector:new(main_panel))
   table.insert(controllers, RecipeEdition:new(main_panel))
@@ -160,6 +163,7 @@ end
 --
 function Controller.parseEvent(event, type)
   Logging:debug(Controller.classname, "parseEvent(event)", event, type)
+  local ok , err = pcall(function()
   if views == nil then Controller.init() end
   if views ~= nil then
     -- settings action
@@ -217,6 +221,11 @@ function Controller.parseEvent(event, type)
         Controller.sendEvent(event, eventController:classname(), action, item, item2, item3)
       end
     end
+  end
+  end)
+  if not(ok) then
+    Player.print(err)
+    log(err)
   end
 end
 

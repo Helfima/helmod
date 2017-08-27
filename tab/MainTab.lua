@@ -311,6 +311,20 @@ end
 function MainTab.methods:onEventAccessRead(event, action, item, item2, item3)
   Logging:debug(self:classname(), "onEventAccessRead():", action, item, item2, item3)
   local model = Model.getModel()
+  local globalGui = Player.getGlobalGui()
+
+  if action == "copy-model" then
+    if globalGui.currentTab == "HMProductionBlockTab" then
+      if globalGui.currentBlock ~= nil and globalGui.currentBlock ~= "new" then
+        globalGui.copy_from_block_id = globalGui.currentBlock
+        globalGui.copy_from_model_id = Player.getGlobalGui("model_id")
+      end
+    end
+    if globalGui.currentTab == "HMProductionLineTab" then
+      globalGui.copy_from_block_id = nil
+      globalGui.copy_from_model_id = Player.getGlobalGui("model_id")
+    end
+  end
   if action == "share-model" then
     if model ~= nil then
       if item == "read" then
@@ -470,6 +484,21 @@ function MainTab.methods:onEventAccessWrite(event, action, item, item2, item3)
       self:update(item, item2, item3)
     end
   end
+
+  if action == "past-model" then
+    if globalGui.currentTab == "HMProductionBlockTab" then
+      Model.pastModel(globalGui.copy_from_model_id, globalGui.copy_from_block_id)
+      Model.update()
+      self:update(item, item2, item3)
+    end
+    if globalGui.currentTab == "HMProductionLineTab" then
+      Model.pastModel(globalGui.copy_from_model_id, globalGui.copy_from_block_id)
+      Model.update()
+      self:update(item, item2, item3)
+      globalGui.currentBlock = "new"
+    end
+  end
+
 end
 
 -------------------------------------------------------------------------------
@@ -612,20 +641,28 @@ function MainTab.methods:updateHeaderPanel(item, item2, item3)
     local block_id = globalGui.currentBlock or "new"
     ElementGui.addGuiButton(tab_panel, "HMRecipeSelector=OPEN=ID=", block_id, "helmod_button_default", ({"helmod_result-panel.add-button-recipe"}))
     ElementGui.addGuiButton(tab_panel, "HMTechnologySelector=OPEN=ID=", block_id, "helmod_button_default", ({"helmod_result-panel.add-button-technology"}))
+    -- copy past
+    ElementGui.addGuiButton(tab_panel, self:classname().."=copy-model=ID=", model.id, "helmod_button_icon_copy", nil, ({"helmod_button.copy"}))
+    ElementGui.addGuiButton(tab_panel, self:classname().."=past-model=ID=", model.id, "helmod_button_icon_past", nil, ({"helmod_button.past"}))
+    -- download
+    if globalGui.currentTab == "HMProductionLineTab" then
+      ElementGui.addGuiButton(tab_panel, "HMDownload=OPEN=ID=", "download", "helmod_button_icon_download", nil, ({"helmod_result-panel.download-button-production-line"}))
+      ElementGui.addGuiButton(tab_panel, "HMDownload=OPEN=ID=", "upload", "helmod_button_icon_upload", nil, ({"helmod_result-panel.upload-button-production-line"}))
+    end
     -- delete control
     if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 4) > 0) then
-    if globalGui.currentTab == "HMProductionLineTab" then
-      ElementGui.addGuiButton(tab_panel, self:classname().."=remove-model=ID=", model.id, "helmod_button_icon_delete_red", nil, ({"helmod_result-panel.remove-button-production-line"}))
-    end
-    if globalGui.currentTab == "HMProductionBlockTab" then
-      ElementGui.addGuiButton(tab_panel, self:classname().."=production-block-remove=ID=", block_id, "helmod_button_icon_delete_red", nil, ({"helmod_result-panel.remove-button-production-block"}))
-    end
+      if globalGui.currentTab == "HMProductionLineTab" then
+        ElementGui.addGuiButton(tab_panel, self:classname().."=remove-model=ID=", model.id, "helmod_button_icon_delete_red", nil, ({"helmod_result-panel.remove-button-production-line"}))
+      end
+      if globalGui.currentTab == "HMProductionBlockTab" then
+        ElementGui.addGuiButton(tab_panel, self:classname().."=production-block-remove=ID=", block_id, "helmod_button_icon_delete_red", nil, ({"helmod_result-panel.remove-button-production-block"}))
+      end
     end
     -- refresh control
     ElementGui.addGuiButton(tab_panel, self:classname().."=refresh-model=ID=", model.id, "helmod_button_icon_refresh", nil, ({"helmod_result-panel.refresh-button"}))
     -- pin control
     if globalGui.currentTab == "HMProductionBlockTab" then
-        ElementGui.addGuiButton(tab_panel, "HMPinPanel=OPEN=ID=", block_id, "helmod_button_icon_pin", nil, ({"helmod_result-panel.tab-button-pin"}))
+      ElementGui.addGuiButton(tab_panel, "HMPinPanel=OPEN=ID=", block_id, "helmod_button_icon_pin", nil, ({"helmod_result-panel.tab-button-pin"}))
     end
 
     -- index panel
@@ -639,133 +676,27 @@ function MainTab.methods:updateHeaderPanel(item, item2, item3)
       for _,imodel in pairs(models) do
         i = i + 1
         local style = "helmod_button_default"
-        if imodel.id == model_id then style = "helmod_button_selected" end
-        ElementGui.addGuiButton(indexPanel, self:classname().."=change-model=ID=", imodel.id, style, i)
+        --if imodel.id == model_id then style = "helmod_button_selected" end
+        --ElementGui.addGuiButton(indexPanel, self:classname().."=change-model=ID=", imodel.id, style, i)
+        local element = Model.firstRecipe(imodel.blocks)
+        if imodel.id == model_id then
+          if element ~= nil then
+            ElementGui.addGuiButtonSprite(indexPanel, self:classname().."=change-model=ID="..imodel.id.."=", Player.getIconType(element), element.name, imodel.id, RecipePrototype.load(element).getLocalisedName())
+          else
+            ElementGui.addGuiButton(indexPanel, self:classname().."=change-model=ID=", imodel.id, "helmod_button_icon_help_selected")
+          end
+        else
+          if element ~= nil then
+            ElementGui.addGuiButtonSelectSprite(indexPanel, self:classname().."=change-model=ID="..imodel.id.."=", Player.getIconType(element), element.name, imodel.id, RecipePrototype.load(element).getLocalisedName())
+          else
+            ElementGui.addGuiButton(indexPanel, self:classname().."=change-model=ID=", imodel.id, "helmod_button_icon_help")
+          end
+        end
+
       end
     end
     ElementGui.addGuiButton(indexPanel, self:classname().."=change-model=ID=", "new", "helmod_button_default", "+")
   end
-end
-
--------------------------------------------------------------------------------
--- Add cell element
---
--- @function [parent=#MainTab] addCellElement
---
--- @param #LuaGuiElement guiTable
--- @param #table element production block
---
-function MainTab.methods:addCellElement(guiTable, element, action, select, tooltip_name, color)
-  Logging:debug("MainTab", "addCellElement():", guiTable, element, action, select, tooltip_name, color)
-  local display_cell_mod = Player.getSettings("display_cell_mod")
-  -- ingredient = {type="item", name="steel-plate", amount=8}
-  local cell = nil
-  local button = nil
-
-  if display_cell_mod == "by-kilo" then
-    -- by-kilo
-    cell = self:addCellLabel(guiTable, element.name, Format.formatNumberKilo(element.count))
-  else
-    cell = self:addCellLabel(guiTable, element.name, Format.formatNumberElement(element.count))
-  end
-
-  self:addIconCell(cell, element, action, select, tooltip_name, color)
-end
-
--------------------------------------------------------------------------------
--- Add icon in cell element
---
--- @function [parent=#MainTab] addIconRecipeCell
---
--- @param #LuaGuiElement cell
--- @param #table element production block
--- @param #string action
--- @param #boolean select
--- @param #string tooltip_name
--- @param #string color
---
-function MainTab.methods:addIconRecipeCell(cell, element, action, select, tooltip_name, color)
-  Logging:debug("MainTab", "addIconRecipeCell():", element, action, select, tooltip_name, color)
-  local display_cell_mod = Player.getSettings("display_cell_mod")
-  -- ingredient = {type="item", name="steel-plate", amount=8}
-  if display_cell_mod == "small-icon" then
-    if cell ~= nil and select == true then
-      ElementGui.addGuiButtonSelectSpriteM(cell, self:classname()..action, self.player:getRecipeIconType(player, element), element.name, element.name, ({tooltip_name, self.player:getRecipeLocalisedName(player, element)}), color)
-    else
-      ElementGui.addGuiButtonSpriteM(cell, self:classname()..action, self.player:getRecipeIconType(player, element), element.name, element.name, ({tooltip_name, self.player:getRecipeLocalisedName(player, element)}), color)
-    end
-  else
-    if cell ~= nil and select == true then
-      ElementGui.addGuiButtonSelectSprite(cell, self:classname()..action, self.player:getRecipeIconType(player, element), element.name, element.name, ({tooltip_name, self.player:getRecipeLocalisedName(player, element)}), color)
-    else
-      ElementGui.addGuiButtonSprite(cell, self:classname()..action, self.player:getRecipeIconType(player, element), element.name, element.name, ({tooltip_name, self.player:getRecipeLocalisedName(player, element)}), color)
-    end
-  end
-end
-
--------------------------------------------------------------------------------
--- Add icon in cell element
---
--- @function [parent=#MainTab] addIconCell
---
--- @param #LuaGuiElement cell
--- @param #table element production block
--- @param #string action
--- @param #boolean select
--- @param #string tooltip_name
--- @param #string color
---
-function MainTab.methods:addIconCell(cell, element, action, select, tooltip_name, color)
-  Logging:debug("MainTab", "addIconCell():", cell, element, action, select, tooltip_name, color)
-  local display_cell_mod = Player.getSettings("display_cell_mod")
-  -- ingredient = {type="item", name="steel-plate", amount=8}
-  if display_cell_mod == "small-icon" then
-    if cell ~= nil and select == true then
-      ElementGui.addGuiButtonSelectSpriteM(cell, self:classname()..action, self.player:getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, self.player:getLocalisedName(player, element)}), color)
-    else
-      ElementGui.addGuiButtonSpriteM(cell, self:classname()..action, self.player:getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, self.player:getLocalisedName(player, element)}), color)
-    end
-  else
-    if cell ~= nil and select == true then
-      ElementGui.addGuiButtonSelectSprite(cell, self:classname()..action, self.player:getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, self.player:getLocalisedName(player, element)}), color)
-    else
-      ElementGui.addGuiButtonSprite(cell, self:classname()..action, self.player:getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, self.player:getLocalisedName(player, element)}), color)
-    end
-  end
-end
-
--------------------------------------------------------------------------------
--- Add cell label
---
--- @function [parent=#MainTab] addCellLabel
---
--- @param #string name
--- @param #string label
---
-function MainTab.methods:addCellLabel(guiTable, name, label, minimal_width)
-  Logging:debug("MainTab", "addCellLabel():", guiTable, name, label)
-  local display_cell_mod = Player.getSettings("display_cell_mod")
-  local cell = nil
-
-  if display_cell_mod == "small-text"then
-    -- small
-    cell = ElementGui.addGuiFlowH(guiTable,"cell_"..name, "helmod_flow_cell")
-    ElementGui.addGuiLabel(cell, name, label, "helmod_label_icon_text_sm").style["minimal_width"] = minimal_width or 45
-  elseif display_cell_mod == "small-icon" then
-    -- small
-    cell = ElementGui.addGuiFlowH(guiTable,"cell_"..name, "helmod_flow_cell")
-    ElementGui.addGuiLabel(cell, name, label, "helmod_label_icon_sm").style["minimal_width"] = minimal_width or 45
-  elseif display_cell_mod == "by-kilo" then
-    -- by-kilo
-    cell = ElementGui.addGuiFlowH(guiTable,"cell_"..name, "helmod_flow_cell")
-    ElementGui.addGuiLabel(cell, name, label, "helmod_label_row_right").style["minimal_width"] = minimal_width or 50
-  else
-    -- default
-    cell = ElementGui.addGuiFlowH(guiTable,"cell_"..name, "helmod_flow_cell")
-    ElementGui.addGuiLabel(cell, name, label, "helmod_label_row_right").style["minimal_width"] = minimal_width or 60
-
-  end
-  return cell
 end
 
 -------------------------------------------------------------------------------

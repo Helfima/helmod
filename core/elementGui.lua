@@ -89,6 +89,37 @@ function ElementGui.addGuiText(parent, key, text, style, tooltip)
 end
 
 -------------------------------------------------------------------------------
+-- Add a text box element
+--
+-- @function [parent=#ElementGui] addGuiTextbox
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #string key unique id
+-- @param #string text input text
+-- @param #string style style of text
+-- @param #string tooltip displayed text
+--
+-- @return #LuaGuiElement the LuaGuiElement added
+--
+function ElementGui.addGuiTextbox(parent, key, text, style, tooltip)
+  Logging:trace(ElementGui.classname, "addGuiTextbox", parent, key, text, style, tooltip)
+  local options = {}
+  options.type = "text-box"
+  options.name = key
+  options.text = ""
+  if text ~= nil then
+    options.text = text
+  end
+  if style ~= nil then
+    options.style = style
+  end
+  if tooltip ~= nil then
+    options.tooltip = tooltip
+  end
+  return parent.add(options)
+end
+
+-------------------------------------------------------------------------------
 -- Add a button element
 --
 -- @function [parent=#ElementGui] addGuiButton
@@ -296,7 +327,9 @@ function ElementGui.addGuiButtonSpriteStyled(parent, style, action, type, key, c
     options.tooltip = tooltip
   end
   options.style = style
-  options.sprite = type.."/"..key
+  if type ~= nil and key ~= nil then
+    options.sprite = type.."/"..key
+  end
 
   local button = nil
   local ok , err = pcall(function()

@@ -1282,6 +1282,111 @@ function Model.update()
 end
 
 -------------------------------------------------------------------------------
+-- Past model
+--
+-- @function [parent=#Model] pastModel
+--
+-- @param #string from_model_id
+-- @param #string from_block_id
+--
+function Model.pastModel(from_model_id, from_block_id)
+  local globalGui = Player.getGlobalGui()
+  local model = Model.getModel()
+  local models = Model.getModels()
+  local from_model = models[from_model_id]
+  local from_block = from_model.blocks[from_block_id]
+
+  if from_model ~= nil then
+    if from_block ~= nil then
+      Model.copyBlock(from_model, from_block)
+    else
+      Model.copyModel(from_model)
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Copy model
+--
+-- @function [parent=#Model] copyModel
+--
+-- @param #table from_model
+--
+function Model.copyModel(from_model)
+  local globalGui = Player.getGlobalGui()
+
+  if from_model ~= nil then
+    local from_block_ids = {}
+    for block_id,block in pairs(from_model.blocks) do
+      table.insert(from_block_ids, block_id)
+    end
+    for _,block_id in ipairs(from_block_ids) do
+      globalGui.currentBlock = "new"
+      local from_block = from_model.blocks[block_id]
+      Model.copyBlock(from_model, from_block)
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Copy block
+--
+-- @function [parent=#Model] copyBlock
+--
+-- @param #table from_model_id
+-- @param #table from_block_id
+--
+function Model.copyBlock(from_model, from_block)
+  local globalGui = Player.getGlobalGui()
+  local model = Model.getModel()
+  local to_block_id = globalGui.currentBlock
+
+  if from_model ~= nil and from_block ~= nil then
+    local from_recipe_ids = {}
+    for recipe_id, recipe in spairs(from_block.recipes,function(t,a,b) return t[b].index > t[a].index end) do
+      table.insert(from_recipe_ids, recipe_id)
+    end
+    local recipe_index = #from_recipe_ids
+    for _, recipe_id in ipairs(from_recipe_ids) do
+      local recipe = from_block.recipes[recipe_id]
+      RecipePrototype.find(recipe)
+      if RecipePrototype.native() ~= nil then
+        -- ajoute le bloc si il n'existe pas
+        if model.blocks[to_block_id] == nil then
+          local to_block = Model.createProductionBlockModel(RecipePrototype.native())
+          local index = Model.countBlocks()
+          to_block.index = index
+          to_block.unlinked = from_block.unlinked
+          -- copy input
+          if from_block.input ~= nil then
+            for key,value in pairs(from_block.input) do
+              if to_block.input == nil then to_block.input = {} end
+              to_block.input[key] = value
+            end
+          end
+
+          model.blocks[to_block.id] = to_block
+          to_block_id = to_block.id
+          globalGui.currentBlock = to_block_id
+        end
+
+
+        local recipe_model = Model.createRecipeModel(recipe.name, RecipePrototype.type())
+        recipe_model.index = recipe_index
+        recipe_model.production = recipe.production or 1
+        recipe_model.factory = Model.createFactoryModel(recipe.factory.name)
+        recipe_model.factory.limit = recipe.factory.limit
+        recipe_model.factory.modules = recipe.factory.modules
+        recipe_model.beacon = Model.createBeaconModel(recipe.beacon.name)
+        recipe_model.beacon.modules = recipe.beacon.modules
+        model.blocks[to_block_id].recipes[recipe_model.id] = recipe_model
+        recipe_index = recipe_index + 1
+      end
+    end
+    Model.reIndexList(model.blocks[to_block_id].recipes)
+  end
+end
+-------------------------------------------------------------------------------
 -- Update model
 --
 -- @function [parent=#Model] updateVersion_0_6_0
