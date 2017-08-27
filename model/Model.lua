@@ -1317,7 +1317,7 @@ function Model.copyModel(from_model)
 
   if from_model ~= nil then
     local from_block_ids = {}
-    for block_id,block in pairs(from_model.blocks) do
+    for block_id,block in spairs(from_model.blocks,function(t,a,b) return t[b].index > t[a].index end) do
       table.insert(from_block_ids, block_id)
     end
     for _,block_id in ipairs(from_block_ids) do
