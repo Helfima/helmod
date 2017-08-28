@@ -111,6 +111,7 @@ end
 -- @function [parent=#AbstractSelector] afterInit
 --
 function AbstractSelector.methods:afterInit()
+  Logging:debug(self:classname(), "afterInit()")
   self.disable_option = false
   self.hidden_option = false
   self.product_option = false

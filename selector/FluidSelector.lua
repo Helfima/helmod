@@ -102,7 +102,7 @@ end
 function FluidSelector.methods:buildPrototypeTooltip(prototype)
   Logging:trace(self:classname(), "buildPrototypeTooltip(player, prototype):", prototype)
   -- initalize tooltip
-  local tooltip = Player.getLocalisedName(prototype)
+  local tooltip = FluidPrototype.load(prototype).getLocalisedName()
   return tooltip
 end
 

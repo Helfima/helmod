@@ -11,10 +11,12 @@ TechnologySelector = setclass("HMTechnologySelector", AbstractSelector)
 -------------------------------------------------------------------------------
 -- After initialization
 --
--- @function [parent=#TechnologySelector] after_init
+-- @function [parent=#TechnologySelector] afterInit
 --
-function TechnologySelector.methods:after_init()
+function TechnologySelector.methods:afterInit()
   self.disable_option = true
+  self.hidden_option = true
+  self.product_option = true
 end
 
 -------------------------------------------------------------------------------

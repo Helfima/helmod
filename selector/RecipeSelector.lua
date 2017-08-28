@@ -13,9 +13,10 @@ local firstGroup = nil
 -------------------------------------------------------------------------------
 -- After initialization
 --
--- @function [parent=#RecipeSelector] after_init
+-- @function [parent=#RecipeSelector] afterInit
 --
-function RecipeSelector.methods:after_init()
+function RecipeSelector.methods:afterInit()
+  Logging:debug(self:classname(), "afterInit()")
   self.disable_option = true
   self.hidden_option = true
   self.product_option = true
