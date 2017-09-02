@@ -44,18 +44,18 @@ end
 --
 function RecipeSelector.methods:checkFilter(recipe_prototype)
   Logging:trace(self:classname(), "checkFilter()")
-  local prototypeFilter = self:getFilter()
-  local prototypeFilterProduct = self:getProductFilter()
+  local filter_prototype = self:getFilter()
+  local filter_prototype_product = self:getProductFilter()
   local find = false
-  if prototypeFilter ~= nil and prototypeFilter ~= "" then
+  if filter_prototype ~= nil and filter_prototype ~= "" then
     local elements = recipe_prototype.getProducts()
-    if prototypeFilterProduct ~= true then
+    if filter_prototype_product ~= true then
       elements = recipe_prototype.getIngredients()
     end
 
     for key, element in pairs(elements) do
       local search = element.name:lower():gsub("[-]"," ")
-      if string.find(search, prototypeFilter) then
+      if string.find(search, filter_prototype) then
         find = true
       end
     end
@@ -72,27 +72,31 @@ end
 --
 -- @param #string name
 -- @param #string type
--- @param #table groupList
--- @param #table prototypeGroups
+-- @param #table list_group
+-- @param #table list_subgroup
+-- @param #table list_prototype
 --
-function RecipeSelector.methods:appendGroups(name, type, groupList, prototypeGroups)
+function RecipeSelector.methods:appendGroups(name, type, list_group, list_subgroup, list_prototype)
   Logging:debug(self:classname(), "appendGroups()", name, type)
-  local recipe_prototype = RecipePrototype.load(name, type)
-  local find = self:checkFilter(recipe_prototype)
+  RecipePrototype.load(name, type)
+  local find = self:checkFilter(RecipePrototype)
   local filter_show_disable = Player.getGlobalSettings("filter_show_disable")
   local filter_show_hidden = Player.getGlobalSettings("filter_show_hidden")
   
-  if find == true and (recipe_prototype.getEnabled() == true or filter_show_disable == true) and (recipe_prototype.getHidden() == false or filter_show_hidden == true) then
-    local group_name = RecipePrototype.native().group.name
-    local subgroup_name = RecipePrototype.native().subgroup.name
+  if find == true and (RecipePrototype.getEnabled() == true or filter_show_disable == true) and (RecipePrototype.getHidden() == false or filter_show_hidden == true) then
+    local lua_recipe = RecipePrototype.native()
+    local group_name = lua_recipe.group.name
+    local subgroup_name = lua_recipe.subgroup.name
     
     if firstGroup == nil then firstGroup = group_name end
-    groupList[group_name] = RecipePrototype.native().group
-    if prototypeGroups[group_name] == nil then prototypeGroups[group_name] = {} end
-    if prototypeGroups[group_name][subgroup_name] == nil then prototypeGroups[group_name][subgroup_name] = {} end
-    table.insert(prototypeGroups[group_name][subgroup_name], {name=name, type=type})
+    list_group[group_name] = lua_recipe.group
+    list_subgroup[subgroup_name] = lua_recipe.subgroup
+    if list_prototype[group_name] == nil then list_prototype[group_name] = {} end
+    if list_prototype[group_name][subgroup_name] == nil then list_prototype[group_name][subgroup_name] = {} end
+    table.insert(list_prototype[group_name][subgroup_name], {name=name, type=type, order=lua_recipe.order})
   end
 end
+
 -------------------------------------------------------------------------------
 -- Update groups
 --
@@ -102,55 +106,36 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
--- @return groupList, prototypeGroups
+-- @return list_group, list_subgroup, list_prototype
 --
 function RecipeSelector.methods:updateGroups(item, item2, item3)
   Logging:debug(self:classname(), "updateGroups():", item, item2, item3)
-  local globalPlayer = Player.getGlobal()
-  local globalGui = Player.getGlobalGui()
+  local global_player = Player.getGlobal()
+  local global_gui = Player.getGlobalGui()
   -- recuperation recipes
-  local prototypeGroups = {}
-  local groupList = {}
+  local list_group = {}
+  local list_subgroup = {}
+  local list_prototype = {}
 
   firstGroup = nil
 
-  for key, recipe in spairs(Player.getRecipes(),function(t,a,b) return t[b]["subgroup"]["order"] > t[a]["subgroup"]["order"] end) do
-    self:appendGroups(recipe.name, "recipe", groupList, prototypeGroups)
+  for key, recipe in pairs(Player.getRecipes()) do
+    self:appendGroups(recipe.name, "recipe", list_group, list_subgroup, list_prototype)
   end
-  if globalGui.currentTab ~= "HMPropertiesTab" then
-    for key, fluid in spairs(Player.getFluidPrototypes(),function(t,a,b) return t[b]["subgroup"]["order"] > t[a]["subgroup"]["order"] end) do
-      self:appendGroups(fluid.name, "fluid", groupList, prototypeGroups)
+  if global_gui.currentTab ~= "HMPropertiesTab" then
+    for key, fluid in pairs(Player.getFluidPrototypes()) do
+      self:appendGroups(fluid.name, "fluid", list_group, list_subgroup, list_prototype)
     end
-    for key, resource in spairs(Player.getResources(),function(t,a,b) return t[b]["subgroup"]["order"] > t[a]["subgroup"]["order"] end) do
-      self:appendGroups(resource.name, "resource", groupList, prototypeGroups)
+    for key, resource in pairs(Player.getResources()) do
+      self:appendGroups(resource.name, "resource", list_group, list_subgroup, list_prototype)
     end
   end
 
-  if prototypeGroups[globalPlayer.recipeGroupSelected] == nil then
-    globalPlayer.recipeGroupSelected = firstGroup
+  if list_prototype[global_player.recipeGroupSelected] == nil then
+    global_player.recipeGroupSelected = firstGroup
   end
-  Logging:debug(self:classname(), "groupList", groupList, "prototypeGroups", prototypeGroups)
-  return groupList, prototypeGroups
-end
-
--------------------------------------------------------------------------------
--- Get item list
---
--- @function [parent=#RecipeSelector] getItemList
---
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function RecipeSelector.methods:getItemList(item, item2, item3)
-  Logging:trace(self:classname(), "getItemList():", item, item2, item3)
-  local globalPlayer = Player.getGlobal()
-  local list = {}
-  local prototypeGroups = self:getPrototypeGroups()
-  if prototypeGroups[globalPlayer.recipeGroupSelected] ~= nil then
-    list = prototypeGroups[globalPlayer.recipeGroupSelected]
-  end
-  return list
+  Logging:debug(self:classname(), "list_group", list_group, "list_subgroup", list_subgroup, "list_prototype", list_prototype)
+  return list_group, list_subgroup, list_prototype
 end
 
 -------------------------------------------------------------------------------
@@ -162,40 +147,7 @@ end
 -- 
 function RecipeSelector.methods:buildPrototypeTooltip(prototype)
   Logging:trace(self:classname(), "buildRecipeTooltip(element):", prototype)
-  local recipe_prototype = RecipePrototype.load(prototype)
-  -- initalize tooltip
-  local tooltip = {"tooltip.recipe-info"}
-  -- insert __1__ value
-  table.insert(tooltip, recipe_prototype.getLocalisedName())
-
-  -- insert __2__ value
-  local lastTooltip = tooltip
-  for _,element in pairs(recipe_prototype.getProducts()) do
-    local product = Product.load(element)
-    local count = Product.getElementAmount(element)
-    local name = Product.getLocalisedName()
-    local currentTooltip = {"tooltip.recipe-info-element", count, name}
-    -- insert le dernier tooltip dans le precedent
-    table.insert(lastTooltip, currentTooltip)
-    lastTooltip = currentTooltip
-  end
-  -- finalise la derniere valeur
-  table.insert(lastTooltip, "")
-
-  -- insert __3__ value
-  local lastTooltip = tooltip
-  for _,element in pairs(recipe_prototype.getIngredients()) do
-    local product = Product.load(element)
-    local count = Product.getElementAmount(element)
-    local name = Product.getLocalisedName()
-    local currentTooltip = {"tooltip.recipe-info-element", count, name}
-    -- insert le dernier tooltip dans le precedent
-    table.insert(lastTooltip, currentTooltip)
-    lastTooltip = currentTooltip
-  end
-  -- finalise la derniere valeur
-  table.insert(lastTooltip, "")
-  return tooltip
+  return ElementGui.getTooltipRecipe(prototype)
 end
 
 -------------------------------------------------------------------------------
@@ -206,10 +158,10 @@ end
 -- @param #table prototype
 -- 
 function RecipeSelector.methods:buildPrototypeIcon(guiElement, prototype, tooltip)
-  Logging:debug(self:classname(), "buildPrototypeIcon(player, guiElement, prototype, tooltip:", guiElement, recipe_prototype, tooltip)
+  Logging:debug(self:classname(), "buildPrototypeIcon(player, guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
   local recipe_prototype = RecipePrototype.load(prototype)
-  local type = recipe_prototype.type()
-  local prototype_name = recipe_prototype.native().name
-  local prototype_localised_name = recipe_prototype.getLocalisedName()
-  ElementGui.addGuiButtonSelectSprite(guiElement, self:classname().."=element-select=ID="..type.."=", Player.getRecipeIconType(recipe_prototype.native()), prototype_name, prototype_localised_name, tooltip)
+  local type = RecipePrototype.type()
+  local prototype_name = RecipePrototype.native().name
+  local prototype_localised_name = RecipePrototype.getLocalisedName()
+  ElementGui.addGuiButtonSelectSprite(guiElement, self:classname().."=element-select=ID="..type.."=", Player.getRecipeIconType(RecipePrototype.native()), prototype_name, prototype_localised_name, tooltip)
 end

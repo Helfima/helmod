@@ -39,6 +39,18 @@ function ItemPrototype.native()
 end
 
 -------------------------------------------------------------------------------
+-- Return valid
+--
+-- @function [parent=#ItemPrototype] getValid
+--
+-- @return #boolean
+--
+function ItemPrototype.getValid()
+  if lua_item_prototype == nil then return false end
+  return lua_item_prototype.valid
+end
+
+-------------------------------------------------------------------------------
 -- Return localised name
 --
 -- @function [parent=#ItemPrototype] getLocalisedName

@@ -8,6 +8,8 @@ require "selector.AbstractSelector"
 
 EntitySelector = setclass("HMEntitySelector", AbstractSelector)
 
+local firstGroup = nil
+
 -------------------------------------------------------------------------------
 -- Return caption
 --
@@ -20,6 +22,64 @@ function EntitySelector.methods:getCaption(parent)
 end
 
 -------------------------------------------------------------------------------
+-- Check filter
+--
+-- @function [parent=#EntitySelector] checkFilter
+--
+-- @param #LuaEntityPrototype prototype
+--
+-- @return boolean
+--
+function EntitySelector.methods:checkFilter(prototype)
+  Logging:trace(self:classname(), "checkFilter()")
+  local filter_prototype = self:getFilter()
+  local filter_prototype_product = self:getProductFilter()
+  local find = false
+  if filter_prototype ~= nil and filter_prototype ~= "" then
+    if filter_prototype_product ~= true then
+      local search = prototype.name:lower():gsub("[-]"," ")
+      if string.find(search, filter_prototype) then
+        find = true
+      end
+    end
+  else
+    find = true
+  end
+  return find
+end
+
+-------------------------------------------------------------------------------
+-- Append groups
+--
+-- @function [parent=#EntitySelector] appendGroups
+--
+-- @param #string name
+-- @param #string type
+-- @param #table list_group
+-- @param #table list_subgroup
+-- @param #table list_prototype
+--
+function EntitySelector.methods:appendGroups(name, type, list_group, list_subgroup, list_prototype)
+  Logging:debug(self:classname(), "appendGroups()", name, type)
+  EntityPrototype.load(name, type)
+  local find = self:checkFilter(EntityPrototype.native())
+  local filter_show_disable = Player.getGlobalSettings("filter_show_disable")
+  local filter_show_hidden = Player.getGlobalSettings("filter_show_hidden")
+  
+  if find == true and (EntityPrototype.getValid() == true or filter_show_disable == true) then
+    local group_name = EntityPrototype.native().group.name
+    local subgroup_name = EntityPrototype.native().subgroup.name
+    
+    if firstGroup == nil then firstGroup = group_name end
+    list_group[group_name] = EntityPrototype.native().group
+    list_subgroup[subgroup_name] = EntityPrototype.native().subgroup
+    if list_prototype[group_name] == nil then list_prototype[group_name] = {} end
+    if list_prototype[group_name][subgroup_name] == nil then list_prototype[group_name][subgroup_name] = {} end
+    table.insert(list_prototype[group_name][subgroup_name], {name=name, type=type, order=EntityPrototype.native().order})
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Update groups
 --
 -- @function [parent=#EntitySelector] updateGroups
@@ -28,68 +88,28 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
--- @return {groupList, prototypeGroups}
+-- @return list_group, list_subgroup, list_prototype
 --
 function EntitySelector.methods:updateGroups(item, item2, item3)
-  Logging:trace(self:classname(), "on_update():", item, item2, item3)
-  local globalPlayer = Player.getGlobal()
+  Logging:debug(self:classname(), "updateGroups():", item, item2, item3)
+  local global_player = Player.getGlobal()
+  local global_gui = Player.getGlobalGui()
   -- recuperation recipes
-  local prototypeGroups = {}
-  local groupList = {}
-  local prototypeFilter = self:getFilter()
-  local prototypeFilterProduct = self:getProductFilter()
+  local list_group = {}
+  local list_subgroup = {}
+  local list_prototype = {}
 
-  local firstGroup = nil
-  for key, prototype in spairs(Player.getEntityPrototypes(),function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
-    -- ne traite pas les entity sans name
-    if prototype.name ~= nil then
-      local find = false
-      if prototypeFilter ~= nil and prototypeFilter ~= "" then
-        if prototypeFilterProduct == true then
-          local search = prototype.name:lower():gsub("[-]"," ")
-          if string.find(search, prototypeFilter) then
-            find = true
-          end
-        end
-      else
-        find = true
-      end
+  firstGroup = nil
 
-      local filter_show_hidden = Player.getGlobalSettings("filter_show_hidden")
-      if find == true and (prototype.valid == true or filter_show_hidden == true) then
-        if firstGroup == nil then firstGroup = prototype.group.name end
-        groupList[prototype.group.name] = prototype.group
-        if prototypeGroups[prototype.group.name] == nil then prototypeGroups[prototype.group.name] = {} end
-        if prototypeGroups[prototype.group.name][prototype.subgroup.name] == nil then prototypeGroups[prototype.group.name][prototype.subgroup.name] = {} end
-        table.insert(prototypeGroups[prototype.group.name][prototype.subgroup.name], prototype)
-      end
-    end
+  for key, entity in pairs(Player.getEntityPrototypes()) do
+    self:appendGroups(entity.name, "entity", list_group, list_subgroup, list_prototype)
   end
 
-  if prototypeGroups[globalPlayer.recipeGroupSelected] == nil then
-    globalPlayer.recipeGroupSelected = firstGroup
+  if list_prototype[global_player.recipeGroupSelected] == nil then
+    global_player.recipeGroupSelected = firstGroup
   end
-  return groupList, prototypeGroups
-end
-
--------------------------------------------------------------------------------
--- Get item list
---
--- @function [parent=#EntitySelector] getItemList
---
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function EntitySelector.methods:getItemList(item, item2, item3)
-  Logging:trace(self:classname(), "getItemList():", item, item2, item3)
-  local globalPlayer = Player.getGlobal()
-  local list = {}
-  local prototypeGroups = self:getPrototypeGroups()
-  if prototypeGroups[globalPlayer.recipeGroupSelected] ~= nil then
-    list = prototypeGroups[globalPlayer.recipeGroupSelected]
-  end
-  return list
+  Logging:debug(self:classname(), "list_group", list_group, "list_subgroup", list_subgroup, "list_prototype", list_prototype)
+  return list_group, list_subgroup, list_prototype
 end
 
 -------------------------------------------------------------------------------
@@ -102,7 +122,7 @@ end
 function EntitySelector.methods:buildPrototypeTooltip(prototype)
   Logging:trace(self:classname(), "buildPrototypeTooltip(player, prototype):", prototype)
   -- initalize tooltip
-  local tooltip = Player.getLocalisedName(prototype)
+  local tooltip = EntityPrototype.load(prototype).getLocalisedName()
   return tooltip
 end
 

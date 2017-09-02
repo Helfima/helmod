@@ -7,10 +7,11 @@
 
 AbstractSelector = setclass("HMAbstractSelector", Dialog)
 
-local groupList = {}
-local prototypeGroups = {}
-local prototypeFilter = nil
-local prototypeFilterProduct = true
+local list_group = {}
+local list_subgroup = {}
+local list_prototype = {}
+local filter_prototype = nil
+local filter_prototype_product = true
 
 -------------------------------------------------------------------------------
 -- Return filter - filtre sur les prototypes
@@ -20,7 +21,7 @@ local prototypeFilterProduct = true
 -- @return #table
 --
 function AbstractSelector.methods:getProductFilter()
-  return prototypeFilterProduct
+  return filter_prototype_product
 end
 
 -------------------------------------------------------------------------------
@@ -31,7 +32,7 @@ end
 -- @return #table
 --
 function AbstractSelector.methods:getFilter()
-  return prototypeFilter
+  return filter_prototype
 end
 
 -------------------------------------------------------------------------------
@@ -42,7 +43,7 @@ end
 -- @return #table
 --
 function AbstractSelector.methods:getGroups()
-  return groupList
+  return list_group
 end
 
 -------------------------------------------------------------------------------
@@ -55,31 +56,31 @@ end
 -- @return #table
 --
 function AbstractSelector.methods:setGroups(list)
-  groupList = list
+  list_group = list
 end
 
 -------------------------------------------------------------------------------
--- Return prototype groups
+-- Return list prototype
 --
--- @function [parent=#AbstractSelector] getPrototypeGroups
+-- @function [parent=#AbstractSelector] getListPrototype
 --
 -- @return #table
 --
-function AbstractSelector.methods:getPrototypeGroups()
-  return prototypeGroups
+function AbstractSelector.methods:getListPrototype()
+  return list_prototype
 end
 
 -------------------------------------------------------------------------------
--- Set prototype groups
+-- Set list prototype
 --
--- @function [parent=#AbstractSelector] getPrototypeGroups
+-- @function [parent=#AbstractSelector] setListPrototype
 --
 -- @param #table list
 --
 -- @return #table
 --
-function AbstractSelector.methods:setPrototypeGroups(list)
-  prototypeGroups = list
+function AbstractSelector.methods:setListPrototype(list)
+  list_prototype = list
 end
 
 -------------------------------------------------------------------------------
@@ -201,11 +202,11 @@ function AbstractSelector.methods:onOpen(event, action, item, item2, item3)
   Logging:debug(self:classname(), "onOpen():", action, item, item2, item3)
   local globalPlayer = Player.getGlobal()
   if item3 ~= nil then
-    prototypeFilter = item3:lower():gsub("[-]"," ")
+    filter_prototype = item3:lower():gsub("[-]"," ")
   else
-    prototypeFilter = nil
+    filter_prototype = nil
   end
-  prototypeFilterProduct = true
+  filter_prototype_product = true
   -- close si nouvel appel
   return true
 end
@@ -258,16 +259,16 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
   end
 
   if action == "recipe-filter-switch" then
-    prototypeFilterProduct = not(prototypeFilterProduct)
+    filter_prototype_product = not(filter_prototype_product)
     self:onUpdate(item, item2, item3)
   end
 
   if action == "recipe-filter" then
     if Player.getSettings("filter_on_text_changed", true) then
-      prototypeFilter = event.element.text
+      filter_prototype = event.element.text
     else
       if event.element.parent ~= nil and event.element.parent["filter-text"] ~= nil then
-        prototypeFilter = event.element.parent["filter-text"].text
+        filter_prototype = event.element.parent["filter-text"].text
       end
     end
     self:onUpdate(item, item2, item3)
@@ -284,11 +285,11 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
--- @return {groupList, prototypeGroups}
+-- @return {list_group, list_subgroup, list_prototype}
 --
 function AbstractSelector.methods:updateGroups(item, item2, item3)
   Logging:trace(self:classname(), "updateGroups():", item, item2, item3)
-  return {},{}
+  return {},{},{}
 end
 
 -------------------------------------------------------------------------------
@@ -301,9 +302,9 @@ end
 -- @param #string item3 third item name
 --
 function AbstractSelector.methods:onUpdate(item, item2, item3)
-  Logging:trace(self:classname(), "onUpdate():",item, item2, item3)
+  Logging:debug(self:classname(), "onUpdate():",item, item2, item3)
   -- recuperation recipes
-  groupList , prototypeGroups = self:updateGroups(item, item2, item3)
+  list_group, list_subgroup, list_prototype = self:updateGroups(item, item2, item3)
 
   self:updateFilter(item, item2, item3)
   self:updateGroupSelector(item, item2, item3)
@@ -338,30 +339,52 @@ function AbstractSelector.methods:updateFilter(item, item2, item3)
     end
 
     if self.product_option then
-      ElementGui.addGuiCheckbox(guiFilter, self:classname().."=recipe-filter-switch=ID=filter-product", prototypeFilterProduct)
+      ElementGui.addGuiCheckbox(guiFilter, self:classname().."=recipe-filter-switch=ID=filter-product", filter_prototype_product)
       ElementGui.addGuiLabel(guiFilter, "filter-product", ({"helmod_recipe-edition-panel.filter-by-product"}))
   
-      ElementGui.addGuiCheckbox(guiFilter, self:classname().."=recipe-filter-switch=ID=filter-ingredient", not(prototypeFilterProduct))
+      ElementGui.addGuiCheckbox(guiFilter, self:classname().."=recipe-filter-switch=ID=filter-ingredient", not(filter_prototype_product))
       ElementGui.addGuiLabel(guiFilter, "filter-ingredient", ({"helmod_recipe-edition-panel.filter-by-ingredient"}))
     end
 
     ElementGui.addGuiLabel(guiFilter, "filter-value", ({"helmod_common.filter"}))
     local cellFilter = ElementGui.addGuiFlowH(guiFilter,"text-filter")
     if Player.getSettings("filter_on_text_changed", true) then
-      ElementGui.addGuiText(cellFilter, self:classname().."=recipe-filter=ID=filter-value", prototypeFilter)
+      ElementGui.addGuiText(cellFilter, self:classname().."=recipe-filter=ID=filter-value", filter_prototype)
     else
-      ElementGui.addGuiText(cellFilter, "filter-text", prototypeFilter)
+      ElementGui.addGuiText(cellFilter, "filter-text", filter_prototype)
       ElementGui.addGuiButton(cellFilter, self:classname().."=recipe-filter=ID=", "filter-value", "helmod_button_default", ({"helmod_button.apply"}))
     end
 
     ElementGui.addGuiLabel(panel, "message", ({"helmod_recipe-edition-panel.message"}))
   else
     if self.product_option then
-      panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-product"].state = prototypeFilterProduct
-      panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-ingredient"].state = not(prototypeFilterProduct)
+      panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-product"].state = filter_prototype_product
+      panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-ingredient"].state = not(filter_prototype_product)
     end
   end
 
+end
+
+-------------------------------------------------------------------------------
+-- Get item list
+--
+-- @function [parent=#AbstractSelector] getItemList
+--
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+-- 
+-- @return #table
+--
+function AbstractSelector.methods:getItemList(item, item2, item3)
+  Logging:trace(self:classname(), "getItemList():",item, item2, item3)
+  local global_player = Player.getGlobal()
+  local list_selected = {}
+  local list = self:getListPrototype()
+  if list[global_player.recipeGroupSelected] ~= nil then
+    list_selected = list[global_player.recipeGroupSelected]
+  end
+  return list_selected
 end
 
 -------------------------------------------------------------------------------
@@ -382,16 +405,14 @@ function AbstractSelector.methods:updateItemList(item, item2, item3)
   end
 
   -- recuperation recipes et subgroupes
-  local list = self:getItemList(item, item2, item3)
+  local list = self:getItemList()
 
   --local guiRecipeSelectorTable = ElementGui.addGuiTable(panel, "recipe-table", 10)
   local guiRecipeSelectorList = ElementGui.addGuiFlowV(panel, "recipe-list", "helmod_flow_recipe_selector")
-  for key, subgroup in pairs(list) do
+  for subgroup, list in spairs(list,function(t,a,b) return list_subgroup[b]["order"] > list_subgroup[a]["order"] end) do
     -- boucle subgroup
-    local guiRecipeSubgroup = ElementGui.addGuiTable(guiRecipeSelectorList, "recipe-table-"..key, 10, "helmod_table_recipe_selector")
-    for key, prototype in spairs(subgroup,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
-      --Logging:trace(self:classname(), "updateItemList():recipe", recipe.name, recipe.category, recipe.group.name, recipe.group.order, recipe.subgroup.name, recipe.subgroup.order, recipe.order)
-
+    local guiRecipeSubgroup = ElementGui.addGuiTable(guiRecipeSelectorList, "recipe-table-"..subgroup, 10, "helmod_table_recipe_selector")
+    for key, prototype in spairs(list,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
       local tooltip = self:buildPrototypeTooltip(prototype)
       self:buildPrototypeIcon(guiRecipeSubgroup, prototype, tooltip)
     end
@@ -403,19 +424,17 @@ end
 -- Get item list
 --
 -- @function [parent=#AbstractSelector] getItemList
+-- 
+-- @return #table
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function AbstractSelector.methods:getItemList(item, item2, item3)
-  Logging:trace(self:classname(), "getItemList():", item, item2, item3)
-  local globalPlayer = Player.getGlobal()
-  local list = {}
-  if prototypeGroups[globalPlayer.recipeGroupSelected] ~= nil then
-    list = prototypeGroups[globalPlayer.recipeGroupSelected]
+function AbstractSelector.methods:getItemList()
+  Logging:trace(self:classname(), "getItemList()")
+  local global_player = Player.getGlobal()
+  local list_selected = {}
+  if list_prototype[global_player.recipeGroupSelected] ~= nil then
+    list_selected = list_prototype[global_player.recipeGroupSelected]
   end
-  return list
+  return list_selected
 end
 
 -------------------------------------------------------------------------------
@@ -451,27 +470,27 @@ end
 --
 function AbstractSelector.methods:updateGroupSelector(item, item2, item3)
   Logging:trace(self:classname(), "updateGroupSelector():", item, item2, item3)
-  local globalPlayer = Player.getGlobal()
+  local global_player = Player.getGlobal()
   local panel = self:getGroupsPanel()
 
   if panel["recipe-groups"] ~= nil  and panel["recipe-groups"].valid then
     panel["recipe-groups"].destroy()
   end
 
-  Logging:debug(self:classname(), "groupList:",groupList)
+  Logging:debug(self:classname(), "list_group:",list_group)
 
   -- ajouter de la table des groupes de recipe
-  local guiRecipeSelectorGroups = ElementGui.addGuiTable(panel, "recipe-groups", 6, "helmod_table_recipe_selector")
-  for _, group in spairs(groupList,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
+  local gui_group_panel = ElementGui.addGuiTable(panel, "recipe-groups", 6, "helmod_table_recipe_selector")
+  for _, group in spairs(list_group,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
     -- set le groupe
-    if globalPlayer.recipeGroupSelected == nil then globalPlayer.recipeGroupSelected = group.name end
+    if global_player.recipeGroupSelected == nil then global_player.recipeGroupSelected = group.name end
     local color = nil
-    if globalPlayer.recipeGroupSelected == group.name then
+    if global_player.recipeGroupSelected == group.name then
       color = "yellow"
     end
     local tooltip = "item-group-name."..group.name
     -- ajoute les icons de groupe
-    local action = ElementGui.addGuiButtonSelectSpriteXxl(guiRecipeSelectorGroups, self:classname().."=recipe-group=ID=", "item-group", group.name, group.name, ({tooltip}), color)
+    local action = ElementGui.addGuiButtonSelectSpriteXxl(gui_group_panel, self:classname().."=recipe-group=ID=", "item-group", group.name, group.name, ({tooltip}), color)
   end
 
 end

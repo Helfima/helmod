@@ -855,10 +855,10 @@ end
 -- @param #lua_product element
 -- @param #string container name
 --
--- @return #number
+-- @return #table
 --
 function ElementGui.getTooltipProduct(element, container)
-  Logging:debug(ElementGui.classname, "getTooltip", element, container)
+  Logging:debug(ElementGui.classname, "getTooltipProduct", element, container)
   local tooltip = {"tooltip.cargo-info", EntityPrototype.load(container).getLocalisedName()}
   local total_tooltip = {"tooltip.cargo-info-element", {"helmod_common.total"}, Format.formatNumberElement(Product.countContainer(element.count, container))}
   if element.limit_count ~= nil then
@@ -879,10 +879,10 @@ end
 --
 -- @param #string module_name
 --
--- @return #number
+-- @return #table
 --
 function ElementGui.getTooltipModule(module_name)
-  Logging:debug(ElementGui.classname, "getTooltip", module_name)
+  Logging:debug(ElementGui.classname, "getTooltipModule", module_name)
   local tooltip = nil
   if module_name == nil then return nil end
   local module = ItemPrototype.load(module_name).native()
@@ -891,8 +891,61 @@ function ElementGui.getTooltipModule(module_name)
     local speed = Format.formatPercent(Player.getModuleBonus(module.name, "speed"))
     local productivity = Format.formatPercent(Player.getModuleBonus(module.name, "productivity"))
     local pollution = Format.formatPercent(Player.getModuleBonus(module.name, "pollution"))
-    tooltip = ({"tooltip.module-description" , ItemPrototype.getLocalisedName(), consumption, speed, productivity, pollution})
+    tooltip = {"tooltip.module-description" , ItemPrototype.getLocalisedName(), consumption, speed, productivity, pollution}
   end
+  return tooltip
+end
+
+-------------------------------------------------------------------------------
+-- Get tooltip for recipe
+--
+-- @function [parent=#ElementGui] getTooltipRecipe
+--
+-- @param #table prototype
+--
+-- @return #table
+--
+
+local cache_tooltip_recipe = {}
+
+function ElementGui.getTooltipRecipe(prototype)
+  Logging:debug(ElementGui.classname, "getTooltipRecipe", prototype)
+  RecipePrototype.load(prototype)
+  if RecipePrototype.native() == nil then return nil end
+  if cache_tooltip_recipe[prototype.name] ~= nil then return cache_tooltip_recipe[prototype.name] end
+  -- initalize tooltip
+  local tooltip = {"tooltip.recipe-info"}
+  -- insert __1__ value
+  table.insert(tooltip, RecipePrototype.getLocalisedName())
+
+  -- insert __2__ value
+  local lastTooltip = tooltip
+  for _,element in pairs(RecipePrototype.getProducts()) do
+    local product = Product.load(element)
+    local count = Product.getElementAmount(element)
+    local name = Product.getLocalisedName()
+    local currentTooltip = {"tooltip.recipe-info-element", count, name}
+    -- insert le dernier tooltip dans le precedent
+    table.insert(lastTooltip, currentTooltip)
+    lastTooltip = currentTooltip
+  end
+  -- finalise la derniere valeur
+  table.insert(lastTooltip, "")
+
+  -- insert __3__ value
+  local lastTooltip = tooltip
+  for _,element in pairs(RecipePrototype.getIngredients()) do
+    local product = Product.load(element)
+    local count = Product.getElementAmount(element)
+    local name = Product.getLocalisedName()
+    local currentTooltip = {"tooltip.recipe-info-element", count, name}
+    -- insert le dernier tooltip dans le precedent
+    table.insert(lastTooltip, currentTooltip)
+    lastTooltip = currentTooltip
+  end
+  -- finalise la derniere valeur
+  table.insert(lastTooltip, "")
+  cache_tooltip_recipe[prototype.name] = tooltip
   return tooltip
 end
 

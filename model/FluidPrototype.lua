@@ -39,6 +39,18 @@ function FluidPrototype.native()
 end
 
 -------------------------------------------------------------------------------
+-- Return valid
+--
+-- @function [parent=#FluidPrototype] getValid
+--
+-- @return #boolean
+--
+function FluidPrototype.getValid()
+  if lua_fluid_prototype == nil then return false end
+  return lua_fluid_prototype.valid
+end
+
+-------------------------------------------------------------------------------
 -- Return localised name
 --
 -- @function [parent=#FluidPrototype] getLocalisedName

@@ -78,29 +78,34 @@ function PropertiesTab.methods:updateData()
     local prototype_type = globalPlayer["prototype-properties"].type
     local prototype = nil
     if prototype_type == "entity" then
-      prototype = Player.getEntityPrototype(prototype_name)
+      EntityPrototype.load(prototype_name)
+      prototype = EntityPrototype.native()
       if prototype ~= nil then
-        ElementGui.addGuiButtonSprite(listPanel, self:classname().."=entity-select=ID=", Player.getEntityIconType(prototype), prototype.name, prototype.name, Player.getLocalisedName(prototype))
+        ElementGui.addGuiButtonSprite(listPanel, self:classname().."=entity-select=ID=", Player.getEntityIconType(prototype), prototype.name, prototype.name, EntityPrototype.getLocalisedName())
       end
     elseif prototype_type == "item" then
-      prototype = Player.getItemPrototype(prototype_name)
+      ItemPrototype.load(prototype_name)
+      prototype = ItemPrototype.native()
       if prototype ~= nil then
-        ElementGui.addGuiButtonSprite(listPanel, self:classname().."=item-select=ID=", Player.getItemIconType(prototype), prototype.name, prototype.name, Player.getLocalisedName(prototype))
+        ElementGui.addGuiButtonSprite(listPanel, self:classname().."=item-select=ID=", Player.getItemIconType(prototype), prototype.name, prototype.name, ItemPrototype.getLocalisedName())
       end
     elseif prototype_type == "fluid" then
-      prototype = Player.getFluidPrototype(prototype_name)
+      FluidPrototype.load(prototype_name)
+      prototype = FluidPrototype.native()
       if prototype ~= nil then
-        ElementGui.addGuiButtonSprite(listPanel, self:classname().."=fluid-select=ID=", Player.getItemIconType(prototype), prototype.name, prototype.name, Player.getLocalisedName(prototype))
+        ElementGui.addGuiButtonSprite(listPanel, self:classname().."=fluid-select=ID=", Player.getItemIconType(prototype), prototype.name, prototype.name, FluidPrototype.getLocalisedName())
       end
     elseif prototype_type == "recipe" then
-      prototype = Player.getRecipe(prototype_name)
+      RecipePrototype.load(prototype_name)
+      prototype = RecipePrototype.native()
       if prototype ~= nil then
-        ElementGui.addGuiButtonSprite(listPanel, self:classname().."=recipe-select=ID=", Player.getRecipeIconType(prototype), prototype.name, prototype.name, Player.getRecipeLocalisedName(prototype))
+        ElementGui.addGuiButtonSprite(listPanel, self:classname().."=recipe-select=ID=", Player.getRecipeIconType(prototype), prototype.name, prototype.name, RecipePrototype.getLocalisedName())
       end
     elseif prototype_type == "technology" then
-      prototype = Player.getTechnology(prototype_name)
-      if prototype ~= nil then
-        ElementGui.addGuiButtonSprite(listPanel, self:classname().."=technology-select=ID=", "technology", prototype.name, prototype.name, Player.getTechnologyLocalisedName(prototype))
+      Technology.load(prototype_name)
+      prototype = Technology.native()
+     if prototype ~= nil then
+        ElementGui.addGuiButtonSprite(listPanel, self:classname().."=technology-select=ID=", "technology", prototype.name, prototype.name, Technology.getLocalisedName())
       end
     end
     if prototype ~= nil then

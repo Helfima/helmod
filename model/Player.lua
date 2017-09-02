@@ -789,7 +789,10 @@ end
 --
 -- @return #table entity prototype
 --
+local cache_resources = nil
+
 function Player.getResources()
+  if cache_resources ~= nil then return cache_resources end
   local items = {}
   for _,item in pairs(game.entity_prototypes) do
     --Logging:debug(Player.classname, "getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
@@ -797,6 +800,7 @@ function Player.getResources()
       table.insert(items,item)
     end
   end
+  cache_resources = items
   return items
 end
 

@@ -51,6 +51,18 @@ function EntityPrototype.getType()
 end
 
 -------------------------------------------------------------------------------
+-- Return valid
+--
+-- @function [parent=#EntityPrototype] getValid
+--
+-- @return #boolean
+--
+function EntityPrototype.getValid()
+  if lua_entity_prototype == nil then return false end
+  return lua_entity_prototype.valid
+end
+
+-------------------------------------------------------------------------------
 -- Return energy usage per second
 --
 -- @function [parent=#EntityPrototype] getEnergyUsage

@@ -8,6 +8,8 @@ require "selector.AbstractSelector"
 
 TechnologySelector = setclass("HMTechnologySelector", AbstractSelector)
 
+local firstGroup = nil
+
 -------------------------------------------------------------------------------
 -- After initialization
 --
@@ -31,6 +33,74 @@ function TechnologySelector.methods:getCaption(parent)
 end
 
 -------------------------------------------------------------------------------
+-- Check filter
+--
+-- @function [parent=#TechnologySelector] checkFilter
+--
+-- @param #LuaTechnology prototype
+--
+-- @return boolean
+--
+function TechnologySelector.methods:checkFilter(prototype)
+  Logging:trace(self:classname(), "checkFilter()")
+  local filter_prototype = self:getFilter()
+  local filter_prototype_product = self:getProductFilter()
+  local find = false
+  if filter_prototype ~= nil and filter_prototype ~= "" then
+    if filter_prototype_product == true then
+      local elements = prototype.research_unit_ingredients
+      for key, element in pairs(elements) do
+        local search = element.name:lower():gsub("[-]"," ")
+        if string.find(search, filter_prototype) then
+          find = true
+        end
+      end
+    else
+      local search = prototype.name:lower():gsub("[-]"," ")
+      if string.find(search, filter_prototype) then
+        find = true
+      end
+    end
+  else
+    find = true
+  end
+  return find
+end
+
+-------------------------------------------------------------------------------
+-- Append groups
+--
+-- @function [parent=#TechnologySelector] appendGroups
+--
+-- @param #string name
+-- @param #string type
+-- @param #table list_group
+-- @param #table list_subgroup
+-- @param #table list_prototype
+--
+function TechnologySelector.methods:appendGroups(name, type, list_group, list_subgroup, list_prototype)
+  Logging:debug(self:classname(), "appendGroups()", name, type)
+  Technology.load(name, type)
+  local find = self:checkFilter(Technology.native())
+  local filter_show_disable = Player.getGlobalSettings("filter_show_disable")
+  local filter_show_hidden = Player.getGlobalSettings("filter_show_hidden")
+
+  if find == true and (Technology.getValid() == true or filter_show_disable == true) then
+    local group_name = "normal"
+    if Technology.native().research_unit_count_formula ~= nil then group_name = "infinite" end
+
+    local subgroup_name = "default"
+
+    if firstGroup == nil then firstGroup = group_name end
+    list_group[group_name] = {name = group_name}
+    list_subgroup[subgroup_name] = {name = subgroup_name}
+    if list_prototype[group_name] == nil then list_prototype[group_name] = {} end
+    if list_prototype[group_name][subgroup_name] == nil then list_prototype[group_name][subgroup_name] = {} end
+    table.insert(list_prototype[group_name][subgroup_name], {name=name, type=type, order=Technology.native().order})
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Update groups
 --
 -- @function [parent=#TechnologySelector] updateGroups
@@ -39,75 +109,28 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
--- @return {groupList, prototypeGroups}
+-- @return list_group, list_subgroup, list_prototype
 --
 function TechnologySelector.methods:updateGroups(item, item2, item3)
-  Logging:trace(self:classname(), "on_update():", item, item2, item3)
-  local globalPlayer = Player.getGlobal()
+  Logging:debug(self:classname(), "updateGroups():", item, item2, item3)
+  local global_player = Player.getGlobal()
+  local global_gui = Player.getGlobalGui()
   -- recuperation recipes
-  local prototypeGroups = {}
-  local groupList = {}
-  local prototypeFilter = self:getFilter()
-  local prototypeFilterProduct = self:getProductFilter()
+  local list_group = {}
+  local list_subgroup = {}
+  local list_prototype = {}
 
-  local firstGroup = nil
-  for key, prototype in spairs(Player.getTechnologies(),function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
-    local find = false
-    if prototypeFilter ~= nil and prototypeFilter ~= "" then
-      if prototypeFilterProduct == true then
-        local search = prototype.name:lower():gsub("[-]"," ")
-        if string.find(search, prototypeFilter) then
-          find = true
-        end
-      else
-        local elements = prototype.research_unit_ingredients
-        for key, element in pairs(elements) do
-          local search = element.name:lower():gsub("[-]"," ")
-          if string.find(search, prototypeFilter) then
-            find = true
-          end
-        end
-      end
-    else
-      find = true
-    end
+  firstGroup = nil
 
-   local filter_show_hidden = Player.getGlobalSettings("filter_show_hidden")
-    if find == true and (prototype.enabled == true or filter_show_hidden == true) then
-      local group_name = "normal"
-      if prototype.research_unit_count_formula ~= nil then group_name = "infinite" end
-      if firstGroup == nil then firstGroup = group_name end
-      groupList[group_name] = {name = group_name}
-      if prototypeGroups[group_name] == nil then prototypeGroups[group_name] = {} end
-      if prototypeGroups[group_name]["default"] == nil then prototypeGroups[group_name]["default"] = {} end
-      table.insert(prototypeGroups[group_name]["default"], prototype)
-    end
+  for key, technology in pairs(Player.getTechnologies()) do
+    self:appendGroups(technology.name, "technology", list_group, list_subgroup, list_prototype)
   end
 
-  if prototypeGroups[globalPlayer.recipeGroupSelected] == nil then
-    globalPlayer.recipeGroupSelected = firstGroup
+  if list_prototype[global_player.recipeGroupSelected] == nil then
+    global_player.recipeGroupSelected = firstGroup
   end
-  return groupList, prototypeGroups
-end
-
--------------------------------------------------------------------------------
--- Get item list
---
--- @function [parent=#TechnologySelector] getItemList
---
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function TechnologySelector.methods:getItemList(item, item2, item3)
-  Logging:trace(self:classname(), "getItemList():",item, item2, item3)
-  local globalPlayer = Player.getGlobal()
-  local list = {}
-  local prototypeGroups = self:getPrototypeGroups()
-  if prototypeGroups[globalPlayer.recipeGroupSelected] ~= nil then
-    list = prototypeGroups[globalPlayer.recipeGroupSelected]
-  end
-  return list
+  Logging:debug(self:classname(), "list_group", list_group, "list_subgroup", list_subgroup, "list_prototype", list_prototype)
+  return list_group, list_subgroup, list_prototype
 end
 
 -------------------------------------------------------------------------------
@@ -121,18 +144,19 @@ function TechnologySelector.methods:buildPrototypeTooltip(prototype)
   Logging:trace(self:classname(), "buildPrototypeTooltip(prototype):", prototype)
   -- initalize tooltip
   local tooltip = {"tooltip.technology-info"}
+  Technology.load(prototype)
   -- insert __1__ value
-  table.insert(tooltip, Player.getTechnologyLocalisedName(prototype))
+  table.insert(tooltip, Technology.getLocalisedName())
 
   -- insert __2__ value
-  table.insert(tooltip, prototype.level)
+  table.insert(tooltip, Technology.getLevel())
 
   -- insert __3__ value
-  table.insert(tooltip, prototype.research_unit_count_formula or "")
+  table.insert(tooltip, Technology.getFormula() or "")
 
   -- insert __4__ value
   local lastTooltip = tooltip
-  for _,element in pairs(prototype.research_unit_ingredients) do
+  for _,element in pairs(Technology.getIngredients()) do
     local count = Product.getElementAmount(element)
     local name = Player.getLocalisedName(element)
     local currentTooltip = {"tooltip.recipe-info-element", count, name}
@@ -154,5 +178,6 @@ function TechnologySelector.methods:buildPrototypeIcon(guiElement, prototype, to
   Logging:trace(self:classname(), "buildPrototypeIcon(guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
   ElementGui.addGuiButtonSelectSprite(guiElement, self:classname().."=element-select=ID=technology=", "technology", prototype.name, prototype.name, tooltip)
 end
+
 
 
