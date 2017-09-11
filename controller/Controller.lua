@@ -122,7 +122,10 @@ function Controller.bindController(player)
   if player ~= nil then
     local gui_top = Player.getGuiTop(player)
     if gui_top["helmod_menu-main"] ~= nil then gui_top["helmod_menu-main"].destroy() end
-    if gui_top ~= nil and gui_top["helmod_planner-command"] == nil then
+    if not(Player.getSettings("display_main_icon")) then
+      if gui_top["helmod_planner-command"] ~= nil then gui_top["helmod_planner-command"].destroy() end
+    end
+    if gui_top ~= nil and gui_top["helmod_planner-command"] == nil and Player.getSettings("display_main_icon") then
       local gui_button = ElementGui.addGuiFrameH(gui_top, "helmod_planner-command", "helmod_frame_default")
       gui_button.add({type="button", name="helmod_planner-command", tooltip=({"helmod_planner-command"}), style="helmod_icon"})
     end
@@ -170,6 +173,7 @@ function Controller.parseEvent(event, type)
     local main_panel = Controller.getView("HMMainPanel")
     if type == "settings" and event.element == nil then
       Logging:trace(Controller.classname, "parse_event(event): settings=", event.name)
+      Controller.bindController(Player.native())
       if main_panel:isOpened() then
         main_panel:main()
         main_panel:main()

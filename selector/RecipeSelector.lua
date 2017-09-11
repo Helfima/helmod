@@ -118,7 +118,6 @@ function RecipeSelector.methods:updateGroups(item, item2, item3)
   local list_prototype = {}
 
   firstGroup = nil
-
   for key, recipe in pairs(Player.getRecipes()) do
     self:appendGroups(recipe.name, "recipe", list_group, list_subgroup, list_prototype)
   end
