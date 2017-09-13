@@ -3,9 +3,9 @@ require "core.class"
 require "core.defines"
 require "core.logging"
 
+Format = require "core.Format"
 ElementGui = require "core.ElementGui"
 Player = require "model.Player"
-Format = require "core.Format"
 Controller = require "controller.Controller"
 Event = require "core.Event"
 --===========================

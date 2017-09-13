@@ -37,6 +37,20 @@ function Player.load(event)
 end
 
 -------------------------------------------------------------------------------
+-- Set factorio player
+--
+-- @function [parent=#Player] set
+--
+-- @param #LuaPlayer player
+--
+-- @return #Player
+--
+function Player.set(player)
+  Lua_player = player
+  return Player
+end
+
+-------------------------------------------------------------------------------
 -- Return factorio player
 --
 -- @function [parent=#Player] native

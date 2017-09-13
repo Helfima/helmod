@@ -113,6 +113,7 @@ function Event.onConfigurationChanged(data)
   if data.mod_changes["helmod"] then
     --initialise au chargement d'une partie existante
     for _,player in pairs(game.players) do
+      Player.set(player)
       Controller.bindController(player)
     end
   end
