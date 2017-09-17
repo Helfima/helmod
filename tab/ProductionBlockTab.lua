@@ -319,7 +319,7 @@ function ProductionBlockTab.methods:addTableRow(guiTable, block, recipe)
   -- ingredients
   local display_ingredient_cols = Player.getSettings("display_ingredient_cols")
   local tIngredient = ElementGui.addGuiTable(guiTable,"ingredients_"..recipe.id, display_ingredient_cols)
-  for r, lua_ingredient in pairs(RecipePrototype.getIngredients()) do
+  for r, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
     local ingredient = Product.load(lua_ingredient).new()
     ingredient.count = Product.countIngredient(recipe)
     if block.count > 1 then

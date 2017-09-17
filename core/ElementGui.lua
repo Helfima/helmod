@@ -934,7 +934,7 @@ function ElementGui.getTooltipRecipe(prototype)
 
   -- insert __3__ value
   local lastTooltip = tooltip
-  for _,element in pairs(RecipePrototype.getIngredients()) do
+  for _,element in pairs(RecipePrototype.getIngredients(prototype.factory)) do
     local product = Product.load(element)
     local count = Product.getElementAmount(element)
     local name = Product.getLocalisedName()

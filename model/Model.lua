@@ -7,7 +7,11 @@ local Model = {
   classname = "HMModel",
   version = "0.6.0",
   capEnergy = -0.8,
-  capSpeed = -0.8
+  capSpeed = -0.8,
+  -- 15°c
+  initial_temp = 15,
+  -- 200J/unit/°c
+  fluid_energy_per_unit = 200
 }
 
 -------------------------------------------------------------------------------
@@ -1481,7 +1485,7 @@ function Model.computeBlockRecipe(block, recipe)
     Logging:debug(Model.classname, "recipe.count=", recipe.count)
 
     -- compute ingredients
-    for k, lua_ingredient in pairs(RecipePrototype.getIngredients()) do
+    for k, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
       local ingredient = Product.load(lua_ingredient).new()
       -- consolide la production
       local i_amount = ingredient.amount
@@ -1521,10 +1525,10 @@ function Model.computeBlockTechnology(block, recipe)
     productNominal = loadstring("local L = " .. lua_recipe.level .. " return " .. recipe.research_unit_count_formula)()
   end
   -- calcul factory productivity effect
-  recipe.count = (productNominal - productNominal * recipe.factory.effects.productivity)*production
+  recipe.count = productNominal*production / (1 + recipe.factory.effects.productivity)
 
   -- compute ingredients
-  for k, lua_ingredient in pairs(RecipePrototype.getIngredients()) do
+  for k, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
     local ingredient = Product.load(lua_ingredient).new()
     local i_amount = ingredient.amount
     local nextCount = i_amount * recipe.count
@@ -1554,7 +1558,7 @@ function Model.computeBlock(block)
     for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
       local lua_recipe = RecipePrototype.load(recipe).native()
       -- construit la list des ingredients
-      for _, lua_ingredient in pairs(RecipePrototype.getIngredients()) do
+      for _, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
         if block.ingredients[lua_ingredient.name] == nil then
           block.ingredients[lua_ingredient.name] = Product.load(lua_ingredient).new()
         end
@@ -1615,7 +1619,7 @@ function Model.computeBlock(block)
             -- consolide product.count
             -- exclus le type ressource ou fluid
             if recipe.type ~= "resource" and recipe.type ~= "fluid" then
-              for k, lua_ingredient in pairs(RecipePrototype.getIngredients()) do
+              for k, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
                 if lua_ingredient.name == product.name then
                   local ingredient = Product.load(lua_ingredient).new()
                   i_amount = ingredient.amount
@@ -1691,7 +1695,7 @@ function Model.computeBlock(block)
         end
       end
       Logging:debug(Model.classname , "********** Compute after clean product:", block)
-      for _, lua_ingredient in pairs(RecipePrototype.getIngredients()) do
+      for _, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
         local count = Product.load(lua_ingredient).countIngredient(recipe)
         -- consomme les ingredients
         -- exclus le type ressource ou fluid
@@ -1950,7 +1954,12 @@ function Model.speedFactory(recipe)
   Logging:debug(Model.classname, "speedFactory()", recipe.name)
   if recipe.name == "steam" then
     -- @see https://wiki.factorio.com/Boiler
-    return 60
+    EntityPrototype.load(recipe.factory)
+    -- info energy 1J=1W
+    local power_extract = EntityPrototype.getPowerExtract()
+    local power_usage = EntityPrototype.getMaxEnergyUsage()
+    Logging:debug(Model.classname, "power_extract", power_extract, "power_usage", power_usage, "fluid", power_usage/power_extract)
+    return power_usage/power_extract
   elseif recipe.type == "resource" then
     -- (mining power - ore mining hardness) * mining speed
     -- @see https://wiki.factorio.com/Mining
@@ -1960,6 +1969,8 @@ function Model.speedFactory(recipe)
     local mining_time = EntityPrototype.load(recipe.name).getMineableMiningTime()
     local bonus = Player.getForce().mining_drill_productivity_bonus
     return (mining_power - hardness) * mining_speed * (1 + bonus) / mining_time
+  elseif recipe.type == "technology" then
+    return 1
   else
     return EntityPrototype.load(recipe.factory).getCraftingSpeed()
   end
@@ -1978,7 +1989,7 @@ function Model.computeFactory(recipe)
   -- effet speed
   recipe.factory.speed = Model.speedFactory(recipe) * (1 + recipe.factory.effects.speed)
   -- cap speed creation maximum de 1 cycle par tick
-  if recipe_energy/recipe.factory.speed < 1/60 then recipe.factory.speed = 60*recipe_energy end
+  if recipe.name ~= "steam" and recipe_energy/recipe.factory.speed < 1/60 then recipe.factory.speed = 60*recipe_energy end
 
   -- effet consumption
   local energy_type = EntityPrototype.load(recipe.factory).getEnergyType()
@@ -2090,7 +2101,11 @@ function Model.computePower(key)
       power.primary.count = count or 0
       -- calcul secondary
       if EntityPrototype.load(power.secondary.name).native() ~= nil and EntityPrototype.load(power.secondary.name).getType() == EntityType.boiler then
-        local count = math.ceil( power.power / EntityPrototype.load(power.secondary.name).getEnergyNominal() )
+        local count = 0
+        -- angel mod a un electrical boiler, on filtre
+        if EntityPrototype.getEnergyType() == "burner" then
+          count = math.ceil( power.power / EntityPrototype.load(power.secondary.name).getEnergyNominal() )
+        end
         power.secondary.count = count or 0
       else
         power.secondary.count = 0

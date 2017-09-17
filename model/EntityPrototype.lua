@@ -77,6 +77,21 @@ function EntityPrototype.getEnergyUsage()
 end
 
 -------------------------------------------------------------------------------
+-- Return extract power of fluid (boiler) in J
+--
+-- @function [parent=#EntityPrototype] getPowerExtract
+--
+-- @return #number default 0
+--
+function EntityPrototype.getPowerExtract()
+  if lua_entity_prototype ~= nil and lua_entity_prototype.target_temperature ~= nil then
+    -- [boiler.target_temperature]-15°c)x[200J/unit/°]
+    return (lua_entity_prototype.target_temperature-15)*200
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
 -- Return max energy usage per second
 --
 -- @function [parent=#EntityPrototype] getMaxEnergyUsage
@@ -174,6 +189,20 @@ end
 function EntityPrototype.getMaximumTemperature()
   if lua_entity_prototype ~= nil then
     return lua_entity_prototype.maximum_temperature or 0
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
+-- Return traget temperature
+--
+-- @function [parent=#EntityPrototype] getTargetTemperature
+--
+-- @return #number default 0
+--
+function EntityPrototype.getTargetTemperature()
+  if lua_entity_prototype ~= nil then
+    return lua_entity_prototype.target_temperature or 0
   end
   return 0
 end
@@ -354,6 +383,20 @@ end
 function EntityPrototype.getElectricEffectivity()
   if lua_entity_prototype ~= nil and lua_entity_prototype.electric_energy_source_prototype ~= nil then
     return lua_entity_prototype.electric_energy_source_prototype.effectivity or 0
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
+-- Return burner prototype effectivity
+--
+-- @function [parent=#EntityPrototype] getBurnerEffectivity
+--
+-- @return #number default 0
+--
+function EntityPrototype.getBurnerEffectivity()
+  if lua_entity_prototype ~= nil and lua_entity_prototype.burner_prototype ~= nil then
+    return lua_entity_prototype.burner_prototype.effectivity or 0
   end
   return 0
 end

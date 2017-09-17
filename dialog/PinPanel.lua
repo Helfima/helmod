@@ -266,7 +266,7 @@ function PinPanel.methods:addProductionBlockRow(guiTable, blockId, recipe)
 	-- ingredients
 	local tIngredient = ElementGui.addGuiTable(guiTable,"ingredients_"..recipe.id, 3)
 	if RecipePrototype.getIngredients() ~= nil then
-		for r, ingredient in pairs(RecipePrototype.getIngredients()) do
+		for r, ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
 			local cell = ElementGui.addGuiFlowH(tIngredient,"cell_"..ingredient.name, "helmod_flow_default")
 			local amount = Product.getElementAmount(ingredient)
 			ElementGui.addGuiLabel(cell, ingredient.name, amount, "helmod_label_sm")

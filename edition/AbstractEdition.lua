@@ -817,6 +817,7 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
       -- item=recipe item2=factory
       Model.setFactory(item, item2, item3)
       Model.update()
+      self:updateHeader(item, item2, item3)
       self:updateFactoryInfo(item, item2, item3)
       self.parent:refreshDisplayData(nil, item, item2)
     end
