@@ -238,11 +238,29 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
         self:close()
       end
     else
-      if action == "element-select" then
+      -- classic selector
+      if action == "element-select" and item ~= "container" then
         local productionBlock = Model.addRecipeIntoProductionBlock(item2, item)
         Model.update()
         self.parent:refreshDisplayData()
         self:close()
+      end
+      -- container selector
+      if action == "element-select" and item == "container" then
+        local type = EntityPrototype.load(item2).getType()
+        if type == "container" or type == "logistic-container" then
+          globalGui.container_solid = item2
+        end
+        if type == "storage-tank" then
+          globalGui.container_fluid = item2
+        end
+        if type == "car" or type == "cargo-wagon" or type == "item-with-entity-data"  or type == "logistic-robot" then
+          globalGui.vehicle_solid = item2
+        end
+        if type == "fluid-wagon" then
+          globalGui.vehicle_fluid = item2
+        end
+        self.parent:refreshDisplayData()
       end
     end
   end

@@ -12,6 +12,7 @@ require "selector.RecipeSelector"
 require "selector.TechnologySelector"
 require "selector.ItemSelector"
 require "selector.FluidSelector"
+require "selector.ContainerSelector"
 require "tab.MainTab"
 
 Model = require "model.Model"
@@ -63,6 +64,7 @@ function Controller.init()
   table.insert(controllers, TechnologySelector:new(main_panel))
   table.insert(controllers, ItemSelector:new(main_panel))
   table.insert(controllers, FluidSelector:new(main_panel))
+  table.insert(controllers, ContainerSelector:new(main_panel))
 
   views = {}
   for _,controller in pairs(controllers) do

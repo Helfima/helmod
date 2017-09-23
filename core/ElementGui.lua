@@ -265,6 +265,49 @@ function ElementGui.addGuiDropDown(parent, action, key, items, selected, style, 
 end
 
 -------------------------------------------------------------------------------
+-- Add a selector element
+--
+-- @function [parent=#ElementGui] addGuiDropDownElement
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #string action action name
+-- @param #string key unique id
+-- @param #string elem_type
+-- @param #string selected selected element
+-- @param #string style style of button
+-- @param #string caption container for element
+-- @param #string tooltip displayed text
+--
+-- @return #LuaGuiElement the LuaGuiElement added
+--
+function ElementGui.addGuiDropDownElement(parent, action, key, elem_type, selected, style, caption, tooltip)
+  Logging:debug(ElementGui.classname, "addGuiDropDownElement", parent, action, key, selected, style, caption, tooltip)
+  local options = {}
+  options.type = "choose-elem-button"
+  options.style = style
+  options.caption = caption
+  options.tooltip = tooltip
+
+  if key ~= nil then
+    options.name = action..key
+  else
+    options.name = action
+  end
+
+    options.elem_type = elem_type
+  if elem_type ~= nil and selected ~= nil then
+    options[elem_type] = selected
+  end
+
+  local element = nil
+  local ok , err = pcall(function()
+    element = parent.add(options)
+  end)
+  if not(ok) then Logging:error(ElementGui.classname, "addGuiDropDownElement", options, ok , err) end
+  return element
+end
+
+-------------------------------------------------------------------------------
 -- Add a button element for item
 --
 -- @function [parent=#ElementGui] addGuiButtonItem
@@ -832,17 +875,22 @@ end
 --
 function ElementGui.addCellCargoInfo(parent, element)
   Logging:debug(ElementGui.classname, "addCellCargoInfo():", element)
+  local globalGui = Player.getGlobalGui()
   Product.load(element)
   if Product.native() ~= nil then
     local table_cargo = ElementGui.addGuiTable(parent,"element_cargo", 1, "helmod_beacon_modules")
     if element.type == 0 or element.type == "item" then
-      ElementGui.addGuiButtonSpriteSm(table_cargo, "steel-chest", "item", "steel-chest", nil, ElementGui.getTooltipProduct(element, "steel-chest"))
-      ElementGui.addGuiButtonSpriteSm(table_cargo, "cargo-wagon", "item", "cargo-wagon", nil, ElementGui.getTooltipProduct(element, "cargo-wagon"))
+      local container_solid = globalGui.container_solid or "steel-chest"
+      local vehicle_solid = globalGui.vehicle_solid or "cargo-wagon"
+      ElementGui.addGuiButtonSpriteSm(table_cargo, container_solid, "item", container_solid, nil, ElementGui.getTooltipProduct(element, container_solid))
+      ElementGui.addGuiButtonSpriteSm(table_cargo, vehicle_solid, "item", vehicle_solid, nil, ElementGui.getTooltipProduct(element, vehicle_solid))
     end
   
     if element.type == 1 or element.type == "fluid" then
-      ElementGui.addGuiButtonSpriteSm(table_cargo, "storage-tank", "item", "storage-tank", nil, ElementGui.getTooltipProduct(element, "storage-tank"))
-      ElementGui.addGuiButtonSpriteSm(table_cargo, "fluid-wagon", "item", "fluid-wagon", nil, ElementGui.getTooltipProduct(element, "fluid-wagon"))
+      local container_fluid = globalGui.container_fluid or "storage-tank"
+      local vehicle_fluid = globalGui.wagon_fluid or "fluid-wagon"
+      ElementGui.addGuiButtonSpriteSm(table_cargo, container_fluid, "item", container_fluid, nil, ElementGui.getTooltipProduct(element, container_fluid))
+      ElementGui.addGuiButtonSpriteSm(table_cargo, vehicle_fluid, "item", vehicle_fluid, nil, ElementGui.getTooltipProduct(element, vehicle_fluid))
     end
   end
 end

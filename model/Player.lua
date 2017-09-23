@@ -722,12 +722,24 @@ end
 --
 -- @function [parent=#Player] getEntityPrototypes
 --
--- @param #string entity name
+-- @param #table type filter
 --
 -- @return #LuaEntityPrototype entity prototype
 --
-function Player.getEntityPrototypes()
+function Player.getEntityPrototypes(types)
+  if types == nil then
   return game.entity_prototypes
+  else
+    local entities = {}
+    for _,entity in pairs(game.entity_prototypes) do
+      for _,type in pairs(types) do
+        if entity.type == type then
+          entities[entity.name] = entity
+        end
+      end
+    end
+    return entities
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -822,8 +834,6 @@ end
 -- Return item prototypes
 --
 -- @function [parent=#Player] getItemPrototypes
---
--- @param #string item name
 --
 -- @return #LuaItemPrototype item prototype
 --

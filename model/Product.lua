@@ -166,10 +166,19 @@ end
 function Product.countContainer(count, container)
   Logging:debug(Product.classname, "countContainer",lua_product)
   if lua_product.type == 0 or lua_product.type == "item" then
-  local cargo_wagon_size = EntityPrototype.load(container).getInventorySize()
-    local stack_size = ItemPrototype.load(lua_product.name).stackSize()
-    if cargo_wagon_size * stack_size == 0 then return 0 end
-    return count / (cargo_wagon_size * stack_size)
+    EntityPrototype.load(container)
+    local cargo_wagon_size = EntityPrototype.getInventorySize(1)
+    if EntityPrototype.getType() ~= "logistic-robot" then
+      if EntityPrototype.getInventorySize(2) ~= nil and EntityPrototype.getInventorySize(2) > EntityPrototype.getInventorySize(1) then
+        cargo_wagon_size = EntityPrototype.getInventorySize(2)
+      end
+      local stack_size = ItemPrototype.load(lua_product.name).stackSize()
+      if cargo_wagon_size * stack_size == 0 then return 0 end
+      return count / (cargo_wagon_size * stack_size)
+    else
+      cargo_wagon_size = EntityPrototype.native().max_payload_size + (Player.getForce().worker_robots_storage_bonus or 0 )
+      return count / cargo_wagon_size
+    end
   end
   if lua_product.type == 1 or lua_product.type == "fluid" then
     local cargo_wagon_size = EntityPrototype.load(container).getFluidCapacity()

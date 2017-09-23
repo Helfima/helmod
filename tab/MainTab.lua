@@ -641,6 +641,7 @@ function MainTab.methods:updateHeaderPanel(item, item2, item3)
     local block_id = globalGui.currentBlock or "new"
     ElementGui.addGuiButton(tab_panel, "HMRecipeSelector=OPEN=ID=", block_id, "helmod_button_default", ({"helmod_result-panel.add-button-recipe"}))
     ElementGui.addGuiButton(tab_panel, "HMTechnologySelector=OPEN=ID=", block_id, "helmod_button_default", ({"helmod_result-panel.add-button-technology"}))
+    ElementGui.addGuiButton(tab_panel, "HMContainerSelector=OPEN=ID=", block_id, "helmod_button_default", ({"helmod_result-panel.select-button-container"}))
     -- copy past
     ElementGui.addGuiButton(tab_panel, self:classname().."=copy-model=ID=", model.id, "helmod_button_icon_copy", nil, ({"helmod_button.copy"}))
     ElementGui.addGuiButton(tab_panel, self:classname().."=past-model=ID=", model.id, "helmod_button_icon_past", nil, ({"helmod_button.past"}))
@@ -664,7 +665,7 @@ function MainTab.methods:updateHeaderPanel(item, item2, item3)
     if globalGui.currentTab == "HMProductionBlockTab" then
       ElementGui.addGuiButton(tab_panel, "HMPinPanel=OPEN=ID=", block_id, "helmod_button_icon_pin", nil, ({"helmod_result-panel.tab-button-pin"}))
     end
-
+    
     -- index panel
     local indexPanel = ElementGui.addGuiFlowH(menuPanel, "index", "helmod_flow_resize_row_width")
     Player.setStyle(indexPanel, "data", "minimal_width")
