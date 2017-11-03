@@ -1240,13 +1240,26 @@ function Model.update()
       -- premiere recette
       local _,recipe = next(block.recipes)
       if recipe ~= nil then
-        local lua_recipe = RecipePrototype.load(recipe).native()
-        if not(block.unlinked) and RecipePrototype.getProducts() ~= nil then
-          for _,product in pairs(RecipePrototype.getProducts()) do
-            if input[product.name] ~= nil then
-              -- block linked
-              if block.input == nil then block.input = {} end
-              block.input[product.name] = input[product.name]
+
+--        local lua_recipe = RecipePrototype.load(recipe).native()
+--        if not(block.unlinked) and RecipePrototype.getProducts() ~= nil then
+--          for _,product in pairs(RecipePrototype.getProducts()) do
+--            if input[product.name] ~= nil then
+--              -- block linked
+--              if block.input == nil then block.input = {} end
+--              block.input[product.name] = input[product.name]
+--            end
+--          end
+--        end
+        -- prepare input
+        if not(block.unlinked) and block.products ~= nil then
+          for _,product in pairs(block.products) do
+            if product.state ~= nil and bit32.band(product.state, 1) > 0 then
+              if input[product.name] ~= nil then
+                -- block linked
+                if block.input == nil then block.input = {} end
+                block.input[product.name] = input[product.name]
+              end
             end
           end
         end
@@ -1380,9 +1393,19 @@ function Model.copyBlock(from_model, from_block)
         recipe_model.production = recipe.production or 1
         recipe_model.factory = Model.createFactoryModel(recipe.factory.name)
         recipe_model.factory.limit = recipe.factory.limit
-        recipe_model.factory.modules = recipe.factory.modules
+        recipe_model.factory.modules = {}
+        if recipe.factory.modules ~= nil then
+          for name,value in pairs(recipe.factory.modules) do
+            recipe_model.factory.modules[name] = value
+          end
+        end
         recipe_model.beacon = Model.createBeaconModel(recipe.beacon.name)
-        recipe_model.beacon.modules = recipe.beacon.modules
+        recipe_model.beacon.modules = {}
+        if recipe.beacon.modules ~= nil then
+          for name,value in pairs(recipe.beacon.modules) do
+            recipe_model.beacon.modules[name] = value
+          end
+        end
         model.blocks[to_block_id].recipes[recipe_model.id] = recipe_model
         recipe_index = recipe_index + 1
       end

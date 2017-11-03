@@ -115,8 +115,9 @@ function Dialog.methods:open(event, action, item, item2, item3)
 		if self.panelCaption ~= nil then caption = self.panelCaption end
 
 		local panel = self:getPanel()
-		local headerPanel = ElementGui.addGuiFrameH(panel, "header-panel", "helmod_frame_resize_row_width")
-		ElementGui.addGuiLabel(headerPanel, "title", caption, "helmod_label_title_frame")
+		
+		local header_panel = ElementGui.addGuiFrameH(panel, "header-panel", "helmod_frame_resize_row_width")
+		ElementGui.addGuiLabel(header_panel, "title", caption, "helmod_label_title_frame")
 		
 		self:onOpen(event, action, item, item2, item3)
 		self:afterOpen(event, action, item, item2, item3)

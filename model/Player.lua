@@ -100,6 +100,7 @@ end
 function Player.getDefaultSettings()
   return {
     display_pin_beacon = false,
+    display_pin_level = 4,
     model_auto_compute = false,
     model_loop_limit = 1000,
     other_speed_panel=false,
@@ -181,11 +182,11 @@ end
 function Player.getGlobalSettings(property)
   local settings = Player.getGlobal("settings")
   if settings ~= nil and property ~= nil then
-    local guiProperty = settings[property]
-    if guiProperty == nil then
-      guiProperty = Player.getDefaultSettings()[property]
+    local value = settings[property]
+    if value == nil then
+      value = Player.getDefaultSettings()[property]
     end
-    return guiProperty
+    return value
   end
   return settings
 end

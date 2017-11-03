@@ -127,8 +127,8 @@ function EntityPrototype.getEnergyNominal()
     if lua_entity_prototype.type == EntityType.boiler then
       return EntityPrototype.getMaxEnergyUsage()
     end
-    if lua_entity_prototype.type == EntityType.solar_panel then
-      return lua_entity_prototype.production or 0
+    if lua_entity_prototype.type == EntityType.solar_panel and lua_entity_prototype.production ~= nil then
+      return lua_entity_prototype.production*60 or 0
     end
   end
   return 0
@@ -339,8 +339,8 @@ end
 -- @return #number default 0
 --
 function EntityPrototype.getElectricInputFlowLimit()
-  if lua_entity_prototype ~= nil and lua_entity_prototype.electric_energy_source_prototype ~= nil then
-    return lua_entity_prototype.electric_energy_source_prototype.input_flow_limit or 0
+  if lua_entity_prototype ~= nil and lua_entity_prototype.electric_energy_source_prototype ~= nil and lua_entity_prototype.electric_energy_source_prototype.input_flow_limit~= nil then
+    return lua_entity_prototype.electric_energy_source_prototype.input_flow_limit*60 or 0
   end
   return 0
 end
@@ -353,8 +353,8 @@ end
 -- @return #number default 0
 --
 function EntityPrototype.getElectricOutputFlowLimit()
-  if lua_entity_prototype ~= nil and lua_entity_prototype.electric_energy_source_prototype ~= nil then
-    return lua_entity_prototype.electric_energy_source_prototype.output_flow_limit or 0
+  if lua_entity_prototype ~= nil and lua_entity_prototype.electric_energy_source_prototype ~= nil and lua_entity_prototype.electric_energy_source_prototype.output_flow_limit~= nil then
+    return lua_entity_prototype.electric_energy_source_prototype.output_flow_limit*60 or 0
   end
   return 0
 end

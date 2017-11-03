@@ -960,7 +960,10 @@ function ElementGui.getTooltipRecipe(prototype)
   Logging:debug(ElementGui.classname, "getTooltipRecipe", prototype)
   RecipePrototype.load(prototype)
   if RecipePrototype.native() == nil then return nil end
-  if cache_tooltip_recipe[prototype.name] ~= nil then return cache_tooltip_recipe[prototype.name] end
+  local prototype_type = prototype.type or "other"
+  if cache_tooltip_recipe[prototype_type] ~= nil and cache_tooltip_recipe[prototype_type][prototype.name] ~= nil then
+    return cache_tooltip_recipe[prototype_type][prototype.name]
+  end
   -- initalize tooltip
   local tooltip = {"tooltip.recipe-info"}
   -- insert __1__ value
@@ -993,7 +996,8 @@ function ElementGui.getTooltipRecipe(prototype)
   end
   -- finalise la derniere valeur
   table.insert(lastTooltip, "")
-  cache_tooltip_recipe[prototype.name] = tooltip
+  if cache_tooltip_recipe[prototype_type] == nil then cache_tooltip_recipe[prototype_type] = {} end
+  cache_tooltip_recipe[prototype_type][prototype.name] = tooltip
   return tooltip
 end
 

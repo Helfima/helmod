@@ -1225,9 +1225,9 @@ default_gui["helmod_scroll_block_element"] = {
 default_gui["helmod_scroll_block_pin_tab"] = {
   type = "scroll_pane_style",
   parent = "scroll_pane_style",
-  minimal_width = 220,
+  minimal_width = 180,
   maximal_width = 450,
-  minimal_height = 72,
+  minimal_height = 0,
   maximal_height = 500
 }
 

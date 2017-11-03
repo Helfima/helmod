@@ -242,6 +242,7 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
       if action == "element-select" and item ~= "container" then
         local productionBlock = Model.addRecipeIntoProductionBlock(item2, item)
         Model.update()
+        globalGui.currentTab = "HMProductionBlockTab"
         self.parent:refreshDisplayData()
         self:close()
       end
