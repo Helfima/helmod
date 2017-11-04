@@ -35,7 +35,7 @@ function ResourceTab.methods:addTableHeader(itable)
   -- data columns
   self:addCellHeader(itable, "count", {"helmod_result-panel.col-header-total"},"count")
   self:addCellHeader(itable, "ingredient", {"helmod_result-panel.col-header-ingredient"}, "index")
-  self:addCellHeader(itable, "type", {"helmod_result-panel.col-header-type"}, "resource_category")
+  self:addCellHeader(itable, "ressource_type", {"helmod_result-panel.col-header-type"}, "resource_category")
 end
 
 -------------------------------------------------------------------------------

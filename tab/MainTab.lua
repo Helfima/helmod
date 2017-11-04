@@ -654,8 +654,6 @@ function MainTab.methods:updateHeaderPanel(item, item2, item3)
     if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 4) > 0) then
       if globalGui.currentTab == "HMProductionLineTab" then
         ElementGui.addGuiButton(tab_panel, self:classname().."=remove-model=ID=", model.id, "helmod_button_icon_delete_red", nil, ({"helmod_result-panel.remove-button-production-line"}))
-      end
-      if globalGui.currentTab == "HMProductionBlockTab" then
         ElementGui.addGuiButton(tab_panel, self:classname().."=production-block-remove=ID=", block_id, "helmod_button_icon_delete_red", nil, ({"helmod_result-panel.remove-button-production-block"}))
       end
     end
@@ -666,6 +664,9 @@ function MainTab.methods:updateHeaderPanel(item, item2, item3)
       ElementGui.addGuiButton(tab_panel, "HMPinPanel=OPEN=ID=", block_id, "helmod_button_icon_pin", nil, ({"helmod_result-panel.tab-button-pin"}))
     end
     
+    if globalGui.currentTab == "HMProductionLineTab" then
+      ElementGui.addGuiButton(tab_panel, "HMStatusPanel=OPEN=ID=", block_id, "helmod_button_info_pin", nil, ({"helmod_button.info"}))
+    end
     -- index panel
     local indexPanel = ElementGui.addGuiFlowH(menuPanel, "index", "helmod_flow_resize_row_width")
     Player.setStyle(indexPanel, "data", "minimal_width")

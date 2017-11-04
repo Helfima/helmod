@@ -1,6 +1,7 @@
 require "core.MainPanel"
 require "dialog.Dialog"
 require "dialog.PinPanel"
+require "dialog.StatusPanel"
 require "dialog.Settings"
 require "dialog.Download"
 require "edition.RecipeEdition"
@@ -61,6 +62,7 @@ function Controller.init()
   table.insert(controllers, ProductEdition:new(main_panel))
   table.insert(controllers, EnergyEdition:new(main_panel))
   table.insert(controllers, PinPanel:new(main_panel))
+  table.insert(controllers, StatusPanel:new(main_panel))
   table.insert(controllers, TechnologySelector:new(main_panel))
   table.insert(controllers, ItemSelector:new(main_panel))
   table.insert(controllers, FluidSelector:new(main_panel))
@@ -132,6 +134,18 @@ function Controller.bindController(player)
       gui_button.add({type="button", name="helmod_planner-command", tooltip=({"helmod_planner-command"}), style="helmod_icon"})
     end
   end
+end
+
+-------------------------------------------------------------------------------
+-- On tick
+--
+-- @function [parent=#Controller] onTick
+--
+-- @param #table event
+--
+function Controller.onTick(event)
+  Logging:trace(Controller.classname, "onTick(event)", event)
+  
 end
 
 -------------------------------------------------------------------------------

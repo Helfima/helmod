@@ -1502,6 +1502,15 @@ function Model.computeBlockRecipe(block, recipe)
         local product = Product.load(lua_product).new()
         local p_amount = Product.getAmount(recipe)
         local count = block.ingredients[lua_product.name].count*production / p_amount
+        -- for void in angel mod
+        if p_amount == 0 then
+          local lua_ingredient = RecipePrototype.getIngredients(recipe.factory)[1]
+          local ingredient = Product.load(lua_ingredient).new()
+          p_amount = ingredient.amount
+          count = block.products[lua_ingredient.name].count*production / p_amount
+        end
+        Logging:debug(Model.classname, "count", count)
+        Logging:debug(Model.classname, "p_amount", p_amount)
         if recipe.count < count then recipe.count = count end
       end
     end

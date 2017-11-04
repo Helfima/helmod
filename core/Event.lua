@@ -128,6 +128,8 @@ end
 --
 function Event.onTick(event)
   Logging:trace(Event.classname, "onTick(event)", event)
+  Player.load(event)
+  Controller.onTick(event)
 end
 
 -------------------------------------------------------------------------------
