@@ -665,7 +665,7 @@ function MainTab.methods:updateHeaderPanel(item, item2, item3)
     end
     
     if globalGui.currentTab == "HMProductionLineTab" then
-      ElementGui.addGuiButton(tab_panel, "HMStatusPanel=OPEN=ID=", block_id, "helmod_button_info_pin", nil, ({"helmod_button.info"}))
+      ElementGui.addGuiButton(tab_panel, "HMStatusPanel=OPEN=ID=", block_id, "helmod_button_icon_info", nil, ({"helmod_button.info"}))
     end
     -- index panel
     local indexPanel = ElementGui.addGuiFlowH(menuPanel, "index", "helmod_flow_resize_row_width")

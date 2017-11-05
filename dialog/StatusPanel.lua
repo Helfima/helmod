@@ -143,6 +143,7 @@ function StatusPanel.methods:updateHeader(event, action, item, item2, item3)
   local model = Model.getModel()
 
   ElementGui.addGuiButton(header_panel, self:classname().."=CLOSE", nil, "helmod_button_icon_close_red", nil, ({"helmod_button.close"}))
+  ElementGui.addGuiButton(header_panel, self:classname().."=UPDATE", nil, "helmod_button_icon_refresh", nil, ({"helmod_result-panel.refresh-button"}))
   --  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID=down", nil, "helmod_button_icon_arrow_left", nil, ({"helmod_button.minimize"}))
   --  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID=up", nil, "helmod_button_icon_arrow_right", nil, ({"helmod_button.minimize"}))
   --  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID=min", nil, "helmod_button_icon_minimize", nil, ({"helmod_button.minimize"}))
@@ -180,8 +181,9 @@ function StatusPanel.methods:updateInfo(event, action, item, item2, item3)
   table.insert(elements, {name = "locomotive", type = "entity", value = #Player.getForce().get_trains()})
   
   local entities = {"straight-rail", "curved-rail", "electric-furnace",
-                    "assembling-machine-3", "chemical-plant", "oil-refinery", "beacon",
-                    "express-transport-belt", "express-underground-belt", "express-splitter"}
+                    "assembling-machine-3", "chemical-plant", "oil-refinery", "beacon", "lab", "electric-mining-drill",
+                    "express-transport-belt", "express-underground-belt", "express-splitter"
+                    , "medium-electric-pole", "big-electric-pole"}
   for _, element in pairs(entities) do
     table.insert(elements, {name = element, type = "entity", value = Player.getForce().get_entity_count(element)})
   end
