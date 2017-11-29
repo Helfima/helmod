@@ -596,7 +596,7 @@ function Player.getProductionsCrafting(category, entity_name)
             check = true
           end
         elseif category ~= nil and category == "extraction-machine" then
-          if lua_entity.subgroup ~= nil and lua_entity.subgroup.name == "extraction-machine" then
+          if lua_entity.subgroup ~= nil and (lua_entity.subgroup.name == "extraction-machine" or lua_entity.subgroup.name == 'shinyminer1' or lua_entity.subgroup.name == 'shinyminer2') then
             check = true
           end
         elseif category ~= nil and category == "energy" then
