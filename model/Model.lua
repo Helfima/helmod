@@ -667,7 +667,7 @@ function Model.addRecipeIntoProductionBlock(key, type)
     end
     model.blocks[blockId].recipes[ModelRecipe.id] = ModelRecipe
 
-    local defaultFactory = Model.getDefaultPrototypeFactory(RecipePrototype.getCategory(), lua_recipe.name)
+    local defaultFactory = Model.getDefaultPrototypeFactory(RecipePrototype.getCategory(), lua_recipe)
     if defaultFactory ~= nil then
       Model.setFactory(blockId, ModelRecipe.id, defaultFactory)
     end
@@ -1629,8 +1629,11 @@ function Model.computeBlock(block)
           local _,lua_product = next(RecipePrototype.load(first_recipe).getProducts())
           if block.input == nil then block.input = {} end
           -- formula [product amount] * (1 + [productivity]) *[assembly speed]*[time]/[recipe energy]
-          block.input[lua_product.name] = Product.load(lua_product).getAmount(first_recipe) * (1 + first_recipe.factory.effects.productivity) * ( block.factory_number or 0 ) * first_recipe.factory.speed * model.time / RecipePrototype.getEnergy()
+          -- Product.load(lua_product).getAmount(first_recipe) calcul avec la productivity
+          block.input[lua_product.name] = Product.load(lua_product).getAmount(first_recipe) * ( block.factory_number or 0 ) * first_recipe.factory.speed * model.time / RecipePrototype.getEnergy()
+          Logging:debug(Model.classname, "by factory info", Product.load(lua_product).getAmount(first_recipe), first_recipe.factory.speed)
         end
+        Logging:debug(Model.classname, "block.input",block.input)
       end
     end
 
@@ -2002,7 +2005,8 @@ function Model.speedFactory(recipe)
     local bonus = Player.getForce().mining_drill_productivity_bonus
     return (mining_power - hardness) * mining_speed * (1 + bonus) / mining_time
   elseif recipe.type == "technology" then
-    return 1
+    local bonus = Player.getForce().laboratory_speed_modifier or 1
+    return 1*bonus
   else
     return EntityPrototype.load(recipe.factory).getCraftingSpeed()
   end
@@ -2231,13 +2235,13 @@ end
 -- @function [parent=#Model] getDefaultPrototypeFactory
 --
 -- @param #string category
--- @param #string name
+-- @param #string recipe
 --
 -- @return #string
 --
-function Model.getDefaultPrototypeFactory(category, name)
+function Model.getDefaultPrototypeFactory(category, recipe)
   if category ~= nil then
-    local factories = Player.getProductionsCrafting(category, name)
+    local factories = Player.getProductionsCrafting(category, recipe)
     local default_factory_level = Player.getSettings("default_factory_level")
     local factory_level = 1
     if default_factory_level == "fast" then

@@ -180,7 +180,7 @@ function StatusPanel.methods:updateInfo(event, action, item, item2, item3)
   
   table.insert(elements, {name = "locomotive", type = "entity", value = #Player.getForce().get_trains()})
   
-  local entities = {"straight-rail", "curved-rail", "electric-furnace",
+  local entities = {"logistic-robot", "construction-robot", "straight-rail", "curved-rail", "electric-furnace",
                     "assembling-machine-3", "chemical-plant", "oil-refinery", "beacon", "lab", "electric-mining-drill",
                     "express-transport-belt", "express-underground-belt", "express-splitter"
                     , "medium-electric-pole", "big-electric-pole"}

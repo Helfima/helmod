@@ -255,6 +255,10 @@ function Player.getStyleSizes()
     style_sizes.data.minimal_width = width - width_info
     style_sizes.data.maximal_width = width - width_info
 
+    style_sizes.data_section = {}
+    style_sizes.data_section.minimal_width = width - width_info - 4*width_scroll
+    style_sizes.data_section.maximal_width = width - width_info - 4*width_scroll
+
     style_sizes.scroll_recipe_selector = {}
     style_sizes.scroll_recipe_selector.minimal_height = height - height_selector_header
     style_sizes.scroll_recipe_selector.maximal_height = height - height_selector_header
@@ -562,14 +566,14 @@ end
 -- @function [parent=#Player] getProductionsCrafting
 --
 -- @param #string category filter
--- @param #string entity_name name entity filter
+-- @param #string lua_recipe
 --
 -- @return #table list of productions
 --
-function Player.getProductionsCrafting(category, entity_name)
-  Logging:debug(Player.classname, "getProductionsCrafting(category)", category, entity_name)
+function Player.getProductionsCrafting(category, lua_recipe)
+  Logging:debug(Player.classname, "getProductionsCrafting(category)", category, lua_recipe)
   local productions = {}
-  if entity_name ~= nil and entity_name == "water" then
+  if lua_recipe.name ~= nil and lua_recipe.name == "water" then
     for key, lua_entity in pairs(game.entity_prototypes) do
       if lua_entity.type ~= nil and lua_entity.name ~= nil and lua_entity.name ~= "player" then
         if lua_entity.type == EntityType.offshore_pump then
@@ -577,7 +581,7 @@ function Player.getProductionsCrafting(category, entity_name)
         end
       end
     end
-  elseif entity_name ~= nil and entity_name == "steam" then
+  elseif lua_recipe.name ~= nil and lua_recipe.name == "steam" then
     for key, lua_entity in pairs(game.entity_prototypes) do
       if lua_entity.type ~= nil and lua_entity.name ~= nil and lua_entity.name ~= "player" then
         if lua_entity.type == EntityType.boiler then
@@ -593,7 +597,12 @@ function Player.getProductionsCrafting(category, entity_name)
         if category ~= nil and category ~= "extraction-machine" and category ~= "energy" and category ~= "technology" then
           -- standard recipe
           if lua_entity.crafting_categories ~= nil and lua_entity.crafting_categories[category] then
-            check = true
+            local recipe_ingredient_count = #RecipePrototype.load(lua_recipe).native().ingredients
+            local factory_ingredient_count = EntityPrototype.load(lua_entity).getIngredientCount()
+            Logging:debug(Player.classname, "crafting", recipe_ingredient_count, factory_ingredient_count)
+            if factory_ingredient_count >= recipe_ingredient_count then
+              check = true
+            end
           end
         elseif category ~= nil and category == "extraction-machine" then
           if lua_entity.subgroup ~= nil and (lua_entity.subgroup.name == "extraction-machine" or lua_entity.subgroup.name == 'shinyminer1' or lua_entity.subgroup.name == 'shinyminer2') then
@@ -614,8 +623,8 @@ function Player.getProductionsCrafting(category, entity_name)
         end
         -- resource filter
         if check then
-          if entity_name ~= nil then
-            local lua_entity_filter = Player.getEntityPrototype(entity_name)
+          if lua_recipe.name ~= nil then
+            local lua_entity_filter = Player.getEntityPrototype(lua_recipe.name)
             if lua_entity_filter ~= nil and lua_entity.resource_categories ~= nil and not(lua_entity.resource_categories[lua_entity_filter.resource_category]) then
               check = false
             end

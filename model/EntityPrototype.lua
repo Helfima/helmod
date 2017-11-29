@@ -51,6 +51,17 @@ function EntityPrototype.getType()
 end
 
 -------------------------------------------------------------------------------
+-- Return ingredient_count
+--
+-- @function [parent=#EntityPrototype] getIngredientCount
+--
+-- @return #number
+--
+function EntityPrototype.getIngredientCount()
+  return lua_entity_prototype.ingredient_count or 6
+end
+
+-------------------------------------------------------------------------------
 -- Return valid
 --
 -- @function [parent=#EntityPrototype] getValid

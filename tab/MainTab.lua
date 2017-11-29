@@ -4,6 +4,7 @@ require "tab.ProductionLineTab"
 require "tab.ResourceTab"
 require "tab.SummaryTab"
 require "tab.PropertiesTab"
+require "tab.StatisticTab"
 -------------------------------------------------------------------------------
 -- Class to build tab
 --
@@ -29,6 +30,7 @@ function MainTab.methods:init(parent)
   table.insert(tabs, ResourceTab:new(self))
   table.insert(tabs, SummaryTab:new(self))
   table.insert(tabs, PropertiesTab:new(self))
+  table.insert(tabs, StatisticTab:new(self))
 
   self.tabs = {}
   for _,tab in pairs(tabs) do
@@ -663,9 +665,9 @@ function MainTab.methods:updateHeaderPanel(item, item2, item3)
     if globalGui.currentTab == "HMProductionBlockTab" then
       ElementGui.addGuiButton(tab_panel, "HMPinPanel=OPEN=ID=", block_id, "helmod_button_icon_pin", nil, ({"helmod_result-panel.tab-button-pin"}))
     end
-    
-    if globalGui.currentTab == "HMProductionLineTab" then
-      ElementGui.addGuiButton(tab_panel, "HMStatusPanel=OPEN=ID=", block_id, "helmod_button_icon_info", nil, ({"helmod_button.info"}))
+    -- pin info
+    if globalGui.currentTab == "HMStatisticTab" then
+      ElementGui.addGuiButton(tab_panel, "HMStatusPanel=OPEN=ID=", block_id, "helmod_button_icon_pin", nil, ({"helmod_result-panel.tab-button-pin"}))
     end
     -- index panel
     local indexPanel = ElementGui.addGuiFlowH(menuPanel, "index", "helmod_flow_resize_row_width")

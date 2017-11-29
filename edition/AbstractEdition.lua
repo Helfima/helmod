@@ -551,7 +551,7 @@ function AbstractEdition.methods:updateFactorySelector(item, item2, item3)
   local category = prototype.getCategory()
   if not(Player.getSettings("model_filter_factory", true)) then category = nil end
 
-  local factories = Player.getProductionsCrafting(category, object.name)
+  local factories = Player.getProductionsCrafting(category, object)
   Logging:debug(self:classname(), "factories:",factories)
 
 

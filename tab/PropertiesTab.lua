@@ -117,7 +117,10 @@ function PropertiesTab.methods:updateData()
       local properties = self:parseProperties(prototype, 0)
 
       for _, property in pairs(properties) do
-        self:addTableRow(resultTable, property)
+        if property.value ~= "nil" then
+          Logging:debug(self:classname(), "property:", property)
+          self:addTableRow(resultTable, property)
+        end
       end
     end
   end

@@ -1014,6 +1014,46 @@ default_gui["helmod_frame_default"] = {
 }
 
 -------------------------------------------------------------------------------
+-- Style of section panel
+--
+-- @field [parent=#Frame] section
+--
+
+default_gui["helmod_frame_section"] = {
+  type = "frame_style",
+  parent = "helmod_frame_default",
+  graphical_set =
+      {
+        type = "composition",
+        filename = "__helmod__/graphics/gui.png",
+        priority = "extra-high-no-scale",
+        load_in_minimal_mode = true,
+        corner_size = {3, 3},
+        position = {0, 0}
+      }
+}
+
+-------------------------------------------------------------------------------
+-- Style of section panel
+--
+-- @field [parent=#Frame] section
+--
+
+default_gui["helmod_frame_section2"] = {
+  type = "frame_style",
+  parent = "helmod_frame_default",
+  graphical_set =
+      {
+        type = "composition",
+        filename = "__helmod__/graphics/gui.png",
+        priority = "extra-high-no-scale",
+        load_in_minimal_mode = true,
+        corner_size = {3, 3},
+        position = {0, 8}
+      }
+}
+
+-------------------------------------------------------------------------------
 -- Style of left menu panel
 --
 -- @field [parent=#Frame] left_menu
