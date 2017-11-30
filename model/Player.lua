@@ -597,7 +597,7 @@ function Player.getProductionsCrafting(category, lua_recipe)
         if category ~= nil and category ~= "extraction-machine" and category ~= "energy" and category ~= "technology" then
           -- standard recipe
           if lua_entity.crafting_categories ~= nil and lua_entity.crafting_categories[category] then
-            local recipe_ingredient_count = #RecipePrototype.load(lua_recipe).native().ingredients
+            local recipe_ingredient_count = #RecipePrototype.load(lua_recipe, "recipe").getIngredients(lua_entity)
             local factory_ingredient_count = EntityPrototype.load(lua_entity).getIngredientCount()
             Logging:debug(Player.classname, "crafting", recipe_ingredient_count, factory_ingredient_count)
             if factory_ingredient_count >= recipe_ingredient_count then

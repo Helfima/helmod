@@ -28,7 +28,7 @@ function RecipePrototype.load(object, object_type)
     lua_type = object_type
   elseif object.name ~= nil then
     object_name = object.name
-    lua_type = object.type
+    lua_type = object_type or object.type
   end
   Logging:debug(RecipePrototype.classname, "object_name", object_name, "lua_type", lua_type)
   if lua_type == nil or lua_type == "recipe" then
