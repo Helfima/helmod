@@ -573,7 +573,10 @@ end
 function Player.getProductionsCrafting(category, lua_recipe)
   Logging:debug(Player.classname, "getProductionsCrafting(category)", category, lua_recipe)
   local productions = {}
-  if lua_recipe.name ~= nil and lua_recipe.name == "water" then
+  
+  if category == "crafting-handonly" then
+    productions["player"] = game.entity_prototypes["player"]
+  elseif lua_recipe.name ~= nil and lua_recipe.name == "water" then
     for key, lua_entity in pairs(game.entity_prototypes) do
       if lua_entity.type ~= nil and lua_entity.name ~= nil and lua_entity.name ~= "player" then
         if lua_entity.type == EntityType.offshore_pump then
@@ -592,7 +595,7 @@ function Player.getProductionsCrafting(category, lua_recipe)
   else
     for key, lua_entity in pairs(game.entity_prototypes) do
       if lua_entity.type ~= nil and lua_entity.type ~= "offshore-pump" and lua_entity.name ~= nil and lua_entity.name ~= "player" then
-        Logging:trace(Player.classname, "getProductionsCrafting(category):item", lua_entity.name, lua_entity.type, lua_entity.group.name, lua_entity.subgroup.name, lua_entity.crafting_categories)
+        Logging:debug(Player.classname, "getProductionsCrafting(category):item", lua_entity.name, lua_entity.type, lua_entity.group.name, lua_entity.subgroup.name, lua_entity.crafting_categories)
         local check = false
         if category ~= nil and category ~= "extraction-machine" and category ~= "energy" and category ~= "technology" then
           -- standard recipe

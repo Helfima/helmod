@@ -89,7 +89,7 @@ function ProductionLineTab.methods:updateHeader(item, item2, item3)
     local inputTable = ElementGui.addGuiTable(outputScroll,"output-table",6)
     if model.products ~= nil then
       for r, element in pairs(model.products) do
-        ElementGui.addCellElement(inputTable, element, "HMIngredient=OPEN=ID="..element.name.."=", false, "tooltip.product", nil)
+        ElementGui.addCellElement(inputTable, element, self.parent:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.product", nil)
       end
     end
 
@@ -97,7 +97,7 @@ function ProductionLineTab.methods:updateHeader(item, item2, item3)
     local inputTable = ElementGui.addGuiTable(inputScroll,"input-table",6)
     if model.ingredients ~= nil then
       for r, element in pairs(model.ingredients) do
-        ElementGui.addCellElement(inputTable, element, "HMIngredient=OPEN=ID="..element.name.."=", false, "tooltip.ingredient", nil)
+        ElementGui.addCellElement(inputTable, element, self.parent:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.ingredient", nil)
       end
     end
 
@@ -226,16 +226,16 @@ function ProductionLineTab.methods:addTableRow(guiTable, block)
     for r, product in pairs(block.products) do
       if bit32.band(product.state, 1) > 0 then
         if not(unlinked) or block.by_factory == true then
-          ElementGui.addCellElement(tProducts, product, "HMProduct=OPEN=ID=", false, "tooltip.product", nil)
+          ElementGui.addCellElement(tProducts, product, self.parent:classname().."=product-selected=ID="..block.id.."="..product.name.."=", false, "tooltip.product", nil)
         else
-          ElementGui.addCellElement(tProducts, product, "HMProductEdition=OPEN=ID="..block.id.."=", true, "tooltip.edit-product", self.color_button_edit)
+          ElementGui.addCellElement(tProducts, product, self.parent:classname().."=product-edition=ID="..block.id.."="..product.name.."=", true, "tooltip.edit-product", self.color_button_edit)
         end
       end
       if bit32.band(product.state, 2) > 0 and bit32.band(product.state, 1) == 0 then
-        ElementGui.addCellElement(tProducts, product, "HMProduct=OPEN=ID=", true, "tooltip.rest-product", self.color_button_rest)
+        ElementGui.addCellElement(tProducts, product, self.parent:classname().."=product-selected=ID="..block.id.."="..product.name.."=", true, "tooltip.rest-product", self.color_button_rest)
       end
       if product.state == 0 then
-        ElementGui.addCellElement(tProducts, product, "HMProduct=OPEN=ID=", false, "tooltip.other-product", nil)
+        ElementGui.addCellElement(tProducts, product, self.parent:classname().."=product-selected=ID="..block.id.."="..product.name.."=", false, "tooltip.other-product", nil)
       end
     end
   end

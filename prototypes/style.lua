@@ -322,14 +322,14 @@ default_gui["helmod_button_icon"] = {
 --
 -- @field [parent=#Button] select_icon
 for _,style in pairs(style_list) do
-default_gui["helmod_button_select_icon"..style.suffix] = {
-  type = "button_style",
-  parent = "helmod_button_icon",
+  default_gui["helmod_button_select_icon"..style.suffix] = {
+    type = "button_style",
+    parent = "helmod_button_icon",
     default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
     hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
     clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
     disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true)
-}
+  }
 end
 
 -------------------------------------------------------------------------------
@@ -424,14 +424,14 @@ default_gui["helmod_button_icon_sm"] = {
 -- @field [parent=#Button] select_icon_sm
 
 for _,style in pairs(style_list) do
-default_gui["helmod_button_select_icon_sm"..style.suffix] = {
-  type = "button_style",
-  parent = "helmod_button_icon_sm",
+  default_gui["helmod_button_select_icon_sm"..style.suffix] = {
+    type = "button_style",
+    parent = "helmod_button_icon_sm",
     default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
     hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
     clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
     disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true)
-}
+  }
 end
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -618,11 +618,11 @@ end
 --
 -- @field [parent=#Label] row_right
 
-  default_gui["helmod_label_row_right"] = {
-    type = "label_style",
-    parent = "helmod_label_right",
-    top_padding = 15
-  }
+default_gui["helmod_label_row_right"] = {
+  type = "label_style",
+  parent = "helmod_label_right",
+  top_padding = 15
+}
 
 -------------------------------------------------------------------------------
 -- Style of default
@@ -642,15 +642,15 @@ end
 --
 -- @field [parent=#Label] row2_right
 
-  default_gui["helmod_label_row2_right"] = {
-    type = "label_style",
-    parent = "helmod_label_right",
-    font = "helmod_font_normal",
-    top_padding = 0,
-    right_padding = 1,
-    bottom_padding = 1,
-    left_padding = 0
-  }
+default_gui["helmod_label_row2_right"] = {
+  type = "label_style",
+  parent = "helmod_label_right",
+  font = "helmod_font_normal",
+  top_padding = 0,
+  right_padding = 1,
+  bottom_padding = 1,
+  left_padding = 0
+}
 
 -------------------------------------------------------------------------------
 -- Style of default
@@ -670,15 +670,15 @@ end
 --
 -- @field [parent=#Label] row2_right_sm
 
-  default_gui["helmod_label_row2_right_sm"] = {
-    type = "label_style",
-    parent = "helmod_label_right",
-    font = "helmod_font_small",
-    top_padding = 0,
-    right_padding = 1,
-    bottom_padding = 0,
-    left_padding = 0
-  }
+default_gui["helmod_label_row2_right_sm"] = {
+  type = "label_style",
+  parent = "helmod_label_right",
+  font = "helmod_font_small",
+  top_padding = 0,
+  right_padding = 1,
+  bottom_padding = 0,
+  left_padding = 0
+}
 
 -------------------------------------------------------------------------------
 -- Style of default
@@ -1023,14 +1023,14 @@ default_gui["helmod_frame_section"] = {
   type = "frame_style",
   parent = "helmod_frame_default",
   graphical_set =
-      {
-        type = "composition",
-        filename = "__helmod__/graphics/gui.png",
-        priority = "extra-high-no-scale",
-        load_in_minimal_mode = true,
-        corner_size = {3, 3},
-        position = {0, 0}
-      }
+  {
+    type = "composition",
+    filename = "__helmod__/graphics/gui.png",
+    priority = "extra-high-no-scale",
+    load_in_minimal_mode = true,
+    corner_size = {3, 3},
+    position = {0, 0}
+  }
 }
 
 -------------------------------------------------------------------------------
@@ -1043,14 +1043,14 @@ default_gui["helmod_frame_section2"] = {
   type = "frame_style",
   parent = "helmod_frame_default",
   graphical_set =
-      {
-        type = "composition",
-        filename = "__helmod__/graphics/gui.png",
-        priority = "extra-high-no-scale",
-        load_in_minimal_mode = true,
-        corner_size = {3, 3},
-        position = {0, 8}
-      }
+  {
+    type = "composition",
+    filename = "__helmod__/graphics/gui.png",
+    priority = "extra-high-no-scale",
+    load_in_minimal_mode = true,
+    corner_size = {3, 3},
+    position = {0, 8}
+  }
 }
 
 -------------------------------------------------------------------------------

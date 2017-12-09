@@ -393,6 +393,20 @@ function MainTab.methods:onEventAccessWrite(event, action, item, item2, item3)
     self:update(item, item2, item3)
   end
 
+  if action == "product-selected" then
+    if event.button == defines.mouse_button_type.right then
+      Controller.sendEvent(event, "HMRecipeSelector", "OPEN", item, item2, item3)
+    end
+  end
+
+  if action == "product-edition" then
+    if event.button == defines.mouse_button_type.right then
+      Controller.sendEvent(event, "HMRecipeSelector", "OPEN", item, item2, item3)
+    else
+      Controller.sendEvent(event, "HMProductEdition", "OPEN", item, item2, item3)
+    end
+  end
+
   if action == "production-block-unlink" then
     Model.unlinkProductionBlock(item)
     Model.update()
@@ -656,6 +670,8 @@ function MainTab.methods:updateHeaderPanel(item, item2, item3)
     if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 4) > 0) then
       if globalGui.currentTab == "HMProductionLineTab" then
         ElementGui.addGuiButton(tab_panel, self:classname().."=remove-model=ID=", model.id, "helmod_button_icon_delete_red", nil, ({"helmod_result-panel.remove-button-production-line"}))
+      end
+      if globalGui.currentTab == "HMProductionBlockTab" then
         ElementGui.addGuiButton(tab_panel, self:classname().."=production-block-remove=ID=", block_id, "helmod_button_icon_delete_red", nil, ({"helmod_result-panel.remove-button-production-block"}))
       end
     end

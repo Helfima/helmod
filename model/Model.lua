@@ -1241,16 +1241,11 @@ function Model.update()
       local _,recipe = next(block.recipes)
       if recipe ~= nil then
 
---        local lua_recipe = RecipePrototype.load(recipe).native()
---        if not(block.unlinked) and RecipePrototype.getProducts() ~= nil then
---          for _,product in pairs(RecipePrototype.getProducts()) do
---            if input[product.name] ~= nil then
---              -- block linked
---              if block.input == nil then block.input = {} end
---              block.input[product.name] = input[product.name]
---            end
---          end
---        end
+        Model.prepareBlock(block)
+        
+        -- state = 0 => produit
+        -- state = 1 => produit pilotant
+        -- state = 2 => produit restant
         -- prepare input
         if not(block.unlinked) and block.products ~= nil then
           for _,product in pairs(block.products) do
@@ -1567,14 +1562,15 @@ function Model.computeBlockTechnology(block, recipe)
     block.ingredients[ingredient.name].count = block.ingredients[ingredient.name].count + nextCount
   end
 end
+
 -------------------------------------------------------------------------------
--- Compute production block
+-- Prepare production block
 --
--- @function [parent=#Model] computeBlock
+-- @function [parent=#Model] prepareBlock
 --
--- @param #table element production block model
+-- @param #table block block of model
 --
-function Model.computeBlock(block)
+function Model.prepareBlock(block)
   Logging:debug(Model.classname, "computeBlock():", block.name)
   local model = Model.getModel()
 
@@ -1611,7 +1607,23 @@ function Model.computeBlock(block)
       -- initialise le recipe
       recipe.count = 0
     end
+  end
+ end
 
+
+-------------------------------------------------------------------------------
+-- Compute production block
+--
+-- @function [parent=#Model] computeBlock
+--
+-- @param #table block block of model
+--
+function Model.computeBlock(block)
+  Logging:debug(Model.classname, "computeBlock():", block.name)
+  local model = Model.getModel()
+
+  local recipes = block.recipes
+  if recipes ~= nil then
 
     -- calcul selon la factory
     if block.by_factory == true then
@@ -1636,6 +1648,17 @@ function Model.computeBlock(block)
         Logging:debug(Model.classname, "block.input",block.input)
       end
     end
+
+    if block.input ~= nil then
+    -- state = 0 => produit
+    -- state = 1 => produit pilotant
+    -- state = 2 => produit restant
+      for product_name,quantity in pairs(block.input) do
+        if block.products[product_name] == nil or not(bit32.band(block.products[product_name].state, 1)) then
+          block.input[product_name] = nil
+        end
+      end
+    end      
 
     if block.input ~= nil then
       local input_computed = {}

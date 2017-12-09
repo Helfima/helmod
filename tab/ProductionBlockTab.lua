@@ -105,16 +105,16 @@ function ProductionBlockTab.methods:updateHeader(item, item2, item3)
         end
         if bit32.band(lua_product.state, 1) > 0 then
           if not(unlinked) or element.by_factory == true then
-            ElementGui.addCellElement(outputTable, product, "HMProduct=OPEN=ID="..element.id.."=", false, "tooltip.product", nil)
+            ElementGui.addCellElement(outputTable, product, self.parent:classname().."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.product", nil)
           else
-            ElementGui.addCellElement(outputTable, product, "HMProductEdition=OPEN=ID="..element.id.."=", true, "tooltip.edit-product", self.color_button_edit)
+            ElementGui.addCellElement(outputTable, product, self.parent:classname().."=product-edition=ID="..element.id.."="..product.name.."=", true, "tooltip.edit-product", self.color_button_edit)
           end
         end
         if bit32.band(lua_product.state, 2) > 0 and bit32.band(lua_product.state, 1) == 0 then
-          ElementGui.addCellElement(outputTable, product, "HMProduct=OPEN=ID="..element.id.."=", true, "tooltip.rest-product", self.color_button_rest)
+          ElementGui.addCellElement(outputTable, product, self.parent:classname().."=product-selected=ID="..element.id.."="..product.name.."=", true, "tooltip.rest-product", self.color_button_rest)
         end
         if lua_product.state == 0 then
-          ElementGui.addCellElement(outputTable, product, "HMProduct=OPEN=ID="..element.id.."=", false, "tooltip.other-product", nil)
+          ElementGui.addCellElement(outputTable, product, self.parent:classname().."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.other-product", nil)
         end
       end
     end
@@ -129,7 +129,7 @@ function ProductionBlockTab.methods:updateHeader(item, item2, item3)
         if element.count > 1 then
           ingredient.limit_count = lua_product.count / element.count
         end
-        ElementGui.addCellElement(inputTable, ingredient, "HMIngredient=OPEN=ID="..element.id.."=", false, "tooltip.ingredient", nil)
+        ElementGui.addCellElement(inputTable, ingredient, self.parent:classname().."=product-selected=ID="..element.id.."="..ingredient.name.."=", false, "tooltip.ingredient", nil)
       end
     end
 
@@ -313,7 +313,7 @@ function ProductionBlockTab.methods:addTableRow(guiTable, block, recipe)
     if block.count > 1 then
       product.limit_count = product.count / block.count
     end
-    ElementGui.addCellElement(tProducts, product, "HMProduct=OPEN=ID="..block.id.."="..recipe.name.."=", false, "tooltip.product", nil)
+    ElementGui.addCellElement(tProducts, product, self.parent:classname().."=product-selected=ID="..block.id.."="..recipe.name.."=", false, "tooltip.product", nil)
   end
 
   -- ingredients

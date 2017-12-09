@@ -200,15 +200,29 @@ end
 --
 function AbstractSelector.methods:onOpen(event, action, item, item2, item3)
   Logging:debug(self:classname(), "onOpen():", action, item, item2, item3)
+  local player_gui = Player.getGlobalGui()
+  local close = true
+  filter_prototype_product = true
+
   local globalPlayer = Player.getGlobal()
   if item3 ~= nil then
     filter_prototype = item3:lower():gsub("[-]"," ")
   else
     filter_prototype = nil
   end
-  filter_prototype_product = true
+  if event ~= nil and event.button ~= nil and event.button == defines.mouse_button_type.right then
+    filter_prototype_product = false
+  end
+  if item ~= nil and item2 ~= nil then
+    Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
+    if player_gui.guiElementLast ~= item..item2 then
+      close = false
+    end
+    player_gui.guiElementLast = item..item2
+    Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
+  end
   -- close si nouvel appel
-  return true
+  return close
 end
 
 -------------------------------------------------------------------------------
@@ -321,7 +335,7 @@ end
 -- @param #string item3 third item name
 --
 function AbstractSelector.methods:onUpdate(item, item2, item3)
-  Logging:debug(self:classname(), "onUpdate():",item, item2, item3)
+  Logging:trace(self:classname(), "onUpdate():",item, item2, item3)
   -- recuperation recipes
   list_group, list_subgroup, list_prototype = self:updateGroups(item, item2, item3)
 
@@ -350,7 +364,7 @@ function AbstractSelector.methods:updateFilter(item, item2, item3)
       ElementGui.addGuiCheckbox(guiFilter, self:classname().."=change-boolean-settings=ID=filter_show_disable", filter_show_disable)
       ElementGui.addGuiLabel(guiFilter, "filter_show_disable", ({"helmod_recipe-edition-panel.filter-show-disable"}))
     end
-    
+
     if self.hidden_option then
       local filter_show_hidden = Player.getGlobalSettings("filter_show_hidden")
       ElementGui.addGuiCheckbox(guiFilter, self:classname().."=change-boolean-settings=ID=filter_show_hidden", filter_show_hidden)
@@ -360,13 +374,13 @@ function AbstractSelector.methods:updateFilter(item, item2, item3)
     if self.product_option then
       ElementGui.addGuiCheckbox(guiFilter, self:classname().."=recipe-filter-switch=ID=filter-product", filter_prototype_product)
       ElementGui.addGuiLabel(guiFilter, "filter-product", ({"helmod_recipe-edition-panel.filter-by-product"}))
-  
+
       ElementGui.addGuiCheckbox(guiFilter, self:classname().."=recipe-filter-switch=ID=filter-ingredient", not(filter_prototype_product))
       ElementGui.addGuiLabel(guiFilter, "filter-ingredient", ({"helmod_recipe-edition-panel.filter-by-ingredient"}))
     end
 
     ElementGui.addGuiLabel(guiFilter, "filter-value", ({"helmod_common.filter"}))
-    local cellFilter = ElementGui.addGuiFlowH(guiFilter,"text-filter")
+    local cellFilter = ElementGui.addGuiFlowH(guiFilter,"cell-filter")
     if Player.getSettings("filter_on_text_changed", true) then
       ElementGui.addGuiText(cellFilter, self:classname().."=recipe-filter=ID=filter-value", filter_prototype)
     else
@@ -379,6 +393,13 @@ function AbstractSelector.methods:updateFilter(item, item2, item3)
     if self.product_option then
       panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-product"].state = filter_prototype_product
       panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-ingredient"].state = not(filter_prototype_product)
+      if filter_prototype ~= nil then
+        if Player.getSettings("filter_on_text_changed", true) then
+          panel["filter"]["cell-filter"][self:classname().."=recipe-filter=ID=filter-value"].text = filter_prototype
+        else
+          panel["filter"]["cell-filter"]["filter-text"].text = filter_prototype
+        end
+      end
     end
   end
 
@@ -392,7 +413,7 @@ end
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
--- 
+--
 -- @return #table
 --
 function AbstractSelector.methods:getItemList(item, item2, item3)
@@ -443,7 +464,7 @@ end
 -- Get item list
 --
 -- @function [parent=#AbstractSelector] getItemList
--- 
+--
 -- @return #table
 --
 function AbstractSelector.methods:getItemList()
@@ -496,7 +517,7 @@ function AbstractSelector.methods:updateGroupSelector(item, item2, item3)
     panel["recipe-groups"].destroy()
   end
 
-  Logging:debug(self:classname(), "list_group:",list_group)
+  Logging:trace(self:classname(), "list_group:",list_group)
 
   -- ajouter de la table des groupes de recipe
   local gui_group_panel = ElementGui.addGuiTable(panel, "recipe-groups", 6, "helmod_table_recipe_selector")

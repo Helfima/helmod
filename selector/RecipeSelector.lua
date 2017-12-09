@@ -77,7 +77,7 @@ end
 -- @param #table list_prototype
 --
 function RecipeSelector.methods:appendGroups(name, type, list_group, list_subgroup, list_prototype)
-  Logging:debug(self:classname(), "appendGroups()", name, type)
+  Logging:trace(self:classname(), "appendGroups()", name, type)
   RecipePrototype.load(name, type)
   local find = self:checkFilter(RecipePrototype)
   local filter_show_disable = Player.getGlobalSettings("filter_show_disable")
@@ -109,7 +109,7 @@ end
 -- @return list_group, list_subgroup, list_prototype
 --
 function RecipeSelector.methods:updateGroups(item, item2, item3)
-  Logging:debug(self:classname(), "updateGroups():", item, item2, item3)
+  Logging:trace(self:classname(), "updateGroups():", item, item2, item3)
   local global_player = Player.getGlobal()
   local global_gui = Player.getGlobalGui()
   -- recuperation recipes
@@ -133,7 +133,7 @@ function RecipeSelector.methods:updateGroups(item, item2, item3)
   if list_prototype[global_player.recipeGroupSelected] == nil then
     global_player.recipeGroupSelected = firstGroup
   end
-  Logging:debug(self:classname(), "list_group", list_group, "list_subgroup", list_subgroup, "list_prototype", list_prototype)
+  Logging:trace(self:classname(), "list_group", list_group, "list_subgroup", list_subgroup, "list_prototype", list_prototype)
   return list_group, list_subgroup, list_prototype
 end
 
@@ -157,10 +157,16 @@ end
 -- @param #table prototype
 -- 
 function RecipeSelector.methods:buildPrototypeIcon(guiElement, prototype, tooltip)
-  Logging:debug(self:classname(), "buildPrototypeIcon(player, guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
+  Logging:trace(self:classname(), "buildPrototypeIcon(player, guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
   local recipe_prototype = RecipePrototype.load(prototype)
   local type = RecipePrototype.type()
   local prototype_name = RecipePrototype.native().name
   local prototype_localised_name = RecipePrototype.getLocalisedName()
-  ElementGui.addGuiButtonSelectSprite(guiElement, self:classname().."=element-select=ID="..type.."=", Player.getRecipeIconType(RecipePrototype.native()), prototype_name, prototype_localised_name, tooltip)
+  local color = nil
+  if RecipePrototype.getCategory() == "crafting-handonly" then
+    color = "yellow"
+  elseif RecipePrototype.getEnabled() == false then
+    color = "red"
+  end
+  ElementGui.addGuiButtonSelectSprite(guiElement, self:classname().."=element-select=ID="..type.."=", Player.getRecipeIconType(RecipePrototype.native()), prototype_name, prototype_localised_name, tooltip, color)
 end

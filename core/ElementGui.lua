@@ -798,7 +798,7 @@ end
 -------------------------------------------------------------------------------
 -- Add icon in cell element
 --
--- @function [parent=#AbstractTab] addCellIcon
+-- @function [parent=#ElementGui] addCellIcon
 --
 -- @param #LuaGuiElement parent container for element
 -- @param #table element production block
@@ -970,6 +970,15 @@ function ElementGui.getTooltipRecipe(prototype)
   table.insert(tooltip, RecipePrototype.getLocalisedName())
 
   -- insert __2__ value
+  if RecipePrototype.getCategory() == "crafting-handonly" then
+    table.insert(tooltip, {"tooltip.recipe-by-hand"})
+  elseif RecipePrototype.getEnabled() == false then
+    table.insert(tooltip, {"tooltip.recipe-unsearched"})
+  else
+    table.insert(tooltip, "")
+  end
+
+  -- insert __3__ value
   local lastTooltip = tooltip
   for _,element in pairs(RecipePrototype.getProducts()) do
     local product = Product.load(element)
@@ -983,7 +992,7 @@ function ElementGui.getTooltipRecipe(prototype)
   -- finalise la derniere valeur
   table.insert(lastTooltip, "")
 
-  -- insert __3__ value
+  -- insert __4__ value
   local lastTooltip = tooltip
   for _,element in pairs(RecipePrototype.getIngredients(prototype.factory)) do
     local product = Product.load(element)
