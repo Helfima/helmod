@@ -274,8 +274,14 @@ function Player.getStyleSizes()
     style_sizes.scroll_block_list = {}
     style_sizes.scroll_block_list.minimal_width = width - width_info - width_scroll
     style_sizes.scroll_block_list.maximal_width = width - width_info - width_scroll
-    style_sizes.scroll_block_list.minimal_height = height - height_block_header
-    style_sizes.scroll_block_list.maximal_height = height - height_block_header
+
+    if Player.getSettings("debug", true) ~= "none" then
+      style_sizes.scroll_block_list.minimal_height = height - height_block_header - 200
+      style_sizes.scroll_block_list.maximal_height = height - height_block_header - 200
+    else
+      style_sizes.scroll_block_list.minimal_height = height - height_block_header
+      style_sizes.scroll_block_list.maximal_height = height - height_block_header
+    end
 
 
   end
@@ -573,7 +579,7 @@ end
 function Player.getProductionsCrafting(category, lua_recipe)
   Logging:debug(Player.classname, "getProductionsCrafting(category)", category, lua_recipe)
   local productions = {}
-  
+
   if category == "crafting-handonly" then
     productions["player"] = game.entity_prototypes["player"]
   elseif lua_recipe.name ~= nil and lua_recipe.name == "water" then
@@ -741,7 +747,7 @@ end
 --
 function Player.getEntityPrototypes(types)
   if types == nil then
-  return game.entity_prototypes
+    return game.entity_prototypes
   else
     local entities = {}
     for _,entity in pairs(game.entity_prototypes) do

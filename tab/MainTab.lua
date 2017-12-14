@@ -80,6 +80,21 @@ function MainTab.methods:getModelPanel()
 end
 
 -------------------------------------------------------------------------------
+-- Get or create model panel
+--
+-- @function [parent=#MainTab] getDebugPanel
+--
+function MainTab.methods:getDebugPanel()
+  local dataPanel = self:getDataPanel()
+  if dataPanel["debug"] ~= nil and dataPanel["debug"].valid then
+    return dataPanel["debug"]
+  end
+  local panel = ElementGui.addGuiFrameH(dataPanel, "debug", "helmod_frame_data_menu", "Debug")
+  Player.setStyle(panel, "data", "minimal_width")
+  return panel
+end
+
+-------------------------------------------------------------------------------
 -- Get or create menu panel
 --
 -- @function [parent=#MainTab] getTabMenuPanel
@@ -550,8 +565,8 @@ end
 -- @param #string item3 third item name
 --
 function MainTab.methods:update(item, item2, item3)
-  Logging:debug("MainTab", "update():", item, item2, item3)
-  Logging:debug("MainTab", "update():global", global)
+  Logging:debug(self:classname(), "update():", item, item2, item3)
+  Logging:debug(self:classname(), "update():global", global)
   local globalGui = Player.getGlobalGui()
   local dataPanel = self:getDataPanel()
 
@@ -562,6 +577,11 @@ function MainTab.methods:update(item, item2, item3)
 
   if self.tabs[globalGui.currentTab] ~= nil then
     local tab = self.tabs[globalGui.currentTab]
+    Logging:debug(self:classname(), "debug_mode", Player.getSettings("debug"))
+    if Player.getSettings("debug", true) ~= "none" then
+      tab:updateDebugPanel()
+    end
+
     tab:beforeUpdate(item, item2, item3)
     tab:updateHeader(item, item2, item3)
     tab:updateData(item, item2, item3)

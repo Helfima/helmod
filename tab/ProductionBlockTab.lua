@@ -20,6 +20,55 @@ function ProductionBlockTab.methods:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
+-- Update debug panel
+--
+-- @function [parent=#ProductionBlockTab] updateDebugPanel
+--
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function ProductionBlockTab.methods:updateDebugPanel(item, item2, item3)
+  Logging:debug("ProductionBlockTab", "updateDebugPanel():", item, item2, item3)
+  local debug_panel = self.parent:getDebugPanel()
+  local model = Model.getModel()
+  local globalGui = Player.getGlobalGui()
+
+  local blockId = globalGui.currentBlock or "new"
+  local countRecipes = Model.countBlockRecipes(blockId)
+
+  if countRecipes > 0 then
+
+    local block = model.blocks[blockId]
+
+    local input_table = ElementGui.addGuiTable(debug_panel,"input-data", 2 , "helmod_table-odd")
+    self:addCellHeader(input_table, "title", "Input")
+    self:addCellHeader(input_table, "value", {"helmod_result-panel.col-header-value"})
+
+    if block.input ~= nil then
+      for input_name,value in pairs(block.input) do
+        ElementGui.addGuiLabel(input_table, input_name.."_title", input_name)
+        ElementGui.addGuiLabel(input_table, input_name.."_value", value)
+      end
+    end
+
+    local product_table = ElementGui.addGuiTable(debug_panel,"product-data", 3 , "helmod_table-odd")
+    self:addCellHeader(product_table, "title", "Product")
+    self:addCellHeader(product_table, "value", {"helmod_result-panel.col-header-value"})
+    self:addCellHeader(product_table, "state", {"helmod_result-panel.col-header-state"})
+
+
+    if block.products ~= nil then
+      for _,product in pairs(block.products) do
+        ElementGui.addGuiLabel(product_table, product.name.."_title", product.name)
+        ElementGui.addGuiLabel(product_table, product.name.."_value", product.count)
+        ElementGui.addGuiLabel(product_table, product.name.."_state", product.state)
+      end
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Update header
 --
 -- @function [parent=#ProductionBlockTab] updateHeader
@@ -104,7 +153,7 @@ function ProductionBlockTab.methods:updateHeader(item, item2, item3)
           product.limit_count = lua_product.count / element.count
         end
         if bit32.band(lua_product.state, 1) > 0 then
-          if not(unlinked) or element.by_factory == true then
+          if element.by_factory == true then
             ElementGui.addCellElement(outputTable, product, self.parent:classname().."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.product", nil)
           else
             ElementGui.addCellElement(outputTable, product, self.parent:classname().."=product-edition=ID="..element.id.."="..product.name.."=", true, "tooltip.edit-product", self.color_button_edit)

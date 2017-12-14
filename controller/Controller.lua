@@ -1,5 +1,6 @@
 require "core.MainPanel"
 require "dialog.Dialog"
+require "dialog.HelpPanel"
 require "dialog.PinPanel"
 require "dialog.StatusPanel"
 require "dialog.Settings"
@@ -54,6 +55,7 @@ function Controller.init()
   table.insert(controllers, main_panel)
   table.insert(controllers, MainTab:new(main_panel))
   table.insert(controllers, Settings:new(main_panel))
+  table.insert(controllers, HelpPanel:new(main_panel))
   table.insert(controllers, Download:new(main_panel))
   table.insert(controllers, EntitySelector:new(main_panel))
   table.insert(controllers, RecipeSelector:new(main_panel))

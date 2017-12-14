@@ -71,6 +71,7 @@ function MainPanel.methods:main()
     local actionPanel = ElementGui.addGuiFrameV(menuPanel, "settings", "helmod_frame_default")
     ElementGui.addGuiButton(actionPanel, self:classname().."=CLOSE", nil, "helmod_button_icon_close_red", nil, ({"helmod_button.close"}))
     ElementGui.addGuiButton(actionPanel, "HMSettings=OPEN", nil, "helmod_button_icon_menu", nil, ({"helmod_button.options"}))
+    ElementGui.addGuiButton(actionPanel, "HMHelpPanel=OPEN", nil, "helmod_button_icon_help", nil, ({"helmod_button.help"}))
     -- info
     local infoPanel = self:getInfoPanel()
     -- data

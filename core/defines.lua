@@ -4,7 +4,7 @@ helmod_icons = {}
 helmod_icons["unknown-assembling-machine"]="__helmod__/graphics/icons/unknown-assembling-machine.png"
 helmod_icons["default-assembling-machine"]="__helmod__/graphics/icons/unknown-assembling-machine.png"
 
-helmod_display_sizes = {"1920x1200","1920x1080","1680x1050","1680x900","1440x900","1360x768"}
+helmod_display_sizes = {"1920x1200","1920x1080","1680x1050","1680x900","1600x900","1440x900","1360x768"}
 
 helmod_display_cell_mod = {"default", "small-text", "small-icon", "by-kilo"}
 
@@ -89,7 +89,7 @@ helmod_settings_mod = {
     localised_name = {"helmod_settings.display-size"},
     localised_description = {"helmod_settings.display-size-desc"},
     default_value = "1680x1050",
-    allowed_values = {"1920x1200","1920x1080","1680x1050","1680x900","1440x900","1360x768"},
+    allowed_values = {"1920x1200","1920x1080","1680x1050","1680x900","1600x900","1440x900","1360x768"},
     order = "b0"
   },
   -- display size

@@ -533,7 +533,8 @@ default_gui["helmod_label_default"] = {
 default_gui["helmod_label_help"] = {
   type = "label_style",
   parent = "helmod_label_default",
-  maximal_width = 50
+  minimal_width = 400,
+  maximal_width = 400
 }
 
 -------------------------------------------------------------------------------

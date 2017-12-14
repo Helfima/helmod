@@ -1254,6 +1254,7 @@ function Model.update()
                 -- block linked
                 if block.input == nil then block.input = {} end
                 block.input[product.name] = input[product.name]
+                product.state = 0
               end
             end
           end
@@ -1776,7 +1777,7 @@ function Model.computeBlock(block)
     -- reduit les produits du block
     for _, product in pairs(block.products) do
       if block.ingredients[product.name] ~= nil then
-        product.state = product.state + 2
+        product.state = 2
       end
       if block.products[product.name].count < 0.01 and not(bit32.band(product.state, 1) > 0) then
         block.products[product.name] = nil

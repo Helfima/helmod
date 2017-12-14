@@ -182,6 +182,19 @@ function AbstractTab.methods:addCellLabel(guiTable, name, label, minimal_width)
 end
 
 -------------------------------------------------------------------------------
+-- Update debug panel
+--
+-- @function [parent=#AbstractTab] updateDebugPanel
+--
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function AbstractTab.methods:updateDebugPanel(item, item2, item3)
+  Logging:debug("AbstractTab", "updateDebugPanel():", item, item2, item3)
+end
+
+-------------------------------------------------------------------------------
 -- Update header
 --
 -- @function [parent=#AbstractTab] updateHeader

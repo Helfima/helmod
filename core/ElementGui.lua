@@ -27,6 +27,21 @@ function ElementGui.getInputNumber(element)
 end
 
 -------------------------------------------------------------------------------
+-- Add a sprite element
+--
+-- @function [parent=#ElementGui] addSprite
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #string sprite name of sprite
+--
+-- @return #LuaGuiElement the LuaGuiElement added
+--
+function ElementGui.addSprite(parent, sprite)
+  Logging:trace(ElementGui.classname, "addSprite", parent, key, caption, style, tooltip, single_line)
+  return parent.add({type = "sprite", sprite= sprite})
+end
+
+-------------------------------------------------------------------------------
 -- Add a label element
 --
 -- @function [parent=#ElementGui] addGuiLabel
