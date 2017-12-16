@@ -37,6 +37,7 @@ helmod_settings_mod = {
       "HMEnergyEdition",
       "HMEnergyTab",
       "HMEvent",
+      "HMHelpPanel",
       "HMMainOanel",
       "HMMainTab",
       "HMModel",

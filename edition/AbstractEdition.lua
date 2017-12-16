@@ -803,7 +803,7 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
       local options = {}
 
       if inputPanel["production"] ~= nil then
-        options["production"] = ElementGui.getInputNumber(inputPanel["production"])
+        options["production"] = (ElementGui.getInputNumber(inputPanel["production"]) or 100)/100
       end
 
       Model.updateObject(item, item2, options)

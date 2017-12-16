@@ -218,7 +218,7 @@ function Controller.parseEvent(event, type)
       end
     end
     -- button action
-    if type == nil and event.element ~= nil and event.element.valid then
+    if (type == nil or type == "dropdown") and event.element ~= nil and event.element.valid then
       local eventController = nil
       for _, controller in pairs(views) do
         Logging:trace(Controller.classname, "match:", event.element.name, controller:classname())

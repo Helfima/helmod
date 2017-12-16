@@ -263,6 +263,12 @@ function Player.getStyleSizes()
     style_sizes.scroll_recipe_selector.minimal_height = height - height_selector_header
     style_sizes.scroll_recipe_selector.maximal_height = height - height_selector_header
 
+    style_sizes.scroll_help = {}
+    style_sizes.scroll_help.minimal_width = width_info - width_scroll - 50
+    style_sizes.scroll_help.maximal_width = width_info - width_scroll - 50
+    style_sizes.scroll_help.minimal_height = height - 200
+    style_sizes.scroll_help.maximal_height = height - 200
+    
     -- input/output table
     style_sizes.scroll_block_element = {}
     style_sizes.scroll_block_element.minimal_width = width - width_info - width_block_info - width_scroll - 10

@@ -533,8 +533,58 @@ default_gui["helmod_label_default"] = {
 default_gui["helmod_label_help"] = {
   type = "label_style",
   parent = "helmod_label_default",
-  minimal_width = 400,
-  maximal_width = 400
+  minimal_width = 380,
+  maximal_width = 380
+}
+
+-------------------------------------------------------------------------------
+-- Style of text
+--
+-- @field [parent=#Label] help_number
+
+default_gui["helmod_label_help_number"] = {
+  type = "label_style",
+  parent = "helmod_label_default",
+  left_padding = 10,
+  align = "right",
+  minimal_width = 30
+}
+
+-------------------------------------------------------------------------------
+-- Style of text
+--
+-- @field [parent=#Label] help_text
+
+default_gui["helmod_label_help_text"] = {
+  type = "label_style",
+  parent = "helmod_label_default",
+  left_padding = 10,
+  minimal_width = 350,
+  maximal_width = 350,
+  vertical_align = "top"
+}
+
+
+-------------------------------------------------------------------------------
+-- Style of text
+--
+-- @field [parent=#Label] help_title
+
+default_gui["helmod_label_help_title"] = {
+  type = "label_style",
+  parent = "helmod_label_help",
+  font = "helmod_font_title_frame"
+}
+
+-------------------------------------------------------------------------------
+-- Style of text
+--
+-- @field [parent=#Label] help_normal
+
+default_gui["helmod_label_help_normal"] = {
+  type = "label_style",
+  parent = "helmod_label_help",
+  left_padding = 10
 }
 
 -------------------------------------------------------------------------------
@@ -812,7 +862,7 @@ default_gui["helmod_table_recipe_selector"] = {
 }
 
 -------------------------------------------------------------------------------
--- Style of recipe selector
+-- Style of recipe table
 --
 -- @field [parent=#Table] odd
 
@@ -833,6 +883,35 @@ default_gui["helmod_table-odd"] = {
     corner_size = {0, 0},
     position = {78, 18},
     opacity = 0.7
+  }
+}
+
+-------------------------------------------------------------------------------
+-- Style of help table
+--  
+--  header_row_graphical_set
+--  even_row_graphical_set
+--  odd_row_graphical_set
+--  
+-- @field [parent=#Table] help
+
+default_gui["helmod_table-help"] = {
+  type = "table_style",
+  -- default orange with alfa
+  hovered_row_color = {r=0.98, g=0.66, b=0.22, a=0.7},
+  cell_padding = 1,
+  horizontal_spacing = 3,
+  vertical_spacing = 2,
+  horizontal_padding = 1,
+  vertical_padding = 1,
+  odd_row_graphical_set =
+  {
+    type = "composition",
+    filename = "__core__/graphics/gui.png",
+    priority = "extra-high-no-scale",
+    corner_size = {0, 0},
+    position = {78, 18},
+    opacity = 0.4
   }
 }
 

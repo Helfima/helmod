@@ -32,50 +32,6 @@ function RecipeEdition.methods:getParentPanel()
 end
 
 -------------------------------------------------------------------------------
--- On open
---
--- @function [parent=#RecipeEdition] onOpen
---
--- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
--- @return #boolean if true the next call close dialog
---
-function RecipeEdition.methods:onOpen(event, action, item, item2, item3)
-  local model = Model.getModel()
-  local close = true
-  model.moduleListRefresh = false
-  if model.guiRecipeLast == nil or model.guiRecipeLast ~= item..item2 then
-    close = false
-    model.factoryGroupSelected = nil
-    model.beaconGroupSelected = nil
-    model.moduleListRefresh = true
-  end
-  model.guiRecipeLast = item..item2
-  return close
-end
-
--------------------------------------------------------------------------------
--- On close dialog
---
--- @function [parent=#RecipeEdition] onClose
---
--- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function RecipeEdition.methods:onClose(event, action, item, item2, item3)
-  local model = Model.getModel()
-  model.guiRecipeLast = nil
-  model.moduleListRefresh = false
-end
-
--------------------------------------------------------------------------------
 -- Get or create recipe panel
 --
 -- @function [parent=#RecipeEdition] getRecipePanel
@@ -232,8 +188,8 @@ function RecipeEdition.methods:updateObjectInfo(item, item2, item3)
       ElementGui.addGuiLabel(tablePanel, "label-energy", ({"helmod_common.energy"}))
       ElementGui.addGuiLabel(tablePanel, "energy", RecipePrototype.getEnergy())
 
-      ElementGui.addGuiLabel(tablePanel, "label-production", ({"helmod_common.production"}))
-      ElementGui.addGuiText(tablePanel, "production", recipe.production, "helmod_textfield")
+      ElementGui.addGuiLabel(tablePanel, "label-production", ({"helmod_recipe-edition-panel.production"}))
+      ElementGui.addGuiText(tablePanel, "production", (recipe.production or 1)*100, "helmod_textfield")
 
       ElementGui.addGuiButton(tablePanel, self:classname().."=object-update=ID="..item.."=", recipe.id, "helmod_button_default", ({"helmod_button.update"}))
     end
