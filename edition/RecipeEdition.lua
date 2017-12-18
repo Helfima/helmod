@@ -40,10 +40,10 @@ end
 --
 function RecipeEdition.methods:getRecipePanel()
   local panel = self:getPanel()
-  if panel["recipe"] ~= nil and panel["recipe"].valid then
-    return panel["recipe"]
+  if panel["recipe_panel"] ~= nil and panel["recipe_panel"].valid then
+    return panel["recipe_panel"]
   end
-  return ElementGui.addGuiFlowH(panel, "recipe", "helmod_flow_resize_row_width")
+  return ElementGui.addGuiTable(panel, "recipe_panel", 2, helmod_table_style.panel)
 end
 
 -------------------------------------------------------------------------------
@@ -70,10 +70,10 @@ end
 --
 function RecipeEdition.methods:getOtherInfoPanel()
   local panel = self:getRecipePanel()
-  if panel["other-info"] ~= nil and panel["other-info"].valid then
-    return panel["other-info"]
+  if panel["other_info_panel"] ~= nil and panel["other_info_panel"].valid then
+    return panel["other_info_panel"]
   end
-  return ElementGui.addGuiFlowV(panel, "other-info", "helmod_flow_resize_row_width")
+  return ElementGui.addGuiTable(panel, "other_info_panel", 1, helmod_table_style.panel)
 end
 
 -------------------------------------------------------------------------------

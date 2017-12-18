@@ -1,4 +1,24 @@
-helmod_defines = {}
+
+helmod_flow_style = {
+  horizontal = "helmod_flow_horizontal",
+  vertical = "helmod_flow_vertical"
+}
+
+helmod_frame_style = {
+  default = "helmod_frame_default",
+  hidden = "helmod_frame_hidden",
+  panel = "helmod_frame_default",
+  cell = "helmod_frame_hidden",
+  scroll_pane = "scroll_pane",
+  scroll_recipe_selector = "helmod_scroll_recipe_selector",
+  recipe_column = "helmod_frame_recipe_info"
+}
+
+helmod_table_style = {
+  default = "helmod_table_default",
+  panel = "helmod_table_panel",
+  list = "helmod_table_list"
+}
 
 helmod_icons = {}
 helmod_icons["unknown-assembling-machine"]="__helmod__/graphics/icons/unknown-assembling-machine.png"

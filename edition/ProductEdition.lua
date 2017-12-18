@@ -82,19 +82,6 @@ function ProductEdition.methods:getInfoPanel()
 end
 
 -------------------------------------------------------------------------------
--- Get or create buttons panel
---
--- @function [parent=#ProductEdition] getButtonsPanel
---
-function ProductEdition.methods:getButtonsPanel()
-  local panel = self:getPanel()
-  if panel["buttons"] ~= nil and panel["buttons"].valid then
-    return panel["buttons"]
-  end
-  return ElementGui.addGuiFlowH(panel, "buttons")
-end
-
--------------------------------------------------------------------------------
 -- After open
 --
 -- @function [parent=#ProductEdition] after_open

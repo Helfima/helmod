@@ -35,7 +35,7 @@ function StatisticTab.methods:updateData()
   Player.setStyle(elementsPanel, "data_section", "minimal_width")
   Player.setStyle(elementsPanel, "data_section", "maximal_width")
 
-  local column = 2*10
+  local column = 2*8
 
   local resultTable = ElementGui.addGuiTable(elementsPanel,"list-data",column, "helmod_table-odd")
   --self:addProductionBlockHeader(resultTable)

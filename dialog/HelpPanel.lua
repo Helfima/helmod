@@ -186,7 +186,7 @@ function HelpPanel.methods:getHeaderPanel()
   if panel["header-panel"] ~= nil and panel["header-panel"].valid then
     return panel["header-panel"]
   end
-  return ElementGui.addGuiFrameV(panel, "header-panel", "helmod_frame_resize_row_width", {"helmod_settings-panel.about-section"})
+  return ElementGui.addGuiFrameV(panel, "header-panel", helmod_frame_style.panel, {"helmod_settings-panel.about-section"})
 end
 
 -------------------------------------------------------------------------------
@@ -199,7 +199,7 @@ function HelpPanel.methods:getMenuPanel()
   if panel["menu-panel"] ~= nil and panel["menu-panel"].valid then
     return panel["menu-panel"]
   end
-  return ElementGui.addGuiFrameH(panel, "menu-panel", "helmod_frame_resize_row_width")
+  return ElementGui.addGuiFrameH(panel, "menu-panel", helmod_frame_style.panel)
 end
 
 -------------------------------------------------------------------------------
@@ -212,7 +212,7 @@ function HelpPanel.methods:getContentPanel()
   if panel["content-panel"] ~= nil and panel["content-panel"].valid then
     return panel["content-panel"]
   end
-  return ElementGui.addGuiFrameV(panel, "content-panel", "helmod_frame_resize_row_width")
+  return ElementGui.addGuiFrameV(panel, "content-panel", helmod_frame_style.panel)
 end
 
 -------------------------------------------------------------------------------
@@ -227,7 +227,7 @@ function HelpPanel.methods:getContentScrollPanel(caption)
   if content_panel["scroll-content"] ~= nil and content_panel["scroll-content"].valid then
     return content_panel["scroll-content"]
   end
-  local scroll_panel = ElementGui.addGuiScrollPane(content_panel, "scroll-content", "scroll_pane_style", "auto", "auto")
+  local scroll_panel = ElementGui.addGuiScrollPane(content_panel, "scroll-content", helmod_frame_style.scroll_pane)
   Player.setStyle(scroll_panel, "scroll_help", "minimal_width")
   Player.setStyle(scroll_panel, "scroll_help", "maximal_width")
   Player.setStyle(scroll_panel, "scroll_help", "minimal_height")

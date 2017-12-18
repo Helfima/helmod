@@ -231,62 +231,64 @@ function Player.getStyleSizes()
   Logging:trace(Player.classname, "getStyleSizes(player):display_size", display_size)
   local style_sizes = {}
   if display_size ~= nil then
-    local width_info=490
+    local width_dialog=470
     local width_scroll=8
     local width_block_info=290
     local width_recipe_column=220
     local height_block_header = 450
-    local height_selector_header = 350
-    local height_row_element = 72
+    local height_selector_header = 230
+    local height_row_element = 80
 
     local string_width = string.match(display_size,"([0-9]*)x[0-9]*",1)
     local string_height = string.match(display_size,"[0-9]*x([0-9]*)",1)
     Logging:trace(Player.classname, "getStyleSizes(player):parse", string_width, string_height)
-    local width = math.ceil(1920*0.85)
-    local height = math.ceil(1680*0.85)
-    if string_width ~= nil then width = math.ceil(tonumber(string_width)*0.85) end
-    if string_height ~= nil then height = math.ceil(tonumber(string_height)*0.85) end
+    local ratio = 0.75
+    local width_main = math.ceil(1920*ratio)
+    local height_main = math.ceil(1680*ratio)
+    if string_width ~= nil then width_main = math.ceil(tonumber(string_width)*ratio) end
+    if string_height ~= nil then height_main = math.ceil(tonumber(string_height)*ratio) end
 
     style_sizes.main = {}
-    style_sizes.main.minimal_width = width
-    style_sizes.main.minimal_height = height
+    style_sizes.main.width = width_main
+    style_sizes.main.height = height_main
 
+    style_sizes.dialog = {}
+    style_sizes.dialog.width = width_dialog
+    
     style_sizes.data = {}
-    style_sizes.data.minimal_width = width - width_info
-    style_sizes.data.maximal_width = width - width_info
+    style_sizes.data.width = width_main - width_dialog
+
+    style_sizes.power = {}
+    style_sizes.power.height = 200
 
     style_sizes.data_section = {}
-    style_sizes.data_section.minimal_width = width - width_info - 4*width_scroll
-    style_sizes.data_section.maximal_width = width - width_info - 4*width_scroll
+    style_sizes.data_section.minimal_width = width_main - width_dialog - 4*width_scroll
+    style_sizes.data_section.maximal_width = width_main - width_dialog - 4*width_scroll
 
-    style_sizes.scroll_recipe_selector = {}
-    style_sizes.scroll_recipe_selector.minimal_height = height - height_selector_header
-    style_sizes.scroll_recipe_selector.maximal_height = height - height_selector_header
+    style_sizes.recipe_selector = {}
+    style_sizes.recipe_selector.height = height_main - height_selector_header
 
     style_sizes.scroll_help = {}
-    style_sizes.scroll_help.minimal_width = width_info - width_scroll - 50
-    style_sizes.scroll_help.maximal_width = width_info - width_scroll - 50
-    style_sizes.scroll_help.minimal_height = height - 200
-    style_sizes.scroll_help.maximal_height = height - 200
+    style_sizes.scroll_help.minimal_width = width_dialog - width_scroll - 50
+    style_sizes.scroll_help.maximal_width = width_dialog - width_scroll - 50
+    style_sizes.scroll_help.minimal_height = height_main - 200
+    style_sizes.scroll_help.maximal_height = height_main - 200
     
     -- input/output table
     style_sizes.scroll_block_element = {}
-    style_sizes.scroll_block_element.minimal_width = width - width_info - width_block_info - width_scroll - 10
-    style_sizes.scroll_block_element.maximal_width = width - width_info - width_block_info - width_scroll - 10
-    style_sizes.scroll_block_element.minimal_height = height_row_element
-    style_sizes.scroll_block_element.maximal_height = height_row_element
+    style_sizes.scroll_block_element.height = height_row_element
 
     -- recipe table
     style_sizes.scroll_block_list = {}
-    style_sizes.scroll_block_list.minimal_width = width - width_info - width_scroll
-    style_sizes.scroll_block_list.maximal_width = width - width_info - width_scroll
+    style_sizes.scroll_block_list.minimal_width = width_main - width_dialog - width_scroll
+    style_sizes.scroll_block_list.maximal_width = width_main - width_dialog - width_scroll
 
     if Player.getSettings("debug", true) ~= "none" then
-      style_sizes.scroll_block_list.minimal_height = height - height_block_header - 200
-      style_sizes.scroll_block_list.maximal_height = height - height_block_header - 200
+      style_sizes.scroll_block_list.minimal_height = height_main - height_block_header - 200
+      style_sizes.scroll_block_list.maximal_height = height_main - height_block_header - 200
     else
-      style_sizes.scroll_block_list.minimal_height = height - height_block_header
-      style_sizes.scroll_block_list.maximal_height = height - height_block_header
+      style_sizes.scroll_block_list.minimal_height = height_main - height_block_header
+      style_sizes.scroll_block_list.maximal_height = height_main - height_block_header
     end
 
 

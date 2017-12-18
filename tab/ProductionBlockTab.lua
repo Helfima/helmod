@@ -89,28 +89,23 @@ function ProductionBlockTab.methods:updateHeader(item, item2, item3)
 
   local countRecipes = Model.countBlockRecipes(blockId)
 
-  local infoPanel = self.parent:getInfoPanel()
+  local info_panel = self.parent:getInfoPanel()
   -- info panel
-  local blockPanel = ElementGui.addGuiFrameV(infoPanel, "block", "helmod_frame_default", ({"helmod_result-panel.tab-title-production-block"}))
-  local blockScroll = ElementGui.addGuiScrollPane(blockPanel, "output-scroll", "helmod_scroll_block_info", "auto", "auto")
-  local blockTable = ElementGui.addGuiTable(blockScroll,"output-table",2)
+  local block_panel = ElementGui.addGuiFrameV(info_panel, "block", helmod_frame_style.panel, ({"helmod_result-panel.tab-title-production-block"}))
+  local block_scroll = ElementGui.addGuiScrollPane(block_panel, "output-scroll", helmod_frame_style.scroll_pane, true)
+  local block_table = ElementGui.addGuiTable(block_scroll,"output-table",2)
 
-  local elementPanel = ElementGui.addGuiFlowV(infoPanel, "elements", "helmod_flow_default")
+  local element_panel = ElementGui.addGuiTable(info_panel, "elements", 1, helmod_table_style.panel)
   -- ouput panel
-  local outputPanel = ElementGui.addGuiFrameV(elementPanel, "output", "helmod_frame_resize_row_width", ({"helmod_common.output"}))
-  local outputScroll = ElementGui.addGuiScrollPane(outputPanel, "output-scroll", "helmod_scroll_block_element", "auto", "auto")
-  Player.setStyle(outputScroll, "scroll_block_element", "minimal_width")
-  Player.setStyle(outputScroll, "scroll_block_element", "maximal_width")
-  Player.setStyle(outputScroll, "scroll_block_element", "minimal_height")
-  Player.setStyle(outputScroll, "scroll_block_element", "maximal_height")
+  local output_panel = ElementGui.addGuiFrameV(element_panel, "output", helmod_frame_style.panel, ({"helmod_common.output"}))
+  local output_scroll = ElementGui.addGuiScrollPane(output_panel, "output-scroll", helmod_frame_style.scroll_pane, true)
+  output_scroll.style.horizontally_stretchable = true
+  Player.setStyle(output_scroll, "scroll_block_element", "height")
 
   -- input panel
-  local inputPanel = ElementGui.addGuiFrameV(elementPanel, "input", "helmod_frame_resize_row_width", ({"helmod_common.input"}))
-  local inputScroll = ElementGui.addGuiScrollPane(inputPanel, "output-scroll", "helmod_scroll_block_element", "auto", "auto")
-  Player.setStyle(inputScroll, "scroll_block_element", "minimal_width")
-  Player.setStyle(inputScroll, "scroll_block_element", "maximal_width")
-  Player.setStyle(inputScroll, "scroll_block_element", "minimal_height")
-  Player.setStyle(inputScroll, "scroll_block_element", "maximal_height")
+  local input_panel = ElementGui.addGuiFrameV(element_panel, "input", helmod_frame_style.panel, ({"helmod_common.input"}))
+  local input_scroll = ElementGui.addGuiScrollPane(input_panel, "output-scroll", helmod_frame_style.scroll_pane, true)
+  Player.setStyle(input_scroll, "scroll_block_element", "height")
 
   -- production block result
   if countRecipes > 0 then
@@ -118,33 +113,33 @@ function ProductionBlockTab.methods:updateHeader(item, item2, item3)
     local element = model.blocks[blockId]
 
     -- block panel
-    ElementGui.addGuiLabel(blockTable, "label-power", ({"helmod_label.electrical-consumption"}))
-    ElementGui.addGuiLabel(blockTable, "power", Format.formatNumberKilo(element.power or 0, "W"),"helmod_label_right_70")
+    ElementGui.addGuiLabel(block_table, "label-power", ({"helmod_label.electrical-consumption"}))
+    ElementGui.addGuiLabel(block_table, "power", Format.formatNumberKilo(element.power or 0, "W"),"helmod_label_right_70")
 
-    ElementGui.addGuiLabel(blockTable, "label-count", ({"helmod_label.block-number"}))
-    ElementGui.addGuiLabel(blockTable, "count", Format.formatNumberFactory(element.count or 0),"helmod_label_right_70")
+    ElementGui.addGuiLabel(block_table, "label-count", ({"helmod_label.block-number"}))
+    ElementGui.addGuiLabel(block_table, "count", Format.formatNumberFactory(element.count or 0),"helmod_label_right_70")
 
-    ElementGui.addGuiLabel(blockTable, "label-sub-power", ({"helmod_label.sub-block-power"}))
-    ElementGui.addGuiLabel(blockTable, "sub-power", Format.formatNumberKilo(element.sub_power or 0),"helmod_label_right_70")
+    ElementGui.addGuiLabel(block_table, "label-sub-power", ({"helmod_label.sub-block-power"}))
+    ElementGui.addGuiLabel(block_table, "sub-power", Format.formatNumberKilo(element.sub_power or 0),"helmod_label_right_70")
 
-    ElementGui.addGuiLabel(blockTable, "options-linked", ({"helmod_label.block-unlinked"}))
+    ElementGui.addGuiLabel(block_table, "options-linked", ({"helmod_label.block-unlinked"}))
     local unlinked = element.unlinked and true or false
     if element.index == 0 then unlinked = true end
-    ElementGui.addGuiCheckbox(blockTable, self.parent:classname().."=change-boolean-option=ID=unlinked", unlinked)
+    ElementGui.addGuiCheckbox(block_table, self.parent:classname().."=change-boolean-option=ID=unlinked", unlinked)
 
-    ElementGui.addGuiLabel(blockTable, "options-by-factory", ({"helmod_label.compute-by-factory"}))
+    ElementGui.addGuiLabel(block_table, "options-by-factory", ({"helmod_label.compute-by-factory"}))
     local by_factory = element.by_factory and true or false
-    ElementGui.addGuiCheckbox(blockTable, self.parent:classname().."=change-boolean-option=ID=by_factory", by_factory)
+    ElementGui.addGuiCheckbox(block_table, self.parent:classname().."=change-boolean-option=ID=by_factory", by_factory)
 
     if element.by_factory == true then
       local factory_number = element.factory_number or 0
-      ElementGui.addGuiLabel(blockTable, "label-factory_number", ({"helmod_label.factory-number"}))
-      ElementGui.addGuiText(blockTable, "factory_number", factory_number, "helmod_textfield")
-      ElementGui.addGuiButton(blockTable, self.parent:classname().."=change-number-option=ID=", "factory_number", "helmod_button_default", ({"helmod_button.update"}))
+      ElementGui.addGuiLabel(block_table, "label-factory_number", ({"helmod_label.factory-number"}))
+      ElementGui.addGuiText(block_table, "factory_number", factory_number, "helmod_textfield")
+      ElementGui.addGuiButton(block_table, self.parent:classname().."=change-number-option=ID=", "factory_number", "helmod_button_default", ({"helmod_button.update"}))
     end
 
     -- ouput panel
-    local outputTable = ElementGui.addGuiTable(outputScroll,"output-table",6)
+    local output_table = ElementGui.addGuiTable(output_scroll,"output-table",6)
     if element.products ~= nil then
       for r, lua_product in pairs(element.products) do
         local product = Product.load(lua_product).new()
@@ -154,23 +149,23 @@ function ProductionBlockTab.methods:updateHeader(item, item2, item3)
         end
         if bit32.band(lua_product.state, 1) > 0 then
           if element.by_factory == true then
-            ElementGui.addCellElement(outputTable, product, self.parent:classname().."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.product", nil)
+            ElementGui.addCellElement(output_table, product, self.parent:classname().."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.product", nil)
           else
-            ElementGui.addCellElement(outputTable, product, self.parent:classname().."=product-edition=ID="..element.id.."="..product.name.."=", true, "tooltip.edit-product", self.color_button_edit)
+            ElementGui.addCellElement(output_table, product, self.parent:classname().."=product-edition=ID="..element.id.."="..product.name.."=", true, "tooltip.edit-product", self.color_button_edit)
           end
         end
         if bit32.band(lua_product.state, 2) > 0 and bit32.band(lua_product.state, 1) == 0 then
-          ElementGui.addCellElement(outputTable, product, self.parent:classname().."=product-selected=ID="..element.id.."="..product.name.."=", true, "tooltip.rest-product", self.color_button_rest)
+          ElementGui.addCellElement(output_table, product, self.parent:classname().."=product-selected=ID="..element.id.."="..product.name.."=", true, "tooltip.rest-product", self.color_button_rest)
         end
         if lua_product.state == 0 then
-          ElementGui.addCellElement(outputTable, product, self.parent:classname().."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.other-product", nil)
+          ElementGui.addCellElement(output_table, product, self.parent:classname().."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.other-product", nil)
         end
       end
     end
 
     -- input panel
 
-    local inputTable = ElementGui.addGuiTable(inputScroll,"input-table",6)
+    local input_table = ElementGui.addGuiTable(input_scroll,"input-table",6)
     if element.ingredients ~= nil then
       for r, lua_product in pairs(element.ingredients) do
         local ingredient = Product.load(lua_product).new()
@@ -178,7 +173,7 @@ function ProductionBlockTab.methods:updateHeader(item, item2, item3)
         if element.count > 1 then
           ingredient.limit_count = lua_product.count / element.count
         end
-        ElementGui.addCellElement(inputTable, ingredient, self.parent:classname().."=product-selected=ID="..element.id.."="..ingredient.name.."=", false, "tooltip.ingredient", nil)
+        ElementGui.addCellElement(input_table, ingredient, self.parent:classname().."=product-selected=ID="..element.id.."="..ingredient.name.."=", false, "tooltip.ingredient", nil)
       end
     end
 
@@ -267,113 +262,109 @@ end
 --
 -- @function [parent=#ProductionBlockTab] addTableRow
 --
--- @param #LuaGuiElement guiTable
--- @param #string blockId
--- @param #table element production recipe
+-- @param #LuaGuiElement gui_table
+-- @param #table block
+-- @param #table recipe production recipe
 --
-function ProductionBlockTab.methods:addTableRow(guiTable, block, recipe)
-  Logging:debug("ProductionBlockTab", "addTableRow():", guiTable, block, recipe)
+function ProductionBlockTab.methods:addTableRow(gui_table, block, recipe)
+  Logging:debug("ProductionBlockTab", "addTableRow():", gui_table, block, recipe)
   local lua_recipe = RecipePrototype.load(recipe).native()
   local display_cell_mod = Player.getSettings("display_cell_mod")
 
   -- col action
-  local guiAction = ElementGui.addGuiFlowH(guiTable,"action"..recipe.id, "helmod_flow_default")
-  ElementGui.addGuiButton(guiAction, self.parent:classname().."=production-recipe-remove=ID="..block.id.."=", recipe.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
-  ElementGui.addGuiButton(guiAction, self.parent:classname().."=production-recipe-down=ID="..block.id.."=", recipe.id, "helmod_button_default", ({"helmod_result-panel.row-button-down"}), ({"tooltip.down-element", Player.getSettings("row_move_step")}))
-  ElementGui.addGuiButton(guiAction, self.parent:classname().."=production-recipe-up=ID="..block.id.."=", recipe.id, "helmod_button_default", ({"helmod_result-panel.row-button-up"}), ({"tooltip.up-element", Player.getSettings("row_move_step")}))
+  local cell_action = ElementGui.addCell(gui_table, "action"..recipe.id, 3)
+  ElementGui.addGuiButton(cell_action, self.parent:classname().."=production-recipe-remove=ID="..block.id.."=", recipe.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
+  ElementGui.addGuiButton(cell_action, self.parent:classname().."=production-recipe-down=ID="..block.id.."=", recipe.id, "helmod_button_default", ({"helmod_result-panel.row-button-down"}), ({"tooltip.down-element", Player.getSettings("row_move_step")}))
+  ElementGui.addGuiButton(cell_action, self.parent:classname().."=production-recipe-up=ID="..block.id.."=", recipe.id, "helmod_button_default", ({"helmod_result-panel.row-button-up"}), ({"tooltip.up-element", Player.getSettings("row_move_step")}))
 
   -- col index
   if Player.getSettings("display_data_col_index", true) then
-    local guiIndex = ElementGui.addGuiFlowH(guiTable,"index"..recipe.id)
-    ElementGui.addGuiLabel(guiIndex, "index", recipe.index, "helmod_label_row_right_40")
+    ElementGui.addGuiLabel(gui_table, "value_index"..recipe.id, recipe.index, "helmod_label_row_right_40")
   end
   -- col id
   if Player.getSettings("display_data_col_id", true) then
-    local guiId = ElementGui.addGuiFlowH(guiTable,"id"..recipe.id)
-    ElementGui.addGuiLabel(guiId, "id", recipe.id)
+    ElementGui.addGuiLabel(gui_table, "value_id"..recipe.id, recipe.id)
   end
   -- col name
   if Player.getSettings("display_data_col_name", true) then
-    local guiName = ElementGui.addGuiFlowH(guiTable,"name"..recipe.id)
-    ElementGui.addGuiLabel(guiName, "name_", recipe.name)
+    ElementGui.addGuiLabel(gui_table, "value_name"..recipe.id, recipe.name)
   end
   -- col type
   if Player.getSettings("display_data_col_type", true) then
-    local guiName = ElementGui.addGuiFlowH(guiTable,"type"..recipe.id)
-    ElementGui.addGuiLabel(guiName, "type_", recipe.type)
+    ElementGui.addGuiLabel(gui_table, "value_type"..recipe.id, recipe.type)
   end
   -- col recipe
   local production = recipe.production or 1
-  local guiRecipe = self:addCellLabel(guiTable, "recipe-"..recipe.id, Format.formatPercent(production).."%", 35)
-  self:addIconRecipeCell(guiRecipe, recipe, "HMRecipeEdition=OPEN=ID="..block.id.."="..recipe.id.."=", true, "tooltip.edit-recipe", self.color_button_edit)
+  local cell_recipe = ElementGui.addCellLabel(gui_table, "recipe-"..recipe.id, Format.formatPercent(production).."%", 35)
+  self:addIconRecipeCell(cell_recipe, recipe, "HMRecipeEdition=OPEN=ID="..block.id.."="..recipe.id.."=", true, "tooltip.edit-recipe", self.color_button_edit)
 
   -- col energy
-  local guiEnergy = self:addCellLabel(guiTable, "energy-"..recipe.id, Format.formatNumberKilo(recipe.energy_total, "W"), 60)
+  local cell_nergy = ElementGui.addCellLabel(gui_table, "energy-"..recipe.id, Format.formatNumberKilo(recipe.energy_total, "W"), 60)
 
   -- col factory
   local factory = recipe.factory
-  local gui_cell_factory = ElementGui.addCell(guiTable, "factory-"..recipe.id)
+  local cell_factory = ElementGui.addCell(gui_table, "factory-"..recipe.id)
 
   if block.count > 1 then
-    ElementGui.addCellLabel2(gui_cell_factory, "factory-"..recipe.id, Format.formatNumberFactory(factory.limit_count), Format.formatNumberFactory(factory.count))
+    ElementGui.addCellLabel2(cell_factory, "factory-"..recipe.id, Format.formatNumberFactory(factory.limit_count), Format.formatNumberFactory(factory.count))
   else
-    ElementGui.addCellLabel(gui_cell_factory, "factory-"..recipe.id, Format.formatNumberFactory(factory.limit_count))
+    ElementGui.addCellLabel(cell_factory, "factory-"..recipe.id, Format.formatNumberFactory(factory.limit_count))
   end
-  ElementGui.addCellIcon(gui_cell_factory, factory, "HMRecipeEdition=OPEN=ID="..block.id.."="..recipe.id.."=", true, "tooltip.edit-recipe", self.color_button_edit)
+  ElementGui.addCellIcon(cell_factory, factory, "HMRecipeEdition=OPEN=ID="..block.id.."="..recipe.id.."=", true, "tooltip.edit-recipe", self.color_button_edit)
   local col_size = 2
   if display_cell_mod == "small-icon" then col_size = 5 end
-  local guiFactoryModule = ElementGui.addGuiTable(gui_cell_factory,"factory-modules"..recipe.name, col_size, "helmod_factory_modules")
+  local cell_factory_module = ElementGui.addGuiTable(cell_factory,"factory-modules"..recipe.name, col_size, "helmod_factory_modules")
   -- modules
   for name, count in pairs(factory.modules) do
     for index = 1, count, 1 do
-      ElementGui.addGuiButtonSpriteSm(guiFactoryModule, "HMFactorySelector_factory-module_"..name.."_"..index, "item", name, nil, ElementGui.getTooltipModule(name))
+      ElementGui.addGuiButtonSpriteSm(cell_factory_module, "HMFactorySelector_factory-module_"..name.."_"..index, "item", name, nil, ElementGui.getTooltipModule(name))
       index = index + 1
     end
   end
 
   -- col beacon
   local beacon = recipe.beacon
-  local gui_cell_beacon = ElementGui.addCell(guiTable, "beacon-"..recipe.id)
+  local cell_beacon = ElementGui.addCell(gui_table, "beacon-"..recipe.id)
 
   if block.count > 1 then
-    ElementGui.addCellLabel2(gui_cell_beacon, "beacon-"..recipe.id, Format.formatNumberFactory(beacon.limit_count), Format.formatNumberFactory(beacon.count))
+    ElementGui.addCellLabel2(cell_beacon, "beacon-"..recipe.id, Format.formatNumberFactory(beacon.limit_count), Format.formatNumberFactory(beacon.count))
   else
-    ElementGui.addCellLabel(gui_cell_beacon, "beacon-"..recipe.id, Format.formatNumberFactory(beacon.limit_count))
+    ElementGui.addCellLabel(cell_beacon, "beacon-"..recipe.id, Format.formatNumberFactory(beacon.limit_count))
   end
-  ElementGui.addCellIcon(gui_cell_beacon, beacon, "HMRecipeEdition=OPEN=ID="..block.id.."="..recipe.id.."=", true, "tooltip.edit-recipe", self.color_button_edit)
+  ElementGui.addCellIcon(cell_beacon, beacon, "HMRecipeEdition=OPEN=ID="..block.id.."="..recipe.id.."=", true, "tooltip.edit-recipe", self.color_button_edit)
 
   local col_size = 1
   if display_cell_mod == "small-icon" then col_size = 5 end
-  local guiBeaconModule = ElementGui.addGuiTable(gui_cell_beacon,"beacon-modules"..recipe.name, col_size, "helmod_beacon_modules")
+  local cell_beacon_module = ElementGui.addGuiTable(cell_beacon,"beacon-modules"..recipe.name, col_size, "helmod_beacon_modules")
   -- modules
   for name, count in pairs(beacon.modules) do
     for index = 1, count, 1 do
-      ElementGui.addGuiButtonSpriteSm(guiBeaconModule, "HMFactorySelector_beacon-module_"..name.."_"..index, "item", name, nil, ElementGui.getTooltipModule(name))
+      ElementGui.addGuiButtonSpriteSm(cell_beacon_module, "HMFactorySelector_beacon-module_"..name.."_"..index, "item", name, nil, ElementGui.getTooltipModule(name))
       index = index + 1
     end
   end
 
   -- products
   local display_product_cols = Player.getSettings("display_product_cols")
-  local tProducts = ElementGui.addGuiTable(guiTable,"products_"..recipe.id, display_product_cols)
+  local cell_products = ElementGui.addCell(gui_table,"products_"..recipe.id, display_product_cols)
   for r, lua_product in pairs(RecipePrototype.getProducts()) do
     local product = Product.load(lua_product).new()
     product.count = Product.countProduct(recipe)
     if block.count > 1 then
       product.limit_count = product.count / block.count
     end
-    ElementGui.addCellElement(tProducts, product, self.parent:classname().."=product-selected=ID="..block.id.."="..recipe.name.."=", false, "tooltip.product", nil)
+    ElementGui.addCellElement(cell_products, product, self.parent:classname().."=product-selected=ID="..block.id.."="..recipe.name.."=", false, "tooltip.product", nil)
   end
 
   -- ingredients
   local display_ingredient_cols = Player.getSettings("display_ingredient_cols")
-  local tIngredient = ElementGui.addGuiTable(guiTable,"ingredients_"..recipe.id, display_ingredient_cols)
+  local cell_ingredients = ElementGui.addCell(gui_table,"ingredients_"..recipe.id, display_ingredient_cols)
   for r, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
     local ingredient = Product.load(lua_ingredient).new()
     ingredient.count = Product.countIngredient(recipe)
     if block.count > 1 then
       ingredient.limit_count = ingredient.count / block.count
     end
-    ElementGui.addCellElement(tIngredient, ingredient, self.parent:classname().."=production-recipe-add=ID="..block.id.."="..recipe.name.."=", true, "tooltip.add-recipe", self.color_button_add)
+    ElementGui.addCellElement(cell_ingredients, ingredient, self.parent:classname().."=production-recipe-add=ID="..block.id.."="..recipe.name.."=", true, "tooltip.add-recipe", self.color_button_add)
   end
 end

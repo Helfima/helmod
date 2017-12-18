@@ -21,7 +21,10 @@ function Event.start()
   --Event.pcallEvent("on_tick", defines.events.on_tick, Event.onTick)
   Event.pcallEvent("on_gui_click", defines.events.on_gui_click, Event.onGuiClick)
   Event.pcallEvent("on_gui_text_changed", defines.events.on_gui_text_changed, Event.onGuiTextChanged)
+  -- dropdown changed
   Event.pcallEvent("on_gui_selection_state_changed", defines.events.on_gui_selection_state_changed, Event.onGuiSelectionStateChanged)
+  -- checked changed
+  Event.pcallEvent("on_gui_checked_state_changed", defines.events.on_gui_checked_state_changed, Event.onGuiCheckedStateChanged)
   Event.pcallEvent("on_player_created", defines.events.on_player_created, Event.onPlayerCreated)
   Event.pcallEvent("on_player_joined_game", defines.events.on_player_joined_game, Event.onPlayerJoinedGame)
   Event.pcallEvent("on_runtime_mod_setting_changed", defines.events.on_runtime_mod_setting_changed, Event.onRuntimeModSettingChanged)
@@ -188,6 +191,19 @@ function Event.onGuiSelectionStateChanged(event)
   Logging:trace(Event.classname, "onGuiSelectionStateChanged(event)", event)
   Player.load(event)
   Controller.parseEvent(event, "dropdown")
+end
+
+-------------------------------------------------------------------------------
+-- On checkbox event
+--
+-- @function [parent=#Event] onGuiCheckedStateChanged
+--
+-- @param event
+--
+function Event.onGuiCheckedStateChanged(event)
+  Logging:trace(Event.classname, "onGuiCheckedStateChanged(event)", event)
+  Player.load(event)
+  Controller.parseEvent(event, "checked")
 end
 
 -------------------------------------------------------------------------------

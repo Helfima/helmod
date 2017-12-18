@@ -580,6 +580,28 @@ function ElementGui.addGuiButtonSelectSpriteXxl(parent, action, type, key, capti
 end
 
 -------------------------------------------------------------------------------
+-- Add a flow container
+--
+-- @function [parent=#ElementGui] addGuiFlowH
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #string key unique id
+-- @param #string style style of frame
+--
+-- @return #LuaGuiElement the LuaGuiElement added
+--
+function ElementGui.addGuiFlow(parent, key, style)
+  Logging:trace(ElementGui.classname, "addGuiFlow()", key, style)
+  local options = {}
+  options.type = "flow"
+  options.name = key
+  if style ~= nil then
+    options.style = style
+  end
+  return parent.add(options)
+end
+
+-------------------------------------------------------------------------------
 -- Add a horizontal flow container
 --
 -- @function [parent=#ElementGui] addGuiFlowH
@@ -591,9 +613,10 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiFlowH(parent, key, style)
+  Logging:trace(ElementGui.classname, "addGuiFlowH()", key, style)
   local options = {}
   options.type = "flow"
-  options.direction = "horizontal"
+  --options.direction = "horizontal"
   options.name = key
   if style ~= nil then
     options.style = style
@@ -613,6 +636,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiFlowV(parent, key, style)
+  Logging:trace(ElementGui.classname, "addGuiFlowV()", key, style)
   local options = {}
   options.type = "flow"
   options.direction = "vertical"
@@ -631,26 +655,16 @@ end
 -- @param #LuaGuiElement parent container for element
 -- @param #string key unique id
 -- @param #string style style of frame
--- @param #string horizontal horizontal scroll policy
--- @param #string vertical vertical scroll policy
+-- @param #string horizontal can_scroll_horizontally
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.addGuiScrollPane(parent, key, style, horizontal, vertical)
+function ElementGui.addGuiScrollPane(parent, key, style, horizontal)
   local options = {}
   options.type = "scroll-pane"
-  options.horizontal_scroll_policy = "auto"
-  options.vertical_scroll_policy = "auto"
+  options.can_scroll_horizontally = horizontal or false
   options.name = key
-  if style ~= nil then
-    options.style = style
-  end
-  if horizontal ~= nil then
-    options.horizontal_scroll_policy = horizontal
-  end
-  if vertical ~= nil then
-    options.vertical_scroll_policy = vertical
-  end
+  options.style = style
   return parent.add(options)
 end
 
@@ -713,15 +727,15 @@ end
 --
 -- @param #LuaGuiElement parent container for element
 -- @param #string key unique id
--- @param #number colspan column number
+-- @param #number column_count column number
 -- @param #string style style of frame
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.addGuiTable(parent, key, colspan, style)
+function ElementGui.addGuiTable(parent, key, column_count, style)
   local options = {}
   options.type = "table"
-  options.colspan = colspan
+  options.column_count = column_count
   options.name = key
   if style ~= nil then
     options.style = style
@@ -736,10 +750,11 @@ end
 --
 -- @param #LuaGuiElement parent container for element
 -- @param #string name
+-- @param #number column_count
 --
-function ElementGui.addCell(parent, name)
+function ElementGui.addCell(parent, name, column_count)
   Logging:trace(ElementGui.classname, "addCell()", name)
-  local cell = ElementGui.addGuiFlowH(parent,"cell_"..name, "helmod_flow_cell")
+  local cell = ElementGui.addGuiTable(parent, "cell_"..name, column_count or 3, helmod_table_style.list)
   return cell
 end
 
@@ -756,7 +771,7 @@ end
 function ElementGui.addCellLabel(parent, name, label, minimal_width)
   Logging:trace(ElementGui.classname, "addCellLabel()", name, label, minimal_width)
   local display_cell_mod = Player.getSettings("display_cell_mod")
-  local cell = ElementGui.addGuiFlowV(parent,"cell_"..name, "helmod_flow_cell")
+  local cell = ElementGui.addCell(parent, "cell_"..name)
 
   if display_cell_mod == "small-text"then
     -- small
@@ -772,6 +787,7 @@ function ElementGui.addCellLabel(parent, name, label, minimal_width)
     ElementGui.addGuiLabel(cell, "label1_"..name, label, "helmod_label_row_right", {"helmod_common.total"}).style["minimal_width"] = minimal_width or 60
 
   end
+  return cell
 end
 
 -------------------------------------------------------------------------------
@@ -788,7 +804,7 @@ end
 function ElementGui.addCellLabel2(parent, name, label1, label2, minimal_width)
   Logging:trace(ElementGui.classname, "addCellLabel()", name, label1, label2, minimal_width)
   local display_cell_mod = Player.getSettings("display_cell_mod")
-  local cell = ElementGui.addGuiFlowV(parent,"cell_"..name, "helmod_flow_cell")
+  local cell = ElementGui.addCell(parent, "cell_"..name, 1)
 
   if display_cell_mod == "small-text"then
     -- small

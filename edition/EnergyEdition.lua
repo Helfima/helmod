@@ -39,7 +39,7 @@ function EnergyEdition.methods:getPowerPanel()
   if panel["power"] ~= nil and panel["power"].valid then
     return panel["power"]
   end
-  return ElementGui.addGuiFrameV(panel, "power", "helmod_frame_resize_row_width")
+  return ElementGui.addGuiFrameH(panel, "power", helmod_frame_style.panel)
 end
 
 -------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ function EnergyEdition.methods:getPrimaryPanel()
   if panel["Primary"] ~= nil and panel["Primary"].valid then
     return panel["Primary"]
   end
-  return ElementGui.addGuiFlowH(panel, "Primary", "helmod_flow_resize_row_width")
+  return ElementGui.addGuiTable(panel, "Primary", 2, helmod_table_style.panel)
 end
 
 -------------------------------------------------------------------------------
@@ -65,7 +65,9 @@ function EnergyEdition.methods:getPrimaryInfoPanel()
   if panel["info"] ~= nil and panel["info"].valid then
     return panel["info"]
   end
-  return ElementGui.addGuiFrameV(panel, "info", "helmod_frame_recipe_factory", ({"helmod_common.primary-generator"}))
+  local panel = ElementGui.addGuiFrameV(panel, "info", helmod_frame_style.recipe_column, ({"helmod_common.primary-generator"}))
+  Player.setStyle(panel, "power", "height")
+  return panel
 end
 
 -------------------------------------------------------------------------------
@@ -78,7 +80,7 @@ function EnergyEdition.methods:getPrimarySelectorPanel()
   if panel["selector"] ~= nil and panel["selector"].valid then
     return panel["selector"]
   end
-  return ElementGui.addGuiFrameV(panel, "selector", "helmod_frame_recipe_factory", ({"helmod_common.generator"}))
+  return ElementGui.addGuiFrameV(panel, "selector", helmod_frame_style.recipe_column, ({"helmod_common.generator"}))
 end
 
 -------------------------------------------------------------------------------
@@ -102,7 +104,7 @@ function EnergyEdition.methods:getSecondaryPanel()
   if panel["Secondary"] ~= nil and panel["Secondary"].valid then
     return panel["Secondary"]
   end
-  return ElementGui.addGuiFlowH(panel, "Secondary", "helmod_flow_resize_row_width")
+  return ElementGui.addGuiTable(panel, "Secondary", 2, helmod_table_style.panel)
 end
 
 -------------------------------------------------------------------------------
@@ -115,7 +117,9 @@ function EnergyEdition.methods:getSecondaryInfoPanel()
   if panel["info"] ~= nil and panel["info"].valid then
     return panel["info"]
   end
-  return ElementGui.addGuiFrameV(panel, "info", "helmod_frame_recipe_factory", ({"helmod_common.secondary-generator"}))
+  local panel = ElementGui.addGuiFrameV(panel, "info", helmod_frame_style.recipe_column, ({"helmod_common.secondary-generator"}))
+  Player.setStyle(panel, "power", "height")
+  return panel
 end
 
 -------------------------------------------------------------------------------
@@ -128,7 +132,7 @@ function EnergyEdition.methods:getSecondarySelectorPanel()
   if panel["selector"] ~= nil and panel["selector"].valid then
     return panel["selector"]
   end
-  return ElementGui.addGuiFrameV(panel, "selector", "helmod_frame_recipe_factory", ({"helmod_common.generator"}))
+  return ElementGui.addGuiFrameV(panel, "selector", helmod_frame_style.recipe_column, ({"helmod_common.generator"}))
 end
 
 -------------------------------------------------------------------------------
@@ -327,7 +331,7 @@ end
 --
 function EnergyEdition.methods:updatePowerInfo(item, item2, item3)
   Logging:debug(self:classname(), "updatePowerInfo():", item, item2, item3)
-  local infoPanel = self:getPowerPanel()
+  local power_panel = self:getPowerPanel()
   local model = Model.getModel()
   local default = Model.getDefault()
 
@@ -336,11 +340,11 @@ function EnergyEdition.methods:updatePowerInfo(item, item2, item3)
     local power = self:getObject(item, item2, item3)
     if power ~= nil then
       Logging:debug(self:classname(), "updatePowerInfo():power=",power)
-      for k,guiName in pairs(infoPanel.children_names) do
-        infoPanel[guiName].destroy()
+      for k,guiName in pairs(power_panel.children_names) do
+        power_panel[guiName].destroy()
       end
 
-      local tablePanel = ElementGui.addGuiTable(infoPanel,"table-input",2)
+      local tablePanel = ElementGui.addGuiTable(power_panel,"table-input",2)
 
       ElementGui.addGuiLabel(tablePanel, "label-power", ({"helmod_energy-edition-panel.power"}))
       ElementGui.addGuiText(tablePanel, "power", math.ceil(power.power/1000)/1000, "helmod_textfield")
@@ -436,7 +440,7 @@ function EnergyEdition.methods:updatePrimarySelector(item, item2, item3)
   if selectorPanel["scroll-primary"] ~= nil and selectorPanel["scroll-primary"].valid then
     selectorPanel["scroll-primary"].destroy()
   end
-  local scrollPanel = ElementGui.addGuiScrollPane(selectorPanel, "scroll-primary", "helmod_scroll_recipe_factories", "auto", "auto")
+  local scrollPanel = ElementGui.addGuiScrollPane(selectorPanel, "scroll-primary", helmod_frame_style.scroll_pane, true)
 
   local object = self:getObject(item, item2, item3)
 
@@ -572,7 +576,7 @@ function EnergyEdition.methods:updateSecondarySelector(item, item2, item3)
   if selectorPanel["scroll-secondary"] ~= nil and selectorPanel["scroll-secondary"].valid then
     selectorPanel["scroll-secondary"].destroy()
   end
-  local scrollPanel = ElementGui.addGuiScrollPane(selectorPanel, "scroll-secondary", "helmod_scroll_recipe_factories", "auto", "auto")
+  local scrollPanel = ElementGui.addGuiScrollPane(selectorPanel, "scroll-secondary", helmod_frame_style.scroll_pane, true)
 
   local object = self:getObject(item, item2, item3)
 

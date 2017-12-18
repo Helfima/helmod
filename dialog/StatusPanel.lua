@@ -79,7 +79,7 @@ function StatusPanel.methods:getInfoPanel()
     return panel["info-panel"]["scroll-panel"]
   end
   local mainPanel = ElementGui.addGuiFrameV(panel, "info-panel", "helmod_frame_resize_row_width")
-  return ElementGui.addGuiScrollPane(mainPanel, "scroll-panel", "helmod_scroll_block_pin_tab", "auto", "auto")
+  return ElementGui.addGuiScrollPane(mainPanel, "scroll-panel", "helmod_scroll_block_pin_tab")
 end
 
 -------------------------------------------------------------------------------

@@ -139,7 +139,7 @@ function AbstractSelector.methods:getFilterPanel()
   if panel["filter-panel"] ~= nil and panel["filter-panel"].valid then
     return panel["filter-panel"]
   end
-  return ElementGui.addGuiFrameV(panel, "filter-panel", "helmod_frame_resize_row_width", ({"helmod_common.filter"}))
+  return ElementGui.addGuiFrameV(panel, "filter-panel", helmod_frame_style.panel, ({"helmod_common.filter"}))
 end
 
 -------------------------------------------------------------------------------
@@ -149,14 +149,13 @@ end
 --
 function AbstractSelector.methods:getSrollPanel()
   local panel = self:getPanel()
-  if panel["main-panel"] ~= nil and panel["main-panel"].valid then
-    return panel["main-panel"]["scroll-panel"]
+  if panel["main_panel"] ~= nil and panel["main_panel"].valid then
+    return panel["main_panel"]["scroll_panel"]
   end
-  local mainPanel = ElementGui.addGuiFrameV(panel, "main-panel", "helmod_frame_resize_row_width")
-  local panel = ElementGui.addGuiScrollPane(mainPanel, "scroll-panel", "helmod_scroll_recipe_selector", "auto", "auto")
-  Player.setStyle(panel, "scroll_recipe_selector", "minimal_height")
-  Player.setStyle(panel, "scroll_recipe_selector", "maximal_height")
-  return panel
+  local main_panel = ElementGui.addGuiFrameV(panel, "main_panel", helmod_frame_style.panel)
+  Player.setStyle(main_panel, "recipe_selector", "height")
+  local scroll_panel = ElementGui.addGuiScrollPane(main_panel, "scroll_panel", helmod_frame_style.scroll_recipe_selector)
+  return scroll_panel
 end
 
 -------------------------------------------------------------------------------
@@ -165,11 +164,11 @@ end
 -- @function [parent=#AbstractSelector] getGroupsPanel
 --
 function AbstractSelector.methods:getGroupsPanel()
-  local panel = self:getSrollPanel()
-  if panel["groups-panel"] ~= nil and panel["groups-panel"].valid then
-    return panel["groups-panel"]
+  local scroll_panel = self:getSrollPanel()
+  if scroll_panel["groups_panel"] ~= nil and scroll_panel["groups_panel"].valid then
+    return scroll_panel["groups_panel"]
   end
-  return ElementGui.addGuiFlowV(panel, "groups-panel", "helmod_flow_resize_row_width")
+  return ElementGui.addGuiFrameV(scroll_panel, "groups_panel", helmod_frame_style.hidden)
 end
 
 -------------------------------------------------------------------------------
@@ -178,11 +177,11 @@ end
 -- @function [parent=#AbstractSelector] getItemListPanel
 --
 function AbstractSelector.methods:getItemListPanel()
-  local panel = self:getSrollPanel()
-  if panel["item-list-panel"] ~= nil and panel["item-list-panel"].valid then
-    return panel["item-list-panel"]
+  local scroll_panel = self:getSrollPanel()
+  if scroll_panel["item_list_panel"] ~= nil and scroll_panel["item_list_panel"].valid then
+    return scroll_panel["item_list_panel"]
   end
-  return ElementGui.addGuiFlowV(panel, "item-list-panel", "helmod_flow_resize_row_width")
+  return ElementGui.addGuiFrameV(scroll_panel, "item_list_panel", helmod_frame_style.hidden)
 end
 
 -------------------------------------------------------------------------------
@@ -380,7 +379,7 @@ function AbstractSelector.methods:updateFilter(item, item2, item3)
     end
 
     ElementGui.addGuiLabel(guiFilter, "filter-value", ({"helmod_common.filter"}))
-    local cellFilter = ElementGui.addGuiFlowH(guiFilter,"cell-filter")
+    local cellFilter = ElementGui.addGuiFrameH(guiFilter,"cell-filter", helmod_frame_style.hidden)
     if Player.getSettings("filter_on_text_changed", true) then
       ElementGui.addGuiText(cellFilter, self:classname().."=recipe-filter=ID=filter-value", filter_prototype)
     else
@@ -438,20 +437,19 @@ end
 --
 function AbstractSelector.methods:updateItemList(item, item2, item3)
   Logging:trace(self:classname(), "updateItemList():", item, item2, item3)
-  local panel = self:getItemListPanel()
+  local item_list_panel = self:getItemListPanel()
 
-  if panel["recipe-list"] ~= nil  and panel["recipe-list"].valid then
-    panel["recipe-list"].destroy()
+  if item_list_panel["recipe_list"] ~= nil  and item_list_panel["recipe_list"].valid then
+    item_list_panel["recipe_list"].destroy()
   end
 
   -- recuperation recipes et subgroupes
   local list = self:getItemList()
 
-  --local guiRecipeSelectorTable = ElementGui.addGuiTable(panel, "recipe-table", 10)
-  local guiRecipeSelectorList = ElementGui.addGuiFlowV(panel, "recipe-list", "helmod_flow_recipe_selector")
+  local recipe_selector_list = ElementGui.addGuiTable(item_list_panel, "recipe_list", 1, helmod_table_style.list)
   for subgroup, list in spairs(list,function(t,a,b) return list_subgroup[b]["order"] > list_subgroup[a]["order"] end) do
     -- boucle subgroup
-    local guiRecipeSubgroup = ElementGui.addGuiTable(guiRecipeSelectorList, "recipe-table-"..subgroup, 10, "helmod_table_recipe_selector")
+    local guiRecipeSubgroup = ElementGui.addGuiTable(recipe_selector_list, "recipe-table-"..subgroup, 10, "helmod_table_recipe_selector")
     for key, prototype in spairs(list,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
       local tooltip = self:buildPrototypeTooltip(prototype)
       self:buildPrototypeIcon(guiRecipeSubgroup, prototype, tooltip)

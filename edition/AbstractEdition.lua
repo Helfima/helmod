@@ -69,10 +69,10 @@ end
 --
 function AbstractEdition.methods:getFactoryPanel()
   local panel = self:getPanel()
-  if panel["factory"] ~= nil and panel["factory"].valid then
-    return panel["factory"]
+  if panel["factory_panel"] ~= nil and panel["factory_panel"].valid then
+    return panel["factory_panel"]
   end
-  return ElementGui.addGuiFlowH(panel, "factory", "helmod_flow_resize_row_width")
+  return ElementGui.addGuiTable(panel, "factory_panel", 2, helmod_table_style.panel)
 end
 
 -------------------------------------------------------------------------------
@@ -82,10 +82,10 @@ end
 --
 function AbstractEdition.methods:getFactoryOtherInfoPanel()
   local panel = self:getFactoryPanel()
-  if panel["other-info"] ~= nil and panel["other-info"].valid then
-    return panel["other-info"]
+  if panel["other_info_panel"] ~= nil and panel["other_info_panel"].valid then
+    return panel["other_info_panel"]
   end
-  return ElementGui.addGuiFlowV(panel, "other-info", "helmod_flow_default")
+  return ElementGui.addGuiTable(panel, "other_info_panel", 1, helmod_table_style.panel)
 end
 
 -------------------------------------------------------------------------------
@@ -98,7 +98,7 @@ function AbstractEdition.methods:getFactorySelectorPanel()
   if panel["selector"] ~= nil and panel["selector"].valid then
     return panel["selector"]
   end
-  return ElementGui.addGuiFrameV(panel, "selector", "helmod_frame_recipe_factory", ({"helmod_common.factory"}))
+  return ElementGui.addGuiFrameV(panel, "selector", helmod_frame_style.recipe_column, ({"helmod_common.factory"}))
 end
 
 -------------------------------------------------------------------------------
@@ -111,7 +111,7 @@ function AbstractEdition.methods:getFactoryInfoPanel()
   if panel["info"] ~= nil and panel["info"].valid then
     return panel["info"]
   end
-  return ElementGui.addGuiFrameV(panel, "info", "helmod_frame_recipe_factory", ({"helmod_common.factory"}))
+  return ElementGui.addGuiFrameV(panel, "info", helmod_frame_style.recipe_column, ({"helmod_common.factory"}))
 end
 
 -------------------------------------------------------------------------------
@@ -128,7 +128,7 @@ function AbstractEdition.methods:getFactoryModulesSelectorPanel()
 
   local scrollModulesPanel = selectionModulesPanel["scroll-modules"]
   if scrollModulesPanel == nil then
-    scrollModulesPanel = ElementGui.addGuiScrollPane(selectionModulesPanel, "scroll-modules", "helmod_scroll_recipe_module_list", "auto", "auto")
+    scrollModulesPanel = ElementGui.addGuiScrollPane(selectionModulesPanel, "scroll-modules", "helmod_scroll_recipe_module_list", true)
   end
   return scrollModulesPanel
 end
@@ -153,10 +153,10 @@ end
 --
 function AbstractEdition.methods:getBeaconPanel()
   local panel = self:getPanel()
-  if panel["beacon"] ~= nil and panel["beacon"].valid then
-    return panel["beacon"]
+  if panel["beacon_panel"] ~= nil and panel["beacon_panel"].valid then
+    return panel["beacon_panel"]
   end
-  return ElementGui.addGuiFlowH(panel, "beacon", "helmod_flow_resize_row_width")
+  return ElementGui.addGuiTable(panel, "beacon_panel", 2, helmod_table_style.panel)
 end
 
 -------------------------------------------------------------------------------
@@ -166,10 +166,10 @@ end
 --
 function AbstractEdition.methods:getBeaconOtherInfoPanel()
   local panel = self:getBeaconPanel()
-  if panel["selector"] ~= nil and panel["selector"].valid then
-    return panel["selector"]
+  if panel["other_info_panel"] ~= nil and panel["other_info_panel"].valid then
+    return panel["other_info_panel"]
   end
-  return ElementGui.addGuiFlowV(panel, "selector", "helmod_flow_default")
+  return ElementGui.addGuiTable(panel, "other_info_panel", 1, helmod_table_style.panel)
 end
 
 -------------------------------------------------------------------------------
@@ -179,10 +179,10 @@ end
 --
 function AbstractEdition.methods:getBeaconSelectorPanel()
   local panel = self:getBeaconOtherInfoPanel()
-  if panel["selector"] ~= nil and panel["selector"].valid then
-    return panel["selector"]
+  if panel["selector_panel"] ~= nil and panel["selector_panel"].valid then
+    return panel["selector_panel"]
   end
-  return ElementGui.addGuiFrameV(panel, "selector", "helmod_frame_recipe_factory", ({"helmod_common.beacon"}))
+  return ElementGui.addGuiFrameV(panel, "selector_panel", helmod_frame_style.recipe_column, ({"helmod_common.beacon"}))
 end
 
 -------------------------------------------------------------------------------
@@ -195,7 +195,7 @@ function AbstractEdition.methods:getBeaconInfoPanel()
   if panel["info"] ~= nil and panel["info"].valid then
     return panel["info"]
   end
-  return ElementGui.addGuiFrameV(panel, "info", "helmod_frame_recipe_factory", ({"helmod_common.beacon"}))
+  return ElementGui.addGuiFrameV(panel, "info", helmod_frame_style.recipe_column, ({"helmod_common.beacon"}))
 end
 
 -------------------------------------------------------------------------------
@@ -212,7 +212,7 @@ function AbstractEdition.methods:getBeaconModulesSelectorPanel()
 
   local scrollModulesPanel = selectionModulesPanel["scroll-modules"]
   if scrollModulesPanel == nil then
-    scrollModulesPanel = ElementGui.addGuiScrollPane(selectionModulesPanel, "scroll-modules", "helmod_scroll_recipe_module_list", "auto", "auto")
+    scrollModulesPanel = ElementGui.addGuiScrollPane(selectionModulesPanel, "scroll-modules", "helmod_scroll_recipe_module_list", true)
   end
   return scrollModulesPanel
 end
@@ -537,7 +537,7 @@ function AbstractEdition.methods:updateFactorySelector(item, item2, item3)
   if selectorPanel["scroll-factory"] ~= nil and selectorPanel["scroll-factory"].valid then
     selectorPanel["scroll-factory"].destroy()
   end
-  local scrollPanel = ElementGui.addGuiScrollPane(selectorPanel, "scroll-factory", "helmod_scroll_recipe_factories", "auto", "auto")
+  local scrollPanel = ElementGui.addGuiScrollPane(selectorPanel, "scroll-factory", "helmod_scroll_recipe_factories", true)
 
   local model = Model.getModel()
 
@@ -723,7 +723,7 @@ function AbstractEdition.methods:updateBeaconSelector(item, item2, item3)
   if selectorPanel["scroll-beacon"] ~= nil and selectorPanel["scroll-beacon"].valid then
     selectorPanel["scroll-beacon"].destroy()
   end
-  local scrollPanel = ElementGui.addGuiScrollPane(selectorPanel, "scroll-beacon", "helmod_scroll_recipe_factories", "auto", "auto")
+  local scrollPanel = ElementGui.addGuiScrollPane(selectorPanel, "scroll-beacon", "helmod_scroll_recipe_factories", true)
 
   local object = self:getObject(item, item2, item3)
 

@@ -86,6 +86,7 @@ function menuIconType(name, icon_row, icon_col, suffix, font, hovered_font_color
   default_gui[style_name] = {
     type = "button_style",
     parent = "helmod_button_default",
+    top_padding = 9,
     width = 32,
     height = 32,
     scalable = false,
@@ -129,7 +130,7 @@ end
 -- @field [parent=#Textfield] default
 default_gui["helmod_textfield"] = {
   type = "textfield_style",
-  parent = "textfield_style",
+  parent = "textfield",
   minimal_width = 70,
   maximal_width = 70
 }
@@ -146,7 +147,7 @@ default_gui["helmod_textfield"] = {
 -- @field [parent=#Textbox] default
 default_gui["helmod_textbox_default"] = {
   type = "textbox_style",
-  parent = "textbox_style",
+  parent = "textbox",
   minimal_width = 300,
   maximal_width = 300,
   minimal_height = 300,
@@ -518,7 +519,7 @@ default_gui["helmod_button_small_bold_end"] = {
 
 default_gui["helmod_label_default"] = {
   type = "label_style",
-  parent = "label_style",
+  parent = "label",
   top_padding = 2,
   right_padding = 2,
   bottom_padding = 2,
@@ -618,7 +619,7 @@ default_gui["helmod_label_title_frame"] = {
 
 default_gui["helmod_label_time"] = {
   type = "label_style",
-  parent = "label_style",
+  parent = "label",
   top_padding = 4,
   right_padding = 2,
   bottom_padding = 2,
@@ -807,10 +808,44 @@ default_gui["helmod_table_default"] = {
   type = "table_style",
   horizontal_spacing = 0,
   vertical_spacing = 0,
+  cell_spacing = 0,
   top_padding = 0,
   right_padding = 0,
   bottom_padding = 0,
   left_padding = 0
+}
+
+-------------------------------------------------------------------------------
+-- Style of panel
+--
+-- @field [parent=#Table] panel
+
+default_gui["helmod_table_panel"] = {
+  type = "table_style",
+  horizontal_spacing = 0,
+  vertical_spacing = 0,
+  top_padding = 0,
+  right_padding = 0,
+  bottom_padding = 0,
+  left_padding = 0,
+  vertical_align = "top"
+}
+
+-------------------------------------------------------------------------------
+-- Style of list
+--
+-- @field [parent=#Table] list
+
+default_gui["helmod_table_list"] = {
+  type = "table_style",
+  horizontal_spacing = 1,
+  vertical_spacing = 1,
+  cell_spacing = 1,
+  top_padding = 0,
+  right_padding = 0,
+  bottom_padding = 0,
+  left_padding = 0,
+  vertical_align = "top"
 }
 
 -------------------------------------------------------------------------------
@@ -842,7 +877,7 @@ default_gui["helmod_beacon_modules"] = {
 
 default_gui["helmod_table_recipe_modules"] = {
   type = "table_style",
-  parent = "table_style",
+  parent = "table",
   minimal_height = 36
 }
 
@@ -871,6 +906,7 @@ default_gui["helmod_table-odd"] = {
   -- default orange with alfa
   hovered_row_color = {r=0.98, g=0.66, b=0.22, a=0.7},
   cell_padding = 1,
+  vertical_align = "top",
   horizontal_spacing = 3,
   vertical_spacing = 2,
   horizontal_padding = 1,
@@ -888,11 +924,11 @@ default_gui["helmod_table-odd"] = {
 
 -------------------------------------------------------------------------------
 -- Style of help table
---  
+--
 --  header_row_graphical_set
 --  even_row_graphical_set
 --  odd_row_graphical_set
---  
+--
 -- @field [parent=#Table] help
 
 default_gui["helmod_table-help"] = {
@@ -960,101 +996,27 @@ local height_1050 = math.ceil(1050*0.85) -- 893
 
 default_gui["helmod_flow_default"] = {
   type = "flow_style",
-  parent = "flow_style",
   horizontal_spacing = 1,
   vertical_spacing = 1
 }
 
 -------------------------------------------------------------------------------
--- Style of default
+-- Style of horizontal
 --
--- @field [parent=#Flow] cell
+-- @field [parent=#Flow] horizontal
 
-default_gui["helmod_flow_cell"] = {
-  type = "flow_style",
-  parent = "helmod_flow_default",
-  horizontal_spacing = 0,
-  vertical_spacing = 0
+default_gui["helmod_flow_horizontal"] = {
+  type = "horizontal_flow_style",
+  horizontal_spacing = 0
 }
 
 -------------------------------------------------------------------------------
--- Style of left menu panel
+-- Style of vertical
 --
--- @field [parent=#Flow] left_menu
---
+-- @field [parent=#Flow] vertical
 
-default_gui["helmod_flow_left_menu"] = {
-  type = "flow_style",
-  parent = "helmod_flow_default",
-  minimal_width = 46,
-  maximal_width = 46,
-  maximal_height = height_1050
-}
-
--------------------------------------------------------------------------------
--- Style of data tab panel
---
--- @field [parent=#Flow] data_tab
-
-default_gui["helmod_flow_data_tab"] = {
-  type = "flow_style",
-  parent = "helmod_flow_default",
-  horizontal_spacing = 3,
-  minimal_width = width_1680 - width_info - 400
-}
-
--------------------------------------------------------------------------------
--- Style of full resize row panel
---
--- @field [parent=#Flow] full_resize_row
-
-default_gui["helmod_flow_full_resize_row"] = {
-  type = "flow_style",
-  parent = "helmod_flow_default",
-  resize_row_to_width = true,
-  resize_to_row_height = true
-}
-
--------------------------------------------------------------------------------
--- Style of resize row width panel
---
--- @field [parent=#Flow] resize_row_width
-
-default_gui["helmod_flow_resize_row_width"] = {
-  type = "flow_style",
-  parent = "helmod_flow_default",
-  resize_row_to_width = true
-}
-
--------------------------------------------------------------------------------
--- Style of info panel
---
--- @field [parent=#Flow] info
-
-default_gui["helmod_flow_info"] = {
-  type = "flow_style",
-  parent = "helmod_flow_resize_row_width"
-}
-
--------------------------------------------------------------------------------
--- Style of dialog panel
---
--- @field [parent=#Flow] dialog
-
-default_gui["helmod_flow_dialog"] = {
-  type = "flow_style",
-  parent = "helmod_flow_resize_row_width"
-}
-
--------------------------------------------------------------------------------
--- Style of recipe selector
---
--- @field [parent=#Flow] recipe_selector
-
-default_gui["helmod_flow_recipe_selector"] = {
-  type = "flow_style",
-  parent = "flow_style",
-  horizontal_spacing = 0,
+default_gui["helmod_flow_vertical"] = {
+  type = "vertical_flow_style",
   vertical_spacing = 0
 }
 
@@ -1065,19 +1027,18 @@ default_gui["helmod_flow_recipe_selector"] = {
 --
 
 -------------------------------------------------------------------------------
--- Style of default
+-- Style of hidden
 --
--- @field [parent=#Frame] default
+-- @field [parent=#Frame] hidden
 
-default_gui["helmod_frame_default"] = {
+default_gui["helmod_frame_hidden"] = {
   type = "frame_style",
-  parent = "frame_style",
-
+  font_color = {r=1, g=1, b=1},
   -- marge interieure
-  top_padding  = 2,
-  right_padding = 2,
-  bottom_padding = 2,
-  left_padding = 2,
+  top_padding  = 0,
+  right_padding = 0,
+  bottom_padding = 0,
+  left_padding = 0,
 
   -- padding title
   title_top_padding = 0,
@@ -1087,8 +1048,75 @@ default_gui["helmod_frame_default"] = {
 
   font = "helmod_font_title_frame",
 
+  
   flow_style = {
+    type = "flow_style",
     horizontal_spacing = 0,
+    vertical_spacing = 0
+  },
+  horizontal_flow_style =
+  {
+    type = "horizontal_flow_style",
+    horizontal_spacing = 0,
+  },
+
+  vertical_flow_style =
+  {
+    type = "vertical_flow_style",
+    vertical_spacing = 0
+  },
+  graphical_set =
+  {
+    type = "composition",
+    filename = "__helmod__/graphics/gui.png",
+    priority = "extra-high-no-scale",
+    load_in_minimal_mode = true,
+    corner_size = {0, 0},
+    position = {0, 0}
+  }
+}
+-------------------------------------------------------------------------------
+-- Style of default
+--
+-- @field [parent=#Frame] default
+
+default_gui["helmod_frame_default"] = {
+  type = "frame_style",
+  font = "helmod_font_title_frame",
+  font_color = {r=1, g=1, b=1},
+  -- marge interieure
+  top_padding  = 0,
+  right_padding = 0,
+  bottom_padding = 0,
+  left_padding = 0,
+
+  -- padding title
+  title_top_padding = 0,
+  title_left_padding = 0,
+  title_bottom_padding = 4,
+  title_right_padding = 0,
+  {
+    type = "composition",
+    filename = "__core__/graphics/gui.png",
+    priority = "extra-high-no-scale",
+    load_in_minimal_mode = true,
+    corner_size = {3, 3},
+    position = {8, 0}
+  },
+  flow_style = {
+    type = "flow_style",
+    horizontal_spacing = 0,
+    vertical_spacing = 0
+  },
+  horizontal_flow_style =
+  {
+    type = "horizontal_flow_style",
+    horizontal_spacing = 0,
+  },
+
+  vertical_flow_style =
+  {
+    type = "vertical_flow_style",
     vertical_spacing = 0
   }
 }
@@ -1154,7 +1182,7 @@ default_gui["helmod_frame_left_menu"] = {
 
 default_gui["helmod_frame_main"] = {
   type = "frame_style",
-  parent = "frame_style",
+  parent = "frame",
   -- marge interieure
   top_padding  = 0,
   right_padding = 0,
@@ -1174,7 +1202,7 @@ default_gui["helmod_frame_main"] = {
 
 default_gui["helmod_frame_data_menu"] = {
   type = "frame_style",
-  parent = "frame_style",
+  parent = "frame",
 
   -- marge interieure
   top_padding  = 0,
@@ -1211,6 +1239,7 @@ default_gui["helmod_frame_resize_row_width"] = {
   parent = "helmod_frame_default",
   resize_row_to_width = true,
   flow_style = {
+    type = "flow_style",
     resize_row_to_width = true,
     horizontal_spacing = 0,
     vertical_spacing = 0
@@ -1229,6 +1258,7 @@ default_gui["helmod_frame_full_resize_row"] = {
   resize_row_to_width = true,
   resize_to_row_height = true,
   flow_style = {
+    type = "flow_style",
     resize_row_to_width = true,
     resize_to_row_height = true,
     horizontal_spacing = 0,
@@ -1320,7 +1350,7 @@ default_gui["helmod_frame_recipe_factory"] = {
 
 default_gui["helmod_scroll_block_info"] = {
   type = "scroll_pane_style",
-  parent = "scroll_pane_style",
+  parent = "scroll_pane",
   minimal_width = width_block_info,
   maximal_width = width_block_info
 }
@@ -1332,7 +1362,7 @@ default_gui["helmod_scroll_block_info"] = {
 
 default_gui["helmod_scroll_block_element"] = {
   type = "scroll_pane_style",
-  parent = "scroll_pane_style",
+  parent = "scroll_pane",
   minimal_height = 36,
   maximal_height = 72
 }
@@ -1344,7 +1374,7 @@ default_gui["helmod_scroll_block_element"] = {
 
 default_gui["helmod_scroll_block_pin_tab"] = {
   type = "scroll_pane_style",
-  parent = "scroll_pane_style",
+  parent = "scroll_pane",
   minimal_width = 50,
   maximal_width = 450,
   minimal_height = 0,
@@ -1358,7 +1388,7 @@ default_gui["helmod_scroll_block_pin_tab"] = {
 
 default_gui["helmod_scroll_recipe_module_list"] = {
   type = "scroll_pane_style",
-  parent = "scroll_pane_style",
+  parent = "scroll_pane",
   minimal_width = width_recipe_column - width_scroll,
   maximal_width = width_recipe_column - width_scroll,
   minimal_height = 197,
@@ -1372,7 +1402,7 @@ default_gui["helmod_scroll_recipe_module_list"] = {
 
 default_gui["helmod_scroll_recipe_selector"] = {
   type = "scroll_pane_style",
-  parent = "scroll_pane_style",
+  parent = "scroll_pane",
   minimal_width = 400,
   maximal_width = 400
 }
@@ -1384,7 +1414,7 @@ default_gui["helmod_scroll_recipe_selector"] = {
 
 default_gui["helmod_scroll_recipe_factories"] = {
   type = "scroll_pane_style",
-  parent = "scroll_pane_style",
+  parent = "scroll_pane",
   minimal_width = width_recipe_column - width_scroll,
   maximal_width = width_recipe_column - width_scroll,
   minimal_height = 270,
@@ -1397,7 +1427,7 @@ default_gui["helmod_scroll_recipe_factories"] = {
 
 default_gui["helmod_button-sorted-none"] = {
   type = "button_style",
-  parent = "button_style",
+  parent = "button",
   scalable = false,
   width = 22,
   height = 22,
@@ -1412,7 +1442,7 @@ default_gui["helmod_button-sorted-none"] = {
 
 default_gui["helmod_button-sorted-down"] = {
   type = "button_style",
-  parent = "button_style",
+  parent = "button",
   scalable = false,
   width = 22,
   height = 22,
@@ -1427,7 +1457,7 @@ default_gui["helmod_button-sorted-down"] = {
 
 default_gui["helmod_button-sorted-up"] = {
   type = "button_style",
-  parent = "button_style",
+  parent = "button",
   scalable = false,
   width = 22,
   height = 22,

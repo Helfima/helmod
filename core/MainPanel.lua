@@ -31,8 +31,8 @@ function MainPanel.methods:cleanMainPanel()
   Logging:trace(self:classname(), "cleanMainPanel()")
   local lua_player = Player.native()
   for _,location in pairs(helmod_settings_mod.display_location.allowed_values) do
-    if lua_player.gui[location]["helmod_planner_main"] ~= nil then
-      lua_player.gui[location]["helmod_planner_main"].destroy()
+    if lua_player.gui[location]["helmod_main_panel"] ~= nil then
+      lua_player.gui[location]["helmod_main_panel"].destroy()
     end
   end
 end
@@ -60,20 +60,17 @@ function MainPanel.methods:main()
   Logging:debug(self:classname(), "main()")
   local lua_player = Player.native()
   local location = Player.getSettings("display_location")
-  local guiMain = lua_player.gui[location]
-  if guiMain["helmod_planner_main"] ~= nil and guiMain["helmod_planner_main"].valid then
-    guiMain["helmod_planner_main"].destroy()
+  local gui_main = lua_player.gui[location]
+  if gui_main["helmod_main_panel"] ~= nil and gui_main["helmod_main_panel"].valid then
+    gui_main["helmod_main_panel"].destroy()
   else
-    -- main panel
-    local mainPanel = self:getMainPanel()
     -- menu
     local menuPanel = self:getMenuPanel()
     local actionPanel = ElementGui.addGuiFrameV(menuPanel, "settings", "helmod_frame_default")
     ElementGui.addGuiButton(actionPanel, self:classname().."=CLOSE", nil, "helmod_button_icon_close_red", nil, ({"helmod_button.close"}))
     ElementGui.addGuiButton(actionPanel, "HMSettings=OPEN", nil, "helmod_button_icon_menu", nil, ({"helmod_button.options"}))
     ElementGui.addGuiButton(actionPanel, "HMHelpPanel=OPEN", nil, "helmod_button_icon_help", nil, ({"helmod_button.help"}))
-    -- info
-    local infoPanel = self:getInfoPanel()
+    
     -- data
     local dataPanel = self:getDataPanel()
     -- dialogue
@@ -85,6 +82,17 @@ function MainPanel.methods:main()
 end
 
 -------------------------------------------------------------------------------
+-- Name of display
+--
+--  Table.main
+-- |--------------|--------------|--------------|
+-- ||------------|||------------|||------------||
+-- || Frame.menu ||| Frame.data ||| Frame.info ||
+-- ||------------|||------------|||------------||
+-- |--------------|--------------|--------------|
+--
+
+-------------------------------------------------------------------------------
 -- Get or create main panel
 --
 -- @function [parent=#MainPanel] getMainPanel
@@ -93,15 +101,59 @@ function MainPanel.methods:getMainPanel()
   Logging:debug(self:classname(), "getMainPanel()")
   local lua_player = Player.native()
   local location = Player.getSettings("display_location")
-  local guiMain = lua_player.gui[location]
-  if guiMain["helmod_planner_main"] ~= nil and guiMain["helmod_planner_main"].valid then
-    return guiMain["helmod_planner_main"]
+  local gui_main = lua_player.gui[location]
+  if gui_main["helmod_main_panel"] ~= nil and gui_main["helmod_main_panel"].valid then
+    return gui_main["helmod_main_panel"]
   end
-  local panel = ElementGui.addGuiFlowH(guiMain, "helmod_planner_main", "helmod_flow_resize_row_width")
-  --local panel = ElementGui.addGuiFrameH(guiMain, "helmod_planner_main", "helmod_frame_main")
-  Player.setStyle(panel, "main", "minimal_width")
-  Player.setStyle(panel, "main", "minimal_height")
+  local panel = ElementGui.addGuiFrameH(gui_main, "helmod_main_panel", helmod_frame_style.hidden)
+  Player.setStyle(panel, "main", "width")
+  Player.setStyle(panel, "main", "height")
   return panel
+end
+
+-------------------------------------------------------------------------------
+-- Get or create dialog panel
+--
+-- @function [parent=#MainPanel] getDialogPanel
+--
+function MainPanel.methods:getDialogPanel()
+  local main_panel = self:getMainPanel()
+  if main_panel["helmod_dialog_panel"] ~= nil and main_panel["helmod_dialog_panel"].valid then
+    return main_panel["helmod_dialog_panel"]
+  end
+  local panel = ElementGui.addGuiFrameV(main_panel, "helmod_dialog_panel", helmod_frame_style.hidden)
+  Player.setStyle(panel, "dialog", "width")
+end
+
+-------------------------------------------------------------------------------
+-- Get or create menu panel
+--
+-- @function [parent=#MainPanel] getMenuPanel
+--
+function MainPanel.methods:getMenuPanel()
+  local main_panel = self:getMainPanel()
+  if main_panel["helmod_menu_panel"] ~= nil and main_panel["helmod_menu_panel"].valid then
+    return main_panel["helmod_menu_panel"]
+  end
+  return ElementGui.addGuiTable(main_panel, "helmod_menu_panel", 1, helmod_table_style.panel)
+end
+
+-------------------------------------------------------------------------------
+-- Get or create data panel
+--
+-- @function [parent=#MainPanel] getDataPanel
+--
+function MainPanel.methods:getDataPanel()
+  local main_panel = self:getMainPanel()
+  if main_panel["helmod_data_panel"] ~= nil and main_panel["helmod_data_panel"].valid and main_panel["helmod_data_panel"]["helmod_data_table"] then
+    return main_panel["helmod_data_panel"]["helmod_data_table"]
+  end
+  local panel = ElementGui.addGuiFrameV(main_panel, "helmod_data_panel", helmod_frame_style.hidden)
+  Player.setStyle(panel, "data", "width")
+  panel.style.vertically_stretchable = true
+  local table_panel = ElementGui.addGuiTable(panel, "helmod_data_table", 1, helmod_table_style.panel)
+  --table_panel.draw_horizontal_lines = true
+  return table_panel
 end
 
 -------------------------------------------------------------------------------
@@ -114,7 +166,7 @@ function MainPanel.methods:isOpened()
   local lua_player = Player.native()
   local location = Player.getSettings("display_location")
   local guiMain = lua_player.gui[location]
-  if guiMain["helmod_planner_main"] ~= nil then
+  if guiMain["helmod_main_panel"] ~= nil then
     return true
   end
   return false
@@ -132,62 +184,7 @@ function MainPanel.methods:getPinTabPanel()
   if guiMain["helmod_planner_pin_tab"] ~= nil and guiMain["helmod_planner_pin_tab"].valid then
     return guiMain["helmod_planner_pin_tab"]
   end
-  return ElementGui.addGuiFlowH(guiMain, "helmod_planner_pin_tab", "helmod_flow_resize_row_width")
-end
-
--------------------------------------------------------------------------------
--- Get or create info panel
---
--- @function [parent=#MainPanel] getInfoPanel
---
-function MainPanel.methods:getInfoPanel()
-  local mainPanel = self:getMainPanel()
-  if mainPanel["helmod_planner_info"] ~= nil and mainPanel["helmod_planner_info"].valid then
-    return mainPanel["helmod_planner_info"]
-  end
-  return ElementGui.addGuiFlowV(mainPanel, "helmod_planner_info", "helmod_flow_info")
-end
-
--------------------------------------------------------------------------------
--- Get or create dialog panel
---
--- @function [parent=#MainPanel] getDialogPanel
---
-function MainPanel.methods:getDialogPanel()
-  local mainPanel = self:getMainPanel()
-  if mainPanel["helmod_planner_dialog"] ~= nil and mainPanel["helmod_planner_dialog"].valid then
-    return mainPanel["helmod_planner_dialog"]
-  end
-  return ElementGui.addGuiFlowH(mainPanel, "helmod_planner_dialog", "helmod_flow_dialog")
-end
-
--------------------------------------------------------------------------------
--- Get or create menu panel
---
--- @function [parent=#MainPanel] getMenuPanel
---
-function MainPanel.methods:getMenuPanel()
-  local menuPanel = self:getMainPanel()
-  if menuPanel["helmod_planner_settings"] ~= nil and menuPanel["helmod_planner_settings"].valid then
-    return menuPanel["helmod_planner_settings"]
-  end
-  return ElementGui.addGuiFlowV(menuPanel, "helmod_planner_settings", "helmod_flow_resize_row_width")
-end
-
--------------------------------------------------------------------------------
--- Get or create data panel
---
--- @function [parent=#MainPanel] getDataPanel
---
-function MainPanel.methods:getDataPanel()
-  local infoPanel = self:getInfoPanel()
-  if infoPanel["helmod_planner_data"] ~= nil and infoPanel["helmod_planner_data"].valid then
-    return infoPanel["helmod_planner_data"]
-  end
-  local panel = ElementGui.addGuiFlowV(infoPanel, "helmod_planner_data", "helmod_flow_resize_row_width")
-  Player.setStyle(panel, "data", "minimal_width")
-  Player.setStyle(panel, "data", "maximal_width")
-  return panel
+  return ElementGui.addGuiFrameV(guiMain, "helmod_planner_pin_tab", helmod_frame_style.hidden)
 end
 
 -------------------------------------------------------------------------------

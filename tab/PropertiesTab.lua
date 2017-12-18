@@ -40,22 +40,22 @@ end
 --
 -- @function [parent=#PropertiesTab] addTableRow
 --
--- @param #LuaGuiElement itable container for element
+-- @param #LuaGuiElement gui_table container for element
 -- @param #table property
 --
-function PropertiesTab.methods:addTableRow(guiTable, property)
-  Logging:debug(self:classname(), "addTableRow():", guiTable, property)
+function PropertiesTab.methods:addTableRow(gui_table, property)
+  Logging:debug(self:classname(), "addTableRow():", gui_table, property)
   -- col property
-  local guiCount = ElementGui.addGuiFlowH(guiTable,property.name.."_name")
-  ElementGui.addGuiLabel(guiCount, "label", property.name)
+  local cell_name = ElementGui.addGuiFrameH(gui_table,property.name.."_name", helmod_frame_style.hidden)
+  ElementGui.addGuiLabel(cell_name, "label", property.name)
 
   -- col chmod
-  local guiCount = ElementGui.addGuiFlowH(guiTable,property.name.."_chmod")
-  ElementGui.addGuiLabel(guiCount, "label", property.chmod or "")
+  local cell_chmod = ElementGui.addGuiFrameH(gui_table,property.name.."_chmod", helmod_frame_style.hidden)
+  ElementGui.addGuiLabel(cell_chmod, "label", property.chmod or "")
 
   -- col value
-  local guiType = ElementGui.addGuiFlowH(guiTable,property.name.."_value")
-  ElementGui.addGuiLabel(guiType, "label", property.value, "helmod_label_max_600", nil, false)
+  local cell_value = ElementGui.addGuiFrameH(gui_table,property.name.."_value", helmod_frame_style.hidden)
+  ElementGui.addGuiLabel(cell_value, "label", property.value, "helmod_label_max_600", nil, false)
 
 end
 
@@ -69,7 +69,7 @@ function PropertiesTab.methods:updateData()
   local globalGui = Player.getGlobalGui()
   -- data
   local resultPanel = self.parent:getResultPanel({"helmod_result-panel.tab-title-properties"})
-  local listPanel = ElementGui.addGuiFlowH(resultPanel, "list-element", "helmod_flow_full_resize_row")
+  local listPanel = ElementGui.addGuiFrameH(resultPanel, "list-element", helmod_frame_style.hidden)
   local scrollPanel = self.parent:getResultScrollPanel()
 
   local globalPlayer = Player.getGlobal()

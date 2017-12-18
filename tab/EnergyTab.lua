@@ -30,9 +30,9 @@ function EnergyTab.methods:updateData()
   local globalGui = Player.getGlobalGui()
 
   -- data
-  local scrollPanel = self.parent:getResultScrollPanel({"helmod_result-panel.tab-title-energy"})
-  local menuPanel = ElementGui.addGuiFlowH(scrollPanel,"menu")
-  ElementGui.addGuiButton(menuPanel, "HMEnergyEdition=OPEN=ID=", "new", "helmod_button_default", ({"helmod_result-panel.add-button-power"}))
+  local scroll_panel = self.parent:getResultScrollPanel({"helmod_result-panel.tab-title-energy"})
+  local menu_manel = ElementGui.addGuiFrameH(scroll_panel,"menu", helmod_frame_style.hidden)
+  ElementGui.addGuiButton(menu_manel, "HMEnergyEdition=OPEN=ID=", "new", "helmod_button_default", ({"helmod_result-panel.add-button-power"}))
 
   local countBlock = Model.countPowers()
   if model.powers ~= nil and countBlock > 0 then
@@ -42,7 +42,7 @@ function EnergyTab.methods:updateData()
     if Player.getSettings("display_data_col_id", true) then
       extra_cols = extra_cols + 1
     end
-    local resultTable = ElementGui.addGuiTable(scrollPanel,"list-data",4 + extra_cols, "helmod_table-odd")
+    local resultTable = ElementGui.addGuiTable(scroll_panel,"list-data",4 + extra_cols, "helmod_table-odd")
 
     self:addTableHeader(resultTable)
 
@@ -82,35 +82,35 @@ end
 -- @param #LuaGuiElement itable container for element
 -- @param #table power
 --
-function EnergyTab.methods:addTableRow(guiTable, power)
-  Logging:debug(self:classname(), "addPowersRow():", guiTable, power)
+function EnergyTab.methods:addTableRow(gui_table, power)
+  Logging:debug(self:classname(), "addPowersRow():", gui_table, power)
   local model = Model.getModel()
 
   -- col action
-  local guiAction = ElementGui.addGuiFlowH(guiTable,"action"..power.id, "helmod_flow_default")
-  ElementGui.addGuiButton(guiAction, self.parent:classname().."=power-remove=ID=", power.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
+  local cell_action = ElementGui.addGuiFrameH(gui_table,"action"..power.id, helmod_frame_style.hidden)
+  ElementGui.addGuiButton(cell_action, self.parent:classname().."=power-remove=ID=", power.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
 
   -- col id
   if Player.getSettings("display_data_col_id", true) then
-    local guiId = ElementGui.addGuiFlowH(guiTable,"id"..power.id)
-    ElementGui.addGuiLabel(guiId, "id", power.id)
+    local cell_id = ElementGui.addGuiFrameH(gui_table,"id"..power.id, helmod_frame_style.hidden)
+    ElementGui.addGuiLabel(cell_id, "id", power.id)
   end
   -- col power
-  local guiPower = ElementGui.addGuiFlowH(guiTable,"power"..power.id)
-  ElementGui.addGuiLabel(guiPower, power.id, Format.formatNumberKilo(power.power, "W"), "helmod_label_right_70")
+  local cell_power = ElementGui.addGuiFrameH(gui_table,"power"..power.id, helmod_frame_style.hidden)
+  ElementGui.addGuiLabel(cell_power, power.id, Format.formatNumberKilo(power.power, "W"), "helmod_label_right_70")
 
   -- col primary
-  local guiPrimary = ElementGui.addGuiFlowH(guiTable,"primary"..power.id)
+  local cell_primary = ElementGui.addGuiFrameH(gui_table,"primary"..power.id, helmod_frame_style.hidden)
   local primary = power.primary
   if primary.name ~= nil then
-    ElementGui.addGuiLabel(guiPrimary, primary.name, Format.formatNumberFactory(primary.count), "helmod_label_right_60")
-    ElementGui.addGuiButtonSelectSprite(guiPrimary, "HMEnergyEdition=OPEN=ID="..power.id.."=", Player.getIconType(primary), primary.name, "X"..Format.formatNumberFactory(primary.count), {"tooltip.edit-energy", Player.getLocalisedName(primary)})
+    ElementGui.addGuiLabel(cell_primary, primary.name, Format.formatNumberFactory(primary.count), "helmod_label_right_60")
+    ElementGui.addGuiButtonSelectSprite(cell_primary, "HMEnergyEdition=OPEN=ID="..power.id.."=", Player.getIconType(primary), primary.name, "X"..Format.formatNumberFactory(primary.count), {"tooltip.edit-energy", Player.getLocalisedName(primary)})
   end
   -- col secondary
-  local guiSecondary = ElementGui.addGuiFlowH(guiTable,"secondary"..power.id)
+  local cell_secondary = ElementGui.addGuiFrameH(gui_table,"secondary"..power.id, helmod_frame_style.hidden)
   local secondary = power.secondary
   if secondary.name ~= nil then
-    ElementGui.addGuiLabel(guiSecondary, secondary.name, Format.formatNumberFactory(secondary.count), "helmod_label_right_60")
-    ElementGui.addGuiButtonSelectSprite(guiSecondary, "HMEnergyEdition=OPEN=ID="..power.id.."=", Player.getIconType(secondary), secondary.name, "X"..Format.formatNumberFactory(secondary.count), {"tooltip.edit-energy", Player.getLocalisedName(secondary)})
+    ElementGui.addGuiLabel(cell_secondary, secondary.name, Format.formatNumberFactory(secondary.count), "helmod_label_right_60")
+    ElementGui.addGuiButtonSelectSprite(cell_secondary, "HMEnergyEdition=OPEN=ID="..power.id.."=", Player.getIconType(secondary), secondary.name, "X"..Format.formatNumberFactory(secondary.count), {"tooltip.edit-energy", Player.getLocalisedName(secondary)})
   end
 end

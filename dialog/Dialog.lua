@@ -56,11 +56,11 @@ end
 -- @return #LuaGuiElement
 --  
 function Dialog.methods:getPanel()
-	local panel = self:getParentPanel()
-	if panel[self:classname()] ~= nil and panel[self:classname()].valid then
-		return panel[self:classname()]
+	local parent_panel = self:getParentPanel()
+	if parent_panel[self:classname()] ~= nil and parent_panel[self:classname()].valid then
+		return parent_panel[self:classname()]
 	end
-	return ElementGui.addGuiFlowV(panel, self:classname(), "helmod_flow_resize_row_width")
+	return ElementGui.addGuiTable(parent_panel, self:classname(), 1, helmod_table_style.panel)
 end
 
 -------------------------------------------------------------------------------
@@ -116,8 +116,7 @@ function Dialog.methods:open(event, action, item, item2, item3)
 
 		local panel = self:getPanel()
 		
-		local header_panel = ElementGui.addGuiFrameH(panel, "header-panel", "helmod_frame_resize_row_width")
-		ElementGui.addGuiLabel(header_panel, "title", caption, "helmod_label_title_frame")
+		ElementGui.addGuiFrameH(panel, "header-panel", helmod_frame_style.panel, caption)
 		
 		self:onOpen(event, action, item, item2, item3)
 		self:afterOpen(event, action, item, item2, item3)

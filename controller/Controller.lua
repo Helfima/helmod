@@ -110,8 +110,8 @@ end
 function Controller.cleanController(player)
   Logging:trace(Controller.classname, "cleanController(player)")
   for _,location in pairs(helmod_settings_mod.display_location.allowed_values) do
-    if player.gui[location]["helmod_planner_main"] ~= nil then
-      player.gui[location]["helmod_planner_main"].destroy()
+    if player.gui[location]["helmod_main_panel"] ~= nil then
+      player.gui[location]["helmod_main_panel"].destroy()
     end
   end
 end
@@ -218,7 +218,7 @@ function Controller.parseEvent(event, type)
       end
     end
     -- button action
-    if (type == nil or type == "dropdown") and event.element ~= nil and event.element.valid then
+    if (type == nil or type == "dropdown" or type == "checked") and event.element ~= nil and event.element.valid then
       local eventController = nil
       for _, controller in pairs(views) do
         Logging:trace(Controller.classname, "match:", event.element.name, controller:classname())

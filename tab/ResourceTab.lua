@@ -52,24 +52,24 @@ function ResourceTab.methods:addTableRow(guiTable, ingredient)
 
   -- col index
   if Player.getSettings("display_data_col_index", true) then
-    local guiIndex = ElementGui.addGuiFlowH(guiTable,"index"..ingredient.name)
+    local guiIndex = ElementGui.addGuiFrameH(guiTable,"index"..ingredient.name, helmod_frame_style.hidden)
     ElementGui.addGuiLabel(guiIndex, "index", ingredient.index, "helmod_label_row_right_40")
   end
   -- col name
   if Player.getSettings("display_data_col_name", true) then
-    local guiName = ElementGui.addGuiFlowH(guiTable,"name"..ingredient.name)
+    local guiName = ElementGui.addGuiFrameH(guiTable,"name"..ingredient.name, helmod_frame_style.hidden)
     ElementGui.addGuiLabel(guiName, "name_", ingredient.name)
   end
   -- col count
-  local guiCount = ElementGui.addGuiFlowH(guiTable,"count"..ingredient.name)
+  local guiCount = ElementGui.addGuiFrameH(guiTable,"count"..ingredient.name, helmod_frame_style.hidden)
   ElementGui.addGuiLabel(guiCount, ingredient.name, Format.formatNumberElement(ingredient.count), "helmod_label_right_60")
 
   -- col ingredient
-  local guiIngredient = ElementGui.addGuiFlowH(guiTable,"ingredient"..ingredient.name)
+  local guiIngredient = ElementGui.addGuiFrameH(guiTable,"ingredient"..ingredient.name, helmod_frame_style.hidden)
   ElementGui.addGuiButtonSprite(guiIngredient, "HMIngredient=OPEN=ID=", Player.getIconType(ingredient), ingredient.name, ingredient.name, Player.getLocalisedName(ingredient))
 
   -- col type
-  local guiType = ElementGui.addGuiFlowH(guiTable,"type"..ingredient.name)
+  local guiType = ElementGui.addGuiFrameH(guiTable,"type"..ingredient.name, helmod_frame_style.hidden)
   ElementGui.addGuiLabel(guiType, ingredient.name, ingredient.resource_category)
 
 end
