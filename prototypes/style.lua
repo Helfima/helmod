@@ -506,6 +506,59 @@ default_gui["helmod_button_small_bold_end"] = {
   left_padding = 0
 }
 
+
+-------------------------------------------------------------------------------
+-- Style of tab
+--
+-- @field [parent=#Button] tab
+
+default_gui["helmod_button_tab"] = {
+  type = "button_style",
+  font = "helmod_font_normal",
+  default_font_color={r=1, g=1, b=1},
+  align = "center",
+  top_padding = 2,
+  right_padding = 8,
+  bottom_padding = 2,
+  left_padding = 8,
+  height = 28,
+  default_graphical_set = compositionIcon("__helmod__/graphics/gui.png", corner_size, {16, 0}),
+  hovered_font_color={r=0, g=0, b=0},
+  hovered_graphical_set = compositionIcon("__helmod__/graphics/gui.png", corner_size, {16, 8}),
+  clicked_font_color={r=1, g=1, b=1},
+  clicked_graphical_set = compositionIcon("__helmod__/graphics/gui.png", corner_size, {16, 0}),
+  disabled_font_color={r=0.5, g=0.5, b=0.5},
+  disabled_graphical_set = compositionIcon("__helmod__/graphics/gui.png", corner_size, {16, 0}),
+  pie_progress_color = {r=1, g=1, b=1}
+}
+
+
+-------------------------------------------------------------------------------
+-- Style of selected tab
+--
+-- @field [parent=#Button] tab_selected
+
+default_gui["helmod_button_tab_selected"] = {
+  type = "button_style",
+  font = "helmod_font_normal",
+  default_font_color={r=1, g=1, b=1},
+  align = "center",
+  top_padding = 2,
+  right_padding = 8,
+  bottom_padding = 2,
+  left_padding = 8,
+  height = 28,
+  default_graphical_set = compositionIcon("__helmod__/graphics/gui.png", corner_size, {8, 0}),
+  hovered_font_color={r=0, g=0, b=0},
+  hovered_graphical_set = compositionIcon("__helmod__/graphics/gui.png", corner_size, {8, 8}),
+  clicked_font_color={r=1, g=1, b=1},
+  clicked_graphical_set = compositionIcon("__helmod__/graphics/gui.png", corner_size, {8, 0}),
+  disabled_font_color={r=0.5, g=0.5, b=0.5},
+  disabled_graphical_set = compositionIcon("__helmod__/graphics/gui.png", corner_size, {8, 0}),
+  pie_progress_color = {r=1, g=1, b=1}
+}
+
+
 -------------------------------------------------------------------------------
 -- Style label
 --
@@ -849,6 +902,23 @@ default_gui["helmod_table_list"] = {
 }
 
 -------------------------------------------------------------------------------
+-- Style of tab
+--
+-- @field [parent=#Table] tab
+
+default_gui["helmod_table_tab"] = {
+  type = "table_style",
+  horizontal_spacing = 0,
+  vertical_spacing = 0,
+  cell_spacing = 0,
+  top_padding = 0,
+  right_padding = 0,
+  bottom_padding = 0,
+  left_padding = 0,
+  vertical_align = "top"
+}
+
+-------------------------------------------------------------------------------
 -- Style of factory modules
 --
 -- @field [parent=#Table] factory_modules
@@ -1086,9 +1156,9 @@ default_gui["helmod_frame_default"] = {
   font_color = {r=1, g=1, b=1},
   -- marge interieure
   top_padding  = 0,
-  right_padding = 0,
+  right_padding = 2,
   bottom_padding = 0,
-  left_padding = 0,
+  left_padding = 2,
 
   -- padding title
   title_top_padding = 0,
@@ -1130,57 +1200,16 @@ default_gui["helmod_frame_default"] = {
 default_gui["helmod_frame_section"] = {
   type = "frame_style",
   parent = "helmod_frame_default",
-  graphical_set =
-  {
-    type = "composition",
-    filename = "__helmod__/graphics/gui.png",
-    priority = "extra-high-no-scale",
-    load_in_minimal_mode = true,
-    corner_size = {3, 3},
-    position = {0, 0}
-  }
+  graphical_set = compositionIcon("__helmod__/graphics/gui.png", corner_size, {24, 8})
 }
 
 -------------------------------------------------------------------------------
--- Style of section panel
---
--- @field [parent=#Frame] section
---
-
-default_gui["helmod_frame_section2"] = {
-  type = "frame_style",
-  parent = "helmod_frame_default",
-  graphical_set =
-  {
-    type = "composition",
-    filename = "__helmod__/graphics/gui.png",
-    priority = "extra-high-no-scale",
-    load_in_minimal_mode = true,
-    corner_size = {3, 3},
-    position = {0, 8}
-  }
-}
-
--------------------------------------------------------------------------------
--- Style of left menu panel
---
--- @field [parent=#Frame] left_menu
---
-
-default_gui["helmod_frame_left_menu"] = {
-  type = "frame_style",
-  parent = "helmod_frame_default",
-  minimal_width = 46,
-  maximal_width = 46
-}
-
--------------------------------------------------------------------------------
--- Style of main panel (only testing)
+-- Style of tab panel
 -- minimal_width = screen width * 85%
 -- minimal_height = screen height * 85%
--- @field [parent=#Frame] main
+-- @field [parent=#Frame] tab
 
-default_gui["helmod_frame_main"] = {
+default_gui["helmod_frame_tab"] = {
   type = "frame_style",
   parent = "frame",
   -- marge interieure
@@ -1193,120 +1222,8 @@ default_gui["helmod_frame_main"] = {
   title_top_padding = 0,
   title_left_padding = 0,
   title_bottom_padding = 0,
-  title_right_padding = 0
-}
-
--------------------------------------------------------------------------------
--- Style of data menu
--- @field [parent=#Frame] data_menu
-
-default_gui["helmod_frame_data_menu"] = {
-  type = "frame_style",
-  parent = "frame",
-
-  -- marge interieure
-  top_padding  = 0,
-  right_padding = 0,
-  bottom_padding = 0,
-  left_padding = 0,
-
-  -- padding title
-  title_top_padding = 0,
-  title_left_padding = 0,
-  title_bottom_padding = 2,
-  title_right_padding = 0
-}
-
--------------------------------------------------------------------------------
--- Style of main menu panel
---
--- @field [parent=#Frame] main_menu
---
-
-default_gui["helmod_frame_main_menu"] = {
-  type = "frame_style",
-  parent = "helmod_frame_default"
-}
-
--------------------------------------------------------------------------------
--- Style of resize width row panel
---
--- @field [parent=#Frame] resize_row_width
---
-
-default_gui["helmod_frame_resize_row_width"] = {
-  type = "frame_style",
-  parent = "helmod_frame_default",
-  resize_row_to_width = true,
-  flow_style = {
-    type = "flow_style",
-    resize_row_to_width = true,
-    horizontal_spacing = 0,
-    vertical_spacing = 0
-  }
-}
-
--------------------------------------------------------------------------------
--- Style of resize full row panel
---
--- @field [parent=#Frame] full_resize_row
---
-
-default_gui["helmod_frame_full_resize_row"] = {
-  type = "frame_style",
-  parent = "helmod_frame_default",
-  resize_row_to_width = true,
-  resize_to_row_height = true,
-  flow_style = {
-    type = "flow_style",
-    resize_row_to_width = true,
-    resize_to_row_height = true,
-    horizontal_spacing = 0,
-    vertical_spacing = 0
-  }
-}
-
--------------------------------------------------------------------------------
--- Style of recipe modules panel
---
--- @field [parent=#Frame] recipe_modules
---
-
-default_gui["helmod_frame_recipe_modules"] = {
-  type = "frame_style",
-  parent = "helmod_frame_default",
-  minimal_width = width_recipe_column,
-  maximal_width = width_recipe_column
-}
-
--------------------------------------------------------------------------------
--- Style of recipe ingredients panel
---
--- @field [parent=#Frame] recipe_ingredients
---
-
-default_gui["helmod_frame_recipe_ingredients"] = {
-  type = "frame_style",
-  parent = "helmod_frame_default",
-  minimal_width = width_recipe_column,
-  maximal_width = width_recipe_column,
-  minimal_height = 76,
-  maximal_height = 76
-}
-
--------------------------------------------------------------------------------
--- Style of recipe products panel
---
--- @field [parent=#Frame] recipe_products
---
-
-default_gui["helmod_frame_recipe_products"] = {
-  type = "frame_style",
-  parent = "helmod_frame_default",
-  minimal_width = width_recipe_column,
-  maximal_width = width_recipe_column,
-  minimal_height = 77,
-  maximal_height = 77
+  title_right_padding = 0,
+  graphical_set = compositionIcon("__helmod__/graphics/gui.png", corner_size, {24, 0})
 }
 
 -------------------------------------------------------------------------------
@@ -1320,21 +1237,6 @@ default_gui["helmod_frame_recipe_info"] = {
   parent = "helmod_frame_default",
   minimal_width = width_recipe_column,
   maximal_width = width_recipe_column
-}
-
--------------------------------------------------------------------------------
--- Style of recipe factory panel
---
--- @field [parent=#Frame] recipe_factory
---
-
-default_gui["helmod_frame_recipe_factory"] = {
-  type = "frame_style",
-  parent = "helmod_frame_default",
-  minimal_width = width_recipe_column,
-  maximal_width = width_recipe_column,
-  minimal_height = 305,
-  maximal_height = 305
 }
 
 -------------------------------------------------------------------------------

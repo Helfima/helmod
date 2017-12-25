@@ -93,19 +93,22 @@ function ProductionBlockTab.methods:updateHeader(item, item2, item3)
   -- info panel
   local block_panel = ElementGui.addGuiFrameV(info_panel, "block", helmod_frame_style.panel, ({"helmod_result-panel.tab-title-production-block"}))
   local block_scroll = ElementGui.addGuiScrollPane(block_panel, "output-scroll", helmod_frame_style.scroll_pane, true)
+  ElementGui.setStyle(block_scroll, "scroll_block", "height")
   local block_table = ElementGui.addGuiTable(block_scroll,"output-table",2)
 
   local element_panel = ElementGui.addGuiTable(info_panel, "elements", 1, helmod_table_style.panel)
   -- ouput panel
   local output_panel = ElementGui.addGuiFrameV(element_panel, "output", helmod_frame_style.panel, ({"helmod_common.output"}))
+  output_panel.style.horizontally_stretchable = true
+  ElementGui.setStyle(output_panel, "block_element", "height")
   local output_scroll = ElementGui.addGuiScrollPane(output_panel, "output-scroll", helmod_frame_style.scroll_pane, true)
-  output_scroll.style.horizontally_stretchable = true
-  Player.setStyle(output_scroll, "scroll_block_element", "height")
+  ElementGui.setStyle(output_scroll, "scroll_block_element", "height")
 
   -- input panel
   local input_panel = ElementGui.addGuiFrameV(element_panel, "input", helmod_frame_style.panel, ({"helmod_common.input"}))
+  ElementGui.setStyle(input_panel, "block_element", "height")
   local input_scroll = ElementGui.addGuiScrollPane(input_panel, "output-scroll", helmod_frame_style.scroll_pane, true)
-  Player.setStyle(input_scroll, "scroll_block_element", "height")
+  ElementGui.setStyle(input_scroll, "scroll_block_element", "height")
 
   -- production block result
   if countRecipes > 0 then

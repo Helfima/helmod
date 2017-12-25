@@ -46,7 +46,7 @@ function MainPanel.methods:bindMainPanel()
   Logging:trace(self:classname(), "bindMainPanel()")
   local parentGui = Player.getGui()
   if parentGui ~= nil then
-    local guiButton = ElementGui.addGuiFrameH(parentGui, PLANNER_COMMAND, "helmod_frame_default")
+    local guiButton = ElementGui.addGuiFrameH(parentGui, PLANNER_COMMAND, helmod_frame_style.default)
     guiButton.add({type="button", name=PLANNER_COMMAND, tooltip=({PLANNER_COMMAND}), style="helmod_icon"})
   end
 end
@@ -66,7 +66,7 @@ function MainPanel.methods:main()
   else
     -- menu
     local menuPanel = self:getMenuPanel()
-    local actionPanel = ElementGui.addGuiFrameV(menuPanel, "settings", "helmod_frame_default")
+    local actionPanel = ElementGui.addGuiFrameV(menuPanel, "settings", helmod_frame_style.default)
     ElementGui.addGuiButton(actionPanel, self:classname().."=CLOSE", nil, "helmod_button_icon_close_red", nil, ({"helmod_button.close"}))
     ElementGui.addGuiButton(actionPanel, "HMSettings=OPEN", nil, "helmod_button_icon_menu", nil, ({"helmod_button.options"}))
     ElementGui.addGuiButton(actionPanel, "HMHelpPanel=OPEN", nil, "helmod_button_icon_help", nil, ({"helmod_button.help"}))
@@ -106,8 +106,8 @@ function MainPanel.methods:getMainPanel()
     return gui_main["helmod_main_panel"]
   end
   local panel = ElementGui.addGuiFrameH(gui_main, "helmod_main_panel", helmod_frame_style.hidden)
-  Player.setStyle(panel, "main", "width")
-  Player.setStyle(panel, "main", "height")
+  ElementGui.setStyle(panel, "main", "width")
+  ElementGui.setStyle(panel, "main", "height")
   return panel
 end
 
@@ -122,7 +122,8 @@ function MainPanel.methods:getDialogPanel()
     return main_panel["helmod_dialog_panel"]
   end
   local panel = ElementGui.addGuiFrameV(main_panel, "helmod_dialog_panel", helmod_frame_style.hidden)
-  Player.setStyle(panel, "dialog", "width")
+  ElementGui.setStyle(panel, "dialog", "width")
+  return panel
 end
 
 -------------------------------------------------------------------------------
@@ -149,7 +150,7 @@ function MainPanel.methods:getDataPanel()
     return main_panel["helmod_data_panel"]["helmod_data_table"]
   end
   local panel = ElementGui.addGuiFrameV(main_panel, "helmod_data_panel", helmod_frame_style.hidden)
-  Player.setStyle(panel, "data", "width")
+  ElementGui.setStyle(panel, "data", "width")
   panel.style.vertically_stretchable = true
   local table_panel = ElementGui.addGuiTable(panel, "helmod_data_table", 1, helmod_table_style.panel)
   --table_panel.draw_horizontal_lines = true

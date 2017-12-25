@@ -21,7 +21,7 @@ local Model = {
 --
 -- @return #table
 --
-function Model.getModels()
+function Model.getModels(bypass)
   Logging:trace(Model.classname, "getModels():global.models:",global.models)
   local model_id = Player.getGlobalGui("model_id")
   local display_all_sheet = Player.getSettings("display_all_sheet", true)
@@ -31,7 +31,7 @@ function Model.getModels()
   local global_models = global.models
   if Model.countModel() > 0 then
     for _,model in pairs(global.models) do
-      if Player.isAdmin() and ( display_all_sheet or model.owner == "admin" ) then
+      if Player.isAdmin() and ( display_all_sheet or model.owner == "admin" or bypass ) then
         models[model.id] = model
         if first_id == nil then first_id = model.id end
         if model_id == model.id then reset_model_id = false end

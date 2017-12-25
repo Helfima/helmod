@@ -85,7 +85,7 @@ function ResourceEdition.methods:getObjectInfoPanel()
 	if panel["info"] ~= nil and panel["info"].valid then
 		return panel["info"]
 	end
-	return ElementGui.addGuiFrameH(panel, "info", "helmod_frame_resize_row_width", ({"helmod_common.resource"}))
+	return ElementGui.addGuiFrameH(panel, "info", helmod_frame_style.panel, ({"helmod_common.resource"}))
 end
 
 -------------------------------------------------------------------------------

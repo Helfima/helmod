@@ -66,7 +66,7 @@ function EnergyEdition.methods:getPrimaryInfoPanel()
     return panel["info"]
   end
   local panel = ElementGui.addGuiFrameV(panel, "info", helmod_frame_style.recipe_column, ({"helmod_common.primary-generator"}))
-  Player.setStyle(panel, "power", "height")
+  ElementGui.setStyle(panel, "power", "height")
   return panel
 end
 
@@ -118,7 +118,7 @@ function EnergyEdition.methods:getSecondaryInfoPanel()
     return panel["info"]
   end
   local panel = ElementGui.addGuiFrameV(panel, "info", helmod_frame_style.recipe_column, ({"helmod_common.secondary-generator"}))
-  Player.setStyle(panel, "power", "height")
+  ElementGui.setStyle(panel, "power", "height")
   return panel
 end
 

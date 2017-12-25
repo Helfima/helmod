@@ -51,6 +51,7 @@ end
 -- @param #string caption displayed text
 -- @param #string style style of label
 -- @param #string tooltip displayed text
+-- @param #boolean single_line
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
@@ -60,16 +61,17 @@ function ElementGui.addGuiLabel(parent, key, caption, style, tooltip, single_lin
   options.type = "label"
   options.name = key
   options.caption = caption
-  if single_line ~= nil then
-    options.single_line = single_line
-  end
   if style ~= nil then
     options.style = style
   end
   if tooltip ~= nil then
     options.tooltip = tooltip
   end
-  return parent.add(options)
+  local label = parent.add(options)
+  if single_line ~= nil then
+    label.style.single_line = single_line
+  end
+  return label
 end
 
 -------------------------------------------------------------------------------
@@ -309,7 +311,7 @@ function ElementGui.addGuiDropDownElement(parent, action, key, elem_type, select
     options.name = action
   end
 
-    options.elem_type = elem_type
+  options.elem_type = elem_type
   if elem_type ~= nil and selected ~= nil then
     options[elem_type] = selected
   end
@@ -655,17 +657,24 @@ end
 -- @param #LuaGuiElement parent container for element
 -- @param #string key unique id
 -- @param #string style style of frame
--- @param #string horizontal can_scroll_horizontally
+-- @param #boolean policy scroll horizontally
+-- @param #boolean stretchable horizontally
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.addGuiScrollPane(parent, key, style, horizontal)
+function ElementGui.addGuiScrollPane(parent, key, style, policy)
   local options = {}
   options.type = "scroll-pane"
-  options.can_scroll_horizontally = horizontal or false
+  options.horizontal_scroll_policy = "auto"
+  if policy == true then
+    options.vertical_scroll_policy = "auto"
+  end
+  options.horizontally_stretchable = true
   options.name = key
   options.style = style
-  return parent.add(options)
+  local scroll = parent.add(options)
+  --scroll.style.horizontally_stretchable = true
+  return scroll
 end
 
 -------------------------------------------------------------------------------
@@ -916,7 +925,7 @@ function ElementGui.addCellCargoInfo(parent, element)
       ElementGui.addGuiButtonSpriteSm(table_cargo, container_solid, "item", container_solid, nil, ElementGui.getTooltipProduct(element, container_solid))
       ElementGui.addGuiButtonSpriteSm(table_cargo, vehicle_solid, "item", vehicle_solid, nil, ElementGui.getTooltipProduct(element, vehicle_solid))
     end
-  
+
     if element.type == 1 or element.type == "fluid" then
       local container_fluid = globalGui.container_fluid or "storage-tank"
       local vehicle_fluid = globalGui.wagon_fluid or "fluid-wagon"
@@ -1039,6 +1048,143 @@ function ElementGui.getTooltipRecipe(prototype)
   if cache_tooltip_recipe[prototype_type] == nil then cache_tooltip_recipe[prototype_type] = {} end
   cache_tooltip_recipe[prototype_type][prototype.name] = tooltip
   return tooltip
+end
+
+-------------------------------------------------------------------------------
+-- Get display sizes
+--
+-- @function [parent=#ElementGui] getDisplaySizes
+--
+-- return
+--
+function ElementGui.getDisplaySizes()
+  Logging:trace(ElementGui.classname, "getDisplaySizes()")
+  local display_size = Player.getSettings("display_size")
+  local display_size_free = Player.getSettings("display_size_free")
+  if string.match(display_size_free, "([0-9]*x[0-9]*)", 1) then
+    display_size = display_size_free
+  end
+  local string_width = string.match(display_size,"([0-9]*)x[0-9]*",1)
+  local string_height = string.match(display_size,"[0-9]*x([0-9]*)",1)
+  local width_main = 1920
+  local height_main = 1680
+
+  if string_width ~= nil then width_main = tonumber(string_width) end
+  if string_height ~= nil then height_main = tonumber(string_height) end
+  return width_main, height_main
+end
+-------------------------------------------------------------------------------
+-- Get style sizes
+--
+-- @function [parent=#ElementGui] getStyleSizes
+--
+function ElementGui.getStyleSizes()
+  Logging:trace(ElementGui.classname, "getStyleSizes()")
+  local width, height = ElementGui.getDisplaySizes()
+  
+  local style_sizes = {}
+  if type(width) == "number" and  type(height) == "number" then
+    local width_recipe_column_1 = 220
+    local width_recipe_column_2 = 220
+    local width_dialog = width_recipe_column_1 + width_recipe_column_2 + 70
+    local width_scroll = 8
+    local width_block_info = 290
+    local height_block_header = 450
+    local height_selector_header = 230
+    local height_row_element = 110
+
+    local ratio_h = 0.80
+    local ratio_v = 0.75
+    local width_main = math.ceil(width*ratio_h)
+    local height_main = math.ceil(height*ratio_v)
+    
+    style_sizes.main = {}
+    style_sizes.main.width = width_main
+    style_sizes.main.height = height_main
+
+    style_sizes.dialog = {}
+    style_sizes.dialog.width = width_dialog
+
+    style_sizes.data = {}
+    style_sizes.data.width = width_main - width_dialog
+
+    style_sizes.power = {}
+    style_sizes.power.height = 200
+
+    style_sizes.data_section = {}
+    style_sizes.data_section.width = width_main - width_dialog - 4*width_scroll
+
+    style_sizes.recipe_selector = {}
+    style_sizes.recipe_selector.height = height_main - height_selector_header
+
+    style_sizes.recipe_product = {}
+    style_sizes.recipe_product.height = 77
+
+    style_sizes.recipe_tab = {}
+    style_sizes.recipe_tab.height = 32
+
+    style_sizes.recipe_module = {}
+    style_sizes.recipe_module.width = width_recipe_column_2 - width_scroll*2
+    style_sizes.recipe_module.height = 147
+
+    style_sizes.recipe_edition_1 = {}
+    style_sizes.recipe_edition_1.width = width_recipe_column_1
+    style_sizes.recipe_edition_1.height = 250
+
+    style_sizes.recipe_edition_2 = {}
+    style_sizes.recipe_edition_2.width = width_recipe_column_2
+
+    style_sizes.scroll_help = {}
+    style_sizes.scroll_help.width = width_dialog - width_scroll - 50
+    style_sizes.scroll_help.height = height_main - 200
+
+    -- block
+    style_sizes.scroll_block = {}
+    style_sizes.scroll_block.height = (height_row_element - 34) * 2
+
+    -- input/output table
+    style_sizes.block_element = {}
+    style_sizes.block_element.height = height_row_element
+
+    -- input/output table
+    style_sizes.scroll_block_element = {}
+    style_sizes.scroll_block_element.height = height_row_element - 34
+
+    -- recipe table
+    style_sizes.scroll_block_list = {}
+    style_sizes.scroll_block_list.minimal_width = width_main - width_dialog - width_scroll
+    style_sizes.scroll_block_list.maximal_width = width_main - width_dialog - width_scroll
+
+    if Player.getSettings("debug", true) ~= "none" then
+      style_sizes.scroll_block_list.minimal_height = height_main - height_block_header - 200
+      style_sizes.scroll_block_list.maximal_height = height_main - height_block_header - 200
+    else
+      style_sizes.scroll_block_list.minimal_height = height_main - height_block_header
+      style_sizes.scroll_block_list.maximal_height = height_main - height_block_header
+    end
+
+
+  end
+  Logging:trace(ElementGui.classname, "getStyleSizes(player)", style_sizes)
+  return style_sizes
+end
+
+-------------------------------------------------------------------------------
+-- Set style
+--
+-- @function [parent=#ElementGui] setStyle
+--
+-- @param #LuaGuiElement element
+-- @param #string style
+-- @param #string property
+--
+function ElementGui.setStyle(element, style, property)
+  Logging:trace(ElementGui.classname, "setStyle(player, element, style, property)", element, style, property)
+  local style_sizes = ElementGui.getStyleSizes()
+  if element.style ~= nil and style_sizes[style] ~= nil and style_sizes[style][property] ~= nil then
+    Logging:trace(ElementGui.classname, "setStyle(player, element, style, property)", style_sizes[style][property])
+    element.style[property] = style_sizes[style][property]
+  end
 end
 
 return ElementGui

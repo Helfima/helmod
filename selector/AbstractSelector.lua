@@ -153,7 +153,7 @@ function AbstractSelector.methods:getSrollPanel()
     return panel["main_panel"]["scroll_panel"]
   end
   local main_panel = ElementGui.addGuiFrameV(panel, "main_panel", helmod_frame_style.panel)
-  Player.setStyle(main_panel, "recipe_selector", "height")
+  ElementGui.setStyle(main_panel, "recipe_selector", "height")
   local scroll_panel = ElementGui.addGuiScrollPane(main_panel, "scroll_panel", helmod_frame_style.scroll_recipe_selector)
   return scroll_panel
 end

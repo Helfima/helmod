@@ -31,9 +31,8 @@ function SummaryTab.methods:updateData()
   local scrollPanel = self.parent:getResultScrollPanel({"helmod_result-panel.tab-title-summary"})
   
   -- resources
-  local resourcesPanel = ElementGui.addGuiFrameV(scrollPanel, "resources", "helmod_frame_section", ({"helmod_common.resources"}))
-  Player.setStyle(resourcesPanel, "data_section", "minimal_width")
-  Player.setStyle(resourcesPanel, "data_section", "maximal_width")
+  local resourcesPanel = ElementGui.addGuiFrameV(scrollPanel, "resources", helmod_frame_style.section, ({"helmod_common.resources"}))
+  ElementGui.setStyle(resourcesPanel, "data_section", "width")
 
   local resourcesTable = ElementGui.addGuiTable(resourcesPanel,"table-resources",4)
   ElementGui.addGuiLabel(resourcesTable, "header-ingredient", ({"helmod_result-panel.col-header-ingredient"}))
@@ -71,9 +70,8 @@ function SummaryTab.methods:updateData()
     end
   end
 
-  local energyPanel = ElementGui.addGuiFrameV(scrollPanel, "energy", "helmod_frame_section", ({"helmod_common.generators"}))
-  Player.setStyle(energyPanel, "data_section", "minimal_width")
-  Player.setStyle(energyPanel, "data_section", "maximal_width")
+  local energyPanel = ElementGui.addGuiFrameV(scrollPanel, "energy", helmod_frame_style.section, ({"helmod_common.generators"}))
+  ElementGui.setStyle(energyPanel, "data_section", "width")
 
   local resultTable = ElementGui.addGuiTable(energyPanel,"table-energy",2)
 
@@ -86,9 +84,8 @@ function SummaryTab.methods:updateData()
   end
 
   -- factories
-  local factoryPanel = ElementGui.addGuiFrameV(scrollPanel, "factory", "helmod_frame_section", ({"helmod_common.factories"}))
-  Player.setStyle(factoryPanel, "data_section", "minimal_width")
-  Player.setStyle(factoryPanel, "data_section", "maximal_width")
+  local factoryPanel = ElementGui.addGuiFrameV(scrollPanel, "factory", helmod_frame_style.section, ({"helmod_common.factories"}))
+  ElementGui.setStyle(factoryPanel, "data_section", "width")
 
   if model.summary ~= nil then
     local resultTable = ElementGui.addGuiTable(factoryPanel,"table-factory",10)
@@ -100,9 +97,8 @@ function SummaryTab.methods:updateData()
     end
 
     -- beacons
-    local beaconPanel = ElementGui.addGuiFrameV(scrollPanel, "beacon", "helmod_frame_section", ({"helmod_common.beacons"}))
-    Player.setStyle(beaconPanel, "data_section", "minimal_width")
-    Player.setStyle(beaconPanel, "data_section", "maximal_width")
+    local beaconPanel = ElementGui.addGuiFrameV(scrollPanel, "beacon", helmod_frame_style.section, ({"helmod_common.beacons"}))
+    ElementGui.setStyle(beaconPanel, "data_section", "width")
 
     local resultTable = ElementGui.addGuiTable(beaconPanel,"table-beacon",10)
 
@@ -113,9 +109,8 @@ function SummaryTab.methods:updateData()
     end
 
     -- modules
-    local modulesPanel = ElementGui.addGuiFrameV(scrollPanel, "modules", "helmod_frame_section", ({"helmod_common.modules"}))
-    Player.setStyle(modulesPanel, "data_section", "minimal_width")
-    Player.setStyle(modulesPanel, "data_section", "maximal_width")
+    local modulesPanel = ElementGui.addGuiFrameV(scrollPanel, "modules", helmod_frame_style.section, ({"helmod_common.modules"}))
+    ElementGui.setStyle(modulesPanel, "data_section", "width")
 
     local resultTable = ElementGui.addGuiTable(modulesPanel,"table-modules",10)
 

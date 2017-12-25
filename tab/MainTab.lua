@@ -3,8 +3,9 @@ require "tab.ProductionBlockTab"
 require "tab.ProductionLineTab"
 require "tab.ResourceTab"
 require "tab.SummaryTab"
-require "tab.PropertiesTab"
 require "tab.StatisticTab"
+require "tab.PropertiesTab"
+require "tab.AdminTab"
 -------------------------------------------------------------------------------
 -- Class to build tab
 --
@@ -29,8 +30,9 @@ function MainTab.methods:init(parent)
   table.insert(tabs, EnergyTab:new(self))
   table.insert(tabs, ResourceTab:new(self))
   table.insert(tabs, SummaryTab:new(self))
-  table.insert(tabs, PropertiesTab:new(self))
   table.insert(tabs, StatisticTab:new(self))
+  table.insert(tabs, PropertiesTab:new(self))
+  table.insert(tabs, AdminTab:new(self))
 
   self.tabs = {}
   for _,tab in pairs(tabs) do
@@ -63,7 +65,7 @@ function MainTab.methods:getModelPanel()
   if menu_panel["model_panel"] ~= nil and menu_panel["model_panel"].valid then
     return menu_panel["model_panel"]["model_table"]
   end
-  local panel = ElementGui.addGuiFrameV(menu_panel, "model_panel", "helmod_frame_default")
+  local panel = ElementGui.addGuiFrameV(menu_panel, "model_panel", helmod_frame_style.default)
   return ElementGui.addGuiTable(panel, "model_table", 1, helmod_table_style.list)
 end
 
@@ -77,7 +79,7 @@ function MainTab.methods:getDebugPanel()
   if parent_panel["debug_panel"] ~= nil and parent_panel["debug_panel"].valid then
     return parent_panel["debug_panel"]
   end
-  local panel = ElementGui.addGuiFrameH(parent_panel, "debug_panel", "helmod_frame_data_menu", "Debug")
+  local panel = ElementGui.addGuiFrameH(parent_panel, "debug_panel", helmod_frame_style.panel, "Debug")
   return panel
 end
 
@@ -105,7 +107,7 @@ function MainTab.methods:getTabMenuPanel()
   if parent_panel["tab_menu_panel"] ~= nil and parent_panel["tab_menu_panel"].valid then
     return parent_panel["tab_menu_panel"]
   end
-  local panel = ElementGui.addGuiTable(parent_panel, "tab_menu_panel", 10, helmod_table_style.list)
+  local panel = ElementGui.addGuiTable(parent_panel, "tab_menu_panel", 20, helmod_table_style.tab)
   return panel
 end
 
@@ -178,11 +180,11 @@ end
 -- @param #string caption
 --
 function MainTab.methods:getResultScrollPanel(caption)
-  local resultPanel = self:getResultPanel(caption)
-  local scrollPanel = ElementGui.addGuiScrollPane(resultPanel, "scroll-data", helmod_frame_style.scroll_pane, true)
-  scrollPanel.style.horizontally_stretchable = true
-  scrollPanel.style.vertically_stretchable = true
-  return scrollPanel
+  local result_panel = self:getResultPanel(caption)
+  local scroll_panel = ElementGui.addGuiScrollPane(result_panel, "scroll-data", helmod_frame_style.scroll_pane, true, true)
+  scroll_panel.style.horizontally_stretchable = true
+  scroll_panel.style.vertically_stretchable = true
+  return scroll_panel
 end
 
 -------------------------------------------------------------------------------
@@ -339,7 +341,7 @@ end
 --
 function MainTab.methods:onEventAccessRead(event, action, item, item2, item3)
   Logging:debug(self:classname(), "onEventAccessRead():", action, item, item2, item3)
-  local model = Model.getModel()
+  
   local globalGui = Player.getGlobalGui()
 
   if action == "copy-model" then
@@ -355,6 +357,8 @@ function MainTab.methods:onEventAccessRead(event, action, item, item2, item3)
     end
   end
   if action == "share-model" then
+    local models = Model.getModels(true)
+    local model = models[item2]
     if model ~= nil then
       if item == "read" then
         if model.share == nil or not(bit32.band(model.share, 1) > 0) then
@@ -661,12 +665,14 @@ function MainTab.methods:updateHeaderPanel(item, item2, item3)
   local tab_menu_panel = self:getTabMenuPanel()
   
   for _, tab in pairs(self.tabs) do
-    if tab:classname() ~= "HMPropertiesTab" or Player.getSettings("properties_tab", true) then
-      local style = "helmod_button_default"
-      if tab:classname() == globalGui.currentTab then style = "helmod_button_selected" end
+    if (tab:classname() ~= "HMPropertiesTab" or Player.getSettings("properties_tab", true)) and (tab:classname() ~= "HMAdminTab" or Player.isAdmin()) then
+      local style = "helmod_button_tab"
+      if tab:classname() == globalGui.currentTab then style = "helmod_button_tab_selected" end
+      ElementGui.addGuiFrameH(tab_menu_panel,tab:classname().."_separator",helmod_frame_style.tab).style.width = 5
       ElementGui.addGuiButton(tab_menu_panel, self:classname().."=change-tab=ID=", tab:classname(), style, tab:getButtonCaption())
     end
   end
+  ElementGui.addGuiFrameH(tab_menu_panel,"tab_final",helmod_frame_style.tab).style.width = 1000
   -- action panel
   local action_panel = self:getActionPanel()
 

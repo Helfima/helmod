@@ -132,7 +132,7 @@ function Controller.bindController(player)
       if gui_top["helmod_planner-command"] ~= nil then gui_top["helmod_planner-command"].destroy() end
     end
     if gui_top ~= nil and gui_top["helmod_planner-command"] == nil and Player.getSettings("display_main_icon") then
-      local gui_button = ElementGui.addGuiFrameH(gui_top, "helmod_planner-command", "helmod_frame_default")
+      local gui_button = ElementGui.addGuiFrameH(gui_top, "helmod_planner-command", helmod_frame_style.default)
       gui_button.add({type="button", name="helmod_planner-command", tooltip=({"helmod_planner-command"}), style="helmod_icon"})
     end
   end

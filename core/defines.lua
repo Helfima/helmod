@@ -9,15 +9,25 @@ helmod_frame_style = {
   hidden = "helmod_frame_hidden",
   panel = "helmod_frame_default",
   cell = "helmod_frame_hidden",
+  tab = "helmod_frame_tab",
+  section = "helmod_frame_section",
   scroll_pane = "scroll_pane",
   scroll_recipe_selector = "helmod_scroll_recipe_selector",
   recipe_column = "helmod_frame_recipe_info"
 }
 
+helmod_scroll_style = {
+  default = "scroll_pane",
+  recipe_selector = "helmod_scroll_recipe_selector",
+  recipe_list = "helmod_scroll_recipe_module_list",
+  pin_tab = "helmod_scroll_block_pin_tab"
+}
+
 helmod_table_style = {
   default = "helmod_table_default",
   panel = "helmod_table_panel",
-  list = "helmod_table_list"
+  list = "helmod_table_list",
+  tab = "helmod_table_tab"
 }
 
 helmod_icons = {}

@@ -28,16 +28,15 @@ function StatisticTab.methods:updateData()
   Logging:debug(self:classname(), "updateSummary()")
   local model = Model.getModel()
   -- data
-  local scrollPanel = self.parent:getResultScrollPanel({"helmod_result-panel.tab-title-statistic"})
+  local scroll_panel = self.parent:getResultScrollPanel({"helmod_result-panel.tab-title-statistic"})
   
   -- resources
-  local elementsPanel = ElementGui.addGuiFrameV(scrollPanel, "resources", "helmod_frame_section", ({"helmod_common.total"}))
-  Player.setStyle(elementsPanel, "data_section", "minimal_width")
-  Player.setStyle(elementsPanel, "data_section", "maximal_width")
+  local element_panel = ElementGui.addGuiFrameV(scroll_panel, "resources", helmod_frame_style.section, ({"helmod_common.total"}))
+  ElementGui.setStyle(element_panel, "data_section", "width")
 
   local column = 2*8
 
-  local resultTable = ElementGui.addGuiTable(elementsPanel,"list-data",column, "helmod_table-odd")
+  local result_table = ElementGui.addGuiTable(scroll_panel,"list-data",column, "helmod_table-odd")
   --self:addProductionBlockHeader(resultTable)
   local elements = {}
   
@@ -52,7 +51,7 @@ function StatisticTab.methods:updateData()
   end
   
   for _, element in pairs(elements) do
-    self:addElementRow(resultTable, element)
+    self:addElementRow(result_table, element)
   end
 end
 

@@ -99,5 +99,5 @@ function Settings.methods:updateAboutSettings(event, action, item, item2, item3)
   ElementGui.addGuiLabel(dataSettingsTable, self:classname().."=version-label", {"helmod_settings-panel.mod-version"})
   ElementGui.addGuiLabel(dataSettingsTable, self:classname().."=version", game.active_mods["helmod"])
 
-  ElementGui.addGuiLabel(aboutSettingsPanel, self:classname().."=info", {"helmod_settings-panel.mod-info"}, "helmod_label_max_250", nil, true)
+  ElementGui.addGuiLabel(aboutSettingsPanel, self:classname().."=info", {"helmod_settings-panel.mod-info"}, "helmod_label_help", nil, true)
 end

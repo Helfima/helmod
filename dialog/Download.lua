@@ -61,7 +61,7 @@ function Download.methods:getDownloadPanel()
   if panel["download"] ~= nil and panel["download"].valid then
     return panel["download"]
   end
-  return ElementGui.addGuiFrameV(panel, "download", "helmod_frame_resize_row_width", {"helmod_common.download"})
+  return ElementGui.addGuiFrameV(panel, "download", helmod_frame_style.panel, {"helmod_common.download"})
 end
 
 -------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ function Download.methods:getUploadPanel()
   if panel["upload"] ~= nil and panel["upload"].valid then
     return panel["upload"]
   end
-  return ElementGui.addGuiFrameV(panel, "upload", "helmod_frame_resize_row_width", {"helmod_common.upload"})
+  return ElementGui.addGuiFrameV(panel, "upload", helmod_frame_style.panel, {"helmod_common.upload"})
 end
 
 -------------------------------------------------------------------------------

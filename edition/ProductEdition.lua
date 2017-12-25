@@ -78,7 +78,7 @@ function ProductEdition.methods:getInfoPanel()
   if panel["info"] ~= nil and panel["info"].valid then
     return panel["info"]
   end
-  return ElementGui.addGuiFrameV(panel, "info", "helmod_frame_resize_row_width")
+  return ElementGui.addGuiFrameV(panel, "info", helmod_frame_style.panel)
 end
 
 -------------------------------------------------------------------------------

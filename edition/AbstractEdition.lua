@@ -7,6 +7,7 @@
 
 AbstractEdition = setclass("HMAbstractEdition", Dialog)
 
+local limit_display_height = 850
 -------------------------------------------------------------------------------
 -- Get the parent panel
 --
@@ -32,16 +33,16 @@ end
 -- @return #boolean if true the next call close dialog
 --
 function AbstractEdition.methods:onOpen(event, action, item, item2, item3)
-  local model = Model.getModel()
+  local player_gui = Player.getGlobalGui()
   local close = true
-  model.moduleListRefresh = false
-  if model.guiElementLast == nil or model.guiElementLast ~= item..item2 then
+  player_gui.moduleListRefresh = false
+  if player_gui.guiElementLast == nil or player_gui.guiElementLast ~= item..item2 then
     close = false
-    model.factoryGroupSelected = nil
-    model.beaconGroupSelected = nil
-    model.moduleListRefresh = true
+    player_gui.factoryGroupSelected = nil
+    player_gui.beaconGroupSelected = nil
+    player_gui.moduleListRefresh = true
   end
-  model.guiElementLast = item..item2
+  player_gui.guiElementLast = item..item2
   return close
 end
 
@@ -57,35 +58,82 @@ end
 -- @param #string item3 third item name
 --
 function AbstractEdition.methods:onClose(event, action, item, item2, item3)
-  local model = Model.getModel()
-  model.guiElementLast = nil
-  model.moduleListRefresh = false
+  local player_gui = Player.getGlobalGui()
+  player_gui.guiElementLast = nil
+  player_gui.moduleListRefresh = false
 end
 
 -------------------------------------------------------------------------------
--- Get or create factory panel
+-- Get or create tab panel
 --
--- @function [parent=#AbstractEdition] getFactoryPanel
+-- @function [parent=#AbstractEdition] getTabPanel
 --
-function AbstractEdition.methods:getFactoryPanel()
+function AbstractEdition.methods:getTabPanel()
   local panel = self:getPanel()
-  if panel["factory_panel"] ~= nil and panel["factory_panel"].valid then
-    return panel["factory_panel"]
+  if panel["menu_panel"] ~= nil and panel["menu_panel"].valid then
+    return panel["menu_panel"]
   end
-  return ElementGui.addGuiTable(panel, "factory_panel", 2, helmod_table_style.panel)
+  return ElementGui.addGuiTable(panel, "menu_panel", 2, helmod_table_style.panel)
 end
 
 -------------------------------------------------------------------------------
--- Get or create other info panel
+-- Get or create left panel
 --
--- @function [parent=#AbstractEdition] getFactoryOtherInfoPanel
+-- @function [parent=#AbstractEdition] getLeftPanel
 --
-function AbstractEdition.methods:getFactoryOtherInfoPanel()
-  local panel = self:getFactoryPanel()
-  if panel["other_info_panel"] ~= nil and panel["other_info_panel"].valid then
-    return panel["other_info_panel"]
+function AbstractEdition.methods:getLeftPanel()
+  local panel = self:getTabPanel()
+  if panel["left_panel"] ~= nil and panel["left_panel"].valid then
+    return panel["left_panel"]
   end
-  return ElementGui.addGuiTable(panel, "other_info_panel", 1, helmod_table_style.panel)
+  local left_panel = ElementGui.addGuiFrameV(panel, "left_panel", helmod_frame_style.panel)
+  ElementGui.setStyle(left_panel,"recipe_edition_1","width")
+  return left_panel
+end
+
+-------------------------------------------------------------------------------
+-- Get or create right panel
+--
+-- @function [parent=#AbstractEdition] getRightPanel
+--
+function AbstractEdition.methods:getRightPanel()
+  local panel = self:getTabPanel()
+  if panel["right_panel"] ~= nil and panel["right_panel"].valid then
+    return panel["right_panel"]
+  end
+  local right_panel = ElementGui.addGuiFrameV(panel, "right_panel", helmod_frame_style.panel)
+  ElementGui.setStyle(right_panel,"recipe_edition_2","width")
+  return right_panel
+end
+
+-------------------------------------------------------------------------------
+-- Get or create tab left panel
+--
+-- @function [parent=#AbstractEdition] getTabLeftPanel
+--
+function AbstractEdition.methods:getTabLeftPanel()
+  local left_panel = self:getLeftPanel()
+  if left_panel["tab_left_panel"] ~= nil and left_panel["tab_left_panel"].valid then
+    return left_panel["tab_left_panel"]["tab_panel"]
+  end
+  local tab_panel = ElementGui.addGuiFrameH(left_panel, "tab_left_panel", helmod_frame_style.hidden)
+  ElementGui.setStyle(tab_panel,"recipe_tab","height")
+  return ElementGui.addGuiTable(tab_panel, "tab_panel", 5, helmod_table_style.tab)
+end
+
+-------------------------------------------------------------------------------
+-- Get or create tab right panel
+--
+-- @function [parent=#AbstractEdition] getTabRightPanel
+--
+function AbstractEdition.methods:getTabRightPanel()
+  local right_panel = self:getRightPanel()
+  if right_panel["tab_right_panel"] ~= nil and right_panel["tab_right_panel"].valid then
+    return right_panel["tab_right_panel"]["tab_panel"]
+  end
+  local tab_panel = ElementGui.addGuiFrameV(right_panel, "tab_right_panel", helmod_frame_style.hidden)
+  ElementGui.setStyle(tab_panel,"recipe_tab","height")
+  return ElementGui.addGuiTable(tab_panel, "tab_panel", 5, helmod_table_style.tab)
 end
 
 -------------------------------------------------------------------------------
@@ -94,11 +142,13 @@ end
 -- @function [parent=#AbstractEdition] getFactorySelectorPanel
 --
 function AbstractEdition.methods:getFactorySelectorPanel()
-  local panel = self:getFactoryOtherInfoPanel()
-  if panel["selector"] ~= nil and panel["selector"].valid then
-    return panel["selector"]
+  local right_panel = self:getRightPanel()
+  if right_panel["factory_selector"] ~= nil and right_panel["factory_selector"].valid then
+    return right_panel["factory_selector"]
   end
-  return ElementGui.addGuiFrameV(panel, "selector", helmod_frame_style.recipe_column, ({"helmod_common.factory"}))
+  local panel = ElementGui.addGuiFrameV(right_panel, "factory_selector", helmod_frame_style.section, ({"helmod_common.factory"}))
+  ElementGui.setStyle(panel, "recipe_edition_1", "height")
+  return panel
 end
 
 -------------------------------------------------------------------------------
@@ -107,11 +157,14 @@ end
 -- @function [parent=#AbstractEdition] getFactoryInfoPanel
 --
 function AbstractEdition.methods:getFactoryInfoPanel()
-  local panel = self:getFactoryPanel()
-  if panel["info"] ~= nil and panel["info"].valid then
-    return panel["info"]
+  local left_panel = self:getLeftPanel()
+  if left_panel["factory_info"] ~= nil and left_panel["factory_info"].valid then
+    return left_panel["factory_info"]
   end
-  return ElementGui.addGuiFrameV(panel, "info", helmod_frame_style.recipe_column, ({"helmod_common.factory"}))
+  local panel = ElementGui.addGuiFrameV(left_panel, "factory_info", helmod_frame_style.section, ({"helmod_common.factory"}))
+  ElementGui.setStyle(panel, "recipe_edition_1", "width")
+  ElementGui.setStyle(panel, "recipe_edition_1", "height")
+  return panel
 end
 
 -------------------------------------------------------------------------------
@@ -120,17 +173,17 @@ end
 -- @function [parent=#AbstractEdition] getFactoryModulesSelectorPanel
 --
 function AbstractEdition.methods:getFactoryModulesSelectorPanel()
-  local modulesPanel = self:getFactoryOtherInfoPanel()
-  local selectionModulesPanel = modulesPanel["selection-modules"]
-  if selectionModulesPanel == nil then
-    selectionModulesPanel = ElementGui.addGuiFrameV(modulesPanel, "selection-modules", "helmod_frame_recipe_modules", ({"helmod_recipe-edition-panel.selection-modules"}))
+  local right_panel = self:getRightPanel()
+  if right_panel["factory_selection_modules"] ~= nil and right_panel["factory_selection_modules"].valid then
+    return right_panel["factory_selection_modules"]["scroll_modules"]
   end
 
-  local scrollModulesPanel = selectionModulesPanel["scroll-modules"]
-  if scrollModulesPanel == nil then
-    scrollModulesPanel = ElementGui.addGuiScrollPane(selectionModulesPanel, "scroll-modules", "helmod_scroll_recipe_module_list", true)
-  end
-  return scrollModulesPanel
+  local selection_panel = ElementGui.addGuiFrameV(right_panel, "factory_selection_modules", helmod_frame_style.section, ({"helmod_recipe-edition-panel.selection-modules"}))
+  ElementGui.setStyle(selection_panel, "recipe_edition_2", "width")
+  local scroll_panel = ElementGui.addGuiScrollPane(selection_panel, "scroll_modules", helmod_scroll_style.default, true)
+  ElementGui.setStyle(scroll_panel, "recipe_module", "width")
+  ElementGui.setStyle(scroll_panel, "recipe_module", "height")
+  return scroll_panel
 end
 
 -------------------------------------------------------------------------------
@@ -139,50 +192,13 @@ end
 -- @function [parent=#AbstractEdition] getFactoryActivedModulesPanel
 --
 function AbstractEdition.methods:getFactoryActivedModulesPanel()
-  local modulesPanel = self:getFactoryOtherInfoPanel()
-  if modulesPanel["current-modules"] ~= nil and modulesPanel["current-modules"].valid then
-    return modulesPanel["current-modules"]
+  local right_panel = self:getRightPanel()
+  if right_panel["factory_modules"] ~= nil and right_panel["factory_modules"].valid then
+    return right_panel["factory_modules"]
   end
-  return ElementGui.addGuiFrameV(modulesPanel, "current-modules", "helmod_frame_recipe_modules", ({"helmod_recipe-edition-panel.current-modules"}))
-end
-
--------------------------------------------------------------------------------
--- Get or create beacon panel
---
--- @function [parent=#AbstractEdition] getBeaconPanel
---
-function AbstractEdition.methods:getBeaconPanel()
-  local panel = self:getPanel()
-  if panel["beacon_panel"] ~= nil and panel["beacon_panel"].valid then
-    return panel["beacon_panel"]
-  end
-  return ElementGui.addGuiTable(panel, "beacon_panel", 2, helmod_table_style.panel)
-end
-
--------------------------------------------------------------------------------
--- Get or create other info panel
---
--- @function [parent=#AbstractEdition] getBeaconOtherInfoPanel
---
-function AbstractEdition.methods:getBeaconOtherInfoPanel()
-  local panel = self:getBeaconPanel()
-  if panel["other_info_panel"] ~= nil and panel["other_info_panel"].valid then
-    return panel["other_info_panel"]
-  end
-  return ElementGui.addGuiTable(panel, "other_info_panel", 1, helmod_table_style.panel)
-end
-
--------------------------------------------------------------------------------
--- Get or create selector panel
---
--- @function [parent=#AbstractEdition] getBeaconSelectorPanel
---
-function AbstractEdition.methods:getBeaconSelectorPanel()
-  local panel = self:getBeaconOtherInfoPanel()
-  if panel["selector_panel"] ~= nil and panel["selector_panel"].valid then
-    return panel["selector_panel"]
-  end
-  return ElementGui.addGuiFrameV(panel, "selector_panel", helmod_frame_style.recipe_column, ({"helmod_common.beacon"}))
+  local panel = ElementGui.addGuiFrameV(right_panel, "factory_modules", helmod_frame_style.section, ({"helmod_recipe-edition-panel.current-modules"}))
+  ElementGui.setStyle(panel, "recipe_edition_2", "width")
+  return panel
 end
 
 -------------------------------------------------------------------------------
@@ -191,11 +207,30 @@ end
 -- @function [parent=#AbstractEdition] getBeaconInfoPanel
 --
 function AbstractEdition.methods:getBeaconInfoPanel()
-  local panel = self:getBeaconPanel()
-  if panel["info"] ~= nil and panel["info"].valid then
-    return panel["info"]
+  local panel = self:getLeftPanel()
+  if panel["beacon_info"] ~= nil and panel["beacon_info"].valid then
+    return panel["beacon_info"]
   end
-  return ElementGui.addGuiFrameV(panel, "info", helmod_frame_style.recipe_column, ({"helmod_common.beacon"}))
+  local panel = ElementGui.addGuiFrameV(panel, "beacon_info", helmod_frame_style.section, ({"helmod_common.beacon"}))
+  ElementGui.setStyle(panel, "recipe_edition_1", "width")
+  ElementGui.setStyle(panel, "recipe_edition_1", "height")
+  return panel
+end
+
+-------------------------------------------------------------------------------
+-- Get or create selector panel
+--
+-- @function [parent=#AbstractEdition] getBeaconSelectorPanel
+--
+function AbstractEdition.methods:getBeaconSelectorPanel()
+  local right_panel = self:getRightPanel()
+  if right_panel["beacon_selector"] ~= nil and right_panel["beacon_selector"].valid then
+    return right_panel["beacon_selector"]
+  end
+  local panel = ElementGui.addGuiFrameV(right_panel, "beacon_selector", helmod_frame_style.section, ({"helmod_common.beacon"}))
+  ElementGui.setStyle(panel, "recipe_edition_2", "width")
+  ElementGui.setStyle(panel, "recipe_edition_1", "height")
+  return panel
 end
 
 -------------------------------------------------------------------------------
@@ -204,17 +239,17 @@ end
 -- @function [parent=#AbstractEdition] getBeaconModulesSelectorPanel
 --
 function AbstractEdition.methods:getBeaconModulesSelectorPanel()
-  local modulesPanel = self:getBeaconOtherInfoPanel()
-  local selectionModulesPanel = modulesPanel["selection-modules"]
-  if selectionModulesPanel == nil then
-    selectionModulesPanel = ElementGui.addGuiFrameV(modulesPanel, "selection-modules", "helmod_frame_recipe_modules", ({"helmod_recipe-edition-panel.selection-modules"}))
+  local right_panel = self:getRightPanel()
+  if right_panel["beacon_selection_modules"] ~= nil and right_panel["beacon_selection_modules"].valid then
+    return right_panel["beacon_selection_modules"]["scroll_modules"]
   end
 
-  local scrollModulesPanel = selectionModulesPanel["scroll-modules"]
-  if scrollModulesPanel == nil then
-    scrollModulesPanel = ElementGui.addGuiScrollPane(selectionModulesPanel, "scroll-modules", "helmod_scroll_recipe_module_list", true)
-  end
-  return scrollModulesPanel
+  local selection_panel = ElementGui.addGuiFrameV(right_panel, "beacon_selection_modules", helmod_frame_style.section, ({"helmod_recipe-edition-panel.selection-modules"}))
+  ElementGui.setStyle(selection_panel, "recipe_edition_2", "width")
+  local scroll_panel = ElementGui.addGuiScrollPane(selection_panel, "scroll_modules", helmod_scroll_style.recipe_list, true)
+  ElementGui.setStyle(scroll_panel, "recipe_module", "width")
+  ElementGui.setStyle(scroll_panel, "recipe_module", "height")
+  return scroll_panel
 end
 
 -------------------------------------------------------------------------------
@@ -223,11 +258,13 @@ end
 -- @function [parent=#AbstractEdition] getBeaconActivedModulesPanel
 --
 function AbstractEdition.methods:getBeaconActivedModulesPanel()
-  local modulesPanel = self:getBeaconOtherInfoPanel()
-  if modulesPanel["current-modules"] ~= nil and modulesPanel["current-modules"].valid then
-    return modulesPanel["current-modules"]
+  local right_panel = self:getRightPanel()
+  if right_panel["beacon_modules"] ~= nil and right_panel["beacon_modules"].valid then
+    return right_panel["beacon_modules"]
   end
-  return ElementGui.addGuiFrameV(modulesPanel, "current-modules", "helmod_frame_recipe_modules", ({"helmod_recipe-edition-panel.current-modules"}))
+  local panel = ElementGui.addGuiFrameV(right_panel, "beacon_modules", helmod_frame_style.section, ({"helmod_recipe-edition-panel.current-modules"}))
+  ElementGui.setStyle(panel, "recipe_edition_2", "width")
+  return panel
 end
 
 -------------------------------------------------------------------------------
@@ -245,9 +282,12 @@ function AbstractEdition.methods:afterOpen(event, action, item, item2, item3)
   Logging:debug(self:classname(), "afterOpen():", action, item, item2, item3)
   local object = self:getObject(event, action, item, item2, item3)
 
-  local model = Model.getModel()
-  if model.module_panel == nil then
-    model.module_panel = true
+  local player_gui = Player.getGlobalGui()
+  if player_gui.module_panel == nil then
+    player_gui.module_panel = true
+  end
+  if player_gui.factory_tab == nil then
+    player_gui.factory_tab = true
   end
 
   self:buildHeaderPanel()
@@ -276,8 +316,8 @@ end
 --
 function AbstractEdition.methods:buildFactoryPanel()
   Logging:debug(self:classname(), "buildFactoryPanel()")
-  self:getFactoryInfoPanel(player)
-  self:getFactoryOtherInfoPanel(player)
+  self:getFactoryInfoPanel()
+  self:getFactoryOtherInfoPanel()
 end
 
 -------------------------------------------------------------------------------
@@ -304,14 +344,22 @@ end
 --
 function AbstractEdition.methods:onUpdate(event, action, item, item2, item3)
   Logging:debug(self:classname(), "onUpdate():", action, item, item2, item3)
+  local global_gui = Player.getGlobalGui()
+  local display_width, display_height = ElementGui.getDisplaySizes()
   local object = self:getObject(item, item2, item3)
   -- header
   self:updateHeader(item, item2, item3)
   if object ~= nil then
-    -- factory
-    self:updateFactory(item, item2, item3)
-    -- beacon
-    self:updateBeacon(item, item2, item3)
+    -- tab menu
+    self:updateTabMenu(item, item2, item3)
+    if display_height >= limit_display_height or global_gui.factory_tab then
+      -- factory
+      self:updateFactory(item, item2, item3)
+    end
+    if display_height >= limit_display_height or not(global_gui.factory_tab) then
+      -- beacon
+      self:updateBeacon(item, item2, item3)
+    end
   end
 end
 
@@ -330,6 +378,59 @@ function AbstractEdition.methods:updateHeader(item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
+-- Update tab menu
+--
+-- @function [parent=#AbstractEdition] updateTabMenu
+--
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function AbstractEdition.methods:updateTabMenu(item, item2, item3)
+  Logging:debug(self:classname(), "updateTabMenu():", item, item2, item3)
+  local global_gui = Player.getGlobalGui()
+  local tab_left_panel = self:getTabLeftPanel()
+  local tab_right_panel = self:getTabRightPanel()
+  local object = self:getObject(item, item2, item3)
+
+  local display_width, display_height = ElementGui.getDisplaySizes()
+
+  tab_left_panel.clear()
+  tab_right_panel.clear()
+
+  -- left tab
+  if display_height < limit_display_height then
+    local style = "helmod_button_tab"
+    if global_gui.factory_tab == true then style = "helmod_button_tab_selected" end
+
+    ElementGui.addGuiFrameH(tab_left_panel, self:classname().."_separator_factory",helmod_frame_style.tab).style.width = 5
+    ElementGui.addGuiButton(tab_left_panel, self:classname().."=change-tab=ID="..item.."="..object.id.."=", "factory", style, {"helmod_common.factory"}, {"helmod_common.factory"})
+
+    local style = "helmod_button_tab"
+    if global_gui.factory_tab == false then style = "helmod_button_tab_selected" end
+
+    ElementGui.addGuiFrameH(tab_left_panel, self:classname().."_separator_beacon",helmod_frame_style.tab).style.width = 5
+    ElementGui.addGuiButton(tab_left_panel, self:classname().."=change-tab=ID="..item.."="..object.id.."=", "beacon", style, {"helmod_common.beacon"}, {"helmod_common.beacon"})
+
+    ElementGui.addGuiFrameH(tab_left_panel,"tab_final",helmod_frame_style.tab).style.width = 100
+  end
+  -- right tab
+  local style = "helmod_button_tab"
+  if global_gui.module_panel == false then style = "helmod_button_tab_selected" end
+
+  ElementGui.addGuiFrameH(tab_right_panel, self:classname().."_separator_factory",helmod_frame_style.tab).style.width = 5
+  ElementGui.addGuiButton(tab_right_panel, self:classname().."=change-panel=ID="..item.."="..object.id.."=", "factory", style, {"helmod_common.factory"}, {"tooltip.selector-factory"})
+
+  local style = "helmod_button_tab"
+  if global_gui.module_panel == true then style = "helmod_button_tab_selected" end
+
+  ElementGui.addGuiFrameH(tab_right_panel, self:classname().."_separator_module",helmod_frame_style.tab).style.width = 5
+  ElementGui.addGuiButton(tab_right_panel, self:classname().."=change-panel=ID="..item.."="..object.id.."=", "module", style, {"helmod_common.module"}, {"tooltip.selector-module"})
+
+  ElementGui.addGuiFrameH(tab_right_panel,"tab_final",helmod_frame_style.tab).style.width = 100
+end
+
+-------------------------------------------------------------------------------
 -- Update factory
 --
 -- @function [parent=#AbstractEdition] updateFactory
@@ -340,10 +441,10 @@ end
 --
 function AbstractEdition.methods:updateFactory(item, item2, item3)
   Logging:debug(self:classname(), "updateFactory():", item, item2, item3)
-  local model = Model.getModel()
+  local global_gui = Player.getGlobalGui()
 
   self:updateFactoryInfo(item, item2, item3)
-  if model.module_panel == true then
+  if global_gui.module_panel == true then
     self:updateFactoryActivedModules(item, item2, item3)
     self:updateFactoryModulesSelector(item, item2, item3)
   else
@@ -362,10 +463,10 @@ end
 --
 function AbstractEdition.methods:updateBeacon(item, item2, item3)
   Logging:debug(self:classname(), "updateBeacon():", item, item2, item3)
-  local model = Model.getModel()
+  local global_gui = Player.getGlobalGui()
 
   self:updateBeaconInfo(item, item2, item3)
-  if model.module_panel == true then
+  if global_gui.module_panel == true then
     self:updateBeaconActivedModules(item, item2, item3)
     self:updateBeaconModulesSelector(item, item2, item3)
   else
@@ -401,7 +502,7 @@ function AbstractEdition.methods:updateFactoryInfo(item, item2, item3)
   Logging:debug(self:classname(), "updateFactoryInfo():", item, item2, item3)
   local infoPanel = self:getFactoryInfoPanel()
   local object = self:getObject(item, item2, item3)
-  local model = Model.getModel()
+  local global_gui = Player.getGlobalGui()
   if object ~= nil then
     Logging:debug(self:classname(), "updateFactoryInfo():object:",object)
     local factory = object.factory
@@ -413,7 +514,7 @@ function AbstractEdition.methods:updateFactoryInfo(item, item2, item3)
 
     local headerPanel = ElementGui.addGuiTable(infoPanel,"table-header",2)
     local tooltip = ({"tooltip.selector-module"})
-    if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
+    if global_gui.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
     ElementGui.addGuiButtonSelectSprite(headerPanel, self:classname().."=change-panel=ID="..item.."="..object.id.."=", Player.getIconType(factory), factory.name, factory.name, tooltip, self.color_button_edit)
     if EntityPrototype.native() == nil then
       ElementGui.addGuiLabel(headerPanel, "label", factory.name)
@@ -427,7 +528,7 @@ function AbstractEdition.methods:updateFactoryInfo(item, item2, item3)
     ElementGui.addGuiLabel(inputPanel, "module-slots", EntityPrototype.getModuleInventorySize())
 
     ElementGui.addGuiLabel(inputPanel, "label-energy", ({"helmod_label.energy"}))
-    
+
     local sign = ""
     if factory.effects.consumption > 0 then sign = "+" end
     ElementGui.addGuiLabel(inputPanel, "energy", Format.formatNumberKilo(factory.energy, "W").." ("..sign..Format.formatPercent(factory.effects.consumption).."%)")
@@ -461,12 +562,12 @@ end
 function AbstractEdition.methods:updateFactoryModulesSelector(item, item2, item3)
   Logging:debug(self:classname(), "updateFactoryModulesSelector():", item, item2, item3)
   local selectorPanel = self:getFactoryModulesSelectorPanel()
-  local model = Model.getModel()
+  local player_gui = Player.getGlobalGui()
   local object = self:getObject(item, item2, item3)
   local model_filter_factory_module = Player.getSettings("model_filter_factory_module", true)
 
 
-  if selectorPanel["modules"] ~= nil and selectorPanel["modules"].valid and model.moduleListRefresh == true then
+  if selectorPanel["modules"] ~= nil and selectorPanel["modules"].valid and player_gui.moduleListRefresh == true then
     selectorPanel["modules"].destroy()
   end
 
@@ -533,13 +634,12 @@ end
 function AbstractEdition.methods:updateFactorySelector(item, item2, item3)
   Logging:debug(self:classname(), "updateFactorySelector():", item, item2, item3)
   local selectorPanel = self:getFactorySelectorPanel()
+  local global_gui = Player.getGlobalGui()
 
   if selectorPanel["scroll-factory"] ~= nil and selectorPanel["scroll-factory"].valid then
     selectorPanel["scroll-factory"].destroy()
   end
-  local scrollPanel = ElementGui.addGuiScrollPane(selectorPanel, "scroll-factory", "helmod_scroll_recipe_factories", true)
-
-  local model = Model.getModel()
+  local scrollPanel = ElementGui.addGuiScrollPane(selectorPanel, "scroll-factory", helmod_scroll_style.recipe_list, true)
 
   local object = self:getObject(item, item2, item3)
 
@@ -570,7 +670,7 @@ function AbstractEdition.methods:updateFactorySelector(item, item2, item3)
 
     for group, count in pairs(subgroups) do
       -- set le groupe
-      if model.factoryGroupSelected == nil then model.factoryGroupSelected = group end
+      if global_gui.factoryGroupSelected == nil then global_gui.factoryGroupSelected = group end
       -- ajoute les icons de groupe
       local action = ElementGui.addGuiButton(groupsPanel, self:classname().."=factory-group=ID="..item.."="..object.id.."=", group, "helmod_button_default", group)
     end
@@ -578,7 +678,7 @@ function AbstractEdition.methods:updateFactorySelector(item, item2, item3)
 
   local tablePanel = ElementGui.addGuiTable(scrollPanel, "factory-table", 5)
   for key, factory in pairs(factories) do
-    if category ~= nil or (factory.subgroup ~= nil and factory.subgroup.name == model.factoryGroupSelected) then
+    if category ~= nil or (factory.subgroup ~= nil and factory.subgroup.name == global_gui.factoryGroupSelected) then
       local localised_name = Player.getLocalisedName(factory)
       ElementGui.addGuiButtonSelectSprite(tablePanel, self:classname().."=factory-select=ID="..item.."="..object.id.."=", "item", factory.name, factory.name, localised_name)
     end
@@ -598,7 +698,7 @@ function AbstractEdition.methods:updateBeaconInfo(item, item2, item3)
   Logging:debug(self:classname(), "updateBeaconInfo():", item, item2, item3)
   local infoPanel = self:getBeaconInfoPanel()
   local object = self:getObject(item, item2, item3)
-  local model = Model.getModel()
+  local global_gui = Player.getGlobalGui()
 
   if object ~= nil then
     local beacon = object.beacon
@@ -610,7 +710,7 @@ function AbstractEdition.methods:updateBeaconInfo(item, item2, item3)
 
     local headerPanel = ElementGui.addGuiTable(infoPanel,"table-header",2)
     local tooltip = ({"tooltip.selector-module"})
-    if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
+    if global_gui.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
     ElementGui.addGuiButtonSelectSprite(headerPanel, self:classname().."=change-panel=ID="..item.."="..object.id.."=", Player.getIconType(beacon), beacon.name, beacon.name, tooltip, self.color_button_edit)
     if beacon_prototype.native() == nil then
       ElementGui.addGuiLabel(headerPanel, "label", beacon.name)
@@ -680,11 +780,11 @@ end
 function AbstractEdition.methods:updateBeaconModulesSelector(item, item2, item3)
   Logging:debug(self:classname(), "updateBeaconModulesSelector():", item, item2, item3)
   local selectorPanel = self:getBeaconModulesSelectorPanel()
-  local model = Model.getModel()
+  local player_gui = Player.getGlobalGui()
   local object = self:getObject(item, item2, item3)
   local model_filter_beacon_module = Player.getSettings("model_filter_beacon_module", true)
 
-  if selectorPanel["modules"] ~= nil and selectorPanel["modules"].valid and model.moduleListRefresh == true then
+  if selectorPanel["modules"] ~= nil and selectorPanel["modules"].valid and player_gui.moduleListRefresh == true then
     selectorPanel["modules"].destroy()
   end
 
@@ -718,12 +818,12 @@ end
 function AbstractEdition.methods:updateBeaconSelector(item, item2, item3)
   Logging:debug(self:classname(), "updateBeaconSelector():", item, item2, item3)
   local selectorPanel = self:getBeaconSelectorPanel()
-  local model = Model.getModel()
+  local global_gui = Player.getGlobalGui()
 
   if selectorPanel["scroll-beacon"] ~= nil and selectorPanel["scroll-beacon"].valid then
     selectorPanel["scroll-beacon"].destroy()
   end
-  local scrollPanel = ElementGui.addGuiScrollPane(selectorPanel, "scroll-beacon", "helmod_scroll_recipe_factories", true)
+  local scrollPanel = ElementGui.addGuiScrollPane(selectorPanel, "scroll-beacon", helmod_scroll_style.recipe_list, true)
 
   local object = self:getObject(item, item2, item3)
 
@@ -751,7 +851,7 @@ function AbstractEdition.methods:updateBeaconSelector(item, item2, item3)
 
     for group, count in pairs(subgroups) do
       -- set le groupe
-      if model.beaconGroupSelected == nil then model.beaconGroupSelected = group end
+      if global_gui.beaconGroupSelected == nil then global_gui.beaconGroupSelected = group end
       -- ajoute les icons de groupe
       local action = ElementGui.addGuiButton(groupsPanel, self:classname().."=beacon-group=ID="..item.."="..object.id.."=", group, "helmod_button_default", group)
     end
@@ -759,7 +859,7 @@ function AbstractEdition.methods:updateBeaconSelector(item, item2, item3)
 
   local tablePanel = ElementGui.addGuiTable(scrollPanel, "beacon-table", 5)
   for key, beacon in pairs(factories) do
-    if category ~= nil or (beacon.subgroup ~= nil and beacon.subgroup.name == model.beaconGroupSelected) then
+    if category ~= nil or (beacon.subgroup ~= nil and beacon.subgroup.name == global_gui.beaconGroupSelected) then
       local localised_name = Player.getLocalisedName(beacon)
       ElementGui.addGuiButtonSelectSprite(tablePanel, self:classname().."=beacon-select=ID="..item.."="..object.id.."=", "item", beacon.name, beacon.name, localised_name)
     end
@@ -779,21 +879,29 @@ end
 --
 function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
   Logging:debug(self:classname(), "onEvent():", action, item, item2, item3)
+  local display_width, display_height = ElementGui.getDisplaySizes()
   local model = Model.getModel()
+  local global_gui = Player.getGlobalGui()
+
+  if action == "change-tab" then
+    global_gui.factory_tab = not(global_gui.factory_tab)
+    self:sendEvent(event, "CLOSE", item, item2, item3)
+    self:sendEvent(event, "OPEN", item, item2, item3)
+  end
 
   if action == "change-panel" then
-    model.module_panel = not(model.module_panel)
+    global_gui.module_panel = not(global_gui.module_panel)
     self:sendEvent(event, "CLOSE", item, item2, item3)
     self:sendEvent(event, "OPEN", item, item2, item3)
   end
 
   if action == "factory-group" then
-    model.factoryGroupSelected = item3
+    global_gui.factoryGroupSelected = item3
     self:updateFactorySelector(item, item2, item3)
   end
 
   if action == "beacon-group" then
-    model.beaconGroupSelected = item3
+    global_gui.beaconGroupSelected = item3
     self:updateBeaconSelector(item, item2, item3)
   end
 
@@ -841,7 +949,6 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
       Model.update()
       self:updateFactoryInfo(item, item2, item3)
       self:updateFactoryActivedModules(item, item2, item3)
-      self:updateBeaconInfo(item, item2, item3)
       self.parent:refreshDisplayData(nil, item, item2)
     end
 
@@ -850,7 +957,6 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
       Model.update()
       self:updateFactoryInfo(item, item2, item3)
       self:updateFactoryActivedModules(item, item2, item3)
-      self:updateBeaconInfo(item, item2, item3)
       self.parent:refreshDisplayData(nil, item, item2)
     end
 
@@ -876,7 +982,9 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
       Model.updateBeacon(item, item2, options)
       Model.update()
       self:updateBeaconInfo(item, item2, item3)
-      self:updateFactoryInfo(item, item2, item3)
+      if display_height >= limit_display_height or global_gui.factory_tab then
+        self:updateFactoryInfo(item, item2, item3)
+      end
       self.parent:refreshDisplayData(nil, item, item2)
     end
 
@@ -885,7 +993,9 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
       Model.update()
       self:updateBeaconInfo(item, item2, item3)
       self:updateBeaconActivedModules(item, item2, item3)
-      self:updateFactoryInfo(item, item2, item3)
+      if display_height >= limit_display_height or global_gui.factory_tab then
+        self:updateFactoryInfo(item, item2, item3)
+      end
       self.parent:refreshDisplayData(nil, item, item2)
     end
 
@@ -894,7 +1004,9 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
       Model.update()
       self:updateBeaconInfo(item, item2, item3)
       self:updateBeaconActivedModules(item, item2, item3)
-      self:updateFactoryInfo(item, item2, item3)
+      if display_height >= limit_display_height or global_gui.factory_tab then
+        self:updateFactoryInfo(item, item2, item3)
+      end
       self.parent:refreshDisplayData(nil, item, item2)
     end
   end

@@ -227,11 +227,9 @@ function HelpPanel.methods:getContentScrollPanel(caption)
   if content_panel["scroll-content"] ~= nil and content_panel["scroll-content"].valid then
     return content_panel["scroll-content"]
   end
-  local scroll_panel = ElementGui.addGuiScrollPane(content_panel, "scroll-content", helmod_frame_style.scroll_pane)
-  Player.setStyle(scroll_panel, "scroll_help", "minimal_width")
-  Player.setStyle(scroll_panel, "scroll_help", "maximal_width")
-  Player.setStyle(scroll_panel, "scroll_help", "minimal_height")
-  Player.setStyle(scroll_panel, "scroll_help", "maximal_height")
+  local scroll_panel = ElementGui.addGuiScrollPane(content_panel, "scroll-content", helmod_scroll_style.default)
+  ElementGui.setStyle(scroll_panel, "scroll_help", "width")
+  ElementGui.setStyle(scroll_panel, "scroll_help", "height")
   return scroll_panel
 end
 
@@ -360,19 +358,21 @@ function HelpPanel.methods:updateContent(event, action, item, item2, item3)
     ElementGui.addGuiLabel(content_panel, table.concat({section.name, "-name"}), {table.concat({"helmod_help.",section.name})}, "helmod_label_help_title", nil, false)
     ElementGui.addGuiLabel(content_panel, table.concat({section.name, "-desc"}), {table.concat({"helmod_help.",section.name, "-desc"})}, "helmod_label_help", nil, false)
     for i,content in pairs(section.content) do
-      ElementGui.addGuiLabel(content_panel, table.concat({section.name, "-title-",i}), {table.concat({"helmod_help.",content.localised_text})}, "helmod_label_help_title", nil, false)
+      local section_panel = ElementGui.addGuiFrameV(content_panel, table.concat({section.name, "-panel-",i}), helmod_frame_style.section)
+    
+      ElementGui.addGuiLabel(section_panel, table.concat({section.name, "-title-",i}), {table.concat({"helmod_help.",content.localised_text})}, "helmod_label_help_title", nil, false)
       if content.desc then
-        ElementGui.addGuiLabel(content_panel, table.concat({section.name, "-desc-",i}), {table.concat({"helmod_help.",content.localised_text, "-desc"})}, "helmod_label_help", nil, false)
+        ElementGui.addGuiLabel(section_panel, table.concat({section.name, "-desc-",i}), {table.concat({"helmod_help.",content.localised_text, "-desc"})}, "helmod_label_help", nil, false)
       end
       if content.sprite then
-        ElementGui.addSprite(content_panel, "helmod_"..content.sprite)
+        ElementGui.addSprite(section_panel, "helmod_"..content.sprite)
       end
 
       local column = 1
       if content.list == "number" then
         column = 2
       end
-      local content_table = ElementGui.addGuiTable(content_panel, table.concat({section.name, "-list-",i}), column, "helmod_table-help")
+      local content_table = ElementGui.addGuiTable(section_panel, table.concat({section.name, "-list-",i}), column, "helmod_table-help")
       for line=1, content.count do
         if content.list == "number" then
           ElementGui.addGuiLabel(content_table, table.concat({section.name, "-num-",i, "-", line}), table.concat({line,":"}) , "helmod_label_help_number")

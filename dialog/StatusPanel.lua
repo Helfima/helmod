@@ -78,8 +78,8 @@ function StatusPanel.methods:getInfoPanel()
   if panel["info-panel"] ~= nil and panel["info-panel"].valid then
     return panel["info-panel"]["scroll-panel"]
   end
-  local mainPanel = ElementGui.addGuiFrameV(panel, "info-panel", "helmod_frame_resize_row_width")
-  return ElementGui.addGuiScrollPane(mainPanel, "scroll-panel", "helmod_scroll_block_pin_tab")
+  local mainPanel = ElementGui.addGuiFrameV(panel, "info-panel", helmod_frame_style.panel)
+  return ElementGui.addGuiScrollPane(mainPanel, "scroll-panel", helmod_scroll_style.pin_tab)
 end
 
 -------------------------------------------------------------------------------
@@ -92,7 +92,7 @@ function StatusPanel.methods:getHeaderPanel()
   if panel["header"] ~= nil and panel["header"].valid then
     return panel["header"]
   end
-  return ElementGui.addGuiFrameH(panel, "header", "helmod_frame_resize_row_width")
+  return ElementGui.addGuiFrameH(panel, "header", helmod_frame_style.panel)
 end
 
 -------------------------------------------------------------------------------

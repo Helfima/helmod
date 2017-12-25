@@ -1,12 +1,12 @@
 
 {
   "name": "helmod",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "title": "Helmod: assistant for planning your base.",
   "author": "Helfima",
   "contact": "Helfima",
   "homepage": "https://github.com/Helfima/helmod/wiki",
   "description": "Assistant to plan its base. calculates the needs, resources, factories, beacon or electric power.",
-  "dependencies": ["base >= 0.16.0"],
+  "dependencies": ["base >= 0.16.7"],
   "factorio_version": "0.16"
 }

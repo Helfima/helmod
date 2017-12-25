@@ -43,7 +43,8 @@ function RecipeEdition.methods:getRecipePanel()
   if panel["recipe_panel"] ~= nil and panel["recipe_panel"].valid then
     return panel["recipe_panel"]
   end
-  return ElementGui.addGuiTable(panel, "recipe_panel", 2, helmod_table_style.panel)
+  local table_panel = ElementGui.addGuiTable(panel, "recipe_panel", 2, helmod_table_style.panel)
+  return table_panel
 end
 
 -------------------------------------------------------------------------------
@@ -58,7 +59,9 @@ function RecipeEdition.methods:getObjectInfoPanel()
   if panel["info"] ~= nil and panel["info"].valid then
     return panel["info"]
   end
-  return ElementGui.addGuiFrameH(panel, "info", "helmod_frame_recipe_info", ({"helmod_common.recipe"}))
+  local panel = ElementGui.addGuiFrameH(panel, "info", helmod_frame_style.recipe_column, ({"helmod_common.recipe"}))
+  ElementGui.setStyle(panel, "recipe_edition_1", "width")
+  return panel
 end
 
 -------------------------------------------------------------------------------
@@ -73,7 +76,8 @@ function RecipeEdition.methods:getOtherInfoPanel()
   if panel["other_info_panel"] ~= nil and panel["other_info_panel"].valid then
     return panel["other_info_panel"]
   end
-  return ElementGui.addGuiTable(panel, "other_info_panel", 1, helmod_table_style.panel)
+  local table_panel = ElementGui.addGuiTable(panel, "other_info_panel", 1, helmod_table_style.panel)
+  return table_panel
 end
 
 -------------------------------------------------------------------------------
@@ -88,7 +92,10 @@ function RecipeEdition.methods:getRecipeIngredientsPanel()
   if panel["ingredients"] ~= nil and panel["ingredients"].valid then
     return panel["ingredients"]
   end
-  return ElementGui.addGuiFrameV(panel, "ingredients", "helmod_frame_recipe_ingredients", ({"helmod_common.ingredients"}))
+  local panel = ElementGui.addGuiFrameV(panel, "ingredients", helmod_frame_style.panel, ({"helmod_common.ingredients"}))
+  ElementGui.setStyle(panel, "recipe_edition_2", "width")
+  ElementGui.setStyle(panel, "recipe_product", "height")
+  return panel
 end
 
 -------------------------------------------------------------------------------
@@ -103,7 +110,10 @@ function RecipeEdition.methods:getRecipeProductsPanel()
   if panel["products"] ~= nil and panel["products"].valid then
     return panel["products"]
   end
-  return ElementGui.addGuiFrameV(panel, "products", "helmod_frame_recipe_products", ({"helmod_common.products"}))
+  local panel = ElementGui.addGuiFrameV(panel, "products", helmod_frame_style.panel, ({"helmod_common.products"}))
+  ElementGui.setStyle(panel, "recipe_edition_2", "width")
+  ElementGui.setStyle(panel, "recipe_product", "height")
+  return panel
 end
 
 -------------------------------------------------------------------------------
