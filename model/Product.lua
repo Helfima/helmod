@@ -120,6 +120,9 @@ end
 function Product.getAmount(recipe)
   Logging:debug(Product.classname, "getAmount(recipe)",lua_product)
   local amount = Product.getElementAmount(lua_product)
+  if recipe == nil then
+    return amount
+  end
   return amount + amount * recipe.factory.effects.productivity
 end
 

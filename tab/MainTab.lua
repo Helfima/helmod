@@ -341,7 +341,7 @@ end
 --
 function MainTab.methods:onEventAccessRead(event, action, item, item2, item3)
   Logging:debug(self:classname(), "onEventAccessRead():", action, item, item2, item3)
-  
+
   local globalGui = Player.getGlobalGui()
 
   if action == "copy-model" then
@@ -454,6 +454,14 @@ function MainTab.methods:onEventAccessWrite(event, action, item, item2, item3)
       self:update(item, item2, item3)
     else
       Controller.sendEvent(nil, "HMRecipeSelector", "OPEN", item, item2, item3)
+    end
+  end
+
+  if action == "production-block-solver" then
+    if model.blocks[item] ~= nil then
+      Model.updateProductionBlockOption(item, "solver", not(model.blocks[item].solver))
+      Model.update()
+      self:update(item, item2, item3)
     end
   end
 
@@ -663,7 +671,7 @@ function MainTab.methods:updateHeaderPanel(item, item2, item3)
 
   -- tab menu panel
   local tab_menu_panel = self:getTabMenuPanel()
-  
+
   for _, tab in pairs(self.tabs) do
     if (tab:classname() ~= "HMPropertiesTab" or Player.getSettings("properties_tab", true)) and (tab:classname() ~= "HMAdminTab" or Player.isAdmin()) then
       local style = "helmod_button_tab"
@@ -710,6 +718,12 @@ function MainTab.methods:updateHeaderPanel(item, item2, item3)
     -- pin control
     if globalGui.currentTab == "HMProductionBlockTab" then
       ElementGui.addGuiButton(action_panel, "HMPinPanel=OPEN=ID=", block_id, "helmod_button_icon_pin", nil, ({"helmod_result-panel.tab-button-pin"}))
+      local block = model.blocks[block_id]
+      if block ~= nil then
+        local style = "helmod_button_icon_settings"
+        if block.solver == true then style = "helmod_button_icon_settings_selected" end
+        ElementGui.addGuiButton(action_panel, self:classname().."=production-block-solver=ID=", block_id, style, nil, ({"helmod_button.matrix-solver"}))
+      end
     end
     -- pin info
     if globalGui.currentTab == "HMStatisticTab" then
@@ -746,4 +760,5 @@ function MainTab.methods:updateHeaderPanel(item, item2, item3)
     ElementGui.addGuiButton(index_panel, self:classname().."=change-model=ID=", "new", "helmod_button_default", "+")
   end
 end
+
 

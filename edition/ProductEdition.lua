@@ -122,7 +122,7 @@ end
 --
 function ProductEdition.methods:updateInfo(item, item2, item3)
   Logging:debug(self:classname(), "updateInfo():", item, item2, item3)
-  local infoPanel = self:getInfoPanel()
+  local info_panel = self:getInfoPanel()
   local model = Model.getModel()
 
   if model.blocks[item] ~= nil then
@@ -134,19 +134,19 @@ function ProductEdition.methods:updateInfo(item, item2, item3)
     end
 
     if product ~= nil then
-      for k,guiName in pairs(infoPanel.children_names) do
-        infoPanel[guiName].destroy()
-      end
+      info_panel.clear()
 
-      local tablePanel = ElementGui.addGuiTable(infoPanel,"table-header",2)
+      local tablePanel = ElementGui.addGuiTable(info_panel,"table-header",2)
       ElementGui.addGuiButtonSprite(tablePanel, "product", Player.getIconType(product), product.name)
       ElementGui.addGuiLabel(tablePanel, "product-label", Player.getLocalisedName(product))
 
       ElementGui.addGuiLabel(tablePanel, "quantity-label", ({"helmod_common.quantity"}))
       ElementGui.addGuiText(tablePanel, "quantity", product.count)
 
-      ElementGui.addGuiButton(tablePanel, self:classname().."=product-update=ID="..item.."=", product.name, "helmod_button_default", ({"helmod_button.save"}))
-      ElementGui.addGuiButton(tablePanel, self:classname().."=CLOSE=ID="..item.."=", product.name, "helmod_button_default", ({"helmod_button.close"}))
+      local action_panel = ElementGui.addGuiTable(info_panel,"table_action",3)
+      ElementGui.addGuiButton(action_panel, self:classname().."=product-update=ID="..item.."=", product.name, "helmod_button_default", ({"helmod_button.save"}))
+      ElementGui.addGuiButton(action_panel, self:classname().."=product-reset=ID="..item.."=", product.name, "helmod_button_default", ({"helmod_button.reset"}))
+      ElementGui.addGuiButton(action_panel, self:classname().."=CLOSE=ID="..item.."=", product.name, "helmod_button_default", ({"helmod_button.close"}))
     end
   end
 end
@@ -173,6 +173,15 @@ function ProductEdition.methods:onEvent(event, action, item, item2, item3)
       local quantity = ElementGui.getInputNumber(inputPanel["quantity"])
 
       Model.updateProduct(item, item2, quantity)
+      Model.update()
+      self.parent:refreshDisplayData(nil, item, item2)
+      self:close()
+    end
+    if action == "product-reset" then
+      local products = {}
+      local inputPanel = self:getInfoPanel()["table-header"]
+
+      Model.updateProduct(item, item2, nil)
       Model.update()
       self.parent:refreshDisplayData(nil, item, item2)
       self:close()

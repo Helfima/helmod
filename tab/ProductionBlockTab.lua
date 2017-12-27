@@ -41,7 +41,9 @@ function ProductionBlockTab.methods:updateDebugPanel(item, item2, item3)
 
     local block = model.blocks[blockId]
 
-    local input_table = ElementGui.addGuiTable(debug_panel,"input-data", 2 , "helmod_table-odd")
+    -- input
+    local input_panel = ElementGui.addGuiFrameV(debug_panel, "input_panel", helmod_frame_style.hidden, "Input data")
+    local input_table = ElementGui.addGuiTable(input_panel,"input-data", 2 , "helmod_table-odd")
     self:addCellHeader(input_table, "title", "Input")
     self:addCellHeader(input_table, "value", {"helmod_result-panel.col-header-value"})
 
@@ -52,7 +54,9 @@ function ProductionBlockTab.methods:updateDebugPanel(item, item2, item3)
       end
     end
 
-    local product_table = ElementGui.addGuiTable(debug_panel,"product-data", 3 , "helmod_table-odd")
+    -- product
+    local product_panel = ElementGui.addGuiFrameV(debug_panel, "product_panel", helmod_frame_style.hidden, "Product data")
+    local product_table = ElementGui.addGuiTable(product_panel,"product-data", 3 , "helmod_table-odd")
     self:addCellHeader(product_table, "title", "Product")
     self:addCellHeader(product_table, "value", {"helmod_result-panel.col-header-value"})
     self:addCellHeader(product_table, "state", {"helmod_result-panel.col-header-state"})
@@ -63,6 +67,25 @@ function ProductionBlockTab.methods:updateDebugPanel(item, item2, item3)
         ElementGui.addGuiLabel(product_table, product.name.."_title", product.name)
         ElementGui.addGuiLabel(product_table, product.name.."_value", product.count)
         ElementGui.addGuiLabel(product_table, product.name.."_state", product.state)
+      end
+    end
+
+    -- matrix A
+    local ma_panel = ElementGui.addGuiFrameV(debug_panel, "ma_panel", helmod_frame_style.hidden, "Matrix A")
+    if block.matrix ~= nil then
+      local matrix_table = ElementGui.addGuiTable(ma_panel,"matrix_data", #block.matrix.mA , "helmod_table-odd")
+
+      local col_limit = 1
+      for column,value in spairs(block.matrix.columns, function(t,a,b) return t[b] > t[a] end) do
+        if col_limit <= #block.matrix.mA then
+          ElementGui.addGuiLabel(matrix_table, column.."_title", column.."("..value..")")
+        end
+        col_limit = col_limit + 1
+      end
+      for i,row in pairs(block.matrix.mA) do
+        for j,col in pairs(row) do
+          ElementGui.addGuiLabel(matrix_table, i.."-"..j.."_value", col)
+        end
       end
     end
   end
@@ -298,7 +321,9 @@ function ProductionBlockTab.methods:addTableRow(gui_table, block, recipe)
   end
   -- col recipe
   local production = recipe.production or 1
-  local cell_recipe = ElementGui.addCellLabel(gui_table, "recipe-"..recipe.id, Format.formatPercent(production).."%", 35)
+  local production_label = Format.formatPercent(production).."%"
+  if block.solver == true then production_label = "" end
+  local cell_recipe = ElementGui.addCellLabel(gui_table, "recipe-"..recipe.id, production_label, 35)
   self:addIconRecipeCell(cell_recipe, recipe, "HMRecipeEdition=OPEN=ID="..block.id.."="..recipe.id.."=", true, "tooltip.edit-recipe", self.color_button_edit)
 
   -- col energy
