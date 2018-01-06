@@ -172,8 +172,8 @@ function ProductEdition.methods:onEvent(event, action, item, item2, item3)
 
       local quantity = ElementGui.getInputNumber(inputPanel["quantity"])
 
-      Model.updateProduct(item, item2, quantity)
-      Model.update()
+      ModelBuilder.updateProduct(item, item2, quantity)
+      ModelCompute.update()
       self.parent:refreshDisplayData(nil, item, item2)
       self:close()
     end
@@ -181,8 +181,8 @@ function ProductEdition.methods:onEvent(event, action, item, item2, item3)
       local products = {}
       local inputPanel = self:getInfoPanel()["table-header"]
 
-      Model.updateProduct(item, item2, nil)
-      Model.update()
+      ModelBuilder.updateProduct(item, item2, nil)
+      ModelCompute.update()
       self.parent:refreshDisplayData(nil, item, item2)
       self:close()
     end

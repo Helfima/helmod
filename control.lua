@@ -7,6 +7,8 @@ Format = require "core.Format"
 ElementGui = require "core.ElementGui"
 Player = require "model.Player"
 Controller = require "controller.Controller"
+UnitTest = require "core.UnitTest"
+Command = require "core.Command"
 Event = require "core.Event"
 --===========================
 -- trace=4
@@ -19,7 +21,7 @@ Logging:new()
 Logging.console = false
 
 -- add interface
-remote.add_interface("helmod", require "core.Remote")
+-- remote.add_interface("helmod", require "core.Remote")
 
 -- attach events
 Event.start()

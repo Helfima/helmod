@@ -1140,7 +1140,7 @@ function ElementGui.getStyleSizes()
 
     -- block
     style_sizes.scroll_block = {}
-    style_sizes.scroll_block.height = (height_row_element - 34) * 2
+    style_sizes.scroll_block.height = (height_row_element) * 2 - 34
 
     -- input/output table
     style_sizes.block_element = {}

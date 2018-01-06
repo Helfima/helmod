@@ -253,8 +253,8 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
     else
       -- classic selector
       if action == "element-select" and item ~= "container" then
-        local productionBlock = Model.addRecipeIntoProductionBlock(item2, item)
-        Model.update()
+        local productionBlock = ModelBuilder.addRecipeIntoProductionBlock(item2, item)
+        ModelCompute.update()
         globalGui.currentTab = "HMProductionBlockTab"
         self.parent:refreshDisplayData()
         self:close()

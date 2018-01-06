@@ -291,7 +291,7 @@ function MainTab.methods:onEventAccessAll(event, action, item, item2, item3)
   Logging:debug(self:classname(), "onEventAccessAll():", action, item, item2, item3)
   local globalGui = Player.getGlobalGui()
   if action == "refresh-model" then
-    Model.update()
+    ModelCompute.update()
     self:update(item, item2, item3)
   end
 
@@ -403,8 +403,8 @@ function MainTab.methods:onEventAccessWrite(event, action, item, item2, item3)
   local model = Model.getModel()
   if action == "change-boolean-option" and model.blocks ~= nil and model.blocks[globalGui.currentBlock] ~= nil then
     local element = model.blocks[globalGui.currentBlock]
-    Model.updateProductionBlockOption(globalGui.currentBlock, item, not(element[item]))
-    Model.update()
+    ModelBuilder.updateProductionBlockOption(globalGui.currentBlock, item, not(element[item]))
+    ModelCompute.update()
     self:update(item, item2, item3)
   end
 
@@ -412,15 +412,15 @@ function MainTab.methods:onEventAccessWrite(event, action, item, item2, item3)
     local panel = self:getInfoPanel()["block"]["output-scroll"]["output-table"]
     if panel[item] ~= nil then
       local value = ElementGui.getInputNumber(panel[item])
-      Model.updateProductionBlockOption(globalGui.currentBlock, item, value)
-      Model.update()
+      ModelBuilder.updateProductionBlockOption(globalGui.currentBlock, item, value)
+      ModelCompute.update()
       self:update(item, item2, item3)
     end
   end
 
   if action == "change-time" then
     model.time = tonumber(item) or 1
-    Model.update()
+    ModelCompute.update()
     self:update(item, item2, item3)
   end
 
@@ -439,8 +439,8 @@ function MainTab.methods:onEventAccessWrite(event, action, item, item2, item3)
   end
 
   if action == "production-block-unlink" then
-    Model.unlinkProductionBlock(item)
-    Model.update()
+    ModelBuilder.unlinkProductionBlock(item)
+    ModelCompute.update()
     self:update(self.PRODUCTION_LINE_TAB, item, item2, item3)
   end
 
@@ -449,8 +449,8 @@ function MainTab.methods:onEventAccessWrite(event, action, item, item2, item3)
     Logging:debug(self:classname(), "block recipes:",recipes)
     if #recipes == 1 then
       local recipe = recipes[1]
-      local productionBlock = Model.addRecipeIntoProductionBlock(recipe.name, recipe.type)
-      Model.update()
+      ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type)
+      ModelCompute.update()
       self:update(item, item2, item3)
     else
       Controller.sendEvent(nil, "HMRecipeSelector", "OPEN", item, item2, item3)
@@ -459,15 +459,15 @@ function MainTab.methods:onEventAccessWrite(event, action, item, item2, item3)
 
   if action == "production-block-solver" then
     if model.blocks[item] ~= nil then
-      Model.updateProductionBlockOption(item, "solver", not(model.blocks[item].solver))
-      Model.update()
+      ModelBuilder.updateProductionBlockOption(item, "solver", not(model.blocks[item].solver))
+      ModelCompute.update()
       self:update(item, item2, item3)
     end
   end
 
   if action == "production-block-remove" then
-    Model.removeProductionBlock(item)
-    Model.update()
+    ModelBuilder.removeProductionBlock(item)
+    ModelCompute.update()
     self:update(item, item2, item3)
     globalGui.currentBlock = "new"
   end
@@ -478,8 +478,8 @@ function MainTab.methods:onEventAccessWrite(event, action, item, item2, item3)
       Logging:debug(self:classname(), "line recipes:",recipes)
       if #recipes == 1 then
         local recipe = recipes[1]
-        local productionBlock = Model.addRecipeIntoProductionBlock(recipe.name, recipe.type)
-        Model.update()
+        ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type)
+        ModelCompute.update()
         globalGui.currentTab = "HMProductionBlockTab"
         self:update(item, item2, item3)
       else
@@ -492,8 +492,8 @@ function MainTab.methods:onEventAccessWrite(event, action, item, item2, item3)
       local step = 1
       if event.shift then step = Player.getSettings("row_move_step") end
       if event.control then step = 1000 end
-      Model.upProductionBlock(item, step)
-      Model.update()
+      ModelBuilder.upProductionBlock(item, step)
+      ModelCompute.update()
       self:update(item, item2, item3)
     end
 
@@ -501,16 +501,16 @@ function MainTab.methods:onEventAccessWrite(event, action, item, item2, item3)
       local step = 1
       if event.shift then step = Player.getSettings("row_move_step") end
       if event.control then step = 1000 end
-      Model.downProductionBlock(item, step)
-      Model.update()
+      ModelBuilder.downProductionBlock(item, step)
+      ModelCompute.update()
       self:update(item, item2, item3)
     end
   end
 
   if globalGui.currentTab == "HMProductionBlockTab" then
     if action == "production-recipe-remove" then
-      Model.removeProductionRecipe(item, item2)
-      Model.update()
+      ModelBuilder.removeProductionRecipe(item, item2)
+      ModelCompute.update()
       self:update(item, item2, item3)
     end
 
@@ -518,8 +518,8 @@ function MainTab.methods:onEventAccessWrite(event, action, item, item2, item3)
       local step = 1
       if event.shift then step = Player.getSettings("row_move_step") end
       if event.control then step = 1000 end
-      Model.upProductionRecipe(item, item2, step)
-      Model.update()
+      ModelBuilder.upProductionRecipe(item, item2, step)
+      ModelCompute.update()
       self:update(item, item2, item3)
     end
 
@@ -527,28 +527,28 @@ function MainTab.methods:onEventAccessWrite(event, action, item, item2, item3)
       local step = 1
       if event.shift then step = Player.getSettings("row_move_step") end
       if event.control then step = 1000 end
-      Model.downProductionRecipe(item, item2, step)
-      Model.update()
+      ModelBuilder.downProductionRecipe(item, item2, step)
+      ModelCompute.update()
       self:update(item, item2, item3)
     end
   end
 
   if globalGui.currentTab == "HMEnergyTab" then
     if action == "power-remove" then
-      Model.removePower(item)
+      ModelBuilder.removePower(item)
       self:update(item, item2, item3)
     end
   end
 
   if action == "past-model" then
     if globalGui.currentTab == "HMProductionBlockTab" then
-      Model.pastModel(globalGui.copy_from_model_id, globalGui.copy_from_block_id)
-      Model.update()
+      ModelBuilder.pastModel(globalGui.copy_from_model_id, globalGui.copy_from_block_id)
+      ModelCompute.update()
       self:update(item, item2, item3)
     end
     if globalGui.currentTab == "HMProductionLineTab" then
-      Model.pastModel(globalGui.copy_from_model_id, globalGui.copy_from_block_id)
-      Model.update()
+      ModelBuilder.pastModel(globalGui.copy_from_model_id, globalGui.copy_from_block_id)
+      ModelCompute.update()
       self:update(item, item2, item3)
       globalGui.currentBlock = "new"
     end
@@ -571,7 +571,7 @@ function MainTab.methods:onEventAccessDelete(event, action, item, item2, item3)
   Logging:debug(self:classname(), "onEventAccessDelete():", action, item, item2, item3)
   local globalGui = Player.getGlobalGui()
   if action == "remove-model" then
-    Model.removeModel(item)
+    ModelBuilder.removeModel(item)
     globalGui.currentTab = "HMProductionLineTab"
     globalGui.currentBlock = "new"
 
@@ -628,7 +628,7 @@ function MainTab.methods:updateModelPanel(item, item2, item3)
   local model = Model.getModel()
 
   if model ~= nil and (model.version == nil or model.version ~= Model.version) then
-    Model.update(true)
+    ModelCompute.update(true)
   end
 
   model_panel.clear()

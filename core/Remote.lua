@@ -15,7 +15,19 @@ local Remote = {
 -- 
 function Remote.close()
   if game.player.admin then
-     proxy_gui_click({player_index=game.player.index, element = {valid=true, name="HMController=CLOSE"}})
+     Controller.onGuiClick({player_index=game.player.index, element = {valid=true, name="HMController=CLOSE"}})
+    end
+end
+
+-------------------------------------------------------------------------------
+-- Close panel
+--
+-- @function [parent=#Remote] test
+--
+-- 
+function Remote.test()
+  if game.player.admin then
+     UnitTest.run({player_index=game.player.index})
     end
 end
 

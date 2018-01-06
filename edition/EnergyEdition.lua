@@ -268,7 +268,7 @@ function EnergyEdition.methods:onEvent(event, action, item, item2, item3)
         options["power"] = ElementGui.getInputNumber(inputPanel["power"])
       end
 
-      Model.updatePower(item, options)
+      ModelBuilder.updatePower(item, options)
       self:updatePowerInfo(item, item2, item3)
       self.parent:refreshDisplayData(nil, item, item2)
     end
@@ -276,12 +276,12 @@ function EnergyEdition.methods:onEvent(event, action, item, item2, item3)
     if action == "primary-select" then
       local object = self:getObject(item, item2, item3)
       if object ~= nil then
-        local power = Model.addPrimaryPower(item, item2)
+        local power = ModelBuilder.addPrimaryPower(item, item2)
       else
-        local power = Model.addPrimaryPower(nil, item2)
+        local power = ModelBuilder.addPrimaryPower(nil, item2)
         item = power.id
       end
-      Model.computePower(item)
+      ModelCompute.computePower(item)
       self.parent:refreshDisplayData()
       Controller.sendEvent(nil, self:classname(), "CLOSE", item, item2, item3)
       Controller.sendEvent(nil, self:classname(), "OPEN", item, item2, item3)
@@ -290,12 +290,12 @@ function EnergyEdition.methods:onEvent(event, action, item, item2, item3)
     if action == "secondary-select" then
       local object = self:getObject(item, item2, item3)
       if object ~= nil then
-        local power = Model.addSecondaryPower(item, item2)
+        local power = ModelBuilder.addSecondaryPower(item, item2)
       else
-        local power = Model.addSecondaryPower(nil, item2)
+        local power = ModelBuilder.addSecondaryPower(nil, item2)
         item = power.id
       end
-      Model.computePower(item)
+      ModelCompute.computePower(item)
       self.parent:refreshDisplayData()
       Controller.sendEvent(nil, self:classname(), "CLOSE", item, item2, item3)
       Controller.sendEvent(nil, self:classname(), "OPEN", item, item2, item3)

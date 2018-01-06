@@ -64,6 +64,9 @@ function MainPanel.methods:main()
   if gui_main["helmod_main_panel"] ~= nil and gui_main["helmod_main_panel"].valid then
     gui_main["helmod_main_panel"].destroy()
   else
+    -- interessant mais genere une fausse UI ouverte
+    --Player.native().opened = self:getMainPanel()
+    
     -- menu
     local menuPanel = self:getMenuPanel()
     local actionPanel = ElementGui.addGuiFrameV(menuPanel, "settings", helmod_frame_style.default)

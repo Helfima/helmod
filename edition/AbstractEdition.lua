@@ -914,8 +914,8 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
         options["production"] = (ElementGui.getInputNumber(inputPanel["production"]) or 100)/100
       end
 
-      Model.updateObject(item, item2, options)
-      Model.update()
+      ModelBuilder.updateObject(item, item2, options)
+      ModelCompute.update()
       self:updateObjectInfo(item, item2, item3)
       self.parent:refreshDisplayData(nil, item, item2)
     end
@@ -924,7 +924,7 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
       --element.state = true
       -- item=recipe item2=factory
       Model.setFactory(item, item2, item3)
-      Model.update()
+      ModelCompute.update()
       self:updateHeader(item, item2, item3)
       self:updateFactoryInfo(item, item2, item3)
       self.parent:refreshDisplayData(nil, item, item2)
@@ -938,23 +938,23 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
         options["limit"] = ElementGui.getInputNumber(inputPanel["limit"])
       end
 
-      Model.updateFactory(item, item2, options)
-      Model.update()
+      ModelBuilder.updateFactory(item, item2, options)
+      ModelCompute.update()
       self:updateFactoryInfo(item, item2, item3)
       self.parent:refreshDisplayData(nil, item, item2)
     end
 
     if action == "factory-module-add" then
-      Model.addFactoryModule(item, item2, item3)
-      Model.update()
+      ModelBuilder.addFactoryModule(item, item2, item3)
+      ModelCompute.update()
       self:updateFactoryInfo(item, item2, item3)
       self:updateFactoryActivedModules(item, item2, item3)
       self.parent:refreshDisplayData(nil, item, item2)
     end
 
     if action == "factory-module-remove" then
-      Model.removeFactoryModule(item, item2, item3)
-      Model.update()
+      ModelBuilder.removeFactoryModule(item, item2, item3)
+      ModelCompute.update()
       self:updateFactoryInfo(item, item2, item3)
       self:updateFactoryActivedModules(item, item2, item3)
       self.parent:refreshDisplayData(nil, item, item2)
@@ -962,7 +962,7 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
 
     if action == "beacon-select" then
       Model.setBeacon(item, item2, item3)
-      Model.update()
+      ModelCompute.update()
       self:updateBeaconInfo(item, item2, item3)
       self.parent:refreshDisplayData(nil, item, item2)
     end
@@ -979,8 +979,8 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
         options["factory"] = ElementGui.getInputNumber(inputPanel["factory"])
       end
 
-      Model.updateBeacon(item, item2, options)
-      Model.update()
+      ModelBuilder.updateBeacon(item, item2, options)
+      ModelCompute.update()
       self:updateBeaconInfo(item, item2, item3)
       if display_height >= limit_display_height or global_gui.factory_tab then
         self:updateFactoryInfo(item, item2, item3)
@@ -989,8 +989,8 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
     end
 
     if action == "beacon-module-add" then
-      Model.addBeaconModule(item, item2, item3)
-      Model.update()
+      ModelBuilder.addBeaconModule(item, item2, item3)
+      ModelCompute.update()
       self:updateBeaconInfo(item, item2, item3)
       self:updateBeaconActivedModules(item, item2, item3)
       if display_height >= limit_display_height or global_gui.factory_tab then
@@ -1000,8 +1000,8 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
     end
 
     if action == "beacon-module-remove" then
-      Model.removeBeaconModule(item, item2, item3)
-      Model.update()
+      ModelBuilder.removeBeaconModule(item, item2, item3)
+      ModelCompute.update()
       self:updateBeaconInfo(item, item2, item3)
       self:updateBeaconActivedModules(item, item2, item3)
       if display_height >= limit_display_height or global_gui.factory_tab then

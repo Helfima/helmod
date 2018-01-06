@@ -152,7 +152,7 @@ end
 --
 function RecipePrototype.getCategory()
   Logging:debug(RecipePrototype.classname, "getCategory()", lua_prototype, lua_type)
-  if lua_type == "recipe" then
+  if lua_type == "recipe" and lua_prototype ~= nil then
     return lua_prototype.category or "crafting"
   elseif lua_type == "resource" then
     return "extraction-machine"
@@ -173,14 +173,16 @@ end
 --
 function RecipePrototype.getProducts()
   Logging:debug(RecipePrototype.classname, "getProducts()", lua_prototype, lua_type)
-  if lua_type == "recipe" then
-    return lua_prototype.products
-  elseif lua_type == "resource" then
-    return {{name=lua_prototype.name, type="item", amount=1}}
-  elseif lua_type == "fluid" then
-    return {{name=lua_prototype.name, type="fluid", amount=1}}
-  elseif lua_type == "technology" then
-    return {{name=lua_prototype.name, type="technology", amount=1}}
+  if lua_prototype ~= nil then
+    if lua_type == "recipe" then
+      return lua_prototype.products
+    elseif lua_type == "resource" then
+      return {{name=lua_prototype.name, type="item", amount=1}}
+    elseif lua_type == "fluid" then
+      return {{name=lua_prototype.name, type="fluid", amount=1}}
+    elseif lua_type == "technology" then
+      return {{name=lua_prototype.name, type="technology", amount=1}}
+    end
   end
   return {}
 end
@@ -194,26 +196,28 @@ end
 --
 function RecipePrototype.getIngredients(factory)
   Logging:debug(RecipePrototype.classname, "getIngredients()", lua_prototype, lua_type)
-  if lua_type == "recipe" then
-    return lua_prototype.ingredients
-  elseif lua_type == "resource" then
-    return {{name=lua_prototype.name, type="item", amount=1}}
-  elseif lua_type == "fluid" then
-    if lua_prototype.name == "steam" then
-      EntityPrototype.load(factory)
-      if factory ~= nil and EntityPrototype.getEnergyType() == "burner" then
-        -- source energy en kJ
-        local energy_coal = 8000000
-        local power_extract = EntityPrototype.getPowerExtract()
-        local amount = power_extract/(energy_coal*EntityPrototype.getBurnerEffectivity())
-        return {{name="water", type="fluid", amount=1},{name="coal", type="item", amount=amount}}
-      else
-        return {{name="water", type="fluid", amount=1}}
+  if lua_prototype ~= nil then
+    if lua_type == "recipe" then
+      return lua_prototype.ingredients
+    elseif lua_type == "resource" then
+      return {{name=lua_prototype.name, type="item", amount=1}}
+    elseif lua_type == "fluid" then
+      if lua_prototype.name == "steam" then
+        EntityPrototype.load(factory)
+        if factory ~= nil and EntityPrototype.getEnergyType() == "burner" then
+          -- source energy en kJ
+          local energy_coal = 8000000
+          local power_extract = EntityPrototype.getPowerExtract()
+          local amount = power_extract/(energy_coal*EntityPrototype.getBurnerEffectivity())
+          return {{name="water", type="fluid", amount=1},{name="coal", type="item", amount=amount}}
+        else
+          return {{name="water", type="fluid", amount=1}}
+        end
       end
+      return {{name=lua_prototype.name, type="fluid", amount=1}}
+    elseif lua_type == "technology" then
+      return lua_prototype.research_unit_ingredients
     end
-    return {{name=lua_prototype.name, type="fluid", amount=1}}
-  elseif lua_type == "technology" then
-    return lua_prototype.research_unit_ingredients
   end
   return {}
 end
@@ -227,14 +231,16 @@ end
 --
 function RecipePrototype.getEnergy()
   Logging:debug(RecipePrototype.classname, "getEnergy()", lua_prototype, lua_type)
-  if lua_type == "recipe" then
-    return lua_prototype.energy
-  elseif lua_type == "resource" then
-    return 1
-  elseif lua_type == "fluid" then
-    return 1
-  elseif lua_type == "technology" then
-    return lua_prototype.research_unit_energy/60
+  if lua_prototype ~= nil then
+    if lua_type == "recipe" then
+      return lua_prototype.energy
+    elseif lua_type == "resource" then
+      return 1
+    elseif lua_type == "fluid" then
+      return 1
+    elseif lua_type == "technology" then
+      return lua_prototype.research_unit_energy/60
+    end
   end
   return 0
 end
@@ -248,14 +254,16 @@ end
 --
 function RecipePrototype.getEnabled()
   Logging:debug(RecipePrototype.classname, "getEnabled()", lua_prototype, lua_type)
-  if lua_type == "recipe" then
-    return lua_prototype.enabled
-  elseif lua_type == "resource" then
-    return true
-  elseif lua_type == "fluid" then
-    return true
-  elseif lua_type == "technology" then
-    return true
+  if lua_prototype ~= nil then
+    if lua_type == "recipe" then
+      return lua_prototype.enabled
+    elseif lua_type == "resource" then
+      return true
+    elseif lua_type == "fluid" then
+      return true
+    elseif lua_type == "technology" then
+      return true
+    end
   end
   return true
 end
@@ -269,14 +277,16 @@ end
 --
 function RecipePrototype.getHidden()
   Logging:debug(RecipePrototype.classname, "getHidden()", lua_prototype, lua_type)
-  if lua_type == "recipe" then
-    return lua_prototype.hidden
-  elseif lua_type == "resource" then
-    return false
-  elseif lua_type == "fluid" then
-    return false
-  elseif lua_type == "technology" then
-    return false
+  if lua_prototype ~= nil then
+    if lua_type == "recipe" then
+      return lua_prototype.hidden
+    elseif lua_type == "resource" then
+      return false
+    elseif lua_type == "fluid" then
+      return false
+    elseif lua_type == "technology" then
+      return false
+    end
   end
   return false
 end

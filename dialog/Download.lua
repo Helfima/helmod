@@ -100,8 +100,8 @@ function Download.methods:onEvent(event, action, item, item2, item3)
     if data_table ~= nil then
       local model = Model.newModel()
       model.time = data_table.time
-      Model.copyModel(data_table)
-      Model.update()
+      ModelBuilder.copyModel(data_table)
+      ModelCompute.update()
       Controller.refreshDisplay()
     end
   end

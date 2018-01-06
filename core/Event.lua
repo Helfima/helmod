@@ -28,9 +28,12 @@ function Event.start()
   Event.pcallEvent("on_player_created", defines.events.on_player_created, Event.onPlayerCreated)
   Event.pcallEvent("on_player_joined_game", defines.events.on_player_joined_game, Event.onPlayerJoinedGame)
   Event.pcallEvent("on_runtime_mod_setting_changed", defines.events.on_runtime_mod_setting_changed, Event.onRuntimeModSettingChanged)
+  Event.pcallEvent("on_console_command", defines.events.on_console_command, Event.onConsoleCommand)
+  --Event.pcallEvent("on_gui_closed", defines.events.on_gui_closed, Event.onGuiClosed)
   
   -- event hotkey
-  Event.pcallEvent("helmod-open-close", "helmod-input-valid", Event.onCustomInput)
+  Event.pcallEvent("helmod-input-valid", "helmod-input-valid", Event.onCustomInput)
+  Event.pcallEvent("helmod-close", "helmod-close", Event.onCustomInput)
   Event.pcallEvent("helmod-open-close", "helmod-open-close", Event.onCustomInput)
   Event.pcallEvent("helmod-recipe-selector-open", "helmod-recipe-selector-open", Event.onCustomInput)
   Event.pcallEvent("helmod-production-line-open", "helmod-production-line-open", Event.onCustomInput)
@@ -89,6 +92,35 @@ end
 --
 function Event.onLoad(event)
   Logging:trace(Event.classname, "onLoad(event)", event)
+  Command.start()
+end
+
+-------------------------------------------------------------------------------
+-- On console command
+--
+-- @function [parent=#Event] onConsoleCommand
+--
+-- @param #table event
+--
+function Event.onConsoleCommand(event)
+  Logging:trace(Event.classname, "onConsoleCommand(event)", event)
+  Player.load(event)
+  Command.parse(event)
+end
+
+-------------------------------------------------------------------------------
+-- On load
+--
+-- @function [parent=#Event] onGuiClosed
+--
+-- @param #table event
+--
+-- @deprecated
+--
+function Event.onGuiClosed(event)
+  Logging:trace(Event.classname, "onGuiClosed(event)", event)
+  Player.load(event)
+  Controller.onGuiClosed(event)
 end
 
 -------------------------------------------------------------------------------

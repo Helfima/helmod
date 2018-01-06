@@ -18,6 +18,8 @@ require "selector.ContainerSelector"
 require "tab.MainTab"
 
 Model = require "model.Model"
+ModelCompute = require "core.ModelCompute"
+ModelBuilder = require "core.ModelBuilder"
 EntityType = require "model.EntityType"
 EntityPrototype = require "model.EntityPrototype"
 FluidPrototype = require "model.FluidPrototype"
@@ -151,6 +153,20 @@ function Controller.onTick(event)
 end
 
 -------------------------------------------------------------------------------
+-- On gui closed
+--
+-- @function [parent=#Controller] onGuiClosed
+--
+-- @param #table event
+--
+function Controller.onGuiClosed(event)
+  Logging:trace(Controller.classname, "onGuiClosed(event)", event)
+  if event.element ~= nil and event.element.name == "helmod_main_panel" then
+    event.element.destroy()
+  end
+end
+
+-------------------------------------------------------------------------------
 -- On click event
 --
 -- @function [parent=#Controller] onGuiClick
@@ -201,6 +217,11 @@ function Controller.parseEvent(event, type)
     if type == "hotkey" and event.element == nil then
       Logging:trace(Controller.classname, "parse_event(event): hotkey=", event.name)
       local player = game.players[event.player_index]
+      if event.name == "helmod-close" then
+        if main_panel:isOpened() then
+          main_panel:main()
+        end
+      end
       if event.name == "helmod-open-close" then
         main_panel:main()
       end
