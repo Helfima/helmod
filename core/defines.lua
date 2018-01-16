@@ -288,6 +288,15 @@ helmod_settings_mod = {
     default_value = true,
     order = "d2"
   },
+  --model-filter-generator
+  model_filter_generator = {
+    type = "bool-setting",
+    setting_type = "runtime-global",
+    localised_name = {"helmod_settings.model-filter-generator"},
+    localised_description = {"helmod_settings.model-filter-generator-desc"},
+    default_value = true,
+    order = "d3"
+  },
   --model-filter-factory-module
   model_filter_factory_module = {
     type = "bool-setting",
@@ -295,7 +304,7 @@ helmod_settings_mod = {
     localised_name = {"helmod_settings.model-filter-factory-module"},
     localised_description = {"helmod_settings.model-filter-factory-module-desc"},
     default_value = true,
-    order = "d3"
+    order = "d4"
   },
   --model-filter-beacon-module
   model_filter_beacon_module = {
@@ -303,15 +312,6 @@ helmod_settings_mod = {
     setting_type = "runtime-global",
     localised_name = {"helmod_settings.model-filter-beacon-module"},
     localised_description = {"helmod_settings.model-filter-beacon-module-desc"},
-    default_value = true,
-    order = "d4"
-  },
-  --model-filter-generator
-  model_filter_generator = {
-    type = "bool-setting",
-    setting_type = "runtime-global",
-    localised_name = {"helmod_settings.model-filter-generator"},
-    localised_description = {"helmod_settings.model-filter-generator-desc"},
     default_value = true,
     order = "d5"
   },

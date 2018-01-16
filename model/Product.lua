@@ -4,7 +4,8 @@
 --
 local Product = {
   -- single-line comment
-  classname = "HMProduct"
+  classname = "HMProduct",
+  belt_ratio = 40/0.09375
 }
 
 local lua_product = nil
@@ -171,7 +172,11 @@ function Product.countContainer(count, container)
   if lua_product.type == 0 or lua_product.type == "item" then
     EntityPrototype.load(container)
     local cargo_wagon_size = EntityPrototype.getInventorySize(1)
-    if EntityPrototype.getType() ~= "logistic-robot" then
+    if EntityPrototype.getType() == "transport-belt" then
+      -- ratio = item_per_s / speed_belt (blue belt)
+      local belt_speed = EntityPrototype.getBeltSpeed()
+      return count / (belt_speed * Product.belt_ratio)
+    elseif EntityPrototype.getType() ~= "logistic-robot" then
       if EntityPrototype.getInventorySize(2) ~= nil and EntityPrototype.getInventorySize(2) > EntityPrototype.getInventorySize(1) then
         cargo_wagon_size = EntityPrototype.getInventorySize(2)
       end

@@ -268,7 +268,7 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
         if type == "storage-tank" then
           globalGui.container_fluid = item2
         end
-        if type == "car" or type == "cargo-wagon" or type == "item-with-entity-data"  or type == "logistic-robot" then
+        if type == "car" or type == "cargo-wagon" or type == "item-with-entity-data"  or type == "logistic-robot" or type == "transport-belt" then
           globalGui.vehicle_solid = item2
         end
         if type == "fluid-wagon" then

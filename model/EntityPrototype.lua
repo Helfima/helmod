@@ -440,4 +440,18 @@ function EntityPrototype.getFluidCapacity()
   return 0
 end
 
+-------------------------------------------------------------------------------
+-- Return belt speed
+--
+-- @function [parent=#EntityPrototype] getBeltSpeed
+--
+-- @return #number default 0
+--
+function EntityPrototype.getBeltSpeed()
+  if lua_entity_prototype ~= nil then
+    return lua_entity_prototype.belt_speed or 0
+  end
+  return 0
+end
+
 return EntityPrototype

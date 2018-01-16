@@ -37,7 +37,7 @@ local help_data = {
       localised_text = "mod-settings-map",
       desc = false,
       list = "none",
-      count = 8
+      count = 10
     },
     {
       sprite = "mod-settings-player",

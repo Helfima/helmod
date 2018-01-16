@@ -101,7 +101,7 @@ function ContainerSelector.methods:updateGroups(item, item2, item3)
 
   firstGroup = nil
 
-  for key, entity in pairs(Player.getEntityPrototypes({"storage-tank", "container", "logistic-container", "cargo-wagon", "fluid-wagon", "item-with-entity-data", "car", "logistic-robot"})) do
+  for key, entity in pairs(Player.getEntityPrototypes({"storage-tank", "container", "logistic-container", "cargo-wagon", "fluid-wagon", "item-with-entity-data", "car", "logistic-robot", "transport-belt"})) do
     self:appendGroups(entity.name, "entity", list_group, list_subgroup, list_prototype)
   end
 

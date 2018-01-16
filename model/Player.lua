@@ -650,7 +650,7 @@ end
 --
 -- @function [parent=#Player] getEntityPrototypes
 --
--- @param #table type filter
+-- @param #table types filter
 --
 -- @return #LuaEntityPrototype entity prototype
 --

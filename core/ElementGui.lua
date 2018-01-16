@@ -27,6 +27,23 @@ function ElementGui.getInputNumber(element)
 end
 
 -------------------------------------------------------------------------------
+-- Set the number of textfield input
+--
+-- @function [parent=#ElementGui] setInputNumber
+--
+-- @param #LuaGuiElement element textfield input
+-- @param #number value
+--
+-- @return #number number of textfield input
+--
+function ElementGui.setInputNumber(element, value)
+  Logging:trace(ElementGui.classname, "setInputNumber", element, value)
+  if element ~= nil and element.text ~= nil then
+    element.text = value
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Add a sprite element
 --
 -- @function [parent=#ElementGui] addSprite
@@ -997,12 +1014,13 @@ end
 local cache_tooltip_recipe = {}
 
 function ElementGui.getTooltipRecipe(prototype)
-  Logging:debug(ElementGui.classname, "getTooltipRecipe", prototype)
+  Logging:trace(ElementGui.classname, "getTooltipRecipe", prototype)
   RecipePrototype.load(prototype)
   if RecipePrototype.native() == nil then return nil end
   local prototype_type = prototype.type or "other"
-  if cache_tooltip_recipe[prototype_type] ~= nil and cache_tooltip_recipe[prototype_type][prototype.name] ~= nil then
-    return cache_tooltip_recipe[prototype_type][prototype.name]
+  if cache_tooltip_recipe[prototype_type] ~= nil and cache_tooltip_recipe[prototype_type][prototype.name] ~= nil and cache_tooltip_recipe[prototype_type][prototype.name].enabled == RecipePrototype.getEnabled() then
+    Logging:debug(ElementGui.classname, "use cache", prototype.name)
+    return cache_tooltip_recipe[prototype_type][prototype.name].value
   end
   -- initalize tooltip
   local tooltip = {"tooltip.recipe-info"}
@@ -1046,7 +1064,10 @@ function ElementGui.getTooltipRecipe(prototype)
   -- finalise la derniere valeur
   table.insert(lastTooltip, "")
   if cache_tooltip_recipe[prototype_type] == nil then cache_tooltip_recipe[prototype_type] = {} end
-  cache_tooltip_recipe[prototype_type][prototype.name] = tooltip
+  Logging:debug(ElementGui.classname, "build cache", prototype.name)
+  cache_tooltip_recipe[prototype_type][prototype.name] = {}
+  cache_tooltip_recipe[prototype_type][prototype.name].value = tooltip
+  cache_tooltip_recipe[prototype_type][prototype.name].enabled = RecipePrototype.getEnabled()
   return tooltip
 end
 
