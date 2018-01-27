@@ -64,6 +64,20 @@ function Dialog.methods:getPanel()
 end
 
 -------------------------------------------------------------------------------
+-- Is opened panel
+--
+-- @function [parent=#Dialog] isOpened
+--
+function Dialog.methods:isOpened()
+  Logging:trace(self:classname(), "isOpened()")
+  local parent_panel = self:getParentPanel()
+  if parent_panel[self:classname()] ~= nil then
+    return true
+  end
+  return false
+end
+
+-------------------------------------------------------------------------------
 -- Bind the button
 --
 -- @function [parent=#Dialog] bindButton

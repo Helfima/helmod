@@ -112,6 +112,11 @@ table.insert(UnitTest.stage, {description = "Test properties tab", test = functi
   Controller.sendEvent(nil, "HMMainTab", "change-tab", "HMPropertiesTab")
 end})
 
+require("production-score")
+table.insert(UnitTest.stage, {description = "Test production score", test = function()
+  production_score.get_production_scores(global.price_list)
+end})
+
 table.insert(UnitTest.stage, {description = "Close main panel", test = function()
   Controller.onGuiClick({player_index=Player.native().index, element = {valid=true, name="HMController=CLOSE"}})
 end})

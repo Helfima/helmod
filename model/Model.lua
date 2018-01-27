@@ -1,6 +1,8 @@
 ------------------------------------------------------------------------------
 -- Description of the module.
 -- @module Model
+-- 
+-- @field [parent=#Model] #number time base time
 --
 local Model = {
   -- single-line comment
@@ -84,7 +86,7 @@ end
 --
 -- @function [parent=#Model] getModel
 --
--- @return #table
+-- @return #Model
 --
 function Model.getModel()
   Logging:trace(Model.classname, "getModel()")

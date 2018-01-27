@@ -175,7 +175,7 @@ function Product.countContainer(count, container)
     if EntityPrototype.getType() == "transport-belt" then
       -- ratio = item_per_s / speed_belt (blue belt)
       local belt_speed = EntityPrototype.getBeltSpeed()
-      return count / (belt_speed * Product.belt_ratio)
+      return count / (belt_speed * Product.belt_ratio * (Model.getModel().time or 1))
     elseif EntityPrototype.getType() ~= "logistic-robot" then
       if EntityPrototype.getInventorySize(2) ~= nil and EntityPrototype.getInventorySize(2) > EntityPrototype.getInventorySize(1) then
         cargo_wagon_size = EntityPrototype.getInventorySize(2)

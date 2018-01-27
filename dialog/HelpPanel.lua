@@ -106,6 +106,12 @@ local help_data = {
       desc = true,
       list = "number",
       count = 7
+    },
+    {
+      localised_text = "compute-solver",
+      desc = true,
+      list = "none",
+      count = 5
     }}
   },
   {

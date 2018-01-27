@@ -609,6 +609,7 @@ function MainTab.methods:update(item, item2, item3)
     tab:beforeUpdate(item, item2, item3)
     tab:updateHeader(item, item2, item3)
     tab:updateData(item, item2, item3)
+    Controller.refreshPin()
   end
 
 end

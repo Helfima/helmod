@@ -10,6 +10,14 @@ PinPanel = setclass("HMPinPanel", Dialog)
 local display_pin_level_min = 0
 local display_pin_level_max = 4
 
+local display_level = {
+  base = 0,
+  factory = 0,
+  products = 1,
+  ingredients = 2,
+  beacon = 3
+}
+
 -------------------------------------------------------------------------------
 -- On initialization
 --
@@ -201,27 +209,27 @@ function PinPanel.methods:addProductionBlockHeader(itable)
   local display_pin_level = Player.getGlobalSettings("display_pin_level")
   local model = Model.getModel()
 
-  if display_pin_level > 0 then
+  if display_pin_level > display_level.base then
     local guiRecipe = ElementGui.addGuiFrameH(itable,"header-recipe", helmod_frame_style.hidden)
     ElementGui.addGuiLabel(guiRecipe, "header-recipe", ({"helmod_result-panel.col-header-recipe"}))
   end
 
-  if display_pin_level > 3 then
+  if display_pin_level > display_level.products then
     local guiProducts = ElementGui.addGuiFrameH(itable,"header-products", helmod_frame_style.hidden)
     ElementGui.addGuiLabel(guiProducts, "header-products", ({"helmod_result-panel.col-header-products"}))
   end
 
-  if display_pin_level > 0 then
+  if display_pin_level > display_level.factory then
     local guiFactory = ElementGui.addGuiFrameH(itable,"header-factory", helmod_frame_style.hidden)
     ElementGui.addGuiLabel(guiFactory, "header-factory", ({"helmod_result-panel.col-header-factory"}))
   end
 
-  if display_pin_level > 2 then
+  if display_pin_level > display_level.ingredients then
     local guiIngredients = ElementGui.addGuiFrameH(itable,"header-ingredients", helmod_frame_style.hidden)
     ElementGui.addGuiLabel(guiIngredients, "header-ingredients", ({"helmod_result-panel.col-header-ingredients"}))
   end
 
-  if display_pin_level > 1 then
+  if display_pin_level > display_level.beacon then
     local guiBeacon = ElementGui.addGuiFrameH(itable,"header-beacon", helmod_frame_style.hidden)
     ElementGui.addGuiLabel(guiBeacon, "header-beacon", ({"helmod_result-panel.col-header-beacon"}))
   end
@@ -241,13 +249,13 @@ function PinPanel.methods:addProductionBlockRow(gui_table, blockId, recipe)
   local display_pin_level = Player.getGlobalSettings("display_pin_level")
   local model = Model.getModel()
   local lua_recipe = RecipePrototype.load(recipe).native()
-  if display_pin_level > 0 then
+  if display_pin_level > display_level.base then
     -- col recipe
     local guiRecipe = ElementGui.addGuiFrameH(gui_table,"recipe"..recipe.id, helmod_frame_style.hidden)
     ElementGui.addGuiButtonSprite(guiRecipe, "PinPanel_recipe_"..blockId.."=", Player.getRecipeIconType(recipe), recipe.name, recipe.name, Player.getRecipeLocalisedName(recipe))
   end
 
-  if display_pin_level > 3 then
+  if display_pin_level > display_level.products then
     -- products
     local tProducts = ElementGui.addGuiTable(gui_table,"products_"..recipe.id, 3)
     if RecipePrototype.getProducts() ~= nil then
@@ -261,7 +269,7 @@ function PinPanel.methods:addProductionBlockRow(gui_table, blockId, recipe)
     end
   end
 
-  if display_pin_level > 0 then
+  if display_pin_level > display_level.factory then
     -- col factory
     local cell_factory =ElementGui.addCell(gui_table, "factory-"..recipe.id)
     local factory = recipe.factory
@@ -277,7 +285,7 @@ function PinPanel.methods:addProductionBlockRow(gui_table, blockId, recipe)
     end
   end
 
-  if display_pin_level > 2 then
+  if display_pin_level > display_level.ingredients then
     -- ingredients
     local tIngredient = ElementGui.addGuiTable(gui_table,"ingredients_"..recipe.id, 3)
     if RecipePrototype.getIngredients() ~= nil then
@@ -291,7 +299,7 @@ function PinPanel.methods:addProductionBlockRow(gui_table, blockId, recipe)
     end
   end
 
-  if display_pin_level > 1 then
+  if display_pin_level > display_level.beacon then
     -- col beacon
     local cell_beacon = ElementGui.addCell(gui_table, "beacon-"..recipe.id)
     local beacon = recipe.beacon
