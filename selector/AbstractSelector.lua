@@ -238,7 +238,7 @@ end
 function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
   Logging:debug(self:classname(), "onEvent():", action, item, item2, item3)
   local globalPlayer = Player.getGlobal()
-  local globalSettings = Player.getGlobal("settings")
+  local globalSettings = Player.getGlobalSettings()
   local defaultSettings = Player.getDefaultSettings()
   local globalGui = Player.getGlobalGui()
 

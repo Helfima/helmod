@@ -178,7 +178,7 @@ function Event.onGuiClick(event)
   Logging:trace(Event.classname, "onGuiClick(event)", event)
   Player.load(event)
   local allowed = true
-  if event.element ~= nil and event.element.valid and event.element.type == "drop-down" then
+  if event.element ~= nil and event.element.valid and (event.element.type == "drop-down" or event.element.type == "checkbox" or event.element.type == "radiobutton") then
     allowed = false
   end
   if allowed then

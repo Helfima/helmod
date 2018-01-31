@@ -310,7 +310,7 @@ function Controller.refreshDisplayData(player, item, item2, item3)
   Controller.getView("HMMainTab"):update(player, item, item2, item3)
   local pin_panel = Controller.getView("HMPinPanel")
   if pin_panel:isOpened() then
-    pin_panel:update(player, item, item2, item3)
+    pin_panel:update()
   end
 end
 
