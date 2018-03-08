@@ -31,33 +31,111 @@ function AdminTab.methods:updateData()
   -- data
   local scroll_panel = self.parent:getResultScrollPanel({"helmod_result-panel.tab-title-admin"})
   
-  local menu_panel = ElementGui.addGuiFrameH(scroll_panel,"menu", helmod_frame_style.section, {"helmod_result-panel.sheet-list"})
-  menu_panel.style.horizontally_stretchable = true
+  -- Rule List
+  local rule_panel = ElementGui.addGuiFrameH(scroll_panel,"rule-list", helmod_frame_style.section, {"helmod_result-panel.rule-list"})
+  rule_panel.style.horizontally_stretchable = true
+  
+  local count_rule = #Model.getRules()
+  if count_rule > 0 then
+    
+    local result_table = ElementGui.addGuiTable(rule_panel,"list-data", 8, "helmod_table-rule-odd")
+
+    self:addRuleListHeader(result_table)
+
+    for rule_id, element in spairs(Model.getRules(), function(t,a,b) return t[b].index > t[a].index end) do
+      self:addRuleListRow(result_table, element, rule_id)
+    end
+
+  end
+  
+  -- Sheet List
+  local sheet_panel = ElementGui.addGuiFrameH(scroll_panel,"sheet-list", helmod_frame_style.section, {"helmod_result-panel.sheet-list"})
+  sheet_panel.style.horizontally_stretchable = true
 
   local count_model = Model.countModel()
   if count_model > 0 then
     
-    local result_table = ElementGui.addGuiTable(menu_panel,"list-data", 3, "helmod_table-odd")
+    local result_table = ElementGui.addGuiTable(sheet_panel,"list-data", 3, "helmod_table-odd")
 
-    self:addTableHeader(result_table)
+    self:addSheetListHeader(result_table)
 
     local i = 0
     for _, element in spairs(Model.getModels(true), function(t,a,b) return t[b].owner > t[a].owner end) do
-      self:addTableRow(result_table, element)
+      self:addSheetListRow(result_table, element)
     end
 
   end
 end
 
 -------------------------------------------------------------------------------
--- Add table header
+-- Add rule List header
 --
--- @function [parent=#AdminTab] addTableHeader
+-- @function [parent=#AdminTab] addRuleListHeader
 --
 -- @param #LuaGuiElement itable container for element
 --
-function AdminTab.methods:addTableHeader(itable)
-  Logging:debug(self:classname(), "addTableHeader():", itable)
+function AdminTab.methods:addRuleListHeader(itable)
+  Logging:debug(self:classname(), "addRuleListHeader():", itable)
+
+  -- col action
+  self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
+  -- data
+  self:addCellHeader(itable, "header-index", {"helmod_result-panel.col-header-index"})
+  self:addCellHeader(itable, "header-mod", {"helmod_result-panel.col-header-mod"})
+  self:addCellHeader(itable, "header-name", {"helmod_result-panel.col-header-name"})
+  self:addCellHeader(itable, "header-category", {"helmod_result-panel.col-header-category"})
+  self:addCellHeader(itable, "header-type", {"helmod_result-panel.col-header-type"})
+  self:addCellHeader(itable, "header-value", {"helmod_result-panel.col-header-value"})
+  self:addCellHeader(itable, "header-excluded", {"helmod_result-panel.col-header-excluded"})
+end
+
+-------------------------------------------------------------------------------
+-- Add row Rule List
+--
+-- @function [parent=#AdminTab] addRuleListRow
+--
+-- @param #LuaGuiElement itable container for element
+-- @param #table model
+--
+function AdminTab.methods:addRuleListRow(gui_table, rule, rule_id)
+  Logging:debug(self:classname(), "addSheetListRow():", gui_table, rule, rule_id)
+
+  -- col action
+  local cell_action = ElementGui.addCell(gui_table, "action"..rule_id, 4)
+  ElementGui.addGuiButton(cell_action, self.parent:classname().."=rule-remove=ID=", rule_id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
+
+  -- col index
+  ElementGui.addGuiLabel(gui_table, "index"..rule_id, rule.index)
+  
+  -- col mod
+  ElementGui.addGuiLabel(gui_table, "mod"..rule_id, rule.mod)
+  
+  -- col name
+  ElementGui.addGuiLabel(gui_table, "name"..rule_id, rule.name)
+  
+  -- col category
+  ElementGui.addGuiLabel(gui_table, "category"..rule_id, rule.category)
+  
+  -- col type
+  ElementGui.addGuiLabel(gui_table, "type"..rule_id, rule.type)
+  
+  -- col value
+  ElementGui.addGuiLabel(gui_table, "value"..rule_id, rule.value)
+  
+  -- col value
+  ElementGui.addGuiLabel(gui_table, "excluded"..rule_id, rule.excluded)
+  
+end
+
+-------------------------------------------------------------------------------
+-- Add Sheet List header
+--
+-- @function [parent=#AdminTab] addSheetListHeader
+--
+-- @param #LuaGuiElement itable container for element
+--
+function AdminTab.methods:addSheetListHeader(itable)
+  Logging:debug(self:classname(), "addSheetListHeader():", itable)
 
   -- col action
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
@@ -67,15 +145,15 @@ function AdminTab.methods:addTableHeader(itable)
 end
 
 -------------------------------------------------------------------------------
--- Add row table
+-- Add row Sheet List
 --
--- @function [parent=#AdminTab] addTableRow
+-- @function [parent=#AdminTab] addSheetListRow
 --
 -- @param #LuaGuiElement itable container for element
 -- @param #table model
 --
-function AdminTab.methods:addTableRow(gui_table, model)
-  Logging:debug(self:classname(), "addPowersRow():", gui_table, model)
+function AdminTab.methods:addSheetListRow(gui_table, model)
+  Logging:debug(self:classname(), "addSheetListRow():", gui_table, model)
 
   -- col action
   local cell_action = ElementGui.addCell(gui_table, "action"..model.id, 4)

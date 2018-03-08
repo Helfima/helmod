@@ -476,6 +476,61 @@ function Player.getTechnology(name)
 end
 
 -------------------------------------------------------------------------------
+-- Return rule
+--
+-- @function [parent=#Player] getRules
+--
+-- @param #string rule_name
+--
+-- @return #table, #table rules_included, rules_excluded
+--
+function Player.getRules(rule_name)
+  local rules_included = {}
+  local rules_excluded = {}
+  for rule_id, rule in spairs(Model.getRules(), function(t,a,b) return t[b].index > t[a].index end) do
+    if game.active_mods[rule.mod] and rule.name == rule_name then
+      if rule.excluded then
+        if rules_excluded[rule.category] == nil then rules_excluded[rule.category] = {} end
+        if rules_excluded[rule.category][rule.type] == nil then rules_excluded[rule.category][rule.type] = {} end
+        rules_excluded[rule.category][rule.type][rule.value] = true
+      else
+        if rules_included[rule.category] == nil then rules_included[rule.category] = {} end
+        if rules_included[rule.category][rule.type] == nil then rules_included[rule.category][rule.type] = {} end
+        rules_included[rule.category][rule.type][rule.value] = true
+      end
+    end
+  end
+  return rules_included, rules_excluded
+end
+
+-------------------------------------------------------------------------------
+-- Check limitation module
+--
+-- @function [parent=#Player] checkLimitationModule
+--
+-- @param #lua_item_prototype module
+-- @param #table lua_recipe
+--
+-- @return #table list of productions
+--
+function Player.checkLimitationModule(module, lua_recipe)
+  Logging:debug(Player.classname, "checkLimitationModule()", module, lua_recipe)
+  local model_filter_factory_module = Player.getSettings("model_filter_factory_module", true)
+  local factory = lua_recipe.factory
+  local allowed = true
+  local factory_type = EntityPrototype.load(factory.name).getType()
+  if Player.getModuleBonus(module.name, "productivity") > 0 and factory_type ~= "mining-drill" and factory_type ~= "lab" and model_filter_factory_module == true then
+    allowed = false
+    for _, recipe_name in pairs(module.limitations) do
+      if lua_recipe.name == recipe_name then allowed = true end
+    end
+  end
+  if factory.module_slots ==  0 then
+    allowed = false
+  end
+  return allowed
+end
+-------------------------------------------------------------------------------
 -- Return list of productions
 --
 -- @function [parent=#Player] getProductionsCrafting
@@ -488,6 +543,9 @@ end
 function Player.getProductionsCrafting(category, lua_recipe)
   Logging:debug(Player.classname, "getProductionsCrafting(category)", category, lua_recipe)
   local productions = {}
+  local rules_included, rules_excluded = Player.getRules("production-crafting")
+
+  Logging:debug(Player.classname, "rules", rules_included, rules_excluded)
 
   if category == "crafting-handonly" then
     productions["player"] = game.entity_prototypes["player"]
@@ -512,27 +570,60 @@ function Player.getProductionsCrafting(category, lua_recipe)
       if lua_entity.type ~= nil and lua_entity.type ~= "offshore-pump" and lua_entity.name ~= nil and lua_entity.name ~= "player" then
         Logging:debug(Player.classname, "getProductionsCrafting(category):item", lua_entity.name, lua_entity.type, lua_entity.group.name, lua_entity.subgroup.name, lua_entity.crafting_categories)
         local check = false
-        if category ~= nil and category ~= "extraction-machine" and category ~= "energy" and category ~= "technology" then
-          -- standard recipe
-          if lua_entity.crafting_categories ~= nil and lua_entity.crafting_categories[category] then
-            local recipe_ingredient_count = #RecipePrototype.load(lua_recipe, "recipe").getIngredients(lua_entity)
-            local factory_ingredient_count = EntityPrototype.load(lua_entity).getIngredientCount()
-            Logging:debug(Player.classname, "crafting", recipe_ingredient_count, factory_ingredient_count)
-            if factory_ingredient_count >= recipe_ingredient_count then
-              check = true
+        if category ~= nil then
+          if not(rules_included[category]) and not(rules_included[category]) then
+            -- standard recipe
+            if lua_entity.crafting_categories ~= nil and lua_entity.crafting_categories[category] then
+              local recipe_ingredient_count = #RecipePrototype.load(lua_recipe, "recipe").getIngredients(lua_entity)
+              local factory_ingredient_count = EntityPrototype.load(lua_entity).getIngredientCount()
+              Logging:debug(Player.classname, "crafting", recipe_ingredient_count, factory_ingredient_count)
+              if factory_ingredient_count >= recipe_ingredient_count then
+                check = true
+              end
+              if rules_excluded["standard"] then
+                if rules_excluded["standard"]["entity-name"] and rules_excluded["standard"]["entity-name"][lua_entity.name] then
+                  check = false
+                end
+                if rules_excluded["standard"]["entity-type"] and rules_excluded["standard"]["entity-type"][lua_entity.type] then
+                  check = false
+                end
+                if rules_excluded["standard"]["entity-group"] and rules_excluded["standard"]["entity-group"][lua_entity.group.name] then
+                  check = false
+                end
+                if rules_excluded["standard"]["entity-subgroup"] and rules_excluded["standard"]["entity-subgroup"][lua_entity.subgroup.name] then
+                  check = false
+                end
+              end
             end
-          end
-        elseif category ~= nil and category == "extraction-machine" then
-          if lua_entity.subgroup ~= nil and (lua_entity.subgroup.name == "extraction-machine" or lua_entity.subgroup.name == 'shinyminer1' or lua_entity.subgroup.name == 'shinyminer2') then
-            check = true
-          end
-        elseif category ~= nil and category == "energy" then
-          if lua_entity.subgroup ~= nil and lua_entity.subgroup.name == "energy" then
-            check = true
-          end
-        elseif category ~= nil and category == "technology" then
-          if lua_entity.type == "lab" then
-            check = true
+          else
+            if rules_included[category] then
+              if rules_included[category]["entity-name"] and rules_included[category]["entity-name"][lua_entity.name] then
+                check = true
+              end
+              if rules_included[category]["entity-type"] and rules_included[category]["entity-type"][lua_entity.type] then
+                check = true
+              end
+              if rules_included[category]["entity-group"] and rules_included[category]["entity-group"][lua_entity.group.name] then
+                check = true
+              end
+              if rules_included[category]["entity-subgroup"] and rules_included[category]["entity-subgroup"][lua_entity.subgroup.name] then
+                check = true
+              end
+            end
+            if rules_excluded[category] then
+              if rules_excluded[category]["entity-name"] and rules_excluded[category]["entity-name"][lua_entity.name] then
+                check = false
+              end
+              if rules_excluded[category]["entity-type"] and rules_excluded[category]["entity-type"][lua_entity.type] then
+                check = false
+              end
+              if rules_excluded[category]["entity-group"] and rules_excluded[category]["entity-group"][lua_entity.group.name] then
+                check = false
+              end
+              if rules_excluded[category]["entity-subgroup"] and rules_excluded[category]["entity-subgroup"][lua_entity.subgroup.name] then
+                check = false
+              end
+            end
           end
         else
           if lua_entity.group ~= nil and lua_entity.group.name == "production" then

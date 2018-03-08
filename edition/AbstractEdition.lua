@@ -564,7 +564,6 @@ function AbstractEdition.methods:updateFactoryModulesSelector(item, item2, item3
   local selectorPanel = self:getFactoryModulesSelectorPanel()
   local player_gui = Player.getGlobalGui()
   local object = self:getObject(item, item2, item3)
-  local model_filter_factory_module = Player.getSettings("model_filter_factory_module", true)
 
 
   if selectorPanel["modules"] ~= nil and selectorPanel["modules"].valid and player_gui.moduleListRefresh == true then
@@ -573,19 +572,14 @@ function AbstractEdition.methods:updateFactoryModulesSelector(item, item2, item3
 
   if selectorPanel["modules"] == nil then
     local tableModulesPanel = ElementGui.addGuiTable(selectorPanel,"modules",5)
-    local factory = object.factory
     for k, module in pairs(Player.getModules()) do
-      local allowed = true
-      local factory_type = EntityPrototype.load(factory.name).getType()
-      if Player.getModuleBonus(module.name, "productivity") > 0 and factory_type ~= "mining-drill" and factory_type ~= "lab" and model_filter_factory_module == true then
-        if module.limitations[object.name] == nil then allowed = false end
-      end
-      if factory.module_slots ==  0 then
-        allowed = false
-      end
       local tooltip = ElementGui.getTooltipModule(module.name)
-      if allowed == false then
-        tooltip = ({"item-limitation."..module.limitation_message_key})
+      if Player.checkLimitationModule(module, object) == false then
+        if module.limitation_message_key ~= nil then
+          tooltip = {"item-limitation."..module.limitation_message_key}
+        else
+          tooltip = {"item-limitation.production-module-usable-only-on-intermediates"}
+        end
         ElementGui.addGuiButtonSelectSprite(tableModulesPanel, self:classname().."=do-nothing=ID="..item.."="..object.id.."=", "item", module.name, module.name, tooltip, "red")
       else
         ElementGui.addGuiButtonSelectSprite(tableModulesPanel, self:classname().."=factory-module-add=ID="..item.."="..object.id.."=", "item", module.name, module.name, tooltip)
@@ -679,7 +673,7 @@ function AbstractEdition.methods:updateFactorySelector(item, item2, item3)
   local tablePanel = ElementGui.addGuiTable(scrollPanel, "factory-table", 5)
   for key, factory in pairs(factories) do
     if category ~= nil or (factory.subgroup ~= nil and factory.subgroup.name == global_gui.factoryGroupSelected) then
-      local localised_name = Player.getLocalisedName(factory)
+      local localised_name = EntityPrototype.load(factory.name).getLocalisedName()
       ElementGui.addGuiButtonSelectSprite(tablePanel, self:classname().."=factory-select=ID="..item.."="..object.id.."=", "item", factory.name, factory.name, localised_name)
     end
   end

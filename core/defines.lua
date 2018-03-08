@@ -27,8 +27,13 @@ helmod_table_style = {
   default = "helmod_table_default",
   panel = "helmod_table_panel",
   list = "helmod_table_list",
-  tab = "helmod_table_tab"
+  tab = "helmod_table_tab",
+  rule = "helmod_table_rule"
 }
+
+helmod_rule_manes = {"production-crafting"}
+helmod_rule_categories = {"standard", "crafting-handonly", "extraction-machine", "energy", "technology"}
+helmod_rule_types = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
 
 helmod_icons = {}
 helmod_icons["unknown-assembling-machine"]="__helmod__/graphics/icons/unknown-assembling-machine.png"

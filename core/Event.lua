@@ -14,7 +14,7 @@ local Event = {
 --
 function Event.start()
   Logging:trace(Event.classname, "start()")
-  
+
   script.on_init(Event.onInit)
   script.on_load(Event.onLoad)
   script.on_configuration_changed(Event.onConfigurationChanged)
@@ -30,7 +30,7 @@ function Event.start()
   Event.pcallEvent("on_runtime_mod_setting_changed", defines.events.on_runtime_mod_setting_changed, Event.onRuntimeModSettingChanged)
   Event.pcallEvent("on_console_command", defines.events.on_console_command, Event.onConsoleCommand)
   --Event.pcallEvent("on_gui_closed", defines.events.on_gui_closed, Event.onGuiClosed)
-  
+
   -- event hotkey
   Event.pcallEvent("helmod-input-valid", "helmod-input-valid", Event.onCustomInput)
   Event.pcallEvent("helmod-close", "helmod-close", Event.onCustomInput)
@@ -48,9 +48,11 @@ end
 --
 function Event.onCustomInput(event)
   Logging:trace(Event.classname, "onCustomInput(event)", event)
-  Player.load(event)
-  local new_event = {name=event.input_name, player_index = event.player_index}
-  Controller.parseEvent(new_event, "hotkey")
+  if event ~= nil and event.player_index ~= nil then
+    Player.load(event)
+    local new_event = {name=event.input_name, player_index = event.player_index}
+    Controller.parseEvent(new_event, "hotkey")
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -81,6 +83,7 @@ end
 --
 function Event.onInit(event)
   Logging:trace(Event.classname, "onInit(event)", event)
+  Command.start()
 end
 
 -------------------------------------------------------------------------------
@@ -104,8 +107,10 @@ end
 --
 function Event.onConsoleCommand(event)
   Logging:trace(Event.classname, "onConsoleCommand(event)", event)
-  Player.load(event)
-  Command.parse(event)
+  if event ~= nil and event.player_index ~= nil then
+    Player.load(event)
+    Command.parse(event)
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -119,8 +124,10 @@ end
 --
 function Event.onGuiClosed(event)
   Logging:trace(Event.classname, "onGuiClosed(event)", event)
-  Player.load(event)
-  Controller.onGuiClosed(event)
+  if event ~= nil and event.player_index ~= nil then
+    Player.load(event)
+    Controller.onGuiClosed(event)
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -163,8 +170,10 @@ end
 --
 function Event.onTick(event)
   Logging:trace(Event.classname, "onTick(event)", event)
-  Player.load(event)
-  Controller.onTick(event)
+  if event ~= nil and event.player_index ~= nil then
+    Player.load(event)
+    Controller.onTick(event)
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -176,13 +185,15 @@ end
 --
 function Event.onGuiClick(event)
   Logging:trace(Event.classname, "onGuiClick(event)", event)
-  Player.load(event)
-  local allowed = true
-  if event.element ~= nil and event.element.valid and (event.element.type == "drop-down" or event.element.type == "checkbox" or event.element.type == "radiobutton") then
-    allowed = false
-  end
-  if allowed then
-    Controller.onGuiClick(event)
+  if event ~= nil and event.player_index ~= nil then
+    Player.load(event)
+    local allowed = true
+    if event.element ~= nil and event.element.valid and (event.element.type == "drop-down" or event.element.type == "checkbox" or event.element.type == "radiobutton") then
+      allowed = false
+    end
+    if allowed then
+      Controller.onGuiClick(event)
+    end
   end
 end
 
@@ -195,8 +206,10 @@ end
 --
 function Event.onGuiTextChanged(event)
   Logging:trace(Event.classname, "onGuiTextChanged(event)", event)
-  Player.load(event)
-  Controller.parseEvent(event)
+  if event ~= nil and event.player_index ~= nil then
+    Player.load(event)
+    Controller.parseEvent(event)
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -208,8 +221,10 @@ end
 --
 function Event.onGuiHotkey(event)
   Logging:trace(Event.classname, "onGuiHotkey(event)", event)
-  Player.load(event)
-  Controller.parseEvent(event, "hotkey")
+  if event ~= nil and event.player_index ~= nil then
+    Player.load(event)
+    Controller.parseEvent(event, "hotkey")
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -221,8 +236,10 @@ end
 --
 function Event.onGuiSelectionStateChanged(event)
   Logging:trace(Event.classname, "onGuiSelectionStateChanged(event)", event)
-  Player.load(event)
-  Controller.parseEvent(event, "dropdown")
+  if event ~= nil and event.player_index ~= nil then
+    Player.load(event)
+    Controller.parseEvent(event, "dropdown")
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -234,8 +251,10 @@ end
 --
 function Event.onGuiCheckedStateChanged(event)
   Logging:trace(Event.classname, "onGuiCheckedStateChanged(event)", event)
-  Player.load(event)
-  Controller.parseEvent(event, "checked")
+  if event ~= nil and event.player_index ~= nil then
+    Player.load(event)
+    Controller.parseEvent(event, "checked")
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -247,8 +266,10 @@ end
 --
 function Event.onRuntimeModSettingChanged(event)
   Logging:trace(Event.classname, "onRuntimeModSettingChanged(event)", event)
-  Player.load(event)
-  Controller.parseEvent(event, "settings")
+  if event ~= nil and event.player_index ~= nil then
+    Player.load(event)
+    Controller.parseEvent(event, "settings")
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -261,8 +282,10 @@ end
 function Event.onPlayerCreated(event)
   --log("Event.onPlayerCreated(event)")
   Logging:trace(Event.classname, "onPlayerCreated(event)", event)
-  local player = Player.load(event).native()
-  Controller.bindController(player)
+  if event ~= nil and event.player_index ~= nil then
+    local player = Player.load(event).native()
+    Controller.bindController(player)
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -275,8 +298,10 @@ end
 function Event.onPlayerJoinedGame(event)
   --log("Event.onPlayerJoinedGame(event)")
   Logging:trace(Event.classname, "onPlayerJoinedGame(event)", event)
-  local player = Player.load(event).native()
-  Controller.bindController(player)
+  if event ~= nil and event.player_index ~= nil then
+    local player = Player.load(event).native()
+    Controller.bindController(player)
+  end
 end
 
 return Event

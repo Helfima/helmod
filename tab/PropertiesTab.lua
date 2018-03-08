@@ -104,7 +104,7 @@ function PropertiesTab.methods:updateData()
     elseif prototype_type == "technology" then
       Technology.load(prototype_name)
       prototype = Technology.native()
-     if prototype ~= nil then
+      if prototype ~= nil then
         ElementGui.addGuiButtonSprite(listPanel, self:classname().."=technology-select=ID=", "technology", prototype.name, prototype.name, Technology.getLocalisedName())
       end
     end
@@ -134,17 +134,25 @@ end
 -- @param #LuaObject prototype
 --
 function PropertiesTab.methods:parseProperties(prototype, level)
+  Logging:debug(self:classname(), "***************************")
   local properties = {}
 
   local help_string = string.gmatch(prototype:help(),"(%S+) [[](RW?)[]]")
+  Logging:debug(self:classname(), "help_string", help_string)
 
   for key, chmod in help_string do
-    --Logging:debug(self:classname(), "help_string:", i)
+    Logging:debug(self:classname(), "loop", key)
     pcall(function()
       local type = type(prototype[key])
       local value = tostring(prototype[key])
-      if type == "table" then
-        if level < 2 and pcall(function() prototype[key]:help() end) then
+      Logging:debug(self:classname(), "property", key, type, value)
+      if key == "group" or key == "subgroup" then
+        local group = prototype[key]
+        value = group.name
+      elseif type == "table" then
+        local test, error = pcall(function() prototype[key]:help() return true end)
+        pcall(function() Logging:debug(self:classname(), "level", level, "help", prototype[key]:help(), "test", test, error, level < 2 and test) end)
+        if level < 2 and test then
           local result = PropertiesTab.methods:parseProperties(prototype[key], level + 1)
           value = ""
           for _, property in pairs(result) do

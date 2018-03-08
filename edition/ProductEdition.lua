@@ -43,12 +43,12 @@ end
 -- @return #boolean if true the next call close dialog
 --
 function ProductEdition.methods:onOpen(event, action, item, item2, item3)
-  local model = Model.getModel()
+  local player_gui = Player.getGlobalGui()
   local close = true
-  if model.guiProductLast == nil or model.guiProductLast ~= item then
+  if player_gui.guiProductLast == nil or player_gui.guiProductLast ~= item then
     close = false
   end
-  model.guiProductLast = item
+  player_gui.guiProductLast = item
   return close
 end
 
@@ -64,8 +64,8 @@ end
 -- @param #string item3 third item name
 --
 function ProductEdition.methods:onClose(event, action, item, item2, item3)
-  local model = Model.getModel()
-  model.guiProductLast = nil
+  local player_gui = Player.getGlobalGui()
+  player_gui.guiProductLast = nil
 end
 
 -------------------------------------------------------------------------------
@@ -257,7 +257,7 @@ function ProductEdition.methods:onEvent(event, action, item, item2, item3)
     end
     if action == "element-select" then
       local input_panel = self:getToolPanel()["table-header"]
-      belt_count = ElementGui.getInputNumber(input_panel["quantity"])
+      local belt_count = ElementGui.getInputNumber(input_panel["quantity"])
       local belt_speed = EntityPrototype.load(item).getBeltSpeed()
       
       local output_panel = self:getInfoPanel()["table-header"]

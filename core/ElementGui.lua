@@ -206,6 +206,56 @@ function ElementGui.addGuiButton(parent, action, key, style, caption, tooltip)
 end
 
 -------------------------------------------------------------------------------
+-- Add a choose element button
+--
+-- @function [parent=#ElementGui] addGuiChooseButton
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #string action action name
+-- @param #string key unique id
+-- @param #string elem_type "item", "tile", "entity", or "signal"
+-- @param #string default
+-- @param #string style style of button
+-- @param #string caption container for element
+-- @param #string tooltip displayed text
+--
+-- @return #LuaGuiElement the LuaGuiElement added
+--
+function ElementGui.addGuiChooseButton(parent, action, key, elem_type, default, style, caption, tooltip)
+  Logging:trace(ElementGui.classname, "addGuiButton", parent, action, key, elem_type, default, style, caption, tooltip)
+  local options = {}
+  options.type = "choose-elem-button"
+  if key ~= nil then
+    options.name = action..key
+  else
+    options.name = action
+  end
+  options.elem_type = elem_type
+  options[elem_type] = default
+  options.style = style
+  options.caption = caption
+  options.tooltip = tooltip
+
+  local button = nil
+  local ok , err = pcall(function()
+    button = parent.add(options)
+  end)
+  if not ok then
+    Logging:trace(ElementGui.classname, "addGuiButton", action, key, style, err)
+    options.style = "helmod_button_default"
+    if (type(caption) == "boolean") then
+      Logging:error(ElementGui.classname, "addGuiButton - caption is a boolean")
+    elseif caption ~= nil then
+      options.caption = caption
+    else
+      options.caption = key
+    end
+    button = parent.add(options)
+  end
+  return button
+end
+
+-------------------------------------------------------------------------------
 -- Add a radio-button element
 --
 -- @function [parent=#ElementGui] addGuiRadioButton
@@ -1102,7 +1152,7 @@ end
 function ElementGui.getStyleSizes()
   Logging:trace(ElementGui.classname, "getStyleSizes()")
   local width, height = ElementGui.getDisplaySizes()
-  
+
   local style_sizes = {}
   if type(width) == "number" and  type(height) == "number" then
     local width_recipe_column_1 = 220
@@ -1118,7 +1168,7 @@ function ElementGui.getStyleSizes()
     local ratio_v = 0.75
     local width_main = math.ceil(width*ratio_h)
     local height_main = math.ceil(height*ratio_v)
-    
+
     style_sizes.main = {}
     style_sizes.main.width = width_main
     style_sizes.main.height = height_main
@@ -1206,6 +1256,20 @@ function ElementGui.setStyle(element, style, property)
     Logging:trace(ElementGui.classname, "setStyle(player, element, style, property)", style_sizes[style][property])
     element.style[property] = style_sizes[style][property]
   end
+end
+
+-------------------------------------------------------------------------------
+-- Get dropdown selection
+--
+-- @function [parent=#ElementGui] getDropdownSelection
+--
+-- @param #LuaGuiElement element
+--
+function ElementGui.getDropdownSelection(element)
+  Logging:trace(ElementGui.classname, "getDropdownSelection(element)", element)
+  if element.selected_index == 0 then return nil end
+  if #element.items == 0 then return nil end
+  return element.items[element.selected_index]
 end
 
 return ElementGui

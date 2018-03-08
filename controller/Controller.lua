@@ -9,6 +9,7 @@ require "edition.RecipeEdition"
 require "edition.ProductEdition"
 require "edition.ResourceEdition"
 require "edition.EnergyEdition"
+require "edition.RuleEdition"
 require "selector.EntitySelector"
 require "selector.RecipeSelector"
 require "selector.TechnologySelector"
@@ -65,6 +66,7 @@ function Controller.init()
   table.insert(controllers, ResourceEdition:new(main_panel))
   table.insert(controllers, ProductEdition:new(main_panel))
   table.insert(controllers, EnergyEdition:new(main_panel))
+  table.insert(controllers, RuleEdition:new(main_panel))
   table.insert(controllers, PinPanel:new(main_panel))
   table.insert(controllers, StatusPanel:new(main_panel))
   table.insert(controllers, TechnologySelector:new(main_panel))

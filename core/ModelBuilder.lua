@@ -150,6 +150,23 @@ function ModelBuilder.removePower(power_id)
 end
 
 -------------------------------------------------------------------------------
+-- Remove a rule
+--
+-- @function [parent=#ModelBuilder] removeRule
+--
+-- @param #number power_id
+--
+function ModelBuilder.removeRule(rule_id)
+  Logging:trace(ModelBuilder.classname, "removeRule()", rule_id)
+  if global.rules ~= nil then
+    Logging:debug(ModelBuilder.classname, "before remove rule", global.rules)
+    table.remove(global.rules,rule_id)
+    Model.reIndexList(global.rules)
+    Logging:debug(ModelBuilder.classname, "after remove rule", global.rules)
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Update a object
 --
 -- @function [parent=#ModelBuilder] updateObject
@@ -663,7 +680,24 @@ function ModelBuilder.upProductionList(list, index, step)
   end
 end
 
-
-
+-------------------------------------------------------------------------------
+-- Add rule
+--
+-- @function [parent=#ModelBuilder] addRule
+--
+-- @param #string mod
+-- @param #string name
+-- @param #string category
+-- @param #string type
+-- @param #string value
+-- @param #string excluded
+-- @param #string index
+--
+function ModelBuilder.addRule(mod, name, category, type, value, excluded, index)
+  Logging:debug(ModelBuilder.classname, "addRule()", mod, name, category, type, value, excluded, index)
+  local rule = Model.newRule(mod, name, category, type, value, excluded, #Model.getRules())
+  local rules = Model.getRules()
+  table.insert(rules, rule)
+end
 
 return ModelBuilder

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 -- Description of the module.
 -- @module Model
--- 
+--
 -- @field [parent=#Model] #number time base time
 --
 local Model = {
@@ -50,6 +50,41 @@ function Model.getModels(bypass)
     Player.getGlobalGui()["model_id"] = first_id
   end
   return models
+end
+
+-------------------------------------------------------------------------------
+-- Get rules
+--
+-- @function [parent=#Model] getRules
+--
+-- @return #table
+--
+function Model.getRules()
+  Logging:trace(Model.classname, "getRules()", global.rules)
+  if global.rules == nil then
+    Model.resetRules()
+  end
+  return global.rules
+end
+
+-------------------------------------------------------------------------------
+-- Reset rules
+--
+-- @function [parent=#Model] resetRules
+--
+function Model.resetRules()
+  Logging:trace(Model.classname, "resetRules()", global.rules)
+  global.rules = {}
+  table.insert(global.rules, {index=0, mod="base", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="extraction-machine", excluded = false})
+  table.insert(global.rules, {index=1, mod="base", name="production-crafting", category="energy", type="entity-subgroup", value="energy", excluded = false})
+  table.insert(global.rules, {index=2, mod="base", name="production-crafting", category="technology", type="entity-type", value="lab", excluded = false})
+  table.insert(global.rules, {index=3, mod="ShinyIcons", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="shinyminer1", excluded = false})
+  table.insert(global.rules, {index=4, mod="ShinyIcons", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="shinyminer2", excluded = false})
+  table.insert(global.rules, {index=5, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="dyworld-extraction-burner", excluded = false})
+  table.insert(global.rules, {index=6, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="dyworld-drills-electric", excluded = false})
+  table.insert(global.rules, {index=7, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="dyworld-drills-burner", excluded = false})
+  table.insert(global.rules, {index=8, mod="DyWorld", name="production-crafting", category="standard", type="entity-group", value="production", excluded = true})
+  table.insert(global.rules, {index=9, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-group", value="production", excluded = true})
 end
 
 -------------------------------------------------------------------------------
@@ -310,6 +345,35 @@ function Model.newIngredient(name, type, count)
   ingredientModel.count = count
 
   return ingredientModel
+end
+
+-------------------------------------------------------------------------------
+-- Create model Rule
+--
+-- @function [parent=#Model] newRule
+--
+-- @param #string mod
+-- @param #string name
+-- @param #string category
+-- @param #string type
+-- @param #string value
+-- @param #boolean excluded
+-- @param #number index
+--
+-- @return #Table
+--
+function Model.newRule(mod, name, category, type, value, excluded, index)
+  Logging:debug(Model.classname, "newRule()", mod, name, category, type, value, excluded, index)
+  local rule_model = {}
+  rule_model.mod = mod
+  rule_model.name = name
+  rule_model.category = category
+  rule_model.type = type
+  rule_model.value = value
+  rule_model.excluded = excluded
+  rule_model.index = index
+
+  return rule_model
 end
 
 -------------------------------------------------------------------------------

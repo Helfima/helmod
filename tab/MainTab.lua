@@ -246,6 +246,14 @@ function MainTab.methods:onEvent(event, action, item, item2, item3)
   if self.tabs[globalGui.currentTab] ~= nil then
 
     -- *******************************
+    -- access admin only
+    -- *******************************
+    
+    if Player.isAdmin() then
+      self:onEventAccessAdmin(event, action, item, item2, item3)
+    end
+
+    -- *******************************
     -- access admin or owner or write
     -- *******************************
 
@@ -580,6 +588,31 @@ function MainTab.methods:onEventAccessDelete(event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
+-- On event
+--
+-- @function [parent=#MainTab] onEventAccessAdmin
+--
+-- @param #LuaEvent event
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function MainTab.methods:onEventAccessAdmin(event, action, item, item2, item3)
+  Logging:debug(self:classname(), "onEventAccessAdmin():", action, item, item2, item3)
+  local globalGui = Player.getGlobalGui()
+  if action == "rule-remove" then
+    ModelBuilder.removeRule(item)
+    self:update(item, item2, item3)
+  end
+  if action == "reset-rules" then
+    Model.resetRules()
+    self:update(item, item2, item3)
+  end
+  
+end
+
+-------------------------------------------------------------------------------
 -- Update
 --
 -- @function [parent=#MainTab] update
@@ -685,7 +718,10 @@ function MainTab.methods:updateHeaderPanel(item, item2, item3)
   -- action panel
   local action_panel = self:getActionPanel()
 
-  if globalGui.currentTab == "HMPropertiesTab" then
+  if globalGui.currentTab == "HMAdminTab" then
+    ElementGui.addGuiButton(action_panel, "HMRuleEdition=", "OPEN", "helmod_button_default", ({"helmod_result-panel.add-button-rule"}))
+    ElementGui.addGuiButton(action_panel, self:classname().."=reset-rules=", nil, "helmod_button_default", ({"helmod_result-panel.reset-button-rule"}))
+  elseif globalGui.currentTab == "HMPropertiesTab" then
     ElementGui.addGuiButton(action_panel, "HMEntitySelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-entity"}))
     ElementGui.addGuiButton(action_panel, "HMItemSelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-item"}))
     ElementGui.addGuiButton(action_panel, "HMFluidSelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-fluid"}))
