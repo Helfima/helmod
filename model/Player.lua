@@ -504,6 +504,35 @@ function Player.getRules(rule_name)
 end
 
 -------------------------------------------------------------------------------
+-- Return rule
+--
+-- @function [parent=#Player] getRules
+--
+-- @param #boolean check
+-- @param #table rules
+-- @param #string category
+-- @param #lua_entity lua_entity
+-- @param #boolean included
+--
+-- @return #boolean
+--
+function Player.checkRules(check, rules, category, lua_entity, included)
+  Logging:debug(Player.classname, "checkRules()", check, rules, category, lua_entity.name, included)
+  if rules[category] then
+    if rules[category]["entity-name"] and (rules[category]["entity-name"]["all"] or rules[category]["entity-name"][lua_entity.name]) then
+      check = included
+    elseif rules[category]["entity-type"] and (rules[category]["entity-type"]["all"] or rules[category]["entity-type"][lua_entity.type]) then
+      check = included
+    elseif rules[category]["entity-group"] and (rules[category]["entity-group"]["all"] or rules[category]["entity-group"][lua_entity.group.name]) then
+      check = included
+    elseif rules[category]["entity-subgroup"] and (rules[category]["entity-subgroup"]["all"] or rules[category]["entity-subgroup"][lua_entity.subgroup.name]) then
+      check = included
+    end
+  end
+  return check
+end
+
+-------------------------------------------------------------------------------
 -- Check limitation module
 --
 -- @function [parent=#Player] checkLimitationModule
@@ -514,12 +543,17 @@ end
 -- @return #table list of productions
 --
 function Player.checkLimitationModule(module, lua_recipe)
-  Logging:debug(Player.classname, "checkLimitationModule()", module, lua_recipe)
+  Logging:debug(Player.classname, "checkLimitationModule()", module, lua_recipe.name)
+  local rules_included, rules_excluded = Player.getRules("module-limitation")
   local model_filter_factory_module = Player.getSettings("model_filter_factory_module", true)
   local factory = lua_recipe.factory
   local allowed = true
-  local factory_type = EntityPrototype.load(factory.name).getType()
-  if Player.getModuleBonus(module.name, "productivity") > 0 and factory_type ~= "mining-drill" and factory_type ~= "lab" and model_filter_factory_module == true then
+  local check_not_bypass = true
+  local prototype = RecipePrototype.load(lua_recipe)
+  local category = prototype.getCategory()
+  if rules_excluded[category] == nil then category = "standard" end
+  check_not_bypass = Player.checkRules(check_not_bypass, rules_excluded, category, EntityPrototype.load(factory.name).native(), false)
+  if Player.getModuleBonus(module.name, "productivity") > 0 and check_not_bypass and model_filter_factory_module == true then
     allowed = false
     for _, recipe_name in pairs(module.limitations) do
       if lua_recipe.name == recipe_name then allowed = true end
@@ -580,50 +614,14 @@ function Player.getProductionsCrafting(category, lua_recipe)
               if factory_ingredient_count >= recipe_ingredient_count then
                 check = true
               end
-              if rules_excluded["standard"] then
-                if rules_excluded["standard"]["entity-name"] and rules_excluded["standard"]["entity-name"][lua_entity.name] then
-                  check = false
-                end
-                if rules_excluded["standard"]["entity-type"] and rules_excluded["standard"]["entity-type"][lua_entity.type] then
-                  check = false
-                end
-                if rules_excluded["standard"]["entity-group"] and rules_excluded["standard"]["entity-group"][lua_entity.group.name] then
-                  check = false
-                end
-                if rules_excluded["standard"]["entity-subgroup"] and rules_excluded["standard"]["entity-subgroup"][lua_entity.subgroup.name] then
-                  check = false
-                end
-              end
+            -- resolve rule excluded
+              check = Player.checkRules(check, rules_excluded, "standard", lua_entity, false)
             end
           else
-            if rules_included[category] then
-              if rules_included[category]["entity-name"] and rules_included[category]["entity-name"][lua_entity.name] then
-                check = true
-              end
-              if rules_included[category]["entity-type"] and rules_included[category]["entity-type"][lua_entity.type] then
-                check = true
-              end
-              if rules_included[category]["entity-group"] and rules_included[category]["entity-group"][lua_entity.group.name] then
-                check = true
-              end
-              if rules_included[category]["entity-subgroup"] and rules_included[category]["entity-subgroup"][lua_entity.subgroup.name] then
-                check = true
-              end
-            end
-            if rules_excluded[category] then
-              if rules_excluded[category]["entity-name"] and rules_excluded[category]["entity-name"][lua_entity.name] then
-                check = false
-              end
-              if rules_excluded[category]["entity-type"] and rules_excluded[category]["entity-type"][lua_entity.type] then
-                check = false
-              end
-              if rules_excluded[category]["entity-group"] and rules_excluded[category]["entity-group"][lua_entity.group.name] then
-                check = false
-              end
-              if rules_excluded[category]["entity-subgroup"] and rules_excluded[category]["entity-subgroup"][lua_entity.subgroup.name] then
-                check = false
-              end
-            end
+            -- resolve rule included
+            check = Player.checkRules(check, rules_included, category, lua_entity, true)
+            -- resolve rule excluded
+            check = Player.checkRules(check, rules_excluded, category, lua_entity, false)
           end
         else
           if lua_entity.group ~= nil and lua_entity.group.name == "production" then

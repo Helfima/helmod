@@ -572,7 +572,9 @@ function AbstractEdition.methods:updateFactoryModulesSelector(item, item2, item3
 
   if selectorPanel["modules"] == nil then
     local tableModulesPanel = ElementGui.addGuiTable(selectorPanel,"modules",5)
-    for k, module in pairs(Player.getModules()) do
+    local prototype = RecipePrototype.load(object)
+    local category = prototype.getCategory()
+    for k, module in pairs(Player.getModules(category)) do
       local tooltip = ElementGui.getTooltipModule(module.name)
       if Player.checkLimitationModule(module, object) == false then
         if module.limitation_message_key ~= nil then
@@ -784,7 +786,9 @@ function AbstractEdition.methods:updateBeaconModulesSelector(item, item2, item3)
 
   if selectorPanel["modules"] == nil then
     local tableModulesPanel = ElementGui.addGuiTable(selectorPanel,"modules",5)
-    for k, module in pairs(Player.getModules()) do
+    local prototype = RecipePrototype.load(object)
+    local category = prototype.getCategory()
+    for k, module in pairs(Player.getModules(category)) do
       local allowed = true
       if Player.getModuleBonus(module.name, "productivity") > 0 and model_filter_beacon_module == true then
         allowed = false

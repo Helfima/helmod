@@ -31,9 +31,18 @@ helmod_table_style = {
   rule = "helmod_table_rule"
 }
 
-helmod_rule_manes = {"production-crafting"}
-helmod_rule_categories = {"standard", "crafting-handonly", "extraction-machine", "energy", "technology"}
-helmod_rule_types = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
+helmod_rules = {}
+helmod_rules["production-crafting"] = {excluded_only=false ,categories={}}
+helmod_rules["production-crafting"].categories["standard"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
+helmod_rules["production-crafting"].categories["crafting-handonly"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
+helmod_rules["production-crafting"].categories["extraction-machine"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
+helmod_rules["production-crafting"].categories["energy"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
+helmod_rules["production-crafting"].categories["technology"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
+
+helmod_rules["module-limitation"] = {excluded_only=true ,categories={}}
+helmod_rules["module-limitation"].categories["standard"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
+helmod_rules["module-limitation"].categories["extraction-machine"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
+helmod_rules["module-limitation"].categories["technology"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
 
 helmod_icons = {}
 helmod_icons["unknown-assembling-machine"]="__helmod__/graphics/icons/unknown-assembling-machine.png"
