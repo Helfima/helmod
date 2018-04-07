@@ -48,8 +48,6 @@ helmod_icons = {}
 helmod_icons["unknown-assembling-machine"]="__helmod__/graphics/icons/unknown-assembling-machine.png"
 helmod_icons["default-assembling-machine"]="__helmod__/graphics/icons/unknown-assembling-machine.png"
 
-helmod_display_sizes = {"3840x2160", "1920x1200","1920x1080","1680x1050","1680x900","1600x900","1440x900","1360x768"}
-
 helmod_display_cell_mod = {"default", "small-text", "small-icon", "by-kilo"}
 
 helmod_settings_mod = {
@@ -130,24 +128,28 @@ helmod_settings_mod = {
     allowed_values = {"0","0.0","0.00"},
     order = "a2"
   },
-  -- display size
-  display_size = {
-    type = "string-setting",
+  -- display_ratio_horizontal
+  display_ratio_horizontal = {
+    type = "double-setting",
     setting_type = "runtime-per-user",
-    localised_name = {"helmod_settings.display-size"},
-    localised_description = {"helmod_settings.display-size-desc"},
-    default_value = "1680x1050",
-    allowed_values = helmod_display_sizes,
+    localised_name = {"helmod_settings.display-ratio-horizontal"},
+    localised_description = {"helmod_settings.display-ratio-horizontal-desc"},
+    default_value = 0.85,
+    minimum_value = 0.1,
+    maximum_value = 2,
+    allow_blank = false,
     order = "b0"
   },
-  -- display size
-  display_size_free = {
-    type = "string-setting",
+  -- display_ratio_vertical
+  display_ratio_vertical = {
+    type = "double-setting",
     setting_type = "runtime-per-user",
-    localised_name = {"helmod_settings.display-size-free"},
-    localised_description = {"helmod_settings.display-size-free-desc"},
-    default_value = "",
-    allow_blank = true,
+    localised_name = {"helmod_settings.display-ratio-vertical"},
+    localised_description = {"helmod_settings.display-ratio-vertical-desc"},
+    default_value = 0.8,
+    minimum_value = 0.1,
+    maximum_value = 2,
+    allow_blank = false,
     order = "b1"
   },
   -- display main icon

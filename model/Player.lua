@@ -785,7 +785,7 @@ function Player.getProductionsBeacon()
   for _,item in pairs(game.entity_prototypes) do
     --Logging:debug(Player.classname, "getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
     if item.name ~= nil and item.type == EntityType.beacon then
-      local efficiency = EntityPrototype.load(item.name).getElectricEffectivity()
+      local efficiency = EntityPrototype.load(item.name).getDistributionEffectivity()
       Logging:trace(Player.classname, "getProductionsBeacon(type):", item.name, efficiency)
       if efficiency ~= nil then
         table.insert(items,item)

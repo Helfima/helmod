@@ -1130,20 +1130,11 @@ end
 --
 function ElementGui.getDisplaySizes()
   Logging:trace(ElementGui.classname, "getDisplaySizes()")
-  local display_size = Player.getSettings("display_size")
-  local display_size_free = Player.getSettings("display_size_free")
-  if string.match(display_size_free, "([0-9]*x[0-9]*)", 1) then
-    display_size = display_size_free
-  end
-  local string_width = string.match(display_size,"([0-9]*)x[0-9]*",1)
-  local string_height = string.match(display_size,"[0-9]*x([0-9]*)",1)
-  local width_main = 1920
-  local height_main = 1680
-
-  if string_width ~= nil then width_main = tonumber(string_width) end
-  if string_height ~= nil then height_main = tonumber(string_height) end
-  return width_main, height_main
+  local display_resolution = Player.native().display_resolution
+  local display_scale = Player.native().display_scale
+  return display_resolution.width/display_scale, display_resolution.height/display_scale
 end
+
 -------------------------------------------------------------------------------
 -- Get style sizes
 --
@@ -1151,8 +1142,10 @@ end
 --
 function ElementGui.getStyleSizes()
   Logging:trace(ElementGui.classname, "getStyleSizes()")
-  local width, height = ElementGui.getDisplaySizes()
-
+  local display_ratio_horizontal = Player.getSettings("display_ratio_horizontal")
+  local display_ratio_vertictal = Player.getSettings("display_ratio_vertical")
+  
+  local width , height = ElementGui.getDisplaySizes()
   local style_sizes = {}
   if type(width) == "number" and  type(height) == "number" then
     local width_recipe_column_1 = 220
@@ -1164,10 +1157,8 @@ function ElementGui.getStyleSizes()
     local height_selector_header = 230
     local height_row_element = 110
 
-    local ratio_h = 0.80
-    local ratio_v = 0.75
-    local width_main = math.ceil(width*ratio_h)
-    local height_main = math.ceil(height*ratio_v)
+    local width_main = math.ceil(width*display_ratio_horizontal)
+    local height_main = math.ceil(height*display_ratio_vertictal)
 
     style_sizes.main = {}
     style_sizes.main.width = width_main

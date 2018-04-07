@@ -393,7 +393,7 @@ end
 --
 function EntityPrototype.getElectricEffectivity()
   if lua_entity_prototype ~= nil and lua_entity_prototype.electric_energy_source_prototype ~= nil then
-    return lua_entity_prototype.electric_energy_source_prototype.effectivity or 0
+    return lua_entity_prototype.effectivity or 0
   end
   return 0
 end
