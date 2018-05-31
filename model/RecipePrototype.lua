@@ -165,7 +165,7 @@ function RecipePrototype.getCategory()
 end
 
 -------------------------------------------------------------------------------
--- Return products array of Prototype
+-- Return products array of Prototype (duplicates are combined into one entry)
 --
 -- @function [parent=#RecipePrototype] getProducts
 --
@@ -173,6 +173,40 @@ end
 --
 function RecipePrototype.getProducts()
   Logging:debug(RecipePrototype.classname, "getProducts()", lua_prototype, lua_type)
+  raw_products = RecipePrototype.getRawProducts()
+  lua_products = {}
+  for r, raw_product in pairs(RecipePrototype.getRawProducts()) do
+    product_id = raw_product.type .. "/" .. raw_product.name
+    if lua_products[product_id] ~= nil then
+      -- make a new product table for the combined result
+      new_product = {}
+      for k, v in pairs(lua_products[product_id]) do
+	new_product[k] = v
+      end
+      -- combine product amounts, averaging in variable and probabilistic outputs
+      amount_a = Product.getElementAmount(new_product)
+      amount_b = Product.getElementAmount(raw_product)
+      new_product.amount = amount_a + amount_b
+      new_product.min_amount = nil
+      new_product.max_amount = nil
+      new_product.probability = nil
+      lua_products[product_id] = new_product
+    else
+      lua_products[product_id] = raw_product
+    end
+  end
+  return lua_products
+end
+
+-------------------------------------------------------------------------------
+-- Return products array of Prototype (may contain duplicate products)
+--
+-- @function [parent=#RecipePrototype] getRawProducts
+--
+-- @return #table
+--
+function RecipePrototype.getRawProducts()
+  Logging:debug(RecipePrototype.classname, "getRawProducts()", lua_prototype, lua_type)
   if lua_prototype ~= nil then
     if lua_type == "recipe" then
       return lua_prototype.products
