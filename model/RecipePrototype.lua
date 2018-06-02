@@ -173,19 +173,19 @@ end
 --
 function RecipePrototype.getProducts()
   Logging:debug(RecipePrototype.classname, "getProducts()", lua_prototype, lua_type)
-  raw_products = RecipePrototype.getRawProducts()
-  lua_products = {}
+  local raw_products = RecipePrototype.getRawProducts()
+  local lua_products = {}
   for r, raw_product in pairs(RecipePrototype.getRawProducts()) do
-    product_id = raw_product.type .. "/" .. raw_product.name
+    local product_id = raw_product.type .. "/" .. raw_product.name
     if lua_products[product_id] ~= nil then
       -- make a new product table for the combined result
-      new_product = {}
+      local new_product = {}
       for k, v in pairs(lua_products[product_id]) do
-  new_product[k] = v
+      new_product[k] = v
       end
       -- combine product amounts, averaging in variable and probabilistic outputs
-      amount_a = Product.getElementAmount(new_product)
-      amount_b = Product.getElementAmount(raw_product)
+      local amount_a = Product.getElementAmount(new_product)
+      local amount_b = Product.getElementAmount(raw_product)
       new_product.amount = amount_a + amount_b
       new_product.min_amount = nil
       new_product.max_amount = nil
