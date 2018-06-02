@@ -165,7 +165,7 @@ function RecipePrototype.getCategory()
 end
 
 -------------------------------------------------------------------------------
--- Return products array of Prototype
+-- Return products array of Prototype (duplicates are combined into one entry)
 --
 -- @function [parent=#RecipePrototype] getProducts
 --
@@ -173,6 +173,40 @@ end
 --
 function RecipePrototype.getProducts()
   Logging:debug(RecipePrototype.classname, "getProducts()", lua_prototype, lua_type)
+  raw_products = RecipePrototype.getRawProducts()
+  lua_products = {}
+  for r, raw_product in pairs(RecipePrototype.getRawProducts()) do
+    product_id = raw_product.type .. "/" .. raw_product.name
+    if lua_products[product_id] ~= nil then
+      -- make a new product table for the combined result
+      new_product = {}
+      for k, v in pairs(lua_products[product_id]) do
+  new_product[k] = v
+      end
+      -- combine product amounts, averaging in variable and probabilistic outputs
+      amount_a = Product.getElementAmount(new_product)
+      amount_b = Product.getElementAmount(raw_product)
+      new_product.amount = amount_a + amount_b
+      new_product.min_amount = nil
+      new_product.max_amount = nil
+      new_product.probability = nil
+      lua_products[product_id] = new_product
+    else
+      lua_products[product_id] = raw_product
+    end
+  end
+  return lua_products
+end
+
+-------------------------------------------------------------------------------
+-- Return products array of Prototype (may contain duplicate products)
+--
+-- @function [parent=#RecipePrototype] getRawProducts
+--
+-- @return #table
+--
+function RecipePrototype.getRawProducts()
+  Logging:debug(RecipePrototype.classname, "getRawProducts()", lua_prototype, lua_type)
   if lua_prototype ~= nil then
     if lua_type == "recipe" then
       return lua_prototype.products
@@ -200,7 +234,37 @@ function RecipePrototype.getIngredients(factory)
     if lua_type == "recipe" then
       return lua_prototype.ingredients
     elseif lua_type == "resource" then
-      return {{name=lua_prototype.name, type="item", amount=1}}
+      local ingredients = {{name=lua_prototype.name, type="item", amount=1}}
+      -- ajouter le liquide obligatoire, s'il y en a
+      if EntityPrototype.load(lua_prototype).getMineableMiningFluidRequired() then
+        local fluid_ingredient = {name=EntityPrototype.getMineableMiningFluidRequired(), type="fluid", amount=EntityPrototype.getMineableMiningFluidAmount()}
+        table.insert(ingredients, fluid_ingredient)
+      end
+      -- computing burner
+      -- @see https://wiki.factorio.com/Fuel
+      -- Burn time (s) = Fuel value (MJ) ÷ Energy consumption (MW)
+      -- source energy en kJ
+      local energy_coal = 25000000
+      local energy_coal = 8000000
+      local hardness = EntityPrototype.getMineableHardness()
+      local mining_time = EntityPrototype.getMineableMiningTime()
+        Logging:debug(RecipePrototype.classname, "mining properties", "hardness", hardness, "mining_time", mining_time)
+      EntityPrototype.load(factory)
+      if factory ~= nil and EntityPrototype.getEnergyType() == "burner" then
+        local energy_usage = EntityPrototype.getEnergyUsage()
+        local burner_effectivity = EntityPrototype.getBurnerEffectivity()
+        local mining_speed = EntityPrototype.getMiningSpeed()
+        local mining_power = EntityPrototype.getMiningPower()
+                Logging:debug(RecipePrototype.classname, "factory properties", "energy_usage", energy_usage, "burner_effectivity", burner_effectivity, "mining_speed", mining_speed, "mining_power", mining_power)
+        
+        local speed_factory = (mining_power - hardness) * mining_speed / mining_time
+        local fuel_value = energy_usage*speed_factory*12.5
+        local burner_count = fuel_value/energy_coal
+        local burner_ingredient = {name="coal", type="item", amount=burner_count}
+        Logging:debug(RecipePrototype.classname, "add resource coal", "speed_factory", speed_factory, "fuel_value", fuel_value, "burner_count", burner_count)
+        table.insert(ingredients, burner_ingredient)
+      end
+      return ingredients
     elseif lua_type == "fluid" then
       if lua_prototype.name == "steam" then
         EntityPrototype.load(factory)

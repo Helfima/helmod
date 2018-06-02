@@ -124,7 +124,7 @@ function Product.getAmount(recipe)
   if recipe == nil then
     return amount
   end
-  return amount + amount * recipe.factory.effects.productivity
+  return amount + amount * Product.getProductivityBonus(recipe)
 end
 
 -------------------------------------------------------------------------------
@@ -139,7 +139,7 @@ end
 function Product.countProduct(recipe)
   Logging:debug(Product.classname, "countProduct",lua_product)
   local amount = Product.getElementAmount(lua_product)
-  return (amount + amount * recipe.factory.effects.productivity ) * recipe.count
+  return (amount + amount * Product.getProductivityBonus(recipe) ) * recipe.count
 end
 
 -------------------------------------------------------------------------------
@@ -193,6 +193,24 @@ function Product.countContainer(count, container)
     if cargo_wagon_size == 0 then return 0 end
     return count / cargo_wagon_size
   end
+end
+
+-------------------------------------------------------------------------------
+-- Get the productivity bonus of the recipe
+--
+-- @function [parent=#Product] getProductivityBonus
+--
+-- @param #table recipe
+--
+-- @return #number
+--
+function Product.getProductivityBonus(recipe)
+  Logging:debug(Product.classname, "getProductivityBonus(recipe)", lua_product)
+  local productivity = recipe.factory.effects.productivity
+  if recipe.type == "resource" then
+    productivity = productivity + Player.getForce().mining_drill_productivity_bonus
+  end
+  return productivity
 end
 
 return Product

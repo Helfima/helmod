@@ -289,7 +289,7 @@ function EntityPrototype.getMiningPower()
 end
 
 -------------------------------------------------------------------------------
--- Return energy type
+-- Return energy type (electrical or burner)
 --
 -- @function [parent=#EntityPrototype] getEnergyType
 --
@@ -326,6 +326,34 @@ function EntityPrototype.getMineableMiningTime()
     return lua_entity_prototype.mineable_properties.mining_time or 0.5
   end
   return 0.5
+end
+
+-------------------------------------------------------------------------------
+-- Return mineable property required fluid
+--
+-- @function [parent=#EntityPrototype] getMineableMiningFluidRequired
+--
+-- @return #string
+--
+function EntityPrototype.getMineableMiningFluidRequired()
+  if lua_entity_prototype ~= nil and lua_entity_prototype.mineable_properties ~= nil then
+    return lua_entity_prototype.mineable_properties.required_fluid
+  end
+  return nil
+end
+
+-------------------------------------------------------------------------------
+-- Return mineable property amount fluid
+--
+-- @function [parent=#EntityPrototype] getMineableMiningFluidAmount
+--
+-- @return #string
+--
+function EntityPrototype.getMineableMiningFluidAmount()
+  if lua_entity_prototype ~= nil and lua_entity_prototype.mineable_properties ~= nil then
+    return lua_entity_prototype.mineable_properties.fluid_amount/10
+  end
+  return 0
 end
 
 -------------------------------------------------------------------------------

@@ -313,12 +313,18 @@ function ModelCompute.prepareBlock(block)
     block.power = 0
     block.count = 1
 
+    block.mining_ingredient = nil
     -- preparation produits et ingredients du block
     for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
+      Logging:debug(ModelCompute.classname, "recipe", recipe.name, recipe.type)
       local lua_recipe = RecipePrototype.load(recipe).native()
       -- construit la list des ingredients
       for _, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
         if block.ingredients[lua_ingredient.name] == nil then
+          if recipe.type == "resource" then
+            block.mining_ingredient = lua_ingredient.name
+            Logging:debug(ModelCompute.classname, "mining_ingredient", block.mining_ingredient)
+          end
           block.ingredients[lua_ingredient.name] = Product.load(lua_ingredient).new()
         end
         block.ingredients[lua_ingredient.name].count = 0
@@ -327,7 +333,11 @@ function ModelCompute.prepareBlock(block)
       for _, lua_product in pairs(RecipePrototype.getProducts()) do
         if block.products[lua_product.name] == nil then
           block.products[lua_product.name] = Product.load(lua_product).new()
-          if not(block.ingredients[lua_product.name]) then
+          -- state = 0 => produit
+          -- state = 1 => produit pilotant
+          -- state = 2 => produit restant
+
+          if not(block.ingredients[lua_product.name]) or block.mining_ingredient == lua_product.name then
             block.products[lua_product.name].state = 1
           else
             block.products[lua_product.name].state = 0
@@ -734,7 +744,7 @@ function ModelCompute.computeBlock(block)
         local count = Product.load(lua_ingredient).countIngredient(recipe)
         -- consomme les ingredients
         -- exclus le type ressource ou fluid
-        if recipe.type ~= "resource" and recipe.type ~= "fluid" and block.products[lua_ingredient.name] ~= nil then
+        if recipe.type ~= "resource" and recipe.type ~= "fluid" and block.products[lua_ingredient.name] ~= nil and block.mining_ingredient ~= lua_ingredient.name  then
           block.products[lua_ingredient.name].count = block.products[lua_ingredient.name].count - count
         end
       end
@@ -752,7 +762,7 @@ function ModelCompute.computeBlock(block)
 
     -- reduit les produits du block
     for _, product in pairs(block.products) do
-      if block.ingredients[product.name] ~= nil then
+      if block.ingredients[product.name] ~= nil and block.mining_ingredient ~= product.name then
         product.state = 2
       end
       if block.products[product.name].count < 0.01 and not(bit32.band(product.state, 1) > 0) then
@@ -775,6 +785,7 @@ function ModelCompute.computeBlock(block)
         recipe.factory.limit_count = recipe.factory.limit
       end
     end
+    Logging:debug(ModelCompute.classname , "computeBlock end", block)
   end
 end
 
@@ -911,7 +922,7 @@ function ModelCompute.computeInputOutput()
   for _, element in spairs(model.blocks, function(t,a,b) return t[b].index > t[a].index end) do
     -- consomme les produits
     for _, ingredient in pairs(element.ingredients) do
-      if model.products[ingredient.name] ~= nil then
+      if model.products[ingredient.name] ~= nil and element.mining_ingredient ~= ingredient.name then
         model.products[ingredient.name].count = model.products[ingredient.name].count - ingredient.count
         if model.products[ingredient.name].count < 0.01 then model.products[ingredient.name] = nil end
       end
@@ -1132,8 +1143,7 @@ function ModelCompute.speedFactory(recipe)
     local mining_power = EntityPrototype.load(recipe.factory).getMiningPower()
     local hardness = EntityPrototype.load(recipe.name).getMineableHardness()
     local mining_time = EntityPrototype.load(recipe.name).getMineableMiningTime()
-    local bonus = Player.getForce().mining_drill_productivity_bonus
-    return (mining_power - hardness) * mining_speed * (1 + bonus) / mining_time
+    return (mining_power - hardness) * mining_speed / mining_time
   elseif recipe.type == "technology" then
     local bonus = Player.getForce().laboratory_speed_modifier or 1
     return 1*bonus

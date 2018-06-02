@@ -7,6 +7,29 @@ local ElementGui = {
   classname = "HMElementGui"
 }
 
+local element_id = 0
+-------------------------------------------------------------------------------
+-- Get element name
+--
+-- @function [parent=#ElementGui] getElementName
+--
+-- @param #table list
+-- @param #string key
+--
+-- @return #string
+--
+function ElementGui.getElementName(list, key)
+  local element_name = nil
+  if type(list) == "string"  then element_name = list end
+  if type(list) == "table"  then element_name = table.concat(list, "=") end
+  if key ~= nil then element_name = table.concat({element_name, key}, "=") end
+  if string.find(element_name, "?") then
+    element_id = element_id + 1
+    element_name = string.gsub(element_name, "?", element_id)
+  end
+  return element_name
+end
+
 -------------------------------------------------------------------------------
 -- Get the number of textfield input
 --

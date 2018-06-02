@@ -149,6 +149,9 @@ function PropertiesTab.methods:parseProperties(prototype, level)
       if key == "group" or key == "subgroup" then
         local group = prototype[key]
         value = group.name
+      elseif key == "burner_prototype" then
+        local burner_prototype = prototype[key]
+        value = "effectivity="..burner_prototype.effectivity
       elseif type == "table" then
         local test, error = pcall(function() prototype[key]:help() return true end)
         pcall(function() Logging:debug(self:classname(), "level", level, "help", prototype[key]:help(), "test", test, error, level < 2 and test) end)

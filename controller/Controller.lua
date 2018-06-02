@@ -252,12 +252,12 @@ function Controller.parseEvent(event, type)
       end
       if eventController ~= nil then
         local patternAction = eventController:classname().."=([^=]*)"
-        local patternItem = eventController:classname()..".*=ID=([^=]*)"
-        local patternItem2 = eventController:classname()..".*=ID=[^=]*=([^=]*)"
-        local patternItem3 = eventController:classname()..".*=ID=[^=]*=[^=]*=([^=]*)"
+        local patternItem = eventController:classname()..".*=ID[0-9]*=([^=]*)"
+        local patternItem2 = eventController:classname()..".*=ID[0-9]*=[^=]*=([^=]*)"
+        local patternItem3 = eventController:classname()..".*=ID[0-9]*=[^=]*=[^=]*=([^=]*)"
 
         Logging:trace(Controller.classname, "pattern:", patternAction, patternItem, patternItem2, patternItem3)
-
+        Logging:debug(Controller.classname, "event.element.name", event.element.name)
         local action = string.match(event.element.name,patternAction,1)
         local item = string.match(event.element.name,patternItem,1)
         local item2 = string.match(event.element.name,patternItem2,1)
