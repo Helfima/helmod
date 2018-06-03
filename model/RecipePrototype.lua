@@ -9,6 +9,7 @@ local RecipePrototype = {
 
 local lua_prototype = nil
 local lua_type = nil
+local is_voider = nil
 
 -------------------------------------------------------------------------------
 -- Load factorio RecipePrototype
@@ -23,6 +24,7 @@ local lua_type = nil
 function RecipePrototype.load(object, object_type)
   Logging:debug(RecipePrototype.classname, "load(object, object_type)", object, object_type)
   local object_name = nil
+  is_voider = nil
   if type(object) == "string" then
     object_name = object
     lua_type = object_type
@@ -125,6 +127,18 @@ function RecipePrototype.type()
 end
 
 -------------------------------------------------------------------------------
+-- Return if recipe void ingredient
+-- for flare stack/clarifier ect...
+-- @function [parent=#RecipePrototype] isVoid
+-- 
+-- @return #boolean
+--
+function RecipePrototype.isVoid()
+  if is_voider == nil then RecipePrototype.getProducts() end
+  return is_voider
+end
+
+-------------------------------------------------------------------------------
 -- Return localised name of Prototype
 --
 -- @function [parent=#RecipePrototype] getLocalisedName
@@ -172,30 +186,37 @@ end
 -- @return #table
 --
 function RecipePrototype.getProducts()
-  Logging:debug(RecipePrototype.classname, "getProducts()", lua_prototype, lua_type)
+  Logging:debug(RecipePrototype.classname, "getProducts()", lua_prototype.name, lua_type)
   local raw_products = RecipePrototype.getRawProducts()
+  --Logging:debug(RecipePrototype.classname, "raw_products", raw_products)
+  -- if recipe is a voider
+  if #raw_products == 1 and Product.getElementAmount(raw_products[1]) == 0 then
+    Logging:debug(RecipePrototype.classname, "is_voider", lua_prototype.name)
+    is_voider = true
+    return {}
+  else
+    is_voider = false
+  end
   local lua_products = {}
   for r, raw_product in pairs(RecipePrototype.getRawProducts()) do
     local product_id = raw_product.type .. "/" .. raw_product.name
     if lua_products[product_id] ~= nil then
       -- make a new product table for the combined result
-      local new_product = {}
-      for k, v in pairs(lua_products[product_id]) do
-      new_product[k] = v
-      end
       -- combine product amounts, averaging in variable and probabilistic outputs
-      local amount_a = Product.getElementAmount(new_product)
+      local amount_a = Product.getElementAmount(lua_products[product_id])
       local amount_b = Product.getElementAmount(raw_product)
-      new_product.amount = amount_a + amount_b
-      new_product.min_amount = nil
-      new_product.max_amount = nil
-      new_product.probability = nil
-      lua_products[product_id] = new_product
+      lua_products[product_id] = {type=raw_product.type,name=raw_product.name,amount=amount_a + amount_b}
     else
       lua_products[product_id] = raw_product
     end
   end
-  return lua_products
+  -- convert map to array
+  local raw_products = {}
+  for _, lua_product in pairs(lua_products) do
+    table.insert(raw_products,lua_product)
+  end
+  
+  return raw_products
 end
 
 -------------------------------------------------------------------------------
@@ -206,12 +227,12 @@ end
 -- @return #table
 --
 function RecipePrototype.getRawProducts()
-  Logging:debug(RecipePrototype.classname, "getRawProducts()", lua_prototype, lua_type)
+  Logging:debug(RecipePrototype.classname, "getRawProducts()", lua_prototype.name, lua_type)
   if lua_prototype ~= nil then
     if lua_type == "recipe" then
       return lua_prototype.products
     elseif lua_type == "resource" then
-      return {{name=lua_prototype.name, type="item", amount=1}}
+      return EntityPrototype.load(lua_prototype).getMineableMiningProducts()
     elseif lua_type == "fluid" then
       return {{name=lua_prototype.name, type="fluid", amount=1}}
     elseif lua_type == "technology" then
@@ -221,6 +242,25 @@ function RecipePrototype.getRawProducts()
   return {}
 end
 
+-------------------------------------------------------------------------------
+-- Return solid ingredient number of Prototype
+--
+-- @function [parent=#RecipePrototype] getIngredientCount
+--
+-- @return #number
+--
+function RecipePrototype.getIngredientCount(factory)
+  Logging:debug(RecipePrototype.classname, "getIngredientCount()", lua_prototype, lua_type)
+  local count = 0
+  if lua_prototype ~= nil and RecipePrototype.getIngredients(factory) ~= nil then
+    for _,lua_ingredient in pairs(RecipePrototype.getIngredients(factory)) do
+      if Product.load(lua_ingredient).getType() == "item" then
+        count = count + 1
+      end
+    end
+  end
+  return count
+end
 -------------------------------------------------------------------------------
 -- Return ingredients array of Prototype
 --
@@ -248,15 +288,15 @@ function RecipePrototype.getIngredients(factory)
       local energy_coal = 8000000
       local hardness = EntityPrototype.getMineableHardness()
       local mining_time = EntityPrototype.getMineableMiningTime()
-        Logging:debug(RecipePrototype.classname, "mining properties", "hardness", hardness, "mining_time", mining_time)
+      Logging:debug(RecipePrototype.classname, "mining properties", "hardness", hardness, "mining_time", mining_time)
       EntityPrototype.load(factory)
       if factory ~= nil and EntityPrototype.getEnergyType() == "burner" then
         local energy_usage = EntityPrototype.getEnergyUsage()
         local burner_effectivity = EntityPrototype.getBurnerEffectivity()
         local mining_speed = EntityPrototype.getMiningSpeed()
         local mining_power = EntityPrototype.getMiningPower()
-                Logging:debug(RecipePrototype.classname, "factory properties", "energy_usage", energy_usage, "burner_effectivity", burner_effectivity, "mining_speed", mining_speed, "mining_power", mining_power)
-        
+        Logging:debug(RecipePrototype.classname, "factory properties", "energy_usage", energy_usage, "burner_effectivity", burner_effectivity, "mining_speed", mining_speed, "mining_power", mining_power)
+
         local speed_factory = (mining_power - hardness) * mining_speed / mining_time
         local fuel_value = energy_usage*speed_factory*12.5
         local burner_count = fuel_value/energy_coal

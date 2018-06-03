@@ -102,7 +102,7 @@ function RuleEdition.methods:updateRule(item, item2, item3)
   end
   if rule_mod == nil then rule_mod = mod_list[1] end
   ElementGui.addGuiLabel(rule_table, "label-mod", ({"helmod_rule-edition-panel.mod"}))
-  ElementGui.addGuiDropDown(rule_table, "dropdown=ID=", "mod", mod_list, rule_mod)
+  ElementGui.addGuiDropDown(rule_table, self:classname().."=dropdown=ID=", "mod", mod_list, rule_mod)
 
   -- name
   local helmod_rule_manes = {}

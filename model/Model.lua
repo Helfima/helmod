@@ -85,8 +85,10 @@ function Model.resetRules()
   table.insert(global.rules, {index=7, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="dyworld-extraction-burner", excluded = false})
   table.insert(global.rules, {index=8, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="dyworld-drills-electric", excluded = false})
   table.insert(global.rules, {index=9, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="dyworld-drills-burner", excluded = false})
-  table.insert(global.rules, {index=10, mod="DyWorld", name="production-crafting", category="standard", type="entity-group", value="production", excluded = true})
-  table.insert(global.rules, {index=11, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-group", value="production", excluded = true})
+  table.insert(global.rules, {index=10, mod="DyWorld", name="production-crafting", category="standard", type="entity-name", value="assembling-machine-1", excluded = true})
+  table.insert(global.rules, {index=11, mod="DyWorld", name="production-crafting", category="standard", type="entity-name", value="assembling-machine-2", excluded = true})
+  table.insert(global.rules, {index=12, mod="DyWorld", name="production-crafting", category="standard", type="entity-name", value="assembling-machine-3", excluded = true})
+  table.insert(global.rules, {index=13, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-group", value="production", excluded = true})
 end
 
 -------------------------------------------------------------------------------

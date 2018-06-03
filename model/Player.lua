@@ -506,7 +506,7 @@ end
 -------------------------------------------------------------------------------
 -- Return rule
 --
--- @function [parent=#Player] getRules
+-- @function [parent=#Player] checkRules
 --
 -- @param #boolean check
 -- @param #table rules
@@ -602,17 +602,18 @@ function Player.getProductionsCrafting(category, lua_recipe)
   else
     for key, lua_entity in pairs(game.entity_prototypes) do
       if lua_entity.type ~= nil and lua_entity.type ~= "offshore-pump" and lua_entity.name ~= nil and lua_entity.name ~= "player" then
-        Logging:debug(Player.classname, "getProductionsCrafting(category):item", lua_entity.name, lua_entity.type, lua_entity.group.name, lua_entity.subgroup.name, lua_entity.crafting_categories)
+        Logging:trace(Player.classname, "loop production machines", lua_entity.name, lua_entity.type, lua_entity.group.name, lua_entity.subgroup.name, lua_entity.crafting_categories)
         local check = false
         if category ~= nil then
           if not(rules_included[category]) and not(rules_included[category]) then
             -- standard recipe
             if lua_entity.crafting_categories ~= nil and lua_entity.crafting_categories[category] then
-              local recipe_ingredient_count = #RecipePrototype.load(lua_recipe, "recipe").getIngredients(lua_entity)
+              local recipe_ingredient_count = RecipePrototype.load(lua_recipe, "recipe").getIngredientCount(lua_entity)
               local factory_ingredient_count = EntityPrototype.load(lua_entity).getIngredientCount()
               Logging:debug(Player.classname, "crafting", recipe_ingredient_count, factory_ingredient_count)
               if factory_ingredient_count >= recipe_ingredient_count then
                 check = true
+                Logging:debug(Player.classname, "allowed machine", lua_entity.name)
               end
             -- resolve rule excluded
               check = Player.checkRules(check, rules_excluded, "standard", lua_entity, false)
@@ -721,8 +722,12 @@ function Player.searchRecipe(name)
   end
   -- recherche dans les resource
   for key, resource in pairs(Player.getResources()) do
-    if resource.name == name then
-      table.insert(recipes,{name=resource.name, type="resource"})
+    local products = EntityPrototype.load(resource).getMineableMiningProducts()
+    for key, product in pairs(products) do
+      if product.name == name then
+        table.insert(recipes,{name=resource.name, type="resource"})
+        break
+      end
     end
   end
   -- recherche dans les fluids

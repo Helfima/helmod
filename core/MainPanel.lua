@@ -61,8 +61,8 @@ function MainPanel.methods:main()
   local lua_player = Player.native()
   local location = Player.getSettings("display_location")
   local gui_main = lua_player.gui[location]
-  if gui_main["helmod_main_panel"] ~= nil and gui_main["helmod_main_panel"].valid then
-    gui_main["helmod_main_panel"].destroy()
+  if self:isOpened() then
+    Controller.cleanController(Player.native())
   else
     -- interessant mais genere une fausse UI ouverte
     --Player.native().opened = self:getMainPanel()

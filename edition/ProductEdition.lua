@@ -123,6 +123,7 @@ function ProductEdition.methods:after_open(event, action, item, item2, item3)
 end
 
 local product = nil
+local product_count = 0
 
 -------------------------------------------------------------------------------
 -- On update
@@ -139,9 +140,15 @@ function ProductEdition.methods:onUpdate(event, action, item, item2, item3)
   local model = Model.getModel()
   product = nil
   if model.blocks[item] ~= nil then
-    for _, element in pairs(model.blocks[item].products) do
+    local block = model.blocks[item]
+    for _, element in pairs(block.products) do
       if element.name == item2 then
         product = element
+        if block.input[product.name] then
+          product_count = block.input[product.name]
+        else
+          product_count = product.count
+        end
       end
     end
   end
@@ -172,7 +179,7 @@ function ProductEdition.methods:updateInfo(item, item2, item3)
     ElementGui.addGuiLabel(tablePanel, "product-label", Player.getLocalisedName(product))
 
     ElementGui.addGuiLabel(tablePanel, "quantity-label", ({"helmod_common.quantity"}))
-    ElementGui.addGuiText(tablePanel, "quantity", product.count)
+    ElementGui.addGuiText(tablePanel, "quantity", product_count or 0)
   end
 end
 

@@ -184,23 +184,29 @@ function ModelCompute.computeBlockRecipe(block, recipe)
     local production = 1
     if recipe.production ~= nil then production = recipe.production end
 
-    -- recipe classique
-    -- prepare le recipe
-    for _, lua_product in pairs(RecipePrototype.getProducts()) do
-      if block.ingredients[lua_product.name] ~= nil then
-        local product = Product.load(lua_product).new()
-        local p_amount = Product.getAmount(recipe)
-        local count = block.ingredients[lua_product.name].count*production / p_amount
-        -- for void in angel mod
-        if p_amount == 0 then
-          local lua_ingredient = RecipePrototype.getIngredients(recipe.factory)[1]
-          local ingredient = Product.load(lua_ingredient).new()
-          p_amount = ingredient.amount
-          count = block.products[lua_ingredient.name].count*production / p_amount
+    -- for void in angel mod
+    if RecipePrototype.isVoid() then
+      Logging:debug(ModelCompute.classname, "isvoid", RecipePrototype.isVoid(), "recipe name", recipe.name)
+      local lua_ingredient = RecipePrototype.getIngredients(recipe.factory)[1]
+      local ingredient = Product.load(lua_ingredient).new()
+      local p_amount = ingredient.amount
+      local count = 0
+      if block.products[lua_ingredient.name] ~= nil then
+        count = block.products[lua_ingredient.name].count*production / p_amount
+      end
+      if recipe.count < count then recipe.count = count end
+    else
+      -- recipe classique
+      -- prepare le recipe
+      for _, lua_product in pairs(RecipePrototype.getProducts()) do
+        if block.ingredients[lua_product.name] ~= nil then
+          local product = Product.load(lua_product).new()
+          local p_amount = Product.getAmount(recipe)
+          local count = block.ingredients[lua_product.name].count*production / p_amount
+          Logging:debug(ModelCompute.classname, "count", count)
+          Logging:debug(ModelCompute.classname, "p_amount", p_amount)
+          if recipe.count < count then recipe.count = count end
         end
-        Logging:debug(ModelCompute.classname, "count", count)
-        Logging:debug(ModelCompute.classname, "p_amount", p_amount)
-        if recipe.count < count then recipe.count = count end
       end
     end
     Logging:debug(ModelCompute.classname, "recipe.count=", recipe.count)
@@ -302,7 +308,7 @@ end
 -- @param #table block block of model
 --
 function ModelCompute.prepareBlock(block)
-  Logging:debug(ModelCompute.classname, "computeBlock():", block.name)
+  Logging:debug(ModelCompute.classname, "prepareBlock", block.name)
   local model = Model.getModel()
 
   local recipes = block.recipes
@@ -330,6 +336,7 @@ function ModelCompute.prepareBlock(block)
         block.ingredients[lua_ingredient.name].count = 0
       end
       -- construit la list des produits
+      -- si c'est un voider la liste est vide
       for _, lua_product in pairs(RecipePrototype.getProducts()) do
         if block.products[lua_product.name] == nil then
           block.products[lua_product.name] = Product.load(lua_product).new()
@@ -641,7 +648,7 @@ end
 -- @param #table block block of model
 --
 function ModelCompute.computeBlock(block)
-  Logging:debug(Model.classname, "computeBlock():", block.name)
+  Logging:debug(ModelCompute.classname, "********** computeBlock **********")
   local model = Model.getModel()
 
   local recipes = block.recipes
@@ -746,6 +753,9 @@ function ModelCompute.computeBlock(block)
         -- exclus le type ressource ou fluid
         if recipe.type ~= "resource" and recipe.type ~= "fluid" and block.products[lua_ingredient.name] ~= nil and block.mining_ingredient ~= lua_ingredient.name  then
           block.products[lua_ingredient.name].count = block.products[lua_ingredient.name].count - count
+          if RecipePrototype.isVoid() then
+            block.ingredients[lua_ingredient.name].count = block.ingredients[lua_ingredient.name].count - count
+          end
         end
       end
       Logging:debug(ModelCompute.classname , "********** Compute after clean ingredient:", block)
@@ -762,7 +772,8 @@ function ModelCompute.computeBlock(block)
 
     -- reduit les produits du block
     for _, product in pairs(block.products) do
-      if block.ingredients[product.name] ~= nil and block.mining_ingredient ~= product.name then
+      -- change le satus si exedant
+      if block.ingredients[product.name] ~= nil and block.mining_ingredient ~= product.name and not(RecipePrototype.isVoid()) then
         product.state = 2
       end
       if block.products[product.name].count < 0.01 and not(bit32.band(product.state, 1) > 0) then

@@ -163,9 +163,7 @@ end
 --
 function Controller.onGuiClosed(event)
   Logging:trace(Controller.classname, "onGuiClosed(event)", event)
-  if event.element ~= nil and event.element.name == "helmod_main_panel" then
-    event.element.destroy()
-  end
+  Controller.cleanController(Player.native())
 end
 
 -------------------------------------------------------------------------------
@@ -185,8 +183,7 @@ function Controller.onGuiClick(event)
     end
 
     if event.element.name == Controller.classname.."=CLOSE" then
-      local player = game.players[event.player_index]
-      Controller.cleanController(player)
+      Controller.cleanController(Player.native())
     end
     Controller.parseEvent(event)
   end
@@ -213,6 +210,9 @@ function Controller.parseEvent(event, type)
       if main_panel:isOpened() then
         main_panel:main()
         main_panel:main()
+      else
+      -- prevent change location
+        Controller.cleanController(Player.native())
       end
     end
     -- hotkey action

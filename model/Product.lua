@@ -110,6 +110,19 @@ function Product.getElementAmount(element)
 end
 
 -------------------------------------------------------------------------------
+-- Get type of element (item or fluid)
+--
+-- @function [parent=#Product] getType
+--
+-- @return #string
+--
+function Product.getType()
+  Logging:debug(Product.classname, "getType()",lua_product)
+  if lua_product.type == 1 or lua_product.type == "fluid" then return "fluid" end
+  return "item"
+end
+
+-------------------------------------------------------------------------------
 -- Get amount of element
 --
 -- @function [parent=#Product] getAmount
@@ -206,6 +219,7 @@ end
 --
 function Product.getProductivityBonus(recipe)
   Logging:debug(Product.classname, "getProductivityBonus(recipe)", lua_product)
+  if recipe.isluaobject or recipe.factory == nil or recipe.factory.effects == nil then return 1 end
   local productivity = recipe.factory.effects.productivity
   if recipe.type == "resource" then
     productivity = productivity + Player.getForce().mining_drill_productivity_bonus

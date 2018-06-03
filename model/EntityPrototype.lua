@@ -357,6 +357,20 @@ function EntityPrototype.getMineableMiningFluidAmount()
 end
 
 -------------------------------------------------------------------------------
+-- Return mineable property products
+--
+-- @function [parent=#EntityPrototype] getMineableMiningProducts
+--
+-- @return #string
+--
+function EntityPrototype.getMineableMiningProducts()
+  if lua_entity_prototype ~= nil and lua_entity_prototype.mineable_properties ~= nil then
+    return lua_entity_prototype.mineable_properties.products
+  end
+  return {}
+end
+
+-------------------------------------------------------------------------------
 -- Return electric energy source prototype buffer capacity
 --
 -- @function [parent=#EntityPrototype] getElectricBufferCapacity

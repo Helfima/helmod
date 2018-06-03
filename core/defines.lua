@@ -100,6 +100,7 @@ helmod_settings_mod = {
       "HMRemote",
       "HMResourceEdition",
       "HMResourceTab",
+      "HMRuleEdition",
       "HMSatisticTab",
       "HMSummaryTab",
       "HMTechnology",
