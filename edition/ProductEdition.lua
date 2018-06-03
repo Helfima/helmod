@@ -144,7 +144,7 @@ function ProductEdition.methods:onUpdate(event, action, item, item2, item3)
     for _, element in pairs(block.products) do
       if element.name == item2 then
         product = element
-        if block.input[product.name] then
+        if block.input ~= nil and block.input[product.name] then
           product_count = block.input[product.name]
         else
           product_count = product.count
