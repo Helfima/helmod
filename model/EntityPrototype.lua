@@ -365,7 +365,7 @@ end
 --
 function EntityPrototype.getMineableMiningProducts()
   if lua_entity_prototype ~= nil and lua_entity_prototype.mineable_properties ~= nil then
-    return lua_entity_prototype.mineable_properties.products
+    return lua_entity_prototype.mineable_properties.products or {}
   end
   return {}
 end

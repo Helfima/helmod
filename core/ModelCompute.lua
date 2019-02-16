@@ -761,6 +761,23 @@ function ModelCompute.computeBlock(block)
       Logging:debug(ModelCompute.classname , "********** Compute after clean ingredient:", block)
     end
 
+    -- control zero state 1
+    local count_state_1 = 0
+    for _, product in pairs(block.products) do
+      if bit32.band(product.state, 1) > 0 then count_state_1 = count_state_1 + 1 end
+    end
+    Logging:debug(ModelCompute.classname , "product.state = 1", count_state_1)
+    if count_state_1 == 0 then
+      for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
+        for _, product in pairs(RecipePrototype.load(recipe).getProducts()) do
+          if block.products[product.name] ~= nil then
+            block.products[product.name].state = 1
+          end
+        end
+        break
+      end
+    end
+    Logging:debug(ModelCompute.classname , "block.products", block.products)
     if block.count < 1 then
       block.count = 1
     end
@@ -772,8 +789,8 @@ function ModelCompute.computeBlock(block)
 
     -- reduit les produits du block
     for _, product in pairs(block.products) do
-      -- change le satus si exedant
-      if block.ingredients[product.name] ~= nil and block.mining_ingredient ~= product.name and not(RecipePrototype.isVoid()) then
+      -- change le satuts si exedant
+      if block.ingredients[product.name] ~= nil and count_state_1 ~= 0 and block.mining_ingredient ~= product.name and not(RecipePrototype.isVoid()) then
         product.state = 2
       end
       if block.products[product.name].count < 0.01 and not(bit32.band(product.state, 1) > 0) then

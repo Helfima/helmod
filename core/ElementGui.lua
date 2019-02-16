@@ -8,6 +8,7 @@ local ElementGui = {
 }
 
 local element_id = 0
+local cell_id = 0
 -------------------------------------------------------------------------------
 -- Get element name
 --
@@ -853,7 +854,8 @@ end
 --
 function ElementGui.addCell(parent, name, column_count)
   Logging:trace(ElementGui.classname, "addCell()", name)
-  local cell = ElementGui.addGuiTable(parent, "cell_"..name, column_count or 3, helmod_table_style.list)
+  local cell = ElementGui.addGuiTable(parent, "cell"..cell_id.."_"..name, column_count or 3, helmod_table_style.list)
+  cell_id = cell_id+1
   return cell
 end
 

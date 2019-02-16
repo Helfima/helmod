@@ -9,7 +9,8 @@ Player = require "model.Player"
 Controller = require "controller.Controller"
 UnitTest = require "core.UnitTest"
 Command = require "core.Command"
-Event = require "core.Event"
+Event = require "core.event"
+EventController = require "controller.EventController"
 --===========================
 -- trace=4
 -- debug=3
@@ -24,4 +25,4 @@ Logging.console = false
 -- remote.add_interface("helmod", require "core.Remote")
 
 -- attach events
-Event.start()
+EventController.start()

@@ -676,7 +676,7 @@ function AbstractEdition.methods:updateFactorySelector(item, item2, item3)
   for key, factory in pairs(factories) do
     if category ~= nil or (factory.subgroup ~= nil and factory.subgroup.name == global_gui.factoryGroupSelected) then
       local localised_name = EntityPrototype.load(factory.name).getLocalisedName()
-      ElementGui.addGuiButtonSelectSprite(tablePanel, self:classname().."=factory-select=ID="..item.."="..object.id.."=", "item", factory.name, factory.name, localised_name)
+      ElementGui.addGuiButtonSelectSprite(tablePanel, self:classname().."=factory-select=ID="..item.."="..object.id.."=", "entity", factory.name, factory.name, localised_name)
     end
   end
 end

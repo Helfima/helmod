@@ -305,7 +305,6 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
     end
     self:onUpdate(item, item2, item3)
   end
-
 end
 
 -------------------------------------------------------------------------------

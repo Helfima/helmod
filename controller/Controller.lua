@@ -151,7 +151,9 @@ end
 --
 function Controller.onTick(event)
   Logging:trace(Controller.classname, "onTick(event)", event)
-  
+  if(not(Event.released)) then
+    Controller.parseEvent()
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -197,15 +199,15 @@ end
 -- @param event
 -- @param type event type
 --
-function Controller.parseEvent(event, type)
-  Logging:debug(Controller.classname, "parseEvent(event)", event, type)
+function Controller.parseEvent()
+  Logging:debug(Controller.classname, "parseEvent()", Event)
   local ok , err = pcall(function()
   if views == nil then Controller.init() end
   if views ~= nil then
     -- settings action
     local main_panel = Controller.getView("HMMainPanel")
-    if type == "settings" and event.element == nil then
-      Logging:trace(Controller.classname, "parse_event(event): settings=", event.name)
+    if Event.isSettings() then
+      Logging:trace(Controller.classname, "parse_event(): settings=", Event.getElementName())
       Controller.bindController(Player.native())
       if main_panel:isOpened() then
         main_panel:main()
@@ -216,54 +218,42 @@ function Controller.parseEvent(event, type)
       end
     end
     -- hotkey action
-    if type == "hotkey" and event.element == nil then
-      Logging:trace(Controller.classname, "parse_event(event): hotkey=", event.name)
-      local player = game.players[event.player_index]
-      if event.name == "helmod-close" then
+    if Event.isHotkey() then
+      Logging:trace(Controller.classname, "parse_event(): hotkey=", Event.getElementName())
+      if Event.getName() == "helmod-close" then
         if main_panel:isOpened() then
           main_panel:main()
         end
       end
-      if event.name == "helmod-open-close" then
+      if Event.getName() == "helmod-open-close" then
         main_panel:main()
       end
-      if event.name == "helmod-production-line-open" then
+      if Event.getName() == "helmod-production-line-open" then
         if not(main_panel:isOpened()) then
           main_panel:main()
         end
-        Controller.sendEvent(event, "HMMainTab", "change-tab", "HMProductionLineTab")
+        Controller.sendEvent(Event.native(), "HMMainTab", "change-tab", "HMProductionLineTab")
       end
-      if event.name == "helmod-recipe-selector-open" then
+      if Event.getName() == "helmod-recipe-selector-open" then
         if not(main_panel:isOpened()) then
           main_panel:main()
         end
-        Controller.sendEvent(event, "HMRecipeSelector", "OPEN")
+        Controller.sendEvent(Event.native(), "HMRecipeSelector", "OPEN")
       end
     end
     -- button action
-    if (type == nil or type == "dropdown" or type == "checked") and event.element ~= nil and event.element.valid then
-      local eventController = nil
-      for _, controller in pairs(views) do
-        Logging:trace(Controller.classname, "match:", event.element.name, controller:classname())
-        if string.find(event.element.name, controller:classname()) then
-          Logging:trace(Controller.classname, "match ok:", controller:classname())
-          eventController = controller
+    if Event.isButton() then
+      if Event.name == "helmod_planner-command" then
+        local main_panel = Controller.getView("HMMainPanel")
+        main_panel:main()
+      else
+        for _, controller in pairs(views) do
+          Logging:trace(Controller.classname, "match:", Event.name, controller:classname())
+          if Event.name == controller:classname() then
+            Logging:trace(Controller.classname, "match ok:", controller:classname())
+            Controller.sendEvent(Event.native(), controller:classname(), Event.action, Event.item1, Event.item2, Event.item3)
+          end
         end
-      end
-      if eventController ~= nil then
-        local patternAction = eventController:classname().."=([^=]*)"
-        local patternItem = eventController:classname()..".*=ID[0-9]*=([^=]*)"
-        local patternItem2 = eventController:classname()..".*=ID[0-9]*=[^=]*=([^=]*)"
-        local patternItem3 = eventController:classname()..".*=ID[0-9]*=[^=]*=[^=]*=([^=]*)"
-
-        Logging:trace(Controller.classname, "pattern:", patternAction, patternItem, patternItem2, patternItem3)
-        Logging:debug(Controller.classname, "event.element.name", event.element.name)
-        local action = string.match(event.element.name,patternAction,1)
-        local item = string.match(event.element.name,patternItem,1)
-        local item2 = string.match(event.element.name,patternItem2,1)
-        local item3 = string.match(event.element.name,patternItem3,1)
-        Logging:trace(Controller.classname, "parse_event:", event.element.name, action, item, item2, item3)
-        Controller.sendEvent(event, eventController:classname(), action, item, item2, item3)
       end
     end
   end
@@ -272,6 +262,7 @@ function Controller.parseEvent(event, type)
     Player.print(err)
     log(err)
   end
+  Event.released = true
 end
 
 -------------------------------------------------------------------------------

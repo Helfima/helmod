@@ -236,8 +236,9 @@ function RecipeEdition.methods:updateRecipeIngredients(item, item2, item3)
       else
         tooltip = ({"tooltip.element-amount-probability", localisedName, ingredient.amount_min, ingredient.amount_max, ingredient.probability})
       end
-      ElementGui.addGuiButtonSpriteSm(tablePanel, "item=ID=", Player.getIconType(ingredient), ingredient.name, ingredient.name, tooltip)
-      ElementGui.addGuiLabel(tablePanel, ingredient.name, Format.formatNumber(Product.getElementAmount(ingredient),5), "helmod_label_sm")
+      local cell = ElementGui.addCell(tablePanel, ingredient.name)
+      ElementGui.addGuiButtonSpriteSm(cell, "item=ID=", Player.getIconType(ingredient), ingredient.name, ingredient.name, tooltip)
+      ElementGui.addGuiLabel(cell, ingredient.name, Format.formatNumber(Product.getElementAmount(ingredient),5), "helmod_label_sm")
     end
   end
 end
@@ -272,8 +273,9 @@ function RecipeEdition.methods:updateRecipeProducts(item, item2, item3)
         else
           tooltip = ({"tooltip.element-amount-probability", localisedName, product.amount_min, product.amount_max, product.probability})
         end
-        ElementGui.addGuiButtonSpriteSm(tablePanel, "item=ID=", Player.getIconType(product), product.name, product.name, tooltip)
-        ElementGui.addGuiLabel(tablePanel, product.name, Product.getElementAmount(product), "helmod_label_sm")
+        local cell = ElementGui.addCell(tablePanel, product.name)
+        ElementGui.addGuiButtonSpriteSm(cell, "item=ID=", Player.getIconType(product), product.name, product.name, tooltip)
+        ElementGui.addGuiLabel(cell, product.name, Product.getElementAmount(product), "helmod_label_sm")
       end
     end
   end
