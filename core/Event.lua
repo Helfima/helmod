@@ -10,7 +10,11 @@ local Event = {
   item1 = "",
   item2 = "",
   item3  = "",
-  released = true
+  state = 0,
+  STATE_START=0,
+  STATE_CONTINUE=1,
+  STATE_RELEASE=9,
+  next = false
 }
 
 local lua_event = nil
@@ -41,16 +45,40 @@ end
 --
 function Event.load(event, type)
   Logging:debug(Event.classname, "load(event, type)", event, type)
-  if(Event.released) then
+  if(event.element ~= nil) then Logging:debug(Event.classname, "element name", event.element.name) end
+  if(Event.state == Event.STATE_RELEASE) then
     lua_event = event
     type_event = type
     Event.name, Event.action, Event.item1, Event.item2, Event.item3 = string.match(Event.getElementName(),pattern)
-    Event.released = false
+    Event.state = Event.STATE_START
+    Event.next = false
   end
   Logging:debug(Event.classname, "loaded", Event)
   return Event
 end
 
+-------------------------------------------------------------------------------
+-- Set next event
+--
+-- @function [parent=#Event] setNext
+--
+-- @param #String name
+-- @param #String action
+-- @param #String item1
+-- @param #String item2
+-- @param #String item3
+--
+-- @return #Event
+--
+function Event.setNext(name, action, item1, item2, item3)
+  Event.name = name
+  Event.action = action
+  Event.item1 = item1
+  Event.item2 = item2
+  Event.item3 = item3
+  Event.state = Event.STATE_START
+  Event.next = true
+end
 -------------------------------------------------------------------------------
 -- Get type event
 --
@@ -92,7 +120,7 @@ end
 -- @return #lua_element
 --
 function Event.getElementName()
-  if(lua_event.element == nil) then return "" end
+  if(lua_event == nil or lua_event.element == nil) then return "" end
   return lua_event.element.name
 end
 
@@ -104,7 +132,7 @@ end
 -- @return #boolean
 --
 function Event.isElementValid()
-  return (lua_event.element ~= nil and lua_event.element.valid)
+  return (lua_event ~= nil and lua_event.element ~= nil and lua_event.element.valid)
 end
 
 -------------------------------------------------------------------------------
@@ -116,7 +144,7 @@ end
 --
 function Event.isButton()
   Logging:debug(Event.classname, "isButton()", type_event, Event.isElementValid())
-  return ((type_event == nil or type_event == "dropdown" or type_event == "checked") and Event.isElementValid())
+  return (lua_event ~= nil and (type_event == nil or type_event == "dropdown" or type_event == "checked") and Event.isElementValid())
 end
 
 -------------------------------------------------------------------------------
@@ -127,7 +155,7 @@ end
 -- @return #boolean
 --
 function Event.isSettings()
-  return (lua_event.element == nil and type_event == "settings")
+  return (lua_event ~= nil and lua_event.element == nil and type_event == "settings")
 end
 
 -------------------------------------------------------------------------------
@@ -138,7 +166,7 @@ end
 -- @return #boolean
 --
 function Event.isHotkey()
-  return (lua_event.element == nil and type_event == "hotkey")
+  return (lua_event ~= nil and lua_event.element == nil and type_event == "hotkey")
 end
 
 return Event

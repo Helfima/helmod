@@ -34,7 +34,7 @@ end
 --
 function AbstractEdition.methods:onOpen(event, action, item, item2, item3)
   local player_gui = Player.getGlobalGui()
-  local close = true
+  local close = (action == "OPEN") -- only on open event
   player_gui.moduleListRefresh = false
   if player_gui.guiElementLast == nil or player_gui.guiElementLast ~= item..item2 then
     close = false
@@ -51,13 +51,7 @@ end
 --
 -- @function [parent=#AbstractEdition] onClose
 --
--- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function AbstractEdition.methods:onClose(event, action, item, item2, item3)
+function AbstractEdition.methods:onClose()
   local player_gui = Player.getGlobalGui()
   player_gui.guiElementLast = nil
   player_gui.moduleListRefresh = false
@@ -883,16 +877,14 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
 
   if action == "change-tab" then
     global_gui.factory_tab = not(global_gui.factory_tab)
-    self:sendEvent(event, "CLOSE", item, item2, item3)
-    self:sendEvent(event, "OPEN", item, item2, item3)
+    self:close()
   end
 
   if action == "change-panel" then
     global_gui.module_panel = not(global_gui.module_panel)
-    self:sendEvent(event, "CLOSE", item, item2, item3)
-    self:sendEvent(event, "OPEN", item, item2, item3)
+    self:close()
   end
-
+  
   if action == "factory-group" then
     global_gui.factoryGroupSelected = item3
     self:updateFactorySelector(item, item2, item3)

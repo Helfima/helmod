@@ -7,19 +7,18 @@ PLANNER_COMMAND = "helmod_planner-command"
 -- @module MainPanel
 --
 
-MainPanel = setclass("HMMainPanel")
+MainPanel = setclass("HMMainPanel", Form)
 
 -------------------------------------------------------------------------------
--- Initialization
+-- On initialization
 --
--- @function [parent=#MainPanel] init
---
-function MainPanel.methods:init()
-  Logging:debug(self:classname(), "init():global=", global)
-
+-- @function [parent=#MainPanel] onInit
+-- 
+-- @param #Controller parent parent controller
+-- 
+function MainPanel.methods:onInit(parent)
   self.locate = "center"
   self.pinLocate = "left"
-
 end
 
 -------------------------------------------------------------------------------
@@ -177,21 +176,6 @@ function MainPanel.methods:isOpened()
 end
 
 -------------------------------------------------------------------------------
--- Get or create pin tab panel
---
--- @function [parent=#MainPanel] getPinTabPanel
---
-function MainPanel.methods:getPinTabPanel()
-  Logging:trace(self:classname(), "getPinTabPanel(player)")
-  local lua_player = Player.native()
-  local guiMain = lua_player.gui[self.pinLocate]
-  if guiMain["helmod_planner_pin_tab"] ~= nil and guiMain["helmod_planner_pin_tab"].valid then
-    return guiMain["helmod_planner_pin_tab"]
-  end
-  return ElementGui.addGuiFrameV(guiMain, "helmod_planner_pin_tab", helmod_frame_style.hidden)
-end
-
--------------------------------------------------------------------------------
 -- Refresh display data
 --
 -- @function [parent=#MainPanel] refreshDisplayData
@@ -199,6 +183,8 @@ end
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
+--
+-- @usage deprecated
 --
 function MainPanel.methods:refreshDisplayData(item, item2, item3)
   Logging:debug(self:classname(), "refreshDisplayData():", item, item2, item3)
@@ -213,6 +199,8 @@ end
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
+--
+--  @usage deprecated
 --
 function MainPanel.methods:refreshDisplay(item, item2, item3)
   Logging:debug(self:classname(), "refreshDisplay():", item, item2, item3)
@@ -231,6 +219,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 -- 
+-- @usage deprecated
+-- 
 function MainPanel.methods:sendEvent(event, action, item, item2, item3)
     Logging:debug(self:classname(), "sendEvent():", action, item, item2, item3)
     if action == "OPEN" then
@@ -240,6 +230,15 @@ function MainPanel.methods:sendEvent(event, action, item, item2, item3)
     if action == "CLOSE" then
       self:main()
     end
-
 end
 
+-------------------------------------------------------------------------------
+-- Close dialog
+--
+-- @function [parent=#MainPanel] close
+-- 
+-- @param #boolean force state close
+-- 
+function MainPanel.methods:close()
+  Controller.cleanController(Player.native())
+end

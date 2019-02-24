@@ -138,6 +138,50 @@ function RecipeSelector.methods:updateGroups(item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
+-- Prepare groups
+--
+-- @function [parent=#AbstractSelector] prepareGroups
+--
+function RecipeSelector.methods:prepareGroups()
+  Logging:debug(self:classname(), "prepareGroups()")
+  self.list_group = {}
+  self.list_subgroup = {}
+  self.list_prototype = {}
+  for key, recipe in pairs(Player.getRecipes()) do
+    self:appendGroups2(recipe.name, "recipe")
+  end
+  for key, fluid in pairs(Player.getFluidPrototypes()) do
+    self:appendGroups2(fluid.name, "fluid")
+  end
+  for key, resource in pairs(Player.getResources()) do
+    self:appendGroups2(resource.name, "resource")
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Append groups
+--
+-- @function [parent=#RecipeSelector] appendGroups2
+--
+-- @param #string name
+-- @param #string type
+--
+function RecipeSelector.methods:appendGroups2(name, type)
+  Logging:trace(self:classname(), "appendGroups()", name, type)
+  RecipePrototype.load(name, type)
+  local lua_recipe = RecipePrototype.native()
+  local group_name = lua_recipe.group.name
+  local subgroup_name = lua_recipe.subgroup.name
+  
+  if firstGroup == nil then firstGroup = group_name end
+  self.list_group[group_name] = lua_recipe.group
+  self.list_subgroup[subgroup_name] = lua_recipe.subgroup
+  if self.list_prototype[group_name] == nil then self.list_prototype[group_name] = {} end
+  if self.list_prototype[group_name][subgroup_name] == nil then self.list_prototype[group_name][subgroup_name] = {} end
+  table.insert(self.list_prototype[group_name][subgroup_name], {name=name, type=type, order=lua_recipe.order})
+end
+
+-------------------------------------------------------------------------------
 -- Build recipe tooltip
 --
 -- @function [parent=#RecipeSelector] buildPrototypeTooltip

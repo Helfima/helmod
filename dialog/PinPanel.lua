@@ -5,7 +5,7 @@
 -- @extends #Dialog
 --
 
-PinPanel = setclass("HMPinPanel", Dialog)
+PinPanel = setclass("HMPinPanel", Form)
 
 local display_pin_level_min = 0
 local display_pin_level_max = 4
@@ -27,7 +27,9 @@ local display_level = {
 --
 function PinPanel.methods:onInit(parent)
   self.panelCaption = ({"helmod_pin-tab-panel.title"})
+  self.otherClose = false
 end
+
 
 -------------------------------------------------------------------------------
 -- Get the parent panel
@@ -37,7 +39,12 @@ end
 -- @return #LuaGuiElement
 --
 function PinPanel.methods:getParentPanel()
-  return self.parent:getPinTabPanel()
+  local lua_player = Player.native()
+  local guiMain = lua_player.gui[self.parent.pinLocate]
+  if guiMain["helmod_planner_pin_tab"] ~= nil and guiMain["helmod_planner_pin_tab"].valid then
+    return guiMain["helmod_planner_pin_tab"]
+  end
+  return ElementGui.addGuiFrameV(guiMain, "helmod_planner_pin_tab", helmod_frame_style.hidden)
 end
 
 -------------------------------------------------------------------------------
@@ -68,13 +75,7 @@ end
 --
 -- @function [parent=#PinPanel] onClose
 --
--- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function PinPanel.methods:onClose(event, action, item, item2, item3)
+function PinPanel.methods:onClose()
   local globalGui = Player.getGlobalGui()
   globalGui.pinBlock = nil
 end
@@ -85,7 +86,7 @@ end
 -- @function [parent=#PinPanel] getInfoPanel
 --
 function PinPanel.methods:getInfoPanel()
-  local panel = self:getPanel(player)
+  local panel = self:getPanel()
   if panel["info-panel"] ~= nil and panel["info-panel"].valid then
     return panel["info-panel"]["scroll-panel"]
   end
@@ -154,10 +155,10 @@ function PinPanel.methods:updateHeader(event, action, item, item2, item3)
   local model = Model.getModel()
 
   ElementGui.addGuiButton(header_panel, self:classname().."=CLOSE", nil, "helmod_button_icon_close_red", nil, ({"helmod_button.close"}))
-  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID=down", nil, "helmod_button_icon_arrow_left", nil, ({"helmod_button.decrease"}))
-  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID=up", nil, "helmod_button_icon_arrow_right", nil, ({"helmod_button.expand"}))
-  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID=min", nil, "helmod_button_icon_minimize", nil, ({"helmod_button.minimize"}))
-  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID=max", nil, "helmod_button_icon_maximize", nil, ({"helmod_button.maximize"}))
+  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID="..item.."=down", nil, "helmod_button_icon_arrow_left", nil, ({"helmod_button.decrease"}))
+  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID="..item.."=up", nil, "helmod_button_icon_arrow_right", nil, ({"helmod_button.expand"}))
+  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID="..item.."=min", nil, "helmod_button_icon_minimize", nil, ({"helmod_button.minimize"}))
+  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID="..item.."=max", nil, "helmod_button_icon_maximize", nil, ({"helmod_button.maximize"}))
 
 end
 
@@ -184,6 +185,7 @@ function PinPanel.methods:updateInfo(event, action, item, item2, item3)
 
   local column = Player.getGlobalSettings("display_pin_level") + 1
 
+  Logging:debug(self:classname(), "updateInfo", globalGui.pinBlock, model.blocks[globalGui.pinBlock])
   if globalGui.pinBlock ~= nil and model.blocks[globalGui.pinBlock] ~= nil then
     local block = model.blocks[globalGui.pinBlock]
 
@@ -337,10 +339,10 @@ function PinPanel.methods:onEvent(event, action, item, item2, item3)
   if action == "change-level" then
     local display_pin_level = Player.getGlobalSettings("display_pin_level")
     Logging:debug(self:classname(), "display_pin_level", display_pin_level)
-    if item == "down" and display_pin_level > display_pin_level_min  then global_settings["display_pin_level"] = display_pin_level - 1 end
-    if item == "up" and display_pin_level < display_pin_level_max  then global_settings["display_pin_level"] = display_pin_level + 1 end
-    if item == "min" then global_settings["display_pin_level"] = display_pin_level_min end
-    if item == "max" then global_settings["display_pin_level"] = display_pin_level_max end
+    if item2 == "down" and display_pin_level > display_pin_level_min  then global_settings["display_pin_level"] = display_pin_level - 1 end
+    if item2 == "up" and display_pin_level < display_pin_level_max  then global_settings["display_pin_level"] = display_pin_level + 1 end
+    if item2 == "min" then global_settings["display_pin_level"] = display_pin_level_min end
+    if item2 == "max" then global_settings["display_pin_level"] = display_pin_level_max end
     self:updateInfo(event, action, global_gui.pinBlock, item2, item3)
   end
 end

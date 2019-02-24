@@ -5,7 +5,7 @@
 -- @extends #Dialog
 --
 
-Settings = setclass("HMSettings", Dialog)
+Settings = setclass("HMSettings", Form)
 
 local dropdown = {}
 

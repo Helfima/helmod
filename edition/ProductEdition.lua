@@ -57,13 +57,7 @@ end
 --
 -- @function [parent=#ProductEdition] onClose
 --
--- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function ProductEdition.methods:onClose(event, action, item, item2, item3)
+function ProductEdition.methods:onClose()
   local player_gui = Player.getGlobalGui()
   player_gui.guiProductLast = nil
 end

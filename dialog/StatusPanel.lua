@@ -57,13 +57,7 @@ end
 --
 -- @function [parent=#StatusPanel] onClose
 --
--- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function StatusPanel.methods:onClose(event, action, item, item2, item3)
+function StatusPanel.methods:onClose()
   local globalGui = Player.getGlobalGui()
   globalGui.pinBlock = nil
 end
@@ -144,10 +138,6 @@ function StatusPanel.methods:updateHeader(event, action, item, item2, item3)
 
   ElementGui.addGuiButton(header_panel, self:classname().."=CLOSE", nil, "helmod_button_icon_close_red", nil, ({"helmod_button.close"}))
   ElementGui.addGuiButton(header_panel, self:classname().."=UPDATE", nil, "helmod_button_icon_refresh", nil, ({"helmod_result-panel.refresh-button"}))
-  --  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID=down", nil, "helmod_button_icon_arrow_left", nil, ({"helmod_button.minimize"}))
-  --  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID=up", nil, "helmod_button_icon_arrow_right", nil, ({"helmod_button.minimize"}))
-  --  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID=min", nil, "helmod_button_icon_minimize", nil, ({"helmod_button.minimize"}))
-  --  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID=max", nil, "helmod_button_icon_maximize", nil, ({"helmod_button.maximize"}))
 
 end
 

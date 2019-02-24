@@ -1,3 +1,4 @@
+require "core.Form"
 require "core.MainPanel"
 require "dialog.Dialog"
 require "dialog.HelpPanel"
@@ -43,7 +44,7 @@ local Controller = {
 local views = nil
 local locate = "center"
 local pinLocate = "left"
-
+local nextEvent = nil
 
 -------------------------------------------------------------------------------
 -- Initialization
@@ -151,7 +152,7 @@ end
 --
 function Controller.onTick(event)
   Logging:trace(Controller.classname, "onTick(event)", event)
-  if(not(Event.released)) then
+  if(Event.state ~= Event.STATE_RELEASE) then
     Controller.parseEvent()
   end
 end
@@ -201,6 +202,8 @@ end
 --
 function Controller.parseEvent()
   Logging:debug(Controller.classname, "parseEvent()", Event)
+  Event.state = Event.STATE_RELEASE
+  nextEvent = nil
   local ok , err = pcall(function()
   if views == nil then Controller.init() end
   if views ~= nil then
@@ -242,17 +245,23 @@ function Controller.parseEvent()
       end
     end
     -- button action
-    if Event.isButton() then
+    if Event.isButton() or Event.next then
+      Logging:debug(Controller.classname, "button action")
       if Event.name == "helmod_planner-command" then
         local main_panel = Controller.getView("HMMainPanel")
         main_panel:main()
       else
-        for _, controller in pairs(views) do
-          Logging:trace(Controller.classname, "match:", Event.name, controller:classname())
-          if Event.name == controller:classname() then
-            Logging:trace(Controller.classname, "match ok:", controller:classname())
-            Controller.sendEvent(Event.native(), controller:classname(), Event.action, Event.item1, Event.item2, Event.item3)
+        if views ~= nil and views[Event.name] then
+          local continue = Controller.sendEvent(Event.native(), Event.name, Event.action, Event.item1, Event.item2, Event.item3)
+          if(continue) then
+            -- release state in the event without stage
+            Event.state = Event.STATE_CONTINUE
           end
+          if(nextEvent) then
+            Event.setNext(nextEvent.name, nextEvent.action, nextEvent.item1, nextEvent.item2, nextEvent.item3)
+            nextEvent = nil
+          end
+          Logging:debug(Controller.classname, "event state", Event.state)
         end
       end
     end
@@ -262,7 +271,6 @@ function Controller.parseEvent()
     Player.print(err)
     log(err)
   end
-  Event.released = true
 end
 
 -------------------------------------------------------------------------------
@@ -279,13 +287,51 @@ end
 --
 function Controller.sendEvent(event, classname, action, item, item2, item3)
   Logging:debug(Controller.classname, "send_event(event, classname, action, item, item2, item3)", classname, action, item, item2, item3)
-  if views ~= nil then
-    for r, controller in pairs(views) do
-      if controller:classname() == classname then
-        controller:sendEvent(event, action, item, item2, item3)
+  if views ~= nil and views[classname] then
+    local form = views[classname]
+    Logging:debug(Controller.classname, "form state begin", form:classname(), form.state)
+    if action == "CLOSE" then
+      form:close(true)
+    else
+      if form.state == form.STATE_CLOSE or form.state == form.STATE_EVENT then
+        Logging:debug(Controller.classname, "*** event", form:classname(), form.state)
+        form.state = form.STATE_OPEN
+        form:onEvent(event, action, item, item2, item3)
+      end
+      if form.state == form.STATE_OPEN then
+        Logging:debug(Controller.classname, "*** Open", form:classname(), form.state)
+        form:beforeOpen(event, action, item, item2, item3)
+        form.state = form.STATE_UPDATE
+        form:open(event, action, item, item2, item3)
+      end
+      if form.state == form.STATE_UPDATE then
+        Logging:debug(Controller.classname, "*** update", form:classname(), form.state)
+        form.state = form.STATE_EVENT
+        form:update(event, action, item, item2, item3)
       end
     end
+    Logging:debug(Controller.classname, "form state end", form:classname(), form.state)
+    -- release state in the event without stage
+    return form.state == form.STATE_UPDATE and form.state ~= nil
   end
+  return false
+end
+
+-------------------------------------------------------------------------------
+-- Send event dialog
+--
+-- @function [parent=#Controller] createEvent
+--
+-- @param #lua_event event
+-- @param #string classname controller name
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function Controller.createEvent(event, classname, action, item, item2, item3)
+  Logging:debug(Controller.classname, "createEvent(event, classname, action, item, item2, item3)", classname, action, item, item2, item3)
+  nextEvent = {name=classname, action=action, item1=item, item2=item2, item3=item3}
 end
 
 -------------------------------------------------------------------------------

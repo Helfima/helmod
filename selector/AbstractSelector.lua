@@ -7,9 +7,6 @@
 
 AbstractSelector = setclass("HMAbstractSelector", Dialog)
 
-local list_group = {}
-local list_subgroup = {}
-local list_prototype = {}
 local filter_prototype = nil
 local filter_prototype_product = true
 
@@ -212,14 +209,12 @@ function AbstractSelector.methods:onOpen(event, action, item, item2, item3)
   if event ~= nil and event.button ~= nil and event.button == defines.mouse_button_type.right then
     filter_prototype_product = false
   end
-  if item ~= nil and item2 ~= nil then
-    Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
-    if player_gui.guiElementLast ~= item..item2 then
-      close = false
-    end
-    player_gui.guiElementLast = item..item2
-    Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
+  if player_gui.guiElementLast == nil or player_gui.guiElementLast ~= item..item2 then
+    close = false
   end
+  player_gui.guiElementLast = item..item2
+  
+  Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, item..item2, close)
   -- close si nouvel appel
   return close
 end
@@ -324,6 +319,18 @@ function AbstractSelector.methods:updateGroups(item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
+-- Prepare groups
+--
+-- @function [parent=#AbstractSelector] prepareGroups
+--
+function AbstractSelector.methods:prepareGroups()
+  Logging:trace(self:classname(), "prepareGroups()")
+  self.list_group = {}
+  self.list_subgroup = {}
+  self.list_prototype = {}
+end
+
+-------------------------------------------------------------------------------
 -- On update
 --
 -- @function [parent=#AbstractSelector] onUpdate
@@ -333,10 +340,15 @@ end
 -- @param #string item3 third item name
 --
 function AbstractSelector.methods:onUpdate(item, item2, item3)
-  Logging:trace(self:classname(), "onUpdate():",item, item2, item3)
+  Logging:debug(self:classname(), "onUpdate():",item, item2, item3)
   -- recuperation recipes
-  list_group, list_subgroup, list_prototype = self:updateGroups(item, item2, item3)
-
+  if(not(self.group_ready)) then
+      self.group_ready = true
+      -- Run this methode in the next tick
+      self.state = self.STATE_UPDATE
+      self:prepareGroups()
+      return
+  end
   self:updateFilter(item, item2, item3)
   self:updateGroupSelector(item, item2, item3)
   self:updateItemList(item, item2, item3)
@@ -446,7 +458,7 @@ function AbstractSelector.methods:updateItemList(item, item2, item3)
   local list = self:getItemList()
 
   local recipe_selector_list = ElementGui.addGuiTable(item_list_panel, "recipe_list", 1, helmod_table_style.list)
-  for subgroup, list in spairs(list,function(t,a,b) return list_subgroup[b]["order"] > list_subgroup[a]["order"] end) do
+  for subgroup, list in spairs(list,function(t,a,b) return self.list_subgroup[b]["order"] > self.list_subgroup[a]["order"] end) do
     -- boucle subgroup
     local guiRecipeSubgroup = ElementGui.addGuiTable(recipe_selector_list, "recipe-table-"..subgroup, 10, "helmod_table_recipe_selector")
     for key, prototype in spairs(list,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
@@ -468,8 +480,8 @@ function AbstractSelector.methods:getItemList()
   Logging:trace(self:classname(), "getItemList()")
   local global_player = Player.getGlobal()
   local list_selected = {}
-  if list_prototype[global_player.recipeGroupSelected] ~= nil then
-    list_selected = list_prototype[global_player.recipeGroupSelected]
+  if self.list_prototype[global_player.recipeGroupSelected] ~= nil then
+    list_selected = self.list_prototype[global_player.recipeGroupSelected]
   end
   return list_selected
 end
@@ -514,11 +526,11 @@ function AbstractSelector.methods:updateGroupSelector(item, item2, item3)
     panel["recipe-groups"].destroy()
   end
 
-  Logging:trace(self:classname(), "list_group:",list_group)
+  Logging:trace(self:classname(), "list_group:",self.list_group)
 
   -- ajouter de la table des groupes de recipe
   local gui_group_panel = ElementGui.addGuiTable(panel, "recipe-groups", 6, "helmod_table_recipe_selector")
-  for _, group in spairs(list_group,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
+  for _, group in spairs(self.list_group,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
     -- set le groupe
     if global_player.recipeGroupSelected == nil then global_player.recipeGroupSelected = group.name end
     local color = nil

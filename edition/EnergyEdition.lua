@@ -206,13 +206,7 @@ end
 --
 -- @function [parent=#EnergyEdition] onClose
 --
--- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function EnergyEdition.methods:onClose(event, action, item, item2, item3)
+function EnergyEdition.methods:onClose()
   local model = Model.getModel()
 end
 
@@ -283,8 +277,8 @@ function EnergyEdition.methods:onEvent(event, action, item, item2, item3)
       end
       ModelCompute.computePower(item)
       self.parent:refreshDisplayData()
-      Controller.sendEvent(nil, self:classname(), "CLOSE", item, item2, item3)
-      Controller.sendEvent(nil, self:classname(), "OPEN", item, item2, item3)
+      self:close()
+      Controller.createEvent(nil, self:classname(), "OPEN", item, item2, item3)
     end
 
     if action == "secondary-select" then
@@ -297,8 +291,8 @@ function EnergyEdition.methods:onEvent(event, action, item, item2, item3)
       end
       ModelCompute.computePower(item)
       self.parent:refreshDisplayData()
-      Controller.sendEvent(nil, self:classname(), "CLOSE", item, item2, item3)
-      Controller.sendEvent(nil, self:classname(), "OPEN", item, item2, item3)
+      self:close()
+      Controller.createEvent(nil, self:classname(), "OPEN", item, item2, item3)
     end
   end
 end

@@ -63,13 +63,7 @@ end
 --
 -- @function [parent=#ResourceEdition] onClose
 --
--- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function ResourceEdition.methods:onClose(event, action, item, item2, item3)
+function ResourceEdition.methods:onClose()
 	local model = Model.getModel()
 	model.guiRecipeLast = nil
 	model.moduleListRefresh = false

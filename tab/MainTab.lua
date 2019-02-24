@@ -12,7 +12,7 @@ require "tab.AdminTab"
 -- @module MainTab
 --
 
-MainTab = setclass("HMMainTab")
+MainTab = setclass("HMMainTab", Form)
 
 -------------------------------------------------------------------------------
 -- Initialization
@@ -212,6 +212,20 @@ function MainTab.methods:buildPanel()
 end
 
 -------------------------------------------------------------------------------
+-- Build first container
+--
+-- @function [parent=#MainTab] open
+-- 
+-- @param #LuaEvent event
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+-- 
+function MainTab.methods:open(event, action, item, item2, item3)
+  Logging:debug(self:classname(), "open():", action, item, item2, item3)
+end
+-------------------------------------------------------------------------------
 -- Send event
 --
 -- @function [parent=#MainTab] sendEvent
@@ -221,7 +235,7 @@ end
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
---
+-- 
 function MainTab.methods:sendEvent(event, action, item, item2, item3)
   Logging:debug("MainTab", "sendEvent():", action, item, item2, item3)
   self:onEvent(event, action, item, item2, item3)
@@ -311,17 +325,11 @@ function MainTab.methods:onEventAccessAll(event, action, item, item2, item3)
   end
 
   if action == "change-tab" then
-    local panel_recipe = "CLOSE"
     globalGui.currentTab = item
     if item == "HMProductionLineTab" then
       globalGui.currentBlock = "new"
     end
     globalGui.currentBlock = item2
-    if item == "HMProductionBlockTab" and globalGui.currentBlock == nil then
-      Controller.sendEvent(nil, "HMRecipeSelector", "OPEN", item2)
-    else
-      Controller.sendEvent(nil, "HMRecipeSelector", "CLOSE")
-    end
     self.parent:refreshDisplayData()
   end
 
@@ -434,15 +442,15 @@ function MainTab.methods:onEventAccessWrite(event, action, item, item2, item3)
 
   if action == "product-selected" then
     if event.button == defines.mouse_button_type.right then
-      Controller.sendEvent(event, "HMRecipeSelector", "OPEN", item, item2, item3)
+      Controller.createEvent(event, "HMRecipeSelector", "OPEN", item, item2, item3)
     end
   end
 
   if action == "product-edition" then
     if event.button == defines.mouse_button_type.right then
-      Controller.sendEvent(event, "HMRecipeSelector", "OPEN", item, item2, item3)
+      Controller.createEvent(event, "HMRecipeSelector", "OPEN", item, item2, item3)
     else
-      Controller.sendEvent(event, "HMProductEdition", "OPEN", item, item2, item3)
+      Controller.createEvent(event, "HMProductEdition", "OPEN", item, item2, item3)
     end
   end
 
@@ -461,7 +469,7 @@ function MainTab.methods:onEventAccessWrite(event, action, item, item2, item3)
       ModelCompute.update()
       self:update(item, item2, item3)
     else
-      Controller.sendEvent(nil, "HMRecipeSelector", "OPEN", item, item2, item3)
+      Controller.createEvent(nil, "HMRecipeSelector", "OPEN", item, item2, item3)
     end
   end
 
@@ -492,7 +500,7 @@ function MainTab.methods:onEventAccessWrite(event, action, item, item2, item3)
         self:update(item, item2, item3)
       else
         globalGui.currentTab = "HMProductionBlockTab"
-        Controller.sendEvent(nil, "HMRecipeSelector", "OPEN", item, item2, item3)
+        Controller.createEvent(nil, "HMRecipeSelector", "OPEN", item, item2, item3)
       end
     end
 
