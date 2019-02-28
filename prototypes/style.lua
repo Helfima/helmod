@@ -27,13 +27,14 @@ end
 
 function monolithIcon(filename, size, scale, shift, position, border, stretch)
   return {
-    type = "monolith",
-    top_monolith_border = border.top,
-    right_monolith_border = border.right,
-    bottom_monolith_border = border.bottom,
-    left_monolith_border = border.left,
-    monolith_image = sprite(filename, size, scale, shift, position),
-    stretch_monolith_image_to_size = stretch
+    filename = filename,
+    priority = "extra-high-no-scale",
+    align = "center",
+    size = size,
+    scale = scale,
+    shift = shift,
+    position = position,
+    border = border
   }
 end
 
