@@ -27,13 +27,14 @@ end
 
 function monolithIcon(filename, size, scale, shift, position, border, stretch)
   return {
-    type = "monolith",
-    top_monolith_border = border.top,
-    right_monolith_border = border.right,
-    bottom_monolith_border = border.bottom,
-    left_monolith_border = border.left,
-    monolith_image = sprite(filename, size, scale, shift, position),
-    stretch_monolith_image_to_size = stretch
+    filename = filename,
+    priority = "extra-high-no-scale",
+    align = "center",
+    size = size,
+    scale = scale,
+    shift = shift,
+    position = position,
+    border = border.top
   }
 end
 
@@ -129,8 +130,8 @@ end
 --
 -- @field [parent=#Textfield] default
 default_gui["helmod_textfield"] = {
-  type = "textfield_style",
-  parent = "textfield",
+  type = "textbox_style",
+  parent = "search_textfield_with_fixed_width",
   minimal_width = 70,
   maximal_width = 70
 }
@@ -217,7 +218,7 @@ default_gui["helmod_button_selected"] = {
 --
 -- @field [parent=#Button] favicon
 
-local icon_corner_size = 0
+local icon_corner_size = 1
 default_gui["helmod_icon"] = {
   type = "button_style",
   parent = "helmod_button_default",
@@ -1005,7 +1006,7 @@ default_gui["helmod_table-odd"] = {
     type = "composition",
     filename = "__core__/graphics/gui.png",
     priority = "extra-high-no-scale",
-    corner_size = {0, 0},
+    corner_size = {1, 1},
     position = {78, 18},
     opacity = 0.7
   }
@@ -1031,7 +1032,7 @@ default_gui["helmod_table-rule-odd"] = {
     type = "composition",
     filename = "__core__/graphics/gui.png",
     priority = "extra-high-no-scale",
-    corner_size = {0, 0},
+    corner_size = {1, 1},
     position = {78, 18},
     opacity = 0.7
   }
@@ -1060,7 +1061,7 @@ default_gui["helmod_table-help"] = {
     type = "composition",
     filename = "__core__/graphics/gui.png",
     priority = "extra-high-no-scale",
-    corner_size = {0, 0},
+    corner_size = {1, 1},
     position = {78, 18},
     opacity = 0.4
   }
@@ -1186,7 +1187,7 @@ default_gui["helmod_frame_hidden"] = {
     filename = "__helmod__/graphics/gui.png",
     priority = "extra-high-no-scale",
     load_in_minimal_mode = true,
-    corner_size = {0, 0},
+    corner_size = {1, 1},
     position = {0, 0}
   }
 }
