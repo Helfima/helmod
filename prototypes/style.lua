@@ -218,7 +218,7 @@ default_gui["helmod_button_selected"] = {
 --
 -- @field [parent=#Button] favicon
 
-local icon_corner_size = 0
+local icon_corner_size = 1
 default_gui["helmod_icon"] = {
   type = "button_style",
   parent = "helmod_button_default",
@@ -1006,7 +1006,7 @@ default_gui["helmod_table-odd"] = {
     type = "composition",
     filename = "__core__/graphics/gui.png",
     priority = "extra-high-no-scale",
-    corner_size = {0, 0},
+    corner_size = {1, 1},
     position = {78, 18},
     opacity = 0.7
   }
@@ -1032,7 +1032,7 @@ default_gui["helmod_table-rule-odd"] = {
     type = "composition",
     filename = "__core__/graphics/gui.png",
     priority = "extra-high-no-scale",
-    corner_size = {0, 0},
+    corner_size = {1, 1},
     position = {78, 18},
     opacity = 0.7
   }
@@ -1061,7 +1061,7 @@ default_gui["helmod_table-help"] = {
     type = "composition",
     filename = "__core__/graphics/gui.png",
     priority = "extra-high-no-scale",
-    corner_size = {0, 0},
+    corner_size = {1, 1},
     position = {78, 18},
     opacity = 0.4
   }
@@ -1187,7 +1187,7 @@ default_gui["helmod_frame_hidden"] = {
     filename = "__helmod__/graphics/gui.png",
     priority = "extra-high-no-scale",
     load_in_minimal_mode = true,
-    corner_size = {0, 0},
+    corner_size = {1, 1},
     position = {0, 0}
   }
 }
