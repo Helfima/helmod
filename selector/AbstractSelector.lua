@@ -9,7 +9,7 @@ AbstractSelector = setclass("HMAbstractSelector", Dialog)
 
 local filter_prototype = nil
 local filter_prototype_product = true
-
+local cell_prototype_names = nil
 -------------------------------------------------------------------------------
 -- Return filter - filtre sur les prototypes
 --
@@ -198,22 +198,23 @@ function AbstractSelector.methods:onOpen(event, action, item, item2, item3)
   Logging:debug(self:classname(), "onOpen():", action, item, item2, item3)
   local player_gui = Player.getGlobalGui()
   local close = true
-  filter_prototype_product = true
-
-  local globalPlayer = Player.getGlobal()
-  if item3 ~= nil then
-    filter_prototype = item3:lower():gsub("[-]"," ")
-  else
-    filter_prototype = nil
-  end
-  if event ~= nil and event.button ~= nil and event.button == defines.mouse_button_type.right then
-    filter_prototype_product = false
-  end
-  if player_gui.guiElementLast == nil or player_gui.guiElementLast ~= item..item2 then
-    close = false
-  end
-  player_gui.guiElementLast = item..item2
+  if(action == "OPEN") then
+    filter_prototype_product = true
   
+    local globalPlayer = Player.getGlobal()
+    if item3 ~= nil then
+      filter_prototype = item3:lower():gsub("[-]"," ")
+    else
+      filter_prototype = nil
+    end
+    if event ~= nil and event.button ~= nil and event.button == defines.mouse_button_type.right then
+      filter_prototype_product = false
+    end
+    if player_gui.guiElementLast == nil or player_gui.guiElementLast ~= item..item2 then
+      close = false
+    end
+    player_gui.guiElementLast = item..item2
+  end
   Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, item..item2, close)
   -- close si nouvel appel
   return close
@@ -282,12 +283,12 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
   if action == "change-boolean-settings" then
     if globalSettings[item] == nil then globalSettings[item] = defaultSettings[item] end
     globalSettings[item] = not(globalSettings[item])
-    self:onUpdate(item, item2, item3)
+    self:applyFilter(item, item2, item3)
   end
 
   if action == "recipe-filter-switch" then
     filter_prototype_product = not(filter_prototype_product)
-    self:onUpdate(item, item2, item3)
+    self:applyFilter(item, item2, item3)
   end
 
   if action == "recipe-filter" then
@@ -298,7 +299,7 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
         filter_prototype = event.element.parent["filter-text"].text
       end
     end
-    self:onUpdate(item, item2, item3)
+    self:applyFilter(item, item2, item3)
   end
 end
 
@@ -328,6 +329,7 @@ function AbstractSelector.methods:prepareGroups()
   self.list_group = {}
   self.list_subgroup = {}
   self.list_prototype = {}
+  self.cell_prototype_names = {}
 end
 
 -------------------------------------------------------------------------------
@@ -352,6 +354,7 @@ function AbstractSelector.methods:onUpdate(item, item2, item3)
   self:updateFilter(item, item2, item3)
   self:updateGroupSelector(item, item2, item3)
   self:updateItemList(item, item2, item3)
+  self:applyFilter(item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -403,16 +406,40 @@ function AbstractSelector.methods:updateFilter(item, item2, item3)
     if self.product_option then
       panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-product"].state = filter_prototype_product
       panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-ingredient"].state = not(filter_prototype_product)
-      if filter_prototype ~= nil then
-        if Player.getSettings("filter_on_text_changed", true) then
-          panel["filter"]["cell-filter"][self:classname().."=recipe-filter=ID=filter-value"].text = filter_prototype
-        else
-          panel["filter"]["cell-filter"]["filter-text"].text = filter_prototype
+    end
+  end
+
+end
+
+-------------------------------------------------------------------------------
+-- Apply filter
+--
+-- @function [parent=#AbstractSelector] applyFilter
+--
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function AbstractSelector.methods:applyFilter(item, item2, item3)
+  Logging:debug(self:classname(), "applyFilter():", item, item2, item3)
+  local item_list_panel = self:getItemListPanel()
+  if(item_list_panel ~= nil and item_list_panel["recipe_list"] ~= nil) then
+    local recipe_selector_list = item_list_panel["recipe_list"]
+    for _,group in pairs(recipe_selector_list.children) do
+      for _,cell in pairs(group.children) do
+        Logging:debug(self:classname(), "cell.name", cell.name)
+        if cell_prototype_names ~= nil then
+          local prototype = cell_prototype_names[cell.name]
+          Logging:debug(self:classname(), "prototype", prototype)
+          if(prototype) then
+            local visible = self:checkFilter(prototype)
+            Logging:debug(self:classname(), "visible", visible)
+            ElementGui.setVisible(cell, visible)
+          end
         end
       end
     end
   end
-
 end
 
 -------------------------------------------------------------------------------
@@ -449,7 +476,8 @@ end
 function AbstractSelector.methods:updateItemList(item, item2, item3)
   Logging:trace(self:classname(), "updateItemList():", item, item2, item3)
   local item_list_panel = self:getItemListPanel()
-
+  cell_prototype_names = {}
+  
   if item_list_panel["recipe_list"] ~= nil  and item_list_panel["recipe_list"].valid then
     item_list_panel["recipe_list"].destroy()
   end
@@ -463,7 +491,8 @@ function AbstractSelector.methods:updateItemList(item, item2, item3)
     local guiRecipeSubgroup = ElementGui.addGuiTable(recipe_selector_list, "recipe-table-"..subgroup, 10, "helmod_table_recipe_selector")
     for key, prototype in spairs(list,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
       local tooltip = self:buildPrototypeTooltip(prototype)
-      self:buildPrototypeIcon(guiRecipeSubgroup, prototype, tooltip)
+      local cell_name,prototype_name,prototype_type = self:buildPrototypeIcon(guiRecipeSubgroup, prototype, tooltip)
+      cell_prototype_names[cell_name] = {name = prototype_name, type = prototype_type}
     end
   end
 

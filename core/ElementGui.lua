@@ -1275,6 +1275,21 @@ function ElementGui.setStyle(element, style, property)
 end
 
 -------------------------------------------------------------------------------
+-- Set style
+--
+-- @function [parent=#ElementGui] setVisible
+--
+-- @param #LuaGuiElement element
+-- @param #boolean visible
+--
+function ElementGui.setVisible(element, visible)
+  Logging:trace(ElementGui.classname, "setVisible(element, visible)", element, visible)
+  if element.style ~= nil then
+    element.style.visible = visible
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Get dropdown selection
 --
 -- @function [parent=#ElementGui] getDropdownSelection
