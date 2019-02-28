@@ -34,7 +34,7 @@ function monolithIcon(filename, size, scale, shift, position, border, stretch)
     scale = scale,
     shift = shift,
     position = position,
-    border = border
+    border = border.top
   }
 end
 
