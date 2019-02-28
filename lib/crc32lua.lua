@@ -141,11 +141,11 @@ local function requireany(...)
   error(table.concat(errs, '\n'), 2)
 end
 
-local bit, name_ = requireany('bit', 'bit32', 'bit.numberlua')
-local bxor = bit.bxor
-local bnot = bit.bnot
-local band = bit.band
-local rshift = bit.rshift
+-- local bit, name_ = requireany('bit', 'bit32', 'bit.numberlua')
+local bxor = bit32.bxor
+local bnot = bit32.bnot
+local band = bit32.band
+local rshift = bit32.rshift
 
 -- CRC-32-IEEE 802.3 (V.42)
 local POLY = 0xEDB88320
@@ -201,7 +201,7 @@ function M.crc32(s, crc)
 end
 
 
-M.bit = bit  -- bit library used
+M.bit = bit32  -- bit library used
 
 
 return M
