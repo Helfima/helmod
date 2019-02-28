@@ -131,7 +131,7 @@ end
 -- @field [parent=#Textfield] default
 default_gui["helmod_textfield"] = {
   type = "textbox_style",
-  parent = "textfield",
+  parent = "search_textfield_with_fixed_width",
   minimal_width = 70,
   maximal_width = 70
 }
