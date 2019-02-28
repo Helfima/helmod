@@ -44,10 +44,10 @@ function requireany(...)
 end
 
 local crc32 = require 'crc32lua' . crc32_byte
-local bit, name_ = requireany('bit', 'bit32', 'bit.numberlua')
-local bnot = bit.bnot
-local band, bor, bxor = bit.band, bit.bor, bit.bxor
-local lshift, rshift = bit.lshift, bit.rshift
+-- local bit, name_ = requireany('bit', 'bit32', 'bit.numberlua')
+local bnot = bit32.bnot
+local band, bor, bxor = bit32.band, bit32.bor, bit32.bxor
+local lshift, rshift = bit32.lshift, bit32.rshift
 
 -- common definitions
 local ZLIB = {}

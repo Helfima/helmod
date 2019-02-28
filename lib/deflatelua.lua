@@ -154,7 +154,7 @@ end
 
 
 local crc32 = require "crc32lua" . crc32_byte
-local bit, name_ = requireany('bit', 'bit32', 'bit.numberlua', nil)
+-- local bit, name_ = requireany('bit', 'bit32', 'bit.numberlua', nil)
 
 local DEBUG = false
 
@@ -164,9 +164,9 @@ local NATIVE_BITOPS = (bit ~= nil)
 
 local band, lshift, rshift
 if NATIVE_BITOPS then
-  band = bit.band
-  lshift = bit.lshift
-  rshift = bit.rshift
+  band = bit32.band
+  lshift = bit32.lshift
+  rshift = bit32.rshift
 end
 
 
