@@ -94,6 +94,7 @@ function MainTab.methods:getMenuPanel()
     return parent_panel["menu_panel"]
   end
   local panel = ElementGui.addGuiFrameV(parent_panel, "menu_panel", helmod_frame_style.panel)
+  ElementGui.setStyle(panel, "data", "width")
   return panel
 end
 
@@ -150,7 +151,7 @@ function MainTab.methods:getInfoPanel()
     return parent_panel["info_panel"]
   end
   local table_panel = ElementGui.addGuiTable(parent_panel, "info_panel", 2, helmod_table_style.panel)
-  table_panel.style.horizontally_stretchable = true
+  ElementGui.setStyle(table_panel, "block_info", "height")
   return table_panel
 end
 
@@ -181,6 +182,22 @@ end
 --
 function MainTab.methods:getResultScrollPanel(caption)
   local result_panel = self:getResultPanel(caption)
+  local scroll_panel = ElementGui.addGuiScrollPane(result_panel, "scroll-data", helmod_frame_style.scroll_pane, true, true)
+  scroll_panel.style.horizontally_stretchable = true
+  scroll_panel.style.vertically_stretchable = true
+  return scroll_panel
+end
+
+-------------------------------------------------------------------------------
+-- Get or create result scroll panel
+--
+-- @function [parent=#MainTab] getResultScrollPanel
+--
+-- @param #string caption
+--
+function MainTab.methods:getDataScrollPanel(caption)
+  local result_panel = self:getResultPanel(caption)
+  ElementGui.setStyle(result_panel, "block_data", "height")
   local scroll_panel = ElementGui.addGuiScrollPane(result_panel, "scroll-data", helmod_frame_style.scroll_pane, true, true)
   scroll_panel.style.horizontally_stretchable = true
   scroll_panel.style.vertically_stretchable = true
@@ -722,7 +739,6 @@ function MainTab.methods:updateHeaderPanel(item, item2, item3)
       ElementGui.addGuiButton(tab_menu_panel, self:classname().."=change-tab=ID=", tab:classname(), style, tab:getButtonCaption())
     end
   end
-  ElementGui.addGuiFrameH(tab_menu_panel,"tab_final",helmod_frame_style.tab).style.width = 1000
   -- action panel
   local action_panel = self:getActionPanel()
 
@@ -802,7 +818,7 @@ function MainTab.methods:updateHeaderPanel(item, item2, item3)
 
       end
     end
-    ElementGui.addGuiButton(index_panel, self:classname().."=change-model=ID=", "new", "helmod_button_default", "+")
+    ElementGui.addGuiShortButton(index_panel, self:classname().."=change-model=ID=", "new", "helmod_button_default", "+")
   end
 end
 

@@ -294,10 +294,9 @@ function RecipePrototype.getIngredients(factory)
         local energy_usage = EntityPrototype.getEnergyUsage()
         local burner_effectivity = EntityPrototype.getBurnerEffectivity()
         local mining_speed = EntityPrototype.getMiningSpeed()
-        local mining_power = EntityPrototype.getMiningPower()
-        Logging:debug(RecipePrototype.classname, "factory properties", "energy_usage", energy_usage, "burner_effectivity", burner_effectivity, "mining_speed", mining_speed, "mining_power", mining_power)
+        Logging:debug(RecipePrototype.classname, "factory properties", "energy_usage", energy_usage, "burner_effectivity", burner_effectivity, "mining_speed", mining_speed)
 
-        local speed_factory = (mining_power - hardness) * mining_speed / mining_time
+        local speed_factory = hardness * mining_speed / mining_time
         local fuel_value = energy_usage*speed_factory*12.5
         local burner_count = fuel_value/energy_coal
         local burner_ingredient = {name="coal", type="item", amount=burner_count}

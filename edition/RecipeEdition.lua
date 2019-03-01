@@ -44,6 +44,7 @@ function RecipeEdition.methods:getRecipePanel()
     return panel["recipe_panel"]
   end
   local table_panel = ElementGui.addGuiTable(panel, "recipe_panel", 2, helmod_table_style.panel)
+  ElementGui.setStyle(table_panel, "recipe_info_object", "height")
   return table_panel
 end
 

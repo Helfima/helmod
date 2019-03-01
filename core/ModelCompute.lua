@@ -1168,10 +1168,9 @@ function ModelCompute.speedFactory(recipe)
     -- (mining power - ore mining hardness) * mining speed
     -- @see https://wiki.factorio.com/Mining
     local mining_speed = EntityPrototype.load(recipe.factory).getMiningSpeed()
-    local mining_power = EntityPrototype.load(recipe.factory).getMiningPower()
     local hardness = EntityPrototype.load(recipe.name).getMineableHardness()
     local mining_time = EntityPrototype.load(recipe.name).getMineableMiningTime()
-    return (mining_power - hardness) * mining_speed / mining_time
+    return hardness * mining_speed / mining_time
   elseif recipe.type == "technology" then
     local bonus = Player.getForce().laboratory_speed_modifier or 1
     return 1*bonus

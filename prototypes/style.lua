@@ -436,7 +436,6 @@ for _,style in pairs(style_list) do
   }
 end
 -------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 -- Style of button
 --
 -- @field [parent=#Button] small_bold
@@ -458,7 +457,7 @@ default_gui["helmod_button_small_bold"] = {
 -------------------------------------------------------------------------------
 -- Style of button
 --
--- @field [parent=#Button] small-bold-start
+-- @field [parent=#Button] small_bold_start
 
 default_gui["helmod_button_small_bold_start"] = {
   type = "button_style",
@@ -477,7 +476,7 @@ default_gui["helmod_button_small_bold_start"] = {
 -------------------------------------------------------------------------------
 -- Style of button
 --
--- @field [parent=#Button] small-bold-middle
+-- @field [parent=#Button] small_bold_middle
 
 default_gui["helmod_button_small_bold_middle"] = {
   type = "button_style",

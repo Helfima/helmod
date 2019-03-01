@@ -35,13 +35,15 @@ function ProductionLineTab.methods:updateHeader(item, item2, item3)
 
   local info_panel = self.parent:getInfoPanel()
   -- info panel
-  local block_panel = ElementGui.addGuiFrameH(info_panel, "block", helmod_frame_style.panel, ({"helmod_result-panel.tab-title-production-line"}))
+  local block_panel = ElementGui.addGuiFrameV(info_panel, "block", helmod_frame_style.panel, ({"helmod_result-panel.tab-title-production-line"}))
+  ElementGui.setStyle(block_panel, "block_info", "width")
   local block_scroll = ElementGui.addGuiScrollPane(block_panel, "output-scroll", helmod_frame_style.scroll_pane, true)
   ElementGui.setStyle(block_scroll, "scroll_block", "height")
   local block_table = ElementGui.addGuiTable(block_scroll,"output-table",2)
 
 
   local element_panel = ElementGui.addGuiTable(info_panel, "elements", 1, helmod_table_style.panel)
+  ElementGui.setStyle(element_panel, "block_element", "width")
   -- ouput panel
   local output_panel = ElementGui.addGuiFrameV(element_panel, "output", helmod_frame_style.panel, ({"helmod_common.output"}))
   output_panel.style.horizontally_stretchable = true
@@ -119,7 +121,7 @@ function ProductionLineTab.methods:updateData(item, item2, item3)
   local model = Model.getModel()
 
   -- data panel
-  local scrollPanel = self.parent:getResultScrollPanel({"helmod_common.blocks"})
+  local scrollPanel = self.parent:getDataScrollPanel({"helmod_common.blocks"})
 
   local countBlock = Model.countBlocks()
   if countBlock > 0 then
@@ -188,13 +190,13 @@ function ProductionLineTab.methods:addTableRow(gui_table, block)
   -- col action
   local cell_action = ElementGui.addCell(gui_table, "action"..block.id, 4)
 
-  ElementGui.addGuiButton(cell_action, self.parent:classname().."=production-block-remove=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
-  ElementGui.addGuiButton(cell_action, self.parent:classname().."=production-block-down=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-down"}), ({"tooltip.down-element", Player.getSettings("row_move_step")}))
-  ElementGui.addGuiButton(cell_action, self.parent:classname().."=production-block-up=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-up"}), ({"tooltip.up-element", Player.getSettings("row_move_step")}))
+  ElementGui.addGuiShortButton(cell_action, self.parent:classname().."=production-block-remove=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
+  ElementGui.addGuiShortButton(cell_action, self.parent:classname().."=production-block-down=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-down"}), ({"tooltip.down-element", Player.getSettings("row_move_step")}))
+  ElementGui.addGuiShortButton(cell_action, self.parent:classname().."=production-block-up=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-up"}), ({"tooltip.up-element", Player.getSettings("row_move_step")}))
   if unlinked then
-    ElementGui.addGuiButton(cell_action, self.parent:classname().."=production-block-unlink=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-unlink"}), ({"tooltip.unlink-element"}))
+    ElementGui.addGuiShortButton(cell_action, self.parent:classname().."=production-block-unlink=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-unlink"}), ({"tooltip.unlink-element"}))
   else
-    ElementGui.addGuiButton(cell_action, self.parent:classname().."=production-block-unlink=ID=", block.id, "helmod_button_selected", ({"helmod_result-panel.row-button-unlink"}), ({"tooltip.unlink-element"}))
+    ElementGui.addGuiShortButton(cell_action, self.parent:classname().."=production-block-unlink=ID=", block.id, "helmod_button_selected", ({"helmod_result-panel.row-button-unlink"}), ({"tooltip.unlink-element"}))
   end
 
   -- col index

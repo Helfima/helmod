@@ -298,7 +298,7 @@ function Controller.sendEvent(event, classname, action, item, item2, item3)
         form.state = form.STATE_OPEN
         form:onEvent(event, action, item, item2, item3)
       end
-      if action == "OPEN" then
+      --if action == "OPEN" then
         if form.state == form.STATE_OPEN then
           Logging:debug(Controller.classname, "*** Open", form:classname(), form.state)
           form:beforeOpen(event, action, item, item2, item3)
@@ -310,9 +310,9 @@ function Controller.sendEvent(event, classname, action, item, item2, item3)
           form.state = form.STATE_EVENT
           form:update(event, action, item, item2, item3)
         end
-      else
-        form.state = form.STATE_EVENT
-      end
+--      else
+--        form.state = form.STATE_EVENT
+--      end
     end
     Logging:debug(Controller.classname, "form state end", form:classname(), form.state)
     -- release state in the event without stage

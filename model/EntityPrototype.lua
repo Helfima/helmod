@@ -275,20 +275,6 @@ function EntityPrototype.getMiningSpeed()
 end
 
 -------------------------------------------------------------------------------
--- Return mining power
---
--- @function [parent=#EntityPrototype] getMiningPower
---
--- @return #number default 0
---
-function EntityPrototype.getMiningPower()
-  if lua_entity_prototype ~= nil then
-    return lua_entity_prototype.mining_power or 0
-  end
-  return 0
-end
-
--------------------------------------------------------------------------------
 -- Return energy type (electrical or burner)
 --
 -- @function [parent=#EntityPrototype] getEnergyType

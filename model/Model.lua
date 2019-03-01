@@ -764,8 +764,7 @@ function Model.getSpeedFactory(key)
   local crafting_speed = EntityPrototype.load(key).getCraftingSpeed()
   if crafting_speed ~= 0 then return crafting_speed end
   local mining_speed = EntityPrototype.load(key).getMiningSpeed()
-  local mining_power = EntityPrototype.load(key).getMiningPower()
-  if mining_speed ~= 0 and mining_power ~= 0 then return mining_speed * mining_power end
+  if mining_speed ~= 0 then return mining_speed end
   return 1
 end
 

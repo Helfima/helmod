@@ -153,9 +153,9 @@ function MainPanel.methods:getDataPanel()
   end
   local panel = ElementGui.addGuiFrameV(main_panel, "helmod_data_panel", helmod_frame_style.hidden)
   ElementGui.setStyle(panel, "data", "width")
-  panel.style.vertically_stretchable = true
+  --panel.style.vertically_stretchable = false
   local table_panel = ElementGui.addGuiTable(panel, "helmod_data_table", 1, helmod_table_style.panel)
-  --table_panel.draw_horizontal_lines = true
+  --table_panel.style.vertically_stretchable = false
   return table_panel
 end
 

@@ -55,7 +55,8 @@ function PropertiesTab.methods:addTableRow(gui_table, property)
 
   -- col value
   local cell_value = ElementGui.addGuiFrameH(gui_table,property.name.."_value", helmod_frame_style.hidden)
-  ElementGui.addGuiLabel(cell_value, "label", property.value, "helmod_label_max_600", nil, false)
+  local label_value = ElementGui.addGuiLabel(cell_value, "label", property.value, "helmod_label_max_600", nil, false)
+  label_value.style.width = 600
 
 end
 

@@ -230,6 +230,27 @@ function ElementGui.addGuiButton(parent, action, key, style, caption, tooltip)
 end
 
 -------------------------------------------------------------------------------
+-- Add a button element
+--
+-- @function [parent=#ElementGui] addGuiShortButton
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #string action action name
+-- @param #string key unique id
+-- @param #string style style of button
+-- @param #string caption container for element
+-- @param #string tooltip displayed text
+--
+-- @return #LuaGuiElement the LuaGuiElement added
+--
+function ElementGui.addGuiShortButton(parent, action, key, style, caption, tooltip)
+  Logging:trace(ElementGui.classname, "addGuiButton", parent, action, key, style, caption, tooltip)
+  local button = ElementGui.addGuiButton(parent, action, key, style, caption, tooltip)
+  button.style.width = 20
+  return button
+end
+
+-------------------------------------------------------------------------------
 -- Add a choose element button
 --
 -- @function [parent=#ElementGui] addGuiChooseButton
@@ -749,7 +770,6 @@ end
 -- @param #string key unique id
 -- @param #string style style of frame
 -- @param #boolean policy scroll horizontally
--- @param #boolean stretchable horizontally
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
@@ -764,7 +784,6 @@ function ElementGui.addGuiScrollPane(parent, key, style, policy)
   options.name = key
   options.style = style
   local scroll = parent.add(options)
-  --scroll.style.horizontally_stretchable = true
   return scroll
 end
 
@@ -1173,11 +1192,11 @@ function ElementGui.getStyleSizes()
   local width , height = ElementGui.getDisplaySizes()
   local style_sizes = {}
   if type(width) == "number" and  type(height) == "number" then
-    local width_recipe_column_1 = 220
-    local width_recipe_column_2 = 220
-    local width_dialog = width_recipe_column_1 + width_recipe_column_2 + 70
+    local width_recipe_column_1 = 240
+    local width_recipe_column_2 = 250
+    local width_dialog = width_recipe_column_1 + width_recipe_column_2
     local width_scroll = 8
-    local width_block_info = 290
+    local width_block_info = 320
     local height_block_header = 450
     local height_selector_header = 230
     local height_row_element = 110
@@ -1198,12 +1217,19 @@ function ElementGui.getStyleSizes()
     style_sizes.power = {}
     style_sizes.power.height = 200
 
+    style_sizes.edition_product_tool = {}
+    style_sizes.edition_product_tool.height = 150
+
     style_sizes.data_section = {}
     style_sizes.data_section.width = width_main - width_dialog - 4*width_scroll
 
     style_sizes.recipe_selector = {}
     style_sizes.recipe_selector.height = height_main - height_selector_header
 
+    style_sizes.scroll_recipe_selector = {}
+    style_sizes.scroll_recipe_selector.width = width_dialog - 20
+    style_sizes.scroll_recipe_selector.height = height_main - height_selector_header - 20
+    
     style_sizes.recipe_product = {}
     style_sizes.recipe_product.height = 77
 
@@ -1214,6 +1240,9 @@ function ElementGui.getStyleSizes()
     style_sizes.recipe_module.width = width_recipe_column_2 - width_scroll*2
     style_sizes.recipe_module.height = 147
 
+    style_sizes.recipe_info_object = {}
+    style_sizes.recipe_info_object.height = 155
+    
     style_sizes.recipe_edition_1 = {}
     style_sizes.recipe_edition_1.width = width_recipe_column_1
     style_sizes.recipe_edition_1.height = 250
@@ -1225,13 +1254,22 @@ function ElementGui.getStyleSizes()
     style_sizes.scroll_help.width = width_dialog - width_scroll - 50
     style_sizes.scroll_help.height = height_main - 200
 
+    
     -- block
+    style_sizes.block_data = {}
+    style_sizes.block_data.height = height_main - 122 - height_row_element * 2
+    
+    style_sizes.block_info = {}
+    style_sizes.block_info.width = width_block_info
+    style_sizes.block_info.height = (height_row_element) * 2 + 4
+
     style_sizes.scroll_block = {}
     style_sizes.scroll_block.height = (height_row_element) * 2 - 34
 
     -- input/output table
     style_sizes.block_element = {}
     style_sizes.block_element.height = height_row_element
+    style_sizes.block_element.width = width_main - width_dialog - width_block_info
 
     -- input/output table
     style_sizes.scroll_block_element = {}

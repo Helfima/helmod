@@ -63,7 +63,9 @@ function Form.methods:getPanel()
 	if parent_panel[self:classname()] ~= nil and parent_panel[self:classname()].valid then
 		return parent_panel[self:classname()]
 	end
-	return ElementGui.addGuiTable(parent_panel, self:classname(), 1, helmod_table_style.panel)
+	--local panel = ElementGui.addGuiTable(parent_panel, self:classname(), 1, helmod_table_style.panel)
+	local panel = ElementGui.addGuiFrameV(parent_panel, self:classname(), helmod_frame_style.hidden, caption)
+	return panel
 end
 
 -------------------------------------------------------------------------------
@@ -116,8 +118,8 @@ function Form.methods:open(event, action, item, item2, item3)
 
     local panel = self:getPanel()
     
-    ElementGui.addGuiFrameH(panel, "header-panel", helmod_frame_style.panel, caption)
-    
+    local header_panel = ElementGui.addGuiFrameH(panel, "header-panel", helmod_frame_style.panel, caption)
+    header_panel.style.height = 30
     self:onOpen(event, action, item, item2, item3)
     self:afterOpen(event, action, item, item2, item3)
     

@@ -72,7 +72,9 @@ function ProductEdition.methods:getInfoPanel()
   if panel["info"] ~= nil and panel["info"].valid then
     return panel["info"]
   end
-  return ElementGui.addGuiFrameV(panel, "info", helmod_frame_style.panel)
+  local info_panel = ElementGui.addGuiFrameV(panel, "info", helmod_frame_style.panel)
+  info_panel.style.horizontally_stretchable = true
+  return info_panel
 end
 
 -------------------------------------------------------------------------------
@@ -85,7 +87,10 @@ function ProductEdition.methods:getToolPanel()
   if panel["tool_panel"] ~= nil and panel["tool_panel"].valid then
     return panel["tool_panel"]
   end
-  return ElementGui.addGuiFrameV(panel, "tool_panel", helmod_frame_style.panel, {"helmod_product-edition-panel.tool"})
+  local tool_panel = ElementGui.addGuiFrameV(panel, "tool_panel", helmod_frame_style.panel, {"helmod_product-edition-panel.tool"})
+  tool_panel.style.horizontally_stretchable = true
+  ElementGui.setStyle(tool_panel, "edition_product_tool", "height")
+  return tool_panel
 end
 
 -------------------------------------------------------------------------------
@@ -98,7 +103,9 @@ function ProductEdition.methods:getActionPanel()
   if panel["action_panel"] ~= nil and panel["action_panel"].valid then
     return panel["action_panel"]
   end
-  return ElementGui.addGuiFrameV(panel, "action_panel", helmod_frame_style.panel)
+  local action_panel = ElementGui.addGuiFrameV(panel, "action_panel", helmod_frame_style.panel)
+  action_panel.style.horizontally_stretchable = true
+  return action_panel
 end
 
 -------------------------------------------------------------------------------
