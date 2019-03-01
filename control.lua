@@ -9,7 +9,7 @@ Player = require "model.Player"
 Controller = require "controller.Controller"
 UnitTest = require "core.UnitTest"
 Command = require "core.Command"
-Event = require "core.event"
+Event = require "core.Event"
 EventController = require "controller.EventController"
 --===========================
 -- trace=4
