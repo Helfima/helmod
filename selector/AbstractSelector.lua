@@ -203,25 +203,27 @@ end
 function AbstractSelector.methods:onOpen(event, action, item, item2, item3)
   Logging:debug(self:classname(), "onOpen():", action, item, item2, item3)
   local player_gui = Player.getGlobalGui()
-  local close = true
+  local close = action == "OPEN"
   filter_prototype_product = true
 
-  local globalPlayer = Player.getGlobal()
-  if item3 ~= nil then
-    filter_prototype = item3:lower():gsub("[-]"," ")
-  else
-    filter_prototype = nil
-  end
-  if event ~= nil and event.button ~= nil and event.button == defines.mouse_button_type.right then
-    filter_prototype_product = false
-  end
-  if item ~= nil and item2 ~= nil then
-    Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
-    if player_gui.guiElementLast ~= item..item2 then
-      close = false
+  if action == "OPEN" then
+    local globalPlayer = Player.getGlobal()
+    if item3 ~= nil then
+      filter_prototype = item3:lower():gsub("[-]"," ")
+    else
+      filter_prototype = nil
     end
-    player_gui.guiElementLast = item..item2
-    Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
+    if event ~= nil and event.button ~= nil and event.button == defines.mouse_button_type.right then
+      filter_prototype_product = false
+    end
+    if item ~= nil and item2 ~= nil then
+      Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
+      if player_gui.guiElementLast ~= item..item2 then
+        close = false
+      end
+      player_gui.guiElementLast = item..item2
+      Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
+    end
   end
   -- close si nouvel appel
   return close
@@ -391,6 +393,7 @@ function AbstractSelector.methods:updateFilter(item, item2, item3)
     end
 
     ElementGui.addGuiLabel(panel, "message", ({"helmod_recipe-edition-panel.message"}))
+
   else
     if self.product_option then
       panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-product"].state = filter_prototype_product

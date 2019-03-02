@@ -5,7 +5,8 @@
 local Product = {
   -- single-line comment
   classname = "HMProduct",
-  belt_ratio = 40/0.09375
+  -- speed in game/speed data for blue belt
+  belt_ratio = 45/0.09375
 }
 
 local lua_product = nil

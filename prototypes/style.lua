@@ -580,6 +580,21 @@ default_gui["helmod_label_default"] = {
 }
 
 -------------------------------------------------------------------------------
+-- Style of default
+--
+-- @field [parent=#Label] element
+
+default_gui["helmod_label_element"] = {
+  type = "label_style",
+  parent = "label",
+  font = "helmod_font_normal",
+  top_padding = -5,
+  right_padding = 2,
+  bottom_padding = -5,
+  left_padding = 2
+}
+
+-------------------------------------------------------------------------------
 -- Style of text
 --
 -- @field [parent=#Label] help
@@ -704,7 +719,7 @@ default_gui["helmod_label_sm"] = {
 default_gui["helmod_label_right"] = {
   type = "label_style",
   font = "default",
-  align = "right"
+  horizontal_align = "right"
 }
 
 -------------------------------------------------------------------------------
@@ -1163,7 +1178,7 @@ default_gui["helmod_frame_hidden"] = {
 
   font = "helmod_font_title_frame",
 
-  
+
   flow_style = {
     type = "flow_style",
     horizontal_spacing = 0,
@@ -1199,43 +1214,88 @@ default_gui["helmod_frame_default"] = {
   type = "frame_style",
   font = "helmod_font_title_frame",
   font_color = {r=1, g=1, b=1},
-  -- marge interieure
-  top_padding  = 0,
-  right_padding = 2,
-  bottom_padding = 0,
-  left_padding = 2,
 
-  -- padding title
+  -- padding of the title area of the frame, when the frame title
+  -- is empty, the area doesn't exist and these values are not used
   title_top_padding = 0,
-  title_left_padding = 0,
-  title_bottom_padding = 4,
-  title_right_padding = 0,
+  title_left_padding = 2,
+  title_bottom_padding = 0,
+  title_right_padding = 2,
+  -- padding of the content area of the frame
+  top_padding  = 0,
+  right_padding = 0,
+  bottom_padding = 4,
+  left_padding = 0,
+  graphical_set =
   {
-    type = "composition",
-    filename = "__core__/graphics/gui.png",
-    priority = "extra-high-no-scale",
-    load_in_minimal_mode = true,
-    corner_size = {3, 3},
-    position = {8, 0}
+    base = {position = {0, 0}, corner_size = 8},
+    shadow = default_shadow
   },
-  flow_style = {
-    type = "flow_style",
-    horizontal_spacing = 0,
-    vertical_spacing = 0
-  },
-  horizontal_flow_style =
+  flow_style = { type = "flow_style" },
+  horizontal_flow_style = { type = "horizontal_flow_style" },
+  vertical_flow_style = { type = "vertical_flow_style"  },
+  header_flow_style = { type = "horizontal_flow_style", vertical_align = "center", maximal_height = 24},
+  header_filler_style =
   {
-    type = "horizontal_flow_style",
-    horizontal_spacing = 0,
+    type = "empty_widget_style",
+    parent = "draggable_space_header",
+    height = 24
   },
-
-  vertical_flow_style =
-  {
-    type = "vertical_flow_style",
-    vertical_spacing = 0
-  }
+  use_header_filler = true,
+  border = {}
 }
 
+-------------------------------------------------------------------------------
+-- Style of element
+--
+-- @field [parent=#Frame] element
+--
+function default_glow(tint_value, scale_value)
+  return
+    {
+      position = {200, 128},
+      corner_size = 8,
+      tint = tint_value,
+      scale = scale_value,
+      draw_type = "outer"
+    }
+end
+
+default_shadow_color = {0, 0, 0, 0.35}
+default_shadow = default_glow(default_shadow_color, 0.5)
+
+
+local style_element_list = {
+  {suffix="yellow", x=296, y=136},
+  {suffix="orange", x=296, y=153},
+  {suffix="red", x=296, y=170},
+  {suffix="green", x=296, y=187},
+  {suffix="gray", x=296, y=204}
+}
+for _,style in pairs(style_element_list) do
+  for i = 1, 7 do
+    local style_name = table.concat({"helmod_frame_element",style.suffix,i},"_")
+    local x = style.x + (i-1)*17
+    local y = style.y
+
+    default_gui[style_name] = {
+      type = "frame_style",
+      parent = "frame",
+      graphical_set = {
+        base = {position = {x,y}, corner_size = 8},
+        shadow = default_glow(default_shadow_color, 0.5)
+      },
+      top_padding  = 0,
+      right_padding = 0,
+      bottom_padding = 0,
+      left_padding = 0,
+      
+      width = 70,
+      horizontally_stretchable = "on",
+      vertically_stretchable = "off"
+    }
+  end
+end
 -------------------------------------------------------------------------------
 -- Style of section panel
 --
@@ -1416,3 +1476,6 @@ default_gui["helmod_button-sorted-up"] = {
   hovered_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 1, {0,0}, {x=48,y=0}, {top=1,right=1,bottom=1,left=1}, false),
   clicked_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 1, {0,0}, {x=72,y=0}, {top=1,right=1,bottom=1,left=1}, false)
 }
+
+
+
