@@ -915,7 +915,8 @@ default_gui["helmod_table_list"] = {
   right_padding = 0,
   bottom_padding = 0,
   left_padding = 0,
-  vertical_align = "top"
+  vertical_align = "top",
+  horizontally_stretchable = "off"
 }
 
 -------------------------------------------------------------------------------
@@ -1253,7 +1254,7 @@ default_gui["helmod_frame_default"] = {
 function default_glow(tint_value, scale_value)
   return
     {
-      position = {200, 128},
+      position = {57,64},
       corner_size = 8,
       tint = tint_value,
       scale = scale_value,
@@ -1266,28 +1267,30 @@ default_shadow = default_glow(default_shadow_color, 0.5)
 
 
 local style_element_list = {
-  {suffix="yellow", x=296, y=136},
-  {suffix="orange", x=296, y=153},
-  {suffix="red", x=296, y=170},
-  {suffix="green", x=296, y=187},
-  {suffix="gray", x=296, y=204}
+  {suffix="yellow", x=0, y=16},
+  {suffix="orange", x=0, y=24},
+  {suffix="red", x=0, y=32},
+  {suffix="green", x=0, y=40},
+  {suffix="blue", x=0, y=48},
+  {suffix="gray", x=0, y=56},
+  {suffix="magenta", x=0, y=64}
 }
 for _,style in pairs(style_element_list) do
-  for i = 1, 7 do
+  for i = 1, 3 do
     local style_name = table.concat({"helmod_frame_element",style.suffix,i},"_")
-    local x = style.x + (i-1)*17
+    local x = style.x + (i-1)*8
     local y = style.y
 
     default_gui[style_name] = {
       type = "frame_style",
-      parent = "frame",
       graphical_set = {
-        base = {position = {x,y}, corner_size = 8},
-        shadow = default_glow(default_shadow_color, 0.5)
+        filename = "__helmod__/graphics/gui.png",
+        corner_size = 1,
+        position = {x,y}
       },
-      top_padding  = 0,
+      top_padding  = 2,
       right_padding = 0,
-      bottom_padding = 0,
+      bottom_padding = 2,
       left_padding = 0,
       
       width = 70,

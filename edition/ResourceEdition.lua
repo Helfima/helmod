@@ -21,17 +21,6 @@ function ResourceEdition.methods:onInit(parent)
 end
 
 -------------------------------------------------------------------------------
--- Get the parent panel
---
--- @function [parent=#ResourceEdition] getParentPanel
---
--- @return #LuaGuiElement
---
-function ResourceEdition.methods:getParentPanel()
-	return self.parent:getDialogPanel()
-end
-
--------------------------------------------------------------------------------
 -- On open
 --
 -- @function [parent=#ResourceEdition] onOpen

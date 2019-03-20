@@ -69,9 +69,9 @@ function PropertiesTab.methods:updateData()
   Logging:debug(self:classname(), "updateData()")
   local globalGui = Player.getGlobalGui()
   -- data
-  local resultPanel = self.parent:getResultPanel({"helmod_result-panel.tab-title-properties"})
+  local resultPanel = self:getResultPanel({"helmod_result-panel.tab-title-properties"})
   local listPanel = ElementGui.addGuiFrameH(resultPanel, "list-element", helmod_frame_style.hidden)
-  local scrollPanel = self.parent:getResultScrollPanel()
+  local scrollPanel = self:getResultScrollPanel()
 
   local globalPlayer = Player.getGlobal()
   if globalPlayer["prototype-properties"] ~= nil and globalPlayer["prototype-properties"].name ~= nil then

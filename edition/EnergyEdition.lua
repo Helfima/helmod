@@ -5,7 +5,7 @@
 -- @extends #Dialog
 --
 
-EnergyEdition = setclass("HMEnergyEdition", Dialog)
+EnergyEdition = setclass("HMEnergyEdition", AbstractEdition)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -16,17 +16,6 @@ EnergyEdition = setclass("HMEnergyEdition", Dialog)
 --
 function EnergyEdition.methods:onInit(parent)
   self.panelCaption = ({"helmod_energy-edition-panel.title"})
-end
-
--------------------------------------------------------------------------------
--- Get the parent panel
---
--- @function [parent=#EnergyEdition] getParentPanel
---
--- @return #LuaGuiElement
---
-function EnergyEdition.methods:getParentPanel()
-  return self.parent:getDialogPanel()
 end
 
 -------------------------------------------------------------------------------
@@ -264,7 +253,6 @@ function EnergyEdition.methods:onEvent(event, action, item, item2, item3)
 
       ModelBuilder.updatePower(item, options)
       self:updatePowerInfo(item, item2, item3)
-      self.parent:refreshDisplayData(nil, item, item2)
     end
 
     if action == "primary-select" then
@@ -276,7 +264,6 @@ function EnergyEdition.methods:onEvent(event, action, item, item2, item3)
         item = power.id
       end
       ModelCompute.computePower(item)
-      self.parent:refreshDisplayData()
       self:close()
       Controller.createEvent(nil, self:classname(), "OPEN", item, item2, item3)
     end
@@ -290,7 +277,6 @@ function EnergyEdition.methods:onEvent(event, action, item, item2, item3)
         item = power.id
       end
       ModelCompute.computePower(item)
-      self.parent:refreshDisplayData()
       self:close()
       Controller.createEvent(nil, self:classname(), "OPEN", item, item2, item3)
     end

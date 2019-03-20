@@ -561,15 +561,6 @@ function ModelCompute.computeMatrixBlock(block)
         block.ingredients[ingredient.name] = nil
       end
     end
-
-    -- calcul ratio
-    for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
-      recipe.factory.limit_count = recipe.factory.count*ratio
-      recipe.beacon.limit_count = recipe.beacon.count*ratio
-      if ratioRecipe ~= nil and ratioRecipe == recipe.index then
-        recipe.factory.limit_count = recipe.factory.limit
-      end
-    end
   end
 end
 
@@ -802,15 +793,6 @@ function ModelCompute.computeBlock(block)
     for _, ingredient in pairs(block.ingredients) do
       if block.ingredients[ingredient.name].count < 0.01 then
         block.ingredients[ingredient.name] = nil
-      end
-    end
-
-    -- calcul ratio
-    for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
-      recipe.factory.limit_count = recipe.factory.count*ratio
-      recipe.beacon.limit_count = recipe.beacon.count*ratio
-      if ratioRecipe ~= nil and ratioRecipe == recipe.index then
-        recipe.factory.limit_count = recipe.factory.limit
       end
     end
     Logging:debug(ModelCompute.classname , "computeBlock end", block)

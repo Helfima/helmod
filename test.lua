@@ -8,3 +8,6 @@ print(action)
 print(item1)
 print(item2)
 print(item3=="")
+
+local a={1}
+print(rawlen(a))

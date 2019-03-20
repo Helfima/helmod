@@ -33,7 +33,7 @@ function ProductionLineTab.methods:updateHeader(item, item2, item3)
   local globalGui = Player.getGlobalGui()
   local model = Model.getModel()
 
-  local info_panel = self.parent:getInfoPanel()
+  local info_panel = self:getInfoPanel()
   -- info panel
   local block_panel = ElementGui.addGuiFrameV(info_panel, "block", helmod_frame_style.panel, ({"helmod_result-panel.tab-title-production-line"}))
   ElementGui.setStyle(block_panel, "block_info", "width")
@@ -66,18 +66,18 @@ function ProductionLineTab.methods:updateHeader(item, item2, item3)
   local tableAdminPanel = ElementGui.addGuiTable(block_table, "table" , 9)
   local model_read = false
   if model.share ~= nil and  bit32.band(model.share, 1) > 0 then model_read = true end
-  ElementGui.addGuiCheckbox(tableAdminPanel, self.parent:classname().."=share-model=ID=read="..model.id, model_read, nil, ({"tooltip.share-mod", {"helmod_common.reading"}}))
-  ElementGui.addGuiLabel(tableAdminPanel, self.parent:classname().."=share-model-read", "R", nil, ({"tooltip.share-mod", {"helmod_common.reading"}}))
+  ElementGui.addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID=read="..model.id, model_read, nil, ({"tooltip.share-mod", {"helmod_common.reading"}}))
+  ElementGui.addGuiLabel(tableAdminPanel, self:classname().."=share-model-read", "R", nil, ({"tooltip.share-mod", {"helmod_common.reading"}}))
 
   local model_write = false
   if model.share ~= nil and  bit32.band(model.share, 2) > 0 then model_write = true end
-  ElementGui.addGuiCheckbox(tableAdminPanel, self.parent:classname().."=share-model=ID=write="..model.id, model_write, nil, ({"tooltip.share-mod", {"helmod_common.writing"}}))
-  ElementGui.addGuiLabel(tableAdminPanel, self.parent:classname().."=share-model-write", "W", nil, ({"tooltip.share-mod", {"helmod_common.writing"}}))
+  ElementGui.addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID=write="..model.id, model_write, nil, ({"tooltip.share-mod", {"helmod_common.writing"}}))
+  ElementGui.addGuiLabel(tableAdminPanel, self:classname().."=share-model-write", "W", nil, ({"tooltip.share-mod", {"helmod_common.writing"}}))
 
   local model_delete = false
   if model.share ~= nil and bit32.band(model.share, 4) > 0 then model_delete = true end
-  ElementGui.addGuiCheckbox(tableAdminPanel, self.parent:classname().."=share-model=ID=delete="..model.id, model_delete, nil, ({"tooltip.share-mod", {"helmod_common.removal"}}))
-  ElementGui.addGuiLabel(tableAdminPanel, self.parent:classname().."=share-model-delete", "X", nil, ({"tooltip.share-mod", {"helmod_common.removal"}}))
+  ElementGui.addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID=delete="..model.id, model_delete, nil, ({"tooltip.share-mod", {"helmod_common.removal"}}))
+  ElementGui.addGuiLabel(tableAdminPanel, self:classname().."=share-model-delete", "X", nil, ({"tooltip.share-mod", {"helmod_common.removal"}}))
 
   local count_block = Model.countBlocks()
   if count_block > 0 then
@@ -91,7 +91,7 @@ function ProductionLineTab.methods:updateHeader(item, item2, item3)
     local output_table = ElementGui.addGuiTable(output_scroll,"output-table",6)
     if model.products ~= nil then
       for r, element in pairs(model.products) do
-        ElementGui.addCellElement(output_table, element, self.parent:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.product", nil)
+        ElementGui.addCellElement(output_table, element, self:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.product", nil)
       end
     end
 
@@ -99,7 +99,7 @@ function ProductionLineTab.methods:updateHeader(item, item2, item3)
     local input_table = ElementGui.addGuiTable(input_scroll,"input-table",6)
     if model.ingredients ~= nil then
       for r, element in pairs(model.ingredients) do
-        ElementGui.addCellElement(input_table, element, self.parent:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.ingredient", nil)
+        ElementGui.addCellElement(input_table, element, self:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.ingredient", nil)
       end
     end
 
@@ -121,7 +121,7 @@ function ProductionLineTab.methods:updateData(item, item2, item3)
   local model = Model.getModel()
 
   -- data panel
-  local scrollPanel = self.parent:getDataScrollPanel({"helmod_common.blocks"})
+  local scrollPanel = self:getDataScrollPanel({"helmod_common.blocks"})
 
   local countBlock = Model.countBlocks()
   if countBlock > 0 then
@@ -190,13 +190,13 @@ function ProductionLineTab.methods:addTableRow(gui_table, block)
   -- col action
   local cell_action = ElementGui.addCell(gui_table, "action"..block.id, 4)
 
-  ElementGui.addGuiShortButton(cell_action, self.parent:classname().."=production-block-remove=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
-  ElementGui.addGuiShortButton(cell_action, self.parent:classname().."=production-block-down=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-down"}), ({"tooltip.down-element", Player.getSettings("row_move_step")}))
-  ElementGui.addGuiShortButton(cell_action, self.parent:classname().."=production-block-up=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-up"}), ({"tooltip.up-element", Player.getSettings("row_move_step")}))
+  ElementGui.addGuiShortButton(cell_action, self:classname().."=production-block-remove=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
+  ElementGui.addGuiShortButton(cell_action, self:classname().."=production-block-down=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-down"}), ({"tooltip.down-element", Player.getSettings("row_move_step")}))
+  ElementGui.addGuiShortButton(cell_action, self:classname().."=production-block-up=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-up"}), ({"tooltip.up-element", Player.getSettings("row_move_step")}))
   if unlinked then
-    ElementGui.addGuiShortButton(cell_action, self.parent:classname().."=production-block-unlink=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-unlink"}), ({"tooltip.unlink-element"}))
+    ElementGui.addGuiShortButton(cell_action, self:classname().."=production-block-unlink=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-unlink"}), ({"tooltip.unlink-element"}))
   else
-    ElementGui.addGuiShortButton(cell_action, self.parent:classname().."=production-block-unlink=ID=", block.id, "helmod_button_selected", ({"helmod_result-panel.row-button-unlink"}), ({"tooltip.unlink-element"}))
+    ElementGui.addGuiShortButton(cell_action, self:classname().."=production-block-unlink=ID=", block.id, "helmod_button_selected", ({"helmod_result-panel.row-button-unlink"}), ({"tooltip.unlink-element"}))
   end
 
   -- col index
@@ -214,12 +214,12 @@ function ProductionLineTab.methods:addTableRow(gui_table, block)
 
   -- col recipe
   local cell_recipe = ElementGui.addCell(gui_table, "recipe"..block.id)
-  self:addIconRecipeCell(cell_recipe, block, self.parent:classname().."=change-tab=ID=HMProductionBlockTab="..block.id.."=", true, "tooltip.edit-block", self.color_button_edit)
+  ElementGui.addCellRecipe(cell_recipe, block, self:classname().."=change-tab=ID=HMProductionBlockTab="..block.id.."=", true, "tooltip.edit-block", "gray")
 
   -- col energy
   local cell_energy = ElementGui.addCell(gui_table, block.id)
-  ElementGui.addCellLabel(cell_energy, "cell_energy", Format.formatNumberKilo(block.power, "W"), 60)
-
+  ElementGui.addCellEnergy(cell_energy, block, self:classname().."=change-tab=ID=HMProductionBlockTab="..block.id.."=", true, "tooltip.edit-block", "gray")
+  
   -- products
   local display_product_cols = Player.getSettings("display_product_cols") + 1
   local cell_products = ElementGui.addCell(gui_table,"products_"..block.id, display_product_cols)
@@ -227,16 +227,16 @@ function ProductionLineTab.methods:addTableRow(gui_table, block)
     for r, product in pairs(block.products) do
       if bit32.band(product.state, 1) > 0 then
         if not(unlinked) or block.by_factory == true then
-          ElementGui.addCellElement(cell_products, product, self.parent:classname().."=product-selected=ID="..block.id.."="..product.name.."=", false, "tooltip.product", nil)
+          ElementGui.addCellElement(cell_products, product, self:classname().."=product-selected=ID="..block.id.."="..product.name.."=", false, "tooltip.product", nil)
         else
-          ElementGui.addCellElement(cell_products, product, self.parent:classname().."=product-edition=ID="..block.id.."="..product.name.."=", true, "tooltip.edit-product", self.color_button_edit)
+          ElementGui.addCellElement(cell_products, product, self:classname().."=product-edition=ID="..block.id.."="..product.name.."=", true, "tooltip.edit-product", self.color_button_edit)
         end
       end
       if bit32.band(product.state, 2) > 0 and bit32.band(product.state, 1) == 0 then
-        ElementGui.addCellElement(cell_products, product, self.parent:classname().."=product-selected=ID="..block.id.."="..product.name.."=", true, "tooltip.rest-product", self.color_button_rest)
+        ElementGui.addCellElement(cell_products, product, self:classname().."=product-selected=ID="..block.id.."="..product.name.."=", true, "tooltip.rest-product", self.color_button_rest)
       end
       if product.state == 0 then
-        ElementGui.addCellElement(cell_products, product, self.parent:classname().."=product-selected=ID="..block.id.."="..product.name.."=", false, "tooltip.other-product", nil)
+        ElementGui.addCellElement(cell_products, product, self:classname().."=product-selected=ID="..block.id.."="..product.name.."=", false, "tooltip.other-product", nil)
       end
     end
   end
@@ -245,7 +245,7 @@ function ProductionLineTab.methods:addTableRow(gui_table, block)
   local cell_ingredients = ElementGui.addCell(gui_table,"ingredients_"..block.id, display_ingredient_cols)
   if block.ingredients ~= nil then
     for r, ingredient in pairs(block.ingredients) do
-      ElementGui.addCellElement(cell_ingredients, ingredient, self.parent:classname().."=production-block-add=ID="..block.id.."="..ingredient.name.."=", true, "tooltip.add-recipe", self.color_button_add)
+      ElementGui.addCellElement(cell_ingredients, ingredient, self:classname().."=production-block-add=ID="..block.id.."="..ingredient.name.."=", true, "tooltip.add-recipe", self.color_button_add)
     end
   end
 end

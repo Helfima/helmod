@@ -28,7 +28,7 @@ function StatisticTab.methods:updateData()
   Logging:debug(self:classname(), "updateSummary()")
   local model = Model.getModel()
   -- data
-  local scroll_panel = self.parent:getResultScrollPanel({"helmod_result-panel.tab-title-statistic"})
+  local scroll_panel = self:getResultScrollPanel({"helmod_result-panel.tab-title-statistic"})
   
   -- resources
   local element_panel = ElementGui.addGuiFrameV(scroll_panel, "resources", helmod_frame_style.section, ({"helmod_common.total"}))

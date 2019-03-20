@@ -5,7 +5,7 @@
 -- @extends #Dialog
 --
 
-ProductEdition = setclass("HMProductEdition", Dialog)
+ProductEdition = setclass("HMProductEdition", AbstractEdition)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -16,17 +16,6 @@ ProductEdition = setclass("HMProductEdition", Dialog)
 --
 function ProductEdition.methods:onInit(parent)
   self.panelCaption = ({"helmod_product-edition-panel.title"})
-end
-
--------------------------------------------------------------------------------
--- Get the parent panel
---
--- @function [parent=#ProductEdition] getParentPanel
---
--- @return #LuaGuiElement
---
-function ProductEdition.methods:getParentPanel(player)
-  return self.parent:getDialogPanel(player)
 end
 
 -------------------------------------------------------------------------------
@@ -251,7 +240,6 @@ function ProductEdition.methods:onEvent(event, action, item, item2, item3)
 
       ModelBuilder.updateProduct(item, item2, quantity)
       ModelCompute.update()
-      self.parent:refreshDisplayData(nil, item, item2)
       self:close()
     end
     if action == "product-reset" then
@@ -260,7 +248,6 @@ function ProductEdition.methods:onEvent(event, action, item, item2, item3)
 
       ModelBuilder.updateProduct(item, item2, nil)
       ModelCompute.update()
-      self.parent:refreshDisplayData(nil, item, item2)
       self:close()
     end
     if action == "element-select" then

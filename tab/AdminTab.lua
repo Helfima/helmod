@@ -29,7 +29,7 @@ function AdminTab.methods:updateData()
   local globalGui = Player.getGlobalGui()
 
   -- data
-  local scroll_panel = self.parent:getResultScrollPanel({"helmod_result-panel.tab-title-admin"})
+  local scroll_panel = self:getResultScrollPanel({"helmod_result-panel.tab-title-admin"})
   
   -- Rule List
   local rule_panel = ElementGui.addGuiFrameH(scroll_panel,"rule-list", helmod_frame_style.section, {"helmod_result-panel.rule-list"})
@@ -102,7 +102,7 @@ function AdminTab.methods:addRuleListRow(gui_table, rule, rule_id)
 
   -- col action
   local cell_action = ElementGui.addCell(gui_table, "action"..rule_id, 4)
-  ElementGui.addGuiButton(cell_action, self.parent:classname().."=rule-remove=ID=", rule_id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
+  ElementGui.addGuiButton(cell_action, self:classname().."=rule-remove=ID=", rule_id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
 
   -- col index
   ElementGui.addGuiLabel(gui_table, "index"..rule_id, rule.index)
@@ -158,19 +158,19 @@ function AdminTab.methods:addSheetListRow(gui_table, model)
   -- col action
   local cell_action = ElementGui.addCell(gui_table, "action"..model.id, 4)
   if model.share ~= nil and bit32.band(model.share, 1) > 0 then
-    ElementGui.addGuiButton(cell_action, self.parent:classname().."=share-model=ID=read=", model.id, "helmod_button_selected", "R", {"tooltip.share-mod", {"helmod_common.reading"}})
+    ElementGui.addGuiButton(cell_action, self:classname().."=share-model=ID=read=", model.id, "helmod_button_selected", "R", {"tooltip.share-mod", {"helmod_common.reading"}})
   else
-    ElementGui.addGuiButton(cell_action, self.parent:classname().."=share-model=ID=read=", model.id, "helmod_button_default", "R", {"tooltip.share-mod", {"helmod_common.reading"}})
+    ElementGui.addGuiButton(cell_action, self:classname().."=share-model=ID=read=", model.id, "helmod_button_default", "R", {"tooltip.share-mod", {"helmod_common.reading"}})
   end
   if model.share ~= nil and bit32.band(model.share, 2) > 0 then
-    ElementGui.addGuiButton(cell_action, self.parent:classname().."=share-model=ID=write=", model.id, "helmod_button_selected", "W", {"tooltip.share-mod", {"helmod_common.writing"}})
+    ElementGui.addGuiButton(cell_action, self:classname().."=share-model=ID=write=", model.id, "helmod_button_selected", "W", {"tooltip.share-mod", {"helmod_common.writing"}})
   else
-    ElementGui.addGuiButton(cell_action, self.parent:classname().."=share-model=ID=write=", model.id, "helmod_button_default", "W", {"tooltip.share-mod", {"helmod_common.writing"}})
+    ElementGui.addGuiButton(cell_action, self:classname().."=share-model=ID=write=", model.id, "helmod_button_default", "W", {"tooltip.share-mod", {"helmod_common.writing"}})
   end
   if model.share ~= nil and bit32.band(model.share, 4) > 0 then
-    ElementGui.addGuiButton(cell_action, self.parent:classname().."=share-model=ID=delete=", model.id, "helmod_button_selected", "X", {"tooltip.share-mod", {"helmod_common.removal"}})
+    ElementGui.addGuiButton(cell_action, self:classname().."=share-model=ID=delete=", model.id, "helmod_button_selected", "X", {"tooltip.share-mod", {"helmod_common.removal"}})
   else
-    ElementGui.addGuiButton(cell_action, self.parent:classname().."=share-model=ID=delete=", model.id, "helmod_button_default", "X", {"tooltip.share-mod", {"helmod_common.removal"}})
+    ElementGui.addGuiButton(cell_action, self:classname().."=share-model=ID=delete=", model.id, "helmod_button_default", "X", {"tooltip.share-mod", {"helmod_common.removal"}})
   end
 
   -- col owner

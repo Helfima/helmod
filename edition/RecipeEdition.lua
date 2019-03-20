@@ -21,17 +21,6 @@ function RecipeEdition.methods:onInit(parent)
 end
 
 -------------------------------------------------------------------------------
--- Get the parent panel
---
--- @function [parent=#RecipeEdition] getParentPanel
---
--- @return #LuaGuiElement
---
-function RecipeEdition.methods:getParentPanel()
-  return self.parent:getDialogPanel()
-end
-
--------------------------------------------------------------------------------
 -- Get or create recipe panel
 --
 -- @function [parent=#RecipeEdition] getRecipePanel
@@ -181,9 +170,7 @@ function RecipeEdition.methods:updateObjectInfo(item, item2, item3)
     local recipe = self:getObject(item, item2, item3)
     if recipe ~= nil then
       Logging:debug(self:classname(), "updateObjectInfo():recipe=",recipe)
-      for k,guiName in pairs(infoPanel.children_names) do
-        infoPanel[guiName].destroy()
-      end
+      infoPanel.clear()
 
       local tablePanel = ElementGui.addGuiTable(infoPanel,"table-input",2)
       ElementGui.addGuiButtonSprite(tablePanel, "recipe", Player.getRecipeIconType(recipe), recipe.name)
@@ -224,9 +211,7 @@ function RecipeEdition.methods:updateRecipeIngredients(item, item2, item3)
   if recipe ~= nil then
     local lua_recipe = RecipePrototype.load(recipe).native()
 
-    for k,guiName in pairs(ingredientsPanel.children_names) do
-      ingredientsPanel[guiName].destroy()
-    end
+    ingredientsPanel.clear()
     local tablePanel= ElementGui.addGuiTable(ingredientsPanel, "table-ingredients", 6)
 
     for key, ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
@@ -262,9 +247,7 @@ function RecipeEdition.methods:updateRecipeProducts(item, item2, item3)
     local lua_recipe = RecipePrototype.load(recipe).native()
     if lua_recipe ~= nil then
 
-      for k,guiName in pairs(productsPanel.children_names) do
-        productsPanel[guiName].destroy()
-      end
+      productsPanel.clear()
       local tablePanel= ElementGui.addGuiTable(productsPanel, "table-products", 6)
       for key, product in pairs(RecipePrototype.getProducts()) do
         local tooltip = nil

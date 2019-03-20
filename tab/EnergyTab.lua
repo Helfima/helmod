@@ -30,7 +30,7 @@ function EnergyTab.methods:updateData()
   local globalGui = Player.getGlobalGui()
 
   -- data
-  local scroll_panel = self.parent:getResultScrollPanel({"helmod_result-panel.tab-title-energy"})
+  local scroll_panel = self:getResultScrollPanel({"helmod_result-panel.tab-title-energy"})
   local menu_manel = ElementGui.addGuiFrameH(scroll_panel,"menu", helmod_frame_style.hidden)
   ElementGui.addGuiButton(menu_manel, "HMEnergyEdition=OPEN=ID=", "new", "helmod_button_default", ({"helmod_result-panel.add-button-power"}))
 
@@ -88,7 +88,7 @@ function EnergyTab.methods:addTableRow(gui_table, power)
 
   -- col action
   local cell_action = ElementGui.addGuiFrameH(gui_table,"action"..power.id, helmod_frame_style.hidden)
-  ElementGui.addGuiButton(cell_action, self.parent:classname().."=power-remove=ID=", power.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
+  ElementGui.addGuiButton(cell_action, self:classname().."=power-remove=ID=", power.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
 
   -- col id
   if Player.getSettings("display_data_col_id", true) then

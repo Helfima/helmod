@@ -989,20 +989,20 @@ end
 -- @param #string tooltip_name tooltip name
 -- @param #string color button color
 --
-function ElementGui.addCellElement2(parent, element, action, select, tooltip_name, color)
+function ElementGui.addCellElement(parent, element, action, select, tooltip_name, color)
   Logging:trace(ElementGui.classname, "addCellElement():", element, action, select, tooltip_name, color)
   local display_cell_mod = Player.getSettings("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
-  local cell = nil
   local button = nil
-  color = color or "gray"
+  color = color or "blue"
   local cell = ElementGui.addGuiFlowV(parent,element.name, helmod_flow_style.vertical)
   local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_element_"..color.."_1")
-  ElementGui.addCellIcon(row1, element, action, select, tooltip_name, color)
+  --ElementGui.addCellIcon(row1, element, action, select, tooltip_name, nil)
+  ElementGui.addGuiButtonSprite(row1, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}))
   ElementGui.addCellCargoInfo(row1, element)
   
   if element.limit_count ~= nil then
-    local row2 = ElementGui.addGuiFrameH(cell,"row2","helmod_frame_element_"..color.."_5")
+    local row2 = ElementGui.addGuiFrameH(cell,"row2","helmod_frame_element_"..color.."_2")
     if display_cell_mod == "by-kilo" then
       -- by-kilo
         ElementGui.addGuiLabel(row2, "label1_"..element.name, Format.formatNumberKilo(element.limit_count), "helmod_label_element", {"helmod_common.per-sub-block"})
@@ -1011,7 +1011,7 @@ function ElementGui.addCellElement2(parent, element, action, select, tooltip_nam
     end
   end
     
-  local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_element_"..color.."_7")
+  local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_element_"..color.."_3")
   if display_cell_mod == "by-kilo" then
     -- by-kilo
     ElementGui.addGuiLabel(row3, "label2_"..element.name, Format.formatNumberKilo(element.count), "helmod_label_element", {"helmod_common.total"})
@@ -1022,41 +1022,101 @@ function ElementGui.addCellElement2(parent, element, action, select, tooltip_nam
 end
 
 -------------------------------------------------------------------------------
--- Add cell element
+-- Add cell factory
 --
--- @function [parent=#ElementGui] addCellElement
+-- @function [parent=#ElementGui] addCellFactory
 --
 -- @param #LuaGuiElement parent container for element
--- @param #table element production block
+-- @param #table factory
 -- @param #string action
 -- @param #boolean select true if select button
 -- @param #string tooltip_name tooltip name
 -- @param #string color button color
 --
-function ElementGui.addCellElement(parent, element, action, select, tooltip_name, color)
-  Logging:trace(ElementGui.classname, "addCellElement():", element, action, select, tooltip_name, color)
+function ElementGui.addCellFactory(parent, factory, action, select, tooltip_name, color)
+  Logging:trace(ElementGui.classname, "addCellFactory():", factory, action, select, tooltip_name, color)
   local display_cell_mod = Player.getSettings("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
-  local cell = nil
   local button = nil
-  local cell = ElementGui.addCell(parent, element.name,3)
-  if display_cell_mod == "by-kilo" then
-    -- by-kilo
-    if element.limit_count ~= nil then
-      ElementGui.addCellLabel2(cell, element.name, Format.formatNumberKilo(element.limit_count), Format.formatNumberKilo(element.count))
-    else
-      ElementGui.addCellLabel(cell, element.name, Format.formatNumberKilo(element.count))
-    end
-  else
-    if element.limit_count ~= nil then
-      ElementGui.addCellLabel2(cell, element.name, Format.formatNumberElement(element.limit_count), Format.formatNumberElement(element.count))
-    else
-      ElementGui.addCellLabel(cell, element.name, Format.formatNumberElement(element.count))
+  color = color or "green"
+  local cell = ElementGui.addGuiFlowV(parent,factory.name, helmod_flow_style.vertical)
+  local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_element_"..color.."_1")
+  --ElementGui.addCellIcon(row1, element, action, select, tooltip_name, nil)
+  ElementGui.addGuiButtonSprite(row1, action, Player.getIconType(factory), factory.name, nil, ({tooltip_name, Player.getLocalisedName(factory)}))
+  
+  local col_size = 2
+  if display_cell_mod == "small-icon" then col_size = 5 end
+  local cell_factory_module = ElementGui.addGuiTable(row1,"factory-modules", col_size, "helmod_factory_modules")
+  -- modules
+  for name, count in pairs(factory.modules) do
+    for index = 1, count, 1 do
+      ElementGui.addGuiButtonSpriteSm(cell_factory_module, "HMFactorySelector_factory-module_"..name.."_"..index, "item", name, nil, ElementGui.getTooltipModule(name))
+      index = index + 1
     end
   end
+  if factory.limit_count ~= nil then
+    local row2 = ElementGui.addGuiFrameH(cell,"row2","helmod_frame_element_"..color.."_2")
+      ElementGui.addGuiLabel(row2, "label1_"..factory.name, Format.formatNumberFactory(factory.limit_count), "helmod_label_element", {"helmod_common.per-sub-block"})
+  end
+    
+  local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_element_"..color.."_3")
+  ElementGui.addGuiLabel(row3, "label2_"..factory.name, Format.formatNumberFactory(factory.count), "helmod_label_element", {"helmod_common.total"})
+  return cell
+end
 
-  ElementGui.addCellIcon(cell, element, action, select, tooltip_name, color)
-  ElementGui.addCellCargoInfo(cell, element)
+-------------------------------------------------------------------------------
+-- Add cell recipe
+--
+-- @function [parent=#ElementGui] addCellRecipe
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #table factory
+-- @param #string action
+-- @param #boolean select true if select button
+-- @param #string tooltip_name tooltip name
+-- @param #string color button color
+--
+function ElementGui.addCellRecipe(parent, recipe, action, select, tooltip_name, color)
+  Logging:trace(ElementGui.classname, "addCellRecipe():", recipe, action, select, tooltip_name, color)
+  local display_cell_mod = Player.getSettings("display_cell_mod")
+  -- ingredient = {type="item", name="steel-plate", amount=8}
+  local button = nil
+  color = color or "green"
+  local cell = ElementGui.addGuiFlowV(parent,recipe.name, helmod_flow_style.vertical)
+  local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_element_"..color.."_1")
+  
+  local recipe_icon = ElementGui.addGuiButtonSprite(row1, action, Player.getRecipeIconType(recipe), recipe.name, recipe.name, ({tooltip_name, Player.getRecipeLocalisedName(recipe)}))
+  
+  local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_element_"..color.."_3")
+  ElementGui.addGuiLabel(row3, "label2_"..recipe.name, Format.formatPercent(recipe.production or 1).."%", "helmod_label_element", {"helmod_common.total"})
+  return cell
+end
+
+-------------------------------------------------------------------------------
+-- Add cell energy
+--
+-- @function [parent=#ElementGui] addCellEnergy
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #table factory
+-- @param #string action
+-- @param #boolean select true if select button
+-- @param #string tooltip_name tooltip name
+-- @param #string color button color
+--
+function ElementGui.addCellEnergy(parent, recipe, action, select, tooltip_name, color)
+  Logging:trace(ElementGui.classname, "addCellEnergy():", recipe, action, select, tooltip_name, color)
+  local display_cell_mod = Player.getSettings("display_cell_mod")
+  -- ingredient = {type="item", name="steel-plate", amount=8}
+  local button = nil
+  color = color or "green"
+  local cell = ElementGui.addGuiFlowV(parent,recipe.name, helmod_flow_style.vertical)
+  local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_element_"..color.."_1")
+  
+  local recipe_icon = ElementGui.addGuiButtonSprite(row1, action, "item", "steam-engine", "steam-engine", {tooltip_name, {"helmod_common.energy"}})
+  
+  local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_element_"..color.."_3")
+  ElementGui.addGuiLabel(row3, "label2_"..recipe.name, Format.formatNumberKilo(recipe.energy_total or recipe.power, "W"), "helmod_label_element", {"helmod_common.total"})
   return cell
 end
 

@@ -84,7 +84,7 @@ function ResourceTab.methods:updateData()
   local model = Model.getModel()
   local globalGui = Player.getGlobalGui()
   -- data
-  local scrollPanel = self.parent:getResultScrollPanel({"helmod_result-panel.tab-title-energy"})
+  local scrollPanel = self:getResultScrollPanel({"helmod_result-panel.tab-title-energy"})
 
 
   local extra_cols = 0

@@ -4,7 +4,7 @@
 -- @module RuleEdition
 --
 
-RuleEdition = setclass("HMRuleEdition", Dialog)
+RuleEdition = setclass("HMRuleEdition", AbstractEdition)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -15,17 +15,6 @@ RuleEdition = setclass("HMRuleEdition", Dialog)
 --
 function RuleEdition.methods:onInit(parent)
   self.panelCaption = ({"helmod_rule-edition-panel.title"})
-end
-
--------------------------------------------------------------------------------
--- Get the parent panel
---
--- @function [parent=#RuleEdition] getParentPanel
---
--- @return #LuaGuiElement
---
-function RuleEdition.methods:getParentPanel()
-  return self.parent:getDialogPanel()
 end
 
 -------------------------------------------------------------------------------
@@ -208,7 +197,6 @@ function RuleEdition.methods:onEvent(event, action, item, item2, item3)
         rule_value = "all"
       end
       ModelBuilder.addRule(rule_mod, rule_name, rule_category, rule_type, rule_value, rule_excluded)
-      self.parent:refreshDisplayData()
       self:close()
     end
   end

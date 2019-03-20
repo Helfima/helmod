@@ -26,7 +26,7 @@ end
 -- @return #LuaGuiElement
 --
 function StatusPanel.methods:getParentPanel()
-  return self.parent:getPinTabPanel()
+  return Controller.getPinTabPanel()
 end
 
 -------------------------------------------------------------------------------

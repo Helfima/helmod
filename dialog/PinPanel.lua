@@ -193,7 +193,7 @@ function PinPanel.methods:updateInfo(event, action, item, item2, item3)
 
     self:addProductionBlockHeader(resultTable)
     for _, recipe in spairs(block.recipes, function(t,a,b) if globalGui.order.ascendant then return t[b][globalGui.order.name] > t[a][globalGui.order.name] else return t[b][globalGui.order.name] < t[a][globalGui.order.name] end end) do
-      self:addProductionBlockRow(resultTable, globalGui.pinBlock, recipe)
+      self:addProductionBlockRow(resultTable, block, recipe)
     end
 
   end
@@ -246,27 +246,28 @@ end
 -- @param #string blockId
 -- @param #table element production recipe
 --
-function PinPanel.methods:addProductionBlockRow(gui_table, blockId, recipe)
-  Logging:debug(self:classname(), "addProductionBlockRow():", gui_table, blockId, recipe)
+function PinPanel.methods:addProductionBlockRow(gui_table, block, recipe)
+  Logging:debug(self:classname(), "addProductionBlockRow():", gui_table, block, recipe)
   local display_pin_level = Player.getGlobalSettings("display_pin_level")
   local model = Model.getModel()
   local lua_recipe = RecipePrototype.load(recipe).native()
   if display_pin_level > display_level.base then
     -- col recipe
-    local guiRecipe = ElementGui.addGuiFrameH(gui_table,"recipe"..recipe.id, helmod_frame_style.hidden)
-    ElementGui.addGuiButtonSprite(guiRecipe, "PinPanel_recipe_"..blockId.."=", Player.getRecipeIconType(recipe), recipe.name, recipe.name, Player.getRecipeLocalisedName(recipe))
+    local cell_recipe = ElementGui.addGuiFrameH(gui_table,"recipe"..recipe.id, helmod_frame_style.hidden)
+    ElementGui.addCellRecipe(cell_recipe, recipe, self:classname().."=do_noting=ID=", true, "tooltip.product", "gray")
   end
 
   if display_pin_level > display_level.products then
     -- products
-    local tProducts = ElementGui.addGuiTable(gui_table,"products_"..recipe.id, 3)
+    local cell_products = ElementGui.addGuiTable(gui_table,"products_"..recipe.id, 3)
     if RecipePrototype.getProducts() ~= nil then
-      for r, product in pairs(RecipePrototype.getProducts()) do
-        local cell = ElementGui.addCell(tProducts, product.name)
-        local amount = Product.getElementAmount(product)
-        ElementGui.addGuiLabel(cell, product.name, amount, "helmod_label_sm")
-        -- product = {type="item", name="steel-plate", amount=8}
-        ElementGui.addGuiButtonSpriteSm(cell, self:classname().."=do_noting=ID="..blockId.."="..recipe.name.."=", Player.getIconType(product), product.name, "X"..amount, Player.getLocalisedName(product))
+      for r, lua_product in pairs(RecipePrototype.getProducts()) do
+        local product = Product.load(lua_product).new()
+        product.count = Product.countProduct(recipe)
+        if block.count > 1 then
+          product.limit_count = product.count / block.count
+        end
+        ElementGui.addCellElement(cell_products, product, self:classname().."=do_noting=ID=", false, "tooltip.product", nil)
       end
     end
   end
@@ -275,46 +276,34 @@ function PinPanel.methods:addProductionBlockRow(gui_table, blockId, recipe)
     -- col factory
     local cell_factory =ElementGui.addCell(gui_table, "factory-"..recipe.id)
     local factory = recipe.factory
-    ElementGui.addGuiLabel(cell_factory, factory.name, Format.formatNumberFactory(factory.limit_count), "helmod_label_right_30")
-    ElementGui.addGuiButtonSprite(cell_factory, "PinPanel_recipe_"..blockId.."="..recipe.name.."=", Player.getIconType(factory), factory.name, factory.name, Player.getLocalisedName(factory))
-    local guiFactoryModule = ElementGui.addGuiTable(cell_factory,"factory-modules"..recipe.name, 2, "helmod_factory_modules")
-    -- modules
-    for name, count in pairs(factory.modules) do
-      for index = 1, count, 1 do
-        ElementGui.addGuiButtonSpriteSm(guiFactoryModule, "HMFactorySelector_factory-module_"..name.."_"..index, "item", name, nil, ElementGui.getTooltipModule(name))
-        index = index + 1
-      end
-    end
+    ElementGui.addCellFactory(cell_factory, factory, self:classname().."=do_noting=ID=", false, "tooltip.product", "gray")
   end
 
   if display_pin_level > display_level.ingredients then
     -- ingredients
-    local tIngredient = ElementGui.addGuiTable(gui_table,"ingredients_"..recipe.id, 3)
+    local cell_ingredients = ElementGui.addGuiTable(gui_table,"ingredients_"..recipe.id, 3)
     if RecipePrototype.getIngredients() ~= nil then
-      for r, ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
-        local cell = ElementGui.addCell(tIngredient, ingredient.name)
-        local amount = Product.getElementAmount(ingredient)
-        ElementGui.addGuiLabel(cell, ingredient.name, amount, "helmod_label_sm")
-        -- ingredient = {type="item", name="steel-plate", amount=8}
-        ElementGui.addGuiButtonSpriteSm(cell, self:classname().."=do_noting=ID="..blockId.."="..recipe.name.."=", Player.getIconType(ingredient), ingredient.name, "X"..amount, Player.getLocalisedName(ingredient))
+      for r, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
+        local ingredient = Product.load(lua_ingredient).new()
+        ingredient.count = Product.countIngredient(recipe)
+        if block.count > 1 then
+          ingredient.limit_count = ingredient.count / block.count
+        end
+        ElementGui.addCellElement(cell_ingredients, ingredient, self:classname().."=do_noting=ID=", true, "tooltip.product", self.color_button_add)
       end
     end
   end
 
   if display_pin_level > display_level.beacon then
     -- col beacon
-    local cell_beacon = ElementGui.addCell(gui_table, "beacon-"..recipe.id)
     local beacon = recipe.beacon
-    ElementGui.addGuiLabel(cell_beacon, beacon.name, Format.formatNumberFactory(beacon.limit_count), "helmod_label_right_30")
-    ElementGui.addGuiButtonSprite(cell_beacon, "PinPanel_recipe_"..blockId.."="..recipe.name.."=", Player.getIconType(beacon), beacon.name, beacon.name, Player.getLocalisedName(beacon))
-    local guiBeaconModule = ElementGui.addGuiTable(cell_beacon,"beacon-modules"..recipe.name, 1, "helmod_beacon_modules")
-    -- modules
-    for name, count in pairs(beacon.modules) do
-      for index = 1, count, 1 do
-        ElementGui.addGuiButtonSpriteSm(guiBeaconModule, "HMFactorySelector_beacon-module_"..name.."_"..index, "item", name, nil, ElementGui.getTooltipModule(name))
-        index = index + 1
-      end
+    if block.count > 1 then
+      beacon.limit_count = factory.count / block.count
+    else
+      beacon.limit_count = nil
     end
+    local cell_beacon = ElementGui.addCell(gui_table, "beacon-"..recipe.id)
+    ElementGui.addCellFactory(cell_beacon, beacon, self:classname().."=do_noting=ID="..block.id.."="..recipe.id.."=", false, "tooltip.product", "gray")
   end
 
 end

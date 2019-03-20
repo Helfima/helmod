@@ -28,7 +28,7 @@ function SummaryTab.methods:updateData()
   Logging:debug(self:classname(), "updateSummary()")
   local model = Model.getModel()
   -- data
-  local scrollPanel = self.parent:getResultScrollPanel({"helmod_result-panel.tab-title-summary"})
+  local scrollPanel = self:getResultScrollPanel({"helmod_result-panel.tab-title-summary"})
   
   -- resources
   local resourcesPanel = ElementGui.addGuiFrameV(scrollPanel, "resources", helmod_frame_style.section, ({"helmod_common.resources"}))

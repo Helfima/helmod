@@ -161,7 +161,7 @@ end
 -- @return #LuaGuiElement
 --
 function HelpPanel.methods:getParentPanel()
-  return self.parent:getDialogPanel()
+  return Controller.getDialogPanel()
 end
 
 -------------------------------------------------------------------------------

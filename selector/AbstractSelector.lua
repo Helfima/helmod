@@ -126,7 +126,7 @@ end
 -- @return #LuaGuiElement
 --
 function AbstractSelector.methods:getParentPanel()
-  return self.parent:getDialogPanel()
+  return Controller.getDialogPanel()
 end
 
 -------------------------------------------------------------------------------
@@ -252,7 +252,6 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
     if globalGui.currentTab == "HMPropertiesTab" then
       if action == "element-select" then
         globalPlayer["prototype-properties"] = {type = item, name = item2 }
-        self.parent:refreshDisplayData()
         self:close()
       end
     else
@@ -261,7 +260,6 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
         local productionBlock = ModelBuilder.addRecipeIntoProductionBlock(item2, item)
         ModelCompute.update()
         globalGui.currentTab = "HMProductionBlockTab"
-        self.parent:refreshDisplayData()
         self:close()
       end
       -- container selector
@@ -279,7 +277,6 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
         if type == "fluid-wagon" then
           globalGui.vehicle_fluid = item2
         end
-        self.parent:refreshDisplayData()
       end
     end
   end

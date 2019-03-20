@@ -29,7 +29,7 @@ end
 -- @return #LuaGuiElement
 --
 function Settings.methods:getParentPanel()
-  return self.parent:getDialogPanel()
+  return Controller.getDialogPanel()
 end
 
 -------------------------------------------------------------------------------

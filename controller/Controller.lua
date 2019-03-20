@@ -1,7 +1,8 @@
 require "core.Form"
-require "core.MainPanel"
 require "dialog.Dialog"
 require "dialog.HelpPanel"
+require "dialog.LeftMenuPanel"
+require "dialog.MainMenuPanel"
 require "dialog.PinPanel"
 require "dialog.StatusPanel"
 require "dialog.Settings"
@@ -17,7 +18,18 @@ require "selector.TechnologySelector"
 require "selector.ItemSelector"
 require "selector.FluidSelector"
 require "selector.ContainerSelector"
-require "tab.MainTab"
+
+require "tab.EnergyTab"
+require "tab.ProductionBlockTab"
+require "tab.ProductionLineTab"
+require "tab.ResourceTab"
+require "tab.SummaryTab"
+require "tab.StatisticTab"
+require "tab.PropertiesTab"
+require "tab.AdminTab"
+
+require "edition.ProductLineEdition"
+require "edition.ProductBlockEdition"
 
 Model = require "model.Model"
 ModelCompute = require "core.ModelCompute"
@@ -32,6 +44,8 @@ Technology = require "model.Technology"
 Prototype = require "model.Prototype"
 Converter = require "core.Converter"
 
+PLANNER_COMMAND = "helmod_planner-command"
+
 ---
 -- Description of the module.
 -- @module Controller
@@ -45,6 +59,7 @@ local views = nil
 local locate = "center"
 local pinLocate = "left"
 local nextEvent = nil
+local force_refresh = nil
 
 -------------------------------------------------------------------------------
 -- Initialization
@@ -55,30 +70,43 @@ function Controller.init()
   Logging:debug(Controller.classname, "init()")
 
   local controllers = {}
-  local main_panel = MainPanel:new()
-  table.insert(controllers, main_panel)
-  table.insert(controllers, MainTab:new(main_panel))
-  table.insert(controllers, Settings:new(main_panel))
-  table.insert(controllers, HelpPanel:new(main_panel))
-  table.insert(controllers, Download:new(main_panel))
-  table.insert(controllers, EntitySelector:new(main_panel))
-  table.insert(controllers, RecipeSelector:new(main_panel))
-  table.insert(controllers, RecipeEdition:new(main_panel))
-  table.insert(controllers, ResourceEdition:new(main_panel))
-  table.insert(controllers, ProductEdition:new(main_panel))
-  table.insert(controllers, EnergyEdition:new(main_panel))
-  table.insert(controllers, RuleEdition:new(main_panel))
-  table.insert(controllers, PinPanel:new(main_panel))
-  table.insert(controllers, StatusPanel:new(main_panel))
-  table.insert(controllers, TechnologySelector:new(main_panel))
-  table.insert(controllers, ItemSelector:new(main_panel))
-  table.insert(controllers, FluidSelector:new(main_panel))
-  table.insert(controllers, ContainerSelector:new(main_panel))
+  table.insert(controllers, MainMenuPanel:new())
+  table.insert(controllers, LeftMenuPanel:new())
 
+  table.insert(controllers, Settings:new())
+  table.insert(controllers, HelpPanel:new())
+  table.insert(controllers, Download:new())
+
+  table.insert(controllers, ProductionLineTab:new())
+  table.insert(controllers, ProductionBlockTab:new())
+  table.insert(controllers, EnergyTab:new())
+  table.insert(controllers, ResourceTab:new())
+  table.insert(controllers, SummaryTab:new())
+  table.insert(controllers, StatisticTab:new())
+  table.insert(controllers, PropertiesTab:new())
+  table.insert(controllers, AdminTab:new())
+
+  table.insert(controllers, EntitySelector:new())
+  table.insert(controllers, RecipeSelector:new())
+  table.insert(controllers, RecipeEdition:new())
+  table.insert(controllers, ResourceEdition:new())
+  table.insert(controllers, ProductEdition:new())
+  table.insert(controllers, EnergyEdition:new())
+  table.insert(controllers, RuleEdition:new())
+  table.insert(controllers, PinPanel:new())
+  table.insert(controllers, StatusPanel:new())
+  table.insert(controllers, TechnologySelector:new())
+  table.insert(controllers, ItemSelector:new())
+  table.insert(controllers, FluidSelector:new())
+  table.insert(controllers, ContainerSelector:new())
+
+  table.insert(controllers, ProductLineEdition:new())
+  table.insert(controllers, ProductBlockEdition:new())
   views = {}
   for _,controller in pairs(controllers) do
     views[controller:classname()] = controller
   end
+
 end
 
 -------------------------------------------------------------------------------
@@ -177,12 +205,11 @@ end
 -- @param event
 --
 function Controller.onGuiClick(event)
-  Logging:trace(Controller.classname, "on_gui_click(event)")
+  Logging:debug(Controller.classname, "on_gui_click(event)")
   if views == nil then Controller.init() end
   if event.element and event.element.valid then
     if event.element.name == "helmod_planner-command" then
-      local main_panel = Controller.getView("HMMainPanel")
-      main_panel:main()
+      Controller.OpenMainPanel()
     end
 
     if event.element.name == Controller.classname.."=CLOSE" then
@@ -191,6 +218,8 @@ function Controller.onGuiClick(event)
     Controller.parseEvent(event)
   end
 end
+
+
 
 -------------------------------------------------------------------------------
 -- Parse event
@@ -205,67 +234,80 @@ function Controller.parseEvent()
   Event.state = Event.STATE_RELEASE
   nextEvent = nil
   local ok , err = pcall(function()
-  if views == nil then Controller.init() end
-  if views ~= nil then
-    -- settings action
-    local main_panel = Controller.getView("HMMainPanel")
-    if Event.isSettings() then
-      Logging:trace(Controller.classname, "parse_event(): settings=", Event.getElementName())
-      Controller.bindController(Player.native())
-      if main_panel:isOpened() then
-        main_panel:main()
-        main_panel:main()
-      else
-      -- prevent change location
-        Controller.cleanController(Player.native())
-      end
-    end
-    -- hotkey action
-    if Event.isHotkey() then
-      Logging:trace(Controller.classname, "parse_event(): hotkey=", Event.getElementName())
-      if Event.getName() == "helmod-close" then
-        if main_panel:isOpened() then
-          main_panel:main()
+    if views == nil then Controller.init() end
+    if views ~= nil then
+      -- settings action
+      if Event.isSettings() then
+        Logging:trace(Controller.classname, "parse_event(): settings=", Event.getElementName())
+        Controller.bindController(Player.native())
+        if Controller.isOpened() then
+          Controller.cleanController(Player.native())
+          Controller.openMainPanel()
+        else
+          -- prevent change location
+          Controller.cleanController(Player.native())
         end
       end
-      if Event.getName() == "helmod-open-close" then
-        main_panel:main()
-      end
-      if Event.getName() == "helmod-production-line-open" then
-        if not(main_panel:isOpened()) then
-          main_panel:main()
-        end
-        Controller.sendEvent(Event.native(), "HMMainTab", "change-tab", "HMProductionLineTab")
-      end
-      if Event.getName() == "helmod-recipe-selector-open" then
-        if not(main_panel:isOpened()) then
-          main_panel:main()
-        end
-        Controller.sendEvent(Event.native(), "HMRecipeSelector", "OPEN")
-      end
-    end
-    -- button action
-    if Event.isButton() or Event.next then
-      Logging:debug(Controller.classname, "button action")
-      if Event.name == "helmod_planner-command" then
-        local main_panel = Controller.getView("HMMainPanel")
-        main_panel:main()
-      else
-        if views ~= nil and views[Event.name] then
-          local continue = Controller.sendEvent(Event.native(), Event.name, Event.action, Event.item1, Event.item2, Event.item3)
-          if(continue) then
-            -- release state in the event without stage
-            Event.state = Event.STATE_CONTINUE
+      -- hotkey action
+      if Event.isHotkey() then
+        Logging:trace(Controller.classname, "parse_event(): hotkey=", Event.getElementName())
+        if Event.getName() == "helmod-close" then
+          if Controller.isOpened() then
+            Controller.cleanController(Player.native())
           end
-          if(nextEvent) then
-            Event.setNext(nextEvent.name, nextEvent.action, nextEvent.item1, nextEvent.item2, nextEvent.item3)
-            nextEvent = nil
+        end
+        if Event.getName() == "helmod-open-close" then
+          Controller.openMainPanel()
+        end
+        if Event.getName() == "helmod-production-line-open" then
+          if not(Controller.isOpened()) then
+            Controller.openMainPanel()
           end
-          Logging:debug(Controller.classname, "event state", Event.state)
+          Controller.sendEvent(Event.native(), "HMMainTab", "change-tab", "HMProductionLineTab")
+        end
+        if Event.getName() == "helmod-recipe-selector-open" then
+          if not(Controller.isOpened()) then
+            Controller.openMainPanel()
+          end
+          Controller.sendEvent(Event.native(), "HMRecipeSelector", "OPEN")
         end
       end
+      -- Open form
+      if Controller.isOpened() then
+      --Controller.openFormPanel(Event.native(), Event.name, Event.action, Event.item1, Event.item2, Event.item3)
+      end
+      -- button action
+      if Event.isButton() or Event.next then
+        Logging:debug(Controller.classname, "button action")
+        if Event.name == Controller.classname and Event.action == "CLOSE" then
+          Controller.cleanController(Player.native())
+        elseif Event.name == "helmod_planner-command" then
+          Controller.openMainPanel()
+        else
+          if views ~= nil and views[Event.name] then
+            local continue = Controller.sendEvent(Event.native(), Event.name, Event.action, Event.item1, Event.item2, Event.item3)
+            if(continue) then
+              -- release state in the event without stage
+              Event.state = Event.STATE_CONTINUE
+            end
+            if(nextEvent) then
+              Event.setNext(nextEvent.name, nextEvent.action, nextEvent.item1, nextEvent.item2, nextEvent.item3)
+              nextEvent = nil
+            end
+            Logging:debug(Controller.classname, "event state", Event.state)
+            force_refresh = false
+          end
+        end
+      end
+      --    if Controller.isOpened() and (rawlen(Controller.getDialogPanel().children) == 0 or Controller.getView("HMProductLineEdition"):isOpened() or Controller.getView("HMProductBlockEdition"):isOpened()) then
+      --        local globalGui = Player.getGlobalGui()
+      --        if globalGui.currentTab == "HMProductionBlockTab" then
+      --          Controller.sendEvent(nil, "HMProductBlockEdition", "OPEN", Event.item1, Event.item2, Event.item3)
+      --          else
+      --          Controller.sendEvent(nil, "HMProductLineEdition", "OPEN", Event.item1, Event.item2, Event.item3)
+      --        end
+      --    end
     end
-  end
   end)
   if not(ok) then
     Player.print(err)
@@ -287,36 +329,61 @@ end
 --
 function Controller.sendEvent(event, classname, action, item, item2, item3)
   Logging:debug(Controller.classname, "send_event(event, classname, action, item, item2, item3)", classname, action, item, item2, item3)
+  Controller.onEvent(event, action, item, item2, item3)
   if views ~= nil and views[classname] then
-    local form = views[classname]
-    Logging:debug(Controller.classname, "form state begin", form:classname(), form.state)
     if action == "CLOSE" then
-      form:close(true)
-    else
-      if form.state == form.STATE_CLOSE or form.state == form.STATE_EVENT then
-        Logging:debug(Controller.classname, "*** event", form:classname(), form.state)
-        form.state = form.STATE_OPEN
-        form:onEvent(event, action, item, item2, item3)
-      end
-      --if action == "OPEN" then
-        if form.state == form.STATE_OPEN then
-          Logging:debug(Controller.classname, "*** Open", form:classname(), form.state)
-          form:beforeOpen(event, action, item, item2, item3)
-          form.state = form.STATE_UPDATE
-          form:open(event, action, item, item2, item3)
-        end
-        if form.state == form.STATE_UPDATE then
-          Logging:debug(Controller.classname, "*** update", form:classname(), form.state)
-          form.state = form.STATE_EVENT
-          form:update(event, action, item, item2, item3)
-        end
---      else
---        form.state = form.STATE_EVENT
---      end
+      views[classname]:close(true)
     end
-    Logging:debug(Controller.classname, "form state end", form:classname(), form.state)
-    -- release state in the event without stage
-    return form.state == form.STATE_UPDATE and form.state ~= nil
+    local ui = Player.getGlobalUI()
+    if action == "OPEN" then
+      if string.find(classname, "Edition") or string.find(classname, "Selector") or string.find(classname, "Settings") or string.find(classname, "Help") or string.find(classname, "Download") then
+        ui.dialog = classname
+      end
+      if string.find(classname, "Tab") then
+        ui.data = classname
+      end
+    end
+
+    Logging:debug(Controller.classname, "***** before event: ui", ui)
+
+    for locate,form_name in pairs(ui) do
+      Logging:debug(Controller.classname, "before event", form_name, classname)
+      if form_name == classname then
+        views[form_name]:beforeEvent(event, action, item, item2, item3)
+      end
+    end
+
+    ui.menu = "HMMainMenuPanel"
+    ui.left = "HMLeftMenuPanel"
+    if ui.data == nil then
+      ui.data = "HMProductionLineTab"
+    end
+    if ui.dialog == nil then
+      if ui.data == "HMProductionLineTab" then
+        ui.dialog = "HMProductLineEdition"
+      else
+        ui.dialog = "HMProductBlockEdition"
+      end
+    end
+
+    for locate,form_name in pairs(ui) do
+      Logging:debug(Controller.classname, "on event", form_name, classname)
+      if form_name == classname then
+        views[form_name]:onEvent(event, action, item, item2, item3)
+      end
+    end
+    Logging:debug(Controller.classname, "***** after event: ui", ui)
+    for locate,form_name in pairs(ui) do
+      if action == "OPEN" then
+        Logging:debug(Controller.classname, "open form")
+        views[form_name]:open(event, action, item, item2, item3)
+      end
+      if not(action ~= "OPEN" and form_name == classname) or force_refresh == true then
+        Logging:debug(Controller.classname, "update form")
+        views[form_name]:update(event, action, item, item2, item3)
+      end
+    end
+    return false
   end
   return false
 end
@@ -390,6 +457,581 @@ function Controller.refreshDisplay(player, item, item2, item3)
   local main_panel = Controller.getView("HMMainPanel")
   main_panel:main()
   main_panel:main()
+end
+
+-------------------------------------------------------------------------------
+-- Name of display
+--
+--  Table.main
+-- |--------------|--------------|--------------|
+-- ||------------|||------------|||------------||
+-- || Frame.menu ||| Frame.data ||| Frame.info ||
+-- ||------------|||------------|||------------||
+-- |--------------|--------------|--------------|
+--
+
+-------------------------------------------------------------------------------
+-- Get or create main panel
+--
+-- @function [parent=#Controller] getMainPanel
+--
+function Controller.getMainPanel()
+  Logging:debug(Controller.classname, "getMainPanel()")
+  local lua_player = Player.native()
+  local location = Player.getSettings("display_location")
+  local gui_main = lua_player.gui[location]
+  if gui_main["helmod_main_panel"] ~= nil and gui_main["helmod_main_panel"].valid then
+    return gui_main["helmod_main_panel"]
+  end
+  local panel = ElementGui.addGuiFrameH(gui_main, "helmod_main_panel", helmod_frame_style.hidden)
+  ElementGui.setStyle(panel, "main", "width")
+  ElementGui.setStyle(panel, "main", "height")
+  return panel
+end
+
+-------------------------------------------------------------------------------
+-- Get or create dialog panel
+--
+-- @function [parent=#Controller] getDialogPanel
+--
+function Controller.getDialogPanel()
+  local main_panel = Controller.getMainPanel()
+  if main_panel["helmod_dialog_panel"] ~= nil and main_panel["helmod_dialog_panel"].valid then
+    return main_panel["helmod_dialog_panel"]
+  end
+  local panel = ElementGui.addGuiFrameV(main_panel, "helmod_dialog_panel", helmod_frame_style.hidden)
+  ElementGui.setStyle(panel, "dialog", "width")
+  return panel
+end
+
+-------------------------------------------------------------------------------
+-- Get or create menu panel
+--
+-- @function [parent=#Controller] getMenuPanel
+--
+function Controller.getMenuPanel()
+  local parent_panel = Controller.getDataPanel()
+  if parent_panel["menu_panel"] ~= nil then
+    return parent_panel["menu_panel"]
+  end
+  local panel = ElementGui.addGuiFrameV(parent_panel, "menu_panel", helmod_frame_style.panel)
+  ElementGui.setStyle(panel, "data", "width")
+  return panel
+end
+
+-------------------------------------------------------------------------------
+-- Get or create tab panel
+--
+-- @function [parent=#Controller] getTabPanel
+--
+function Controller.getTabPanel()
+  local parent_panel = Controller.getDataPanel()
+  if parent_panel["tab_panel"] ~= nil then
+    return parent_panel["tab_panel"]
+  end
+  local panel = ElementGui.addGuiFrameV(parent_panel, "tab_panel", helmod_frame_style.panel)
+  ElementGui.setStyle(panel, "data", "width")
+  return panel
+end
+
+-------------------------------------------------------------------------------
+-- Get or create left panel
+--
+-- @function [parent=#Controller] getLeftPanel
+--
+function Controller.getLeftPanel()
+  local main_panel = Controller.getMainPanel()
+  if main_panel["helmod_left_panel"] ~= nil and main_panel["helmod_left_panel"].valid then
+    return main_panel["helmod_left_panel"]
+  end
+  return ElementGui.addGuiTable(main_panel, "helmod_left_panel", 1, helmod_table_style.panel)
+end
+
+-------------------------------------------------------------------------------
+-- Get or create data panel
+--
+-- @function [parent=#Controller] getDataPanel
+--
+function Controller.getDataPanel()
+  local main_panel = Controller.getMainPanel()
+  if main_panel["helmod_data_panel"] ~= nil and main_panel["helmod_data_panel"].valid and main_panel["helmod_data_panel"]["helmod_data_table"] then
+    return main_panel["helmod_data_panel"]["helmod_data_table"]
+  end
+  local panel = ElementGui.addGuiFrameV(main_panel, "helmod_data_panel", helmod_frame_style.hidden)
+  ElementGui.setStyle(panel, "data", "width")
+  --panel.style.vertically_stretchable = false
+  local table_panel = ElementGui.addGuiTable(panel, "helmod_data_table", 1, helmod_table_style.panel)
+  --table_panel.style.vertically_stretchable = false
+  return table_panel
+end
+
+-------------------------------------------------------------------------------
+-- Prepare main display
+--
+-- @function [parent=#Controller] openMainPanel
+--
+function Controller.openMainPanel()
+  Logging:debug(Controller.classname, "openMainPanel()")
+  local lua_player = Player.native()
+  local location = Player.getSettings("display_location")
+  local gui_main = lua_player.gui[location]
+  if Controller.isOpened() then
+    Controller.cleanController(Player.native())
+  else
+    local ui = Player.getGlobalUI()
+    ui.menu = "HMMainMenuPanel"
+    ui.left = "HMLeftMenuPanel"
+    ui.data = "HMProductionLineTab"
+    force_refresh = true
+    -- interessant mais genere une fausse UI ouverte
+    --Player.native().opened = self:getMainPanel()
+    -- left
+    local dataPanel = Controller.getLeftPanel()
+    -- data
+    local dataPanel = Controller.getDataPanel()
+    local menuPanel = Controller.getMenuPanel()
+    -- dialogue
+    local dialogPanel = Controller.getDialogPanel()
+    Controller.sendEvent(nil, ui.data, "OPEN")
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Prepare main display
+--
+-- @function [parent=#Controller] openFormPanel
+--
+-- @param #lua_event event
+-- @param #string classname controller name
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function Controller.openFormPanel(event, classname, action, item, item2, item3)
+  Logging:debug(Controller.classname, "openFormPanel", event, classname, action, item, item2, item3)
+  local ui = Player.getGlobalUI()
+  ui.menu = "HMMainMenuPanel"
+  ui.left = "HMLeftMenuPanel"
+  if ui.data == nil then
+    ui.data = "HMProductionLineTab"
+  end
+  if ui.dialog == nil then
+    ui.dialog = "HMProductLineEdition"
+  end
+
+
+  if rawlen(Controller.getLeftPanel().children) == 0 then
+    Logging:debug(Controller.classname, "left panel", ui.left)
+    Controller.getView(ui.left):open(event, action, item, item2, item3)
+    Controller.getView(ui.left):update(event, action, item, item2, item3)
+  end
+  if rawlen(Controller.getDataPanel().children) == 0 then
+    Logging:debug(Controller.classname, "data panel", ui.data)
+    Controller.getView(ui.menu):open(event, action, item, item2, item3)
+    Controller.getView(ui.menu):update(event, action, item, item2, item3)
+    Controller.getView(ui.data):open(event, action, item, item2, item3)
+    Controller.getView(ui.data):update(event, action, item, item2, item3)
+  end
+  if rawlen(Controller.getDialogPanel().children) == 0 then
+    Logging:debug(Controller.classname, "dialog panel", ui.dialog)
+    Controller.getView(ui.dialog):open(event, action, item, item2, item3)
+    Controller.getView(ui.dialog):update(event, action, item, item2, item3)
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Is opened main panel
+--
+-- @function [parent=#Controller] isOpened
+--
+function Controller.isOpened()
+  Logging:trace(Controller.classname, "isOpened()")
+  local lua_player = Player.native()
+  local location = Player.getSettings("display_location")
+  local guiMain = lua_player.gui[location]
+  if guiMain["helmod_main_panel"] ~= nil then
+    return true
+  end
+  return false
+end
+
+-------------------------------------------------------------------------------
+-- On event
+--
+-- @function [parent=#Controller] onEvent
+--
+-- @param #LuaEvent event
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function Controller.onEvent(event, action, item, item2, item3)
+  Logging:debug(Controller.classname, "onEvent():", action, item, item2, item3)
+  local model = Model.getModel()
+
+  -- *******************************
+  -- access admin only
+  -- *******************************
+
+  if Player.isAdmin() then
+    Controller.onEventAccessAdmin(event, action, item, item2, item3)
+  end
+
+  -- *******************************
+  -- access admin or owner or write
+  -- *******************************
+
+  if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
+    Controller.onEventAccessWrite(event, action, item, item2, item3)
+  end
+
+  -- ***************************
+  -- access admin or owner
+  -- ***************************
+
+  if Player.isAdmin() or model.owner == Player.native().name then
+    Controller.onEventAccessRead(event, action, item, item2, item3)
+  end
+
+  -- ********************************
+  -- access admin or owner or delete
+  -- ********************************
+
+  if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 4) > 0) then
+    Controller.onEventAccessDelete(event, action, item, item2, item3)
+  end
+
+  -- ***************************
+  -- access for all
+  -- ***************************
+  Controller.onEventAccessAll(event, action, item, item2, item3)
+
+end
+
+-------------------------------------------------------------------------------
+-- On event
+--
+-- @function [parent=#Controller] onEventAccessAll
+--
+-- @param #LuaEvent event
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function Controller.onEventAccessAll(event, action, item, item2, item3)
+  Logging:debug(Controller.classname, "onEventAccessAll():", action, item, item2, item3)
+  local globalGui = Player.getGlobalGui()
+  local ui = Player.getGlobalUI()
+
+  if action == "refresh-model" then
+    ModelCompute.update()
+    force_refresh = true
+  end
+
+  if action == "change-model" then
+    globalGui.model_id = item
+    ui.data = "HMProductionLineTab"
+    globalGui.currentBlock = "new"
+    force_refresh = true
+  end
+
+  if action == "change-tab" then
+    ui.data = item
+    if item == "HMProductionLineTab" then
+      globalGui.currentBlock = "new"
+    end
+    globalGui.currentBlock = item2
+    force_refresh = true
+  end
+
+  if action == "change-sort" then
+    if globalGui.order.name == item then
+      globalGui.order.ascendant = not(globalGui.order.ascendant)
+    else
+      globalGui.order = {name=item, ascendant=true}
+    end
+    force_refresh = true
+  end
+
+end
+
+-------------------------------------------------------------------------------
+-- On event
+--
+-- @function [parent=#Controller] onEventAccessRead
+--
+-- @param #LuaEvent event
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function Controller.onEventAccessRead(event, action, item, item2, item3)
+  Logging:debug(Controller.classname, "onEventAccessRead():", action, item, item2, item3)
+
+  local globalGui = Player.getGlobalGui()
+  local ui = Player.getGlobalUI()
+
+  if action == "copy-model" then
+    if ui.data == "HMProductionBlockTab" then
+      if globalGui.currentBlock ~= nil and globalGui.currentBlock ~= "new" then
+        globalGui.copy_from_block_id = globalGui.currentBlock
+        globalGui.copy_from_model_id = Player.getGlobalGui("model_id")
+      end
+    end
+    if ui.data == "HMProductionLineTab" then
+      globalGui.copy_from_block_id = nil
+      globalGui.copy_from_model_id = Player.getGlobalGui("model_id")
+    end
+    force_refresh = true
+  end
+  if action == "share-model" then
+    local models = Model.getModels(true)
+    local model = models[item2]
+    if model ~= nil then
+      if item == "read" then
+        if model.share == nil or not(bit32.band(model.share, 1) > 0) then
+          model.share = 1
+        else
+          model.share = 0
+        end
+      end
+      if item == "write" then
+        if model.share == nil or not(bit32.band(model.share, 2) > 0) then
+          model.share = 3
+        else
+          model.share = 1
+        end
+      end
+      if item == "delete" then
+        if model.share == nil or not(bit32.band(model.share, 4) > 0) then
+          model.share = 7
+        else
+          model.share = 3
+        end
+      end
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- On event
+--
+-- @function [parent=#Controller] onEventAccessWrite
+--
+-- @param #LuaEvent event
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function Controller.onEventAccessWrite(event, action, item, item2, item3)
+  Logging:debug(Controller.classname, "onEventAccessWrite():", action, item, item2, item3)
+  local globalGui = Player.getGlobalGui()
+  local ui = Player.getGlobalUI()
+  local model = Model.getModel()
+  if action == "change-boolean-option" and model.blocks ~= nil and model.blocks[globalGui.currentBlock] ~= nil then
+    local element = model.blocks[globalGui.currentBlock]
+    ModelBuilder.updateProductionBlockOption(globalGui.currentBlock, item, not(element[item]))
+    ModelCompute.update()
+    force_refresh = true
+  end
+
+  if action == "change-number-option" and model.blocks ~= nil and model.blocks[globalGui.currentBlock] ~= nil then
+    local panel = self:getInfoPanel()["block"]["output-scroll"]["output-table"]
+    if panel[item] ~= nil then
+      local value = ElementGui.getInputNumber(panel[item])
+      ModelBuilder.updateProductionBlockOption(globalGui.currentBlock, item, value)
+      ModelCompute.update()
+      force_refresh = true
+    end
+  end
+
+  if action == "change-time" then
+    model.time = tonumber(item) or 1
+    ModelCompute.update()
+    force_refresh = true
+  end
+
+  if action == "product-selected" then
+    Logging:debug(Controller.classname, "product-selected", event.button, defines.mouse_button_type.right)
+    if event.button == defines.mouse_button_type.right then
+      Controller.sendEvent(event, "HMRecipeSelector", "OPEN", item, item2, item3)
+    end
+  end
+
+  if action == "product-edition" then
+    if event.button == defines.mouse_button_type.right then
+      Controller.createEvent(event, "HMRecipeSelector", "OPEN", item, item2, item3)
+    else
+      Controller.createEvent(event, "HMProductEdition", "OPEN", item, item2, item3)
+    end
+  end
+
+  if action == "production-block-unlink" then
+    ModelBuilder.unlinkProductionBlock(item)
+    ModelCompute.update()
+    force_refresh = true
+  end
+
+  if action == "production-recipe-add" then
+    local recipes = Player.searchRecipe(item3)
+    if #recipes == 1 then
+      local recipe = recipes[1]
+      ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type)
+      ModelCompute.update()
+      force_refresh = true
+    else
+      Controller.createEvent(nil, "HMRecipeSelector", "OPEN", item, item2, item3)
+    end
+  end
+
+  if action == "production-block-solver" then
+    if model.blocks[item] ~= nil then
+      ModelBuilder.updateProductionBlockOption(item, "solver", not(model.blocks[item].solver))
+      ModelCompute.update()
+      force_refresh = true
+    end
+  end
+
+  if action == "production-block-remove" then
+    ModelBuilder.removeProductionBlock(item)
+    ModelCompute.update()
+    globalGui.currentBlock = "new"
+    force_refresh = true
+  end
+
+  if ui.data == "HMProductionLineTab" then
+    if action == "production-block-add" then
+      local recipes = Player.searchRecipe(item2)
+      if #recipes == 1 then
+        local recipe = recipes[1]
+        ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type)
+        ModelCompute.update()
+        ui.data = "HMProductionBlockTab"
+        force_refresh = true
+      else
+        ui.data = "HMProductionBlockTab"
+        Controller.createEvent(nil, "HMRecipeSelector", "OPEN", item, item2, item3)
+      end
+    end
+
+    if action == "production-block-up" then
+      local step = 1
+      if event.shift then step = Player.getSettings("row_move_step") end
+      if event.control then step = 1000 end
+      ModelBuilder.upProductionBlock(item, step)
+      ModelCompute.update()
+      force_refresh = true
+    end
+
+    if action == "production-block-down" then
+      local step = 1
+      if event.shift then step = Player.getSettings("row_move_step") end
+      if event.control then step = 1000 end
+      ModelBuilder.downProductionBlock(item, step)
+      ModelCompute.update()
+      force_refresh = true
+    end
+  end
+
+  if ui.data == "HMProductionBlockTab" then
+    if action == "production-recipe-remove" then
+      ModelBuilder.removeProductionRecipe(item, item2)
+      ModelCompute.update()
+      force_refresh = true
+    end
+
+    if action == "production-recipe-up" then
+      local step = 1
+      if event.shift then step = Player.getSettings("row_move_step") end
+      if event.control then step = 1000 end
+      ModelBuilder.upProductionRecipe(item, item2, step)
+      ModelCompute.update()
+      force_refresh = true
+    end
+
+    if action == "production-recipe-down" then
+      local step = 1
+      if event.shift then step = Player.getSettings("row_move_step") end
+      if event.control then step = 1000 end
+      ModelBuilder.downProductionRecipe(item, item2, step)
+      ModelCompute.update()
+      force_refresh = true
+    end
+  end
+
+  if ui.data == "HMEnergyTab" then
+    if action == "power-remove" then
+      ModelBuilder.removePower(item)
+      force_refresh = true
+    end
+  end
+
+  if action == "past-model" then
+    if ui.data == "HMProductionBlockTab" then
+      ModelBuilder.pastModel(globalGui.copy_from_model_id, globalGui.copy_from_block_id)
+      ModelCompute.update()
+      force_refresh = true
+    end
+    if ui.data == "HMProductionLineTab" then
+      ModelBuilder.pastModel(globalGui.copy_from_model_id, globalGui.copy_from_block_id)
+      ModelCompute.update()
+      globalGui.currentBlock = "new"
+      force_refresh = true
+    end
+  end
+
+end
+
+-------------------------------------------------------------------------------
+-- On event
+--
+-- @function [parent=#Controller] onEventAccessDelete
+--
+-- @param #LuaEvent event
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function Controller.onEventAccessDelete(event, action, item, item2, item3)
+  Logging:debug(Controller.classname, "onEventAccessDelete():", action, item, item2, item3)
+  local globalGui = Player.getGlobalGui()
+  local ui = Player.getGlobalUI()
+  if action == "remove-model" then
+    ModelBuilder.removeModel(item)
+    ui.data = "HMProductionLineTab"
+    globalGui.currentBlock = "new"
+    force_refresh = true
+  end
+end
+
+-------------------------------------------------------------------------------
+-- On event
+--
+-- @function [parent=#Controller] onEventAccessAdmin
+--
+-- @param #LuaEvent event
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function Controller.onEventAccessAdmin(event, action, item, item2, item3)
+  Logging:debug(Controller.classname, "onEventAccessAdmin():", action, item, item2, item3)
+  if action == "rule-remove" then
+    ModelBuilder.removeRule(item)
+    force_refresh = true
+  end
+  if action == "reset-rules" then
+    Model.resetRules()
+    force_refresh = true
+  end
+
 end
 
 return Controller

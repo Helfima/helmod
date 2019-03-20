@@ -1,3 +1,4 @@
+require "mod-gui"
 require "core.global"
 require "core.class"
 require "core.defines"
@@ -9,7 +10,6 @@ Player = require "model.Player"
 Controller = require "controller.Controller"
 UnitTest = require "core.UnitTest"
 Command = require "core.Command"
-Event = require "core.Event"
 EventController = require "controller.EventController"
 --===========================
 -- trace=4

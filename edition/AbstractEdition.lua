@@ -5,9 +5,10 @@
 -- @extends #Dialog
 --
 
-AbstractEdition = setclass("HMAbstractEdition", Dialog)
+AbstractEdition = setclass("HMAbstractEdition", Form)
 
 local limit_display_height = 850
+
 -------------------------------------------------------------------------------
 -- Get the parent panel
 --
@@ -16,7 +17,7 @@ local limit_display_height = 850
 -- @return #LuaGuiElement
 --
 function AbstractEdition.methods:getParentPanel()
-  return self.parent:getDialogPanel()
+  return Controller.getDialogPanel()
 end
 
 -------------------------------------------------------------------------------
@@ -36,13 +37,16 @@ function AbstractEdition.methods:onOpen(event, action, item, item2, item3)
   local player_gui = Player.getGlobalGui()
   local close = (action == "OPEN") -- only on open event
   player_gui.moduleListRefresh = false
-  if player_gui.guiElementLast == nil or player_gui.guiElementLast ~= item..item2 then
-    close = false
-    player_gui.factoryGroupSelected = nil
-    player_gui.beaconGroupSelected = nil
-    player_gui.moduleListRefresh = true
+  if item ~= nil and item2 ~= nil then
+    if player_gui.guiElementLast == nil or player_gui.guiElementLast ~= item..item2 then
+      close = false
+      player_gui.factoryGroupSelected = nil
+      player_gui.beaconGroupSelected = nil
+      player_gui.moduleListRefresh = true
+    end
+
+    player_gui.guiElementLast = item..item2
   end
-  player_gui.guiElementLast = item..item2
   return close
 end
 
@@ -344,6 +348,8 @@ function AbstractEdition.methods:onUpdate(event, action, item, item2, item3)
   -- header
   self:updateHeader(item, item2, item3)
   if object ~= nil then
+    self:getLeftPanel().clear()
+    self:getRightPanel().clear()
     -- tab menu
     self:updateTabMenu(item, item2, item3)
     if display_height >= limit_display_height or global_gui.factory_tab then
@@ -559,10 +565,7 @@ function AbstractEdition.methods:updateFactoryModulesSelector(item, item2, item3
   local player_gui = Player.getGlobalGui()
   local object = self:getObject(item, item2, item3)
 
-
-  if selectorPanel["modules"] ~= nil and selectorPanel["modules"].valid and player_gui.moduleListRefresh == true then
-    selectorPanel["modules"].destroy()
-  end
+  selectorPanel.clear()
 
   if selectorPanel["modules"] == nil then
     local tableModulesPanel = ElementGui.addGuiTable(selectorPanel,"modules",5)
@@ -626,9 +629,8 @@ function AbstractEdition.methods:updateFactorySelector(item, item2, item3)
   local selectorPanel = self:getFactorySelectorPanel()
   local global_gui = Player.getGlobalGui()
 
-  if selectorPanel["scroll-factory"] ~= nil and selectorPanel["scroll-factory"].valid then
-    selectorPanel["scroll-factory"].destroy()
-  end
+  selectorPanel.clear()
+  
   local scrollPanel = ElementGui.addGuiScrollPane(selectorPanel, "scroll-factory", helmod_scroll_style.recipe_list, true)
 
   local object = self:getObject(item, item2, item3)
@@ -774,9 +776,7 @@ function AbstractEdition.methods:updateBeaconModulesSelector(item, item2, item3)
   local object = self:getObject(item, item2, item3)
   local model_filter_beacon_module = Player.getSettings("model_filter_beacon_module", true)
 
-  if selectorPanel["modules"] ~= nil and selectorPanel["modules"].valid and player_gui.moduleListRefresh == true then
-    selectorPanel["modules"].destroy()
-  end
+  selectorPanel.clear()
 
   if selectorPanel["modules"] == nil then
     local tableModulesPanel = ElementGui.addGuiTable(selectorPanel,"modules",5)
@@ -812,9 +812,8 @@ function AbstractEdition.methods:updateBeaconSelector(item, item2, item3)
   local selectorPanel = self:getBeaconSelectorPanel()
   local global_gui = Player.getGlobalGui()
 
-  if selectorPanel["scroll-beacon"] ~= nil and selectorPanel["scroll-beacon"].valid then
-    selectorPanel["scroll-beacon"].destroy()
-  end
+  selectorPanel.clear()
+  
   local scrollPanel = ElementGui.addGuiScrollPane(selectorPanel, "scroll-beacon", helmod_scroll_style.recipe_list, true)
 
   local object = self:getObject(item, item2, item3)
@@ -882,9 +881,9 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
 
   if action == "change-panel" then
     global_gui.module_panel = not(global_gui.module_panel)
-    self:close()
+    self:onUpdate(event, action, item, item2, item3)
   end
-  
+
   if action == "factory-group" then
     global_gui.factoryGroupSelected = item3
     self:updateFactorySelector(item, item2, item3)
@@ -907,7 +906,6 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
       ModelBuilder.updateObject(item, item2, options)
       ModelCompute.update()
       self:updateObjectInfo(item, item2, item3)
-      self.parent:refreshDisplayData(nil, item, item2)
     end
 
     if action == "factory-select" then
@@ -917,7 +915,6 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
       ModelCompute.update()
       self:updateHeader(item, item2, item3)
       self:updateFactoryInfo(item, item2, item3)
-      self.parent:refreshDisplayData(nil, item, item2)
     end
 
     if action == "factory-update" then
@@ -931,7 +928,6 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
       ModelBuilder.updateFactory(item, item2, options)
       ModelCompute.update()
       self:updateFactoryInfo(item, item2, item3)
-      self.parent:refreshDisplayData(nil, item, item2)
     end
 
     if action == "factory-module-add" then
@@ -939,7 +935,6 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
       ModelCompute.update()
       self:updateFactoryInfo(item, item2, item3)
       self:updateFactoryActivedModules(item, item2, item3)
-      self.parent:refreshDisplayData(nil, item, item2)
     end
 
     if action == "factory-module-remove" then
@@ -947,14 +942,12 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
       ModelCompute.update()
       self:updateFactoryInfo(item, item2, item3)
       self:updateFactoryActivedModules(item, item2, item3)
-      self.parent:refreshDisplayData(nil, item, item2)
     end
 
     if action == "beacon-select" then
       Model.setBeacon(item, item2, item3)
       ModelCompute.update()
       self:updateBeaconInfo(item, item2, item3)
-      self.parent:refreshDisplayData(nil, item, item2)
     end
 
     if action == "beacon-update" then
@@ -975,7 +968,6 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
       if display_height >= limit_display_height or global_gui.factory_tab then
         self:updateFactoryInfo(item, item2, item3)
       end
-      self.parent:refreshDisplayData(nil, item, item2)
     end
 
     if action == "beacon-module-add" then
@@ -986,7 +978,6 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
       if display_height >= limit_display_height or global_gui.factory_tab then
         self:updateFactoryInfo(item, item2, item3)
       end
-      self.parent:refreshDisplayData(nil, item, item2)
     end
 
     if action == "beacon-module-remove" then
@@ -997,7 +988,6 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
       if display_height >= limit_display_height or global_gui.factory_tab then
         self:updateFactoryInfo(item, item2, item3)
       end
-      self.parent:refreshDisplayData(nil, item, item2)
     end
   end
 end

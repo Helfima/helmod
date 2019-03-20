@@ -29,7 +29,7 @@ end
 -- @return #LuaGuiElement
 --
 function Download.methods:getParentPanel()
-  return self.parent:getDialogPanel()
+  return Controller.getDialogPanel()
 end
 
 -------------------------------------------------------------------------------

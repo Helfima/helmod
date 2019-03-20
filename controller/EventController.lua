@@ -7,6 +7,7 @@ local EventController = {
   classname = "HMEventController"
 }
 
+Event = require "core.Event"
 -------------------------------------------------------------------------------
 -- Start
 --

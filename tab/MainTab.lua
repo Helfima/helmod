@@ -191,7 +191,7 @@ end
 -------------------------------------------------------------------------------
 -- Get or create result scroll panel
 --
--- @function [parent=#MainTab] getResultScrollPanel
+-- @function [parent=#MainTab] getDataScrollPanel
 --
 -- @param #string caption
 --

@@ -173,6 +173,21 @@ function Player.getGlobalGui(property)
 end
 
 -------------------------------------------------------------------------------
+-- Get global UI
+--
+-- @function [parent=#Player] getGlobalUI
+--
+-- @param #string property
+--
+function Player.getGlobalUI(property)
+  local ui = Player.getGlobal("ui")
+  if ui ~= nil and property ~= nil then
+    return ui[property]
+  end
+  return ui
+end
+
+-------------------------------------------------------------------------------
 -- Get global settings
 --
 -- @function [parent=#Player] getGlobalSettings
