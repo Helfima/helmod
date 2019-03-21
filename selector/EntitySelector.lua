@@ -34,18 +34,18 @@ function EntitySelector.methods:checkFilter(prototype)
   Logging:trace(self:classname(), "checkFilter()")
   local filter_prototype = self:getFilter()
   local filter_prototype_product = self:getProductFilter()
-  local find = false
+
   if filter_prototype ~= nil and filter_prototype ~= "" then
     if filter_prototype_product ~= true then
       local search = prototype.name:lower():gsub("[-]"," ")
       if string.find(search, filter_prototype) then
-        find = true
+        return true
       end
     end
   else
-    find = true
+    return true
   end
-  return find
+  return false
 end
 
 -------------------------------------------------------------------------------
@@ -59,23 +59,26 @@ end
 -- @param #table list_subgroup
 -- @param #table list_prototype
 --
-function EntitySelector.methods:appendGroups(name, type, list_group, list_subgroup, list_prototype)
-  Logging:debug(self:classname(), "appendGroups()", name, type)
-  EntityPrototype.load(name, type)
-  local find = self:checkFilter(EntityPrototype.native())
+function EntitySelector.methods:appendGroups(entity, type, list_group, list_subgroup, list_prototype)
+  Logging:debug(self:classname(), "appendGroups()", entity.name, type)
   local filter_show_disable = Player.getGlobalSettings("filter_show_disable")
   local filter_show_hidden = Player.getGlobalSettings("filter_show_hidden")
-  
-  if find == true and (EntityPrototype.getValid() == true or filter_show_disable == true) then
-    local group_name = EntityPrototype.native().group.name
-    local subgroup_name = EntityPrototype.native().subgroup.name
-    
-    if firstGroup == nil then firstGroup = group_name end
-    list_group[group_name] = EntityPrototype.native().group
-    list_subgroup[subgroup_name] = EntityPrototype.native().subgroup
-    if list_prototype[group_name] == nil then list_prototype[group_name] = {} end
-    if list_prototype[group_name][subgroup_name] == nil then list_prototype[group_name][subgroup_name] = {} end
-    table.insert(list_prototype[group_name][subgroup_name], {name=name, type=type, order=EntityPrototype.native().order})
+
+  if (entity.valid == true or filter_show_disable == true) then
+    EntityPrototype.load(entity.name, type)
+    local find = self:checkFilter(EntityPrototype.native())
+
+    if find == true then
+      local group_name = EntityPrototype.native().group.name
+      local subgroup_name = EntityPrototype.native().subgroup.name
+
+      if firstGroup == nil then firstGroup = group_name end
+      list_group[group_name] = EntityPrototype.native().group
+      list_subgroup[subgroup_name] = EntityPrototype.native().subgroup 
+      if list_prototype[group_name] == nil then list_prototype[group_name] = {} end
+      if list_prototype[group_name][subgroup_name] == nil then list_prototype[group_name][subgroup_name] = {} end
+      table.insert(list_prototype[group_name][subgroup_name],{name = entity.name, type = type, order = EntityPrototype.native().order})
+    end
   end
 end
 
@@ -102,7 +105,7 @@ function EntitySelector.methods:updateGroups(item, item2, item3)
   firstGroup = nil
 
   for key, entity in pairs(Player.getEntityPrototypes()) do
-    self:appendGroups(entity.name, "entity", list_group, list_subgroup, list_prototype)
+    self:appendGroups({name = entity.name, valid = entity.valid}, "entity", list_group, list_subgroup, list_prototype)
   end
 
   if list_prototype[global_player.recipeGroupSelected] == nil then
