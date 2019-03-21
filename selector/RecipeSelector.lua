@@ -46,23 +46,25 @@ function RecipeSelector.methods:checkFilter(recipe_prototype)
   Logging:trace(self:classname(), "checkFilter()")
   local filter_prototype = self:getFilter()
   local filter_prototype_product = self:getProductFilter()
-  local find = false
+  local elements = {}
+
   if filter_prototype ~= nil and filter_prototype ~= "" then
-    local elements = recipe_prototype.getProducts()
-    if filter_prototype_product ~= true then
+    if filter_prototype_product == true then
+      elements = recipe_prototype.getProducts()
+    else
       elements = recipe_prototype.getIngredients()
     end
 
     for key, element in pairs(elements) do
       local search = element.name:lower():gsub("[-]"," ")
       if string.find(search, filter_prototype) then
-        find = true
+        return true
       end
     end
   else
-    find = true
+    return true
   end
-  return find
+  return false
 end
 
 -------------------------------------------------------------------------------
@@ -76,24 +78,27 @@ end
 -- @param #table list_subgroup
 -- @param #table list_prototype
 --
-function RecipeSelector.methods:appendGroups(name, type, list_group, list_subgroup, list_prototype)
-  Logging:trace(self:classname(), "appendGroups()", name, type)
-  RecipePrototype.load(name, type)
-  local find = self:checkFilter(RecipePrototype)
+function RecipeSelector.methods:appendGroups(recipe, type, list_group, list_subgroup, list_prototype)
+  Logging:trace(self:classname(), "appendGroups()", recipe.name, type)
   local filter_show_disable = Player.getGlobalSettings("filter_show_disable")
   local filter_show_hidden = Player.getGlobalSettings("filter_show_hidden")
-  
-  if find == true and (RecipePrototype.getEnabled() == true or filter_show_disable == true) and (RecipePrototype.getHidden() == false or filter_show_hidden == true) then
-    local lua_recipe = RecipePrototype.native()
-    local group_name = lua_recipe.group.name
-    local subgroup_name = lua_recipe.subgroup.name
-    
-    if firstGroup == nil then firstGroup = group_name end
-    list_group[group_name] = lua_recipe.group
-    list_subgroup[subgroup_name] = lua_recipe.subgroup
-    if list_prototype[group_name] == nil then list_prototype[group_name] = {} end
-    if list_prototype[group_name][subgroup_name] == nil then list_prototype[group_name][subgroup_name] = {} end
-    table.insert(list_prototype[group_name][subgroup_name], {name=name, type=type, order=lua_recipe.order})
+
+  if (recipe.enabled == true or filter_show_disable == true) and (recipe.hidden == false or filter_show_hidden == true) then
+    RecipePrototype.load(recipe.name, type)
+    local find = self:checkFilter(RecipePrototype)
+
+    if find == true then
+      local lua_recipe = RecipePrototype.native()
+      local group_name = lua_recipe.group.name
+      local subgroup_name = lua_recipe.subgroup.name
+
+      if firstGroup == nil then firstGroup = group_name end
+      list_group[group_name] = lua_recipe.group
+      list_subgroup[subgroup_name] = lua_recipe.subgroup
+      if list_prototype[group_name] == nil then list_prototype[group_name] = {} end
+      if list_prototype[group_name][subgroup_name] == nil then list_prototype[group_name][subgroup_name] = {} end
+      table.insert(list_prototype[group_name][subgroup_name],{name = recipe.name, type = type, order = lua_recipe.order})
+    end
   end
 end
 
@@ -119,7 +124,7 @@ function RecipeSelector.methods:updateGroups(item, item2, item3)
 
   firstGroup = nil
   for key, recipe in pairs(Player.getRecipes()) do
-    self:appendGroups(recipe.name, "recipe", list_group, list_subgroup, list_prototype)
+    self:appendGroups({name = recipe.name, enabled = recipe.enabled, hidden = recipe.hidden}, "recipe", list_group, list_subgroup, list_prototype)
   end
   if global_gui.currentTab ~= "HMPropertiesTab" then
     for key, fluid in pairs(Player.getFluidPrototypes()) do
