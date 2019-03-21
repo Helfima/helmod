@@ -45,26 +45,26 @@ function TechnologySelector.methods:checkFilter(prototype)
   Logging:trace(self:classname(), "checkFilter()")
   local filter_prototype = self:getFilter()
   local filter_prototype_product = self:getProductFilter()
-  local find = false
+
   if filter_prototype ~= nil and filter_prototype ~= "" then
     if filter_prototype_product == true then
       local elements = prototype.research_unit_ingredients
       for key, element in pairs(elements) do
         local search = element.name:lower():gsub("[-]"," ")
         if string.find(search, filter_prototype) then
-          find = true
+          return true
         end
       end
     else
       local search = prototype.name:lower():gsub("[-]"," ")
       if string.find(search, filter_prototype) then
-        find = true
+        return true
       end
     end
   else
-    find = true
+    return true
   end
-  return find
+  return false
 end
 
 -------------------------------------------------------------------------------
@@ -78,25 +78,28 @@ end
 -- @param #table list_subgroup
 -- @param #table list_prototype
 --
-function TechnologySelector.methods:appendGroups(name, type, list_group, list_subgroup, list_prototype)
-  Logging:debug(self:classname(), "appendGroups()", name, type)
-  Technology.load(name, type)
-  local find = self:checkFilter(Technology.native())
+function TechnologySelector.methods:appendGroups(technology, type, list_group, list_subgroup, list_prototype)
+  Logging:debug(self:classname(), "appendGroups()", technology.name, type)
   local filter_show_disable = Player.getGlobalSettings("filter_show_disable")
   local filter_show_hidden = Player.getGlobalSettings("filter_show_hidden")
 
-  if find == true and (Technology.getValid() == true or filter_show_disable == true) then
-    local group_name = "normal"
-    if Technology.native().research_unit_count_formula ~= nil then group_name = "infinite" end
+  if (technology.valid == true or filter_show_disable == true) then
+    Technology.load(technology.name, type)
+    local find = self:checkFilter(Technology.native())
 
-    local subgroup_name = "default"
+    if find == true then
+      local group_name = "normal"
+      if Technology.native().research_unit_count_formula ~= nil then group_name = "infinite" end
 
-    if firstGroup == nil then firstGroup = group_name end
-    list_group[group_name] = {name = group_name}
-    list_subgroup[subgroup_name] = {name = subgroup_name}
-    if list_prototype[group_name] == nil then list_prototype[group_name] = {} end
-    if list_prototype[group_name][subgroup_name] == nil then list_prototype[group_name][subgroup_name] = {} end
-    table.insert(list_prototype[group_name][subgroup_name], {name=name, type=type, order=Technology.native().order})
+      local subgroup_name = "default"
+
+      if firstGroup == nil then firstGroup = group_name end
+      list_group[group_name] = {name = group_name}
+      list_subgroup[subgroup_name] = {name = subgroup_name}
+      if list_prototype[group_name] == nil then list_prototype[group_name] = {} end
+      if list_prototype[group_name][subgroup_name] == nil then list_prototype[group_name][subgroup_name] = {} end
+      table.insert(list_prototype[group_name][subgroup_name],{name = technology.name, type = type, order = Technology.native().order})
+    end
   end
 end
 
@@ -123,7 +126,7 @@ function TechnologySelector.methods:updateGroups(item, item2, item3)
   firstGroup = nil
 
   for key, technology in pairs(Player.getTechnologies()) do
-    self:appendGroups(technology.name, "technology", list_group, list_subgroup, list_prototype)
+    self:appendGroups({name = technology.name, valid = technology.valid}, "technology", list_group, list_subgroup, list_prototype)
   end
 
   if list_prototype[global_player.recipeGroupSelected] == nil then
