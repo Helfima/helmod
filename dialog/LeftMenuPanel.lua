@@ -73,7 +73,7 @@ end
 -- @param #string item3 third item name
 --
 function LeftMenuPanel.methods:updateMenu(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "updateHeader():", action, item, item2, item3)
+  Logging:debug(self:classname(), "updateMenu():", action, item, item2, item3)
   -- menu
   local menuPanel = self:getMenuPanel()
   menuPanel.clear()

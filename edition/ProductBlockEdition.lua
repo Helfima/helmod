@@ -32,6 +32,7 @@ end
 -- @return #boolean if true the next call close dialog
 --
 function ProductBlockEdition.methods:onOpen(event, action, item, item2, item3)
+  Logging:debug(self:classname(), "onOpen():", action, item, item2, item3)
   local player_gui = Player.getGlobalGui()
   local close = true
   if player_gui.guiProductLast == nil or player_gui.guiProductLast ~= item then
@@ -76,9 +77,10 @@ function ProductBlockEdition.methods:getOutputPanel()
   if panel["output"] ~= nil and panel["output"].valid then
     return panel["output"]
   end
-  local info_panel = ElementGui.addGuiFrameV(panel, "output", helmod_frame_style.panel)
-  info_panel.style.horizontally_stretchable = true
-  return info_panel
+  local output_panel = ElementGui.addGuiFrameV(panel, "output", helmod_frame_style.panel, ({"helmod_common.output"}))
+  output_panel.style.horizontally_stretchable = true
+  ElementGui.setStyle(output_panel, "block_element", "height")
+  return output_panel
 end
 
 -------------------------------------------------------------------------------
@@ -91,9 +93,10 @@ function ProductBlockEdition.methods:getInputPanel()
   if panel["input"] ~= nil and panel["input"].valid then
     return panel["input"]
   end
-  local info_panel = ElementGui.addGuiFrameV(panel, "input", helmod_frame_style.panel)
-  info_panel.style.horizontally_stretchable = true
-  return info_panel
+  local input_panel = ElementGui.addGuiFrameV(panel, "input", helmod_frame_style.panel, ({"helmod_common.input"}))
+  input_panel.style.horizontally_stretchable = true
+  ElementGui.setStyle(input_panel, "block_element", "height")
+  return input_panel
 end
 
 -------------------------------------------------------------------------------
@@ -124,8 +127,8 @@ end
 --
 function ProductBlockEdition.methods:onUpdate(event, action, item, item2, item3)
   self:updateInfo(item, item2, item3)
-  self:updateInput(item, item2, item3)
   self:updateOutput(item, item2, item3)
+  self:updateInput(item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -150,9 +153,7 @@ function ProductBlockEdition.methods:updateInfo(item, item2, item3)
   local info_panel = self:getInfoPanel()
   info_panel.clear()
   -- info panel
-  local block_panel = ElementGui.addGuiFrameV(info_panel, "block", helmod_frame_style.panel, ({"helmod_result-panel.tab-title-production-block"}))
-  ElementGui.setStyle(block_panel, "block_info", "width")
-  local block_scroll = ElementGui.addGuiScrollPane(block_panel, "output-scroll", helmod_frame_style.scroll_pane, true)
+  local block_scroll = ElementGui.addGuiScrollPane(info_panel, "output-scroll", helmod_frame_style.scroll_pane, true)
   ElementGui.setStyle(block_scroll, "scroll_block", "height")
   local block_table = ElementGui.addGuiTable(block_scroll,"output-table",2)
 
@@ -203,17 +204,15 @@ function ProductBlockEdition.methods:updateInput(item, item2, item3)
   Logging:debug(self:classname(), "updateInput", item, item2, item3)
   local model = Model.getModel()
   local globalGui = Player.getGlobalGui()
-  Logging:debug("ProductionBlockTab", "model:", model)
+  Logging:debug(self:classname(), "model:", model)
   -- data
   local blockId = globalGui.currentBlock or "new"
 
   local countRecipes = Model.countBlockRecipes(blockId)
 
-  local element_panel = self:getInputPanel()
-  element_panel.clear()
+  local input_panel = self:getInputPanel()
+  input_panel.clear()
   -- input panel
-  local input_panel = ElementGui.addGuiFrameV(element_panel, "input", helmod_frame_style.panel, ({"helmod_common.input"}))
-  ElementGui.setStyle(input_panel, "block_element", "height")
   local input_scroll = ElementGui.addGuiScrollPane(input_panel, "output-scroll", helmod_frame_style.scroll_pane, true)
   ElementGui.setStyle(input_scroll, "scroll_block_element", "height")
 
@@ -222,8 +221,8 @@ function ProductBlockEdition.methods:updateInput(item, item2, item3)
 
     local element = model.blocks[blockId]
     -- input panel
-    local input_table = ElementGui.addGuiTable(input_scroll,"input-table",6)
-    if element.ingredients ~= nil then
+    local input_table = ElementGui.addGuiTable(input_scroll,"input-table", 5, "helmod_table_element")
+      if element.ingredients ~= nil then
       for r, lua_product in pairs(element.ingredients) do
         local ingredient = Product.load(lua_product).new()
         ingredient.count = lua_product.count
@@ -250,17 +249,15 @@ function ProductBlockEdition.methods:updateOutput(item, item2, item3)
   Logging:debug(self:classname(), "updateOutput", item, item2, item3)
   local model = Model.getModel()
   local globalGui = Player.getGlobalGui()
-  Logging:debug("ProductionBlockTab", "model:", model)
+  Logging:debug(self:classname(), "model:", model)
   -- data
   local blockId = globalGui.currentBlock or "new"
 
   local countRecipes = Model.countBlockRecipes(blockId)
 
-  local element_panel = self:getOutputPanel()
-  element_panel.clear()
+  local output_panel = self:getOutputPanel()
+  output_panel.clear()
   -- ouput panel
-  local output_panel = ElementGui.addGuiFrameV(element_panel, "output", helmod_frame_style.panel, ({"helmod_common.output"}))
-  output_panel.style.horizontally_stretchable = true
   ElementGui.setStyle(output_panel, "block_element", "height")
   local output_scroll = ElementGui.addGuiScrollPane(output_panel, "output-scroll", helmod_frame_style.scroll_pane, true)
   ElementGui.setStyle(output_scroll, "scroll_block_element", "height")
@@ -271,7 +268,7 @@ function ProductBlockEdition.methods:updateOutput(item, item2, item3)
     local element = model.blocks[blockId]
 
     -- ouput panel
-    local output_table = ElementGui.addGuiTable(output_scroll,"output-table",6)
+    local output_table = ElementGui.addGuiTable(output_scroll,"output-table", 5, "helmod_table_element")
     if element.products ~= nil then
       for r, lua_product in pairs(element.products) do
         local product = Product.load(lua_product).new()
@@ -340,4 +337,22 @@ function ProductBlockEdition.methods:onEvent(event, action, item, item2, item3)
       ElementGui.setInputNumber(output_panel["quantity"], belt_count * belt_speed * Product.belt_ratio)
     end
   end
+end
+
+-------------------------------------------------------------------------------
+-- Get factory number
+--
+-- @function [parent=#ProductBlockEdition] getFactoryNumber
+-- 
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function ProductBlockEdition.methods:getFactoryNumber(item, item2, item3)
+  Logging:debug(self:classname(), "getFactoryNumber()")
+  local panel = self:getInfoPanel()["block"]["output-scroll"]["output-table"]
+    if panel[item] ~= nil then
+    return ElementGui.getInputNumber(panel[item])
+   end
+   return 0
 end

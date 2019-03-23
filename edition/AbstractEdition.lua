@@ -288,6 +288,7 @@ function AbstractEdition.methods:afterOpen(event, action, item, item2, item3)
     player_gui.factory_tab = true
   end
 
+  self:updateTitle(event, action, item, item2, item3)
   self:buildHeaderPanel()
   if object ~= nil then
     -- factory

@@ -403,7 +403,9 @@ function ModelBuilder.copyBlock(from_model, from_block)
         recipe_index = recipe_index + 1
       end
     end
-    Model.reIndexList(model.blocks[to_block_id].recipes)
+    if model.blocks[to_block_id] ~= nil then
+      Model.reIndexList(model.blocks[to_block_id].recipes)
+    end
   end
 end
 -------------------------------------------------------------------------------

@@ -876,13 +876,25 @@ default_gui["helmod_label_icon_sm"] = {
 
 default_gui["helmod_table_default"] = {
   type = "table_style",
-  horizontal_spacing = 0,
-  vertical_spacing = 0,
-  cell_spacing = 0,
+  horizontal_spacing = 2,
+  vertical_spacing = 2,
+  cell_spacing = 4,
   top_padding = 0,
-  right_padding = 0,
+  right_padding = 1,
   bottom_padding = 0,
-  left_padding = 0
+  left_padding = 1,
+  vertical_align = "top"
+}
+
+-------------------------------------------------------------------------------
+-- Style of default
+--
+-- @field [parent=#Table] element
+
+default_gui["helmod_table_element"] = {
+  type = "table_style",
+  parent = "helmod_table_default",
+  horizontally_stretchable = "off"
 }
 
 -------------------------------------------------------------------------------
@@ -1030,7 +1042,7 @@ default_gui["helmod_table-odd"] = {
 -------------------------------------------------------------------------------
 -- Style of recipe table
 --
--- @field [parent=#Table] odd
+-- @field [parent=#Table] rule_odd
 
 default_gui["helmod_table-rule-odd"] = {
   type = "table_style",
@@ -1293,7 +1305,7 @@ for _,style in pairs(style_element_list) do
       bottom_padding = 2,
       left_padding = 0,
       
-      width = 70,
+      width = 80,
       horizontally_stretchable = "on",
       vertically_stretchable = "off"
     }

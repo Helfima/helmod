@@ -241,6 +241,8 @@ function ProductEdition.methods:onEvent(event, action, item, item2, item3)
       ModelBuilder.updateProduct(item, item2, quantity)
       ModelCompute.update()
       self:close()
+      Event.force_open = true
+      Event.force_refresh = true
     end
     if action == "product-reset" then
       local products = {}
@@ -249,6 +251,8 @@ function ProductEdition.methods:onEvent(event, action, item, item2, item3)
       ModelBuilder.updateProduct(item, item2, nil)
       ModelCompute.update()
       self:close()
+      Event.force_open = true
+      Event.force_refresh = true
     end
     if action == "element-select" then
       local input_panel = self:getToolPanel()["table-header"]

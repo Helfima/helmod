@@ -7,21 +7,6 @@
 AbstractTab = setclass("HMAbstractTab", Form)
 
 -------------------------------------------------------------------------------
--- Initialization
---
--- @function [parent=#AbstractTab] init
---
--- @param #Controller parent parent controller
---
-function AbstractTab.methods:init(parent)
-  self.parent = parent
-
-  self.color_button_edit="green"
-  self.color_button_add="yellow"
-  self.color_button_rest="red"
-end
-
--------------------------------------------------------------------------------
 -- Get the parent panel
 --
 -- @function [parent=#AbstractTab] getParentPanel
@@ -38,25 +23,11 @@ end
 -- @function [parent=#AbstractTab] getDebugPanel
 --
 function AbstractTab.methods:getDebugPanel()
-  local parent_panel = self:getParentPanel()
+  local parent_panel = self:getPanel()
   if parent_panel["debug_panel"] ~= nil and parent_panel["debug_panel"].valid then
     return parent_panel["debug_panel"]
   end
   local panel = ElementGui.addGuiFrameH(parent_panel, "debug_panel", helmod_frame_style.panel, "Debug")
-  return panel
-end
-
--------------------------------------------------------------------------------
--- Get or create index panel
---
--- @function [parent=#AbstractTab] getIndexPanel
---
-function AbstractTab.methods:getIndexPanel()
-  local parent_panel = self:getMenuPanel()
-  if parent_panel["index_panel"] ~= nil and parent_panel["index_panel"].valid then
-    return parent_panel["index_panel"]
-  end
-  local panel = ElementGui.addGuiTable(parent_panel, "index_panel", 10, helmod_table_style.list)
   return panel
 end
 
@@ -66,7 +37,7 @@ end
 -- @function [parent=#AbstractTab] getInfoPanel
 --
 function AbstractTab.methods:getInfoPanel()
-  local parent_panel = self:getParentPanel()
+  local parent_panel = self:getPanel()
   if parent_panel["info_panel"] ~= nil and parent_panel["info_panel"].valid then
     return parent_panel["info_panel"]
   end
@@ -83,7 +54,7 @@ end
 -- @param #string caption
 --
 function AbstractTab.methods:getResultPanel(caption)
-  local parent_panel = self:getParentPanel()
+  local parent_panel = self:getPanel()
   if parent_panel["result"] ~= nil and parent_panel["result"].valid then
     return parent_panel["result"]
   end

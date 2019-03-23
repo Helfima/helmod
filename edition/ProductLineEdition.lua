@@ -32,6 +32,7 @@ end
 -- @return #boolean if true the next call close dialog
 --
 function ProductLineEdition.methods:onOpen(event, action, item, item2, item3)
+  Logging:debug(self:classname(), "onOpen():", action, item, item2, item3)
   local player_gui = Player.getGlobalGui()
   local close = true
   if player_gui.guiProductLast == nil or player_gui.guiProductLast ~= item then
@@ -76,9 +77,10 @@ function ProductLineEdition.methods:getOutputPanel()
   if panel["output"] ~= nil and panel["output"].valid then
     return panel["output"]
   end
-  local info_panel = ElementGui.addGuiFrameV(panel, "output", helmod_frame_style.panel)
-  info_panel.style.horizontally_stretchable = true
-  return info_panel
+  local output_panel = ElementGui.addGuiFrameV(panel, "output", helmod_frame_style.panel, ({"helmod_common.output"}))
+  output_panel.style.horizontally_stretchable = true
+  ElementGui.setStyle(output_panel, "block_element", "height")
+  return output_panel
 end
 
 -------------------------------------------------------------------------------
@@ -91,9 +93,11 @@ function ProductLineEdition.methods:getInputPanel()
   if panel["input"] ~= nil and panel["input"].valid then
     return panel["input"]
   end
-  local info_panel = ElementGui.addGuiFrameV(panel, "input", helmod_frame_style.panel)
-  info_panel.style.horizontally_stretchable = true
-  return info_panel
+  local input_panel = ElementGui.addGuiFrameV(panel, "input", helmod_frame_style.panel, ({"helmod_common.input"}))
+  input_panel.style.horizontally_stretchable = true
+  ElementGui.setStyle(input_panel, "block_element", "height")
+  
+  return input_panel
 end
 
 -------------------------------------------------------------------------------
@@ -124,8 +128,8 @@ end
 --
 function ProductLineEdition.methods:onUpdate(event, action, item, item2, item3)
   self:updateInfo(item, item2, item3)
-  self:updateInput(item, item2, item3)
   self:updateOutput(item, item2, item3)
+  self:updateInput(item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -197,32 +201,19 @@ function ProductLineEdition.methods:updateInput(item, item2, item3)
   local globalGui = Player.getGlobalGui()
   Logging:debug("ProductionBlockTab", "model:", model)
   -- data
-  local blockId = globalGui.currentBlock or "new"
-
-  local countRecipes = Model.countBlockRecipes(blockId)
-
-  local element_panel = self:getInputPanel()
-  element_panel.clear()
+  local input_panel = self:getInputPanel()
+  input_panel.clear()
   -- input panel
-  local input_panel = ElementGui.addGuiFrameV(element_panel, "input", helmod_frame_style.panel, ({"helmod_common.input"}))
-  ElementGui.setStyle(input_panel, "block_element", "height")
   local input_scroll = ElementGui.addGuiScrollPane(input_panel, "output-scroll", helmod_frame_style.scroll_pane, true)
   ElementGui.setStyle(input_scroll, "scroll_block_element", "height")
 
-  -- production block result
-  if countRecipes > 0 then
+  local count_block = Model.countBlocks()
+  if count_block > 0 then
 
-    local element = model.blocks[blockId]
-    -- input panel
-    local input_table = ElementGui.addGuiTable(input_scroll,"input-table",6)
-    if element.ingredients ~= nil then
-      for r, lua_product in pairs(element.ingredients) do
-        local ingredient = Product.load(lua_product).new()
-        ingredient.count = lua_product.count
-        if element.count > 1 then
-          ingredient.limit_count = lua_product.count / element.count
-        end
-        ElementGui.addCellElement(input_table, ingredient, self:classname().."=product-selected=ID="..element.id.."="..ingredient.name.."=", false, "tooltip.ingredient", nil)
+    local input_table = ElementGui.addGuiTable(input_scroll,"input-table", 5, "helmod_table_element")
+    if model.ingredients ~= nil then
+      for r, element in pairs(model.ingredients) do
+        ElementGui.addCellElement(input_table, element, self:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.ingredient", nil)
       end
     end
 
@@ -244,48 +235,24 @@ function ProductLineEdition.methods:updateOutput(item, item2, item3)
   local globalGui = Player.getGlobalGui()
   Logging:debug("ProductionBlockTab", "model:", model)
   -- data
-  local blockId = globalGui.currentBlock or "new"
-
-  local countRecipes = Model.countBlockRecipes(blockId)
-
-  local element_panel = self:getOutputPanel()
-  element_panel.clear()
+  local output_panel = self:getOutputPanel()
+  output_panel.clear()
   -- ouput panel
-  local output_panel = ElementGui.addGuiFrameV(element_panel, "output", helmod_frame_style.panel, ({"helmod_common.output"}))
-  output_panel.style.horizontally_stretchable = true
-  ElementGui.setStyle(output_panel, "block_element", "height")
   local output_scroll = ElementGui.addGuiScrollPane(output_panel, "output-scroll", helmod_frame_style.scroll_pane, true)
   ElementGui.setStyle(output_scroll, "scroll_block_element", "height")
 
   -- production block result
-  if countRecipes > 0 then
-
-    local element = model.blocks[blockId]
+  local count_block = Model.countBlocks()
+  if count_block > 0 then
 
     -- ouput panel
-    local output_table = ElementGui.addGuiTable(output_scroll,"output-table",6)
-    if element.products ~= nil then
-      for r, lua_product in pairs(element.products) do
-        local product = Product.load(lua_product).new()
-        product.count = lua_product.count
-        if element.count > 1 then
-          product.limit_count = lua_product.count / element.count
-        end
-        if bit32.band(lua_product.state, 1) > 0 then
-          if element.by_factory == true then
-            ElementGui.addCellElement(output_table, product, self:classname().."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.product", nil)
-          else
-            ElementGui.addCellElement(output_table, product, self:classname().."=product-edition=ID="..element.id.."="..product.name.."=", true, "tooltip.edit-product", self.color_button_edit)
-          end
-        end
-        if bit32.band(lua_product.state, 2) > 0 and bit32.band(lua_product.state, 1) == 0 then
-          ElementGui.addCellElement(output_table, product, self:classname().."=product-selected=ID="..element.id.."="..product.name.."=", true, "tooltip.rest-product", self.color_button_rest)
-        end
-        if lua_product.state == 0 then
-          ElementGui.addCellElement(output_table, product, self:classname().."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.other-product", nil)
-        end
+    local output_table = ElementGui.addGuiTable(output_scroll,"output-table", 5, "helmod_table_element")
+    if model.products ~= nil then
+      for r, element in pairs(model.products) do
+        ElementGui.addCellElement(output_table, element, self:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.product", nil)
       end
     end
+    
   end
 end
 

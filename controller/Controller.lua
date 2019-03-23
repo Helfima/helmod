@@ -59,7 +59,6 @@ local views = nil
 local locate = "center"
 local pinLocate = "left"
 local nextEvent = nil
-local force_refresh = nil
 
 -------------------------------------------------------------------------------
 -- Initialization
@@ -295,7 +294,7 @@ function Controller.parseEvent()
               nextEvent = nil
             end
             Logging:debug(Controller.classname, "event state", Event.state)
-            force_refresh = false
+            Event.finaly()
           end
         end
       end
@@ -358,29 +357,33 @@ function Controller.sendEvent(event, classname, action, item, item2, item3)
     if ui.data == nil then
       ui.data = "HMProductionLineTab"
     end
+
     if ui.dialog == nil then
-      if ui.data == "HMProductionLineTab" then
-        ui.dialog = "HMProductLineEdition"
-      else
-        ui.dialog = "HMProductBlockEdition"
-      end
+      ui.dialog = helmod_tab_dialog[ui.data]
     end
 
     for locate,form_name in pairs(ui) do
-      Logging:debug(Controller.classname, "on event", form_name, classname)
+      Logging:debug(Controller.classname, "***** on event", form_name, classname)
       if form_name == classname then
         views[form_name]:onEvent(event, action, item, item2, item3)
       end
     end
+    if ui.dialog == nil then
+      ui.dialog = helmod_tab_dialog[ui.data]
+    end
+
     Logging:debug(Controller.classname, "***** after event: ui", ui)
-    for locate,form_name in pairs(ui) do
-      if action == "OPEN" then
-        Logging:debug(Controller.classname, "open form")
-        views[form_name]:open(event, action, item, item2, item3)
-      end
-      if not(action ~= "OPEN" and form_name == classname) or force_refresh == true then
-        Logging:debug(Controller.classname, "update form")
-        views[form_name]:update(event, action, item, item2, item3)
+    for _,locate in pairs({"left", "menu", "data", "dialog"}) do
+      local form_name = ui[locate]
+      if form_name ~= nil then
+        if action == "OPEN" or Event.force_open == true then
+          Logging:debug(Controller.classname, "***** open form")
+          views[form_name]:open(event, action, item, item2, item3)
+        end
+        if not(action ~= "OPEN" and form_name == classname) or Event.force_refresh == true then
+          Logging:debug(Controller.classname, "***** update form")
+          views[form_name]:update(event, action, item, item2, item3)
+        end
       end
     end
     return false
@@ -514,7 +517,7 @@ function Controller.getMenuPanel()
   if parent_panel["menu_panel"] ~= nil then
     return parent_panel["menu_panel"]
   end
-  local panel = ElementGui.addGuiFrameV(parent_panel, "menu_panel", helmod_frame_style.panel)
+  local panel = ElementGui.addGuiFrameV(parent_panel, "menu_panel", helmod_frame_style.hidden)
   ElementGui.setStyle(panel, "data", "width")
   return panel
 end
@@ -529,7 +532,7 @@ function Controller.getTabPanel()
   if parent_panel["tab_panel"] ~= nil then
     return parent_panel["tab_panel"]
   end
-  local panel = ElementGui.addGuiFrameV(parent_panel, "tab_panel", helmod_frame_style.panel)
+  local panel = ElementGui.addGuiFrameV(parent_panel, "tab_panel", helmod_frame_style.hidden)
   ElementGui.setStyle(panel, "data", "width")
   return panel
 end
@@ -582,7 +585,8 @@ function Controller.openMainPanel()
     ui.menu = "HMMainMenuPanel"
     ui.left = "HMLeftMenuPanel"
     ui.data = "HMProductionLineTab"
-    force_refresh = true
+    ui.dialog = "HMProductLineEdition"
+    Event.force_refresh = true
     -- interessant mais genere une fausse UI ouverte
     --Player.native().opened = self:getMainPanel()
     -- left
@@ -728,23 +732,25 @@ function Controller.onEventAccessAll(event, action, item, item2, item3)
 
   if action == "refresh-model" then
     ModelCompute.update()
-    force_refresh = true
+    Event.force_refresh = true
   end
 
   if action == "change-model" then
     globalGui.model_id = item
     ui.data = "HMProductionLineTab"
     globalGui.currentBlock = "new"
-    force_refresh = true
+    Event.force_refresh = true
   end
 
   if action == "change-tab" then
     ui.data = item
+    ui.dialog = helmod_tab_dialog[item]
     if item == "HMProductionLineTab" then
       globalGui.currentBlock = "new"
     end
     globalGui.currentBlock = item2
-    force_refresh = true
+    Event.force_refresh = true
+    Event.force_open = true
   end
 
   if action == "change-sort" then
@@ -753,7 +759,7 @@ function Controller.onEventAccessAll(event, action, item, item2, item3)
     else
       globalGui.order = {name=item, ascendant=true}
     end
-    force_refresh = true
+    Event.force_refresh = true
   end
 
 end
@@ -786,7 +792,7 @@ function Controller.onEventAccessRead(event, action, item, item2, item3)
       globalGui.copy_from_block_id = nil
       globalGui.copy_from_model_id = Player.getGlobalGui("model_id")
     end
-    force_refresh = true
+    Event.force_refresh = true
   end
   if action == "share-model" then
     local models = Model.getModels(true)
@@ -837,23 +843,20 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
     local element = model.blocks[globalGui.currentBlock]
     ModelBuilder.updateProductionBlockOption(globalGui.currentBlock, item, not(element[item]))
     ModelCompute.update()
-    force_refresh = true
+    Event.force_refresh = true
   end
 
   if action == "change-number-option" and model.blocks ~= nil and model.blocks[globalGui.currentBlock] ~= nil then
-    local panel = self:getInfoPanel()["block"]["output-scroll"]["output-table"]
-    if panel[item] ~= nil then
-      local value = ElementGui.getInputNumber(panel[item])
+      local value = Controller.getView("HMProductBlockEdition"):getFactoryNumber(item, item2, item3)
       ModelBuilder.updateProductionBlockOption(globalGui.currentBlock, item, value)
       ModelCompute.update()
-      force_refresh = true
-    end
+      Event.force_refresh = true
   end
 
   if action == "change-time" then
     model.time = tonumber(item) or 1
     ModelCompute.update()
-    force_refresh = true
+    Event.force_refresh = true
   end
 
   if action == "product-selected" then
@@ -874,7 +877,7 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
   if action == "production-block-unlink" then
     ModelBuilder.unlinkProductionBlock(item)
     ModelCompute.update()
-    force_refresh = true
+    Event.force_refresh = true
   end
 
   if action == "production-recipe-add" then
@@ -883,7 +886,7 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
       local recipe = recipes[1]
       ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type)
       ModelCompute.update()
-      force_refresh = true
+      Event.force_refresh = true
     else
       Controller.createEvent(nil, "HMRecipeSelector", "OPEN", item, item2, item3)
     end
@@ -893,7 +896,7 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
     if model.blocks[item] ~= nil then
       ModelBuilder.updateProductionBlockOption(item, "solver", not(model.blocks[item].solver))
       ModelCompute.update()
-      force_refresh = true
+      Event.force_refresh = true
     end
   end
 
@@ -901,7 +904,7 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
     ModelBuilder.removeProductionBlock(item)
     ModelCompute.update()
     globalGui.currentBlock = "new"
-    force_refresh = true
+    Event.force_refresh = true
   end
 
   if ui.data == "HMProductionLineTab" then
@@ -912,7 +915,9 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
         ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type)
         ModelCompute.update()
         ui.data = "HMProductionBlockTab"
-        force_refresh = true
+        ui.dialog = helmod_tab_dialog[ui.data]
+        Event.force_refresh = true
+        Event.force_open = true
       else
         ui.data = "HMProductionBlockTab"
         Controller.createEvent(nil, "HMRecipeSelector", "OPEN", item, item2, item3)
@@ -925,7 +930,7 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
       if event.control then step = 1000 end
       ModelBuilder.upProductionBlock(item, step)
       ModelCompute.update()
-      force_refresh = true
+      Event.force_refresh = true
     end
 
     if action == "production-block-down" then
@@ -934,7 +939,7 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
       if event.control then step = 1000 end
       ModelBuilder.downProductionBlock(item, step)
       ModelCompute.update()
-      force_refresh = true
+      Event.force_refresh = true
     end
   end
 
@@ -942,7 +947,7 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
     if action == "production-recipe-remove" then
       ModelBuilder.removeProductionRecipe(item, item2)
       ModelCompute.update()
-      force_refresh = true
+      Event.force_refresh = true
     end
 
     if action == "production-recipe-up" then
@@ -951,7 +956,7 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
       if event.control then step = 1000 end
       ModelBuilder.upProductionRecipe(item, item2, step)
       ModelCompute.update()
-      force_refresh = true
+      Event.force_refresh = true
     end
 
     if action == "production-recipe-down" then
@@ -960,14 +965,14 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
       if event.control then step = 1000 end
       ModelBuilder.downProductionRecipe(item, item2, step)
       ModelCompute.update()
-      force_refresh = true
+      Event.force_refresh = true
     end
   end
 
   if ui.data == "HMEnergyTab" then
     if action == "power-remove" then
       ModelBuilder.removePower(item)
-      force_refresh = true
+      Event.force_refresh = true
     end
   end
 
@@ -975,13 +980,13 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
     if ui.data == "HMProductionBlockTab" then
       ModelBuilder.pastModel(globalGui.copy_from_model_id, globalGui.copy_from_block_id)
       ModelCompute.update()
-      force_refresh = true
+      Event.force_refresh = true
     end
     if ui.data == "HMProductionLineTab" then
       ModelBuilder.pastModel(globalGui.copy_from_model_id, globalGui.copy_from_block_id)
       ModelCompute.update()
       globalGui.currentBlock = "new"
-      force_refresh = true
+      Event.force_refresh = true
     end
   end
 
@@ -1006,7 +1011,7 @@ function Controller.onEventAccessDelete(event, action, item, item2, item3)
     ModelBuilder.removeModel(item)
     ui.data = "HMProductionLineTab"
     globalGui.currentBlock = "new"
-    force_refresh = true
+    Event.force_refresh = true
   end
 end
 
@@ -1025,11 +1030,11 @@ function Controller.onEventAccessAdmin(event, action, item, item2, item3)
   Logging:debug(Controller.classname, "onEventAccessAdmin():", action, item, item2, item3)
   if action == "rule-remove" then
     ModelBuilder.removeRule(item)
-    force_refresh = true
+    Event.force_refresh = true
   end
   if action == "reset-rules" then
     Model.resetRules()
-    force_refresh = true
+    Event.force_refresh = true
   end
 
 end

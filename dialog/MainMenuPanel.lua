@@ -15,7 +15,7 @@ MainMenuPanel = setclass("HMMainMenuPanel", Form)
 -- @return #LuaGuiElement
 --
 function MainMenuPanel.methods:getParentPanel()
-  return Controller.getDataPanel()
+  return Controller.getMenuPanel()
 end
 
 -------------------------------------------------------------------------------
@@ -71,7 +71,12 @@ function MainMenuPanel.methods:getIndexPanel()
   if parent_panel["index_panel"] ~= nil and parent_panel["index_panel"].valid then
     return parent_panel["index_panel"]
   end
-  local panel = ElementGui.addGuiTable(parent_panel, "index_panel", 30, helmod_table_style.list)
+  local display_ratio_horizontal = Player.getSettings("display_ratio_horizontal")
+  local width , height = ElementGui.getDisplaySizes()
+  local width_main = math.ceil(width*display_ratio_horizontal)
+  
+  local col_num = math.ceil((width_main-650)/32)
+  local panel = ElementGui.addGuiTable(parent_panel, "index_panel", col_num, helmod_table_style.list)
   return panel
 end
 
@@ -124,10 +129,10 @@ function MainMenuPanel.methods:updateMenuPanel(item, item2, item3)
   local action_panel = self:getActionPanel()
   action_panel.clear()
 
-  if globalGui.currentTab == "HMAdminTab" then
+  if current_tab == "HMAdminTab" then
     ElementGui.addGuiButton(action_panel, "HMRuleEdition=", "OPEN", "helmod_button_default", ({"helmod_result-panel.add-button-rule"}))
     ElementGui.addGuiButton(action_panel, self:classname().."=reset-rules=", nil, "helmod_button_default", ({"helmod_result-panel.reset-button-rule"}))
-  elseif globalGui.currentTab == "HMPropertiesTab" then
+  elseif current_tab == "HMPropertiesTab" then
     ElementGui.addGuiButton(action_panel, "HMEntitySelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-entity"}))
     ElementGui.addGuiButton(action_panel, "HMItemSelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-item"}))
     ElementGui.addGuiButton(action_panel, "HMFluidSelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-fluid"}))
@@ -143,23 +148,23 @@ function MainMenuPanel.methods:updateMenuPanel(item, item2, item3)
     ElementGui.addGuiButton(action_panel, self:classname().."=copy-model=ID=", model.id, "helmod_button_icon_copy", nil, ({"helmod_button.copy"}))
     ElementGui.addGuiButton(action_panel, self:classname().."=past-model=ID=", model.id, "helmod_button_icon_past", nil, ({"helmod_button.past"}))
     -- download
-    if globalGui.currentTab == "HMProductionLineTab" then
+    if current_tab == "HMProductionLineTab" then
       ElementGui.addGuiButton(action_panel, "HMDownload=OPEN=ID=", "download", "helmod_button_icon_download", nil, ({"helmod_result-panel.download-button-production-line"}))
       ElementGui.addGuiButton(action_panel, "HMDownload=OPEN=ID=", "upload", "helmod_button_icon_upload", nil, ({"helmod_result-panel.upload-button-production-line"}))
     end
     -- delete control
     if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 4) > 0) then
-      if globalGui.currentTab == "HMProductionLineTab" then
+      if current_tab == "HMProductionLineTab" then
         ElementGui.addGuiButton(action_panel, self:classname().."=remove-model=ID=", model.id, "helmod_button_icon_delete_red", nil, ({"helmod_result-panel.remove-button-production-line"}))
       end
-      if globalGui.currentTab == "HMProductionBlockTab" then
+      if current_tab == "HMProductionBlockTab" then
         ElementGui.addGuiButton(action_panel, self:classname().."=production-block-remove=ID=", block_id, "helmod_button_icon_delete_red", nil, ({"helmod_result-panel.remove-button-production-block"}))
       end
     end
     -- refresh control
     ElementGui.addGuiButton(action_panel, self:classname().."=refresh-model=ID=", model.id, "helmod_button_icon_refresh", nil, ({"helmod_result-panel.refresh-button"}))
     -- pin control
-    if globalGui.currentTab == "HMProductionBlockTab" then
+    if current_tab == "HMProductionBlockTab" then
       ElementGui.addGuiButton(action_panel, "HMPinPanel=OPEN=ID=", block_id, "helmod_button_icon_pin", nil, ({"helmod_result-panel.tab-button-pin"}))
       local block = model.blocks[block_id]
       if block ~= nil then
@@ -169,7 +174,7 @@ function MainMenuPanel.methods:updateMenuPanel(item, item2, item3)
       end
     end
     -- pin info
-    if globalGui.currentTab == "HMStatisticTab" then
+    if current_tab == "HMStatisticTab" then
       ElementGui.addGuiButton(action_panel, "HMStatusPanel=OPEN=ID=", block_id, "helmod_button_icon_pin", nil, ({"helmod_result-panel.tab-button-pin"}))
     end
   end
@@ -189,13 +194,13 @@ function MainMenuPanel.methods:updateIndexPanel(item, item2, item3)
   local models = Model.getModels()
   local model = Model.getModel()
   local model_id = Player.getGlobalGui("model_id")
-  local globalGui = Player.getGlobalGui()
+  local current_tab = Player.getGlobalUI("data")
 
-  if globalGui.currentTab ~= "HMAdminTab" and globalGui.currentTab ~= "HMPropertiesTab" then
+  if current_tab ~= "HMAdminTab" and current_tab ~= "HMPropertiesTab" then
     -- index panel
     local index_panel = self:getIndexPanel()
     index_panel.clear()
-    Logging:debug(self:classname(), "updateHeaderPanel():countModel", Model.countModel())
+    Logging:debug(self:classname(), "updateIndexPanel():countModel", Model.countModel())
     if Model.countModel() > 0 then
       local i = 0
       for _,imodel in pairs(models) do

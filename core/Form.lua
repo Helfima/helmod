@@ -19,6 +19,7 @@ function Form.methods:init(parent)
   self.color_button_rest = "red"
 
   self.otherClose = true
+  self.locate = "dialog"
 
   self:onInit(parent)
 end
@@ -57,7 +58,7 @@ function Form.methods:getPanel()
     return parent_panel[self:classname()]
   end
   --local panel = ElementGui.addGuiTable(parent_panel, self:classname(), 1, helmod_table_style.panel)
-  local panel = ElementGui.addGuiFrameV(parent_panel, self:classname(), helmod_frame_style.hidden, caption)
+  local panel = ElementGui.addGuiFrameV(parent_panel, self:classname(), helmod_frame_style.hidden)
   return panel
 end
 
@@ -106,16 +107,8 @@ function Form.methods:open(event, action, item, item2, item3)
   Logging:debug(self:classname(), "open():", action, item, item2, item3)
   local parentPanel = self:getParentPanel()
   if parentPanel[self:classname()] == nil then
+    Logging:debug(self:classname(), "parentPanel.clear()")
     parentPanel.clear()
-    -- affecte le caption
-    if self.panelCaption ~= nil then
-      local caption = self.panelCaption
-
-      local panel = self:getPanel()
-
-      local header_panel = ElementGui.addGuiFrameH(panel, "header-panel", helmod_frame_style.panel, caption)
-      header_panel.style.height = 30
-    end
     self:onOpen(event, action, item, item2, item3)
     self:afterOpen(event, action, item, item2, item3)
   end
@@ -136,7 +129,7 @@ function Form.methods:beforeEvent(event, action, item, item2, item3)
   local parentPanel = self:getParentPanel()
   if parentPanel[self:classname()] ~= nil and parentPanel[self:classname()].valid then
     local close = self:onOpen(event, action, item, item2, item3)
-    --Logging:debug(self:classname() , "must close:",close)
+    Logging:debug(self:classname() , "must close:",close)
     if close and action == "OPEN" then
       self:close(true)
     end
@@ -183,6 +176,7 @@ end
 -- @param #string item3 third item name
 --
 function Form.methods:onOpen(event, action, item, item2, item3)
+  Logging:debug(self:classname(), "onOpen():", action, item, item2, item3)
   return false
 end
 
@@ -201,6 +195,29 @@ function Form.methods:afterOpen(event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
+-- Update header
+--
+-- @function [parent=#Form] updateTitle
+--
+-- @param #LuaEvent event
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function Form.methods:updateTitle(event, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateTitle():", action, item, item2, item3)
+      local panel = self:getPanel()
+    -- affecte le caption
+    if self.panelCaption ~= nil and panel["title-panel"] == nil then
+      local caption = self.panelCaption
+
+      local header_panel = ElementGui.addGuiFrameH(panel, "title-panel", helmod_frame_style.panel, caption)
+      header_panel.style.height = 30
+    end
+end
+
+-------------------------------------------------------------------------------
 -- Update
 --
 -- @function [parent=#Form] update
@@ -213,6 +230,7 @@ end
 --
 function Form.methods:update(event, action, item, item2, item3)
   Logging:debug(self:classname(), "update():", action, item, item2, item3)
+  self:updateTitle(event, action, item, item2, item3)
   self:onUpdate(event, action, item, item2, item3)
 end
 

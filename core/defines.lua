@@ -1,3 +1,7 @@
+helmod_tab_dialog = {
+   HMProductionLineTab = "HMProductLineEdition",
+   HMProductionBlockTab = "HMProductBlockEdition"
+}
 
 helmod_flow_style = {
   horizontal = "helmod_flow_horizontal",

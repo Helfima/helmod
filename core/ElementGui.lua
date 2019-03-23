@@ -353,7 +353,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiDropDown(parent, action, key, items, selected, style, caption, tooltip)
-  Logging:debug(ElementGui.classname, "addGuiDropDown", parent, action, key, items, selected, style, caption, tooltip)
+  Logging:trace(ElementGui.classname, "addGuiDropDown", parent, action, key, items, selected, style, caption, tooltip)
   local options = {}
   options.type = "drop-down"
   if key ~= nil then
@@ -410,7 +410,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiDropDownElement(parent, action, key, elem_type, selected, style, caption, tooltip)
-  Logging:debug(ElementGui.classname, "addGuiDropDownElement", parent, action, key, selected, style, caption, tooltip)
+  Logging:trace(ElementGui.classname, "addGuiDropDownElement", parent, action, key, selected, style, caption, tooltip)
   local options = {}
   options.type = "choose-elem-button"
   options.style = style
@@ -995,7 +995,8 @@ function ElementGui.addCellElement(parent, element, action, select, tooltip_name
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
   color = color or "blue"
-  local cell = ElementGui.addGuiFlowV(parent,element.name, helmod_flow_style.vertical)
+  local cell = ElementGui.addGuiFlowV(parent,element.name..cell_id, helmod_flow_style.vertical)
+  cell_id = cell_id+1
   local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_element_"..color.."_1")
   --ElementGui.addCellIcon(row1, element, action, select, tooltip_name, nil)
   ElementGui.addGuiButtonSprite(row1, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}))
@@ -1129,7 +1130,7 @@ end
 -- @param #table element production block
 --
 function ElementGui.addCellCargoInfo(parent, element)
-  Logging:debug(ElementGui.classname, "addCellCargoInfo():", element)
+  Logging:trace(ElementGui.classname, "addCellCargoInfo():", element)
   local globalGui = Player.getGlobalGui()
   Product.load(element)
   if Product.native() ~= nil then
@@ -1161,7 +1162,7 @@ end
 -- @return #table
 --
 function ElementGui.getTooltipProduct(element, container)
-  Logging:debug(ElementGui.classname, "getTooltipProduct", element, container)
+  Logging:trace(ElementGui.classname, "getTooltipProduct", element, container)
   local tooltip = {"tooltip.cargo-info", EntityPrototype.load(container).getLocalisedName()}
   local total_tooltip = {"tooltip.cargo-info-element", {"helmod_common.total"}, Format.formatNumberElement(Product.countContainer(element.count, container))}
   if element.limit_count ~= nil then
@@ -1185,7 +1186,7 @@ end
 -- @return #table
 --
 function ElementGui.getTooltipModule(module_name)
-  Logging:debug(ElementGui.classname, "getTooltipModule", module_name)
+  Logging:trace(ElementGui.classname, "getTooltipModule", module_name)
   local tooltip = nil
   if module_name == nil then return nil end
   local module = ItemPrototype.load(module_name).native()
@@ -1217,7 +1218,7 @@ function ElementGui.getTooltipRecipe(prototype)
   if RecipePrototype.native() == nil then return nil end
   local prototype_type = prototype.type or "other"
   if cache_tooltip_recipe[prototype_type] ~= nil and cache_tooltip_recipe[prototype_type][prototype.name] ~= nil and cache_tooltip_recipe[prototype_type][prototype.name].enabled == RecipePrototype.getEnabled() then
-    Logging:debug(ElementGui.classname, "use cache", prototype.name)
+    Logging:trace(ElementGui.classname, "use cache", prototype.name)
     return cache_tooltip_recipe[prototype_type][prototype.name].value
   end
   -- initalize tooltip
@@ -1262,7 +1263,7 @@ function ElementGui.getTooltipRecipe(prototype)
   -- finalise la derniere valeur
   table.insert(lastTooltip, "")
   if cache_tooltip_recipe[prototype_type] == nil then cache_tooltip_recipe[prototype_type] = {} end
-  Logging:debug(ElementGui.classname, "build cache", prototype.name)
+  Logging:trace(ElementGui.classname, "build cache", prototype.name)
   cache_tooltip_recipe[prototype_type][prototype.name] = {}
   cache_tooltip_recipe[prototype_type][prototype.name].value = tooltip
   cache_tooltip_recipe[prototype_type][prototype.name].enabled = RecipePrototype.getEnabled()
@@ -1301,9 +1302,11 @@ function ElementGui.getStyleSizes()
     local width_dialog = width_recipe_column_1 + width_recipe_column_2
     local width_scroll = 8
     local width_block_info = 320
+    local width_left_menu = 50
     local height_block_header = 450
     local height_selector_header = 230
-    local height_row_element = 110
+    local height_recipe_info = 220
+    local height_row_element = 160
 
     local width_main = math.ceil(width*display_ratio_horizontal)
     local height_main = math.ceil(height*display_ratio_vertictal)
@@ -1316,7 +1319,7 @@ function ElementGui.getStyleSizes()
     style_sizes.dialog.width = width_dialog
 
     style_sizes.data = {}
-    style_sizes.data.width = width_main - width_dialog
+    style_sizes.data.width = width_main - width_dialog - width_left_menu
 
     style_sizes.power = {}
     style_sizes.power.height = 200
@@ -1325,7 +1328,7 @@ function ElementGui.getStyleSizes()
     style_sizes.edition_product_tool.height = 150
 
     style_sizes.data_section = {}
-    style_sizes.data_section.width = width_main - width_dialog - 4*width_scroll
+    style_sizes.data_section.width = width_main - width_dialog - width_left_menu - 4*width_scroll
 
     style_sizes.recipe_selector = {}
     style_sizes.recipe_selector.height = height_main - height_selector_header
@@ -1361,14 +1364,14 @@ function ElementGui.getStyleSizes()
     
     -- block
     style_sizes.block_data = {}
-    style_sizes.block_data.height = height_main - 122 - height_row_element * 2
+    style_sizes.block_data.height = height_main - 122 
     
     style_sizes.block_info = {}
     style_sizes.block_info.width = width_block_info
-    style_sizes.block_info.height = (height_row_element) * 2 + 4
+    style_sizes.block_info.height = height_recipe_info + 4
 
     style_sizes.scroll_block = {}
-    style_sizes.scroll_block.height = (height_row_element) * 2 - 34
+    style_sizes.scroll_block.height = height_recipe_info - 34
 
     -- input/output table
     style_sizes.block_element = {}

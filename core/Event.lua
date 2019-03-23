@@ -14,7 +14,9 @@ local Event = {
   STATE_START=0,
   STATE_CONTINUE=1,
   STATE_RELEASE=9,
-  next = false
+  next = false,
+  force_refresh = false,
+  force_open = false
 }
 
 local lua_event = nil
@@ -167,6 +169,16 @@ end
 --
 function Event.isHotkey()
   return (lua_event ~= nil and lua_event.element == nil and type_event == "hotkey")
+end
+
+-------------------------------------------------------------------------------
+-- finaly event
+--
+-- @function [parent=#Event] finaly
+--
+function Event.finaly()
+  Event.force_refresh = false
+  Event.force_open = false
 end
 
 return Event

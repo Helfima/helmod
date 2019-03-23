@@ -113,7 +113,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductionBlockTab.methods:updateHeader(item, item2, item3)
+function ProductionBlockTab.methods:updateHeader2(item, item2, item3)
   Logging:debug("ProductionBlockTab", "updateHeader():", item, item2, item3)
   local model = Model.getModel()
   local globalGui = Player.getGlobalGui()
@@ -240,7 +240,7 @@ function ProductionBlockTab.methods:updateData(item, item2, item3)
   end
 
   -- data panel
-  local scrollPanel = self:getDataScrollPanel({"helmod_common.recipes"})
+  local scrollPanel = self:getDataScrollPanel({"helmod_result-panel.tab-button-production-block"})
 
   local countRecipes = Model.countBlockRecipes(blockId)
   -- production block result

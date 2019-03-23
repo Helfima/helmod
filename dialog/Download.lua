@@ -94,23 +94,23 @@ function Download.methods:onEvent(event, action, item, item2, item3)
   if action == "download-model" then
     local download_panel = self:getDownloadPanel()
     local text_box = download_panel["data-text"]
-    --Logging:debug(self:classname(), "data_string", text_box.text)
+    Logging:debug(self:classname(), "data_string", text_box.text)
     local data_table = Converter.read(text_box.text)
-    --Logging:debug(self:classname(), "data_table", data_table)
+    Logging:debug(self:classname(), "data_table", data_table)
     if data_table ~= nil then
       local model = Model.newModel()
       model.time = data_table.time
       ModelBuilder.copyModel(data_table)
       ModelCompute.update()
-      Controller.refreshDisplay()
+      Event.force_refresh = true
     end
   end
 end
 
 -------------------------------------------------------------------------------
--- After open
+-- On update
 --
--- @function [parent=#Download] afterOpen
+-- @function [parent=#Download] Download
 --
 -- @param #LuaEvent event
 -- @param #string action action name
@@ -118,8 +118,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Download.methods:afterOpen(event, action, item, item2, item3)
-  self:updateDownload(event, action, item, item2, item3)
+function Download.methods:onUpdate(event, action, item, item2, item3)
+  self:updateDownload(item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -133,12 +133,13 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Download.methods:updateDownload(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "updateDownload():", action, item, item2, item3)
+function Download.methods:updateDownload(item, item2, item3)
+  Logging:debug(self:classname(), "updateDownload():", item, item2, item3)
   local data_string = ""
   -- export
   if item == "upload" then
     local download_panel = self:getUploadPanel()
+    download_panel.clear()
     local model = Model.getModel() 
     data_string = Converter.write(model)
     local text_box = ElementGui.addGuiTextbox(download_panel, "data-text", data_string, "helmod_textbox_default")
@@ -147,6 +148,7 @@ function Download.methods:updateDownload(event, action, item, item2, item3)
   -- import
   if item == "download" then
     local download_panel = self:getDownloadPanel()
+    download_panel.clear()
     local text_box = ElementGui.addGuiTextbox(download_panel, "data-text", data_string, "helmod_textbox_default")
     ElementGui.addGuiButton(download_panel, self:classname().."=download-model=ID=", "download", "helmod_button_default", ({"helmod_common.download"}))
     ElementGui.addGuiButton(download_panel, self:classname().."=CLOSE", nil, "helmod_button_default", ({"helmod_button.close"}))

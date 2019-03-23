@@ -33,7 +33,7 @@ end
 -- @return #table
 --
 function Product.getLocalisedName()
-  Logging:debug(Product.classname, "getLocalisedName()", lua_product)
+  Logging:trace(Product.classname, "getLocalisedName()", lua_product)
   if lua_product ~= nil then
     if not(Player.getSettings("display_real_name", true)) then
       local localisedName = lua_product.name
@@ -96,7 +96,7 @@ end
 -- @see http://lua-api.factorio.com/latest/Concepts.html#Product
 --
 function Product.getElementAmount(element)
-  Logging:debug(Product.classname, "getElementAmount",element)
+  Logging:trace(Product.classname, "getElementAmount",element)
   if element == nil then return 0 end
 
   if element.amount ~= nil then
@@ -118,7 +118,7 @@ end
 -- @return #string
 --
 function Product.getType()
-  Logging:debug(Product.classname, "getType()",lua_product)
+  Logging:trace(Product.classname, "getType()",lua_product)
   if lua_product.type == 1 or lua_product.type == "fluid" then return "fluid" end
   return "item"
 end
@@ -133,7 +133,7 @@ end
 -- @return #number
 --
 function Product.getAmount(recipe)
-  Logging:debug(Product.classname, "getAmount(recipe)",lua_product)
+  Logging:trace(Product.classname, "getAmount(recipe)",lua_product)
   local amount = Product.getElementAmount(lua_product)
   if recipe == nil then
     return amount
@@ -151,7 +151,7 @@ end
 -- @return #number
 --
 function Product.countProduct(recipe)
-  Logging:debug(Product.classname, "countProduct",lua_product)
+  Logging:trace(Product.classname, "countProduct",lua_product)
   local amount = Product.getElementAmount(lua_product)
   return (amount + amount * Product.getProductivityBonus(recipe) ) * recipe.count
 end
@@ -166,7 +166,7 @@ end
 -- @return #number
 --
 function Product.countIngredient(recipe)
-  Logging:debug(Product.classname, "countIngredient",lua_product)
+  Logging:trace(Product.classname, "countIngredient",lua_product)
   local amount = Product.getElementAmount(lua_product)
   return amount * recipe.count
 end
@@ -182,7 +182,7 @@ end
 -- @return #number
 --
 function Product.countContainer(count, container)
-  Logging:debug(Product.classname, "countContainer",lua_product)
+  Logging:trace(Product.classname, "countContainer",lua_product)
   if lua_product.type == 0 or lua_product.type == "item" then
     EntityPrototype.load(container)
     local cargo_wagon_size = EntityPrototype.getInventorySize(1)
@@ -219,7 +219,7 @@ end
 -- @return #number
 --
 function Product.getProductivityBonus(recipe)
-  Logging:debug(Product.classname, "getProductivityBonus(recipe)", lua_product)
+  Logging:trace(Product.classname, "getProductivityBonus(recipe)", lua_product)
   if recipe.isluaobject or recipe.factory == nil or recipe.factory.effects == nil then return 1 end
   local productivity = recipe.factory.effects.productivity
   if recipe.type == "resource" then

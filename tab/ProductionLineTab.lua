@@ -28,7 +28,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductionLineTab.methods:updateHeader(item, item2, item3)
+function ProductionLineTab.methods:updateHeader2(item, item2, item3)
   Logging:debug(self:classname(), "updateHeader():", item, item2, item3)
   local globalGui = Player.getGlobalGui()
   local model = Model.getModel()
@@ -121,7 +121,7 @@ function ProductionLineTab.methods:updateData(item, item2, item3)
   local model = Model.getModel()
 
   -- data panel
-  local scrollPanel = self:getDataScrollPanel({"helmod_common.blocks"})
+  local scrollPanel = self:getDataScrollPanel({"helmod_result-panel.tab-button-production-line"})
 
   local countBlock = Model.countBlocks()
   if countBlock > 0 then
