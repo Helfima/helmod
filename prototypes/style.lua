@@ -595,6 +595,21 @@ default_gui["helmod_label_element"] = {
 }
 
 -------------------------------------------------------------------------------
+-- Style of default
+--
+-- @field [parent=#Label] element_sm
+
+default_gui["helmod_label_element_sm"] = {
+  type = "label_style",
+  parent = "label",
+  font = "helmod_font_small_bold",
+  top_padding = -4,
+  right_padding = 2,
+  bottom_padding = -4,
+  left_padding = 2
+}
+
+-------------------------------------------------------------------------------
 -- Style of text
 --
 -- @field [parent=#Label] help
@@ -1258,11 +1273,6 @@ default_gui["helmod_frame_default"] = {
   border = {}
 }
 
--------------------------------------------------------------------------------
--- Style of element
---
--- @field [parent=#Frame] element
---
 function default_glow(tint_value, scale_value)
   return
     {
@@ -1287,6 +1297,12 @@ local style_element_list = {
   {suffix="gray", x=0, y=56},
   {suffix="magenta", x=0, y=64}
 }
+-------------------------------------------------------------------------------
+-- Style of element
+--
+-- @field [parent=#Frame] element
+--
+
 for _,style in pairs(style_element_list) do
   for i = 1, 3 do
     local style_name = table.concat({"helmod_frame_element",style.suffix,i},"_")
@@ -1306,6 +1322,37 @@ for _,style in pairs(style_element_list) do
       left_padding = 0,
       
       width = 80,
+      horizontally_stretchable = "on",
+      vertically_stretchable = "off"
+    }
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Style of element
+--
+-- @field [parent=#Frame] element_sm
+--
+
+for _,style in pairs(style_element_list) do
+  for i = 1, 3 do
+    local style_name = table.concat({"helmod_frame_element_sm",style.suffix,i},"_")
+    local x = style.x + (i-1)*8
+    local y = style.y
+
+    default_gui[style_name] = {
+      type = "frame_style",
+      graphical_set = {
+        filename = "__helmod__/graphics/gui.png",
+        corner_size = 1,
+        position = {x,y}
+      },
+      top_padding  = 2,
+      right_padding = 0,
+      bottom_padding = 2,
+      left_padding = 0,
+      
+      width = 30,
       horizontally_stretchable = "on",
       vertically_stretchable = "off"
     }

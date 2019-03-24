@@ -21,8 +21,6 @@ function Form.methods:init(parent)
   self.otherClose = true
   self.locate = "dialog"
 
-  self.pinLocate = "left"
-
   self:onInit(parent)
 end
 
@@ -269,6 +267,9 @@ function Form.methods:close(force)
   end
   if string.find(self:classname(), "Tab") then
     ui.data = nil
+  end
+  if string.find(self:classname(), "Pin") then
+    ui.pin = nil
   end
   Logging:debug(self:classname(), "**** UI", ui)
 end

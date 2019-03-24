@@ -350,7 +350,7 @@ end
 --
 function ProductBlockEdition.methods:getFactoryNumber(item, item2, item3)
   Logging:debug(self:classname(), "getFactoryNumber()")
-  local panel = self:getInfoPanel()["block"]["output-scroll"]["output-table"]
+  local panel = self:getInfoPanel()["output-scroll"]["output-table"]
     if panel[item] ~= nil then
     return ElementGui.getInputNumber(panel[item])
    end

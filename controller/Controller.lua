@@ -341,6 +341,9 @@ function Controller.sendEvent(event, classname, action, item, item2, item3)
       if string.find(classname, "Tab") then
         ui.data = classname
       end
+      if string.find(classname, "Pin") then
+        ui.pin = classname
+      end
     end
 
     Logging:debug(Controller.classname, "***** before event: ui", ui)
@@ -372,8 +375,10 @@ function Controller.sendEvent(event, classname, action, item, item2, item3)
       ui.dialog = helmod_tab_dialog[ui.data]
     end
 
+    local form_loop = {"left", "menu", "data", "dialog", "pin"}
+    if string.find(classname, "Pin") then form_loop = {"pin"} end
     Logging:debug(Controller.classname, "***** after event: ui", ui)
-    for _,locate in pairs({"left", "menu", "data", "dialog"}) do
+    for _,locate in pairs(form_loop) do
       local form_name = ui[locate]
       if form_name ~= nil then
         if action == "OPEN" or Event.force_open == true then
@@ -577,6 +582,7 @@ function Controller.openMainPanel()
   Logging:debug(Controller.classname, "openMainPanel()")
   local lua_player = Player.native()
   local location = Player.getSettings("display_location")
+  local globalGui = Player.getGlobalGui()
   local gui_main = lua_player.gui[location]
   if Controller.isOpened() then
     Controller.cleanController(Player.native())
@@ -585,7 +591,10 @@ function Controller.openMainPanel()
     ui.menu = "HMMainMenuPanel"
     ui.left = "HMLeftMenuPanel"
     ui.data = "HMProductionLineTab"
-    ui.dialog = "HMProductLineEdition"
+    if globalGui.currentBlock ~= nil then
+      ui.data = "HMProductionBlockTab"
+    end
+    ui.dialog = helmod_tab_dialog[ui.data]
     Event.force_refresh = true
     -- interessant mais genere une fausse UI ouverte
     --Player.native().opened = self:getMainPanel()

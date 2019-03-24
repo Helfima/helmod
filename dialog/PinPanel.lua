@@ -28,6 +28,7 @@ local display_level = {
 function PinPanel.methods:onInit(parent)
   self.panelCaption = ({"helmod_pin-tab-panel.title"})
   self.otherClose = false
+  self.locate = "pin"
 end
 
 
@@ -40,7 +41,7 @@ end
 --
 function PinPanel.methods:getParentPanel()
   local lua_player = Player.native()
-  local guiMain = lua_player.gui[self.pinLocate]
+  local guiMain = lua_player.gui["left"]
   if guiMain["helmod_planner_pin_tab"] ~= nil and guiMain["helmod_planner_pin_tab"].valid then
     return guiMain["helmod_planner_pin_tab"]
   end
@@ -62,11 +63,13 @@ end
 --
 function PinPanel.methods:onOpen( event, action, item, item2, item3)
   local globalGui = Player.getGlobalGui()
-  local close = true
-  if globalGui.pinBlock == nil or globalGui.pinBlock ~= item then
-    close = false
+  local close = (action == "OPEN") -- only on open event
+  if action == "OPEN" then
+    if globalGui.pinBlock == nil or globalGui.pinBlock ~= item then
+      close = false
+    end
+    globalGui.pinBlock = item
   end
-  globalGui.pinBlock = item
   return close
 end
 
@@ -104,23 +107,9 @@ function PinPanel.methods:getHeaderPanel()
   if panel["header"] ~= nil and panel["header"].valid then
     return panel["header"]
   end
-  return ElementGui.addGuiFrameH(panel, "header", helmod_frame_style.panel)
-end
-
--------------------------------------------------------------------------------
--- After open
---
--- @function [parent=#PinPanel] afterOpen
---
--- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function PinPanel.methods:afterOpen(event, action, item, item2, item3)
-  self:updateHeader(event, action, item, item2, item3)
-  self:getInfoPanel()
+  local header_panel = ElementGui.addGuiFrameH(panel, "header", helmod_frame_style.panel)
+  header_panel.style.horizontally_stretchable = true
+  return header_panel
 end
 
 -------------------------------------------------------------------------------
@@ -135,13 +124,14 @@ end
 -- @param #string item3 third item name
 --
 function PinPanel.methods:onUpdate(event, action, item, item2, item3)
+  self:updateHeader(event, action, item, item2, item3)
   self:updateInfo(event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
 -- Update information
 --
--- @function [parent=#PinPanel] updateInfo
+-- @function [parent=#PinPanel] updateHeader
 --
 -- @param #LuaEvent event
 -- @param #string action action name
@@ -153,12 +143,12 @@ function PinPanel.methods:updateHeader(event, action, item, item2, item3)
   Logging:debug(self:classname(), "updateHeader():", action, item, item2, item3)
   local header_panel = self:getHeaderPanel()
   local model = Model.getModel()
-
+  header_panel.clear()
   ElementGui.addGuiButton(header_panel, self:classname().."=CLOSE", nil, "helmod_button_icon_close_red", nil, ({"helmod_button.close"}))
-  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID="..item.."=down", nil, "helmod_button_icon_arrow_left", nil, ({"helmod_button.decrease"}))
-  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID="..item.."=up", nil, "helmod_button_icon_arrow_right", nil, ({"helmod_button.expand"}))
-  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID="..item.."=min", nil, "helmod_button_icon_minimize", nil, ({"helmod_button.minimize"}))
-  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID="..item.."=max", nil, "helmod_button_icon_maximize", nil, ({"helmod_button.maximize"}))
+  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID=down", nil, "helmod_button_icon_arrow_left", nil, ({"helmod_button.decrease"}))
+  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID=up", nil, "helmod_button_icon_arrow_right", nil, ({"helmod_button.expand"}))
+  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID=min", nil, "helmod_button_icon_minimize", nil, ({"helmod_button.minimize"}))
+  ElementGui.addGuiButton(header_panel, self:classname().."=change-level=ID=max", nil, "helmod_button_icon_maximize", nil, ({"helmod_button.maximize"}))
 
 end
 
@@ -179,9 +169,7 @@ function PinPanel.methods:updateInfo(event, action, item, item2, item3)
   local model = Model.getModel()
   local globalGui = Player.getGlobalGui()
 
-  for k,guiName in pairs(infoPanel.children_names) do
-    infoPanel[guiName].destroy()
-  end
+  infoPanel.clear()
 
   local column = Player.getGlobalSettings("display_pin_level") + 1
 
@@ -261,13 +249,13 @@ function PinPanel.methods:addProductionBlockRow(gui_table, block, recipe)
     -- products
     local cell_products = ElementGui.addGuiTable(gui_table,"products_"..recipe.id, 3)
     if RecipePrototype.getProducts() ~= nil then
-      for r, lua_product in pairs(RecipePrototype.getProducts()) do
+      for index, lua_product in pairs(RecipePrototype.getProducts()) do
         local product = Product.load(lua_product).new()
         product.count = Product.countProduct(recipe)
         if block.count > 1 then
           product.limit_count = product.count / block.count
         end
-        ElementGui.addCellElement(cell_products, product, self:classname().."=do_noting=ID=", false, "tooltip.product", nil, index)
+        ElementGui.addCellElementSm(cell_products, product, self:classname().."=do_noting=ID=", false, "tooltip.product", nil, index)
       end
     end
   end
@@ -283,13 +271,13 @@ function PinPanel.methods:addProductionBlockRow(gui_table, block, recipe)
     -- ingredients
     local cell_ingredients = ElementGui.addGuiTable(gui_table,"ingredients_"..recipe.id, 3)
     if RecipePrototype.getIngredients() ~= nil then
-      for r, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
+      for index, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
         local ingredient = Product.load(lua_ingredient).new()
         ingredient.count = Product.countIngredient(recipe)
         if block.count > 1 then
           ingredient.limit_count = ingredient.count / block.count
         end
-        ElementGui.addCellElement(cell_ingredients, ingredient, self:classname().."=do_noting=ID=", true, "tooltip.product", self.color_button_add, index)
+        ElementGui.addCellElementSm(cell_ingredients, ingredient, self:classname().."=do_noting=ID=", true, "tooltip.product", self.color_button_add, index)
       end
     end
   end
@@ -328,10 +316,10 @@ function PinPanel.methods:onEvent(event, action, item, item2, item3)
   if action == "change-level" then
     local display_pin_level = Player.getGlobalSettings("display_pin_level")
     Logging:debug(self:classname(), "display_pin_level", display_pin_level)
-    if item2 == "down" and display_pin_level > display_pin_level_min  then global_settings["display_pin_level"] = display_pin_level - 1 end
-    if item2 == "up" and display_pin_level < display_pin_level_max  then global_settings["display_pin_level"] = display_pin_level + 1 end
-    if item2 == "min" then global_settings["display_pin_level"] = display_pin_level_min end
-    if item2 == "max" then global_settings["display_pin_level"] = display_pin_level_max end
+    if item == "down" and display_pin_level > display_pin_level_min  then global_settings["display_pin_level"] = display_pin_level - 1 end
+    if item == "up" and display_pin_level < display_pin_level_max  then global_settings["display_pin_level"] = display_pin_level + 1 end
+    if item == "min" then global_settings["display_pin_level"] = display_pin_level_min end
+    if item == "max" then global_settings["display_pin_level"] = display_pin_level_max end
     self:updateInfo(event, action, global_gui.pinBlock, item2, item3)
   end
 end
