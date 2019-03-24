@@ -71,12 +71,7 @@ function MainMenuPanel.methods:getIndexPanel()
   if parent_panel["index_panel"] ~= nil and parent_panel["index_panel"].valid then
     return parent_panel["index_panel"]
   end
-  local display_ratio_horizontal = Player.getSettings("display_ratio_horizontal")
-  local width , height = ElementGui.getDisplaySizes()
-  local width_main = math.ceil(width*display_ratio_horizontal)
-  
-  local col_num = math.ceil((width_main-650)/32)
-  local panel = ElementGui.addGuiTable(parent_panel, "index_panel", col_num, helmod_table_style.list)
+  local panel = ElementGui.addGuiTable(parent_panel, "index_panel", ElementGui.getIndexColumnNumber(), helmod_table_style.list)
   return panel
 end
 

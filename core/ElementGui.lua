@@ -1380,8 +1380,9 @@ function ElementGui.getStyleSizes()
 
     
     -- block
+    local row_number = math.floor(Model.countModel()/ElementGui.getIndexColumnNumber())
     style_sizes.block_data = {}
-    style_sizes.block_data.height = height_main - 122 
+    style_sizes.block_data.height = height_main - 122 - row_number*32
     
     style_sizes.block_info = {}
     style_sizes.block_info.width = width_block_info
@@ -1418,6 +1419,23 @@ function ElementGui.getStyleSizes()
   return style_sizes
 end
 
+-------------------------------------------------------------------------------
+-- Get Index column number
+--
+-- @function [parent=#ElementGui] getIndexColumnNumber
+--
+-- @param #LuaGuiElement element
+-- @param #string style
+-- @param #string property
+--
+function ElementGui.getIndexColumnNumber()
+
+  local display_ratio_horizontal = Player.getSettings("display_ratio_horizontal")
+  local width , height = ElementGui.getDisplaySizes()
+  local width_main = math.ceil(width*display_ratio_horizontal)
+  
+  return math.ceil((width_main-650)/32)
+end
 -------------------------------------------------------------------------------
 -- Set style
 --

@@ -583,6 +583,7 @@ function Controller.openMainPanel()
   local lua_player = Player.native()
   local location = Player.getSettings("display_location")
   local globalGui = Player.getGlobalGui()
+  local model = Model.getModel()
   local gui_main = lua_player.gui[location]
   if Controller.isOpened() then
     Controller.cleanController(Player.native())
@@ -591,7 +592,7 @@ function Controller.openMainPanel()
     ui.menu = "HMMainMenuPanel"
     ui.left = "HMLeftMenuPanel"
     ui.data = "HMProductionLineTab"
-    if globalGui.currentBlock ~= nil then
+    if globalGui.currentBlock and model.blocks[globalGui.currentBlock] then
       ui.data = "HMProductionBlockTab"
     end
     ui.dialog = helmod_tab_dialog[ui.data]
@@ -747,8 +748,10 @@ function Controller.onEventAccessAll(event, action, item, item2, item3)
   if action == "change-model" then
     globalGui.model_id = item
     ui.data = "HMProductionLineTab"
+    ui.dialog = helmod_tab_dialog[ui.data]
     globalGui.currentBlock = "new"
     Event.force_refresh = true
+    Event.force_open = true
   end
 
   if action == "change-tab" then
@@ -757,6 +760,7 @@ function Controller.onEventAccessAll(event, action, item, item2, item3)
     if item == "HMProductionLineTab" then
       globalGui.currentBlock = "new"
     end
+    ui.dialog = helmod_tab_dialog[ui.data]
     globalGui.currentBlock = item2
     Event.force_refresh = true
     Event.force_open = true
