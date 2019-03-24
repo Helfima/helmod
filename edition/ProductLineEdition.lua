@@ -212,8 +212,8 @@ function ProductLineEdition.methods:updateInput(item, item2, item3)
 
     local input_table = ElementGui.addGuiTable(input_scroll,"input-table", 5, "helmod_table_element")
     if model.ingredients ~= nil then
-      for r, element in pairs(model.ingredients) do
-        ElementGui.addCellElement(input_table, element, self:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.ingredient", nil)
+      for index, element in pairs(model.ingredients) do
+        ElementGui.addCellElement(input_table, element, self:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.ingredient", nil, index)
       end
     end
 
@@ -248,8 +248,8 @@ function ProductLineEdition.methods:updateOutput(item, item2, item3)
     -- ouput panel
     local output_table = ElementGui.addGuiTable(output_scroll,"output-table", 5, "helmod_table_element")
     if model.products ~= nil then
-      for r, element in pairs(model.products) do
-        ElementGui.addCellElement(output_table, element, self:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.product", nil)
+      for index, element in pairs(model.products) do
+        ElementGui.addCellElement(output_table, element, self:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.product", nil, index)
       end
     end
     

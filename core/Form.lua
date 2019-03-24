@@ -21,6 +21,8 @@ function Form.methods:init(parent)
   self.otherClose = true
   self.locate = "dialog"
 
+  self.pinLocate = "left"
+
   self:onInit(parent)
 end
 

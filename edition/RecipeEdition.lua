@@ -214,7 +214,7 @@ function RecipeEdition.methods:updateRecipeIngredients(item, item2, item3)
     ingredientsPanel.clear()
     local tablePanel= ElementGui.addGuiTable(ingredientsPanel, "table-ingredients", 6)
 
-    for key, ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
+    for index, ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
       local tooltip = nil
       local localisedName = Player.getLocalisedName(ingredient)
       if ingredient.amount ~= nil then
@@ -222,7 +222,7 @@ function RecipeEdition.methods:updateRecipeIngredients(item, item2, item3)
       else
         tooltip = ({"tooltip.element-amount-probability", localisedName, ingredient.amount_min, ingredient.amount_max, ingredient.probability})
       end
-      local cell = ElementGui.addCell(tablePanel, ingredient.name)
+      local cell = ElementGui.addCell(tablePanel, ingredient.name, nil, index)
       ElementGui.addGuiButtonSpriteSm(cell, "item=ID=", Player.getIconType(ingredient), ingredient.name, ingredient.name, tooltip)
       ElementGui.addGuiLabel(cell, ingredient.name, Format.formatNumber(Product.getElementAmount(ingredient),5), "helmod_label_sm")
     end

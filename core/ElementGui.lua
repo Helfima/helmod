@@ -7,30 +7,6 @@ local ElementGui = {
   classname = "HMElementGui"
 }
 
-local element_id = 0
-local cell_id = 0
--------------------------------------------------------------------------------
--- Get element name
---
--- @function [parent=#ElementGui] getElementName
---
--- @param #table list
--- @param #string key
---
--- @return #string
---
-function ElementGui.getElementName(list, key)
-  local element_name = nil
-  if type(list) == "string"  then element_name = list end
-  if type(list) == "table"  then element_name = table.concat(list, "=") end
-  if key ~= nil then element_name = table.concat({element_name, key}, "=") end
-  if string.find(element_name, "?") then
-    element_id = element_id + 1
-    element_name = string.gsub(element_name, "?", element_id)
-  end
-  return element_name
-end
-
 -------------------------------------------------------------------------------
 -- Get the number of textfield input
 --
@@ -871,10 +847,9 @@ end
 -- @param #string name
 -- @param #number column_count
 --
-function ElementGui.addCell(parent, name, column_count)
+function ElementGui.addCell(parent, name, column_count, index)
   Logging:trace(ElementGui.classname, "addCell()", name)
-  local cell = ElementGui.addGuiTable(parent, "cell"..cell_id.."_"..name, column_count or 3, helmod_table_style.list)
-  cell_id = cell_id+1
+  local cell = ElementGui.addGuiTable(parent, "cell".."_"..name..(index or ""), column_count or 3, helmod_table_style.list)
   return cell
 end
 
@@ -989,14 +964,13 @@ end
 -- @param #string tooltip_name tooltip name
 -- @param #string color button color
 --
-function ElementGui.addCellElement(parent, element, action, select, tooltip_name, color)
+function ElementGui.addCellElement(parent, element, action, select, tooltip_name, color, index)
   Logging:trace(ElementGui.classname, "addCellElement():", element, action, select, tooltip_name, color)
   local display_cell_mod = Player.getSettings("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
   color = color or "blue"
-  local cell = ElementGui.addGuiFlowV(parent,element.name..cell_id, helmod_flow_style.vertical)
-  cell_id = cell_id+1
+  local cell = ElementGui.addGuiFlowV(parent,element.name..(index or ""), helmod_flow_style.vertical)
   local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_element_"..color.."_1")
   --ElementGui.addCellIcon(row1, element, action, select, tooltip_name, nil)
   ElementGui.addGuiButtonSprite(row1, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}))

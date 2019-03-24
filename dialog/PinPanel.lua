@@ -40,7 +40,7 @@ end
 --
 function PinPanel.methods:getParentPanel()
   local lua_player = Player.native()
-  local guiMain = lua_player.gui[self.parent.pinLocate]
+  local guiMain = lua_player.gui[self.pinLocate]
   if guiMain["helmod_planner_pin_tab"] ~= nil and guiMain["helmod_planner_pin_tab"].valid then
     return guiMain["helmod_planner_pin_tab"]
   end
@@ -267,7 +267,7 @@ function PinPanel.methods:addProductionBlockRow(gui_table, block, recipe)
         if block.count > 1 then
           product.limit_count = product.count / block.count
         end
-        ElementGui.addCellElement(cell_products, product, self:classname().."=do_noting=ID=", false, "tooltip.product", nil)
+        ElementGui.addCellElement(cell_products, product, self:classname().."=do_noting=ID=", false, "tooltip.product", nil, index)
       end
     end
   end
@@ -289,7 +289,7 @@ function PinPanel.methods:addProductionBlockRow(gui_table, block, recipe)
         if block.count > 1 then
           ingredient.limit_count = ingredient.count / block.count
         end
-        ElementGui.addCellElement(cell_ingredients, ingredient, self:classname().."=do_noting=ID=", true, "tooltip.product", self.color_button_add)
+        ElementGui.addCellElement(cell_ingredients, ingredient, self:classname().."=do_noting=ID=", true, "tooltip.product", self.color_button_add, index)
       end
     end
   end

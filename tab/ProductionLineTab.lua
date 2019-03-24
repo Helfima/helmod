@@ -90,16 +90,16 @@ function ProductionLineTab.methods:updateHeader2(item, item2, item3)
     -- ouput panel
     local output_table = ElementGui.addGuiTable(output_scroll,"output-table",6)
     if model.products ~= nil then
-      for r, element in pairs(model.products) do
-        ElementGui.addCellElement(output_table, element, self:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.product", nil)
+      for index, element in pairs(model.products) do
+        ElementGui.addCellElement(output_table, element, self:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.product", nil, index)
       end
     end
 
     -- input panel
     local input_table = ElementGui.addGuiTable(input_scroll,"input-table",6)
     if model.ingredients ~= nil then
-      for r, element in pairs(model.ingredients) do
-        ElementGui.addCellElement(input_table, element, self:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.ingredient", nil)
+      for index, element in pairs(model.ingredients) do
+        ElementGui.addCellElement(input_table, element, self:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.ingredient", nil, index)
       end
     end
 
@@ -224,19 +224,19 @@ function ProductionLineTab.methods:addTableRow(gui_table, block)
   local display_product_cols = Player.getSettings("display_product_cols") + 1
   local cell_products = ElementGui.addCell(gui_table,"products_"..block.id, display_product_cols)
   if block.products ~= nil then
-    for r, product in pairs(block.products) do
+    for index, product in pairs(block.products) do
       if bit32.band(product.state, 1) > 0 then
         if not(unlinked) or block.by_factory == true then
-          ElementGui.addCellElement(cell_products, product, self:classname().."=product-selected=ID="..block.id.."="..product.name.."=", false, "tooltip.product", nil)
+          ElementGui.addCellElement(cell_products, product, self:classname().."=product-selected=ID="..block.id.."="..product.name.."=", false, "tooltip.product", nil, index)
         else
-          ElementGui.addCellElement(cell_products, product, self:classname().."=product-edition=ID="..block.id.."="..product.name.."=", true, "tooltip.edit-product", self.color_button_edit)
+          ElementGui.addCellElement(cell_products, product, self:classname().."=product-edition=ID="..block.id.."="..product.name.."=", true, "tooltip.edit-product", self.color_button_edit, index)
         end
       end
       if bit32.band(product.state, 2) > 0 and bit32.band(product.state, 1) == 0 then
-        ElementGui.addCellElement(cell_products, product, self:classname().."=product-selected=ID="..block.id.."="..product.name.."=", true, "tooltip.rest-product", self.color_button_rest)
+        ElementGui.addCellElement(cell_products, product, self:classname().."=product-selected=ID="..block.id.."="..product.name.."=", true, "tooltip.rest-product", self.color_button_rest, index)
       end
       if product.state == 0 then
-        ElementGui.addCellElement(cell_products, product, self:classname().."=product-selected=ID="..block.id.."="..product.name.."=", false, "tooltip.other-product", nil)
+        ElementGui.addCellElement(cell_products, product, self:classname().."=product-selected=ID="..block.id.."="..product.name.."=", false, "tooltip.other-product", nil, index)
       end
     end
   end
@@ -244,8 +244,8 @@ function ProductionLineTab.methods:addTableRow(gui_table, block)
   local display_ingredient_cols = Player.getSettings("display_ingredient_cols") + 2
   local cell_ingredients = ElementGui.addCell(gui_table,"ingredients_"..block.id, display_ingredient_cols)
   if block.ingredients ~= nil then
-    for r, ingredient in pairs(block.ingredients) do
-      ElementGui.addCellElement(cell_ingredients, ingredient, self:classname().."=production-block-add=ID="..block.id.."="..ingredient.name.."=", true, "tooltip.add-recipe", self.color_button_add)
+    for index, ingredient in pairs(block.ingredients) do
+      ElementGui.addCellElement(cell_ingredients, ingredient, self:classname().."=production-block-add=ID="..block.id.."="..ingredient.name.."=", true, "tooltip.add-recipe", self.color_button_add, index)
     end
   end
 end
