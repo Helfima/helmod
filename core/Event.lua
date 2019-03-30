@@ -11,6 +11,7 @@ local Event = {
   item2 = "",
   item3  = "",
   state = 0,
+  prepare = false,
   STATE_START=0,
   STATE_CONTINUE=1,
   STATE_RELEASE=9,
@@ -179,6 +180,7 @@ end
 function Event.finaly()
   Event.force_refresh = false
   Event.force_open = false
+  Event.prepare = false
 end
 
 return Event

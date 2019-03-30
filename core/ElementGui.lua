@@ -1434,7 +1434,7 @@ function ElementGui.getIndexColumnNumber()
   local width , height = ElementGui.getDisplaySizes()
   local width_main = math.ceil(width*display_ratio_horizontal)
   
-  return math.ceil((width_main-650)/32)
+  return math.ceil((width_main-650)/36)
 end
 -------------------------------------------------------------------------------
 -- Set style

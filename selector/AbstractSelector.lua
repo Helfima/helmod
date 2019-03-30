@@ -283,29 +283,37 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
 
   if action == "recipe-group" then
     globalPlayer.recipeGroupSelected = item
-    self:onUpdate(item, item2, item3)
+    --self:onUpdate(item, item2, item3)
+    Controller.createEvent(event, self:classname(), "UPDATE", item, item2, item3)
   end
 
   if action == "change-boolean-settings" then
     if globalSettings[item] == nil then globalSettings[item] = defaultSettings[item] end
     globalSettings[item] = not(globalSettings[item])
-    self:onUpdate(item, item2, item3)
+    --self:onUpdate(item, item2, item3)
+    Controller.createEvent(event, self:classname(), "UPDATE", item, item2, item3)
   end
 
   if action == "recipe-filter-switch" then
     filter_prototype_product = not(filter_prototype_product)
-    self:onUpdate(item, item2, item3)
+    --self:onUpdate(item, item2, item3)
+    Controller.createEvent(event, self:classname(), "UPDATE", item, item2, item3)
   end
 
   if action == "recipe-filter" then
     if Player.getSettings("filter_on_text_changed", true) then
       filter_prototype = event.element.text
+      --if string.len(filter_prototype) > 2 then
+      --self:onUpdate(item, item2, item3)
+      Controller.createEvent(event, self:classname(), "UPDATE", item, item2, item3)
+      --end
     else
       if event.element.parent ~= nil and event.element.parent["filter-text"] ~= nil then
         filter_prototype = event.element.parent["filter-text"].text
       end
+      --self:onUpdate(item, item2, item3)
+      Controller.createEvent(event, self:classname(), "UPDATE", item, item2, item3)
     end
-    self:onUpdate(item, item2, item3)
   end
 
 end
@@ -327,6 +335,23 @@ function AbstractSelector.methods:updateGroups(item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
+-- Prepare
+--
+-- @function [parent=#AbstractSelector] prepare
+--
+-- @param #LuaEvent event
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function AbstractSelector.methods:prepare(event, action, item, item2, item3)
+  -- recuperation recipes
+  list_group, list_subgroup, list_prototype = self:updateGroups(item, item2, item3)
+  return true
+end
+
+-------------------------------------------------------------------------------
 -- On update
 --
 -- @function [parent=#AbstractSelector] onUpdate
@@ -338,7 +363,7 @@ end
 function AbstractSelector.methods:onUpdate(item, item2, item3)
   Logging:trace(self:classname(), "onUpdate():",item, item2, item3)
   -- recuperation recipes
-  list_group, list_subgroup, list_prototype = self:updateGroups(item, item2, item3)
+  --list_group, list_subgroup, list_prototype = self:updateGroups(item, item2, item3)
 
   self:updateFilter(item, item2, item3)
   self:updateGroupSelector(item, item2, item3)

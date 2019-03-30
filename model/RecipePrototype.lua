@@ -87,6 +87,22 @@ function RecipePrototype.find(object)
 end
 
 -------------------------------------------------------------------------------
+-- set prototype model
+--
+-- @function [parent=#RecipePrototype] set
+--
+-- @param #object object prototype
+-- @param #string object_type prototype type
+--
+-- @return #RecipePrototype
+--
+function RecipePrototype.set(prototype, object_type)
+  lua_prototype = prototype
+  lua_type = object_type
+  return RecipePrototype
+end
+
+-------------------------------------------------------------------------------
 -- new prototype model
 --
 -- @function [parent=#RecipePrototype] new

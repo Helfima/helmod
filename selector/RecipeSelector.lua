@@ -56,13 +56,13 @@ function RecipeSelector.methods:checkFilter(recipe_prototype)
     for key, element in pairs(elements) do
       local search = element.name:lower():gsub("[-]"," ")
       if string.find(search, filter_prototype) then
-        find = true
+        return true
       end
     end
   else
-    find = true
+    return true
   end
-  return find
+  return false
 end
 
 -------------------------------------------------------------------------------
@@ -70,15 +70,15 @@ end
 --
 -- @function [parent=#RecipeSelector] appendGroups
 --
--- @param #string name
+-- @param #string recipe
 -- @param #string type
 -- @param #table list_group
 -- @param #table list_subgroup
 -- @param #table list_prototype
 --
-function RecipeSelector.methods:appendGroups(name, type, list_group, list_subgroup, list_prototype)
-  Logging:trace(self:classname(), "appendGroups()", name, type)
-  RecipePrototype.load(name, type)
+function RecipeSelector.methods:appendGroups(recipe, type, list_group, list_subgroup, list_prototype)
+  Logging:trace(self:classname(), "appendGroups()", recipe.name, type)
+  RecipePrototype.set(recipe, type)
   local find = self:checkFilter(RecipePrototype)
   local filter_show_disable = Player.getGlobalSettings("filter_show_disable")
   local filter_show_hidden = Player.getGlobalSettings("filter_show_hidden")
@@ -93,7 +93,7 @@ function RecipeSelector.methods:appendGroups(name, type, list_group, list_subgro
     list_subgroup[subgroup_name] = lua_recipe.subgroup
     if list_prototype[group_name] == nil then list_prototype[group_name] = {} end
     if list_prototype[group_name][subgroup_name] == nil then list_prototype[group_name][subgroup_name] = {} end
-    table.insert(list_prototype[group_name][subgroup_name], {name=name, type=type, order=lua_recipe.order})
+    table.insert(list_prototype[group_name][subgroup_name], {name=recipe.name, type=type, order=lua_recipe.order})
   end
 end
 
@@ -119,14 +119,14 @@ function RecipeSelector.methods:updateGroups(item, item2, item3)
 
   firstGroup = nil
   for key, recipe in pairs(Player.getRecipes()) do
-    self:appendGroups(recipe.name, "recipe", list_group, list_subgroup, list_prototype)
+    self:appendGroups(recipe, "recipe", list_group, list_subgroup, list_prototype)
   end
   if global_gui.currentTab ~= "HMPropertiesTab" then
     for key, fluid in pairs(Player.getFluidPrototypes()) do
-      self:appendGroups(fluid.name, "fluid", list_group, list_subgroup, list_prototype)
+      self:appendGroups(fluid, "fluid", list_group, list_subgroup, list_prototype)
     end
     for key, resource in pairs(Player.getResources()) do
-      self:appendGroups(resource.name, "resource", list_group, list_subgroup, list_prototype)
+      self:appendGroups(resource, "resource", list_group, list_subgroup, list_prototype)
     end
   end
 

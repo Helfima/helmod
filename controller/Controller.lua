@@ -292,9 +292,13 @@ function Controller.parseEvent()
             if(nextEvent) then
               Event.setNext(nextEvent.name, nextEvent.action, nextEvent.item1, nextEvent.item2, nextEvent.item3)
               nextEvent = nil
+              Event.state = Event.STATE_CONTINUE
+              Event.force_refresh = true
             end
             Logging:debug(Controller.classname, "event state", Event.state)
-            Event.finaly()
+            if(Event.state == Event.STATE_RELEASE) then
+              Event.finaly()
+            end
           end
         end
       end
@@ -334,50 +338,66 @@ function Controller.sendEvent(event, classname, action, item, item2, item3)
       views[classname]:close(true)
     end
     local ui = Player.getGlobalUI()
-    if action == "OPEN" then
-      if string.find(classname, "Edition") or string.find(classname, "Selector") or string.find(classname, "Settings") or string.find(classname, "Help") or string.find(classname, "Download") then
-        ui.dialog = classname
-      end
-      if string.find(classname, "Tab") then
-        ui.data = classname
-      end
-      if string.find(classname, "Pin") then
-        ui.pin = classname
-      end
-    end
-
-    Logging:debug(Controller.classname, "***** before event: ui", ui)
-
-    for locate,form_name in pairs(ui) do
-      Logging:debug(Controller.classname, "before event", form_name, classname)
-      if form_name == classname then
-        views[form_name]:beforeEvent(event, action, item, item2, item3)
-      end
-    end
-
-    ui.menu = "HMMainMenuPanel"
-    ui.left = "HMLeftMenuPanel"
-    if ui.data == nil then
-      ui.data = "HMProductionLineTab"
-    end
-
-    if ui.dialog == nil then
-      ui.dialog = helmod_tab_dialog[ui.data]
-    end
-
-    for locate,form_name in pairs(ui) do
-      Logging:debug(Controller.classname, "***** on event", form_name, classname)
-      if form_name == classname then
-        views[form_name]:onEvent(event, action, item, item2, item3)
-      end
-    end
-    if ui.dialog == nil then
-      ui.dialog = helmod_tab_dialog[ui.data]
-    end
-
     local form_loop = {"left", "menu", "data", "dialog", "pin"}
     if string.find(classname, "Pin") then form_loop = {"pin"} end
-    Logging:debug(Controller.classname, "***** after event: ui", ui)
+
+    if Event.prepare == false then
+      if action == "OPEN" then
+        if string.find(classname, "Edition") or string.find(classname, "Selector") or string.find(classname, "Settings") or string.find(classname, "Help") or string.find(classname, "Download") then
+          ui.dialog = classname
+        end
+        if string.find(classname, "Tab") then
+          ui.data = classname
+        end
+        if string.find(classname, "Pin") then
+          ui.pin = classname
+        end
+      end
+
+      Logging:debug(Controller.classname, "***** before event: ui", ui)
+
+      for locate,form_name in pairs(ui) do
+        Logging:debug(Controller.classname, "before event", form_name, classname)
+        if form_name == classname then
+          views[form_name]:beforeEvent(event, action, item, item2, item3)
+        end
+      end
+
+      ui.menu = "HMMainMenuPanel"
+      ui.left = "HMLeftMenuPanel"
+      if ui.data == nil then
+        ui.data = "HMProductionLineTab"
+      end
+
+      if ui.dialog == nil then
+        ui.dialog = helmod_tab_dialog[ui.data]
+      end
+
+      for locate,form_name in pairs(ui) do
+        Logging:debug(Controller.classname, "***** on event", form_name, classname)
+        if form_name == classname then
+          views[form_name]:onEvent(event, action, item, item2, item3)
+        end
+      end
+      if ui.dialog == nil then
+        ui.dialog = helmod_tab_dialog[ui.data]
+      end
+      Logging:debug(Controller.classname, "***** after event: ui", ui)
+
+      for _,locate in pairs(form_loop) do
+        local form_name = ui[locate]
+        if form_name ~= nil then
+        local prepared = views[form_name]:prepare(event, action, item, item2, item3)
+        if(prepared == true) then
+          Event.prepare = prepared
+        end
+        end
+      end
+      if(Event.prepare == true) then
+        return true
+      end
+    end
+
     for _,locate in pairs(form_loop) do
       local form_name = ui[locate]
       if form_name ~= nil then
@@ -860,10 +880,10 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
   end
 
   if action == "change-number-option" and model.blocks ~= nil and model.blocks[globalGui.currentBlock] ~= nil then
-      local value = Controller.getView("HMProductBlockEdition"):getFactoryNumber(item, item2, item3)
-      ModelBuilder.updateProductionBlockOption(globalGui.currentBlock, item, value)
-      ModelCompute.update()
-      Event.force_refresh = true
+    local value = Controller.getView("HMProductBlockEdition"):getFactoryNumber(item, item2, item3)
+    ModelBuilder.updateProductionBlockOption(globalGui.currentBlock, item, value)
+    ModelCompute.update()
+    Event.force_refresh = true
   end
 
   if action == "change-time" then

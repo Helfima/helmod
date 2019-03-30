@@ -195,6 +195,21 @@ function Form.methods:afterOpen(event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
+-- Prepare
+--
+-- @function [parent=#Form] prepare
+--
+-- @param #LuaEvent event
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function Form.methods:prepare(event, action, item, item2, item3)
+  return false
+end
+
+-------------------------------------------------------------------------------
 -- Update header
 --
 -- @function [parent=#Form] updateTitle
