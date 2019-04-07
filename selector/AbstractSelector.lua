@@ -188,9 +188,9 @@ function AbstractSelector.methods:getItemListPanel()
 end
 
 -------------------------------------------------------------------------------
--- On open
+-- On before event
 --
--- @function [parent=#AbstractSelector] onOpen
+-- @function [parent=#AbstractSelector] onBeforeEvent
 --
 -- @param #LuaEvent event
 -- @param #string action action name
@@ -198,33 +198,30 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
--- @return #boolean if true the next call close dialog
---
-function AbstractSelector.methods:onOpen(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "onOpen():", action, item, item2, item3)
+function AbstractSelector.methods:onBeforeEvent(event, action, item, item2, item3)
+  Logging:debug(self:classname(), "onBeforeEvent():", action, item, item2, item3)
   local player_gui = Player.getGlobalGui()
-  local close = action == "OPEN"
+  local close = true
   filter_prototype_product = true
 
-  if action == "OPEN" then
-    local globalPlayer = Player.getGlobal()
-    if item3 ~= nil then
-      filter_prototype = item3:lower():gsub("[-]"," ")
-    else
-      filter_prototype = nil
-    end
-    if event ~= nil and event.button ~= nil and event.button == defines.mouse_button_type.right then
-      filter_prototype_product = false
-    end
-    if item ~= nil and item2 ~= nil then
-      Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
-      if player_gui.guiElementLast ~= item..item2 then
-        close = false
-      end
-      player_gui.guiElementLast = item..item2
-      Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
-    end
+  local globalPlayer = Player.getGlobal()
+  if item3 ~= nil then
+    filter_prototype = item3:lower():gsub("[-]"," ")
+  else
+    filter_prototype = nil
   end
+  if event ~= nil and event.button ~= nil and event.button == defines.mouse_button_type.right then
+    filter_prototype_product = false
+  end
+  if item ~= nil and item2 ~= nil then
+    Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
+    if player_gui.guiElementLast ~= item..item2 then
+      close = false
+    end
+    player_gui.guiElementLast = item..item2
+    Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
+  end
+  --Logging:debug(Controller.classname, "filter_prototype", filter_prototype)
   -- close si nouvel appel
   return close
 end

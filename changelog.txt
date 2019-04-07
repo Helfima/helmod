@@ -1,118 +1,124 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.8.8
+Date: 07. 04. 2019
+  Bugfixes:
+    - Fixed recipe selector filter
+    - Fixed changelog
+---------------------------------------------------------------------------------------------------
 Version: 0.8.7
 Date: 30. 03. 2019
   Features:
-  	- Added changelog
+    - Added changelog
   Changes:
-  	- MP Perform 50% fast
+    - MP Perform 50% fast
   Bugfixes:
-  	- Fixed index menu
+    - Fixed index menu
 ---------------------------------------------------------------------------------------------------
 Version: 0.8.6
   Bugfixes:
-	- Fixed pin panel
-	- Fixed remember current production block
-	- Fixed event Computing by Factory
-	- Fixed height data section
+    - Fixed pin panel
+    - Fixed remember current production block
+    - Fixed event Computing by Factory
+    - Fixed height data section
 ---------------------------------------------------------------------------------------------------
 Version: 0.8.5
   Bugfixes:
-	- Fixed MP desync
-	- Fixed error pin panel
+    - Fixed MP desync
+    - Fixed error pin panel
 ---------------------------------------------------------------------------------------------------
 Version: 0.8.4
   Changes:
-	- Changed UI
+    - Changed UI
   Bugfixes:
-	- Fixed MP desync
-	- Fixed production line list size
+    - Fixed MP desync
+    - Fixed production line list size
 ---------------------------------------------------------------------------------------------------
 Version: 0.8.3
   Bugfixes:
-	- Fixed speed belt
-	- Fixed selector filter
+    - Fixed speed belt
+    - Fixed selector filter
 ---------------------------------------------------------------------------------------------------
 Version: 0.8.2
   Bugfixes:
-	- fixed file name required
+    - fixed file name required
 ---------------------------------------------------------------------------------------------------
 Version: 0.8.1
   Changes:
-	- Upgrade factorio v0.17
-	- removed mining power
+    - Upgrade factorio v0.17
+    - removed mining power
   Bugfixes:
-	- fixed some panel style
+    - fixed some panel style
 ---------------------------------------------------------------------------------------------------
 Version: 0.7.11
   Bugfixes:
-	- Fixed error in product edition
+    - Fixed error in product edition
 ---------------------------------------------------------------------------------------------------
 Version: 0.7.10
   Changes:
-	- Added flare stack/clarifier consumption recipes
+    - Added flare stack/clarifier consumption recipes
   Bugfixes:
-	- Fixed show assembly for recipe
-	- Fixed product name for resource recipe
-	- Fixed close panel when change location
+    - Fixed show assembly for recipe
+    - Fixed product name for resource recipe
+    - Fixed close panel when change location
 ---------------------------------------------------------------------------------------------------
 Version: 0.7.9
   Changes:
-	- Added support for multiple identical products in recipes
-	- Added support for fluid and coal consuption in mining recipes
+    - Added support for multiple identical products in recipes
+    - Added support for fluid and coal consuption in mining recipes
 ---------------------------------------------------------------------------------------------------
 Version: 0.7.8
   Changes:
-	- Removed display size choose
-	- Added auto display sizing with scale
+    - Removed display size choose
+    - Added auto display sizing with scale
   Bugfixes:
-	- Fixed LuaElectricEnergySourcePrototype::effectivity Removal
+    - Fixed LuaElectricEnergySourcePrototype::effectivity Removal
 ---------------------------------------------------------------------------------------------------
 Version: 0.7.7
   Features:
-	- Added Rules for production machine list
+    - Added Rules for production machine list
   Bugfixes:
-	- Fixed Not Multiplayer Compatible
-	- Fixed module limitation
+    - Fixed Not Multiplayer Compatible
+    - Fixed module limitation
 ---------------------------------------------------------------------------------------------------
 Version: 0.7.6
   Bugfixes:
-	- Fixed event on checkbox
+    - Fixed event on checkbox
 ---------------------------------------------------------------------------------------------------
 Version: 0.7.5
   Changes:
-	- Completed french help
-	- Added auto update for pin panel
+    - Completed french help
+    - Added auto update for pin panel
   Bugfixes:
-	- Fixed count container with base time
+    - Fixed count container with base time
 ---------------------------------------------------------------------------------------------------
 Version: 0.7.4
   Features:
-	- Added belt container
-	- Added tool for product edition
-	- Added partial french help
+    - Added belt container
+    - Added tool for product edition
+    - Added partial french help
   Bugfixes:
-	- Fixed desync (tooltip cache)
+    - Fixed desync (tooltip cache)
 ---------------------------------------------------------------------------------------------------
 Version: 0.7.3
   Features:
-	- Added command
-	- Added close hotkey
+    - Added command
+    - Added close hotkey
   Changes:
-	- Changed compute model
-	- Removed remote control
+    - Changed compute model
+    - Removed remote control
   Bugfixes:
-	- Fixed recipe prototype
+    - Fixed recipe prototype
 ---------------------------------------------------------------------------------------------------
 Version: 0.7.2
   Features:
-	- Added matrix solver block (optional)
+    - Added matrix solver block (optional)
 ---------------------------------------------------------------------------------------------------
 Version: 0.7.1
   Features:
-	- Added administration tab
+    - Added administration tab
   Changes:
-	- Updated UI
+    - Updated UI
 ---------------------------------------------------------------------------------------------------
 Version: 0.7.0
   Changes:
-	- Fixed for v0.16
+    - Fixed for v0.16

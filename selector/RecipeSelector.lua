@@ -116,7 +116,7 @@ function RecipeSelector.methods:updateGroups(item, item2, item3)
   local list_group = {}
   local list_subgroup = {}
   local list_prototype = {}
-
+  --Logging:debug(Controller.classname, "filter_prototype", self:getFilter())
   firstGroup = nil
   for key, recipe in pairs(Player.getRecipes()) do
     self:appendGroups(recipe, "recipe", list_group, list_subgroup, list_prototype)

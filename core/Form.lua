@@ -109,7 +109,7 @@ function Form.methods:open(event, action, item, item2, item3)
   if parentPanel[self:classname()] == nil then
     Logging:debug(self:classname(), "parentPanel.clear()")
     parentPanel.clear()
-    self:onOpen(event, action, item, item2, item3)
+    --self:onOpen(event, action, item, item2, item3)
     self:afterOpen(event, action, item, item2, item3)
   end
 end
@@ -128,12 +128,28 @@ end
 function Form.methods:beforeEvent(event, action, item, item2, item3)
   local parentPanel = self:getParentPanel()
   if parentPanel[self:classname()] ~= nil and parentPanel[self:classname()].valid then
+    local close1 = self:onBeforeEvent(event, action, item, item2, item3)
     local close = self:onOpen(event, action, item, item2, item3)
     Logging:debug(self:classname() , "must close:",close)
     if close and action == "OPEN" then
       self:close(true)
     end
   end
+end
+
+-------------------------------------------------------------------------------
+-- On before event
+--
+-- @function [parent=#Form] onBeforeEvent
+--
+-- @param #LuaEvent event
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function Form.methods:onBeforeEvent(event, action, item, item2, item3)
+  return false
 end
 
 -------------------------------------------------------------------------------

@@ -294,6 +294,7 @@ function Controller.parseEvent()
               nextEvent = nil
               Event.state = Event.STATE_CONTINUE
               Event.force_refresh = true
+              Event.prepare = false
             end
             Logging:debug(Controller.classname, "event state", Event.state)
             if(Event.state == Event.STATE_RELEASE) then
@@ -302,14 +303,6 @@ function Controller.parseEvent()
           end
         end
       end
-      --    if Controller.isOpened() and (rawlen(Controller.getDialogPanel().children) == 0 or Controller.getView("HMProductLineEdition"):isOpened() or Controller.getView("HMProductBlockEdition"):isOpened()) then
-      --        local globalGui = Player.getGlobalGui()
-      --        if globalGui.currentTab == "HMProductionBlockTab" then
-      --          Controller.sendEvent(nil, "HMProductBlockEdition", "OPEN", Event.item1, Event.item2, Event.item3)
-      --          else
-      --          Controller.sendEvent(nil, "HMProductLineEdition", "OPEN", Event.item1, Event.item2, Event.item3)
-      --        end
-      --    end
     end
   end)
   if not(ok) then
@@ -332,7 +325,9 @@ end
 --
 function Controller.sendEvent(event, classname, action, item, item2, item3)
   Logging:debug(Controller.classname, "send_event(event, classname, action, item, item2, item3)", classname, action, item, item2, item3)
-  Controller.onEvent(event, action, item, item2, item3)
+  if Event.prepare == false then
+    Controller.onEvent(event, action, item, item2, item3)
+  end
   if views ~= nil and views[classname] then
     if action == "CLOSE" then
       views[classname]:close(true)
@@ -342,6 +337,7 @@ function Controller.sendEvent(event, classname, action, item, item2, item3)
     if string.find(classname, "Pin") then form_loop = {"pin"} end
 
     if Event.prepare == false then
+      Logging:debug(Controller.classname, "===== prepare", game.tick)
       if action == "OPEN" then
         if string.find(classname, "Edition") or string.find(classname, "Selector") or string.find(classname, "Settings") or string.find(classname, "Help") or string.find(classname, "Download") then
           ui.dialog = classname
@@ -398,6 +394,7 @@ function Controller.sendEvent(event, classname, action, item, item2, item3)
       end
     end
 
+    Logging:debug(Controller.classname, "===== open and update", game.tick)
     for _,locate in pairs(form_loop) do
       local form_name = ui[locate]
       if form_name ~= nil then
@@ -431,6 +428,7 @@ end
 function Controller.createEvent(event, classname, action, item, item2, item3)
   Logging:debug(Controller.classname, "createEvent(event, classname, action, item, item2, item3)", classname, action, item, item2, item3)
   nextEvent = {name=classname, action=action, item1=item, item2=item2, item3=item3}
+  Event.force_refresh = true
 end
 
 -------------------------------------------------------------------------------
