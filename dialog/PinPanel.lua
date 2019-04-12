@@ -49,9 +49,9 @@ function PinPanel.methods:getParentPanel()
 end
 
 -------------------------------------------------------------------------------
--- On open
+-- On before event
 --
--- @function [parent=#PinPanel] onOpen
+-- @function [parent=#PinPanel] onBeforeEvent
 --
 -- @param #LuaEvent event
 -- @param #string action action name
@@ -61,7 +61,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function PinPanel.methods:onOpen( event, action, item, item2, item3)
+function PinPanel.methods:onBeforeEvent( event, action, item, item2, item3)
   local globalGui = Player.getGlobalGui()
   local close = (action == "OPEN") -- only on open event
   if action == "OPEN" then
@@ -71,16 +71,6 @@ function PinPanel.methods:onOpen( event, action, item, item2, item3)
     globalGui.pinBlock = item
   end
   return close
-end
-
--------------------------------------------------------------------------------
--- On close dialog
---
--- @function [parent=#PinPanel] onClose
---
-function PinPanel.methods:onClose()
-  local globalGui = Player.getGlobalGui()
-  globalGui.pinBlock = nil
 end
 
 -------------------------------------------------------------------------------

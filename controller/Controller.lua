@@ -218,8 +218,6 @@ function Controller.onGuiClick(event)
   end
 end
 
-
-
 -------------------------------------------------------------------------------
 -- Parse event
 --

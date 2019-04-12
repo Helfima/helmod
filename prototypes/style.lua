@@ -588,9 +588,9 @@ default_gui["helmod_label_element"] = {
   type = "label_style",
   parent = "label",
   font = "helmod_font_normal",
-  top_padding = -5,
+  top_padding = -3,
   right_padding = 2,
-  bottom_padding = -5,
+  bottom_padding = 0,
   left_padding = 2
 }
 
@@ -603,9 +603,9 @@ default_gui["helmod_label_element_sm"] = {
   type = "label_style",
   parent = "label",
   font = "helmod_font_small_bold",
-  top_padding = -4,
+  top_padding = -2,
   right_padding = 2,
-  bottom_padding = -4,
+  bottom_padding = -1,
   left_padding = 2
 }
 
