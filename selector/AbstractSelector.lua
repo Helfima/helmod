@@ -190,6 +190,30 @@ end
 -------------------------------------------------------------------------------
 -- On before event
 --
+-- @function [parent=#Form] beforeEvent
+--
+-- @param #LuaEvent event
+-- @param #string action action name
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function AbstractSelector.methods:beforeEvent(event, action, item, item2, item3)
+  if action == "OPEN" then
+    local close1 = self:onBeforeEvent(event, action, item, item2, item3)
+    local close = self:onOpen(event, action, item, item2, item3)
+    Logging:debug(self:classname() , "must close:",close)
+    if close and action == "OPEN" then
+      self:close(true)
+    end
+  else
+    self.class.super.methods.beforeEvent(self, event, action, item, item2, item3)
+  end
+end
+
+-------------------------------------------------------------------------------
+-- On before event
+--
 -- @function [parent=#AbstractSelector] onBeforeEvent
 --
 -- @param #LuaEvent event
@@ -201,25 +225,27 @@ end
 function AbstractSelector.methods:onBeforeEvent(event, action, item, item2, item3)
   Logging:debug(self:classname(), "onBeforeEvent():", action, item, item2, item3)
   local player_gui = Player.getGlobalGui()
-  local close = true
+  local close = action == "OPEN"
   filter_prototype_product = true
 
-  local globalPlayer = Player.getGlobal()
-  if item3 ~= nil then
-    filter_prototype = item3:lower():gsub("[-]"," ")
-  else
-    filter_prototype = nil
-  end
-  if event ~= nil and event.button ~= nil and event.button == defines.mouse_button_type.right then
-    filter_prototype_product = false
-  end
-  if item ~= nil and item2 ~= nil then
-    Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
-    if player_gui.guiElementLast ~= item..item2 then
-      close = false
+  if action == "OPEN" then
+    local globalPlayer = Player.getGlobal()
+    if item3 ~= nil then
+      filter_prototype = item3:lower():gsub("[-]"," ")
+    else
+      filter_prototype = nil
     end
-    player_gui.guiElementLast = item..item2
-    Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
+    if event ~= nil and event.button ~= nil and event.button == defines.mouse_button_type.right then
+      filter_prototype_product = false
+    end
+    if item ~= nil and item2 ~= nil then
+      Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
+      if player_gui.guiElementLast ~= item..item2 then
+        close = false
+      end
+      player_gui.guiElementLast = item..item2
+      Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
+    end
   end
   --Logging:debug(Controller.classname, "filter_prototype", filter_prototype)
   -- close si nouvel appel
