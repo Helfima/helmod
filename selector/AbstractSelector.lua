@@ -207,7 +207,7 @@ function AbstractSelector.methods:beforeEvent(event, action, item, item2, item3)
       self:close(true)
     end
   else
-    self.class.super.methods.beforeEvent(self, event, action, item, item2, item3)
+    AbstractSelector.super.methods.beforeEvent(self, event, action, item, item2, item3)
   end
 end
 
