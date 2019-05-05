@@ -164,9 +164,9 @@ function EnergyEdition.methods:getObject(item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
--- On open
+-- On before event
 --
--- @function [parent=#EnergyEdition] onOpen
+-- @function [parent=#EnergyEdition] onBeforeEvent
 --
 -- @param #LuaEvent event
 -- @param #string action action name
@@ -176,8 +176,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function EnergyEdition.methods:onOpen(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "onOpen():", action, item, item2, item3)
+function EnergyEdition.methods:onBeforeEvent(event, action, item, item2, item3)
   local model = Model.getModel()
   local close = true
   if model.guiPowerLast == nil or model.guiPowerLast ~= item then
@@ -200,9 +199,9 @@ function EnergyEdition.methods:onClose()
 end
 
 -------------------------------------------------------------------------------
--- After open
+-- On open
 --
--- @function [parent=#EnergyEdition] afterOpen
+-- @function [parent=#EnergyEdition] onOpen
 --
 -- @param #LuaEvent event
 -- @param #string action action name
@@ -210,8 +209,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function EnergyEdition.methods:afterOpen(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "afterOpen():", action, item, item2, item3)
+function EnergyEdition.methods:onOpen(event, action, item, item2, item3)
+  Logging:debug(self:classname(), "onOpen()", action, item, item2, item3)
   self:buildHeaderPanel()
   self:buildPrimaryPanel()
   self:buildSecondaryPanel()

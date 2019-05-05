@@ -21,9 +21,9 @@ function AbstractEdition.methods:getParentPanel()
 end
 
 -------------------------------------------------------------------------------
--- On open
+-- On before event
 --
--- @function [parent=#AbstractEdition] onOpen
+-- @function [parent=#AbstractEdition] onBeforeEvent
 --
 -- @param #LuaEvent event
 -- @param #string action action name
@@ -33,7 +33,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function AbstractEdition.methods:onOpen(event, action, item, item2, item3)
+function AbstractEdition.methods:onBeforeEvent(event, action, item, item2, item3)
   local player_gui = Player.getGlobalGui()
   local close = (action == "OPEN") -- only on open event
   player_gui.moduleListRefresh = false
@@ -266,9 +266,9 @@ function AbstractEdition.methods:getBeaconActivedModulesPanel()
 end
 
 -------------------------------------------------------------------------------
--- After open
+-- On open
 --
--- @function [parent=#AbstractEdition] afterOpen
+-- @function [parent=#AbstractEdition] onOpen
 --
 -- @param #LuaEvent event
 -- @param #string action action name
@@ -276,8 +276,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractEdition.methods:afterOpen(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "afterOpen():", action, item, item2, item3)
+function AbstractEdition.methods:onOpen(event, action, item, item2, item3)
+  Logging:debug(self:classname(), "onOpen()", action, item, item2, item3)
   local object = self:getObject(event, action, item, item2, item3)
 
   local player_gui = Player.getGlobalGui()

@@ -104,13 +104,11 @@ end
 -- @param #string item3 third item name
 --
 function Form.methods:open(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "open():", action, item, item2, item3)
+  Logging:debug(self:classname(), "open()", action, item, item2, item3)
   local parentPanel = self:getParentPanel()
   if parentPanel[self:classname()] == nil then
-    Logging:debug(self:classname(), "parentPanel.clear()")
     parentPanel.clear()
-    --self:onOpen(event, action, item, item2, item3)
-    self:afterOpen(event, action, item, item2, item3)
+    self:onOpen(event, action, item, item2, item3)
   end
 end
 
@@ -126,10 +124,10 @@ end
 -- @param #string item3 third item name
 --
 function Form.methods:beforeEvent(event, action, item, item2, item3)
+  Logging:debug(self:classname(), "beforeEvent()", action, item, item2, item3)
   local parentPanel = self:getParentPanel()
   if parentPanel[self:classname()] ~= nil and parentPanel[self:classname()].valid then
-    local close1 = self:onBeforeEvent(event, action, item, item2, item3)
-    local close = self:onOpen(event, action, item, item2, item3)
+    local close = self:onBeforeEvent(event, action, item, item2, item3)
     Logging:debug(self:classname() , "must close:",close)
     if close and action == "OPEN" then
       self:close(true)
@@ -167,20 +165,6 @@ function Form.methods:onEvent(event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
--- Before Open
---
--- @function [parent=#Form] beforeOpen
---
--- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function Form.methods:beforeOpen(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "beforeOpen():", action, item, item2, item3)
-end
--------------------------------------------------------------------------------
 -- On open
 --
 -- @function [parent=#Form] onOpen
@@ -192,22 +176,7 @@ end
 -- @param #string item3 third item name
 --
 function Form.methods:onOpen(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "onOpen():", action, item, item2, item3)
   return false
-end
-
--------------------------------------------------------------------------------
--- After open
---
--- @function [parent=#Form] afterOpen
---
--- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function Form.methods:afterOpen(event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------

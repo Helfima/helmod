@@ -7,9 +7,6 @@
 
 AbstractSelector = setclass("HMAbstractSelector", Dialog)
 
-local list_group = {}
-local list_subgroup = {}
-local list_prototype = {}
 local filter_prototype = nil
 local filter_prototype_product = true
 
@@ -49,7 +46,7 @@ end
 -------------------------------------------------------------------------------
 -- Set groups
 --
--- @function [parent=#AbstractSelector] getGroups
+-- @function [parent=#AbstractSelector] setGroups
 --
 -- @param #table list
 --
@@ -67,20 +64,29 @@ end
 -- @return #table
 --
 function AbstractSelector.methods:getListPrototype()
-  return list_prototype
+  return {}
 end
 
 -------------------------------------------------------------------------------
--- Set list prototype
+-- Return list group
 --
--- @function [parent=#AbstractSelector] setListPrototype
---
--- @param #table list
+-- @function [parent=#AbstractSelector] getListGroup
 --
 -- @return #table
 --
-function AbstractSelector.methods:setListPrototype(list)
-  list_prototype = list
+function AbstractSelector.methods:getListGroup()
+  return {}
+end
+
+-------------------------------------------------------------------------------
+-- Return list subgroup
+--
+-- @function [parent=#AbstractSelector] getListSubgroup
+--
+-- @return #table
+--
+function AbstractSelector.methods:getListSubgroup()
+  return {}
 end
 
 -------------------------------------------------------------------------------
@@ -201,25 +207,27 @@ end
 function AbstractSelector.methods:onBeforeEvent(event, action, item, item2, item3)
   Logging:debug(self:classname(), "onBeforeEvent():", action, item, item2, item3)
   local player_gui = Player.getGlobalGui()
-  local close = true
-  filter_prototype_product = true
+  local close = action == "OPEN"
+  if action == "OPEN" then
+    filter_prototype_product = true
 
-  local globalPlayer = Player.getGlobal()
-  if item3 ~= nil then
-    filter_prototype = item3:lower():gsub("[-]"," ")
-  else
-    filter_prototype = nil
-  end
-  if event ~= nil and event.button ~= nil and event.button == defines.mouse_button_type.right then
-    filter_prototype_product = false
-  end
-  if item ~= nil and item2 ~= nil then
-    Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
-    if player_gui.guiElementLast ~= item..item2 then
-      close = false
+    local globalPlayer = Player.getGlobal()
+    if item3 ~= nil then
+      filter_prototype = item3:lower():gsub("[-]"," ")
+    else
+      filter_prototype = nil
     end
-    player_gui.guiElementLast = item..item2
-    Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
+    if event ~= nil and event.button ~= nil and event.button == defines.mouse_button_type.right then
+      filter_prototype_product = false
+    end
+    if item ~= nil and item2 ~= nil then
+      Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
+      if player_gui.guiElementLast ~= item..item2 then
+        close = false
+      end
+      player_gui.guiElementLast = item..item2
+      Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
+    end
   end
   --Logging:debug(Controller.classname, "filter_prototype", filter_prototype)
   -- close si nouvel appel
@@ -280,35 +288,29 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
 
   if action == "recipe-group" then
     globalPlayer.recipeGroupSelected = item
-    --self:onUpdate(item, item2, item3)
     Controller.createEvent(event, self:classname(), "UPDATE", item, item2, item3)
   end
 
   if action == "change-boolean-settings" then
     if globalSettings[item] == nil then globalSettings[item] = defaultSettings[item] end
     globalSettings[item] = not(globalSettings[item])
-    --self:onUpdate(item, item2, item3)
+    self:resetGroups(item, item2, item3)
     Controller.createEvent(event, self:classname(), "UPDATE", item, item2, item3)
   end
 
   if action == "recipe-filter-switch" then
     filter_prototype_product = not(filter_prototype_product)
-    --self:onUpdate(item, item2, item3)
     Controller.createEvent(event, self:classname(), "UPDATE", item, item2, item3)
   end
 
   if action == "recipe-filter" then
     if Player.getSettings("filter_on_text_changed", true) then
       filter_prototype = event.element.text
-      --if string.len(filter_prototype) > 2 then
-      --self:onUpdate(item, item2, item3)
       Controller.createEvent(event, self:classname(), "UPDATE", item, item2, item3)
-      --end
     else
       if event.element.parent ~= nil and event.element.parent["filter-text"] ~= nil then
         filter_prototype = event.element.parent["filter-text"].text
       end
-      --self:onUpdate(item, item2, item3)
       Controller.createEvent(event, self:classname(), "UPDATE", item, item2, item3)
     end
   end
@@ -316,18 +318,29 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
+-- Reset groups
+--
+-- @function [parent=#AbstractSelector] resetGroups
+--
+function AbstractSelector.methods:resetGroups()
+  Logging:error(self:classname(), "no resetGroups() overided")
+end
+
+-------------------------------------------------------------------------------
 -- Update groups
 --
 -- @function [parent=#AbstractSelector] updateGroups
 --
+-- @param #LuaEvent event
+-- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
 -- @return {list_group, list_subgroup, list_prototype}
 --
-function AbstractSelector.methods:updateGroups(item, item2, item3)
-  Logging:trace(self:classname(), "updateGroups():", item, item2, item3)
+function AbstractSelector.methods:updateGroups(event, action, item, item2, item3)
+  Logging:trace(self:classname(), "updateGroups()", action, item, item2, item3)
   return {},{},{}
 end
 
@@ -344,8 +357,12 @@ end
 --
 function AbstractSelector.methods:prepare(event, action, item, item2, item3)
   -- recuperation recipes
-  list_group, list_subgroup, list_prototype = self:updateGroups(item, item2, item3)
-  return true
+  if Model.countList(self:getListGroup()) == 0 then
+    self:updateGroups(event, action, item, item2, item3)
+    return true
+  end
+  --Logging:debug(self:classname(), "prepare()", Model.countList(list_group), Model.countList(list_subgroup), Model.countList(list_prototype))
+  return false
 end
 
 -------------------------------------------------------------------------------
@@ -353,18 +370,43 @@ end
 --
 -- @function [parent=#AbstractSelector] onUpdate
 --
+-- @param #LuaEvent event
+-- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractSelector.methods:onUpdate(item, item2, item3)
-  Logging:trace(self:classname(), "onUpdate():",item, item2, item3)
-  -- recuperation recipes
-  --list_group, list_subgroup, list_prototype = self:updateGroups(item, item2, item3)
+function AbstractSelector.methods:onUpdate(event, action, item, item2, item3)
+  Logging:trace(self:classname(), "onUpdate():", action, item, item2, item3)
+  self:updateFilter(event, action, item, item2, item3)
+  self:updateGroupSelector(event, action, item, item2, item3)
+  self:updateItemList(event, action, item, item2, item3)
+end
 
-  self:updateFilter(item, item2, item3)
-  self:updateGroupSelector(item, item2, item3)
-  self:updateItemList(item, item2, item3)
+-------------------------------------------------------------------------------
+-- Check filter
+--
+-- @function [parent=#AbstractSelector] checkFilter
+--
+-- @param #element
+--
+-- @return boolean
+--
+function AbstractSelector.methods:checkFilter(element)
+  Logging:trace(self:classname(), "checkFilter()")
+  local filter_prototype = self:getFilter()
+  local filter_prototype_product = self:getProductFilter()
+  local find = false
+  if filter_prototype ~= nil and filter_prototype ~= "" then
+    local search = element.search_products
+    if filter_prototype_product ~= true then
+      search = element.search_ingredients
+    end
+    return string.find(search:lower():gsub("[-]"," "), filter_prototype)
+  else
+    return true
+  end
+  return false
 end
 
 -------------------------------------------------------------------------------
@@ -372,12 +414,14 @@ end
 --
 -- @function [parent=#AbstractSelector] updateFilter
 --
+-- @param #LuaEvent event
+-- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractSelector.methods:updateFilter(item, item2, item3)
-  Logging:trace(self:classname(), "updateFilter():", item, item2, item3)
+function AbstractSelector.methods:updateFilter(event, action, item, item2, item3)
+  Logging:trace(self:classname(), "updateFilter()", action, item, item2, item3)
   local panel = self:getFilterPanel()
 
   if panel["filter"] == nil then
@@ -417,7 +461,7 @@ function AbstractSelector.methods:updateFilter(item, item2, item3)
     if self.product_option then
       panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-product"].state = filter_prototype_product
       panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-ingredient"].state = not(filter_prototype_product)
-      if filter_prototype ~= nil then
+      if filter_prototype ~= nil and action == "OPEN" then
         if Player.getSettings("filter_on_text_changed", true) then
           panel["filter"]["cell-filter"][self:classname().."=recipe-filter=ID=filter-value"].text = filter_prototype
         else
@@ -456,12 +500,14 @@ end
 --
 -- @function [parent=#AbstractSelector] updateItemList
 --
+-- @param #LuaEvent event
+-- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractSelector.methods:updateItemList(item, item2, item3)
-  Logging:trace(self:classname(), "updateItemList():", item, item2, item3)
+function AbstractSelector.methods:updateItemList(event, action, item, item2, item3)
+  Logging:trace(self:classname(), "updateItemList():", action, item, item2, item3)
   local item_list_panel = self:getItemListPanel()
 
   if item_list_panel["recipe_list"] ~= nil  and item_list_panel["recipe_list"].valid then
@@ -469,15 +515,18 @@ function AbstractSelector.methods:updateItemList(item, item2, item3)
   end
 
   -- recuperation recipes et subgroupes
-  local list = self:getItemList()
+  local list_item = self:getItemList()
+  local list_subgroup = self:getListSubgroup()
 
   local recipe_selector_list = ElementGui.addGuiTable(item_list_panel, "recipe_list", 1, helmod_table_style.list)
-  for subgroup, list in spairs(list,function(t,a,b) return list_subgroup[b]["order"] > list_subgroup[a]["order"] end) do
+  for subgroup, list in spairs(list_item,function(t,a,b) return list_subgroup[b]["order"] > list_subgroup[a]["order"] end) do
     -- boucle subgroup
     local guiRecipeSubgroup = ElementGui.addGuiTable(recipe_selector_list, "recipe-table-"..subgroup, 10, "helmod_table_recipe_selector")
     for key, prototype in spairs(list,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
-      local tooltip = self:buildPrototypeTooltip(prototype)
-      self:buildPrototypeIcon(guiRecipeSubgroup, prototype, tooltip)
+      if self:checkFilter(prototype) then
+        local tooltip = self:buildPrototypeTooltip(prototype)
+        self:buildPrototypeIcon(guiRecipeSubgroup, prototype, tooltip)
+      end
     end
   end
 
@@ -494,6 +543,7 @@ function AbstractSelector.methods:getItemList()
   Logging:trace(self:classname(), "getItemList()")
   local global_player = Player.getGlobal()
   local list_selected = {}
+  local list_prototype = self:getListPrototype()
   if list_prototype[global_player.recipeGroupSelected] ~= nil then
     list_selected = list_prototype[global_player.recipeGroupSelected]
   end
@@ -527,12 +577,14 @@ end
 --
 -- @function [parent=#AbstractSelector] updateGroupSelector
 --
+-- @param #LuaEvent event
+-- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractSelector.methods:updateGroupSelector(item, item2, item3)
-  Logging:trace(self:classname(), "updateGroupSelector():", item, item2, item3)
+function AbstractSelector.methods:updateGroupSelector(event, action, item, item2, item3)
+  Logging:trace(self:classname(), "updateGroupSelector():", action, item, item2, item3)
   local global_player = Player.getGlobal()
   local panel = self:getGroupsPanel()
 
@@ -540,20 +592,23 @@ function AbstractSelector.methods:updateGroupSelector(item, item2, item3)
     panel["recipe-groups"].destroy()
   end
 
+  local list_group = self:getListGroup()
   Logging:trace(self:classname(), "list_group:",list_group)
 
   -- ajouter de la table des groupes de recipe
   local gui_group_panel = ElementGui.addGuiTable(panel, "recipe-groups", 6, "helmod_table_recipe_selector")
   for _, group in spairs(list_group,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
-    -- set le groupe
-    if global_player.recipeGroupSelected == nil then global_player.recipeGroupSelected = group.name end
-    local color = nil
-    if global_player.recipeGroupSelected == group.name then
-      color = "yellow"
+    if self:checkFilter(group) then
+      -- set le groupe
+      if global_player.recipeGroupSelected == nil then global_player.recipeGroupSelected = group.name end
+      local color = nil
+      if global_player.recipeGroupSelected == group.name then
+        color = "yellow"
+      end
+      local tooltip = "item-group-name."..group.name
+      -- ajoute les icons de groupe
+      local action = ElementGui.addGuiButtonSelectSpriteXxl(gui_group_panel, self:classname().."=recipe-group=ID=", "item-group", group.name, group.name, ({tooltip}), color)
     end
-    local tooltip = "item-group-name."..group.name
-    -- ajoute les icons de groupe
-    local action = ElementGui.addGuiButtonSelectSpriteXxl(gui_group_panel, self:classname().."=recipe-group=ID=", "item-group", group.name, group.name, ({tooltip}), color)
   end
 
 end

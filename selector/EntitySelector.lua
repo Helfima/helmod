@@ -9,6 +9,9 @@ require "selector.AbstractSelector"
 EntitySelector = setclass("HMEntitySelector", AbstractSelector)
 
 local firstGroup = nil
+local list_group = {}
+local list_subgroup = {}
+local list_prototype = {}
 
 -------------------------------------------------------------------------------
 -- Return caption
@@ -22,30 +25,60 @@ function EntitySelector.methods:getCaption(parent)
 end
 
 -------------------------------------------------------------------------------
--- Check filter
+-- After initialization
 --
--- @function [parent=#EntitySelector] checkFilter
+-- @function [parent=#EntitySelector] afterInit
 --
--- @param #LuaEntityPrototype prototype
+function EntitySelector.methods:afterInit()
+  Logging:debug(self:classname(), "afterInit()")
+  self.disable_option = true
+  self.hidden_option = true
+  self.product_option = false
+end
+
+-------------------------------------------------------------------------------
+-- Reset groups
 --
--- @return boolean
+-- @function [parent=#EntitySelector] resetGroups
 --
-function EntitySelector.methods:checkFilter(prototype)
-  Logging:trace(self:classname(), "checkFilter()")
-  local filter_prototype = self:getFilter()
-  local filter_prototype_product = self:getProductFilter()
-  local find = false
-  if filter_prototype ~= nil and filter_prototype ~= "" then
-    if filter_prototype_product ~= true then
-      local search = prototype.name:lower():gsub("[-]"," ")
-      if string.find(search, filter_prototype) then
-        find = true
-      end
-    end
-  else
-    find = true
-  end
-  return find
+function EntitySelector.methods:resetGroups()
+  Logging:trace(self:classname(), "resetGroups()")
+  list_group = {}
+  list_subgroup = {}
+  list_prototype = {}
+end
+
+-------------------------------------------------------------------------------
+-- Return list prototype
+--
+-- @function [parent=#EntitySelector] getListPrototype
+--
+-- @return #table
+--
+function EntitySelector.methods:getListPrototype()
+  return list_prototype
+end
+
+-------------------------------------------------------------------------------
+-- Return list group
+--
+-- @function [parent=#EntitySelector] getListGroup
+--
+-- @return #table
+--
+function EntitySelector.methods:getListGroup()
+  return list_group
+end
+
+-------------------------------------------------------------------------------
+-- Return list subgroup
+--
+-- @function [parent=#EntitySelector] getListSubgroup
+--
+-- @return #table
+--
+function EntitySelector.methods:getListSubgroup()
+  return list_subgroup
 end
 
 -------------------------------------------------------------------------------
@@ -71,11 +104,20 @@ function EntitySelector.methods:appendGroups(name, type, list_group, list_subgro
     local subgroup_name = EntityPrototype.native().subgroup.name
     
     if firstGroup == nil then firstGroup = group_name end
-    list_group[group_name] = EntityPrototype.native().group
+    if list_group[group_name] == nil then
+      list_group[group_name] = {name=group_name, search_products="", search_ingredients=""}
+    end
     list_subgroup[subgroup_name] = EntityPrototype.native().subgroup
     if list_prototype[group_name] == nil then list_prototype[group_name] = {} end
     if list_prototype[group_name][subgroup_name] == nil then list_prototype[group_name][subgroup_name] = {} end
-    table.insert(list_prototype[group_name][subgroup_name], {name=name, type=type, order=EntityPrototype.native().order})
+    
+    local search_products = name
+    list_group[group_name].search_products = list_group[group_name].search_products .. search_products
+    
+    local search_ingredients = name
+    list_group[group_name].search_ingredients = list_group[group_name].search_ingredients .. search_ingredients
+
+    table.insert(list_prototype[group_name][subgroup_name], {name=name, type=type, order=EntityPrototype.native().order, search_products=search_products, search_ingredients=search_ingredients})
   end
 end
 
@@ -84,20 +126,18 @@ end
 --
 -- @function [parent=#EntitySelector] updateGroups
 --
+-- @param #LuaEvent event
+-- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
--- @return list_group, list_subgroup, list_prototype
---
-function EntitySelector.methods:updateGroups(item, item2, item3)
-  Logging:debug(self:classname(), "updateGroups():", item, item2, item3)
+function EntitySelector.methods:updateGroups(event, action, item, item2, item3)
+  Logging:trace(self:classname(), "updateGroups()", action, item, item2, item3)
   local global_player = Player.getGlobal()
   local global_gui = Player.getGlobalGui()
-  -- recuperation recipes
-  local list_group = {}
-  local list_subgroup = {}
-  local list_prototype = {}
+  
+  self:resetGroups()
 
   firstGroup = nil
 
@@ -108,8 +148,6 @@ function EntitySelector.methods:updateGroups(item, item2, item3)
   if list_prototype[global_player.recipeGroupSelected] == nil then
     global_player.recipeGroupSelected = firstGroup
   end
-  Logging:debug(self:classname(), "list_group", list_group, "list_subgroup", list_subgroup, "list_prototype", list_prototype)
-  return list_group, list_subgroup, list_prototype
 end
 
 -------------------------------------------------------------------------------
@@ -133,7 +171,7 @@ end
 --
 function EntitySelector.methods:buildPrototypeIcon(guiElement, prototype, tooltip)
   Logging:trace(self:classname(), "buildPrototypeIcon(player, guiElement, prototype, tooltip:",player, guiElement, prototype, tooltip)
-  ElementGui.addGuiButtonSelectSprite(guiElement, self:classname().."=element-select=ID=entity=", Player.getEntityIconType(prototype), prototype.name, prototype.name, tooltip)
+  ElementGui.addGuiButtonSelectSprite(guiElement, self:classname().."=element-select=ID=entity=", "entity", prototype.name, prototype.name, tooltip)
 end
 
 

@@ -33,9 +33,9 @@ function Download.methods:getParentPanel()
 end
 
 -------------------------------------------------------------------------------
--- On open
+-- On before event
 --
--- @function [parent=#Download] onOpen
+-- @function [parent=#Download] onBeforeEvent
 --
 -- @param #LuaEvent event
 -- @param #string action action name
@@ -45,7 +45,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function Download.methods:onOpen(event, action, item, item2, item3)
+function Download.methods:onBeforeEvent(event, action, item, item2, item3)
   -- close si nouvel appel
   return true
 end

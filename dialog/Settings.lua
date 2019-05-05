@@ -33,9 +33,9 @@ function Settings.methods:getParentPanel()
 end
 
 -------------------------------------------------------------------------------
--- On open
+-- On before event
 --
--- @function [parent=#Settings] onOpen
+-- @function [parent=#Settings] onBeforeEvent
 --
 -- @param #LuaEvent event
 -- @param #string action action name
@@ -45,7 +45,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function Settings.methods:onOpen(event, action, item, item2, item3)
+function Settings.methods:onBeforeEvent(event, action, item, item2, item3)
   -- close si nouvel appel
   return true
 end
@@ -64,9 +64,9 @@ function Settings.methods:getAboutSettingsPanel()
 end
 
 -------------------------------------------------------------------------------
--- After open
+-- On open
 --
--- @function [parent=#Settings] afterOpen
+-- @function [parent=#Settings] onOpen
 --
 -- @param #LuaEvent event
 -- @param #string action action name
@@ -74,7 +74,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Settings.methods:afterOpen(event, action, item, item2, item3)
+function Settings.methods:onOpen(event, action, item, item2, item3)
   self:updateAboutSettings(event, action, item, item2, item3)
 end
 

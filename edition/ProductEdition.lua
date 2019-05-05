@@ -19,9 +19,9 @@ function ProductEdition.methods:onInit(parent)
 end
 
 -------------------------------------------------------------------------------
--- On open
+-- On before event
 --
--- @function [parent=#ProductEdition] onOpen
+-- @function [parent=#ProductEdition] onBeforeEvent
 --
 -- @param #LuaEvent event
 -- @param #string action action name
@@ -31,7 +31,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function ProductEdition.methods:onOpen(event, action, item, item2, item3)
+function ProductEdition.methods:onBeforeEvent(event, action, item, item2, item3)
   local player_gui = Player.getGlobalGui()
   local close = true
   if player_gui.guiProductLast == nil or player_gui.guiProductLast ~= item then

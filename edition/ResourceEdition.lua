@@ -21,9 +21,9 @@ function ResourceEdition.methods:onInit(parent)
 end
 
 -------------------------------------------------------------------------------
--- On open
+-- On before event
 --
--- @function [parent=#ResourceEdition] onOpen
+-- @function [parent=#ResourceEdition] onBeforeEvent
 --
 -- @param #LuaEvent event
 -- @param #string action action name
@@ -33,7 +33,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function ResourceEdition.methods:onOpen(event, action, item, item2, item3)
+function ResourceEdition.methods:onBeforeEvent(event, action, item, item2, item3)
 	local model = Model.getModel()
 	local close = true
 	model.moduleListRefresh = false

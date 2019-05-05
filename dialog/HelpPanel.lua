@@ -165,9 +165,9 @@ function HelpPanel.methods:getParentPanel()
 end
 
 -------------------------------------------------------------------------------
--- On open
+-- On before event
 --
--- @function [parent=#HelpPanel] onOpen
+-- @function [parent=#HelpPanel] onBeforeEvent
 --
 -- @param #LuaEvent event
 -- @param #string action action name
@@ -177,7 +177,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function HelpPanel.methods:onOpen(event, action, item, item2, item3)
+function HelpPanel.methods:onBeforeEvent(event, action, item, item2, item3)
   -- close si nouvel appel
   return true
 end
@@ -282,9 +282,9 @@ function HelpPanel.methods:onEvent(event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
--- After open
+-- On open
 --
--- @function [parent=#HelpPanel] afterOpen
+-- @function [parent=#HelpPanel] onOpen
 --
 -- @param #LuaEvent event
 -- @param #string action action name
@@ -292,7 +292,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function HelpPanel.methods:afterOpen(event, action, item, item2, item3)
+function HelpPanel.methods:onOpen(event, action, item, item2, item3)
   self:updateMenu(event, action, item, item2, item3)
   self:getContentPanel()
 end

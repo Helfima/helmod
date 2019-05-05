@@ -218,7 +218,7 @@ function Player.getSettings(name, global)
   Logging:trace(Player.classname, "getSettings(name, global)", name, global)
   local property = nil
   local prefixe = "helmod_"
-  if not(global) then
+  if not(global) and Lua_player ~= nil then
     property = Lua_player.mod_settings[prefixe..name]
   else
     property = settings.global[prefixe..name]

@@ -30,9 +30,9 @@ function StatusPanel.methods:getParentPanel()
 end
 
 -------------------------------------------------------------------------------
--- On open
+-- On before event
 --
--- @function [parent=#StatusPanel] onOpen
+-- @function [parent=#StatusPanel] onBeforeEvent
 --
 -- @param #LuaEvent event
 -- @param #string action action name
@@ -42,7 +42,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function StatusPanel.methods:onOpen( event, action, item, item2, item3)
+function StatusPanel.methods:onBeforeEvent( event, action, item, item2, item3)
   local globalGui = Player.getGlobalGui()
   local close = true
   if globalGui.pinBlock == nil or globalGui.pinBlock ~= item then
@@ -90,9 +90,9 @@ function StatusPanel.methods:getHeaderPanel()
 end
 
 -------------------------------------------------------------------------------
--- After open
+-- On open
 --
--- @function [parent=#StatusPanel] afterOpen
+-- @function [parent=#StatusPanel] onOpen
 --
 -- @param #LuaEvent event
 -- @param #string action action name
@@ -100,7 +100,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function StatusPanel.methods:afterOpen(event, action, item, item2, item3)
+function StatusPanel.methods:onOpen(event, action, item, item2, item3)
   self:updateHeader(event, action, item, item2, item3)
   self:getInfoPanel()
 end

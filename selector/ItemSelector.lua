@@ -9,6 +9,9 @@ require "selector.AbstractSelector"
 ItemSelector = setclass("HMItemSelector", AbstractSelector)
 
 local firstGroup = nil
+local list_group = {}
+local list_subgroup = {}
+local list_prototype = {}
 
 -------------------------------------------------------------------------------
 -- Return caption
@@ -22,30 +25,48 @@ function ItemSelector.methods:getCaption(parent)
 end
 
 -------------------------------------------------------------------------------
--- Check filter
+-- Reset groups
 --
--- @function [parent=#ItemSelector] checkFilter
+-- @function [parent=#ItemSelector] resetGroups
 --
--- @param #LuaItemPrototype prototype
+function ItemSelector.methods:resetGroups()
+  Logging:trace(self:classname(), "resetGroups()")
+  list_group = {}
+  list_subgroup = {}
+  list_prototype = {}
+end
+
+-------------------------------------------------------------------------------
+-- Return list prototype
 --
--- @return boolean
+-- @function [parent=#ItemSelector] getListPrototype
 --
-function ItemSelector.methods:checkFilter(prototype)
-  Logging:trace(self:classname(), "checkFilter()")
-  local filter_prototype = self:getFilter()
-  local filter_prototype_product = self:getProductFilter()
-  local find = false
-  if filter_prototype ~= nil and filter_prototype ~= "" then
-    if filter_prototype_product ~= true then
-      local search = prototype.name:lower():gsub("[-]"," ")
-      if string.find(search, filter_prototype) then
-        find = true
-      end
-    end
-  else
-    find = true
-  end
-  return find
+-- @return #table
+--
+function ItemSelector.methods:getListPrototype()
+  return list_prototype
+end
+
+-------------------------------------------------------------------------------
+-- Return list group
+--
+-- @function [parent=#ItemSelector] getListGroup
+--
+-- @return #table
+--
+function ItemSelector.methods:getListGroup()
+  return list_group
+end
+
+-------------------------------------------------------------------------------
+-- Return list subgroup
+--
+-- @function [parent=#ItemSelector] getListSubgroup
+--
+-- @return #table
+--
+function ItemSelector.methods:getListSubgroup()
+  return list_subgroup
 end
 
 -------------------------------------------------------------------------------
@@ -71,11 +92,20 @@ function ItemSelector.methods:appendGroups(name, type, list_group, list_subgroup
     local subgroup_name = ItemPrototype.native().subgroup.name
     
     if firstGroup == nil then firstGroup = group_name end
-    list_group[group_name] = ItemPrototype.native().group
+    if list_group[group_name] == nil then
+      list_group[group_name] = {name=group_name, search_products="", search_ingredients=""}
+    end
     list_subgroup[subgroup_name] = ItemPrototype.native().subgroup
     if list_prototype[group_name] == nil then list_prototype[group_name] = {} end
     if list_prototype[group_name][subgroup_name] == nil then list_prototype[group_name][subgroup_name] = {} end
-    table.insert(list_prototype[group_name][subgroup_name], {name=name, type=type, order=ItemPrototype.native().order})
+    
+    local search_products = name
+    list_group[group_name].search_products = list_group[group_name].search_products .. search_products
+    
+    local search_ingredients = name
+    list_group[group_name].search_ingredients = list_group[group_name].search_ingredients .. search_ingredients
+
+    table.insert(list_prototype[group_name][subgroup_name], {name=name, type=type, order=ItemPrototype.native().order, search_products=search_products, search_ingredients=search_ingredients})
   end
 end
 
@@ -84,20 +114,18 @@ end
 --
 -- @function [parent=#ItemSelector] updateGroups
 --
+-- @param #LuaEvent event
+-- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
--- @return list_group, list_subgroup, list_prototype
---
-function ItemSelector.methods:updateGroups(item, item2, item3)
-  Logging:debug(self:classname(), "updateGroups():", item, item2, item3)
+function ItemSelector.methods:updateGroups(event, action, item, item2, item3)
+  Logging:trace(self:classname(), "updateGroups()", action, item, item2, item3)
   local global_player = Player.getGlobal()
   local global_gui = Player.getGlobalGui()
-  -- recuperation recipes
-  local list_group = {}
-  local list_subgroup = {}
-  local list_prototype = {}
+
+  self:resetGroups()
 
   firstGroup = nil
 
@@ -108,8 +136,6 @@ function ItemSelector.methods:updateGroups(item, item2, item3)
   if list_prototype[global_player.recipeGroupSelected] == nil then
     global_player.recipeGroupSelected = firstGroup
   end
-  Logging:debug(self:classname(), "list_group", list_group, "list_subgroup", list_subgroup, "list_prototype", list_prototype)
-  return list_group, list_subgroup, list_prototype
 end
 
 -------------------------------------------------------------------------------

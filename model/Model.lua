@@ -465,11 +465,7 @@ end
 --
 function Model.countRepices()
   local model = Model.getModel()
-  local count = 0
-  for key, recipe in pairs(model.recipes) do
-    count = count + 1
-  end
-  return count
+  return Model.countList(model.recipes)
 end
 
 -------------------------------------------------------------------------------
@@ -481,11 +477,7 @@ end
 --
 function Model.countIngredients()
   local model = Model.getModel()
-  local count = 0
-  for key, recipe in pairs(model.ingredients) do
-    count = count + 1
-  end
-  return count
+  return Model.countList(model.ingredients)
 end
 
 -------------------------------------------------------------------------------
@@ -497,11 +489,7 @@ end
 --
 function Model.countBlocks()
   local model = Model.getModel()
-  local count = 0
-  for key, recipe in pairs(model.blocks) do
-    count = count + 1
-  end
-  return count
+  return Model.countList(model.blocks)
 end
 
 -------------------------------------------------------------------------------
@@ -513,13 +501,7 @@ end
 --
 function Model.countPowers()
   local model = Model.getModel()
-  local count = 0
-  if model.powers ~= nil then
-    for key, recipe in pairs(model.powers) do
-      count = count + 1
-    end
-  end
-  return count
+  return Model.countList(model.powers)
 end
 
 -------------------------------------------------------------------------------
@@ -531,16 +513,9 @@ end
 --
 -- @return #number
 --
-function Model.countBlockRecipes( blockId)
-  Logging:debug(Model.classname, "countBlockRecipes():", blockId)
+function Model.countBlockRecipes(blockId)
   local model = Model.getModel()
-  local count = 0
-  if model.blocks[blockId] ~= nil then
-    for key, recipe in pairs(model.blocks[blockId].recipes) do
-      count = count + 1
-    end
-  end
-  return count
+  return Model.countList(model.blocks[blockId].recipes)
 end
 
 -------------------------------------------------------------------------------
@@ -551,13 +526,7 @@ end
 -- @return #number
 --
 function Model.countModel()
-  local count = 0
-  if global.models ~= nil then
-    for key, element in pairs(global.models) do
-      count = count + 1
-    end
-  end
-  return count
+  return Model.countList(global.models)
 end
 
 -------------------------------------------------------------------------------
@@ -570,11 +539,7 @@ end
 -- @return #number
 --
 function Model.countList(list)
-  local count = 0
-  for key, element in pairs(list) do
-    count = count + 1
-  end
-  return count
+  return table_size(list)
 end
 
 -------------------------------------------------------------------------------
