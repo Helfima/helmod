@@ -540,6 +540,7 @@ end
 -- @return #number
 --
 function Model.countList(list)
+  if list == nil then return 0 end
   return table_size(list)
 end
 

@@ -3,6 +3,7 @@ Version: 0.8.11
 Date: 07. 05. 2019
   Bugfixes:
     - Fixed MP desynch when open selector
+    - Fixed Model.countList for new game
 ---------------------------------------------------------------------------------------------------
 Version: 0.8.10
 Date: 07. 05. 2019
