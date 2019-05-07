@@ -44,12 +44,14 @@ end
 -- @return #number the formated number
 --
 function Format.round(val, decimal)
-  if (decimal) then
-    return math.ceil( (val * 10^decimal)) / (10^decimal)
+  if decimal then
+    local exponent = 10 ^ decimal
+    return math.floor(val * exponent + 0.5) / exponent
   else
-    return math.ceil(val)
+    return math.floor(val + 0.5)
   end
 end
+
 -------------------------------------------------------------------------------
 -- Format the number
 --
