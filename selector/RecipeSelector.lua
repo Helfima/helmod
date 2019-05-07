@@ -144,23 +144,17 @@ function RecipeSelector.methods:updateGroups(event, action, item, item2, item3)
 
   self:resetGroups()
   
-  local recipe_count=0
-  local fluid_count=0
-  local resource_count=0
   --Logging:debug(Controller.classname, "filter_prototype", self:getFilter())
   firstGroup = nil
   for key, recipe in pairs(Player.getRecipes()) do
     self:appendGroups(recipe, "recipe", list_group, list_subgroup, list_prototype)
-    recipe_count = recipe_count + 1
   end
   if global_gui.currentTab ~= "HMPropertiesTab" then
     for key, fluid in pairs(Player.getFluidPrototypes()) do
       self:appendGroups(fluid, "fluid", list_group, list_subgroup, list_prototype)
-      fluid_count = fluid_count + 1
     end
     for key, resource in pairs(Player.getResources()) do
       self:appendGroups(resource, "resource", list_group, list_subgroup, list_prototype)
-      resource_count = resource_count + 1
     end
   end
 

@@ -2,10 +2,10 @@
 -- Class to build HelpPanel panel
 --
 -- @module HelpPanel
--- @extends #Dialog
+-- @extends #Form
 --
 
-HelpPanel = setclass("HMHelpPanel", Dialog)
+HelpPanel = setclass("HMHelpPanel", Form)
 
 local help_data = {
   {

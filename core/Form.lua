@@ -20,6 +20,7 @@ function Form.methods:init(parent)
 
   self.otherClose = true
   self.locate = "dialog"
+  self.panelClose = true
 
   self:onInit(parent)
 end
@@ -60,22 +61,6 @@ function Form.methods:getPanel()
   --local panel = ElementGui.addGuiTable(parent_panel, self:classname(), 1, helmod_table_style.panel)
   local panel = ElementGui.addGuiFrameV(parent_panel, self:classname(), helmod_frame_style.hidden)
   return panel
-end
-
--------------------------------------------------------------------------------
--- Bind the button
---
--- @function [parent=#Form] bindButton
---
--- @param #LuaGuiElement gui parent element
--- @param #string label displayed text
---
-function Form.methods:bindButton(gui, label)
-  local caption = ({self.ACTION_OPEN})
-  if label ~= nil then caption = label end
-  if gui ~= nil then
-    gui.add({type="button", name=self.ACTION_OPEN, caption=caption, style="helmod_button_default"})
-  end
 end
 
 -------------------------------------------------------------------------------
@@ -126,8 +111,8 @@ end
 function Form.methods:beforeEvent(event, action, item, item2, item3)
   Logging:debug(self:classname(), "beforeEvent()", action, item, item2, item3)
   local parentPanel = self:getParentPanel()
+  local close = self:onBeforeEvent(event, action, item, item2, item3)
   if parentPanel[self:classname()] ~= nil and parentPanel[self:classname()].valid then
-    local close = self:onBeforeEvent(event, action, item, item2, item3)
     Logging:debug(self:classname() , "must close:",close)
     if close and action == "OPEN" then
       self:close(true)
@@ -209,11 +194,15 @@ function Form.methods:updateTitle(event, action, item, item2, item3)
   Logging:debug(self:classname(), "updateTitle():", action, item, item2, item3)
       local panel = self:getPanel()
     -- affecte le caption
-    if self.panelCaption ~= nil and panel["title-panel"] == nil then
+    if self.panelCaption ~= nil and panel["header-panel"] == nil then
       local caption = self.panelCaption
 
-      local header_panel = ElementGui.addGuiFrameH(panel, "title-panel", helmod_frame_style.panel, caption)
-      header_panel.style.height = 30
+      local header_panel = ElementGui.addGuiFlowH(panel, "header-panel", helmod_flow_style.horizontal)
+      local title_panel = ElementGui.addGuiFrameH(header_panel, "title-panel", helmod_frame_style.panel, caption)
+      title_panel.style.height = 32
+      if self.panelClose then
+        ElementGui.addGuiButton(header_panel, self:classname().."=CLOSE", nil, "helmod_button_icon_close_red", nil, ({"helmod_button.close"}))
+      end
     end
 end
 

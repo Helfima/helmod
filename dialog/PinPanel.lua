@@ -2,7 +2,7 @@
 -- Class to build pin tab dialog
 --
 -- @module PinPanel
--- @extends #Dialog
+-- @extends #Form
 --
 
 PinPanel = setclass("HMPinPanel", Form)

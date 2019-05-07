@@ -1,4 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.8.10
+Date: 07. 05. 2019
+  Changes:
+    - MP Perform fast
+    - Added close button
+    - Fixed a precision of Format.round
+  Bugfixes:
+    - Fixed number cut off
+    - Fixed pin panel display
+---------------------------------------------------------------------------------------------------
 Version: 0.8.9
 Date: 13. 04. 2019
   Bugfixes:

@@ -2,7 +2,7 @@
 -- Class to build product edition dialog
 --
 -- @module ProductEdition
--- @extends #Dialog
+-- @extends #AbstractEdition
 --
 
 ProductEdition = setclass("HMProductEdition", AbstractEdition)

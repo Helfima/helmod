@@ -76,7 +76,6 @@ helmod_settings_mod = {
       "HMAbstractTab",
       "HMContainerSelector",
       "HMController",
-      "HMDialog",
       "HMDownload",
       "HMElementGui",
       "HMEnergyEdition",

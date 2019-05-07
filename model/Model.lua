@@ -515,6 +515,7 @@ end
 --
 function Model.countBlockRecipes(blockId)
   local model = Model.getModel()
+  if model.blocks[blockId] == nil then return 0 end
   return Model.countList(model.blocks[blockId].recipes)
 end
 

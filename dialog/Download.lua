@@ -2,10 +2,10 @@
 -- Class to build Download panel
 --
 -- @module Download
--- @extends #Dialog
+-- @extends #Form
 --
 
-Download = setclass("HMDownload", Dialog)
+Download = setclass("HMDownload", Form)
 
 local transfert_mode = nil
 

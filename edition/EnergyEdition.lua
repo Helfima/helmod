@@ -2,7 +2,7 @@
 -- Class to build power edition dialog
 --
 -- @module EnergyEdition
--- @extends #Dialog
+-- @extends #AbstractEdition
 --
 
 EnergyEdition = setclass("HMEnergyEdition", AbstractEdition)

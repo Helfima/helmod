@@ -2,7 +2,7 @@
 -- Class to build settings panel
 --
 -- @module Settings
--- @extends #Dialog
+-- @extends #Form
 --
 
 Settings = setclass("HMSettings", Form)

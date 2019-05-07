@@ -22,7 +22,7 @@ local is_voider = nil
 -- @return #RecipePrototype
 --
 function RecipePrototype.load(object, object_type)
-  Logging:debug(RecipePrototype.classname, "load(object, object_type)", object, object_type)
+  Logging:trace(RecipePrototype.classname, "load(object, object_type)", object, object_type)
   local object_name = nil
   is_voider = nil
   if type(object) == "string" then
@@ -32,7 +32,7 @@ function RecipePrototype.load(object, object_type)
     object_name = object.name
     lua_type = object_type or object.type
   end
-  Logging:debug(RecipePrototype.classname, "object_name", object_name, "lua_type", lua_type)
+  Logging:trace(RecipePrototype.classname, "object_name", object_name, "lua_type", lua_type)
   if lua_type == nil or lua_type == "recipe" then
     lua_prototype = Player.getRecipe(object_name)
     lua_type = "recipe"
@@ -62,7 +62,7 @@ end
 -- @return #RecipePrototype
 --
 function RecipePrototype.find(object)
-  Logging:debug(RecipePrototype.classname, "find(object)", object)
+  Logging:trace(RecipePrototype.classname, "find(object)", object)
   local object_name = nil
   if type(object) == "string" then
     object_name = object
@@ -162,7 +162,6 @@ end
 -- @return #table
 --
 function RecipePrototype.getLocalisedName()
-  Logging:debug(RecipePrototype.classname, "getLocalisedName()", lua_prototype, lua_type)
   if lua_prototype ~= nil then
     if not(Player.getSettings("display_real_name", true)) then
       return lua_prototype.localised_name
@@ -181,7 +180,6 @@ end
 -- @return #table
 --
 function RecipePrototype.getCategory()
-  Logging:debug(RecipePrototype.classname, "getCategory()", lua_prototype, lua_type)
   if lua_type == "recipe" and lua_prototype ~= nil then
     return lua_prototype.category or "crafting"
   elseif lua_type == "resource" then
@@ -202,12 +200,10 @@ end
 -- @return #table
 --
 function RecipePrototype.getProducts()
-  Logging:debug(RecipePrototype.classname, "getProducts()", lua_prototype.name, lua_type)
   local raw_products = RecipePrototype.getRawProducts()
   --Logging:debug(RecipePrototype.classname, "raw_products", raw_products)
   -- if recipe is a voider
   if #raw_products == 1 and Product.getElementAmount(raw_products[1]) == 0 then
-    Logging:debug(RecipePrototype.classname, "is_voider", lua_prototype.name)
     is_voider = true
     return {}
   else
@@ -243,7 +239,6 @@ end
 -- @return #table
 --
 function RecipePrototype.getRawProducts()
-  Logging:debug(RecipePrototype.classname, "getRawProducts()", lua_prototype.name, lua_type)
   if lua_prototype ~= nil then
     if lua_type == "recipe" then
       return lua_prototype.products
@@ -266,7 +261,6 @@ end
 -- @return #number
 --
 function RecipePrototype.getIngredientCount(factory)
-  Logging:debug(RecipePrototype.classname, "getIngredientCount()", lua_prototype, lua_type)
   local count = 0
   if lua_prototype ~= nil and RecipePrototype.getIngredients(factory) ~= nil then
     for _,lua_ingredient in pairs(RecipePrototype.getIngredients(factory)) do
@@ -285,7 +279,7 @@ end
 -- @return #table
 --
 function RecipePrototype.getIngredients(factory)
-  Logging:debug(RecipePrototype.classname, "getIngredients()", lua_prototype, lua_type)
+  Logging:trace(RecipePrototype.classname, "getIngredients()", lua_prototype, lua_type)
   if lua_prototype ~= nil then
     if lua_type == "recipe" then
       return lua_prototype.ingredients
@@ -304,19 +298,16 @@ function RecipePrototype.getIngredients(factory)
       local energy_coal = 8000000
       local hardness = EntityPrototype.getMineableHardness()
       local mining_time = EntityPrototype.getMineableMiningTime()
-      Logging:debug(RecipePrototype.classname, "mining properties", "hardness", hardness, "mining_time", mining_time)
       EntityPrototype.load(factory)
       if factory ~= nil and EntityPrototype.getEnergyType() == "burner" then
         local energy_usage = EntityPrototype.getEnergyUsage()
         local burner_effectivity = EntityPrototype.getBurnerEffectivity()
         local mining_speed = EntityPrototype.getMiningSpeed()
-        Logging:debug(RecipePrototype.classname, "factory properties", "energy_usage", energy_usage, "burner_effectivity", burner_effectivity, "mining_speed", mining_speed)
 
         local speed_factory = hardness * mining_speed / mining_time
         local fuel_value = energy_usage*speed_factory*12.5
         local burner_count = fuel_value/energy_coal
         local burner_ingredient = {name="coal", type="item", amount=burner_count}
-        Logging:debug(RecipePrototype.classname, "add resource coal", "speed_factory", speed_factory, "fuel_value", fuel_value, "burner_count", burner_count)
         table.insert(ingredients, burner_ingredient)
       end
       return ingredients
@@ -349,7 +340,6 @@ end
 -- @return #table
 --
 function RecipePrototype.getEnergy()
-  Logging:debug(RecipePrototype.classname, "getEnergy()", lua_prototype, lua_type)
   if lua_prototype ~= nil then
     if lua_type == "recipe" then
       return lua_prototype.energy
@@ -372,7 +362,6 @@ end
 -- @return #boolean
 --
 function RecipePrototype.getEnabled()
-  Logging:debug(RecipePrototype.classname, "getEnabled()", lua_prototype, lua_type)
   if lua_prototype ~= nil then
     if lua_type == "recipe" then
       return lua_prototype.enabled
@@ -395,7 +384,6 @@ end
 -- @return #boolean
 --
 function RecipePrototype.getHidden()
-  Logging:debug(RecipePrototype.classname, "getHidden()", lua_prototype, lua_type)
   if lua_prototype ~= nil then
     if lua_type == "recipe" then
       return lua_prototype.hidden

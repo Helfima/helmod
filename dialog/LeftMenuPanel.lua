@@ -2,7 +2,7 @@
 -- Class to build left menu form
 --
 -- @module LeftMenuPanel
--- @extends #Dialog
+-- @extends #Form
 --
 
 LeftMenuPanel = setclass("HMLeftMenuPanel", Form)

@@ -2,10 +2,10 @@
 -- Class to build pin tab dialog
 --
 -- @module StatusPanel
--- @extends #Dialog
+-- @extends #Form
 --
 
-StatusPanel = setclass("HMStatusPanel", Dialog)
+StatusPanel = setclass("HMStatusPanel", Form)
 
 -------------------------------------------------------------------------------
 -- On initialization

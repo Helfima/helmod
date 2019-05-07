@@ -2,7 +2,7 @@
 -- Class to build product edition dialog
 --
 -- @module ProductLineEdition
--- @extends #Dialog
+-- @extends #AbstractEdition
 --
 
 ProductLineEdition = setclass("HMProductLineEdition", AbstractEdition)
@@ -16,6 +16,7 @@ ProductLineEdition = setclass("HMProductLineEdition", AbstractEdition)
 --
 function ProductLineEdition.methods:onInit(parent)
   self.panelCaption = ({"helmod_result-panel.tab-title-production-line"})
+  self.panelClose = false
 end
 
 -------------------------------------------------------------------------------

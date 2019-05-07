@@ -1,5 +1,4 @@
 require "core.Form"
-require "dialog.Dialog"
 require "dialog.HelpPanel"
 require "dialog.LeftMenuPanel"
 require "dialog.MainMenuPanel"
@@ -865,6 +864,7 @@ end
 --
 function Controller.onEventAccessWrite(event, action, item, item2, item3)
   Logging:debug(Controller.classname, "onEventAccessWrite():", action, item, item2, item3)
+  local global_player = Player.getGlobal()
   local globalGui = Player.getGlobalGui()
   local ui = Player.getGlobalUI()
   local model = Model.getModel()
@@ -891,7 +891,7 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
   if action == "product-selected" then
     Logging:debug(Controller.classname, "product-selected", event.button, defines.mouse_button_type.right)
     if event.button == defines.mouse_button_type.right then
-      Controller.sendEvent(event, "HMRecipeSelector", "OPEN", item, item2, item3)
+      Controller.createEvent(event, "HMRecipeSelector", "OPEN", item, item2, item3)
     end
   end
 
@@ -917,7 +917,7 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
       ModelCompute.update()
       Event.force_refresh = true
     else
-      Controller.createEvent(nil, "HMRecipeSelector", "OPEN", item, item2, item3)
+      Controller.createEvent(event, "HMRecipeSelector", "OPEN", item, item2, item3)
     end
   end
 

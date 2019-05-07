@@ -2,7 +2,7 @@
 -- Class to build abstract edition dialog
 --
 -- @module AbstractEdition
--- @extends #Dialog
+-- @extends #Form
 --
 
 AbstractEdition = setclass("HMAbstractEdition", Form)

@@ -2,10 +2,10 @@
 -- Classe to build selector dialog
 --
 -- @module AbstractSelector
--- @extends #Dialog
+-- @extends #Form
 --
 
-AbstractSelector = setclass("HMAbstractSelector", Dialog)
+AbstractSelector = setclass("HMAbstractSelector", Form)
 
 local filter_prototype = nil
 local filter_prototype_product = true
@@ -205,8 +205,9 @@ end
 -- @param #string item3 third item name
 --
 function AbstractSelector.methods:onBeforeEvent(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "onBeforeEvent():", action, item, item2, item3)
+  Logging:debug(self:classname(), "onBeforeEvent()", action, item, item2, item3)
   local player_gui = Player.getGlobalGui()
+  local global_player = Player.getGlobal()
   local close = action == "OPEN"
   if action == "OPEN" then
     filter_prototype_product = true
@@ -220,14 +221,14 @@ function AbstractSelector.methods:onBeforeEvent(event, action, item, item2, item
     if event ~= nil and event.button ~= nil and event.button == defines.mouse_button_type.right then
       filter_prototype_product = false
     end
-    if item ~= nil and item2 ~= nil then
-      Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
-      if player_gui.guiElementLast ~= item..item2 then
+    if item ~= nil and item2 ~= nil and item3 ~= nil then
+      if player_gui.guiElementLast ~= item..item2..item3 then
+        global_player.recipeGroupSelected = nil
         close = false
       end
-      player_gui.guiElementLast = item..item2
-      Logging:debug(self:classname(), "guiElementLast", player_gui.guiElementLast, close)
+      player_gui.guiElementLast = item..item2..item3
     end
+    Logging:debug(self:classname(), "filter_prototype_product", filter_prototype_product)
   end
   --Logging:debug(Controller.classname, "filter_prototype", filter_prototype)
   -- close si nouvel appel
@@ -251,10 +252,11 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
   local globalSettings = Player.getGlobalSettings()
   local defaultSettings = Player.getDefaultSettings()
   local globalGui = Player.getGlobalGui()
+  local ui = Player.getGlobalUI()
 
   local model = Model.getModel()
   if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
-    if globalGui.currentTab == "HMPropertiesTab" then
+    if ui.data == "HMPropertiesTab" then
       if action == "element-select" then
         globalPlayer["prototype-properties"] = {type = item, name = item2 }
         self:close()
@@ -264,8 +266,9 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
       if action == "element-select" and item ~= "container" then
         local productionBlock = ModelBuilder.addRecipeIntoProductionBlock(item2, item)
         ModelCompute.update()
-        globalGui.currentTab = "HMProductionBlockTab"
         self:close()
+        ui.data = "HMProductionBlockTab"
+        ui.dialog = helmod_tab_dialog[ui.data]
       end
       -- container selector
       if action == "element-select" and item == "container" then
@@ -356,9 +359,11 @@ end
 -- @param #string item3 third item name
 --
 function AbstractSelector.methods:prepare(event, action, item, item2, item3)
+  Logging:trace(self:classname(), "prepare()", action, item, item2, item3)
   -- recuperation recipes
   if Model.countList(self:getListGroup()) == 0 then
     self:updateGroups(event, action, item, item2, item3)
+    Logging:debug(self:classname(), "prepare ok")
     return true
   end
   --Logging:debug(self:classname(), "prepare()", Model.countList(list_group), Model.countList(list_subgroup), Model.countList(list_prototype))
@@ -393,9 +398,9 @@ end
 -- @return boolean
 --
 function AbstractSelector.methods:checkFilter(element)
-  Logging:trace(self:classname(), "checkFilter()")
   local filter_prototype = self:getFilter()
   local filter_prototype_product = self:getProductFilter()
+  --Logging:debug(self:classname(), element, "filter_prototype", filter_prototype, "filter_prototype_product", filter_prototype_product)
   local find = false
   if filter_prototype ~= nil and filter_prototype ~= "" then
     local search = element.search_products
@@ -456,17 +461,16 @@ function AbstractSelector.methods:updateFilter(event, action, item, item2, item3
     end
 
     ElementGui.addGuiLabel(panel, "message", ({"helmod_recipe-edition-panel.message"}))
+  end
 
-  else
-    if self.product_option then
-      panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-product"].state = filter_prototype_product
-      panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-ingredient"].state = not(filter_prototype_product)
-      if filter_prototype ~= nil and action == "OPEN" then
-        if Player.getSettings("filter_on_text_changed", true) then
-          panel["filter"]["cell-filter"][self:classname().."=recipe-filter=ID=filter-value"].text = filter_prototype
-        else
-          panel["filter"]["cell-filter"]["filter-text"].text = filter_prototype
-        end
+  if self.product_option then
+    panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-product"].state = filter_prototype_product
+    panel["filter"][self:classname().."=recipe-filter-switch=ID=filter-ingredient"].state = not(filter_prototype_product)
+    if filter_prototype ~= nil and action == "OPEN" then
+      if Player.getSettings("filter_on_text_changed", true) then
+        panel["filter"]["cell-filter"][self:classname().."=recipe-filter=ID=filter-value"].text = filter_prototype
+      else
+        panel["filter"]["cell-filter"]["filter-text"].text = filter_prototype
       end
     end
   end
@@ -507,8 +511,9 @@ end
 -- @param #string item3 third item name
 --
 function AbstractSelector.methods:updateItemList(event, action, item, item2, item3)
-  Logging:trace(self:classname(), "updateItemList():", action, item, item2, item3)
+  Logging:debug(self:classname(), "updateItemList()", action, item, item2, item3)
   local item_list_panel = self:getItemListPanel()
+  local filter_prototype = self:getFilter()
 
   if item_list_panel["recipe_list"] ~= nil  and item_list_panel["recipe_list"].valid then
     item_list_panel["recipe_list"].destroy()
@@ -519,11 +524,14 @@ function AbstractSelector.methods:updateItemList(event, action, item, item2, ite
   local list_subgroup = self:getListSubgroup()
 
   local recipe_selector_list = ElementGui.addGuiTable(item_list_panel, "recipe_list", 1, helmod_table_style.list)
+  Logging:debug(self:classname(), "filter_prototype", filter_prototype)
   for subgroup, list in spairs(list_item,function(t,a,b) return list_subgroup[b]["order"] > list_subgroup[a]["order"] end) do
     -- boucle subgroup
     local guiRecipeSubgroup = ElementGui.addGuiTable(recipe_selector_list, "recipe-table-"..subgroup, 10, "helmod_table_recipe_selector")
     for key, prototype in spairs(list,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
+      Logging:debug(self:classname(), "prototype test", prototype.name)
       if self:checkFilter(prototype) then
+        Logging:debug(self:classname(), "prototype ok")
         local tooltip = self:buildPrototypeTooltip(prototype)
         self:buildPrototypeIcon(guiRecipeSubgroup, prototype, tooltip)
       end

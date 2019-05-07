@@ -2,7 +2,7 @@
 -- Class to build main menu form
 --
 -- @module MainMenuPanel
--- @extends #Dialog
+-- @extends #Form
 --
 
 MainMenuPanel = setclass("HMMainMenuPanel", Form)
