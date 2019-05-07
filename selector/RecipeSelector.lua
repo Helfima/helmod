@@ -8,7 +8,6 @@ require "selector.AbstractSelector"
 
 RecipeSelector = setclass("HMRecipeSelector", AbstractSelector)
 
-local firstGroup = nil
 local list_group = {}
 local list_subgroup = {}
 local list_prototype = {}
@@ -88,11 +87,9 @@ end
 --
 -- @param #string recipe
 -- @param #string type
--- @param #table list_group
--- @param #table list_subgroup
--- @param #table list_prototype
 --
-function RecipeSelector.methods:appendGroups(recipe, type, list_group, list_subgroup, list_prototype)
+
+function RecipeSelector.methods:appendGroups(recipe, type)
   Logging:trace(self:classname(), "appendGroups()", recipe.name, type)
   RecipePrototype.set(recipe, type)
   local filter_show_disable = Player.getGlobalSettings("filter_show_disable")
@@ -103,7 +100,6 @@ function RecipeSelector.methods:appendGroups(recipe, type, list_group, list_subg
     local group_name = lua_recipe.group.name
     local subgroup_name = lua_recipe.subgroup.name
     
-    if firstGroup == nil then firstGroup = group_name end
     if list_group[group_name] == nil then
       list_group[group_name] = {name=group_name, search_products="", search_ingredients=""}
     end
@@ -144,23 +140,21 @@ function RecipeSelector.methods:updateGroups(event, action, item, item2, item3)
 
   self:resetGroups()
   
-  --Logging:debug(Controller.classname, "filter_prototype", self:getFilter())
-  firstGroup = nil
   for key, recipe in pairs(Player.getRecipes()) do
-    self:appendGroups(recipe, "recipe", list_group, list_subgroup, list_prototype)
+    self:appendGroups(recipe, "recipe")
   end
   if global_gui.currentTab ~= "HMPropertiesTab" then
     for key, fluid in pairs(Player.getFluidPrototypes()) do
-      self:appendGroups(fluid, "fluid", list_group, list_subgroup, list_prototype)
+      self:appendGroups(fluid, "fluid")
     end
     for key, resource in pairs(Player.getResources()) do
-      self:appendGroups(resource, "resource", list_group, list_subgroup, list_prototype)
+      self:appendGroups(resource, "resource")
     end
   end
 
-  if list_prototype[global_player.recipeGroupSelected] == nil then
-    global_player.recipeGroupSelected = firstGroup
-  end
+  --Logging:debug(self:classname(), "list_group", list_group)
+  --Logging:debug(self:classname(), "list_subgroup", list_subgroup)
+  --Logging:debug(self:classname(), "list_prototype", list_prototype)
 end
 
 -------------------------------------------------------------------------------

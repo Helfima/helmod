@@ -8,7 +8,6 @@ require "selector.AbstractSelector"
 
 ContainerSelector = setclass("HMContainerSelector", AbstractSelector)
 
-local firstGroup = nil
 local list_group = {}
 local list_subgroup = {}
 local list_prototype = {}
@@ -91,7 +90,6 @@ function ContainerSelector.methods:appendGroups(name, type, list_group, list_sub
     local group_name = EntityPrototype.native().group.name
     local subgroup_name = EntityPrototype.native().subgroup.name
     
-    if firstGroup == nil then firstGroup = group_name end
     if list_group[group_name] == nil then
       list_group[group_name] = {name=group_name, search_products="", search_ingredients=""}
     end
@@ -126,16 +124,11 @@ function ContainerSelector.methods:updateGroups(event, action, item, item2, item
   local global_gui = Player.getGlobalGui()
   
   self:resetGroups()
-  
-  firstGroup = nil
 
   for key, entity in pairs(Player.getEntityPrototypes({"storage-tank", "container", "logistic-container", "cargo-wagon", "fluid-wagon", "item-with-entity-data", "car", "logistic-robot", "transport-belt"})) do
     self:appendGroups(entity.name, "entity", list_group, list_subgroup, list_prototype)
   end
 
-  if list_prototype[global_player.recipeGroupSelected] == nil then
-    global_player.recipeGroupSelected = firstGroup
-  end
 end
 
 -------------------------------------------------------------------------------

@@ -226,7 +226,7 @@ end
 -- @param type event type
 --
 function Controller.parseEvent()
-  Logging:debug(Controller.classname, "parseEvent()", Event)
+  Logging:debug(Controller.classname, "parseEvent()")
   Event.state = Event.STATE_RELEASE
   nextEvent = nil
   local ok , err = pcall(function()

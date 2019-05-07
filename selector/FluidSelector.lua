@@ -8,7 +8,6 @@ require "selector.AbstractSelector"
 
 FluidSelector = setclass("HMFluidSelector", AbstractSelector)
 
-local firstGroup = nil
 local list_group = {}
 local list_subgroup = {}
 local list_prototype = {}
@@ -91,7 +90,6 @@ function FluidSelector.methods:appendGroups(name, type, list_group, list_subgrou
     local group_name = FluidPrototype.native().group.name
     local subgroup_name = FluidPrototype.native().subgroup.name
     
-    if firstGroup == nil then firstGroup = group_name end
     if list_group[group_name] == nil then
       list_group[group_name] = {name=group_name, search_products="", search_ingredients=""}
     end
@@ -133,14 +131,8 @@ function FluidSelector.methods:updateGroups(event, action, item, item2, item3)
 
   self:resetGroups()
 
-  firstGroup = nil
-
   for key, recipe in pairs(Player.getFluidPrototypes()) do
     self:appendGroups(recipe.name, "recipe", list_group, list_subgroup, list_prototype)
-  end
-
-  if list_prototype[global_player.recipeGroupSelected] == nil then
-    global_player.recipeGroupSelected = firstGroup
   end
 end
 

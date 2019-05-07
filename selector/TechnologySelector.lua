@@ -8,7 +8,6 @@ require "selector.AbstractSelector"
 
 TechnologySelector = setclass("HMTechnologySelector", AbstractSelector)
 
-local firstGroup = nil
 local list_group = {}
 local list_subgroup = {}
 local list_prototype = {}
@@ -87,11 +86,8 @@ end
 --
 -- @param #string name
 -- @param #string type
--- @param #table list_group
--- @param #table list_subgroup
--- @param #table list_prototype
 --
-function TechnologySelector.methods:appendGroups(name, type, list_group, list_subgroup, list_prototype)
+function TechnologySelector.methods:appendGroups(name, type)
   Logging:debug(self:classname(), "appendGroups()", name, type)
   Technology.load(name, type)
   local find = self:checkFilter(Technology.native())
@@ -104,7 +100,6 @@ function TechnologySelector.methods:appendGroups(name, type, list_group, list_su
 
     local subgroup_name = "default"
 
-    if firstGroup == nil then firstGroup = group_name end
     if list_group[group_name] == nil then
       list_group[group_name] = {name=group_name, search_products="", search_ingredients=""}
     end
@@ -144,15 +139,10 @@ function TechnologySelector.methods:updateGroups(event, action, item, item2, ite
 
   self:resetGroups()
 
-  firstGroup = nil
-
   for key, technology in pairs(Player.getTechnologies()) do
-    self:appendGroups(technology.name, "technology", list_group, list_subgroup, list_prototype)
+    self:appendGroups(technology.name, "technology")
   end
 
-  if list_prototype[global_player.recipeGroupSelected] == nil then
-    global_player.recipeGroupSelected = firstGroup
-  end
 end
 
 -------------------------------------------------------------------------------

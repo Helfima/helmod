@@ -210,6 +210,8 @@ function AbstractSelector.methods:onBeforeEvent(event, action, item, item2, item
   local global_player = Player.getGlobal()
   local close = action == "OPEN"
   if action == "OPEN" then
+    global_player.recipeGroupSelected = nil
+        
     filter_prototype_product = true
 
     local globalPlayer = Player.getGlobal()
@@ -223,7 +225,6 @@ function AbstractSelector.methods:onBeforeEvent(event, action, item, item2, item
     end
     if item ~= nil and item2 ~= nil and item3 ~= nil then
       if player_gui.guiElementLast ~= item..item2..item3 then
-        global_player.recipeGroupSelected = nil
         close = false
       end
       player_gui.guiElementLast = item..item2..item3
@@ -364,10 +365,9 @@ function AbstractSelector.methods:prepare(event, action, item, item2, item3)
   if Model.countList(self:getListGroup()) == 0 then
     self:updateGroups(event, action, item, item2, item3)
     Logging:debug(self:classname(), "prepare ok")
-    return true
   end
   --Logging:debug(self:classname(), "prepare()", Model.countList(list_group), Model.countList(list_subgroup), Model.countList(list_prototype))
-  return false
+  return true
 end
 
 -------------------------------------------------------------------------------
