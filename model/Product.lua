@@ -100,7 +100,11 @@ function Product.getElementAmount(element)
   if element == nil then return 0 end
 
   if element.amount ~= nil then
-    return element.amount
+    if element.probability ~= nil then
+      return element.amount * element.probability
+    else
+      return element.amount
+    end
   end
 
   if element.probability ~= nil and element.amount_min ~= nil and  element.amount_max ~= nil then
