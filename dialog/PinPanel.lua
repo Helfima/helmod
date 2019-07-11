@@ -276,7 +276,7 @@ function PinPanel.methods:addProductionBlockRow(gui_table, block, recipe)
     -- col beacon
     local beacon = recipe.beacon
     if block.count > 1 then
-      beacon.limit_count = factory.count / block.count
+      beacon.limit_count = beacon.count / block.count
     else
       beacon.limit_count = nil
     end

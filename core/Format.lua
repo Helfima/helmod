@@ -48,12 +48,12 @@ end
 --
 -- @return #number the formated number
 --
+--
 function Format.round(val, decimal)
-  if decimal then
-    local exponent = 10 ^ decimal
-    return math.floor(val * exponent + 0.98) / exponent
+  if (decimal) then
+    return math.ceil( (val * 10^decimal)) / (10^decimal)
   else
-    return math.floor(val + 0.98)
+    return math.ceil(val)
   end
 end
 
