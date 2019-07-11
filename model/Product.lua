@@ -100,6 +100,8 @@ function Product.getElementAmount(element)
   if element == nil then return 0 end
 
   if element.amount ~= nil then
+    -- In 0.17, it seems probability can be used with just 'amount' and it
+    -- doesn't need to use amount_min/amount_max
     if element.probability ~= nil then
       return element.amount * element.probability
     else
