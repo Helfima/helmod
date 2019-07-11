@@ -36,6 +36,11 @@ end
 --
 -- @see http://lua-users.org/wiki/FormattingNumbers
 --
+-- @details Round up unless the number is lower than x.02, then round down.
+--   Since this is used mostly to format factory/resource numbers this gives
+--   the minimum necessary amount rounded to a proper number of decimal places,
+--   but drops small surpluses from floating point.
+--
 -- @function [parent=#Format] round
 --
 -- @param #number val the number
@@ -46,9 +51,9 @@ end
 function Format.round(val, decimal)
   if decimal then
     local exponent = 10 ^ decimal
-    return math.floor(val * exponent + 0.5) / exponent
+    return math.floor(val * exponent + 0.98) / exponent
   else
-    return math.floor(val + 0.5)
+    return math.floor(val + 0.98)
   end
 end
 
