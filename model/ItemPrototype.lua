@@ -51,6 +51,18 @@ function ItemPrototype.getValid()
 end
 
 -------------------------------------------------------------------------------
+-- Return fuel value
+--
+-- @function [parent=#ItemPrototype] getFuelValue
+--
+-- @return #boolean
+--
+function ItemPrototype.getFuelValue()
+  if lua_item_prototype == nil then return 0 end
+  return lua_item_prototype.fuel_value
+end
+
+-------------------------------------------------------------------------------
 -- Return localised name
 --
 -- @function [parent=#ItemPrototype] getLocalisedName

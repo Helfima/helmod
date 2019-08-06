@@ -294,8 +294,6 @@ function RecipePrototype.getIngredients(factory)
       -- @see https://wiki.factorio.com/Fuel
       -- Burn time (s) = Fuel value (MJ) ÷ Energy consumption (MW)
       -- source energy en kJ
-      local energy_coal = 25000000
-      local energy_coal = 8000000
       local hardness = EntityPrototype.getMineableHardness()
       local mining_time = EntityPrototype.getMineableMiningTime()
       EntityPrototype.load(factory)
@@ -306,7 +304,7 @@ function RecipePrototype.getIngredients(factory)
 
         local speed_factory = hardness * mining_speed / mining_time
         local fuel_value = energy_usage*speed_factory*12.5
-        local burner_count = fuel_value/energy_coal
+        local burner_count = fuel_value/ItemPrototype.load("coal").getFuelValue()
         local burner_ingredient = {name="coal", type="item", amount=burner_count}
         table.insert(ingredients, burner_ingredient)
       end
@@ -316,9 +314,8 @@ function RecipePrototype.getIngredients(factory)
         EntityPrototype.load(factory)
         if factory ~= nil and EntityPrototype.getEnergyType() == "burner" then
           -- source energy en kJ
-          local energy_coal = 8000000
           local power_extract = EntityPrototype.getPowerExtract()
-          local amount = power_extract/(energy_coal*EntityPrototype.getBurnerEffectivity())
+          local amount = power_extract/(ItemPrototype.load("coal").getFuelValue()*EntityPrototype.getBurnerEffectivity())
           return {{name="water", type="fluid", amount=1},{name="coal", type="item", amount=amount}}
         else
           return {{name="water", type="fluid", amount=1}}

@@ -83,8 +83,6 @@ helmod_settings_mod = {
       "HMEvent",
       "HMEventController",
       "HMHelpPanel",
-      "HMMainOanel",
-      "HMMainTab",
       "HMModel",
       "HMModelCompute",
       "HMModelBuilder",

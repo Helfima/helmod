@@ -274,7 +274,7 @@ function Controller.parseEvent()
           if not(Controller.isOpened()) then
             Controller.openMainPanel()
           end
-          Controller.sendEvent(Event.native(), "HMMainTab", "change-tab", "HMProductionLineTab")
+          Controller.sendEvent(Event.native(), "HMController", "change-tab", "HMProductionLineTab")
         end
         if Event.getName() == "helmod-recipe-selector-open" then
           if not(Controller.isOpened()) then
@@ -441,60 +441,6 @@ function Controller.createEvent(event, classname, action, item, item2, item3)
   Logging:debug(Controller.classname, "createEvent(event, classname, action, item, item2, item3)", classname, action, item, item2, item3)
   nextEvent = {name=classname, action=action, item1=item, item2=item2, item3=item3}
   Event.force_refresh = true
-end
-
--------------------------------------------------------------------------------
--- Refresh display data
---
--- @function [parent=#Controller] refreshDisplayData
---
--- @param #LuaPlayer player
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function Controller.refreshDisplayData(player, item, item2, item3)
-  Logging:debug(Controller.classname, "refreshDisplayData():",player, item, item2, item3)
-  Controller.getView("HMMainTab"):update(player, item, item2, item3)
-  local pin_panel = Controller.getView("HMPinPanel")
-  if pin_panel:isOpened() then
-    pin_panel:update()
-  end
-end
-
--------------------------------------------------------------------------------
--- Refresh pin data
---
--- @function [parent=#Controller] refreshPin
---
--- @param #LuaPlayer player
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function Controller.refreshPin(player, item, item2, item3)
-  Logging:debug(Controller.classname, "refreshPin():",player, item, item2, item3)
-  local pin_panel = Controller.getView("HMPinPanel")
-  if pin_panel:isOpened() then
-    pin_panel:update()
-  end
-end
-
--------------------------------------------------------------------------------
--- Refresh display
---
--- @function [parent=#Controller] refreshDisplay
---
--- @param #LuaPlayer player
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function Controller.refreshDisplay(player, item, item2, item3)
-  Logging:debug(Controller.classname, "refreshDisplay():",player, item, item2, item3)
-  local main_panel = Controller.getView("HMMainPanel")
-  main_panel:main()
-  main_panel:main()
 end
 
 -------------------------------------------------------------------------------
