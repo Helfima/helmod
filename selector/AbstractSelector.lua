@@ -268,6 +268,7 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
         local productionBlock = ModelBuilder.addRecipeIntoProductionBlock(item2, item)
         ModelCompute.update()
         self:close()
+        globalGui["scroll_down"] = true
         ui.data = "HMProductionBlockTab"
         ui.dialog = helmod_tab_dialog[ui.data]
       end
@@ -298,7 +299,7 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
   if action == "change-boolean-settings" then
     if globalSettings[item] == nil then globalSettings[item] = defaultSettings[item] end
     globalSettings[item] = not(globalSettings[item])
-    self:resetGroups(item, item2, item3)
+    self:resetGroups()
     Controller.createEvent(event, self:classname(), "UPDATE", item, item2, item3)
   end
 

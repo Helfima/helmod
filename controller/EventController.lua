@@ -30,6 +30,7 @@ function EventController.start()
   EventController.pcallEvent("on_player_joined_game", defines.events.on_player_joined_game, EventController.onPlayerJoinedGame)
   EventController.pcallEvent("on_runtime_mod_setting_changed", defines.events.on_runtime_mod_setting_changed, EventController.onRuntimeModSettingChanged)
   EventController.pcallEvent("on_console_command", defines.events.on_console_command, EventController.onConsoleCommand)
+  EventController.pcallEvent("on_research_finished", defines.events.on_research_finished, EventController.onResearchFinished)
   --EventController.pcallEvent("on_gui_closed", defines.events.on_gui_closed, EventController.onGuiClosed)
 
   -- event hotkey
@@ -98,6 +99,19 @@ end
 function EventController.onLoad(event)
   Logging:trace(EventController.classname, "onLoad(event)", event)
   Command.start()
+end
+
+-------------------------------------------------------------------------------
+-- On console command
+--
+-- @function [parent=#EventController] onConsoleCommand
+--
+-- @param #table event
+--
+function EventController.onResearchFinished(event)
+  Logging:trace(EventController.classname, "onResearchFinished(event)", event)
+  Controller.resetCaches()
+  --Player.print("Caches are reseted!")
 end
 
 -------------------------------------------------------------------------------

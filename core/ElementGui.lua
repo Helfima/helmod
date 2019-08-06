@@ -1375,8 +1375,8 @@ function ElementGui.getStyleSizes()
     style_sizes.recipe_edition_2.width = width_recipe_column_2
 
     style_sizes.scroll_help = {}
-    style_sizes.scroll_help.width = width_dialog - width_scroll - 50
-    style_sizes.scroll_help.height = height_main - 200
+    style_sizes.scroll_help.width = width_dialog - width_scroll
+    style_sizes.scroll_help.height = height_main - 125
 
     
     -- block

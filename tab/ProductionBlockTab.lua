@@ -266,8 +266,14 @@ function ProductionBlockTab.methods:updateData(item, item2, item3)
 
     self:addTableHeader(resultTable)
 
+    local last_element = nil
     for _, recipe in spairs(model.blocks[blockId].recipes, function(t,a,b) if globalGui.order.ascendant then return t[b][globalGui.order.name] > t[a][globalGui.order.name] else return t[b][globalGui.order.name] < t[a][globalGui.order.name] end end) do
-      self:addTableRow(resultTable, element, recipe)
+      last_element = self:addTableRow(resultTable, element, recipe)
+    end
+    
+    if globalGui["scroll_down"] then
+      scrollPanel.scroll_to_element(last_element)
+      globalGui["scroll_down"] = false
     end
   end
 end
@@ -312,11 +318,11 @@ function ProductionBlockTab.methods:addTableRow(gui_table, block, recipe)
   local display_cell_mod = Player.getSettings("display_cell_mod")
 
   -- col action
-  local cell_action = ElementGui.addCell(gui_table, "action"..recipe.id, 3)
-  ElementGui.addGuiShortButton(cell_action, self:classname().."=production-recipe-remove=ID="..block.id.."=", recipe.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
-  ElementGui.addGuiShortButton(cell_action, self:classname().."=production-recipe-down=ID="..block.id.."=", recipe.id, "helmod_button_default", ({"helmod_result-panel.row-button-down"}), ({"tooltip.down-element", Player.getSettings("row_move_step")}))
-  ElementGui.addGuiShortButton(cell_action, self:classname().."=production-recipe-up=ID="..block.id.."=", recipe.id, "helmod_button_default", ({"helmod_result-panel.row-button-up"}), ({"tooltip.up-element", Player.getSettings("row_move_step")}))
-
+  local cell_action = ElementGui.addCell(gui_table, "action"..recipe.id, 2)
+  ElementGui.addGuiButton(cell_action, self:classname().."=production-recipe-up=ID="..block.id.."=", recipe.id, "helmod_button_icon_arrow_top_sm", nil, ({"tooltip.up-element", Player.getSettings("row_move_step")}))
+  ElementGui.addGuiButton(cell_action, self:classname().."=production-recipe-remove=ID="..block.id.."=", recipe.id, "helmod_button_icon_delete_sm_red", nil, ({"tooltip.remove-element"}))
+  ElementGui.addGuiButton(cell_action, self:classname().."=production-recipe-down=ID="..block.id.."=", recipe.id, "helmod_button_icon_arrow_down_sm", nil, ({"tooltip.down-element", Player.getSettings("row_move_step")}))
+  
   -- col index
   if Player.getSettings("display_data_col_index", true) then
     ElementGui.addGuiLabel(gui_table, "value_index"..recipe.id, recipe.index, "helmod_label_row_right_40")
@@ -387,4 +393,6 @@ function ProductionBlockTab.methods:addTableRow(gui_table, block, recipe)
     end
     ElementGui.addCellElement(cell_ingredients, ingredient, self:classname().."=production-recipe-add=ID="..block.id.."="..recipe.name.."=", true, "tooltip.add-recipe", self.color_button_add, index)
   end
+  
+  return cell_recipe
 end

@@ -10,13 +10,13 @@ Settings = setclass("HMSettings", Form)
 local dropdown = {}
 
 -------------------------------------------------------------------------------
--- Initialization
+-- On initialization
 --
--- @function [parent=#Settings] init
+-- @function [parent=#Settings] onInit
 --
 -- @param #Controller parent parent controller
 --
-function Settings.methods:init(parent)
+function Settings.methods:onInit(parent)
   self.panelCaption = ({"helmod_settings-panel.title"})
   self.parent = parent
 end
@@ -64,9 +64,9 @@ function Settings.methods:getAboutSettingsPanel()
 end
 
 -------------------------------------------------------------------------------
--- On open
+-- On update
 --
--- @function [parent=#Settings] onOpen
+-- @function [parent=#Settings] onUpdate
 --
 -- @param #LuaEvent event
 -- @param #string action action name
@@ -74,7 +74,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Settings.methods:onOpen(event, action, item, item2, item3)
+function Settings.methods:onUpdate(event, action, item, item2, item3)
   self:updateAboutSettings(event, action, item, item2, item3)
 end
 

@@ -108,7 +108,7 @@ function Controller.init()
 end
 
 -------------------------------------------------------------------------------
--- Initialization
+-- Get views
 --
 -- @function [parent=#Controller] getViews
 --
@@ -116,6 +116,21 @@ end
 --
 function Controller.getViews()
   return views
+end
+
+-------------------------------------------------------------------------------
+-- Reset caches
+--
+-- @function [parent=#Controller] resetCaches
+--
+-- @return #table
+--
+function Controller.resetCaches()
+  for _,view in pairs(views) do
+    if string.find(view:classname(), "Selector") then
+      view:resetGroups()
+    end
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -915,6 +930,7 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
       local recipe = recipes[1]
       ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type)
       ModelCompute.update()
+      globalGui["scroll_down"] = true
       Event.force_refresh = true
     else
       Controller.createEvent(event, "HMRecipeSelector", "OPEN", item, item2, item3)

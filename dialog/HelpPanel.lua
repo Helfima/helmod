@@ -142,13 +142,13 @@ local help_data = {
 }
 
 -------------------------------------------------------------------------------
--- Initialization
+-- On initialization
 --
--- @function [parent=#HelpPanel] init
+-- @function [parent=#HelpPanel] onInit
 --
 -- @param #Controller parent parent controller
 --
-function HelpPanel.methods:init(parent)
+function HelpPanel.methods:onInit(parent)
   self.panelCaption = ({"helmod_help.panel-title"})
   self.parent = parent
 end
@@ -205,7 +205,9 @@ function HelpPanel.methods:getMenuPanel()
   if panel["menu-panel"] ~= nil and panel["menu-panel"].valid then
     return panel["menu-panel"]
   end
-  return ElementGui.addGuiFrameH(panel, "menu-panel", helmod_frame_style.panel)
+  local menu_panel = ElementGui.addGuiFrameH(panel, "menu-panel", helmod_frame_style.panel)
+  menu_panel.style.horizontally_stretchable = true
+  return menu_panel
 end
 
 -------------------------------------------------------------------------------
@@ -218,7 +220,9 @@ function HelpPanel.methods:getContentPanel()
   if panel["content-panel"] ~= nil and panel["content-panel"].valid then
     return panel["content-panel"]
   end
-  return ElementGui.addGuiFrameV(panel, "content-panel", helmod_frame_style.panel)
+  local content_panel = ElementGui.addGuiFrameV(panel, "content-panel", helmod_frame_style.panel)
+  content_panel.style.horizontally_stretchable = true
+  return content_panel
 end
 
 -------------------------------------------------------------------------------
@@ -282,22 +286,6 @@ function HelpPanel.methods:onEvent(event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
--- On open
---
--- @function [parent=#HelpPanel] onOpen
---
--- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function HelpPanel.methods:onOpen(event, action, item, item2, item3)
-  self:updateMenu(event, action, item, item2, item3)
-  self:getContentPanel()
-end
-
--------------------------------------------------------------------------------
 -- Update about HelpPanel
 --
 -- @function [parent=#HelpPanel] updateMenu
@@ -332,6 +320,7 @@ end
 -- @param #string item3 third item name
 --
 function HelpPanel.methods:onUpdate(event, action, item, item2, item3)
+  self:updateMenu(event, action, item, item2, item3)
   self:updateContent(event, action, item, item2, item3)
 end
 

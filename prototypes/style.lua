@@ -81,15 +81,15 @@ end
 -- @param #string font
 -- @param #table hovered_font_color
 --
-function menuIconType(name, icon_row, icon_col, suffix, font, hovered_font_color)
+function menuIconType(name, icon_row, icon_col, size, suffix, font, hovered_font_color)
   local style_name = "helmod_button_icon_"..name
   if suffix ~= nil then style_name = style_name.."_"..suffix end
   default_gui[style_name] = {
     type = "button_style",
     parent = "helmod_button_default",
     top_padding = 9,
-    width = 32,
-    height = 32,
+    width = size,
+    height = size,
     scalable = false,
     default_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=icon_col[1],y=(icon_row-1)*32}, {top=0,right=0,bottom=0,left=0}, true),
     hovered_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=icon_col[2],y=(icon_row-1)*32}, {top=0,right=0,bottom=0,left=0}, true),
@@ -112,11 +112,28 @@ end
 -- @param #string font
 --
 function menuIcons(name, icon_row, font)
-  menuIconType(name, icon_row, {0,32,0,0}, nil, font, {r=0, g=0, b=0})
-  menuIconType(name, icon_row, {0,64,0,0}, "red", font, {r=0, g=0, b=0})
-  menuIconType(name, icon_row, {96,96,96,96}, "selected", font, {r=1, g=1, b=1})
-  menuIconType(name, icon_row, {128,128,128,128}, "selected_yellow", font, {r=0, g=0, b=0})
-  menuIconType(name, icon_row, {160,160,160,160}, "selected_red", font, {r=0, g=0, b=0})
+  menuIconType(name, icon_row, {0,32,0,0}, 32, nil, font, {r=0, g=0, b=0})
+  menuIconType(name, icon_row, {0,64,0,0}, 32, "red", font, {r=0, g=0, b=0})
+  menuIconType(name, icon_row, {96,128,96,96}, 32, "selected", font, {r=1, g=1, b=1})
+  menuIconType(name, icon_row, {128,128,128,128}, 32, "selected_yellow", font, {r=0, g=0, b=0})
+  menuIconType(name, icon_row, {160,160,160,160}, 32, "selected_red", font, {r=0, g=0, b=0})
+end
+
+-------------------------------------------------------------------------------
+-- Menu Small icons
+--
+-- @function menuSmIcons
+--
+-- @param #string name
+-- @param #number icon_row
+-- @param #string font
+--
+function menuSmIcons(name, icon_row, font)
+  menuIconType(name, icon_row, {0,32,0,0}, 24, "sm", font, {r=0, g=0, b=0})
+  menuIconType(name, icon_row, {0,64,0,0}, 24, "sm_red", font, {r=0, g=0, b=0})
+  menuIconType(name, icon_row, {96,128,96,96}, 24, "sm_selected", font, {r=1, g=1, b=1})
+  menuIconType(name, icon_row, {128,128,128,128}, 24, "sm_selected_yellow", font, {r=0, g=0, b=0})
+  menuIconType(name, icon_row, {160,160,160,160}, 24, "sm_selected_red", font, {r=0, g=0, b=0})
 end
 
 -------------------------------------------------------------------------------
@@ -271,10 +288,13 @@ local list = {
   {name="delete"},
   {name="edit"},
   {name="settings"},
-  {name="time", font="helmod_font_small2_bold"}
+  {name="time", font="helmod_font_small2_bold"},
+  {name="unlink"},
+  {name="link"}
 }
 for icon_row,icon in pairs(list) do
   menuIcons(icon.name, icon_row, icon.font)
+  menuSmIcons(icon.name, icon_row, icon.font)
 end
 
 -------------------------------------------------------------------------------

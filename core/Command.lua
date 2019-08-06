@@ -38,13 +38,17 @@ function Command.parse(event)
   if event.command == "helmod" then
     if event.parameters ~= nil then
       if string.lower(event.parameters) == "help" then
-        Player.print("Valid arguments: help | close | ExportData | UnitTest")
+        Player.print("Valid arguments: help | close | ExportData | ResetCaches | UnitTest")
       end
       if string.lower(event.parameters) == "close" then
         Controller.onGuiClick({player_index=Player.native().index, element = {valid=true, name="HMController=CLOSE"}})
       end
       if string.lower(event.parameters) == "unittest" then
         UnitTest.run(event)
+      end
+      if string.lower(event.parameters) == "resetcaches" then
+        Controller.resetCaches()
+        Player.print("Caches are reseted!")
       end
       if string.lower(event.parameters) == "exportdata" then
         Logging.limit = level or 10

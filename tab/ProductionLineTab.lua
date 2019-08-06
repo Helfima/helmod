@@ -188,15 +188,15 @@ function ProductionLineTab.methods:addTableRow(gui_table, block)
   if block.index == 0 then unlinked = true end
 
   -- col action
-  local cell_action = ElementGui.addCell(gui_table, "action"..block.id, 4)
+  local cell_action = ElementGui.addCell(gui_table, "action"..block.id, 2)
 
-  ElementGui.addGuiShortButton(cell_action, self:classname().."=production-block-remove=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
-  ElementGui.addGuiShortButton(cell_action, self:classname().."=production-block-down=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-down"}), ({"tooltip.down-element", Player.getSettings("row_move_step")}))
-  ElementGui.addGuiShortButton(cell_action, self:classname().."=production-block-up=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-up"}), ({"tooltip.up-element", Player.getSettings("row_move_step")}))
+  ElementGui.addGuiButton(cell_action, self:classname().."=production-block-up=ID=", block.id, "helmod_button_icon_arrow_top_sm", nil, ({"tooltip.up-element", Player.getSettings("row_move_step")}))
+  ElementGui.addGuiButton(cell_action, self:classname().."=production-block-remove=ID=", block.id, "helmod_button_icon_delete_sm_red", nil, ({"tooltip.remove-element"}))
+  ElementGui.addGuiButton(cell_action, self:classname().."=production-block-down=ID=", block.id, "helmod_button_icon_arrow_down_sm", nil, ({"tooltip.down-element", Player.getSettings("row_move_step")}))
   if unlinked then
-    ElementGui.addGuiShortButton(cell_action, self:classname().."=production-block-unlink=ID=", block.id, "helmod_button_default", ({"helmod_result-panel.row-button-unlink"}), ({"tooltip.unlink-element"}))
+    ElementGui.addGuiButton(cell_action, self:classname().."=production-block-unlink=ID=", block.id, "helmod_button_icon_unlink_sm", nil, ({"tooltip.unlink-element"}))
   else
-    ElementGui.addGuiShortButton(cell_action, self:classname().."=production-block-unlink=ID=", block.id, "helmod_button_selected", ({"helmod_result-panel.row-button-unlink"}), ({"tooltip.unlink-element"}))
+    ElementGui.addGuiButton(cell_action, self:classname().."=production-block-unlink=ID=", block.id, "helmod_button_icon_link_sm_selected", nil, ({"tooltip.unlink-element"}))
   end
 
   -- col index
