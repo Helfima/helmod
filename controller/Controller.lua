@@ -126,9 +126,11 @@ end
 -- @return #table
 --
 function Controller.resetCaches()
-  for _,view in pairs(views) do
-    if string.find(view:classname(), "Selector") then
-      view:resetGroups()
+  if views ~= nil then
+    for _,view in pairs(views) do
+      if string.find(view:classname(), "Selector") then
+        view:resetGroups()
+      end
     end
   end
 end

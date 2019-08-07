@@ -138,6 +138,7 @@ function ProductionLineTab.methods:updateData(item, item2, item3)
       extra_cols = extra_cols + 1
     end
     local result_table = ElementGui.addGuiTable(scrollPanel,"list-data",5 + extra_cols, "helmod_table-odd")
+    result_table.vertical_centering = false
 
     self:addTableHeader(result_table)
 

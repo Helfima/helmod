@@ -9,9 +9,7 @@ function sprite_help(name,width,height)
   }
 end
 
-
-data:extend(
-{
+data:extend({
   sprite_help("getting-start", 400, 203),
   sprite_help("mod-settings-map", 150, 179),
   sprite_help("mod-settings-player", 150, 179),
@@ -23,3 +21,4 @@ data:extend(
   sprite_help("recipe-selector-all", 200, 321),
   sprite_help("compute-order", 300, 223)
 })
+

@@ -262,13 +262,13 @@ function ProductionBlockTab.methods:updateData(item, item2, item3)
     if Player.getSettings("display_data_col_type", true) then
       extra_cols = extra_cols + 1
     end
-    local resultTable = ElementGui.addGuiTable(scrollPanel,"list-data",7 + extra_cols, "helmod_table-odd")
-
-    self:addTableHeader(resultTable)
+    local result_table = ElementGui.addGuiTable(scrollPanel,"list-data",7 + extra_cols, "helmod_table-odd")
+    result_table.vertical_centering = false
+    self:addTableHeader(result_table)
 
     local last_element = nil
     for _, recipe in spairs(model.blocks[blockId].recipes, function(t,a,b) if globalGui.order.ascendant then return t[b][globalGui.order.name] > t[a][globalGui.order.name] else return t[b][globalGui.order.name] < t[a][globalGui.order.name] end end) do
-      last_element = self:addTableRow(resultTable, element, recipe)
+      last_element = self:addTableRow(result_table, element, recipe)
     end
     
     if globalGui["scroll_down"] then
