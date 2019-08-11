@@ -8,7 +8,6 @@
 AbstractEdition = setclass("HMAbstractEdition", Form)
 
 local limit_display_height = 850
-
 -------------------------------------------------------------------------------
 -- Get the parent panel
 --
@@ -405,13 +404,13 @@ function AbstractEdition.methods:updateTabMenu(item, item2, item3)
     if global_gui.factory_tab == true then style = "helmod_button_tab_selected" end
 
     ElementGui.addGuiFrameH(tab_left_panel, self:classname().."_separator_factory",helmod_frame_style.tab).style.width = 5
-    ElementGui.addGuiButton(tab_left_panel, self:classname().."=change-tab=ID="..item.."="..object.id.."=", "factory", style, {"helmod_common.factory"}, {"helmod_common.factory"})
+    ElementGui.addGuiButton(tab_left_panel, self:classname().."=edition-change-tab=ID="..item.."="..object.id.."=", "factory", style, {"helmod_common.factory"}, {"helmod_common.factory"})
 
     local style = "helmod_button_tab"
     if global_gui.factory_tab == false then style = "helmod_button_tab_selected" end
 
     ElementGui.addGuiFrameH(tab_left_panel, self:classname().."_separator_beacon",helmod_frame_style.tab).style.width = 5
-    ElementGui.addGuiButton(tab_left_panel, self:classname().."=change-tab=ID="..item.."="..object.id.."=", "beacon", style, {"helmod_common.beacon"}, {"helmod_common.beacon"})
+    ElementGui.addGuiButton(tab_left_panel, self:classname().."=edition-change-tab=ID="..item.."="..object.id.."=", "beacon", style, {"helmod_common.beacon"}, {"helmod_common.beacon"})
 
     ElementGui.addGuiFrameH(tab_left_panel,"tab_final",helmod_frame_style.tab).style.width = 100
   end
@@ -875,9 +874,9 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
   local model = Model.getModel()
   local global_gui = Player.getGlobalGui()
 
-  if action == "change-tab" then
+  if action == "edition-change-tab" then
     global_gui.factory_tab = not(global_gui.factory_tab)
-    self:close()
+    self:onUpdate(event, action, item, item2, item3)
   end
 
   if action == "change-panel" then

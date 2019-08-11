@@ -396,11 +396,16 @@ function Controller.sendEvent(event, classname, action, item, item2, item3)
 
       for _,locate in pairs(form_loop) do
         local form_name = ui[locate]
+        Logging:debug(Controller.classname, "***** locate", ui, locate)
         if form_name ~= nil then
-        local prepared = views[form_name]:prepare(event, action, item, item2, item3)
-        if(prepared == true) then
-          Event.prepare = prepared
-        end
+          if views[form_name] ~= nil then
+            local prepared = views[form_name]:prepare(event, action, item, item2, item3)
+            if(prepared == true) then
+              Event.prepare = prepared
+            end
+          else
+            Logging:error(Controller.classname, "Prepare locate", ui, locate)
+          end
         end
       end
       if(Event.prepare == true) then
@@ -412,13 +417,17 @@ function Controller.sendEvent(event, classname, action, item, item2, item3)
     for _,locate in pairs(form_loop) do
       local form_name = ui[locate]
       if form_name ~= nil then
-        if action == "OPEN" or Event.force_open == true then
-          Logging:debug(Controller.classname, "***** open form")
-          views[form_name]:open(event, action, item, item2, item3)
-        end
-        if not(action ~= "OPEN" and form_name == classname) or Event.force_refresh == true then
-          Logging:debug(Controller.classname, "***** update form")
-          views[form_name]:update(event, action, item, item2, item3)
+        if views[form_name] ~= nil then
+          if action == "OPEN" or Event.force_open == true then
+            Logging:debug(Controller.classname, "***** open form")
+            views[form_name]:open(event, action, item, item2, item3)
+          end
+          if not(action ~= "OPEN" and form_name == classname) or Event.force_refresh == true then
+            Logging:debug(Controller.classname, "***** update form")
+            views[form_name]:update(event, action, item, item2, item3)
+          end
+        else
+          Logging:error(Controller.classname, "Open or Update locate", ui, locate)
         end
       end
     end

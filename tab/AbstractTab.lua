@@ -87,9 +87,12 @@ end
 -- @param #string caption
 --
 function AbstractTab.methods:getDataScrollPanel(caption)
-  local result_panel = self:getResultPanel(caption)
-  ElementGui.setStyle(result_panel, "block_data", "height")
-  local scroll_panel = ElementGui.addGuiScrollPane(result_panel, "scroll-data", helmod_frame_style.scroll_pane, true, true)
+  local parent_panel = self:getResultPanel(caption)
+  ElementGui.setStyle(parent_panel, "block_data", "height")
+  if parent_panel["scroll-data"] ~= nil and parent_panel["scroll-data"].valid then
+    return parent_panel["scroll-data"]
+  end
+  local scroll_panel = ElementGui.addGuiScrollPane(parent_panel, "scroll-data", helmod_frame_style.scroll_pane, true, true)
   scroll_panel.style.horizontally_stretchable = true
   scroll_panel.style.vertically_stretchable = true
   return scroll_panel
@@ -112,14 +115,14 @@ function AbstractTab.methods:update(item, item2, item3)
 
   parent_panel.clear()
 
+  self:beforeUpdate(item, item2, item3)
+  self:updateHeader(item, item2, item3)
+  self:updateData(item, item2, item3)
+
   Logging:debug(self:classname(), "debug_mode", Player.getSettings("debug"))
   if Player.getSettings("debug", true) ~= "none" then
     self:updateDebugPanel()
   end
-
-  self:beforeUpdate(item, item2, item3)
-  self:updateHeader(item, item2, item3)
-  self:updateData(item, item2, item3)
 
 end
 

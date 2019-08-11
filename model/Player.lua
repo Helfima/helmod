@@ -128,6 +128,17 @@ function Player.getSortedStyle(key)
 end
 
 -------------------------------------------------------------------------------
+-- Reset global variable for player
+--
+-- @function [parent=#Player] resetGlobal
+--
+-- @param #string key
+--
+function Player.resetGlobal()
+  global["users"] = {}
+end
+
+-------------------------------------------------------------------------------
 -- Get global variable for player
 --
 -- @function [parent=#Player] getGlobal

@@ -20,7 +20,7 @@ local list_prototype = {}
 -- @param #Controller parent parent controller
 --
 function FluidSelector.methods:getCaption(parent)
-  return {"helmod_selector-panel.item-title"}
+  return {"helmod_selector-panel.fluid-title"}
 end
 
 -------------------------------------------------------------------------------
