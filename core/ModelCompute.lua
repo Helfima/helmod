@@ -1,5 +1,6 @@
 Matrix = require "core.Matrix"
-Simplex = require "core.Simplex"
+Solver = require "core.Solver"
+Simplex = require "core.SolverSimplex"
 ------------------------------------------------------------------------------
 -- Description of the module.
 -- @module ModelCompute
@@ -131,14 +132,14 @@ function ModelCompute.update()
 
         if block.solver == true then
           local ok , err = pcall(function()
-            --ModelCompute.computeMatrixBlock(block)
             ModelCompute.computeSimplexBlock(block)
           end)
           if not(ok) then
             Player.print("Matrix solver can not found solution!")
           end
         else
-          ModelCompute.computeBlock(block)
+          --ModelCompute.computeBlock(block)
+          ModelCompute.computeBlock2(block)
         end
 
         -- compte les ingredients
@@ -383,214 +384,6 @@ end
 -------------------------------------------------------------------------------
 -- Compute production block
 --
--- @function [parent=#ModelCompute] computeMatrixBlock
---
--- @param #table block block of model
---
-function ModelCompute.computeMatrixBlock(block)
-  Logging:debug(ModelCompute.classname, "computeMatrixBlock():", block.name)
-  local model = Model.getModel()
-
-  local recipes = block.recipes
-  if recipes ~= nil then
-    local mC = nil
-    local computed_recipe = {}
-    if block.input ~= nil then
-      local input_computed = {}
-      local rows = {}
-      local columns = {}
-      -- begin loop recipes
-      for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
-        local production = 1
-        
-        ModelCompute.computeModuleEffects(recipe)
-        --ModelCompute.computeFactory(recipe)
-        local row = {}
-        local row_valid = false
-        local lua_recipe = RecipePrototype.load(recipe).native()
-        for i, lua_product in pairs(RecipePrototype.getProducts()) do
-          if block.input[lua_product.name] ~= nil or block.ingredients[lua_product.name] ~= nil or (block.products[lua_product.name] ~= nil and bit32.band(block.products[lua_product.name].state, 1) > 0) then
-            columns[lua_product.name] = i
-            row[lua_product.name] = Product.load(lua_product).getAmount(recipe) / RecipePrototype.getEnergy()
-            row_valid = true
-          end
-        end
-        if recipe.type ~= "resource" and recipe.type ~= "fluid" then
-          for i, lua_ingredient in pairs(RecipePrototype.getIngredients()) do
-            if block.products[lua_ingredient.name] ~= nil then
-              columns[lua_ingredient.name] = i
-              row[lua_ingredient.name] = ( row[lua_ingredient.name] or 0 ) - Product.load(lua_ingredient).getAmount() / RecipePrototype.getEnergy()
-              row_valid = true
-            end
-          end
-        end
-        if row_valid then
-          computed_recipe[recipe.id] = true
-          table.insert(rows,row)
-        end
-      end
-      -- end loop recipes
-      Logging:debug(ModelCompute.classname, "matrix columns", columns)
-      Logging:debug(ModelCompute.classname, "matrix rows", rows)
-
-      -- on bluid A correctement
-      local mA = {}
-      for _,row in pairs(rows) do
-        local rowA = {}
-        local col_limit = 1
-        for column,_ in spairs(columns, function(t,a,b) return t[b] > t[a] end) do
-          if col_limit <= #rows then
-            if row[column] ~= nil then
-              table.insert(rowA, row[column])
-            else
-              table.insert(rowA, 0)
-            end
-          end
-          col_limit = col_limit + 1
-        end
-        table.insert(mA, rowA)
-      end
-      Logging:debug(ModelCompute.classname, "matrix A", mA)
-
-      if Player.getSettings("debug", true) ~= "none" then
-        block.matrix = {}
-        block.matrix.columns = columns
-        block.matrix.mA = mA
-      end
-      -- on transpose A
-      local mAT = Matrix.transpose(mA)
-      -- inverse de A
-      local invA = Matrix.invert(mAT)
-
-      -- build B
-      local mB = {}
-      local col_limit = 1
-      for column,_ in spairs(columns, function(t,a,b) return t[b] > t[a] end) do
-        if col_limit <= #rows then
-          if block.input[column] ~= nil then
-            table.insert(mB, {block.input[column]})
-          else
-            table.insert(mB, {0})
-          end
-        end
-        col_limit = col_limit + 1
-      end
-      Logging:debug(ModelCompute.classname, "matrix B", mB)
-
-      if Player.getSettings("debug", true) ~= "none" then
-        block.matrix.mB = mB
-      end
-      -- produit invA x B
-      mC = Matrix.mul(invA,mB)
-      Logging:debug(ModelCompute.classname, "matrix C", mC)
-
-      if Player.getSettings("debug", true) ~= "none" then
-        block.matrix.mC = mC
-      end
-    end
-
-    -- ratio pour le calcul du nombre de block
-    local ratio = 1
-    local ratioRecipe = nil
-    -- calcul ordonnee sur les recipes du block
-    local row_index = 1
-    for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
-      Logging:debug(ModelCompute.classname , "matrix index", recipe.name, row_index)
-      ModelCompute.computeModuleEffects(recipe)
-      if computed_recipe[recipe.id] then
-        recipe.count = mC[row_index][1] / RecipePrototype.load(recipe).getEnergy()
-        row_index = row_index + 1
-      else
-        recipe.count = 0
-      end
-      --Logging:debug(Model.classname , "matrix recipe.count", recipe.count, Model.speedFactory(recipe) * (1 + recipe.factory.effects.speed))
-
-      if recipe.type == "technology" then
-        ModelCompute.computeMatrixBlockTechnology(block, recipe)
-      else
-        ModelCompute.computeMatrixBlockRecipe(block, recipe)
-      end
-
-      ModelCompute.computeFactory(recipe)
-
-      block.power = block.power + recipe.energy_total
-
-      if type(recipe.factory.limit) == "number" and recipe.factory.limit > 0 then
-        local currentRatio = recipe.factory.limit/recipe.factory.count
-        if currentRatio < ratio then
-          ratio = currentRatio
-          ratioRecipe = recipe.index
-          -- block number
-          block.count = recipe.factory.count/recipe.factory.limit
-          -- subblock energy
-          block.sub_power = 0
-          if block.count ~= nil and block.count > 0 then
-            block.sub_power = math.ceil(block.power/block.count)
-          end
-        end
-      end
-
-      Logging:debug(ModelCompute.classname , "********** Compute before clean:", block)
-
-      local lua_recipe = RecipePrototype.load(recipe).native()
-      -- reduit les produits du block
-      -- state = 0 => produit
-      -- state = 1 => produit pilotant
-      -- state = 2 => produit restant
-      for _, lua_product in pairs(RecipePrototype.getProducts()) do
-        local count = Product.load(lua_product).countProduct(recipe)
-        -- compte les produits
-        if block.products[lua_product.name] ~= nil then
-          block.products[lua_product.name].count = block.products[lua_product.name].count + count
-        end
-        -- consomme les produits
-        if block.ingredients[lua_product.name] ~= nil then
-          block.ingredients[lua_product.name].count = block.ingredients[lua_product.name].count - count
-        end
-      end
-      Logging:debug(ModelCompute.classname , "********** Compute after clean product:", block)
-      for _, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
-        local count = Product.load(lua_ingredient).countIngredient(recipe)
-        -- consomme les ingredients
-        -- exclus le type ressource ou fluid
-        if recipe.type ~= "resource" and recipe.type ~= "fluid" and block.products[lua_ingredient.name] ~= nil then
-          block.products[lua_ingredient.name].count = block.products[lua_ingredient.name].count - count
-        end
-      end
-      Logging:debug(ModelCompute.classname , "********** Compute after clean ingredient:", block)
-    end
-
-    if block.count < 1 then
-      block.count = 1
-    end
-
-    -- reduit les engredients fake du block
-    for _, ingredient in pairs(block.ingredients) do
-      if ingredient.type == "fake" then block.ingredients[ingredient.name] = nil end
-    end
-
-    -- reduit les produits du block
-    for _, product in pairs(block.products) do
-      if block.ingredients[product.name] ~= nil then
-        product.state = 2
-      end
-      if block.products[product.name].count < ModelCompute.waste_value and not(bit32.band(product.state, 1) > 0) then
-        block.products[product.name] = nil
-      end
-    end
-
-    -- reduit les ingredients du block
-    for _, ingredient in pairs(block.ingredients) do
-      if block.ingredients[ingredient.name].count < ModelCompute.waste_value then
-        block.ingredients[ingredient.name] = nil
-      end
-    end
-  end
-end
-
--------------------------------------------------------------------------------
--- Compute production block
---
 -- @function [parent=#ModelCompute] computeBlockByFactory
 --
 -- @param #table block block of model
@@ -642,125 +435,15 @@ function ModelCompute.computeSimplexBlock(block)
 
   local recipes = block.recipes
   if recipes ~= nil then
-    local mC = nil
-    local computed_recipe = {}
-    local row_headers = {}
-    local col_headers = {}
-    if block.input ~= nil then
-      local products = {}
-      local ingredients = {}
-      local input_computed = {}
-      local rows = {}
-      col_headers["C"] = {name="C", type="none"}
-      -- begin loop recipes
-      local irow = 1
-      for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
-        local production = 1
-        if recipe.production ~= nil then production = recipe.production end
-        ModelCompute.computeModuleEffects(recipe)
-        --ModelCompute.computeFactory(recipe)
-        local row = {}
-        local row_valid = false
-        local lua_recipe = RecipePrototype.load(recipe).native()
-        
-        row["C"] = 0
-        table.insert(row_headers, {name=recipe.name, type=recipe.type})
-        
-        
-        for i, lua_product in pairs(RecipePrototype.getProducts()) do
-          products[lua_product.name]=lua_product
-          col_headers[lua_product.name] = {name=lua_product.name, type=lua_product.type}
-          row[lua_product.name] = Product.load(lua_product).getAmount(recipe)
-          row_valid = true
-        end
-        for i, lua_ingredient in pairs(RecipePrototype.getIngredients()) do
-          ingredients[lua_ingredient.name]=lua_ingredient
-          col_headers[lua_ingredient.name] = {name=lua_ingredient.name, type=lua_ingredient.type}
-          row[lua_ingredient.name] = ( row[lua_ingredient.name] or 0 ) - Product.load(lua_ingredient).getAmount()
-          row_valid = true
-        end
-        row["tax"] = -1
-        
-        if row_valid then
-          computed_recipe[recipe.name] = irow
-          irow = irow + 1
-          table.insert(rows,row)
-        end
-      end
-      local index = 1
-      for name,ingredient in pairs(ingredients) do
-        if products[name] == nil then
-          local row = {}
-          
-          for column,_ in pairs(col_headers) do
-            if column == "C" then
-              row[column] = math.pow(100,index)
-            elseif column == name then
-              row[column] = 1
-            else
-              row[column] = 0
-            end
-          end
-          row["tax"] = 0
-          table.insert(rows,row)
-          table.insert(row_headers, {name=ingredient.name, type=ingredient.type})
-          index = index + 1
-        end
-      end
-      col_headers["tax"] = {name="tax", type="none"}
-      -- end loop recipes
-      Logging:debug(ModelCompute.classname, "----> matrix col headers", col_headers)
-      Logging:debug(ModelCompute.classname, "----> matrix row headers", row_headers)
-      Logging:debug(ModelCompute.classname, "----> matrix rows", rows)
-
-      -- on bluid A correctement
-      local mA = {}
-      local mB = {}
-      for _,row in pairs(rows) do
-        local rowA = {}
-        local col_limit = 1
-        for column,_ in pairs(col_headers) do
-          --if col_limit <= #rows then
-            if row[column] ~= nil then
-              table.insert(rowA, row[column])
-            else
-              table.insert(rowA, 0)
-            end
-          --end
-          col_limit = col_limit + 1
-        end
-        table.insert(mA, rowA)
-      end
+    local mB,mC
+    local mA, row_headers, col_headers = ModelCompute.getBlockMatrix(block)
       
-      local rowZ = {}
-      local rowTax = {}
-      for column,_ in pairs(col_headers) do
-        if block.input[column] then
-          table.insert(rowZ, block.input[column])
-        else
-          table.insert(rowZ, 0)
-        end
-        if column == "C" or column == "tax" then
-          table.insert(rowTax, 1)
-        else
-          table.insert(rowTax, 0)
-        end
-      end
-      table.insert(mA, rowTax)
-      table.insert(row_headers, {name="tax", type="none"})
-      
-      table.insert(mA, rowZ)
-      table.insert(row_headers, {name="Z", type="none"})
-      
-      Logging:debug(ModelCompute.classname, "----> matrix A", mA)
-
-      
-
+    if mA ~= nil then
       if Player.getSettings("debug", true) ~= "none" then
-        block.matrix = {}
-        block.matrix.col_headers = col_headers
-        block.matrix.row_headers = row_headers
-        block.matrix.mA = mA
+        block.matrix2 = {}
+        block.matrix2.col_headers = col_headers
+        block.matrix2.row_headers = row_headers
+        block.matrix2.mA = mA
       end
 
       Simplex.new(mA)
@@ -770,82 +453,79 @@ function ModelCompute.computeSimplexBlock(block)
       Logging:debug(ModelCompute.classname, "----> matrix B", mB)
 
       if Player.getSettings("debug", true) ~= "none" then
-        block.matrix.mB = mB
-        block.matrix.mC = mC
+        block.matrix2.mB = mB
+        block.matrix2.mC = mC
       end
     end
-    
-        -- ratio pour le calcul du nombre de block
-    local ratio = 1
-    local ratioRecipe = nil
-    -- calcul ordonnee sur les recipes du block
-    local row_index = 1
-    for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
-      Logging:debug(ModelCompute.classname , "matrix index", recipe.name, row_index)
-      ModelCompute.computeModuleEffects(recipe)
-      if computed_recipe[recipe.name] then
-        local icol = Model.countList(col_headers) + computed_recipe[recipe.name]
-        recipe.count =  - mC[#mC][icol] --* RecipePrototype.load(recipe).getEnergy()
+    if mC ~= nil then    
+          -- ratio pour le calcul du nombre de block
+      local ratio = 1
+      local ratioRecipe = nil
+      -- calcul ordonnee sur les recipes du block
+      local row_index = 2
+      for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
+        Logging:debug(ModelCompute.classname , "matrix index", recipe.name, row_index)
+        ModelCompute.computeModuleEffects(recipe)
+        local icol = 1
+        recipe.count =  mC[row_index][icol]
         row_index = row_index + 1
         Logging:debug(ModelCompute.classname , "----> matrix solution", recipe.name, icol, recipe.count)
-      else
-        recipe.count = 0
-      end
-      --Logging:debug(Model.classname , "matrix recipe.count", recipe.count, Model.speedFactory(recipe) * (1 + recipe.factory.effects.speed))
-
-      if recipe.type == "technology" then
-        ModelCompute.computeMatrixBlockTechnology(block, recipe)
-      else
-        ModelCompute.computeMatrixBlockRecipe(block, recipe)
-      end
-
-      ModelCompute.computeFactory(recipe)
-
-      block.power = block.power + recipe.energy_total
-
-      if type(recipe.factory.limit) == "number" and recipe.factory.limit > 0 then
-        local currentRatio = recipe.factory.limit/recipe.factory.count
-        if currentRatio < ratio then
-          ratio = currentRatio
-          ratioRecipe = recipe.index
-          -- block number
-          block.count = recipe.factory.count/recipe.factory.limit
-          -- subblock energy
-          block.sub_power = 0
-          if block.count ~= nil and block.count > 0 then
-            block.sub_power = math.ceil(block.power/block.count)
+        --Logging:debug(Model.classname , "matrix recipe.count", recipe.count, Model.speedFactory(recipe) * (1 + recipe.factory.effects.speed))
+  
+        if recipe.type == "technology" then
+          ModelCompute.computeMatrixBlockTechnology(block, recipe)
+        else
+          ModelCompute.computeMatrixBlockRecipe(block, recipe)
+        end
+  
+        ModelCompute.computeFactory(recipe)
+  
+        block.power = block.power + recipe.energy_total
+  
+        if type(recipe.factory.limit) == "number" and recipe.factory.limit > 0 then
+          local currentRatio = recipe.factory.limit/recipe.factory.count
+          if currentRatio < ratio then
+            ratio = currentRatio
+            ratioRecipe = recipe.index
+            -- block number
+            block.count = recipe.factory.count/recipe.factory.limit
+            -- subblock energy
+            block.sub_power = 0
+            if block.count ~= nil and block.count > 0 then
+              block.sub_power = math.ceil(block.power/block.count)
+            end
           end
         end
-      end
-
-      Logging:debug(ModelCompute.classname , "********** Compute before clean:", block)
-
-      local lua_recipe = RecipePrototype.load(recipe).native()
-      -- reduit les produits du block
-      -- state = 0 => produit
-      -- state = 1 => produit pilotant
-      -- state = 2 => produit restant
-      for _, lua_product in pairs(RecipePrototype.getProducts()) do
-        local count = Product.load(lua_product).countProduct(recipe)
-        -- compte les produits
-        if block.products[lua_product.name] ~= nil then
-          block.products[lua_product.name].count = block.products[lua_product.name].count + count
+  
+        Logging:debug(ModelCompute.classname , "********** Compute before clean:", block)
+  
+        local lua_recipe = RecipePrototype.load(recipe).native()
+        -- reduit les produits du block
+        -- state = 0 => produit
+        -- state = 1 => produit pilotant
+        -- state = 2 => produit restant
+        for _, lua_product in pairs(RecipePrototype.getProducts()) do
+          local count = Product.load(lua_product).countProduct(recipe)
+          -- compte les produits
+          if block.products[lua_product.name] ~= nil then
+            block.products[lua_product.name].count = block.products[lua_product.name].count + count
+          end
+          -- consomme les produits
+          if block.ingredients[lua_product.name] ~= nil then
+            block.ingredients[lua_product.name].count = block.ingredients[lua_product.name].count - count
+          end
         end
-        -- consomme les produits
-        if block.ingredients[lua_product.name] ~= nil then
-          block.ingredients[lua_product.name].count = block.ingredients[lua_product.name].count - count
+        Logging:debug(ModelCompute.classname , "********** Compute after clean product:", block)
+        for _, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
+          local count = Product.load(lua_ingredient).countIngredient(recipe)
+          -- consomme les ingredients
+          -- exclus le type ressource ou fluid
+          if recipe.type ~= "resource" and recipe.type ~= "fluid" and block.products[lua_ingredient.name] ~= nil then
+            block.products[lua_ingredient.name].count = block.products[lua_ingredient.name].count - count
+          end
         end
+        Logging:debug(ModelCompute.classname , "********** Compute after clean ingredient:", block)
       end
-      Logging:debug(ModelCompute.classname , "********** Compute after clean product:", block)
-      for _, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
-        local count = Product.load(lua_ingredient).countIngredient(recipe)
-        -- consomme les ingredients
-        -- exclus le type ressource ou fluid
-        if recipe.type ~= "resource" and recipe.type ~= "fluid" and block.products[lua_ingredient.name] ~= nil then
-          block.products[lua_ingredient.name].count = block.products[lua_ingredient.name].count - count
-        end
-      end
-      Logging:debug(ModelCompute.classname , "********** Compute after clean ingredient:", block)
     end
 
     if block.count < 1 then
@@ -902,6 +582,299 @@ function ModelCompute.computeBlockCleanInput(block)
     end
   end
 end
+
+-------------------------------------------------------------------------------
+-- Clone une matrice
+--
+-- @function [parent=#ModelCompute] cloneMatrix
+-- @param #table M
+--
+-- @return #number
+--
+function ModelCompute.cloneMatrix(M)
+  local Mx = {}
+  local num_row = rawlen(M)
+  local num_col = rawlen(M[1])
+  for irow,row in pairs(M) do
+    Mx[irow] = {}
+    for icol,col in pairs(row) do
+      Mx[irow][icol] = col
+    end
+  end
+  return Mx
+end
+
+
+-------------------------------------------------------------------------------
+-- Return a matrix of block
+--
+-- @function [parent=#ModelCompute] getMatrix
+--
+-- @param #table block block of model
+--
+function ModelCompute.getBlockMatrix(block)
+  Logging:debug(ModelCompute.classname, "getBlockMatrix()", block.name)
+
+  local recipes = block.recipes
+  if recipes ~= nil then
+    local row_headers = {}
+    local col_headers = {}
+    local col_index = {}
+    if block.input ~= nil then
+      local rows = {}
+      col_headers["R"] = {name="R", type="none"} -- Count recipe
+      col_headers["P"] = {name="P", type="none"} -- Production
+      col_headers["E"] = {name="E", type="none"} -- Energy
+      col_headers["C"] = {name="C", type="none"} -- Coefficient ou resultat
+      -- begin loop recipes
+      local irow = 1
+      for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
+        local row = {}
+              
+        local row_valid = false
+        local lua_recipe = RecipePrototype.load(recipe).native()
+
+        -- prepare le taux de production
+        local production = 1
+        if recipe.production ~= nil then production = recipe.production end
+        table.insert(row_headers,{name=recipe.name, type=recipe.type, tooltip=recipe.name.."\nRecette"})
+        row["R"] = 0
+        row["P"] = production
+        row["E"] = RecipePrototype.getEnergy()
+        row["C"] = 0
+
+        ModelCompute.computeModuleEffects(recipe)
+        --ModelCompute.computeFactory(recipe)
+
+        local col_product = {}
+        for i, lua_product in pairs(RecipePrototype.getProducts()) do
+          local index = 1
+          if col_index[lua_product.name] ~= nil then
+            index = col_index[lua_product.name]
+          end
+          col_index[lua_product.name] = index
+          col_product[lua_product.name] = true
+          
+          local col_name = lua_product.name..index
+          col_headers[col_name] = {name=lua_product.name, type=lua_product.type, is_ingredient = false, tooltip=col_name.."\nProduit"}
+          row[col_name] = Product.load(lua_product).getAmount(recipe)
+          row_valid = true
+        end
+        local col_ingredient = {}
+        for i, lua_ingredient in pairs(RecipePrototype.getIngredients()) do
+          local index = 1
+          -- cas normal de l'ingredient n'existant pas du cote produit
+          if col_index[lua_ingredient.name] ~= nil and col_product[lua_ingredient.name] == nil then
+            index = col_index[lua_ingredient.name]
+          end
+          -- cas de l'ingredient existant du cote produit
+          if col_index[lua_ingredient.name] ~= nil and col_product[lua_ingredient.name] ~= nil then
+            if col_ingredient[lua_ingredient.name] == nil then
+              index = col_index[lua_ingredient.name]+1
+            else
+              index = col_index[lua_ingredient.name]
+            end
+          end
+          col_index[lua_ingredient.name] = index
+          col_ingredient[lua_ingredient.name] = true
+          
+          local col_name = lua_ingredient.name..index
+          col_headers[col_name] = {name=lua_ingredient.name, type=lua_ingredient.type, is_ingredient = true, tooltip=col_name.."\nIngredient"}
+          row[col_name] = ( row[col_name] or 0 ) - Product.load(lua_ingredient).getAmount()
+          row_valid = true
+        end
+
+        if row_valid then
+          table.insert(rows,row)
+        end
+      end
+
+      -- end loop recipes
+      Logging:debug(ModelCompute.classname, "----> matrix col headers", col_headers)
+      Logging:debug(ModelCompute.classname, "----> matrix row headers", row_headers)
+      Logging:debug(ModelCompute.classname, "----> matrix rows", rows)
+
+      -- on bluid A correctement
+      local mA = {}
+      for _,row in pairs(rows) do
+        local rowA = {}
+        for column,_ in pairs(col_headers) do
+          if row[column] ~= nil then
+            table.insert(rowA, row[column])
+          else
+            table.insert(rowA, 0)
+          end
+        end
+        table.insert(mA, rowA)
+      end
+
+      local row_input = {}
+      local input_ready = {}
+      for column,col_header in pairs(col_headers) do
+        if block.input[col_header.name] and not(input_ready[col_header.name]) then
+          table.insert(row_input, block.input[col_header.name])
+          input_ready[col_header.name] = true
+        else
+          table.insert(row_input, 0)
+        end
+      end
+      table.insert(mA, 1, row_input)
+      table.insert(row_headers,1, {name="Input", type="none"})
+      table.insert(row_headers, {name="Z", type="none"})
+
+      Logging:debug(ModelCompute.classname, "----> matrix A", mA)
+      local export = ""
+      for _,row in pairs(mA) do
+        export = export.."{"
+        for icol,cell in pairs(row) do
+          export = export..cell
+          if icol ~= #row then
+            export = export..","
+          end
+        end
+        export = export.."}"
+      end
+      Logging:debug(ModelCompute.classname, "----> export matrix A", export)
+      
+      return mA, row_headers, col_headers
+    end
+  end
+end
+-------------------------------------------------------------------------------
+-- Compute production block
+--
+-- @function [parent=#ModelCompute] computeBlock2
+--
+-- @param #table block block of model
+--
+function ModelCompute.computeBlock2(block)
+  Logging:debug(ModelCompute.classname, "computeBlock()", block.name)
+
+  local recipes = block.recipes
+  if recipes ~= nil then
+    local mB,mC
+    local mA, row_headers, col_headers = ModelCompute.getBlockMatrix(block)
+    
+    if mA ~= nil then
+      if Player.getSettings("debug", true) ~= "none" then
+        block.matrix1 = {}
+        block.matrix1.col_headers = col_headers
+        block.matrix1.row_headers = row_headers
+        block.matrix1.mA = mA
+      end
+
+      Solver.new(mA)
+      
+      mC = Solver.solve()
+      mB = Solver.getMx()
+
+
+      Logging:debug(ModelCompute.classname, "----> matrix B", mB)
+      Logging:debug(ModelCompute.classname, "----> matrix C", mC)
+
+      if Player.getSettings("debug", true) ~= "none" then
+        block.matrix1.mB = mB
+        block.matrix1.mC = mC
+      end
+    end
+    if mC ~= nil then
+      -- ratio pour le calcul du nombre de block
+      local ratio = 1
+      local ratioRecipe = nil
+      -- calcul ordonnee sur les recipes du block
+      local row_index = 2
+      for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
+        Logging:debug(ModelCompute.classname , "solver index", recipe.name, row_index)
+        ModelCompute.computeModuleEffects(recipe)
+        local icol = 1
+        recipe.count = mC[row_index][icol]
+        row_index = row_index + 1
+        Logging:debug(ModelCompute.classname , "----> solver solution", recipe.name, icol, recipe.count)
+
+        if recipe.type == "technology" then
+          ModelCompute.computeMatrixBlockTechnology(block, recipe)
+        else
+          ModelCompute.computeMatrixBlockRecipe(block, recipe)
+        end
+
+        ModelCompute.computeFactory(recipe)
+
+        block.power = block.power + recipe.energy_total
+
+        if type(recipe.factory.limit) == "number" and recipe.factory.limit > 0 then
+          local currentRatio = recipe.factory.limit/recipe.factory.count
+          if currentRatio < ratio then
+            ratio = currentRatio
+            ratioRecipe = recipe.index
+            -- block number
+            block.count = recipe.factory.count/recipe.factory.limit
+            -- subblock energy
+            block.sub_power = 0
+            if block.count ~= nil and block.count > 0 then
+              block.sub_power = math.ceil(block.power/block.count)
+            end
+          end
+        end
+
+        Logging:debug(ModelCompute.classname , "********** Compute before clean:", block)
+
+        local lua_recipe = RecipePrototype.load(recipe).native()
+        -- reduit les produits du block
+        -- state = 0 => produit
+        -- state = 1 => produit pilotant
+        -- state = 2 => produit restant
+        for _, lua_product in pairs(RecipePrototype.getProducts()) do
+          local count = Product.load(lua_product).countProduct(recipe)
+          -- compte les produits
+          if block.products[lua_product.name] ~= nil then
+            block.products[lua_product.name].count = block.products[lua_product.name].count + count
+          end
+          -- consomme les produits
+          if block.ingredients[lua_product.name] ~= nil then
+            block.ingredients[lua_product.name].count = block.ingredients[lua_product.name].count - count
+          end
+        end
+        Logging:debug(ModelCompute.classname , "********** Compute after clean product:", block)
+        for _, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
+          local count = Product.load(lua_ingredient).countIngredient(recipe)
+          -- consomme les ingredients
+          -- exclus le type ressource ou fluid
+          if recipe.type ~= "resource" and recipe.type ~= "fluid" and block.products[lua_ingredient.name] ~= nil then
+            block.products[lua_ingredient.name].count = block.products[lua_ingredient.name].count - count
+          end
+        end
+        Logging:debug(ModelCompute.classname , "********** Compute after clean ingredient:", block)
+      end
+
+      if block.count < 1 then
+        block.count = 1
+      end
+
+      -- reduit les engredients fake du block
+      for _, ingredient in pairs(block.ingredients) do
+        if ingredient.type == "fake" then block.ingredients[ingredient.name] = nil end
+      end
+
+      -- reduit les produits du block
+      for _, product in pairs(block.products) do
+        if block.ingredients[product.name] ~= nil then
+          product.state = 2
+        end
+        if block.products[product.name].count < ModelCompute.waste_value and not(bit32.band(product.state, 1) > 0) then
+          block.products[product.name] = nil
+        end
+      end
+
+      -- reduit les ingredients du block
+      for _, ingredient in pairs(block.ingredients) do
+        if block.ingredients[ingredient.name].count < ModelCompute.waste_value then
+          block.ingredients[ingredient.name] = nil
+        end
+      end
+    end
+  end
+end
+
 -------------------------------------------------------------------------------
 -- Compute production block
 --
@@ -999,24 +972,28 @@ function ModelCompute.computeBlock(block)
       -- state = 2 => produit restant
       for _, lua_product in pairs(RecipePrototype.getProducts()) do
         local count = Product.load(lua_product).countProduct(recipe)
-        -- compte les produits
-        if block.products[lua_product.name] ~= nil then
-          block.products[lua_product.name].count = block.products[lua_product.name].count + count
-        end
-        -- consomme les produits
-        if block.ingredients[lua_product.name] ~= nil then
-          block.ingredients[lua_product.name].count = block.ingredients[lua_product.name].count - count
+        if count > 0 then
+          -- compte les produits
+          if block.products[lua_product.name] ~= nil then
+            block.products[lua_product.name].count = block.products[lua_product.name].count + count
+          end
+          -- consomme les produits
+          if block.ingredients[lua_product.name] ~= nil then
+            block.ingredients[lua_product.name].count = block.ingredients[lua_product.name].count - count
+          end
         end
       end
       Logging:debug(ModelCompute.classname , "********** Compute after clean product:", block)
       for _, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
         local count = Product.load(lua_ingredient).countIngredient(recipe)
-        -- consomme les ingredients
-        -- exclus le type ressource ou fluid
-        if recipe.type ~= "resource" and recipe.type ~= "fluid" and block.products[lua_ingredient.name] ~= nil and block.mining_ingredient ~= lua_ingredient.name  then
-          block.products[lua_ingredient.name].count = block.products[lua_ingredient.name].count - count
-          if RecipePrototype.isVoid() then
-            block.ingredients[lua_ingredient.name].count = block.ingredients[lua_ingredient.name].count - count
+        if count > 0 then
+          -- consomme les ingredients
+          -- exclus le type ressource ou fluid
+          if recipe.type ~= "resource" and recipe.type ~= "fluid" and block.products[lua_ingredient.name] ~= nil and block.mining_ingredient ~= lua_ingredient.name  then
+            block.products[lua_ingredient.name].count = block.products[lua_ingredient.name].count - count
+            if RecipePrototype.isVoid() then
+              block.ingredients[lua_ingredient.name].count = block.ingredients[lua_ingredient.name].count - count
+            end
           end
         end
       end

@@ -267,7 +267,7 @@ function PinPanel.methods:addProductionBlockRow(gui_table, block, recipe)
         if block.count > 1 then
           ingredient.limit_count = ingredient.count / block.count
         end
-        ElementGui.addCellElementSm(cell_ingredients, ingredient, self:classname().."=do_noting=ID=", true, "tooltip.product", self.color_button_add, index)
+        ElementGui.addCellElementSm(cell_ingredients, ingredient, self:classname().."=do_noting=ID=", true, "tooltip.product", ElementGui.color_button_add, index)
       end
     end
   end

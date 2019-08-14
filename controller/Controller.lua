@@ -649,6 +649,7 @@ end
 function Controller.isOpened()
   Logging:trace(Controller.classname, "isOpened()")
   local lua_player = Player.native()
+  if lua_player == nil then return false end
   local location = Player.getSettings("display_location")
   local guiMain = lua_player.gui[location]
   if guiMain["helmod_main_panel"] ~= nil then

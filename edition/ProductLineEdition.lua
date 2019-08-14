@@ -213,7 +213,7 @@ function ProductLineEdition.methods:updateInput(item, item2, item3)
     local input_table = ElementGui.addGuiTable(input_scroll,"input-table", 5, "helmod_table_element")
     if model.ingredients ~= nil then
       for index, element in pairs(model.ingredients) do
-        ElementGui.addCellElement(input_table, element, self:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.ingredient", nil, index)
+        ElementGui.addCellElement(input_table, element, self:classname().."=production-block-add=ID=new="..element.name.."=", true, "tooltip.add-recipe", ElementGui.color_button_add, index)
       end
     end
 

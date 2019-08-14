@@ -206,9 +206,9 @@ function ProductBlockEdition.methods:updateInput(item, item2, item3)
   local globalGui = Player.getGlobalGui()
   Logging:debug(self:classname(), "model:", model)
   -- data
-  local blockId = globalGui.currentBlock or "new"
+  local block_id = globalGui.currentBlock or "new"
 
-  local countRecipes = Model.countBlockRecipes(blockId)
+  local countRecipes = Model.countBlockRecipes(block_id)
 
   local input_panel = self:getInputPanel()
   input_panel.clear()
@@ -219,7 +219,7 @@ function ProductBlockEdition.methods:updateInput(item, item2, item3)
   -- production block result
   if countRecipes > 0 then
 
-    local element = model.blocks[blockId]
+    local element = model.blocks[block_id]
     -- input panel
     local input_table = ElementGui.addGuiTable(input_scroll,"input-table", 5, "helmod_table_element")
       if element.ingredients ~= nil then
@@ -229,7 +229,7 @@ function ProductBlockEdition.methods:updateInput(item, item2, item3)
         if element.count > 1 then
           ingredient.limit_count = lua_product.count / element.count
         end
-        ElementGui.addCellElement(input_table, ingredient, self:classname().."=product-selected=ID="..element.id.."="..ingredient.name.."=", false, "tooltip.ingredient", nil, index)
+        ElementGui.addCellElement(input_table, ingredient, self:classname().."=production-recipe-add=ID="..block_id.."="..element.name.."=", true, "tooltip.ingredient", ElementGui.color_button_add, index)
       end
     end
 
@@ -280,11 +280,11 @@ function ProductBlockEdition.methods:updateOutput(item, item2, item3)
           if element.by_factory == true then
             ElementGui.addCellElement(output_table, product, self:classname().."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.product", nil, index)
           else
-            ElementGui.addCellElement(output_table, product, self:classname().."=product-edition=ID="..element.id.."="..product.name.."=", true, "tooltip.edit-product", self.color_button_edit, index)
+            ElementGui.addCellElement(output_table, product, self:classname().."=product-edition=ID="..element.id.."="..product.name.."=", true, "tooltip.edit-product", ElementGui.color_button_edit, index)
           end
         end
         if bit32.band(lua_product.state, 2) > 0 and bit32.band(lua_product.state, 1) == 0 then
-          ElementGui.addCellElement(output_table, product, self:classname().."=product-selected=ID="..element.id.."="..product.name.."=", true, "tooltip.rest-product", self.color_button_rest, index)
+          ElementGui.addCellElement(output_table, product, self:classname().."=product-selected=ID="..element.id.."="..product.name.."=", true, "tooltip.rest-product", ElementGui.color_button_rest, index)
         end
         if lua_product.state == 0 then
           ElementGui.addCellElement(output_table, product, self:classname().."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.other-product", nil, index)

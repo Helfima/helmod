@@ -14,9 +14,6 @@ Form = setclass("HMForm")
 --
 function Form.methods:init(parent)
   self.parent = parent
-  self.color_button_edit = "green"
-  self.color_button_add = "yellow"
-  self.color_button_rest = "red"
 
   self.otherClose = true
   self.locate = "dialog"

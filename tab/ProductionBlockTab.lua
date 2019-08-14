@@ -83,107 +83,108 @@ function ProductionBlockTab.methods:updateDebugPanel(item, item2, item3)
       end
     end
 
-    -- matrix A
-    local ma_panel = ElementGui.addGuiFrameV(debug_panel, "ma_panel", helmod_frame_style.hidden, "Matrix A")
-    if block.matrix ~= nil then
-      local matrix_table = ElementGui.addGuiTable(ma_panel,"matrix_data", Model.countList(block.matrix.col_headers)+1 , "helmod_table-odd")
-      ElementGui.addGuiLabel(matrix_table, "recipes", "recipes")
-      for i,col_header in pairs(block.matrix.col_headers) do
-          if col_header.type == "none" then
-            ElementGui.addGuiLabel(matrix_table, "nothing1"..i, col_header.name)
-          else
-            ElementGui.addGuiButtonSprite(matrix_table, "nothing1"..i, col_header.type, col_header.name)
-          end
-      end
-      
-      for i,row in pairs(block.matrix.mA) do
-        local row_header = block.matrix.row_headers[i]
-        if row_header.type == "none" then
-            ElementGui.addGuiLabel(matrix_table, "nothing"..i, row_header.name)
-          else
-            ElementGui.addGuiButtonSprite(matrix_table, "nothing"..i, row_header.type, row_header.name)
-          end
-        for j,col in pairs(row) do
-          ElementGui.addGuiLabel(matrix_table, i.."-"..j.."_value", col)
+
+    if block.solver == true then
+      -- *** Simplex Method ***
+      if block.matrix2 ~= nil then
+        -- matrix A
+        local ma_panel = ElementGui.addGuiFrameV(debug_panel, "ma_panel", helmod_frame_style.hidden, "Matrix A")
+        self:buildMatrix(ma_panel, block.matrix2.mA, block.matrix2.row_headers, block.matrix2.col_headers)
+
+        local col_headers2 = {}
+        for _,col_header in pairs(block.matrix2.col_headers) do
+          table.insert(col_headers2,col_header)
         end
+        table.insert(col_headers2,{name="T", type="none"})
+        for i,row_header in pairs(block.matrix2.row_headers) do
+          if i > 1 and i < #block.matrix2.row_headers then
+            table.insert(col_headers2,row_header)
+          end
+        end
+        local row_headers2 = {}
+        for i,row_header in pairs(block.matrix2.row_headers) do
+          if i < #block.matrix2.row_headers then
+            table.insert(row_headers2,row_header)
+          end
+        end
+        for i,row_header in pairs(block.matrix2.mB) do
+          if i > #block.matrix2.row_headers then
+            table.insert(row_headers2,{name="", type="none"})
+          end
+        end
+        table.insert(row_headers2,{name="Z", type="none"})
+        
+        -- matrix B
+        local mb_panel = ElementGui.addGuiFrameV(debug_panel, "mb_panel", helmod_frame_style.hidden, "Matrix B")
+        self:buildMatrix(mb_panel, block.matrix2.mB, row_headers2, col_headers2)
+
+        -- matrix C
+        local mc_panel = ElementGui.addGuiFrameV(debug_panel, "mc_panel", helmod_frame_style.hidden, "Matrix C")
+        self:buildMatrix(mc_panel, block.matrix2.mC, block.matrix2.row_headers, block.matrix2.col_headers)
+      end
+    else
+      -- *** Normal Method ***
+      if block.matrix1 ~= nil then
+        -- matrix A
+        local ma_panel = ElementGui.addGuiFrameV(debug_panel, "ma_panel", helmod_frame_style.hidden, "Matrix A")
+        self:buildMatrix(ma_panel, block.matrix1.mA, block.matrix1.row_headers, block.matrix1.col_headers)
+
+        -- matrix B
+        local mb_panel = ElementGui.addGuiFrameV(debug_panel, "mb_panel", helmod_frame_style.hidden, "Matrix B")
+        self:buildMatrix(mb_panel, block.matrix1.mB, block.matrix1.row_headers, block.matrix1.col_headers)
+
+        -- matrix C
+        local mc_panel = ElementGui.addGuiFrameV(debug_panel, "mc_panel", helmod_frame_style.hidden, "Matrix C")
+        self:buildMatrix(mc_panel, block.matrix1.mC, block.matrix1.row_headers, block.matrix1.col_headers)
       end
     end
-    
-    -- matrix B
-    local mb_panel = ElementGui.addGuiFrameV(debug_panel, "mb_panel", helmod_frame_style.hidden, "Matrix B")
-    if block.matrix ~= nil then
-      local matrix_table = ElementGui.addGuiTable(mb_panel,"matrix_data", #block.matrix.row_headers+Model.countList(block.matrix.col_headers)-1 , "helmod_table-odd")
-      ElementGui.addGuiLabel(matrix_table, "recipes", "B")
-      for i,col_header in pairs(block.matrix.col_headers) do
-          if col_header.type == "none" then
-            ElementGui.addGuiLabel(matrix_table, "nothing1"..i, col_header.name)
-          else
-            ElementGui.addGuiButtonSprite(matrix_table, "nothing1"..i, col_header.type, col_header.name)
-          end
-      end
-      
-      for i,row_header in pairs(block.matrix.row_headers) do
-          if i <= (#block.matrix.row_headers - 2) then
-            if row_header.type == "none" then
-              ElementGui.addGuiLabel(matrix_table, "nothing2"..i, row_header.name)
-            else
-              ElementGui.addGuiButtonSprite(matrix_table, "nothing2"..i, row_header.type, row_header.name)
-            end
-          end
-      end
-      
-      for i,row in pairs(block.matrix.mB) do
-        local row_header = block.matrix.row_headers[i]
-          if row_header.type == "none" then
-            ElementGui.addGuiLabel(matrix_table, "nothing"..i, row_header.name)
-          else
-            ElementGui.addGuiButtonSprite(matrix_table, "nothing"..i, row_header.type, row_header.name)
-          end
-        for j,col in pairs(row) do
-          ElementGui.addGuiLabel(matrix_table, i.."-"..j.."_value", col)
-        end
-      end
-    end
-    
-    -- matrix C
-    local mc_panel = ElementGui.addGuiFrameV(debug_panel, "mc_panel", helmod_frame_style.hidden, "Matrix C")
-    if block.matrix ~= nil then
-      local matrix_table = ElementGui.addGuiTable(mc_panel,"matrix_data", #block.matrix.row_headers+Model.countList(block.matrix.col_headers)-1 , "helmod_table-odd")
-      ElementGui.addGuiLabel(matrix_table, "recipes", "B")
-      for i,col_header in pairs(block.matrix.col_headers) do
-          if col_header.type == "none" then
-            ElementGui.addGuiLabel(matrix_table, "nothing1"..i, col_header.name)
-          else
-            ElementGui.addGuiButtonSprite(matrix_table, "nothing1"..i, col_header.type, col_header.name)
-          end
-      end
-      
-      for i,row_header in pairs(block.matrix.row_headers) do
-          if i <= (#block.matrix.row_headers - 2) then
-            if row_header.type == "none" then
-              ElementGui.addGuiLabel(matrix_table, "nothing2"..i, row_header.name)
-            else
-              ElementGui.addGuiButtonSprite(matrix_table, "nothing2"..i, row_header.type, row_header.name)
-            end
-          end
-      end
-      
-      for i,row in pairs(block.matrix.mC) do
-        local row_header = block.matrix.row_headers[i]
-          if row_header.type == "none" then
-            ElementGui.addGuiLabel(matrix_table, "nothing"..i, row_header.name)
-          else
-            ElementGui.addGuiButtonSprite(matrix_table, "nothing"..i, row_header.type, row_header.name)
-          end
-        for j,col in pairs(row) do
-          ElementGui.addGuiLabel(matrix_table, i.."-"..j.."_value", col)
-        end
-      end
-    end
-    
+
   end
 end
 
+-------------------------------------------------------------------------------
+-- Build matrix
+--
+-- @function [parent=#ProductionBlockTab] buildMatrix
+--
+-- @param #string #ElementGui matrix_panel
+-- @param #string #block block
+--
+function ProductionBlockTab.methods:buildMatrix(matrix_panel, matrix, row_headers, col_headers)
+  Logging:debug("ProductionBlockTab", "buildMatrix()")
+  if matrix ~= nil then
+    local num_col = #matrix[1]
+    local num_row_header = #row_headers
+    local num_col_header = Model.countList(col_headers)
+
+    local matrix_table = ElementGui.addGuiTable(matrix_panel,"matrix_data", num_col+1 , "helmod_table-odd")
+    ElementGui.addGuiLabel(matrix_table, "recipes", "B")
+    
+    for col_name,col_header in pairs(col_headers) do
+      if col_header.type == "none" then
+        ElementGui.addGuiLabel(matrix_table, "nothing_col_"..col_name, col_header.name)
+      else
+        ElementGui.addGuiButtonSprite(matrix_table, "nothing_col_"..col_name, col_header.type, col_header.name, nil, col_header.tooltip)
+      end
+    end
+
+    for i,row in pairs(matrix) do
+      local row_header = row_headers[i]
+      if row_header == nil then
+          ElementGui.addGuiLabel(matrix_table, "nothing_row_"..i, "nil")
+      else
+        if row_header.type == "none" then
+          ElementGui.addGuiLabel(matrix_table, "nothing_row_"..i, row_header.name)
+        else
+          ElementGui.addGuiButtonSprite(matrix_table, "nothing_row_"..i, row_header.type, row_header.name, nil, row_header.tooltip)
+        end
+      end
+      for j,col in pairs(row) do
+        ElementGui.addGuiLabel(matrix_table, i.."-"..j.."_value", col)
+      end
+    end
+  end
+end
 -------------------------------------------------------------------------------
 -- Update header
 --
@@ -271,11 +272,11 @@ function ProductionBlockTab.methods:updateHeader2(item, item2, item3)
           if element.by_factory == true then
             ElementGui.addCellElement(output_table, product, self:classname().."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.product", nil, index)
           else
-            ElementGui.addCellElement(output_table, product, self:classname().."=product-edition=ID="..element.id.."="..product.name.."=", true, "tooltip.edit-product", self.color_button_edit, index)
+            ElementGui.addCellElement(output_table, product, self:classname().."=product-edition=ID="..element.id.."="..product.name.."=", true, "tooltip.edit-product", ElementGui.color_button_edit, index)
           end
         end
         if bit32.band(lua_product.state, 2) > 0 and bit32.band(lua_product.state, 1) == 0 then
-          ElementGui.addCellElement(output_table, product, self:classname().."=product-selected=ID="..element.id.."="..product.name.."=", true, "tooltip.rest-product", self.color_button_rest, index)
+          ElementGui.addCellElement(output_table, product, self:classname().."=product-selected=ID="..element.id.."="..product.name.."=", true, "tooltip.rest-product", ElementGui.color_button_rest, index)
         end
         if lua_product.state == 0 then
           ElementGui.addCellElement(output_table, product, self:classname().."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.other-product", nil, index)
@@ -354,11 +355,6 @@ function ProductionBlockTab.methods:updateData(item, item2, item3)
     if globalGui["scroll_down"] then
       scrollPanel.scroll_to_element(last_element)
       globalGui["scroll_down"] = false
-    end
-    
-    if Player.getSettings("debug", true) ~= "none" then
-      
-    
     end
     
   end
@@ -477,7 +473,7 @@ function ProductionBlockTab.methods:addTableRow(gui_table, block, recipe)
     if block.count > 1 then
       ingredient.limit_count = ingredient.count / block.count
     end
-    ElementGui.addCellElement(cell_ingredients, ingredient, self:classname().."=production-recipe-add=ID="..block.id.."="..recipe.name.."=", true, "tooltip.add-recipe", self.color_button_add, index)
+    ElementGui.addCellElement(cell_ingredients, ingredient, self:classname().."=production-recipe-add=ID="..block.id.."="..recipe.name.."=", true, "tooltip.add-recipe", ElementGui.color_button_add, index)
   end
   
   return cell_recipe

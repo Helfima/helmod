@@ -77,7 +77,7 @@ function Logging:logging(tag, level, logClass, ...)
 			message = message..self:objectToString(object)
 		end
 		--game.write_file(self.filename, tag.."|"..logClass.."|"..message.."\n", append_log)
-    log(tag.."|"..logClass.."|"..message)
+    log(tag.."|"..logClass.."|"..string.gsub(message,"\n",""))
 		if append_log == false then append_log = true end
 	end
 end

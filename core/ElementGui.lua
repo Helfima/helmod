@@ -4,7 +4,10 @@
 --
 local ElementGui = {
   -- single-line comment
-  classname = "HMElementGui"
+  classname = "HMElementGui",
+  color_button_edit = "green",
+  color_button_add = "yellow",
+  color_button_rest = "red"
 }
 
 -------------------------------------------------------------------------------

@@ -148,7 +148,7 @@ function RecipeEdition.methods:updateObjectInfo(item, item2, item3)
         for index, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
           local ingredient = Product.load(lua_ingredient).new()
           ingredient.count = Product.getElementAmount(lua_ingredient)
-          ElementGui.addCellProductSm(cell_ingredients, ingredient, self:classname().."=do_noting=ID=", true, "tooltip.product", self.color_button_add, index)
+          ElementGui.addCellProductSm(cell_ingredients, ingredient, self:classname().."=do_noting=ID=", true, "tooltip.product", ElementGui.color_button_add, index)
         end
       end
 

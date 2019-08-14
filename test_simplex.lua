@@ -1,4 +1,4 @@
-Simplex = require "core.Simplex"
+Simplex = require "core.SolverSimplex"
 
 function printM(M)
   for irow,row in pairs(M) do
@@ -59,7 +59,7 @@ M[index][5]={10,0,1,0,0,0,0,0,0}
 M[index][6]={100,0,0,0,1,0,0,0,0}
 M[index][7]={1000,0,0,0,0,0,0,1,0}
 M[index][8]={1,0,0,0,0,0,0,0,1}
-M[index][9]={0,-10,0,0,0,0,0,0,0}
+M[index][9]={0,10,0,0,0,0,0,0,0}
 
 index = 5
 row_headers[index] = {"solid heavy", "solid light", "solid gas", "petrol2", "petrol1", "petrol3", "heavy", "light", "water", "crude", "coal", "steam", "tax"}
@@ -115,7 +115,57 @@ M[index][5]={100,0,0,0,0,1,0}
 M[index][6]={1,0,0,0,0,0,1}
 M[index][7]={0,10,0,0,0,0,0}
 
-local test = 8
+index = 9
+row_headers[index] = {"R plastic", "R light oil", "R heavy oil", "R petrole", "R water", "R crude", "tax"}
+col_headers[index] = {"plastic", "coal", "gas", "water", "leger", "lourd", "crude", "tax"}
+M[index] = {}
+M[index][1]={0,2,-1,-20,0,0,0,0,-1}
+M[index][2]={0,0,0,20,-30,-30,0,0,-1}
+M[index][3]={0,0,0,0,-30,30,-40,0,-1}
+M[index][4]={0,0,0,55,-50,45,25,-100,-1}
+M[index][5]={100,0,0,0,1,0,0,0,0}
+M[index][6]={1000,0,0,0,0,0,0,1,0}
+M[index][7]={1,0,0,0,0,0,0,0,1}
+M[index][8]={0,0,0,100,0,0,0,0,0}
+
+index = 10
+row_headers[index] = {"R pressure", "R tank", "R steel", "R water1", "R scrap", "R water2", "R iron", "tax"}
+col_headers[index] = {"pressure", "scap", "water1", "tank", "data", "water2", "iron", "steel", "tax"}
+M[index] = {}
+M[index][1]={0,5,50,9900,-1,-5,-10000,0,0,-1}
+M[index][2]={0,0,0,0,1,0,0,-20,-5,-1}
+M[index][3]={0,0,0,0,0,0,0,-5,1,-1}
+M[index][4]={0,0,0,1,0,0,-1,0,0,-1}
+M[index][5]={100,0,1,0,0,0,0,0,0,0}
+M[index][6]={1000,0,0,0,0,0,1,0,0,0}
+M[index][7]={10000,0,0,0,0,0,0,1,0,0}
+M[index][8]={1,0,0,0,0,0,0,0,0,1}
+M[index][9]={0,5,0,0,0,0,0,0,0,0}
+
+index = 11
+row_headers[index] = {"Input","R pressure", "R tank", "R steel", "R water2"}
+col_headers[index] = {"R","P","E","C","pressure", "scap", "water1", "tank", "data", "water2", "iron", "steel", "water3"}
+M[index] = {}
+M[index][1]={0,0,0,0,5,0,0,0,0,0,0,0,0}
+M[index][2]={0,1,40,0,5,50,9900,-1,-5,-10000,0,0,0}
+M[index][3]={0,1,3,0,0,0,0,1,0,0,-20,-5,0}
+M[index][4]={0,1,16,0,0,0,0,0,0,0,-5,1,0}
+M[index][5]={0,1,1,0,0,0,0,0,0,1,0,0,-1}
+
+index = 12
+row_headers[index] = {"Input","R plastic", "R solid-fuel", "R sulfuric-acid", "R lubricant", "R light-oil-cracking", "R heavy-oil-cracking", "R advanced-oil-processing"}
+col_headers[index] = {"R","P","E","C","plastic-bar", "coal", "petroleum-gas", "solid-fuel", "light-oil", "sulfuric-acid", "iron-plate", "sulfur", "water", "lubricant", "heavy-oil", "crude-oil"}
+M[index] = {}
+M[index][1]={0,0,0,0,30,0,0,30,0,1000,0,0,0,500,0,0}
+M[index][2]={0,0,1,1,2,-1,-20,0,0,0,0,0,0,0,0,0}
+M[index][3]={0,0,1,2,0,0,0,1,-10,0,0,0,0,0,0,0}
+M[index][4]={0,0,1,1,0,0,0,0,0,50,-1,-5,-100,0,0,0}
+M[index][5]={0,0,1,1,0,0,0,0,0,0,0,0,0,10,-10,0}
+M[index][6]={0,0,1,2,0,0,20,0,-30,0,0,0,-30,0,0,0}
+M[index][7]={0,0,1,2,0,0,0,0,30,0,0,0,-30,0,-40,0}
+M[index][8]={0,0,1,5,0,0,55,0,45,0,0,0,-50,0,25,-100}
+
+local test = 12
 --Simplex.new(M[test])
 Simplex.new(M[test], row_headers[test], col_headers[test])
 Simplex.solve()
