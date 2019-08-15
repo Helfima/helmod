@@ -133,9 +133,15 @@ function ProductionBlockTab.methods:updateDebugPanel(item, item2, item3)
         local mb_panel = ElementGui.addGuiFrameV(debug_panel, "mb_panel", helmod_frame_style.hidden, "Matrix B")
         self:buildMatrix(mb_panel, block.matrix1.mB, block.matrix1.row_headers, block.matrix1.col_headers)
 
+        local row_header2 = {}
+        table.insert(row_header2,{name="State", type="none"})
+        for _,col_header in pairs(block.matrix1.row_headers) do
+          table.insert(row_header2,col_header)
+        end
+        
         -- matrix C
         local mc_panel = ElementGui.addGuiFrameV(debug_panel, "mc_panel", helmod_frame_style.hidden, "Matrix C")
-        self:buildMatrix(mc_panel, block.matrix1.mC, block.matrix1.row_headers, block.matrix1.col_headers)
+        self:buildMatrix(mc_panel, block.matrix1.mC, row_header2, block.matrix1.col_headers)
       end
     end
 
@@ -179,8 +185,8 @@ function ProductionBlockTab.methods:buildMatrix(matrix_panel, matrix, row_header
           ElementGui.addGuiButtonSprite(matrix_table, "nothing_row_"..i, row_header.type, row_header.name, nil, row_header.tooltip)
         end
       end
-      for j,col in pairs(row) do
-        ElementGui.addGuiLabel(matrix_table, i.."-"..j.."_value", col)
+      for j,value in pairs(row) do
+        ElementGui.addGuiLabel(matrix_table, i.."-"..j.."_value", Format.formatNumber(value,4))
       end
     end
   end

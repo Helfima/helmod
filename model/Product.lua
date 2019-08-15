@@ -189,6 +189,7 @@ end
 --
 function Product.countContainer(count, container)
   Logging:trace(Product.classname, "countContainer",lua_product)
+  if count == nil then return 0 end
   if lua_product.type == 0 or lua_product.type == "item" then
     EntityPrototype.load(container)
     local cargo_wagon_size = EntityPrototype.getInventorySize(1)

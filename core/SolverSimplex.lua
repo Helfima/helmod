@@ -183,6 +183,7 @@ end
 -- @return #table
 --
 function Simplex.prepare()
+  Simplex.row_input = 1
   -- ajoute la ligne Z
   local irow = 1
   local zrow = {}
@@ -246,7 +247,7 @@ function Simplex.prepare()
       local row = {}
       for icol,_ in pairs(Mx[1]) do
         if icol == Simplex.col_start then
-          table.insert(row,math.pow(100,index))
+          table.insert(row,math.pow(10,index)*10)
         elseif icol == xcol then
           table.insert(row,1)
         else
@@ -261,7 +262,7 @@ function Simplex.prepare()
       index = index + 1
     end
   end
-
+  Mx[#Mx-1][Simplex.col_start] = 1
   -- ajoute les row en colonne
   local num_row = rawlen(m_M)-Simplex.row_input-1
   local num_col = rawlen(Mx[1])
@@ -286,6 +287,49 @@ function Simplex.prepare()
   end
 
   return Mx
+end
+
+-------------------------------------------------------------------------------
+-- Ajoute la ligne State
+--
+-- @function [parent=#Solver] appendState
+-- @param #table M
+--
+-- @return #table
+--
+function Simplex.appendState(M)
+  local srow = {}
+  for irow,row in pairs(M) do
+    if irow > Simplex.row_input and irow < #M then
+      for icol,cell in pairs(row) do
+        if srow[icol] == nil then
+          table.insert(srow,0)
+        end
+        if icol > Simplex.col_start then
+          if cell < 0 then
+            srow[icol] = 2
+          end
+          if cell > 0 and srow[icol] ~= 2 then
+            srow[icol] = 1
+          end
+        end
+      end
+    end
+  end
+  local zrow = M[#M]
+  for icol,cell in pairs(zrow) do
+    if icol > Simplex.col_start then
+      if cell > 0 and srow[icol] == 2 then
+        srow[icol] = 3
+      end
+    end
+  end
+  table.insert(M,1, srow)
+  if m_row_headers ~= nil then
+    table.insert(m_row_headers,1, "State")
+  end
+  Simplex.row_input = Simplex.row_input + 1
+  return M
 end
 
 -------------------------------------------------------------------------------
@@ -492,7 +536,7 @@ function Simplex.solve()
     -- finalisation
     m_Mr = Simplex.clone(m_M)
     m_Mr = Simplex.tableCompute(m_Mr, m_Mi)
-    --m_Mr = Simplex.finalize(m_Mr)
+    m_Mr = Simplex.appendState(m_Mr)
     Simplex.print(m_Mr)
     return m_Mr
   end

@@ -276,17 +276,15 @@ function ProductBlockEdition.methods:updateOutput(item, item2, item3)
         if element.count > 1 then
           product.limit_count = lua_product.count / element.count
         end
-        if bit32.band(lua_product.state, 1) > 0 then
+        if lua_product.state == 1 then
           if element.by_factory == true then
             ElementGui.addCellElement(output_table, product, self:classname().."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.product", nil, index)
           else
             ElementGui.addCellElement(output_table, product, self:classname().."=product-edition=ID="..element.id.."="..product.name.."=", true, "tooltip.edit-product", ElementGui.color_button_edit, index)
           end
-        end
-        if bit32.band(lua_product.state, 2) > 0 and bit32.band(lua_product.state, 1) == 0 then
+        elseif lua_product.state == 3 then
           ElementGui.addCellElement(output_table, product, self:classname().."=product-selected=ID="..element.id.."="..product.name.."=", true, "tooltip.rest-product", ElementGui.color_button_rest, index)
-        end
-        if lua_product.state == 0 then
+        else
           ElementGui.addCellElement(output_table, product, self:classname().."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.other-product", nil, index)
         end
       end

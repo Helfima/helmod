@@ -181,6 +181,7 @@ end
 -- @return #table
 --
 function Solver.prepare(M)
+  Solver.row_input = 1
   local Mx = Solver.clone(M)
   -- initialise les valeurs des produits par second
   for irow,row in pairs(Mx) do
@@ -220,6 +221,49 @@ function Solver.finalize(M)
   for icol,cell in pairs(M[#M]) do
     M[#M][icol] = M[#M][icol] + M[Solver.row_input][icol]
   end
+  return M
+end
+
+-------------------------------------------------------------------------------
+-- Ajoute la ligne State
+--
+-- @function [parent=#Solver] appendState
+-- @param #table M
+--
+-- @return #table
+--
+function Solver.appendState(M)
+  local srow = {}
+  for irow,row in pairs(M) do
+    if irow > Solver.row_input and irow < #M then
+      for icol,cell in pairs(row) do
+        if srow[icol] == nil then
+          table.insert(srow,0)
+        end
+        if icol > Solver.col_start then
+          if cell < 0 then
+            srow[icol] = 2
+          end
+          if cell > 0 and srow[icol] ~= 2 then
+            srow[icol] = 1
+          end
+        end
+      end
+    end
+  end
+  local zrow = M[#M]
+  for icol,cell in pairs(zrow) do
+    if icol > Solver.col_start then
+      if cell > 0 and srow[icol] == 2 then
+        srow[icol] = 3
+      end
+    end
+  end
+  table.insert(M,1, srow)
+  if m_row_headers ~= nil then
+    table.insert(m_row_headers,1, "State")
+  end
+  Solver.row_input = Solver.row_input + 1
   return M
 end
 -------------------------------------------------------------------------------
@@ -303,6 +347,7 @@ function Solver.solve()
       end
     end
     m_Mr = Solver.finalize(m_Mr)
+    m_Mr = Solver.appendState(m_Mr)
     Solver.print(m_Mr)
     Solver.print(string.format("End in %s loop",num_loop))
     return m_Mr
