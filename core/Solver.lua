@@ -190,7 +190,7 @@ function Solver.prepare(M)
       local E = Mx[irow][3]
       for icol,cell in pairs(row) do
         if icol > Solver.col_start then
-          Mx[irow][icol] = cell * P / E
+          Mx[irow][icol] = cell / E
         end
       end
     end
@@ -309,16 +309,17 @@ function Solver.lineCompute(M, xrow, xcol)
   Solver.print(m_Mr, xrow, xcol)
   if m_Mr == nil or xrow == 0 or xcol == 0 then return M end
   local row = M[xrow]
+  local P = M[xrow][2]
   local E = M[xrow][Solver.col_start-1] -- energy
   local Z = M[#M][xcol] -- valeur demandee Z
   local V = M[xrow][xcol] -- valeur produite
   local C = -Z/V -- coefficient
   local R = C/E -- nombre de recette necessaire
   M[xrow][Solver.col_start] = C
-  M[xrow][1] = C / E
+  M[xrow][1] = P * C / E
   for icol,cell_value in pairs(row) do
     if icol > Solver.col_start then
-      M[#M][icol] = M[#M][icol] + M[xrow][icol] * C
+      M[#M][icol] = M[#M][icol] + M[xrow][icol] * P * C
     end
   end
   return M

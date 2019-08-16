@@ -734,19 +734,17 @@ function ModelCompute.getBlockMatrix(block)
       table.insert(row_headers, {name="Z", type="none"})
 
       Logging:debug(ModelCompute.classname, "----> matrix A", mA)
-      local export = ""
-      for _,row in pairs(mA) do
-        export = export.."{"
-        for icol,cell in pairs(row) do
-          export = export..cell
-          if icol ~= #row then
-            export = export..","
-          end
+      if Player.getSettings("debug", true) ~= "none" then
+        local row_headers2 = {}
+        for _,row in pairs(row_headers) do
+          table.insert(row_headers2, row.name)
         end
-        export = export.."}"
+        local col_headers2 = {}
+        for _,col in pairs(col_headers) do
+          table.insert(col_headers2, col.name)
+        end
+        Logging:debug(ModelCompute.classname, "----> export matrix A", game.table_to_json({col_headers=col_headers2 ,row_headers=row_headers2 ,matrix=mA}))
       end
-      Logging:debug(ModelCompute.classname, "----> export matrix A", export)
-
       return mA, row_headers, col_headers
   end
 end
