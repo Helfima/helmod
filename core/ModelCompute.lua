@@ -114,14 +114,21 @@ function ModelCompute.update()
         -- state = 1 => produit pilotant
         -- state = 2 => produit restant
         -- prepare input
-        if not(block.unlinked) and block.products ~= nil then
-          for _,product in pairs(block.products) do
-            if product.state ~= nil and bit32.band(product.state, 1) > 0 then
-              if input[product.name] ~= nil then
-                -- block linked
-                if block.input == nil then block.input = {} end
-                block.input[product.name] = input[product.name]
-                product.state = 0
+        Logging:debug(ModelCompute.classname , "prepare", not(block.unlinked), block)
+        if not(block.unlinked) then
+          if block.products == nil then
+            Logging:debug(ModelCompute.classname , "prepare compute")
+            ModelCompute.computeBlock2(block)
+          end
+          if block.products ~= nil then
+            for _,product in pairs(block.products) do
+              if product.state ~= nil and product.state == 1 then
+                if input[product.name] ~= nil then
+                  -- block linked
+                  if block.input == nil then block.input = {} end
+                  block.input[product.name] = input[product.name]
+                  product.state = 0
+                end
               end
             end
           end
@@ -637,42 +644,54 @@ function ModelCompute.getBlockMatrix(block)
         ModelCompute.computeModuleEffects(recipe)
         --ModelCompute.computeFactory(recipe)
 
-        local col_product = {}
+        -- preparation
+        local lua_products = {}
+        local lua_ingredients = {}
         for i, lua_product in pairs(RecipePrototype.getProducts()) do
-          local index = 1
-          if col_index[lua_product.name] ~= nil then
-            index = col_index[lua_product.name]
+          lua_products[lua_product.name] = {name=lua_product.name, type=lua_product.type, count = Product.load(lua_product).getAmount(recipe)}
+        end
+        for i, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
+          if lua_ingredients[lua_ingredient.name] == nil then
+            lua_ingredients[lua_ingredient.name] = {name=lua_ingredient.name, type=lua_ingredient.type, count = Product.load(lua_ingredient).getAmount()}
+          else
+            lua_ingredients[lua_ingredient.name].count = lua_ingredients[lua_ingredient.name].count + Product.load(lua_ingredient).getAmount()
           end
-          col_index[lua_product.name] = index
-          col_product[lua_product.name] = true
+        end
+        
+        
+        for name, lua_product in pairs(lua_products) do
+          local index = 1
+          if col_index[name] ~= nil then
+            index = col_index[name]
+          end
+          col_index[name] = index
 
-          local col_name = lua_product.name..index
+          local col_name = name..index
           col_headers[col_name] = {name=lua_product.name, type=lua_product.type, is_ingredient = false, tooltip=col_name.."\nProduit"}
-          row[col_name] = Product.load(lua_product).getAmount(recipe)
+          row[col_name] = lua_product.count
           row_valid = true
         end
-        local col_ingredient = {}
-        Logging:debug(ModelCompute.classname, "----> ingredient", recipe.name, RecipePrototype.getIngredients(recipe.factory))
-        for i, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
+        Logging:debug(ModelCompute.classname, "----> ingredient", recipe.name, lua_ingredients)
+        for name, lua_ingredient in pairs(lua_ingredients) do
           local index = 1
           -- cas normal de l'ingredient n'existant pas du cote produit
-          if col_index[lua_ingredient.name] ~= nil and col_product[lua_ingredient.name] == nil then
-            index = col_index[lua_ingredient.name]
+          if col_index[name] ~= nil and lua_products[name] == nil then
+            index = col_index[name]
           end
           -- cas de l'ingredient existant du cote produit
-          if col_index[lua_ingredient.name] ~= nil and col_product[lua_ingredient.name] ~= nil then
-            if col_ingredient[lua_ingredient.name] == nil then
-              index = col_index[lua_ingredient.name]+1
+          if col_index[name] ~= nil and lua_products[name] ~= nil then
+            -- cas de la valeur equivalente, on creer un nouveau element
+            if lua_products[name].count == lua_ingredients[name].count or recipe.type == "resource" then
+              index = col_index[name]+1
             else
-              index = col_index[lua_ingredient.name]
+              index = col_index[name]
             end
           end
-          col_index[lua_ingredient.name] = index
-          col_ingredient[lua_ingredient.name] = true
+          col_index[name] = index
 
-          local col_name = lua_ingredient.name..index
+          local col_name = name..index
           col_headers[col_name] = {name=lua_ingredient.name, type=lua_ingredient.type, is_ingredient = true, tooltip=col_name.."\nIngredient"}
-          row[col_name] = ( row[col_name] or 0 ) - Product.load(lua_ingredient).getAmount()
+          row[col_name] = ( row[col_name] or 0 ) - lua_ingredients[name].count
           row_valid = true
         end
 

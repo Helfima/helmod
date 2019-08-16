@@ -151,6 +151,8 @@ function RecipeSelector.methods:updateGroups(event, action, item, item2, item3)
       self:appendGroups(resource, "resource")
     end
   end
+      Logging:debug(self:classname(), "Player.getResources()", Player.getResources())
+      Logging:debug(self:classname(), "Player.getResources2()", Player.getResources2())
 
   --Logging:debug(self:classname(), "list_group", list_group)
   --Logging:debug(self:classname(), "list_subgroup", list_subgroup)

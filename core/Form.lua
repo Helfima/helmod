@@ -33,6 +33,28 @@ function Form.methods:onInit(parent)
 end
 
 -------------------------------------------------------------------------------
+-- Is visible
+--
+-- @function [parent=#Form] isVisible
+--
+-- @return boolean
+--
+function Form.methods:isVisible()
+  return true
+end
+
+-------------------------------------------------------------------------------
+-- Has index model (for Tab panel)
+--
+-- @function [parent=#Form] hasIndexModel
+--
+-- @return #boolean
+--
+function Form.methods:hasIndexModel()
+  return true
+end
+
+-------------------------------------------------------------------------------
 -- Get the parent panel
 --
 -- @function [parent=#Form] getParentPanel

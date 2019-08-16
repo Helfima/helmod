@@ -72,8 +72,11 @@ end
 -- @param #string caption
 --
 function AbstractTab.methods:getResultScrollPanel(caption)
-  local result_panel = self:getResultPanel(caption)
-  local scroll_panel = ElementGui.addGuiScrollPane(result_panel, "scroll-data", helmod_frame_style.scroll_pane, true, true)
+  local parent_panel = self:getResultPanel(caption)
+  if parent_panel["scroll-data"] ~= nil and parent_panel["scroll-data"].valid then
+    return parent_panel["scroll-data"]
+  end
+  local scroll_panel = ElementGui.addGuiScrollPane(parent_panel, "scroll-data", helmod_frame_style.scroll_pane, true, true)
   scroll_panel.style.horizontally_stretchable = true
   scroll_panel.style.vertically_stretchable = true
   return scroll_panel

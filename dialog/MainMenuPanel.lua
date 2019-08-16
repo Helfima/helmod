@@ -113,7 +113,7 @@ function MainMenuPanel.methods:updateMenuPanel(item, item2, item3)
   menu_panel.clear()
 
   for _, form in pairs(Controller.getViews()) do
-    if string.find(form:classname(), "Tab") and (form:classname() ~= "HMPropertiesTab" or Player.getSettings("properties_tab", true)) and (form:classname() ~= "HMAdminTab" or Player.isAdmin()) then
+    if string.find(form:classname(), "Tab") and form:isVisible() then
       local style = "helmod_button_tab"
       if form:classname() == current_tab then style = "helmod_button_tab_selected" end
       ElementGui.addGuiFrameH(menu_panel,form:classname().."_separator",helmod_frame_style.tab).style.width = 5
@@ -133,6 +133,7 @@ function MainMenuPanel.methods:updateMenuPanel(item, item2, item3)
     ElementGui.addGuiButton(action_panel, "HMFluidSelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-fluid"}))
     ElementGui.addGuiButton(action_panel, "HMRecipeSelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-recipe"}))
     ElementGui.addGuiButton(action_panel, "HMTechnologySelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-technology"}))
+  elseif current_tab == "HMPrototypeFiltersTab" then
   else
     -- add recipe
     local block_id = globalGui.currentBlock or "new"
@@ -190,8 +191,9 @@ function MainMenuPanel.methods:updateIndexPanel(item, item2, item3)
   local model = Model.getModel()
   local model_id = Player.getGlobalGui("model_id")
   local current_tab = Player.getGlobalUI("data")
-
-  if current_tab ~= "HMAdminTab" and current_tab ~= "HMPropertiesTab" then
+  local view = Controller.getView(current_tab)
+  
+  if view:hasIndexModel() then
     -- index panel
     local index_panel = self:getIndexPanel()
     index_panel.clear()
@@ -221,5 +223,8 @@ function MainMenuPanel.methods:updateIndexPanel(item, item2, item3)
       end
     end
     ElementGui.addGuiShortButton(index_panel, self:classname().."=change-model=ID=", "new", "helmod_button_default", "+")
+  else
+    local index_panel = self:getIndexPanel()
+    index_panel.clear()
   end
 end

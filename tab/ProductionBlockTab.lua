@@ -91,36 +91,38 @@ function ProductionBlockTab.methods:updateDebugPanel(item, item2, item3)
         local ma_panel = ElementGui.addGuiFrameV(debug_panel, "ma_panel", helmod_frame_style.hidden, "Matrix A")
         self:buildMatrix(ma_panel, block.matrix2.mA, block.matrix2.row_headers, block.matrix2.col_headers)
 
-        local col_headers2 = {}
-        for _,col_header in pairs(block.matrix2.col_headers) do
-          table.insert(col_headers2,col_header)
-        end
-        table.insert(col_headers2,{name="T", type="none"})
-        for i,row_header in pairs(block.matrix2.row_headers) do
-          if i > 1 and i < #block.matrix2.row_headers then
-            table.insert(col_headers2,row_header)
+        if block.matrix2.mB then
+          local col_headers2 = {}
+          for _,col_header in pairs(block.matrix2.col_headers) do
+            table.insert(col_headers2,col_header)
           end
-        end
-        local row_headers2 = {}
-        for i,row_header in pairs(block.matrix2.row_headers) do
-          if i < #block.matrix2.row_headers then
-            table.insert(row_headers2,row_header)
+          table.insert(col_headers2,{name="T", type="none"})
+          for i,row_header in pairs(block.matrix2.row_headers) do
+            if i > 1 and i < #block.matrix2.row_headers then
+              table.insert(col_headers2,row_header)
+            end
           end
-        end
-        for i,row_header in pairs(block.matrix2.mB) do
-          if i > #block.matrix2.row_headers then
-            table.insert(row_headers2,{name="", type="none"})
+          local row_headers2 = {}
+          for i,row_header in pairs(block.matrix2.row_headers) do
+            if i < #block.matrix2.row_headers then
+              table.insert(row_headers2,row_header)
+            end
           end
-        end
-        table.insert(row_headers2,{name="Z", type="none"})
-        
-        -- matrix B
-        local mb_panel = ElementGui.addGuiFrameV(debug_panel, "mb_panel", helmod_frame_style.hidden, "Matrix B")
-        self:buildMatrix(mb_panel, block.matrix2.mB, row_headers2, col_headers2)
+          for i,row_header in pairs(block.matrix2.mB) do
+            if i > #block.matrix2.row_headers then
+              table.insert(row_headers2,{name="", type="none"})
+            end
+          end
+          table.insert(row_headers2,{name="Z", type="none"})
 
-        -- matrix C
-        local mc_panel = ElementGui.addGuiFrameV(debug_panel, "mc_panel", helmod_frame_style.hidden, "Matrix C")
-        self:buildMatrix(mc_panel, block.matrix2.mC, block.matrix2.row_headers, block.matrix2.col_headers)
+          -- matrix B
+          local mb_panel = ElementGui.addGuiFrameV(debug_panel, "mb_panel", helmod_frame_style.hidden, "Matrix B")
+          self:buildMatrix(mb_panel, block.matrix2.mB, row_headers2, col_headers2)
+
+          -- matrix C
+          local mc_panel = ElementGui.addGuiFrameV(debug_panel, "mc_panel", helmod_frame_style.hidden, "Matrix C")
+          self:buildMatrix(mc_panel, block.matrix2.mC, block.matrix2.row_headers, block.matrix2.col_headers)
+        end
       end
     else
       -- *** Normal Method ***
@@ -129,19 +131,21 @@ function ProductionBlockTab.methods:updateDebugPanel(item, item2, item3)
         local ma_panel = ElementGui.addGuiFrameV(debug_panel, "ma_panel", helmod_frame_style.hidden, "Matrix A")
         self:buildMatrix(ma_panel, block.matrix1.mA, block.matrix1.row_headers, block.matrix1.col_headers)
 
-        -- matrix B
-        local mb_panel = ElementGui.addGuiFrameV(debug_panel, "mb_panel", helmod_frame_style.hidden, "Matrix B")
-        self:buildMatrix(mb_panel, block.matrix1.mB, block.matrix1.row_headers, block.matrix1.col_headers)
+        if block.matrix1.mB then
+          -- matrix B
+          local mb_panel = ElementGui.addGuiFrameV(debug_panel, "mb_panel", helmod_frame_style.hidden, "Matrix B")
+          self:buildMatrix(mb_panel, block.matrix1.mB, block.matrix1.row_headers, block.matrix1.col_headers)
 
-        local row_header2 = {}
-        table.insert(row_header2,{name="State", type="none"})
-        for _,col_header in pairs(block.matrix1.row_headers) do
-          table.insert(row_header2,col_header)
+          local row_header2 = {}
+          table.insert(row_header2,{name="State", type="none"})
+          for _,col_header in pairs(block.matrix1.row_headers) do
+            table.insert(row_header2,col_header)
+          end
+
+          -- matrix C
+          local mc_panel = ElementGui.addGuiFrameV(debug_panel, "mc_panel", helmod_frame_style.hidden, "Matrix C")
+          self:buildMatrix(mc_panel, block.matrix1.mC, row_header2, block.matrix1.col_headers)
         end
-        
-        -- matrix C
-        local mc_panel = ElementGui.addGuiFrameV(debug_panel, "mc_panel", helmod_frame_style.hidden, "Matrix C")
-        self:buildMatrix(mc_panel, block.matrix1.mC, row_header2, block.matrix1.col_headers)
       end
     end
 
@@ -165,7 +169,7 @@ function ProductionBlockTab.methods:buildMatrix(matrix_panel, matrix, row_header
 
     local matrix_table = ElementGui.addGuiTable(matrix_panel,"matrix_data", num_col+1 , "helmod_table-odd")
     ElementGui.addGuiLabel(matrix_table, "recipes", "B")
-    
+
     for col_name,col_header in pairs(col_headers) do
       if col_header.type == "none" then
         ElementGui.addGuiLabel(matrix_table, "nothing_col_"..col_name, col_header.name)
@@ -177,7 +181,7 @@ function ProductionBlockTab.methods:buildMatrix(matrix_panel, matrix, row_header
     for i,row in pairs(matrix) do
       local row_header = row_headers[i]
       if row_header == nil then
-          ElementGui.addGuiLabel(matrix_table, "nothing_row_"..i, "nil")
+        ElementGui.addGuiLabel(matrix_table, "nothing_row_"..i, "nil")
       else
         if row_header.type == "none" then
           ElementGui.addGuiLabel(matrix_table, "nothing_row_"..i, row_header.name)
@@ -357,12 +361,12 @@ function ProductionBlockTab.methods:updateData(item, item2, item3)
     for _, recipe in spairs(model.blocks[blockId].recipes, function(t,a,b) if globalGui.order.ascendant then return t[b][globalGui.order.name] > t[a][globalGui.order.name] else return t[b][globalGui.order.name] < t[a][globalGui.order.name] end end) do
       last_element = self:addTableRow(result_table, element, recipe)
     end
-    
+
     if globalGui["scroll_down"] then
       scrollPanel.scroll_to_element(last_element)
       globalGui["scroll_down"] = false
     end
-    
+
   end
 end
 
@@ -410,7 +414,7 @@ function ProductionBlockTab.methods:addTableRow(gui_table, block, recipe)
   ElementGui.addGuiButton(cell_action, self:classname().."=production-recipe-up=ID="..block.id.."=", recipe.id, "helmod_button_icon_arrow_top_sm", nil, ({"tooltip.up-element", Player.getSettings("row_move_step")}))
   ElementGui.addGuiButton(cell_action, self:classname().."=production-recipe-remove=ID="..block.id.."=", recipe.id, "helmod_button_icon_delete_sm_red", nil, ({"tooltip.remove-element"}))
   ElementGui.addGuiButton(cell_action, self:classname().."=production-recipe-down=ID="..block.id.."=", recipe.id, "helmod_button_icon_arrow_down_sm", nil, ({"tooltip.down-element", Player.getSettings("row_move_step")}))
-  
+
   -- col index
   if Player.getSettings("display_data_col_index", true) then
     ElementGui.addGuiLabel(gui_table, "value_index"..recipe.id, recipe.index, "helmod_label_row_right_40")
@@ -428,9 +432,9 @@ function ProductionBlockTab.methods:addTableRow(gui_table, block, recipe)
     ElementGui.addGuiLabel(gui_table, "value_type"..recipe.id, recipe.type)
   end
   -- col recipe
---  local production = recipe.production or 1
---  local production_label = Format.formatPercent(production).."%"
---  if block.solver == true then production_label = "" end
+  --  local production = recipe.production or 1
+  --  local production_label = Format.formatPercent(production).."%"
+  --  if block.solver == true then production_label = "" end
   local cell_recipe = ElementGui.addCell(gui_table, "recipe-"..recipe.id)
   ElementGui.addCellRecipe(cell_recipe, recipe, "HMRecipeEdition=OPEN=ID="..block.id.."="..recipe.id.."=", true, "tooltip.edit-recipe", "gray")
 
@@ -481,6 +485,6 @@ function ProductionBlockTab.methods:addTableRow(gui_table, block, recipe)
     end
     ElementGui.addCellElement(cell_ingredients, ingredient, self:classname().."=production-recipe-add=ID="..block.id.."="..recipe.name.."=", true, "tooltip.add-recipe", ElementGui.color_button_add, index)
   end
-  
+
   return cell_recipe
 end

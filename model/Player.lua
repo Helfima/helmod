@@ -749,6 +749,22 @@ function Player.getEntityPrototypes(types)
 end
 
 -------------------------------------------------------------------------------
+-- Return entity prototype types
+--
+-- @function [parent=#Player] getEntityPrototypeTypes
+--
+-- @return #table
+--
+function Player.getEntityPrototypeTypes()
+  local types = {}
+  for _,entity in pairs(game.entity_prototypes) do
+    local type = entity.type
+    types[type] = true
+  end
+  return types
+end
+
+-------------------------------------------------------------------------------
 -- Return entity prototype
 --
 -- @function [parent=#Player] getEntityPrototype
@@ -823,6 +839,13 @@ end
 --
 local cache_resources = nil
 
+function Player.getResources2()
+  local items = {}
+  for _,item in pairs(game.get_filtered_item_prototypes({{filter="type",type="item",mode="and"},{filter="subgroup",subgroup="raw-resource",mode="and"}})) do
+    table.insert(items,item)
+  end
+  return items
+end
 function Player.getResources()
   if cache_resources ~= nil then return cache_resources end
   local items = {}
@@ -841,10 +864,44 @@ end
 --
 -- @function [parent=#Player] getItemPrototypes
 --
+-- @param #table filters  sample: {{filter="fuel-category", mode="or", invert=false,["fuel-category"]="chemical"}}
+-- 
 -- @return #LuaItemPrototype item prototype
 --
-function Player.getItemPrototypes()
+function Player.getItemPrototypes(filters)
+  if filters ~= nil then
+    return game.get_filtered_item_prototypes(filters)
+  end
   return game.item_prototypes
+end
+
+-------------------------------------------------------------------------------
+-- Return item prototype types
+--
+-- @function [parent=#Player] getItemPrototypeTypes
+--
+-- @return #table
+--
+function Player.getItemPrototypeTypes()
+  local types = {}
+  for _,entity in pairs(game.item_prototypes) do
+    local type = entity.type
+    types[type] = true
+  end
+  return types
+end
+
+-------------------------------------------------------------------------------
+-- Return chemical fuel item prototypes
+--
+-- @function [parent=#Player] getChemicalFuelItemPrototypes
+--
+-- @param #string name item name
+--
+-- @return #LuaItemPrototype item prototypes
+--
+function Player.getChemicalFuelItemPrototypes()
+  return Player.getItemPrototypes({{filter="fuel-category", mode="or", invert=false,["fuel-category"]="chemical"}})
 end
 
 -------------------------------------------------------------------------------

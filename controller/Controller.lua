@@ -25,6 +25,7 @@ require "tab.ResourceTab"
 require "tab.SummaryTab"
 require "tab.StatisticTab"
 require "tab.PropertiesTab"
+require "tab.PrototypeFiltersTab"
 require "tab.AdminTab"
 
 require "edition.ProductLineEdition"
@@ -41,6 +42,7 @@ Product = require "model.Product"
 RecipePrototype = require "model.RecipePrototype"
 Technology = require "model.Technology"
 Prototype = require "model.Prototype"
+PrototypeFilter = require "model.PrototypeFilter"
 Converter = require "core.Converter"
 
 PLANNER_COMMAND = "helmod_planner-command"
@@ -82,6 +84,7 @@ function Controller.init()
   table.insert(controllers, SummaryTab:new())
   table.insert(controllers, StatisticTab:new())
   table.insert(controllers, PropertiesTab:new())
+  table.insert(controllers, PrototypeFiltersTab:new())
   table.insert(controllers, AdminTab:new())
 
   table.insert(controllers, EntitySelector:new())

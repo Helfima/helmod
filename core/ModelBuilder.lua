@@ -44,13 +44,25 @@ function ModelBuilder.addRecipeIntoProductionBlock(key, type)
     -- ajoute les produits du block
     for _, lua_product in pairs(RecipePrototype.getProducts()) do
       local product = Product.load(lua_product).new()
-      model.blocks[blockId].products[lua_product.name] = product
+      if model.blocks[blockId].products[lua_product.name] == nil then
+        if model.blocks[blockId].ingredients[lua_product.name] ~= nil then
+          product.state = 2
+        else
+          product.state = 1
+        end
+        model.blocks[blockId].products[lua_product.name] = product
+      end
     end
 
     -- ajoute les ingredients du block
     for _, lua_ingredient in pairs(RecipePrototype.getIngredients()) do
       local ingredient = Product.load(lua_ingredient).new()
-      model.blocks[blockId].ingredients[lua_ingredient.name] = ingredient
+      if model.blocks[blockId].ingredients[lua_ingredient.name] == nil then
+        model.blocks[blockId].ingredients[lua_ingredient.name] = ingredient
+        if model.blocks[blockId].products[lua_ingredient.name] ~= nil and model.blocks[blockId].products[lua_ingredient.name].state == 1 then
+          model.blocks[blockId].products[lua_ingredient.name].state = 2
+        end
+      end
     end
     model.blocks[blockId].recipes[ModelRecipe.id] = ModelRecipe
 
@@ -218,6 +230,23 @@ function ModelBuilder.updateFactory(item, key, options)
   local object = Model.getObject(item, key)
   if object ~= nil then
     object.factory.limit = options.limit or 0
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update a factory
+--
+-- @function [parent=#ModelBuilder] updateFuelFactory
+--
+-- @param #string item block_id or resource
+-- @param #string key object name
+-- @param #table options
+--
+function ModelBuilder.updateFuelFactory(item, key, options)
+  Logging:debug(ModelBuilder.classname, "updateFactory():", item, key, options)
+  local object = Model.getObject(item, key)
+  if object ~= nil then
+    object.factory.fuel = options.fuel or "coal"
   end
 end
 

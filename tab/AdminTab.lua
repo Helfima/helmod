@@ -20,6 +20,28 @@ function AdminTab.methods:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
+-- Is visible
+--
+-- @function [parent=#AdminTab] isVisible
+--
+-- @return boolean
+--
+function AdminTab.methods:isVisible()
+  return Player.isAdmin()
+end
+
+-------------------------------------------------------------------------------
+-- Has index model (for Tab panel)
+--
+-- @function [parent=#AdminTab] hasIndexModel
+--
+-- @return #boolean
+--
+function AdminTab.methods:hasIndexModel()
+  return false
+end
+
+-------------------------------------------------------------------------------
 -- Update data
 --
 -- @function [parent=#AdminTab] updateData

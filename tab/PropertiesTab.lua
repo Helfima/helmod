@@ -20,6 +20,28 @@ function PropertiesTab.methods:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
+-- Is visible
+--
+-- @function [parent=#PropertiesTab] isVisible
+--
+-- @return boolean
+--
+function PropertiesTab.methods:isVisible()
+  return Player.getSettings("properties_tab", true)
+end
+
+-------------------------------------------------------------------------------
+-- Has index model (for Tab panel)
+--
+-- @function [parent=#PropertiesTab] hasIndexModel
+--
+-- @return #boolean
+--
+function PropertiesTab.methods:hasIndexModel()
+  return false
+end
+
+-------------------------------------------------------------------------------
 -- Add table header
 --
 -- @function [parent=#PropertiesTab] addTableHeader

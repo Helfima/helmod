@@ -83,9 +83,11 @@ helmod_settings_mod = {
       "HMEvent",
       "HMEventController",
       "HMHelpPanel",
+      "HMMainMenuPanel",
       "HMModel",
       "HMModelCompute",
       "HMModelBuilder",
+      "HMLeftMenuPanel",
       "HMPinPanel",
       "HMPlayer",
       "HMProduct",
@@ -95,6 +97,7 @@ helmod_settings_mod = {
       "HMProductEdition",
       "HMPropertiesTab",
       "HMPrototype",
+      "HMPrototypeFiltersTab",
       "HMRecipeEdition",
       "HMRecipeSelector",
       "HMRecipePrototype",
@@ -341,5 +344,14 @@ helmod_settings_mod = {
     localised_description = {"helmod_settings.properties-tab-desc"},
     default_value = false,
     order = "e1"
+  },
+  --prototype-filters-tab
+  prototype_filters_tab = {
+    type = "bool-setting",
+    setting_type = "runtime-global",
+    localised_name = {"helmod_settings.prototype-filters-tab"},
+    localised_description = {"helmod_settings.prototype-filters-tab-desc"},
+    default_value = false,
+    order = "e2"
   }
 }

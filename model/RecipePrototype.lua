@@ -281,6 +281,7 @@ end
 function RecipePrototype.getIngredients(factory)
   Logging:trace(RecipePrototype.classname, "getIngredients()", lua_prototype, lua_type)
   if lua_prototype ~= nil then
+    local factory_fuel = "coal"
     if lua_type == "recipe" then
       return lua_prototype.ingredients
     elseif lua_type == "resource" then
@@ -301,11 +302,11 @@ function RecipePrototype.getIngredients(factory)
         local energy_usage = EntityPrototype.getEnergyUsage()
         local burner_effectivity = EntityPrototype.getBurnerEffectivity()
         local mining_speed = EntityPrototype.getMiningSpeed()
-
+        factory_fuel = factory.fuel or factory_fuel
         local speed_factory = hardness * mining_speed / mining_time
         local fuel_value = energy_usage*speed_factory*12.5
-        local burner_count = fuel_value/ItemPrototype.load("coal").getFuelValue()
-        local burner_ingredient = {name="coal", type="item", amount=burner_count}
+        local burner_count = fuel_value/ItemPrototype.load(factory_fuel).getFuelValue()
+        local burner_ingredient = {name=factory_fuel, type="item", amount=burner_count}
         table.insert(ingredients, burner_ingredient)
       end
       return ingredients
@@ -313,10 +314,11 @@ function RecipePrototype.getIngredients(factory)
       if lua_prototype.name == "steam" then
         EntityPrototype.load(factory)
         if factory ~= nil and EntityPrototype.getEnergyType() == "burner" then
+          factory_fuel = factory.fuel or factory_fuel
           -- source energy en kJ
           local power_extract = EntityPrototype.getPowerExtract()
-          local amount = power_extract/(ItemPrototype.load("coal").getFuelValue()*EntityPrototype.getBurnerEffectivity())
-          return {{name="water", type="fluid", amount=1},{name="coal", type="item", amount=amount}}
+          local amount = power_extract/(ItemPrototype.load(factory_fuel).getFuelValue()*EntityPrototype.getBurnerEffectivity())
+          return {{name="water", type="fluid", amount=1},{name=factory_fuel, type="item", amount=amount}}
         else
           return {{name="water", type="fluid", amount=1}}
         end
