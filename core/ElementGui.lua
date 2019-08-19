@@ -1151,7 +1151,7 @@ end
 -- @function [parent=#ElementGui] addCellRecipe
 --
 -- @param #LuaGuiElement parent container for element
--- @param #table factory
+-- @param #table recipe
 -- @param #string action
 -- @param #boolean select true if select button
 -- @param #string tooltip_name tooltip name
@@ -1174,12 +1174,40 @@ function ElementGui.addCellRecipe(parent, recipe, action, select, tooltip_name, 
 end
 
 -------------------------------------------------------------------------------
+-- Add cell block
+--
+-- @function [parent=#ElementGui] addCellBlock
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #table block
+-- @param #string action
+-- @param #boolean select true if select button
+-- @param #string tooltip_name tooltip name
+-- @param #string color button color
+--
+function ElementGui.addCellBlock(parent, block, action, select, tooltip_name, color)
+  Logging:trace(ElementGui.classname, "addCellRecipe():", block, action, select, tooltip_name, color)
+  local display_cell_mod = Player.getSettings("display_cell_mod")
+  -- ingredient = {type="item", name="steel-plate", amount=8}
+  local button = nil
+  color = color or "green"
+  local cell = ElementGui.addGuiFlowV(parent,block.name, helmod_flow_style.vertical)
+  local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_product_"..color.."_1")
+  
+  local recipe_icon = ElementGui.addGuiButtonSprite(row1, action, Player.getRecipeIconType(block), block.name, block.name, ({tooltip_name, Player.getRecipeLocalisedName(block)}))
+  
+  local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_product_"..color.."_3")
+  ElementGui.addGuiLabel(row3, "label2_"..block.name, Format.formatNumberFactory(block.count or 0), "helmod_label_element", {"helmod_common.total"})
+  return cell
+end
+
+-------------------------------------------------------------------------------
 -- Add cell energy
 --
 -- @function [parent=#ElementGui] addCellEnergy
 --
 -- @param #LuaGuiElement parent container for element
--- @param #table factory
+-- @param #table recipe
 -- @param #string action
 -- @param #boolean select true if select button
 -- @param #string tooltip_name tooltip name
@@ -1290,7 +1318,6 @@ end
 --
 -- @return #table
 --
-
 local cache_tooltip_recipe = {}
 
 function ElementGui.getTooltipRecipe(prototype)
@@ -1322,7 +1349,7 @@ function ElementGui.getTooltipRecipe(prototype)
     local product = Product.load(element)
     local count = Product.getElementAmount(element)
     local name = Product.getLocalisedName()
-    local currentTooltip = {"tooltip.recipe-info-element", count, name}
+    local currentTooltip = {"tooltip.recipe-info-element", string.format("[%s=%s]",element.type,element.name), count, name}
     -- insert le dernier tooltip dans le precedent
     table.insert(lastTooltip, currentTooltip)
     lastTooltip = currentTooltip
@@ -1336,7 +1363,7 @@ function ElementGui.getTooltipRecipe(prototype)
     local product = Product.load(element)
     local count = Product.getElementAmount(element)
     local name = Product.getLocalisedName()
-    local currentTooltip = {"tooltip.recipe-info-element", count, name}
+    local currentTooltip = {"tooltip.recipe-info-element", string.format("[%s=%s]",element.type,element.name), count, name}
     -- insert le dernier tooltip dans le precedent
     table.insert(lastTooltip, currentTooltip)
     lastTooltip = currentTooltip
@@ -1351,6 +1378,43 @@ function ElementGui.getTooltipRecipe(prototype)
   return tooltip
 end
 
+-------------------------------------------------------------------------------
+-- Get tooltip for technology
+--
+-- @function [parent=#ElementGui] getTooltipTechnology
+--
+-- @param #table prototype
+--
+-- @return #table
+--
+function ElementGui.getTooltipTechnology(prototype)
+  Logging:trace(ElementGui.classname, "getTooltipTechnology", prototype)
+  -- initalize tooltip
+  local tooltip = {"tooltip.technology-info"}
+  Technology.load(prototype)
+  -- insert __1__ value
+  table.insert(tooltip, Technology.getLocalisedName())
+
+  -- insert __2__ value
+  table.insert(tooltip, Technology.getLevel())
+
+  -- insert __3__ value
+  table.insert(tooltip, Technology.getFormula() or "")
+
+  -- insert __4__ value
+  local lastTooltip = tooltip
+  for _,element in pairs(Technology.getIngredients()) do
+    local count = Product.getElementAmount(element)
+    local name = Player.getLocalisedName(element)
+    local currentTooltip = {"tooltip.recipe-info-element", string.format("[%s=%s]",element.type,element.name), count, name}
+    -- insert le dernier tooltip dans le precedent
+    table.insert(lastTooltip, currentTooltip)
+    lastTooltip = currentTooltip
+  end
+  -- finalise la derniere valeur
+  table.insert(lastTooltip, "")
+  return tooltip
+end
 -------------------------------------------------------------------------------
 -- Get display sizes
 --
@@ -1403,6 +1467,7 @@ function ElementGui.getStyleSizes()
     style_sizes.data.width = width_main - width_dialog - width_left_menu
 
     style_sizes.power = {}
+    style_sizes.power.width = width_dialog/2
     style_sizes.power.height = 200
 
     style_sizes.edition_product_tool = {}

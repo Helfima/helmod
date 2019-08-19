@@ -5,7 +5,7 @@
 local Solver = {
   -- single-line comment
   classname = "HMSolver",
-  debug = true,
+  debug = false,
   debug_col = 8,
   col_start = 4,
   row_input = 1
@@ -126,6 +126,7 @@ function Solver.print(object, xrow, xcol)
         for icol,cell_value in pairs(row) do
           separator = "|"
           if irow == xrow or icol == xcol then separator = "<" end
+          if math.abs(cell_value) < 0.001 then cell_value = 0 end
           message = string.format("%s %s %s", message, Solver.format(cell_value), separator)
         end
         
@@ -186,7 +187,6 @@ function Solver.prepare(M)
   -- initialise les valeurs des produits par second
   for irow,row in pairs(Mx) do
     if irow > Solver.row_input then
-      local P = Mx[irow][2]
       local E = Mx[irow][3]
       for icol,cell in pairs(row) do
         if icol > Solver.col_start then
@@ -319,7 +319,8 @@ function Solver.lineCompute(M, xrow, xcol)
   M[xrow][1] = P * C / E
   for icol,cell_value in pairs(row) do
     if icol > Solver.col_start then
-      M[#M][icol] = M[#M][icol] + M[xrow][icol] * P * C
+      local X = M[xrow][icol]
+      M[#M][icol] = M[#M][icol] + X * P * C
     end
   end
   return M

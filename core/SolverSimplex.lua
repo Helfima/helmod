@@ -5,7 +5,7 @@
 local Simplex = {
   -- single-line comment
   classname = "HMSimplex",
-  debug = true,
+  debug = false,
   debug_col = 8,
   row_input = 1,
   col_start = 4
@@ -421,6 +421,7 @@ function Simplex.print(object, xrow, xcol)
         for icol,cell_value in pairs(row) do
           separator = "|"
           if (irow == xrow and icol >= Simplex.col_start) or (icol == xcol and irow > Simplex.row_input) then separator = "<" end
+          if math.abs(cell_value) < 0.001 then cell_value = 0 end
           message = string.format("%s %s %s", message, Simplex.format(cell_value), separator)
         end
         
@@ -445,14 +446,28 @@ function Simplex.lineCompute(Mx, xrow)
   local row = Mx[xrow]
   local R = row[1]
   local E = row[3]
-  local C = row[4]
+
   for icol,cell_value in pairs(row) do
-    if icol > Simplex.col_start then
-      -- initialise les valeurs des produits par second
-      Mx[xrow][icol] = cell_value / E
-      -- calcul du Z
+    if cell_value ~= 0 and icol > Simplex.col_start then
       local Z = Mx[#Mx][icol] -- valeur demandee Z
-      Mx[#Mx][icol] = Z + Mx[xrow][icol] * C
+      local X = cell_value
+
+      local C = -Z/X
+      if C > 0 and C > Mx[xrow][Simplex.col_start] then
+        Mx[xrow][Simplex.col_start] = C
+        Mx[xrow][2] = R * E / C
+      end
+    end
+  end
+  
+  local P = Mx[xrow][2]
+  local C = Mx[xrow][Simplex.col_start]
+  for icol,cell_value in pairs(row) do
+    if cell_value ~= 0 and icol > Simplex.col_start then
+      local Z = Mx[#Mx][icol] -- valeur demandee Z
+      local X = cell_value
+      -- calcul du Z
+      Mx[#Mx][icol] = Z + X * P * C
     end
   end
   return Mx
@@ -474,13 +489,30 @@ function Simplex.tableCompute(Mx, Mi)
     Mx[#Mx][icol] = 0
   end
   
-  -- preparation de la colonne R et C
+  -- preparation de la colonne R et P
   for irow,_ in pairs(Mx) do
     if irow > Simplex.row_input and irow < #Mx then
       -- colonne correspondant à la recette
       local icol = #Mx[1] + 1 + irow - Simplex.row_input
       Mx[irow][1] = - Mi[#Mi][icol] -- moins la valeur affichee dans Z
-      Mx[irow][4] = Mx[irow][3]*Mx[irow][1] -- C = R*E
+      Mx[irow][2] = 0
+    end
+  end
+  -- preparation input
+  -- ajoute la ligne Z avec Z=-input
+  for icol,cell in pairs(Mx[Simplex.row_input]) do
+    Mx[#Mx][icol] = 0-cell
+  end
+  
+    -- initialise les valeurs des produits par second
+  for irow,row in pairs(Mx) do
+    if irow > Simplex.row_input and irow < #Mx then
+      local E = Mx[irow][3]
+      for icol,cell in pairs(row) do
+        if icol > Simplex.col_start then
+          Mx[irow][icol] = cell / E
+        end
+      end
     end
   end
   
@@ -488,6 +520,7 @@ function Simplex.tableCompute(Mx, Mi)
   for irow,_ in pairs(Mx) do
     if irow > Simplex.row_input and irow < #Mx then
       Mx = Simplex.lineCompute(Mx, irow)
+      --Simplex.print(Mx)
     end
   end
   return Mx
@@ -536,6 +569,7 @@ function Simplex.solve()
     -- finalisation
     m_Mr = Simplex.clone(m_M)
     m_Mr = Simplex.tableCompute(m_Mr, m_Mi)
+    m_Mr = Simplex.finalize(m_Mr)
     m_Mr = Simplex.appendState(m_Mr)
     Simplex.print(m_Mr)
     return m_Mr

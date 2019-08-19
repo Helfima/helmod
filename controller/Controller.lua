@@ -844,6 +844,13 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
   local globalGui = Player.getGlobalGui()
   local ui = Player.getGlobalUI()
   local model = Model.getModel()
+  
+  if action == "change-tab" then
+    if item == "HMProductionBlockTab" and item2 == "new" then
+      Controller.createEvent(event, "HMRecipeSelector", "OPEN", item, item2, item3)
+    end
+  end
+  
   if action == "change-boolean-option" and model.blocks ~= nil and model.blocks[globalGui.currentBlock] ~= nil then
     local element = model.blocks[globalGui.currentBlock]
     ModelBuilder.updateProductionBlockOption(globalGui.currentBlock, item, not(element[item]))

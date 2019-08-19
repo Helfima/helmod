@@ -40,8 +40,19 @@ M[index]["matrix"][1] = {0,0,0,0,5,0,0}
 M[index]["matrix"][2] = {0,1,16,0,1,-5,0}
 M[index]["matrix"][3] = {0,0.5,3.2,0,0,1,-1}
 
-local test = 3
---Simplex.new(M[test])
+index = 4
+M[index] = {}
+M[index]["matrix"] = {}
+M[index]["col_headers"] = {"R", "P", "E", "C", "plastic-bar1", "coal1", "petroleum-gas1", "water1","light-oil1","heavy-oil1","crude-oil1"}
+M[index]["row_headers"] = {"input","R plastic-bar", "R light-oil-cracking", "R heavy-oil-cracking", "R advanced-oil-processing"}
+M[index]["matrix"][1]={0,0,0,0,30,0,0,0,0,0,0}
+M[index]["matrix"][2]={0,1,1,0,2,-1,-20,0,0,0,0}
+M[index]["matrix"][3]={0,0.435897,2,0,0,0,20,-30,-30,0,0}
+M[index]["matrix"][4]={0,0.294117,2,0,0,0,0,-30,30,-40,0}
+M[index]["matrix"][5]={0,1,5,0,0,0,55,-50,45,25,-100}
+
+local test = 4
+Solver.debug = true
 Solver.new(M[test]["matrix"], M[test]["row_headers"], M[test]["col_headers"])
 Solver.solve()
 

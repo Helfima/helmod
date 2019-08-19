@@ -28,7 +28,9 @@ function EnergyEdition.methods:getPowerPanel()
   if panel["power"] ~= nil and panel["power"].valid then
     return panel["power"]
   end
-  return ElementGui.addGuiFrameH(panel, "power", helmod_frame_style.panel)
+  local panel = ElementGui.addGuiFrameH(panel, "power", helmod_frame_style.panel)
+  panel.style.horizontally_stretchable = true
+  return panel
 end
 
 -------------------------------------------------------------------------------
@@ -54,8 +56,10 @@ function EnergyEdition.methods:getPrimaryInfoPanel()
   if panel["info"] ~= nil and panel["info"].valid then
     return panel["info"]
   end
-  local panel = ElementGui.addGuiFrameV(panel, "info", helmod_frame_style.recipe_column, ({"helmod_common.primary-generator"}))
+  local panel = ElementGui.addGuiFrameV(panel, "info", helmod_frame_style.panel, ({"helmod_common.primary-generator"}))
+  ElementGui.setStyle(panel, "power", "width")
   ElementGui.setStyle(panel, "power", "height")
+  panel.style.horizontally_stretchable = true
   return panel
 end
 
@@ -67,9 +71,16 @@ end
 function EnergyEdition.methods:getPrimarySelectorPanel()
   local panel = self:getPrimaryPanel()
   if panel["selector"] ~= nil and panel["selector"].valid then
-    return panel["selector"]
+    return panel["selector"]["scroll-primary"]
   end
-  return ElementGui.addGuiFrameV(panel, "selector", helmod_frame_style.recipe_column, ({"helmod_common.generator"}))
+  local panel = ElementGui.addGuiFrameV(panel, "selector", helmod_frame_style.panel, ({"helmod_common.generator"}))
+  panel.style.horizontally_stretchable = true
+  ElementGui.setStyle(panel, "power", "width")
+  ElementGui.setStyle(panel, "power", "height")
+  local scroll_panel = ElementGui.addGuiScrollPane(panel, "scroll-primary", helmod_frame_style.scroll_pane, true)
+  scroll_panel.style.horizontally_stretchable = true
+  scroll_panel.style.vertically_stretchable = true
+  return scroll_panel
 end
 
 -------------------------------------------------------------------------------
@@ -106,8 +117,10 @@ function EnergyEdition.methods:getSecondaryInfoPanel()
   if panel["info"] ~= nil and panel["info"].valid then
     return panel["info"]
   end
-  local panel = ElementGui.addGuiFrameV(panel, "info", helmod_frame_style.recipe_column, ({"helmod_common.secondary-generator"}))
+  local panel = ElementGui.addGuiFrameV(panel, "info", helmod_frame_style.panel, ({"helmod_common.secondary-generator"}))
+  ElementGui.setStyle(panel, "power", "width")
   ElementGui.setStyle(panel, "power", "height")
+  panel.style.horizontally_stretchable = true
   return panel
 end
 
@@ -121,7 +134,14 @@ function EnergyEdition.methods:getSecondarySelectorPanel()
   if panel["selector"] ~= nil and panel["selector"].valid then
     return panel["selector"]
   end
-  return ElementGui.addGuiFrameV(panel, "selector", helmod_frame_style.recipe_column, ({"helmod_common.generator"}))
+  local panel = ElementGui.addGuiFrameV(panel, "selector", helmod_frame_style.panel, ({"helmod_common.generator"}))
+  panel.style.horizontally_stretchable = true
+  ElementGui.setStyle(panel, "power", "width")
+  ElementGui.setStyle(panel, "power", "height")
+  local scroll_panel = ElementGui.addGuiScrollPane(panel, "scroll-primary", helmod_frame_style.scroll_pane, true)
+  scroll_panel.style.horizontally_stretchable = true
+  scroll_panel.style.vertically_stretchable = true
+  return scroll_panel
 end
 
 -------------------------------------------------------------------------------
@@ -196,24 +216,6 @@ end
 --
 function EnergyEdition.methods:onClose()
   local model = Model.getModel()
-end
-
--------------------------------------------------------------------------------
--- On open
---
--- @function [parent=#EnergyEdition] onOpen
---
--- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function EnergyEdition.methods:onOpen(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "onOpen()", action, item, item2, item3)
-  self:buildHeaderPanel()
-  self:buildPrimaryPanel()
-  self:buildSecondaryPanel()
 end
 
 -------------------------------------------------------------------------------
@@ -413,17 +415,14 @@ end
 --
 function EnergyEdition.methods:updatePrimarySelector(item, item2, item3)
   Logging:debug(self:classname(), "updatePrimarySelector():", item, item2, item3)
-  local selectorPanel = self:getPrimarySelectorPanel()
+  local scroll_panel = self:getPrimarySelectorPanel()
   local model = Model.getModel()
 
-  if selectorPanel["scroll-primary"] ~= nil and selectorPanel["scroll-primary"].valid then
-    selectorPanel["scroll-primary"].destroy()
-  end
-  local scrollPanel = ElementGui.addGuiScrollPane(selectorPanel, "scroll-primary", helmod_frame_style.scroll_pane, true)
+  scroll_panel.clear()
 
   local object = self:getObject(item, item2, item3)
 
-  local groupsPanel = ElementGui.addGuiTable(scrollPanel, "primary-groups", 1)
+  local groupsPanel = ElementGui.addGuiTable(scroll_panel, "primary-groups", 1)
 
   local category = "primary"
   if not(Player.getSettings("model_filter_generator", true)) then category = nil end
@@ -453,11 +452,11 @@ function EnergyEdition.methods:updatePrimarySelector(item, item2, item3)
     end
   end
 
-  local tablePanel = ElementGui.addGuiTable(scrollPanel, "primary-table", 5)
+  local tablePanel = ElementGui.addGuiTable(scroll_panel, "primary-table", 5)
   for key, element in pairs(factories) do
     if category ~= nil or (element.subgroup ~= nil and element.subgroup.name == model.primaryGroupSelected) then
       local localised_name = Player.getLocalisedName(element)
-      ElementGui.addGuiButtonSelectSprite(tablePanel, self:classname().."=primary-select=ID="..item.."=", "item", element.name, element.name, localised_name)
+      ElementGui.addGuiButtonSelectSprite(tablePanel, self:classname().."=primary-select=ID="..item.."=", "entity", element.name, element.name, localised_name)
     end
   end
 end
@@ -549,17 +548,14 @@ end
 --
 function EnergyEdition.methods:updateSecondarySelector(item, item2, item3)
   Logging:debug(self:classname(), "updateSecondarySelector():", item, item2, item3)
-  local selectorPanel = self:getSecondarySelectorPanel()
+  local scroll_panel = self:getSecondarySelectorPanel()
   local model = Model.getModel()
 
-  if selectorPanel["scroll-secondary"] ~= nil and selectorPanel["scroll-secondary"].valid then
-    selectorPanel["scroll-secondary"].destroy()
-  end
-  local scrollPanel = ElementGui.addGuiScrollPane(selectorPanel, "scroll-secondary", helmod_frame_style.scroll_pane, true)
-
+  scroll_panel.clear()
+  
   local object = self:getObject(item, item2, item3)
 
-  local groupsPanel = ElementGui.addGuiTable(scrollPanel, "secondary-groups", 1)
+  local groupsPanel = ElementGui.addGuiTable(scroll_panel, "secondary-groups", 1)
 
   local category = "secondary"
   if not(Player.getSettings("model_filter_generator", true)) then category = nil end
@@ -589,11 +585,11 @@ function EnergyEdition.methods:updateSecondarySelector(item, item2, item3)
     end
   end
 
-  local tablePanel = ElementGui.addGuiTable(scrollPanel, "secondary-table", 5)
+  local tablePanel = ElementGui.addGuiTable(scroll_panel, "secondary-table", 5)
   for key, element in pairs(factories) do
     if category ~= nil or (element.subgroup ~= nil and element.subgroup.name == model.secondaryGroupSelected) then
       local localised_name = Player.getLocalisedName(element)
-      ElementGui.addGuiButtonSelectSprite(tablePanel, self:classname().."=secondary-select=ID="..item.."=", "item", element.name, element.name, localised_name)
+      ElementGui.addGuiButtonSelectSprite(tablePanel, self:classname().."=secondary-select=ID="..item.."=", "entity", element.name, element.name, localised_name)
     end
   end
 end

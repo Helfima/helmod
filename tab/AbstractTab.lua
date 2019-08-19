@@ -65,6 +65,28 @@ function AbstractTab.methods:getResultPanel(caption)
 end
 
 -------------------------------------------------------------------------------
+-- Get or create result panel
+--
+-- @function [parent=#AbstractTab] getResultPanel2
+--
+-- @param #string caption
+--
+function AbstractTab.methods:getResultPanel2(caption)
+  local parent_panel = self:getPanel()
+  if parent_panel["result"] ~= nil and parent_panel["result"].valid then
+    return parent_panel["result"]["result1"],parent_panel["result"]["result2"]
+  end
+  local panel = ElementGui.addGuiTable(parent_panel,"result",2, helmod_table_style.panel)
+  ElementGui.setStyle(panel, "block_data", "height")
+  panel.style.horizontally_stretchable = true
+  panel.style.vertically_stretchable = true
+  
+  local panel1 = ElementGui.addGuiFrameV(panel, "result1", helmod_frame_style.panel)
+  local panel2 = ElementGui.addGuiFrameV(panel, "result2", helmod_frame_style.panel, caption)
+  return panel1,panel2
+end
+
+-------------------------------------------------------------------------------
 -- Get or create result scroll panel
 --
 -- @function [parent=#AbstractTab] getResultScrollPanel
@@ -85,20 +107,25 @@ end
 -------------------------------------------------------------------------------
 -- Get or create result scroll panel
 --
--- @function [parent=#AbstractTab] getDataScrollPanel
+-- @function [parent=#AbstractTab] getResultScrollPanel2
 --
 -- @param #string caption
 --
-function AbstractTab.methods:getDataScrollPanel(caption)
-  local parent_panel = self:getResultPanel(caption)
-  ElementGui.setStyle(parent_panel, "block_data", "height")
-  if parent_panel["scroll-data"] ~= nil and parent_panel["scroll-data"].valid then
-    return parent_panel["scroll-data"]
+function AbstractTab.methods:getResultScrollPanel2(caption)
+  local parent_panel1,parent_panel2 = self:getResultPanel2(caption)
+  if parent_panel1["header-data1"] ~= nil and parent_panel1["header-data1"].valid then
+    return parent_panel1["header-data1"],parent_panel2["header-data2"],parent_panel1["scroll-data1"],parent_panel2["scroll-data2"]
   end
-  local scroll_panel = ElementGui.addGuiScrollPane(parent_panel, "scroll-data", helmod_frame_style.scroll_pane, true, true)
-  scroll_panel.style.horizontally_stretchable = true
-  scroll_panel.style.vertically_stretchable = true
-  return scroll_panel
+  local header_panel1 = ElementGui.addGuiFlowV(parent_panel1, "header-data1", helmod_flow_style.vertical)
+  local header_panel2 = ElementGui.addGuiFlowV(parent_panel2, "header-data2", helmod_flow_style.vertical)
+  local scroll_panel1 = ElementGui.addGuiScrollPane(parent_panel1, "scroll-data1", helmod_frame_style.scroll_pane, true, true)
+  --scroll_panel1.style.horizontally_stretchable = true
+  scroll_panel1.style.vertically_stretchable = true
+  scroll_panel1.style.width = 70
+  local scroll_panel2 = ElementGui.addGuiScrollPane(parent_panel2, "scroll-data2", helmod_frame_style.scroll_pane, true, true)
+  scroll_panel2.style.horizontally_stretchable = true
+  scroll_panel2.style.vertically_stretchable = true
+  return header_panel1,header_panel2,scroll_panel1,scroll_panel2
 end
 
 -------------------------------------------------------------------------------

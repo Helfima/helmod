@@ -568,6 +568,80 @@ function Player.getProductionsCrafting(category, lua_recipe)
   if category == "crafting-handonly" then
     productions["player"] = game.entity_prototypes["player"]
   elseif lua_recipe.name ~= nil and lua_recipe.name == "water" then
+    for key, lua_entity in pairs(Player.getOffshorePump()) do
+        productions[lua_entity.name] = lua_entity
+    end
+  elseif lua_recipe.name ~= nil and lua_recipe.name == "steam" then
+    for key, lua_entity in pairs(Player.getBoilers()) do
+        productions[lua_entity.name] = lua_entity
+    end
+  else
+    for key, lua_entity in pairs(Player.getProductionMachines()) do
+      Logging:trace(Player.classname, "loop production machines", lua_entity.name, lua_entity.type, lua_entity.group.name, lua_entity.subgroup.name, lua_entity.crafting_categories)
+      local check = false
+      if category ~= nil then
+        if not(rules_included[category]) and not(rules_included[category]) then
+          -- standard recipe
+          if lua_entity.crafting_categories ~= nil and lua_entity.crafting_categories[category] then
+            local recipe_ingredient_count = RecipePrototype.load(lua_recipe, "recipe").getIngredientCount(lua_entity)
+            local factory_ingredient_count = EntityPrototype.load(lua_entity).getIngredientCount()
+            Logging:debug(Player.classname, "crafting", recipe_ingredient_count, factory_ingredient_count)
+            if factory_ingredient_count >= recipe_ingredient_count then
+              check = true
+              Logging:debug(Player.classname, "allowed machine", lua_entity.name)
+            end
+          -- resolve rule excluded
+            check = Player.checkRules(check, rules_excluded, "standard", lua_entity, false)
+          end
+        else
+          -- resolve rule included
+          check = Player.checkRules(check, rules_included, category, lua_entity, true)
+          -- resolve rule excluded
+          check = Player.checkRules(check, rules_excluded, category, lua_entity, false)
+        end
+      else
+        if lua_entity.group ~= nil and lua_entity.group.name == "production" then
+          check = true
+        end
+      end
+      -- resource filter
+      if check then
+        if lua_recipe.name ~= nil then
+          local lua_entity_filter = Player.getEntityPrototype(lua_recipe.name)
+          if lua_entity_filter ~= nil and lua_entity.resource_categories ~= nil and not(lua_entity.resource_categories[lua_entity_filter.resource_category]) then
+            check = false
+          end
+        end
+      end
+      -- ok to add entity
+      if check then
+        productions[lua_entity.name] = lua_entity
+      end
+    end
+  end
+  Logging:debug(Player.classname, "category", category, "productions", productions)
+  return productions
+end
+-------------------------------------------------------------------------------
+-- Return list of productions
+--
+-- @function [parent=#Player] getProductionsCrafting2
+--
+-- @param #string category filter
+-- @param #string lua_recipe
+--
+-- @return #table list of productions
+--
+function Player.getProductionsCrafting2(category, lua_recipe)
+  Logging:debug(Player.classname, "getProductionsCrafting(category)", category, lua_recipe)
+  local productions = {}
+  local rules_included, rules_excluded = Player.getRules("production-crafting")
+
+  Logging:debug(Player.classname, "rules", rules_included, rules_excluded)
+
+  if category == "crafting-handonly" then
+    productions["player"] = game.entity_prototypes["player"]
+  elseif lua_recipe.name ~= nil and lua_recipe.name == "water" then
     for key, lua_entity in pairs(game.entity_prototypes) do
       if lua_entity.type ~= nil and lua_entity.name ~= nil and lua_entity.name ~= "player" then
         if lua_entity.type == EntityType.offshore_pump then
@@ -641,14 +715,59 @@ end
 -- @return #table list of modules
 --
 function Player.getModules()
-  -- recuperation des groupes
-  local modules = {}
-  for key, item in pairs(game.item_prototypes) do
-    if item.type ~= nil and item.type == "module" then
-      modules[item.name] = item
-    end
+  local items = {}
+  local filters = {}
+  table.insert(filters,{filter="type",type="module",mode="or"})
+  
+  for _,item in pairs(game.get_filtered_item_prototypes(filters)) do
+    table.insert(items,item)
   end
-  return modules
+  return items
+end
+
+-------------------------------------------------------------------------------
+-- Return list of production machines
+--
+-- @function [parent=#Player] getProductionMachines
+--
+-- @return #table list of modules
+--
+function Player.getProductionMachines()
+  local filters = {}
+  table.insert(filters,{filter="crafting-machine",mode="and"})
+  table.insert(filters,{filter="hidden",mode="and",invert=true})
+  table.insert(filters,{filter="type", type="lab",mode="or"})
+  table.insert(filters,{filter="type", type="mining-drill",mode="or"})
+  
+  return game.get_filtered_entity_prototypes(filters)
+end
+
+-------------------------------------------------------------------------------
+-- Return list of boilers
+--
+-- @function [parent=#Player] getBoilers
+--
+-- @return #table list of modules
+--
+function Player.getBoilers()
+  local filters = {}
+  table.insert(filters,{filter="type", type="boiler" ,mode="or"})
+  
+  return game.get_filtered_entity_prototypes(filters)
+end
+
+-------------------------------------------------------------------------------
+-- Return list of Offshore-Pump
+--
+-- @function [parent=#Player] getOffshorePump
+--
+-- @return #table list of modules
+--
+function Player.getOffshorePump()
+  local filters = {}
+  table.insert(filters,{filter="type", type="offshore-pump" ,mode="or"})
+  
+  return game.get_filtered_entity_prototypes(filters)
 end
 
 -------------------------------------------------------------------------------
@@ -787,15 +906,11 @@ end
 --
 function Player.getProductionsBeacon()
   local items = {}
-  for _,item in pairs(game.entity_prototypes) do
-    --Logging:debug(Player.classname, "getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
-    if item.name ~= nil and item.type == EntityType.beacon then
-      local efficiency = EntityPrototype.load(item.name).getDistributionEffectivity()
-      Logging:trace(Player.classname, "getProductionsBeacon(type):", item.name, efficiency)
-      if efficiency ~= nil then
-        table.insert(items,item)
-      end
-    end
+  local filters = {}
+  table.insert(filters,{filter="type",type=EntityType.beacon,mode="or"})
+  
+  for _,item in pairs(game.get_filtered_entity_prototypes(filters)) do
+    table.insert(items,item)
   end
   return items
 end
@@ -812,20 +927,17 @@ end
 function Player.getGenerators(type)
   if type == nil then type = "primary" end
   local items = {}
-  for _,item in pairs(game.entity_prototypes) do
-    --Logging:debug(Player.classname, "getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
-    if item.name ~= nil then
-      local entity_type = EntityPrototype.load(item).getType()
-      if item.group.name == "production" then
-        Logging:trace(Player.classname, "getGenerators():", item.name, item.type, item.group.name, item.subgroup.name)
-      end
-      if type == "primary" and (entity_type == EntityType.generator or entity_type == EntityType.solar_panel) then
-        table.insert(items,item)
-      end
-      if type == "secondary" and (entity_type == EntityType.boiler or entity_type == EntityType.accumulator) then
-        table.insert(items,item)
-      end
-    end
+  local filters = {}
+  if type == "primary" then
+    table.insert(filters,{filter="type",type=EntityType.generator,mode="or"})
+    table.insert(filters,{filter="type",type=EntityType.solar_panel,mode="or"})
+  else
+    table.insert(filters,{filter="type",type=EntityType.boiler,mode="or"})
+    table.insert(filters,{filter="type",type=EntityType.accumulator,mode="or"})
+  end
+  
+  for _,item in pairs(game.get_filtered_entity_prototypes(filters)) do
+    table.insert(items,item)
   end
   return items
 end

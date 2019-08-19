@@ -154,31 +154,7 @@ end
 --
 function TechnologySelector.methods:buildPrototypeTooltip(prototype)
   Logging:trace(self:classname(), "buildPrototypeTooltip(prototype):", prototype)
-  -- initalize tooltip
-  local tooltip = {"tooltip.technology-info"}
-  Technology.load(prototype)
-  -- insert __1__ value
-  table.insert(tooltip, Technology.getLocalisedName())
-
-  -- insert __2__ value
-  table.insert(tooltip, Technology.getLevel())
-
-  -- insert __3__ value
-  table.insert(tooltip, Technology.getFormula() or "")
-
-  -- insert __4__ value
-  local lastTooltip = tooltip
-  for _,element in pairs(Technology.getIngredients()) do
-    local count = Product.getElementAmount(element)
-    local name = Player.getLocalisedName(element)
-    local currentTooltip = {"tooltip.recipe-info-element", count, name}
-    -- insert le dernier tooltip dans le precedent
-    table.insert(lastTooltip, currentTooltip)
-    lastTooltip = currentTooltip
-  end
-  -- finalise la derniere valeur
-  table.insert(lastTooltip, "")
-  return tooltip
+  return ElementGui.getTooltipTechnology(prototype)
 end
 
 -------------------------------------------------------------------------------

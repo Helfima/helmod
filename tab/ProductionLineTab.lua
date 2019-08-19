@@ -20,93 +20,6 @@ function ProductionLineTab.methods:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
--- Update header
---
--- @function [parent=#ProductionLineTab] updateHeader
---
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function ProductionLineTab.methods:updateHeader2(item, item2, item3)
-  Logging:debug(self:classname(), "updateHeader():", item, item2, item3)
-  local globalGui = Player.getGlobalGui()
-  local model = Model.getModel()
-
-  local info_panel = self:getInfoPanel()
-  -- info panel
-  local block_panel = ElementGui.addGuiFrameV(info_panel, "block", helmod_frame_style.panel, ({"helmod_result-panel.tab-title-production-line"}))
-  ElementGui.setStyle(block_panel, "block_info", "width")
-  local block_scroll = ElementGui.addGuiScrollPane(block_panel, "output-scroll", helmod_frame_style.scroll_pane, true)
-  ElementGui.setStyle(block_scroll, "scroll_block", "height")
-  local block_table = ElementGui.addGuiTable(block_scroll,"output-table",2)
-
-
-  local element_panel = ElementGui.addGuiTable(info_panel, "elements", 1, helmod_table_style.panel)
-  ElementGui.setStyle(element_panel, "block_element", "width")
-  -- ouput panel
-  local output_panel = ElementGui.addGuiFrameV(element_panel, "output", helmod_frame_style.panel, ({"helmod_common.output"}))
-  output_panel.style.horizontally_stretchable = true
-  ElementGui.setStyle(output_panel, "block_element", "height")
-  local output_scroll = ElementGui.addGuiScrollPane(output_panel, "output-scroll", helmod_frame_style.scroll_pane, true)
-  ElementGui.setStyle(output_scroll, "scroll_block_element", "height")
-
-  -- input panel
-  local input_panel = ElementGui.addGuiFrameV(element_panel, "input", helmod_frame_style.panel, ({"helmod_common.input"}))
-  ElementGui.setStyle(input_panel, "block_element", "height")
-  local input_scroll = ElementGui.addGuiScrollPane(input_panel, "output-scroll", helmod_frame_style.scroll_pane, true)
-  ElementGui.setStyle(input_scroll, "scroll_block_element", "height")
-
-  -- admin panel
-  ElementGui.addGuiLabel(block_table, "label-owner", ({"helmod_result-panel.owner"}))
-  ElementGui.addGuiLabel(block_table, "value-owner", model.owner)
-
-  ElementGui.addGuiLabel(block_table, "label-share", ({"helmod_result-panel.share"}))
-
-  local tableAdminPanel = ElementGui.addGuiTable(block_table, "table" , 9)
-  local model_read = false
-  if model.share ~= nil and  bit32.band(model.share, 1) > 0 then model_read = true end
-  ElementGui.addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID=read="..model.id, model_read, nil, ({"tooltip.share-mod", {"helmod_common.reading"}}))
-  ElementGui.addGuiLabel(tableAdminPanel, self:classname().."=share-model-read", "R", nil, ({"tooltip.share-mod", {"helmod_common.reading"}}))
-
-  local model_write = false
-  if model.share ~= nil and  bit32.band(model.share, 2) > 0 then model_write = true end
-  ElementGui.addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID=write="..model.id, model_write, nil, ({"tooltip.share-mod", {"helmod_common.writing"}}))
-  ElementGui.addGuiLabel(tableAdminPanel, self:classname().."=share-model-write", "W", nil, ({"tooltip.share-mod", {"helmod_common.writing"}}))
-
-  local model_delete = false
-  if model.share ~= nil and bit32.band(model.share, 4) > 0 then model_delete = true end
-  ElementGui.addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID=delete="..model.id, model_delete, nil, ({"tooltip.share-mod", {"helmod_common.removal"}}))
-  ElementGui.addGuiLabel(tableAdminPanel, self:classname().."=share-model-delete", "X", nil, ({"tooltip.share-mod", {"helmod_common.removal"}}))
-
-  local count_block = Model.countBlocks()
-  if count_block > 0 then
-    -- info panel
-    ElementGui.addGuiLabel(block_table, "label-power", ({"helmod_label.electrical-consumption"}))
-    if model.summary ~= nil then
-      ElementGui.addGuiLabel(block_table, "power", Format.formatNumberKilo(model.summary.energy or 0, "W"))
-    end
-
-    -- ouput panel
-    local output_table = ElementGui.addGuiTable(output_scroll,"output-table",6)
-    if model.products ~= nil then
-      for index, element in pairs(model.products) do
-        ElementGui.addCellElement(output_table, element, self:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.product", nil, index)
-      end
-    end
-
-    -- input panel
-    local input_table = ElementGui.addGuiTable(input_scroll,"input-table",6)
-    if model.ingredients ~= nil then
-      for index, element in pairs(model.ingredients) do
-        ElementGui.addCellElement(input_table, element, self:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.ingredient", nil, index)
-      end
-    end
-
-  end
-end
-
--------------------------------------------------------------------------------
 -- Update data
 --
 -- @function [parent=#ProductionLineTab] updateData
@@ -121,7 +34,7 @@ function ProductionLineTab.methods:updateData(item, item2, item3)
   local model = Model.getModel()
 
   -- data panel
-  local scrollPanel = self:getDataScrollPanel({"helmod_result-panel.tab-button-production-line"})
+  local scrollPanel = self:getResultScrollPanel({"helmod_result-panel.tab-button-production-line"})
 
   local countBlock = Model.countBlocks()
   if countBlock > 0 then
@@ -215,7 +128,7 @@ function ProductionLineTab.methods:addTableRow(gui_table, block)
 
   -- col recipe
   local cell_recipe = ElementGui.addCell(gui_table, "recipe"..block.id)
-  ElementGui.addCellRecipe(cell_recipe, block, self:classname().."=change-tab=ID=HMProductionBlockTab="..block.id.."=", true, "tooltip.edit-block", "gray")
+  ElementGui.addCellBlock(cell_recipe, block, self:classname().."=change-tab=ID=HMProductionBlockTab="..block.id.."=", true, "tooltip.edit-block", "gray")
 
   -- col energy
   local cell_energy = ElementGui.addCell(gui_table, block.id)

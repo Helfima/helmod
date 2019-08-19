@@ -137,16 +137,16 @@ function PrototypeFiltersTab.methods:updateData()
   if prototype_filter_type ~= nil then
     local filters = PrototypeFilter.getFilters(prototype_filter_type)
     prototype_filters = {}
-    for key,options in pairs(filters) do
+    for key,options in spairs(filters,function(t,a,b) return b > a end) do
       table.insert(prototype_filters,key)
     end
-    prototype_filter = prototype_filter or prototype_filters[1]
+    prototype_filter = prototype_filter or "type"
     Logging:debug(self:classname(),"prototype_filters", prototype_filters)
     drop_down_prototype_filter = ElementGui.addGuiDropDown(resultTable, self:classname().."=change-prototype-filter", nil, prototype_filters, prototype_filter)
 
     if filters[prototype_filter] ~= nil then
       prototype_filter_options = {}
-      for key,options in pairs(filters[prototype_filter]) do
+      for key,options in spairs(filters[prototype_filter],function(t,a,b) return b > a end) do
         table.insert(prototype_filter_options,key)
       end
       if Model.countList(prototype_filter_options) > 0 then

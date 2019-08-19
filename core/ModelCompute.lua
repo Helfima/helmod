@@ -478,6 +478,7 @@ function ModelCompute.computeSimplexBlock(block)
         ModelCompute.computeModuleEffects(recipe)
         local icol = 1
         recipe.count =  mC[row_index][icol]
+        recipe.production = mC[row_index][2]
         row_index = row_index + 1
         Logging:debug(ModelCompute.classname , "----> matrix solution", recipe.name, icol, recipe.count)
         --Logging:debug(Model.classname , "matrix recipe.count", recipe.count, Model.speedFactory(recipe) * (1 + recipe.factory.effects.speed))
@@ -1362,10 +1363,7 @@ function ModelCompute.computePower(key)
       -- calcul secondary
       if EntityPrototype.load(power.secondary.name).native() ~= nil and EntityPrototype.load(power.secondary.name).getType() == EntityType.boiler then
         local count = 0
-        -- angel mod a un electrical boiler, on filtre
-        if EntityPrototype.getEnergyType() == "burner" then
-          count = math.ceil( power.power / EntityPrototype.load(power.secondary.name).getEnergyNominal() )
-        end
+        count = math.ceil( power.power / EntityPrototype.load(power.secondary.name).getEnergyNominal() )
         power.secondary.count = count or 0
       else
         power.secondary.count = 0
