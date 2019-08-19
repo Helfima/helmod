@@ -537,7 +537,7 @@ function Player.checkLimitationModule(module, lua_recipe)
   local category = prototype.getCategory()
   if rules_excluded[category] == nil then category = "standard" end
   check_not_bypass = Player.checkRules(check_not_bypass, rules_excluded, category, EntityPrototype.load(factory.name).native(), false)
-  if Player.getModuleBonus(module.name, "productivity") > 0 and check_not_bypass and model_filter_factory_module == true then
+  if Model.countList(module.limitations) > 0 and Player.getModuleBonus(module.name, "productivity") > 0 and check_not_bypass and model_filter_factory_module == true then
     allowed = false
     for _, recipe_name in pairs(module.limitations) do
       if lua_recipe.name == recipe_name then allowed = true end
