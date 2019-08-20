@@ -47,9 +47,13 @@ function Command.parse(event)
       Controller.resetCaches()
       Player.print("Caches are reseted!")
     elseif string.lower(event.parameters) == "exportdata" then
-      Logging.limit = level or 10
+      Logging.limit = 10
       game.write_file("helmod\\data.json", Logging:objectToString(global), false)
       Player.print("Data exported!")
+    elseif string.lower(event.parameters) == "exportcache" then
+      Logging.limit = 10
+      game.write_file("helmod\\cache.json", Logging:objectToString(Cache.getData()), false)
+      Player.print("Cache exported!")
     else
       Player.print("Valid arguments: close | ExportData | ResetCaches | ResetUserUI")
     end

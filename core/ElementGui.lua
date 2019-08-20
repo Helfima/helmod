@@ -1318,12 +1318,13 @@ end
 --
 -- @return #table
 --
-local cache_tooltip_recipe = {}
+
 
 function ElementGui.getTooltipRecipe(prototype)
   Logging:trace(ElementGui.classname, "getTooltipRecipe", prototype)
   RecipePrototype.load(prototype)
   if RecipePrototype.native() == nil then return nil end
+  local cache_tooltip_recipe = Cache.getData(ElementGui.classname, "tooltip_recipe") or {}
   local prototype_type = prototype.type or "other"
   if cache_tooltip_recipe[prototype_type] ~= nil and cache_tooltip_recipe[prototype_type][prototype.name] ~= nil and cache_tooltip_recipe[prototype_type][prototype.name].enabled == RecipePrototype.getEnabled() then
     Logging:trace(ElementGui.classname, "use cache", prototype.name)
@@ -1375,6 +1376,7 @@ function ElementGui.getTooltipRecipe(prototype)
   cache_tooltip_recipe[prototype_type][prototype.name] = {}
   cache_tooltip_recipe[prototype_type][prototype.name].value = tooltip
   cache_tooltip_recipe[prototype_type][prototype.name].enabled = RecipePrototype.getEnabled()
+  Cache.setData(ElementGui.classname, "tooltip_recipe",cache_tooltip_recipe)
   return tooltip
 end
 

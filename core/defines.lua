@@ -74,6 +74,7 @@ helmod_settings_mod = {
       "HMAbstractEdition",
       "HMAbstractSelector",
       "HMAbstractTab",
+      "HMCache",
       "HMContainerSelector",
       "HMController",
       "HMDownload",

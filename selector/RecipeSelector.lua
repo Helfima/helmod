@@ -8,10 +8,6 @@ require "selector.AbstractSelector"
 
 RecipeSelector = setclass("HMRecipeSelector", AbstractSelector)
 
-local list_group = {}
-local list_subgroup = {}
-local list_prototype = {}
-
 -------------------------------------------------------------------------------
 -- After initialization
 --
@@ -36,51 +32,6 @@ function RecipeSelector.methods:getCaption(parent)
 end
 
 -------------------------------------------------------------------------------
--- Reset groups
---
--- @function [parent=#RecipeSelector] resetGroups
---
-function RecipeSelector.methods:resetGroups()
-  Logging:trace(self:classname(), "resetGroups()")
-  list_group = {}
-  list_subgroup = {}
-  list_prototype = {}
-end
-
--------------------------------------------------------------------------------
--- Return list prototype
---
--- @function [parent=#RecipeSelector] getListPrototype
---
--- @return #table
---
-function RecipeSelector.methods:getListPrototype()
-  return list_prototype
-end
-
--------------------------------------------------------------------------------
--- Return list group
---
--- @function [parent=#RecipeSelector] getListGroup
---
--- @return #table
---
-function RecipeSelector.methods:getListGroup()
-  return list_group
-end
-
--------------------------------------------------------------------------------
--- Return list subgroup
---
--- @function [parent=#RecipeSelector] getListSubgroup
---
--- @return #table
---
-function RecipeSelector.methods:getListSubgroup()
-  return list_subgroup
-end
-
--------------------------------------------------------------------------------
 -- Append groups
 --
 -- @function [parent=#RecipeSelector] appendGroups
@@ -95,10 +46,16 @@ function RecipeSelector.methods:appendGroups(recipe, type)
   local filter_show_disable = Player.getGlobalSettings("filter_show_disable")
   local filter_show_hidden = Player.getGlobalSettings("filter_show_hidden")
   
+  local list_group = Cache.getData(self:classname(), "list_group")
+  local list_prototype = Cache.getData(self:classname(), "list_prototype")
+  local list_subgroup = Cache.getData(self:classname(), "list_subgroup")
+  
   if (RecipePrototype.getEnabled() == true or filter_show_disable == true) and (RecipePrototype.getHidden() == false or filter_show_hidden == true) then
     local lua_recipe = RecipePrototype.native()
     local group_name = lua_recipe.group.name
     local subgroup_name = lua_recipe.subgroup.name
+    
+    list_subgroup[subgroup_name] = lua_recipe.subgroup
     
     if list_group[group_name] == nil then
       list_group[group_name] = {name=group_name, search_products="", search_ingredients=""}
@@ -151,12 +108,6 @@ function RecipeSelector.methods:updateGroups(event, action, item, item2, item3)
       self:appendGroups(resource, "resource")
     end
   end
-      Logging:debug(self:classname(), "Player.getResources()", Player.getResources())
-      Logging:debug(self:classname(), "Player.getResources2()", Player.getResources2())
-
-  --Logging:debug(self:classname(), "list_group", list_group)
-  --Logging:debug(self:classname(), "list_subgroup", list_subgroup)
-  --Logging:debug(self:classname(), "list_prototype", list_prototype)
 end
 
 -------------------------------------------------------------------------------

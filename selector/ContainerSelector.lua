@@ -8,10 +8,6 @@ require "selector.AbstractSelector"
 
 ContainerSelector = setclass("HMContainerSelector", AbstractSelector)
 
-local list_group = {}
-local list_subgroup = {}
-local list_prototype = {}
-
 -------------------------------------------------------------------------------
 -- Return caption
 --
@@ -24,71 +20,29 @@ function ContainerSelector.methods:getCaption(parent)
 end
 
 -------------------------------------------------------------------------------
--- Reset groups
---
--- @function [parent=#ContainerSelector] resetGroups
---
-function ContainerSelector.methods:resetGroups()
-  Logging:trace(self:classname(), "resetGroups()")
-  list_group = {}
-  list_subgroup = {}
-  list_prototype = {}
-end
-
--------------------------------------------------------------------------------
--- Return list prototype
---
--- @function [parent=#ContainerSelector] getListPrototype
---
--- @return #table
---
-function ContainerSelector.methods:getListPrototype()
-  return list_prototype
-end
-
--------------------------------------------------------------------------------
--- Return list group
---
--- @function [parent=#ContainerSelector] getListGroup
---
--- @return #table
---
-function ContainerSelector.methods:getListGroup()
-  return list_group
-end
-
--------------------------------------------------------------------------------
--- Return list subgroup
---
--- @function [parent=#ContainerSelector] getListSubgroup
---
--- @return #table
---
-function ContainerSelector.methods:getListSubgroup()
-  return list_subgroup
-end
-
--------------------------------------------------------------------------------
 -- Append groups
 --
 -- @function [parent=#ContainerSelector] appendGroups
 --
 -- @param #string name
 -- @param #string type
--- @param #table list_group
--- @param #table list_subgroup
--- @param #table list_prototype
 --
-function ContainerSelector.methods:appendGroups(name, type, list_group, list_subgroup, list_prototype)
+function ContainerSelector.methods:appendGroups(name, type)
   Logging:debug(self:classname(), "appendGroups()", name, type)
   EntityPrototype.load(name, type)
   local find = self:checkFilter(EntityPrototype.native())
   local filter_show_disable = Player.getGlobalSettings("filter_show_disable")
   local filter_show_hidden = Player.getGlobalSettings("filter_show_hidden")
   
+  local list_group = Cache.getData(self:classname(), "list_group")
+  local list_prototype = Cache.getData(self:classname(), "list_prototype")
+  local list_subgroup = Cache.getData(self:classname(), "list_subgroup")
+  
   if find == true and (EntityPrototype.getValid() == true or filter_show_disable == true) then
     local group_name = EntityPrototype.native().group.name
     local subgroup_name = EntityPrototype.native().subgroup.name
+    
+    list_subgroup[subgroup_name] = EntityPrototype.native().subgroup
     
     if list_group[group_name] == nil then
       list_group[group_name] = {name=group_name, search_products="", search_ingredients=""}
@@ -120,13 +74,11 @@ end
 --
 function ContainerSelector.methods:updateGroups(event, action, item, item2, item3)
   Logging:trace(self:classname(), "updateGroups()", action, item, item2, item3)
-  local global_player = Player.getGlobal()
-  local global_gui = Player.getGlobalGui()
   
   self:resetGroups()
 
   for key, entity in pairs(Player.getEntityPrototypes({"storage-tank", "container", "logistic-container", "cargo-wagon", "fluid-wagon", "item-with-entity-data", "car", "logistic-robot", "transport-belt"})) do
-    self:appendGroups(entity.name, "entity", list_group, list_subgroup, list_prototype)
+    self:appendGroups(entity.name, "entity")
   end
 
 end

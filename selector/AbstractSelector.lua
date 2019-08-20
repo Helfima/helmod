@@ -33,30 +33,6 @@ function AbstractSelector.methods:getFilter()
 end
 
 -------------------------------------------------------------------------------
--- Return groups
---
--- @function [parent=#AbstractSelector] getGroups
---
--- @return #table
---
-function AbstractSelector.methods:getGroups()
-  return list_group
-end
-
--------------------------------------------------------------------------------
--- Set groups
---
--- @function [parent=#AbstractSelector] setGroups
---
--- @param #table list
---
--- @return #table
---
-function AbstractSelector.methods:setGroups(list)
-  list_group = list
-end
-
--------------------------------------------------------------------------------
 -- Return list prototype
 --
 -- @function [parent=#AbstractSelector] getListPrototype
@@ -64,7 +40,7 @@ end
 -- @return #table
 --
 function AbstractSelector.methods:getListPrototype()
-  return {}
+  return Cache.getData(self:classname(), "list_prototype") or {}
 end
 
 -------------------------------------------------------------------------------
@@ -75,7 +51,7 @@ end
 -- @return #table
 --
 function AbstractSelector.methods:getListGroup()
-  return {}
+  return Cache.getData(self:classname(), "list_group") or {}
 end
 
 -------------------------------------------------------------------------------
@@ -86,7 +62,7 @@ end
 -- @return #table
 --
 function AbstractSelector.methods:getListSubgroup()
-  return {}
+  return Cache.getData(self:classname(), "list_subgroup") or {}
 end
 
 -------------------------------------------------------------------------------
@@ -328,7 +304,9 @@ end
 -- @function [parent=#AbstractSelector] resetGroups
 --
 function AbstractSelector.methods:resetGroups()
-  Logging:error(self:classname(), "no resetGroups() overided")
+  Cache.setData(self:classname(), "list_group", {})
+  Cache.setData(self:classname(), "list_subgroup", {})
+  Cache.setData(self:classname(), "list_prototype", {})
 end
 
 -------------------------------------------------------------------------------

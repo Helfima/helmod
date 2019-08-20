@@ -8,10 +8,6 @@ require "selector.AbstractSelector"
 
 TechnologySelector = setclass("HMTechnologySelector", AbstractSelector)
 
-local list_group = {}
-local list_subgroup = {}
-local list_prototype = {}
-
 -------------------------------------------------------------------------------
 -- After initialization
 --
@@ -35,51 +31,6 @@ function TechnologySelector.methods:getCaption(parent)
 end
 
 -------------------------------------------------------------------------------
--- Reset groups
---
--- @function [parent=#TechnologySelector] resetGroups
---
-function TechnologySelector.methods:resetGroups()
-  Logging:trace(self:classname(), "resetGroups()")
-  list_group = {}
-  list_subgroup = {}
-  list_prototype = {}
-end
-
--------------------------------------------------------------------------------
--- Return list prototype
---
--- @function [parent=#TechnologySelector] getListPrototype
---
--- @return #table
---
-function TechnologySelector.methods:getListPrototype()
-  return list_prototype
-end
-
--------------------------------------------------------------------------------
--- Return list group
---
--- @function [parent=#TechnologySelector] getListGroup
---
--- @return #table
---
-function TechnologySelector.methods:getListGroup()
-  return list_group
-end
-
--------------------------------------------------------------------------------
--- Return list subgroup
---
--- @function [parent=#TechnologySelector] getListSubgroup
---
--- @return #table
---
-function TechnologySelector.methods:getListSubgroup()
-  return list_subgroup
-end
-
--------------------------------------------------------------------------------
 -- Append groups
 --
 -- @function [parent=#TechnologySelector] appendGroups
@@ -94,11 +45,17 @@ function TechnologySelector.methods:appendGroups(name, type)
   local filter_show_disable = Player.getGlobalSettings("filter_show_disable")
   local filter_show_hidden = Player.getGlobalSettings("filter_show_hidden")
 
+  local list_group = Cache.getData(self:classname(), "list_group")
+  local list_prototype = Cache.getData(self:classname(), "list_prototype")
+  local list_subgroup = Cache.getData(self:classname(), "list_subgroup")
+  
   if find == true and (Technology.getValid() == true or filter_show_disable == true) then
     local group_name = "normal"
     if Technology.native().research_unit_count_formula ~= nil then group_name = "infinite" end
 
     local subgroup_name = "default"
+
+    --list_subgroup[subgroup_name] = ItemPrototype.native().subgroup
 
     if list_group[group_name] == nil then
       list_group[group_name] = {name=group_name, search_products="", search_ingredients=""}
@@ -134,8 +91,6 @@ end
 --
 function TechnologySelector.methods:updateGroups(event, action, item, item2, item3)
   Logging:trace(self:classname(), "updateGroups()", action, item, item2, item3)
-  local global_player = Player.getGlobal()
-  local global_gui = Player.getGlobalGui()
 
   self:resetGroups()
 

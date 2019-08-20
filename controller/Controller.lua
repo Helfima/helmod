@@ -31,6 +31,7 @@ require "tab.AdminTab"
 require "edition.ProductLineEdition"
 require "edition.ProductBlockEdition"
 
+Cache = require "core.Cache"
 Model = require "model.Model"
 ModelCompute = require "core.ModelCompute"
 ModelBuilder = require "core.ModelBuilder"
@@ -129,13 +130,7 @@ end
 -- @return #table
 --
 function Controller.resetCaches()
-  if views ~= nil then
-    for _,view in pairs(views) do
-      if string.find(view:classname(), "Selector") then
-        view:resetGroups()
-      end
-    end
-  end
+  Cache.reset()
 end
 
 -------------------------------------------------------------------------------

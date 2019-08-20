@@ -949,16 +949,9 @@ end
 --
 -- @return #table entity prototype
 --
-local cache_resources = nil
 
-function Player.getResources2()
-  local items = {}
-  for _,item in pairs(game.get_filtered_item_prototypes({{filter="type",type="item",mode="and"},{filter="subgroup",subgroup="raw-resource",mode="and"}})) do
-    table.insert(items,item)
-  end
-  return items
-end
 function Player.getResources()
+  local cache_resources = Cache.getData(Player.classname, "resources")
   if cache_resources ~= nil then return cache_resources end
   local items = {}
   for _,item in pairs(game.entity_prototypes) do
@@ -967,7 +960,7 @@ function Player.getResources()
       table.insert(items,item)
     end
   end
-  cache_resources = items
+  Cache.setData(Player.classname, "resources", items)
   return items
 end
 

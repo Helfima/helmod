@@ -45,12 +45,14 @@ function Logging:objectToString(object, level)
 		if object then message = message.." true"
 		else message = message.." false" end
 	elseif type(object) == "number" then
-		message = message.." "..object end
-	if type(object) == "string" then
-		message = message.."\""..object.."\"" end
-	if type(object) == "function" then
-		message = message.."\"__function\"" end
-	if type(object) == "table" then
+		message = message.." "..object
+	elseif type(object) == "string" then
+		message = message.."\""..object.."\""
+	elseif type(object) == "function" then
+		message = message.."\"__function\""
+  elseif object.isluaobject then
+    message = message..string.format("{\"type\":%q,\"name\":%q}", object.type, object.name)
+  elseif type(object) == "table" then
 		if level <= self.limit then
 			local first = true
 			message = message.."{"
