@@ -20,6 +20,17 @@ function AdminTab.methods:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
+-- Get Button Styles
+--
+-- @function [parent=#AdminTab] getButtonStyles
+--
+-- @return boolean
+--
+function AdminTab.methods:getButtonStyles()
+  return "helmod_button_icon_database","helmod_button_icon_database_selected"
+end
+
+-------------------------------------------------------------------------------
 -- Is visible
 --
 -- @function [parent=#AdminTab] isVisible
@@ -28,6 +39,17 @@ end
 --
 function AdminTab.methods:isVisible()
   return Player.isAdmin()
+end
+
+-------------------------------------------------------------------------------
+-- Is special
+--
+-- @function [parent=#AdminTab] isSpecial
+--
+-- @return boolean
+--
+function AdminTab.methods:isSpecial()
+  return true
 end
 
 -------------------------------------------------------------------------------

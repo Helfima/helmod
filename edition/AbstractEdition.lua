@@ -8,17 +8,6 @@
 AbstractEdition = setclass("HMAbstractEdition", Form)
 
 local limit_display_height = 850
-local factory_fuel_drop_down = nil
--------------------------------------------------------------------------------
--- Get the parent panel
---
--- @function [parent=#AbstractEdition] getParentPanel
---
--- @return #LuaGuiElement
---
-function AbstractEdition.methods:getParentPanel()
-  return Controller.getDialogPanel()
-end
 
 -------------------------------------------------------------------------------
 -- On before event
@@ -542,7 +531,7 @@ function AbstractEdition.methods:updateFactoryInfo(item, item2, item3)
         table.insert(items,"[item="..item.name.."]")
       end
       local default_fuel = "[item="..(factory.fuel or "coal").."]"
-      factory_fuel_drop_down = ElementGui.addGuiDropDown(inputPanel, self:classname().."=factory-fuel-update=ID="..item.."=", object.id, items, default_fuel)
+      ElementGui.addGuiDropDown(inputPanel, self:classname().."=factory-fuel-update=ID="..item.."=", object.id, items, default_fuel)
     end
 
     local sign = ""
@@ -943,21 +932,20 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
     end
 
     if action == "factory-fuel-update" then
-      if factory_fuel_drop_down ~= nil then
-        local index = factory_fuel_drop_down.selected_index
-        local fuel_list = Player.getChemicalFuelItemPrototypes()
-        local items = {}
-        local options = {}
-        for _,item in pairs(fuel_list) do
-          if index == 1 then
-            options.fuel = item.name
-          break end
-          index = index - 1
-        end
-        ModelBuilder.updateFuelFactory(item, item2, options)
-        ModelCompute.update()
-        self:updateFactoryInfo(item, item2, item3)
+      
+      local index = event.element.selected_index
+      local fuel_list = Player.getChemicalFuelItemPrototypes()
+      local items = {}
+      local options = {}
+      for _,item in pairs(fuel_list) do
+        if index == 1 then
+          options.fuel = item.name
+        break end
+        index = index - 1
       end
+      ModelBuilder.updateFuelFactory(item, item2, options)
+      ModelCompute.update()
+      self:updateFactoryInfo(item, item2, item3)
     end
 
     if action == "factory-module-add" then

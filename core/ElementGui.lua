@@ -709,7 +709,7 @@ function ElementGui.addGuiFlowH(parent, key, style)
   Logging:trace(ElementGui.classname, "addGuiFlowH()", key, style)
   local options = {}
   options.type = "flow"
-  --options.direction = "horizontal"
+  options.direction = "horizontal"
   options.name = key
   if style ~= nil then
     options.style = style
@@ -968,7 +968,7 @@ end
 -- @param #string color button color
 --
 function ElementGui.addCellElement(parent, element, action, select, tooltip_name, color, index)
-  Logging:trace(ElementGui.classname, "addCellElement():", element, action, select, tooltip_name, color)
+  Logging:trace(ElementGui.classname, "addCellElement()", element, action, select, tooltip_name, color)
   local display_cell_mod = Player.getSettings("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
@@ -1012,14 +1012,13 @@ end
 -- @param #string color button color
 --
 function ElementGui.addCellElementSm(parent, element, action, select, tooltip_name, color, index)
-  Logging:trace(ElementGui.classname, "addCellElement():", element, action, select, tooltip_name, color)
+  Logging:trace(ElementGui.classname, "addCellElementSm()", element, action, select, tooltip_name, color)
   local display_cell_mod = Player.getSettings("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
   color = color or "blue"
   local cell = ElementGui.addGuiFlowV(parent,element.name..(index or ""), helmod_flow_style.vertical)
   local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_element_sm_"..color.."_1")
-  --ElementGui.addCellIcon(row1, element, action, select, tooltip_name, nil)
   ElementGui.addGuiButtonSpriteSm(row1, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}))
   
   if element.limit_count ~= nil then
@@ -1038,6 +1037,48 @@ function ElementGui.addCellElementSm(parent, element, action, select, tooltip_na
     ElementGui.addGuiLabel(row3, "label2_"..element.name, Format.formatNumberKilo(element.count), "helmod_label_element_sm", {"helmod_common.total"})
   else
     ElementGui.addGuiLabel(row3, "label2_"..element.name, Format.formatNumberElement(element.count), "helmod_label_element_sm", {"helmod_common.total"})
+  end
+  return cell
+end
+
+-------------------------------------------------------------------------------
+-- Add cell element
+--
+-- @function [parent=#ElementGui] addCellElementM
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #table element production block
+-- @param #string action
+-- @param #boolean select true if select button
+-- @param #string tooltip_name tooltip name
+-- @param #string color button color
+--
+function ElementGui.addCellElementM(parent, element, action, select, tooltip_name, color, index)
+  Logging:trace(ElementGui.classname, "addCellElementM()", element, action, select, tooltip_name, color)
+  local display_cell_mod = Player.getSettings("display_cell_mod")
+  -- ingredient = {type="item", name="steel-plate", amount=8}
+  local button = nil
+  color = color or "blue"
+  local cell = ElementGui.addGuiFlowV(parent,element.name..(index or ""), helmod_flow_style.vertical)
+  local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_element_m_"..color.."_1")
+  ElementGui.addGuiButtonSpriteM(row1, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}))
+  
+  if element.limit_count ~= nil then
+    local row2 = ElementGui.addGuiFrameH(cell,"row2","helmod_frame_element_m_"..color.."_2")
+    if display_cell_mod == "by-kilo" then
+      -- by-kilo
+        ElementGui.addGuiLabel(row2, "label1_"..element.name, Format.formatNumberKilo(element.limit_count), "helmod_label_element_m", {"helmod_common.per-sub-block"})
+    else
+        ElementGui.addGuiLabel(row2, "label1_"..element.name, Format.formatNumberElement(element.limit_count), "helmod_label_element_m", {"helmod_common.per-sub-block"})
+    end
+  end
+    
+  local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_element_m_"..color.."_3")
+  if display_cell_mod == "by-kilo" then
+    -- by-kilo
+    ElementGui.addGuiLabel(row3, "label2_"..element.name, Format.formatNumberKilo(element.count), "helmod_label_element_m", {"helmod_common.total"})
+  else
+    ElementGui.addGuiLabel(row3, "label2_"..element.name, Format.formatNumberElement(element.count), "helmod_label_element_m", {"helmod_common.total"})
   end
   return cell
 end
@@ -1458,6 +1499,8 @@ function ElementGui.getStyleSizes()
     local width_main = math.ceil(width*display_ratio_horizontal)
     local height_main = math.ceil(height*display_ratio_vertictal)
 
+    style_sizes["Tab"] = {width = width_main,height = height_main}
+
     style_sizes.main = {}
     style_sizes.main.width = width_main
     style_sizes.main.height = height_main
@@ -1516,8 +1559,8 @@ function ElementGui.getStyleSizes()
     style_sizes.block_data.height = height_main - 122 - row_number*32
     
     style_sizes.block_info = {}
-    style_sizes.block_info.width = width_block_info
-    style_sizes.block_info.height = height_recipe_info + 4
+    style_sizes.block_info.width = 500
+    style_sizes.block_info.height = 50*2+30
 
     style_sizes.scroll_block = {}
     style_sizes.scroll_block.height = height_recipe_info - 34
@@ -1555,9 +1598,7 @@ end
 --
 -- @function [parent=#ElementGui] getIndexColumnNumber
 --
--- @param #LuaGuiElement element
--- @param #string style
--- @param #string property
+-- @return #number
 --
 function ElementGui.getIndexColumnNumber()
 
@@ -1566,6 +1607,24 @@ function ElementGui.getIndexColumnNumber()
   local width_main = math.ceil(width*display_ratio_horizontal)
   
   return math.ceil((width_main-650)/36)
+end
+
+-------------------------------------------------------------------------------
+-- Get Element column number
+--
+-- @function [parent=#ElementGui] getElementColumnNumber
+--
+-- @param #number size
+--
+-- @return #number
+--
+function ElementGui.getElementColumnNumber(size)
+
+  local display_ratio_horizontal = Player.getSettings("display_ratio_horizontal")
+  local width , height = ElementGui.getDisplaySizes()
+  local width_main = math.ceil(width*display_ratio_horizontal)
+  Logging:debug(ElementGui.classname, "getElementColumnNumber(width)", width_main, math.ceil((width_main-600)/(2*size)))
+  return math.floor((width_main-600)/(2*size))
 end
 -------------------------------------------------------------------------------
 -- Set style
@@ -1579,6 +1638,9 @@ end
 function ElementGui.setStyle(element, style, property)
   Logging:trace(ElementGui.classname, "setStyle(player, element, style, property)", element, style, property)
   local style_sizes = ElementGui.getStyleSizes()
+  if string.find(style, "Tab") then
+    style = "Tab"
+  end
   if element.style ~= nil and style_sizes[style] ~= nil and style_sizes[style][property] ~= nil then
     Logging:trace(ElementGui.classname, "setStyle(player, element, style, property)", style_sizes[style][property])
     element.style[property] = style_sizes[style][property]

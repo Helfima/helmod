@@ -47,6 +47,12 @@ data:extend(
   },
   {
     type = "font",
+    name = "helmod_font_medium_bold",
+    from = "default-bold",
+    size = 11
+  },
+  {
+    type = "font",
     name = "helmod_font_small_bold",
     from = "default-bold",
     size = 10

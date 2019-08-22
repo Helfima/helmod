@@ -20,6 +20,137 @@ function ProductionLineTab.methods:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
+-- Get Button Styles
+--
+-- @function [parent=#ProductionLineTab] getButtonStyles
+--
+-- @return boolean
+--
+function ProductionLineTab.methods:getButtonStyles()
+  return "helmod_button_icon_factory","helmod_button_icon_factory_selected"
+end
+
+-------------------------------------------------------------------------------
+-- Update header
+--
+-- @function [parent=#ProductionLineTab] updateInfo
+--
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function ProductionLineTab.methods:updateInfo(item, item2, item3)
+  Logging:debug(self:classname(), "updateInfo", item, item2, item3)
+  local model = Model.getModel()
+  local globalGui = Player.getGlobalGui()
+  Logging:debug(self:classname(), "model:", model)
+  -- data
+  local info_scroll, output_scroll, input_scroll = self:getInfoPanel()
+  info_scroll.clear()
+  -- info panel
+  
+  local block_table = ElementGui.addGuiTable(info_scroll,"output-table",2)
+
+  ElementGui.addGuiLabel(block_table, "label-owner", ({"helmod_result-panel.owner"}))
+  ElementGui.addGuiLabel(block_table, "value-owner", model.owner)
+
+  ElementGui.addGuiLabel(block_table, "label-share", ({"helmod_result-panel.share"}))
+
+  local tableAdminPanel = ElementGui.addGuiTable(block_table, "table" , 9)
+  local model_read = false
+  if model.share ~= nil and  bit32.band(model.share, 1) > 0 then model_read = true end
+  ElementGui.addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID=read="..model.id, model_read, nil, ({"tooltip.share-mod", {"helmod_common.reading"}}))
+  ElementGui.addGuiLabel(tableAdminPanel, self:classname().."=share-model-read", "R", nil, ({"tooltip.share-mod", {"helmod_common.reading"}}))
+
+  local model_write = false
+  if model.share ~= nil and  bit32.band(model.share, 2) > 0 then model_write = true end
+  ElementGui.addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID=write="..model.id, model_write, nil, ({"tooltip.share-mod", {"helmod_common.writing"}}))
+  ElementGui.addGuiLabel(tableAdminPanel, self:classname().."=share-model-write", "W", nil, ({"tooltip.share-mod", {"helmod_common.writing"}}))
+
+  local model_delete = false
+  if model.share ~= nil and bit32.band(model.share, 4) > 0 then model_delete = true end
+  ElementGui.addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID=delete="..model.id, model_delete, nil, ({"tooltip.share-mod", {"helmod_common.removal"}}))
+  ElementGui.addGuiLabel(tableAdminPanel, self:classname().."=share-model-delete", "X", nil, ({"tooltip.share-mod", {"helmod_common.removal"}}))
+
+  local count_block = Model.countBlocks()
+  if count_block > 0 then
+    -- info panel
+    ElementGui.addGuiLabel(block_table, "label-power", ({"helmod_label.electrical-consumption"}))
+    if model.summary ~= nil then
+      ElementGui.addGuiLabel(block_table, "power", Format.formatNumberKilo(model.summary.energy or 0, "W"))
+    end
+  end
+
+end
+
+-------------------------------------------------------------------------------
+-- Update header
+--
+-- @function [parent=#ProductionLineTab] updateInput
+--
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function ProductionLineTab.methods:updateInput(item, item2, item3)
+  Logging:debug(self:classname(), "updateInput", item, item2, item3)
+  local model = Model.getModel()
+  local globalGui = Player.getGlobalGui()
+  Logging:debug("ProductionBlockTab", "model:", model)
+  -- data
+  local info_scroll, output_scroll, input_scroll = self:getInfoPanel()
+  input_scroll.clear()
+  -- input panel
+
+  local count_block = Model.countBlocks()
+  if count_block > 0 then
+
+    local input_table = ElementGui.addGuiTable(input_scroll,"input-table", ElementGui.getElementColumnNumber(50), "helmod_table_element")
+    
+    if model.ingredients ~= nil then
+      for index, element in pairs(model.ingredients) do
+        ElementGui.addCellElementM(input_table, element, self:classname().."=production-block-add=ID=new="..element.name.."=", true, "tooltip.add-recipe", ElementGui.color_button_add, index)
+      end
+    end
+
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update header
+--
+-- @function [parent=#ProductionLineTab] updateOutput
+--
+-- @param #string item first item name
+-- @param #string item2 second item name
+-- @param #string item3 third item name
+--
+function ProductionLineTab.methods:updateOutput(item, item2, item3)
+  Logging:debug(self:classname(), "updateOutput", item, item2, item3)
+  local model = Model.getModel()
+  local globalGui = Player.getGlobalGui()
+  Logging:debug("ProductionBlockTab", "model:", model)
+  -- data
+  local info_scroll, output_scroll, input_scroll = self:getInfoPanel()
+  output_scroll.clear()
+  -- ouput panel
+
+  -- production block result
+  local count_block = Model.countBlocks()
+  if count_block > 0 then
+
+    -- ouput panel
+    local output_table = ElementGui.addGuiTable(output_scroll,"output-table", ElementGui.getElementColumnNumber(50), "helmod_table_element")
+    if model.products ~= nil then
+      for index, element in pairs(model.products) do
+        ElementGui.addCellElementM(output_table, element, self:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.product", nil, index)
+      end
+    end
+    
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Update data
 --
 -- @function [parent=#ProductionLineTab] updateData
@@ -33,8 +164,12 @@ function ProductionLineTab.methods:updateData(item, item2, item3)
   local globalGui = Player.getGlobalGui()
   local model = Model.getModel()
 
+  self:updateInfo(item, item2, item3)
+  self:updateOutput(item, item2, item3)
+  self:updateInput(item, item2, item3)
+  
   -- data panel
-  local scrollPanel = self:getResultScrollPanel({"helmod_result-panel.tab-button-production-line"})
+  local scrollPanel = self:getResultScrollPanel()
 
   local countBlock = Model.countBlocks()
   if countBlock > 0 then

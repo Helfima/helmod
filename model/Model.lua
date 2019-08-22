@@ -143,6 +143,23 @@ function Model.getModel()
 end
 
 -------------------------------------------------------------------------------
+-- Get last model
+--
+-- @function [parent=#Model] getLastModel
+--
+-- @return #Model
+--
+function Model.getLastModel()
+  Logging:trace(Model.classname, "getLastModel()")
+  local last_model = nil
+  local models = Model.getModels()
+  for _,model in pairs(models) do
+    last_model = model
+  end
+  return last_model
+end
+
+-------------------------------------------------------------------------------
 -- Get Object
 --
 -- @function [parent=#Model] getObject

@@ -20,6 +20,17 @@ function StatisticTab.methods:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
+-- Get Button Styles
+--
+-- @function [parent=#StatisticTab] getButtonStyles
+--
+-- @return boolean
+--
+function StatisticTab.methods:getButtonStyles()
+  return "helmod_button_icon_chart","helmod_button_icon_chart_selected"
+end
+
+-------------------------------------------------------------------------------
 -- Update data
 --
 -- @function [parent=#StatisticTab] updateData

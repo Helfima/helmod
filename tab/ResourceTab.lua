@@ -20,6 +20,17 @@ function ResourceTab.methods:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
+-- Get Button Styles
+--
+-- @function [parent=#ResourceTab] getButtonStyles
+--
+-- @return boolean
+--
+function ResourceTab.methods:getButtonStyles()
+  return "helmod_button_icon_jewel","helmod_button_icon_jewel_selected"
+end
+
+-------------------------------------------------------------------------------
 -- Add table header
 --
 -- @function [parent=#ResourceTab] addTableHeader

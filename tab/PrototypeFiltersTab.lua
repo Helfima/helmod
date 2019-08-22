@@ -20,6 +20,17 @@ function PrototypeFiltersTab.methods:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
+-- Get Button Styles
+--
+-- @function [parent=#PrototypeFiltersTab] getButtonStyles
+--
+-- @return boolean
+--
+function PrototypeFiltersTab.methods:getButtonStyles()
+  return "helmod_button_icon_filter","helmod_button_icon_filter_selected"
+end
+
+-------------------------------------------------------------------------------
 -- Is visible
 --
 -- @function [parent=#PrototypeFiltersTab] isVisible
@@ -28,6 +39,17 @@ end
 --
 function PrototypeFiltersTab.methods:isVisible()
   return Player.getSettings("prototype_filters_tab", true)
+end
+
+-------------------------------------------------------------------------------
+-- Is special
+--
+-- @function [parent=#PrototypeFiltersTab] isSpecial
+--
+-- @return boolean
+--
+function PrototypeFiltersTab.methods:isSpecial()
+  return true
 end
 
 -------------------------------------------------------------------------------

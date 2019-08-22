@@ -101,17 +101,6 @@ function AbstractSelector.methods:afterInit()
 end
 
 -------------------------------------------------------------------------------
--- Get the parent panel
---
--- @function [parent=#AbstractSelector] getParentPanel
---
--- @return #LuaGuiElement
---
-function AbstractSelector.methods:getParentPanel()
-  return Controller.getDialogPanel()
-end
-
--------------------------------------------------------------------------------
 -- Get or create filter panel
 --
 -- @function [parent=#AbstractSelector] getFilterPanel
@@ -233,7 +222,7 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
 
   local model = Model.getModel()
   if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
-    if ui.data == "HMPropertiesTab" then
+    if Controller.isActiveForm("HMPropertiesTab") then
       if action == "element-select" then
         globalPlayer["prototype-properties"] = {type = item, name = item2 }
         self:close()
@@ -245,8 +234,7 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
         ModelCompute.update()
         self:close()
         globalGui["scroll_down"] = true
-        ui.data = "HMProductionBlockTab"
-        ui.dialog = helmod_tab_dialog[ui.data]
+        Controller.setActiveForm("HMProductionBlockTab")
       end
       -- container selector
       if action == "element-select" and item == "container" then

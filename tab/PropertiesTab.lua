@@ -20,6 +20,17 @@ function PropertiesTab.methods:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
+-- Get Button Styles
+--
+-- @function [parent=#PropertiesTab] getButtonStyles
+--
+-- @return boolean
+--
+function PropertiesTab.methods:getButtonStyles()
+  return "helmod_button_icon_property","helmod_button_icon_property_selected"
+end
+
+-------------------------------------------------------------------------------
 -- Is visible
 --
 -- @function [parent=#PropertiesTab] isVisible
@@ -28,6 +39,17 @@ end
 --
 function PropertiesTab.methods:isVisible()
   return Player.getSettings("properties_tab", true)
+end
+
+-------------------------------------------------------------------------------
+-- Is special
+--
+-- @function [parent=#PropertiesTab] isSpecial
+--
+-- @return boolean
+--
+function PropertiesTab.methods:isSpecial()
+  return true
 end
 
 -------------------------------------------------------------------------------

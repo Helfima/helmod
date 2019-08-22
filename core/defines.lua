@@ -1,9 +1,5 @@
-helmod_tab_dialog = {
-   HMProductionLineTab = "HMProductLineEdition",
-   HMProductionBlockTab = "HMProductBlockEdition"
-}
-
 helmod_flow_style = {
+  flow = "flow",
   horizontal = "helmod_flow_horizontal",
   vertical = "helmod_flow_vertical"
 }
@@ -47,10 +43,6 @@ helmod_rules["module-limitation"] = {excluded_only=true ,categories={}}
 helmod_rules["module-limitation"].categories["standard"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
 helmod_rules["module-limitation"].categories["extraction-machine"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
 helmod_rules["module-limitation"].categories["technology"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
-
-helmod_icons = {}
-helmod_icons["unknown-assembling-machine"]="__helmod__/graphics/icons/unknown-assembling-machine.png"
-helmod_icons["default-assembling-machine"]="__helmod__/graphics/icons/unknown-assembling-machine.png"
 
 helmod_display_cell_mod = {"default", "small-text", "small-icon", "by-kilo"}
 

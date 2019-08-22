@@ -151,17 +151,7 @@ local help_data = {
 function HelpPanel.methods:onInit(parent)
   self.panelCaption = ({"helmod_help.panel-title"})
   self.parent = parent
-end
-
--------------------------------------------------------------------------------
--- Get the parent panel
---
--- @function [parent=#HelpPanel] getParentPanel
---
--- @return #LuaGuiElement
---
-function HelpPanel.methods:getParentPanel()
-  return Controller.getDialogPanel()
+  self.help_button = false
 end
 
 -------------------------------------------------------------------------------
@@ -183,34 +173,6 @@ function HelpPanel.methods:onBeforeEvent(event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
--- Get or create header panel
---
--- @function [parent=#HelpPanel] getHeaderPanel
---
-function HelpPanel.methods:getHeaderPanel()
-  local panel = self:getPanel()
-  if panel["header-panel"] ~= nil and panel["header-panel"].valid then
-    return panel["header-panel"]
-  end
-  return ElementGui.addGuiFrameV(panel, "header-panel", helmod_frame_style.panel, {"helmod_settings-panel.about-section"})
-end
-
--------------------------------------------------------------------------------
--- Get or create menu panel
---
--- @function [parent=#HelpPanel] getMenuPanel
---
-function HelpPanel.methods:getMenuPanel()
-  local panel = self:getPanel()
-  if panel["menu-panel"] ~= nil and panel["menu-panel"].valid then
-    return panel["menu-panel"]
-  end
-  local menu_panel = ElementGui.addGuiFrameH(panel, "menu-panel", helmod_frame_style.panel)
-  menu_panel.style.horizontally_stretchable = true
-  return menu_panel
-end
-
--------------------------------------------------------------------------------
 -- Get or create content panel
 --
 -- @function [parent=#HelpPanel] getContentPanel
@@ -220,7 +182,7 @@ function HelpPanel.methods:getContentPanel()
   if panel["content-panel"] ~= nil and panel["content-panel"].valid then
     return panel["content-panel"]
   end
-  local content_panel = ElementGui.addGuiFrameV(panel, "content-panel", helmod_frame_style.panel)
+  local content_panel = ElementGui.addGuiFlowV(panel, "content-panel", helmod_flow_style.vertical)
   content_panel.style.horizontally_stretchable = true
   return content_panel
 end
@@ -262,7 +224,7 @@ function HelpPanel.methods:onEvent(event, action, item, item2, item3)
   end
 
   if action == "previous-page" then
-    local menu_panel = self:getMenuPanel()
+    local menu_panel = self:getLeftMenuPanel()
     if menu_panel[self:classname().."=change-page"] then
       local selected_index = menu_panel[self:classname().."=change-page"].selected_index
       if selected_index > 1 then
@@ -273,7 +235,7 @@ function HelpPanel.methods:onEvent(event, action, item, item2, item3)
   end
 
   if action == "next-page" then
-    local menu_panel = self:getMenuPanel()
+    local menu_panel = self:getLeftMenuPanel()
     if menu_panel[self:classname().."=change-page"] then
       local selected_index = menu_panel[self:classname().."=change-page"].selected_index
       if selected_index < #help_data then
@@ -298,7 +260,8 @@ end
 --
 function HelpPanel.methods:updateMenu(event, action, item, item2, item3)
   Logging:debug(self:classname(), "updateMenu():", action, item, item2, item3)
-  local menu_panel = self:getMenuPanel()
+  local menu_panel = self:getLeftMenuPanel()
+  menu_panel.clear()
   local items = {}
   for _,help in pairs(help_data) do
     table.insert(items, {"helmod_help."..help.name})
@@ -342,7 +305,7 @@ function HelpPanel.methods:updateContent(event, action, item, item2, item3)
     content_panel.clear()
   end
 
-  local menu_panel = self:getMenuPanel()
+  local menu_panel = self:getLeftMenuPanel()
   local selected_index = 1
   if menu_panel[self:classname().."=change-page"] then
     selected_index = menu_panel[self:classname().."=change-page"].selected_index

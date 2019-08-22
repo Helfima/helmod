@@ -20,6 +20,17 @@ function EnergyTab.methods:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
+-- Get Button Styles
+--
+-- @function [parent=#EnergyTab] getButtonStyles
+--
+-- @return boolean
+--
+function EnergyTab.methods:getButtonStyles()
+  return "helmod_button_icon_nuclear","helmod_button_icon_nuclear_selected"
+end
+
+-------------------------------------------------------------------------------
 -- Update data
 --
 -- @function [parent=#EnergyTab] updateData
@@ -30,7 +41,7 @@ function EnergyTab.methods:updateData()
   local globalGui = Player.getGlobalGui()
 
   -- data
-  local scroll_panel = self:getResultScrollPanel({"helmod_result-panel.tab-title-energy"})
+  local scroll_panel = self:getResultScrollPanel()
   local menu_manel = ElementGui.addGuiFrameH(scroll_panel,"menu", helmod_frame_style.hidden)
   ElementGui.addGuiButton(menu_manel, "HMEnergyEdition=OPEN=ID=", "new", "helmod_button_default", ({"helmod_result-panel.add-button-power"}))
 

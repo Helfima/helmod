@@ -22,6 +22,8 @@ function EventController.start()
   EventController.pcallEvent("on_tick", defines.events.on_tick, EventController.onTick)
   EventController.pcallEvent("on_gui_click", defines.events.on_gui_click, EventController.onGuiClick)
   EventController.pcallEvent("on_gui_text_changed", defines.events.on_gui_text_changed, EventController.onGuiTextChanged)
+  
+  EventController.pcallEvent("on_gui_confirmed", defines.events.on_gui_confirmed, EventController.on_gui_confirmed)
   -- dropdown changed
   EventController.pcallEvent("on_gui_selection_state_changed", defines.events.on_gui_selection_state_changed, EventController.onGuiSelectionStateChanged)
   -- checked changed
@@ -201,10 +203,11 @@ function EventController.onGuiClick(event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
     local allowed = true
-    if event.element ~= nil and event.element.valid and (event.element.type == "drop-down" or event.element.type == "checkbox" or event.element.type == "radiobutton") then
+    if event.element ~= nil and event.element.valid and (event.element.type == "textfield" or event.element.type == "drop-down" or event.element.type == "checkbox" or event.element.type == "radiobutton") then
       allowed = false
     end
     if allowed then
+      Logging:debug(EventController.classname, "allowed", allowed)
       Event.load(event)
     end
   end
@@ -219,6 +222,21 @@ end
 --
 function EventController.onGuiTextChanged(event)
   Logging:trace(EventController.classname, "onGuiTextChanged(event)", event)
+  if event ~= nil and event.player_index ~= nil and event.element ~= nil and string.find(event.element.name, "filter") then
+    Player.load(event)
+    Event.load(event)
+  end
+end
+
+-------------------------------------------------------------------------------
+-- On confirmed
+--
+-- @function [parent=#EventController] on_gui_confirmed
+--
+-- @param #table event
+--
+function EventController.on_gui_confirmed(event)
+  Logging:trace(EventController.classname, "on_gui_confirmed(event)", event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
     Event.load(event)
@@ -235,8 +253,14 @@ end
 function EventController.onGuiHotkey(event)
   Logging:trace(EventController.classname, "onGuiHotkey(event)", event)
   if event ~= nil and event.player_index ~= nil then
-    Player.load(event)
-    Event.load(event, "hotkey")
+    local allowed = true
+    if event.element ~= nil and event.element.valid and (event.element.type == "textfield" or event.element.type == "drop-down" or event.element.type == "checkbox" or event.element.type == "radiobutton") then
+      allowed = false
+    end
+    if allowed then
+      Player.load(event)
+      Event.load(event, "hotkey")
+    end
   end
 end
 

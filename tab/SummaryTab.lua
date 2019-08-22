@@ -20,6 +20,17 @@ function SummaryTab.methods:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
+-- Get Button Styles
+--
+-- @function [parent=#SummaryTab] getButtonStyles
+--
+-- @return boolean
+--
+function SummaryTab.methods:getButtonStyles()
+  return "helmod_button_icon_brief","helmod_button_icon_brief_selected"
+end
+
+-------------------------------------------------------------------------------
 -- Update data
 --
 -- @function [parent=#SummaryTab] updateData

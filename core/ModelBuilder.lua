@@ -138,7 +138,7 @@ function ModelBuilder.removeModel(model_id)
   Logging:trace(ModelBuilder.classname, "removeModel()", model_id)
   global.models[model_id] = nil
   local models = Model.getModels()
-  local _,model = next(models)
+  local model = Model.getLastModel()
   if model ~= nil then
     Player.getGlobalGui()["model_id"] = model.id
   else
