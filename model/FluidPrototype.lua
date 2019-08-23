@@ -59,7 +59,7 @@ end
 --
 function FluidPrototype.getLocalisedName()
   if lua_fluid_prototype ~= nil then
-    if Player.getSettings("display_real_name", true) then
+    if User.getModGlobalSetting("display_real_name") then
       return lua_fluid_prototype.name
     end
     return lua_fluid_prototype.localised_name

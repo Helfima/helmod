@@ -73,173 +73,16 @@ function Player.isAdmin()
 end
 
 -------------------------------------------------------------------------------
--- Get top gui
+-- Get gui
 --
--- @function [parent=#Player] getGuiTop
+-- @function [parent=#Player] getGui
 --
--- @param player
+-- @param location
+-- 
+-- @return #LuaGuiElement
 --
-function Player.getGuiTop(player)
-  return player.gui.top
-end
-
--------------------------------------------------------------------------------
--- Init global settings
---
--- @function [parent=#Player] initGlobalSettings
---
-function Player.initGlobalSettings()
-  global["users"][Lua_player.name].settings = Player.getDefaultSettings()
-end
-
--------------------------------------------------------------------------------
--- Get default settings
---
--- @function [parent=#Player] getDefaultSettings
---
-function Player.getDefaultSettings()
-  return {
-    display_pin_beacon = false,
-    display_pin_level = 4,
-    model_auto_compute = false,
-    model_loop_limit = 1000,
-    other_speed_panel=false,
-    filter_show_disable=false,
-    filter_show_hidden=false
-  }
-end
-
--------------------------------------------------------------------------------
--- Get sorted style
---
--- @function [parent=#Player] getSortedStyle
---
--- @param #string key
---
--- @return #string style
---
-function Player.getSortedStyle(key)
-  local globalGui = Player.getGlobalGui()
-  if globalGui.order == nil then globalGui.order = {name="index",ascendant="true"} end
-  local style = "helmod_button-sorted-none"
-  if globalGui.order.name == key and globalGui.order.ascendant then style = "helmod_button-sorted-up" end
-  if globalGui.order.name == key and not(globalGui.order.ascendant) then style = "helmod_button-sorted-down" end
-  return style
-end
-
--------------------------------------------------------------------------------
--- Reset global variable for player
---
--- @function [parent=#Player] resetGlobal
---
--- @param #string key
---
-function Player.resetGlobal()
-  global["users"] = {}
-end
-
--------------------------------------------------------------------------------
--- Get global variable for player
---
--- @function [parent=#Player] getGlobal
---
--- @param #string key
---
--- @return #table global
---
-function Player.getGlobal(key)
-  if global["users"] == nil then
-    global["users"] = {}
-  end
-  if global["users"][Lua_player.name] == nil then
-    global["users"][Lua_player.name] = {}
-  end
-
-  if global["users"][Lua_player.name].settings == nil then
-    Player.initGlobalSettings()
-  end
-
-  if key ~= nil then
-    if global["users"][Lua_player.name][key] == nil then
-      global["users"][Lua_player.name][key] = {}
-    end
-    return global["users"][Lua_player.name][key]
-  end
-  return global["users"][Lua_player.name]
-end
-
--------------------------------------------------------------------------------
--- Get global gui
---
--- @function [parent=#Player] getGlobalGui
---
--- @param #string property
---
-function Player.getGlobalGui(property)
-  local settings = Player.getGlobal("gui")
-  if settings ~= nil and property ~= nil then
-    return settings[property]
-  end
-  return settings
-end
-
--------------------------------------------------------------------------------
--- Get global UI
---
--- @function [parent=#Player] getGlobalUI
---
--- @param #string property
---
-function Player.getGlobalUI(property)
-  local ui = Player.getGlobal("ui")
-  if ui ~= nil and property ~= nil then
-    return ui[property]
-  end
-  return ui
-end
-
--------------------------------------------------------------------------------
--- Get global settings
---
--- @function [parent=#Player] getGlobalSettings
---
--- @param #string property
---
-function Player.getGlobalSettings(property)
-  local settings = Player.getGlobal("settings")
-  if settings ~= nil and property ~= nil then
-    local value = settings[property]
-    if value == nil then
-      value = Player.getDefaultSettings()[property]
-    end
-    return value
-  end
-  return settings
-end
-
--------------------------------------------------------------------------------
--- Get settings
---
--- @function [parent=#Player] getSettings
---
--- @param #string name
--- @param #boolean global
---
-function Player.getSettings(name, global)
-  Logging:trace(Player.classname, "getSettings(name, global)", name, global)
-  local property = nil
-  local prefixe = "helmod_"
-  if not(global) and Lua_player ~= nil then
-    property = Lua_player.mod_settings[prefixe..name]
-  else
-    property = settings.global[prefixe..name]
-  end
-  if property ~= nil then
-    return property.value
-  else
-    Logging:error(Player.classname, "settings property not found:", name)
-    return helmod_settings_mod[name].default_value
-  end
+function Player.getGui(location)
+  return Lua_player.gui[location]
 end
 
 -------------------------------------------------------------------------------
@@ -358,7 +201,7 @@ end
 --
 function Player.getLocalisedName(element)
   Logging:trace(Player.classname, "getLocalisedName(element)", element)
-  if Player.getSettings("display_real_name", true) then
+  if User.getModGlobalSetting("display_real_name") then
     return element.name
   end
   local localisedName = element.name
@@ -396,7 +239,7 @@ end
 --
 function Player.getRecipeLocalisedName(prototype)
   local element = Player.getRecipe(prototype.name)
-  if element ~= nil and not(Player.getSettings("display_real_name", true)) then
+  if element ~= nil and not(User.getModGlobalSetting("display_real_name")) then
     return element.localised_name
   end
   return prototype.name
@@ -413,7 +256,7 @@ end
 --
 function Player.getTechnologyLocalisedName(prototype)
   local element = Player.getTechnology(prototype.name)
-  if element ~= nil and not(Player.getSettings("display_real_name", true)) then
+  if element ~= nil and not(User.getModGlobalSetting("display_real_name")) then
     return element.localised_name
   end
   return element.name
@@ -529,7 +372,7 @@ end
 function Player.checkLimitationModule(module, lua_recipe)
   Logging:debug(Player.classname, "checkLimitationModule()", module, lua_recipe.name)
   local rules_included, rules_excluded = Player.getRules("module-limitation")
-  local model_filter_factory_module = Player.getSettings("model_filter_factory_module", true)
+  local model_filter_factory_module = User.getModGlobalSetting("model_filter_factory_module")
   local factory = lua_recipe.factory
   local allowed = true
   local check_not_bypass = true

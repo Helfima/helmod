@@ -53,7 +53,7 @@ helmod_settings_mod = {
     localised_name = {"helmod_settings.debug"},
     localised_description = {"helmod_settings.debug-desc"},
     default_value = "none",
-    allowed_values = {"none","info","error","debug","trace"},
+    allowed_values = {"none","error","warn","info","debug","trace"},
     order = "a0"
   },
   debug_filter = {

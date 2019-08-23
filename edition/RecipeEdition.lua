@@ -18,6 +18,7 @@ RecipeEdition = setclass("HMRecipeEdition", AbstractEdition)
 --
 function RecipeEdition.methods:onInit(parent)
   self.panelCaption = ({"helmod_recipe-edition-panel.title"})
+  self.parameterLast = string.format("%s_%s",self:classname(),"last")
 end
 
 -------------------------------------------------------------------------------

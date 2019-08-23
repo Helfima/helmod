@@ -43,8 +43,8 @@ end
 function RecipeSelector.methods:appendGroups(recipe, type)
   Logging:trace(self:classname(), "appendGroups()", recipe.name, type)
   RecipePrototype.set(recipe, type)
-  local filter_show_disable = Player.getGlobalSettings("filter_show_disable")
-  local filter_show_hidden = Player.getGlobalSettings("filter_show_hidden")
+  local filter_show_disable = User.getSetting("filter_show_disable")
+  local filter_show_hidden = User.getSetting("filter_show_hidden")
   
   local list_group = Cache.getData(self:classname(), "list_group")
   local list_prototype = Cache.getData(self:classname(), "list_prototype")
@@ -92,15 +92,13 @@ end
 --
 function RecipeSelector.methods:updateGroups(event, action, item, item2, item3)
   Logging:trace(self:classname(), "updateGroups()", action, item, item2, item3)
-  local global_player = Player.getGlobal()
-  local global_gui = Player.getGlobalGui()
 
   self:resetGroups()
   
   for key, recipe in pairs(Player.getRecipes()) do
     self:appendGroups(recipe, "recipe")
   end
-  if global_gui.currentTab ~= "HMPropertiesTab" then
+  if not(User.isActiveForm("HMPropertiesTab")) then
     for key, fluid in pairs(Player.getFluidPrototypes()) do
       self:appendGroups(fluid, "fluid")
     end

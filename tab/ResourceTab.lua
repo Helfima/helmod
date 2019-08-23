@@ -62,12 +62,12 @@ function ResourceTab.methods:addTableRow(guiTable, ingredient)
   local model = Model.getModel()
 
   -- col index
-  if Player.getSettings("display_data_col_index", true) then
+  if User.getModGlobalSetting("display_data_col_index") then
     local guiIndex = ElementGui.addGuiFrameH(guiTable,"index"..ingredient.name, helmod_frame_style.hidden)
     ElementGui.addGuiLabel(guiIndex, "index", ingredient.index, "helmod_label_row_right_40")
   end
   -- col name
-  if Player.getSettings("display_data_col_name", true) then
+  if User.getModGlobalSetting("display_data_col_name") then
     local guiName = ElementGui.addGuiFrameH(guiTable,"name"..ingredient.name, helmod_frame_style.hidden)
     ElementGui.addGuiLabel(guiName, "name_", ingredient.name)
   end
@@ -93,16 +93,16 @@ end
 function ResourceTab.methods:updateData()
   Logging:debug(self:classname(), "updateData()")
   local model = Model.getModel()
-  local globalGui = Player.getGlobalGui()
+  local order = User.getParameter("order")
   -- data
   local scrollPanel = self:getResultScrollPanel({"helmod_result-panel.tab-title-energy"})
 
 
   local extra_cols = 0
-  if Player.getSettings("display_data_col_index", true) then
+  if User.getModGlobalSetting("display_data_col_index") then
     extra_cols = extra_cols + 1
   end
-  if Player.getSettings("display_data_col_name", true) then
+  if User.getModGlobalSetting("display_data_col_name") then
     extra_cols = extra_cols + 1
   end
   local resultTable = ElementGui.addGuiTable(scrollPanel,"table-resources",3 + extra_cols)
@@ -110,7 +110,7 @@ function ResourceTab.methods:updateData()
   self:addTableHeader(resultTable)
 
 
-  for _, recipe in spairs(model.ingredients, function(t,a,b) if globalGui.order.ascendant then return t[b][globalGui.order.name] > t[a][globalGui.order.name] else return t[b][globalGui.order.name] < t[a][globalGui.order.name] end end) do
+  for _, recipe in spairs(model.ingredients, function(t,a,b) if order.ascendant then return t[b][order.name] > t[a][order.name] else return t[b][order.name] < t[a][order.name] end end) do
     self:addTableRow(resultTable, recipe)
   end
 end

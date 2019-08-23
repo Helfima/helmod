@@ -19,6 +19,7 @@ function Form.methods:init(parent)
   self.locate = "screen"
   self.panelClose = true
   self.help_button = true
+  self.auto_clear = true
 
   self:onInit(parent)
 end
@@ -56,6 +57,17 @@ function Form.methods:isSpecial()
 end
 
 -------------------------------------------------------------------------------
+-- Get panel name
+--
+-- @function [parent=#Form] getPanelName
+--
+-- @return #LuaGuiElement
+--
+function Form.methods:getPanelName()
+  return self:classname()
+end
+
+-------------------------------------------------------------------------------
 -- Get the parent panel
 --
 -- @function [parent=#Form] getParentPanel
@@ -75,21 +87,15 @@ end
 -- @return #LuaGuiElement
 --
 function Form.methods:getPanel()
-  local ui = Player.getGlobalUI()
   local parent_panel = self:getParentPanel()
-  if parent_panel[self:classname()] ~= nil and parent_panel[self:classname()].valid then
-    return parent_panel[self:classname()]
+  if parent_panel[self:getPanelName()] ~= nil and parent_panel[self:getPanelName()].valid then
+    return parent_panel[self:getPanelName()]
   end
   if parent_panel.name == self.locate then
-    local panel = ElementGui.addGuiFrameV(parent_panel, self:classname(), helmod_frame_style.default, self.panelCaption or self:classname())
+    local panel = ElementGui.addGuiFrameV(parent_panel, self:getPanelName(), helmod_frame_style.default, self.panelCaption or self:classname())
     panel.style.horizontally_stretchable = true
     panel.style.vertically_stretchable = true
-    local location = Controller.getLocationForm(self:classname())
-    if location ~= nil then
-      panel.location = location
-    else
-      panel.force_auto_center()
-    end
+    panel.location = User.getLocationForm(self:getPanelName())
     ElementGui.setStyle(panel, self:classname(), "width")
     ElementGui.setStyle(panel, self:classname(), "height")
     --Logging:debug(self:classname(), "children",panel.children_names)
@@ -191,7 +197,7 @@ end
 function Form.methods:open(event, action, item, item2, item3)
   Logging:debug(self:classname(), "open()", action, item, item2, item3)
   local parent_panel = self:getParentPanel()
-  if parent_panel[self:classname()] == nil then
+  if parent_panel[self:getPanelName()] == nil then
     self:onOpen(event, action, item, item2, item3)
   end
 end
@@ -211,7 +217,7 @@ function Form.methods:beforeEvent(event, action, item, item2, item3)
   Logging:debug(self:classname(), "beforeEvent()", action, item, item2, item3)
   local parent_panel = self:getParentPanel()
   local close = self:onBeforeEvent(event, action, item, item2, item3)
-  if parent_panel ~= nil and parent_panel[self:classname()] ~= nil and parent_panel[self:classname()].valid then
+  if parent_panel ~= nil and parent_panel[self:getPanelName()] ~= nil and parent_panel[self:getPanelName()].valid then
     Logging:debug(self:classname() , "must close?",close)
     if close and action == "OPEN" then
       self:close(true)
@@ -300,9 +306,9 @@ function Form.methods:updateTitle(event, action, item, item2, item3)
     if self.panelClose then
       local group1 = ElementGui.addGuiFlowH(right_menu_panel,"group1",helmod_flow_style.horizontal)
       for _, form in pairs(Controller.getViews()) do
-        if string.find(form:classname(), "Tab") and form:isVisible() and form:isSpecial() then
+        if string.find(self:classname(), "Tab") and string.find(form:classname(), "Tab") and form:isVisible() and form:isSpecial() then
           local style, selected_style = form:getButtonStyles()
-          if Controller.isActiveForm(form:classname()) then style = selected_style end
+          if User.isActiveForm(form:classname()) then style = selected_style end
           ElementGui.addGuiButton(group1, self:classname().."=change-tab=ID=", form:classname(), style, nil, form:getButtonCaption())
         end
       end
@@ -330,8 +336,7 @@ end
 function Form.methods:update(event, action, item, item2, item3)
   Logging:debug(self:classname(), "update():", action, item, item2, item3)
   local panel = self:getPanel()
-  panel.clear()
-  panel.focus()
+  if self.auto_clear then panel.clear() end
 
   self:updateTitle(event, action, item, item2, item3)
   self:onUpdate(event, action, item, item2, item3)
@@ -361,9 +366,8 @@ end
 --
 function Form.methods:close(force)
   Logging:debug(self:classname(), "close()")
-  local ui = Player.getGlobalUI()
   local panel = self:getPanel()
-  Controller.setCloseForm(self:classname(), panel.location)
+  User.setCloseForm(self:classname(), panel.location)
   self:onClose()
   panel.destroy()
 end

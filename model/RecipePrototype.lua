@@ -163,7 +163,7 @@ end
 --
 function RecipePrototype.getLocalisedName()
   if lua_prototype ~= nil then
-    if not(Player.getSettings("display_real_name", true)) then
+    if not(User.getModGlobalSetting("display_real_name")) then
       return lua_prototype.localised_name
     else
       return lua_prototype.name

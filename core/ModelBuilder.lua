@@ -18,64 +18,63 @@ local ModelBuilder = {
 function ModelBuilder.addRecipeIntoProductionBlock(key, type)
   Logging:debug(ModelBuilder.classname, "addRecipeIntoProductionBlock():", key, type)
   local model = Model.getModel()
-  local globalGui = Player.getGlobalGui()
-  local blockId = globalGui.currentBlock
+  local current_block = User.getParameter("current_block")
   local lua_recipe = RecipePrototype.load(key, type).native()
 
   if lua_recipe ~= nil then
     -- ajoute le bloc si il n'existe pas
-    if model.blocks[blockId] == nil then
+    if model.blocks[current_block] == nil then
       local modelBlock = Model.newBlock(lua_recipe)
       local index = Model.countBlocks()
       modelBlock.index = index
       modelBlock.unlinked = false
       model.blocks[modelBlock.id] = modelBlock
-      blockId = modelBlock.id
-      globalGui.currentBlock = blockId
+      current_block = modelBlock.id
+      User.setParameter("current_block",current_block)
       -- check si le block est independant
       ModelCompute.checkUnlinkedBlock(modelBlock)
     end
 
     -- ajoute le recipe si il n'existe pas
     local ModelRecipe = Model.newRecipe(lua_recipe.name, type)
-    local index = Model.countBlockRecipes(blockId)
+    local index = Model.countBlockRecipes(current_block)
     ModelRecipe.index = index
     ModelRecipe.count = 1
     -- ajoute les produits du block
     for _, lua_product in pairs(RecipePrototype.getProducts()) do
       local product = Product.load(lua_product).new()
-      if model.blocks[blockId].products[lua_product.name] == nil then
-        if model.blocks[blockId].ingredients[lua_product.name] ~= nil then
+      if model.blocks[current_block].products[lua_product.name] == nil then
+        if model.blocks[current_block].ingredients[lua_product.name] ~= nil then
           product.state = 2
         else
           product.state = 1
         end
-        model.blocks[blockId].products[lua_product.name] = product
+        model.blocks[current_block].products[lua_product.name] = product
       end
     end
 
     -- ajoute les ingredients du block
     for _, lua_ingredient in pairs(RecipePrototype.getIngredients()) do
       local ingredient = Product.load(lua_ingredient).new()
-      if model.blocks[blockId].ingredients[lua_ingredient.name] == nil then
-        model.blocks[blockId].ingredients[lua_ingredient.name] = ingredient
-        if model.blocks[blockId].products[lua_ingredient.name] ~= nil and model.blocks[blockId].products[lua_ingredient.name].state == 1 then
-          model.blocks[blockId].products[lua_ingredient.name].state = 2
+      if model.blocks[current_block].ingredients[lua_ingredient.name] == nil then
+        model.blocks[current_block].ingredients[lua_ingredient.name] = ingredient
+        if model.blocks[current_block].products[lua_ingredient.name] ~= nil and model.blocks[current_block].products[lua_ingredient.name].state == 1 then
+          model.blocks[current_block].products[lua_ingredient.name].state = 2
         end
       end
     end
-    model.blocks[blockId].recipes[ModelRecipe.id] = ModelRecipe
+    model.blocks[current_block].recipes[ModelRecipe.id] = ModelRecipe
 
     local defaultFactory = Model.getDefaultPrototypeFactory(RecipePrototype.getCategory(), lua_recipe)
     if defaultFactory ~= nil then
-      Model.setFactory(blockId, ModelRecipe.id, defaultFactory)
+      Model.setFactory(current_block, ModelRecipe.id, defaultFactory)
     end
     local defaultBeacon = Model.getDefaultRecipeBeacon(lua_recipe.name)
     if defaultBeacon ~= nil then
-      Model.setBeacon(blockId, ModelRecipe.id, defaultBeacon)
+      Model.setBeacon(current_block, ModelRecipe.id, defaultBeacon)
     end
-    Logging:debug(ModelBuilder.classname, "addRecipeIntoProductionBlock()", model.blocks[blockId])
-    return model.blocks[blockId]
+    Logging:debug(ModelBuilder.classname, "addRecipeIntoProductionBlock()", model.blocks[current_block])
+    return model.blocks[current_block]
   end
 end
 
@@ -140,7 +139,7 @@ function ModelBuilder.removeModel(model_id)
   local models = Model.getModels()
   local model = Model.getLastModel()
   if model ~= nil then
-    Player.getGlobalGui()["model_id"] = model.id
+    User.setParameter("model_id",model.id)
   else
     Model.newModel()
   end
@@ -328,7 +327,6 @@ end
 -- @param #string from_block_id
 --
 function ModelBuilder.pastModel(from_model_id, from_block_id)
-  local globalGui = Player.getGlobalGui()
   local model = Model.getModel()
   local models = Model.getModels()
   local from_model = models[from_model_id]
@@ -351,15 +349,13 @@ end
 -- @param #table from_model
 --
 function ModelBuilder.copyModel(from_model)
-  local globalGui = Player.getGlobalGui()
-
   if from_model ~= nil then
     local from_block_ids = {}
     for block_id,block in spairs(from_model.blocks,function(t,a,b) return t[b].index > t[a].index end) do
       table.insert(from_block_ids, block_id)
     end
     for _,block_id in ipairs(from_block_ids) do
-      globalGui.currentBlock = "new"
+      User.setParameter("current_block","new")
       local from_block = from_model.blocks[block_id]
       ModelBuilder.copyBlock(from_model, from_block)
     end
@@ -375,9 +371,8 @@ end
 -- @param #table from_block_id
 --
 function ModelBuilder.copyBlock(from_model, from_block)
-  local globalGui = Player.getGlobalGui()
   local model = Model.getModel()
-  local to_block_id = globalGui.currentBlock
+  local to_block_id = User.getParameter("current_block")
 
   if from_model ~= nil and from_block ~= nil then
     local from_recipe_ids = {}
@@ -406,7 +401,7 @@ function ModelBuilder.copyBlock(from_model, from_block)
 
           model.blocks[to_block.id] = to_block
           to_block_id = to_block.id
-          globalGui.currentBlock = to_block_id
+          User.setParameter("current_block",to_block_id)
         end
 
 

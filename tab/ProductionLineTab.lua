@@ -42,7 +42,6 @@ end
 function ProductionLineTab.methods:updateInfo(item, item2, item3)
   Logging:debug(self:classname(), "updateInfo", item, item2, item3)
   local model = Model.getModel()
-  local globalGui = Player.getGlobalGui()
   Logging:debug(self:classname(), "model:", model)
   -- data
   local info_scroll, output_scroll, input_scroll = self:getInfoPanel()
@@ -95,7 +94,6 @@ end
 function ProductionLineTab.methods:updateInput(item, item2, item3)
   Logging:debug(self:classname(), "updateInput", item, item2, item3)
   local model = Model.getModel()
-  local globalGui = Player.getGlobalGui()
   Logging:debug("ProductionBlockTab", "model:", model)
   -- data
   local info_scroll, output_scroll, input_scroll = self:getInfoPanel()
@@ -128,8 +126,6 @@ end
 function ProductionLineTab.methods:updateOutput(item, item2, item3)
   Logging:debug(self:classname(), "updateOutput", item, item2, item3)
   local model = Model.getModel()
-  local globalGui = Player.getGlobalGui()
-  Logging:debug("ProductionBlockTab", "model:", model)
   -- data
   local info_scroll, output_scroll, input_scroll = self:getInfoPanel()
   output_scroll.clear()
@@ -161,7 +157,6 @@ end
 --
 function ProductionLineTab.methods:updateData(item, item2, item3)
   Logging:debug(self:classname(), "updateData():", item, item2, item3)
-  local globalGui = Player.getGlobalGui()
   local model = Model.getModel()
 
   self:updateInfo(item, item2, item3)
@@ -173,25 +168,21 @@ function ProductionLineTab.methods:updateData(item, item2, item3)
 
   local countBlock = Model.countBlocks()
   if countBlock > 0 then
-    local globalSettings = Player.getGlobal("settings")
     -- data panel
     local extra_cols = 0
-    if Player.getSettings("display_data_col_index", true) then
-      extra_cols = extra_cols + 1
+    for _,parameter in pairs({"display_data_col_index","display_data_col_id","display_data_col_name"}) do
+      if User.getModGlobalSetting(parameter) then
+        extra_cols = extra_cols + 1
+      end
     end
-    if Player.getSettings("display_data_col_id", true) then
-      extra_cols = extra_cols + 1
-    end
-    if Player.getSettings("display_data_col_name", true) then
-      extra_cols = extra_cols + 1
-    end
+    
     local result_table = ElementGui.addGuiTable(scrollPanel,"list-data",5 + extra_cols, "helmod_table-odd")
     result_table.vertical_centering = false
 
     self:addTableHeader(result_table)
 
     local i = 0
-    for _, element in spairs(model.blocks, function(t,a,b) if globalGui.order.ascendant then return t[b][globalGui.order.name] > t[a][globalGui.order.name] else return t[b][globalGui.order.name] < t[a][globalGui.order.name] end end) do
+    for _, element in spairs(model.blocks, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
       self:addTableRow(result_table, element)
     end
   end
@@ -232,16 +223,15 @@ function ProductionLineTab.methods:addTableRow(gui_table, block)
   Logging:debug(self:classname(), "addTableRow()", block)
   local model = Model.getModel()
 
-  local globalSettings = Player.getGlobal("settings")
   local unlinked = block.unlinked and true or false
   if block.index == 0 then unlinked = true end
 
   -- col action
   local cell_action = ElementGui.addCell(gui_table, "action"..block.id, 2)
 
-  ElementGui.addGuiButton(cell_action, self:classname().."=production-block-up=ID=", block.id, "helmod_button_icon_arrow_top_sm", nil, ({"tooltip.up-element", Player.getSettings("row_move_step")}))
+  ElementGui.addGuiButton(cell_action, self:classname().."=production-block-up=ID=", block.id, "helmod_button_icon_arrow_top_sm", nil, ({"tooltip.up-element", User.getModGlobalSetting("row_move_step")}))
   ElementGui.addGuiButton(cell_action, self:classname().."=production-block-remove=ID=", block.id, "helmod_button_icon_delete_sm_red", nil, ({"tooltip.remove-element"}))
-  ElementGui.addGuiButton(cell_action, self:classname().."=production-block-down=ID=", block.id, "helmod_button_icon_arrow_down_sm", nil, ({"tooltip.down-element", Player.getSettings("row_move_step")}))
+  ElementGui.addGuiButton(cell_action, self:classname().."=production-block-down=ID=", block.id, "helmod_button_icon_arrow_down_sm", nil, ({"tooltip.down-element", User.getModGlobalSetting("row_move_step")}))
   if unlinked then
     ElementGui.addGuiButton(cell_action, self:classname().."=production-block-unlink=ID=", block.id, "helmod_button_icon_unlink_sm", nil, ({"tooltip.unlink-element"}))
   else
@@ -249,15 +239,15 @@ function ProductionLineTab.methods:addTableRow(gui_table, block)
   end
 
   -- col index
-  if Player.getSettings("display_data_col_index", true) then
+  if User.getModGlobalSetting("display_data_col_index") then
     ElementGui.addCellLabel(gui_table, "cell_index"..block.id, block.index)
   end
   -- col id
-  if Player.getSettings("display_data_col_id", true) then
+  if User.getModGlobalSetting("display_data_col_id") then
     ElementGui.addCellLabel(gui_table, "cell_id"..block.id, block.id)
   end
   -- col name
-  if Player.getSettings("display_data_col_name", true) then
+  if User.getModGlobalSetting("display_data_col_name") then
     ElementGui.addCellLabel(gui_table, "cell_name"..block.id, block.name)
   end
 
@@ -270,7 +260,7 @@ function ProductionLineTab.methods:addTableRow(gui_table, block)
   ElementGui.addCellEnergy(cell_energy, block, self:classname().."=change-tab=ID=HMProductionBlockTab="..block.id.."=", true, "tooltip.edit-block", "gray")
   
   -- products
-  local display_product_cols = Player.getSettings("display_product_cols") + 1
+  local display_product_cols = User.getModSetting("display_product_cols") + 1
   local cell_products = ElementGui.addCell(gui_table,"products_"..block.id, display_product_cols)
   if block.products ~= nil then
     for index, product in pairs(block.products) do
@@ -288,7 +278,7 @@ function ProductionLineTab.methods:addTableRow(gui_table, block)
     end
   end
   -- ingredients
-  local display_ingredient_cols = Player.getSettings("display_ingredient_cols") + 2
+  local display_ingredient_cols = User.getModSetting("display_ingredient_cols") + 2
   local cell_ingredients = ElementGui.addCell(gui_table,"ingredients_"..block.id, display_ingredient_cols)
   if block.ingredients ~= nil then
     for index, ingredient in pairs(block.ingredients) do

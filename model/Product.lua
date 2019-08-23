@@ -35,7 +35,7 @@ end
 function Product.getLocalisedName()
   Logging:trace(Product.classname, "getLocalisedName()", lua_product)
   if lua_product ~= nil then
-    if not(Player.getSettings("display_real_name", true)) then
+    if not(User.getModGlobalSetting("display_real_name")) then
       local localisedName = lua_product.name
       if lua_product.type == 0 or lua_product.type == "item" then
         local item = Player.getItemPrototype(lua_product.name)

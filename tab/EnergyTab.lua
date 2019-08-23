@@ -38,7 +38,7 @@ end
 function EnergyTab.methods:updateData()
   Logging:debug(self:classname(), "updatePowers()")
   local model = Model.getModel()
-  local globalGui = Player.getGlobalGui()
+  local order = User.getParameter("order")
 
   -- data
   local scroll_panel = self:getResultScrollPanel()
@@ -47,10 +47,9 @@ function EnergyTab.methods:updateData()
 
   local countBlock = Model.countPowers()
   if model.powers ~= nil and countBlock > 0 then
-    local globalSettings = Player.getGlobal("settings")
 
     local extra_cols = 0
-    if Player.getSettings("display_data_col_id", true) then
+    if User.getModGlobalSetting("display_data_col_id") then
       extra_cols = extra_cols + 1
     end
     local resultTable = ElementGui.addGuiTable(scroll_panel,"list-data",4 + extra_cols, "helmod_table-odd")
@@ -58,7 +57,7 @@ function EnergyTab.methods:updateData()
     self:addTableHeader(resultTable)
 
     local i = 0
-    for _, element in spairs(model.powers, function(t,a,b) if globalGui.order.ascendant then return t[b][globalGui.order.name] > t[a][globalGui.order.name] else return t[b][globalGui.order.name] < t[a][globalGui.order.name] end end) do
+    for _, element in spairs(model.powers, function(t,a,b) if order.ascendant then return t[b][order.name] > t[a][order.name] else return t[b][order.name] < t[a][order.name] end end) do
       self:addTableRow(resultTable, element)
     end
 
@@ -102,7 +101,7 @@ function EnergyTab.methods:addTableRow(gui_table, power)
   ElementGui.addGuiButton(cell_action, self:classname().."=power-remove=ID=", power.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
 
   -- col id
-  if Player.getSettings("display_data_col_id", true) then
+  if User.getModGlobalSetting("display_data_col_id") then
     local cell_id = ElementGui.addGuiFrameH(gui_table,"id"..power.id, helmod_frame_style.hidden)
     ElementGui.addGuiLabel(cell_id, "id", power.id)
   end

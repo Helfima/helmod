@@ -38,7 +38,7 @@ end
 -- @return boolean
 --
 function PrototypeFiltersTab.methods:isVisible()
-  return Player.getSettings("prototype_filters_tab", true)
+  return User.getModGlobalSetting("prototype_filters_tab")
 end
 
 -------------------------------------------------------------------------------
@@ -139,7 +139,6 @@ end
 --
 function PrototypeFiltersTab.methods:updateData()
   Logging:debug(self:classname(), "updateData()")
-  local globalGui = Player.getGlobalGui()
   -- data
 
   local scrollPanel = self:getResultScrollPanel()
@@ -212,7 +211,6 @@ end
 --
 function PrototypeFiltersTab.methods:onEvent(event, action, item, item2, item3)
   Logging:debug(self:classname(), "onEvent():", action, item, item2, item3)
-  local globalPlayer = Player.getGlobal()
   if action == "change-prototype-filter-type" and drop_down_prototype_filter_type ~= nil then
     local index = drop_down_prototype_filter_type.selected_index
     Logging:debug(self:classname(), "--> change-prototype-filter-type", prototype_filter_types[index])

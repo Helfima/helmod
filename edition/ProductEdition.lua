@@ -16,6 +16,7 @@ ProductEdition = setclass("HMProductEdition", AbstractEdition)
 --
 function ProductEdition.methods:onInit(parent)
   self.panelCaption = ({"helmod_product-edition-panel.title"})
+  self.parameterLast = string.format("%s_%s",self:classname(),"last")
 end
 
 -------------------------------------------------------------------------------
@@ -32,12 +33,11 @@ end
 -- @return #boolean if true the next call close dialog
 --
 function ProductEdition.methods:onBeforeEvent(event, action, item, item2, item3)
-  local player_gui = Player.getGlobalGui()
   local close = true
-  if player_gui.guiProductLast == nil or player_gui.guiProductLast ~= item then
+  if User.getParameter(self.parameterLast) == nil or User.getParameter(self.parameterLast) ~= item then
     close = false
   end
-  player_gui.guiProductLast = item
+  User.setParameter(self.parameterLast,item)
   return close
 end
 
@@ -47,8 +47,7 @@ end
 -- @function [parent=#ProductEdition] onClose
 --
 function ProductEdition.methods:onClose()
-  local player_gui = Player.getGlobalGui()
-  player_gui.guiProductLast = nil
+  User.setParameter(self.parameterLast,nil)
 end
 
 -------------------------------------------------------------------------------

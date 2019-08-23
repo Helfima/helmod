@@ -17,6 +17,7 @@ ProductBlockEdition = setclass("HMProductBlockEdition", AbstractEdition)
 function ProductBlockEdition.methods:onInit(parent)
   self.panelCaption = ({"helmod_result-panel.tab-title-production-block"})
   self.panelClose = false
+  self.parameterLast = string.format("%s_%s",self:classname(),"last")
 end
 
 -------------------------------------------------------------------------------
@@ -33,12 +34,11 @@ end
 -- @return #boolean if true the next call close dialog
 --
 function ProductBlockEdition.methods:onBeforeEvent(event, action, item, item2, item3)
-  local player_gui = Player.getGlobalGui()
   local close = true
-  if player_gui.guiProductLast == nil or player_gui.guiProductLast ~= item then
+  if User.getParameter(self.parameterLast) == nil or User.getParameter(self.parameterLast) ~= item then
     close = false
   end
-  player_gui.guiProductLast = item
+  User.setParameter(self.parameterLast,item)
   return close
 end
 
@@ -48,8 +48,7 @@ end
 -- @function [parent=#ProductBlockEdition] onClose
 --
 function ProductBlockEdition.methods:onClose()
-  local player_gui = Player.getGlobalGui()
-  player_gui.guiProductLast = nil
+  User.setParameter(self.parameterLast,nil)
 end
 
 -------------------------------------------------------------------------------
@@ -143,12 +142,10 @@ end
 function ProductBlockEdition.methods:updateInfo(item, item2, item3)
   Logging:debug(self:classname(), "updateInfo", item, item2, item3)
   local model = Model.getModel()
-  local globalGui = Player.getGlobalGui()
-  Logging:debug(self:classname(), "model:", model)
   -- data
-  local blockId = globalGui.currentBlock or "new"
+  local current_block = User.getParameter("current_block") or "new"
 
-  local countRecipes = Model.countBlockRecipes(blockId)
+  local countRecipes = Model.countBlockRecipes(current_block)
 
   local info_panel = self:getInfoPanel()
   info_panel.clear()
@@ -160,7 +157,7 @@ function ProductBlockEdition.methods:updateInfo(item, item2, item3)
   -- production block result
   if countRecipes > 0 then
 
-    local element = model.blocks[blockId]
+    local element = model.blocks[current_block]
 
     -- block panel
     ElementGui.addGuiLabel(block_table, "label-power", ({"helmod_label.electrical-consumption"}))
@@ -203,12 +200,10 @@ end
 function ProductBlockEdition.methods:updateInput(item, item2, item3)
   Logging:debug(self:classname(), "updateInput", item, item2, item3)
   local model = Model.getModel()
-  local globalGui = Player.getGlobalGui()
-  Logging:debug(self:classname(), "model:", model)
   -- data
-  local block_id = globalGui.currentBlock or "new"
+  local current_block = User.getParameter("current_block") or "new"
 
-  local countRecipes = Model.countBlockRecipes(block_id)
+  local countRecipes = Model.countBlockRecipes(current_block)
 
   local input_panel = self:getInputPanel()
   input_panel.clear()
@@ -219,7 +214,7 @@ function ProductBlockEdition.methods:updateInput(item, item2, item3)
   -- production block result
   if countRecipes > 0 then
 
-    local element = model.blocks[block_id]
+    local element = model.blocks[current_block]
     -- input panel
     local input_table = ElementGui.addGuiTable(input_scroll,"input-table", 5, "helmod_table_element")
       if element.ingredients ~= nil then
@@ -229,7 +224,7 @@ function ProductBlockEdition.methods:updateInput(item, item2, item3)
         if element.count > 1 then
           ingredient.limit_count = lua_product.count / element.count
         end
-        ElementGui.addCellElement(input_table, ingredient, self:classname().."=production-recipe-add=ID="..block_id.."="..element.name.."=", true, "tooltip.ingredient", ElementGui.color_button_add, index)
+        ElementGui.addCellElement(input_table, ingredient, self:classname().."=production-recipe-add=ID="..current_block.."="..element.name.."=", true, "tooltip.ingredient", ElementGui.color_button_add, index)
       end
     end
 
@@ -248,12 +243,11 @@ end
 function ProductBlockEdition.methods:updateOutput(item, item2, item3)
   Logging:debug(self:classname(), "updateOutput", item, item2, item3)
   local model = Model.getModel()
-  local globalGui = Player.getGlobalGui()
   Logging:debug(self:classname(), "model:", model)
   -- data
-  local blockId = globalGui.currentBlock or "new"
+  local current_block = User.getParameter("current_block") or "new"
 
-  local countRecipes = Model.countBlockRecipes(blockId)
+  local countRecipes = Model.countBlockRecipes(current_block)
 
   local output_panel = self:getOutputPanel()
   output_panel.clear()
@@ -265,7 +259,7 @@ function ProductBlockEdition.methods:updateOutput(item, item2, item3)
   -- production block result
   if countRecipes > 0 then
 
-    local element = model.blocks[blockId]
+    local element = model.blocks[current_block]
 
     -- ouput panel
     local output_table = ElementGui.addGuiTable(output_scroll,"output-table", 5, "helmod_table_element")

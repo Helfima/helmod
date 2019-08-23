@@ -154,7 +154,7 @@ end
 --
 function EntityPrototype.getLocalisedName()
   if lua_entity_prototype ~= nil then
-    if Player.getSettings("display_real_name", true) then
+    if User.getModGlobalSetting("display_real_name") then
       return lua_entity_prototype.name
     end
     return lua_entity_prototype.localised_name

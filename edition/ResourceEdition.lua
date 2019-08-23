@@ -18,44 +18,7 @@ ResourceEdition = setclass("HMResourceEdition", AbstractEdition)
 --
 function ResourceEdition.methods:onInit(parent)
 	self.panelCaption = ({"helmod_resource-edition-panel.title"})
-end
-
--------------------------------------------------------------------------------
--- On before event
---
--- @function [parent=#ResourceEdition] onBeforeEvent
---
--- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
--- @return #boolean if true the next call close dialog
---
-function ResourceEdition.methods:onBeforeEvent(event, action, item, item2, item3)
-	local model = Model.getModel()
-	local close = true
-	model.moduleListRefresh = false
-	if model.guiRecipeLast == nil or model.guiRecipeLast ~= item..item2 then
-		close = false
-		model.factoryGroupSelected = nil
-		model.beaconGroupSelected = nil
-		model.moduleListRefresh = true
-	end
-	model.guiRecipeLast = item..item2
-	return close
-end
-
--------------------------------------------------------------------------------
--- On close dialog
---
--- @function [parent=#ResourceEdition] onClose
---
-function ResourceEdition.methods:onClose()
-	local model = Model.getModel()
-	model.guiRecipeLast = nil
-	model.moduleListRefresh = false
+	self.parameterLast = string.format("%s_%s",self:classname(),"last")
 end
 
 -------------------------------------------------------------------------------

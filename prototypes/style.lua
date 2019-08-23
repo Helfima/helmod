@@ -235,8 +235,8 @@ local icon_corner_size = 1
 default_gui["helmod_icon"] = {
   type = "button_style",
   parent = "helmod_button_default",
-  width = 32,
-  height = 32,
+  width = 36,
+  height = 36,
   scalable = false,
   default_graphical_set = monolithIcon("__helmod__/graphics/icons/helmod_icon.png", 32, 1, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
   hovered_graphical_set = monolithIcon("__helmod__/graphics/icons/helmod_icon.png", 32, 1, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
@@ -264,6 +264,7 @@ default_gui["helmod_button_icon_default"] = {
 -- @field [parent=#Button] icon_yyy
 
 local list = {
+  {name="calculator"},
   {name="arrow_down"},
   {name="arrow_right"},
   {name="arrow_top"},

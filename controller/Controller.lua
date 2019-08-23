@@ -1,7 +1,5 @@
 require "core.Form"
 require "dialog.HelpPanel"
-require "dialog.LeftMenuPanel"
-require "dialog.MainMenuPanel"
 require "dialog.PinPanel"
 require "dialog.StatusPanel"
 require "dialog.Settings"
@@ -31,7 +29,9 @@ require "tab.AdminTab"
 require "edition.ProductLineEdition"
 require "edition.ProductBlockEdition"
 
+ModGui = require "mod-gui"
 Cache = require "core.Cache"
+User = require "model.User"
 Model = require "model.Model"
 ModelCompute = require "core.ModelCompute"
 ModelBuilder = require "core.ModelBuilder"
@@ -71,9 +71,6 @@ function Controller.init()
   Logging:debug(Controller.classname, "init()")
 
   local controllers = {}
-  table.insert(controllers, MainMenuPanel:new())
-  table.insert(controllers, LeftMenuPanel:new())
-
   table.insert(controllers, Settings:new())
   table.insert(controllers, HelpPanel:new())
   table.insert(controllers, Download:new())
@@ -155,9 +152,22 @@ end
 --
 function Controller.cleanController(player)
   Logging:trace(Controller.classname, "cleanController(player)")
-  for _,location in pairs(helmod_settings_mod.display_location.allowed_values) do
-    if player.gui[location]["helmod_main_panel"] ~= nil then
-      player.gui[location]["helmod_main_panel"].destroy()
+  for _,location in pairs({"center", "left", "top", "screen"}) do
+    local lua_gui_element = player.gui[location]
+    for _,children_name in pairs(lua_gui_element.children_names) do
+      if string.find(children_name,"helmod") then
+        lua_gui_element[children_name].destroy()
+      end
+      if Controller.getView(children_name) then
+        Controller.getView(children_name):close()
+      end
+      if children_name == "HMTab" then
+        for _,form in pairs(Controller.getViews()) do
+          if form:getPanelName() == "HMTab" then
+            form:close()
+          end
+        end
+      end
     end
   end
 end
@@ -172,14 +182,19 @@ end
 function Controller.bindController(player)
   Logging:trace(Controller.classname, "bindController()")
   if player ~= nil then
-    local gui_top = Player.getGuiTop(player)
-    if gui_top["helmod_menu-main"] ~= nil then gui_top["helmod_menu-main"].destroy() end
-    if not(Player.getSettings("display_main_icon")) then
-      if gui_top["helmod_planner-command"] ~= nil then gui_top["helmod_planner-command"].destroy() end
+    local lua_gui_element = Player.getGui("top")
+    if lua_gui_element["helmod_menu-main"] ~= nil then lua_gui_element["helmod_menu-main"].destroy() end
+    if lua_gui_element["helmod_planner-command"] ~= nil then lua_gui_element["helmod_planner-command"].destroy() end
+    
+    lua_gui_element = ModGui.get_button_flow(Player.native())
+    if not(User.getModSetting("display_main_icon")) or User.getVersion() < "0.8.18" then
+      if lua_gui_element["helmod_planner-command"] ~= nil then lua_gui_element["helmod_planner-command"].destroy() end
     end
-    if gui_top ~= nil and gui_top["helmod_planner-command"] == nil and Player.getSettings("display_main_icon") then
-      local gui_button = ElementGui.addGuiFrameH(gui_top, "helmod_planner-command", helmod_frame_style.default)
-      gui_button.add({type="button", name="helmod_planner-command", tooltip=({"helmod_planner-command"}), style="helmod_icon"})
+    if lua_gui_element ~= nil and lua_gui_element["helmod_planner-command"] == nil and User.getModSetting("display_main_icon") then
+      --local gui_button = ElementGui.addGuiFrameH(lua_gui_element, "helmod_planner-command", helmod_frame_style.default)
+      local gui_button = ElementGui.addGuiButton(lua_gui_element, "helmod_planner-command", nil, "helmod_button_icon_calculator",nil, ({"helmod_planner-command"}))
+      gui_button.style.width = 37
+      gui_button.style.height = 37
     end
   end
 end
@@ -256,11 +271,8 @@ function Controller.parseEvent()
             Controller.openMainPanel()
           end
           Controller.sendEvent(Event.native(), "HMRecipeSelector", "OPEN")
+          Controller.sendEvent(Event.native(), "HMRecipeSelector", "OPEN")
         end
-      end
-      -- Open form
-      if Controller.isOpened() then
-      --Controller.openFormPanel(Event.native(), Event.name, Event.action, Event.item1, Event.item2, Event.item3)
       end
       -- button action
       if Event.isButton() or Event.next then
@@ -316,47 +328,45 @@ function Controller.sendEvent(event, classname, action, item, item2, item3)
     Controller.onEvent(event, action, item, item2, item3)
   end
   if views ~= nil and views[classname] then
-    local ui = Player.getGlobalUI()
+    local navigate = User.getNavigate()
     if action == "CLOSE" then
       views[classname]:close(true)
     end
-    local form_loop = { "data"}
-    if string.find(classname, "Pin") then form_loop = {"pin"} end
 
     if Event.prepare == false then
-      Logging:debug(Controller.classname, "===== prepare", game.tick)
+      Logging:debug(Controller.classname, "-> prepare", game.tick)
       if action == "OPEN" then
-        Controller.setActiveForm(classname)
+        User.setActiveForm(classname)
       end
 
-      Logging:debug(Controller.classname, "***** before event: ui", ui)
+      Logging:debug(Controller.classname, "-> before event: navigate", navigate)
 
-      for form_name,form_ui in pairs(ui) do
-        Logging:debug(Controller.classname, "before event", form_name, classname)
-        if views[form_name] ~= nil and form_name == classname and Controller.isActiveForm(form_name) then
-          views[form_name]:beforeEvent(event, action, item, item2, item3)
+      for _,form in pairs(views) do
+        local form_name = form:classname()
+        Logging:debug(Controller.classname, "--> beforeEvent", form_name, classname)
+        if form_name == classname and User.isActiveForm(form_name) then
+          form:beforeEvent(event, action, item, item2, item3)
         end
       end
 
-      for form_name,form_ui in pairs(ui) do
-        Logging:debug(Controller.classname, "***** on event", form_name, classname)
-        if views[form_name] ~= nil and form_name == classname and Controller.isActiveForm(form_name) then
-          views[form_name]:onEvent(event, action, item, item2, item3)
+      for _,form in pairs(views) do
+        local form_name = form:classname()
+        Logging:debug(Controller.classname, "--> onEvent", form_name, classname)
+        if form_name == classname and User.isActiveForm(form_name) then
+          form:onEvent(event, action, item, item2, item3)
         end
       end
-      Logging:debug(Controller.classname, "***** after event: ui", ui)
-
-      for form_name,form_ui in pairs(ui) do
-        Logging:debug(Controller.classname, "***** locate", ui, locate)
-        if form_name ~= nil then
-          if views[form_name] ~= nil and Controller.isActiveForm(form_name) then
-            local prepared = views[form_name]:prepare(event, action, item, item2, item3)
-            if(prepared == true) then
-              Event.prepare = prepared
-            end
-          else
-            Logging:error(Controller.classname, "Prepare locate", ui, locate)
+      
+      for _,form in pairs(views) do
+        local form_name = form:classname()
+        Logging:debug(Controller.classname, "--> prepare", form_name)
+        if User.isActiveForm(form_name) then
+          local prepared = form:prepare(event, action, item, item2, item3)
+          if(prepared == true) then
+            Event.prepare = prepared
           end
+        else
+          Logging:warn(Controller.classname, "--> Prepare", form_name)
         end
       end
       if(Event.prepare == true) then
@@ -364,21 +374,21 @@ function Controller.sendEvent(event, classname, action, item, item2, item3)
       end
     end
 
-    Logging:debug(Controller.classname, "===== open and update", game.tick)
-    for form_name,form_ui in pairs(ui) do
-      if form_name ~= nil then
-        if views[form_name] ~= nil and Controller.isActiveForm(form_name) then
-          if action == "OPEN" or Event.force_open == true then
-            Logging:debug(Controller.classname, "***** open form")
-            views[form_name]:open(event, action, item, item2, item3)
-          end
-          if not(action ~= "OPEN" and form_name == classname) or Event.force_refresh == true then
-            Logging:debug(Controller.classname, "***** update form")
-            views[form_name]:update(event, action, item, item2, item3)
-          end
-        else
-          Logging:error(Controller.classname, "Open or Update locate", ui, locate)
+    Logging:debug(Controller.classname, "-> open and update", game.tick)
+    for _,form in pairs(views) do
+      local form_name = form:classname()
+      Logging:debug(Controller.classname, "--> open and update", form_name, User.isActiveForm(form_name))
+      if User.isActiveForm(form_name) then
+        if action == "OPEN" or Event.force_open == true then
+          Logging:debug(Controller.classname, "---> open form", form_name)
+          form:open(event, action, item, item2, item3)
         end
+        if not(action ~= "OPEN" and form_name == classname) or Event.force_refresh == true then
+          Logging:debug(Controller.classname, "---> update form", form_name)
+          form:update(event, action, item, item2, item3)
+        end
+      else
+        Logging:warn(Controller.classname, "---> Open or Update", form_name)
       end
     end
     return false
@@ -411,22 +421,24 @@ end
 --
 function Controller.openMainPanel()
   Logging:debug(Controller.classname, "openMainPanel()")
-  local lua_player = Player.native()
-  local location = Player.getSettings("display_location")
-  local globalGui = Player.getGlobalGui()
+  local current_block = User.getParameter("current_block")
   local model = Model.getModel()
-  local gui_main = lua_player.gui[location]
+
   if Controller.isOpened() then
     Controller.cleanController(Player.native())
   else
     local form_name
-    if globalGui.currentBlock and model.blocks[globalGui.currentBlock] then
+    if current_block and model.blocks[current_block] then
       form_name = "HMProductionBlockTab"
     else
       form_name = "HMProductionLineTab"
     end
     Event.force_refresh = true
+    Event.prepare = false
     Controller.sendEvent(nil, form_name, "OPEN")
+    Event.prepare = true
+    Controller.sendEvent(nil, form_name, "OPEN")
+    Event.finaly()
   end
 end
 
@@ -436,15 +448,19 @@ end
 -- @function [parent=#Controller] isOpened
 --
 function Controller.isOpened()
-  Logging:trace(Controller.classname, "isOpened()")
+  Logging:debug(Controller.classname, "isOpened()")
   local lua_player = Player.native()
   if lua_player == nil then return false end
-  local location = Player.getSettings("display_location")
-  local guiMain = lua_player.gui[location]
-  if guiMain["helmod_main_panel"] ~= nil then
-    return true
+  local gui_screen = Player.getGui("screen")
+  local is_open = false
+  for _,form_name in pairs(gui_screen.children_names) do
+    --if string.find(form_name,"Tab") and Controller.getView(form_name) then
+    if form_name == "HMTab" then
+      Logging:debug(Controller.classname,"form is open", form_name)
+      is_open = true
+    end
   end
-  return false
+  return is_open
 end
 
 -------------------------------------------------------------------------------
@@ -514,8 +530,6 @@ end
 --
 function Controller.onEventAccessAll(event, action, item, item2, item3)
   Logging:debug(Controller.classname, "onEventAccessAll()", action, item, item2, item3)
-  local globalGui = Player.getGlobalGui()
-  local ui = Player.getGlobalUI()
 
   if action == "refresh-model" then
     ModelCompute.update()
@@ -523,31 +537,33 @@ function Controller.onEventAccessAll(event, action, item, item2, item3)
   end
 
   if action == "change-model" then
-    globalGui.model_id = item
+    User.setParameter("model_id", item)
     Model.getModel()
-    Controller.setActiveForm("HMProductionLineTab")
-    globalGui.currentBlock = "new"
+    User.setActiveForm("HMProductionLineTab")
+    User.setParameter("current_block", "new")
     Event.force_refresh = true
     Event.force_open = true
   end
 
   if action == "change-tab" then
-    Controller.setActiveForm(item)
     if item == "HMProductionLineTab" then
-      globalGui.currentBlock = "new"
+      User.setParameter("current_block", "new")
     else
-      globalGui.currentBlock = item2
+      User.setParameter("current_block", item2)
     end
     Event.force_refresh = true
     Event.force_open = true
+    Controller.createEvent(event, item, "OPEN", item, item2, item3)
   end
 
   if action == "change-sort" then
-    if globalGui.order.name == item then
-      globalGui.order.ascendant = not(globalGui.order.ascendant)
+    local order = User.getParameter("order")
+    if order.name == item then
+      order.ascendant = not(order.ascendant)
     else
-      globalGui.order = {name=item, ascendant=true}
+      order = {name=item, ascendant=true}
     end
+    User.setParameter("order", order)
     Event.force_refresh = true
   end
 
@@ -567,19 +583,18 @@ end
 function Controller.onEventAccessRead(event, action, item, item2, item3)
   Logging:debug(Controller.classname, "onEventAccessRead()", action, item, item2, item3)
 
-  local globalGui = Player.getGlobalGui()
-  local ui = Player.getGlobalUI()
-
   if action == "copy-model" then
-    if Controller.isActiveForm("HMProductionBlockTab") then
-      if globalGui.currentBlock ~= nil and globalGui.currentBlock ~= "new" then
-        globalGui.copy_from_block_id = globalGui.currentBlock
-        globalGui.copy_from_model_id = Player.getGlobalGui("model_id")
+    local model_id = User.getParameter("model_id")
+    local current_block = User.getParameter("current_block")
+    if User.isActiveForm("HMProductionBlockTab") then
+      if current_block ~= nil and current_block ~= "new" then
+        User.setParameter("copy_from_block_id", current_block)
+        User.setParameter("copy_from_model_id", model_id)
       end
     end
-    if Controller.isActiveForm("HMProductionLineTab") then
-      globalGui.copy_from_block_id = nil
-      globalGui.copy_from_model_id = Player.getGlobalGui("model_id")
+    if User.isActiveForm("HMProductionLineTab") then
+      User.setParameter("copy_from_block_id", nil)
+      User.setParameter("copy_from_model_id", model_id)
     end
     Event.force_refresh = true
   end
@@ -625,27 +640,26 @@ end
 --
 function Controller.onEventAccessWrite(event, action, item, item2, item3)
   Logging:debug(Controller.classname, "onEventAccessWrite()", action, item, item2, item3)
-  local global_player = Player.getGlobal()
-  local globalGui = Player.getGlobalGui()
-  local ui = Player.getGlobalUI()
   local model = Model.getModel()
-  
+  local model_id = User.getParameter("model_id")
+  local current_block = User.getParameter("current_block")
+      
   if action == "change-tab" then
     if item == "HMProductionBlockTab" and item2 == "new" then
       Controller.createEvent(event, "HMRecipeSelector", "OPEN", item, item2, item3)
     end
   end
   
-  if action == "change-boolean-option" and model.blocks ~= nil and model.blocks[globalGui.currentBlock] ~= nil then
-    local element = model.blocks[globalGui.currentBlock]
-    ModelBuilder.updateProductionBlockOption(globalGui.currentBlock, item, not(element[item]))
+  if action == "change-boolean-option" and model.blocks ~= nil and model.blocks[current_block] ~= nil then
+    local element = model.blocks[current_block]
+    ModelBuilder.updateProductionBlockOption(current_block, item, not(element[item]))
     ModelCompute.update()
     Event.force_refresh = true
   end
 
-  if action == "change-number-option" and model.blocks ~= nil and model.blocks[globalGui.currentBlock] ~= nil then
+  if action == "change-number-option" and model.blocks ~= nil and model.blocks[current_block] ~= nil then
     local value = ElementGui.getInputNumber(event.element)
-    ModelBuilder.updateProductionBlockOption(globalGui.currentBlock, item, value)
+    ModelBuilder.updateProductionBlockOption(current_block, item, value)
     ModelCompute.update()
     Event.force_refresh = true
   end
@@ -683,7 +697,7 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
       local recipe = recipes[1]
       ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type)
       ModelCompute.update()
-      globalGui["scroll_down"] = true
+      User.setParameter("scroll_down",true)
       Event.force_refresh = true
     else
       Controller.createEvent(event, "HMRecipeSelector", "OPEN", item, item2, item3)
@@ -701,11 +715,11 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
   if action == "production-block-remove" then
     ModelBuilder.removeProductionBlock(item)
     ModelCompute.update()
-    globalGui.currentBlock = "new"
+    User.setParameter("current_block","new")
     Event.force_refresh = true
   end
 
-  if Controller.isActiveForm("HMProductionLineTab") then
+  if User.isActiveForm("HMProductionLineTab") then
     if action == "production-block-add" then
       local recipes = Player.searchRecipe(item2)
       if #recipes == 1 then
@@ -717,12 +731,12 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
       else
         Controller.createEvent(nil, "HMRecipeSelector", "OPEN", item, item2, item3)
       end
-      Controller.setActiveForm("HMProductionBlockTab")
+      User.setActiveForm("HMProductionBlockTab")
     end
 
     if action == "production-block-up" then
       local step = 1
-      if event.shift then step = Player.getSettings("row_move_step") end
+      if event.shift then step = User.getModSetting("row_move_step") end
       if event.control then step = 1000 end
       ModelBuilder.upProductionBlock(item, step)
       ModelCompute.update()
@@ -731,7 +745,7 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
 
     if action == "production-block-down" then
       local step = 1
-      if event.shift then step = Player.getSettings("row_move_step") end
+      if event.shift then step = User.getModSetting("row_move_step") end
       if event.control then step = 1000 end
       ModelBuilder.downProductionBlock(item, step)
       ModelCompute.update()
@@ -739,7 +753,7 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
     end
   end
 
-  if Controller.isActiveForm("HMProductionBlockTab") then
+  if User.isActiveForm("HMProductionBlockTab") then
     if action == "production-recipe-remove" then
       ModelBuilder.removeProductionRecipe(item, item2)
       ModelCompute.update()
@@ -748,7 +762,7 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
 
     if action == "production-recipe-up" then
       local step = 1
-      if event.shift then step = Player.getSettings("row_move_step") end
+      if event.shift then step = User.getModSetting("row_move_step") end
       if event.control then step = 1000 end
       ModelBuilder.upProductionRecipe(item, item2, step)
       ModelCompute.update()
@@ -757,7 +771,7 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
 
     if action == "production-recipe-down" then
       local step = 1
-      if event.shift then step = Player.getSettings("row_move_step") end
+      if event.shift then step = User.getModSetting("row_move_step") end
       if event.control then step = 1000 end
       ModelBuilder.downProductionRecipe(item, item2, step)
       ModelCompute.update()
@@ -765,7 +779,7 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
     end
   end
 
-  if ui.data == "HMEnergyTab" then
+  if User.isActiveForm("HMEnergyTab") then
     if action == "power-remove" then
       ModelBuilder.removePower(item)
       Event.force_refresh = true
@@ -773,15 +787,15 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
   end
 
   if action == "past-model" then
-    if Controller.isActiveForm("HMProductionBlockTab") then
-      ModelBuilder.pastModel(globalGui.copy_from_model_id, globalGui.copy_from_block_id)
+    if User.isActiveForm("HMProductionBlockTab") then
+      ModelBuilder.pastModel(User.getParameter("copy_from_model_id"), User.getParameter("copy_from_block_id"))
       ModelCompute.update()
       Event.force_refresh = true
     end
-    if Controller.isActiveForm("HMProductionLineTab") then
-      ModelBuilder.pastModel(globalGui.copy_from_model_id, globalGui.copy_from_block_id)
+    if User.isActiveForm("HMProductionLineTab") then
+      ModelBuilder.pastModel(User.getParameter("copy_from_model_id"), User.getParameter("copy_from_block_id"))
       ModelCompute.update()
-      globalGui.currentBlock = "new"
+      User.setParameter("current_block","new")
       Event.force_refresh = true
     end
   end
@@ -801,12 +815,10 @@ end
 --
 function Controller.onEventAccessDelete(event, action, item, item2, item3)
   Logging:debug(Controller.classname, "onEventAccessDelete()", action, item, item2, item3)
-  local globalGui = Player.getGlobalGui()
-  local ui = Player.getGlobalUI()
   if action == "remove-model" then
     ModelBuilder.removeModel(item)
-    Controller.setActiveForm("HMProductionLineTab")
-    globalGui.currentBlock = "new"
+    User.setActiveForm("HMProductionLineTab")
+    User.setParameter("current_block","new")
     Event.force_refresh = true
   end
 end
@@ -833,86 +845,6 @@ function Controller.onEventAccessAdmin(event, action, item, item2, item3)
     Event.force_refresh = true
   end
 
-end
-
--------------------------------------------------------------------------------
--- Set Close Form
---
--- @function [parent=#Controller] setCloseForm
---
--- @param #string classname
--- @param #table location
---
-function Controller.setCloseForm(classname, location)
-  Logging:debug(Controller.classname, "setCloseForm()", classname)
-  local ui = Player.getGlobalUI()
-  if ui[classname] == nil then ui[classname] = {} end
-  ui[classname]["open"] = false
-  if string.find(classname, "Tab") then
-    if ui["Tab"] == nil then ui["Tab"] = {} end
-    ui["Tab"]["location"] = location
-  else
-    ui[classname]["location"] = location
-  end
-end
-
--------------------------------------------------------------------------------
--- Get location Form
---
--- @function [parent=#Controller] getLocationForm
---
--- @param #string classname
--- @param #table location
---
--- @return #table
---
-function Controller.getLocationForm(classname)
-  Logging:debug(Controller.classname, "getLocationForm()", classname)
-  local ui = Player.getGlobalUI()
-  if string.find(classname, "Tab") then
-    if ui["Tab"] == nil then return nil end
-    return ui["Tab"]["location"]
-  else
-    if ui[classname] == nil then return nil end
-    return ui[classname]["location"]
-  end
-end
-
--------------------------------------------------------------------------------
--- Set Active Form
---
--- @function [parent=#Controller] setActiveForm
---
--- @param #string classname
--- 
-function Controller.setActiveForm(classname)
-  Logging:debug(Controller.classname, "setActiveForm()", classname)
-  local ui = Player.getGlobalUI()
-  if string.find(classname, "Tab") then
-    for form_name,form in pairs(ui) do
-      if views[form_name] ~= nil and form_name ~= classname and string.find(form_name, "Tab") then
-        Controller.getView(form_name):close(true)
-      end
-    end
-  end
-  if ui[classname] == nil then ui[classname] = {} end
-  ui[classname]["open"] = true
-end
-
--------------------------------------------------------------------------------
--- Is Active Form
---
--- @function [parent=#Controller] isActiveForm
---
--- @param #string classname
--- 
--- @return #boolean
---
-function Controller.isActiveForm(classname)
-  Logging:debug(Controller.classname, "isActiveForm()", classname)
-  local ui = Player.getGlobalUI()
-  if ui[classname] ~= nil then return ui[classname]["open"] end
-  return false
 end
 
 return Controller

@@ -27,8 +27,8 @@ local Model = {
 --
 function Model.getModels(bypass)
   Logging:trace(Model.classname, "getModels()", bypass ,global.models)
-  local model_id = Player.getGlobalGui("model_id")
-  local display_all_sheet = Player.getSettings("display_all_sheet", true)
+  local model_id = User.getParameter("model_id")
+  local display_all_sheet = User.getModGlobalSetting("display_all_sheet")
   local first_id = nil
   local reset_model_id = true
   local models = {}
@@ -47,7 +47,7 @@ function Model.getModels(bypass)
     end
   end
   if reset_model_id == true then
-    Player.getGlobalGui()["model_id"] = first_id
+    User.setParameter("model_id",first_id)
   end
   return models
 end
@@ -115,8 +115,7 @@ function Model.newModel()
   model.time = 1
   model.version = Model.version
   global.models[model.id] = model
-
-  Player.getGlobalGui()["model_id"] = model.id
+  User.setParameter("model_id",model.id)
   return model
 end
 
@@ -129,12 +128,12 @@ end
 --
 function Model.getModel()
   Logging:trace(Model.classname, "getModel()")
-  local model_id = Player.getGlobalGui("model_id")
+  local model_id = User.getParameter("model_id")
   if model_id == "new" then
     Model.newModel()
   end
 
-  model_id = Player.getGlobalGui("model_id")
+  model_id = User.getParameter("model_id")
   local models = Model.getModels()
   local model = models[model_id]
   if model == nil then return Model.newModel() end
@@ -311,7 +310,7 @@ end
 --
 function Model.newPower()
   Logging:debug(Model.classname, "newPower()")
-  local model = Player.getGlobal("model")
+  local model = User.get("model")
 
   if model.power_id == nil then model.power_id = 0 end
   model.power_id = model.power_id + 1
@@ -709,7 +708,7 @@ end
 -- @return #table
 --
 function Model.getDefault()
-  local default = Player.getGlobal("default")
+  local default = User.get("default")
 
   if default.recipes == nil then default.recipes = {} end
 
@@ -765,7 +764,7 @@ end
 function Model.getDefaultPrototypeFactory(category, recipe)
   if category ~= nil then
     local factories = Player.getProductionsCrafting(category, recipe)
-    local default_factory_level = Player.getSettings("default_factory_level")
+    local default_factory_level = User.getModGlobalSetting("default_factory_level")
     local factory_level = 1
     if default_factory_level == "fast" then
       factory_level = 100

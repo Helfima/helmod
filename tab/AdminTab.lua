@@ -70,7 +70,6 @@ end
 --
 function AdminTab.methods:updateData()
   Logging:debug(self:classname(), "updatePowers()")
-  local globalGui = Player.getGlobalGui()
 
   -- data
   local scroll_panel = self:getResultScrollPanel({"helmod_result-panel.tab-title-admin"})

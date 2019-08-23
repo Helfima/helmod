@@ -449,7 +449,7 @@ function ModelCompute.computeSimplexBlock(block)
     local mA, row_headers, col_headers = ModelCompute.getBlockMatrix(block)
 
     if mA ~= nil then
-      if Player.getSettings("debug", true) ~= "none" then
+      if User.getModGlobalSetting("debug") ~= "none" then
         block.matrix2 = {}
         block.matrix2.col_headers = col_headers
         block.matrix2.row_headers = row_headers
@@ -462,7 +462,7 @@ function ModelCompute.computeSimplexBlock(block)
       mB = Simplex.getMx()
       Logging:debug(ModelCompute.classname, "----> matrix B", mB)
 
-      if Player.getSettings("debug", true) ~= "none" then
+      if User.getModGlobalSetting("debug") ~= "none" then
         block.matrix2.mB = mB
         block.matrix2.mC = mC
       end
@@ -735,7 +735,7 @@ function ModelCompute.getBlockMatrix(block)
       table.insert(row_headers, {name="Z", type="none"})
 
       Logging:debug(ModelCompute.classname, "----> matrix A", mA)
-      if Player.getSettings("debug", true) ~= "none" then
+      if User.getModGlobalSetting("debug") ~= "none" then
         local row_headers2 = {}
         for _,row in pairs(row_headers) do
           table.insert(row_headers2, row.name)
@@ -768,7 +768,7 @@ function ModelCompute.computeBlock2(block)
     local mA, row_headers, col_headers = ModelCompute.getBlockMatrix(block)
 
     if mA ~= nil then
-      if Player.getSettings("debug", true) ~= "none" then
+      if User.getModGlobalSetting("debug") ~= "none" then
         block.matrix1 = {}
         block.matrix1.col_headers = col_headers
         block.matrix1.row_headers = row_headers
@@ -784,7 +784,7 @@ function ModelCompute.computeBlock2(block)
       Logging:debug(ModelCompute.classname, "----> matrix B", mB)
       Logging:debug(ModelCompute.classname, "----> matrix C", mC)
 
-      if Player.getSettings("debug", true) ~= "none" then
+      if User.getModGlobalSetting("debug") ~= "none" then
         block.matrix1.mB = mB
         block.matrix1.mC = mC
       end
@@ -1441,9 +1441,8 @@ function ModelCompute.updateVersion_0_6_0()
   local model = Model.getModel()
   if model.version == nil or model.version < "0.6.0" then
     Logging:debug(Model.classname , "********** updating version 0.6.0")
-    local globalGui = Player.getGlobalGui()
     for _, block in pairs(model.blocks) do
-      globalGui.currentBlock = block.id
+      User.setParameter("current_block",block.id)
       for _, recipe in pairs(block.recipes) do
         local recipe_type = RecipePrototype.find(recipe).type()
         if recipe.is_resource then recipe_type = "resource" end

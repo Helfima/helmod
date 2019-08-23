@@ -38,7 +38,7 @@ end
 -- @return boolean
 --
 function PropertiesTab.methods:isVisible()
-  return Player.getSettings("properties_tab", true)
+  return User.getModGlobalSetting("properties_tab")
 end
 
 -------------------------------------------------------------------------------
@@ -111,16 +111,15 @@ end
 --
 function PropertiesTab.methods:updateData()
   Logging:debug(self:classname(), "updateData()")
-  local globalGui = Player.getGlobalGui()
   -- data
   local resultPanel = self:getResultPanel({"helmod_result-panel.tab-title-properties"})
   local listPanel = ElementGui.addGuiFrameH(resultPanel, "list-element", helmod_frame_style.hidden)
   local scrollPanel = self:getResultScrollPanel()
 
-  local globalPlayer = Player.getGlobal()
-  if globalPlayer["prototype-properties"] ~= nil and globalPlayer["prototype-properties"].name ~= nil then
-    local prototype_name = globalPlayer["prototype-properties"].name
-    local prototype_type = globalPlayer["prototype-properties"].type
+  local prototype_properties = User.getParameter("prototype_properties")
+  if prototype_properties ~= nil and prototype_properties.name ~= nil then
+    local prototype_name = prototype_properties.name
+    local prototype_type = prototype_properties.type
     local prototype = nil
     if prototype_type == "entity" then
       EntityPrototype.load(prototype_name)

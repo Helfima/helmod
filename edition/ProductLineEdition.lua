@@ -17,6 +17,7 @@ ProductLineEdition = setclass("HMProductLineEdition", AbstractEdition)
 function ProductLineEdition.methods:onInit(parent)
   self.panelCaption = ({"helmod_result-panel.tab-title-production-line"})
   self.panelClose = false
+  self.parameterLast = string.format("%s_%s",self:classname(),"last")
 end
 
 -------------------------------------------------------------------------------
@@ -33,12 +34,11 @@ end
 -- @return #boolean if true the next call close dialog
 --
 function ProductLineEdition.methods:onBeforeEvent(event, action, item, item2, item3)
-  local player_gui = Player.getGlobalGui()
   local close = true
-  if player_gui.guiProductLast == nil or player_gui.guiProductLast ~= item then
+  if User.getParameter(self.parameterLast) == nil or User.getParameter(self.parameterLast) ~= item then
     close = false
   end
-  player_gui.guiProductLast = item
+  User.setParameter(self.parameterLast,item)
   return close
 end
 
@@ -48,8 +48,7 @@ end
 -- @function [parent=#ProductLineEdition] onClose
 --
 function ProductLineEdition.methods:onClose()
-  local player_gui = Player.getGlobalGui()
-  player_gui.guiProductLast = nil
+  User.setParameter(self.parameterLast,nil)
 end
 
 -------------------------------------------------------------------------------
@@ -144,7 +143,6 @@ end
 function ProductLineEdition.methods:updateInfo(item, item2, item3)
   Logging:debug(self:classname(), "updateInfo", item, item2, item3)
   local model = Model.getModel()
-  local globalGui = Player.getGlobalGui()
   Logging:debug(self:classname(), "model:", model)
   -- data
   local info_panel = self:getInfoPanel()
@@ -198,7 +196,6 @@ end
 function ProductLineEdition.methods:updateInput(item, item2, item3)
   Logging:debug(self:classname(), "updateInput", item, item2, item3)
   local model = Model.getModel()
-  local globalGui = Player.getGlobalGui()
   Logging:debug("ProductionBlockTab", "model:", model)
   -- data
   local input_panel = self:getInputPanel()
@@ -232,7 +229,6 @@ end
 function ProductLineEdition.methods:updateOutput(item, item2, item3)
   Logging:debug(self:classname(), "updateOutput", item, item2, item3)
   local model = Model.getModel()
-  local globalGui = Player.getGlobalGui()
   Logging:debug("ProductionBlockTab", "model:", model)
   -- data
   local output_panel = self:getOutputPanel()

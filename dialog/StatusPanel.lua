@@ -16,17 +16,7 @@ StatusPanel = setclass("HMStatusPanel", Form)
 --
 function StatusPanel.methods:onInit(parent)
   self.panelCaption = ({"helmod_status-tab-panel.title"})
-end
-
--------------------------------------------------------------------------------
--- Get the parent panel
---
--- @function [parent=#StatusPanel] getParentPanel
---
--- @return #LuaGuiElement
---
-function StatusPanel.methods:getParentPanel()
-  return Controller.getPinTabPanel()
+  self.parameterLast = string.format("%s_%s",self:classname(),"last")
 end
 
 -------------------------------------------------------------------------------
@@ -43,12 +33,11 @@ end
 -- @return #boolean if true the next call close dialog
 --
 function StatusPanel.methods:onBeforeEvent( event, action, item, item2, item3)
-  local globalGui = Player.getGlobalGui()
   local close = true
-  if globalGui.pinBlock == nil or globalGui.pinBlock ~= item then
+  if User.getParameter(self.parameterLast) == nil or User.getParameter(self.parameterLast) then
     close = false
   end
-  globalGui.pinBlock = item
+  User.setParameter(self.parameterLast,item)
   return close
 end
 
@@ -58,8 +47,7 @@ end
 -- @function [parent=#StatusPanel] onClose
 --
 function StatusPanel.methods:onClose()
-  local globalGui = Player.getGlobalGui()
-  globalGui.pinBlock = nil
+  User.setParameter(self.parameterLast,nil)
 end
 
 -------------------------------------------------------------------------------
@@ -68,7 +56,7 @@ end
 -- @function [parent=#StatusPanel] getInfoPanel
 --
 function StatusPanel.methods:getInfoPanel()
-  local panel = self:getPanel(player)
+  local panel = self:getPanel()
   if panel["info-panel"] ~= nil and panel["info-panel"].valid then
     return panel["info-panel"]["scroll-panel"]
   end
@@ -154,17 +142,14 @@ end
 --
 function StatusPanel.methods:updateInfo(event, action, item, item2, item3)
   Logging:debug(self:classname(), "updateInfo():", action, item, item2, item3)
-  local infoPanel = self:getInfoPanel()
+  local info_panel = self:getInfoPanel()
   local model = Model.getModel()
-  local globalGui = Player.getGlobalGui()
 
-  for k,guiName in pairs(infoPanel.children_names) do
-    infoPanel[guiName].destroy()
-  end
+  info_panel.clear()
 
   local column = 2
 
-  local resultTable = ElementGui.addGuiTable(infoPanel,"list-data",column, "helmod_table-odd")
+  local resultTable = ElementGui.addGuiTable(info_panel,"list-data",column, "helmod_table-odd")
   --self:addProductionBlockHeader(resultTable)
   local elements = {}
   
@@ -225,16 +210,5 @@ end
 function StatusPanel.methods:onEvent(event, action, item, item2, item3)
   Logging:debug(self:classname(), "onEvent():", action, item, item2, item3)
   local model = Model.getModel()
-  local global_settings = Player.getGlobalSettings()
-  local global_gui = Player.getGlobalGui()
 
-  if action == "change-level" then
-    local display_pin_level = Player.getGlobalSettings("display_pin_level")
-    Logging:debug(self:classname(), "display_pin_level", display_pin_level)
-    if item == "down" and display_pin_level > display_pin_level_min  then global_settings["display_pin_level"] = display_pin_level - 1 end
-    if item == "up" and display_pin_level < display_pin_level_max  then global_settings["display_pin_level"] = display_pin_level + 1 end
-    if item == "min" then global_settings["display_pin_level"] = display_pin_level_min end
-    if item == "max" then global_settings["display_pin_level"] = display_pin_level_max end
-    self:updateInfo(event, action, global_gui.pinBlock, item2, item3)
-  end
 end

@@ -2,12 +2,12 @@ Logging = {}
 
 local append_log=false
 
-function Logging:new(log)
+function Logging:new()
 	self.limit = 5
 	self.filename="helmod\\helmod.log"
 	self.logClass = {}
 	
-	self.debug_values = {none=0,info=1,error=2,debug=3,trace=4}
+	self.debug_values = {none=0,error=1,warn=2,info=3,debug=4,trace=5}
 end
 
 function Logging:checkClass(logClass)
@@ -18,22 +18,27 @@ end
 
 function Logging:trace(...)
   local arg = {...}
-  self:logging("[TRACE]", 4, unpack(arg))
+  self:logging("[TRACE]", self.debug_values.trace, unpack(arg))
 end
 
 function Logging:debug(...)
 	local arg = {...}
-	self:logging("[DEBUG]", 3, unpack(arg))
+	self:logging("[DEBUG]", self.debug_values.debug, unpack(arg))
 end
 
 function Logging:info(...)
-	local arg = {...}
-	self:logging("[INFO]", 2, unpack(arg))
+  local arg = {...}
+  self:logging("[INFO]", self.debug_values.info, unpack(arg))
+end
+
+function Logging:warn(...)
+  local arg = {...}
+  self:logging("[WARN]", self.debug_values.warn, unpack(arg))
 end
 
 function Logging:error(...)
 	local arg = {...}
-	self:logging("[ERROR]", 1, unpack(arg))
+	self:logging("[ERROR]", self.debug_values.error, unpack(arg))
 end
 
 function Logging:objectToString(object, level)
@@ -66,7 +71,7 @@ function Logging:objectToString(object, level)
 			message = message.."\"".."__table".."\""
 		end
 	end
-	return message
+	return string.gsub(message,"\n","")
 end
 
 function Logging:logging(tag, level, logClass, ...)
@@ -79,7 +84,7 @@ function Logging:logging(tag, level, logClass, ...)
 			message = message..self:objectToString(object)
 		end
 		--game.write_file(self.filename, tag.."|"..logClass.."|"..message.."\n", append_log)
-    log(tag.."|"..logClass.."|"..string.gsub(message,"\n",""))
+    log(tag.."|"..logClass.."|"..message)
 		if append_log == false then append_log = true end
 	end
 end

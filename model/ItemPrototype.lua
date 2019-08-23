@@ -71,7 +71,7 @@ end
 --
 function ItemPrototype.getLocalisedName()
   if lua_item_prototype ~= nil then
-    if Player.getSettings("display_real_name", true) then
+    if User.getModGlobalSetting("display_real_name") then
       return lua_item_prototype.name
     end
     return lua_item_prototype.localised_name

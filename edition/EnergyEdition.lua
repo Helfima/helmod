@@ -16,6 +16,7 @@ EnergyEdition = setclass("HMEnergyEdition", AbstractEdition)
 --
 function EnergyEdition.methods:onInit(parent)
   self.panelCaption = ({"helmod_energy-edition-panel.title"})
+  self.parameterLast = string.format("%s_%s",self:classname(),"last")
 end
 
 -------------------------------------------------------------------------------
@@ -425,7 +426,7 @@ function EnergyEdition.methods:updatePrimarySelector(item, item2, item3)
   local groupsPanel = ElementGui.addGuiTable(scroll_panel, "primary-groups", 1)
 
   local category = "primary"
-  if not(Player.getSettings("model_filter_generator", true)) then category = nil end
+  if not(User.getModGlobalSetting("model_filter_generator")) then category = nil end
   -- ajouter de la table des groupes de recipe
   local factories = Player.getGenerators("primary")
   Logging:debug(self:classname(), "factories:",factories)
@@ -558,7 +559,7 @@ function EnergyEdition.methods:updateSecondarySelector(item, item2, item3)
   local groupsPanel = ElementGui.addGuiTable(scroll_panel, "secondary-groups", 1)
 
   local category = "secondary"
-  if not(Player.getSettings("model_filter_generator", true)) then category = nil end
+  if not(User.getModGlobalSetting("model_filter_generator")) then category = nil end
   -- ajouter de la table des groupes de recipe
   local factories = Player.getGenerators("secondary")
   Logging:debug(self:classname(), "factories:",factories)

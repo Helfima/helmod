@@ -15,6 +15,7 @@ RuleEdition = setclass("HMRuleEdition", AbstractEdition)
 --
 function RuleEdition.methods:onInit(parent)
   self.panelCaption = ({"helmod_rule-edition-panel.title"})
+  self.parameterLast = string.format("%s_%s",self:classname(),"last")
 end
 
 -------------------------------------------------------------------------------

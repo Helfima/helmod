@@ -67,14 +67,14 @@ function ProductionBlockTab.methods:updateDebugPanel(item, item2, item3)
   Logging:debug("ProductionBlockTab", "updateDebugPanel():", item, item2, item3)
   local header_panel1, header_panel2,scroll_panel1, scroll_panel2 = self:getResultScrollPanel2({"helmod_result-panel.tab-button-production-block"})
   local model = Model.getModel()
-  local globalGui = Player.getGlobalGui()
-
-  local blockId = globalGui.currentBlock or "new"
-  local countRecipes = Model.countBlockRecipes(blockId)
+  
+  local current_block = User.getParameter("current_block") or "new"
+  
+  local countRecipes = Model.countBlockRecipes(current_block)
 
   if countRecipes > 0 then
 
-    local block = model.blocks[blockId]
+    local block = model.blocks[current_block]
 
     -- input
     local input_panel = ElementGui.addGuiFrameV(scroll_panel2, "input_panel", helmod_frame_style.hidden, "Input data")
@@ -236,12 +236,11 @@ end
 function ProductionBlockTab.methods:updateInfo(item, item2, item3)
   Logging:debug(self:classname(), "updateInfo", item, item2, item3)
   local model = Model.getModel()
-  local globalGui = Player.getGlobalGui()
   Logging:debug(self:classname(), "model:", model)
   -- data
-  local blockId = globalGui.currentBlock or "new"
+  local current_block = User.getParameter("current_block") or "new"
 
-  local countRecipes = Model.countBlockRecipes(blockId)
+  local countRecipes = Model.countBlockRecipes(current_block)
 
   local info_scroll, output_scroll, input_scroll = self:getInfoPanel2()
   info_scroll.clear()
@@ -253,7 +252,7 @@ function ProductionBlockTab.methods:updateInfo(item, item2, item3)
   -- production block result
   if countRecipes > 0 then
 
-    local element = model.blocks[blockId]
+    local element = model.blocks[current_block]
 
     -- block panel
     ElementGui.addGuiLabel(block_table, "label-power", ({"helmod_label.electrical-consumption"}))
@@ -295,12 +294,11 @@ end
 function ProductionBlockTab.methods:updateInput(item, item2, item3)
   Logging:debug(self:classname(), "updateInput", item, item2, item3)
   local model = Model.getModel()
-  local globalGui = Player.getGlobalGui()
   Logging:debug(self:classname(), "model:", model)
   -- data
-  local block_id = globalGui.currentBlock or "new"
+  local current_block = User.getParameter("current_block") or "new"
 
-  local countRecipes = Model.countBlockRecipes(block_id)
+  local countRecipes = Model.countBlockRecipes(current_block)
 
   local info_scroll, output_scroll, input_scroll = self:getInfoPanel2()
   input_scroll.clear()
@@ -309,7 +307,7 @@ function ProductionBlockTab.methods:updateInput(item, item2, item3)
   -- production block result
   if countRecipes > 0 then
 
-    local element = model.blocks[block_id]
+    local element = model.blocks[current_block]
     -- input panel
     local input_table = ElementGui.addGuiTable(input_scroll,"input-table", ElementGui.getElementColumnNumber(50), "helmod_table_element")
       if element.ingredients ~= nil then
@@ -319,7 +317,7 @@ function ProductionBlockTab.methods:updateInput(item, item2, item3)
         if element.count > 1 then
           ingredient.limit_count = lua_product.count / element.count
         end
-        ElementGui.addCellElementM(input_table, ingredient, self:classname().."=production-recipe-add=ID="..block_id.."="..element.name.."=", true, "tooltip.ingredient", ElementGui.color_button_add, index)
+        ElementGui.addCellElementM(input_table, ingredient, self:classname().."=production-recipe-add=ID="..current_block.."="..element.name.."=", true, "tooltip.ingredient", ElementGui.color_button_add, index)
       end
     end
 
@@ -338,12 +336,11 @@ end
 function ProductionBlockTab.methods:updateOutput(item, item2, item3)
   Logging:debug(self:classname(), "updateOutput", item, item2, item3)
   local model = Model.getModel()
-  local globalGui = Player.getGlobalGui()
   Logging:debug(self:classname(), "model:", model)
   -- data
-  local blockId = globalGui.currentBlock or "new"
+  local current_block = User.getParameter("current_block") or "new"
 
-  local countRecipes = Model.countBlockRecipes(blockId)
+  local countRecipes = Model.countBlockRecipes(current_block)
 
   local info_scroll, output_scroll, input_scroll = self:getInfoPanel2()
   output_scroll.clear()
@@ -352,7 +349,7 @@ function ProductionBlockTab.methods:updateOutput(item, item2, item3)
   -- production block result
   if countRecipes > 0 then
 
-    local element = model.blocks[blockId]
+    local element = model.blocks[current_block]
 
     -- ouput panel
     local output_table = ElementGui.addGuiTable(output_scroll,"output-table", ElementGui.getElementColumnNumber(50), "helmod_table_element")
@@ -391,12 +388,8 @@ end
 function ProductionBlockTab.methods:updateData(item, item2, item3)
   Logging:debug("ProductionBlockTab", "updateData():", item, item2, item3)
   local model = Model.getModel()
-  local globalGui = Player.getGlobalGui()
   Logging:debug("ProductionBlockTab", "model:", model)
-  local block_id = "new"
-  if globalGui.currentBlock ~= nil then
-    block_id = globalGui.currentBlock
-  end
+  local current_block = User.getParameter("current_block") or "new"
 
   self:updateInfo(item, item2, item3)
   self:updateOutput(item, item2, item3)
@@ -415,18 +408,18 @@ function ProductionBlockTab.methods:updateData(item, item2, item3)
   -- col recipe
   local color = "gray"
   local cell_recipe = ElementGui.addCell(recipe_table, "recipe-new")
-  if block_id == "new" then
+  if current_block == "new" then
     last_element = cell_recipe
     color = "orange"
   end
   local block_new = {name = "helmod_button_icon_robot_flat2" ,count = 0,localised_name = "helmod_result-panel.add-button-production-block"}
   ElementGui.addCellProduct(cell_recipe, block_new, self:classname().."=change-tab=ID=HMProductionBlockTab=new=", true, "tooltip.edit-block", color)
   
-  for _, block in spairs(model.blocks, function(t,a,b) if globalGui.order.ascendant then return t[b][globalGui.order.name] > t[a][globalGui.order.name] else return t[b][globalGui.order.name] < t[a][globalGui.order.name] end end) do
+  for _, block in spairs(model.blocks, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
     -- col recipe
     local color = "gray"
     local cell_recipe = ElementGui.addCell(recipe_table, "recipe"..block.id)
-    if block_id == block.id then
+    if current_block == block.id then
       last_element = cell_recipe
       color = "orange"
     end
@@ -436,38 +429,31 @@ function ProductionBlockTab.methods:updateData(item, item2, item3)
     scroll_panel1.scroll_to_element(last_element)
   end
   
-  local countRecipes = Model.countBlockRecipes(block_id)
+  local countRecipes = Model.countBlockRecipes(current_block)
   -- production block result
   if countRecipes > 0 then
 
-    local element = model.blocks[block_id]
+    local elements = model.blocks[current_block]
     -- data panel
 
     local extra_cols = 0
-    if Player.getSettings("display_data_col_index", true) then
-      extra_cols = extra_cols + 1
-    end
-    if Player.getSettings("display_data_col_id", true) then
-      extra_cols = extra_cols + 1
-    end
-    if Player.getSettings("display_data_col_name", true) then
-      extra_cols = extra_cols + 1
-    end
-    if Player.getSettings("display_data_col_type", true) then
-      extra_cols = extra_cols + 1
+    for _,parameter in pairs({"display_data_col_index","display_data_col_id","display_data_col_name","display_data_col_type"}) do
+      if User.getModGlobalSetting(parameter) then
+        extra_cols = extra_cols + 1
+      end
     end
     local result_table = ElementGui.addGuiTable(scroll_panel2,"list-data",7 + extra_cols, "helmod_table-odd")
     result_table.vertical_centering = false
     self:addTableHeader(result_table)
 
     local last_element = nil
-    for _, recipe in spairs(model.blocks[block_id].recipes, function(t,a,b) if globalGui.order.ascendant then return t[b][globalGui.order.name] > t[a][globalGui.order.name] else return t[b][globalGui.order.name] < t[a][globalGui.order.name] end end) do
-      last_element = self:addTableRow(result_table, element, recipe)
+    for _, recipe in spairs(elements.recipes, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
+      last_element = self:addTableRow(result_table, elements, recipe)
     end
 
-    if globalGui["scroll_down"] then
+    if User.getParameter("scroll_down") then
       scroll_panel2.scroll_to_element(last_element)
-      globalGui["scroll_down"] = false
+      User.setParameter("scroll_down", false)
     end
 
   end
@@ -510,28 +496,27 @@ end
 function ProductionBlockTab.methods:addTableRow(gui_table, block, recipe)
   Logging:debug("ProductionBlockTab", "addTableRow():", gui_table, block, recipe)
   local lua_recipe = RecipePrototype.load(recipe).native()
-  local display_cell_mod = Player.getSettings("display_cell_mod")
 
   -- col action
   local cell_action = ElementGui.addCell(gui_table, "action"..recipe.id, 2)
-  ElementGui.addGuiButton(cell_action, self:classname().."=production-recipe-up=ID="..block.id.."=", recipe.id, "helmod_button_icon_arrow_top_sm", nil, ({"tooltip.up-element", Player.getSettings("row_move_step")}))
+  ElementGui.addGuiButton(cell_action, self:classname().."=production-recipe-up=ID="..block.id.."=", recipe.id, "helmod_button_icon_arrow_top_sm", nil, ({"tooltip.up-element", User.getModSetting("row_move_step")}))
   ElementGui.addGuiButton(cell_action, self:classname().."=production-recipe-remove=ID="..block.id.."=", recipe.id, "helmod_button_icon_delete_sm_red", nil, ({"tooltip.remove-element"}))
-  ElementGui.addGuiButton(cell_action, self:classname().."=production-recipe-down=ID="..block.id.."=", recipe.id, "helmod_button_icon_arrow_down_sm", nil, ({"tooltip.down-element", Player.getSettings("row_move_step")}))
+  ElementGui.addGuiButton(cell_action, self:classname().."=production-recipe-down=ID="..block.id.."=", recipe.id, "helmod_button_icon_arrow_down_sm", nil, ({"tooltip.down-element", User.getModSetting("row_move_step")}))
 
   -- col index
-  if Player.getSettings("display_data_col_index", true) then
+  if User.getModGlobalSetting("display_data_col_index") then
     ElementGui.addGuiLabel(gui_table, "value_index"..recipe.id, recipe.index, "helmod_label_row_right_40")
   end
   -- col id
-  if Player.getSettings("display_data_col_id", true) then
+  if User.getModGlobalSetting("display_data_col_id") then
     ElementGui.addGuiLabel(gui_table, "value_id"..recipe.id, recipe.id)
   end
   -- col name
-  if Player.getSettings("display_data_col_name", true) then
+  if User.getModGlobalSetting("display_data_col_name") then
     ElementGui.addGuiLabel(gui_table, "value_name"..recipe.id, recipe.name)
   end
   -- col type
-  if Player.getSettings("display_data_col_type", true) then
+  if User.getModGlobalSetting("display_data_col_type") then
     ElementGui.addGuiLabel(gui_table, "value_type"..recipe.id, recipe.type)
   end
   -- col recipe
@@ -566,7 +551,7 @@ function ProductionBlockTab.methods:addTableRow(gui_table, block, recipe)
   ElementGui.addCellFactory(cell_beacon, beacon, "HMRecipeEdition=OPEN=ID="..block.id.."="..recipe.id.."=", false, "tooltip.edit-recipe", "gray")
 
   -- products
-  local display_product_cols = Player.getSettings("display_product_cols")
+  local display_product_cols = User.getModSetting("display_product_cols")
   local cell_products = ElementGui.addCell(gui_table,"products_"..recipe.id, display_product_cols)
   for index, lua_product in pairs(RecipePrototype.getProducts()) do
     local product = Product.load(lua_product).new()
@@ -578,7 +563,7 @@ function ProductionBlockTab.methods:addTableRow(gui_table, block, recipe)
   end
 
   -- ingredients
-  local display_ingredient_cols = Player.getSettings("display_ingredient_cols")
+  local display_ingredient_cols = User.getModSetting("display_ingredient_cols")
   local cell_ingredients = ElementGui.addCell(gui_table,"ingredients_"..recipe.id, display_ingredient_cols)
   for index, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
     local ingredient = Product.load(lua_ingredient).new()

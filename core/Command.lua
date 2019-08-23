@@ -41,7 +41,10 @@ function Command.parse(event)
     elseif string.lower(event.parameters) == "unittest" then
       UnitTest.run(event)
     elseif string.lower(event.parameters) == "resetuserui" then
-      Player.resetGlobal()
+      User.reset()
+      Player.print("User UI are reseted!")
+    elseif string.lower(event.parameters) == "resetuserallui" then
+      User.resetAll()
       Player.print("User UI are reseted!")
     elseif string.lower(event.parameters) == "resetcaches" then
       Controller.resetCaches()

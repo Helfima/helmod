@@ -29,6 +29,17 @@ function AbstractTab.methods:getButtonStyles()
 end
 
 -------------------------------------------------------------------------------
+-- Get panel name
+--
+-- @function [parent=#AbstractTab] getPanelName
+--
+-- @return #LuaGuiElement
+--
+function AbstractTab.methods:getPanelName()
+  return "HMTab"
+end
+
+-------------------------------------------------------------------------------
 -- Get or create index panel
 --
 -- @function [parent=#AbstractTab] getIndexPanel
@@ -165,8 +176,10 @@ function AbstractTab.methods:getResultPanel2()
   panel.style.horizontally_stretchable = true
   panel.style.vertically_stretchable = true
   
-  local panel1 = ElementGui.addGuiFrameV(panel, "result1", helmod_frame_style.panel)
-  local panel2 = ElementGui.addGuiFrameV(panel, "result2", helmod_frame_style.panel, self:getButtonCaption())
+  local panel1 = ElementGui.addGuiFlowV(panel, "result1", helmod_flow_style.vertical)
+  local panel2 = ElementGui.addGuiFrameV(panel, "result2", helmod_frame_style.section, self:getButtonCaption())
+  panel2.style.horizontally_stretchable = true
+  panel2.style.vertically_stretchable = true
   return panel1,panel2
 end
 
@@ -200,7 +213,7 @@ function AbstractTab.methods:getResultScrollPanel2()
   local header_panel2 = ElementGui.addGuiFlowV(parent_panel2, "header-data2", helmod_flow_style.vertical)
   local scroll_panel1 = ElementGui.addGuiScrollPane(parent_panel1, "scroll-data1", helmod_frame_style.scroll_pane, true, true)
   --scroll_panel1.style.horizontally_stretchable = true
-  --scroll_panel1.style.vertically_stretchable = true
+  scroll_panel1.style.vertically_stretchable = true
   scroll_panel1.style.width = 70
   local scroll_panel2 = ElementGui.addGuiScrollPane(parent_panel2, "scroll-data2", helmod_frame_style.scroll_pane, true, true)
   scroll_panel2.style.horizontally_stretchable = true
@@ -213,14 +226,14 @@ end
 --
 -- @function [parent=#AbstractTab] onUpdate
 --
+-- @param #LuaEvent event
+-- @param #string action action name
 -- @param #string item first item name
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractTab.methods:onUpdate(item, item2, item3)
+function AbstractTab.methods:onUpdate(event, action, item, item2, item3)
   Logging:debug(self:classname(), "update():", item, item2, item3)
-  Logging:debug(self:classname(), "update():global", global)
-  local globalGui = Player.getGlobalGui()
   local panel = self:getPanel()
 
   self:beforeUpdate(item, item2, item3)
@@ -230,8 +243,8 @@ function AbstractTab.methods:onUpdate(item, item2, item3)
   self:updateHeader(item, item2, item3)
   self:updateData(item, item2, item3)
 
-  Logging:debug(self:classname(), "debug_mode", Player.getSettings("debug"))
-  if Player.getSettings("debug", true) ~= "none" then
+  Logging:debug(self:classname(), "debug_mode", User.getModGlobalSetting("debug"))
+  if User.getModGlobalSetting("debug") ~= "none" then
     self:updateDebugPanel()
   end
 
@@ -250,8 +263,8 @@ function AbstractTab.methods:updateMenuPanel(item, item2, item3)
   Logging:debug(self:classname(), "updateMenuPanel():", item, item2, item3)
   local models = Model.getModels()
   local model = Model.getModel()
-  local model_id = Player.getGlobalGui("model_id")
-  local globalGui = Player.getGlobalGui()
+  local model_id = User.getParameter("model_id")
+  local current_block = User.getParameter("current_block")
 
   -- action panel
   local action_panel = self:getLeftMenuPanel()
@@ -261,7 +274,7 @@ function AbstractTab.methods:updateMenuPanel(item, item2, item3)
   for _, form in pairs(Controller.getViews()) do
     if string.find(form:classname(), "Tab") and form:isVisible() and not(form:isSpecial()) then
       local style, selected_style = form:getButtonStyles()
-      if Controller.isActiveForm(form:classname()) then style = selected_style end
+      if User.isActiveForm(form:classname()) then style = selected_style end
       ElementGui.addGuiButton(group4, self:classname().."=change-tab=ID=", form:classname(), style, nil, form:getButtonCaption())
     end
   end
@@ -279,7 +292,7 @@ function AbstractTab.methods:updateMenuPanel(item, item2, item3)
   else
     -- add recipe
     local group1 = ElementGui.addGuiFlowH(action_panel,"group1",helmod_flow_style.horizontal)
-    local block_id = globalGui.currentBlock or "new"
+    local block_id = current_block or "new"
     ElementGui.addGuiButton(group1, "HMRecipeSelector=OPEN=ID=", block_id, "helmod_button_icon_wrench",nil, ({"helmod_result-panel.add-button-recipe"}))
     ElementGui.addGuiButton(group1, "HMTechnologySelector=OPEN=ID=", block_id, "helmod_button_icon_graduation",nil, ({"helmod_result-panel.add-button-technology"}))
     ElementGui.addGuiButton(group1, "HMContainerSelector=OPEN=ID=", block_id, "helmod_button_icon_container",nil, ({"helmod_result-panel.select-button-container"}))
@@ -294,7 +307,7 @@ function AbstractTab.methods:updateMenuPanel(item, item2, item3)
       ElementGui.addGuiButton(group2, "HMDownload=OPEN=ID=", "upload", "helmod_button_icon_upload", nil, ({"helmod_result-panel.upload-button-production-line"}))
     end
     -- delete control
-    if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 4) > 0) then
+    if User.isAdmin() or model.owner == User.name() or (model.share ~= nil and bit32.band(model.share, 4) > 0) then
       if self:classname() == "HMProductionLineTab" then
         ElementGui.addGuiButton(group2, self:classname().."=remove-model=ID=", model.id, "helmod_button_icon_delete_red", nil, ({"helmod_result-panel.remove-button-production-line"}))
       end
@@ -347,7 +360,7 @@ end
 function AbstractTab.methods:updateIndexPanel(item, item2, item3)
   Logging:debug(self:classname(), "updateIndexPanel():", item, item2, item3)
   local models = Model.getModels()
-  local model_id = Player.getGlobalGui("model_id")
+  local model_id = User.getParameter("model_id")
   
   if self:hasIndexModel() then
     -- index panel
@@ -411,45 +424,9 @@ end
 function AbstractTab.methods:addCellHeader(guiTable, name, caption, sorted)
   Logging:trace(self:classname(), "addCellHeader():", guiTable, name, caption, sorted)
 
-  if (name ~= "index" and name ~= "id" and name ~= "name" and name ~= "type") or Player.getSettings("display_data_col_"..name, true) then
+  if (name ~= "index" and name ~= "id" and name ~= "name" and name ~= "type") or User.getModGlobalSetting("display_data_col_"..name) then
     local cell = ElementGui.addGuiFrameH(guiTable,"header-"..name, helmod_frame_style.hidden)
     ElementGui.addGuiLabel(cell, "label", caption)
-    if sorted ~= nil then
-      ElementGui.addGuiButton(cell, self:classname().."=change-sort=ID=", sorted, Player.getSortedStyle(sorted))
-    end
-  end
-end
-
--------------------------------------------------------------------------------
--- Add icon in cell element
---
--- @function [parent=#AbstractTab] addIconRecipeCell
---
--- @param #LuaGuiElement cell
--- @param #table element production block
--- @param #string action
--- @param #boolean select
--- @param #string tooltip_name
--- @param #string color
---
--- @deprecated
---
-function AbstractTab.methods:addIconRecipeCell(cell, element, action, select, tooltip_name, color)
-  Logging:trace(self:classname(), "addIconRecipeCell():", element, action, select, tooltip_name, color)
-  local display_cell_mod = Player.getSettings("display_cell_mod")
-  -- ingredient = {type="item", name="steel-plate", amount=8}
-  if display_cell_mod == "small-icon" then
-    if cell ~= nil and select == true then
-      ElementGui.addGuiButtonSelectSpriteM(cell, action, Player.getRecipeIconType(element), element.name, element.name, ({tooltip_name, Player.getRecipeLocalisedName(element)}), color)
-    else
-      ElementGui.addGuiButtonSpriteM(cell, action, Player.getRecipeIconType(element), element.name, element.name, ({tooltip_name, Player.getRecipeLocalisedName(element)}), color)
-    end
-  else
-    if cell ~= nil and select == true then
-      ElementGui.addGuiButtonSelectSprite(cell, action, Player.getRecipeIconType(element), element.name, element.name, ({tooltip_name, Player.getRecipeLocalisedName(element)}), color)
-    else
-      ElementGui.addGuiButtonSprite(cell, action, Player.getRecipeIconType(element), element.name, element.name, ({tooltip_name, Player.getRecipeLocalisedName(element)}), color)
-    end
   end
 end
 
