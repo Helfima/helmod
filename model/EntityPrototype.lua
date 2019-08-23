@@ -51,6 +51,18 @@ function EntityPrototype.getType()
 end
 
 -------------------------------------------------------------------------------
+-- Return Allowed Effects
+--
+-- @function [parent=#EntityPrototype] getAllowedEffects
+--
+-- @return #table
+--
+function EntityPrototype.getAllowedEffects()
+  if lua_entity_prototype == nil then return nil end
+  return lua_entity_prototype.allowed_effects
+end
+
+-------------------------------------------------------------------------------
 -- Return ingredient_count
 --
 -- @function [parent=#EntityPrototype] getIngredientCount

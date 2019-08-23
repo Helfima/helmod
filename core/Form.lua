@@ -89,23 +89,28 @@ end
 function Form.methods:getPanel()
   local parent_panel = self:getParentPanel()
   if parent_panel[self:getPanelName()] ~= nil and parent_panel[self:getPanelName()].valid then
-    return parent_panel[self:getPanelName()]
+    return parent_panel[self:getPanelName()], parent_panel[self:getPanelName()]["content_panel"], parent_panel[self:getPanelName()]["header_panel"]["menu_panel"]
   end
-  if parent_panel.name == self.locate then
-    local panel = ElementGui.addGuiFrameV(parent_panel, self:getPanelName(), helmod_frame_style.default, self.panelCaption or self:classname())
-    panel.style.horizontally_stretchable = true
-    panel.style.vertically_stretchable = true
-    panel.location = User.getLocationForm(self:getPanelName())
-    ElementGui.setStyle(panel, self:classname(), "width")
-    ElementGui.setStyle(panel, self:classname(), "height")
-    --Logging:debug(self:classname(), "children",panel.children_names)
-    return panel
-  else
-    local panel = ElementGui.addGuiFlowH(parent_panel, self:classname(), helmod_flow_style.horizontal)
-    panel.style.horizontally_stretchable = true
-    panel.style.vertically_stretchable = true
-    return panel
-  end
+
+  local flow_panel = ElementGui.addGuiFrameV(parent_panel, self:getPanelName(), helmod_frame_style.hidden)
+  flow_panel.style.horizontally_stretchable = true
+  flow_panel.style.vertically_stretchable = true
+  flow_panel.location = User.getLocationForm(self:getPanelName())
+  Logging:debug(self:classname(), "location", self:getPanelName(), User.getLocationForm(self:getPanelName()))
+  ElementGui.setStyle(flow_panel, self:classname(), "width")
+  ElementGui.setStyle(flow_panel, self:classname(), "height")
+  
+  local header_panel = ElementGui.addGuiFlowH(flow_panel, "header_panel")
+  local title_panel = ElementGui.addGuiFrameH(header_panel, "title_panel", helmod_frame_style.default, self.panelCaption or self:classname())
+  title_panel.style.height = 40
+  local menu_panel = ElementGui.addGuiFrameH(header_panel, "menu_panel", helmod_frame_style.panel)
+  --menu_panel.style.horizontal_spacing = 10
+  menu_panel.style.horizontal_align = "right"
+  
+  local content_panel = ElementGui.addGuiFlowV(flow_panel, "content_panel")
+  title_panel.drag_target = flow_panel
+  --Logging:debug(self:classname(), "children",panel.children_names)
+  return flow_panel, content_panel, menu_panel
 end
 
 -------------------------------------------------------------------------------
@@ -116,15 +121,15 @@ end
 -- @return #LuaGuiElement
 --
 function Form.methods:getMenuPanel()
-  local parent_panel = self:getPanel()
+  local flow_panel, content_panel, menu_panel = self:getPanel()
   local panel_name = "menu"
-  if parent_panel[panel_name] ~= nil and parent_panel[panel_name].valid then
-    return parent_panel[panel_name]
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[panel_name]
   end
-  local panel = ElementGui.addGuiFlowH(parent_panel, panel_name, helmod_flow_style.horizontal)
+  local panel = ElementGui.addGuiFrameH(content_panel, panel_name, helmod_frame_style.default)
   panel.style.horizontally_stretchable = true
   --panel.style.vertically_stretchable = true
-  panel.style.height = 32
+  panel.style.height = 40
   return panel
 end
 
@@ -285,9 +290,9 @@ function Form.methods:prepare(event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
--- Update header
+-- Update top menu
 --
--- @function [parent=#Form] updateTitle
+-- @function [parent=#Form] updateTopMenu
 --
 -- @param #LuaEvent event
 -- @param #string action action name
@@ -295,16 +300,15 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Form.methods:updateTitle(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "updateTitle():", action, item, item2, item3)
+function Form.methods:updateTopMenu(event, action, item, item2, item3)
+  Logging:debug(self:classname(), "updateTopMenu()", action, item, item2, item3)
   -- ajoute un menu
   if self.panelCaption ~= nil then
 
-    local left_menu_panel = self:getLeftMenuPanel()
-    local right_menu_panel = self:getRightMenuPanel()
-    right_menu_panel.clear()
+    local flow_panel, content_panel, menu_panel = self:getPanel()
+    menu_panel.clear()
     if self.panelClose then
-      local group1 = ElementGui.addGuiFlowH(right_menu_panel,"group1",helmod_flow_style.horizontal)
+      local group1 = ElementGui.addGuiFlowH(menu_panel,"group1",helmod_flow_style.horizontal)
       for _, form in pairs(Controller.getViews()) do
         if string.find(self:classname(), "Tab") and string.find(form:classname(), "Tab") and form:isVisible() and form:isSpecial() then
           local style, selected_style = form:getButtonStyles()
@@ -313,7 +317,7 @@ function Form.methods:updateTitle(event, action, item, item2, item3)
         end
       end
 
-      local group2 = ElementGui.addGuiFlowH(right_menu_panel,"group2",helmod_flow_style.horizontal)
+      local group2 = ElementGui.addGuiFlowH(menu_panel,"group2",helmod_flow_style.horizontal)
       if self.help_button then
         ElementGui.addGuiButton(group2, "HMHelpPanel=OPEN", nil, "helmod_button_icon_help", nil, ({"helmod_button.help"}))
       end
@@ -335,10 +339,11 @@ end
 --
 function Form.methods:update(event, action, item, item2, item3)
   Logging:debug(self:classname(), "update():", action, item, item2, item3)
-  local panel = self:getPanel()
-  if self.auto_clear then panel.clear() end
-
-  self:updateTitle(event, action, item, item2, item3)
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if self.auto_clear then content_panel.clear() end
+  if action == "OPEN" then
+    self:updateTopMenu(event, action, item, item2, item3)
+  end
   self:onUpdate(event, action, item, item2, item3)
 end
 
@@ -366,10 +371,10 @@ end
 --
 function Form.methods:close(force)
   Logging:debug(self:classname(), "close()")
-  local panel = self:getPanel()
-  User.setCloseForm(self:classname(), panel.location)
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  User.setCloseForm(self:classname(), flow_panel.location)
   self:onClose()
-  panel.destroy()
+  flow_panel.destroy()
 end
 
 -------------------------------------------------------------------------------

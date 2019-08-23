@@ -29,11 +29,11 @@ end
 -- @return #LuaGuiElement
 --
 function RecipeEdition.methods:getObjectInfoPanel()
-  local panel = self:getPanel()
-  if panel["info"] ~= nil and panel["info"].valid then
-    return panel["info"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["info"] ~= nil and content_panel["info"].valid then
+    return content_panel["info"]
   end
-  local panel = ElementGui.addGuiFrameV(panel, "info", helmod_frame_style.default)
+  local panel = ElementGui.addGuiFrameV(content_panel, "info", helmod_frame_style.default)
   
   return panel
 end

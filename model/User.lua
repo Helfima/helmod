@@ -7,7 +7,7 @@ local User = {
   classname = "HMUser",
   gui = "gui",
   prefixe = "helmod",
-  version = "0.8.18"
+  version = "0.9.0"
 }
 
 -------------------------------------------------------------------------------
@@ -328,10 +328,10 @@ function User.getLocationForm(classname)
   Logging:debug(User.classname, "getLocationForm()", classname)
   local navigate = User.getNavigate()
   if string.find(classname, "Tab") then
-    if navigate["Tab"] == nil then return {50,50} end
+    if navigate["Tab"] == nil or navigate["Tab"]["location"] == nil then return {50,50} end
     return navigate["Tab"]["location"]
   else
-    if navigate[classname] == nil then return {50,100} end
+    if navigate[classname] == nil or navigate[classname]["location"] == nil then return {200,100} end
     return navigate[classname]["location"]
   end
 end
@@ -346,10 +346,17 @@ end
 function User.setActiveForm(classname)
   Logging:debug(User.classname, "setActiveForm()", classname)
   local navigate = User.getNavigate()
+  if string.find(classname, "Edition") then
+    for form_name,form in pairs(navigate) do
+      if Controller.getView(form_name) ~= nil and form_name ~= classname and string.find(form_name, "Edition") then
+        Controller.getView(form_name):close(true)
+      end
+    end
+  end
   if string.find(classname, "Tab") then
     for form_name,form in pairs(navigate) do
       if Controller.getView(form_name) ~= nil and form_name ~= classname and string.find(form_name, "Tab") then
-        Controller.getView(form_name):close(true)
+        navigate[form_name]["open"] = false
       end
     end
   end
@@ -373,6 +380,21 @@ function User.isActiveForm(classname)
     return navigate[classname]["open"] == true
   end
   return false
+end
+
+-------------------------------------------------------------------------------
+-- Is Active Form
+--
+-- @function [parent=#User] isActiveForm
+--
+-- @param #string classname
+-- 
+-- @return #boolean
+--
+function User.update()
+  if User.getVersion() < User.version then
+    User.reset()
+  end
 end
 
 return User

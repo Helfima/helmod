@@ -167,11 +167,12 @@ end
 -- @param #string style style of button
 -- @param #string caption container for element
 -- @param #string tooltip displayed text
+-- @param #number size
 --
 -- @return #LuaGuiElement the LuaGuiElement added
 --
-function ElementGui.addGuiButton(parent, action, key, style, caption, tooltip)
-  Logging:trace(ElementGui.classname, "addGuiButton", parent, action, key, style, caption, tooltip)
+function ElementGui.addGuiButton(parent, action, key, style, caption, tooltip, size)
+  Logging:trace(ElementGui.classname, "addGuiButton", parent, action, key, style, caption, tooltip, size)
   local options = {}
   options.type = "button"
   if key ~= nil then
@@ -204,6 +205,10 @@ function ElementGui.addGuiButton(parent, action, key, style, caption, tooltip)
       options.caption = key
     end
     button = parent.add(options)
+  end
+  if size ~= nil then
+    button.style.width = size
+    button.style.height = size
   end
   return button
 end
@@ -711,9 +716,7 @@ function ElementGui.addGuiFlowH(parent, key, style)
   options.type = "flow"
   options.direction = "horizontal"
   options.name = key
-  if style ~= nil then
-    options.style = style
-  end
+  options.style = style or helmod_flow_style.horizontal
   return parent.add(options)
 end
 
@@ -734,9 +737,7 @@ function ElementGui.addGuiFlowV(parent, key, style)
   options.type = "flow"
   options.direction = "vertical"
   options.name = key
-  if style ~= nil then
-    options.style = style
-  end
+  options.style = style or helmod_flow_style.vertical
   return parent.add(options)
 end
 

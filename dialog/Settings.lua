@@ -22,17 +22,6 @@ function Settings.methods:onInit(parent)
 end
 
 -------------------------------------------------------------------------------
--- Get the parent panel
---
--- @function [parent=#Settings] getParentPanel
---
--- @return #LuaGuiElement
---
-function Settings.methods:getParentPanel()
-  return Controller.getDialogPanel()
-end
-
--------------------------------------------------------------------------------
 -- On before event
 --
 -- @function [parent=#Settings] onBeforeEvent
@@ -56,11 +45,11 @@ end
 -- @function [parent=#Settings] getAboutSettingsPanel
 --
 function Settings.methods:getAboutSettingsPanel()
-  local panel = self:getPanel()
-  if panel["about-settings"] ~= nil and panel["about-settings"].valid then
-    return panel["about-settings"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["about-settings"] ~= nil and content_panel["about-settings"].valid then
+    return content_panel["about-settings"]
   end
-  return ElementGui.addGuiFrameV(panel, "about-settings", helmod_frame_style.panel, ({"helmod_settings-panel.about-section"}))
+  return ElementGui.addGuiFrameV(content_panel, "about-settings", helmod_frame_style.panel, ({"helmod_settings-panel.about-section"}))
 end
 
 -------------------------------------------------------------------------------

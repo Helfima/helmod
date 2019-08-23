@@ -178,11 +178,11 @@ end
 -- @function [parent=#HelpPanel] getContentPanel
 --
 function HelpPanel.methods:getContentPanel()
-  local panel = self:getPanel()
-  if panel["content-panel"] ~= nil and panel["content-panel"].valid then
-    return panel["content-panel"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["content-panel"] ~= nil and content_panel["content-panel"].valid then
+    return content_panel["content-panel"]
   end
-  local content_panel = ElementGui.addGuiFlowV(panel, "content-panel", helmod_flow_style.vertical)
+  local content_panel = ElementGui.addGuiFrameV(content_panel, "content-panel", helmod_frame_style.default)
   content_panel.style.horizontally_stretchable = true
   return content_panel
 end

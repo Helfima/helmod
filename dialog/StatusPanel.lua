@@ -56,11 +56,11 @@ end
 -- @function [parent=#StatusPanel] getInfoPanel
 --
 function StatusPanel.methods:getInfoPanel()
-  local panel = self:getPanel()
-  if panel["info-panel"] ~= nil and panel["info-panel"].valid then
-    return panel["info-panel"]["scroll-panel"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["info-panel"] ~= nil and content_panel["info-panel"].valid then
+    return content_panel["info-panel"]["scroll-panel"]
   end
-  local mainPanel = ElementGui.addGuiFrameV(panel, "info-panel", helmod_frame_style.panel)
+  local mainPanel = ElementGui.addGuiFrameV(content_panel, "info-panel", helmod_frame_style.panel)
   return ElementGui.addGuiScrollPane(mainPanel, "scroll-panel", helmod_scroll_style.pin_tab)
 end
 
@@ -70,11 +70,11 @@ end
 -- @function [parent=#StatusPanel] getHeaderPanel
 --
 function StatusPanel.methods:getHeaderPanel()
-  local panel = self:getPanel()
-  if panel["header"] ~= nil and panel["header"].valid then
-    return panel["header"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["header"] ~= nil and content_panel["header"].valid then
+    return content_panel["header"]
   end
-  return ElementGui.addGuiFrameH(panel, "header", helmod_frame_style.panel)
+  return ElementGui.addGuiFrameH(content_panel, "header", helmod_frame_style.panel)
 end
 
 -------------------------------------------------------------------------------

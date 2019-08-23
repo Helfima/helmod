@@ -14,7 +14,7 @@ AbstractTab = setclass("HMAbstractTab", Form)
 -- @param #Controller parent parent controller
 --
 function AbstractTab.methods:onInit(parent)
-  self.panelCaption = string.format("%s V%s Test","Helmod",game.active_mods["helmod"])
+  self.panelCaption = string.format("%s %s","Helmod",game.active_mods["helmod"])
 end
 
 -------------------------------------------------------------------------------
@@ -45,13 +45,15 @@ end
 -- @function [parent=#AbstractTab] getIndexPanel
 --
 function AbstractTab.methods:getIndexPanel()
-  local parent_panel = self:getPanel()
+  local flow_panel, content_panel, menu_panel = self:getPanel()
   local panel_name = "index_panel"
-  if parent_panel[panel_name] ~= nil and parent_panel[panel_name].valid then
-    return parent_panel[panel_name]
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[panel_name]["table_index"]
   end
-  local panel = ElementGui.addGuiTable(parent_panel, panel_name, ElementGui.getIndexColumnNumber(), helmod_table_style.list)
-  return panel
+  local panel = ElementGui.addGuiFrameH(content_panel, panel_name, helmod_frame_style.panel)
+  panel.style.horizontally_stretchable = true
+  local table_index = ElementGui.addGuiTable(panel, "table_index", ElementGui.getIndexColumnNumber(), helmod_table_style.list)
+  return table_index
 end
 
 -------------------------------------------------------------------------------
@@ -60,12 +62,12 @@ end
 -- @function [parent=#AbstractTab] getDebugPanel
 --
 function AbstractTab.methods:getDebugPanel()
-  local parent_panel = self:getPanel()
+  local flow_panel, content_panel, menu_panel = self:getPanel()
   local panel_name = "debug_panel"
-  if parent_panel[panel_name] ~= nil and parent_panel[panel_name].valid then
-    return parent_panel[panel_name]
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[panel_name]
   end
-  local panel = ElementGui.addGuiFrameH(parent_panel, panel_name, helmod_frame_style.panel, "Debug")
+  local panel = ElementGui.addGuiFrameH(content_panel, panel_name, helmod_frame_style.panel, "Debug")
   return panel
 end
 
@@ -90,7 +92,7 @@ function AbstractTab.methods:getInfoPanel()
   ElementGui.setStyle(info_panel, "block_info", "width")
   local info_scroll = ElementGui.addGuiScrollPane(info_panel, "info-scroll", helmod_frame_style.scroll_pane, true)
   info_scroll.style.horizontally_stretchable = true
-  
+
   local output_panel = ElementGui.addGuiFlowV(panel, "output", helmod_flow_style.vertical)
   ElementGui.addGuiLabel(output_panel, "label-info", ({"helmod_common.output"}), "helmod_label_title_frame")
   ElementGui.setStyle(output_panel, "block_info", "height")
@@ -127,7 +129,7 @@ function AbstractTab.methods:getInfoPanel2()
   ElementGui.setStyle(info_panel, "block_info", "width")
   local info_scroll = ElementGui.addGuiScrollPane(info_panel, "info-scroll", helmod_frame_style.scroll_pane, true)
   info_scroll.style.horizontally_stretchable = true
-  
+
   local output_panel = ElementGui.addGuiFlowV(panel, "output", helmod_flow_style.vertical)
   ElementGui.addGuiLabel(output_panel, "label-info", ({"helmod_common.output"}), "helmod_label_title_frame")
   ElementGui.setStyle(output_panel, "block_info", "height")
@@ -149,12 +151,12 @@ end
 -- @function [parent=#AbstractTab] getResultPanel
 --
 function AbstractTab.methods:getResultPanel()
-  local parent_panel = self:getPanel()
+  local flow_panel, content_panel, menu_panel = self:getPanel()
   local panel_name = "result"
-  if parent_panel[panel_name] ~= nil and parent_panel[panel_name].valid then
-    return parent_panel[panel_name]
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[panel_name]
   end
-  local panel = ElementGui.addGuiFrameV(parent_panel, panel_name, helmod_frame_style.section, self:getButtonCaption())
+  local panel = ElementGui.addGuiFrameV(content_panel, panel_name, helmod_frame_style.default, self:getButtonCaption())
   panel.style.horizontally_stretchable = true
   panel.style.vertically_stretchable = true
   return panel
@@ -166,18 +168,18 @@ end
 -- @function [parent=#AbstractTab] getResultPanel2
 --
 function AbstractTab.methods:getResultPanel2()
-  local parent_panel = self:getPanel()
+  local flow_panel, content_panel, menu_panel = self:getPanel()
   local panel_name = "result2"
-  if parent_panel[panel_name] ~= nil and parent_panel[panel_name].valid then
-    return parent_panel[panel_name]["result1"],parent_panel[panel_name]["result2"]
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[panel_name]["result1"],content_panel[panel_name]["result2"]
   end
-  local panel = ElementGui.addGuiTable(parent_panel,panel_name,2, helmod_table_style.panel)
+  local panel = ElementGui.addGuiTable(content_panel,panel_name,2, helmod_table_style.panel)
   --ElementGui.setStyle(panel, "block_data", "height")
   panel.style.horizontally_stretchable = true
   panel.style.vertically_stretchable = true
-  
-  local panel1 = ElementGui.addGuiFlowV(panel, "result1", helmod_flow_style.vertical)
-  local panel2 = ElementGui.addGuiFrameV(panel, "result2", helmod_frame_style.section, self:getButtonCaption())
+
+  local panel1 = ElementGui.addGuiFrameV(panel, "result1", helmod_frame_style.default)
+  local panel2 = ElementGui.addGuiFrameV(panel, "result2", helmod_frame_style.default, self:getButtonCaption())
   panel2.style.horizontally_stretchable = true
   panel2.style.vertically_stretchable = true
   return panel1,panel2
@@ -234,12 +236,11 @@ end
 --
 function AbstractTab.methods:onUpdate(event, action, item, item2, item3)
   Logging:debug(self:classname(), "update():", item, item2, item3)
-  local panel = self:getPanel()
 
   self:beforeUpdate(item, item2, item3)
   self:updateMenuPanel(item, item2, item3)
   self:updateIndexPanel(item, item2, item3)
-  
+
   self:updateHeader(item, item2, item3)
   self:updateData(item, item2, item3)
 
@@ -278,7 +279,7 @@ function AbstractTab.methods:updateMenuPanel(item, item2, item3)
       ElementGui.addGuiButton(group4, self:classname().."=change-tab=ID=", form:classname(), style, nil, form:getButtonCaption())
     end
   end
-  
+
   if self:classname() == "HMAdminTab" then
     ElementGui.addGuiButton(action_panel, "HMRuleEdition=", "OPEN", "helmod_button_default", ({"helmod_result-panel.add-button-rule"}))
     ElementGui.addGuiButton(action_panel, self:classname().."=reset-rules=", nil, "helmod_button_default", ({"helmod_result-panel.reset-button-rule"}))
@@ -317,7 +318,7 @@ function AbstractTab.methods:updateMenuPanel(item, item2, item3)
     end
     -- refresh control
     ElementGui.addGuiButton(group2, self:classname().."=refresh-model=ID=", model.id, "helmod_button_icon_refresh", nil, ({"helmod_result-panel.refresh-button"}))
-   
+
     local group3 = ElementGui.addGuiFlowH(action_panel,"group3",helmod_flow_style.horizontal)
     -- pin control
     if self:classname() == "HMProductionBlockTab" then
@@ -334,7 +335,25 @@ function AbstractTab.methods:updateMenuPanel(item, item2, item3)
       ElementGui.addGuiButton(group3, "HMStatusPanel=OPEN=ID=", block_id, "helmod_button_icon_pin", nil, ({"helmod_result-panel.tab-button-pin"}))
     end
   end
+
+
+  local time_panel = self:getRightMenuPanel()
+  time_panel.clear()
+
+  local items = {}
+  local default_time = 1
+  for index,base_time in pairs(helmod_base_times) do
+    table.insert(items,base_time.tooltip)
+    if model.time == base_time.value then
+      default_time = base_time.tooltip
+    end
+  end
+
+  local group_time = ElementGui.addGuiFlowH(time_panel,"group_time",helmod_flow_style.horizontal)
+  ElementGui.addGuiLabel(group_time,"label_time",{"helmod_data-panel.base-time", ""}, "helmod_label_title_frame")
   
+  ElementGui.addGuiDropDown(group_time, self:classname().."=change-time=ID=", model_id, items, default_time)
+
 end
 
 -------------------------------------------------------------------------------
@@ -361,7 +380,7 @@ function AbstractTab.methods:updateIndexPanel(item, item2, item3)
   Logging:debug(self:classname(), "updateIndexPanel():", item, item2, item3)
   local models = Model.getModels()
   local model_id = User.getParameter("model_id")
-  
+
   if self:hasIndexModel() then
     -- index panel
     local index_panel = self:getIndexPanel()

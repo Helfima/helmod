@@ -56,11 +56,11 @@ end
 -- @function [parent=#ProductEdition] getInfoPanel
 --
 function ProductEdition.methods:getInfoPanel()
-  local panel = self:getPanel()
-  if panel["info"] ~= nil and panel["info"].valid then
-    return panel["info"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["info"] ~= nil and content_panel["info"].valid then
+    return content_panel["info"]
   end
-  local info_panel = ElementGui.addGuiFrameV(panel, "info", helmod_frame_style.panel)
+  local info_panel = ElementGui.addGuiFrameV(content_panel, "info", helmod_frame_style.panel)
   info_panel.style.horizontally_stretchable = true
   return info_panel
 end
@@ -71,11 +71,11 @@ end
 -- @function [parent=#ProductEdition] getToolPanel
 --
 function ProductEdition.methods:getToolPanel()
-  local panel = self:getPanel()
-  if panel["tool_panel"] ~= nil and panel["tool_panel"].valid then
-    return panel["tool_panel"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["tool_panel"] ~= nil and content_panel["tool_panel"].valid then
+    return content_panel["tool_panel"]
   end
-  local tool_panel = ElementGui.addGuiFrameV(panel, "tool_panel", helmod_frame_style.panel, {"helmod_product-edition-panel.tool"})
+  local tool_panel = ElementGui.addGuiFrameV(content_panel, "tool_panel", helmod_frame_style.panel, {"helmod_product-edition-panel.tool"})
   tool_panel.style.horizontally_stretchable = true
   ElementGui.setStyle(tool_panel, "edition_product_tool", "height")
   return tool_panel
@@ -87,11 +87,11 @@ end
 -- @function [parent=#ProductEdition] getActionPanel
 --
 function ProductEdition.methods:getActionPanel()
-  local panel = self:getPanel()
-  if panel["action_panel"] ~= nil and panel["action_panel"].valid then
-    return panel["action_panel"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["action_panel"] ~= nil and content_panel["action_panel"].valid then
+    return content_panel["action_panel"]
   end
-  local action_panel = ElementGui.addGuiFrameV(panel, "action_panel", helmod_frame_style.panel)
+  local action_panel = ElementGui.addGuiFrameV(content_panel, "action_panel", helmod_frame_style.panel)
   action_panel.style.horizontally_stretchable = true
   return action_panel
 end

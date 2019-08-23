@@ -71,7 +71,6 @@ function Controller.init()
   Logging:debug(Controller.classname, "init()")
 
   local controllers = {}
-  table.insert(controllers, Settings:new())
   table.insert(controllers, HelpPanel:new())
   table.insert(controllers, Download:new())
 
@@ -158,7 +157,7 @@ function Controller.cleanController(player)
       if string.find(children_name,"helmod") then
         lua_gui_element[children_name].destroy()
       end
-      if Controller.getView(children_name) then
+      if Controller.getView(children_name) and children_name ~= "HMPinPanel" then
         Controller.getView(children_name):close()
       end
       if children_name == "HMTab" then
@@ -170,6 +169,23 @@ function Controller.cleanController(player)
       end
     end
   end
+end
+
+-------------------------------------------------------------------------------
+-- closeEditionOrSelector
+--
+-- @function [parent=#Controller] closeEditionOrSelector
+--
+-- @param #LuaPlayer player
+--
+function Controller.closeEditionOrSelector()
+  Logging:trace(Controller.classname, "closeEditionOrSelector()")
+    local lua_gui_element = Player.getGui("screen")
+    for _,children_name in pairs(lua_gui_element.children_names) do
+      if Controller.getView(children_name) and (string.find(children_name,"Edition") ~= nil) then
+        Controller.getView(children_name):close()
+      end
+    end
 end
 
 -------------------------------------------------------------------------------
@@ -187,7 +203,7 @@ function Controller.bindController(player)
     if lua_gui_element["helmod_planner-command"] ~= nil then lua_gui_element["helmod_planner-command"].destroy() end
     
     lua_gui_element = ModGui.get_button_flow(Player.native())
-    if not(User.getModSetting("display_main_icon")) or User.getVersion() < "0.8.18" then
+    if not(User.getModSetting("display_main_icon")) or User.getVersion() < User.version then
       if lua_gui_element["helmod_planner-command"] ~= nil then lua_gui_element["helmod_planner-command"].destroy() end
     end
     if lua_gui_element ~= nil and lua_gui_element["helmod_planner-command"] == nil and User.getModSetting("display_main_icon") then
@@ -196,6 +212,11 @@ function Controller.bindController(player)
       gui_button.style.width = 37
       gui_button.style.height = 37
     end
+    if User.getVersion() < User.version then
+      local message = string.format("%s %s: %s","Helmod",game.active_mods["helmod"], "Now every panel is draggable.")
+      Player.print(message)
+    end
+    User.update()
   end
 end
 
@@ -334,16 +355,16 @@ function Controller.sendEvent(event, classname, action, item, item2, item3)
     end
 
     if Event.prepare == false then
-      Logging:debug(Controller.classname, "-> prepare", game.tick)
+      Logging:trace(Controller.classname, "-> prepare", game.tick)
       if action == "OPEN" then
         User.setActiveForm(classname)
       end
 
-      Logging:debug(Controller.classname, "-> before event: navigate", navigate)
+      Logging:trace(Controller.classname, "-> before event: navigate", navigate)
 
       for _,form in pairs(views) do
         local form_name = form:classname()
-        Logging:debug(Controller.classname, "--> beforeEvent", form_name, classname)
+        Logging:trace(Controller.classname, "--> beforeEvent", form_name, classname)
         if form_name == classname and User.isActiveForm(form_name) then
           form:beforeEvent(event, action, item, item2, item3)
         end
@@ -351,7 +372,7 @@ function Controller.sendEvent(event, classname, action, item, item2, item3)
 
       for _,form in pairs(views) do
         local form_name = form:classname()
-        Logging:debug(Controller.classname, "--> onEvent", form_name, classname)
+        Logging:trace(Controller.classname, "--> onEvent", form_name, classname)
         if form_name == classname and User.isActiveForm(form_name) then
           form:onEvent(event, action, item, item2, item3)
         end
@@ -359,7 +380,7 @@ function Controller.sendEvent(event, classname, action, item, item2, item3)
       
       for _,form in pairs(views) do
         local form_name = form:classname()
-        Logging:debug(Controller.classname, "--> prepare", form_name)
+        Logging:trace(Controller.classname, "--> prepare", form_name)
         if User.isActiveForm(form_name) then
           local prepared = form:prepare(event, action, item, item2, item3)
           if(prepared == true) then
@@ -374,17 +395,17 @@ function Controller.sendEvent(event, classname, action, item, item2, item3)
       end
     end
 
-    Logging:debug(Controller.classname, "-> open and update", game.tick)
+    Logging:trace(Controller.classname, "-> open and update", game.tick)
     for _,form in pairs(views) do
       local form_name = form:classname()
-      Logging:debug(Controller.classname, "--> open and update", form_name, User.isActiveForm(form_name))
+      Logging:trace(Controller.classname, "--> open and update", form_name, User.isActiveForm(form_name))
       if User.isActiveForm(form_name) then
         if action == "OPEN" or Event.force_open == true then
-          Logging:debug(Controller.classname, "---> open form", form_name)
+          Logging:trace(Controller.classname, "---> open form", form_name)
           form:open(event, action, item, item2, item3)
         end
         if not(action ~= "OPEN" and form_name == classname) or Event.force_refresh == true then
-          Logging:debug(Controller.classname, "---> update form", form_name)
+          Logging:trace(Controller.classname, "---> update form", form_name)
           form:update(event, action, item, item2, item3)
         end
       else
@@ -478,6 +499,11 @@ function Controller.onEvent(event, action, item, item2, item3)
   Logging:debug(Controller.classname, "onEvent()", action, item, item2, item3)
   local model = Model.getModel()
 
+  -- ***************************
+  -- access for all
+  -- ***************************
+  Controller.onEventAccessAll(event, action, item, item2, item3)
+
   -- *******************************
   -- access admin only
   -- *******************************
@@ -509,11 +535,6 @@ function Controller.onEvent(event, action, item, item2, item3)
   if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 4) > 0) then
     Controller.onEventAccessDelete(event, action, item, item2, item3)
   end
-
-  -- ***************************
-  -- access for all
-  -- ***************************
-  Controller.onEventAccessAll(event, action, item, item2, item3)
 
 end
 
@@ -553,6 +574,7 @@ function Controller.onEventAccessAll(event, action, item, item2, item3)
     end
     Event.force_refresh = true
     Event.force_open = true
+    Controller.closeEditionOrSelector()
     Controller.createEvent(event, item, "OPEN", item, item2, item3)
   end
 
@@ -665,7 +687,9 @@ function Controller.onEventAccessWrite(event, action, item, item2, item3)
   end
 
   if action == "change-time" then
-    model.time = tonumber(item) or 1
+    local index = event.element.selected_index
+    model.time = helmod_base_times[index].value or 1
+    Logging:debug(Controller.classname, "change-time", index, helmod_base_times[index], model.time)
     ModelCompute.update()
     Event.force_refresh = true
   end

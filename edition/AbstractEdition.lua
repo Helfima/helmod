@@ -55,11 +55,11 @@ end
 -- @function [parent=#AbstractEdition] getTabPanel
 --
 function AbstractEdition.methods:getTabPanel()
-  local panel = self:getPanel()
-  if panel["menu_panel"] ~= nil and panel["menu_panel"].valid then
-    return panel["menu_panel"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["menu_panel"] ~= nil and content_panel["menu_panel"].valid then
+    return content_panel["menu_panel"]
   end
-  return ElementGui.addGuiTable(panel, "menu_panel", 2, helmod_table_style.panel)
+  return ElementGui.addGuiTable(content_panel, "menu_panel", 2, helmod_table_style.panel)
 end
 
 -------------------------------------------------------------------------------
@@ -89,6 +89,7 @@ function AbstractEdition.methods:getRightPanel()
   end
   local right_panel = ElementGui.addGuiFrameV(panel, "right_panel", helmod_frame_style.panel)
   ElementGui.setStyle(right_panel,"recipe_edition_2","width")
+  right_panel.style.horizontally_stretchable = true
   return right_panel
 end
 
@@ -104,7 +105,9 @@ function AbstractEdition.methods:getTabLeftPanel()
   end
   local tab_panel = ElementGui.addGuiFrameH(left_panel, "tab_left_panel", helmod_frame_style.hidden)
   ElementGui.setStyle(tab_panel,"recipe_tab","height")
-  return ElementGui.addGuiTable(tab_panel, "tab_panel", 5, helmod_table_style.tab)
+  local table_panel = ElementGui.addGuiTable(tab_panel, "tab_panel", 5, helmod_table_style.tab)
+  table_panel.style.horizontally_stretchable = true
+  return table_panel
 end
 
 -------------------------------------------------------------------------------
@@ -119,7 +122,9 @@ function AbstractEdition.methods:getTabRightPanel()
   end
   local tab_panel = ElementGui.addGuiFrameV(right_panel, "tab_right_panel", helmod_frame_style.hidden)
   ElementGui.setStyle(tab_panel,"recipe_tab","height")
-  return ElementGui.addGuiTable(tab_panel, "tab_panel", 5, helmod_table_style.tab)
+  local table_panel = ElementGui.addGuiTable(tab_panel, "tab_panel", 5, helmod_table_style.tab)
+  table_panel.style.horizontally_stretchable = true
+  return table_panel
 end
 
 -------------------------------------------------------------------------------
@@ -275,7 +280,7 @@ function AbstractEdition.methods:onOpen(event, action, item, item2, item3)
     User.setParameter("factory_tab", true)
   end
 
-  self:updateTitle(event, action, item, item2, item3)
+  --self:updateTitle(event, action, item, item2, item3)
   self:buildHeaderPanel()
   if object ~= nil then
     -- factory
@@ -771,10 +776,12 @@ function AbstractEdition.methods:updateBeaconModulesSelector(item, item2, item3)
   if selectorPanel["modules"] == nil then
     local tableModulesPanel = ElementGui.addGuiTable(selectorPanel,"modules",5)
     local prototype = RecipePrototype.load(object)
+    local beacon = object.beacon
+    local allowed_effects = EntityPrototype.load(beacon).getAllowedEffects()
     local category = prototype.getCategory()
     for k, module in pairs(Player.getModules(category)) do
       local allowed = true
-      if Player.getModuleBonus(module.name, "productivity") > 0 and model_filter_beacon_module == true then
+      if Player.getModuleBonus(module.name, "productivity") > 0 and not(allowed_effects.productivity) and model_filter_beacon_module == true then
         allowed = false
       end
       local tooltip = ElementGui.getTooltipModule(module.name)

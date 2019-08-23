@@ -226,24 +226,7 @@ default_gui["helmod_button_selected"] = {
   pie_progress_color = {r=1, g=1, b=1}
 }
 
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] favicon
-
 local icon_corner_size = 1
-default_gui["helmod_icon"] = {
-  type = "button_style",
-  parent = "helmod_button_default",
-  width = 36,
-  height = 36,
-  scalable = false,
-  default_graphical_set = monolithIcon("__helmod__/graphics/icons/helmod_icon.png", 32, 1, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
-  hovered_graphical_set = monolithIcon("__helmod__/graphics/icons/helmod_icon.png", 32, 1, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
-  clicked_graphical_set = monolithIcon("__helmod__/graphics/icons/helmod_icon.png", 32, 1, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true),
-  disabled_graphical_set = monolithIcon("__helmod__/graphics/icons/helmod_icon.png", 32, 1, {0,0}, {x=0,y=0}, {top=0,right=0,bottom=0,left=0}, true)
-}
-
 -------------------------------------------------------------------------------
 -- Style of button
 --
@@ -1475,6 +1458,33 @@ default_gui["helmod_frame_section"] = {
   type = "frame_style",
   parent = "helmod_frame_default",
   graphical_set = compositionIcon("__helmod__/graphics/gui.png", corner_size, {24, 8})
+}
+
+-------------------------------------------------------------------------------
+-- Style of panel
+--
+-- @field [parent=#Frame] panel
+--
+
+default_gui["helmod_frame_panel"] = {
+  type = "frame_style",
+  parent = "helmod_frame_default",
+  top_padding  = 0,
+  right_padding = 0,
+  bottom_padding = 0,
+  left_padding = 0,
+  horizontal_flow =
+    {
+      type = "horizontal_flow_style",
+      horizontal_spacing = 0
+    },
+
+    vertical_flow =
+    {
+      type = "vertical_flow_style",
+      vertical_spacing = 0
+    },
+  use_header_filler = false
 }
 
 -------------------------------------------------------------------------------

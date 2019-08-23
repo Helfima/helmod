@@ -108,11 +108,14 @@ end
 -- @function [parent=#AbstractSelector] getFilterPanel
 --
 function AbstractSelector.methods:getFilterPanel()
-  local panel = self:getPanel()
-  if panel["filter-panel"] ~= nil and panel["filter-panel"].valid then
-    return panel["filter-panel"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["filter-panel"] ~= nil and content_panel["filter-panel"].valid then
+    return content_panel["filter-panel"]
   end
-  return ElementGui.addGuiFrameV(panel, "filter-panel", helmod_frame_style.section, ({"helmod_common.filter"}))
+  local panel = ElementGui.addGuiFrameV(content_panel, "filter-panel", helmod_frame_style.default)
+  panel.style.horizontally_stretchable = true
+  ElementGui.addGuiLabel(panel,"frame_title",({"helmod_common.filter"}),"helmod_label_title_frame")
+  return panel
 end
 
 -------------------------------------------------------------------------------
@@ -121,11 +124,11 @@ end
 -- @function [parent=#AbstractSelector] getSrollPanel
 --
 function AbstractSelector.methods:getSrollPanel()
-  local panel = self:getPanel()
-  if panel["main_panel"] ~= nil and panel["main_panel"].valid then
-    return panel["main_panel"]["scroll_panel"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["main_panel"] ~= nil and content_panel["main_panel"].valid then
+    return content_panel["main_panel"]["scroll_panel"]
   end
-  local main_panel = ElementGui.addGuiFrameV(panel, "main_panel", helmod_frame_style.hidden)
+  local main_panel = ElementGui.addGuiFrameV(content_panel, "main_panel", helmod_frame_style.default)
   ElementGui.setStyle(main_panel, "dialog", "width")
   ElementGui.setStyle(main_panel, "recipe_selector", "height")
   local scroll_panel = ElementGui.addGuiScrollPane(main_panel, "scroll_panel", helmod_frame_style.scroll_recipe_selector)
@@ -228,7 +231,7 @@ function AbstractSelector.methods:onEvent(event, action, item, item2, item3)
       if action == "element-select" and item ~= "container" then
         local productionBlock = ModelBuilder.addRecipeIntoProductionBlock(item2, item)
         ModelCompute.update()
-        self:close()
+        --self:close()
         User.setParameter("scroll_down",true)
         User.setActiveForm("HMProductionBlockTab")
       end

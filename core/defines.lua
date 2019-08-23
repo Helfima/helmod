@@ -1,3 +1,15 @@
+helmod_base_times = {
+  { value = 1, caption = "1s", tooltip="1s"},
+  { value = 60, caption = "1", tooltip="1mn"},
+  { value = 300, caption = "5", tooltip="5mn"},
+  { value = 600, caption = "10", tooltip="10mn"},
+  { value = 1800, caption = "30", tooltip="30mn"},
+  { value = 3600, caption = "1h", tooltip="1h"},
+  { value = 3600*6, caption = "6h", tooltip="6h"},
+  { value = 3600*12, caption = "12h", tooltip="12h"},
+  { value = 3600*24, caption = "24h", tooltip="24h"}
+}
+
 helmod_flow_style = {
   flow = "flow",
   horizontal = "helmod_flow_horizontal",
@@ -7,7 +19,7 @@ helmod_flow_style = {
 helmod_frame_style = {
   default = "helmod_frame_default",
   hidden = "helmod_frame_hidden",
-  panel = "helmod_frame_default",
+  panel = "helmod_frame_panel",
   cell = "helmod_frame_hidden",
   tab = "helmod_frame_tab",
   section = "helmod_frame_section",

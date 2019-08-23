@@ -25,11 +25,11 @@ end
 -- @function [parent=#EnergyEdition] getPowerPanel
 --
 function EnergyEdition.methods:getPowerPanel()
-  local panel = self:getPanel()
-  if panel["power"] ~= nil and panel["power"].valid then
-    return panel["power"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["power"] ~= nil and content_panel["power"].valid then
+    return content_panel["power"]
   end
-  local panel = ElementGui.addGuiFrameH(panel, "power", helmod_frame_style.panel)
+  local panel = ElementGui.addGuiFrameH(content_panel, "power", helmod_frame_style.panel)
   panel.style.horizontally_stretchable = true
   return panel
 end
@@ -40,11 +40,11 @@ end
 -- @function [parent=#EnergyEdition] getPrimaryPanel
 --
 function EnergyEdition.methods:getPrimaryPanel()
-  local panel = self:getPanel()
-  if panel["Primary"] ~= nil and panel["Primary"].valid then
-    return panel["Primary"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["Primary"] ~= nil and content_panel["Primary"].valid then
+    return content_panel["Primary"]
   end
-  return ElementGui.addGuiTable(panel, "Primary", 2, helmod_table_style.panel)
+  return ElementGui.addGuiTable(content_panel, "Primary", 2, helmod_table_style.panel)
 end
 
 -------------------------------------------------------------------------------
@@ -101,11 +101,11 @@ end
 -- @function [parent=#EnergyEdition] getSecondaryPanel
 --
 function EnergyEdition.methods:getSecondaryPanel()
-  local panel = self:getPanel()
-  if panel["Secondary"] ~= nil and panel["Secondary"].valid then
-    return panel["Secondary"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["Secondary"] ~= nil and content_panel["Secondary"].valid then
+    return content_panel["Secondary"]
   end
-  return ElementGui.addGuiTable(panel, "Secondary", 2, helmod_table_style.panel)
+  return ElementGui.addGuiTable(content_panel, "Secondary", 2, helmod_table_style.panel)
 end
 
 -------------------------------------------------------------------------------

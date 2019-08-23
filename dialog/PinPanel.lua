@@ -62,11 +62,11 @@ end
 -- @function [parent=#PinPanel] getInfoPanel
 --
 function PinPanel.methods:getInfoPanel()
-  local panel = self:getPanel()
-  if panel["info-panel"] ~= nil and panel["info-panel"].valid then
-    return panel["info-panel"]["scroll-panel"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["info-panel"] ~= nil and content_panel["info-panel"].valid then
+    return content_panel["info-panel"]["scroll-panel"]
   end
-  local mainPanel = ElementGui.addGuiFrameV(panel, "info-panel", helmod_frame_style.panel)
+  local mainPanel = ElementGui.addGuiFrameV(content_panel, "info-panel", helmod_frame_style.panel)
   return ElementGui.addGuiScrollPane(mainPanel, "scroll-panel", helmod_scroll_style.pin_tab)
 end
 

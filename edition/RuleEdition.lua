@@ -26,11 +26,11 @@ end
 -- @return #LuaGuiElement
 --
 function RuleEdition.methods:getRulePanel()
-  local panel = self:getPanel()
-  if panel["rule_panel"] ~= nil and panel["rule_panel"].valid then
-    return panel["rule_panel"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["rule_panel"] ~= nil and content_panel["rule_panel"].valid then
+    return content_panel["rule_panel"]
   end
-  local table_panel = ElementGui.addGuiFrameV(panel, "rule_panel", helmod_frame_style.panel)
+  local table_panel = ElementGui.addGuiFrameV(content_panel, "rule_panel", helmod_frame_style.panel)
   return table_panel
 end
 
@@ -40,11 +40,11 @@ end
 -- @function [parent=#RuleEdition] getActionPanel
 --
 function RuleEdition.methods:getActionPanel()
-  local panel = self:getPanel()
-  if panel["action_panel"] ~= nil and panel["action_panel"].valid then
-    return panel["action_panel"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["action_panel"] ~= nil and content_panel["action_panel"].valid then
+    return content_panel["action_panel"]
   end
-  return ElementGui.addGuiFrameV(panel, "action_panel", helmod_frame_style.panel)
+  return ElementGui.addGuiFrameV(content_panel, "action_panel", helmod_frame_style.panel)
 end
 
 -------------------------------------------------------------------------------

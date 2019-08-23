@@ -57,11 +57,11 @@ end
 -- @function [parent=#Download] getDownloadPanel
 --
 function Download.methods:getDownloadPanel()
-  local panel = self:getPanel()
-  if panel["download"] ~= nil and panel["download"].valid then
-    return panel["download"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["download"] ~= nil and content_panel["download"].valid then
+    return content_panel["download"]
   end
-  return ElementGui.addGuiFrameV(panel, "download", helmod_frame_style.panel, {"helmod_common.download"})
+  return ElementGui.addGuiFrameV(content_panel, "download", helmod_frame_style.panel, {"helmod_common.download"})
 end
 
 -------------------------------------------------------------------------------
@@ -70,11 +70,11 @@ end
 -- @function [parent=#Download] getUploadPanel
 --
 function Download.methods:getUploadPanel()
-  local panel = self:getPanel()
-  if panel["upload"] ~= nil and panel["upload"].valid then
-    return panel["upload"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["upload"] ~= nil and content_panel["upload"].valid then
+    return content_panel["upload"]
   end
-  return ElementGui.addGuiFrameV(panel, "upload", helmod_frame_style.panel, {"helmod_common.upload"})
+  return ElementGui.addGuiFrameV(content_panel, "upload", helmod_frame_style.panel, {"helmod_common.upload"})
 end
 
 -------------------------------------------------------------------------------

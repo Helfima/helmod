@@ -57,11 +57,11 @@ end
 -- @function [parent=#ProductBlockEdition] getInfoPanel
 --
 function ProductBlockEdition.methods:getInfoPanel()
-  local panel = self:getPanel()
-  if panel["info"] ~= nil and panel["info"].valid then
-    return panel["info"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["info"] ~= nil and content_panel["info"].valid then
+    return content_panel["info"]
   end
-  local info_panel = ElementGui.addGuiFrameV(panel, "info", helmod_frame_style.panel)
+  local info_panel = ElementGui.addGuiFrameV(content_panel, "info", helmod_frame_style.panel)
   info_panel.style.horizontally_stretchable = true
   return info_panel
 end
@@ -72,9 +72,9 @@ end
 -- @function [parent=#ProductBlockEdition] getOutputPanel
 --
 function ProductBlockEdition.methods:getOutputPanel()
-  local panel = self:getPanel()
-  if panel["output"] ~= nil and panel["output"].valid then
-    return panel["output"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["output"] ~= nil and content_panel["output"].valid then
+    return content_panel["output"]
   end
   local output_panel = ElementGui.addGuiFrameV(panel, "output", helmod_frame_style.panel, ({"helmod_common.output"}))
   output_panel.style.horizontally_stretchable = true
@@ -88,11 +88,11 @@ end
 -- @function [parent=#ProductBlockEdition] getInputPanel
 --
 function ProductBlockEdition.methods:getInputPanel()
-  local panel = self:getPanel()
-  if panel["input"] ~= nil and panel["input"].valid then
-    return panel["input"]
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel["input"] ~= nil and content_panel["input"].valid then
+    return content_panel["input"]
   end
-  local input_panel = ElementGui.addGuiFrameV(panel, "input", helmod_frame_style.panel, ({"helmod_common.input"}))
+  local input_panel = ElementGui.addGuiFrameV(content_panel, "input", helmod_frame_style.panel, ({"helmod_common.input"}))
   input_panel.style.horizontally_stretchable = true
   ElementGui.setStyle(input_panel, "block_element", "height")
   return input_panel
