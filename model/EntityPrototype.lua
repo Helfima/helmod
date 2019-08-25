@@ -453,6 +453,20 @@ function EntityPrototype.getBurnerEffectivity()
 end
 
 -------------------------------------------------------------------------------
+-- Return burner energy source prototype emissions
+--
+-- @function [parent=#EntityPrototype] getBurnerEmissions
+--
+-- @return #number default 0
+--
+function EntityPrototype.getBurnerEmissions()
+  if lua_entity_prototype ~= nil and lua_entity_prototype.burner_prototype ~= nil then
+    return lua_entity_prototype.burner_prototype.emissions or 1
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
 -- Return inventory size
 --
 -- @function [parent=#EntityPrototype] getInventorySize

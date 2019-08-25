@@ -484,6 +484,7 @@ function ElementGui.addGuiButtonSpriteStyled(parent, style, action, type, key, c
   end
   options.style = style
   if type ~= nil and key ~= nil then
+    if type == "resource" then type = "item" end
     options.sprite = type.."/"..key
   end
 

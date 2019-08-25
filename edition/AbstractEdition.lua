@@ -517,12 +517,12 @@ function AbstractEdition.methods:updateFactoryInfo(item, item2, item3)
 
     ElementGui.addGuiLabel(inputPanel, "label-energy", ({"helmod_label.energy"}))
 
-    if EntityPrototype.getEnergyType() == "electrical" then
-      local sign = ""
-      if factory.effects.consumption > 0 then sign = "+" end
-      ElementGui.addGuiLabel(inputPanel, "energy", Format.formatNumberKilo(factory.energy, "W").." ("..sign..Format.formatPercent(factory.effects.consumption).."%)")
-    else
+    local sign = ""
+    if factory.effects.consumption > 0 then sign = "+" end
+    ElementGui.addGuiLabel(inputPanel, "energy", Format.formatNumberKilo(factory.energy, "W").." ("..sign..Format.formatPercent(factory.effects.consumption).."%)")
+    if EntityPrototype.getEnergyType() == "burner" then
 
+      ElementGui.addGuiLabel(inputPanel, "label-burner", ({"helmod_common.resource"}))
       local fuel_list = Player.getChemicalFuelItemPrototypes()
       local items = {}
       for _,item in pairs(fuel_list) do
@@ -540,12 +540,15 @@ function AbstractEdition.methods:updateFactoryInfo(item, item2, item3)
     local sign = ""
     if factory.effects.productivity > 0 then sign = "+" end
     ElementGui.addGuiLabel(inputPanel, "label-productivity", ({"helmod_label.productivity"}))
-    ElementGui.addGuiLabel(inputPanel, "productivity", sign..Format.formatPercent(factory.effects.productivity).."%")
+    local productivity_tooltip = nil
+    if object.type == "resource" then
+      --productivity_tooltip = ({"gui-bonus.mining-drill-productivity-bonus"})
+    end
+    ElementGui.addGuiLabel(inputPanel, "productivity", sign..Format.formatPercent(factory.effects.productivity).."%",nil,productivity_tooltip)
 
     ElementGui.addGuiLabel(inputPanel, "label-limit", ({"helmod_label.limit"}), nil, {"tooltip.factory-limit"})
-    ElementGui.addGuiText(inputPanel, "limit", factory.limit, "helmod_textfield", {"tooltip.factory-limit"})
+    ElementGui.addGuiText(inputPanel, string.format("%s=factory-update=ID=%s=%s", self:classname(), item, object.id), factory.limit, "helmod_textfield", {"tooltip.factory-limit"})
 
-    ElementGui.addGuiButton(infoPanel, self:classname().."=factory-update=ID="..item.."=", object.id, "helmod_button_default", ({"helmod_button.update"}))
   end
 end
 
@@ -627,7 +630,7 @@ function AbstractEdition.methods:updateFactorySelector(item, item2, item3)
   local selectorPanel = self:getFactorySelectorPanel()
 
   selectorPanel.clear()
-  
+
   local scrollPanel = ElementGui.addGuiScrollPane(selectorPanel, "scroll-factory", helmod_scroll_style.recipe_list, true)
 
   local object = self:getObject(item, item2, item3)
@@ -718,12 +721,10 @@ function AbstractEdition.methods:updateBeaconInfo(item, item2, item3)
     ElementGui.addGuiLabel(inputPanel, "efficiency", EntityPrototype.getDistributionEffectivity())
 
     ElementGui.addGuiLabel(inputPanel, "label-combo", ({"helmod_label.beacon-on-factory"}), nil, {"tooltip.beacon-on-factory"})
-    ElementGui.addGuiText(inputPanel, "combo", beacon.combo, "helmod_textfield", {"tooltip.beacon-on-factory"})
+    ElementGui.addGuiText(inputPanel, string.format("%s=beacon-update=ID=%s=%s=%s", self:classname(), item, object.id, "combo"), beacon.combo, "helmod_textfield", {"tooltip.beacon-on-factory"})
 
     ElementGui.addGuiLabel(inputPanel, "label-factory", ({"helmod_label.factory-per-beacon"}), nil, {"tooltip.factory-per-beacon"})
-    ElementGui.addGuiText(inputPanel, "factory", beacon.factory, "helmod_textfield", {"tooltip.factory-per-beacon"})
-
-    ElementGui.addGuiButton(infoPanel, self:classname().."=beacon-update=ID="..item.."=", object.id, "helmod_button_default", ({"helmod_button.update"}))
+    ElementGui.addGuiText(inputPanel, string.format("%s=beacon-update=ID=%s=%s=%s", self:classname(), item, object.id, "factory"), beacon.factory, "helmod_textfield", {"tooltip.factory-per-beacon"})
   end
 end
 
@@ -809,7 +810,7 @@ function AbstractEdition.methods:updateBeaconSelector(item, item2, item3)
   local selectorPanel = self:getBeaconSelectorPanel()
 
   selectorPanel.clear()
-  
+
   local scrollPanel = ElementGui.addGuiScrollPane(selectorPanel, "scroll-beacon", helmod_scroll_style.recipe_list, true)
 
   local object = self:getObject(item, item2, item3)
@@ -892,13 +893,9 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
 
   if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
     if action == "object-update" then
-      local inputPanel = self:getObjectInfoPanel(player)["table-input"]
       local options = {}
-
-      if inputPanel["production"] ~= nil then
-        options["production"] = (ElementGui.getInputNumber(inputPanel["production"]) or 100)/100
-      end
-
+      local text = event.element.text
+      options["production"] = (tonumber(text) or 100)/100
       ModelBuilder.updateObject(item, item2, options)
       ModelCompute.update()
       self:updateObjectInfo(item, item2, item3)
@@ -917,9 +914,8 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
       local inputPanel = self:getFactoryInfoPanel()["table-input"]
       local options = {}
 
-      if inputPanel["limit"] ~= nil then
-        options["limit"] = ElementGui.getInputNumber(inputPanel["limit"])
-      end
+      local text = event.element.text
+      options["limit"] = tonumber(text) or 0
 
       ModelBuilder.updateFactory(item, item2, options)
       ModelCompute.update()
@@ -927,7 +923,7 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
     end
 
     if action == "factory-fuel-update" then
-      
+
       local index = event.element.selected_index
       local fuel_list = Player.getChemicalFuelItemPrototypes()
       local items = {}
@@ -935,7 +931,7 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
       for _,item in pairs(fuel_list) do
         if index == 1 then
           options.fuel = item.name
-        break end
+          break end
         index = index - 1
       end
       ModelBuilder.updateFuelFactory(item, item2, options)
@@ -964,16 +960,10 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
     end
 
     if action == "beacon-update" then
-      local inputPanel = self:getBeaconInfoPanel()["table-input"]
       local options = {}
-
-      if inputPanel["combo"] ~= nil then
-        options["combo"] = ElementGui.getInputNumber(inputPanel["combo"])
-      end
-
-      if inputPanel["factory"] ~= nil then
-        options["factory"] = ElementGui.getInputNumber(inputPanel["factory"])
-      end
+      local text = event.element.text
+      -- item3 = "combo" or "factory"
+      options[item3] = tonumber(text) or 0
 
       ModelBuilder.updateBeacon(item, item2, options)
       ModelCompute.update()

@@ -5,7 +5,7 @@
 -- @extends #AbstractEdition
 --
 
-ProductEdition = setclass("HMProductEdition", AbstractEdition)
+ProductEdition = setclass("HMProductEdition", Form)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -143,7 +143,7 @@ function ProductEdition.methods:onUpdate(event, action, item, item2, item3)
   end
 
   self:updateInfo(item, item2, item3)
-  self:updateTool(item, item2, item3)
+  --self:updateTool(item, item2, item3)
   self:updateAction(item, item2, item3)
 end
 
@@ -168,7 +168,7 @@ function ProductEdition.methods:updateInfo(item, item2, item3)
     ElementGui.addGuiLabel(tablePanel, "product-label", Player.getLocalisedName(product))
 
     ElementGui.addGuiLabel(tablePanel, "quantity-label", ({"helmod_common.quantity"}))
-    ElementGui.addGuiText(tablePanel, "quantity", product_count or 0)
+    ElementGui.addGuiText(tablePanel, string.format("%s=product-update=ID=%s=%s",self:classname(),item,product.name), product_count or 0, nil, ({"tooltip.formula-allowed"}))
   end
 end
 
@@ -187,9 +187,7 @@ function ProductEdition.methods:updateAction(item, item2, item3)
   if product ~= nil then
     action_panel.clear()
     local action_panel = ElementGui.addGuiTable(action_panel,"table_action",3)
-    ElementGui.addGuiButton(action_panel, self:classname().."=product-update=ID="..item.."=", product.name, "helmod_button_default", ({"helmod_button.save"}))
     ElementGui.addGuiButton(action_panel, self:classname().."=product-reset=ID="..item.."=", product.name, "helmod_button_default", ({"helmod_button.reset"}))
-    ElementGui.addGuiButton(action_panel, self:classname().."=CLOSE=ID="..item.."=", product.name, "helmod_button_default", ({"helmod_button.close"}))
   end
 end
 
@@ -211,7 +209,7 @@ function ProductEdition.methods:updateTool(item, item2, item3)
   ItemPrototype.load("transport-belt").getLocalisedName()
   ElementGui.addGuiLabel(table_panel, "quantity-label", {"helmod_product-edition-panel.transport-belt"})
   ElementGui.addGuiText(table_panel, "quantity", belt_count)
-  
+
   local table_panel = ElementGui.addGuiTable(tool_panel,"table-belt",5)
   for key, prototype in pairs(Player.getEntityPrototypes({"transport-belt"})) do
     ElementGui.addGuiButtonSelectSprite(table_panel, self:classname().."=element-select=ID=", Player.getEntityIconType(prototype), prototype.name, prototype.name, EntityPrototype.load(prototype).getLocalisedName())
@@ -234,14 +232,20 @@ function ProductEdition.methods:onEvent(event, action, item, item2, item3)
   if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
     if action == "product-update" then
       local products = {}
-      local input_panel = self:getInfoPanel()["table-header"]
-      local quantity = ElementGui.getInputNumber(input_panel["quantity"])
 
-      ModelBuilder.updateProduct(item, item2, quantity)
-      ModelCompute.update()
-      self:close()
-      Event.force_open = true
-      Event.force_refresh = true
+      local operation = event.element.text
+      local ok , err = pcall(function()
+        local quantity = formula(operation)
+
+        ModelBuilder.updateProduct(item, item2, quantity)
+        ModelCompute.update()
+        self:close()
+        Event.force_open = true
+        Event.force_refresh = true
+      end)
+      if not(ok) then
+        Player.print("Formula is not valid!")
+      end
     end
     if action == "product-reset" then
       local products = {}
@@ -257,7 +261,7 @@ function ProductEdition.methods:onEvent(event, action, item, item2, item3)
       local input_panel = self:getToolPanel()["table-header"]
       local belt_count = ElementGui.getInputNumber(input_panel["quantity"])
       local belt_speed = EntityPrototype.load(item).getBeltSpeed()
-      
+
       local output_panel = self:getInfoPanel()["table-header"]
       ElementGui.setInputNumber(output_panel["quantity"], belt_count * belt_speed * Product.belt_ratio)
     end

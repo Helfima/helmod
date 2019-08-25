@@ -283,7 +283,22 @@ function RecipePrototype.getIngredients(factory)
   if lua_prototype ~= nil then
     local factory_fuel = "coal"
     if lua_type == "recipe" then
-      return lua_prototype.ingredients
+      local ingredients = lua_prototype.ingredients
+      EntityPrototype.load(factory)
+      if factory ~= nil and EntityPrototype.getEnergyType() == "burner" then
+        local energy_usage = EntityPrototype.getEnergyUsage()
+        local burner_effectivity = EntityPrototype.getBurnerEffectivity()
+        --local burner_emission = EntityPrototype.getBurnerEmissions()
+        local speed_factory = EntityPrototype.getCraftingSpeed()
+        factory_fuel = factory.fuel or factory_fuel
+        
+        --Logging:debug(RecipePrototype.classname, "burner", energy_usage,speed_factory,burner_effectivity,burner_emission)
+        local fuel_value = energy_usage*speed_factory*(1/1.26)
+        local burner_count = fuel_value/ItemPrototype.load(factory_fuel).getFuelValue()
+        local burner_ingredient = {name=factory_fuel, type="item", amount=burner_count}
+        table.insert(ingredients, burner_ingredient)
+      end
+      return ingredients
     elseif lua_type == "resource" then
       local ingredients = {{name=lua_prototype.name, type="item", amount=1}}
       -- ajouter le liquide obligatoire, s'il y en a
@@ -301,9 +316,11 @@ function RecipePrototype.getIngredients(factory)
       if factory ~= nil and EntityPrototype.getEnergyType() == "burner" then
         local energy_usage = EntityPrototype.getEnergyUsage()
         local burner_effectivity = EntityPrototype.getBurnerEffectivity()
+        --local burner_emission = EntityPrototype.getBurnerEmissions()
         local mining_speed = EntityPrototype.getMiningSpeed()
         factory_fuel = factory.fuel or factory_fuel
         local speed_factory = hardness * mining_speed / mining_time
+        --Logging:debug(RecipePrototype.classname, "resource burner", energy_usage,speed_factory,burner_effectivity,burner_emission)
         local fuel_value = energy_usage*speed_factory*12.5
         local burner_count = fuel_value/ItemPrototype.load(factory_fuel).getFuelValue()
         local burner_ingredient = {name=factory_fuel, type="item", amount=burner_count}

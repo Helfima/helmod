@@ -56,7 +56,11 @@ function Logging:objectToString(object, level)
 	elseif type(object) == "function" then
 		message = message.."\"__function\""
   elseif object.isluaobject then
-    message = message..string.format("{\"type\":%q,\"name\":%q}", object.type, object.name)
+    if object.valid then
+      message = message..string.format("{\"type\":%q,\"name\":%q}", object.type, object.name)
+    else
+      message = message.."invalid object"
+    end
   elseif type(object) == "table" then
 		if level <= self.limit then
 			local first = true

@@ -19,6 +19,7 @@ RecipeEdition = setclass("HMRecipeEdition", AbstractEdition)
 function RecipeEdition.methods:onInit(parent)
   self.panelCaption = ({"helmod_recipe-edition-panel.title"})
   self.parameterLast = string.format("%s_%s",self:classname(),"last")
+  self.content_verticaly = true
 end
 
 -------------------------------------------------------------------------------
@@ -155,9 +156,8 @@ function RecipeEdition.methods:updateObjectInfo(item, item2, item3)
 
       local tablePanel = ElementGui.addGuiTable(info_panel,"table-input",3)
       ElementGui.addGuiLabel(tablePanel, "label-production", ({"helmod_recipe-edition-panel.production"}))
-      ElementGui.addGuiText(tablePanel, "production", (recipe.production or 1)*100, "helmod_textfield")
+      ElementGui.addGuiText(tablePanel, string.format("%s=object-update=ID=%s=%s", self:classname(), item, recipe.id), (recipe.production or 1)*100, "helmod_textfield")
 
-      ElementGui.addGuiButton(tablePanel, self:classname().."=object-update=ID="..item.."=", recipe.id, "helmod_button_default", ({"helmod_button.update"}))
     end
   end
 end

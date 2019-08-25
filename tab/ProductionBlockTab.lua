@@ -67,9 +67,9 @@ function ProductionBlockTab.methods:updateDebugPanel(item, item2, item3)
   Logging:debug("ProductionBlockTab", "updateDebugPanel():", item, item2, item3)
   local header_panel1, header_panel2,scroll_panel1, scroll_panel2 = self:getResultScrollPanel2({"helmod_result-panel.tab-button-production-block"})
   local model = Model.getModel()
-  
+
   local current_block = User.getParameter("current_block") or "new"
-  
+
   local countRecipes = Model.countBlockRecipes(current_block)
 
   if countRecipes > 0 then
@@ -106,74 +106,57 @@ function ProductionBlockTab.methods:updateDebugPanel(item, item2, item3)
     end
 
 
-    if block.solver == true then
-      -- *** Simplex Method ***
-      if block.matrix2 ~= nil then
-        -- matrix A
-        local ma_panel = ElementGui.addGuiFrameV(scroll_panel2, "ma_panel", helmod_frame_style.hidden, "Matrix A")
-        self:buildMatrix(ma_panel, block.matrix2.mA, block.matrix2.row_headers, block.matrix2.col_headers)
+    if block.matrix ~= nil then
+      -- matrix A
+      local ma_panel = ElementGui.addGuiFrameV(scroll_panel2, "ma_panel", helmod_frame_style.hidden, "Matrix A")
+      self:buildMatrix(ma_panel, block.matrix.mA, block.matrix.row_headers, block.matrix.col_headers)
 
-        if block.matrix2.mB then
-          local col_headers2 = {}
-          for _,col_header in pairs(block.matrix2.col_headers) do
-            table.insert(col_headers2,col_header)
-          end
+      if block.matrix.mB then
+        local col_headers2 = {}
+        for _,col_header in pairs(block.matrix.col_headers) do
+          table.insert(col_headers2,col_header)
+        end
+        if block.solver == true then
           table.insert(col_headers2,{name="T", type="none"})
-          for i,row_header in pairs(block.matrix2.row_headers) do
-            if i > 1 and i < #block.matrix2.row_headers then
+          for i,row_header in pairs(block.matrix.row_headers) do
+            if i > 1 and i < #block.matrix.row_headers then
               table.insert(col_headers2,row_header)
             end
           end
-          local row_headers2 = {}
-          for i,row_header in pairs(block.matrix2.row_headers) do
-            if i < #block.matrix2.row_headers then
+        end
+
+        local row_headers2 = {}
+        if block.solver == true then
+          table.insert(row_headers2,{name="input", type="none"})
+          for i=1, (#block.matrix.mB - 3) do
+            table.insert(row_headers2,{name="", type="none"})
+          end
+          table.insert(row_headers2,{name="T", type="none"})
+        else
+          for i,row_header in pairs(block.matrix.row_headers) do
+            if i < #block.matrix.row_headers then
               table.insert(row_headers2,row_header)
             end
           end
-          for i,row_header in pairs(block.matrix2.mB) do
-            if i > #block.matrix2.row_headers then
-              table.insert(row_headers2,{name="", type="none"})
-            end
-          end
-          table.insert(row_headers2,{name="Z", type="none"})
-
-          -- matrix B
-          local mb_panel = ElementGui.addGuiFrameV(scroll_panel2, "mb_panel", helmod_frame_style.hidden, "Matrix B")
-          self:buildMatrix(mb_panel, block.matrix2.mB, row_headers2, col_headers2)
-
-          -- matrix C
-          row_headers2 = {}
-          table.insert(row_headers2,{name="State", type="none"})
-          for _,col_header in pairs(block.matrix2.row_headers) do
-            table.insert(row_headers2,col_header)
-          end
-          
-          local mc_panel = ElementGui.addGuiFrameV(scroll_panel2, "mc_panel", helmod_frame_style.hidden, "Matrix C")
-          self:buildMatrix(mc_panel, block.matrix2.mC, row_headers2, block.matrix2.col_headers)
         end
-      end
-    else
-      -- *** Normal Method ***
-      if block.matrix1 ~= nil then
-        -- matrix A
-        local ma_panel = ElementGui.addGuiFrameV(scroll_panel2, "ma_panel", helmod_frame_style.hidden, "Matrix A")
-        self:buildMatrix(ma_panel, block.matrix1.mA, block.matrix1.row_headers, block.matrix1.col_headers)
+        table.insert(row_headers2,{name="Z", type="none"})
 
-        if block.matrix1.mB then
-          -- matrix B
-          local mb_panel = ElementGui.addGuiFrameV(scroll_panel2, "mb_panel", helmod_frame_style.hidden, "Matrix B")
-          self:buildMatrix(mb_panel, block.matrix1.mB, block.matrix1.row_headers, block.matrix1.col_headers)
+        -- matrix B
+        local mb_panel = ElementGui.addGuiFrameV(scroll_panel2, "mb_panel", helmod_frame_style.hidden, "Matrix B")
+        self:buildMatrix(mb_panel, block.matrix.mB, row_headers2, col_headers2)
 
-          local row_headers2 = {}
-          table.insert(row_headers2,{name="State", type="none"})
-          for _,col_header in pairs(block.matrix1.row_headers) do
-            table.insert(row_headers2,col_header)
+        local row_headers2 = {}
+        table.insert(row_headers2,{name="State", type="none"})
+        for i,row_header in pairs(block.matrix.row_headers) do
+          if i < #block.matrix.row_headers then
+            table.insert(row_headers2,row_header)
           end
-
-          -- matrix C
-          local mc_panel = ElementGui.addGuiFrameV(scroll_panel2, "mc_panel", helmod_frame_style.hidden, "Matrix C")
-          self:buildMatrix(mc_panel, block.matrix1.mC, row_headers2, block.matrix1.col_headers)
         end
+        table.insert(row_headers2,{name="Z", type="none"})
+
+        -- matrix C
+        local mc_panel = ElementGui.addGuiFrameV(scroll_panel2, "mc_panel", helmod_frame_style.hidden, "Matrix C")
+        self:buildMatrix(mc_panel, block.matrix.mC, row_headers2, block.matrix.col_headers)
       end
     end
 
@@ -309,8 +292,8 @@ function ProductionBlockTab.methods:updateInput(item, item2, item3)
 
     local element = model.blocks[current_block]
     -- input panel
-    local input_table = ElementGui.addGuiTable(input_scroll,"input-table", ElementGui.getElementColumnNumber(50), "helmod_table_element")
-      if element.ingredients ~= nil then
+    local input_table = ElementGui.addGuiTable(input_scroll,"input-table", ElementGui.getElementColumnNumber(50)-2, "helmod_table_element")
+    if element.ingredients ~= nil then
       for index, lua_product in pairs(element.ingredients) do
         local ingredient = Product.load(lua_product).new()
         ingredient.count = lua_product.count
@@ -352,7 +335,7 @@ function ProductionBlockTab.methods:updateOutput(item, item2, item3)
     local element = model.blocks[current_block]
 
     -- ouput panel
-    local output_table = ElementGui.addGuiTable(output_scroll,"output-table", ElementGui.getElementColumnNumber(50), "helmod_table_element")
+    local output_table = ElementGui.addGuiTable(output_scroll,"output-table", ElementGui.getElementColumnNumber(50)-2, "helmod_table_element")
     if element.products ~= nil then
       for index, lua_product in pairs(element.products) do
         local product = Product.load(lua_product).new()
@@ -397,10 +380,10 @@ function ProductionBlockTab.methods:updateData(item, item2, item3)
 
   -- data panel
   local header_panel1, header_panel2,scroll_panel1, scroll_panel2 = self:getResultScrollPanel2({"helmod_result-panel.tab-button-production-block"})
-  
+
   local back_button = ElementGui.addGuiButton(header_panel1,self:classname().."=change-tab=ID=","HMProductionLineTab","back_button","Back")
   back_button.style.width = 70
-  
+
   local recipe_table = ElementGui.addGuiTable(scroll_panel1,"recipe-data",1)
   recipe_table.vertical_centering = false
 
@@ -414,7 +397,7 @@ function ProductionBlockTab.methods:updateData(item, item2, item3)
   end
   local block_new = {name = "helmod_button_icon_robot_flat2" ,count = 0,localised_name = "helmod_result-panel.add-button-production-block"}
   ElementGui.addCellProduct(cell_recipe, block_new, self:classname().."=change-tab=ID=HMProductionBlockTab=new=", true, "tooltip.edit-block", color)
-  
+
   for _, block in spairs(model.blocks, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
     -- col recipe
     local color = "gray"
@@ -428,7 +411,7 @@ function ProductionBlockTab.methods:updateData(item, item2, item3)
   if last_element ~= nil then
     scroll_panel1.scroll_to_element(last_element)
   end
-  
+
   local countRecipes = Model.countBlockRecipes(current_block)
   -- production block result
   if countRecipes > 0 then

@@ -426,7 +426,7 @@ function Player.getProductionsCrafting(category, lua_recipe)
         if not(rules_included[category]) and not(rules_included[category]) then
           -- standard recipe
           if lua_entity.crafting_categories ~= nil and lua_entity.crafting_categories[category] then
-            local recipe_ingredient_count = RecipePrototype.load(lua_recipe, "recipe").getIngredientCount(lua_entity)
+            local recipe_ingredient_count = RecipePrototype.load(lua_recipe, "recipe").getIngredientCount()
             local factory_ingredient_count = EntityPrototype.load(lua_entity).getIngredientCount()
             Logging:debug(Player.classname, "crafting", recipe_ingredient_count, factory_ingredient_count)
             if factory_ingredient_count >= recipe_ingredient_count then

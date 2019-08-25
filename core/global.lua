@@ -39,3 +39,21 @@ function spairs(t, order)
 		end
 	end
 end
+
+-------------------------------------------------------------------------------
+-- formula
+--
+-- @function formula
+--
+-- @param operation
+--
+function formula(operation)
+  if operation == nil or operation == "" then return 0 end
+  local allowed = false
+  for i=1, string.len(operation) do
+  	if not(string.find(operation,"[0-9.()/*-+]+",i)) then
+  	 error({code=1})
+  	end
+  end
+  return load("return " .. operation)()
+end

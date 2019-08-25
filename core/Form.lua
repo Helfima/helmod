@@ -20,7 +20,7 @@ function Form.methods:init(parent)
   self.panelClose = true
   self.help_button = true
   self.auto_clear = true
-
+  self.content_verticaly = true
   self:onInit(parent)
 end
 
@@ -107,7 +107,12 @@ function Form.methods:getPanel()
   --menu_panel.style.horizontal_spacing = 10
   menu_panel.style.horizontal_align = "right"
   
-  local content_panel = ElementGui.addGuiFlowV(flow_panel, "content_panel")
+  local content_panel
+  if self.content_verticaly then
+    content_panel = ElementGui.addGuiFlowV(flow_panel, "content_panel")
+  else
+    content_panel = ElementGui.addGuiFlowH(flow_panel, "content_panel")
+  end
   title_panel.drag_target = flow_panel
   --Logging:debug(self:classname(), "children",panel.children_names)
   return flow_panel, content_panel, menu_panel

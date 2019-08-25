@@ -229,9 +229,7 @@ function Product.getProductivityBonus(recipe)
   Logging:trace(Product.classname, "getProductivityBonus(recipe)", lua_product)
   if recipe.isluaobject or recipe.factory == nil or recipe.factory.effects == nil then return 1 end
   local productivity = recipe.factory.effects.productivity
-  if recipe.type == "resource" then
-    productivity = productivity + Player.getForce().mining_drill_productivity_bonus
-  end
+  
   return productivity
 end
 
