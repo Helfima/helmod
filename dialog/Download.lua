@@ -16,20 +16,9 @@ local transfert_mode = nil
 --
 -- @param #Controller parent parent controller
 --
-function Download.methods:init(parent)
+function Download.methods:onInit(parent)
   self.panelCaption = ({"helmod_download-panel.title"})
   self.parent = parent
-end
-
--------------------------------------------------------------------------------
--- Get the parent panel
---
--- @function [parent=#Download] getParentPanel
---
--- @return #LuaGuiElement
---
-function Download.methods:getParentPanel()
-  return Controller.getDialogPanel()
 end
 
 -------------------------------------------------------------------------------

@@ -340,6 +340,9 @@ function AbstractTab.methods:updateMenuPanel(item, item2, item3)
   local time_panel = self:getRightMenuPanel()
   time_panel.clear()
 
+  local group_special = ElementGui.addGuiFlowH(time_panel,"group_special",helmod_flow_style.horizontal)
+  ElementGui.addGuiButton(group_special, "HMCalculator=OPEN=ID=", nil, "helmod_button_icon_calculator", nil, ({"helmod_calculator-panel.title"}))
+  
   local items = {}
   local default_time = 1
   for index,base_time in pairs(helmod_base_times) do

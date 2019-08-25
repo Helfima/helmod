@@ -150,6 +150,15 @@ default_gui["helmod_textfield"] = {
 }
 
 -------------------------------------------------------------------------------
+-- Style of calculator
+--
+-- @field [parent=#Textfield] calculator
+default_gui["helmod_textfield_calculator"] = {
+  type = "textbox_style",
+  font = "helmod_font_calculator"
+}
+
+-------------------------------------------------------------------------------
 -- Style Textbox
 --
 -- @type Textbox
@@ -448,6 +457,25 @@ for _,style in pairs(style_list) do
     disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true)
   }
 end
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] calculator
+
+default_gui["helmod_button_calculator"] = {
+  type = "button_style",
+  parent = "helmod_button_default",
+  font = "helmod_font_calculator",
+
+  minimal_width = 36,
+  height = 36,
+
+  top_padding = 2,
+  right_padding = 2,
+  bottom_padding = 2,
+  left_padding = 2
+}
+
 -------------------------------------------------------------------------------
 -- Style of button
 --

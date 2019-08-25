@@ -542,7 +542,7 @@ function AbstractEdition.methods:updateFactoryInfo(item, item2, item3)
     ElementGui.addGuiLabel(inputPanel, "label-productivity", ({"helmod_label.productivity"}))
     local productivity_tooltip = nil
     if object.type == "resource" then
-      --productivity_tooltip = ({"gui-bonus.mining-drill-productivity-bonus"})
+    --productivity_tooltip = ({"gui-bonus.mining-drill-productivity-bonus"})
     end
     ElementGui.addGuiLabel(inputPanel, "productivity", sign..Format.formatPercent(factory.effects.productivity).."%",nil,productivity_tooltip)
 
@@ -915,11 +915,16 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
       local options = {}
 
       local text = event.element.text
-      options["limit"] = tonumber(text) or 0
+      local ok , err = pcall(function()
+        options["limit"] = formula(text) or 0
 
-      ModelBuilder.updateFactory(item, item2, options)
-      ModelCompute.update()
-      self:updateFactoryInfo(item, item2, item3)
+        ModelBuilder.updateFactory(item, item2, options)
+        ModelCompute.update()
+        self:updateFactoryInfo(item, item2, item3)
+      end)
+      if not(ok) then
+        Player.print("Formula is not valid!")
+      end
     end
 
     if action == "factory-fuel-update" then
@@ -963,13 +968,18 @@ function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
       local options = {}
       local text = event.element.text
       -- item3 = "combo" or "factory"
-      options[item3] = tonumber(text) or 0
+      local ok , err = pcall(function()
+        options[item3] = formula(text) or 0
 
-      ModelBuilder.updateBeacon(item, item2, options)
-      ModelCompute.update()
-      self:updateBeaconInfo(item, item2, item3)
-      if display_height >= limit_display_height or User.getParameter("factory_tab") then
-        self:updateFactoryInfo(item, item2, item3)
+        ModelBuilder.updateBeacon(item, item2, options)
+        ModelCompute.update()
+        self:updateBeaconInfo(item, item2, item3)
+        if display_height >= limit_display_height or User.getParameter("factory_tab") then
+          self:updateFactoryInfo(item, item2, item3)
+        end
+      end)
+      if not(ok) then
+        Player.print("Formula is not valid!")
       end
     end
 

@@ -4,6 +4,7 @@ require "dialog.PinPanel"
 require "dialog.StatusPanel"
 require "dialog.Settings"
 require "dialog.Download"
+require "dialog.Calculator"
 require "edition.RecipeEdition"
 require "edition.ProductEdition"
 require "edition.ResourceEdition"
@@ -73,6 +74,7 @@ function Controller.init()
   local controllers = {}
   table.insert(controllers, HelpPanel:new())
   table.insert(controllers, Download:new())
+  table.insert(controllers, Calculator:new())
 
   table.insert(controllers, ProductionLineTab:new())
   table.insert(controllers, ProductionBlockTab:new())

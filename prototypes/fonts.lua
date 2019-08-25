@@ -111,4 +111,11 @@ data:extend(
     from = "default-bold",
     size = 14
   }
+  ,
+  {
+    type = "font",
+    name = "helmod_font_calculator",
+    from = "default-bold",
+    size = 20
+  }
 })
