@@ -344,6 +344,23 @@ default_gui["helmod_button_icon"] = {
 -------------------------------------------------------------------------------
 -- Style of button
 --
+-- @field [parent=#Button] slot
+
+default_gui["helmod_button_slot"] = {
+  type = "button_style",
+  parent = "slot_button",
+  width = icon_size + 2*icon_padding,
+  height = icon_size + 2*icon_padding,
+  top_padding = icon_padding,
+  right_padding = icon_padding,
+  bottom_padding = icon_padding,
+  left_padding = icon_padding,
+  scalable = false
+}
+
+-------------------------------------------------------------------------------
+-- Style of button
+--
 -- @field [parent=#Button] select_icon
 for _,style in pairs(style_list) do
   default_gui["helmod_button_select_icon"..style.suffix] = {
@@ -411,6 +428,23 @@ default_gui["helmod_button_icon_m"] = {
 -------------------------------------------------------------------------------
 -- Style of button
 --
+-- @field [parent=#Button] slot_m
+
+default_gui["helmod_button_slot_m"] = {
+  type = "button_style",
+  parent = "slot_button",
+  width = icon_m_size + 2*icon_m_padding,
+  height = icon_m_size + 2*icon_m_padding,
+  top_padding = icon_m_padding,
+  right_padding = icon_m_padding,
+  bottom_padding = icon_m_padding,
+  left_padding = icon_m_padding,
+  scalable = false
+}
+
+-------------------------------------------------------------------------------
+-- Style of button
+--
 -- @field [parent=#Button] select_icon_m
 
 for _,style in pairs(style_list) do
@@ -439,6 +473,23 @@ default_gui["helmod_button_icon_sm"] = {
   bottom_padding = icon_sm_padding,
   left_padding = icon_sm_padding,
   default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=0,y=60}, {top=0,right=0,bottom=0,left=0}, true),
+  scalable = false
+}
+
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] slot_sm
+
+default_gui["helmod_button_slot_sm"] = {
+  type = "button_style",
+  parent = "slot_button",
+  width = icon_sm_size + 2*icon_sm_padding,
+  height = icon_sm_size + 2*icon_sm_padding,
+  top_padding = icon_sm_padding,
+  right_padding = icon_sm_padding,
+  bottom_padding = icon_sm_padding,
+  left_padding = icon_sm_padding,
   scalable = false
 }
 
@@ -1343,6 +1394,26 @@ end
 default_shadow_color = {0, 0, 0, 0.35}
 default_shadow = default_glow(default_shadow_color, 0.5)
 
+-------------------------------------------------------------------------------
+-- Style of default
+--
+-- @field [parent=#Frame] default
+
+local panel_colors = {}
+panel_colors["blue"] = {329,48}
+panel_colors["blue2"] = {346,48}
+panel_colors["green"] = {431,48}
+for key,position in pairs(panel_colors) do
+default_gui["helmod_frame_color_"..key] = {
+  type = "frame_style",
+  parent = "helmod_frame_default",
+  graphical_set =
+  {
+    base = {position = position, corner_size = 8, opacity = 0.75}
+    
+  }
+}
+end
 
 local style_element_list = {
   {suffix="yellow", x=0, y=16},

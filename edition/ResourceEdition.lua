@@ -7,7 +7,7 @@ require "edition.AbstractEdition"
 -- @extends #AbstractEdition
 --
 
-ResourceEdition = setclass("HMResourceEdition", AbstractEdition)
+ResourceEdition = class(AbstractEdition)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -16,9 +16,9 @@ ResourceEdition = setclass("HMResourceEdition", AbstractEdition)
 --
 -- @param #Controller parent parent controller
 --
-function ResourceEdition.methods:onInit(parent)
+function ResourceEdition:onInit(parent)
 	self.panelCaption = ({"helmod_resource-edition-panel.title"})
-	self.parameterLast = string.format("%s_%s",self:classname(),"last")
+	self.parameterLast = string.format("%s_%s",self.classname,"last")
 end
 
 -------------------------------------------------------------------------------
@@ -26,7 +26,7 @@ end
 --
 -- @function [parent=#ResourceEdition] getObjectInfoPanel
 --
-function ResourceEdition.methods:getObjectInfoPanel()
+function ResourceEdition:getObjectInfoPanel()
 	local flow_panel, content_panel, menu_panel = self:getPanel()
 	if content_panel["info"] ~= nil and content_panel["info"].valid then
 		return content_panel["info"]
@@ -43,7 +43,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ResourceEdition.methods:getObject(item, item2, item3)
+function ResourceEdition:getObject(item, item2, item3)
 	local model = Model.getModel()
 	if  model.resources[item2] ~= nil then
 		-- return resource
@@ -57,8 +57,8 @@ end
 --
 -- @function [parent=#ResourceEdition] buildHeaderPanel
 --
-function ResourceEdition.methods:buildHeaderPanel()
-	Logging:debug(self:classname(), "buildHeaderPanel()")
+function ResourceEdition:buildHeaderPanel()
+	Logging:debug(self.classname, "buildHeaderPanel()")
 	self:getObjectInfoPanel()
 end
 
@@ -71,8 +71,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ResourceEdition.methods:updateHeader(item, item2, item3)
-	Logging:debug(self:classname(), "updateHeader():", item, item2, item3)
+function ResourceEdition:updateHeader(item, item2, item3)
+	Logging:debug(self.classname, "updateHeader():", item, item2, item3)
 	self:updateObjectInfo(item, item2, item3)
 end
 
@@ -85,8 +85,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ResourceEdition.methods:updateObjectInfo(item, item2, item3)
-	Logging:debug(self:classname(), "updateObjectInfo():", item, item2, item3)
+function ResourceEdition:updateObjectInfo(item, item2, item3)
+	Logging:debug(self.classname, "updateObjectInfo():", item, item2, item3)
 	local infoPanel = self:getObjectInfoPanel()
 	local model = Model.getModel()
 	local _resource = Player.getItemPrototype(item2)
@@ -94,7 +94,7 @@ function ResourceEdition.methods:updateObjectInfo(item, item2, item3)
 	local model = Model.getModel()
 	if  model.ingredients[item2] ~= nil then
 		local resource = self:getObject(item, item2, item3)
-		Logging:debug(self:classname(), "updateResourceInfo():resource=",resource)
+		Logging:debug(self.classname, "updateResourceInfo():resource=",resource)
 		for k,guiName in pairs(infoPanel.children_names) do
 			infoPanel[guiName].destroy()
 		end

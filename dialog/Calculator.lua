@@ -5,7 +5,7 @@
 -- @extends #Form
 --
 
-Calculator = setclass("HMCalculator", Form)
+Calculator = class(Form)
 
 local display_panel = nil
 
@@ -16,7 +16,7 @@ local display_panel = nil
 --
 -- @param #Controller parent parent controller
 --
-function Calculator.methods:onInit(parent)
+function Calculator:onInit(parent)
   self.panelCaption = ({"helmod_calculator-panel.title"})
   self.parent = parent
 end
@@ -34,7 +34,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function Calculator.methods:onBeforeEvent(event, action, item, item2, item3)
+function Calculator:onBeforeEvent(event, action, item, item2, item3)
   -- close si nouvel appel
   return true
 end
@@ -45,7 +45,7 @@ end
 --
 -- @function [parent=#Calculator] getColumnPanel
 --
-function Calculator.methods:getColumnPanel()
+function Calculator:getColumnPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["main_panel"] ~= nil and content_panel["main_panel"].valid then
     return content_panel["main_panel"]["display_panel1"], content_panel["main_panel"]["display_panel2"]
@@ -63,7 +63,7 @@ end
 --
 -- @function [parent=#Calculator] getDisplayPanel
 --
-function Calculator.methods:getDisplayPanel()
+function Calculator:getDisplayPanel()
   local display_panel1, display_panel2 = self:getColumnPanel()
   if display_panel1["display"] ~= nil and display_panel1["display"].valid then
     return display_panel1["display"]
@@ -76,7 +76,7 @@ end
 --
 -- @function [parent=#Calculator] getKeyboardPanel
 --
-function Calculator.methods:getKeyboardPanel()
+function Calculator:getKeyboardPanel()
   local display_panel1, display_panel2 = self:getColumnPanel()
   if display_panel1["keyboard"] ~= nil and display_panel1["keyboard"].valid then
     return display_panel1["keyboard"]
@@ -91,7 +91,7 @@ end
 --
 -- @function [parent=#Calculator] getHistoryPanel
 --
-function Calculator.methods:getHistoryPanel()
+function Calculator:getHistoryPanel()
   local display_panel1, display_panel2 = self:getColumnPanel()
   if display_panel2["history"] ~= nil and display_panel2["history"].valid then
     return display_panel2["history"]
@@ -113,8 +113,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Calculator.methods:onEvent(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "onEvent()", action, item, item2, item3)
+function Calculator:onEvent(event, action, item, item2, item3)
+  Logging:debug(self.classname, "onEvent()", action, item, item2, item3)
   -- import
   if action == "compute" then
     local text = event.element.text
@@ -162,7 +162,7 @@ end
 -- @param #string calculator_value
 -- @param #number result
 --
-function Calculator.methods:addHistory(calculator_value, result)
+function Calculator:addHistory(calculator_value, result)
   if calculator_value ~= result then
     local calculator_history = User.getParameter("calculator_history") or {}
     table.insert(calculator_history,1,string.format("%s=%s",calculator_value,result))
@@ -182,7 +182,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Calculator.methods:onUpdate(event, action, item, item2, item3)
+function Calculator:onUpdate(event, action, item, item2, item3)
   self:updateDisplay(item, item2, item3)
   self:updateKeyboard(item, item2, item3)
   self:updateHistory(item, item2, item3)
@@ -199,17 +199,18 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Calculator.methods:updateDisplay(item, item2, item3)
-  Logging:debug(self:classname(), "updateDisplay()", item, item2, item3)
+function Calculator:updateDisplay(item, item2, item3)
+  Logging:debug(self.classname, "updateDisplay()", item, item2, item3)
   local keyboard_panel = self:getDisplayPanel()
   keyboard_panel.clear()
 
   --local table_panel = ElementGui.addGuiTable(keyboard_panel,"keys",2)
   local calculator_value = User.getParameter("calculator_value") or 0
-  display_panel = ElementGui.addGuiText(keyboard_panel,self:classname().."=compute=ID=",calculator_value,"helmod_textfield_calculator")
+  display_panel = ElementGui.addGuiText(keyboard_panel,self.classname.."=compute=ID=",calculator_value,"helmod_textfield_calculator")
   --display_panel.style.horizontally_stretchable = true
   display_panel.style.width=155
   display_panel.style.horizontal_align = "right"
+  display_panel.focus()
 
 end
 -------------------------------------------------------------------------------
@@ -223,8 +224,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Calculator.methods:updateKeyboard(item, item2, item3)
-  Logging:debug(self:classname(), "updateCalculator()", item, item2, item3)
+function Calculator:updateKeyboard(item, item2, item3)
+  Logging:debug(self.classname, "updateCalculator()", item, item2, item3)
   local keyboard_panel = self:getKeyboardPanel()
   keyboard_panel.clear()
 
@@ -259,7 +260,7 @@ function Calculator.methods:updateKeyboard(item, item2, item3)
     if button.key == "" then
       ElementGui.addGuiLabel(table_panel,string.format("vide_%s",index))
     else
-      ElementGui.addGuiButton(table_panel,self:classname().."=selected-key=ID=",button.key,"helmod_button_calculator",button.caption)
+      ElementGui.addGuiButton(table_panel,self.classname.."=selected-key=ID=",button.key,"helmod_button_calculator",button.caption)
     end
   end
 
@@ -276,8 +277,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Calculator.methods:updateHistory(item, item2, item3)
-  Logging:debug(self:classname(), "updateHistory()", item, item2, item3)
+function Calculator:updateHistory(item, item2, item3)
+  Logging:debug(self.classname, "updateHistory()", item, item2, item3)
   local history_panel = self:getHistoryPanel()
   history_panel.clear()
 

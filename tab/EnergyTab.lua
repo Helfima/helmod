@@ -6,7 +6,7 @@ require "tab.AbstractTab"
 -- @extends #AbstractTab
 --
 
-EnergyTab = setclass("HMEnergyTab", AbstractTab)
+EnergyTab = class(AbstractTab)
 
 -------------------------------------------------------------------------------
 -- Return button caption
@@ -15,7 +15,7 @@ EnergyTab = setclass("HMEnergyTab", AbstractTab)
 --
 -- @return #string
 --
-function EnergyTab.methods:getButtonCaption()
+function EnergyTab:getButtonCaption()
   return {"helmod_result-panel.tab-button-energy"}
 end
 
@@ -26,7 +26,7 @@ end
 --
 -- @return boolean
 --
-function EnergyTab.methods:getButtonStyles()
+function EnergyTab:getButtonStyles()
   return "helmod_button_icon_nuclear","helmod_button_icon_nuclear_selected"
 end
 
@@ -35,8 +35,8 @@ end
 --
 -- @function [parent=#EnergyTab] updateData
 --
-function EnergyTab.methods:updateData()
-  Logging:debug(self:classname(), "updatePowers()")
+function EnergyTab:updateData()
+  Logging:debug(self.classname, "updatePowers()")
   local model = Model.getModel()
   local order = User.getParameter("order")
 
@@ -71,8 +71,8 @@ end
 --
 -- @param #LuaGuiElement itable container for element
 --
-function EnergyTab.methods:addTableHeader(itable)
-  Logging:debug(self:classname(), "addTableHeader():", itable)
+function EnergyTab:addTableHeader(itable)
+  Logging:debug(self.classname, "addTableHeader():", itable)
   local model = Model.getModel()
 
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
@@ -92,13 +92,13 @@ end
 -- @param #LuaGuiElement itable container for element
 -- @param #table power
 --
-function EnergyTab.methods:addTableRow(gui_table, power)
-  Logging:debug(self:classname(), "addPowersRow():", gui_table, power)
+function EnergyTab:addTableRow(gui_table, power)
+  Logging:debug(self.classname, "addPowersRow():", gui_table, power)
   local model = Model.getModel()
 
   -- col action
   local cell_action = ElementGui.addGuiFrameH(gui_table,"action"..power.id, helmod_frame_style.hidden)
-  ElementGui.addGuiButton(cell_action, self:classname().."=power-remove=ID=", power.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
+  ElementGui.addGuiButton(cell_action, self.classname.."=power-remove=ID=", power.id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
 
   -- col id
   if User.getModGlobalSetting("display_data_col_id") then

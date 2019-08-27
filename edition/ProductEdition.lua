@@ -1,3 +1,4 @@
+require "edition.AbstractEdition"
 -------------------------------------------------------------------------------
 -- Class to build product edition dialog
 --
@@ -5,7 +6,7 @@
 -- @extends #AbstractEdition
 --
 
-ProductEdition = setclass("HMProductEdition", Form)
+ProductEdition = class(Form)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -14,9 +15,9 @@ ProductEdition = setclass("HMProductEdition", Form)
 --
 -- @param #Controller parent parent controller
 --
-function ProductEdition.methods:onInit(parent)
+function ProductEdition:onInit(parent)
   self.panelCaption = ({"helmod_product-edition-panel.title"})
-  self.parameterLast = string.format("%s_%s",self:classname(),"last")
+  self.parameterLast = string.format("%s_%s",self.classname,"last")
 end
 
 -------------------------------------------------------------------------------
@@ -32,7 +33,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function ProductEdition.methods:onBeforeEvent(event, action, item, item2, item3)
+function ProductEdition:onBeforeEvent(event, action, item, item2, item3)
   local close = true
   if User.getParameter(self.parameterLast) == nil or User.getParameter(self.parameterLast) ~= item then
     close = false
@@ -46,7 +47,7 @@ end
 --
 -- @function [parent=#ProductEdition] onClose
 --
-function ProductEdition.methods:onClose()
+function ProductEdition:onClose()
   User.setParameter(self.parameterLast,nil)
 end
 
@@ -55,7 +56,7 @@ end
 --
 -- @function [parent=#ProductEdition] getInfoPanel
 --
-function ProductEdition.methods:getInfoPanel()
+function ProductEdition:getInfoPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["info"] ~= nil and content_panel["info"].valid then
     return content_panel["info"]
@@ -70,7 +71,7 @@ end
 --
 -- @function [parent=#ProductEdition] getToolPanel
 --
-function ProductEdition.methods:getToolPanel()
+function ProductEdition:getToolPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["tool_panel"] ~= nil and content_panel["tool_panel"].valid then
     return content_panel["tool_panel"]
@@ -86,7 +87,7 @@ end
 --
 -- @function [parent=#ProductEdition] getActionPanel
 --
-function ProductEdition.methods:getActionPanel()
+function ProductEdition:getActionPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["action_panel"] ~= nil and content_panel["action_panel"].valid then
     return content_panel["action_panel"]
@@ -107,7 +108,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductEdition.methods:after_open(event, action, item, item2, item3)
+function ProductEdition:after_open(event, action, item, item2, item3)
   self:getInfoPanel()
 end
 
@@ -125,7 +126,7 @@ local product_count = 0
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductEdition.methods:onUpdate(event, action, item, item2, item3)
+function ProductEdition:onUpdate(event, action, item, item2, item3)
   local model = Model.getModel()
   product = nil
   if model.blocks[item] ~= nil then
@@ -157,8 +158,8 @@ end
 -- @param #string item3 third item name
 --
 
-function ProductEdition.methods:updateInfo(item, item2, item3)
-  Logging:debug(self:classname(), "updateInfo():", item, item2, item3)
+function ProductEdition:updateInfo(item, item2, item3)
+  Logging:debug(self.classname, "updateInfo():", item, item2, item3)
   local info_panel = self:getInfoPanel()
   if product ~= nil then
     info_panel.clear()
@@ -168,7 +169,9 @@ function ProductEdition.methods:updateInfo(item, item2, item3)
     ElementGui.addGuiLabel(tablePanel, "product-label", Player.getLocalisedName(product))
 
     ElementGui.addGuiLabel(tablePanel, "quantity-label", ({"helmod_common.quantity"}))
-    ElementGui.addGuiText(tablePanel, string.format("%s=product-update=ID=%s=%s",self:classname(),item,product.name), product_count or 0, nil, ({"tooltip.formula-allowed"}))
+    local textfield = ElementGui.addGuiText(tablePanel, string.format("%s=product-update=ID=%s=%s",self.classname,item,product.name), product_count or 0, nil, ({"tooltip.formula-allowed"}))
+    textfield.focus()
+    textfield.select_all()
   end
 end
 
@@ -181,13 +184,13 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductEdition.methods:updateAction(item, item2, item3)
-  Logging:debug(self:classname(), "updateAction():", item, item2, item3)
+function ProductEdition:updateAction(item, item2, item3)
+  Logging:debug(self.classname, "updateAction():", item, item2, item3)
   local action_panel = self:getActionPanel()
   if product ~= nil then
     action_panel.clear()
     local action_panel = ElementGui.addGuiTable(action_panel,"table_action",3)
-    ElementGui.addGuiButton(action_panel, self:classname().."=product-reset=ID="..item.."=", product.name, "helmod_button_default", ({"helmod_button.reset"}))
+    ElementGui.addGuiButton(action_panel, self.classname.."=product-reset=ID="..item.."=", product.name, "helmod_button_default", ({"helmod_button.reset"}))
   end
 end
 
@@ -201,8 +204,8 @@ end
 -- @param #string item3 third item name
 --
 local belt_count = 1
-function ProductEdition.methods:updateTool(item, item2, item3)
-  Logging:debug(self:classname(), "updateTool():", item, item2, item3)
+function ProductEdition:updateTool(item, item2, item3)
+  Logging:debug(self.classname, "updateTool():", item, item2, item3)
   local tool_panel = self:getToolPanel()
   tool_panel.clear()
   local table_panel = ElementGui.addGuiTable(tool_panel,"table-header",1)
@@ -212,7 +215,7 @@ function ProductEdition.methods:updateTool(item, item2, item3)
 
   local table_panel = ElementGui.addGuiTable(tool_panel,"table-belt",5)
   for key, prototype in pairs(Player.getEntityPrototypes({"transport-belt"})) do
-    ElementGui.addGuiButtonSelectSprite(table_panel, self:classname().."=element-select=ID=", Player.getEntityIconType(prototype), prototype.name, prototype.name, EntityPrototype.load(prototype).getLocalisedName())
+    ElementGui.addGuiButtonSelectSprite(table_panel, self.classname.."=element-select=ID=", Player.getEntityIconType(prototype), prototype.name, prototype.name, EntityPrototype.load(prototype).getLocalisedName())
   end
 end
 -------------------------------------------------------------------------------
@@ -226,8 +229,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductEdition.methods:onEvent(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "onEvent():", action, item, item2, item3)
+function ProductEdition:onEvent(event, action, item, item2, item3)
+  Logging:debug(self.classname, "onEvent():", action, item, item2, item3)
   local model = Model.getModel()
   if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
     if action == "product-update" then

@@ -6,7 +6,7 @@ require "tab.AbstractTab"
 -- @extends #AbstractTab
 --
 
-ResourceTab = setclass("HMResourceTab", AbstractTab)
+ResourceTab = class(AbstractTab)
 
 -------------------------------------------------------------------------------
 -- Return button caption
@@ -15,7 +15,7 @@ ResourceTab = setclass("HMResourceTab", AbstractTab)
 --
 -- @return #string
 --
-function ResourceTab.methods:getButtonCaption()
+function ResourceTab:getButtonCaption()
   return {"helmod_result-panel.tab-button-resources"}
 end
 
@@ -26,7 +26,7 @@ end
 --
 -- @return boolean
 --
-function ResourceTab.methods:getButtonStyles()
+function ResourceTab:getButtonStyles()
   return "helmod_button_icon_jewel","helmod_button_icon_jewel_selected"
 end
 
@@ -37,8 +37,8 @@ end
 --
 -- @param #LuaGuiElement itable container for element
 --
-function ResourceTab.methods:addTableHeader(itable)
-  Logging:debug(self:classname(), "addTableHeader():", itable)
+function ResourceTab:addTableHeader(itable)
+  Logging:debug(self.classname, "addTableHeader():", itable)
   
   -- optionnal columns
   self:addCellHeader(itable, "index", {"helmod_result-panel.col-header-index"},"index")
@@ -57,8 +57,8 @@ end
 -- @param #LuaGuiElement itable container for element
 -- @param #table ingredient
 --
-function ResourceTab.methods:addTableRow(guiTable, ingredient)
-  Logging:debug(self:classname(), "addTableRow():", guiTable, ingredient)
+function ResourceTab:addTableRow(guiTable, ingredient)
+  Logging:debug(self.classname, "addTableRow():", guiTable, ingredient)
   local model = Model.getModel()
 
   -- col index
@@ -90,8 +90,8 @@ end
 --
 -- @function [parent=#ResourceTab] updateData
 --
-function ResourceTab.methods:updateData()
-  Logging:debug(self:classname(), "updateData()")
+function ResourceTab:updateData()
+  Logging:debug(self.classname, "updateData()")
   local model = Model.getModel()
   local order = User.getParameter("order")
   -- data

@@ -6,15 +6,15 @@ require "selector.AbstractSelector"
 -- @extends #AbstractSelector
 --
 
-RecipeSelector = setclass("HMRecipeSelector", AbstractSelector)
+RecipeSelector = class(AbstractSelector)
 
 -------------------------------------------------------------------------------
 -- After initialization
 --
 -- @function [parent=#RecipeSelector] afterInit
 --
-function RecipeSelector.methods:afterInit()
-  Logging:debug(self:classname(), "afterInit()")
+function RecipeSelector:afterInit()
+  Logging:debug(self.classname, "afterInit()")
   self.disable_option = true
   self.hidden_option = true
   self.product_option = true
@@ -27,7 +27,7 @@ end
 --
 -- @param #Controller parent parent controller
 --
-function RecipeSelector.methods:getCaption(parent)
+function RecipeSelector:getCaption(parent)
   return {"helmod_selector-panel.recipe-title"}
 end
 
@@ -40,15 +40,15 @@ end
 -- @param #string type
 --
 
-function RecipeSelector.methods:appendGroups(recipe, type)
-  Logging:trace(self:classname(), "appendGroups()", recipe.name, type)
+function RecipeSelector:appendGroups(recipe, type)
+  Logging:trace(self.classname, "appendGroups()", recipe.name, type)
   RecipePrototype.set(recipe, type)
   local filter_show_disable = User.getSetting("filter_show_disable")
   local filter_show_hidden = User.getSetting("filter_show_hidden")
   
-  local list_group = Cache.getData(self:classname(), "list_group")
-  local list_prototype = Cache.getData(self:classname(), "list_prototype")
-  local list_subgroup = Cache.getData(self:classname(), "list_subgroup")
+  local list_group = Cache.getData(self.classname, "list_group")
+  local list_prototype = Cache.getData(self.classname, "list_prototype")
+  local list_subgroup = Cache.getData(self.classname, "list_subgroup")
   
   if (RecipePrototype.getEnabled() == true or filter_show_disable == true) and (RecipePrototype.getHidden() == false or filter_show_hidden == true) then
     local lua_recipe = RecipePrototype.native()
@@ -90,8 +90,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function RecipeSelector.methods:updateGroups(event, action, item, item2, item3)
-  Logging:trace(self:classname(), "updateGroups()", action, item, item2, item3)
+function RecipeSelector:updateGroups(event, action, item, item2, item3)
+  Logging:trace(self.classname, "updateGroups()", action, item, item2, item3)
 
   self:resetGroups()
   
@@ -115,8 +115,8 @@ end
 --
 -- @param #table prototype
 -- 
-function RecipeSelector.methods:buildPrototypeTooltip(prototype)
-  Logging:trace(self:classname(), "buildRecipeTooltip(element):", prototype)
+function RecipeSelector:buildPrototypeTooltip(prototype)
+  Logging:trace(self.classname, "buildRecipeTooltip(element):", prototype)
   return ElementGui.getTooltipRecipe(prototype)
 end
 
@@ -127,8 +127,8 @@ end
 --
 -- @param #table prototype
 -- 
-function RecipeSelector.methods:buildPrototypeIcon(guiElement, prototype, tooltip)
-  Logging:trace(self:classname(), "buildPrototypeIcon(player, guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
+function RecipeSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
+  Logging:trace(self.classname, "buildPrototypeIcon(player, guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
   local recipe_prototype = RecipePrototype.load(prototype)
   local type = RecipePrototype.type()
   local prototype_name = RecipePrototype.native().name
@@ -139,5 +139,5 @@ function RecipeSelector.methods:buildPrototypeIcon(guiElement, prototype, toolti
   elseif RecipePrototype.getEnabled() == false then
     color = "red"
   end
-  ElementGui.addGuiButtonSelectSprite(guiElement, self:classname().."=element-select=ID="..type.."=", Player.getRecipeIconType(RecipePrototype.native()), prototype_name, prototype_localised_name, tooltip, color)
+  ElementGui.addGuiButtonSelectSprite(guiElement, self.classname.."=element-select=ID="..type.."=", Player.getRecipeIconType(RecipePrototype.native()), prototype_name, prototype_localised_name, tooltip, color)
 end

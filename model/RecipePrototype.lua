@@ -293,7 +293,7 @@ function RecipePrototype.getIngredients(factory)
         factory_fuel = factory.fuel or factory_fuel
         
         --Logging:debug(RecipePrototype.classname, "burner", energy_usage,speed_factory,burner_effectivity,burner_emission)
-        local fuel_value = energy_usage*speed_factory*(1/1.26)
+        local fuel_value = (energy_usage/burner_effectivity)*(RecipePrototype.getEnergy()/speed_factory)
         local burner_count = fuel_value/ItemPrototype.load(factory_fuel).getFuelValue()
         local burner_ingredient = {name=factory_fuel, type="item", amount=burner_count}
         table.insert(ingredients, burner_ingredient)
@@ -321,7 +321,7 @@ function RecipePrototype.getIngredients(factory)
         factory_fuel = factory.fuel or factory_fuel
         local speed_factory = hardness * mining_speed / mining_time
         --Logging:debug(RecipePrototype.classname, "resource burner", energy_usage,speed_factory,burner_effectivity,burner_emission)
-        local fuel_value = energy_usage*speed_factory*12.5
+        local fuel_value = (energy_usage/burner_effectivity)*(1/speed_factory)
         local burner_count = fuel_value/ItemPrototype.load(factory_fuel).getFuelValue()
         local burner_ingredient = {name=factory_fuel, type="item", amount=burner_count}
         table.insert(ingredients, burner_ingredient)

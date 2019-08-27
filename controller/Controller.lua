@@ -72,39 +72,42 @@ function Controller.init()
   Logging:debug(Controller.classname, "init()")
 
   local controllers = {}
-  table.insert(controllers, HelpPanel:new())
-  table.insert(controllers, Download:new())
-  table.insert(controllers, Calculator:new())
+  table.insert(controllers, HelpPanel("HMHelpPanel"))
+  table.insert(controllers, Download("HMDownload"))
+  table.insert(controllers, Calculator("HMCalculator"))
 
-  table.insert(controllers, ProductionLineTab:new())
-  table.insert(controllers, ProductionBlockTab:new())
-  table.insert(controllers, EnergyTab:new())
-  table.insert(controllers, ResourceTab:new())
-  table.insert(controllers, SummaryTab:new())
-  table.insert(controllers, StatisticTab:new())
-  table.insert(controllers, PropertiesTab:new())
-  table.insert(controllers, PrototypeFiltersTab:new())
-  table.insert(controllers, AdminTab:new())
+  table.insert(controllers, ProductionLineTab("HMProductionLineTab"))
+  table.insert(controllers, ProductionBlockTab("HMProductionBlockTab"))
+  table.insert(controllers, EnergyTab("HMEnergyTab"))
+  table.insert(controllers, ResourceTab("HMResourceTab"))
+  table.insert(controllers, SummaryTab("HMSummaryTab"))
+  table.insert(controllers, StatisticTab("HMStatisticTab"))
+  table.insert(controllers, PropertiesTab("HMPropertiesTab"))
+  table.insert(controllers, PrototypeFiltersTab("HMPrototypeFiltersTab"))
+  table.insert(controllers, AdminTab("HMAdminTab"))
 
-  table.insert(controllers, EntitySelector:new())
-  table.insert(controllers, RecipeSelector:new())
-  table.insert(controllers, RecipeEdition:new())
-  table.insert(controllers, ResourceEdition:new())
-  table.insert(controllers, ProductEdition:new())
-  table.insert(controllers, EnergyEdition:new())
-  table.insert(controllers, RuleEdition:new())
-  table.insert(controllers, PinPanel:new())
-  table.insert(controllers, StatusPanel:new())
-  table.insert(controllers, TechnologySelector:new())
-  table.insert(controllers, ItemSelector:new())
-  table.insert(controllers, FluidSelector:new())
-  table.insert(controllers, ContainerSelector:new())
-
-  table.insert(controllers, ProductLineEdition:new())
-  table.insert(controllers, ProductBlockEdition:new())
+  table.insert(controllers, EntitySelector("HMEntitySelector"))
+  table.insert(controllers, RecipeSelector("HMRecipeSelector"))
+  table.insert(controllers, TechnologySelector("HMTechnologySelector"))
+  table.insert(controllers, ItemSelector("HMItemSelector"))
+  table.insert(controllers, FluidSelector("HMFluidSelector"))
+  table.insert(controllers, ContainerSelector("HMContainerSelector"))
+  
+  table.insert(controllers, RecipeEdition("HMRecipeEdition"))
+  table.insert(controllers, ResourceEdition("HMResourceEdition"))
+  table.insert(controllers, ProductEdition("HMProductEdition"))
+  table.insert(controllers, EnergyEdition("HMEnergyEdition"))
+  table.insert(controllers, RuleEdition("HMRuleEdition"))
+  
+  table.insert(controllers, PinPanel("HMPinPanel"))
+  table.insert(controllers, StatusPanel("HMStatusPanel"))
+  
+  table.insert(controllers, ProductLineEdition("HMProductLineEdition"))
+  table.insert(controllers, ProductBlockEdition("HMProductBlockEdition"))
   views = {}
+  Logging:debug(Controller.classname, controllers)
   for _,controller in pairs(controllers) do
-    views[controller:classname()] = controller
+    views[controller.classname] = controller
   end
 
 end
@@ -365,7 +368,7 @@ function Controller.sendEvent(event, classname, action, item, item2, item3)
       Logging:trace(Controller.classname, "-> before event: navigate", navigate)
 
       for _,form in pairs(views) do
-        local form_name = form:classname()
+        local form_name = form.classname
         Logging:trace(Controller.classname, "--> beforeEvent", form_name, classname)
         if form_name == classname and User.isActiveForm(form_name) then
           form:beforeEvent(event, action, item, item2, item3)
@@ -373,7 +376,7 @@ function Controller.sendEvent(event, classname, action, item, item2, item3)
       end
 
       for _,form in pairs(views) do
-        local form_name = form:classname()
+        local form_name = form.classname
         Logging:trace(Controller.classname, "--> onEvent", form_name, classname)
         if form_name == classname and User.isActiveForm(form_name) then
           form:onEvent(event, action, item, item2, item3)
@@ -381,7 +384,7 @@ function Controller.sendEvent(event, classname, action, item, item2, item3)
       end
       
       for _,form in pairs(views) do
-        local form_name = form:classname()
+        local form_name = form.classname
         Logging:trace(Controller.classname, "--> prepare", form_name)
         if User.isActiveForm(form_name) then
           local prepared = form:prepare(event, action, item, item2, item3)
@@ -399,7 +402,7 @@ function Controller.sendEvent(event, classname, action, item, item2, item3)
 
     Logging:trace(Controller.classname, "-> open and update", game.tick)
     for _,form in pairs(views) do
-      local form_name = form:classname()
+      local form_name = form.classname
       Logging:trace(Controller.classname, "--> open and update", form_name, User.isActiveForm(form_name))
       if User.isActiveForm(form_name) then
         if action == "OPEN" or Event.force_open == true then

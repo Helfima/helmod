@@ -6,14 +6,14 @@ require "selector.AbstractSelector"
 -- @extends #AbstractSelector
 --
 
-TechnologySelector = setclass("HMTechnologySelector", AbstractSelector)
+TechnologySelector = class(AbstractSelector)
 
 -------------------------------------------------------------------------------
 -- After initialization
 --
 -- @function [parent=#TechnologySelector] afterInit
 --
-function TechnologySelector.methods:afterInit()
+function TechnologySelector:afterInit()
   self.disable_option = true
   self.hidden_option = true
   self.product_option = true
@@ -26,7 +26,7 @@ end
 --
 -- @param #Controller parent parent controller
 --
-function TechnologySelector.methods:getCaption(parent)
+function TechnologySelector:getCaption(parent)
   return {"helmod_selector-panel.technology-title"}
 end
 
@@ -38,16 +38,16 @@ end
 -- @param #string name
 -- @param #string type
 --
-function TechnologySelector.methods:appendGroups(name, type)
-  Logging:debug(self:classname(), "appendGroups()", name, type)
+function TechnologySelector:appendGroups(name, type)
+  Logging:debug(self.classname, "appendGroups()", name, type)
   Technology.load(name, type)
   local find = self:checkFilter(Technology.native())
   local filter_show_disable = User.getSetting("filter_show_disable")
   local filter_show_hidden = User.getSetting("filter_show_hidden")
 
-  local list_group = Cache.getData(self:classname(), "list_group")
-  local list_prototype = Cache.getData(self:classname(), "list_prototype")
-  local list_subgroup = Cache.getData(self:classname(), "list_subgroup")
+  local list_group = Cache.getData(self.classname, "list_group")
+  local list_prototype = Cache.getData(self.classname, "list_prototype")
+  local list_subgroup = Cache.getData(self.classname, "list_subgroup")
   
   if find == true and (Technology.getValid() == true or filter_show_disable == true) then
     local group_name = "normal"
@@ -89,8 +89,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function TechnologySelector.methods:updateGroups(event, action, item, item2, item3)
-  Logging:trace(self:classname(), "updateGroups()", action, item, item2, item3)
+function TechnologySelector:updateGroups(event, action, item, item2, item3)
+  Logging:trace(self.classname, "updateGroups()", action, item, item2, item3)
 
   self:resetGroups()
 
@@ -107,8 +107,8 @@ end
 --
 -- @param #LuaPrototype prototype
 --
-function TechnologySelector.methods:buildPrototypeTooltip(prototype)
-  Logging:trace(self:classname(), "buildPrototypeTooltip(prototype):", prototype)
+function TechnologySelector:buildPrototypeTooltip(prototype)
+  Logging:trace(self.classname, "buildPrototypeTooltip(prototype):", prototype)
   return ElementGui.getTooltipTechnology(prototype)
 end
 
@@ -117,9 +117,9 @@ end
 --
 -- @function [parent=#TechnologySelector] buildPrototypeIcon
 --
-function TechnologySelector.methods:buildPrototypeIcon(guiElement, prototype, tooltip)
-  Logging:trace(self:classname(), "buildPrototypeIcon(guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
-  ElementGui.addGuiButtonSelectSprite(guiElement, self:classname().."=element-select=ID=technology=", "technology", prototype.name, prototype.name, tooltip)
+function TechnologySelector:buildPrototypeIcon(guiElement, prototype, tooltip)
+  Logging:trace(self.classname, "buildPrototypeIcon(guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
+  ElementGui.addGuiButtonSelectSprite(guiElement, self.classname.."=element-select=ID=technology=", "technology", prototype.name, prototype.name, tooltip)
 end
 
 

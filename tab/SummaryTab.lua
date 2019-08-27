@@ -6,7 +6,7 @@ require "tab.AbstractTab"
 -- @extends #AbstractTab
 --
 
-SummaryTab = setclass("HMSummaryTab", AbstractTab)
+SummaryTab = class(AbstractTab)
 
 -------------------------------------------------------------------------------
 -- Return button caption
@@ -15,7 +15,7 @@ SummaryTab = setclass("HMSummaryTab", AbstractTab)
 --
 -- @return #string
 --
-function SummaryTab.methods:getButtonCaption()
+function SummaryTab:getButtonCaption()
   return {"helmod_result-panel.tab-button-summary"}
 end
 
@@ -26,7 +26,7 @@ end
 --
 -- @return boolean
 --
-function SummaryTab.methods:getButtonStyles()
+function SummaryTab:getButtonStyles()
   return "helmod_button_icon_brief","helmod_button_icon_brief_selected"
 end
 
@@ -35,8 +35,8 @@ end
 --
 -- @function [parent=#SummaryTab] updateData
 --
-function SummaryTab.methods:updateData()
-  Logging:debug(self:classname(), "updateSummary()")
+function SummaryTab:updateData()
+  Logging:debug(self.classname, "updateSummary()")
   local model = Model.getModel()
   -- data
   local scrollPanel = self:getResultScrollPanel({"helmod_result-panel.tab-title-summary"})

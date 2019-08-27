@@ -4,7 +4,9 @@
 -- @module AbstractTab
 --
 
-AbstractTab = setclass("HMAbstractTab", Form)
+AbstractTab = class(Form,function(base,classname)
+  Form.init(base,classname)
+end)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -13,7 +15,7 @@ AbstractTab = setclass("HMAbstractTab", Form)
 --
 -- @param #Controller parent parent controller
 --
-function AbstractTab.methods:onInit(parent)
+function AbstractTab:onInit(parent)
   self.panelCaption = string.format("%s %s","Helmod",game.active_mods["helmod"])
 end
 
@@ -24,7 +26,7 @@ end
 --
 -- @return boolean
 --
-function AbstractTab.methods:getButtonStyles()
+function AbstractTab:getButtonStyles()
   return "helmod_button_default","helmod_button_selected"
 end
 
@@ -35,7 +37,7 @@ end
 --
 -- @return #LuaGuiElement
 --
-function AbstractTab.methods:getPanelName()
+function AbstractTab:getPanelName()
   return "HMTab"
 end
 
@@ -44,7 +46,7 @@ end
 --
 -- @function [parent=#AbstractTab] getIndexPanel
 --
-function AbstractTab.methods:getIndexPanel()
+function AbstractTab:getIndexPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   local panel_name = "index_panel"
   if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
@@ -61,7 +63,7 @@ end
 --
 -- @function [parent=#AbstractTab] getDebugPanel
 --
-function AbstractTab.methods:getDebugPanel()
+function AbstractTab:getDebugPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   local panel_name = "debug_panel"
   if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
@@ -76,7 +78,7 @@ end
 --
 -- @function [parent=#AbstractTab] getInfoPanel
 --
-function AbstractTab.methods:getInfoPanel()
+function AbstractTab:getInfoPanel()
   local parent_panel = self:getResultPanel()
   local panel_name = "info"
   if parent_panel[panel_name] ~= nil and parent_panel[panel_name].valid then
@@ -113,7 +115,7 @@ end
 --
 -- @function [parent=#AbstractTab] getInfoPanel2
 --
-function AbstractTab.methods:getInfoPanel2()
+function AbstractTab:getInfoPanel2()
   local _,parent_panel = self:getResultPanel2()
   local panel_name = "info"
   if parent_panel[panel_name] ~= nil and parent_panel[panel_name].valid then
@@ -150,7 +152,7 @@ end
 --
 -- @function [parent=#AbstractTab] getResultPanel
 --
-function AbstractTab.methods:getResultPanel()
+function AbstractTab:getResultPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   local panel_name = "result"
   if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
@@ -167,7 +169,7 @@ end
 --
 -- @function [parent=#AbstractTab] getResultPanel2
 --
-function AbstractTab.methods:getResultPanel2()
+function AbstractTab:getResultPanel2()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   local panel_name = "result2"
   if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
@@ -190,7 +192,7 @@ end
 --
 -- @function [parent=#AbstractTab] getResultScrollPanel
 --
-function AbstractTab.methods:getResultScrollPanel()
+function AbstractTab:getResultScrollPanel()
   local parent_panel = self:getResultPanel()
   if parent_panel["scroll-data"] ~= nil and parent_panel["scroll-data"].valid then
     return parent_panel["scroll-data"]
@@ -206,7 +208,7 @@ end
 --
 -- @function [parent=#AbstractTab] getResultScrollPanel2
 --
-function AbstractTab.methods:getResultScrollPanel2()
+function AbstractTab:getResultScrollPanel2()
   local parent_panel1,parent_panel2 = self:getResultPanel2()
   if parent_panel1["header-data1"] ~= nil and parent_panel1["header-data1"].valid then
     return parent_panel1["header-data1"],parent_panel2["header-data2"],parent_panel1["scroll-data1"],parent_panel2["scroll-data2"]
@@ -234,8 +236,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractTab.methods:onUpdate(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "update():", item, item2, item3)
+function AbstractTab:onUpdate(event, action, item, item2, item3)
+  Logging:debug(self.classname, "update():", item, item2, item3)
 
   self:beforeUpdate(item, item2, item3)
   self:updateMenuPanel(item, item2, item3)
@@ -244,7 +246,7 @@ function AbstractTab.methods:onUpdate(event, action, item, item2, item3)
   self:updateHeader(item, item2, item3)
   self:updateData(item, item2, item3)
 
-  Logging:debug(self:classname(), "debug_mode", User.getModGlobalSetting("debug"))
+  Logging:debug(self.classname, "debug_mode", User.getModGlobalSetting("debug"))
   if User.getModGlobalSetting("debug") ~= "none" then
     self:updateDebugPanel()
   end
@@ -260,8 +262,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractTab.methods:updateMenuPanel(item, item2, item3)
-  Logging:debug(self:classname(), "updateMenuPanel():", item, item2, item3)
+function AbstractTab:updateMenuPanel(item, item2, item3)
+  Logging:debug(self.classname, "updateMenuPanel():", item, item2, item3)
   local models = Model.getModels()
   local model = Model.getModel()
   local model_id = User.getParameter("model_id")
@@ -273,23 +275,23 @@ function AbstractTab.methods:updateMenuPanel(item, item2, item3)
 
   local group4 = ElementGui.addGuiFlowH(action_panel,"group4",helmod_flow_style.horizontal)
   for _, form in pairs(Controller.getViews()) do
-    if string.find(form:classname(), "Tab") and form:isVisible() and not(form:isSpecial()) then
+    if string.find(form.classname, "Tab") and form:isVisible() and not(form:isSpecial()) then
       local style, selected_style = form:getButtonStyles()
-      if User.isActiveForm(form:classname()) then style = selected_style end
-      ElementGui.addGuiButton(group4, self:classname().."=change-tab=ID=", form:classname(), style, nil, form:getButtonCaption())
+      if User.isActiveForm(form.classname) then style = selected_style end
+      ElementGui.addGuiButton(group4, self.classname.."=change-tab=ID=", form.classname, style, nil, form:getButtonCaption())
     end
   end
 
-  if self:classname() == "HMAdminTab" then
+  if self.classname == "HMAdminTab" then
     ElementGui.addGuiButton(action_panel, "HMRuleEdition=", "OPEN", "helmod_button_default", ({"helmod_result-panel.add-button-rule"}))
-    ElementGui.addGuiButton(action_panel, self:classname().."=reset-rules=", nil, "helmod_button_default", ({"helmod_result-panel.reset-button-rule"}))
-  elseif self:classname() == "HMPropertiesTab" then
+    ElementGui.addGuiButton(action_panel, self.classname.."=reset-rules=", nil, "helmod_button_default", ({"helmod_result-panel.reset-button-rule"}))
+  elseif self.classname == "HMPropertiesTab" then
     ElementGui.addGuiButton(action_panel, "HMEntitySelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-entity"}))
     ElementGui.addGuiButton(action_panel, "HMItemSelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-item"}))
     ElementGui.addGuiButton(action_panel, "HMFluidSelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-fluid"}))
     ElementGui.addGuiButton(action_panel, "HMRecipeSelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-recipe"}))
     ElementGui.addGuiButton(action_panel, "HMTechnologySelector=", "OPEN", "helmod_button_default", ({"helmod_result-panel.select-button-technology"}))
-  elseif self:classname() == "HMPrototypeFiltersTab" then
+  elseif self.classname == "HMPrototypeFiltersTab" then
   else
     -- add recipe
     local group1 = ElementGui.addGuiFlowH(action_panel,"group1",helmod_flow_style.horizontal)
@@ -300,38 +302,38 @@ function AbstractTab.methods:updateMenuPanel(item, item2, item3)
 
     local group2 = ElementGui.addGuiFlowH(action_panel,"group2",helmod_flow_style.horizontal)
     -- copy past
-    ElementGui.addGuiButton(group2, self:classname().."=copy-model=ID=", model.id, "helmod_button_icon_copy", nil, ({"helmod_button.copy"}))
-    ElementGui.addGuiButton(group2, self:classname().."=past-model=ID=", model.id, "helmod_button_icon_past", nil, ({"helmod_button.past"}))
+    ElementGui.addGuiButton(group2, self.classname.."=copy-model=ID=", model.id, "helmod_button_icon_copy", nil, ({"helmod_button.copy"}))
+    ElementGui.addGuiButton(group2, self.classname.."=past-model=ID=", model.id, "helmod_button_icon_past", nil, ({"helmod_button.past"}))
     -- download
-    if self:classname() == "HMProductionLineTab" then
+    if self.classname == "HMProductionLineTab" then
       ElementGui.addGuiButton(group2, "HMDownload=OPEN=ID=", "download", "helmod_button_icon_download", nil, ({"helmod_result-panel.download-button-production-line"}))
       ElementGui.addGuiButton(group2, "HMDownload=OPEN=ID=", "upload", "helmod_button_icon_upload", nil, ({"helmod_result-panel.upload-button-production-line"}))
     end
     -- delete control
     if User.isAdmin() or model.owner == User.name() or (model.share ~= nil and bit32.band(model.share, 4) > 0) then
-      if self:classname() == "HMProductionLineTab" then
-        ElementGui.addGuiButton(group2, self:classname().."=remove-model=ID=", model.id, "helmod_button_icon_delete_red", nil, ({"helmod_result-panel.remove-button-production-line"}))
+      if self.classname == "HMProductionLineTab" then
+        ElementGui.addGuiButton(group2, self.classname.."=remove-model=ID=", model.id, "helmod_button_icon_delete_red", nil, ({"helmod_result-panel.remove-button-production-line"}))
       end
-      if self:classname() == "HMProductionBlockTab" then
-        ElementGui.addGuiButton(group2, self:classname().."=production-block-remove=ID=", block_id, "helmod_button_icon_delete_red", nil, ({"helmod_result-panel.remove-button-production-block"}))
+      if self.classname == "HMProductionBlockTab" then
+        ElementGui.addGuiButton(group2, self.classname.."=production-block-remove=ID=", block_id, "helmod_button_icon_delete_red", nil, ({"helmod_result-panel.remove-button-production-block"}))
       end
     end
     -- refresh control
-    ElementGui.addGuiButton(group2, self:classname().."=refresh-model=ID=", model.id, "helmod_button_icon_refresh", nil, ({"helmod_result-panel.refresh-button"}))
+    ElementGui.addGuiButton(group2, self.classname.."=refresh-model=ID=", model.id, "helmod_button_icon_refresh", nil, ({"helmod_result-panel.refresh-button"}))
 
     local group3 = ElementGui.addGuiFlowH(action_panel,"group3",helmod_flow_style.horizontal)
     -- pin control
-    if self:classname() == "HMProductionBlockTab" then
+    if self.classname == "HMProductionBlockTab" then
       ElementGui.addGuiButton(group3, "HMPinPanel=OPEN=ID=", block_id, "helmod_button_icon_pin", nil, ({"helmod_result-panel.tab-button-pin"}))
       local block = model.blocks[block_id]
       if block ~= nil then
         local style = "helmod_button_icon_settings"
         if block.solver == true then style = "helmod_button_icon_settings_selected" end
-        ElementGui.addGuiButton(group3, self:classname().."=production-block-solver=ID=", block_id, style, nil, ({"helmod_button.matrix-solver"}))
+        ElementGui.addGuiButton(group3, self.classname.."=production-block-solver=ID=", block_id, style, nil, ({"helmod_button.matrix-solver"}))
       end
     end
     -- pin info
-    if self:classname() == "HMStatisticTab" then
+    if self.classname == "HMStatisticTab" then
       ElementGui.addGuiButton(group3, "HMStatusPanel=OPEN=ID=", block_id, "helmod_button_icon_pin", nil, ({"helmod_result-panel.tab-button-pin"}))
     end
   end
@@ -355,7 +357,7 @@ function AbstractTab.methods:updateMenuPanel(item, item2, item3)
   local group_time = ElementGui.addGuiFlowH(time_panel,"group_time",helmod_flow_style.horizontal)
   ElementGui.addGuiLabel(group_time,"label_time",{"helmod_data-panel.base-time", ""}, "helmod_label_title_frame")
   
-  ElementGui.addGuiDropDown(group_time, self:classname().."=change-time=ID=", model_id, items, default_time)
+  ElementGui.addGuiDropDown(group_time, self.classname.."=change-time=ID=", model_id, items, default_time)
 
 end
 
@@ -366,7 +368,7 @@ end
 --
 -- @return #boolean
 --
-function AbstractTab.methods:hasIndexModel()
+function AbstractTab:hasIndexModel()
   return true
 end
 
@@ -379,8 +381,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractTab.methods:updateIndexPanel(item, item2, item3)
-  Logging:debug(self:classname(), "updateIndexPanel():", item, item2, item3)
+function AbstractTab:updateIndexPanel(item, item2, item3)
+  Logging:debug(self.classname, "updateIndexPanel():", item, item2, item3)
   local models = Model.getModels()
   local model_id = User.getParameter("model_id")
 
@@ -388,32 +390,32 @@ function AbstractTab.methods:updateIndexPanel(item, item2, item3)
     -- index panel
     local index_panel = self:getIndexPanel()
     index_panel.clear()
-    Logging:debug(self:classname(), "updateIndexPanel():countModel", Model.countModel())
+    Logging:debug(self.classname, "updateIndexPanel():countModel", Model.countModel())
     if Model.countModel() > 0 then
       local i = 0
       for _,imodel in pairs(models) do
         i = i + 1
         local style = "helmod_button_default"
         --if imodel.id == model_id then style = "helmod_button_selected" end
-        --ElementGui.addGuiButton(indexPanel, self:classname().."=change-model=ID=", imodel.id, style, i)
+        --ElementGui.addGuiButton(indexPanel, self.classname.."=change-model=ID=", imodel.id, style, i)
         local element = Model.firstRecipe(imodel.blocks)
         if imodel.id == model_id then
           if element ~= nil then
-            ElementGui.addGuiButtonSprite(index_panel, self:classname().."=change-model=ID="..imodel.id.."=", Player.getIconType(element), element.name, imodel.id, RecipePrototype.load(element).getLocalisedName())
+            ElementGui.addGuiButtonSprite(index_panel, self.classname.."=change-model=ID="..imodel.id.."=", Player.getIconType(element), element.name, imodel.id, RecipePrototype.load(element).getLocalisedName())
           else
-            ElementGui.addGuiButton(index_panel, self:classname().."=change-model=ID=", imodel.id, "helmod_button_icon_help_selected")
+            ElementGui.addGuiButton(index_panel, self.classname.."=change-model=ID=", imodel.id, "helmod_button_icon_help_selected")
           end
         else
           if element ~= nil then
-            ElementGui.addGuiButtonSelectSprite(index_panel, self:classname().."=change-model=ID="..imodel.id.."=", Player.getIconType(element), element.name, imodel.id, RecipePrototype.load(element).getLocalisedName())
+            ElementGui.addGuiButtonSelectSprite(index_panel, self.classname.."=change-model=ID="..imodel.id.."=", Player.getIconType(element), element.name, imodel.id, RecipePrototype.load(element).getLocalisedName())
           else
-            ElementGui.addGuiButton(index_panel, self:classname().."=change-model=ID=", imodel.id, "helmod_button_icon_help")
+            ElementGui.addGuiButton(index_panel, self.classname.."=change-model=ID=", imodel.id, "helmod_button_icon_help")
           end
         end
 
       end
     end
-    ElementGui.addGuiShortButton(index_panel, self:classname().."=change-model=ID=", "new", "helmod_button_default", "+")
+    ElementGui.addGuiShortButton(index_panel, self.classname.."=change-model=ID=", "new", "helmod_button_default", "+")
   else
     local index_panel = self:getIndexPanel()
     index_panel.clear()
@@ -429,8 +431,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractTab.methods:beforeUpdate(item, item2, item3)
-  Logging:trace(self:classname(), "beforeUpdate():", item, item2, item3)
+function AbstractTab:beforeUpdate(item, item2, item3)
+  Logging:trace(self.classname, "beforeUpdate():", item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -443,8 +445,8 @@ end
 -- @param #string caption
 -- @param #string sorted
 --
-function AbstractTab.methods:addCellHeader(guiTable, name, caption, sorted)
-  Logging:trace(self:classname(), "addCellHeader():", guiTable, name, caption, sorted)
+function AbstractTab:addCellHeader(guiTable, name, caption, sorted)
+  Logging:trace(self.classname, "addCellHeader():", guiTable, name, caption, sorted)
 
   if (name ~= "index" and name ~= "id" and name ~= "name" and name ~= "type") or User.getModGlobalSetting("display_data_col_"..name) then
     local cell = ElementGui.addGuiFrameH(guiTable,"header-"..name, helmod_frame_style.hidden)
@@ -461,7 +463,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractTab.methods:updateDebugPanel(item, item2, item3)
+function AbstractTab:updateDebugPanel(item, item2, item3)
   Logging:debug("AbstractTab", "updateDebugPanel():", item, item2, item3)
 end
 
@@ -474,7 +476,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractTab.methods:updateHeader(item, item2, item3)
+function AbstractTab:updateHeader(item, item2, item3)
   Logging:debug("AbstractTab", "updateHeader():", item, item2, item3)
 end
 -------------------------------------------------------------------------------
@@ -486,6 +488,6 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractTab.methods:updateData(item, item2, item3)
+function AbstractTab:updateData(item, item2, item3)
   Logging:debug("AbstractTab", "updateData():", item, item2, item3)
 end

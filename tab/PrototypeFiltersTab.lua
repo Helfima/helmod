@@ -6,7 +6,7 @@ require "tab.AbstractTab"
 -- @extends #AbstractTab
 --
 
-PrototypeFiltersTab = setclass("HMPrototypeFiltersTab", AbstractTab)
+PrototypeFiltersTab = class(AbstractTab)
 
 -------------------------------------------------------------------------------
 -- Return button caption
@@ -15,7 +15,7 @@ PrototypeFiltersTab = setclass("HMPrototypeFiltersTab", AbstractTab)
 --
 -- @return #string
 --
-function PrototypeFiltersTab.methods:getButtonCaption()
+function PrototypeFiltersTab:getButtonCaption()
   return {"helmod_result-panel.tab-button-prototype-filters"}
 end
 
@@ -26,7 +26,7 @@ end
 --
 -- @return boolean
 --
-function PrototypeFiltersTab.methods:getButtonStyles()
+function PrototypeFiltersTab:getButtonStyles()
   return "helmod_button_icon_filter","helmod_button_icon_filter_selected"
 end
 
@@ -37,7 +37,7 @@ end
 --
 -- @return boolean
 --
-function PrototypeFiltersTab.methods:isVisible()
+function PrototypeFiltersTab:isVisible()
   return User.getModGlobalSetting("prototype_filters_tab")
 end
 
@@ -48,7 +48,7 @@ end
 --
 -- @return boolean
 --
-function PrototypeFiltersTab.methods:isSpecial()
+function PrototypeFiltersTab:isSpecial()
   return true
 end
 
@@ -59,7 +59,7 @@ end
 --
 -- @return #boolean
 --
-function PrototypeFiltersTab.methods:hasIndexModel()
+function PrototypeFiltersTab:hasIndexModel()
   return false
 end
 
@@ -70,8 +70,8 @@ end
 --
 -- @param #LuaGuiElement itable container for element
 --
-function PrototypeFiltersTab.methods:addTableHeader(itable)
-  Logging:debug(self:classname(), "addTableHeader():", itable)
+function PrototypeFiltersTab:addTableHeader(itable)
+  Logging:debug(self.classname, "addTableHeader():", itable)
 
   -- data columns
   self:addCellHeader(itable, "property", {"helmod_result-panel.col-header-name"})
@@ -87,8 +87,8 @@ end
 -- @param #LuaGuiElement gui_table container for element
 -- @param #table property
 --
-function PrototypeFiltersTab.methods:addTableRow(gui_table, property)
-  Logging:debug(self:classname(), "addTableRow():", gui_table, property)
+function PrototypeFiltersTab:addTableRow(gui_table, property)
+  Logging:debug(self.classname, "addTableRow():", gui_table, property)
   -- col property
   local cell_name = ElementGui.addGuiFrameH(gui_table,property.name.."_name", helmod_frame_style.hidden)
   ElementGui.addGuiLabel(cell_name, "label", property.name)
@@ -127,8 +127,8 @@ local drop_down_filter_invert = nil
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PrototypeFiltersTab.methods:updateHeader(item, item2, item3)
-  Logging:debug(self:classname(), "updateHeader():", item, item2, item3)
+function PrototypeFiltersTab:updateHeader(item, item2, item3)
+  Logging:debug(self.classname, "updateHeader():", item, item2, item3)
   local resultPanel = self:getResultPanel({"helmod_result-panel.tab-title-prototype-filters"})
   local listPanel = ElementGui.addGuiFrameH(resultPanel, "list-element", helmod_frame_style.hidden)
 end
@@ -137,8 +137,8 @@ end
 --
 -- @function [parent=#PrototypeFiltersTab] updateData
 --
-function PrototypeFiltersTab.methods:updateData()
-  Logging:debug(self:classname(), "updateData()")
+function PrototypeFiltersTab:updateData()
+  Logging:debug(self.classname, "updateData()")
   -- data
 
   local scrollPanel = self:getResultScrollPanel()
@@ -153,7 +153,7 @@ function PrototypeFiltersTab.methods:updateData()
   ElementGui.addGuiLabel(resultTable, "invert", "Invert")
 
 
-  drop_down_prototype_filter_type = ElementGui.addGuiDropDown(resultTable, self:classname().."=change-prototype-filter-type", nil, prototype_filter_types, prototype_filter_type)
+  drop_down_prototype_filter_type = ElementGui.addGuiDropDown(resultTable, self.classname.."=change-prototype-filter-type", nil, prototype_filter_types, prototype_filter_type)
 
   if prototype_filter_type ~= nil then
     local filters = PrototypeFilter.getFilters(prototype_filter_type)
@@ -162,8 +162,8 @@ function PrototypeFiltersTab.methods:updateData()
       table.insert(prototype_filters,key)
     end
     prototype_filter = prototype_filter or "type"
-    Logging:debug(self:classname(),"prototype_filters", prototype_filters)
-    drop_down_prototype_filter = ElementGui.addGuiDropDown(resultTable, self:classname().."=change-prototype-filter", nil, prototype_filters, prototype_filter)
+    Logging:debug(self.classname,"prototype_filters", prototype_filters)
+    drop_down_prototype_filter = ElementGui.addGuiDropDown(resultTable, self.classname.."=change-prototype-filter", nil, prototype_filters, prototype_filter)
 
     if filters[prototype_filter] ~= nil then
       prototype_filter_options = {}
@@ -172,7 +172,7 @@ function PrototypeFiltersTab.methods:updateData()
       end
       if Model.countList(prototype_filter_options) > 0 then
         prototype_filter_option = prototype_filter_option or prototype_filter_options[1]
-        drop_down_filter_option = ElementGui.addGuiDropDown(resultTable, self:classname().."=change-filter-option", nil, prototype_filter_options, prototype_filter_option)
+        drop_down_filter_option = ElementGui.addGuiDropDown(resultTable, self.classname.."=change-filter-option", nil, prototype_filter_options, prototype_filter_option)
       else
         ElementGui.addGuiLabel(resultTable, "option-none", "None")
       end
@@ -188,14 +188,14 @@ function PrototypeFiltersTab.methods:updateData()
     if prototype_filter_option ~= nil then
       filter[prototype_filter] = prototype_filter_option
     end
-    Logging:debug(self:classname(),"filter", filter)
+    Logging:debug(self.classname,"filter", filter)
     local elements = PrototypeFilter.getElements(prototype_filter_type ,filter)
     for key,element in pairs(elements) do
       ElementGui.addGuiButtonSprite(elements_table, "nothing", prototype_filter_type, element.name, element.name, element.localised_name)
     end
   end
 
-  drop_down_filter_invert = ElementGui.addGuiDropDown(resultTable, self:classname().."=change-filter-invert", nil, prototype_filter_inverts, prototype_filter_invert)
+  drop_down_filter_invert = ElementGui.addGuiDropDown(resultTable, self.classname.."=change-filter-invert", nil, prototype_filter_inverts, prototype_filter_invert)
 end
 
 -------------------------------------------------------------------------------
@@ -209,11 +209,11 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PrototypeFiltersTab.methods:onEvent(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "onEvent():", action, item, item2, item3)
+function PrototypeFiltersTab:onEvent(event, action, item, item2, item3)
+  Logging:debug(self.classname, "onEvent():", action, item, item2, item3)
   if action == "change-prototype-filter-type" and drop_down_prototype_filter_type ~= nil then
     local index = drop_down_prototype_filter_type.selected_index
-    Logging:debug(self:classname(), "--> change-prototype-filter-type", prototype_filter_types[index])
+    Logging:debug(self.classname, "--> change-prototype-filter-type", prototype_filter_types[index])
     prototype_filter_type = prototype_filter_types[index]
     prototype_filter = nil
     prototype_filter_option= nil
@@ -222,7 +222,7 @@ function PrototypeFiltersTab.methods:onEvent(event, action, item, item2, item3)
 
   if action == "change-prototype-filter" and drop_down_prototype_filter ~= nil then
     local index = drop_down_prototype_filter.selected_index
-    Logging:debug(self:classname(), "--> change-prototype-filter", prototype_filters[index])
+    Logging:debug(self.classname, "--> change-prototype-filter", prototype_filters[index])
     prototype_filter = prototype_filters[index]
     prototype_filter_option= nil
     self:updateData()
@@ -230,14 +230,14 @@ function PrototypeFiltersTab.methods:onEvent(event, action, item, item2, item3)
 
   if action == "change-filter-option" and drop_down_filter_option ~= nil then
     local index = drop_down_filter_option.selected_index
-    Logging:debug(self:classname(), "--> change-filter-option", prototype_filter_options[index])
+    Logging:debug(self.classname, "--> change-filter-option", prototype_filter_options[index])
     prototype_filter_option = prototype_filter_options[index]
     self:updateData()
   end
 
   if action == "change-filter-invert" and drop_down_filter_invert ~= nil then
     local index = drop_down_filter_invert.selected_index
-    Logging:debug(self:classname(), "--> change-filter-invert", prototype_filter_inverts[index])
+    Logging:debug(self.classname, "--> change-filter-invert", prototype_filter_inverts[index])
     prototype_filter_invert = prototype_filter_inverts[index]
     self:updateData()
   end

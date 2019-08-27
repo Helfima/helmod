@@ -6,7 +6,7 @@ require "tab.AbstractTab"
 -- @extends #AbstractTab
 --
 
-ProductionBlockTab = setclass("HMProductionBlockTab", AbstractTab)
+ProductionBlockTab = class(AbstractTab)
 
 -------------------------------------------------------------------------------
 -- Return button caption
@@ -15,7 +15,7 @@ ProductionBlockTab = setclass("HMProductionBlockTab", AbstractTab)
 --
 -- @return #string
 --
-function ProductionBlockTab.methods:getButtonCaption()
+function ProductionBlockTab:getButtonCaption()
   return {"helmod_result-panel.tab-button-production-block"}
 end
 
@@ -26,7 +26,7 @@ end
 --
 -- @return boolean
 --
-function ProductionBlockTab.methods:isVisible()
+function ProductionBlockTab:isVisible()
   return false
 end
 
@@ -37,7 +37,7 @@ end
 --
 -- @return #boolean
 --
-function ProductionBlockTab.methods:hasIndexModel()
+function ProductionBlockTab:hasIndexModel()
   return false
 end
 
@@ -50,8 +50,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductionBlockTab.methods:beforeUpdate(item, item2, item3)
-  Logging:trace(self:classname(), "beforeUpdate():", item, item2, item3)
+function ProductionBlockTab:beforeUpdate(item, item2, item3)
+  Logging:trace(self.classname, "beforeUpdate():", item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -63,7 +63,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductionBlockTab.methods:updateDebugPanel(item, item2, item3)
+function ProductionBlockTab:updateDebugPanel(item, item2, item3)
   Logging:debug("ProductionBlockTab", "updateDebugPanel():", item, item2, item3)
   local header_panel1, header_panel2,scroll_panel1, scroll_panel2 = self:getResultScrollPanel2({"helmod_result-panel.tab-button-production-block"})
   local model = Model.getModel()
@@ -171,7 +171,7 @@ end
 -- @param #string #ElementGui matrix_panel
 -- @param #string #block block
 --
-function ProductionBlockTab.methods:buildMatrix(matrix_panel, matrix, row_headers, col_headers)
+function ProductionBlockTab:buildMatrix(matrix_panel, matrix, row_headers, col_headers)
   Logging:debug("ProductionBlockTab", "buildMatrix()")
   if matrix ~= nil then
     local num_col = #matrix[1]
@@ -216,10 +216,10 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductionBlockTab.methods:updateInfo(item, item2, item3)
-  Logging:debug(self:classname(), "updateInfo", item, item2, item3)
+function ProductionBlockTab:updateInfo(item, item2, item3)
+  Logging:debug(self.classname, "updateInfo", item, item2, item3)
   local model = Model.getModel()
-  Logging:debug(self:classname(), "model:", model)
+  Logging:debug(self.classname, "model:", model)
   -- data
   local current_block = User.getParameter("current_block") or "new"
 
@@ -250,16 +250,16 @@ function ProductionBlockTab.methods:updateInfo(item, item2, item3)
     ElementGui.addGuiLabel(block_table, "options-linked", ({"helmod_label.block-unlinked"}))
     local unlinked = element.unlinked and true or false
     if element.index == 0 then unlinked = true end
-    ElementGui.addGuiCheckbox(block_table, self:classname().."=change-boolean-option=ID=unlinked", unlinked)
+    ElementGui.addGuiCheckbox(block_table, self.classname.."=change-boolean-option=ID=unlinked", unlinked)
 
     ElementGui.addGuiLabel(block_table, "options-by-factory", ({"helmod_label.compute-by-factory"}))
     local by_factory = element.by_factory and true or false
-    ElementGui.addGuiCheckbox(block_table, self:classname().."=change-boolean-option=ID=by_factory", by_factory)
+    ElementGui.addGuiCheckbox(block_table, self.classname.."=change-boolean-option=ID=by_factory", by_factory)
 
     if element.by_factory == true then
       local factory_number = element.factory_number or 0
       ElementGui.addGuiLabel(block_table, "label-factory_number", ({"helmod_label.factory-number"}))
-      ElementGui.addGuiText(block_table, self:classname().."=change-number-option=ID=factory_number", factory_number, "helmod_textfield")
+      ElementGui.addGuiText(block_table, self.classname.."=change-number-option=ID=factory_number", factory_number, "helmod_textfield")
     end
 
   end
@@ -274,10 +274,10 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductionBlockTab.methods:updateInput(item, item2, item3)
-  Logging:debug(self:classname(), "updateInput", item, item2, item3)
+function ProductionBlockTab:updateInput(item, item2, item3)
+  Logging:debug(self.classname, "updateInput", item, item2, item3)
   local model = Model.getModel()
-  Logging:debug(self:classname(), "model:", model)
+  Logging:debug(self.classname, "model:", model)
   -- data
   local current_block = User.getParameter("current_block") or "new"
 
@@ -300,7 +300,7 @@ function ProductionBlockTab.methods:updateInput(item, item2, item3)
         if element.count > 1 then
           ingredient.limit_count = lua_product.count / element.count
         end
-        ElementGui.addCellElementM(input_table, ingredient, self:classname().."=production-recipe-add=ID="..current_block.."="..element.name.."=", true, "tooltip.ingredient", ElementGui.color_button_add, index)
+        ElementGui.addCellElementM(input_table, ingredient, self.classname.."=production-recipe-add=ID="..current_block.."="..element.name.."=", true, "tooltip.ingredient", ElementGui.color_button_add, index)
       end
     end
 
@@ -316,10 +316,10 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductionBlockTab.methods:updateOutput(item, item2, item3)
-  Logging:debug(self:classname(), "updateOutput", item, item2, item3)
+function ProductionBlockTab:updateOutput(item, item2, item3)
+  Logging:debug(self.classname, "updateOutput", item, item2, item3)
   local model = Model.getModel()
-  Logging:debug(self:classname(), "model:", model)
+  Logging:debug(self.classname, "model:", model)
   -- data
   local current_block = User.getParameter("current_block") or "new"
 
@@ -345,14 +345,14 @@ function ProductionBlockTab.methods:updateOutput(item, item2, item3)
         end
         if lua_product.state == 1 then
           if not(element.unlinked) or element.by_factory == true then
-            ElementGui.addCellElementM(output_table, product, self:classname().."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.product", nil, index)
+            ElementGui.addCellElementM(output_table, product, self.classname.."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.product", nil, index)
           else
-            ElementGui.addCellElementM(output_table, product, self:classname().."=product-edition=ID="..element.id.."="..product.name.."=", true, "tooltip.edit-product", ElementGui.color_button_edit, index)
+            ElementGui.addCellElementM(output_table, product, self.classname.."=product-edition=ID="..element.id.."="..product.name.."=", true, "tooltip.edit-product", ElementGui.color_button_edit, index)
           end
         elseif lua_product.state == 3 then
-          ElementGui.addCellElementM(output_table, product, self:classname().."=product-selected=ID="..element.id.."="..product.name.."=", true, "tooltip.rest-product", ElementGui.color_button_rest, index)
+          ElementGui.addCellElementM(output_table, product, self.classname.."=product-selected=ID="..element.id.."="..product.name.."=", true, "tooltip.rest-product", ElementGui.color_button_rest, index)
         else
-          ElementGui.addCellElementM(output_table, product, self:classname().."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.other-product", nil, index)
+          ElementGui.addCellElementM(output_table, product, self.classname.."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.other-product", nil, index)
         end
       end
     end
@@ -368,7 +368,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductionBlockTab.methods:updateData(item, item2, item3)
+function ProductionBlockTab:updateData(item, item2, item3)
   Logging:debug("ProductionBlockTab", "updateData():", item, item2, item3)
   local model = Model.getModel()
   Logging:debug("ProductionBlockTab", "model:", model)
@@ -381,7 +381,7 @@ function ProductionBlockTab.methods:updateData(item, item2, item3)
   -- data panel
   local header_panel1, header_panel2,scroll_panel1, scroll_panel2 = self:getResultScrollPanel2({"helmod_result-panel.tab-button-production-block"})
 
-  local back_button = ElementGui.addGuiButton(header_panel1,self:classname().."=change-tab=ID=","HMProductionLineTab","back_button","Back")
+  local back_button = ElementGui.addGuiButton(header_panel1,self.classname.."=change-tab=ID=","HMProductionLineTab","back_button","Back")
   back_button.style.width = 70
 
   local recipe_table = ElementGui.addGuiTable(scroll_panel1,"recipe-data",1)
@@ -396,7 +396,7 @@ function ProductionBlockTab.methods:updateData(item, item2, item3)
     color = "orange"
   end
   local block_new = {name = "helmod_button_icon_robot_flat2" ,count = 0,localised_name = "helmod_result-panel.add-button-production-block"}
-  ElementGui.addCellProduct(cell_recipe, block_new, self:classname().."=change-tab=ID=HMProductionBlockTab=new=", true, "tooltip.edit-block", color)
+  ElementGui.addCellProduct(cell_recipe, block_new, self.classname.."=change-tab=ID=HMProductionBlockTab=new=", true, "tooltip.edit-block", color)
 
   for _, block in spairs(model.blocks, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
     -- col recipe
@@ -406,7 +406,7 @@ function ProductionBlockTab.methods:updateData(item, item2, item3)
       last_element = cell_recipe
       color = "orange"
     end
-    ElementGui.addCellBlock(cell_recipe, block, self:classname().."=change-tab=ID=HMProductionBlockTab="..block.id.."=", true, "tooltip.edit-block", color)
+    ElementGui.addCellBlock(cell_recipe, block, self.classname.."=change-tab=ID=HMProductionBlockTab="..block.id.."=", true, "tooltip.edit-block", color)
   end
   if last_element ~= nil then
     scroll_panel1.scroll_to_element(last_element)
@@ -449,7 +449,7 @@ end
 --
 -- @param #LuaGuiElement itable container for element
 --
-function ProductionBlockTab.methods:addTableHeader(itable)
+function ProductionBlockTab:addTableHeader(itable)
   Logging:debug("ProductionBlockTab", "addTableHeader():", itable)
 
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
@@ -476,15 +476,15 @@ end
 -- @param #table block
 -- @param #table recipe production recipe
 --
-function ProductionBlockTab.methods:addTableRow(gui_table, block, recipe)
+function ProductionBlockTab:addTableRow(gui_table, block, recipe)
   Logging:debug("ProductionBlockTab", "addTableRow():", gui_table, block, recipe)
   local lua_recipe = RecipePrototype.load(recipe).native()
 
   -- col action
   local cell_action = ElementGui.addCell(gui_table, "action"..recipe.id, 2)
-  ElementGui.addGuiButton(cell_action, self:classname().."=production-recipe-up=ID="..block.id.."=", recipe.id, "helmod_button_icon_arrow_top_sm", nil, ({"tooltip.up-element", User.getModSetting("row_move_step")}))
-  ElementGui.addGuiButton(cell_action, self:classname().."=production-recipe-remove=ID="..block.id.."=", recipe.id, "helmod_button_icon_delete_sm_red", nil, ({"tooltip.remove-element"}))
-  ElementGui.addGuiButton(cell_action, self:classname().."=production-recipe-down=ID="..block.id.."=", recipe.id, "helmod_button_icon_arrow_down_sm", nil, ({"tooltip.down-element", User.getModSetting("row_move_step")}))
+  ElementGui.addGuiButton(cell_action, self.classname.."=production-recipe-up=ID="..block.id.."=", recipe.id, "helmod_button_icon_arrow_top_sm", nil, ({"tooltip.up-element", User.getModSetting("row_move_step")}))
+  ElementGui.addGuiButton(cell_action, self.classname.."=production-recipe-remove=ID="..block.id.."=", recipe.id, "helmod_button_icon_delete_sm_red", nil, ({"tooltip.remove-element"}))
+  ElementGui.addGuiButton(cell_action, self.classname.."=production-recipe-down=ID="..block.id.."=", recipe.id, "helmod_button_icon_arrow_down_sm", nil, ({"tooltip.down-element", User.getModSetting("row_move_step")}))
 
   -- col index
   if User.getModGlobalSetting("display_data_col_index") then
@@ -542,7 +542,7 @@ function ProductionBlockTab.methods:addTableRow(gui_table, block, recipe)
     if block.count > 1 then
       product.limit_count = product.count / block.count
     end
-    ElementGui.addCellElement(cell_products, product, self:classname().."=product-selected=ID="..block.id.."="..recipe.name.."=", false, "tooltip.product", nil, index)
+    ElementGui.addCellElement(cell_products, product, self.classname.."=product-selected=ID="..block.id.."="..recipe.name.."=", false, "tooltip.product", nil, index)
   end
 
   -- ingredients
@@ -554,7 +554,7 @@ function ProductionBlockTab.methods:addTableRow(gui_table, block, recipe)
     if block.count > 1 then
       ingredient.limit_count = ingredient.count / block.count
     end
-    ElementGui.addCellElement(cell_ingredients, ingredient, self:classname().."=production-recipe-add=ID="..block.id.."="..recipe.name.."=", true, "tooltip.add-recipe", ElementGui.color_button_add, index)
+    ElementGui.addCellElement(cell_ingredients, ingredient, self.classname.."=production-recipe-add=ID="..block.id.."="..recipe.name.."=", true, "tooltip.add-recipe", ElementGui.color_button_add, index)
   end
 
   return cell_recipe

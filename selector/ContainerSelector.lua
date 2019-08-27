@@ -6,7 +6,7 @@ require "selector.AbstractSelector"
 -- @extends #AbstractSelector
 --
 
-ContainerSelector = setclass("HMContainerSelector", AbstractSelector)
+ContainerSelector = class(AbstractSelector)
 
 -------------------------------------------------------------------------------
 -- Return caption
@@ -15,7 +15,7 @@ ContainerSelector = setclass("HMContainerSelector", AbstractSelector)
 --
 -- @param #Controller parent parent controller
 --
-function ContainerSelector.methods:getCaption(parent)
+function ContainerSelector:getCaption(parent)
   return {"helmod_selector-panel.container-title"}
 end
 
@@ -27,16 +27,16 @@ end
 -- @param #string name
 -- @param #string type
 --
-function ContainerSelector.methods:appendGroups(name, type)
-  Logging:debug(self:classname(), "appendGroups()", name, type)
+function ContainerSelector:appendGroups(name, type)
+  Logging:debug(self.classname, "appendGroups()", name, type)
   EntityPrototype.load(name, type)
   local find = self:checkFilter(EntityPrototype.native())
   local filter_show_disable = User.getSetting("filter_show_disable")
   local filter_show_hidden = User.getSetting("filter_show_hidden")
   
-  local list_group = Cache.getData(self:classname(), "list_group")
-  local list_prototype = Cache.getData(self:classname(), "list_prototype")
-  local list_subgroup = Cache.getData(self:classname(), "list_subgroup")
+  local list_group = Cache.getData(self.classname, "list_group")
+  local list_prototype = Cache.getData(self.classname, "list_prototype")
+  local list_subgroup = Cache.getData(self.classname, "list_subgroup")
   
   if find == true and (EntityPrototype.getValid() == true or filter_show_disable == true) then
     local group_name = EntityPrototype.native().group.name
@@ -72,8 +72,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ContainerSelector.methods:updateGroups(event, action, item, item2, item3)
-  Logging:trace(self:classname(), "updateGroups()", action, item, item2, item3)
+function ContainerSelector:updateGroups(event, action, item, item2, item3)
+  Logging:trace(self.classname, "updateGroups()", action, item, item2, item3)
   
   self:resetGroups()
 
@@ -90,8 +90,8 @@ end
 --
 -- @param #LuaPrototype prototype
 --
-function ContainerSelector.methods:buildPrototypeTooltip(prototype)
-  Logging:trace(self:classname(), "buildPrototypeTooltip(player, prototype):", prototype)
+function ContainerSelector:buildPrototypeTooltip(prototype)
+  Logging:trace(self.classname, "buildPrototypeTooltip(player, prototype):", prototype)
   -- initalize tooltip
   local tooltip = EntityPrototype.load(prototype).getLocalisedName()
   return tooltip
@@ -102,9 +102,9 @@ end
 --
 -- @function [parent=#ContainerSelector] buildPrototypeIcon
 --
-function ContainerSelector.methods:buildPrototypeIcon(guiElement, prototype, tooltip)
-  Logging:trace(self:classname(), "buildPrototypeIcon(player, guiElement, prototype, tooltip:",player, guiElement, prototype, tooltip)
-  ElementGui.addGuiButtonSelectSprite(guiElement, self:classname().."=element-select=ID=container=", Player.getEntityIconType(prototype), prototype.name, prototype.name, tooltip)
+function ContainerSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
+  Logging:trace(self.classname, "buildPrototypeIcon(player, guiElement, prototype, tooltip:",player, guiElement, prototype, tooltip)
+  ElementGui.addGuiButtonSelectSprite(guiElement, self.classname.."=element-select=ID=container=", Player.getEntityIconType(prototype), prototype.name, prototype.name, tooltip)
 end
 
 

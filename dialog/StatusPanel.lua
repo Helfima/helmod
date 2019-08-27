@@ -5,7 +5,7 @@
 -- @extends #Form
 --
 
-StatusPanel = setclass("HMStatusPanel", Form)
+StatusPanel = class(Form)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -14,9 +14,9 @@ StatusPanel = setclass("HMStatusPanel", Form)
 --
 -- @param #Controller parent parent controller
 --
-function StatusPanel.methods:onInit(parent)
+function StatusPanel:onInit(parent)
   self.panelCaption = ({"helmod_status-tab-panel.title"})
-  self.parameterLast = string.format("%s_%s",self:classname(),"last")
+  self.parameterLast = string.format("%s_%s",self.classname,"last")
 end
 
 -------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function StatusPanel.methods:onBeforeEvent( event, action, item, item2, item3)
+function StatusPanel:onBeforeEvent( event, action, item, item2, item3)
   local close = true
   if User.getParameter(self.parameterLast) == nil or User.getParameter(self.parameterLast) then
     close = false
@@ -46,7 +46,7 @@ end
 --
 -- @function [parent=#StatusPanel] onClose
 --
-function StatusPanel.methods:onClose()
+function StatusPanel:onClose()
   User.setParameter(self.parameterLast,nil)
 end
 
@@ -55,7 +55,7 @@ end
 --
 -- @function [parent=#StatusPanel] getInfoPanel
 --
-function StatusPanel.methods:getInfoPanel()
+function StatusPanel:getInfoPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["info-panel"] ~= nil and content_panel["info-panel"].valid then
     return content_panel["info-panel"]["scroll-panel"]
@@ -69,7 +69,7 @@ end
 --
 -- @function [parent=#StatusPanel] getHeaderPanel
 --
-function StatusPanel.methods:getHeaderPanel()
+function StatusPanel:getHeaderPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["header"] ~= nil and content_panel["header"].valid then
     return content_panel["header"]
@@ -88,7 +88,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function StatusPanel.methods:onOpen(event, action, item, item2, item3)
+function StatusPanel:onOpen(event, action, item, item2, item3)
   self:updateHeader(event, action, item, item2, item3)
   self:getInfoPanel()
 end
@@ -104,7 +104,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function StatusPanel.methods:onUpdate(event, action, item, item2, item3)
+function StatusPanel:onUpdate(event, action, item, item2, item3)
   self:updateInfo(event, action, item, item2, item3)
 end
 
@@ -119,13 +119,13 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function StatusPanel.methods:updateHeader(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "updateHeader():", action, item, item2, item3)
+function StatusPanel:updateHeader(event, action, item, item2, item3)
+  Logging:debug(self.classname, "updateHeader():", action, item, item2, item3)
   local header_panel = self:getHeaderPanel()
   local model = Model.getModel()
 
-  ElementGui.addGuiButton(header_panel, self:classname().."=CLOSE", nil, "helmod_button_icon_close_red", nil, ({"helmod_button.close"}))
-  ElementGui.addGuiButton(header_panel, self:classname().."=UPDATE", nil, "helmod_button_icon_refresh", nil, ({"helmod_result-panel.refresh-button"}))
+  ElementGui.addGuiButton(header_panel, self.classname.."=CLOSE", nil, "helmod_button_icon_close_red", nil, ({"helmod_button.close"}))
+  ElementGui.addGuiButton(header_panel, self.classname.."=UPDATE", nil, "helmod_button_icon_refresh", nil, ({"helmod_result-panel.refresh-button"}))
 
 end
 
@@ -140,8 +140,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function StatusPanel.methods:updateInfo(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "updateInfo():", action, item, item2, item3)
+function StatusPanel:updateInfo(event, action, item, item2, item3)
+  Logging:debug(self.classname, "updateInfo():", action, item, item2, item3)
   local info_panel = self:getInfoPanel()
   local model = Model.getModel()
 
@@ -175,8 +175,8 @@ end
 --
 -- @param #LuaGuiElement itable container for element
 --
-function StatusPanel.methods:addProductionBlockHeader(itable)
-  Logging:debug(self:classname(), "addProductionBlockHeader():", itable)
+function StatusPanel:addProductionBlockHeader(itable)
+  Logging:debug(self.classname, "addProductionBlockHeader():", itable)
 end
 
 -------------------------------------------------------------------------------
@@ -187,8 +187,8 @@ end
 -- @param #LuaGuiElement guiTable
 -- @param #table element
 --
-function StatusPanel.methods:addProductionBlockRow(guiTable, element)
-  Logging:debug(self:classname(), "addProductionBlockRow():", guiTable, element)
+function StatusPanel:addProductionBlockRow(guiTable, element)
+  Logging:debug(self.classname, "addProductionBlockRow():", guiTable, element)
   EntityPrototype.load(element).native()
   
   ElementGui.addGuiButtonSprite(guiTable, "element_"..element.name.."=", Player.getIconType(element), element.name, element.name, Player.getLocalisedName(element))
@@ -207,8 +207,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function StatusPanel.methods:onEvent(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "onEvent():", action, item, item2, item3)
+function StatusPanel:onEvent(event, action, item, item2, item3)
+  Logging:debug(self.classname, "onEvent():", action, item, item2, item3)
   local model = Model.getModel()
 
 end

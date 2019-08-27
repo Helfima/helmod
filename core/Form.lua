@@ -3,35 +3,23 @@
 --
 -- @module Form
 --
-Form = setclass("HMForm")
-
--------------------------------------------------------------------------------
--- Initialization
---
--- @function [parent=#Form] init
---
--- @param #Controller parent parent controller
---
-function Form.methods:init(parent)
-  self.parent = parent
-
-  self.otherClose = true
-  self.locate = "screen"
-  self.panelClose = true
-  self.help_button = true
-  self.auto_clear = true
-  self.content_verticaly = true
-  self:onInit(parent)
-end
+Form = class(function(base,classname)
+  base.classname = classname
+  base.otherClose = true
+  base.locate = "screen"
+  base.panelClose = true
+  base.help_button = true
+  base.auto_clear = true
+  base.content_verticaly = true
+  base:onInit()
+end)
 
 -------------------------------------------------------------------------------
 -- On initialization
 --
 -- @function [parent=#Form] onInit
 --
--- @param #Controller parent parent controller
---
-function Form.methods:onInit(parent)
+function Form:onInit()
 end
 
 -------------------------------------------------------------------------------
@@ -41,7 +29,7 @@ end
 --
 -- @return boolean
 --
-function Form.methods:isVisible()
+function Form:isVisible()
   return true
 end
 
@@ -52,7 +40,7 @@ end
 --
 -- @return boolean
 --
-function Form.methods:isSpecial()
+function Form:isSpecial()
   return false
 end
 
@@ -63,8 +51,8 @@ end
 --
 -- @return #LuaGuiElement
 --
-function Form.methods:getPanelName()
-  return self:classname()
+function Form:getPanelName()
+  return self.classname
 end
 
 -------------------------------------------------------------------------------
@@ -74,7 +62,7 @@ end
 --
 -- @return #LuaGuiElement
 --
-function Form.methods:getParentPanel()
+function Form:getParentPanel()
   local lua_player = Player.native()
   return lua_player.gui[self.locate]
 end
@@ -86,7 +74,7 @@ end
 --
 -- @return #LuaGuiElement
 --
-function Form.methods:getPanel()
+function Form:getPanel()
   local parent_panel = self:getParentPanel()
   if parent_panel[self:getPanelName()] ~= nil and parent_panel[self:getPanelName()].valid then
     return parent_panel[self:getPanelName()], parent_panel[self:getPanelName()]["content_panel"], parent_panel[self:getPanelName()]["header_panel"]["menu_panel"]
@@ -96,12 +84,12 @@ function Form.methods:getPanel()
   flow_panel.style.horizontally_stretchable = true
   flow_panel.style.vertically_stretchable = true
   flow_panel.location = User.getLocationForm(self:getPanelName())
-  Logging:debug(self:classname(), "location", self:getPanelName(), User.getLocationForm(self:getPanelName()))
-  ElementGui.setStyle(flow_panel, self:classname(), "width")
-  ElementGui.setStyle(flow_panel, self:classname(), "height")
+  Logging:debug(self.classname, "location", self:getPanelName(), User.getLocationForm(self:getPanelName()))
+  ElementGui.setStyle(flow_panel, self.classname, "width")
+  ElementGui.setStyle(flow_panel, self.classname, "height")
   
   local header_panel = ElementGui.addGuiFlowH(flow_panel, "header_panel")
-  local title_panel = ElementGui.addGuiFrameH(header_panel, "title_panel", helmod_frame_style.default, self.panelCaption or self:classname())
+  local title_panel = ElementGui.addGuiFrameH(header_panel, "title_panel", helmod_frame_style.default, self.panelCaption or self.classname)
   title_panel.style.height = 40
   local menu_panel = ElementGui.addGuiFrameH(header_panel, "menu_panel", helmod_frame_style.panel)
   --menu_panel.style.horizontal_spacing = 10
@@ -114,7 +102,7 @@ function Form.methods:getPanel()
     content_panel = ElementGui.addGuiFlowH(flow_panel, "content_panel")
   end
   title_panel.drag_target = flow_panel
-  --Logging:debug(self:classname(), "children",panel.children_names)
+  --Logging:debug(self.classname, "children",panel.children_names)
   return flow_panel, content_panel, menu_panel
 end
 
@@ -125,7 +113,7 @@ end
 --
 -- @return #LuaGuiElement
 --
-function Form.methods:getMenuPanel()
+function Form:getMenuPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   local panel_name = "menu"
   if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
@@ -145,7 +133,7 @@ end
 --
 -- @return #LuaGuiElement
 --
-function Form.methods:getLeftMenuPanel()
+function Form:getLeftMenuPanel()
   local parent_panel = self:getMenuPanel()
   local panel_name = "left_menu"
   if parent_panel[panel_name] ~= nil and parent_panel[panel_name].valid then
@@ -165,7 +153,7 @@ end
 --
 -- @return #LuaGuiElement
 --
-function Form.methods:getRightMenuPanel()
+function Form:getRightMenuPanel()
   local parent_panel = self:getMenuPanel()
   local panel_name = "right_menu"
   if parent_panel[panel_name] ~= nil and parent_panel[panel_name].valid then
@@ -184,10 +172,10 @@ end
 --
 -- @function [parent=#Form] isOpened
 --
-function Form.methods:isOpened()
-  Logging:trace(self:classname(), "isOpened()")
+function Form:isOpened()
+  Logging:trace(self.classname, "isOpened()")
   local parent_panel = self:getParentPanel()
-  if parent_panel[self:classname()] ~= nil then
+  if parent_panel[self.classname] ~= nil then
     return true
   end
   return false
@@ -204,8 +192,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Form.methods:open(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "open()", action, item, item2, item3)
+function Form:open(event, action, item, item2, item3)
+  Logging:debug(self.classname, "open()", action, item, item2, item3)
   local parent_panel = self:getParentPanel()
   if parent_panel[self:getPanelName()] == nil then
     self:onOpen(event, action, item, item2, item3)
@@ -223,12 +211,12 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Form.methods:beforeEvent(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "beforeEvent()", action, item, item2, item3)
+function Form:beforeEvent(event, action, item, item2, item3)
+  Logging:debug(self.classname, "beforeEvent()", action, item, item2, item3)
   local parent_panel = self:getParentPanel()
   local close = self:onBeforeEvent(event, action, item, item2, item3)
   if parent_panel ~= nil and parent_panel[self:getPanelName()] ~= nil and parent_panel[self:getPanelName()].valid then
-    Logging:debug(self:classname() , "must close?",close)
+    Logging:debug(self.classname , "must close?",close)
     if close and action == "OPEN" then
       self:close(true)
     end
@@ -246,7 +234,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Form.methods:onBeforeEvent(event, action, item, item2, item3)
+function Form:onBeforeEvent(event, action, item, item2, item3)
   return false
 end
 
@@ -261,7 +249,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Form.methods:onEvent(event, action, item, item2, item3)
+function Form:onEvent(event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
@@ -275,7 +263,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Form.methods:onOpen(event, action, item, item2, item3)
+function Form:onOpen(event, action, item, item2, item3)
   return false
 end
 
@@ -290,7 +278,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Form.methods:prepare(event, action, item, item2, item3)
+function Form:prepare(event, action, item, item2, item3)
   return false
 end
 
@@ -305,8 +293,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Form.methods:updateTopMenu(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "updateTopMenu()", action, item, item2, item3)
+function Form:updateTopMenu(event, action, item, item2, item3)
+  Logging:debug(self.classname, "updateTopMenu()", action, item, item2, item3)
   -- ajoute un menu
   if self.panelCaption ~= nil then
 
@@ -315,10 +303,10 @@ function Form.methods:updateTopMenu(event, action, item, item2, item3)
     if self.panelClose then
       local group1 = ElementGui.addGuiFlowH(menu_panel,"group1",helmod_flow_style.horizontal)
       for _, form in pairs(Controller.getViews()) do
-        if string.find(self:classname(), "Tab") and string.find(form:classname(), "Tab") and form:isVisible() and form:isSpecial() then
+        if string.find(self.classname, "Tab") and string.find(form.classname, "Tab") and form:isVisible() and form:isSpecial() then
           local style, selected_style = form:getButtonStyles()
-          if User.isActiveForm(form:classname()) then style = selected_style end
-          ElementGui.addGuiButton(group1, self:classname().."=change-tab=ID=", form:classname(), style, nil, form:getButtonCaption())
+          if User.isActiveForm(form.classname) then style = selected_style end
+          ElementGui.addGuiButton(group1, self.classname.."=change-tab=ID=", form.classname, style, nil, form:getButtonCaption())
         end
       end
 
@@ -326,7 +314,7 @@ function Form.methods:updateTopMenu(event, action, item, item2, item3)
       if self.help_button then
         ElementGui.addGuiButton(group2, "HMHelpPanel=OPEN", nil, "helmod_button_icon_help", nil, ({"helmod_button.help"}))
       end
-      ElementGui.addGuiButton(group2, self:classname().."=CLOSE", nil, "helmod_button_icon_close_red", nil, ({"helmod_button.close"}))
+      ElementGui.addGuiButton(group2, self.classname.."=CLOSE", nil, "helmod_button_icon_close_red", nil, ({"helmod_button.close"}))
     end
   end
 end
@@ -342,8 +330,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Form.methods:update(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "update():", action, item, item2, item3)
+function Form:update(event, action, item, item2, item3)
+  Logging:debug(self.classname, "update():", action, item, item2, item3)
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if self.auto_clear then content_panel.clear() end
   if action == "OPEN" then
@@ -363,7 +351,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Form.methods:onUpdate(event, action, item, item2, item3)
+function Form:onUpdate(event, action, item, item2, item3)
 
 end
 
@@ -374,10 +362,10 @@ end
 --
 -- @param #boolean force state close
 --
-function Form.methods:close(force)
-  Logging:debug(self:classname(), "close()")
+function Form:close(force)
+  Logging:debug(self.classname, "close()")
   local flow_panel, content_panel, menu_panel = self:getPanel()
-  User.setCloseForm(self:classname(), flow_panel.location)
+  User.setCloseForm(self.classname, flow_panel.location)
   self:onClose()
   flow_panel.destroy()
 end
@@ -389,5 +377,5 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function Form.methods:onClose()
+function Form:onClose()
 end

@@ -1,10 +1,11 @@
+require "edition.AbstractEdition"
 -------------------------------------------------------------------------------
 -- Class to build rule edition dialog
 --
 -- @module RuleEdition
 --
 
-RuleEdition = setclass("HMRuleEdition", AbstractEdition)
+RuleEdition = class(AbstractEdition)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -13,9 +14,9 @@ RuleEdition = setclass("HMRuleEdition", AbstractEdition)
 --
 -- @param #Controller parent parent controller
 --
-function RuleEdition.methods:onInit(parent)
+function RuleEdition:onInit(parent)
   self.panelCaption = ({"helmod_rule-edition-panel.title"})
-  self.parameterLast = string.format("%s_%s",self:classname(),"last")
+  self.parameterLast = string.format("%s_%s",self.classname,"last")
 end
 
 -------------------------------------------------------------------------------
@@ -25,7 +26,7 @@ end
 --
 -- @return #LuaGuiElement
 --
-function RuleEdition.methods:getRulePanel()
+function RuleEdition:getRulePanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["rule_panel"] ~= nil and content_panel["rule_panel"].valid then
     return content_panel["rule_panel"]
@@ -39,7 +40,7 @@ end
 --
 -- @function [parent=#RuleEdition] getActionPanel
 --
-function RuleEdition.methods:getActionPanel()
+function RuleEdition:getActionPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["action_panel"] ~= nil and content_panel["action_panel"].valid then
     return content_panel["action_panel"]
@@ -58,8 +59,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function RuleEdition.methods:onUpdate(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "onUpdate():", action, item, item2, item3)
+function RuleEdition:onUpdate(event, action, item, item2, item3)
+  Logging:debug(self.classname, "onUpdate():", action, item, item2, item3)
   self:updateRule(item, item2, item3)
   self:updateAction(item, item2, item3)
 end
@@ -79,8 +80,8 @@ local rule_excluded = false
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function RuleEdition.methods:updateRule(item, item2, item3)
-  Logging:debug(self:classname(), "updateRule():", item, item2, item3)
+function RuleEdition:updateRule(item, item2, item3)
+  Logging:debug(self.classname, "updateRule():", item, item2, item3)
   local rule_panel = self:getRulePanel()
   rule_panel.clear()
   local rule_table = ElementGui.addGuiTable(rule_panel,"list-data", 2, helmod_table_style.rule)
@@ -92,7 +93,7 @@ function RuleEdition.methods:updateRule(item, item2, item3)
   end
   if rule_mod == nil then rule_mod = mod_list[1] end
   ElementGui.addGuiLabel(rule_table, "label-mod", ({"helmod_rule-edition-panel.mod"}))
-  ElementGui.addGuiDropDown(rule_table, self:classname().."=dropdown=ID=", "mod", mod_list, rule_mod)
+  ElementGui.addGuiDropDown(rule_table, self.classname.."=dropdown=ID=", "mod", mod_list, rule_mod)
 
   -- name
   local helmod_rule_manes = {}
@@ -101,7 +102,7 @@ function RuleEdition.methods:updateRule(item, item2, item3)
   end
   if rule_name == nil then rule_name = helmod_rule_manes[1] end
   ElementGui.addGuiLabel(rule_table, "label-name", ({"helmod_rule-edition-panel.name"}))
-  ElementGui.addGuiDropDown(rule_table, self:classname().."=dropdown=ID=", "name", helmod_rule_manes, rule_name)
+  ElementGui.addGuiDropDown(rule_table, self.classname.."=dropdown=ID=", "name", helmod_rule_manes, rule_name)
 
   -- category
   local helmod_rule_categories = {}
@@ -110,13 +111,13 @@ function RuleEdition.methods:updateRule(item, item2, item3)
   end
   if rule_category == nil then rule_category = helmod_rule_categories[1] end
   ElementGui.addGuiLabel(rule_table, "label-category", ({"helmod_rule-edition-panel.category"}))
-  ElementGui.addGuiDropDown(rule_table, self:classname().."=dropdown=ID=", "category", helmod_rule_categories, rule_category)
+  ElementGui.addGuiDropDown(rule_table, self.classname.."=dropdown=ID=", "category", helmod_rule_categories, rule_category)
 
   -- type
   local helmod_rule_types = helmod_rules[rule_name].categories[rule_category]
   if rule_type == nil then rule_type = helmod_rule_types[1] end
   ElementGui.addGuiLabel(rule_table, "label-type", ({"helmod_rule-edition-panel.type"}))
-  ElementGui.addGuiDropDown(rule_table, self:classname().."=dropdown=ID=", "type",  helmod_rule_types, rule_type)
+  ElementGui.addGuiDropDown(rule_table, self.classname.."=dropdown=ID=", "type",  helmod_rule_types, rule_type)
 
   ElementGui.addGuiLabel(rule_table, "label-value", ({"helmod_rule-edition-panel.value"}))
   ElementGui.addGuiChooseButton(rule_table, "choose=", "value", "entity", nil, nil)
@@ -138,13 +139,13 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function RuleEdition.methods:updateAction(item, item2, item3)
-  Logging:debug(self:classname(), "updateAction():", item, item2, item3)
+function RuleEdition:updateAction(item, item2, item3)
+  Logging:debug(self.classname, "updateAction():", item, item2, item3)
   local action_panel = self:getActionPanel()
   action_panel.clear()
   local action_panel = ElementGui.addGuiTable(action_panel,"table_action",2)
-  ElementGui.addGuiButton(action_panel, self:classname().."=", "save", "helmod_button_default", ({"helmod_button.save"}))
-  ElementGui.addGuiButton(action_panel, self:classname().."=CLOSE=", "close", "helmod_button_default", ({"helmod_button.close"}))
+  ElementGui.addGuiButton(action_panel, self.classname.."=", "save", "helmod_button_default", ({"helmod_button.save"}))
+  ElementGui.addGuiButton(action_panel, self.classname.."=CLOSE=", "close", "helmod_button_default", ({"helmod_button.close"}))
 end
 
 -------------------------------------------------------------------------------
@@ -158,8 +159,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function RuleEdition.methods:onEvent(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "onEvent():", action, item, item2, item3)
+function RuleEdition:onEvent(event, action, item, item2, item3)
+  Logging:debug(self.classname, "onEvent():", action, item, item2, item3)
   if Player.isAdmin() then
     if action == "dropdown" then
       if item == "mod" then

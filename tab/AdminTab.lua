@@ -6,7 +6,7 @@ require "tab.AbstractTab"
 -- @extends #AbstractTab
 --
 
-AdminTab = setclass("HMAdminTab", AbstractTab)
+AdminTab = class(AbstractTab)
 
 -------------------------------------------------------------------------------
 -- Return button caption
@@ -15,7 +15,7 @@ AdminTab = setclass("HMAdminTab", AbstractTab)
 --
 -- @return #string
 --
-function AdminTab.methods:getButtonCaption()
+function AdminTab:getButtonCaption()
   return {"helmod_result-panel.tab-button-admin"}
 end
 
@@ -26,7 +26,7 @@ end
 --
 -- @return boolean
 --
-function AdminTab.methods:getButtonStyles()
+function AdminTab:getButtonStyles()
   return "helmod_button_icon_database","helmod_button_icon_database_selected"
 end
 
@@ -37,7 +37,7 @@ end
 --
 -- @return boolean
 --
-function AdminTab.methods:isVisible()
+function AdminTab:isVisible()
   return Player.isAdmin()
 end
 
@@ -48,7 +48,7 @@ end
 --
 -- @return boolean
 --
-function AdminTab.methods:isSpecial()
+function AdminTab:isSpecial()
   return true
 end
 
@@ -59,7 +59,7 @@ end
 --
 -- @return #boolean
 --
-function AdminTab.methods:hasIndexModel()
+function AdminTab:hasIndexModel()
   return false
 end
 
@@ -68,8 +68,8 @@ end
 --
 -- @function [parent=#AdminTab] updateData
 --
-function AdminTab.methods:updateData()
-  Logging:debug(self:classname(), "updatePowers()")
+function AdminTab:updateData()
+  Logging:debug(self.classname, "updatePowers()")
 
   -- data
   local scroll_panel = self:getResultScrollPanel({"helmod_result-panel.tab-title-admin"})
@@ -117,8 +117,8 @@ end
 --
 -- @param #LuaGuiElement itable container for element
 --
-function AdminTab.methods:addRuleListHeader(itable)
-  Logging:debug(self:classname(), "addRuleListHeader():", itable)
+function AdminTab:addRuleListHeader(itable)
+  Logging:debug(self.classname, "addRuleListHeader():", itable)
 
   -- col action
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
@@ -140,12 +140,12 @@ end
 -- @param #LuaGuiElement itable container for element
 -- @param #table model
 --
-function AdminTab.methods:addRuleListRow(gui_table, rule, rule_id)
-  Logging:debug(self:classname(), "addSheetListRow():", gui_table, rule, rule_id)
+function AdminTab:addRuleListRow(gui_table, rule, rule_id)
+  Logging:debug(self.classname, "addSheetListRow():", gui_table, rule, rule_id)
 
   -- col action
   local cell_action = ElementGui.addCell(gui_table, "action"..rule_id, 4)
-  ElementGui.addGuiButton(cell_action, self:classname().."=rule-remove=ID=", rule_id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
+  ElementGui.addGuiButton(cell_action, self.classname.."=rule-remove=ID=", rule_id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
 
   -- col index
   ElementGui.addGuiLabel(gui_table, "index"..rule_id, rule.index)
@@ -177,8 +177,8 @@ end
 --
 -- @param #LuaGuiElement itable container for element
 --
-function AdminTab.methods:addSheetListHeader(itable)
-  Logging:debug(self:classname(), "addSheetListHeader():", itable)
+function AdminTab:addSheetListHeader(itable)
+  Logging:debug(self.classname, "addSheetListHeader():", itable)
 
   -- col action
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
@@ -195,25 +195,25 @@ end
 -- @param #LuaGuiElement itable container for element
 -- @param #table model
 --
-function AdminTab.methods:addSheetListRow(gui_table, model)
-  Logging:debug(self:classname(), "addSheetListRow():", gui_table, model)
+function AdminTab:addSheetListRow(gui_table, model)
+  Logging:debug(self.classname, "addSheetListRow():", gui_table, model)
 
   -- col action
   local cell_action = ElementGui.addCell(gui_table, "action"..model.id, 4)
   if model.share ~= nil and bit32.band(model.share, 1) > 0 then
-    ElementGui.addGuiButton(cell_action, self:classname().."=share-model=ID=read=", model.id, "helmod_button_selected", "R", {"tooltip.share-mod", {"helmod_common.reading"}})
+    ElementGui.addGuiButton(cell_action, self.classname.."=share-model=ID=read=", model.id, "helmod_button_selected", "R", {"tooltip.share-mod", {"helmod_common.reading"}})
   else
-    ElementGui.addGuiButton(cell_action, self:classname().."=share-model=ID=read=", model.id, "helmod_button_default", "R", {"tooltip.share-mod", {"helmod_common.reading"}})
+    ElementGui.addGuiButton(cell_action, self.classname.."=share-model=ID=read=", model.id, "helmod_button_default", "R", {"tooltip.share-mod", {"helmod_common.reading"}})
   end
   if model.share ~= nil and bit32.band(model.share, 2) > 0 then
-    ElementGui.addGuiButton(cell_action, self:classname().."=share-model=ID=write=", model.id, "helmod_button_selected", "W", {"tooltip.share-mod", {"helmod_common.writing"}})
+    ElementGui.addGuiButton(cell_action, self.classname.."=share-model=ID=write=", model.id, "helmod_button_selected", "W", {"tooltip.share-mod", {"helmod_common.writing"}})
   else
-    ElementGui.addGuiButton(cell_action, self:classname().."=share-model=ID=write=", model.id, "helmod_button_default", "W", {"tooltip.share-mod", {"helmod_common.writing"}})
+    ElementGui.addGuiButton(cell_action, self.classname.."=share-model=ID=write=", model.id, "helmod_button_default", "W", {"tooltip.share-mod", {"helmod_common.writing"}})
   end
   if model.share ~= nil and bit32.band(model.share, 4) > 0 then
-    ElementGui.addGuiButton(cell_action, self:classname().."=share-model=ID=delete=", model.id, "helmod_button_selected", "X", {"tooltip.share-mod", {"helmod_common.removal"}})
+    ElementGui.addGuiButton(cell_action, self.classname.."=share-model=ID=delete=", model.id, "helmod_button_selected", "X", {"tooltip.share-mod", {"helmod_common.removal"}})
   else
-    ElementGui.addGuiButton(cell_action, self:classname().."=share-model=ID=delete=", model.id, "helmod_button_default", "X", {"tooltip.share-mod", {"helmod_common.removal"}})
+    ElementGui.addGuiButton(cell_action, self.classname.."=share-model=ID=delete=", model.id, "helmod_button_default", "X", {"tooltip.share-mod", {"helmod_common.removal"}})
   end
 
   -- col owner
@@ -224,9 +224,9 @@ function AdminTab.methods:addSheetListRow(gui_table, model)
   local cell_element = ElementGui.addGuiFrameH(gui_table,"element"..model.id, helmod_frame_style.hidden)
   local element = Model.firstRecipe(model.blocks)
   if element ~= nil then
-    ElementGui.addGuiButtonSprite(cell_element, self:classname().."=donothing=ID="..model.id.."=", Player.getIconType(element), element.name, model.id, RecipePrototype.load(element).getLocalisedName())
+    ElementGui.addGuiButtonSprite(cell_element, self.classname.."=donothing=ID="..model.id.."=", Player.getIconType(element), element.name, model.id, RecipePrototype.load(element).getLocalisedName())
   else
-    ElementGui.addGuiButton(cell_element, self:classname().."=donothing=ID=", model.id, "helmod_button_icon_help_selected")
+    ElementGui.addGuiButton(cell_element, self.classname.."=donothing=ID=", model.id, "helmod_button_icon_help_selected")
   end
   
 end

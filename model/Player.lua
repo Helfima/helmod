@@ -474,6 +474,8 @@ end
 -- @param #string lua_recipe
 --
 -- @return #table list of productions
+-- 
+-- @deprecated
 --
 function Player.getProductionsCrafting2(category, lua_recipe)
   Logging:debug(Player.classname, "getProductionsCrafting(category)", category, lua_recipe)

@@ -5,7 +5,9 @@
 -- @extends #Form
 --
 
-AbstractEdition = setclass("HMAbstractEdition", Form)
+AbstractEdition = class(Form,function(base,classname)
+  Form.init(base,classname)
+end)
 
 local limit_display_height = 850
 
@@ -22,7 +24,7 @@ local limit_display_height = 850
 --
 -- @return #boolean if true the next call close dialog
 --
-function AbstractEdition.methods:onBeforeEvent(event, action, item, item2, item3)
+function AbstractEdition:onBeforeEvent(event, action, item, item2, item3)
   local close = (action == "OPEN") -- only on open event
   User.setParameter("module_list_refresh",false)
   if item ~= nil and item2 ~= nil then
@@ -44,7 +46,7 @@ end
 --
 -- @function [parent=#AbstractEdition] onClose
 --
-function AbstractEdition.methods:onClose()
+function AbstractEdition:onClose()
   User.setParameter(self.parameterLast,nil)
   User.setParameter("module_list_refresh",false)
 end
@@ -54,7 +56,7 @@ end
 --
 -- @function [parent=#AbstractEdition] getTabPanel
 --
-function AbstractEdition.methods:getTabPanel()
+function AbstractEdition:getTabPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["menu_panel"] ~= nil and content_panel["menu_panel"].valid then
     return content_panel["menu_panel"]
@@ -67,7 +69,7 @@ end
 --
 -- @function [parent=#AbstractEdition] getLeftPanel
 --
-function AbstractEdition.methods:getLeftPanel()
+function AbstractEdition:getLeftPanel()
   local panel = self:getTabPanel()
   if panel["left_panel"] ~= nil and panel["left_panel"].valid then
     return panel["left_panel"]
@@ -82,7 +84,7 @@ end
 --
 -- @function [parent=#AbstractEdition] getRightPanel
 --
-function AbstractEdition.methods:getRightPanel()
+function AbstractEdition:getRightPanel()
   local panel = self:getTabPanel()
   if panel["right_panel"] ~= nil and panel["right_panel"].valid then
     return panel["right_panel"]
@@ -98,7 +100,7 @@ end
 --
 -- @function [parent=#AbstractEdition] getTabLeftPanel
 --
-function AbstractEdition.methods:getTabLeftPanel()
+function AbstractEdition:getTabLeftPanel()
   local left_panel = self:getLeftPanel()
   if left_panel["tab_left_panel"] ~= nil and left_panel["tab_left_panel"].valid then
     return left_panel["tab_left_panel"]["tab_panel"]
@@ -115,7 +117,7 @@ end
 --
 -- @function [parent=#AbstractEdition] getTabRightPanel
 --
-function AbstractEdition.methods:getTabRightPanel()
+function AbstractEdition:getTabRightPanel()
   local right_panel = self:getRightPanel()
   if right_panel["tab_right_panel"] ~= nil and right_panel["tab_right_panel"].valid then
     return right_panel["tab_right_panel"]["tab_panel"]
@@ -132,7 +134,7 @@ end
 --
 -- @function [parent=#AbstractEdition] getFactorySelectorPanel
 --
-function AbstractEdition.methods:getFactorySelectorPanel()
+function AbstractEdition:getFactorySelectorPanel()
   local right_panel = self:getRightPanel()
   if right_panel["factory_selector"] ~= nil and right_panel["factory_selector"].valid then
     return right_panel["factory_selector"]
@@ -147,7 +149,7 @@ end
 --
 -- @function [parent=#AbstractEdition] getFactoryInfoPanel
 --
-function AbstractEdition.methods:getFactoryInfoPanel()
+function AbstractEdition:getFactoryInfoPanel()
   local left_panel = self:getLeftPanel()
   if left_panel["factory_info"] ~= nil and left_panel["factory_info"].valid then
     return left_panel["factory_info"]
@@ -163,7 +165,7 @@ end
 --
 -- @function [parent=#AbstractEdition] getFactoryModulesSelectorPanel
 --
-function AbstractEdition.methods:getFactoryModulesSelectorPanel()
+function AbstractEdition:getFactoryModulesSelectorPanel()
   local right_panel = self:getRightPanel()
   if right_panel["factory_selection_modules"] ~= nil and right_panel["factory_selection_modules"].valid then
     return right_panel["factory_selection_modules"]["scroll_modules"]
@@ -182,7 +184,7 @@ end
 --
 -- @function [parent=#AbstractEdition] getFactoryActivedModulesPanel
 --
-function AbstractEdition.methods:getFactoryActivedModulesPanel()
+function AbstractEdition:getFactoryActivedModulesPanel()
   local right_panel = self:getRightPanel()
   if right_panel["factory_modules"] ~= nil and right_panel["factory_modules"].valid then
     return right_panel["factory_modules"]
@@ -197,7 +199,7 @@ end
 --
 -- @function [parent=#AbstractEdition] getBeaconInfoPanel
 --
-function AbstractEdition.methods:getBeaconInfoPanel()
+function AbstractEdition:getBeaconInfoPanel()
   local panel = self:getLeftPanel()
   if panel["beacon_info"] ~= nil and panel["beacon_info"].valid then
     return panel["beacon_info"]
@@ -213,7 +215,7 @@ end
 --
 -- @function [parent=#AbstractEdition] getBeaconSelectorPanel
 --
-function AbstractEdition.methods:getBeaconSelectorPanel()
+function AbstractEdition:getBeaconSelectorPanel()
   local right_panel = self:getRightPanel()
   if right_panel["beacon_selector"] ~= nil and right_panel["beacon_selector"].valid then
     return right_panel["beacon_selector"]
@@ -229,7 +231,7 @@ end
 --
 -- @function [parent=#AbstractEdition] getBeaconModulesSelectorPanel
 --
-function AbstractEdition.methods:getBeaconModulesSelectorPanel()
+function AbstractEdition:getBeaconModulesSelectorPanel()
   local right_panel = self:getRightPanel()
   if right_panel["beacon_selection_modules"] ~= nil and right_panel["beacon_selection_modules"].valid then
     return right_panel["beacon_selection_modules"]["scroll_modules"]
@@ -248,7 +250,7 @@ end
 --
 -- @function [parent=#AbstractEdition] getBeaconActivedModulesPanel
 --
-function AbstractEdition.methods:getBeaconActivedModulesPanel()
+function AbstractEdition:getBeaconActivedModulesPanel()
   local right_panel = self:getRightPanel()
   if right_panel["beacon_modules"] ~= nil and right_panel["beacon_modules"].valid then
     return right_panel["beacon_modules"]
@@ -269,8 +271,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractEdition.methods:onOpen(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "onOpen()", action, item, item2, item3)
+function AbstractEdition:onOpen(event, action, item, item2, item3)
+  Logging:debug(self.classname, "onOpen()", action, item, item2, item3)
   local object = self:getObject(event, action, item, item2, item3)
 
   if User.getParameter("module_panel") == nil then
@@ -295,8 +297,8 @@ end
 --
 -- @function [parent=#AbstractEdition] buildHeaderPanel
 --
-function AbstractEdition.methods:buildHeaderPanel()
-  Logging:debug(self:classname(), "buildHeaderPanel()")
+function AbstractEdition:buildHeaderPanel()
+  Logging:debug(self.classname, "buildHeaderPanel()")
   -- TODO something
 end
 
@@ -305,8 +307,8 @@ end
 --
 -- @function [parent=#AbstractEdition] buildFactoryPanel
 --
-function AbstractEdition.methods:buildFactoryPanel()
-  Logging:debug(self:classname(), "buildFactoryPanel()")
+function AbstractEdition:buildFactoryPanel()
+  Logging:debug(self.classname, "buildFactoryPanel()")
   self:getFactoryInfoPanel()
   self:getFactoryOtherInfoPanel()
 end
@@ -316,8 +318,8 @@ end
 --
 -- @function [parent=#AbstractEdition] buildBeaconPanel
 --
-function AbstractEdition.methods:buildBeaconPanel()
-  Logging:debug(self:classname(), "buildBeaconPanel()")
+function AbstractEdition:buildBeaconPanel()
+  Logging:debug(self.classname, "buildBeaconPanel()")
   self:getBeaconInfoPanel()
   self:getBeaconOtherInfoPanel()
 end
@@ -333,8 +335,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractEdition.methods:onUpdate(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "onUpdate():", action, item, item2, item3)
+function AbstractEdition:onUpdate(event, action, item, item2, item3)
+  Logging:debug(self.classname, "onUpdate():", action, item, item2, item3)
   local display_width, display_height = ElementGui.getDisplaySizes()
   local object = self:getObject(item, item2, item3)
   -- header
@@ -364,8 +366,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractEdition.methods:updateHeader(item, item2, item3)
-  Logging:debug(self:classname(), "updateHeader():", item, item2, item3)
+function AbstractEdition:updateHeader(item, item2, item3)
+  Logging:debug(self.classname, "updateHeader():", item, item2, item3)
   -- TODO something
 end
 
@@ -378,8 +380,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractEdition.methods:updateTabMenu(item, item2, item3)
-  Logging:debug(self:classname(), "updateTabMenu():", item, item2, item3)
+function AbstractEdition:updateTabMenu(item, item2, item3)
+  Logging:debug(self.classname, "updateTabMenu():", item, item2, item3)
   local tab_left_panel = self:getTabLeftPanel()
   local tab_right_panel = self:getTabRightPanel()
   local object = self:getObject(item, item2, item3)
@@ -394,14 +396,14 @@ function AbstractEdition.methods:updateTabMenu(item, item2, item3)
     local style = "helmod_button_tab"
     if User.getParameter("factory_tab") == true then style = "helmod_button_tab_selected" end
 
-    ElementGui.addGuiFrameH(tab_left_panel, self:classname().."_separator_factory",helmod_frame_style.tab).style.width = 5
-    ElementGui.addGuiButton(tab_left_panel, self:classname().."=edition-change-tab=ID="..item.."="..object.id.."=", "factory", style, {"helmod_common.factory"}, {"helmod_common.factory"})
+    ElementGui.addGuiFrameH(tab_left_panel, self.classname.."_separator_factory",helmod_frame_style.tab).style.width = 5
+    ElementGui.addGuiButton(tab_left_panel, self.classname.."=edition-change-tab=ID="..item.."="..object.id.."=", "factory", style, {"helmod_common.factory"}, {"helmod_common.factory"})
 
     local style = "helmod_button_tab"
     if User.getParameter("factory_tab") == false then style = "helmod_button_tab_selected" end
 
-    ElementGui.addGuiFrameH(tab_left_panel, self:classname().."_separator_beacon",helmod_frame_style.tab).style.width = 5
-    ElementGui.addGuiButton(tab_left_panel, self:classname().."=edition-change-tab=ID="..item.."="..object.id.."=", "beacon", style, {"helmod_common.beacon"}, {"helmod_common.beacon"})
+    ElementGui.addGuiFrameH(tab_left_panel, self.classname.."_separator_beacon",helmod_frame_style.tab).style.width = 5
+    ElementGui.addGuiButton(tab_left_panel, self.classname.."=edition-change-tab=ID="..item.."="..object.id.."=", "beacon", style, {"helmod_common.beacon"}, {"helmod_common.beacon"})
 
     ElementGui.addGuiFrameH(tab_left_panel,"tab_final",helmod_frame_style.tab).style.width = 100
   end
@@ -409,14 +411,14 @@ function AbstractEdition.methods:updateTabMenu(item, item2, item3)
   local style = "helmod_button_tab"
   if User.getParameter("module_panel") == false then style = "helmod_button_tab_selected" end
 
-  ElementGui.addGuiFrameH(tab_right_panel, self:classname().."_separator_factory",helmod_frame_style.tab).style.width = 5
-  ElementGui.addGuiButton(tab_right_panel, self:classname().."=change-panel=ID="..item.."="..object.id.."=", "factory", style, {"helmod_common.factory"}, {"tooltip.selector-factory"})
+  ElementGui.addGuiFrameH(tab_right_panel, self.classname.."_separator_factory",helmod_frame_style.tab).style.width = 5
+  ElementGui.addGuiButton(tab_right_panel, self.classname.."=change-panel=ID="..item.."="..object.id.."=", "factory", style, {"helmod_common.factory"}, {"tooltip.selector-factory"})
 
   local style = "helmod_button_tab"
   if User.getParameter("module_panel") == true then style = "helmod_button_tab_selected" end
 
-  ElementGui.addGuiFrameH(tab_right_panel, self:classname().."_separator_module",helmod_frame_style.tab).style.width = 5
-  ElementGui.addGuiButton(tab_right_panel, self:classname().."=change-panel=ID="..item.."="..object.id.."=", "module", style, {"helmod_common.module"}, {"tooltip.selector-module"})
+  ElementGui.addGuiFrameH(tab_right_panel, self.classname.."_separator_module",helmod_frame_style.tab).style.width = 5
+  ElementGui.addGuiButton(tab_right_panel, self.classname.."=change-panel=ID="..item.."="..object.id.."=", "module", style, {"helmod_common.module"}, {"tooltip.selector-module"})
 
   ElementGui.addGuiFrameH(tab_right_panel,"tab_final",helmod_frame_style.tab).style.width = 100
 end
@@ -430,8 +432,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractEdition.methods:updateFactory(item, item2, item3)
-  Logging:debug(self:classname(), "updateFactory():", item, item2, item3)
+function AbstractEdition:updateFactory(item, item2, item3)
+  Logging:debug(self.classname, "updateFactory():", item, item2, item3)
 
   self:updateFactoryInfo(item, item2, item3)
   if User.getParameter("module_panel") == true then
@@ -451,8 +453,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractEdition.methods:updateBeacon(item, item2, item3)
-  Logging:debug(self:classname(), "updateBeacon():", item, item2, item3)
+function AbstractEdition:updateBeacon(item, item2, item3)
+  Logging:debug(self.classname, "updateBeacon():", item, item2, item3)
 
   self:updateBeaconInfo(item, item2, item3)
   if User.getParameter("module_panel") == true then
@@ -474,7 +476,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractEdition.methods:getObject(event, action, item, item2, item3)
+function AbstractEdition:getObject(event, action, item, item2, item3)
   -- TODO something
   return nil
 end
@@ -487,12 +489,12 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractEdition.methods:updateFactoryInfo(item, item2, item3)
-  Logging:debug(self:classname(), "updateFactoryInfo():", item, item2, item3)
+function AbstractEdition:updateFactoryInfo(item, item2, item3)
+  Logging:debug(self.classname, "updateFactoryInfo():", item, item2, item3)
   local infoPanel = self:getFactoryInfoPanel()
   local object = self:getObject(item, item2, item3)
   if object ~= nil then
-    Logging:debug(self:classname(), "updateFactoryInfo():object:",object)
+    Logging:debug(self.classname, "updateFactoryInfo():object:",object)
     local factory = object.factory
     local factory_prototype = EntityPrototype.load(factory)
 
@@ -503,7 +505,7 @@ function AbstractEdition.methods:updateFactoryInfo(item, item2, item3)
     local headerPanel = ElementGui.addGuiTable(infoPanel,"table-header",2)
     local tooltip = ({"tooltip.selector-module"})
     if User.getParameter("module_panel") == true then tooltip = ({"tooltip.selector-factory"}) end
-    ElementGui.addGuiButtonSelectSprite(headerPanel, self:classname().."=change-panel=ID="..item.."="..object.id.."=", Player.getIconType(factory), factory.name, factory.name, tooltip, ElementGui.color_button_edit)
+    ElementGui.addGuiButtonSelectSprite(headerPanel, self.classname.."=change-panel=ID="..item.."="..object.id.."=", Player.getIconType(factory), factory.name, factory.name, tooltip, ElementGui.color_button_edit)
     if EntityPrototype.native() == nil then
       ElementGui.addGuiLabel(headerPanel, "label", factory.name)
     else
@@ -529,7 +531,7 @@ function AbstractEdition.methods:updateFactoryInfo(item, item2, item3)
         table.insert(items,"[item="..item.name.."]")
       end
       local default_fuel = "[item="..(factory.fuel or "coal").."]"
-      ElementGui.addGuiDropDown(inputPanel, self:classname().."=factory-fuel-update=ID="..item.."=", object.id, items, default_fuel)
+      ElementGui.addGuiDropDown(inputPanel, self.classname.."=factory-fuel-update=ID="..item.."=", object.id, items, default_fuel)
     end
 
     local sign = ""
@@ -547,7 +549,7 @@ function AbstractEdition.methods:updateFactoryInfo(item, item2, item3)
     ElementGui.addGuiLabel(inputPanel, "productivity", sign..Format.formatPercent(factory.effects.productivity).."%",nil,productivity_tooltip)
 
     ElementGui.addGuiLabel(inputPanel, "label-limit", ({"helmod_label.limit"}), nil, {"tooltip.factory-limit"})
-    ElementGui.addGuiText(inputPanel, string.format("%s=factory-update=ID=%s=%s", self:classname(), item, object.id), factory.limit, "helmod_textfield", {"tooltip.factory-limit"})
+    ElementGui.addGuiText(inputPanel, string.format("%s=factory-update=ID=%s=%s", self.classname, item, object.id), factory.limit, "helmod_textfield", {"tooltip.factory-limit"})
 
   end
 end
@@ -561,8 +563,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractEdition.methods:updateFactoryModulesSelector(item, item2, item3)
-  Logging:debug(self:classname(), "updateFactoryModulesSelector():", item, item2, item3)
+function AbstractEdition:updateFactoryModulesSelector(item, item2, item3)
+  Logging:debug(self.classname, "updateFactoryModulesSelector():", item, item2, item3)
   local selectorPanel = self:getFactoryModulesSelectorPanel()
   local object = self:getObject(item, item2, item3)
 
@@ -580,9 +582,9 @@ function AbstractEdition.methods:updateFactoryModulesSelector(item, item2, item3
         else
           tooltip = {"item-limitation.production-module-usable-only-on-intermediates"}
         end
-        ElementGui.addGuiButtonSelectSprite(tableModulesPanel, self:classname().."=do-nothing=ID="..item.."="..object.id.."=", "item", module.name, module.name, tooltip, "red")
+        ElementGui.addGuiButtonSelectSprite(tableModulesPanel, self.classname.."=do-nothing=ID="..item.."="..object.id.."=", "item", module.name, module.name, tooltip, "red")
       else
-        ElementGui.addGuiButtonSelectSprite(tableModulesPanel, self:classname().."=factory-module-add=ID="..item.."="..object.id.."=", "item", module.name, module.name, tooltip)
+        ElementGui.addGuiButtonSelectSprite(tableModulesPanel, self.classname.."=factory-module-add=ID="..item.."="..object.id.."=", "item", module.name, module.name, tooltip)
       end
     end
   end
@@ -597,8 +599,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractEdition.methods:updateFactoryActivedModules(item, item2, item3)
-  Logging:debug(self:classname(), "updateFactoryActivedModules():", item, item2, item3)
+function AbstractEdition:updateFactoryActivedModules(item, item2, item3)
+  Logging:debug(self.classname, "updateFactoryActivedModules():", item, item2, item3)
   local activedModulesPanel = self:getFactoryActivedModulesPanel()
   local object = self:getObject(item, item2, item3)
   local factory = object.factory
@@ -611,7 +613,7 @@ function AbstractEdition.methods:updateFactoryActivedModules(item, item2, item3)
   local currentTableModulesPanel = ElementGui.addGuiTable(activedModulesPanel,"modules",4,"helmod_table_recipe_modules")
   for module, count in pairs(factory.modules) do
     for i = 1, count, 1 do
-      ElementGui.addGuiButtonSelectSprite(currentTableModulesPanel, self:classname().."=factory-module-remove=ID="..item.."="..object.id.."="..module.."="..i, "item", module, module, ElementGui.getTooltipModule(module.name))
+      ElementGui.addGuiButtonSelectSprite(currentTableModulesPanel, self.classname.."=factory-module-remove=ID="..item.."="..object.id.."="..module.."="..i, "item", module, module, ElementGui.getTooltipModule(module.name))
     end
   end
 end
@@ -625,8 +627,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractEdition.methods:updateFactorySelector(item, item2, item3)
-  Logging:debug(self:classname(), "updateFactorySelector():", item, item2, item3)
+function AbstractEdition:updateFactorySelector(item, item2, item3)
+  Logging:debug(self.classname, "updateFactorySelector():", item, item2, item3)
   local selectorPanel = self:getFactorySelectorPanel()
 
   selectorPanel.clear()
@@ -637,14 +639,14 @@ function AbstractEdition.methods:updateFactorySelector(item, item2, item3)
 
   -- ajouter de la table des groupes de recipe
   local groupsPanel = ElementGui.addGuiTable(scrollPanel, "factory-groups", 2)
-  Logging:debug(self:classname(), "updateFactorySelector(): group category=",object.category)
+  Logging:debug(self.classname, "updateFactorySelector(): group category=",object.category)
 
   local prototype = RecipePrototype.load(object)
   local category = prototype.getCategory()
   if not(User.getModGlobalSetting("model_filter_factory")) then category = nil end
 
   local factories = Player.getProductionsCrafting(category, object)
-  Logging:debug(self:classname(), "factories:",factories)
+  Logging:debug(self.classname, "factories:",factories)
 
 
   if category == nil then
@@ -664,7 +666,7 @@ function AbstractEdition.methods:updateFactorySelector(item, item2, item3)
       -- set le groupe
       if User.getParameter("factory_group_selected") == nil then User.setParameter("factory_group_selected",group) end
       -- ajoute les icons de groupe
-      local action = ElementGui.addGuiButton(groupsPanel, self:classname().."=factory-group=ID="..item.."="..object.id.."=", group, "helmod_button_default", group)
+      local action = ElementGui.addGuiButton(groupsPanel, self.classname.."=factory-group=ID="..item.."="..object.id.."=", group, "helmod_button_default", group)
     end
   end
 
@@ -672,7 +674,7 @@ function AbstractEdition.methods:updateFactorySelector(item, item2, item3)
   for key, factory in pairs(factories) do
     if category ~= nil or (factory.subgroup ~= nil and factory.subgroup.name == User.getParameter("factory_group_selected")) then
       local localised_name = EntityPrototype.load(factory.name).getLocalisedName()
-      ElementGui.addGuiButtonSelectSprite(tablePanel, self:classname().."=factory-select=ID="..item.."="..object.id.."=", "entity", factory.name, factory.name, localised_name)
+      ElementGui.addGuiButtonSelectSprite(tablePanel, self.classname.."=factory-select=ID="..item.."="..object.id.."=", "entity", factory.name, factory.name, localised_name)
     end
   end
 end
@@ -686,8 +688,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractEdition.methods:updateBeaconInfo(item, item2, item3)
-  Logging:debug(self:classname(), "updateBeaconInfo():", item, item2, item3)
+function AbstractEdition:updateBeaconInfo(item, item2, item3)
+  Logging:debug(self.classname, "updateBeaconInfo():", item, item2, item3)
   local infoPanel = self:getBeaconInfoPanel()
   local object = self:getObject(item, item2, item3)
 
@@ -702,7 +704,7 @@ function AbstractEdition.methods:updateBeaconInfo(item, item2, item3)
     local headerPanel = ElementGui.addGuiTable(infoPanel,"table-header",2)
     local tooltip = ({"tooltip.selector-module"})
     if User.getParameter("module_panel") == true then tooltip = ({"tooltip.selector-factory"}) end
-    ElementGui.addGuiButtonSelectSprite(headerPanel, self:classname().."=change-panel=ID="..item.."="..object.id.."=", Player.getIconType(beacon), beacon.name, beacon.name, tooltip, ElementGui.color_button_edit)
+    ElementGui.addGuiButtonSelectSprite(headerPanel, self.classname.."=change-panel=ID="..item.."="..object.id.."=", Player.getIconType(beacon), beacon.name, beacon.name, tooltip, ElementGui.color_button_edit)
     if beacon_prototype.native() == nil then
       ElementGui.addGuiLabel(headerPanel, "label", beacon.name)
     else
@@ -721,10 +723,10 @@ function AbstractEdition.methods:updateBeaconInfo(item, item2, item3)
     ElementGui.addGuiLabel(inputPanel, "efficiency", EntityPrototype.getDistributionEffectivity())
 
     ElementGui.addGuiLabel(inputPanel, "label-combo", ({"helmod_label.beacon-on-factory"}), nil, {"tooltip.beacon-on-factory"})
-    ElementGui.addGuiText(inputPanel, string.format("%s=beacon-update=ID=%s=%s=%s", self:classname(), item, object.id, "combo"), beacon.combo, "helmod_textfield", {"tooltip.beacon-on-factory"})
+    ElementGui.addGuiText(inputPanel, string.format("%s=beacon-update=ID=%s=%s=%s", self.classname, item, object.id, "combo"), beacon.combo, "helmod_textfield", {"tooltip.beacon-on-factory"})
 
     ElementGui.addGuiLabel(inputPanel, "label-factory", ({"helmod_label.factory-per-beacon"}), nil, {"tooltip.factory-per-beacon"})
-    ElementGui.addGuiText(inputPanel, string.format("%s=beacon-update=ID=%s=%s=%s", self:classname(), item, object.id, "factory"), beacon.factory, "helmod_textfield", {"tooltip.factory-per-beacon"})
+    ElementGui.addGuiText(inputPanel, string.format("%s=beacon-update=ID=%s=%s=%s", self.classname, item, object.id, "factory"), beacon.factory, "helmod_textfield", {"tooltip.factory-per-beacon"})
   end
 end
 
@@ -737,8 +739,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractEdition.methods:updateBeaconActivedModules(item, item2, item3)
-  Logging:debug(self:classname(), "updateBeaconActivedModules():", item, item2, item3)
+function AbstractEdition:updateBeaconActivedModules(item, item2, item3)
+  Logging:debug(self.classname, "updateBeaconActivedModules():", item, item2, item3)
   local activedModulesPanel = self:getBeaconActivedModulesPanel()
 
   local object = self:getObject(item, item2, item3)
@@ -752,7 +754,7 @@ function AbstractEdition.methods:updateBeaconActivedModules(item, item2, item3)
   local currentTableModulesPanel = ElementGui.addGuiTable(activedModulesPanel,"modules",4, "helmod_table_recipe_modules")
   for module, count in pairs(beacon.modules) do
     for i = 1, count, 1 do
-      ElementGui.addGuiButtonSelectSprite(currentTableModulesPanel, self:classname().."=beacon-module-remove=ID="..item.."="..object.id.."="..module.."="..i, "item", module, module, ElementGui.getTooltipModule(module.name))
+      ElementGui.addGuiButtonSelectSprite(currentTableModulesPanel, self.classname.."=beacon-module-remove=ID="..item.."="..object.id.."="..module.."="..i, "item", module, module, ElementGui.getTooltipModule(module.name))
     end
   end
 end
@@ -766,8 +768,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractEdition.methods:updateBeaconModulesSelector(item, item2, item3)
-  Logging:debug(self:classname(), "updateBeaconModulesSelector():", item, item2, item3)
+function AbstractEdition:updateBeaconModulesSelector(item, item2, item3)
+  Logging:debug(self.classname, "updateBeaconModulesSelector():", item, item2, item3)
   local selectorPanel = self:getBeaconModulesSelectorPanel()
   local object = self:getObject(item, item2, item3)
   local model_filter_beacon_module = User.getModGlobalSetting("model_filter_beacon_module")
@@ -788,9 +790,9 @@ function AbstractEdition.methods:updateBeaconModulesSelector(item, item2, item3)
       local tooltip = ElementGui.getTooltipModule(module.name)
       if allowed == false then
         tooltip = ({"item-limitation.item-not-allowed-in-this-container-item"})
-        ElementGui.addGuiButtonSelectSprite(tableModulesPanel, self:classname().."=do-nothing=ID="..item.."="..object.id.."=", "item", module.name, module.name, tooltip, "red")
+        ElementGui.addGuiButtonSelectSprite(tableModulesPanel, self.classname.."=do-nothing=ID="..item.."="..object.id.."=", "item", module.name, module.name, tooltip, "red")
       else
-        ElementGui.addGuiButtonSelectSprite(tableModulesPanel, self:classname().."=beacon-module-add=ID="..item.."="..object.id.."=", "item", module.name, module.name, tooltip)
+        ElementGui.addGuiButtonSelectSprite(tableModulesPanel, self.classname.."=beacon-module-add=ID="..item.."="..object.id.."=", "item", module.name, module.name, tooltip)
       end
     end
   end
@@ -805,8 +807,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractEdition.methods:updateBeaconSelector(item, item2, item3)
-  Logging:debug(self:classname(), "updateBeaconSelector():", item, item2, item3)
+function AbstractEdition:updateBeaconSelector(item, item2, item3)
+  Logging:debug(self.classname, "updateBeaconSelector():", item, item2, item3)
   local selectorPanel = self:getBeaconSelectorPanel()
 
   selectorPanel.clear()
@@ -821,7 +823,7 @@ function AbstractEdition.methods:updateBeaconSelector(item, item2, item3)
   if not(User.getModGlobalSetting("model_filter_beacon")) then category = nil end
   -- ajouter de la table des groupes de recipe
   local factories = Player.getProductionsBeacon()
-  Logging:debug(self:classname(), "factories:",factories)
+  Logging:debug(self.classname, "factories:",factories)
 
 
   if category == nil then
@@ -841,7 +843,7 @@ function AbstractEdition.methods:updateBeaconSelector(item, item2, item3)
       -- set le groupe
       if User.getParameter("beacon_group_selected") == nil then User.setParameter("beacon_group_selected",group) end
       -- ajoute les icons de groupe
-      local action = ElementGui.addGuiButton(groupsPanel, self:classname().."=beacon-group=ID="..item.."="..object.id.."=", group, "helmod_button_default", group)
+      local action = ElementGui.addGuiButton(groupsPanel, self.classname.."=beacon-group=ID="..item.."="..object.id.."=", group, "helmod_button_default", group)
     end
   end
 
@@ -849,7 +851,7 @@ function AbstractEdition.methods:updateBeaconSelector(item, item2, item3)
   for key, beacon in pairs(factories) do
     if category ~= nil or (beacon.subgroup ~= nil and beacon.subgroup.name == User.getParameter("beacon_group_selected")) then
       local localised_name = Player.getLocalisedName(beacon)
-      ElementGui.addGuiButtonSelectSprite(tablePanel, self:classname().."=beacon-select=ID="..item.."="..object.id.."=", "item", beacon.name, beacon.name, localised_name)
+      ElementGui.addGuiButtonSelectSprite(tablePanel, self.classname.."=beacon-select=ID="..item.."="..object.id.."=", "item", beacon.name, beacon.name, localised_name)
     end
   end
 end
@@ -865,8 +867,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function AbstractEdition.methods:onEvent(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "onEvent():", action, item, item2, item3)
+function AbstractEdition:onEvent(event, action, item, item2, item3)
+  Logging:debug(self.classname, "onEvent():", action, item, item2, item3)
   local display_width, display_height = ElementGui.getDisplaySizes()
   local model = Model.getModel()
 

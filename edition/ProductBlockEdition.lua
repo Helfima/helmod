@@ -1,3 +1,4 @@
+require "edition.AbstractEdition"
 -------------------------------------------------------------------------------
 -- Class to build product edition dialog
 --
@@ -5,7 +6,7 @@
 -- @extends #AbstractEdition
 --
 
-ProductBlockEdition = setclass("HMProductBlockEdition", AbstractEdition)
+ProductBlockEdition = class(AbstractEdition)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -14,10 +15,10 @@ ProductBlockEdition = setclass("HMProductBlockEdition", AbstractEdition)
 --
 -- @param #Controller parent parent controller
 --
-function ProductBlockEdition.methods:onInit(parent)
+function ProductBlockEdition:onInit(parent)
   self.panelCaption = ({"helmod_result-panel.tab-title-production-block"})
   self.panelClose = false
-  self.parameterLast = string.format("%s_%s",self:classname(),"last")
+  self.parameterLast = string.format("%s_%s",self.classname,"last")
 end
 
 -------------------------------------------------------------------------------
@@ -33,7 +34,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function ProductBlockEdition.methods:onBeforeEvent(event, action, item, item2, item3)
+function ProductBlockEdition:onBeforeEvent(event, action, item, item2, item3)
   local close = true
   if User.getParameter(self.parameterLast) == nil or User.getParameter(self.parameterLast) ~= item then
     close = false
@@ -47,7 +48,7 @@ end
 --
 -- @function [parent=#ProductBlockEdition] onClose
 --
-function ProductBlockEdition.methods:onClose()
+function ProductBlockEdition:onClose()
   User.setParameter(self.parameterLast,nil)
 end
 
@@ -56,7 +57,7 @@ end
 --
 -- @function [parent=#ProductBlockEdition] getInfoPanel
 --
-function ProductBlockEdition.methods:getInfoPanel()
+function ProductBlockEdition:getInfoPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["info"] ~= nil and content_panel["info"].valid then
     return content_panel["info"]
@@ -71,7 +72,7 @@ end
 --
 -- @function [parent=#ProductBlockEdition] getOutputPanel
 --
-function ProductBlockEdition.methods:getOutputPanel()
+function ProductBlockEdition:getOutputPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["output"] ~= nil and content_panel["output"].valid then
     return content_panel["output"]
@@ -87,7 +88,7 @@ end
 --
 -- @function [parent=#ProductBlockEdition] getInputPanel
 --
-function ProductBlockEdition.methods:getInputPanel()
+function ProductBlockEdition:getInputPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["input"] ~= nil and content_panel["input"].valid then
     return content_panel["input"]
@@ -109,7 +110,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductBlockEdition.methods:after_open(event, action, item, item2, item3)
+function ProductBlockEdition:after_open(event, action, item, item2, item3)
   self:getInfoPanel()
 end
 
@@ -124,7 +125,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductBlockEdition.methods:onUpdate(event, action, item, item2, item3)
+function ProductBlockEdition:onUpdate(event, action, item, item2, item3)
   self:updateInfo(item, item2, item3)
   self:updateOutput(item, item2, item3)
   self:updateInput(item, item2, item3)
@@ -139,8 +140,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductBlockEdition.methods:updateInfo(item, item2, item3)
-  Logging:debug(self:classname(), "updateInfo", item, item2, item3)
+function ProductBlockEdition:updateInfo(item, item2, item3)
+  Logging:debug(self.classname, "updateInfo", item, item2, item3)
   local model = Model.getModel()
   -- data
   local current_block = User.getParameter("current_block") or "new"
@@ -172,17 +173,17 @@ function ProductBlockEdition.methods:updateInfo(item, item2, item3)
     ElementGui.addGuiLabel(block_table, "options-linked", ({"helmod_label.block-unlinked"}))
     local unlinked = element.unlinked and true or false
     if element.index == 0 then unlinked = true end
-    ElementGui.addGuiCheckbox(block_table, self:classname().."=change-boolean-option=ID=unlinked", unlinked)
+    ElementGui.addGuiCheckbox(block_table, self.classname.."=change-boolean-option=ID=unlinked", unlinked)
 
     ElementGui.addGuiLabel(block_table, "options-by-factory", ({"helmod_label.compute-by-factory"}))
     local by_factory = element.by_factory and true or false
-    ElementGui.addGuiCheckbox(block_table, self:classname().."=change-boolean-option=ID=by_factory", by_factory)
+    ElementGui.addGuiCheckbox(block_table, self.classname.."=change-boolean-option=ID=by_factory", by_factory)
 
     if element.by_factory == true then
       local factory_number = element.factory_number or 0
       ElementGui.addGuiLabel(block_table, "label-factory_number", ({"helmod_label.factory-number"}))
       ElementGui.addGuiText(block_table, "factory_number", factory_number, "helmod_textfield")
-      ElementGui.addGuiButton(block_table, self:classname().."=change-number-option=ID=", "factory_number", "helmod_button_default", ({"helmod_button.update"}))
+      ElementGui.addGuiButton(block_table, self.classname.."=change-number-option=ID=", "factory_number", "helmod_button_default", ({"helmod_button.update"}))
     end
 
   end
@@ -197,8 +198,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductBlockEdition.methods:updateInput(item, item2, item3)
-  Logging:debug(self:classname(), "updateInput", item, item2, item3)
+function ProductBlockEdition:updateInput(item, item2, item3)
+  Logging:debug(self.classname, "updateInput", item, item2, item3)
   local model = Model.getModel()
   -- data
   local current_block = User.getParameter("current_block") or "new"
@@ -224,7 +225,7 @@ function ProductBlockEdition.methods:updateInput(item, item2, item3)
         if element.count > 1 then
           ingredient.limit_count = lua_product.count / element.count
         end
-        ElementGui.addCellElement(input_table, ingredient, self:classname().."=production-recipe-add=ID="..current_block.."="..element.name.."=", true, "tooltip.ingredient", ElementGui.color_button_add, index)
+        ElementGui.addCellElement(input_table, ingredient, self.classname.."=production-recipe-add=ID="..current_block.."="..element.name.."=", true, "tooltip.ingredient", ElementGui.color_button_add, index)
       end
     end
 
@@ -240,10 +241,10 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductBlockEdition.methods:updateOutput(item, item2, item3)
-  Logging:debug(self:classname(), "updateOutput", item, item2, item3)
+function ProductBlockEdition:updateOutput(item, item2, item3)
+  Logging:debug(self.classname, "updateOutput", item, item2, item3)
   local model = Model.getModel()
-  Logging:debug(self:classname(), "model:", model)
+  Logging:debug(self.classname, "model:", model)
   -- data
   local current_block = User.getParameter("current_block") or "new"
 
@@ -272,14 +273,14 @@ function ProductBlockEdition.methods:updateOutput(item, item2, item3)
         end
         if lua_product.state == 1 then
           if not(element.unlinked) or element.by_factory == true then
-            ElementGui.addCellElement(output_table, product, self:classname().."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.product", nil, index)
+            ElementGui.addCellElement(output_table, product, self.classname.."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.product", nil, index)
           else
-            ElementGui.addCellElement(output_table, product, self:classname().."=product-edition=ID="..element.id.."="..product.name.."=", true, "tooltip.edit-product", ElementGui.color_button_edit, index)
+            ElementGui.addCellElement(output_table, product, self.classname.."=product-edition=ID="..element.id.."="..product.name.."=", true, "tooltip.edit-product", ElementGui.color_button_edit, index)
           end
         elseif lua_product.state == 3 then
-          ElementGui.addCellElement(output_table, product, self:classname().."=product-selected=ID="..element.id.."="..product.name.."=", true, "tooltip.rest-product", ElementGui.color_button_rest, index)
+          ElementGui.addCellElement(output_table, product, self.classname.."=product-selected=ID="..element.id.."="..product.name.."=", true, "tooltip.rest-product", ElementGui.color_button_rest, index)
         else
-          ElementGui.addCellElement(output_table, product, self:classname().."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.other-product", nil, index)
+          ElementGui.addCellElement(output_table, product, self.classname.."=product-selected=ID="..element.id.."="..product.name.."=", false, "tooltip.other-product", nil, index)
         end
       end
     end
@@ -295,8 +296,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductBlockEdition.methods:getFactoryNumber(item, item2, item3)
-  Logging:debug(self:classname(), "getFactoryNumber()")
+function ProductBlockEdition:getFactoryNumber(item, item2, item3)
+  Logging:debug(self.classname, "getFactoryNumber()")
   local panel = self:getInfoPanel()["output-scroll"]["output-table"]
     if panel[item] ~= nil then
     return ElementGui.getInputNumber(panel[item])

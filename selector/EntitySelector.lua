@@ -6,7 +6,7 @@ require "selector.AbstractSelector"
 -- @extends #AbstractSelector
 --
 
-EntitySelector = setclass("HMEntitySelector", AbstractSelector)
+EntitySelector = class(AbstractSelector)
 
 -------------------------------------------------------------------------------
 -- Return caption
@@ -15,7 +15,7 @@ EntitySelector = setclass("HMEntitySelector", AbstractSelector)
 --
 -- @param #Controller parent parent controller
 --
-function EntitySelector.methods:getCaption(parent)
+function EntitySelector:getCaption(parent)
   return {"helmod_selector-panel.entity-title"}
 end
 
@@ -24,8 +24,8 @@ end
 --
 -- @function [parent=#EntitySelector] afterInit
 --
-function EntitySelector.methods:afterInit()
-  Logging:debug(self:classname(), "afterInit()")
+function EntitySelector:afterInit()
+  Logging:debug(self.classname, "afterInit()")
   self.disable_option = true
   self.hidden_option = true
   self.product_option = false
@@ -39,16 +39,16 @@ end
 -- @param #string name
 -- @param #string type
 --
-function EntitySelector.methods:appendGroups(name, type)
-  Logging:debug(self:classname(), "appendGroups()", name, type)
+function EntitySelector:appendGroups(name, type)
+  Logging:debug(self.classname, "appendGroups()", name, type)
   EntityPrototype.load(name, type)
   local find = self:checkFilter(EntityPrototype.native())
   local filter_show_disable = User.getSetting("filter_show_disable")
   local filter_show_hidden = User.getSetting("filter_show_hidden")
   
-  local list_group = Cache.getData(self:classname(), "list_group")
-  local list_prototype = Cache.getData(self:classname(), "list_prototype")
-  local list_subgroup = Cache.getData(self:classname(), "list_subgroup")
+  local list_group = Cache.getData(self.classname, "list_group")
+  local list_prototype = Cache.getData(self.classname, "list_prototype")
+  local list_subgroup = Cache.getData(self.classname, "list_subgroup")
   
   if find == true and (EntityPrototype.getValid() == true or filter_show_disable == true) then
     local group_name = EntityPrototype.native().group.name
@@ -84,8 +84,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function EntitySelector.methods:updateGroups(event, action, item, item2, item3)
-  Logging:trace(self:classname(), "updateGroups()", action, item, item2, item3)
+function EntitySelector:updateGroups(event, action, item, item2, item3)
+  Logging:trace(self.classname, "updateGroups()", action, item, item2, item3)
   
   self:resetGroups()
 
@@ -101,8 +101,8 @@ end
 --
 -- @param #LuaPrototype prototype
 --
-function EntitySelector.methods:buildPrototypeTooltip(prototype)
-  Logging:trace(self:classname(), "buildPrototypeTooltip(player, prototype):", prototype)
+function EntitySelector:buildPrototypeTooltip(prototype)
+  Logging:trace(self.classname, "buildPrototypeTooltip(player, prototype):", prototype)
   -- initalize tooltip
   local tooltip = EntityPrototype.load(prototype).getLocalisedName()
   return tooltip
@@ -113,9 +113,9 @@ end
 --
 -- @function [parent=#EntitySelector] buildPrototypeIcon
 --
-function EntitySelector.methods:buildPrototypeIcon(guiElement, prototype, tooltip)
-  Logging:trace(self:classname(), "buildPrototypeIcon(player, guiElement, prototype, tooltip:",player, guiElement, prototype, tooltip)
-  ElementGui.addGuiButtonSelectSprite(guiElement, self:classname().."=element-select=ID=entity=", "entity", prototype.name, prototype.name, tooltip)
+function EntitySelector:buildPrototypeIcon(guiElement, prototype, tooltip)
+  Logging:trace(self.classname, "buildPrototypeIcon(player, guiElement, prototype, tooltip:",player, guiElement, prototype, tooltip)
+  ElementGui.addGuiButtonSelectSprite(guiElement, self.classname.."=element-select=ID=entity=", "entity", prototype.name, prototype.name, tooltip)
 end
 
 

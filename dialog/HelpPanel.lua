@@ -5,7 +5,7 @@
 -- @extends #Form
 --
 
-HelpPanel = setclass("HMHelpPanel", Form)
+HelpPanel = class(Form)
 
 local help_data = {
   {
@@ -148,7 +148,7 @@ local help_data = {
 --
 -- @param #Controller parent parent controller
 --
-function HelpPanel.methods:onInit(parent)
+function HelpPanel:onInit(parent)
   self.panelCaption = ({"helmod_help.panel-title"})
   self.parent = parent
   self.help_button = false
@@ -167,7 +167,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function HelpPanel.methods:onBeforeEvent(event, action, item, item2, item3)
+function HelpPanel:onBeforeEvent(event, action, item, item2, item3)
   -- close si nouvel appel
   return true
 end
@@ -177,7 +177,7 @@ end
 --
 -- @function [parent=#HelpPanel] getContentPanel
 --
-function HelpPanel.methods:getContentPanel()
+function HelpPanel:getContentPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["content-panel"] ~= nil and content_panel["content-panel"].valid then
     return content_panel["content-panel"]
@@ -194,7 +194,7 @@ end
 --
 -- @param #string caption
 --
-function HelpPanel.methods:getContentScrollPanel(caption)
+function HelpPanel:getContentScrollPanel(caption)
   local content_panel = self:getContentPanel(caption)
   if content_panel["scroll-content"] ~= nil and content_panel["scroll-content"].valid then
     return content_panel["scroll-content"]
@@ -216,8 +216,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function HelpPanel.methods:onEvent(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "onEvent():", action, item, item2, item3)
+function HelpPanel:onEvent(event, action, item, item2, item3)
+  Logging:debug(self.classname, "onEvent():", action, item, item2, item3)
 
   if action == "change-page" then
     self:updateContent(event, action, item, item2, item3)
@@ -225,10 +225,10 @@ function HelpPanel.methods:onEvent(event, action, item, item2, item3)
 
   if action == "previous-page" then
     local menu_panel = self:getLeftMenuPanel()
-    if menu_panel[self:classname().."=change-page"] then
-      local selected_index = menu_panel[self:classname().."=change-page"].selected_index
+    if menu_panel[self.classname.."=change-page"] then
+      local selected_index = menu_panel[self.classname.."=change-page"].selected_index
       if selected_index > 1 then
-        menu_panel[self:classname().."=change-page"].selected_index = selected_index - 1
+        menu_panel[self.classname.."=change-page"].selected_index = selected_index - 1
         self:updateContent(event, action, item, item2, item3)
       end
     end
@@ -236,10 +236,10 @@ function HelpPanel.methods:onEvent(event, action, item, item2, item3)
 
   if action == "next-page" then
     local menu_panel = self:getLeftMenuPanel()
-    if menu_panel[self:classname().."=change-page"] then
-      local selected_index = menu_panel[self:classname().."=change-page"].selected_index
+    if menu_panel[self.classname.."=change-page"] then
+      local selected_index = menu_panel[self.classname.."=change-page"].selected_index
       if selected_index < #help_data then
-        menu_panel[self:classname().."=change-page"].selected_index = selected_index + 1
+        menu_panel[self.classname.."=change-page"].selected_index = selected_index + 1
         self:updateContent(event, action, item, item2, item3)
       end
     end
@@ -258,17 +258,17 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function HelpPanel.methods:updateMenu(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "updateMenu():", action, item, item2, item3)
+function HelpPanel:updateMenu(event, action, item, item2, item3)
+  Logging:debug(self.classname, "updateMenu():", action, item, item2, item3)
   local menu_panel = self:getLeftMenuPanel()
   menu_panel.clear()
   local items = {}
   for _,help in pairs(help_data) do
     table.insert(items, {"helmod_help."..help.name})
   end
-  ElementGui.addGuiButton(menu_panel, self:classname().."=previous-page", nil, "helmod_button_icon_arrow_left", nil, ({"helmod_help.button-previous"}))
-  ElementGui.addGuiDropDown(menu_panel,self:classname().."=change-page", nil, items)
-  ElementGui.addGuiButton(menu_panel, self:classname().."=next-page=", nil, "helmod_button_icon_arrow_right", nil, ({"helmod_help.button-next"}))
+  ElementGui.addGuiButton(menu_panel, self.classname.."=previous-page", nil, "helmod_button_icon_arrow_left", nil, ({"helmod_help.button-previous"}))
+  ElementGui.addGuiDropDown(menu_panel,self.classname.."=change-page", nil, items)
+  ElementGui.addGuiButton(menu_panel, self.classname.."=next-page=", nil, "helmod_button_icon_arrow_right", nil, ({"helmod_help.button-next"}))
 end
 
 -------------------------------------------------------------------------------
@@ -282,7 +282,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function HelpPanel.methods:onUpdate(event, action, item, item2, item3)
+function HelpPanel:onUpdate(event, action, item, item2, item3)
   self:updateMenu(event, action, item, item2, item3)
   self:updateContent(event, action, item, item2, item3)
 end
@@ -298,8 +298,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function HelpPanel.methods:updateContent(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "updateContent():", action, item, item2, item3)
+function HelpPanel:updateContent(event, action, item, item2, item3)
+  Logging:debug(self.classname, "updateContent():", action, item, item2, item3)
   local content_panel = self:getContentScrollPanel()
   if content_panel then
     content_panel.clear()
@@ -307,8 +307,8 @@ function HelpPanel.methods:updateContent(event, action, item, item2, item3)
 
   local menu_panel = self:getLeftMenuPanel()
   local selected_index = 1
-  if menu_panel[self:classname().."=change-page"] then
-    selected_index = menu_panel[self:classname().."=change-page"].selected_index
+  if menu_panel[self.classname.."=change-page"] then
+    selected_index = menu_panel[self.classname.."=change-page"].selected_index
   end
 
   local section = help_data[selected_index or 1]

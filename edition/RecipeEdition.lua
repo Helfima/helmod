@@ -7,7 +7,7 @@ require "edition.AbstractEdition"
 -- @extends #AbstractEdition
 --
 
-RecipeEdition = setclass("HMRecipeEdition", AbstractEdition)
+RecipeEdition = class(AbstractEdition)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -16,9 +16,9 @@ RecipeEdition = setclass("HMRecipeEdition", AbstractEdition)
 --
 -- @param #Controller parent parent controller
 --
-function RecipeEdition.methods:onInit(parent)
+function RecipeEdition:onInit(parent)
   self.panelCaption = ({"helmod_recipe-edition-panel.title"})
-  self.parameterLast = string.format("%s_%s",self:classname(),"last")
+  self.parameterLast = string.format("%s_%s",self.classname,"last")
   self.content_verticaly = true
 end
 
@@ -29,7 +29,7 @@ end
 --
 -- @return #LuaGuiElement
 --
-function RecipeEdition.methods:getObjectInfoPanel()
+function RecipeEdition:getObjectInfoPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["info"] ~= nil and content_panel["info"].valid then
     return content_panel["info"]
@@ -46,7 +46,7 @@ end
 --
 -- @return #LuaGuiElement
 --
-function RecipeEdition.methods:getOtherInfoPanel()
+function RecipeEdition:getOtherInfoPanel()
   local panel = self:getRecipePanel()
   if panel["other_info_panel"] ~= nil and panel["other_info_panel"].valid then
     return panel["other_info_panel"]
@@ -64,8 +64,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function RecipeEdition.methods:getObject(item, item2, item3)
-  Logging:debug(self:classname(), "getObject():", item, item2, item3)
+function RecipeEdition:getObject(item, item2, item3)
+  Logging:debug(self.classname, "getObject():", item, item2, item3)
   local model = Model.getModel()
   if  model.blocks[item] ~= nil and model.blocks[item].recipes[item2] ~= nil then
     -- return recipe
@@ -79,8 +79,8 @@ end
 --
 -- @function [parent=#RecipeEdition] buildHeaderPanel
 --
-function RecipeEdition.methods:buildHeaderPanel()
-  Logging:debug(self:classname(), "buildHeaderPanel()")
+function RecipeEdition:buildHeaderPanel()
+  Logging:debug(self.classname, "buildHeaderPanel()")
   self:getObjectInfoPanel()
 end
 
@@ -93,8 +93,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function RecipeEdition.methods:updateHeader(item, item2, item3)
-  Logging:debug(self:classname(), "updateHeader():", item, item2, item3)
+function RecipeEdition:updateHeader(item, item2, item3)
+  Logging:debug(self.classname, "updateHeader():", item, item2, item3)
   self:updateObjectInfo(item, item2, item3)
 end
 
@@ -107,14 +107,14 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function RecipeEdition.methods:updateObjectInfo(item, item2, item3)
-  Logging:debug(self:classname(), "updateObjectInfo():", item, item2, item3)
+function RecipeEdition:updateObjectInfo(item, item2, item3)
+  Logging:debug(self.classname, "updateObjectInfo():", item, item2, item3)
   local info_panel = self:getObjectInfoPanel()
   local model = Model.getModel()
   if  model.blocks[item] ~= nil then
     local recipe = self:getObject(item, item2, item3)
     if recipe ~= nil then
-      Logging:debug(self:classname(), "updateObjectInfo():recipe=",recipe)
+      Logging:debug(self.classname, "updateObjectInfo():recipe=",recipe)
       info_panel.clear()
 
       RecipePrototype.load(recipe).native()
@@ -126,13 +126,13 @@ function RecipeEdition.methods:updateObjectInfo(item, item2, item3)
       ElementGui.addGuiLabel(recipe_table, "header-products", ({"helmod_result-panel.col-header-products"}))
       ElementGui.addGuiLabel(recipe_table, "header-ingredients", ({"helmod_result-panel.col-header-ingredients"}))
       local cell_recipe = ElementGui.addGuiFrameH(recipe_table,"recipe"..recipe.id, helmod_frame_style.hidden)
-      ElementGui.addCellRecipe(cell_recipe, recipe, self:classname().."=do_noting=ID=", true, "tooltip.product", "gray")
+      ElementGui.addCellRecipe(cell_recipe, recipe, self.classname.."=do_noting=ID=", true, "tooltip.product", "gray")
 
 
       -- energy
       local cell_energy = ElementGui.addGuiFrameH(recipe_table,"energy"..recipe.id, helmod_frame_style.hidden)
       local element_energy = {name = "helmod_button_icon_clock_flat2" ,count = RecipePrototype.getEnergy(),localised_name = "helmod_label.energy"}
-      ElementGui.addCellProduct(cell_energy, element_energy, self:classname().."=do_noting=ID=", true, "tooltip.product", "gray")
+      ElementGui.addCellProduct(cell_energy, element_energy, self.classname.."=do_noting=ID=", true, "tooltip.product", "gray")
       
       -- products
       local cell_products = ElementGui.addGuiTable(recipe_table,"products_"..recipe.id, 3)
@@ -140,7 +140,7 @@ function RecipeEdition.methods:updateObjectInfo(item, item2, item3)
         for index, lua_product in pairs(RecipePrototype.getProducts()) do
           local product = Product.load(lua_product).new()
           product.count = Product.getElementAmount(lua_product)
-          ElementGui.addCellProductSm(cell_products, product, self:classname().."=do_noting=ID=", false, "tooltip.product", nil, index)
+          ElementGui.addCellProductSm(cell_products, product, self.classname.."=do_noting=ID=", false, "tooltip.product", nil, index)
         end
       end
       
@@ -150,13 +150,13 @@ function RecipeEdition.methods:updateObjectInfo(item, item2, item3)
         for index, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
           local ingredient = Product.load(lua_ingredient).new()
           ingredient.count = Product.getElementAmount(lua_ingredient)
-          ElementGui.addCellProductSm(cell_ingredients, ingredient, self:classname().."=do_noting=ID=", true, "tooltip.product", ElementGui.color_button_add, index)
+          ElementGui.addCellProductSm(cell_ingredients, ingredient, self.classname.."=do_noting=ID=", true, "tooltip.product", ElementGui.color_button_add, index)
         end
       end
 
       local tablePanel = ElementGui.addGuiTable(info_panel,"table-input",3)
       ElementGui.addGuiLabel(tablePanel, "label-production", ({"helmod_recipe-edition-panel.production"}))
-      ElementGui.addGuiText(tablePanel, string.format("%s=object-update=ID=%s=%s", self:classname(), item, recipe.id), (recipe.production or 1)*100, "helmod_textfield")
+      ElementGui.addGuiText(tablePanel, string.format("%s=object-update=ID=%s=%s", self.classname, item, recipe.id), (recipe.production or 1)*100, "helmod_textfield")
 
     end
   end

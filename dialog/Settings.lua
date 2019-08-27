@@ -5,7 +5,7 @@
 -- @extends #Form
 --
 
-Settings = setclass("HMSettings", Form)
+Settings = class(Form)
 
 local dropdown = {}
 
@@ -16,7 +16,7 @@ local dropdown = {}
 --
 -- @param #Controller parent parent controller
 --
-function Settings.methods:onInit(parent)
+function Settings:onInit(parent)
   self.panelCaption = ({"helmod_settings-panel.title"})
   self.parent = parent
 end
@@ -34,7 +34,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function Settings.methods:onBeforeEvent(event, action, item, item2, item3)
+function Settings:onBeforeEvent(event, action, item, item2, item3)
   -- close si nouvel appel
   return true
 end
@@ -44,7 +44,7 @@ end
 --
 -- @function [parent=#Settings] getAboutSettingsPanel
 --
-function Settings.methods:getAboutSettingsPanel()
+function Settings:getAboutSettingsPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["about-settings"] ~= nil and content_panel["about-settings"].valid then
     return content_panel["about-settings"]
@@ -63,7 +63,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Settings.methods:onUpdate(event, action, item, item2, item3)
+function Settings:onUpdate(event, action, item, item2, item3)
   self:updateAboutSettings(event, action, item, item2, item3)
 end
 
@@ -78,15 +78,15 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Settings.methods:updateAboutSettings(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "updateAboutSettings():", action, item, item2, item3)
+function Settings:updateAboutSettings(event, action, item, item2, item3)
+  Logging:debug(self.classname, "updateAboutSettings():", action, item, item2, item3)
 
   local aboutSettingsPanel = self:getAboutSettingsPanel()
 
   local dataSettingsTable = ElementGui.addGuiTable(aboutSettingsPanel, "settings", 2)
 
-  ElementGui.addGuiLabel(dataSettingsTable, self:classname().."=version-label", {"helmod_settings-panel.mod-version"})
-  ElementGui.addGuiLabel(dataSettingsTable, self:classname().."=version", game.active_mods["helmod"])
+  ElementGui.addGuiLabel(dataSettingsTable, self.classname.."=version-label", {"helmod_settings-panel.mod-version"})
+  ElementGui.addGuiLabel(dataSettingsTable, self.classname.."=version", game.active_mods["helmod"])
 
-  ElementGui.addGuiLabel(aboutSettingsPanel, self:classname().."=info", {"helmod_settings-panel.mod-info"}, "helmod_label_help", nil, true)
+  ElementGui.addGuiLabel(aboutSettingsPanel, self.classname.."=info", {"helmod_settings-panel.mod-info"}, "helmod_label_help", nil, true)
 end

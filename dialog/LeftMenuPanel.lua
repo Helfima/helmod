@@ -5,7 +5,7 @@
 -- @extends #Form
 --
 
-LeftMenuPanel = setclass("HMLeftMenuPanel", Form)
+LeftMenuPanel = class(Form)
 
 -------------------------------------------------------------------------------
 -- Get the parent panel
@@ -14,7 +14,7 @@ LeftMenuPanel = setclass("HMLeftMenuPanel", Form)
 --
 -- @return #LuaGuiElement
 --
-function LeftMenuPanel.methods:getParentPanel()
+function LeftMenuPanel:getParentPanel()
   return Controller.getLeftPanel()
 end
 
@@ -23,7 +23,7 @@ end
 --
 -- @function [parent=#LeftMenuPanel] getMenuPanel
 --
-function LeftMenuPanel.methods:getMenuPanel()
+function LeftMenuPanel:getMenuPanel()
   local menu_panel = self:getPanel()
   if menu_panel["menu_panel"] ~= nil then
     return menu_panel["menu_panel"]
@@ -36,7 +36,7 @@ end
 --
 -- @function [parent=#LeftMenuPanel] getModelPanel
 --
-function LeftMenuPanel.methods:getModelPanel()
+function LeftMenuPanel:getModelPanel()
   local menu_panel = self:getPanel()
   if menu_panel["model_panel"] ~= nil and menu_panel["model_panel"].valid then
     return menu_panel["model_panel"]["model_table"]
@@ -56,7 +56,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function LeftMenuPanel.methods:onUpdate(event, action, item, item2, item3)
+function LeftMenuPanel:onUpdate(event, action, item, item2, item3)
   self:updateMenu(event, action, item, item2, item3)
   self:updateModelPanel(event, action, item, item2, item3)
 end
@@ -72,8 +72,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function LeftMenuPanel.methods:updateMenu(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "updateMenu():", action, item, item2, item3)
+function LeftMenuPanel:updateMenu(event, action, item, item2, item3)
+  Logging:debug(self.classname, "updateMenu():", action, item, item2, item3)
   -- menu
   local menuPanel = self:getMenuPanel()
   menuPanel.clear()
@@ -94,8 +94,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function LeftMenuPanel.methods:updateModelPanel(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "updateModelPanel():", action, item, item2, item3)
+function LeftMenuPanel:updateModelPanel(event, action, item, item2, item3)
+  Logging:debug(self.classname, "updateModelPanel():", action, item, item2, item3)
   local model_panel = self:getModelPanel()
   local model = Model.getModel()
 
@@ -120,7 +120,7 @@ function LeftMenuPanel.methods:updateModelPanel(event, action, item, item2, item
   for _,time in pairs(times) do
     local style = "helmod_button_icon_time"
     if model.time == time.value then style = "helmod_button_icon_time_selected" end
-    ElementGui.addGuiButton(model_panel, self:classname().."=change-time=ID=", time.value, style, time.caption, {"helmod_data-panel.base-time", time.tooltip})
+    ElementGui.addGuiButton(model_panel, self.classname.."=change-time=ID=", time.value, style, time.caption, {"helmod_data-panel.base-time", time.tooltip})
   end
 
 end
@@ -136,7 +136,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function LeftMenuPanel.methods:onEvent(event, action, item, item2, item3)
+function LeftMenuPanel:onEvent(event, action, item, item2, item3)
   if action == "change-time" then
     self:onUpdate(event, action, item, item2, item3)
   end

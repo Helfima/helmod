@@ -550,6 +550,25 @@ function ElementGui.addGuiButtonSelectSpriteSm(parent, action, type, key, captio
 end
 
 -------------------------------------------------------------------------------
+-- Add a smal slot button element for item
+--
+-- @function [parent=#ElementGui] addGuiButtonSlotSm
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #string action action name
+-- @param #string type type of item
+-- @param #string key name of item
+-- @param #string caption displayed text
+-- @param #string tooltip displayed text
+--
+-- @return #LuaGuiElement the LuaGuiElement added
+--
+function ElementGui.addGuiButtonSlotSm(parent, action, type, key, caption, tooltip)
+  Logging:trace(ElementGui.classname, "addGuiButtonSlotSm",action, type, key, caption, tooltip)
+  return ElementGui.addGuiButtonSpriteStyled(parent, "helmod_button_slot_sm", action, type, key, caption, tooltip)
+end
+
+-------------------------------------------------------------------------------
 -- Add a smal sprite button element for item
 --
 -- @function [parent=#ElementGui] addGuiButtonSpriteM
@@ -1178,6 +1197,7 @@ function ElementGui.addCellFactory(parent, factory, action, select, tooltip_name
       index = index + 1
     end
   end
+  --ElementGui.addGuiButtonSlotSm(cell_factory_module, "slot_button", "utility", "slot_icon_module")
   if factory.limit_count ~= nil then
     local row2 = ElementGui.addGuiFrameH(cell,"row2","helmod_frame_element_"..color.."_2")
       ElementGui.addGuiLabel(row2, "label1_"..factory.name, Format.formatNumberFactory(factory.limit_count), "helmod_label_element", {"helmod_common.per-sub-block"})

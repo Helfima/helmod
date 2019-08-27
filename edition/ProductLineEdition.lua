@@ -1,3 +1,4 @@
+require "edition.AbstractEdition"
 -------------------------------------------------------------------------------
 -- Class to build product edition dialog
 --
@@ -5,7 +6,7 @@
 -- @extends #AbstractEdition
 --
 
-ProductLineEdition = setclass("HMProductLineEdition", AbstractEdition)
+ProductLineEdition = class(AbstractEdition)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -14,10 +15,10 @@ ProductLineEdition = setclass("HMProductLineEdition", AbstractEdition)
 --
 -- @param #Controller parent parent controller
 --
-function ProductLineEdition.methods:onInit(parent)
+function ProductLineEdition:onInit(parent)
   self.panelCaption = ({"helmod_result-panel.tab-title-production-line"})
   self.panelClose = false
-  self.parameterLast = string.format("%s_%s",self:classname(),"last")
+  self.parameterLast = string.format("%s_%s",self.classname,"last")
 end
 
 -------------------------------------------------------------------------------
@@ -33,7 +34,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function ProductLineEdition.methods:onBeforeEvent(event, action, item, item2, item3)
+function ProductLineEdition:onBeforeEvent(event, action, item, item2, item3)
   local close = true
   if User.getParameter(self.parameterLast) == nil or User.getParameter(self.parameterLast) ~= item then
     close = false
@@ -47,7 +48,7 @@ end
 --
 -- @function [parent=#ProductLineEdition] onClose
 --
-function ProductLineEdition.methods:onClose()
+function ProductLineEdition:onClose()
   User.setParameter(self.parameterLast,nil)
 end
 
@@ -56,7 +57,7 @@ end
 --
 -- @function [parent=#ProductLineEdition] getInfoPanel
 --
-function ProductLineEdition.methods:getInfoPanel()
+function ProductLineEdition:getInfoPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["info"] ~= nil and content_panel["info"].valid then
     return content_panel["info"]
@@ -71,7 +72,7 @@ end
 --
 -- @function [parent=#ProductLineEdition] getOutputPanel
 --
-function ProductLineEdition.methods:getOutputPanel()
+function ProductLineEdition:getOutputPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["output"] ~= nil and content_panel["output"].valid then
     return content_panel["output"]
@@ -87,7 +88,7 @@ end
 --
 -- @function [parent=#ProductLineEdition] getInputPanel
 --
-function ProductLineEdition.methods:getInputPanel()
+function ProductLineEdition:getInputPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["input"] ~= nil and content_panel["input"].valid then
     return content_panel["input"]
@@ -110,7 +111,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductLineEdition.methods:after_open(event, action, item, item2, item3)
+function ProductLineEdition:after_open(event, action, item, item2, item3)
   self:getInfoPanel()
 end
 
@@ -125,7 +126,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductLineEdition.methods:onUpdate(event, action, item, item2, item3)
+function ProductLineEdition:onUpdate(event, action, item, item2, item3)
   self:updateInfo(item, item2, item3)
   self:updateOutput(item, item2, item3)
   self:updateInput(item, item2, item3)
@@ -140,10 +141,10 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductLineEdition.methods:updateInfo(item, item2, item3)
-  Logging:debug(self:classname(), "updateInfo", item, item2, item3)
+function ProductLineEdition:updateInfo(item, item2, item3)
+  Logging:debug(self.classname, "updateInfo", item, item2, item3)
   local model = Model.getModel()
-  Logging:debug(self:classname(), "model:", model)
+  Logging:debug(self.classname, "model:", model)
   -- data
   local info_panel = self:getInfoPanel()
   info_panel.clear()
@@ -160,18 +161,18 @@ function ProductLineEdition.methods:updateInfo(item, item2, item3)
   local tableAdminPanel = ElementGui.addGuiTable(block_table, "table" , 9)
   local model_read = false
   if model.share ~= nil and  bit32.band(model.share, 1) > 0 then model_read = true end
-  ElementGui.addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID=read="..model.id, model_read, nil, ({"tooltip.share-mod", {"helmod_common.reading"}}))
-  ElementGui.addGuiLabel(tableAdminPanel, self:classname().."=share-model-read", "R", nil, ({"tooltip.share-mod", {"helmod_common.reading"}}))
+  ElementGui.addGuiCheckbox(tableAdminPanel, self.classname.."=share-model=ID=read="..model.id, model_read, nil, ({"tooltip.share-mod", {"helmod_common.reading"}}))
+  ElementGui.addGuiLabel(tableAdminPanel, self.classname.."=share-model-read", "R", nil, ({"tooltip.share-mod", {"helmod_common.reading"}}))
 
   local model_write = false
   if model.share ~= nil and  bit32.band(model.share, 2) > 0 then model_write = true end
-  ElementGui.addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID=write="..model.id, model_write, nil, ({"tooltip.share-mod", {"helmod_common.writing"}}))
-  ElementGui.addGuiLabel(tableAdminPanel, self:classname().."=share-model-write", "W", nil, ({"tooltip.share-mod", {"helmod_common.writing"}}))
+  ElementGui.addGuiCheckbox(tableAdminPanel, self.classname.."=share-model=ID=write="..model.id, model_write, nil, ({"tooltip.share-mod", {"helmod_common.writing"}}))
+  ElementGui.addGuiLabel(tableAdminPanel, self.classname.."=share-model-write", "W", nil, ({"tooltip.share-mod", {"helmod_common.writing"}}))
 
   local model_delete = false
   if model.share ~= nil and bit32.band(model.share, 4) > 0 then model_delete = true end
-  ElementGui.addGuiCheckbox(tableAdminPanel, self:classname().."=share-model=ID=delete="..model.id, model_delete, nil, ({"tooltip.share-mod", {"helmod_common.removal"}}))
-  ElementGui.addGuiLabel(tableAdminPanel, self:classname().."=share-model-delete", "X", nil, ({"tooltip.share-mod", {"helmod_common.removal"}}))
+  ElementGui.addGuiCheckbox(tableAdminPanel, self.classname.."=share-model=ID=delete="..model.id, model_delete, nil, ({"tooltip.share-mod", {"helmod_common.removal"}}))
+  ElementGui.addGuiLabel(tableAdminPanel, self.classname.."=share-model-delete", "X", nil, ({"tooltip.share-mod", {"helmod_common.removal"}}))
 
   local count_block = Model.countBlocks()
   if count_block > 0 then
@@ -193,8 +194,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductLineEdition.methods:updateInput(item, item2, item3)
-  Logging:debug(self:classname(), "updateInput", item, item2, item3)
+function ProductLineEdition:updateInput(item, item2, item3)
+  Logging:debug(self.classname, "updateInput", item, item2, item3)
   local model = Model.getModel()
   Logging:debug("ProductionBlockTab", "model:", model)
   -- data
@@ -210,7 +211,7 @@ function ProductLineEdition.methods:updateInput(item, item2, item3)
     local input_table = ElementGui.addGuiTable(input_scroll,"input-table", 5, "helmod_table_element")
     if model.ingredients ~= nil then
       for index, element in pairs(model.ingredients) do
-        ElementGui.addCellElement(input_table, element, self:classname().."=production-block-add=ID=new="..element.name.."=", true, "tooltip.add-recipe", ElementGui.color_button_add, index)
+        ElementGui.addCellElement(input_table, element, self.classname.."=production-block-add=ID=new="..element.name.."=", true, "tooltip.add-recipe", ElementGui.color_button_add, index)
       end
     end
 
@@ -226,8 +227,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function ProductLineEdition.methods:updateOutput(item, item2, item3)
-  Logging:debug(self:classname(), "updateOutput", item, item2, item3)
+function ProductLineEdition:updateOutput(item, item2, item3)
+  Logging:debug(self.classname, "updateOutput", item, item2, item3)
   local model = Model.getModel()
   Logging:debug("ProductionBlockTab", "model:", model)
   -- data
@@ -245,7 +246,7 @@ function ProductLineEdition.methods:updateOutput(item, item2, item3)
     local output_table = ElementGui.addGuiTable(output_scroll,"output-table", 5, "helmod_table_element")
     if model.products ~= nil then
       for index, element in pairs(model.products) do
-        ElementGui.addCellElement(output_table, element, self:classname().."=product-selected=ID=new="..element.name.."=", false, "tooltip.product", nil, index)
+        ElementGui.addCellElement(output_table, element, self.classname.."=product-selected=ID=new="..element.name.."=", false, "tooltip.product", nil, index)
       end
     end
     

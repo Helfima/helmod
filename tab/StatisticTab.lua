@@ -6,7 +6,7 @@ require "tab.AbstractTab"
 -- @extends #AbstractTab
 --
 
-StatisticTab = setclass("HMStatisticTab", AbstractTab)
+StatisticTab = class(AbstractTab)
 
 -------------------------------------------------------------------------------
 -- Return button caption
@@ -15,7 +15,7 @@ StatisticTab = setclass("HMStatisticTab", AbstractTab)
 --
 -- @return #string
 --
-function StatisticTab.methods:getButtonCaption()
+function StatisticTab:getButtonCaption()
   return {"helmod_result-panel.tab-button-statistic"}
 end
 
@@ -26,7 +26,7 @@ end
 --
 -- @return boolean
 --
-function StatisticTab.methods:getButtonStyles()
+function StatisticTab:getButtonStyles()
   return "helmod_button_icon_chart","helmod_button_icon_chart_selected"
 end
 
@@ -35,8 +35,8 @@ end
 --
 -- @function [parent=#StatisticTab] updateData
 --
-function StatisticTab.methods:updateData()
-  Logging:debug(self:classname(), "updateSummary()")
+function StatisticTab:updateData()
+  Logging:debug(self.classname, "updateSummary()")
   local model = Model.getModel()
   -- data
   local scroll_panel = self:getResultScrollPanel({"helmod_result-panel.tab-title-statistic"})
@@ -74,8 +74,8 @@ end
 -- @param #LuaGuiElement guiTable
 -- @param #table element
 --
-function StatisticTab.methods:addElementRow(guiTable, element)
-  Logging:debug(self:classname(), "addProductionBlockRow():", guiTable, element)
+function StatisticTab:addElementRow(guiTable, element)
+  Logging:debug(self.classname, "addProductionBlockRow():", guiTable, element)
   EntityPrototype.load(element).native()
   
   ElementGui.addGuiLabel(guiTable, "value_"..element.name, Format.formatNumberElement(element.value), "helmod_label_right_60")

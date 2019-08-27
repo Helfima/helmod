@@ -5,7 +5,7 @@
 -- @extends #Form
 --
 
-Download = setclass("HMDownload", Form)
+Download = class(Form)
 
 local transfert_mode = nil
 
@@ -16,7 +16,7 @@ local transfert_mode = nil
 --
 -- @param #Controller parent parent controller
 --
-function Download.methods:onInit(parent)
+function Download:onInit(parent)
   self.panelCaption = ({"helmod_download-panel.title"})
   self.parent = parent
 end
@@ -34,7 +34,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function Download.methods:onBeforeEvent(event, action, item, item2, item3)
+function Download:onBeforeEvent(event, action, item, item2, item3)
   -- close si nouvel appel
   return true
 end
@@ -45,7 +45,7 @@ end
 --
 -- @function [parent=#Download] getDownloadPanel
 --
-function Download.methods:getDownloadPanel()
+function Download:getDownloadPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["download"] ~= nil and content_panel["download"].valid then
     return content_panel["download"]
@@ -58,7 +58,7 @@ end
 --
 -- @function [parent=#Download] getUploadPanel
 --
-function Download.methods:getUploadPanel()
+function Download:getUploadPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["upload"] ~= nil and content_panel["upload"].valid then
     return content_panel["upload"]
@@ -77,15 +77,15 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Download.methods:onEvent(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "onEvent()", action, item, item2, item3)
+function Download:onEvent(event, action, item, item2, item3)
+  Logging:debug(self.classname, "onEvent()", action, item, item2, item3)
   -- import
   if action == "download-model" then
     local download_panel = self:getDownloadPanel()
     local text_box = download_panel["data-text"]
-    Logging:debug(self:classname(), "data_string", text_box.text)
+    Logging:debug(self.classname, "data_string", text_box.text)
     local data_table = Converter.read(text_box.text)
-    Logging:debug(self:classname(), "data_table", data_table)
+    Logging:debug(self.classname, "data_table", data_table)
     if data_table ~= nil then
       local model = Model.newModel()
       model.time = data_table.time
@@ -107,7 +107,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Download.methods:onUpdate(event, action, item, item2, item3)
+function Download:onUpdate(event, action, item, item2, item3)
   self:updateDownload(item, item2, item3)
 end
 
@@ -122,8 +122,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function Download.methods:updateDownload(item, item2, item3)
-  Logging:debug(self:classname(), "updateDownload():", item, item2, item3)
+function Download:updateDownload(item, item2, item3)
+  Logging:debug(self.classname, "updateDownload():", item, item2, item3)
   local data_string = ""
   -- export
   if item == "upload" then
@@ -132,14 +132,14 @@ function Download.methods:updateDownload(item, item2, item3)
     local model = Model.getModel() 
     data_string = Converter.write(model)
     local text_box = ElementGui.addGuiTextbox(download_panel, "data-text", data_string, "helmod_textbox_default")
-    ElementGui.addGuiButton(download_panel, self:classname().."=CLOSE", nil, "helmod_button_default", ({"helmod_button.close"}))
+    ElementGui.addGuiButton(download_panel, self.classname.."=CLOSE", nil, "helmod_button_default", ({"helmod_button.close"}))
   end
   -- import
   if item == "download" then
     local download_panel = self:getDownloadPanel()
     download_panel.clear()
     local text_box = ElementGui.addGuiTextbox(download_panel, "data-text", data_string, "helmod_textbox_default")
-    ElementGui.addGuiButton(download_panel, self:classname().."=download-model=ID=", "download", "helmod_button_default", ({"helmod_common.download"}))
-    ElementGui.addGuiButton(download_panel, self:classname().."=CLOSE", nil, "helmod_button_default", ({"helmod_button.close"}))
+    ElementGui.addGuiButton(download_panel, self.classname.."=download-model=ID=", "download", "helmod_button_default", ({"helmod_common.download"}))
+    ElementGui.addGuiButton(download_panel, self.classname.."=CLOSE", nil, "helmod_button_default", ({"helmod_button.close"}))
   end
 end

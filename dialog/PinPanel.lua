@@ -5,7 +5,7 @@
 -- @extends #Form
 --
 
-PinPanel = setclass("HMPinPanel", Form)
+PinPanel = class(Form)
 
 local display_pin_level_min = 0
 local display_pin_level_max = 4
@@ -25,10 +25,10 @@ local display_level = {
 --
 -- @param #Controller parent parent controller
 --
-function PinPanel.methods:onInit(parent)
+function PinPanel:onInit(parent)
   self.panelCaption = ({"helmod_pin-tab-panel.title"})
   self.otherClose = false
-  self.parameterLast = string.format("%s_%s",self:classname(),"last")
+  self.parameterLast = string.format("%s_%s",self.classname,"last")
 end
 
 -------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ end
 --
 -- @return #boolean if true the next call close dialog
 --
-function PinPanel.methods:onBeforeEvent( event, action, item, item2, item3)
+function PinPanel:onBeforeEvent( event, action, item, item2, item3)
   local close = (action == "OPEN") -- only on open event
   if action == "OPEN" then
     if User.getParameter(self.parameterLast) == nil or User.getParameter(self.parameterLast) then
@@ -61,7 +61,7 @@ end
 --
 -- @function [parent=#PinPanel] getInfoPanel
 --
-function PinPanel.methods:getInfoPanel()
+function PinPanel:getInfoPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["info-panel"] ~= nil and content_panel["info-panel"].valid then
     return content_panel["info-panel"]["scroll-panel"]
@@ -81,7 +81,7 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PinPanel.methods:onUpdate(event, action, item, item2, item3)
+function PinPanel:onUpdate(event, action, item, item2, item3)
   self:updateHeader(event, action, item, item2, item3)
   self:updateInfo(event, action, item, item2, item3)
 end
@@ -97,16 +97,16 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PinPanel.methods:updateHeader(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "updateHeader():", action, item, item2, item3)
+function PinPanel:updateHeader(event, action, item, item2, item3)
+  Logging:debug(self.classname, "updateHeader():", action, item, item2, item3)
   local left_menu_panel = self:getLeftMenuPanel()
   local model = Model.getModel()
   left_menu_panel.clear()
   local group1 = ElementGui.addGuiFlowH(left_menu_panel,"group1",helmod_flow_style.horizontal)
-  ElementGui.addGuiButton(group1, self:classname().."=change-level=ID=down", nil, "helmod_button_icon_arrow_left", nil, ({"helmod_button.decrease"}))
-  ElementGui.addGuiButton(group1, self:classname().."=change-level=ID=up", nil, "helmod_button_icon_arrow_right", nil, ({"helmod_button.expand"}))
-  ElementGui.addGuiButton(group1, self:classname().."=change-level=ID=min", nil, "helmod_button_icon_minimize", nil, ({"helmod_button.minimize"}))
-  ElementGui.addGuiButton(group1, self:classname().."=change-level=ID=max", nil, "helmod_button_icon_maximize", nil, ({"helmod_button.maximize"}))
+  ElementGui.addGuiButton(group1, self.classname.."=change-level=ID=down", nil, "helmod_button_icon_arrow_left", nil, ({"helmod_button.decrease"}))
+  ElementGui.addGuiButton(group1, self.classname.."=change-level=ID=up", nil, "helmod_button_icon_arrow_right", nil, ({"helmod_button.expand"}))
+  ElementGui.addGuiButton(group1, self.classname.."=change-level=ID=min", nil, "helmod_button_icon_minimize", nil, ({"helmod_button.minimize"}))
+  ElementGui.addGuiButton(group1, self.classname.."=change-level=ID=max", nil, "helmod_button_icon_maximize", nil, ({"helmod_button.maximize"}))
 
 end
 
@@ -121,8 +121,8 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PinPanel.methods:updateInfo(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "updateInfo():", action, item, item2, item3)
+function PinPanel:updateInfo(event, action, item, item2, item3)
+  Logging:debug(self.classname, "updateInfo():", action, item, item2, item3)
   local infoPanel = self:getInfoPanel()
   local model = Model.getModel()
   local pin_block_id = User.getParameter("pin_block_id")
@@ -132,7 +132,7 @@ function PinPanel.methods:updateInfo(event, action, item, item2, item3)
 
   local column = User.getSetting("display_pin_level") + 1
 
-  Logging:debug(self:classname(), "updateInfo", pin_block_id, model.blocks[pin_block_id])
+  Logging:debug(self.classname, "updateInfo", pin_block_id, model.blocks[pin_block_id])
   if pin_block_id ~= nil and model.blocks[pin_block_id] ~= nil then
     local block = model.blocks[pin_block_id]
 
@@ -153,8 +153,8 @@ end
 --
 -- @param #LuaGuiElement itable container for element
 --
-function PinPanel.methods:addProductionBlockHeader(itable)
-  Logging:debug(self:classname(), "addProductionBlockHeader():", itable)
+function PinPanel:addProductionBlockHeader(itable)
+  Logging:debug(self.classname, "addProductionBlockHeader():", itable)
   local display_pin_level = User.getSetting("display_pin_level")
   local model = Model.getModel()
 
@@ -193,15 +193,15 @@ end
 -- @param #string blockId
 -- @param #table element production recipe
 --
-function PinPanel.methods:addProductionBlockRow(gui_table, block, recipe)
-  Logging:debug(self:classname(), "addProductionBlockRow():", gui_table, block, recipe)
+function PinPanel:addProductionBlockRow(gui_table, block, recipe)
+  Logging:debug(self.classname, "addProductionBlockRow():", gui_table, block, recipe)
   local display_pin_level = User.getSetting("display_pin_level")
   local model = Model.getModel()
   local lua_recipe = RecipePrototype.load(recipe).native()
   if display_pin_level > display_level.base then
     -- col recipe
     local cell_recipe = ElementGui.addGuiFrameH(gui_table,"recipe"..recipe.id, helmod_frame_style.hidden)
-    ElementGui.addCellRecipe(cell_recipe, recipe, self:classname().."=do_noting=ID=", true, "tooltip.product", "gray")
+    ElementGui.addCellRecipe(cell_recipe, recipe, self.classname.."=do_noting=ID=", true, "tooltip.product", "gray")
   end
 
   if display_pin_level > display_level.products then
@@ -214,7 +214,7 @@ function PinPanel.methods:addProductionBlockRow(gui_table, block, recipe)
         if block.count > 1 then
           product.limit_count = product.count / block.count
         end
-        ElementGui.addCellElementSm(cell_products, product, self:classname().."=do_noting=ID=", false, "tooltip.product", nil, index)
+        ElementGui.addCellElementSm(cell_products, product, self.classname.."=do_noting=ID=", false, "tooltip.product", nil, index)
       end
     end
   end
@@ -223,7 +223,7 @@ function PinPanel.methods:addProductionBlockRow(gui_table, block, recipe)
     -- col factory
     local cell_factory =ElementGui.addCell(gui_table, "factory-"..recipe.id)
     local factory = recipe.factory
-    ElementGui.addCellFactory(cell_factory, factory, self:classname().."=do_noting=ID=", false, "tooltip.product", "gray")
+    ElementGui.addCellFactory(cell_factory, factory, self.classname.."=do_noting=ID=", false, "tooltip.product", "gray")
   end
 
   if display_pin_level > display_level.ingredients then
@@ -236,7 +236,7 @@ function PinPanel.methods:addProductionBlockRow(gui_table, block, recipe)
         if block.count > 1 then
           ingredient.limit_count = ingredient.count / block.count
         end
-        ElementGui.addCellElementSm(cell_ingredients, ingredient, self:classname().."=do_noting=ID=", true, "tooltip.product", ElementGui.color_button_add, index)
+        ElementGui.addCellElementSm(cell_ingredients, ingredient, self.classname.."=do_noting=ID=", true, "tooltip.product", ElementGui.color_button_add, index)
       end
     end
   end
@@ -250,7 +250,7 @@ function PinPanel.methods:addProductionBlockRow(gui_table, block, recipe)
       beacon.limit_count = nil
     end
     local cell_beacon = ElementGui.addCell(gui_table, "beacon-"..recipe.id)
-    ElementGui.addCellFactory(cell_beacon, beacon, self:classname().."=do_noting=ID="..block.id.."="..recipe.id.."=", false, "tooltip.product", "gray")
+    ElementGui.addCellFactory(cell_beacon, beacon, self.classname.."=do_noting=ID="..block.id.."="..recipe.id.."=", false, "tooltip.product", "gray")
   end
 
 end
@@ -266,14 +266,14 @@ end
 -- @param #string item2 second item name
 -- @param #string item3 third item name
 --
-function PinPanel.methods:onEvent(event, action, item, item2, item3)
-  Logging:debug(self:classname(), "onEvent():", action, item, item2, item3)
+function PinPanel:onEvent(event, action, item, item2, item3)
+  Logging:debug(self.classname, "onEvent():", action, item, item2, item3)
   local model = Model.getModel()
   local pin_block_id = User.getParameter("pin_block_id")
 
   if action == "change-level" then
     local display_pin_level = User.getSetting("display_pin_level")
-    Logging:debug(self:classname(), "display_pin_level", display_pin_level)
+    Logging:debug(self.classname, "display_pin_level", display_pin_level)
     if item == "down" and display_pin_level > display_pin_level_min  then User.setSetting("display_pin_level",display_pin_level - 1) end
     if item == "up" and display_pin_level < display_pin_level_max  then User.setSetting("display_pin_level",display_pin_level + 1) end
     if item == "min" then User.setParameter("display_pin_level",display_pin_level_min) end
