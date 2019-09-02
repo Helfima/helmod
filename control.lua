@@ -3,14 +3,8 @@ require "core.global"
 require "core.class"
 require "core.defines"
 require "core.logging"
+require "controller.DispatcherController"
 
-Format = require "core.Format"
-ElementGui = require "core.ElementGui"
-Player = require "model.Player"
-Controller = require "controller.Controller"
-UnitTest = require "core.UnitTest"
-Command = require "core.Command"
-EventController = require "controller.EventController"
 --===========================
 -- trace=4
 -- debug=3
@@ -21,8 +15,14 @@ EventController = require "controller.EventController"
 Logging:new()
 Logging.console = false
 
--- add interface
--- remote.add_interface("helmod", require "core.Remote")
+Dispatcher = DispatcherController("HMDispatcherController")
+Format = require "core.Format"
+ElementGui = require "core.ElementGui"
+Player = require "model.Player"
+Controller = require "controller.Controller"
+UnitTest = require "core.UnitTest"
+Command = require "core.Command"
+EventController = require "controller.EventController"
 
 -- attach events
 EventController.start()

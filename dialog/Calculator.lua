@@ -5,7 +5,7 @@
 -- @extends #Form
 --
 
-Calculator = class(Form)
+Calculator = newclass(Form)
 
 local display_panel = nil
 
@@ -27,14 +27,10 @@ end
 -- @function [parent=#Calculator] onBeforeEvent
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
 -- @return #boolean if true the next call close dialog
 --
-function Calculator:onBeforeEvent(event, action, item, item2, item3)
+function Calculator:onBeforeEvent(event)
   -- close si nouvel appel
   return true
 end
@@ -108,48 +104,44 @@ end
 -- @function [parent=#Calculator] onEvent
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function Calculator:onEvent(event, action, item, item2, item3)
-  Logging:debug(self.classname, "onEvent()", action, item, item2, item3)
+function Calculator:onEvent(event)
+  Logging:debug(self.classname, "onEvent()", event)
   -- import
-  if action == "compute" then
+  if event.action == "compute" then
     local text = event.element.text
     local ok , err = pcall(function()
       local result = formula(text)
       self:addHistory(text, result)
       User.setParameter("calculator_value", result or 0)
-      self:updateDisplay(item, item2, item3)
-      self:updateHistory(item, item2, item3)
+      self:updateDisplay()
+      self:updateHistory()
     end)
     if not(ok) then
       Player.print("Formula is not valid!")
     end
   end
-  if action == "selected-key" then
-    if item == "enter" then
+  if event.action == "selected-key" then
+    if event.item1 == "enter" then
       local ok , err = pcall(function()
         local calculator_value = User.getParameter("calculator_value") or 0
         local result = formula(calculator_value)
         self:addHistory(calculator_value, result)
         User.setParameter("calculator_value", result or 0)
-        self:updateDisplay(item, item2, item3)
-        self:updateHistory(item, item2, item3)
+        self:updateDisplay()
+        self:updateHistory()
       end)
       if not(ok) then
         Player.print("Formula is not valid!")
       end
-    elseif item == "clear" then
+    elseif event.item1 == "clear" then
       User.setParameter("calculator_value", 0)
-      self:updateDisplay(item, item2, item3)
+      self:updateDisplay()
     else
       local calculator_value = User.getParameter("calculator_value") or 0
       if calculator_value == 0 then calculator_value = "" end
-      User.setParameter("calculator_value", calculator_value..item)
-      self:updateDisplay(item, item2, item3)
+      User.setParameter("calculator_value", calculator_value..event.item1)
+      self:updateDisplay()
     end
   end
 end
@@ -177,12 +169,8 @@ end
 -- @function [parent=#Calculator] Calculator
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function Calculator:onUpdate(event, action, item, item2, item3)
+function Calculator:onUpdate(event)
   self:updateDisplay(item, item2, item3)
   self:updateKeyboard(item, item2, item3)
   self:updateHistory(item, item2, item3)
@@ -193,14 +181,8 @@ end
 --
 -- @function [parent=#Calculator] updateDisplay
 --
--- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function Calculator:updateDisplay(item, item2, item3)
-  Logging:debug(self.classname, "updateDisplay()", item, item2, item3)
+function Calculator:updateDisplay()
+  Logging:debug(self.classname, "updateDisplay()")
   local keyboard_panel = self:getDisplayPanel()
   keyboard_panel.clear()
 
@@ -218,14 +200,8 @@ end
 --
 -- @function [parent=#Calculator] updateKeyboard
 --
--- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function Calculator:updateKeyboard(item, item2, item3)
-  Logging:debug(self.classname, "updateCalculator()", item, item2, item3)
+function Calculator:updateKeyboard()
+  Logging:debug(self.classname, "updateCalculator()")
   local keyboard_panel = self:getKeyboardPanel()
   keyboard_panel.clear()
 
@@ -271,14 +247,8 @@ end
 --
 -- @function [parent=#Calculator] updateHistory
 --
--- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
---
-function Calculator:updateHistory(item, item2, item3)
-  Logging:debug(self.classname, "updateHistory()", item, item2, item3)
+function Calculator:updateHistory()
+  Logging:debug(self.classname, "updateHistory()")
   local history_panel = self:getHistoryPanel()
   history_panel.clear()
 

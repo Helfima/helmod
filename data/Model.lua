@@ -169,7 +169,7 @@ end
 -- @return #table
 --
 function Model.getObject(item, key)
-  Logging:trace(Model.classname, "getObject():", item, key)
+  Logging:trace(Model.classname, "getObject()", item, key)
   local object = nil
   local model = Model.getModel()
   if item == "resource" then
@@ -210,7 +210,7 @@ end
 -- @return #table
 --
 function Model.getPower(key)
-  Logging:trace(Model.classname, "getPower():", key)
+  Logging:trace(Model.classname, "getPower()", key)
   local object = nil
   local model = Model.getModel()
   if model.powers ~= nil and model.powers[key] ~= nil then
@@ -591,7 +591,7 @@ end
 -- @param #string name factory name
 --
 function Model.setFactory(item, key, name)
-  Logging:debug(Model.classname, "setFactory():", item, key, name)
+  Logging:debug(Model.classname, "setFactory()", item, key, name)
   local object = Model.getObject(item, key)
   if object ~= nil then
     local factory = Player.getEntityPrototype(name)

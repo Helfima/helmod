@@ -6,7 +6,7 @@ require "tab.AbstractTab"
 -- @extends #AbstractTab
 --
 
-ResourceTab = class(AbstractTab)
+ResourceTab = newclass(AbstractTab)
 
 -------------------------------------------------------------------------------
 -- Return button caption
@@ -38,7 +38,7 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function ResourceTab:addTableHeader(itable)
-  Logging:debug(self.classname, "addTableHeader():", itable)
+  Logging:debug(self.classname, "addTableHeader()", itable)
   
   -- optionnal columns
   self:addCellHeader(itable, "index", {"helmod_result-panel.col-header-index"},"index")
@@ -58,7 +58,7 @@ end
 -- @param #table ingredient
 --
 function ResourceTab:addTableRow(guiTable, ingredient)
-  Logging:debug(self.classname, "addTableRow():", guiTable, ingredient)
+  Logging:debug(self.classname, "addTableRow()", guiTable, ingredient)
   local model = Model.getModel()
 
   -- col index
@@ -90,8 +90,10 @@ end
 --
 -- @function [parent=#ResourceTab] updateData
 --
-function ResourceTab:updateData()
-  Logging:debug(self.classname, "updateData()")
+-- @param #LuaEvent event
+-- 
+function ResourceTab:updateData(event)
+  Logging:debug(self.classname, "updateData()", event)
   local model = Model.getModel()
   local order = User.getParameter("order")
   -- data

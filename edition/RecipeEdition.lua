@@ -7,7 +7,7 @@ require "edition.AbstractEdition"
 -- @extends #AbstractEdition
 --
 
-RecipeEdition = class(AbstractEdition)
+RecipeEdition = newclass(AbstractEdition)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -60,16 +60,14 @@ end
 --
 -- @function [parent=#RecipeEdition] getObject
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function RecipeEdition:getObject(item, item2, item3)
-  Logging:debug(self.classname, "getObject():", item, item2, item3)
+function RecipeEdition:getObject(event)
+  Logging:debug(self.classname, "getObject()", event)
   local model = Model.getModel()
-  if  model.blocks[item] ~= nil and model.blocks[item].recipes[item2] ~= nil then
+  if  model.blocks[event.item1] ~= nil and model.blocks[event.item1].recipes[event.item2] ~= nil then
     -- return recipe
-    return model.blocks[item].recipes[item2]
+    return model.blocks[event.item1].recipes[event.item2]
   end
   return nil
 end
@@ -89,13 +87,11 @@ end
 --
 -- @function [parent=#RecipeEdition] updateHeader
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function RecipeEdition:updateHeader(item, item2, item3)
-  Logging:debug(self.classname, "updateHeader():", item, item2, item3)
-  self:updateObjectInfo(item, item2, item3)
+function RecipeEdition:updateHeader(event)
+  Logging:debug(self.classname, "updateHeader()", event)
+  self:updateObjectInfo(event)
 end
 
 -------------------------------------------------------------------------------
@@ -103,16 +99,14 @@ end
 --
 -- @function [parent=#RecipeEdition] updateObjectInfo
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function RecipeEdition:updateObjectInfo(item, item2, item3)
-  Logging:debug(self.classname, "updateObjectInfo():", item, item2, item3)
+function RecipeEdition:updateObjectInfo(event)
+  Logging:debug(self.classname, "updateObjectInfo()", event)
   local info_panel = self:getObjectInfoPanel()
   local model = Model.getModel()
-  if  model.blocks[item] ~= nil then
-    local recipe = self:getObject(item, item2, item3)
+  if  model.blocks[event.item1] ~= nil then
+    local recipe = self:getObject(event)
     if recipe ~= nil then
       Logging:debug(self.classname, "updateObjectInfo():recipe=",recipe)
       info_panel.clear()
@@ -156,7 +150,7 @@ function RecipeEdition:updateObjectInfo(item, item2, item3)
 
       local tablePanel = ElementGui.addGuiTable(info_panel,"table-input",3)
       ElementGui.addGuiLabel(tablePanel, "label-production", ({"helmod_recipe-edition-panel.production"}))
-      ElementGui.addGuiText(tablePanel, string.format("%s=object-update=ID=%s=%s", self.classname, item, recipe.id), (recipe.production or 1)*100, "helmod_textfield")
+      ElementGui.addGuiText(tablePanel, string.format("%s=object-update=ID=%s=%s", self.classname, event.item1, recipe.id), (recipe.production or 1)*100, "helmod_textfield")
 
     end
   end

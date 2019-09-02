@@ -6,7 +6,7 @@ require "selector.AbstractSelector"
 -- @extends #AbstractSelector
 --
 
-EntitySelector = class(AbstractSelector)
+EntitySelector = newclass(AbstractSelector)
 
 -------------------------------------------------------------------------------
 -- Return caption
@@ -79,13 +79,9 @@ end
 -- @function [parent=#EntitySelector] updateGroups
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function EntitySelector:updateGroups(event, action, item, item2, item3)
-  Logging:trace(self.classname, "updateGroups()", action, item, item2, item3)
+function EntitySelector:updateGroups(event)
+  Logging:trace(self.classname, "updateGroups()", event)
   
   self:resetGroups()
 
@@ -102,7 +98,7 @@ end
 -- @param #LuaPrototype prototype
 --
 function EntitySelector:buildPrototypeTooltip(prototype)
-  Logging:trace(self.classname, "buildPrototypeTooltip(player, prototype):", prototype)
+  Logging:trace(self.classname, "buildPrototypeTooltip(player, prototype)", prototype)
   -- initalize tooltip
   local tooltip = EntityPrototype.load(prototype).getLocalisedName()
   return tooltip

@@ -19,28 +19,28 @@ function EventController.start()
   script.on_init(EventController.onInit)
   script.on_load(EventController.onLoad)
   script.on_configuration_changed(EventController.onConfigurationChanged)
-  EventController.pcallEvent("on_tick", defines.events.on_tick, EventController.onTick)
-  EventController.pcallEvent("on_gui_click", defines.events.on_gui_click, EventController.onGuiClick)
-  EventController.pcallEvent("on_gui_text_changed", defines.events.on_gui_text_changed, EventController.onGuiTextChanged)
+  --EventController.pcallEvent(defines.events.on_tick, EventController.onTick)
+  EventController.pcallEvent(defines.events.on_gui_click, EventController.onGuiClick)
+  EventController.pcallEvent(defines.events.on_gui_text_changed, EventController.onGuiTextChanged)
   
-  EventController.pcallEvent("on_gui_confirmed", defines.events.on_gui_confirmed, EventController.on_gui_confirmed)
+  EventController.pcallEvent(defines.events.on_gui_confirmed, EventController.on_gui_confirmed)
   -- dropdown changed
-  EventController.pcallEvent("on_gui_selection_state_changed", defines.events.on_gui_selection_state_changed, EventController.onGuiSelectionStateChanged)
+  EventController.pcallEvent(defines.events.on_gui_selection_state_changed, EventController.onGuiSelectionStateChanged)
   -- checked changed
-  EventController.pcallEvent("on_gui_checked_state_changed", defines.events.on_gui_checked_state_changed, EventController.onGuiCheckedStateChanged)
-  EventController.pcallEvent("on_player_created", defines.events.on_player_created, EventController.onPlayerCreated)
-  EventController.pcallEvent("on_player_joined_game", defines.events.on_player_joined_game, EventController.onPlayerJoinedGame)
-  EventController.pcallEvent("on_runtime_mod_setting_changed", defines.events.on_runtime_mod_setting_changed, EventController.onRuntimeModSettingChanged)
-  EventController.pcallEvent("on_console_command", defines.events.on_console_command, EventController.onConsoleCommand)
-  EventController.pcallEvent("on_research_finished", defines.events.on_research_finished, EventController.onResearchFinished)
-  --EventController.pcallEvent("on_gui_closed", defines.events.on_gui_closed, EventController.onGuiClosed)
+  EventController.pcallEvent(defines.events.on_gui_checked_state_changed, EventController.onGuiCheckedStateChanged)
+  EventController.pcallEvent(defines.events.on_player_created, EventController.onPlayerCreated)
+  EventController.pcallEvent(defines.events.on_player_joined_game, EventController.onPlayerJoinedGame)
+  EventController.pcallEvent(defines.events.on_runtime_mod_setting_changed, EventController.onRuntimeModSettingChanged)
+  EventController.pcallEvent(defines.events.on_console_command, EventController.onConsoleCommand)
+  EventController.pcallEvent(defines.events.on_research_finished, EventController.onResearchFinished)
+  --EventController.pcallEvent(defines.events.on_gui_closed, EventController.onGuiClosed)
 
   -- event hotkey
-  EventController.pcallEvent("helmod-input-valid", "helmod-input-valid", EventController.onCustomInput)
-  EventController.pcallEvent("helmod-close", "helmod-close", EventController.onCustomInput)
-  EventController.pcallEvent("helmod-open-close", "helmod-open-close", EventController.onCustomInput)
-  EventController.pcallEvent("helmod-recipe-selector-open", "helmod-recipe-selector-open", EventController.onCustomInput)
-  EventController.pcallEvent("helmod-production-line-open", "helmod-production-line-open", EventController.onCustomInput)
+  EventController.pcallEvent("helmod-input-valid", EventController.onCustomInput)
+  EventController.pcallEvent("helmod-close", EventController.onCustomInput)
+  EventController.pcallEvent("helmod-open-close", EventController.onCustomInput)
+  EventController.pcallEvent("helmod-recipe-selector-open", EventController.onCustomInput)
+  EventController.pcallEvent("helmod-production-line-open", EventController.onCustomInput)
 end
 
 -------------------------------------------------------------------------------
@@ -54,9 +54,7 @@ function EventController.onCustomInput(event)
   Logging:trace(EventController.classname, "onCustomInput(event)", event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
-    local new_event = {name=event.input_name, player_index = event.player_index}
-    Event.load(new_event, "hotkey")
-    Controller.parseEvent()
+    Dispatcher:send("on_gui_hotkey", event, Controller.classname)
   end
 end
 
@@ -65,16 +63,15 @@ end
 --
 -- @function [parent=#EventController] pcallEvent
 --
--- @param #string name
--- @param #lua_event event
+-- @param #event_type event
 -- @param #function callback
 --
-function EventController.pcallEvent(name, event, callback)
+function EventController.pcallEvent(event_type, callback)
   local ok , err = pcall(function()
-    script.on_event(event,callback)
+    script.on_event(event_type,callback)
   end)
   if not(ok) then
-    log("Helmod: defined event "..name.." is not valid!")
+    log("Helmod: defined event "..event_type.." is not valid!")
     log(err)
   end
 end
@@ -208,7 +205,8 @@ function EventController.onGuiClick(event)
     end
     if allowed then
       Logging:debug(EventController.classname, "allowed", allowed)
-      Event.load(event)
+      --Event.load(event)
+      Dispatcher:send("on_gui_action", event, Controller.classname)
     end
   end
 end
@@ -224,7 +222,7 @@ function EventController.onGuiTextChanged(event)
   Logging:trace(EventController.classname, "onGuiTextChanged(event)", event)
   if event ~= nil and event.player_index ~= nil and event.element ~= nil and string.find(event.element.name, "filter") then
     Player.load(event)
-    Event.load(event)
+    Dispatcher:send("on_gui_action", event, Controller.classname)
   end
 end
 
@@ -239,28 +237,7 @@ function EventController.on_gui_confirmed(event)
   Logging:trace(EventController.classname, "on_gui_confirmed(event)", event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
-    Event.load(event)
-  end
-end
-
--------------------------------------------------------------------------------
--- On hotkey event
---
--- @function [parent=#EventController] onGuiHotkey
---
--- @param #table event
---
-function EventController.onGuiHotkey(event)
-  Logging:trace(EventController.classname, "onGuiHotkey(event)", event)
-  if event ~= nil and event.player_index ~= nil then
-    local allowed = true
-    if event.element ~= nil and event.element.valid and (event.element.type == "textfield" or event.element.type == "drop-down" or event.element.type == "checkbox" or event.element.type == "radiobutton") then
-      allowed = false
-    end
-    if allowed then
-      Player.load(event)
-      Event.load(event, "hotkey")
-    end
+    Dispatcher:send("on_gui_action", event, Controller.classname)
   end
 end
 
@@ -275,7 +252,8 @@ function EventController.onGuiSelectionStateChanged(event)
   Logging:trace(EventController.classname, "onGuiSelectionStateChanged(event)", event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
-    Event.load(event, "dropdown")
+    --Event.load(event, "dropdown")
+    Dispatcher:send("on_gui_action", event, Controller.classname)
   end
 end
 
@@ -290,7 +268,8 @@ function EventController.onGuiCheckedStateChanged(event)
   Logging:trace(EventController.classname, "onGuiCheckedStateChanged(event)", event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
-    Event.load(event, "checked")
+    --Event.load(event, "checked")
+    Dispatcher:send("on_gui_action", event, Controller.classname)
   end
 end
 
@@ -305,7 +284,7 @@ function EventController.onRuntimeModSettingChanged(event)
   Logging:trace(EventController.classname, "onRuntimeModSettingChanged(event)", event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
-    Event.load(event, "settings")
+    Dispatcher:send("on_gui_setting", event, Controller.classname)
   end
 end
 

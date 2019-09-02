@@ -4,9 +4,18 @@
 -- @module AbstractTab
 --
 
-AbstractTab = class(Form,function(base,classname)
+AbstractTab = newclass(Form,function(base,classname)
   Form.init(base,classname)
 end)
+
+-------------------------------------------------------------------------------
+-- On Bind Dispatcher
+--
+-- @function [parent=#AbstractTab] onBind
+--
+function AbstractTab:onBind()
+  Dispatcher:bind("on_gui_refresh", self, self.update)
+end
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -15,7 +24,7 @@ end)
 --
 -- @param #Controller parent parent controller
 --
-function AbstractTab:onInit(parent)
+function AbstractTab:onInit()
   self.panelCaption = string.format("%s %s","Helmod",game.active_mods["helmod"])
 end
 
@@ -231,20 +240,15 @@ end
 -- @function [parent=#AbstractTab] onUpdate
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function AbstractTab:onUpdate(event, action, item, item2, item3)
-  Logging:debug(self.classname, "update():", item, item2, item3)
+function AbstractTab:onUpdate(event)
+  Logging:debug(self.classname, "update()", event)
+  self:beforeUpdate(event)
+  self:updateMenuPanel(event)
+  self:updateIndexPanel(event)
 
-  self:beforeUpdate(item, item2, item3)
-  self:updateMenuPanel(item, item2, item3)
-  self:updateIndexPanel(item, item2, item3)
-
-  self:updateHeader(item, item2, item3)
-  self:updateData(item, item2, item3)
+  self:updateHeader(event)
+  self:updateData(event)
 
   Logging:debug(self.classname, "debug_mode", User.getModGlobalSetting("debug"))
   if User.getModGlobalSetting("debug") ~= "none" then
@@ -258,12 +262,10 @@ end
 --
 -- @function [parent=#AbstractTab] updateMenuPanel
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function AbstractTab:updateMenuPanel(item, item2, item3)
-  Logging:debug(self.classname, "updateMenuPanel():", item, item2, item3)
+function AbstractTab:updateMenuPanel(event)
+  Logging:debug(self.classname, "updateMenuPanel()", event)
   local models = Model.getModels()
   local model = Model.getModel()
   local model_id = User.getParameter("model_id")
@@ -377,12 +379,10 @@ end
 --
 -- @function [parent=#AbstractTab] updateIndexPanel
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function AbstractTab:updateIndexPanel(item, item2, item3)
-  Logging:debug(self.classname, "updateIndexPanel():", item, item2, item3)
+function AbstractTab:updateIndexPanel(event)
+  Logging:debug(self.classname, "updateIndexPanel()", event)
   local models = Model.getModels()
   local model_id = User.getParameter("model_id")
 
@@ -427,12 +427,10 @@ end
 --
 -- @function [parent=#AbstractTab] beforeUpdate
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function AbstractTab:beforeUpdate(item, item2, item3)
-  Logging:trace(self.classname, "beforeUpdate():", item, item2, item3)
+function AbstractTab:beforeUpdate(event)
+  Logging:trace(self.classname, "beforeUpdate()", event)
 end
 
 -------------------------------------------------------------------------------
@@ -446,7 +444,7 @@ end
 -- @param #string sorted
 --
 function AbstractTab:addCellHeader(guiTable, name, caption, sorted)
-  Logging:trace(self.classname, "addCellHeader():", guiTable, name, caption, sorted)
+  Logging:trace(self.classname, "addCellHeader()", guiTable, name, caption, sorted)
 
   if (name ~= "index" and name ~= "id" and name ~= "name" and name ~= "type") or User.getModGlobalSetting("display_data_col_"..name) then
     local cell = ElementGui.addGuiFrameH(guiTable,"header-"..name, helmod_frame_style.hidden)
@@ -459,12 +457,10 @@ end
 --
 -- @function [parent=#AbstractTab] updateDebugPanel
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function AbstractTab:updateDebugPanel(item, item2, item3)
-  Logging:debug("AbstractTab", "updateDebugPanel():", item, item2, item3)
+function AbstractTab:updateDebugPanel(event)
+  Logging:debug("AbstractTab", "updateDebugPanel()", event)
 end
 
 -------------------------------------------------------------------------------
@@ -472,22 +468,18 @@ end
 --
 -- @function [parent=#AbstractTab] updateHeader
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function AbstractTab:updateHeader(item, item2, item3)
-  Logging:debug("AbstractTab", "updateHeader():", item, item2, item3)
+function AbstractTab:updateHeader(event)
+  Logging:debug("AbstractTab", "updateHeader()", event)
 end
 -------------------------------------------------------------------------------
 -- Update data
 --
 -- @function [parent=#AbstractTab] updateData
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function AbstractTab:updateData(item, item2, item3)
-  Logging:debug("AbstractTab", "updateData():", item, item2, item3)
+function AbstractTab:updateData(event)
+  Logging:debug("AbstractTab", "updateData()", event)
 end

@@ -6,7 +6,7 @@ require "edition.AbstractEdition"
 -- @extends #AbstractEdition
 --
 
-ProductLineEdition = class(AbstractEdition)
+ProductLineEdition = newclass(AbstractEdition)
 
 -------------------------------------------------------------------------------
 -- On initialization

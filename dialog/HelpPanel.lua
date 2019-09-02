@@ -5,7 +5,7 @@
 -- @extends #Form
 --
 
-HelpPanel = class(Form)
+HelpPanel = newclass(Form)
 
 local help_data = {
   {
@@ -160,14 +160,10 @@ end
 -- @function [parent=#HelpPanel] onBeforeEvent
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
 -- @return #boolean if true the next call close dialog
 --
-function HelpPanel:onBeforeEvent(event, action, item, item2, item3)
+function HelpPanel:onBeforeEvent(event)
   -- close si nouvel appel
   return true
 end
@@ -211,36 +207,32 @@ end
 -- @function [parent=#HelpPanel] onEvent
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function HelpPanel:onEvent(event, action, item, item2, item3)
-  Logging:debug(self.classname, "onEvent():", action, item, item2, item3)
+function HelpPanel:onEvent(event)
+  Logging:debug(self.classname, "onEvent()",event)
 
-  if action == "change-page" then
-    self:updateContent(event, action, item, item2, item3)
+  if event.action == "change-page" then
+    self:updateContent(event)
   end
 
-  if action == "previous-page" then
+  if event.action == "previous-page" then
     local menu_panel = self:getLeftMenuPanel()
     if menu_panel[self.classname.."=change-page"] then
       local selected_index = menu_panel[self.classname.."=change-page"].selected_index
       if selected_index > 1 then
         menu_panel[self.classname.."=change-page"].selected_index = selected_index - 1
-        self:updateContent(event, action, item, item2, item3)
+        self:updateContent(event)
       end
     end
   end
 
-  if action == "next-page" then
+  if event.action == "next-page" then
     local menu_panel = self:getLeftMenuPanel()
     if menu_panel[self.classname.."=change-page"] then
       local selected_index = menu_panel[self.classname.."=change-page"].selected_index
       if selected_index < #help_data then
         menu_panel[self.classname.."=change-page"].selected_index = selected_index + 1
-        self:updateContent(event, action, item, item2, item3)
+        self:updateContent(event)
       end
     end
   end
@@ -253,13 +245,9 @@ end
 -- @function [parent=#HelpPanel] updateMenu
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function HelpPanel:updateMenu(event, action, item, item2, item3)
-  Logging:debug(self.classname, "updateMenu():", action, item, item2, item3)
+function HelpPanel:updateMenu(event)
+  Logging:debug(self.classname, "updateMenu()", event)
   local menu_panel = self:getLeftMenuPanel()
   menu_panel.clear()
   local items = {}
@@ -277,14 +265,10 @@ end
 -- @function [parent=#HelpPanel] onUpdate
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function HelpPanel:onUpdate(event, action, item, item2, item3)
-  self:updateMenu(event, action, item, item2, item3)
-  self:updateContent(event, action, item, item2, item3)
+function HelpPanel:onUpdate(event)
+  self:updateMenu(event)
+  self:updateContent(event)
 end
 
 -------------------------------------------------------------------------------
@@ -293,13 +277,9 @@ end
 -- @function [parent=#HelpPanel] updateContent
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function HelpPanel:updateContent(event, action, item, item2, item3)
-  Logging:debug(self.classname, "updateContent():", action, item, item2, item3)
+function HelpPanel:updateContent(event)
+  Logging:debug(self.classname, "updateContent()", event)
   local content_panel = self:getContentScrollPanel()
   if content_panel then
     content_panel.clear()

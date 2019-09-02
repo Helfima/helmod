@@ -45,20 +45,24 @@ function Command.parse(event)
       Player.print("User UI are reseted!")
     elseif string.lower(event.parameters) == "resetuserallui" then
       User.resetAll()
-      Player.print("User UI are reseted!")
+      Player.print("All User UIs are reseted!")
     elseif string.lower(event.parameters) == "resetcaches" then
-      Controller.resetCaches()
+      Cache.reset()
       Player.print("Caches are reseted!")
     elseif string.lower(event.parameters) == "exportdata" then
       Logging.limit = 10
       game.write_file("helmod\\data.json", Logging:objectToString(global), false)
       Player.print("Data exported!")
+    elseif string.lower(event.parameters) == "exportdataui" then
+      Logging.limit = 10
+      game.write_file("helmod\\data_ui.json", Logging:objectToString(User.get()), false)
+      Player.print("Data UI exported!")
     elseif string.lower(event.parameters) == "exportcache" then
       Logging.limit = 10
       game.write_file("helmod\\cache.json", Logging:objectToString(Cache.getData()), false)
       Player.print("Cache exported!")
     else
-      Player.print("Valid arguments: close | ExportData | ResetCaches | ResetUserUI")
+      Player.print("Valid arguments: close | ExportData | ExportDataUI | ResetCaches | ResetUserUI")
     end
   end
 end

@@ -7,7 +7,7 @@ require "edition.AbstractEdition"
 -- @extends #AbstractEdition
 --
 
-ResourceEdition = class(AbstractEdition)
+ResourceEdition = newclass(AbstractEdition)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -39,15 +39,13 @@ end
 --
 -- @function [parent=#ResourceEdition] getObject
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function ResourceEdition:getObject(item, item2, item3)
+function ResourceEdition:getObject(event)
 	local model = Model.getModel()
-	if  model.resources[item2] ~= nil then
+	if  model.resources[event.item2] ~= nil then
 		-- return resource
-		return model.resources[item2]
+		return model.resources[event.item2]
 	end
 	return nil
 end
@@ -67,13 +65,11 @@ end
 --
 -- @function [parent=#ResourceEdition] updateHeader
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function ResourceEdition:updateHeader(item, item2, item3)
-	Logging:debug(self.classname, "updateHeader():", item, item2, item3)
-	self:updateObjectInfo(item, item2, item3)
+function ResourceEdition:updateHeader(event)
+	Logging:debug(self.classname, "updateHeader()", event)
+	self:updateObjectInfo(event)
 end
 
 -------------------------------------------------------------------------------
@@ -81,19 +77,17 @@ end
 --
 -- @function [parent=#ResourceEdition] updateObjectInfo
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function ResourceEdition:updateObjectInfo(item, item2, item3)
-	Logging:debug(self.classname, "updateObjectInfo():", item, item2, item3)
+function ResourceEdition:updateObjectInfo(event)
+	Logging:debug(self.classname, "updateObjectInfo()", event)
 	local infoPanel = self:getObjectInfoPanel()
 	local model = Model.getModel()
-	local _resource = Player.getItemPrototype(item2)
+	local _resource = Player.getItemPrototype(event.item2)
 
 	local model = Model.getModel()
-	if  model.ingredients[item2] ~= nil then
-		local resource = self:getObject(item, item2, item3)
+	if  model.ingredients[event.item2] ~= nil then
+		local resource = self:getObject(event)
 		Logging:debug(self.classname, "updateResourceInfo():resource=",resource)
 		for k,guiName in pairs(infoPanel.children_names) do
 			infoPanel[guiName].destroy()

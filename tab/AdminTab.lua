@@ -6,7 +6,7 @@ require "tab.AbstractTab"
 -- @extends #AbstractTab
 --
 
-AdminTab = class(AbstractTab)
+AdminTab = newclass(AbstractTab)
 
 -------------------------------------------------------------------------------
 -- Return button caption
@@ -118,7 +118,7 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function AdminTab:addRuleListHeader(itable)
-  Logging:debug(self.classname, "addRuleListHeader():", itable)
+  Logging:debug(self.classname, "addRuleListHeader()", itable)
 
   -- col action
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
@@ -141,7 +141,7 @@ end
 -- @param #table model
 --
 function AdminTab:addRuleListRow(gui_table, rule, rule_id)
-  Logging:debug(self.classname, "addSheetListRow():", gui_table, rule, rule_id)
+  Logging:debug(self.classname, "addSheetListRow()", gui_table, rule, rule_id)
 
   -- col action
   local cell_action = ElementGui.addCell(gui_table, "action"..rule_id, 4)
@@ -178,7 +178,7 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function AdminTab:addSheetListHeader(itable)
-  Logging:debug(self.classname, "addSheetListHeader():", itable)
+  Logging:debug(self.classname, "addSheetListHeader()", itable)
 
   -- col action
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
@@ -196,7 +196,7 @@ end
 -- @param #table model
 --
 function AdminTab:addSheetListRow(gui_table, model)
-  Logging:debug(self.classname, "addSheetListRow():", gui_table, model)
+  Logging:debug(self.classname, "addSheetListRow()", gui_table, model)
 
   -- col action
   local cell_action = ElementGui.addCell(gui_table, "action"..model.id, 4)

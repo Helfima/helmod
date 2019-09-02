@@ -5,7 +5,7 @@
 -- @extends #Form
 --
 
-Settings = class(Form)
+Settings = newclass(Form)
 
 local dropdown = {}
 
@@ -27,14 +27,10 @@ end
 -- @function [parent=#Settings] onBeforeEvent
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
 -- @return #boolean if true the next call close dialog
 --
-function Settings:onBeforeEvent(event, action, item, item2, item3)
+function Settings:onBeforeEvent(event)
   -- close si nouvel appel
   return true
 end
@@ -58,13 +54,9 @@ end
 -- @function [parent=#Settings] onUpdate
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function Settings:onUpdate(event, action, item, item2, item3)
-  self:updateAboutSettings(event, action, item, item2, item3)
+function Settings:onUpdate(event)
+  self:updateAboutSettings(event)
 end
 
 -------------------------------------------------------------------------------
@@ -73,13 +65,9 @@ end
 -- @function [parent=#Settings] updateAboutSettings
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function Settings:updateAboutSettings(event, action, item, item2, item3)
-  Logging:debug(self.classname, "updateAboutSettings():", action, item, item2, item3)
+function Settings:updateAboutSettings(event)
+  Logging:debug(self.classname, "updateAboutSettings()", event)
 
   local aboutSettingsPanel = self:getAboutSettingsPanel()
 

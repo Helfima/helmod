@@ -5,12 +5,21 @@
 -- @extends #Form
 --
 
-AbstractSelector = class(Form,function(base,classname)
+AbstractSelector = newclass(Form,function(base,classname)
   Form.init(base,classname)
 end)
 
 local filter_prototype = nil
 local filter_prototype_product = true
+
+-------------------------------------------------------------------------------
+-- On Bind Dispatcher
+--
+-- @function [parent=#AbstractSelector] onBind
+--
+function AbstractSelector:onBind()
+  Dispatcher:bind("on_gui_prepare", self, self.prepare)
+end
 
 -------------------------------------------------------------------------------
 -- Return filter - filtre sur les prototypes
@@ -171,29 +180,25 @@ end
 -- @function [parent=#AbstractSelector] onBeforeEvent
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function AbstractSelector:onBeforeEvent(event, action, item, item2, item3)
-  Logging:debug(self.classname, "onBeforeEvent()", action, item, item2, item3)
-  local close = action == "OPEN"
-  if action == "OPEN" then
+function AbstractSelector:onBeforeEvent(event)
+  Logging:debug(self.classname, "onBeforeEvent()", event)
+  local close = event.action == "OPEN"
+  if event.action == "OPEN" then
     User.setParameter("recipe_group_selected",nil)
 
     filter_prototype_product = true
 
-    if item3 ~= nil then
-      filter_prototype = item3:lower():gsub("[-]"," ")
+    if event.item3 ~= nil then
+      filter_prototype = event.item3:lower():gsub("[-]"," ")
     else
       filter_prototype = nil
     end
     if event ~= nil and event.button ~= nil and event.button == defines.mouse_button_type.right then
       filter_prototype_product = false
     end
-    if item ~= nil and item2 ~= nil and item3 ~= nil then
-      local parameter_last = string.format("%s_%s_%s",item,item2,item3)
+    if event.item1 ~= nil and event.item2 ~= nil and event.item3 ~= nil then
+      local parameter_last = string.format("%s_%s_%s", event.item1, event.item2, event.item3)
       if User.getParameter(self.parameterLast) ~= parameter_last then
         close = false
       end
@@ -212,76 +217,74 @@ end
 -- @function [parent=#AbstractSelector] onEvent
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function AbstractSelector:onEvent(event, action, item, item2, item3)
-  Logging:debug(self.classname, "onEvent():", action, item, item2, item3)
+function AbstractSelector:onEvent(event)
+  Logging:debug(self.classname, "onEvent()", event)
   local default_settings = User.getDefaultSettings()
 
   local model = Model.getModel()
   if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
     if User.isActiveForm("HMPropertiesTab") then
-      if action == "element-select" then
-        User.setParameter("prototype_properties",{type = item, name = item2 })
+      if event.action == "element-select" then
+        User.setParameter("prototype_properties",{type = event.item1, name = event.item2 })
         self:close()
+        Event.force_refresh = true
       end
     else
       -- classic selector
-      if action == "element-select" and item ~= "container" then
-        local productionBlock = ModelBuilder.addRecipeIntoProductionBlock(item2, item)
+      if event.action == "element-select" and event.item1 ~= "container" then
+        local productionBlock = ModelBuilder.addRecipeIntoProductionBlock(event.item2, event.item1)
         ModelCompute.update()
-        --self:close()
         User.setParameter("scroll_down",true)
         User.setActiveForm("HMProductionBlockTab")
+        Event.force_refresh = true
       end
       -- container selector
-      if action == "element-select" and item == "container" then
-        local type = EntityPrototype.load(item2).getType()
+      if event.action == "element-select" and event.item1 == "container" then
+        local type = EntityPrototype.load(event.item2).getType()
         if type == "container" or type == "logistic-container" then
-          User.setParameter("container_solid",item2)
+          User.setParameter("container_solid",event.item2)
         end
         if type == "storage-tank" then
-          User.setParameter("container_fluid",item2)
+          User.setParameter("container_fluid",event.item2)
         end
         if type == "car" or type == "cargo-wagon" or type == "item-with-entity-data"  or type == "logistic-robot" or type == "transport-belt" then
-          User.setParameter("vehicle_solid",item2)
+          User.setParameter("vehicle_solid",event.item2)
         end
         if type == "fluid-wagon" then
-          User.setParameter("vehicle_fluid",item2)
+          User.setParameter("vehicle_fluid",event.item2)
         end
       end
     end
   end
 
-  if action == "recipe-group" then
-    User.setParameter("recipe_group_selected",item)
-    Controller.createEvent(event, self.classname, "UPDATE", item, item2, item3)
+  if event.action == "recipe-group" then
+    User.setParameter("recipe_group_selected",event.item1)
+    Controller:send("on_gui_update", event, self.classname)
   end
 
-  if action == "change-boolean-settings" then
-    if User.getSetting(item) == nil then User.setSetting(item, default_settings[item]) end
-    User.setSetting(item, not(User.getSetting(item)))
+  if event.action == "change-boolean-settings" then
+    if User.getSetting(event.item1) == nil then User.setSetting(event.item1, default_settings[event.item]) end
+    User.setSetting(event.item1, not(User.getSetting(event.item1)))
     self:resetGroups()
-    Controller.createEvent(event, self.classname, "UPDATE", item, item2, item3)
+    Controller:send("on_gui_prepare", event, self.classname)
+    Controller:send("on_gui_update", event, self.classname)
   end
 
-  if action == "recipe-filter-switch" then
+  if event.action == "recipe-filter-switch" then
     filter_prototype_product = not(filter_prototype_product)
-    Controller.createEvent(event, self.classname, "UPDATE", item, item2, item3)
+    Controller:send("on_gui_update", event, self.classname)
   end
 
-  if action == "recipe-filter" then
+  if event.action == "recipe-filter" then
     if User.getModGlobalSetting("filter_on_text_changed") then
       filter_prototype = event.element.text
-      Controller.createEvent(event, self.classname, "UPDATE", item, item2, item3)
+      Controller:send("on_gui_update", event, self.classname)
     else
       if event.element.parent ~= nil and event.element.parent["filter-text"] ~= nil then
         filter_prototype = event.element.parent["filter-text"].text
       end
-      Controller.createEvent(event, self.classname, "UPDATE", item, item2, item3)
+      Controller:send("on_gui_update", event, self.classname)
     end
   end
 
@@ -304,15 +307,11 @@ end
 -- @function [parent=#AbstractSelector] updateGroups
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
 -- @return {list_group, list_subgroup, list_prototype}
 --
-function AbstractSelector:updateGroups(event, action, item, item2, item3)
-  Logging:trace(self.classname, "updateGroups()", action, item, item2, item3)
+function AbstractSelector:updateGroups(event)
+  Logging:trace(self.classname, "updateGroups()", event)
   return {},{},{}
 end
 
@@ -322,19 +321,14 @@ end
 -- @function [parent=#AbstractSelector] prepare
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function AbstractSelector:prepare(event, action, item, item2, item3)
-  Logging:trace(self.classname, "prepare()", action, item, item2, item3)
+function AbstractSelector:prepare(event)
+  Logging:trace(self.classname, "prepare()", event)
   -- recuperation recipes
   if Model.countList(self:getListGroup()) == 0 then
-    self:updateGroups(event, action, item, item2, item3)
+    self:updateGroups(event)
     Logging:debug(self.classname, "prepare ok")
   end
-  --Logging:debug(self.classname, "prepare()", Model.countList(list_group), Model.countList(list_subgroup), Model.countList(list_prototype))
   return true
 end
 
@@ -344,16 +338,12 @@ end
 -- @function [parent=#AbstractSelector] onUpdate
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function AbstractSelector:onUpdate(event, action, item, item2, item3)
-  Logging:trace(self.classname, "onUpdate():", action, item, item2, item3)
-  self:updateFilter(event, action, item, item2, item3)
-  self:updateGroupSelector(event, action, item, item2, item3)
-  self:updateItemList(event, action, item, item2, item3)
+function AbstractSelector:onUpdate(event)
+  Logging:trace(self.classname, "onUpdate()", event)
+  self:updateFilter(event)
+  self:updateGroupSelector(event)
+  self:updateItemList(event)
 end
 
 -------------------------------------------------------------------------------
@@ -388,13 +378,9 @@ end
 -- @function [parent=#AbstractSelector] updateFilter
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function AbstractSelector:updateFilter(event, action, item, item2, item3)
-  Logging:trace(self.classname, "updateFilter()", action, item, item2, item3)
+function AbstractSelector:updateFilter(event)
+  Logging:trace(self.classname, "updateFilter()", event)
   local panel = self:getFilterPanel()
 
   if panel["filter"] == nil then
@@ -436,7 +422,7 @@ function AbstractSelector:updateFilter(event, action, item, item2, item3)
   if self.product_option then
     panel["filter"][self.classname.."=recipe-filter-switch=ID=filter-product"].state = filter_prototype_product
     panel["filter"][self.classname.."=recipe-filter-switch=ID=filter-ingredient"].state = not(filter_prototype_product)
-    if filter_prototype ~= nil and action == "OPEN" then
+    if filter_prototype ~= nil and event.action == "OPEN" then
       if User.getModGlobalSetting("filter_on_text_changed") then
         panel["filter"]["cell-filter"][self.classname.."=recipe-filter=ID=filter-value"].text = filter_prototype
       else
@@ -471,13 +457,9 @@ end
 -- @function [parent=#AbstractSelector] updateItemList
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function AbstractSelector:updateItemList(event, action, item, item2, item3)
-  Logging:debug(self.classname, "updateItemList()", action, item, item2, item3)
+function AbstractSelector:updateItemList(event)
+  Logging:debug(self.classname, "updateItemList()", event)
   local item_list_panel = self:getItemListPanel()
   local filter_prototype = self:getFilter()
 
@@ -510,7 +492,7 @@ end
 -- @function [parent=#AbstractSelector] buildPrototypeTooltip
 --
 function AbstractSelector:buildPrototypeTooltip(prototype)
-  Logging:trace(self.classname, "buildPrototypeTooltip(element):", prototype)
+  Logging:trace(self.classname, "buildPrototypeTooltip(element)", prototype)
   -- initalize tooltip
   local tooltip = ""
   return tooltip
@@ -532,13 +514,9 @@ end
 -- @function [parent=#AbstractSelector] updateGroupSelector
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function AbstractSelector:updateGroupSelector(event, action, item, item2, item3)
-  Logging:trace(self.classname, "updateGroupSelector():", action, item, item2, item3)
+function AbstractSelector:updateGroupSelector(event)
+  Logging:trace(self.classname, "updateGroupSelector()", event)
   local panel = self:getGroupsPanel()
 
   panel.clear()

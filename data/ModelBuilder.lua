@@ -16,7 +16,7 @@ local ModelBuilder = {
 -- @param #string type recipe type
 --
 function ModelBuilder.addRecipeIntoProductionBlock(key, type)
-  Logging:debug(ModelBuilder.classname, "addRecipeIntoProductionBlock():", key, type)
+  Logging:debug(ModelBuilder.classname, "addRecipeIntoProductionBlock()", key, type)
   local model = Model.getModel()
   local current_block = User.getParameter("current_block")
   local lua_recipe = RecipePrototype.load(key, type).native()
@@ -87,7 +87,7 @@ end
 -- @param #string key generator name
 --
 function ModelBuilder.addPrimaryPower(power_id, key)
-  Logging:debug(ModelBuilder.classname, "addPrimaryPower():", power_id, key)
+  Logging:debug(ModelBuilder.classname, "addPrimaryPower()", power_id, key)
   local model = Model.getModel()
   if model.powers == nil then model.powers = {} end
   local power = model.powers[power_id]
@@ -110,7 +110,7 @@ end
 -- @param #string key generator name
 --
 function ModelBuilder.addSecondaryPower(power_id, key)
-  Logging:debug(ModelBuilder.classname, "addSecondaryPower():", key)
+  Logging:debug(ModelBuilder.classname, "addSecondaryPower()", key)
   local model = Model.getModel()
   if model.powers == nil then model.powers = {} end
   local power = model.powers[power_id]
@@ -205,7 +205,7 @@ end
 -- @param #table options
 --
 function ModelBuilder.updatePower(key, options)
-  Logging:debug(ModelBuilder.classname, "updatePower():", options)
+  Logging:debug(ModelBuilder.classname, "updatePower()", options)
   local object = Model.getPower(key)
   if object ~= nil then
     if options.power ~= nil then
@@ -225,7 +225,7 @@ end
 -- @param #table options
 --
 function ModelBuilder.updateFactory(item, key, options)
-  Logging:debug(ModelBuilder.classname, "updateFactory():", item, key, options)
+  Logging:debug(ModelBuilder.classname, "updateFactory()", item, key, options)
   local object = Model.getObject(item, key)
   if object ~= nil then
     object.factory.limit = options.limit or 0
@@ -242,7 +242,7 @@ end
 -- @param #table options
 --
 function ModelBuilder.updateFuelFactory(item, key, options)
-  Logging:debug(ModelBuilder.classname, "updateFactory():", item, key, options)
+  Logging:debug(ModelBuilder.classname, "updateFactory()", item, key, options)
   local object = Model.getObject(item, key)
   if object ~= nil then
     object.factory.fuel = options.fuel or "coal"
@@ -540,7 +540,7 @@ end
 -- @param #number quantity
 --
 function ModelBuilder.updateProduct(blockId, key, quantity)
-  Logging:debug(ModelBuilder.classname, "updateProduct():", blockId, key, quantity)
+  Logging:debug(ModelBuilder.classname, "updateProduct()", blockId, key, quantity)
   local model = Model.getModel()
 
   if model.blocks[blockId] ~= nil then
@@ -560,7 +560,7 @@ end
 -- @param #number value
 --
 function ModelBuilder.updateProductionBlockOption(blockId, option, value)
-  Logging:debug(ModelBuilder.classname, "updateProductionBlockOption():", blockId, option, value)
+  Logging:debug(ModelBuilder.classname, "updateProductionBlockOption()", blockId, option, value)
   local model = Model.getModel()
 
   if model.blocks[blockId] ~= nil then

@@ -79,8 +79,10 @@ helmod_settings_mod = {
       "HMAbstractSelector",
       "HMAbstractTab",
       "HMCache",
+      "HMCalculator",
       "HMContainerSelector",
       "HMController",
+      "HMDispatcherController",
       "HMDownload",
       "HMElementGui",
       "HMEnergyEdition",
@@ -114,7 +116,7 @@ helmod_settings_mod = {
       "HMSummaryTab",
       "HMTechnology",
       "HMTechnologySelector",
-      "UnitTest"
+      "HMUser"
     },
     order = "a1"
   },

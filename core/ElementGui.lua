@@ -47,6 +47,23 @@ function ElementGui.setInputNumber(element, value)
 end
 
 -------------------------------------------------------------------------------
+-- Set the text of textfield input
+--
+-- @function [parent=#ElementGui] setInputText
+--
+-- @param #LuaGuiElement element textfield input
+-- @param #number value
+--
+-- @return #number number of textfield input
+--
+function ElementGui.setInputText(element, value)
+  Logging:trace(ElementGui.classname, "setInputText", element, value)
+  if element ~= nil and element.text ~= nil then
+    element.text = value
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Add a sprite element
 --
 -- @function [parent=#ElementGui] addSprite
@@ -889,7 +906,7 @@ end
 --
 function ElementGui.addCellLabel(parent, name, label, minimal_width)
   Logging:trace(ElementGui.classname, "addCellLabel()", name, label, minimal_width)
-  local display_cell_mod = User.getModGlobalSetting("display_cell_mod")
+  local display_cell_mod = User.getModSetting("display_cell_mod")
   local cell = ElementGui.addCell(parent, "cell_"..name)
 
   if display_cell_mod == "small-text"then
@@ -922,7 +939,7 @@ end
 --
 function ElementGui.addCellLabel2(parent, name, label1, label2, minimal_width)
   Logging:trace(ElementGui.classname, "addCellLabel()", name, label1, label2, minimal_width)
-  local display_cell_mod = User.getModGlobalSetting("display_cell_mod")
+  local display_cell_mod = User.getModSetting("display_cell_mod")
   local cell = ElementGui.addCell(parent, "cell_"..name, 1)
 
   if display_cell_mod == "small-text"then
@@ -959,7 +976,7 @@ end
 --
 function ElementGui.addCellIcon(parent, element, action, select, tooltip_name, color)
   Logging:trace(ElementGui.classname, "addCellIcon()", element, action, select, tooltip_name, color)
-  local display_cell_mod = User.getModGlobalSetting("display_cell_mod")
+  local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   if display_cell_mod == "small-icon" then
     if parent ~= nil and select == true then
@@ -990,7 +1007,7 @@ end
 --
 function ElementGui.addCellElement(parent, element, action, select, tooltip_name, color, index)
   Logging:trace(ElementGui.classname, "addCellElement()", element, action, select, tooltip_name, color)
-  local display_cell_mod = User.getModGlobalSetting("display_cell_mod")
+  local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
   color = color or "blue"
@@ -1034,7 +1051,7 @@ end
 --
 function ElementGui.addCellElementSm(parent, element, action, select, tooltip_name, color, index)
   Logging:trace(ElementGui.classname, "addCellElementSm()", element, action, select, tooltip_name, color)
-  local display_cell_mod = User.getModGlobalSetting("display_cell_mod")
+  local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
   color = color or "blue"
@@ -1076,7 +1093,7 @@ end
 --
 function ElementGui.addCellElementM(parent, element, action, select, tooltip_name, color, index)
   Logging:trace(ElementGui.classname, "addCellElementM()", element, action, select, tooltip_name, color)
-  local display_cell_mod = User.getModGlobalSetting("display_cell_mod")
+  local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
   color = color or "blue"
@@ -1117,8 +1134,8 @@ end
 -- @param #string color button color
 --
 function ElementGui.addCellProduct(parent, element, action, select, tooltip_name, color, index)
-  Logging:trace(ElementGui.classname, "addCellProduct():", element, action, select, tooltip_name, color)
-  local display_cell_mod = User.getModGlobalSetting("display_cell_mod")
+  Logging:trace(ElementGui.classname, "addCellProduct()", element, action, select, tooltip_name, color)
+  local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
   color = color or "blue"
@@ -1147,8 +1164,8 @@ end
 -- @param #string color button color
 --
 function ElementGui.addCellProductSm(parent, element, action, select, tooltip_name, color, index)
-  Logging:trace(ElementGui.classname, "addCellProductSm():", element, action, select, tooltip_name, color)
-  local display_cell_mod = User.getModGlobalSetting("display_cell_mod")
+  Logging:trace(ElementGui.classname, "addCellProductSm()", element, action, select, tooltip_name, color)
+  local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
   color = color or "blue"
@@ -1177,8 +1194,8 @@ end
 -- @param #string color button color
 --
 function ElementGui.addCellFactory(parent, factory, action, select, tooltip_name, color)
-  Logging:trace(ElementGui.classname, "addCellFactory():", factory, action, select, tooltip_name, color)
-  local display_cell_mod = User.getModGlobalSetting("display_cell_mod")
+  Logging:trace(ElementGui.classname, "addCellFactory()", factory, action, select, tooltip_name, color)
+  local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
   color = color or "green"
@@ -1221,8 +1238,8 @@ end
 -- @param #string color button color
 --
 function ElementGui.addCellRecipe(parent, recipe, action, select, tooltip_name, color)
-  Logging:trace(ElementGui.classname, "addCellRecipe():", recipe, action, select, tooltip_name, color)
-  local display_cell_mod = User.getModGlobalSetting("display_cell_mod")
+  Logging:trace(ElementGui.classname, "addCellRecipe()", recipe, action, select, tooltip_name, color)
+  local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
   color = color or "green"
@@ -1249,8 +1266,8 @@ end
 -- @param #string color button color
 --
 function ElementGui.addCellBlock(parent, block, action, select, tooltip_name, color)
-  Logging:trace(ElementGui.classname, "addCellRecipe():", block, action, select, tooltip_name, color)
-  local display_cell_mod = User.getModGlobalSetting("display_cell_mod")
+  Logging:trace(ElementGui.classname, "addCellRecipe()", block, action, select, tooltip_name, color)
+  local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
   color = color or "green"
@@ -1277,8 +1294,8 @@ end
 -- @param #string color button color
 --
 function ElementGui.addCellEnergy(parent, recipe, action, select, tooltip_name, color)
-  Logging:trace(ElementGui.classname, "addCellEnergy():", recipe, action, select, tooltip_name, color)
-  local display_cell_mod = User.getModGlobalSetting("display_cell_mod")
+  Logging:trace(ElementGui.classname, "addCellEnergy()", recipe, action, select, tooltip_name, color)
+  local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
   color = color or "green"
@@ -1302,7 +1319,7 @@ end
 -- @param #table element production block
 --
 function ElementGui.addCellCargoInfo(parent, element)
-  Logging:trace(ElementGui.classname, "addCellCargoInfo():", element)
+  Logging:trace(ElementGui.classname, "addCellCargoInfo()", element)
   local parameters = User.getParameter()
   Product.load(element)
   if Product.native() ~= nil then
@@ -1501,8 +1518,8 @@ end
 --
 function ElementGui.getStyleSizes()
   Logging:trace(ElementGui.classname, "getStyleSizes()")
-  local display_ratio_horizontal = User.getModGlobalSetting("display_ratio_horizontal")
-  local display_ratio_vertictal = User.getModGlobalSetting("display_ratio_vertical")
+  local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
+  local display_ratio_vertictal = User.getModSetting("display_ratio_vertical")
   
   local width , height = ElementGui.getDisplaySizes()
   local style_sizes = {}
@@ -1624,7 +1641,7 @@ end
 --
 function ElementGui.getIndexColumnNumber()
 
-  local display_ratio_horizontal = User.getModGlobalSetting("display_ratio_horizontal")
+  local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
   local width , height = ElementGui.getDisplaySizes()
   local width_main = math.ceil(width*display_ratio_horizontal)
   
@@ -1642,7 +1659,7 @@ end
 --
 function ElementGui.getElementColumnNumber(size)
 
-  local display_ratio_horizontal = User.getModGlobalSetting("display_ratio_horizontal")
+  local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
   local width , height = ElementGui.getDisplaySizes()
   local width_main = math.ceil(width*display_ratio_horizontal)
   Logging:debug(ElementGui.classname, "getElementColumnNumber(width)", width_main, math.ceil((width_main-600)/(2*size)))

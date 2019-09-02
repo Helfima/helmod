@@ -6,7 +6,7 @@ require "selector.AbstractSelector"
 -- @extends #AbstractSelector
 --
 
-FluidSelector = class(AbstractSelector)
+FluidSelector = newclass(AbstractSelector)
 
 local list_group = {}
 local list_subgroup = {}
@@ -77,13 +77,9 @@ end
 -- @function [parent=#FluidSelector] updateGroups
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function FluidSelector:updateGroups(event, action, item, item2, item3)
-  Logging:trace(self.classname, "updateGroups()", action, item, item2, item3)
+function FluidSelector:updateGroups(event)
+  Logging:trace(self.classname, "updateGroups()", event)
 
   self:resetGroups()
 
@@ -100,7 +96,7 @@ end
 -- @param #LuaPrototype prototype
 --
 function FluidSelector:buildPrototypeTooltip(prototype)
-  Logging:trace(self.classname, "buildPrototypeTooltip(player, prototype):", prototype)
+  Logging:trace(self.classname, "buildPrototypeTooltip(player, prototype)", prototype)
   -- initalize tooltip
   local tooltip = FluidPrototype.load(prototype).getLocalisedName()
   return tooltip

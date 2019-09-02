@@ -5,7 +5,7 @@
 -- @extends #Form
 --
 
-StatusPanel = class(Form)
+StatusPanel = newclass(Form)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -25,19 +25,15 @@ end
 -- @function [parent=#StatusPanel] onBeforeEvent
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
 -- @return #boolean if true the next call close dialog
 --
-function StatusPanel:onBeforeEvent( event, action, item, item2, item3)
+function StatusPanel:onBeforeEvent(event)
   local close = true
   if User.getParameter(self.parameterLast) == nil or User.getParameter(self.parameterLast) then
     close = false
   end
-  User.setParameter(self.parameterLast,item)
+  User.setParameter(self.parameterLast, event.item1)
   return close
 end
 
@@ -83,13 +79,9 @@ end
 -- @function [parent=#StatusPanel] onOpen
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function StatusPanel:onOpen(event, action, item, item2, item3)
-  self:updateHeader(event, action, item, item2, item3)
+function StatusPanel:onOpen(event)
+  self:updateHeader(event)
   self:getInfoPanel()
 end
 
@@ -99,13 +91,9 @@ end
 -- @function [parent=#StatusPanel] onUpdate
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function StatusPanel:onUpdate(event, action, item, item2, item3)
-  self:updateInfo(event, action, item, item2, item3)
+function StatusPanel:onUpdate(event)
+  self:updateInfo(event)
 end
 
 -------------------------------------------------------------------------------
@@ -114,13 +102,9 @@ end
 -- @function [parent=#StatusPanel] updateInfo
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function StatusPanel:updateHeader(event, action, item, item2, item3)
-  Logging:debug(self.classname, "updateHeader():", action, item, item2, item3)
+function StatusPanel:updateHeader(event)
+  Logging:debug(self.classname, "updateHeader()", event)
   local header_panel = self:getHeaderPanel()
   local model = Model.getModel()
 
@@ -135,13 +119,9 @@ end
 -- @function [parent=#StatusPanel] updateInfo
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function StatusPanel:updateInfo(event, action, item, item2, item3)
-  Logging:debug(self.classname, "updateInfo():", action, item, item2, item3)
+function StatusPanel:updateInfo(event)
+  Logging:debug(self.classname, "updateInfo()", event)
   local info_panel = self:getInfoPanel()
   local model = Model.getModel()
 
@@ -176,7 +156,7 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function StatusPanel:addProductionBlockHeader(itable)
-  Logging:debug(self.classname, "addProductionBlockHeader():", itable)
+  Logging:debug(self.classname, "addProductionBlockHeader()", itable)
 end
 
 -------------------------------------------------------------------------------
@@ -188,7 +168,7 @@ end
 -- @param #table element
 --
 function StatusPanel:addProductionBlockRow(guiTable, element)
-  Logging:debug(self.classname, "addProductionBlockRow():", guiTable, element)
+  Logging:debug(self.classname, "addProductionBlockRow()", guiTable, element)
   EntityPrototype.load(element).native()
   
   ElementGui.addGuiButtonSprite(guiTable, "element_"..element.name.."=", Player.getIconType(element), element.name, element.name, Player.getLocalisedName(element))
@@ -202,13 +182,8 @@ end
 -- @function [parent=#StatusPanel] onEvent
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function StatusPanel:onEvent(event, action, item, item2, item3)
-  Logging:debug(self.classname, "onEvent():", action, item, item2, item3)
+function StatusPanel:onEvent(event)
+  Logging:debug(self.classname, "onEvent()", event)
   local model = Model.getModel()
-
 end

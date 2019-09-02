@@ -36,13 +36,37 @@ function PrototypeFilter.getTypes()
 end
 
 -------------------------------------------------------------------------------
--- Get filters
+-- Get modes
 --
--- @function [parent=#PrototypeFilter] getFilters
+-- @function [parent=#PrototypeFilter] getModes
 --
 -- @return #table
 --
-function PrototypeFilter.getFilters(type)
+function PrototypeFilter.getModes()
+  local modes = {"or","and"}
+  return modes
+end
+
+-------------------------------------------------------------------------------
+-- Get inverts
+--
+-- @function [parent=#PrototypeFilter] getInverts
+--
+-- @return #table
+--
+function PrototypeFilter.getInverts()
+  local modes = {"false","true"}
+  return modes
+end
+
+-------------------------------------------------------------------------------
+-- Get prototype filters
+--
+-- @function [parent=#PrototypeFilter] getPototypeFilters
+--
+-- @return #table
+--
+function PrototypeFilter.getPototypeFilters(type)
   local filters = {}
   filters["entity"] = {}
   filters["entity"]["type"]=Player.getEntityPrototypeTypes()
@@ -156,35 +180,71 @@ function PrototypeFilter.getFilters(type)
 end
 
 -------------------------------------------------------------------------------
+-- Get filters
+--
+-- @function [parent=#PrototypeFilter] getFilters
+--
+-- @return #table
+--
+function PrototypeFilter.getFilters(type)
+  local filters = {}
+  for key,options in spairs(PrototypeFilter.getPototypeFilters(type),function(t,a,b) return b > a end) do
+    table.insert(filters,key)
+  end
+  return filters
+end
+
+-------------------------------------------------------------------------------
+-- Get options
+--
+-- @function [parent=#PrototypeFilter] getOptions
+--
+-- @return #table
+--
+function PrototypeFilter.getOptions(type, filter)
+  local options = {}
+  local filters = PrototypeFilter.getPototypeFilters(type)
+  for key,option in spairs(filters[filter],function(t,a,b) return b > a end) do
+    table.insert(options,key)
+  end
+  return options
+end
+
+-------------------------------------------------------------------------------
 -- Get elements
 --
 -- @function [parent=#PrototypeFilter] getElements
 --
 -- @return #table
 --
-function PrototypeFilter.getElements(type ,filter)
+function PrototypeFilter.getElements(type ,filters)
+  for key,filter in pairs(filters) do
+    if type == "entity" then
+      if filter["collision-mask"] then
+        filter["mask"] = filter["collision-mask"]
+        filter["collision-mask"] = nil
+      end
+    elseif type == "item" then
+    elseif type == "equipment" then
+    elseif type == "mod" then
+      if filter["setting-type"] then
+        filter["type"] = filter["setting-type"]
+        filter["setting-type"] = nil
+      end
+    elseif type == "achievement" then
+    end
+    filters[key] = filter
+  end
   if type == "entity" then
-    if filter["collision-mask"] then
-      filter["mask"] = filter["collision-mask"]
-      filter["collision-mask"] = nil
-    end
-    return game.get_filtered_entity_prototypes({filter})
-
+    return game.get_filtered_entity_prototypes(filters)
   elseif type == "item" then
-    return game.get_filtered_item_prototypes({filter})
-
+    return game.get_filtered_item_prototypes(filters)
   elseif type == "equipment" then
-    return game.get_filtered_equipment_prototypes({filter})
-
+    return game.get_filtered_equipment_prototypes(filters)
   elseif type == "mod" then
-    if filter["setting-type"] then
-      filter["type"] = filter["setting-type"]
-      filter["setting-type"] = nil
-    end
-    return game.get_filtered_mod_setting_prototypes({filter})
-
+    return game.get_filtered_mod_setting_prototypes(filters)
   elseif type == "achievement" then
-    return game.get_filtered_achievement_prototypes({filter})
+    return game.get_filtered_achievement_prototypes(filters)
   end
   return {}
 end

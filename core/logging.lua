@@ -11,9 +11,24 @@ function Logging:new()
 end
 
 function Logging:checkClass(logClass)
-  local name = settings.global["helmod_debug_filter"].value
-  if name == "all" or name == logClass then return true end
+  if self:getFilter() == "all" or self:getFilter() == logClass then return true end
   return false
+end
+
+function Logging:getFilter()
+  local filter = "all"
+  if settings ~= nil  then
+    filter = settings.global["helmod_debug_filter"].value
+  end
+  return filter
+end
+
+function Logging:getLevel()
+  local level = "none"
+  if settings ~= nil  then
+    level = settings.global["helmod_debug"].value
+  end
+  return level
 end
 
 function Logging:trace(...)
@@ -33,7 +48,7 @@ end
 
 function Logging:warn(...)
   local arg = {...}
-  self:logging("[WARN]", self.debug_values.warn, unpack(arg))
+  self:logging("[WARN ]", self.debug_values.warn, unpack(arg))
 end
 
 function Logging:error(...)
@@ -57,7 +72,7 @@ function Logging:objectToString(object, level)
 		message = message.."\"__function\""
   elseif object.isluaobject then
     if object.valid then
-      message = message..string.format("{\"type\":%q,\"name\":%q}", object.type, object.name)
+      message = message..string.format("{\"type\":%q,\"name\":%q}", object.type or "nil", object.name or "nil")
     else
       message = message.."invalid object"
     end
@@ -79,7 +94,7 @@ function Logging:objectToString(object, level)
 end
 
 function Logging:logging(tag, level, logClass, ...)
-  local debug_level = self.debug_values[settings.global["helmod_debug"].value] or 0
+  local debug_level = self.debug_values[self:getLevel()] or 0
   local arg = {...}
 	if arg == nil then arg = "nil" end
 	if self:checkClass(logClass) and level <= debug_level then
@@ -87,8 +102,8 @@ function Logging:logging(tag, level, logClass, ...)
 		for key, object in pairs(arg) do
 			message = message..self:objectToString(object)
 		end
-		--game.write_file(self.filename, tag.."|"..logClass.."|"..message.."\n", append_log)
-    log(tag.."|"..logClass.."|"..message)
+		local debug_info = debug.getinfo(3)
+		log(string.format("%s|%s|%s:%s|%s", tag, logClass, string.match(debug_info.source,"[^/]*$"), debug_info.currentline, message))
 		if append_log == false then append_log = true end
 	end
 end

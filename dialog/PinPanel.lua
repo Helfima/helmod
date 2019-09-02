@@ -5,7 +5,7 @@
 -- @extends #Form
 --
 
-PinPanel = class(Form)
+PinPanel = newclass(Form)
 
 local display_pin_level_min = 0
 local display_pin_level_max = 4
@@ -37,21 +37,17 @@ end
 -- @function [parent=#PinPanel] onBeforeEvent
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
 -- @return #boolean if true the next call close dialog
 --
-function PinPanel:onBeforeEvent( event, action, item, item2, item3)
+function PinPanel:onBeforeEvent(event)
   local close = (action == "OPEN") -- only on open event
-  if action == "OPEN" then
+  if event.action == "OPEN" then
     if User.getParameter(self.parameterLast) == nil or User.getParameter(self.parameterLast) then
       close = false
     end
-    User.setParameter(self.parameterLast,item)
-    User.setParameter("pin_block_id",item)
+    User.setParameter(self.parameterLast, event.item1)
+    User.setParameter("pin_block_id", event.item1)
   end
   return close
 end
@@ -76,14 +72,10 @@ end
 -- @function [parent=#PinPanel] onUpdate
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function PinPanel:onUpdate(event, action, item, item2, item3)
-  self:updateHeader(event, action, item, item2, item3)
-  self:updateInfo(event, action, item, item2, item3)
+function PinPanel:onUpdate(event)
+  self:updateHeader(event)
+  self:updateInfo(event)
 end
 
 -------------------------------------------------------------------------------
@@ -92,13 +84,9 @@ end
 -- @function [parent=#PinPanel] updateHeader
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function PinPanel:updateHeader(event, action, item, item2, item3)
-  Logging:debug(self.classname, "updateHeader():", action, item, item2, item3)
+function PinPanel:updateHeader(event)
+  Logging:debug(self.classname, "updateHeader()", event)
   local left_menu_panel = self:getLeftMenuPanel()
   local model = Model.getModel()
   left_menu_panel.clear()
@@ -116,13 +104,9 @@ end
 -- @function [parent=#PinPanel] updateInfo
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function PinPanel:updateInfo(event, action, item, item2, item3)
-  Logging:debug(self.classname, "updateInfo():", action, item, item2, item3)
+function PinPanel:updateInfo(event)
+  Logging:debug(self.classname, "updateInfo()", event)
   local infoPanel = self:getInfoPanel()
   local model = Model.getModel()
   local pin_block_id = User.getParameter("pin_block_id")
@@ -154,7 +138,7 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function PinPanel:addProductionBlockHeader(itable)
-  Logging:debug(self.classname, "addProductionBlockHeader():", itable)
+  Logging:debug(self.classname, "addProductionBlockHeader()", itable)
   local display_pin_level = User.getSetting("display_pin_level")
   local model = Model.getModel()
 
@@ -194,7 +178,7 @@ end
 -- @param #table element production recipe
 --
 function PinPanel:addProductionBlockRow(gui_table, block, recipe)
-  Logging:debug(self.classname, "addProductionBlockRow():", gui_table, block, recipe)
+  Logging:debug(self.classname, "addProductionBlockRow()", gui_table, block, recipe)
   local display_pin_level = User.getSetting("display_pin_level")
   local model = Model.getModel()
   local lua_recipe = RecipePrototype.load(recipe).native()
@@ -261,23 +245,19 @@ end
 -- @function [parent=#PinPanel] onEvent
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function PinPanel:onEvent(event, action, item, item2, item3)
-  Logging:debug(self.classname, "onEvent():", action, item, item2, item3)
+function PinPanel:onEvent(event)
+  Logging:debug(self.classname, "onEvent()", event)
   local model = Model.getModel()
   local pin_block_id = User.getParameter("pin_block_id")
 
-  if action == "change-level" then
+  if event.action == "change-level" then
     local display_pin_level = User.getSetting("display_pin_level")
     Logging:debug(self.classname, "display_pin_level", display_pin_level)
-    if item == "down" and display_pin_level > display_pin_level_min  then User.setSetting("display_pin_level",display_pin_level - 1) end
-    if item == "up" and display_pin_level < display_pin_level_max  then User.setSetting("display_pin_level",display_pin_level + 1) end
-    if item == "min" then User.setParameter("display_pin_level",display_pin_level_min) end
-    if item == "max" then User.setParameter("display_pin_level",display_pin_level_max) end
-    self:updateInfo(event, action, pin_block_id, item2, item3)
+    if event.item1 == "down" and display_pin_level > display_pin_level_min  then User.setSetting("display_pin_level",display_pin_level - 1) end
+    if event.item1 == "up" and display_pin_level < display_pin_level_max  then User.setSetting("display_pin_level",display_pin_level + 1) end
+    if event.item1 == "min" then User.setParameter("display_pin_level",display_pin_level_min) end
+    if event.item1 == "max" then User.setParameter("display_pin_level",display_pin_level_max) end
+    self:updateInfo(event)
   end
 end

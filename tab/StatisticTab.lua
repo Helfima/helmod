@@ -6,7 +6,7 @@ require "tab.AbstractTab"
 -- @extends #AbstractTab
 --
 
-StatisticTab = class(AbstractTab)
+StatisticTab = newclass(AbstractTab)
 
 -------------------------------------------------------------------------------
 -- Return button caption
@@ -35,8 +35,10 @@ end
 --
 -- @function [parent=#StatisticTab] updateData
 --
-function StatisticTab:updateData()
-  Logging:debug(self.classname, "updateSummary()")
+-- @param #LuaEvent event
+--
+function StatisticTab:updateData(event)
+  Logging:debug(self.classname, "updateSummary()", event)
   local model = Model.getModel()
   -- data
   local scroll_panel = self:getResultScrollPanel({"helmod_result-panel.tab-title-statistic"})
@@ -75,7 +77,7 @@ end
 -- @param #table element
 --
 function StatisticTab:addElementRow(guiTable, element)
-  Logging:debug(self.classname, "addProductionBlockRow():", guiTable, element)
+  Logging:debug(self.classname, "addProductionBlockRow()", guiTable, element)
   EntityPrototype.load(element).native()
   
   ElementGui.addGuiLabel(guiTable, "value_"..element.name, Format.formatNumberElement(element.value), "helmod_label_right_60")

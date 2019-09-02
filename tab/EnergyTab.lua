@@ -6,7 +6,7 @@ require "tab.AbstractTab"
 -- @extends #AbstractTab
 --
 
-EnergyTab = class(AbstractTab)
+EnergyTab = newclass(AbstractTab)
 
 -------------------------------------------------------------------------------
 -- Return button caption
@@ -72,7 +72,7 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function EnergyTab:addTableHeader(itable)
-  Logging:debug(self.classname, "addTableHeader():", itable)
+  Logging:debug(self.classname, "addTableHeader()", itable)
   local model = Model.getModel()
 
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
@@ -93,7 +93,7 @@ end
 -- @param #table power
 --
 function EnergyTab:addTableRow(gui_table, power)
-  Logging:debug(self.classname, "addPowersRow():", gui_table, power)
+  Logging:debug(self.classname, "addPowersRow()", gui_table, power)
   local model = Model.getModel()
 
   -- col action

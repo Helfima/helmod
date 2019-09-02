@@ -6,7 +6,7 @@ require "selector.AbstractSelector"
 -- @extends #AbstractSelector
 --
 
-RecipeSelector = class(AbstractSelector)
+RecipeSelector = newclass(AbstractSelector)
 
 -------------------------------------------------------------------------------
 -- After initialization
@@ -85,13 +85,9 @@ end
 -- @function [parent=#RecipeSelector] updateGroups
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function RecipeSelector:updateGroups(event, action, item, item2, item3)
-  Logging:trace(self.classname, "updateGroups()", action, item, item2, item3)
+function RecipeSelector:updateGroups(event)
+  Logging:trace(self.classname, "updateGroups()", event)
 
   self:resetGroups()
   
@@ -109,19 +105,19 @@ function RecipeSelector:updateGroups(event, action, item, item2, item3)
 end
 
 -------------------------------------------------------------------------------
--- Build recipe tooltip
+-- Create recipe tooltip
 --
 -- @function [parent=#RecipeSelector] buildPrototypeTooltip
 --
 -- @param #table prototype
 -- 
 function RecipeSelector:buildPrototypeTooltip(prototype)
-  Logging:trace(self.classname, "buildRecipeTooltip(element):", prototype)
+  Logging:trace(self.classname, "buildRecipeTooltip(element)", prototype)
   return ElementGui.getTooltipRecipe(prototype)
 end
 
 -------------------------------------------------------------------------------
--- Build prototype icon
+-- Create prototype icon
 --
 -- @function [parent=#RecipeSelector] buildPrototypeIcon
 --

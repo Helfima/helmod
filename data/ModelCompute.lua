@@ -1,6 +1,6 @@
-Matrix = require "core.Matrix"
-Solver = require "core.Solver"
-Simplex = require "core.SolverSimplex"
+Matrix = require "math.Matrix"
+Solver = require "math.Solver"
+Simplex = require "math.SolverSimplex"
 ------------------------------------------------------------------------------
 -- Description of the module.
 -- @module ModelCompute
@@ -40,7 +40,7 @@ end
 -- @param #table block
 --
 function ModelCompute.checkUnlinkedBlock(block)
-  Logging:debug(ModelCompute.classname, "checkUnlinkedBlock():", block)
+  Logging:debug(ModelCompute.classname, "checkUnlinkedBlock()", block)
   local model = Model.getModel()
   local unlinked = true
   local recipe = Player.getRecipe(block.name)
@@ -160,10 +160,10 @@ function ModelCompute.update()
 
     ModelCompute.computeResources()
 
-    Logging:debug(ModelCompute.classname, "update():","Factory compute OK")
+    Logging:debug(ModelCompute.classname, "update()","Factory compute OK")
     -- genere un bilan
     ModelCompute.createSummary()
-    Logging:debug(ModelCompute.classname, "update():","Summary OK")
+    Logging:debug(ModelCompute.classname, "update()","Summary OK")
 
     Logging:debug(ModelCompute.classname , "********** model updated:",model)
   end
@@ -385,7 +385,7 @@ end
 -- @param #table block block of model
 --
 function ModelCompute.computeBlockByFactory(block)
-  Logging:debug(ModelCompute.classname, "computeBlockByFactory():", block.name)
+  Logging:debug(ModelCompute.classname, "computeBlockByFactory()", block.name)
   local model = Model.getModel()
 
   local recipes = block.recipes
@@ -426,7 +426,7 @@ end
 -- @param #table block block of model
 --
 function ModelCompute.computeSimplexBlock(block)
-  Logging:debug(ModelCompute.classname, "computeSimplexBlock():", block.name)
+  Logging:debug(ModelCompute.classname, "computeSimplexBlock()", block.name)
   local model = Model.getModel()
 
   local recipes = block.recipes
@@ -553,7 +553,7 @@ end
 -- @param #table block block of model
 --
 function ModelCompute.computeBlockCleanInput(block)
-  Logging:debug(ModelCompute.classname, "computeBlockCleanInput():", block.name)
+  Logging:debug(ModelCompute.classname, "computeBlockCleanInput()", block.name)
   local model = Model.getModel()
 
   local recipes = block.recipes
@@ -899,7 +899,7 @@ end
 -- @param #table recipe
 --
 function ModelCompute.computeModuleEffects(recipe)
-  Logging:debug(ModelCompute.classname, "computeModuleEffects()",recipe.name)
+  Logging:trace(ModelCompute.classname, "computeModuleEffects()",recipe.name)
 
   local factory = recipe.factory
   factory.effects = {speed = 0, productivity = 0, consumption = 0}
@@ -946,7 +946,7 @@ end
 -- @param #table recipe
 --
 function ModelCompute.computeFactory(recipe)
-  Logging:debug(ModelCompute.classname, "computeFactory()", recipe.name)
+  Logging:trace(ModelCompute.classname, "computeFactory()", recipe.name)
   local recipe_energy = RecipePrototype.load(recipe).getEnergy()
   -- effet speed
   recipe.factory.speed = ModelCompute.speedFactory(recipe) * (1 + recipe.factory.effects.speed)
@@ -961,7 +961,7 @@ function ModelCompute.computeFactory(recipe)
   local model = Model.getModel()
   -- [ratio recipe] * [effort necessaire du recipe] / ([la vitesse de la factory] * [le temps en second])
   local count = recipe.count*recipe_energy/(recipe.factory.speed * model.time)
-  Logging:debug(ModelCompute.classname, "computeFactory()", "recipe.count=" , recipe.count, "lua_recipe.energy=", recipe_energy, "recipe.factory.speed=", recipe.factory.speed, "model.time=", model.time)
+  Logging:trace(ModelCompute.classname, "computeFactory()", "recipe.count=" , recipe.count, "lua_recipe.energy=", recipe_energy, "recipe.factory.speed=", recipe.factory.speed, "model.time=", model.time)
   if recipe.factory.speed == 0 then count = 0 end
   recipe.factory.count = count
   if Model.countModulesModel(recipe.beacon) > 0 then
@@ -1183,7 +1183,7 @@ end
 --
 function ModelCompute.computePower(key)
   local power = Model.getPower(key)
-  Logging:debug(ModelCompute.classname, "computePower():", key, power)
+  Logging:debug(ModelCompute.classname, "computePower()", key, power)
   if power ~= nil then
     if EntityPrototype.load(power.primary.name).getType() == EntityType.generator then
       -- calcul primary

@@ -7,7 +7,8 @@ local User = {
   classname = "HMUser",
   gui = "gui",
   prefixe = "helmod",
-  version = "0.9.0"
+  version = "0.9.0",
+  tab_name = "HMTab"
 }
 
 -------------------------------------------------------------------------------
@@ -269,7 +270,7 @@ function User.getModGlobalSetting(name)
   if property ~= nil then
     return property.value
   else
-    Logging:error(User.classname, "Mod Global settings property not found:", property_name)
+    Logging:warn(User.classname, "Mod Global settings property not found:", property_name)
     return helmod_settings_mod[name].default_value
   end
 end
@@ -307,8 +308,8 @@ function User.setCloseForm(classname, location)
   if navigate[classname] == nil then navigate[classname] = {} end
   navigate[classname]["open"] = false
   if string.find(classname, "Tab") then
-    if navigate["Tab"] == nil then navigate["Tab"] = {} end
-    navigate["Tab"]["location"] = location
+    if navigate[User.tab_name] == nil then navigate[User.tab_name] = {} end
+    navigate[User.tab_name]["location"] = location
   else
     navigate[classname]["location"] = location
   end
@@ -328,8 +329,8 @@ function User.getLocationForm(classname)
   Logging:debug(User.classname, "getLocationForm()", classname)
   local navigate = User.getNavigate()
   if string.find(classname, "Tab") then
-    if navigate["Tab"] == nil or navigate["Tab"]["location"] == nil then return {50,50} end
-    return navigate["Tab"]["location"]
+    if navigate[User.tab_name] == nil or navigate[User.tab_name]["location"] == nil then return {50,50} end
+    return navigate[User.tab_name]["location"]
   else
     if navigate[classname] == nil or navigate[classname]["location"] == nil then return {200,100} end
     return navigate[classname]["location"]
@@ -349,19 +350,18 @@ function User.setActiveForm(classname)
   if string.find(classname, "Edition") then
     for form_name,form in pairs(navigate) do
       if Controller.getView(form_name) ~= nil and form_name ~= classname and string.find(form_name, "Edition") then
-        Controller.getView(form_name):close(true)
+        Controller.getView(form_name):close()
       end
     end
   end
   if string.find(classname, "Tab") then
-    for form_name,form in pairs(navigate) do
-      if Controller.getView(form_name) ~= nil and form_name ~= classname and string.find(form_name, "Tab") then
-        navigate[form_name]["open"] = false
-      end
-    end
+    if navigate[User.tab_name] == nil then navigate[User.tab_name] = {} end
+    navigate[User.tab_name]["open"] = true
+    navigate[User.tab_name]["name"] = classname
+  else
+    if navigate[classname] == nil then navigate[classname] = {} end
+    navigate[classname]["open"] = true
   end
-  if navigate[classname] == nil then navigate[classname] = {} end
-  navigate[classname]["open"] = true
 end
 
 -------------------------------------------------------------------------------
@@ -376,7 +376,9 @@ end
 function User.isActiveForm(classname)
   Logging:debug(User.classname, "isActiveForm()", classname)
   local navigate = User.getNavigate()
-  if classname ~= "Tab" and navigate[classname] ~= nil then 
+  if string.find(classname, "Tab") and navigate[User.tab_name] ~= nil then 
+    return navigate[User.tab_name]["open"] == true and navigate[User.tab_name]["name"] == classname
+  elseif navigate[classname] ~= nil then 
     return navigate[classname]["open"] == true
   end
   return false

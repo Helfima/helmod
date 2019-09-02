@@ -6,7 +6,7 @@ require "tab.AbstractTab"
 -- @extends #AbstractTab
 --
 
-ProductionBlockTab = class(AbstractTab)
+ProductionBlockTab = newclass(AbstractTab)
 
 -------------------------------------------------------------------------------
 -- Return button caption
@@ -46,12 +46,10 @@ end
 --
 -- @function [parent=#ProductionBlockTab] beforeUpdate
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function ProductionBlockTab:beforeUpdate(item, item2, item3)
-  Logging:trace(self.classname, "beforeUpdate():", item, item2, item3)
+function ProductionBlockTab:beforeUpdate(event)
+  Logging:trace(self.classname, "beforeUpdate()", event)
 end
 
 -------------------------------------------------------------------------------
@@ -59,12 +57,10 @@ end
 --
 -- @function [parent=#ProductionBlockTab] updateDebugPanel
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function ProductionBlockTab:updateDebugPanel(item, item2, item3)
-  Logging:debug("ProductionBlockTab", "updateDebugPanel():", item, item2, item3)
+function ProductionBlockTab:updateDebugPanel(event)
+  Logging:debug("ProductionBlockTab", "updateDebugPanel()", event)
   local header_panel1, header_panel2,scroll_panel1, scroll_panel2 = self:getResultScrollPanel2({"helmod_result-panel.tab-button-production-block"})
   local model = Model.getModel()
 
@@ -212,12 +208,10 @@ end
 --
 -- @function [parent=#ProductionBlockTab] updateInfo
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function ProductionBlockTab:updateInfo(item, item2, item3)
-  Logging:debug(self.classname, "updateInfo", item, item2, item3)
+function ProductionBlockTab:updateInfo(event)
+  Logging:debug(self.classname, "updateInfo", event)
   local model = Model.getModel()
   Logging:debug(self.classname, "model:", model)
   -- data
@@ -270,12 +264,10 @@ end
 --
 -- @function [parent=#ProductionBlockTab] updateInput
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function ProductionBlockTab:updateInput(item, item2, item3)
-  Logging:debug(self.classname, "updateInput", item, item2, item3)
+function ProductionBlockTab:updateInput(event)
+  Logging:debug(self.classname, "updateInput", event)
   local model = Model.getModel()
   Logging:debug(self.classname, "model:", model)
   -- data
@@ -312,12 +304,10 @@ end
 --
 -- @function [parent=#ProductionBlockTab] updateOutput
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function ProductionBlockTab:updateOutput(item, item2, item3)
-  Logging:debug(self.classname, "updateOutput", item, item2, item3)
+function ProductionBlockTab:updateOutput(event)
+  Logging:debug(self.classname, "updateOutput", event)
   local model = Model.getModel()
   Logging:debug(self.classname, "model:", model)
   -- data
@@ -364,19 +354,17 @@ end
 --
 -- @function [parent=#ProductionBlockTab] updateData
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function ProductionBlockTab:updateData(item, item2, item3)
-  Logging:debug("ProductionBlockTab", "updateData():", item, item2, item3)
+function ProductionBlockTab:updateData(event)
+  Logging:debug("ProductionBlockTab", "updateData()", event)
   local model = Model.getModel()
   Logging:debug("ProductionBlockTab", "model:", model)
   local current_block = User.getParameter("current_block") or "new"
 
-  self:updateInfo(item, item2, item3)
-  self:updateOutput(item, item2, item3)
-  self:updateInput(item, item2, item3)
+  self:updateInfo(event)
+  self:updateOutput(event)
+  self:updateInput(event)
 
   -- data panel
   local header_panel1, header_panel2,scroll_panel1, scroll_panel2 = self:getResultScrollPanel2({"helmod_result-panel.tab-button-production-block"})
@@ -450,7 +438,7 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function ProductionBlockTab:addTableHeader(itable)
-  Logging:debug("ProductionBlockTab", "addTableHeader():", itable)
+  Logging:debug("ProductionBlockTab", "addTableHeader()", itable)
 
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
   -- optionnal columns
@@ -477,7 +465,7 @@ end
 -- @param #table recipe production recipe
 --
 function ProductionBlockTab:addTableRow(gui_table, block, recipe)
-  Logging:debug("ProductionBlockTab", "addTableRow():", gui_table, block, recipe)
+  Logging:debug("ProductionBlockTab", "addTableRow()", gui_table, block, recipe)
   local lua_recipe = RecipePrototype.load(recipe).native()
 
   -- col action

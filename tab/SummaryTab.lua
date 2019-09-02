@@ -6,7 +6,7 @@ require "tab.AbstractTab"
 -- @extends #AbstractTab
 --
 
-SummaryTab = class(AbstractTab)
+SummaryTab = newclass(AbstractTab)
 
 -------------------------------------------------------------------------------
 -- Return button caption
@@ -35,8 +35,10 @@ end
 --
 -- @function [parent=#SummaryTab] updateData
 --
-function SummaryTab:updateData()
-  Logging:debug(self.classname, "updateSummary()")
+-- @param #LuaEvent event
+--
+function SummaryTab:updateData(event)
+  Logging:debug(self.classname, "updateSummary()", event)
   local model = Model.getModel()
   -- data
   local scrollPanel = self:getResultScrollPanel({"helmod_result-panel.tab-title-summary"})

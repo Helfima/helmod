@@ -1,18 +1,41 @@
+require "core.Object"
+
 -------------------------------------------------------------------------------
 -- Class to help to build form
 --
 -- @module Form
 --
-Form = class(function(base,classname)
-  base.classname = classname
+Form = newclass(Object,function(base,classname)
+  Object.init(base,classname)
   base.otherClose = true
   base.locate = "screen"
   base.panelClose = true
   base.help_button = true
   base.auto_clear = true
   base.content_verticaly = true
-  base:onInit()
 end)
+
+-------------------------------------------------------------------------------
+-- Bind Dispatcher
+--
+-- @function [parent=#Form] bind
+--
+function Form:bind()
+  Dispatcher:bind("on_gui_event", self, self.event)
+  Dispatcher:bind("on_gui_open", self, self.open)
+  Dispatcher:bind("on_gui_open", self, self.update)
+  Dispatcher:bind("on_gui_update", self, self.update)
+  Dispatcher:bind("on_gui_close", self, self.close)
+  self:onBind()
+end
+
+-------------------------------------------------------------------------------
+-- On Bind Dispatcher
+--
+-- @function [parent=#Form] onBind
+--
+function Form:onBind()
+end
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -175,7 +198,8 @@ end
 function Form:isOpened()
   Logging:trace(self.classname, "isOpened()")
   local parent_panel = self:getParentPanel()
-  if parent_panel[self.classname] ~= nil then
+  Logging:debug(self.classname, "isOpened test", parent_panel[self:getPanelName()] ~= nil, User.isActiveForm(self.classname))
+  if parent_panel[self:getPanelName()] ~= nil and User.isActiveForm(self.classname) then
     return true
   end
   return false
@@ -187,16 +211,15 @@ end
 -- @function [parent=#Form] open
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function Form:open(event, action, item, item2, item3)
-  Logging:debug(self.classname, "open()", action, item, item2, item3)
+function Form:open(event)
+  if self:isOpened() then return end
+  Logging:debug(self.classname, "open()", event)
   local parent_panel = self:getParentPanel()
+  User.setActiveForm(self.classname)
   if parent_panel[self:getPanelName()] == nil then
-    self:onOpen(event, action, item, item2, item3)
+    self:updateTopMenu(event)
+    self:onOpen(event)
   end
 end
 
@@ -206,18 +229,14 @@ end
 -- @function [parent=#Form] beforeEvent
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function Form:beforeEvent(event, action, item, item2, item3)
-  Logging:debug(self.classname, "beforeEvent()", action, item, item2, item3)
+function Form:beforeEvent(event)
+  Logging:debug(self.classname, "beforeEvent()", event)
   local parent_panel = self:getParentPanel()
-  local close = self:onBeforeEvent(event, action, item, item2, item3)
+  local close = self:onBeforeEvent(event)
   if parent_panel ~= nil and parent_panel[self:getPanelName()] ~= nil and parent_panel[self:getPanelName()].valid then
     Logging:debug(self.classname , "must close?",close)
-    if close and action == "OPEN" then
+    if close and event.action == "OPEN" then
       self:close(true)
     end
   end
@@ -229,13 +248,22 @@ end
 -- @function [parent=#Form] onBeforeEvent
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function Form:onBeforeEvent(event, action, item, item2, item3)
+function Form:onBeforeEvent(event)
   return false
+end
+
+-------------------------------------------------------------------------------
+-- Event
+--
+-- @function [parent=#Form] event
+--
+-- @param #LuaEvent event
+--
+function Form:event(event)
+  if not(self:isOpened()) then return end
+  self:onBeforeEvent(event)
+  self:onEvent(event)
 end
 
 -------------------------------------------------------------------------------
@@ -244,12 +272,8 @@ end
 -- @function [parent=#Form] onEvent
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function Form:onEvent(event, action, item, item2, item3)
+function Form:onEvent(event)
 end
 
 -------------------------------------------------------------------------------
@@ -258,12 +282,8 @@ end
 -- @function [parent=#Form] onOpen
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function Form:onOpen(event, action, item, item2, item3)
+function Form:onOpen(event)
   return false
 end
 
@@ -273,12 +293,8 @@ end
 -- @function [parent=#Form] prepare
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function Form:prepare(event, action, item, item2, item3)
+function Form:prepare(event)
   return false
 end
 
@@ -288,13 +304,9 @@ end
 -- @function [parent=#Form] updateTopMenu
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function Form:updateTopMenu(event, action, item, item2, item3)
-  Logging:debug(self.classname, "updateTopMenu()", action, item, item2, item3)
+function Form:updateTopMenu(event)
+  Logging:debug(self.classname, "updateTopMenu()", event)
   -- ajoute un menu
   if self.panelCaption ~= nil then
 
@@ -325,19 +337,13 @@ end
 -- @function [parent=#Form] update
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function Form:update(event, action, item, item2, item3)
-  Logging:debug(self.classname, "update():", action, item, item2, item3)
+function Form:update(event)
+  if not(self:isOpened()) then return end
+  Logging:debug(self.classname, "update()", event)
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if self.auto_clear then content_panel.clear() end
-  if action == "OPEN" then
-    self:updateTopMenu(event, action, item, item2, item3)
-  end
-  self:onUpdate(event, action, item, item2, item3)
+  self:onUpdate(event)
 end
 
 -------------------------------------------------------------------------------
@@ -346,12 +352,8 @@ end
 -- @function [parent=#Form] onUpdate
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function Form:onUpdate(event, action, item, item2, item3)
+function Form:onUpdate(event)
 
 end
 
@@ -360,9 +362,8 @@ end
 --
 -- @function [parent=#Form] close
 --
--- @param #boolean force state close
---
 function Form:close(force)
+  if not(force) and not(self:isOpened()) then return end
   Logging:debug(self.classname, "close()")
   local flow_panel, content_panel, menu_panel = self:getPanel()
   User.setCloseForm(self.classname, flow_panel.location)

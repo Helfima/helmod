@@ -6,16 +6,14 @@ require "edition.AbstractEdition"
 -- @extends #AbstractEdition
 --
 
-EnergyEdition = class(AbstractEdition)
+EnergyEdition = newclass(AbstractEdition)
 
 -------------------------------------------------------------------------------
 -- On initialization
 --
 -- @function [parent=#EnergyEdition] onInit
 --
--- @param #Controller parent parent controller
---
-function EnergyEdition:onInit(parent)
+function EnergyEdition:onInit()
   self.panelCaption = ({"helmod_energy-edition-panel.title"})
   self.parameterLast = string.format("%s_%s",self.classname,"last")
 end
@@ -172,15 +170,13 @@ end
 --
 -- @function [parent=#EnergyEdition] getObject
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function EnergyEdition:getObject(item, item2, item3)
+function EnergyEdition:getObject(event)
   local model = Model.getModel()
-  if model.powers ~= nil and model.powers[item] ~= nil then
+  if model.powers ~= nil and model.powers[event.item1] ~= nil then
     -- return power
-    return model.powers[item]
+    return model.powers[event.item1]
   end
   return nil
 end
@@ -191,20 +187,16 @@ end
 -- @function [parent=#EnergyEdition] onBeforeEvent
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
 -- @return #boolean if true the next call close dialog
 --
-function EnergyEdition:onBeforeEvent(event, action, item, item2, item3)
+function EnergyEdition:onBeforeEvent(event)
   local model = Model.getModel()
   local close = true
-  if model.guiPowerLast == nil or model.guiPowerLast ~= item then
+  if model.guiPowerLast == nil or model.guiPowerLast ~= event.item1 then
     close = false
   end
-  model.guiPowerLast = item
+  model.guiPowerLast = event.item1
   model.primaryGroupSelected = nil
   model.secondaryGroupSelected = nil
 
@@ -226,27 +218,23 @@ end
 -- @function [parent=#EnergyEdition] onEvent
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function EnergyEdition:onEvent(event, action, item, item2, item3)
-  Logging:debug(self.classname, "onEvent():", action, item, item2, item3)
+function EnergyEdition:onEvent(event)
+  Logging:debug(self.classname, "onEvent()", event)
   local model = Model.getModel()
 
-  if action == "primary-group" then
-    model.primaryGroupSelected = item2
-    self:updatePrimarySelector(item, item2, item3)
+  if event.action == "primary-group" then
+    model.primaryGroupSelected = event.item2
+    self:updatePrimarySelector(event)
   end
 
-  if action == "secondary-group" then
-    model.secondaryGroupSelected = item2
-    self:updateSecondarySelector(item, item2, item3)
+  if event.action == "secondary-group" then
+    model.secondaryGroupSelected = event.item2
+    self:updateSecondarySelector(event)
   end
 
   if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
-    if action == "power-update" then
+    if event.action == "power-update" then
       local inputPanel = self:getPowerPanel()["table-input"]
       local options = {}
 
@@ -254,34 +242,34 @@ function EnergyEdition:onEvent(event, action, item, item2, item3)
         options["power"] = ElementGui.getInputNumber(inputPanel["power"])
       end
 
-      ModelBuilder.updatePower(item, options)
-      self:updatePowerInfo(item, item2, item3)
+      ModelBuilder.updatePower(event.item1, options)
+      self:updatePowerInfo(event)
     end
 
-    if action == "primary-select" then
-      local object = self:getObject(item, item2, item3)
+    if event.action == "primary-select" then
+      local object = self:getObject(event)
       if object ~= nil then
-        local power = ModelBuilder.addPrimaryPower(item, item2)
+        local power = ModelBuilder.addPrimaryPower(event.item1, event.item2)
       else
-        local power = ModelBuilder.addPrimaryPower(nil, item2)
-        item = power.id
+        local power = ModelBuilder.addPrimaryPower(nil, event.item2)
+        event.item1 = power.id
       end
-      ModelCompute.computePower(item)
+      ModelCompute.computePower(event.item1)
       self:close()
-      Controller.createEvent(nil, self.classname, "OPEN", item, item2, item3)
+      Controller:send("on_gui_update", event)
     end
 
-    if action == "secondary-select" then
-      local object = self:getObject(item, item2, item3)
+    if event.action == "secondary-select" then
+      local object = self:getObject(event)
       if object ~= nil then
-        local power = ModelBuilder.addSecondaryPower(item, item2)
+        local power = ModelBuilder.addSecondaryPower(event.item1, event.item2)
       else
-        local power = ModelBuilder.addSecondaryPower(nil, item2)
-        item = power.id
+        local power = ModelBuilder.addSecondaryPower(nil, event.item2)
+        event.item1 = power.id
       end
-      ModelCompute.computePower(item)
+      ModelCompute.computePower(event.item1)
       self:close()
-      Controller.createEvent(nil, self.classname, "OPEN", item, item2, item3)
+      Controller:send("on_gui_update", event)
     end
   end
 end
@@ -292,15 +280,11 @@ end
 -- @function [parent=#EnergyEdition] onUpdate
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function EnergyEdition:onUpdate(event, action, item, item2, item3)
-  self:updatePowerInfo(item, item2, item3)
-  self:updatePrimary(item, item2, item3)
-  self:updateSecondary(item, item2, item3)
+function EnergyEdition:onUpdate(event)
+  self:updatePowerInfo(event)
+  self:updatePrimary(event)
+  self:updateSecondary(event)
 end
 
 -------------------------------------------------------------------------------
@@ -308,19 +292,17 @@ end
 --
 -- @function [parent=#EnergyEdition] updatePowerInfo
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function EnergyEdition:updatePowerInfo(item, item2, item3)
-  Logging:debug(self.classname, "updatePowerInfo():", item, item2, item3)
+function EnergyEdition:updatePowerInfo(event)
+  Logging:debug(self.classname, "updatePowerInfo()", event)
   local power_panel = self:getPowerPanel()
   local model = Model.getModel()
   local default = Model.getDefault()
 
   local model = Model.getModel()
-  if model.powers ~= nil and model.powers[item] ~= nil then
-    local power = self:getObject(item, item2, item3)
+  if model.powers ~= nil and model.powers[event.item1] ~= nil then
+    local power = self:getObject(event)
     if power ~= nil then
       Logging:debug(self.classname, "updatePowerInfo():power=",power)
       for k,guiName in pairs(power_panel.children_names) do
@@ -332,7 +314,7 @@ function EnergyEdition:updatePowerInfo(item, item2, item3)
       ElementGui.addGuiLabel(tablePanel, "label-power", ({"helmod_energy-edition-panel.power"}))
       ElementGui.addGuiText(tablePanel, "power", math.ceil(power.power/1000)/1000, "helmod_textfield")
 
-      ElementGui.addGuiButton(tablePanel, self.classname.."=power-update=ID="..item.."=", power.id, "helmod_button_default", ({"helmod_button.update"}))    --
+      ElementGui.addGuiButton(tablePanel, self.classname.."=power-update=ID="..event.item1.."=", power.id, "helmod_button_default", ({"helmod_button.update"}))
     end
   end
 end
@@ -341,16 +323,14 @@ end
 --
 -- @function [parent=#EnergyEdition] updatePrimary
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function EnergyEdition:updatePrimary(item, item2, item3)
-  Logging:debug(self.classname, "updatePrimary():", item, item2, item3)
+function EnergyEdition:updatePrimary(event)
+  Logging:debug(self.classname, "updatePrimary()", event)
   local model = Model.getModel()
 
-  self:updatePrimaryInfo(item, item2, item3)
-  self:updatePrimarySelector(item, item2, item3)
+  self:updatePrimaryInfo(event)
+  self:updatePrimarySelector(event)
 end
 
 -------------------------------------------------------------------------------
@@ -358,14 +338,12 @@ end
 --
 -- @function [parent=#EnergyEdition] updatePrimaryInfo
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function EnergyEdition:updatePrimaryInfo(item, item2, item3)
-  Logging:debug(self.classname, "updatePrimaryInfo():", item, item2, item3)
+function EnergyEdition:updatePrimaryInfo(event)
+  Logging:debug(self.classname, "updatePrimaryInfo()", event)
   local infoPanel = self:getPrimaryInfoPanel()
-  local object = self:getObject(item, item2, item3)
+  local object = self:getObject(event)
   local model = Model.getModel()
 
   for k,guiName in pairs(infoPanel.children_names) do
@@ -411,18 +389,16 @@ end
 --
 -- @function [parent=#EnergyEdition] updatePrimarySelector
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function EnergyEdition:updatePrimarySelector(item, item2, item3)
-  Logging:debug(self.classname, "updatePrimarySelector():", item, item2, item3)
+function EnergyEdition:updatePrimarySelector(event)
+  Logging:debug(self.classname, "updatePrimarySelector()", event)
   local scroll_panel = self:getPrimarySelectorPanel()
   local model = Model.getModel()
 
   scroll_panel.clear()
 
-  local object = self:getObject(item, item2, item3)
+  local object = self:getObject(event)
 
   local groupsPanel = ElementGui.addGuiTable(scroll_panel, "primary-groups", 1)
 
@@ -450,7 +426,7 @@ function EnergyEdition:updatePrimarySelector(item, item2, item3)
       -- set le groupe
       if model.primaryGroupSelected == nil then model.primaryGroupSelected = group end
       -- ajoute les icons de groupe
-      local action = ElementGui.addGuiButton(groupsPanel, self.classname.."=primary-group=ID="..item.."=", group, "helmod_button_default", group)
+      local action = ElementGui.addGuiButton(groupsPanel, self.classname.."=primary-group=ID="..event.item1.."=", group, "helmod_button_default", group)
     end
   end
 
@@ -458,7 +434,7 @@ function EnergyEdition:updatePrimarySelector(item, item2, item3)
   for key, element in pairs(factories) do
     if category ~= nil or (element.subgroup ~= nil and element.subgroup.name == model.primaryGroupSelected) then
       local localised_name = Player.getLocalisedName(element)
-      ElementGui.addGuiButtonSelectSprite(tablePanel, self.classname.."=primary-select=ID="..item.."=", "entity", element.name, element.name, localised_name)
+      ElementGui.addGuiButtonSelectSprite(tablePanel, self.classname.."=primary-select=ID="..event.item1.."=", "entity", element.name, element.name, localised_name)
     end
   end
 end
@@ -468,16 +444,14 @@ end
 --
 -- @function [parent=#EnergyEdition] updateSecondary
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function EnergyEdition:updateSecondary(item, item2, item3)
-  Logging:debug(self.classname, "updateSecondary():", item, item2, item3)
+function EnergyEdition:updateSecondary(event)
+  Logging:debug(self.classname, "updateSecondary()", event)
   local model = Model.getModel()
 
-  self:updateSecondaryInfo(item, item2, item3)
-  self:updateSecondarySelector(item, item2, item3)
+  self:updateSecondaryInfo(event)
+  self:updateSecondarySelector(event)
 end
 
 -------------------------------------------------------------------------------
@@ -485,14 +459,12 @@ end
 --
 -- @function [parent=#EnergyEdition] updateSecondaryInfo
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function EnergyEdition:updateSecondaryInfo(item, item2, item3)
-  Logging:debug(self.classname, "updateSecondaryInfo():", item, item2, item3)
+function EnergyEdition:updateSecondaryInfo(event)
+  Logging:debug(self.classname, "updateSecondaryInfo()", event)
   local infoPanel = self:getSecondaryInfoPanel()
-  local object = self:getObject(item, item2, item3)
+  local object = self:getObject(event)
   local model = Model.getModel()
 
   for k,guiName in pairs(infoPanel.children_names) do
@@ -544,18 +516,16 @@ end
 --
 -- @function [parent=#EnergyEdition] updateSecondarySelector
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function EnergyEdition:updateSecondarySelector(item, item2, item3)
-  Logging:debug(self.classname, "updateSecondarySelector():", item, item2, item3)
+function EnergyEdition:updateSecondarySelector(event)
+  Logging:debug(self.classname, "updateSecondarySelector()", event)
   local scroll_panel = self:getSecondarySelectorPanel()
   local model = Model.getModel()
 
   scroll_panel.clear()
   
-  local object = self:getObject(item, item2, item3)
+  local object = self:getObject(event)
 
   local groupsPanel = ElementGui.addGuiTable(scroll_panel, "secondary-groups", 1)
 
@@ -583,7 +553,7 @@ function EnergyEdition:updateSecondarySelector(item, item2, item3)
       -- set le groupe
       if model.secondaryGroupSelected == nil then model.secondaryGroupSelected = group end
       -- ajoute les icons de groupe
-      local action = ElementGui.addGuiButton(groupsPanel, self.classname.."=secondary-group=ID="..item.."=", group, "helmod_button_default", group)
+      local action = ElementGui.addGuiButton(groupsPanel, self.classname.."=secondary-group=ID="..event.item1.."=", group, "helmod_button_default", group)
     end
   end
 
@@ -591,7 +561,7 @@ function EnergyEdition:updateSecondarySelector(item, item2, item3)
   for key, element in pairs(factories) do
     if category ~= nil or (element.subgroup ~= nil and element.subgroup.name == model.secondaryGroupSelected) then
       local localised_name = Player.getLocalisedName(element)
-      ElementGui.addGuiButtonSelectSprite(tablePanel, self.classname.."=secondary-select=ID="..item.."=", "entity", element.name, element.name, localised_name)
+      ElementGui.addGuiButtonSelectSprite(tablePanel, self.classname.."=secondary-select=ID="..event.item1.."=", "entity", element.name, element.name, localised_name)
     end
   end
 end

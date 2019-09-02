@@ -420,10 +420,11 @@ function Player.getProductionsCrafting(category, lua_recipe)
     end
   else
     for key, lua_entity in pairs(Player.getProductionMachines()) do
-      Logging:trace(Player.classname, "loop production machines", lua_entity.name, lua_entity.type, lua_entity.group.name, lua_entity.subgroup.name, lua_entity.crafting_categories)
+      Logging:debug(Player.classname, "loop production machines", lua_entity.name, lua_entity.type, lua_entity.group.name, lua_entity.subgroup.name, lua_entity.crafting_categories)
       local check = false
       if category ~= nil then
         if not(rules_included[category]) and not(rules_included[category]) then
+          Logging:debug(Player.classname, "test crafting", lua_entity.name, category, lua_entity.crafting_categories )
           -- standard recipe
           if lua_entity.crafting_categories ~= nil and lua_entity.crafting_categories[category] then
             local recipe_ingredient_count = RecipePrototype.load(lua_recipe, "recipe").getIngredientCount()
@@ -583,7 +584,6 @@ function Player.getProductionMachines()
   table.insert(filters,{filter="hidden",mode="and",invert=true})
   table.insert(filters,{filter="type", type="lab",mode="or"})
   table.insert(filters,{filter="type", type="mining-drill",mode="or"})
-  
   return game.get_filtered_entity_prototypes(filters)
 end
 
@@ -800,7 +800,7 @@ function Player.getResources()
   if cache_resources ~= nil then return cache_resources end
   local items = {}
   for _,item in pairs(game.entity_prototypes) do
-    --Logging:debug(Player.classname, "getItemsPrototype(type):", item.name, item.group.name, item.subgroup.name)
+    --Logging:debug(Player.classname, "getItemsPrototype(type)", item.name, item.group.name, item.subgroup.name)
     if item.name ~= nil and item.resource_category ~= nil then
       table.insert(items,item)
     end

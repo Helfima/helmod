@@ -6,7 +6,7 @@ require "selector.AbstractSelector"
 -- @extends #AbstractSelector
 --
 
-TechnologySelector = class(AbstractSelector)
+TechnologySelector = newclass(AbstractSelector)
 
 -------------------------------------------------------------------------------
 -- After initialization
@@ -84,13 +84,9 @@ end
 -- @function [parent=#TechnologySelector] updateGroups
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function TechnologySelector:updateGroups(event, action, item, item2, item3)
-  Logging:trace(self.classname, "updateGroups()", action, item, item2, item3)
+function TechnologySelector:updateGroups(event)
+  Logging:trace(self.classname, "updateGroups()", event)
 
   self:resetGroups()
 
@@ -108,7 +104,7 @@ end
 -- @param #LuaPrototype prototype
 --
 function TechnologySelector:buildPrototypeTooltip(prototype)
-  Logging:trace(self.classname, "buildPrototypeTooltip(prototype):", prototype)
+  Logging:trace(self.classname, "buildPrototypeTooltip(prototype)", prototype)
   return ElementGui.getTooltipTechnology(prototype)
 end
 

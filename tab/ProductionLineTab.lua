@@ -6,7 +6,7 @@ require "tab.AbstractTab"
 -- @extends #AbstractTab
 --
 
-ProductionLineTab = class(AbstractTab)
+ProductionLineTab = newclass(AbstractTab)
 
 -------------------------------------------------------------------------------
 -- Return button caption
@@ -35,12 +35,10 @@ end
 --
 -- @function [parent=#ProductionLineTab] updateInfo
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function ProductionLineTab:updateInfo(item, item2, item3)
-  Logging:debug(self.classname, "updateInfo", item, item2, item3)
+function ProductionLineTab:updateInfo(event)
+  Logging:debug(self.classname, "updateInfo", event)
   local model = Model.getModel()
   Logging:debug(self.classname, "model:", model)
   -- data
@@ -87,12 +85,10 @@ end
 --
 -- @function [parent=#ProductionLineTab] updateInput
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function ProductionLineTab:updateInput(item, item2, item3)
-  Logging:debug(self.classname, "updateInput", item, item2, item3)
+function ProductionLineTab:updateInput(event)
+  Logging:debug(self.classname, "updateInput", event)
   local model = Model.getModel()
   Logging:debug("ProductionBlockTab", "model:", model)
   -- data
@@ -119,12 +115,10 @@ end
 --
 -- @function [parent=#ProductionLineTab] updateOutput
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function ProductionLineTab:updateOutput(item, item2, item3)
-  Logging:debug(self.classname, "updateOutput", item, item2, item3)
+function ProductionLineTab:updateOutput(event)
+  Logging:debug(self.classname, "updateOutput", event)
   local model = Model.getModel()
   -- data
   local info_scroll, output_scroll, input_scroll = self:getInfoPanel()
@@ -151,17 +145,15 @@ end
 --
 -- @function [parent=#ProductionLineTab] updateData
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function ProductionLineTab:updateData(item, item2, item3)
-  Logging:debug(self.classname, "updateData():", item, item2, item3)
+function ProductionLineTab:updateData(event)
+  Logging:debug(self.classname, "updateData()", event)
   local model = Model.getModel()
 
-  self:updateInfo(item, item2, item3)
-  self:updateOutput(item, item2, item3)
-  self:updateInput(item, item2, item3)
+  self:updateInfo(event)
+  self:updateOutput(event)
+  self:updateInput(event)
   
   -- data panel
   local scrollPanel = self:getResultScrollPanel()
@@ -229,9 +221,9 @@ function ProductionLineTab:addTableRow(gui_table, block)
   -- col action
   local cell_action = ElementGui.addCell(gui_table, "action"..block.id, 2)
 
-  ElementGui.addGuiButton(cell_action, self.classname.."=production-block-up=ID=", block.id, "helmod_button_icon_arrow_top_sm", nil, ({"tooltip.up-element", User.getModGlobalSetting("row_move_step")}))
+  ElementGui.addGuiButton(cell_action, self.classname.."=production-block-up=ID=", block.id, "helmod_button_icon_arrow_top_sm", nil, ({"tooltip.up-element", User.getModSetting("row_move_step")}))
   ElementGui.addGuiButton(cell_action, self.classname.."=production-block-remove=ID=", block.id, "helmod_button_icon_delete_sm_red", nil, ({"tooltip.remove-element"}))
-  ElementGui.addGuiButton(cell_action, self.classname.."=production-block-down=ID=", block.id, "helmod_button_icon_arrow_down_sm", nil, ({"tooltip.down-element", User.getModGlobalSetting("row_move_step")}))
+  ElementGui.addGuiButton(cell_action, self.classname.."=production-block-down=ID=", block.id, "helmod_button_icon_arrow_down_sm", nil, ({"tooltip.down-element", User.getModSetting("row_move_step")}))
   if unlinked then
     ElementGui.addGuiButton(cell_action, self.classname.."=production-block-unlink=ID=", block.id, "helmod_button_icon_unlink_sm", nil, ({"tooltip.unlink-element"}))
   else

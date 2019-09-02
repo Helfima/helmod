@@ -5,7 +5,7 @@
 -- @extends #Form
 --
 
-Download = class(Form)
+Download = newclass(Form)
 
 local transfert_mode = nil
 
@@ -27,14 +27,10 @@ end
 -- @function [parent=#Download] onBeforeEvent
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
 -- @return #boolean if true the next call close dialog
 --
-function Download:onBeforeEvent(event, action, item, item2, item3)
+function Download:onBeforeEvent(event)
   -- close si nouvel appel
   return true
 end
@@ -72,15 +68,11 @@ end
 -- @function [parent=#Download] onEvent
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function Download:onEvent(event, action, item, item2, item3)
-  Logging:debug(self.classname, "onEvent()", action, item, item2, item3)
+function Download:onEvent(event)
+  Logging:debug(self.classname, "onEvent()", event)
   -- import
-  if action == "download-model" then
+  if event.action == "download-model" then
     local download_panel = self:getDownloadPanel()
     local text_box = download_panel["data-text"]
     Logging:debug(self.classname, "data_string", text_box.text)
@@ -102,13 +94,9 @@ end
 -- @function [parent=#Download] Download
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function Download:onUpdate(event, action, item, item2, item3)
-  self:updateDownload(item, item2, item3)
+function Download:onUpdate(event)
+  self:updateDownload(event)
 end
 
 -------------------------------------------------------------------------------
@@ -117,16 +105,12 @@ end
 -- @function [parent=#Download] updateDownload
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function Download:updateDownload(item, item2, item3)
-  Logging:debug(self.classname, "updateDownload():", item, item2, item3)
+function Download:updateDownload(event)
+  Logging:debug(self.classname, "updateDownload()", event)
   local data_string = ""
   -- export
-  if item == "upload" then
+  if event.item1 == "upload" then
     local download_panel = self:getUploadPanel()
     download_panel.clear()
     local model = Model.getModel() 
@@ -135,7 +119,7 @@ function Download:updateDownload(item, item2, item3)
     ElementGui.addGuiButton(download_panel, self.classname.."=CLOSE", nil, "helmod_button_default", ({"helmod_button.close"}))
   end
   -- import
-  if item == "download" then
+  if event.item1 == "download" then
     local download_panel = self:getDownloadPanel()
     download_panel.clear()
     local text_box = ElementGui.addGuiTextbox(download_panel, "data-text", data_string, "helmod_textbox_default")

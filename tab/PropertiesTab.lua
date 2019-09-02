@@ -6,7 +6,7 @@ require "tab.AbstractTab"
 -- @extends #AbstractTab
 --
 
-PropertiesTab = class(AbstractTab)
+PropertiesTab = newclass(AbstractTab)
 
 -------------------------------------------------------------------------------
 -- Return button caption
@@ -71,7 +71,7 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function PropertiesTab:addTableHeader(itable)
-  Logging:debug(self.classname, "addTableHeader():", itable)
+  Logging:debug(self.classname, "addTableHeader()", itable)
 
   -- data columns
   self:addCellHeader(itable, "property", {"helmod_result-panel.col-header-name"})
@@ -88,7 +88,7 @@ end
 -- @param #table property
 --
 function PropertiesTab:addTableRow(gui_table, property)
-  Logging:debug(self.classname, "addTableRow():", gui_table, property)
+  Logging:debug(self.classname, "addTableRow()", gui_table, property)
   -- col property
   local cell_name = ElementGui.addGuiFrameH(gui_table,property.name.."_name", helmod_frame_style.hidden)
   ElementGui.addGuiLabel(cell_name, "label", property.name)
@@ -109,8 +109,10 @@ end
 --
 -- @function [parent=#PropertiesTab] updateData
 --
-function PropertiesTab:updateData()
-  Logging:debug(self.classname, "updateData()")
+-- @param #LuaEvent event
+--
+function PropertiesTab:updateData(event)
+  Logging:debug(self.classname, "updateData()", event)
   -- data
   local resultPanel = self:getResultPanel({"helmod_result-panel.tab-title-properties"})
   local listPanel = ElementGui.addGuiFrameH(resultPanel, "list-element", helmod_frame_style.hidden)

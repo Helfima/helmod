@@ -5,7 +5,7 @@ require "edition.AbstractEdition"
 -- @module RuleEdition
 --
 
-RuleEdition = class(AbstractEdition)
+RuleEdition = newclass(AbstractEdition)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -54,15 +54,11 @@ end
 -- @function [parent=#RuleEdition] onUpdate
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function RuleEdition:onUpdate(event, action, item, item2, item3)
-  Logging:debug(self.classname, "onUpdate():", action, item, item2, item3)
-  self:updateRule(item, item2, item3)
-  self:updateAction(item, item2, item3)
+function RuleEdition:onUpdate(event)
+  Logging:debug(self.classname, "onUpdate()", event)
+  self:updateRule(event)
+  self:updateAction(event)
 end
 
 local rule_mod = nil
@@ -76,12 +72,10 @@ local rule_excluded = false
 --
 -- @function [parent=#RuleEdition] updateRule
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function RuleEdition:updateRule(item, item2, item3)
-  Logging:debug(self.classname, "updateRule():", item, item2, item3)
+function RuleEdition:updateRule(event)
+  Logging:debug(self.classname, "updateRule()", event)
   local rule_panel = self:getRulePanel()
   rule_panel.clear()
   local rule_table = ElementGui.addGuiTable(rule_panel,"list-data", 2, helmod_table_style.rule)
@@ -135,12 +129,10 @@ end
 --
 -- @function [parent=#RuleEdition] updateAction
 --
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #LuaEvent event
 --
-function RuleEdition:updateAction(item, item2, item3)
-  Logging:debug(self.classname, "updateAction():", item, item2, item3)
+function RuleEdition:updateAction(event)
+  Logging:debug(self.classname, "updateAction()", event)
   local action_panel = self:getActionPanel()
   action_panel.clear()
   local action_panel = ElementGui.addGuiTable(action_panel,"table_action",2)
@@ -154,28 +146,24 @@ end
 -- @function [parent=#RuleEdition] onEvent
 --
 -- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
 --
-function RuleEdition:onEvent(event, action, item, item2, item3)
-  Logging:debug(self.classname, "onEvent():", action, item, item2, item3)
+function RuleEdition:onEvent(event)
+  Logging:debug(self.classname, "onEvent()", event)
   if Player.isAdmin() then
-    if action == "dropdown" then
-      if item == "mod" then
+    if event.action == "dropdown" then
+      if event.item1 == "mod" then
         rule_mod = ElementGui.getDropdownSelection(event.element)
       end
-      if item == "name" then
+      if event.item1 == "name" then
         rule_name = ElementGui.getDropdownSelection(event.element)
       end
-      if item == "category" then
+      if event.item1 == "category" then
         rule_category = ElementGui.getDropdownSelection(event.element)
       end
-      if item == "type" then
+      if event.item1 == "type" then
         rule_type = ElementGui.getDropdownSelection(event.element)
       end
-      self:updateRule(item, item2, item3)
+      self:updateRule(event)
     end
 
     if action == "save" then
