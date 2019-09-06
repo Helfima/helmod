@@ -166,7 +166,7 @@ function RuleEdition:onEvent(event)
       self:updateRule(event)
     end
 
-    if action == "save" then
+    if event.action == "save" then
       local rule_panel = self:getRulePanel()
       local rule_table = rule_panel["list-data"]
 
@@ -175,13 +175,13 @@ function RuleEdition:onEvent(event)
 
       if rule_value ~= nil then
         if rule_type == "entity-type" then
-          rule_value = EntityPrototype.load(rule_value).getType()
+          rule_value = EntityPrototype(rule_value):getType()
         end
         if rule_type == "entity-group" then
-          rule_value = EntityPrototype.load(rule_value).native().group.name
+          rule_value = EntityPrototype(rule_value):native().group.name
         end
         if rule_type == "entity-subgroup" then
-          rule_value = EntityPrototype.load(rule_value).native().subgroup.name
+          rule_value = EntityPrototype(rule_value):native().subgroup.name
         end
       else
         rule_value = "all"

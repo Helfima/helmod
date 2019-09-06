@@ -31,7 +31,7 @@ end
 -- @return #table
 --
 function PrototypeFilter.getTypes()
-  local types = {"entity","item","equipment","mod","achievement"}
+  local types = {"entity","item","equipment","mod","achievement","recipe"}
   return types
 end
 
@@ -176,6 +176,27 @@ function PrototypeFilter.getPototypeFilters(type)
   filters["achievement"] = {}
   filters["achievement"]["type"] = {}
   filters["achievement"]["allowed-without-fight"] = {}
+
+  filters["recipe"] = {}
+  filters["recipe"]["enabled"] = {}
+  filters["recipe"]["hidden"] = {}
+  filters["recipe"]["hidden-from-flow-stats"] = {}
+  filters["recipe"]["hidden-from-player-crafting"] = {}
+  filters["recipe"]["allow-as-intermediate"] = {}
+  filters["recipe"]["allow-intermediates"] = {}
+  filters["recipe"]["allow-decomposition"] = {}
+  filters["recipe"]["always-show-made-in"] = {}
+  filters["recipe"]["always-show-products"] = {}
+  filters["recipe"]["show-amount-in-title"] = {}
+  filters["recipe"]["has-ingredients"] = {}
+  filters["recipe"]["has-products"] = {}
+  filters["recipe"]["subgroup"] = {}
+  filters["recipe"]["category"] = game.recipe_category_prototypes
+  filters["recipe"]["energy"] = {}
+  filters["recipe"]["emissions-multiplier"] = {}
+  filters["recipe"]["request-paste-multiplier"] = {}
+  filters["recipe"]["overload-multiplier"] = {}
+
   return filters[type]
 end
 
@@ -232,6 +253,7 @@ function PrototypeFilter.getElements(type ,filters)
         filter["setting-type"] = nil
       end
     elseif type == "achievement" then
+    elseif type == "recipe" then
     end
     filters[key] = filter
   end
@@ -245,6 +267,8 @@ function PrototypeFilter.getElements(type ,filters)
     return game.get_filtered_mod_setting_prototypes(filters)
   elseif type == "achievement" then
     return game.get_filtered_achievement_prototypes(filters)
+  elseif type == "recipe" then
+    return game.get_filtered_recipe_prototypes(filters)
   end
   return {}
 end

@@ -19,8 +19,9 @@ function ModelBuilder.addRecipeIntoProductionBlock(key, type)
   Logging:debug(ModelBuilder.classname, "addRecipeIntoProductionBlock()", key, type)
   local model = Model.getModel()
   local current_block = User.getParameter("current_block")
-  local lua_recipe = RecipePrototype.load(key, type).native()
-
+  local recipe_prototype = RecipePrototype(key, type)
+  local lua_recipe = recipe_prototype:native()
+  
   if lua_recipe ~= nil then
     -- ajoute le bloc si il n'existe pas
     if model.blocks[current_block] == nil then
@@ -41,8 +42,8 @@ function ModelBuilder.addRecipeIntoProductionBlock(key, type)
     ModelRecipe.index = index
     ModelRecipe.count = 1
     -- ajoute les produits du block
-    for _, lua_product in pairs(RecipePrototype.getProducts()) do
-      local product = Product.load(lua_product).new()
+    for _, lua_product in pairs(recipe_prototype:getProducts()) do
+      local product = Product(lua_product):clone()
       if model.blocks[current_block].products[lua_product.name] == nil then
         if model.blocks[current_block].ingredients[lua_product.name] ~= nil then
           product.state = 2
@@ -54,8 +55,8 @@ function ModelBuilder.addRecipeIntoProductionBlock(key, type)
     end
 
     -- ajoute les ingredients du block
-    for _, lua_ingredient in pairs(RecipePrototype.getIngredients()) do
-      local ingredient = Product.load(lua_ingredient).new()
+    for _, lua_ingredient in pairs(recipe_prototype:getIngredients()) do
+      local ingredient = Product(lua_ingredient):clone()
       if model.blocks[current_block].ingredients[lua_ingredient.name] == nil then
         model.blocks[current_block].ingredients[lua_ingredient.name] = ingredient
         if model.blocks[current_block].products[lua_ingredient.name] ~= nil and model.blocks[current_block].products[lua_ingredient.name].state == 1 then
@@ -65,7 +66,7 @@ function ModelBuilder.addRecipeIntoProductionBlock(key, type)
     end
     model.blocks[current_block].recipes[ModelRecipe.id] = ModelRecipe
 
-    local defaultFactory = Model.getDefaultPrototypeFactory(RecipePrototype.getCategory(), lua_recipe)
+    local defaultFactory = Model.getDefaultPrototypeFactory(recipe_prototype:getCategory(), lua_recipe)
     if defaultFactory ~= nil then
       Model.setFactory(current_block, ModelRecipe.id, defaultFactory)
     end
@@ -382,11 +383,11 @@ function ModelBuilder.copyBlock(from_model, from_block)
     local recipe_index = #from_recipe_ids
     for _, recipe_id in ipairs(from_recipe_ids) do
       local recipe = from_block.recipes[recipe_id]
-      RecipePrototype.find(recipe)
-      if RecipePrototype.native() ~= nil then
+      local recipe_prototype = RecipePrototype.find(recipe)
+      if recipe_prototype:native() ~= nil then
         -- ajoute le bloc si il n'existe pas
         if model.blocks[to_block_id] == nil then
-          local to_block = Model.newBlock(RecipePrototype.native())
+          local to_block = Model.newBlock(recipe_prototype:native())
           local index = Model.countBlocks()
           to_block.index = index
           to_block.unlinked = from_block.unlinked
@@ -405,7 +406,7 @@ function ModelBuilder.copyBlock(from_model, from_block)
         end
 
 
-        local recipe_model = Model.newRecipe(recipe.name, RecipePrototype.type())
+        local recipe_model = Model.newRecipe(recipe.name, recipe_prototype:getType())
         recipe_model.index = recipe_index
         recipe_model.production = recipe.production or 1
         recipe_model.factory = Model.newFactory(recipe.factory.name)
@@ -441,9 +442,9 @@ end
 -- @param #string name
 --
 function ModelBuilder.addModuleModel(element, name)
-  local factory_prototype = EntityPrototype.load(element)
+  local factory_prototype = EntityPrototype(element)
   if element.modules[name] == nil then element.modules[name] = 0 end
-  if Model.countModulesModel(element) < factory_prototype.getModuleInventorySize() then
+  if Model.countModulesModel(element) < factory_prototype:getModuleInventorySize() then
     element.modules[name] = element.modules[name] + 1
   end
 end

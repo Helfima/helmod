@@ -27,8 +27,14 @@ require "tab.PropertiesTab"
 require "tab.PrototypeFiltersTab"
 require "tab.AdminTab"
 
-require "edition.ProductLineEdition"
-require "edition.ProductBlockEdition"
+require "model.Prototype"
+require "model.BurnerPrototype"
+require "model.EntityPrototype"
+require "model.FluidPrototype"
+require "model.ItemPrototype"
+require "model.Product"
+require "model.RecipePrototype"
+require "model.Technology"
 
 ModGui = require "mod-gui"
 Cache = require "data.Cache"
@@ -37,12 +43,7 @@ Model = require "data.Model"
 ModelCompute = require "data.ModelCompute"
 ModelBuilder = require "data.ModelBuilder"
 EntityType = require "model.EntityType"
-EntityPrototype = require "model.EntityPrototype"
-FluidPrototype = require "model.FluidPrototype"
-ItemPrototype = require "model.ItemPrototype"
-Product = require "model.Product"
-RecipePrototype = require "model.RecipePrototype"
-Technology = require "model.Technology"
+
 PrototypeFilter = require "model.PrototypeFilter"
 Converter = require "core.Converter"
 
@@ -96,8 +97,6 @@ function Controller:prepare()
   table.insert(forms, PinPanel("HMPinPanel"))
   table.insert(forms, StatusPanel("HMStatusPanel"))
 
-  table.insert(forms, ProductLineEdition("HMProductLineEdition"))
-  table.insert(forms, ProductBlockEdition("HMProductBlockEdition"))
   views = {}
   Logging:debug(Controller.classname, forms)
   for _,form in pairs(forms) do
@@ -629,8 +628,7 @@ function Controller:onEventAccessWrite(event)
         local recipe = recipes[1]
         ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type)
         ModelCompute.update()
-        Event.force_refresh = true
-        Event.force_open = true
+        Controller:send("on_gui_refresh", event)
       else
       Controller:send("on_gui_open", event,"HMRecipeSelector")
       end

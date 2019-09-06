@@ -376,10 +376,10 @@ function Player.checkLimitationModule(module, lua_recipe)
   local factory = lua_recipe.factory
   local allowed = true
   local check_not_bypass = true
-  local prototype = RecipePrototype.load(lua_recipe)
-  local category = prototype.getCategory()
+  local prototype = RecipePrototype(lua_recipe)
+  local category = prototype:getCategory()
   if rules_excluded[category] == nil then category = "standard" end
-  check_not_bypass = Player.checkRules(check_not_bypass, rules_excluded, category, EntityPrototype.load(factory.name).native(), false)
+  check_not_bypass = Player.checkRules(check_not_bypass, rules_excluded, category, EntityPrototype(factory.name):native(), false)
   if Model.countList(module.limitations) > 0 and Player.getModuleBonus(module.name, "productivity") > 0 and check_not_bypass and model_filter_factory_module == true then
     allowed = false
     for _, recipe_name in pairs(module.limitations) do
@@ -427,8 +427,8 @@ function Player.getProductionsCrafting(category, lua_recipe)
           Logging:debug(Player.classname, "test crafting", lua_entity.name, category, lua_entity.crafting_categories )
           -- standard recipe
           if lua_entity.crafting_categories ~= nil and lua_entity.crafting_categories[category] then
-            local recipe_ingredient_count = RecipePrototype.load(lua_recipe, "recipe").getIngredientCount()
-            local factory_ingredient_count = EntityPrototype.load(lua_entity).getIngredientCount()
+            local recipe_ingredient_count = RecipePrototype(lua_recipe, "recipe"):getIngredientCount()
+            local factory_ingredient_count = EntityPrototype(lua_entity):getIngredientCount()
             Logging:debug(Player.classname, "crafting", recipe_ingredient_count, factory_ingredient_count)
             if factory_ingredient_count >= recipe_ingredient_count then
               check = true
@@ -512,8 +512,8 @@ function Player.getProductionsCrafting2(category, lua_recipe)
           if not(rules_included[category]) and not(rules_included[category]) then
             -- standard recipe
             if lua_entity.crafting_categories ~= nil and lua_entity.crafting_categories[category] then
-              local recipe_ingredient_count = RecipePrototype.load(lua_recipe, "recipe").getIngredientCount(lua_entity)
-              local factory_ingredient_count = EntityPrototype.load(lua_entity).getIngredientCount()
+              local recipe_ingredient_count = RecipePrototype(lua_recipe, "recipe"):getIngredientCount(lua_entity)
+              local factory_ingredient_count = EntityPrototype(lua_entity):getIngredientCount()
               Logging:debug(Player.classname, "crafting", recipe_ingredient_count, factory_ingredient_count)
               if factory_ingredient_count >= recipe_ingredient_count then
                 check = true
@@ -670,7 +670,7 @@ function Player.searchRecipe(name)
   end
   -- recherche dans les resource
   for key, resource in pairs(Player.getResources()) do
-    local products = EntityPrototype.load(resource).getMineableMiningProducts()
+    local products = EntityPrototype(resource):getMineableMiningProducts()
     for key, product in pairs(products) do
       if product.name == name then
         table.insert(recipes,{name=resource.name, type="resource"})
@@ -839,19 +839,6 @@ function Player.getItemPrototypeTypes()
     types[type] = true
   end
   return types
-end
-
--------------------------------------------------------------------------------
--- Return chemical fuel item prototypes
---
--- @function [parent=#Player] getChemicalFuelItemPrototypes
---
--- @param #string name item name
---
--- @return #LuaItemPrototype item prototypes
---
-function Player.getChemicalFuelItemPrototypes()
-  return Player.getItemPrototypes({{filter="fuel-category", mode="or", invert=false,["fuel-category"]="chemical"}})
 end
 
 -------------------------------------------------------------------------------

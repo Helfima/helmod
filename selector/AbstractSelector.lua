@@ -228,7 +228,7 @@ function AbstractSelector:onEvent(event)
       if event.action == "element-select" then
         User.setParameter("prototype_properties",{type = event.item1, name = event.item2 })
         self:close()
-        Event.force_refresh = true
+        Controller:send("on_gui_refresh", event)
       end
     else
       -- classic selector
@@ -237,11 +237,11 @@ function AbstractSelector:onEvent(event)
         ModelCompute.update()
         User.setParameter("scroll_down",true)
         User.setActiveForm("HMProductionBlockTab")
-        Event.force_refresh = true
+        Controller:send("on_gui_refresh", event)
       end
       -- container selector
       if event.action == "element-select" and event.item1 == "container" then
-        local type = EntityPrototype.load(event.item2).getType()
+        local type = EntityPrototype(event.item2):getType()
         if type == "container" or type == "logistic-container" then
           User.setParameter("container_solid",event.item2)
         end

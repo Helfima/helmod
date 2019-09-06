@@ -191,7 +191,7 @@ function ProductEdition:updateTool(event)
   tool_panel.clear()
   local table_panel = ElementGui.addGuiTable(tool_panel,"table-belt",5)
   for key, prototype in pairs(Player.getEntityPrototypes({"transport-belt"})) do
-    ElementGui.addGuiButtonSelectSprite(table_panel, self.classname.."=element-select=ID=", Player.getEntityIconType(prototype), prototype.name, prototype.name, EntityPrototype.load(prototype).getLocalisedName())
+    ElementGui.addGuiButtonSelectSprite(table_panel, self.classname.."=element-select=ID=", Player.getEntityIconType(prototype), prototype.name, prototype.name, EntityPrototype(prototype):getLocalisedName())
   end
 end
 -------------------------------------------------------------------------------
@@ -229,9 +229,9 @@ function ProductEdition:onEvent(event)
       Controller:send("on_gui_refresh", event)
     end
     if event.action == "element-select" then
-      local belt_speed = EntityPrototype.load(event.item1).getBeltSpeed()
+      local belt_speed = EntityPrototype(event.item1):getBeltSpeed()
 
-      local text = string.format("%s*1", belt_speed * Product.belt_ratio)
+      local text = string.format("%s*1", belt_speed * Product().belt_ratio)
       ElementGui.setInputText(input_quantity, text)
       input_quantity.focus()
       input_quantity.select(string.len(text), string.len(text))

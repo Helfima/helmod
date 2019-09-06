@@ -40,8 +40,8 @@ end
 --
 function TechnologySelector:appendGroups(name, type)
   Logging:debug(self.classname, "appendGroups()", name, type)
-  Technology.load(name, type)
-  local find = self:checkFilter(Technology.native())
+  local technology_protoype = Technology(name)
+  local find = self:checkFilter(technology_protoype:native())
   local filter_show_disable = User.getSetting("filter_show_disable")
   local filter_show_hidden = User.getSetting("filter_show_hidden")
 
@@ -49,13 +49,11 @@ function TechnologySelector:appendGroups(name, type)
   local list_prototype = Cache.getData(self.classname, "list_prototype")
   local list_subgroup = Cache.getData(self.classname, "list_subgroup")
   
-  if find == true and (Technology.getValid() == true or filter_show_disable == true) then
+  if find == true and (technology_protoype:getValid() == true or filter_show_disable == true) then
     local group_name = "normal"
-    if Technology.native().research_unit_count_formula ~= nil then group_name = "infinite" end
+    if technology_protoype:native().research_unit_count_formula ~= nil then group_name = "infinite" end
 
     local subgroup_name = "default"
-
-    --list_subgroup[subgroup_name] = ItemPrototype.native().subgroup
 
     if list_group[group_name] == nil then
       list_group[group_name] = {name=group_name, search_products="", search_ingredients=""}
@@ -66,7 +64,7 @@ function TechnologySelector:appendGroups(name, type)
     
     local search_ingredients = ""
     
-    for key, element in pairs(Technology.native().research_unit_ingredients) do
+    for key, element in pairs(technology_protoype:native().research_unit_ingredients) do
       search_ingredients = search_ingredients .. element.name
       list_group[group_name].search_ingredients = list_group[group_name].search_ingredients .. search_ingredients
     end
@@ -74,7 +72,7 @@ function TechnologySelector:appendGroups(name, type)
     local search_products = name
     list_group[group_name].search_products = list_group[group_name].search_products .. search_products
 
-    table.insert(list_prototype[group_name][subgroup_name], {name=name, type=type, order=Technology.native().order, search_products=search_products, search_ingredients=search_ingredients})
+    table.insert(list_prototype[group_name][subgroup_name], {name=name, type=type, order=technology_protoype:native().order, search_products=search_products, search_ingredients=search_ingredients})
   end
 end
 

@@ -83,7 +83,7 @@ function Download:onEvent(event)
       model.time = data_table.time
       ModelBuilder.copyModel(data_table)
       ModelCompute.update()
-      Event.force_refresh = true
+      Controller:send("on_gui_refresh", event)
     end
   end
 end

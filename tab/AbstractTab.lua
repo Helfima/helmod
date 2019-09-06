@@ -401,13 +401,13 @@ function AbstractTab:updateIndexPanel(event)
         local element = Model.firstRecipe(imodel.blocks)
         if imodel.id == model_id then
           if element ~= nil then
-            ElementGui.addGuiButtonSprite(index_panel, self.classname.."=change-model=ID="..imodel.id.."=", Player.getIconType(element), element.name, imodel.id, RecipePrototype.load(element).getLocalisedName())
+            ElementGui.addGuiButtonSprite(index_panel, self.classname.."=change-model=ID="..imodel.id.."=", Player.getIconType(element), element.name, imodel.id, RecipePrototype(element):getLocalisedName())
           else
             ElementGui.addGuiButton(index_panel, self.classname.."=change-model=ID=", imodel.id, "helmod_button_icon_help_selected")
           end
         else
           if element ~= nil then
-            ElementGui.addGuiButtonSelectSprite(index_panel, self.classname.."=change-model=ID="..imodel.id.."=", Player.getIconType(element), element.name, imodel.id, RecipePrototype.load(element).getLocalisedName())
+            ElementGui.addGuiButtonSelectSprite(index_panel, self.classname.."=change-model=ID="..imodel.id.."=", Player.getIconType(element), element.name, imodel.id, RecipePrototype(element):getLocalisedName())
           else
             ElementGui.addGuiButton(index_panel, self.classname.."=change-model=ID=", imodel.id, "helmod_button_icon_help")
           end

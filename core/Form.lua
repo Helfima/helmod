@@ -213,8 +213,8 @@ end
 -- @param #LuaEvent event
 --
 function Form:open(event)
-  if self:isOpened() then return end
   Logging:debug(self.classname, "open()", event)
+  if self:isOpened() then return end
   local parent_panel = self:getParentPanel()
   User.setActiveForm(self.classname)
   if parent_panel[self:getPanelName()] == nil then
@@ -309,7 +309,6 @@ function Form:updateTopMenu(event)
   Logging:debug(self.classname, "updateTopMenu()", event)
   -- ajoute un menu
   if self.panelCaption ~= nil then
-
     local flow_panel, content_panel, menu_panel = self:getPanel()
     menu_panel.clear()
     if self.panelClose then
@@ -339,8 +338,8 @@ end
 -- @param #LuaEvent event
 --
 function Form:update(event)
-  if not(self:isOpened()) then return end
   Logging:debug(self.classname, "update()", event)
+  if not(self:isOpened()) then return end
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if self.auto_clear then content_panel.clear() end
   self:onUpdate(event)

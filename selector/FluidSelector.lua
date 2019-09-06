@@ -1,6 +1,6 @@
 require "selector.AbstractSelector"
 -------------------------------------------------------------------------------
--- Class to build technology selector
+-- Class to build fluid selector
 --
 -- @module FluidSelector
 -- @extends #AbstractSelector
@@ -33,8 +33,8 @@ end
 --
 function FluidSelector:appendGroups(name, type)
   Logging:debug(self.classname, "appendGroups()", name, type)
-  FluidPrototype.load(name, type)
-  local find = self:checkFilter(FluidPrototype.native())
+  local fluid_prototype = FluidPrototype(name)
+  local find = self:checkFilter(fluid_prototype:native())
   local filter_show_disable = User.getSetting("filter_show_disable")
   local filter_show_hidden = User.getSetting("filter_show_hidden")
 
@@ -42,32 +42,26 @@ function FluidSelector:appendGroups(name, type)
   local list_prototype = Cache.getData(self.classname, "list_prototype")
   local list_subgroup = Cache.getData(self.classname, "list_subgroup")
   
-  if find == true and (FluidPrototype.getValid() == true or filter_show_disable == true) then
-    local group_name = FluidPrototype.native().group.name
-    local subgroup_name = FluidPrototype.native().subgroup.name
+  if find == true and (fluid_prototype:getValid() == true or filter_show_disable == true) then
+    local group_name = fluid_prototype:native().group.name
+    local subgroup_name = fluid_prototype:native().subgroup.name
     
-    list_subgroup[subgroup_name] = FluidPrototype.native().subgroup
+    list_subgroup[subgroup_name] = fluid_prototype:native().subgroup
     
     if list_group[group_name] == nil then
       list_group[group_name] = {name=group_name, search_products="", search_ingredients=""}
     end
-    list_subgroup[subgroup_name] = FluidPrototype.native().subgroup
+    list_subgroup[subgroup_name] = fluid_prototype:native().subgroup
     if list_prototype[group_name] == nil then list_prototype[group_name] = {} end
     if list_prototype[group_name][subgroup_name] == nil then list_prototype[group_name][subgroup_name] = {} end
     
-    local search_products = ""
-    for key, element in pairs(RecipePrototype.getProducts()) do
-      search_products = search_products .. element.name
-      list_group[group_name].search_products = list_group[group_name].search_products .. search_products
-    end
+    local search_products = name
+    list_group[group_name].search_products = list_group[group_name].search_products .. search_products
     
-    local search_ingredients = ""
-    for key, element in pairs(RecipePrototype.getIngredients()) do
-      search_ingredients = search_ingredients .. element.name
-      list_group[group_name].search_ingredients = list_group[group_name].search_ingredients .. search_ingredients
-    end
+    local search_ingredients = name
+    list_group[group_name].search_ingredients = list_group[group_name].search_ingredients .. search_ingredients
     
-    table.insert(list_prototype[group_name][subgroup_name], {name=name, type=type, order=FluidPrototype.native().order, search_products=search_products, search_ingredients=search_ingredients})
+    table.insert(list_prototype[group_name][subgroup_name], {name=name, type=type, order=fluid_prototype:native().order, search_products=search_products, search_ingredients=search_ingredients})
   end
 end
 
@@ -98,7 +92,7 @@ end
 function FluidSelector:buildPrototypeTooltip(prototype)
   Logging:trace(self.classname, "buildPrototypeTooltip(player, prototype)", prototype)
   -- initalize tooltip
-  local tooltip = FluidPrototype.load(prototype).getLocalisedName()
+  local tooltip = FluidPrototype(prototype):getLocalisedName()
   return tooltip
 end
 

@@ -978,17 +978,19 @@ function ElementGui.addCellIcon(parent, element, action, select, tooltip_name, c
   Logging:trace(ElementGui.classname, "addCellIcon()", element, action, select, tooltip_name, color)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
+  local product_prototype = Product(element)
+  local product_amount = product_prototype:getElementAmount()
   if display_cell_mod == "small-icon" then
     if parent ~= nil and select == true then
-      ElementGui.addGuiButtonSelectSpriteM(parent, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}), color)
+      ElementGui.addGuiButtonSelectSpriteM(parent, action, Player.getIconType(element), element.name, "X"..product_amount, ({tooltip_name, Player.getLocalisedName(element)}), color)
     else
-      ElementGui.addGuiButtonSpriteM(parent, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}), color)
+      ElementGui.addGuiButtonSpriteM(parent, action, Player.getIconType(element), element.name, "X"..product_amount, ({tooltip_name, Player.getLocalisedName(element)}), color)
     end
   else
     if parent ~= nil and select == true then
-      ElementGui.addGuiButtonSelectSprite(parent, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}), color)
+      ElementGui.addGuiButtonSelectSprite(parent, action, Player.getIconType(element), element.name, "X"..product_amount, ({tooltip_name, Player.getLocalisedName(element)}), color)
     else
-      ElementGui.addGuiButtonSprite(parent, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}), color)
+      ElementGui.addGuiButtonSprite(parent, action, Player.getIconType(element), element.name, "X"..product_amount, ({tooltip_name, Player.getLocalisedName(element)}), color)
     end
   end
 end
@@ -1014,7 +1016,7 @@ function ElementGui.addCellElement(parent, element, action, select, tooltip_name
   local cell = ElementGui.addGuiFlowV(parent,element.name..(index or ""), helmod_flow_style.vertical)
   local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_element_"..color.."_1")
   --ElementGui.addCellIcon(row1, element, action, select, tooltip_name, nil)
-  ElementGui.addGuiButtonSprite(row1, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}))
+  ElementGui.addGuiButtonSprite(row1, action, Player.getIconType(element), element.name, "X"..Product(element):getElementAmount(), ({tooltip_name, Player.getLocalisedName(element)}))
   ElementGui.addCellCargoInfo(row1, element)
   
   if element.limit_count ~= nil then
@@ -1057,7 +1059,7 @@ function ElementGui.addCellElementSm(parent, element, action, select, tooltip_na
   color = color or "blue"
   local cell = ElementGui.addGuiFlowV(parent,element.name..(index or ""), helmod_flow_style.vertical)
   local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_element_sm_"..color.."_1")
-  ElementGui.addGuiButtonSpriteSm(row1, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}))
+  ElementGui.addGuiButtonSpriteSm(row1, action, Player.getIconType(element), element.name, "X"..Product(element):getElementAmount(), ({tooltip_name, Player.getLocalisedName(element)}))
   
   if element.limit_count ~= nil then
     local row2 = ElementGui.addGuiFrameH(cell,"row2","helmod_frame_element_sm_"..color.."_2")
@@ -1099,7 +1101,7 @@ function ElementGui.addCellElementM(parent, element, action, select, tooltip_nam
   color = color or "blue"
   local cell = ElementGui.addGuiFlowV(parent,element.name..(index or ""), helmod_flow_style.vertical)
   local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_element_m_"..color.."_1")
-  ElementGui.addGuiButtonSpriteM(row1, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}))
+  ElementGui.addGuiButtonSpriteM(row1, action, Player.getIconType(element), element.name, "X"..Product(element):getElementAmount(), ({tooltip_name, Player.getLocalisedName(element)}))
   
   if element.limit_count ~= nil then
     local row2 = ElementGui.addGuiFrameH(cell,"row2","helmod_frame_element_m_"..color.."_2")
@@ -1144,7 +1146,7 @@ function ElementGui.addCellProduct(parent, element, action, select, tooltip_name
   if string.find(element.name, "helmod") then
     ElementGui.addGuiButton(row1, action, nil, element.name, nil, ({element.localised_name}))
   else
-    ElementGui.addGuiButtonSprite(row1, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}))
+    ElementGui.addGuiButtonSprite(row1, action, Player.getIconType(element), element.name, "X"..Product(element):getElementAmount(), ({tooltip_name, Player.getLocalisedName(element)}))
   end
   local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_product_"..color.."_3")
   ElementGui.addGuiLabel(row3, "label2_"..element.name, Format.formatNumber(element.count, 5), "helmod_label_element", {"helmod_common.total"})
@@ -1174,7 +1176,7 @@ function ElementGui.addCellProductSm(parent, element, action, select, tooltip_na
   if string.find(element.name, "helmod") then
     ElementGui.addGuiButton(row1, action, nil, element.name, nil, ({element.localised_name}))
   else
-    ElementGui.addGuiButtonSpriteSm(row1, action, Player.getIconType(element), element.name, "X"..Product.getElementAmount(element), ({tooltip_name, Player.getLocalisedName(element)}))
+    ElementGui.addGuiButtonSpriteSm(row1, action, Player.getIconType(element), element.name, "X"..Product(element):getElementAmount(), ({tooltip_name, Player.getLocalisedName(element)}))
   end
   local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_product_"..color.."_3")
   ElementGui.addGuiLabel(row3, "label2_"..element.name, Format.formatNumber(element.count, 5), "helmod_label_element_sm", {"helmod_common.total"})
@@ -1321,8 +1323,8 @@ end
 function ElementGui.addCellCargoInfo(parent, element)
   Logging:trace(ElementGui.classname, "addCellCargoInfo()", element)
   local parameters = User.getParameter()
-  Product.load(element)
-  if Product.native() ~= nil then
+  local product_prototype = Product(element)
+  if product_prototype:native() ~= nil then
     local table_cargo = ElementGui.addGuiTable(parent,"element_cargo", 1, "helmod_beacon_modules")
     if element.type == 0 or element.type == "item" then
       local container_solid = parameters.container_solid or "steel-chest"
@@ -1352,10 +1354,12 @@ end
 --
 function ElementGui.getTooltipProduct(element, container)
   Logging:trace(ElementGui.classname, "getTooltipProduct", element, container)
-  local tooltip = {"tooltip.cargo-info", EntityPrototype.load(container).getLocalisedName()}
-  local total_tooltip = {"tooltip.cargo-info-element", {"helmod_common.total"}, Format.formatNumberElement(Product.countContainer(element.count, container))}
+  local entity_prototype = EntityPrototype(container)
+  local tooltip = {"tooltip.cargo-info", entity_prototype:getLocalisedName()}
+  local product_prototype = Product(element)
+  local total_tooltip = {"tooltip.cargo-info-element", {"helmod_common.total"}, Format.formatNumberElement(product_prototype:countContainer(element.count, container))}
   if element.limit_count ~= nil then
-    local limit_tooltip = {"tooltip.cargo-info-element", {"helmod_common.per-sub-block"}, Format.formatNumberElement(Product.countContainer(element.limit_count, container))}
+    local limit_tooltip = {"tooltip.cargo-info-element", {"helmod_common.per-sub-block"}, Format.formatNumberElement(product_prototype:countContainer(element.limit_count, container))}
     table.insert(tooltip, limit_tooltip)
     table.insert(tooltip, total_tooltip)
   else
@@ -1378,13 +1382,14 @@ function ElementGui.getTooltipModule(module_name)
   Logging:trace(ElementGui.classname, "getTooltipModule", module_name)
   local tooltip = nil
   if module_name == nil then return nil end
-  local module = ItemPrototype.load(module_name).native()
+  local module_prototype = ItemPrototype(module_name)
+  local module = module_prototype:native()
   if module ~= nil then
     local consumption = Format.formatPercent(Player.getModuleBonus(module.name, "consumption"))
     local speed = Format.formatPercent(Player.getModuleBonus(module.name, "speed"))
     local productivity = Format.formatPercent(Player.getModuleBonus(module.name, "productivity"))
     local pollution = Format.formatPercent(Player.getModuleBonus(module.name, "pollution"))
-    tooltip = {"tooltip.module-description" , ItemPrototype.getLocalisedName(), consumption, speed, productivity, pollution}
+    tooltip = {"tooltip.module-description" , module_prototype:getLocalisedName(), consumption, speed, productivity, pollution}
   end
   return tooltip
 end
@@ -1402,23 +1407,23 @@ end
 
 function ElementGui.getTooltipRecipe(prototype)
   Logging:trace(ElementGui.classname, "getTooltipRecipe", prototype)
-  RecipePrototype.load(prototype)
-  if RecipePrototype.native() == nil then return nil end
+  local recipe_prototype = RecipePrototype(prototype)
+  if recipe_prototype:native() == nil then return nil end
   local cache_tooltip_recipe = Cache.getData(ElementGui.classname, "tooltip_recipe") or {}
   local prototype_type = prototype.type or "other"
-  if cache_tooltip_recipe[prototype_type] ~= nil and cache_tooltip_recipe[prototype_type][prototype.name] ~= nil and cache_tooltip_recipe[prototype_type][prototype.name].enabled == RecipePrototype.getEnabled() then
+  if cache_tooltip_recipe[prototype_type] ~= nil and cache_tooltip_recipe[prototype_type][prototype.name] ~= nil and cache_tooltip_recipe[prototype_type][prototype.name].enabled == recipe_prototype:getEnabled() then
     Logging:trace(ElementGui.classname, "use cache", prototype.name)
     return cache_tooltip_recipe[prototype_type][prototype.name].value
   end
   -- initalize tooltip
   local tooltip = {"tooltip.recipe-info"}
   -- insert __1__ value
-  table.insert(tooltip, RecipePrototype.getLocalisedName())
+  table.insert(tooltip, recipe_prototype:getLocalisedName())
 
   -- insert __2__ value
-  if RecipePrototype.getCategory() == "crafting-handonly" then
+  if recipe_prototype:getCategory() == "crafting-handonly" then
     table.insert(tooltip, {"tooltip.recipe-by-hand"})
-  elseif RecipePrototype.getEnabled() == false then
+  elseif recipe_prototype:getEnabled() == false then
     table.insert(tooltip, {"tooltip.recipe-unsearched"})
   else
     table.insert(tooltip, "")
@@ -1426,10 +1431,10 @@ function ElementGui.getTooltipRecipe(prototype)
 
   -- insert __3__ value
   local lastTooltip = tooltip
-  for _,element in pairs(RecipePrototype.getProducts()) do
-    local product = Product.load(element)
-    local count = Product.getElementAmount(element)
-    local name = Product.getLocalisedName()
+  for _,element in pairs(recipe_prototype:getProducts()) do
+    local product_prototype = Product(element)
+    local count = product_prototype:getElementAmount()
+    local name = product_prototype:getLocalisedName()
     local currentTooltip = {"tooltip.recipe-info-element", string.format("[%s=%s]",element.type,element.name), count, name}
     -- insert le dernier tooltip dans le precedent
     table.insert(lastTooltip, currentTooltip)
@@ -1440,10 +1445,10 @@ function ElementGui.getTooltipRecipe(prototype)
 
   -- insert __4__ value
   local lastTooltip = tooltip
-  for _,element in pairs(RecipePrototype.getIngredients(prototype.factory)) do
-    local product = Product.load(element)
-    local count = Product.getElementAmount(element)
-    local name = Product.getLocalisedName()
+  for _,element in pairs(recipe_prototype:getIngredients(prototype.factory)) do
+    local product_prototype = Product(element)
+    local count = product_prototype:getElementAmount(element)
+    local name = product_prototype:getLocalisedName()
     local currentTooltip = {"tooltip.recipe-info-element", string.format("[%s=%s]",element.type,element.name), count, name}
     -- insert le dernier tooltip dans le precedent
     table.insert(lastTooltip, currentTooltip)
@@ -1455,7 +1460,7 @@ function ElementGui.getTooltipRecipe(prototype)
   Logging:trace(ElementGui.classname, "build cache", prototype.name)
   cache_tooltip_recipe[prototype_type][prototype.name] = {}
   cache_tooltip_recipe[prototype_type][prototype.name].value = tooltip
-  cache_tooltip_recipe[prototype_type][prototype.name].enabled = RecipePrototype.getEnabled()
+  cache_tooltip_recipe[prototype_type][prototype.name].enabled = recipe_prototype:getEnabled()
   Cache.setData(ElementGui.classname, "tooltip_recipe",cache_tooltip_recipe)
   return tooltip
 end
@@ -1473,19 +1478,19 @@ function ElementGui.getTooltipTechnology(prototype)
   Logging:trace(ElementGui.classname, "getTooltipTechnology", prototype)
   -- initalize tooltip
   local tooltip = {"tooltip.technology-info"}
-  Technology.load(prototype)
+  local technology_protoype = Technology(prototype)
   -- insert __1__ value
-  table.insert(tooltip, Technology.getLocalisedName())
+  table.insert(tooltip, technology_protoype:getLocalisedName())
 
   -- insert __2__ value
-  table.insert(tooltip, Technology.getLevel())
+  table.insert(tooltip, technology_protoype:getLevel())
 
   -- insert __3__ value
-  table.insert(tooltip, Technology.getFormula() or "")
+  table.insert(tooltip, technology_protoype:getFormula() or "")
 
   -- insert __4__ value
   local lastTooltip = tooltip
-  for _,element in pairs(Technology.getIngredients()) do
+  for _,element in pairs(technology_protoype:getIngredients()) do
     local count = Product.getElementAmount(element)
     local name = Player.getLocalisedName(element)
     local currentTooltip = {"tooltip.recipe-info-element", string.format("[%s=%s]",element.type,element.name), count, name}

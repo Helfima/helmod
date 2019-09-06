@@ -470,7 +470,7 @@ function AbstractEdition:updateFactoryInfo(event)
   if object ~= nil then
     Logging:debug(self.classname, "updateFactoryInfo():object:",object)
     local factory = object.factory
-    local factory_prototype = EntityPrototype.load(factory)
+    local factory_prototype = EntityPrototype(factory)
 
     for k,guiName in pairs(infoPanel.children_names) do
       infoPanel[guiName].destroy()
@@ -480,31 +480,32 @@ function AbstractEdition:updateFactoryInfo(event)
     local tooltip = ({"tooltip.selector-module"})
     if User.getParameter("module_panel") == true then tooltip = ({"tooltip.selector-factory"}) end
     ElementGui.addGuiButtonSelectSprite(headerPanel, self.classname.."=change-panel=ID="..event.item1.."="..object.id.."=", Player.getIconType(factory), factory.name, factory.name, tooltip, ElementGui.color_button_edit)
-    if EntityPrototype.native() == nil then
+    if factory_prototype:native() == nil then
       ElementGui.addGuiLabel(headerPanel, "label", factory.name)
     else
-      ElementGui.addGuiLabel(headerPanel, "label", EntityPrototype.getLocalisedName())
+      ElementGui.addGuiLabel(headerPanel, "label", factory_prototype:getLocalisedName())
     end
 
     local inputPanel = ElementGui.addGuiTable(infoPanel,"table-input",2)
 
     ElementGui.addGuiLabel(inputPanel, "label-module-slots", ({"helmod_label.module-slots"}))
-    ElementGui.addGuiLabel(inputPanel, "module-slots", EntityPrototype.getModuleInventorySize())
+    ElementGui.addGuiLabel(inputPanel, "module-slots", factory_prototype:getModuleInventorySize())
 
     ElementGui.addGuiLabel(inputPanel, "label-energy", ({"helmod_label.energy"}))
 
     local sign = ""
     if factory.effects.consumption > 0 then sign = "+" end
     ElementGui.addGuiLabel(inputPanel, "energy", Format.formatNumberKilo(factory.energy, "W").." ("..sign..Format.formatPercent(factory.effects.consumption).."%)")
-    if EntityPrototype.getEnergyType() == "burner" then
+    if factory_prototype:getEnergyType() == "burner" then
 
       ElementGui.addGuiLabel(inputPanel, "label-burner", ({"helmod_common.resource"}))
-      local fuel_list = Player.getChemicalFuelItemPrototypes()
+      local fuel_list = factory_prototype:getBurnerPrototype():getFuelItemPrototypes()
+      local first_fuel = factory_prototype:getBurnerPrototype():getFirstFuelItemPrototype()
       local items = {}
       for _,item in pairs(fuel_list) do
         table.insert(items,"[item="..item.name.."]")
       end
-      local default_fuel = "[item="..(factory.fuel or "coal").."]"
+      local default_fuel = "[item="..(factory.fuel or first_fuel.name).."]"
       ElementGui.addGuiDropDown(inputPanel, self.classname.."=factory-fuel-update=ID="..event.item1.."=", object.id, items, default_fuel)
     end
 
@@ -544,8 +545,8 @@ function AbstractEdition:updateFactoryModulesSelector(event)
 
   if selectorPanel["modules"] == nil then
     local tableModulesPanel = ElementGui.addGuiTable(selectorPanel,"modules",5)
-    local prototype = RecipePrototype.load(object)
-    local category = prototype.getCategory()
+    local recipe_prototype = RecipePrototype(object)
+    local category = recipe_prototype:getCategory()
     for k, module in pairs(Player.getModules(category)) do
       local tooltip = ElementGui.getTooltipModule(module.name)
       if Player.checkLimitationModule(module, object) == false then
@@ -609,8 +610,8 @@ function AbstractEdition:updateFactorySelector(event)
   local groupsPanel = ElementGui.addGuiTable(scrollPanel, "factory-groups", 2)
   Logging:debug(self.classname, "updateFactorySelector(): group category=",object.category)
 
-  local prototype = RecipePrototype.load(object)
-  local category = prototype.getCategory()
+  local recipe_prototype = RecipePrototype(object)
+  local category = recipe_prototype:getCategory()
   if not(User.getModGlobalSetting("model_filter_factory")) then category = nil end
 
   local factories = Player.getProductionsCrafting(category, object)
@@ -641,7 +642,7 @@ function AbstractEdition:updateFactorySelector(event)
   local tablePanel = ElementGui.addGuiTable(scrollPanel, "factory-table", 5)
   for key, factory in pairs(factories) do
     if category ~= nil or (factory.subgroup ~= nil and factory.subgroup.name == User.getParameter("factory_group_selected")) then
-      local localised_name = EntityPrototype.load(factory.name).getLocalisedName()
+      local localised_name = EntityPrototype(factory.name):getLocalisedName()
       ElementGui.addGuiButtonSelectSprite(tablePanel, self.classname.."=factory-select=ID="..event.item1.."="..object.id.."=", "entity", factory.name, factory.name, localised_name)
     end
   end
@@ -661,7 +662,7 @@ function AbstractEdition:updateBeaconInfo(event)
 
   if object ~= nil then
     local beacon = object.beacon
-    local beacon_prototype = EntityPrototype.load(beacon)
+    local beacon_prototype = EntityPrototype(beacon)
 
     for k,guiName in pairs(infoPanel.children_names) do
       infoPanel[guiName].destroy()
@@ -671,22 +672,22 @@ function AbstractEdition:updateBeaconInfo(event)
     local tooltip = ({"tooltip.selector-module"})
     if User.getParameter("module_panel") == true then tooltip = ({"tooltip.selector-factory"}) end
     ElementGui.addGuiButtonSelectSprite(headerPanel, self.classname.."=change-panel=ID="..event.item1.."="..object.id.."=", Player.getIconType(beacon), beacon.name, beacon.name, tooltip, ElementGui.color_button_edit)
-    if beacon_prototype.native() == nil then
+    if beacon_prototype:native() == nil then
       ElementGui.addGuiLabel(headerPanel, "label", beacon.name)
     else
-      ElementGui.addGuiLabel(headerPanel, "label", EntityPrototype.getLocalisedName())
+      ElementGui.addGuiLabel(headerPanel, "label", beacon_prototype:getLocalisedName())
     end
 
     local inputPanel = ElementGui.addGuiTable(infoPanel,"table-input",2)
 
     ElementGui.addGuiLabel(inputPanel, "label-module-slots", ({"helmod_label.module-slots"}))
-    ElementGui.addGuiLabel(inputPanel, "module-slots", EntityPrototype.getModuleInventorySize())
+    ElementGui.addGuiLabel(inputPanel, "module-slots", beacon_prototype:getModuleInventorySize())
 
     ElementGui.addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy"}))
-    ElementGui.addGuiLabel(inputPanel, "energy", Format.formatNumberKilo(EntityPrototype.getEnergyUsage(), "W"))
+    ElementGui.addGuiLabel(inputPanel, "energy", Format.formatNumberKilo(beacon_prototype:getEnergyUsage(), "W"))
 
     ElementGui.addGuiLabel(inputPanel, "label-efficiency", ({"helmod_label.efficiency"}))
-    ElementGui.addGuiLabel(inputPanel, "efficiency", EntityPrototype.getDistributionEffectivity())
+    ElementGui.addGuiLabel(inputPanel, "efficiency", beacon_prototype:getDistributionEffectivity())
 
     ElementGui.addGuiLabel(inputPanel, "label-combo", ({"helmod_label.beacon-on-factory"}), nil, {"tooltip.beacon-on-factory"})
     ElementGui.addGuiText(inputPanel, string.format("%s=beacon-update=ID=%s=%s=%s", self.classname, event.item1, object.id, "combo"), beacon.combo, "helmod_textfield", {"tooltip.beacon-on-factory"})
@@ -740,10 +741,10 @@ function AbstractEdition:updateBeaconModulesSelector(event)
 
   if selectorPanel["modules"] == nil then
     local tableModulesPanel = ElementGui.addGuiTable(selectorPanel,"modules",5)
-    local prototype = RecipePrototype.load(object)
+    local recipe_prototype = RecipePrototype(object)
     local beacon = object.beacon
-    local allowed_effects = EntityPrototype.load(beacon).getAllowedEffects()
-    local category = prototype.getCategory()
+    local allowed_effects = EntityPrototype(beacon):getAllowedEffects()
+    local category = recipe_prototype:getCategory()
     for k, module in pairs(Player.getModules(category)) do
       local allowed = true
       if Player.getModuleBonus(module.name, "productivity") > 0 and not(allowed_effects.productivity) and model_filter_beacon_module == true then
@@ -890,7 +891,9 @@ function AbstractEdition:onEvent(event)
     if event.action == "factory-fuel-update" then
 
       local index = event.element.selected_index
-      local fuel_list = Player.getChemicalFuelItemPrototypes()
+      local object = self:getObject(event)
+      local factory_prototype = EntityPrototype(object.factory)
+      local fuel_list = factory_prototype:getBurnerPrototype():getFuelItemPrototypes()
       local items = {}
       local options = {}
       for _,item in pairs(fuel_list) do

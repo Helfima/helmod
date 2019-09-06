@@ -286,11 +286,12 @@ function ProductionBlockTab:updateInput(event)
     -- input panel
     local input_table = ElementGui.addGuiTable(input_scroll,"input-table", ElementGui.getElementColumnNumber(50)-2, "helmod_table_element")
     if element.ingredients ~= nil then
-      for index, lua_product in pairs(element.ingredients) do
-        local ingredient = Product.load(lua_product).new()
-        ingredient.count = lua_product.count
+      for index, lua_ingredient in pairs(element.ingredients) do
+        Logging:debug(self.classname, "lua_product", lua_ingredient, Product(lua_ingredient))
+        local ingredient = Product(lua_ingredient):clone()
+        ingredient.count = lua_ingredient.count
         if element.count > 1 then
-          ingredient.limit_count = lua_product.count / element.count
+          ingredient.limit_count = lua_ingredient.count / element.count
         end
         ElementGui.addCellElementM(input_table, ingredient, self.classname.."=production-recipe-add=ID="..current_block.."="..element.name.."=", true, "tooltip.ingredient", ElementGui.color_button_add, index)
       end
@@ -328,7 +329,8 @@ function ProductionBlockTab:updateOutput(event)
     local output_table = ElementGui.addGuiTable(output_scroll,"output-table", ElementGui.getElementColumnNumber(50)-2, "helmod_table_element")
     if element.products ~= nil then
       for index, lua_product in pairs(element.products) do
-        local product = Product.load(lua_product).new()
+        Logging:debug(self.classname, "lua_product", lua_product)
+        local product = Product(lua_product):clone()
         product.count = lua_product.count
         if element.count > 1 then
           product.limit_count = lua_product.count / element.count
@@ -466,7 +468,8 @@ end
 --
 function ProductionBlockTab:addTableRow(gui_table, block, recipe)
   Logging:debug("ProductionBlockTab", "addTableRow()", gui_table, block, recipe)
-  local lua_recipe = RecipePrototype.load(recipe).native()
+  local recipe_prototype = RecipePrototype(recipe)
+  --local lua_recipe = RecipePrototype(recipe):native()
 
   -- col action
   local cell_action = ElementGui.addCell(gui_table, "action"..recipe.id, 2)
@@ -524,9 +527,10 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
   -- products
   local display_product_cols = User.getModSetting("display_product_cols")
   local cell_products = ElementGui.addCell(gui_table,"products_"..recipe.id, display_product_cols)
-  for index, lua_product in pairs(RecipePrototype.getProducts()) do
-    local product = Product.load(lua_product).new()
-    product.count = Product.countProduct(recipe)
+  for index, lua_product in pairs(recipe_prototype:getProducts()) do
+    local product_prototype = Product(lua_product)
+    local product = product_prototype:clone()
+    product.count = product_prototype:countProduct(recipe)
     if block.count > 1 then
       product.limit_count = product.count / block.count
     end
@@ -536,9 +540,10 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
   -- ingredients
   local display_ingredient_cols = User.getModSetting("display_ingredient_cols")
   local cell_ingredients = ElementGui.addCell(gui_table,"ingredients_"..recipe.id, display_ingredient_cols)
-  for index, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
-    local ingredient = Product.load(lua_ingredient).new()
-    ingredient.count = Product.countIngredient(recipe)
+  for index, lua_ingredient in pairs(recipe_prototype:getIngredients(recipe.factory)) do
+    local ingredient_prototype = Product(lua_ingredient)
+    local ingredient = ingredient_prototype:clone()
+    ingredient.count = ingredient_prototype:countIngredient(recipe)
     if block.count > 1 then
       ingredient.limit_count = ingredient.count / block.count
     end

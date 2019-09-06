@@ -42,7 +42,7 @@ end
 
 function RecipeSelector:appendGroups(recipe, type)
   Logging:trace(self.classname, "appendGroups()", recipe.name, type)
-  RecipePrototype.set(recipe, type)
+  local recipe_prototype = RecipePrototype(recipe, type)
   local filter_show_disable = User.getSetting("filter_show_disable")
   local filter_show_hidden = User.getSetting("filter_show_hidden")
   
@@ -50,8 +50,8 @@ function RecipeSelector:appendGroups(recipe, type)
   local list_prototype = Cache.getData(self.classname, "list_prototype")
   local list_subgroup = Cache.getData(self.classname, "list_subgroup")
   
-  if (RecipePrototype.getEnabled() == true or filter_show_disable == true) and (RecipePrototype.getHidden() == false or filter_show_hidden == true) then
-    local lua_recipe = RecipePrototype.native()
+  if (recipe_prototype:getEnabled() == true or filter_show_disable == true) and (recipe_prototype:getHidden() == false or filter_show_hidden == true) then
+    local lua_recipe = recipe_prototype:native()
     local group_name = lua_recipe.group.name
     local subgroup_name = lua_recipe.subgroup.name
     
@@ -64,13 +64,13 @@ function RecipeSelector:appendGroups(recipe, type)
     if list_prototype[group_name][subgroup_name] == nil then list_prototype[group_name][subgroup_name] = {} end
     
     local search_products = ""
-    for key, element in pairs(RecipePrototype.getProducts()) do
+    for key, element in pairs(recipe_prototype:getProducts()) do
       search_products = search_products .. element.name
       list_group[group_name].search_products = list_group[group_name].search_products .. search_products
     end
     
     local search_ingredients = ""
-    for key, element in pairs(RecipePrototype.getIngredients()) do
+    for key, element in pairs(recipe_prototype:getIngredients()) do
       search_ingredients = search_ingredients .. element.name
       list_group[group_name].search_ingredients = list_group[group_name].search_ingredients .. search_ingredients
     end
@@ -125,15 +125,15 @@ end
 -- 
 function RecipeSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
   Logging:trace(self.classname, "buildPrototypeIcon(player, guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
-  local recipe_prototype = RecipePrototype.load(prototype)
-  local type = RecipePrototype.type()
-  local prototype_name = RecipePrototype.native().name
-  local prototype_localised_name = RecipePrototype.getLocalisedName()
+  local recipe_prototype = RecipePrototype(prototype)
+  local type = recipe_prototype:getType()
+  local prototype_name = recipe_prototype:native().name
+  local prototype_localised_name = recipe_prototype:getLocalisedName()
   local color = nil
-  if RecipePrototype.getCategory() == "crafting-handonly" then
+  if recipe_prototype:getCategory() == "crafting-handonly" then
     color = "yellow"
-  elseif RecipePrototype.getEnabled() == false then
+  elseif recipe_prototype:getEnabled() == false then
     color = "red"
   end
-  ElementGui.addGuiButtonSelectSprite(guiElement, self.classname.."=element-select=ID="..type.."=", Player.getRecipeIconType(RecipePrototype.native()), prototype_name, prototype_localised_name, tooltip, color)
+  ElementGui.addGuiButtonSelectSprite(guiElement, self.classname.."=element-select=ID="..type.."=", Player.getRecipeIconType(recipe_prototype:native()), prototype_name, prototype_localised_name, tooltip, color)
 end

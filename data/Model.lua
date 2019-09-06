@@ -197,7 +197,7 @@ function Model.getRecipe(block_id, key)
   if model.blocks[block_id] ~= nil and model.blocks[block_id].recipes[key] ~= nil then
     object = model.blocks[block_id].recipes[key]
   end
-  return RecipePrototype.load(object)
+  return RecipePrototype(object)
 end
 
 -------------------------------------------------------------------------------
@@ -744,9 +744,10 @@ end
 -- @return #string
 --
 function Model.getSpeedFactory(key)
-  local crafting_speed = EntityPrototype.load(key).getCraftingSpeed()
+  local entity_prototype = EntityPrototype(key)
+  local crafting_speed = entity_prototype:getCraftingSpeed()
   if crafting_speed ~= 0 then return crafting_speed end
-  local mining_speed = EntityPrototype.load(key).getMiningSpeed()
+  local mining_speed = entity_prototype:getMiningSpeed()
   if mining_speed ~= 0 then return mining_speed end
   return 1
 end

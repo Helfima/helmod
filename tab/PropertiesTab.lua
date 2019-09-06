@@ -1,4 +1,5 @@
 require "tab.AbstractTab"
+require "model.BurnerPrototype"
 -------------------------------------------------------------------------------
 -- Class to build tab
 --
@@ -124,34 +125,34 @@ function PropertiesTab:updateData(event)
     local prototype_type = prototype_properties.type
     local prototype = nil
     if prototype_type == "entity" then
-      EntityPrototype.load(prototype_name)
-      prototype = EntityPrototype.native()
+      local entity_prototype = EntityPrototype(prototype_name)
+      prototype = entity_prototype:native()
       if prototype ~= nil then
-        ElementGui.addGuiButtonSprite(listPanel, self.classname.."=entity-select=ID=", Player.getEntityIconType(prototype), prototype.name, prototype.name, EntityPrototype.getLocalisedName())
+        ElementGui.addGuiButtonSprite(listPanel, self.classname.."=entity-select=ID=", Player.getEntityIconType(prototype), prototype.name, prototype.name, entity_prototype:getLocalisedName())
       end
     elseif prototype_type == "item" then
-      ItemPrototype.load(prototype_name)
-      prototype = ItemPrototype.native()
+      local item_prototype = ItemPrototype(prototype_name)
+      prototype = item_prototype:native()
       if prototype ~= nil then
-        ElementGui.addGuiButtonSprite(listPanel, self.classname.."=item-select=ID=", Player.getItemIconType(prototype), prototype.name, prototype.name, ItemPrototype.getLocalisedName())
+        ElementGui.addGuiButtonSprite(listPanel, self.classname.."=item-select=ID=", Player.getItemIconType(prototype), prototype.name, prototype.name, item_prototype:getLocalisedName())
       end
     elseif prototype_type == "fluid" then
-      FluidPrototype.load(prototype_name)
-      prototype = FluidPrototype.native()
+      local fluid_prototype = FluidPrototype(prototype_name)
+      prototype = fluid_prototype:native()
       if prototype ~= nil then
-        ElementGui.addGuiButtonSprite(listPanel, self.classname.."=fluid-select=ID=", Player.getItemIconType(prototype), prototype.name, prototype.name, FluidPrototype.getLocalisedName())
+        ElementGui.addGuiButtonSprite(listPanel, self.classname.."=fluid-select=ID=", Player.getItemIconType(prototype), prototype.name, prototype.name, fluid_prototype:getLocalisedName())
       end
     elseif prototype_type == "recipe" then
-      RecipePrototype.load(prototype_name)
-      prototype = RecipePrototype.native()
+      local recipe_protoype = RecipePrototype(prototype_name)
+      prototype = recipe_protoype:native()
       if prototype ~= nil then
-        ElementGui.addGuiButtonSprite(listPanel, self.classname.."=recipe-select=ID=", Player.getRecipeIconType(prototype), prototype.name, prototype.name, RecipePrototype.getLocalisedName())
+        ElementGui.addGuiButtonSprite(listPanel, self.classname.."=recipe-select=ID=", Player.getRecipeIconType(prototype), prototype.name, prototype.name, recipe_protoype:getLocalisedName())
       end
     elseif prototype_type == "technology" then
-      Technology.load(prototype_name)
-      prototype = Technology.native()
+      local technology_protoype = Technology(prototype_name)
+      prototype = technology_protoype:native()
       if prototype ~= nil then
-        ElementGui.addGuiButtonSprite(listPanel, self.classname.."=technology-select=ID=", "technology", prototype.name, prototype.name, Technology.getLocalisedName())
+        ElementGui.addGuiButtonSprite(listPanel, self.classname.."=technology-select=ID=", "technology", prototype.name, prototype.name, technology_protoype:getLocalisedName())
       end
     end
     if prototype ~= nil then
@@ -196,8 +197,8 @@ function PropertiesTab:parseProperties(prototype, level)
         local group = prototype[key]
         value = group.name
       elseif key == "burner_prototype" then
-        local burner_prototype = prototype[key]
-        value = "effectivity="..burner_prototype.effectivity
+        local burner_prototype = BurnerPrototype(prototype[key]):toString()
+        value = burner_prototype
       elseif type == "table" then
         local test, error = pcall(function() prototype[key]:help() return true end)
         pcall(function() Logging:debug(self.classname, "level", level, "help", prototype[key]:help(), "test", test, error, level < 2 and test) end)

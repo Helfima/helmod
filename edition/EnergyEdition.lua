@@ -359,8 +359,10 @@ function EnergyEdition:updatePrimaryInfo(event)
       local tooltip = ({"tooltip.selector-module"})
       if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
       ElementGui.addGuiButtonSprite(headerPanel, self.classname.."=do-nothing=ID=", Player.getIconType(primary), primary.name, primary.name, tooltip)
-      if EntityPrototype.load(primary.name).native() ~= nil then
-        ElementGui.addGuiLabel(headerPanel, "label", EntityPrototype.getLocalisedName())
+      
+      local entity_prototype = EntityPrototype(primary.name)
+      if entity_prototype:native() ~= nil then
+        ElementGui.addGuiLabel(headerPanel, "label", entity_prototype:getLocalisedName())
       else
         ElementGui.addGuiLabel(headerPanel, "label", primary.name)
       end
@@ -368,17 +370,17 @@ function EnergyEdition:updatePrimaryInfo(event)
       local inputPanel = ElementGui.addGuiTable(infoPanel,"table-input",2)
 
       ElementGui.addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy-nominal"}))
-      ElementGui.addGuiLabel(inputPanel, "energy-nominal", Format.formatNumberKilo(EntityPrototype.getEnergyNominal(), "W"))
+      ElementGui.addGuiLabel(inputPanel, "energy-nominal", Format.formatNumberKilo(entity_prototype:getEnergyNominal(), "W"))
 
-      if EntityPrototype.getType() == "generator" then
+      if entity_prototype:getType() == "generator" then
         ElementGui.addGuiLabel(inputPanel, "label-maximum-temperature", ({"helmod_label.maximum-temperature"}))
-        ElementGui.addGuiLabel(inputPanel, "maximum-temperature", EntityPrototype.getMaximumTemperature() or "NAN")
+        ElementGui.addGuiLabel(inputPanel, "maximum-temperature", entity_prototype:getMaximumTemperature() or "NAN")
 
         ElementGui.addGuiLabel(inputPanel, "label-fluid-usage", ({"helmod_label.fluid-usage"}))
-        ElementGui.addGuiLabel(inputPanel, "fluid-usage", EntityPrototype.getFluidUsagePerTick() or "NAN")
+        ElementGui.addGuiLabel(inputPanel, "fluid-usage", entity_prototype:getFluidUsagePerTick() or "NAN")
 
         ElementGui.addGuiLabel(inputPanel, "label-effectivity", ({"helmod_label.effectivity"}))
-        ElementGui.addGuiLabel(inputPanel, "effectivity", EntityPrototype.getEffectivity() or "NAN")
+        ElementGui.addGuiLabel(inputPanel, "effectivity", entity_prototype:getEffectivity() or "NAN")
       end
     end
   end
@@ -480,31 +482,33 @@ function EnergyEdition:updateSecondaryInfo(event)
       local tooltip = ({"tooltip.selector-module"})
       if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
       ElementGui.addGuiButtonSprite(headerPanel, self.classname.."=do-nothing=ID=", Player.getIconType(secondary), secondary.name, secondary.name, tooltip)
-      if EntityPrototype.load(secondary.name).native() ~= nil then
-        ElementGui.addGuiLabel(headerPanel, "label", EntityPrototype.getLocalisedName())
+      
+      local entity_prototype = EntityPrototype(primary.name)
+      if entity_prototype:native() ~= nil then
+        ElementGui.addGuiLabel(headerPanel, "label", entity_prototype:getLocalisedName())
       else
         ElementGui.addGuiLabel(headerPanel, "label", secondary.name)
       end
 
       local inputPanel = ElementGui.addGuiTable(infoPanel,"table-input",2)
 
-      if EntityPrototype.getType() == EntityType.boiler then
+      if entity_prototype:getType() == EntityType.boiler then
         ElementGui.addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy-nominal"}))
-        ElementGui.addGuiLabel(inputPanel, "energy-nominal", Format.formatNumberKilo(EntityPrototype.getEnergyNominal(), "W"))
+        ElementGui.addGuiLabel(inputPanel, "energy-nominal", Format.formatNumberKilo(entity_prototype:getEnergyNominal(), "W"))
 
         ElementGui.addGuiLabel(inputPanel, "label-effectivity", ({"helmod_label.effectivity"}))
-        ElementGui.addGuiLabel(inputPanel, "effectivity", EntityPrototype.getEffectivity())
+        ElementGui.addGuiLabel(inputPanel, "effectivity", entity_prototype:getEffectivity())
       end
 
-      if EntityPrototype.getType() == EntityType.accumulator then
+      if entity_prototype:getType() == EntityType.accumulator then
         ElementGui.addGuiLabel(inputPanel, "label-buffer-capacity", ({"helmod_label.buffer-capacity"}))
-        ElementGui.addGuiLabel(inputPanel, "buffer-capacity", Format.formatNumberKilo(EntityPrototype.getElectricBufferCapacity(), "J"))
+        ElementGui.addGuiLabel(inputPanel, "buffer-capacity", Format.formatNumberKilo(entity_prototype:getElectricBufferCapacity(), "J"))
 
         ElementGui.addGuiLabel(inputPanel, "label-input_flow_limit", ({"helmod_label.input-flow-limit"}))
-        ElementGui.addGuiLabel(inputPanel, "input-flow-limit", Format.formatNumberKilo(EntityPrototype.getElectricInputFlowLimit(), "W"))
+        ElementGui.addGuiLabel(inputPanel, "input-flow-limit", Format.formatNumberKilo(entity_prototype:getElectricInputFlowLimit(), "W"))
 
         ElementGui.addGuiLabel(inputPanel, "label-output-flow-limit", ({"helmod_label.output-flow-limit"}))
-        ElementGui.addGuiLabel(inputPanel, "output-flow-limit", Format.formatNumberKilo(EntityPrototype.getElectricOutputFlowLimit(), "W"))
+        ElementGui.addGuiLabel(inputPanel, "output-flow-limit", Format.formatNumberKilo(entity_prototype:getElectricOutputFlowLimit(), "W"))
       end
 
     end

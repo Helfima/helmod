@@ -111,7 +111,7 @@ function RecipeEdition:updateObjectInfo(event)
       Logging:debug(self.classname, "updateObjectInfo():recipe=",recipe)
       info_panel.clear()
 
-      RecipePrototype.load(recipe).native()
+      local recipe_prototype = RecipePrototype(recipe)
       local recipe_table = ElementGui.addGuiTable(info_panel,"list-data",4)
       recipe_table.vertical_centering = false
 
@@ -125,25 +125,27 @@ function RecipeEdition:updateObjectInfo(event)
 
       -- energy
       local cell_energy = ElementGui.addGuiFrameH(recipe_table,"energy"..recipe.id, helmod_frame_style.hidden)
-      local element_energy = {name = "helmod_button_icon_clock_flat2" ,count = RecipePrototype.getEnergy(),localised_name = "helmod_label.energy"}
+      local element_energy = {name = "helmod_button_icon_clock_flat2" ,count = recipe_prototype:getEnergy(),localised_name = "helmod_label.energy"}
       ElementGui.addCellProduct(cell_energy, element_energy, self.classname.."=do_noting=ID=", true, "tooltip.product", "gray")
       
       -- products
       local cell_products = ElementGui.addGuiTable(recipe_table,"products_"..recipe.id, 3)
-      if RecipePrototype.getProducts() ~= nil then
-        for index, lua_product in pairs(RecipePrototype.getProducts()) do
-          local product = Product.load(lua_product).new()
-          product.count = Product.getElementAmount(lua_product)
+      if recipe_prototype:getProducts() ~= nil then
+        for index, lua_product in pairs(recipe_prototype:getProducts()) do
+          local product_prototype = Product(lua_product)
+          local product = product_prototype:clone()
+          product.count = product_prototype:getElementAmount()
           ElementGui.addCellProductSm(cell_products, product, self.classname.."=do_noting=ID=", false, "tooltip.product", nil, index)
         end
       end
       
       -- ingredients
       local cell_ingredients = ElementGui.addGuiTable(recipe_table,"ingredients_"..recipe.id, 3)
-      if RecipePrototype.getIngredients() ~= nil then
-        for index, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
-          local ingredient = Product.load(lua_ingredient).new()
-          ingredient.count = Product.getElementAmount(lua_ingredient)
+      if recipe_prototype:getIngredients() ~= nil then
+        for index, lua_ingredient in pairs(recipe_prototype:getIngredients(recipe.factory)) do
+          local ingredient_prototype = Product(lua_ingredient)
+          local ingredient = ingredient_prototype:clone()
+          ingredient.count = ingredient_prototype:getElementAmount()
           ElementGui.addCellProductSm(cell_ingredients, ingredient, self.classname.."=do_noting=ID=", true, "tooltip.product", ElementGui.color_button_add, index)
         end
       end

@@ -2,28 +2,11 @@
 -- Description of the module.
 -- @module Product
 --
-local Product = {
-  -- single-line comment
-  classname = "HMProduct",
-  -- speed in game/speed data for blue belt
-  belt_ratio = 45/0.09375
-}
-
-local lua_product = nil
-
--------------------------------------------------------------------------------
--- Load factorio Product
---
--- @function [parent=#Product] load
---
--- @param #object object
---
--- @return #Product
---
-function Product.load(object)
-  lua_product = object
-  return Product
-end
+Product = newclass(Prototype,function(base, object)
+  Prototype.init(base, object)
+  base.classname = "HMProduct"
+  base.belt_ratio = 45/0.09375
+end)
 
 -------------------------------------------------------------------------------
 -- Return localised name of Prototype
@@ -32,56 +15,45 @@ end
 --
 -- @return #table
 --
-function Product.getLocalisedName()
-  Logging:trace(Product.classname, "getLocalisedName()", lua_product)
-  if lua_product ~= nil then
+function Product:getLocalisedName()
+  Logging:trace(self.classname, "getLocalisedName()", self.lua_prototype)
+  if self.lua_prototype ~= nil then
     if not(User.getModGlobalSetting("display_real_name")) then
-      local localisedName = lua_product.name
-      if lua_product.type == 0 or lua_product.type == "item" then
-        local item = Player.getItemPrototype(lua_product.name)
+      local localisedName = self.lua_prototype.name
+      if self.lua_prototype.type == 0 or self.lua_prototype.type == "item" then
+        local item = Player.getItemPrototype(self.lua_prototype.name)
         if item ~= nil then
           localisedName = item.localised_name
         end
       end
-      if lua_product.type == 1 or lua_product.type == "fluid" then
-        local item = Player.getFluidPrototype(lua_product.name)
+      if self.lua_prototype.type == 1 or self.lua_prototype.type == "fluid" then
+        local item = Player.getFluidPrototype(self.lua_prototype.name)
         if item ~= nil then
           localisedName = item.localised_name
         end
       end
       return localisedName
     else
-      return lua_product.name
+      return self.lua_prototype.name
     end
   end
   return "unknow"
 end
 
 -------------------------------------------------------------------------------
--- new prototype model
+-- Clone prototype model
 --
--- @function [parent=#Product] new
+-- @function [parent=#Product] clone
 --
 -- @return #table
 --
-function Product.new()
+function Product:clone()
   local prototype = {
-    type = lua_product.type,
-    name = lua_product.name,
-    amount = Product.getElementAmount(lua_product)
+    type = self.lua_prototype.type,
+    name = self.lua_prototype.name,
+    amount = self:getElementAmount()
   }
   return prototype
-end
-
--------------------------------------------------------------------------------
--- Return factorio Product
---
--- @function [parent=#Product] native
---
--- @return #lua_product
---
-function Product.native()
-  return lua_product
 end
 
 -------------------------------------------------------------------------------
@@ -89,14 +61,13 @@ end
 --
 -- @function [parent=#Product] getElementAmount
 --
--- @param #table element
---
 -- @return #number
 --
 -- @see http://lua-api.factorio.com/latest/Concepts.html#Product
 --
-function Product.getElementAmount(element)
-  Logging:trace(Product.classname, "getElementAmount",element)
+function Product:getElementAmount()
+  Logging:trace(self.classname, "getElementAmount",self.lua_prototype)
+  local element = self.lua_prototype
   if element == nil then return 0 end
 
   if element.amount ~= nil then
@@ -123,9 +94,9 @@ end
 --
 -- @return #string
 --
-function Product.getType()
-  Logging:trace(Product.classname, "getType()",lua_product)
-  if lua_product.type == 1 or lua_product.type == "fluid" then return "fluid" end
+function Product:getType()
+  Logging:trace(self.classname, "getType()",self.lua_prototype)
+  if self.lua_prototype.type == 1 or self.lua_prototype.type == "fluid" then return "fluid" end
   return "item"
 end
 
@@ -138,13 +109,13 @@ end
 --
 -- @return #number
 --
-function Product.getAmount(recipe)
-  Logging:trace(Product.classname, "getAmount(recipe)",lua_product)
-  local amount = Product.getElementAmount(lua_product)
+function Product:getAmount(recipe)
+  Logging:trace(self.classname, "getAmount(recipe)",self.lua_prototype)
+  local amount = self:getElementAmount()
   if recipe == nil then
     return amount
   end
-  return amount + amount * Product.getProductivityBonus(recipe)
+  return amount + amount * self:getProductivityBonus(recipe)
 end
 
 -------------------------------------------------------------------------------
@@ -156,10 +127,10 @@ end
 --
 -- @return #number
 --
-function Product.countProduct(recipe)
-  Logging:trace(Product.classname, "countProduct",lua_product)
-  local amount = Product.getElementAmount(lua_product)
-  return (amount + amount * Product.getProductivityBonus(recipe) ) * recipe.count
+function Product:countProduct(recipe)
+  Logging:trace(self.classname, "countProduct",self.lua_prototype)
+  local amount = self:getElementAmount()
+  return (amount + amount * self:getProductivityBonus(recipe) ) * recipe.count
 end
 
 -------------------------------------------------------------------------------
@@ -171,9 +142,9 @@ end
 --
 -- @return #number
 --
-function Product.countIngredient(recipe)
-  Logging:trace(Product.classname, "countIngredient",lua_product)
-  local amount = Product.getElementAmount(lua_product)
+function Product:countIngredient(recipe)
+  Logging:trace(self.classname, "countIngredient",self.lua_prototype)
+  local amount = self:getElementAmount()
   return amount * recipe.count
 end
 
@@ -187,30 +158,30 @@ end
 --
 -- @return #number
 --
-function Product.countContainer(count, container)
-  Logging:trace(Product.classname, "countContainer",lua_product)
+function Product:countContainer(count, container)
+  Logging:trace(self.classname, "countContainer",self.lua_prototype)
   if count == nil then return 0 end
-  if lua_product.type == 0 or lua_product.type == "item" then
-    EntityPrototype.load(container)
-    local cargo_wagon_size = EntityPrototype.getInventorySize(1)
-    if EntityPrototype.getType() == "transport-belt" then
+  if self.lua_prototype.type == 0 or self.lua_prototype.type == "item" then
+    local entity_prototype = EntityPrototype(container)
+    local cargo_wagon_size = entity_prototype:getInventorySize(1)
+    if entity_prototype:getType() == "transport-belt" then
       -- ratio = item_per_s / speed_belt (blue belt)
-      local belt_speed = EntityPrototype.getBeltSpeed()
-      return count / (belt_speed * Product.belt_ratio * (Model.getModel().time or 1))
-    elseif EntityPrototype.getType() ~= "logistic-robot" then
-      if EntityPrototype.getInventorySize(2) ~= nil and EntityPrototype.getInventorySize(2) > EntityPrototype.getInventorySize(1) then
-        cargo_wagon_size = EntityPrototype.getInventorySize(2)
+      local belt_speed = entity_prototype:getBeltSpeed()
+      return count / (belt_speed * self.belt_ratio * (Model.getModel().time or 1))
+    elseif entity_prototype:getType() ~= "logistic-robot" then
+      if entity_prototype:getInventorySize(2) ~= nil and entity_prototype:getInventorySize(2) > entity_prototype:getInventorySize(1) then
+        cargo_wagon_size = entity_prototype:getInventorySize(2)
       end
-      local stack_size = ItemPrototype.load(lua_product.name).stackSize()
+      local stack_size = ItemPrototype(self.lua_prototype.name):stackSize()
       if cargo_wagon_size * stack_size == 0 then return 0 end
       return count / (cargo_wagon_size * stack_size)
     else
-      cargo_wagon_size = EntityPrototype.native().max_payload_size + (Player.getForce().worker_robots_storage_bonus or 0 )
+      cargo_wagon_size = entity_prototype:native().max_payload_size + (Player.getForce().worker_robots_storage_bonus or 0 )
       return count / cargo_wagon_size
     end
   end
-  if lua_product.type == 1 or lua_product.type == "fluid" then
-    local cargo_wagon_size = EntityPrototype.load(container).getFluidCapacity()
+  if self.lua_prototype.type == 1 or self.lua_prototype.type == "fluid" then
+    local cargo_wagon_size = EntityPrototype(container):getFluidCapacity()
     if cargo_wagon_size == 0 then return 0 end
     return count / cargo_wagon_size
   end
@@ -225,12 +196,10 @@ end
 --
 -- @return #number
 --
-function Product.getProductivityBonus(recipe)
-  Logging:trace(Product.classname, "getProductivityBonus(recipe)", lua_product)
+function Product:getProductivityBonus(recipe)
+  Logging:trace(self.classname, "getProductivityBonus(recipe)", self.lua_prototype)
   if recipe.isluaobject or recipe.factory == nil or recipe.factory.effects == nil then return 1 end
   local productivity = recipe.factory.effects.productivity
   
   return productivity
 end
-
-return Product

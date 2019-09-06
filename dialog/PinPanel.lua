@@ -41,7 +41,8 @@ end
 -- @return #boolean if true the next call close dialog
 --
 function PinPanel:onBeforeEvent(event)
-  local close = (action == "OPEN") -- only on open event
+  Logging:debug(self.classname, "onBeforeEvent()", event)
+  local close = (event.action == "OPEN") -- only on open event
   if event.action == "OPEN" then
     if User.getParameter(self.parameterLast) == nil or User.getParameter(self.parameterLast) then
       close = false
@@ -181,7 +182,7 @@ function PinPanel:addProductionBlockRow(gui_table, block, recipe)
   Logging:debug(self.classname, "addProductionBlockRow()", gui_table, block, recipe)
   local display_pin_level = User.getSetting("display_pin_level")
   local model = Model.getModel()
-  local lua_recipe = RecipePrototype.load(recipe).native()
+  local recipe_prototype = RecipePrototype(recipe)
   if display_pin_level > display_level.base then
     -- col recipe
     local cell_recipe = ElementGui.addGuiFrameH(gui_table,"recipe"..recipe.id, helmod_frame_style.hidden)
@@ -191,10 +192,11 @@ function PinPanel:addProductionBlockRow(gui_table, block, recipe)
   if display_pin_level > display_level.products then
     -- products
     local cell_products = ElementGui.addGuiTable(gui_table,"products_"..recipe.id, 3)
-    if RecipePrototype.getProducts() ~= nil then
-      for index, lua_product in pairs(RecipePrototype.getProducts()) do
-        local product = Product.load(lua_product).new()
-        product.count = Product.countProduct(recipe)
+    if recipe_prototype:getProducts() ~= nil then
+      for index, lua_product in pairs(recipe_prototype:getProducts()) do
+        local product_prototype = Product(lua_product)
+        local product = product_prototype:clone()
+        product.count = product_prototype:countProduct(recipe)
         if block.count > 1 then
           product.limit_count = product.count / block.count
         end
@@ -213,10 +215,11 @@ function PinPanel:addProductionBlockRow(gui_table, block, recipe)
   if display_pin_level > display_level.ingredients then
     -- ingredients
     local cell_ingredients = ElementGui.addGuiTable(gui_table,"ingredients_"..recipe.id, 3)
-    if RecipePrototype.getIngredients() ~= nil then
-      for index, lua_ingredient in pairs(RecipePrototype.getIngredients(recipe.factory)) do
-        local ingredient = Product.load(lua_ingredient).new()
-        ingredient.count = Product.countIngredient(recipe)
+    if recipe_prototype:getIngredients() ~= nil then
+      for index, lua_ingredient in pairs(recipe_prototype:getIngredients(recipe.factory)) do
+        local ingredient_prototype = Product(lua_ingredient)
+        local ingredient = ingredient_prototype:clone()
+        ingredient.count = ingredient_prototype:countIngredient(recipe)
         if block.count > 1 then
           ingredient.limit_count = ingredient.count / block.count
         end

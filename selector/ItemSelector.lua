@@ -1,6 +1,6 @@
 require "selector.AbstractSelector"
 -------------------------------------------------------------------------------
--- Class to build technology selector
+-- Class to build item selector
 --
 -- @module ItemSelector
 -- @extends #AbstractSelector
@@ -29,8 +29,8 @@ end
 --
 function ItemSelector:appendGroups(name, type)
   Logging:debug(self.classname, "appendGroups()", name, type)
-  ItemPrototype.load(name, type)
-  local find = self:checkFilter(ItemPrototype.native())
+  local item_prototype = ItemPrototype(name)
+  local find = self:checkFilter(item_prototype:native())
   local filter_show_disable = User.getSetting("filter_show_disable")
   local filter_show_hidden = User.getSetting("filter_show_hidden")
   
@@ -38,16 +38,16 @@ function ItemSelector:appendGroups(name, type)
   local list_prototype = Cache.getData(self.classname, "list_prototype")
   local list_subgroup = Cache.getData(self.classname, "list_subgroup")
 
-  if find == true and (ItemPrototype.getValid() == true or filter_show_disable == true) then
-    local group_name = ItemPrototype.native().group.name
-    local subgroup_name = ItemPrototype.native().subgroup.name
+  if find == true and (item_prototype:getValid() == true or filter_show_disable == true) then
+    local group_name = item_prototype:native().group.name
+    local subgroup_name = item_prototype:native().subgroup.name
     
-    list_subgroup[subgroup_name] = ItemPrototype.native().subgroup
+    list_subgroup[subgroup_name] = item_prototype:native().subgroup
     
     if list_group[group_name] == nil then
       list_group[group_name] = {name=group_name, search_products="", search_ingredients=""}
     end
-    list_subgroup[subgroup_name] = ItemPrototype.native().subgroup
+    list_subgroup[subgroup_name] = item_prototype:native().subgroup
     if list_prototype[group_name] == nil then list_prototype[group_name] = {} end
     if list_prototype[group_name][subgroup_name] == nil then list_prototype[group_name][subgroup_name] = {} end
     
@@ -57,7 +57,7 @@ function ItemSelector:appendGroups(name, type)
     local search_ingredients = name
     list_group[group_name].search_ingredients = list_group[group_name].search_ingredients .. search_ingredients
 
-    table.insert(list_prototype[group_name][subgroup_name], {name=name, type=type, order=ItemPrototype.native().order, search_products=search_products, search_ingredients=search_ingredients})
+    table.insert(list_prototype[group_name][subgroup_name], {name=name, type=type, order=item_prototype:native().order, search_products=search_products, search_ingredients=search_ingredients})
   end
 end
 
@@ -92,7 +92,7 @@ end
 function ItemSelector:buildPrototypeTooltip(prototype)
   Logging:trace(self.classname, "buildPrototypeTooltip(player, prototype)", prototype)
   -- initalize tooltip
-  local tooltip = ItemPrototype.load(prototype).getLocalisedName()
+  local tooltip = ItemPrototype(prototype):getLocalisedName()
   return tooltip
 end
 

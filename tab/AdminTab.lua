@@ -224,7 +224,7 @@ function AdminTab:addSheetListRow(gui_table, model)
   local cell_element = ElementGui.addGuiFrameH(gui_table,"element"..model.id, helmod_frame_style.hidden)
   local element = Model.firstRecipe(model.blocks)
   if element ~= nil then
-    ElementGui.addGuiButtonSprite(cell_element, self.classname.."=donothing=ID="..model.id.."=", Player.getIconType(element), element.name, model.id, RecipePrototype.load(element).getLocalisedName())
+    ElementGui.addGuiButtonSprite(cell_element, self.classname.."=donothing=ID="..model.id.."=", Player.getIconType(element), element.name, model.id, RecipePrototype(element):getLocalisedName())
   else
     ElementGui.addGuiButton(cell_element, self.classname.."=donothing=ID=", model.id, "helmod_button_icon_help_selected")
   end
