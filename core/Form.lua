@@ -4,6 +4,7 @@ require "core.Object"
 -- Class to help to build form
 --
 -- @module Form
+-- @extends Object#Object 
 --
 Form = newclass(Object,function(base,classname)
   Object.init(base,classname)
@@ -22,8 +23,10 @@ end)
 --
 function Form:bind()
   Dispatcher:bind("on_gui_event", self, self.event)
+  
   Dispatcher:bind("on_gui_open", self, self.open)
   Dispatcher:bind("on_gui_open", self, self.update)
+  
   Dispatcher:bind("on_gui_update", self, self.update)
   Dispatcher:bind("on_gui_close", self, self.close)
   self:onBind()
@@ -214,6 +217,7 @@ end
 --
 function Form:open(event)
   Logging:debug(self.classname, "open()", event)
+  self:onBeforeOpen(event)
   if self:isOpened() then return end
   local parent_panel = self:getParentPanel()
   User.setActiveForm(self.classname)
@@ -254,6 +258,17 @@ function Form:onBeforeEvent(event)
 end
 
 -------------------------------------------------------------------------------
+-- On before open
+--
+-- @function [parent=#Form] onBeforeOpen
+--
+-- @param #LuaEvent event
+--
+function Form:onBeforeOpen(event)
+  return false
+end
+
+-------------------------------------------------------------------------------
 -- Event
 --
 -- @function [parent=#Form] event
@@ -261,8 +276,9 @@ end
 -- @param #LuaEvent event
 --
 function Form:event(event)
-  if not(self:isOpened()) then return end
+  Logging:debug(self.classname, "event()", event)
   self:onBeforeEvent(event)
+  if not(self:isOpened()) then return end
   self:onEvent(event)
 end
 

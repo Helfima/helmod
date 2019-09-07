@@ -135,5 +135,6 @@ function RecipeSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
   elseif recipe_prototype:getEnabled() == false then
     color = "red"
   end
+  --GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select", type):sprite(Player.getRecipeIconType(recipe_prototype:native()), prototype_name.."1"):caption(prototype_localised_name):tooltip(tooltip):color(color))
   ElementGui.addGuiButtonSelectSprite(guiElement, self.classname.."=element-select=ID="..type.."=", Player.getRecipeIconType(recipe_prototype:native()), prototype_name, prototype_localised_name, tooltip, color)
 end

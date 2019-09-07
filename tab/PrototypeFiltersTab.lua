@@ -93,9 +93,11 @@ function PrototypeFiltersTab:updateData(event)
   scrollPanel.clear()
 
   -- prepare
-  modes = PrototypeFilter.getModes()
-  filter_types = PrototypeFilter.getTypes()
-  inverts = PrototypeFilter.getInverts()
+  PrototypeFilters.initialization()
+  --Logging:debug(self.classname, "PrototypeFilters", PrototypeFilters)
+  modes = PrototypeFilters.getModes()
+  filter_types = PrototypeFilters.getTypes()
+  inverts = PrototypeFilters.getInverts()
 
 
   -- update
@@ -130,15 +132,16 @@ function PrototypeFiltersTab:addRowFilter(itable, prototype_filter, index)
   Logging:debug(self.classname, "addRowFilter()",prototype_filter, index)
   index = index or 0
   local prototype_filter_type = User.getParameter("prototype_filter_type") or filter_types[1]
+  local PrototypeFilter = PrototypeFilters.getFilterType(prototype_filter_type)
   -- mode
   prototype_filter.mode = prototype_filter.mode or modes[1]
   ElementGui.addGuiDropDown(itable, self.classname.."=change-filter-mode=ID=", index, modes, prototype_filter.mode)
   -- filter
-  local filters = PrototypeFilter.getFilters(prototype_filter_type)
+  local filters = PrototypeFilter:getFilters()
   prototype_filter.filter = prototype_filter.filter or filters[1]
   ElementGui.addGuiDropDown(itable, self.classname.."=change-prototype-filter=ID=", index, filters, prototype_filter.filter)
 
-  local options = PrototypeFilter.getOptions(prototype_filter_type, prototype_filter.filter)
+  local options = PrototypeFilter:getOptions(prototype_filter.filter)
   if Model.countList(options) > 0 then
     prototype_filter.option = prototype_filter.option or options[1]
     ElementGui.addGuiDropDown(itable, self.classname.."=change-filter-option=ID=", index, options, prototype_filter.option)
@@ -174,13 +177,14 @@ function PrototypeFiltersTab:updateFilter()
 
   local resultTable = ElementGui.addGuiTable(scrollPanel,"table-filter",5)
 
-  local prototype_filter_type = User.getParameter("prototype_filter_type") or filter_types[1]
+  local PrototypeFilter = PrototypeFilters.getFilterType(prototype_filter_type)
+
   local prototype_filter = User.getParameter("prototype_filter")
   if prototype_filter == nil then
     prototype_filter = {}
     prototype_filter.mode = modes[1]
-    prototype_filter.filter = PrototypeFilter.getFilters(prototype_filter_type)[1]
-    prototype_filter.option = PrototypeFilter.getOptions(prototype_filter_type, prototype_filter.filter)[1] or nil
+    prototype_filter.filter = PrototypeFilter:getFilters()[1]
+    prototype_filter.option = PrototypeFilter:getOptions(prototype_filter.filter)[1] or nil
     prototype_filter.invert = inverts[1]
     User.setParameter("prototype_filter", prototype_filter)
   end
@@ -208,6 +212,7 @@ function PrototypeFiltersTab:updateResult()
   end
 
   local prototype_filters = User.getParameter("prototype_filters") or {}
+  
 
   if Model.countList(prototype_filters) > 0 then
     local elements_table = ElementGui.addGuiTable(scrollPanel,"table-elements",20)
@@ -222,8 +227,9 @@ function PrototypeFiltersTab:updateResult()
       table.insert(filters, filter)
     end
     
+    local PrototypeFilter = PrototypeFilters.getFilterType(prototype_filter_type)
     Logging:debug(self.classname,"result filters", filters)
-    local elements = PrototypeFilter.getElements(prototype_filter_type ,filters)
+    local elements = PrototypeFilter:getElements(filters)
     for key,element in pairs(elements) do
       ElementGui.addGuiButtonSprite(elements_table, "nothing", prototype_filter_type, element.name, element.name, element.localised_name)
     end
@@ -245,8 +251,9 @@ function PrototypeFiltersTab:onEvent(event)
 
   Logging:debug(self.classname, "prototype_filter", prototype_filter)
   Logging:debug(self.classname, "prototype_filters", prototype_filters)
-  filter_types = PrototypeFilter.getTypes()
+  filter_types = PrototypeFilters.getTypes()
   local prototype_filter_type = User.getParameter("prototype_filter_type") or filter_types[1]
+  local PrototypeFilter = PrototypeFilters.getFilterType(prototype_filter_type)
   
   local index = tonumber(event.item1) or 0
   if index > 0 then
@@ -258,10 +265,10 @@ function PrototypeFiltersTab:onEvent(event)
     prototype_filter_type = filter_types[selected_index]
     User.setParameter("prototype_filter_type", prototype_filter_type)
     
-    local filters = PrototypeFilter.getFilters(prototype_filter_type)
+    local filters = PrototypeFilter:getFilters()
     Logging:debug(self.classname, "--> filters", filters)
     prototype_filter.filter = filters[1]
-    local options = PrototypeFilter.getOptions(prototype_filter_type, prototype_filter.filter)
+    local options = PrototypeFilter:getOptions(prototype_filter.filter)
     Logging:debug(self.classname, "--> options", options)
     prototype_filter.option = options[1] or nil
     Logging:debug(self.classname, "--> prototype_filter", prototype_filter)
@@ -273,13 +280,13 @@ function PrototypeFiltersTab:onEvent(event)
   if event.action == "change-prototype-filter" then
     local selected_index = event.element.selected_index
     Logging:debug(self.classname, "--> change-prototype-filter", prototype_filters[selected_index])
-    prototype_filter.filter = PrototypeFilter.getFilters(prototype_filter_type)[selected_index]
-    prototype_filter.option = PrototypeFilter.getOptions(prototype_filter_type, prototype_filter.filter)[1] or nil
+    prototype_filter.filter = PrototypeFilter:getFilters()[selected_index]
+    prototype_filter.option = PrototypeFilter:getOptions(prototype_filter.filter)[1] or nil
   end
 
   if event.action == "change-filter-option" then
     local selected_index = event.element.selected_index
-    local options = PrototypeFilter.getOptions(prototype_filter_type, prototype_filter.filter)
+    local options = PrototypeFilter:getOptions(prototype_filter.filter)
     Logging:debug(self.classname, "--> change-filter-option", options[selected_index])
     prototype_filter.option = options[selected_index] or nil
   end

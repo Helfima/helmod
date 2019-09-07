@@ -692,24 +692,15 @@ end
 --
 -- @function [parent=#Player] getEntityPrototypes
 --
--- @param #table types filter
+-- @param #table filters  sample: {{filter="type", mode="or", invert=false type="transport-belt"}}
 --
 -- @return #LuaEntityPrototype entity prototype
 --
-function Player.getEntityPrototypes(types)
-  if types == nil then
-    return game.entity_prototypes
-  else
-    local entities = {}
-    for _,entity in pairs(game.entity_prototypes) do
-      for _,type in pairs(types) do
-        if entity.type == type then
-          entities[entity.name] = entity
-        end
-      end
-    end
-    return entities
+function Player.getEntityPrototypes(filters)
+  if filters ~= nil then
+    return game.get_filtered_entity_prototypes(filters)
   end
+  return game.entity_prototypes
 end
 
 -------------------------------------------------------------------------------

@@ -1,29 +1,20 @@
--------------------------------------------------------------------------------
--- Class to help to build GuiElement
---
+---
+-- Description of the module.
+-- 
 -- @module GuiElement
 --
-
 -------------------------------------------------------------------------------
 --
--- @function [parent = #GuiElement] constructor
+-- @function [parent=#GuiElement] constructor
+-- @param #arg name
 -- @return #GuiElement
 -- 
-GuiElement = newclass(function(base,parent)
-  base.parent = parent
-  base.gui = {type = "sprite-button"}
+GuiElement = newclass(function(base,...)
+  base.name = {...}
+  base.classname = "HMGuiElement"
+  base.options = {}
+  base.is_caption = true
 end)
-
--------------------------------------------------------------------------------
---
--- @function [parent=#GuiElement] name
--- @param #string name
--- @return #GuiElement
--- 
-function GuiElement:name(name)
-  self.gui.name = name
-  return self
-end
 
 -------------------------------------------------------------------------------
 --
@@ -32,18 +23,7 @@ end
 -- @return #GuiElement
 -- 
 function GuiElement:style(style)
-  self.gui.style = style
-  return self
-end
-
--------------------------------------------------------------------------------
---
--- @function [parent=#GuiElement] action
--- @param #...
--- @return #GuiElement
--- 
-function GuiElement:action(...)
-  self.gui.name = table.concat({...},"=")
+  self.options.style = style
   return self
 end
 
@@ -54,7 +34,7 @@ end
 -- @return #GuiElement
 -- 
 function GuiElement:caption(caption)
-  self.gui.caption = caption
+  self.caption = caption
   return self
 end
 
@@ -65,28 +45,64 @@ end
 -- @return #GuiElement
 -- 
 function GuiElement:tooltip(tooltip)
-  self.gui.tooltip = tooltip
+  self.options.tooltip = tooltip
   return self
 end
 
 -------------------------------------------------------------------------------
 --
 -- @function [parent=#GuiElement] sprite
--- @param #string type
--- @param #string name
+-- @param #string sprite
 -- @return #GuiElement
 -- 
-function GuiElement:sprite(type, name)
-  self.gui.sprite = string.format("%s/%s",type, name)
+function GuiElement:sprite(sprite)
+  self.options.type = "sprite"
+  self.options.sprite = sprite
   return self
 end
 
 -------------------------------------------------------------------------------
 --
--- @function [parent=#GuiElement] apply
+-- @function [parent=#GuiElement] getOptions
 -- @return #table
 -- 
-function GuiElement:apply()
-  self.gui.caption = nil
-  return self.parent.add(self.gui)
+function GuiElement:getOptions()
+  self.options.name = table.concat(self.name,"=")
+  if self.is_caption then
+    self.options.caption = self.caption
+  end
+  return self.options
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiElement] onErrorOptions
+-- @return #table
+-- 
+function GuiElement:onErrorOptions()
+  local options = self:getOptions()
+  options.style = nil
+  return options
+end
+
+-------------------------------------------------------------------------------
+-- Add a element
+--
+-- @function [parent=#GuiElement] add
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #GuiElement gui_element
+--
+-- @return #LuaGuiElement the LuaGuiElement added
+--
+function GuiElement.add(parent, gui_element)
+  Logging:trace(gui_element.classname, "add", gui_element)
+  local element = nil
+  local ok , err = pcall(function()
+    element = parent.add(gui_element:getOptions())
+  end)
+  if not ok then
+    element = parent.add(gui_element:onErrorOptions())
+  end
+  return element
 end

@@ -74,7 +74,7 @@ function ProductEdition:getToolPanel()
   end
   local tool_panel = ElementGui.addGuiFrameV(content_panel, "tool_panel", helmod_frame_style.panel, {"helmod_product-edition-panel.tool"})
   tool_panel.style.horizontally_stretchable = true
-  ElementGui.setStyle(tool_panel, "edition_product_tool", "height")
+  --ElementGui.setStyle(tool_panel, "edition_product_tool", "height")
   return tool_panel
 end
 
@@ -133,7 +133,7 @@ function ProductEdition:onUpdate(event)
 
   self:updateInfo(event)
   self:updateTool(event)
-  self:updateAction(event)
+  --self:updateAction(event)
 end
 
 -------------------------------------------------------------------------------
@@ -190,7 +190,7 @@ function ProductEdition:updateTool(event)
   local tool_panel = self:getToolPanel()
   tool_panel.clear()
   local table_panel = ElementGui.addGuiTable(tool_panel,"table-belt",5)
-  for key, prototype in pairs(Player.getEntityPrototypes({"transport-belt"})) do
+  for key, prototype in pairs(Player.getEntityPrototypes({{filter="type", mode="or", invert=false, type="transport-belt"}})) do
     ElementGui.addGuiButtonSelectSprite(table_panel, self.classname.."=element-select=ID=", Player.getEntityIconType(prototype), prototype.name, prototype.name, EntityPrototype(prototype):getLocalisedName())
   end
 end
@@ -211,7 +211,7 @@ function ProductEdition:onEvent(event)
       local operation = event.element.text
       local ok , err = pcall(function()
         local quantity = formula(operation)
-
+        if quantity == 0 then quantity = nil end
         ModelBuilder.updateProduct(event.item1, event.item2, quantity)
         ModelCompute.update()
         self:close()

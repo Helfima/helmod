@@ -149,7 +149,7 @@ end
 -------------------------------------------------------------------------------
 -- Add history
 --
--- @function [parent=#Calculator] Calculator
+-- @function [parent=#Calculator] addHistory
 --
 -- @param #string calculator_value
 -- @param #number result
@@ -193,7 +193,6 @@ function Calculator:updateDisplay()
   display_panel.style.width=155
   display_panel.style.horizontal_align = "right"
   display_panel.focus()
-
 end
 -------------------------------------------------------------------------------
 -- Update keyboard
@@ -207,9 +206,14 @@ function Calculator:updateKeyboard()
 
   local table_panel = ElementGui.addGuiTable(keyboard_panel,"keys",4)
   local keys = {}
-  table.insert(keys, {key="clear" ,caption="C"})
+  table.insert(keys, {key="clear" ,caption="C", tooltip="clear"})
   table.insert(keys, {key="(" ,caption="("})
   table.insert(keys, {key=")" ,caption=")"})
+  table.insert(keys, {key="" ,caption=""})
+
+  table.insert(keys, {key="" ,caption=""})
+  table.insert(keys, {key="^" ,caption="^", tooltip="x pow y"})
+  table.insert(keys, {key="%" ,caption="%", tooltip="x modulo y"})
   table.insert(keys, {key="/" ,caption="/"})
 
   table.insert(keys, {key="7" ,caption="7"})
@@ -236,7 +240,7 @@ function Calculator:updateKeyboard()
     if button.key == "" then
       ElementGui.addGuiLabel(table_panel,string.format("vide_%s",index))
     else
-      ElementGui.addGuiButton(table_panel,self.classname.."=selected-key=ID=",button.key,"helmod_button_calculator",button.caption)
+      ElementGui.addGuiButton(table_panel,self.classname.."=selected-key=ID=",button.key,"helmod_button_calculator",button.caption, button.tooltip)
     end
   end
 

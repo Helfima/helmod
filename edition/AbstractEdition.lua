@@ -881,7 +881,8 @@ function AbstractEdition:onEvent(event)
         ModelBuilder.updateFactory(event.item1, event.item2, options)
         ModelCompute.update()
         self:updateFactoryInfo(event)
-      Controller:send("on_gui_refresh", event)
+        self:updateHeader(event)
+        Controller:send("on_gui_refresh", event)
       end)
       if not(ok) then
         Player.print("Formula is not valid!")
@@ -905,6 +906,7 @@ function AbstractEdition:onEvent(event)
       ModelBuilder.updateFuelFactory(event.item1, event.item2, options)
       ModelCompute.update()
       self:updateFactoryInfo(event)
+      self:updateHeader(event)
       Controller:send("on_gui_refresh", event)
     end
 

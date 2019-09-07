@@ -46,10 +46,13 @@ end
 --
 function BurnerPrototype:getFirstFuelItemPrototype()
   local fuel_items = self:getFuelItemPrototypes()
+  local first_fuel = nil
   for _,fuel_item in pairs(fuel_items) do
-    return fuel_item
+    if first_fuel == nil or fuel_item.name == "coal" then
+      first_fuel = fuel_item
+    end
   end
-  return nil
+  return first_fuel
 end
 
 

@@ -44,7 +44,7 @@ ModelCompute = require "data.ModelCompute"
 ModelBuilder = require "data.ModelBuilder"
 EntityType = require "model.EntityType"
 
-PrototypeFilter = require "model.PrototypeFilter"
+PrototypeFilters = require "model.PrototypeFilters"
 Converter = require "core.Converter"
 
 PLANNER_COMMAND = "helmod_planner-command"
@@ -630,7 +630,7 @@ function Controller:onEventAccessWrite(event)
         ModelCompute.update()
         Controller:send("on_gui_refresh", event)
       else
-      Controller:send("on_gui_open", event,"HMRecipeSelector")
+        Controller:send("on_gui_open", event,"HMRecipeSelector")
       end
       User.setActiveForm("HMProductionBlockTab")
     end

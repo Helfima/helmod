@@ -34,22 +34,20 @@ end
 -------------------------------------------------------------------------------
 -- On before event
 --
--- @function [parent=#PinPanel] onBeforeEvent
+-- @function [parent=#PinPanel] onBeforeOpen
 --
 -- @param #LuaEvent event
 --
 -- @return #boolean if true the next call close dialog
 --
-function PinPanel:onBeforeEvent(event)
+function PinPanel:onBeforeOpen(event)
   Logging:debug(self.classname, "onBeforeEvent()", event)
   local close = (event.action == "OPEN") -- only on open event
-  if event.action == "OPEN" then
-    if User.getParameter(self.parameterLast) == nil or User.getParameter(self.parameterLast) then
-      close = false
-    end
-    User.setParameter(self.parameterLast, event.item1)
-    User.setParameter("pin_block_id", event.item1)
+  if User.getParameter(self.parameterLast) == nil or User.getParameter(self.parameterLast) then
+    close = false
   end
+  User.setParameter(self.parameterLast, event.item1)
+  User.setParameter("pin_block_id", event.item1)
   return close
 end
 

@@ -175,38 +175,35 @@ function AbstractSelector:getItemListPanel()
 end
 
 -------------------------------------------------------------------------------
--- On before event
+-- On before open
 --
--- @function [parent=#AbstractSelector] onBeforeEvent
+-- @function [parent=#AbstractSelector] onBeforeOpen
 --
 -- @param #LuaEvent event
 --
-function AbstractSelector:onBeforeEvent(event)
+function AbstractSelector:onBeforeOpen(event)
   Logging:debug(self.classname, "onBeforeEvent()", event)
   local close = event.action == "OPEN"
-  if event.action == "OPEN" then
-    User.setParameter("recipe_group_selected",nil)
+  User.setParameter("recipe_group_selected",nil)
 
-    filter_prototype_product = true
+  filter_prototype_product = true
 
-    if event.item3 ~= nil then
-      filter_prototype = event.item3:lower():gsub("[-]"," ")
-    else
-      filter_prototype = nil
-    end
-    if event ~= nil and event.button ~= nil and event.button == defines.mouse_button_type.right then
-      filter_prototype_product = false
-    end
-    if event.item1 ~= nil and event.item2 ~= nil and event.item3 ~= nil then
-      local parameter_last = string.format("%s_%s_%s", event.item1, event.item2, event.item3)
-      if User.getParameter(self.parameterLast) ~= parameter_last then
-        close = false
-      end
-      User.setParameter(self.parameterLast,parameter_last)
-    end
-    Logging:debug(self.classname, "filter_prototype_product", filter_prototype_product)
+  if event.item3 ~= nil then
+    filter_prototype = event.item3:lower():gsub("[-]"," ")
+  else
+    filter_prototype = nil
   end
-  --Logging:debug(Controller.classname, "filter_prototype", filter_prototype)
+  if event ~= nil and event.button ~= nil and event.button == defines.mouse_button_type.right then
+    filter_prototype_product = false
+  end
+  if event.item1 ~= nil and event.item2 ~= nil and event.item3 ~= nil then
+    local parameter_last = string.format("%s_%s_%s", event.item1, event.item2, event.item3)
+    if User.getParameter(self.parameterLast) ~= parameter_last then
+      close = false
+    end
+    User.setParameter(self.parameterLast,parameter_last)
+  end
+  Logging:debug(self.classname, "filter_prototype_product", filter_prototype_product)
   -- close si nouvel appel
   return close
 end
@@ -475,9 +472,9 @@ function AbstractSelector:updateItemList(event)
     -- boucle subgroup
     local guiRecipeSubgroup = ElementGui.addGuiTable(recipe_selector_list, "recipe-table-"..subgroup, 10, "helmod_table_recipe_selector")
     for key, prototype in spairs(list,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
-      Logging:debug(self.classname, "prototype test", prototype.name)
+      Logging:trace(self.classname, "prototype test", prototype.name)
       if self:checkFilter(prototype) then
-        Logging:debug(self.classname, "prototype ok")
+        Logging:trace(self.classname, "prototype ok")
         local tooltip = self:buildPrototypeTooltip(prototype)
         self:buildPrototypeIcon(guiRecipeSubgroup, prototype, tooltip)
       end
