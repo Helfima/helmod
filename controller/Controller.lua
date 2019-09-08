@@ -89,7 +89,7 @@ function Controller:prepare()
   table.insert(forms, ContainerSelector("HMContainerSelector"))
 
   table.insert(forms, RecipeEdition("HMRecipeEdition"))
-  table.insert(forms, ResourceEdition("HMResourceEdition"))
+  --table.insert(forms, ResourceEdition("HMResourceEdition"))
   table.insert(forms, ProductEdition("HMProductEdition"))
   table.insert(forms, EnergyEdition("HMEnergyEdition"))
   table.insert(forms, RuleEdition("HMRuleEdition"))

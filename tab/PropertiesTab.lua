@@ -90,7 +90,7 @@ function PropertiesTab:addTableHeader(itable, prototype_compare)
       local fluid_prototype = FluidPrototype(prototype)
       icon_type = Player.getEntityIconType(fluid_prototype:native())
       localised_name = fluid_prototype:getLocalisedName()
-    elseif prototype.type == "recipe" or prototype.type == "resource" then
+    elseif string.find(prototype.type, "recipe") then
       local recipe_protoype = RecipePrototype(prototype)
       icon_type = Player.getEntityIconType(recipe_protoype:native())
       localised_name = recipe_protoype:getLocalisedName()
@@ -102,9 +102,16 @@ function PropertiesTab:addTableHeader(itable, prototype_compare)
     ElementGui.addGuiButtonSprite(itable, self.classname.."=element-delete=ID=", icon_type, prototype.name, prototype.name, localised_name)
 
   end
-  -- data columns
-  --self:addCellHeader(itable, "chmod", {"helmod_result-panel.col-header-chmod"})
-  --self:addCellHeader(itable, "value", {"helmod_result-panel.col-header-value"})
+
+  self:addCellHeader(itable, "property_type", "Element Type")
+  for _,prototype in pairs(prototype_compare) do
+    ElementGui.addGuiLabel(itable, string.format("element_type_%s", prototype.name), prototype.type)
+  end
+
+  self:addCellHeader(itable, "property_name", "Element Name")
+  for _,prototype in pairs(prototype_compare) do
+    ElementGui.addGuiText(itable, string.format("element_name_%s", prototype.name), prototype.name)
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -172,19 +179,29 @@ function PropertiesTab:getPrototypeData(prototype)
   if prototype ~= nil then
     local lua_prototype = nil
     if prototype.type == "entity" then
-      lua_prototype = EntityPrototype(prototype)
+      lua_prototype = EntityPrototype(prototype):native()
     elseif prototype.type == "item" then
-      lua_prototype = ItemPrototype(prototype)
+      lua_prototype = ItemPrototype(prototype):native()
     elseif prototype.type == "fluid" then
-      lua_prototype = FluidPrototype(prototype)
-    elseif prototype.type == "recipe" or prototype.type == "resource" then
-      lua_prototype = RecipePrototype(prototype)
+      lua_prototype = FluidPrototype(prototype):native()
+    elseif string.find(prototype.type, "recipe") then
+      local recipe_prototype = RecipePrototype(prototype)
+      lua_prototype = recipe_prototype:native()
+      if recipe_prototype:getType() ~= "recipe" then
+        function lua_prototype:help()
+          local help = "Help for LuaRecipePrototype:Methods:help(...)Values:"
+          for key,_ in pairs(lua_prototype) do
+            help = string.format("%s %s [R]", help, key)
+          end
+          return help
+        end
+      end
     elseif prototype.type == "technology" then
-      lua_prototype = Technology(prototype)
+      lua_prototype = Technology(prototype):native()
     end
     if lua_prototype ~= nil then
       Logging:debug(self.classname, "prototype", prototype)
-      return self:parseProperties(lua_prototype:native(), 0)
+      return self:parseProperties(lua_prototype, 0)
     end
   end
   return {}

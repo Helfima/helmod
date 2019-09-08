@@ -76,6 +76,7 @@ function ModelCompute.update()
   Logging:debug(ModelCompute.classname , "********** update()")
   ModelCompute.updateVersion_0_5_4()
   ModelCompute.updateVersion_0_6_0()
+  ModelCompute.updateVersion_0_9_3()
 
   local model = Model.getModel()
 
@@ -107,8 +108,6 @@ function ModelCompute.update()
       -- premiere recette
       local _,recipe = next(block.recipes)
       if recipe ~= nil then
-
-        --ModelCompute.prepareBlock(block)
 
         -- state = 0 => produit
         -- state = 1 => produit pilotant
@@ -169,72 +168,6 @@ function ModelCompute.update()
   end
   model.version = Model.version
 end
--------------------------------------------------------------------------------
--- Compute recipe block
---
--- @function [parent=#ModelCompute] computeBlockRecipe
---
--- @param #table element production block model
---
-function ModelCompute.computeBlockRecipe(block, recipe)
-  Logging:debug(ModelCompute.classname, "computeBlockRecipe()", block.name, recipe.name, recipe.type)
-  if recipe ~= nil then
-    local recipe_prototype = RecipePrototype(recipe)
-    local lua_recipe = recipe_prototype:native()
-
-    local production = 1
-    if recipe.production ~= nil then production = recipe.production end
-
-    -- for void in angel mod
-    if recipe_prototype:isVoid() then
-      Logging:debug(ModelCompute.classname, "isvoid", recipe_prototype:isVoid(), "recipe name", recipe.name)
-      local lua_ingredient = recipe_prototype:getIngredients(recipe.factory)[1]
-      local ingredient = Product(lua_ingredient):clone()
-      local p_amount = ingredient.amount
-      local count = 0
-      if block.products[lua_ingredient.name] ~= nil then
-        count = block.products[lua_ingredient.name].count*production / p_amount
-      end
-      if recipe.count < count then recipe.count = count end
-    else
-      -- recipe classique
-      -- prepare le recipe
-      for _, lua_product in pairs(recipe_prototype:getProducts()) do
-        if block.ingredients[lua_product.name] ~= nil then
-          local product_prototype = Product(lua_product):clone()
-          local product = product_prototype:clone()
-          local p_amount = product_prototype:getAmount(recipe)
-          local count = block.ingredients[lua_product.name].count*production / p_amount
-          Logging:debug(ModelCompute.classname, "count", count)
-          Logging:debug(ModelCompute.classname, "p_amount", p_amount)
-          if recipe.count < count then recipe.count = count end
-        end
-      end
-    end
-    Logging:debug(ModelCompute.classname, "recipe.count=", recipe.count)
-
-    -- compute ingredients
-    for k, lua_ingredient in pairs(recipe_prototype:getIngredients(recipe.factory)) do
-      local ingredient = Product(lua_ingredient):clone()
-      -- consolide la production
-      local i_amount = ingredient.amount
-      -- exclus le type ressource ou fluid
-      if recipe.type ~= "resource" and recipe.type ~= "fluid" then
-        for k, lua_product in pairs(recipe_prototype:getProducts()) do
-          if lua_ingredient.name == lua_product.name then
-            local product = Product(lua_product):clone()
-            i_amount = i_amount - product.amount
-          end
-        end
-      end
-
-      local nextCount = i_amount * recipe.count
-      block.ingredients[lua_ingredient.name].count = block.ingredients[lua_ingredient.name].count + nextCount
-      Logging:debug(ModelCompute.classname, "lua_ingredient.name", lua_ingredient.name, "nextCount=", nextCount)
-    end
-    Logging:debug(ModelCompute.classname, "block.ingredients=", block.ingredients)
-  end
-end
 
 -------------------------------------------------------------------------------
 -- Compute recipe block
@@ -277,36 +210,6 @@ end
 -------------------------------------------------------------------------------
 -- Compute recipe block
 --
--- @function [parent=#ModelCompute] computeBlockTechnology
---
--- @param #table element production block model
---
-function ModelCompute.computeBlockTechnology(block, recipe)
-  Logging:debug(ModelCompute.classname, "computeBlockTechnology()", block.name)
-  local recipe_prototype = RecipePrototype(recipe)
-  local lua_recipe = recipe_prototype:native()
-  local production = 1
-  if recipe.production ~= nil then production = recipe.production end
-
-  local productNominal = lua_recipe.research_unit_count
-  if recipe.research_unit_count_formula ~= nil then
-    productNominal = loadstring("local L = " .. lua_recipe.level .. " return " .. recipe.research_unit_count_formula)()
-  end
-  -- calcul factory productivity effect
-  recipe.count = productNominal*production / (1 + recipe.factory.effects.productivity)
-
-  -- compute ingredients
-  for k, lua_ingredient in pairs(recipe_prototype:getIngredients(recipe.factory)) do
-    local ingredient = Product(lua_ingredient):clone()
-    local i_amount = ingredient.amount
-    local nextCount = i_amount * recipe.count
-    block.ingredients[ingredient.name].count = block.ingredients[ingredient.name].count + nextCount
-  end
-end
-
--------------------------------------------------------------------------------
--- Compute recipe block
---
 -- @function [parent=#ModelCompute] computeMatrixBlockTechnology
 --
 -- @param #table element production block model
@@ -321,65 +224,6 @@ function ModelCompute.computeMatrixBlockTechnology(block, recipe)
     local i_amount = ingredient.amount
     local nextCount = i_amount * recipe.count
     block.ingredients[ingredient.name].count = block.ingredients[ingredient.name].count + nextCount
-  end
-end
-
--------------------------------------------------------------------------------
--- Prepare production block
---
--- @function [parent=#ModelCompute] prepareBlock
---
--- @param #table block block of model
---
-function ModelCompute.prepareBlock(block)
-  Logging:debug(ModelCompute.classname, "prepareBlock", block.name)
-  local model = Model.getModel()
-
-  local recipes = block.recipes
-  if recipes ~= nil then
-    -- initialisation
-    block.products = {}
-    block.ingredients = {}
-    block.power = 0
-    block.count = 1
-
-    block.mining_ingredient = nil
-    -- preparation produits et ingredients du block
-    for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
-      Logging:debug(ModelCompute.classname, "recipe", recipe.name, recipe.type)
-      local recipe_prototype = RecipePrototype(recipe)
-      local lua_recipe = recipe_prototype:native()
-      -- construit la list des ingredients
-      for _, lua_ingredient in pairs(recipe_prototype:getIngredients(recipe.factory)) do
-        if block.ingredients[lua_ingredient.name] == nil then
-          if recipe.type == "resource" then
-            block.mining_ingredient = lua_ingredient.name
-            Logging:debug(ModelCompute.classname, "mining_ingredient", block.mining_ingredient)
-          end
-          block.ingredients[lua_ingredient.name] = Product(lua_ingredient):clone()
-        end
-        block.ingredients[lua_ingredient.name].count = 0
-      end
-      -- construit la list des produits
-      -- si c'est un voider la liste est vide
-      for _, lua_product in pairs(recipe_prototype:getProducts()) do
-        if block.products[lua_product.name] == nil then
-          block.products[lua_product.name] = Product(lua_product):clone()
-          -- state = 0 => produit
-          -- state = 1 => produit pilotant
-          -- state = 2 => produit restant
-
-          if not(block.ingredients[lua_product.name]) or block.mining_ingredient == lua_product.name then
-            block.products[lua_product.name].state = 1
-          else
-            block.products[lua_product.name].state = 0
-          end
-        end
-        block.products[lua_product.name].count = 0
-      end
-      -- initialise le recipe
-      recipe.count = 0
-    end
   end
 end
 
@@ -960,8 +804,9 @@ function ModelCompute.computeFactory(recipe)
   local recipe_energy = RecipePrototype(recipe):getEnergy()
   -- effet speed
   recipe.factory.speed = ModelCompute.speedFactory(recipe) * (1 + recipe.factory.effects.speed)
+  Logging:debug(ModelCompute.classname, "recipe.factory.speed", ModelCompute.speedFactory(recipe), recipe.factory.speed)
   -- cap speed creation maximum de 1 cycle par tick
-  if recipe.name ~= "steam" and recipe_energy/recipe.factory.speed < 1/60 then recipe.factory.speed = 60*recipe_energy end
+  if recipe.type ~= "fluid" and recipe_energy/recipe.factory.speed < 1/60 then recipe.factory.speed = 60*recipe_energy end
 
   -- effet consumption
   local factory_prototype = EntityPrototype(recipe.factory)
@@ -1269,12 +1114,33 @@ function ModelCompute.speedFactory(recipe)
     local hardness = recipe_prototype:getMineableHardness()
     local mining_time = recipe_prototype:getMineableMiningTime()
     return hardness * mining_speed / mining_time
+  elseif recipe.type == "fluid" then
+    -- @see https://wiki.factorio.com/Power_production
+    local factory_prototype = EntityPrototype(recipe.factory)
+    Logging:debug(ModelCompute.classname, "factory_prototype", recipe.factory, factory_prototype)
+    local pumping_speed = factory_prototype:getPumpingSpeed()
+    return pumping_speed
   elseif recipe.type == "technology" then
     local bonus = Player.getForce().laboratory_speed_modifier or 1
     return 1*bonus
   else
     local factory_prototype = EntityPrototype(recipe.factory)
     return factory_prototype:getCraftingSpeed()
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update model
+--
+-- @function [parent=#ModelCompute] updateVersion_0_9_3
+--
+function ModelCompute.updateVersion_0_9_3()
+  local model = Model.getModel()
+  if model.version == nil or model.version < "0.9.3" then
+    Logging:debug(ModelCompute.classname , "********** updating version 0.9.3")
+    Model.resetRules()
+    Logging:debug(ModelCompute.classname , "********** updated version 0.9.3")
+    Player.print("Helmod information: Model is updated to version 0.9.3")
   end
 end
 

@@ -78,7 +78,7 @@ end
 -- @function [parent=#Player] getGui
 --
 -- @param location
--- 
+--
 -- @return #LuaGuiElement
 --
 function Player.getGui(location)
@@ -412,11 +412,11 @@ function Player.getProductionsCrafting(category, lua_recipe)
     productions["player"] = game.entity_prototypes["player"]
   elseif lua_recipe.name ~= nil and lua_recipe.name == "water" then
     for key, lua_entity in pairs(Player.getOffshorePump()) do
-        productions[lua_entity.name] = lua_entity
+      productions[lua_entity.name] = lua_entity
     end
   elseif lua_recipe.name ~= nil and lua_recipe.name == "steam" then
     for key, lua_entity in pairs(Player.getBoilers()) do
-        productions[lua_entity.name] = lua_entity
+      productions[lua_entity.name] = lua_entity
     end
   else
     for key, lua_entity in pairs(Player.getProductionMachines()) do
@@ -434,7 +434,7 @@ function Player.getProductionsCrafting(category, lua_recipe)
               check = true
               Logging:debug(Player.classname, "allowed machine", lua_entity.name)
             end
-          -- resolve rule excluded
+            -- resolve rule excluded
             check = Player.checkRules(check, rules_excluded, "standard", lua_entity, false)
           end
         else
@@ -478,7 +478,7 @@ function Player.getModules()
   local items = {}
   local filters = {}
   table.insert(filters,{filter="type",type="module",mode="or"})
-  
+
   for _,item in pairs(game.get_filtered_item_prototypes(filters)) do
     table.insert(items,item)
   end
@@ -511,7 +511,7 @@ end
 function Player.getBoilers()
   local filters = {}
   table.insert(filters,{filter="type", type="boiler" ,mode="or"})
-  
+
   return game.get_filtered_entity_prototypes(filters)
 end
 
@@ -525,7 +525,7 @@ end
 function Player.getOffshorePump()
   local filters = {}
   table.insert(filters,{filter="type", type="offshore-pump" ,mode="or"})
-  
+
   return game.get_filtered_entity_prototypes(filters)
 end
 
@@ -561,6 +561,105 @@ end
 --
 function Player.getRecipe(name)
   return Player.getForce().recipes[name]
+end
+
+-------------------------------------------------------------------------------
+-- Return resource recipe
+--
+-- @function [parent=#Player] getRecipeEntity
+--
+-- @param #string name recipe name
+--
+-- @return #LuaRecipe recipe
+--
+function Player.getRecipeEntity(name)
+  local entity_prototype = EntityPrototype(name)
+  local prototype = entity_prototype:native()
+  local ingredients = {{name=prototype.name, type="item", amount=1}}
+  if entity_prototype:getMineableMiningFluidRequired() then
+    local fluid_ingredient = {name=entity_prototype:getMineableMiningFluidRequired(), type="fluid", amount=entity_prototype:getMineableMiningFluidAmount()}
+    table.insert(ingredients, fluid_ingredient)
+  end
+  local recipe = {}
+  recipe.category = "extraction-machine"
+  recipe.enabled = true
+  recipe.energy = 1
+  recipe.force = {}
+  recipe.group = prototype.group
+  recipe.subgroup = prototype.subgroup
+  recipe.hidden = false
+  recipe.ingredients = ingredients
+  recipe.products = entity_prototype:getMineableMiningProducts()
+  recipe.localised_description = prototype.localised_description
+  recipe.localised_name = prototype.localised_name
+  recipe.name = prototype.name
+  recipe.prototype = {}
+  recipe.valid = true
+  return recipe
+end
+
+-------------------------------------------------------------------------------
+-- Return recipe
+--
+-- @function [parent=#Player] getRecipeFluid
+--
+-- @param #string name recipe name
+--
+-- @return #LuaRecipe recipe
+--
+function Player.getRecipeFluid(name)
+  local fluid_prototype = FluidPrototype(name)
+  local prototype = fluid_prototype:native()
+  local products = {{name=prototype.name, type="fluid", amount=1}}
+  local ingredients = {{name=prototype.name, type="fluid", amount=1}}
+  if prototype.name == "steam" then
+    ingredients = {{name="water", type="fluid", amount=1}}
+  end
+  local recipe = {}
+  recipe.category = "chemistry"
+  recipe.enabled = true
+  recipe.energy = 1
+  recipe.force = {}
+  recipe.group = prototype.group
+  recipe.subgroup = prototype.subgroup
+  recipe.hidden = false
+  recipe.ingredients = ingredients
+  recipe.products = products
+  recipe.localised_description = prototype.localised_description
+  recipe.localised_name = prototype.localised_name
+  recipe.name = prototype.name
+  recipe.prototype = {}
+  recipe.valid = true
+  return recipe
+end
+
+-------------------------------------------------------------------------------
+-- Return recipe
+--
+-- @function [parent=#Player] getRecipeTechnology
+--
+-- @param #string name recipe name
+--
+-- @return #LuaRecipe recipe
+--
+function Player.getRecipeTechnology(name)
+  local technology_prototype = Player.getTechnology(name)
+  local recipe = {}
+  recipe.category = "technology"
+  recipe.enabled = true
+  recipe.energy = 1
+  recipe.force = technology_prototype.force
+  recipe.group = {}
+  recipe.subgroup = {}
+  recipe.hidden = false
+  recipe.ingredients = {}
+  recipe.products = {}
+  recipe.localised_description = technology_prototype.localised_description
+  recipe.localised_name = technology_prototype.localised_name
+  recipe.name = technology_prototype.name
+  recipe.prototype = technology_prototype.prototype
+  recipe.valid = true
+  return recipe
 end
 
 -------------------------------------------------------------------------------
@@ -658,7 +757,7 @@ function Player.getProductionsBeacon()
   local items = {}
   local filters = {}
   table.insert(filters,{filter="type",type=EntityType.beacon,mode="or"})
-  
+
   for _,item in pairs(game.get_filtered_entity_prototypes(filters)) do
     table.insert(items,item)
   end
@@ -685,7 +784,7 @@ function Player.getGenerators(type)
     table.insert(filters,{filter="type",type=EntityType.boiler,mode="or"})
     table.insert(filters,{filter="type",type=EntityType.accumulator,mode="or"})
   end
-  
+
   for _,item in pairs(game.get_filtered_entity_prototypes(filters)) do
     table.insert(items,item)
   end
@@ -720,7 +819,7 @@ end
 -- @function [parent=#Player] getItemPrototypes
 --
 -- @param #table filters  sample: {{filter="fuel-category", mode="or", invert=false,["fuel-category"]="chemical"}}
--- 
+--
 -- @return #LuaItemPrototype item prototype
 --
 function Player.getItemPrototypes(filters)

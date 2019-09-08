@@ -52,6 +52,7 @@ function RecipeSelector:appendGroups(recipe, type)
 
   if (recipe_prototype:getEnabled() == true or filter_show_disable == true) and (recipe_prototype:getHidden() == false or filter_show_hidden == true) then
     local lua_recipe = recipe_prototype:native()
+    Logging:debug(self.classname, "lua_recipe", lua_recipe)
     local group_name = lua_recipe.group.name
     local subgroup_name = lua_recipe.subgroup.name
 

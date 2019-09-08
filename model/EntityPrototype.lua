@@ -219,6 +219,20 @@ function EntityPrototype:getMiningSpeed()
 end
 
 -------------------------------------------------------------------------------
+-- Return pumping speed
+--
+-- @function [parent=#EntityPrototype] getPumpingSpeed
+--
+-- @return #number default 0
+--
+function EntityPrototype:getPumpingSpeed()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.pumping_speed*60 or 0
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
 -- Return energy type (electrical or burner)
 --
 -- @function [parent=#EntityPrototype] getEnergyType

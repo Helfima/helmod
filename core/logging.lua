@@ -72,7 +72,7 @@ function Logging:objectToString(object, level)
 		message = message.."\"__function\""
   elseif object.isluaobject then
     if object.valid then
-      message = message..string.format("{\"type\":%q,\"name\":%q}", object.type or "nil", object.name or "nil")
+      message = message..string.format("{\"type\":%q,\"name\":%q}", "nil", object.name or "nil")
     else
       message = message.."invalid object"
     end
