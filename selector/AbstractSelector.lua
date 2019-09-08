@@ -223,7 +223,9 @@ function AbstractSelector:onEvent(event)
   if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
     if User.isActiveForm("HMPropertiesTab") then
       if event.action == "element-select" then
-        User.setParameter("prototype_properties",{type = event.item1, name = event.item2 })
+        local prototype_compare = User.getParameter("prototype_compare") or {}
+        table.insert(prototype_compare, {type = event.item1, name = event.item2 })
+        User.setParameter("prototype_compare", prototype_compare)
         self:close()
         Controller:send("on_gui_refresh", event)
       end

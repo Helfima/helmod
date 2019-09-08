@@ -71,38 +71,40 @@ end
 --
 -- @param #LuaGuiElement itable container for element
 --
-function PropertiesTab:addTableHeader(itable)
+function PropertiesTab:addTableHeader(itable, prototype_compare)
   Logging:debug(self.classname, "addTableHeader()", itable)
 
-  -- data columns
   self:addCellHeader(itable, "property", {"helmod_result-panel.col-header-name"})
-  self:addCellHeader(itable, "chmod", {"helmod_result-panel.col-header-chmod"})
-  self:addCellHeader(itable, "value", {"helmod_result-panel.col-header-value"})
-end
+  for _,prototype in pairs(prototype_compare) do
+    local icon_type = nil
+    local localised_name = nil
+    if prototype.type == "entity" then
+      local entity_prototype = EntityPrototype(prototype)
+      icon_type = Player.getEntityIconType(entity_prototype:native())
+      localised_name = entity_prototype:getLocalisedName()
+    elseif prototype.type == "item" then
+      local item_prototype = ItemPrototype(prototype)
+      icon_type = Player.getEntityIconType(item_prototype:native())
+      localised_name = item_prototype:getLocalisedName()
+    elseif prototype.type == "fluid" then
+      local fluid_prototype = FluidPrototype(prototype)
+      icon_type = Player.getEntityIconType(fluid_prototype:native())
+      localised_name = fluid_prototype:getLocalisedName()
+    elseif prototype.type == "recipe" or prototype.type == "resource" then
+      local recipe_protoype = RecipePrototype(prototype)
+      icon_type = Player.getEntityIconType(recipe_protoype:native())
+      localised_name = recipe_protoype:getLocalisedName()
+    elseif prototype.type == "technology" then
+      local technology_protoype = Technology(prototype)
+      icon_type = Player.getEntityIconType(technology_protoype:native())
+      localised_name = technology_protoype:getLocalisedName()
+    end
+    ElementGui.addGuiButtonSprite(itable, self.classname.."=element-delete=ID=", icon_type, prototype.name, prototype.name, localised_name)
 
--------------------------------------------------------------------------------
--- Add table row
---
--- @function [parent=#PropertiesTab] addTableRow
---
--- @param #LuaGuiElement gui_table container for element
--- @param #table property
---
-function PropertiesTab:addTableRow(gui_table, property)
-  Logging:debug(self.classname, "addTableRow()", gui_table, property)
-  -- col property
-  local cell_name = ElementGui.addGuiFrameH(gui_table,property.name.."_name", helmod_frame_style.hidden)
-  ElementGui.addGuiLabel(cell_name, "label", property.name)
-
-  -- col chmod
-  local cell_chmod = ElementGui.addGuiFrameH(gui_table,property.name.."_chmod", helmod_frame_style.hidden)
-  ElementGui.addGuiLabel(cell_chmod, "label", property.chmod or "")
-
-  -- col value
-  local cell_value = ElementGui.addGuiFrameH(gui_table,property.name.."_value", helmod_frame_style.hidden)
-  local label_value = ElementGui.addGuiLabel(cell_value, "label", property.value, "helmod_label_max_600", nil, false)
-  label_value.style.width = 600
-
+  end
+  -- data columns
+  --self:addCellHeader(itable, "chmod", {"helmod_result-panel.col-header-chmod"})
+  --self:addCellHeader(itable, "value", {"helmod_result-panel.col-header-value"})
 end
 
 -------------------------------------------------------------------------------
@@ -115,64 +117,103 @@ end
 function PropertiesTab:updateData(event)
   Logging:debug(self.classname, "updateData()", event)
   -- data
-  local resultPanel = self:getResultPanel({"helmod_result-panel.tab-title-properties"})
-  local listPanel = ElementGui.addGuiFrameH(resultPanel, "list-element", helmod_frame_style.hidden)
-  local scrollPanel = self:getResultScrollPanel()
+  --local result_panel = self:getResultPanel({"helmod_result-panel.tab-title-properties"})
+  local scroll_panel = self:getResultScrollPanel()
+  scroll_panel.clear()
 
-  local prototype_properties = User.getParameter("prototype_properties")
-  if prototype_properties ~= nil and prototype_properties.name ~= nil then
-    local prototype_name = prototype_properties.name
-    local prototype_type = prototype_properties.type
-    local prototype = nil
-    if prototype_type == "entity" then
-      local entity_prototype = EntityPrototype(prototype_name)
-      prototype = entity_prototype:native()
-      if prototype ~= nil then
-        ElementGui.addGuiButtonSprite(listPanel, self.classname.."=entity-select=ID=", Player.getEntityIconType(prototype), prototype.name, prototype.name, entity_prototype:getLocalisedName())
-      end
-    elseif prototype_type == "item" then
-      local item_prototype = ItemPrototype(prototype_name)
-      prototype = item_prototype:native()
-      if prototype ~= nil then
-        ElementGui.addGuiButtonSprite(listPanel, self.classname.."=item-select=ID=", Player.getItemIconType(prototype), prototype.name, prototype.name, item_prototype:getLocalisedName())
-      end
-    elseif prototype_type == "fluid" then
-      local fluid_prototype = FluidPrototype(prototype_name)
-      prototype = fluid_prototype:native()
-      if prototype ~= nil then
-        ElementGui.addGuiButtonSprite(listPanel, self.classname.."=fluid-select=ID=", Player.getItemIconType(prototype), prototype.name, prototype.name, fluid_prototype:getLocalisedName())
-      end
-    elseif prototype_type == "recipe" then
-      local recipe_protoype = RecipePrototype(prototype_name)
-      prototype = recipe_protoype:native()
-      if prototype ~= nil then
-        ElementGui.addGuiButtonSprite(listPanel, self.classname.."=recipe-select=ID=", Player.getRecipeIconType(prototype), prototype.name, prototype.name, recipe_protoype:getLocalisedName())
-      end
-    elseif prototype_type == "technology" then
-      local technology_protoype = Technology(prototype_name)
-      prototype = technology_protoype:native()
-      if prototype ~= nil then
-        ElementGui.addGuiButtonSprite(listPanel, self.classname.."=technology-select=ID=", "technology", prototype.name, prototype.name, technology_protoype:getLocalisedName())
+  local prototype_compare = User.getParameter("prototype_compare")
+  if prototype_compare ~= nil then
+    local data = {}
+    for _,prototype in pairs(prototype_compare) do
+      local data_prototype = self:getPrototypeData(prototype)
+      --Logging:debug(self.classname, "data_prototype", data_prototype)
+      for _,properties in pairs(data_prototype) do
+        if data[properties.name] == nil then data[properties.name] = {} end
+        data[properties.name][prototype.name] = properties
       end
     end
-    if prototype ~= nil then
-      ElementGui.addGuiLabel(listPanel, "type-label", prototype_type, "helmod_label_right_100")
-      local resultTable = ElementGui.addGuiTable(scrollPanel,"table-resources",3)
+    local result_table = ElementGui.addGuiTable(scroll_panel,"table-resources",#prototype_compare+1, "helmod_table-rule-odd")
 
-      self:addTableHeader(resultTable)
+    self:addTableHeader(result_table, prototype_compare)
 
-      local properties = self:parseProperties(prototype, 0)
+    for property, values in pairs(data) do
+      local cell_name = ElementGui.addGuiFrameH(result_table, string.format("property_%s", property), helmod_frame_style.hidden)
+      ElementGui.addGuiLabel(cell_name, "label", property)
 
-      for _, property in pairs(properties) do
-        if property.value ~= "nil" then
-          Logging:debug(self.classname, "property:", property)
-          self:addTableRow(resultTable, property)
+      -- col chmod
+      --local cell_chmod = ElementGui.addGuiFrameH(gui_table,property.name.."_chmod", helmod_frame_style.hidden)
+      --ElementGui.addGuiLabel(cell_chmod, "label", property.chmod or "")
+
+      for _,prototype in pairs(prototype_compare) do
+        -- col value
+        local cell_value = ElementGui.addGuiFrameH(result_table, string.format("%s_%s", property, prototype.name), helmod_frame_style.hidden)
+        if values[prototype.name] ~= nil then
+          local chmod = values[prototype.name].chmod
+          local value = values[prototype.name].value
+          local label_value = ElementGui.addGuiLabel(cell_value, "prototype_value", string.format("[%s]: %s", chmod, value), "helmod_label_max_600", nil, false)
+          label_value.style.width = 400
         end
       end
     end
+
   end
 end
 
+-------------------------------------------------------------------------------
+-- Get prototype data
+--
+-- @function [parent=#PropertiesTab] getPrototypeData
+--
+-- @param #table prototype
+--
+function PropertiesTab:getPrototypeData(prototype)
+  Logging:debug(self.classname, "getPrototypeData()", prototype)
+  -- data
+  if prototype ~= nil then
+    local lua_prototype = nil
+    if prototype.type == "entity" then
+      lua_prototype = EntityPrototype(prototype)
+    elseif prototype.type == "item" then
+      lua_prototype = ItemPrototype(prototype)
+    elseif prototype.type == "fluid" then
+      lua_prototype = FluidPrototype(prototype)
+    elseif prototype.type == "recipe" or prototype.type == "resource" then
+      lua_prototype = RecipePrototype(prototype)
+    elseif prototype.type == "technology" then
+      lua_prototype = Technology(prototype)
+    end
+    if lua_prototype ~= nil then
+      Logging:debug(self.classname, "prototype", prototype)
+      return self:parseProperties(lua_prototype:native(), 0)
+    end
+  end
+  return {}
+end
+
+-------------------------------------------------------------------------------
+-- On event
+--
+-- @function [parent=#PropertiesTab] onEvent
+--
+-- @param #LuaEvent event
+--
+function PropertiesTab:onEvent(event)
+  Logging:debug(self.classname, "onEvent()", event)
+  if event.action == "element-delete" then
+    local prototype_compare = User.getParameter("prototype_compare") or {}
+    local index = nil
+    for i,prototype in pairs(prototype_compare) do
+      if prototype.name == event.item1 then
+        index = i
+      end
+    end
+    if index ~= nil then
+      table.remove(prototype_compare, index)
+    end
+    User.setParameter("prototype_compare", prototype_compare)
+    self:updateData(event)
+  end
+end
 -------------------------------------------------------------------------------
 -- Parse Properties
 --
