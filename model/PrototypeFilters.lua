@@ -48,6 +48,18 @@ function PrototypeFilters.getInverts()
 end
 
 -------------------------------------------------------------------------------
+-- Get comparison
+--
+-- @function [parent=#PrototypeFilter] getComparison
+--
+-- @return #table
+--
+function PrototypeFilters.getComparison()
+  local modes = {"<", ">", "=", "≥", "≤", "≠"}
+  return modes
+end
+
+-------------------------------------------------------------------------------
 -- Add filter type
 --
 -- @function [parent=#PrototypeFilter] addFilterType
@@ -85,7 +97,6 @@ function PrototypeFilters.initialization()
   -------------------------------------------------------------------------------
   local PrototypeFilterEntity = PrototypeFilters.addFilterType("entity")
   PrototypeFilterEntity:addMapping({["collision-mask"]="mask"})
-  PrototypeFilterEntity:setGameFunction("get_filtered_entity_prototypes")
 
   PrototypeFilterEntity:addFilter("type", Player.getEntityPrototypeTypes())
   PrototypeFilterEntity:addFilter("flying-robot")
@@ -113,6 +124,7 @@ function PrototypeFilters.initialization()
   PrototypeFilterEntity:addFilter("circuit-connectable")
   PrototypeFilterEntity:addFilter("autoplace")
   PrototypeFilterEntity:addFilter("blueprintable")
+  PrototypeFilterEntity:addFilter("item-to-place")
   local collision_mask = {}
   collision_mask["ground-tile"]=true
   collision_mask["water-tile"]=true
@@ -157,12 +169,14 @@ function PrototypeFilters.initialization()
   entity_flag["not-selectable-in-game"]=true
   entity_flag["not-upgradable"]=true
   PrototypeFilterEntity:addFilter("flag", entity_flag)
+  PrototypeFilterEntity:addFilter("build-base-evolution-requirement", "comparison")
+  PrototypeFilterEntity:addFilter("selection-priority", "comparison")
+  PrototypeFilterEntity:addFilter("emissions", "comparison")
 
   -------------------------------------------------------------------------------
   -------------------------------------------------------------------------------
   local PrototypeFilterItem = PrototypeFilters.addFilterType("item")
   PrototypeFilterItem:addMapping(nil)
-  PrototypeFilterItem:setGameFunction("get_filtered_item_prototypes")
   PrototypeFilterItem:addFilter("type", Player.getItemPrototypeTypes())
   PrototypeFilterItem:addFilter("tool")
   PrototypeFilterItem:addFilter("mergeable")
@@ -174,6 +188,7 @@ function PrototypeFilters.initialization()
   PrototypeFilterItem:addFilter("place-result")
   PrototypeFilterItem:addFilter("placed-as-equipment-result")
   PrototypeFilterItem:addFilter("burnt-result")
+  PrototypeFilterItem:addFilter("show-in-blueprint-library")
 
   local item_flag = {}
   item_flag["hidden"] = true
@@ -187,19 +202,25 @@ function PrototypeFilters.initialization()
   PrototypeFilterItem:addFilter("flag", item_flag)
   PrototypeFilterItem:addFilter("subgroup", game.item_subgroup_prototypes)
   PrototypeFilterItem:addFilter("fuel-category", game.fuel_category_prototypes)
+  PrototypeFilterItem:addFilter("stack-size", "comparison")
+  PrototypeFilterItem:addFilter("default-request-amount", "comparison")
+  PrototypeFilterItem:addFilter("wire-count", "comparison")
+  PrototypeFilterItem:addFilter("fuel-value", "comparison")
+  PrototypeFilterItem:addFilter("fuel-acceleration-multiplier", "comparison")
+  PrototypeFilterItem:addFilter("fuel-top-speed-multiplier", "comparison")
+  PrototypeFilterItem:addFilter("fuel-emissions-multiplier", "comparison")
 
   -------------------------------------------------------------------------------
   -------------------------------------------------------------------------------
   local PrototypeFilterEquipement = PrototypeFilters.addFilterType("equipment")
   PrototypeFilterEquipement:addMapping(nil)
-  PrototypeFilterEquipement:setGameFunction("get_filtered_equipment_prototypes")
   PrototypeFilterEquipement:addFilter("type")
+  PrototypeFilterEquipement:addFilter("item-to-place")
 
   -------------------------------------------------------------------------------
   -------------------------------------------------------------------------------
   local PrototypeFilterEquipement = PrototypeFilters.addFilterType("mod")
   PrototypeFilterEquipement:addMapping({["setting-type"]="type"})
-  PrototypeFilterEquipement:setGameFunction("get_filtered_mod_setting_prototypes")
   PrototypeFilterEquipement:addFilter("type")
   PrototypeFilterEquipement:addFilter("mod")
   local setting_type = {}
@@ -212,15 +233,48 @@ function PrototypeFilters.initialization()
   -------------------------------------------------------------------------------
   local PrototypeFilterAchievement = PrototypeFilters.addFilterType("achievement")
   PrototypeFilterAchievement:addMapping(nil)
-  PrototypeFilterAchievement:setGameFunction("get_filtered_achievement_prototypes")
   PrototypeFilterAchievement:addFilter("type")
   PrototypeFilterAchievement:addFilter("allowed-without-fight")
 
   -------------------------------------------------------------------------------
   -------------------------------------------------------------------------------
+  local PrototypeFilterTile = PrototypeFilters.addFilterType("tile")
+  PrototypeFilterTile:addMapping({["collision-mask"]="mask"})
+  PrototypeFilterTile:addFilter("minable")
+  PrototypeFilterTile:addFilter("autoplace")
+  PrototypeFilterTile:addFilter("blueprintable")
+  PrototypeFilterTile:addFilter("item-to-place")
+  PrototypeFilterTile:addFilter("collision-mask", collision_mask)
+  PrototypeFilterTile:addFilter("walking-speed-modifier", "comparison")
+  PrototypeFilterTile:addFilter("vehicle-friction-modifier", "comparison")
+  PrototypeFilterTile:addFilter("decorative-removal-probability", "comparison")
+  PrototypeFilterTile:addFilter("emissions", "comparison")
+
+  -------------------------------------------------------------------------------
+  -------------------------------------------------------------------------------
+  local PrototypeFilterDecorative = PrototypeFilters.addFilterType("decorative")
+  PrototypeFilterDecorative:addMapping({["collision-mask"]="mask"})
+  PrototypeFilterDecorative:addFilter("decal")
+  PrototypeFilterDecorative:addFilter("autoplace")
+  PrototypeFilterDecorative:addFilter("collision-mask", collision_mask)
+
+  -------------------------------------------------------------------------------
+  -------------------------------------------------------------------------------
+  local PrototypeFilterFluid = PrototypeFilters.addFilterType("fluid")
+  PrototypeFilterFluid:addMapping(nil)
+  PrototypeFilterFluid:addFilter("hidden")
+  PrototypeFilterFluid:addFilter("subgroup", Player.getFluidPrototypeSubgroups())
+  PrototypeFilterFluid:addFilter("default-temperature", "comparison")
+  PrototypeFilterFluid:addFilter("max-temperature", "comparison")
+  PrototypeFilterFluid:addFilter("heat-capacity", "comparison")
+  PrototypeFilterFluid:addFilter("fuel-value", "comparison")
+  PrototypeFilterFluid:addFilter("emissions-multiplier", "comparison")
+  PrototypeFilterFluid:addFilter("gas-temperature", "comparison")
+
+  -------------------------------------------------------------------------------
+  -------------------------------------------------------------------------------
   local PrototypeFilterRecipe = PrototypeFilters.addFilterType("recipe")
   PrototypeFilterRecipe:addMapping(nil)
-  PrototypeFilterRecipe:setGameFunction("get_filtered_recipe_prototypes")
   PrototypeFilterRecipe:addFilter("enabled")
   PrototypeFilterRecipe:addFilter("hidden")
   PrototypeFilterRecipe:addFilter("hidden-from-flow-stats")
@@ -235,10 +289,26 @@ function PrototypeFilters.initialization()
   PrototypeFilterRecipe:addFilter("has-products")
   PrototypeFilterRecipe:addFilter("subgroup")
   PrototypeFilterRecipe:addFilter("category", game.recipe_category_prototypes)
-  PrototypeFilterRecipe:addFilter("energy")
-  PrototypeFilterRecipe:addFilter("emissions-multiplier")
-  PrototypeFilterRecipe:addFilter("request-paste-multiplier")
-  PrototypeFilterRecipe:addFilter("overload-multiplier")
+  PrototypeFilterRecipe:addFilter("energy", "comparison")
+  PrototypeFilterRecipe:addFilter("emissions-multiplier", "comparison")
+  PrototypeFilterRecipe:addFilter("request-paste-multiplier", "comparison")
+  PrototypeFilterRecipe:addFilter("overload-multiplier", "comparison")
+  
+    -------------------------------------------------------------------------------
+  -------------------------------------------------------------------------------
+  local PrototypeFilterTechnology = PrototypeFilters.addFilterType("technology")
+  PrototypeFilterTechnology:addMapping({["research-unit-ingredient"]="ingredient"})
+  PrototypeFilterTechnology:addFilter("enabled")
+  PrototypeFilterTechnology:addFilter("hidden")
+  PrototypeFilterTechnology:addFilter("upgrade")
+  PrototypeFilterTechnology:addFilter("visible-when-disabled")
+  PrototypeFilterTechnology:addFilter("has-effects")
+  PrototypeFilterTechnology:addFilter("has-prerequisites")
+  PrototypeFilterTechnology:addFilter("research-unit-ingredient", PrototypeFilter("item"):getElements({{filter="type", type="tool"}}))
+  PrototypeFilterTechnology:addFilter("level", "comparison")
+  PrototypeFilterTechnology:addFilter("max-level", "comparison")
+  PrototypeFilterTechnology:addFilter("time", "comparison")
+
 end
 
 return PrototypeFilters

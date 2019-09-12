@@ -1,14 +1,17 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.9.3
-Date: 08. 09. 2019
+Date: 12. 09. 2019
   Features:
     - Restored utility for product edition
     - Added compare in Propeties Tab
+    - Added comparison in Propeties Filter Tab
   Changes:
     - Changed class.lua
     - Changed Event Dispatcher
     - Changed Class Prototype
     - Changed Class PrototypeFilter
+    - Changed recipe prototype (resource and fluid)
+    - Added new rule extraction-machine (mining-drill)
   Bugfixes:
     - Fixed fuel for factory
     - Fixed pumping speed

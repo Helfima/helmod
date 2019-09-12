@@ -22,8 +22,12 @@ end)
 function PrototypeFilter:addFilter(filter, options)
   if self.filters[filter] == nil then self.filters[filter] = {} end
   if options ~= nil then
-    for key, option in pairs(options) do
-      self.filters[filter][key] = option
+    if type(options) == "string" then
+      self.filters[filter] = options
+    else
+      for key, option in pairs(options) do
+        self.filters[filter][key] = option
+      end
     end
   end
 end
@@ -55,9 +59,13 @@ end
 function PrototypeFilter:getOptions(filter)
   local options = {}
   local filters = self.filters
-  if filters[filter] ~= nil and Model.countList(filters[filter]) > 0 then
-    for key,option in spairs(filters[filter],function(t,a,b) return b > a end) do
-      table.insert(options,key)
+  if filters[filter] ~= nil then
+    if type(filters[filter]) == "string" then
+      return filters[filter]
+    elseif Model.countList(filters[filter]) > 0 then
+      for key,option in spairs(filters[filter],function(t,a,b) return b > a end) do
+        table.insert(options,key)
+      end
     end
   end
   return options
@@ -101,5 +109,26 @@ function PrototypeFilter:getElements(filters)
       end
     end
   end
-  return game[self.game_function](filters)
+  if self.type == "entity" then
+    return game.get_filtered_entity_prototypes(filters)
+  elseif self.type == "item" then
+    return game.get_filtered_item_prototypes(filters)
+  elseif self.type == "equipment" then
+    return game.get_filtered_equipment_prototypes(filters)
+  elseif self.type == "mod" then
+    return game.get_filtered_mod_setting_prototypes(filters)
+  elseif self.type == "achievement" then
+    return game.get_filtered_achievement_prototypes(filters)
+  elseif self.type == "tile" then
+    return game.get_filtered_tile_prototypes(filters)
+  elseif self.type == "decorative" then
+    return game.get_filtered_decorative_prototypes(filters)
+  elseif self.type == "fuild" then
+    return game.get_filtered_fluid_prototypes(filters)
+  elseif self.type == "recipe" then
+    return game.get_filtered_recipe_prototypes(filters)
+  elseif self.type == "technology" then
+    return game.get_filtered_technology_prototypes(filters)
+  end
+  return {}
 end

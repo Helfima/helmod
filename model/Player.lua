@@ -871,6 +871,38 @@ function Player.getFluidPrototypes()
 end
 
 -------------------------------------------------------------------------------
+-- Return fluid prototype types
+--
+-- @function [parent=#Player] getFluidPrototypeTypes
+--
+-- @return #table
+--
+function Player.getFluidPrototypeTypes()
+  local types = {}
+  for _,entity in pairs(game.fluid_prototypes) do
+    local type = entity.type
+    types[type] = true
+  end
+  return types
+end
+
+-------------------------------------------------------------------------------
+-- Return fluid prototype subgroups
+--
+-- @function [parent=#Player] getFluidPrototypeSubgroups
+--
+-- @return #table
+--
+function Player.getFluidPrototypeSubgroups()
+  local types = {}
+  for _,entity in pairs(game.fluid_prototypes) do
+    local type = entity.subgroup.name
+    types[type] = true
+  end
+  return types
+end
+
+-------------------------------------------------------------------------------
 -- Return fluid prototype
 --
 -- @function [parent=#Player] getFluidPrototype

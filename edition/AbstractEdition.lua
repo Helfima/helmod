@@ -871,7 +871,6 @@ function AbstractEdition:onEvent(event)
     end
 
     if event.action == "factory-update" then
-      local inputPanel = self:getFactoryInfoPanel()["table-input"]
       local options = {}
 
       local text = event.element.text

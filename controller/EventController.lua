@@ -220,7 +220,7 @@ end
 --
 function EventController.onGuiTextChanged(event)
   Logging:trace(EventController.classname, "onGuiTextChanged(event)", event)
-  if event ~= nil and event.player_index ~= nil and event.element ~= nil and string.find(event.element.name, "filter") then
+  if event ~= nil and event.player_index ~= nil and event.element ~= nil and string.find(event.element.name, "onchange") then
     Player.load(event)
     Dispatcher:send("on_gui_action", event, Controller.classname)
   end
