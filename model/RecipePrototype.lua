@@ -162,6 +162,24 @@ function RecipePrototype:getRawProducts()
 end
 
 -------------------------------------------------------------------------------
+-- Return products array of Prototype (may contain duplicate products)
+--
+-- @function [parent=#RecipePrototype] getIngredientProducts
+--
+-- @return #table
+--
+function RecipePrototype:getRawIngredients()
+  if self.lua_prototype ~= nil then
+    if self.lua_type == "recipe" or self.lua_type == "resource" or self.lua_type == "fluid" then
+      return self.lua_prototype.ingredients
+    elseif self.lua_type == "technology" then
+      return self.lua_prototype.research_unit_ingredients
+    end
+  end
+  return {}
+end
+
+-------------------------------------------------------------------------------
 -- Return solid ingredient number of Prototype
 --
 -- @function [parent=#RecipePrototype] getIngredientCount

@@ -20,10 +20,10 @@ local data = {}
 -- @return #table
 --
 function Cache.getData(classname, name)
-  Logging:debug(Cache.classname, "getData(classname, name)",classname, name)
+  Logging:trace(Cache.classname, "getData(classname, name)",classname, name)
   if classname == nil and name == nil then return data end
   if data[classname] == nil or data[classname][name] == nil then return nil end
-  Logging:debug(Cache.classname, "--> cache",data[classname][name])
+  Logging:trace(Cache.classname, "--> cache",data[classname][name])
   return data[classname][name]
 end
 
@@ -39,7 +39,7 @@ end
 -- @return #object
 --
 function Cache.setData(classname, name, value)
-  Logging:debug(Cache.classname, "setData(classname, name, value)",classname, name, value)
+  Logging:trace(Cache.classname, "setData(classname, name, value)",classname, name, value)
   if data[classname] == nil then data[classname] = {} end
   data[classname][name] = value
 end
@@ -55,7 +55,7 @@ end
 -- @return #boolean
 --
 function Cache.hasData(classname, name)
-  Logging:debug(Cache.classname, "getData(hasData, name)",classname, name)
+  Logging:trace(Cache.classname, "getData(hasData, name)",classname, name)
   return data[classname] ~= nil and data[classname][name] == nil
 end
 
@@ -66,9 +66,9 @@ end
 --
 -- @param #string classname
 -- @param #string name
--- 
+--
 function Cache.reset(classname, name)
-  Logging:debug(Cache.classname, "reset(classname, name)", classname, name)
+  Logging:trace(Cache.classname, "reset(classname, name)", classname, name)
   if classname == nil and name == nil then
     data = {}
   elseif data[classname] ~= nil and name == nil then

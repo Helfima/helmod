@@ -40,7 +40,7 @@ end
 -- @param #string type
 --
 
-function RecipeSelector:appendGroups(recipe, type)
+function RecipeSelector:appendGroups2(recipe, type)
   Logging:trace(self.classname, "appendGroups()", recipe.name, type)
   local recipe_prototype = RecipePrototype(recipe, type)
   local filter_show_disable = User.getSetting("filter_show_disable")
@@ -79,6 +79,35 @@ function RecipeSelector:appendGroups(recipe, type)
     table.insert(list_prototype[group_name][subgroup_name], {name=recipe.name, type=type, order=lua_recipe.order, search_products=search_products, search_ingredients=search_ingredients})
   end
 end
+local loop = {product=0,ingredient=0}
+
+function RecipeSelector:appendGroups(recipe, type, list_group, list_subgroup, list_products, list_ingredients)
+  Logging:trace(self.classname, "appendGroups()", recipe.name, type)
+  local recipe_prototype = RecipePrototype(recipe, type)
+
+  local lua_recipe = recipe_prototype:native()
+  Logging:trace(self.classname, "lua_recipe", lua_recipe)
+  local group_name = lua_recipe.group.name
+  local subgroup_name = lua_recipe.subgroup.name
+
+  list_subgroup[subgroup_name] = lua_recipe.subgroup
+  list_group[group_name] = lua_recipe.group
+  
+  for key, element in pairs(recipe_prototype:getRawProducts()) do
+    if list_products[element.name] == nil then list_products[element.name] = {} end
+    if list_products[element.name][group_name] == nil then list_products[element.name][group_name] = {} end
+    list_products[element.name][group_name][lua_recipe.name] = {name=lua_recipe.name, subgroup=subgroup_name, type=type, order=lua_recipe.order}
+    loop.product = loop.product + 1
+  end
+
+  for key, element in pairs(recipe_prototype:getRawIngredients()) do
+    if list_ingredients[element.name] == nil then list_ingredients[element.name] = {} end
+    if list_ingredients[element.name][group_name] == nil then list_ingredients[element.name][group_name] = {} end
+    list_ingredients[element.name][group_name][lua_recipe.name] = {name=lua_recipe.name, subgroup=subgroup_name, type=type, order=lua_recipe.order}
+    loop.ingredient = loop.ingredient + 1
+  end
+
+end
 
 -------------------------------------------------------------------------------
 -- Update groups
@@ -90,17 +119,26 @@ end
 function RecipeSelector:updateGroups(event)
   Logging:trace(self.classname, "updateGroups()", event)
 
-  self:resetGroups()
+  local list_group = {}
+  local list_subgroup = {}
+  local list_products = {}
+  local list_ingredients = {}
 
   for key, recipe in pairs(Player.getRecipes()) do
-    self:appendGroups(recipe, "recipe")
+    self:appendGroups(recipe, "recipe", list_group, list_subgroup, list_products, list_ingredients)
   end
   for key, fluid in pairs(Player.getFluidPrototypes()) do
-    self:appendGroups(fluid, "fluid")
+    self:appendGroups(fluid, "fluid", list_group, list_subgroup, list_products, list_ingredients)
   end
   for key, resource in pairs(Player.getResources()) do
-    self:appendGroups(resource, "resource")
+    self:appendGroups(resource, "resource", list_group, list_subgroup, list_products, list_ingredients)
   end
+  
+  Cache.setData(self.classname, "list_group", list_group)
+  Cache.setData(self.classname, "list_subgroup", list_subgroup)
+  Cache.setData(self.classname, "list_products", list_products)
+  Cache.setData(self.classname, "list_ingredients", list_ingredients)
+  --Player.print(string.format("product=%d , ingredient=%s", loop.product, loop.ingredient))
 end
 
 -------------------------------------------------------------------------------

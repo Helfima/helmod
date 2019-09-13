@@ -253,7 +253,7 @@ function PropertiesTab:parseProperties(prototype, level)
       Logging:debug(self.classname, "property", key, type, value)
       if key == "group" or key == "subgroup" then
         local group = prototype[key]
-        value = group.name
+        value = string.format("{name=%s,type=%s,order_in_recipe=%s,order=%s}", group.name, group.type, group.order_in_recipe, group.order) 
       elseif key == "burner_prototype" then
         local burner_prototype = BurnerPrototype(prototype[key]):toString()
         value = burner_prototype
