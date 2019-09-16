@@ -98,6 +98,8 @@ end
 --
 -- @function [parent=#PrototypeFilter] getElements
 --
+-- @param  filters
+--
 -- @return #table
 --
 function PrototypeFilter:getElements(filters)

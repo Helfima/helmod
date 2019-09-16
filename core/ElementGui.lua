@@ -1018,17 +1018,17 @@ function ElementGui.addCellElement(parent, element, action, select, tooltip_name
   --ElementGui.addCellIcon(row1, element, action, select, tooltip_name, nil)
   ElementGui.addGuiButtonSprite(row1, action, Player.getIconType(element), element.name, "X"..Product(element):getElementAmount(), ({tooltip_name, Player.getLocalisedName(element)}))
   ElementGui.addCellCargoInfo(row1, element)
-  
+
   if element.limit_count ~= nil then
     local row2 = ElementGui.addGuiFrameH(cell,"row2","helmod_frame_element_"..color.."_2")
     if display_cell_mod == "by-kilo" then
       -- by-kilo
-        ElementGui.addGuiLabel(row2, "label1_"..element.name, Format.formatNumberKilo(element.limit_count), "helmod_label_element", {"helmod_common.per-sub-block"})
+      ElementGui.addGuiLabel(row2, "label1_"..element.name, Format.formatNumberKilo(element.limit_count), "helmod_label_element", {"helmod_common.per-sub-block"})
     else
-        ElementGui.addGuiLabel(row2, "label1_"..element.name, Format.formatNumberElement(element.limit_count), "helmod_label_element", {"helmod_common.per-sub-block"})
+      ElementGui.addGuiLabel(row2, "label1_"..element.name, Format.formatNumberElement(element.limit_count), "helmod_label_element", {"helmod_common.per-sub-block"})
     end
   end
-    
+
   local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_element_"..color.."_3")
   if display_cell_mod == "by-kilo" then
     -- by-kilo
@@ -1060,17 +1060,17 @@ function ElementGui.addCellElementSm(parent, element, action, select, tooltip_na
   local cell = ElementGui.addGuiFlowV(parent,element.name..(index or ""), helmod_flow_style.vertical)
   local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_element_sm_"..color.."_1")
   ElementGui.addGuiButtonSpriteSm(row1, action, Player.getIconType(element), element.name, "X"..Product(element):getElementAmount(), ({tooltip_name, Player.getLocalisedName(element)}))
-  
+
   if element.limit_count ~= nil then
     local row2 = ElementGui.addGuiFrameH(cell,"row2","helmod_frame_element_sm_"..color.."_2")
     if display_cell_mod == "by-kilo" then
       -- by-kilo
-        ElementGui.addGuiLabel(row2, "label1_"..element.name, Format.formatNumberKilo(element.limit_count), "helmod_label_element_sm", {"helmod_common.per-sub-block"})
+      ElementGui.addGuiLabel(row2, "label1_"..element.name, Format.formatNumberKilo(element.limit_count), "helmod_label_element_sm", {"helmod_common.per-sub-block"})
     else
-        ElementGui.addGuiLabel(row2, "label1_"..element.name, Format.formatNumberElement(element.limit_count), "helmod_label_element_sm", {"helmod_common.per-sub-block"})
+      ElementGui.addGuiLabel(row2, "label1_"..element.name, Format.formatNumberElement(element.limit_count), "helmod_label_element_sm", {"helmod_common.per-sub-block"})
     end
   end
-    
+
   local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_element_sm_"..color.."_3")
   if display_cell_mod == "by-kilo" then
     -- by-kilo
@@ -1102,17 +1102,17 @@ function ElementGui.addCellElementM(parent, element, action, select, tooltip_nam
   local cell = ElementGui.addGuiFlowV(parent,element.name..(index or ""), helmod_flow_style.vertical)
   local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_element_m_"..color.."_1")
   ElementGui.addGuiButtonSpriteM(row1, action, Player.getIconType(element), element.name, "X"..Product(element):getElementAmount(), ({tooltip_name, Player.getLocalisedName(element)}))
-  
+
   if element.limit_count ~= nil then
     local row2 = ElementGui.addGuiFrameH(cell,"row2","helmod_frame_element_m_"..color.."_2")
     if display_cell_mod == "by-kilo" then
       -- by-kilo
-        ElementGui.addGuiLabel(row2, "label1_"..element.name, Format.formatNumberKilo(element.limit_count), "helmod_label_element_m", {"helmod_common.per-sub-block"})
+      ElementGui.addGuiLabel(row2, "label1_"..element.name, Format.formatNumberKilo(element.limit_count), "helmod_label_element_m", {"helmod_common.per-sub-block"})
     else
-        ElementGui.addGuiLabel(row2, "label1_"..element.name, Format.formatNumberElement(element.limit_count), "helmod_label_element_m", {"helmod_common.per-sub-block"})
+      ElementGui.addGuiLabel(row2, "label1_"..element.name, Format.formatNumberElement(element.limit_count), "helmod_label_element_m", {"helmod_common.per-sub-block"})
     end
   end
-    
+
   local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_element_m_"..color.."_3")
   if display_cell_mod == "by-kilo" then
     -- by-kilo
@@ -1203,9 +1203,12 @@ function ElementGui.addCellFactory(parent, factory, action, select, tooltip_name
   color = color or "green"
   local cell = ElementGui.addGuiFlowV(parent,factory.name, helmod_flow_style.vertical)
   local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_element_"..color.."_1")
-  --ElementGui.addCellIcon(row1, element, action, select, tooltip_name, nil)
-  ElementGui.addGuiButtonSprite(row1, action, Player.getIconType(factory), factory.name, nil, ({tooltip_name, Player.getLocalisedName(factory)}))
-  
+  if tooltip_name == nil then
+    ElementGui.addGuiButtonSprite(row1, action, "entity", factory.name)
+  else
+    ElementGui.addGuiButtonSprite(row1, action, "entity", factory.name, nil, ({tooltip_name, Player.getLocalisedName(factory)}))
+  end
+
   local col_size = 2
   if display_cell_mod == "small-icon" then col_size = 5 end
   local cell_factory_module = ElementGui.addGuiTable(row1,"factory-modules", col_size, "helmod_factory_modules")
@@ -1219,9 +1222,9 @@ function ElementGui.addCellFactory(parent, factory, action, select, tooltip_name
   --ElementGui.addGuiButtonSlotSm(cell_factory_module, "slot_button", "utility", "slot_icon_module")
   if factory.limit_count ~= nil then
     local row2 = ElementGui.addGuiFrameH(cell,"row2","helmod_frame_element_"..color.."_2")
-      ElementGui.addGuiLabel(row2, "label1_"..factory.name, Format.formatNumberFactory(factory.limit_count), "helmod_label_element", {"helmod_common.per-sub-block"})
+    ElementGui.addGuiLabel(row2, "label1_"..factory.name, Format.formatNumberFactory(factory.limit_count), "helmod_label_element", {"helmod_common.per-sub-block"})
   end
-    
+
   local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_element_"..color.."_3")
   ElementGui.addGuiLabel(row3, "label2_"..factory.name, Format.formatNumberFactory(factory.count), "helmod_label_element", {"helmod_common.total"})
   return cell
@@ -1247,9 +1250,9 @@ function ElementGui.addCellRecipe(parent, recipe, action, select, tooltip_name, 
   color = color or "green"
   local cell = ElementGui.addGuiFlowV(parent,recipe.name, helmod_flow_style.vertical)
   local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_product_"..color.."_1")
-  
+
   local recipe_icon = ElementGui.addGuiButtonSprite(row1, action, Player.getRecipeIconType(recipe), recipe.name, recipe.name, ({tooltip_name, Player.getRecipeLocalisedName(recipe)}))
-  
+
   local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_product_"..color.."_3")
   ElementGui.addGuiLabel(row3, "label2_"..recipe.name, Format.formatPercent(recipe.production or 1).."%", "helmod_label_element", {"helmod_common.total"})
   return cell
@@ -1275,9 +1278,9 @@ function ElementGui.addCellBlock(parent, block, action, select, tooltip_name, co
   color = color or "green"
   local cell = ElementGui.addGuiFlowV(parent,block.name, helmod_flow_style.vertical)
   local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_product_"..color.."_1")
-  
+
   local recipe_icon = ElementGui.addGuiButtonSprite(row1, action, Player.getRecipeIconType(block), block.name, block.name, ({tooltip_name, Player.getRecipeLocalisedName(block)}))
-  
+
   local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_product_"..color.."_3")
   ElementGui.addGuiLabel(row3, "label2_"..block.name, Format.formatNumberFactory(block.count or 0), "helmod_label_element", {"helmod_common.total"})
   return cell
@@ -1303,10 +1306,10 @@ function ElementGui.addCellEnergy(parent, recipe, action, select, tooltip_name, 
   color = color or "green"
   local cell = ElementGui.addGuiFlowV(parent,recipe.name, helmod_flow_style.vertical)
   local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_element_"..color.."_1")
-  
+
   --local recipe_icon = ElementGui.addGuiButtonSprite(row1, action, "item", "steam-engine", "steam-engine", {tooltip_name, {"helmod_common.energy"}})
   ElementGui.addGuiButton(row1, action, "item", "helmod_button_icon_energy_flat2", nil, {tooltip_name, {"helmod_common.energy"}})
-  
+
   local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_element_"..color.."_3")
   ElementGui.addGuiLabel(row3, "label2_"..recipe.name, Format.formatNumberKilo(recipe.energy_total or recipe.power, "W"), "helmod_label_element", {"helmod_common.total"})
   return cell
@@ -1431,7 +1434,7 @@ function ElementGui.getTooltipRecipe(prototype)
 
   -- insert __3__ value
   local lastTooltip = tooltip
-  for _,element in pairs(recipe_prototype:getProducts()) do
+  for _,element in pairs(recipe_prototype:getRawProducts()) do
     local product_prototype = Product(element)
     local count = product_prototype:getElementAmount()
     local name = product_prototype:getLocalisedName()
@@ -1445,7 +1448,7 @@ function ElementGui.getTooltipRecipe(prototype)
 
   -- insert __4__ value
   local lastTooltip = tooltip
-  for _,element in pairs(recipe_prototype:getIngredients(prototype.factory)) do
+  for _,element in pairs(recipe_prototype:getRawIngredients()) do
     local product_prototype = Product(element)
     local count = product_prototype:getElementAmount(element)
     local name = product_prototype:getLocalisedName()
@@ -1525,7 +1528,7 @@ function ElementGui.getStyleSizes()
   Logging:trace(ElementGui.classname, "getStyleSizes()")
   local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
   local display_ratio_vertictal = User.getModSetting("display_ratio_vertical")
-  
+
   local width , height = ElementGui.getDisplaySizes()
   local style_sizes = {}
   if type(width) == "number" and  type(height) == "number" then
@@ -1571,7 +1574,7 @@ function ElementGui.getStyleSizes()
     style_sizes.scroll_recipe_selector = {}
     style_sizes.scroll_recipe_selector.width = width_dialog - 20
     style_sizes.scroll_recipe_selector.height = height_main - height_selector_header - 20
-    
+
     style_sizes.recipe_product = {}
     style_sizes.recipe_product.height = 77
 
@@ -1584,7 +1587,7 @@ function ElementGui.getStyleSizes()
 
     style_sizes.recipe_info_object = {}
     style_sizes.recipe_info_object.height = 155
-    
+
     style_sizes.recipe_edition_1 = {}
     style_sizes.recipe_edition_1.width = width_recipe_column_1
     style_sizes.recipe_edition_1.height = 250
@@ -1596,12 +1599,12 @@ function ElementGui.getStyleSizes()
     style_sizes.scroll_help.width = width_dialog - width_scroll
     style_sizes.scroll_help.height = height_main - 125
 
-    
+
     -- block
     local row_number = math.floor(Model.countModel()/ElementGui.getIndexColumnNumber())
     style_sizes.block_data = {}
     style_sizes.block_data.height = height_main - 122 - row_number*32
-    
+
     style_sizes.block_info = {}
     style_sizes.block_info.width = 500
     style_sizes.block_info.height = 50*2+30
@@ -1649,7 +1652,7 @@ function ElementGui.getIndexColumnNumber()
   local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
   local width , height = ElementGui.getDisplaySizes()
   local width_main = math.ceil(width*display_ratio_horizontal)
-  
+
   return math.ceil((width_main-650)/36)
 end
 

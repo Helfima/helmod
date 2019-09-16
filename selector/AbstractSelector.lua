@@ -11,7 +11,6 @@ end)
 
 local filter_prototype = nil
 local filter_prototype_product = true
-local list_group, list_subgroup, list_item
 -------------------------------------------------------------------------------
 -- On Bind Dispatcher
 --
@@ -51,7 +50,7 @@ end
 -- @return #table
 --
 function AbstractSelector:getListPrototype()
-  if self:getFilter() then
+  if self:getProductFilter() and not(Cache.isEmpty(self.classname, "list_products")) then
     return Cache.getData(self.classname, "list_products") or {}
   end
   return Cache.getData(self.classname, "list_ingredients") or {}
@@ -84,9 +83,7 @@ end
 --
 -- @function [parent=#AbstractSelector] getCaption
 --
--- @param #Controller parent parent controller
---
-function AbstractSelector:getCaption(parent)
+function AbstractSelector:getCaption()
   return {"helmod_selector-panel.recipe-title"}
 end
 
@@ -95,10 +92,8 @@ end
 --
 -- @function [parent=#AbstractSelector] onInit
 --
--- @param #Controller parent parent controller
---
-function AbstractSelector:onInit(parent)
-  self.panelCaption = self:getCaption(parent)
+function AbstractSelector:onInit()
+  self.panelCaption = self:getCaption() -- obligatoire sinon le panneau ne s'affiche pas
   self.auto_clear = false
   self:afterInit()
   self.parameterLast = string.format("%s_%s",self.classname,"last")
@@ -110,7 +105,6 @@ end
 -- @function [parent=#AbstractSelector] afterInit
 --
 function AbstractSelector:afterInit()
-  Logging:debug(self.classname, "afterInit()")
   self.disable_option = false
   self.hidden_option = false
   self.product_option = false
@@ -191,11 +185,15 @@ function AbstractSelector:onBeforeOpen(event)
 
   filter_prototype_product = true
 
-  if event.item3 ~= nil then
+  if event.item3 ~= nil and event.item3 ~= "" then
+    Logging:debug(self.classname, "event.item3", event.item3)
     filter_prototype = event.item3:lower():gsub("[-]"," ")
+    self:resetGroups()
   else
+    if filter_prototype ~= nil then self:resetGroups() end
     filter_prototype = nil
   end
+  
   if event ~= nil and event.button ~= nil and event.button == defines.mouse_button_type.right then
     filter_prototype_product = false
   end
@@ -268,22 +266,27 @@ function AbstractSelector:onEvent(event)
   if event.action == "change-boolean-settings" then
     if User.getSetting(event.item1) == nil then User.setSetting(event.item1, default_settings[event.item]) end
     User.setSetting(event.item1, not(User.getSetting(event.item1)))
+    self:resetGroups()
     Controller:send("on_gui_update", event, self.classname)
   end
 
   if event.action == "recipe-filter-switch" then
     filter_prototype_product = not(filter_prototype_product)
+    self:resetGroups()
+    Controller:send("on_gui_prepare", event, self.classname)
     Controller:send("on_gui_update", event, self.classname)
   end
 
   if event.action == "recipe-filter" then
     if User.getModGlobalSetting("filter_on_text_changed") then
       filter_prototype = event.element.text
+      self:resetGroups()
       Controller:send("on_gui_update", event, self.classname)
     else
       if event.element.parent ~= nil and event.element.parent["filter-text"] ~= nil then
         filter_prototype = event.element.parent["filter-text"].text
       end
+      self:resetGroups()
       Controller:send("on_gui_update", event, self.classname)
     end
   end
@@ -296,11 +299,10 @@ end
 -- @function [parent=#AbstractSelector] resetGroups
 --
 function AbstractSelector:resetGroups()
-  Cache.setData(self.classname, "list_group", {})
-  Cache.setData(self.classname, "list_subgroup", {})
-  Cache.setData(self.classname, "list_prototype", {})
-  Cache.setData(self.classname, "list_products", {})
-  Cache.setData(self.classname, "list_ingredients", {})
+  Logging:debug(self.classname, "resetGroups()")
+  Cache.setData(self.classname, "list_group", nil)
+  Cache.setData(self.classname, "list_subgroup", nil)
+  Cache.setData(self.classname, "list_group_elements", nil)
 end
 
 -------------------------------------------------------------------------------
@@ -325,13 +327,14 @@ end
 -- @param #LuaEvent event
 --
 function AbstractSelector:prepare(event)
-  Logging:trace(self.classname, "prepare()", event)
+  Logging:debug(self.classname, "prepare()", event)
   -- recuperation recipes
   if Model.countList(self:getListGroup()) == 0 then
     self:updateGroups(event)
     Logging:debug(self.classname, "prepare ok")
+    return true
   end
-  return true
+  return false
 end
 
 -------------------------------------------------------------------------------
@@ -342,7 +345,7 @@ end
 -- @param #LuaEvent event
 --
 function AbstractSelector:onUpdate(event)
-  Logging:trace(self.classname, "onUpdate()", event)
+  Logging:debug(self.classname, "onUpdate()", event)
 
   self:createElementLists()
 
@@ -439,37 +442,12 @@ end
 --
 function AbstractSelector:createElementLists()
   Logging:trace(self.classname, "createElementLists()")
-  local list_group_elements = {}
-  list_group = {}
-  list_subgroup = {}
-  list_item = {}
-
-  local list = self:getListPrototype()
+  local list_group_elements = self:onCreateElementLists()
+  
+  local list_item = Cache.getData(self.classname, "list_item") or {}
   local group_selected = User.getParameter("recipe_group_selected")
-  local filter_prototype_product = self:getProductFilter()
-
-  local filter_show_disable = User.getSetting("filter_show_disable")
-  local filter_show_hidden = User.getSetting("filter_show_hidden")
-
-  -- list_products[element.name][group_name][lua_recipe.name]
-  for key, element in pairs(list) do
-    -- filter sur le nom element (product ou ingredient)
-    if self:checkFilter(key) then
-      for group_name, recipes in pairs(element) do
-        for recipe_name, recipe in pairs(recipes) do
-          local recipe_prototype = RecipePrototype(recipe)
-          if (recipe_prototype:getEnabled() == true or filter_show_disable == true) and (recipe_prototype:getHidden() == false or filter_show_hidden == true) then
-            if list_group_elements[group_name] == nil then list_group_elements[group_name] = {} end
-            if list_group_elements[group_name][recipe.subgroup] == nil then list_group_elements[group_name][recipe.subgroup] = {} end
-            list_group_elements[group_name][recipe.subgroup][recipe_name] = recipe
-
-            list_group[group_name] = recipe_prototype:native().group
-            list_subgroup[recipe.subgroup] = recipe_prototype:native().subgroup
-          end
-        end
-      end
-    end
-  end
+  local list_group = Cache.getData(self.classname, "list_group") or {}
+  
   if list_group_elements[group_selected] then
     list_item = list_group_elements[group_selected]
   else
@@ -477,6 +455,79 @@ function AbstractSelector:createElementLists()
     User.setParameter("recipe_group_selected", group_selected)
     list_item = list_group_elements[group_selected]
   end
+  Cache.setData(self.classname, "list_item", list_item or {})
+end
+
+-------------------------------------------------------------------------------
+-- Get prototype
+--
+-- @function [parent=#AbstractSelector] getPrototype
+--
+-- @param element
+-- @param type
+--
+-- @return #table
+--
+function AbstractSelector:getPrototype(element, type)
+end
+
+-------------------------------------------------------------------------------
+-- Append groups
+--
+-- @function [parent=#AbstractSelector] appendGroups
+--
+-- @param #string element
+-- @param #string type
+--
+function AbstractSelector:appendGroups(element, type, list_products, list_ingredients)
+  Logging:debug(self.classname, "appendGroups()", element.name, type)
+  local prototype = self:getPrototype(element)
+  local lua_prototype = prototype:native()
+
+  if list_ingredients[lua_prototype.name] == nil then list_ingredients[lua_prototype.name] = {} end
+  list_ingredients[lua_prototype.name][lua_prototype.name] = {name=lua_prototype.name, group=prototype:getGroup().name, subgroup=prototype:getSubgroup().name, type=type, order=lua_prototype.order}
+end
+
+-------------------------------------------------------------------------------
+-- On create element lists
+--
+-- @function [parent=#AbstractSelector] onCreateElementLists
+--
+-- @return #table
+--
+function AbstractSelector:onCreateElementLists()
+  Logging:trace(self.classname, "onCreateElementLists()")
+  local list_group_elements = Cache.getData(self.classname, "list_group_elements") or {}
+  local list_group = Cache.getData(self.classname, "list_group") or {}
+  local list_subgroup = Cache.getData(self.classname, "list_subgroup") or {}
+
+  if Model.countList(list_group) == 0 then
+    local list = self:getListPrototype()
+    local filter_show_disable = User.getSetting("filter_show_disable")
+    local filter_show_hidden = User.getSetting("filter_show_hidden")
+
+    -- list_products[element.name][group_name][lua_recipe.name]
+    for key, element in pairs(list) do
+      -- filter sur le nom element (product ou ingredient)
+      if self:checkFilter(key) then
+        for element_name, element in pairs(element) do
+          local prototype = self:getPrototype(element)
+          if (not(self.disable_option) or (prototype:getEnabled() == true or filter_show_disable == true)) and (not(self.hidden_option) or (prototype:getHidden() == false or filter_show_hidden == true)) then
+            if list_group_elements[element.group] == nil then list_group_elements[element.group] = {} end
+            if list_group_elements[element.group][element.subgroup] == nil then list_group_elements[element.group][element.subgroup] = {} end
+            list_group_elements[element.group][element.subgroup][element_name] = element
+
+            list_group[element.group] = prototype:getGroup()
+            list_subgroup[element.subgroup] = prototype:getSubgroup()
+          end
+        end
+      end
+    end
+    Cache.setData(self.classname, "list_group", list_group)
+    Cache.setData(self.classname, "list_subgroup", list_subgroup)
+    Cache.setData(self.classname, "list_group_elements", list_group_elements)
+  end
+  return list_group_elements
 end
 
 -------------------------------------------------------------------------------
@@ -489,13 +540,11 @@ end
 function AbstractSelector:updateItemList(event)
   Logging:debug(self.classname, "updateItemList()", event)
   local item_list_panel = self:getItemListPanel()
-  local filter_prototype = self:getFilter()
-
   item_list_panel.clear()
-
+  local list_subgroup = Cache.getData(self.classname, "list_subgroup") or {}
+  local list_item = Cache.getData(self.classname, "list_item") or {}
   -- recuperation recipes et subgroupes
   local recipe_selector_list = ElementGui.addGuiTable(item_list_panel, "recipe_list", 1, helmod_table_style.list)
-  Logging:debug(self.classname, "filter_prototype", filter_prototype)
   for subgroup, list in spairs(list_item,function(t,a,b) return list_subgroup[b]["order"] > list_subgroup[a]["order"] end) do
     -- boucle subgroup
     local guiRecipeSubgroup = ElementGui.addGuiTable(recipe_selector_list, "recipe-table-"..subgroup, 10, "helmod_table_recipe_selector")
@@ -541,7 +590,7 @@ function AbstractSelector:updateGroupSelector(event)
   local panel = self:getGroupsPanel()
 
   panel.clear()
-
+  local list_group = Cache.getData(self.classname, "list_group") or {}
   Logging:debug(self.classname, "list_group:",list_group)
 
   -- ajouter de la table des groupes de recipe

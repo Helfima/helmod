@@ -14,11 +14,8 @@ local transfert_mode = nil
 --
 -- @function [parent=#Download] init
 --
--- @param #Controller parent parent controller
---
 function Download:onInit(parent)
   self.panelCaption = ({"helmod_download-panel.title"})
-  self.parent = parent
 end
 
 -------------------------------------------------------------------------------

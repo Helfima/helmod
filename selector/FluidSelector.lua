@@ -8,10 +8,6 @@ require "selector.AbstractSelector"
 
 FluidSelector = newclass(AbstractSelector)
 
-local list_group = {}
-local list_subgroup = {}
-local list_prototype = {}
-
 -------------------------------------------------------------------------------
 -- Return caption
 --
@@ -24,45 +20,17 @@ function FluidSelector:getCaption(parent)
 end
 
 -------------------------------------------------------------------------------
--- Append groups
+-- Get prototype
 --
--- @function [parent=#FluidSelector] appendGroups
+-- @function [parent=#FluidSelector] getPrototype
 --
--- @param #string name
--- @param #string type
+-- @param element
+-- @param type
 --
-function FluidSelector:appendGroups(name, type)
-  Logging:debug(self.classname, "appendGroups()", name, type)
-  local fluid_prototype = FluidPrototype(name)
-  local find = self:checkFilter(fluid_prototype:native())
-  local filter_show_disable = User.getSetting("filter_show_disable")
-  local filter_show_hidden = User.getSetting("filter_show_hidden")
-
-  local list_group = Cache.getData(self.classname, "list_group")
-  local list_prototype = Cache.getData(self.classname, "list_prototype")
-  local list_subgroup = Cache.getData(self.classname, "list_subgroup")
-  
-  if find == true and (fluid_prototype:getValid() == true or filter_show_disable == true) then
-    local group_name = fluid_prototype:native().group.name
-    local subgroup_name = fluid_prototype:native().subgroup.name
-    
-    list_subgroup[subgroup_name] = fluid_prototype:native().subgroup
-    
-    if list_group[group_name] == nil then
-      list_group[group_name] = {name=group_name, search_products="", search_ingredients=""}
-    end
-    list_subgroup[subgroup_name] = fluid_prototype:native().subgroup
-    if list_prototype[group_name] == nil then list_prototype[group_name] = {} end
-    if list_prototype[group_name][subgroup_name] == nil then list_prototype[group_name][subgroup_name] = {} end
-    
-    local search_products = name
-    list_group[group_name].search_products = list_group[group_name].search_products .. search_products
-    
-    local search_ingredients = name
-    list_group[group_name].search_ingredients = list_group[group_name].search_ingredients .. search_ingredients
-    
-    table.insert(list_prototype[group_name][subgroup_name], {name=name, type=type, order=fluid_prototype:native().order, search_products=search_products, search_ingredients=search_ingredients})
-  end
+-- @return #table
+--
+function FluidSelector:getPrototype(element, type)
+  return FluidPrototype(element, type)
 end
 
 -------------------------------------------------------------------------------
@@ -75,11 +43,14 @@ end
 function FluidSelector:updateGroups(event)
   Logging:trace(self.classname, "updateGroups()", event)
 
-  self:resetGroups()
+  local list_products = {}
+  local list_ingredients = {}
 
-  for key, recipe in pairs(Player.getFluidPrototypes()) do
-    self:appendGroups(recipe.name, "recipe")
+  for key, fluid in pairs(Player.getFluidPrototypes()) do
+    self:appendGroups(fluid, "fluid", list_products, list_ingredients)
   end
+  Cache.setData(self.classname, "list_products", list_products)
+  Cache.setData(self.classname, "list_ingredients", list_ingredients)
 end
 
 -------------------------------------------------------------------------------

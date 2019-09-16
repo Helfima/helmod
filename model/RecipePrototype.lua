@@ -164,7 +164,7 @@ end
 -------------------------------------------------------------------------------
 -- Return products array of Prototype (may contain duplicate products)
 --
--- @function [parent=#RecipePrototype] getIngredientProducts
+-- @function [parent=#RecipePrototype] getRawIngredients
 --
 -- @return #table
 --

@@ -15,8 +15,6 @@ TechnologySelector = newclass(AbstractSelector)
 --
 function TechnologySelector:afterInit()
   self.disable_option = true
-  self.hidden_option = true
-  self.product_option = true
 end
 
 -------------------------------------------------------------------------------
@@ -31,49 +29,17 @@ function TechnologySelector:getCaption(parent)
 end
 
 -------------------------------------------------------------------------------
--- Append groups
+-- Get prototype
 --
--- @function [parent=#TechnologySelector] appendGroups
+-- @function [parent=#TechnologySelector] getPrototype
 --
--- @param #string name
--- @param #string type
+-- @param element
+-- @param type
 --
-function TechnologySelector:appendGroups(name, type)
-  Logging:debug(self.classname, "appendGroups()", name, type)
-  local technology_protoype = Technology(name)
-  local find = self:checkFilter(technology_protoype:native())
-  local filter_show_disable = User.getSetting("filter_show_disable")
-  local filter_show_hidden = User.getSetting("filter_show_hidden")
-
-  local list_group = Cache.getData(self.classname, "list_group")
-  local list_prototype = Cache.getData(self.classname, "list_prototype")
-  local list_subgroup = Cache.getData(self.classname, "list_subgroup")
-  
-  if find == true and (technology_protoype:getValid() == true or filter_show_disable == true) then
-    local group_name = "normal"
-    if technology_protoype:native().research_unit_count_formula ~= nil then group_name = "infinite" end
-
-    local subgroup_name = "default"
-
-    if list_group[group_name] == nil then
-      list_group[group_name] = {name=group_name, search_products="", search_ingredients=""}
-    end
-    list_subgroup[subgroup_name] = {name = subgroup_name}
-    if list_prototype[group_name] == nil then list_prototype[group_name] = {} end
-    if list_prototype[group_name][subgroup_name] == nil then list_prototype[group_name][subgroup_name] = {} end
-    
-    local search_ingredients = ""
-    
-    for key, element in pairs(technology_protoype:native().research_unit_ingredients) do
-      search_ingredients = search_ingredients .. element.name
-      list_group[group_name].search_ingredients = list_group[group_name].search_ingredients .. search_ingredients
-    end
-    
-    local search_products = name
-    list_group[group_name].search_products = list_group[group_name].search_products .. search_products
-
-    table.insert(list_prototype[group_name][subgroup_name], {name=name, type=type, order=technology_protoype:native().order, search_products=search_products, search_ingredients=search_ingredients})
-  end
+-- @return #table
+--
+function TechnologySelector:getPrototype(element, type)
+  return Technology(element, type)
 end
 
 -------------------------------------------------------------------------------
@@ -86,12 +52,15 @@ end
 function TechnologySelector:updateGroups(event)
   Logging:trace(self.classname, "updateGroups()", event)
 
-  self:resetGroups()
+  local list_products = {}
+  local list_ingredients = {}
 
   for key, technology in pairs(Player.getTechnologies()) do
-    self:appendGroups(technology.name, "technology")
+    self:appendGroups(technology, "technology", list_products, list_ingredients)
   end
 
+  Cache.setData(self.classname, "list_products", list_products)
+  Cache.setData(self.classname, "list_ingredients", list_ingredients)
 end
 
 -------------------------------------------------------------------------------
@@ -115,6 +84,8 @@ function TechnologySelector:buildPrototypeIcon(guiElement, prototype, tooltip)
   Logging:trace(self.classname, "buildPrototypeIcon(guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
   ElementGui.addGuiButtonSelectSprite(guiElement, self.classname.."=element-select=ID=technology=", "technology", prototype.name, prototype.name, tooltip)
 end
+
+
 
 
 

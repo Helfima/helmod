@@ -12,9 +12,7 @@ RuleEdition = newclass(AbstractEdition)
 --
 -- @function [parent=#RuleEdition] onInit
 --
--- @param #Controller parent parent controller
---
-function RuleEdition:onInit(parent)
+function RuleEdition:onInit()
   self.panelCaption = ({"helmod_rule-edition-panel.title"})
   self.parameterLast = string.format("%s_%s",self.classname,"last")
 end

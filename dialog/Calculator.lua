@@ -14,11 +14,8 @@ local display_panel = nil
 --
 -- @function [parent=#Calculator] init
 --
--- @param #Controller parent parent controller
---
-function Calculator:onInit(parent)
+function Calculator:onInit()
   self.panelCaption = ({"helmod_calculator-panel.title"})
-  self.parent = parent
 end
 
 -------------------------------------------------------------------------------

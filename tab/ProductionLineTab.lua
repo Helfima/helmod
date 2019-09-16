@@ -157,6 +157,7 @@ function ProductionLineTab:updateData(event)
   
   -- data panel
   local scrollPanel = self:getResultScrollPanel()
+  --test scrollPanel.add({type="choose-elem-button", elem_type="recipe"})
 
   local countBlock = Model.countBlocks()
   if countBlock > 0 then

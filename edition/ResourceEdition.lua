@@ -14,9 +14,7 @@ ResourceEdition = newclass(AbstractEdition)
 --
 -- @function [parent=#ResourceEdition] onInit
 --
--- @param #Controller parent parent controller
---
-function ResourceEdition:onInit(parent)
+function ResourceEdition:onInit()
 	self.panelCaption = ({"helmod_resource-edition-panel.title"})
 	self.parameterLast = string.format("%s_%s",self.classname,"last")
 end

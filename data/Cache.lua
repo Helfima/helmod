@@ -56,7 +56,29 @@ end
 --
 function Cache.hasData(classname, name)
   Logging:trace(Cache.classname, "getData(hasData, name)",classname, name)
-  return data[classname] ~= nil and data[classname][name] == nil
+  return data[classname] ~= nil and data[classname][name] ~= nil
+end
+
+-------------------------------------------------------------------------------
+-- Is empty
+--
+-- @function [parent=#Cache] isEmpty
+--
+-- @param #string classname
+-- @param #string name
+--
+-- @return #boolean
+--
+function Cache.isEmpty(classname, name)
+  Logging:trace(Cache.classname, "getData(hasData, name)",classname, name)
+  if data[classname] ~= nil and data[classname][name] ~= nil then
+    if type(data[classname][name]) == "string" then
+      return data[classname][name] == ""
+    else
+      return Model.countList(data[classname][name]) == 0
+    end
+  end
+  return true
 end
 
 -------------------------------------------------------------------------------

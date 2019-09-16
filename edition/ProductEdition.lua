@@ -13,9 +13,7 @@ ProductEdition = newclass(Form)
 --
 -- @function [parent=#ProductEdition] onInit
 --
--- @param #Controller parent parent controller
---
-function ProductEdition:onInit(parent)
+function ProductEdition:onInit()
   self.panelCaption = ({"helmod_product-edition-panel.title"})
   self.parameterLast = string.format("%s_%s",self.classname,"last")
 end

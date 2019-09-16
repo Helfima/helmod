@@ -78,6 +78,7 @@ end
 -- @return #LuaGuiElement
 --
 function Form:getPanelName()
+  Logging:trace(self.classname, "getPanelName()", self.classname)
   return self.classname
 end
 
@@ -101,6 +102,7 @@ end
 -- @return #LuaGuiElement
 --
 function Form:getPanel()
+  Logging:debug(self.classname, "getPanel()")
   local parent_panel = self:getParentPanel()
   if parent_panel[self:getPanelName()] ~= nil and parent_panel[self:getPanelName()].valid then
     return parent_panel[self:getPanelName()], parent_panel[self:getPanelName()]["content_panel"], parent_panel[self:getPanelName()]["header_panel"]["menu_panel"]
@@ -129,6 +131,7 @@ function Form:getPanel()
   end
   title_panel.drag_target = flow_panel
   --Logging:debug(self.classname, "children",panel.children_names)
+  Logging:debug(self.classname, "panel ready")
   return flow_panel, content_panel, menu_panel
 end
 
@@ -218,13 +221,15 @@ end
 function Form:open(event)
   Logging:debug(self.classname, "open()", event)
   self:onBeforeOpen(event)
-  if self:isOpened() then return end
+  if self:isOpened() then return true end
   local parent_panel = self:getParentPanel()
   User.setActiveForm(self.classname)
   if parent_panel[self:getPanelName()] == nil then
     self:updateTopMenu(event)
     self:onOpen(event)
+    self:isOpened()
   end
+  return true
 end
 
 -------------------------------------------------------------------------------
@@ -325,6 +330,7 @@ function Form:updateTopMenu(event)
   Logging:debug(self.classname, "updateTopMenu()", event)
   -- ajoute un menu
   if self.panelCaption ~= nil then
+    Logging:debug(self.classname, "self.panelCaption OK")
     local flow_panel, content_panel, menu_panel = self:getPanel()
     menu_panel.clear()
     if self.panelClose then
@@ -343,6 +349,8 @@ function Form:updateTopMenu(event)
       end
       ElementGui.addGuiButton(group2, self.classname.."=CLOSE", nil, "helmod_button_icon_close_red", nil, ({"helmod_button.close"}))
     end
+  else
+    Logging:warn(self.classname, "self.panelCaption not found")
   end
 end
 

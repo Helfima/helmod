@@ -23,9 +23,7 @@ local display_level = {
 --
 -- @function [parent=#PinPanel] onInit
 --
--- @param #Controller parent parent controller
---
-function PinPanel:onInit(parent)
+function PinPanel:onInit()
   self.panelCaption = ({"helmod_pin-tab-panel.title"})
   self.otherClose = false
   self.parameterLast = string.format("%s_%s",self.classname,"last")

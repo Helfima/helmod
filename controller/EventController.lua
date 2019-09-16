@@ -35,6 +35,7 @@ function EventController.start()
   EventController.pcallEvent(defines.events.on_research_finished, EventController.onResearchFinished)
   --EventController.pcallEvent(defines.events.on_gui_closed, EventController.onGuiClosed)
 
+  EventController.pcallNthTick(10, EventController.onNthTick)
   -- event hotkey
   EventController.pcallEvent("helmod-input-valid", EventController.onCustomInput)
   EventController.pcallEvent("helmod-close", EventController.onCustomInput)
@@ -55,6 +56,24 @@ function EventController.onCustomInput(event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
     Dispatcher:send("on_gui_hotkey", event, Controller.classname)
+  end
+end
+
+-------------------------------------------------------------------------------
+-- EventController callback
+--
+-- @function [parent=#EventController] pcallNthTick
+--
+-- @param #number tick
+-- @param #function callback
+--
+function EventController.pcallNthTick(tick, callback)
+  local ok , err = pcall(function()
+    script.on_nth_tick(tick,callback)
+  end)
+  if not(ok) then
+    log("Helmod: defined on_nth_tick is not valid!")
+    log(err)
   end
 end
 
@@ -109,7 +128,7 @@ end
 --
 function EventController.onResearchFinished(event)
   Logging:trace(EventController.classname, "onResearchFinished(event)", event)
-  Controller.resetCaches()
+  Controller:resetCaches()
   --Player.print("Caches are reseted!")
 end
 
@@ -141,7 +160,7 @@ function EventController.onGuiClosed(event)
   Logging:trace(EventController.classname, "onGuiClosed(event)", event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
-    Controller.onGuiClosed(event)
+    Controller:onGuiClosed(event)
   end
 end
 
@@ -171,7 +190,7 @@ function EventController.onConfigurationChanged(data)
     --initialise au chargement d'une partie existante
     for _,player in pairs(game.players) do
       Player.set(player)
-      Controller.bindController(player)
+      Controller:bindController(player)
     end
   end
 end
@@ -185,7 +204,19 @@ end
 --
 function EventController.onTick(event)
   Logging:trace(EventController.classname, "onTick(event)", event)
-  Controller.onTick(event)
+  Controller:onTick(event)
+end
+
+-------------------------------------------------------------------------------
+-- On tick
+--
+-- @function [parent=#EventController] onTick
+--
+-- @param #table NthTickEvent {tick=#number, nth_tick=#number}
+--
+function EventController.onNthTick(NthTickEvent)
+  Logging:trace(EventController.classname, "on_nth_tick(NthTickEvent)", NthTickEvent)
+  Controller:onNthTick(NthTickEvent)
 end
 
 -------------------------------------------------------------------------------
@@ -300,7 +331,7 @@ function EventController.onPlayerCreated(event)
   Logging:trace(EventController.classname, "onPlayerCreated(event)", event)
   if event ~= nil and event.player_index ~= nil then
     local player = Player.load(event).native()
-    Controller.bindController(player)
+    Controller:bindController(player)
   end
 end
 
@@ -316,7 +347,7 @@ function EventController.onPlayerJoinedGame(event)
   Logging:trace(EventController.classname, "onPlayerJoinedGame(event)", event)
   if event ~= nil and event.player_index ~= nil then
     local player = Player.load(event).native()
-    Controller.bindController(player)
+    Controller:bindController(player)
   end
 end
 

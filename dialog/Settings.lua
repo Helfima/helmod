@@ -14,11 +14,8 @@ local dropdown = {}
 --
 -- @function [parent=#Settings] onInit
 --
--- @param #Controller parent parent controller
---
-function Settings:onInit(parent)
+function Settings:onInit()
   self.panelCaption = ({"helmod_settings-panel.title"})
-  self.parent = parent
 end
 
 -------------------------------------------------------------------------------

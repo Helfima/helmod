@@ -59,3 +59,27 @@ function Prototype:getType()
   return self.lua_prototype.type
 end
 
+-------------------------------------------------------------------------------
+-- Return group
+--
+-- @function [parent=#Prototype] getGroup
+--
+-- @return #string
+--
+function Prototype:getGroup()
+  if self.lua_prototype == nil then return {} end
+  return self.lua_prototype.group
+end
+
+-------------------------------------------------------------------------------
+-- Return group
+--
+-- @function [parent=#Prototype] getGroup
+--
+-- @return #string
+--
+function Prototype:getSubgroup()
+  if self.lua_prototype == nil then return {} end
+  return self.lua_prototype.subgroup
+end
+

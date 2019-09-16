@@ -146,11 +146,8 @@ local help_data = {
 --
 -- @function [parent=#HelpPanel] onInit
 --
--- @param #Controller parent parent controller
---
-function HelpPanel:onInit(parent)
+function HelpPanel:onInit()
   self.panelCaption = ({"helmod_help.panel-title"})
-  self.parent = parent
   self.help_button = false
 end
 

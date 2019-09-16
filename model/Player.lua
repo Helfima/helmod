@@ -64,7 +64,7 @@ end
 -------------------------------------------------------------------------------
 -- Return admin player
 --
--- @function [parent=#Player] native
+-- @function [parent=#Player] isAdmin
 --
 -- @return #boolean
 --
@@ -97,6 +97,10 @@ end
 function Player.getIconType(element)
   Logging:trace(Player.classname, "getIconType(element)", element)
   if element == nil or element.name == nil then return "unknown" end
+  local entity = Player.getEntityPrototype(element.name)
+  if entity ~= nil then
+    return "entity"
+  end
   local item = Player.getItemPrototype(element.name)
   if item ~= nil then
     return "item"
@@ -104,10 +108,6 @@ function Player.getIconType(element)
   local fluid = Player.getFluidPrototype(element.name)
   if fluid ~= nil then
     return "fluid"
-  end
-  local entity = Player.getEntityPrototype(element.name)
-  if entity ~= nil then
-    return "entity"
   end
   local technology = Player.getTechnology(element.name)
   if technology ~= nil then

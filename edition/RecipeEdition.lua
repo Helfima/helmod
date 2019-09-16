@@ -14,9 +14,7 @@ RecipeEdition = newclass(AbstractEdition)
 --
 -- @function [parent=#RecipeEdition] onInit
 --
--- @param #Controller parent parent controller
---
-function RecipeEdition:onInit(parent)
+function RecipeEdition:onInit()
   self.panelCaption = ({"helmod_recipe-edition-panel.title"})
   self.parameterLast = string.format("%s_%s",self.classname,"last")
   self.content_verticaly = true

@@ -20,45 +20,17 @@ function ItemSelector:getCaption(parent)
 end
 
 -------------------------------------------------------------------------------
--- Append groups
+-- Get prototype
 --
--- @function [parent=#ItemSelector] appendGroups
+-- @function [parent=#ItemSelector] getPrototype
 --
--- @param #string name
--- @param #string type
+-- @param element
+-- @param type
 --
-function ItemSelector:appendGroups(name, type)
-  Logging:debug(self.classname, "appendGroups()", name, type)
-  local item_prototype = ItemPrototype(name)
-  local find = self:checkFilter(item_prototype:native())
-  local filter_show_disable = User.getSetting("filter_show_disable")
-  local filter_show_hidden = User.getSetting("filter_show_hidden")
-  
-  local list_group = Cache.getData(self.classname, "list_group")
-  local list_prototype = Cache.getData(self.classname, "list_prototype")
-  local list_subgroup = Cache.getData(self.classname, "list_subgroup")
-
-  if find == true and (item_prototype:getValid() == true or filter_show_disable == true) then
-    local group_name = item_prototype:native().group.name
-    local subgroup_name = item_prototype:native().subgroup.name
-    
-    list_subgroup[subgroup_name] = item_prototype:native().subgroup
-    
-    if list_group[group_name] == nil then
-      list_group[group_name] = {name=group_name, search_products="", search_ingredients=""}
-    end
-    list_subgroup[subgroup_name] = item_prototype:native().subgroup
-    if list_prototype[group_name] == nil then list_prototype[group_name] = {} end
-    if list_prototype[group_name][subgroup_name] == nil then list_prototype[group_name][subgroup_name] = {} end
-    
-    local search_products = name
-    list_group[group_name].search_products = list_group[group_name].search_products .. search_products
-    
-    local search_ingredients = name
-    list_group[group_name].search_ingredients = list_group[group_name].search_ingredients .. search_ingredients
-
-    table.insert(list_prototype[group_name][subgroup_name], {name=name, type=type, order=item_prototype:native().order, search_products=search_products, search_ingredients=search_ingredients})
-  end
+-- @return #table
+--
+function ItemSelector:getPrototype(element, type)
+  return ItemPrototype(element, type)
 end
 
 -------------------------------------------------------------------------------
@@ -75,11 +47,14 @@ end
 function ItemSelector:updateGroups(event)
   Logging:trace(self.classname, "updateGroups()", event)
 
-  self:resetGroups()
+  local list_products = {}
+  local list_ingredients = {}
 
   for key, item in pairs(Player.getItemPrototypes()) do
-    self:appendGroups(item.name, "item")
+    self:appendGroups(item, "item", list_products, list_ingredients)
   end
+  Cache.setData(self.classname, "list_products", list_products)
+  Cache.setData(self.classname, "list_ingredients", list_ingredients)
 end
 
 -------------------------------------------------------------------------------
@@ -105,6 +80,11 @@ function ItemSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
   Logging:trace(self.classname, "buildPrototypeIcon(player, guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
   ElementGui.addGuiButtonSelectSprite(guiElement, self.classname.."=element-select=ID=item=", Player.getItemIconType(prototype), prototype.name, prototype.name, tooltip)
 end
+
+
+
+
+
 
 
 

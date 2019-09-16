@@ -12,9 +12,7 @@ StatusPanel = newclass(Form)
 --
 -- @function [parent=#StatusPanel] onInit
 --
--- @param #Controller parent parent controller
---
-function StatusPanel:onInit(parent)
+function StatusPanel:onInit()
   self.panelCaption = ({"helmod_status-tab-panel.title"})
   self.parameterLast = string.format("%s_%s",self.classname,"last")
 end

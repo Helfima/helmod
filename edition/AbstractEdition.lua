@@ -343,6 +343,7 @@ function AbstractEdition:onUpdate(event)
       self:updateBeacon(event)
     end
   end
+
 end
 
 -------------------------------------------------------------------------------

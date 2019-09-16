@@ -97,6 +97,7 @@ helmod_settings_mod = {
       "HMLeftMenuPanel",
       "HMPinPanel",
       "HMPlayer",
+      "HMPreferenceEdition",
       "HMProduct",
       "HMProductEdition",
       "HMProductionBlockTab",

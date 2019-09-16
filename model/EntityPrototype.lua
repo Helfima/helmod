@@ -227,7 +227,7 @@ end
 --
 function EntityPrototype:getPumpingSpeed()
   if self.lua_prototype ~= nil then
-    return self.lua_prototype.pumping_speed*60 or 0
+    return (self.lua_prototype.pumping_speed or 0)*60 
   end
   return 0
 end
