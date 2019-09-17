@@ -963,6 +963,25 @@ function ElementGui.addCellLabel2(parent, name, label1, label2, minimal_width)
 end
 
 -------------------------------------------------------------------------------
+-- Add cell input
+--
+-- @function [parent=#ElementGui] addCellInput
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #string key unique id
+-- @param #string text input text
+-- @param #string style style of text
+-- @param #string tooltip displayed text
+--
+function ElementGui.addCellInput(parent, key, text, style, tooltip)
+  Logging:trace(ElementGui.classname, "addCellInput()", key, text, style, tooltip)
+  local cell = ElementGui.addCell(parent, key, 2)
+  local input = ElementGui.addGuiText(cell, key, text, style, ({"tooltip.formula-allowed"}))
+  local button = ElementGui.addGuiButton(cell, key, "=validation", "helmod_button_icon_ok",nil, {"helmod_button.apply"})
+  return cell, input, button
+end
+
+-------------------------------------------------------------------------------
 -- Add icon in cell element
 --
 -- @function [parent=#ElementGui] addCellIcon
@@ -1426,8 +1445,6 @@ function ElementGui.getTooltipRecipe(prototype)
   -- insert __2__ value
   if recipe_prototype:getCategory() == "crafting-handonly" then
     table.insert(tooltip, {"tooltip.recipe-by-hand"})
-  elseif recipe_prototype:getEnabled() == false then
-    table.insert(tooltip, {"tooltip.recipe-unsearched"})
   else
     table.insert(tooltip, "")
   end

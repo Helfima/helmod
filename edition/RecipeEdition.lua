@@ -7,17 +7,19 @@ require "edition.AbstractEdition"
 -- @extends #AbstractEdition
 --
 
-RecipeEdition = newclass(AbstractEdition)
-
+RecipeEdition = newclass(AbstractEdition,function(base,classname)
+  AbstractEdition.init(base,classname)
+  base.content_verticaly = true
+end)
 -------------------------------------------------------------------------------
 -- On initialization
 --
 -- @function [parent=#RecipeEdition] onInit
 --
 function RecipeEdition:onInit()
+  Logging:debug(self.classname, "onInit()")
   self.panelCaption = ({"helmod_recipe-edition-panel.title"})
   self.parameterLast = string.format("%s_%s",self.classname,"last")
-  self.content_verticaly = true
 end
 
 -------------------------------------------------------------------------------

@@ -329,7 +329,7 @@ end
 function AbstractSelector:prepare(event)
   Logging:debug(self.classname, "prepare()", event)
   -- recuperation recipes
-  if Model.countList(self:getListGroup()) == 0 then
+  if Model.countList(Cache.getData(self.classname, "list_products")) == 0 then
     self:updateGroups(event)
     Logging:debug(self.classname, "prepare ok")
     return true

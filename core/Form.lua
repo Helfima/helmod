@@ -124,14 +124,12 @@ function Form:getPanel()
   menu_panel.style.horizontal_align = "right"
   
   local content_panel
-  if self.content_verticaly then
+  if self.content_verticaly == true then
     content_panel = ElementGui.addGuiFlowV(flow_panel, "content_panel")
   else
     content_panel = ElementGui.addGuiFlowH(flow_panel, "content_panel")
   end
   title_panel.drag_target = flow_panel
-  --Logging:debug(self.classname, "children",panel.children_names)
-  Logging:debug(self.classname, "panel ready")
   return flow_panel, content_panel, menu_panel
 end
 

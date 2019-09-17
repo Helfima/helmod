@@ -153,7 +153,8 @@ function ProductEdition:updateInfo(event)
     ElementGui.addGuiLabel(table_panel, "product-label", Player.getLocalisedName(product))
 
     ElementGui.addGuiLabel(table_panel, "quantity-label", ({"helmod_common.quantity"}))
-    input_quantity = ElementGui.addGuiText(table_panel, string.format("%s=product-update=ID=%s=%s",self.classname,event.item1,product.name), product_count or 0, nil, ({"tooltip.formula-allowed"}))
+    local cell, button
+    cell, input_quantity, button = ElementGui.addCellInput(table_panel, string.format("%s=product-update=ID=%s=%s",self.classname,event.item1,product.name), product_count or 0, nil, ({"tooltip.formula-allowed"}))
     input_quantity.focus()
     input_quantity.select_all()
   end
@@ -206,7 +207,7 @@ function ProductEdition:onEvent(event)
     if event.action == "product-update" then
       local products = {}
 
-      local operation = event.element.text
+      local operation = input_quantity.text
       local ok , err = pcall(function()
         local quantity = formula(operation)
         if quantity == 0 then quantity = nil end
@@ -218,13 +219,6 @@ function ProductEdition:onEvent(event)
       if not(ok) then
         Player.print("Formula is not valid!")
       end
-    end
-    if event.action == "product-reset" then
-      local products = {}
-      ModelBuilder.updateProduct(event.item1, event.item2, nil)
-      ModelCompute.update()
-      self:close()
-      Controller:send("on_gui_refresh", event)
     end
     if event.action == "element-select" then
       local belt_speed = EntityPrototype(event.item1):getBeltSpeed()

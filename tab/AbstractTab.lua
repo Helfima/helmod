@@ -299,7 +299,7 @@ function AbstractTab:updateMenuPanel(event)
     ElementGui.addGuiButton(group1, "HMRecipeSelector=OPEN=ID=", block_id, "helmod_button_icon_wrench",nil, ({"helmod_result-panel.add-button-recipe"}))
     ElementGui.addGuiButton(group1, "HMTechnologySelector=OPEN=ID=", block_id, "helmod_button_icon_graduation",nil, ({"helmod_result-panel.add-button-technology"}))
     ElementGui.addGuiButton(group1, "HMContainerSelector=OPEN=ID=", block_id, "helmod_button_icon_container",nil, ({"helmod_result-panel.select-button-container"}))
-    ElementGui.addGuiButton(group1, "HMPreferenceEdition=OPEN=ID=", block_id, "helmod_button_icon_database",nil, ({"helmod_button.preferences"}))
+    --ElementGui.addGuiButton(group1, "HMPreferenceEdition=OPEN=ID=", block_id, "helmod_button_icon_services",nil, {"helmod_button.preferences"})
 
     local group2 = ElementGui.addGuiFlowH(action_panel,"group2",helmod_flow_style.horizontal)
     -- copy past

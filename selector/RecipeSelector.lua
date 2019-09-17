@@ -66,7 +66,6 @@ function RecipeSelector:appendGroups(element, type, list_products, list_ingredie
     list_products[element.name][lua_prototype.name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
     loop.product = loop.product + 1
   end
-
   for key, element in pairs(prototype:getRawIngredients()) do
     if list_ingredients[element.name] == nil then list_ingredients[element.name] = {} end
     list_ingredients[element.name][lua_prototype.name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
