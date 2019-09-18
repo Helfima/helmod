@@ -32,7 +32,7 @@ function EventController.start()
   EventController.pcallEvent(defines.events.on_player_joined_game, EventController.onPlayerJoinedGame)
   EventController.pcallEvent(defines.events.on_runtime_mod_setting_changed, EventController.onRuntimeModSettingChanged)
   EventController.pcallEvent(defines.events.on_console_command, EventController.onConsoleCommand)
-  EventController.pcallEvent(defines.events.on_research_finished, EventController.onResearchFinished)
+  --EventController.pcallEvent(defines.events.on_research_finished, EventController.onResearchFinished)
   --EventController.pcallEvent(defines.events.on_gui_closed, EventController.onGuiClosed)
 
   EventController.pcallNthTick(10, EventController.onNthTick)
@@ -128,7 +128,7 @@ end
 --
 function EventController.onResearchFinished(event)
   Logging:trace(EventController.classname, "onResearchFinished(event)", event)
-  Controller:resetCaches()
+  Cache.reset()
   --Player.print("Caches are reseted!")
 end
 

@@ -60,15 +60,16 @@ function RecipeSelector:appendGroups(element, type, list_products, list_ingredie
   local prototype = self:getPrototype(element, type)
 
   local lua_prototype = prototype:native()
+  local prototype_name = string.format("%s-%s",type , lua_prototype.name)
   Logging:trace(self.classname, "lua_recipe", lua_prototype)
   for key, element in pairs(prototype:getRawProducts()) do
     if list_products[element.name] == nil then list_products[element.name] = {} end
-    list_products[element.name][lua_prototype.name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
+    list_products[element.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
     loop.product = loop.product + 1
   end
   for key, element in pairs(prototype:getRawIngredients()) do
     if list_ingredients[element.name] == nil then list_ingredients[element.name] = {} end
-    list_ingredients[element.name][lua_prototype.name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
+    list_ingredients[element.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
     loop.ingredient = loop.ingredient + 1
   end
 

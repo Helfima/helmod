@@ -254,6 +254,7 @@ function AbstractSelector:onEvent(event)
         if type == "fluid-wagon" then
           User.setParameter("vehicle_fluid",event.item2)
         end
+        Controller:send("on_gui_refresh", event)
       end
     end
   end
@@ -506,7 +507,7 @@ function AbstractSelector:onCreateElementLists()
     local filter_show_disable = User.getSetting("filter_show_disable")
     local filter_show_hidden = User.getSetting("filter_show_hidden")
 
-    -- list_products[element.name][group_name][lua_recipe.name]
+    -- list_products[element.name][type - lua_recipe.name]
     for key, element in pairs(list) do
       -- filter sur le nom element (product ou ingredient)
       if self:checkFilter(key) then

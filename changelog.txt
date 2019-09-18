@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.9.4
+Date: 18. 09. 2019
+  Bugfixes:
+    - Fixed refresh when container change
+    - Removed event on_research_finished (not need)
+    - Fixed recipe selector (collision name)
+---------------------------------------------------------------------------------------------------
 Version: 0.9.3
 Date: 18. 09. 2019
   Features:

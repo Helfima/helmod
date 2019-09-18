@@ -296,7 +296,8 @@ local list = {
   {name="robot"},
   {name="ok"},
   {name="checkmark"},
-  {name="services"}
+  {name="services"},
+  {name="search"}
 }
 for icon_row,icon in pairs(list) do
   menuIcons(icon.name, icon_row, icon.font)

@@ -5,6 +5,7 @@ require "dialog.StatusPanel"
 require "dialog.Settings"
 require "dialog.Download"
 require "dialog.Calculator"
+require "dialog.RecipeExplorer"
 require "edition.RecipeEdition"
 require "edition.ProductEdition"
 require "edition.ResourceEdition"
@@ -71,6 +72,7 @@ function Controller:prepare()
   table.insert(forms, HelpPanel("HMHelpPanel"))
   table.insert(forms, Download("HMDownload"))
   table.insert(forms, Calculator("HMCalculator"))
+  table.insert(forms, RecipeExplorer("HMRecipeExplorer"))
 
   table.insert(forms, ProductionLineTab("HMProductionLineTab"))
   table.insert(forms, ProductionBlockTab("HMProductionBlockTab"))
