@@ -350,7 +350,7 @@ end
 -- @return #number default 0
 --
 function EntityPrototype:getElectricOutputFlowLimit()
-  if self.lua_prototype ~= nil and self.lua_prototype.electric_energy_source_prototype ~= nil and self.lua_prototypes.electric_energy_source_prototype.output_flow_limit~= nil then
+  if self.lua_prototype ~= nil and self.lua_prototype.electric_energy_source_prototype ~= nil and self.lua_prototype.electric_energy_source_prototype.output_flow_limit~= nil then
     return self.lua_prototype.electric_energy_source_prototype.output_flow_limit*60 or 0
   end
   return 0

@@ -1,4 +1,3 @@
-require "edition.AbstractEdition"
 -------------------------------------------------------------------------------
 -- Class to build power edition dialog
 --
@@ -6,8 +5,9 @@ require "edition.AbstractEdition"
 -- @extends #AbstractEdition
 --
 
-EnergyEdition = newclass(AbstractEdition)
+EnergyEdition = newclass(Form)
 
+local input_quantity = nil
 -------------------------------------------------------------------------------
 -- On initialization
 --
@@ -193,14 +193,14 @@ end
 function EnergyEdition:onBeforeEvent(event)
   local model = Model.getModel()
   local close = true
-  if model.guiPowerLast == nil or model.guiPowerLast ~= event.item1 then
+  if User.getParameter(self.parameterLast) == nil or User.getParameter(self.parameterLast) ~= event.item1 then
     close = false
   end
-  model.guiPowerLast = event.item1
+  User.setParameter(self.parameterLast, event.item1)
   model.primaryGroupSelected = nil
   model.secondaryGroupSelected = nil
 
-  return close
+  return false
 end
 
 -------------------------------------------------------------------------------
@@ -209,7 +209,7 @@ end
 -- @function [parent=#EnergyEdition] onClose
 --
 function EnergyEdition:onClose()
-  local model = Model.getModel()
+  User.setParameter(self.parameterLast,nil)
 end
 
 -------------------------------------------------------------------------------
@@ -233,17 +233,21 @@ function EnergyEdition:onEvent(event)
     self:updateSecondarySelector(event)
   end
 
-  if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
+  if User.isWriter() then
     if event.action == "power-update" then
-      local inputPanel = self:getPowerPanel()["table-input"]
       local options = {}
-
-      if inputPanel["power"] ~= nil then
-        options["power"] = ElementGui.getInputNumber(inputPanel["power"])
+      local operation = input_quantity.text
+      local ok , err = pcall(function()
+        local quantity = formula(operation)
+        if quantity == 0 then quantity = nil end
+        options["power"] = quantity
+        ModelBuilder.updatePower(event.item1, options)
+        self:updatePowerInfo(event)
+        Controller:send("on_gui_refresh", event)
+      end)
+      if not(ok) then
+        Player.print("Formula is not valid!")
       end
-
-      ModelBuilder.updatePower(event.item1, options)
-      self:updatePowerInfo(event)
     end
 
     if event.action == "primary-select" then
@@ -255,7 +259,6 @@ function EnergyEdition:onEvent(event)
         event.item1 = power.id
       end
       ModelCompute.computePower(event.item1)
-      self:close()
       Controller:send("on_gui_update", event)
     end
 
@@ -268,7 +271,6 @@ function EnergyEdition:onEvent(event)
         event.item1 = power.id
       end
       ModelCompute.computePower(event.item1)
-      self:close()
       Controller:send("on_gui_update", event)
     end
   end
@@ -294,6 +296,7 @@ end
 --
 -- @param #LuaEvent event
 --
+
 function EnergyEdition:updatePowerInfo(event)
   Logging:debug(self.classname, "updatePowerInfo()", event)
   local power_panel = self:getPowerPanel()
@@ -309,12 +312,14 @@ function EnergyEdition:updatePowerInfo(event)
         power_panel[guiName].destroy()
       end
 
-      local tablePanel = ElementGui.addGuiTable(power_panel,"table-input",2)
+      local table_panel = ElementGui.addGuiTable(power_panel,"table-input",2)
 
-      ElementGui.addGuiLabel(tablePanel, "label-power", ({"helmod_energy-edition-panel.power"}))
-      ElementGui.addGuiText(tablePanel, "power", math.ceil(power.power/1000)/1000, "helmod_textfield")
-
-      ElementGui.addGuiButton(tablePanel, self.classname.."=power-update=ID="..event.item1.."=", power.id, "helmod_button_default", ({"helmod_button.update"}))
+      ElementGui.addGuiLabel(table_panel, "label-power", ({"helmod_energy-edition-panel.power"}))
+      local cell, button
+      local power_value = math.ceil(power.power/1000)/1000
+      cell, input_quantity, button = ElementGui.addCellInput(table_panel, string.format("%s=power-update=ID=%s=%s",self.classname,event.item1,power.id), power_value or 0, nil, ({"tooltip.formula-allowed"}))
+      input_quantity.focus()
+      input_quantity.select_all()
     end
   end
 end
@@ -359,7 +364,7 @@ function EnergyEdition:updatePrimaryInfo(event)
       local tooltip = ({"tooltip.selector-module"})
       if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
       ElementGui.addGuiButtonSprite(headerPanel, self.classname.."=do-nothing=ID=", Player.getIconType(primary), primary.name, primary.name, tooltip)
-      
+
       local entity_prototype = EntityPrototype(primary.name)
       if entity_prototype:native() ~= nil then
         ElementGui.addGuiLabel(headerPanel, "label", entity_prototype:getLocalisedName())
@@ -482,8 +487,8 @@ function EnergyEdition:updateSecondaryInfo(event)
       local tooltip = ({"tooltip.selector-module"})
       if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
       ElementGui.addGuiButtonSprite(headerPanel, self.classname.."=do-nothing=ID=", Player.getIconType(secondary), secondary.name, secondary.name, tooltip)
-      
-      local entity_prototype = EntityPrototype(primary.name)
+
+      local entity_prototype = EntityPrototype(secondary.name)
       if entity_prototype:native() ~= nil then
         ElementGui.addGuiLabel(headerPanel, "label", entity_prototype:getLocalisedName())
       else
@@ -528,7 +533,7 @@ function EnergyEdition:updateSecondarySelector(event)
   local model = Model.getModel()
 
   scroll_panel.clear()
-  
+
   local object = self:getObject(event)
 
   local groupsPanel = ElementGui.addGuiTable(scroll_panel, "secondary-groups", 1)

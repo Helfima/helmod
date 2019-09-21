@@ -63,6 +63,18 @@ function User.isAdmin()
 end
 
 -------------------------------------------------------------------------------
+-- Return is writer player
+--
+-- @function [parent=#User] isWriter
+--
+-- @return #boolean
+--
+function User.isWriter()
+  local model = Model.getModel()
+  return Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0)
+end
+
+-------------------------------------------------------------------------------
 -- Return is filter translate
 --
 -- @function [parent=#User] isFilterTranslate

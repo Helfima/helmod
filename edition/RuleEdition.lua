@@ -1,11 +1,10 @@
-require "edition.AbstractEdition"
 -------------------------------------------------------------------------------
 -- Class to build rule edition dialog
 --
 -- @module RuleEdition
 --
 
-RuleEdition = newclass(AbstractEdition)
+RuleEdition = newclass(Form)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -147,7 +146,7 @@ end
 --
 function RuleEdition:onEvent(event)
   Logging:debug(self.classname, "onEvent()", event)
-  if Player.isAdmin() then
+  if User.isAdmin() then
     if event.action == "dropdown" then
       if event.item1 == "mod" then
         rule_mod = ElementGui.getDropdownSelection(event.element)
@@ -186,6 +185,7 @@ function RuleEdition:onEvent(event)
       end
       ModelBuilder.addRule(rule_mod, rule_name, rule_category, rule_type, rule_value, rule_excluded)
       self:close()
+      Controller:send("on_gui_refresh", event)
     end
   end
 end

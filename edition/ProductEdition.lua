@@ -1,4 +1,3 @@
-require "edition.AbstractEdition"
 -------------------------------------------------------------------------------
 -- Class to build product edition dialog
 --
@@ -203,7 +202,7 @@ end
 function ProductEdition:onEvent(event)
   Logging:debug(self.classname, "onEvent()", event)
   local model = Model.getModel()
-  if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
+  if User.isWriter() then
     if event.action == "product-update" then
       local products = {}
 

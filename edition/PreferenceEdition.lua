@@ -1,4 +1,3 @@
-require "edition.AbstractEdition"
 -------------------------------------------------------------------------------
 -- Class to build product edition dialog
 --
