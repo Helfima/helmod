@@ -51,7 +51,7 @@ end
 -- @param #table list_ingredients
 -- @param #table list_translate
 --
-function TechnologySelector:updateGroups(element, type, list_products, list_ingredients, list_translate)
+function TechnologySelector:updateGroups(list_products, list_ingredients, list_translate)
   Logging:trace(self.classname, "updateGroups()")
 
   for key, technology in pairs(Player.getTechnologies()) do
