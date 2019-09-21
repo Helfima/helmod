@@ -34,6 +34,8 @@ function EventController.start()
   EventController.pcallEvent(defines.events.on_console_command, EventController.onConsoleCommand)
   --EventController.pcallEvent(defines.events.on_research_finished, EventController.onResearchFinished)
   --EventController.pcallEvent(defines.events.on_gui_closed, EventController.onGuiClosed)
+  
+  EventController.pcallEvent(defines.events.on_string_translated, EventController.onStringTranslated)
 
   EventController.pcallNthTick(10, EventController.onNthTick)
   -- event hotkey
@@ -220,6 +222,19 @@ function EventController.onNthTick(NthTickEvent)
 end
 
 -------------------------------------------------------------------------------
+-- On string translated
+--
+-- @function [parent=#EventController] onStringTranslated
+--
+-- @param #table event {player_index=number, localised_ string=#string,result=#string, translated=#boolean}
+--
+function EventController.onStringTranslated(event)
+  Logging:debug(EventController.classname, "onStringTranslated(event)", event)
+  Player.load(event)
+  Controller:onStringTranslated(event)
+end
+
+-------------------------------------------------------------------------------
 -- On click event
 --
 -- @function [parent=#EventController] onGuiClick
@@ -283,7 +298,6 @@ function EventController.onGuiSelectionStateChanged(event)
   Logging:trace(EventController.classname, "onGuiSelectionStateChanged(event)", event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
-    --Event.load(event, "dropdown")
     Dispatcher:send("on_gui_action", event, Controller.classname)
   end
 end

@@ -174,16 +174,6 @@ helmod_settings_mod = {
     default_value = true,
     order = "b2"
   },
-  -- display location
-  display_location = {
-    type = "string-setting",
-    setting_type = "runtime-per-user",
-    localised_name = {"helmod_settings.display-location"},
-    localised_description = {"helmod_settings.display-location-desc"},
-    default_value = "center",
-    allowed_values = {"center", "left", "top"},
-    order = "b3"
-  },
   --display-cell-mod
   display_cell_mod = {
     type = "string-setting",
@@ -246,50 +236,14 @@ helmod_settings_mod = {
     default_value = false,
     order = "c0"
   },
-  --display-real-name
-  display_real_name = {
+
+  filter_translated_string_active = {
     type = "bool-setting",
     setting_type = "runtime-global",
-    localised_name = {"helmod_settings.display-real-name"},
-    localised_description = {"helmod_settings.display-real-name-desc"},
-    default_value = false,
-    order = "c1"
-  },
-  --data-col-index
-  display_data_col_index = {
-    type = "bool-setting",
-    setting_type = "runtime-global",
-    localised_name = {"helmod_settings.display-data-col-index"},
-    localised_description = {"helmod_settings.display-data-col-index-desc"},
-    default_value = false,
-    order = "c2"
-  },
-  --data-col-id
-  display_data_col_id = {
-    type = "bool-setting",
-    setting_type = "runtime-global",
-    localised_name = {"helmod_settings.display-data-col-id"},
-    localised_description = {"helmod_settings.display-data-col-id-desc"},
-    default_value = false,
-    order = "c3"
-  },
-  --data-col-name
-  display_data_col_name = {
-    type = "bool-setting",
-    setting_type = "runtime-global",
-    localised_name = {"helmod_settings.display-data-col-name"},
-    localised_description = {"helmod_settings.display-data-col-name-desc"},
-    default_value = false,
-    order = "c4"
-  },
-  --data-col-name
-  display_data_col_type = {
-    type = "bool-setting",
-    setting_type = "runtime-global",
-    localised_name = {"helmod_settings.display-data-col-type"},
-    localised_description = {"helmod_settings.display-data-col-type-desc"},
-    default_value = false,
-    order = "c5"
+    localised_name = {"helmod_settings.filter-translated-string-active"},
+    localised_description = {"helmod_settings.filter-translated-string-active-desc"},
+    default_value = true,
+    order = "d0"
   },
   filter_on_text_changed = {
     type = "bool-setting",
@@ -297,7 +251,7 @@ helmod_settings_mod = {
     localised_name = {"helmod_settings.filter-on-text-changed"},
     localised_description = {"helmod_settings.filter-on-text-changed-desc"},
     default_value = false,
-    order = "d0"
+    order = "d1"
   },
   --model-filter-factory
   model_filter_factory = {
@@ -306,7 +260,7 @@ helmod_settings_mod = {
     localised_name = {"helmod_settings.model-filter-factory"},
     localised_description = {"helmod_settings.model-filter-factory-desc"},
     default_value = true,
-    order = "d1"
+    order = "d2"
   },
   --model-filter-beacon
   model_filter_beacon = {
@@ -315,7 +269,7 @@ helmod_settings_mod = {
     localised_name = {"helmod_settings.model-filter-beacon"},
     localised_description = {"helmod_settings.model-filter-beacon-desc"},
     default_value = true,
-    order = "d2"
+    order = "d3"
   },
   --model-filter-generator
   model_filter_generator = {
@@ -324,7 +278,7 @@ helmod_settings_mod = {
     localised_name = {"helmod_settings.model-filter-generator"},
     localised_description = {"helmod_settings.model-filter-generator-desc"},
     default_value = true,
-    order = "d3"
+    order = "d4"
   },
   --model-filter-factory-module
   model_filter_factory_module = {
@@ -333,7 +287,7 @@ helmod_settings_mod = {
     localised_name = {"helmod_settings.model-filter-factory-module"},
     localised_description = {"helmod_settings.model-filter-factory-module-desc"},
     default_value = true,
-    order = "d4"
+    order = "d5"
   },
   --model-filter-beacon-module
   model_filter_beacon_module = {
@@ -342,7 +296,7 @@ helmod_settings_mod = {
     localised_name = {"helmod_settings.model-filter-beacon-module"},
     localised_description = {"helmod_settings.model-filter-beacon-module-desc"},
     default_value = true,
-    order = "d5"
+    order = "d6"
   },
   --properties-tab
   properties_tab = {
@@ -361,5 +315,50 @@ helmod_settings_mod = {
     localised_description = {"helmod_settings.prototype-filters-tab-desc"},
     default_value = false,
     order = "e2"
+  },
+    --display-real-name
+  display_real_name = {
+    type = "bool-setting",
+    setting_type = "runtime-global",
+    localised_name = {"helmod_settings.display-real-name"},
+    localised_description = {"helmod_settings.display-real-name-desc"},
+    default_value = false,
+    order = "f1"
+  },
+  --data-col-index
+  display_data_col_index = {
+    type = "bool-setting",
+    setting_type = "runtime-global",
+    localised_name = {"helmod_settings.display-data-col-index"},
+    localised_description = {"helmod_settings.display-data-col-index-desc"},
+    default_value = false,
+    order = "f2"
+  },
+  --data-col-id
+  display_data_col_id = {
+    type = "bool-setting",
+    setting_type = "runtime-global",
+    localised_name = {"helmod_settings.display-data-col-id"},
+    localised_description = {"helmod_settings.display-data-col-id-desc"},
+    default_value = false,
+    order = "f3"
+  },
+  --data-col-name
+  display_data_col_name = {
+    type = "bool-setting",
+    setting_type = "runtime-global",
+    localised_name = {"helmod_settings.display-data-col-name"},
+    localised_description = {"helmod_settings.display-data-col-name-desc"},
+    default_value = false,
+    order = "f4"
+  },
+  --data-col-name
+  display_data_col_type = {
+    type = "bool-setting",
+    setting_type = "runtime-global",
+    localised_name = {"helmod_settings.display-data-col-type"},
+    localised_description = {"helmod_settings.display-data-col-type-desc"},
+    default_value = false,
+    order = "f5"
   }
 }

@@ -61,11 +61,22 @@ function RecipeSelector:appendGroups(element, type, list_products, list_ingredie
 
   local lua_prototype = prototype:native()
   local prototype_name = string.format("%s-%s",type , lua_prototype.name)
+  local product_request = {"helmod-request"}
+  local translated = User.get("translated")
   Logging:trace(self.classname, "lua_recipe", lua_prototype)
   for key, element in pairs(prototype:getRawProducts()) do
     if list_products[element.name] == nil then list_products[element.name] = {} end
     list_products[element.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
     loop.product = loop.product + 1
+    -- on ne retraduit pas
+    if translated[element.name] == nil then
+      local product = Product(element)
+      table.insert(product_request, product:getLocalisedName())
+    end
+  end
+  -- pousse la requete que si necessaire
+  if User.isFilterTranslate() and Model.countList(product_request) > 1 then
+    Player.native().request_translation(product_request)
   end
   for key, element in pairs(prototype:getRawIngredients()) do
     if list_ingredients[element.name] == nil then list_ingredients[element.name] = {} end

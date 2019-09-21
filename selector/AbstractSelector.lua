@@ -7,6 +7,7 @@
 
 AbstractSelector = newclass(Form,function(base,classname)
   Form.init(base,classname)
+  base.auto_clear = false
 end)
 
 local filter_prototype = nil
@@ -94,7 +95,6 @@ end
 --
 function AbstractSelector:onInit()
   self.panelCaption = self:getCaption() -- obligatoire sinon le panneau ne s'affiche pas
-  self.auto_clear = false
   self:afterInit()
   self.parameterLast = string.format("%s_%s",self.classname,"last")
 end
@@ -274,7 +274,13 @@ function AbstractSelector:onEvent(event)
   if event.action == "recipe-filter-switch" then
     filter_prototype_product = not(filter_prototype_product)
     self:resetGroups()
-    Controller:send("on_gui_prepare", event, self.classname)
+    --Controller:send("on_gui_prepare", event, self.classname)
+    Controller:send("on_gui_update", event, self.classname)
+  end
+
+  if event.action == "filter-language-switch" then
+    Logging:debug(self.classname, "filter-language-switch", event.element.switch_state)
+    User.setParameter("filter-language", event.element.switch_state)
     Controller:send("on_gui_update", event, self.classname)
   end
 
@@ -367,6 +373,9 @@ end
 function AbstractSelector:checkFilter(search)
   local filter_prototype_product = self:getProductFilter()
   if filter_prototype ~= nil and filter_prototype ~= "" then
+    if User.isFilterTranslate()  then
+      search = User.getTranslate(search)
+    end
     return string.find(search:lower():gsub("[-]"," "), filter_prototype)
   end
   return true
@@ -416,8 +425,16 @@ function AbstractSelector:updateFilter(event)
       ElementGui.addGuiText(cellFilter, "filter-text", filter_prototype)
       ElementGui.addGuiButton(cellFilter, self.classname.."=recipe-filter=ID=", "filter-value", "helmod_button_default", ({"helmod_button.apply"}))
     end
-
-    ElementGui.addGuiLabel(panel, "message", ({"helmod_recipe-edition-panel.message"}))
+    local switch_position = "right"
+    if User.getModGlobalSetting("filter_translated_string_active") and User.getParameter("filter-language") ~= nil then
+      switch_position = User.getParameter("filter-language")
+    end
+    Logging:debug(self.classname, "switch_position", switch_position)
+    local filter_switch = ElementGui.addGuiSwitch(panel,string.format("%s=%s", self.classname, "filter-language-switch"), switch_position, false, {"helmod_recipe-edition-panel.filter-language-switch-left"}, {"tooltip.filter-language-switch-left"}, {"helmod_recipe-edition-panel.filter-language-switch-right"}, {"tooltip.filter-language-switch-right"},nil, {"helmod_recipe-edition-panel.filter-language-switch"})
+    if not(User.getModGlobalSetting("filter_translated_string_active")) then
+      filter_switch.enabled = false
+      filter_switch.switch_state = "left"
+    end
   end
 
   if self.product_option then
@@ -487,6 +504,13 @@ function AbstractSelector:appendGroups(element, type, list_products, list_ingred
 
   if list_ingredients[lua_prototype.name] == nil then list_ingredients[lua_prototype.name] = {} end
   list_ingredients[lua_prototype.name][lua_prototype.name] = {name=lua_prototype.name, group=prototype:getGroup().name, subgroup=prototype:getSubgroup().name, type=type, order=lua_prototype.order}
+
+  local product_request = {"helmod-request"}
+  table.insert(product_request, prototype:getLocalisedName())
+  if User.isFilterTranslate() then
+    Player.native().request_translation(product_request)
+  end
+
 end
 
 -------------------------------------------------------------------------------

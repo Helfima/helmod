@@ -100,4 +100,37 @@ function Cache.reset(classname, name)
   end
 end
 
+-------------------------------------------------------------------------------
+-- Add translate
+--
+-- @function [parent=#Cache] addTranslate
+--
+-- @param #table request {player_index=number, localised_string=#string, result=#string, translated=#boolean}
+--
+function Cache.addTranslate(request)
+  local localised_string = request.localised_string
+  local result = request.result
+  local index = 1
+  for translated in string.gmatch(result, "[^|]*") do
+    index = index + 1
+    if localised_string[index] ~= nil and translated ~= "" then
+      if data["translated"] == nil then data["translated"] = {} end
+      local _,key = string.match(localised_string[index][1],"([^.]*).([^.]*)")
+      data["translated"][key] = translated
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Get translate
+--
+-- @function [parent=#Cache] getTranslate
+--
+-- @param #string name
+--
+function Cache.getTranslate(name)
+  if data["translated"] == nil or data["translated"][name] == nil then return name end
+  return data["translated"][name]
+end
+
 return Cache

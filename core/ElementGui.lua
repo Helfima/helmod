@@ -180,6 +180,40 @@ end
 --
 -- @param #LuaGuiElement parent container for element
 -- @param #string action action name
+-- @param #string switch_state
+-- @param #string allow_none_state
+-- @param #string left_label_caption
+-- @param #string left_label_tooltip
+-- @param #string right_label_caption
+-- @param #string right_label_tooltip
+-- @param #string style style of button
+-- @param #string tooltip displayed text
+--
+-- @return #LuaGuiElement the LuaGuiElement added
+--
+function ElementGui.addGuiSwitch(parent, action, switch_state, allow_none_state, left_label_caption, left_label_tooltip, right_label_caption, right_label_tooltip, style, tooltip)
+  Logging:trace(ElementGui.classname, "addGuiSwitch", action, switch_state, allow_none_state, left_label_caption, left_label_tooltip, right_label_caption, right_label_tooltip, style, tooltip)
+  local options = {}
+  options.type = "switch"
+  options.name = action
+  options.switch_state = switch_state  
+  options.allow_none_state = allow_none_state
+  options.left_label_caption = left_label_caption
+  options.left_label_tooltip = left_label_tooltip
+  options.right_label_caption = right_label_caption
+  options.right_label_tooltip = right_label_tooltip
+  options.tooltip = tooltip
+  options.style = style
+  return parent.add(options)
+end
+
+-------------------------------------------------------------------------------
+-- Add a button element
+--
+-- @function [parent=#ElementGui] addGuiButton
+--
+-- @param #LuaGuiElement parent container for element
+-- @param #string action action name
 -- @param #string key unique id
 -- @param #string style style of button
 -- @param #string caption container for element

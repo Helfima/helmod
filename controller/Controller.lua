@@ -55,6 +55,8 @@ local Controller = newclass(Object,function(base,classname)
   Object.init(base,classname)
 end)
 
+Controller.classname = "HMController"
+
 local views = nil
 local locate = "center"
 local pinLocate = "left"
@@ -265,6 +267,18 @@ function Controller:onNthTick(NthTickEvent)
       User.setParameter("next_event",nil)
     end
   end
+end
+
+-------------------------------------------------------------------------------
+-- On string translated
+--
+-- @function [parent=#Controller] onStringTranslated
+--
+-- @param #table event {player_index=number, localised_ string=#string,result=#string, translated=#boolean}
+--
+function Controller:onStringTranslated(event)
+  Logging:debug(Controller.classname, "onStringTranslated(event)", event)
+  User.addTranslate(event)
 end
 
 -------------------------------------------------------------------------------
@@ -813,7 +827,7 @@ function Controller:sendWithPrepare(event_type, data, classname)
   end
 end
 
-local MyController = Controller("HMController")
+local MyController = Controller(Controller.classname)
 MyController:bind()
 
 return MyController

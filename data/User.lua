@@ -63,6 +63,17 @@ function User.isAdmin()
 end
 
 -------------------------------------------------------------------------------
+-- Return is filter translate
+--
+-- @function [parent=#User] isFilterTranslate
+--
+-- @return #boolean
+--
+function User.isFilterTranslate()
+  return User.getModGlobalSetting("filter_translated_string_active") and (User.getParameter("filter-language") == nil or User.getParameter("filter-language") == "right")
+end
+
+-------------------------------------------------------------------------------
 -- Get default settings
 --
 -- @function [parent=#User] getDefaultSettings
@@ -397,6 +408,50 @@ function User.update()
   if User.getVersion() < User.version then
     User.reset()
   end
+end
+
+-------------------------------------------------------------------------------
+-- Add translate
+--
+-- @function [parent=#User] addTranslate
+--
+-- @param #table request {player_index=number, localised_string=#string, result=#string, translated=#boolean}
+--
+function User.addTranslate(request)
+  local localised_string = request.localised_string
+  local result = request.result
+  local index = 1
+  local translated = User.get("translated")
+  for string_translated in string.gmatch(result, "[^|]*") do
+    index = index + 1
+    if localised_string[index] ~= nil and string_translated ~= "" then
+      local _,key = string.match(localised_string[index][1],"([^.]*).([^.]*)")
+      translated[key] = string_translated
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Get translate
+--
+-- @function [parent=#User] getTranslate
+--
+-- @param #string name
+--
+function User.getTranslate(name)
+  local translated = User.get("translated")
+  if translated == nil or translated[name] == nil then return name end
+  return translated[name]
+end
+
+-------------------------------------------------------------------------------
+-- Reset translate
+--
+-- @function [parent=#User] resetTranslate
+--
+function User.resetTranslate()
+  local translated = User.get("translated")
+  translated = {}
 end
 
 return User
