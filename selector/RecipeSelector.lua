@@ -52,31 +52,27 @@ end
 --
 -- @param #string element
 -- @param #string type
---
+-- @param #table list_products
+-- @param #table list_ingredients
+-- @param #table list_translate
+-- 
 local loop = {product=0,ingredient=0}
 
-function RecipeSelector:appendGroups(element, type, list_products, list_ingredients)
+function RecipeSelector:appendGroups(element, type, list_products, list_ingredients, list_translate)
   Logging:trace(self.classname, "appendGroups()", element.name, type)
   local prototype = self:getPrototype(element, type)
 
   local lua_prototype = prototype:native()
   local prototype_name = string.format("%s-%s",type , lua_prototype.name)
-  local product_request = {"helmod-request"}
-  local translated = User.get("translated")
   Logging:trace(self.classname, "lua_recipe", lua_prototype)
   for key, element in pairs(prototype:getRawProducts()) do
     if list_products[element.name] == nil then list_products[element.name] = {} end
     list_products[element.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
     loop.product = loop.product + 1
-    -- on ne retraduit pas
-    if translated[element.name] == nil then
-      local product = Product(element)
-      table.insert(product_request, product:getLocalisedName())
+    
+    if lua_prototype.localised_name ~= nil then
+      list_translate[element.name] = lua_prototype.localised_name
     end
-  end
-  -- pousse la requete que si necessaire
-  if User.isFilterTranslate() and Model.countList(product_request) > 1 then
-    Player.native().request_translation(product_request)
   end
   for key, element in pairs(prototype:getRawIngredients()) do
     if list_ingredients[element.name] == nil then list_ingredients[element.name] = {} end
@@ -91,27 +87,24 @@ end
 --
 -- @function [parent=#RecipeSelector] updateGroups
 --
--- @param #LuaEvent event
+-- @param #table list_products
+-- @param #table list_ingredients
+-- @param #table list_translate
 --
-function RecipeSelector:updateGroups(event)
-  Logging:trace(self.classname, "updateGroups()", event)
+function RecipeSelector:updateGroups(list_products, list_ingredients, list_translate)
+  Logging:trace(self.classname, "updateGroups()")
   loop = {product=0,ingredient=0}
-  local list_products = {}
-  local list_ingredients = {}
 
   for key, recipe in pairs(Player.getRecipes()) do
-    self:appendGroups(recipe, "recipe", list_products, list_ingredients)
+    self:appendGroups(recipe, "recipe", list_products, list_ingredients, list_translate)
   end
   for key, fluid in pairs(Player.getFluidPrototypes()) do
-    self:appendGroups(fluid, "fluid", list_products, list_ingredients)
+    self:appendGroups(fluid, "fluid", list_products, list_ingredients, list_translate)
   end
   for key, resource in pairs(Player.getResources()) do
-    self:appendGroups(resource, "resource", list_products, list_ingredients)
+    self:appendGroups(resource, "resource", list_products, list_ingredients, list_translate)
   end
 
-  Cache.setData(self.classname, "list_products", list_products)
-  Cache.setData(self.classname, "list_ingredients", list_ingredients)
-  --Player.print(string.format("product=%d , ingredient=%s", loop.product, loop.ingredient))
 end
 
 -------------------------------------------------------------------------------

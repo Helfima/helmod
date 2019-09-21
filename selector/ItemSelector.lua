@@ -38,23 +38,17 @@ end
 --
 -- @function [parent=#ItemSelector] updateGroups
 --
--- @param #LuaEvent event
--- @param #string action action name
--- @param #string item first item name
--- @param #string item2 second item name
--- @param #string item3 third item name
+-- @param #table list_products
+-- @param #table list_ingredients
+-- @param #table list_translate
 --
-function ItemSelector:updateGroups(event)
-  Logging:trace(self.classname, "updateGroups()", event)
-
-  local list_products = {}
-  local list_ingredients = {}
+function ItemSelector:updateGroups(list_products, list_ingredients, list_translate)
+  Logging:trace(self.classname, "updateGroups()")
 
   for key, item in pairs(Player.getItemPrototypes()) do
-    self:appendGroups(item, "item", list_products, list_ingredients)
+    self:appendGroups(item, "item", list_products, list_ingredients, list_translate)
   end
-  Cache.setData(self.classname, "list_products", list_products)
-  Cache.setData(self.classname, "list_ingredients", list_ingredients)
+
 end
 
 -------------------------------------------------------------------------------

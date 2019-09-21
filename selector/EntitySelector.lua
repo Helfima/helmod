@@ -47,19 +47,16 @@ end
 --
 -- @function [parent=#EntitySelector] updateGroups
 --
--- @param #LuaEvent event
+-- @param #table list_products
+-- @param #table list_ingredients
+-- @param #table list_translate
 --
-function EntitySelector:updateGroups(event)
-  Logging:trace(self.classname, "updateGroups()", event)
+function EntitySelector:updateGroups(list_products, list_ingredients, list_translate)
+  Logging:trace(self.classname, "updateGroups()")
   
-  local list_products = {}
-  local list_ingredients = {}
-
   for key, entity in pairs(Player.getEntityPrototypes()) do
-    self:appendGroups(entity, "entity", list_products, list_ingredients)
+    self:appendGroups(entity, "entity", list_products, list_ingredients, list_translate)
   end
-  Cache.setData(self.classname, "list_products", list_products)
-  Cache.setData(self.classname, "list_ingredients", list_ingredients)
 end
 
 -------------------------------------------------------------------------------

@@ -181,7 +181,7 @@ end
 --
 function User.setParameter(property, value)
   if property == nil then
-      Logging:error(User.classname, "property must not nil", value)
+    Logging:error(User.classname, "property must not nil", value)
     return nil
   end
   User.setVersion()
@@ -366,7 +366,7 @@ end
 -- @function [parent=#User] setActiveForm
 --
 -- @param #string classname
--- 
+--
 function User.setActiveForm(classname)
   Logging:debug(User.classname, "setActiveForm()", classname)
   local navigate = User.getNavigate()
@@ -393,15 +393,15 @@ end
 -- @function [parent=#User] isActiveForm
 --
 -- @param #string classname
--- 
+--
 -- @return #boolean
 --
 function User.isActiveForm(classname)
   Logging:debug(User.classname, "isActiveForm()", classname)
   local navigate = User.getNavigate()
-  if string.find(classname, "Tab") and navigate[User.tab_name] ~= nil then 
+  if string.find(classname, "Tab") and navigate[User.tab_name] ~= nil then
     return navigate[User.tab_name]["open"] == true and navigate[User.tab_name]["name"] == classname
-  elseif navigate[classname] ~= nil then 
+  elseif navigate[classname] ~= nil then
     return navigate[classname]["open"] == true
   end
   return false
@@ -413,7 +413,7 @@ end
 -- @function [parent=#User] isActiveForm
 --
 -- @param #string classname
--- 
+--
 -- @return #boolean
 --
 function User.update()
@@ -430,15 +430,22 @@ end
 -- @param #table request {player_index=number, localised_string=#string, result=#string, translated=#boolean}
 --
 function User.addTranslate(request)
-  local localised_string = request.localised_string
-  local result = request.result
-  local index = 1
-  local translated = User.get("translated")
-  for string_translated in string.gmatch(result, "[^|]*") do
-    index = index + 1
-    if localised_string[index] ~= nil and string_translated ~= "" then
-      local _,key = string.match(localised_string[index][1],"([^.]*).([^.]*)")
-      translated[key] = string_translated
+  --Logging:debug(User.classname, "addTranslate()", request)
+  if request.translated == true then
+    local localised_string = request.localised_string
+    local string_translated = request.result
+    --Logging:debug(User.classname, "-> addTranslate", localised_string, string_translated)
+    if type(localised_string) == "table" then
+      local localised_value = localised_string[1]
+      --Logging:debug(User.classname, "--> localised_value", localised_value)
+      if localised_value ~= nil and localised_value ~= "" then
+        local _,key = string.match(localised_value,"([^.]*).([^.]*)")
+        --Logging:debug(User.classname, "---> key", key)
+        if key ~= nil and key ~= "" then
+          local translated = User.get("translated")
+          translated[key] = string_translated
+        end
+      end
     end
   end
 end
@@ -462,8 +469,8 @@ end
 -- @function [parent=#User] resetTranslate
 --
 function User.resetTranslate()
-  local translated = User.get("translated")
-  translated = {}
+  local data_user = User.get()
+  data_user["translated"] = {}
 end
 
 return User

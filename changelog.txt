@@ -5,6 +5,7 @@ Date: 21. 09. 2019
   Changes:
     - Changed power input in Energy Edition
     - Removed abstractEdition.lua
+    - Fixed selector search with translated string
 ---------------------------------------------------------------------------------------------------
 Version: 0.9.5
 Date: 21. 09. 2019

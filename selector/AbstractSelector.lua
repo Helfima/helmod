@@ -187,13 +187,17 @@ function AbstractSelector:onBeforeOpen(event)
 
   if event.item3 ~= nil and event.item3 ~= "" then
     Logging:debug(self.classname, "event.item3", event.item3)
-    filter_prototype = event.item3:lower():gsub("[-]"," ")
+    if User.isFilterTranslate()  then
+      filter_prototype = User.getTranslate(event.item3)
+    else
+      filter_prototype = event.item3
+    end
     self:resetGroups()
   else
     if filter_prototype ~= nil then self:resetGroups() end
     filter_prototype = nil
   end
-  
+
   if event ~= nil and event.button ~= nil and event.button == defines.mouse_button_type.right then
     filter_prototype_product = false
   end
@@ -307,9 +311,9 @@ end
 --
 function AbstractSelector:resetGroups()
   Logging:debug(self.classname, "resetGroups()")
-  Cache.setData(self.classname, "list_group", nil)
-  Cache.setData(self.classname, "list_subgroup", nil)
-  Cache.setData(self.classname, "list_group_elements", nil)
+  Cache.reset(self.classname, "list_group")
+  Cache.reset(self.classname, "list_subgroup")
+  Cache.reset(self.classname, "list_group_elements")
 end
 
 -------------------------------------------------------------------------------
@@ -336,9 +340,23 @@ end
 function AbstractSelector:prepare(event)
   Logging:debug(self.classname, "prepare()", event)
   -- recuperation recipes
-  if Model.countList(Cache.getData(self.classname, "list_products")) == 0 then
-    self:updateGroups(event)
+  if Cache.isEmpty(self.classname, "list_ingredients") then
+    local list_products = {}
+    local list_ingredients = {}
+    local list_translate = {}
+
+    self:updateGroups(list_products, list_ingredients, list_translate)
+
+    Cache.setData(self.classname, "list_products", list_products)
+    Cache.setData(self.classname, "list_ingredients", list_ingredients)
+    Cache.setData(self.classname, "list_translate", list_translate)
+
     Logging:debug(self.classname, "prepare ok")
+    if User.getModGlobalSetting("filter_translated_string_active") then
+      for _,localised_name in pairs(list_translate) do
+        Player.native().request_translation(localised_name)
+      end
+    end
     return true
   end
   return false
@@ -376,7 +394,7 @@ function AbstractSelector:checkFilter(search)
     if User.isFilterTranslate()  then
       search = User.getTranslate(search)
     end
-    return string.find(search:lower():gsub("[-]"," "), filter_prototype)
+    return string.find(search:lower():gsub("[-]"," "), filter_prototype:lower():gsub("[-]"," "))
   end
   return true
 end
@@ -440,7 +458,7 @@ function AbstractSelector:updateFilter(event)
   if self.product_option then
     panel["filter"][self.classname.."=recipe-filter-switch=ID=filter-product"].state = filter_prototype_product
     panel["filter"][self.classname.."=recipe-filter-switch=ID=filter-ingredient"].state = not(filter_prototype_product)
-    if filter_prototype ~= nil and event.action == "OPEN" then
+    if filter_prototype ~= nil then
       if User.getModGlobalSetting("filter_on_text_changed") then
         panel["filter"]["cell-filter"][self.classname.."=recipe-filter=ID=filter-value=onchange"].text = filter_prototype
       else
@@ -461,11 +479,11 @@ end
 function AbstractSelector:createElementLists()
   Logging:trace(self.classname, "createElementLists()")
   local list_group_elements = self:onCreateElementLists()
-  
+
   local list_item = Cache.getData(self.classname, "list_item") or {}
   local group_selected = User.getParameter("recipe_group_selected")
   local list_group = Cache.getData(self.classname, "list_group") or {}
-  
+
   if list_group_elements[group_selected] then
     list_item = list_group_elements[group_selected]
   else
@@ -496,8 +514,11 @@ end
 --
 -- @param #string element
 -- @param #string type
+-- @param #table list_products
+-- @param #table list_ingredients
+-- @param #table list_translate
 --
-function AbstractSelector:appendGroups(element, type, list_products, list_ingredients)
+function AbstractSelector:appendGroups(element, type, list_products, list_ingredients, list_translate)
   Logging:debug(self.classname, "appendGroups()", element.name, type)
   local prototype = self:getPrototype(element)
   local lua_prototype = prototype:native()
@@ -505,10 +526,8 @@ function AbstractSelector:appendGroups(element, type, list_products, list_ingred
   if list_ingredients[lua_prototype.name] == nil then list_ingredients[lua_prototype.name] = {} end
   list_ingredients[lua_prototype.name][lua_prototype.name] = {name=lua_prototype.name, group=prototype:getGroup().name, subgroup=prototype:getSubgroup().name, type=type, order=lua_prototype.order}
 
-  local product_request = {"helmod-request"}
-  table.insert(product_request, prototype:getLocalisedName())
-  if User.isFilterTranslate() then
-    Player.native().request_translation(product_request)
+  if lua_prototype.localised_name ~= nil then
+    list_translate[element.name] = lua_prototype.localised_name
   end
 
 end

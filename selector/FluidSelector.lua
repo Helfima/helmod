@@ -38,19 +38,16 @@ end
 --
 -- @function [parent=#FluidSelector] updateGroups
 --
--- @param #LuaEvent event
+-- @param #table list_products
+-- @param #table list_ingredients
+-- @param #table list_translate
 --
-function FluidSelector:updateGroups(event)
-  Logging:trace(self.classname, "updateGroups()", event)
-
-  local list_products = {}
-  local list_ingredients = {}
+function FluidSelector:updateGroups(list_products, list_ingredients, list_translate)
+  Logging:trace(self.classname, "updateGroups()")
 
   for key, fluid in pairs(Player.getFluidPrototypes()) do
-    self:appendGroups(fluid, "fluid", list_products, list_ingredients)
+    self:appendGroups(fluid, "fluid", list_products, list_ingredients, list_translate)
   end
-  Cache.setData(self.classname, "list_products", list_products)
-  Cache.setData(self.classname, "list_ingredients", list_ingredients)
 end
 
 -------------------------------------------------------------------------------
