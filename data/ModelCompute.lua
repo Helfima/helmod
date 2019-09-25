@@ -257,12 +257,26 @@ function ModelCompute.computeBlockByFactory(block)
           local recipe_prototype = RecipePrototype(first_recipe)
 
           local _,lua_product = next(recipe_prototype:getProducts())
+          local lua_ingredient = nil
+          for _,ingredient in pairs(recipe_prototype:getIngredients()) do
+            Logging:debug(ModelCompute.classname, "compare", ingredient.name, lua_product.name)
+            if ingredient.name == lua_product.name then
+              lua_ingredient = ingredient
+            end
+          end
           if block.input == nil then block.input = {} end
           -- formula [product amount] * (1 + [productivity]) *[assembly speed]*[time]/[recipe energy]
           -- Product.load(lua_product).getAmount(first_recipe) calcul avec la productivity
           local product_prototype = Product(lua_product)
-          block.input[lua_product.name] = product_prototype:getAmount(first_recipe) * ( block.factory_number or 0 ) * first_recipe.factory.speed * model.time / recipe_prototype:getEnergy()
-          Logging:debug(ModelCompute.classname, "by factory info", product_prototype:getAmount(first_recipe), first_recipe.factory.speed)
+          local amount = product_prototype:getAmount(first_recipe)
+          Logging:debug(ModelCompute.classname, "by factory info: product", amount)
+          if lua_ingredient ~= nil then
+            local ingredient_prototype = Product(lua_product)
+            amount = amount - ingredient_prototype:getAmount()
+            Logging:debug(ModelCompute.classname, "by factory info: ingredient", ingredient_prototype:getAmount())
+          end
+          Logging:debug(ModelCompute.classname, "by factory info", amount, first_recipe.factory.speed)
+          block.input[lua_product.name] = amount * ( block.factory_number or 0 ) * first_recipe.factory.speed * model.time / recipe_prototype:getEnergy()
         end
         Logging:debug(ModelCompute.classname, "block.input",block.input)
       end

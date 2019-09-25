@@ -95,6 +95,7 @@ end
 --
 function AbstractSelector:onInit()
   self.panelCaption = self:getCaption() -- obligatoire sinon le panneau ne s'affiche pas
+  self.sprite_type = "item-group"
   self:afterInit()
   self.parameterLast = string.format("%s_%s",self.classname,"last")
 end
@@ -619,7 +620,7 @@ end
 --
 function AbstractSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
   Logging:trace(self.classname, "buildPrototypeIcon(player, guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
-  ElementGui.addGuiButtonSelectSprite(guiElement, self.classname.."=recipe-select=ID=", Player.getRecipeIconType(prototype), prototype.name, prototype.name, tooltip)
+  ElementGui.addGuiButtonSelectSprite(guiElement, self.classname.."=recipe-select=ID=", prototype.type, prototype.name, prototype.name, tooltip)
 end
 
 -------------------------------------------------------------------------------
@@ -629,7 +630,7 @@ end
 --
 -- @param #LuaEvent event
 --
-function AbstractSelector:updateGroupSelector(event)
+function AbstractSelector.updateGroupSelector(self, event)
   Logging:trace(self.classname, "updateGroupSelector()", event)
   local panel = self:getGroupsPanel()
 
@@ -652,7 +653,7 @@ function AbstractSelector:updateGroupSelector(event)
     end
     local tooltip = "item-group-name."..group.name
     -- ajoute les icons de groupe
-    local action = ElementGui.addGuiButtonSelectSpriteXxl(gui_group_panel, self.classname.."=recipe-group=ID=", "item-group", group.name, group.name, ({tooltip}), color)
+    local action = ElementGui.addGuiButtonSelectSpriteXxl(gui_group_panel, self.classname.."=recipe-group=ID=", self.sprite_type, group.name, group.name, ({tooltip}), color)
   end
 
 end

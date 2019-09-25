@@ -79,7 +79,7 @@ end
 function StatisticTab:addElementRow(guiTable, element)
   Logging:debug(self.classname, "addProductionBlockRow()", guiTable, element)
   ElementGui.addGuiLabel(guiTable, "value_"..element.name, Format.formatNumberElement(element.value), "helmod_label_right_60")
-  ElementGui.addGuiButtonSprite(guiTable, "element_"..element.name.."=", Player.getIconType(element), element.name, element.name, Player.getLocalisedName(element))
+  ElementGui.addGuiButtonSprite(guiTable, "element_"..element.name.."=", element.type, element.name, element.name, Player.getLocalisedName(element))
 
 end
 

@@ -80,23 +80,23 @@ function PropertiesTab:addTableHeader(itable, prototype_compare)
     local localised_name = nil
     if prototype.type == "entity" then
       local entity_prototype = EntityPrototype(prototype)
-      icon_type = Player.getEntityIconType(entity_prototype:native())
+      icon_type = "entity"
       localised_name = entity_prototype:getLocalisedName()
     elseif prototype.type == "item" then
       local item_prototype = ItemPrototype(prototype)
-      icon_type = Player.getEntityIconType(item_prototype:native())
+      icon_type = "item"
       localised_name = item_prototype:getLocalisedName()
     elseif prototype.type == "fluid" then
       local fluid_prototype = FluidPrototype(prototype)
-      icon_type = Player.getEntityIconType(fluid_prototype:native())
+      icon_type = "fluid"
       localised_name = fluid_prototype:getLocalisedName()
     elseif string.find(prototype.type, "recipe") then
       local recipe_protoype = RecipePrototype(prototype)
-      icon_type = Player.getEntityIconType(recipe_protoype:native())
+      icon_type = recipe_protoype:getType()
       localised_name = recipe_protoype:getLocalisedName()
     elseif prototype.type == "technology" then
       local technology_protoype = Technology(prototype)
-      icon_type = Player.getEntityIconType(technology_protoype:native())
+      icon_type = "technology"
       localised_name = technology_protoype:getLocalisedName()
     end
     ElementGui.addGuiButtonSprite(itable, self.classname.."=element-delete=ID=", icon_type, prototype.name, prototype.name, localised_name)

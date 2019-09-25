@@ -114,13 +114,13 @@ function EnergyTab:addTableRow(gui_table, power)
   local primary = power.primary
   if primary.name ~= nil then
     ElementGui.addGuiLabel(cell_primary, primary.name, Format.formatNumberFactory(primary.count), "helmod_label_right_60")
-    ElementGui.addGuiButtonSelectSprite(cell_primary, "HMEnergyEdition=OPEN=ID="..power.id.."=", Player.getIconType(primary), primary.name, "X"..Format.formatNumberFactory(primary.count), {"tooltip.edit-energy", Player.getLocalisedName(primary)})
+    ElementGui.addGuiButtonSelectSprite(cell_primary, "HMEnergyEdition=OPEN=ID="..power.id.."=", primary.type, primary.name, "X"..Format.formatNumberFactory(primary.count), {"tooltip.edit-energy", Player.getLocalisedName(primary)})
   end
   -- col secondary
   local cell_secondary = ElementGui.addGuiFrameH(gui_table,"secondary"..power.id, helmod_frame_style.hidden)
   local secondary = power.secondary
   if secondary.name ~= nil then
     ElementGui.addGuiLabel(cell_secondary, secondary.name, Format.formatNumberFactory(secondary.count), "helmod_label_right_60")
-    ElementGui.addGuiButtonSelectSprite(cell_secondary, "HMEnergyEdition=OPEN=ID="..power.id.."=", Player.getIconType(secondary), secondary.name, "X"..Format.formatNumberFactory(secondary.count), {"tooltip.edit-energy", Player.getLocalisedName(secondary)})
+    ElementGui.addGuiButtonSelectSprite(cell_secondary, "HMEnergyEdition=OPEN=ID="..power.id.."=", secondary.type, secondary.name, "X"..Format.formatNumberFactory(secondary.count), {"tooltip.edit-energy", Player.getLocalisedName(secondary)})
   end
 end

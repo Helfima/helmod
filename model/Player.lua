@@ -51,6 +51,20 @@ function Player.set(player)
 end
 
 -------------------------------------------------------------------------------
+-- Is valid sprite path
+--
+-- @function [parent=#Player] is_valid_sprite_path
+--
+-- @param #string sprite_path
+--
+-- @return #boolean
+--
+function Player.is_valid_sprite_path(sprite_path)
+  if Lua_player == nil then return false end
+  return Lua_player.gui.is_valid_sprite_path(sprite_path)
+end
+
+-------------------------------------------------------------------------------
 -- Return factorio player
 --
 -- @function [parent=#Player] native
@@ -86,37 +100,6 @@ function Player.getGui(location)
 end
 
 -------------------------------------------------------------------------------
--- Return icon type
---
--- @function [parent=#Player] getIconType
---
--- @param #ModelRecipe element
---
--- @return #string recipe type
---
-function Player.getIconType(element)
-  Logging:trace(Player.classname, "getIconType(element)", element)
-  if element == nil or element.name == nil then return "unknown" end
-  local entity = Player.getEntityPrototype(element.name)
-  if entity ~= nil then
-    return "entity"
-  end
-  local item = Player.getItemPrototype(element.name)
-  if item ~= nil then
-    return "item"
-  end
-  local fluid = Player.getFluidPrototype(element.name)
-  if fluid ~= nil then
-    return "fluid"
-  end
-  local technology = Player.getTechnology(element.name)
-  if technology ~= nil then
-    return "technology"
-  end
-  return "recipe"
-end
-
--------------------------------------------------------------------------------
 -- Return force's player
 --
 -- @function [parent=#Player] getForce
@@ -126,29 +109,6 @@ end
 --
 function Player.getForce()
   return Lua_player.force
-end
-
--------------------------------------------------------------------------------
--- Return recipe type
---
--- @function [parent=#Player] getRecipeIconType
---
--- @param #ModelRecipe element
---
--- @return #string recipe type
---
-function Player.getRecipeIconType(element)
-  Logging:trace(Player.classname, "getRecipeIconType(element)", element)
-  if element == nil then Logging:error(Player.classname, "getRecipeIconType(element): missing player") end
-  local lua_recipe = Player.getRecipe(element.name)
-  if lua_recipe ~= nil and lua_recipe.force ~= nil then
-    return "recipe"
-  end
-  local lua_technology = Player.getTechnology(element.name)
-  if lua_technology ~= nil and lua_technology.force ~= nil then
-    return "technology"
-  end
-  return Player.getIconType(element);
 end
 
 -------------------------------------------------------------------------------

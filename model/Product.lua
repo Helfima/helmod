@@ -8,6 +8,7 @@ Product = newclass(Prototype,function(base, object)
   base.belt_ratio = 45/0.09375
 end)
 
+Product.classname = "HMProduct"
 -------------------------------------------------------------------------------
 -- Return localised name of Prototype
 --
@@ -88,6 +89,38 @@ function Product:getElementAmount()
 end
 
 -------------------------------------------------------------------------------
+-- Get amount of element for bonus
+--
+-- @function [parent=#Product] getBonusAmount
+--
+-- @return #number
+--
+function Product:getBonusAmount()
+  Logging:trace(self.classname, "getBonusAmount",self.lua_prototype)
+  local element = self.lua_prototype
+  if element == nil then return 0 end
+
+  local catalyst_amount = element.catalyst_amount or 0
+  local probability = element.probability or 1
+  local amount = 0
+  -- If amount not specified, amount_min, amount_max and probability must all be specified.
+  -- Minimal amount of the item or fluid to give. Has no effect when amount is specified.
+  -- Maximum amount of the item or fluid to give. Has no effect when amount is specified.
+  if element.probability ~= nil and element.amount_min ~= nil and  element.amount_max ~= nil then
+    amount = (element.amount_min + element.amount_max) / 2
+  end
+
+  if element.amount ~= nil then
+    amount = element.amount
+  end
+  Logging:debug(self.classname, "getBonusAmount", amount, catalyst_amount, probability)
+  if amount >= catalyst_amount then
+    return (amount - catalyst_amount) * probability
+  end
+  return amount * probability
+end
+
+-------------------------------------------------------------------------------
 -- Get type of element (item or fluid)
 --
 -- @function [parent=#Product] getType
@@ -112,10 +145,11 @@ end
 function Product:getAmount(recipe)
   Logging:trace(self.classname, "getAmount(recipe)",self.lua_prototype)
   local amount = self:getElementAmount()
+  local bonus_amount = self:getBonusAmount() -- if there are no catalyst amount = bonus_amount
   if recipe == nil then
     return amount
   end
-  return amount + amount * self:getProductivityBonus(recipe)
+  return amount + bonus_amount * self:getProductivityBonus(recipe)
 end
 
 -------------------------------------------------------------------------------
@@ -130,7 +164,8 @@ end
 function Product:countProduct(recipe)
   Logging:trace(self.classname, "countProduct",self.lua_prototype)
   local amount = self:getElementAmount()
-  return (amount + amount * self:getProductivityBonus(recipe) ) * recipe.count
+  local bonus_amount = self:getBonusAmount() -- if there are no catalyst amount = bonus_amount
+  return (amount + bonus_amount * self:getProductivityBonus(recipe) ) * recipe.count
 end
 
 -------------------------------------------------------------------------------

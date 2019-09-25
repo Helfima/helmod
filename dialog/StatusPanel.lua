@@ -167,7 +167,7 @@ end
 --
 function StatusPanel:addProductionBlockRow(guiTable, element)
   Logging:debug(self.classname, "addProductionBlockRow()", guiTable, element)
-  ElementGui.addGuiButtonSprite(guiTable, "element_"..element.name.."=", Player.getIconType(element), element.name, element.name, Player.getLocalisedName(element))
+  ElementGui.addGuiButtonSprite(guiTable, "element_"..element.name.."=", element.type, element.name, element.name, Player.getLocalisedName(element))
   ElementGui.addGuiLabel(guiTable, "value_"..element.name, element.value)
 
 end

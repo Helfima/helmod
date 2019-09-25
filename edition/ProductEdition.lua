@@ -148,7 +148,7 @@ function ProductEdition:updateInfo(event)
     info_panel.clear()
 
     local table_panel = ElementGui.addGuiTable(info_panel,"input-table",2)
-    ElementGui.addGuiButtonSprite(table_panel, "product", Player.getIconType(product), product.name)
+    ElementGui.addGuiButtonSprite(table_panel, "product", product.type, product.name)
     ElementGui.addGuiLabel(table_panel, "product-label", Player.getLocalisedName(product))
 
     ElementGui.addGuiLabel(table_panel, "quantity-label", ({"helmod_common.quantity"}))

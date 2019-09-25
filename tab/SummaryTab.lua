@@ -71,7 +71,7 @@ function SummaryTab:updateData(event)
     local guiWagon = ElementGui.addGuiFrameH(resourcesTable,"wagon"..resource.name, helmod_frame_style.hidden)
     if wagon ~= nil then
       ElementGui.addGuiLabel(guiWagon, "count", Format.formatNumberElement(wagon.limit_count).."/"..Format.formatNumberElement(wagon.count), "helmod_label_right_70")
-      ElementGui.addGuiButtonSprite(guiWagon, "HMWagon=OPEN=ID=", Player.getIconType(wagon), wagon.name, wagon.name, Player.getLocalisedName(wagon))
+      ElementGui.addGuiButtonSprite(guiWagon, "HMWagon=OPEN=ID=", wagon.type, wagon.name, wagon.name, Player.getLocalisedName(wagon))
     end
 
     -- col storage
@@ -79,7 +79,7 @@ function SummaryTab:updateData(event)
     local guiStorage = ElementGui.addGuiFrameH(resourcesTable,"storage"..resource.name, helmod_frame_style.hidden)
     if storage ~= nil then
       ElementGui.addGuiLabel(guiStorage, "count", Format.formatNumberElement(storage.limit_count).."/"..Format.formatNumberElement(storage.count), "helmod_label_right_70")
-      ElementGui.addGuiButtonSprite(guiStorage, "HMStorage=OPEN=ID=", Player.getIconType(storage), storage.name, storage.name, Player.getLocalisedName(storage))
+      ElementGui.addGuiButtonSprite(guiStorage, "HMStorage=OPEN=ID=", storage.type, storage.name, storage.name, Player.getLocalisedName(storage))
     end
   end
 

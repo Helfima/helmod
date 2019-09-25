@@ -522,7 +522,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiButtonSpriteStyled(parent, style, action, type, key, caption, tooltip)
-  Logging:trace(ElementGui.classname, "addGuiButtonSpriteStyled", style,action, type, key, caption, tooltip)
+  Logging:trace(ElementGui.classname, "addGuiButtonSpriteStyled", style, action, type, key, caption, tooltip)
   local options = {}
   options.type = "sprite-button"
   if key ~= nil then
@@ -536,23 +536,47 @@ function ElementGui.addGuiButtonSpriteStyled(parent, style, action, type, key, c
   options.style = style
   if type ~= nil and key ~= nil then
     if type == "resource" then type = "item" end
-    options.sprite = type.."/"..key
+    if Player.is_valid_sprite_path(string.format("%s/%s", type, key)) then
+      options.sprite = string.format("%s/%s", type, key)
+    elseif Player.is_valid_sprite_path(string.format("%s/%s", "item", key)) then
+      options.sprite = string.format("%s/%s", "item", key)
+      Logging:warn(ElementGui.classname, "wrong type", type, key, "-> item")
+    elseif Player.is_valid_sprite_path(string.format("%s/%s", "entity", key)) then
+      options.sprite = string.format("%s/%s", "entity", key)
+      Logging:warn(ElementGui.classname, "wrong type", type, key, "-> entity")
+    elseif Player.is_valid_sprite_path(string.format("%s/%s", "fluid", key)) then
+      options.sprite = string.format("%s/%s", "fluid", key)
+      Logging:warn(ElementGui.classname, "wrong type", type, key, "-> fluid")
+    elseif Player.is_valid_sprite_path(string.format("%s/%s", "technology", key)) then
+      options.sprite = string.format("%s/%s", "technology", key)
+      Logging:warn(ElementGui.classname, "wrong type", type, key, "-> technology")
+    elseif Player.is_valid_sprite_path(string.format("%s/%s", "recipe", key)) then
+      options.sprite = string.format("%s/%s", "recipe", key)
+      Logging:warn(ElementGui.classname, "wrong type", type, key, "-> recipe")
+    elseif Player.is_valid_sprite_path(string.format("%s/%s", "item-group", key)) then
+      options.sprite = string.format("%s/%s", "item-group", key)
+      Logging:warn(ElementGui.classname, "wrong type", type, key, "-> item-group")
+    end
   end
 
   local button = nil
-  local ok , err = pcall(function()
-    button = parent.add(options)
-  end)
-  if not ok then
-    Logging:error(ElementGui.classname, "addGuiButtonSpriteStyled", action, type, key, err)
-    if parent[options.name] and parent[options.name].valid then
-      parent[options.name].destroy()
+  if type ~= nil then
+    local ok , err = pcall(function()
+      button = parent.add(options)
+    end)
+    if not ok then
+      Logging:error(ElementGui.classname, "addGuiButtonSpriteStyled", action, type, key, err)
+      if parent[options.name] and parent[options.name].valid then
+        parent[options.name].destroy()
+      end
+      if caption ~= nil then
+        options.caption = caption
+      end
+  
+      button = ElementGui.addGuiButtonIcon(parent, action, type, key, caption)
     end
-    if caption ~= nil then
-      options.caption = caption
-    end
-
-    ElementGui.addGuiButtonIcon(parent, action, type, key, caption)
+  else
+    button = ElementGui.addGuiButton(parent, action, key, "helmod_button_default", caption)
   end
   return button
 end
@@ -1035,15 +1059,15 @@ function ElementGui.addCellIcon(parent, element, action, select, tooltip_name, c
   local product_amount = product_prototype:getElementAmount()
   if display_cell_mod == "small-icon" then
     if parent ~= nil and select == true then
-      ElementGui.addGuiButtonSelectSpriteM(parent, action, Player.getIconType(element), element.name, "X"..product_amount, ({tooltip_name, Player.getLocalisedName(element)}), color)
+      ElementGui.addGuiButtonSelectSpriteM(parent, action, element.type, element.name, "X"..product_amount, ({tooltip_name, Player.getLocalisedName(element)}), color)
     else
-      ElementGui.addGuiButtonSpriteM(parent, action, Player.getIconType(element), element.name, "X"..product_amount, ({tooltip_name, Player.getLocalisedName(element)}), color)
+      ElementGui.addGuiButtonSpriteM(parent, action, element.type, element.name, "X"..product_amount, ({tooltip_name, Player.getLocalisedName(element)}), color)
     end
   else
     if parent ~= nil and select == true then
-      ElementGui.addGuiButtonSelectSprite(parent, action, Player.getIconType(element), element.name, "X"..product_amount, ({tooltip_name, Player.getLocalisedName(element)}), color)
+      ElementGui.addGuiButtonSelectSprite(parent, action, element.type, element.name, "X"..product_amount, ({tooltip_name, Player.getLocalisedName(element)}), color)
     else
-      ElementGui.addGuiButtonSprite(parent, action, Player.getIconType(element), element.name, "X"..product_amount, ({tooltip_name, Player.getLocalisedName(element)}), color)
+      ElementGui.addGuiButtonSprite(parent, action, element.type, element.name, "X"..product_amount, ({tooltip_name, Player.getLocalisedName(element)}), color)
     end
   end
 end
@@ -1069,7 +1093,7 @@ function ElementGui.addCellElement(parent, element, action, select, tooltip_name
   local cell = ElementGui.addGuiFlowV(parent,element.name..(index or ""), helmod_flow_style.vertical)
   local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_element_"..color.."_1")
   --ElementGui.addCellIcon(row1, element, action, select, tooltip_name, nil)
-  ElementGui.addGuiButtonSprite(row1, action, Player.getIconType(element), element.name, "X"..Product(element):getElementAmount(), ({tooltip_name, Player.getLocalisedName(element)}))
+  ElementGui.addGuiButtonSprite(row1, action, element.type, element.name, "X"..Product(element):getElementAmount(), ({tooltip_name, Player.getLocalisedName(element)}))
   ElementGui.addCellCargoInfo(row1, element)
 
   if element.limit_count ~= nil then
@@ -1112,7 +1136,7 @@ function ElementGui.addCellElementSm(parent, element, action, select, tooltip_na
   color = color or "blue"
   local cell = ElementGui.addGuiFlowV(parent,element.name..(index or ""), helmod_flow_style.vertical)
   local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_element_sm_"..color.."_1")
-  ElementGui.addGuiButtonSpriteSm(row1, action, Player.getIconType(element), element.name, "X"..Product(element):getElementAmount(), ({tooltip_name, Player.getLocalisedName(element)}))
+  ElementGui.addGuiButtonSpriteSm(row1, action, element.type, element.name, "X"..Product(element):getElementAmount(), ({tooltip_name, Player.getLocalisedName(element)}))
 
   if element.limit_count ~= nil then
     local row2 = ElementGui.addGuiFrameH(cell,"row2","helmod_frame_element_sm_"..color.."_2")
@@ -1154,7 +1178,7 @@ function ElementGui.addCellElementM(parent, element, action, select, tooltip_nam
   color = color or "blue"
   local cell = ElementGui.addGuiFlowV(parent,element.name..(index or ""), helmod_flow_style.vertical)
   local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_element_m_"..color.."_1")
-  ElementGui.addGuiButtonSpriteM(row1, action, Player.getIconType(element), element.name, "X"..Product(element):getElementAmount(), ({tooltip_name, Player.getLocalisedName(element)}))
+  ElementGui.addGuiButtonSpriteM(row1, action, element.type, element.name, "X"..Product(element):getElementAmount(), ({tooltip_name, Player.getLocalisedName(element)}))
 
   if element.limit_count ~= nil then
     local row2 = ElementGui.addGuiFrameH(cell,"row2","helmod_frame_element_m_"..color.."_2")
@@ -1199,7 +1223,7 @@ function ElementGui.addCellProduct(parent, element, action, select, tooltip_name
   if string.find(element.name, "helmod") then
     ElementGui.addGuiButton(row1, action, nil, element.name, nil, ({element.localised_name}))
   else
-    ElementGui.addGuiButtonSprite(row1, action, Player.getIconType(element), element.name, "X"..Product(element):getElementAmount(), ({tooltip_name, Player.getLocalisedName(element)}))
+    ElementGui.addGuiButtonSprite(row1, action, element.type, element.name, "X"..Product(element):getElementAmount(), ({tooltip_name, Player.getLocalisedName(element)}))
   end
   local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_product_"..color.."_3")
   ElementGui.addGuiLabel(row3, "label2_"..element.name, Format.formatNumber(element.count, 5), "helmod_label_element", {"helmod_common.total"})
@@ -1229,7 +1253,7 @@ function ElementGui.addCellProductSm(parent, element, action, select, tooltip_na
   if string.find(element.name, "helmod") then
     ElementGui.addGuiButton(row1, action, nil, element.name, nil, ({element.localised_name}))
   else
-    ElementGui.addGuiButtonSpriteSm(row1, action, Player.getIconType(element), element.name, "X"..Product(element):getElementAmount(), ({tooltip_name, Player.getLocalisedName(element)}))
+    ElementGui.addGuiButtonSpriteSm(row1, action, element.type, element.name, "X"..Product(element):getElementAmount(), ({tooltip_name, Player.getLocalisedName(element)}))
   end
   local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_product_"..color.."_3")
   ElementGui.addGuiLabel(row3, "label2_"..element.name, Format.formatNumber(element.count, 5), "helmod_label_element_sm", {"helmod_common.total"})
@@ -1304,7 +1328,7 @@ function ElementGui.addCellRecipe(parent, recipe, action, select, tooltip_name, 
   local cell = ElementGui.addGuiFlowV(parent,recipe.name, helmod_flow_style.vertical)
   local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_product_"..color.."_1")
 
-  local recipe_icon = ElementGui.addGuiButtonSprite(row1, action, Player.getRecipeIconType(recipe), recipe.name, recipe.name, ({tooltip_name, Player.getRecipeLocalisedName(recipe)}))
+  local recipe_icon = ElementGui.addGuiButtonSprite(row1, action, recipe.type, recipe.name, recipe.name, ({tooltip_name, Player.getRecipeLocalisedName(recipe)}))
 
   local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_product_"..color.."_3")
   ElementGui.addGuiLabel(row3, "label2_"..recipe.name, Format.formatPercent(recipe.production or 1).."%", "helmod_label_element", {"helmod_common.total"})
@@ -1332,7 +1356,7 @@ function ElementGui.addCellBlock(parent, block, action, select, tooltip_name, co
   local cell = ElementGui.addGuiFlowV(parent,block.name, helmod_flow_style.vertical)
   local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_product_"..color.."_1")
 
-  local recipe_icon = ElementGui.addGuiButtonSprite(row1, action, Player.getRecipeIconType(block), block.name, block.name, ({tooltip_name, Player.getRecipeLocalisedName(block)}))
+  local recipe_icon = ElementGui.addGuiButtonSprite(row1, action, "recipe", block.name, block.name, ({tooltip_name, Player.getRecipeLocalisedName(block)}))
 
   local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_product_"..color.."_3")
   ElementGui.addGuiLabel(row3, "label2_"..block.name, Format.formatNumberFactory(block.count or 0), "helmod_label_element", {"helmod_common.total"})

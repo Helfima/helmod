@@ -15,6 +15,7 @@ TechnologySelector = newclass(AbstractSelector)
 --
 function TechnologySelector:afterInit()
   self.disable_option = true
+  self.sprite_type = nil
 end
 
 -------------------------------------------------------------------------------

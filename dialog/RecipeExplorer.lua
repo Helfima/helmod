@@ -65,37 +65,6 @@ function RecipeExplorer:getDisplayPanel()
 end
 
 -------------------------------------------------------------------------------
--- Get or create keyboard panel
---
--- @function [parent=#RecipeExplorer] getKeyboardPanel
---
-function RecipeExplorer:getKeyboardPanel()
-  local display_panel1, display_panel2 = self:getColumnPanel()
-  if display_panel1["keyboard"] ~= nil and display_panel1["keyboard"].valid then
-    return display_panel1["keyboard"]
-  end
-  local panel = ElementGui.addGuiFrameV(display_panel1, "keyboard", helmod_frame_style.panel)
-  panel.style.horizontally_stretchable = true
-  return panel
-end
-
--------------------------------------------------------------------------------
--- Get or create history panel
---
--- @function [parent=#RecipeExplorer] getHistoryPanel
---
-function RecipeExplorer:getHistoryPanel()
-  local display_panel1, display_panel2 = self:getColumnPanel()
-  if display_panel2["history"] ~= nil and display_panel2["history"].valid then
-    return display_panel2["history"]
-  end
-  local panel = ElementGui.addGuiFrameV(display_panel2, "history", helmod_frame_style.panel)
-  panel.style.horizontally_stretchable = true
-  panel.style.vertically_stretchable = true
-  return panel
-end
-
--------------------------------------------------------------------------------
 -- On event
 --
 -- @function [parent=#RecipeExplorer] onEvent
@@ -144,23 +113,6 @@ function RecipeExplorer:onEvent(event)
 end
 
 -------------------------------------------------------------------------------
--- Add history
---
--- @function [parent=#RecipeExplorer] addHistory
---
--- @param #string RecipeExplorer_value
--- @param #number result
---
-function RecipeExplorer:addHistory(RecipeExplorer_value, result)
-  if RecipeExplorer_value ~= result then
-    local RecipeExplorer_history = User.getParameter("RecipeExplorer_history") or {}
-    table.insert(RecipeExplorer_history,1,string.format("%s=%s",RecipeExplorer_value,result))
-    if #RecipeExplorer_history > 9 then table.remove(RecipeExplorer_history,#RecipeExplorer_history) end
-    User.setParameter("RecipeExplorer_history", RecipeExplorer_history)
-  end
-end
-
--------------------------------------------------------------------------------
 -- On update
 --
 -- @function [parent=#RecipeExplorer] RecipeExplorer
@@ -168,9 +120,7 @@ end
 -- @param #LuaEvent event
 --
 function RecipeExplorer:onUpdate(event)
-  self:updateDisplay(item, item2, item3)
-  self:updateKeyboard(item, item2, item3)
-  self:updateHistory(item, item2, item3)
+  self:updateDisplay()
 end
 
 -------------------------------------------------------------------------------
@@ -183,28 +133,5 @@ function RecipeExplorer:updateDisplay()
   local keyboard_panel = self:getDisplayPanel()
   keyboard_panel.clear()
 
-  --local table_panel = ElementGui.addGuiTable(keyboard_panel,"keys",2)
-  local RecipeExplorer_value = User.getParameter("RecipeExplorer_value") or 0
-  display_panel = ElementGui.addGuiText(keyboard_panel,self.classname.."=compute=ID=",RecipeExplorer_value,"helmod_textfield_RecipeExplorer")
-  --display_panel.style.horizontally_stretchable = true
-  display_panel.style.width=155
-  display_panel.style.horizontal_align = "right"
-  display_panel.focus()
-end
-
--------------------------------------------------------------------------------
--- Update history
---
--- @function [parent=#RecipeExplorer] updateHistory
---
-function RecipeExplorer:updateHistory()
-  Logging:debug(self.classname, "updateHistory()")
-  local history_panel = self:getHistoryPanel()
-  history_panel.clear()
-
-  local RecipeExplorer_history = User.getParameter("RecipeExplorer_history") or {}
-  for index, line in pairs(RecipeExplorer_history) do
-    ElementGui.addGuiLabel(history_panel,string.format("history_%s",index),line)
-  end
-
+  
 end

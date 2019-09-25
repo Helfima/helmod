@@ -64,23 +64,130 @@ function AdminTab:hasIndexModel()
 end
 
 -------------------------------------------------------------------------------
+-- Get or create tab panel
+--
+-- @function [parent=#AdminTab] getTabPane
+--
+function AdminTab:getTabPane()
+  local content_panel = self:getResultPanel()
+  local panel_name = "tab_panel"
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[panel_name]
+  end
+  local panel = GuiElement.add(content_panel, GuiTabPane(panel_name))
+  return panel
+end
+
+-------------------------------------------------------------------------------
+-- Get or create cache tab panel
+--
+-- @function [parent=#AdminTab] getCacheTab
+--
+function AdminTab:getCacheTab()
+  local content_panel = self:getTabPane()
+  local panel_name = "cache-tab-panel"
+  local scroll_name = "cache-scroll"
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[scroll_name]
+  end
+  local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption({"helmod_result-panel.cache-list"}))
+  local scroll_panel = GuiElement.add(content_panel, GuiScroll(scroll_name):style(helmod_frame_style.scroll_pane):policy(true))
+  content_panel.add_tab(tab_panel,scroll_panel)
+  scroll_panel.style.horizontally_stretchable = true
+  scroll_panel.style.vertically_stretchable = true
+  return scroll_panel
+end
+
+-------------------------------------------------------------------------------
+-- Get or create rule tab panel
+--
+-- @function [parent=#AdminTab] getRuleTab
+--
+function AdminTab:getRuleTab()
+  local content_panel = self:getTabPane()
+  local panel_name = "rule-tab-panel"
+  local scroll_name = "rule-scroll"
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[scroll_name]
+  end
+  local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption({"helmod_result-panel.rule-list"}))
+  local scroll_panel = GuiElement.add(content_panel, GuiScroll(scroll_name):style(helmod_frame_style.scroll_pane):policy(true))
+  content_panel.add_tab(tab_panel,scroll_panel)
+  scroll_panel.style.horizontally_stretchable = true
+  scroll_panel.style.vertically_stretchable = true
+  return scroll_panel
+end
+
+-------------------------------------------------------------------------------
+-- Get or create sheet tab panel
+--
+-- @function [parent=#AdminTab] getSheetTab
+--
+function AdminTab:getSheetTab()
+  local content_panel = self:getTabPane()
+  local panel_name = "sheet-tab-panel"
+  local scroll_name = "sheet-scroll"
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[scroll_name]
+  end
+  local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption({"helmod_result-panel.sheet-list"}))
+  local scroll_panel = GuiElement.add(content_panel, GuiScroll(scroll_name):style(helmod_frame_style.scroll_pane):policy(true))
+  content_panel.add_tab(tab_panel,scroll_panel)
+  scroll_panel.style.horizontally_stretchable = true
+  scroll_panel.style.vertically_stretchable = true
+  return scroll_panel
+end
+
+-------------------------------------------------------------------------------
 -- Update data
 --
 -- @function [parent=#AdminTab] updateData
 --
 function AdminTab:updateData()
-  Logging:debug(self.classname, "updatePowers()")
+  Logging:debug(self.classname, "updateData()")
 
-  -- data
-  local scroll_panel = self:getResultScrollPanel({"helmod_result-panel.tab-title-admin"})
-  
+  self:updateCache()
+  self:updateRule()
+  self:updateSheet()
+end
+
+-------------------------------------------------------------------------------
+-- Update data
+--
+-- @function [parent=#AdminTab] updateCache
+--
+function AdminTab:updateCache()
+  Logging:debug(self.classname, "updateCache()")
+
   -- Rule List
-  local rule_panel = ElementGui.addGuiFrameH(scroll_panel,"rule-list", helmod_frame_style.section, {"helmod_result-panel.rule-list"})
-  rule_panel.style.horizontally_stretchable = true
-  
+  local rule_panel = self:getCacheTab()
+  local users_data = global["users"]
+  if Model.countList(users_data) > 0 then
+
+    local result_table = ElementGui.addGuiTable(rule_panel,"list-data", 3, "helmod_table-rule-odd")
+
+    self:addCacheListHeader(result_table)
+
+    for user_name, user_data in spairs(users_data, function(t,a,b) return b > a end) do
+      self:addCacheListRow(result_table, user_name, user_data)
+    end
+
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update data
+--
+-- @function [parent=#AdminTab] updateRule
+--
+function AdminTab:updateRule()
+  Logging:debug(self.classname, "updateRule()")
+
+  -- Rule List
+  local rule_panel = self:getRuleTab()
   local count_rule = #Model.getRules()
   if count_rule > 0 then
-    
+
     local result_table = ElementGui.addGuiTable(rule_panel,"list-data", 8, "helmod_table-rule-odd")
 
     self:addRuleListHeader(result_table)
@@ -90,14 +197,21 @@ function AdminTab:updateData()
     end
 
   end
-  
+end
+
+-------------------------------------------------------------------------------
+-- Update data
+--
+-- @function [parent=#AdminTab] updateSheet
+--
+function AdminTab:updateSheet()
+  Logging:debug(self.classname, "updateSheet()")
   -- Sheet List
-  local sheet_panel = ElementGui.addGuiFrameH(scroll_panel,"sheet-list", helmod_frame_style.section, {"helmod_result-panel.sheet-list"})
-  sheet_panel.style.horizontally_stretchable = true
+  local sheet_panel = self:getSheetTab()
 
   local count_model = Model.countModel()
   if count_model > 0 then
-    
+
     local result_table = ElementGui.addGuiTable(sheet_panel,"list-data", 3, "helmod_table-odd")
 
     self:addSheetListHeader(result_table)
@@ -108,6 +222,46 @@ function AdminTab:updateData()
     end
 
   end
+end
+
+-------------------------------------------------------------------------------
+-- Add cahce List header
+--
+-- @function [parent=#AdminTab] addCacheListHeader
+--
+-- @param #LuaGuiElement itable container for element
+--
+function AdminTab:addCacheListHeader(itable)
+  Logging:debug(self.classname, "addCacheListHeader()", itable)
+
+  -- col action
+  self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
+  -- data
+  self:addCellHeader(itable, "header-owner", {"helmod_result-panel.col-header-owner"})
+  self:addCellHeader(itable, "header-translated", "Count Translated")
+end
+
+-------------------------------------------------------------------------------
+-- Add row Rule List
+--
+-- @function [parent=#AdminTab] addCacheListRow
+--
+-- @param #LuaGuiElement itable container for element
+-- @param #table model
+--
+function AdminTab:addCacheListRow(gui_table, user_name, user_data)
+  Logging:debug(self.classname, "addCacheListRow()", gui_table, user_name, user_data)
+
+  -- col action
+  local cell_action = ElementGui.addCell(gui_table, "action"..user_name, 4)
+  ElementGui.addGuiButton(cell_action, self.classname.."=user-remove=ID=", user_name, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
+
+  -- col owner
+  ElementGui.addGuiLabel(gui_table, "owner"..user_name, user_name)
+
+  -- col translated
+  ElementGui.addGuiLabel(gui_table, "translated"..user_name, Model.countList(user_data.translated))
+
 end
 
 -------------------------------------------------------------------------------
@@ -141,7 +295,7 @@ end
 -- @param #table model
 --
 function AdminTab:addRuleListRow(gui_table, rule, rule_id)
-  Logging:debug(self.classname, "addSheetListRow()", gui_table, rule, rule_id)
+  Logging:debug(self.classname, "addRuleListRow()", gui_table, rule, rule_id)
 
   -- col action
   local cell_action = ElementGui.addCell(gui_table, "action"..rule_id, 4)
@@ -149,25 +303,25 @@ function AdminTab:addRuleListRow(gui_table, rule, rule_id)
 
   -- col index
   ElementGui.addGuiLabel(gui_table, "index"..rule_id, rule.index)
-  
+
   -- col mod
   ElementGui.addGuiLabel(gui_table, "mod"..rule_id, rule.mod)
-  
+
   -- col name
   ElementGui.addGuiLabel(gui_table, "name"..rule_id, rule.name)
-  
+
   -- col category
   ElementGui.addGuiLabel(gui_table, "category"..rule_id, rule.category)
-  
+
   -- col type
   ElementGui.addGuiLabel(gui_table, "type"..rule_id, rule.type)
-  
+
   -- col value
   ElementGui.addGuiLabel(gui_table, "value"..rule_id, rule.value)
-  
+
   -- col value
   ElementGui.addGuiLabel(gui_table, "excluded"..rule_id, rule.excluded)
-  
+
 end
 
 -------------------------------------------------------------------------------
@@ -219,14 +373,14 @@ function AdminTab:addSheetListRow(gui_table, model)
   -- col owner
   local cell_owner = ElementGui.addGuiFrameH(gui_table,"owner"..model.id, helmod_frame_style.hidden)
   ElementGui.addGuiLabel(cell_owner, model.id, model.owner or "empty", "helmod_label_right_70")
-  
+
   -- col element
   local cell_element = ElementGui.addGuiFrameH(gui_table,"element"..model.id, helmod_frame_style.hidden)
   local element = Model.firstRecipe(model.blocks)
   if element ~= nil then
-    ElementGui.addGuiButtonSprite(cell_element, self.classname.."=donothing=ID="..model.id.."=", Player.getIconType(element), element.name, model.id, RecipePrototype(element):getLocalisedName())
+    ElementGui.addGuiButtonSprite(cell_element, self.classname.."=donothing=ID="..model.id.."=", "recipe", element.name, model.id, RecipePrototype(element):getLocalisedName())
   else
     ElementGui.addGuiButton(cell_element, self.classname.."=donothing=ID=", model.id, "helmod_button_icon_help_selected")
   end
-  
+
 end

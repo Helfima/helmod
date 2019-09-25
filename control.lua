@@ -18,8 +18,7 @@ Logging.console = false
 Dispatcher = DispatcherController("HMDispatcherController")
 Format = require "core.Format"
 ElementGui = require "core.ElementGui"
-require "gui.GuiElement"
-require "gui.GuiButton"
+require "gui.Gui"
 Player = require "model.Player"
 Controller = require "controller.Controller"
 UnitTest = require "core.UnitTest"

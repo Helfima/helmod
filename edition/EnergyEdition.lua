@@ -363,7 +363,7 @@ function EnergyEdition:updatePrimaryInfo(event)
       local headerPanel = ElementGui.addGuiTable(infoPanel,"table-header",2)
       local tooltip = ({"tooltip.selector-module"})
       if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
-      ElementGui.addGuiButtonSprite(headerPanel, self.classname.."=do-nothing=ID=", Player.getIconType(primary), primary.name, primary.name, tooltip)
+      ElementGui.addGuiButtonSprite(headerPanel, self.classname.."=do-nothing=ID=", primary.type, primary.name, primary.name, tooltip)
 
       local entity_prototype = EntityPrototype(primary.name)
       if entity_prototype:native() ~= nil then
@@ -486,7 +486,7 @@ function EnergyEdition:updateSecondaryInfo(event)
       local headerPanel = ElementGui.addGuiTable(infoPanel,"table-header",2)
       local tooltip = ({"tooltip.selector-module"})
       if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
-      ElementGui.addGuiButtonSprite(headerPanel, self.classname.."=do-nothing=ID=", Player.getIconType(secondary), secondary.name, secondary.name, tooltip)
+      ElementGui.addGuiButtonSprite(headerPanel, self.classname.."=do-nothing=ID=", secondary.type, secondary.name, secondary.name, tooltip)
 
       local entity_prototype = EntityPrototype(secondary.name)
       if entity_prototype:native() ~= nil then

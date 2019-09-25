@@ -299,7 +299,7 @@ function AbstractTab:updateMenuPanel(event)
     ElementGui.addGuiButton(group1, "HMRecipeSelector=OPEN=ID=", block_id, "helmod_button_icon_wrench",nil, ({"helmod_result-panel.add-button-recipe"}))
     ElementGui.addGuiButton(group1, "HMTechnologySelector=OPEN=ID=", block_id, "helmod_button_icon_graduation",nil, ({"helmod_result-panel.add-button-technology"}))
     ElementGui.addGuiButton(group1, "HMContainerSelector=OPEN=ID=", block_id, "helmod_button_icon_container",nil, ({"helmod_result-panel.select-button-container"}))
-    --ElementGui.addGuiButton(group1, "HMPreferenceEdition=OPEN=ID=", block_id, "helmod_button_icon_services",nil, {"helmod_button.preferences"})
+    ElementGui.addGuiButton(group1, "HMPreferenceEdition=OPEN=ID=", block_id, "helmod_button_icon_services",nil, {"helmod_button.preferences"})
     --ElementGui.addGuiButton(group1, "HMRecipeExplorer=OPEN=ID=", block_id, "helmod_button_icon_search",nil, {"helmod_button.search"})
 
     local group2 = ElementGui.addGuiFlowH(action_panel,"group2",helmod_flow_style.horizontal)
@@ -401,13 +401,13 @@ function AbstractTab:updateIndexPanel(event)
         local element = Model.firstRecipe(imodel.blocks)
         if imodel.id == model_id then
           if element ~= nil then
-            ElementGui.addGuiButtonSprite(index_panel, self.classname.."=change-model=ID="..imodel.id.."=", Player.getIconType(element), element.name, imodel.id, RecipePrototype(element):getLocalisedName())
+            ElementGui.addGuiButtonSprite(index_panel, self.classname.."=change-model=ID="..imodel.id.."=", "recipe", element.name, imodel.id, RecipePrototype(element):getLocalisedName())
           else
             ElementGui.addGuiButton(index_panel, self.classname.."=change-model=ID=", imodel.id, "helmod_button_icon_help_selected")
           end
         else
           if element ~= nil then
-            ElementGui.addGuiButtonSelectSprite(index_panel, self.classname.."=change-model=ID="..imodel.id.."=", Player.getIconType(element), element.name, imodel.id, RecipePrototype(element):getLocalisedName())
+            ElementGui.addGuiButtonSelectSprite(index_panel, self.classname.."=change-model=ID="..imodel.id.."=", "recipe", element.name, imodel.id, RecipePrototype(element):getLocalisedName())
           else
             ElementGui.addGuiButton(index_panel, self.classname.."=change-model=ID=", imodel.id, "helmod_button_icon_help")
           end

@@ -675,7 +675,7 @@ function RecipeEdition:updateFactoryInfo(event)
     local headerPanel = ElementGui.addGuiTable(infoPanel,"table-header",2)
     local tooltip = ({"tooltip.selector-module"})
     if User.getParameter("module_panel") == true then tooltip = ({"tooltip.selector-factory"}) end
-    ElementGui.addGuiButtonSelectSprite(headerPanel, self.classname.."=change-panel=ID="..event.item1.."="..object.id.."=", Player.getIconType(factory), factory.name, factory.name, tooltip, ElementGui.color_button_edit)
+    ElementGui.addGuiButtonSelectSprite(headerPanel, self.classname.."=change-panel=ID="..event.item1.."="..object.id.."=", factory.type, factory.name, factory.name, tooltip, ElementGui.color_button_edit)
     if factory_prototype:native() == nil then
       ElementGui.addGuiLabel(headerPanel, "label", factory.name)
     else
@@ -867,7 +867,7 @@ function RecipeEdition:updateBeaconInfo(event)
     local headerPanel = ElementGui.addGuiTable(infoPanel,"table-header",2)
     local tooltip = ({"tooltip.selector-module"})
     if User.getParameter("module_panel") == true then tooltip = ({"tooltip.selector-factory"}) end
-    ElementGui.addGuiButtonSelectSprite(headerPanel, self.classname.."=change-panel=ID="..event.item1.."="..object.id.."=", Player.getIconType(beacon), beacon.name, beacon.name, tooltip, ElementGui.color_button_edit)
+    ElementGui.addGuiButtonSelectSprite(headerPanel, self.classname.."=change-panel=ID="..event.item1.."="..object.id.."=", beacon.type, beacon.name, beacon.name, tooltip, ElementGui.color_button_edit)
     if beacon_prototype:native() == nil then
       ElementGui.addGuiLabel(headerPanel, "label", beacon.name)
     else

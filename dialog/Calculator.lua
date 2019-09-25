@@ -163,14 +163,14 @@ end
 -------------------------------------------------------------------------------
 -- On update
 --
--- @function [parent=#Calculator] Calculator
+-- @function [parent=#Calculator] onUpdate
 --
 -- @param #LuaEvent event
 --
 function Calculator:onUpdate(event)
-  self:updateDisplay(item, item2, item3)
-  self:updateKeyboard(item, item2, item3)
-  self:updateHistory(item, item2, item3)
+  self:updateDisplay()
+  self:updateKeyboard()
+  self:updateHistory()
 end
 
 -------------------------------------------------------------------------------
