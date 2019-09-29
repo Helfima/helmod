@@ -7,7 +7,7 @@ local EventController = {
   classname = "HMEventController"
 }
 
-Event = require "core.Event"
+defines.events.on_prepare=script.generate_event_name()
 -------------------------------------------------------------------------------
 -- Start
 --
@@ -22,6 +22,7 @@ function EventController.start()
   --EventController.pcallEvent(defines.events.on_tick, EventController.onTick)
   EventController.pcallEvent(defines.events.on_gui_click, EventController.onGuiClick)
   EventController.pcallEvent(defines.events.on_gui_text_changed, EventController.onGuiTextChanged)
+  EventController.pcallEvent(defines.events.on_prepare, EventController.onPrepare)
   
   EventController.pcallEvent(defines.events.on_gui_confirmed, EventController.on_gui_confirmed)
   -- dropdown changed
@@ -37,7 +38,7 @@ function EventController.start()
   
   EventController.pcallEvent(defines.events.on_string_translated, EventController.onStringTranslated)
 
-  EventController.pcallNthTick(10, EventController.onNthTick)
+  --EventController.pcallNthTick(10, EventController.onNthTick)
   -- event hotkey
   EventController.pcallEvent("helmod-input-valid", EventController.onCustomInput)
   EventController.pcallEvent("helmod-close", EventController.onCustomInput)
@@ -210,9 +211,9 @@ function EventController.onTick(event)
 end
 
 -------------------------------------------------------------------------------
--- On tick
+-- On nth tick
 --
--- @function [parent=#EventController] onTick
+-- @function [parent=#EventController] onNthTick
 --
 -- @param #table NthTickEvent {tick=#number, nth_tick=#number}
 --
@@ -362,6 +363,22 @@ function EventController.onPlayerJoinedGame(event)
   if event ~= nil and event.player_index ~= nil then
     local player = Player.load(event).native()
     Controller:bindController(player)
+  end
+end
+
+-------------------------------------------------------------------------------
+-- On prepare
+--
+-- @function [parent=#EventController] onPrepare
+--
+-- @param #table event
+--
+function EventController.onPrepare(event)
+  Logging:trace(EventController.classname, "onPrepare(event)", event)
+  if event ~= nil and event.player_index ~= nil then
+    event.tick = game.tick
+    Player.load(event)
+    Dispatcher:send("on_gui_event", event, Controller.classname)
   end
 end
 

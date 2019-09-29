@@ -160,14 +160,14 @@ function AdminTab:updateCache()
   Logging:debug(self.classname, "updateCache()")
 
   -- Rule List
-  local rule_panel = self:getCacheTab()
+  local cache_panel = self:getCacheTab()
   local users_data = global["users"]
   if Model.countList(users_data) > 0 then
 
-    local result_table = ElementGui.addGuiTable(rule_panel,"list-data", 3, "helmod_table-rule-odd")
-
+    local translate_panel = ElementGui.addGuiFlowV(cache_panel, "translate", helmod_flow_style.vertical);
+    ElementGui.addGuiLabel(translate_panel, "translate-label", "Translated String", "helmod_label_title_frame")
+    local result_table = ElementGui.addGuiTable(translate_panel,"list-data", 3, "helmod_table-rule-odd")
     self:addCacheListHeader(result_table)
-
     for user_name, user_data in spairs(users_data, function(t,a,b) return b > a end) do
       self:addCacheListRow(result_table, user_name, user_data)
     end
@@ -238,7 +238,7 @@ function AdminTab:addCacheListHeader(itable)
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
   -- data
   self:addCellHeader(itable, "header-owner", {"helmod_result-panel.col-header-owner"})
-  self:addCellHeader(itable, "header-translated", "Count Translated")
+  self:addCellHeader(itable, "header-total", {"helmod_result-panel.col-header-total"})
 end
 
 -------------------------------------------------------------------------------
@@ -254,13 +254,13 @@ function AdminTab:addCacheListRow(gui_table, user_name, user_data)
 
   -- col action
   local cell_action = ElementGui.addCell(gui_table, "action"..user_name, 4)
-  ElementGui.addGuiButton(cell_action, self.classname.."=user-remove=ID=", user_name, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
+  --ElementGui.addGuiButton(cell_action, self.classname.."=user-remove=ID=", user_name, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
 
   -- col owner
-  ElementGui.addGuiLabel(gui_table, "owner"..user_name, user_name)
+  ElementGui.addGuiLabel(gui_table, string.format("%s_%s","owner",user_name), user_name)
 
   -- col translated
-  ElementGui.addGuiLabel(gui_table, "translated"..user_name, Model.countList(user_data.translated))
+  ElementGui.addGuiLabel(gui_table, string.format("%s_%s","total",user_name), Model.countList(user_data.translated))
 
 end
 

@@ -87,7 +87,6 @@ helmod_settings_mod = {
       "HMElementGui",
       "HMEnergyEdition",
       "HMEnergyTab",
-      "HMEvent",
       "HMEventController",
       "HMHelpPanel",
       "HMMainMenuPanel",

@@ -1,8 +1,12 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.9.7
-Date: 22. 09. 2019
+Date: 29. 09. 2019
+  Features:
+    - Added selector search with equal or contain option
   Bugfixes:
     - Fixed model compute with catalyst_amount
+    - Fixed build translated string
+    - Fixed icon prototype display
 ---------------------------------------------------------------------------------------------------
 Version: 0.9.6
 Date: 21. 09. 2019

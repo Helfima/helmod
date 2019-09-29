@@ -86,6 +86,17 @@ function User.isFilterTranslate()
 end
 
 -------------------------------------------------------------------------------
+-- Return is filter contain
+--
+-- @function [parent=#User] isFilterContain
+--
+-- @return #boolean
+--
+function User.isFilterContain()
+  return (User.getParameter("filter-contain") == nil or User.getParameter("filter-contain") == "right")
+end
+
+-------------------------------------------------------------------------------
 -- Get default settings
 --
 -- @function [parent=#User] getDefaultSettings
@@ -180,6 +191,7 @@ end
 -- @param #object value
 --
 function User.setParameter(property, value)
+  --Logging:debug(User.classname, property, value)
   if property == nil then
     Logging:error(User.classname, "property must not nil", value)
     return nil
@@ -448,6 +460,16 @@ function User.addTranslate(request)
       end
     end
   end
+end
+
+-------------------------------------------------------------------------------
+-- Is translate
+--
+-- @function [parent=#User] isTranslate
+--
+function User.isTranslate()
+  local translated = User.get("translated")
+  return translated ~= nil and Model.countList(translated) > 0
 end
 
 -------------------------------------------------------------------------------

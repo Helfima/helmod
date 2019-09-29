@@ -117,6 +117,7 @@ end
 --
 function Controller:bind()
   Dispatcher:bind("on_gui_action", self, self.onGuiAction)
+  Dispatcher:bind("on_gui_event", self, self.onGuiEvent)
   Dispatcher:bind("on_gui_setting", self, self.onGuiSetting)
   Dispatcher:bind("on_gui_hotkey", self, self.onGuiHotkey)
 end
@@ -233,14 +234,12 @@ end
 -- @param #table event
 --
 function Controller:onTick(event)
-  Logging:debug(Controller.classname, "onNthTick(NthTickEvent)", NthTickEvent)
+  Logging:trace(Controller.classname, "onTick(event)", event)
   if Player.native() ~= nil then
     local next_event = User.getParameter("next_event")
-    if next_event ~= nil then
-      if next_event.event.action == "OPEN" then
-        Controller:send("on_gui_open", next_event.event, next_event.classname)
-      end
-      Controller:send("on_gui_event", next_event.event, next_event.classname)
+    if next_event ~= nil and next_event.event.tick < event.tick then
+      next_event.event.tick = event.tick
+      script.raise_event(next_event.type_event, next_event.event)
       User.setParameter("next_event",nil)
     end
   end
@@ -257,12 +256,10 @@ function Controller:onNthTick(NthTickEvent)
   Logging:trace(Controller.classname, "onNthTick(NthTickEvent)", NthTickEvent)
   if Player.native() ~= nil then
     local next_event = User.getParameter("next_event")
-    if next_event ~= nil then
+    if next_event ~= nil and next_event.event.tick < NthTickEvent.tick then
+      Player.load(next_event.event)
       next_event.event.tick = NthTickEvent.tick
-      if next_event.event.action == "OPEN" then
-        Controller:send("on_gui_open", next_event.event, next_event.classname)
-      end
-      Controller:send("on_gui_event", next_event.event, next_event.classname)
+      script.raise_event(next_event.type_event, next_event.event)
       User.setParameter("next_event",nil)
     end
   end
@@ -276,7 +273,7 @@ end
 -- @param #table event {player_index=number, localised_ string=#string,result=#string, translated=#boolean}
 --
 function Controller:onStringTranslated(event)
-  Logging:debug(Controller.classname, "onStringTranslated(event)", event)
+  Logging:trace(Controller.classname, "onStringTranslated(event)", event)
   User.addTranslate(event)
 end
 
@@ -320,17 +317,25 @@ function Controller:onGuiAction(event)
     if event.action == "OPEN" then
       User.setActiveForm(event.classname)
     end
-    User.setParameter("prepare",false)
-    Controller:send("on_gui_prepare", event, event.classname)
-    if User.getParameter("prepare") then
-      User.setParameter("next_event", {event=event, classname=event.classname})
-    else
-      if event.action == "OPEN" then
-        Controller:send("on_gui_open", event, event.classname)
-      end
-      Controller:send("on_gui_event", event, event.classname)
-    end
+    self:onGuiEvent(event)
   end
+end
+
+-------------------------------------------------------------------------------
+-- On gui event
+--
+-- @function [parent=#Controller] onGuiEvent
+--
+-- @param #table event
+--
+function Controller:onGuiEvent(event)
+  Logging:debug(self.classname, "onGuiEvent(event)", event)
+  Controller:send("on_gui_prepare", event, event.classname)
+  Controller:send("on_gui_translate", event, event.classname)
+  if event.action == "OPEN" then
+    Controller:send("on_gui_open", event, event.classname)
+  end
+  Controller:send("on_gui_event", event, event.classname)
 end
 
 -------------------------------------------------------------------------------

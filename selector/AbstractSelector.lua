@@ -19,6 +19,7 @@ local filter_prototype_product = true
 --
 function AbstractSelector:onBind()
   Dispatcher:bind("on_gui_prepare", self, self.prepare)
+  Dispatcher:bind("on_gui_translate", self, self.translate)
 end
 
 -------------------------------------------------------------------------------
@@ -286,6 +287,14 @@ function AbstractSelector:onEvent(event)
   if event.action == "filter-language-switch" then
     Logging:debug(self.classname, "filter-language-switch", event.element.switch_state)
     User.setParameter("filter-language", event.element.switch_state)
+    self:resetGroups()
+    Controller:send("on_gui_update", event, self.classname)
+  end
+
+  if event.action == "filter-contain-switch" then
+    Logging:debug(self.classname, "filter-contain-switch", event.element.switch_state)
+    User.setParameter("filter-contain", event.element.switch_state)
+    self:resetGroups()
     Controller:send("on_gui_update", event, self.classname)
   end
 
@@ -350,17 +359,41 @@ function AbstractSelector:prepare(event)
 
     Cache.setData(self.classname, "list_products", list_products)
     Cache.setData(self.classname, "list_ingredients", list_ingredients)
-    Cache.setData(self.classname, "list_translate", list_translate)
 
     Logging:debug(self.classname, "prepare ok")
     if User.getModGlobalSetting("filter_translated_string_active") then
+      Cache.setData(self.classname, "list_translate", list_translate)
+    end
+    User.setParameter("prepare",true)
+  else
+    User.setParameter("prepare",false)
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Translate
+--
+-- @function [parent=#AbstractSelector] translate
+--
+-- @param #LuaEvent event
+--
+function AbstractSelector:translate(event)
+  Logging:debug(self.classname, "prepare()", event)
+  -- recuperation recipes
+  if not(Cache.isEmpty(self.classname, "list_translate")) then
+    if User.getModGlobalSetting("filter_translated_string_active") and not(User.isTranslate()) then
+      local list_translate = Cache.getData(self.classname, "list_translate")
+
       for _,localised_name in pairs(list_translate) do
         Player.native().request_translation(localised_name)
       end
+      User.setParameter("translate",true)
+    else
+      User.setParameter("translate",false)
     end
-    return true
+  else
+    User.setParameter("translate",false)
   end
-  return false
 end
 
 -------------------------------------------------------------------------------
@@ -395,7 +428,11 @@ function AbstractSelector:checkFilter(search)
     if User.isFilterTranslate()  then
       search = User.getTranslate(search)
     end
-    return string.find(search:lower():gsub("[-]"," "), filter_prototype:lower():gsub("[-]"," "))
+    if User.isFilterContain() then
+      return string.find(search:lower():gsub("[-]"," "), filter_prototype:lower():gsub("[-]"," "))
+    else
+      return search:lower():gsub("[-]"," ") == filter_prototype:lower():gsub("[-]"," ")
+    end
   end
   return true
 end
@@ -444,6 +481,7 @@ function AbstractSelector:updateFilter(event)
       ElementGui.addGuiText(cellFilter, "filter-text", filter_prototype)
       ElementGui.addGuiButton(cellFilter, self.classname.."=recipe-filter=ID=", "filter-value", "helmod_button_default", ({"helmod_button.apply"}))
     end
+    -- switch language
     local switch_position = "right"
     if User.getModGlobalSetting("filter_translated_string_active") and User.getParameter("filter-language") ~= nil then
       switch_position = User.getParameter("filter-language")
@@ -454,6 +492,14 @@ function AbstractSelector:updateFilter(event)
       filter_switch.enabled = false
       filter_switch.switch_state = "left"
     end
+    -- switch contain
+    local contain_position = "right"
+    if User.getParameter("filter-contain") ~= nil then
+      contain_position = User.getParameter("filter-contain")
+    end
+    Logging:debug(self.classname, "strict_position", contain_position)
+    ElementGui.addGuiSwitch(panel,string.format("%s=%s", self.classname, "filter-contain-switch"), contain_position, false, {"helmod_recipe-edition-panel.filter-contain-switch-left"}, {"tooltip.filter-contain-switch-left"}, {"helmod_recipe-edition-panel.filter-contain-switch-right"}, {"tooltip.filter-contain-switch-right"},nil, {"helmod_recipe-edition-panel.filter-contain-switch"})
+    
   end
 
   if self.product_option then
