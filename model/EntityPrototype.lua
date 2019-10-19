@@ -191,6 +191,20 @@ function EntityPrototype:getModuleInventorySize()
 end
 
 -------------------------------------------------------------------------------
+-- Return crafting categories
+--
+-- @function [parent=#EntityPrototype] getCraftingCategories
+--
+-- @return #number default 0
+--
+function EntityPrototype:getCraftingCategories()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.crafting_categories or {}
+  end
+  return {}
+end
+
+-------------------------------------------------------------------------------
 -- Return crafting speed
 --
 -- @function [parent=#EntityPrototype] getCraftingSpeed

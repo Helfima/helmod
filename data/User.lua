@@ -147,6 +147,145 @@ function User.getParameter(property)
 end
 
 -------------------------------------------------------------------------------
+-- Get default factory
+--
+-- @function [parent=#User] getDefaultFactory
+--
+-- @param #table recipe
+--
+function User.getDefaultFactory(recipe)
+  local default_factory = User.getParameter("default_factory")
+  local recipe_prototype = RecipePrototype(recipe)
+  local category = recipe_prototype:getCategory()
+  if category ~= nil and default_factory ~= nil and default_factory[category] ~= nil then
+    return default_factory[category]
+  end
+  return nil
+end
+
+-------------------------------------------------------------------------------
+-- Set default factory
+--
+-- @function [parent=#User] setDefaultFactory
+--
+-- @param #table recipe
+--
+function User.setDefaultFactory(recipe)
+  local default_factory = User.getParameter("default_factory") or {}
+  local recipe_prototype = RecipePrototype(recipe)
+  local category = recipe_prototype:getCategory()
+  local factory = recipe.factory
+  if category ~= nil then
+    default_factory[category] = {name = factory.name}
+    User.setParameter("default_factory", default_factory)
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Get default factory module
+--
+-- @function [parent=#User] getDefaultFactoryModule
+--
+-- @param #table recipe
+--
+function User.getDefaultFactoryModule(recipe)
+  local default_factory_module = User.getParameter("default_factory_module")
+  local recipe_prototype = RecipePrototype(recipe)
+  local category = recipe_prototype:getCategory()
+  if category ~= nil and default_factory_module ~= nil and default_factory_module[category] ~= nil then
+    return default_factory_module[category]
+  end
+  return nil
+end
+
+-------------------------------------------------------------------------------
+-- Set default factory module
+--
+-- @function [parent=#User] setDefaultFactoryModule
+--
+-- @param #table recipe
+--
+function User.setDefaultFactoryModule(recipe)
+  local default_factory_module = User.getParameter("default_factory_module") or {}
+  local recipe_prototype = RecipePrototype(recipe)
+  local category = recipe_prototype:getCategory()
+  local factory = recipe.factory
+  if category ~= nil then
+    default_factory_module[category] = factory.module_priority
+    User.setParameter("default_factory_module", default_factory_module)
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Get default beacon
+--
+-- @function [parent=#User] getDefaultBeacon
+--
+-- @param #table recipe
+--
+function User.getDefaultBeacon(recipe)
+  local default_beacon = User.getParameter("default_beacon")
+  local recipe_prototype = RecipePrototype(recipe)
+  local category = recipe_prototype:getCategory()
+  if category ~= nil and default_beacon ~= nil and default_beacon[category] ~= nil then
+    return default_beacon[category]
+  end
+  return nil
+end
+
+-------------------------------------------------------------------------------
+-- Set default beacon
+--
+-- @function [parent=#User] setDefaultBeacon
+--
+-- @param #table recipe
+--
+function User.setDefaultBeacon(recipe)
+  local default_beacon = User.getParameter("default_beacon") or {}
+  local recipe_prototype = RecipePrototype(recipe)
+  local category = recipe_prototype:getCategory()
+  local beacon = recipe.beacon
+  if category ~= nil then
+    default_beacon[category] = {name = beacon.name}
+    User.setParameter("default_beacon", default_beacon)
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Get default beacon module
+--
+-- @function [parent=#User] getDefaultBeaconModule
+--
+-- @param #table recipe
+--
+function User.getDefaultBeaconModule(recipe)
+  local default_beacon_module = User.getParameter("default_beacon_module")
+  local recipe_prototype = RecipePrototype(recipe)
+  local category = recipe_prototype:getCategory()
+  if category ~= nil and default_beacon_module ~= nil and default_beacon_module[category] ~= nil then
+    return default_beacon_module[category]
+  end
+  return nil
+end
+
+-------------------------------------------------------------------------------
+-- Set default beacon module
+--
+-- @function [parent=#User] setDefaultBeaconModule
+--
+-- @param #table recipe
+--
+function User.setDefaultBeaconModule(recipe)
+  local default_beacon_module = User.getParameter("default_beacon_module") or {}
+  local recipe_prototype = RecipePrototype(recipe)
+  local category = recipe_prototype:getCategory()
+  if category ~= nil then
+    default_beacon_module[category] = recipe.beacon.module_priority
+    User.setParameter("default_beacon_module", default_beacon_module)
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Get version
 --
 -- @function [parent=#User] getVersion
@@ -345,6 +484,7 @@ function User.setCloseForm(classname, location)
   if string.find(classname, "Tab") then
     if navigate[User.tab_name] == nil then navigate[User.tab_name] = {} end
     navigate[User.tab_name]["location"] = location
+    game.tick_paused = false
   else
     navigate[classname]["location"] = location
   end
@@ -393,6 +533,11 @@ function User.setActiveForm(classname)
     if navigate[User.tab_name] == nil then navigate[User.tab_name] = {} end
     navigate[User.tab_name]["open"] = true
     navigate[User.tab_name]["name"] = classname
+    if not(game.is_multiplayer()) and User.getParameter("auto-pause") then
+      game.tick_paused = true
+    else
+      game.tick_paused = false
+    end
   else
     if navigate[classname] == nil then navigate[classname] = {} end
     navigate[classname]["open"] = true

@@ -115,6 +115,9 @@ function menuIcons(name, icon_row, font)
   menuIconType(name, icon_row, {1,2,1,1}, 32, nil, font, {r=0, g=0, b=0})
   menuIconType(name, icon_row, {1,2,1,1}, 24, "sm", font, {r=0, g=0, b=0})
   
+  menuIconType(name, icon_row, {3,2,1,1}, 32, "actived_red", font, {r=0, g=0, b=0})
+  menuIconType(name, icon_row, {3,2,1,1}, 32, "sm_actived_red", font, {r=0, g=0, b=0})
+
   menuIconType(name, icon_row, {1,3,1,1}, 32, "red", font, {r=0, g=0, b=0})
   menuIconType(name, icon_row, {1,3,1,1}, 24, "sm_red", font, {r=0, g=0, b=0})
   
@@ -297,7 +300,12 @@ local list = {
   {name="ok"},
   {name="checkmark"},
   {name="services"},
-  {name="search"}
+  {name="search"},
+  {name="play"},
+  {name="end"},
+  {name="pause"},
+  {name="record"},
+  {name="erase"}
 }
 for icon_row,icon in pairs(list) do
   menuIcons(icon.name, icon_row, icon.font)
@@ -512,6 +520,45 @@ for _,style in pairs(style_list) do
     disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true)
   }
 end
+
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] bold
+
+default_gui["helmod_button_bold"] = {
+  type = "button_style",
+  parent = "helmod_button_default",
+  font = "helmod_font_big_bold",
+
+  minimal_width = 32,
+  height = 32,
+
+  top_padding = 2,
+  right_padding = 2,
+  bottom_padding = 2,
+  left_padding = 2
+}
+
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] bold_selected
+
+default_gui["helmod_button_bold_selected"] = {
+  type = "button_style",
+  parent = "helmod_button_selected",
+  font = "helmod_font_big_bold",
+
+  minimal_width = 32,
+  height = 32,
+
+  top_padding = 2,
+  right_padding = 2,
+  bottom_padding = 2,
+  left_padding = 2
+}
+
 -------------------------------------------------------------------------------
 -- Style of button
 --
@@ -539,6 +586,25 @@ default_gui["helmod_button_calculator"] = {
 default_gui["helmod_button_small_bold"] = {
   type = "button_style",
   parent = "helmod_button_default",
+  font = "helmod_font_normal_bold",
+
+  minimal_width = 24,
+  height = 24,
+
+  top_padding = 2,
+  right_padding = 2,
+  bottom_padding = 2,
+  left_padding = 2
+}
+
+-------------------------------------------------------------------------------
+-- Style of button
+--
+-- @field [parent=#Button] small_bold_selected
+
+default_gui["helmod_button_small_bold_selected"] = {
+  type = "button_style",
+  parent = "helmod_button_selected",
   font = "helmod_font_normal_bold",
 
   minimal_width = 24,

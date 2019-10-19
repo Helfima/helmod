@@ -1,4 +1,18 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.9.9
+Date: 19. 10. 2019
+  Features:
+    - Added default and propagation factory/module
+  Bugfixes:
+    - Fixed UI right click
+---------------------------------------------------------------------------------------------------
+Version: 0.9.8
+Date: 01. 10. 2019
+  Features:
+    - Added auto frozen game (Not for MP game)
+  Bugfixes:
+    - Fixed performance (logging.lua)
+---------------------------------------------------------------------------------------------------
 Version: 0.9.7
 Date: 29. 09. 2019
   Features:

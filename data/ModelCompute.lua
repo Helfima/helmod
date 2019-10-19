@@ -639,8 +639,8 @@ function ModelCompute.computeBlock(block)
       end
 
       local ok , err = pcall(function()
-          mC = my_solver.solve()
-          mB = my_solver.getMx()
+        mC = my_solver.solve()
+        mB = my_solver.getMx()
       end)
       if not(ok) then
         Player.print("Matrix solver can not found solution!")
@@ -1029,18 +1029,22 @@ function ModelCompute.computeSummaryFactory(object)
   if model.summary.factories[factory.name] == nil then model.summary.factories[factory.name] = {name = factory.name, type = "item", count = 0} end
   model.summary.factories[factory.name].count = model.summary.factories[factory.name].count + math.ceil(factory.count)
   -- calcul nombre de module factory
-  for module, value in pairs(factory.modules) do
-    if model.summary.modules[module] == nil then model.summary.modules[module] = {name = module, type = "item", count = 0} end
-    model.summary.modules[module].count = model.summary.modules[module].count + value * math.ceil(factory.count)
+  if factory.modules ~= nil then
+    for module, value in pairs(factory.modules) do
+      if model.summary.modules[module] == nil then model.summary.modules[module] = {name = module, type = "item", count = 0} end
+      model.summary.modules[module].count = model.summary.modules[module].count + value * math.ceil(factory.count)
+    end
   end
   -- calcul nombre beacon
   local beacon = object.beacon
   if model.summary.beacons[beacon.name] == nil then model.summary.beacons[beacon.name] = {name = beacon.name, type = "item", count = 0} end
   model.summary.beacons[beacon.name].count = model.summary.beacons[beacon.name].count + math.ceil(beacon.count)
   -- calcul nombre de module beacon
-  for module, value in pairs(beacon.modules) do
-    if model.summary.modules[module] == nil then model.summary.modules[module] = {name = module, type = "item", count = 0} end
-    model.summary.modules[module].count = model.summary.modules[module].count + value * math.ceil(beacon.count)
+  if beacon.modules ~= nil then
+    for module, value in pairs(beacon.modules) do
+      if model.summary.modules[module] == nil then model.summary.modules[module] = {name = module, type = "item", count = 0} end
+      model.summary.modules[module].count = model.summary.modules[module].count + value * math.ceil(beacon.count)
+    end
   end
 end
 
@@ -1123,7 +1127,7 @@ function ModelCompute.speedFactory(recipe)
     -- @see https://wiki.factorio.com/Mining
     local factory_prototype = EntityPrototype(recipe.factory)
     local recipe_prototype = EntityPrototype(recipe.name)
-    
+
     local mining_speed = factory_prototype:getMiningSpeed()
     local hardness = recipe_prototype:getMineableHardness()
     local mining_time = recipe_prototype:getMineableMiningTime()

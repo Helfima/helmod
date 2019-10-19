@@ -196,7 +196,7 @@ function ElementGui.addGuiSwitch(parent, action, switch_state, allow_none_state,
   local options = {}
   options.type = "switch"
   options.name = action
-  options.switch_state = switch_state  
+  options.switch_state = switch_state
   options.allow_none_state = allow_none_state
   options.left_label_caption = left_label_caption
   options.left_label_tooltip = left_label_tooltip
@@ -223,7 +223,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiButton(parent, action, key, style, caption, tooltip, size)
-  Logging:trace(ElementGui.classname, "addGuiButton", parent, action, key, style, caption, tooltip, size)
+  --Logging:trace(ElementGui.classname, "addGuiButton", parent, action, key, style, caption, tooltip, size)
   local options = {}
   options.type = "button"
   if key ~= nil then
@@ -246,7 +246,6 @@ function ElementGui.addGuiButton(parent, action, key, style, caption, tooltip, s
     button = parent.add(options)
   end)
   if not ok then
-    Logging:trace(ElementGui.classname, "addGuiButton", action, key, style, err)
     options.style = "helmod_button_default"
     if (type(caption) == "boolean") then
       Logging:error(ElementGui.classname, "addGuiButton - caption is a boolean")
@@ -279,7 +278,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiShortButton(parent, action, key, style, caption, tooltip)
-  Logging:trace(ElementGui.classname, "addGuiButton", parent, action, key, style, caption, tooltip)
+  --Logging:trace(ElementGui.classname, "addGuiButton", parent, action, key, style, caption, tooltip)
   local button = ElementGui.addGuiButton(parent, action, key, style, caption, tooltip)
   button.style.width = 20
   return button
@@ -302,7 +301,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiChooseButton(parent, action, key, elem_type, default, style, caption, tooltip)
-  Logging:trace(ElementGui.classname, "addGuiButton", parent, action, key, elem_type, default, style, caption, tooltip)
+  --Logging:trace(ElementGui.classname, "addGuiButton", parent, action, key, elem_type, default, style, caption, tooltip)
   local options = {}
   options.type = "choose-elem-button"
   if key ~= nil then
@@ -321,7 +320,6 @@ function ElementGui.addGuiChooseButton(parent, action, key, elem_type, default, 
     button = parent.add(options)
   end)
   if not ok then
-    Logging:trace(ElementGui.classname, "addGuiButton", action, key, style, err)
     options.style = "helmod_button_default"
     if (type(caption) == "boolean") then
       Logging:error(ElementGui.classname, "addGuiButton - caption is a boolean")
@@ -349,7 +347,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiRadioButton(parent, key, state, style, tooltip)
-  Logging:trace(ElementGui.classname, "addGuiRadioButton", parent, key, state, style, tooltip)
+  --Logging:trace(ElementGui.classname, "addGuiRadioButton", parent, key, state, style, tooltip)
   return parent.add({type="radiobutton", name=key, state=state, style=style, tooltip=tooltip})
 end
 
@@ -367,7 +365,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiCheckbox(parent, key, state, style, tooltip)
-  Logging:trace(ElementGui.classname, "addGuiCheckbox", parent, key, state, style, tooltip)
+  --Logging:trace(ElementGui.classname, "addGuiCheckbox", parent, key, state, style, tooltip)
   return parent.add({type="checkbox", name=key, state=state, style=style, tooltip=tooltip})
 end
 
@@ -388,7 +386,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiDropDown(parent, action, key, items, selected, style, caption, tooltip)
-  Logging:trace(ElementGui.classname, "addGuiDropDown", parent, action, key, items, selected, style, caption, tooltip)
+  --Logging:trace(ElementGui.classname, "addGuiDropDown", parent, action, key, items, selected, style, caption, tooltip)
   local options = {}
   options.type = "drop-down"
   if key ~= nil then
@@ -445,7 +443,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiDropDownElement(parent, action, key, elem_type, selected, style, caption, tooltip)
-  Logging:trace(ElementGui.classname, "addGuiDropDownElement", parent, action, key, selected, style, caption, tooltip)
+  --Logging:trace(ElementGui.classname, "addGuiDropDownElement", parent, action, key, selected, style, caption, tooltip)
   local options = {}
   options.type = "choose-elem-button"
   options.style = style
@@ -484,7 +482,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiButtonItem(parent, action, key, caption)
-  Logging:trace(ElementGui.classname, "addGuiButtonItem", parent, action, key, caption)
+  --Logging:trace(ElementGui.classname, "addGuiButtonItem", parent, action, key, caption)
   return ElementGui.addGuiButton(parent, action, key, key, caption)
 end
 
@@ -502,7 +500,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiButtonIcon(parent, action, type, key, caption)
-  Logging:trace(ElementGui.classname, "addGuiButtonIcon", parent, action, type, key, caption)
+  --Logging:trace(ElementGui.classname, "addGuiButtonIcon", parent, action, type, key, caption)
   return ElementGui.addGuiButton(parent, action, key, "helmod_button_"..type.."_"..key, caption)
 end
 
@@ -522,7 +520,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiButtonSpriteStyled(parent, style, action, type, key, caption, tooltip)
-  Logging:trace(ElementGui.classname, "addGuiButtonSpriteStyled", style, action, type, key, caption, tooltip)
+  --Logging:trace(ElementGui.classname, "addGuiButtonSpriteStyled", style, action, type, key, caption, tooltip)
   local options = {}
   options.type = "sprite-button"
   if key ~= nil then
@@ -572,7 +570,7 @@ function ElementGui.addGuiButtonSpriteStyled(parent, style, action, type, key, c
       if caption ~= nil then
         options.caption = caption
       end
-  
+
       button = ElementGui.addGuiButtonIcon(parent, action, type, key, caption)
     end
   else
@@ -596,7 +594,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiButtonSpriteSm(parent, action, type, key, caption, tooltip)
-  Logging:trace(ElementGui.classname, "addGuiButtonSpriteSm",action, type, key, caption, tooltip)
+  --Logging:trace(ElementGui.classname, "addGuiButtonSpriteSm",action, type, key, caption, tooltip)
   return ElementGui.addGuiButtonSpriteStyled(parent, "helmod_button_icon_sm", action, type, key, caption, tooltip)
 end
 
@@ -616,7 +614,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiButtonSelectSpriteSm(parent, action, type, key, caption, tooltip, color)
-  Logging:trace(ElementGui.classname, "addGuiButtonSelectSpriteSm",action, type, key, caption, tooltip, color)
+  --Logging:trace(ElementGui.classname, "addGuiButtonSelectSpriteSm",action, type, key, caption, tooltip, color)
   local style = "helmod_button_select_icon_sm"
   if color == "red" then style = "helmod_button_select_icon_sm_red" end
   if color == "yellow" then style = "helmod_button_select_icon_sm_yellow" end
@@ -639,7 +637,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiButtonSlotSm(parent, action, type, key, caption, tooltip)
-  Logging:trace(ElementGui.classname, "addGuiButtonSlotSm",action, type, key, caption, tooltip)
+  --Logging:trace(ElementGui.classname, "addGuiButtonSlotSm",action, type, key, caption, tooltip)
   return ElementGui.addGuiButtonSpriteStyled(parent, "helmod_button_slot_sm", action, type, key, caption, tooltip)
 end
 
@@ -658,7 +656,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiButtonSpriteM(parent, action, type, key, caption, tooltip)
-  Logging:trace(ElementGui.classname, "addGuiButtonSpriteM",action, type, key, caption, tooltip)
+  --Logging:trace(ElementGui.classname, "addGuiButtonSpriteM",action, type, key, caption, tooltip)
   return ElementGui.addGuiButtonSpriteStyled(parent, "helmod_button_icon_m", action, type, key, caption, tooltip)
 end
 
@@ -678,12 +676,12 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiButtonSelectSpriteM(parent, action, type, key, caption, tooltip, color)
-  Logging:trace(ElementGui.classname, "addGuiButtonSelectSpriteM",action, type, key, caption, tooltip, color)
+  --Logging:trace(ElementGui.classname, "addGuiButtonSelectSpriteM",action, type, key, caption, tooltip, color)
   local style = "helmod_button_select_icon_m"
   if color == "red" then style = "helmod_button_select_icon_m_red" end
   if color == "yellow" then style = "helmod_button_select_icon_m_yellow" end
   if color == "green" then style = "helmod_button_select_icon_m_green" end
-  return ElementGui.addGuiButtonSpriteStyled(parent, "helmod_button_select_icon_m", action, type, key, caption, tooltip, color)
+  return ElementGui.addGuiButtonSpriteStyled(parent, style, action, type, key, caption, tooltip, color)
 end
 
 -------------------------------------------------------------------------------
@@ -701,7 +699,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiButtonSprite(parent, action, type, key, caption, tooltip)
-  Logging:trace(ElementGui.classname, ":addGuiButtonSprite",action, type, key, caption, tooltip)
+  --Logging:trace(ElementGui.classname, ":addGuiButtonSprite",action, type, key, caption, tooltip)
   return ElementGui.addGuiButtonSpriteStyled(parent, "helmod_button_icon", action, type, key, caption, tooltip)
 end
 
@@ -721,7 +719,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiButtonSelectSprite(parent, action, type, key, caption, tooltip, color)
-  Logging:trace(ElementGui.classname, "addGuiButtonSelectSprite",action, type, key, caption, tooltip, color)
+  --Logging:trace(ElementGui.classname, "addGuiButtonSelectSprite",action, type, key, caption, tooltip, color)
   local style = "helmod_button_select_icon"
   if color == "red" then style = "helmod_button_select_icon_red" end
   if color == "yellow" then style = "helmod_button_select_icon_yellow" end
@@ -744,7 +742,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiButtonSpriteXxl(parent, action, type, key, caption, tooltip)
-  Logging:trace(ElementGui.classname, "addGuiButtonSpriteXxl",action, type, key, caption, tooltip)
+  --Logging:trace(ElementGui.classname, "addGuiButtonSpriteXxl",action, type, key, caption, tooltip)
   return ElementGui.addGuiButtonSpriteStyled(parent, "helmod_button_icon_xxl", action, type, key, caption, tooltip)
 end
 
@@ -764,7 +762,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiButtonSelectSpriteXxl(parent, action, type, key, caption, tooltip, color)
-  Logging:trace(ElementGui.classname, "addGuiButtonSelectSpriteXxl",action, type, key, caption, tooltip, color)
+  --Logging:trace(ElementGui.classname, "addGuiButtonSelectSpriteXxl",action, type, key, caption, tooltip, color)
   local style = "helmod_button_select_icon_xxl"
   if color == "red" then style = "helmod_button_select_icon_xxl_red" end
   if color == "yellow" then style = "helmod_button_select_icon_xxl_yellow" end
@@ -784,7 +782,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiFlow(parent, key, style)
-  Logging:trace(ElementGui.classname, "addGuiFlow()", key, style)
+  --Logging:trace(ElementGui.classname, "addGuiFlow()", key, style)
   local options = {}
   options.type = "flow"
   options.name = key
@@ -806,7 +804,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiFlowH(parent, key, style)
-  Logging:trace(ElementGui.classname, "addGuiFlowH()", key, style)
+  --Logging:trace(ElementGui.classname, "addGuiFlowH()", key, style)
   local options = {}
   options.type = "flow"
   options.direction = "horizontal"
@@ -827,7 +825,7 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function ElementGui.addGuiFlowV(parent, key, style)
-  Logging:trace(ElementGui.classname, "addGuiFlowV()", key, style)
+  --Logging:trace(ElementGui.classname, "addGuiFlowV()", key, style)
   local options = {}
   options.type = "flow"
   options.direction = "vertical"
@@ -947,7 +945,7 @@ end
 -- @param #number column_count
 --
 function ElementGui.addCell(parent, name, column_count, index)
-  Logging:trace(ElementGui.classname, "addCell()", name)
+  --Logging:trace(ElementGui.classname, "addCell()", name)
   local cell = ElementGui.addGuiTable(parent, "cell".."_"..name..(index or ""), column_count or 3, helmod_table_style.list)
   return cell
 end
@@ -963,7 +961,7 @@ end
 -- @param #number minimal_width
 --
 function ElementGui.addCellLabel(parent, name, label, minimal_width)
-  Logging:trace(ElementGui.classname, "addCellLabel()", name, label, minimal_width)
+  --Logging:trace(ElementGui.classname, "addCellLabel()", name, label, minimal_width)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local cell = ElementGui.addCell(parent, "cell_"..name)
 
@@ -996,7 +994,7 @@ end
 -- @param #number minimal_width
 --
 function ElementGui.addCellLabel2(parent, name, label1, label2, minimal_width)
-  Logging:trace(ElementGui.classname, "addCellLabel()", name, label1, label2, minimal_width)
+  --Logging:trace(ElementGui.classname, "addCellLabel()", name, label1, label2, minimal_width)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local cell = ElementGui.addCell(parent, "cell_"..name, 1)
 
@@ -1032,7 +1030,7 @@ end
 -- @param #string tooltip displayed text
 --
 function ElementGui.addCellInput(parent, key, text, style, tooltip)
-  Logging:trace(ElementGui.classname, "addCellInput()", key, text, style, tooltip)
+  --Logging:trace(ElementGui.classname, "addCellInput()", key, text, style, tooltip)
   local cell = ElementGui.addCell(parent, key, 2)
   local input = ElementGui.addGuiText(cell, key, text, style, ({"tooltip.formula-allowed"}))
   local button = ElementGui.addGuiButton(cell, key, "=validation", "helmod_button_icon_ok",nil, {"helmod_button.apply"})
@@ -1052,7 +1050,7 @@ end
 -- @param #string color
 --
 function ElementGui.addCellIcon(parent, element, action, select, tooltip_name, color)
-  Logging:trace(ElementGui.classname, "addCellIcon()", element, action, select, tooltip_name, color)
+  --Logging:trace(ElementGui.classname, "addCellIcon()", element, action, select, tooltip_name, color)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local product_prototype = Product(element)
@@ -1085,7 +1083,7 @@ end
 -- @param #string color button color
 --
 function ElementGui.addCellElement(parent, element, action, select, tooltip_name, color, index)
-  Logging:trace(ElementGui.classname, "addCellElement()", element, action, select, tooltip_name, color)
+  --Logging:trace(ElementGui.classname, "addCellElement()", element, action, select, tooltip_name, color)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
@@ -1129,7 +1127,7 @@ end
 -- @param #string color button color
 --
 function ElementGui.addCellElementSm(parent, element, action, select, tooltip_name, color, index)
-  Logging:trace(ElementGui.classname, "addCellElementSm()", element, action, select, tooltip_name, color)
+  --Logging:trace(ElementGui.classname, "addCellElementSm()", element, action, select, tooltip_name, color)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
@@ -1171,7 +1169,7 @@ end
 -- @param #string color button color
 --
 function ElementGui.addCellElementM(parent, element, action, select, tooltip_name, color, index)
-  Logging:trace(ElementGui.classname, "addCellElementM()", element, action, select, tooltip_name, color)
+  --Logging:trace(ElementGui.classname, "addCellElementM()", element, action, select, tooltip_name, color)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
@@ -1213,7 +1211,7 @@ end
 -- @param #string color button color
 --
 function ElementGui.addCellProduct(parent, element, action, select, tooltip_name, color, index)
-  Logging:trace(ElementGui.classname, "addCellProduct()", element, action, select, tooltip_name, color)
+  --Logging:trace(ElementGui.classname, "addCellProduct()", element, action, select, tooltip_name, color)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
@@ -1243,7 +1241,7 @@ end
 -- @param #string color button color
 --
 function ElementGui.addCellProductSm(parent, element, action, select, tooltip_name, color, index)
-  Logging:trace(ElementGui.classname, "addCellProductSm()", element, action, select, tooltip_name, color)
+  --Logging:trace(ElementGui.classname, "addCellProductSm()", element, action, select, tooltip_name, color)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
@@ -1273,7 +1271,7 @@ end
 -- @param #string color button color
 --
 function ElementGui.addCellFactory(parent, factory, action, select, tooltip_name, color)
-  Logging:trace(ElementGui.classname, "addCellFactory()", factory, action, select, tooltip_name, color)
+  --Logging:trace(ElementGui.classname, "addCellFactory()", factory, action, select, tooltip_name, color)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
@@ -1290,10 +1288,12 @@ function ElementGui.addCellFactory(parent, factory, action, select, tooltip_name
   if display_cell_mod == "small-icon" then col_size = 5 end
   local cell_factory_module = ElementGui.addGuiTable(row1,"factory-modules", col_size, "helmod_factory_modules")
   -- modules
-  for name, count in pairs(factory.modules) do
-    for index = 1, count, 1 do
-      ElementGui.addGuiButtonSpriteSm(cell_factory_module, "HMFactorySelector_factory-module_"..name.."_"..index, "item", name, nil, ElementGui.getTooltipModule(name))
-      index = index + 1
+  if factory.modules ~= nil then
+    for name, count in pairs(factory.modules) do
+      for index = 1, count, 1 do
+        ElementGui.addGuiButtonSpriteSm(cell_factory_module, "HMFactorySelector_factory-module_"..name.."_"..index, "item", name, nil, ElementGui.getTooltipModule(name))
+        index = index + 1
+      end
     end
   end
   --ElementGui.addGuiButtonSlotSm(cell_factory_module, "slot_button", "utility", "slot_icon_module")
@@ -1320,7 +1320,7 @@ end
 -- @param #string color button color
 --
 function ElementGui.addCellRecipe(parent, recipe, action, select, tooltip_name, color)
-  Logging:trace(ElementGui.classname, "addCellRecipe()", recipe, action, select, tooltip_name, color)
+  --Logging:trace(ElementGui.classname, "addCellRecipe()", recipe, action, select, tooltip_name, color)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
@@ -1348,7 +1348,7 @@ end
 -- @param #string color button color
 --
 function ElementGui.addCellBlock(parent, block, action, select, tooltip_name, color)
-  Logging:trace(ElementGui.classname, "addCellRecipe()", block, action, select, tooltip_name, color)
+  --Logging:trace(ElementGui.classname, "addCellRecipe()", block, action, select, tooltip_name, color)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
@@ -1376,7 +1376,7 @@ end
 -- @param #string color button color
 --
 function ElementGui.addCellEnergy(parent, recipe, action, select, tooltip_name, color)
-  Logging:trace(ElementGui.classname, "addCellEnergy()", recipe, action, select, tooltip_name, color)
+  --Logging:trace(ElementGui.classname, "addCellEnergy()", recipe, action, select, tooltip_name, color)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
   local button = nil
@@ -1401,7 +1401,7 @@ end
 -- @param #table element production block
 --
 function ElementGui.addCellCargoInfo(parent, element)
-  Logging:trace(ElementGui.classname, "addCellCargoInfo()", element)
+  --Logging:trace(ElementGui.classname, "addCellCargoInfo()", element)
   local parameters = User.getParameter()
   local product_prototype = Product(element)
   if product_prototype:native() ~= nil then
@@ -1433,7 +1433,7 @@ end
 -- @return #table
 --
 function ElementGui.getTooltipProduct(element, container)
-  Logging:trace(ElementGui.classname, "getTooltipProduct", element, container)
+  --Logging:trace(ElementGui.classname, "getTooltipProduct", element, container)
   local entity_prototype = EntityPrototype(container)
   local tooltip = {"tooltip.cargo-info", entity_prototype:getLocalisedName()}
   local product_prototype = Product(element)
@@ -1459,7 +1459,7 @@ end
 -- @return #table
 --
 function ElementGui.getTooltipModule(module_name)
-  Logging:trace(ElementGui.classname, "getTooltipModule", module_name)
+  --Logging:trace(ElementGui.classname, "getTooltipModule", module_name)
   local tooltip = nil
   if module_name == nil then return nil end
   local module_prototype = ItemPrototype(module_name)
@@ -1486,13 +1486,12 @@ end
 
 
 function ElementGui.getTooltipRecipe(prototype)
-  Logging:trace(ElementGui.classname, "getTooltipRecipe", prototype)
+  --Logging:trace(ElementGui.classname, "getTooltipRecipe", prototype)
   local recipe_prototype = RecipePrototype(prototype)
   if recipe_prototype:native() == nil then return nil end
   local cache_tooltip_recipe = Cache.getData(ElementGui.classname, "tooltip_recipe") or {}
   local prototype_type = prototype.type or "other"
   if cache_tooltip_recipe[prototype_type] ~= nil and cache_tooltip_recipe[prototype_type][prototype.name] ~= nil and cache_tooltip_recipe[prototype_type][prototype.name].enabled == recipe_prototype:getEnabled() then
-    Logging:trace(ElementGui.classname, "use cache", prototype.name)
     return cache_tooltip_recipe[prototype_type][prototype.name].value
   end
   -- initalize tooltip
@@ -1535,7 +1534,6 @@ function ElementGui.getTooltipRecipe(prototype)
   -- finalise la derniere valeur
   table.insert(lastTooltip, "")
   if cache_tooltip_recipe[prototype_type] == nil then cache_tooltip_recipe[prototype_type] = {} end
-  Logging:trace(ElementGui.classname, "build cache", prototype.name)
   cache_tooltip_recipe[prototype_type][prototype.name] = {}
   cache_tooltip_recipe[prototype_type][prototype.name].value = tooltip
   cache_tooltip_recipe[prototype_type][prototype.name].enabled = recipe_prototype:getEnabled()
@@ -1553,7 +1551,7 @@ end
 -- @return #table
 --
 function ElementGui.getTooltipTechnology(prototype)
-  Logging:trace(ElementGui.classname, "getTooltipTechnology", prototype)
+  --Logging:trace(ElementGui.classname, "getTooltipTechnology", prototype)
   -- initalize tooltip
   local tooltip = {"tooltip.technology-info"}
   local technology_protoype = Technology(prototype)
@@ -1588,7 +1586,7 @@ end
 -- return
 --
 function ElementGui.getDisplaySizes()
-  Logging:trace(ElementGui.classname, "getDisplaySizes()")
+  --Logging:trace(ElementGui.classname, "getDisplaySizes()")
   local display_resolution = Player.native().display_resolution
   local display_scale = Player.native().display_scale
   return display_resolution.width/display_scale, display_resolution.height/display_scale
@@ -1600,7 +1598,7 @@ end
 -- @function [parent=#ElementGui] getStyleSizes
 --
 function ElementGui.getStyleSizes()
-  Logging:trace(ElementGui.classname, "getStyleSizes()")
+  --Logging:trace(ElementGui.classname, "getStyleSizes()")
   local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
   local display_ratio_vertictal = User.getModSetting("display_ratio_vertical")
 
@@ -1711,7 +1709,7 @@ function ElementGui.getStyleSizes()
 
 
   end
-  Logging:trace(ElementGui.classname, "getStyleSizes(player)", style_sizes)
+  --Logging:trace(ElementGui.classname, "getStyleSizes(player)", style_sizes)
   return style_sizes
 end
 
@@ -1745,7 +1743,6 @@ function ElementGui.getElementColumnNumber(size)
   local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
   local width , height = ElementGui.getDisplaySizes()
   local width_main = math.ceil(width*display_ratio_horizontal)
-  Logging:debug(ElementGui.classname, "getElementColumnNumber(width)", width_main, math.ceil((width_main-600)/(2*size)))
   return math.floor((width_main-600)/(2*size))
 end
 -------------------------------------------------------------------------------
@@ -1758,13 +1755,12 @@ end
 -- @param #string property
 --
 function ElementGui.setStyle(element, style, property)
-  Logging:trace(ElementGui.classname, "setStyle(player, element, style, property)", element, style, property)
+  --Logging:trace(ElementGui.classname, "setStyle(player, element, style, property)", element, style, property)
   local style_sizes = ElementGui.getStyleSizes()
   if string.find(style, "Tab") then
     style = "Tab"
   end
   if element.style ~= nil and style_sizes[style] ~= nil and style_sizes[style][property] ~= nil then
-    Logging:trace(ElementGui.classname, "setStyle(player, element, style, property)", style_sizes[style][property])
     element.style[property] = style_sizes[style][property]
   end
 end
@@ -1778,7 +1774,7 @@ end
 -- @param #boolean visible
 --
 function ElementGui.setVisible(element, visible)
-  Logging:trace(ElementGui.classname, "setVisible(element, visible)", element, visible)
+  --Logging:trace(ElementGui.classname, "setVisible(element, visible)", element, visible)
   if element.style ~= nil then
     element.style.visible = visible
   end
@@ -1792,7 +1788,7 @@ end
 -- @param #LuaGuiElement element
 --
 function ElementGui.getDropdownSelection(element)
-  Logging:trace(ElementGui.classname, "getDropdownSelection(element)", element)
+  --Logging:trace(ElementGui.classname, "getDropdownSelection(element)", element)
   if element.selected_index == 0 then return nil end
   if #element.items == 0 then return nil end
   return element.items[element.selected_index]

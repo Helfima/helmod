@@ -15,6 +15,7 @@ end)
 --
 function AbstractTab:onBind()
   Dispatcher:bind("on_gui_refresh", self, self.update)
+  Dispatcher:bind("on_gui_pause", self, self.updateTopMenu)
 end
 
 -------------------------------------------------------------------------------

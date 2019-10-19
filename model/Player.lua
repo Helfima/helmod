@@ -304,7 +304,7 @@ end
 -- @return #boolean
 --
 function Player.checkRules(check, rules, category, lua_entity, included)
-  Logging:debug(Player.classname, "checkRules()", check, rules, category, lua_entity.name, included)
+  --Logging:debug(Player.classname, "checkRules()", check, rules, category, lua_entity.name, included)
   if rules[category] then
     if rules[category]["entity-name"] and (rules[category]["entity-name"]["all"] or rules[category]["entity-name"][lua_entity.name]) then
       check = included
@@ -320,17 +320,16 @@ function Player.checkRules(check, rules, category, lua_entity, included)
 end
 
 -------------------------------------------------------------------------------
--- Check limitation module
+-- Check factory limitation module
 --
--- @function [parent=#Player] checkLimitationModule
+-- @function [parent=#Player] checkFactoryLimitationModule
 --
 -- @param #lua_item_prototype module
 -- @param #table lua_recipe
 --
 -- @return #table list of productions
 --
-function Player.checkLimitationModule(module, lua_recipe)
-  Logging:debug(Player.classname, "checkLimitationModule()", module, lua_recipe.name)
+function Player.checkFactoryLimitationModule(module, lua_recipe)
   local rules_included, rules_excluded = Player.getRules("module-limitation")
   local model_filter_factory_module = User.getModGlobalSetting("model_filter_factory_module")
   local factory = lua_recipe.factory
@@ -351,6 +350,32 @@ function Player.checkLimitationModule(module, lua_recipe)
   end
   return allowed
 end
+
+-------------------------------------------------------------------------------
+-- Check beacon limitation module
+--
+-- @function [parent=#Player] checkBeaconLimitationModule
+--
+-- @param #lua_item_prototype module
+-- @param #table lua_recipe
+--
+-- @return #table list of productions
+--
+function Player.checkBeaconLimitationModule(module, lua_recipe)
+  local model_filter_factory_module = User.getModGlobalSetting("model_filter_factory_module")
+  local beacon = lua_recipe.beacon
+  local allowed = true
+  local model_filter_beacon_module = User.getModGlobalSetting("model_filter_beacon_module")
+  local allowed_effects = EntityPrototype(beacon):getAllowedEffects()
+  if Model.countList(module.limitations) > 0 and Player.getModuleBonus(module.name, "productivity") > 0 and not(allowed_effects.productivity) and model_filter_beacon_module == true then
+    allowed = false
+  end
+  if beacon.module_slots ==  0 then
+    allowed = false
+  end
+  return allowed
+end
+
 -------------------------------------------------------------------------------
 -- Return list of productions
 --
@@ -362,11 +387,8 @@ end
 -- @return #table list of productions
 --
 function Player.getProductionsCrafting(category, lua_recipe)
-  Logging:debug(Player.classname, "getProductionsCrafting(category)", category, lua_recipe)
   local productions = {}
   local rules_included, rules_excluded = Player.getRules("production-crafting")
-
-  Logging:debug(Player.classname, "rules", rules_included, rules_excluded)
 
   if category == "crafting-handonly" then
     productions["player"] = game.entity_prototypes["player"]
@@ -380,19 +402,15 @@ function Player.getProductionsCrafting(category, lua_recipe)
     end
   else
     for key, lua_entity in pairs(Player.getProductionMachines()) do
-      Logging:debug(Player.classname, "loop production machines", lua_entity.name, lua_entity.type, lua_entity.group.name, lua_entity.subgroup.name, lua_entity.crafting_categories)
       local check = false
       if category ~= nil then
         if not(rules_included[category]) and not(rules_included[category]) then
-          Logging:debug(Player.classname, "test crafting", lua_entity.name, category, lua_entity.crafting_categories )
           -- standard recipe
           if lua_entity.crafting_categories ~= nil and lua_entity.crafting_categories[category] then
             local recipe_ingredient_count = RecipePrototype(lua_recipe, "recipe"):getIngredientCount()
             local factory_ingredient_count = EntityPrototype(lua_entity):getIngredientCount()
-            Logging:debug(Player.classname, "crafting", recipe_ingredient_count, factory_ingredient_count)
             if factory_ingredient_count >= recipe_ingredient_count then
               check = true
-              Logging:debug(Player.classname, "allowed machine", lua_entity.name)
             end
             -- resolve rule excluded
             check = Player.checkRules(check, rules_excluded, "standard", lua_entity, false)
@@ -423,7 +441,6 @@ function Player.getProductionsCrafting(category, lua_recipe)
       end
     end
   end
-  Logging:debug(Player.classname, "category", category, "productions", productions)
   return productions
 end
 

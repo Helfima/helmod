@@ -74,3 +74,17 @@ function toBinStr(x)
   ret=tostring(x)..ret
   return ret
 end
+
+
+function table.clone(org)
+  return {table.unpack(org)}
+end
+
+function compare_priority(a,b)
+  if a == nil or b == nil then return false end
+  for k,v in pairs(a) do
+    if b[k] == nil then return false end
+    if b[k].name ~= v.name or b[k].value ~= v.value then return false end
+  end
+  return true
+end

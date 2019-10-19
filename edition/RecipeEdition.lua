@@ -745,7 +745,7 @@ function RecipeEdition:updateFactoryModulesSelector(event)
     local category = recipe_prototype:getCategory()
     for k, module in pairs(Player.getModules(category)) do
       local tooltip = ElementGui.getTooltipModule(module.name)
-      if Player.checkLimitationModule(module, object) == false then
+      if Player.checkFactoryLimitationModule(module, object) == false then
         if module.limitation_message_key ~= nil then
           tooltip = {"item-limitation."..module.limitation_message_key}
         else

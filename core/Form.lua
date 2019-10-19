@@ -29,6 +29,7 @@ function Form:bind()
   
   Dispatcher:bind("on_gui_update", self, self.update)
   Dispatcher:bind("on_gui_close", self, self.close)
+
   self:onBind()
 end
 
@@ -332,6 +333,21 @@ function Form:updateTopMenu(event)
     local flow_panel, content_panel, menu_panel = self:getPanel()
     menu_panel.clear()
     if self.panelClose then
+      -- pause game
+      if string.find(self.classname, "Tab") then
+        local group3 = ElementGui.addGuiFlowH(menu_panel,"group3",helmod_flow_style.horizontal)
+        if game.is_multiplayer() and not(game.tick_paused) then
+          local pause_button = ElementGui.addGuiButton(group3, "do-nothing", nil, "helmod_button_icon_play_flat", nil, ({"helmod_button.game-play-multiplayer"}))
+          pause_button.enabled = false
+        else
+          if game.tick_paused then
+            ElementGui.addGuiButton(group3, self.classname.."=game-play", nil, "helmod_button_icon_pause_actived_red", nil, ({"helmod_button.game-pause"}))
+          else
+            ElementGui.addGuiButton(group3, self.classname.."=game-pause", nil, "helmod_button_icon_play", nil, ({"helmod_button.game-play"}))
+          end
+        end
+      end
+      -- special tab
       local group1 = ElementGui.addGuiFlowH(menu_panel,"group1",helmod_flow_style.horizontal)
       for _, form in pairs(Controller.getViews()) do
         if string.find(self.classname, "Tab") and string.find(form.classname, "Tab") and form:isVisible() and form:isSpecial() then
@@ -340,7 +356,7 @@ function Form:updateTopMenu(event)
           ElementGui.addGuiButton(group1, self.classname.."=change-tab=ID=", form.classname, style, nil, form:getButtonCaption())
         end
       end
-
+      -- current button
       local group2 = ElementGui.addGuiFlowH(menu_panel,"group2",helmod_flow_style.horizontal)
       if self.help_button then
         ElementGui.addGuiButton(group2, "HMHelpPanel=OPEN", nil, "helmod_button_icon_help", nil, ({"helmod_button.help"}))

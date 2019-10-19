@@ -164,8 +164,10 @@ end
 --
 -- @function [parent=#ProductionBlockTab] buildMatrix
 --
--- @param #string #ElementGui matrix_panel
--- @param #string #block block
+-- @param #ElementGui matrix_panel
+-- @param #table matrix
+-- @param #table row_headers
+-- @param #table col_headers
 --
 function ProductionBlockTab:buildMatrix(matrix_panel, matrix, row_headers, col_headers)
   Logging:debug("ProductionBlockTab", "buildMatrix()")
@@ -517,7 +519,7 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
   -- col beacon
   local beacon = recipe.beacon
   if block.count > 1 then
-    beacon.limit_count = factory.count / block.count
+    beacon.limit_count = beacon.count / block.count
   else
     beacon.limit_count = nil
   end

@@ -1,57 +1,60 @@
 Logging = {}
 
 local append_log=false
+local debug_level = 0
+local debug_filter = "all"
 
 function Logging:new()
   self.limit = 5
   self.filename="helmod\\helmod.log"
   self.logClass = {}
-
   self.debug_values = {none=0,error=1,warn=2,info=3,debug=4,trace=5}
+  self:updateLevel()
 end
 
 function Logging:checkClass(logClass)
-  if self:getFilter() == "all" or self:getFilter() == logClass then return true end
+  if debug_filter == "all" or debug_filter == logClass then return true end
   return false
 end
 
-function Logging:getFilter()
-  local filter = "all"
-  if settings ~= nil  then
-    filter = settings.global["helmod_debug_filter"].value
-  end
-  return filter
-end
-
-function Logging:getLevel()
+function Logging:updateLevel()
   local level = "none"
   if settings ~= nil  then
     level = settings.global["helmod_debug"].value
   end
-  return level
+  debug_level = self.debug_values[level] or 0
+  
+  if settings ~= nil  then
+    debug_filter = settings.global["helmod_debug_filter"].value
+  end
 end
 
 function Logging:trace(...)
+  if self.debug_values.trace > debug_level then return end
   local arg = {...}
   self:logging("[TRACE]", self.debug_values.trace, unpack(arg))
 end
 
 function Logging:debug(...)
+  if self.debug_values.debug > debug_level then return end
   local arg = {...}
   self:logging("[DEBUG]", self.debug_values.debug, unpack(arg))
 end
 
 function Logging:info(...)
+  if self.debug_values.info > debug_level then return end
   local arg = {...}
   self:logging("[INFO]", self.debug_values.info, unpack(arg))
 end
 
 function Logging:warn(...)
+  if self.debug_values.warn > debug_level then return end
   local arg = {...}
   self:logging("[WARN ]", self.debug_values.warn, unpack(arg))
 end
 
 function Logging:error(...)
+  if self.debug_values.error > debug_level then return end
   local arg = {...}
   self:logging("[ERROR]", self.debug_values.error, unpack(arg))
 end
@@ -104,10 +107,9 @@ function Logging:objectToString(object, level)
 end
 
 function Logging:logging(tag, level, logClass, ...)
-  local debug_level = self.debug_values[self:getLevel()] or 0
   local arg = {...}
   if arg == nil then arg = "nil" end
-  if self:checkClass(logClass) and level <= debug_level then
+  if self:checkClass(logClass) then
     local message = "";
     for key, object in pairs(arg) do
       message = message..self:objectToString(object)

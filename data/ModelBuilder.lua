@@ -21,7 +21,7 @@ function ModelBuilder.addRecipeIntoProductionBlock(key, type)
   local current_block = User.getParameter("current_block")
   local recipe_prototype = RecipePrototype(key, type)
   local lua_recipe = recipe_prototype:native()
-  
+
   if lua_recipe ~= nil then
     -- ajoute le bloc si il n'existe pas
     if model.blocks[current_block] == nil then
@@ -66,14 +66,34 @@ function ModelBuilder.addRecipeIntoProductionBlock(key, type)
     end
     model.blocks[current_block].recipes[ModelRecipe.id] = ModelRecipe
 
-    local defaultFactory = Model.getDefaultPrototypeFactory(recipe_prototype:getCategory(), lua_recipe)
-    if defaultFactory ~= nil then
-      Model.setFactory(current_block, ModelRecipe.id, defaultFactory)
+    local default_factory = User.getDefaultFactory(ModelRecipe)
+    if default_factory ~= nil then
+      Model.setFactory(current_block, ModelRecipe.id, default_factory.name)
+    else
+      local default_factory_name = Model.getDefaultPrototypeFactory(recipe_prototype)
+      if default_factory_name ~= nil then
+        Model.setFactory(current_block, ModelRecipe.id, default_factory_name)
+      end
     end
-    local defaultBeacon = Model.getDefaultRecipeBeacon(lua_recipe.name)
-    if defaultBeacon ~= nil then
-      Model.setBeacon(current_block, ModelRecipe.id, defaultBeacon)
+    local default_factory_module = User.getDefaultFactoryModule(ModelRecipe)
+    if default_factory_module ~= nil then
+      ModelBuilder.setFactoryModulePriority(current_block, ModelRecipe.id, default_factory_module)
     end
+
+    local default_beacon = User.getDefaultBeacon(ModelRecipe)
+    if default_beacon ~= nil then
+      Model.setBeacon(current_block, ModelRecipe.id, default_beacon.name)
+    else
+      local default_beacon_name = Model.getDefaultRecipeBeacon(lua_recipe.name)
+      if default_beacon_name ~= nil then
+        Model.setBeacon(current_block, ModelRecipe.id, default_beacon_name)
+      end
+    end
+    local default_beacon_module = User.getDefaultBeaconModule(ModelRecipe)
+    if default_beacon_module ~= nil then
+      ModelBuilder.setBeaconModulePriority(current_block, ModelRecipe.id, default_beacon_module)
+    end
+    
     Logging:debug(ModelBuilder.classname, "addRecipeIntoProductionBlock()", model.blocks[current_block])
     return model.blocks[current_block]
   end
@@ -267,6 +287,273 @@ function ModelBuilder.addFactoryModule(item, key, name)
 end
 
 -------------------------------------------------------------------------------
+-- Set a module in factory
+--
+-- @function [parent=#ModelBuilder] setFactoryModule
+--
+-- @param #string item
+-- @param #string key object name
+-- @param #string name module name
+-- @param #number value module number
+--
+function ModelBuilder.setFactoryModule(item, key, name, value)
+  local object = Model.getObject(item, key)
+  if object ~= nil then
+    return ModelBuilder.setModuleModel(object.factory, name, value)
+  end
+  return false
+end
+
+-------------------------------------------------------------------------------
+-- Set a module priority
+--
+-- @function [parent=#ModelBuilder] setModulePriority
+--
+-- @param #table element
+-- @param #table module_priority
+--
+function ModelBuilder.setModulePriority(element, module_priority)
+  if element ~= nil then
+    for i,priority in pairs(module_priority) do
+      if i == 1 then
+        ModelBuilder.setModuleModel(element, priority.name, priority.value)
+      else
+        ModelBuilder.appendModuleModel(element, priority.name, priority.value)
+      end
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Set a module priority in factory
+--
+-- @function [parent=#ModelBuilder] setFactoryModulePriority
+--
+-- @param #string item
+-- @param #string key object name
+-- @param #table module_priority
+--
+function ModelBuilder.setFactoryModulePriority(item, key, module_priority)
+  Logging:debug(ModelBuilder.classname, "setFactoryModulePriority()", item, key, module_priority)
+  local element = Model.getObject(item, key)
+  if element ~= nil then
+    if module_priority == nil then
+      element.factory.module_priority = nil
+      element.factory.modules = {}
+    else
+      element.factory.module_priority = table.clone(module_priority)
+      local first = true
+      for i,priority in pairs(module_priority) do
+        local module = ItemPrototype(priority.name)
+        if Player.checkFactoryLimitationModule(module:native(), element) == true then
+          Logging:debug(ModelBuilder.classname, "setFactoryModulePriority()", "ok", first)
+          if first then
+            ModelBuilder.setModuleModel(element.factory, priority.name, priority.value)
+            first = false
+          else
+            ModelBuilder.appendModuleModel(element.factory, priority.name, priority.value)
+          end
+        end
+      end
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Set a module priority in beacon
+--
+-- @function [parent=#ModelBuilder] setBeaconModulePriority
+--
+-- @param #string item
+-- @param #string key object name
+-- @param #table module_priority
+--
+function ModelBuilder.setBeaconModulePriority(item, key, module_priority)
+  Logging:debug(ModelBuilder.classname, "setBeaconModulePriority()", item, key, module_priority)
+  local element = Model.getObject(item, key)
+  if element ~= nil then
+    if module_priority == nil then
+      element.beacon.module_priority = nil
+      element.beacon.modules = {}
+    else
+      element.beacon.module_priority = table.clone(module_priority)
+      local first = true
+      for i,priority in pairs(module_priority) do
+        local module = ItemPrototype(priority.name)
+        if Player.checkBeaconLimitationModule(module:native(), element) == true then
+          Logging:debug(ModelBuilder.classname, "setFactoryModulePriority()", "ok", first)
+          if first then
+            ModelBuilder.setModuleModel(element.beacon, priority.name, priority.value)
+            first = false
+          else
+            ModelBuilder.appendModuleModel(element.beacon, priority.name, priority.value)
+          end
+        end
+      end
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Set factory block
+--
+-- @function [parent=#ModelBuilder] setFactoryBlock
+--
+-- @param #string block_id
+-- @param #table current_recipe recipe
+--
+function ModelBuilder.setFactoryBlock(block_id, current_recipe)
+  if current_recipe ~= nil then
+    local default_factory_mode = User.getParameter("default_factory_mode")
+    local categories = EntityPrototype(current_recipe.factory.name):getCraftingCategories()
+    local model = Model.getModel()
+    local block = model.blocks[block_id]
+    for key, recipe in pairs(block.recipes) do
+      local prototype_recipe = RecipePrototype(recipe)
+      if (default_factory_mode ~= "category" and categories[prototype_recipe:getCategory()]) or prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
+        Model.setFactory(block_id, key, current_recipe.factory.name)
+        if User.getParameter("default_factory_with_module") == true then
+          ModelBuilder.setFactoryModulePriority(block_id, key, current_recipe.factory.module_priority)
+        end
+      end
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Set factory line
+--
+-- @function [parent=#ModelBuilder] setFactoryLine
+--
+-- @param #table current_recipe recipe
+--
+function ModelBuilder.setFactoryLine(current_recipe)
+  if current_recipe ~= nil then
+    local model = Model.getModel()
+    for block_id, recipe in pairs(model.blocks) do
+      ModelBuilder.setFactoryBlock(block_id, current_recipe)
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Set factory module block
+--
+-- @function [parent=#ModelBuilder] setFactoryModuleBlock
+--
+-- @param #string block_id
+-- @param #table current_recipe recipe
+--
+function ModelBuilder.setFactoryModuleBlock(block_id, current_recipe)
+  if current_recipe ~= nil then
+    local default_factory_mode = User.getParameter("default_factory_mode")
+    local model = Model.getModel()
+    local block = model.blocks[block_id]
+    for key, recipe in pairs(block.recipes) do
+      local prototype_recipe = RecipePrototype(recipe)
+      if default_factory_mode ~= "category" or prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
+        ModelBuilder.setFactoryModulePriority(block_id, key, current_recipe.factory.module_priority)
+      end
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Set factory module line
+--
+-- @function [parent=#ModelBuilder] setFactoryModuleLine
+--
+-- @param #table current_recipe recipe
+--
+function ModelBuilder.setFactoryModuleLine(current_recipe)
+  if current_recipe ~= nil then
+    local model = Model.getModel()
+    for block_id, recipe in pairs(model.blocks) do
+      ModelBuilder.setFactoryModuleBlock(block_id, current_recipe)
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Set beacon block
+--
+-- @function [parent=#ModelBuilder] setBeaconBlock
+--
+-- @param #string block_id
+-- @param #table current_recipe recipe
+--
+function ModelBuilder.setBeaconBlock(block_id, current_recipe)
+  if current_recipe ~= nil then
+    local default_beacon_mode = User.getParameter("default_beacon_mode")
+    local model = Model.getModel()
+    local block = model.blocks[block_id]
+    for key, recipe in pairs(block.recipes) do
+      local prototype_recipe = RecipePrototype(recipe)
+      if default_beacon_mode ~= "category" or prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
+        Model.setBeacon(block_id, key, current_recipe.beacon.name)
+        if User.getParameter("default_beacon_with_module") == true then
+          ModelBuilder.setBeaconModulePriority(block_id, key, current_recipe.beacon.module_priority)
+        end
+      end
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Set beacon line
+--
+-- @function [parent=#ModelBuilder] setBeaconLine
+--
+-- @param #table current_recipe recipe
+--
+function ModelBuilder.setBeaconLine(current_recipe)
+  if current_recipe ~= nil then
+    local model = Model.getModel()
+    for block_id, recipe in pairs(model.blocks) do
+      ModelBuilder.setBeaconBlock(block_id, current_recipe)
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Set beacon module block
+--
+-- @function [parent=#ModelBuilder] setBeaconModuleBlock
+--
+-- @param #string block_id
+-- @param #table current_recipe recipe
+--
+function ModelBuilder.setBeaconModuleBlock(block_id, current_recipe)
+  if current_recipe ~= nil then
+    local default_beacon_mode = User.getParameter("default_beacon_mode")
+    local model = Model.getModel()
+    local block = model.blocks[block_id]
+    for key, recipe in pairs(block.recipes) do
+      local prototype_recipe = RecipePrototype(recipe)
+      if default_beacon_mode ~= "category" or prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
+        ModelBuilder.setBeaconModulePriority(block_id, key, current_recipe.beacon.module_priority)
+      end
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Set beacon module line
+--
+-- @function [parent=#ModelBuilder] setBeaconModuleLine
+--
+-- @param #table current_recipe recipe
+--
+function ModelBuilder.setBeaconModuleLine(current_recipe)
+  if current_recipe ~= nil then
+    local model = Model.getModel()
+    for block_id, recipe in pairs(model.blocks) do
+      ModelBuilder.setBeaconModuleBlock(block_id, current_recipe)
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Remove a module from factory
 --
 -- @function [parent=#ModelBuilder] removeFactoryModule
@@ -433,6 +720,7 @@ function ModelBuilder.copyBlock(from_model, from_block)
     end
   end
 end
+
 -------------------------------------------------------------------------------
 -- Add module model
 --
@@ -447,6 +735,54 @@ function ModelBuilder.addModuleModel(element, name)
   if Model.countModulesModel(element) < factory_prototype:getModuleInventorySize() then
     element.modules[name] = element.modules[name] + 1
   end
+end
+
+-------------------------------------------------------------------------------
+-- Set module model
+--
+-- @function [parent=#ModelBuilder] setModuleModel
+--
+-- @param #table element
+-- @param #string name
+-- @param #number value
+--
+function ModelBuilder.setModuleModel(element, name, value)
+  Logging:debug(ModelBuilder.classname, "setModuleModel()", element, name, value)
+  local element_prototype = EntityPrototype(element)
+  if element.modules ~= nil and element.modules[name] == value then return false end
+  element.modules = {}
+  element.modules[name] = 0
+  if value <= element_prototype:getModuleInventorySize() then
+    element.modules[name] = value
+  else
+    element.modules[name] = element_prototype:getModuleInventorySize()
+  end
+  return true
+end
+
+-------------------------------------------------------------------------------
+-- Append module model
+--
+-- @function [parent=#ModelBuilder] appendModuleModel
+--
+-- @param #table element
+-- @param #string name
+-- @param #number value
+--
+function ModelBuilder.appendModuleModel(element, name, value)
+  Logging:debug(ModelBuilder.classname, "appendModuleModel()", element, name, value)
+  local factory_prototype = EntityPrototype(element)
+  if element.modules ~= nil and element.modules[name] == value then return false end
+  local count_modules = Model.countModulesModel(element)
+  if count_modules >= factory_prototype:getModuleInventorySize() then
+    return false
+  elseif (count_modules + value) <= factory_prototype:getModuleInventorySize() then
+    element.modules[name] = value
+  else
+    Logging:debug(ModelBuilder.classname, "appendModuleModel()", factory_prototype:getModuleInventorySize(), count_modules, factory_prototype:getModuleInventorySize() - count_modules)
+    element.modules[name] = factory_prototype:getModuleInventorySize() - count_modules
+  end
+  return true
 end
 
 -------------------------------------------------------------------------------

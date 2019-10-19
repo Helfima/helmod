@@ -24,7 +24,8 @@ function EventController.start()
   EventController.pcallEvent(defines.events.on_gui_text_changed, EventController.onGuiTextChanged)
   EventController.pcallEvent(defines.events.on_prepare, EventController.onPrepare)
   
-  EventController.pcallEvent(defines.events.on_gui_confirmed, EventController.on_gui_confirmed)
+  EventController.pcallEvent(defines.events.on_gui_confirmed, EventController.onGuiConfirmed)
+  EventController.pcallEvent(defines.events.on_gui_value_changed, EventController.onGuiValueChanged)
   -- dropdown changed
   EventController.pcallEvent(defines.events.on_gui_selection_state_changed, EventController.onGuiSelectionStateChanged)
   -- checked changed
@@ -276,12 +277,27 @@ end
 -------------------------------------------------------------------------------
 -- On confirmed
 --
--- @function [parent=#EventController] on_gui_confirmed
+-- @function [parent=#EventController] onGuiConfirmed
 --
 -- @param #table event
 --
-function EventController.on_gui_confirmed(event)
-  Logging:trace(EventController.classname, "on_gui_confirmed(event)", event)
+function EventController.onGuiConfirmed(event)
+  Logging:trace(EventController.classname, "onGuiConfirmed(event)", event)
+  if event ~= nil and event.player_index ~= nil then
+    Player.load(event)
+    Dispatcher:send("on_gui_action", event, Controller.classname)
+  end
+end
+
+-------------------------------------------------------------------------------
+-- On value changed
+--
+-- @function [parent=#EventController] onGuiValueChanged
+--
+-- @param #table event
+--
+function EventController.onGuiValueChanged(event)
+  Logging:trace(EventController.classname, "onGuiValueChanged(event)", event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
     Dispatcher:send("on_gui_action", event, Controller.classname)
@@ -329,6 +345,7 @@ end
 function EventController.onRuntimeModSettingChanged(event)
   Logging:trace(EventController.classname, "onRuntimeModSettingChanged(event)", event)
   if event ~= nil and event.player_index ~= nil then
+    Logging:updateLevel()
     Player.load(event)
     Dispatcher:send("on_gui_setting", event, Controller.classname)
   end

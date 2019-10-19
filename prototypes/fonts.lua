@@ -109,7 +109,7 @@ data:extend(
     type = "font",
     name = "helmod_font_big_bold",
     from = "default-bold",
-    size = 14
+    size = 16
   }
   ,
   {

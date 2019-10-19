@@ -6,7 +6,7 @@ require "dialog.Settings"
 require "dialog.Download"
 require "dialog.Calculator"
 require "dialog.RecipeExplorer"
-require "edition.RecipeEdition"
+require "edition.RecipeEdition2"
 require "edition.ProductEdition"
 require "edition.EnergyEdition"
 require "edition.RuleEdition"
@@ -300,24 +300,26 @@ local pattern = "([^=]*)=?([^=]*)=?[^=]*=?([^=]*)=?([^=]*)=?([^=]*)"
 --
 function Controller:onGuiAction(event)
   Logging:debug(self.classname, "onGuiAction(event)", event)
-  if views == nil then self:prepare() end
-
-  event.classname, event.action, event.item1, event.item2, event.item3 = string.match(event.element.name,pattern)
-  Controller:onEvent(event)
-
-  if event.classname == self.classname and event.action == "CLOSE" then
-    Controller:cleanController(Player.native())
-  elseif event.classname == "helmod_planner-command" then
-    Controller:openMainPanel()
-  else
-    if event.action == "CLOSE" then
-      Controller:send("on_gui_close", event, event.classname)
+  if event.element ~= nil and (string.find(event.element.name,"^HM.*") or string.find(event.element.name,"^helmod.*")) then
+    if views == nil then self:prepare() end
+  
+    event.classname, event.action, event.item1, event.item2, event.item3 = string.match(event.element.name,pattern)
+    Controller:onEvent(event)
+  
+    if event.classname == self.classname and event.action == "CLOSE" then
+      Controller:cleanController(Player.native())
+    elseif event.classname == "helmod_planner-command" then
+      Controller:openMainPanel()
+    else
+      if event.action == "CLOSE" then
+        Controller:send("on_gui_close", event, event.classname)
+      end
+  
+      if event.action == "OPEN" then
+        User.setActiveForm(event.classname)
+      end
+      self:onGuiEvent(event)
     end
-
-    if event.action == "OPEN" then
-      User.setActiveForm(event.classname)
-    end
-    self:onGuiEvent(event)
   end
 end
 
@@ -405,6 +407,7 @@ function Controller:openMainPanel()
   if self:isOpened() then
     self:cleanController(Player.native())
   else
+    
     local form_name
     if current_block and model.blocks[current_block] then
       form_name = "HMProductionBlockTab"
@@ -801,6 +804,18 @@ function Controller:onEventAccessAdmin(event)
     self:send("on_gui_update", event)
   end
 
+  if event.action == "game-pause" then
+    User.setParameter("auto-pause", true)
+    game.tick_paused = true
+    self:send("on_gui_pause", event)
+  end
+
+  if event.action == "game-play" then
+    User.setParameter("auto-pause", false)
+    game.tick_paused = false
+    self:send("on_gui_pause", event)
+  end
+
 end
 
 -------------------------------------------------------------------------------
@@ -817,14 +832,16 @@ end
 -------------------------------------------------------------------------------
 -- Send
 --
--- @function [parent=#Controller] send
+-- @function [parent=#Controller] sendWithPrepare
 --
 function Controller:sendWithPrepare(event_type, data, classname)
   Logging:trace(self.classname, "send()", event_type, data, classname)
   if classname ~= nil then data.classname = classname end
   User.setParameter("prepare",false)
-  Dispatcher:send("on_gui_prepare", data, classname)
-  if User.getParameter("prepare") then
+  User.setParameter("translate",false)
+  Controller:send("on_gui_prepare", data, classname)
+  Controller:send("on_gui_translate", data, classname)
+  if User.getParameter("prepare") or User.getParameter("translate") then
     User.setParameter("next_event", {event=data, classname=classname})
   else
     Dispatcher:send(event_type, data, classname)

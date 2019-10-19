@@ -45,24 +45,24 @@ function PreferenceEdition:onClose()
 end
 
 -------------------------------------------------------------------------------
--- Get or create info panel
+-- Get or create priority module panel
 --
--- @function [parent=#PreferenceEdition] getInfoPanel
+-- @function [parent=#PreferenceEdition] getPriorityModulePanel
 --
-function PreferenceEdition:getRecipeCategoryPanel()
+function PreferenceEdition:getPriorityModulePanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
-  local panel_name = "scroll-recipe-category"
+  local panel_name = "priority_module"
   if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
-    return content_panel[panel_name]["scroll_panel"]
+    return content_panel[panel_name]
   end
-  local panel = ElementGui.addGuiFrameV(content_panel, panel_name, helmod_frame_style.default, "Default factory")
-  panel.style.height = 600
-  panel.style.width = 900
-  local scroll_panel = ElementGui.addGuiScrollPane(panel, "scroll_panel", helmod_frame_style.scroll_pane, true, true)
-  scroll_panel.style.horizontally_stretchable = true
-  scroll_panel.style.vertically_stretchable = true
+  local panel = GuiElement.add(content_panel, GuiFrameV(panel_name))
+  --panel.style.height = 600
+  --panel.style.width = 900
 
-  return scroll_panel
+  panel.style.horizontally_stretchable = true
+  panel.style.vertically_stretchable = true
+
+  return panel
 end
 
 -------------------------------------------------------------------------------
@@ -73,37 +73,58 @@ end
 -- @param #LuaEvent event
 --
 function PreferenceEdition:onUpdate(event)
-  self:updateRecipeCategory(event)
+  self:updatePriorityModule(event)
 end
 
 -------------------------------------------------------------------------------
--- Update information
+-- Update priority module
 --
--- @function [parent=#PreferenceEdition] updateRecipeCategory
+-- @function [parent=#PreferenceEdition] updatePriorityModule
 --
 -- @param #LuaEvent event
 --
 
-function PreferenceEdition:updateRecipeCategory(event)
+function PreferenceEdition:updatePriorityModule(event)
   Logging:debug(self.classname, "updateRecipeCategory()", event)
-  local recipe_category_panel = self:getRecipeCategoryPanel()
-  recipe_category_panel.clear()
-  local category_table = ElementGui.addGuiTable(recipe_category_panel, "categories", 2, helmod_table_style.panel)
-  category_table.vertical_centering = false
-  
-  for category_name,category in pairs(game.recipe_category_prototypes) do
-    ElementGui.addGuiLabel(category_table, category_name, category_name)
-    local factory_cell = ElementGui.addGuiFlowH(category_table, string.format("factory_%s",category_name),helmod_flow_style.horizontal)
-    factory_cell.style.horizontally_stretchable = false
-    local factories = Player.getProductionMachines()
-    for _,lua_factory in pairs(factories) do
-      if lua_factory.crafting_categories ~= nil and lua_factory.crafting_categories[category_name] then
-        local factory = Model.newFactory(lua_factory.name)
-        factory.localised_name = lua_factory.localised_name
-        Logging:debug(self.classname, "factory", factory)
-        ElementGui.addCellFactory(factory_cell, factory, string.format("%s=change-preference=ID=%s", self.classname, factory.name), false, nil, "gray")
-      end
+  local priority_module_panel = self:getPriorityModulePanel()
+  priority_module_panel.clear()
+
+  GuiElement.add(priority_module_panel, GuiLabel("priority_module_label"):caption({"helmod_common.module"}):style("helmod_label_title_frame"))
+
+
+  local configuration_table_panel = GuiElement.add(priority_module_panel, GuiTable("configuration-table"):column(2))
+  configuration_table_panel.vertical_centering = false
+
+  local configuration_panel = GuiElement.add(configuration_table_panel, GuiFlowV("configuration"))
+  -- configuration select
+  local tool_panel = GuiElement.add(configuration_panel, GuiFlowH("tool"))
+  tool_panel.style.width = 200
+  local configuration_priority = User.getParameter("configuration_priority") or 1
+  local priority_modules = User.getParameter("priority_modules") or {}
+  local button_style = "helmod_button_bold"
+  for i, priority_module in pairs(priority_modules) do
+    local button_style2 = button_style
+    if configuration_priority == i then button_style2 = "helmod_button_bold_selected" end
+    GuiElement.add(tool_panel, GuiButton(self.classname, "configuration-priority-select=ID", i):caption(i):style(button_style2))
+  end
+  GuiElement.add(tool_panel, GuiButton(self.classname, "configuration-priority-select=ID", "new"):caption("+"):style(button_style))
+  -- module priority
+  local priority_table_panel = GuiElement.add(configuration_panel, GuiTable("module-priority-table"):column(3))
+  if priority_modules[configuration_priority] ~= nil then
+    Logging:debug(self.classname, "priority_modules", priority_modules, configuration_priority)
+    for index, element in pairs(priority_modules[configuration_priority]) do
+      local tooltip = ElementGui.getTooltipModule(element.module)
+      GuiElement.add(priority_table_panel, GuiButtonSprite(self.classname, "do-nothing=ID", index):sprite("entity", element.name):tooltip(tooltip))
+      GuiElement.add(priority_table_panel, GuiTextField(self.classname, "priority-module-update=ID", index):text(element.value))
+      GuiElement.add(priority_table_panel, GuiButtonSprite(self.classname, "priority-module-remove=ID", index):style("helmod_button_icon_delete_red"):tooltip(tooltip))
     end
+  end
+  
+  -- module selector
+  local module_table_panel = GuiElement.add(configuration_table_panel, GuiTable("module-selector-table"):column(6))
+  for k, element in pairs(Player.getModules()) do
+    local tooltip = ElementGui.getTooltipModule(element.name)
+    GuiElement.add(module_table_panel, GuiButtonSelectSprite(self.classname, "priority-module-select=ID"):sprite("entity", element.name):tooltip(tooltip))
   end
 end
 
@@ -116,38 +137,55 @@ end
 --
 function PreferenceEdition:onEvent(event)
   Logging:debug(self.classname, "onEvent()", event)
-  local model = Model.getModel()
-  if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
-    if event.action == "product-update" then
-      local products = {}
-
-      local operation = event.element.text
-      local ok , err = pcall(function()
-        local quantity = formula(operation)
-        if quantity == 0 then quantity = nil end
-        ModelBuilder.updateProduct(event.item1, event.item2, quantity)
-        ModelCompute.update()
-        self:close()
-        Controller:send("on_gui_refresh", event)
-      end)
-      if not(ok) then
-        Player.print("Formula is not valid!")
+  
+  if event.action == "configuration-priority-select" then
+    if event.item1 == "new" then
+      local priority_modules = User.getParameter("priority_modules") or {}
+      table.insert(priority_modules, {})
+      User.setParameter("configuration_priority", Model.countList(priority_modules))
+      User.setParameter("priority_modules", priority_modules)
+    else
+      User.setParameter("configuration_priority", tonumber(event.item1))
+    end
+    self:updatePriorityModule(event)
+  end
+  
+  if event.action == "priority-module-select" then
+    local configuration_priority = User.getParameter("configuration_priority") or 1
+    local priority_modules = User.getParameter("priority_modules") or {}
+    if Model.countList(priority_modules) == 0 then
+      table.insert(priority_modules, {{name=event.item1, value=1}})
+      User.setParameter("configuration_priority", 1)
+      User.setParameter("priority_modules", priority_modules)
+    else
+      if priority_modules[configuration_priority] ~= nil then
+        table.insert(priority_modules[configuration_priority], {name=event.item1, value=1})
       end
     end
-    if event.action == "product-reset" then
-      local products = {}
-      ModelBuilder.updateProduct(event.item1, event.item2, nil)
-      ModelCompute.update()
-      self:close()
-      Controller:send("on_gui_refresh", event)
+    self:updatePriorityModule(event)
+    Controller:send("on_gui_priority_module", event)
+  end
+  
+  if event.action == "priority-module-update" then
+    local configuration_priority = User.getParameter("configuration_priority")
+    local priority_modules = User.getParameter("priority_modules")
+    local priority_index = tonumber(event.item1)
+    if priority_modules ~= nil and priority_modules[configuration_priority] ~= nil and priority_modules[configuration_priority][priority_index] ~= nil then
+        local text = event.element.text
+        priority_modules[configuration_priority][priority_index].value = tonumber(text)
     end
-    if event.action == "element-select" then
-      local belt_speed = EntityPrototype(event.item1):getBeltSpeed()
-
-      local text = string.format("%s*1", belt_speed * Product().belt_ratio)
-      ElementGui.setInputText(input_quantity, text)
-      input_quantity.focus()
-      input_quantity.select(string.len(text), string.len(text))
+    self:updatePriorityModule(event)
+    Controller:send("on_gui_priority_module", event)
+  end
+  
+  if event.action == "priority-module-remove" then
+    local configuration_priority = User.getParameter("configuration_priority")
+    local priority_modules = User.getParameter("priority_modules")
+    local priority_index = tonumber(event.item1)
+    if priority_modules ~= nil and priority_modules[configuration_priority] ~= nil and priority_modules[configuration_priority][priority_index] ~= nil then
+        table.remove(priority_modules[configuration_priority], priority_index)
     end
+    self:updatePriorityModule(event)
+    Controller:send("on_gui_priority_module", event)
   end
 end

@@ -182,9 +182,9 @@ function Model.getObject(item, key)
 end
 
 -------------------------------------------------------------------------------
--- Get Object
+-- Get Recipe
 --
--- @function [parent=#Model] getObject
+-- @function [parent=#Model] getRecipe
 --
 -- @param #string block_id block id
 -- @param #string key object name
@@ -408,7 +408,7 @@ end
 --
 function Model.countModulesModel(element)
   local count = 0
-  for name,value in pairs(element.modules) do
+  for name, value in pairs(element.modules) do
     count = count + value
   end
   return count
@@ -573,11 +573,12 @@ end
 function Model.setBeacon(item, key, name)
   local object = Model.getObject(item, key)
   if object ~= nil then
-    local beacon = Player.getEntityPrototype(name)
-    if beacon ~= nil then
-      -- set global default
-      Model.setDefaultRecipeBeacon(item, key, beacon.name)
-      object.beacon.name = beacon.name
+    local beacon_prototype = EntityPrototype(name)
+    if beacon_prototype:native() ~= nil then
+      object.beacon.name = name
+      if Model.countModulesModel(object.beacon) >= beacon_prototype:getModuleInventorySize() then
+        object.beacon.modules = {}
+      end
     end
   end
 end
@@ -595,9 +596,12 @@ function Model.setFactory(item, key, name)
   Logging:debug(Model.classname, "setFactory()", item, key, name)
   local object = Model.getObject(item, key)
   if object ~= nil then
-    local factory = Player.getEntityPrototype(name)
-    if factory ~= nil then
-      object.factory.name = factory.name
+    local factory_prototype = EntityPrototype(name)
+    if factory_prototype:native() ~= nil then
+      object.factory.name = name
+      if Model.countModulesModel(object.factory) >= factory_prototype:getModuleInventorySize() then
+        object.factory.modules = {}
+      end
     end
   end
 end
@@ -758,14 +762,14 @@ end
 --
 -- @function [parent=#Model] getDefaultPrototypeFactory
 --
--- @param #string category
--- @param #string recipe
+-- @param #RecipePrototype recipe_prototype
 --
 -- @return #string
 --
-function Model.getDefaultPrototypeFactory(category, recipe)
+function Model.getDefaultPrototypeFactory(recipe_prototype)
+  local category = recipe_prototype:getCategory()
   if category ~= nil then
-    local factories = Player.getProductionsCrafting(category, recipe)
+    local factories = Player.getProductionsCrafting(category, recipe_prototype:native())
     local default_factory_level = User.getModGlobalSetting("default_factory_level")
     local factory_level = 1
     if default_factory_level == "fast" then

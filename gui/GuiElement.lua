@@ -103,6 +103,7 @@ function GuiElement.add(parent, gui_element)
     element = parent.add(gui_element:getOptions())
   end)
   if not ok then
+    Logging:debug(gui_element.classname, "options", gui_element:onErrorOptions())
     element = parent.add(gui_element:onErrorOptions())
   end
   return element
