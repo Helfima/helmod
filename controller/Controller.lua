@@ -658,9 +658,9 @@ function Controller:onEventAccessWrite(event)
       local recipes = Player.searchRecipe(event.item3)
       if #recipes == 1 then
         local recipe = recipes[1]
-        ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type)
+        local new_recipe = ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type)
         ModelCompute.update()
-        User.setParameter("scroll_down",true)
+        User.setParameter("scroll_element", new_recipe.id)
         self:send("on_gui_update", event)
       else
         self:send("on_gui_open", event,"HMRecipeSelector")
@@ -707,6 +707,7 @@ function Controller:onEventAccessWrite(event)
       if event.control then step = 1000 end
       ModelBuilder.upProductionBlock(event.item1, step)
       ModelCompute.update()
+      User.setParameter("scroll_element", event.item1)
       self:send("on_gui_update", event)
     end
 
@@ -716,6 +717,7 @@ function Controller:onEventAccessWrite(event)
       if event.control then step = 1000 end
       ModelBuilder.downProductionBlock(event.item1, step)
       ModelCompute.update()
+      User.setParameter("scroll_element", event.item1)
       self:send("on_gui_update", event)
     end
   end
@@ -733,6 +735,7 @@ function Controller:onEventAccessWrite(event)
       if event.control then step = 1000 end
       ModelBuilder.upProductionRecipe(event.item1, event.item2, step)
       ModelCompute.update()
+      User.setParameter("scroll_element", event.item2)
       self:send("on_gui_update", event)
     end
 
@@ -742,6 +745,7 @@ function Controller:onEventAccessWrite(event)
       if event.control then step = 1000 end
       ModelBuilder.downProductionRecipe(event.item1, event.item2, step)
       ModelCompute.update()
+      User.setParameter("scroll_element", event.item2)
       self:send("on_gui_update", event)
     end
   end

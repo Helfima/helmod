@@ -239,9 +239,9 @@ function AbstractSelector:onEvent(event)
     else
       -- classic selector
       if event.action == "element-select" and event.item1 ~= "container" then
-        local productionBlock = ModelBuilder.addRecipeIntoProductionBlock(event.item2, event.item1)
+        local new_recipe = ModelBuilder.addRecipeIntoProductionBlock(event.item2, event.item1)
         ModelCompute.update()
-        User.setParameter("scroll_down",true)
+        User.setParameter("scroll_element", new_recipe.id)
         User.setActiveForm("HMProductionBlockTab")
         Controller:send("on_gui_refresh", event)
       end
@@ -408,10 +408,15 @@ function AbstractSelector:onUpdate(event)
 
   self:createElementLists()
 
+  --Logging:profilerStart()
   self:updateFilter(event)
+  --Logging:profilerReset()
   self:updateGroupSelector(event)
+  --Logging:profilerReset()
   self:updateItemList(event)
-end
+  --Logging:profilerStop()
+  
+  end
 
 -------------------------------------------------------------------------------
 -- Check filter
@@ -635,10 +640,12 @@ function AbstractSelector:updateItemList(event)
   local list_subgroup = Cache.getData(self.classname, "list_subgroup") or {}
   local list_item = Cache.getData(self.classname, "list_item") or {}
   -- recuperation recipes et subgroupes
-  local recipe_selector_list = ElementGui.addGuiTable(item_list_panel, "recipe_list", 1, helmod_table_style.list)
+  --local recipe_selector_list = ElementGui.addGuiTable(item_list_panel, "recipe_list", 1, helmod_table_style.list)
+  local recipe_selector_list = GuiElement.add(item_list_panel, GuiFlowV("recipe_list"))
   for subgroup, list in spairs(list_item,function(t,a,b) return list_subgroup[b]["order"] > list_subgroup[a]["order"] end) do
     -- boucle subgroup
-    local guiRecipeSubgroup = ElementGui.addGuiTable(recipe_selector_list, "recipe-table-"..subgroup, 10, "helmod_table_recipe_selector")
+    --local guiRecipeSubgroup = ElementGui.addGuiTable(recipe_selector_list, "recipe-table-"..subgroup, 10, "helmod_table_recipe_selector")
+    local guiRecipeSubgroup = GuiElement.add(recipe_selector_list, GuiTable("recipe-table-", subgroup):column(10):style("helmod_table_recipe_selector"))
     for key, prototype in spairs(list,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
       local tooltip = self:buildPrototypeTooltip(prototype)
       self:buildPrototypeIcon(guiRecipeSubgroup, prototype, tooltip)

@@ -40,7 +40,6 @@ end
 function ProductionLineTab:updateInfo(event)
   Logging:debug(self.classname, "updateInfo", event)
   local model = Model.getModel()
-  Logging:debug(self.classname, "model:", model)
   -- data
   local info_scroll, output_scroll, input_scroll = self:getInfoPanel()
   info_scroll.clear()
@@ -90,7 +89,6 @@ end
 function ProductionLineTab:updateInput(event)
   Logging:debug(self.classname, "updateInput", event)
   local model = Model.getModel()
-  Logging:debug("ProductionBlockTab", "model:", model)
   -- data
   local info_scroll, output_scroll, input_scroll = self:getInfoPanel()
   input_scroll.clear()
@@ -156,8 +154,7 @@ function ProductionLineTab:updateData(event)
   self:updateInput(event)
   
   -- data panel
-  local scrollPanel = self:getResultScrollPanel()
-  --test scrollPanel.add({type="choose-elem-button", elem_type="recipe"})
+  local scroll_panel = self:getResultScrollPanel()
 
   local countBlock = Model.countBlocks()
   if countBlock > 0 then
@@ -169,14 +166,20 @@ function ProductionLineTab:updateData(event)
       end
     end
     
-    local result_table = ElementGui.addGuiTable(scrollPanel,"list-data",5 + extra_cols, "helmod_table-odd")
+    local result_table = ElementGui.addGuiTable(scroll_panel,"list-data",5 + extra_cols, "helmod_table-odd")
     result_table.vertical_centering = false
 
     self:addTableHeader(result_table)
 
-    local i = 0
+    local last_element = nil
     for _, element in spairs(model.blocks, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
-      self:addTableRow(result_table, element)
+      local element_cell = self:addTableRow(result_table, element)
+      if User.getParameter("scroll_element") == element.id then last_element = element_cell end
+    end
+    
+    if last_element ~= nil then
+      scroll_panel.scroll_to_element(last_element)
+      User.setParameter("scroll_element", nil)
     end
   end
 end
@@ -278,4 +281,5 @@ function ProductionLineTab:addTableRow(gui_table, block)
       ElementGui.addCellElement(cell_ingredients, ingredient, self.classname.."=production-block-add=ID="..block.id.."="..ingredient.name.."=", true, "tooltip.add-recipe", ElementGui.color_button_add, index)
     end
   end
+  return cell_recipe
 end

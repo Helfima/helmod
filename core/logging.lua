@@ -3,6 +3,7 @@ Logging = {}
 local append_log=false
 local debug_level = 0
 local debug_filter = "all"
+local profiler = nil
 
 function Logging:new()
   self.limit = 5
@@ -10,6 +11,25 @@ function Logging:new()
   self.logClass = {}
   self.debug_values = {none=0,error=1,warn=2,info=3,debug=4,trace=5}
   self:updateLevel()
+end
+
+function Logging:profilerStart()
+  if profiler == nil then profiler = game.create_profiler() end
+  profiler.reset()
+end
+
+function Logging:profilerReset()
+  if profiler ~= nil then
+    log(profiler)
+    profiler.reset()
+  end
+end
+
+function Logging:profilerStop()
+  if profiler ~= nil then
+    log(profiler)
+    profiler.stop()
+  end
 end
 
 function Logging:checkClass(logClass)

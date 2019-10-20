@@ -91,7 +91,7 @@ function ModelCompute.update()
           local beacon = recipe.beacon
           local _recipe = Player.getRecipe(recipe.name)
           Model.setFactory(productBlock.id, recipe.name, factory.name)
-          Model.setBeacon(productBlock.id, recipe.name, beacon.name)
+          Model.setBeacon(productBlock.id, recipe.name, beacon.name, beacon.combo, beacon.factory)
           if _recipe ~= nil then
             recipe.is_resource = not(_recipe.force)
             if recipe.is_resource then recipe.category = "extraction-machine" end

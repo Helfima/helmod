@@ -15,6 +15,8 @@ local ModelBuilder = {
 -- @param #string key recipe name
 -- @param #string type recipe type
 --
+-- @return recipe
+--
 function ModelBuilder.addRecipeIntoProductionBlock(key, type)
   Logging:debug(ModelBuilder.classname, "addRecipeIntoProductionBlock()", key, type)
   local model = Model.getModel()
@@ -82,7 +84,7 @@ function ModelBuilder.addRecipeIntoProductionBlock(key, type)
 
     local default_beacon = User.getDefaultBeacon(ModelRecipe)
     if default_beacon ~= nil then
-      Model.setBeacon(current_block, ModelRecipe.id, default_beacon.name)
+      Model.setBeacon(current_block, ModelRecipe.id, default_beacon.name, default_beacon.combo, default_beacon.factory)
     else
       local default_beacon_name = Model.getDefaultRecipeBeacon(lua_recipe.name)
       if default_beacon_name ~= nil then
@@ -95,7 +97,7 @@ function ModelBuilder.addRecipeIntoProductionBlock(key, type)
     end
     
     Logging:debug(ModelBuilder.classname, "addRecipeIntoProductionBlock()", model.blocks[current_block])
-    return model.blocks[current_block]
+    return ModelRecipe
   end
 end
 
@@ -490,7 +492,7 @@ function ModelBuilder.setBeaconBlock(block_id, current_recipe)
     for key, recipe in pairs(block.recipes) do
       local prototype_recipe = RecipePrototype(recipe)
       if default_beacon_mode ~= "category" or prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
-        Model.setBeacon(block_id, key, current_recipe.beacon.name)
+        Model.setBeacon(block_id, key, current_recipe.beacon.name, current_recipe.beacon.combo, current_recipe.beacon.factory)
         if User.getParameter("default_beacon_with_module") == true then
           ModelBuilder.setBeaconModulePriority(block_id, key, current_recipe.beacon.module_priority)
         end

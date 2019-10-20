@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.9.10
+Date: 20. 10. 2019
+  Changes:
+    - Added default and propagation beacon settings
+    - Added auto scroll when line move up/down
+    - Changed module table of cell when module count > 4 (on 2 row)
+    - Updated Russian locale (by Astorin)
+---------------------------------------------------------------------------------------------------
 Version: 0.9.9
 Date: 19. 10. 2019
   Features:

@@ -13,7 +13,10 @@ local Model = {
   -- 15°c
   initial_temp = 15,
   -- 200J/unit/°c
-  fluid_energy_per_unit = 200
+  fluid_energy_per_unit = 200,
+  beacon_combo = 4,
+  beacon_factory = 1.2
+
 }
 
 -------------------------------------------------------------------------------
@@ -268,8 +271,8 @@ function Model.newBeacon(name, count)
   beaconModel.type = "item"
   beaconModel.count = count or 0
   beaconModel.energy = 0
-  beaconModel.combo = 4
-  beaconModel.factory = 1.2
+  beaconModel.combo = Model.beacon_combo
+  beaconModel.factory = Model.beacon_factory
   -- limit infini = 0
   beaconModel.limit = 0
   -- modules
@@ -408,8 +411,10 @@ end
 --
 function Model.countModulesModel(element)
   local count = 0
-  for name, value in pairs(element.modules) do
-    count = count + value
+  if element ~= nil and element.modules ~= nil then
+    for name, value in pairs(element.modules) do
+      count = count + value
+    end
   end
   return count
 end
@@ -569,13 +574,17 @@ end
 -- @param #string item block_id or resource
 -- @param #string key object name
 -- @param #string name beacon name
+-- @param #number combo beacon combo
+-- @param #number factory beacon factory
 --
-function Model.setBeacon(item, key, name)
+function Model.setBeacon(item, key, name, combo, factory)
   local object = Model.getObject(item, key)
   if object ~= nil then
     local beacon_prototype = EntityPrototype(name)
     if beacon_prototype:native() ~= nil then
       object.beacon.name = name
+      object.beacon.combo = combo or Model.beacon_combo
+      object.beacon.factory = factory or Model.beacon_factory
       if Model.countModulesModel(object.beacon) >= beacon_prototype:getModuleInventorySize() then
         object.beacon.modules = {}
       end

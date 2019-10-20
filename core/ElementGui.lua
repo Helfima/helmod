@@ -1284,8 +1284,9 @@ function ElementGui.addCellFactory(parent, factory, action, select, tooltip_name
     ElementGui.addGuiButtonSprite(row1, action, "entity", factory.name, nil, ({tooltip_name, Player.getLocalisedName(factory)}))
   end
 
-  local col_size = 2
-  if display_cell_mod == "small-icon" then col_size = 5 end
+  local col_size = math.ceil(Model.countModulesModel(factory)/2)
+  if col_size < 2 then col_size = 2 end
+  if display_cell_mod == "small-icon" then col_size = col_size * 2 end
   local cell_factory_module = ElementGui.addGuiTable(row1,"factory-modules", col_size, "helmod_factory_modules")
   -- modules
   if factory.modules ~= nil then

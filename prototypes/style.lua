@@ -1518,7 +1518,7 @@ for _,style in pairs(style_element_list) do
       bottom_padding = 2,
       left_padding = 0,
       
-      width = 80,
+      minimal_width = 80,
       horizontally_stretchable = "on",
       vertically_stretchable = "off"
     }
@@ -1549,7 +1549,7 @@ for _,style in pairs(style_element_list) do
       bottom_padding = 2,
       left_padding = 0,
       
-      width = 50,
+      minimal_width = 50,
       horizontally_stretchable = "on",
       vertically_stretchable = "off"
     }
@@ -1580,7 +1580,7 @@ for _,style in pairs(style_element_list) do
       bottom_padding = 2,
       left_padding = 0,
       
-      width = 30,
+      minimal_width = 30,
       horizontally_stretchable = "on",
       vertically_stretchable = "off"
     }

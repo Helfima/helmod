@@ -6,7 +6,9 @@ require "tab.AbstractTab"
 -- @extends #AbstractTab
 --
 
-ProductionBlockTab = newclass(AbstractTab)
+ProductionBlockTab = newclass(AbstractTab,function(base,classname)
+  AbstractTab.init(base,classname)
+end)
 
 -------------------------------------------------------------------------------
 -- Return button caption
@@ -269,9 +271,7 @@ end
 -- @param #LuaEvent event
 --
 function ProductionBlockTab:updateInput(event)
-  Logging:debug(self.classname, "updateInput", event)
   local model = Model.getModel()
-  Logging:debug(self.classname, "model:", model)
   -- data
   local current_block = User.getParameter("current_block") or "new"
 
@@ -310,9 +310,7 @@ end
 -- @param #LuaEvent event
 --
 function ProductionBlockTab:updateOutput(event)
-  Logging:debug(self.classname, "updateOutput", event)
   local model = Model.getModel()
-  Logging:debug(self.classname, "model:", model)
   -- data
   local current_block = User.getParameter("current_block") or "new"
 
@@ -361,9 +359,8 @@ end
 -- @param #LuaEvent event
 --
 function ProductionBlockTab:updateData(event)
-  Logging:debug("ProductionBlockTab", "updateData()", event)
+  Logging:debug(self.classname, "updateData()", event)
   local model = Model.getModel()
-  Logging:debug("ProductionBlockTab", "model:", model)
   local current_block = User.getParameter("current_block") or "new"
 
   self:updateInfo(event)
@@ -423,12 +420,14 @@ function ProductionBlockTab:updateData(event)
 
     local last_element = nil
     for _, recipe in spairs(elements.recipes, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
-      last_element = self:addTableRow(result_table, elements, recipe)
+      local recipe_cell = self:addTableRow(result_table, elements, recipe)
+      if User.getParameter("scroll_element") == recipe.id then last_element = recipe_cell end
     end
 
-    if User.getParameter("scroll_down") then
+    Logging:debug(self.classname, "scroll_element", User.getParameter("scroll_element"))
+    if last_element ~= nil then
       scroll_panel2.scroll_to_element(last_element)
-      User.setParameter("scroll_down", false)
+      User.setParameter("scroll_element", nil)
     end
 
   end
@@ -442,8 +441,6 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function ProductionBlockTab:addTableHeader(itable)
-  Logging:debug("ProductionBlockTab", "addTableHeader()", itable)
-
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
   -- optionnal columns
   self:addCellHeader(itable, "index", {"helmod_result-panel.col-header-index"},"index")
