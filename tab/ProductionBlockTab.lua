@@ -497,8 +497,10 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
   --  local production_label = Format.formatPercent(production).."%"
   --  if block.solver == true then production_label = "" end
   local cell_recipe = ElementGui.addCell(gui_table, "recipe-"..recipe.id)
-  ElementGui.addCellRecipe(cell_recipe, recipe, "HMRecipeEdition=OPEN=ID="..block.id.."="..recipe.id.."=", true, "tooltip.edit-recipe", "gray")
-
+  ElementGui.addCellRecipe(cell_recipe, recipe, "HMRecipeEdition=OPEN=ID="..block.id.."="..recipe.id.."=", true, "tooltip.edit-recipe", "gray", recipe_prototype:native() == nil)
+  if recipe_prototype:native() == nil then
+    Player.print("ERROR: Recipe ".. recipe.name .." not exist in game")
+  end
   -- col energy
   local cell_energy = ElementGui.addCell(gui_table, "energy-"..recipe.id)
   ElementGui.addCellEnergy(cell_energy, recipe, "HMRecipeEdition=OPEN=ID="..block.id.."="..recipe.id.."=", true, "tooltip.edit-recipe", "gray")

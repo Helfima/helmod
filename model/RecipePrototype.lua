@@ -3,6 +3,7 @@
 -- @module RecipePrototype
 --
 RecipePrototype = newclass(Prototype,function(base, object, object_type)
+  --Logging:debug("HMRecipePrototype", "constructor", type(object), object, object_type)
   base.classname = "HMRecipePrototype"
   base.is_voider = nil
   if type(object) == "string" then
@@ -27,9 +28,12 @@ RecipePrototype = newclass(Prototype,function(base, object, object_type)
     base.lua_type = "technology"
   end
   if base.lua_prototype == nil then
-    RecipePrototype.find(object)
+    Logging:error("HMRecipePrototype", "recipe not found", type(object), object)
+    Logging:line("HMRecipePrototype", 3)
+    Logging:line("HMRecipePrototype", 4)
+    Logging:line("HMRecipePrototype", 5)
+    Logging:line("HMRecipePrototype", 6)
   end
-  base.classname = "HMRecipePrototype"
 end)
 
 -------------------------------------------------------------------------------

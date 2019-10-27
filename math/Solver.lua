@@ -291,6 +291,19 @@ function Solver.getCol(M, xrow)
       end 
     end
   end
+  -- cas des voider
+  if xcol == 0 then
+    for icol,cell_value in pairs(row) do
+      if icol > Solver.col_start and cell_value < 0 then
+        local Z = M[#M][icol]-M[Solver.row_input][icol] -- valeur demandee (input - Z)
+        local C = -Z/cell_value
+        if C > max then
+          max = C
+          xcol = icol
+        end 
+      end
+    end
+  end
   Solver.print(string.format("%s: %s in %s,%s", "Best Ratio", max, xrow, xcol))
   return xcol
 end

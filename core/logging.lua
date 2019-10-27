@@ -79,6 +79,12 @@ function Logging:error(...)
   self:logging("[ERROR]", self.debug_values.error, unpack(arg))
 end
 
+function Logging:line(...)
+  if self.debug_values.debug > debug_level then return end
+  local arg = {...}
+  self:previousCall("[DEBUG]", unpack(arg))
+end
+
 function Logging:objectToString(object, level)
   if level == nil then level = 0 end
   local message = ""
@@ -138,4 +144,10 @@ function Logging:logging(tag, level, logClass, ...)
     log(string.format("%s|%s|%s:%s|%s", tag, logClass, string.match(debug_info.source,"[^/]*$"), debug_info.currentline, message))
     if append_log == false then append_log = true end
   end
+end
+
+
+function Logging:previousCall(tag, logClass, back)
+  local debug_info = debug.getinfo(back+2)
+  log(string.format("%s|%s|%s:%s", tag, logClass, string.match(debug_info.source,"[^/]*$"), debug_info.currentline))
 end

@@ -57,6 +57,32 @@ end
 
 -------------------------------------------------------------------------------
 --
+-- @function [parent=#GuiButton] option
+-- @param #string name
+-- @param #string value
+-- @return #GuiButton
+--
+function GuiButton:option(name, value)
+  self.options[name] = value
+end
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiButton] choose
+-- @param #string type
+-- @param #string name
+-- @return #GuiButton
+--
+function GuiButton:choose(type, name)
+  self.options.type = "choose-elem-button"
+  if type ==  "resource" then type = "entity" end
+  self.options.elem_type = type
+  self.options[type] = name
+  table.insert(self.name, name)
+  return self
+end
+
+-------------------------------------------------------------------------------
+--
 -- @function [parent=#GuiButton] onErrorOptions
 -- @return #table
 --

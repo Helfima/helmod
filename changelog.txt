@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.9.11
+Date: 27. 10. 2019
+  Changes:
+    - Added voider implementation in normal solver
+    - Changed tooltip by standard tooltip in recipe selector
+  Bugfixes:
+    - Fixed error when recipe is lost after mod update
+---------------------------------------------------------------------------------------------------
 Version: 0.9.10
 Date: 20. 10. 2019
   Changes:

@@ -484,6 +484,7 @@ function ModelCompute.getBlockMatrix(block)
     -- begin loop recipes
     local irow = 1
     for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
+      Logging:debug(ModelCompute.classname, "---> recipe", recipe)
       local row = {}
 
       local row_valid = false

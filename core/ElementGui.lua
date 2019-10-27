@@ -1320,7 +1320,7 @@ end
 -- @param #string tooltip_name tooltip name
 -- @param #string color button color
 --
-function ElementGui.addCellRecipe(parent, recipe, action, select, tooltip_name, color)
+function ElementGui.addCellRecipe(parent, recipe, action, select, tooltip_name, color, broken)
   --Logging:trace(ElementGui.classname, "addCellRecipe()", recipe, action, select, tooltip_name, color)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   -- ingredient = {type="item", name="steel-plate", amount=8}
@@ -1330,6 +1330,11 @@ function ElementGui.addCellRecipe(parent, recipe, action, select, tooltip_name, 
   local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_product_"..color.."_1")
 
   local recipe_icon = ElementGui.addGuiButtonSprite(row1, action, recipe.type, recipe.name, recipe.name, ({tooltip_name, Player.getRecipeLocalisedName(recipe)}))
+  if broken == true then
+    recipe_icon.tooltip = "ERROR: Recipe ".. recipe.name .." not exist in game"
+    recipe_icon.sprite = "utility/warning_icon"
+    row1.style = "helmod_frame_product_red_1"
+  end
 
   local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_product_"..color.."_3")
   ElementGui.addGuiLabel(row3, "label2_"..recipe.name, Format.formatPercent(recipe.production or 1).."%", "helmod_label_element", {"helmod_common.total"})
