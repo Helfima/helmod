@@ -84,7 +84,6 @@ helmod_settings_mod = {
       "HMController",
       "HMDispatcherController",
       "HMDownload",
-      "HMElementGui",
       "HMEnergyEdition",
       "HMEnergyTab",
       "HMEventController",

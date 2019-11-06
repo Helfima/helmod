@@ -44,12 +44,12 @@ function StatisticTab:updateData(event)
   local scroll_panel = self:getResultScrollPanel({"helmod_result-panel.tab-title-statistic"})
   
   -- resources
-  local element_panel = ElementGui.addGuiFrameV(scroll_panel, "resources", helmod_frame_style.section, ({"helmod_common.total"}))
-  ElementGui.setStyle(element_panel, "data_section", "width")
+  local element_panel = GuiElement.add(scroll_panel, GuiFrameV("resources"):style(helmod_frame_style.section):tooltip({"helmod_common.total"}))
+  GuiElement.setStyle(element_panel, "data_section", "width")
 
   local column = 2*8
 
-  local result_table = ElementGui.addGuiTable(scroll_panel,"list-data",column, "helmod_table-odd")
+  local result_table = GuiElement.add(scroll_panel, GuiTable("list-data"):column(column):style("helmod_table-odd"))
   --self:addProductionBlockHeader(resultTable)
   local elements = {}
   
@@ -78,8 +78,7 @@ end
 --
 function StatisticTab:addElementRow(guiTable, element)
   Logging:debug(self.classname, "addProductionBlockRow()", guiTable, element)
-  ElementGui.addGuiLabel(guiTable, "value_"..element.name, Format.formatNumberElement(element.value), "helmod_label_right_60")
-  ElementGui.addGuiButtonSprite(guiTable, "element_"..element.name.."=", element.type, element.name, element.name, Player.getLocalisedName(element))
-
+  GuiElement.add(guiTable, GuiLabel("value", element.name):caption(Format.formatNumberElement(element.value)):style("helmod_label_right_60"))
+  GuiElement.add(guiTable, GuiButtonSprite("element", element.name):sprite(element.type, element.name):tooltip(Player.getLocalisedName(element)))
 end
 

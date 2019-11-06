@@ -6,7 +6,7 @@ require "dialog.Settings"
 require "dialog.Download"
 require "dialog.Calculator"
 require "dialog.RecipeExplorer"
-require "edition.RecipeEdition2"
+require "edition.RecipeEdition"
 require "edition.ProductEdition"
 require "edition.EnergyEdition"
 require "edition.RuleEdition"
@@ -213,8 +213,7 @@ function Controller:bindController(player)
       if lua_gui_element["helmod_planner-command"] ~= nil then lua_gui_element["helmod_planner-command"].destroy() end
     end
     if lua_gui_element ~= nil and lua_gui_element["helmod_planner-command"] == nil and User.getModSetting("display_main_icon") then
-      --local gui_button = ElementGui.addGuiFrameH(lua_gui_element, "helmod_planner-command", helmod_frame_style.default)
-      local gui_button = ElementGui.addGuiButton(lua_gui_element, "helmod_planner-command", nil, "helmod_button_icon_calculator",nil, ({"helmod_planner-command"}))
+      local gui_button = GuiElement.add(lua_gui_element, GuiButton("helmod_planner-command"):style("helmod_button_icon_calculator"):tooltip({"helmod_planner-command"}))
       gui_button.style.width = 37
       gui_button.style.height = 37
     end
@@ -616,7 +615,7 @@ function Controller:onEventAccessWrite(event)
   end
 
   if event.action == "change-number-option" and model.blocks ~= nil and model.blocks[current_block] ~= nil then
-    local value = ElementGui.getInputNumber(event.element)
+    local value = GuiElement.getInputNumber(event.element)
     ModelBuilder.updateProductionBlockOption(current_block, event.item1, value)
     ModelCompute.update()
     self:send("on_gui_update", event)

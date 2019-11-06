@@ -109,26 +109,26 @@ function Form:getPanel()
     return parent_panel[self:getPanelName()], parent_panel[self:getPanelName()]["content_panel"], parent_panel[self:getPanelName()]["header_panel"]["menu_panel"]
   end
 
-  local flow_panel = ElementGui.addGuiFrameV(parent_panel, self:getPanelName(), helmod_frame_style.hidden)
+  local flow_panel = GuiElement.add(parent_panel, GuiFrameV(self:getPanelName()):style(helmod_frame_style.hidden))
   flow_panel.style.horizontally_stretchable = true
   flow_panel.style.vertically_stretchable = true
   flow_panel.location = User.getLocationForm(self:getPanelName())
   Logging:debug(self.classname, "location", self:getPanelName(), User.getLocationForm(self:getPanelName()))
-  ElementGui.setStyle(flow_panel, self.classname, "width")
-  ElementGui.setStyle(flow_panel, self.classname, "height")
+  GuiElement.setStyle(flow_panel, self.classname, "width")
+  GuiElement.setStyle(flow_panel, self.classname, "height")
   
-  local header_panel = ElementGui.addGuiFlowH(flow_panel, "header_panel")
-  local title_panel = ElementGui.addGuiFrameH(header_panel, "title_panel", helmod_frame_style.default, self.panelCaption or self.classname)
+  local header_panel = GuiElement.add(flow_panel, GuiFlowH("header_panel"))
+  local title_panel = GuiElement.add(header_panel, GuiFrameH("title_panel"):caption(self.panelCaption or self.classname))
   title_panel.style.height = 40
-  local menu_panel = ElementGui.addGuiFrameH(header_panel, "menu_panel", helmod_frame_style.panel)
+  local menu_panel = GuiElement.add(header_panel,  GuiFrameH("menu_panel"):style(helmod_frame_style.panel))
   --menu_panel.style.horizontal_spacing = 10
   menu_panel.style.horizontal_align = "right"
   
   local content_panel
   if self.content_verticaly == true then
-    content_panel = ElementGui.addGuiFlowV(flow_panel, "content_panel")
+    content_panel = GuiElement.add(flow_panel, GuiFlowV("content_panel"))
   else
-    content_panel = ElementGui.addGuiFlowH(flow_panel, "content_panel")
+    content_panel = GuiElement.add(flow_panel, GuiFlowH("content_panel"))
   end
   title_panel.drag_target = flow_panel
   return flow_panel, content_panel, menu_panel
@@ -147,7 +147,7 @@ function Form:getMenuPanel()
   if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
     return content_panel[panel_name]
   end
-  local panel = ElementGui.addGuiFrameH(content_panel, panel_name, helmod_frame_style.default)
+  local panel = GuiElement.add(content_panel, GuiFrameH(panel_name))
   panel.style.horizontally_stretchable = true
   --panel.style.vertically_stretchable = true
   panel.style.height = 40
@@ -167,7 +167,7 @@ function Form:getLeftMenuPanel()
   if parent_panel[panel_name] ~= nil and parent_panel[panel_name].valid then
     return parent_panel[panel_name]
   end
-  local panel = ElementGui.addGuiFlowH(parent_panel, panel_name, helmod_flow_style.horizontal)
+  local panel = GuiElement.add(parent_panel, GuiFlowH(panel_name))
   panel.style.horizontal_spacing = 10
   panel.style.horizontally_stretchable = true
   --panel.style.vertically_stretchable = true
@@ -187,7 +187,7 @@ function Form:getRightMenuPanel()
   if parent_panel[panel_name] ~= nil and parent_panel[panel_name].valid then
     return parent_panel[panel_name]
   end
-  local panel = ElementGui.addGuiFlowH(parent_panel, panel_name, helmod_flow_style.horizontal)
+  local panel = GuiElement.add(parent_panel, GuiFlowH(panel_name))
   panel.style.horizontal_spacing = 10
   --panel.style.horizontally_stretchable = true
   --panel.style.vertically_stretchable = true
@@ -335,33 +335,33 @@ function Form:updateTopMenu(event)
     if self.panelClose then
       -- pause game
       if string.find(self.classname, "Tab") then
-        local group3 = ElementGui.addGuiFlowH(menu_panel,"group3",helmod_flow_style.horizontal)
+        local group3 = GuiElement.add(menu_panel, GuiFlowH("group3"))
         if game.is_multiplayer() and not(game.tick_paused) then
-          local pause_button = ElementGui.addGuiButton(group3, "do-nothing", nil, "helmod_button_icon_play_flat", nil, ({"helmod_button.game-play-multiplayer"}))
+          local pause_button = GuiElement.add(group3, GuiButton("do-nothing"):style("helmod_button_icon_play_flat"):tooltip({"helmod_button.game-play-multiplayer"}))
           pause_button.enabled = false
         else
           if game.tick_paused then
-            ElementGui.addGuiButton(group3, self.classname.."=game-play", nil, "helmod_button_icon_pause_actived_red", nil, ({"helmod_button.game-pause"}))
+            GuiElement.add(group3, GuiButton(self.classname, "game-play"):style("helmod_button_icon_pause_actived_red"):tooltip({"helmod_button.game-pause"}))
           else
-            ElementGui.addGuiButton(group3, self.classname.."=game-pause", nil, "helmod_button_icon_play", nil, ({"helmod_button.game-play"}))
+            GuiElement.add(group3, GuiButton(self.classname, "game-pause"):style("helmod_button_icon_play"):tooltip({"helmod_button.game-play"}))
           end
         end
       end
       -- special tab
-      local group1 = ElementGui.addGuiFlowH(menu_panel,"group1",helmod_flow_style.horizontal)
+      local group1 = GuiElement.add(menu_panel, GuiFlowH("group1"))
       for _, form in pairs(Controller.getViews()) do
         if string.find(self.classname, "Tab") and string.find(form.classname, "Tab") and form:isVisible() and form:isSpecial() then
           local style, selected_style = form:getButtonStyles()
           if User.isActiveForm(form.classname) then style = selected_style end
-          ElementGui.addGuiButton(group1, self.classname.."=change-tab=ID=", form.classname, style, nil, form:getButtonCaption())
+          GuiElement.add(group1, GuiButton(self.classname, "change-tab=ID", form.classname):style(style):tooltip(form:getButtonCaption()))
         end
       end
       -- current button
-      local group2 = ElementGui.addGuiFlowH(menu_panel,"group2",helmod_flow_style.horizontal)
+      local group2 = GuiElement.add(menu_panel, GuiFlowH("group2"))
       if self.help_button then
-        ElementGui.addGuiButton(group2, "HMHelpPanel=OPEN", nil, "helmod_button_icon_help", nil, ({"helmod_button.help"}))
+        GuiElement.add(group2, GuiButton("HMHelpPanel", "OPEN"):style("helmod_button_icon_help"):tooltip({"helmod_button.help"}))
       end
-      ElementGui.addGuiButton(group2, self.classname.."=CLOSE", nil, "helmod_button_icon_close_red", nil, ({"helmod_button.close"}))
+      GuiElement.add(group2, GuiButton(self.classname, "CLOSE"):style("helmod_button_icon_close_red"):tooltip({"helmod_button.close"}))
     end
   else
     Logging:warn(self.classname, "self.panelCaption not found")

@@ -28,7 +28,7 @@ function RuleEdition:getRulePanel()
   if content_panel["rule_panel"] ~= nil and content_panel["rule_panel"].valid then
     return content_panel["rule_panel"]
   end
-  local table_panel = ElementGui.addGuiFrameV(content_panel, "rule_panel", helmod_frame_style.panel)
+  local table_panel = GuiElement.add(content_panel, GuiFrameV("rule_panel"):style(helmod_frame_style.panel))
   return table_panel
 end
 
@@ -42,7 +42,7 @@ function RuleEdition:getActionPanel()
   if content_panel["action_panel"] ~= nil and content_panel["action_panel"].valid then
     return content_panel["action_panel"]
   end
-  return ElementGui.addGuiFrameV(content_panel, "action_panel", helmod_frame_style.panel)
+  return GuiElement.add(content_panel, GuiFrameV("action_panel"):style(helmod_frame_style.panel))
 end
 
 -------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ function RuleEdition:updateRule(event)
   Logging:debug(self.classname, "updateRule()", event)
   local rule_panel = self:getRulePanel()
   rule_panel.clear()
-  local rule_table = ElementGui.addGuiTable(rule_panel,"list-data", 2, helmod_table_style.rule)
+  local rule_table = GuiElement.add(rule_panel, GuiTable("list-data"):column(2):style(helmod_table_style.rule))
 
   -- mod
   local mod_list = {}
@@ -83,8 +83,8 @@ function RuleEdition:updateRule(event)
     table.insert(mod_list, name)
   end
   if rule_mod == nil then rule_mod = mod_list[1] end
-  ElementGui.addGuiLabel(rule_table, "label-mod", ({"helmod_rule-edition-panel.mod"}))
-  ElementGui.addGuiDropDown(rule_table, self.classname.."=dropdown=ID=", "mod", mod_list, rule_mod)
+  GuiElement.add(rule_table, GuiLabel("label-mod"):caption({"helmod_rule-edition-panel.mod"}))
+  GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown=ID", "mod"):items(mod_list, rule_mod))
 
   -- name
   local helmod_rule_manes = {}
@@ -92,8 +92,8 @@ function RuleEdition:updateRule(event)
     table.insert(helmod_rule_manes,name)
   end
   if rule_name == nil then rule_name = helmod_rule_manes[1] end
-  ElementGui.addGuiLabel(rule_table, "label-name", ({"helmod_rule-edition-panel.name"}))
-  ElementGui.addGuiDropDown(rule_table, self.classname.."=dropdown=ID=", "name", helmod_rule_manes, rule_name)
+  GuiElement.add(rule_table, GuiLabel("label-name"):caption({"helmod_rule-edition-panel.name"}))
+  GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown=ID", "name"):items(helmod_rule_manes, rule_name))
 
   -- category
   local helmod_rule_categories = {}
@@ -101,20 +101,20 @@ function RuleEdition:updateRule(event)
     table.insert(helmod_rule_categories,name)
   end
   if rule_category == nil then rule_category = helmod_rule_categories[1] end
-  ElementGui.addGuiLabel(rule_table, "label-category", ({"helmod_rule-edition-panel.category"}))
-  ElementGui.addGuiDropDown(rule_table, self.classname.."=dropdown=ID=", "category", helmod_rule_categories, rule_category)
+  GuiElement.add(rule_table, GuiLabel("label-category"):caption({"helmod_rule-edition-panel.category"}))
+  GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown=ID", "category"):items(helmod_rule_categories, rule_category))
 
   -- type
   local helmod_rule_types = helmod_rules[rule_name].categories[rule_category]
   if rule_type == nil then rule_type = helmod_rule_types[1] end
-  ElementGui.addGuiLabel(rule_table, "label-type", ({"helmod_rule-edition-panel.type"}))
-  ElementGui.addGuiDropDown(rule_table, self.classname.."=dropdown=ID=", "type",  helmod_rule_types, rule_type)
+  GuiElement.add(rule_table, GuiLabel("label-type"):caption({"helmod_rule-edition-panel.type"}))
+  GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown=ID", "type"):items(helmod_rule_types, rule_type))
 
-  ElementGui.addGuiLabel(rule_table, "label-value", ({"helmod_rule-edition-panel.value"}))
-  ElementGui.addGuiChooseButton(rule_table, "choose=", "value", "entity", nil, nil)
+  GuiElement.add(rule_table, GuiLabel("label-value"):caption({"helmod_rule-edition-panel.value"}))
+  GuiElement.add(rule_table, GuiButton("choose", "value"):choose("entity"))
 
-  ElementGui.addGuiLabel(rule_table, "label-excluded", ({"helmod_rule-edition-panel.excluded"}))
-  local checkbox = ElementGui.addGuiCheckbox(rule_table, "excluded", false)
+  GuiElement.add(rule_table, GuiLabel("label-excluded"):caption({"helmod_rule-edition-panel.excluded"}))
+  local checkbox = GuiElement.add(rule_table, GuiCheckBox("excluded"):state(false))
   if helmod_rules[rule_name].excluded_only then
     checkbox.state=true
     checkbox.enabled=false
@@ -132,9 +132,9 @@ function RuleEdition:updateAction(event)
   Logging:debug(self.classname, "updateAction()", event)
   local action_panel = self:getActionPanel()
   action_panel.clear()
-  local action_panel = ElementGui.addGuiTable(action_panel,"table_action",2)
-  ElementGui.addGuiButton(action_panel, self.classname.."=", "save", "helmod_button_default", ({"helmod_button.save"}))
-  ElementGui.addGuiButton(action_panel, self.classname.."=CLOSE=", "close", "helmod_button_default", ({"helmod_button.close"}))
+  local action_panel = GuiElement.add(action_panel, GuiTable("table_action"):column(2))
+  GuiElement.add(action_panel, GuiButton(self.classname, "save"):caption({"helmod_button.save"}))
+  GuiElement.add(action_panel, GuiButton(self.classname, "CLOSE"):caption({"helmod_button.close"}))
 end
 
 -------------------------------------------------------------------------------
@@ -149,16 +149,16 @@ function RuleEdition:onEvent(event)
   if User.isAdmin() then
     if event.action == "dropdown" then
       if event.item1 == "mod" then
-        rule_mod = ElementGui.getDropdownSelection(event.element)
+        rule_mod = GuiElement.getDropdownSelection(event.element)
       end
       if event.item1 == "name" then
-        rule_name = ElementGui.getDropdownSelection(event.element)
+        rule_name = GuiElement.getDropdownSelection(event.element)
       end
       if event.item1 == "category" then
-        rule_category = ElementGui.getDropdownSelection(event.element)
+        rule_category = GuiElement.getDropdownSelection(event.element)
       end
       if event.item1 == "type" then
-        rule_type = ElementGui.getDropdownSelection(event.element)
+        rule_type = GuiElement.getDropdownSelection(event.element)
       end
       self:updateRule(event)
     end

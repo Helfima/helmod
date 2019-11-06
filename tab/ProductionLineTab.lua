@@ -45,35 +45,35 @@ function ProductionLineTab:updateInfo(event)
   info_scroll.clear()
   -- info panel
   
-  local block_table = ElementGui.addGuiTable(info_scroll,"output-table",2)
+  local block_table = GuiElement.add(info_scroll, GuiTable("output-table"):column(2))
 
-  ElementGui.addGuiLabel(block_table, "label-owner", ({"helmod_result-panel.owner"}))
-  ElementGui.addGuiLabel(block_table, "value-owner", model.owner)
+  GuiElement.add(block_table, GuiLabel("label-owner"):caption({"helmod_result-panel.owner"}))
+  GuiElement.add(block_table, GuiLabel("value-owner"):caption(model.owner))
 
-  ElementGui.addGuiLabel(block_table, "label-share", ({"helmod_result-panel.share"}))
+  GuiElement.add(block_table, GuiLabel("label-share"):caption({"helmod_result-panel.share"}))
 
-  local tableAdminPanel = ElementGui.addGuiTable(block_table, "table" , 9)
+  local tableAdminPanel = GuiElement.add(block_table, GuiTable("table"):column(9))
   local model_read = false
   if model.share ~= nil and  bit32.band(model.share, 1) > 0 then model_read = true end
-  ElementGui.addGuiCheckbox(tableAdminPanel, self.classname.."=share-model=ID=read="..model.id, model_read, nil, ({"tooltip.share-mod", {"helmod_common.reading"}}))
-  ElementGui.addGuiLabel(tableAdminPanel, self.classname.."=share-model-read", "R", nil, ({"tooltip.share-mod", {"helmod_common.reading"}}))
+  GuiElement.add(tableAdminPanel, GuiCheckBox(self.classname, "share-model=ID=read", model.id):state(model_read):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
+  GuiElement.add(tableAdminPanel, GuiLabel(self.classname, "share-model-read"):caption("R"):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
 
   local model_write = false
   if model.share ~= nil and  bit32.band(model.share, 2) > 0 then model_write = true end
-  ElementGui.addGuiCheckbox(tableAdminPanel, self.classname.."=share-model=ID=write="..model.id, model_write, nil, ({"tooltip.share-mod", {"helmod_common.writing"}}))
-  ElementGui.addGuiLabel(tableAdminPanel, self.classname.."=share-model-write", "W", nil, ({"tooltip.share-mod", {"helmod_common.writing"}}))
+  GuiElement.add(tableAdminPanel, GuiCheckBox(self.classname, "share-model=ID=write", model.id):state(model_write):tooltip({"tooltip.share-mod", {"helmod_common.writing"}}))
+  GuiElement.add(tableAdminPanel, GuiLabel(self.classname, "share-model-write"):caption("W"):tooltip({"tooltip.share-mod", {"helmod_common.writing"}}))
 
   local model_delete = false
   if model.share ~= nil and bit32.band(model.share, 4) > 0 then model_delete = true end
-  ElementGui.addGuiCheckbox(tableAdminPanel, self.classname.."=share-model=ID=delete="..model.id, model_delete, nil, ({"tooltip.share-mod", {"helmod_common.removal"}}))
-  ElementGui.addGuiLabel(tableAdminPanel, self.classname.."=share-model-delete", "X", nil, ({"tooltip.share-mod", {"helmod_common.removal"}}))
+  GuiElement.add(tableAdminPanel,GuiCheckBox( self.classname, "share-model=ID=delete", model.id):state(model_delete):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
+  GuiElement.add(tableAdminPanel, GuiLabel(self.classname, "share-model-delete"):caption("X"):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
 
   local count_block = Model.countBlocks()
   if count_block > 0 then
     -- info panel
-    ElementGui.addGuiLabel(block_table, "label-power", ({"helmod_label.electrical-consumption"}))
+    GuiElement.add(block_table, GuiLabel("label-power"):caption({"helmod_label.electrical-consumption"}))
     if model.summary ~= nil then
-      ElementGui.addGuiLabel(block_table, "power", Format.formatNumberKilo(model.summary.energy or 0, "W"))
+      GuiElement.add(block_table, GuiLabel("power"):caption(Format.formatNumberKilo(model.summary.energy or 0, "W")))
     end
   end
 
@@ -97,11 +97,11 @@ function ProductionLineTab:updateInput(event)
   local count_block = Model.countBlocks()
   if count_block > 0 then
 
-    local input_table = ElementGui.addGuiTable(input_scroll,"input-table", ElementGui.getElementColumnNumber(50), "helmod_table_element")
+    local input_table = GuiElement.add(input_scroll, GuiTable("input-table"):column(GuiElement.getElementColumnNumber(50)):style("helmod_table_element"))
     
     if model.ingredients ~= nil then
       for index, element in pairs(model.ingredients) do
-        ElementGui.addCellElementM(input_table, element, self.classname.."=production-block-add=ID=new="..element.name.."=", true, "tooltip.add-recipe", ElementGui.color_button_add, index)
+        GuiElement.add(input_table, GuiCellElementM(self.classname, "production-block-add=ID", "new", element.name):element(element):tooltip("tooltip.add-recipe"):color(GuiElement.color_button_add):index(index))
       end
     end
 
@@ -128,10 +128,10 @@ function ProductionLineTab:updateOutput(event)
   if count_block > 0 then
 
     -- ouput panel
-    local output_table = ElementGui.addGuiTable(output_scroll,"output-table", ElementGui.getElementColumnNumber(50), "helmod_table_element")
+    local output_table = GuiElement.add(output_scroll, GuiTable("output-table"):column(GuiElement.getElementColumnNumber(50)):style("helmod_table_element"))
     if model.products ~= nil then
       for index, element in pairs(model.products) do
-        ElementGui.addCellElementM(output_table, element, self.classname.."=product-selected=ID=new="..element.name.."=", false, "tooltip.product", nil, index)
+        GuiElement.add(output_table, GuiCellElementM(self.classname, "product-selected=ID", "new", element.name):element(element):tooltip("tooltip.product"):index(index))
       end
     end
     
@@ -166,7 +166,8 @@ function ProductionLineTab:updateData(event)
       end
     end
     
-    local result_table = ElementGui.addGuiTable(scroll_panel,"list-data",5 + extra_cols, "helmod_table-odd")
+    local result_table = GuiElement.add(scroll_panel, GuiTable("list-data"):column(5 + extra_cols):style("helmod_table-odd"))
+    result_table.style.horizontally_stretchable = false
     result_table.vertical_centering = false
 
     self:addTableHeader(result_table)
@@ -223,62 +224,64 @@ function ProductionLineTab:addTableRow(gui_table, block)
   if block.index == 0 then unlinked = true end
 
   -- col action
-  local cell_action = ElementGui.addCell(gui_table, "action"..block.id, 2)
+  local cell_action = GuiElement.add(gui_table, GuiTable("action", block.id):column(2))
 
-  ElementGui.addGuiButton(cell_action, self.classname.."=production-block-up=ID=", block.id, "helmod_button_icon_arrow_top_sm", nil, ({"tooltip.up-element", User.getModSetting("row_move_step")}))
-  ElementGui.addGuiButton(cell_action, self.classname.."=production-block-remove=ID=", block.id, "helmod_button_icon_delete_sm_red", nil, ({"tooltip.remove-element"}))
-  ElementGui.addGuiButton(cell_action, self.classname.."=production-block-down=ID=", block.id, "helmod_button_icon_arrow_down_sm", nil, ({"tooltip.down-element", User.getModSetting("row_move_step")}))
+  GuiElement.add(cell_action, GuiButton(self.classname, "production-block-up=ID", block.id):style("helmod_button_icon_arrow_top_sm"):tooltip({"tooltip.up-element", User.getModSetting("row_move_step")}))
+  GuiElement.add(cell_action, GuiButton(self.classname, "production-block-remove=ID", block.id):style("helmod_button_icon_delete_sm_red"):tooltip({"tooltip.remove-element"}))
+  GuiElement.add(cell_action, GuiButton(self.classname, "production-block-down=ID", block.id):style("helmod_button_icon_arrow_down_sm"):tooltip({"tooltip.down-element", User.getModSetting("row_move_step")}))
   if unlinked then
-    ElementGui.addGuiButton(cell_action, self.classname.."=production-block-unlink=ID=", block.id, "helmod_button_icon_unlink_sm", nil, ({"tooltip.unlink-element"}))
+    GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink=ID", block.id):style("helmod_button_icon_unlink_sm"):tooltip({"tooltip.unlink-element"}))
   else
-    ElementGui.addGuiButton(cell_action, self.classname.."=production-block-unlink=ID=", block.id, "helmod_button_icon_link_sm_selected", nil, ({"tooltip.unlink-element"}))
+    GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink=ID", block.id):style("helmod_button_icon_link_sm_selected"):tooltip({"tooltip.unlink-element"}))
   end
 
   -- col index
   if User.getModGlobalSetting("display_data_col_index") then
-    ElementGui.addCellLabel(gui_table, "cell_index"..block.id, block.index)
+    GuiElement.add(gui_table, GuiCellLabel("cell_index", block.id):caption(block.index))
   end
   -- col id
   if User.getModGlobalSetting("display_data_col_id") then
-    ElementGui.addCellLabel(gui_table, "cell_id"..block.id, block.id)
+    GuiElement.add(gui_table, GuiCellLabel("cell_id", block.id):caption(block.id))
   end
   -- col name
   if User.getModGlobalSetting("display_data_col_name") then
-    ElementGui.addCellLabel(gui_table, "cell_name"..block.id, block.name)
+    GuiElement.add(gui_table, GuiCellLabel("cell_name", block.id):caption(block.name))
   end
 
   -- col recipe
-  local cell_recipe = ElementGui.addCell(gui_table, "recipe"..block.id)
-  ElementGui.addCellBlock(cell_recipe, block, self.classname.."=change-tab=ID=HMProductionBlockTab="..block.id.."=", true, "tooltip.edit-block", "gray")
+  local cell_recipe = GuiElement.add(gui_table, GuiTable("recipe", block.id):column(1))
+  GuiElement.add(cell_recipe, GuiCellBlock(self.classname, "change-tab=ID", "HMProductionBlockTab", block.id):element(block):tooltip("tooltip.edit-block"):color(GuiElement.color_button_default))
 
   -- col energy
-  local cell_energy = ElementGui.addCell(gui_table, block.id)
-  ElementGui.addCellEnergy(cell_energy, block, self.classname.."=change-tab=ID=HMProductionBlockTab="..block.id.."=", true, "tooltip.edit-block", "gray")
+  local cell_energy = GuiElement.add(gui_table, GuiTable(block.id):column(1))
+  GuiElement.add(cell_energy, GuiCellEnergy(self.classname, "change-tab=ID", "HMProductionBlockTab", block.id):element(block):tooltip("tooltip.edit-block"):color("gray"))
   
   -- products
   local display_product_cols = User.getModSetting("display_product_cols") + 1
-  local cell_products = ElementGui.addCell(gui_table,"products_"..block.id, display_product_cols)
+  local cell_products = GuiElement.add(gui_table, GuiTable("products", block.id):column(display_product_cols))
+  cell_products.style.horizontally_stretchable = false
   if block.products ~= nil then
     for index, product in pairs(block.products) do
       if product.state == 1 then
         if not(unlinked) or block.by_factory == true then
-          ElementGui.addCellElement(cell_products, product, self.classname.."=product-selected=ID="..block.id.."="..product.name.."=", false, "tooltip.product", nil, index)
+          GuiElement.add(cell_products, GuiCellElement(self.classname, "product-selected=ID", block.id, product.name):element(product):tooltip("tooltip.product"):index(index))
         else
-          ElementGui.addCellElement(cell_products, product, self.classname.."=product-edition=ID="..block.id.."="..product.name.."=", true, "tooltip.edit-product", ElementGui.color_button_edit, index)
+          GuiElement.add(cell_products, GuiCellElement(self.classname, "product-edition=ID", block.id, product.name):element(product):tooltip("tooltip.edit-product"):color(GuiElement.color_button_edit):index(index))
         end
       elseif product.state == 3 then
-        ElementGui.addCellElement(cell_products, product, self.classname.."=product-selected=ID="..block.id.."="..product.name.."=", true, "tooltip.rest-product", ElementGui.color_button_rest, index)
+        GuiElement.add(cell_products, GuiCellElement(self.classname, "product-selected=ID", block.id, product.name):element(product):tooltip("tooltip.rest-product"):color(GuiElement.color_button_rest):index(index))
       else
-        ElementGui.addCellElement(cell_products, product, self.classname.."=product-selected=ID="..block.id.."="..product.name.."=", false, "tooltip.other-product", nil, index)
+        GuiElement.add(cell_products, GuiCellElement(self.classname, "product-selected=ID", block.id, product.name):element(product):tooltip("tooltip.other-product"):index(index))
       end
     end
   end
   -- ingredients
   local display_ingredient_cols = User.getModSetting("display_ingredient_cols") + 2
-  local cell_ingredients = ElementGui.addCell(gui_table,"ingredients_"..block.id, display_ingredient_cols)
+  local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients", block.id):column(display_ingredient_cols))
+  cell_ingredients.style.horizontally_stretchable = false
   if block.ingredients ~= nil then
     for index, ingredient in pairs(block.ingredients) do
-      ElementGui.addCellElement(cell_ingredients, ingredient, self.classname.."=production-block-add=ID="..block.id.."="..ingredient.name.."=", true, "tooltip.add-recipe", ElementGui.color_button_add, index)
+      GuiElement.add(cell_ingredients, GuiCellElement(self.classname, "production-block-add=ID", block.id, ingredient.name):element(ingredient):tooltip("tooltip.add-recipe"):color(GuiElement.color_button_add):index(index))
     end
   end
   return cell_recipe

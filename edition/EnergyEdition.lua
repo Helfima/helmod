@@ -28,7 +28,7 @@ function EnergyEdition:getPowerPanel()
   if content_panel["power"] ~= nil and content_panel["power"].valid then
     return content_panel["power"]
   end
-  local panel = ElementGui.addGuiFrameH(content_panel, "power", helmod_frame_style.panel)
+  local panel = GuiElement.add(content_panel, GuiFrameH("power"):style(helmod_frame_style.panel))
   panel.style.horizontally_stretchable = true
   return panel
 end
@@ -43,7 +43,7 @@ function EnergyEdition:getPrimaryPanel()
   if content_panel["Primary"] ~= nil and content_panel["Primary"].valid then
     return content_panel["Primary"]
   end
-  return ElementGui.addGuiTable(content_panel, "Primary", 2, helmod_table_style.panel)
+  return GuiElement.add(content_panel, GuiTable("Primary"):column(2):style(helmod_table_style.panel))
 end
 
 -------------------------------------------------------------------------------
@@ -56,9 +56,9 @@ function EnergyEdition:getPrimaryInfoPanel()
   if panel["info"] ~= nil and panel["info"].valid then
     return panel["info"]
   end
-  local panel = ElementGui.addGuiFrameV(panel, "info", helmod_frame_style.panel, ({"helmod_common.primary-generator"}))
-  ElementGui.setStyle(panel, "power", "width")
-  ElementGui.setStyle(panel, "power", "height")
+  local panel = GuiElement.add(panel, GuiFrameV("info"):style(helmod_frame_style.panel):caption({"helmod_common.primary-generator"}))
+  GuiElement.setStyle(panel, "power", "width")
+  GuiElement.setStyle(panel, "power", "height")
   panel.style.horizontally_stretchable = true
   return panel
 end
@@ -73,11 +73,11 @@ function EnergyEdition:getPrimarySelectorPanel()
   if panel["selector"] ~= nil and panel["selector"].valid then
     return panel["selector"]["scroll-primary"]
   end
-  local panel = ElementGui.addGuiFrameV(panel, "selector", helmod_frame_style.panel, ({"helmod_common.generator"}))
+  local panel = GuiElement.add(panel, GuiFrameV("selector"):style(helmod_frame_style.panel):caption({"helmod_common.generator"}))
   panel.style.horizontally_stretchable = true
-  ElementGui.setStyle(panel, "power", "width")
-  ElementGui.setStyle(panel, "power", "height")
-  local scroll_panel = ElementGui.addGuiScrollPane(panel, "scroll-primary", helmod_frame_style.scroll_pane, true)
+  GuiElement.setStyle(panel, "power", "width")
+  GuiElement.setStyle(panel, "power", "height")
+  local scroll_panel = GuiElement.add(panel, GuiScroll("scroll-primary"):style(helmod_frame_style.scroll_pane))
   scroll_panel.style.horizontally_stretchable = true
   scroll_panel.style.vertically_stretchable = true
   return scroll_panel
@@ -104,7 +104,7 @@ function EnergyEdition:getSecondaryPanel()
   if content_panel["Secondary"] ~= nil and content_panel["Secondary"].valid then
     return content_panel["Secondary"]
   end
-  return ElementGui.addGuiTable(content_panel, "Secondary", 2, helmod_table_style.panel)
+  return GuiElement.add(content_panel, GuiTable("Secondary"):column(2):style(helmod_table_style.panel))
 end
 
 -------------------------------------------------------------------------------
@@ -117,9 +117,9 @@ function EnergyEdition:getSecondaryInfoPanel()
   if panel["info"] ~= nil and panel["info"].valid then
     return panel["info"]
   end
-  local panel = ElementGui.addGuiFrameV(panel, "info", helmod_frame_style.panel, ({"helmod_common.secondary-generator"}))
-  ElementGui.setStyle(panel, "power", "width")
-  ElementGui.setStyle(panel, "power", "height")
+  local panel = GuiElement.add(panel, GuiFrameV("info"):style(helmod_frame_style.panel):caption({"helmod_common.secondary-generator"}))
+  GuiElement.setStyle(panel, "power", "width")
+  GuiElement.setStyle(panel, "power", "height")
   panel.style.horizontally_stretchable = true
   return panel
 end
@@ -134,11 +134,11 @@ function EnergyEdition:getSecondarySelectorPanel()
   if panel["selector"] ~= nil and panel["selector"].valid then
     return panel["selector"]
   end
-  local panel = ElementGui.addGuiFrameV(panel, "selector", helmod_frame_style.panel, ({"helmod_common.generator"}))
+  local panel = GuiElement.add(panel, GuiFrameV("selector"):style(helmod_frame_style.panel):caption({"helmod_common.generator"}))
   panel.style.horizontally_stretchable = true
-  ElementGui.setStyle(panel, "power", "width")
-  ElementGui.setStyle(panel, "power", "height")
-  local scroll_panel = ElementGui.addGuiScrollPane(panel, "scroll-primary", helmod_frame_style.scroll_pane, true)
+  GuiElement.setStyle(panel, "power", "width")
+  GuiElement.setStyle(panel, "power", "height")
+  local scroll_panel = GuiElement.add(panel, GuiScroll("scroll-primary"):style(helmod_frame_style.scroll_pane))
   scroll_panel.style.horizontally_stretchable = true
   scroll_panel.style.vertically_stretchable = true
   return scroll_panel
@@ -312,12 +312,12 @@ function EnergyEdition:updatePowerInfo(event)
         power_panel[guiName].destroy()
       end
 
-      local table_panel = ElementGui.addGuiTable(power_panel,"table-input",2)
+      local table_panel = GuiElement.add(power_panel, GuiTable("table-input"):column(2))
 
-      ElementGui.addGuiLabel(table_panel, "label-power", ({"helmod_energy-edition-panel.power"}))
+      GuiElement.add(table_panel, GuiLabel("label-power"):caption({"helmod_energy-edition-panel.power"}))
       local cell, button
       local power_value = math.ceil(power.power/1000)/1000
-      cell, input_quantity, button = ElementGui.addCellInput(table_panel, string.format("%s=power-update=ID=%s=%s",self.classname,event.item1,power.id), power_value or 0, nil, ({"tooltip.formula-allowed"}))
+      cell, input_quantity, button = GuiCellInput(self.classname, "power-update=ID", event.item1, power.id):text(power_value or 0):create(table_panel)
       input_quantity.focus()
       input_quantity.select_all()
     end
@@ -360,32 +360,32 @@ function EnergyEdition:updatePrimaryInfo(event)
     local primary = object.primary
     if primary.name ~= nil then
 
-      local headerPanel = ElementGui.addGuiTable(infoPanel,"table-header",2)
+      local headerPanel = GuiElement.add(infoPanel, GuiTable("table-header"):column(2))
       local tooltip = ({"tooltip.selector-module"})
       if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
-      ElementGui.addGuiButtonSprite(headerPanel, self.classname.."=do-nothing=ID=", primary.type, primary.name, primary.name, tooltip)
+      GuiElement.add(headerPanel, GuiButtonSprite(self.classname, "do-nothing=ID"):sprite(primary.type, primary.name):tooltip(tooltip))
 
       local entity_prototype = EntityPrototype(primary.name)
       if entity_prototype:native() ~= nil then
-        ElementGui.addGuiLabel(headerPanel, "label", entity_prototype:getLocalisedName())
+        GuiElement.add(headerPanel, GuiLabel("label"):caption(entity_prototype:getLocalisedName()))
       else
-        ElementGui.addGuiLabel(headerPanel, "label", primary.name)
+        GuiElement.add(headerPanel, GuiLabel("label"):caption(primary.name))
       end
 
-      local inputPanel = ElementGui.addGuiTable(infoPanel,"table-input",2)
+      local inputPanel = GuiElement.add(infoPanel, GuiTable("table-input"):column(2))
 
-      ElementGui.addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy-nominal"}))
-      ElementGui.addGuiLabel(inputPanel, "energy-nominal", Format.formatNumberKilo(entity_prototype:getEnergyNominal(), "W"))
+      GuiElement.add(inputPanel, GuiLabel("label-energy-nominal"):caption({"helmod_label.energy-nominal"}))
+      GuiElement.add(inputPanel, GuiLabel("energy-nominal"):caption(Format.formatNumberKilo(entity_prototype:getEnergyNominal(), "W")))
 
       if entity_prototype:getType() == "generator" then
-        ElementGui.addGuiLabel(inputPanel, "label-maximum-temperature", ({"helmod_label.maximum-temperature"}))
-        ElementGui.addGuiLabel(inputPanel, "maximum-temperature", entity_prototype:getMaximumTemperature() or "NAN")
+        GuiElement.add(inputPanel, GuiLabel("label-maximum-temperature"):caption({"helmod_label.maximum-temperature"}))
+        GuiElement.add(inputPanel, GuiLabel("maximum-temperature"):caption(entity_prototype:getMaximumTemperature() or "NAN"))
 
-        ElementGui.addGuiLabel(inputPanel, "label-fluid-usage", ({"helmod_label.fluid-usage"}))
-        ElementGui.addGuiLabel(inputPanel, "fluid-usage", entity_prototype:getFluidUsagePerTick() or "NAN")
+        GuiElement.add(inputPanel, GuiLabel("label-fluid-usage"):caption({"helmod_label.fluid-usage"}))
+        GuiElement.add(inputPanel, GuiLabel("fluid-usage"):caption(entity_prototype:getFluidUsagePerTick() or "NAN"))
 
-        ElementGui.addGuiLabel(inputPanel, "label-effectivity", ({"helmod_label.effectivity"}))
-        ElementGui.addGuiLabel(inputPanel, "effectivity", entity_prototype:getEffectivity() or "NAN")
+        GuiElement.add(inputPanel, GuiLabel("label-effectivity"):caption({"helmod_label.effectivity"}))
+        GuiElement.add(inputPanel, GuiLabel("effectivity"):caption(entity_prototype:getEffectivity() or "NAN"))
       end
     end
   end
@@ -407,7 +407,7 @@ function EnergyEdition:updatePrimarySelector(event)
 
   local object = self:getObject(event)
 
-  local groupsPanel = ElementGui.addGuiTable(scroll_panel, "primary-groups", 1)
+  local groupsPanel = GuiElement.add(scroll_panel, GuiTable("primary-groups"):column(1))
 
   local category = "primary"
   if not(User.getModGlobalSetting("model_filter_generator")) then category = nil end
@@ -433,15 +433,15 @@ function EnergyEdition:updatePrimarySelector(event)
       -- set le groupe
       if model.primaryGroupSelected == nil then model.primaryGroupSelected = group end
       -- ajoute les icons de groupe
-      local action = ElementGui.addGuiButton(groupsPanel, self.classname.."=primary-group=ID="..event.item1.."=", group, "helmod_button_default", group)
+      local action = GuiElement.add(groupsPanel, GuiButton(self.classname, "primary-group=ID", event.item1, group):caption(group))
     end
   end
 
-  local tablePanel = ElementGui.addGuiTable(scroll_panel, "primary-table", 5)
+  local tablePanel = GuiElement.add(scroll_panel, GuiTable("primary-table"):column(5))
   for key, element in pairs(factories) do
     if category ~= nil or (element.subgroup ~= nil and element.subgroup.name == model.primaryGroupSelected) then
       local localised_name = Player.getLocalisedName(element)
-      ElementGui.addGuiButtonSelectSprite(tablePanel, self.classname.."=primary-select=ID="..event.item1.."=", "entity", element.name, element.name, localised_name)
+      GuiElement.add(tablePanel, GuiButtonSelectSprite(self.classname, "primary-select=ID", event.item1):sprite("entity", element.name):tooltip(localised_name))
     end
   end
 end
@@ -483,37 +483,37 @@ function EnergyEdition:updateSecondaryInfo(event)
     local secondary = object.secondary
     if secondary.name ~= nil then
 
-      local headerPanel = ElementGui.addGuiTable(infoPanel,"table-header",2)
+      local headerPanel = GuiElement.add(infoPanel, GuiTable("table-header"):column(2))
       local tooltip = ({"tooltip.selector-module"})
       if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
-      ElementGui.addGuiButtonSprite(headerPanel, self.classname.."=do-nothing=ID=", secondary.type, secondary.name, secondary.name, tooltip)
+      GuiElement.add(headerPanel, GuiButtonSelectSprite(self.classname, "do-nothing=ID"):sprite(secondary.type, secondary.name):tooltip(tooltip))
 
       local entity_prototype = EntityPrototype(secondary.name)
       if entity_prototype:native() ~= nil then
-        ElementGui.addGuiLabel(headerPanel, "label", entity_prototype:getLocalisedName())
+        GuiElement.add(headerPanel, GuiLabel("label"):caption(entity_prototype:getLocalisedName()))
       else
-        ElementGui.addGuiLabel(headerPanel, "label", secondary.name)
+        GuiElement.add(headerPanel, GuiLabel("label"):caption(secondary.name))
       end
 
-      local inputPanel = ElementGui.addGuiTable(infoPanel,"table-input",2)
+      local inputPanel = GuiElement.add(infoPanel, GuiTable("table-input"):column(2))
 
       if entity_prototype:getType() == EntityType.boiler then
-        ElementGui.addGuiLabel(inputPanel, "label-energy-nominal", ({"helmod_label.energy-nominal"}))
-        ElementGui.addGuiLabel(inputPanel, "energy-nominal", Format.formatNumberKilo(entity_prototype:getEnergyNominal(), "W"))
+        GuiElement.add(inputPanel, GuiLabel("label-energy-nominal"):caption({"helmod_label.energy-nominal"}))
+        GuiElement.add(inputPanel, GuiLabel("energy-nominal"):caption(Format.formatNumberKilo(entity_prototype:getEnergyNominal(), "W")))
 
-        ElementGui.addGuiLabel(inputPanel, "label-effectivity", ({"helmod_label.effectivity"}))
-        ElementGui.addGuiLabel(inputPanel, "effectivity", entity_prototype:getEffectivity())
+        GuiElement.add(inputPanel, GuiLabel("label-effectivity"):caption({"helmod_label.effectivity"}))
+        GuiElement.add(inputPanel, GuiLabel("effectivity"):caption(entity_prototype:getEffectivity()))
       end
 
       if entity_prototype:getType() == EntityType.accumulator then
-        ElementGui.addGuiLabel(inputPanel, "label-buffer-capacity", ({"helmod_label.buffer-capacity"}))
-        ElementGui.addGuiLabel(inputPanel, "buffer-capacity", Format.formatNumberKilo(entity_prototype:getElectricBufferCapacity(), "J"))
+        GuiElement.add(inputPanel, GuiLabel("label-buffer-capacity"):caption({"helmod_label.buffer-capacity"}))
+        GuiElement.add(inputPanel, GuiLabel("buffer-capacity"):caption(Format.formatNumberKilo(entity_prototype:getElectricBufferCapacity(), "J")))
 
-        ElementGui.addGuiLabel(inputPanel, "label-input_flow_limit", ({"helmod_label.input-flow-limit"}))
-        ElementGui.addGuiLabel(inputPanel, "input-flow-limit", Format.formatNumberKilo(entity_prototype:getElectricInputFlowLimit(), "W"))
+        GuiElement.add(inputPanel, GuiLabel("label-input_flow_limit"):caption({"helmod_label.input-flow-limit"}))
+        GuiElement.add(inputPanel, GuiLabel("input-flow-limit"):caption(Format.formatNumberKilo(entity_prototype:getElectricInputFlowLimit(), "W")))
 
-        ElementGui.addGuiLabel(inputPanel, "label-output-flow-limit", ({"helmod_label.output-flow-limit"}))
-        ElementGui.addGuiLabel(inputPanel, "output-flow-limit", Format.formatNumberKilo(entity_prototype:getElectricOutputFlowLimit(), "W"))
+        GuiElement.add(inputPanel, GuiLabel("label-output-flow-limit"):caption({"helmod_label.output-flow-limit"}))
+        GuiElement.add(inputPanel, GuiLabel("output-flow-limit"):caption(Format.formatNumberKilo(entity_prototype:getElectricOutputFlowLimit(), "W")))
       end
 
     end
@@ -536,7 +536,7 @@ function EnergyEdition:updateSecondarySelector(event)
 
   local object = self:getObject(event)
 
-  local groupsPanel = ElementGui.addGuiTable(scroll_panel, "secondary-groups", 1)
+  local groupsPanel = GuiElement.add(scroll_panel, GuiTable("secondary-groups"):column(1))
 
   local category = "secondary"
   if not(User.getModGlobalSetting("model_filter_generator")) then category = nil end
@@ -562,15 +562,15 @@ function EnergyEdition:updateSecondarySelector(event)
       -- set le groupe
       if model.secondaryGroupSelected == nil then model.secondaryGroupSelected = group end
       -- ajoute les icons de groupe
-      local action = ElementGui.addGuiButton(groupsPanel, self.classname.."=secondary-group=ID="..event.item1.."=", group, "helmod_button_default", group)
+      local action = GuiElement.add(groupsPanel, GuiButton(self.classname, "secondary-group=ID", event.item1, group):caption(group))
     end
   end
 
-  local tablePanel = ElementGui.addGuiTable(scroll_panel, "secondary-table", 5)
+  local tablePanel = GuiElement.add(scroll_panel, GuiTable("secondary-table"):column(5))
   for key, element in pairs(factories) do
     if category ~= nil or (element.subgroup ~= nil and element.subgroup.name == model.secondaryGroupSelected) then
       local localised_name = Player.getLocalisedName(element)
-      ElementGui.addGuiButtonSelectSprite(tablePanel, self.classname.."=secondary-select=ID="..event.item1.."=", "entity", element.name, element.name, localised_name)
+      GuiElement.add(tablePanel, GuiButtonSelectSprite(self.classname, "secondary-select=ID", event.item1):sprite("entity", element.name):tooltip(localised_name))
     end
   end
 end

@@ -76,7 +76,8 @@ end
 --
 function ContainerSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
   Logging:trace(self.classname, "buildPrototypeIcon(player, guiElement, prototype, tooltip:",player, guiElement, prototype, tooltip)
-  ElementGui.addGuiButtonSelectSprite(guiElement, self.classname.."=element-select=ID=container=", Player.getEntityIconType(prototype), prototype.name, prototype.name, tooltip)
+  local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select=ID", "container"):choose(prototype.type, prototype.name))
+  button.locked = true
 end
 
 

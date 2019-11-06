@@ -73,7 +73,7 @@ end
 function PrototypeFiltersTab:updateHeader(event)
   Logging:debug(self.classname, "updateHeader()", event)
   local resultPanel = self:getResultPanel({"helmod_result-panel.tab-title-prototype-filters"})
-  local listPanel = ElementGui.addGuiFrameH(resultPanel, "list-element", helmod_frame_style.hidden)
+  local listPanel = GuiElement.add(resultPanel, GuiFrameH("list-element"):style(helmod_frame_style.hidden))
 end
 
 local modes = nil
@@ -115,11 +115,11 @@ end
 --
 function PrototypeFiltersTab:addHeaderFilter(itable)
   Logging:debug(self.classname, "addHeaderFilter()")
-  ElementGui.addGuiLabel(itable, "mode", "Mode")
-  ElementGui.addGuiLabel(itable, "filter", "Filter")
-  ElementGui.addGuiLabel(itable, "option", "Option")
-  ElementGui.addGuiLabel(itable, "invert", "Invert")
-  ElementGui.addGuiLabel(itable, "action", "action")
+  GuiElement.add(itable, GuiLabel("mode"):caption("Mode"))
+  GuiElement.add(itable, GuiLabel("filter"):caption("Filter"))
+  GuiElement.add(itable, GuiLabel("option"):caption("Option"))
+  GuiElement.add(itable, GuiLabel("invert"):caption("Invert"))
+  GuiElement.add(itable, GuiLabel("action"):caption("action"))
 end
 
 -------------------------------------------------------------------------------
@@ -136,16 +136,16 @@ function PrototypeFiltersTab:addRowFilter(itable, prototype_filter, index)
   local PrototypeFilter = PrototypeFilters.getFilterType(prototype_filter_type)
   -- mode
   prototype_filter.mode = prototype_filter.mode or modes[1]
-  ElementGui.addGuiDropDown(itable, self.classname.."=change-filter-mode=ID=", index, modes, prototype_filter.mode)
+  GuiElement.add(itable, GuiDropDown(self.classname, "change-filter-mode=ID", index):items(modes, prototype_filter.mode))
   -- filter
   local filters = PrototypeFilter:getFilters()
   prototype_filter.filter = prototype_filter.filter or filters[1]
-  ElementGui.addGuiDropDown(itable, self.classname.."=change-prototype-filter=ID=", index, filters, prototype_filter.filter)
+  GuiElement.add(itable, GuiDropDown(self.classname, "change-prototype-filter=ID", index):items(filters, prototype_filter.filter))
 
   local options = PrototypeFilter:getOptions(prototype_filter.filter)
   Logging:debug(self.classname, "options", options)
   if options == "comparison" then
-      local comparaison_cell = ElementGui.addCell(itable, "comparison", 2, index)
+      local comparaison_cell = GuiElement.add(itable, GuiTable("comparison"):column(2))
       local comparison = "<"
       local comparison_value = ""
       if prototype_filter.option ~= nil then
@@ -153,21 +153,21 @@ function PrototypeFiltersTab:addRowFilter(itable, prototype_filter, index)
         comparison_value = prototype_filter.option.value
       end
       Logging:debug(self.classname, "option", prototype_filter.option, comparison, comparison_value)
-      ElementGui.addGuiDropDown(comparaison_cell, self.classname.."=change-filter-option-comparison=ID=", index, comparisons, comparison)
-      ElementGui.addGuiText(comparaison_cell, self.classname.."=change-filter-option-value=ID="..index, comparison_value)
+      GuiElement.add(comparaison_cell, GuiDropDown(self.classname, "change-filter-option-comparison=ID", index):items(comparisons, comparison))
+      GuiElement.add(comparaison_cell, GuiTextField(self.classname, "change-filter-option-value=ID", index):text(comparison_value))
   elseif Model.countList(options) > 0 then
       prototype_filter.option = prototype_filter.option or options[1]
-      ElementGui.addGuiDropDown(itable, self.classname.."=change-filter-option=ID=", index, options, prototype_filter.option)
+      GuiElement.add(itable, GuiDropDown(self.classname, "change-filter-option=ID", index):items(options, prototype_filter.option))
   else
-    ElementGui.addGuiLabel(itable, "option-none_"..index, "None")
+    GuiElement.add(itable, GuiLabel("option-none", index):caption("None"))
   end
 
   prototype_filter.invert = prototype_filter.invert or inverts[1]
-  ElementGui.addGuiDropDown(itable, self.classname.."=change-filter-invert=ID=", index, inverts, prototype_filter.invert)
+  GuiElement.add(itable, GuiDropDown(self.classname, "change-filter-invert=ID", index):items(inverts, prototype_filter.invert))
   if index == 0 then
-    ElementGui.addGuiButton(itable, self.classname.."=add-prototype-filter=ID=",index, nil, "+")
+    GuiElement.add(itable, GuiButton(self.classname, "add-prototype-filter=ID", index):caption("+"):style("helmod_button_small_bold"))
   else
-    ElementGui.addGuiButton(itable, self.classname.."=remove-prototype-filter=ID=",index, nil, "-")
+    GuiElement.add(itable, GuiButton(self.classname, "remove-prototype-filter=ID", index):style("helmod_button_icon_delete_sm_red"))
   end
 end
 
@@ -182,13 +182,13 @@ function PrototypeFiltersTab:updateFilter()
 
   local scrollPanel = self:getResultScrollPanel()
   -- type
-  local type_table = ElementGui.addGuiTable(scrollPanel,"type-filter",5)
+  local type_table = GuiElement.add(scrollPanel, GuiTable("type-filter"):column(5))
   local prototype_filter_type = User.getParameter("prototype_filter_type") or filter_types[1]
-  ElementGui.addGuiLabel(type_table, "prototype", "Type")
-  ElementGui.addGuiDropDown(type_table, self.classname.."=change-prototype-filter-type=ID=", nil, filter_types, prototype_filter_type)
+  GuiElement.add(type_table, GuiLabel("prototype"):caption("Type"))
+  GuiElement.add(type_table, GuiDropDown(self.classname, "change-prototype-filter-type=ID"):items(filter_types, prototype_filter_type))
 
 
-  local resultTable = ElementGui.addGuiTable(scrollPanel,"table-filter",5)
+  local resultTable = GuiElement.add(scrollPanel, GuiTable("table-filter"):column(5))
 
   local PrototypeFilter = PrototypeFilters.getFilterType(prototype_filter_type)
 
@@ -215,7 +215,7 @@ function PrototypeFiltersTab:updateResult()
   -- data
   local scrollPanel = self:getResultScrollPanel()
 
-  local resultTable = ElementGui.addGuiTable(scrollPanel,"table-filters",5)
+  local resultTable = GuiElement.add(scrollPanel, GuiTable("table-filters"):column(5))
   -- prototype filter
   self:addHeaderFilter(resultTable)
 
@@ -228,7 +228,7 @@ function PrototypeFiltersTab:updateResult()
 
 
   if Model.countList(prototype_filters) > 0 then
-    local elements_table = ElementGui.addGuiTable(scrollPanel,"table-elements",20)
+    local elements_table = GuiElement.add(scrollPanel, GuiTable("table-elements"):column(20))
     local prototype_filter_type = User.getParameter("prototype_filter_type") or filter_types[1]
 
     local filters = {}
@@ -249,7 +249,7 @@ function PrototypeFiltersTab:updateResult()
     Logging:debug(self.classname,"result filters", filters)
     local elements = PrototypeFilter:getElements(filters)
     for key,element in pairs(elements) do
-      ElementGui.addGuiButtonSprite(elements_table, "nothing", prototype_filter_type, element.name, element.name, element.localised_name)
+      GuiElement.add(elements_table, GuiButtonSprite("nothing"):sprite(prototype_filter_type, element.name):tooltip(element.localised_name))
     end
   end
 

@@ -164,9 +164,9 @@ function AdminTab:updateCache()
   local users_data = global["users"]
   if Model.countList(users_data) > 0 then
 
-    local translate_panel = ElementGui.addGuiFlowV(cache_panel, "translate", helmod_flow_style.vertical);
-    ElementGui.addGuiLabel(translate_panel, "translate-label", "Translated String", "helmod_label_title_frame")
-    local result_table = ElementGui.addGuiTable(translate_panel,"list-data", 3, "helmod_table-rule-odd")
+    local translate_panel = GuiElement.add(cache_panel, GuiFlowV("translate"))
+    GuiElement.add(translate_panel, GuiLabel("translate-label"):caption("Translated String"):style("helmod_label_title_frame"))
+    local result_table = GuiElement.add(translate_panel, GuiTable("list-data"):column(3):style("helmod_table-rule-odd"))
     self:addCacheListHeader(result_table)
     for user_name, user_data in spairs(users_data, function(t,a,b) return b > a end) do
       self:addCacheListRow(result_table, user_name, user_data)
@@ -188,7 +188,7 @@ function AdminTab:updateRule()
   local count_rule = #Model.getRules()
   if count_rule > 0 then
 
-    local result_table = ElementGui.addGuiTable(rule_panel,"list-data", 8, "helmod_table-rule-odd")
+    local result_table = GuiElement.add(rule_panel, GuiTable("list-data"):column(8):style("helmod_table-rule-odd"))
 
     self:addRuleListHeader(result_table)
 
@@ -212,7 +212,7 @@ function AdminTab:updateSheet()
   local count_model = Model.countModel()
   if count_model > 0 then
 
-    local result_table = ElementGui.addGuiTable(sheet_panel,"list-data", 3, "helmod_table-odd")
+    local result_table = GuiElement.add(sheet_panel, GuiTable("list-data"):column(3):style("helmod_table-odd"))
 
     self:addSheetListHeader(result_table)
 
@@ -253,14 +253,13 @@ function AdminTab:addCacheListRow(gui_table, user_name, user_data)
   Logging:debug(self.classname, "addCacheListRow()", gui_table, user_name, user_data)
 
   -- col action
-  local cell_action = ElementGui.addCell(gui_table, "action"..user_name, 4)
-  --ElementGui.addGuiButton(cell_action, self.classname.."=user-remove=ID=", user_name, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
+  local cell_action = GuiElement.add(gui_table, GuiTable("action", user_name):column(4))
 
   -- col owner
-  ElementGui.addGuiLabel(gui_table, string.format("%s_%s","owner",user_name), user_name)
+  GuiElement.add(gui_table, GuiLabel("owner", user_name):caption(user_name))
 
   -- col translated
-  ElementGui.addGuiLabel(gui_table, string.format("%s_%s","total",user_name), Model.countList(user_data.translated))
+  GuiElement.add(gui_table, GuiLabel("total", user_name):caption(Model.countList(user_data.translated)))
 
 end
 
@@ -298,29 +297,29 @@ function AdminTab:addRuleListRow(gui_table, rule, rule_id)
   Logging:debug(self.classname, "addRuleListRow()", gui_table, rule, rule_id)
 
   -- col action
-  local cell_action = ElementGui.addCell(gui_table, "action"..rule_id, 4)
-  ElementGui.addGuiButton(cell_action, self.classname.."=rule-remove=ID=", rule_id, "helmod_button_default", ({"helmod_result-panel.row-button-delete"}), ({"tooltip.remove-element"}))
+  local cell_action = GuiElement.add(gui_table, GuiTable("action", rule_id):column(4))
+  GuiElement.add(cell_action, GuiButton(self.classname, "rule-remove=ID", rule_id):style("helmod_button_icon_delete_sm_red"):tooltip({"tooltip.remove-element"}))
 
   -- col index
-  ElementGui.addGuiLabel(gui_table, "index"..rule_id, rule.index)
+  GuiElement.add(gui_table, GuiLabel("index", rule_id):caption(rule.index))
 
   -- col mod
-  ElementGui.addGuiLabel(gui_table, "mod"..rule_id, rule.mod)
+  GuiElement.add(gui_table, GuiLabel("mod", rule_id):caption(rule.mod))
 
   -- col name
-  ElementGui.addGuiLabel(gui_table, "name"..rule_id, rule.name)
+  GuiElement.add(gui_table, GuiLabel("name", rule_id):caption(rule.name))
 
   -- col category
-  ElementGui.addGuiLabel(gui_table, "category"..rule_id, rule.category)
+  GuiElement.add(gui_table, GuiLabel("category", rule_id):caption(rule.category))
 
   -- col type
-  ElementGui.addGuiLabel(gui_table, "type"..rule_id, rule.type)
+  GuiElement.add(gui_table, GuiLabel("type", rule_id):caption(rule.type))
 
   -- col value
-  ElementGui.addGuiLabel(gui_table, "value"..rule_id, rule.value)
+  GuiElement.add(gui_table, GuiLabel("value", rule_id):caption(rule.value))
 
   -- col value
-  ElementGui.addGuiLabel(gui_table, "excluded"..rule_id, rule.excluded)
+  GuiElement.add(gui_table, GuiLabel("excluded", rule_id):caption(rule.excluded))
 
 end
 
@@ -353,34 +352,34 @@ function AdminTab:addSheetListRow(gui_table, model)
   Logging:debug(self.classname, "addSheetListRow()", gui_table, model)
 
   -- col action
-  local cell_action = ElementGui.addCell(gui_table, "action"..model.id, 4)
+  local cell_action = GuiElement.add(gui_table, GuiTable("action", model.id):column(4))
   if model.share ~= nil and bit32.band(model.share, 1) > 0 then
-    ElementGui.addGuiButton(cell_action, self.classname.."=share-model=ID=read=", model.id, "helmod_button_selected", "R", {"tooltip.share-mod", {"helmod_common.reading"}})
+    GuiElement.add(cell_action, GuiButton(self.classname, "share-model=ID=read", model.id):style("helmod_button_selected"):caption("R"):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
   else
-    ElementGui.addGuiButton(cell_action, self.classname.."=share-model=ID=read=", model.id, "helmod_button_default", "R", {"tooltip.share-mod", {"helmod_common.reading"}})
+    GuiElement.add(cell_action, GuiButton(self.classname, "share-model=ID=read", model.id):style("helmod_button_default"):caption("R"):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
   end
   if model.share ~= nil and bit32.band(model.share, 2) > 0 then
-    ElementGui.addGuiButton(cell_action, self.classname.."=share-model=ID=write=", model.id, "helmod_button_selected", "W", {"tooltip.share-mod", {"helmod_common.writing"}})
+    GuiElement.add(cell_action, GuiButton(self.classname, "share-model=ID=write", model.id):style("helmod_button_selected"):caption("W"):tooltip({"tooltip.share-mod", {"helmod_common.writing"}}))
   else
-    ElementGui.addGuiButton(cell_action, self.classname.."=share-model=ID=write=", model.id, "helmod_button_default", "W", {"tooltip.share-mod", {"helmod_common.writing"}})
+    GuiElement.add(cell_action, GuiButton(self.classname, "share-model=ID=write", model.id):style("helmod_button_default"):caption("W"):tooltip({"tooltip.share-mod", {"helmod_common.writing"}}))
   end
   if model.share ~= nil and bit32.band(model.share, 4) > 0 then
-    ElementGui.addGuiButton(cell_action, self.classname.."=share-model=ID=delete=", model.id, "helmod_button_selected", "X", {"tooltip.share-mod", {"helmod_common.removal"}})
+    GuiElement.add(cell_action, GuiButton(self.classname, "share-model=ID=delete", model.id):style("helmod_button_selected"):caption("X"):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
   else
-    ElementGui.addGuiButton(cell_action, self.classname.."=share-model=ID=delete=", model.id, "helmod_button_default", "X", {"tooltip.share-mod", {"helmod_common.removal"}})
+    GuiElement.add(cell_action, GuiButton(self.classname, "share-model=ID=delete", model.id):style("helmod_button_default"):caption("X"):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
   end
 
   -- col owner
-  local cell_owner = ElementGui.addGuiFrameH(gui_table,"owner"..model.id, helmod_frame_style.hidden)
-  ElementGui.addGuiLabel(cell_owner, model.id, model.owner or "empty", "helmod_label_right_70")
+  local cell_owner = GuiElement.add(gui_table, GuiFrameH("owner", model.id):style(helmod_frame_style.hidden))
+  GuiElement.add(cell_owner, GuiLabel(model.id):caption(model.owner or "empty"):style("helmod_label_right_70"))
 
   -- col element
-  local cell_element = ElementGui.addGuiFrameH(gui_table,"element"..model.id, helmod_frame_style.hidden)
+  local cell_element = GuiElement.add(gui_table, GuiFrameH("element", model.id):style(helmod_frame_style.hidden))
   local element = Model.firstRecipe(model.blocks)
   if element ~= nil then
-    ElementGui.addGuiButtonSprite(cell_element, self.classname.."=donothing=ID="..model.id.."=", "recipe", element.name, model.id, RecipePrototype(element):getLocalisedName())
+    GuiElement.add(cell_element, GuiButtonSprite(self.classname, "donothing=ID", model.id):sprite("recipe", element.name):tooltip(RecipePrototype(element):getLocalisedName()))
   else
-    ElementGui.addGuiButton(cell_element, self.classname.."=donothing=ID=", model.id, "helmod_button_icon_help_selected")
+    GuiElement.add(cell_element, GuiButton(self.classname, "donothing=ID", model.id):style("helmod_button_icon_help_selected"))
   end
 
 end

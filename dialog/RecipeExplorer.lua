@@ -43,9 +43,9 @@ function RecipeExplorer:getColumnPanel()
   if content_panel["main_panel"] ~= nil and content_panel["main_panel"].valid then
     return content_panel["main_panel"]["display_panel1"], content_panel["main_panel"]["display_panel2"]
   end
-  local panel = ElementGui.addGuiFlowH(content_panel, "main_panel", helmod_flow_style.horizontal)
-  local display_panel1 = ElementGui.addGuiFlowV(panel, "display_panel1", helmod_flow_style.vertical)
-  local display_panel2 = ElementGui.addGuiFlowV(panel, "display_panel2", helmod_flow_style.vertical)
+  local panel = GuiElement.add(content_panel, GuiFlowH("main_panel"))
+  local display_panel1 = GuiElement.add(panel, GuiFlowV("display_panel1"))
+  local display_panel2 = GuiElement.add(panel, GuiFlowV("display_panel2"))
   display_panel2.style.width=200
 
   return display_panel1, display_panel2
@@ -61,7 +61,7 @@ function RecipeExplorer:getDisplayPanel()
   if display_panel1["display"] ~= nil and display_panel1["display"].valid then
     return display_panel1["display"]
   end
-  return ElementGui.addGuiFrameV(display_panel1, "display", helmod_frame_style.panel)
+  return GuiElement.add(display_panel1, GuiFrameV("display"):style(helmod_frame_style.panel))
 end
 
 -------------------------------------------------------------------------------

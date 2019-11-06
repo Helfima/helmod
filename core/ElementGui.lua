@@ -1297,7 +1297,6 @@ function ElementGui.addCellFactory(parent, factory, action, select, tooltip_name
       end
     end
   end
-  --ElementGui.addGuiButtonSlotSm(cell_factory_module, "slot_button", "utility", "slot_icon_module")
   if factory.limit_count ~= nil then
     local row2 = ElementGui.addGuiFrameH(cell,"row2","helmod_frame_element_"..color.."_2")
     ElementGui.addGuiLabel(row2, "label1_"..factory.name, Format.formatNumberFactory(factory.limit_count), "helmod_label_element", {"helmod_common.per-sub-block"})
@@ -1390,9 +1389,13 @@ function ElementGui.addCellEnergy(parent, recipe, action, select, tooltip_name, 
   local cell = ElementGui.addGuiFlowV(parent,recipe.name, helmod_flow_style.vertical)
   local row1 = ElementGui.addGuiFrameH(cell,"row1","helmod_frame_element_"..color.."_1")
 
-  --local recipe_icon = ElementGui.addGuiButtonSprite(row1, action, "item", "steam-engine", "steam-engine", {tooltip_name, {"helmod_common.energy"}})
   ElementGui.addGuiButton(row1, action, "item", "helmod_button_icon_energy_flat2", nil, {tooltip_name, {"helmod_common.energy"}})
 
+  if recipe.limit_energy ~= nil then
+    local row2 = ElementGui.addGuiFrameH(cell,"row2","helmod_frame_element_"..color.."_2")
+    ElementGui.addGuiLabel(row2, "label1_"..recipe.name, Format.formatNumberKilo(recipe.limit_energy), "helmod_label_element", {"helmod_common.per-sub-block"})
+  end
+  
   local row3 = ElementGui.addGuiFrameH(cell,"row3","helmod_frame_element_"..color.."_3")
   ElementGui.addGuiLabel(row3, "label2_"..recipe.name, Format.formatNumberKilo(recipe.energy_total or recipe.power, "W"), "helmod_label_element", {"helmod_common.total"})
   return cell

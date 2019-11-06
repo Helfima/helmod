@@ -116,7 +116,7 @@ end
 --
 function RecipeSelector:buildPrototypeTooltip(prototype)
   Logging:trace(self.classname, "buildRecipeTooltip(element)", prototype)
-  return ElementGui.getTooltipRecipe(prototype)
+  return GuiElement.getTooltipRecipe(prototype)
 end
 
 -------------------------------------------------------------------------------
@@ -138,6 +138,10 @@ function RecipeSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
   elseif recipe_prototype:getEnabled() == false then
     color = "red"
   end
-  --GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select=ID", type):sprite(prototype.type, prototype_name):caption(prototype_localised_name):tooltip(tooltip):color(color))
-  GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select=ID", type):choose(prototype.type, prototype_name):color(color)).locked = true
+  local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select=ID", type):choose(prototype.type, prototype_name):color(color))
+  button.locked = true
+  if prototype.type ~= "recipe" then
+    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"))
+    sprite.style.top_padding = -8
+  end
 end

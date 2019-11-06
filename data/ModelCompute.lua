@@ -288,133 +288,6 @@ end
 -------------------------------------------------------------------------------
 -- Compute production block
 --
--- @function [parent=#ModelCompute] computeSimplexBlock
---
--- @param #table block block of model
---
-function ModelCompute.computeSimplexBlock(block)
-  Logging:debug(ModelCompute.classname, "computeSimplexBlock()", block.name)
-  local model = Model.getModel()
-
-  local recipes = block.recipes
-  block.power = 0
-  block.count = 1
-
-  if recipes ~= nil then
-    local mB,mC
-    local mA, row_headers, col_headers = ModelCompute.getBlockMatrix(block)
-
-    if mA ~= nil then
-      if User.getModGlobalSetting("debug") ~= "none" then
-        block.matrix2 = {}
-        block.matrix2.col_headers = col_headers
-        block.matrix2.row_headers = row_headers
-        block.matrix2.mA = mA
-      end
-
-      Simplex.new(mA)
-
-      mC = Simplex.solve()
-      mB = Simplex.getMx()
-      Logging:debug(ModelCompute.classname, "----> matrix B", mB)
-
-      if User.getModGlobalSetting("debug") ~= "none" then
-        block.matrix2.mB = mB
-        block.matrix2.mC = mC
-      end
-    end
-    if mC ~= nil then
-      -- ratio pour le calcul du nombre de block
-      local ratio = 1
-      local ratioRecipe = nil
-      -- calcul ordonnee sur les recipes du block
-      local row_index = Simplex.row_input + 1
-      for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
-        Logging:debug(ModelCompute.classname , "matrix index", recipe.name, row_index)
-        ModelCompute.computeModuleEffects(recipe)
-        local icol = 1
-        recipe.count =  mC[row_index][icol]
-        recipe.production = mC[row_index][2]
-        row_index = row_index + 1
-        Logging:debug(ModelCompute.classname , "----> matrix solution", recipe.name, icol, recipe.count)
-        --Logging:debug(Model.classname , "matrix recipe.count", recipe.count, Model.speedFactory(recipe) * (1 + recipe.factory.effects.speed))
-
-        --        if recipe.type == "technology" then
-        --          ModelCompute.computeMatrixBlockTechnology(block, recipe)
-        --        else
-        --          ModelCompute.computeMatrixBlockRecipe(block, recipe)
-        --        end
-
-        ModelCompute.computeFactory(recipe)
-
-        block.power = block.power + recipe.energy_total
-
-        if type(recipe.factory.limit) == "number" and recipe.factory.limit > 0 then
-          local currentRatio = recipe.factory.limit/recipe.factory.count
-          if currentRatio < ratio then
-            ratio = currentRatio
-            ratioRecipe = recipe.index
-            -- block number
-            block.count = recipe.factory.count/recipe.factory.limit
-            -- subblock energy
-            block.sub_power = 0
-            if block.count ~= nil and block.count > 0 then
-              block.sub_power = math.ceil(block.power/block.count)
-            end
-          end
-        end
-
-        -- state = 0 => produit
-        -- state = 1 => produit pilotant
-        -- state = 2 => produit restant
-      end
-
-      if block.count < 1 then
-        block.count = 1
-      end
-
-      -- initialisation
-      block.products = {}
-      block.ingredients = {}
-      -- conversion des col headers en array
-      local product_headers = {}
-      for _,header in pairs(col_headers) do
-        table.insert(product_headers,header)
-      end
-      -- finalisation du bloc
-      for icol,state in pairs(mC[1]) do
-        if icol > Solver.col_start then
-          local Z = math.abs(mC[#mC][icol])
-          local product_header = product_headers[icol]
-          local product = Product(product_header):clone()
-          product.count = Z
-          product.state = state
-          Logging:debug(ModelCompute.classname , "----> product", product)
-          if state == 1 or state == 3 then
-            if block.products[product.name] == nil then
-              block.products[product.name] = product
-            else
-              block.products[product.name].count = block.products[product.name].count + product.count
-            end
-          else
-            if math.abs(Z) > ModelCompute.waste_value then
-              if block.ingredients[product.name] == nil then
-                block.ingredients[product.name] = product
-              else
-                block.ingredients[product.name].count = block.products[product.name].count + product.count
-              end
-            end
-          end
-        end
-      end
-      -- initialisation end
-    end
-  end
-end
-
--------------------------------------------------------------------------------
--- Compute production block
---
 -- @function [parent=#ModelCompute] computeBlockCleanInput
 --
 -- @param #table block block of model
@@ -464,7 +337,7 @@ end
 -------------------------------------------------------------------------------
 -- Return a matrix of block
 --
--- @function [parent=#ModelCompute] getMatrix
+-- @function [parent=#ModelCompute] getBlockMatrix
 --
 -- @param #table block block of model
 --
@@ -692,16 +565,26 @@ function ModelCompute.computeBlock(block)
 
         Logging:debug(ModelCompute.classname , "********** Compute before clean:", block)
 
-        -- state = 0 => produit
-        -- state = 1 => produit pilotant
-        -- state = 2 => produit restant
-
       end
 
-      if block.count < 1 then
+      if block.count <= 1 then
         block.count = 1
+        for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
+          recipe.factory.limit_count = nil
+          recipe.beacon.limit_count = nil
+          recipe.limit_energy = nil
+        end
+      else
+        for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
+          recipe.factory.limit_count = recipe.factory.count / block.count
+          recipe.beacon.limit_count = recipe.beacon.count / block.count
+          recipe.limit_energy = recipe.energy_total / block.count
+        end
       end
 
+      -- state = 0 => produit
+      -- state = 1 => produit pilotant
+      -- state = 2 => produit restant
       -- initialisation
       block.products = {}
       block.ingredients = {}

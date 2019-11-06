@@ -175,7 +175,7 @@ function HelpPanel:getContentPanel()
   if content_panel["content-panel"] ~= nil and content_panel["content-panel"].valid then
     return content_panel["content-panel"]
   end
-  local content_panel = ElementGui.addGuiFrameV(content_panel, "content-panel", helmod_frame_style.default)
+  local content_panel = GuiElement.add(content_panel, GuiFrameV("content-panel"))
   content_panel.style.horizontally_stretchable = true
   return content_panel
 end
@@ -192,9 +192,9 @@ function HelpPanel:getContentScrollPanel(caption)
   if content_panel["scroll-content"] ~= nil and content_panel["scroll-content"].valid then
     return content_panel["scroll-content"]
   end
-  local scroll_panel = ElementGui.addGuiScrollPane(content_panel, "scroll-content", helmod_scroll_style.default)
-  ElementGui.setStyle(scroll_panel, "scroll_help", "width")
-  ElementGui.setStyle(scroll_panel, "scroll_help", "height")
+  local scroll_panel = GuiElement.add(content_panel, GuiScroll("scroll-content"))
+  GuiElement.setStyle(scroll_panel, "scroll_help", "width")
+  GuiElement.setStyle(scroll_panel, "scroll_help", "height")
   return scroll_panel
 end
 
@@ -251,9 +251,9 @@ function HelpPanel:updateMenu(event)
   for _,help in pairs(help_data) do
     table.insert(items, {"helmod_help."..help.name})
   end
-  ElementGui.addGuiButton(menu_panel, self.classname.."=previous-page", nil, "helmod_button_icon_arrow_left", nil, ({"helmod_help.button-previous"}))
-  ElementGui.addGuiDropDown(menu_panel,self.classname.."=change-page", nil, items)
-  ElementGui.addGuiButton(menu_panel, self.classname.."=next-page=", nil, "helmod_button_icon_arrow_right", nil, ({"helmod_help.button-next"}))
+  GuiElement.add(menu_panel, GuiButton(self.classname, "previous-page"):style("helmod_button_icon_arrow_left"):tooltip({"helmod_help.button-previous"}))
+  GuiElement.add(menu_panel, GuiDropDown(self.classname, "change-page"):items(items))
+  GuiElement.add(menu_panel, GuiButton(self.classname, "next-page"):style("helmod_button_icon_arrow_right"):tooltip({"helmod_help.button-next"}))
 end
 
 -------------------------------------------------------------------------------
@@ -290,30 +290,30 @@ function HelpPanel:updateContent(event)
 
   local section = help_data[selected_index or 1]
   if section then
-    ElementGui.addGuiLabel(content_panel, table.concat({section.name, "-name"}), {table.concat({"helmod_help.",section.name})}, "helmod_label_help_title", nil, false)
-    ElementGui.addGuiLabel(content_panel, table.concat({section.name, "-desc"}), {table.concat({"helmod_help.",section.name, "-desc"})}, "helmod_label_help", nil, false)
+    GuiElement.add(content_panel, GuiLabel(section.name, "name"):caption({"helmod_help."..section.name}):style("helmod_label_help_title"))
+    GuiElement.add(content_panel, GuiLabel(section.name, "desc"):caption({"helmod_help."..section.name.."-desc"}):style("helmod_label_help"))
     for i,content in pairs(section.content) do
-      local section_panel = ElementGui.addGuiFrameV(content_panel, table.concat({section.name, "-panel-",i}), helmod_frame_style.section)
+      local section_panel = GuiElement.add(content_panel, GuiFrameV(section.name, "panel",i):style(helmod_frame_style.section))
     
-      ElementGui.addGuiLabel(section_panel, table.concat({section.name, "-title-",i}), {table.concat({"helmod_help.",content.localised_text})}, "helmod_label_help_title", nil, false)
+      GuiElement.add(section_panel, GuiLabel(section.name, "title",i):caption({"helmod_help."..content.localised_text}):style("helmod_label_help_title"))
       if content.desc then
-        ElementGui.addGuiLabel(section_panel, table.concat({section.name, "-desc-",i}), {table.concat({"helmod_help.",content.localised_text, "-desc"})}, "helmod_label_help", nil, false)
+        GuiElement.add(section_panel, GuiLabel(section.name, "desc",i):caption({"helmod_help."..content.localised_text.."-desc"}):style("helmod_label_help"))
       end
       if content.sprite then
-        ElementGui.addSprite(section_panel, "helmod_"..content.sprite)
+        GuiElement.add(section_panel, GuiSprite():sprite("helmod_"..content.sprite))
       end
 
       local column = 1
       if content.list == "number" then
         column = 2
       end
-      local content_table = ElementGui.addGuiTable(section_panel, table.concat({section.name, "-list-",i}), column, "helmod_table-help")
+      local content_table = GuiElement.add(section_panel, GuiTable(section.name, "list",i):column(column):style("helmod_table-help"))
       for line=1, content.count do
         if content.list == "number" then
-          ElementGui.addGuiLabel(content_table, table.concat({section.name, "-num-",i, "-", line}), table.concat({line,":"}) , "helmod_label_help_number")
-          ElementGui.addGuiLabel(content_table, table.concat({section.name, "-",i, "-", line}), {table.concat({"helmod_help.",content.localised_text,"-",line})}, "helmod_label_help_text", nil, false)
+          GuiElement.add(content_table, GuiLabel(section.name, "num", i, line):caption(line..":"):style("helmod_label_help_number"))
+          GuiElement.add(content_table, GuiLabel(section.name, i, line):caption({"helmod_help."..content.localised_text.."-"..line}):style("helmod_label_help_text"))
         else
-          ElementGui.addGuiLabel(content_table, table.concat({section.name, "-",i, "-", line}), {table.concat({"helmod_help.",content.localised_text,"-",line})}, "helmod_label_help_normal", nil, false)
+          GuiElement.add(content_table, GuiLabel(section.name, i, line):caption({"helmod_help."..content.localised_text.."-"..line}):style("helmod_label_help_normal"))
         end
       end
     end

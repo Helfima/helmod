@@ -33,22 +33,22 @@ function GuiButton:sprite(type, name)
       self.options.sprite = string.format("%s/%s", type, name)
     elseif Player.is_valid_sprite_path(string.format("%s/%s", "item", name)) then
       self.options.sprite = string.format("%s/%s", "item", name)
-      Logging:warn(ElementGui.classname, "wrong type", type, name, "-> item")
+      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> item")
     elseif Player.is_valid_sprite_path(string.format("%s/%s", "entity", name)) then
       self.options.sprite = string.format("%s/%s", "entity", name)
-      Logging:warn(ElementGui.classname, "wrong type", type, name, "-> entity")
+      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> entity")
     elseif Player.is_valid_sprite_path(string.format("%s/%s", "fluid", name)) then
       self.options.sprite = string.format("%s/%s", "fluid", name)
-      Logging:warn(ElementGui.classname, "wrong type", type, name, "-> fluid")
+      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> fluid")
     elseif Player.is_valid_sprite_path(string.format("%s/%s", "technology", name)) then
       self.options.sprite = string.format("%s/%s", "technology", name)
-      Logging:warn(ElementGui.classname, "wrong type", type, name, "-> technology")
+      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> technology")
     elseif Player.is_valid_sprite_path(string.format("%s/%s", "recipe", name)) then
       self.options.sprite = string.format("%s/%s", "recipe", name)
-      Logging:warn(ElementGui.classname, "wrong type", type, name, "-> recipe")
+      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> recipe")
     elseif Player.is_valid_sprite_path(string.format("%s/%s", "item-group", name)) then
       self.options.sprite = string.format("%s/%s", "item-group", name)
-      Logging:warn(ElementGui.classname, "wrong type", type, name, "-> item-group")
+      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> item-group")
     end
   end
   table.insert(self.name, name)
@@ -65,6 +65,7 @@ end
 function GuiButton:option(name, value)
   self.options[name] = value
 end
+
 -------------------------------------------------------------------------------
 --
 -- @function [parent=#GuiButton] choose
@@ -74,6 +75,7 @@ end
 --
 function GuiButton:choose(type, name)
   self.options.type = "choose-elem-button"
+  self.options.style = "slot_button"
   if type ==  "resource" then type = "entity" end
   self.options.elem_type = type
   self.options[type] = name

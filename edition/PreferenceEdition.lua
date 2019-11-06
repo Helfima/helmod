@@ -113,7 +113,7 @@ function PreferenceEdition:updatePriorityModule(event)
   if priority_modules[configuration_priority] ~= nil then
     Logging:debug(self.classname, "priority_modules", priority_modules, configuration_priority)
     for index, element in pairs(priority_modules[configuration_priority]) do
-      local tooltip = ElementGui.getTooltipModule(element.module)
+      local tooltip = GuiElement.getTooltipModule(element.module)
       GuiElement.add(priority_table_panel, GuiButtonSprite(self.classname, "do-nothing=ID", index):sprite("entity", element.name):tooltip(tooltip))
       GuiElement.add(priority_table_panel, GuiTextField(self.classname, "priority-module-update=ID", index):text(element.value))
       GuiElement.add(priority_table_panel, GuiButtonSprite(self.classname, "priority-module-remove=ID", index):style("helmod_button_icon_delete_red"):tooltip(tooltip))
@@ -123,7 +123,7 @@ function PreferenceEdition:updatePriorityModule(event)
   -- module selector
   local module_table_panel = GuiElement.add(configuration_table_panel, GuiTable("module-selector-table"):column(6))
   for k, element in pairs(Player.getModules()) do
-    local tooltip = ElementGui.getTooltipModule(element.name)
+    local tooltip = GuiElement.getTooltipModule(element.name)
     GuiElement.add(module_table_panel, GuiButtonSelectSprite(self.classname, "priority-module-select=ID"):sprite("entity", element.name):tooltip(tooltip))
   end
 end

@@ -54,8 +54,8 @@ function StatusPanel:getInfoPanel()
   if content_panel["info-panel"] ~= nil and content_panel["info-panel"].valid then
     return content_panel["info-panel"]["scroll-panel"]
   end
-  local mainPanel = ElementGui.addGuiFrameV(content_panel, "info-panel", helmod_frame_style.panel)
-  return ElementGui.addGuiScrollPane(mainPanel, "scroll-panel", helmod_scroll_style.pin_tab)
+  local mainPanel = GuiElement.add(content_panel, GuiFrameV("info-panel"):style(helmod_frame_style.panel))
+  return GuiElement.add(mainPanel, GuiScroll("scroll-panel"):style(helmod_scroll_style.pin_tab))
 end
 
 -------------------------------------------------------------------------------
@@ -68,7 +68,7 @@ function StatusPanel:getHeaderPanel()
   if content_panel["header"] ~= nil and content_panel["header"].valid then
     return content_panel["header"]
   end
-  return ElementGui.addGuiFrameH(content_panel, "header", helmod_frame_style.panel)
+  return GuiElement.add(content_panel, GuiFrameH("header"):style(helmod_frame_style.panel))
 end
 
 -------------------------------------------------------------------------------
@@ -106,8 +106,8 @@ function StatusPanel:updateHeader(event)
   local header_panel = self:getHeaderPanel()
   local model = Model.getModel()
 
-  ElementGui.addGuiButton(header_panel, self.classname.."=CLOSE", nil, "helmod_button_icon_close_red", nil, ({"helmod_button.close"}))
-  ElementGui.addGuiButton(header_panel, self.classname.."=UPDATE", nil, "helmod_button_icon_refresh", nil, ({"helmod_result-panel.refresh-button"}))
+  GuiElement.add(header_panel, GuiButton(self.classname, "CLOSE"):style("helmod_button_icon_close_red"):caption({"helmod_button.close"}))
+  GuiElement.add(header_panel, GuiButton(self.classname.."=UPDATE"):style("helmod_button_icon_refresh"):caption({"helmod_result-panel.refresh-button"}))
 
 end
 
@@ -127,7 +127,7 @@ function StatusPanel:updateInfo(event)
 
   local column = 2
 
-  local resultTable = ElementGui.addGuiTable(info_panel,"list-data",column, "helmod_table-odd")
+  local resultTable = GuiElement.add(info_panel, GuiTable("list-data"):column(column):style("helmod_table-odd"))
   --self:addProductionBlockHeader(resultTable)
   local elements = {}
   
@@ -167,8 +167,8 @@ end
 --
 function StatusPanel:addProductionBlockRow(guiTable, element)
   Logging:debug(self.classname, "addProductionBlockRow()", guiTable, element)
-  ElementGui.addGuiButtonSprite(guiTable, "element_"..element.name.."=", element.type, element.name, element.name, Player.getLocalisedName(element))
-  ElementGui.addGuiLabel(guiTable, "value_"..element.name, element.value)
+  GuiElement.add(guiTable, GuiButtonSprite("element", element.name):sprite(element.type, element.name):tooltip(Player.getLocalisedName(element)))
+  GuiElement.add(guiTable, GuiLabel("value", element.name):caption(element.value))
 
 end
 

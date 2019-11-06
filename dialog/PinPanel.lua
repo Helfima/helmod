@@ -59,8 +59,8 @@ function PinPanel:getInfoPanel()
   if content_panel["info-panel"] ~= nil and content_panel["info-panel"].valid then
     return content_panel["info-panel"]["scroll-panel"]
   end
-  local mainPanel = ElementGui.addGuiFrameV(content_panel, "info-panel", helmod_frame_style.panel)
-  return ElementGui.addGuiScrollPane(mainPanel, "scroll-panel", helmod_scroll_style.pin_tab)
+  local mainPanel = GuiElement.add(content_panel, GuiFrameV("info-panel"):style(helmod_frame_style.panel))
+  return GuiElement.add(mainPanel, GuiScroll("scroll-panel"):style(helmod_scroll_style.pin_tab))
 end
 
 -------------------------------------------------------------------------------
@@ -87,11 +87,11 @@ function PinPanel:updateHeader(event)
   local left_menu_panel = self:getLeftMenuPanel()
   local model = Model.getModel()
   left_menu_panel.clear()
-  local group1 = ElementGui.addGuiFlowH(left_menu_panel,"group1",helmod_flow_style.horizontal)
-  ElementGui.addGuiButton(group1, self.classname.."=change-level=ID=down", nil, "helmod_button_icon_arrow_left", nil, ({"helmod_button.decrease"}))
-  ElementGui.addGuiButton(group1, self.classname.."=change-level=ID=up", nil, "helmod_button_icon_arrow_right", nil, ({"helmod_button.expand"}))
-  ElementGui.addGuiButton(group1, self.classname.."=change-level=ID=min", nil, "helmod_button_icon_minimize", nil, ({"helmod_button.minimize"}))
-  ElementGui.addGuiButton(group1, self.classname.."=change-level=ID=max", nil, "helmod_button_icon_maximize", nil, ({"helmod_button.maximize"}))
+  local group1 = GuiElement.add(left_menu_panel, GuiFlowH("group1"))
+  GuiElement.add(group1, GuiButton(self.classname, "change-level=ID", "down"):style("helmod_button_icon_arrow_left"):tooltip({"helmod_button.decrease"}))
+  GuiElement.add(group1, GuiButton(self.classname.."change-level=ID", "up"):style("helmod_button_icon_arrow_right"):tooltip({"helmod_button.expand"}))
+  GuiElement.add(group1, GuiButton(self.classname.."change-level=ID", "min"):style("helmod_button_icon_minimize"):tooltip({"helmod_button.minimize"}))
+  GuiElement.add(group1, GuiButton(self.classname.."change-level=ID", "max"):style("helmod_button_icon_maximize"):tooltip({"helmod_button.maximize"}))
 
 end
 
@@ -117,7 +117,7 @@ function PinPanel:updateInfo(event)
   if pin_block_id ~= nil and model.blocks[pin_block_id] ~= nil then
     local block = model.blocks[pin_block_id]
 
-    local resultTable = ElementGui.addGuiTable(infoPanel,"list-data",column, "helmod_table-odd")
+    local resultTable = GuiElement.add(infoPanel, GuiTable("list-data"):column(column):style("helmod_table-odd"))
 
     self:addProductionBlockHeader(resultTable)
     for _, recipe in spairs(block.recipes, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
@@ -140,28 +140,28 @@ function PinPanel:addProductionBlockHeader(itable)
   local model = Model.getModel()
 
   if display_pin_level > display_level.base then
-    local guiRecipe = ElementGui.addGuiFrameH(itable,"header-recipe", helmod_frame_style.hidden)
-    ElementGui.addGuiLabel(guiRecipe, "header-recipe", ({"helmod_result-panel.col-header-recipe"}))
+    local guiRecipe = GuiElement.add(itable, GuiFrameH("header-recipe"):style(helmod_frame_style.hidden))
+    GuiElement.add(guiRecipe, GuiLabel("header-recipe"):caption({"helmod_result-panel.col-header-recipe"}))
   end
 
   if display_pin_level > display_level.products then
-    local guiProducts = ElementGui.addGuiFrameH(itable,"header-products", helmod_frame_style.hidden)
-    ElementGui.addGuiLabel(guiProducts, "header-products", ({"helmod_result-panel.col-header-products"}))
+    local guiProducts = GuiElement.add(itable, GuiFrameH("header-products"):style(helmod_frame_style.hidden))
+    GuiElement.add(guiProducts, GuiLabel("header-products"):caption({"helmod_result-panel.col-header-products"}))
   end
 
   if display_pin_level > display_level.factory then
-    local guiFactory = ElementGui.addGuiFrameH(itable,"header-factory", helmod_frame_style.hidden)
-    ElementGui.addGuiLabel(guiFactory, "header-factory", ({"helmod_result-panel.col-header-factory"}))
+    local guiFactory = GuiElement.add(itable, GuiFrameH("header-factory"):style(helmod_frame_style.hidden))
+    GuiElement.add(guiFactory, GuiLabel("header-factory"):caption({"helmod_result-panel.col-header-factory"}))
   end
 
   if display_pin_level > display_level.ingredients then
-    local guiIngredients = ElementGui.addGuiFrameH(itable,"header-ingredients", helmod_frame_style.hidden)
-    ElementGui.addGuiLabel(guiIngredients, "header-ingredients", ({"helmod_result-panel.col-header-ingredients"}))
+    local guiIngredients = GuiElement.add(itable, GuiFrameH("header-ingredients"):style(helmod_frame_style.hidden))
+    GuiElement.add(guiIngredients, GuiLabel("header-ingredients"):caption({"helmod_result-panel.col-header-ingredients"}))
   end
 
   if display_pin_level > display_level.beacon then
-    local guiBeacon = ElementGui.addGuiFrameH(itable,"header-beacon", helmod_frame_style.hidden)
-    ElementGui.addGuiLabel(guiBeacon, "header-beacon", ({"helmod_result-panel.col-header-beacon"}))
+    local guiBeacon = GuiElement.add(itable, GuiFrameH("header-beacon"):style(helmod_frame_style.hidden))
+    GuiElement.add(guiBeacon, GuiLabel("header-beacon"):caption({"helmod_result-panel.col-header-beacon"}))
   end
 end
 
@@ -181,13 +181,13 @@ function PinPanel:addProductionBlockRow(gui_table, block, recipe)
   local recipe_prototype = RecipePrototype(recipe)
   if display_pin_level > display_level.base then
     -- col recipe
-    local cell_recipe = ElementGui.addGuiFrameH(gui_table,"recipe"..recipe.id, helmod_frame_style.hidden)
-    ElementGui.addCellRecipe(cell_recipe, recipe, self.classname.."=do_noting=ID=", true, "tooltip.product", "gray")
+    local cell_recipe = GuiElement.add(gui_table, GuiFrameH("recipe", recipe.id):style(helmod_frame_style.hidden))
+    GuiElement.add(cell_recipe, GuiCellRecipe(self.classname, "do_noting=ID"):element(recipe):tooltip("tooltip.product"):color(GuiElement.color_button_default))
   end
 
   if display_pin_level > display_level.products then
     -- products
-    local cell_products = ElementGui.addGuiTable(gui_table,"products_"..recipe.id, 3)
+    local cell_products = GuiElement.add(gui_table, GuiTable("products",recipe.id):column(3))
     if recipe_prototype:getProducts() ~= nil then
       for index, lua_product in pairs(recipe_prototype:getProducts()) do
         local product_prototype = Product(lua_product)
@@ -196,21 +196,20 @@ function PinPanel:addProductionBlockRow(gui_table, block, recipe)
         if block.count > 1 then
           product.limit_count = product.count / block.count
         end
-        ElementGui.addCellElementSm(cell_products, product, self.classname.."=do_noting=ID=", false, "tooltip.product", nil, index)
+        GuiElement.add(cell_products, GuiCellElementSm(self.classname, "do_noting=ID", "product"):index(index):element(product):tooltip("tooltip.product"):color(GuiElement.color_button_none))
       end
     end
   end
 
   if display_pin_level > display_level.factory then
     -- col factory
-    local cell_factory =ElementGui.addCell(gui_table, "factory-"..recipe.id)
     local factory = recipe.factory
-    ElementGui.addCellFactory(cell_factory, factory, self.classname.."=do_noting=ID=", false, "tooltip.product", "gray")
+    GuiElement.add(gui_table, GuiCellFactory(self.classname, "do_noting=ID", "factory"):index(recipe.id):element(factory):tooltip("tooltip.product"):color(GuiElement.color_button_default))
   end
 
   if display_pin_level > display_level.ingredients then
     -- ingredients
-    local cell_ingredients = ElementGui.addGuiTable(gui_table,"ingredients_"..recipe.id, 3)
+    local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients", recipe.id):column(3))
     if recipe_prototype:getIngredients() ~= nil then
       for index, lua_ingredient in pairs(recipe_prototype:getIngredients(recipe.factory)) do
         local ingredient_prototype = Product(lua_ingredient)
@@ -219,7 +218,7 @@ function PinPanel:addProductionBlockRow(gui_table, block, recipe)
         if block.count > 1 then
           ingredient.limit_count = ingredient.count / block.count
         end
-        ElementGui.addCellElementSm(cell_ingredients, ingredient, self.classname.."=do_noting=ID=", true, "tooltip.product", ElementGui.color_button_add, index)
+        GuiElement.add(cell_ingredients, GuiCellElementSm(self.classname, "do_noting=ID", "ingredient"):index(index):element(ingredient):tooltip("tooltip.product"):color(GuiElement.color_button_add))
       end
     end
   end
@@ -232,8 +231,7 @@ function PinPanel:addProductionBlockRow(gui_table, block, recipe)
     else
       beacon.limit_count = nil
     end
-    local cell_beacon = ElementGui.addCell(gui_table, "beacon-"..recipe.id)
-    ElementGui.addCellFactory(cell_beacon, beacon, self.classname.."=do_noting=ID="..block.id.."="..recipe.id.."=", false, "tooltip.product", "gray")
+    GuiElement.add(gui_table, GuiCellFactory(self.classname, "do_noting=ID", "beacon"):index(recipe.id):element(beacon):tooltip("tooltip.product"):color(GuiElement.color_button_default))
   end
 
 end

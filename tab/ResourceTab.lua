@@ -63,25 +63,25 @@ function ResourceTab:addTableRow(guiTable, ingredient)
 
   -- col index
   if User.getModGlobalSetting("display_data_col_index") then
-    local guiIndex = ElementGui.addGuiFrameH(guiTable,"index"..ingredient.name, helmod_frame_style.hidden)
-    ElementGui.addGuiLabel(guiIndex, "index", ingredient.index, "helmod_label_row_right_40")
+    local guiIndex = GuiElement.add(guiTable, GuiFrameH("index", ingredient.name):style(helmod_frame_style.hidden))
+    GuiElement.add(guiIndex, GuiLabel("index"):caption(ingredient.index):style("helmod_label_row_right_40"))
   end
   -- col name
   if User.getModGlobalSetting("display_data_col_name") then
-    local guiName = ElementGui.addGuiFrameH(guiTable,"name"..ingredient.name, helmod_frame_style.hidden)
-    ElementGui.addGuiLabel(guiName, "name_", ingredient.name)
+    local guiName = GuiElement.add(guiTable, GuiFrameH("name", ingredient.name):style(helmod_frame_style.hidden))
+    GuiElement.add(guiName, GuiLabel("name", ingredient.name):caption(ingredient.name))
   end
   -- col count
-  local guiCount = ElementGui.addGuiFrameH(guiTable,"count"..ingredient.name, helmod_frame_style.hidden)
-  ElementGui.addGuiLabel(guiCount, ingredient.name, Format.formatNumberElement(ingredient.count), "helmod_label_right_60")
+  local guiCount = GuiElement.add(guiTable, GuiFrameH("count", ingredient.name):style(helmod_frame_style.hidden))
+  GuiElement.add(guiCount, GuiLabel(ingredient.name):caption(Format.formatNumberElement(ingredient.count)):style("helmod_label_right_60"))
 
   -- col ingredient
-  local guiIngredient = ElementGui.addGuiFrameH(guiTable,"ingredient"..ingredient.name, helmod_frame_style.hidden)
-  ElementGui.addGuiButtonSprite(guiIngredient, "HMIngredient=OPEN=ID=", ingredient.type, ingredient.name, ingredient.name, Player.getLocalisedName(ingredient))
+  local guiIngredient = GuiElement.add(guiTable, GuiFrameH("ingredient", ingredient.name):style(helmod_frame_style.hidden))
+  GuiElement.add(guiIngredient, GuiButtonSprite("HMIngredient=OPEN=ID"):sprite(ingredient.type, ingredient.name):tooltip(Player.getLocalisedName(ingredient)))
 
   -- col type
-  local guiType = ElementGui.addGuiFrameH(guiTable,"type"..ingredient.name, helmod_frame_style.hidden)
-  ElementGui.addGuiLabel(guiType, ingredient.name, ingredient.resource_category)
+  local guiType = GuiElement.add(guiTable, GuiFrameH("type", ingredient.name):style(helmod_frame_style.hidden))
+  GuiElement.add(guiType, GuiLabel(ingredient.name):caption(ingredient.resource_category))
 
 end
 
@@ -107,7 +107,7 @@ function ResourceTab:updateData(event)
   if User.getModGlobalSetting("display_data_col_name") then
     extra_cols = extra_cols + 1
   end
-  local resultTable = ElementGui.addGuiTable(scrollPanel,"table-resources",3 + extra_cols)
+  local resultTable = GuiElement.add(scrollPanel, GuiTable("table-resources"):column(3 + extra_cols))
 
   self:addTableHeader(resultTable)
 

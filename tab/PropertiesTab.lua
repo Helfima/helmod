@@ -75,7 +75,7 @@ function PropertiesTab:addTableHeader(itable, prototype_compare)
   Logging:debug(self.classname, "addTableHeader()", itable)
 
   self:addCellHeader(itable, "property", {"helmod_result-panel.col-header-name"})
-  for _,prototype in pairs(prototype_compare) do
+  for index,prototype in pairs(prototype_compare) do
     local icon_type = nil
     local localised_name = nil
     if prototype.type == "entity" then
@@ -99,18 +99,18 @@ function PropertiesTab:addTableHeader(itable, prototype_compare)
       icon_type = "technology"
       localised_name = technology_protoype:getLocalisedName()
     end
-    ElementGui.addGuiButtonSprite(itable, self.classname.."=element-delete=ID=", icon_type, prototype.name, prototype.name, localised_name)
+    GuiElement.add(itable, GuiButtonSprite(self.classname, "element-delete=ID", prototype.name, index):sprite(icon_type, prototype.name):tooltip(localised_name))
 
   end
 
   self:addCellHeader(itable, "property_type", "Element Type")
-  for _,prototype in pairs(prototype_compare) do
-    ElementGui.addGuiLabel(itable, string.format("element_type_%s", prototype.name), prototype.type)
+  for index,prototype in pairs(prototype_compare) do
+    GuiElement.add(itable, GuiLabel("element_type", prototype.name, index):caption(prototype.type))
   end
 
   self:addCellHeader(itable, "property_name", "Element Name")
-  for _,prototype in pairs(prototype_compare) do
-    ElementGui.addGuiText(itable, string.format("element_name_%s", prototype.name), prototype.name)
+  for index,prototype in pairs(prototype_compare) do
+    GuiElement.add(itable, GuiLabel("element_name", prototype.name, index):caption(prototype.name))
   end
 end
 
@@ -124,7 +124,6 @@ end
 function PropertiesTab:updateData(event)
   Logging:debug(self.classname, "updateData()", event)
   -- data
-  --local result_panel = self:getResultPanel({"helmod_result-panel.tab-title-properties"})
   local scroll_panel = self:getResultScrollPanel()
   scroll_panel.clear()
 
@@ -133,31 +132,26 @@ function PropertiesTab:updateData(event)
     local data = {}
     for _,prototype in pairs(prototype_compare) do
       local data_prototype = self:getPrototypeData(prototype)
-      --Logging:debug(self.classname, "data_prototype", data_prototype)
       for _,properties in pairs(data_prototype) do
         if data[properties.name] == nil then data[properties.name] = {} end
         data[properties.name][prototype.name] = properties
       end
     end
-    local result_table = ElementGui.addGuiTable(scroll_panel,"table-resources",#prototype_compare+1, "helmod_table-rule-odd")
+    local result_table = GuiElement.add(scroll_panel, GuiTable("table-resources"):column(#prototype_compare+1):style("helmod_table-rule-odd"))
 
     self:addTableHeader(result_table, prototype_compare)
 
     for property, values in pairs(data) do
-      local cell_name = ElementGui.addGuiFrameH(result_table, string.format("property_%s", property), helmod_frame_style.hidden)
-      ElementGui.addGuiLabel(cell_name, "label", property)
+      local cell_name = GuiElement.add(result_table, GuiFrameH("property", property):style(helmod_frame_style.hidden))
+      GuiElement.add(cell_name, GuiLabel("label"):caption(property))
 
-      -- col chmod
-      --local cell_chmod = ElementGui.addGuiFrameH(gui_table,property.name.."_chmod", helmod_frame_style.hidden)
-      --ElementGui.addGuiLabel(cell_chmod, "label", property.chmod or "")
-
-      for _,prototype in pairs(prototype_compare) do
+      for index,prototype in pairs(prototype_compare) do
         -- col value
-        local cell_value = ElementGui.addGuiFrameH(result_table, string.format("%s_%s", property, prototype.name), helmod_frame_style.hidden)
+        local cell_value = GuiElement.add(result_table, GuiFrameH(property, prototype.name, index):style(helmod_frame_style.hidden))
         if values[prototype.name] ~= nil then
           local chmod = values[prototype.name].chmod
           local value = values[prototype.name].value
-          local label_value = ElementGui.addGuiLabel(cell_value, "prototype_value", string.format("[%s]: %s", chmod, value), "helmod_label_max_600", nil, false)
+          local label_value = GuiElement.add(cell_value, GuiLabel("prototype_value"):caption(string.format("[%s]: %s", chmod, value)):style("helmod_label_max_600"))
           label_value.style.width = 400
         end
       end
@@ -271,7 +265,6 @@ function PropertiesTab:parseProperties(prototype, level)
         end
       end
       table.insert(properties, {name = key, chmod = chmod, value = value})
-      --Logging:debug(self.classname, "help_string:", i, type, value)
     end)
   end
   return properties

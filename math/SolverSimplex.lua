@@ -247,7 +247,8 @@ function Simplex.prepare()
       local row = {}
       for icol,_ in pairs(Mx[1]) do
         if icol == Simplex.col_start then
-          table.insert(row,math.pow(10,index)*10)
+          --table.insert(row,math.pow(10,index)*10)
+          table.insert(row,math.pow(10,4))
         elseif icol == xcol then
           table.insert(row,1)
         else

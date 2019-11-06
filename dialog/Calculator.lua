@@ -43,9 +43,9 @@ function Calculator:getColumnPanel()
   if content_panel["main_panel"] ~= nil and content_panel["main_panel"].valid then
     return content_panel["main_panel"]["display_panel1"], content_panel["main_panel"]["display_panel2"]
   end
-  local panel = ElementGui.addGuiFlowH(content_panel, "main_panel", helmod_flow_style.horizontal)
-  local display_panel1 = ElementGui.addGuiFlowV(panel, "display_panel1", helmod_flow_style.vertical)
-  local display_panel2 = ElementGui.addGuiFlowV(panel, "display_panel2", helmod_flow_style.vertical)
+  local panel = GuiElement.add(content_panel, GuiFlowH("main_panel"))
+  local display_panel1 = GuiElement.add(panel, GuiFlowV("display_panel1"))
+  local display_panel2 = GuiElement.add(panel, GuiFlowV("display_panel2"))
   display_panel2.style.width=200
 
   return display_panel1, display_panel2
@@ -61,7 +61,7 @@ function Calculator:getDisplayPanel()
   if display_panel1["display"] ~= nil and display_panel1["display"].valid then
     return display_panel1["display"]
   end
-  return ElementGui.addGuiFrameV(display_panel1, "display", helmod_frame_style.panel)
+  return GuiElement.add(display_panel1, GuiFrameV("display"):style(helmod_frame_style.panel))
 end
 
 -------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ function Calculator:getKeyboardPanel()
   if display_panel1["keyboard"] ~= nil and display_panel1["keyboard"].valid then
     return display_panel1["keyboard"]
   end
-  local panel = ElementGui.addGuiFrameV(display_panel1, "keyboard", helmod_frame_style.panel)
+  local panel = GuiElement.add(display_panel1, GuiFrameV("keyboard"):style(helmod_frame_style.panel))
   panel.style.horizontally_stretchable = true
   return panel
 end
@@ -89,7 +89,7 @@ function Calculator:getHistoryPanel()
   if display_panel2["history"] ~= nil and display_panel2["history"].valid then
     return display_panel2["history"]
   end
-  local panel = ElementGui.addGuiFrameV(display_panel2, "history", helmod_frame_style.panel)
+  local panel = GuiElement.add(display_panel2, GuiFrameV("history"):style(helmod_frame_style.panel))
   panel.style.horizontally_stretchable = true
   panel.style.vertically_stretchable = true
   return panel
@@ -183,9 +183,8 @@ function Calculator:updateDisplay()
   local keyboard_panel = self:getDisplayPanel()
   keyboard_panel.clear()
 
-  --local table_panel = ElementGui.addGuiTable(keyboard_panel,"keys",2)
   local calculator_value = User.getParameter("calculator_value") or 0
-  display_panel = ElementGui.addGuiText(keyboard_panel,self.classname.."=compute=ID=",calculator_value,"helmod_textfield_calculator")
+  display_panel = GuiElement.add(keyboard_panel, GuiTextField(self.classname, "compute=ID"):text(calculator_value):style("helmod_textfield_calculator"))
   --display_panel.style.horizontally_stretchable = true
   display_panel.style.width=155
   display_panel.style.horizontal_align = "right"
@@ -201,7 +200,7 @@ function Calculator:updateKeyboard()
   local keyboard_panel = self:getKeyboardPanel()
   keyboard_panel.clear()
 
-  local table_panel = ElementGui.addGuiTable(keyboard_panel,"keys",4)
+  local table_panel = GuiElement.add(keyboard_panel, GuiTable("keys"):column(4))
   local keys = {}
   table.insert(keys, {key="clear" ,caption="C", tooltip="clear"})
   table.insert(keys, {key="(" ,caption="("})
@@ -235,9 +234,9 @@ function Calculator:updateKeyboard()
 
   for index,button in pairs(keys) do
     if button.key == "" then
-      ElementGui.addGuiLabel(table_panel,string.format("vide_%s",index))
+      GuiElement.add(table_panel, GuiLabel("vide",index))
     else
-      ElementGui.addGuiButton(table_panel,self.classname.."=selected-key=ID=",button.key,"helmod_button_calculator",button.caption, button.tooltip)
+      GuiElement.add(table_panel, GuiButton(self.classname, "selected-key=ID",button.key):caption(button.caption):tooltip(button.tooltip):style("helmod_button_calculator"))
     end
   end
 
@@ -255,7 +254,7 @@ function Calculator:updateHistory()
 
   local calculator_history = User.getParameter("calculator_history") or {}
   for index, line in pairs(calculator_history) do
-    ElementGui.addGuiLabel(history_panel,string.format("history_%s",index),line)
+    GuiElement.add(history_panel, GuiLabel("history",index):caption(line))
   end
 
 end

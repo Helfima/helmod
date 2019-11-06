@@ -54,7 +54,7 @@ function ProductEdition:getInfoPanel()
   if content_panel["info"] ~= nil and content_panel["info"].valid then
     return content_panel["info"]
   end
-  local info_panel = ElementGui.addGuiFrameV(content_panel, "info", helmod_frame_style.panel)
+  local info_panel = GuiElement.add(content_panel, GuiFrameV("info"):style(helmod_frame_style.panel))
   info_panel.style.horizontally_stretchable = true
   return info_panel
 end
@@ -69,9 +69,8 @@ function ProductEdition:getToolPanel()
   if content_panel["tool_panel"] ~= nil and content_panel["tool_panel"].valid then
     return content_panel["tool_panel"]
   end
-  local tool_panel = ElementGui.addGuiFrameV(content_panel, "tool_panel", helmod_frame_style.panel, {"helmod_product-edition-panel.tool"})
+  local tool_panel = GuiElement.add(content_panel, GuiFrameV("tool_panel"):style(helmod_frame_style.panel):caption({"helmod_product-edition-panel.tool"}))
   tool_panel.style.horizontally_stretchable = true
-  --ElementGui.setStyle(tool_panel, "edition_product_tool", "height")
   return tool_panel
 end
 
@@ -85,7 +84,7 @@ function ProductEdition:getActionPanel()
   if content_panel["action_panel"] ~= nil and content_panel["action_panel"].valid then
     return content_panel["action_panel"]
   end
-  local action_panel = ElementGui.addGuiFrameV(content_panel, "action_panel", helmod_frame_style.panel)
+  local action_panel = GuiElement.add(content_panel, GuiFrameV("action_panel"):style(helmod_frame_style.panel))
   action_panel.style.horizontally_stretchable = true
   return action_panel
 end
@@ -147,13 +146,13 @@ function ProductEdition:updateInfo(event)
   if product ~= nil then
     info_panel.clear()
 
-    local table_panel = ElementGui.addGuiTable(info_panel,"input-table",2)
-    ElementGui.addGuiButtonSprite(table_panel, "product", product.type, product.name)
-    ElementGui.addGuiLabel(table_panel, "product-label", Player.getLocalisedName(product))
+    local table_panel = GuiElement.add(info_panel, GuiTable("input-table"):column(2))
+    GuiElement.add(table_panel, GuiButtonSprite("product"):sprite(product.type, product.name))
+    GuiElement.add(table_panel, GuiLabel("product-label"):caption(Player.getLocalisedName(product)))
 
-    ElementGui.addGuiLabel(table_panel, "quantity-label", ({"helmod_common.quantity"}))
+    GuiElement.add(table_panel, GuiLabel("quantity-label"):caption({"helmod_common.quantity"}))
     local cell, button
-    cell, input_quantity, button = ElementGui.addCellInput(table_panel, string.format("%s=product-update=ID=%s=%s",self.classname,event.item1,product.name), product_count or 0, nil, ({"tooltip.formula-allowed"}))
+    cell, input_quantity, button = GuiCellInput(self.classname, "product-update=ID", event.item1, product.name):text(product_count or 0):create(table_panel)
     input_quantity.focus()
     input_quantity.select_all()
   end
@@ -171,8 +170,8 @@ function ProductEdition:updateAction(event)
   local action_panel = self:getActionPanel()
   if product ~= nil then
     action_panel.clear()
-    local action_panel = ElementGui.addGuiTable(action_panel,"table_action",3)
-    ElementGui.addGuiButton(action_panel, self.classname.."=product-reset=ID="..event.item1.."=", product.name, "helmod_button_default", ({"helmod_button.reset"}))
+    local action_panel = GuiElement.add(action_panel, GuiTable("table_action"):column(3))
+    GuiElement.add(action_panel, GuiButton(self.classname, "product-reset=ID", event.item1, product.name):caption({"helmod_button.reset"}))
   end
 end
 
@@ -187,9 +186,9 @@ function ProductEdition:updateTool(event)
   Logging:debug(self.classname, "updateTool()", event)
   local tool_panel = self:getToolPanel()
   tool_panel.clear()
-  local table_panel = ElementGui.addGuiTable(tool_panel,"table-belt",5)
+  local table_panel = GuiElement.add(tool_panel, GuiTable("table-belt"):column(5))
   for key, prototype in pairs(Player.getEntityPrototypes({{filter="type", mode="or", invert=false, type="transport-belt"}})) do
-    ElementGui.addGuiButtonSelectSprite(table_panel, self.classname.."=element-select=ID=", Player.getEntityIconType(prototype), prototype.name, prototype.name, EntityPrototype(prototype):getLocalisedName())
+    GuiElement.add(table_panel, GuiButtonSelectSprite(self.classname, "element-select=ID"):sprite("entity", prototype.name):tooltip(EntityPrototype(prototype):getLocalisedName()))
   end
 end
 -------------------------------------------------------------------------------
@@ -223,7 +222,7 @@ function ProductEdition:onEvent(event)
       local belt_speed = EntityPrototype(event.item1):getBeltSpeed()
 
       local text = string.format("%s*1", belt_speed * Product().belt_ratio)
-      ElementGui.setInputText(input_quantity, text)
+      GuiElement.setInputText(input_quantity, text)
       input_quantity.focus()
       input_quantity.select(string.len(text), string.len(text))
     end

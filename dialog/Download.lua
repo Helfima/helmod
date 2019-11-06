@@ -43,7 +43,7 @@ function Download:getDownloadPanel()
   if content_panel["download"] ~= nil and content_panel["download"].valid then
     return content_panel["download"]
   end
-  return ElementGui.addGuiFrameV(content_panel, "download", helmod_frame_style.panel, {"helmod_common.download"})
+  return GuiElement.add(content_panel, GuiFrameV("download"):style(helmod_frame_style.panel):tooltip({"helmod_common.download"}))
 end
 
 -------------------------------------------------------------------------------
@@ -56,7 +56,7 @@ function Download:getUploadPanel()
   if content_panel["upload"] ~= nil and content_panel["upload"].valid then
     return content_panel["upload"]
   end
-  return ElementGui.addGuiFrameV(content_panel, "upload", helmod_frame_style.panel, {"helmod_common.upload"})
+  return GuiElement.add(content_panel, GuiFrameV("upload"):style(helmod_frame_style.panel):tooltip({"helmod_common.upload"}))
 end
 
 -------------------------------------------------------------------------------
@@ -104,7 +104,6 @@ end
 -- @param #LuaEvent event
 --
 function Download:updateDownload(event)
-  Logging:debug(self.classname, "updateDownload()", event)
   local data_string = ""
   -- export
   if event.item1 == "upload" then
@@ -112,15 +111,15 @@ function Download:updateDownload(event)
     download_panel.clear()
     local model = Model.getModel() 
     data_string = Converter.write(model)
-    local text_box = ElementGui.addGuiTextbox(download_panel, "data-text", data_string, "helmod_textbox_default")
-    ElementGui.addGuiButton(download_panel, self.classname.."=CLOSE", nil, "helmod_button_default", ({"helmod_button.close"}))
+    local text_box = GuiElement.add(download_panel, GuiTextBox("data-text"):text(data_string))
+    GuiElement.add(download_panel, GuiButton(self.classname, "CLOSE"):caption({"helmod_button.close"}))
   end
   -- import
   if event.item1 == "download" then
     local download_panel = self:getDownloadPanel()
     download_panel.clear()
-    local text_box = ElementGui.addGuiTextbox(download_panel, "data-text", data_string, "helmod_textbox_default")
-    ElementGui.addGuiButton(download_panel, self.classname.."=download-model=ID=", "download", "helmod_button_default", ({"helmod_common.download"}))
-    ElementGui.addGuiButton(download_panel, self.classname.."=CLOSE", nil, "helmod_button_default", ({"helmod_button.close"}))
+    local text_box = GuiElement.add(download_panel, GuiTextBox("data-text"):text(data_string))
+    GuiElement.add(download_panel, GuiButton(self.classname, "download-model=ID", "download"):style("helmod_button_default"):caption({"helmod_common.download"}))
+    GuiElement.add(download_panel, GuiButton(self.classname, "CLOSE"):caption({"helmod_button.close"}))
   end
 end

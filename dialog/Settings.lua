@@ -42,7 +42,7 @@ function Settings:getAboutSettingsPanel()
   if content_panel["about-settings"] ~= nil and content_panel["about-settings"].valid then
     return content_panel["about-settings"]
   end
-  return ElementGui.addGuiFrameV(content_panel, "about-settings", helmod_frame_style.panel, ({"helmod_settings-panel.about-section"}))
+  return GuiElement.add(content_panel, GuiFrameV("about-settings"):style(helmod_frame_style.panel):caption({"helmod_settings-panel.about-section"}))
 end
 
 -------------------------------------------------------------------------------
@@ -68,10 +68,10 @@ function Settings:updateAboutSettings(event)
 
   local aboutSettingsPanel = self:getAboutSettingsPanel()
 
-  local dataSettingsTable = ElementGui.addGuiTable(aboutSettingsPanel, "settings", 2)
+  local dataSettingsTable = GuiElement.add(aboutSettingsPanel, GuiTable("settings"):column(2))
 
-  ElementGui.addGuiLabel(dataSettingsTable, self.classname.."=version-label", {"helmod_settings-panel.mod-version"})
-  ElementGui.addGuiLabel(dataSettingsTable, self.classname.."=version", game.active_mods["helmod"])
+  GuiElement.add(dataSettingsTable, GuiLabel(self.classname, "version-label"):caption({"helmod_settings-panel.mod-version"}))
+  GuiElement.add(dataSettingsTable, GuiLabel(self.classname, "version"):caption(game.active_mods["helmod"]))
 
-  ElementGui.addGuiLabel(aboutSettingsPanel, self.classname.."=info", {"helmod_settings-panel.mod-info"}, "helmod_label_help", nil, true)
+  GuiElement.add(aboutSettingsPanel, GuiLabel(self.classname, "info"):caption({"helmod_settings-panel.mod-info"}):style("helmod_label_help"))
 end

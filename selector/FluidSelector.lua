@@ -71,7 +71,8 @@ end
 --
 function FluidSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
   Logging:trace(self.classname, "buildPrototypeIcon(player, guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
-  ElementGui.addGuiButtonSelectSprite(guiElement, self.classname.."=element-select=ID=fluid=", Player.getItemIconType(prototype), prototype.name, prototype.name, tooltip)
+  local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select=ID", "fluid"):choose(prototype.type, prototype.name))
+  button.locked = true
 end
 
 
