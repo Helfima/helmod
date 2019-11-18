@@ -20,14 +20,14 @@ function SummaryTab:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
--- Get Button Styles
+-- Get Button Sprites
 --
--- @function [parent=#SummaryTab] getButtonStyles
+-- @function [parent=#SummaryTab] getButtonSprites
 --
 -- @return boolean
 --
-function SummaryTab:getButtonStyles()
-  return "helmod_button_icon_brief","helmod_button_icon_brief_selected"
+function SummaryTab:getButtonSprites()
+  return "brief-white","brief"
 end
 
 -------------------------------------------------------------------------------

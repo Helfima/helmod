@@ -22,3 +22,103 @@ data:extend({
   sprite_help("compute-order", 300, 223)
 })
 
+function sprite_icon(name, width, height, white)
+  local icon_name = "helmod-"..name
+  local position = {0,0}
+  if white then 
+    position = {32,0}
+    icon_name = icon_name.."-white"
+  end
+  return {
+    type ="sprite",
+    name = icon_name,
+    filename = "__helmod__/graphics/icons/"..name..".png",
+    priority = "extra-high-no-scale",
+    width = width,
+    height = height,
+    position = position,
+    shift = {0, 0}
+  }
+end
+
+function sprite_icon_sm(name, width, height, white)
+  local icon_name = "helmod-"..name
+  local position = {64,0}
+  if white then 
+    position = {88,0}
+    icon_name = icon_name.."-white"
+  end
+  icon_name = icon_name.."-sm"
+  return {
+    type ="sprite",
+    name = icon_name,
+    filename = "__helmod__/graphics/icons/"..name..".png",
+    priority = "extra-high-no-scale",
+    width = width,
+    height = height,
+    position = position,
+    shift = {0, 0}
+  }
+end
+
+local list = {
+  {name="arrow-down", sm=true},
+  {name="arrow-right"},
+  {name="arrow-up", sm=true},
+  {name="arrow-left"},
+  {name="brief"},
+  {name="calculator"},
+  {name="chart"},
+  {name="checkmark"},
+  {name="clock"},
+  {name="close-window"},
+  {name="container"},
+  {name="copy"},
+  {name="database"},
+  {name="delete", sm=true},
+  {name="download"},
+  {name="edit"},
+  {name="end", sm=true},
+  {name="energy"},
+  {name="erase", sm=true},
+  {name="factory"},
+  {name="filter", sm=true},
+  {name="filter-edit"},
+  {name="graduation"},
+  {name="hangar"},
+  {name="help"},
+  {name="info"},
+  {name="jewel"},
+  {name="link", sm=true},
+  {name="maximize-window"},
+  {name="menu"},
+  {name="minimize-window"},
+  {name="nuclear"},
+  {name="ok"},
+  {name="paste"},
+  {name="pause"},
+  {name="pin"},
+  {name="play", sm=true},
+  {name="property"},
+  {name="record", sm=true},
+  {name="refresh"},
+  {name="robot"},
+  {name="search"},
+  {name="services", sm=true},
+  {name="settings"},
+  {name="time"},
+  {name="unlink", sm=true},
+  {name="upload"},
+  {name="wrench"}
+}
+local spite_icons = {}
+for icon_row,icon in pairs(list) do
+  table.insert(spite_icons, sprite_icon(icon.name, 32, 32))
+  table.insert(spite_icons, sprite_icon(icon.name, 32, 32, true))
+  if icon.sm then
+    table.insert(spite_icons, sprite_icon_sm(icon.name, 24, 24))
+    table.insert(spite_icons, sprite_icon_sm(icon.name, 24, 24, true))
+  end
+end
+
+data:extend(spite_icons)

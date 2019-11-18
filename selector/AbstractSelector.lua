@@ -239,7 +239,9 @@ function AbstractSelector:onEvent(event)
     else
       -- classic selector
       if event.action == "element-select" and event.item1 ~= "container" then
-        local new_recipe = ModelBuilder.addRecipeIntoProductionBlock(event.item2, event.item1)
+        local index = nil
+        if filter_prototype_product == false then index = 0 end
+        local new_recipe = ModelBuilder.addRecipeIntoProductionBlock(event.item2, event.item1, index)
         ModelCompute.update()
         User.setParameter("scroll_element", new_recipe.id)
         User.setActiveForm("HMProductionBlockTab")

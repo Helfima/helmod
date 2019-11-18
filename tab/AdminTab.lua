@@ -20,14 +20,14 @@ function AdminTab:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
--- Get Button Styles
+-- Get Button Sprites
 --
--- @function [parent=#AdminTab] getButtonStyles
+-- @function [parent=#AdminTab] getButtonSprites
 --
 -- @return boolean
 --
-function AdminTab:getButtonStyles()
-  return "helmod_button_icon_database","helmod_button_icon_database_selected"
+function AdminTab:getButtonSprites()
+  return "database-white","database"
 end
 
 -------------------------------------------------------------------------------
@@ -298,7 +298,7 @@ function AdminTab:addRuleListRow(gui_table, rule, rule_id)
 
   -- col action
   local cell_action = GuiElement.add(gui_table, GuiTable("action", rule_id):column(4))
-  GuiElement.add(cell_action, GuiButton(self.classname, "rule-remove=ID", rule_id):style("helmod_button_icon_delete_sm_red"):tooltip({"tooltip.remove-element"}))
+  GuiElement.add(cell_action, GuiButton(self.classname, "rule-remove=ID", rule_id):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
 
   -- col index
   GuiElement.add(gui_table, GuiLabel("index", rule_id):caption(rule.index))
@@ -379,7 +379,7 @@ function AdminTab:addSheetListRow(gui_table, model)
   if element ~= nil then
     GuiElement.add(cell_element, GuiButtonSprite(self.classname, "donothing=ID", model.id):sprite("recipe", element.name):tooltip(RecipePrototype(element):getLocalisedName()))
   else
-    GuiElement.add(cell_element, GuiButton(self.classname, "donothing=ID", model.id):style("helmod_button_icon_help_selected"))
+    GuiElement.add(cell_element, GuiButton(self.classname, "donothing=ID", model.id):sprite("menu", "help-white", "help"):style("helmod_button_menu_selected"))
   end
 
 end

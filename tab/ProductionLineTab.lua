@@ -20,14 +20,14 @@ function ProductionLineTab:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
--- Get Button Styles
+-- Get Button Sprites
 --
--- @function [parent=#ProductionLineTab] getButtonStyles
+-- @function [parent=#ProductionLineTab] getButtonSprites
 --
 -- @return boolean
 --
-function ProductionLineTab:getButtonStyles()
-  return "helmod_button_icon_factory","helmod_button_icon_factory_selected"
+function ProductionLineTab:getButtonSprites()
+  return "factory-white","factory"
 end
 
 -------------------------------------------------------------------------------
@@ -226,13 +226,13 @@ function ProductionLineTab:addTableRow(gui_table, block)
   -- col action
   local cell_action = GuiElement.add(gui_table, GuiTable("action", block.id):column(2))
 
-  GuiElement.add(cell_action, GuiButton(self.classname, "production-block-up=ID", block.id):style("helmod_button_icon_arrow_top_sm"):tooltip({"tooltip.up-element", User.getModSetting("row_move_step")}))
-  GuiElement.add(cell_action, GuiButton(self.classname, "production-block-remove=ID", block.id):style("helmod_button_icon_delete_sm_red"):tooltip({"tooltip.remove-element"}))
-  GuiElement.add(cell_action, GuiButton(self.classname, "production-block-down=ID", block.id):style("helmod_button_icon_arrow_down_sm"):tooltip({"tooltip.down-element", User.getModSetting("row_move_step")}))
+  GuiElement.add(cell_action, GuiButton(self.classname, "production-block-up=ID", block.id):sprite("menu", "arrow-up-white-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.up-element", User.getModSetting("row_move_step")}))
+  GuiElement.add(cell_action, GuiButton(self.classname, "production-block-remove=ID", block.id):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
+  GuiElement.add(cell_action, GuiButton(self.classname, "production-block-down=ID", block.id):sprite("menu", "arrow-down-white-sm", "arrow-down-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.down-element", User.getModSetting("row_move_step")}))
   if unlinked then
-    GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink=ID", block.id):style("helmod_button_icon_unlink_sm"):tooltip({"tooltip.unlink-element"}))
+    GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink=ID", block.id):sprite("menu", "unlink-white-sm", "unlink-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.unlink-element"}))
   else
-    GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink=ID", block.id):style("helmod_button_icon_link_sm_selected"):tooltip({"tooltip.unlink-element"}))
+    GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink=ID", block.id):sprite("menu", "link-white-sm", "link-sm"):style("helmod_button_menu_sm_selected"):tooltip({"tooltip.unlink-element"}))
   end
 
   -- col index

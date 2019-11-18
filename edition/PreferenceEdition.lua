@@ -116,7 +116,7 @@ function PreferenceEdition:updatePriorityModule(event)
       local tooltip = GuiElement.getTooltipModule(element.module)
       GuiElement.add(priority_table_panel, GuiButtonSprite(self.classname, "do-nothing=ID", index):sprite("entity", element.name):tooltip(tooltip))
       GuiElement.add(priority_table_panel, GuiTextField(self.classname, "priority-module-update=ID", index):text(element.value))
-      GuiElement.add(priority_table_panel, GuiButtonSprite(self.classname, "priority-module-remove=ID", index):style("helmod_button_icon_delete_red"):tooltip(tooltip))
+      GuiElement.add(priority_table_panel, GuiButtonSprite(self.classname, "priority-module-remove=ID", index):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip(tooltip))
     end
   end
   

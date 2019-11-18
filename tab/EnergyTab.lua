@@ -22,14 +22,14 @@ function EnergyTab:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
--- Get Button Styles
+-- Get Button Sprites
 --
--- @function [parent=#EnergyTab] getButtonStyles
+-- @function [parent=#EnergyTab] getButtonSprites
 --
 -- @return boolean
 --
-function EnergyTab:getButtonStyles()
-  return "helmod_button_icon_nuclear","helmod_button_icon_nuclear_selected"
+function EnergyTab:getButtonSprites()
+  return "nuclear-white","nuclear"
 end
 
 -------------------------------------------------------------------------------
@@ -100,7 +100,7 @@ function EnergyTab:addTableRow(gui_table, power)
   log(self.classname)
   -- col action
   local cell_action = GuiElement.add(gui_table, GuiFrameH("action", power.id):style(helmod_frame_style.hidden))
-  GuiElement.add(cell_action, GuiButton(self.classname, "power-remove=ID", power.id):style("helmod_button_icon_delete_sm_red"):tooltip({"tooltip.remove-element"}))
+  GuiElement.add(cell_action, GuiButton(self.classname, "power-remove=ID", power.id):sprite("menu", "delete-white", "delete"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
   log(self.classname)
 
   -- col id

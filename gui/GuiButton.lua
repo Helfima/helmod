@@ -22,36 +22,24 @@ end)
 -- @function [parent=#GuiButton] sprite
 -- @param #string type
 -- @param #string name
+-- @param #string hovered
 -- @return #GuiButton
 --
-function GuiButton:sprite(type, name)
+function GuiButton:sprite(type, name, hovered)
   self.options.type = "sprite-button"
   self.is_caption = false
-  if type ~= nil and name ~= nil then
-    if type == "resource" then type = "item" end
-    if Player.is_valid_sprite_path(string.format("%s/%s", type, name)) then
-      self.options.sprite = string.format("%s/%s", type, name)
-    elseif Player.is_valid_sprite_path(string.format("%s/%s", "item", name)) then
-      self.options.sprite = string.format("%s/%s", "item", name)
-      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> item")
-    elseif Player.is_valid_sprite_path(string.format("%s/%s", "entity", name)) then
-      self.options.sprite = string.format("%s/%s", "entity", name)
-      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> entity")
-    elseif Player.is_valid_sprite_path(string.format("%s/%s", "fluid", name)) then
-      self.options.sprite = string.format("%s/%s", "fluid", name)
-      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> fluid")
-    elseif Player.is_valid_sprite_path(string.format("%s/%s", "technology", name)) then
-      self.options.sprite = string.format("%s/%s", "technology", name)
-      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> technology")
-    elseif Player.is_valid_sprite_path(string.format("%s/%s", "recipe", name)) then
-      self.options.sprite = string.format("%s/%s", "recipe", name)
-      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> recipe")
-    elseif Player.is_valid_sprite_path(string.format("%s/%s", "item-group", name)) then
-      self.options.sprite = string.format("%s/%s", "item-group", name)
-      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> item-group")
+  if type == "menu" then
+    self.options.sprite = GuiElement.getSprite(name)
+    if hovered then
+      self.options.hovered_sprite = GuiElement.getSprite(hovered)
     end
+  else
+    self.options.sprite = GuiElement.getSprite(type, name)
+    if hovered then
+      self.options.hovered_sprite = GuiElement.getSprite(type, hovered)
+    end
+    table.insert(self.name, name)
   end
-  table.insert(self.name, name)
   return self
 end
 
@@ -257,5 +245,8 @@ function GuiButtonSelectSpriteXxl:color(color)
   self.options.style = style
   return self
 end
+
+
+
 
 

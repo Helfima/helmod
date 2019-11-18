@@ -14,10 +14,11 @@ local ModelBuilder = {
 --
 -- @param #string key recipe name
 -- @param #string type recipe type
+-- @param #number index
 --
 -- @return recipe
 --
-function ModelBuilder.addRecipeIntoProductionBlock(key, type)
+function ModelBuilder.addRecipeIntoProductionBlock(key, type, index)
   Logging:debug(ModelBuilder.classname, "addRecipeIntoProductionBlock()", key, type)
   local model = Model.getModel()
   local current_block = User.getParameter("current_block")
@@ -28,8 +29,8 @@ function ModelBuilder.addRecipeIntoProductionBlock(key, type)
     -- ajoute le bloc si il n'existe pas
     if model.blocks[current_block] == nil then
       local modelBlock = Model.newBlock(lua_recipe)
-      local index = Model.countBlocks()
-      modelBlock.index = index
+      local block_index = Model.countBlocks()
+      modelBlock.index = block_index
       modelBlock.unlinked = false
       model.blocks[modelBlock.id] = modelBlock
       current_block = modelBlock.id
@@ -40,8 +41,17 @@ function ModelBuilder.addRecipeIntoProductionBlock(key, type)
 
     -- ajoute le recipe si il n'existe pas
     local ModelRecipe = Model.newRecipe(lua_recipe.name, type)
-    local index = Model.countBlockRecipes(current_block)
-    ModelRecipe.index = index
+    if index == nil then
+      local recipe_index = Model.countBlockRecipes(current_block)
+      ModelRecipe.index = recipe_index
+    else
+      ModelRecipe.index = index
+      for _,recipe in pairs(model.blocks[current_block].recipes) do
+        if recipe.index >= index then
+          recipe.index = recipe.index + 1
+        end
+      end
+    end
     ModelRecipe.count = 1
     -- ajoute les produits du block
     for _, lua_product in pairs(recipe_prototype:getProducts()) do
@@ -95,7 +105,7 @@ function ModelBuilder.addRecipeIntoProductionBlock(key, type)
     if default_beacon_module ~= nil then
       ModelBuilder.setBeaconModulePriority(current_block, ModelRecipe.id, default_beacon_module)
     end
-    
+
     Logging:debug(ModelBuilder.classname, "addRecipeIntoProductionBlock()", model.blocks[current_block])
     return ModelRecipe
   end
@@ -875,17 +885,22 @@ end
 -- @function [parent=#ModelBuilder] updateProduct
 --
 -- @param #string blockId production block id
--- @param #string key product name
+-- @param #string product_name
 -- @param #number quantity
 --
-function ModelBuilder.updateProduct(blockId, key, quantity)
-  Logging:debug(ModelBuilder.classname, "updateProduct()", blockId, key, quantity)
+function ModelBuilder.updateProduct(blockId, product_name, quantity)
+  Logging:debug(ModelBuilder.classname, "updateProduct()", blockId, product_name, quantity)
   local model = Model.getModel()
 
   if model.blocks[blockId] ~= nil then
     local block = model.blocks[blockId]
-    if block.input == nil then block.input = {} end
-    block.input[key] = quantity
+    local block_elements = block.products
+    if block.by_product == false then
+      block_elements = block.ingredients
+    end
+    if block_elements ~= nil and block_elements[product_name] ~= nil then 
+      block_elements[product_name].input = quantity
+    end
   end
 end
 

@@ -345,6 +345,12 @@ function Player.checkFactoryLimitationModule(module, lua_recipe)
       if lua_recipe.name == recipe_name then allowed = true end
     end
   end
+  
+  local allowed_effects = EntityPrototype(factory):getAllowedEffects()
+  if Model.countList(module.limitations) > 0 and Player.getModuleBonus(module.name, "productivity") > 0 and not(allowed_effects.productivity) and model_filter_factory_module == true then
+    allowed = false
+  end
+  
   if factory.module_slots ==  0 then
     allowed = false
   end
@@ -644,25 +650,28 @@ end
 --
 -- @function [parent=#Player] searchRecipe
 --
--- @param #string recipe name
+-- @param #string element_name
+-- @param #boolean by_ingredient
 --
 -- @return #table list of recipes
 --
-function Player.searchRecipe(name)
+function Player.searchRecipe(element_name, by_ingredient)
   local recipes = {}
   -- recherche dans les produits des recipes
   for key, recipe in pairs(Player.getRecipes()) do
-    for k, product in pairs(recipe.products) do
-      if product.name == name then
+    local elements = recipe.products or {}
+    if by_ingredient == true then elements = recipe.ingredients or {} end
+    for k, element in pairs(elements) do
+      if element.name == element_name then
         table.insert(recipes,{name=recipe.name, type="recipe"})
       end
     end
   end
   -- recherche dans les resource
   for key, resource in pairs(Player.getResources()) do
-    local products = EntityPrototype(resource):getMineableMiningProducts()
-    for key, product in pairs(products) do
-      if product.name == name then
+    local elements = EntityPrototype(resource):getMineableMiningProducts()
+    for key, element in pairs(elements) do
+      if element.name == element_name then
         table.insert(recipes,{name=resource.name, type="resource"})
         break
       end
@@ -670,7 +679,7 @@ function Player.searchRecipe(name)
   end
   -- recherche dans les fluids
   for key, fluid in pairs(Player.getFluidPrototypes()) do
-    if fluid.name == name then
+    if fluid.name == element_name then
       table.insert(recipes,{name=fluid.name, type="fluid"})
     end
   end

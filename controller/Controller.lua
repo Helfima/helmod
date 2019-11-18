@@ -213,7 +213,7 @@ function Controller:bindController(player)
       if lua_gui_element["helmod_planner-command"] ~= nil then lua_gui_element["helmod_planner-command"].destroy() end
     end
     if lua_gui_element ~= nil and lua_gui_element["helmod_planner-command"] == nil and User.getModSetting("display_main_icon") then
-      local gui_button = GuiElement.add(lua_gui_element, GuiButton("helmod_planner-command"):style("helmod_button_icon_calculator"):tooltip({"helmod_planner-command"}))
+      local gui_button = GuiElement.add(lua_gui_element, GuiButton("helmod_planner-command"):sprite("menu", "calculator-white", "calculator"):style("helmod_button_menu"):tooltip({"helmod_planner-command"}))
       gui_button.style.width = 37
       gui_button.style.height = 37
     end
@@ -650,7 +650,26 @@ function Controller:onEventAccessWrite(event)
     self:send("on_gui_update", event)
   end
 
-  if event.action == "production-recipe-add" then
+  if event.action == "production-recipe-product-add" then
+    if event.button == defines.mouse_button_type.right then
+      self:sendWithPrepare("on_gui_open", event, "HMRecipeSelector")
+    else
+      local recipes = Player.searchRecipe(event.item3, true)
+      if #recipes == 1 then
+        local recipe = recipes[1]
+        local new_recipe = ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type, 0)
+        ModelCompute.update()
+        User.setParameter("scroll_element", new_recipe.id)
+        self:send("on_gui_update", event)
+      else
+        -- pour ouvrir avec le filtre ingredient
+        event.button = defines.mouse_button_type.right
+        self:send("on_gui_open", event, "HMRecipeSelector")
+      end
+    end
+  end
+
+  if event.action == "production-recipe-ingredient-add" then
     if event.button == defines.mouse_button_type.right then
       self:sendWithPrepare("on_gui_open", event, "HMRecipeSelector")
     else
@@ -662,7 +681,7 @@ function Controller:onEventAccessWrite(event)
         User.setParameter("scroll_element", new_recipe.id)
         self:send("on_gui_update", event)
       else
-        self:send("on_gui_open", event,"HMRecipeSelector")
+        self:send("on_gui_open", event, "HMRecipeSelector")
       end
     end
   end

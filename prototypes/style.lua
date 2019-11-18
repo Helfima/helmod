@@ -72,7 +72,7 @@ end
 -------------------------------------------------------------------------------
 -- Menu icon type
 --
--- @function menuIconType
+-- @function menuButtonIcon
 --
 -- @param #string name
 -- @param #number icon_row
@@ -81,21 +81,24 @@ end
 -- @param #string font
 -- @param #table hovered_font_color
 --
-function menuIconType(name, icon_row, icon_col, size, suffix, font, hovered_font_color)
-  local style_name = "helmod_button_icon_"..name
+function menuButtonIcon(name, icon_row, icon_col, size, suffix, font, hovered_font_color)
+  local style_name = "helmod_button_"..name
   if suffix ~= nil then style_name = style_name.."_"..suffix end
   default_gui[style_name] = {
     type = "button_style",
     parent = "helmod_button_default",
-    top_padding = 9,
+    top_padding = 0,
+  right_padding = 0,
+  bottom_padding = 0,
+  left_padding = 0,
     width = size,
     height = size,
     scalable = false,
-    default_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=(icon_col[1]-1)*32,y=(icon_row-1)*32}, {top=0,right=0,bottom=0,left=0}, true),
-    hovered_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=(icon_col[2]-1)*32,y=(icon_row-1)*32}, {top=0,right=0,bottom=0,left=0}, true),
+    default_graphical_set = monolithIcon("__helmod__/graphics/icons/button.png", 32, 1, {0,0}, {x=(icon_col[1]-1)*32,y=(icon_row-1)*32}, {top=0,right=0,bottom=0,left=0}, true),
+    hovered_graphical_set = monolithIcon("__helmod__/graphics/icons/button.png", 32, 1, {0,0}, {x=(icon_col[2]-1)*32,y=(icon_row-1)*32}, {top=0,right=0,bottom=0,left=0}, true),
     hovered_font_color = hovered_font_color,
-    clicked_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=(icon_col[3]-1)*32,y=(icon_row-1)*32}, {top=0,right=0,bottom=0,left=0}, true),
-    disabled_graphical_set = monolithIcon("__helmod__/graphics/icons/menu_icons.png", 32, 1, {0,0}, {x=(icon_col[4]-1)*32,y=(icon_row-1)*32}, {top=0,right=0,bottom=0,left=0}, true)
+    clicked_graphical_set = monolithIcon("__helmod__/graphics/icons/button.png", 32, 1, {0,0}, {x=(icon_col[3]-1)*32,y=(icon_row-1)*32}, {top=0,right=0,bottom=0,left=0}, true),
+    disabled_graphical_set = monolithIcon("__helmod__/graphics/icons/button.png", 32, 1, {0,0}, {x=(icon_col[4]-1)*32,y=(icon_row-1)*32}, {top=0,right=0,bottom=0,left=0}, true)
   }
   if font ~= nil then
     default_gui[style_name].font = font
@@ -105,34 +108,34 @@ end
 -------------------------------------------------------------------------------
 -- Menu icons
 --
--- @function menuIcons
+-- @function menuButtonIcons
 --
 -- @param #string name
 -- @param #number icon_row
 -- @param #string font
 --
-function menuIcons(name, icon_row, font)
-  menuIconType(name, icon_row, {1,2,1,1}, 32, nil, font, {r=0, g=0, b=0})
-  menuIconType(name, icon_row, {1,2,1,1}, 24, "sm", font, {r=0, g=0, b=0})
+function menuButtonIcons(name, icon_row, font)
+  menuButtonIcon(name, icon_row, {1,2,1,1}, 32, nil, font, {r=0, g=0, b=0})
+  menuButtonIcon(name, icon_row, {1,2,1,1}, 24, "sm", font, {r=0, g=0, b=0})
   
-  menuIconType(name, icon_row, {3,2,1,1}, 32, "actived_red", font, {r=0, g=0, b=0})
-  menuIconType(name, icon_row, {3,2,1,1}, 32, "sm_actived_red", font, {r=0, g=0, b=0})
+  menuButtonIcon(name, icon_row, {3,2,1,1}, 32, "actived_red", font, {r=0, g=0, b=0})
+  menuButtonIcon(name, icon_row, {3,2,1,1}, 32, "sm_actived_red", font, {r=0, g=0, b=0})
 
-  menuIconType(name, icon_row, {1,3,1,1}, 32, "red", font, {r=0, g=0, b=0})
-  menuIconType(name, icon_row, {1,3,1,1}, 24, "sm_red", font, {r=0, g=0, b=0})
+  menuButtonIcon(name, icon_row, {1,3,1,1}, 32, "red", font, {r=0, g=0, b=0})
+  menuButtonIcon(name, icon_row, {1,3,1,1}, 24, "sm_red", font, {r=0, g=0, b=0})
   
-  menuIconType(name, icon_row, {4,5,4,4}, 32, "selected", font, {r=1, g=1, b=1})
-  menuIconType(name, icon_row, {4,5,4,4}, 24, "sm_selected", font, {r=1, g=1, b=1})
+  menuButtonIcon(name, icon_row, {4,5,4,4}, 32, "selected", font, {r=1, g=1, b=1})
+  menuButtonIcon(name, icon_row, {4,5,4,4}, 24, "sm_selected", font, {r=1, g=1, b=1})
   
-  menuIconType(name, icon_row, {5,5,5,5}, 32, "selected_yellow", font, {r=0, g=0, b=0})
-  menuIconType(name, icon_row, {5,5,5,5}, 24, "sm_selected_yellow", font, {r=0, g=0, b=0})
+  menuButtonIcon(name, icon_row, {5,5,5,5}, 32, "selected_yellow", font, {r=0, g=0, b=0})
+  menuButtonIcon(name, icon_row, {5,5,5,5}, 24, "sm_selected_yellow", font, {r=0, g=0, b=0})
   
-  menuIconType(name, icon_row, {6,6,6,6}, 32, "selected_red", font, {r=0, g=0, b=0})
-  menuIconType(name, icon_row, {6,6,6,6}, 24, "sm_selected_red", font, {r=0, g=0, b=0})
+  menuButtonIcon(name, icon_row, {6,6,6,6}, 32, "selected_red", font, {r=0, g=0, b=0})
+  menuButtonIcon(name, icon_row, {6,6,6,6}, 24, "sm_selected_red", font, {r=0, g=0, b=0})
   
-  menuIconType(name, icon_row, {7,8,7,7}, 36, "flat2", font, {r=0, g=0, b=0})
-  menuIconType(name, icon_row, {7,8,7,7}, 32, "flat", font, {r=0, g=0, b=0})
-  menuIconType(name, icon_row, {7,8,7,7}, 24, "sm_flat", font, {r=0, g=0, b=0})
+  menuButtonIcon(name, icon_row, {7,8,7,7}, 36, "flat2", font, {r=0, g=0, b=0})
+  menuButtonIcon(name, icon_row, {7,8,7,7}, 32, "flat", font, {r=0, g=0, b=0})
+  menuButtonIcon(name, icon_row, {7,8,7,7}, 24, "sm_flat", font, {r=0, g=0, b=0})
 end
 
 -------------------------------------------------------------------------------
@@ -253,64 +256,7 @@ default_gui["helmod_button_icon_default"] = {
   disabled_graphical_set = compositionIcon("__core__/graphics/gui.png", {icon_corner_size, icon_corner_size}, {3 - icon_corner_size, 19 - icon_corner_size}),
 }
 
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] icon_yyy
-
-local list = {
-  {name="calculator"},
-  {name="arrow_down"},
-  {name="arrow_right"},
-  {name="arrow_top"},
-  {name="arrow_left"},
-  {name="download"},
-  {name="upload"},
-  {name="refresh"},
-  {name="clock"},
-  {name="close"},
-  {name="copy"},
-  {name="help"},
-  {name="info"},
-  {name="maximize"},
-  {name="minimize"},
-  {name="menu"},
-  {name="past"},
-  {name="pin"},
-  {name="delete"},
-  {name="edit"},
-  {name="settings"},
-  {name="time", font="helmod_font_small2_bold"},
-  {name="unlink"},
-  {name="link"},
-  {name="energy"},
-  {name="property"},
-  {name="graduation"},
-  {name="filter"},
-  {name="container"},
-  {name="wrench"},
-  {name="brief"},
-  {name="chart"},
-  {name="database"},
-  {name="jewel"},
-  {name="nuclear"},
-  {name="factory"},
-  {name="hangar"},
-  {name="robot"},
-  {name="ok"},
-  {name="checkmark"},
-  {name="services"},
-  {name="search"},
-  {name="play"},
-  {name="end"},
-  {name="pause"},
-  {name="record"},
-  {name="erase"}
-}
-for icon_row,icon in pairs(list) do
-  menuIcons(icon.name, icon_row, icon.font)
-end
-
+menuButtonIcons("menu",1)
 -------------------------------------------------------------------------------
 -- Style of button
 --

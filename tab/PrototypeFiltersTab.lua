@@ -20,14 +20,14 @@ function PrototypeFiltersTab:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
--- Get Button Styles
+-- Get Button Sprites
 --
--- @function [parent=#PrototypeFiltersTab] getButtonStyles
+-- @function [parent=#PrototypeFiltersTab] getButtonSprites
 --
 -- @return boolean
 --
-function PrototypeFiltersTab:getButtonStyles()
-  return "helmod_button_icon_filter","helmod_button_icon_filter_selected"
+function PrototypeFiltersTab:getButtonSprites()
+  return "filter-edit-white","filter-edit"
 end
 
 -------------------------------------------------------------------------------
@@ -167,7 +167,7 @@ function PrototypeFiltersTab:addRowFilter(itable, prototype_filter, index)
   if index == 0 then
     GuiElement.add(itable, GuiButton(self.classname, "add-prototype-filter=ID", index):caption("+"):style("helmod_button_small_bold"))
   else
-    GuiElement.add(itable, GuiButton(self.classname, "remove-prototype-filter=ID", index):style("helmod_button_icon_delete_sm_red"))
+    GuiElement.add(itable, GuiButton(self.classname, "remove-prototype-filter=ID", index):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"))
   end
 end
 

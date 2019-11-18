@@ -115,14 +115,17 @@ function ProductEdition:onUpdate(event)
   product = nil
   if model.blocks[event.item1] ~= nil then
     local block = model.blocks[event.item1]
-    for _, element in pairs(block.products) do
-      if element.name == event.item2 then
-        product = element
-        if block.input ~= nil and block.input[product.name] then
-          product_count = block.input[product.name]
-        else
-          product_count = product.count
-        end
+    local block_elements = block.products
+    if block.by_product == false then
+      block_elements = block.ingredients
+    end
+    local element_name = event.item2
+    if block_elements ~= nil and block_elements[element_name] ~= nil then
+      product = block_elements[element_name]
+      if product.input ~= nil then
+        product_count = product.input
+      else
+        product_count = product.count
       end
     end
   end

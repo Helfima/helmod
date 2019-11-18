@@ -56,6 +56,82 @@ end
 
 -------------------------------------------------------------------------------
 --
+-- @function [parent=#GuiElement] overlay
+-- @param #string type
+-- @param #string name
+-- @return #GuiElement
+-- 
+function GuiElement:overlay(type, name)
+  if self.options.overlay == nil then self.options.overlay = {} end
+  if name == nil then
+    table.insert(self.options.overlay, string.format("helmod-%s", type))
+  elseif type ~= nil and name ~= nil then
+    if type == "resource" then type = "item" end
+    if Player.is_valid_sprite_path(string.format("%s/%s", type, name)) then
+      table.insert(self.options.overlay, string.format("%s/%s", type, name))
+    elseif Player.is_valid_sprite_path(string.format("%s/%s", "item", name)) then
+      table.insert(self.options.overlay, string.format("%s/%s", "item", name))
+      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> item")
+    elseif Player.is_valid_sprite_path(string.format("%s/%s", "entity", name)) then
+      table.insert(self.options.overlay, string.format("%s/%s", "entity", name))
+      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> entity")
+    elseif Player.is_valid_sprite_path(string.format("%s/%s", "fluid", name)) then
+      table.insert(self.options.overlay, string.format("%s/%s", "fluid", name))
+      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> fluid")
+    elseif Player.is_valid_sprite_path(string.format("%s/%s", "technology", name)) then
+      table.insert(self.options.overlay, string.format("%s/%s", "technology", name))
+      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> technology")
+    elseif Player.is_valid_sprite_path(string.format("%s/%s", "recipe", name)) then
+      table.insert(self.options.overlay, string.format("%s/%s", "recipe", name))
+      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> recipe")
+    elseif Player.is_valid_sprite_path(string.format("%s/%s", "item-group", name)) then
+      table.insert(self.options.overlay, string.format("%s/%s", "item-group", name))
+      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> item-group")
+    end
+  end
+  return self
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiElement] getSprite
+-- @param #string type
+-- @param #string name
+-- @return #GuiElement
+-- 
+function GuiElement.getSprite(type, name)
+  local sprite = ""
+  if name == nil then
+    sprite = string.format("helmod-%s", type)
+  elseif type ~= nil and name ~= nil then
+    if type == "resource" then type = "item" end
+    if Player.is_valid_sprite_path(string.format("%s/%s", type, name)) then
+      sprite = string.format("%s/%s", type, name)
+    elseif Player.is_valid_sprite_path(string.format("%s/%s", "item", name)) then
+      sprite = string.format("%s/%s", "item", name)
+      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> item")
+    elseif Player.is_valid_sprite_path(string.format("%s/%s", "entity", name)) then
+      sprite = string.format("%s/%s", "entity", name)
+      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> entity")
+    elseif Player.is_valid_sprite_path(string.format("%s/%s", "fluid", name)) then
+      sprite = string.format("%s/%s", "fluid", name)
+      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> fluid")
+    elseif Player.is_valid_sprite_path(string.format("%s/%s", "technology", name)) then
+      sprite = string.format("%s/%s", "technology", name)
+      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> technology")
+    elseif Player.is_valid_sprite_path(string.format("%s/%s", "recipe", name)) then
+      sprite = string.format("%s/%s", "recipe", name)
+      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> recipe")
+    elseif Player.is_valid_sprite_path(string.format("%s/%s", "item-group", name)) then
+      sprite = string.format("%s/%s", "item-group", name)
+      Logging:warn(GuiButton.classname, "wrong type", type, name, "-> item-group")
+    end
+  end
+  return sprite
+end
+
+-------------------------------------------------------------------------------
+--
 -- @function [parent=#GuiElement] getOptions
 -- @return #table
 -- 

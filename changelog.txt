@@ -1,8 +1,15 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.9.12
-Date: 06. 11. 2019
+Date: 18. 11. 2019
+  Features:
+    - Added switch to choose product/ingredient block input
+    - Added capability to set all product/ingredient input
   Changes:
+    - Changed product tooltip
+    - Changed sprite button
     - Changed classes of UI
+  Bugfixes:
+    - Fixed module limitation on factory
 ---------------------------------------------------------------------------------------------------
 Version: 0.9.11
 Date: 27. 10. 2019

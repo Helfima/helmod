@@ -3,6 +3,7 @@ Logging = {}
 local append_log=false
 local debug_level = 0
 local debug_filter = "all"
+local global_profiler = nil
 local profiler = nil
 
 function Logging:new()
@@ -11,23 +12,32 @@ function Logging:new()
   self.logClass = {}
   self.debug_values = {none=0,error=1,warn=2,info=3,debug=4,trace=5}
   self:updateLevel()
+  self.profiler = false
 end
 
 function Logging:profilerStart()
+  if self.profiler == false then return end
+  if global_profiler == nil then global_profiler = game.create_profiler() end
   if profiler == nil then profiler = game.create_profiler() end
+  global_profiler.reset()
   profiler.reset()
+  log({"", "*** Profiler begin ***", " | ", profiler})
 end
 
-function Logging:profilerReset()
+function Logging:profilerReset(...)
+  if self.profiler == false then return end
   if profiler ~= nil then
-    log(profiler)
+    local message = {...}
+    log({"", table.concat({...}," "), " | ", profiler})
     profiler.reset()
   end
 end
 
 function Logging:profilerStop()
+  if self.profiler == false then return end
   if profiler ~= nil then
-    log(profiler)
+    log({"", "*** Profiler end ***", " | ", global_profiler})
+    global_profiler.stop()
     profiler.stop()
   end
 end

@@ -4,7 +4,7 @@ require "core.Object"
 -- Class to help to build form
 --
 -- @module Form
--- @extends Object#Object 
+-- @extends Object#Object
 --
 Form = newclass(Object,function(base,classname)
   Object.init(base,classname)
@@ -23,10 +23,10 @@ end)
 --
 function Form:bind()
   Dispatcher:bind("on_gui_event", self, self.event)
-  
+
   Dispatcher:bind("on_gui_open", self, self.open)
   Dispatcher:bind("on_gui_open", self, self.update)
-  
+
   Dispatcher:bind("on_gui_update", self, self.update)
   Dispatcher:bind("on_gui_close", self, self.close)
 
@@ -116,14 +116,14 @@ function Form:getPanel()
   Logging:debug(self.classname, "location", self:getPanelName(), User.getLocationForm(self:getPanelName()))
   GuiElement.setStyle(flow_panel, self.classname, "width")
   GuiElement.setStyle(flow_panel, self.classname, "height")
-  
+
   local header_panel = GuiElement.add(flow_panel, GuiFlowH("header_panel"))
   local title_panel = GuiElement.add(header_panel, GuiFrameH("title_panel"):caption(self.panelCaption or self.classname))
   title_panel.style.height = 40
   local menu_panel = GuiElement.add(header_panel,  GuiFrameH("menu_panel"):style(helmod_frame_style.panel))
   --menu_panel.style.horizontal_spacing = 10
   menu_panel.style.horizontal_align = "right"
-  
+
   local content_panel
   if self.content_verticaly == true then
     content_panel = GuiElement.add(flow_panel, GuiFlowV("content_panel"))
@@ -337,13 +337,13 @@ function Form:updateTopMenu(event)
       if string.find(self.classname, "Tab") then
         local group3 = GuiElement.add(menu_panel, GuiFlowH("group3"))
         if game.is_multiplayer() and not(game.tick_paused) then
-          local pause_button = GuiElement.add(group3, GuiButton("do-nothing"):style("helmod_button_icon_play_flat"):tooltip({"helmod_button.game-play-multiplayer"}))
+          local pause_button = GuiElement.add(group3, GuiButton("do-nothing"):sprite("menu", "play-white", "play"):style("helmod_button_menu_flat"):tooltip({"helmod_button.game-play-multiplayer"}))
           pause_button.enabled = false
         else
           if game.tick_paused then
-            GuiElement.add(group3, GuiButton(self.classname, "game-play"):style("helmod_button_icon_pause_actived_red"):tooltip({"helmod_button.game-pause"}))
+            GuiElement.add(group3, GuiButton(self.classname, "game-play"):sprite("menu", "pause", "pause"):style("helmod_button_menu_actived_red"):tooltip({"helmod_button.game-pause"}))
           else
-            GuiElement.add(group3, GuiButton(self.classname, "game-pause"):style("helmod_button_icon_play"):tooltip({"helmod_button.game-play"}))
+            GuiElement.add(group3, GuiButton(self.classname, "game-pause"):sprite("menu", "play-white", "play"):style("helmod_button_menu"):tooltip({"helmod_button.game-play"}))
           end
         end
       end
@@ -351,17 +351,18 @@ function Form:updateTopMenu(event)
       local group1 = GuiElement.add(menu_panel, GuiFlowH("group1"))
       for _, form in pairs(Controller.getViews()) do
         if string.find(self.classname, "Tab") and string.find(form.classname, "Tab") and form:isVisible() and form:isSpecial() then
-          local style, selected_style = form:getButtonStyles()
-          if User.isActiveForm(form.classname) then style = selected_style end
-          GuiElement.add(group1, GuiButton(self.classname, "change-tab=ID", form.classname):style(style):tooltip(form:getButtonCaption()))
+          local icon_hovered, icon = form:getButtonSprites()
+          local style = "helmod_button_menu"
+          if User.isActiveForm(form.classname) then style = "helmod_button_menu_selected" end
+          GuiElement.add(group1, GuiButton(self.classname, "change-tab=ID", form.classname):sprite("menu", icon_hovered, icon):style(style):tooltip(form:getButtonCaption()))
         end
       end
       -- current button
       local group2 = GuiElement.add(menu_panel, GuiFlowH("group2"))
       if self.help_button then
-        GuiElement.add(group2, GuiButton("HMHelpPanel", "OPEN"):style("helmod_button_icon_help"):tooltip({"helmod_button.help"}))
+        GuiElement.add(group2, GuiButton("HMHelpPanel", "OPEN"):sprite("menu", "help-white", "help"):style("helmod_button_menu"):tooltip({"helmod_button.help"}))
       end
-      GuiElement.add(group2, GuiButton(self.classname, "CLOSE"):style("helmod_button_icon_close_red"):tooltip({"helmod_button.close"}))
+      GuiElement.add(group2, GuiButton(self.classname, "CLOSE"):sprite("menu", "close-window-white", "close-window"):style("helmod_button_menu_red"):tooltip({"helmod_button.close"}))
     end
   else
     Logging:warn(self.classname, "self.panelCaption not found")

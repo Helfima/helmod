@@ -88,10 +88,10 @@ function PinPanel:updateHeader(event)
   local model = Model.getModel()
   left_menu_panel.clear()
   local group1 = GuiElement.add(left_menu_panel, GuiFlowH("group1"))
-  GuiElement.add(group1, GuiButton(self.classname, "change-level=ID", "down"):style("helmod_button_icon_arrow_left"):tooltip({"helmod_button.decrease"}))
-  GuiElement.add(group1, GuiButton(self.classname.."change-level=ID", "up"):style("helmod_button_icon_arrow_right"):tooltip({"helmod_button.expand"}))
-  GuiElement.add(group1, GuiButton(self.classname.."change-level=ID", "min"):style("helmod_button_icon_minimize"):tooltip({"helmod_button.minimize"}))
-  GuiElement.add(group1, GuiButton(self.classname.."change-level=ID", "max"):style("helmod_button_icon_maximize"):tooltip({"helmod_button.maximize"}))
+  GuiElement.add(group1, GuiButton(self.classname, "change-level=ID", "down"):sprite("menu", "arrow-left-white", "arrow-left"):style("helmod_button_menu"):tooltip({"helmod_button.decrease"}))
+  GuiElement.add(group1, GuiButton(self.classname.."change-level=ID", "up"):sprite("menu", "arrow-right-white", "arrow-right"):style("helmod_button_menu"):tooltip({"helmod_button.expand"}))
+  GuiElement.add(group1, GuiButton(self.classname.."change-level=ID", "min"):sprite("menu", "minimize-window-white", "minimize-window"):style("helmod_button_menu"):tooltip({"helmod_button.minimize"}))
+  GuiElement.add(group1, GuiButton(self.classname.."change-level=ID", "max"):sprite("menu", "maximize-window-white", "maximize-window"):style("helmod_button_menu"):tooltip({"helmod_button.maximize"}))
 
 end
 

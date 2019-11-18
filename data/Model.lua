@@ -56,6 +56,22 @@ function Model.getModels(bypass)
 end
 
 -------------------------------------------------------------------------------
+-- Get block order
+--
+-- @function [parent=#Model] getBlockOrder
+--
+-- @return #table
+--
+function Model.getBlockOrder()
+  local model = Model.getModel()
+  local current_block = User.getParameter("current_block")
+  local block = model.blocks[current_block]
+  local order = {"products", "ingredients"}
+  if block.by_product == false then order = {"ingredients", "products"} end
+  return order
+end
+
+-------------------------------------------------------------------------------
 -- Get rules
 --
 -- @function [parent=#Model] getRules

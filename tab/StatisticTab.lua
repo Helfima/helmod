@@ -20,14 +20,14 @@ function StatisticTab:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
--- Get Button Styles
+-- Get Button Sprites
 --
--- @function [parent=#StatisticTab] getButtonStyles
+-- @function [parent=#StatisticTab] getButtonSprites
 --
 -- @return boolean
 --
-function StatisticTab:getButtonStyles()
-  return "helmod_button_icon_chart","helmod_button_icon_chart_selected"
+function StatisticTab:getButtonSprites()
+  return "chart-white","chart"
 end
 
 -------------------------------------------------------------------------------

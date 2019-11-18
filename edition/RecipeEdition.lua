@@ -567,11 +567,11 @@ function RecipeEdition:updateFactoryInfo(event)
     local tool_panel1 = GuiElement.add(tool_action_panel, GuiFlowH("tool1"))
 
     local default_factory = User.getDefaultFactory(recipe)
-    local record_style = "helmod_button_icon_record_sm"
-    if default_factory ~= nil and default_factory.name == factory.name  then record_style = "helmod_button_icon_record_sm_selected" end
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool=ID", block_id, recipe_id, "default"):style(record_style):tooltip({"helmod_recipe-edition-panel.set-default"}))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool=ID", block_id, recipe_id, "block"):style("helmod_button_icon_play_sm"):tooltip({"helmod_recipe-edition-panel.apply-block", {"helmod_recipe-edition-panel.current-factory"}}))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool=ID", block_id, recipe_id, "line"):style("helmod_button_icon_end_sm"):tooltip({"helmod_recipe-edition-panel.apply-line", {"helmod_recipe-edition-panel.current-factory"}}))
+    local record_style = "helmod_button_menu_sm"
+    if default_factory ~= nil and default_factory.name == factory.name  then record_style = "helmod_button_menu_sm_selected" end
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool=ID", block_id, recipe_id, "default"):sprite("menu", "services-white-sm", "services-sm"):style(record_style):tooltip({"helmod_recipe-edition-panel.set-default"}))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool=ID", block_id, recipe_id, "block"):sprite("menu", "play-white-sm", "play-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_recipe-edition-panel.apply-block", {"helmod_recipe-edition-panel.current-factory"}}))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool=ID", block_id, recipe_id, "line"):sprite("menu", "end-white-sm", "end-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_recipe-edition-panel.apply-line", {"helmod_recipe-edition-panel.current-factory"}}))
 
     local tool_panel2 = GuiElement.add(tool_action_panel, GuiFlowH("tool2"))
     local button_style = "helmod_button_small_bold"
@@ -682,13 +682,13 @@ function RecipeEdition:updateFactoryModules(event)
     tool_action_panel.style.bottom_padding = 10
     local tool_panel1 = GuiElement.add(tool_action_panel, GuiFlowH("tool1"))
     local default_factory_module = User.getDefaultFactoryModule(recipe)
-    local record_style = "helmod_button_icon_record_sm"
+    local record_style = "helmod_button_menu_sm"
     Logging:debug(self.classname, "default_factory_module", default_factory_module, factory.module_priority)
-    if compare_priority(default_factory_module, factory.module_priority) then record_style = "helmod_button_icon_record_sm_selected" end
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-tool=ID", block_id, recipe_id, "default"):style(record_style):tooltip({"helmod_recipe-edition-panel.set-default"}))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-tool=ID", block_id, recipe_id, "block"):style("helmod_button_icon_play_sm"):tooltip({"helmod_recipe-edition-panel.apply-block", {"helmod_recipe-edition-panel.current-module"}}))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-tool=ID", block_id, recipe_id, "line"):style("helmod_button_icon_end_sm"):tooltip({"helmod_recipe-edition-panel.apply-line", {"helmod_recipe-edition-panel.current-module"}}))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-tool=ID", block_id, recipe_id, "erase"):style("helmod_button_icon_erase_sm"):tooltip({"helmod_recipe-edition-panel.module-clear"}))
+    if compare_priority(default_factory_module, factory.module_priority) then record_style = "helmod_button_menu_sm_selected" end
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-tool=ID", block_id, recipe_id, "default"):sprite("menu", "record-white-sm", "record-sm"):style(record_style):tooltip({"helmod_recipe-edition-panel.set-default"}))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-tool=ID", block_id, recipe_id, "block"):sprite("menu", "play-white-sm", "play-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_recipe-edition-panel.apply-block", {"helmod_recipe-edition-panel.current-module"}}))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-tool=ID", block_id, recipe_id, "line"):sprite("menu", "end-white-sm", "end-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_recipe-edition-panel.apply-line", {"helmod_recipe-edition-panel.current-module"}}))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-tool=ID", block_id, recipe_id, "erase"):sprite("menu", "erase-white-sm", "erase-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_recipe-edition-panel.module-clear"}))
 
     -- actived modules panel
     local module_table = GuiElement.add(factory_module_panel, GuiTable("modules"):column(6):style("helmod_table_recipe_modules"))
@@ -710,8 +710,8 @@ function RecipeEdition:updateFactoryModules(event)
 
     local tool_panel1 = GuiElement.add(tool_action_panel2, GuiFlowH("tool1"))
     local button_style = "helmod_button_small_bold"
-    GuiElement.add(tool_panel1, GuiButton("HMPreferenceEdition=OPEN=ID="):style("helmod_button_icon_services_sm"):tooltip({"helmod_button.preferences"}))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-priority-apply=ID", block_id, recipe_id):style("helmod_button_icon_arrow_top_sm"):tooltip({"helmod_recipe-edition-panel.apply-priority"}))
+    GuiElement.add(tool_panel1, GuiButton("HMPreferenceEdition=OPEN=ID="):sprite("menu", "services-white-sm", "services-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_button.preferences"}))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-priority-apply=ID", block_id, recipe_id):sprite("menu", "arrow-up-white-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_recipe-edition-panel.apply-priority"}))
 
     local tool_panel2 = GuiElement.add(tool_action_panel2, GuiFlowH("tool2"))
     for i, priority_module in pairs(priority_modules) do
@@ -768,11 +768,11 @@ function RecipeEdition:updateBeaconInfo(event)
     local tool_panel1 = GuiElement.add(tool_action_panel, GuiFlowH("tool1"))
 
     local default_beacon = User.getDefaultBeacon(recipe)
-    local record_style = "helmod_button_icon_record_sm"
-    if default_beacon ~= nil and default_beacon.name == beacon.name  then record_style = "helmod_button_icon_record_sm_selected" end
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-tool=ID", block_id, recipe_id, "default"):style(record_style):tooltip({"helmod_recipe-edition-panel.set-default"}))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-tool=ID", block_id, recipe_id, "block"):style("helmod_button_icon_play_sm"):tooltip({"helmod_recipe-edition-panel.apply-block", {"helmod_recipe-edition-panel.current-beacon"}}))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-tool=ID", block_id, recipe_id, "line"):style("helmod_button_icon_end_sm"):tooltip({"helmod_recipe-edition-panel.apply-line", {"helmod_recipe-edition-panel.current-beacon"}}))
+    local record_style = "helmod_button_menu_sm"
+    if default_beacon ~= nil and default_beacon.name == beacon.name  then record_style = "helmod_button_menu_sm_selected" end
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-tool=ID", block_id, recipe_id, "default"):sprite("menu", "record-white-sm", "record-sm"):style(record_style):tooltip({"helmod_recipe-edition-panel.set-default"}))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-tool=ID", block_id, recipe_id, "block"):sprite("menu", "play-white-sm", "play-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_recipe-edition-panel.apply-block", {"helmod_recipe-edition-panel.current-beacon"}}))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-tool=ID", block_id, recipe_id, "line"):sprite("menu", "end-white-sm", "end-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_recipe-edition-panel.apply-line", {"helmod_recipe-edition-panel.current-beacon"}}))
 
     local tool_panel2 = GuiElement.add(tool_action_panel, GuiFlowH("tool2"))
     local button_style = "helmod_button_small_bold"
@@ -857,13 +857,13 @@ function RecipeEdition:updateBeaconModules(event)
     tool_action_panel.style.bottom_padding = 10
     local tool_panel1 = GuiElement.add(tool_action_panel, GuiFlowH("tool1"))
     local default_beacon_module = User.getDefaultBeaconModule(recipe)
-    local record_style = "helmod_button_icon_record_sm"
+    local record_style = "helmod_button_menu_sm"
     Logging:debug(self.classname, "default_factory_module", default_beacon_module, beacon.module_priority)
-    if compare_priority(default_beacon_module, beacon.module_priority) then record_style = "helmod_button_icon_record_sm_selected" end
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool=ID", block_id, recipe_id, "default"):style(record_style):tooltip({"helmod_recipe-edition-panel.set-default"}))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool=ID", block_id, recipe_id, "block"):style("helmod_button_icon_play_sm"):tooltip({"helmod_recipe-edition-panel.apply-block", {"helmod_recipe-edition-panel.current-module"}}))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool=ID", block_id, recipe_id, "line"):style("helmod_button_icon_end_sm"):tooltip({"helmod_recipe-edition-panel.apply-line", {"helmod_recipe-edition-panel.current-module"}}))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool=ID", block_id, recipe_id, "erase"):style("helmod_button_icon_erase_sm"):tooltip({"helmod_recipe-edition-panel.module-clear"}))
+    if compare_priority(default_beacon_module, beacon.module_priority) then record_style = "helmod_button_menu_sm_selected" end
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool=ID", block_id, recipe_id, "default"):sprite("menu", "record-white-sm", "record-sm"):style(record_style):tooltip({"helmod_recipe-edition-panel.set-default"}))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool=ID", block_id, recipe_id, "block"):sprite("menu", "play-white-sm", "play-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_recipe-edition-panel.apply-block", {"helmod_recipe-edition-panel.current-module"}}))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool=ID", block_id, recipe_id, "line"):sprite("menu", "end-white-sm", "end-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_recipe-edition-panel.apply-line", {"helmod_recipe-edition-panel.current-module"}}))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool=ID", block_id, recipe_id, "erase"):sprite("menu", "erase-white-sm", "erase-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_recipe-edition-panel.module-clear"}))
 
     -- actived modules panel
     local module_table = GuiElement.add(beacon_module_panel, GuiTable("modules"):column(6):style("helmod_table_recipe_modules"))
@@ -885,8 +885,8 @@ function RecipeEdition:updateBeaconModules(event)
 
     local tool_panel1 = GuiElement.add(tool_action_panel2, GuiFlowH("tool1"))
     local button_style = "helmod_button_small_bold"
-    GuiElement.add(tool_panel1, GuiButton("HMPreferenceEdition=OPEN=ID="):style("helmod_button_icon_services_sm"):tooltip({"helmod_button.preferences"}))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-priority-apply=ID", block_id, recipe_id):style("helmod_button_icon_arrow_top_sm"):tooltip({"helmod_recipe-edition-panel.apply-priority"}))
+    GuiElement.add(tool_panel1, GuiButton("HMPreferenceEdition=OPEN=ID="):sprite("menu", "services-white-sm", "services-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_button.preferences"}))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-priority-apply=ID", block_id, recipe_id):sprite("menu", "arrow-up-white-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_recipe-edition-panel.apply-priority"}))
 
     local tool_panel2 = GuiElement.add(tool_action_panel2, GuiFlowH("tool2"))
     for i, priority_module in pairs(priority_modules) do
@@ -961,7 +961,7 @@ function RecipeEdition:updateObjectInfo(event)
 
     -- energy
     local cell_energy = GuiElement.add(recipe_table, GuiFrameH("energy", recipe.id):style(helmod_frame_style.hidden))
-    local element_energy = {name = "helmod_button_icon_clock_flat2" ,count = recipe_prototype:getEnergy(),localised_name = "helmod_label.energy"}
+    local element_energy = {name = "helmod_button_menu_flat", hovered = "clock-white", sprite = "clock" , count = recipe_prototype:getEnergy(),localised_name = "helmod_label.energy"}
     GuiElement.add(cell_energy, GuiCellProduct(self.classname, "do_noting=ID"):element(element_energy):tooltip("tooltip.product"):color("gray"))
 
     -- products

@@ -177,7 +177,7 @@ function GuiCellProduct:create(parent)
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
   
   if string.find(element.name, "helmod") then
-    GuiElement.add(row1, GuiButton(unpack(self.name)):style(element.name):tooltip({element.localised_name}))
+    GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", element.hovered, element.sprite):style(element.name):tooltip({element.localised_name}))
   else
     GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type, element.name):caption("X"..Product(element):getElementAmount()):tooltip({self.options.tooltip, Player.getLocalisedName(element)}))
   end
@@ -285,9 +285,11 @@ function GuiCellEnergy:create(parent)
   local element = self.element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element", color, 1))
+  row1.style.top_padding=4
+  row1.style.bottom_padding=4
   
-  GuiElement.add(row1, GuiButton(unpack(self.name)):style("helmod_button_icon_energy_flat2"):tooltip({self.options.tooltip, {"helmod_common.energy"}}))
-
+  local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", "energy-white", "energy"):style("helmod_button_menu_flat"):tooltip({self.options.tooltip, {"helmod_label.energy"}}))
+  
   if element.limit_energy ~= nil then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element", color, 2))
     local caption2 = Format.formatNumberElement(element.limit_energy)
@@ -500,7 +502,7 @@ function GuiCellInput:create(parent)
   table.insert(button_name, "validation")
   local cell = GuiElement.add(parent, GuiTable(unpack(cell_name)):column(2))
   local input = GuiElement.add(cell, GuiTextField(unpack(self.name)):text(self.m_text):tooltip({"tooltip.formula-allowed"}))
-  local button = GuiElement.add(cell, GuiButton(unpack(button_name)):style("helmod_button_icon_ok"):tooltip({"helmod_button.apply"}))
+  local button = GuiElement.add(cell, GuiButton(unpack(button_name)):sprite("menu", "ok-white", "ok"):style("helmod_button_menu"):tooltip({"helmod_button.apply"}))
   log("final")
   return cell, input, button
 end

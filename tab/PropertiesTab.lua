@@ -21,14 +21,14 @@ function PropertiesTab:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
--- Get Button Styles
+-- Get Button Sprites
 --
--- @function [parent=#PropertiesTab] getButtonStyles
+-- @function [parent=#PropertiesTab] getButtonSprites
 --
 -- @return boolean
 --
-function PropertiesTab:getButtonStyles()
-  return "helmod_button_icon_property","helmod_button_icon_property_selected"
+function PropertiesTab:getButtonSprites()
+  return "property-white","property"
 end
 
 -------------------------------------------------------------------------------

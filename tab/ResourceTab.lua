@@ -20,14 +20,14 @@ function ResourceTab:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
--- Get Button Styles
+-- Get Button Sprites
 --
--- @function [parent=#ResourceTab] getButtonStyles
+-- @function [parent=#ResourceTab] getButtonSprites
 --
 -- @return boolean
 --
-function ResourceTab:getButtonStyles()
-  return "helmod_button_icon_jewel","helmod_button_icon_jewel_selected"
+function ResourceTab:getButtonSprites()
+  return "jewel-white","jewel"
 end
 
 -------------------------------------------------------------------------------

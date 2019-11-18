@@ -251,9 +251,9 @@ function HelpPanel:updateMenu(event)
   for _,help in pairs(help_data) do
     table.insert(items, {"helmod_help."..help.name})
   end
-  GuiElement.add(menu_panel, GuiButton(self.classname, "previous-page"):style("helmod_button_icon_arrow_left"):tooltip({"helmod_help.button-previous"}))
+  GuiElement.add(menu_panel, GuiButton(self.classname, "previous-page"):sprite("menu", "arrow-left-white", "arrow-left"):style("helmod_button_menu"):tooltip({"helmod_help.button-previous"}))
   GuiElement.add(menu_panel, GuiDropDown(self.classname, "change-page"):items(items))
-  GuiElement.add(menu_panel, GuiButton(self.classname, "next-page"):style("helmod_button_icon_arrow_right"):tooltip({"helmod_help.button-next"}))
+  GuiElement.add(menu_panel, GuiButton(self.classname, "next-page"):sprite("menu", "arrow-right-white", "arrow-right"):style("helmod_button_menu"):tooltip({"helmod_help.button-next"}))
 end
 
 -------------------------------------------------------------------------------

@@ -56,6 +56,10 @@ function Command.parse(event)
       Logging.limit = 10
       game.write_file("helmod\\data.json", Logging:objectToString(global), false)
       Player.print("Data exported!")
+    elseif string.lower(event.parameters) == "exportmodel" then
+      Logging.limit = 10
+      game.write_file("helmod\\model.json", Logging:objectToString(Model.getModel()), false)
+      Player.print("Model exported!")
     elseif string.lower(event.parameters) == "exportdatauser" then
       Logging.limit = 10
       game.write_file("helmod\\data_user.json", Logging:objectToString(User.get()), false)
@@ -65,7 +69,7 @@ function Command.parse(event)
       game.write_file("helmod\\cache.json", Logging:objectToString(Cache.getData()), false)
       Player.print("Cache exported!")
     else
-      Player.print("Valid arguments: close | ExportData | ExportDataUser | ResetCaches | ResetUserUI | ResetTranslate")
+      Player.print("Valid arguments: close | ExportData | ExportModel | ExportDataUser | ResetCaches | ResetUserUI | ResetTranslate")
     end
   end
 end
