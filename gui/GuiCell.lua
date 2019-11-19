@@ -94,7 +94,8 @@ function GuiCellFactory:create(parent)
   local cell = GuiElement.add(parent, GuiFlowV(factory.name, self.m_index))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element", color, 1))
 
-  GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("entity", factory.name):tooltip({self.options.tooltip, Player.getLocalisedName(factory)}))
+  local tooltip = GuiTooltip(self.options.tooltip):element(factory)
+  GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("entity", factory.name):tooltip(tooltip))
 
   local col_size = math.ceil(Model.countModulesModel(factory)/2)
   if col_size < 2 then col_size = 2 end
@@ -141,7 +142,8 @@ function GuiCellRecipe:create(parent)
   local cell = GuiElement.add(parent, GuiFlowV(recipe.name, self.m_index))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
   
-  local recipe_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("entity", recipe.name):tooltip({self.options.tooltip, Player.getRecipeLocalisedName(recipe)}))
+  local tooltip = GuiTooltip(self.options.tooltip):element(recipe)
+  local recipe_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("entity", recipe.name):tooltip(tooltip))
   if self.m_broken == true then
     recipe_icon.tooltip = "ERROR: Recipe ".. recipe.name .." not exist in game"
     recipe_icon.sprite = "utility/warning_icon"
@@ -245,7 +247,52 @@ function GuiCellBlock:create(parent)
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
   
-  GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("recipe", element.name):tooltip({self.options.tooltip, Player.getRecipeLocalisedName(element)}))
+  local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
+  GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("recipe", element.name):tooltip(tooltip))
+
+  if element.limit_count ~= nil then
+    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_product", color, 2))
+    local caption2 = Format.formatNumberFactory(element.limit_count)
+    if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_count) end
+    GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element"):tooltip({"helmod_common.total"}))
+  end
+
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
+  local caption3 = Format.formatNumberFactory(element.count)
+  if display_cell_mod == "by-kilo" then caption3 = Format.formatNumberKilo(element.count) end
+  GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
+
+  return cell
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiCell] constructor
+-- @param #arg name
+-- @return #GuiCellBlockInfo
+--
+GuiCellBlockInfo = newclass(GuiCell,function(base,...)
+  GuiCell.init(base,...)
+end)
+
+-------------------------------------------------------------------------------
+-- Create cell
+--
+-- @function [parent=#GuiCellBlockInfo] create
+--
+-- @param #LuaGuiElement parent container for element
+--
+function GuiCellBlockInfo:create(parent)
+  local display_cell_mod = User.getModSetting("display_cell_mod")
+  local color = self.m_color or "gray"
+  local element = self.element or {}
+  local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
+  row1.style.top_padding=4
+  row1.style.bottom_padding=4
+  
+  local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
+  GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", "hangar-white", "hangar"):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   if element.limit_count ~= nil then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_product", color, 2))
@@ -288,12 +335,13 @@ function GuiCellEnergy:create(parent)
   row1.style.top_padding=4
   row1.style.bottom_padding=4
   
-  local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", "energy-white", "energy"):style("helmod_button_menu_flat"):tooltip({self.options.tooltip, {"helmod_label.energy"}}))
+  local tooltip = GuiTooltip(self.options.tooltip):element(element)
+  local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", "energy-white", "energy"):style("helmod_button_menu_flat"):tooltip(tooltip))
   
-  if element.limit_energy ~= nil then
+  if element.limit_energy ~= nil or element.sub_power ~= nil then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element", color, 2))
-    local caption2 = Format.formatNumberElement(element.limit_energy)
-    if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_energy) end
+    local caption2 = Format.formatNumberKilo(element.limit_energy or element.sub_power or 0, "W")
+    if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_energy or element.sub_power) end
     GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element"):tooltip({"helmod_common.total"}))
   end
 
@@ -327,7 +375,9 @@ function GuiCellElement:create(parent)
   local element = self.element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element", color, 1))
-  GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type, element.name):caption("X"..Product(element):getElementAmount()):tooltip({self.options.tooltip, Player.getLocalisedName(element)}))
+  
+  local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
+  GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type, element.name):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   GuiElement.add(row1, GuiCellCargoInfo():element(element))
 
   if element.limit_count ~= nil then
@@ -410,7 +460,8 @@ function GuiCellElementM:create(parent)
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_m", color, 1))
   
-  GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(element.type, element.name):caption("X"..Product(element):getElementAmount()):tooltip({self.options.tooltip, Player.getLocalisedName(element)}))
+  local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
+  GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(element.type, element.name):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
 
   if element.limit_count ~= nil then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_m", color, 2))

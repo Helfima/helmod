@@ -122,11 +122,7 @@ function ProductEdition:onUpdate(event)
     local element_name = event.item2
     if block_elements ~= nil and block_elements[element_name] ~= nil then
       product = block_elements[element_name]
-      if product.input ~= nil then
-        product_count = product.input
-      else
-        product_count = product.count
-      end
+      product_count = product.input or 0
     end
   end
 

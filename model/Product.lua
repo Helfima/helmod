@@ -52,7 +52,8 @@ function Product:clone()
   local prototype = {
     type = self.lua_prototype.type,
     name = self.lua_prototype.name,
-    amount = self:getElementAmount()
+    amount = self:getElementAmount(),
+    state = self.lua_prototype.state
   }
   return prototype
 end

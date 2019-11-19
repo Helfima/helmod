@@ -7,7 +7,7 @@ local User = {
   classname = "HMUser",
   gui = "gui",
   prefixe = "helmod",
-  version = "0.9.0",
+  version = "0.9.12",
   tab_name = "HMTab"
 }
 

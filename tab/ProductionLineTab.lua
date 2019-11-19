@@ -44,7 +44,7 @@ function ProductionLineTab:updateInfo(event)
   local info_scroll, output_scroll, input_scroll = self:getInfoPanel()
   info_scroll.clear()
   -- info panel
-  
+
   local block_table = GuiElement.add(info_scroll, GuiTable("output-table"):column(2))
 
   GuiElement.add(block_table, GuiLabel("label-owner"):caption({"helmod_result-panel.owner"}))
@@ -98,7 +98,7 @@ function ProductionLineTab:updateInput(event)
   if count_block > 0 then
 
     local input_table = GuiElement.add(input_scroll, GuiTable("input-table"):column(GuiElement.getElementColumnNumber(50)):style("helmod_table_element"))
-    
+
     if model.ingredients ~= nil then
       for index, element in pairs(model.ingredients) do
         GuiElement.add(input_table, GuiCellElementM(self.classname, "production-block-add=ID", "new", element.name):element(element):tooltip("tooltip.add-recipe"):color(GuiElement.color_button_add):index(index))
@@ -131,10 +131,10 @@ function ProductionLineTab:updateOutput(event)
     local output_table = GuiElement.add(output_scroll, GuiTable("output-table"):column(GuiElement.getElementColumnNumber(50)):style("helmod_table_element"))
     if model.products ~= nil then
       for index, element in pairs(model.products) do
-        GuiElement.add(output_table, GuiCellElementM(self.classname, "product-selected=ID", "new", element.name):element(element):tooltip("tooltip.product"):index(index))
+        GuiElement.add(output_table, GuiCellElementM(self.classname, "production-block-add=ID", "new", element.name):element(element):tooltip("tooltip.add-recipe"):index(index))
       end
     end
-    
+
   end
 end
 
@@ -152,7 +152,7 @@ function ProductionLineTab:updateData(event)
   self:updateInfo(event)
   self:updateOutput(event)
   self:updateInput(event)
-  
+
   -- data panel
   local scroll_panel = self:getResultScrollPanel()
 
@@ -165,7 +165,7 @@ function ProductionLineTab:updateData(event)
         extra_cols = extra_cols + 1
       end
     end
-    
+
     local result_table = GuiElement.add(scroll_panel, GuiTable("list-data"):column(5 + extra_cols):style("helmod_table-odd"))
     result_table.style.horizontally_stretchable = false
     result_table.vertical_centering = false
@@ -177,7 +177,7 @@ function ProductionLineTab:updateData(event)
       local element_cell = self:addTableRow(result_table, element)
       if User.getParameter("scroll_element") == element.id then last_element = element_cell end
     end
-    
+
     if last_element ~= nil then
       scroll_panel.scroll_to_element(last_element)
       User.setParameter("scroll_element", nil)
@@ -195,7 +195,7 @@ end
 function ProductionLineTab:addTableHeader(itable)
   Logging:debug(self.classname, "addTableHeader()")
   local model = Model.getModel()
-  
+
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
   -- optionnal columns
   self:addCellHeader(itable, "index", {"helmod_result-panel.col-header-index"},"index")
@@ -222,7 +222,8 @@ function ProductionLineTab:addTableRow(gui_table, block)
 
   local unlinked = block.unlinked and true or false
   if block.index == 0 then unlinked = true end
-
+  local block_by_product = not(block ~= nil and block.by_product == false)
+  block.type = "recipe"
   -- col action
   local cell_action = GuiElement.add(gui_table, GuiTable("action", block.id):column(2))
 
@@ -250,28 +251,50 @@ function ProductionLineTab:addTableRow(gui_table, block)
 
   -- col recipe
   local cell_recipe = GuiElement.add(gui_table, GuiTable("recipe", block.id):column(1))
-  GuiElement.add(cell_recipe, GuiCellBlock(self.classname, "change-tab=ID", "HMProductionBlockTab", block.id):element(block):tooltip("tooltip.edit-block"):color(GuiElement.color_button_default))
+
+  local block_color = "gray"
+  if not(block_by_product) then block_color = "orange" end
+  GuiElement.add(cell_recipe, GuiCellBlock(self.classname, "change-tab=ID", "HMProductionBlockTab", block.id):element(block):tooltip("tooltip.edit-block"):color(block_color))
 
   -- col energy
   local cell_energy = GuiElement.add(gui_table, GuiTable(block.id):column(1))
-  GuiElement.add(cell_energy, GuiCellEnergy(self.classname, "change-tab=ID", "HMProductionBlockTab", block.id):element(block):tooltip("tooltip.edit-block"):color("gray"))
-  
+  GuiElement.add(cell_energy, GuiCellEnergy(self.classname, "change-tab=ID", "HMProductionBlockTab", block.id):element(block):tooltip("tooltip.edit-block"):color(block_color))
+
   -- products
   local display_product_cols = User.getModSetting("display_product_cols") + 1
   local cell_products = GuiElement.add(gui_table, GuiTable("products", block.id):column(display_product_cols))
   cell_products.style.horizontally_stretchable = false
   if block.products ~= nil then
     for index, product in pairs(block.products) do
-      if product.state == 1 then
-        if not(unlinked) or block.by_factory == true then
-          GuiElement.add(cell_products, GuiCellElement(self.classname, "product-selected=ID", block.id, product.name):element(product):tooltip("tooltip.product"):index(index))
+      if (product.state or 0) == 1 or (product.count or 0) > ModelCompute.waste_value then
+        local button_action = "production-block-product-add=ID"
+        local button_tooltip = "tooltip.product"
+        local button_color = GuiElement.color_button_default_product
+        if not(block_by_product) then
+          button_action = "production-block-product-add=ID"
+          button_tooltip = "tooltip.add-recipe"
         else
-          GuiElement.add(cell_products, GuiCellElement(self.classname, "product-edition=ID", block.id, product.name):element(product):tooltip("tooltip.edit-product"):color(GuiElement.color_button_edit):index(index))
+          if not(block.unlinked) or block.by_factory == true then
+            button_action = "product-info=ID"
+            button_tooltip = "tooltip.info-product"
+          else
+            button_action = "product-edition=ID"
+            button_tooltip = "tooltip.edit-product"
+          end
         end
-      elseif product.state == 3 then
-        GuiElement.add(cell_products, GuiCellElement(self.classname, "product-selected=ID", block.id, product.name):element(product):tooltip("tooltip.rest-product"):color(GuiElement.color_button_rest):index(index))
-      else
-        GuiElement.add(cell_products, GuiCellElement(self.classname, "product-selected=ID", block.id, product.name):element(product):tooltip("tooltip.other-product"):index(index))
+        -- color
+        if product.state == 1 then
+          if not(block.unlinked) or block.by_factory == true then
+            button_color = GuiElement.color_button_default_product
+          else
+            button_color = GuiElement.color_button_edit
+          end
+        elseif product.state == 3 then
+          button_color = GuiElement.color_button_rest
+        else
+          button_color = GuiElement.color_button_default_product
+        end
+        GuiElement.add(cell_products, GuiCellElement(self.classname, button_action, block.id, product.name):element(product):tooltip(button_tooltip):color(button_color):index(index))
       end
     end
   end
@@ -281,7 +304,31 @@ function ProductionLineTab:addTableRow(gui_table, block)
   cell_ingredients.style.horizontally_stretchable = false
   if block.ingredients ~= nil then
     for index, ingredient in pairs(block.ingredients) do
-      GuiElement.add(cell_ingredients, GuiCellElement(self.classname, "production-block-add=ID", block.id, ingredient.name):element(ingredient):tooltip("tooltip.add-recipe"):color(GuiElement.color_button_add):index(index))
+      if (ingredient.state or 0) == 1 or (ingredient.count or 0) > ModelCompute.waste_value then
+        local button_action = "production-block-ingredient-add=ID"
+        local button_tooltip = "tooltip.ingredient"
+        local button_color = GuiElement.color_button_default_ingredient
+        if block_by_product then
+          button_action = "production-block-ingredient-add=ID"
+          button_tooltip = "tooltip.add-recipe"
+        else
+          button_action = "product-edition=ID"
+          button_tooltip = "tooltip.edit-product"
+        end
+        -- color
+        if ingredient.state == 1 then
+          if not(block.unlinked) or block.by_factory == true then
+            button_color = GuiElement.color_button_default_ingredient
+          else
+            button_color = GuiElement.color_button_edit
+          end
+        elseif ingredient.state == 3 then
+          button_color = GuiElement.color_button_rest
+        else
+          button_color = GuiElement.color_button_default_ingredient
+        end
+        GuiElement.add(cell_ingredients, GuiCellElement(self.classname, button_action, block.id, ingredient.name):element(ingredient):tooltip(button_tooltip):color(button_color):index(index))
+      end
     end
   end
   return cell_recipe

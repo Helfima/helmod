@@ -61,6 +61,19 @@ function sprite_icon_sm(name, width, height, white)
   }
 end
 
+function sprite_tooltip(name, size, scale)
+  local icon_name = "helmod-"..name
+  return {
+    type ="sprite",
+    name = icon_name,
+    filename = "__helmod__/graphics/icons/"..name..".png",
+    priority = "extra-high-no-scale",
+    width = size,
+    height = size,
+    scale = scale
+  }
+end
+
 local list = {
   {name="arrow-down", sm=true},
   {name="arrow-right"},
@@ -121,4 +134,13 @@ for icon_row,icon in pairs(list) do
   end
 end
 
+local list = {
+  {name="tooltip-add", size=24, scale=1},
+  {name="tooltip-edit", size=48, scale=1},
+  {name="tooltip-blank", size=24, scale=1},
+  {name="tooltip-info", size=32, scale=1}
+}
+for icon_row,icon in pairs(list) do
+  table.insert(spite_icons, sprite_tooltip(icon.name, icon.size, icon.scale))
+end
 data:extend(spite_icons)

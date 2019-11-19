@@ -664,7 +664,7 @@ function Controller:onEventAccessWrite(event)
       else
         -- pour ouvrir avec le filtre ingredient
         event.button = defines.mouse_button_type.right
-        self:send("on_gui_open", event, "HMRecipeSelector")
+        self:sendWithPrepare("on_gui_open", event, "HMRecipeSelector")
       end
     end
   end
@@ -681,7 +681,7 @@ function Controller:onEventAccessWrite(event)
         User.setParameter("scroll_element", new_recipe.id)
         self:send("on_gui_update", event)
       else
-        self:send("on_gui_open", event, "HMRecipeSelector")
+        self:sendWithPrepare("on_gui_open", event, "HMRecipeSelector")
       end
     end
   end
@@ -705,16 +705,30 @@ function Controller:onEventAccessWrite(event)
     if event.button == defines.mouse_button_type.right then
       self:sendWithPrepare("on_gui_open", event, "HMRecipeSelector")
     else
-      if event.action == "production-block-add" then
+      if event.action == "production-block-product-add" then
+        local recipes = Player.searchRecipe(event.item2, true)
+        if #recipes == 1 then
+          local recipe = recipes[1]
+          ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type, 0)
+          ModelCompute.update()
+          User.setActiveForm("HMProductionBlockTab")
+          self:send("on_gui_refresh", event)
+        else
+          -- pour ouvrir avec le filtre ingredient
+          event.button = defines.mouse_button_type.right
+          self:sendWithPrepare("on_gui_open", event,"HMRecipeSelector")
+        end
+      end
+      if event.action == "production-block-ingredient-add" then
         local recipes = Player.searchRecipe(event.item2)
         if #recipes == 1 then
           local recipe = recipes[1]
           ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type)
           ModelCompute.update()
-          self:send("on_gui_refresh", event)
           User.setActiveForm("HMProductionBlockTab")
+          self:send("on_gui_refresh", event)
         else
-          self:send("on_gui_open", event,"HMRecipeSelector")
+          self:sendWithPrepare("on_gui_open", event,"HMRecipeSelector")
         end
       end
     end

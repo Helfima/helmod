@@ -7,7 +7,7 @@
 local Model = {
   -- single-line comment
   classname = "HMModel",
-  version = "0.9.3",
+  version = "0.9.12",
   capEnergy = -0.8,
   capSpeed = -0.8,
   -- 15°c

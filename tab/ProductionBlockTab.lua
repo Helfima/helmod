@@ -229,6 +229,8 @@ function ProductionBlockTab:updateInfo(event)
   -- info panel
 
   local block_table = GuiElement.add(info_scroll, GuiTable("output-table"):column(2))
+  block_table.style.horizontally_stretchable = false
+  block_table.vertical_centering = false
   block_table.style.horizontal_spacing=10
 
   -- production block result
@@ -237,20 +239,9 @@ function ProductionBlockTab:updateInfo(event)
     local element = model.blocks[current_block]
 
     -- block panel
-    GuiElement.add(block_table, GuiLabel("label-power"):caption({"helmod_label.electrical-consumption"}))
-    GuiElement.add(block_table, GuiLabel("power"):caption(Format.formatNumberKilo(element.power or 0, "W")):style("helmod_label_right_70"))
+    GuiElement.add(block_table, GuiCellBlockInfo("block-count"):element(element):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(1))
+    GuiElement.add(block_table, GuiCellEnergy("block-power"):element(element):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2))
 
-    GuiElement.add(block_table, GuiLabel("label-count"):caption({"helmod_label.block-number"}))
-    GuiElement.add(block_table, GuiLabel("count"):caption(Format.formatNumberFactory(element.count or 0)):style("helmod_label_right_70"))
-
-    GuiElement.add(block_table, GuiLabel("label-sub-power"):caption({"helmod_label.sub-block-power"}))
-    GuiElement.add(block_table, GuiLabel("sub-power"):caption(Format.formatNumberKilo(element.sub_power or 0)):style("helmod_label_right_70"))
-
-    if element.by_factory == true then
-      local factory_number = element.factory_number or 0
-      GuiElement.add(block_table, GuiLabel("label-factory_number"):caption({"helmod_label.factory-number"}))
-      GuiElement.add(block_table, GuiTextField(self.classname, "change-number-option=ID", "factory_number"):text(factory_number):style("helmod_textfield"))
-    end
     local unlink_state = "right"
     if element.unlinked == true then unlink_state = "left" end
     local unlink_switch = GuiElement.add(options_scroll, GuiSwitch(self.classname, "block-switch-unlink=ID", current_block):state(unlink_state):leftLabel({"helmod_label.block-unlinked"}):rightLabel({"helmod_label.block-linked"}))
@@ -270,6 +261,14 @@ function ProductionBlockTab:updateInfo(event)
     local by_factory_state = "left"
     if element.by_factory == true then by_factory_state = "right" end
     GuiElement.add(options_scroll, GuiSwitch(self.classname, "block-switch-factory=ID", current_block):state(by_factory_state):leftLabel({"helmod_label.compute-by-element"}):rightLabel({"helmod_label.compute-by-factory"}))
+
+    if element.by_factory == true then
+      local by_factory_panel = GuiElement.add(options_scroll, GuiFlowH("by_factory_panel"))
+      by_factory_panel.style.horizontal_spacing=10
+      local factory_number = element.factory_number or 0
+      GuiElement.add(by_factory_panel, GuiLabel("label-factory_number"):caption({"helmod_label.factory-number"}))
+      GuiElement.add(by_factory_panel, GuiTextField(self.classname, "change-number-option=ID", "factory_number"):text(factory_number):style("helmod_textfield"))
+    end
   end
 end
 
@@ -330,25 +329,25 @@ function ProductionBlockTab:updateInput(event)
           end
           local button_action = "production-recipe-ingredient-add=ID"
           local button_tooltip = "tooltip.ingredient"
-          local button_color = nil
+          local button_color = GuiElement.color_button_default_ingredient
+          if block_by_product then
+            button_action = "production-recipe-ingredient-add=ID"
+            button_tooltip = "tooltip.add-recipe"
+          else
+            button_action = "product-edition=ID"
+            button_tooltip = "tooltip.edit-product"
+          end
+          -- color
           if lua_ingredient.state == 1 then
-            if not(block.unlinked) or block.by_factory == true or block_by_product then
-              button_action = "production-recipe-ingredient-add=ID"
-              button_tooltip = "tooltip.ingredient"
-              button_color = nil
+            if not(block.unlinked) or block.by_factory == true then
+              button_color = GuiElement.color_button_default_ingredient
             else
-              button_action = "product-edition=ID"
-              button_tooltip = "tooltip.edit-ingredient"
               button_color = GuiElement.color_button_edit
             end
           elseif lua_ingredient.state == 3 then
-            button_action = "product-edition=ID"
-            button_tooltip = "rest-ingredient"
             button_color = GuiElement.color_button_rest
           else
-            button_action = "product-edition=ID"
-            button_tooltip = "tooltip.other-ingredient"
-            button_color = nil
+            button_color = GuiElement.color_button_default_ingredient
           end
           GuiElement.add(input_table, GuiCellElementM(self.classname, button_action, block.id, ingredient.name):element(ingredient):tooltip(button_tooltip):index(index):color(button_color))
         end
@@ -413,26 +412,32 @@ function ProductionBlockTab:updateOutput(event)
           end
           local button_action = "production-recipe-product-add=ID"
           local button_tooltip = "tooltip.product"
-          local button_color = nil
-          if lua_product.state == 1 then
-            if not(block.unlinked) or block.by_factory == true or not(block_by_product) then
-              button_action = "production-recipe-product-add=ID"
-              button_tooltip = "tooltip.product"
-              button_color = nil
+          local button_color = GuiElement.color_button_default_product
+          if not(block_by_product) then
+            button_action = "production-recipe-product-add=ID"
+            button_tooltip = "tooltip.add-recipe"
+          else
+            if not(block.unlinked) or block.by_factory == true then
+              button_action = "product-info=ID"
+              button_tooltip = "tooltip.info-product"
             else
               button_action = "product-edition=ID"
               button_tooltip = "tooltip.edit-product"
+            end
+          end
+          -- color
+          if lua_product.state == 1 then
+            if not(block.unlinked) or block.by_factory == true then
+              button_color = GuiElement.color_button_default_product
+            else
               button_color = GuiElement.color_button_edit
             end
           elseif lua_product.state == 3 then
-            button_action = "product-edition=ID"
-            button_tooltip = "tooltip.rest-product"
             button_color = GuiElement.color_button_rest
           else
-            button_action = "product-edition=ID"
-            button_tooltip = "tooltip.other-product"
-            button_color = nil
+            button_color = GuiElement.color_button_default_product
           end
+
           GuiElement.add(output_table, GuiCellElementM(self.classname, button_action, block.id, product.name):element(product):tooltip(button_tooltip):index(index):color(button_color))
         end
       end
@@ -630,7 +635,7 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
         if block.count > 1 then
           product.limit_count = product.count / block.count
         end
-        GuiElement.add(cell_products, GuiCellElement(self.classname, "production-recipe-product-add=ID", block.id, recipe.name):element(product):tooltip("tooltip.product"):index(index))
+        GuiElement.add(cell_products, GuiCellElement(self.classname, "production-recipe-product-add=ID", block.id, recipe.name):element(product):tooltip("tooltip.add-recipe"):index(index))
       end
     else
       -- ingredients

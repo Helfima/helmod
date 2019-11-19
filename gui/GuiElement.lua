@@ -17,6 +17,8 @@ GuiElement = newclass(function(base,...)
 end)
 GuiElement.classname = "HMGuiElement"
 GuiElement.color_button_default = "gray"
+GuiElement.color_button_default_product = "blue"
+GuiElement.color_button_default_ingredient = "yellow"
 GuiElement.color_button_none = "blue"
 GuiElement.color_button_edit = "green"
 GuiElement.color_button_add = "yellow"
@@ -50,7 +52,11 @@ end
 -- @return #GuiElement
 -- 
 function GuiElement:tooltip(tooltip)
-  self.options.tooltip = tooltip
+  if tooltip ~= nil and tooltip.classname == "HMGuiTooltip" then
+    self.options.tooltip = tooltip:create()
+  else
+    self.options.tooltip = tooltip
+  end
   return self
 end
 
@@ -281,7 +287,7 @@ function GuiElement.getStyleSizes()
 
     style_sizes.block_info = {}
     style_sizes.block_info.width = 500
-    style_sizes.block_info.height = 50*2+30
+    style_sizes.block_info.height = 50*2+40
 
     style_sizes.scroll_block = {}
     style_sizes.scroll_block.height = height_recipe_info - 34

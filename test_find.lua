@@ -11,3 +11,7 @@ function numberToBinStr(x)
 end
 
 print(string.format("%s",numberToBinStr(operation)))
+
+local v1,v2,v3 = string.match("0.9.3", "([0-9]+)[.]([0-9]+)[.]([0-9]+)")
+
+print(string.format("%s",numberToBinStr(operation)))

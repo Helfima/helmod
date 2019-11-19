@@ -74,31 +74,15 @@ end
 --
 function ModelCompute.update()
   Logging:debug(ModelCompute.classname , "********** update()")
-  ModelCompute.updateVersion_0_5_4()
-  ModelCompute.updateVersion_0_6_0()
-  ModelCompute.updateVersion_0_9_3()
 
   local model = Model.getModel()
 
   -- reset all factories
   if model ~= nil and (model.version == nil or model.version ~= Model.version) then
     Logging:debug(Model.classname , "********** version",Model.version)
-
-    if model.blocks ~= nil then
-      for _, productBlock in pairs(model.blocks) do
-        for _, recipe in pairs(productBlock.recipes) do
-          local factory = recipe.factory
-          local beacon = recipe.beacon
-          local _recipe = Player.getRecipe(recipe.name)
-          Model.setFactory(productBlock.id, recipe.name, factory.name)
-          Model.setBeacon(productBlock.id, recipe.name, beacon.name, beacon.combo, beacon.factory)
-          if _recipe ~= nil then
-            recipe.is_resource = not(_recipe.force)
-            if recipe.is_resource then recipe.category = "extraction-machine" end
-          end
-        end
-      end
-    end
+    ModelCompute.updateVersion_0_9_3()
+    ModelCompute.updateVersion_0_9_12()
+    Player.print("Helmod information: Model is updated to version "..Model.version)
   end
 
   if model.blocks ~= nil then
@@ -125,11 +109,13 @@ function ModelCompute.update()
           -- prepare les inputs
           local block_elements = block.products
           if block.by_product == false then
-            block_elements = block.ingredient
+            block_elements = block.ingredients
           end
+          Logging:debug(ModelCompute.classname , "-> input", input)
           if block_elements ~= nil then
             for _,element in pairs(block_elements) do
               if element.state ~= nil and element.state == 1 then
+                Logging:debug(ModelCompute.classname , "--> element", element.name, element)
                 if input[element.name] ~= nil then
                   element.input = input[element.name]
                   --element.state = 0
@@ -166,7 +152,9 @@ function ModelCompute.update()
         end
         -- consomme les ingredients
         for _,product in pairs(block.products) do
-          if input[product.name] ~= nil then
+          if input[product.name] == nil then
+            input[product.name] = product.count
+          elseif input[product.name] ~= nil then
             input[product.name] = input[product.name] - product.count
           end
         end
@@ -456,7 +444,7 @@ function ModelCompute.getBlockMatrix(block)
           row_valid = true
         end
       else
-      -- prepare header ingredients
+        -- prepare header ingredients
         for name, lua_ingredient in pairs(lua_ingredients) do
           local index = 1
           -- cas normal de l'ingredient n'existant pas du cote produit
@@ -1181,84 +1169,37 @@ end
 -------------------------------------------------------------------------------
 -- Update model
 --
+-- @function [parent=#ModelCompute] updateVersion_0_9_12
+--
+function ModelCompute.updateVersion_0_9_12()
+  local model = Model.getModel()
+  local v1,v2,v3 = string.match(model.version, "([0-9]+)[.]([0-9]+)[.]([0-9]+)")
+  --Logging:debug(ModelCompute.classname, v1,v2,v3,tonumber(v2) <= 9,tonumber(v3) < 12)
+  if model.version == nil or (tonumber(v2) <= 9 and tonumber(v3) < 12) then
+    Logging:debug(ModelCompute.classname, "******  update block 0.9.12")
+    if model.blocks ~= nil then
+      for _, block in pairs(model.blocks) do
+        for _,element in pairs(block.products) do
+          if block.input[element.name] ~= nil then
+            element.input = block.input[element.name]
+          end
+        end
+        Logging:debug(ModelCompute.classname, "******  update block", block)
+      end
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update model
+--
 -- @function [parent=#ModelCompute] updateVersion_0_9_3
 --
 function ModelCompute.updateVersion_0_9_3()
   local model = Model.getModel()
   if model.version == nil or model.version < "0.9.3" then
-    Logging:debug(ModelCompute.classname , "********** updating version 0.9.3")
     Model.resetRules()
-    Logging:debug(ModelCompute.classname , "********** updated version 0.9.3")
-    Player.print("Helmod information: Model is updated to version 0.9.3")
   end
 end
-
--------------------------------------------------------------------------------
--- Update model
---
--- @function [parent=#ModelCompute] updateVersion_0_6_0
---
-function ModelCompute.updateVersion_0_6_0()
-  local model = Model.getModel()
-  if model.version == nil or model.version < "0.6.0" then
-    Logging:debug(Model.classname , "********** updating version 0.6.0")
-    for _, block in pairs(model.blocks) do
-      User.setParameter("current_block",block.id)
-      for _, recipe in pairs(block.recipes) do
-        local recipe_type = RecipePrototype.find(recipe):getType()
-        if recipe.is_resource then recipe_type = "resource" end
-
-        local recipeModel = {}
-        recipeModel.id = recipe.id
-        recipeModel.index = recipe.index
-        recipeModel.name = recipe.name
-        recipeModel.type = recipe_type
-        recipeModel.count = 0
-        recipeModel.production = recipe.production or 1
-        recipeModel.factory = Model.newFactory(recipe.factory.name)
-        recipeModel.factory.limit = recipe.factory.limit
-        recipeModel.factory.modules = recipe.factory.modules
-        recipeModel.beacon = Model.newBeacon(recipe.beacon.name)
-        recipeModel.beacon.modules = recipe.beacon.modules
-        block.recipes[recipe.id] = recipeModel
-      end
-    end
-    ModelCompute.checkUnlinkedBlocks()
-    Logging:debug(ModelCompute.classname , "********** updated version 0.6.0")
-    Player.print("Helmod information: Model is updated to version 0.6.0")
-  end
-end
--------------------------------------------------------------------------------
--- Update model
---
--- @function [parent=#ModelCompute] updateVersion_0_5_4
---
-function ModelCompute.updateVersion_0_5_4()
-  local model = Model.getModel()
-  if model.version == nil or model.version < "0.5.4" then
-    Logging:debug(ModelCompute.classname , "********** updating version 0.5.4")
-    model.resources = {}
-    for _, productBlock in pairs(model.blocks) do
-      -- modify recipe id
-      local recipes = {}
-      for _, recipe in pairs(productBlock.recipes) do
-        recipe.id = "R"..recipe.id
-        recipes[recipe.id] = recipe
-      end
-      productBlock.recipes = recipes
-      -- modify input
-      if productBlock.input ~= nil and productBlock.input.key ~= nil then
-        local key = productBlock.input.key
-        local quantity = productBlock.input.quantity
-        productBlock.input = {}
-        productBlock.input[key] = quantity or 0
-      end
-    end
-    ModelCompute.checkUnlinkedBlocks()
-    Logging:debug(ModelCompute.classname , "********** updated version 0.5.4")
-    Player.print("Helmod information: Model is updated to version 0.5.4")
-  end
-end
-
 
 return ModelCompute
