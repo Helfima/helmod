@@ -89,9 +89,9 @@ function PinPanel:updateHeader(event)
   left_menu_panel.clear()
   local group1 = GuiElement.add(left_menu_panel, GuiFlowH("group1"))
   GuiElement.add(group1, GuiButton(self.classname, "change-level=ID", "down"):sprite("menu", "arrow-left-white", "arrow-left"):style("helmod_button_menu"):tooltip({"helmod_button.decrease"}))
-  GuiElement.add(group1, GuiButton(self.classname.."change-level=ID", "up"):sprite("menu", "arrow-right-white", "arrow-right"):style("helmod_button_menu"):tooltip({"helmod_button.expand"}))
-  GuiElement.add(group1, GuiButton(self.classname.."change-level=ID", "min"):sprite("menu", "minimize-window-white", "minimize-window"):style("helmod_button_menu"):tooltip({"helmod_button.minimize"}))
-  GuiElement.add(group1, GuiButton(self.classname.."change-level=ID", "max"):sprite("menu", "maximize-window-white", "maximize-window"):style("helmod_button_menu"):tooltip({"helmod_button.maximize"}))
+  GuiElement.add(group1, GuiButton(self.classname, "change-level=ID", "up"):sprite("menu", "arrow-right-white", "arrow-right"):style("helmod_button_menu"):tooltip({"helmod_button.expand"}))
+  GuiElement.add(group1, GuiButton(self.classname, "change-level=ID", "min"):sprite("menu", "minimize-window-white", "minimize-window"):style("helmod_button_menu"):tooltip({"helmod_button.minimize"}))
+  GuiElement.add(group1, GuiButton(self.classname, "change-level=ID", "max"):sprite("menu", "maximize-window-white", "maximize-window"):style("helmod_button_menu"):tooltip({"helmod_button.maximize"}))
 
 end
 
@@ -253,8 +253,8 @@ function PinPanel:onEvent(event)
     Logging:debug(self.classname, "display_pin_level", display_pin_level)
     if event.item1 == "down" and display_pin_level > display_pin_level_min  then User.setSetting("display_pin_level",display_pin_level - 1) end
     if event.item1 == "up" and display_pin_level < display_pin_level_max  then User.setSetting("display_pin_level",display_pin_level + 1) end
-    if event.item1 == "min" then User.setParameter("display_pin_level",display_pin_level_min) end
-    if event.item1 == "max" then User.setParameter("display_pin_level",display_pin_level_max) end
+    if event.item1 == "min" then User.setSetting("display_pin_level",display_pin_level_min) end
+    if event.item1 == "max" then User.setSetting("display_pin_level",display_pin_level_max) end
     self:updateInfo(event)
   end
 end

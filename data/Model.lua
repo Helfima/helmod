@@ -708,6 +708,19 @@ function Model.firstRecipe(recipes)
 end
 
 -------------------------------------------------------------------------------
+-- Return last recipe of block
+--
+-- @function [parent=#Model] lastRecipe
+--
+-- @param #table recipes
+--
+function Model.lastRecipe(recipes)
+  for _, recipe in spairs(recipes,function(t,a,b) return t[b].index < t[a].index end) do
+    return recipe
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Get productions list
 --
 -- @function [parent=#Model] getRecipeByProduct

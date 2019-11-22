@@ -1,6 +1,17 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.9.14
+Date: 22. 11. 2019
+  Bugfixes:
+    - Fixed event on pin panel
+    - Fixed error with logger
+---------------------------------------------------------------------------------------------------
+Version: 0.9.13
+Date: 20. 11. 2019
+  Bugfixes:
+    - Fixed computing by factory
+---------------------------------------------------------------------------------------------------
 Version: 0.9.12
-Date: 18. 11. 2019
+Date: 19. 11. 2019
   Features:
     - Added switch to choose product/ingredient block input
     - Added capability to set all product/ingredient input

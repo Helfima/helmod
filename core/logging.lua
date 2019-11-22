@@ -113,7 +113,7 @@ function Logging:objectToString(object, level)
     if object.valid then
       local help = object.help()
       if help ~= nil and help ~= "" then
-        local lua_type = string.gmatch(help, "Help for%s([^:]*)")
+        local lua_type = string.match(help, "Help for%s([^:]*)")
         if lua_type == "LuaRecipe" or lua_type == "LuaRecipePrototype" or lua_type == "LuaTechnology" then
           message = message..string.format("{\"type\":%q,\"name\":%q}", lua_type, object.name or "nil")
         else
