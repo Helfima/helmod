@@ -1199,7 +1199,7 @@ function ModelCompute.updateVersion_0_9_12()
     if model.blocks ~= nil then
       for _, block in pairs(model.blocks) do
         for _,element in pairs(block.products) do
-          if block.input[element.name] ~= nil then
+          if block.input ~= nil and block.input[element.name] ~= nil then
             element.input = block.input[element.name]
           end
         end

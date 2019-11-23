@@ -101,7 +101,7 @@ function ProductionLineTab:updateInput(event)
 
     if model.ingredients ~= nil then
       for index, element in pairs(model.ingredients) do
-        GuiElement.add(input_table, GuiCellElementM(self.classname, "production-block-add=ID", "new", element.name):element(element):tooltip("tooltip.add-recipe"):color(GuiElement.color_button_add):index(index))
+        GuiElement.add(input_table, GuiCellElementM(self.classname, "production-block-ingredient-add=ID", "new", element.name):element(element):tooltip("tooltip.add-recipe"):color(GuiElement.color_button_add):index(index))
       end
     end
 
@@ -131,7 +131,7 @@ function ProductionLineTab:updateOutput(event)
     local output_table = GuiElement.add(output_scroll, GuiTable("output-table"):column(GuiElement.getElementColumnNumber(50)):style("helmod_table_element"))
     if model.products ~= nil then
       for index, element in pairs(model.products) do
-        GuiElement.add(output_table, GuiCellElementM(self.classname, "production-block-add=ID", "new", element.name):element(element):tooltip("tooltip.add-recipe"):index(index))
+        GuiElement.add(output_table, GuiCellElementM(self.classname, "production-block-product-add=ID", "new", element.name):element(element):tooltip("tooltip.add-recipe"):index(index))
       end
     end
 

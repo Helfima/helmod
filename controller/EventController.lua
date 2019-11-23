@@ -197,6 +197,10 @@ function EventController.onConfigurationChanged(data)
       Controller:bindController(player)
     end
   end
+  for _,player in pairs(game.players) do
+    Player.set(player)
+    User.resetTranslate()
+  end
 end
 
 -------------------------------------------------------------------------------

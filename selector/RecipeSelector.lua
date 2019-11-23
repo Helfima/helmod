@@ -70,8 +70,9 @@ function RecipeSelector:appendGroups(element, type, list_products, list_ingredie
     list_products[element.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
     loop.product = loop.product + 1
     
-    if lua_prototype.localised_name ~= nil then
-      list_translate[element.name] = lua_prototype.localised_name
+    local localised_name = Product(element):getLocalisedName()
+    if localised_name ~= nil and localised_name ~= "unknow" then
+      list_translate[element.name] = localised_name
     end
   end
   for key, element in pairs(prototype:getRawIngredients()) do

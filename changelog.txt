@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.9.16
+Date: 23. 11. 2019
+  Bugfixes:
+    - Fixed update model version 0.9.12
+    - Fixed translate for recipe selector
+    - Fixed event on button of input/ouput production line
+---------------------------------------------------------------------------------------------------
 Version: 0.9.15
 Date: 22. 11. 2019
   Changes:

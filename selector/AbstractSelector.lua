@@ -386,7 +386,8 @@ function AbstractSelector:translate(event)
     if User.getModGlobalSetting("filter_translated_string_active") and not(User.isTranslate()) then
       local list_translate = Cache.getData(self.classname, "list_translate")
 
-      for _,localised_name in pairs(list_translate) do
+      for item_name,localised_name in pairs(list_translate) do
+        --Logging:debug(Controller.classname, "translate", item_name, localised_name)
         Player.native().request_translation(localised_name)
       end
       User.setParameter("translate",true)
