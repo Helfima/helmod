@@ -401,13 +401,15 @@ function ModelCompute.getBlockMatrix(block)
 
       -- prepare le taux de production
       local production = 1
-      if recipe.production ~= nil then production = recipe.production end
+      if not(block.solver == true) and recipe.production ~= nil then production = recipe.production end
       table.insert(row_headers,{name=recipe.name, type=recipe.type, tooltip=recipe.name.."\nRecette"})
       row["R"] = 0
       row["P"] = production
       row["E"] = recipe_prototype:getEnergy()
       row["C"] = 0
 
+      --Logging:debug(ModelCompute.classname, "----> production", recipe.name, production)
+      
       ModelCompute.computeModuleEffects(recipe)
       --ModelCompute.computeFactory(recipe)
 

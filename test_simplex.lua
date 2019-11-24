@@ -1,4 +1,4 @@
-Simplex = require "core.SolverSimplex"
+Simplex = require "math.SolverSimplex"
 
 function printM(M)
   for irow,row in pairs(M) do
@@ -162,9 +162,21 @@ M[index][6]={0,0,1,2,0,0,20,0,-30,0,0,0,-30,0,0,0}
 M[index][7]={0,0,1,2,0,0,0,0,30,0,0,0,-30,0,-40,0}
 M[index][8]={0,0,1,5,0,0,55,0,45,0,0,0,-50,0,25,-100}
 
-local test = 9
+
+index = 10
+M[index] = {}
+M[index]["matrix"] = {}
+M[index]["col_headers"] = {"R","P","E","C","plastic-bar","coal","petroleum-gas","water","light-oil","heavy-oil","crude-oil"}
+M[index]["row_headers"] = {"Input","plastic-bar","light-oil-cracking","heavy-oil-cracking","advanced-oil-processing","Z"}
+M[index]["matrix"][1]={0,0,0,0,10,0,0,0,0,0,0}
+M[index]["matrix"][2]={0,1,1,0,2,-1,-20,0,0,0,0}
+M[index]["matrix"][3]={0,0.35294117647058858011632764828391373157501220703125,2,0,0,0,20,-30,-30,0,0}
+M[index]["matrix"][4]={0,1,2,0,0,0,0,-30,30,-40,0}
+M[index]["matrix"][5]={0,0.9999999999999975131004248396493494510650634765625,5,0,0,0,55,-50,45,25,-100}
+
+local test = 10
 Simplex.debug = true
 --Simplex.new(M[test])
-Simplex.new(M[test], row_headers[test], col_headers[test])
+Simplex.new(M[test]["matrix"], M[test]["row_headers"], M[test]["col_headers"])
 Simplex.solve()
 

@@ -110,7 +110,8 @@ function PropertiesTab:addTableHeader(itable, prototype_compare)
 
   self:addCellHeader(itable, "property_name", "Element Name")
   for index,prototype in pairs(prototype_compare) do
-    GuiElement.add(itable, GuiLabel("element_name", prototype.name, index):caption(prototype.name))
+    local textfield = GuiElement.add(itable, GuiTextField("element_name", prototype.name, index):text(prototype.name))
+    textfield.style.width = 300
   end
 end
 

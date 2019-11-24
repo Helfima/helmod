@@ -613,17 +613,17 @@ end
 --
 -- @function [parent=#Model] setFactory
 --
--- @param #string item block_id or resource
--- @param #string key object name
--- @param #string name factory name
+-- @param #string block_id
+-- @param #string recipe_id
+-- @param #string factory_name
 --
-function Model.setFactory(item, key, name)
-  Logging:debug(Model.classname, "setFactory()", item, key, name)
-  local object = Model.getObject(item, key)
+function Model.setFactory(block_id, recipe_id, factory_name)
+  Logging:debug(Model.classname, "setFactory()", block_id, recipe_id, factory_name)
+  local object = Model.getObject(block_id, recipe_id)
   if object ~= nil then
-    local factory_prototype = EntityPrototype(name)
+    local factory_prototype = EntityPrototype(factory_name)
     if factory_prototype:native() ~= nil then
-      object.factory.name = name
+      object.factory.name = factory_name
       if Model.countModulesModel(object.factory) >= factory_prototype:getModuleInventorySize() then
         object.factory.modules = {}
       end

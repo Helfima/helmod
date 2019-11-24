@@ -220,9 +220,9 @@ function RecipeEdition:onEvent(event)
     end
 
     if event.action == "factory-select" then
-      --element.state = true
       -- item1=recipe item2=factory
       Model.setFactory(event.item1, event.item2, event.item3)
+      ModelBuilder.applyFactoryModulePriority(event.item1, event.item2)
       ModelCompute.update()
       self:update(event)
       Controller:send("on_gui_refresh", event)
@@ -713,7 +713,7 @@ function RecipeEdition:updateFactoryModules(event)
     GuiElement.add(tool_panel1, GuiButton("HMPreferenceEdition=OPEN=ID="):sprite("menu", "services-white-sm", "services-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_button.preferences"}))
     GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-priority-apply=ID", block_id, recipe_id):sprite("menu", "arrow-up-white-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_recipe-edition-panel.apply-priority"}))
 
-    local tool_panel2 = GuiElement.add(tool_action_panel2, GuiFlowH("tool2"))
+    local tool_panel2 = GuiElement.add(tool_action_panel2,  GuiTable("tool2"):column(6))
     for i, priority_module in pairs(priority_modules) do
       local button_style2 = button_style
       if factory_module_priority == i then button_style2 = "helmod_button_small_bold_selected" end
@@ -888,7 +888,7 @@ function RecipeEdition:updateBeaconModules(event)
     GuiElement.add(tool_panel1, GuiButton("HMPreferenceEdition=OPEN=ID="):sprite("menu", "services-white-sm", "services-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_button.preferences"}))
     GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-priority-apply=ID", block_id, recipe_id):sprite("menu", "arrow-up-white-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_recipe-edition-panel.apply-priority"}))
 
-    local tool_panel2 = GuiElement.add(tool_action_panel2, GuiFlowH("tool2"))
+    local tool_panel2 = GuiElement.add(tool_action_panel2, GuiTable("tool2"):column(6))
     for i, priority_module in pairs(priority_modules) do
       local button_style2 = button_style
       if beacon_module_priority == i then button_style2 = "helmod_button_small_bold_selected" end

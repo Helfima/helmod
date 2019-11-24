@@ -99,15 +99,16 @@ function PreferenceEdition:updatePriorityModule(event)
   -- configuration select
   local tool_panel = GuiElement.add(configuration_panel, GuiFlowH("tool"))
   tool_panel.style.width = 200
+  local conf_table_panel = GuiElement.add(tool_panel, GuiTable("configuration-table"):column(6))
   local configuration_priority = User.getParameter("configuration_priority") or 1
   local priority_modules = User.getParameter("priority_modules") or {}
   local button_style = "helmod_button_bold"
   for i, priority_module in pairs(priority_modules) do
     local button_style2 = button_style
     if configuration_priority == i then button_style2 = "helmod_button_bold_selected" end
-    GuiElement.add(tool_panel, GuiButton(self.classname, "configuration-priority-select=ID", i):caption(i):style(button_style2))
+    GuiElement.add(conf_table_panel, GuiButton(self.classname, "configuration-priority-select=ID", i):caption(i):style(button_style2))
   end
-  GuiElement.add(tool_panel, GuiButton(self.classname, "configuration-priority-select=ID", "new"):caption("+"):style(button_style))
+  GuiElement.add(conf_table_panel, GuiButton(self.classname, "configuration-priority-select=ID", "new"):caption("+"):style(button_style))
   -- module priority
   local priority_table_panel = GuiElement.add(configuration_panel, GuiTable("module-priority-table"):column(3))
   if priority_modules[configuration_priority] ~= nil then
@@ -148,6 +149,7 @@ function PreferenceEdition:onEvent(event)
       User.setParameter("configuration_priority", tonumber(event.item1))
     end
     self:updatePriorityModule(event)
+    Controller:send("on_gui_priority_module", event)
   end
   
   if event.action == "priority-module-select" then

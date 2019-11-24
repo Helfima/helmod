@@ -341,19 +341,52 @@ end
 --
 -- @function [parent=#ModelBuilder] setFactoryModulePriority
 --
--- @param #string item
--- @param #string key object name
+-- @param #string block_id
+-- @param #string recipe_id
 -- @param #table module_priority
 --
-function ModelBuilder.setFactoryModulePriority(item, key, module_priority)
-  Logging:debug(ModelBuilder.classname, "setFactoryModulePriority()", item, key, module_priority)
-  local element = Model.getObject(item, key)
+function ModelBuilder.setFactoryModulePriority(block_id, recipe_id, module_priority)
+  Logging:debug(ModelBuilder.classname, "setFactoryModulePriority()", block_id, recipe_id, module_priority)
+  local element = Model.getObject(block_id, recipe_id)
   if element ~= nil then
     if module_priority == nil then
       element.factory.module_priority = nil
       element.factory.modules = {}
     else
       element.factory.module_priority = table.clone(module_priority)
+      local first = true
+      for i,priority in pairs(module_priority) do
+        local module = ItemPrototype(priority.name)
+        if Player.checkFactoryLimitationModule(module:native(), element) == true then
+          Logging:debug(ModelBuilder.classname, "setFactoryModulePriority()", "ok", first)
+          if first then
+            ModelBuilder.setModuleModel(element.factory, priority.name, priority.value)
+            first = false
+          else
+            ModelBuilder.appendModuleModel(element.factory, priority.name, priority.value)
+          end
+        end
+      end
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Apply a module priority in factory
+--
+-- @function [parent=#ModelBuilder] applyFactoryModulePriority
+--
+-- @param #string block_id
+-- @param #string recipe_id
+--
+function ModelBuilder.applyFactoryModulePriority(block_id, recipe_id)
+  Logging:debug(ModelBuilder.classname, "setFactoryModulePriority()", block_id, recipe_id)
+  local element = Model.getObject(block_id, recipe_id)
+  if element ~= nil then
+    local module_priority = element.factory.module_priority
+    if module_priority == nil then
+      element.factory.modules = {}
+    else
       local first = true
       for i,priority in pairs(module_priority) do
         local module = ItemPrototype(priority.name)
