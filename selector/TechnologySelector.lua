@@ -61,18 +61,6 @@ function TechnologySelector:updateGroups(list_products, list_ingredients, list_t
 end
 
 -------------------------------------------------------------------------------
--- Build prototype tooltip
---
--- @function [parent=#TechnologySelector] buildPrototypeTooltip
---
--- @param #LuaPrototype prototype
---
-function TechnologySelector:buildPrototypeTooltip(prototype)
-  Logging:trace(self.classname, "buildPrototypeTooltip(prototype)", prototype)
-  return GuiElement.getTooltipTechnology(prototype)
-end
-
--------------------------------------------------------------------------------
 -- Build prototype icon
 --
 -- @function [parent=#TechnologySelector] buildPrototypeIcon

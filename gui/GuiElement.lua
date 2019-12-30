@@ -110,7 +110,7 @@ function GuiElement.getSprite(type, name)
   if name == nil then
     sprite = string.format("helmod-%s", type)
   elseif type ~= nil and name ~= nil then
-    if type == "resource" then type = "item" end
+    if type == "resource" then type = "entity" end
     if Player.is_valid_sprite_path(string.format("%s/%s", type, name)) then
       sprite = string.format("%s/%s", type, name)
     elseif Player.is_valid_sprite_path(string.format("%s/%s", "item", name)) then
@@ -142,6 +142,9 @@ end
 -- @return #table
 -- 
 function GuiElement:getOptions()
+  if self.m_index ~= nil then
+    table.insert(self.name, self.m_index)
+  end
   self.options.name = table.concat(self.name,"=")
   if self.is_caption then
     self.options.caption = self.m_caption
@@ -227,6 +230,20 @@ function GuiElement.getStyleSizes()
     local height_main = math.ceil(height*display_ratio_vertictal)
 
     style_sizes["Tab"] = {width = width_main,height = height_main}
+    style_sizes["HMPinPanel"] = {
+      minimal_width = 50,
+      maximal_width = 450,
+      minimal_height = 0,
+      maximal_height = height_main
+     }
+    
+    style_sizes["HMSummaryPanel"] = {
+      minimal_width = 50,
+      maximal_width = 450,
+      minimal_height = 0,
+      maximal_height = height_main
+     }
+    
 
     style_sizes.main = {}
     style_sizes.main.width = width_main
@@ -393,133 +410,6 @@ function GuiElement.getTooltipProduct(element, container)
     table.insert(tooltip, total_tooltip)
     table.insert(tooltip, "")
   end
-  return tooltip
-end
-
--------------------------------------------------------------------------------
--- Get tooltip for module
---
--- @function [parent=#GuiElement] getTooltipModule
---
--- @param #string module_name
---
--- @return #table
---
-function GuiElement.getTooltipModule(module_name)
-  local tooltip = nil
-  if module_name == nil then return nil end
-  local module_prototype = ItemPrototype(module_name)
-  local module = module_prototype:native()
-  if module ~= nil then
-    local consumption = Format.formatPercent(Player.getModuleBonus(module.name, "consumption"))
-    local speed = Format.formatPercent(Player.getModuleBonus(module.name, "speed"))
-    local productivity = Format.formatPercent(Player.getModuleBonus(module.name, "productivity"))
-    local pollution = Format.formatPercent(Player.getModuleBonus(module.name, "pollution"))
-    tooltip = {"tooltip.module-description" , module_prototype:getLocalisedName(), consumption, speed, productivity, pollution}
-  end
-  return tooltip
-end
-
--------------------------------------------------------------------------------
--- Get tooltip for recipe
---
--- @function [parent=#GuiElement] getTooltipRecipe
---
--- @param #table prototype
---
--- @return #table
---
-
-
-function GuiElement.getTooltipRecipe(prototype)
-  local recipe_prototype = RecipePrototype(prototype)
-  if recipe_prototype:native() == nil then return nil end
-  local cache_tooltip_recipe = Cache.getData(GuiElement.classname, "tooltip_recipe") or {}
-  local prototype_type = prototype.type or "other"
-  if cache_tooltip_recipe[prototype_type] ~= nil and cache_tooltip_recipe[prototype_type][prototype.name] ~= nil and cache_tooltip_recipe[prototype_type][prototype.name].enabled == recipe_prototype:getEnabled() then
-    return cache_tooltip_recipe[prototype_type][prototype.name].value
-  end
-  -- initalize tooltip
-  local tooltip = {"tooltip.recipe-info"}
-  -- insert __1__ value
-  table.insert(tooltip, recipe_prototype:getLocalisedName())
-
-  -- insert __2__ value
-  if recipe_prototype:getCategory() == "crafting-handonly" then
-    table.insert(tooltip, {"tooltip.recipe-by-hand"})
-  else
-    table.insert(tooltip, "")
-  end
-
-  -- insert __3__ value
-  local lastTooltip = tooltip
-  for _,element in pairs(recipe_prototype:getRawProducts()) do
-    local product_prototype = Product(element)
-    local count = product_prototype:getElementAmount()
-    local name = product_prototype:getLocalisedName()
-    local currentTooltip = {"tooltip.recipe-info-element", string.format("[%s=%s]",element.type,element.name), count, name}
-    -- insert le dernier tooltip dans le precedent
-    table.insert(lastTooltip, currentTooltip)
-    lastTooltip = currentTooltip
-  end
-  -- finalise la derniere valeur
-  table.insert(lastTooltip, "")
-
-  -- insert __4__ value
-  local lastTooltip = tooltip
-  for _,element in pairs(recipe_prototype:getRawIngredients()) do
-    local product_prototype = Product(element)
-    local count = product_prototype:getElementAmount(element)
-    local name = product_prototype:getLocalisedName()
-    local currentTooltip = {"tooltip.recipe-info-element", string.format("[%s=%s]",element.type,element.name), count, name}
-    -- insert le dernier tooltip dans le precedent
-    table.insert(lastTooltip, currentTooltip)
-    lastTooltip = currentTooltip
-  end
-  -- finalise la derniere valeur
-  table.insert(lastTooltip, "")
-  if cache_tooltip_recipe[prototype_type] == nil then cache_tooltip_recipe[prototype_type] = {} end
-  cache_tooltip_recipe[prototype_type][prototype.name] = {}
-  cache_tooltip_recipe[prototype_type][prototype.name].value = tooltip
-  cache_tooltip_recipe[prototype_type][prototype.name].enabled = recipe_prototype:getEnabled()
-  Cache.setData(GuiElement.classname, "tooltip_recipe",cache_tooltip_recipe)
-  return tooltip
-end
-
--------------------------------------------------------------------------------
--- Get tooltip for technology
---
--- @function [parent=#GuiElement] getTooltipTechnology
---
--- @param #table prototype
---
--- @return #table
---
-function GuiElement.getTooltipTechnology(prototype)
-  -- initalize tooltip
-  local tooltip = {"tooltip.technology-info"}
-  local technology_protoype = Technology(prototype)
-  -- insert __1__ value
-  table.insert(tooltip, technology_protoype:getLocalisedName())
-
-  -- insert __2__ value
-  table.insert(tooltip, technology_protoype:getLevel())
-
-  -- insert __3__ value
-  table.insert(tooltip, technology_protoype:getFormula() or "")
-
-  -- insert __4__ value
-  local lastTooltip = tooltip
-  for _,element in pairs(technology_protoype:getIngredients()) do
-    local count = Product.getElementAmount(element)
-    local name = Player.getLocalisedName(element)
-    local currentTooltip = {"tooltip.recipe-info-element", string.format("[%s=%s]",element.type,element.name), count, name}
-    -- insert le dernier tooltip dans le precedent
-    table.insert(lastTooltip, currentTooltip)
-    lastTooltip = currentTooltip
-  end
-  -- finalise la derniere valeur
-  table.insert(lastTooltip, "")
   return tooltip
 end
 

@@ -57,6 +57,7 @@ function sprite_icon_sm(name, width, height, white)
     width = width,
     height = height,
     position = position,
+    scale = 0.7,
     shift = {0, 0}
   }
 end
@@ -97,7 +98,7 @@ local list = {
   {name="factory"},
   {name="filter", sm=true},
   {name="filter-edit"},
-  {name="graduation"},
+  {name="graduation", sm=true},
   {name="hangar"},
   {name="help"},
   {name="info"},
@@ -118,7 +119,7 @@ local list = {
   {name="robot"},
   {name="search"},
   {name="services", sm=true},
-  {name="settings"},
+  {name="settings", sm=true},
   {name="time"},
   {name="unlink", sm=true},
   {name="upload"},
@@ -136,9 +137,14 @@ end
 
 local list = {
   {name="tooltip-add", size=24, scale=1},
+  {name="tooltip-remove", size=24, scale=1},
   {name="tooltip-edit", size=48, scale=1},
   {name="tooltip-blank", size=24, scale=1},
-  {name="tooltip-info", size=32, scale=1}
+  {name="tooltip-info", size=32, scale=1},
+  {name="tooltip-record", size=32, scale=1},
+  {name="tooltip-play", size=32, scale=1},
+  {name="tooltip-end", size=32, scale=1},
+  {name="tooltip-erase", size=32, scale=1}
 }
 for icon_row,icon in pairs(list) do
   table.insert(spite_icons, sprite_tooltip(icon.name, icon.size, icon.scale))

@@ -372,6 +372,7 @@ function AbstractTab:updateMenuPanel(event)
     -- pin control
     if self.classname == "HMProductionBlockTab" then
       GuiElement.add(group3, GuiButton("HMPinPanel=OPEN=ID", block_id):sprite("menu", "pin-white", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
+      GuiElement.add(group3, GuiButton("HMSummaryPanel=OPEN=ID", block_id):sprite("menu", "brief-white","brief"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
       local block = model.blocks[block_id]
       if block ~= nil then
         local style = "helmod_button_menu"

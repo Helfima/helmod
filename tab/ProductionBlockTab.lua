@@ -437,7 +437,6 @@ function ProductionBlockTab:updateOutput(event)
           else
             button_color = GuiElement.color_button_default_product
           end
-
           GuiElement.add(output_table, GuiCellElementM(self.classname, button_action, block.id, product.name):element(product):tooltip(button_tooltip):index(index):color(button_color))
         end
       end
@@ -605,7 +604,7 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
   --  local production_label = Format.formatPercent(production).."%"
   --  if block.solver == true then production_label = "" end
   local cell_recipe = GuiElement.add(gui_table, GuiTable("recipe", recipe.id):column(2):style(helmod_table_style.list))
-  GuiElement.add(cell_recipe, GuiCellRecipe("HMRecipeEdition=OPEN=ID", block.id, recipe.id):element(recipe):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):broken(recipe_prototype:native() == nil))
+  GuiElement.add(cell_recipe, GuiCellRecipe("HMRecipeEdition=OPEN=ID", block.id, recipe.id):element(recipe):infoIcon(recipe.type):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):broken(recipe_prototype:native() == nil))
   if recipe_prototype:native() == nil then
     Player.print("ERROR: Recipe ".. recipe.name .." not exist in game")
   end

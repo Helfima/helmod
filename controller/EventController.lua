@@ -41,7 +41,6 @@ function EventController.start()
 
   --EventController.pcallNthTick(10, EventController.onNthTick)
   -- event hotkey
-  EventController.pcallEvent("helmod-input-valid", EventController.onCustomInput)
   EventController.pcallEvent("helmod-close", EventController.onCustomInput)
   EventController.pcallEvent("helmod-open-close", EventController.onCustomInput)
   EventController.pcallEvent("helmod-recipe-selector-open", EventController.onCustomInput)
@@ -104,11 +103,10 @@ end
 --
 -- @function [parent=#EventController] onInit
 --
--- @param  #table event
---
-function EventController.onInit(event)
-  Logging:trace(EventController.classname, "onInit(event)", event)
+function EventController.onInit()
+  Logging:trace(EventController.classname, "onInit()")
   Command.start()
+  Controller:on_init()
 end
 
 -------------------------------------------------------------------------------
@@ -196,6 +194,8 @@ function EventController.onConfigurationChanged(data)
       Player.set(player)
       Controller:bindController(player)
     end
+  else
+    Cache.reset()
   end
   for _,player in pairs(game.players) do
     Player.set(player)

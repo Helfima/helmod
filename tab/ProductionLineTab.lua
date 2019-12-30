@@ -254,11 +254,12 @@ function ProductionLineTab:addTableRow(gui_table, block)
 
   local block_color = "gray"
   if not(block_by_product) then block_color = "orange" end
-  GuiElement.add(cell_recipe, GuiCellBlock(self.classname, "change-tab=ID", "HMProductionBlockTab", block.id):element(block):tooltip("tooltip.edit-block"):color(block_color))
+  GuiElement.add(cell_recipe, GuiCellBlock(self.classname, "change-tab=ID", "HMProductionBlockTab", block.id):element(block):infoIcon(block.type):tooltip("tooltip.edit-block"):color(block_color))
 
   -- col energy
   local cell_energy = GuiElement.add(gui_table, GuiTable(block.id):column(1))
-  GuiElement.add(cell_energy, GuiCellEnergy(self.classname, "change-tab=ID", "HMProductionBlockTab", block.id):element(block):tooltip("tooltip.edit-block"):color(block_color))
+  local element_block = {name=block.name, power=block.power}
+  GuiElement.add(cell_energy, GuiCellEnergy(self.classname, "change-tab=ID", "HMProductionBlockTab", block.id):element(element_block):tooltip("tooltip.edit-block"):color(block_color))
 
   -- products
   local display_product_cols = User.getModSetting("display_product_cols") + 1

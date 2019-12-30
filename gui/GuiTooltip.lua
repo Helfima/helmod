@@ -22,7 +22,7 @@ end)
 -- @return #GuiCell
 --
 function GuiTooltip:element(element)
-  self.element = element
+  self.m_element = element
   return self
 end
 
@@ -53,150 +53,32 @@ function GuiTooltip.container(element, container)
 end
 
 -------------------------------------------------------------------------------
--- Get tooltip for module
---
--- @function [parent=#GuiTooltip] module
---
--- @param #string module_name
---
--- @return #table
---
-function GuiTooltip.module(module_name)
-  local tooltip = nil
-  if module_name == nil then return nil end
-  local module_prototype = ItemPrototype(module_name)
-  local module = module_prototype:native()
-  if module ~= nil then
-    local consumption = Format.formatPercent(Player.getModuleBonus(module.name, "consumption"))
-    local speed = Format.formatPercent(Player.getModuleBonus(module.name, "speed"))
-    local productivity = Format.formatPercent(Player.getModuleBonus(module.name, "productivity"))
-    local pollution = Format.formatPercent(Player.getModuleBonus(module.name, "pollution"))
-    tooltip = {"tooltip.module-description" , module_prototype:getLocalisedName(), consumption, speed, productivity, pollution}
-  end
-  return tooltip
-end
-
--------------------------------------------------------------------------------
--- Get tooltip for recipe
---
--- @function [parent=#GuiTooltip] recipe
---
--- @param #table prototype
---
--- @return #table
---
-
-
-function GuiTooltip.recipe(prototype)
-  local recipe_prototype = RecipePrototype(prototype)
-  if recipe_prototype:native() == nil then return nil end
-  local cache_tooltip_recipe = Cache.getData(GuiElement.classname, "tooltip_recipe") or {}
-  local prototype_type = prototype.type or "other"
-  if cache_tooltip_recipe[prototype_type] ~= nil and cache_tooltip_recipe[prototype_type][prototype.name] ~= nil and cache_tooltip_recipe[prototype_type][prototype.name].enabled == recipe_prototype:getEnabled() then
-    return cache_tooltip_recipe[prototype_type][prototype.name].value
-  end
-  -- initalize tooltip
-  local tooltip = {"tooltip.recipe-info"}
-  -- insert __1__ value
-  table.insert(tooltip, recipe_prototype:getLocalisedName())
-
-  -- insert __2__ value
-  if recipe_prototype:getCategory() == "crafting-handonly" then
-    table.insert(tooltip, {"tooltip.recipe-by-hand"})
-  else
-    table.insert(tooltip, "")
-  end
-
-  -- insert __3__ value
-  local lastTooltip = tooltip
-  for _,element in pairs(recipe_prototype:getRawProducts()) do
-    local product_prototype = Product(element)
-    local count = product_prototype:getElementAmount()
-    local name = product_prototype:getLocalisedName()
-    local currentTooltip = {"tooltip.recipe-info-element", string.format("[%s=%s]",element.type,element.name), count, name}
-    -- insert le dernier tooltip dans le precedent
-    table.insert(lastTooltip, currentTooltip)
-    lastTooltip = currentTooltip
-  end
-  -- finalise la derniere valeur
-  table.insert(lastTooltip, "")
-
-  -- insert __4__ value
-  local lastTooltip = tooltip
-  for _,element in pairs(recipe_prototype:getRawIngredients()) do
-    local product_prototype = Product(element)
-    local count = product_prototype:getElementAmount(element)
-    local name = product_prototype:getLocalisedName()
-    local currentTooltip = {"tooltip.recipe-info-element", string.format("[%s=%s]",element.type,element.name), count, name}
-    -- insert le dernier tooltip dans le precedent
-    table.insert(lastTooltip, currentTooltip)
-    lastTooltip = currentTooltip
-  end
-  -- finalise la derniere valeur
-  table.insert(lastTooltip, "")
-  if cache_tooltip_recipe[prototype_type] == nil then cache_tooltip_recipe[prototype_type] = {} end
-  cache_tooltip_recipe[prototype_type][prototype.name] = {}
-  cache_tooltip_recipe[prototype_type][prototype.name].value = tooltip
-  cache_tooltip_recipe[prototype_type][prototype.name].enabled = recipe_prototype:getEnabled()
-  Cache.setData(GuiElement.classname, "tooltip_recipe",cache_tooltip_recipe)
-  return tooltip
-end
-
--------------------------------------------------------------------------------
--- Get tooltip for technology
---
--- @function [parent=#GuiTooltip] technology
---
--- @param #table prototype
---
--- @return #table
---
-function GuiTooltip.technology(prototype)
-  -- initalize tooltip
-  local tooltip = {"tooltip.technology-info"}
-  local technology_protoype = Technology(prototype)
-  -- insert __1__ value
-  table.insert(tooltip, technology_protoype:getLocalisedName())
-
-  -- insert __2__ value
-  table.insert(tooltip, technology_protoype:getLevel())
-
-  -- insert __3__ value
-  table.insert(tooltip, technology_protoype:getFormula() or "")
-
-  -- insert __4__ value
-  local lastTooltip = tooltip
-  for _,element in pairs(technology_protoype:getIngredients()) do
-    local count = Product.getElementAmount(element)
-    local name = Player.getLocalisedName(element)
-    local currentTooltip = {"tooltip.recipe-info-element", string.format("[%s=%s]",element.type,element.name), count, name}
-    -- insert le dernier tooltip dans le precedent
-    table.insert(lastTooltip, currentTooltip)
-    lastTooltip = currentTooltip
-  end
-  -- finalise la derniere valeur
-  table.insert(lastTooltip, "")
-  return tooltip
-end
-
--------------------------------------------------------------------------------
 -- Create tooltip
 --
 -- @function [parent=#GuiTooltip] create
 --
 function GuiTooltip:create()
   local tooltip = {""}
-  if string.find(self.name[1], "edit") then
-    table.insert(tooltip, {"", "[img=helmod-tooltip-edit]", " ", "[color=255,222,61]", "[font=default-bold]", self.name, "[/font]", "[/color]", "\n"})
-  elseif string.find(self.name[1], "add") then
-    table.insert(tooltip, {"", "[img=helmod-tooltip-add]", " ", "[color=255,222,61]", "[font=default-bold]", self.name, "[/font]", "[/color]", "\n"})
-  elseif string.find(self.name[1], "info") then
-    table.insert(tooltip, {"", "[img=helmod-tooltip-info]", " ", "[color=229,229,229]", "[font=default-bold]", self.name, "[/font]", "[/color]", "\n"})
+  if string.find(self.name[1], "edit[-]") then
+    table.insert(tooltip, {"", "[img=helmod-tooltip-edit]", " ", "[color=255,222,61]", "[font=default-bold]", self.name, "[/font]", "[/color]"})
+  elseif string.find(self.name[1], "add[-]") then
+    table.insert(tooltip, {"", "[img=helmod-tooltip-add]", " ", "[color=255,222,61]", "[font=default-bold]", self.name, "[/font]", "[/color]"})
+  elseif string.find(self.name[1], "remove[-]") then
+    table.insert(tooltip, {"", "[img=helmod-tooltip-remove]", " ", "[color=255,222,61]", "[font=default-bold]", self.name, "[/font]", "[/color]"})
+  elseif string.find(self.name[1], "info[-]") then
+    table.insert(tooltip, {"", "[img=helmod-tooltip-info]", " ", "[color=229,229,229]", "[font=default-bold]", self.name, "[/font]", "[/color]"})
+  elseif string.find(self.name[1], "set[-]default") then
+    table.insert(tooltip, {"", "[img=helmod-tooltip-record]", " ", "[color=255,222,61]", "[font=default-bold]", self.name, "[/font]", "[/color]"})
+  elseif string.find(self.name[1], "apply[-]block") then
+    table.insert(self.name, {self.options.tooltip})
+    table.insert(tooltip, {"", "[img=helmod-tooltip-play]", " ", "[color=255,222,61]", "[font=default-bold]", self.name, "[/font]", "[/color]"})
+  elseif string.find(self.name[1], "apply[-]line") then
+    table.insert(self.name, {self.options.tooltip})
+    table.insert(tooltip, {"", "[img=helmod-tooltip-end]", " ", "[color=255,222,61]", "[font=default-bold]", self.name, "[/font]", "[/color]"})
+  elseif string.find(self.name[1], "module[-]clear") then
+    table.insert(tooltip, {"", "[img=helmod-tooltip-erase]", " ", "[color=255,222,61]", "[font=default-bold]", self.name, "[/font]", "[/color]"})
   else
-    table.insert(tooltip, {"", "[img=helmod-tooltip-blank]", " ", "[font=default-bold]", self.name, "[/font]", "\n"})
-  end
-  if self.element then
-    table.insert(tooltip, {"", string.format("[%s=%s]", self.element.type, self.element.name), " ", "[color=255,230,192]", "[font=default-bold]", Player.getLocalisedName(self.element), "[/font]", "[/color]"})
+    table.insert(tooltip, {"", "[img=helmod-tooltip-blank]", " ", "[font=default-bold]", self.name, "[/font]"})
   end
   return tooltip
 end
@@ -219,17 +101,132 @@ end)
 --
 function GuiTooltipElement:create()
   local tooltip = self._super.create(self)
-  -- quantity
-  local total_count = Format.formatNumberElement(self.element.count)
-  if self.element.limit_count ~= nil then
-    local limit_count = Format.formatNumberElement(self.element.limit_count)
-    table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", "[color=255,230,192]", "[font=default-bold]", {"helmod_common.quantity"}, ": ", "[/font]", "[/color]", limit_count or 0, "/", total_count})
-  else
-    table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", "[color=255,230,192]", "[font=default-bold]", {"helmod_common.quantity"}, ": ", "[/font]", "[/color]", total_count or 0})
-  end
-  if User.getModGlobalSetting("debug") ~= "none" then
-    table.insert(tooltip, {"", "\n", "----------------------", "\n"})
-    table.insert(tooltip, {"", "[img=developer]", " ", "State", ": ", "[font=default-bold]", self.element.state or 0, "[/font]"})
+  if self.m_element then
+    local type = self.m_element.type
+    if self.m_element.type == "resource" then type = "entity" end
+    table.insert(tooltip, {"", "\n", string.format("[%s=%s]", type, self.m_element.name), " ", "[color=255,230,192]", "[font=default-bold]", Player.getLocalisedName({type=type, name=self.m_element.name}), "[/font]", "[/color]"})
+    -- quantity
+    local total_count = Format.formatNumberElement(self.m_element.count)
+    if self.m_element.limit_count ~= nil then
+      local limit_count = Format.formatNumberElement(self.m_element.limit_count)
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", "[color=255,230,192]", "[font=default-bold]", {"helmod_common.quantity"}, ": ", "[/font]", "[/color]", limit_count or 0, "/", total_count})
+    else
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", "[color=255,230,192]", "[font=default-bold]", {"helmod_common.quantity"}, ": ", "[/font]", "[/color]", total_count or 0})
+    end
+    if User.getModGlobalSetting("debug") ~= "none" then
+      table.insert(tooltip, {"", "\n", "----------------------"})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Name", ": ", "[font=default-bold]", self.m_element.name or "nil", "[/font]"})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Type", ": ", "[font=default-bold]", self.m_element.type or "nil", "[/font]"})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "State", ": ", "[font=default-bold]", self.m_element.state or 0, "[/font]"})
+    end
   end
   return tooltip
 end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiTooltip] constructor
+-- @param #arg name
+-- @return #GuiTooltipFactory
+--
+GuiTooltipFactory = newclass(GuiTooltip,function(base,...)
+  GuiTooltip.init(base,...)
+  base.classname = "HMGuiTooltip"
+end)
+
+-------------------------------------------------------------------------------
+-- Create tooltip
+--
+-- @function [parent=#GuiTooltipFactory] create
+--
+function GuiTooltipFactory:create()
+  local tooltip = self._super.create(self)
+  if self.m_element then
+    local type = "item"
+    local prototype = ItemPrototype(self.m_element.name)
+    table.insert(tooltip, {"", "\n", string.format("[%s=%s]", type, self.m_element.name), " ", "[color=255,230,192]", "[font=default-bold]", prototype:getLocalisedName(), "[/font]", "[/color]"})
+  end
+  return tooltip
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiTooltip] constructor
+-- @param #arg name
+-- @return #GuiTooltipModule
+--
+GuiTooltipModule = newclass(GuiTooltip,function(base,...)
+  GuiTooltip.init(base,...)
+  base.classname = "HMGuiTooltip"
+end)
+
+-------------------------------------------------------------------------------
+-- Create tooltip
+--
+-- @function [parent=#GuiTooltipModule] create
+--
+function GuiTooltipModule:create()
+  local tooltip = self._super.create(self)
+  if self.m_element then
+    local module_prototype = ItemPrototype(self.m_element.name)
+    local module = module_prototype:native()
+    if module ~= nil then
+      local bonus_consumption = Player.getModuleBonus(module.name, "consumption")
+      local bonus_speed = Player.getModuleBonus(module.name, "speed")
+      local bonus_productivity = Player.getModuleBonus(module.name, "productivity")
+      local bonus_pollution = Player.getModuleBonus(module.name, "pollution")
+
+      local bonus_consumption_positive = "+"
+      if bonus_consumption <= 0 then bonus_consumption_positive = "" end
+      if bonus_consumption ~= 0 then
+        table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", "[color=255,230,192]", {"description.consumption-bonus"}, ": ", "[/color]", "[font=default-bold]", bonus_consumption_positive, Format.formatPercent(bonus_consumption), "%", "[/font]"})
+      end
+      local bonus_speed_positive = "+"
+      if bonus_speed <= 0 then bonus_speed_positive = "" end
+      if bonus_speed ~= 0 then
+        table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", "[color=255,230,192]", {"description.speed-bonus"}, ": ", "[/color]", "[font=default-bold]", bonus_speed_positive, Format.formatPercent(bonus_speed), "%", "[/font]"})
+      end
+      local bonus_productivity_positive = "+"
+      if bonus_productivity <= 0 then bonus_productivity_positive = "" end
+      if bonus_productivity ~= 0 then
+        table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", "[color=255,230,192]", {"description.productivity-bonus"}, ": ", "[/color]", "[font=default-bold]", bonus_productivity_positive, Format.formatPercent(bonus_productivity), "%", "[/font]"})
+      end
+      local bonus_pollution_positive = "+"
+      if bonus_pollution <= 0 then bonus_pollution_positive = "" end
+      if bonus_pollution ~= 0 then
+        table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", "[color=255,230,192]", {"description.pollution-bonus"}, ": ", "[/color]", "[font=default-bold]", bonus_pollution_positive, Format.formatPercent(bonus_pollution), "%", "[/font]"})
+      end
+    end
+  end
+  return tooltip
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiTooltip] constructor
+-- @param #arg name
+-- @return #GuiTooltipPriority
+--
+GuiTooltipPriority = newclass(GuiTooltip,function(base,...)
+  GuiTooltip.init(base,...)
+  base.classname = "HMGuiTooltip"
+end)
+
+-------------------------------------------------------------------------------
+-- Create tooltip
+--
+-- @function [parent=#GuiTooltipModule] create
+--
+function GuiTooltipPriority:create()
+  local tooltip = self._super.create(self)
+  if self.m_element then
+    for i,priority in pairs(self.m_element) do
+      local module_prototype = ItemPrototype(priority.name)
+      table.insert(tooltip, {"", "\n", string.format("[%s=%s]", "item", priority.name), " ", "[font=default-bold]", priority.value, " x ", "[/font]", "[color=255,230,192]", module_prototype:getLocalisedName(), "[/color]"})
+    end
+  end
+  return tooltip
+end
+
+
+

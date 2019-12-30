@@ -160,18 +160,31 @@ function AdminTab:updateCache()
   Logging:debug(self.classname, "updateCache()")
 
   -- Rule List
-  local cache_panel = self:getCacheTab()
+  local caches_panel = self:getCacheTab()
   local users_data = global["users"]
   if Model.countList(users_data) > 0 then
 
-    local translate_panel = GuiElement.add(cache_panel, GuiFlowV("translate"))
+    local translate_panel = GuiElement.add(caches_panel, GuiFlowV("translate"))
     GuiElement.add(translate_panel, GuiLabel("translate-label"):caption("Translated String"):style("helmod_label_title_frame"))
     local result_table = GuiElement.add(translate_panel, GuiTable("list-data"):column(3):style("helmod_table-rule-odd"))
-    self:addCacheListHeader(result_table)
+    self:addTranslateListHeader(result_table)
     for user_name, user_data in spairs(users_data, function(t,a,b) return b > a end) do
-      self:addCacheListRow(result_table, user_name, user_data)
+      self:addTranslateListRow(result_table, user_name, user_data)
     end
 
+  end
+
+  local caches_data = Cache.get()
+  if Model.countList(caches_data) > 0 then
+    local cache_panel = GuiElement.add(caches_panel, GuiFlowV("caches"))
+    GuiElement.add(cache_panel, GuiLabel("translate-label"):caption("Cache Data"):style("helmod_label_title_frame"))
+    local result_table = GuiElement.add(cache_panel, GuiTable("list-data"):column(3):style("helmod_table-rule-odd"))
+    self:addCacheListHeader(result_table)
+    for key1, data1 in pairs(caches_data) do
+      for key2, data2 in pairs(data1) do
+        self:addCacheListRow(result_table, string.format("%s->%s", key1, key2), data2)
+      end
+    end
   end
 end
 
@@ -227,6 +240,23 @@ end
 -------------------------------------------------------------------------------
 -- Add cahce List header
 --
+-- @function [parent=#AdminTab] addTranslateListHeader
+--
+-- @param #LuaGuiElement itable container for element
+--
+function AdminTab:addTranslateListHeader(itable)
+  Logging:debug(self.classname, "addCacheListHeader()", itable)
+
+  -- col action
+  self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
+  -- data
+  self:addCellHeader(itable, "header-owner", {"helmod_result-panel.col-header-owner"})
+  self:addCellHeader(itable, "header-total", {"helmod_result-panel.col-header-total"})
+end
+
+-------------------------------------------------------------------------------
+-- Add cahce List header
+--
 -- @function [parent=#AdminTab] addCacheListHeader
 --
 -- @param #LuaGuiElement itable container for element
@@ -242,14 +272,14 @@ function AdminTab:addCacheListHeader(itable)
 end
 
 -------------------------------------------------------------------------------
--- Add row Rule List
+-- Add row translate List
 --
--- @function [parent=#AdminTab] addCacheListRow
+-- @function [parent=#AdminTab] addTranslateListRow
 --
 -- @param #LuaGuiElement itable container for element
 -- @param #table model
 --
-function AdminTab:addCacheListRow(gui_table, user_name, user_data)
+function AdminTab:addTranslateListRow(gui_table, user_name, user_data)
   Logging:debug(self.classname, "addCacheListRow()", gui_table, user_name, user_data)
 
   -- col action
@@ -260,6 +290,28 @@ function AdminTab:addCacheListRow(gui_table, user_name, user_data)
 
   -- col translated
   GuiElement.add(gui_table, GuiLabel("total", user_name):caption(Model.countList(user_data.translated)))
+
+end
+
+-------------------------------------------------------------------------------
+-- Add row Rule List
+--
+-- @function [parent=#AdminTab] addCacheListRow
+--
+-- @param #LuaGuiElement itable container for element
+-- @param #table model
+--
+function AdminTab:addCacheListRow(gui_table, class_name, data)
+  Logging:debug(self.classname, "addCacheListRow()", gui_table, class_name, data)
+
+  -- col action
+  local cell_action = GuiElement.add(gui_table, GuiTable("action", class_name):column(4))
+
+  -- col class
+  GuiElement.add(gui_table, GuiLabel("class", class_name):caption(class_name))
+
+  -- col count
+  GuiElement.add(gui_table, GuiLabel("total", class_name):caption(Model.countList(data)))
 
 end
 

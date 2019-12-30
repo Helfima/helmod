@@ -109,18 +109,6 @@ function RecipeSelector:updateGroups(list_products, list_ingredients, list_trans
 end
 
 -------------------------------------------------------------------------------
--- Create recipe tooltip
---
--- @function [parent=#RecipeSelector] buildPrototypeTooltip
---
--- @param #table prototype
---
-function RecipeSelector:buildPrototypeTooltip(prototype)
-  Logging:trace(self.classname, "buildRecipeTooltip(element)", prototype)
-  return GuiElement.getTooltipRecipe(prototype)
-end
-
--------------------------------------------------------------------------------
 -- Create prototype icon
 --
 -- @function [parent=#RecipeSelector] buildPrototypeIcon
@@ -142,7 +130,7 @@ function RecipeSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
   local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select=ID", type):choose(prototype.type, prototype_name):color(color))
   button.locked = true
   if prototype.type ~= "recipe" then
-    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"))
+    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({"tooltip.resource-recipe"}))
     sprite.style.top_padding = -8
   end
 end

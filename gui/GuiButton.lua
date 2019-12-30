@@ -22,7 +22,7 @@ end)
 -- @function [parent=#GuiButton] sprite
 -- @param #string type
 -- @param #string name
--- @param #string hovered
+-- @param #string hovered (change au survole)
 -- @return #GuiButton
 --
 function GuiButton:sprite(type, name, hovered)
@@ -52,6 +52,17 @@ end
 --
 function GuiButton:option(name, value)
   self.options[name] = value
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiButton] index
+-- @param #number index
+-- @return #GuiButton
+--
+function GuiButton:index(index)
+  self.m_index = index
+  return self
 end
 
 -------------------------------------------------------------------------------

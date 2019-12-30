@@ -283,18 +283,101 @@ function ModelBuilder.updateFuelFactory(item, key, options)
 end
 
 -------------------------------------------------------------------------------
+-- Convert factory modules to a prority module
+--
+-- @function [parent=#ModelBuilder] convertModuleToPriority
+--
+-- @param #string factory
+--
+function ModelBuilder.convertModuleToPriority(factory)
+  local module_priority = {}
+  for name,value in pairs(factory.modules or {}) do
+    table.insert(module_priority, {name=name, value=value})
+  end
+  return module_priority
+end
+
+-------------------------------------------------------------------------------
+-- Add a module to prority module
+--
+-- @function [parent=#ModelBuilder] addModulePriority
+--
+-- @param #string factory
+-- @param #string name module
+--
+function ModelBuilder.addModulePriority(factory, name)
+  local module_priority = ModelBuilder.convertModuleToPriority(factory)
+  local factory_prototype = EntityPrototype(factory)
+  Logging:debug(ModelBuilder.classname, "addModulePriority()", name, module_priority)
+  if Model.countModulesModel(factory) < factory_prototype:getModuleInventorySize() then
+    local success = false
+    -- parcours la priorite
+    for i,priority in pairs(module_priority) do
+      if priority.name == name then
+        priority.value = priority.value + 1
+        success = true
+        Logging:debug(ModelBuilder.classname, "->success", success)
+      end
+    end
+    if success == false then
+      table.insert(module_priority, {name=name,value=1})
+      Logging:debug(ModelBuilder.classname, "->insert", module_priority)
+    end
+  end
+  Logging:debug(ModelBuilder.classname, "->final", module_priority)
+  return module_priority
+end
+
+-------------------------------------------------------------------------------
+-- Remove module priority
+--
+-- @function [parent=#ModelBuilder] removeModulePriority
+--
+-- @param #table factory
+-- @param #string name
+--
+function ModelBuilder.removeModulePriority(factory, name)
+  local module_priority = ModelBuilder.convertModuleToPriority(factory)
+  local factory_prototype = EntityPrototype(factory)
+  Logging:debug(ModelBuilder.classname, "removeModulePriority()", name, module_priority)
+  -- parcours la priorite
+  local index = nil
+  for i,priority in pairs(module_priority) do
+    if priority.name == name then
+      if priority.value > 0 then
+        priority.value = priority.value - 1
+      else
+        index = i
+        Logging:debug(ModelBuilder.classname, "->need remove index", index)
+      end
+    end
+  end
+  if index ~= nil then
+    table.remove(module_priority, index)
+    Logging:debug(ModelBuilder.classname, "->remove index", index)
+  end
+  Logging:debug(ModelBuilder.classname, "->final", module_priority)
+  return module_priority
+end
+
+
+-------------------------------------------------------------------------------
 -- Add a module in factory
 --
 -- @function [parent=#ModelBuilder] addFactoryModule
 --
--- @param #string item
--- @param #string key object name
--- @param #string name module name
+-- @param #string block_id
+-- @param #string recipe_id
+-- @param #string name module
 --
-function ModelBuilder.addFactoryModule(item, key, name)
-  local object = Model.getObject(item, key)
-  if object ~= nil then
-    ModelBuilder.addModuleModel(object.factory, name)
+function ModelBuilder.addFactoryModule(block_id, recipe_id, name)
+  local element = Model.getObject(block_id, recipe_id)
+  local module = ItemPrototype(name)
+  if element ~= nil and module:native() ~= nil then
+    if Player.checkFactoryLimitationModule(module:native(), element) == true then
+      local module_priority = ModelBuilder.addModulePriority(element.factory, name)
+      ModelBuilder.setFactoryModulePriority(block_id, recipe_id, module_priority)
+    end
   end
 end
 
@@ -349,9 +432,9 @@ function ModelBuilder.setFactoryModulePriority(block_id, recipe_id, module_prior
   Logging:debug(ModelBuilder.classname, "setFactoryModulePriority()", block_id, recipe_id, module_priority)
   local element = Model.getObject(block_id, recipe_id)
   if element ~= nil then
+    element.factory.modules = {}
     if module_priority == nil then
       element.factory.module_priority = nil
-      element.factory.modules = {}
     else
       element.factory.module_priority = table.clone(module_priority)
       local first = true
@@ -417,9 +500,9 @@ function ModelBuilder.setBeaconModulePriority(item, key, module_priority)
   Logging:debug(ModelBuilder.classname, "setBeaconModulePriority()", item, key, module_priority)
   local element = Model.getObject(item, key)
   if element ~= nil then
+    element.beacon.modules = {}
     if module_priority == nil then
       element.beacon.module_priority = nil
-      element.beacon.modules = {}
     else
       element.beacon.module_priority = table.clone(module_priority)
       local first = true
@@ -603,14 +686,16 @@ end
 --
 -- @function [parent=#ModelBuilder] removeFactoryModule
 --
--- @param #string item
--- @param #string key object name
--- @param #string name module name
+-- @param #string block_id
+-- @param #string recipe_id
+-- @param #string name module
 --
-function ModelBuilder.removeFactoryModule(item, key, name)
-  local object = Model.getObject(item, key)
-  if object ~= nil then
-    ModelBuilder.removeModuleModel(object.factory, name)
+function ModelBuilder.removeFactoryModule(block_id, recipe_id, name)
+  local element = Model.getObject(block_id, recipe_id)
+  local module = ItemPrototype(name)
+  if element ~= nil and module:native() ~= nil then
+    local module_priority = ModelBuilder.removeModulePriority(element.factory, name)
+    ModelBuilder.setFactoryModulePriority(block_id, recipe_id, module_priority)
   end
 end
 
@@ -767,22 +852,6 @@ function ModelBuilder.copyBlock(from_model, from_block)
 end
 
 -------------------------------------------------------------------------------
--- Add module model
---
--- @function [parent=#ModelBuilder] addModuleModel
---
--- @param #table element
--- @param #string name
---
-function ModelBuilder.addModuleModel(element, name)
-  local factory_prototype = EntityPrototype(element)
-  if element.modules[name] == nil then element.modules[name] = 0 end
-  if Model.countModulesModel(element) < factory_prototype:getModuleInventorySize() then
-    element.modules[name] = element.modules[name] + 1
-  end
-end
-
--------------------------------------------------------------------------------
 -- Set module model
 --
 -- @function [parent=#ModelBuilder] setModuleModel
@@ -815,34 +884,23 @@ end
 -- @param #number value
 --
 function ModelBuilder.appendModuleModel(element, name, value)
-  Logging:debug(ModelBuilder.classname, "appendModuleModel()", element, name, value)
+  Logging:debug(ModelBuilder.classname, "appendModuleModel", name, value)
   local factory_prototype = EntityPrototype(element)
   if element.modules ~= nil and element.modules[name] == value then return false end
   local count_modules = Model.countModulesModel(element)
+  Logging:debug(ModelBuilder.classname, "->name", name, "inventory size", factory_prototype:getModuleInventorySize(), "count", count_modules, "delta", factory_prototype:getModuleInventorySize() - count_modules)
   if count_modules >= factory_prototype:getModuleInventorySize() then
     return false
   elseif (count_modules + value) <= factory_prototype:getModuleInventorySize() then
+    Logging:debug(ModelBuilder.classname, "-->set", name, "value", value)
     element.modules[name] = value
   else
-    Logging:debug(ModelBuilder.classname, "appendModuleModel()", factory_prototype:getModuleInventorySize(), count_modules, factory_prototype:getModuleInventorySize() - count_modules)
-    element.modules[name] = factory_prototype:getModuleInventorySize() - count_modules
+    element.modules[name] = 0
+    local delta = factory_prototype:getModuleInventorySize() - Model.countModulesModel(element)
+    Logging:debug(ModelBuilder.classname, "-->cap", name, "delta", delta)
+    element.modules[name] = delta
   end
   return true
-end
-
--------------------------------------------------------------------------------
--- Remove module model
---
--- @function [parent=#ModelBuilder] removeModuleModel
---
--- @param #table element
--- @param #string name
---
-function ModelBuilder.removeModuleModel(element, name)
-  if element.modules[name] == nil then element.modules[name] = 0 end
-  if element.modules[name] > 0 then
-    element.modules[name] = element.modules[name] - 1
-  end
 end
 
 -------------------------------------------------------------------------------
@@ -871,14 +929,18 @@ end
 --
 -- @function [parent=#ModelBuilder] addBeaconModule
 --
--- @param #string item
--- @param #string key object name
--- @param #string name module name
+-- @param #string block_id
+-- @param #string recipe_id
+-- @param #string name module
 --
-function ModelBuilder.addBeaconModule(item, key, name)
-  local object = Model.getObject(item, key)
-  if object ~= nil then
-    ModelBuilder.addModuleModel(object.beacon, name)
+function ModelBuilder.addBeaconModule(block_id, recipe_id, name)
+  local element = Model.getObject(block_id, recipe_id)
+  local module = ItemPrototype(name)
+  if element ~= nil and module:native() ~= nil then
+    if Player.checkFactoryLimitationModule(module:native(), element) == true then
+      local module_priority = ModelBuilder.addModulePriority(element.beacon, name)
+      ModelBuilder.setBeaconModulePriority(block_id, recipe_id, module_priority)
+    end
   end
 end
 
@@ -887,14 +949,16 @@ end
 --
 -- @function [parent=#ModelBuilder] removeBeaconModule
 --
--- @param #string item
--- @param #string key object name
--- @param #string name module name
+-- @param #string block_id
+-- @param #string recipe_id
+-- @param #string name module
 --
-function ModelBuilder.removeBeaconModule(item, key, name)
-  local object = Model.getObject(item, key)
-  if object ~= nil then
-    ModelBuilder.removeModuleModel(object.beacon, name)
+function ModelBuilder.removeBeaconModule(block_id, recipe_id, name)
+  local element = Model.getObject(block_id, recipe_id)
+  local module = ItemPrototype(name)
+  if element ~= nil and module:native() ~= nil then
+    local module_priority = ModelBuilder.removeModulePriority(element.beacon, name)
+    ModelBuilder.setBeaconModulePriority(block_id, recipe_id, module_priority)
   end
 end
 -------------------------------------------------------------------------------
@@ -931,7 +995,7 @@ function ModelBuilder.updateProduct(blockId, product_name, quantity)
     if block.by_product == false then
       block_elements = block.ingredients
     end
-    if block_elements ~= nil and block_elements[product_name] ~= nil then 
+    if block_elements ~= nil and block_elements[product_name] ~= nil then
       block_elements[product_name].input = quantity
     end
   end

@@ -103,7 +103,7 @@ end
 -- @return #LuaGuiElement
 --
 function Form:getPanel()
-  Logging:debug(self.classname, "getPanel()")
+  Logging:trace(self.classname, "getPanel()")
   local parent_panel = self:getParentPanel()
   if parent_panel[self:getPanelName()] ~= nil and parent_panel[self:getPanelName()].valid then
     return parent_panel[self:getPanelName()], parent_panel[self:getPanelName()]["content_panel"], parent_panel[self:getPanelName()]["header_panel"]["menu_panel"]
@@ -113,9 +113,12 @@ function Form:getPanel()
   flow_panel.style.horizontally_stretchable = true
   flow_panel.style.vertically_stretchable = true
   flow_panel.location = User.getLocationForm(self:getPanelName())
-  Logging:debug(self.classname, "location", self:getPanelName(), User.getLocationForm(self:getPanelName()))
   GuiElement.setStyle(flow_panel, self.classname, "width")
   GuiElement.setStyle(flow_panel, self.classname, "height")
+  GuiElement.setStyle(flow_panel, self.classname, "minimal_width")
+  GuiElement.setStyle(flow_panel, self.classname, "minimal_height")
+  GuiElement.setStyle(flow_panel, self.classname, "maximal_width")
+  GuiElement.setStyle(flow_panel, self.classname, "maximal_height")
 
   local header_panel = GuiElement.add(flow_panel, GuiFlowH("header_panel"))
   local title_panel = GuiElement.add(header_panel, GuiFrameH("title_panel"):caption(self.panelCaption or self.classname))

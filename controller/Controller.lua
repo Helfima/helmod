@@ -1,6 +1,7 @@
 require "core.Form"
 require "dialog.HelpPanel"
 require "dialog.PinPanel"
+require "dialog.SummaryPanel"
 require "dialog.StatusPanel"
 require "dialog.Settings"
 require "dialog.Download"
@@ -99,6 +100,7 @@ function Controller:prepare()
   table.insert(forms, PreferenceEdition("HMPreferenceEdition"))
 
   table.insert(forms, PinPanel("HMPinPanel"))
+  table.insert(forms, SummaryPanel("HMSummaryPanel"))
   table.insert(forms, StatusPanel("HMStatusPanel"))
 
   views = {}
@@ -110,6 +112,19 @@ function Controller:prepare()
 
 end
 
+-------------------------------------------------------------------------------
+-- On initialization
+--
+-- @function [parent=#Controller] on_init
+--
+function Controller:on_init()
+  log("Controller:on_init()")
+  Logging:debug(self.classname, "on_init()")
+  local caches_data = Cache.get()
+  if caches_data["HMPlayer"] == nil then
+    Player.getResources()
+  end
+end
 -------------------------------------------------------------------------------
 -- Bind Dispatcher
 --

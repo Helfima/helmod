@@ -160,13 +160,25 @@ end
 -- @return #string localised name
 --
 function Player.getLocalisedName(element)
-  Logging:trace(Player.classname, "getLocalisedName(element)", element)
+  Logging:debug(Player.classname, "getLocalisedName(element)", element)
   if User.getModGlobalSetting("display_real_name") then
     return element.name
   end
   local localisedName = element.name
   if element.type ~= nil then
-    if element.type == "entity" then
+    if element.type == "recipe" then
+      local recipe = Player.getRecipe(element.name)
+      if recipe ~= nil then
+        localisedName = recipe.localised_name
+      end
+    end
+    if element.type == "technology" then
+      local technology = Player.getTechnology(element.name)
+      if technology ~= nil then
+        localisedName = technology.localised_name
+      end
+    end
+    if element.type == "entity" or element.type == "resource" then
       local item = Player.getEntityPrototype(element.name)
       if item ~= nil then
         localisedName = item.localised_name
@@ -347,7 +359,7 @@ function Player.checkFactoryLimitationModule(module, lua_recipe)
   end
   
   local allowed_effects = EntityPrototype(factory):getAllowedEffects()
-  if Model.countList(module.limitations) > 0 and Player.getModuleBonus(module.name, "productivity") > 0 and not(allowed_effects.productivity) and model_filter_factory_module == true then
+  if Model.countList(module.limitations) > 0 and Player.getModuleBonus(module.name, "productivity") > 0 and ( allowed_effects ~= nil and not(allowed_effects.productivity)) and model_filter_factory_module == true then
     allowed = false
   end
   
@@ -558,7 +570,9 @@ end
 function Player.getRecipeEntity(name)
   local entity_prototype = EntityPrototype(name)
   local prototype = entity_prototype:native()
-  local ingredients = {{name=prototype.name, type="item", amount=1}}
+  local type = "item"
+  if name == "crude-oil" then type = "entity" end
+  local ingredients = {{name=prototype.name, type=type, amount=1}}
   if entity_prototype:getMineableMiningFluidRequired() then
     local fluid_ingredient = {name=entity_prototype:getMineableMiningFluidRequired(), type="fluid", amount=entity_prototype:getMineableMiningFluidAmount()}
     table.insert(ingredients, fluid_ingredient)

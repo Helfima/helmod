@@ -19,6 +19,15 @@ local display_level = {
 }
 
 -------------------------------------------------------------------------------
+-- On Bind Dispatcher
+--
+-- @function [parent=#PinPanel] onBind
+--
+function PinPanel:onBind()
+  Dispatcher:bind("on_gui_refresh", self, self.update)
+end
+
+-------------------------------------------------------------------------------
 -- On initialization
 --
 -- @function [parent=#PinPanel] onInit
@@ -60,7 +69,9 @@ function PinPanel:getInfoPanel()
     return content_panel["info-panel"]["scroll-panel"]
   end
   local mainPanel = GuiElement.add(content_panel, GuiFrameV("info-panel"):style(helmod_frame_style.panel))
-  return GuiElement.add(mainPanel, GuiScroll("scroll-panel"):style(helmod_scroll_style.pin_tab))
+  local scroll_panel = GuiElement.add(mainPanel, GuiScroll("scroll-panel"))
+  scroll_panel.style.horizontally_stretchable = false
+  return  scroll_panel
 end
 
 -------------------------------------------------------------------------------
@@ -118,12 +129,13 @@ function PinPanel:updateInfo(event)
     local block = model.blocks[pin_block_id]
 
     local resultTable = GuiElement.add(infoPanel, GuiTable("list-data"):column(column):style("helmod_table-odd"))
+    resultTable.vertical_centering = false
+    resultTable.style.horizontally_stretchable = false
 
     self:addProductionBlockHeader(resultTable)
     for _, recipe in spairs(block.recipes, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
       self:addProductionBlockRow(resultTable, block, recipe)
     end
-
   end
 end
 
@@ -188,6 +200,7 @@ function PinPanel:addProductionBlockRow(gui_table, block, recipe)
   if display_pin_level > display_level.products then
     -- products
     local cell_products = GuiElement.add(gui_table, GuiTable("products",recipe.id):column(3))
+    cell_products.style.horizontally_stretchable = false
     if recipe_prototype:getProducts() ~= nil then
       for index, lua_product in pairs(recipe_prototype:getProducts()) do
         local product_prototype = Product(lua_product)
@@ -210,6 +223,7 @@ function PinPanel:addProductionBlockRow(gui_table, block, recipe)
   if display_pin_level > display_level.ingredients then
     -- ingredients
     local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients", recipe.id):column(3))
+    cell_ingredients.style.horizontally_stretchable = false
     if recipe_prototype:getIngredients() ~= nil then
       for index, lua_ingredient in pairs(recipe_prototype:getIngredients(recipe.factory)) do
         local ingredient_prototype = Product(lua_ingredient)
