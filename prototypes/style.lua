@@ -88,9 +88,9 @@ function menuButtonIcon(name, icon_row, icon_col, size, suffix, font, hovered_fo
     type = "button_style",
     parent = "helmod_button_default",
     top_padding = 0,
-  right_padding = 0,
-  bottom_padding = 0,
-  left_padding = 0,
+    right_padding = 0,
+    bottom_padding = 0,
+    left_padding = 0,
     width = size,
     height = size,
     scalable = false,
@@ -117,22 +117,22 @@ end
 function menuButtonIcons(name, icon_row, font)
   menuButtonIcon(name, icon_row, {1,2,1,1}, 32, nil, font, {r=0, g=0, b=0})
   menuButtonIcon(name, icon_row, {1,2,1,1}, 24, "sm", font, {r=0, g=0, b=0})
-  
+
   menuButtonIcon(name, icon_row, {3,2,1,1}, 32, "actived_red", font, {r=0, g=0, b=0})
   menuButtonIcon(name, icon_row, {3,2,1,1}, 32, "sm_actived_red", font, {r=0, g=0, b=0})
 
   menuButtonIcon(name, icon_row, {1,3,1,1}, 32, "red", font, {r=0, g=0, b=0})
   menuButtonIcon(name, icon_row, {1,3,1,1}, 24, "sm_red", font, {r=0, g=0, b=0})
-  
+
   menuButtonIcon(name, icon_row, {4,5,4,4}, 32, "selected", font, {r=1, g=1, b=1})
   menuButtonIcon(name, icon_row, {4,5,4,4}, 24, "sm_selected", font, {r=1, g=1, b=1})
-  
+
   menuButtonIcon(name, icon_row, {5,5,5,5}, 32, "selected_yellow", font, {r=0, g=0, b=0})
   menuButtonIcon(name, icon_row, {5,5,5,5}, 24, "sm_selected_yellow", font, {r=0, g=0, b=0})
-  
+
   menuButtonIcon(name, icon_row, {6,6,6,6}, 32, "selected_red", font, {r=0, g=0, b=0})
   menuButtonIcon(name, icon_row, {6,6,6,6}, 24, "sm_selected_red", font, {r=0, g=0, b=0})
-  
+
   menuButtonIcon(name, icon_row, {7,8,7,7}, 36, "flat2", font, {r=0, g=0, b=0})
   menuButtonIcon(name, icon_row, {7,8,7,7}, 32, "flat", font, {r=0, g=0, b=0})
   menuButtonIcon(name, icon_row, {7,8,7,7}, 24, "sm_flat", font, {r=0, g=0, b=0})
@@ -1420,15 +1420,15 @@ panel_colors["blue"] = {329,48}
 panel_colors["blue2"] = {346,48}
 panel_colors["green"] = {431,48}
 for key,position in pairs(panel_colors) do
-default_gui["helmod_frame_color_"..key] = {
-  type = "frame_style",
-  parent = "helmod_frame_default",
-  graphical_set =
-  {
-    base = {position = position, corner_size = 8, opacity = 0.75}
-    
+  default_gui["helmod_frame_color_"..key] = {
+    type = "frame_style",
+    parent = "helmod_frame_default",
+    graphical_set =
+    {
+      base = {position = position, corner_size = 8, opacity = 0.75}
+
+    }
   }
-}
 end
 
 local style_element_list = {
@@ -1463,7 +1463,7 @@ for _,style in pairs(style_element_list) do
       right_padding = 0,
       bottom_padding = 2,
       left_padding = 0,
-      
+
       minimal_width = 80,
       horizontally_stretchable = "on",
       vertically_stretchable = "off"
@@ -1494,7 +1494,7 @@ for _,style in pairs(style_element_list) do
       right_padding = 0,
       bottom_padding = 2,
       left_padding = 0,
-      
+
       minimal_width = 50,
       horizontally_stretchable = "on",
       vertically_stretchable = "off"
@@ -1525,7 +1525,7 @@ for _,style in pairs(style_element_list) do
       right_padding = 0,
       bottom_padding = 2,
       left_padding = 0,
-      
+
       minimal_width = 30,
       horizontally_stretchable = "on",
       vertically_stretchable = "off"
@@ -1589,16 +1589,16 @@ default_gui["helmod_frame_panel"] = {
   bottom_padding = 0,
   left_padding = 0,
   horizontal_flow =
-    {
-      type = "horizontal_flow_style",
-      horizontal_spacing = 0
-    },
+  {
+    type = "horizontal_flow_style",
+    horizontal_spacing = 0
+  },
 
-    vertical_flow =
-    {
-      type = "vertical_flow_style",
-      vertical_spacing = 0
-    },
+  vertical_flow =
+  {
+    type = "vertical_flow_style",
+    vertical_spacing = 0
+  },
   use_header_filler = false
 }
 
@@ -1770,6 +1770,3 @@ default_gui["helmod_button-sorted-up"] = {
   hovered_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 1, {0,0}, {x=48,y=0}, {top=1,right=1,bottom=1,left=1}, false),
   clicked_graphical_set = monolithIcon("__helmod__/graphics/switch-quickbar.png", 24, 1, {0,0}, {x=72,y=0}, {top=1,right=1,bottom=1,left=1}, false)
 }
-
-
-

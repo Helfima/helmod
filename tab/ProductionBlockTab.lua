@@ -320,7 +320,7 @@ function ProductionBlockTab:updateInput(event)
     local input_table = GuiElement.add(input_scroll, GuiTable("input-table"):column(GuiElement.getElementColumnNumber(50)-2):style("helmod_table_element"))
     if block.ingredients ~= nil then
       for index, lua_ingredient in pairs(block.ingredients) do
-        if all_visible == true or lua_ingredient.state == 1 or lua_ingredient.count > ModelCompute.waste_value then
+        if all_visible == true or (lua_ingredient.state == 1 and not(block_by_product)) or lua_ingredient.count > ModelCompute.waste_value then
           Logging:debug("HMProductionBlockTab", "lua_ingredient", lua_ingredient, Product(lua_ingredient))
           local ingredient = Product(lua_ingredient):clone()
           ingredient.count = lua_ingredient.count
@@ -404,7 +404,7 @@ function ProductionBlockTab:updateOutput(event)
     local output_table = GuiElement.add(output_scroll, GuiTable("output-table"):column(GuiElement.getElementColumnNumber(50)-2):style("helmod_table_element"))
     if block.products ~= nil then
       for index, lua_product in pairs(block.products) do
-        if all_visible == true or lua_product.state == 1 or lua_product.count > ModelCompute.waste_value then
+        if all_visible == true or (lua_product.state == 1 and block_by_product) or lua_product.count > ModelCompute.waste_value then
           local product = Product(lua_product):clone()
           product.count = lua_product.count
           if block.count > 1 then

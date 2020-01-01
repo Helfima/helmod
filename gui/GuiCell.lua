@@ -341,7 +341,7 @@ function GuiCellBlockInfo:create(parent)
   row1.style.top_padding=4
   row1.style.bottom_padding=4
 
-  local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
+  local tooltip = GuiTooltipBlock(self.options.tooltip):element(element)
   GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", "hangar-white", "hangar"):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   if element.limit_count ~= nil then
@@ -385,7 +385,7 @@ function GuiCellEnergy:create(parent)
   row1.style.top_padding=4
   row1.style.bottom_padding=4
 
-  local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
+  local tooltip = GuiTooltipEnergy(self.options.tooltip):element(element)
   local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", "energy-white", "energy"):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   if element.limit_energy ~= nil then

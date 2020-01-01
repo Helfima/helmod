@@ -267,7 +267,7 @@ function ProductionLineTab:addTableRow(gui_table, block)
   cell_products.style.horizontally_stretchable = false
   if block.products ~= nil then
     for index, product in pairs(block.products) do
-      if (product.state or 0) == 1 or (product.count or 0) > ModelCompute.waste_value then
+      if ((product.state or 0) == 1 and block_by_product)  or (product.count or 0) > ModelCompute.waste_value then
         local button_action = "production-block-product-add=ID"
         local button_tooltip = "tooltip.product"
         local button_color = GuiElement.color_button_default_product
@@ -305,7 +305,7 @@ function ProductionLineTab:addTableRow(gui_table, block)
   cell_ingredients.style.horizontally_stretchable = false
   if block.ingredients ~= nil then
     for index, ingredient in pairs(block.ingredients) do
-      if (ingredient.state or 0) == 1 or (ingredient.count or 0) > ModelCompute.waste_value then
+      if ((ingredient.state or 0) == 1 and not(block_by_product)) or (ingredient.count or 0) > ModelCompute.waste_value then
         local button_action = "production-block-ingredient-add=ID"
         local button_tooltip = "tooltip.ingredient"
         local button_color = GuiElement.color_button_default_ingredient

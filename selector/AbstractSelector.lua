@@ -280,7 +280,8 @@ function AbstractSelector:onEvent(event)
   end
 
   if event.action == "recipe-filter-switch" then
-    filter_prototype_product = not(filter_prototype_product)
+    local switch_by_product = event.element.switch_state == "left"
+    filter_prototype_product = switch_by_product
     self:resetGroups()
     --Controller:send("on_gui_prepare", event, self.classname)
     Controller:send("on_gui_update", event, self.classname)
@@ -458,6 +459,29 @@ function AbstractSelector:updateFilter(event)
 
   if panel["filter"] == nil then
     Logging:debug(self.classname, "build filter")
+
+    if self.product_option then
+      GuiElement.add(panel, GuiSwitch(self.classname, "recipe-filter-switch"):state("left"):leftLabel({"helmod_recipe-edition-panel.filter-by-product"}):rightLabel({"helmod_recipe-edition-panel.filter-by-ingredient"}))
+    end
+
+    -- switch language
+    local switch_position = "left"
+    if User.getModGlobalSetting("filter_translated_string_active") and User.getParameter("filter-language") ~= nil then
+      switch_position = User.getParameter("filter-language")
+    end
+    local filter_switch = GuiElement.add(panel, GuiSwitch(self.classname, "filter-language-switch"):state(switch_position):rightLabel({"helmod_recipe-edition-panel.filter-language-switch-left"}, {"tooltip.filter-language-switch-left"}):leftLabel({"helmod_recipe-edition-panel.filter-language-switch-right"}, {"tooltip.filter-language-switch-right"}):tooltip({"helmod_recipe-edition-panel.filter-language-switch"}))
+    if not(User.getModGlobalSetting("filter_translated_string_active")) then
+      filter_switch.enabled = false
+      filter_switch.switch_state = "right"
+    end
+    -- switch contain
+    local contain_position = "left"
+    if User.getParameter("filter-contain") ~= nil then
+      contain_position = User.getParameter("filter-contain")
+    end
+    Logging:debug(self.classname, "strict_position", contain_position)
+    GuiElement.add(panel, GuiSwitch(self.classname, "filter-contain-switch"):state(contain_position):rightLabel({"helmod_recipe-edition-panel.filter-contain-switch-left"}, {"tooltip.filter-contain-switch-left"}):leftLabel({"helmod_recipe-edition-panel.filter-contain-switch-right"}, {"tooltip.filter-contain-switch-right"}):tooltip({"helmod_recipe-edition-panel.filter-contain-switch"}))
+
     local guiFilter = GuiElement.add(panel, GuiTable("filter"):column(2))
     if self.disable_option then
       local filter_show_disable = User.getSetting("filter_show_disable")
@@ -471,14 +495,6 @@ function AbstractSelector:updateFilter(event)
       GuiElement.add(guiFilter, GuiLabel("filter_show_hidden"):caption({"helmod_recipe-edition-panel.filter-show-hidden"}))
     end
 
-    if self.product_option then
-      GuiElement.add(guiFilter, GuiCheckBox(self.classname, "recipe-filter-switch=ID", "filter-product"):state(filter_prototype_product))
-      GuiElement.add(guiFilter, GuiLabel("filter-product"):caption({"helmod_recipe-edition-panel.filter-by-product"}))
-
-      GuiElement.add(guiFilter, GuiCheckBox(self.classname, "recipe-filter-switch=ID", "filter-ingredient"):state(not(filter_prototype_product)))
-      GuiElement.add(guiFilter, GuiLabel("filter-ingredient"):caption({"helmod_recipe-edition-panel.filter-by-ingredient"}))
-    end
-
     GuiElement.add(guiFilter, GuiLabel("filter-value"):caption({"helmod_common.filter"}))
     local cellFilter = GuiElement.add(guiFilter, GuiFrameH("cell-filter"):style(helmod_frame_style.hidden))
     if User.getModGlobalSetting("filter_on_text_changed") then
@@ -489,30 +505,13 @@ function AbstractSelector:updateFilter(event)
       GuiElement.add(cellFilter, GuiTextField("filter-text"):text(filter_prototype):style())
       GuiElement.add(cellFilter, GuiButton(self.classname, "recipe-filter=ID", "filter-value"):caption({"helmod_button.apply"}))
     end
-    -- switch language
-    local switch_position = "right"
-    if User.getModGlobalSetting("filter_translated_string_active") and User.getParameter("filter-language") ~= nil then
-      switch_position = User.getParameter("filter-language")
-    end
-    Logging:debug(self.classname, "switch_position", switch_position)
-    local filter_switch = GuiElement.add(panel, GuiSwitch(self.classname, "filter-language-switch"):state(switch_position):leftLabel({"helmod_recipe-edition-panel.filter-language-switch-left"}, {"tooltip.filter-language-switch-left"}):rightLabel({"helmod_recipe-edition-panel.filter-language-switch-right"}, {"tooltip.filter-language-switch-right"}):tooltip({"helmod_recipe-edition-panel.filter-language-switch"}))
-    if not(User.getModGlobalSetting("filter_translated_string_active")) then
-      filter_switch.enabled = false
-      filter_switch.switch_state = "left"
-    end
-    -- switch contain
-    local contain_position = "right"
-    if User.getParameter("filter-contain") ~= nil then
-      contain_position = User.getParameter("filter-contain")
-    end
-    Logging:debug(self.classname, "strict_position", contain_position)
-    GuiElement.add(panel, GuiSwitch(self.classname, "filter-contain-switch"):state(contain_position):leftLabel({"helmod_recipe-edition-panel.filter-contain-switch-left"}, {"tooltip.filter-contain-switch-left"}):rightLabel({"helmod_recipe-edition-panel.filter-contain-switch-right"}, {"tooltip.filter-contain-switch-right"}):tooltip({"helmod_recipe-edition-panel.filter-contain-switch"}))
     
   end
 
   if self.product_option then
-    panel["filter"][self.classname.."=recipe-filter-switch=ID=filter-product"].state = filter_prototype_product
-    panel["filter"][self.classname.."=recipe-filter-switch=ID=filter-ingredient"].state = not(filter_prototype_product)
+    local switch_by_product = "right"
+    if filter_prototype_product == true then switch_by_product = "left" end
+    panel[self.classname.."=recipe-filter-switch"].switch_state = switch_by_product
     if filter_prototype ~= nil then
       if User.getModGlobalSetting("filter_on_text_changed") then
         panel["filter"]["cell-filter"][self.classname.."=recipe-filter=ID=filter-value=onchange"].text = filter_prototype

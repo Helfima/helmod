@@ -44,8 +44,8 @@ function SummaryTab:updateData(event)
   local scrollPanel = self:getResultScrollPanel({"helmod_result-panel.tab-title-summary"})
   
   -- resources
-  local resourcesPanel = GuiElement.add(scrollPanel, GuiFrameV("resources"):style(helmod_frame_style.section):caption({"helmod_common.resources"}))
-  GuiElement.setStyle(resourcesPanel, "data_section", "width")
+  local resourcesPanel = GuiElement.add(scrollPanel, GuiFlowV("resources"))
+  GuiElement.add(resourcesPanel, GuiLabel("label"):caption({"helmod_common.resources"}):style("helmod_label_title_frame"))
 
   local resourcesTable = GuiElement.add(resourcesPanel, GuiTable("table-resources"):column(4))
   GuiElement.add(resourcesTable, GuiLabel("header-ingredient"):caption({"helmod_result-panel.col-header-ingredient"}))
@@ -79,9 +79,10 @@ function SummaryTab:updateData(event)
       GuiElement.add(guiStorage, GuiButtonSprite("HMStorage=OPEN=ID"):sprite(storage.type, storage.name):tooltip(Player.getLocalisedName(storage)))
     end
   end
-
-  local energyPanel = GuiElement.add(scrollPanel, GuiFrameV("energy"):style(helmod_frame_style.section):caption({"helmod_common.generators"}))
-  GuiElement.setStyle(energyPanel, "data_section", "width")
+  -- generators
+  local energyPanel = GuiElement.add(scrollPanel, GuiFlowV("energy"))
+  GuiElement.add(energyPanel, GuiLineH("line"))
+  GuiElement.add(energyPanel, GuiLabel("label"):caption({"helmod_common.generators"}):style("helmod_label_title_frame"))
 
   local resultTable = GuiElement.add(energyPanel, GuiTable("table-energy"):column(2))
 
@@ -93,11 +94,12 @@ function SummaryTab:updateData(event)
     end
   end
 
-  -- factories
-  local factoryPanel = GuiElement.add(scrollPanel, GuiFrameV("factory"):style(helmod_frame_style.section):caption({"helmod_common.factories"}))
-  GuiElement.setStyle(factoryPanel, "data_section", "width")
-
   if model.summary ~= nil then
+    -- factories
+    local factoryPanel = GuiElement.add(scrollPanel, GuiFlowV("factory"))
+    GuiElement.add(factoryPanel, GuiLineH("line"))
+    GuiElement.add(factoryPanel, GuiLabel("label"):caption({"helmod_common.factories"}):style("helmod_label_title_frame"))
+
     local resultTable = GuiElement.add(factoryPanel, GuiTable("table-factory"):column(10))
 
     for _, element in pairs(model.summary.factories) do
@@ -107,8 +109,9 @@ function SummaryTab:updateData(event)
     end
 
     -- beacons
-    local beaconPanel = GuiElement.add(scrollPanel, GuiFrameV("beacon"):style(helmod_frame_style.section):caption({"helmod_common.beacons"}))
-    GuiElement.setStyle(beaconPanel, "data_section", "width")
+    local beaconPanel = GuiElement.add(scrollPanel, GuiFlowV("beacon"))
+    GuiElement.add(beaconPanel, GuiLineH("line"))
+    GuiElement.add(beaconPanel, GuiLabel("label"):caption({"helmod_common.beacons"}):style("helmod_label_title_frame"))
 
     local resultTable = GuiElement.add(beaconPanel, GuiTable("table-beacon"):column(10))
 
@@ -119,8 +122,9 @@ function SummaryTab:updateData(event)
     end
 
     -- modules
-    local modulesPanel = GuiElement.add(scrollPanel, GuiFrameV("modules"):style(helmod_frame_style.section):caption({"helmod_common.modules"}))
-    GuiElement.setStyle(modulesPanel, "data_section", "width")
+    local modulesPanel = GuiElement.add(scrollPanel, GuiFlowV("modules"))
+    GuiElement.add(modulesPanel, GuiLineH("line"))
+    GuiElement.add(modulesPanel, GuiLabel("label"):caption({"helmod_common.modules"}):style("helmod_label_title_frame"))
 
     local resultTable = GuiElement.add(modulesPanel, GuiTable("table-modules"):column(10))
 

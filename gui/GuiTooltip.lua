@@ -153,6 +153,56 @@ end
 --
 -- @function [parent=#GuiTooltip] constructor
 -- @param #arg name
+-- @return #GuiTooltipEnergy
+--
+GuiTooltipEnergy = newclass(GuiTooltip,function(base,...)
+  GuiTooltip.init(base,...)
+  base.classname = "HMGuiTooltip"
+end)
+
+-------------------------------------------------------------------------------
+-- Create tooltip
+--
+-- @function [parent=#GuiTooltipEnergy] create
+--
+function GuiTooltipEnergy:create()
+  local tooltip = self._super.create(self)
+  if self.m_element then
+    local power = Format.formatNumberKilo(self.m_element.energy_total or self.m_element.power, "W")
+    table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", "[color=255,230,192]", {"description.energy-consumption"}, ": ", "[/color]", "[font=default-bold]", power, "[/font]"})
+  end
+  return tooltip
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiTooltip] constructor
+-- @param #arg name
+-- @return #GuiTooltipBlock
+--
+GuiTooltipBlock = newclass(GuiTooltip,function(base,...)
+  GuiTooltip.init(base,...)
+  base.classname = "HMGuiTooltip"
+end)
+
+-------------------------------------------------------------------------------
+-- Create tooltip
+--
+-- @function [parent=#GuiTooltipBlock] create
+--
+function GuiTooltipBlock:create()
+  local tooltip = self._super.create(self)
+  if self.m_element then
+    local quantity = self.m_element.count
+    table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", "[color=255,230,192]", {"helmod_common.quantity"}, ": ", "[/color]", "[font=default-bold]", quantity, "[/font]"})
+  end
+  return tooltip
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiTooltip] constructor
+-- @param #arg name
 -- @return #GuiTooltipModule
 --
 GuiTooltipModule = newclass(GuiTooltip,function(base,...)
@@ -171,6 +221,7 @@ function GuiTooltipModule:create()
     local module_prototype = ItemPrototype(self.m_element.name)
     local module = module_prototype:native()
     if module ~= nil then
+      table.insert(tooltip, {"", "\n", string.format("[%s=%s]", self.m_element.type, self.m_element.name), " ", "[color=255,230,192]", "[font=default-bold]", module_prototype:getLocalisedName(), "[/font]", "[/color]"})
       local bonus_consumption = Player.getModuleBonus(module.name, "consumption")
       local bonus_speed = Player.getModuleBonus(module.name, "speed")
       local bonus_productivity = Player.getModuleBonus(module.name, "productivity")

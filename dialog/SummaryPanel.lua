@@ -58,8 +58,8 @@ function SummaryPanel:getInfoPanel()
     return content_panel["info-panel"]["scroll-panel"]
   end
   local mainPanel = GuiElement.add(content_panel, GuiFrameV("info-panel"):style(helmod_frame_style.panel))
+  mainPanel.style.horizontally_stretchable = true
   local scroll_panel = GuiElement.add(mainPanel, GuiScroll("scroll-panel"))
-  scroll_panel.style.horizontally_stretchable = false
   return  scroll_panel
 end
 

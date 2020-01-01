@@ -55,7 +55,8 @@ function StatusPanel:getInfoPanel()
     return content_panel["info-panel"]["scroll-panel"]
   end
   local mainPanel = GuiElement.add(content_panel, GuiFrameV("info-panel"):style(helmod_frame_style.panel))
-  return GuiElement.add(mainPanel, GuiScroll("scroll-panel"):style(helmod_scroll_style.pin_tab))
+  mainPanel.style.horizontally_stretchable = true
+  return GuiElement.add(mainPanel, GuiScroll("scroll-panel"))
 end
 
 -------------------------------------------------------------------------------
