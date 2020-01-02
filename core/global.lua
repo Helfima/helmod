@@ -41,6 +41,20 @@ function spairs(t, order)
 end
 
 -------------------------------------------------------------------------------
+-- Return first element of table
+--
+-- @function first
+--
+-- @param table
+--
+-- @return element
+--
+function first(t)
+  for _,v in pairs(t) do
+    return v
+  end
+end
+-------------------------------------------------------------------------------
 -- formula
 --
 -- @function formula

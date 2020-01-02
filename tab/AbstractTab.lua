@@ -150,6 +150,23 @@ function AbstractTab:getInfoPanel2()
 end
 
 -------------------------------------------------------------------------------
+-- Get or create info panel
+--
+-- @function [parent=#AbstractTab] getInfoPanel3
+--
+function AbstractTab:getInfoPanel3()
+  local parent_panel = self:getResultPanel()
+  local panel_name = "info"
+  if parent_panel[panel_name] ~= nil and parent_panel[panel_name].valid then
+    return parent_panel[panel_name]["info"]["info-scroll"],parent_panel[panel_name]["output"]["output-scroll"],parent_panel[panel_name]["input"]["input-scroll"]
+  end
+  local panel = GuiElement.add(parent_panel, GuiFlowH(panel_name))
+  panel.style.horizontally_stretchable = true
+  panel.style.horizontal_spacing=10
+  return panel
+end
+
+-------------------------------------------------------------------------------
 -- Get or create left info panel
 --
 -- @function [parent=#AbstractTab] getLeftInfoPanel2
@@ -343,7 +360,7 @@ function AbstractTab:updateMenuPanel(event)
     local block_id = current_block or "new"
     GuiElement.add(group1, GuiButton("HMRecipeSelector", "OPEN", "ID", block_id):sprite("menu", "wrench-white", "wrench"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-recipe"}))
     GuiElement.add(group1, GuiButton("HMTechnologySelector", "OPEN", "ID", block_id):sprite("menu", "graduation-white", "graduation"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-technology"}))
-    GuiElement.add(group1, GuiButton("HMContainerSelector", "OPEN", "ID", block_id):sprite("menu", "container-white", "container"):style("helmod_button_menu"):tooltip({"helmod_result-panel.select-button-container"}))
+    --GuiElement.add(group1, GuiButton("HMContainerSelector", "OPEN", "ID", block_id):sprite("menu", "container-white", "container"):style("helmod_button_menu"):tooltip({"helmod_result-panel.select-button-container"}))
     GuiElement.add(group1, GuiButton("HMPreferenceEdition", "OPEN", "ID", block_id):sprite("menu", "services-white", "services"):style("helmod_button_menu"):tooltip({"helmod_button.preferences"}))
     --GuiElement.add(group1, GuiButton("HMRecipeExplorer", "OPEN=ID", block_id):sprite("menu", "search-white", "search"):style("helmod_button_menu"):tooltip({"helmod_button.search"}))
 

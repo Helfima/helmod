@@ -357,12 +357,12 @@ function Player.checkFactoryLimitationModule(module, lua_recipe)
       if lua_recipe.name == recipe_name then allowed = true end
     end
   end
-  
+
   local allowed_effects = EntityPrototype(factory):getAllowedEffects()
   if Model.countList(module.limitations) > 0 and Player.getModuleBonus(module.name, "productivity") > 0 and ( allowed_effects ~= nil and not(allowed_effects.productivity)) and model_filter_factory_module == true then
     allowed = false
   end
-  
+
   if factory.module_slots ==  0 then
     allowed = false
   end
@@ -914,6 +914,90 @@ end
 function Player.getFluidPrototype(name)
   if name == nil then return nil end
   return game.fluid_prototypes[name]
+end
+
+-------------------------------------------------------------------------------
+-- Return items logistic
+--
+-- @function [parent=#Player] getItemsLogistic
+--
+-- @param type belt, container or transport
+--
+-- @return #table
+--
+function Player.getItemsLogistic(type)
+  local filters = {}
+  if type == "belt" then
+    filters = {{filter="type", mode="or", invert=false, type="transport-belt"}}
+  elseif type == "container" then
+    filters = {{filter="type", mode="or", invert=false, type="container"}, {filter="minable", mode="and", invert=false}, {filter="type", mode="or", invert=false, type="logistic-container"}, {filter="minable", mode="and", invert=false}}
+  elseif type == "transport" then
+    filters = {{filter="type", mode="or", invert=false, type="cargo-wagon"}, {filter="type", mode="or", invert=false, type="logistic-robot"}, {filter="type", mode="or", invert=false, type="car"}}
+  end
+  return Player.getEntityPrototypes(filters)
+end
+
+-------------------------------------------------------------------------------
+-- Return default item logistic
+--
+-- @function [parent=#Player] getDefaultItemLogistic
+--
+-- @param type belt, container or transport
+--
+-- @return #table
+--
+function Player.getDefaultItemLogistic(type)
+  local default = User.getParameter(string.format("items_logistic_%s", type))
+  if default == nil then 
+    local logistics = Player.getItemsLogistic(type)
+    if logistics ~= nil then
+      default = first(logistics).name
+      User.setParameter(string.format("items_logistic_%s", type), default)
+    end
+  end
+  return default
+end
+
+-------------------------------------------------------------------------------
+-- Return fluids logistic
+--
+-- @function [parent=#Player] getFluidsLogistic
+--
+-- @param type pipe, container or transport
+--
+-- @return #table
+--
+function Player.getFluidsLogistic(type)
+  local filters = {}
+  if type == "pipe" then
+    filters = {{filter="type", mode="or", invert=false, type="pipe"}}
+  elseif type == "container" then
+    filters = {{filter="type", mode="or", invert=false, type="storage-tank"}, {filter="minable", mode="and", invert=false}}
+  elseif type == "transport" then
+    filters = {{filter="type", mode="or", invert=false, type="fluid-wagon"}}
+  end
+  return Player.getEntityPrototypes(filters)
+end
+
+-------------------------------------------------------------------------------
+-- Return default fluid logistic
+--
+-- @function [parent=#Player] getDefaultFluidLogistic
+--
+-- @param type pipe, container or transport
+--
+-- @return #table
+--
+function Player.getDefaultFluidLogistic(type)
+  local default = User.getParameter(string.format("fluids_logistic_%s", type))
+  if default == nil then 
+    local logistics = Player.getFluidsLogistic(type)
+    if logistics ~= nil then
+      default = first(logistics).name
+      User.setParameter(string.format("fluids_logistic_%s", type), default)
+    end
+  end
+  return default
 end
 
 -------------------------------------------------------------------------------

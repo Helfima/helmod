@@ -72,11 +72,11 @@ end
 
 -------------------------------------------------------------------------------
 --
--- @function [parent=#GuiCell] withoutCargo
+-- @function [parent=#GuiCell] withLogistic
 -- @return #GuiCell
 --
-function GuiCell:withoutCargo()
-  self.m_without_cargo = true
+function GuiCell:withLogistic()
+  self.m_with_logistic = true
   return self
 end
 
@@ -426,11 +426,8 @@ function GuiCellElement:create(parent)
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index or 1))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element", color, 1))
 
-  local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
+  local tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic()
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type or "entity", element.name):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
-  if self.m_without_cargo ~= true then
-    GuiElement.add(row1, GuiCellCargoInfo():element(element))
-  end
   if self.m_info_icon then
     infoIcon(button, self.m_info_icon)
   end
@@ -515,7 +512,7 @@ function GuiCellElementM:create(parent)
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index or 1))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_m", color, 1))
 
-  local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
+  local tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic(self.m_with_logistic)
   local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(element.type or "entity", element.name):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   if self.m_info_icon then
     infoIcon(button, self.m_info_icon)
@@ -534,46 +531,6 @@ function GuiCellElementM:create(parent)
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element_m"):tooltip({"helmod_common.total"}))
 
   return cell
-end
-
--------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] constructor
--- @param #arg name
--- @return #GuiCellCargoInfo
---
-GuiCellCargoInfo = newclass(GuiCell,function(base,...)
-  GuiCell.init(base,...)
-end)
-
--------------------------------------------------------------------------------
--- Create cell
---
--- @function [parent=#GuiCellCargoInfo] create
---
--- @param #LuaGuiElement parent container for element
---
-function GuiCellCargoInfo:create(parent)
-  local element = self.element or {}
-
-  local parameters = User.getParameter()
-  local product_prototype = Product(element)
-  if product_prototype:native() ~= nil then
-    local table_cargo = GuiElement.add(parent, GuiTable("element_cargo"):column(1):style("helmod_beacon_modules"))
-    if element.type == 0 or element.type == "item" then
-      local container_solid = parameters.container_solid or "steel-chest"
-      local vehicle_solid = parameters.vehicle_solid or "cargo-wagon"
-      GuiElement.add(table_cargo, GuiButtonSpriteSm(container_solid):sprite("item", container_solid):tooltip(GuiElement.getTooltipProduct(element, container_solid)))
-      GuiElement.add(table_cargo, GuiButtonSpriteSm(vehicle_solid):sprite("item", vehicle_solid):tooltip(GuiElement.getTooltipProduct(element, vehicle_solid)))
-    end
-
-    if element.type == 1 or element.type == "fluid" then
-      local container_fluid = parameters.container_fluid or "storage-tank"
-      local vehicle_fluid = parameters.wagon_fluid or "fluid-wagon"
-      GuiElement.add(table_cargo, GuiButtonSpriteSm(container_fluid):sprite("item", container_fluid):tooltip(GuiElement.getTooltipProduct(element, container_fluid)))
-      GuiElement.add(table_cargo, GuiButtonSpriteSm(vehicle_fluid):sprite("item", vehicle_fluid):tooltip(GuiElement.getTooltipProduct(element, vehicle_fluid)))
-    end
-  end
 end
 
 -------------------------------------------------------------------------------

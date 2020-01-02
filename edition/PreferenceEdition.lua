@@ -66,6 +66,48 @@ function PreferenceEdition:getPriorityModulePanel()
 end
 
 -------------------------------------------------------------------------------
+-- Get or create solid container panel
+--
+-- @function [parent=#PreferenceEdition] getSolidContainerPanel
+--
+function PreferenceEdition:getSolidContainerPanel()
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  local panel_name = "solid_container"
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[panel_name]
+  end
+  local panel = GuiElement.add(content_panel, GuiFrameV(panel_name))
+  --panel.style.height = 600
+  --panel.style.width = 900
+
+  panel.style.horizontally_stretchable = true
+  panel.style.vertically_stretchable = true
+
+  return panel
+end
+
+-------------------------------------------------------------------------------
+-- Get or create fluid container panel
+--
+-- @function [parent=#PreferenceEdition] getFluidContainerPanel
+--
+function PreferenceEdition:getFluidContainerPanel()
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  local panel_name = "fluid_container"
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[panel_name]
+  end
+  local panel = GuiElement.add(content_panel, GuiFrameV(panel_name))
+  --panel.style.height = 600
+  --panel.style.width = 900
+
+  panel.style.horizontally_stretchable = true
+  panel.style.vertically_stretchable = true
+
+  return panel
+end
+
+-------------------------------------------------------------------------------
 -- On update
 --
 -- @function [parent=#PreferenceEdition] onUpdate
@@ -74,6 +116,8 @@ end
 --
 function PreferenceEdition:onUpdate(event)
   self:updatePriorityModule(event)
+  self:updateItemsLogistic(event)
+  self:updateFluidsLogistic(event)
 end
 
 -------------------------------------------------------------------------------
@@ -85,11 +129,11 @@ end
 --
 
 function PreferenceEdition:updatePriorityModule(event)
-  Logging:debug(self.classname, "updateRecipeCategory()", event)
+  Logging:debug(self.classname, "updatePriorityModule()", event)
   local priority_module_panel = self:getPriorityModulePanel()
   priority_module_panel.clear()
 
-  GuiElement.add(priority_module_panel, GuiLabel("priority_module_label"):caption({"helmod_common.module"}):style("helmod_label_title_frame"))
+  GuiElement.add(priority_module_panel, GuiLabel("priority_module_label"):caption({"helmod_label.priority-modules"}):style("helmod_label_title_frame"))
 
 
   local configuration_table_panel = GuiElement.add(priority_module_panel, GuiTable("configuration-table"):column(2))
@@ -127,6 +171,88 @@ function PreferenceEdition:updatePriorityModule(event)
   for k, element in pairs(Player.getModules()) do
     local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name})
     GuiElement.add(module_table_panel, GuiButtonSelectSprite(self.classname, "priority-module-select=ID"):sprite("entity", element.name):tooltip(tooltip))
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update items logistic
+--
+-- @function [parent=#PreferenceEdition] updateItemsLogistic
+--
+-- @param #LuaEvent event
+--
+
+function PreferenceEdition:updateItemsLogistic(event)
+  Logging:debug(self.classname, "updateItemsLogistic()", event)
+  local container_panel = self:getSolidContainerPanel()
+  container_panel.clear()
+
+  GuiElement.add(container_panel, GuiLabel("solid_container_label"):caption({"helmod_preferences-edition-panel.items-logistic-default"}):style("helmod_label_title_frame"))
+  
+  local options_table = GuiElement.add(container_panel, GuiTable("options-table"):column(2))
+  options_table.vertical_centering = false
+  options_table.style.horizontal_spacing=10
+  options_table.style.vertical_spacing=10
+  
+  for _,type in pairs({"belt", "container", "transport"}) do
+    local type_label = GuiElement.add(options_table, GuiLabel(string.format("%s-label", type)):caption({string.format("helmod_preferences-edition-panel.items-logistic-%s", type)}))
+    type_label.style.width = 200
+    local type_table_panel = GuiElement.add(options_table, GuiTable(string.format("%s-selector-table", type)):column(6))
+    local item_logistic = Player.getDefaultItemLogistic(type)
+    for key, entity in pairs(Player.getItemsLogistic(type)) do
+      local color = nil
+      if entity.name == item_logistic then color = "green" end
+      local button = GuiElement.add(type_table_panel, GuiButtonSelectSprite(self.classname, "items-logistic-select=ID", type):choose("entity", entity.name):color(color))
+      button.locked = true
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update fluids logistic
+--
+-- @function [parent=#PreferenceEdition] updateFluidsLogistic
+--
+-- @param #LuaEvent event
+--
+
+function PreferenceEdition:updateFluidsLogistic(event)
+  Logging:debug(self.classname, "updateFluidContainer()", event)
+  local container_panel = self:getFluidContainerPanel()
+  container_panel.clear()
+
+  GuiElement.add(container_panel, GuiLabel("fluid_container_label"):caption({"helmod_preferences-edition-panel.fluids-logistic-default"}):style("helmod_label_title_frame"))
+  
+  local options_table = GuiElement.add(container_panel, GuiTable("options-table"):column(2))
+  options_table.vertical_centering = false
+  options_table.style.horizontal_spacing=10
+  options_table.style.vertical_spacing=10
+  
+  local type_label = GuiElement.add(options_table, GuiLabel("maximum-flow"):caption({"helmod_preferences-edition-panel.fluids-logistic-maximum-flow"}))
+  type_label.style.width = 200
+  local fluids_logistic_maximum_flow = User.getParameter("fluids_logistic_maximum_flow")
+  local default_flow = nil
+  local items = {}
+  for _,element in pairs(helmod_logistic_flow) do
+    local flow = {"helmod_preferences-edition-panel.fluids-logistic-flow", element.pipe, element.flow}
+    table.insert(items, flow)
+    if fluids_logistic_maximum_flow ~= nil and fluids_logistic_maximum_flow == element.flow or element.flow == helmod_logistic_flow_default then
+      default_flow = flow
+    end
+  end
+  GuiElement.add(options_table, GuiDropDown(self.classname, "fluids-logistic-flow=ID"):items(items, default_flow))
+  
+  for _,type in pairs({"pipe", "container", "transport"}) do
+    local type_label = GuiElement.add(options_table, GuiLabel(string.format("%s-label", type)):caption({string.format("helmod_preferences-edition-panel.fluids-logistic-%s", type)}))
+    type_label.style.width = 200
+    local type_table_panel = GuiElement.add(options_table, GuiTable(string.format("%s-selector-table", type)):column(6))
+    local fluid_logistic = Player.getDefaultFluidLogistic(type)
+    for key, entity in pairs(Player.getFluidsLogistic(type)) do
+      local color = nil
+      if entity.name == fluid_logistic then color = "green" end
+      local button = GuiElement.add(type_table_panel, GuiButtonSelectSprite(self.classname, "fluids-logistic-select=ID", type):choose("entity", entity.name):color(color))
+      button.locked = true
+    end
   end
 end
 
@@ -201,4 +327,24 @@ function PreferenceEdition:onEvent(event)
     self:updatePriorityModule(event)
     Controller:send("on_gui_priority_module", event)
   end
+  
+  if event.action == "items-logistic-select" then
+    User.setParameter(string.format("items_logistic_%s", event.item1), event.item2)
+    self:updateItemsLogistic(event)
+    Controller:send("on_gui_refresh", event)
+  end
+  
+  if event.action == "fluids-logistic-select" then
+    User.setParameter(string.format("fluids_logistic_%s", event.item1), event.item2)
+    self:updateFluidsLogistic(event)
+    Controller:send("on_gui_refresh", event)
+  end
+  
+  if event.action == "fluids-logistic-flow" then
+    local index = event.element.selected_index
+    local fluids_logistic_maximum_flow = helmod_logistic_flow[index].flow
+    User.setParameter("fluids_logistic_maximum_flow", fluids_logistic_maximum_flow)
+    Controller:send("on_gui_refresh", event)
+  end
+  
 end

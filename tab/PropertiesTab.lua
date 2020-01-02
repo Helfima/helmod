@@ -116,6 +116,32 @@ function PropertiesTab:addTableHeader(itable, prototype_compare)
 end
 
 -------------------------------------------------------------------------------
+-- Update header
+--
+-- @function [parent=#PropertiesTab] updateHeader
+--
+-- @param #LuaEvent event
+--
+function PropertiesTab:updateHeader(event)
+  local info_panel = self:getInfoPanel3()
+  local options_table = GuiElement.add(info_panel, GuiTable("options-table"):column(2))
+  -- nil values
+  local switch_nil = "left"
+  if User.getParameter("filter-nil-property") == true then
+    switch_nil = "right"
+  end
+  GuiElement.add(options_table, GuiLabel("filter-nil-property"):caption("Hide nil values:"))
+  local filter_switch = GuiElement.add(options_table, GuiSwitch(self.classname, "filter-nil-property-switch"):state(switch_nil):leftLabel("Off"):rightLabel("On"))
+  -- difference values
+  local switch_nil = "left"
+  if User.getParameter("filter-difference-property") == true then
+    switch_nil = "right"
+  end
+  GuiElement.add(options_table, GuiLabel("filter-difference-property"):caption("Show differences:"))
+  local filter_switch = GuiElement.add(options_table, GuiSwitch(self.classname, "filter-difference-property-switch"):state(switch_nil):leftLabel("Off"):rightLabel("On"))
+end
+
+-------------------------------------------------------------------------------
 -- Update data
 --
 -- @function [parent=#PropertiesTab] updateData
@@ -127,7 +153,7 @@ function PropertiesTab:updateData(event)
   -- data
   local scroll_panel = self:getResultScrollPanel()
   scroll_panel.clear()
-
+  -- data
   local prototype_compare = User.getParameter("prototype_compare")
   if prototype_compare ~= nil then
     local data = {}
@@ -143,22 +169,65 @@ function PropertiesTab:updateData(event)
     self:addTableHeader(result_table, prototype_compare)
 
     for property, values in pairs(data) do
-      local cell_name = GuiElement.add(result_table, GuiFrameH("property", property):style(helmod_frame_style.hidden))
-      GuiElement.add(cell_name, GuiLabel("label"):caption(property))
+      if not(User.getParameter("filter-nil-property") == true and self:isNilLine(values, prototype_compare)) then
+        if not(User.getParameter("filter-difference-property") == true and self:isSameLine(values, prototype_compare)) then
+          local cell_name = GuiElement.add(result_table, GuiFrameH("property", property):style(helmod_frame_style.hidden))
+          GuiElement.add(cell_name, GuiLabel("label"):caption(property))
 
-      for index,prototype in pairs(prototype_compare) do
-        -- col value
-        local cell_value = GuiElement.add(result_table, GuiFrameH(property, prototype.name, index):style(helmod_frame_style.hidden))
-        if values[prototype.name] ~= nil then
-          local chmod = values[prototype.name].chmod
-          local value = values[prototype.name].value
-          local label_value = GuiElement.add(cell_value, GuiLabel("prototype_value"):caption(string.format("[%s]: %s", chmod, value)):style("helmod_label_max_600"))
-          label_value.style.width = 400
+          for index,prototype in pairs(prototype_compare) do
+            -- col value
+            local cell_value = GuiElement.add(result_table, GuiFrameH(property, prototype.name, index):style(helmod_frame_style.hidden))
+            if values[prototype.name] ~= nil then
+              local chmod = values[prototype.name].chmod
+              local value = values[prototype.name].value
+              local label_value = GuiElement.add(cell_value, GuiLabel("prototype_value"):caption(string.format("[%s]: %s", chmod, value)):style("helmod_label_max_600"))
+              label_value.style.width = 400
+            end
+          end
         end
       end
     end
 
   end
+end
+
+-------------------------------------------------------------------------------
+-- Is nil line
+--
+-- @function [parent=#PropertiesTab] isNilLine
+--
+-- @param #table values
+-- @param #table prototype_compare
+--
+function PropertiesTab:isNilLine(values, prototype_compare)
+  local is_nil = true
+  for index,prototype in pairs(prototype_compare) do
+    if values[prototype.name] ~= nil and values[prototype.name].value ~= "nil" then is_nil = false end
+  end
+  return is_nil
+end
+
+-------------------------------------------------------------------------------
+-- Is same line
+--
+-- @function [parent=#PropertiesTab] isSameLine
+--
+-- @param #table values
+-- @param #table prototype_compare
+--
+function PropertiesTab:isSameLine(values, prototype_compare)
+  local is_same = true
+  local compare = nil
+  for index,prototype in pairs(prototype_compare) do
+    if values[prototype.name] ~= nil then
+      if compare == nil then
+        compare = values[prototype.name].value
+      else
+        if values[prototype.name].value ~= compare then is_same = false end
+      end
+    end
+  end
+  return is_same
 end
 
 -------------------------------------------------------------------------------
@@ -225,6 +294,18 @@ function PropertiesTab:onEvent(event)
     User.setParameter("prototype_compare", prototype_compare)
     self:updateData(event)
   end
+
+  if event.action == "filter-nil-property-switch" then
+    local switch_nil = event.element.switch_state == "right"
+    User.setParameter("filter-nil-property", switch_nil)
+    self:updateData(event)
+  end
+
+  if event.action == "filter-difference-property-switch" then
+    local switch_nil = event.element.switch_state == "right"
+    User.setParameter("filter-difference-property", switch_nil)
+    self:updateData(event)
+  end
 end
 -------------------------------------------------------------------------------
 -- Parse Properties
@@ -248,7 +329,7 @@ function PropertiesTab:parseProperties(prototype, level)
       Logging:debug(self.classname, "property", key, type, value)
       if key == "group" or key == "subgroup" then
         local group = prototype[key]
-        value = string.format("{name=%s,type=%s,order_in_recipe=%s,order=%s}", group.name, group.type, group.order_in_recipe, group.order) 
+        value = string.format("{name=%s,type=%s,order_in_recipe=%s,order=%s}", group.name, group.type, group.order_in_recipe, group.order)
       elseif key == "burner_prototype" then
         local burner_prototype = BurnerPrototype(prototype[key]):toString()
         value = burner_prototype

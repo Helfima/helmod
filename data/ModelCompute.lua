@@ -114,9 +114,11 @@ function ModelCompute.update(check_unlink)
             ModelCompute.computeBlock(block)
           end
           -- prepare les inputs
+          local factor = -1
           local block_elements = block.products
           if block.by_product == false then
             block_elements = block.ingredients
+            factor = 1
           end
           Logging:debug(ModelCompute.classname , "-> input", input)
           if block_elements ~= nil then
@@ -124,7 +126,7 @@ function ModelCompute.update(check_unlink)
               if element.state ~= nil and element.state == 1 then
                 Logging:debug(ModelCompute.classname , "--> element", element.name, element)
                 if input[element.name] ~= nil then
-                  element.input = input[element.name] or 0
+                  element.input = (input[element.name] or 0) * factor
                   --element.state = 0
                 end
               end
@@ -149,20 +151,20 @@ function ModelCompute.update(check_unlink)
         ModelCompute.computeBlock(block)
         Logging:profilerReset("--> computeBlock          ")
 
-        -- compte les ingredients
-        for _,ingredient in pairs(block.ingredients) do
-          if input[ingredient.name] == nil then
-            input[ingredient.name] = ingredient.count
-          else
-            input[ingredient.name] = input[ingredient.name] + ingredient.count
-          end
-        end
         -- consomme les ingredients
         for _,product in pairs(block.products) do
           if input[product.name] == nil then
-            input[product.name] = product.count
+            input[product.name] =  product.count
           elseif input[product.name] ~= nil then
-            input[product.name] = input[product.name] - product.count
+            input[product.name] = input[product.name] + product.count
+          end
+        end
+        -- compte les ingredients
+        for _,ingredient in pairs(block.ingredients) do
+          if input[ingredient.name] == nil then
+            input[ingredient.name] =  - ingredient.count
+          else
+            input[ingredient.name] = input[ingredient.name] - ingredient.count
           end
         end
 

@@ -727,7 +727,7 @@ function RecipeEdition:updateFactoryModules(event)
     local factory_switch_priority = User.getParameter("factory_switch_priority")
     local element_state = "left"
     if factory_switch_priority == true then element_state = "right" end
-    local factory_switch_module = GuiElement.add(factory_module_panel, GuiSwitch(self.classname, "factory-switch-module=ID", block_id, recipe_id):state(element_state):leftLabel({"helmod_recipe-edition-panel.selection-modules"}):rightLabel({"helmod_recipe-edition-panel.priority-modules"}))
+    local factory_switch_module = GuiElement.add(factory_module_panel, GuiSwitch(self.classname, "factory-switch-module=ID", block_id, recipe_id):state(element_state):leftLabel({"helmod_recipe-edition-panel.selection-modules"}):rightLabel({"helmod_label.priority-modules"}))
     if factory_switch_priority == true then
       -- module priority
       self:updateFactoryModulesPriority(factory_module_panel)
@@ -963,7 +963,7 @@ function RecipeEdition:updateBeaconModules(event)
     local beacon_switch_priority = User.getParameter("beacon_switch_priority")
     local element_state = "left"
     if beacon_switch_priority == true then element_state = "right" end
-    local factory_switch_module = GuiElement.add(beacon_module_panel, GuiSwitch(self.classname, "beacon-switch-module=ID", block_id, recipe_id):state(element_state):leftLabel({"helmod_recipe-edition-panel.selection-modules"}):rightLabel({"helmod_recipe-edition-panel.priority-modules"}))
+    local factory_switch_module = GuiElement.add(beacon_module_panel, GuiSwitch(self.classname, "beacon-switch-module=ID", block_id, recipe_id):state(element_state):leftLabel({"helmod_recipe-edition-panel.selection-modules"}):rightLabel({"helmod_label.priority-modules"}))
     if beacon_switch_priority == true then
       -- module priority
       self:updateBeaconModulesPriority(beacon_module_panel)

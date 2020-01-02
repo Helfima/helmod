@@ -1,4 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.9.20
+Date: 02. 01. 2020
+  Features:
+    - Added logistic preference
+    - Added logistic in element tooltip
+  Changes:
+    - Removed container selector
+  Bugfixes:
+    - Fixed automatic input when block using same product/ingredient
+---------------------------------------------------------------------------------------------------
 Version: 0.9.19
 Date: 01. 01. 2020
   Bugfixes:

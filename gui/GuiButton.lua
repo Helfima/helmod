@@ -67,6 +67,17 @@ end
 
 -------------------------------------------------------------------------------
 --
+-- @function [parent=#GuiButton] number
+-- @param #number value
+-- @return #GuiButton
+--
+function GuiButton:number(value)
+  self.options.number = value
+  return self
+end
+
+-------------------------------------------------------------------------------
+--
 -- @function [parent=#GuiButton] choose
 -- @param #string type
 -- @param #string name
