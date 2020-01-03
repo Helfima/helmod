@@ -80,6 +80,8 @@ local modes = nil
 local filter_types = nil
 local inverts = nil
 local comparisons = nil
+local collision_mask = {}
+local collision_mask_mode = {}
 
 -------------------------------------------------------------------------------
 -- Update data
@@ -100,7 +102,8 @@ function PrototypeFiltersTab:updateData(event)
   filter_types = PrototypeFilters.getTypes()
   inverts = PrototypeFilters.getInverts()
   comparisons = PrototypeFilters.getComparison()
-
+  collision_mask = PrototypeFilters.getCollisionMask()
+  collision_mask_mode = PrototypeFilters.getCollisionMaskMode()
   -- update
   self:updateFilter()
   self:updateResult()
@@ -145,19 +148,29 @@ function PrototypeFiltersTab:addRowFilter(itable, prototype_filter, index)
   local options = PrototypeFilter:getOptions(prototype_filter.filter)
   Logging:debug(self.classname, "options", options)
   if options == "comparison" then
-      local comparaison_cell = GuiElement.add(itable, GuiTable("comparison"):column(2))
-      local comparison = "<"
-      local comparison_value = ""
-      if prototype_filter.option ~= nil then
-        comparison = prototype_filter.option.comparison
-        comparison_value = prototype_filter.option.value
-      end
-      Logging:debug(self.classname, "option", prototype_filter.option, comparison, comparison_value)
-      GuiElement.add(comparaison_cell, GuiDropDown(self.classname, "change-filter-option-comparison=ID", index):items(comparisons, comparison))
-      GuiElement.add(comparaison_cell, GuiTextField(self.classname, "change-filter-option-value=ID", index):text(comparison_value))
+    local comparaison_cell = GuiElement.add(itable, GuiTable("comparison"):column(2))
+    local comparison = "<"
+    local comparison_value = ""
+    if prototype_filter.option ~= nil then
+      comparison = prototype_filter.option.comparison
+      comparison_value = prototype_filter.option.value
+    end
+    Logging:debug(self.classname, "option", prototype_filter.option, comparison, comparison_value)
+    GuiElement.add(comparaison_cell, GuiDropDown(self.classname, "change-filter-option-comparison=ID", index):items(comparisons, comparison))
+    GuiElement.add(comparaison_cell, GuiTextField(self.classname, "change-filter-option-value=ID", index):text(comparison_value))
+  elseif prototype_filter.filter == "collision-mask" then
+    local collision_mask_cell = GuiElement.add(itable, GuiTable("collision-mask"):column(2))
+    local mask = collision_mask[1]
+    local mask_mode = collision_mask_mode[1]
+    if prototype_filter.option ~= nil then
+        mask = prototype_filter.option.mask
+        mask_mode = prototype_filter.option.mask_mode
+    end
+    GuiElement.add(collision_mask_cell, GuiDropDown(self.classname, "change-filter-option-collision-mask=ID", index):items(collision_mask, mask))
+    GuiElement.add(collision_mask_cell, GuiDropDown(self.classname, "change-filter-option-collision-mask-mode=ID", index):items(collision_mask_mode, mask_mode))
   elseif Model.countList(options) > 0 then
-      prototype_filter.option = prototype_filter.option or options[1]
-      GuiElement.add(itable, GuiDropDown(self.classname, "change-filter-option=ID", index):items(options, prototype_filter.option))
+    prototype_filter.option = prototype_filter.option or options[1]
+    GuiElement.add(itable, GuiDropDown(self.classname, "change-filter-option=ID", index):items(options, prototype_filter.option))
   else
     GuiElement.add(itable, GuiLabel("option-none", index):caption("None"))
   end
@@ -238,6 +251,9 @@ function PrototypeFiltersTab:updateResult()
         if prototype_filter.option.comparison ~= nil then
           filter["comparison"] = prototype_filter.option.comparison
           filter["value"] = prototype_filter.option.value
+        elseif prototype_filter.option.mask ~= nil then
+          filter["mask"] = prototype_filter.option.mask
+          filter["mask_mode"] = prototype_filter.option.mask_mode
         else
           filter[prototype_filter.filter] = prototype_filter.option
         end
@@ -338,6 +354,18 @@ function PrototypeFiltersTab:onEvent(event)
     prototype_filter.option.value = value
   end
 
+  if event.action == "change-filter-option-collision-mask" then
+    local selected_index = event.element.selected_index
+    if prototype_filter.option == nil then prototype_filter.option = {mask_mode =collision_mask_mode[1]} end
+    prototype_filter.option.mask = collision_mask[selected_index]
+  end
+
+  if event.action == "change-filter-option-collision-mask-mode" then
+    local selected_index = event.element.selected_index
+    if prototype_filter.option == nil then prototype_filter.option = {mask=collision_mask[1]} end
+    prototype_filter.option.mask_mode = collision_mask_mode[selected_index]
+  end
+
   if event.action == "add-prototype-filter" then
     Logging:debug(self.classname, "--> add-prototype-filter", prototype_filter)
     table.insert(prototype_filters, prototype_filter)
@@ -348,12 +376,16 @@ function PrototypeFiltersTab:onEvent(event)
 
   if event.action == "remove-prototype-filter" then
     Logging:debug(self.classname, "--> remove-prototype-filter", #prototype_filters, index)
-    table.remove(prototype_filters, index)
+    if #prototype_filters == 1 then
+      prototype_filters = nil
+    else
+      table.remove(prototype_filters, index)
+    end
     User.setParameter("prototype_filters", prototype_filters)
     self:updateData()
   end
 
-  if index > 0 then
+  if prototype_filters ~= nil and index > 0 then
     prototype_filters[index] = prototype_filter
     User.setParameter("prototype_filters", prototype_filters)
     self:updateData()

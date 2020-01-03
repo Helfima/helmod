@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.9.21
+Date: 03. 01. 2020
+  Changes:
+    - Changed collision mask for prototype filter tab
+  Bugfixes:
+    - Fixed help text display
+    - Fixed some tooltip
+---------------------------------------------------------------------------------------------------
 Version: 0.9.20
 Date: 02. 01. 2020
   Features:

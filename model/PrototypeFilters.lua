@@ -87,6 +87,51 @@ function PrototypeFilters.getFilterType(filter_type)
 end
 
 -------------------------------------------------------------------------------
+-- Get Collision Mask
+--
+-- @function [parent=#PrototypeFilter] getCollisionMask
+--
+-- @return #table
+--
+function PrototypeFilters.getCollisionMask()
+  local collision_mask = {}
+  table.insert(collision_mask, "ground-tile")
+  table.insert(collision_mask, "water-tile")
+  table.insert(collision_mask, "resource-layer")
+  table.insert(collision_mask, "doodad-layer")
+  table.insert(collision_mask, "floor-layer")
+  table.insert(collision_mask, "item-layer")
+  table.insert(collision_mask, "ghost-layer")
+  table.insert(collision_mask, "object-layer")
+  table.insert(collision_mask, "player-layer")
+  table.insert(collision_mask, "train-layer")
+  table.insert(collision_mask, "layer-11")
+  table.insert(collision_mask, "layer-12")
+  table.insert(collision_mask, "layer-13")
+  table.insert(collision_mask, "layer-14")
+  table.insert(collision_mask, "layer-15")
+  table.insert(collision_mask, "not-setup")
+  table.insert(collision_mask, "not-colliding-with-itself")
+  table.insert(collision_mask, "consider-tile-transitions")
+  table.insert(collision_mask, "colliding-with-tiles-only")
+  return collision_mask
+end
+
+-------------------------------------------------------------------------------
+-- Get Collision Mask Mode
+--
+-- @function [parent=#PrototypeFilter] getCollisionMaskMode
+--
+-- @return #table
+--
+function PrototypeFilters.getCollisionMaskMode()
+  local collision_mask_mode = {}
+  table.insert(collision_mask_mode, "collides")
+  table.insert(collision_mask_mode, "layers-equals")
+  return collision_mask_mode
+end
+
+-------------------------------------------------------------------------------
 -- initialization
 --
 -- @function [parent=#PrototypeFilter] initialization
@@ -96,7 +141,7 @@ function PrototypeFilters.initialization()
   -------------------------------------------------------------------------------
   -------------------------------------------------------------------------------
   local PrototypeFilterEntity = PrototypeFilters.addFilterType("entity")
-  PrototypeFilterEntity:addMapping({["collision-mask"]="mask"})
+  PrototypeFilterEntity:addMapping(nil)
 
   PrototypeFilterEntity:addFilter("type", Player.getEntityPrototypeTypes())
   PrototypeFilterEntity:addFilter("flying-robot")
@@ -125,24 +170,8 @@ function PrototypeFilters.initialization()
   PrototypeFilterEntity:addFilter("autoplace")
   PrototypeFilterEntity:addFilter("blueprintable")
   PrototypeFilterEntity:addFilter("item-to-place")
-  local collision_mask = {}
-  collision_mask["ground-tile"]=true
-  collision_mask["water-tile"]=true
-  collision_mask["resource-layer"]=true
-  collision_mask["doodad-layer"]=true
-  collision_mask["floor-layer"]=true
-  collision_mask["item-layer"]=true
-  collision_mask["ghost-layer"]=true
-  collision_mask["object-layer"]=true
-  collision_mask["player-layer"]=true
-  collision_mask["train-layer"]=true
-  collision_mask["layer-11"]=true
-  collision_mask["layer-12"]=true
-  collision_mask["layer-13"]=true
-  collision_mask["layer-14"]=true
-  collision_mask["layer-15"]=true
-  collision_mask["not-setup"]=true
-  PrototypeFilterEntity:addFilter("collision-mask", collision_mask)
+  PrototypeFilterEntity:addFilter("collision-mask")
+  
   local entity_flag={}
   entity_flag["not-rotatable"]=true
   entity_flag["placeable-neutral"]=true
@@ -219,15 +248,15 @@ function PrototypeFilters.initialization()
 
   -------------------------------------------------------------------------------
   -------------------------------------------------------------------------------
-  local PrototypeFilterEquipement = PrototypeFilters.addFilterType("mod")
-  PrototypeFilterEquipement:addMapping({["setting-type"]="type"})
-  PrototypeFilterEquipement:addFilter("type")
-  PrototypeFilterEquipement:addFilter("mod")
+  local PrototypeFilterModSetting = PrototypeFilters.addFilterType("mod")
+  PrototypeFilterModSetting:addMapping({["setting-type"]="type"})
+  PrototypeFilterModSetting:addFilter("type")
+  PrototypeFilterModSetting:addFilter("mod")
   local setting_type = {}
   setting_type["startup"] = true
   setting_type["runtime-global"] = true
   setting_type["runtime-per-user"] = true
-  PrototypeFilterEquipement:addFilter("setting-type", setting_type)
+  PrototypeFilterModSetting:addFilter("setting-type", setting_type)
 
   -------------------------------------------------------------------------------
   -------------------------------------------------------------------------------
@@ -239,12 +268,12 @@ function PrototypeFilters.initialization()
   -------------------------------------------------------------------------------
   -------------------------------------------------------------------------------
   local PrototypeFilterTile = PrototypeFilters.addFilterType("tile")
-  PrototypeFilterTile:addMapping({["collision-mask"]="mask"})
+  PrototypeFilterTile:addMapping(nil)
   PrototypeFilterTile:addFilter("minable")
   PrototypeFilterTile:addFilter("autoplace")
   PrototypeFilterTile:addFilter("blueprintable")
   PrototypeFilterTile:addFilter("item-to-place")
-  PrototypeFilterTile:addFilter("collision-mask", collision_mask)
+  PrototypeFilterTile:addFilter("collision-mask")
   PrototypeFilterTile:addFilter("walking-speed-modifier", "comparison")
   PrototypeFilterTile:addFilter("vehicle-friction-modifier", "comparison")
   PrototypeFilterTile:addFilter("decorative-removal-probability", "comparison")
@@ -253,10 +282,10 @@ function PrototypeFilters.initialization()
   -------------------------------------------------------------------------------
   -------------------------------------------------------------------------------
   local PrototypeFilterDecorative = PrototypeFilters.addFilterType("decorative")
-  PrototypeFilterDecorative:addMapping({["collision-mask"]="mask"})
+  PrototypeFilterDecorative:addMapping(nil)
   PrototypeFilterDecorative:addFilter("decal")
   PrototypeFilterDecorative:addFilter("autoplace")
-  PrototypeFilterDecorative:addFilter("collision-mask", collision_mask)
+  PrototypeFilterDecorative:addFilter("collision-mask")
 
   -------------------------------------------------------------------------------
   -------------------------------------------------------------------------------

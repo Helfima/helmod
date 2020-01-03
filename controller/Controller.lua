@@ -232,10 +232,10 @@ function Controller:bindController(player)
       gui_button.style.width = 37
       gui_button.style.height = 37
     end
-    if User.getVersion() < User.version then
-      local message = string.format("%s %s: %s","Helmod",game.active_mods["helmod"], "Now every panel is draggable.")
-      Player.print(message)
-    end
+--    if User.getVersion() < User.version then
+--      local message = string.format("%s %s: %s","Helmod",game.active_mods["helmod"], "Now every panel is draggable.")
+--      Player.print(message)
+--    end
     User.update()
   end
 end

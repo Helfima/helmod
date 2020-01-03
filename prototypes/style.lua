@@ -741,7 +741,8 @@ default_gui["helmod_label_help"] = {
   type = "label_style",
   parent = "helmod_label_default",
   minimal_width = 380,
-  maximal_width = 380
+  maximal_width = 380,
+  single_line = false
 }
 
 -------------------------------------------------------------------------------
@@ -754,7 +755,8 @@ default_gui["helmod_label_help_number"] = {
   parent = "helmod_label_default",
   left_padding = 10,
   align = "right",
-  minimal_width = 30
+  minimal_width = 30,
+  single_line = false
 }
 
 -------------------------------------------------------------------------------
@@ -768,7 +770,8 @@ default_gui["helmod_label_help_text"] = {
   left_padding = 10,
   minimal_width = 350,
   maximal_width = 350,
-  vertical_align = "top"
+  vertical_align = "top",
+  single_line = false
 }
 
 
