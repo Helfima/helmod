@@ -1,8 +1,10 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.9.21
-Date: 03. 01. 2020
+Date: 05. 01. 2020
   Changes:
+    - Added scroll for module selector
     - Changed collision mask for prototype filter tab
+    - Updated Russian locale (by Astorin)
   Bugfixes:
     - Fixed help text display
     - Fixed some tooltip

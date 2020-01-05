@@ -167,7 +167,9 @@ function PreferenceEdition:updatePriorityModule(event)
   end
   
   -- module selector
-  local module_table_panel = GuiElement.add(configuration_table_panel, GuiTable("module-selector-table"):column(6))
+  local module_scroll = GuiElement.add(configuration_table_panel, GuiScroll("module-selector-scroll"))
+  module_scroll.style.maximal_height = 118
+  local module_table_panel = GuiElement.add(module_scroll, GuiTable("module-selector-table"):column(6))
   for k, element in pairs(Player.getModules()) do
     local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name})
     GuiElement.add(module_table_panel, GuiButtonSelectSprite(self.classname, "priority-module-select=ID"):sprite("entity", element.name):tooltip(tooltip))

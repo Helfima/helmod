@@ -809,7 +809,9 @@ function RecipeEdition:updateFactoryModulesSelector(factory_module_panel)
   local element = User.getParameter("recipe_edition_object")
   local block_id = element.block
   local recipe_id = element.recipe
-  local module_table_panel = GuiElement.add(factory_module_panel, GuiTable("module-selector-table"):column(8))
+  local module_scroll = GuiElement.add(factory_module_panel, GuiScroll("module-selector-scroll"))
+  module_scroll.style.maximal_height = 118
+  local module_table_panel = GuiElement.add(module_scroll, GuiTable("module-selector-table"):column(6))
   for k, element in pairs(Player.getModules()) do
     local color = nil
     local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name})
@@ -1045,7 +1047,9 @@ function RecipeEdition:updateBeaconModulesSelector(beacon_module_panel)
   local element = User.getParameter("recipe_edition_object")
   local block_id = element.block
   local recipe_id = element.recipe
-  local module_table_panel = GuiElement.add(beacon_module_panel, GuiTable("module-selector-table"):column(8))
+  local module_scroll = GuiElement.add(beacon_module_panel, GuiScroll("module-selector-scroll"))
+  module_scroll.style.maximal_height = 118
+  local module_table_panel = GuiElement.add(module_scroll, GuiTable("module-selector-table"):column(6))
   for k, element in pairs(Player.getModules()) do
     local color = nil
     local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name})
