@@ -140,6 +140,7 @@ local list = {
   {name="tooltip-remove", size=24, scale=1},
   {name="tooltip-edit", size=48, scale=1},
   {name="tooltip-blank", size=24, scale=1},
+  {name="tooltip-pipette", size=24, scale=1},
   {name="tooltip-info", size=32, scale=1},
   {name="tooltip-record", size=32, scale=1},
   {name="tooltip-play", size=32, scale=1},

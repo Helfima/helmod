@@ -61,6 +61,8 @@ function GuiTooltip:create()
     table.insert(tooltip, {"", "[img=helmod-tooltip-end]", " ", "[color=255,222,61]", "[font=default-bold]", self.name, "[/font]", "[/color]"})
   elseif string.find(self.name[1], "module[-]clear") then
     table.insert(tooltip, {"", "[img=helmod-tooltip-erase]", " ", "[color=255,222,61]", "[font=default-bold]", self.name, "[/font]", "[/color]"})
+  elseif string.find(self.name[1], "pipette") then
+    table.insert(tooltip, {"", "[img=helmod-tooltip-pipette]", " ", "[color=255,222,61]", "[font=default-bold]", self.name, "[/font]", "[/color]"})
   else
     table.insert(tooltip, {"", "[img=helmod-tooltip-blank]", " ", "[font=default-bold]", self.name, "[/font]"})
   end

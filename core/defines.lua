@@ -173,6 +173,26 @@ helmod_settings_mod = {
     allowed_values = {"0","0.0","0.00"},
     order = "a2"
   },
+  -- preference number line by scroll
+  preference_number_line = {
+    type = "int-setting",
+    setting_type = "runtime-per-user",
+    localised_name = {"helmod_settings.preference-number-line"},
+    localised_description = {"helmod_settings.preference-number-line-desc"},
+    default_value = 3,
+    allowed_values = {1,2,3,4,5},
+    order = "a1"
+  },
+  -- factory level
+  default_factory_level = {
+    type = "string-setting",
+    setting_type = "runtime-per-user",
+    localised_name = {"helmod_settings.default-factory-level"},
+    localised_description = {"helmod_settings.default-factory-level-desc"},
+    default_value = "last",
+    allowed_values = {"1","2","3","4","5","6","last"},
+    order = "a2"
+  },
   -- display_ratio_horizontal
   display_ratio_horizontal = {
     type = "double-setting",
@@ -248,16 +268,6 @@ helmod_settings_mod = {
     minimum_value = 2,
     maximum_value = 10,
     order = "c0"
-  },
-  -- format number element
-  default_factory_level = {
-    type = "string-setting",
-    setting_type = "runtime-per-user",
-    localised_name = {"helmod_settings.default-factory-level"},
-    localised_description = {"helmod_settings.default-factory-level-desc"},
-    default_value = "last",
-    allowed_values = {"1","2","3","4","5","6","last"},
-    order = "a2"
   },
   --display_all_sheet
   display_all_sheet = {

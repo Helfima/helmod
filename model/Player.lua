@@ -51,6 +51,20 @@ function Player.set(player)
 end
 
 -------------------------------------------------------------------------------
+-- Set pipette
+--
+-- @function [parent=#Player] setPipette
+--
+-- @param #string entity
+--
+-- @return #table
+--
+function Player.setPipette(entity)
+  if Lua_player == nil then return nil end
+  return Lua_player.pipette_entity(entity)
+end
+
+-------------------------------------------------------------------------------
 -- Is valid sprite path
 --
 -- @function [parent=#Player] is_valid_sprite_path

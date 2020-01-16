@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.9.22
+Date: 16. 01. 2020
+  Features:
+    - Added set smart pipette when click factory in pin panel
+  Changes:
+    - Added scroll for all choices in the preference
+    - Added user settings: Number of lines for preference
+---------------------------------------------------------------------------------------------------
 Version: 0.9.21
 Date: 05. 01. 2020
   Changes:

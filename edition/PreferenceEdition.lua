@@ -15,6 +15,17 @@ PreferenceEdition = newclass(Form)
 function PreferenceEdition:onInit()
   self.panelCaption = ({"helmod_preferences-edition-panel.title"})
   self.parameterLast = string.format("%s_%s",self.classname,"last")
+  self.scroll_height = 38*3+4
+end
+
+-------------------------------------------------------------------------------
+-- On initialization
+--
+-- @function [parent=#PreferenceEdition] onInit
+--
+function PreferenceEdition:getSrollHeight()
+  local number_line = User.getModSetting("preference_number_line") 
+  return 38 * (number_line or 3) + 4
 end
 
 -------------------------------------------------------------------------------
@@ -168,7 +179,7 @@ function PreferenceEdition:updatePriorityModule(event)
   
   -- module selector
   local module_scroll = GuiElement.add(configuration_table_panel, GuiScroll("module-selector-scroll"))
-  module_scroll.style.maximal_height = 118
+  module_scroll.style.maximal_height = self:getSrollHeight()
   local module_table_panel = GuiElement.add(module_scroll, GuiTable("module-selector-table"):column(6))
   for k, element in pairs(Player.getModules()) do
     local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name})
@@ -199,7 +210,11 @@ function PreferenceEdition:updateItemsLogistic(event)
   for _,type in pairs({"belt", "container", "transport"}) do
     local type_label = GuiElement.add(options_table, GuiLabel(string.format("%s-label", type)):caption({string.format("helmod_preferences-edition-panel.items-logistic-%s", type)}))
     type_label.style.width = 200
-    local type_table_panel = GuiElement.add(options_table, GuiTable(string.format("%s-selector-table", type)):column(6))
+    
+    local scroll_panel = GuiElement.add(options_table, GuiScroll(string.format("%s-selector-scroll", type)))
+    scroll_panel.style.maximal_height = self:getSrollHeight()
+  
+    local type_table_panel = GuiElement.add(scroll_panel, GuiTable(string.format("%s-selector-table", type)):column(6))
     local item_logistic = Player.getDefaultItemLogistic(type)
     for key, entity in pairs(Player.getItemsLogistic(type)) do
       local color = nil
@@ -247,7 +262,11 @@ function PreferenceEdition:updateFluidsLogistic(event)
   for _,type in pairs({"pipe", "container", "transport"}) do
     local type_label = GuiElement.add(options_table, GuiLabel(string.format("%s-label", type)):caption({string.format("helmod_preferences-edition-panel.fluids-logistic-%s", type)}))
     type_label.style.width = 200
-    local type_table_panel = GuiElement.add(options_table, GuiTable(string.format("%s-selector-table", type)):column(6))
+    
+    local scroll_panel = GuiElement.add(options_table, GuiScroll(string.format("%s-selector-scroll", type)))
+    scroll_panel.style.maximal_height = self:getSrollHeight()
+  
+    local type_table_panel = GuiElement.add(scroll_panel, GuiTable(string.format("%s-selector-table", type)):column(6))
     local fluid_logistic = Player.getDefaultFluidLogistic(type)
     for key, entity in pairs(Player.getFluidsLogistic(type)) do
       local color = nil
