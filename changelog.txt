@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.9.23
+Date: 18. 01. 2020
+  Changes:
+    - Changed pipette tool to bluid a blueprint (machine+recipe+module)
+    - Added button to see summary from pin panel
+---------------------------------------------------------------------------------------------------
 Version: 0.9.22
 Date: 16. 01. 2020
   Features:

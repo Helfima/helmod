@@ -65,6 +65,77 @@ function Player.setPipette(entity)
 end
 
 -------------------------------------------------------------------------------
+-- Get main inventory
+--
+-- @function [parent=#Player] getMainInventory
+--
+-- @return #LuaInventory
+--
+function Player.getMainInventory()
+  if Lua_player == nil then return nil end
+  return Lua_player.get_main_inventory()
+end
+
+-------------------------------------------------------------------------------
+-- Get smart tool
+--
+-- @function [parent=#Player] getSmartTool
+--
+-- @return #LuaItemStack
+--
+function Player.getSmartTool()
+  if Lua_player == nil then return nil end
+  local inventory = Player.getMainInventory()
+  local tool_stack = nil
+  for i = 1, #inventory do
+    local stack = inventory[i]
+    if stack.valid_for_read and stack.is_blueprint and stack.name == "blueprint" and stack.label == "Helmod Smart Tool" then
+      if stack.is_blueprint_setup() then
+        if Lua_player.cursor_stack.swap_stack(stack) then
+            return Lua_player.cursor_stack
+        end
+      else
+        Lua_player.cursor_stack.swap_stack(stack)
+        return Lua_player.cursor_stack
+      end
+    end
+  end
+  Lua_player.cursor_stack.set_stack("blueprint")
+  return Lua_player.cursor_stack
+end
+
+-------------------------------------------------------------------------------
+-- Set smart tool
+--
+-- @function [parent=#Player] setSmartTool
+--
+function Player.setSmartTool(recipe, type)
+  if Lua_player == nil then return nil end
+  local tool_stack = Player.getSmartTool()
+  if tool_stack ~= nil then
+    tool_stack.clear_blueprint()
+    tool_stack.label = "Helmod Smart Tool"
+    tool_stack.allow_manual_label_change = false
+    local factory = recipe[type]
+    local modules = {}
+    for name,value in pairs(factory.modules or {}) do
+      modules[name] = value
+    end
+    local entity = {
+      entity_number = 1,
+      name = factory.name,
+      position = {0, 0},
+      items = modules
+    }
+    if type == "factory" then
+      entity.recipe = recipe.name
+    end
+    tool_stack.set_blueprint_entities({entity})
+  
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Is valid sprite path
 --
 -- @function [parent=#Player] is_valid_sprite_path

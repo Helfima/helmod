@@ -96,7 +96,7 @@ end
 function PinPanel:updateHeader(event)
   Logging:debug(self.classname, "updateHeader()", event)
   local left_menu_panel = self:getLeftMenuPanel()
-  local model = Model.getModel()
+  local pin_block_id = User.getParameter("pin_block_id")
   left_menu_panel.clear()
   local group1 = GuiElement.add(left_menu_panel, GuiFlowH("group1"))
   GuiElement.add(group1, GuiButton(self.classname, "change-level=ID", "down"):sprite("menu", "arrow-left-white", "arrow-left"):style("helmod_button_menu"):tooltip({"helmod_button.decrease"}))
@@ -104,6 +104,8 @@ function PinPanel:updateHeader(event)
   GuiElement.add(group1, GuiButton(self.classname, "change-level=ID", "min"):sprite("menu", "minimize-window-white", "minimize-window"):style("helmod_button_menu"):tooltip({"helmod_button.minimize"}))
   GuiElement.add(group1, GuiButton(self.classname, "change-level=ID", "max"):sprite("menu", "maximize-window-white", "maximize-window"):style("helmod_button_menu"):tooltip({"helmod_button.maximize"}))
 
+  local group2 = GuiElement.add(left_menu_panel, GuiFlowH("group2"))
+  GuiElement.add(group2, GuiButton("HMSummaryPanel=OPEN=ID", pin_block_id):sprite("menu", "brief-white","brief"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
 end
 
 -------------------------------------------------------------------------------
@@ -189,7 +191,6 @@ end
 function PinPanel:addProductionBlockRow(gui_table, block, recipe)
   Logging:debug(self.classname, "addProductionBlockRow()", gui_table, block, recipe)
   local display_pin_level = User.getSetting("display_pin_level")
-  local model = Model.getModel()
   local recipe_prototype = RecipePrototype(recipe)
   if display_pin_level > display_level.base then
     -- col recipe
@@ -217,7 +218,7 @@ function PinPanel:addProductionBlockRow(gui_table, block, recipe)
   if display_pin_level > display_level.factory then
     -- col factory
     local factory = recipe.factory
-    GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity=ID", "factory"):index(recipe.id):element(factory):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default))
+    GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity=ID", recipe.id, "factory"):index(recipe.id):element(factory):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default))
   end
 
   if display_pin_level > display_level.ingredients then
@@ -245,7 +246,7 @@ function PinPanel:addProductionBlockRow(gui_table, block, recipe)
     else
       beacon.limit_count = nil
     end
-    GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity=ID", "beacon"):index(recipe.id):element(beacon):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default))
+    GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity=ID", recipe.id, "beacon"):index(recipe.id):element(beacon):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default))
   end
 
 end
@@ -273,6 +274,10 @@ function PinPanel:onEvent(event)
   end
   
   if event.action == "pipette-entity" then
-    Player.setPipette(event.item2)
+    --Player.setPipette(event.item2)
+    if pin_block_id ~= nil and model.blocks[pin_block_id] ~= nil then
+      local recipes = model.blocks[pin_block_id].recipes
+      Player.setSmartTool(recipes[event.item1], event.item2)
+    end
   end
 end
