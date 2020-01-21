@@ -631,6 +631,20 @@ function Player.getModuleBonus(module, effect)
 end
 
 -------------------------------------------------------------------------------
+-- Return recipe prototype
+--
+-- @function [parent=#Player] getRecipePrototype
+--
+-- @param #string name recipe name
+--
+-- @return #LuaRecipe recipe
+--
+function Player.getRecipePrototype(name)
+  if name == nil then return nil end
+  return game.recipe_prototypes[name]
+end
+
+-------------------------------------------------------------------------------
 -- Return recipe
 --
 -- @function [parent=#Player] getRecipe

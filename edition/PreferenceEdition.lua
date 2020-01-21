@@ -161,19 +161,19 @@ function PreferenceEdition:updatePriorityModule(event)
   for i, priority_module in pairs(priority_modules) do
     local button_style2 = button_style
     if configuration_priority == i then button_style2 = "helmod_button_bold_selected" end
-    GuiElement.add(conf_table_panel, GuiButton(self.classname, "configuration-priority-select=ID", i):caption(i):style(button_style2))
+    GuiElement.add(conf_table_panel, GuiButton(self.classname, "configuration-priority-select", i):caption(i):style(button_style2))
   end
-  GuiElement.add(conf_table_panel, GuiButton(self.classname, "configuration-priority-select=ID", "new"):caption("+"):style(button_style))
-  GuiElement.add(conf_table_panel, GuiButton(self.classname, "configuration-priority-remove=ID", "new"):caption("-"):style(button_style))
+  GuiElement.add(conf_table_panel, GuiButton(self.classname, "configuration-priority-select", "new"):caption("+"):style(button_style))
+  GuiElement.add(conf_table_panel, GuiButton(self.classname, "configuration-priority-remove", "new"):caption("-"):style(button_style))
   -- module priority
   local priority_table_panel = GuiElement.add(configuration_panel, GuiTable("module-priority-table"):column(3))
   if priority_modules[configuration_priority] ~= nil then
     Logging:debug(self.classname, "priority_modules", priority_modules, configuration_priority)
     for index, element in pairs(priority_modules[configuration_priority]) do
       local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name})
-      GuiElement.add(priority_table_panel, GuiButtonSprite(self.classname, "do-nothing=ID", index):sprite("entity", element.name):tooltip(tooltip))
-      GuiElement.add(priority_table_panel, GuiTextField(self.classname, "priority-module-update=ID", index):text(element.value))
-      GuiElement.add(priority_table_panel, GuiButtonSprite(self.classname, "priority-module-remove=ID", index):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip(tooltip))
+      GuiElement.add(priority_table_panel, GuiButtonSprite(self.classname, "do-nothing", index):sprite("entity", element.name):tooltip(tooltip))
+      GuiElement.add(priority_table_panel, GuiTextField(self.classname, "priority-module-update", index):text(element.value))
+      GuiElement.add(priority_table_panel, GuiButtonSprite(self.classname, "priority-module-remove", index):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip(tooltip))
     end
   end
   
@@ -183,7 +183,7 @@ function PreferenceEdition:updatePriorityModule(event)
   local module_table_panel = GuiElement.add(module_scroll, GuiTable("module-selector-table"):column(6))
   for k, element in pairs(Player.getModules()) do
     local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name})
-    GuiElement.add(module_table_panel, GuiButtonSelectSprite(self.classname, "priority-module-select=ID"):sprite("entity", element.name):tooltip(tooltip))
+    GuiElement.add(module_table_panel, GuiButtonSelectSprite(self.classname, "priority-module-select"):sprite("entity", element.name):tooltip(tooltip))
   end
 end
 
@@ -219,7 +219,7 @@ function PreferenceEdition:updateItemsLogistic(event)
     for key, entity in pairs(Player.getItemsLogistic(type)) do
       local color = nil
       if entity.name == item_logistic then color = "green" end
-      local button = GuiElement.add(type_table_panel, GuiButtonSelectSprite(self.classname, "items-logistic-select=ID", type):choose("entity", entity.name):color(color))
+      local button = GuiElement.add(type_table_panel, GuiButtonSelectSprite(self.classname, "items-logistic-select", type):choose("entity", entity.name):color(color))
       button.locked = true
     end
   end
@@ -257,7 +257,7 @@ function PreferenceEdition:updateFluidsLogistic(event)
       default_flow = flow
     end
   end
-  GuiElement.add(options_table, GuiDropDown(self.classname, "fluids-logistic-flow=ID"):items(items, default_flow))
+  GuiElement.add(options_table, GuiDropDown(self.classname, "fluids-logistic-flow"):items(items, default_flow))
   
   for _,type in pairs({"pipe", "container", "transport"}) do
     local type_label = GuiElement.add(options_table, GuiLabel(string.format("%s-label", type)):caption({string.format("helmod_preferences-edition-panel.fluids-logistic-%s", type)}))
@@ -271,7 +271,7 @@ function PreferenceEdition:updateFluidsLogistic(event)
     for key, entity in pairs(Player.getFluidsLogistic(type)) do
       local color = nil
       if entity.name == fluid_logistic then color = "green" end
-      local button = GuiElement.add(type_table_panel, GuiButtonSelectSprite(self.classname, "fluids-logistic-select=ID", type):choose("entity", entity.name):color(color))
+      local button = GuiElement.add(type_table_panel, GuiButtonSelectSprite(self.classname, "fluids-logistic-select", type):choose("entity", entity.name):color(color))
       button.locked = true
     end
   end

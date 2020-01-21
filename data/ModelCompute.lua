@@ -10,6 +10,7 @@ local ModelCompute = {
   classname = "HMModelCompute",
   capEnergy = -0.8,
   capSpeed = -0.8,
+  capPollution = -0.8,
   -- 15°c
   initial_temp = 15,
   -- 200J/unit/°c
@@ -646,6 +647,7 @@ function ModelCompute.computeBlock(block)
   local recipes = block.recipes
   block.power = 0
   block.count = 1
+  block.pollution_total = 0
 
   if recipes ~= nil then
     local mB,mC,my_solver
@@ -704,6 +706,7 @@ function ModelCompute.computeBlock(block)
         ModelCompute.computeFactory(recipe)
 
         block.power = block.power + recipe.energy_total
+        block.pollution_total = block.pollution_total + recipe.pollution_total
 
         if type(recipe.factory.limit) == "number" and recipe.factory.limit > 0 then
           local currentRatio = recipe.factory.limit/recipe.factory.count
@@ -722,17 +725,21 @@ function ModelCompute.computeBlock(block)
       if block.count <= 1 then
         block.count = 1
         block.limit_energy = nil
+        block.limit_pollution = nil
         for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
           recipe.factory.limit_count = nil
           recipe.beacon.limit_count = nil
           recipe.limit_energy = nil
+          recipe.limit_pollution = nil
         end
       else
-        block.limit_energy = math.ceil(block.power/block.count)
+        block.limit_energy = block.power/block.count
+        block.limit_pollution = block.pollution_total/block.count
         for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
           recipe.factory.limit_count = recipe.factory.count / block.count
           recipe.beacon.limit_count = recipe.beacon.count / block.count
           recipe.limit_energy = recipe.energy_total / block.count
+          recipe.limit_pollution = recipe.pollution_total / block.count
         end
       end
 
@@ -816,16 +823,18 @@ function ModelCompute.computeModuleEffects(recipe)
   Logging:trace(ModelCompute.classname, "computeModuleEffects()",recipe.name)
 
   local factory = recipe.factory
-  factory.effects = {speed = 0, productivity = 0, consumption = 0}
+  factory.effects = {speed = 0, productivity = 0, consumption = 0, pollution = 0}
   -- effet module factory
   if factory.modules ~= nil then
     for module, value in pairs(factory.modules) do
       local speed_bonus = Player.getModuleBonus(module, "speed")
       local productivity_bonus = Player.getModuleBonus(module, "productivity")
       local consumption_bonus = Player.getModuleBonus(module, "consumption")
+      local pollution_bonus = Player.getModuleBonus(module, "pollution")
       factory.effects.speed = factory.effects.speed + value * speed_bonus
       factory.effects.productivity = factory.effects.productivity + value * productivity_bonus
       factory.effects.consumption = factory.effects.consumption + value * consumption_bonus
+      factory.effects.pollution = factory.effects.pollution + value * pollution_bonus
     end
   end
   -- effet module beacon
@@ -835,20 +844,25 @@ function ModelCompute.computeModuleEffects(recipe)
       local speed_bonus = Player.getModuleBonus(module, "speed")
       local productivity_bonus = Player.getModuleBonus(module, "productivity")
       local consumption_bonus = Player.getModuleBonus(module, "consumption")
+      local pollution_bonus = Player.getModuleBonus(module, "pollution")
       local distribution_effectivity = EntityPrototype(beacon):getDistributionEffectivity()
       factory.effects.speed = factory.effects.speed + value * speed_bonus * distribution_effectivity * beacon.combo
       factory.effects.productivity = factory.effects.productivity + value * productivity_bonus * distribution_effectivity * beacon.combo
       factory.effects.consumption = factory.effects.consumption + value * consumption_bonus * distribution_effectivity * beacon.combo
+      factory.effects.pollution = factory.effects.pollution + value * pollution_bonus * distribution_effectivity * beacon.combo
     end
   end
   if recipe.type == "resource" then
     factory.effects.productivity = factory.effects.productivity + Player.getForce().mining_drill_productivity_bonus
   end
   -- cap la vitesse a self.capSpeed
-  if factory.effects.speed < Model.capSpeed  then factory.effects.speed = Model.capSpeed end
+  if factory.effects.speed < ModelCompute.capSpeed  then factory.effects.speed = ModelCompute.capSpeed end
 
   -- cap l'energy a self.capEnergy
-  if factory.effects.consumption < Model.capEnergy  then factory.effects.consumption = Model.capEnergy end
+  if factory.effects.consumption < ModelCompute.capEnergy  then factory.effects.consumption = ModelCompute.capEnergy end
+
+  -- cap la pollution a self.capPollution
+  if factory.effects.pollution < ModelCompute.capPollution  then factory.effects.pollution = ModelCompute.capPollution end
 
 end
 
@@ -861,7 +875,8 @@ end
 --
 function ModelCompute.computeFactory(recipe)
   Logging:trace(ModelCompute.classname, "computeFactory()", recipe.name)
-  local recipe_energy = RecipePrototype(recipe):getEnergy()
+  local recipe_prototype = RecipePrototype(recipe)
+  local recipe_energy = recipe_prototype:getEnergy()
   -- effet speed
   recipe.factory.speed = ModelCompute.speedFactory(recipe) * (1 + recipe.factory.effects.speed)
   Logging:debug(ModelCompute.classname, "recipe.factory.speed", ModelCompute.speedFactory(recipe), recipe.factory.speed)
@@ -873,6 +888,9 @@ function ModelCompute.computeFactory(recipe)
   local energy_type = factory_prototype:getEnergyType()
   recipe.factory.energy = factory_prototype:getEnergyUsage() * (1 + recipe.factory.effects.consumption)
 
+  -- effet pollution
+  recipe.factory.pollution = factory_prototype:getPollution() * (1 + recipe.factory.effects.pollution)
+  
   -- compte le nombre de machines necessaires
   local model = Model.getModel()
   -- [ratio recipe] * [effort necessaire du recipe] / ([la vitesse de la factory] * [le temps en second])
@@ -888,13 +906,25 @@ function ModelCompute.computeFactory(recipe)
   local beacon_prototype = EntityPrototype(recipe.factory)
   recipe.beacon.energy = beacon_prototype:getEnergyUsage()
   -- calcul des totaux
-  if energy_type == "electrical" then
-    recipe.factory.energy_total = math.ceil(recipe.factory.count*recipe.factory.energy)
-  else
+  local fuel_emissions_multiplier = 1
+  if energy_type == "burner" then
     recipe.factory.energy_total = 0
+    local fuel = recipe.factory.fuel
+    if fuel == nil then
+      fuel = EntityPrototype(recipe.factory):getBurnerPrototype():getFirstFuelItemPrototype().name
+    end
+    if fuel ~= nil then
+      local fuel_prototype = ItemPrototype(fuel)
+      fuel_emissions_multiplier = fuel_prototype:getFuelEmissionsMultiplier()
+    end
+  else
+    recipe.factory.energy_total = math.ceil(recipe.factory.count*recipe.factory.energy)
   end
+  recipe.factory.pollution_total = recipe.factory.pollution*recipe.factory.count
+  
   recipe.beacon.energy_total = math.ceil(recipe.beacon.count*recipe.beacon.energy)
   recipe.energy_total = recipe.factory.energy_total + recipe.beacon.energy_total
+  recipe.pollution_total = recipe.factory.pollution_total * fuel_emissions_multiplier * recipe_prototype:getEmissionsMultiplier()
   -- arrondi des valeurs
   recipe.factory.speed = recipe.factory.speed
   recipe.factory.energy = math.ceil(recipe.factory.energy)
@@ -1041,9 +1071,11 @@ function ModelCompute.createSummary()
   model.summary.beacons = {}
   model.summary.modules = {}
   local energy = 0
+  local pollution = 0
 
   for _, block in pairs(model.blocks) do
     energy = energy + block.power
+    pollution = pollution + block.pollution_total
     ModelCompute.computeSummaryFactory(block)
     for _,type in pairs({"factories", "beacons", "modules"}) do
       for _,element in pairs(block.summary[type]) do
@@ -1054,6 +1086,7 @@ function ModelCompute.createSummary()
     
   end
   model.summary.energy = energy
+  model.summary.pollution = pollution
 
   model.generators = {}
   -- formule 20 accumulateur /24 panneau solaire/1 MW

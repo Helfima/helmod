@@ -99,7 +99,7 @@ function PropertiesTab:addTableHeader(itable, prototype_compare)
       icon_type = "technology"
       localised_name = technology_protoype:getLocalisedName()
     end
-    GuiElement.add(itable, GuiButtonSprite(self.classname, "element-delete=ID", prototype.name, index):sprite(icon_type, prototype.name):tooltip(localised_name))
+    GuiElement.add(itable, GuiButtonSprite(self.classname, "element-delete", prototype.name, index):sprite(icon_type, prototype.name):tooltip(localised_name))
 
   end
 
@@ -333,6 +333,9 @@ function PropertiesTab:parseProperties(prototype, level)
       elseif key == "burner_prototype" then
         local burner_prototype = BurnerPrototype(prototype[key]):toString()
         value = burner_prototype
+      elseif key == "electric_energy_source_prototype" then
+        local electric_prototype = ElectricPrototype(prototype[key]):toString()
+        value = electric_prototype
       elseif type == "table" then
         local test, error = pcall(function() prototype[key]:help() return true end)
         pcall(function() Logging:debug(self.classname, "level", level, "help", prototype[key]:help(), "test", test, error, level < 2 and test) end)

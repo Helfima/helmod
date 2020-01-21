@@ -326,3 +326,19 @@ function RecipePrototype:getHidden()
   end
   return false
 end
+
+-------------------------------------------------------------------------------
+-- Return emissions multiplier of Prototype
+--
+-- @function [parent=#RecipePrototype] getEmissionsMultiplier
+--
+-- @return #number
+--
+function RecipePrototype:getEmissionsMultiplier()
+  if self.lua_prototype ~= nil then
+    local prototype = Player.getRecipePrototype(self.lua_prototype.name)
+    if prototype == nil then return 1 end
+    return prototype.emissions_multiplier or 1
+  end
+  return 1
+end

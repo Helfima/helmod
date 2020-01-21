@@ -8,8 +8,6 @@ local Model = {
   -- single-line comment
   classname = "HMModel",
   version = "0.9.12",
-  capEnergy = -0.8,
-  capSpeed = -0.8,
   -- 15°c
   initial_temp = 15,
   -- 200J/unit/°c
@@ -604,6 +602,7 @@ function Model.setBeacon(item, key, name, combo, factory)
       if Model.countModulesModel(object.beacon) >= beacon_prototype:getModuleInventorySize() then
         object.beacon.modules = {}
       end
+      
     end
   end
 end
@@ -616,14 +615,16 @@ end
 -- @param #string block_id
 -- @param #string recipe_id
 -- @param #string factory_name
+-- @param #string factory_fuel
 --
-function Model.setFactory(block_id, recipe_id, factory_name)
+function Model.setFactory(block_id, recipe_id, factory_name, factory_fuel)
   Logging:debug(Model.classname, "setFactory()", block_id, recipe_id, factory_name)
   local object = Model.getObject(block_id, recipe_id)
   if object ~= nil then
     local factory_prototype = EntityPrototype(factory_name)
     if factory_prototype:native() ~= nil then
       object.factory.name = factory_name
+      object.factory.fuel = factory_fuel
       if Model.countModulesModel(object.factory) >= factory_prototype:getModuleInventorySize() then
         object.factory.modules = {}
       end

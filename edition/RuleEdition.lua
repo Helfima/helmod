@@ -84,7 +84,7 @@ function RuleEdition:updateRule(event)
   end
   if rule_mod == nil then rule_mod = mod_list[1] end
   GuiElement.add(rule_table, GuiLabel("label-mod"):caption({"helmod_rule-edition-panel.mod"}))
-  GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown=ID", "mod"):items(mod_list, rule_mod))
+  GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown", "mod"):items(mod_list, rule_mod))
 
   -- name
   local helmod_rule_manes = {}
@@ -93,7 +93,7 @@ function RuleEdition:updateRule(event)
   end
   if rule_name == nil then rule_name = helmod_rule_manes[1] end
   GuiElement.add(rule_table, GuiLabel("label-name"):caption({"helmod_rule-edition-panel.name"}))
-  GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown=ID", "name"):items(helmod_rule_manes, rule_name))
+  GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown", "name"):items(helmod_rule_manes, rule_name))
 
   -- category
   local helmod_rule_categories = {}
@@ -102,13 +102,13 @@ function RuleEdition:updateRule(event)
   end
   if rule_category == nil then rule_category = helmod_rule_categories[1] end
   GuiElement.add(rule_table, GuiLabel("label-category"):caption({"helmod_rule-edition-panel.category"}))
-  GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown=ID", "category"):items(helmod_rule_categories, rule_category))
+  GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown", "category"):items(helmod_rule_categories, rule_category))
 
   -- type
   local helmod_rule_types = helmod_rules[rule_name].categories[rule_category]
   if rule_type == nil then rule_type = helmod_rule_types[1] end
   GuiElement.add(rule_table, GuiLabel("label-type"):caption({"helmod_rule-edition-panel.type"}))
-  GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown=ID", "type"):items(helmod_rule_types, rule_type))
+  GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown", "type"):items(helmod_rule_types, rule_type))
 
   GuiElement.add(rule_table, GuiLabel("label-value"):caption({"helmod_rule-edition-panel.value"}))
   GuiElement.add(rule_table, GuiButton("choose", "value"):choose("entity"))

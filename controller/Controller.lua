@@ -31,6 +31,7 @@ require "tab.AdminTab"
 
 require "model.Prototype"
 require "model.BurnerPrototype"
+require "model.ElectricPrototype"
 require "model.EntityPrototype"
 require "model.FluidPrototype"
 require "model.ItemPrototype"
@@ -303,7 +304,7 @@ function Controller:onGuiClosed(event)
   self:cleanController(Player.native())
 end
 
-local pattern = "([^=]*)=?([^=]*)=?[^=]*=?([^=]*)=?([^=]*)=?([^=]*)"
+local pattern = "([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)"
 
 -------------------------------------------------------------------------------
 -- On gui action
@@ -317,7 +318,7 @@ function Controller:onGuiAction(event)
   if event.element ~= nil and (string.find(event.element.name,"^HM.*") or string.find(event.element.name,"^helmod.*")) then
     if views == nil then self:prepare() end
   
-    event.classname, event.action, event.item1, event.item2, event.item3 = string.match(event.element.name,pattern)
+    event.classname, event.action, event.item1, event.item2, event.item3, event.item4 = string.match(event.element.name,pattern)
     Controller:onEvent(event)
   
     if event.classname == self.classname and event.action == "CLOSE" then

@@ -48,6 +48,12 @@ function Command.parse(event)
       Player.print("All User UIs are reseted!")
     elseif string.lower(event.parameters) == "resetcaches" then
       Cache.reset()
+      local current_player = Player.native()
+      for _,player in pairs(game.players) do
+        Player.set(player)
+        User.resetCache()
+      end
+      Player.set(current_player)
       Player.print("Caches are reseted!")
     elseif string.lower(event.parameters) == "resettranslate" then
       User.resetTranslate()

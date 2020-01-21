@@ -56,7 +56,6 @@ end
 -- @param #table list_ingredients
 -- @param #table list_translate
 -- 
-local loop = {product=0,ingredient=0}
 
 function RecipeSelector:appendGroups(element, type, list_products, list_ingredients, list_translate)
   Logging:trace(self.classname, "appendGroups()", element.name, type)
@@ -68,7 +67,6 @@ function RecipeSelector:appendGroups(element, type, list_products, list_ingredie
   for key, element in pairs(prototype:getRawProducts()) do
     if list_products[element.name] == nil then list_products[element.name] = {} end
     list_products[element.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
-    loop.product = loop.product + 1
     
     local localised_name = Product(element):getLocalisedName()
     if localised_name ~= nil and localised_name ~= "unknow" then
@@ -78,7 +76,6 @@ function RecipeSelector:appendGroups(element, type, list_products, list_ingredie
   for key, element in pairs(prototype:getRawIngredients()) do
     if list_ingredients[element.name] == nil then list_ingredients[element.name] = {} end
     list_ingredients[element.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
-    loop.ingredient = loop.ingredient + 1
   end
 
 end
@@ -94,7 +91,6 @@ end
 --
 function RecipeSelector:updateGroups(list_products, list_ingredients, list_translate)
   Logging:trace(self.classname, "updateGroups()")
-  loop = {product=0,ingredient=0}
 
   for key, recipe in pairs(Player.getRecipes()) do
     self:appendGroups(recipe, "recipe", list_products, list_ingredients, list_translate)
@@ -127,7 +123,7 @@ function RecipeSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
   elseif recipe_prototype:getEnabled() == false then
     color = "red"
   end
-  local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select=ID", type):choose(prototype.type, prototype_name):color(color))
+  local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select", type):choose(prototype.type, prototype_name):color(color))
   button.locked = true
   if prototype.type ~= "recipe" then
     local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({"tooltip.resource-recipe"}))

@@ -176,7 +176,7 @@ function User.setDefaultFactory(recipe)
   local category = recipe_prototype:getCategory()
   local factory = recipe.factory
   if category ~= nil then
-    default_factory[category] = {name = factory.name}
+    default_factory[category] = {name = factory.name, fuel = factory.fuel}
     User.setParameter("default_factory", default_factory)
   end
 end
@@ -638,6 +638,79 @@ end
 function User.resetTranslate()
   local data_user = User.get()
   data_user["translated"] = {}
+end
+
+-------------------------------------------------------------------------------
+-- Return Cache User
+--
+-- @function [parent=#User] getCache
+--
+-- @param #string classname
+-- @param #string name
+--
+-- @return #table
+--
+function User.getCache(classname, name)
+  Logging:trace(User.classname, "getCache(classname, name)",classname, name)
+  local data = User.get("cache")
+  if classname == nil and name == nil then return data end
+  if data[classname] == nil or data[classname][name] == nil then return nil end
+  Logging:trace(User.classname, "--> cache",data[classname][name])
+  return data[classname][name]
+end
+
+-------------------------------------------------------------------------------
+-- Set Cache User
+--
+-- @function [parent=#User] setCache
+--
+-- @param #string classname
+-- @param #string name
+-- @param #object value
+--
+-- @return #object
+--
+function User.setCache(classname, name, value)
+  Logging:trace(User.classname, "setCache(classname, name, value)",classname, name, value)
+  local data = User.get("cache")
+  if data[classname] == nil then data[classname] = {} end
+  data[classname][name] = value
+end
+
+-------------------------------------------------------------------------------
+-- Has User Cache
+--
+-- @function [parent=#User] hasCache
+--
+-- @param #string classname
+-- @param #string name
+--
+-- @return #boolean
+--
+function User.hasCache(classname, name)
+  Logging:trace(User.classname, "hasCache(hasData, name)",classname, name)
+  local data = User.get("cache")
+  return data[classname] ~= nil and data[classname][name] ~= nil
+end
+
+-------------------------------------------------------------------------------
+-- Reset cache
+--
+-- @function [parent=#User] resetCache
+--
+-- @param #string classname
+-- @param #string name
+--
+function User.resetCache(classname, name)
+  Logging:trace(User.classname, "resetCache(classname, name)", classname, name)
+  local data = User.get("cache")
+  if classname == nil and name == nil then
+    data = {}
+  elseif data[classname] ~= nil and name == nil then
+    data[classname] = nil
+  elseif data[classname] ~= nil then
+    data[classname][name] = nil
+  end
 end
 
 return User

@@ -139,11 +139,11 @@ function PrototypeFiltersTab:addRowFilter(itable, prototype_filter, index)
   local PrototypeFilter = PrototypeFilters.getFilterType(prototype_filter_type)
   -- mode
   prototype_filter.mode = prototype_filter.mode or modes[1]
-  GuiElement.add(itable, GuiDropDown(self.classname, "change-filter-mode=ID", index):items(modes, prototype_filter.mode))
+  GuiElement.add(itable, GuiDropDown(self.classname, "change-filter-mode", index):items(modes, prototype_filter.mode))
   -- filter
   local filters = PrototypeFilter:getFilters()
   prototype_filter.filter = prototype_filter.filter or filters[1]
-  GuiElement.add(itable, GuiDropDown(self.classname, "change-prototype-filter=ID", index):items(filters, prototype_filter.filter))
+  GuiElement.add(itable, GuiDropDown(self.classname, "change-prototype-filter", index):items(filters, prototype_filter.filter))
 
   local options = PrototypeFilter:getOptions(prototype_filter.filter)
   Logging:debug(self.classname, "options", options)
@@ -156,8 +156,8 @@ function PrototypeFiltersTab:addRowFilter(itable, prototype_filter, index)
       comparison_value = prototype_filter.option.value
     end
     Logging:debug(self.classname, "option", prototype_filter.option, comparison, comparison_value)
-    GuiElement.add(comparaison_cell, GuiDropDown(self.classname, "change-filter-option-comparison=ID", index):items(comparisons, comparison))
-    GuiElement.add(comparaison_cell, GuiTextField(self.classname, "change-filter-option-value=ID", index):text(comparison_value))
+    GuiElement.add(comparaison_cell, GuiDropDown(self.classname, "change-filter-option-comparison", index):items(comparisons, comparison))
+    GuiElement.add(comparaison_cell, GuiTextField(self.classname, "change-filter-option-value", index):text(comparison_value))
   elseif prototype_filter.filter == "collision-mask" then
     local collision_mask_cell = GuiElement.add(itable, GuiTable("collision-mask"):column(2))
     local mask = collision_mask[1]
@@ -166,21 +166,21 @@ function PrototypeFiltersTab:addRowFilter(itable, prototype_filter, index)
         mask = prototype_filter.option.mask
         mask_mode = prototype_filter.option.mask_mode
     end
-    GuiElement.add(collision_mask_cell, GuiDropDown(self.classname, "change-filter-option-collision-mask=ID", index):items(collision_mask, mask))
-    GuiElement.add(collision_mask_cell, GuiDropDown(self.classname, "change-filter-option-collision-mask-mode=ID", index):items(collision_mask_mode, mask_mode))
+    GuiElement.add(collision_mask_cell, GuiDropDown(self.classname, "change-filter-option-collision-mask", index):items(collision_mask, mask))
+    GuiElement.add(collision_mask_cell, GuiDropDown(self.classname, "change-filter-option-collision-mask-mode", index):items(collision_mask_mode, mask_mode))
   elseif Model.countList(options) > 0 then
     prototype_filter.option = prototype_filter.option or options[1]
-    GuiElement.add(itable, GuiDropDown(self.classname, "change-filter-option=ID", index):items(options, prototype_filter.option))
+    GuiElement.add(itable, GuiDropDown(self.classname, "change-filter-option", index):items(options, prototype_filter.option))
   else
     GuiElement.add(itable, GuiLabel("option-none", index):caption("None"))
   end
 
   prototype_filter.invert = prototype_filter.invert or inverts[1]
-  GuiElement.add(itable, GuiDropDown(self.classname, "change-filter-invert=ID", index):items(inverts, prototype_filter.invert))
+  GuiElement.add(itable, GuiDropDown(self.classname, "change-filter-invert", index):items(inverts, prototype_filter.invert))
   if index == 0 then
-    GuiElement.add(itable, GuiButton(self.classname, "add-prototype-filter=ID", index):caption("+"):style("helmod_button_small_bold"))
+    GuiElement.add(itable, GuiButton(self.classname, "add-prototype-filter", index):caption("+"):style("helmod_button_small_bold"))
   else
-    GuiElement.add(itable, GuiButton(self.classname, "remove-prototype-filter=ID", index):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"))
+    GuiElement.add(itable, GuiButton(self.classname, "remove-prototype-filter", index):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"))
   end
 end
 
@@ -198,7 +198,7 @@ function PrototypeFiltersTab:updateFilter()
   local type_table = GuiElement.add(scrollPanel, GuiTable("type-filter"):column(5))
   local prototype_filter_type = User.getParameter("prototype_filter_type") or filter_types[1]
   GuiElement.add(type_table, GuiLabel("prototype"):caption("Type"))
-  GuiElement.add(type_table, GuiDropDown(self.classname, "change-prototype-filter-type=ID"):items(filter_types, prototype_filter_type))
+  GuiElement.add(type_table, GuiDropDown(self.classname, "change-prototype-filter-type"):items(filter_types, prototype_filter_type))
 
 
   local resultTable = GuiElement.add(scrollPanel, GuiTable("table-filter"):column(5))

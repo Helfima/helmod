@@ -357,7 +357,7 @@ function Form:updateTopMenu(event)
           local icon_hovered, icon = form:getButtonSprites()
           local style = "helmod_button_menu"
           if User.isActiveForm(form.classname) then style = "helmod_button_menu_selected" end
-          GuiElement.add(group1, GuiButton(self.classname, "change-tab=ID", form.classname):sprite("menu", icon_hovered, icon):style(style):tooltip(form:getButtonCaption()))
+          GuiElement.add(group1, GuiButton(self.classname, "change-tab", form.classname):sprite("menu", icon_hovered, icon):style(style):tooltip(form:getButtonCaption()))
         end
       end
       -- current button

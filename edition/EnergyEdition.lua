@@ -317,7 +317,7 @@ function EnergyEdition:updatePowerInfo(event)
       GuiElement.add(table_panel, GuiLabel("label-power"):caption({"helmod_energy-edition-panel.power"}))
       local cell, button
       local power_value = math.ceil(power.power/1000)/1000
-      cell, input_quantity, button = GuiCellInput(self.classname, "power-update=ID", event.item1, power.id):text(power_value or 0):create(table_panel)
+      cell, input_quantity, button = GuiCellInput(self.classname, "power-update", event.item1, power.id):text(power_value or 0):create(table_panel)
       input_quantity.focus()
       input_quantity.select_all()
     end
@@ -363,7 +363,7 @@ function EnergyEdition:updatePrimaryInfo(event)
       local headerPanel = GuiElement.add(infoPanel, GuiTable("table-header"):column(2))
       local tooltip = ({"tooltip.selector-module"})
       if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
-      GuiElement.add(headerPanel, GuiButtonSprite(self.classname, "do-nothing=ID"):sprite(primary.type, primary.name):tooltip(tooltip))
+      GuiElement.add(headerPanel, GuiButtonSprite(self.classname, "do-nothing"):sprite(primary.type, primary.name):tooltip(tooltip))
 
       local entity_prototype = EntityPrototype(primary.name)
       if entity_prototype:native() ~= nil then
@@ -433,7 +433,7 @@ function EnergyEdition:updatePrimarySelector(event)
       -- set le groupe
       if model.primaryGroupSelected == nil then model.primaryGroupSelected = group end
       -- ajoute les icons de groupe
-      local action = GuiElement.add(groupsPanel, GuiButton(self.classname, "primary-group=ID", event.item1, group):caption(group))
+      local action = GuiElement.add(groupsPanel, GuiButton(self.classname, "primary-group", event.item1, group):caption(group))
     end
   end
 
@@ -441,7 +441,7 @@ function EnergyEdition:updatePrimarySelector(event)
   for key, element in pairs(factories) do
     if category ~= nil or (element.subgroup ~= nil and element.subgroup.name == model.primaryGroupSelected) then
       local localised_name = Player.getLocalisedName(element)
-      GuiElement.add(tablePanel, GuiButtonSelectSprite(self.classname, "primary-select=ID", event.item1):sprite("entity", element.name):tooltip(localised_name))
+      GuiElement.add(tablePanel, GuiButtonSelectSprite(self.classname, "primary-select", event.item1):sprite("entity", element.name):tooltip(localised_name))
     end
   end
 end
@@ -486,7 +486,7 @@ function EnergyEdition:updateSecondaryInfo(event)
       local headerPanel = GuiElement.add(infoPanel, GuiTable("table-header"):column(2))
       local tooltip = ({"tooltip.selector-module"})
       if model.module_panel == true then tooltip = ({"tooltip.selector-factory"}) end
-      GuiElement.add(headerPanel, GuiButtonSelectSprite(self.classname, "do-nothing=ID"):sprite(secondary.type, secondary.name):tooltip(tooltip))
+      GuiElement.add(headerPanel, GuiButtonSelectSprite(self.classname, "do-nothing"):sprite(secondary.type, secondary.name):tooltip(tooltip))
 
       local entity_prototype = EntityPrototype(secondary.name)
       if entity_prototype:native() ~= nil then
@@ -562,7 +562,7 @@ function EnergyEdition:updateSecondarySelector(event)
       -- set le groupe
       if model.secondaryGroupSelected == nil then model.secondaryGroupSelected = group end
       -- ajoute les icons de groupe
-      local action = GuiElement.add(groupsPanel, GuiButton(self.classname, "secondary-group=ID", event.item1, group):caption(group))
+      local action = GuiElement.add(groupsPanel, GuiButton(self.classname, "secondary-group", event.item1, group):caption(group))
     end
   end
 
@@ -570,7 +570,7 @@ function EnergyEdition:updateSecondarySelector(event)
   for key, element in pairs(factories) do
     if category ~= nil or (element.subgroup ~= nil and element.subgroup.name == model.secondaryGroupSelected) then
       local localised_name = Player.getLocalisedName(element)
-      GuiElement.add(tablePanel, GuiButtonSelectSprite(self.classname, "secondary-select=ID", event.item1):sprite("entity", element.name):tooltip(localised_name))
+      GuiElement.add(tablePanel, GuiButtonSelectSprite(self.classname, "secondary-select", event.item1):sprite("entity", element.name):tooltip(localised_name))
     end
   end
 end

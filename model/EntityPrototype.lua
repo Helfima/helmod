@@ -481,3 +481,22 @@ function EntityPrototype:getBeltSpeed()
   end
   return 0
 end
+
+-------------------------------------------------------------------------------
+-- Return pollution
+--
+-- @function [parent=#EntityPrototype] getPollution
+--
+-- @return #number default 0
+--
+function EntityPrototype:getPollution()
+  if self.lua_prototype ~= nil then
+    local energy_usage = self:getEnergyUsage()
+    local emission = self:getElectricEmissions()
+    if self:getBurnerEmissions() ~= 0 then
+      emission = self:getBurnerEmissions()
+    end
+    return energy_usage * emission * 60
+  end
+  return 0
+end

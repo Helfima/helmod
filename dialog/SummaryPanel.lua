@@ -100,7 +100,7 @@ function SummaryPanel:updateInfo(event)
       local resultTable = GuiElement.add(infoPanel, GuiTable("table-factory"):column(4))
       resultTable.style.horizontally_stretchable = false
       for _, element in pairs(block.summary.factories) do
-        GuiElement.add(resultTable, GuiCellElementM("HMFactories=OPEN=ID", block.id):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
+        GuiElement.add(resultTable, GuiCellElementM("HMFactories=OPEN", block.id):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
       end
 
       -- beacons
@@ -108,7 +108,7 @@ function SummaryPanel:updateInfo(event)
       local resultTable = GuiElement.add(infoPanel, GuiTable("table-beacon"):column(4))
       resultTable.style.horizontally_stretchable = false
       for _, element in pairs(block.summary.beacons) do
-        GuiElement.add(resultTable, GuiCellElementM("HMBeacons=OPEN=ID", block.id):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
+        GuiElement.add(resultTable, GuiCellElementM("HMBeacons=OPEN", block.id):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
       end
 
       -- modules
@@ -116,7 +116,7 @@ function SummaryPanel:updateInfo(event)
       local resultTable = GuiElement.add(infoPanel, GuiTable("table-modules"):column(4))
       resultTable.style.horizontally_stretchable = false
       for _, element in pairs(block.summary.modules) do
-        GuiElement.add(resultTable, GuiCellElementM("HMModules=OPEN=ID", block.id):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
+        GuiElement.add(resultTable, GuiCellElementM("HMModules=OPEN", block.id):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
       end
     end
   end

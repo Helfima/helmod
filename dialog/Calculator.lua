@@ -184,7 +184,7 @@ function Calculator:updateDisplay()
   keyboard_panel.clear()
 
   local calculator_value = User.getParameter("calculator_value") or 0
-  display_panel = GuiElement.add(keyboard_panel, GuiTextField(self.classname, "compute=ID"):text(calculator_value):style("helmod_textfield_calculator"))
+  display_panel = GuiElement.add(keyboard_panel, GuiTextField(self.classname, "compute"):text(calculator_value):style("helmod_textfield_calculator"))
   --display_panel.style.horizontally_stretchable = true
   display_panel.style.width=155
   display_panel.style.horizontal_align = "right"
@@ -236,7 +236,7 @@ function Calculator:updateKeyboard()
     if button.key == "" then
       GuiElement.add(table_panel, GuiLabel("vide",index))
     else
-      GuiElement.add(table_panel, GuiButton(self.classname, "selected-key=ID",button.key):caption(button.caption):tooltip(button.tooltip):style("helmod_button_calculator"))
+      GuiElement.add(table_panel, GuiButton(self.classname, "selected-key",button.key):caption(button.caption):tooltip(button.tooltip):style("helmod_button_calculator"))
     end
   end
 

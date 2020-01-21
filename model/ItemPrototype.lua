@@ -24,6 +24,18 @@ function ItemPrototype:getFuelValue()
 end
 
 -------------------------------------------------------------------------------
+-- Return fuel emissions multiplier
+--
+-- @function [parent=#ItemPrototype] getFuelEmissionsMultiplier
+--
+-- @return #boolean
+--
+function ItemPrototype:getFuelEmissionsMultiplier()
+  if self.lua_prototype == nil then return 1 end
+  return self.lua_prototype.fuel_emissions_multiplier or 1
+end
+
+-------------------------------------------------------------------------------
 -- Return stack size
 --
 -- @function [parent=#ItemPrototype] stackSize

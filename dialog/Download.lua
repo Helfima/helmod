@@ -119,7 +119,7 @@ function Download:updateDownload(event)
     local download_panel = self:getDownloadPanel()
     download_panel.clear()
     local text_box = GuiElement.add(download_panel, GuiTextBox("data-text"):text(data_string))
-    GuiElement.add(download_panel, GuiButton(self.classname, "download-model=ID", "download"):style("helmod_button_default"):caption({"helmod_common.download"}))
+    GuiElement.add(download_panel, GuiButton(self.classname, "download-model", "download"):style("helmod_button_default"):caption({"helmod_common.download"}))
     GuiElement.add(download_panel, GuiButton(self.classname, "CLOSE"):caption({"helmod_button.close"}))
   end
 end

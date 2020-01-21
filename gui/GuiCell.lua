@@ -380,7 +380,7 @@ function GuiCellEnergy:create(parent)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or "gray"
   local element = self.element or {}
-  local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
+  local cell = GuiElement.add(parent, GuiFlowV(element.name, "energy", self.m_index))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element", color, 1))
   row1.style.top_padding=4
   row1.style.bottom_padding=4
@@ -397,6 +397,49 @@ function GuiCellEnergy:create(parent)
 
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element", color, 3))
   local caption3 = Format.formatNumberKilo(element.energy_total or element.power, "W")
+  GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
+
+  return cell
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiCell] constructor
+-- @param #arg name
+-- @return #GuiCellPollution
+--
+GuiCellPollution = newclass(GuiCell,function(base,...)
+  GuiCell.init(base,...)
+end)
+
+-------------------------------------------------------------------------------
+-- Create cell
+--
+-- @function [parent=#GuiCellPollution] create
+--
+-- @param #LuaGuiElement parent container for element
+--
+function GuiCellPollution:create(parent)
+  local display_cell_mod = User.getModSetting("display_cell_mod")
+  local color = self.m_color or "gray"
+  local element = self.element or {}
+  local cell = GuiElement.add(parent, GuiFlowV(element.name, "pollution", self.m_index))
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element", color, 1))
+  row1.style.top_padding=4
+  row1.style.bottom_padding=4
+
+  local tooltip = GuiTooltipPollution(self.options.tooltip):element(element)
+  local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", "gas-mask-white", "gas-mask"):style("helmod_button_menu_flat"):tooltip(tooltip))
+
+  if element.limit_pollution ~= nil then
+    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element", color, 2))
+    local caption2 = {"", Format.formatNumber(element.limit_pollution or 0),{"per-minute-suffix"}}
+    if display_cell_mod == "by-kilo" then caption2 = {"", Format.formatNumberKilo(element.limit_pollution),{"per-minute-suffix"}} end
+    GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element"):tooltip({"helmod_common.total"}))
+  end
+
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element", color, 3))
+  local caption3 = {"", Format.formatNumber(element.pollution_total),{"per-minute-suffix"}}
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
 
   return cell

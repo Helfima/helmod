@@ -340,7 +340,7 @@ function AbstractTab:updateMenuPanel(event)
       local icon_hovered, icon = form:getButtonSprites()
       local style = "helmod_button_menu"
       if User.isActiveForm(form.classname) then style = "helmod_button_menu_selected" end
-      GuiElement.add(group4, GuiButton(self.classname, "change-tab=ID", form.classname):sprite("menu", icon_hovered, icon):style(style):tooltip(form:getButtonCaption()))
+      GuiElement.add(group4, GuiButton(self.classname, "change-tab", form.classname):sprite("menu", icon_hovered, icon):style(style):tooltip(form:getButtonCaption()))
     end
   end
 
@@ -358,48 +358,48 @@ function AbstractTab:updateMenuPanel(event)
     -- add recipe
     local group1 = GuiElement.add(action_panel, GuiFlowH("group1"))
     local block_id = current_block or "new"
-    GuiElement.add(group1, GuiButton("HMRecipeSelector", "OPEN", "ID", block_id):sprite("menu", "wrench-white", "wrench"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-recipe"}))
-    GuiElement.add(group1, GuiButton("HMTechnologySelector", "OPEN", "ID", block_id):sprite("menu", "graduation-white", "graduation"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-technology"}))
-    --GuiElement.add(group1, GuiButton("HMContainerSelector", "OPEN", "ID", block_id):sprite("menu", "container-white", "container"):style("helmod_button_menu"):tooltip({"helmod_result-panel.select-button-container"}))
-    GuiElement.add(group1, GuiButton("HMPreferenceEdition", "OPEN", "ID", block_id):sprite("menu", "services-white", "services"):style("helmod_button_menu"):tooltip({"helmod_button.preferences"}))
-    --GuiElement.add(group1, GuiButton("HMRecipeExplorer", "OPEN=ID", block_id):sprite("menu", "search-white", "search"):style("helmod_button_menu"):tooltip({"helmod_button.search"}))
+    GuiElement.add(group1, GuiButton("HMRecipeSelector", "OPEN", block_id):sprite("menu", "wrench-white", "wrench"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-recipe"}))
+    GuiElement.add(group1, GuiButton("HMTechnologySelector", "OPEN", block_id):sprite("menu", "graduation-white", "graduation"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-technology"}))
+    --GuiElement.add(group1, GuiButton("HMContainerSelector", "OPEN", block_id):sprite("menu", "container-white", "container"):style("helmod_button_menu"):tooltip({"helmod_result-panel.select-button-container"}))
+    GuiElement.add(group1, GuiButton("HMPreferenceEdition", "OPEN", block_id):sprite("menu", "services-white", "services"):style("helmod_button_menu"):tooltip({"helmod_button.preferences"}))
+    GuiElement.add(group1, GuiButton("HMRecipeExplorer", "OPEN", block_id):sprite("menu", "search-white", "search"):style("helmod_button_menu"):tooltip({"helmod_button.search"}))
 
     local group2 = GuiElement.add(action_panel, GuiFlowH("group2"))
     -- copy past
-    GuiElement.add(group2, GuiButton(self.classname, "copy-model=ID", model.id):sprite("menu", "copy-white", "copy"):style("helmod_button_menu"):tooltip({"helmod_button.copy"}))
-    GuiElement.add(group2, GuiButton(self.classname, "past-model=ID", model.id):sprite("menu", "paste-white", "paste"):style("helmod_button_menu"):tooltip({"helmod_button.past"}))
+    GuiElement.add(group2, GuiButton(self.classname, "copy-model", model.id):sprite("menu", "copy-white", "copy"):style("helmod_button_menu"):tooltip({"helmod_button.copy"}))
+    GuiElement.add(group2, GuiButton(self.classname, "past-model", model.id):sprite("menu", "paste-white", "paste"):style("helmod_button_menu"):tooltip({"helmod_button.past"}))
     -- download
     if self.classname == "HMProductionLineTab" then
-      GuiElement.add(group2, GuiButton("HMDownload=OPEN=ID", "download"):sprite("menu", "download-white", "download"):style("helmod_button_menu"):tooltip({"helmod_result-panel.download-button-production-line"}))
-      GuiElement.add(group2, GuiButton("HMDownload=OPEN=ID", "upload"):sprite("menu", "upload-white", "upload"):style("helmod_button_menu"):tooltip({"helmod_result-panel.upload-button-production-line"}))
+      GuiElement.add(group2, GuiButton("HMDownload", "OPEN", "download"):sprite("menu", "download-white", "download"):style("helmod_button_menu"):tooltip({"helmod_result-panel.download-button-production-line"}))
+      GuiElement.add(group2, GuiButton("HMDownload", "OPEN", "upload"):sprite("menu", "upload-white", "upload"):style("helmod_button_menu"):tooltip({"helmod_result-panel.upload-button-production-line"}))
     end
     -- delete control
     if User.isAdmin() or model.owner == User.name() or (model.share ~= nil and bit32.band(model.share, 4) > 0) then
       if self.classname == "HMProductionLineTab" then
-        GuiElement.add(group2, GuiButton(self.classname, "remove-model=ID", model.id):sprite("menu", "delete-white", "delete"):style("helmod_button_menu_red"):tooltip({"helmod_result-panel.remove-button-production-line"}))
+        GuiElement.add(group2, GuiButton(self.classname, "remove-model", model.id):sprite("menu", "delete-white", "delete"):style("helmod_button_menu_red"):tooltip({"helmod_result-panel.remove-button-production-line"}))
       end
       if self.classname == "HMProductionBlockTab" then
-        GuiElement.add(group2, GuiButton(self.classname, "production-block-remove=ID", block_id):sprite("menu", "delete-white", "delete"):style("helmod_button_menu_red"):tooltip({"helmod_result-panel.remove-button-production-block"}))
+        GuiElement.add(group2, GuiButton(self.classname, "production-block-remove", block_id):sprite("menu", "delete-white", "delete"):style("helmod_button_menu_red"):tooltip({"helmod_result-panel.remove-button-production-block"}))
       end
     end
     -- refresh control
-    GuiElement.add(group2, GuiButton(self.classname, "refresh-model=ID", model.id):sprite("menu", "refresh-white", "refresh"):style("helmod_button_menu"):tooltip({"helmod_result-panel.refresh-button"}))
+    GuiElement.add(group2, GuiButton(self.classname, "refresh-model", model.id):sprite("menu", "refresh-white", "refresh"):style("helmod_button_menu"):tooltip({"helmod_result-panel.refresh-button"}))
 
     local group3 = GuiElement.add(action_panel, GuiFlowH("group3"))
     -- pin control
     if self.classname == "HMProductionBlockTab" then
-      GuiElement.add(group3, GuiButton("HMPinPanel=OPEN=ID", block_id):sprite("menu", "pin-white", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
-      GuiElement.add(group3, GuiButton("HMSummaryPanel=OPEN=ID", block_id):sprite("menu", "brief-white","brief"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
+      GuiElement.add(group3, GuiButton("HMPinPanel", "OPEN", block_id):sprite("menu", "pin-white", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
+      GuiElement.add(group3, GuiButton("HMSummaryPanel", "OPEN", block_id):sprite("menu", "brief-white","brief"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
       local block = model.blocks[block_id]
       if block ~= nil then
         local style = "helmod_button_menu"
         if block.solver == true then style = "helmod_button_menu_selected" end
-        GuiElement.add(group3, GuiButton(self.classname, "production-block-solver=ID", block_id):sprite("menu", "settings-white", "settings"):style(style):tooltip({"helmod_button.matrix-solver"}))
+        GuiElement.add(group3, GuiButton(self.classname, "production-block-solver", block_id):sprite("menu", "settings-white", "settings"):style(style):tooltip({"helmod_button.matrix-solver"}))
       end
     end
     -- pin info
     if self.classname == "HMStatisticTab" then
-      GuiElement.add(group3, GuiButton("HMStatusPanel=OPEN=ID", block_id):sprite("menu", "pin-white", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
+      GuiElement.add(group3, GuiButton("HMStatusPanel", "OPEN", block_id):sprite("menu", "pin-white", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
     end
   end
 
@@ -408,7 +408,7 @@ function AbstractTab:updateMenuPanel(event)
   time_panel.clear()
 
   local group_special = GuiElement.add(time_panel, GuiFlowH("group_special"))
-  GuiElement.add(group_special, GuiButton("HMCalculator=OPEN=ID"):sprite("menu", "calculator-white", "calculator"):style("helmod_button_menu"):tooltip({"helmod_calculator-panel.title"}))
+  GuiElement.add(group_special, GuiButton("HMCalculator", "OPEN"):sprite("menu", "calculator-white", "calculator"):style("helmod_button_menu"):tooltip({"helmod_calculator-panel.title"}))
   
   local items = {}
   local default_time = 1
@@ -422,7 +422,7 @@ function AbstractTab:updateMenuPanel(event)
   local group_time = GuiElement.add(time_panel, GuiFlowH("group_time"))
   GuiElement.add(group_time, GuiLabel("label_time"):caption({"helmod_data-panel.base-time", ""}):style("helmod_label_title_frame"))
   
-  GuiElement.add(group_time, GuiDropDown(self.classname, "change-time=ID", model_id):items(items, default_time))
+  GuiElement.add(group_time, GuiDropDown(self.classname, "change-time", model_id):items(items, default_time))
 
 end
 
@@ -462,21 +462,21 @@ function AbstractTab:updateIndexPanel(event)
         local element = Model.firstRecipe(imodel.blocks)
         if imodel.id == model_id then
           if element ~= nil then
-            GuiElement.add(index_panel, GuiButtonSprite(self.classname, "change-model=ID", imodel.id):sprite("recipe", element.name):tooltip(RecipePrototype(element):getLocalisedName()))
+            GuiElement.add(index_panel, GuiButtonSprite(self.classname, "change-model", imodel.id):sprite("recipe", element.name):tooltip(RecipePrototype(element):getLocalisedName()))
           else
-            GuiElement.add(index_panel, GuiButton(self.classname, "change-model=ID", imodel.id):sprite("menu", "help-white", "help"):style("helmod_button_menu_selected"))
+            GuiElement.add(index_panel, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", "help-white", "help"):style("helmod_button_menu_selected"))
           end
         else
           if element ~= nil then
-            GuiElement.add(index_panel, GuiButtonSelectSprite(self.classname, "change-model=ID", imodel.id):sprite("recipe", element.name):tooltip(RecipePrototype(element):getLocalisedName()))
+            GuiElement.add(index_panel, GuiButtonSelectSprite(self.classname, "change-model", imodel.id):sprite("recipe", element.name):tooltip(RecipePrototype(element):getLocalisedName()))
           else
-            GuiElement.add(index_panel, GuiButton(self.classname, "change-model=ID", imodel.id):sprite("menu", "help-white", "help"):style("helmod_button_menu"))
+            GuiElement.add(index_panel, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", "help-white", "help"):style("helmod_button_menu"))
           end
         end
 
       end
     end
-    GuiElement.add(index_panel, GuiButton(self.classname, "change-model=ID", "new"):caption("+")).style.width=20
+    GuiElement.add(index_panel, GuiButton(self.classname, "change-model", "new"):caption("+")).style.width=20
   else
     local index_panel = self:getIndexPanel()
     index_panel.clear()

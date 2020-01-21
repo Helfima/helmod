@@ -162,6 +162,8 @@ function AdminTab:updateCache()
   -- Rule List
   local caches_panel = self:getCacheTab()
   local users_data = global["users"]
+  local caches_data = Cache.get()
+
   if Model.countList(users_data) > 0 then
 
     local translate_panel = GuiElement.add(caches_panel, GuiFlowV("translate"))
@@ -170,11 +172,12 @@ function AdminTab:updateCache()
     self:addTranslateListHeader(result_table)
     for user_name, user_data in spairs(users_data, function(t,a,b) return b > a end) do
       self:addTranslateListRow(result_table, user_name, user_data)
+      caches_data[user_name] = user_data.cache
     end
 
   end
 
-  local caches_data = Cache.get()
+
   if Model.countList(caches_data) > 0 then
     local cache_panel = GuiElement.add(caches_panel, GuiFlowV("caches"))
     GuiElement.add(cache_panel, GuiLabel("translate-label"):caption("Cache Data"):style("helmod_label_title_frame"))
@@ -182,7 +185,13 @@ function AdminTab:updateCache()
     self:addCacheListHeader(result_table)
     for key1, data1 in pairs(caches_data) do
       for key2, data2 in pairs(data1) do
-        self:addCacheListRow(result_table, string.format("%s->%s", key1, key2), data2)
+        if string.find(key2, "^HM.*") then
+          for key3, data3 in pairs(data2) do
+            self:addCacheListRow(result_table, string.format("%s->%s->%s", key1, key2, key3), data3)
+          end
+        else
+          self:addCacheListRow(result_table, string.format("All->%s->%s", key1, key2), data2)
+        end
       end
     end
   end
@@ -350,7 +359,7 @@ function AdminTab:addRuleListRow(gui_table, rule, rule_id)
 
   -- col action
   local cell_action = GuiElement.add(gui_table, GuiTable("action", rule_id):column(4))
-  GuiElement.add(cell_action, GuiButton(self.classname, "rule-remove=ID", rule_id):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
+  GuiElement.add(cell_action, GuiButton(self.classname, "rule-remove", rule_id):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
 
   -- col index
   GuiElement.add(gui_table, GuiLabel("index", rule_id):caption(rule.index))
@@ -406,19 +415,19 @@ function AdminTab:addSheetListRow(gui_table, model)
   -- col action
   local cell_action = GuiElement.add(gui_table, GuiTable("action", model.id):column(4))
   if model.share ~= nil and bit32.band(model.share, 1) > 0 then
-    GuiElement.add(cell_action, GuiButton(self.classname, "share-model=ID=read", model.id):style("helmod_button_selected"):caption("R"):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
+    GuiElement.add(cell_action, GuiButton(self.classname, "share-model", "read", model.id):style("helmod_button_selected"):caption("R"):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
   else
-    GuiElement.add(cell_action, GuiButton(self.classname, "share-model=ID=read", model.id):style("helmod_button_default"):caption("R"):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
+    GuiElement.add(cell_action, GuiButton(self.classname, "share-model", "read", model.id):style("helmod_button_default"):caption("R"):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
   end
   if model.share ~= nil and bit32.band(model.share, 2) > 0 then
-    GuiElement.add(cell_action, GuiButton(self.classname, "share-model=ID=write", model.id):style("helmod_button_selected"):caption("W"):tooltip({"tooltip.share-mod", {"helmod_common.writing"}}))
+    GuiElement.add(cell_action, GuiButton(self.classname, "share-model", "write", model.id):style("helmod_button_selected"):caption("W"):tooltip({"tooltip.share-mod", {"helmod_common.writing"}}))
   else
-    GuiElement.add(cell_action, GuiButton(self.classname, "share-model=ID=write", model.id):style("helmod_button_default"):caption("W"):tooltip({"tooltip.share-mod", {"helmod_common.writing"}}))
+    GuiElement.add(cell_action, GuiButton(self.classname, "share-model", "write", model.id):style("helmod_button_default"):caption("W"):tooltip({"tooltip.share-mod", {"helmod_common.writing"}}))
   end
   if model.share ~= nil and bit32.band(model.share, 4) > 0 then
-    GuiElement.add(cell_action, GuiButton(self.classname, "share-model=ID=delete", model.id):style("helmod_button_selected"):caption("X"):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
+    GuiElement.add(cell_action, GuiButton(self.classname, "share-model", "delete", model.id):style("helmod_button_selected"):caption("X"):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
   else
-    GuiElement.add(cell_action, GuiButton(self.classname, "share-model=ID=delete", model.id):style("helmod_button_default"):caption("X"):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
+    GuiElement.add(cell_action, GuiButton(self.classname, "share-model", "delete", model.id):style("helmod_button_default"):caption("X"):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
   end
 
   -- col owner
@@ -429,9 +438,9 @@ function AdminTab:addSheetListRow(gui_table, model)
   local cell_element = GuiElement.add(gui_table, GuiFrameH("element", model.id):style(helmod_frame_style.hidden))
   local element = Model.firstRecipe(model.blocks)
   if element ~= nil then
-    GuiElement.add(cell_element, GuiButtonSprite(self.classname, "donothing=ID", model.id):sprite("recipe", element.name):tooltip(RecipePrototype(element):getLocalisedName()))
+    GuiElement.add(cell_element, GuiButtonSprite(self.classname, "donothing", model.id):sprite("recipe", element.name):tooltip(RecipePrototype(element):getLocalisedName()))
   else
-    GuiElement.add(cell_element, GuiButton(self.classname, "donothing=ID", model.id):sprite("menu", "help-white", "help"):style("helmod_button_menu_selected"))
+    GuiElement.add(cell_element, GuiButton(self.classname, "donothing", model.id):sprite("menu", "help-white", "help"):style("helmod_button_menu_selected"))
   end
 
 end

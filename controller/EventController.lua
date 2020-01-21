@@ -130,7 +130,7 @@ end
 --
 function EventController.onResearchFinished(event)
   Logging:trace(EventController.classname, "onResearchFinished(event)", event)
-  Cache.reset()
+  --Cache.reset()
   --Player.print("Caches are reseted!")
 end
 
@@ -196,6 +196,10 @@ function EventController.onConfigurationChanged(data)
     end
   else
     Cache.reset()
+    for _,player in pairs(game.players) do
+      Player.set(player)
+      User.resetCache()
+    end
   end
   for _,player in pairs(game.players) do
     Player.set(player)

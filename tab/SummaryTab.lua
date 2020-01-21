@@ -57,7 +57,7 @@ function SummaryTab:updateData(event)
     -- ingredient
     local guiIngredient = GuiElement.add(resourcesTable, GuiFrameH("ingredient", resource.name):style(helmod_frame_style.hidden))
     GuiElement.add(guiIngredient, GuiLabel("count"):caption(Format.formatNumberElement(resource.count)):style("helmod_label_right_60"))
-    GuiElement.add(guiIngredient, GuiButtonSprite("HMIngredient=OPEN=ID"):sprite(Player.getItemIconType(resource), resource.name):tooltip(Player.getLocalisedName(resource)))
+    GuiElement.add(guiIngredient, GuiButtonSprite("HMIngredient", "OPEN"):sprite(Player.getItemIconType(resource), resource.name):tooltip(Player.getLocalisedName(resource)))
 
     -- col block
     local guiBlock = GuiElement.add(resourcesTable, GuiFrameH("block", resource.name):style(helmod_frame_style.hidden))
@@ -68,7 +68,7 @@ function SummaryTab:updateData(event)
     local guiWagon = GuiElement.add(resourcesTable, GuiFrameH("wagon", resource.name):style(helmod_frame_style.hidden))
     if wagon ~= nil then
       GuiElement.add(guiWagon, GuiLabel("count"):caption(Format.formatNumberElement(wagon.limit_count).."/"..Format.formatNumberElement(wagon.count)):style("helmod_label_right_70"))
-      GuiElement.add(guiWagon, GuiButtonSprite("HMWagon=OPEN=ID"):sprite(wagon.type, wagon.name):style(Player.getLocalisedName(wagon)))
+      GuiElement.add(guiWagon, GuiButtonSprite("HMWagon", "OPEN"):sprite(wagon.type, wagon.name):style(Player.getLocalisedName(wagon)))
     end
 
     -- col storage
@@ -76,7 +76,7 @@ function SummaryTab:updateData(event)
     local guiStorage = GuiElement.add(resourcesTable, GuiFrameH("storage", resource.name):style(helmod_frame_style.hidden))
     if storage ~= nil then
       GuiElement.add(guiStorage, GuiLabel("count"):caption(Format.formatNumberElement(storage.limit_count).."/"..Format.formatNumberElement(storage.count)):style("helmod_label_right_70"))
-      GuiElement.add(guiStorage, GuiButtonSprite("HMStorage=OPEN=ID"):sprite(storage.type, storage.name):tooltip(Player.getLocalisedName(storage)))
+      GuiElement.add(guiStorage, GuiButtonSprite("HMStorage", "OPEN"):sprite(storage.type, storage.name):tooltip(Player.getLocalisedName(storage)))
     end
   end
   -- generators
@@ -90,7 +90,7 @@ function SummaryTab:updateData(event)
     for _, item in pairs(model.generators) do
       local guiCell = GuiElement.add(resultTable, GuiFrameH("cell", item.name):style(helmod_frame_style.hidden))
       GuiElement.add(guiCell, GuiLabel(item.name):caption(Format.formatNumberKilo(item.count)):style("helmod_label_right_50"))
-      GuiElement.add(guiCell, GuiButtonSprite("HMGenerator=OPEN=ID"):sprite("item", item.name):tooltip(Player.getLocalisedName(item)))
+      GuiElement.add(guiCell, GuiButtonSprite("HMGenerator", "OPEN"):sprite("item", item.name):tooltip(Player.getLocalisedName(item)))
     end
   end
 
@@ -105,7 +105,7 @@ function SummaryTab:updateData(event)
     for _, element in pairs(model.summary.factories) do
       local guiCell = GuiElement.add(resultTable, GuiFrameH("cell", element.name):style(helmod_frame_style.hidden))
       GuiElement.add(guiCell, GuiLabel(element.name):caption(Format.formatNumberKilo(element.count)):style("helmod_label_right_50"))
-      GuiElement.add(guiCell, GuiButtonSprite("HMFactories=OPEN=ID"):sprite("item", element.name):tooltip(Player.getLocalisedName(element)))
+      GuiElement.add(guiCell, GuiButtonSprite("HMFactories", "OPEN"):sprite("item", element.name):tooltip(Player.getLocalisedName(element)))
     end
 
     -- beacons
@@ -118,7 +118,7 @@ function SummaryTab:updateData(event)
     for _, element in pairs(model.summary.beacons) do
       local guiCell = GuiElement.add(resultTable, GuiFrameH("cell", element.name):style(helmod_frame_style.hidden))
       GuiElement.add(guiCell, GuiLabel(element.name):caption(Format.formatNumberKilo(element.count)):style("helmod_label_right_50"))
-      GuiElement.add(guiCell, GuiButtonSprite("HMBeacons=OPEN=ID"):sprite("item", element.name):tooltip(Player.getLocalisedName(element)))
+      GuiElement.add(guiCell, GuiButtonSprite("HMBeacons", "OPEN"):sprite("item", element.name):tooltip(Player.getLocalisedName(element)))
     end
 
     -- modules
@@ -132,7 +132,7 @@ function SummaryTab:updateData(event)
       -- col icon
       local guiCell = GuiElement.add(resultTable, GuiFrameH("cell", element.name):style(helmod_frame_style.hidden))
       GuiElement.add(guiCell, GuiLabel(element.name):caption(Format.formatNumberKilo(element.count)):style("helmod_label_right_50"))
-      GuiElement.add(guiCell, GuiButtonSprite("HMModules=OPEN=ID"):sprite("item", element.name):tooltip(Player.getLocalisedName(element)))
+      GuiElement.add(guiCell, GuiButtonSprite("HMModules", "OPEN"):sprite("item", element.name):tooltip(Player.getLocalisedName(element)))
     end
   end
 end

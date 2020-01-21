@@ -99,6 +99,7 @@ local list = {
   {name="filter", sm=true},
   {name="filter-edit"},
   {name="graduation", sm=true},
+  {name="gas-mask", sm=true},
   {name="hangar"},
   {name="help"},
   {name="info"},

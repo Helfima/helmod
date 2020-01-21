@@ -67,7 +67,7 @@ end
 --
 function TechnologySelector:buildPrototypeIcon(guiElement, prototype, tooltip)
   Logging:trace(self.classname, "buildPrototypeIcon(guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
-  local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select=ID", "technology"):choose(prototype.type, prototype.name))
+  local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select", "technology"):choose(prototype.type, prototype.name))
   button.locked = true
 end
 

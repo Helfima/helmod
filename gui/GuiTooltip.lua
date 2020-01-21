@@ -204,6 +204,31 @@ end
 --
 -- @function [parent=#GuiTooltip] constructor
 -- @param #arg name
+-- @return #GuiTooltipPollution
+--
+GuiTooltipPollution = newclass(GuiTooltip,function(base,...)
+  GuiTooltip.init(base,...)
+  base.classname = "HMGuiTooltip"
+end)
+
+-------------------------------------------------------------------------------
+-- Create tooltip
+--
+-- @function [parent=#GuiTooltipPollution] create
+--
+function GuiTooltipPollution:create()
+  local tooltip = self._super.create(self)
+  if self.m_element then
+    local pollution = Format.formatNumber(self.m_element.pollution_total)
+    table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", "[color=255,230,192]", {"description.pollution"}, ": ", "[/color]", "[font=default-bold]", pollution, {"per-minute-suffix"}, "[/font]"})
+  end
+  return tooltip
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiTooltip] constructor
+-- @param #arg name
 -- @return #GuiTooltipBlock
 --
 GuiTooltipBlock = newclass(GuiTooltip,function(base,...)

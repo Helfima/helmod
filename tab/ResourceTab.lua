@@ -77,7 +77,7 @@ function ResourceTab:addTableRow(guiTable, ingredient)
 
   -- col ingredient
   local guiIngredient = GuiElement.add(guiTable, GuiFrameH("ingredient", ingredient.name):style(helmod_frame_style.hidden))
-  GuiElement.add(guiIngredient, GuiButtonSprite("HMIngredient=OPEN=ID"):sprite(ingredient.type, ingredient.name):tooltip(Player.getLocalisedName(ingredient)))
+  GuiElement.add(guiIngredient, GuiButtonSprite("HMIngredient", "OPEN"):sprite(ingredient.type, ingredient.name):tooltip(Player.getLocalisedName(ingredient)))
 
   -- col type
   local guiType = GuiElement.add(guiTable, GuiFrameH("type", ingredient.name):style(helmod_frame_style.hidden))

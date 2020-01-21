@@ -151,7 +151,7 @@ function ProductEdition:updateInfo(event)
 
     GuiElement.add(table_panel, GuiLabel("quantity-label"):caption({"helmod_common.quantity"}))
     local cell, button
-    cell, input_quantity, button = GuiCellInput(self.classname, "product-update=ID", event.item1, product.name):text(product_count or 0):create(table_panel)
+    cell, input_quantity, button = GuiCellInput(self.classname, "product-update", event.item1, product.name):text(product_count or 0):create(table_panel)
     input_quantity.focus()
     input_quantity.select_all()
   end
@@ -170,7 +170,7 @@ function ProductEdition:updateAction(event)
   if product ~= nil then
     action_panel.clear()
     local action_panel = GuiElement.add(action_panel, GuiTable("table_action"):column(3))
-    GuiElement.add(action_panel, GuiButton(self.classname, "product-reset=ID", event.item1, product.name):caption({"helmod_button.reset"}))
+    GuiElement.add(action_panel, GuiButton(self.classname, "product-reset", event.item1, product.name):caption({"helmod_button.reset"}))
   end
 end
 
@@ -187,7 +187,7 @@ function ProductEdition:updateTool(event)
   tool_panel.clear()
   local table_panel = GuiElement.add(tool_panel, GuiTable("table-belt"):column(5))
   for key, prototype in pairs(Player.getEntityPrototypes({{filter="type", mode="or", invert=false, type="transport-belt"}})) do
-    GuiElement.add(table_panel, GuiButtonSelectSprite(self.classname, "element-select=ID"):sprite("entity", prototype.name):tooltip(EntityPrototype(prototype):getLocalisedName()))
+    GuiElement.add(table_panel, GuiButtonSelectSprite(self.classname, "element-select"):sprite("entity", prototype.name):tooltip(EntityPrototype(prototype):getLocalisedName()))
   end
 end
 -------------------------------------------------------------------------------

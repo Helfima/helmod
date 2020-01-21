@@ -34,6 +34,21 @@ end
 
 
 -------------------------------------------------------------------------------
+-- Update information
+--
+-- @function [parent=#RecipeExplorer] updateHeader
+--
+-- @param #LuaEvent event
+--
+function RecipeExplorer:updateHeader(event)
+  Logging:debug(self.classname, "updateHeader()", event)
+  local left_menu_panel = self:getLeftMenuPanel()
+  left_menu_panel.clear()
+  local group1 = GuiElement.add(left_menu_panel, GuiFlowH("group1"))
+  GuiElement.add(group1, GuiButton("HMRecipeSelector", "OPEN"):sprite("menu", "arrow-left-white", "arrow-left"):style("helmod_button_menu"):tooltip({"helmod_button.decrease"}))
+end
+
+-------------------------------------------------------------------------------
 -- Get or create column panel
 --
 -- @function [parent=#RecipeExplorer] getColumnPanel
@@ -115,11 +130,12 @@ end
 -------------------------------------------------------------------------------
 -- On update
 --
--- @function [parent=#RecipeExplorer] RecipeExplorer
+-- @function [parent=#RecipeExplorer] onUpdate
 --
 -- @param #LuaEvent event
 --
 function RecipeExplorer:onUpdate(event)
+  self:updateHeader(event)
   self:updateDisplay()
 end
 

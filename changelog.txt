@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.9.24
+Date: 21. 01. 2020
+  Features:
+    - Added pollution information
+  Changes:
+    - Changed uri of button element
+  Bugfixes:
+    - Fixed fuel for factory default
+---------------------------------------------------------------------------------------------------
 Version: 0.9.23
 Date: 18. 01. 2020
   Changes:

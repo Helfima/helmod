@@ -80,7 +80,7 @@ function ModelBuilder.addRecipeIntoProductionBlock(key, type, index)
 
     local default_factory = User.getDefaultFactory(ModelRecipe)
     if default_factory ~= nil then
-      Model.setFactory(current_block, ModelRecipe.id, default_factory.name)
+      Model.setFactory(current_block, ModelRecipe.id, default_factory.name, default_factory.fuel)
     else
       local default_factory_name = Model.getDefaultPrototypeFactory(recipe_prototype)
       if default_factory_name ~= nil then
