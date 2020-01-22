@@ -348,11 +348,11 @@ function AbstractTab:updateMenuPanel(event)
     GuiElement.add(action_panel, GuiButton("HMRuleEdition", "OPEN"):caption({"helmod_result-panel.add-button-rule"}))
     GuiElement.add(action_panel, GuiButton(self.classname, "reset-rules"):caption({"helmod_result-panel.reset-button-rule"}))
   elseif self.classname == "HMPropertiesTab" then
-    GuiElement.add(action_panel, GuiButton("HMEntitySelector", "OPEN"):caption({"helmod_result-panel.select-button-entity"}))
-    GuiElement.add(action_panel, GuiButton("HMItemSelector", "OPEN"):caption({"helmod_result-panel.select-button-item"}))
-    GuiElement.add(action_panel, GuiButton("HMFluidSelector", "OPEN"):caption({"helmod_result-panel.select-button-fluid"}))
+    GuiElement.add(action_panel, GuiButton("HMEntitySelector", "OPEN", "HMPropertiesTab"):caption({"helmod_result-panel.select-button-entity"}))
+    GuiElement.add(action_panel, GuiButton("HMItemSelector", "OPEN", "HMPropertiesTab"):caption({"helmod_result-panel.select-button-item"}))
+    GuiElement.add(action_panel, GuiButton("HMFluidSelector", "OPEN", "HMPropertiesTab"):caption({"helmod_result-panel.select-button-fluid"}))
     GuiElement.add(action_panel, GuiButton("HMRecipeSelector", "OPEN", "HMPropertiesTab"):caption({"helmod_result-panel.select-button-recipe"}))
-    GuiElement.add(action_panel, GuiButton("HMTechnologySelector", "OPEN"):caption({"helmod_result-panel.select-button-technology"}))
+    GuiElement.add(action_panel, GuiButton("HMTechnologySelector", "OPEN", "HMPropertiesTab"):caption({"helmod_result-panel.select-button-technology"}))
   elseif self.classname == "HMPrototypeFiltersTab" then
   else
     -- add recipe
