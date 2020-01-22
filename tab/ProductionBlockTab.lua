@@ -545,8 +545,8 @@ function ProductionBlockTab:addTableHeader(itable)
   self:addCellHeader(itable, "type", {"helmod_result-panel.col-header-type"},"type")
   -- data columns
   self:addCellHeader(itable, "recipe", {"helmod_result-panel.col-header-recipe"},"index")
-  self:addCellHeader(itable, "energy", {"helmod_result-panel.col-header-energy"},"energy_total")
-  self:addCellHeader(itable, "pollution", {"description.pollution"})
+  self:addCellHeader(itable, "energy", {"helmod_common.energy-consumption"},"energy_total")
+  self:addCellHeader(itable, "pollution", {"helmod_common.pollution"})
   self:addCellHeader(itable, "factory", {"helmod_result-panel.col-header-factory"})
   self:addCellHeader(itable, "beacon", {"helmod_result-panel.col-header-beacon"})
   for _,order in pairs(Model.getBlockOrder()) do

@@ -1,13 +1,13 @@
 helmod_base_times = {
-  { value = 1, caption = "1s", tooltip="1s"},
-  { value = 60, caption = "1", tooltip="1mn"},
-  { value = 300, caption = "5", tooltip="5mn"},
-  { value = 600, caption = "10", tooltip="10mn"},
-  { value = 1800, caption = "30", tooltip="30mn"},
-  { value = 3600, caption = "1h", tooltip="1h"},
-  { value = 3600*6, caption = "6h", tooltip="6h"},
-  { value = 3600*12, caption = "12h", tooltip="12h"},
-  { value = 3600*24, caption = "24h", tooltip="24h"}
+  { value = 1, caption = "1s", tooltip={"helmod_si.seconde",1}},
+  { value = 60, caption = "1", tooltip={"helmod_si.minute",1}},
+  { value = 300, caption = "5", tooltip={"helmod_si.minute",5}},
+  { value = 600, caption = "10", tooltip={"helmod_si.minute",10}},
+  { value = 1800, caption = "30", tooltip={"helmod_si.minute",30}},
+  { value = 3600, caption = "1h", tooltip={"helmod_si.hour",1}},
+  { value = 3600*6, caption = "6h", tooltip={"helmod_si.hour",6}},
+  { value = 3600*12, caption = "12h", tooltip={"helmod_si.hour",12}},
+  { value = 3600*24, caption = "24h", tooltip={"helmod_si.hour",24}}
 }
 
 helmod_logistic_flow_default = 3000

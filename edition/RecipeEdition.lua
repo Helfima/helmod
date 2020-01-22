@@ -676,7 +676,7 @@ function RecipeEdition:updateFactoryInfo(event)
 
     GuiElement.add(input_panel, GuiLabel("label-pollution"):caption({"description.pollution"}))
     --GuiElement.add(input_panel, GuiLabel("pollution"):caption(factory_prototype:getPollution()))
-    GuiElement.add(input_panel, GuiLabel("pollution"):caption({"", Format.formatNumber(factory.pollution),{"per-minute-suffix"}}))
+    GuiElement.add(input_panel, GuiLabel("pollution"):caption({"helmod_si.per-minute", Format.formatNumberElement((factory.pollution or 0)*60)}))
     
     GuiElement.add(input_panel, GuiLabel("label-limit"):caption({"helmod_label.limit"}):tooltip({"tooltip.factory-limit"}))
     GuiElement.add(input_panel, GuiTextField(self.classname, "factory-update", block_id, recipe_id):text(factory.limit):tooltip({"tooltip.factory-limit"}))

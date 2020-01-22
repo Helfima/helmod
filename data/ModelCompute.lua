@@ -920,7 +920,7 @@ function ModelCompute.computeFactory(recipe)
   else
     recipe.factory.energy_total = math.ceil(recipe.factory.count*recipe.factory.energy)
   end
-  recipe.factory.pollution_total = recipe.factory.pollution*recipe.factory.count
+  recipe.factory.pollution_total = recipe.factory.pollution * recipe.factory.count * model.time
   
   recipe.beacon.energy_total = math.ceil(recipe.beacon.count*recipe.beacon.energy)
   recipe.energy_total = recipe.factory.energy_total + recipe.beacon.energy_total

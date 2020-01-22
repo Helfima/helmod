@@ -433,13 +433,13 @@ function GuiCellPollution:create(parent)
 
   if element.limit_pollution ~= nil then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element", color, 2))
-    local caption2 = {"", Format.formatNumber(element.limit_pollution or 0),{"per-minute-suffix"}}
-    if display_cell_mod == "by-kilo" then caption2 = {"", Format.formatNumberKilo(element.limit_pollution),{"per-minute-suffix"}} end
+    local caption2 = Format.formatNumber(element.limit_pollution or 0)
+    if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_pollution) end
     GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element"):tooltip({"helmod_common.total"}))
   end
 
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element", color, 3))
-  local caption3 = {"", Format.formatNumber(element.pollution_total),{"per-minute-suffix"}}
+  local caption3 = Format.formatNumber(element.pollution_total)
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
 
   return cell

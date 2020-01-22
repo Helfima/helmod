@@ -209,8 +209,8 @@ function ProductionLineTab:addTableHeader(itable)
   self:addCellHeader(itable, "name", {"helmod_result-panel.col-header-name"},"name")
   -- data columns
   self:addCellHeader(itable, "recipe", {"helmod_result-panel.col-header-production-block"},"index")
-  self:addCellHeader(itable, "energy", {"helmod_result-panel.col-header-energy"},"power")
-  self:addCellHeader(itable, "pollution", {"description.pollution"})
+  self:addCellHeader(itable, "energy", {"helmod_common.energy-consumption"},"power")
+  self:addCellHeader(itable, "pollution", {"helmod_common.pollution"})
   self:addCellHeader(itable, "products", {"helmod_result-panel.col-header-output"})
   self:addCellHeader(itable, "ingredients", {"helmod_result-panel.col-header-input"})
 end
