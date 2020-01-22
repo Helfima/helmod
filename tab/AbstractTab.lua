@@ -351,7 +351,7 @@ function AbstractTab:updateMenuPanel(event)
     GuiElement.add(action_panel, GuiButton("HMEntitySelector", "OPEN"):caption({"helmod_result-panel.select-button-entity"}))
     GuiElement.add(action_panel, GuiButton("HMItemSelector", "OPEN"):caption({"helmod_result-panel.select-button-item"}))
     GuiElement.add(action_panel, GuiButton("HMFluidSelector", "OPEN"):caption({"helmod_result-panel.select-button-fluid"}))
-    GuiElement.add(action_panel, GuiButton("HMRecipeSelector", "OPEN"):caption({"helmod_result-panel.select-button-recipe"}))
+    GuiElement.add(action_panel, GuiButton("HMRecipeSelector", "OPEN", "HMPropertiesTab"):caption({"helmod_result-panel.select-button-recipe"}))
     GuiElement.add(action_panel, GuiButton("HMTechnologySelector", "OPEN"):caption({"helmod_result-panel.select-button-technology"}))
   elseif self.classname == "HMPrototypeFiltersTab" then
   else

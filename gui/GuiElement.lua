@@ -230,6 +230,13 @@ function GuiElement.getStyleSizes()
     local height_main = math.ceil(height*display_ratio_vertictal)
 
     style_sizes["Tab"] = {width = width_main,height = height_main}
+    style_sizes["HMRecipeExplorer"] = {
+      minimal_width = 300,
+      maximal_width = width_main,
+      minimal_height = 200,
+      maximal_height = height_main
+     }
+    
     style_sizes["HMPinPanel"] = {
       minimal_width = 50,
       maximal_width = 450,

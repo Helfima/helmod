@@ -3,7 +3,9 @@ Version: 0.9.24
 Date: 21. 01. 2020
   Features:
     - Added pollution information
+    - Added recipe explorer
   Changes:
+    - Changed all selector variable to global
     - Changed uri of button element
   Bugfixes:
     - Fixed fuel for factory default

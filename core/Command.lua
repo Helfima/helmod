@@ -43,6 +43,10 @@ function Command.parse(event)
     elseif string.lower(event.parameters) == "resetuserui" then
       User.reset()
       Player.print("User UI are reseted!")
+    elseif string.lower(event.parameters) == "resetuserexplorer" then
+      User.setParameter("explore_recipe", nil)
+      User.setParameter("explore_recipe_id", nil)
+      Player.print("User Explorer are reseted!")
     elseif string.lower(event.parameters) == "resetuserallui" then
       User.resetAll()
       Player.print("All User UIs are reseted!")

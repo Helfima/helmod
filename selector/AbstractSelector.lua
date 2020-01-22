@@ -121,6 +121,7 @@ function AbstractSelector:onInit()
   self.sprite_type = "item-group"
   self:afterInit()
   self.parameterLast = string.format("%s_%s",self.classname,"last")
+  self.parameterTarget = string.format("%s_%s",self.classname,"target")
 end
 
 -------------------------------------------------------------------------------
@@ -205,7 +206,11 @@ end
 function AbstractSelector:onBeforeOpen(event)
   Logging:debug(self.classname, "onBeforeEvent()", event)
   local close = event.action == "OPEN"
-
+  
+  if event.action == "OPEN" then
+    User.setParameter(self.parameterTarget, event.item1)
+  end
+  
   if event.item3 ~= nil and event.item3 ~= "" then
     Logging:debug(self.classname, "event.item3", event.item3)
     if User.isFilterTranslate()  then
@@ -249,13 +254,18 @@ function AbstractSelector:onEvent(event)
 
   local model = Model.getModel()
   if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
-    if User.isActiveForm("HMPropertiesTab") then
+    if User.getParameter(self.parameterTarget) == "HMPropertiesTab" then
       if event.action == "element-select" then
         local prototype_compare = User.getParameter("prototype_compare") or {}
         table.insert(prototype_compare, {type = event.item1, name = event.item2 })
         User.setParameter("prototype_compare", prototype_compare)
         self:close()
         Controller:send("on_gui_refresh", event)
+      end
+    elseif User.getParameter(self.parameterTarget) == "HMRecipeExplorer" then
+      if event.action == "element-select" then
+        Controller:send("on_gui_event", event, "HMRecipeExplorer")
+        self:close()
       end
     else
       -- classic selector

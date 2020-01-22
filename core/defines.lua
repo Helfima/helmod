@@ -139,6 +139,7 @@ helmod_settings_mod = {
       "HMPrototype",
       "HMPrototypeFiltersTab",
       "HMRecipeEdition",
+      "HMRecipeExplorer",
       "HMRecipeSelector",
       "HMRecipePrototype",
       "HMRemote",
