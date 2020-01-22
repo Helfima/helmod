@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.9.24
-Date: 21. 01. 2020
+Date: 22. 01. 2020
   Features:
     - Added pollution information
     - Added recipe explorer
