@@ -82,7 +82,6 @@ function ModelCompute.update(check_unlink)
 
   local model = Model.getModel()
 
-  -- reset all factories
   if model ~= nil and (model.version == nil or model.version ~= Model.version) then
     Logging:debug(Model.classname , "********** version",Model.version)
     ModelCompute.updateVersion_0_9_3()

@@ -190,7 +190,7 @@ helmod_settings_mod = {
     setting_type = "runtime-per-user",
     localised_name = {"helmod_settings.default-factory-level"},
     localised_description = {"helmod_settings.default-factory-level-desc"},
-    default_value = "last",
+    default_value = "1",
     allowed_values = {"1","2","3","4","5","6","last"},
     order = "a2"
   },

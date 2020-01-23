@@ -7,7 +7,7 @@
 local Model = {
   -- single-line comment
   classname = "HMModel",
-  version = "0.9.12",
+  version = "0.9.26",
   -- 15°c
   initial_temp = 15,
   -- 200J/unit/°c
@@ -809,7 +809,7 @@ function Model.getDefaultPrototypeFactory(recipe_prototype)
   local category = recipe_prototype:getCategory()
   if category ~= nil then
     local factories = Player.getProductionsCrafting(category, recipe_prototype:native())
-    local default_factory_level = User.getModGlobalSetting("default_factory_level")
+    local default_factory_level = User.getModSetting("default_factory_level")
     local factory_level = 1
     if default_factory_level == "fast" then
       factory_level = 100

@@ -674,7 +674,7 @@ function RecipeEdition:updateFactoryInfo(event)
     end
     GuiElement.add(input_panel, GuiLabel("productivity"):caption(sign..Format.formatPercent(factory.effects.productivity).."%"):tooltip(productivity_tooltip))
 
-    GuiElement.add(input_panel, GuiLabel("label-pollution"):caption({"description.pollution"}))
+    GuiElement.add(input_panel, GuiLabel("label-pollution"):caption({"helmod_common.pollution"}))
     --GuiElement.add(input_panel, GuiLabel("pollution"):caption(factory_prototype:getPollution()))
     GuiElement.add(input_panel, GuiLabel("pollution"):caption({"helmod_si.per-minute", Format.formatNumberElement((factory.pollution or 0)*60)}))
     
