@@ -361,9 +361,11 @@ function AbstractTab:updateMenuPanel(event)
     GuiElement.add(group1, GuiButton("HMRecipeSelector", "OPEN", block_id):sprite("menu", "wrench-white", "wrench"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-recipe"}))
     GuiElement.add(group1, GuiButton("HMTechnologySelector", "OPEN", block_id):sprite("menu", "graduation-white", "graduation"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-technology"}))
     --GuiElement.add(group1, GuiButton("HMContainerSelector", "OPEN", block_id):sprite("menu", "container-white", "container"):style("helmod_button_menu"):tooltip({"helmod_result-panel.select-button-container"}))
-    GuiElement.add(group1, GuiButton("HMPreferenceEdition", "OPEN", block_id):sprite("menu", "services-white", "services"):style("helmod_button_menu"):tooltip({"helmod_button.preferences"}))
     GuiElement.add(group1, GuiButton("HMRecipeExplorer", "OPEN", block_id):sprite("menu", "search-white", "search"):style("helmod_button_menu"):tooltip({"helmod_button.explorer"}))
 
+    local groupPref = GuiElement.add(action_panel, GuiFlowH("groupPref"))
+    GuiElement.add(groupPref, GuiButton("HMPreferenceEdition", "OPEN", block_id):sprite("menu", "services-white", "services"):style("helmod_button_menu"):tooltip({"helmod_button.preferences"}))
+    
     local group2 = GuiElement.add(action_panel, GuiFlowH("group2"))
     -- copy past
     GuiElement.add(group2, GuiButton(self.classname, "copy-model", model.id):sprite("menu", "copy-white", "copy"):style("helmod_button_menu"):tooltip({"helmod_button.copy"}))

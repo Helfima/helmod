@@ -79,16 +79,7 @@ end
 --
 function ModelCompute.update(check_unlink)
   Logging:debug(ModelCompute.classname , "********** update()")
-
   local model = Model.getModel()
-
-  if model ~= nil and (model.version == nil or model.version ~= Model.version) then
-    Logging:debug(Model.classname , "********** version",Model.version)
-    ModelCompute.updateVersion_0_9_3()
-    ModelCompute.updateVersion_0_9_12()
-    Player.print("Helmod information: Model is updated to version "..Model.version)
-  end
-
   if model.blocks ~= nil then
     Logging.profiler = false
     Logging:profilerStart()
@@ -1233,14 +1224,23 @@ end
 -------------------------------------------------------------------------------
 -- Update model
 --
+-- @function [parent=#ModelCompute] updateVersion_0_9_3
+--
+function ModelCompute.updateVersion_0_9_3()
+  if ModelCompute.versionCompare("0.9.3") then
+    local model = Model.getModel()
+    Model.resetRules()
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update model
+--
 -- @function [parent=#ModelCompute] updateVersion_0_9_12
 --
 function ModelCompute.updateVersion_0_9_12()
-  local model = Model.getModel()
-  local v1,v2,v3 = string.match(model.version, "([0-9]+)[.]([0-9]+)[.]([0-9]+)")
-  --Logging:debug(ModelCompute.classname, v1,v2,v3,tonumber(v2) <= 9,tonumber(v3) < 12)
-  if model.version == nil or (tonumber(v2) <= 9 and tonumber(v3) < 12) then
-    Logging:debug(ModelCompute.classname, "******  update block 0.9.12")
+  if ModelCompute.versionCompare("0.9.12") then
+    local model = Model.getModel()
     if model.blocks ~= nil then
       for _, block in pairs(model.blocks) do
         for _,element in pairs(block.products) do
@@ -1248,7 +1248,6 @@ function ModelCompute.updateVersion_0_9_12()
             element.input = block.input[element.name]
           end
         end
-        Logging:debug(ModelCompute.classname, "******  update block", block)
       end
     end
   end
@@ -1257,13 +1256,43 @@ end
 -------------------------------------------------------------------------------
 -- Update model
 --
--- @function [parent=#ModelCompute] updateVersion_0_9_3
+-- @function [parent=#ModelCompute] updateVersion_0_9_27
 --
-function ModelCompute.updateVersion_0_9_3()
-  local model = Model.getModel()
-  if model.version == nil or model.version < "0.9.3" then
-    Model.resetRules()
+function ModelCompute.updateVersion_0_9_27()
+  if ModelCompute.versionCompare("0.9.27") then
+    ModelCompute.update()
   end
+end
+
+-------------------------------------------------------------------------------
+-- Update model
+--
+-- @function [parent=#ModelCompute] check
+--
+function ModelCompute.check()
+  local model = Model.getModel()
+  if model ~= nil and (model.version == nil or model.version ~= Model.version) then
+    ModelCompute.updateVersion_0_9_3()
+    ModelCompute.updateVersion_0_9_12()
+    ModelCompute.updateVersion_0_9_27()
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update model
+--
+-- @function [parent=#ModelCompute] versionCompare
+--
+function ModelCompute.versionCompare(version)
+  local model = Model.getModel()
+  local vm1,vm2,vm3 = string.match(model.version, "([0-9]+)[.]([0-9]+)[.]([0-9]+)")
+  local v1,v2,v3 = string.match(version, "([0-9]+)[.]([0-9]+)[.]([0-9]+)")
+  --Logging:debug(ModelCompute.classname, v1,v2,v3,tonumber(v2) <= 9,tonumber(v3) < 12)
+  if tonumber(vm1) <= tonumber(v1) and tonumber(vm2) <= tonumber(v2) and tonumber(vm3) < tonumber(v3) then
+    Player.print("Helmod information: Model is updated to version "..Model.version)
+    return true
+  end
+  return false
 end
 
 return ModelCompute

@@ -241,7 +241,9 @@ function ProductionBlockTab:updateInfo(event)
     -- block panel
     GuiElement.add(block_table, GuiCellBlockInfo("block-count"):element(element):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(1))
     GuiElement.add(block_table, GuiCellEnergy("block-power"):element(element):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2))
-    GuiElement.add(block_table, GuiCellPollution("block-pollution"):element(element):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2))
+    if User.getPreferenceSetting("display_pollution") then
+      GuiElement.add(block_table, GuiCellPollution("block-pollution"):element(element):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2))
+    end
 
     local unlink_state = "right"
     if element.unlinked == true then unlink_state = "left" end
@@ -503,12 +505,15 @@ function ProductionBlockTab:updateData(event)
     -- data panel
 
     local extra_cols = 0
+    if User.getPreferenceSetting("display_pollution") then
+      extra_cols = extra_cols + 1
+    end
     for _,parameter in pairs({"display_data_col_index","display_data_col_id","display_data_col_name","display_data_col_type"}) do
       if User.getModGlobalSetting(parameter) then
         extra_cols = extra_cols + 1
       end
     end
-    local result_table = GuiElement.add(scroll_panel2, GuiTable("list-data"):column(8 + extra_cols):style("helmod_table-odd"))
+    local result_table = GuiElement.add(scroll_panel2, GuiTable("list-data"):column(7 + extra_cols):style("helmod_table-odd"))
     result_table.vertical_centering = false
     self:addTableHeader(result_table)
 
@@ -546,7 +551,9 @@ function ProductionBlockTab:addTableHeader(itable)
   -- data columns
   self:addCellHeader(itable, "recipe", {"helmod_result-panel.col-header-recipe"},"index")
   self:addCellHeader(itable, "energy", {"helmod_common.energy-consumption"},"energy_total")
-  self:addCellHeader(itable, "pollution", {"helmod_common.pollution"})
+  if User.getPreferenceSetting("display_pollution") then
+    self:addCellHeader(itable, "pollution", {"helmod_common.pollution"})
+  end
   self:addCellHeader(itable, "factory", {"helmod_result-panel.col-header-factory"})
   self:addCellHeader(itable, "beacon", {"helmod_result-panel.col-header-beacon"})
   for _,order in pairs(Model.getBlockOrder()) do
@@ -615,9 +622,11 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
   GuiElement.add(cell_energy, GuiCellEnergy("HMRecipeEdition", "OPEN", block.id, recipe.id):element(recipe):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default))
 
   -- col pollution
-  local cell_pollution = GuiElement.add(gui_table, GuiTable("pollution", recipe.id):column(2):style(helmod_table_style.list))
-  GuiElement.add(cell_pollution, GuiCellPollution("HMRecipeEdition", "OPEN", block.id, recipe.id):element(recipe):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default))
-
+  if User.getPreferenceSetting("display_pollution") then
+    local cell_pollution = GuiElement.add(gui_table, GuiTable("pollution", recipe.id):column(2):style(helmod_table_style.list))
+    GuiElement.add(cell_pollution, GuiCellPollution("HMRecipeEdition", "OPEN", block.id, recipe.id):element(recipe):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default))
+  end
+  
   -- col factory
   local factory = recipe.factory
   local cell_factory = GuiElement.add(gui_table, GuiTable("factory", recipe.id):column(2):style(helmod_table_style.list))
@@ -631,7 +640,8 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
   for _,order in pairs(Model.getBlockOrder()) do
     if order == "products" then
       -- products
-      local display_product_cols = User.getModSetting("display_product_cols")
+      local display_product_cols = User.getPreferenceSetting("display_product_cols")
+      Logging:debug(self.classname, "display_product_cols", display_product_cols)
       local cell_products = GuiElement.add(gui_table, GuiTable("products", recipe.id):column(display_product_cols):style(helmod_table_style.list))
       for index, lua_product in pairs(recipe_prototype:getProducts()) do
         local product_prototype = Product(lua_product)
@@ -644,7 +654,7 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
       end
     else
       -- ingredients
-      local display_ingredient_cols = User.getModSetting("display_ingredient_cols")
+      local display_ingredient_cols = User.getPreferenceSetting("display_ingredient_cols")
       local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients_", recipe.id):column(display_ingredient_cols):style(helmod_table_style.list))
       for index, lua_ingredient in pairs(recipe_prototype:getIngredients(recipe.factory)) do
         local ingredient_prototype = Product(lua_ingredient)

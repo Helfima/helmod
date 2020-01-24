@@ -105,7 +105,7 @@ end
 --
 function Format.formatNumberFactory(number)
   local decimal = 2
-  local format_number = User.getModGlobalSetting("format_number_factory")
+  local format_number = User.getPreferenceSetting("format_number_factory")
   if format_number == "0" then decimal = 0 end
   if format_number == "0.0" then decimal = 1 end
   if format_number == "0.00" then decimal = 2 end
@@ -121,7 +121,7 @@ end
 --
 function Format.formatNumberElement(number)
   local decimal = 2
-  local format_number = User.getModGlobalSetting("format_number_element")
+  local format_number = User.getPreferenceSetting("format_number_element")
   if format_number == "0" then decimal = 0 end
   if format_number == "0.0" then decimal = 1 end
   if format_number == "0.00" then decimal = 2 end

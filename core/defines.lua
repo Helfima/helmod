@@ -82,6 +82,73 @@ helmod_rules["module-limitation"].categories["technology"] = {"entity-name", "en
 
 helmod_display_cell_mod = {"default", "small-text", "small-icon", "by-kilo"}
 
+helmod_preferences = {
+  -- factory level
+  default_factory_level = {
+    type = "string-setting",
+    localised_name = {"helmod_settings.default-factory-level"},
+    localised_description = {"helmod_settings.default-factory-level-desc"},
+    default_value = "1",
+    allowed_values = {"1","2","3","4","5","6","last"}
+  },
+  -- format number factory
+  format_number_factory = {
+    type = "string-setting",
+    localised_name = {"helmod_settings.format-number-factory"},
+    localised_description = {"helmod_settings.format-number-factory-desc"},
+    default_value = "0",
+    allowed_values = {"0","0.0","0.00"}
+  },
+  -- format number element
+  format_number_element = {
+    type = "string-setting",
+    localised_name = {"helmod_settings.format-number-element"},
+    localised_description = {"helmod_settings.format-number-element-desc"},
+    default_value = "0.0",
+    allowed_values = {"0","0.0","0.00"}
+  },
+  -- preference number line by scroll
+  preference_number_line = {
+    type = "int-setting",
+    localised_name = {"helmod_settings.preference-number-line"},
+    localised_description = {"helmod_settings.preference-number-line-desc"},
+    default_value = 3,
+    allowed_values = {2,3,4,5}
+  },
+  -- preference number column by scroll
+  preference_number_column = {
+    type = "int-setting",
+    localised_name = {"helmod_settings.preference-number-column"},
+    localised_description = {"helmod_settings.preference-number-column-desc"},
+    default_value = 6,
+    allowed_values = {6,7,8,9,10,11,12}
+  },
+  --display product cols
+  display_product_cols = {
+    type = "int-setting",
+    localised_name = {"helmod_settings.display-product-cols"},
+    localised_description = {"helmod_settings.display-product-cols-desc"},
+    default_value = 5,
+    allowed_values = {5,6,7,8,9,10}
+  },
+  --display-ingredient-cols
+  display_ingredient_cols = {
+    type = "int-setting",
+    localised_name = {"helmod_settings.display-ingredient-cols"},
+    localised_description = {"helmod_settings.display-ingredient-cols-desc"},
+    default_value = 5,
+    allowed_values = {5,6,7,8,9,10}
+  },
+  --display-pollution
+  display_pollution = {
+    type = "bool-setting",
+    localised_name = {"helmod_settings.display-pollution"},
+    localised_description = {"helmod_settings.display-pollution-desc"},
+    default_value = true
+  }
+}
+
+
 helmod_settings_mod = {
   debug = {
     type = "string-setting",
@@ -154,46 +221,6 @@ helmod_settings_mod = {
     },
     order = "a1"
   },
-  -- format number factory
-  format_number_factory = {
-    type = "string-setting",
-    setting_type = "runtime-global",
-    localised_name = {"helmod_settings.format-number-factory"},
-    localised_description = {"helmod_settings.format-number-factory-desc"},
-    default_value = "0",
-    allowed_values = {"0","0.0","0.00"},
-    order = "a2"
-  },
-  -- format number element
-  format_number_element = {
-    type = "string-setting",
-    setting_type = "runtime-global",
-    localised_name = {"helmod_settings.format-number-element"},
-    localised_description = {"helmod_settings.format-number-element-desc"},
-    default_value = "0.0",
-    allowed_values = {"0","0.0","0.00"},
-    order = "a2"
-  },
-  -- preference number line by scroll
-  preference_number_line = {
-    type = "int-setting",
-    setting_type = "runtime-per-user",
-    localised_name = {"helmod_settings.preference-number-line"},
-    localised_description = {"helmod_settings.preference-number-line-desc"},
-    default_value = 3,
-    allowed_values = {1,2,3,4,5},
-    order = "a1"
-  },
-  -- factory level
-  default_factory_level = {
-    type = "string-setting",
-    setting_type = "runtime-per-user",
-    localised_name = {"helmod_settings.default-factory-level"},
-    localised_description = {"helmod_settings.default-factory-level-desc"},
-    default_value = "1",
-    allowed_values = {"1","2","3","4","5","6","last"},
-    order = "a2"
-  },
   -- display_ratio_horizontal
   display_ratio_horizontal = {
     type = "double-setting",
@@ -236,28 +263,6 @@ helmod_settings_mod = {
     default_value = "default",
     allowed_values = {"default","small-text","small-icon","by-kilo"},
     order = "b4"
-  },
-  --display product cols
-  display_product_cols = {
-    type = "int-setting",
-    setting_type = "runtime-per-user",
-    localised_name = {"helmod_settings.display-product-cols"},
-    localised_description = {"helmod_settings.display-product-cols-desc"},
-    default_value = 5,
-    minimum_value = 2,
-    maximum_value = 10,
-    order = "b5"
-  },
-  --display-ingredient-cols
-  display_ingredient_cols = {
-    type = "int-setting",
-    setting_type = "runtime-per-user",
-    localised_name = {"helmod_settings.display-ingredient-cols"},
-    localised_description = {"helmod_settings.display-ingredient-cols-desc"},
-    default_value = 5,
-    minimum_value = 2,
-    maximum_value = 10,
-    order = "b6"
   },
   --row_move_step
   row_move_step = {
