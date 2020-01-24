@@ -496,7 +496,7 @@ function EntityPrototype:getPollution()
     if self:getBurnerEmissions() ~= 0 then
       emission = self:getBurnerEmissions()
     end
-    return energy_usage * emission * 60
+    return energy_usage * emission
   end
   return 0
 end

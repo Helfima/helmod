@@ -15,16 +15,36 @@ PreferenceEdition = newclass(Form)
 function PreferenceEdition:onInit()
   self.panelCaption = ({"helmod_preferences-edition-panel.title"})
   self.parameterLast = string.format("%s_%s",self.classname,"last")
-  self.scroll_height = 38*3+4
 end
 
 -------------------------------------------------------------------------------
--- On initialization
+-- On Bind Dispatcher
 --
--- @function [parent=#PreferenceEdition] onInit
+-- @function [parent=#PreferenceEdition] onBind
+--
+function PreferenceEdition:onBind()
+  Dispatcher:bind("on_gui_preference", self, self.updateFluidsLogistic)
+  Dispatcher:bind("on_gui_preference", self, self.updateItemsLogistic)
+  Dispatcher:bind("on_gui_preference", self, self.updatePriorityModule)
+end
+
+-------------------------------------------------------------------------------
+-- On scroll width
+--
+-- @function [parent=#PreferenceEdition] getSrollWidth
+--
+function PreferenceEdition:getSrollWidth()
+  local number_column = User.getPreferenceSetting("preference_number_column")
+  return 38 * (number_column or 6) + 20
+end
+
+-------------------------------------------------------------------------------
+-- On scroll height
+--
+-- @function [parent=#PreferenceEdition] getSrollHeight
 --
 function PreferenceEdition:getSrollHeight()
-  local number_line = User.getModSetting("preference_number_line") 
+  local number_line = User.getPreferenceSetting("preference_number_line")
   return 38 * (number_line or 3) + 4
 end
 
@@ -56,19 +76,19 @@ function PreferenceEdition:onClose()
 end
 
 -------------------------------------------------------------------------------
--- Get or create priority module panel
+-- Get or create preference panel
 --
--- @function [parent=#PreferenceEdition] getPriorityModulePanel
+-- @function [parent=#PreferenceEdition] getPrefrencePanel
 --
-function PreferenceEdition:getPriorityModulePanel()
+function PreferenceEdition:getPrefrencePanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
-  local panel_name = "priority_module"
+  local panel_name = "preference_panel"
   if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
     return content_panel[panel_name]
   end
   local panel = GuiElement.add(content_panel, GuiFrameV(panel_name))
   --panel.style.height = 600
-  --panel.style.width = 900
+  panel.style.minimal_width = 600
 
   panel.style.horizontally_stretchable = true
   panel.style.vertically_stretchable = true
@@ -77,45 +97,114 @@ function PreferenceEdition:getPriorityModulePanel()
 end
 
 -------------------------------------------------------------------------------
--- Get or create solid container panel
+-- Get or create tab panel
 --
--- @function [parent=#PreferenceEdition] getSolidContainerPanel
+-- @function [parent=#PreferenceEdition] getTabPane
 --
-function PreferenceEdition:getSolidContainerPanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
-  local panel_name = "solid_container"
+function PreferenceEdition:getTabPane()
+  local content_panel = self:getPrefrencePanel()
+  local panel_name = "tab_panel"
   if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
     return content_panel[panel_name]
   end
-  local panel = GuiElement.add(content_panel, GuiFrameV(panel_name))
-  --panel.style.height = 600
-  --panel.style.width = 900
-
-  panel.style.horizontally_stretchable = true
-  panel.style.vertically_stretchable = true
-
+  local panel = GuiElement.add(content_panel, GuiTabPane(panel_name))
   return panel
 end
 
 -------------------------------------------------------------------------------
--- Get or create fluid container panel
+-- Set active tab panel
 --
--- @function [parent=#PreferenceEdition] getFluidContainerPanel
+-- @function [parent=#PreferenceEdition] setActiveTab
+-- 
+-- @param #string tab_name
 --
-function PreferenceEdition:getFluidContainerPanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
-  local panel_name = "fluid_container"
-  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
-    return content_panel[panel_name]
+function PreferenceEdition:setActiveTab(tab_name)
+  local content_panel = self:getTabPane()
+  for index,tab in pairs(content_panel.tabs) do
+    if string.find(tab.content.name,tab_name) then
+      content_panel.selected_tab_index = index
+    end
   end
-  local panel = GuiElement.add(content_panel, GuiFrameV(panel_name))
-  --panel.style.height = 600
-  --panel.style.width = 900
+end
 
-  panel.style.horizontally_stretchable = true
-  panel.style.vertically_stretchable = true
+-------------------------------------------------------------------------------
+-- Get or create general tab panel
+--
+-- @function [parent=#PreferenceEdition] getGeneralTab
+--
+function PreferenceEdition:getGeneralTab()
+  local content_panel = self:getTabPane()
+  local panel_name = "general_tab_panel"
+  local scroll_name = "general_scroll"
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[scroll_name]
+  end
+  local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption({"helmod_label.general"}))
+  local scroll_panel = GuiElement.add(content_panel, GuiFlowV(scroll_name))
+  content_panel.add_tab(tab_panel,scroll_panel)
+  scroll_panel.style.horizontally_stretchable = true
+  scroll_panel.style.vertically_stretchable = true
+  return scroll_panel
+end
 
-  return panel
+-------------------------------------------------------------------------------
+-- Get or create priority module tab panel
+--
+-- @function [parent=#PreferenceEdition] getPriorityModuleTab
+--
+function PreferenceEdition:getPriorityModuleTab()
+  local content_panel = self:getTabPane()
+  local panel_name = "priority_module_tab_panel"
+  local scroll_name = "priority_module_scroll"
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[scroll_name]
+  end
+  local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption({"helmod_label.priority-modules"}))
+  local scroll_panel = GuiElement.add(content_panel, GuiFlowV(scroll_name))
+  content_panel.add_tab(tab_panel,scroll_panel)
+  scroll_panel.style.horizontally_stretchable = true
+  scroll_panel.style.vertically_stretchable = true
+  return scroll_panel
+end
+
+-------------------------------------------------------------------------------
+-- Get or create solid container tab panel
+--
+-- @function [parent=#PreferenceEdition] getSolidContainerTab
+--
+function PreferenceEdition:getSolidContainerTab()
+  local content_panel = self:getTabPane()
+  local panel_name = "solid_container_tab_panel"
+  local scroll_name = "solid_container_scroll"
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[scroll_name]
+  end
+  local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption({"helmod_preferences-edition-panel.items-logistic-default"}))
+  local scroll_panel = GuiElement.add(content_panel, GuiFlowV(scroll_name))
+  content_panel.add_tab(tab_panel,scroll_panel)
+  scroll_panel.style.horizontally_stretchable = true
+  scroll_panel.style.vertically_stretchable = true
+  return scroll_panel
+end
+
+-------------------------------------------------------------------------------
+-- Get or create fluid container tab panel
+--
+-- @function [parent=#PreferenceEdition] getFluidContainerTab
+--
+function PreferenceEdition:getFluidContainerTab()
+  local content_panel = self:getTabPane()
+  local panel_name = "fluid_container_tab_panel"
+  local scroll_name = "fluid_container_scroll"
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[scroll_name]
+  end
+  local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption({"helmod_preferences-edition-panel.fluids-logistic-default"}))
+  local scroll_panel = GuiElement.add(content_panel, GuiFlowV(scroll_name))
+  content_panel.add_tab(tab_panel,scroll_panel)
+  scroll_panel.style.horizontally_stretchable = true
+  scroll_panel.style.vertically_stretchable = true
+  return scroll_panel
 end
 
 -------------------------------------------------------------------------------
@@ -126,11 +215,50 @@ end
 -- @param #LuaEvent event
 --
 function PreferenceEdition:onUpdate(event)
+  self:updateGeneral(event)
   self:updatePriorityModule(event)
   self:updateItemsLogistic(event)
   self:updateFluidsLogistic(event)
+  if event.action == "OPEN" then
+    self:setActiveTab(event.item1)
+  end
 end
 
+-------------------------------------------------------------------------------
+-- Update general
+--
+-- @function [parent=#PreferenceEdition] updateGeneral
+--
+-- @param #LuaEvent event
+--
+
+function PreferenceEdition:updateGeneral(event)
+  Logging:debug(self.classname, "updateGeneral()", event)
+  local container_panel = self:getGeneralTab()
+  container_panel.clear()
+
+  GuiElement.add(container_panel, GuiLabel("fluid_container_label"):caption({"helmod_label.general"}):style("helmod_label_title_frame"))
+  
+  local options_table = GuiElement.add(container_panel, GuiTable("options-table"):column(2))
+  options_table.vertical_centering = false
+  options_table.style.horizontal_spacing=10
+  options_table.style.vertical_spacing=5
+  
+  for preference_name,preference in pairs(helmod_preferences) do
+    GuiElement.add(options_table, GuiLabel(self.classname, "label", preference_name):caption(preference.localised_name):tooltip(preference.localised_description))
+    local default_preference = User.getPreferenceSetting(preference_name)
+    if preference.allowed_values then
+      GuiElement.add(options_table, GuiDropDown(self.classname, "preference-setting", preference_name):items(preference.allowed_values, default_preference))
+    else
+      if preference.type == "bool-setting" then
+        GuiElement.add(options_table, GuiCheckBox(self.classname, "preference-setting", preference_name):state(default_preference))
+      end
+      if preference.type == "int-setting" or preference.type == "string-setting" then
+        GuiElement.add(options_table, GuiTextField(self.classname, "preference-setting", preference_name):text(default_preference))
+      end
+    end
+  end
+end
 -------------------------------------------------------------------------------
 -- Update priority module
 --
@@ -141,11 +269,11 @@ end
 
 function PreferenceEdition:updatePriorityModule(event)
   Logging:debug(self.classname, "updatePriorityModule()", event)
-  local priority_module_panel = self:getPriorityModulePanel()
+  local number_column = User.getPreferenceSetting("preference_number_column")
+  local priority_module_panel = self:getPriorityModuleTab()
   priority_module_panel.clear()
 
   GuiElement.add(priority_module_panel, GuiLabel("priority_module_label"):caption({"helmod_label.priority-modules"}):style("helmod_label_title_frame"))
-
 
   local configuration_table_panel = GuiElement.add(priority_module_panel, GuiTable("configuration-table"):column(2))
   configuration_table_panel.vertical_centering = false
@@ -180,7 +308,8 @@ function PreferenceEdition:updatePriorityModule(event)
   -- module selector
   local module_scroll = GuiElement.add(configuration_table_panel, GuiScroll("module-selector-scroll"))
   module_scroll.style.maximal_height = self:getSrollHeight()
-  local module_table_panel = GuiElement.add(module_scroll, GuiTable("module-selector-table"):column(6))
+  module_scroll.style.minimal_width = self:getSrollWidth()
+  local module_table_panel = GuiElement.add(module_scroll, GuiTable("module-selector-table"):column(number_column))
   for k, element in pairs(Player.getModules()) do
     local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name})
     GuiElement.add(module_table_panel, GuiButtonSelectSprite(self.classname, "priority-module-select"):sprite("entity", element.name):tooltip(tooltip))
@@ -197,7 +326,8 @@ end
 
 function PreferenceEdition:updateItemsLogistic(event)
   Logging:debug(self.classname, "updateItemsLogistic()", event)
-  local container_panel = self:getSolidContainerPanel()
+  local number_column = User.getPreferenceSetting("preference_number_column")
+  local container_panel = self:getSolidContainerTab()
   container_panel.clear()
 
   GuiElement.add(container_panel, GuiLabel("solid_container_label"):caption({"helmod_preferences-edition-panel.items-logistic-default"}):style("helmod_label_title_frame"))
@@ -213,8 +343,9 @@ function PreferenceEdition:updateItemsLogistic(event)
     
     local scroll_panel = GuiElement.add(options_table, GuiScroll(string.format("%s-selector-scroll", type)))
     scroll_panel.style.maximal_height = self:getSrollHeight()
-  
-    local type_table_panel = GuiElement.add(scroll_panel, GuiTable(string.format("%s-selector-table", type)):column(6))
+    scroll_panel.style.minimal_width = self:getSrollWidth()
+    
+    local type_table_panel = GuiElement.add(scroll_panel, GuiTable(string.format("%s-selector-table", type)):column(number_column))
     local item_logistic = Player.getDefaultItemLogistic(type)
     for key, entity in pairs(Player.getItemsLogistic(type)) do
       local color = nil
@@ -235,7 +366,8 @@ end
 
 function PreferenceEdition:updateFluidsLogistic(event)
   Logging:debug(self.classname, "updateFluidContainer()", event)
-  local container_panel = self:getFluidContainerPanel()
+  local number_column = User.getPreferenceSetting("preference_number_column")
+  local container_panel = self:getFluidContainerTab()
   container_panel.clear()
 
   GuiElement.add(container_panel, GuiLabel("fluid_container_label"):caption({"helmod_preferences-edition-panel.fluids-logistic-default"}):style("helmod_label_title_frame"))
@@ -265,8 +397,8 @@ function PreferenceEdition:updateFluidsLogistic(event)
     
     local scroll_panel = GuiElement.add(options_table, GuiScroll(string.format("%s-selector-scroll", type)))
     scroll_panel.style.maximal_height = self:getSrollHeight()
-  
-    local type_table_panel = GuiElement.add(scroll_panel, GuiTable(string.format("%s-selector-table", type)):column(6))
+    scroll_panel.style.minimal_width = self:getSrollWidth()
+    local type_table_panel = GuiElement.add(scroll_panel, GuiTable(string.format("%s-selector-table", type)):column(number_column))
     local fluid_logistic = Player.getDefaultFluidLogistic(type)
     for key, entity in pairs(Player.getFluidsLogistic(type)) do
       local color = nil
@@ -286,6 +418,30 @@ end
 --
 function PreferenceEdition:onEvent(event)
   Logging:debug(self.classname, "onEvent()", event)
+  
+  if event.action == "preference-setting" then
+    local preference_name = event.item1
+    local preference = helmod_preferences[preference_name]
+    if preference ~= nil then
+      if preference.allowed_values then
+        local index = event.element.selected_index
+        User.setPreference(preference_name,preference.allowed_values[index])
+      else
+        Logging:debug(self.classname, "element", event.element, event.element.state)
+        if preference.type == "bool-setting" then
+          User.setPreference(preference_name, event.element.state)
+        end
+        if preference.type == "int-setting" then
+          User.setPreference(preference_name, tonumber(event.element.text or preference.default_value))
+        end
+        if preference.type == "string-setting" then
+          User.setPreference(preference_name, event.element.text or preference.default_value)
+        end
+      end
+      Controller:send("on_gui_refresh", event)
+      Controller:send("on_gui_preference", event)
+    end
+  end
   
   if event.action == "configuration-priority-select" then
     if event.item1 == "new" then

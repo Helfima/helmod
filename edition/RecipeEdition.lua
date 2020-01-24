@@ -674,9 +674,9 @@ function RecipeEdition:updateFactoryInfo(event)
     end
     GuiElement.add(input_panel, GuiLabel("productivity"):caption(sign..Format.formatPercent(factory.effects.productivity).."%"):tooltip(productivity_tooltip))
 
-    GuiElement.add(input_panel, GuiLabel("label-pollution"):caption({"description.pollution"}))
+    GuiElement.add(input_panel, GuiLabel("label-pollution"):caption({"helmod_common.pollution"}))
     --GuiElement.add(input_panel, GuiLabel("pollution"):caption(factory_prototype:getPollution()))
-    GuiElement.add(input_panel, GuiLabel("pollution"):caption({"", Format.formatNumber(factory.pollution),{"per-minute-suffix"}}))
+    GuiElement.add(input_panel, GuiLabel("pollution"):caption({"helmod_si.per-minute", Format.formatNumberElement((factory.pollution or 0)*60)}))
     
     GuiElement.add(input_panel, GuiLabel("label-limit"):caption({"helmod_label.limit"}):tooltip({"tooltip.factory-limit"}))
     GuiElement.add(input_panel, GuiTextField(self.classname, "factory-update", block_id, recipe_id):text(factory.limit):tooltip({"tooltip.factory-limit"}))
@@ -768,7 +768,7 @@ function RecipeEdition:updateFactoryModulesPriority(factory_module_panel)
 
   local tool_panel1 = GuiElement.add(tool_action_panel2, GuiFlowH("tool1"))
   local button_style = "helmod_button_small_bold"
-  GuiElement.add(tool_panel1, GuiButton("HMPreferenceEdition","OPEN"):sprite("menu", "services-white-sm", "services-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_button.preferences"}))
+  GuiElement.add(tool_panel1, GuiButton("HMPreferenceEdition", "OPEN", "priority_module"):sprite("menu", "services-white-sm", "services-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_button.preferences"}))
   GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-priority-apply", block_id, recipe_id):sprite("menu", "arrow-up-white-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_recipe-edition-panel.apply-priority"}))
 
   local tool_panel2 = GuiElement.add(tool_action_panel2,  GuiTable("tool2"):column(6))
@@ -1006,7 +1006,7 @@ function RecipeEdition:updateBeaconModulesPriority(beacon_module_panel)
 
   local tool_panel1 = GuiElement.add(tool_action_panel2, GuiFlowH("tool1"))
   local button_style = "helmod_button_small_bold"
-  GuiElement.add(tool_panel1, GuiButton("HMPreferenceEdition", "OPEN"):sprite("menu", "services-white-sm", "services-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_button.preferences"}))
+  GuiElement.add(tool_panel1, GuiButton("HMPreferenceEdition", "OPEN", "priority_module"):sprite("menu", "services-white-sm", "services-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_button.preferences"}))
   GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-priority-apply", block_id, recipe_id):sprite("menu", "arrow-up-white-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_recipe-edition-panel.apply-priority"}))
 
   local tool_panel2 = GuiElement.add(tool_action_panel2,  GuiTable("tool2"):column(6))

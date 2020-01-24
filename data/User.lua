@@ -147,6 +147,21 @@ function User.getParameter(property)
 end
 
 -------------------------------------------------------------------------------
+-- Get preference
+--
+-- @function [parent=#User] getPreference
+--
+-- @param #string property
+--
+function User.getPreference(property)
+  local preferences = User.get("preferences")
+  if preferences ~= nil and property ~= nil then
+    return preferences[property]
+  end
+  return preferences
+end
+
+-------------------------------------------------------------------------------
 -- Get default factory
 --
 -- @function [parent=#User] getDefaultFactory
@@ -342,6 +357,26 @@ function User.setParameter(property, value)
 end
 
 -------------------------------------------------------------------------------
+-- Set preference
+--
+-- @function [parent=#User] setPreference
+--
+-- @param #string property
+-- @param #object value
+--
+function User.setPreference(property, value)
+  --Logging:debug(User.classname, property, value)
+  if property == nil then
+    Logging:error(User.classname, "property must not nil", value)
+    return nil
+  end
+  User.setVersion()
+  local preferences = User.get("preferences")
+  preferences[property] = value
+  return value
+end
+
+-------------------------------------------------------------------------------
 -- Get navigate
 --
 -- @function [parent=#User] getNavigate
@@ -437,7 +472,7 @@ end
 -- @param #string name
 --
 function User.getModGlobalSetting(name)
-  Logging:trace(User.classname, "getModGlobalSetting(name, global)", name)
+  Logging:trace(User.classname, "getModGlobalSetting(name)", name)
   local property = nil
   local property_name = string.format("%s_%s",User.prefixe,name)
   property = settings.global[property_name]
@@ -446,6 +481,24 @@ function User.getModGlobalSetting(name)
   else
     Logging:warn(User.classname, "Mod Global settings property not found:", property_name)
     return helmod_settings_mod[name].default_value
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Get preference settings
+--
+-- @function [parent=#User] getPreferenceSetting
+--
+-- @param #string name
+--
+function User.getPreferenceSetting(name)
+  Logging:trace(User.classname, "getPreferenceSetting(name)", name)
+  local property = User.getPreference(name)
+  if property ~= nil then
+    return property
+  else
+    Logging:warn(User.classname, "Preference settings property not found:", name)
+    return helmod_preferences[name].default_value
   end
 end
 

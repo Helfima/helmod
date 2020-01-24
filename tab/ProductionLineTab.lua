@@ -80,7 +80,9 @@ function ProductionLineTab:updateInfo(event)
       element_block.pollution_total = model.summary.pollution
     end
     GuiElement.add(block_info, GuiCellEnergy("block-power"):element(element_block):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2))
-    GuiElement.add(block_info, GuiCellPollution("block-pollution"):element(element_block):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2))
+    if User.getPreferenceSetting("display_pollution") then
+      GuiElement.add(block_info, GuiCellPollution("block-pollution"):element(element_block):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2))
+    end
   end
 
 end
@@ -166,13 +168,16 @@ function ProductionLineTab:updateData(event)
   if countBlock > 0 then
     -- data panel
     local extra_cols = 0
+    if User.getPreferenceSetting("display_pollution") then
+      extra_cols = extra_cols + 1
+    end
     for _,parameter in pairs({"display_data_col_index","display_data_col_id","display_data_col_name"}) do
       if User.getModGlobalSetting(parameter) then
         extra_cols = extra_cols + 1
       end
     end
 
-    local result_table = GuiElement.add(scroll_panel, GuiTable("list-data"):column(6 + extra_cols):style("helmod_table-odd"))
+    local result_table = GuiElement.add(scroll_panel, GuiTable("list-data"):column(5 + extra_cols):style("helmod_table-odd"))
     result_table.style.horizontally_stretchable = false
     result_table.vertical_centering = false
 
@@ -209,8 +214,10 @@ function ProductionLineTab:addTableHeader(itable)
   self:addCellHeader(itable, "name", {"helmod_result-panel.col-header-name"},"name")
   -- data columns
   self:addCellHeader(itable, "recipe", {"helmod_result-panel.col-header-production-block"},"index")
-  self:addCellHeader(itable, "energy", {"helmod_result-panel.col-header-energy"},"power")
-  self:addCellHeader(itable, "pollution", {"description.pollution"})
+  self:addCellHeader(itable, "energy", {"helmod_common.energy-consumption"},"power")
+  if User.getPreferenceSetting("display_pollution") then
+    self:addCellHeader(itable, "pollution", {"helmod_common.pollution"})
+  end
   self:addCellHeader(itable, "products", {"helmod_result-panel.col-header-output"})
   self:addCellHeader(itable, "ingredients", {"helmod_result-panel.col-header-input"})
 end
@@ -269,11 +276,13 @@ function ProductionLineTab:addTableRow(gui_table, block)
   GuiElement.add(cell_energy, GuiCellEnergy(self.classname, "change-tab", "HMProductionBlockTab", block.id):element(element_block):tooltip("tooltip.edit-block"):color(block_color))
 
   -- col pollution
-  local cell_pollution = GuiElement.add(gui_table, GuiTable(block.id, "pollution"):column(1))
-  GuiElement.add(cell_pollution, GuiCellPollution(self.classname, "change-tab", "HMProductionBlockTab", block.id):element(element_block):tooltip("tooltip.edit-block"):color(block_color))
-
+  if User.getPreferenceSetting("display_pollution") then
+    local cell_pollution = GuiElement.add(gui_table, GuiTable(block.id, "pollution"):column(1))
+    GuiElement.add(cell_pollution, GuiCellPollution(self.classname, "change-tab", "HMProductionBlockTab", block.id):element(element_block):tooltip("tooltip.edit-block"):color(block_color))
+  end
+  
   -- products
-  local display_product_cols = User.getModSetting("display_product_cols") + 1
+  local display_product_cols = User.getPreferenceSetting("display_product_cols") + 1
   local cell_products = GuiElement.add(gui_table, GuiTable("products", block.id):column(display_product_cols))
   cell_products.style.horizontally_stretchable = false
   if block.products ~= nil then
@@ -311,7 +320,7 @@ function ProductionLineTab:addTableRow(gui_table, block)
     end
   end
   -- ingredients
-  local display_ingredient_cols = User.getModSetting("display_ingredient_cols") + 2
+  local display_ingredient_cols = User.getPreferenceSetting("display_ingredient_cols") + 2
   local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients", block.id):column(display_ingredient_cols))
   cell_ingredients.style.horizontally_stretchable = false
   if block.ingredients ~= nil then

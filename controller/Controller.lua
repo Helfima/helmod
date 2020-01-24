@@ -422,7 +422,7 @@ function Controller:openMainPanel()
   if self:isOpened() then
     self:cleanController(Player.native())
   else
-    
+    ModelCompute.check()
     local form_name
     if current_block and model.blocks[current_block] then
       form_name = "HMProductionBlockTab"
@@ -521,6 +521,7 @@ function Controller:onEventAccessAll(event)
 
   if event.action == "change-model" then
     User.setParameter("model_id", event.item1)
+    ModelCompute.check()
     Model.getModel()
     User.setActiveForm("HMProductionLineTab")
     User.setParameter("current_block", "new")

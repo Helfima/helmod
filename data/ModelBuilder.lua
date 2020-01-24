@@ -828,11 +828,15 @@ function ModelBuilder.copyBlock(from_model, from_block)
         recipe_model.production = recipe.production or 1
         recipe_model.factory = Model.newFactory(recipe.factory.name)
         recipe_model.factory.limit = recipe.factory.limit
+        recipe_model.factory.fuel = recipe.factory.fuel
         recipe_model.factory.modules = {}
         if recipe.factory.modules ~= nil then
           for name,value in pairs(recipe.factory.modules) do
             recipe_model.factory.modules[name] = value
           end
+        end
+        if recipe.factory.module_priority ~= nil then
+          recipe_model.factory.module_priority = table.clone(recipe.factory.module_priority)
         end
         recipe_model.beacon = Model.newBeacon(recipe.beacon.name)
         recipe_model.beacon.modules = {}
@@ -840,6 +844,9 @@ function ModelBuilder.copyBlock(from_model, from_block)
           for name,value in pairs(recipe.beacon.modules) do
             recipe_model.beacon.modules[name] = value
           end
+        end
+        if recipe.beacon.module_priority ~= nil then
+          recipe_model.beacon.module_priority = table.clone(recipe.beacon.module_priority)
         end
         model.blocks[to_block_id].recipes[recipe_model.id] = recipe_model
         recipe_index = recipe_index + 1
