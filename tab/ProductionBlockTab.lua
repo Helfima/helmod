@@ -525,7 +525,7 @@ function ProductionBlockTab:updateData(event)
       if User.getParameter("scroll_element") == recipe.id then last_element = recipe_cell end
     end
 
-    Logging:debug(self.classname, "scroll_element", User.getParameter("scroll_element"))
+    --Logging:debug(self.classname, "scroll_element", User.getParameter("scroll_element"))
     if last_element ~= nil then
       scroll_panel2.scroll_to_element(last_element)
       User.setParameter("scroll_element", nil)
@@ -636,7 +636,7 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
   local beacon = recipe.beacon
   local cell_beacon = GuiElement.add(gui_table, GuiTable("beacon", recipe.id):column(2):style(helmod_table_style.list))
   GuiElement.add(cell_beacon, GuiCellFactory("HMRecipeEdition", "OPEN", block.id, recipe.id):element(beacon):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default))
-
+  
   for _,order in pairs(Model.getBlockOrder()) do
     if order == "products" then
       -- products

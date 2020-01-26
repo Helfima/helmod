@@ -213,6 +213,7 @@ end
 --
 function EntityPrototype:getCraftingSpeed()
   if self.lua_prototype ~= nil then
+    if self.lua_prototype.name == "character" then return Player.getCraftingSpeed() end
     return self.lua_prototype.crafting_speed or 0
   end
   return 0

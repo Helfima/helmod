@@ -318,6 +318,25 @@ function PropertiesTab:parseProperties(prototype, level)
   Logging:debug(self.classname, "***************************")
   local properties = {}
 
+  -- special
+  if prototype.name == "character" then
+    table.insert(properties, {name = "character_crafting_speed_modifier", chmod = "RW", value = Player.native().character_crafting_speed_modifier})
+    table.insert(properties, {name = "character_mining_speed_modifier", chmod = "RW", value = Player.native().character_mining_speed_modifier})
+    table.insert(properties, {name = "character_additional_mining_categories", chmod = "RW", value = string.match(serpent.dump(Player.native().character_additional_mining_categories),"do local _=(.*);return _;end")})
+    table.insert(properties, {name = "character_running_speed_modifier", chmod = "RW", value = Player.native().character_running_speed_modifier})
+    table.insert(properties, {name = "character_build_distance_bonus", chmod = "RW", value = Player.native().character_build_distance_bonus})
+    table.insert(properties, {name = "character_item_drop_distance_bonus", chmod = "RW", value = Player.native().character_item_drop_distance_bonus})
+    table.insert(properties, {name = "character_reach_distance_bonus", chmod = "RW", value = Player.native().character_reach_distance_bonus})
+    table.insert(properties, {name = "character_resource_reach_distance_bonus", chmod = "RW", value = Player.native().character_resource_reach_distance_bonus})
+    table.insert(properties, {name = "character_item_pickup_distance_bonus", chmod = "RW", value = Player.native().character_item_pickup_distance_bonus})
+    table.insert(properties, {name = "character_loot_pickup_distance_bonus", chmod = "RW", value = Player.native().character_loot_pickup_distance_bonus})
+    table.insert(properties, {name = "character_inventory_slots_bonus", chmod = "RW", value = Player.native().character_inventory_slots_bonus})
+    table.insert(properties, {name = "character_logistic_slot_count_bonus", chmod = "RW", value = Player.native().character_logistic_slot_count_bonus})
+    table.insert(properties, {name = "character_trash_slot_count_bonus", chmod = "RW", value = Player.native().character_trash_slot_count_bonus})
+    table.insert(properties, {name = "character_maximum_following_robot_count_bonus", chmod = "RW", value = Player.native().character_maximum_following_robot_count_bonus})
+    table.insert(properties, {name = "character_health_bonus", chmod = "RW", value = Player.native().character_health_bonus})
+  end
+
   local help_string = string.gmatch(prototype:help(),"(%S+) [[](RW?)[]]")
   Logging:debug(self.classname, "help_string", help_string)
 

@@ -302,13 +302,14 @@ end
 --
 function AbstractTab:onUpdate(event)
   Logging:debug(self.classname, "update()", event)
+    
   self:beforeUpdate(event)
   self:updateMenuPanel(event)
   self:updateIndexPanel(event)
-
   self:updateHeader(event)
-  self:updateData(event)
 
+  self:updateData(event)
+  
   Logging:debug(self.classname, "debug_mode", User.getModGlobalSetting("debug"))
   if User.getModGlobalSetting("debug") ~= "none" then
     self:updateDebugPanel()

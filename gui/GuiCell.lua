@@ -513,8 +513,8 @@ function GuiCellElementSm:create(parent)
   local element = self.element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_sm", color, 1))
-
-  GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):sprite(element.type, element.name):caption("X"..Product(element):getElementAmount()):tooltip({self.options.tooltip, Player.getLocalisedName(element)}))
+  local tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic()
+  GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):sprite(element.type, element.name):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
 
   if element.limit_count ~= nil then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_sm", color, 2))

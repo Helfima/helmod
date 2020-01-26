@@ -7,9 +7,6 @@ local Cache = {
   classname = "HMCache"
 }
 
-if global.caches == nil then global.caches = {} end
-local data = global.caches
-
 -------------------------------------------------------------------------------
 -- Return Cache
 --
