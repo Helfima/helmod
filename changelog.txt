@@ -1,10 +1,13 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.9.28
-Date: 26. 01. 2020
+Date: 28. 01. 2020
+  Features:
+    - Added inserter in logistic information
   Bugfixes:
     - fixed crafting-handonly recipe, player replaced by character
     - fixed tooltip product in the pinned panel
     - removed cache variable can MP desync
+    - fixed arithemtic error on pollution
 ---------------------------------------------------------------------------------------------------
 Version: 0.9.27
 Date: 24. 01. 2020

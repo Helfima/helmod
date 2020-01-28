@@ -265,7 +265,7 @@ function PropertiesTab:getPrototypeData(prototype)
     end
     if lua_prototype ~= nil then
       Logging:debug(self.classname, "prototype", prototype)
-      return self:parseProperties(lua_prototype, 0)
+      return self:parseProperties(lua_prototype, 0, prototype.type)
     end
   end
   return {}
@@ -314,29 +314,33 @@ end
 --
 -- @param #LuaObject prototype
 --
-function PropertiesTab:parseProperties(prototype, level)
+function PropertiesTab:parseProperties(prototype, level, prototype_type)
   Logging:debug(self.classname, "***************************")
   local properties = {}
 
   -- special
   if prototype.name == "character" then
-    table.insert(properties, {name = "character_crafting_speed_modifier", chmod = "RW", value = Player.native().character_crafting_speed_modifier})
-    table.insert(properties, {name = "character_mining_speed_modifier", chmod = "RW", value = Player.native().character_mining_speed_modifier})
-    table.insert(properties, {name = "character_additional_mining_categories", chmod = "RW", value = string.match(serpent.dump(Player.native().character_additional_mining_categories),"do local _=(.*);return _;end")})
-    table.insert(properties, {name = "character_running_speed_modifier", chmod = "RW", value = Player.native().character_running_speed_modifier})
-    table.insert(properties, {name = "character_build_distance_bonus", chmod = "RW", value = Player.native().character_build_distance_bonus})
-    table.insert(properties, {name = "character_item_drop_distance_bonus", chmod = "RW", value = Player.native().character_item_drop_distance_bonus})
-    table.insert(properties, {name = "character_reach_distance_bonus", chmod = "RW", value = Player.native().character_reach_distance_bonus})
-    table.insert(properties, {name = "character_resource_reach_distance_bonus", chmod = "RW", value = Player.native().character_resource_reach_distance_bonus})
-    table.insert(properties, {name = "character_item_pickup_distance_bonus", chmod = "RW", value = Player.native().character_item_pickup_distance_bonus})
-    table.insert(properties, {name = "character_loot_pickup_distance_bonus", chmod = "RW", value = Player.native().character_loot_pickup_distance_bonus})
-    table.insert(properties, {name = "character_inventory_slots_bonus", chmod = "RW", value = Player.native().character_inventory_slots_bonus})
-    table.insert(properties, {name = "character_logistic_slot_count_bonus", chmod = "RW", value = Player.native().character_logistic_slot_count_bonus})
-    table.insert(properties, {name = "character_trash_slot_count_bonus", chmod = "RW", value = Player.native().character_trash_slot_count_bonus})
-    table.insert(properties, {name = "character_maximum_following_robot_count_bonus", chmod = "RW", value = Player.native().character_maximum_following_robot_count_bonus})
-    table.insert(properties, {name = "character_health_bonus", chmod = "RW", value = Player.native().character_health_bonus})
+    table.insert(properties, {name = "PLAYER.character_crafting_speed_modifier", chmod = "RW", value = Player.native().character_crafting_speed_modifier})
+    table.insert(properties, {name = "PLAYER.character_mining_speed_modifier", chmod = "RW", value = Player.native().character_mining_speed_modifier})
+    table.insert(properties, {name = "PLAYER.character_additional_mining_categories", chmod = "RW", value = string.match(serpent.dump(Player.native().character_additional_mining_categories),"do local _=(.*);return _;end")})
+    table.insert(properties, {name = "PLAYER.character_running_speed_modifier", chmod = "RW", value = Player.native().character_running_speed_modifier})
+    table.insert(properties, {name = "PLAYER.character_build_distance_bonus", chmod = "RW", value = Player.native().character_build_distance_bonus})
+    table.insert(properties, {name = "PLAYER.character_item_drop_distance_bonus", chmod = "RW", value = Player.native().character_item_drop_distance_bonus})
+    table.insert(properties, {name = "PLAYER.character_reach_distance_bonus", chmod = "RW", value = Player.native().character_reach_distance_bonus})
+    table.insert(properties, {name = "PLAYER.character_resource_reach_distance_bonus", chmod = "RW", value = Player.native().character_resource_reach_distance_bonus})
+    table.insert(properties, {name = "PLAYER.character_item_pickup_distance_bonus", chmod = "RW", value = Player.native().character_item_pickup_distance_bonus})
+    table.insert(properties, {name = "PLAYER.character_loot_pickup_distance_bonus", chmod = "RW", value = Player.native().character_loot_pickup_distance_bonus})
+    table.insert(properties, {name = "PLAYER.character_inventory_slots_bonus", chmod = "RW", value = Player.native().character_inventory_slots_bonus})
+    table.insert(properties, {name = "PLAYER.character_logistic_slot_count_bonus", chmod = "RW", value = Player.native().character_logistic_slot_count_bonus})
+    table.insert(properties, {name = "PLAYER.character_trash_slot_count_bonus", chmod = "RW", value = Player.native().character_trash_slot_count_bonus})
+    table.insert(properties, {name = "PLAYER.character_maximum_following_robot_count_bonus", chmod = "RW", value = Player.native().character_maximum_following_robot_count_bonus})
+    table.insert(properties, {name = "PLAYER.character_health_bonus", chmod = "RW", value = Player.native().character_health_bonus})
   end
-
+  if prototype_type ~= "recipe" and prototype.type == "inserter" then
+    table.insert(properties, {name = "FORCE.inserter_stack_size_bonus", chmod = "RW", value = Player.getForce().inserter_stack_size_bonus})
+    table.insert(properties, {name = "FORCE.stack_inserter_capacity_bonus", chmod = "RW", value = Player.getForce().stack_inserter_capacity_bonus})
+  end
+  
   local help_string = string.gmatch(prototype:help(),"(%S+) [[](RW?)[]]")
   Logging:debug(self.classname, "help_string", help_string)
 
@@ -359,7 +363,7 @@ function PropertiesTab:parseProperties(prototype, level)
         local test, error = pcall(function() prototype[key]:help() return true end)
         pcall(function() Logging:debug(self.classname, "level", level, "help", prototype[key]:help(), "test", test, error, level < 2 and test) end)
         if level < 2 and test then
-          local result = PropertiesTab:parseProperties(prototype[key], level + 1)
+          local result = PropertiesTab:parseProperties(prototype[key], level + 1, prototype_type)
           value = ""
           for _, property in pairs(result) do
             value = value .. property.name .. " = " .. property.value .. "\n"

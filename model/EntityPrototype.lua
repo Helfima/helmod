@@ -470,6 +470,40 @@ function EntityPrototype:getFluidCapacity()
 end
 
 -------------------------------------------------------------------------------
+-- Return inserter capacity
+--
+-- @function [parent=#EntityPrototype] getInserterCapacity
+--
+-- @return #number default 0
+--
+function EntityPrototype:getInserterCapacity()
+  if self.lua_prototype ~= nil then
+    local stack_bonus = 0
+    if self.lua_prototype.stack == true then
+      stack_bonus = Player.getForce().stack_inserter_capacity_bonus or 0
+    else
+      stack_bonus = Player.getForce().inserter_stack_size_bonus or 0
+    end
+    return 1 + stack_bonus
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
+-- Return inserter rotation speed °/s
+--
+-- @function [parent=#EntityPrototype] getInserterRotationSpeed
+--
+-- @return #number default 0
+--
+function EntityPrototype:getInserterRotationSpeed()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.inserter_rotation_speed*60
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
 -- Return belt speed
 --
 -- @function [parent=#EntityPrototype] getBeltSpeed

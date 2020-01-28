@@ -1038,7 +1038,9 @@ end
 --
 function Player.getItemsLogistic(type)
   local filters = {}
-  if type == "belt" then
+  if type == "inserter" then
+    filters = {{filter="type", mode="or", invert=false, type="inserter"}}
+  elseif type == "belt" then
     filters = {{filter="type", mode="or", invert=false, type="transport-belt"}}
   elseif type == "container" then
     filters = {{filter="type", mode="or", invert=false, type="container"}, {filter="minable", mode="and", invert=false}, {filter="type", mode="or", invert=false, type="logistic-container"}, {filter="minable", mode="and", invert=false}}
