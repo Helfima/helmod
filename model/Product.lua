@@ -200,7 +200,13 @@ function Product:countContainer(count, container)
   if self.lua_prototype.type == 0 or self.lua_prototype.type == "item" then
     local entity_prototype = EntityPrototype(container)
     local cargo_wagon_size = entity_prototype:getInventorySize(1)
-    if entity_prototype:getType() == "transport-belt" then
+    if entity_prototype:getType() == "inserter" then
+      local inserter_capacity = entity_prototype:getInserterCapacity()
+      local inserter_speed = entity_prototype:getInserterRotationSpeed()
+      -- temps pour 360° t=360/360*inserter_speed
+      local inserter_time = 1 / inserter_speed
+      return count * inserter_time / (inserter_capacity * (Model.getModel().time or 1))
+    elseif entity_prototype:getType() == "transport-belt" then
       -- ratio = item_per_s / speed_belt (blue belt)
       local belt_speed = entity_prototype:getBeltSpeed()
       return count / (belt_speed * self.belt_ratio * (Model.getModel().time or 1))

@@ -213,6 +213,7 @@ end
 --
 function EntityPrototype:getCraftingSpeed()
   if self.lua_prototype ~= nil then
+    if self.lua_prototype.name == "character" then return Player.getCraftingSpeed() end
     return self.lua_prototype.crafting_speed or 0
   end
   return 0
@@ -464,6 +465,40 @@ end
 function EntityPrototype:getFluidCapacity()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.fluid_capacity or 0
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
+-- Return inserter capacity
+--
+-- @function [parent=#EntityPrototype] getInserterCapacity
+--
+-- @return #number default 0
+--
+function EntityPrototype:getInserterCapacity()
+  if self.lua_prototype ~= nil then
+    local stack_bonus = 0
+    if self.lua_prototype.stack == true then
+      stack_bonus = Player.getForce().stack_inserter_capacity_bonus or 0
+    else
+      stack_bonus = Player.getForce().inserter_stack_size_bonus or 0
+    end
+    return 1 + stack_bonus
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
+-- Return inserter rotation speed °/s
+--
+-- @function [parent=#EntityPrototype] getInserterRotationSpeed
+--
+-- @return #number default 0
+--
+function EntityPrototype:getInserterRotationSpeed()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.inserter_rotation_speed*60
   end
   return 0
 end

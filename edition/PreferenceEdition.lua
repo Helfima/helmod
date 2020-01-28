@@ -337,7 +337,7 @@ function PreferenceEdition:updateItemsLogistic(event)
   options_table.style.horizontal_spacing=10
   options_table.style.vertical_spacing=10
   
-  for _,type in pairs({"belt", "container", "transport"}) do
+  for _,type in pairs({"inserter", "belt", "container", "transport"}) do
     local type_label = GuiElement.add(options_table, GuiLabel(string.format("%s-label", type)):caption({string.format("helmod_preferences-edition-panel.items-logistic-%s", type)}))
     type_label.style.width = 200
     

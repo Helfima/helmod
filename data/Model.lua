@@ -308,7 +308,7 @@ function Model.newFactory(name, count)
   Logging:debug(Model.classname, "newFactory()", name, count)
   local factoryModel = {}
   factoryModel.name = name or "assembling-machine-1"
-  factoryModel.type = "item"
+  factoryModel.type = "entity"
   factoryModel.count = count or 0
   factoryModel.energy = 0
   factoryModel.speed = 0
@@ -810,6 +810,7 @@ function Model.getDefaultPrototypeFactory(recipe_prototype)
   if category ~= nil then
     local factories = Player.getProductionsCrafting(category, recipe_prototype:native())
     local default_factory_level = User.getPreferenceSetting("default_factory_level")
+    Logging:debug(Model.classname, "default factory:", factories, default_factory_level)
     local factory_level = 1
     if default_factory_level == "fast" then
       factory_level = 100
