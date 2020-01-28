@@ -81,15 +81,12 @@ function ModelCompute.update(check_unlink)
   Logging:debug(ModelCompute.classname , "********** update()")
   local model = Model.getModel()
   if model.blocks ~= nil then
-    Logging.profiler = false
-    Logging:profilerStart()
     if check_unlink == true then
       ModelCompute.checkUnlinkedBlocks()
     end
     -- calcul les blocks
     local input = {}
     for _, block in spairs(model.blocks, function(t,a,b) return t[b].index > t[a].index end) do
-      Logging:profilerReset("-> loop", block.id, block.name)
       -- premiere recette
       local _,recipe = next(block.recipes)
       if recipe ~= nil then
@@ -98,10 +95,8 @@ function ModelCompute.update(check_unlink)
         -- state = 1 => produit pilotant
         -- state = 2 => produit restant
         -- prepare input
-        Logging:debug(ModelCompute.classname , "prepare", not(block.unlinked), block)
         if not(block.unlinked) then
           if block.products == nil then
-            Logging:debug(ModelCompute.classname , "prepare compute")
             ModelCompute.computeBlock(block)
           end
           -- prepare les inputs
@@ -111,11 +106,9 @@ function ModelCompute.update(check_unlink)
             block_elements = block.ingredients
             factor = 1
           end
-          Logging:debug(ModelCompute.classname , "-> input", input)
           if block_elements ~= nil then
             for _,element in pairs(block_elements) do
               if element.state ~= nil and element.state == 1 then
-                Logging:debug(ModelCompute.classname , "--> element", element.name, element)
                 if input[element.name] ~= nil then
                   element.input = (input[element.name] or 0) * factor
                   --element.state = 0
@@ -125,22 +118,16 @@ function ModelCompute.update(check_unlink)
           end
         end
 
-        Logging:profilerReset("--> prepare input         ")
         -- prepare bloc
         local block_products, block_ingredients = ModelCompute.prepareBlock(block)
         block.products = block_products
         block.ingredients = block_ingredients
-        Logging:profilerReset("--> prepareBlock          ")
-        Logging:debug(ModelCompute.classname , "---> prepare", block_products, block_ingredients)
 
         ModelCompute.computeBlockByFactory(block)
-        Logging:profilerReset("--> computeBlockByFactory ")
 
         ModelCompute.computeBlockCleanInput(block)
-        Logging:profilerReset("--> computeBlockCleanInput")
 
         ModelCompute.computeBlock(block)
-        Logging:profilerReset("--> computeBlock          ")
 
         -- consomme les ingredients
         for _,product in pairs(block.products) do
@@ -166,12 +153,9 @@ function ModelCompute.update(check_unlink)
     ModelCompute.computeInputOutput()
     --Logging:profilerReset()
     ModelCompute.computeResources()
-    Logging:profilerStop()
 
-    Logging:debug(ModelCompute.classname, "update()","Factory compute OK")
     -- genere un bilan
     ModelCompute.createSummary()
-    Logging:debug(ModelCompute.classname, "update()","Summary OK")
 
     Logging:debug(ModelCompute.classname , "********** model updated:",model)
   end
@@ -1065,7 +1049,7 @@ function ModelCompute.createSummary()
 
   for _, block in pairs(model.blocks) do
     energy = energy + block.power
-    pollution = pollution + block.pollution_total
+    pollution = pollution + block.pollution_total or 0
     ModelCompute.computeSummaryFactory(block)
     for _,type in pairs({"factories", "beacons", "modules"}) do
       for _,element in pairs(block.summary[type]) do

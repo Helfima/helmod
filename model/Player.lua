@@ -65,6 +65,18 @@ function Player.setPipette(entity)
 end
 
 -------------------------------------------------------------------------------
+-- Get character crafting speed
+--
+-- @function [parent=#Player] getCraftingSpeed
+--
+-- @return #LuaInventory
+--
+function Player.getCraftingSpeed()
+  if Lua_player == nil then return 0 end
+  return 1 + Lua_player.character_crafting_speed_modifier
+end
+
+-------------------------------------------------------------------------------
 -- Get main inventory
 --
 -- @function [parent=#Player] getMainInventory
@@ -245,7 +257,7 @@ end
 -- @return #string localised name
 --
 function Player.getLocalisedName(element)
-  Logging:debug(Player.classname, "getLocalisedName(element)", element)
+  --Logging:debug(Player.classname, "getLocalisedName(element)", element)
   if User.getModGlobalSetting("display_real_name") then
     return element.name
   end
@@ -492,9 +504,9 @@ end
 function Player.getProductionsCrafting(category, lua_recipe)
   local productions = {}
   local rules_included, rules_excluded = Player.getRules("production-crafting")
-
+  --Logging:debug(Player.classname, "production crafting", category, lua_recipe)
   if category == "crafting-handonly" then
-    productions["player"] = game.entity_prototypes["player"]
+    productions["character"] = game.entity_prototypes["character"]
   elseif lua_recipe.name ~= nil and lua_recipe.name == "water" then
     for key, lua_entity in pairs(Player.getOffshorePump()) do
       productions[lua_entity.name] = lua_entity
@@ -1026,7 +1038,9 @@ end
 --
 function Player.getItemsLogistic(type)
   local filters = {}
-  if type == "belt" then
+  if type == "inserter" then
+    filters = {{filter="type", mode="or", invert=false, type="inserter"}}
+  elseif type == "belt" then
     filters = {{filter="type", mode="or", invert=false, type="transport-belt"}}
   elseif type == "container" then
     filters = {{filter="type", mode="or", invert=false, type="container"}, {filter="minable", mode="and", invert=false}, {filter="type", mode="or", invert=false, type="logistic-container"}, {filter="minable", mode="and", invert=false}}
