@@ -15,7 +15,6 @@ SummaryPanel = newclass(Form)
 function SummaryPanel:onInit()
   self.panelCaption = ({"helmod_result-panel.tab-title-summary"})
   self.otherClose = false
-  self.parameterLast = string.format("%s_%s",self.classname,"last")
 end
 
 -------------------------------------------------------------------------------
@@ -34,17 +33,8 @@ end
 --
 -- @param #LuaEvent event
 --
--- @return #boolean if true the next call close dialog
---
 function SummaryPanel:onBeforeOpen(event)
-  Logging:debug(self.classname, "onBeforeEvent()", event)
-  local close = (event.action == "OPEN") -- only on open event
-  if User.getParameter(self.parameterLast) == nil or User.getParameter(self.parameterLast) then
-    close = false
-  end
-  User.setParameter(self.parameterLast, event.item1)
   User.setParameter("summary_block_id", event.item1)
-  return close
 end
 
 -------------------------------------------------------------------------------

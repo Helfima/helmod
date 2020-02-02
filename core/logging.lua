@@ -18,27 +18,30 @@ end
 function Logging:profilerStart()
   if self.profiler == false then return end
   if global_profiler == nil then global_profiler = game.create_profiler() end
-  if profiler == nil then profiler = game.create_profiler() end
   global_profiler.reset()
-  profiler.reset()
-  log({"", "*** Profiler begin ***", " | ", profiler})
+  log({"", "[PROFILER]", " | ", "GLOBAL", " | ", "*** Profiler begin ***", " | ", global_profiler})
 end
 
-function Logging:profilerReset(...)
+function Logging:profilerStep(name, ...)
   if self.profiler == false then return end
-  if profiler ~= nil then
-    local message = {...}
-    log({"", table.concat({...}," "), " | ", profiler})
-    profiler.reset()
-  end
+  if profiler == nil then profiler = {} end
+  if profiler[name] == nil then profiler[name] = game.create_profiler() end
+  local message = {...}
+  log({"", "[PROFILER]", " | ", name, " | ", table.concat({...}," "), " | ", profiler[name]})
+  profiler[name].reset()
 end
 
 function Logging:profilerStop()
   if self.profiler == false then return end
   if profiler ~= nil then
-    log({"", "*** Profiler end ***", " | ", global_profiler})
+    log({"", "[PROFILER]", " | ", "GLOBAL", " | ", "*** Profiler end ***", " | ", global_profiler})
+    log({"", "----------------------------------------------------------------------------------"})
     global_profiler.stop()
-    profiler.stop()
+    global_profiler = nil
+    for _,profiler_step in pairs(profiler or {}) do
+      profiler_step.stop()
+    end
+    profiler = nil
   end
 end
 

@@ -29,20 +29,6 @@ function RecipeExplorer:onBind()
 end
 
 -------------------------------------------------------------------------------
--- On before event
---
--- @function [parent=#RecipeExplorer] onBeforeEvent
---
--- @param #LuaEvent event
---
--- @return #boolean if true the next call close dialog
---
-function RecipeExplorer:onBeforeEvent(event)
-  -- close si nouvel appel
-  return true
-end
-
--------------------------------------------------------------------------------
 -- Get or create info panel
 --
 -- @function [parent=#RecipeExplorer] getInfoPanel

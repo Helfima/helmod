@@ -93,7 +93,7 @@ end
 -- @return #boolean
 --
 function User.isFilterContain()
-  return (User.getParameter("filter-contain") == nil or User.getParameter("filter-contain") == "right")
+  return (User.getParameter("filter-contain") == nil or User.getParameter("filter-contain") == "left")
 end
 
 -------------------------------------------------------------------------------
@@ -758,7 +758,7 @@ function User.resetCache(classname, name)
   Logging:trace(User.classname, "resetCache(classname, name)", classname, name)
   local data = User.get("cache")
   if classname == nil and name == nil then
-    data = {}
+    User.set("cache",{})
   elseif data[classname] ~= nil and name == nil then
     data[classname] = nil
   elseif data[classname] ~= nil then

@@ -14,7 +14,6 @@ PreferenceEdition = newclass(Form)
 --
 function PreferenceEdition:onInit()
   self.panelCaption = ({"helmod_preferences-edition-panel.title"})
-  self.parameterLast = string.format("%s_%s",self.classname,"last")
 end
 
 -------------------------------------------------------------------------------
@@ -46,33 +45,6 @@ end
 function PreferenceEdition:getSrollHeight()
   local number_line = User.getPreferenceSetting("preference_number_line")
   return 38 * (number_line or 3) + 4
-end
-
--------------------------------------------------------------------------------
--- On before event
---
--- @function [parent=#PreferenceEdition] onBeforeEvent
---
--- @param #LuaEvent event
---
--- @return #boolean if true the next call close dialog
---
-function PreferenceEdition:onBeforeEvent(event)
-  local close = true
-  if User.getParameter(self.parameterLast) == nil or User.getParameter(self.parameterLast) ~= event.item1 then
-    close = false
-  end
-  User.setParameter(self.parameterLast, event.item1)
-  return close
-end
-
--------------------------------------------------------------------------------
--- On close dialog
---
--- @function [parent=#PreferenceEdition] onClose
---
-function PreferenceEdition:onClose()
-  User.setParameter(self.parameterLast,nil)
 end
 
 -------------------------------------------------------------------------------

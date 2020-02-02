@@ -15,7 +15,6 @@ local input_quantity = nil
 --
 function EnergyEdition:onInit()
   self.panelCaption = ({"helmod_energy-edition-panel.title"})
-  self.parameterLast = string.format("%s_%s",self.classname,"last")
 end
 
 -------------------------------------------------------------------------------
@@ -182,34 +181,16 @@ function EnergyEdition:getObject(event)
 end
 
 -------------------------------------------------------------------------------
--- On before event
+-- On before open
 --
--- @function [parent=#EnergyEdition] onBeforeEvent
+-- @function [parent=#EnergyEdition] onBeforeOpen
 --
 -- @param #LuaEvent event
 --
--- @return #boolean if true the next call close dialog
---
-function EnergyEdition:onBeforeEvent(event)
+function EnergyEdition:onBeforeOpen(event)
   local model = Model.getModel()
-  local close = true
-  if User.getParameter(self.parameterLast) == nil or User.getParameter(self.parameterLast) ~= event.item1 then
-    close = false
-  end
-  User.setParameter(self.parameterLast, event.item1)
   model.primaryGroupSelected = nil
   model.secondaryGroupSelected = nil
-
-  return false
-end
-
--------------------------------------------------------------------------------
--- On close dialog
---
--- @function [parent=#EnergyEdition] onClose
---
-function EnergyEdition:onClose()
-  User.setParameter(self.parameterLast,nil)
 end
 
 -------------------------------------------------------------------------------

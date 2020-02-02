@@ -50,6 +50,20 @@ function EntityPrototype:getEnergyUsage()
 end
 
 -------------------------------------------------------------------------------
+-- Return max energy usage per second
+--
+-- @function [parent=#EntityPrototype] getMaxEnergyUsage
+--
+-- @return #number default 0
+--
+function EntityPrototype:getMaxEnergyUsage()
+  if self.lua_prototype ~= nil and self.lua_prototype.max_energy_usage ~= nil then
+    return self.lua_prototype.max_energy_usage*60
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
 -- Return extract power of fluid (boiler) in J
 --
 -- @function [parent=#EntityPrototype] getPowerExtract
@@ -526,7 +540,7 @@ end
 --
 function EntityPrototype:getPollution()
   if self.lua_prototype ~= nil then
-    local energy_usage = self:getEnergyUsage()
+    local energy_usage = self:getMaxEnergyUsage()
     local emission = self:getElectricEmissions()
     if self:getBurnerEmissions() ~= 0 then
       emission = self:getBurnerEmissions()

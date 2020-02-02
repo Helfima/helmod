@@ -14,11 +14,11 @@ local Lua_player = nil
 --
 -- @function [parent=#Player] print
 --
--- @param #string message
+-- @param #arg message
 --
-function Player.print(message)
+function Player.print(...)
   if Lua_player ~= nil then
-    Lua_player.print(message)
+    Lua_player.print(table.concat({...}," "))
   end
 end
 -------------------------------------------------------------------------------

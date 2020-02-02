@@ -161,36 +161,41 @@ function AdminTab:updateCache()
 
   -- Rule List
   local caches_panel = self:getCacheTab()
-  local users_data = global["users"]
-  local caches_data = Cache.get()
 
-  if Model.countList(users_data) > 0 then
-
-    local translate_panel = GuiElement.add(caches_panel, GuiFlowV("translate"))
-    GuiElement.add(translate_panel, GuiLabel("translate-label"):caption("Translated String"):style("helmod_label_title_frame"))
-    local result_table = GuiElement.add(translate_panel, GuiTable("list-data"):column(3):style("helmod_table-rule-odd"))
-    self:addTranslateListHeader(result_table)
-    for user_name, user_data in spairs(users_data, function(t,a,b) return b > a end) do
-      self:addTranslateListRow(result_table, user_name, user_data)
-      caches_data[user_name] = user_data.cache
+  if Model.countList(Cache.get()) > 0 then
+    local translate_panel = GuiElement.add(caches_panel, GuiFlowV("global-caches"))
+    GuiElement.add(translate_panel, GuiLabel("translate-label"):caption("Global caches"):style("helmod_label_title_frame"))
+    local result_table = GuiElement.add(translate_panel, GuiTable("list-data"):column(3))
+    self:addCacheListHeader(result_table)
+    
+    for key1, data1 in pairs(Cache.get()) do
+      self:addCacheListRow(result_table, "caches", key1, nil, nil, nil, data1)
+      for key2, data2 in pairs(data1) do
+        self:addCacheListRow(result_table, "caches", key1, key2, nil, nil, data2)
+      end
     end
-
   end
 
-
-  if Model.countList(caches_data) > 0 then
-    local cache_panel = GuiElement.add(caches_panel, GuiFlowV("caches"))
-    GuiElement.add(cache_panel, GuiLabel("translate-label"):caption("Cache Data"):style("helmod_label_title_frame"))
-    local result_table = GuiElement.add(cache_panel, GuiTable("list-data"):column(3):style("helmod_table-rule-odd"))
+  local users_data = global["users"]
+  if Model.countList(users_data) > 0 then
+    local cache_panel = GuiElement.add(caches_panel, GuiFlowV("user-caches"))
+    GuiElement.add(cache_panel, GuiLabel("translate-label"):caption("User caches"):style("helmod_label_title_frame"))
+    local result_table = GuiElement.add(cache_panel, GuiTable("list-data"):column(3))
     self:addCacheListHeader(result_table)
-    for key1, data1 in pairs(caches_data) do
+    
+    for key1, data1 in pairs(users_data) do
+      self:addCacheListRow(result_table, "users", key1, nil, nil, nil, data1)
       for key2, data2 in pairs(data1) do
-        if string.find(key2, "^HM.*") then
+        self:addCacheListRow(result_table, "users", key1, key2, nil, nil, data2)
+        if key2 == "cache" then
           for key3, data3 in pairs(data2) do
-            self:addCacheListRow(result_table, string.format("%s->%s->%s", key1, key2, key3), data3)
+            self:addCacheListRow(result_table, "users", key1, key2, key3, nil, data3)
+            if string.find(key3, "^HM.*") then
+              for key4, data4 in pairs(data3) do
+                self:addCacheListRow(result_table, "users", key1, key2, key3, key4, data4)
+              end
+            end
           end
-        else
-          self:addCacheListRow(result_table, string.format("All->%s->%s", key1, key2), data2)
         end
       end
     end
@@ -308,19 +313,62 @@ end
 -- @function [parent=#AdminTab] addCacheListRow
 --
 -- @param #LuaGuiElement itable container for element
--- @param #table model
+-- @param #string class_name
+-- @param #table data
 --
-function AdminTab:addCacheListRow(gui_table, class_name, data)
-  Logging:debug(self.classname, "addCacheListRow()", gui_table, class_name, data)
+function AdminTab:addCacheListRow(gui_table, class_name, key1, key2, key3, key4, data)
+  Logging:debug(self.classname, "addCacheListRow()", gui_table, class_name, key1, key2, key3, key4, data)
+  local caption = ""
+  if type(data) == "table" then
+    caption = Model.countList(data)
+  else
+    caption = data
+  end
 
   -- col action
-  local cell_action = GuiElement.add(gui_table, GuiTable("action", class_name):column(4))
-
-  -- col class
-  GuiElement.add(gui_table, GuiLabel("class", class_name):caption(class_name))
-
-  -- col count
-  GuiElement.add(gui_table, GuiLabel("total", class_name):caption(Model.countList(data)))
+  local cell_action = GuiElement.add(gui_table, GuiTable("action", string.format("%s-%s-%s-%s", key1, key2, key3, key4)):column(4))
+  if key2 == nil and key3 == nil and key4 == nil then
+    if class_name ~= "users" then
+      GuiElement.add(cell_action, GuiButton(self.classname, "delete-cache", class_name, key1):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
+      -- col class
+      GuiElement.add(gui_table, GuiLabel("class", key1):caption({"", "[color=255,106,0]", "[font=default-large-bold]", string.format("%s", key1), "[/font]", "[/color]"}))
+    else
+      -- col class
+      GuiElement.add(gui_table, GuiLabel("class", key1):caption({"", "[color=66,141,255]", "[font=default-large-bold]", string.format("%s", key1), "[/font]", "[/color]"}))
+    end
+  
+    -- col count
+    GuiElement.add(gui_table, GuiLabel("total", key1):caption({"", "[font=default-semibold]", caption, "[/font]"}))
+  elseif key3 == nil and key4 == nil then
+    if class_name == "users" and (key2 == "translated" or key2 == "cache") then
+      GuiElement.add(cell_action, GuiButton(self.classname, "delete-cache", class_name, key1, key2):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
+      -- col class
+      GuiElement.add(gui_table, GuiLabel("class", key1, key2):caption({"", "[color=255,106,0]", "[font=default-bold]", "|-" , key2, "[/font]", "[/color]"}))
+    else
+      -- col class
+      GuiElement.add(gui_table, GuiLabel("class", key1, key2):caption({"", "[font=default-bold]", "|-" , key2, "[/font]"}))
+    end
+  
+    -- col count
+    GuiElement.add(gui_table, GuiLabel("total", key1, key2):caption({"", "[font=default-semibold]", caption, "[/font]"}))
+  elseif key4 == nil then
+    if class_name == "users" then
+      GuiElement.add(cell_action, GuiButton(self.classname, "delete-cache", class_name, key1, key2, key3):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
+      -- col class
+      GuiElement.add(gui_table, GuiLabel("class", key1, key2, key3):caption({"", "[color=255,106,0]", "[font=default-bold]", "|\t\t\t|-" , key3, "[/font]", "[/color]"}))
+    else
+      -- col class
+      GuiElement.add(gui_table, GuiLabel("class", key1, key2, key3):caption({"", "[font=default-bold]", "|-" , key3, "[/font]"}))
+    end
+  
+    -- col count
+    GuiElement.add(gui_table, GuiLabel("total", key1, key2, key3):caption({"", "[font=default-semibold]", caption, "[/font]"}))
+  else
+    GuiElement.add(gui_table, GuiLabel("class", key1, key2, key3, key4):caption({"", "[font=default-bold]", "|\t\t\t|\t\t\t|-" , key4, "[/font]"}))
+  
+    -- col count
+    GuiElement.add(gui_table, GuiLabel("total", key1, key2, key3, key4):caption({"", "[font=default-semibold]", caption, "[/font]"}))
+  end
 
 end
 
