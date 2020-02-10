@@ -235,36 +235,6 @@ function Form:open(event)
 end
 
 -------------------------------------------------------------------------------
--- On before event
---
--- @function [parent=#Form] beforeEvent
---
--- @param #LuaEvent event
---
-function Form:beforeEvent(event)
-  Logging:debug(self.classname, "beforeEvent()", event)
-  local parent_panel = self:getParentPanel()
-  local close = self:onBeforeEvent(event)
-  if parent_panel ~= nil and parent_panel[self:getPanelName()] ~= nil and parent_panel[self:getPanelName()].valid then
-    Logging:debug(self.classname , "must close?",close)
-    if close and event.action == "OPEN" then
-      self:close(true)
-    end
-  end
-end
-
--------------------------------------------------------------------------------
--- On before event
---
--- @function [parent=#Form] onBeforeEvent
---
--- @param #LuaEvent event
---
-function Form:onBeforeEvent(event)
-  return false
-end
-
--------------------------------------------------------------------------------
 -- On before open
 --
 -- @function [parent=#Form] onBeforeOpen
@@ -284,7 +254,6 @@ end
 --
 function Form:event(event)
   Logging:debug(self.classname, "event()", event)
-  self:onBeforeEvent(event)
   if not(self:isOpened()) then return end
   self:onEvent(event)
 end

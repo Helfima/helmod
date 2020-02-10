@@ -4,9 +4,9 @@
 -- 
 Technology = newclass(Prototype,function(base, object)
   if object ~= nil and type(object) == "string" then
-    Prototype.init(base, Player.getTechnology(object))
+    Prototype.init(base, Player.getTechnologyPrototype(object))
   elseif object ~= nil and object.name ~= nil then
-    Prototype.init(base, Player.getTechnology(object.name))
+    Prototype.init(base, Player.getTechnologyPrototype(object.name))
   end
   base.classname = "HMTechnology"
 end)

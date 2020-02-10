@@ -125,6 +125,16 @@ function Controller:on_init()
   if caches_data["HMPlayer"] == nil then
     Player.getResources()
   end
+  local forms = {}
+  table.insert(forms, EntitySelector("HMEntitySelector"))
+  table.insert(forms, RecipeSelector("HMRecipeSelector"))
+  table.insert(forms, TechnologySelector("HMTechnologySelector"))
+  table.insert(forms, ItemSelector("HMItemSelector"))
+  table.insert(forms, FluidSelector("HMFluidSelector"))
+  table.insert(forms, ContainerSelector("HMContainerSelector"))
+  for _,form in pairs(forms) do
+    form:prepare()
+  end
 end
 -------------------------------------------------------------------------------
 -- Bind Dispatcher
@@ -254,8 +264,7 @@ function Controller:onTick(event)
     local next_event = User.getParameter("next_event")
     if next_event ~= nil and next_event.event.tick < event.tick then
       next_event.event.tick = event.tick
-      script.raise_event(next_event.type_event, next_event.event)
-      User.setParameter("next_event",nil)
+      Dispatcher:send(next_event.type_event, next_event.event, next_event.classname)
     end
   end
 end
@@ -316,6 +325,10 @@ local pattern = "([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)"
 function Controller:onGuiAction(event)
   Logging:debug(self.classname, "onGuiAction(event)", event)
   if event.element ~= nil and (string.find(event.element.name,"^HM.*") or string.find(event.element.name,"^helmod.*")) then
+    Logging.profiler = false
+    Logging:profilerStart()
+    
+    Logging:profilerStep("onGuiAction", "** start **")
     if views == nil then self:prepare() end
   
     event.classname, event.action, event.item1, event.item2, event.item3, event.item4 = string.match(event.element.name,pattern)
@@ -335,6 +348,8 @@ function Controller:onGuiAction(event)
       end
       self:onGuiEvent(event)
     end
+    
+    Logging:profilerStop()
   end
 end
 
@@ -347,12 +362,18 @@ end
 --
 function Controller:onGuiEvent(event)
   Logging:debug(self.classname, "onGuiEvent(event)", event)
-  Controller:send("on_gui_prepare", event, event.classname)
-  Controller:send("on_gui_translate", event, event.classname)
+  --Controller:send("on_gui_prepare", event, event.classname)
+  --Logging:profilerStep("onGuiAction", "on_gui_prepare")
+
+  --Controller:send("on_gui_translate", event, event.classname)
+  --Logging:profilerStep("onGuiAction", "on_gui_translate")
+
   if event.action == "OPEN" then
     Controller:send("on_gui_open", event, event.classname)
+    Logging:profilerStep("onGuiAction", "on_gui_open")
   end
   Controller:send("on_gui_event", event, event.classname)
+    Logging:profilerStep("onGuiAction", "on_gui_event")
 end
 
 -------------------------------------------------------------------------------
@@ -869,6 +890,51 @@ function Controller:onEventAccessAdmin(event)
     self:send("on_gui_pause", event)
   end
 
+  if event.action == "delete-cache" then
+    if event.item1 ~= nil and global[event.item1] ~= nil then
+      if event.item2 == "" and event.item3 == "" and event.item4 == "" then
+        global[event.item1] = nil
+      elseif event.item3 == "" and event.item4 == "" then
+        global[event.item1][event.item2] = {}
+      elseif event.item4 == "" then
+        global[event.item1][event.item2][event.item3] = nil
+      else
+        global[event.item1][event.item2][event.item3][event.item4] = nil
+      end
+      Player.print("Deleted:", event.item1, event.item2, event.item3, event.item4)
+    else
+      Player.print("Not found to delete:", event.item1, event.item2, event.item3, event.item4)
+    end
+    self:send("on_gui_refresh", event)
+  end
+
+  if event.action == "refresh-cache" then
+    global[event.item1][event.item2] = {}
+    
+    if event.item2 == "HMPlayer" then
+      Player.getResources()
+    else    
+      local forms = {}
+      table.insert(forms, EntitySelector("HMEntitySelector"))
+      table.insert(forms, RecipeSelector("HMRecipeSelector"))
+      table.insert(forms, TechnologySelector("HMTechnologySelector"))
+      table.insert(forms, ItemSelector("HMItemSelector"))
+      table.insert(forms, FluidSelector("HMFluidSelector"))
+      table.insert(forms, ContainerSelector("HMContainerSelector"))
+      for _,form in pairs(forms) do
+        if event.item2 == form.classname then
+          form:prepare()
+        end
+      end
+    end
+    
+    self:send("on_gui_refresh", event)
+  end
+
+  if event.action == "generate-cache" then
+    Controller:on_init()
+    self:send("on_gui_refresh", event)
+  end
 end
 
 -------------------------------------------------------------------------------

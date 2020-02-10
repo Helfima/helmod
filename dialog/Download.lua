@@ -19,21 +19,6 @@ function Download:onInit(parent)
 end
 
 -------------------------------------------------------------------------------
--- On before event
---
--- @function [parent=#Download] onBeforeEvent
---
--- @param #LuaEvent event
---
--- @return #boolean if true the next call close dialog
---
-function Download:onBeforeEvent(event)
-  -- close si nouvel appel
-  return true
-end
-
-
--------------------------------------------------------------------------------
 -- Get or create other Download panel
 --
 -- @function [parent=#Download] getDownloadPanel

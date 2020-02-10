@@ -14,34 +14,6 @@ ProductEdition = newclass(Form)
 --
 function ProductEdition:onInit()
   self.panelCaption = ({"helmod_product-edition-panel.title"})
-  self.parameterLast = string.format("%s_%s",self.classname,"last")
-end
-
--------------------------------------------------------------------------------
--- On before event
---
--- @function [parent=#ProductEdition] onBeforeEvent
---
--- @param #LuaEvent event
---
--- @return #boolean if true the next call close dialog
---
-function ProductEdition:onBeforeEvent(event)
-  local close = true
-  if User.getParameter(self.parameterLast) == nil or User.getParameter(self.parameterLast) ~= event.item1 then
-    close = false
-  end
-  User.setParameter(self.parameterLast, event.item1)
-  return close
-end
-
--------------------------------------------------------------------------------
--- On close dialog
---
--- @function [parent=#ProductEdition] onClose
---
-function ProductEdition:onClose()
-  User.setParameter(self.parameterLast,nil)
 end
 
 -------------------------------------------------------------------------------

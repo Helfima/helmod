@@ -152,20 +152,6 @@ function HelpPanel:onInit()
 end
 
 -------------------------------------------------------------------------------
--- On before event
---
--- @function [parent=#HelpPanel] onBeforeEvent
---
--- @param #LuaEvent event
---
--- @return #boolean if true the next call close dialog
---
-function HelpPanel:onBeforeEvent(event)
-  -- close si nouvel appel
-  return true
-end
-
--------------------------------------------------------------------------------
 -- Get or create content panel
 --
 -- @function [parent=#HelpPanel] getContentPanel

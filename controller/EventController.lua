@@ -19,7 +19,7 @@ function EventController.start()
   script.on_init(EventController.onInit)
   script.on_load(EventController.onLoad)
   script.on_configuration_changed(EventController.onConfigurationChanged)
-  --EventController.pcallEvent(defines.events.on_tick, EventController.onTick)
+  EventController.pcallEvent(defines.events.on_tick, EventController.onTick)
   EventController.pcallEvent(defines.events.on_gui_click, EventController.onGuiClick)
   EventController.pcallEvent(defines.events.on_gui_text_changed, EventController.onGuiTextChanged)
   EventController.pcallEvent(defines.events.on_prepare, EventController.onPrepare)
@@ -194,17 +194,17 @@ function EventController.onConfigurationChanged(data)
       Player.set(player)
       Controller:bindController(player)
     end
-  else
-    Cache.reset()
-    for _,player in pairs(game.players) do
-      Player.set(player)
-      User.resetCache()
-    end
   end
+  
+  Cache.reset()
+
   for _,player in pairs(game.players) do
     Player.set(player)
+    User.resetCache()
     User.resetTranslate()
   end
+  
+  Controller:on_init()
 end
 
 -------------------------------------------------------------------------------

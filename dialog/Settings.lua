@@ -19,20 +19,6 @@ function Settings:onInit()
 end
 
 -------------------------------------------------------------------------------
--- On before event
---
--- @function [parent=#Settings] onBeforeEvent
---
--- @param #LuaEvent event
---
--- @return #boolean if true the next call close dialog
---
-function Settings:onBeforeEvent(event)
-  -- close si nouvel appel
-  return true
-end
-
--------------------------------------------------------------------------------
 -- Get or create about settings panel
 --
 -- @function [parent=#Settings] getAboutSettingsPanel

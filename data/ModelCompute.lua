@@ -251,6 +251,9 @@ function ModelCompute.computeBlockByFactory(block)
           first_recipe.count = 1
         else
           local recipe_prototype = RecipePrototype(first_recipe)
+          
+          -- la recette n'existe plus
+          if recipe_prototype:native() == nil then return end
 
           if block.by_product == false then
             local _,lua_ingredient = next(recipe_prototype:getIngredients())
@@ -383,6 +386,9 @@ function ModelCompute.getBlockMatrix(block)
       local recipe_prototype = RecipePrototype(recipe)
       local lua_recipe = recipe_prototype:native()
 
+      -- la recette n'existe plus
+      if recipe_prototype:native() == nil then return end
+          
       -- prepare le taux de production
       local production = 1
       if not(block.solver == true) and recipe.production ~= nil then production = recipe.production end

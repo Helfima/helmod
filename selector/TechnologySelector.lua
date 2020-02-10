@@ -55,7 +55,7 @@ end
 function TechnologySelector:updateGroups(list_products, list_ingredients, list_translate)
   Logging:trace(self.classname, "updateGroups()")
 
-  for key, technology in pairs(Player.getTechnologies()) do
+  for key, technology in pairs(Player.getTechnologiePrototypes()) do
     self:appendGroups(technology, "technology", list_products, list_ingredients, list_translate)
   end
 end

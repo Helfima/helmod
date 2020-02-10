@@ -91,8 +91,7 @@ end
 --
 function RecipeSelector:updateGroups(list_products, list_ingredients, list_translate)
   Logging:trace(self.classname, "updateGroups()")
-
-  for key, recipe in pairs(Player.getRecipes()) do
+  for key, recipe in pairs(Player.getRecipePrototypes()) do
     self:appendGroups(recipe, "recipe", list_products, list_ingredients, list_translate)
   end
   for key, fluid in pairs(Player.getFluidPrototypes()) do
@@ -113,17 +112,17 @@ end
 --
 function RecipeSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
   Logging:trace(self.classname, "buildPrototypeIcon(player, guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
-  local recipe_prototype = self:getPrototype(prototype)
-  local type = recipe_prototype:getType()
-  local prototype_name = recipe_prototype:native().name
-  local prototype_localised_name = recipe_prototype:getLocalisedName()
-  local color = nil
-  if recipe_prototype:getCategory() == "crafting-handonly" then
-    color = "yellow"
-  elseif recipe_prototype:getEnabled() == false then
-    color = "red"
-  end
-  local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select", type):choose(prototype.type, prototype_name):color(color))
+--  local recipe_prototype = self:getPrototype(prototype)
+--  local type = recipe_prototype:getType()
+--  local prototype_name = recipe_prototype:native().name
+--  local prototype_localised_name = recipe_prototype:getLocalisedName()
+--  local color = nil
+--  if recipe_prototype:getCategory() == "crafting-handonly" then
+--    color = "yellow"
+--  elseif recipe_prototype:getEnabled() == false then
+--    color = "red"
+--  end
+  local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select", prototype.type):choose(prototype.type, prototype.name):color(color))
   button.locked = true
   if prototype.type ~= "recipe" then
     local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({"tooltip.resource-recipe"}))

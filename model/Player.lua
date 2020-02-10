@@ -14,11 +14,11 @@ local Lua_player = nil
 --
 -- @function [parent=#Player] print
 --
--- @param #string message
+-- @param #arg message
 --
-function Player.print(message)
+function Player.print(...)
   if Lua_player ~= nil then
-    Lua_player.print(message)
+    Lua_player.print(table.concat({...}," "))
   end
 end
 -------------------------------------------------------------------------------
@@ -340,6 +340,41 @@ end
 --
 function Player.getRecipes()
   return Player.getForce().recipes
+end
+
+-------------------------------------------------------------------------------
+-- Return recipe prototypes
+--
+-- @function [parent=#Player] getRecipePrototypes
+--
+-- @return #table recipes
+--
+function Player.getRecipePrototypes()
+  return game.recipe_prototypes
+end
+
+-------------------------------------------------------------------------------
+-- Return technologie prototypes
+--
+-- @function [parent=#Player] getTechnologiePrototypes
+--
+-- @return #table technologies
+--
+function Player.getTechnologiePrototypes()
+  return game.technology_prototypes
+end
+
+-------------------------------------------------------------------------------
+-- Return technology prototype
+--
+-- @function [parent=#Player] getTechnologyPrototype
+--
+-- @param #string name technology name
+--
+-- @return #LuaPrototype factorio prototype
+--
+function Player.getTechnologyPrototype(name)
+  return game.technology_prototypes[name]
 end
 
 -------------------------------------------------------------------------------

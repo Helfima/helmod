@@ -167,7 +167,6 @@ function RecipeEdition:onBeforeOpen(event)
   if event.action == "OPEN" and event.item1 ~= nil and event.item2 ~= nil then
     local parameter_last = string.format("%s%s", event.item1, event.item2)
     User.setParameter("recipe_edition_object", {block=event.item1, recipe=event.item2})
-    Logging:debug(self.classname, "onBeforeEvent()", {block=event.item1, recipe=event.item2})
     if User.getParameter(self.parameterLast) or User.getParameter(self.parameterLast) ~= parameter_last then
       close = false
       User.setParameter("factory_group_selected",nil)

@@ -35,7 +35,6 @@ end
 function PinPanel:onInit()
   self.panelCaption = ({"helmod_pin-tab-panel.title"})
   self.otherClose = false
-  self.parameterLast = string.format("%s_%s",self.classname,"last")
 end
 
 -------------------------------------------------------------------------------
@@ -45,17 +44,8 @@ end
 --
 -- @param #LuaEvent event
 --
--- @return #boolean if true the next call close dialog
---
 function PinPanel:onBeforeOpen(event)
-  Logging:debug(self.classname, "onBeforeEvent()", event)
-  local close = (event.action == "OPEN") -- only on open event
-  if User.getParameter(self.parameterLast) == nil or User.getParameter(self.parameterLast) then
-    close = false
-  end
-  User.setParameter(self.parameterLast, event.item1)
   User.setParameter("pin_block_id", event.item1)
-  return close
 end
 
 -------------------------------------------------------------------------------
