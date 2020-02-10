@@ -91,7 +91,7 @@ end
 --
 function RecipeSelector:updateGroups(list_products, list_ingredients, list_translate)
   Logging:trace(self.classname, "updateGroups()")
-  for key, recipe in pairs(Player.getRecipes()) do
+  for key, recipe in pairs(Player.getRecipePrototypes()) do
     self:appendGroups(recipe, "recipe", list_products, list_ingredients, list_translate)
   end
   for key, fluid in pairs(Player.getFluidPrototypes()) do

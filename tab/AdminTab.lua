@@ -161,9 +161,16 @@ function AdminTab:updateCache()
 
   -- Rule List
   local caches_panel = self:getCacheTab()
+  
+  GuiElement.add(caches_panel, GuiLabel("warning"):caption({"", "[color=255,106,0]", "[font=default-large-bold]", "Do not use this panel, unless absolutely necessary", "[/font]", "[/color]"}))
+  GuiElement.add(caches_panel, GuiButton(self.classname, "generate-cache"):sprite("menu", "settings-white", "settings"):style("helmod_button_menu_sm_red"):tooltip("Generate missing cache"))
+  
+  local table_panel = GuiElement.add(caches_panel, GuiTable("list-table"):column(2))
+  table_panel.vertical_centering = false
+  table_panel.style.horizontal_spacing = 50
 
   if Model.countList(Cache.get()) > 0 then
-    local translate_panel = GuiElement.add(caches_panel, GuiFlowV("global-caches"))
+    local translate_panel = GuiElement.add(table_panel, GuiFlowV("global-caches"))
     GuiElement.add(translate_panel, GuiLabel("translate-label"):caption("Global caches"):style("helmod_label_title_frame"))
     local result_table = GuiElement.add(translate_panel, GuiTable("list-data"):column(3))
     self:addCacheListHeader(result_table)
@@ -178,7 +185,7 @@ function AdminTab:updateCache()
 
   local users_data = global["users"]
   if Model.countList(users_data) > 0 then
-    local cache_panel = GuiElement.add(caches_panel, GuiFlowV("user-caches"))
+    local cache_panel = GuiElement.add(table_panel, GuiFlowV("user-caches"))
     GuiElement.add(cache_panel, GuiLabel("translate-label"):caption("User caches"):style("helmod_label_title_frame"))
     local result_table = GuiElement.add(cache_panel, GuiTable("list-data"):column(3))
     self:addCacheListHeader(result_table)
@@ -329,7 +336,8 @@ function AdminTab:addCacheListRow(gui_table, class_name, key1, key2, key3, key4,
   local cell_action = GuiElement.add(gui_table, GuiTable("action", string.format("%s-%s-%s-%s", key1, key2, key3, key4)):column(4))
   if key2 == nil and key3 == nil and key4 == nil then
     if class_name ~= "users" then
-      GuiElement.add(cell_action, GuiButton(self.classname, "delete-cache", class_name, key1):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
+      GuiElement.add(cell_action, GuiButton(self.classname, "delete-cache", class_name, key1):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"helmod_button.remove"}))
+      GuiElement.add(cell_action, GuiButton(self.classname, "refresh-cache", class_name, key1):sprite("menu", "refresh-white-sm", "refresh-sm"):style("helmod_button_menu_sm_red"):tooltip({"helmod_button.refresh"}))
       -- col class
       GuiElement.add(gui_table, GuiLabel("class", key1):caption({"", "[color=255,106,0]", "[font=default-large-bold]", string.format("%s", key1), "[/font]", "[/color]"}))
     else

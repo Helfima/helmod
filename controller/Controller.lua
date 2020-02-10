@@ -125,6 +125,16 @@ function Controller:on_init()
   if caches_data["HMPlayer"] == nil then
     Player.getResources()
   end
+  local forms = {}
+  table.insert(forms, EntitySelector("HMEntitySelector"))
+  table.insert(forms, RecipeSelector("HMRecipeSelector"))
+  table.insert(forms, TechnologySelector("HMTechnologySelector"))
+  table.insert(forms, ItemSelector("HMItemSelector"))
+  table.insert(forms, FluidSelector("HMFluidSelector"))
+  table.insert(forms, ContainerSelector("HMContainerSelector"))
+  for _,form in pairs(forms) do
+    form:prepare()
+  end
 end
 -------------------------------------------------------------------------------
 -- Bind Dispatcher
@@ -885,7 +895,7 @@ function Controller:onEventAccessAdmin(event)
       if event.item2 == "" and event.item3 == "" and event.item4 == "" then
         global[event.item1] = nil
       elseif event.item3 == "" and event.item4 == "" then
-        global[event.item1][event.item2] = nil
+        global[event.item1][event.item2] = {}
       elseif event.item4 == "" then
         global[event.item1][event.item2][event.item3] = nil
       else
@@ -898,6 +908,33 @@ function Controller:onEventAccessAdmin(event)
     self:send("on_gui_refresh", event)
   end
 
+  if event.action == "refresh-cache" then
+    global[event.item1][event.item2] = {}
+    
+    if event.item2 == "HMPlayer" then
+      Player.getResources()
+    else    
+      local forms = {}
+      table.insert(forms, EntitySelector("HMEntitySelector"))
+      table.insert(forms, RecipeSelector("HMRecipeSelector"))
+      table.insert(forms, TechnologySelector("HMTechnologySelector"))
+      table.insert(forms, ItemSelector("HMItemSelector"))
+      table.insert(forms, FluidSelector("HMFluidSelector"))
+      table.insert(forms, ContainerSelector("HMContainerSelector"))
+      for _,form in pairs(forms) do
+        if event.item2 == form.classname then
+          form:prepare()
+        end
+      end
+    end
+    
+    self:send("on_gui_refresh", event)
+  end
+
+  if event.action == "generate-cache" then
+    Controller:on_init()
+    self:send("on_gui_refresh", event)
+  end
 end
 
 -------------------------------------------------------------------------------

@@ -203,6 +203,8 @@ function EventController.onConfigurationChanged(data)
     User.resetCache()
     User.resetTranslate()
   end
+  
+  Controller:on_init()
 end
 
 -------------------------------------------------------------------------------

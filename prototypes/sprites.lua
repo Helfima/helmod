@@ -116,7 +116,7 @@ local list = {
   {name="play", sm=true},
   {name="property"},
   {name="record", sm=true},
-  {name="refresh"},
+  {name="refresh", sm=true},
   {name="robot"},
   {name="search"},
   {name="services", sm=true},

@@ -343,6 +343,41 @@ function Player.getRecipes()
 end
 
 -------------------------------------------------------------------------------
+-- Return recipe prototypes
+--
+-- @function [parent=#Player] getRecipePrototypes
+--
+-- @return #table recipes
+--
+function Player.getRecipePrototypes()
+  return game.recipe_prototypes
+end
+
+-------------------------------------------------------------------------------
+-- Return technologie prototypes
+--
+-- @function [parent=#Player] getTechnologiePrototypes
+--
+-- @return #table technologies
+--
+function Player.getTechnologiePrototypes()
+  return game.technology_prototypes
+end
+
+-------------------------------------------------------------------------------
+-- Return technology prototype
+--
+-- @function [parent=#Player] getTechnologyPrototype
+--
+-- @param #string name technology name
+--
+-- @return #LuaPrototype factorio prototype
+--
+function Player.getTechnologyPrototype(name)
+  return game.technology_prototypes[name]
+end
+
+-------------------------------------------------------------------------------
 -- Return technologies
 --
 -- @function [parent=#Player] getTechnologies

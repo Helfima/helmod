@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.9.30
+Date: 10. 02. 2020
+  Changes:
+    - generate cache on game initialisation
+    - changed admin panel, but not need use
+  Bugfixes:
+    - fixed switch contain/equal in recipe selector
+---------------------------------------------------------------------------------------------------
 Version: 0.9.29
 Date: 02. 02. 2020
   Changes:

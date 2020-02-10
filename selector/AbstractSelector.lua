@@ -386,10 +386,14 @@ function AbstractSelector:prepare(event)
     if User.getModGlobalSetting("filter_translated_string_active") then
       Cache.setData(self.classname, "list_translate", list_translate)
     end
-    User.setParameter("next_event", {type_event=event.type, event=event, classname=self.classname, wait="prepare"})
+    if event ~= nil then
+      User.setParameter("next_event", {type_event=event.type, event=event, classname=self.classname, wait="prepare"})
+    end
     return {wait=true, method="prepare"}
   else
-    User.setParameter("next_event",nil)
+    if event ~= nil then
+      User.setParameter("next_event",nil)
+    end
     return {wait=false, method="prepare"}
   end
 end

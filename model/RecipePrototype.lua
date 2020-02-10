@@ -15,7 +15,7 @@ RecipePrototype = newclass(Prototype,function(base, object, object_type)
   end
   Logging:trace(base.classname, "object_name", base.object_name, "lua_type", base.lua_type)
   if base.lua_type == nil or base.lua_type == "recipe" then
-    Prototype.init(base, Player.getRecipe(base.object_name))
+    Prototype.init(base, Player.getRecipePrototype(base.object_name))
     base.lua_type = "recipe"
   elseif base.lua_type == "resource" then
     Prototype.init(base, Player.getRecipeEntity(base.object_name))
