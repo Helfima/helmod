@@ -153,7 +153,7 @@ function PrototypeFiltersTab:addRowFilter(itable, prototype_filter, index)
     local comparison_value = ""
     if prototype_filter.option ~= nil then
       comparison = prototype_filter.option.comparison
-      comparison_value = prototype_filter.option.value
+      comparison_value = prototype_filter.option.value or 0
     end
     Logging:debug(self.classname, "option", prototype_filter.option, comparison, comparison_value)
     GuiElement.add(comparaison_cell, GuiDropDown(self.classname, "change-filter-option-comparison", index):items(comparisons, comparison))

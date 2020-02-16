@@ -86,3 +86,15 @@ function Technology:getSubgroup()
   return {name="default"}
 end
 
+-------------------------------------------------------------------------------
+-- Return isResearched
+--
+-- @function [parent=#Technology] isResearched
+--
+-- @return #boolean
+--
+function Technology:isResearched()
+  if self.lua_prototype == nil then return false end
+  local technology = Player.getTechnology(self.lua_prototype.name)
+  return technology.researched
+end

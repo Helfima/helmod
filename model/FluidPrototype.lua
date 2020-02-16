@@ -11,3 +11,16 @@ FluidPrototype = newclass(Prototype,function(base, object)
   end
   base.classname = "HMFluidPrototype"
 end)
+
+-------------------------------------------------------------------------------
+-- Return fuel value
+--
+-- @function [parent=#FluidPrototype] getFuelValue
+--
+-- @return #boolean
+--
+function FluidPrototype:getFuelValue()
+  if self.lua_prototype == nil then return 0 end
+  return self.lua_prototype.fuel_value
+end
+

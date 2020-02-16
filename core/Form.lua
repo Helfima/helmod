@@ -30,6 +30,9 @@ function Form:bind()
   Dispatcher:bind("on_gui_update", self, self.update)
   Dispatcher:bind("on_gui_close", self, self.close)
 
+  Dispatcher:bind("on_gui_error", self, self.updateError)
+  Dispatcher:bind("on_gui_message", self, self.updateMessage)
+
   self:onBind()
 end
 
@@ -135,6 +138,44 @@ function Form:getPanel()
   end
   title_panel.drag_target = flow_panel
   return flow_panel, content_panel, menu_panel
+end
+
+-------------------------------------------------------------------------------
+-- Get the error panel
+--
+-- @function [parent=#Form] getErrorPanel
+--
+-- @return #LuaGuiElement
+--
+function Form:getErrorPanel()
+  Logging:trace(self.classname, "getErrorPanel()")
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  local panel_name = "error-panel"
+  if flow_panel[panel_name] ~= nil and flow_panel[panel_name].valid then
+    return flow_panel[panel_name]
+  end
+  local panel = GuiElement.add(flow_panel, GuiFrameV(panel_name))
+  panel.style.horizontally_stretchable = true
+  return panel
+end
+
+-------------------------------------------------------------------------------
+-- Get the message panel
+--
+-- @function [parent=#Form] getMessagePanel
+--
+-- @return #LuaGuiElement
+--
+function Form:getMessagePanel()
+  Logging:trace(self.classname, "getMessagePanel()")
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  local panel_name = "message-panel"
+  if flow_panel[panel_name] ~= nil and flow_panel[panel_name].valid then
+    return flow_panel[panel_name]
+  end
+  local panel = GuiElement.add(flow_panel, GuiFrameV(panel_name))
+  panel.style.horizontally_stretchable = true
+  return panel
 end
 
 -------------------------------------------------------------------------------
@@ -354,6 +395,36 @@ function Form:update(event)
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if self.auto_clear then content_panel.clear() end
   self:onUpdate(event)
+end
+
+-------------------------------------------------------------------------------
+-- Update message
+--
+-- @function [parent=#Form] updateMessage
+--
+-- @param #LuaEvent event
+--
+function Form:updateMessage(event)
+  Logging:debug(self.classname, "updateMessage()", event)
+  if not(self:isOpened()) then return end
+  local panel = self:getMessagePanel()
+  panel.clear()
+  GuiElement.add(panel, GuiLabel("message"):caption(event.message))
+end
+
+-------------------------------------------------------------------------------
+-- Update error
+--
+-- @function [parent=#Form] updateError
+--
+-- @param #LuaEvent event
+--
+function Form:updateError(event)
+  Logging:debug(self.classname, "updateError()", event)
+  if not(self:isOpened()) then return end
+  local panel = self:getErrorPanel()
+  panel.clear()
+  GuiElement.add(panel, GuiLabel("message"):caption(event.message or "Unknown error"):color("red"))
 end
 
 -------------------------------------------------------------------------------

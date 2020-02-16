@@ -142,16 +142,17 @@ function GuiCellFactory:create(parent)
   local tooltip = GuiTooltipElement(self.options.tooltip):element(factory)
   GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("entity", factory.name):tooltip(tooltip))
 
-  local col_size = math.ceil(Model.countModulesModel(factory)/2)
-  if col_size < 2 then col_size = 2 end
+  local col_size = math.ceil(Model.countList(factory.modules)/2)
+  if col_size < 2 then col_size = 1 end
   local cell_factory_module = GuiElement.add(row1, GuiTable("factory-modules"):column(col_size):style("helmod_factory_modules"))
   -- modules
   if factory.modules ~= nil then
     for name, count in pairs(factory.modules) do
-      for index = 1, count, 1 do
+      if count > 0 then
+        local module_cell = GuiElement.add(cell_factory_module, GuiFlowH("module-cell", name))
         local tooltip = GuiTooltipModule("tooltip.info-module"):element({type="item", name=name})
-        GuiElement.add(cell_factory_module, GuiButtonSpriteSm("module", index):sprite("item", name):tooltip(tooltip))
-        index = index + 1
+        GuiElement.add(module_cell, GuiButtonSpriteSm("module"):sprite("item", name):tooltip(tooltip))
+        GuiElement.add(module_cell, GuiLabel("module-amount"):caption({"", "x", count}):style("helmod_label_element"))
       end
     end
   end

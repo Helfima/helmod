@@ -112,16 +112,13 @@ end
 --
 function RecipeSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
   Logging:trace(self.classname, "buildPrototypeIcon(player, guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
---  local recipe_prototype = self:getPrototype(prototype)
---  local type = recipe_prototype:getType()
---  local prototype_name = recipe_prototype:native().name
---  local prototype_localised_name = recipe_prototype:getLocalisedName()
---  local color = nil
---  if recipe_prototype:getCategory() == "crafting-handonly" then
---    color = "yellow"
---  elseif recipe_prototype:getEnabled() == false then
---    color = "red"
---  end
+  local recipe_prototype = self:getPrototype(prototype)
+  local color = nil
+  if recipe_prototype:getCategory() == "crafting-handonly" then
+    color = "yellow"
+  elseif recipe_prototype:getEnabled() == false then
+    color = "red"
+  end
   local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select", prototype.type):choose(prototype.type, prototype.name):color(color))
   button.locked = true
   if prototype.type ~= "recipe" then

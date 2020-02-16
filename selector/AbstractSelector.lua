@@ -11,16 +11,6 @@ AbstractSelector = newclass(Form,function(base,classname)
 end)
 
 -------------------------------------------------------------------------------
--- On Bind Dispatcher
---
--- @function [parent=#AbstractSelector] onBind
---
-function AbstractSelector:onBind()
-  Dispatcher:bind("on_gui_prepare", self, self.prepare)
-  Dispatcher:bind("on_gui_translate", self, self.translate)
-end
-
--------------------------------------------------------------------------------
 -- Return filter - filtre sur les prototypes
 --
 -- @function [parent=#AbstractSelector] getProductFilter
@@ -183,6 +173,19 @@ function AbstractSelector:getGroupsPanel()
 end
 
 -------------------------------------------------------------------------------
+-- Get or create groups panel
+--
+-- @function [parent=#AbstractSelector] getGroupsPanel
+--
+function AbstractSelector:getFailPanel()
+  local scroll_panel = self:getSrollPanel()
+  if scroll_panel["groups_panel"] ~= nil and scroll_panel["groups_panel"].valid then
+    return scroll_panel["groups_panel"]
+  end
+  return GuiElement.add(scroll_panel, GuiFrameV("groups_panel"):style(helmod_frame_style.hidden))
+end
+
+-------------------------------------------------------------------------------
 -- Get or create item list panel
 --
 -- @function [parent=#AbstractSelector] getItemListPanel
@@ -216,10 +219,16 @@ function AbstractSelector:onBeforeOpen(event)
     else
       User.setParameter("filter_prototype", event.item3)
     end
-    self:resetGroups()
+    if event.reset ~= true then
+      event.reset = true
+      self:resetGroups()
+    end
   else
     local filter_prototype = self:getFilter()
-    if filter_prototype ~= nil then self:resetGroups() end
+    if filter_prototype ~= nil and event.continue ~= true then 
+      event.reset = true
+      self:resetGroups()
+    end
     User.setParameter("filter_prototype", nil)
   end
 
@@ -326,8 +335,8 @@ function AbstractSelector:onEvent(event)
       self:resetGroups()
       Controller:send("on_gui_update", event, self.classname)
     else
-      if event.element.parent ~= nil and event.element.parent["filter-text"] ~= nil then
-        User.setParameter("filter_prototype", event.element.parent["filter-text"].text)
+      if event.element.parent ~= nil and event.element.parent[self.classname.."=recipe-filter=filter-text"] ~= nil then
+        User.setParameter("filter_prototype", event.element.parent[self.classname.."=recipe-filter=filter-text"].text)
       end
       self:resetGroups()
       Controller:send("on_gui_update", event, self.classname)
@@ -386,15 +395,6 @@ function AbstractSelector:prepare(event)
     if User.getModGlobalSetting("filter_translated_string_active") then
       Cache.setData(self.classname, "list_translate", list_translate)
     end
-    if event ~= nil then
-      User.setParameter("next_event", {type_event=event.type, event=event, classname=self.classname, wait="prepare"})
-    end
-    return {wait=true, method="prepare"}
-  else
-    if event ~= nil then
-      User.setParameter("next_event",nil)
-    end
-    return {wait=false, method="prepare"}
   end
 end
 
@@ -408,23 +408,30 @@ end
 function AbstractSelector:translate(event)
   Logging:debug(self.classname, "translate()", event)
   -- recuperation recipes
-  if not(Cache.isEmpty(self.classname, "list_translate")) then
-    if User.getModGlobalSetting("filter_translated_string_active") and not(User.isTranslate()) then
+  if not(Cache.isEmpty(self.classname, "list_translate")) or (event.continue and event.method == "translate") then
+    if User.getModGlobalSetting("filter_translated_string_active") and (not(User.isTranslate()) or (event.continue and event.method == "translate")) then
       local list_translate = Cache.getData(self.classname, "list_translate")
-
+      local step_translate = User.getModGlobalSetting("user_cache_step") or 100
+      local start_index = event.index_translate or 0
+      local index = -1
+      event.continue = false
       for item_name,localised_name in pairs(list_translate) do
-        --Logging:debug(Controller.classname, "translate", item_name, localised_name)
-        Player.native().request_translation(localised_name)
+        index = index + 1
+        if index > start_index + step_translate then 
+          event.continue = true
+          break
+        end
+        if index >= start_index then
+          Player.native().request_translation(localised_name)
+        end
       end
-      User.setParameter("next_event", {type_event=event.type, event=event, classname=self.classname, wait="translate"})
-      return {wait=true, method="translate"}
+      Logging:debug(self.classname, "-->event", event)
+      return User.createNextEvent(event, self.classname, "translate", index)
     else
-      User.setParameter("next_event",nil)
-      return {wait=false, method="translate"}
+      return User.createNextEvent(nil, self.classname, "translate")
     end
   else
-    User.setParameter("next_event",nil)
-    return {wait=false, method="translate"}
+    return User.createNextEvent(nil, self.classname, "translate")
   end
 end
 
@@ -442,25 +449,27 @@ function AbstractSelector:onUpdate(event)
   
   self:updateFilter(event)
   Logging:profilerStep("onUpdate", "updateFilter")
+  local response = {wait=false, method="none"}
   
-  self:updateWaitMessage("Wait prepare")
-  local response = self:prepare(event)
-  Logging:profilerStep("onUpdate", "** prepare **")
-  
-  if response.wait == true then 
-    return
-  end
-  
-  self:updateWaitMessage("Wait translate")
+  self:updateWaitMessage(string.format("Wait translate: %s", event.index_translate or 0))
   response = self:translate(event)
+  Logging:debug(self.classname, "response", response)
   Logging:profilerStep("onUpdate", "** translate **")
   
   if response.wait == true then 
     return
   end
   
-  self:createElementLists()
+  self:updateWaitMessage(string.format("Wait list build: %s", event.index_list or 0))
+  response = self:createElementLists(event)
   Logging:profilerStep("onUpdate", "createElementLists")
+
+  Logging:debug(self.classname, "-->response.wait", response.wait)
+
+  if response.wait == true then 
+    return
+  end
+  
   
   self:updateGroupSelector(event)
   Logging:profilerStep("onUpdate", "updateGroupSelector")
@@ -554,8 +563,8 @@ function AbstractSelector:updateFilter(event)
       text_filter.lose_focus_on_confirm = false
       text_filter.focus()
     else
-      GuiElement.add(cellFilter, GuiTextField("filter-text"):text(filter_prototype):style())
-      GuiElement.add(cellFilter, GuiButton(self.classname, "recipe-filter", "filter-value"):caption({"helmod_button.apply"}))
+      GuiElement.add(cellFilter, GuiTextField(self.classname, "recipe-filter", "filter-text"):text(filter_prototype):style())
+      GuiElement.add(cellFilter, GuiButton(self.classname, "recipe-filter", "filter-button"):caption({"helmod_button.apply"}))
     end
     
   end
@@ -568,7 +577,7 @@ function AbstractSelector:updateFilter(event)
       if User.getModGlobalSetting("filter_on_text_changed") then
         panel["filter"]["cell-filter"][self.classname.."=recipe-filter=filter-value=onchange"].text = filter_prototype
       else
-        panel["filter"]["cell-filter"]["filter-text"].text = filter_prototype
+        panel["filter"]["cell-filter"][self.classname.."=recipe-filter=filter-text"].text = filter_prototype
       end
     end
   end
@@ -582,10 +591,55 @@ end
 --
 -- @return #table
 --
-function AbstractSelector:createElementLists()
+function AbstractSelector:createElementLists(event)
   Logging:trace(self.classname, "createElementLists()")
-  local list_group_elements = self:onCreateElementLists()
+  local list_group_elements = self:getListGroupElements()
+  local list_group = self:getListGroup()
+  local list_subgroup = self:getListSubGroup()
 
+  if Model.countList(list_group) == 0 or (event.continue and event.method == "list") then
+    local list = self:getListPrototype()
+    local filter_show_disable = User.getSetting("filter_show_disable")
+    local filter_show_hidden = User.getSetting("filter_show_hidden")
+    
+    event.continue = false
+    local step_list = User.getModGlobalSetting("user_cache_step") or 100
+    local start_index = event.index_list or 0
+    local index = -1
+    -- list_products[element.name][type - lua_recipe.name]
+    for key, element in pairs(list) do
+      index = index + 1
+      if index > start_index + step_list then 
+          Logging:debug(self.classname, "-->continue", index)
+          event.continue = true
+          break
+      end
+      if index >= start_index then
+        -- filter sur le nom element (product ou ingredient)
+        if self:checkFilter(key) then
+          for element_name, element in pairs(element) do
+            local prototype = self:getPrototype(element)
+            if (not(self.disable_option) or (prototype:getEnabled() == true or filter_show_disable == true)) and (not(self.hidden_option) or (prototype:getHidden() == false or filter_show_hidden == true)) then
+              if list_group_elements[element.group] == nil then list_group_elements[element.group] = {} end
+              if list_group_elements[element.group][element.subgroup] == nil then list_group_elements[element.group][element.subgroup] = {} end
+              list_group_elements[element.group][element.subgroup][element_name] = element
+  
+              list_group[element.group] = prototype:getGroup()
+              list_subgroup[element.subgroup] = prototype:getSubgroup()
+            end
+          end
+        end
+      end
+    end
+    Logging:debug(self.classname, "-->list_group", list_group)
+    User.setCache(self.classname, "list_group", list_group)
+    User.setCache(self.classname, "list_subgroup", list_subgroup)
+    User.setCache(self.classname, "list_group_elements", list_group_elements)
+    Logging:debug(self.classname, "-->list", index, start_index, Model.countList(list))
+    return User.createNextEvent(event, self.classname, "list", index)
+  end
+  
+      
   local list_item = self:getListItem()
   local group_selected = User.getParameter("recipe_group_selected")
   local list_group = self:getListGroup()
@@ -598,6 +652,9 @@ function AbstractSelector:createElementLists()
     list_item = list_group_elements[group_selected]
   end
   User.setCache(self.classname, "list_item", list_item or {})
+  Logging:debug(self.classname, "-->list_item", list_item)
+  event.index_list = nil
+  return User.createNextEvent(nil, self.classname, "list")
 end
 
 -------------------------------------------------------------------------------
@@ -639,48 +696,6 @@ function AbstractSelector:appendGroups(element, type, list_products, list_ingred
 end
 
 -------------------------------------------------------------------------------
--- On create element lists
---
--- @function [parent=#AbstractSelector] onCreateElementLists
---
--- @return #table
---
-function AbstractSelector:onCreateElementLists()
-  Logging:trace(self.classname, "onCreateElementLists()")
-  local list_group_elements = self:getListGroupElements()
-  local list_group = self:getListGroup()
-  local list_subgroup = self:getListSubGroup()
-
-  if Model.countList(list_group) == 0 then
-    local list = self:getListPrototype()
-    local filter_show_disable = User.getSetting("filter_show_disable")
-    local filter_show_hidden = User.getSetting("filter_show_hidden")
-
-    -- list_products[element.name][type - lua_recipe.name]
-    for key, element in pairs(list) do
-      -- filter sur le nom element (product ou ingredient)
-      if self:checkFilter(key) then
-        for element_name, element in pairs(element) do
-          local prototype = self:getPrototype(element)
-          if (not(self.disable_option) or (prototype:getEnabled() == true or filter_show_disable == true)) and (not(self.hidden_option) or (prototype:getHidden() == false or filter_show_hidden == true)) then
-            if list_group_elements[element.group] == nil then list_group_elements[element.group] = {} end
-            if list_group_elements[element.group][element.subgroup] == nil then list_group_elements[element.group][element.subgroup] = {} end
-            list_group_elements[element.group][element.subgroup][element_name] = element
-
-            list_group[element.group] = prototype:getGroup()
-            list_subgroup[element.subgroup] = prototype:getSubgroup()
-          end
-        end
-      end
-    end
-    User.setCache(self.classname, "list_group", list_group)
-    User.setCache(self.classname, "list_subgroup", list_subgroup)
-    User.setCache(self.classname, "list_group_elements", list_group_elements)
-  end
-  return list_group_elements
-end
-
--------------------------------------------------------------------------------
 -- Update wait message
 --
 -- @function [parent=#AbstractSelector] updateWaitMessage
@@ -692,8 +707,22 @@ function AbstractSelector:updateWaitMessage(message)
   local panel = self:getGroupsPanel()
   local item_list_panel = self:getItemListPanel()
   item_list_panel.clear()
-
   GuiElement.add(item_list_panel, GuiLabel("wait message"):caption(message))
+end
+
+-------------------------------------------------------------------------------
+-- Update fail message
+--
+-- @function [parent=#AbstractSelector] updateFailMessage
+--
+-- @param #LuaEvent event
+--
+function AbstractSelector:updateFailMessage(event)
+  Logging:debug(self.classname, "updateFailMessage()", event)
+  local panel = self:getGroupsPanel()
+  local item_list_panel = self:getItemListPanel()
+  item_list_panel.clear()
+  GuiElement.add(item_list_panel, GuiLabel("wait message"):caption(message):fail())
 end
 
 -------------------------------------------------------------------------------

@@ -27,3 +27,14 @@ function GuiLabel:wordWrap(wrap)
   return self
 end
 
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiLabel] color
+-- @param #boolean wrap
+-- @return #GuiLabel
+--
+function GuiLabel:color(color)
+  local color = helmod_tag.color[color] or helmod_tag.color.orange
+  self.m_caption = {"", helmod_tag.color.orange, self.m_caption, helmod_tag.color.close}
+  return self
+end

@@ -125,7 +125,7 @@ function PrototypeFilter:getElements(filters)
     return game.get_filtered_tile_prototypes(filters)
   elseif self.type == "decorative" then
     return game.get_filtered_decorative_prototypes(filters)
-  elseif self.type == "fuild" then
+  elseif self.type == "fluid" then
     return game.get_filtered_fluid_prototypes(filters)
   elseif self.type == "recipe" then
     return game.get_filtered_recipe_prototypes(filters)

@@ -55,6 +55,39 @@ function BurnerPrototype:getFirstFuelItemPrototype()
   return first_fuel
 end
 
+-------------------------------------------------------------------------------
+-- Return fuel fluid prototypes
+--
+-- @function [parent=#BurnerPrototype] getFuelFluidPrototypes
+--
+-- @return #table
+--
+function BurnerPrototype:getFuelFluidPrototypes()
+  local filters = {}
+  table.insert(filters, {filter="fuel-value", mode="or", invert=false, comparison=">", value=0})
+  return Player.getFluidPrototypes(filters)
+end
+
+-------------------------------------------------------------------------------
+-- Return first fuel fluid prototype
+--
+-- @function [parent=#BurnerPrototype] getFirstFuelFluidPrototype
+--
+-- @param #string name item name
+--
+-- @return #LuaItemPrototype fluid prototypes
+--
+function BurnerPrototype:getFirstFuelFluidPrototype()
+  local fuel_items = self:getFuelFluidPrototypes()
+  local first_fuel = nil
+  for _,fuel_item in pairs(fuel_items) do
+    if first_fuel == nil then
+      first_fuel = fuel_item
+    end
+  end
+  return first_fuel
+end
+
 
 function BurnerPrototype:toString()
   local data = {}
