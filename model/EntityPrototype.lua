@@ -269,7 +269,11 @@ end
 -- @return #string default electrical
 --
 function EntityPrototype:getEnergyType()
-  if self.lua_prototype ~= nil and self.lua_prototype.burner_prototype ~= nil then return "burner" end
+  if self.lua_prototype ~= nil then
+    if self.lua_prototype.burner_prototype ~= nil then return "burner" end
+    if self.lua_prototype.electric_energy_source_prototype ~= nil then return "electrical" end
+    return "fuel-burner"
+  end
   return "electrical"
 end
 
@@ -422,7 +426,8 @@ end
 --
 function EntityPrototype:getBurnerPrototype()
   if self.lua_prototype ~= nil then
-    return BurnerPrototype(self.lua_prototype.burner_prototype)
+    if self:getEnergyType() == "burner" then return BurnerPrototype(self.lua_prototype.burner_prototype) end
+    if self:getEnergyType() == "fuel-burner" then return BurnerPrototype() end
   end
   return BurnerPrototype()
 end
@@ -435,8 +440,9 @@ end
 -- @return #number default 0
 --
 function EntityPrototype:getBurnerEffectivity()
-  if self.lua_prototype ~= nil and self.lua_prototype.burner_prototype ~= nil then
-    return self.lua_prototype.burner_prototype.effectivity or 0
+  if self.lua_prototype ~= nil then
+    if self:getEnergyType() == "burner" then return self.lua_prototype.burner_prototype.effectivity or 0 end
+    if self:getEnergyType() == "fuel-burner" then return 1 end
   end
   return 0
 end
@@ -449,8 +455,9 @@ end
 -- @return #number default 0
 --
 function EntityPrototype:getBurnerEmissions()
-  if self.lua_prototype ~= nil and self.lua_prototype.burner_prototype ~= nil then
-    return self.lua_prototype.burner_prototype.emissions or 1
+  if self.lua_prototype ~= nil then
+    if self:getEnergyType() == "burner" then return self.lua_prototype.burner_prototype.emissions or 1 end
+    if self:getEnergyType() == "fuel-burner" then return 2.777777e-7 end
   end
   return 0
 end

@@ -1010,9 +1010,14 @@ end
 --
 -- @function [parent=#Player] getFluidPrototypes
 --
+-- @param #table filters  sample: {{filter="type", mode="or", invert=false type="transport-belt"}}
+--
 -- @return #LuaFluidPrototype fluid prototype
 --
-function Player.getFluidPrototypes()
+function Player.getFluidPrototypes(filters)
+  if filters ~= nil then
+    return game.get_filtered_fluid_prototypes(filters)
+  end
   return game.fluid_prototypes
 end
 

@@ -234,7 +234,13 @@ function RecipeEdition:onEvent(event)
       local index = event.element.selected_index
       local object = self:getObject()
       local factory_prototype = EntityPrototype(object.factory)
-      local fuel_list = factory_prototype:getBurnerPrototype():getFuelItemPrototypes()
+      local fuel_list = {}
+      if event.item3 == "item" then
+        fuel_list = factory_prototype:getBurnerPrototype():getFuelItemPrototypes()
+      end
+      if event.item3 == "fluid" then
+        fuel_list = factory_prototype:getBurnerPrototype():getFuelFluidPrototypes()
+      end
       local items = {}
       local options = {}
       for _,item in pairs(fuel_list) do
@@ -645,6 +651,7 @@ function RecipeEdition:updateFactoryInfo(event)
     local sign = ""
     if factory.effects.consumption > 0 then sign = "+" end
     GuiElement.add(input_panel, GuiLabel("energy"):caption(Format.formatNumberKilo(factory.energy, "W").." ("..sign..Format.formatPercent(factory.effects.consumption).."%)"))
+    -- solid burner
     if factory_prototype:getEnergyType() == "burner" then
 
       GuiElement.add(input_panel, GuiLabel("label-burner"):caption({"helmod_common.resource"}))
@@ -655,7 +662,20 @@ function RecipeEdition:updateFactoryInfo(event)
         table.insert(items,"[item="..item.name.."]")
       end
       local default_fuel = "[item="..(factory.fuel or first_fuel.name).."]"
-      GuiElement.add(input_panel, GuiDropDown(self.classname, "factory-fuel-update", block_id, recipe_id):items(items, default_fuel))
+      GuiElement.add(input_panel, GuiDropDown(self.classname, "factory-fuel-update", block_id, recipe_id, "item"):items(items, default_fuel))
+    end
+    -- fluid burner
+    if factory_prototype:getEnergyType() == "fuel-burner" then
+
+      GuiElement.add(input_panel, GuiLabel("label-burner"):caption({"helmod_common.resource"}))
+      local fuel_list = factory_prototype:getBurnerPrototype():getFuelFluidPrototypes()
+      local first_fuel = factory_prototype:getBurnerPrototype():getFirstFuelFluidPrototype()
+      local items = {}
+      for _,item in pairs(fuel_list) do
+        table.insert(items,"[fluid="..item.name.."]")
+      end
+      local default_fuel = "[fluid="..(factory.fuel or first_fuel.name).."]"
+      GuiElement.add(input_panel, GuiDropDown(self.classname, "factory-fuel-update", block_id, recipe_id, "fluid"):items(items, default_fuel))
     end
 
     local sign = ""

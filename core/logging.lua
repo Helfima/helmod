@@ -117,10 +117,16 @@ function Logging:objectToString(object, level)
       local help = object.help()
       if help ~= nil and help ~= "" then
         local lua_type = string.match(help, "Help for%s([^:]*)")
-        if lua_type == "LuaRecipe" or lua_type == "LuaRecipePrototype" or lua_type == "LuaTechnology" then
+        if lua_type == "LuaCustomTable" then
+          local custom_table = {}
+          for _,element in pairs(object) do
+            table.insert(custom_table, element)
+          end
+          return self:objectToString(custom_table, level)
+        elseif string.find(lua_type, "Lua") then
           message = message..string.format("{\"type\":%q,\"name\":%q}", lua_type, object.name or "nil")
         else
-          message = message..string.format("{\"type\":%q,\"name\":%q}", object.type, object.name or "nil")
+          message = message..string.format("{\"type\":%q,\"name\":%q}", object.type or "nil", object.name or "nil")
         end
       else
         message = message.."invalid object"

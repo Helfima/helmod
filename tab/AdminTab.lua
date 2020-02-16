@@ -162,7 +162,7 @@ function AdminTab:updateCache()
   -- Rule List
   local caches_panel = self:getCacheTab()
   
-  GuiElement.add(caches_panel, GuiLabel("warning"):caption({"", "[color=255,106,0]", "[font=default-large-bold]", "Do not use this panel, unless absolutely necessary", "[/font]", "[/color]"}))
+  GuiElement.add(caches_panel, GuiLabel("warning"):caption({"", helmod_tag.color.orange, helmod_tag.font.default_large_bold, "Do not use this panel, unless absolutely necessary", helmod_tag.font.close, helmod_tag.color.close}))
   GuiElement.add(caches_panel, GuiButton(self.classname, "generate-cache"):sprite("menu", "settings-white", "settings"):style("helmod_button_menu_sm_red"):tooltip("Generate missing cache"))
   
   local table_panel = GuiElement.add(caches_panel, GuiTable("list-table"):column(2))
@@ -339,43 +339,43 @@ function AdminTab:addCacheListRow(gui_table, class_name, key1, key2, key3, key4,
       GuiElement.add(cell_action, GuiButton(self.classname, "delete-cache", class_name, key1):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"helmod_button.remove"}))
       GuiElement.add(cell_action, GuiButton(self.classname, "refresh-cache", class_name, key1):sprite("menu", "refresh-white-sm", "refresh-sm"):style("helmod_button_menu_sm_red"):tooltip({"helmod_button.refresh"}))
       -- col class
-      GuiElement.add(gui_table, GuiLabel("class", key1):caption({"", "[color=255,106,0]", "[font=default-large-bold]", string.format("%s", key1), "[/font]", "[/color]"}))
+      GuiElement.add(gui_table, GuiLabel("class", key1):caption({"", helmod_tag.color.orange, helmod_tag.font.default_large_bold, string.format("%s", key1), "[/font]", helmod_tag.color.close}))
     else
       -- col class
-      GuiElement.add(gui_table, GuiLabel("class", key1):caption({"", "[color=66,141,255]", "[font=default-large-bold]", string.format("%s", key1), "[/font]", "[/color]"}))
+      GuiElement.add(gui_table, GuiLabel("class", key1):caption({"", helmod_tag.color.blue, helmod_tag.font.default_large_bold, string.format("%s", key1), "[/font]", helmod_tag.color.close}))
     end
   
     -- col count
-    GuiElement.add(gui_table, GuiLabel("total", key1):caption({"", "[font=default-semibold]", caption, "[/font]"}))
+    GuiElement.add(gui_table, GuiLabel("total", key1):caption({"", helmod_tag.font.default_semibold, caption, "[/font]"}))
   elseif key3 == nil and key4 == nil then
     if class_name == "users" and (key2 == "translated" or key2 == "cache") then
       GuiElement.add(cell_action, GuiButton(self.classname, "delete-cache", class_name, key1, key2):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
       -- col class
-      GuiElement.add(gui_table, GuiLabel("class", key1, key2):caption({"", "[color=255,106,0]", "[font=default-bold]", "|-" , key2, "[/font]", "[/color]"}))
+      GuiElement.add(gui_table, GuiLabel("class", key1, key2):caption({"", helmod_tag.color.orange, helmod_tag.font.default_bold, "|-" , key2, "[/font]", helmod_tag.color.close}))
     else
       -- col class
-      GuiElement.add(gui_table, GuiLabel("class", key1, key2):caption({"", "[font=default-bold]", "|-" , key2, "[/font]"}))
+      GuiElement.add(gui_table, GuiLabel("class", key1, key2):caption({"", helmod_tag.font.default_bold, "|-" , key2, "[/font]"}))
     end
   
     -- col count
-    GuiElement.add(gui_table, GuiLabel("total", key1, key2):caption({"", "[font=default-semibold]", caption, "[/font]"}))
+    GuiElement.add(gui_table, GuiLabel("total", key1, key2):caption({"", helmod_tag.font.default_semibold, caption, "[/font]"}))
   elseif key4 == nil then
     if class_name == "users" then
       GuiElement.add(cell_action, GuiButton(self.classname, "delete-cache", class_name, key1, key2, key3):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
       -- col class
-      GuiElement.add(gui_table, GuiLabel("class", key1, key2, key3):caption({"", "[color=255,106,0]", "[font=default-bold]", "|\t\t\t|-" , key3, "[/font]", "[/color]"}))
+      GuiElement.add(gui_table, GuiLabel("class", key1, key2, key3):caption({"", helmod_tag.color.orange, helmod_tag.font.default_bold, "|\t\t\t|-" , key3, "[/font]", helmod_tag.color.close}))
     else
       -- col class
-      GuiElement.add(gui_table, GuiLabel("class", key1, key2, key3):caption({"", "[font=default-bold]", "|-" , key3, "[/font]"}))
+      GuiElement.add(gui_table, GuiLabel("class", key1, key2, key3):caption({"", helmod_tag.font.default_bold, "|-" , key3, "[/font]"}))
     end
   
     -- col count
-    GuiElement.add(gui_table, GuiLabel("total", key1, key2, key3):caption({"", "[font=default-semibold]", caption, "[/font]"}))
+    GuiElement.add(gui_table, GuiLabel("total", key1, key2, key3):caption({"", helmod_tag.font.default_semibold, caption, "[/font]"}))
   else
-    GuiElement.add(gui_table, GuiLabel("class", key1, key2, key3, key4):caption({"", "[font=default-bold]", "|\t\t\t|\t\t\t|-" , key4, "[/font]"}))
+    GuiElement.add(gui_table, GuiLabel("class", key1, key2, key3, key4):caption({"", helmod_tag.font.default_bold, "|\t\t\t|\t\t\t|-" , key4, "[/font]"}))
   
     -- col count
-    GuiElement.add(gui_table, GuiLabel("total", key1, key2, key3, key4):caption({"", "[font=default-semibold]", caption, "[/font]"}))
+    GuiElement.add(gui_table, GuiLabel("total", key1, key2, key3, key4):caption({"", helmod_tag.font.default_semibold, caption, "[/font]"}))
   end
 
 end

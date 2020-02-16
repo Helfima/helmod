@@ -866,7 +866,7 @@ function ModelCompute.computeFactory(recipe)
   -- effet consumption
   local factory_prototype = EntityPrototype(recipe.factory)
   local energy_type = factory_prototype:getEnergyType()
-  recipe.factory.energy = factory_prototype:getEnergyUsage() * (1 + recipe.factory.effects.consumption)
+  recipe.factory.energy = factory_prototype:getMaxEnergyUsage() * (1 + recipe.factory.effects.consumption)
 
   -- effet pollution
   recipe.factory.pollution = factory_prototype:getPollution() * (1 + recipe.factory.effects.pollution)

@@ -40,6 +40,24 @@ helmod_flow_style = {
   vertical = "helmod_flow_vertical"
 }
 
+helmod_tag = {}
+helmod_tag.color = {}
+helmod_tag.color.close = "[/color]"
+helmod_tag.color.white = "[color=229,229,229]"
+helmod_tag.color.gray = "[color=229,229,229]"
+helmod_tag.color.yellow = "[color=255,222,61]"
+helmod_tag.color.red = "[color=229,229,229]"
+helmod_tag.color.green = "[color=229,229,229]"
+helmod_tag.color.blue = "[color=66,141,255]"
+helmod_tag.color.gold = "[color=255,230,192]"
+helmod_tag.color.orange = "[color=255,106,0]"
+
+helmod_tag.font = {}
+helmod_tag.font.close = "[/font]"
+helmod_tag.font.default_bold = "[font=default-bold]"
+helmod_tag.font.default_semibold = "[font=default-semibold]"
+helmod_tag.font.default_large_bold = "[font=default-large-bold]"
+
 helmod_frame_style = {
   default = "helmod_frame_default",
   hidden = "helmod_frame_hidden",
@@ -220,6 +238,16 @@ helmod_settings_mod = {
       "HMUser"
     },
     order = "a1"
+  },
+  -- display_ratio_horizontal
+  user_cache_step = {
+    type = "int-setting",
+    setting_type = "runtime-global",
+    localised_name = {"helmod_settings.user-cache-step"},
+    localised_description = {"helmod_settings.user-cache-step-desc"},
+    default_value = 100,
+    allowed_values = {50,100,200,300,400,500},
+    order = "a3"
   },
   -- display_ratio_horizontal
   display_ratio_horizontal = {

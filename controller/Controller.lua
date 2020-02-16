@@ -33,6 +33,7 @@ require "model.Prototype"
 require "model.BurnerPrototype"
 require "model.ElectricPrototype"
 require "model.EntityPrototype"
+require "model.FluidboxPrototype"
 require "model.FluidPrototype"
 require "model.ItemPrototype"
 require "model.Product"
@@ -262,9 +263,15 @@ function Controller:onTick(event)
   Logging:trace(Controller.classname, "onTick(event)", event)
   if Player.native() ~= nil then
     local next_event = User.getParameter("next_event")
-    if next_event ~= nil and next_event.event.tick < event.tick then
-      next_event.event.tick = event.tick
-      Dispatcher:send(next_event.type_event, next_event.event, next_event.classname)
+    if next_event ~= nil then
+      if (next_event.event.iteration or 0) < 6000 then
+        next_event.event.iteration = (next_event.event.iteration or 0) + 1
+        Dispatcher:send(next_event.type_event, next_event.event, next_event.classname)
+      else
+        User.setParameter("next_event", nil)
+        event.message = {"", {"helmod_error.excessive-event-iteration"}, " (>6000)"}
+        Dispatcher:send("on_gui_error", event, next_event.classname)
+      end
     end
   end
 end
@@ -670,13 +677,13 @@ function Controller:onEventAccessWrite(event)
   if event.action == "product-selected" then
     Logging:debug(self.classname, "product-selected", event.button, defines.mouse_button_type.right)
     if event.button == defines.mouse_button_type.right then
-      self:sendWithPrepare("on_gui_open", event,"HMRecipeSelector")
+      self:send("on_gui_open", event,"HMRecipeSelector")
     end
   end
 
   if event.action == "product-edition" then
     if event.button == defines.mouse_button_type.right then
-      self:sendWithPrepare("on_gui_open", event, "HMRecipeSelector")
+      self:send("on_gui_open", event, "HMRecipeSelector")
     else
       self:send("on_gui_open", event, "HMProductEdition")
     end
@@ -690,7 +697,7 @@ function Controller:onEventAccessWrite(event)
 
   if event.action == "production-recipe-product-add" then
     if event.button == defines.mouse_button_type.right then
-      self:sendWithPrepare("on_gui_open", event, "HMRecipeSelector")
+      self:send("on_gui_open", event, "HMRecipeSelector")
     else
       local recipes = Player.searchRecipe(event.item3, true)
       if #recipes == 1 then
@@ -702,14 +709,14 @@ function Controller:onEventAccessWrite(event)
       else
         -- pour ouvrir avec le filtre ingredient
         event.button = defines.mouse_button_type.right
-        self:sendWithPrepare("on_gui_open", event, "HMRecipeSelector")
+        self:send("on_gui_open", event, "HMRecipeSelector")
       end
     end
   end
 
   if event.action == "production-recipe-ingredient-add" then
     if event.button == defines.mouse_button_type.right then
-      self:sendWithPrepare("on_gui_open", event, "HMRecipeSelector")
+      self:send("on_gui_open", event, "HMRecipeSelector")
     else
       local recipes = Player.searchRecipe(event.item3)
       if #recipes == 1 then
@@ -719,7 +726,7 @@ function Controller:onEventAccessWrite(event)
         User.setParameter("scroll_element", new_recipe.id)
         self:send("on_gui_update", event)
       else
-        self:sendWithPrepare("on_gui_open", event, "HMRecipeSelector")
+        self:send("on_gui_open", event, "HMRecipeSelector")
       end
     end
   end
@@ -741,7 +748,7 @@ function Controller:onEventAccessWrite(event)
 
   if User.isActiveForm("HMProductionLineTab") then
     if event.button == defines.mouse_button_type.right then
-      self:sendWithPrepare("on_gui_open", event, "HMRecipeSelector")
+      self:send("on_gui_open", event, "HMRecipeSelector")
     else
       if event.action == "production-block-product-add" then
         local recipes = Player.searchRecipe(event.item2, true)
@@ -754,7 +761,7 @@ function Controller:onEventAccessWrite(event)
         else
           -- pour ouvrir avec le filtre ingredient
           event.button = defines.mouse_button_type.right
-          self:sendWithPrepare("on_gui_open", event,"HMRecipeSelector")
+          self:send("on_gui_open", event,"HMRecipeSelector")
         end
       end
       if event.action == "production-block-ingredient-add" then
@@ -766,7 +773,7 @@ function Controller:onEventAccessWrite(event)
           User.setActiveForm("HMProductionBlockTab")
           self:send("on_gui_refresh", event)
         else
-          self:sendWithPrepare("on_gui_open", event,"HMRecipeSelector")
+          self:send("on_gui_open", event,"HMRecipeSelector")
         end
       end
     end
@@ -946,25 +953,6 @@ function Controller:send(event_type, data, classname)
   Logging:trace(self.classname, "send()", event_type, data, classname)
   if classname ~= nil then data.classname = classname end
   Dispatcher:send(event_type, data, classname)
-end
-
--------------------------------------------------------------------------------
--- Send
---
--- @function [parent=#Controller] sendWithPrepare
---
-function Controller:sendWithPrepare(event_type, data, classname)
-  Logging:trace(self.classname, "send()", event_type, data, classname)
-  if classname ~= nil then data.classname = classname end
-  User.setParameter("prepare",false)
-  User.setParameter("translate",false)
-  Controller:send("on_gui_prepare", data, classname)
-  Controller:send("on_gui_translate", data, classname)
-  if User.getParameter("prepare") or User.getParameter("translate") then
-    User.setParameter("next_event", {event=data, classname=classname})
-  else
-    Dispatcher:send(event_type, data, classname)
-  end
 end
 
 local MyController = Controller(Controller.classname)

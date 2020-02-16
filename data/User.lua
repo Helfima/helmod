@@ -357,6 +357,31 @@ function User.setParameter(property, value)
 end
 
 -------------------------------------------------------------------------------
+-- Create next event
+--
+-- @function [parent=#User] createNextEvent
+--
+-- @param #table event
+-- @param #string classname
+-- @param #string method
+-- @param #number index
+--
+function User.createNextEvent(event, classname, method, index)
+  if event == nil then
+    User.setParameter("next_event", nil)
+    local auto_pause = User.getParameter("auto-pause")
+    game.tick_paused = auto_pause
+    return {wait=false, method=method}
+  end
+  local index_name = string.format("index_%s",method)
+  event[index_name] = index
+  event.method = method
+  User.setParameter("next_event", {type_event=event.type, event=event, classname=classname})
+  game.tick_paused = false
+  return {wait=true, method=method}
+end
+
+-------------------------------------------------------------------------------
 -- Set preference
 --
 -- @function [parent=#User] setPreference

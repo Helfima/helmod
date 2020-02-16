@@ -99,8 +99,11 @@ function PropertiesTab:addTableHeader(itable, prototype_compare)
       icon_type = "technology"
       localised_name = technology_protoype:getLocalisedName()
     end
-    GuiElement.add(itable, GuiButtonSprite(self.classname, "element-delete", prototype.name, index):sprite(icon_type, prototype.name):tooltip(localised_name))
-
+    local cell_header = GuiElement.add(itable, GuiFlowH("header", prototype.name, index))
+    GuiElement.add(cell_header, GuiButtonSprite(self.classname, "element-delete", prototype.name, index):sprite(icon_type, prototype.name):tooltip(localised_name))
+    if prototype.type == "technology" then
+      GuiElement.add(cell_header, GuiCheckBox(self.classname, "technology-search", prototype.name, index):state(Technology(prototype):isResearched()):tooltip("isResearched"))
+    end
   end
 
   self:addCellHeader(itable, "property_type", "Element Type")
@@ -306,6 +309,12 @@ function PropertiesTab:onEvent(event)
     User.setParameter("filter-difference-property", switch_nil)
     self:updateData(event)
   end
+  
+  if event.action == "technology-search" then
+    local state = event.element.state
+    Player.getForce().technologies[event.item1].researched = state
+    self:updateData(event)
+  end
 end
 -------------------------------------------------------------------------------
 -- Parse Properties
@@ -336,7 +345,7 @@ function PropertiesTab:parseProperties(prototype, level, prototype_type)
     table.insert(properties, {name = "PLAYER.character_maximum_following_robot_count_bonus", chmod = "RW", value = Player.native().character_maximum_following_robot_count_bonus})
     table.insert(properties, {name = "PLAYER.character_health_bonus", chmod = "RW", value = Player.native().character_health_bonus})
   end
-  if prototype_type ~= "recipe" and prototype.type == "inserter" then
+  if (prototype_type == "item" or prototype_type == "entity") and prototype.type == "inserter" then
     table.insert(properties, {name = "FORCE.inserter_stack_size_bonus", chmod = "RW", value = Player.getForce().inserter_stack_size_bonus})
     table.insert(properties, {name = "FORCE.stack_inserter_capacity_bonus", chmod = "RW", value = Player.getForce().stack_inserter_capacity_bonus})
   end
@@ -354,8 +363,19 @@ function PropertiesTab:parseProperties(prototype, level, prototype_type)
         local group = prototype[key]
         value = string.format("{name=%s,type=%s,order_in_recipe=%s,order=%s}", group.name, group.type, group.order_in_recipe, group.order)
       elseif key == "burner_prototype" then
-        local burner_prototype = BurnerPrototype(prototype[key]):toString()
-        value = burner_prototype
+        local burner_prototype = BurnerPrototype(prototype[key])
+        value = burner_prototype:toString()
+      elseif key == "fluidbox_prototypes" then
+        value = ""
+        if prototype[key] ~= nil then
+          Logging:debug(self.classname, "fluidbox_prototypes", prototype[key])
+          for _,fluidbox in pairs(prototype[key]) do
+            local fluidbox_prototype = FluidboxPrototype(fluidbox)
+            value = string.format("%s\n%s", value, fluidbox_prototype:toString())
+          end
+        else
+          value = nil
+        end
       elseif key == "electric_energy_source_prototype" then
         local electric_prototype = ElectricPrototype(prototype[key]):toString()
         value = electric_prototype

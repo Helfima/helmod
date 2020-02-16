@@ -1,4 +1,18 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.9.31
+Date: 16. 02. 2020
+  Changes:
+    - generate user cache on several tick
+    - added error if recursive event > 6000
+    - added fluid fuel for factory
+    - change display module of factory
+    - added response on ENTER in the filter input of selector
+  Bugfixes:
+    - fixed recipe not appear in recipe selector when researched
+    - fixed some bug in properties tab
+    - fixed generate user cache when auto pause is activate
+    - fixed crash on new game
+---------------------------------------------------------------------------------------------------
 Version: 0.9.30
 Date: 10. 02. 2020
   Changes:
