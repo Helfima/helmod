@@ -498,9 +498,9 @@ function AbstractSelector:checkFilter(search)
       search = User.getTranslate(search)
     end
     if User.isFilterContain() then
-      return string.find(search:lower():gsub("[-]"," "), filter_prototype:lower():gsub("[-]"," "))
+      return string.find(search:lower(), filter_prototype:lower(), 1, true)
     else
-      return search:lower():gsub("[-]"," ") == filter_prototype:lower():gsub("[-]"," ")
+      return search:lower() == filter_prototype:lower()
     end
   end
   return true
@@ -636,7 +636,9 @@ function AbstractSelector:createElementLists(event)
     User.setCache(self.classname, "list_subgroup", list_subgroup)
     User.setCache(self.classname, "list_group_elements", list_group_elements)
     Logging:debug(self.classname, "-->list", index, start_index, Model.countList(list))
-    return User.createNextEvent(event, self.classname, "list", index)
+    if index + 1 < Model.countList(list) then
+      return User.createNextEvent(event, self.classname, "list", index)
+    end
   end
   
       
@@ -742,14 +744,19 @@ function AbstractSelector:updateItemList(event)
   Logging:profilerStep("updateItemList", "** start **")
   -- recuperation recipes et subgroupes
   local recipe_selector_list = GuiElement.add(item_list_panel, GuiFlowV("recipe_list"))
-  for subgroup, list in spairs(list_item,function(t,a,b) return list_subgroup[b]["order"] > list_subgroup[a]["order"] end) do
-    -- boucle subgroup
-    local guiRecipeSubgroup = GuiElement.add(recipe_selector_list, GuiTable("recipe-table-", subgroup):column(10):style("helmod_table_recipe_selector"))
-    for key, prototype in spairs(list,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
-      local tooltip = self:buildPrototypeTooltip(prototype)
-      self:buildPrototypeIcon(guiRecipeSubgroup, prototype, tooltip)
+  if Model.countList(list_item) > 0 then
+    for subgroup, list in spairs(list_item,function(t,a,b) return list_subgroup[b]["order"] > list_subgroup[a]["order"] end) do
+      -- boucle subgroup
+      local guiRecipeSubgroup = GuiElement.add(recipe_selector_list, GuiTable("recipe-table-", subgroup):column(10):style("helmod_table_recipe_selector"))
+      for key, prototype in spairs(list,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
+        local tooltip = self:buildPrototypeTooltip(prototype)
+        self:buildPrototypeIcon(guiRecipeSubgroup, prototype, tooltip)
+      end
+      Logging:profilerStep("updateItemList", "->subgroup", subgroup, Model.countList(list))
     end
-    Logging:profilerStep("updateItemList", "->subgroup", subgroup, Model.countList(list))
+  else
+    event.message = "Empty list"
+    Dispatcher:send("on_gui_message", event, self.classname)
   end
 
 end
