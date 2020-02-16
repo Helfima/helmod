@@ -407,7 +407,7 @@ function ProductionBlockTab:updateOutput(event)
     local output_table = GuiElement.add(output_scroll, GuiTable("output-table"):column(GuiElement.getElementColumnNumber(50)-2):style("helmod_table_element"))
     if block.products ~= nil then
       for index, lua_product in pairs(block.products) do
-        if all_visible == true or (lua_product.state == 1 and block_by_product) or lua_product.count > ModelCompute.waste_value then
+        if all_visible == true or ((lua_product.state or 0) == 1 and block_by_product) or (lua_product.count or 0) > ModelCompute.waste_value then
           local product = Product(lua_product):clone()
           product.count = lua_product.count
           if block.count > 1 then
