@@ -13,7 +13,8 @@ local EntityType = {
   generator = "generator",
   offshore_pump = "offshore-pump",
   solar_panel = "solar-panel",
-  seafloor_pump = "seafloor-pump" 
+  seafloor_pump = "seafloor-pump" ,
+  reactor = "reactor" 
 }
 
 return EntityType

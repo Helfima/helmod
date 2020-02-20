@@ -12,12 +12,13 @@ require "edition.ProductEdition"
 require "edition.EnergyEdition"
 require "edition.RuleEdition"
 require "edition.PreferenceEdition"
+require "selector.ContainerSelector"
+require "selector.EnergySelector"
 require "selector.EntitySelector"
 require "selector.RecipeSelector"
 require "selector.TechnologySelector"
 require "selector.ItemSelector"
 require "selector.FluidSelector"
-require "selector.ContainerSelector"
 
 require "tab.EnergyTab"
 require "tab.ProductionBlockTab"
@@ -32,6 +33,7 @@ require "tab.AdminTab"
 require "model.Prototype"
 require "model.BurnerPrototype"
 require "model.ElectricPrototype"
+require "model.EnergyPrototype"
 require "model.EntityPrototype"
 require "model.FluidboxPrototype"
 require "model.FluidPrototype"
@@ -88,6 +90,7 @@ function Controller:prepare()
   table.insert(forms, PrototypeFiltersTab("HMPrototypeFiltersTab"))
   table.insert(forms, AdminTab("HMAdminTab"))
 
+  table.insert(forms, EnergySelector("HMEnergySelector"))
   table.insert(forms, EntitySelector("HMEntitySelector"))
   table.insert(forms, RecipeSelector("HMRecipeSelector"))
   table.insert(forms, TechnologySelector("HMTechnologySelector"))
@@ -127,6 +130,7 @@ function Controller:on_init()
     Player.getResources()
   end
   local forms = {}
+  table.insert(forms, EnergySelector("HMEnergySelector"))
   table.insert(forms, EntitySelector("HMEntitySelector"))
   table.insert(forms, RecipeSelector("HMRecipeSelector"))
   table.insert(forms, TechnologySelector("HMTechnologySelector"))
@@ -332,7 +336,7 @@ local pattern = "([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)"
 function Controller:onGuiAction(event)
   Logging:debug(self.classname, "onGuiAction(event)", event)
   if event.element ~= nil and (string.find(event.element.name,"^HM.*") or string.find(event.element.name,"^helmod.*")) then
-    Logging.profiler = false
+    Logging.profiler = true
     Logging:profilerStart()
     
     Logging:profilerStep("onGuiAction", "** start **")
@@ -922,6 +926,7 @@ function Controller:onEventAccessAdmin(event)
       Player.getResources()
     else    
       local forms = {}
+      table.insert(forms, EnergySelector("HMEnergySelector"))
       table.insert(forms, EntitySelector("HMEntitySelector"))
       table.insert(forms, RecipeSelector("HMRecipeSelector"))
       table.insert(forms, TechnologySelector("HMTechnologySelector"))

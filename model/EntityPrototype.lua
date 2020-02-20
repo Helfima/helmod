@@ -491,6 +491,20 @@ function EntityPrototype:getFluidCapacity()
 end
 
 -------------------------------------------------------------------------------
+-- Return fluid boxe prototypes
+--
+-- @function [parent=#EntityPrototype] getFluidboxPrototypes
+--
+-- @return #number default 0
+--
+function EntityPrototype:getFluidboxPrototypes()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.fluidbox_prototypes
+  end
+  return nil
+end
+
+-------------------------------------------------------------------------------
 -- Return inserter capacity
 --
 -- @function [parent=#EntityPrototype] getInserterCapacity

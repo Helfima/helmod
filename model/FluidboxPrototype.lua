@@ -55,6 +55,33 @@ function FluidboxPrototype:getFirstFuelItemPrototype()
   return first_fuel
 end
 
+-------------------------------------------------------------------------------
+-- Is input
+--
+-- @function [parent=#FluidboxPrototype] isInput
+--
+-- @return #boolean
+--
+function FluidboxPrototype:isInput()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.production_type ~= "output"
+  end
+  return false
+end
+
+-------------------------------------------------------------------------------
+-- Is output
+--
+-- @function [parent=#FluidboxPrototype] isOutput
+--
+-- @return #boolean
+--
+function FluidboxPrototype:isOutput()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.production_type == "output"
+  end
+  return false
+end
 
 function FluidboxPrototype:toString()
   local data = {}
@@ -66,7 +93,12 @@ function FluidboxPrototype:toString()
   data.base_level = self.lua_prototype.base_level
   data.height = self.lua_prototype.height
   data.volume = self.lua_prototype.volume
-  data.filter = self.lua_prototype.filter
+  local filter = self.lua_prototype.filter
+  if filter == nil then 
+    data.filter = "nil"
+  else
+    data.filter = filter.name
+  end
   data.minimum_temperature = self.lua_prototype.minimum_temperature
   data.maximum_temperature = self.lua_prototype.maximum_temperature
   data.secondary_draw_orders = self.lua_prototype.secondary_draw_orders

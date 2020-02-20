@@ -249,12 +249,13 @@ function RecipePrototype:getIngredients(factory)
       local hardness = entity_prototype:getMineableHardness()
       local mining_time = entity_prototype:getMineableMiningTime()
       local factory_prototype = EntityPrototype(factory)
-      if factory ~= nil and factory_prototype:getEnergyType() == "burner" then
+      Logging:debug(self.classname, "getEnergyType()", self.lua_prototype, self.lua_type)
+      if factory ~= nil and factory_prototype:getEnergyType() ~= "electrical" then
         local energy_usage = factory_prototype:getEnergyUsage()
         local burner_effectivity = factory_prototype:getBurnerEffectivity()
         local mining_speed = factory_prototype:getMiningSpeed()
         
-        if entity_prototype:getEnergyType() == "burner" then
+        if factory_prototype:getEnergyType() == "burner" then
           local first_fuel = factory_prototype:getBurnerPrototype():getFirstFuelItemPrototype()
           local factory_fuel = factory.fuel or first_fuel.name
           local speed_factory = hardness * mining_speed / mining_time
@@ -265,7 +266,7 @@ function RecipePrototype:getIngredients(factory)
           table.insert(ingredients, burner_ingredient)
         end
         
-        if entity_prototype:getEnergyType() == "fuel-burner" then
+        if factory_prototype:getEnergyType() == "fuel-burner" then
           local first_fuel = factory_prototype:getBurnerPrototype():getFirstFuelFluidPrototype()
           local factory_fuel = factory.fuel or first_fuel.name
           local speed_factory = hardness * mining_speed / mining_time
