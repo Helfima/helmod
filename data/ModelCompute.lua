@@ -835,6 +835,9 @@ function ModelCompute.computeModuleEffects(recipe)
   if recipe.type == "resource" then
     factory.effects.productivity = factory.effects.productivity + Player.getForce().mining_drill_productivity_bonus
   end
+  -- cap la productivite
+  if factory.effects.productivity < 0  then factory.effects.productivity = 0 end
+
   -- cap la vitesse a self.capSpeed
   if factory.effects.speed < ModelCompute.capSpeed  then factory.effects.speed = ModelCompute.capSpeed end
 
