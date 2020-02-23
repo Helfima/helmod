@@ -629,6 +629,22 @@ function Player.getProductionMachines()
 end
 
 -------------------------------------------------------------------------------
+-- Return list of energy machines
+--
+-- @function [parent=#Player] getEnergyMachines
+--
+-- @return #table list of modules
+--
+function Player.getEnergyMachines()
+    local filters = {}
+
+  for _,type in pairs({EntityType.generator, EntityType.solar_panel, EntityType.boiler, EntityType.accumulator, EntityType.reactor}) do
+    table.insert(filters, {filter="type", mode="or", invert=false, type=type})
+  end
+  return game.get_filtered_entity_prototypes(filters)
+end
+
+-------------------------------------------------------------------------------
 -- Return list of boilers
 --
 -- @function [parent=#Player] getBoilers

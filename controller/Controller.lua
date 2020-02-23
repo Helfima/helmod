@@ -9,7 +9,6 @@ require "dialog.Calculator"
 require "dialog.RecipeExplorer"
 require "edition.RecipeEdition"
 require "edition.ProductEdition"
-require "edition.EnergyEdition"
 require "edition.RuleEdition"
 require "edition.PreferenceEdition"
 require "selector.ContainerSelector"
@@ -20,7 +19,6 @@ require "selector.TechnologySelector"
 require "selector.ItemSelector"
 require "selector.FluidSelector"
 
-require "tab.EnergyTab"
 require "tab.ProductionBlockTab"
 require "tab.ProductionLineTab"
 require "tab.ResourceTab"
@@ -31,9 +29,8 @@ require "tab.PrototypeFiltersTab"
 require "tab.AdminTab"
 
 require "model.Prototype"
-require "model.BurnerPrototype"
 require "model.ElectricPrototype"
-require "model.EnergyPrototype"
+require "model.EnergySourcePrototype"
 require "model.EntityPrototype"
 require "model.FluidboxPrototype"
 require "model.FluidPrototype"
@@ -82,7 +79,6 @@ function Controller:prepare()
 
   table.insert(forms, ProductionLineTab("HMProductionLineTab"))
   table.insert(forms, ProductionBlockTab("HMProductionBlockTab"))
-  table.insert(forms, EnergyTab("HMEnergyTab"))
   table.insert(forms, ResourceTab("HMResourceTab"))
   table.insert(forms, SummaryTab("HMSummaryTab"))
   table.insert(forms, StatisticTab("HMStatisticTab"))
@@ -100,7 +96,6 @@ function Controller:prepare()
 
   table.insert(forms, RecipeEdition("HMRecipeEdition"))
   table.insert(forms, ProductEdition("HMProductEdition"))
-  table.insert(forms, EnergyEdition("HMEnergyEdition"))
   table.insert(forms, RuleEdition("HMRuleEdition"))
   table.insert(forms, PreferenceEdition("HMPreferenceEdition"))
 
@@ -336,7 +331,7 @@ local pattern = "([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)"
 function Controller:onGuiAction(event)
   Logging:debug(self.classname, "onGuiAction(event)", event)
   if event.element ~= nil and (string.find(event.element.name,"^HM.*") or string.find(event.element.name,"^helmod.*")) then
-    Logging.profiler = true
+    Logging.profiler = false
     Logging:profilerStart()
     
     Logging:profilerStep("onGuiAction", "** start **")

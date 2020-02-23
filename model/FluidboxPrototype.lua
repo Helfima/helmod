@@ -7,55 +7,6 @@ require "model.Prototype"
 FluidboxPrototype = newclass(Prototype)
 
 -------------------------------------------------------------------------------
--- Return fuel categories
---
--- @function [parent=#FluidboxPrototype] getFuelCategories
---
--- @return #table
---
-function FluidboxPrototype:getFuelCategories()
-  if self.lua_prototype ~= nil then
-    return self.lua_prototype.fuel_categories or {}
-  end
-  return {}
-end
-
--------------------------------------------------------------------------------
--- Return fuel item prototypes
---
--- @function [parent=#FluidboxPrototype] getFuelItemPrototypes
---
--- @return #table
---
-function FluidboxPrototype:getFuelItemPrototypes()
-  local filters = {}
-  for fuel_category,_ in pairs(self:getFuelCategories()) do
-    table.insert(filters, {filter="fuel-category", mode="or", invert=false,["fuel-category"]=fuel_category})
-  end
-  return Player.getItemPrototypes(filters)
-end
-
--------------------------------------------------------------------------------
--- Return first fuel item prototype
---
--- @function [parent=#FluidboxPrototype] getFirstFuelItemPrototype
---
--- @param #string name item name
---
--- @return #LuaItemPrototype item prototypes
---
-function FluidboxPrototype:getFirstFuelItemPrototype()
-  local fuel_items = self:getFuelItemPrototypes()
-  local first_fuel = nil
-  for _,fuel_item in pairs(fuel_items) do
-    if first_fuel == nil or fuel_item.name == "coal" then
-      first_fuel = fuel_item
-    end
-  end
-  return first_fuel
-end
-
--------------------------------------------------------------------------------
 -- Is input
 --
 -- @function [parent=#FluidboxPrototype] isInput
@@ -83,9 +34,35 @@ function FluidboxPrototype:isOutput()
   return false
 end
 
-function FluidboxPrototype:toString()
+-------------------------------------------------------------------------------
+-- Return filter
+--
+-- @function [parent=#FluidboxPrototype] getFilter
+--
+-- @return #boolean
+--
+function FluidboxPrototype:getFilter()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.filter
+  end
+  return false
+end
+
+-------------------------------------------------------------------------------
+-- Return data
+--
+-- @function [parent=#FluidboxPrototype] toData
+--
+-- @return #table
+--
+function FluidboxPrototype:toData()
   local data = {}
-  data.entity = self.lua_prototype.entity
+  local entity = self.lua_prototype.entity
+  if entity == nil then 
+    data.entity = "nil"
+  else
+    data.entity = {name=entity.name, type=entity.type}
+  end
   data.index = self.lua_prototype.index
   data.pipe_connections = self.lua_prototype.pipe_connections
   data.production_type = self.lua_prototype.production_type
@@ -97,12 +74,23 @@ function FluidboxPrototype:toString()
   if filter == nil then 
     data.filter = "nil"
   else
-    data.filter = filter.name
+    data.filter = {name=filter.name, type="fluid"}
   end
   data.minimum_temperature = self.lua_prototype.minimum_temperature
   data.maximum_temperature = self.lua_prototype.maximum_temperature
   data.secondary_draw_orders = self.lua_prototype.secondary_draw_orders
   data.render_layer = self.lua_prototype.render_layer
   data.valid = self.lua_prototype.valid
-  return string.format("%s",game.table_to_json(data))
+  return data
+end
+
+-------------------------------------------------------------------------------
+-- Return string
+--
+-- @function [parent=#FluidboxPrototype] toString
+--
+-- @return #string
+--
+function FluidboxPrototype:toString()
+  return game.table_to_json(self:toData())
 end

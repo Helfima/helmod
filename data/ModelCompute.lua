@@ -441,7 +441,7 @@ function ModelCompute.getBlockMatrix(block)
           -- cas de l'ingredient existant du cote produit
           if col_index[name] ~= nil and lua_products[name] ~= nil then
             -- cas de la valeur equivalente, on creer un nouveau element
-            if lua_products[name].count == lua_ingredients[name].count or recipe.type == "resource" then
+            if lua_products[name].count == lua_ingredients[name].count or recipe.type == "resource" or recipe.type == "energy" then
               index = col_index[name]+1
             else
               index = col_index[name]
@@ -682,8 +682,12 @@ function ModelCompute.computeBlock(block)
         recipe.production = mC[row_index][2]
         row_index = row_index + 1
         Logging:debug(ModelCompute.classname , "----> solver solution", recipe.name, icol, recipe.count)
-
-        ModelCompute.computeFactory(recipe)
+        
+        if block.isEnergy == true then
+          ModelCompute.computeEnergyFactory(recipe)
+        else
+          ModelCompute.computeFactory(recipe)
+        end
 
         block.power = block.power + recipe.energy_total
         block.pollution_total = block.pollution_total + recipe.pollution_total
@@ -886,18 +890,15 @@ function ModelCompute.computeFactory(recipe)
   else
     recipe.beacon.count = 0
   end
-  local beacon_prototype = EntityPrototype(recipe.factory)
+  local beacon_prototype = EntityPrototype(recipe.beacon)
   recipe.beacon.energy = beacon_prototype:getEnergyUsage()
   -- calcul des totaux
   local fuel_emissions_multiplier = 1
-  if energy_type == "burner" then
+  if energy_type ~= "electric" then
     recipe.factory.energy_total = 0
-    local fuel = recipe.factory.fuel
-    if fuel == nil then
-      fuel = EntityPrototype(recipe.factory):getBurnerPrototype():getFirstFuelItemPrototype().name
-    end
-    if fuel ~= nil then
-      local fuel_prototype = ItemPrototype(fuel)
+    if energy_type == "burner" or energy_type == "fluid" then
+      local energy_prototype = EntityPrototype(recipe.factory):getEnergySource()
+      local fuel_prototype = energy_prototype:getFuelPrototype(recipe.factory)
       fuel_emissions_multiplier = fuel_prototype:getFuelEmissionsMultiplier()
     end
   else
@@ -912,6 +913,61 @@ function ModelCompute.computeFactory(recipe)
   recipe.factory.speed = recipe.factory.speed
   recipe.factory.energy = math.ceil(recipe.factory.energy)
   recipe.beacon.energy = math.ceil(recipe.beacon.energy)
+end
+
+-------------------------------------------------------------------------------
+-- Compute energy factory for recipes
+--
+-- @function [parent=#ModelCompute] computeEnergyFactory
+--
+-- @param #table recipe
+--
+function ModelCompute.computeEnergyFactory(recipe)
+  Logging:trace(ModelCompute.classname, "computeFactory()", recipe.name)
+  local recipe_prototype = RecipePrototype(recipe)
+  local recipe_energy = recipe_prototype:getEnergy()
+  -- effet speed
+  recipe.factory.speed = ModelCompute.speedFactory(recipe) * (1 + recipe.factory.effects.speed)
+  Logging:debug(ModelCompute.classname, "recipe.factory.speed", ModelCompute.speedFactory(recipe), recipe.factory.speed)
+  -- cap speed creation maximum de 1 cycle par tick
+  if recipe.type ~= "fluid" and recipe_energy/recipe.factory.speed < 1/60 then recipe.factory.speed = 60*recipe_energy end
+
+  -- effet consumption
+  local factory_prototype = EntityPrototype(recipe.factory)
+  local energy_type = factory_prototype:getEnergyType()
+  recipe.factory.energy = factory_prototype:getEnergyNominal() * (1 + recipe.factory.effects.consumption)
+
+  -- effet pollution
+  recipe.factory.pollution = factory_prototype:getPollution() * (1 + recipe.factory.effects.pollution)
+  
+  -- compte le nombre de machines necessaires
+  local model = Model.getModel()
+  -- [ratio recipe] * [effort necessaire du recipe] / ([la vitesse de la factory]
+  local count = recipe.count*recipe_energy/recipe.factory.speed
+  if recipe.factory.speed == 0 then count = 0 end
+  recipe.factory.count = count
+  -- calcul des totaux
+  local fuel_emissions_multiplier = 1
+  if energy_type ~= "electric" then
+    recipe.factory.energy_total = 0
+    if energy_type == "burner" or energy_type == "fluid" then
+      local energy_prototype = EntityPrototype(recipe.factory):getEnergySource()
+      local fuel_prototype = energy_prototype:getFuelPrototype(recipe.factory)
+      fuel_emissions_multiplier = fuel_prototype:getFuelEmissionsMultiplier()
+    end
+  else
+    recipe.factory.energy_total = math.ceil(recipe.factory.count*recipe.factory.energy)
+  end
+  recipe.factory.pollution_total = recipe.factory.pollution * recipe.factory.count * model.time
+  
+  recipe.energy_total = recipe.factory.energy_total
+  recipe.pollution_total = recipe.factory.pollution_total * fuel_emissions_multiplier * recipe_prototype:getEmissionsMultiplier()
+  -- arrondi des valeurs
+  recipe.factory.speed = recipe.factory.speed
+  recipe.factory.energy = math.ceil(recipe.factory.energy)
+  
+  recipe.beacon.energy_total = 0
+  recipe.beacon.energy = 0
 end
 
 -------------------------------------------------------------------------------
@@ -1208,6 +1264,8 @@ function ModelCompute.speedFactory(recipe)
   elseif recipe.type == "technology" then
     local bonus = Player.getForce().laboratory_speed_modifier or 1
     return 1*bonus
+  elseif recipe.type == "energy" then
+    return 1
   else
     local factory_prototype = EntityPrototype(recipe.factory)
     return factory_prototype:getCraftingSpeed()

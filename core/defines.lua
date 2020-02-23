@@ -43,11 +43,11 @@ helmod_flow_style = {
 helmod_tag = {}
 helmod_tag.color = {}
 helmod_tag.color.close = "[/color]"
-helmod_tag.color.white = "[color=229,229,229]"
+helmod_tag.color.white = "[color=255,255,255]"
 helmod_tag.color.gray = "[color=229,229,229]"
 helmod_tag.color.yellow = "[color=255,222,61]"
-helmod_tag.color.red = "[color=229,229,229]"
-helmod_tag.color.green = "[color=229,229,229]"
+helmod_tag.color.red = "[color=255,0,0]"
+helmod_tag.color.green = "[color=0,127,14]"
 helmod_tag.color.blue = "[color=66,141,255]"
 helmod_tag.color.gold = "[color=255,230,192]"
 helmod_tag.color.orange = "[color=255,106,0]"

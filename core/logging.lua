@@ -114,7 +114,8 @@ function Logging:objectToString(object, level)
     message = message.."\"__function\""
   elseif object.isluaobject then
     if object.valid then
-      local help = object.help()
+      local help = nil
+      pcall(function() help = object.help() end)
       if help ~= nil and help ~= "" then
         local lua_type = string.match(help, "Help for%s([^:]*)")
         if lua_type == "LuaCustomTable" then
@@ -124,7 +125,9 @@ function Logging:objectToString(object, level)
           end
           return self:objectToString(custom_table, level)
         elseif string.find(lua_type, "Lua") then
-          message = message..string.format("{\"type\":%q,\"name\":%q}", lua_type, object.name or "nil")
+          local object_name = "unknown"
+          pcall(function() object_name = object.name end)
+          message = message..string.format("{\"type\":%q,\"name\":%q}", lua_type, object_name or "nil")
         else
           message = message..string.format("{\"type\":%q,\"name\":%q}", object.type or "nil", object.name or "nil")
         end

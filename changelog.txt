@@ -1,17 +1,24 @@
 ---------------------------------------------------------------------------------------------------
-Version: 0.9.33
+Version: 0.10.6
+Date: 23. 02. 2020
+  Changes:
+    - added all energy source prototypes
+    - added a new block for energy consumption
+    - removed energy tab
+    - modified property tab
+    - changed fluid recipe, now there are hidden except water and steam
+  Bugfixes:
+    - fixed width internal panel of edit recipe
+---------------------------------------------------------------------------------------------------
+Version: 0.10.5
 Date: 17. 02. 2020
   Bugfixes:
     - fixed a bug in RecipePrototype
     - fixed cap negative productivity
----------------------------------------------------------------------------------------------------
-Version: 0.9.32
-Date: 16. 02. 2020
-  Bugfixes:
     - fixed iteration end on bluiding user cache
     - fixed filter on recipe selector
 ---------------------------------------------------------------------------------------------------
-Version: 0.9.31
+Version: 0.10.4
 Date: 16. 02. 2020
   Changes:
     - generate user cache on several tick
@@ -25,23 +32,18 @@ Date: 16. 02. 2020
     - fixed generate user cache when auto pause is activate
     - fixed crash on new game
 ---------------------------------------------------------------------------------------------------
-Version: 0.9.30
+Version: 0.10.3
 Date: 10. 02. 2020
   Changes:
     - generate cache on game initialisation
     - changed admin panel, but not need use
-  Bugfixes:
-    - fixed switch contain/equal in recipe selector
----------------------------------------------------------------------------------------------------
-Version: 0.9.29
-Date: 02. 02. 2020
-  Changes:
     - changed admin panel, now can delete cache by panel
     - added few tick to generate recipe panel
   Bugfixes:
     - fixed switch contain/equal in recipe selector
+    - fixed switch contain/equal in recipe selector
 ---------------------------------------------------------------------------------------------------
-Version: 0.9.28
+Version: 0.10.2
 Date: 28. 01. 2020
   Features:
     - Added inserter in logistic information
@@ -51,24 +53,23 @@ Date: 28. 01. 2020
     - removed cache variable can MP desync
     - fixed arithemtic error on pollution
 ---------------------------------------------------------------------------------------------------
-Version: 0.9.27
+Version: 0.10.1
 Date: 24. 01. 2020
   Features:
     - Added option to activate or disable pollution information
   Changes:
     - Changed preference panel
     - Moved few mod settings in the preference panel
----------------------------------------------------------------------------------------------------
-Version: 0.9.26
-Date: 22. 01. 2020
-  Changes:
+    - Modify for factorio 0.18
     - Changed pollution to display value, per minute in tooltip
   Bugfixes:
     - fixed copy/past block for fuel and module
     - fixed default factory from mod setting and the default set at 1
 ---------------------------------------------------------------------------------------------------
-Version: 0.9.25
+Version: 0.10.0
 Date: 22. 01. 2020
+  Changes:
+    - Modify for factorio 0.18
   Bugfixes:
     - fixed open selector in properties tab
 ---------------------------------------------------------------------------------------------------
