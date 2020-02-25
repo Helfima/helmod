@@ -923,6 +923,7 @@ function Player.getProductionsBeacon()
   local items = {}
   local filters = {}
   table.insert(filters,{filter="type",type=EntityType.beacon,mode="or"})
+  table.insert(filters,{filter="hidden",invert=true,mode="and"})
 
   for _,item in pairs(game.get_filtered_entity_prototypes(filters)) do
     table.insert(items,item)

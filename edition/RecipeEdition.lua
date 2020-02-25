@@ -825,10 +825,10 @@ function RecipeEdition:updateFactoryModules(event)
   local block, recipe = self:getObjects()
   if recipe ~= nil then
     local factory = recipe.factory
-
+    local factory_switch_priority = User.getParameter("factory_switch_priority")
+  
     module_panel.clear()
 
-    local factory_switch_priority = User.getParameter("factory_switch_priority")
     local element_state = "left"
     if factory_switch_priority == true then element_state = "right" end
     local factory_switch_module = GuiElement.add(module_panel, GuiSwitch(self.classname, "factory-switch-module", block.id, recipe.id):state(element_state):leftLabel({"helmod_recipe-edition-panel.selection-modules"}):rightLabel({"helmod_label.priority-modules"}))

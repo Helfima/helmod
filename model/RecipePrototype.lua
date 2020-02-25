@@ -355,7 +355,7 @@ function RecipePrototype:getIngredients(factory)
         local energy_prototype = factory_prototype:getEnergySource()
         if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then
           local fuel_count = energy_prototype:getFuelCount()
-          local burner_ingredient = {name=fuel_count.name, type=fuel_count.type, amount=fuel_count.count / model.time}
+          local burner_ingredient = {name=fuel_count.name, type=fuel_count.type, amount=fuel_count.count}
           table.insert(raw_ingredients, burner_ingredient)
         end
       end
@@ -365,7 +365,7 @@ function RecipePrototype:getIngredients(factory)
         local energy_prototype = factory_prototype:getEnergySource()
         if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then
           local fuel_count = energy_prototype:getFuelCount()
-          local burner_ingredient = {name=fuel_count.name, type=fuel_count.type, amount=fuel_count.count * model.time}
+          local burner_ingredient = {name=fuel_count.name, type=fuel_count.type, amount=fuel_count.count * model.time*60}
           table.insert(raw_ingredients, burner_ingredient)
         end
       end

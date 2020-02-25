@@ -173,6 +173,7 @@ function BurnerPrototype:getFuelCount()
   local factory_prototype = EntityPrototype(self.factory)
   local energy_consumption = factory_prototype:getEnergyConsumption()
   local factory_fuel = self:getFuelPrototype()
+  Logging:debug("HMEnergySourcePrototype", "factory_fuel", factory_fuel, "energy_consumption", energy_consumption)
   if factory_fuel == nil then return nil end
   -- @see https://wiki.factorio.com/Fuel
   -- Burn time (s) = Fuel value (MJ) ÷ Energy consumption (MW)
@@ -294,17 +295,22 @@ function FluidSourcePrototype:getFuelCount()
   local factory_prototype = EntityPrototype(self.factory)
   local energy_consumption = factory_prototype:getEnergyConsumption()
   local factory_fuel = self:getFuelPrototype()
+  Logging:debug("HMEnergySourcePrototype", "factory_fuel", factory_fuel, "energy_consumption", energy_consumption)
   if factory_fuel == nil then return nil end
   local burner_effectivity = self:getEffectivity()
   local fluid_usage_per_tick = self:getFluidUsagePerTick()
-  if self.lua_prototype.fluid_usage_per_tick ~= nil then
+  if self.lua_prototype.fluid_usage_per_tick ~= nil and self.lua_prototype.fluid_usage_per_tick ~= 0 then
     local fluid_usage_per_tick = self:getFluidUsagePerTick()
     local burner_count = fluid_usage_per_tick*60
-    return {type="fluid", name=factory_fuel:native().name, count=burner_count}
+    local fuel_fluid = {type="fluid", name=factory_fuel:native().name, count=burner_count}
+    Logging:debug("HMEnergySourcePrototype", "fluid_usage_per_tick", fluid_usage_per_tick, "fuel_fluid", fuel_fluid)
+    return fuel_fluid
   else
     local fuel_value = factory_fuel:getFuelValue()
     local burner_count = energy_consumption/(fuel_value*burner_effectivity)
-    return {type="fluid", name=factory_fuel:native().name, count=burner_count}
+    local fuel_fluid = {type="fluid", name=factory_fuel:native().name, count=burner_count}
+    Logging:debug("HMEnergySourcePrototype", "fuel_value", fuel_value, "fuel_fluid", fuel_fluid)
+    return fuel_fluid
   end
 end
 

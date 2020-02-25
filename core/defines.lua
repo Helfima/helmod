@@ -194,7 +194,7 @@ helmod_settings_mod = {
       "HMDispatcherController",
       "HMDownload",
       "HMEnergyEdition",
-      "HMEnergyPrototype",
+      "HMEnergySourcePrototype",
       "HMEnergySelector",
       "HMEnergyTab",
       "HMEventController",
