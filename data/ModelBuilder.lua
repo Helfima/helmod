@@ -273,6 +273,23 @@ end
 -------------------------------------------------------------------------------
 -- Update a factory
 --
+-- @function [parent=#ModelBuilder] updateTemperatureFactory
+--
+-- @param #string item block_id or resource
+-- @param #string key object name
+-- @param #table options
+--
+function ModelBuilder.updateTemperatureFactory(item, key, options)
+  Logging:debug(ModelBuilder.classname, "updateTemperatureFactory()", item, key, options)
+  local object = Model.getObject(item, key)
+  if object ~= nil then
+    object.factory.target_temperature = options.target_temperature or 0
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update a factory
+--
 -- @function [parent=#ModelBuilder] updateFuelFactory
 --
 -- @param #string item block_id or resource

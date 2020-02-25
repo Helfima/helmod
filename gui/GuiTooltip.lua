@@ -139,7 +139,11 @@ function GuiTooltipElement:create()
   if element ~= nil then
     local type = element.type
     if element == "resource" then type = "entity" end
-    table.insert(tooltip, {"", "\n", string.format("[%s=%s]", type, element.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=element.name}), helmod_tag.font.close, helmod_tag.color.close})
+    local element_icon = string.format("[%s=%s]", type, element.name)
+    if type == "energy" and (element.name == "energy" or element.name == "steam-heat") then
+      element_icon = string.format("[img=helmod-%s-white]", type, element.name)
+    end
+    table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=element.name}), helmod_tag.font.close, helmod_tag.color.close})
     -- quantity
     local total_count = Format.formatNumberElement(element.count)
     if element.limit_count ~= nil then

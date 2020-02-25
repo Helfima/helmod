@@ -140,12 +140,12 @@ function RecipeEdition:getFactoryTablePanel()
   local table_panel = GuiElement.add(content_panel, GuiTable(table_name):column(2))
   table_panel.vertical_centering = false
   local factory_info_panel = GuiElement.add(table_panel, GuiFlowV(factory_info_name))
-  factory_info_panel.style.width = 250
+  factory_info_panel.style.minimal_width = 250
   GuiElement.add(factory_info_panel, GuiLabel("factory_label"):caption({"helmod_common.factory"}):style("helmod_label_title_frame"))
   
   local factory_module_panel = GuiElement.add(table_panel, GuiFlowV(factory_module_name))
 
-  factory_module_panel.style.width = 300
+  factory_module_panel.style.minimal_width = 300
   return factory_info_panel, factory_module_panel
 end
 
@@ -200,9 +200,9 @@ function RecipeEdition:getBeaconPanel()
   local table_panel = GuiElement.add(content_panel, GuiTable(table_name):column(2))
   table_panel.vertical_centering = false
   local beacon_info_panel = GuiElement.add(table_panel, GuiFlowV(beacon_info_name))
-  beacon_info_panel.style.width = 250
+  beacon_info_panel.style.minimal_width = 250
   local beacon_module_panel = GuiElement.add(table_panel, GuiFlowV(beacon_module_name))
-  beacon_module_panel.style.width = 300
+  beacon_module_panel.style.minimal_width = 300
   return beacon_info_panel, beacon_module_panel
 end
 
@@ -274,6 +274,24 @@ function RecipeEdition:onEvent(event)
         options["limit"] = formula(text) or 0
 
         ModelBuilder.updateFactory(block.id, recipe.id, options)
+        ModelCompute.update()
+        self:updateFactoryInfo(event)
+        self:updateHeader(event)
+        Controller:send("on_gui_refresh", event)
+      end)
+      if not(ok) then
+        Player.print("Formula is not valid!")
+      end
+    end
+
+    if event.action == "factory-temperature" then
+      local options = {}
+
+      local text = event.element.text
+      local ok , err = pcall(function()
+        options["target_temperature"] = formula(text) or 0
+
+        ModelBuilder.updateTemperatureFactory(block.id, recipe.id, options)
         ModelCompute.update()
         self:updateFactoryInfo(event)
         self:updateHeader(event)
@@ -699,7 +717,8 @@ function RecipeEdition:updateFactoryInfo(event)
     local sign = ""
     if factory.effects.consumption > 0 then sign = "+" end
     GuiElement.add(input_panel, GuiLabel("energy"):caption(Format.formatNumberKilo(factory.energy, "W").." ("..sign..Format.formatPercent(factory.effects.consumption).."%)"))
-    -- solid burner
+    
+    -- burner
     local energy_type = factory_prototype:getEnergyType()
     if energy_type == "burner" or energy_type == "fluid" then
       local fuel_type = "item"
@@ -709,13 +728,18 @@ function RecipeEdition:updateFactoryInfo(event)
       GuiElement.add(input_panel, GuiLabel("label-burner"):caption({"helmod_common.resource"}))
       local energy_prototype = factory_prototype:getEnergySource()
       local fuel_list = energy_prototype:getFuelPrototypes()
-      local factory_fuel = energy_prototype:getFuelPrototype(factory)
+      local factory_fuel = energy_prototype:getFuelPrototype()
       local items = {}
       for _,item in pairs(fuel_list) do
         table.insert(items,string.format("[%s=%s]", fuel_type, item.name))
       end
       local default_fuel = string.format("[%s=%s]", fuel_type, factory_fuel:native().name)
       GuiElement.add(input_panel, GuiDropDown(self.classname, "factory-fuel-update", block.id, recipe.id, fuel_type):items(items, default_fuel))
+      
+--      if factory_fuel:native().name == "steam" then
+--        GuiElement.add(input_panel, GuiLabel("label-temperature"):caption({"helmod_common.temperature"}))
+--        GuiElement.add(input_panel, GuiTextField(self.classname, "factory-temperature", block.id, recipe.id):text(factory.target_temperature or 165):isNumeric())
+--      end
     end
 
     local sign = ""

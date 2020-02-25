@@ -2,11 +2,12 @@
 Version: 0.10.6
 Date: 23. 02. 2020
   Changes:
-    - added all energy source prototypes
     - added a new block for energy consumption
+    - added all energy source prototypes
     - removed energy tab
     - modified property tab
     - changed fluid recipe, now there are hidden except water and steam
+    - removed ingredient for ressource recipes and water recipe
   Bugfixes:
     - fixed width internal panel of edit recipe
 ---------------------------------------------------------------------------------------------------

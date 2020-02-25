@@ -270,7 +270,9 @@ function GuiCellProductSm:create(parent)
   end
 
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
-  GuiElement.add(row3, GuiLabel("label2", element.name):caption(Format.formatNumber(element.count, 5)):style("helmod_label_element_sm"):tooltip({"helmod_common.total"}))
+  local caption3 = Format.formatNumber(element.count, 5)
+  if element.type == "energy" then caption3 = Format.formatNumberKilo(element.count, "W") end
+  GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element_sm"):tooltip({"helmod_common.total"}))
   return cell
 end
 

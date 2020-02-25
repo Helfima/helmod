@@ -4,8 +4,9 @@ require "model.Prototype"
 --
 -- @module EnergySourcePrototype
 --
-EnergySourcePrototype = newclass(Prototype,function(base,lua_prototype)
+EnergySourcePrototype = newclass(Prototype,function(base, lua_prototype, factory)
   Prototype.init(base,lua_prototype)
+  base.factory = factory
 end)
 -------------------------------------------------------------------------------
 -- Return emissions
@@ -81,8 +82,8 @@ function ElectricSourcePrototype:getOutputFlowLimit()
   return 0
 end
 
-BurnerPrototype = newclass(EnergySourcePrototype,function(base,lua_prototype)
-  EnergySourcePrototype.init(base,lua_prototype)
+BurnerPrototype = newclass(EnergySourcePrototype,function(base,lua_prototype, factory)
+  EnergySourcePrototype.init(base, lua_prototype, factory)
 end)
 
 -------------------------------------------------------------------------------
@@ -139,12 +140,10 @@ end
 --
 -- @function [parent=#BurnerPrototype] getFuelPrototype
 --
--- @param #table factory
---
 -- @return #ItemPrototype item prototype
 --
-function BurnerPrototype:getFuelPrototype(factory)
-  local fuel = factory.fuel
+function BurnerPrototype:getFuelPrototype()
+  local fuel = self.factory.fuel
   if fuel == nil then
     local first_fuel = self:getFirstFuelPrototype()
     fuel = first_fuel.name
@@ -167,8 +166,8 @@ function BurnerPrototype:toString()
   return game.table_to_json(self:toData())
 end
 
-FluidSourcePrototype = newclass(EnergySourcePrototype,function(base,lua_prototype)
-  EnergySourcePrototype.init(base,lua_prototype)
+FluidSourcePrototype = newclass(EnergySourcePrototype,function(base, lua_prototype, factory)
+  EnergySourcePrototype.init(base,lua_prototype, factory)
 end)
 
 -------------------------------------------------------------------------------
@@ -213,12 +212,10 @@ end
 --
 -- @function [parent=#FluidSourcePrototype] getFuelPrototype
 --
--- @param #table factory
---
 -- @return #FluidPrototype item prototype
 --
-function FluidSourcePrototype:getFuelPrototype(factory)
-  local fuel = factory.fuel
+function FluidSourcePrototype:getFuelPrototype()
+  local fuel = self.factory.fuel
   if fuel == nil then
     local first_fuel = self:getFirstFuelPrototype()
     fuel = first_fuel.name
@@ -240,10 +237,10 @@ function FluidSourcePrototype:getFluidUsagePerTick()
   return 0
 end
 
-VoidSourcePrototype = newclass(FluidSourcePrototype,function(base,lua_prototype)
-  EnergySourcePrototype.init(base,lua_prototype)
+VoidSourcePrototype = newclass(FluidSourcePrototype,function(base, lua_prototype, factory)
+  EnergySourcePrototype.init(base,lua_prototype, factory)
 end)
 
-HeatSourcePrototype = newclass(EnergySourcePrototype,function(base,lua_prototype)
-  EnergySourcePrototype.init(base,lua_prototype)
+HeatSourcePrototype = newclass(EnergySourcePrototype,function(base, lua_prototype, factory)
+  EnergySourcePrototype.init(base,lua_prototype, factory)
 end)

@@ -734,7 +734,8 @@ function Player.getRecipeEntity(name)
   local prototype = entity_prototype:native()
   local type = "item"
   if name == "crude-oil" then type = "entity" end
-  local ingredients = {{name=prototype.name, type=type, amount=1}}
+  --local ingredients = {{name=prototype.name, type=type, amount=1}}
+  local ingredients = {}
   if entity_prototype:getMineableMiningFluidRequired() then
     local fluid_ingredient = {name=entity_prototype:getMineableMiningFluidRequired(), type="fluid", amount=entity_prototype:getMineableMiningFluidAmount()}
     table.insert(ingredients, fluid_ingredient)
@@ -771,6 +772,9 @@ function Player.getRecipeFluid(name)
   local prototype = fluid_prototype:native()
   local products = {{name=prototype.name, type="fluid", amount=1}}
   local ingredients = {{name=prototype.name, type="fluid", amount=1}}
+  if prototype.name == "water" then
+    ingredients = {}
+  end
   if prototype.name == "steam" then
     ingredients = {{name="water", type="fluid", amount=1}}
   end

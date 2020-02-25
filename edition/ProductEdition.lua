@@ -85,8 +85,8 @@ local product_count = 0
 function ProductEdition:onUpdate(event)
   local model = Model.getModel()
   product = nil
-  if model.blocks[event.item1] ~= nil then
-    local block = model.blocks[event.item1]
+  local block = model.blocks[event.item1]
+  if block ~= nil then
     local block_elements = block.products
     if block.by_product == false then
       block_elements = block.ingredients
@@ -99,8 +99,9 @@ function ProductEdition:onUpdate(event)
   end
 
   self:updateInfo(event)
-  self:updateTool(event)
-  --self:updateAction(event)
+  if block == nil or block.isEnergy ~= true then
+    self:updateTool(event)
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -117,15 +118,26 @@ function ProductEdition:updateInfo(event)
   if product ~= nil then
     info_panel.clear()
 
+    local model = Model.getModel()
+    local block = model.blocks[event.item1]
+    
     local table_panel = GuiElement.add(info_panel, GuiTable("input-table"):column(2))
     GuiElement.add(table_panel, GuiButtonSprite("product"):sprite(product.type, product.name))
     GuiElement.add(table_panel, GuiLabel("product-label"):caption(Player.getLocalisedName(product)))
 
-    GuiElement.add(table_panel, GuiLabel("quantity-label"):caption({"helmod_common.quantity"}))
+    local caption = {"helmod_common.quantity"}
+    local count = product_count or 0
+    if block.isEnergy then
+      caption = {"", {"helmod_common.quantity"}, "(MW)"}
+      count = count/1e6
+    end
+    
+    GuiElement.add(table_panel, GuiLabel("quantity-label"):caption(caption))
     local cell, button
-    cell, input_quantity, button = GuiCellInput(self.classname, "product-update", event.item1, product.name):text(product_count or 0):create(table_panel)
+    cell, input_quantity, button = GuiCellInput(self.classname, "product-update", event.item1, product.name):text(count):create(table_panel)
     input_quantity.focus()
     input_quantity.select_all()
+    input_quantity.style.minimal_width = 100
   end
 end
 
@@ -175,10 +187,14 @@ function ProductEdition:onEvent(event)
   if User.isWriter() then
     if event.action == "product-update" then
       local products = {}
+      local block = model.blocks[event.item1]
 
       local operation = input_quantity.text
       local ok , err = pcall(function()
         local quantity = formula(operation)
+        if block ~= nil and block.isEnergy then
+          quantity = quantity * 1e6
+        end
         if quantity == 0 then quantity = nil end
         ModelBuilder.updateProduct(event.item1, event.item2, quantity)
         ModelCompute.update()

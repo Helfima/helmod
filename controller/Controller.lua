@@ -9,6 +9,7 @@ require "dialog.Calculator"
 require "dialog.RecipeExplorer"
 require "edition.RecipeEdition"
 require "edition.ProductEdition"
+require "edition.EnergyEdition"
 require "edition.RuleEdition"
 require "edition.PreferenceEdition"
 require "selector.ContainerSelector"
@@ -19,6 +20,7 @@ require "selector.TechnologySelector"
 require "selector.ItemSelector"
 require "selector.FluidSelector"
 
+require "tab.EnergyTab"
 require "tab.ProductionBlockTab"
 require "tab.ProductionLineTab"
 require "tab.ResourceTab"
@@ -79,6 +81,7 @@ function Controller:prepare()
 
   table.insert(forms, ProductionLineTab("HMProductionLineTab"))
   table.insert(forms, ProductionBlockTab("HMProductionBlockTab"))
+  --table.insert(forms, EnergyTab("HMEnergyTab"))
   table.insert(forms, ResourceTab("HMResourceTab"))
   table.insert(forms, SummaryTab("HMSummaryTab"))
   table.insert(forms, StatisticTab("HMStatisticTab"))
@@ -96,6 +99,7 @@ function Controller:prepare()
 
   table.insert(forms, RecipeEdition("HMRecipeEdition"))
   table.insert(forms, ProductEdition("HMProductEdition"))
+  --table.insert(forms, EnergyEdition("HMEnergyEdition"))
   table.insert(forms, RuleEdition("HMRuleEdition"))
   table.insert(forms, PreferenceEdition("HMPreferenceEdition"))
 
@@ -644,6 +648,11 @@ function Controller:onEventAccessWrite(event)
   local model = Model.getModel()
   local model_id = User.getParameter("model_id")
   local current_block = User.getParameter("current_block")
+  local block = model.blocks[current_block] or {}
+  local selector_name = "HMRecipeSelector"
+  if model.blocks[current_block] ~= nil and model.blocks[current_block].isEnergy then
+    selector_name = "HMEnergySelector"
+  end
 
   if event.action == "change-tab" then
     if event.item1 == "HMProductionBlockTab" and event.item2 == "new" then
@@ -682,7 +691,7 @@ function Controller:onEventAccessWrite(event)
 
   if event.action == "product-edition" then
     if event.button == defines.mouse_button_type.right then
-      self:send("on_gui_open", event, "HMRecipeSelector")
+      self:send("on_gui_open", event, selector_name)
     else
       self:send("on_gui_open", event, "HMProductEdition")
     end
@@ -696,7 +705,7 @@ function Controller:onEventAccessWrite(event)
 
   if event.action == "production-recipe-product-add" then
     if event.button == defines.mouse_button_type.right then
-      self:send("on_gui_open", event, "HMRecipeSelector")
+      self:send("on_gui_open", event, selector_name)
     else
       local recipes = Player.searchRecipe(event.item3, true)
       if #recipes == 1 then
@@ -708,14 +717,14 @@ function Controller:onEventAccessWrite(event)
       else
         -- pour ouvrir avec le filtre ingredient
         event.button = defines.mouse_button_type.right
-        self:send("on_gui_open", event, "HMRecipeSelector")
+        self:send("on_gui_open", event, selector_name)
       end
     end
   end
 
   if event.action == "production-recipe-ingredient-add" then
     if event.button == defines.mouse_button_type.right then
-      self:send("on_gui_open", event, "HMRecipeSelector")
+      self:send("on_gui_open", event, selector_name)
     else
       local recipes = Player.searchRecipe(event.item3)
       if #recipes == 1 then
@@ -725,7 +734,7 @@ function Controller:onEventAccessWrite(event)
         User.setParameter("scroll_element", new_recipe.id)
         self:send("on_gui_update", event)
       else
-        self:send("on_gui_open", event, "HMRecipeSelector")
+        self:send("on_gui_open", event, selector_name)
       end
     end
   end

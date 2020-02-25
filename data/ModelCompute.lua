@@ -873,7 +873,7 @@ function ModelCompute.computeFactory(recipe)
   -- effet consumption
   local factory_prototype = EntityPrototype(recipe.factory)
   local energy_type = factory_prototype:getEnergyType()
-  recipe.factory.energy = factory_prototype:getMaxEnergyUsage() * (1 + recipe.factory.effects.consumption)
+  recipe.factory.energy = factory_prototype:getEnergyConsumption() * (1 + recipe.factory.effects.consumption)
 
   -- effet pollution
   recipe.factory.pollution = factory_prototype:getPollution() * (1 + recipe.factory.effects.pollution)
@@ -898,7 +898,7 @@ function ModelCompute.computeFactory(recipe)
     recipe.factory.energy_total = 0
     if energy_type == "burner" or energy_type == "fluid" then
       local energy_prototype = EntityPrototype(recipe.factory):getEnergySource()
-      local fuel_prototype = energy_prototype:getFuelPrototype(recipe.factory)
+      local fuel_prototype = energy_prototype:getFuelPrototype()
       fuel_emissions_multiplier = fuel_prototype:getFuelEmissionsMultiplier()
     end
   else
@@ -924,6 +924,7 @@ end
 --
 function ModelCompute.computeEnergyFactory(recipe)
   Logging:trace(ModelCompute.classname, "computeFactory()", recipe.name)
+  local model = Model.getModel()
   local recipe_prototype = RecipePrototype(recipe)
   local recipe_energy = recipe_prototype:getEnergy()
   -- effet speed
@@ -934,14 +935,20 @@ function ModelCompute.computeEnergyFactory(recipe)
 
   -- effet consumption
   local factory_prototype = EntityPrototype(recipe.factory)
+  local energy_prototype = factory_prototype:getEnergySource()
+      
   local energy_type = factory_prototype:getEnergyType()
-  recipe.factory.energy = factory_prototype:getEnergyNominal() * (1 + recipe.factory.effects.consumption)
+  local gameDay = {day=12500,dust=5000,night=2500,dawn=2500}
+  if factory_prototype:getType() == EntityType.accumulator then
+    local dark_time = (gameDay.dust/2 + gameDay.night + gameDay.dawn / 2 )
+    recipe_energy = dark_time/60
+  end
+  recipe.factory.energy = factory_prototype:getEnergyConsumption() * (1 + recipe.factory.effects.consumption)
 
   -- effet pollution
   recipe.factory.pollution = factory_prototype:getPollution() * (1 + recipe.factory.effects.pollution)
   
   -- compte le nombre de machines necessaires
-  local model = Model.getModel()
   -- [ratio recipe] * [effort necessaire du recipe] / ([la vitesse de la factory]
   local count = recipe.count*recipe_energy/recipe.factory.speed
   if recipe.factory.speed == 0 then count = 0 end
@@ -951,12 +958,12 @@ function ModelCompute.computeEnergyFactory(recipe)
   if energy_type ~= "electric" then
     recipe.factory.energy_total = 0
     if energy_type == "burner" or energy_type == "fluid" then
-      local energy_prototype = EntityPrototype(recipe.factory):getEnergySource()
-      local fuel_prototype = energy_prototype:getFuelPrototype(recipe.factory)
+      local fuel_prototype = energy_prototype:getFuelPrototype()
       fuel_emissions_multiplier = fuel_prototype:getFuelEmissionsMultiplier()
     end
   else
-    recipe.factory.energy_total = math.ceil(recipe.factory.count*recipe.factory.energy)
+    recipe.factory.energy_total = 0
+    --recipe.factory.energy_total = math.ceil(recipe.factory.count*recipe.factory.energy)
   end
   recipe.factory.pollution_total = recipe.factory.pollution * recipe.factory.count * model.time
   
@@ -1186,12 +1193,12 @@ function ModelCompute.computePower(key)
     local secondary_prototype = EntityPrototype(power.secondary.name)
     if primary_prototype:getType() == EntityType.generator then
       -- calcul primary
-      local count = math.ceil( power.power / primary_prototype:getEnergyNominal() )
+      local count = math.ceil( power.power / primary_prototype:getEnergyConsumption() )
       power.primary.count = count or 0
       -- calcul secondary
       if secondary_prototype:native() ~= nil and secondary_prototype:getType() == EntityType.boiler then
         local count = 0
-        count = math.ceil( power.power / secondary_prototype:getEnergyNominal() )
+        count = math.ceil( power.power / secondary_prototype:getEnergyConsumption() )
         power.secondary.count = count or 0
       else
         power.secondary.count = 0
@@ -1199,7 +1206,7 @@ function ModelCompute.computePower(key)
     end
     if primary_prototype:getType() == EntityType.solar_panel then
       -- calcul primary
-      local count = math.ceil( power.power / primary_prototype:getEnergyNominal() )
+      local count = math.ceil( power.power / primary_prototype:getEnergyConsumption() )
       power.primary.count = count or 0
       -- calcul secondary
       if secondary_prototype:native() ~= nil and secondary_prototype:getType() == EntityType.accumulator then
@@ -1209,10 +1216,11 @@ function ModelCompute.computePower(key)
         -- selon les aires il faut de l'accu en dehors du jour selon le trapese journalier
         local accu= (gameDay.dust/factor + gameDay.night + gameDay.dawn / factor ) / ( gameDay.day )
         -- puissance nominale la nuit
-        local count1 = power.power/ secondary_prototype:getElectricOutputFlowLimit()
+        local energy_prototype = secondary_prototype:getEnergySource()
+        local count1 = power.power/ energy_prototype:getOutputFlowLimit()
         -- puissance durant la penombre
         -- formula (puissance*durree_penombre)/(60s*capacite)
-        local count2 = power.power*( gameDay.dust / factor + gameDay.night + gameDay.dawn / factor ) / ( 60 * secondary_prototype:getElectricBufferCapacity() )
+        local count2 = power.power*( gameDay.dust / factor + gameDay.night + gameDay.dawn / factor ) / ( 60 * energy_prototype:getBufferCapacity() )
 
         Logging:debug(ModelCompute.classname , "********** computePower result:", accu, count1, count2)
         if count1 > count2 then
@@ -1242,7 +1250,7 @@ function ModelCompute.speedFactory(recipe)
     local factory_prototype = EntityPrototype(recipe.factory)
     -- info energy 1J=1W
     local power_extract = factory_prototype:getPowerExtract()
-    local power_usage = factory_prototype:getMaxEnergyUsage()
+    local power_usage = factory_prototype:getEnergyConsumption()
     Logging:debug(ModelCompute.classname, "power_extract", power_extract, "power_usage", power_usage, "fluid", power_usage/power_extract)
     return power_usage/power_extract
   elseif recipe.type == "resource" then

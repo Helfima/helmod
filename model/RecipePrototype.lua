@@ -169,7 +169,7 @@ function RecipePrototype:getRawProducts()
       local products = {}
       local prototype = EntityPrototype(self.lua_prototype.name)
       if prototype:getType() == EntityType.solar_panel then
-        local amount = prototype:getEnergyNominal()
+        local amount = prototype:getEnergyConsumption()
         local product = {name="energy", type="energy", amount=amount}
         table.insert(products, product)
       end
@@ -191,21 +191,19 @@ function RecipePrototype:getRawProducts()
       end
       if prototype:getType() == EntityType.accumulator then
         local energy_prototype = prototype:getEnergySource()
-        local gameDay = {day=12500,dust=5000,night=2500,dawn=2500}
-        local dark_ratio = (gameDay.dust / 2 + gameDay.night + gameDay.dawn / 2)
-        local amount = energy_prototype:getOutputFlowLimit()/60
+        local amount = energy_prototype:getBufferCapacity()
         local product = {name="energy", type="energy", amount=amount}
         --Logging:debug("HMRecipePrototype", "capacity", energy_prototype:getBufferCapacity(), "dark", (gameDay.dust / 2 + gameDay.night + gameDay.dawn / 2))
         --Logging:debug("HMRecipePrototype", "product", product)
         table.insert(products, product)
       end
       if prototype:getType() == EntityType.generator then
-        local amount = prototype:getEnergyNominal()
+        local amount = prototype:getEnergyConsumption()
         local product = {name="energy", type="energy", amount=amount}
         table.insert(products, product)
       end
       if prototype:getType() == EntityType.reactor then
-        local amount = prototype:getMaxEnergyUsage()
+        local amount = prototype:getEnergyConsumption()
         local product = {name="steam-heat", type="energy", amount=amount}
         table.insert(products, product)
       end
@@ -250,7 +248,7 @@ function RecipePrototype:getRawIngredients()
           end
         end
         if prototype:getTargetTemperature() > 200 then
-            local amount = prototype:getMaxEnergyUsage()
+            local amount = prototype:getEnergyConsumption()
             local ingredient = {name="steam-heat", type="energy", amount=amount}
             table.insert(ingredients, ingredient)
         end
@@ -258,8 +256,8 @@ function RecipePrototype:getRawIngredients()
       if prototype:getType() == EntityType.accumulator then
         local energy_prototype = prototype:getEnergySource()
         local gameDay = {day=12500,dust=5000,night=2500,dawn=2500}
-        local dark_ratio = (gameDay.dust / 2 + gameDay.night + gameDay.dawn / 2)
-        local amount = energy_prototype:getInputFlowLimit()/60
+        local dark_ratio = (gameDay.dust/2 + gameDay.night + gameDay.dawn / 2 ) / ( gameDay.day )
+        local amount = energy_prototype:getBufferCapacity() * (1+dark_ratio)
         local ingredient = {name="energy", type="energy", amount=amount}
         table.insert(ingredients, ingredient)
       end
@@ -327,13 +325,15 @@ function RecipePrototype:getIngredients(factory)
         if energy_type == "burner" or energy_type == "fluid" then
           local energy_prototype = factory_prototype:getEnergySource()
           local burner_effectivity = energy_prototype:getEffectivity()
-          local factory_fuel = energy_prototype:getFuelPrototype(factory)
-          local fuel_value = (energy_usage/burner_effectivity)*(self:getEnergy()/speed_factory)
-          local burner_count = fuel_value/factory_fuel:getFuelValue()
-          local ingredient_type = "item"
-          if energy_type == "fluid" then ingredient_type = "fluid" end
-          local burner_ingredient = {name=factory_fuel:native().name, type=ingredient_type, amount=burner_count}
-          table.insert(raw_ingredients, burner_ingredient)
+          local factory_fuel = energy_prototype:getFuelPrototype()
+          if factory_fuel ~= nil then
+            local fuel_value = (energy_usage/burner_effectivity)*(self:getEnergy()/speed_factory)
+            local burner_count = fuel_value/factory_fuel:getFuelValue()
+            local ingredient_type = "item"
+            if energy_type == "fluid" then ingredient_type = "fluid" end
+            local burner_ingredient = {name=factory_fuel:native().name, type=ingredient_type, amount=burner_count}
+            table.insert(raw_ingredients, burner_ingredient)
+          end
         end
       end
     elseif self.lua_type == "resource" then
@@ -355,15 +355,17 @@ function RecipePrototype:getIngredients(factory)
         if energy_type == "burner" or energy_type == "fluid" then
           local energy_prototype = factory_prototype:getEnergySource()
           local burner_effectivity = energy_prototype:getEffectivity()
-          local factory_fuel = energy_prototype:getFuelPrototype(factory)
-          local speed_factory = hardness * mining_speed / mining_time
-          --Logging:debug(RecipePrototype.classname, "resource burner", energy_usage,speed_factory,burner_effectivity,burner_emission)
-          local fuel_value = (energy_usage/burner_effectivity)*(1/speed_factory)
-          local burner_count = fuel_value/factory_fuel:getFuelValue()
-          local ingredient_type = "item"
-          if energy_type == "fluid" then ingredient_type = "fluid" end
-          local burner_ingredient = {name=factory_fuel:native().name, type=ingredient_type, amount=burner_count}
-          table.insert(raw_ingredients, burner_ingredient)
+          local factory_fuel = energy_prototype:getFuelPrototype()
+          if factory_fuel ~= nil then
+            local speed_factory = hardness * mining_speed / mining_time
+            --Logging:debug(RecipePrototype.classname, "resource burner", energy_usage,speed_factory,burner_effectivity,burner_emission)
+            local fuel_value = (energy_usage/burner_effectivity)*(1/speed_factory)
+            local burner_count = fuel_value/factory_fuel:getFuelValue()
+            local ingredient_type = "item"
+            if energy_type == "fluid" then ingredient_type = "fluid" end
+            local burner_ingredient = {name=factory_fuel:native().name, type=ingredient_type, amount=burner_count}
+            table.insert(raw_ingredients, burner_ingredient)
+          end
         end
       end
     elseif self.lua_type == "fluid" then
@@ -374,34 +376,35 @@ function RecipePrototype:getIngredients(factory)
           if energy_type == "burner" or energy_type == "fluid" then
             local energy_prototype = factory_prototype:getEnergySource()
             local burner_effectivity = energy_prototype:getEffectivity()
-            local factory_fuel = energy_prototype:getFuelPrototype(factory)
-            -- source energy en kJ
-            local power_extract = factory_prototype:getPowerExtract()
-            local fuel_value = factory_fuel:getFuelValue()
-            local burner_count = power_extract/(fuel_value*burner_effectivity)
-            local ingredient_type = "item"
-            if energy_type == "fluid" then ingredient_type = "fluid" end
-            local burner_ingredient = {name=factory_fuel:native().name, type=ingredient_type, amount=burner_count}
-            table.insert(raw_ingredients, burner_ingredient)
+            local factory_fuel = energy_prototype:getFuelPrototype()
+            if factory_fuel ~= nil then
+              -- source energy en kJ
+              local burner_count = energy_prototype:getFluidUsagePerTick()*60
+              local ingredient_type = "item"
+              if energy_type == "fluid" then ingredient_type = "fluid" end
+              local burner_ingredient = {name=factory_fuel:native().name, type=ingredient_type, amount=burner_count}
+              table.insert(raw_ingredients, burner_ingredient)
+            end
           end
         end
       end
     elseif self.lua_type == "energy" then
       local factory_prototype = EntityPrototype(factory)
       if factory ~= nil and factory_prototype:getEnergyType() ~= "electric" then
-        local energy_usage = factory_prototype:getMaxEnergyUsage()
-        
+        local energy_usage = factory_prototype:getEnergyConsumption()
         local energy_type = factory_prototype:getEnergyType()
         if energy_type == "burner" or energy_type == "fluid" then
           local energy_prototype = factory_prototype:getEnergySource()
           local burner_effectivity = energy_prototype:getEffectivity()
-          local factory_fuel = energy_prototype:getFuelPrototype(factory)
-          local fuel_value = factory_fuel:getFuelValue()
-          local burner_count = energy_usage/(fuel_value*burner_effectivity)
-          local ingredient_type = "item"
-          if energy_type == "fluid" then ingredient_type = "fluid" end
-          local burner_ingredient = {name=factory_fuel:native().name, type=ingredient_type, amount=burner_count * model.time}
-          table.insert(raw_ingredients, burner_ingredient)
+          local factory_fuel = energy_prototype:getFuelPrototype()
+          if factory_fuel ~= nil then
+            local fuel_value = factory_fuel:getFuelValue()
+            local burner_count = energy_usage/(fuel_value*burner_effectivity)
+            local ingredient_type = "item"
+            if energy_type == "fluid" then ingredient_type = "fluid" end
+            local burner_ingredient = {name=factory_fuel:native().name, type=ingredient_type, amount=burner_count * model.time}
+            table.insert(raw_ingredients, burner_ingredient)
+          end
         end
       end
     end
