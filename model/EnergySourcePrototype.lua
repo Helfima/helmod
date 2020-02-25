@@ -36,6 +36,17 @@ function EnergySourcePrototype:getEffectivity()
   return 0
 end
 
+-------------------------------------------------------------------------------
+-- Return fuel count
+--
+-- @function [parent=#EnergySourcePrototype] getFuelCount
+--
+-- @return #table
+--
+function EnergySourcePrototype:getFuelCount()
+  return nil
+end
+
 ElectricSourcePrototype = newclass(EnergySourcePrototype,function(base,lua_prototype)
   EnergySourcePrototype.init(base,lua_prototype)
 end)
@@ -151,6 +162,34 @@ function BurnerPrototype:getFuelPrototype()
   return ItemPrototype(fuel)
 end
 
+-------------------------------------------------------------------------------
+-- Return fuel count
+--
+-- @function [parent=#BurnerPrototype] getFuelCount
+--
+-- @return #table
+--
+function BurnerPrototype:getFuelCount()
+  local factory_prototype = EntityPrototype(self.factory)
+  local energy_consumption = factory_prototype:getEnergyConsumption()
+  local factory_fuel = self:getFuelPrototype()
+  if factory_fuel == nil then return nil end
+  -- @see https://wiki.factorio.com/Fuel
+  -- Burn time (s) = Fuel value (MJ) ÷ Energy consumption (MW)
+  -- source energy en kJ
+  local burner_effectivity = self:getEffectivity()
+  local fuel_value = factory_fuel:getFuelValue()
+  local burner_count = energy_consumption/(fuel_value*burner_effectivity)
+  return {type="item", name=factory_fuel:native().name, count=burner_count}
+end
+
+-------------------------------------------------------------------------------
+-- Return data
+--
+-- @function [parent=#BurnerPrototype] toData
+--
+-- @return #table
+--
 function BurnerPrototype:toData()
   local data = {}
   data.emissions = self.lua_prototype.emissions
@@ -162,6 +201,13 @@ function BurnerPrototype:toData()
   return data
 end
 
+-------------------------------------------------------------------------------
+-- Return string
+--
+-- @function [parent=#BurnerPrototype] toString
+--
+-- @return #string
+--
 function BurnerPrototype:toString()
   return game.table_to_json(self:toData())
 end
@@ -235,6 +281,31 @@ function FluidSourcePrototype:getFluidUsagePerTick()
     return self.lua_prototype.fluid_usage_per_tick or 1
   end
   return 0
+end
+
+-------------------------------------------------------------------------------
+-- Return fuel count
+--
+-- @function [parent=#FluidSourcePrototype] getFuelCount
+--
+-- @return #table
+--
+function FluidSourcePrototype:getFuelCount()
+  local factory_prototype = EntityPrototype(self.factory)
+  local energy_consumption = factory_prototype:getEnergyConsumption()
+  local factory_fuel = self:getFuelPrototype()
+  if factory_fuel == nil then return nil end
+  local burner_effectivity = self:getEffectivity()
+  local fluid_usage_per_tick = self:getFluidUsagePerTick()
+  if self.lua_prototype.fluid_usage_per_tick ~= nil then
+    local fluid_usage_per_tick = self:getFluidUsagePerTick()
+    local burner_count = fluid_usage_per_tick*60
+    return {type="fluid", name=factory_fuel:native().name, count=burner_count}
+  else
+    local fuel_value = factory_fuel:getFuelValue()
+    local burner_count = energy_consumption/(fuel_value*burner_effectivity)
+    return {type="fluid", name=factory_fuel:native().name, count=burner_count}
+  end
 end
 
 VoidSourcePrototype = newclass(FluidSourcePrototype,function(base, lua_prototype, factory)

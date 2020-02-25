@@ -1,6 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.10.7
+Date: 25. 02. 2020
+  Bugfixes:
+    - fixed energy source in recipe
+    - fixed crash new game
+---------------------------------------------------------------------------------------------------
 Version: 0.10.6
-Date: 23. 02. 2020
+Date: 25. 02. 2020
   Changes:
     - added a new block for energy consumption
     - added all energy source prototypes
