@@ -1,5 +1,4 @@
 require "tab.AbstractTab"
-require "model.BurnerPrototype"
 -------------------------------------------------------------------------------
 -- Class to build tab
 --
@@ -182,18 +181,60 @@ function PropertiesTab:updateData(event)
             local cell_value = GuiElement.add(result_table, GuiFrameH(property, prototype.name, index):style(helmod_frame_style.hidden))
             if values[prototype.name] ~= nil then
               local chmod = values[prototype.name].chmod
-              local value = values[prototype.name].value
-              local label_value = GuiElement.add(cell_value, GuiLabel("prototype_value"):caption(string.format("[%s]: %s", chmod, value)):style("helmod_label_max_600"))
+              local value = self:tableToString(values[prototype.name].value)
+              GuiElement.add(cell_value, GuiLabel("prototype_chmod"):caption(string.format("[%s]:", chmod)))
+              local label_value = GuiElement.add(cell_value, GuiLabel("prototype_value"):caption(value):style("helmod_label_max_600"))
               label_value.style.width = 400
             end
           end
         end
       end
     end
-
   end
 end
 
+-------------------------------------------------------------------------------
+-- Table to string
+--
+-- @function [parent=#PropertiesTab] tableToString
+--
+-- @param #table value
+--
+function PropertiesTab:tableToString(value)
+  if type(value) == "table" then
+    local key2,_ = next(value)
+    Logging:debug(self.classname, "tableToString()", value, type(key2))
+    if type(key2) ~= "number" then
+      local message = "{\n"
+      local first = true
+      for key,content in pairs(value) do
+        local mask = "%s%s%s=%s%s"
+        if not(first) then
+          message = message..",\n"
+        end
+        if type(content) == "table" then
+          message = string.format(mask, message, helmod_tag.color.orange, key, helmod_tag.color.close, string.match(serpent.dump(content),"do local _=(.*);return _;end"))
+        else
+          message = string.format(mask, message, helmod_tag.color.orange, key, helmod_tag.color.close, content)
+        end
+        first = false
+      end
+      value = message.."\n}"
+    else
+      local message = "{"
+      local first = true
+      for key,content in pairs(value) do
+        if not(first) then
+          message = message..","
+        end
+        message = message..tostring(self:tableToString(content))
+        first = false
+      end
+      value = message.."}"
+    end
+  end
+  return value
+end
 -------------------------------------------------------------------------------
 -- Is nil line
 --
@@ -267,6 +308,7 @@ function PropertiesTab:getPrototypeData(prototype)
       lua_prototype = Technology(prototype):native()
     end
     if lua_prototype ~= nil then
+      Logging:debug(self.classname, "****************************")
       Logging:debug(self.classname, "prototype", prototype)
       return self:parseProperties(lua_prototype, 0, prototype.type)
     end
@@ -324,76 +366,67 @@ end
 -- @param #LuaObject prototype
 --
 function PropertiesTab:parseProperties(prototype, level, prototype_type)
-  Logging:debug(self.classname, "***************************")
-  local properties = {}
-
+  Logging:debug(self.classname, "->prototype", prototype, level, prototype_type)
+  if prototype == nil then return "nil" end
+  if level > 2 then 
+    return prototype
+    --return string.match(serpent.dump(prototype),"do local _=(.*);return _;end")
+  end
   -- special
-  if prototype.name == "character" then
-    table.insert(properties, {name = "PLAYER.character_crafting_speed_modifier", chmod = "RW", value = Player.native().character_crafting_speed_modifier})
-    table.insert(properties, {name = "PLAYER.character_mining_speed_modifier", chmod = "RW", value = Player.native().character_mining_speed_modifier})
-    table.insert(properties, {name = "PLAYER.character_additional_mining_categories", chmod = "RW", value = string.match(serpent.dump(Player.native().character_additional_mining_categories),"do local _=(.*);return _;end")})
-    table.insert(properties, {name = "PLAYER.character_running_speed_modifier", chmod = "RW", value = Player.native().character_running_speed_modifier})
-    table.insert(properties, {name = "PLAYER.character_build_distance_bonus", chmod = "RW", value = Player.native().character_build_distance_bonus})
-    table.insert(properties, {name = "PLAYER.character_item_drop_distance_bonus", chmod = "RW", value = Player.native().character_item_drop_distance_bonus})
-    table.insert(properties, {name = "PLAYER.character_reach_distance_bonus", chmod = "RW", value = Player.native().character_reach_distance_bonus})
-    table.insert(properties, {name = "PLAYER.character_resource_reach_distance_bonus", chmod = "RW", value = Player.native().character_resource_reach_distance_bonus})
-    table.insert(properties, {name = "PLAYER.character_item_pickup_distance_bonus", chmod = "RW", value = Player.native().character_item_pickup_distance_bonus})
-    table.insert(properties, {name = "PLAYER.character_loot_pickup_distance_bonus", chmod = "RW", value = Player.native().character_loot_pickup_distance_bonus})
-    table.insert(properties, {name = "PLAYER.character_inventory_slots_bonus", chmod = "RW", value = Player.native().character_inventory_slots_bonus})
-    table.insert(properties, {name = "PLAYER.character_logistic_slot_count_bonus", chmod = "RW", value = Player.native().character_logistic_slot_count_bonus})
-    table.insert(properties, {name = "PLAYER.character_trash_slot_count_bonus", chmod = "RW", value = Player.native().character_trash_slot_count_bonus})
-    table.insert(properties, {name = "PLAYER.character_maximum_following_robot_count_bonus", chmod = "RW", value = Player.native().character_maximum_following_robot_count_bonus})
-    table.insert(properties, {name = "PLAYER.character_health_bonus", chmod = "RW", value = Player.native().character_health_bonus})
-  end
-  if (prototype_type == "item" or prototype_type == "entity") and prototype.type == "inserter" then
-    table.insert(properties, {name = "FORCE.inserter_stack_size_bonus", chmod = "RW", value = Player.getForce().inserter_stack_size_bonus})
-    table.insert(properties, {name = "FORCE.stack_inserter_capacity_bonus", chmod = "RW", value = Player.getForce().stack_inserter_capacity_bonus})
-  end
+  local isluaobject, error = pcall(function() local test = prototype:help() return true end)
+  local object_type = type(prototype)
+  if isluaobject then
+    local lua_type = string.match(prototype:help(), "Help for%s([^:]*)")
+    if lua_type == "LuaEntityPrototype" and prototype.name == "character" then
+      table.insert(properties, {name = "PLAYER.character_crafting_speed_modifier", chmod = "RW", value = Player.native().character_crafting_speed_modifier})
+      table.insert(properties, {name = "PLAYER.character_mining_speed_modifier", chmod = "RW", value = Player.native().character_mining_speed_modifier})
+      table.insert(properties, {name = "PLAYER.character_additional_mining_categories", chmod = "RW", value = string.match(serpent.dump(Player.native().character_additional_mining_categories),"do local _=(.*);return _;end")})
+      table.insert(properties, {name = "PLAYER.character_running_speed_modifier", chmod = "RW", value = Player.native().character_running_speed_modifier})
+      table.insert(properties, {name = "PLAYER.character_build_distance_bonus", chmod = "RW", value = Player.native().character_build_distance_bonus})
+      table.insert(properties, {name = "PLAYER.character_item_drop_distance_bonus", chmod = "RW", value = Player.native().character_item_drop_distance_bonus})
+      table.insert(properties, {name = "PLAYER.character_reach_distance_bonus", chmod = "RW", value = Player.native().character_reach_distance_bonus})
+      table.insert(properties, {name = "PLAYER.character_resource_reach_distance_bonus", chmod = "RW", value = Player.native().character_resource_reach_distance_bonus})
+      table.insert(properties, {name = "PLAYER.character_item_pickup_distance_bonus", chmod = "RW", value = Player.native().character_item_pickup_distance_bonus})
+      table.insert(properties, {name = "PLAYER.character_loot_pickup_distance_bonus", chmod = "RW", value = Player.native().character_loot_pickup_distance_bonus})
+      table.insert(properties, {name = "PLAYER.character_inventory_slots_bonus", chmod = "RW", value = Player.native().character_inventory_slots_bonus})
+      table.insert(properties, {name = "PLAYER.character_logistic_slot_count_bonus", chmod = "RW", value = Player.native().character_logistic_slot_count_bonus})
+      table.insert(properties, {name = "PLAYER.character_trash_slot_count_bonus", chmod = "RW", value = Player.native().character_trash_slot_count_bonus})
+      table.insert(properties, {name = "PLAYER.character_maximum_following_robot_count_bonus", chmod = "RW", value = Player.native().character_maximum_following_robot_count_bonus})
+      table.insert(properties, {name = "PLAYER.character_health_bonus", chmod = "RW", value = Player.native().character_health_bonus})
+    end
+    if (lua_type == "LuaEntityPrototype" or lua_type == "LuaItemPrototype") and prototype.type == "inserter" then
+      table.insert(properties, {name = "FORCE.inserter_stack_size_bonus", chmod = "RW", value = Player.getForce().inserter_stack_size_bonus})
+      table.insert(properties, {name = "FORCE.stack_inserter_capacity_bonus", chmod = "RW", value = Player.getForce().stack_inserter_capacity_bonus})
+    end
+    if lua_type == "LuaFluidBoxPrototype" then
+      return FluidboxPrototype(prototype):toData()
+    end
   
-  local help_string = string.gmatch(prototype:help(),"(%S+) [[](RW?)[]]")
-  Logging:debug(self.classname, "help_string", help_string)
-
-  for key, chmod in help_string do
-    Logging:debug(self.classname, "loop", key)
-    pcall(function()
-      local type = type(prototype[key])
-      local value = tostring(prototype[key])
-      Logging:debug(self.classname, "property", key, type, value)
-      if key == "group" or key == "subgroup" then
-        local group = prototype[key]
-        value = string.format("{name=%s,type=%s,order_in_recipe=%s,order=%s}", group.name, group.type, group.order_in_recipe, group.order)
-      elseif key == "burner_prototype" then
-        local burner_prototype = BurnerPrototype(prototype[key])
-        value = burner_prototype:toString()
-      elseif key == "fluidbox_prototypes" then
-        value = ""
-        if prototype[key] ~= nil then
-          Logging:debug(self.classname, "fluidbox_prototypes", prototype[key])
-          for _,fluidbox in pairs(prototype[key]) do
-            local fluidbox_prototype = FluidboxPrototype(fluidbox)
-            value = string.format("%s\n%s", value, fluidbox_prototype:toString())
-          end
-        else
-          value = nil
+    local help_string = string.gmatch(prototype:help(),"(%S+) [[](RW?)[]]")
+    local properties = {}
+    for key, chmod in help_string do
+      local value = nil
+        Logging:debug(self.classname, "prototype key", key)
+        pcall( function()
+          value = self:parseProperties(prototype[key], level + 1, nil)
+        end)
+        if key == "heat_energy_source_prototype" then
+          Logging:debug(self.classname, key, chmod, value)
         end
-      elseif key == "electric_energy_source_prototype" then
-        local electric_prototype = ElectricPrototype(prototype[key]):toString()
-        value = electric_prototype
-      elseif type == "table" then
-        local test, error = pcall(function() prototype[key]:help() return true end)
-        pcall(function() Logging:debug(self.classname, "level", level, "help", prototype[key]:help(), "test", test, error, level < 2 and test) end)
-        if level < 2 and test then
-          local result = PropertiesTab:parseProperties(prototype[key], level + 1, prototype_type)
-          value = ""
-          for _, property in pairs(result) do
-            value = value .. property.name .. " = " .. property.value .. "\n"
-          end
+        if level == 0 then
+          table.insert(properties, {name = key, chmod = chmod, value = value})
         else
-          value = string.match(serpent.dump(prototype[key]),"do local _=(.*);return _;end")
+          properties[key]=value
         end
-      end
-      table.insert(properties, {name = key, chmod = chmod, value = value})
-    end)
+    end
+    return properties
+  elseif object_type == "table" then
+    local properties = {}
+    for key,value in pairs(prototype) do
+      properties[key] = self:parseProperties(value, level + 1, nil)
+    end
+    return properties
+  else
+    return prototype
   end
-  return properties
 end

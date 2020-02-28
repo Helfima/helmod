@@ -256,24 +256,28 @@ function RecipePrototype:getIngredients(factory)
         
         if factory_prototype:getEnergyType() == "burner" then
           local first_fuel = factory_prototype:getBurnerPrototype():getFirstFuelItemPrototype()
-          local factory_fuel = factory.fuel or first_fuel.name
-          local speed_factory = hardness * mining_speed / mining_time
-          --Logging:debug(RecipePrototype.classname, "resource burner", energy_usage,speed_factory,burner_effectivity,burner_emission)
-          local fuel_value = (energy_usage/burner_effectivity)*(1/speed_factory)
-          local burner_count = fuel_value/ItemPrototype(factory_fuel):getFuelValue()
-          local burner_ingredient = {name=factory_fuel, type="item", amount=burner_count}
-          table.insert(ingredients, burner_ingredient)
+          if factory.fuel ~= nil or first_fuel ~= nil then
+            local factory_fuel = factory.fuel or first_fuel.name
+            local speed_factory = hardness * mining_speed / mining_time
+            --Logging:debug(RecipePrototype.classname, "resource burner", energy_usage,speed_factory,burner_effectivity,burner_emission)
+            local fuel_value = (energy_usage/burner_effectivity)*(1/speed_factory)
+            local burner_count = fuel_value/ItemPrototype(factory_fuel):getFuelValue()
+            local burner_ingredient = {name=factory_fuel, type="item", amount=burner_count}
+            table.insert(ingredients, burner_ingredient)
+          end
         end
         
         if factory_prototype:getEnergyType() == "fuel-burner" then
           local first_fuel = factory_prototype:getBurnerPrototype():getFirstFuelFluidPrototype()
-          local factory_fuel = factory.fuel or first_fuel.name
-          local speed_factory = hardness * mining_speed / mining_time
-          --Logging:debug(RecipePrototype.classname, "resource burner", energy_usage,speed_factory,burner_effectivity,burner_emission)
-          local fuel_value = (energy_usage/burner_effectivity)*(1/speed_factory)
-          local burner_count = fuel_value/FluidPrototype(factory_fuel):getFuelValue()
-          local burner_ingredient = {name=factory_fuel, type="fluid", amount=burner_count}
-          table.insert(ingredients, burner_ingredient)
+          if factory.fuel ~= nil or first_fuel ~= nil then
+            local factory_fuel = factory.fuel or first_fuel.name
+            local speed_factory = hardness * mining_speed / mining_time
+            --Logging:debug(RecipePrototype.classname, "resource burner", energy_usage,speed_factory,burner_effectivity,burner_emission)
+            local fuel_value = (energy_usage/burner_effectivity)*(1/speed_factory)
+            local burner_count = fuel_value/FluidPrototype(factory_fuel):getFuelValue()
+            local burner_ingredient = {name=factory_fuel, type="fluid", amount=burner_count}
+            table.insert(ingredients, burner_ingredient)
+          end
         end
       end
       return ingredients
@@ -284,23 +288,25 @@ function RecipePrototype:getIngredients(factory)
         if factory ~= nil then
           if factory_prototype:getEnergyType() == "burner" then
             local first_fuel = factory_prototype:getBurnerPrototype():getFirstFuelItemPrototype()
-            local factory_fuel = factory.fuel or first_fuel.name
-            -- source energy en kJ
-            local power_extract = factory_prototype:getPowerExtract()
-            local fuel_value = ItemPrototype(factory_fuel):getFuelValue()
-            local amount = power_extract/(fuel_value*factory_prototype:getBurnerEffectivity())
-            table.insert(ingredients, {name=factory_fuel, type="item", amount=amount})
+            if factory.fuel ~= nil or first_fuel ~= nil then
+              local factory_fuel = factory.fuel or first_fuel.name
+              -- source energy en kJ
+              local power_extract = factory_prototype:getPowerExtract()
+              local fuel_value = ItemPrototype(factory_fuel):getFuelValue()
+              local amount = power_extract/(fuel_value*factory_prototype:getBurnerEffectivity())
+              table.insert(ingredients, {name=factory_fuel, type="item", amount=amount})
+            end
           end
           if factory_prototype:getEnergyType() == "fuel-burner" then
             local first_fuel = factory_prototype:getBurnerPrototype():getFirstFuelFluidPrototype()
-            local factory_fuel = factory.fuel or first_fuel.name
-            -- source energy en kJ
-            local power_extract = factory_prototype:getPowerExtract()
-            local fuel_value = FluidPrototype(factory_fuel):getFuelValue()
-            local amount = power_extract/(fuel_value*factory_prototype:getBurnerEffectivity())
-            table.insert(ingredients, {name=factory_fuel, type="fluid", amount=amount})
-            --Logging:debug("HMRecipePrototype", "fluid fuel burner", factory_prototype:getBurnerPrototype():getFuelFluidPrototypes())
-            --Logging:debug("HMRecipePrototype", "fluid fuel burner", factory_fuel, "power_extract", power_extract, "fuel_value", fuel_value, "amount", amount)
+            if factory.fuel ~= nil or first_fuel ~= nil then
+              local factory_fuel = factory.fuel or first_fuel.name
+              -- source energy en kJ
+              local power_extract = factory_prototype:getPowerExtract()
+              local fuel_value = FluidPrototype(factory_fuel):getFuelValue()
+              local amount = power_extract/(fuel_value*factory_prototype:getBurnerEffectivity())
+              table.insert(ingredients, {name=factory_fuel, type="fluid", amount=amount})
+            end
           end
         end
       end

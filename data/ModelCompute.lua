@@ -1058,7 +1058,7 @@ function ModelCompute.createSummary()
 
   for _, block in pairs(model.blocks) do
     energy = energy + block.power
-    pollution = pollution + block.pollution_total or 0
+    pollution = pollution + (block.pollution_total or 0)
     ModelCompute.computeSummaryFactory(block)
     for _,type in pairs({"factories", "beacons", "modules"}) do
       for _,element in pairs(block.summary[type]) do
