@@ -27,9 +27,10 @@ function ModelBuilder.addRecipeIntoProductionBlock(key, type, index)
 
   if lua_recipe ~= nil then
     -- ajoute le bloc si il n'existe pas
-    if model.blocks[current_block] == nil then
+    if model.blocks[current_block] == nil or (model.blocks[current_block].isEnergy ~= true and type == "energy") or (model.blocks[current_block].isEnergy == true and type ~= "energy") then
       local modelBlock = Model.newBlock(lua_recipe)
       local block_index = Model.countBlocks()
+      modelBlock.isEnergy = type == "energy"
       modelBlock.index = block_index
       modelBlock.unlinked = false
       model.blocks[modelBlock.id] = modelBlock
@@ -78,32 +79,36 @@ function ModelBuilder.addRecipeIntoProductionBlock(key, type, index)
     end
     model.blocks[current_block].recipes[ModelRecipe.id] = ModelRecipe
 
-    local default_factory = User.getDefaultFactory(ModelRecipe)
-    if default_factory ~= nil then
-      Model.setFactory(current_block, ModelRecipe.id, default_factory.name, default_factory.fuel)
-    else
-      local default_factory_name = Model.getDefaultPrototypeFactory(recipe_prototype)
-      if default_factory_name ~= nil then
-        Model.setFactory(current_block, ModelRecipe.id, default_factory_name)
+    if type ~= "energy" then
+      local default_factory = User.getDefaultFactory(ModelRecipe)
+      if default_factory ~= nil then
+        Model.setFactory(current_block, ModelRecipe.id, default_factory.name, default_factory.fuel)
+      else
+        local default_factory_name = Model.getDefaultPrototypeFactory(recipe_prototype)
+        if default_factory_name ~= nil then
+          Model.setFactory(current_block, ModelRecipe.id, default_factory_name)
+        end
       end
-    end
-    local default_factory_module = User.getDefaultFactoryModule(ModelRecipe)
-    if default_factory_module ~= nil then
-      ModelBuilder.setFactoryModulePriority(current_block, ModelRecipe.id, default_factory_module)
-    end
-
-    local default_beacon = User.getDefaultBeacon(ModelRecipe)
-    if default_beacon ~= nil then
-      Model.setBeacon(current_block, ModelRecipe.id, default_beacon.name, default_beacon.combo, default_beacon.factory)
-    else
-      local default_beacon_name = Model.getDefaultRecipeBeacon(lua_recipe.name)
-      if default_beacon_name ~= nil then
-        Model.setBeacon(current_block, ModelRecipe.id, default_beacon_name)
+      local default_factory_module = User.getDefaultFactoryModule(ModelRecipe)
+      if default_factory_module ~= nil then
+        ModelBuilder.setFactoryModulePriority(current_block, ModelRecipe.id, default_factory_module)
       end
-    end
-    local default_beacon_module = User.getDefaultBeaconModule(ModelRecipe)
-    if default_beacon_module ~= nil then
-      ModelBuilder.setBeaconModulePriority(current_block, ModelRecipe.id, default_beacon_module)
+  
+      local default_beacon = User.getDefaultBeacon(ModelRecipe)
+      if default_beacon ~= nil then
+        Model.setBeacon(current_block, ModelRecipe.id, default_beacon.name, default_beacon.combo, default_beacon.factory)
+      else
+        local default_beacon_name = Model.getDefaultRecipeBeacon(lua_recipe.name)
+        if default_beacon_name ~= nil then
+          Model.setBeacon(current_block, ModelRecipe.id, default_beacon_name)
+        end
+      end
+      local default_beacon_module = User.getDefaultBeaconModule(ModelRecipe)
+      if default_beacon_module ~= nil then
+        ModelBuilder.setBeaconModulePriority(current_block, ModelRecipe.id, default_beacon_module)
+      end
+    else
+      Model.setFactory(current_block, ModelRecipe.id, key, nil)
     end
 
     Logging:debug(ModelBuilder.classname, "addRecipeIntoProductionBlock()", model.blocks[current_block])
@@ -262,6 +267,23 @@ function ModelBuilder.updateFactory(item, key, options)
   local object = Model.getObject(item, key)
   if object ~= nil then
     object.factory.limit = options.limit or 0
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update a factory
+--
+-- @function [parent=#ModelBuilder] updateTemperatureFactory
+--
+-- @param #string item block_id or resource
+-- @param #string key object name
+-- @param #table options
+--
+function ModelBuilder.updateTemperatureFactory(item, key, options)
+  Logging:debug(ModelBuilder.classname, "updateTemperatureFactory()", item, key, options)
+  local object = Model.getObject(item, key)
+  if object ~= nil then
+    object.factory.target_temperature = options.target_temperature or 0
   end
 end
 

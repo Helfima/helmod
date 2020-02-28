@@ -38,6 +38,16 @@ end
 
 -------------------------------------------------------------------------------
 --
+-- @function [parent=#GuiTooltip] withEnergy
+-- @return #GuiCell
+--
+function GuiTooltip:withEnergy()
+  self.m_with_energy = true
+  return self
+end
+
+-------------------------------------------------------------------------------
+--
 -- @function [parent=#GuiTooltip] appendLogistic
 -- @return #GuiCell
 --
@@ -129,7 +139,11 @@ function GuiTooltipElement:create()
   if element ~= nil then
     local type = element.type
     if element == "resource" then type = "entity" end
-    table.insert(tooltip, {"", "\n", string.format("[%s=%s]", type, element.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=element.name}), helmod_tag.font.close, helmod_tag.color.close})
+    local element_icon = string.format("[%s=%s]", type, element.name)
+    if type == "energy" and (element.name == "energy" or element.name == "steam-heat") then
+      element_icon = string.format("[img=helmod-%s-white]", type, element.name)
+    end
+    table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=element.name}), helmod_tag.font.close, helmod_tag.color.close})
     -- quantity
     local total_count = Format.formatNumberElement(element.count)
     if element.limit_count ~= nil then
@@ -138,6 +152,18 @@ function GuiTooltipElement:create()
     else
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.quantity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, total_count or 0, helmod_tag.font.close})
     end
+    
+    if self.m_with_energy == true then
+      -- energy
+      local total_power = Format.formatNumberKilo(element.energy_total, "W")
+      if element.limit_energy ~= nil then
+        local limit_power = Format.formatNumberKilo(element.limit_energy, "W")
+        table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.energy-consumption"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, limit_power or 0, "/", total_power, helmod_tag.font.close})
+      else
+        table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.energy-consumption"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, total_power or 0, helmod_tag.font.close})
+      end
+    end
+    
     if self.m_with_logistic == true then
       local total_flow = Format.formatNumberElement(element.count/((Model.getModel().time or 1)/60))
       if element.limit_count ~= nil then
@@ -148,13 +174,14 @@ function GuiTooltipElement:create()
       end
 
       self:appendLogistic(tooltip, element);
-      
-      if User.getModGlobalSetting("debug") ~= "none" then
-        table.insert(tooltip, {"", "\n", "----------------------"})
-        table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Name", ": ", helmod_tag.font.default_bold, self.m_element.name or "nil", helmod_tag.font.close})
-        table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Type", ": ", helmod_tag.font.default_bold, self.m_element.type or "nil", helmod_tag.font.close})
-        table.insert(tooltip, {"", "\n", "[img=developer]", " ", "State", ": ", helmod_tag.font.default_bold, self.m_element.state or 0, helmod_tag.font.close})
-      end
+    end
+    
+    -- debug     
+    if User.getModGlobalSetting("debug") ~= "none" then
+      table.insert(tooltip, {"", "\n", "----------------------"})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Name", ": ", helmod_tag.font.default_bold, self.m_element.name or "nil", helmod_tag.font.close})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Type", ": ", helmod_tag.font.default_bold, self.m_element.type or "nil", helmod_tag.font.close})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "State", ": ", helmod_tag.font.default_bold, self.m_element.state or 0, helmod_tag.font.close})
     end
   end
   return tooltip

@@ -629,6 +629,22 @@ function Player.getProductionMachines()
 end
 
 -------------------------------------------------------------------------------
+-- Return list of energy machines
+--
+-- @function [parent=#Player] getEnergyMachines
+--
+-- @return #table list of modules
+--
+function Player.getEnergyMachines()
+    local filters = {}
+
+  for _,type in pairs({EntityType.generator, EntityType.solar_panel, EntityType.boiler, EntityType.accumulator, EntityType.reactor}) do
+    table.insert(filters, {filter="type", mode="or", invert=false, type=type})
+  end
+  return game.get_filtered_entity_prototypes(filters)
+end
+
+-------------------------------------------------------------------------------
 -- Return list of boilers
 --
 -- @function [parent=#Player] getBoilers
@@ -718,7 +734,8 @@ function Player.getRecipeEntity(name)
   local prototype = entity_prototype:native()
   local type = "item"
   if name == "crude-oil" then type = "entity" end
-  local ingredients = {{name=prototype.name, type=type, amount=1}}
+  --local ingredients = {{name=prototype.name, type=type, amount=1}}
+  local ingredients = {}
   if entity_prototype:getMineableMiningFluidRequired() then
     local fluid_ingredient = {name=entity_prototype:getMineableMiningFluidRequired(), type="fluid", amount=entity_prototype:getMineableMiningFluidAmount()}
     table.insert(ingredients, fluid_ingredient)
@@ -755,6 +772,9 @@ function Player.getRecipeFluid(name)
   local prototype = fluid_prototype:native()
   local products = {{name=prototype.name, type="fluid", amount=1}}
   local ingredients = {{name=prototype.name, type="fluid", amount=1}}
+  if prototype.name == "water" then
+    ingredients = {}
+  end
   if prototype.name == "steam" then
     ingredients = {{name="water", type="fluid", amount=1}}
   end
@@ -903,6 +923,7 @@ function Player.getProductionsBeacon()
   local items = {}
   local filters = {}
   table.insert(filters,{filter="type",type=EntityType.beacon,mode="or"})
+  table.insert(filters,{filter="hidden",invert=true,mode="and"})
 
   for _,item in pairs(game.get_filtered_entity_prototypes(filters)) do
     table.insert(items,item)

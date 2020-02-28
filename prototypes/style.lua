@@ -1198,11 +1198,11 @@ default_gui["helmod_table-rule-odd"] = {
   odd_row_graphical_set =
   {
     type = "composition",
-    filename = "__core__/graphics/gui.png",
+    filename = "__helmod__/graphics/gui.png",
     priority = "extra-high-no-scale",
     corner_size = {1, 1},
-    position = {78, 18},
-    opacity = 0.7
+    position = {16, 56},
+    opacity = 1
   }
 }
 
@@ -1441,7 +1441,8 @@ local style_element_list = {
   {suffix="green", x=0, y=40},
   {suffix="blue", x=0, y=48},
   {suffix="gray", x=0, y=56},
-  {suffix="magenta", x=0, y=64}
+  {suffix="magenta", x=0, y=64},
+  {suffix="none", x=0, y=72}
 }
 -------------------------------------------------------------------------------
 -- Style of element

@@ -27,3 +27,33 @@ function GuiTextField:text(text)
   self.options.text = text
   return self
 end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiTextField] isNumeric
+-- @return #GuiTextField
+--
+function GuiTextField:isNumeric()
+  self.options.numeric = true
+  return self
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiTextField] allowDecimal
+-- @return #GuiTextField
+--
+function GuiTextField:allowDecimal ()
+  self.options.allow_decimal = true
+  return self
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiTextField] allowNegative
+-- @return #GuiTextField
+--
+function GuiTextField:allowNegative ()
+  self.options.allow_negative = true
+  return self
+end

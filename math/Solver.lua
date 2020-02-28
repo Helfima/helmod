@@ -7,42 +7,42 @@ local Solver = {
   classname = "HMSolver",
   debug = false,
   debug_col = 8,
-  col_start = 4,
-  row_input = 1
+  col_start = 5,
+  row_input = 2,
+  col_R = 2,
+  col_P = 3,
+  col_E = 4,
+  col_C = 5
 }
 
 local m_Values = nil
 local m_M = nil
-local m_Mx = nil
+local m_Mi = nil
 local m_Mr = nil
-local m_row_headers = nil
-local m_col_headers = nil
+local m_runtime = nil
 
 -------------------------------------------------------------------------------
 -- Initialisation
 --
 -- @function [parent=#Solver] new
 -- @param #table M
--- @param #table row_headers
--- @param #table col_headers
 --
 -- @return #Solver
 --
-function Solver.new(M, row_headers, col_headers)
+function Solver.new(M)
   m_M = M
-  m_row_headers = row_headers
-  m_col_headers = col_headers
   return Solver
 end
+
 -------------------------------------------------------------------------------
--- Return prepared matrix
+-- Return runtime
 --
--- @function [parent=#Solver] getMx
+-- @function [parent=#Solver] getRuntime
 --
 -- @return #table
 --
-function Solver.getMx()
-  return m_Mx
+function Solver.getRuntime()
+  return m_runtime
 end
 
 -------------------------------------------------------------------------------
@@ -54,6 +54,17 @@ end
 --
 function Solver.getM()
   return m_M
+end
+
+-------------------------------------------------------------------------------
+-- Return intermediaire matrix
+--
+-- @function [parent=#Solver] getMi
+--
+-- @return #table
+--
+function Solver.getMi()
+  return m_Mi
 end
 
 -------------------------------------------------------------------------------
@@ -99,34 +110,17 @@ function Solver.print(object, xrow, xcol)
     else
       -- le tableau
       for irow,row in pairs(object) do
-        -- 1 ere ligne
-        if irow == Solver.row_input + 1 then
-          if m_col_headers ~= nil then
-            local message = ""
-            if m_row_headers ~= nil then
-              message = string.format("%s %s %s", message, Solver.format(""), "|")
-            end
-            for icol=1, (#m_col_headers) do
-              message = string.format("%s %s %s", message, Solver.format(m_col_headers[icol]), "|")
-            end
-            local line = string.rep("-",(Solver.debug_col+3)*(#row+1))
-            print(line)
-            print(message)
-            print(line)
-          end
-        end
         -- ligne
         local message = ""
         local separator = "|"
-        if irow == xrow then separator = "<" end
-        if m_row_headers ~= nil then
-          message = string.format("%s %s %s", message, Solver.format(m_row_headers[irow]), separator)
-        end
-        
         for icol,cell_value in pairs(row) do
           separator = "|"
-          if irow == xrow or icol == xcol then separator = "<" end
-          if math.abs(cell_value) < 0.001 then cell_value = 0 end
+          if (irow == xrow and icol >= Solver.col_start) or (icol == xcol and irow > Solver.row_input) then separator = "<" end
+          if type(cell_value) == "table" then
+            cell_value = cell_value.name
+          else
+            if math.abs(cell_value) < 0.001 then cell_value = 0 end
+          end
           message = string.format("%s %s %s", message, Solver.format(cell_value), separator)
         end
         
@@ -137,6 +131,7 @@ function Solver.print(object, xrow, xcol)
     end
   end
 end
+
 -------------------------------------------------------------------------------
 -- Clone la matrice
 --
@@ -159,21 +154,6 @@ function Solver.clone(M)
 end
 
 -------------------------------------------------------------------------------
--- Insert une ligne dans la matrice
---
--- @function [parent=#Solver] insert
--- @param #string row_name
--- @param #table values
---
-function Solver.insert(row_name, values)
-  m_row_headers[row_name] = true
-  m_Values[row_name] = values
-  for key, value in pairs(values) do
-    m_col_headers[key] = true
-  end
-end
-
--------------------------------------------------------------------------------
 -- Prepare la matrice
 --
 -- @function [parent=#Solver] prepare
@@ -182,12 +162,11 @@ end
 -- @return #table
 --
 function Solver.prepare(M)
-  Solver.row_input = 1
   local Mx = Solver.clone(M)
   -- initialise les valeurs des produits par second
   for irow,row in pairs(Mx) do
     if irow > Solver.row_input then
-      local E = Mx[irow][3]
+      local E = Mx[irow][Solver.col_E]
       for icol,cell in pairs(row) do
         if icol > Solver.col_start then
           Mx[irow][icol] = cell / E
@@ -198,12 +177,10 @@ function Solver.prepare(M)
   local irow = 1
   local row = {}
   -- ajoute la ligne Z avec Z=-input
-  for icol,cell in pairs(Mx[irow]) do
-    table.insert(row, 0-Mx[Solver.row_input][icol])
-  end
-  table.insert(Mx, row)
-  if m_row_headers ~= nil then
-    table.insert(m_row_headers, "Z")
+  for icol,cell in pairs(Mx[Solver.row_input]) do
+    if icol > Solver.col_start then
+      Mx[#Mx][icol] = 0-cell
+    end
   end
   return Mx
 end
@@ -219,7 +196,9 @@ end
 function Solver.finalize(M)
   -- finalize la ligne Z reinject le input Z=Z+input
   for icol,cell in pairs(M[#M]) do
-    M[#M][icol] = M[#M][icol] + M[Solver.row_input][icol]
+    if icol > Solver.col_start then
+      M[#M][icol] = M[#M][icol] + M[Solver.row_input][icol]
+    end
   end
   return M
 end
@@ -259,11 +238,8 @@ function Solver.appendState(M)
       end
     end
   end
-  table.insert(M,1, srow)
-  if m_row_headers ~= nil then
-    table.insert(m_row_headers,1, "State")
-  end
-  Solver.row_input = Solver.row_input + 1
+  srow[1] = {name="State", type="none"}
+  table.insert(M, srow)
   return M
 end
 -------------------------------------------------------------------------------
@@ -304,7 +280,6 @@ function Solver.getCol(M, xrow)
       end
     end
   end
-  Solver.print(string.format("%s: %s in %s,%s", "Best Ratio", max, xrow, xcol))
   return xcol
 end
 
@@ -319,17 +294,17 @@ end
 -- @return #table
 --
 function Solver.lineCompute(M, xrow, xcol)
-  Solver.print(m_Mr, xrow, xcol)
+  Solver.print(M, xrow, xcol)
   if m_Mr == nil or xrow == 0 or xcol == 0 then return M end
   local row = M[xrow]
-  local P = M[xrow][2]
-  local E = M[xrow][Solver.col_start-1] -- energy
+  local P = M[xrow][Solver.col_P]
+  local E = M[xrow][Solver.col_E] -- energy
   local Z = M[#M][xcol] -- valeur demandee Z
   local V = M[xrow][xcol] -- valeur produite
   local C = -Z/V -- coefficient
   local R = C/E -- nombre de recette necessaire
-  M[xrow][Solver.col_start] = C
-  M[xrow][1] = P * C / E
+  M[xrow][Solver.col_C] = C
+  M[xrow][Solver.col_R] = P * C / E
   for icol,cell_value in pairs(row) do
     if icol > Solver.col_start then
       local X = M[xrow][icol]
@@ -348,23 +323,26 @@ end
 --
 function Solver.solve()
   if m_M ~= nil then
+    Solver.print(m_M)
     local num_loop = 0
     local icol = 0
-    Solver.print(m_M)
-    m_Mx = Solver.prepare(m_M)
-    Solver.print(m_Mx)
-    m_Mr = Solver.clone(m_Mx)
-    for irow, row in pairs(m_Mr) do
-      if irow > Solver.row_input and irow < #m_Mr then
-        icol = Solver.getCol(m_Mr, irow)
-        m_Mr = Solver.lineCompute(m_Mr, irow, icol)
+    m_runtime = {}
+    table.insert(m_runtime, {name="Initial", matrix=m_M})
+    m_Mi = Solver.prepare(m_M)
+    table.insert(m_runtime, {name="Prepare", matrix=Solver.clone(m_Mi)})
+    for irow, row in pairs(m_Mi) do
+      if irow > Solver.row_input and irow < #m_Mi then
+        icol = Solver.getCol(m_Mi, irow)
+        Solver.print(string.format("Pivot= %s,%s",irow, icol))
+        table.insert(m_runtime, {name="Step "..num_loop, matrix=Solver.clone(m_Mi), pivot={x=icol,y=irow}})
+        m_Mi = Solver.lineCompute(m_Mi, irow, icol)
         num_loop = num_loop + 1
       end
     end
-    m_Mr = Solver.finalize(m_Mr)
+    m_Mr = Solver.finalize(m_Mi)
     m_Mr = Solver.appendState(m_Mr)
+    table.insert(m_runtime, {name="final", matrix=m_Mr})
     Solver.print(m_Mr)
-    Solver.print(string.format("End in %s loop",num_loop))
     return m_Mr
   end
 end

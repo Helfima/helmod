@@ -365,6 +365,7 @@ function ModelCompute.getBlockMatrix(block)
     local col_headers = {}
     local col_index = {}
     local rows = {}
+    col_headers["B"] = {index=1, name="B", type="none"} -- Base
     col_headers["R"] = {index=1, name="R", type="none"} -- Count recipe
     col_headers["P"] = {index=1, name="P", type="none"} -- Production
     col_headers["E"] = {index=1, name="E", type="none"} -- Energy
@@ -378,6 +379,7 @@ function ModelCompute.getBlockMatrix(block)
       factor = -1
       sorter = function(t,a,b) return t[b].index < t[a].index end
     end
+    
     for _, recipe in spairs(recipes,sorter) do
       Logging:debug(ModelCompute.classname, "---> recipe", recipe)
       local row = {}
@@ -393,6 +395,7 @@ function ModelCompute.getBlockMatrix(block)
       local production = 1
       if not(block.solver == true) and recipe.production ~= nil then production = recipe.production end
       table.insert(row_headers,{name=recipe.name, type=recipe.type, tooltip=recipe.name.."\nRecette"})
+      row["B"] = {name=recipe.name, type=recipe.type, tooltip=recipe.name.."\nRecette"}
       row["R"] = 0
       row["P"] = production
       row["E"] = recipe_prototype:getEnergy()
@@ -441,7 +444,7 @@ function ModelCompute.getBlockMatrix(block)
           -- cas de l'ingredient existant du cote produit
           if col_index[name] ~= nil and lua_products[name] ~= nil then
             -- cas de la valeur equivalente, on creer un nouveau element
-            if lua_products[name].count == lua_ingredients[name].count or recipe.type == "resource" then
+            if lua_products[name].count == lua_ingredients[name].count or recipe.type == "resource" or recipe.type == "energy" then
               index = col_index[name]+1
             else
               index = col_index[name]
@@ -504,6 +507,13 @@ function ModelCompute.getBlockMatrix(block)
 
     -- on bluid A correctement
     local mA = {}
+    -- bluid header
+    local rowH = {}
+    for column,header in pairs(col_headers) do
+      table.insert(rowH, header)
+    end
+    table.insert(mA, rowH)
+    -- bluid value
     for _,row in pairs(rows) do
       local rowA = {}
       for column,_ in pairs(col_headers) do
@@ -517,23 +527,29 @@ function ModelCompute.getBlockMatrix(block)
     end
 
     local row_input = {}
+    local row_z = {}
     local input_ready = {}
     for column,col_header in pairs(col_headers) do
       Logging:debug(ModelCompute.classname, "---> col_header", col_header.name)
-      local block_elements = block.products
-      if block.by_product == false then
-        block_elements = block.ingredients
-      end
-      if block_elements ~= nil and block_elements[col_header.name] ~= nil and not(input_ready[col_header.name]) and col_header.index == 1 then
-        table.insert(row_input, block_elements[col_header.name].input or 0)
-        input_ready[col_header.name] = true
+      if col_header.name == "B" then
+        table.insert(row_input, {name="Input", type="none"})
+        table.insert(row_z, {name="Z", type="none"})
       else
-        table.insert(row_input, 0)
+        local block_elements = block.products
+        if block.by_product == false then
+          block_elements = block.ingredients
+        end
+        if block_elements ~= nil and block_elements[col_header.name] ~= nil and not(input_ready[col_header.name]) and col_header.index == 1 then
+          table.insert(row_input, block_elements[col_header.name].input or 0)
+          input_ready[col_header.name] = true
+        else
+          table.insert(row_input, 0)
+        end
+        table.insert(row_z, 0)
       end
     end
-    table.insert(mA, 1, row_input)
-    table.insert(row_headers,1, {name="Input", type="none"})
-    table.insert(row_headers, {name="Z", type="none"})
+    table.insert(mA, 2, row_input)
+    table.insert(mA, row_z)
 
     Logging:debug(ModelCompute.classname, "----> matrix A", mA)
     if User.getModGlobalSetting("debug") ~= "none" then
@@ -545,7 +561,7 @@ function ModelCompute.getBlockMatrix(block)
       for _,col in pairs(col_headers) do
         table.insert(col_headers2, col.name)
       end
-      Logging:debug(ModelCompute.classname, "----> export matrix A", game.table_to_json({col_headers=col_headers2 ,row_headers=row_headers2 ,matrix=mA}))
+      Logging:debug(ModelCompute.classname, "----> export matrix A", game.table_to_json(mA))
     end
     return mA, row_headers, col_headers
   end
@@ -649,20 +665,16 @@ function ModelCompute.computeBlock(block)
 
       local ok , err = pcall(function()
         mC = my_solver.solve()
-        mB = my_solver.getMx()
       end)
       if not(ok) then
         Player.print("Matrix solver can not found solution!")
       end
 
-
-
-      Logging:debug(ModelCompute.classname, "----> matrix B", mB)
-      Logging:debug(ModelCompute.classname, "----> matrix C", mC)
-
       if User.getModGlobalSetting("debug") ~= "none" then
-        block.matrix.mB = mB
-        block.matrix.mC = mC
+        if not(ok) then
+          Player.print(err)
+        end
+        block.runtimes = my_solver.getRuntime()
       end
     end
     if mC ~= nil then
@@ -678,12 +690,15 @@ function ModelCompute.computeBlock(block)
       for _, recipe in spairs(recipes,sorter) do
         Logging:debug(ModelCompute.classname , "solver index", recipe.name, row_index)
         ModelCompute.computeModuleEffects(recipe)
-        recipe.count =  mC[row_index][1]
-        recipe.production = mC[row_index][2]
+        recipe.count =  mC[row_index][2]
+        recipe.production = mC[row_index][3]
         row_index = row_index + 1
-        Logging:debug(ModelCompute.classname , "----> solver solution", recipe.name, icol, recipe.count)
-
-        ModelCompute.computeFactory(recipe)
+        
+        if block.isEnergy == true then
+          ModelCompute.computeEnergyFactory(recipe)
+        else
+          ModelCompute.computeFactory(recipe)
+        end
 
         block.power = block.power + recipe.energy_total
         block.pollution_total = block.pollution_total + recipe.pollution_total
@@ -733,9 +748,9 @@ function ModelCompute.computeBlock(block)
         table.insert(product_headers,header)
       end
       -- finalisation du bloc
-      for icol,state in pairs(mC[1]) do
+      for icol,state in pairs(mC[#mC]) do
         if icol > my_solver.col_start then
-          local Z = math.abs(mC[#mC][icol])
+          local Z = math.abs(mC[#mC-1][icol])
           local product_header = product_headers[icol]
           local product = Product(product_header):clone()
           product.count = Z
@@ -869,7 +884,7 @@ function ModelCompute.computeFactory(recipe)
   -- effet consumption
   local factory_prototype = EntityPrototype(recipe.factory)
   local energy_type = factory_prototype:getEnergyType()
-  recipe.factory.energy = factory_prototype:getMaxEnergyUsage() * (1 + recipe.factory.effects.consumption)
+  recipe.factory.energy = factory_prototype:getEnergyConsumption() * (1 + recipe.factory.effects.consumption)
 
   -- effet pollution
   recipe.factory.pollution = factory_prototype:getPollution() * (1 + recipe.factory.effects.pollution)
@@ -886,18 +901,15 @@ function ModelCompute.computeFactory(recipe)
   else
     recipe.beacon.count = 0
   end
-  local beacon_prototype = EntityPrototype(recipe.factory)
+  local beacon_prototype = EntityPrototype(recipe.beacon)
   recipe.beacon.energy = beacon_prototype:getEnergyUsage()
   -- calcul des totaux
   local fuel_emissions_multiplier = 1
-  if energy_type == "burner" then
+  if energy_type ~= "electric" then
     recipe.factory.energy_total = 0
-    local fuel = recipe.factory.fuel
-    if fuel == nil then
-      fuel = EntityPrototype(recipe.factory):getBurnerPrototype():getFirstFuelItemPrototype().name
-    end
-    if fuel ~= nil then
-      local fuel_prototype = ItemPrototype(fuel)
+    if energy_type == "burner" or energy_type == "fluid" then
+      local energy_prototype = EntityPrototype(recipe.factory):getEnergySource()
+      local fuel_prototype = energy_prototype:getFuelPrototype()
       fuel_emissions_multiplier = fuel_prototype:getFuelEmissionsMultiplier()
     end
   else
@@ -912,6 +924,68 @@ function ModelCompute.computeFactory(recipe)
   recipe.factory.speed = recipe.factory.speed
   recipe.factory.energy = math.ceil(recipe.factory.energy)
   recipe.beacon.energy = math.ceil(recipe.beacon.energy)
+end
+
+-------------------------------------------------------------------------------
+-- Compute energy factory for recipes
+--
+-- @function [parent=#ModelCompute] computeEnergyFactory
+--
+-- @param #table recipe
+--
+function ModelCompute.computeEnergyFactory(recipe)
+  Logging:trace(ModelCompute.classname, "computeFactory()", recipe.name)
+  local model = Model.getModel()
+  local recipe_prototype = RecipePrototype(recipe)
+  local recipe_energy = recipe_prototype:getEnergy()
+  -- effet speed
+  recipe.factory.speed = ModelCompute.speedFactory(recipe) * (1 + recipe.factory.effects.speed)
+  Logging:debug(ModelCompute.classname, "recipe.factory.speed", ModelCompute.speedFactory(recipe), recipe.factory.speed)
+  -- cap speed creation maximum de 1 cycle par tick
+  if recipe.type ~= "fluid" and recipe_energy/recipe.factory.speed < 1/60 then recipe.factory.speed = 60*recipe_energy end
+
+  -- effet consumption
+  local factory_prototype = EntityPrototype(recipe.factory)
+  local energy_prototype = factory_prototype:getEnergySource()
+      
+  local energy_type = factory_prototype:getEnergyType()
+  local gameDay = {day=12500,dust=5000,night=2500,dawn=2500}
+  if factory_prototype:getType() == EntityType.accumulator then
+    local dark_time = (gameDay.dust/2 + gameDay.night + gameDay.dawn / 2 )
+    recipe_energy = dark_time/60
+  end
+  recipe.factory.energy = factory_prototype:getEnergyConsumption() * (1 + recipe.factory.effects.consumption)
+
+  -- effet pollution
+  recipe.factory.pollution = factory_prototype:getPollution() * (1 + recipe.factory.effects.pollution)
+  
+  -- compte le nombre de machines necessaires
+  -- [ratio recipe] * [effort necessaire du recipe] / ([la vitesse de la factory]
+  local count = recipe.count*recipe_energy/recipe.factory.speed
+  if recipe.factory.speed == 0 then count = 0 end
+  recipe.factory.count = count
+  -- calcul des totaux
+  local fuel_emissions_multiplier = 1
+  if energy_type ~= "electric" then
+    recipe.factory.energy_total = 0
+    if energy_type == "burner" or energy_type == "fluid" then
+      local fuel_prototype = energy_prototype:getFuelPrototype()
+      fuel_emissions_multiplier = fuel_prototype:getFuelEmissionsMultiplier()
+    end
+  else
+    recipe.factory.energy_total = 0
+    --recipe.factory.energy_total = math.ceil(recipe.factory.count*recipe.factory.energy)
+  end
+  recipe.factory.pollution_total = recipe.factory.pollution * recipe.factory.count * model.time
+  
+  recipe.energy_total = recipe.factory.energy_total
+  recipe.pollution_total = recipe.factory.pollution_total * fuel_emissions_multiplier * recipe_prototype:getEmissionsMultiplier()
+  -- arrondi des valeurs
+  recipe.factory.speed = recipe.factory.speed
+  recipe.factory.energy = math.ceil(recipe.factory.energy)
+  
+  recipe.beacon.energy_total = 0
+  recipe.beacon.energy = 0
 end
 
 -------------------------------------------------------------------------------
@@ -1130,12 +1204,12 @@ function ModelCompute.computePower(key)
     local secondary_prototype = EntityPrototype(power.secondary.name)
     if primary_prototype:getType() == EntityType.generator then
       -- calcul primary
-      local count = math.ceil( power.power / primary_prototype:getEnergyNominal() )
+      local count = math.ceil( power.power / primary_prototype:getEnergyConsumption() )
       power.primary.count = count or 0
       -- calcul secondary
       if secondary_prototype:native() ~= nil and secondary_prototype:getType() == EntityType.boiler then
         local count = 0
-        count = math.ceil( power.power / secondary_prototype:getEnergyNominal() )
+        count = math.ceil( power.power / secondary_prototype:getEnergyConsumption() )
         power.secondary.count = count or 0
       else
         power.secondary.count = 0
@@ -1143,7 +1217,7 @@ function ModelCompute.computePower(key)
     end
     if primary_prototype:getType() == EntityType.solar_panel then
       -- calcul primary
-      local count = math.ceil( power.power / primary_prototype:getEnergyNominal() )
+      local count = math.ceil( power.power / primary_prototype:getEnergyConsumption() )
       power.primary.count = count or 0
       -- calcul secondary
       if secondary_prototype:native() ~= nil and secondary_prototype:getType() == EntityType.accumulator then
@@ -1153,10 +1227,11 @@ function ModelCompute.computePower(key)
         -- selon les aires il faut de l'accu en dehors du jour selon le trapese journalier
         local accu= (gameDay.dust/factor + gameDay.night + gameDay.dawn / factor ) / ( gameDay.day )
         -- puissance nominale la nuit
-        local count1 = power.power/ secondary_prototype:getElectricOutputFlowLimit()
+        local energy_prototype = secondary_prototype:getEnergySource()
+        local count1 = power.power/ energy_prototype:getOutputFlowLimit()
         -- puissance durant la penombre
         -- formula (puissance*durree_penombre)/(60s*capacite)
-        local count2 = power.power*( gameDay.dust / factor + gameDay.night + gameDay.dawn / factor ) / ( 60 * secondary_prototype:getElectricBufferCapacity() )
+        local count2 = power.power*( gameDay.dust / factor + gameDay.night + gameDay.dawn / factor ) / ( 60 * energy_prototype:getBufferCapacity() )
 
         Logging:debug(ModelCompute.classname , "********** computePower result:", accu, count1, count2)
         if count1 > count2 then
@@ -1186,7 +1261,7 @@ function ModelCompute.speedFactory(recipe)
     local factory_prototype = EntityPrototype(recipe.factory)
     -- info energy 1J=1W
     local power_extract = factory_prototype:getPowerExtract()
-    local power_usage = factory_prototype:getMaxEnergyUsage()
+    local power_usage = factory_prototype:getEnergyConsumption()
     Logging:debug(ModelCompute.classname, "power_extract", power_extract, "power_usage", power_usage, "fluid", power_usage/power_extract)
     return power_usage/power_extract
   elseif recipe.type == "resource" then
@@ -1208,6 +1283,8 @@ function ModelCompute.speedFactory(recipe)
   elseif recipe.type == "technology" then
     local bonus = Player.getForce().laboratory_speed_modifier or 1
     return 1*bonus
+  elseif recipe.type == "energy" then
+    return 1
   else
     local factory_prototype = EntityPrototype(recipe.factory)
     return factory_prototype:getCraftingSpeed()

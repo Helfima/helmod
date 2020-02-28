@@ -356,7 +356,7 @@ function EnergyEdition:updatePrimaryInfo(event)
       local inputPanel = GuiElement.add(infoPanel, GuiTable("table-input"):column(2))
 
       GuiElement.add(inputPanel, GuiLabel("label-energy-nominal"):caption({"helmod_label.energy-nominal"}))
-      GuiElement.add(inputPanel, GuiLabel("energy-nominal"):caption(Format.formatNumberKilo(entity_prototype:getEnergyNominal(), "W")))
+      GuiElement.add(inputPanel, GuiLabel("energy-nominal"):caption(Format.formatNumberKilo(entity_prototype:getEnergyConsumption(), "W")))
 
       if entity_prototype:getType() == "generator" then
         GuiElement.add(inputPanel, GuiLabel("label-maximum-temperature"):caption({"helmod_label.maximum-temperature"}))
@@ -480,21 +480,22 @@ function EnergyEdition:updateSecondaryInfo(event)
 
       if entity_prototype:getType() == EntityType.boiler then
         GuiElement.add(inputPanel, GuiLabel("label-energy-nominal"):caption({"helmod_label.energy-nominal"}))
-        GuiElement.add(inputPanel, GuiLabel("energy-nominal"):caption(Format.formatNumberKilo(entity_prototype:getEnergyNominal(), "W")))
+        GuiElement.add(inputPanel, GuiLabel("energy-nominal"):caption(Format.formatNumberKilo(entity_prototype:getEnergyConsumption(), "W")))
 
         GuiElement.add(inputPanel, GuiLabel("label-effectivity"):caption({"helmod_label.effectivity"}))
         GuiElement.add(inputPanel, GuiLabel("effectivity"):caption(entity_prototype:getEffectivity()))
       end
 
       if entity_prototype:getType() == EntityType.accumulator then
+        local energy_prototype = entity_prototype:getEnergySource()
         GuiElement.add(inputPanel, GuiLabel("label-buffer-capacity"):caption({"helmod_label.buffer-capacity"}))
-        GuiElement.add(inputPanel, GuiLabel("buffer-capacity"):caption(Format.formatNumberKilo(entity_prototype:getElectricBufferCapacity(), "J")))
+        GuiElement.add(inputPanel, GuiLabel("buffer-capacity"):caption(Format.formatNumberKilo(energy_prototype:getBufferCapacity(), "J")))
 
         GuiElement.add(inputPanel, GuiLabel("label-input_flow_limit"):caption({"helmod_label.input-flow-limit"}))
-        GuiElement.add(inputPanel, GuiLabel("input-flow-limit"):caption(Format.formatNumberKilo(entity_prototype:getElectricInputFlowLimit(), "W")))
+        GuiElement.add(inputPanel, GuiLabel("input-flow-limit"):caption(Format.formatNumberKilo(energy_prototype:getInputFlowLimit(), "W")))
 
         GuiElement.add(inputPanel, GuiLabel("label-output-flow-limit"):caption({"helmod_label.output-flow-limit"}))
-        GuiElement.add(inputPanel, GuiLabel("output-flow-limit"):caption(Format.formatNumberKilo(entity_prototype:getElectricOutputFlowLimit(), "W")))
+        GuiElement.add(inputPanel, GuiLabel("output-flow-limit"):caption(Format.formatNumberKilo(energy_prototype:getOutputFlowLimit(), "W")))
       end
 
     end

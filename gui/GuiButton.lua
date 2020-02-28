@@ -33,6 +33,13 @@ function GuiButton:sprite(type, name, hovered)
     if hovered then
       self.options.hovered_sprite = GuiElement.getSprite(hovered)
     end
+  elseif type == "energy" and (name == "energy" or name == "steam-heat") then
+    self.options.sprite = GuiElement.getSprite(string.format("%s-white", name))
+    if hovered then
+      self.options.hovered_sprite = GuiElement.getSprite(hovered)
+    end
+    table.insert(self.name, name)
+    table.insert(self.name, type)
   else
     self.options.sprite = GuiElement.getSprite(type, name)
     if hovered then

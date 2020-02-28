@@ -1,9 +1,20 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.9.33
-Date: 17. 02. 2020
+Date: 28. 02. 2020
+  Changes:
+    - added a new block for energy consumption
+    - added a debug panel when debug is activated
+    - added energy source prototypes (not perfect only available in 0.18.7)
+    - removed energy tab
+    - modified property tab
+    - changed fluid recipe, now there are hidden except water and steam
+    - removed ingredient for ressource recipes and water recipe
   Bugfixes:
+    - fixed width internal panel of edit recipe
     - fixed a bug in RecipePrototype
     - fixed cap negative productivity
+    - fixed energy source in recipe
+    - fixed crash new game
 ---------------------------------------------------------------------------------------------------
 Version: 0.9.32
 Date: 16. 02. 2020

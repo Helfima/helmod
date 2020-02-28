@@ -9,8 +9,21 @@ EntityPrototype = newclass(Prototype,function(base, object)
   elseif object ~= nil and object.name ~= nil then
     Prototype.init(base, Player.getEntityPrototype(object.name))
   end
+  base.factory = object
   base.classname = "HMEntityPrototype"
 end)
+
+-------------------------------------------------------------------------------
+-- Return type
+--
+-- @function [parent=#EntityPrototype] getType
+--
+-- @return #table
+--
+function EntityPrototype:getType()
+  if self.lua_prototype == nil then return nil end
+  return self.lua_prototype.type
+end
 
 -------------------------------------------------------------------------------
 -- Return Allowed Effects
@@ -50,30 +63,22 @@ function EntityPrototype:getEnergyUsage()
 end
 
 -------------------------------------------------------------------------------
--- Return max energy usage per second
---
--- @function [parent=#EntityPrototype] getMaxEnergyUsage
---
--- @return #number default 0
---
-function EntityPrototype:getMaxEnergyUsage()
-  if self.lua_prototype ~= nil and self.lua_prototype.max_energy_usage ~= nil then
-    return self.lua_prototype.max_energy_usage*60
-  end
-  return 0
-end
-
--------------------------------------------------------------------------------
 -- Return extract power of fluid (boiler) in J
 --
 -- @function [parent=#EntityPrototype] getPowerExtract
 --
+-- @param #number temperature
+--
 -- @return #number default 0
 --
-function EntityPrototype:getPowerExtract()
-  if self.lua_prototype ~= nil and self.lua_prototype.target_temperature ~= nil then
+function EntityPrototype:getPowerExtract(temperature)
+  if self.lua_prototype ~= nil then
+    local target_temperature = temperature or 165
+    if self.lua_prototype.target_temperature ~= nil then
+      target_temperature = math.min(target_temperature , self.lua_prototype.target_temperature)
+    end
     -- [boiler.target_temperature]-15°c)x[200J/unit/°]
-    return (self.lua_prototype.target_temperature-15)*200
+    return (target_temperature-15)*200
   end
   return 0
 end
@@ -97,11 +102,11 @@ end
 -- @see https://wiki.factorio.com/Power_production
 -- @see https://wiki.factorio.com/Liquids/Hot
 --
--- @function [parent=#EntityPrototype] getEnergyNominal
+-- @function [parent=#EntityPrototype] getEnergyConsumption
 --
 -- @return #number default 0
 --
-function EntityPrototype:getEnergyNominal()
+function EntityPrototype:getEnergyConsumption()
   if self.lua_prototype ~= nil then
     if self.lua_prototype.type == EntityType.generator then
       local fluid_usage = self:getFluidUsagePerTick()
@@ -111,12 +116,33 @@ function EntityPrototype:getEnergyNominal()
       -- @see https://wiki.factorio.com/Liquids/Hot
       return fluid_usage*60*effectivity*(maximum_temperature-15)*1000/5
     end
-    if self.lua_prototype.type == EntityType.boiler then
-      return self:getMaxEnergyUsage()
-    end
     if self.lua_prototype.type == EntityType.solar_panel and self.lua_prototype.production ~= nil then
       return self.lua_prototype.production*60 or 0
     end
+    local energy_type = self:getEnergyType()
+    if energy_type == "burner" or energy_type == "fluid" then
+      --return self:getFuelValue()
+    end
+    
+    return self:getMaxEnergyUsage()
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
+-- Return fuel value
+--
+-- @function [parent=#EntityPrototype] getFuelValue
+--
+-- @return #boolean
+--
+function EntityPrototype:getFuelValue()
+  local energy_prototype = self:getEnergySource()
+  local factory_fuel = energy_prototype:getFuelPrototype()
+  if factory_fuel ~= nil then
+    local temperature = self.factory.target_temperature or self.lua_prototype.target_temperature
+    local fuel_value = factory_fuel:getFuelValue(temperature)
+    return fuel_value
   end
   return 0
 end
@@ -185,7 +211,27 @@ end
 --
 function EntityPrototype:getFluidUsagePerTick()
   if self.lua_prototype ~= nil then
-    return self.lua_prototype.fluid_usage_per_tick or 0
+    return self.lua_prototype.fluid_usage_per_tick or 1
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
+-- Return fluid consumption
+--
+-- @function [parent=#EntityPrototype] getFluidConsumption
+--
+-- @return #number default 0
+--
+function EntityPrototype:getFluidConsumption()
+  -- @see https://wiki.factorio.com/Heat_exchanger
+  if self.lua_prototype ~= nil then
+    local power_extract = self:getPowerExtract()
+    local power_usage = self:getEnergyConsumption()
+    -- fluid quantity = [boiler.max_energy_usage]*60/[boiler.target_temperature]-15°c)x[200J/unit/°]
+    -- 1 water = 1 steam
+    -- dans notre cas power_usage est deja en seconde (x60)
+    return power_usage/power_extract
   end
   return 0
 end
@@ -262,19 +308,43 @@ function EntityPrototype:getPumpingSpeed()
 end
 
 -------------------------------------------------------------------------------
--- Return energy type (electrical or burner)
+-- Return energy type (electric or burner)
 --
 -- @function [parent=#EntityPrototype] getEnergyType
 --
--- @return #string default electrical
+-- @return #string default electric
 --
 function EntityPrototype:getEnergyType()
   if self.lua_prototype ~= nil then
     if self.lua_prototype.burner_prototype ~= nil then return "burner" end
-    if self.lua_prototype.electric_energy_source_prototype ~= nil then return "electrical" end
-    return "fuel-burner"
+    if self.lua_prototype.electric_energy_source_prototype ~= nil then return "electric" end
+    if self:getType() == EntityType.reactor or (self:getType() == EntityType.boiler and string.find(self.lua_prototype.name,"heat")) then return "heat" end
+    if self:getMaxEnergyUsage() > 0 then
+      return "fluid"
+    end
   end
-  return "electrical"
+  return "electric"
+end
+
+-------------------------------------------------------------------------------
+-- Return energy source
+--
+-- @function [parent=#EntityPrototype] getEnergySource
+--
+-- @return #EnergySourcePrototype
+--
+function EntityPrototype:getEnergySource()
+  if self.lua_prototype ~= nil then
+    if self.lua_prototype.burner_prototype ~= nil then return BurnerPrototype(self.lua_prototype.burner_prototype, self.factory) end
+    if self.lua_prototype.electric_energy_source_prototype ~= nil then return ElectricSourcePrototype(self.lua_prototype.electric_energy_source_prototype, self.factory) end
+    if self:getType() == EntityType.reactor or (self:getType() == EntityType.boiler and string.find(self.lua_prototype.name,"heat")) then
+      return HeatSourcePrototype({emissions=0}, self.factory)
+    end
+    if self:getMaxEnergyUsage() > 0 then
+      return FluidSourcePrototype({emissions=5.5555e-7}, self.factory)
+    end
+  end
+  return nil
 end
 
 -------------------------------------------------------------------------------
@@ -348,121 +418,6 @@ function EntityPrototype:getMineableMiningProducts()
 end
 
 -------------------------------------------------------------------------------
--- Return electric energy source prototype buffer capacity
---
--- @function [parent=#EntityPrototype] getElectricBufferCapacity
---
--- @return #number default 0
---
-function EntityPrototype:getElectricBufferCapacity()
-  if self.lua_prototype ~= nil and self.lua_prototype.electric_energy_source_prototype ~= nil then
-    return self.lua_prototype.electric_energy_source_prototype.buffer_capacity or 0
-  end
-  return 0
-end
-
--------------------------------------------------------------------------------
--- Return electric energy source prototype input flow limit
---
--- @function [parent=#EntityPrototype] getElectricInputFlowLimit
---
--- @return #number default 0
---
-function EntityPrototype:getElectricInputFlowLimit()
-  if self.lua_prototype ~= nil and self.lua_prototype.electric_energy_source_prototype ~= nil and self.lua_prototype.electric_energy_source_prototype.input_flow_limit~= nil then
-    return self.lua_prototype.electric_energy_source_prototype.input_flow_limit*60 or 0
-  end
-  return 0
-end
-
--------------------------------------------------------------------------------
--- Return electric energy source prototype output flow limit
---
--- @function [parent=#EntityPrototype] getElectricOutputFlowLimit
---
--- @return #number default 0
---
-function EntityPrototype:getElectricOutputFlowLimit()
-  if self.lua_prototype ~= nil and self.lua_prototype.electric_energy_source_prototype ~= nil and self.lua_prototype.electric_energy_source_prototype.output_flow_limit~= nil then
-    return self.lua_prototype.electric_energy_source_prototype.output_flow_limit*60 or 0
-  end
-  return 0
-end
-
--------------------------------------------------------------------------------
--- Return electric energy source prototype emissions
---
--- @function [parent=#EntityPrototype] getElectricEmissions
---
--- @return #number default 0
---
-function EntityPrototype:getElectricEmissions()
-  if self.lua_prototype ~= nil and self.lua_prototype.electric_energy_source_prototype ~= nil then
-    return self.lua_prototype.electric_energy_source_prototype.emissions or 0
-  end
-  return 0
-end
-
--------------------------------------------------------------------------------
--- Return electric energy source prototype effectivity
---
--- @function [parent=#EntityPrototype] getElectricEffectivity
---
--- @return #number default 0
---
-function EntityPrototype:getElectricEffectivity()
-  if self.lua_prototype ~= nil and self.lua_prototype.electric_energy_source_prototype ~= nil then
-    return self.lua_prototype.effectivity or 0
-  end
-  return 0
-end
-
--------------------------------------------------------------------------------
--- Return burner prototype
---
--- @function [parent=#EntityPrototype] getBurnerPrototype
---
--- @return #BurnerPrototype
---
-function EntityPrototype:getBurnerPrototype()
-  if self.lua_prototype ~= nil then
-    if self:getEnergyType() == "burner" then return BurnerPrototype(self.lua_prototype.burner_prototype) end
-    if self:getEnergyType() == "fuel-burner" then return BurnerPrototype() end
-  end
-  return BurnerPrototype()
-end
-
--------------------------------------------------------------------------------
--- Return burner prototype effectivity
---
--- @function [parent=#EntityPrototype] getBurnerEffectivity
---
--- @return #number default 0
---
-function EntityPrototype:getBurnerEffectivity()
-  if self.lua_prototype ~= nil then
-    if self:getEnergyType() == "burner" then return self.lua_prototype.burner_prototype.effectivity or 0 end
-    if self:getEnergyType() == "fuel-burner" then return 1 end
-  end
-  return 0
-end
-
--------------------------------------------------------------------------------
--- Return burner energy source prototype emissions
---
--- @function [parent=#EntityPrototype] getBurnerEmissions
---
--- @return #number default 0
---
-function EntityPrototype:getBurnerEmissions()
-  if self.lua_prototype ~= nil then
-    if self:getEnergyType() == "burner" then return self.lua_prototype.burner_prototype.emissions or 1 end
-    if self:getEnergyType() == "fuel-burner" then return 2.777777e-7 end
-  end
-  return 0
-end
-
--------------------------------------------------------------------------------
 -- Return inventory size
 --
 -- @function [parent=#EntityPrototype] getInventorySize
@@ -488,6 +443,20 @@ function EntityPrototype:getFluidCapacity()
     return self.lua_prototype.fluid_capacity or 0
   end
   return 0
+end
+
+-------------------------------------------------------------------------------
+-- Return fluid boxe prototypes
+--
+-- @function [parent=#EntityPrototype] getFluidboxPrototypes
+--
+-- @return #number default 0
+--
+function EntityPrototype:getFluidboxPrototypes()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.fluidbox_prototypes
+  end
+  return nil
 end
 
 -------------------------------------------------------------------------------
@@ -547,10 +516,11 @@ end
 --
 function EntityPrototype:getPollution()
   if self.lua_prototype ~= nil then
-    local energy_usage = self:getMaxEnergyUsage()
-    local emission = self:getElectricEmissions()
-    if self:getBurnerEmissions() ~= 0 then
-      emission = self:getBurnerEmissions()
+    local energy_usage = self:getEnergyConsumption()
+    local emission = 0
+    local energy_prototype = self:getEnergySource()
+    if energy_prototype ~= nil then
+      emission = energy_prototype:getEmissions()
     end
     return energy_usage * emission
   end

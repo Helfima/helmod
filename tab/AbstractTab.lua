@@ -310,11 +310,6 @@ function AbstractTab:onUpdate(event)
 
   self:updateData(event)
   
-  Logging:debug(self.classname, "debug_mode", User.getModGlobalSetting("debug"))
-  if User.getModGlobalSetting("debug") ~= "none" then
-    self:updateDebugPanel()
-  end
-
 end
 
 -------------------------------------------------------------------------------
@@ -362,6 +357,7 @@ function AbstractTab:updateMenuPanel(event)
     GuiElement.add(group1, GuiButton("HMRecipeSelector", "OPEN", block_id):sprite("menu", "wrench-white", "wrench"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-recipe"}))
     GuiElement.add(group1, GuiButton("HMTechnologySelector", "OPEN", block_id):sprite("menu", "graduation-white", "graduation"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-technology"}))
     --GuiElement.add(group1, GuiButton("HMContainerSelector", "OPEN", block_id):sprite("menu", "container-white", "container"):style("helmod_button_menu"):tooltip({"helmod_result-panel.select-button-container"}))
+    GuiElement.add(group1, GuiButton("HMEnergySelector", "OPEN", block_id):sprite("menu", "nuclear-white","nuclear"):style("helmod_button_menu"):tooltip({"helmod_result-panel.select-button-energy"}))
     GuiElement.add(group1, GuiButton("HMRecipeExplorer", "OPEN", block_id):sprite("menu", "search-white", "search"):style("helmod_button_menu"):tooltip({"helmod_button.explorer"}))
 
     local groupPref = GuiElement.add(action_panel, GuiFlowH("groupPref"))
@@ -399,11 +395,18 @@ function AbstractTab:updateMenuPanel(event)
         if block.solver == true then style = "helmod_button_menu_selected" end
         GuiElement.add(group3, GuiButton(self.classname, "production-block-solver", block_id):sprite("menu", "settings-white", "settings"):style(style):tooltip({"helmod_button.matrix-solver"}))
       end
+      -- Model Debug
+      if User.getModGlobalSetting("debug") ~= "none" then
+        local groupDebug = GuiElement.add(action_panel, GuiFlowH("groupDebug"))
+        GuiElement.add(groupDebug, GuiButton("HMModelDebug", "OPEN", block_id):sprite("menu", "bug-white", "bug"):style("helmod_button_menu"):tooltip("Open Debug"))
+      end
+      
     end
     -- pin info
     if self.classname == "HMStatisticTab" then
       GuiElement.add(group3, GuiButton("HMStatusPanel", "OPEN", block_id):sprite("menu", "pin-white", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
     end
+
   end
 
 
@@ -514,17 +517,6 @@ function AbstractTab:addCellHeader(guiTable, name, caption, sorted)
     local cell = GuiElement.add(guiTable, GuiFrameH("header", name):style(helmod_frame_style.hidden))
     GuiElement.add(cell, GuiLabel("label"):caption(caption))
   end
-end
-
--------------------------------------------------------------------------------
--- Update debug panel
---
--- @function [parent=#AbstractTab] updateDebugPanel
---
--- @param #LuaEvent event
---
-function AbstractTab:updateDebugPanel(event)
-  Logging:debug("AbstractTab", "updateDebugPanel()", event)
 end
 
 -------------------------------------------------------------------------------
