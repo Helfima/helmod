@@ -51,11 +51,7 @@ function Command.parse(event)
       User.resetAll()
       Player.print("All User UIs are reseted!")
     elseif string.lower(event.parameters) == "resetcaches" then
-      Cache.reset()
-      for _,user_data in pairs(global["users"]) do
-        user_data["cache"] = nil
-      end
-      Player.print("Caches are reseted!")
+      Player.print("Command removed! please use Administration panel!")
     elseif string.lower(event.parameters) == "resettranslate" then
       User.resetTranslate()
       Player.print("User translate are reseted!")

@@ -80,6 +80,7 @@ local list = {
   {name="arrow-right"},
   {name="arrow-up", sm=true},
   {name="arrow-left"},
+  {name="bug"},
   {name="brief"},
   {name="calculator"},
   {name="chart"},

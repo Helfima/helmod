@@ -1,5 +1,7 @@
 require "core.Form"
+
 require "dialog.HelpPanel"
+require "dialog.ModelDebug"
 require "dialog.PinPanel"
 require "dialog.SummaryPanel"
 require "dialog.StatusPanel"
@@ -7,11 +9,13 @@ require "dialog.Settings"
 require "dialog.Download"
 require "dialog.Calculator"
 require "dialog.RecipeExplorer"
+
 require "edition.RecipeEdition"
 require "edition.ProductEdition"
 require "edition.EnergyEdition"
 require "edition.RuleEdition"
 require "edition.PreferenceEdition"
+
 require "selector.ContainerSelector"
 require "selector.EnergySelector"
 require "selector.EntitySelector"
@@ -75,6 +79,7 @@ function Controller:prepare()
 
   local forms = {}
   table.insert(forms, HelpPanel("HMHelpPanel"))
+  table.insert(forms, ModelDebug("HMModelDebug"))
   table.insert(forms, Download("HMDownload"))
   table.insert(forms, Calculator("HMCalculator"))
   table.insert(forms, RecipeExplorer("HMRecipeExplorer"))

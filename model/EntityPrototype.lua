@@ -73,6 +73,7 @@ end
 --
 function EntityPrototype:getPowerExtract(temperature)
   if self.lua_prototype ~= nil then
+    -- @see https://wiki.factorio.com/Heat_exchanger
     local target_temperature = temperature or 165
     if self.lua_prototype.target_temperature ~= nil then
       target_temperature = math.min(target_temperature , self.lua_prototype.target_temperature)
@@ -224,14 +225,8 @@ end
 -- @return #number default 0
 --
 function EntityPrototype:getFluidConsumption()
-  -- @see https://wiki.factorio.com/Heat_exchanger
   if self.lua_prototype ~= nil then
-    local power_extract = self:getPowerExtract()
-    local power_usage = self:getEnergyConsumption()
-    -- fluid quantity = [boiler.max_energy_usage]*60/[boiler.target_temperature]-15°c)x[200J/unit/°]
-    -- 1 water = 1 steam
-    -- dans notre cas power_usage est deja en seconde (x60)
-    return power_usage/power_extract
+    return self:getFluidUsagePerTick()*60
   end
   return 0
 end

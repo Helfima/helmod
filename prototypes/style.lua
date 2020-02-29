@@ -1441,7 +1441,8 @@ local style_element_list = {
   {suffix="green", x=0, y=40},
   {suffix="blue", x=0, y=48},
   {suffix="gray", x=0, y=56},
-  {suffix="magenta", x=0, y=64}
+  {suffix="magenta", x=0, y=64},
+  {suffix="none", x=0, y=72}
 }
 -------------------------------------------------------------------------------
 -- Style of element
@@ -1562,6 +1563,35 @@ for _,style in pairs(style_element_list) do
       width = 50,
       horizontally_stretchable = "on",
       vertically_stretchable = "off"
+    }
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Style of colored frame
+--
+-- @field [parent=#Frame] color
+--
+
+for _,style in pairs(style_element_list) do
+  for i = 1, 3 do
+    local style_name = table.concat({"helmod_frame_colored",style.suffix,i},"_")
+    local x = style.x + (i-1)*8
+    local y = style.y
+
+    default_gui[style_name] = {
+      type = "frame_style",
+      graphical_set = {
+        filename = "__helmod__/graphics/gui.png",
+        corner_size = 1,
+        position = {x,y}
+      },
+      top_padding  = 2,
+      right_padding = 2,
+      bottom_padding = 2,
+      left_padding = 2,
+      horizontally_stretchable = "on",
+      vertically_stretchable = "on"
     }
   end
 end

@@ -211,8 +211,9 @@ helmod_settings_mod = {
       "HMHelpPanel",
       "HMMainMenuPanel",
       "HMModel",
-      "HMModelCompute",
       "HMModelBuilder",
+      "HMModelCompute",
+      "HMModelDebug",
       "HMLeftMenuPanel",
       "HMPinPanel",
       "HMPlayer",
@@ -240,6 +241,14 @@ helmod_settings_mod = {
       "HMUser"
     },
     order = "a1"
+  },
+  debug_solver = {
+    type = "bool-setting",
+    setting_type = "runtime-global",
+    localised_name = {"helmod_settings.debug-solver"},
+    localised_description = {"helmod_settings.debug-solver-desc"},
+    default_value = false,
+    order = "a2"
   },
   -- display_ratio_horizontal
   user_cache_step = {

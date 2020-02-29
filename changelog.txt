@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.10.9
+Date: 29. 02. 2020
+  Changes:
+    - added a debug panel when debug is activated
+    - removed command ResetCaches (use administration panel)
+  Bugfixes:
+    - fixed fluid consumption
+    - fixed arithemtic error on pollution
+---------------------------------------------------------------------------------------------------
 Version: 0.10.8
 Date: 25. 02. 2020
   Bugfixes:
