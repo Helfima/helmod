@@ -24,6 +24,19 @@ function ItemPrototype:getFuelValue()
 end
 
 -------------------------------------------------------------------------------
+-- Return burnt result
+--
+-- @function [parent=#ItemPrototype] getBurntResult
+--
+-- @return #boolean
+--
+function ItemPrototype:getBurntResult()
+  if self.lua_prototype == nil then return nil end
+  if self:getFuelValue() > 0 then return self.lua_prototype.burnt_result end
+  return nil
+end
+
+-------------------------------------------------------------------------------
 -- Return fuel emissions multiplier
 --
 -- @function [parent=#ItemPrototype] getFuelEmissionsMultiplier

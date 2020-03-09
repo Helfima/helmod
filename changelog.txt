@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.10.10
+Date: 29. 02. 2020
+  Changes:
+    - added burnt in energy recipe
+  Bugfixes:
+    - fixed power calculation
+    - fixed void recipe when used by factory
+    - fixed slower module selector
+---------------------------------------------------------------------------------------------------
 Version: 0.10.9
 Date: 29. 02. 2020
   Changes:

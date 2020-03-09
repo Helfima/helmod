@@ -66,7 +66,7 @@ function EnergySelector:buildPrototypeTooltip(prototype)
   --Logging:debug(self.classname, "energy_name", energy_name, energy_prototype:native())
   local tooltip = {""}
   table.insert(tooltip, energy_name)
-  table.insert(tooltip, {"", "\n",entity_prototype:getType()})
+  --table.insert(tooltip, {"", "\n",entity_prototype:getType()})
   -- products
   table.insert(tooltip, {"", "\n", "products"})
   for _,product in pairs(recipe_prototype:getProducts()) do

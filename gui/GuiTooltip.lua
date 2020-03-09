@@ -48,10 +48,46 @@ end
 
 -------------------------------------------------------------------------------
 --
+-- @function [parent=#GuiTooltip] appendEnergyConsumption
+-- @return #GuiCell
+--
+function GuiTooltip:appendEnergyConsumption(tooltip, element)
+  if self.m_with_energy == true then
+    -- energy
+    local total_power = Format.formatNumberKilo(element.energy_total, "W")
+    if element.limit_energy ~= nil then
+      local limit_power = Format.formatNumberKilo(element.limit_energy, "W")
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.energy-consumption"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, limit_power or 0, "/", total_power, helmod_tag.font.close})
+    else
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.energy-consumption"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, total_power or 0, helmod_tag.font.close})
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiTooltip] appendFlow
+-- @return #GuiCell
+--
+function GuiTooltip:appendFlow(tooltip, element)
+  if self.m_with_logistic == true then
+    local total_flow = Format.formatNumberElement(element.count/((Model.getModel().time or 1)/60))
+    if element.limit_count ~= nil then
+      local limit_flow = Format.formatNumberElement(element.limit_count/((Model.getModel().time or 1)/60))
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.outflow"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, limit_flow or 0, "/", {"helmod_si.per-minute",total_flow or 0}, helmod_tag.font.close})
+    else
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.outflow"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, {"helmod_si.per-minute",total_flow or 0}, helmod_tag.font.close})
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+--
 -- @function [parent=#GuiTooltip] appendLogistic
 -- @return #GuiCell
 --
 function GuiTooltip:appendLogistic(tooltip, element)
+  if self.m_with_logistic == true then
     table.insert(tooltip, {"", "\n", "----------------------"})
     table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, {"tooltip.info-logistic"}, helmod_tag.font.close})
     -- solid logistic
@@ -82,8 +118,27 @@ function GuiTooltip:appendLogistic(tooltip, element)
         end
       end
     end
+  end
 end
 
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiTooltip] appendDebug
+-- @return #GuiCell
+--
+function GuiTooltip:appendDebug(tooltip, element)
+    -- debug     
+    if User.getModGlobalSetting("debug") ~= "none" then
+      table.insert(tooltip, {"", "\n", "----------------------"})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Name", ": ", helmod_tag.font.default_bold, self.m_element.name or "nil", helmod_tag.font.close})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Type", ": ", helmod_tag.font.default_bold, self.m_element.type or "nil", helmod_tag.font.close})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "State", ": ", helmod_tag.font.default_bold, self.m_element.state or 0, helmod_tag.font.close})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Amount", ": ", helmod_tag.font.default_bold, self.m_element.amount or 0, helmod_tag.font.close})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Count", ": ", helmod_tag.font.default_bold, self.m_element.count or 0, helmod_tag.font.close})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Count limit", ": ", helmod_tag.font.default_bold, self.m_element.limit_count or 0, helmod_tag.font.close})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "By Time", ": ", helmod_tag.font.default_bold, self.m_element.by_time or "false", helmod_tag.font.close})
+    end
+end
 -------------------------------------------------------------------------------
 -- Create tooltip
 --
@@ -138,7 +193,7 @@ function GuiTooltipElement:create()
   local element = self.m_element
   if element ~= nil then
     local type = element.type
-    if element == "resource" then type = "entity" end
+    if type == "resource" then type = "entity" end
     local element_icon = string.format("[%s=%s]", type, element.name)
     if type == "energy" and (element.name == "energy" or element.name == "steam-heat") then
       element_icon = string.format("[img=helmod-%s-white]", type, element.name)
@@ -153,36 +208,53 @@ function GuiTooltipElement:create()
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.quantity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, total_count or 0, helmod_tag.font.close})
     end
     
-    if self.m_with_energy == true then
-      -- energy
-      local total_power = Format.formatNumberKilo(element.energy_total, "W")
-      if element.limit_energy ~= nil then
-        local limit_power = Format.formatNumberKilo(element.limit_energy, "W")
-        table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.energy-consumption"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, limit_power or 0, "/", total_power, helmod_tag.font.close})
-      else
-        table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.energy-consumption"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, total_power or 0, helmod_tag.font.close})
-      end
-    end
-    
-    if self.m_with_logistic == true then
-      local total_flow = Format.formatNumberElement(element.count/((Model.getModel().time or 1)/60))
-      if element.limit_count ~= nil then
-        local limit_flow = Format.formatNumberElement(element.limit_count/((Model.getModel().time or 1)/60))
-        table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.outflow"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, limit_flow or 0, "/", {"helmod_si.per-minute",total_flow or 0}, helmod_tag.font.close})
-      else
-        table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.outflow"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, {"helmod_si.per-minute",total_flow or 0}, helmod_tag.font.close})
-      end
+    self:appendEnergyConsumption(tooltip, element);
+    self:appendFlow(tooltip, element);
+    self:appendLogistic(tooltip, element);
+    self:appendDebug(tooltip, element)
 
-      self:appendLogistic(tooltip, element);
+  end
+  return tooltip
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiTooltip] constructor
+-- @param #arg name
+-- @return #GuiTooltipEnergy
+--
+GuiTooltipEnergy = newclass(GuiTooltip,function(base,...)
+  GuiTooltip.init(base,...)
+  base.classname = "HMGuiTooltip"
+end)
+
+-------------------------------------------------------------------------------
+-- Create tooltip
+--
+-- @function [parent=#GuiTooltipEnergy] create
+--
+function GuiTooltipEnergy:create()
+  local tooltip = self._super.create(self)
+  local element = self.m_element
+  if element ~= nil then
+    local type = element.type
+    if element == "resource" then type = "entity" end
+    local element_icon = string.format("[%s=%s]", type, element.name)
+    if element.name == "energy" or element.name == "steam-heat" then
+      element_icon = string.format("[img=helmod-%s-white]", type, element.name)
+    end
+    table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=element.name}), helmod_tag.font.close, helmod_tag.color.close})
+    -- quantity
+    local total_count = Format.formatNumberKilo(element.count, "W")
+    if element.limit_count ~= nil then
+      local limit_count = Format.formatNumberElement(element.limit_count)
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.quantity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, limit_count or 0, "/", total_count, helmod_tag.font.close})
+    else
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.quantity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, total_count or 0, helmod_tag.font.close})
     end
     
-    -- debug     
-    if User.getModGlobalSetting("debug") ~= "none" then
-      table.insert(tooltip, {"", "\n", "----------------------"})
-      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Name", ": ", helmod_tag.font.default_bold, self.m_element.name or "nil", helmod_tag.font.close})
-      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Type", ": ", helmod_tag.font.default_bold, self.m_element.type or "nil", helmod_tag.font.close})
-      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "State", ": ", helmod_tag.font.default_bold, self.m_element.state or 0, helmod_tag.font.close})
-    end
+    self:appendEnergyConsumption(tooltip, element);
+    self:appendDebug(tooltip, element)
   end
   return tooltip
 end
@@ -217,9 +289,9 @@ end
 --
 -- @function [parent=#GuiTooltip] constructor
 -- @param #arg name
--- @return #GuiTooltipEnergy
+-- @return #GuiTooltipEnergyConsumption
 --
-GuiTooltipEnergy = newclass(GuiTooltip,function(base,...)
+GuiTooltipEnergyConsumption = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
 end)
@@ -227,9 +299,9 @@ end)
 -------------------------------------------------------------------------------
 -- Create tooltip
 --
--- @function [parent=#GuiTooltipEnergy] create
+-- @function [parent=#GuiTooltipEnergyConsumption] create
 --
-function GuiTooltipEnergy:create()
+function GuiTooltipEnergyConsumption:create()
   local tooltip = self._super.create(self)
   if self.m_element then
     local power = Format.formatNumberKilo(self.m_element.energy_total or self.m_element.power, "W")

@@ -53,7 +53,8 @@ function Product:clone()
     type = self.lua_prototype.type,
     name = self.lua_prototype.name,
     amount = self:getElementAmount(),
-    state = self.lua_prototype.state
+    state = self.lua_prototype.state,
+    by_time = self.lua_prototype.by_time
   }
   return prototype
 end
@@ -154,6 +155,23 @@ function Product:getAmount(recipe)
 end
 
 -------------------------------------------------------------------------------
+-- Factor by time
+--
+-- @function [parent=#Product] factorByTime
+--
+-- @param #table recipe
+--
+-- @return #number
+--
+function Product:factorByTime()
+  if self.lua_prototype.by_time == true then
+    local model = Model.getModel()
+    return model.time
+  end
+  return 1
+end
+
+-------------------------------------------------------------------------------
 -- Count product
 --
 -- @function [parent=#Product] countProduct
@@ -166,7 +184,7 @@ function Product:countProduct(recipe)
   Logging:trace(self.classname, "countProduct",self.lua_prototype)
   local amount = self:getElementAmount()
   local bonus_amount = self:getBonusAmount() -- if there are no catalyst amount = bonus_amount
-  return (amount + bonus_amount * self:getProductivityBonus(recipe) ) * recipe.count
+  return (amount + bonus_amount * self:getProductivityBonus(recipe) ) * recipe.count * self:factorByTime()
 end
 
 -------------------------------------------------------------------------------
@@ -180,7 +198,7 @@ end
 --
 function Product:countIngredient(recipe)
   Logging:trace(self.classname, "countIngredient",self.lua_prototype)
-  local amount = self:getElementAmount()
+  local amount = self:getElementAmount() * self:factorByTime()
   return amount * recipe.count
 end
 
@@ -203,7 +221,7 @@ function Product:countContainer(count, container)
     if entity_prototype:getType() == "inserter" then
       local inserter_capacity = entity_prototype:getInserterCapacity()
       local inserter_speed = entity_prototype:getInserterRotationSpeed()
-      -- temps pour 360° t=360/360*inserter_speed
+      -- temps pour 360ï¿½ t=360/360*inserter_speed
       local inserter_time = 1 / inserter_speed
       return count * inserter_time / (inserter_capacity * (Model.getModel().time or 1))
     elseif entity_prototype:getType() == "transport-belt" then

@@ -1,3 +1,7 @@
+if __DebugAdapter then
+    require('__debugadapter__/debugadapter.lua')
+end
+
 require "mod-gui"
 require "core.global"
 require "core.class"

@@ -490,7 +490,7 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
       local display_product_cols = User.getPreferenceSetting("display_product_cols")
       Logging:debug(self.classname, "display_product_cols", display_product_cols)
       local cell_products = GuiElement.add(gui_table, GuiTable("products", recipe.id):column(display_product_cols):style(helmod_table_style.list))
-      for index, lua_product in pairs(recipe_prototype:getProducts()) do
+      for index, lua_product in pairs(recipe_prototype:getProducts(recipe.factory)) do
         local product_prototype = Product(lua_product)
         local product = product_prototype:clone()
         product.count = product_prototype:countProduct(recipe)

@@ -173,15 +173,30 @@ function BurnerPrototype:getFuelCount()
   local factory_prototype = EntityPrototype(self.factory)
   local energy_consumption = factory_prototype:getEnergyConsumption()
   local factory_fuel = self:getFuelPrototype()
-  Logging:debug("HMEnergySourcePrototype", "factory_fuel", factory_fuel, "energy_consumption", energy_consumption)
   if factory_fuel == nil then return nil end
-  -- @see https://wiki.factorio.com/Fuel
-  -- Burn time (s) = Fuel value (MJ) ÷ Energy consumption (MW)
-  -- source energy en kJ
   local burner_effectivity = self:getEffectivity()
   local fuel_value = factory_fuel:getFuelValue()
-  local burner_count = energy_consumption/(fuel_value*burner_effectivity)
+  local burner_count = energy_consumption/(fuel_value*burner_effectivity)*60
   return {type="item", name=factory_fuel:native().name, count=burner_count}
+end
+
+-------------------------------------------------------------------------------
+-- Return fuel count
+--
+-- @function [parent=#BurnerPrototype] getJouleCount
+--
+-- @return #table
+--
+function BurnerPrototype:getJouleCount()
+  local factory_prototype = EntityPrototype(self.factory)
+  local energy_consumption = factory_prototype:getEnergyConsumption()
+  local factory_fuel = self:getFuelPrototype()
+  Logging:debug("HMEnergySourcePrototype", "factory_fuel", factory_fuel, "energy_consumption", energy_consumption)
+  if factory_fuel == nil then return nil end
+  local burner_effectivity = self:getEffectivity()
+  -- 1W/h = 3600J
+  local joule_count = energy_consumption * burner_effectivity / 3600
+  return {type="item", name=factory_fuel:native().name, count=burner_count, is_joule=true}
 end
 
 -------------------------------------------------------------------------------
@@ -295,21 +310,17 @@ function FluidSourcePrototype:getFuelCount()
   local factory_prototype = EntityPrototype(self.factory)
   local energy_consumption = factory_prototype:getEnergyConsumption()
   local factory_fuel = self:getFuelPrototype()
-  Logging:debug("HMEnergySourcePrototype", "factory_fuel", factory_fuel, "energy_consumption", energy_consumption)
   if factory_fuel == nil then return nil end
   local burner_effectivity = self:getEffectivity()
-  local fluid_usage_per_tick = self:getFluidUsagePerTick()
   if self.lua_prototype.fluid_usage_per_tick ~= nil and self.lua_prototype.fluid_usage_per_tick ~= 0 then
-    local fluid_usage_per_tick = self:getFluidUsagePerTick()
-    local burner_count = fluid_usage_per_tick*60
+    local fluid_usage = self:getFluidUsage()
+    local burner_count = fluid_usage
     local fuel_fluid = {type="fluid", name=factory_fuel:native().name, count=burner_count}
-    Logging:debug("HMEnergySourcePrototype", "fluid_usage_per_tick", fluid_usage_per_tick, "fuel_fluid", fuel_fluid)
     return fuel_fluid
   else
     local fuel_value = factory_fuel:getFuelValue()
     local burner_count = energy_consumption/(fuel_value*burner_effectivity)
     local fuel_fluid = {type="fluid", name=factory_fuel:native().name, count=burner_count}
-    Logging:debug("HMEnergySourcePrototype", "fuel_value", fuel_value, "fuel_fluid", fuel_fluid)
     return fuel_fluid
   end
 end
@@ -321,3 +332,4 @@ end)
 HeatSourcePrototype = newclass(EnergySourcePrototype,function(base, lua_prototype, factory)
   EnergySourcePrototype.init(base,lua_prototype, factory)
 end)
+
