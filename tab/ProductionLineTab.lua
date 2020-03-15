@@ -38,7 +38,6 @@ end
 -- @param #LuaEvent event
 --
 function ProductionLineTab:updateInfo(event)
-  Logging:debug(self.classname, "updateInfo", event)
   local model = Model.getModel()
   -- data
   local info_scroll, output_scroll, input_scroll = self:getInfoPanel()
@@ -95,7 +94,6 @@ end
 -- @param #LuaEvent event
 --
 function ProductionLineTab:updateInput(event)
-  Logging:debug(self.classname, "updateInput", event)
   local model = Model.getModel()
   -- data
   local info_scroll, output_scroll, input_scroll = self:getInfoPanel()
@@ -124,7 +122,6 @@ end
 -- @param #LuaEvent event
 --
 function ProductionLineTab:updateOutput(event)
-  Logging:debug(self.classname, "updateOutput", event)
   local model = Model.getModel()
   -- data
   local info_scroll, output_scroll, input_scroll = self:getInfoPanel()
@@ -154,7 +151,6 @@ end
 -- @param #LuaEvent event
 --
 function ProductionLineTab:updateData(event)
-  Logging:debug(self.classname, "updateData()", event)
   local model = Model.getModel()
 
   self:updateInfo(event)
@@ -204,7 +200,6 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function ProductionLineTab:addTableHeader(itable)
-  Logging:debug(self.classname, "addTableHeader()")
   local model = Model.getModel()
 
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
@@ -231,7 +226,6 @@ end
 -- @param #table block production block
 --
 function ProductionLineTab:addTableRow(gui_table, block)
-  Logging:debug(self.classname, "addTableRow()", block)
   local model = Model.getModel()
 
   local unlinked = block.unlinked and true or false

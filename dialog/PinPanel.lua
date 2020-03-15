@@ -84,7 +84,6 @@ end
 -- @param #LuaEvent event
 --
 function PinPanel:updateHeader(event)
-  Logging:debug(self.classname, "updateHeader()", event)
   local left_menu_panel = self:getLeftMenuPanel()
   local pin_block_id = User.getParameter("pin_block_id")
   left_menu_panel.clear()
@@ -106,7 +105,6 @@ end
 -- @param #LuaEvent event
 --
 function PinPanel:updateInfo(event)
-  Logging:debug(self.classname, "updateInfo()", event)
   local infoPanel = self:getInfoPanel()
   local model = Model.getModel()
   local pin_block_id = User.getParameter("pin_block_id")
@@ -116,7 +114,6 @@ function PinPanel:updateInfo(event)
 
   local column = User.getSetting("display_pin_level") + 1
 
-  Logging:debug(self.classname, "updateInfo", pin_block_id, model.blocks[pin_block_id])
   if pin_block_id ~= nil and model.blocks[pin_block_id] ~= nil then
     local block = model.blocks[pin_block_id]
 
@@ -139,7 +136,6 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function PinPanel:addProductionBlockHeader(itable)
-  Logging:debug(self.classname, "addProductionBlockHeader()", itable)
   local display_pin_level = User.getSetting("display_pin_level")
   local model = Model.getModel()
 
@@ -179,7 +175,6 @@ end
 -- @param #table element production recipe
 --
 function PinPanel:addProductionBlockRow(gui_table, block, recipe)
-  Logging:debug(self.classname, "addProductionBlockRow()", gui_table, block, recipe)
   local display_pin_level = User.getSetting("display_pin_level")
   local recipe_prototype = RecipePrototype(recipe)
   if display_pin_level > display_level.base then
@@ -251,13 +246,11 @@ end
 -- @param #LuaEvent event
 --
 function PinPanel:onEvent(event)
-  Logging:debug(self.classname, "onEvent()", event)
   local model = Model.getModel()
   local pin_block_id = User.getParameter("pin_block_id")
 
   if event.action == "change-level" then
     local display_pin_level = User.getSetting("display_pin_level")
-    Logging:debug(self.classname, "display_pin_level", display_pin_level)
     if event.item1 == "down" and display_pin_level > display_pin_level_min  then User.setSetting("display_pin_level",display_pin_level - 1) end
     if event.item1 == "up" and display_pin_level < display_pin_level_max  then User.setSetting("display_pin_level",display_pin_level + 1) end
     if event.item1 == "min" then User.setSetting("display_pin_level",display_pin_level_min) end

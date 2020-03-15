@@ -9,6 +9,17 @@ require "selector.AbstractSelector"
 EnergySelector = newclass(AbstractSelector)
 
 -------------------------------------------------------------------------------
+-- After initialization
+--
+-- @function [parent=#EnergySelector] afterInit
+--
+function EnergySelector:afterInit()
+  self.disable_option = true
+  self.hidden_option = true
+  self.product_option = true
+end
+
+-------------------------------------------------------------------------------
 -- Return caption
 --
 -- @function [parent=#EnergySelector] getCaption
@@ -30,7 +41,40 @@ end
 -- @return #table
 --
 function EnergySelector:getPrototype(element, type)
-  return EntityPrototype(element, type)
+  return RecipePrototype(element, type)
+end
+
+-------------------------------------------------------------------------------
+-- Append groups
+--
+-- @function [parent=#EnergySelector] appendGroups
+--
+-- @param #string element
+-- @param #string type
+-- @param #table list_products
+-- @param #table list_ingredients
+-- @param #table list_translate
+-- 
+
+function EnergySelector:appendGroups(element, type, list_products, list_ingredients, list_translate)
+  local prototype = self:getPrototype(element, type)
+
+  local lua_prototype = prototype:native()
+  local prototype_name = string.format("%s-%s",type , lua_prototype.name)
+  for key, element in pairs(prototype:getRawProducts()) do
+    if list_products[element.name] == nil then list_products[element.name] = {} end
+    list_products[element.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
+    
+    local localised_name = Product(element):getLocalisedName()
+    if localised_name ~= nil and localised_name ~= "unknow" then
+      list_translate[element.name] = localised_name
+    end
+  end
+  for key, element in pairs(prototype:getRawIngredients()) do
+    if list_ingredients[element.name] == nil then list_ingredients[element.name] = {} end
+    list_ingredients[element.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
+  end
+
 end
 
 -------------------------------------------------------------------------------
@@ -43,9 +87,8 @@ end
 -- @param #table list_translate
 --
 function EnergySelector:updateGroups(list_products, list_ingredients, list_translate)
-  Logging:trace(self.classname, "updateGroups()")
   for key, entity in pairs(Player.getEnergyMachines()) do
-    self:appendGroups(entity, "entity", list_products, list_ingredients, list_translate)
+    self:appendGroups(entity, "energy", list_products, list_ingredients, list_translate)
   end
 end
 
@@ -57,13 +100,11 @@ end
 -- @param #LuaPrototype prototype
 --
 function EnergySelector:buildPrototypeTooltip(prototype)
-  Logging:trace(self.classname, "buildPrototypeTooltip(player, prototype)", prototype)
   -- initalize tooltip
   local recipe_prototype = RecipePrototype(prototype.name, "energy")
   local lua_prototype = recipe_prototype:native()
   local entity_prototype = EntityPrototype(prototype)
   local energy_name = entity_prototype:getLocalisedName()
-  --Logging:debug(self.classname, "energy_name", energy_name, energy_prototype:native())
   local tooltip = {""}
   table.insert(tooltip, energy_name)
   --table.insert(tooltip, {"", "\n",entity_prototype:getType()})
@@ -98,11 +139,6 @@ end
 -- @function [parent=#EnergySelector] buildPrototypeIcon
 --
 function EnergySelector:buildPrototypeIcon(guiElement, prototype, tooltip)
-  local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select", "energy"):choose(prototype.type, prototype.name):color():tooltip(tooltip))
+  local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select", "energy"):choose("entity", prototype.name):color():tooltip(tooltip))
   button.locked = true
 end
-
-
-
-
-

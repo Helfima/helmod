@@ -144,8 +144,6 @@ end
 -- @function [parent=#AdminTab] updateData
 --
 function AdminTab:updateData()
-  Logging:debug(self.classname, "updateData()")
-
   self:updateCache()
   self:updateRule()
   self:updateSheet()
@@ -157,8 +155,6 @@ end
 -- @function [parent=#AdminTab] updateCache
 --
 function AdminTab:updateCache()
-  Logging:debug(self.classname, "updateCache()")
-
   -- Rule List
   local caches_panel = self:getCacheTab()
   
@@ -215,8 +211,6 @@ end
 -- @function [parent=#AdminTab] updateRule
 --
 function AdminTab:updateRule()
-  Logging:debug(self.classname, "updateRule()")
-
   -- Rule List
   local rule_panel = self:getRuleTab()
   local count_rule = #Model.getRules()
@@ -239,7 +233,6 @@ end
 -- @function [parent=#AdminTab] updateSheet
 --
 function AdminTab:updateSheet()
-  Logging:debug(self.classname, "updateSheet()")
   -- Sheet List
   local sheet_panel = self:getSheetTab()
 
@@ -266,8 +259,6 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function AdminTab:addTranslateListHeader(itable)
-  Logging:debug(self.classname, "addCacheListHeader()", itable)
-
   -- col action
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
   -- data
@@ -283,8 +274,6 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function AdminTab:addCacheListHeader(itable)
-  Logging:debug(self.classname, "addCacheListHeader()", itable)
-
   -- col action
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
   -- data
@@ -301,8 +290,6 @@ end
 -- @param #table model
 --
 function AdminTab:addTranslateListRow(gui_table, user_name, user_data)
-  Logging:debug(self.classname, "addCacheListRow()", gui_table, user_name, user_data)
-
   -- col action
   local cell_action = GuiElement.add(gui_table, GuiTable("action", user_name):column(4))
 
@@ -324,7 +311,6 @@ end
 -- @param #table data
 --
 function AdminTab:addCacheListRow(gui_table, class_name, key1, key2, key3, key4, data)
-  Logging:debug(self.classname, "addCacheListRow()", gui_table, class_name, key1, key2, key3, key4, data)
   local caption = ""
   if type(data) == "table" then
     caption = Model.countList(data)
@@ -388,8 +374,6 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function AdminTab:addRuleListHeader(itable)
-  Logging:debug(self.classname, "addRuleListHeader()", itable)
-
   -- col action
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
   -- data
@@ -411,8 +395,6 @@ end
 -- @param #table model
 --
 function AdminTab:addRuleListRow(gui_table, rule, rule_id)
-  Logging:debug(self.classname, "addRuleListRow()", gui_table, rule, rule_id)
-
   -- col action
   local cell_action = GuiElement.add(gui_table, GuiTable("action", rule_id):column(4))
   GuiElement.add(cell_action, GuiButton(self.classname, "rule-remove", rule_id):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
@@ -448,8 +430,6 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function AdminTab:addSheetListHeader(itable)
-  Logging:debug(self.classname, "addSheetListHeader()", itable)
-
   -- col action
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
   -- data owner
@@ -466,8 +446,6 @@ end
 -- @param #table model
 --
 function AdminTab:addSheetListRow(gui_table, model)
-  Logging:debug(self.classname, "addSheetListRow()", gui_table, model)
-
   -- col action
   local cell_action = GuiElement.add(gui_table, GuiTable("action", model.id):column(4))
   if model.share ~= nil and bit32.band(model.share, 1) > 0 then

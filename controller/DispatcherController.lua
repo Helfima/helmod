@@ -16,7 +16,6 @@ end)
 -- @function [parent=#DispatcherController] bind
 --
 function DispatcherController:bind(event_type, class, class_handler)
-  Logging:debug(self.classname, "bind()",event_type, class, class_handler)
   if self.handlers[event_type] == nil then self.handlers[event_type] = {} end
   if self.handlers[event_type][class.classname] == nil then
     self.handlers[event_type][class.classname] = {class=class, handlers={}}
@@ -30,7 +29,6 @@ end
 -- @function [parent=#DispatcherController] unbind
 --
 function DispatcherController:unbind(event_type, class, class_handler)
-  Logging:debug(self.classname, "unbind()")
   if class == nil and handler == nil then
     self.handlers[event_type] = nil
   elseif class_handler == nil and self.handlers[event_type] then
@@ -52,7 +50,6 @@ end
 -- @function [parent=#DispatcherController] send
 --
 function DispatcherController:send(event_type, data, classname)
-  Logging:debug(self.classname, "send()", event_type, data, classname)
   local ok , err = pcall(function()
     data.type = event_type
     if self.handlers[event_type] then

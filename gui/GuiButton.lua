@@ -93,6 +93,7 @@ end
 function GuiButton:choose(type, name)
   self.options.type = "choose-elem-button"
   self.options.style = "slot_button"
+  if type ==  "recipe-burnt" then type = "recipe" end
   if type ==  "resource" then type = "entity" end
   self.options.elem_type = type
   self.options[type] = name

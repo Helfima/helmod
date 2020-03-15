@@ -158,12 +158,19 @@ end
 --
 function HelpPanel:getContentPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
-  if content_panel["content-panel"] ~= nil and content_panel["content-panel"].valid then
-    return content_panel["content-panel"]
+  local panel_name = "help-panel"
+  local panel_menu_name = "menu-panel"
+  local panel_content_name = "content-panel"
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[panel_name][panel_menu_name] ,content_panel[panel_name][panel_content_name]
   end
-  local content_panel = GuiElement.add(content_panel, GuiFrameV("content-panel"))
+  local panel = GuiElement.add(content_panel, GuiFlowH(panel_name))
+  local menu_panel = GuiElement.add(panel, GuiFrameV(panel_menu_name))
+  menu_panel.style.vertically_stretchable = true
+  menu_panel.style.width = 250
+  local content_panel = GuiElement.add(panel, GuiFrameV(panel_content_name))
   content_panel.style.horizontally_stretchable = true
-  return content_panel
+  return menu_panel, content_panel
 end
 
 -------------------------------------------------------------------------------
@@ -174,7 +181,7 @@ end
 -- @param #string caption
 --
 function HelpPanel:getContentScrollPanel(caption)
-  local content_panel = self:getContentPanel(caption)
+  local menu_panel, content_panel = self:getContentPanel(caption)
   if content_panel["scroll-content"] ~= nil and content_panel["scroll-content"].valid then
     return content_panel["scroll-content"]
   end
@@ -192,54 +199,10 @@ end
 -- @param #LuaEvent event
 --
 function HelpPanel:onEvent(event)
-  Logging:debug(self.classname, "onEvent()",event)
-
   if event.action == "change-page" then
-    self:updateContent(event)
+    User.setParameter("selected_help", tonumber(event.item1))
+    self:onUpdate(event)
   end
-
-  if event.action == "previous-page" then
-    local menu_panel = self:getLeftMenuPanel()
-    if menu_panel[self.classname.."=change-page"] then
-      local selected_index = menu_panel[self.classname.."=change-page"].selected_index
-      if selected_index > 1 then
-        menu_panel[self.classname.."=change-page"].selected_index = selected_index - 1
-        self:updateContent(event)
-      end
-    end
-  end
-
-  if event.action == "next-page" then
-    local menu_panel = self:getLeftMenuPanel()
-    if menu_panel[self.classname.."=change-page"] then
-      local selected_index = menu_panel[self.classname.."=change-page"].selected_index
-      if selected_index < #help_data then
-        menu_panel[self.classname.."=change-page"].selected_index = selected_index + 1
-        self:updateContent(event)
-      end
-    end
-  end
-
-end
-
--------------------------------------------------------------------------------
--- Update about HelpPanel
---
--- @function [parent=#HelpPanel] updateMenu
---
--- @param #LuaEvent event
---
-function HelpPanel:updateMenu(event)
-  Logging:debug(self.classname, "updateMenu()", event)
-  local menu_panel = self:getLeftMenuPanel()
-  menu_panel.clear()
-  local items = {}
-  for _,help in pairs(help_data) do
-    table.insert(items, {"helmod_help."..help.name})
-  end
-  GuiElement.add(menu_panel, GuiButton(self.classname, "previous-page"):sprite("menu", "arrow-left-white", "arrow-left"):style("helmod_button_menu"):tooltip({"helmod_help.button-previous"}))
-  GuiElement.add(menu_panel, GuiDropDown(self.classname, "change-page"):items(items))
-  GuiElement.add(menu_panel, GuiButton(self.classname, "next-page"):sprite("menu", "arrow-right-white", "arrow-right"):style("helmod_button_menu"):tooltip({"helmod_help.button-next"}))
 end
 
 -------------------------------------------------------------------------------
@@ -257,24 +220,36 @@ end
 -------------------------------------------------------------------------------
 -- Update about HelpPanel
 --
+-- @function [parent=#HelpPanel] updateMenu
+--
+-- @param #LuaEvent event
+--
+function HelpPanel:updateMenu(event)
+  local menu_panel, content_panel = self:getContentPanel()
+  menu_panel.clear()
+  local selected_help = User.getParameter("selected_help")
+  for index,section in pairs(help_data) do
+    local style = "helmod_label_help_menu_1"
+    if index == selected_help then style = style.."_selected" end
+    GuiElement.add(menu_panel, GuiLabel(self.classname, "change-page", index):style(style):caption({"helmod_help."..section.name}):tooltip({"helmod_help."..section.name.."-desc"}))
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update about HelpPanel
+--
 -- @function [parent=#HelpPanel] updateContent
 --
 -- @param #LuaEvent event
 --
 function HelpPanel:updateContent(event)
-  Logging:debug(self.classname, "updateContent()", event)
   local content_panel = self:getContentScrollPanel()
   if content_panel then
     content_panel.clear()
   end
 
-  local menu_panel = self:getLeftMenuPanel()
-  local selected_index = 1
-  if menu_panel[self.classname.."=change-page"] then
-    selected_index = menu_panel[self.classname.."=change-page"].selected_index
-  end
-
-  local section = help_data[selected_index or 1]
+  local selected_help = User.getParameter("selected_help")
+  local section = help_data[selected_help or 1]
   if section then
     GuiElement.add(content_panel, GuiLabel(section.name, "name"):caption({"helmod_help."..section.name}):style("helmod_label_help_title"))
     GuiElement.add(content_panel, GuiLabel(section.name, "desc"):caption({"helmod_help."..section.name.."-desc"}):style("helmod_label_help"))

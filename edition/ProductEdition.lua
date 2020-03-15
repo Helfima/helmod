@@ -113,7 +113,6 @@ end
 --
 local input_quantity = nil
 function ProductEdition:updateInfo(event)
-  Logging:debug(self.classname, "updateInfo()", event)
   local info_panel = self:getInfoPanel()
   if product ~= nil then
     info_panel.clear()
@@ -149,7 +148,6 @@ end
 -- @param #LuaEvent event
 --
 function ProductEdition:updateAction(event)
-  Logging:debug(self.classname, "updateAction()", event)
   local action_panel = self:getActionPanel()
   if product ~= nil then
     action_panel.clear()
@@ -166,7 +164,6 @@ end
 -- @param #LuaEvent event
 --
 function ProductEdition:updateTool(event)
-  Logging:debug(self.classname, "updateTool()", event)
   local tool_panel = self:getToolPanel()
   tool_panel.clear()
   local table_panel = GuiElement.add(tool_panel, GuiTable("table-belt"):column(5))
@@ -182,7 +179,6 @@ end
 -- @param #LuaEvent event
 --
 function ProductEdition:onEvent(event)
-  Logging:debug(self.classname, "onEvent()", event)
   local model = Model.getModel()
   if User.isWriter() then
     if event.action == "product-update" then

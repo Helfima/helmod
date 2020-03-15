@@ -75,7 +75,6 @@ end
 -- @param #LuaEvent event
 --
 function StatusPanel:updateHeader(event)
-  Logging:debug(self.classname, "updateHeader()", event)
   local header_panel = self:getHeaderPanel()
   local model = Model.getModel()
 
@@ -92,7 +91,6 @@ end
 -- @param #LuaEvent event
 --
 function StatusPanel:updateInfo(event)
-  Logging:debug(self.classname, "updateInfo()", event)
   local info_panel = self:getInfoPanel()
   local model = Model.getModel()
 
@@ -127,7 +125,6 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function StatusPanel:addProductionBlockHeader(itable)
-  Logging:debug(self.classname, "addProductionBlockHeader()", itable)
 end
 
 -------------------------------------------------------------------------------
@@ -139,7 +136,6 @@ end
 -- @param #table element
 --
 function StatusPanel:addProductionBlockRow(guiTable, element)
-  Logging:debug(self.classname, "addProductionBlockRow()", guiTable, element)
   GuiElement.add(guiTable, GuiButtonSprite("element", element.name):sprite(element.type, element.name):tooltip(Player.getLocalisedName(element)))
   GuiElement.add(guiTable, GuiLabel("value", element.name):caption(element.value))
 
@@ -153,6 +149,4 @@ end
 -- @param #LuaEvent event
 --
 function StatusPanel:onEvent(event)
-  Logging:debug(self.classname, "onEvent()", event)
-  local model = Model.getModel()
 end

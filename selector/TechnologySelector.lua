@@ -53,8 +53,6 @@ end
 -- @param #table list_translate
 --
 function TechnologySelector:updateGroups(list_products, list_ingredients, list_translate)
-  Logging:trace(self.classname, "updateGroups()")
-
   for key, technology in pairs(Player.getTechnologiePrototypes()) do
     self:appendGroups(technology, "technology", list_products, list_ingredients, list_translate)
   end
@@ -66,12 +64,6 @@ end
 -- @function [parent=#TechnologySelector] buildPrototypeIcon
 --
 function TechnologySelector:buildPrototypeIcon(guiElement, prototype, tooltip)
-  Logging:trace(self.classname, "buildPrototypeIcon(guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
   local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select", "technology"):choose(prototype.type, prototype.name))
   button.locked = true
 end
-
-
-
-
-

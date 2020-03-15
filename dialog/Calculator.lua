@@ -88,7 +88,6 @@ end
 -- @param #LuaEvent event
 --
 function Calculator:onEvent(event)
-  Logging:debug(self.classname, "onEvent()", event)
   -- import
   if event.action == "compute" then
     local text = event.element.text
@@ -164,7 +163,6 @@ end
 -- @function [parent=#Calculator] updateDisplay
 --
 function Calculator:updateDisplay()
-  Logging:debug(self.classname, "updateDisplay()")
   local keyboard_panel = self:getDisplayPanel()
   keyboard_panel.clear()
 
@@ -181,7 +179,6 @@ end
 -- @function [parent=#Calculator] updateKeyboard
 --
 function Calculator:updateKeyboard()
-  Logging:debug(self.classname, "updateCalculator()")
   local keyboard_panel = self:getKeyboardPanel()
   keyboard_panel.clear()
 
@@ -233,7 +230,6 @@ end
 -- @function [parent=#Calculator] updateHistory
 --
 function Calculator:updateHistory()
-  Logging:debug(self.classname, "updateHistory()")
   local history_panel = self:getHistoryPanel()
   history_panel.clear()
 

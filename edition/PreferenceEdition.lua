@@ -205,7 +205,6 @@ end
 --
 
 function PreferenceEdition:updateGeneral(event)
-  Logging:debug(self.classname, "updateGeneral()", event)
   local container_panel = self:getGeneralTab()
   container_panel.clear()
 
@@ -240,7 +239,6 @@ end
 --
 
 function PreferenceEdition:updatePriorityModule(event)
-  Logging:debug(self.classname, "updatePriorityModule()", event)
   local number_column = User.getPreferenceSetting("preference_number_column")
   local priority_module_panel = self:getPriorityModuleTab()
   priority_module_panel.clear()
@@ -268,7 +266,6 @@ function PreferenceEdition:updatePriorityModule(event)
   -- module priority
   local priority_table_panel = GuiElement.add(configuration_panel, GuiTable("module-priority-table"):column(3))
   if priority_modules[configuration_priority] ~= nil then
-    Logging:debug(self.classname, "priority_modules", priority_modules, configuration_priority)
     for index, element in pairs(priority_modules[configuration_priority]) do
       local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name})
       GuiElement.add(priority_table_panel, GuiButtonSprite(self.classname, "do-nothing", index):sprite("entity", element.name):tooltip(tooltip))
@@ -297,7 +294,6 @@ end
 --
 
 function PreferenceEdition:updateItemsLogistic(event)
-  Logging:debug(self.classname, "updateItemsLogistic()", event)
   local number_column = User.getPreferenceSetting("preference_number_column")
   local container_panel = self:getSolidContainerTab()
   container_panel.clear()
@@ -337,7 +333,6 @@ end
 --
 
 function PreferenceEdition:updateFluidsLogistic(event)
-  Logging:debug(self.classname, "updateFluidContainer()", event)
   local number_column = User.getPreferenceSetting("preference_number_column")
   local container_panel = self:getFluidContainerTab()
   container_panel.clear()
@@ -389,8 +384,6 @@ end
 -- @param #LuaEvent event
 --
 function PreferenceEdition:onEvent(event)
-  Logging:debug(self.classname, "onEvent()", event)
-  
   if event.action == "preference-setting" then
     local preference_name = event.item1
     local preference = helmod_preferences[preference_name]
@@ -399,7 +392,6 @@ function PreferenceEdition:onEvent(event)
         local index = event.element.selected_index
         User.setPreference(preference_name,preference.allowed_values[index])
       else
-        Logging:debug(self.classname, "element", event.element, event.element.state)
         if preference.type == "bool-setting" then
           User.setPreference(preference_name, event.element.state)
         end

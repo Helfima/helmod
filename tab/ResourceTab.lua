@@ -38,8 +38,6 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function ResourceTab:addTableHeader(itable)
-  Logging:debug(self.classname, "addTableHeader()", itable)
-  
   -- optionnal columns
   self:addCellHeader(itable, "index", {"helmod_result-panel.col-header-index"},"index")
   self:addCellHeader(itable, "name", {"helmod_result-panel.col-header-name"},"name")
@@ -58,7 +56,6 @@ end
 -- @param #table ingredient
 --
 function ResourceTab:addTableRow(guiTable, ingredient)
-  Logging:debug(self.classname, "addTableRow()", guiTable, ingredient)
   local model = Model.getModel()
 
   -- col index
@@ -93,7 +90,6 @@ end
 -- @param #LuaEvent event
 -- 
 function ResourceTab:updateData(event)
-  Logging:debug(self.classname, "updateData()", event)
   local model = Model.getModel()
   local order = User.getParameter("order")
   -- data

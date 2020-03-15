@@ -50,8 +50,6 @@ end
 -- @param #LuaEvent event
 --
 function Settings:updateAboutSettings(event)
-  Logging:debug(self.classname, "updateAboutSettings()", event)
-
   local aboutSettingsPanel = self:getAboutSettingsPanel()
 
   local dataSettingsTable = GuiElement.add(aboutSettingsPanel, GuiTable("settings"):column(2))

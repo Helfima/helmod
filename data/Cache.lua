@@ -30,11 +30,9 @@ end
 -- @return #table
 --
 function Cache.getData(classname, name)
-  Logging:trace(Cache.classname, "getData(classname, name)",classname, name)
   local data = Cache.get()
   if classname == nil and name == nil then return data end
   if data[classname] == nil or data[classname][name] == nil then return nil end
-  Logging:trace(Cache.classname, "--> cache",data[classname][name])
   return data[classname][name]
 end
 
@@ -50,7 +48,6 @@ end
 -- @return #object
 --
 function Cache.setData(classname, name, value)
-  Logging:trace(Cache.classname, "setData(classname, name, value)",classname, name, value)
   local data = Cache.get()
   if data[classname] == nil then data[classname] = {} end
   data[classname][name] = value
@@ -67,7 +64,6 @@ end
 -- @return #boolean
 --
 function Cache.hasData(classname, name)
-  Logging:trace(Cache.classname, "getData(hasData, name)",classname, name)
   local data = Cache.get()
   return data[classname] ~= nil and data[classname][name] ~= nil
 end
@@ -83,7 +79,6 @@ end
 -- @return #boolean
 --
 function Cache.isEmpty(classname, name)
-  Logging:trace(Cache.classname, "getData(hasData, name)",classname, name)
   local data = Cache.get()
   if data[classname] ~= nil and data[classname][name] ~= nil then
     if type(data[classname][name]) == "string" then
@@ -104,7 +99,6 @@ end
 -- @param #string name
 --
 function Cache.reset(classname, name)
-  Logging:trace(Cache.classname, "reset(classname, name)", classname, name)
   local data = Cache.get()
   if classname == nil and name == nil then
     global.caches = {}

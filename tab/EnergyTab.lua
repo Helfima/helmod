@@ -38,7 +38,6 @@ end
 -- @function [parent=#EnergyTab] updateData
 --
 function EnergyTab:updateData()
-  Logging:debug(self.classname, "updatePowers()")
   local model = Model.getModel()
   local order = User.getParameter("order")
 
@@ -74,7 +73,6 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function EnergyTab:addTableHeader(itable)
-  Logging:debug(self.classname, "addTableHeader()", itable)
   local model = Model.getModel()
 
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
@@ -95,7 +93,6 @@ end
 -- @param #table power
 --
 function EnergyTab:addTableRow(gui_table, power)
-  Logging:debug(self.classname, "addPowersRow()", gui_table, power)
   local model = Model.getModel()
   log(self.classname)
   -- col action

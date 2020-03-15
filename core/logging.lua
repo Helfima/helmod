@@ -52,12 +52,12 @@ end
 
 function Logging:updateLevel()
   local level = "none"
-  if settings ~= nil  then
+  if settings ~= nil and settings.global["helmod_debug"]  then
     level = settings.global["helmod_debug"].value
   end
   debug_level = self.debug_values[level] or 0
   
-  if settings ~= nil  then
+  if settings ~= nil and settings.global["helmod_debug_filter"] then
     debug_filter = settings.global["helmod_debug_filter"].value
   end
 end

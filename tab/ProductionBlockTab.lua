@@ -51,7 +51,6 @@ end
 -- @param #LuaEvent event
 --
 function ProductionBlockTab:beforeUpdate(event)
-  Logging:trace(self.classname, "beforeUpdate()", event)
 end
 
 -------------------------------------------------------------------------------
@@ -62,9 +61,7 @@ end
 -- @param #LuaEvent event
 --
 function ProductionBlockTab:updateInfo(event)
-  Logging:debug(self.classname, "updateInfo", event)
   local model = Model.getModel()
-  Logging:debug(self.classname, "model:", model)
   -- data
   local current_block = User.getParameter("current_block") or "new"
 
@@ -171,7 +168,6 @@ function ProductionBlockTab:updateInput(event)
     if block.ingredients ~= nil then
       for index, lua_ingredient in pairs(block.ingredients) do
         if all_visible == true or (lua_ingredient.state == 1 and not(block_by_product)) or lua_ingredient.count > ModelCompute.waste_value then
-          Logging:debug("HMProductionBlockTab", "lua_ingredient", lua_ingredient, Product(lua_ingredient))
           local ingredient = Product(lua_ingredient):clone()
           ingredient.count = lua_ingredient.count
           if block.count > 1 then
@@ -302,7 +298,6 @@ end
 -- @param #LuaEvent event
 --
 function ProductionBlockTab:updateData(event)
-  Logging:debug(self.classname, "updateData()", event)
   local model = Model.getModel()
   local current_block = User.getParameter("current_block") or "new"
 
@@ -372,7 +367,6 @@ function ProductionBlockTab:updateData(event)
       if User.getParameter("scroll_element") == recipe.id then last_element = recipe_cell end
     end
 
-    --Logging:debug(self.classname, "scroll_element", User.getParameter("scroll_element"))
     if last_element ~= nil then
       scroll_panel2.scroll_to_element(last_element)
       User.setParameter("scroll_element", nil)
@@ -422,7 +416,6 @@ end
 -- @param #table recipe production recipe
 --
 function ProductionBlockTab:addTableRow(gui_table, block, recipe)
-  Logging:debug("ProductionBlockTab", "addTableRow()", gui_table, block, recipe)
   local recipe_prototype = RecipePrototype(recipe)
   --local lua_recipe = RecipePrototype(recipe):native()
 
@@ -439,6 +432,12 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
     GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-remove", block.id, recipe.id):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
     GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-down", block.id, recipe.id):sprite("menu", "arrow-down-white-sm", "arrow-down-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.down-element", User.getModSetting("row_move_step")}))
   end
+  -- matrix solver
+  -- local style_matrix_solver = "helmod_button_menu_sm"
+  -- if recipe.matrix_solver == 1 then
+  --   style_matrix_solver = "helmod_button_menu_sm_selected"
+  -- end
+  -- GuiElement.add(cell_action, GuiButton(self.classname, "update-matrix-solver", block.id, recipe.id):sprite("menu", "settings-white-sm", "settings-sm"):style(style_matrix_solver):tooltip({"helmod_button.matrix-solver"}))
   -- col index
   if User.getModGlobalSetting("display_data_col_index") then
     GuiElement.add(gui_table, GuiLabel("value_index", recipe.id):caption(recipe.index):style("helmod_label_row_right_40"))
@@ -477,7 +476,11 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
   -- col factory
   local factory = recipe.factory
   local cell_factory = GuiElement.add(gui_table, GuiTable("factory", recipe.id):column(2):style(helmod_table_style.list))
-  GuiElement.add(cell_factory, GuiCellFactory("HMRecipeEdition", "OPEN", block.id, recipe.id):element(factory):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default))
+  local gui_cell_factory = GuiCellFactory("HMRecipeEdition", "OPEN", block.id, recipe.id):element(factory):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default)
+  if block.by_factory == true then
+    gui_cell_factory:byFactory(self.classname, "update-factory-number", block.id, recipe.id)
+  end
+  GuiElement.add(cell_factory, gui_cell_factory)
 
   -- col beacon
   local beacon = recipe.beacon
@@ -488,7 +491,6 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
     if order == "products" then
       -- products
       local display_product_cols = User.getPreferenceSetting("display_product_cols")
-      Logging:debug(self.classname, "display_product_cols", display_product_cols)
       local cell_products = GuiElement.add(gui_table, GuiTable("products", recipe.id):column(display_product_cols):style(helmod_table_style.list))
       for index, lua_product in pairs(recipe_prototype:getProducts(recipe.factory)) do
         local product_prototype = Product(lua_product)
@@ -526,34 +528,85 @@ end
 -- @param #LuaEvent event
 --
 function ProductionBlockTab:onEvent(event)
-  Logging:debug(self.classname, "onEvent()", event)
+  if event.action == "block-all-ingredient-visible" then
+    local all_visible = User.getParameter("block_all_ingredient_visible")
+    User.setParameter("block_all_ingredient_visible",not(all_visible))
+    Controller:send("on_gui_update", event, self.classname)
+  end
+
+  if event.action == "block-all-product-visible" then
+    local all_visible = User.getParameter("block_all_product_visible")
+    User.setParameter("block_all_product_visible",not(all_visible))
+    Controller:send("on_gui_update", event, self.classname)
+  end
+
+  -- user writer
   if not(User.isWriter()) then return end
+  
+  if event.action == "update-factory-number" then
+    local value = GuiElement.getInputNumber(event.element)
+    ModelBuilder.updateFactoryNumber(event.item1, event.item2, value)
+    ModelCompute.update()
+    Controller:send("on_gui_update", event)
+  end
+
+  if event.action == "update-matrix-solver" then
+    ModelBuilder.updateMatrixSolver(event.item1, event.item2)
+    ModelCompute.update()
+    Controller:send("on_gui_update", event)
+  end
+
+  if event.action == "production-block-solver" then
+    ModelBuilder.updateBlockMatrixSolver(event.item1)
+    ModelCompute.update()
+    Controller:send("on_gui_update", event)
+  end
+
+  if event.action == "production-recipe-remove" then
+    ModelBuilder.removeProductionRecipe(event.item1, event.item2)
+    ModelCompute.update()
+    Controller:send("on_gui_update", event, self.classname)
+  end
+
+  if event.action == "production-recipe-up" then
+    local step = 1
+    if event.shift then step = User.getModSetting("row_move_step") end
+    if event.control then step = 1000 end
+    ModelBuilder.upProductionRecipe(event.item1, event.item2, step)
+    ModelCompute.update()
+    User.setParameter("scroll_element", event.item2)
+    Controller:send("on_gui_update", event, self.classname)
+  end
+
+  if event.action == "production-recipe-down" then
+    local step = 1
+    if event.shift then step = User.getModSetting("row_move_step") end
+    if event.control then step = 1000 end
+    ModelBuilder.downProductionRecipe(event.item1, event.item2, step)
+    ModelCompute.update()
+    User.setParameter("scroll_element", event.item2)
+    Controller:send("on_gui_update", event, self.classname)
+  end
+
   if event.action == "block-switch-unlink" then
     local switch_unlink_state = event.element.switch_state == "left"
     ModelBuilder.updateProductionBlockOption(event.item1, "unlinked", switch_unlink_state)
     ModelCompute.update()
     Controller:send("on_gui_update", event, self.classname)
   end
+
   if event.action == "block-switch-element" then
     local switch_unlink_state = event.element.switch_state == "left"
     ModelBuilder.updateProductionBlockOption(event.item1, "by_product", switch_unlink_state)
     ModelCompute.update()
     Controller:send("on_gui_update", event, self.classname)
   end
+
   if event.action == "block-switch-factory" then
     local switch_unlink_state = not(event.element.switch_state == "left")
     ModelBuilder.updateProductionBlockOption(event.item1, "by_factory", switch_unlink_state)
     ModelCompute.update()
     Controller:send("on_gui_update", event, self.classname)
   end
-  if event.action == "block-all-ingredient-visible" then
-    local all_visible = User.getParameter("block_all_ingredient_visible")
-    User.setParameter("block_all_ingredient_visible",not(all_visible))
-    Controller:send("on_gui_update", event, self.classname)
-  end
-  if event.action == "block-all-product-visible" then
-    local all_visible = User.getParameter("block_all_product_visible")
-    User.setParameter("block_all_product_visible",not(all_visible))
-    Controller:send("on_gui_update", event, self.classname)
-  end
+
 end

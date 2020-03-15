@@ -38,7 +38,6 @@ end
 -- @param #LuaEvent event
 --
 function StatisticTab:updateData(event)
-  Logging:debug(self.classname, "updateSummary()", event)
   local model = Model.getModel()
   -- data
   local scroll_panel = self:getResultScrollPanel({"helmod_result-panel.tab-title-statistic"})
@@ -77,7 +76,6 @@ end
 -- @param #table element
 --
 function StatisticTab:addElementRow(guiTable, element)
-  Logging:debug(self.classname, "addProductionBlockRow()", guiTable, element)
   GuiElement.add(guiTable, GuiLabel("value", element.name):caption(Format.formatNumberElement(element.value)):style("helmod_label_right_60"))
   GuiElement.add(guiTable, GuiButtonSprite("element", element.name):sprite(element.type, element.name):tooltip(Player.getLocalisedName(element)))
 end

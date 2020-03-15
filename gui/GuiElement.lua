@@ -174,7 +174,6 @@ end
 -- @return #LuaGuiElement the LuaGuiElement added
 --
 function GuiElement.add(parent, gui_element)
-  Logging:trace(gui_element.classname, "add", gui_element)
   local element = nil
   local ok , err = pcall(function()
     --log(gui_element.classname)
@@ -330,15 +329,8 @@ function GuiElement.getStyleSizes()
     style_sizes.scroll_block_list.minimal_width = width_main - width_dialog - width_scroll
     style_sizes.scroll_block_list.maximal_width = width_main - width_dialog - width_scroll
 
-    if User.getModGlobalSetting("debug") ~= "none" then
-      style_sizes.scroll_block_list.minimal_height = height_main - height_block_header - 200
-      style_sizes.scroll_block_list.maximal_height = height_main - height_block_header - 200
-    else
-      style_sizes.scroll_block_list.minimal_height = height_main - height_block_header
-      style_sizes.scroll_block_list.maximal_height = height_main - height_block_header
-    end
-
-
+    style_sizes.scroll_block_list.minimal_height = height_main - height_block_header
+    style_sizes.scroll_block_list.maximal_height = height_main - height_block_header
   end
   return style_sizes
 end

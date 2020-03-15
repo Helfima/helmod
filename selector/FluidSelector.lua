@@ -43,8 +43,6 @@ end
 -- @param #table list_translate
 --
 function FluidSelector:updateGroups(list_products, list_ingredients, list_translate)
-  Logging:trace(self.classname, "updateGroups()")
-
   for key, fluid in pairs(Player.getFluidPrototypes()) do
     self:appendGroups(fluid, "fluid", list_products, list_ingredients, list_translate)
   end
@@ -58,7 +56,6 @@ end
 -- @param #LuaPrototype prototype
 --
 function FluidSelector:buildPrototypeTooltip(prototype)
-  Logging:trace(self.classname, "buildPrototypeTooltip(player, prototype)", prototype)
   -- initalize tooltip
   local tooltip = FluidPrototype(prototype):getLocalisedName()
   return tooltip
@@ -70,10 +67,6 @@ end
 -- @function [parent=#FluidSelector] buildPrototypeIcon
 --
 function FluidSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
-  Logging:trace(self.classname, "buildPrototypeIcon(player, guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
   local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select", "fluid"):choose(prototype.type, prototype.name))
   button.locked = true
 end
-
-
-

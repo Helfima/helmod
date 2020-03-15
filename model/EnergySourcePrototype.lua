@@ -191,7 +191,6 @@ function BurnerPrototype:getJouleCount()
   local factory_prototype = EntityPrototype(self.factory)
   local energy_consumption = factory_prototype:getEnergyConsumption()
   local factory_fuel = self:getFuelPrototype()
-  Logging:debug("HMEnergySourcePrototype", "factory_fuel", factory_fuel, "energy_consumption", energy_consumption)
   if factory_fuel == nil then return nil end
   local burner_effectivity = self:getEffectivity()
   -- 1W/h = 3600J
@@ -245,7 +244,21 @@ function FluidSourcePrototype:getFuelPrototypes()
   else
     local filters = {}
     table.insert(filters, {filter="fuel-value", mode="or", invert=false, comparison=">", value=0})
-    return Player.getFluidPrototypes(filters)
+    local fuels = Player.getFluidPrototypes(filters)
+    if not(FactorioV017) then
+      return fuels
+    else
+      -- adaptation pour Factorio V0.17
+      local result = {}
+      for key,fuel in pairs(fuels or {}) do
+        result[key] = fuel
+      end
+      local steam = Player.getFluidPrototype("steam")
+      if steam ~= nil then
+        result[steam.name] = steam
+      end
+      return result
+    end
   end
 end
 

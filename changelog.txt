@@ -1,8 +1,12 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.10.10
-Date: 29. 02. 2020
+Date: 15. 03. 2020
   Changes:
     - added burnt in energy recipe
+    - removed obselete debug options (replaced by factorio mod debug)
+    - changed display module in edit recipe
+    - removed hidden module in selector
+    - modified solver class
   Bugfixes:
     - fixed power calculation
     - fixed void recipe when used by factory

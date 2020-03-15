@@ -38,7 +38,6 @@ end
 -- @param #LuaEvent event
 --
 function SummaryTab:updateData(event)
-  Logging:debug(self.classname, "updateSummary()", event)
   local model = Model.getModel()
   -- data
   local scrollPanel = self:getResultScrollPanel({"helmod_result-panel.tab-title-summary"})

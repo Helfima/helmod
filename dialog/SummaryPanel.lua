@@ -72,7 +72,6 @@ end
 -- @param #LuaEvent event
 --
 function SummaryPanel:updateInfo(event)
-  Logging:debug(self.classname, "updateInfo()", event)
   local infoPanel = self:getInfoPanel()
   local model = Model.getModel()
   local summary_block_id = User.getParameter("summary_block_id")

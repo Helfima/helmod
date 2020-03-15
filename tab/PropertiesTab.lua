@@ -71,8 +71,6 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function PropertiesTab:addTableHeader(itable, prototype_compare)
-  Logging:debug(self.classname, "addTableHeader()", itable)
-
   self:addCellHeader(itable, "property", {"helmod_result-panel.col-header-name"})
   for index,prototype in pairs(prototype_compare) do
     local icon_type = nil
@@ -156,7 +154,6 @@ end
 -- @param #LuaEvent event
 --
 function PropertiesTab:updateData(event)
-  Logging:debug(self.classname, "updateData()", event)
   -- data
   local scroll_panel = self:getResultScrollPanel()
   scroll_panel.clear()
@@ -211,7 +208,6 @@ end
 function PropertiesTab:tableToString(value)
   if type(value) == "table" then
     local key2,_ = next(value)
-    Logging:debug(self.classname, "tableToString()", value, type(key2))
     if type(key2) ~= "number" then
       local message = "{\n"
       local first = true
@@ -290,7 +286,6 @@ end
 -- @param #table prototype
 --
 function PropertiesTab:getPrototypeData(prototype)
-  Logging:debug(self.classname, "getPrototypeData()", prototype)
   -- data
   if prototype ~= nil then
     local lua_prototype = nil
@@ -316,8 +311,6 @@ function PropertiesTab:getPrototypeData(prototype)
       lua_prototype = Technology(prototype):native()
     end
     if lua_prototype ~= nil then
-      Logging:debug(self.classname, "****************************")
-      Logging:debug(self.classname, "prototype", prototype)
       return self:parseProperties(lua_prototype, 0, prototype.type)
     end
   end
@@ -332,7 +325,6 @@ end
 -- @param #LuaEvent event
 --
 function PropertiesTab:onEvent(event)
-  Logging:debug(self.classname, "onEvent()", event)
   if event.action == "element-delete" then
     local prototype_compare = User.getParameter("prototype_compare") or {}
     local index = nil
@@ -380,7 +372,6 @@ end
 -- @param #LuaObject prototype
 --
 function PropertiesTab:parseProperties(prototype, level, prototype_type)
-  Logging:debug(self.classname, "->prototype", prototype, level, prototype_type)
   if prototype == nil then return "nil" end
   if level > 2 then 
     return prototype
@@ -420,13 +411,9 @@ function PropertiesTab:parseProperties(prototype, level, prototype_type)
     local properties = {}
     for key, chmod in help_string do
       local value = nil
-        Logging:debug(self.classname, "prototype key", key)
         pcall( function()
           value = self:parseProperties(prototype[key], level + 1, nil)
         end)
-        if key == "heat_energy_source_prototype" then
-          Logging:debug(self.classname, key, chmod, value)
-        end
         if level == 0 then
           table.insert(properties, {name = key, chmod = chmod, value = value})
         else

@@ -156,6 +156,18 @@ default_gui["helmod_textfield"] = {
 }
 
 -------------------------------------------------------------------------------
+-- Style of element
+--
+-- @field [parent=#Textfield] element
+default_gui["helmod_textfield_element"] = {
+  type = "textbox_style",
+  parent = "search_textfield_with_fixed_width",
+  font = "helmod_font_normal",
+  minimal_width = 50,
+  maximal_width = 50
+}
+
+-------------------------------------------------------------------------------
 -- Style of calculator
 --
 -- @field [parent=#Textfield] calculator
@@ -794,6 +806,46 @@ default_gui["helmod_label_help_title"] = {
 default_gui["helmod_label_help_normal"] = {
   type = "label_style",
   parent = "helmod_label_help",
+  left_padding = 10
+}
+
+-------------------------------------------------------------------------------
+-- Style of text
+--
+-- @field [parent=#Label] help_title
+
+default_gui["helmod_label_help_menu_1"] = {
+  type = "label_style",
+  parent = "helmod_label_help",
+  font = "helmod_font_title_frame",
+  hovered_font_color = {1, 0.74, 0.40},
+  clicked_font_color = {0.98, 0.66, 0.22}
+}
+
+default_gui["helmod_label_help_menu_1_selected"] = {
+  type = "label_style",
+  parent = "helmod_label_help",
+  font = "helmod_font_title_frame",
+  font_color = {0.98, 0.66, 0.22}
+}
+
+-------------------------------------------------------------------------------
+-- Style of text
+--
+-- @field [parent=#Label] help_normal
+
+default_gui["helmod_label_help_menu_2"] = {
+  type = "label_style",
+  parent = "helmod_label_help",
+  hovered_font_color = {1, 0.74, 0.40},
+  clicked_font_color = {0.98, 0.66, 0.22},
+  left_padding = 10
+}
+
+default_gui["helmod_label_help_menu_2_selected"] = {
+  type = "label_style",
+  parent = "helmod_label_help",
+  font_color = {0.98, 0.66, 0.22},
   left_padding = 10
 }
 

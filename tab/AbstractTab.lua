@@ -301,8 +301,6 @@ end
 -- @param #LuaEvent event
 --
 function AbstractTab:onUpdate(event)
-  Logging:debug(self.classname, "update()", event)
-    
   self:beforeUpdate(event)
   self:updateMenuPanel(event)
   self:updateIndexPanel(event)
@@ -320,7 +318,6 @@ end
 -- @param #LuaEvent event
 --
 function AbstractTab:updateMenuPanel(event)
-  Logging:debug(self.classname, "updateMenuPanel()", event)
   local models = Model.getModels()
   local model = Model.getModel()
   local model_id = User.getParameter("model_id")
@@ -393,7 +390,7 @@ function AbstractTab:updateMenuPanel(event)
       if block ~= nil then
         local style = "helmod_button_menu"
         if block.solver == true then style = "helmod_button_menu_selected" end
-        GuiElement.add(group3, GuiButton(self.classname, "production-block-solver", block_id):sprite("menu", "settings-white", "settings"):style(style):tooltip({"helmod_button.matrix-solver"}))
+        GuiElement.add(group3, GuiButton("HMProductionBlockTab", "production-block-solver", block_id):sprite("menu", "settings-white", "settings"):style(style):tooltip({"helmod_button.matrix-solver"}))
       end
       -- Model Debug
       if User.getModGlobalSetting("debug_solver") == true then
@@ -451,7 +448,6 @@ end
 -- @param #LuaEvent event
 --
 function AbstractTab:updateIndexPanel(event)
-  Logging:debug(self.classname, "updateIndexPanel()", event)
   local models = Model.getModels()
   local model_id = User.getParameter("model_id")
 
@@ -459,7 +455,6 @@ function AbstractTab:updateIndexPanel(event)
     -- index panel
     local index_panel = self:getIndexPanel()
     index_panel.clear()
-    Logging:debug(self.classname, "updateIndexPanel():countModel", Model.countModel())
     if Model.countModel() > 0 then
       local i = 0
       for _,imodel in pairs(models) do
@@ -497,7 +492,6 @@ end
 -- @param #LuaEvent event
 --
 function AbstractTab:beforeUpdate(event)
-  Logging:trace(self.classname, "beforeUpdate()", event)
 end
 
 -------------------------------------------------------------------------------
@@ -511,8 +505,6 @@ end
 -- @param #string sorted
 --
 function AbstractTab:addCellHeader(guiTable, name, caption, sorted)
-  Logging:trace(self.classname, "addCellHeader()", guiTable, name, caption, sorted)
-
   if (name ~= "index" and name ~= "id" and name ~= "name" and name ~= "type") or User.getModGlobalSetting("display_data_col_"..name) then
     local cell = GuiElement.add(guiTable, GuiFrameH("header", name):style(helmod_frame_style.hidden))
     GuiElement.add(cell, GuiLabel("label"):caption(caption))
@@ -527,7 +519,6 @@ end
 -- @param #LuaEvent event
 --
 function AbstractTab:updateHeader(event)
-  Logging:debug("AbstractTab", "updateHeader()", event)
 end
 -------------------------------------------------------------------------------
 -- Update data
@@ -537,5 +528,4 @@ end
 -- @param #LuaEvent event
 --
 function AbstractTab:updateData(event)
-  Logging:debug("AbstractTab", "updateData()", event)
 end

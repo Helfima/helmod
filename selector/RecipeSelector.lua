@@ -14,7 +14,6 @@ RecipeSelector = newclass(AbstractSelector)
 -- @function [parent=#RecipeSelector] afterInit
 --
 function RecipeSelector:afterInit()
-  Logging:debug(self.classname, "afterInit()")
   self.disable_option = true
   self.hidden_option = true
   self.product_option = true
@@ -58,17 +57,18 @@ end
 -- 
 
 function RecipeSelector:appendGroups(element, type, list_products, list_ingredients, list_translate)
-  Logging:trace(self.classname, "appendGroups()", element.name, type)
   local prototype = self:getPrototype(element, type)
+  local has_burnt_result = false
 
   local lua_prototype = prototype:native()
   local prototype_name = string.format("%s-%s",type , lua_prototype.name)
-  Logging:trace(self.classname, "lua_recipe", lua_prototype)
   for key, element in pairs(prototype:getRawProducts()) do
     if list_products[element.name] == nil then list_products[element.name] = {} end
     list_products[element.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
     
-    local localised_name = Product(element):getLocalisedName()
+    local product = Product(element)
+    local localised_name = product:getLocalisedName()
+    has_burnt_result = product:hasBurntResult()
     if localised_name ~= nil and localised_name ~= "unknow" then
       list_translate[element.name] = localised_name
     end
@@ -77,7 +77,7 @@ function RecipeSelector:appendGroups(element, type, list_products, list_ingredie
     if list_ingredients[element.name] == nil then list_ingredients[element.name] = {} end
     list_ingredients[element.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
   end
-
+  return has_burnt_result
 end
 
 -------------------------------------------------------------------------------
@@ -90,9 +90,11 @@ end
 -- @param #table list_translate
 --
 function RecipeSelector:updateGroups(list_products, list_ingredients, list_translate)
-  Logging:trace(self.classname, "updateGroups()")
   for key, recipe in pairs(Player.getRecipePrototypes()) do
-    self:appendGroups(recipe, "recipe", list_products, list_ingredients, list_translate)
+    local has_burnt_result = self:appendGroups(recipe, "recipe", list_products, list_ingredients, list_translate)
+    if has_burnt_result == true then
+      self:appendGroups(recipe, "recipe-burnt", list_products, list_ingredients, list_translate)
+    end
   end
   for key, fluid in pairs(Player.getFluidPrototypes()) do
     self:appendGroups(fluid, "fluid", list_products, list_ingredients, list_translate)
@@ -111,7 +113,6 @@ end
 -- @param #table prototype
 --
 function RecipeSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
-  Logging:trace(self.classname, "buildPrototypeIcon(player, guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
   local recipe_prototype = self:getPrototype(prototype)
   local color = nil
   if recipe_prototype:getCategory() == "crafting-handonly" then
@@ -121,7 +122,10 @@ function RecipeSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
   end
   local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select", prototype.type):choose(prototype.type, prototype.name):color(color))
   button.locked = true
-  if prototype.type ~= "recipe" then
+  if prototype.type == "recipe-burnt" then
+    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({"tooltip.burnt-recipe"}))
+    sprite.style.top_padding = -8
+  elseif prototype.type ~= "recipe" then
     local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({"tooltip.resource-recipe"}))
     sprite.style.top_padding = -8
   end

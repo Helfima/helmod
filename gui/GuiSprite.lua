@@ -24,11 +24,14 @@ end)
 -- @return #GuiSprite
 --
 function GuiSprite:sprite(type, name)
-  if name == nil then
+  if type == "menu" then
+    self.options.sprite = GuiElement.getSprite(name)
+  elseif name == nil then
     self.options.sprite = type
   else
     self.options.sprite = string.format("%s/%s", type, name)
   end
+  local valid = Player.is_valid_sprite_path(self.options.sprite);
   return self
 end
 

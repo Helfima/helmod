@@ -8,9 +8,9 @@ local Model = {
   -- single-line comment
   classname = "HMModel",
   version = "0.9.27",
-  -- 15°c
+  -- 15ï¿½c
   initial_temp = 15,
-  -- 200J/unit/°c
+  -- 200J/unit/ï¿½c
   fluid_energy_per_unit = 200,
   beacon_combo = 4,
   beacon_factory = 1.2
@@ -27,7 +27,6 @@ local Model = {
 -- @return #table
 --
 function Model.getModels(bypass)
-  Logging:trace(Model.classname, "getModels()", bypass ,global.models)
   local model_id = User.getParameter("model_id")
   local display_all_sheet = User.getModGlobalSetting("display_all_sheet")
   local first_id = nil
@@ -77,7 +76,6 @@ end
 -- @return #table
 --
 function Model.getRules()
-  Logging:trace(Model.classname, "getRules()", global.rules)
   if global.rules == nil then
     Model.resetRules()
   end
@@ -90,7 +88,6 @@ end
 -- @function [parent=#Model] resetRules
 --
 function Model.resetRules()
-  Logging:trace(Model.classname, "resetRules()", global.rules)
   global.rules = {}
   table.insert(global.rules, {index=0, mod="base", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="extraction-machine", excluded = false})
   table.insert(global.rules, {index=1, mod="base", name="production-crafting", category="extraction-machine", type="entity-type", value="mining-drill", excluded = false})
@@ -117,7 +114,6 @@ end
 -- @return #table
 --
 function Model.newModel()
-  Logging:trace(Model.classname, "getModel()")
   if global.model_id == nil then global.model_id = 1 end
   if global.models == nil then global.models = {} end
   local owner = Player.native().name
@@ -145,7 +141,6 @@ end
 -- @return #Model
 --
 function Model.getModel()
-  Logging:trace(Model.classname, "getModel()")
   local model_id = User.getParameter("model_id")
   if model_id == "new" then
     Model.newModel()
@@ -167,7 +162,6 @@ end
 -- @return #Model
 --
 function Model.getLastModel()
-  Logging:trace(Model.classname, "getLastModel()")
   local last_model = nil
   local models = Model.getModels()
   for _,model in pairs(models) do
@@ -187,7 +181,6 @@ end
 -- @return #table
 --
 function Model.getObject(item, key)
-  Logging:trace(Model.classname, "getObject()", item, key)
   local object = nil
   local model = Model.getModel()
   if item == "resource" then
@@ -209,7 +202,6 @@ end
 -- @return #Prototype
 --
 function Model.getRecipe(block_id, key)
-  Logging:trace(Model.classname, "getRecipe()", block_id, key)
   local object = nil
   local model = Model.getModel()
   if model.blocks[block_id] ~= nil and model.blocks[block_id].recipes[key] ~= nil then
@@ -228,7 +220,6 @@ end
 -- @return #table
 --
 function Model.getPower(key)
-  Logging:trace(Model.classname, "getPower()", key)
   local object = nil
   local model = Model.getModel()
   if model.powers ~= nil and model.powers[key] ~= nil then
@@ -249,7 +240,6 @@ end
 -- @return #table
 --
 function Model.newBlock(recipe)
-  Logging:debug(Model.classname, "newBlock()", recipe)
   local model = Model.getModel()
 
   if model.block_id == nil then model.block_id = 0 end
@@ -279,7 +269,6 @@ end
 -- @return #table
 --
 function Model.newBeacon(name, count)
-  Logging:debug(Model.classname, "newBeacon()", name, count)
   local beaconModel = {}
   beaconModel.name = name or "beacon"
   beaconModel.type = "item"
@@ -305,7 +294,6 @@ end
 -- @return #table
 --
 function Model.newFactory(name, count)
-  Logging:debug(Model.classname, "newFactory()", name, count)
   local factoryModel = {}
   factoryModel.name = name or "assembling-machine-1"
   factoryModel.type = "entity"
@@ -327,7 +315,6 @@ end
 -- @return #table
 --
 function Model.newPower()
-  Logging:debug(Model.classname, "newPower()")
   local model = User.get("model")
 
   if model.power_id == nil then model.power_id = 0 end
@@ -353,7 +340,6 @@ end
 -- @return #table
 --
 function Model.newGenerator(name, count)
-  Logging:debug(Model.classname, "newGenerator()", name, count)
   local itemModel = {}
   itemModel.name = name or "steam-engine"
   itemModel.type = "item"
@@ -373,7 +359,6 @@ end
 -- @return #table
 --
 function Model.newIngredient(name, type, count)
-  Logging:debug(Model.classname, "newIngredient()", name, count)
   if count == nil then count = 0 end
 
   local ingredientModel = {}
@@ -401,7 +386,6 @@ end
 -- @return #Table
 --
 function Model.newRule(mod, name, category, type, value, excluded, index)
-  Logging:debug(Model.classname, "newRule()", mod, name, category, type, value, excluded, index)
   local rule_model = {}
   rule_model.mod = mod
   rule_model.name = name
@@ -444,7 +428,6 @@ end
 -- @return #table
 --
 function Model.newRecipe(name, type)
-  Logging:debug(Model.classname, "newRecipe()", name, type)
   local model = Model.getModel()
   if model.recipe_id == nil then model.recipe_id = 0 end
   model.recipe_id = model.recipe_id + 1
@@ -473,7 +456,6 @@ end
 -- @return #table
 --
 function Model.newResource(name, type, count)
-  Logging:debug(Model.classname, "newResource()", name, type, count)
   local model = Model.getModel()
   if model.resource_id == nil then model.resource_id = 0 end
   model.resource_id = model.resource_id + 1
@@ -618,7 +600,6 @@ end
 -- @param #string factory_fuel
 --
 function Model.setFactory(block_id, recipe_id, factory_name, factory_fuel)
-  Logging:debug(Model.classname, "setFactory()", block_id, recipe_id, factory_name)
   local object = Model.getObject(block_id, recipe_id)
   if object ~= nil then
     local factory_prototype = EntityPrototype(factory_name)
@@ -640,7 +621,6 @@ end
 -- @param #table list
 --
 function Model.reIndexList(list)
-  Logging:debug(Model.classname, "reIndexList()",list)
   local index = 0
   for _,element in spairs(list,function(t,a,b) return t[b].index > t[a].index end) do
     element.index = index
@@ -654,7 +634,6 @@ end
 -- @function [parent=#Model] recipesReset
 --
 function Model.recipesReset()
-  Logging:debug(Model.classname, "recipesReset")
   local model = Model.getModel()
   for key, recipe in pairs(model.recipes) do
     Model.recipeReset(recipe)
@@ -669,7 +648,6 @@ end
 -- @param #ModelRecipe recipe
 --
 function Model.recipeReset(recipe)
-  Logging:debug(Model.classname, "recipeReset=",recipe)
   if recipe.products ~= nil then
     for index, product in pairs(recipe.products) do
       product.count = 0
@@ -688,7 +666,6 @@ end
 -- @function [parent=#Model] ingredientsReset
 --
 function Model.ingredientsReset()
-  Logging:debug(Model.classname, "ingredientsReset()", player)
   local model = Model.getModel()
   for k, ingredient in pairs(model.ingredients) do
     model.ingredients[ingredient.name].count = 0;
@@ -731,7 +708,6 @@ end
 -- @return #table
 --
 function Model.getRecipeByProduct(player, element)
-  Logging:trace(Model.classname, "getRecipeByProduct=",element)
   local model = Model.getModel(player)
   local recipes = {}
   for key, recipe in pairs(model.recipes) do
@@ -810,7 +786,6 @@ function Model.getDefaultPrototypeFactory(recipe_prototype)
   if category ~= nil then
     local factories = Player.getProductionsCrafting(category, recipe_prototype:native())
     local default_factory_level = User.getPreferenceSetting("default_factory_level")
-    Logging:debug(Model.classname, "default factory:", factories, default_factory_level)
     local factory_level = 1
     if default_factory_level == "fast" then
       factory_level = 100
@@ -824,7 +799,6 @@ function Model.getDefaultPrototypeFactory(recipe_prototype)
       if level == factory_level then lua_factory = factory end
       last_factory = factory
       level = level + 1
-      Logging:debug(Model.classname, "default factory:", last_factory.name, Model.getSpeedFactory(last_factory.name))
     end
     if lua_factory ~= nil then return lua_factory.name end
     if last_factory ~= nil then return last_factory.name end

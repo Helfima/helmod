@@ -71,7 +71,6 @@ end
 -- @param #LuaEvent event
 --
 function PrototypeFiltersTab:updateHeader(event)
-  Logging:debug(self.classname, "updateHeader()", event)
   local resultPanel = self:getResultPanel({"helmod_result-panel.tab-title-prototype-filters"})
   local listPanel = GuiElement.add(resultPanel, GuiFrameH("list-element"):style(helmod_frame_style.hidden))
 end
@@ -91,13 +90,11 @@ local collision_mask_mode = {}
 -- @param #LuaEvent event
 --
 function PrototypeFiltersTab:updateData(event)
-  Logging:debug(self.classname, "updateData()", event)
   local scrollPanel = self:getResultScrollPanel()
   scrollPanel.clear()
 
   -- prepare
   PrototypeFilters.initialization()
-  --Logging:debug(self.classname, "PrototypeFilters", PrototypeFilters)
   modes = PrototypeFilters.getModes()
   filter_types = PrototypeFilters.getTypes()
   inverts = PrototypeFilters.getInverts()
@@ -117,7 +114,6 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function PrototypeFiltersTab:addHeaderFilter(itable)
-  Logging:debug(self.classname, "addHeaderFilter()")
   GuiElement.add(itable, GuiLabel("mode"):caption("Mode"))
   GuiElement.add(itable, GuiLabel("filter"):caption("Filter"))
   GuiElement.add(itable, GuiLabel("option"):caption("Option"))
@@ -133,7 +129,6 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function PrototypeFiltersTab:addRowFilter(itable, prototype_filter, index)
-  Logging:debug(self.classname, "addRowFilter()",prototype_filter, index)
   index = index or 0
   local prototype_filter_type = User.getParameter("prototype_filter_type") or filter_types[1]
   local PrototypeFilter = PrototypeFilters.getFilterType(prototype_filter_type)
@@ -146,7 +141,6 @@ function PrototypeFiltersTab:addRowFilter(itable, prototype_filter, index)
   GuiElement.add(itable, GuiDropDown(self.classname, "change-prototype-filter", index):items(filters, prototype_filter.filter))
 
   local options = PrototypeFilter:getOptions(prototype_filter.filter)
-  Logging:debug(self.classname, "options", options)
   if options == "comparison" then
     local comparaison_cell = GuiElement.add(itable, GuiTable("comparison"):column(2))
     local comparison = "<"
@@ -155,7 +149,6 @@ function PrototypeFiltersTab:addRowFilter(itable, prototype_filter, index)
       comparison = prototype_filter.option.comparison
       comparison_value = prototype_filter.option.value or 0
     end
-    Logging:debug(self.classname, "option", prototype_filter.option, comparison, comparison_value)
     GuiElement.add(comparaison_cell, GuiDropDown(self.classname, "change-filter-option-comparison", index):items(comparisons, comparison))
     GuiElement.add(comparaison_cell, GuiTextField(self.classname, "change-filter-option-value", index):text(comparison_value))
   elseif prototype_filter.filter == "collision-mask" then
@@ -190,9 +183,7 @@ end
 -- @function [parent=#PrototypeFiltersTab] updateFilter
 --
 function PrototypeFiltersTab:updateFilter()
-  Logging:debug(self.classname, "updateFilter()")
   -- data
-
   local scrollPanel = self:getResultScrollPanel()
   -- type
   local type_table = GuiElement.add(scrollPanel, GuiTable("type-filter"):column(5))
@@ -224,7 +215,6 @@ end
 -- @function [parent=#PrototypeFiltersTab] updateResult
 --
 function PrototypeFiltersTab:updateResult()
-  Logging:debug(self.classname, "updateResult()")
   -- data
   local scrollPanel = self:getResultScrollPanel()
 
@@ -262,7 +252,6 @@ function PrototypeFiltersTab:updateResult()
     end
 
     local PrototypeFilter = PrototypeFilters.getFilterType(prototype_filter_type)
-    Logging:debug(self.classname,"result filters", filters)
     local elements = PrototypeFilter:getElements(filters)
     for key,element in pairs(elements) do
       GuiElement.add(elements_table, GuiButtonSprite("nothing"):sprite(prototype_filter_type, element.name):tooltip(element.localised_name))
@@ -279,12 +268,9 @@ end
 -- @param #LuaEvent event
 --
 function PrototypeFiltersTab:onEvent(event)
-  Logging:debug(self.classname, "onEvent()", event)
   local prototype_filter = User.getParameter("prototype_filter")
   local prototype_filters = User.getParameter("prototype_filters") or {}
 
-  Logging:debug(self.classname, "prototype_filter", prototype_filter)
-  Logging:debug(self.classname, "prototype_filters", prototype_filters)
   filter_types = PrototypeFilters.getTypes()
   local prototype_filter_type = User.getParameter("prototype_filter_type") or filter_types[1]
   local PrototypeFilter = PrototypeFilters.getFilterType(prototype_filter_type)
@@ -295,18 +281,14 @@ function PrototypeFiltersTab:onEvent(event)
   end
   if event.action == "change-prototype-filter-type" then
     local selected_index = event.element.selected_index
-    Logging:debug(self.classname, "--> change-prototype-filter-type", filter_types[selected_index], selected_index, filter_types)
     prototype_filter_type = filter_types[selected_index]
     User.setParameter("prototype_filter_type", prototype_filter_type)
 
     PrototypeFilter = PrototypeFilters.getFilterType(prototype_filter_type)
     local filters = PrototypeFilter:getFilters()
-    Logging:debug(self.classname, "--> filters", filters)
     prototype_filter.filter = filters[1]
     local options = PrototypeFilter:getOptions(prototype_filter.filter)
-    Logging:debug(self.classname, "--> options", options)
     prototype_filter.option = options[1] or nil
-    Logging:debug(self.classname, "--> prototype_filter", prototype_filter)
 
     User.setParameter("prototype_filters", {})
 
@@ -314,8 +296,6 @@ function PrototypeFiltersTab:onEvent(event)
 
   if event.action == "change-prototype-filter" then
     local selected_index = event.element.selected_index
-    Logging:debug(self.classname, "--> change-prototype-filter", prototype_filters, selected_index)
-    Logging:debug(self.classname, "--> change-prototype-filter", prototype_filters[selected_index])
     prototype_filter.filter = PrototypeFilter:getFilters()[selected_index]
     prototype_filter.option = PrototypeFilter:getOptions(prototype_filter.filter)[1] or nil
   end
@@ -323,25 +303,21 @@ function PrototypeFiltersTab:onEvent(event)
   if event.action == "change-filter-option" then
     local selected_index = event.element.selected_index
     local options = PrototypeFilter:getOptions(prototype_filter.filter)
-    Logging:debug(self.classname, "--> change-filter-option", options[selected_index])
     prototype_filter.option = options[selected_index] or nil
   end
 
   if event.action == "change-filter-invert" then
     local selected_index = event.element.selected_index
-    Logging:debug(self.classname, "--> change-filter-invert", inverts[selected_index])
     prototype_filter.invert = inverts[selected_index]
   end
 
   if event.action == "change-filter-mode" then
     local selected_index = event.element.selected_index
-    Logging:debug(self.classname, "--> change-filter-mode", modes[selected_index])
     prototype_filter.mode = modes[selected_index]
   end
 
   if event.action == "change-filter-option-comparison" then
     local selected_index = event.element.selected_index
-    Logging:debug(self.classname, "--> change-filter-option-comparison", comparisons[selected_index])
     if prototype_filter.option == nil then prototype_filter.option = {value=0} end
     prototype_filter.option.comparison = comparisons[selected_index]
   end
@@ -349,7 +325,6 @@ function PrototypeFiltersTab:onEvent(event)
   if event.action == "change-filter-option-value" then
     local text = event.element.text
     local value = tonumber(text)
-    Logging:debug(self.classname, "--> change-filter-mode", value)
     if prototype_filter.option == nil then prototype_filter.option = {comparison="<"} end
     prototype_filter.option.value = value
   end
@@ -367,7 +342,6 @@ function PrototypeFiltersTab:onEvent(event)
   end
 
   if event.action == "add-prototype-filter" then
-    Logging:debug(self.classname, "--> add-prototype-filter", prototype_filter)
     table.insert(prototype_filters, prototype_filter)
     User.setParameter("prototype_filters", prototype_filters)
     prototype_filter = nil
@@ -375,7 +349,6 @@ function PrototypeFiltersTab:onEvent(event)
   end
 
   if event.action == "remove-prototype-filter" then
-    Logging:debug(self.classname, "--> remove-prototype-filter", #prototype_filters, index)
     if #prototype_filters == 1 then
       prototype_filters = nil
     else

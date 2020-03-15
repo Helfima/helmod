@@ -257,13 +257,12 @@ end
 -- @return #string localised name
 --
 function Player.getLocalisedName(element)
-  --Logging:debug(Player.classname, "getLocalisedName(element)", element)
   if User.getModGlobalSetting("display_real_name") then
     return element.name
   end
   local localisedName = element.name
   if element.type ~= nil then
-    if element.type == "recipe" then
+    if element.type == "recipe" or element.type == "recipe-burnt" then
       local recipe = Player.getRecipe(element.name)
       if recipe ~= nil then
         localisedName = recipe.localised_name
@@ -448,7 +447,6 @@ end
 -- @return #boolean
 --
 function Player.checkRules(check, rules, category, lua_entity, included)
-  --Logging:debug(Player.classname, "checkRules()", check, rules, category, lua_entity.name, included)
   if rules[category] then
     if rules[category]["entity-name"] and (rules[category]["entity-name"]["all"] or rules[category]["entity-name"][lua_entity.name]) then
       check = included
@@ -540,7 +538,6 @@ end
 function Player.getProductionsCrafting(category, lua_recipe)
   local productions = {}
   local rules_included, rules_excluded = Player.getRules("production-crafting")
-  --Logging:debug(Player.classname, "production crafting", category, lua_recipe)
   if category == "crafting-handonly" then
     productions["character"] = game.entity_prototypes["character"]
   elseif lua_recipe.name ~= nil and lua_recipe.name == "water" then
@@ -606,6 +603,7 @@ function Player.getModules()
   local items = {}
   local filters = {}
   table.insert(filters,{filter="type",type="module",mode="or"})
+  table.insert(filters,{filter="flag",flag="hidden",mode="and", invert=true})
 
   for _,item in pairs(game.get_filtered_item_prototypes(filters)) do
     table.insert(items,item)
@@ -639,7 +637,7 @@ end
 function Player.getEnergyMachines()
     local filters = {}
 
-  for _,type in pairs({EntityType.generator, EntityType.solar_panel, EntityType.boiler, EntityType.accumulator, EntityType.reactor}) do
+  for _,type in pairs({EntityType.generator, EntityType.solar_panel, EntityType.boiler, EntityType.accumulator, EntityType.reactor, EntityType.offshore_pump, EntityType.seafloor_pump}) do
     table.insert(filters, {filter="type", mode="or", invert=false, type=type})
   end
   return game.get_filtered_entity_prototypes(filters)
@@ -972,7 +970,6 @@ function Player.getResources()
   if cache_resources ~= nil then return cache_resources end
   local items = {}
   for _,item in pairs(game.entity_prototypes) do
-    --Logging:debug(Player.classname, "getItemsPrototype(type)", item.name, item.group.name, item.subgroup.name)
     if item.name ~= nil and item.resource_category ~= nil then
       table.insert(items,item)
     end
@@ -1184,11 +1181,9 @@ end
 -- @param #string property
 --
 function Player.parseNumber(number)
-  Logging:trace(Player.classname, "parseNumber(number)", number)
   if number == nil then return 0 end
   local value = string.match(number,"[0-9.]*",1)
   local power = string.match(number,"[0-9.]*([a-zA-Z]*)",1)
-  Logging:trace(Player.classname, "parseNumber(number)", number, value, power)
   if power == nil then
     return tonumber(value)
   elseif string.lower(power) == "kw" then

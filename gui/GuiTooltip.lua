@@ -128,7 +128,7 @@ end
 --
 function GuiTooltip:appendDebug(tooltip, element)
     -- debug     
-    if User.getModGlobalSetting("debug") ~= "none" then
+    if User.getModGlobalSetting("debug_solver") ~= "none" then
       table.insert(tooltip, {"", "\n", "----------------------"})
       table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Name", ": ", helmod_tag.font.default_bold, self.m_element.name or "nil", helmod_tag.font.close})
       table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Type", ": ", helmod_tag.font.default_bold, self.m_element.type or "nil", helmod_tag.font.close})
@@ -193,7 +193,7 @@ function GuiTooltipElement:create()
   local element = self.m_element
   if element ~= nil then
     local type = element.type
-    if type == "resource" then type = "entity" end
+    if type == "resource" or type == "energy" then type = "entity" end
     local element_icon = string.format("[%s=%s]", type, element.name)
     if type == "energy" and (element.name == "energy" or element.name == "steam-heat") then
       element_icon = string.format("[img=helmod-%s-white]", type, element.name)

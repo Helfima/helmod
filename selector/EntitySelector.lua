@@ -25,7 +25,6 @@ end
 -- @function [parent=#EntitySelector] afterInit
 --
 function EntitySelector:afterInit()
-  Logging:debug(self.classname, "afterInit()")
 end
 
 -------------------------------------------------------------------------------
@@ -52,8 +51,6 @@ end
 -- @param #table list_translate
 --
 function EntitySelector:updateGroups(list_products, list_ingredients, list_translate)
-  Logging:trace(self.classname, "updateGroups()")
-  
   for key, entity in pairs(Player.getEntityPrototypes()) do
     self:appendGroups(entity, "entity", list_products, list_ingredients, list_translate)
   end
@@ -67,7 +64,6 @@ end
 -- @param #LuaPrototype prototype
 --
 function EntitySelector:buildPrototypeTooltip(prototype)
-  Logging:trace(self.classname, "buildPrototypeTooltip(player, prototype)", prototype)
   -- initalize tooltip
   local entity_prototype = self:getPrototype(prototype)
   local tooltip = entity_prototype:getLocalisedName()
@@ -80,10 +76,6 @@ end
 -- @function [parent=#EntitySelector] buildPrototypeIcon
 --
 function EntitySelector:buildPrototypeIcon(guiElement, prototype, tooltip)
-  Logging:trace(self.classname, "buildPrototypeIcon(player, guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
   local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select", "entity"):choose(prototype.type, prototype.name))
   button.locked = true
 end
-
-
-
