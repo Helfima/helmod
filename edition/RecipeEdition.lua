@@ -1222,8 +1222,9 @@ function RecipeEdition:updateObjectInfo(event)
 
     -- products
     local cell_products = GuiElement.add(recipe_table, GuiTable("products", recipe.id):column(3):style("helmod_table_element"))
-    if recipe_prototype:getProducts() ~= nil then
-      for index, lua_product in pairs(recipe_prototype:getProducts()) do
+    local lua_products = recipe_prototype:getProducts(recipe.factory)
+    if lua_products ~= nil then
+      for index, lua_product in pairs(lua_products) do
         local product_prototype = Product(lua_product)
         local product = product_prototype:clone()
         product.count = product_prototype:getElementAmount()
@@ -1233,8 +1234,9 @@ function RecipeEdition:updateObjectInfo(event)
 
     -- ingredients
     local cell_ingredients = GuiElement.add(recipe_table, GuiTable("ingredients_"..recipe.id, recipe.id):column(5):style("helmod_table_element"))
-    if recipe_prototype:getIngredients() ~= nil then
-      for index, lua_ingredient in pairs(recipe_prototype:getIngredients(recipe.factory)) do
+    local lua_ingredients = recipe_prototype:getIngredients(recipe.factory)
+    if lua_ingredients ~= nil then
+      for index, lua_ingredient in pairs(lua_ingredients) do
         local ingredient_prototype = Product(lua_ingredient)
         local ingredient = ingredient_prototype:clone()
         ingredient.count = ingredient_prototype:getElementAmount()

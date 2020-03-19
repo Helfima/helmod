@@ -474,6 +474,7 @@ end
 -- @return #table list of productions
 --
 function Player.checkFactoryLimitationModule(module, lua_recipe)
+  if Player.getModuleBonus(module.name, "productivity") <= 0 then return true end
   local rules_included, rules_excluded = Player.getRules("module-limitation")
   local model_filter_factory_module = User.getModGlobalSetting("model_filter_factory_module")
   local factory = lua_recipe.factory

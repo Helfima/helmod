@@ -118,8 +118,7 @@ end
 --
 -- @return #table
 --
-function RecipePrototype:getProducts()
-  local model = Model.getModel()
+function RecipePrototype:getProducts(factory)
   local raw_products = self:getRawProducts()
   --Logging:debug(RecipePrototype.classname, "raw_products", raw_products)
   -- if recipe is a voider
@@ -141,11 +140,37 @@ function RecipePrototype:getProducts()
     else
       lua_products[product_id] = raw_product
     end
+    -- if raw_product.type == "item" then
+    --   Logging:debug(RecipePrototype.classname, "burnt_result", raw_product.name)
+    --   local item = ItemPrototype(raw_product.name)
+    --   local burnt_result = item:getBurntResult()
+    --   if burnt_result ~= nil then
+    --     local burnt_id = burnt_result.type .. "/" .. burnt_result.name
+    --     lua_products[burnt_id] = {type=burnt_result.type,name=burnt_result.name,amount=lua_products[product_id].amount}
+    --   end
+    -- end
   end
   -- convert map to array
   local raw_products = {}
   for _, lua_product in pairs(lua_products) do
     table.insert(raw_products,lua_product)
+  end
+  -- insert burnt
+  if self.lua_type == "energy" then
+    local factory_prototype = EntityPrototype(factory)
+    if factory ~= nil and factory_prototype:getEnergyType() ~= "electric" then
+      local energy_prototype = factory_prototype:getEnergySource()
+      if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then
+        local fuel_count = energy_prototype:getFuelCount()
+        if fuel_count ~= nil and fuel_count.type == "item" then
+          local item = ItemPrototype(fuel_count.name)
+          local burnt_result = item:getBurntResult()
+          if burnt_result ~= nil then
+            table.insert(raw_products, {type=burnt_result.type, name=burnt_result.name, amount=fuel_count.count, by_time=true})
+          end
+        end
+      end
+    end
   end
 
   return raw_products
@@ -165,7 +190,6 @@ function RecipePrototype:getRawProducts()
     elseif self.lua_type == "technology" then
       return {{name=self.lua_prototype.name, type="technology", amount=1}}
     elseif self.lua_type == "energy" then
-      local model = Model.getModel()
       local products = {}
       local prototype = EntityPrototype(self.lua_prototype.name)
       if prototype:getType() == EntityType.solar_panel then
@@ -182,7 +206,7 @@ function RecipePrototype:getRawProducts()
               local filter = fluidbox_prototype:native().filter
               if filter ~= nil then
                 local amount = prototype:getFluidConsumption()
-                local product = {name=filter.name, type="fluid", amount=amount * model.time}
+                local product = {name=filter.name, type="fluid", amount=amount, by_time=true}
                 table.insert(products, product)
               end
             end
@@ -193,8 +217,6 @@ function RecipePrototype:getRawProducts()
         local energy_prototype = prototype:getEnergySource()
         local amount = energy_prototype:getBufferCapacity()
         local product = {name="energy", type="energy", amount=amount}
-        --Logging:debug("HMRecipePrototype", "capacity", energy_prototype:getBufferCapacity(), "dark", (gameDay.dust / 2 + gameDay.night + gameDay.dawn / 2))
-        --Logging:debug("HMRecipePrototype", "product", product)
         table.insert(products, product)
       end
       if prototype:getType() == EntityType.generator then
@@ -227,7 +249,6 @@ function RecipePrototype:getRawIngredients()
     elseif self.lua_type == "technology" then
       return self.lua_prototype.research_unit_ingredients
     elseif self.lua_type == "energy" then
-      local model = Model.getModel()
       local ingredients = {}
       local prototype = EntityPrototype(self.lua_prototype.name)
       if prototype:getType() == EntityType.solar_panel then
@@ -241,13 +262,14 @@ function RecipePrototype:getRawIngredients()
               local filter = fluidbox_prototype:native().filter
               if filter ~= nil then
                 local amount = prototype:getFluidConsumption()
-                local ingredient = {name=filter.name, type="fluid", amount=amount * model.time}
+                local ingredient = {name=filter.name, type="fluid", amount=amount, by_time=true}
                 table.insert(ingredients, ingredient)
               end
             end
           end
         end
-        if prototype:getTargetTemperature() > 200 then
+        local energy_type = prototype:getEnergyType()
+        if energy_type == "heat" then
             local amount = prototype:getEnergyConsumption()
             local ingredient = {name="steam-heat", type="energy", amount=amount}
             table.insert(ingredients, ingredient)
@@ -269,8 +291,8 @@ function RecipePrototype:getRawIngredients()
             if fluidbox_prototype:native() ~= nil and fluidbox_prototype:isInput() then
               local filter = fluidbox_prototype:native().filter
               if filter ~= nil then
-                local amount = prototype:getFluidUsagePerTick() * 60
-                local ingredient = {name=filter.name, type="fluid", amount=amount * model.time}
+                local amount = prototype:getFluidUsage()
+                local ingredient = {name=filter.name, type="fluid", amount=amount, by_time=true}
                 table.insert(ingredients, ingredient)
               end
             end
@@ -312,7 +334,6 @@ end
 --
 function RecipePrototype:getIngredients(factory)
   Logging:trace(self.classname, "getIngredients()", self.lua_prototype, self.lua_type)
-  local model = Model.getModel()
   local raw_ingredients = self:getRawIngredients()
   if self.lua_prototype ~= nil then
     if self.lua_type == "recipe" then
@@ -365,7 +386,7 @@ function RecipePrototype:getIngredients(factory)
         local energy_prototype = factory_prototype:getEnergySource()
         if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then
           local fuel_count = energy_prototype:getFuelCount()
-          local burner_ingredient = {name=fuel_count.name, type=fuel_count.type, amount=fuel_count.count * model.time*60}
+          local burner_ingredient = {name=fuel_count.name, type=fuel_count.type, amount=fuel_count.count, by_time=true }
           table.insert(raw_ingredients, burner_ingredient)
         end
       end

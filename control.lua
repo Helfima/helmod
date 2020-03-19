@@ -12,6 +12,8 @@ require "controller.DispatcherController"
 -- erro=1
 -- nothing=0
 
+FactorioV017 = true
+
 Logging:new()
 Logging.console = false
 

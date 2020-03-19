@@ -388,7 +388,7 @@ function GuiCellEnergy:create(parent)
   row1.style.top_padding=4
   row1.style.bottom_padding=4
 
-  local tooltip = GuiTooltipEnergy(self.options.tooltip):element(element)
+  local tooltip = GuiTooltipEnergyConsumption(self.options.tooltip):element(element)
   local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", "energy-white", "energy"):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   if element.limit_energy ~= nil then
@@ -472,7 +472,12 @@ function GuiCellElement:create(parent)
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index or 1))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element", color, 1))
 
-  local tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic()
+  local tooltip = ""
+  if element.type == "energy" then
+    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic()
+  else
+    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic()
+  end
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type or "entity", element.name):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   if self.m_info_icon then
     infoIcon(button, self.m_info_icon)
@@ -518,7 +523,12 @@ function GuiCellElementSm:create(parent)
   local element = self.element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_sm", color, 1))
-  local tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic()
+  local tooltip = ""
+  if element.type == "energy" then
+    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic()
+  else
+    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic()
+  end
   GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):sprite(element.type, element.name):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
 
   if element.limit_count ~= nil then
@@ -562,7 +572,12 @@ function GuiCellElementM:create(parent)
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index or 1))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_m", color, 1))
 
-  local tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic(self.m_with_logistic)
+  local tooltip = ""
+  if element.type == "energy" then
+    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic()
+  else
+    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic()
+  end
   local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(element.type or "entity", element.name):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   if self.m_info_icon then
     infoIcon(button, self.m_info_icon)

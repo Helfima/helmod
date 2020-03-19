@@ -396,7 +396,7 @@ function AbstractTab:updateMenuPanel(event)
         GuiElement.add(group3, GuiButton(self.classname, "production-block-solver", block_id):sprite("menu", "settings-white", "settings"):style(style):tooltip({"helmod_button.matrix-solver"}))
       end
       -- Model Debug
-      if User.getModGlobalSetting("debug") ~= "none" then
+      if User.getModGlobalSetting("debug_solver") == true then
         local groupDebug = GuiElement.add(action_panel, GuiFlowH("groupDebug"))
         GuiElement.add(groupDebug, GuiButton("HMModelDebug", "OPEN", block_id):sprite("menu", "bug-white", "bug"):style("helmod_button_menu"):tooltip("Open Debug"))
       end

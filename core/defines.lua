@@ -242,6 +242,14 @@ helmod_settings_mod = {
     },
     order = "a1"
   },
+  debug_solver = {
+    type = "bool-setting",
+    setting_type = "runtime-global",
+    localised_name = {"helmod_settings.debug-solver"},
+    localised_description = {"helmod_settings.debug-solver-desc"},
+    default_value = false,
+    order = "a2"
+  },
   -- display_ratio_horizontal
   user_cache_step = {
     type = "int-setting",

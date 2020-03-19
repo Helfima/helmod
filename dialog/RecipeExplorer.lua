@@ -220,7 +220,7 @@ function RecipeExplorer:addCell(parent, recipe, index)
       cell_table.style.horizontal_spacing=5
       -- products
       local cell_products = GuiElement.add(cell_table, GuiFlowV("cell-products"))
-      for index, lua_product in pairs(recipe_prototype:getProducts()) do
+      for index, lua_product in pairs(recipe_prototype:getProducts(recipe.factory)) do
         local product_prototype = Product(lua_product)
         local product = product_prototype:clone()
         product.count = product_prototype:getElementAmount()

@@ -141,6 +141,11 @@ function PropertiesTab:updateHeader(event)
   end
   GuiElement.add(options_table, GuiLabel("filter-difference-property"):caption("Show differences:"))
   local filter_switch = GuiElement.add(options_table, GuiSwitch(self.classname, "filter-difference-property-switch"):state(switch_nil):leftLabel("Off"):rightLabel("On"))
+  
+  GuiElement.add(options_table, GuiLabel("filter-property-label"):caption("Filter:"))
+  local filter_value = User.getParameter("filter-property")
+  local filter_field = GuiElement.add(options_table, GuiTextField(self.classname, "filter-property", "onchange"):text(filter_value))
+  filter_field.style.width = 300
 end
 
 -------------------------------------------------------------------------------
@@ -156,6 +161,7 @@ function PropertiesTab:updateData(event)
   local scroll_panel = self:getResultScrollPanel()
   scroll_panel.clear()
   -- data
+  local filter = User.getParameter("filter-property")
   local prototype_compare = User.getParameter("prototype_compare")
   if prototype_compare ~= nil then
     local data = {}
@@ -171,20 +177,22 @@ function PropertiesTab:updateData(event)
     self:addTableHeader(result_table, prototype_compare)
 
     for property, values in pairs(data) do
-      if not(User.getParameter("filter-nil-property") == true and self:isNilLine(values, prototype_compare)) then
-        if not(User.getParameter("filter-difference-property") == true and self:isSameLine(values, prototype_compare)) then
-          local cell_name = GuiElement.add(result_table, GuiFrameH("property", property):style(helmod_frame_style.hidden))
-          GuiElement.add(cell_name, GuiLabel("label"):caption(property))
-
-          for index,prototype in pairs(prototype_compare) do
-            -- col value
-            local cell_value = GuiElement.add(result_table, GuiFrameH(property, prototype.name, index):style(helmod_frame_style.hidden))
-            if values[prototype.name] ~= nil then
-              local chmod = values[prototype.name].chmod
-              local value = self:tableToString(values[prototype.name].value)
-              GuiElement.add(cell_value, GuiLabel("prototype_chmod"):caption(string.format("[%s]:", chmod)))
-              local label_value = GuiElement.add(cell_value, GuiLabel("prototype_value"):caption(value):style("helmod_label_max_600"))
-              label_value.style.width = 400
+      if filter == nil or filter == "" or string.find(property, filter, 0, true) then
+        if not(User.getParameter("filter-nil-property") == true and self:isNilLine(values, prototype_compare)) then
+          if not(User.getParameter("filter-difference-property") == true and self:isSameLine(values, prototype_compare)) then
+            local cell_name = GuiElement.add(result_table, GuiFrameH("property", property):style(helmod_frame_style.hidden))
+            GuiElement.add(cell_name, GuiLabel("label"):caption(property))
+  
+            for index,prototype in pairs(prototype_compare) do
+              -- col value
+              local cell_value = GuiElement.add(result_table, GuiFrameH(property, prototype.name, index):style(helmod_frame_style.hidden))
+              if values[prototype.name] ~= nil then
+                local chmod = values[prototype.name].chmod
+                local value = self:tableToString(values[prototype.name].value)
+                GuiElement.add(cell_value, GuiLabel("prototype_chmod"):caption(string.format("[%s]:", chmod)))
+                local label_value = GuiElement.add(cell_value, GuiLabel("prototype_value"):caption(value):style("helmod_label_max_600"))
+                label_value.style.width = 400
+              end
             end
           end
         end
@@ -355,6 +363,12 @@ function PropertiesTab:onEvent(event)
   if event.action == "technology-search" then
     local state = event.element.state
     Player.getForce().technologies[event.item1].researched = state
+    self:updateData(event)
+  end
+  
+  if event.action == "filter-property" then
+    local filter = event.element.text
+    User.setParameter("filter-property", filter)
     self:updateData(event)
   end
 end
