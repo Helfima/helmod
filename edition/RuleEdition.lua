@@ -53,7 +53,6 @@ end
 -- @param #LuaEvent event
 --
 function RuleEdition:onUpdate(event)
-  Logging:debug(self.classname, "onUpdate()", event)
   self:updateRule(event)
   self:updateAction(event)
 end
@@ -72,7 +71,6 @@ local rule_excluded = false
 -- @param #LuaEvent event
 --
 function RuleEdition:updateRule(event)
-  Logging:debug(self.classname, "updateRule()", event)
   local rule_panel = self:getRulePanel()
   rule_panel.clear()
   local rule_table = GuiElement.add(rule_panel, GuiTable("list-data"):column(2):style(helmod_table_style.rule))
@@ -129,7 +127,6 @@ end
 -- @param #LuaEvent event
 --
 function RuleEdition:updateAction(event)
-  Logging:debug(self.classname, "updateAction()", event)
   local action_panel = self:getActionPanel()
   action_panel.clear()
   local action_panel = GuiElement.add(action_panel, GuiTable("table_action"):column(2))
@@ -145,7 +142,6 @@ end
 -- @param #LuaEvent event
 --
 function RuleEdition:onEvent(event)
-  Logging:debug(self.classname, "onEvent()", event)
   if User.isAdmin() then
     if event.action == "dropdown" then
       if event.item1 == "mod" then

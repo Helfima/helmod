@@ -149,7 +149,10 @@ local list = {
   {name="tooltip-record", size=32, scale=1},
   {name="tooltip-play", size=32, scale=1},
   {name="tooltip-end", size=32, scale=1},
-  {name="tooltip-erase", size=32, scale=1}
+  {name="tooltip-erase", size=32, scale=1},
+  {name="recipe-jewel", size=16, scale=1},
+  {name="recipe-nuclear", size=16, scale=1},
+  {name="recipe-graduation", size=16, scale=1}
 }
 for icon_row,icon in pairs(list) do
   table.insert(spite_icons, sprite_tooltip(icon.name, icon.size, icon.scale))

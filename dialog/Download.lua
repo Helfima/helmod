@@ -52,14 +52,11 @@ end
 -- @param #LuaEvent event
 --
 function Download:onEvent(event)
-  Logging:debug(self.classname, "onEvent()", event)
   -- import
   if event.action == "download-model" then
     local download_panel = self:getDownloadPanel()
     local text_box = download_panel["data-text"]
-    Logging:debug(self.classname, "data_string", text_box.text)
     local data_table = Converter.read(text_box.text)
-    Logging:debug(self.classname, "data_table", data_table)
     if data_table ~= nil then
       local model = Model.newModel()
       model.time = data_table.time

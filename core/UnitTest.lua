@@ -19,7 +19,6 @@ local stage = 1
 -- @param #LuaEvent event
 -- 
 function UnitTest.run(event)
-  Logging:trace(UnitTest.classname, "run()")
   if event_binded == false then
     Event.pcallEvent("on_tick", defines.events.on_tick, UnitTest.onTick)
   end

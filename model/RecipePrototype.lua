@@ -3,7 +3,6 @@
 -- @module RecipePrototype
 --
 RecipePrototype = newclass(Prototype,function(base, object, object_type)
-  Logging:debug("HMRecipePrototype", "constructor", type(object), object, object_type)
   base.classname = "HMRecipePrototype"
   base.is_voider = nil
   if type(object) == "string" then
@@ -13,10 +12,12 @@ RecipePrototype = newclass(Prototype,function(base, object, object_type)
     base.object_name = object.name
     base.lua_type = object_type or object.type
   end
-  Logging:trace(base.classname, "object_name", base.object_name, "lua_type", base.lua_type)
   if base.lua_type == nil or base.lua_type == "recipe" then
     Prototype.init(base, Player.getRecipePrototype(base.object_name))
     base.lua_type = "recipe"
+  elseif base.lua_type == "recipe-burnt" then
+    Prototype.init(base, Player.getRecipePrototype(base.object_name))
+    base.lua_type = "recipe-burnt"
   elseif base.lua_type == "energy" then
     Prototype.init(base, Player.getRecipeEntity(base.object_name))
     base.lua_type = "energy"
@@ -103,7 +104,7 @@ end
 -- @return #table
 --
 function RecipePrototype:getCategory()
-  if self.lua_prototype ~= nil and (self.lua_type == "recipe" or self.lua_type == "resource" or self.lua_type == "fluid") then
+  if self.lua_prototype ~= nil and (self.lua_type == "recipe" or self.lua_type == "recipe-burnt" or self.lua_type == "resource" or self.lua_type == "fluid") then
     return self.lua_prototype.category or "crafting"
   elseif self.lua_type == "technology" then
     return "technology"
@@ -120,7 +121,6 @@ end
 --
 function RecipePrototype:getProducts(factory)
   local raw_products = self:getRawProducts()
-  --Logging:debug(RecipePrototype.classname, "raw_products", raw_products)
   -- if recipe is a voider
   if #raw_products == 1 and Product(raw_products[1]):getElementAmount() == 0 then
     self.is_voider = true
@@ -140,15 +140,14 @@ function RecipePrototype:getProducts(factory)
     else
       lua_products[product_id] = raw_product
     end
-    -- if raw_product.type == "item" then
-    --   Logging:debug(RecipePrototype.classname, "burnt_result", raw_product.name)
-    --   local item = ItemPrototype(raw_product.name)
-    --   local burnt_result = item:getBurntResult()
-    --   if burnt_result ~= nil then
-    --     local burnt_id = burnt_result.type .. "/" .. burnt_result.name
-    --     lua_products[burnt_id] = {type=burnt_result.type,name=burnt_result.name,amount=lua_products[product_id].amount}
-    --   end
-    -- end
+    if self.lua_type == "recipe-burnt" and raw_product.type == "item" then
+      local item = ItemPrototype(raw_product.name)
+      local burnt_result = item:getBurntResult()
+      if burnt_result ~= nil then
+        local burnt_id = burnt_result.type .. "/" .. burnt_result.name
+        lua_products[burnt_id] = {type=burnt_result.type,name=burnt_result.name,amount=lua_products[product_id].amount}
+      end
+    end
   end
   -- convert map to array
   local raw_products = {}
@@ -185,7 +184,7 @@ end
 --
 function RecipePrototype:getRawProducts()
   if self.lua_prototype ~= nil then
-    if self.lua_type == "recipe" or self.lua_type == "resource" or self.lua_type == "fluid" then
+    if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" or self.lua_type == "resource" or self.lua_type == "fluid" then
       return self.lua_prototype.products
     elseif self.lua_type == "technology" then
       return {{name=self.lua_prototype.name, type="technology", amount=1}}
@@ -229,6 +228,11 @@ function RecipePrototype:getRawProducts()
         local product = {name="steam-heat", type="energy", amount=amount}
         table.insert(products, product)
       end
+      if prototype:getType() == EntityType.offshore_pump or prototype:getType() == EntityType.seafloor_pump then
+        local amount = prototype:getPumpingSpeed()
+        local product = {name="water", type="fluid", amount=amount, by_time=true}
+        table.insert(products, product)
+      end
       return products
     end
   end
@@ -244,7 +248,7 @@ end
 --
 function RecipePrototype:getRawIngredients()
   if self.lua_prototype ~= nil then
-    if self.lua_type == "recipe" or self.lua_type == "resource" or self.lua_type == "fluid" then
+    if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" or self.lua_type == "resource" or self.lua_type == "fluid" then
       return self.lua_prototype.ingredients
     elseif self.lua_type == "technology" then
       return self.lua_prototype.research_unit_ingredients
@@ -333,10 +337,9 @@ end
 -- @return #table
 --
 function RecipePrototype:getIngredients(factory)
-  Logging:trace(self.classname, "getIngredients()", self.lua_prototype, self.lua_type)
   local raw_ingredients = self:getRawIngredients()
   if self.lua_prototype ~= nil then
-    if self.lua_type == "recipe" then
+    if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" then
       local factory_prototype = EntityPrototype(factory)
       if factory ~= nil and factory_prototype:getEnergyType() ~= "electric" then
         local speed_factory = factory_prototype:getCraftingSpeed()
@@ -355,7 +358,6 @@ function RecipePrototype:getIngredients(factory)
       local hardness = entity_prototype:getMineableHardness()
       local mining_time = entity_prototype:getMineableMiningTime()
       local factory_prototype = EntityPrototype(factory)
-      Logging:debug(self.classname, "getEnergyType()", self.lua_prototype, self.lua_type)
       if factory ~= nil and factory_prototype:getEnergyType() ~= "electric" then
         local mining_speed = factory_prototype:getMiningSpeed()
         local speed_factory = hardness * mining_speed / mining_time
@@ -404,7 +406,7 @@ end
 --
 function RecipePrototype:getEnergy()
   if self.lua_prototype ~= nil then
-    if self.lua_type == "recipe" or self.lua_type == "resource" or self.lua_type == "fluid" then
+    if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" or self.lua_type == "resource" or self.lua_type == "fluid" then
       return self.lua_prototype.energy
     elseif self.lua_type == "technology" then
       return self.lua_prototype.research_unit_energy/60
@@ -424,7 +426,7 @@ end
 --
 function RecipePrototype:getEnabled()
   if self.lua_prototype ~= nil then
-    if self.lua_type == "recipe" then
+    if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" then
       local lua_recipe = Player.getRecipe(self.lua_prototype.name)
       if lua_recipe == nil then return false end
       return lua_recipe.enabled
@@ -446,7 +448,7 @@ end
 --
 function RecipePrototype:getHidden()
   if self.lua_prototype ~= nil then
-    if self.lua_type == "recipe" or self.lua_type == "resource" then
+    if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" or self.lua_type == "resource" then
       return self.lua_prototype.hidden
     elseif self.lua_type == "technology" then
       return false

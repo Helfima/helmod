@@ -13,7 +13,6 @@ local Command = {
 -- @function [parent=#Command] start
 --
 function Command.start()
-  Logging:trace(Command.classname, "start()")
   commands.add_command("helmod","helmod commands", Command.run)
 end
 

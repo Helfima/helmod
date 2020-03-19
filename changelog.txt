@@ -1,9 +1,21 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.9.34
-Date: 29. 02. 2020
+Date: 19. 03. 2020
   Changes:
+    - modified computing by factory
+    - modified solver button by switch
+    - added burnt in energy recipe
+    - removed obselete debug options (replaced by factorio mod debug)
+    - changed display module in edit recipe
+    - removed hidden module in selector
+    - modified solver class
     - removed command ResetCaches (use administration panel)
   Bugfixes:
+    - fixed panel headers
+    - fixed debug tooltip
+    - fixed power calculation
+    - fixed void recipe when used by factory
+    - fixed slower module selector
     - fixed fluid consumption
 ---------------------------------------------------------------------------------------------------
 Version: 0.9.33

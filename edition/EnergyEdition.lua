@@ -88,7 +88,6 @@ end
 -- @function [parent=#EnergyEdition] buildPrimaryPanel
 --
 function EnergyEdition:buildPrimaryPanel()
-  Logging:debug(self.classname, "buildPrimaryPanel()")
   self:getPrimaryInfoPanel()
   self:getPrimarySelectorPanel()
 end
@@ -149,7 +148,6 @@ end
 -- @function [parent=#EnergyEdition] buildSecondaryPanel
 --
 function EnergyEdition:buildSecondaryPanel()
-  Logging:debug(self.classname, "buildSecondaryPanel()")
   self:getSecondaryInfoPanel()
   self:getSecondarySelectorPanel()
 end
@@ -160,7 +158,6 @@ end
 -- @function [parent=#EnergyEdition] buildHeaderPanel
 --
 function EnergyEdition:buildHeaderPanel()
-  Logging:debug(self.classname, "buildHeaderPanel()")
   self:getPowerPanel()
 end
 
@@ -201,7 +198,6 @@ end
 -- @param #LuaEvent event
 --
 function EnergyEdition:onEvent(event)
-  Logging:debug(self.classname, "onEvent()", event)
   local model = Model.getModel()
 
   if event.action == "primary-group" then
@@ -279,7 +275,6 @@ end
 --
 
 function EnergyEdition:updatePowerInfo(event)
-  Logging:debug(self.classname, "updatePowerInfo()", event)
   local power_panel = self:getPowerPanel()
   local model = Model.getModel()
   local default = Model.getDefault()
@@ -288,7 +283,6 @@ function EnergyEdition:updatePowerInfo(event)
   if model.powers ~= nil and model.powers[event.item1] ~= nil then
     local power = self:getObject(event)
     if power ~= nil then
-      Logging:debug(self.classname, "updatePowerInfo():power=",power)
       for k,guiName in pairs(power_panel.children_names) do
         power_panel[guiName].destroy()
       end
@@ -312,7 +306,6 @@ end
 -- @param #LuaEvent event
 --
 function EnergyEdition:updatePrimary(event)
-  Logging:debug(self.classname, "updatePrimary()", event)
   local model = Model.getModel()
 
   self:updatePrimaryInfo(event)
@@ -327,7 +320,6 @@ end
 -- @param #LuaEvent event
 --
 function EnergyEdition:updatePrimaryInfo(event)
-  Logging:debug(self.classname, "updatePrimaryInfo()", event)
   local infoPanel = self:getPrimaryInfoPanel()
   local object = self:getObject(event)
   local model = Model.getModel()
@@ -337,7 +329,6 @@ function EnergyEdition:updatePrimaryInfo(event)
   end
 
   if object ~= nil then
-    Logging:debug(self.classname, "updatePrimaryInfo():object:",object)
     local primary = object.primary
     if primary.name ~= nil then
 
@@ -380,7 +371,6 @@ end
 -- @param #LuaEvent event
 --
 function EnergyEdition:updatePrimarySelector(event)
-  Logging:debug(self.classname, "updatePrimarySelector()", event)
   local scroll_panel = self:getPrimarySelectorPanel()
   local model = Model.getModel()
 
@@ -394,8 +384,6 @@ function EnergyEdition:updatePrimarySelector(event)
   if not(User.getModGlobalSetting("model_filter_generator")) then category = nil end
   -- ajouter de la table des groupes de recipe
   local factories = Player.getGenerators("primary")
-  Logging:debug(self.classname, "factories:",factories)
-
 
   if category == nil then
     local subgroups = {}
@@ -435,7 +423,6 @@ end
 -- @param #LuaEvent event
 --
 function EnergyEdition:updateSecondary(event)
-  Logging:debug(self.classname, "updateSecondary()", event)
   local model = Model.getModel()
 
   self:updateSecondaryInfo(event)
@@ -450,7 +437,6 @@ end
 -- @param #LuaEvent event
 --
 function EnergyEdition:updateSecondaryInfo(event)
-  Logging:debug(self.classname, "updateSecondaryInfo()", event)
   local infoPanel = self:getSecondaryInfoPanel()
   local object = self:getObject(event)
   local model = Model.getModel()
@@ -460,7 +446,6 @@ function EnergyEdition:updateSecondaryInfo(event)
   end
 
   if object ~= nil then
-    Logging:debug(self.classname, "updateSecondaryInfo():object:",object)
     local secondary = object.secondary
     if secondary.name ~= nil then
 
@@ -510,7 +495,6 @@ end
 -- @param #LuaEvent event
 --
 function EnergyEdition:updateSecondarySelector(event)
-  Logging:debug(self.classname, "updateSecondarySelector()", event)
   local scroll_panel = self:getSecondarySelectorPanel()
   local model = Model.getModel()
 
@@ -524,8 +508,6 @@ function EnergyEdition:updateSecondarySelector(event)
   if not(User.getModGlobalSetting("model_filter_generator")) then category = nil end
   -- ajouter de la table des groupes de recipe
   local factories = Player.getGenerators("secondary")
-  Logging:debug(self.classname, "factories:",factories)
-
 
   if category == nil then
     local subgroups = {}

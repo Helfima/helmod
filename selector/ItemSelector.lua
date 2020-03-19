@@ -43,8 +43,6 @@ end
 -- @param #table list_translate
 --
 function ItemSelector:updateGroups(list_products, list_ingredients, list_translate)
-  Logging:trace(self.classname, "updateGroups()")
-
   for key, item in pairs(Player.getItemPrototypes()) do
     self:appendGroups(item, "item", list_products, list_ingredients, list_translate)
   end
@@ -59,7 +57,6 @@ end
 -- @param #LuaPrototype prototype
 --
 function ItemSelector:buildPrototypeTooltip(prototype)
-  Logging:trace(self.classname, "buildPrototypeTooltip(player, prototype)", prototype)
   -- initalize tooltip
   local tooltip = ItemPrototype(prototype):getLocalisedName()
   return tooltip
@@ -71,15 +68,6 @@ end
 -- @function [parent=#ItemSelector] buildPrototypeIcon
 --
 function ItemSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
-  Logging:trace(self.classname, "buildPrototypeIcon(player, guiElement, prototype, tooltip:", guiElement, prototype, tooltip)
   local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select", "item"):choose(prototype.type, prototype.name))
   button.locked = true
 end
-
-
-
-
-
-
-
-

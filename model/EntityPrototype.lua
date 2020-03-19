@@ -363,11 +363,21 @@ end
 --
 function EntityPrototype:getEnergyType()
   if self.lua_prototype ~= nil then
-    if self.lua_prototype.burner_prototype ~= nil then return "burner" end
-    if self.lua_prototype.electric_energy_source_prototype ~= nil then return "electric" end
-    if self.lua_prototype.heat_energy_source_prototype ~= nil then return "heat" end
-    if self.lua_prototype.fluid_energy_source_prototype ~= nil then return "fluid" end
-    if self.lua_prototype.void_energy_source_prototype ~= nil then return "void" end
+    if not(FactorioV017) then
+      if self.lua_prototype.burner_prototype ~= nil then return "burner" end
+      if self.lua_prototype.electric_energy_source_prototype ~= nil then return "electric" end
+      if self.lua_prototype.heat_energy_source_prototype ~= nil then return "heat" end
+      if self.lua_prototype.fluid_energy_source_prototype ~= nil then return "fluid" end
+      if self.lua_prototype.void_energy_source_prototype ~= nil then return "void" end
+    else
+      -- adaptation pour Factorio V0.17
+      if self.lua_prototype.burner_prototype ~= nil then return "burner" end
+      if self.lua_prototype.electric_energy_source_prototype ~= nil then return "electric" end
+      if self:getType() == EntityType.reactor or (self:getType() == EntityType.boiler and string.find(self.lua_prototype.name,"heat")) then return "heat" end
+      if self:getMaxEnergyUsage() > 0 then
+        return "fluid"
+      end
+    end
   end
   return "electric"
 end
@@ -381,11 +391,23 @@ end
 --
 function EntityPrototype:getEnergySource()
   if self.lua_prototype ~= nil then
-    if self.lua_prototype.burner_prototype ~= nil then return BurnerPrototype(self.lua_prototype.burner_prototype, self.factory) end
-    if self.lua_prototype.electric_energy_source_prototype ~= nil then return ElectricSourcePrototype(self.lua_prototype.electric_energy_source_prototype, self.factory) end
-    if self.lua_prototype.heat_energy_source_prototype ~= nil then return HeatSourcePrototype(self.lua_prototype.heat_energy_source_prototype, self.factory) end
-    if self.lua_prototype.fluid_energy_source_prototype ~= nil then return FluidSourcePrototype(self.lua_prototype.fluid_energy_source_prototype, self.factory) end
-    if self.lua_prototype.void_energy_source_prototype ~= nil then return VoidSourcePrototype(self.lua_prototype.void_energy_source_prototype, self.factory) end
+    if not(FactorioV017) then
+      if self.lua_prototype.burner_prototype ~= nil then return BurnerPrototype(self.lua_prototype.burner_prototype, self.factory) end
+      if self.lua_prototype.electric_energy_source_prototype ~= nil then return ElectricSourcePrototype(self.lua_prototype.electric_energy_source_prototype, self.factory) end
+      if self.lua_prototype.heat_energy_source_prototype ~= nil then return HeatSourcePrototype(self.lua_prototype.heat_energy_source_prototype, self.factory) end
+      if self.lua_prototype.fluid_energy_source_prototype ~= nil then return FluidSourcePrototype(self.lua_prototype.fluid_energy_source_prototype, self.factory) end
+      if self.lua_prototype.void_energy_source_prototype ~= nil then return VoidSourcePrototype(self.lua_prototype.void_energy_source_prototype, self.factory) end
+    else
+      -- adaptation pour Factorio V0.17
+      if self.lua_prototype.burner_prototype ~= nil then return BurnerPrototype(self.lua_prototype.burner_prototype, self.factory) end
+      if self.lua_prototype.electric_energy_source_prototype ~= nil then return ElectricSourcePrototype(self.lua_prototype.electric_energy_source_prototype, self.factory) end
+      if self:getType() == EntityType.reactor or (self:getType() == EntityType.boiler and string.find(self.lua_prototype.name,"heat")) then
+        return HeatSourcePrototype({emissions=0}, self.factory)
+      end
+      if self:getMaxEnergyUsage() > 0 then
+        return FluidSourcePrototype({emissions=5.5555e-7}, self.factory)
+      end
+    end
   end
   return nil
 end

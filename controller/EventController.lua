@@ -14,8 +14,6 @@ defines.events.on_prepare=script.generate_event_name()
 -- @function [parent=#EventController] start
 --
 function EventController.start()
-  Logging:trace(EventController.classname, "start()")
-
   script.on_init(EventController.onInit)
   script.on_load(EventController.onLoad)
   script.on_configuration_changed(EventController.onConfigurationChanged)
@@ -55,7 +53,6 @@ end
 -- @param  #table event
 --
 function EventController.onCustomInput(event)
-  Logging:trace(EventController.classname, "onCustomInput(event)", event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
     Dispatcher:send("on_gui_hotkey", event, Controller.classname)
@@ -104,7 +101,6 @@ end
 -- @function [parent=#EventController] onInit
 --
 function EventController.onInit()
-  Logging:trace(EventController.classname, "onInit()")
   Command.start()
   Controller:on_init()
 end
@@ -117,8 +113,7 @@ end
 -- @param #table event
 --
 function EventController.onLoad(event)
-  Logging:trace(EventController.classname, "onLoad(event)", event)
-  Command.start()
+ Command.start()
 end
 
 -------------------------------------------------------------------------------
@@ -129,7 +124,6 @@ end
 -- @param #table event
 --
 function EventController.onResearchFinished(event)
-  Logging:trace(EventController.classname, "onResearchFinished(event)", event)
   --Cache.reset()
   --Player.print("Caches are reseted!")
 end
@@ -142,7 +136,6 @@ end
 -- @param #table event
 --
 function EventController.onConsoleCommand(event)
-  Logging:trace(EventController.classname, "onConsoleCommand(event)", event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
     Command.parse(event)
@@ -159,7 +152,6 @@ end
 -- @deprecated
 --
 function EventController.onGuiClosed(event)
-  Logging:trace(EventController.classname, "onGuiClosed(event)", event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
     Controller:onGuiClosed(event)
@@ -184,7 +176,6 @@ end
 --
 function EventController.onConfigurationChanged(data)
   log("EventController.onConfigurationChanged(data)")
-  Logging:trace(EventController.classname, "onConfigurationChanged(data)", data)
   if not data or not data.mod_changes then
     return
   end
@@ -215,7 +206,6 @@ end
 -- @param #table event
 --
 function EventController.onTick(event)
-  Logging:trace(EventController.classname, "onTick(event)", event)
   Controller:onTick(event)
 end
 
@@ -227,7 +217,6 @@ end
 -- @param #table NthTickEvent {tick=#number, nth_tick=#number}
 --
 function EventController.onNthTick(NthTickEvent)
-  Logging:trace(EventController.classname, "on_nth_tick(NthTickEvent)", NthTickEvent)
   Controller:onNthTick(NthTickEvent)
 end
 
@@ -239,7 +228,6 @@ end
 -- @param #table event {player_index=number, localised_ string=#string,result=#string, translated=#boolean}
 --
 function EventController.onStringTranslated(event)
-  Logging:debug(EventController.classname, "onStringTranslated(event)", event)
   Player.load(event)
   Controller:onStringTranslated(event)
 end
@@ -252,7 +240,6 @@ end
 -- @param #table event
 --
 function EventController.onGuiClick(event)
-  Logging:debug(EventController.classname, "onGuiClick(event)", event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
     local allowed = true
@@ -260,8 +247,6 @@ function EventController.onGuiClick(event)
       allowed = false
     end
     if allowed then
-      Logging:debug(EventController.classname, "allowed", allowed)
-      --Event.load(event)
       Dispatcher:send("on_gui_action", event, Controller.classname)
     end
   end
@@ -275,7 +260,6 @@ end
 -- @param #table event
 --
 function EventController.onGuiTextChanged(event)
-  Logging:trace(EventController.classname, "onGuiTextChanged(event)", event)
   if event ~= nil and event.player_index ~= nil and event.element ~= nil and string.find(event.element.name, "onchange") then
     Player.load(event)
     Dispatcher:send("on_gui_action", event, Controller.classname)
@@ -290,7 +274,6 @@ end
 -- @param #table event
 --
 function EventController.onGuiConfirmed(event)
-  Logging:trace(EventController.classname, "onGuiConfirmed(event)", event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
     Dispatcher:send("on_gui_action", event, Controller.classname)
@@ -305,7 +288,6 @@ end
 -- @param #table event
 --
 function EventController.onGuiValueChanged(event)
-  Logging:trace(EventController.classname, "onGuiValueChanged(event)", event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
     Dispatcher:send("on_gui_action", event, Controller.classname)
@@ -320,7 +302,6 @@ end
 -- @param event
 --
 function EventController.onGuiSelectionStateChanged(event)
-  Logging:trace(EventController.classname, "onGuiSelectionStateChanged(event)", event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
     Dispatcher:send("on_gui_action", event, Controller.classname)
@@ -335,7 +316,6 @@ end
 -- @param event
 --
 function EventController.onGuiCheckedStateChanged(event)
-  Logging:trace(EventController.classname, "onGuiCheckedStateChanged(event)", event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
     --Event.load(event, "checked")
@@ -351,9 +331,7 @@ end
 -- @param event
 --
 function EventController.onRuntimeModSettingChanged(event)
-  Logging:trace(EventController.classname, "onRuntimeModSettingChanged(event)", event)
   if event ~= nil and event.player_index ~= nil then
-    Logging:updateLevel()
     Player.load(event)
     Dispatcher:send("on_gui_setting", event, Controller.classname)
   end
@@ -367,8 +345,6 @@ end
 -- @param #table event
 --
 function EventController.onPlayerCreated(event)
-  --log("EventController.onPlayerCreated(event)")
-  Logging:trace(EventController.classname, "onPlayerCreated(event)", event)
   if event ~= nil and event.player_index ~= nil then
     local player = Player.load(event).native()
     Controller:bindController(player)
@@ -383,8 +359,6 @@ end
 -- @param #table event
 --
 function EventController.onPlayerJoinedGame(event)
-  --log("EventController.onPlayerJoinedGame(event)")
-  Logging:trace(EventController.classname, "onPlayerJoinedGame(event)", event)
   if event ~= nil and event.player_index ~= nil then
     local player = Player.load(event).native()
     Controller:bindController(player)
@@ -399,7 +373,6 @@ end
 -- @param #table event
 --
 function EventController.onPrepare(event)
-  Logging:trace(EventController.classname, "onPrepare(event)", event)
   if event ~= nil and event.player_index ~= nil then
     event.tick = game.tick
     Player.load(event)

@@ -75,7 +75,6 @@ local nextEvent = nil
 -- @function [parent=#Controller] prepare
 --
 function Controller:prepare()
-  Logging:debug(self.classname, "prepare()")
 
   local forms = {}
   table.insert(forms, HelpPanel("HMHelpPanel"))
@@ -113,7 +112,6 @@ function Controller:prepare()
   table.insert(forms, StatusPanel("HMStatusPanel"))
 
   views = {}
-  Logging:debug(self.classname, forms)
   for _,form in pairs(forms) do
     form:bind()
     views[form.classname] = form
@@ -128,7 +126,6 @@ end
 --
 function Controller:on_init()
   log("Controller:on_init()")
-  Logging:debug(self.classname, "on_init()")
   local caches_data = Cache.get()
   if caches_data["HMPlayer"] == nil then
     Player.getResources()
@@ -191,7 +188,6 @@ end
 -- @param #LuaPlayer player
 --
 function Controller:cleanController(player)
-  Logging:trace(self.classname, "cleanController(player)")
   for _,location in pairs({"center", "left", "top", "screen"}) do
     local lua_gui_element = player.gui[location]
     for _,children_name in pairs(lua_gui_element.children_names) do
@@ -220,7 +216,6 @@ end
 -- @param #LuaPlayer player
 --
 function Controller:closeEditionOrSelector()
-  Logging:trace(self.classname, "closeEditionOrSelector()")
   local lua_gui_element = Player.getGui("screen")
   for _,children_name in pairs(lua_gui_element.children_names) do
     if self:getView(children_name) and (string.find(children_name,"Edition") ~= nil) then
@@ -237,7 +232,6 @@ end
 -- @param #LuaPlayer player
 --
 function Controller:bindController(player)
-  Logging:trace(self.classname, "bindController()")
   if player ~= nil then
     local lua_gui_element = Player.getGui("top")
     if lua_gui_element["helmod_menu-main"] ~= nil then lua_gui_element["helmod_menu-main"].destroy() end
@@ -268,7 +262,6 @@ end
 -- @param #table event
 --
 function Controller:onTick(event)
-  Logging:trace(Controller.classname, "onTick(event)", event)
   if Player.native() ~= nil then
     local next_event = User.getParameter("next_event")
     if next_event ~= nil then
@@ -292,7 +285,6 @@ end
 -- @param #table NthTickEvent {tick=#number, nth_tick=#number}
 --
 function Controller:onNthTick(NthTickEvent)
-  Logging:trace(Controller.classname, "onNthTick(NthTickEvent)", NthTickEvent)
   if Player.native() ~= nil then
     local next_event = User.getParameter("next_event")
     if next_event ~= nil and next_event.event.tick < NthTickEvent.tick then
@@ -312,7 +304,6 @@ end
 -- @param #table event {player_index=number, localised_ string=#string,result=#string, translated=#boolean}
 --
 function Controller:onStringTranslated(event)
-  Logging:trace(Controller.classname, "onStringTranslated(event)", event)
   User.addTranslate(event)
 end
 
@@ -324,7 +315,6 @@ end
 -- @param #table event
 --
 function Controller:onGuiClosed(event)
-  Logging:trace(self.classname, "onGuiClosed(event)", event)
   self:cleanController(Player.native())
 end
 
@@ -338,7 +328,6 @@ local pattern = "([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)"
 -- @param #table event
 --
 function Controller:onGuiAction(event)
-  Logging:debug(self.classname, "onGuiAction(event)", event)
   if event.element ~= nil and (string.find(event.element.name,"^HM.*") or string.find(event.element.name,"^helmod.*")) then
     Logging.profiler = false
     Logging:profilerStart()
@@ -376,13 +365,6 @@ end
 -- @param #table event
 --
 function Controller:onGuiEvent(event)
-  Logging:debug(self.classname, "onGuiEvent(event)", event)
-  --Controller:send("on_gui_prepare", event, event.classname)
-  --Logging:profilerStep("onGuiAction", "on_gui_prepare")
-
-  --Controller:send("on_gui_translate", event, event.classname)
-  --Logging:profilerStep("onGuiAction", "on_gui_translate")
-
   if event.action == "OPEN" then
     Controller:send("on_gui_open", event, event.classname)
     Logging:profilerStep("onGuiAction", "on_gui_open")
@@ -399,7 +381,6 @@ end
 -- @param #table event
 --
 function Controller:onGuiHotkey(event)
-  Logging:debug(self.classname, "onGuiHotkey(event)", event)
   if views == nil then self:prepare() end
 
   if event.input_name == "helmod-close" then
@@ -432,7 +413,6 @@ end
 -- @param #table event
 --
 function Controller:onGuiSetting(event)
-  Logging:debug(self.classname, "onGuiSetting(event)", event)
   if views == nil then self:prepare() end
 
   self:bindController(Player.native())
@@ -451,7 +431,6 @@ end
 -- @function [parent=#Controller] openMainPanel
 --
 function Controller:openMainPanel()
-  Logging:debug(self.classname, "openMainPanel()")
   local current_block = User.getParameter("current_block")
   local model = Model.getModel()
 
@@ -475,7 +454,6 @@ end
 -- @function [parent=#Controller] isOpened
 --
 function Controller:isOpened()
-  Logging:debug(self.classname, "isOpened()")
   local lua_player = Player.native()
   if lua_player == nil then return false end
   local gui_screen = Player.getGui("screen")
@@ -483,7 +461,6 @@ function Controller:isOpened()
   for _,form_name in pairs(gui_screen.children_names) do
     --if string.find(form_name,"Tab") and Controller.getView(form_name) then
     if form_name == "HMTab" then
-      Logging:debug(self.classname,"form is open", form_name)
       is_open = true
     end
   end
@@ -498,7 +475,6 @@ end
 -- @param #LuaEvent event
 --
 function Controller:onEvent(event)
-  Logging:debug(self.classname, "onEvent()", event)
   local model = Model.getModel()
 
   -- ***************************
@@ -518,7 +494,7 @@ function Controller:onEvent(event)
   -- access admin or owner or write
   -- *******************************
 
-  if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
+  if User.isWriter() then
     self:onEventAccessWrite(event)
   end
 
@@ -548,8 +524,6 @@ end
 -- @param #LuaEvent event
 --
 function Controller:onEventAccessAll(event)
-  Logging:debug(self.classname, "onEventAccessAll()", event)
-
   if event.action == "refresh-model" then
     ModelCompute.update()
     self:send("on_gui_update", event)
@@ -595,8 +569,6 @@ end
 -- @param #LuaEvent event
 --
 function Controller:onEventAccessRead(event)
-  Logging:debug(self.classname, "onEventAccessRead()", event)
-
   if event.action == "copy-model" then
     local model_id = User.getParameter("model_id")
     local current_block = User.getParameter("current_block")
@@ -649,7 +621,6 @@ end
 -- @param #LuaEvent event
 --
 function Controller:onEventAccessWrite(event)
-  Logging:debug(self.classname, "onEventAccessWrite()", event)
   local model = Model.getModel()
   local model_id = User.getParameter("model_id")
   local current_block = User.getParameter("current_block")
@@ -682,13 +653,11 @@ function Controller:onEventAccessWrite(event)
   if event.action == "change-time" then
     local index = event.element.selected_index
     model.time = helmod_base_times[index].value or 1
-    Logging:debug(self.classname, "change-time", index, helmod_base_times[index], model.time)
     ModelCompute.update()
     self:send("on_gui_update", event)
   end
 
   if event.action == "product-selected" then
-    Logging:debug(self.classname, "product-selected", event.button, defines.mouse_button_type.right)
     if event.button == defines.mouse_button_type.right then
       self:send("on_gui_open", event,"HMRecipeSelector")
     end
@@ -700,6 +669,13 @@ function Controller:onEventAccessWrite(event)
     else
       self:send("on_gui_open", event, "HMProductEdition")
     end
+  end
+
+  if event.action == "production-block-remove" then
+    ModelBuilder.removeProductionBlock(event.item1)
+    ModelCompute.update()
+    User.setParameter("current_block","new")
+    self:send("on_gui_update", event)
   end
 
   if event.action == "production-block-unlink" then
@@ -742,21 +718,6 @@ function Controller:onEventAccessWrite(event)
         self:send("on_gui_open", event, selector_name)
       end
     end
-  end
-
-  if event.action == "production-block-solver" then
-    if model.blocks[event.item1] ~= nil then
-      ModelBuilder.updateProductionBlockOption(event.item1, "solver", not(model.blocks[event.item1].solver))
-      ModelCompute.update()
-      self:send("on_gui_update", event)
-    end
-  end
-
-  if event.action == "production-block-remove" then
-    ModelBuilder.removeProductionBlock(event.item1)
-    ModelCompute.update()
-    User.setParameter("current_block","new")
-    self:send("on_gui_update", event)
   end
 
   if User.isActiveForm("HMProductionLineTab") then
@@ -812,34 +773,6 @@ function Controller:onEventAccessWrite(event)
     end
   end
 
-  if User.isActiveForm("HMProductionBlockTab") then
-    if event.action == "production-recipe-remove" then
-      ModelBuilder.removeProductionRecipe(event.item1, event.item2)
-      ModelCompute.update()
-      self:send("on_gui_update", event)
-    end
-
-    if event.action == "production-recipe-up" then
-      local step = 1
-      if event.shift then step = User.getModSetting("row_move_step") end
-      if event.control then step = 1000 end
-      ModelBuilder.upProductionRecipe(event.item1, event.item2, step)
-      ModelCompute.update()
-      User.setParameter("scroll_element", event.item2)
-      self:send("on_gui_update", event)
-    end
-
-    if event.action == "production-recipe-down" then
-      local step = 1
-      if event.shift then step = User.getModSetting("row_move_step") end
-      if event.control then step = 1000 end
-      ModelBuilder.downProductionRecipe(event.item1, event.item2, step)
-      ModelCompute.update()
-      User.setParameter("scroll_element", event.item2)
-      self:send("on_gui_update", event)
-    end
-  end
-
   if User.isActiveForm("HMEnergyTab") then
     if event.action == "power-remove" then
       ModelBuilder.removePower(event.item1)
@@ -871,7 +804,6 @@ end
 -- @param #LuaEvent event
 --
 function Controller:onEventAccessDelete(event)
-  Logging:debug(self.classname, "onEventAccessDelete()", event)
   if event.action == "remove-model" then
     ModelBuilder.removeModel(event.item1)
     User.setActiveForm("HMProductionLineTab")
@@ -888,7 +820,6 @@ end
 -- @param #LuaEvent event
 --
 function Controller:onEventAccessAdmin(event)
-  Logging:debug(self.classname, "onEventAccessAdmin()", event)
   if event.action == "rule-remove" then
     ModelBuilder.removeRule(event.item1)
     self:send("on_gui_update", event)
@@ -964,7 +895,6 @@ end
 -- @function [parent=#Controller] send
 --
 function Controller:send(event_type, data, classname)
-  Logging:trace(self.classname, "send()", event_type, data, classname)
   if classname ~= nil then data.classname = classname end
   Dispatcher:send(event_type, data, classname)
 end

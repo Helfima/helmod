@@ -109,11 +109,28 @@ end
 -- @return #table
 --
 function infoIcon(button, type)
-  if type == "resource" or type == "technology" then 
-    local tooltip = "tooltip.resource-recipe"
-    if type == "technology" then tooltip = "tooltip.technology-recipe" end
+  if type == "recipe-burnt" then 
+    local tooltip = "tooltip.burnt-recipe"
     local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({tooltip}))
     sprite.style.top_padding = -8
+  end
+  if type == "resource" then 
+    local tooltip = "tooltip.resource-recipe"
+    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("helmod-recipe-jewel"):tooltip({tooltip}))
+    sprite.style.top_padding = -4
+    sprite.style.left_padding = -4
+  end
+  if type == "technology" then 
+    local tooltip = "tooltip.technology-recipe"
+    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("helmod-recipe-graduation"):tooltip({tooltip}))
+    sprite.style.top_padding = -4
+    sprite.style.left_padding = -4
+  end
+  if type == "energy" then 
+    local tooltip = "tooltip.energy-recipe"
+    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("helmod-recipe-nuclear"):tooltip({tooltip}))
+    sprite.style.top_padding = -4
+    sprite.style.left_padding = -4
   end
 end
 -------------------------------------------------------------------------------
@@ -125,6 +142,18 @@ end
 GuiCellFactory = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
+
+-------------------------------------------------------------------------------
+-- Create cell
+--
+-- @function [parent=#GuiCellFactory] create
+--
+-- @param #LuaGuiElement parent container for element
+--
+function GuiCellFactory:byFactory(...)
+  self.m_by_factory = true
+  self.m_uri = table.concat({...},"=")
+end
 
 -------------------------------------------------------------------------------
 -- Create cell
@@ -162,7 +191,17 @@ function GuiCellFactory:create(parent)
   end
 
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element", color, 3))
-  GuiElement.add(row3, GuiLabel("label2", factory.name):caption(Format.formatNumberFactory(factory.count)):style("helmod_label_element"):tooltip({"helmod_common.total"}))
+  if self.m_by_factory then
+    local style = "helmod_textfield_element"
+    if factory.input ~= nil then
+      style = "helmod_textfield_element_red"
+    end
+    local text_field = GuiElement.add(row3, GuiTextField(self.m_uri):text(factory.input or factory.count or 0):style(style):tooltip({"helmod_common.total"}))
+    text_field.style.height = 15
+    
+  else
+    GuiElement.add(row3, GuiLabel("label2", factory.name):caption(Format.formatNumberFactory(factory.count)):style("helmod_label_element"):tooltip({"helmod_common.total"}))
+  end
   return cell
 end
 
@@ -301,7 +340,10 @@ function GuiCellBlock:create(parent)
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
 
   local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
-  GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("recipe", element.name):tooltip(tooltip))
+  local recipe_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("recipe", element.name):tooltip(tooltip))
+  if element.isEnergy then
+    infoIcon(recipe_icon, "energy")
+  end
 
   if element.limit_count ~= nil then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_product", color, 2))

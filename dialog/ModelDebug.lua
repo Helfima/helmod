@@ -52,7 +52,6 @@ end
 -- @param #table pivot
 --
 function ModelDebug:buildMatrix(matrix_panel, matrix, pivot)
-  Logging:debug("ProductionBlockTab", "buildMatrix()")
   if matrix ~= nil then
     local num_col = #matrix[1]
 
@@ -60,17 +59,17 @@ function ModelDebug:buildMatrix(matrix_panel, matrix, pivot)
 
     for irow,row in pairs(matrix) do
       for icol,value in pairs(row) do
-        local frame = GuiFrameH("cell", irow, icol):style("helmod_frame_product", "none", 1)
+        local frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", "none", 1)
         if pivot ~= nil then
-          if matrix[1][icol].name == "T" then frame:style("helmod_frame_product", GuiElement.color_button_default_ingredient, 2) end
-          if pivot.x == icol then frame:style("helmod_frame_product", GuiElement.color_button_edit, 2) end
-          if pivot.y == irow then frame:style("helmod_frame_product", GuiElement.color_button_none, 2) end
-          if pivot.x == icol and pivot.y == irow then frame:style("helmod_frame_product", GuiElement.color_button_rest, 2) end
+          if matrix[1][icol].name == "T" then frame:style("helmod_frame_colored", GuiElement.color_button_default_ingredient, 2) end
+          if pivot.x == icol then frame:style("helmod_frame_colored", GuiElement.color_button_edit, 2) end
+          if pivot.y == irow then frame:style("helmod_frame_colored", GuiElement.color_button_none, 2) end
+          if pivot.x == icol and pivot.y == irow then frame:style("helmod_frame_colored", GuiElement.color_button_rest, 2) end
         end
         local cell = GuiElement.add(matrix_table, frame)
         if type(value) == "table" then
           if value.type == "none" then
-            GuiElement.add(cell, GuiLabel("cell_value"):caption(value.name))
+            GuiElement.add(cell, GuiLabel("cell_value"):caption(value.name):tooltip(value.tooltip))
           else
             GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(value.type, value.name):tooltip(value.tooltip))
           end
@@ -90,7 +89,6 @@ end
 -- @param #LuaEvent event
 --
 function ModelDebug:onEvent(event)
-  Logging:debug(self.classname, "onEvent()", event)
   local model = Model.getModel()
   local current_block = User.getParameter("current_block")
   if model.blocks[current_block] ~= nil and model.blocks[current_block].runtimes ~= nil then
@@ -127,7 +125,6 @@ end
 -- @param #LuaEvent event
 --
 function ModelDebug:updateHeader(event)
-  Logging:debug(self.classname, "updateHeader()", event)
   local left_menu_panel = self:getLeftMenuPanel()
   left_menu_panel.clear()
   local group1 = GuiElement.add(left_menu_panel, GuiFlowH("group1"))
@@ -159,7 +156,6 @@ end
 -- @param #LuaEvent event
 --
 function ModelDebug:updateDebugPanel(event)
-  Logging:debug(self.classname, "updateDebugPanel()", event)
   local info_panel = self:getInfoPanel()
   local model = Model.getModel()
 
@@ -198,7 +194,6 @@ function ModelDebug:updateDebugPanel(event)
         stage = 1
         User.setParameter("model_stage", stage)
       end
-      Logging:debug(self.classname, "stage", stage, "block", block)
       local runtime = block.runtimes[stage]
       local ma_panel = GuiElement.add(scroll_panel, GuiFrameV("stage_panel"):style(helmod_frame_style.hidden):caption(runtime.name))
       self:buildMatrix(ma_panel, runtime.matrix, runtime.pivot)
@@ -212,7 +207,6 @@ end
 -- @function [parent=#ModelDebug] updateDisplay
 --
 function ModelDebug:updateDisplay()
-  Logging:debug(self.classname, "updateDisplay()")
   local content_panel = self:getInfoPanel()
   content_panel.clear()
 end

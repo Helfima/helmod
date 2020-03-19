@@ -19,7 +19,6 @@ local ModelBuilder = {
 -- @return recipe
 --
 function ModelBuilder.addRecipeIntoProductionBlock(key, type, index)
-  Logging:debug(ModelBuilder.classname, "addRecipeIntoProductionBlock()", key, type)
   local model = Model.getModel()
   local current_block = User.getParameter("current_block")
   local recipe_prototype = RecipePrototype(key, type)
@@ -111,7 +110,6 @@ function ModelBuilder.addRecipeIntoProductionBlock(key, type, index)
       Model.setFactory(current_block, ModelRecipe.id, key, nil)
     end
 
-    Logging:debug(ModelBuilder.classname, "addRecipeIntoProductionBlock()", model.blocks[current_block])
     return ModelRecipe
   end
 end
@@ -125,7 +123,6 @@ end
 -- @param #string key generator name
 --
 function ModelBuilder.addPrimaryPower(power_id, key)
-  Logging:debug(ModelBuilder.classname, "addPrimaryPower()", power_id, key)
   local model = Model.getModel()
   if model.powers == nil then model.powers = {} end
   local power = model.powers[power_id]
@@ -148,7 +145,6 @@ end
 -- @param #string key generator name
 --
 function ModelBuilder.addSecondaryPower(power_id, key)
-  Logging:debug(ModelBuilder.classname, "addSecondaryPower()", key)
   local model = Model.getModel()
   if model.powers == nil then model.powers = {} end
   local power = model.powers[power_id]
@@ -172,7 +168,6 @@ end
 -- @param #number model_id
 --
 function ModelBuilder.removeModel(model_id)
-  Logging:trace(ModelBuilder.classname, "removeModel()", model_id)
   global.models[model_id] = nil
   local models = Model.getModels()
   local model = Model.getLastModel()
@@ -191,7 +186,6 @@ end
 -- @param #number power_id
 --
 function ModelBuilder.removePower(power_id)
-  Logging:trace(ModelBuilder.classname, "removePower()", power_id)
   local model = Model.getModel()
   if model.powers ~= nil then
     model.powers[power_id] = nil
@@ -206,12 +200,9 @@ end
 -- @param #number power_id
 --
 function ModelBuilder.removeRule(rule_id)
-  Logging:trace(ModelBuilder.classname, "removeRule()", rule_id)
   if global.rules ~= nil then
-    Logging:debug(ModelBuilder.classname, "before remove rule", global.rules)
     table.remove(global.rules,rule_id)
     Model.reIndexList(global.rules)
-    Logging:debug(ModelBuilder.classname, "after remove rule", global.rules)
   end
 end
 
@@ -220,12 +211,11 @@ end
 --
 -- @function [parent=#ModelBuilder] updateObject
 --
--- @param #string item block_id or resource
+-- @param #string item block_id
 -- @param #string key object name
 -- @param #table options
 --
 function ModelBuilder.updateObject(item, key, options)
-  Logging:debug(ModelBuilder.classname, "updateObject()", item, key, options)
   local object = Model.getObject(item, key)
   if object ~= nil then
     if options.production ~= nil then
@@ -243,7 +233,6 @@ end
 -- @param #table options
 --
 function ModelBuilder.updatePower(key, options)
-  Logging:debug(ModelBuilder.classname, "updatePower()", options)
   local object = Model.getPower(key)
   if object ~= nil then
     if options.power ~= nil then
@@ -258,15 +247,89 @@ end
 --
 -- @function [parent=#ModelBuilder] updateFactory
 --
--- @param #string item block_id or resource
+-- @param #string item block_id
 -- @param #string key object name
 -- @param #table options
 --
 function ModelBuilder.updateFactory(item, key, options)
-  Logging:debug(ModelBuilder.classname, "updateFactory()", item, key, options)
   local object = Model.getObject(item, key)
   if object ~= nil then
     object.factory.limit = options.limit or 0
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update a factory number
+--
+-- @function [parent=#ModelBuilder] updateFactoryNumber
+--
+-- @param #string item block_id
+-- @param #string key object name
+-- @param #number value
+--
+function ModelBuilder.updateFactoryNumber(item, key, value)
+  local object = Model.getObject(item, key)
+  if object ~= nil then
+    if value == 0 then
+      object.factory.input = nil
+    else
+      object.factory.input = value
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update block matrix solver
+--
+-- @function [parent=#ModelBuilder] updateBlockMatrixSolver
+--
+-- @param #string item block_id
+--
+function ModelBuilder.updateBlockMatrixSolver(item, value)
+  local model = Model.getModel()
+  local block = model.blocks[item]
+  if block ~= nil then
+    block.solver = value
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update recipe matrix solver
+--
+-- @function [parent=#ModelBuilder] updateMatrixSolver
+--
+-- @param #string item block_id
+-- @param #string key object name
+--
+function ModelBuilder.updateMatrixSolver(item, key)
+  local model = Model.getModel()
+  local block = model.blocks[item]
+  if block ~= nil then
+    local recipes = block.recipes
+    local sorter = function(t,a,b) return t[b].index > t[a].index end
+    if block.by_product == false then
+      sorter = function(t,a,b) return t[b].index < t[a].index end
+    end
+    local apply = false
+    local matrix_solver = 0
+    for _, recipe in spairs(recipes,sorter) do
+      if apply == true and recipe.matrix_solver == matrix_solver then
+        apply = false
+      end
+      if apply == true and recipe.matrix_solver ~= matrix_solver then
+        recipe.matrix_solver = matrix_solver
+      end
+      if recipe.id == key then
+        if recipe.matrix_solver == 0 then
+          matrix_solver = 1
+        else
+          matrix_solver = 0
+        end
+        recipe.matrix_solver = matrix_solver
+        apply = true
+      end
+    end
+    
   end
 end
 
@@ -275,12 +338,11 @@ end
 --
 -- @function [parent=#ModelBuilder] updateTemperatureFactory
 --
--- @param #string item block_id or resource
+-- @param #string item block_id
 -- @param #string key object name
 -- @param #table options
 --
 function ModelBuilder.updateTemperatureFactory(item, key, options)
-  Logging:debug(ModelBuilder.classname, "updateTemperatureFactory()", item, key, options)
   local object = Model.getObject(item, key)
   if object ~= nil then
     object.factory.target_temperature = options.target_temperature or 0
@@ -292,12 +354,11 @@ end
 --
 -- @function [parent=#ModelBuilder] updateFuelFactory
 --
--- @param #string item block_id or resource
+-- @param #string item block_id
 -- @param #string key object name
 -- @param #table options
 --
 function ModelBuilder.updateFuelFactory(item, key, options)
-  Logging:debug(ModelBuilder.classname, "updateFactory()", item, key, options)
   local object = Model.getObject(item, key)
   if object ~= nil then
     object.factory.fuel = options.fuel or "coal"
@@ -330,7 +391,6 @@ end
 function ModelBuilder.addModulePriority(factory, name)
   local module_priority = ModelBuilder.convertModuleToPriority(factory)
   local factory_prototype = EntityPrototype(factory)
-  Logging:debug(ModelBuilder.classname, "addModulePriority()", name, module_priority)
   if Model.countModulesModel(factory) < factory_prototype:getModuleInventorySize() then
     local success = false
     -- parcours la priorite
@@ -338,15 +398,12 @@ function ModelBuilder.addModulePriority(factory, name)
       if priority.name == name then
         priority.value = priority.value + 1
         success = true
-        Logging:debug(ModelBuilder.classname, "->success", success)
       end
     end
     if success == false then
       table.insert(module_priority, {name=name,value=1})
-      Logging:debug(ModelBuilder.classname, "->insert", module_priority)
     end
   end
-  Logging:debug(ModelBuilder.classname, "->final", module_priority)
   return module_priority
 end
 
@@ -361,7 +418,6 @@ end
 function ModelBuilder.removeModulePriority(factory, name)
   local module_priority = ModelBuilder.convertModuleToPriority(factory)
   local factory_prototype = EntityPrototype(factory)
-  Logging:debug(ModelBuilder.classname, "removeModulePriority()", name, module_priority)
   -- parcours la priorite
   local index = nil
   for i,priority in pairs(module_priority) do
@@ -370,15 +426,12 @@ function ModelBuilder.removeModulePriority(factory, name)
         priority.value = priority.value - 1
       else
         index = i
-        Logging:debug(ModelBuilder.classname, "->need remove index", index)
       end
     end
   end
   if index ~= nil then
     table.remove(module_priority, index)
-    Logging:debug(ModelBuilder.classname, "->remove index", index)
   end
-  Logging:debug(ModelBuilder.classname, "->final", module_priority)
   return module_priority
 end
 
@@ -451,7 +504,6 @@ end
 -- @param #table module_priority
 --
 function ModelBuilder.setFactoryModulePriority(block_id, recipe_id, module_priority)
-  Logging:debug(ModelBuilder.classname, "setFactoryModulePriority()", block_id, recipe_id, module_priority)
   local element = Model.getObject(block_id, recipe_id)
   if element ~= nil then
     element.factory.modules = {}
@@ -463,7 +515,6 @@ function ModelBuilder.setFactoryModulePriority(block_id, recipe_id, module_prior
       for i,priority in pairs(module_priority) do
         local module = ItemPrototype(priority.name)
         if Player.checkFactoryLimitationModule(module:native(), element) == true then
-          Logging:debug(ModelBuilder.classname, "setFactoryModulePriority()", "ok", first)
           if first then
             ModelBuilder.setModuleModel(element.factory, priority.name, priority.value)
             first = false
@@ -485,7 +536,6 @@ end
 -- @param #string recipe_id
 --
 function ModelBuilder.applyFactoryModulePriority(block_id, recipe_id)
-  Logging:debug(ModelBuilder.classname, "setFactoryModulePriority()", block_id, recipe_id)
   local element = Model.getObject(block_id, recipe_id)
   if element ~= nil then
     local module_priority = element.factory.module_priority
@@ -496,7 +546,6 @@ function ModelBuilder.applyFactoryModulePriority(block_id, recipe_id)
       for i,priority in pairs(module_priority) do
         local module = ItemPrototype(priority.name)
         if Player.checkFactoryLimitationModule(module:native(), element) == true then
-          Logging:debug(ModelBuilder.classname, "setFactoryModulePriority()", "ok", first)
           if first then
             ModelBuilder.setModuleModel(element.factory, priority.name, priority.value)
             first = false
@@ -519,7 +568,6 @@ end
 -- @param #table module_priority
 --
 function ModelBuilder.setBeaconModulePriority(item, key, module_priority)
-  Logging:debug(ModelBuilder.classname, "setBeaconModulePriority()", item, key, module_priority)
   local element = Model.getObject(item, key)
   if element ~= nil then
     element.beacon.modules = {}
@@ -531,7 +579,6 @@ function ModelBuilder.setBeaconModulePriority(item, key, module_priority)
       for i,priority in pairs(module_priority) do
         local module = ItemPrototype(priority.name)
         if Player.checkBeaconLimitationModule(module:native(), element) == true then
-          Logging:debug(ModelBuilder.classname, "setFactoryModulePriority()", "ok", first)
           if first then
             ModelBuilder.setModuleModel(element.beacon, priority.name, priority.value)
             first = false
@@ -729,7 +776,6 @@ end
 -- @param #string blockId
 --
 function ModelBuilder.removeProductionBlock(blockId)
-  Logging:debug(ModelBuilder.classname, "removeProductionBlock()", blockId)
   local model = Model.getModel()
   if model.blocks[blockId] ~= nil then
     model.blocks[blockId] = nil
@@ -746,7 +792,6 @@ end
 -- @param #string key
 --
 function ModelBuilder.removeProductionRecipe(blockId, key)
-  Logging:debug(ModelBuilder.classname, "removeProductionRecipe()", blockId, key)
   local model = Model.getModel()
   if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
     model.blocks[blockId].recipes[key] = nil
@@ -851,6 +896,7 @@ function ModelBuilder.copyBlock(from_model, from_block)
         recipe_model.factory = Model.newFactory(recipe.factory.name)
         recipe_model.factory.limit = recipe.factory.limit
         recipe_model.factory.fuel = recipe.factory.fuel
+        recipe_model.factory.input = recipe.factory.input
         recipe_model.factory.modules = {}
         if recipe.factory.modules ~= nil then
           for name,value in pairs(recipe.factory.modules) do
@@ -890,7 +936,6 @@ end
 -- @param #number value
 --
 function ModelBuilder.setModuleModel(element, name, value)
-  Logging:debug(ModelBuilder.classname, "setModuleModel()", element, name, value)
   local element_prototype = EntityPrototype(element)
   if element.modules ~= nil and element.modules[name] == value then return false end
   element.modules = {}
@@ -913,20 +958,16 @@ end
 -- @param #number value
 --
 function ModelBuilder.appendModuleModel(element, name, value)
-  Logging:debug(ModelBuilder.classname, "appendModuleModel", name, value)
   local factory_prototype = EntityPrototype(element)
   if element.modules ~= nil and element.modules[name] == value then return false end
   local count_modules = Model.countModulesModel(element)
-  Logging:debug(ModelBuilder.classname, "->name", name, "inventory size", factory_prototype:getModuleInventorySize(), "count", count_modules, "delta", factory_prototype:getModuleInventorySize() - count_modules)
   if count_modules >= factory_prototype:getModuleInventorySize() then
     return false
   elseif (count_modules + value) <= factory_prototype:getModuleInventorySize() then
-    Logging:debug(ModelBuilder.classname, "-->set", name, "value", value)
     element.modules[name] = value
   else
     element.modules[name] = 0
     local delta = factory_prototype:getModuleInventorySize() - Model.countModulesModel(element)
-    Logging:debug(ModelBuilder.classname, "-->cap", name, "delta", delta)
     element.modules[name] = delta
   end
   return true
@@ -998,7 +1039,6 @@ end
 -- @param #string blockId
 --
 function ModelBuilder.unlinkProductionBlock(blockId)
-  Logging:debug(ModelBuilder.classname, "unlinkProductionBlock()", blockId)
   local model = Model.getModel()
   if model.blocks[blockId] ~= nil then
     model.blocks[blockId].unlinked = not(model.blocks[blockId].unlinked)
@@ -1015,7 +1055,6 @@ end
 -- @param #number quantity
 --
 function ModelBuilder.updateProduct(blockId, product_name, quantity)
-  Logging:debug(ModelBuilder.classname, "updateProduct()", blockId, product_name, quantity)
   local model = Model.getModel()
 
   if model.blocks[blockId] ~= nil then
@@ -1040,7 +1079,6 @@ end
 -- @param #number value
 --
 function ModelBuilder.updateProductionBlockOption(blockId, option, value)
-  Logging:debug(ModelBuilder.classname, "updateProductionBlockOption()", blockId, option, value)
   local model = Model.getModel()
 
   if model.blocks[blockId] ~= nil then
@@ -1058,7 +1096,6 @@ end
 -- @param #number step
 --
 function ModelBuilder.downProductionBlock(blockId, step)
-  Logging:debug(ModelBuilder.classname, "downProductionBlock()", blockId, step)
   local model = Model.getModel()
   if model.blocks[blockId] ~= nil then
     ModelBuilder.downProductionList(model.blocks, model.blocks[blockId].index, step)
@@ -1075,7 +1112,6 @@ end
 -- @param #number step
 --
 function ModelBuilder.downProductionRecipe(blockId, key, step)
-  Logging:debug(ModelBuilder.classname, "downProductionRecipe()", blockId, key, step)
   local model = Model.getModel()
   if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
     ModelBuilder.downProductionList(model.blocks[blockId].recipes, model.blocks[blockId].recipes[key].index, step)
@@ -1097,10 +1133,8 @@ end
 -- @param #number step
 --
 function ModelBuilder.downProductionList(list, index, step)
-  Logging:debug(ModelBuilder.classname, "downProductionList()", list, index, step)
   local model = Model.getModel()
   local list_count = Model.countList(list)
-  Logging:debug(ModelBuilder.classname, "downProductionList()", list_count)
   if list ~= nil and index + 1 < Model.countList(list) then
     -- defaut step
     if step == nil then step = 1 end
@@ -1110,7 +1144,6 @@ function ModelBuilder.downProductionList(list, index, step)
       if element.index == index then
         -- change l'index de l'element cible
         element.index = element.index + step
-        Logging:debug(ModelBuilder.classname, "index element", element.index, element.index + step)
       elseif element.index > index and element.index <= index + step then
         -- change les index compris entre index et la fin
         element.index = element.index - 1
@@ -1128,7 +1161,6 @@ end
 -- @param #number step
 --
 function ModelBuilder.upProductionBlock(blockId, step)
-  Logging:debug(ModelBuilder.classname, "upProductionBlock()", blockId, step)
   local model = Model.getModel()
   if model.blocks[blockId] ~= nil then
     ModelBuilder.upProductionList(model.blocks, model.blocks[blockId].index, step)
@@ -1145,7 +1177,6 @@ end
 -- @param #number step
 --
 function ModelBuilder.upProductionRecipe(blockId, key, step)
-  Logging:debug(ModelBuilder.classname, "upProductionRecipe()", blockId, key, step)
   local model = Model.getModel()
   if model.blocks[blockId] ~= nil and model.blocks[blockId].recipes[key] ~= nil then
     ModelBuilder.upProductionList(model.blocks[blockId].recipes, model.blocks[blockId].recipes[key].index, step)
@@ -1167,7 +1198,6 @@ end
 -- @param #number step
 --
 function ModelBuilder.upProductionList(list, index, step)
-  Logging:debug(ModelBuilder.classname, "upProductionList()", list, index, step)
   local model = Model.getModel()
   if list ~= nil and index > 0 then
     -- defaut step
@@ -1200,7 +1230,6 @@ end
 -- @param #string index
 --
 function ModelBuilder.addRule(mod, name, category, type, value, excluded, index)
-  Logging:debug(ModelBuilder.classname, "addRule()", mod, name, category, type, value, excluded, index)
   local rule = Model.newRule(mod, name, category, type, value, excluded, #Model.getRules())
   local rules = Model.getRules()
   table.insert(rules, rule)

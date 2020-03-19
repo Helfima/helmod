@@ -156,6 +156,65 @@ default_gui["helmod_textfield"] = {
 }
 
 -------------------------------------------------------------------------------
+-- Style of element
+--
+-- @field [parent=#Textfield] element
+default_gui["helmod_textfield_element"] = {
+  type = "textbox_style",
+  parent = "search_textfield_with_fixed_width",
+  font = "helmod_font_normal",
+  minimal_width = 50,
+  maximal_width = 50
+}
+
+-------------------------------------------------------------------------------
+-- Style of element
+--
+-- @field [parent=#Textfield] element
+default_gui["helmod_textfield_element_green"] = {
+  type = "textbox_style",
+  parent = "helmod_textfield_element",
+  default_background =
+      {
+        filename = "__helmod__/graphics/gui.png",
+        corner_size = 3,
+        position = {8, 80},
+        scale = 1
+      },
+      active_background =
+      {
+        filename = "__helmod__/graphics/gui.png",
+        corner_size = 3,
+        position = {0, 80},
+        scale = 1
+      }
+}
+
+-------------------------------------------------------------------------------
+-- Style of element
+--
+-- @field [parent=#Textfield] element
+default_gui["helmod_textfield_element_red"] = {
+  type = "textbox_style",
+  parent = "helmod_textfield_element",
+  default_background =
+      {
+        filename = "__helmod__/graphics/gui.png",
+        corner_size = 3,
+        position = {8, 88},
+        scale = 1
+      },
+      active_background =
+      {
+        filename = "__helmod__/graphics/gui.png",
+        corner_size = 3,
+        position = {0, 88},
+        scale = 1
+      }
+}
+
+
+-------------------------------------------------------------------------------
 -- Style of calculator
 --
 -- @field [parent=#Textfield] calculator
@@ -213,7 +272,8 @@ default_gui["helmod_button_default"] = {
   clicked_graphical_set = compositionIcon("__core__/graphics/gui.png", corner_size, {0, 40}),
   disabled_font_color={r=0.5, g=0.5, b=0.5},
   disabled_graphical_set = compositionIcon("__core__/graphics/gui.png", corner_size, {0, 16}),
-  pie_progress_color = {r=1, g=1, b=1}
+  pie_progress_color = {r=1, g=1, b=1},
+  stretch_image_to_widget_size = true
 }
 
 -------------------------------------------------------------------------------
@@ -690,6 +750,22 @@ default_gui["helmod_label_default"] = {
 -------------------------------------------------------------------------------
 -- Style of default
 --
+-- @field [parent=#Label] default
+
+default_gui["helmod_label_header"] = {
+  type = "label_style",
+  parent = "label",
+  font = "helmod_font_header",
+  top_padding = 0,
+  right_padding = 0,
+  bottom_padding = 0,
+  left_padding = 0,
+  font_color = {245/255, 219/255, 194/255}
+}
+
+-------------------------------------------------------------------------------
+-- Style of default
+--
 -- @field [parent=#Label] element
 
 default_gui["helmod_label_element"] = {
@@ -794,6 +870,46 @@ default_gui["helmod_label_help_title"] = {
 default_gui["helmod_label_help_normal"] = {
   type = "label_style",
   parent = "helmod_label_help",
+  left_padding = 10
+}
+
+-------------------------------------------------------------------------------
+-- Style of text
+--
+-- @field [parent=#Label] help_title
+
+default_gui["helmod_label_help_menu_1"] = {
+  type = "label_style",
+  parent = "helmod_label_help",
+  font = "helmod_font_title_frame",
+  hovered_font_color = {1, 0.74, 0.40},
+  clicked_font_color = {0.98, 0.66, 0.22}
+}
+
+default_gui["helmod_label_help_menu_1_selected"] = {
+  type = "label_style",
+  parent = "helmod_label_help",
+  font = "helmod_font_title_frame",
+  font_color = {0.98, 0.66, 0.22}
+}
+
+-------------------------------------------------------------------------------
+-- Style of text
+--
+-- @field [parent=#Label] help_normal
+
+default_gui["helmod_label_help_menu_2"] = {
+  type = "label_style",
+  parent = "helmod_label_help",
+  hovered_font_color = {1, 0.74, 0.40},
+  clicked_font_color = {0.98, 0.66, 0.22},
+  left_padding = 10
+}
+
+default_gui["helmod_label_help_menu_2_selected"] = {
+  type = "label_style",
+  parent = "helmod_label_help",
+  font_color = {0.98, 0.66, 0.22},
   left_padding = 10
 }
 
@@ -1563,6 +1679,35 @@ for _,style in pairs(style_element_list) do
       width = 50,
       horizontally_stretchable = "on",
       vertically_stretchable = "off"
+    }
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Style of colored frame
+--
+-- @field [parent=#Frame] color
+--
+
+for _,style in pairs(style_element_list) do
+  for i = 1, 3 do
+    local style_name = table.concat({"helmod_frame_colored",style.suffix,i},"_")
+    local x = style.x + (i-1)*8
+    local y = style.y
+
+    default_gui[style_name] = {
+      type = "frame_style",
+      graphical_set = {
+        filename = "__helmod__/graphics/gui.png",
+        corner_size = 1,
+        position = {x,y}
+      },
+      top_padding  = 2,
+      right_padding = 2,
+      bottom_padding = 2,
+      left_padding = 2,
+      horizontally_stretchable = "on",
+      vertically_stretchable = "on"
     }
   end
 end

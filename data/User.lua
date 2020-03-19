@@ -48,7 +48,7 @@ end
 -- @function [parent=#User] name
 --
 function User.name()
-  return Player.native().name
+  return Player.native().name or Player.native().index or "nil"
 end
 
 -------------------------------------------------------------------------------
@@ -345,9 +345,7 @@ end
 -- @param #object value
 --
 function User.setParameter(property, value)
-  --Logging:debug(User.classname, property, value)
   if property == nil then
-    Logging:error(User.classname, "property must not nil", value)
     return nil
   end
   User.setVersion()
@@ -390,9 +388,7 @@ end
 -- @param #object value
 --
 function User.setPreference(property, value)
-  --Logging:debug(User.classname, property, value)
   if property == nil then
-    Logging:error(User.classname, "property must not nil", value)
     return nil
   end
   User.setVersion()
@@ -473,7 +469,6 @@ end
 -- @param #string name
 --
 function User.getModSetting(name)
-  Logging:trace(User.classname, "getModSetting(name)", name)
   local property = nil
   local property_name = string.format("%s_%s",User.prefixe,name)
   if Player.native() ~= nil then
@@ -484,7 +479,6 @@ function User.getModSetting(name)
   if property ~= nil then
     return property.value
   else
-    Logging:error(User.classname, "Mod settings property not found:", property_name)
     return helmod_settings_mod[name].default_value
   end
 end
@@ -497,14 +491,12 @@ end
 -- @param #string name
 --
 function User.getModGlobalSetting(name)
-  Logging:trace(User.classname, "getModGlobalSetting(name)", name)
   local property = nil
   local property_name = string.format("%s_%s",User.prefixe,name)
   property = settings.global[property_name]
   if property ~= nil then
     return property.value
   else
-    Logging:warn(User.classname, "Mod Global settings property not found:", property_name)
     return helmod_settings_mod[name].default_value
   end
 end
@@ -517,12 +509,10 @@ end
 -- @param #string name
 --
 function User.getPreferenceSetting(name)
-  Logging:trace(User.classname, "getPreferenceSetting(name)", name)
   local property = User.getPreference(name)
   if property ~= nil then
     return property
   else
-    Logging:warn(User.classname, "Preference settings property not found:", name)
     return helmod_preferences[name].default_value
   end
 end
@@ -555,7 +545,6 @@ end
 -- @param #table location
 --
 function User.setCloseForm(classname, location)
-  Logging:debug(User.classname, "setCloseForm()", classname)
   local navigate = User.getNavigate()
   if navigate[classname] == nil then navigate[classname] = {} end
   navigate[classname]["open"] = false
@@ -579,7 +568,6 @@ end
 -- @return #table
 --
 function User.getLocationForm(classname)
-  Logging:debug(User.classname, "getLocationForm()", classname)
   local navigate = User.getNavigate()
   if string.find(classname, "Tab") then
     if navigate[User.tab_name] == nil or navigate[User.tab_name]["location"] == nil then return {50,50} end
@@ -598,7 +586,6 @@ end
 -- @param #string classname
 --
 function User.setActiveForm(classname)
-  Logging:debug(User.classname, "setActiveForm()", classname)
   local navigate = User.getNavigate()
   if string.find(classname, "Edition") then
     for form_name,form in pairs(navigate) do
@@ -632,7 +619,6 @@ end
 -- @return #boolean
 --
 function User.isActiveForm(classname)
-  Logging:debug(User.classname, "isActiveForm()", classname)
   local navigate = User.getNavigate()
   if string.find(classname, "Tab") and navigate[User.tab_name] ~= nil then
     return navigate[User.tab_name]["open"] == true and navigate[User.tab_name]["name"] == classname
@@ -665,17 +651,13 @@ end
 -- @param #table request {player_index=number, localised_string=#string, result=#string, translated=#boolean}
 --
 function User.addTranslate(request)
-  --Logging:debug(User.classname, "addTranslate()", request)
   if request.translated == true then
     local localised_string = request.localised_string
     local string_translated = request.result
-    --Logging:debug(User.classname, "-> addTranslate", localised_string, string_translated)
     if type(localised_string) == "table" then
       local localised_value = localised_string[1]
-      --Logging:debug(User.classname, "--> localised_value", localised_value)
       if localised_value ~= nil and localised_value ~= "" then
         local _,key = string.match(localised_value,"([^.]*).([^.]*)")
-        --Logging:debug(User.classname, "---> key", key)
         if key ~= nil and key ~= "" then
           local translated = User.get("translated")
           translated[key] = string_translated
@@ -729,11 +711,9 @@ end
 -- @return #table
 --
 function User.getCache(classname, name)
-  Logging:trace(User.classname, "getCache(classname, name)",classname, name)
   local data = User.get("cache")
   if classname == nil and name == nil then return data end
   if data[classname] == nil or data[classname][name] == nil then return nil end
-  Logging:trace(User.classname, "--> cache",data[classname][name])
   return data[classname][name]
 end
 
@@ -749,7 +729,6 @@ end
 -- @return #object
 --
 function User.setCache(classname, name, value)
-  Logging:trace(User.classname, "setCache(classname, name, value)",classname, name, value)
   local data = User.get("cache")
   if data[classname] == nil then data[classname] = {} end
   data[classname][name] = value
@@ -766,7 +745,6 @@ end
 -- @return #boolean
 --
 function User.hasCache(classname, name)
-  Logging:trace(User.classname, "hasCache(hasData, name)",classname, name)
   local data = User.get("cache")
   return data[classname] ~= nil and data[classname][name] ~= nil
 end
@@ -780,7 +758,6 @@ end
 -- @param #string name
 --
 function User.resetCache(classname, name)
-  Logging:trace(User.classname, "resetCache(classname, name)", classname, name)
   local data = User.get("cache")
   if classname == nil and name == nil then
     User.set("cache",{})

@@ -82,7 +82,6 @@ end
 -- @return #LuaGuiElement
 --
 function Form:getPanelName()
-  Logging:trace(self.classname, "getPanelName()", self.classname)
   return self.classname
 end
 
@@ -106,7 +105,6 @@ end
 -- @return #LuaGuiElement
 --
 function Form:getPanel()
-  Logging:trace(self.classname, "getPanel()")
   local parent_panel = self:getParentPanel()
   if parent_panel[self:getPanelName()] ~= nil and parent_panel[self:getPanelName()].valid then
     return parent_panel[self:getPanelName()], parent_panel[self:getPanelName()]["content_panel"], parent_panel[self:getPanelName()]["header_panel"]["menu_panel"]
@@ -124,8 +122,11 @@ function Form:getPanel()
   GuiElement.setStyle(flow_panel, self.classname, "maximal_height")
 
   local header_panel = GuiElement.add(flow_panel, GuiFlowH("header_panel"))
-  local title_panel = GuiElement.add(header_panel, GuiFrameH("title_panel"):caption(self.panelCaption or self.classname))
+  header_panel.style.horizontally_stretchable = true
+  local title_panel = GuiElement.add(header_panel, GuiFrameH("title_panel"):style(helmod_frame_style.default):caption(self.panelCaption or self.classname))
+  title_panel.style.horizontally_stretchable = true
   title_panel.style.height = 40
+  
   local menu_panel = GuiElement.add(header_panel,  GuiFrameH("menu_panel"):style(helmod_frame_style.panel))
   --menu_panel.style.horizontal_spacing = 10
   menu_panel.style.horizontal_align = "right"
@@ -148,7 +149,6 @@ end
 -- @return #LuaGuiElement
 --
 function Form:getErrorPanel()
-  Logging:trace(self.classname, "getErrorPanel()")
   local flow_panel, content_panel, menu_panel = self:getPanel()
   local panel_name = "error-panel"
   if flow_panel[panel_name] ~= nil and flow_panel[panel_name].valid then
@@ -167,7 +167,6 @@ end
 -- @return #LuaGuiElement
 --
 function Form:getMessagePanel()
-  Logging:trace(self.classname, "getMessagePanel()")
   local flow_panel, content_panel, menu_panel = self:getPanel()
   local panel_name = "message-panel"
   if flow_panel[panel_name] ~= nil and flow_panel[panel_name].valid then
@@ -245,9 +244,7 @@ end
 -- @function [parent=#Form] isOpened
 --
 function Form:isOpened()
-  Logging:trace(self.classname, "isOpened()")
   local parent_panel = self:getParentPanel()
-  Logging:debug(self.classname, "isOpened test", parent_panel[self:getPanelName()] ~= nil, User.isActiveForm(self.classname))
   if parent_panel[self:getPanelName()] ~= nil and User.isActiveForm(self.classname) then
     return true
   end
@@ -262,7 +259,6 @@ end
 -- @param #LuaEvent event
 --
 function Form:open(event)
-  Logging:debug(self.classname, "open()", event)
   self:onBeforeOpen(event)
   if self:isOpened() then return true end
   local parent_panel = self:getParentPanel()
@@ -294,7 +290,6 @@ end
 -- @param #LuaEvent event
 --
 function Form:event(event)
-  Logging:debug(self.classname, "event()", event)
   if not(self:isOpened()) then return end
   self:onEvent(event)
 end
@@ -339,10 +334,8 @@ end
 -- @param #LuaEvent event
 --
 function Form:updateTopMenu(event)
-  Logging:debug(self.classname, "updateTopMenu()", event)
   -- ajoute un menu
   if self.panelCaption ~= nil then
-    Logging:debug(self.classname, "self.panelCaption OK")
     local flow_panel, content_panel, menu_panel = self:getPanel()
     menu_panel.clear()
     if self.panelClose then
@@ -390,7 +383,6 @@ end
 -- @param #LuaEvent event
 --
 function Form:update(event)
-  Logging:debug(self.classname, "update()", event)
   if not(self:isOpened()) then return end
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if self.auto_clear then content_panel.clear() end
@@ -405,7 +397,6 @@ end
 -- @param #LuaEvent event
 --
 function Form:updateMessage(event)
-  Logging:debug(self.classname, "updateMessage()", event)
   if not(self:isOpened()) then return end
   local panel = self:getMessagePanel()
   panel.clear()
@@ -420,7 +411,6 @@ end
 -- @param #LuaEvent event
 --
 function Form:updateError(event)
-  Logging:debug(self.classname, "updateError()", event)
   if not(self:isOpened()) then return end
   local panel = self:getErrorPanel()
   panel.clear()
@@ -445,7 +435,6 @@ end
 --
 function Form:close(force)
   if not(force) and not(self:isOpened()) then return end
-  Logging:debug(self.classname, "close()")
   local flow_panel, content_panel, menu_panel = self:getPanel()
   User.setCloseForm(self.classname, flow_panel.location)
   self:onClose()

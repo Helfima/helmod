@@ -191,7 +191,6 @@ function BurnerPrototype:getJouleCount()
   local factory_prototype = EntityPrototype(self.factory)
   local energy_consumption = factory_prototype:getEnergyConsumption()
   local factory_fuel = self:getFuelPrototype()
-  Logging:debug("HMEnergySourcePrototype", "factory_fuel", factory_fuel, "energy_consumption", energy_consumption)
   if factory_fuel == nil then return nil end
   local burner_effectivity = self:getEffectivity()
   -- 1W/h = 3600J
@@ -246,15 +245,20 @@ function FluidSourcePrototype:getFuelPrototypes()
     local filters = {}
     table.insert(filters, {filter="fuel-value", mode="or", invert=false, comparison=">", value=0})
     local fuels = Player.getFluidPrototypes(filters)
-    local result = {}
-    for key,fuel in pairs(fuels or {}) do
-      result[key] = fuel
+    if not(FactorioV017) then
+      return fuels
+    else
+      -- adaptation pour Factorio V0.17
+      local result = {}
+      for key,fuel in pairs(fuels or {}) do
+        result[key] = fuel
+      end
+      local steam = Player.getFluidPrototype("steam")
+      if steam ~= nil then
+        result[steam.name] = steam
+      end
+      return result
     end
-    local steam = Player.getFluidPrototype("steam")
-    if steam ~= nil then
-      result[steam.name] = steam
-    end
-    return result
   end
 end
 
@@ -322,7 +326,7 @@ function FluidSourcePrototype:getFuelCount()
   if factory_fuel == nil then return nil end
   local burner_effectivity = self:getEffectivity()
   if self.lua_prototype.fluid_usage_per_tick ~= nil and self.lua_prototype.fluid_usage_per_tick ~= 0 then
-    local fluid_usage = self:getFluidUsage()
+    local fluid_usage = self:getFluidUsagePerTick()*60
     local burner_count = fluid_usage
     local fuel_fluid = {type="fluid", name=factory_fuel:native().name, count=burner_count}
     return fuel_fluid

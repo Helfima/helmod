@@ -43,8 +43,6 @@ end
 -- @param #table list_translate
 --
 function ContainerSelector:updateGroups(list_products, list_ingredients, list_translate)
-  Logging:trace(self.classname, "updateGroups()")
-
   local filters = {}
   for _,type in pairs({"storage-tank", "container", "logistic-container", "cargo-wagon", "fluid-wagon", "item-with-entity-data", "car", "logistic-robot", "transport-belt"}) do
     table.insert(filters, {filter="type", mode="or", invert=false, type=type})
@@ -62,7 +60,6 @@ end
 -- @param #LuaPrototype prototype
 --
 function ContainerSelector:buildPrototypeTooltip(prototype)
-  Logging:trace(self.classname, "buildPrototypeTooltip(player, prototype)", prototype)
   -- initalize tooltip
   local entity_prototype = EntityPrototype(prototype)
   local tooltip = entity_prototype:getLocalisedName()
@@ -75,12 +72,6 @@ end
 -- @function [parent=#ContainerSelector] buildPrototypeIcon
 --
 function ContainerSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
-  Logging:trace(self.classname, "buildPrototypeIcon(player, guiElement, prototype, tooltip:",player, guiElement, prototype, tooltip)
   local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select", "container"):choose(prototype.type, prototype.name):color())
   button.locked = true
 end
-
-
-
-
-

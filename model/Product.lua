@@ -17,7 +17,6 @@ Product.classname = "HMProduct"
 -- @return #table
 --
 function Product:getLocalisedName()
-  Logging:trace(self.classname, "getLocalisedName()", self.lua_prototype)
   if self.lua_prototype ~= nil then
     if not(User.getModGlobalSetting("display_real_name")) then
       local localisedName = self.lua_prototype.name
@@ -39,6 +38,23 @@ function Product:getLocalisedName()
     end
   end
   return "unknow"
+end
+
+-------------------------------------------------------------------------------
+-- Return localised name of Prototype
+--
+-- @function [parent=#Product] getLocalisedName
+--
+-- @return #table
+--
+function Product:hasBurntResult()
+  if self.lua_prototype ~= nil then
+    if self.lua_prototype.type == 0 or self.lua_prototype.type == "item" then
+      local item = Player.getItemPrototype(self.lua_prototype.name)
+      return item.burnt_result ~= nil
+    end
+  end
+  return false
 end
 
 -------------------------------------------------------------------------------
@@ -69,7 +85,6 @@ end
 -- @see http://lua-api.factorio.com/latest/Concepts.html#Product
 --
 function Product:getElementAmount()
-  Logging:trace(self.classname, "getElementAmount",self.lua_prototype)
   local element = self.lua_prototype
   if element == nil then return 0 end
 
@@ -98,7 +113,6 @@ end
 -- @return #number
 --
 function Product:getBonusAmount()
-  Logging:trace(self.classname, "getBonusAmount",self.lua_prototype)
   local element = self.lua_prototype
   if element == nil then return 0 end
 
@@ -115,7 +129,6 @@ function Product:getBonusAmount()
   if element.amount ~= nil then
     amount = element.amount
   end
-  Logging:debug(self.classname, "getBonusAmount", amount, catalyst_amount, probability)
   if amount >= catalyst_amount then
     return (amount - catalyst_amount) * probability
   end
@@ -130,7 +143,6 @@ end
 -- @return #string
 --
 function Product:getType()
-  Logging:trace(self.classname, "getType()",self.lua_prototype)
   if self.lua_prototype.type == 1 or self.lua_prototype.type == "fluid" then return "fluid" end
   return "item"
 end
@@ -145,7 +157,6 @@ end
 -- @return #number
 --
 function Product:getAmount(recipe)
-  Logging:trace(self.classname, "getAmount(recipe)",self.lua_prototype)
   local amount = self:getElementAmount()
   local bonus_amount = self:getBonusAmount() -- if there are no catalyst amount = bonus_amount
   if recipe == nil then
@@ -181,7 +192,6 @@ end
 -- @return #number
 --
 function Product:countProduct(recipe)
-  Logging:trace(self.classname, "countProduct",self.lua_prototype)
   local amount = self:getElementAmount()
   local bonus_amount = self:getBonusAmount() -- if there are no catalyst amount = bonus_amount
   return (amount + bonus_amount * self:getProductivityBonus(recipe) ) * recipe.count * self:factorByTime()
@@ -197,7 +207,6 @@ end
 -- @return #number
 --
 function Product:countIngredient(recipe)
-  Logging:trace(self.classname, "countIngredient",self.lua_prototype)
   local amount = self:getElementAmount() * self:factorByTime()
   return amount * recipe.count
 end
@@ -213,7 +222,6 @@ end
 -- @return #number
 --
 function Product:countContainer(count, container)
-  Logging:trace(self.classname, "countContainer",self.lua_prototype)
   if count == nil then return 0 end
   if self.lua_prototype.type == 0 or self.lua_prototype.type == "item" then
     local entity_prototype = EntityPrototype(container)
@@ -263,7 +271,6 @@ end
 -- @return #number
 --
 function Product:getProductivityBonus(recipe)
-  Logging:trace(self.classname, "getProductivityBonus(recipe)", self.lua_prototype)
   if recipe.isluaobject or recipe.factory == nil or recipe.factory.effects == nil then return 1 end
   local productivity = recipe.factory.effects.productivity
 

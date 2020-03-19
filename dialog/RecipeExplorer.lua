@@ -58,7 +58,6 @@ end
 -- @param #LuaEvent event
 --
 function RecipeExplorer:updateHeader(event)
-  Logging:debug(self.classname, "updateHeader()", event)
   local left_menu_panel = self:getLeftMenuPanel()
   left_menu_panel.clear()
   local group1 = GuiElement.add(left_menu_panel, GuiFlowH("group1"))
@@ -73,7 +72,6 @@ end
 -- @param #LuaEvent event
 --
 function RecipeExplorer:onEvent(event)
-  Logging:debug(self.classname, "onEvent()", event)
   local recipe_explore = User.getParameter("explore_recipe")
 --  if event.action == "add-parent" then
 --    local recipes = Player.searchRecipe(event.item3, true)
@@ -98,7 +96,6 @@ function RecipeExplorer:onEvent(event)
     if #recipes == 1 then
       local recipe = recipes[1]
       local new_recipe = {type = recipe.type, name = recipe.name, id=game.tick }
-      Logging:debug(self.classname, "-->recipe", new_recipe, event.item3, recipe_explore)
       self:addRecipe(recipe_explore, new_recipe, event.item3)
       --User.setParameter("explore_recipe", recipe_explore)
       self:updateDisplay()
@@ -191,7 +188,6 @@ end
 -- @function [parent=#RecipeExplorer] updateDisplay
 --
 function RecipeExplorer:updateDisplay()
-  Logging:debug(self.classname, "updateDisplay()")
   local content_panel = self:getInfoPanel()
   content_panel.clear()
   local recipe_explore = User.getParameter("explore_recipe")
@@ -207,7 +203,6 @@ end
 -- @param #table recipe
 --
 function RecipeExplorer:addCell(parent, recipe, index)
-  Logging:debug(self.classname, "addCell()", recipe)
   if recipe ~= nil then
     local recipe_prototype = RecipePrototype(recipe)
     if recipe_prototype:native() ~= nil then
