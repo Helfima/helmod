@@ -19,6 +19,13 @@ data:extend(
     size = 16
   },
   
+  {
+    type = "font",
+    name = "helmod_font_header",
+    from = "default-bold",
+    size = 24
+  },
+  
   
   
   {

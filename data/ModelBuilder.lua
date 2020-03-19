@@ -270,7 +270,11 @@ end
 function ModelBuilder.updateFactoryNumber(item, key, value)
   local object = Model.getObject(item, key)
   if object ~= nil then
-    object.factory.input = value
+    if value == 0 then
+      object.factory.input = nil
+    else
+      object.factory.input = value
+    end
   end
 end
 
@@ -281,11 +285,11 @@ end
 --
 -- @param #string item block_id
 --
-function ModelBuilder.updateBlockMatrixSolver(item)
+function ModelBuilder.updateBlockMatrixSolver(item, value)
   local model = Model.getModel()
   local block = model.blocks[item]
   if block ~= nil then
-    block.solver = not(block.solver)
+    block.solver = value
   end
 end
 
@@ -892,6 +896,7 @@ function ModelBuilder.copyBlock(from_model, from_block)
         recipe_model.factory = Model.newFactory(recipe.factory.name)
         recipe_model.factory.limit = recipe.factory.limit
         recipe_model.factory.fuel = recipe.factory.fuel
+        recipe_model.factory.input = recipe.factory.input
         recipe_model.factory.modules = {}
         if recipe.factory.modules ~= nil then
           for name,value in pairs(recipe.factory.modules) do

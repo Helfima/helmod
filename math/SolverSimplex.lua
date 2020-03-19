@@ -302,22 +302,22 @@ end
 --
 -- @return #table
 --
-function SolverSimplex:solve(Mbase)
+function SolverSimplex:solve(Mbase, debug, by_factory, time)
   if Mbase ~= nil then
     local num_loop = 0
     local runtime = {}
-    self:addRuntime(runtime, "Initial", Mbase)
+    self:addRuntime(debug, runtime, "Initial", Mbase)
     local Mstep = self:prepare(Mbase)
-    self:addRuntime(runtime, "Prepare", Mstep)
+    self:addRuntime(debug, runtime, "Prepare", Mstep)
     local loop, xcol, xrow
     loop = true
     while loop do
       loop, xcol, xrow = self:getPivot(Mstep)
       if loop then
-        self:addRuntime(runtime, "Step "..num_loop, Mstep, {x=xcol,y=xrow})
+        self:addRuntime(debug, runtime, "Step "..num_loop, Mstep, {x=xcol,y=xrow})
         Mstep = self:pivot(Mstep, xrow, xcol)
       else
-        self:addRuntime(runtime, "Last", Mstep)
+        self:addRuntime(debug, runtime, "Last", Mstep)
       end
       num_loop = num_loop + 1
     end
@@ -326,7 +326,7 @@ function SolverSimplex:solve(Mbase)
     Mr = self:tableCompute(Mr, Mstep)
     Mr = self:finalize(Mr)
     Mr = self:appendState(Mr)
-    self:addRuntime(runtime, "final", Mr)
+    self:addRuntime(debug, runtime, "final", Mr)
     return Mr, runtime
   end
 end

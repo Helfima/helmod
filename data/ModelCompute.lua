@@ -118,8 +118,6 @@ function ModelCompute.update(check_unlink)
         block.products = block_products
         block.ingredients = block_ingredients
 
-        ModelCompute.computeBlockByFactory(block)
-
         ModelCompute.computeBlockCleanInput(block)
 
         ModelCompute.computeBlock(block)
@@ -209,79 +207,6 @@ end
 -------------------------------------------------------------------------------
 -- Compute production block
 --
--- @function [parent=#ModelCompute] computeBlockByFactory
---
--- @param #table block block of model
---
-function ModelCompute.computeBlockByFactory(block)
-  local model = Model.getModel()
-
-  local recipes = block.recipes
-  if recipes ~= nil then
-
-    -- calcul selon la factory
-    if block.by_factory == true then
-      -- initialise la premiere recette avec le nombre d'usine
-      local first_recipe = Model.firstRecipe(recipes)
-      if block.by_product == false then
-        first_recipe = Model.lastRecipe(recipes)
-      end
-      if first_recipe ~= nil then
-        first_recipe.factory.count = block.factory_number
-        ModelCompute.computeModuleEffects(first_recipe)
-        ModelCompute.computeFactory(first_recipe)
-
-        if first_recipe.type == "technology" then
-          first_recipe.count = 1
-        else
-          local recipe_prototype = RecipePrototype(first_recipe)
-          
-          -- la recette n'existe plus
-          if recipe_prototype:native() == nil then return end
-
-          if block.by_product == false then
-            local _,lua_ingredient = next(recipe_prototype:getIngredients())
-            -- formula [product amount] * (1 + [productivity]) *[assembly speed]*[time]/[recipe energy]
-            -- Product.load(lua_product).getAmount(first_recipe) calcul avec la productivity
-            local ingredient_prototype = Product(lua_ingredient)
-            local amount = ingredient_prototype:getAmount()
-            local input = amount * ( block.factory_number or 0 ) * first_recipe.factory.speed * model.time / recipe_prototype:getEnergy()
-            if block.ingredients[lua_ingredient.name] ~= nil then
-              block.ingredients[lua_ingredient.name].input = input
-            end
-          else
-            local _,lua_product = next(recipe_prototype:getProducts())
-            if lua_product ~= nil then
-              local lua_ingredient = nil
-              for _,ingredient in pairs(recipe_prototype:getIngredients()) do
-                if ingredient.name == lua_product.name then
-                  lua_ingredient = ingredient
-                end
-              end
-              -- formula [product amount] * (1 + [productivity]) *[assembly speed]*[time]/[recipe energy]
-              -- Product.load(lua_product).getAmount(first_recipe) calcul avec la productivity
-              local product_prototype = Product(lua_product)
-              local amount = product_prototype:getAmount(first_recipe)
-              if lua_ingredient ~= nil then
-                local ingredient_prototype = Product(lua_product)
-                amount = amount - ingredient_prototype:getAmount()
-              end
-              local input = amount * ( block.factory_number or 0 ) * first_recipe.factory.speed * model.time / recipe_prototype:getEnergy()
-              if block.products[lua_product.name] ~= nil then
-                block.products[lua_product.name].input = input
-              end
-            end
-          end
-        end
-      end
-    end
-  end
-
-end
-
--------------------------------------------------------------------------------
--- Compute production block
---
 -- @function [parent=#ModelCompute] computeBlockCleanInput
 --
 -- @param #table block block of model
@@ -346,6 +271,7 @@ function ModelCompute.getBlockMatrix(block)
     col_headers["B"] = {index=1, name="B", type="none", tooltip="Base"} -- Base
     col_headers["M"] = {index=1, name="M", type="none", tooltip="Matrix calculation"} -- Matrix calculation
     col_headers["F"] = {index=1, name="F", type="none", tooltip="Number factory"} -- Number factory
+    col_headers["S"] = {index=1, name="S", type="none", tooltip="Speed factory"} -- Speed factory
     col_headers["R"] = {index=1, name="R", type="none", tooltip="Count recipe"} -- Count recipe
     col_headers["P"] = {index=1, name="P", type="none", tooltip="Production"} -- Production
     col_headers["E"] = {index=1, name="E", type="none", tooltip="Energy"} -- Energy
@@ -361,6 +287,12 @@ function ModelCompute.getBlockMatrix(block)
     end
     
     for _, recipe in spairs(recipes,sorter) do
+      ModelCompute.computeModuleEffects(recipe)
+      if block.isEnergy == true then
+        ModelCompute.computeEnergyFactory(recipe)
+      else
+        ModelCompute.computeFactory(recipe)
+      end
       local row = {}
 
       local row_valid = false
@@ -369,6 +301,7 @@ function ModelCompute.getBlockMatrix(block)
 
       -- la recette n'existe plus
       if recipe_prototype:native() == nil then return end
+      
           
       -- prepare le taux de production
       local production = 1
@@ -377,12 +310,11 @@ function ModelCompute.getBlockMatrix(block)
       row["B"] = {name=recipe.name, type=recipe.type, tooltip=recipe.name.."\nRecette"}
       row["M"] = 0 --recipe.matrix_solver or 0
       row["F"] = recipe.factory.input or 0
+      row["S"] = recipe.factory.speed or 0
       row["R"] = 0
       row["P"] = production
       row["E"] = recipe_prototype:getEnergy()
       row["C"] = 0
-
-      ModelCompute.computeModuleEffects(recipe)
 
       -- preparation
       local lua_products = {}
@@ -606,6 +538,7 @@ end
 -- @param #table block block of model
 --
 function ModelCompute.computeBlock(block)
+  local model = Model.getModel()
   local recipes = block.recipes
   block.power = 0
   block.count = 1
@@ -617,14 +550,16 @@ function ModelCompute.computeBlock(block)
 
     if mA ~= nil then
       local debug = User.getModGlobalSetting("debug_solver")
-      if block.solver == true then
-        my_solver = SolverSimplex(debug)
+      if block.solver == true and block.by_factory ~= true then
+        my_solver = SolverSimplex()
       else
-        my_solver = SolverAlgebra(debug)
+        my_solver = SolverAlgebra()
       end
       -- activate debug
       local ok , err = pcall(function()
-        mC, runtimes = my_solver:solve(mA)
+        local time = model.time
+        if block.isEnergy then time = 1 end
+        mC, runtimes = my_solver:solve(mA, debug, block.by_factory, time)
       end)
       if not(ok) then
         Player.print("Matrix solver can not found solution!")
@@ -651,17 +586,17 @@ function ModelCompute.computeBlock(block)
         sorter = function(t,a,b) return t[b].index < t[a].index end
       end
       for _, recipe in spairs(recipes,sorter) do
-        ModelCompute.computeModuleEffects(recipe)
+        
         recipe.count =  mC[row_index][my_solver.col_R]
         recipe.production = mC[row_index][my_solver.col_P]
         row_index = row_index + 1
-        
+        -- calcul dependant du recipe count
         if block.isEnergy == true then
           ModelCompute.computeEnergyFactory(recipe)
         else
           ModelCompute.computeFactory(recipe)
         end
-
+        
         block.power = block.power + recipe.energy_total
         block.pollution_total = block.pollution_total + recipe.pollution_total
 
@@ -808,13 +743,16 @@ function ModelCompute.computeModuleEffects(recipe)
 
   -- cap la vitesse a self.capSpeed
   if factory.effects.speed < ModelCompute.capSpeed  then factory.effects.speed = ModelCompute.capSpeed end
+  -- cap short integer max for %
+  -- @see https://fr.wikipedia.org/wiki/Entier_court
+  if factory.effects.speed*100 > 32767 then factory.effects.speed = 32767/100 end
 
   -- cap l'energy a self.capEnergy
   if factory.effects.consumption < ModelCompute.capEnergy  then factory.effects.consumption = ModelCompute.capEnergy end
 
   -- cap la pollution a self.capPollution
   if factory.effects.pollution < ModelCompute.capPollution  then factory.effects.pollution = ModelCompute.capPollution end
-
+  return recipe
 end
 
 -------------------------------------------------------------------------------

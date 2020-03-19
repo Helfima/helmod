@@ -94,11 +94,11 @@ function ProductionBlockTab:updateInfo(event)
     local unlink_switch = GuiElement.add(options_scroll, GuiSwitch(self.classname, "block-switch-unlink", current_block):state(unlink_state):leftLabel({"helmod_label.block-unlinked"}):rightLabel({"helmod_label.block-linked"}))
     if element.index == 0 then
       unlink_switch.enabled = false
-      unlink_switch.tooltip = "First block can't link"
+      unlink_switch.tooltip = {"tooltip.block-cannot-link-first"}
     end
     if element.by_factory == true then
       unlink_switch.enabled = false
-      unlink_switch.tooltip = "By factory block can't link"
+      unlink_switch.tooltip = {"tooltip.block-cannot-link-by-factory"}
     end
 
     local element_state = "left"
@@ -107,14 +107,18 @@ function ProductionBlockTab:updateInfo(event)
 
     local by_factory_state = "left"
     if element.by_factory == true then by_factory_state = "right" end
-    GuiElement.add(options_scroll, GuiSwitch(self.classname, "block-switch-factory", current_block):state(by_factory_state):leftLabel({"helmod_label.compute-by-element"}):rightLabel({"helmod_label.compute-by-factory"}))
+    local by_factory_switch = GuiElement.add(options_scroll, GuiSwitch(self.classname, "block-switch-factory", current_block):state(by_factory_state):leftLabel({"helmod_label.compute-by-element"}):rightLabel({"helmod_label.compute-by-factory"}))
+    if element.solver == true then
+      by_factory_switch.enabled = false
+      by_factory_switch.tooltip = {"tooltip.block-cannot-by-factory"}
+    end
 
+    local matrix_solver = "left"
+    if element.solver == true then matrix_solver = "right" end
+    local solver_switch = GuiElement.add(options_scroll, GuiSwitch(self.classname, "block-switch-solver", current_block):state(matrix_solver):leftLabel({"helmod_label.algebraic-solver"}):rightLabel({"helmod_label.matrix-solver"}))
     if element.by_factory == true then
-      local by_factory_panel = GuiElement.add(options_scroll, GuiFlowH("by_factory_panel"))
-      by_factory_panel.style.horizontal_spacing=10
-      local factory_number = element.factory_number or 0
-      GuiElement.add(by_factory_panel, GuiLabel("label-factory_number"):caption({"helmod_label.factory-number"}))
-      GuiElement.add(by_factory_panel, GuiTextField(self.classname, "change-number-option", "factory_number"):text(factory_number):style("helmod_textfield"))
+      solver_switch.enabled = false
+      solver_switch.tooltip = {"tooltip.block-cannot-matrix-solver"}
     end
   end
 end
@@ -589,22 +593,29 @@ function ProductionBlockTab:onEvent(event)
   end
 
   if event.action == "block-switch-unlink" then
-    local switch_unlink_state = event.element.switch_state == "left"
-    ModelBuilder.updateProductionBlockOption(event.item1, "unlinked", switch_unlink_state)
+    local switch_state = event.element.switch_state == "left"
+    ModelBuilder.updateProductionBlockOption(event.item1, "unlinked", switch_state)
     ModelCompute.update()
     Controller:send("on_gui_update", event, self.classname)
   end
 
   if event.action == "block-switch-element" then
-    local switch_unlink_state = event.element.switch_state == "left"
-    ModelBuilder.updateProductionBlockOption(event.item1, "by_product", switch_unlink_state)
+    local switch_state = event.element.switch_state == "left"
+    ModelBuilder.updateProductionBlockOption(event.item1, "by_product", switch_state)
     ModelCompute.update()
     Controller:send("on_gui_update", event, self.classname)
   end
 
   if event.action == "block-switch-factory" then
-    local switch_unlink_state = not(event.element.switch_state == "left")
-    ModelBuilder.updateProductionBlockOption(event.item1, "by_factory", switch_unlink_state)
+    local switch_state = not(event.element.switch_state == "left")
+    ModelBuilder.updateProductionBlockOption(event.item1, "by_factory", switch_state)
+    ModelCompute.update()
+    Controller:send("on_gui_update", event, self.classname)
+  end
+
+  if event.action == "block-switch-solver" then
+    local switch_state = event.element.switch_state == "right"
+    ModelBuilder.updateProductionBlockOption(event.item1, "solver", switch_state)
     ModelCompute.update()
     Controller:send("on_gui_update", event, self.classname)
   end

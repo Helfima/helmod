@@ -128,7 +128,7 @@ end
 --
 function GuiTooltip:appendDebug(tooltip, element)
     -- debug     
-    if User.getModGlobalSetting("debug_solver") ~= "none" then
+    if User.getModGlobalSetting("debug_solver") == true then
       table.insert(tooltip, {"", "\n", "----------------------"})
       table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Name", ": ", helmod_tag.font.default_bold, self.m_element.name or "nil", helmod_tag.font.close})
       table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Type", ": ", helmod_tag.font.default_bold, self.m_element.type or "nil", helmod_tag.font.close})

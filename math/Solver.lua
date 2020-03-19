@@ -2,29 +2,18 @@
 -- Description of the module.
 -- @module Solver
 --
-Solver = newclass(function(base, debug)
-    base.debug = debug
-    base.debug_col = 10
-    base.col_start = 7
+Solver = newclass(function(base)
+    base.debug_col = 11
+    base.col_start = 8
     base.row_input = 2
     base.col_M = 2
     base.col_F = 3
-    base.col_R = 4
-    base.col_P = 5
-    base.col_E = 6
-    base.col_C = 7
+    base.col_S = 4
+    base.col_R = 5
+    base.col_P = 6
+    base.col_E = 7
+    base.col_C = 8
 end)
-
--------------------------------------------------------------------------------
--- Add runtime
---
--- @function [parent=#Solver] addRuntime
---
-function Solver:addRuntime(runtime, name, matrix, pivot)
-    if self.debug == true then
-        table.insert(runtime, {name=name, matrix=matrix, pivot=pivot})
-    end
-end
 
 -------------------------------------------------------------------------------
 -- Clone la matrice
@@ -57,17 +46,6 @@ end
 --
 function Solver:prepare(M)
     local Mx = self:clone(M)
-    -- initialise les valeurs des produits par second
-    for irow,row in pairs(Mx) do
-      if irow > self.row_input then
-        local E = Mx[irow][self.col_E]
-        for icol,cell in pairs(row) do
-          if icol > self.col_start then
-            Mx[irow][icol] = cell / E
-          end
-        end
-      end
-    end
     local irow = 1
     local row = {}
     -- ajoute la ligne Z avec Z=-input
@@ -102,8 +80,8 @@ end
 --
 -- @function [parent=#Solver] addRuntime
 --
-function Solver:addRuntime(runtime, name, matrix, pivot)
-    if self.debug == true then
+function Solver:addRuntime(debug, runtime, name, matrix, pivot)
+    if debug == true then
         table.insert(runtime, {name=name, matrix=self:clone(matrix), pivot=pivot})
     end
 end

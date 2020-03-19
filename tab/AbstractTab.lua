@@ -386,12 +386,6 @@ function AbstractTab:updateMenuPanel(event)
     if self.classname == "HMProductionBlockTab" then
       GuiElement.add(group3, GuiButton("HMPinPanel", "OPEN", block_id):sprite("menu", "pin-white", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
       GuiElement.add(group3, GuiButton("HMSummaryPanel", "OPEN", block_id):sprite("menu", "brief-white","brief"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
-      local block = model.blocks[block_id]
-      if block ~= nil then
-        local style = "helmod_button_menu"
-        if block.solver == true then style = "helmod_button_menu_selected" end
-        GuiElement.add(group3, GuiButton("HMProductionBlockTab", "production-block-solver", block_id):sprite("menu", "settings-white", "settings"):style(style):tooltip({"helmod_button.matrix-solver"}))
-      end
       -- Model Debug
       if User.getModGlobalSetting("debug_solver") == true then
         local groupDebug = GuiElement.add(action_panel, GuiFlowH("groupDebug"))

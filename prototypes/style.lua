@@ -168,6 +168,53 @@ default_gui["helmod_textfield_element"] = {
 }
 
 -------------------------------------------------------------------------------
+-- Style of element
+--
+-- @field [parent=#Textfield] element
+default_gui["helmod_textfield_element_green"] = {
+  type = "textbox_style",
+  parent = "helmod_textfield_element",
+  default_background =
+      {
+        filename = "__helmod__/graphics/gui.png",
+        corner_size = 3,
+        position = {8, 80},
+        scale = 1
+      },
+      active_background =
+      {
+        filename = "__helmod__/graphics/gui.png",
+        corner_size = 3,
+        position = {0, 80},
+        scale = 1
+      }
+}
+
+-------------------------------------------------------------------------------
+-- Style of element
+--
+-- @field [parent=#Textfield] element
+default_gui["helmod_textfield_element_red"] = {
+  type = "textbox_style",
+  parent = "helmod_textfield_element",
+  default_background =
+      {
+        filename = "__helmod__/graphics/gui.png",
+        corner_size = 3,
+        position = {8, 88},
+        scale = 1
+      },
+      active_background =
+      {
+        filename = "__helmod__/graphics/gui.png",
+        corner_size = 3,
+        position = {0, 88},
+        scale = 1
+      }
+}
+
+
+-------------------------------------------------------------------------------
 -- Style of calculator
 --
 -- @field [parent=#Textfield] calculator
@@ -225,7 +272,8 @@ default_gui["helmod_button_default"] = {
   clicked_graphical_set = compositionIcon("__core__/graphics/gui.png", corner_size, {0, 40}),
   disabled_font_color={r=0.5, g=0.5, b=0.5},
   disabled_graphical_set = compositionIcon("__core__/graphics/gui.png", corner_size, {0, 16}),
-  pie_progress_color = {r=1, g=1, b=1}
+  pie_progress_color = {r=1, g=1, b=1},
+  stretch_image_to_widget_size = true
 }
 
 -------------------------------------------------------------------------------
@@ -697,6 +745,22 @@ default_gui["helmod_label_default"] = {
   right_padding = 2,
   bottom_padding = 2,
   left_padding = 2
+}
+
+-------------------------------------------------------------------------------
+-- Style of default
+--
+-- @field [parent=#Label] default
+
+default_gui["helmod_label_header"] = {
+  type = "label_style",
+  parent = "label",
+  font = "helmod_font_header",
+  top_padding = 0,
+  right_padding = 0,
+  bottom_padding = 0,
+  left_padding = 0,
+  font_color = {245/255, 219/255, 194/255}
 }
 
 -------------------------------------------------------------------------------

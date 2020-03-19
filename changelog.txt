@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.10.11
+Date: 18. 03. 2020
+  Changes:
+    - modified computing by factory
+    - modified solver button by switch
+  Bugfixes:
+    - fixed panel headers
+    - fixed debug tooltip
+---------------------------------------------------------------------------------------------------
 Version: 0.10.10
 Date: 15. 03. 2020
   Changes:
@@ -56,7 +65,7 @@ Version: 0.10.4
 Date: 16. 02. 2020
   Changes:
     - generate user cache on several tick
-    - added error if recursive event > 6000
+    - added error if recursive event 6000
     - added fluid fuel for factory
     - change display module of factory
     - added response on ENTER in the filter input of selector
@@ -74,8 +83,7 @@ Date: 10. 02. 2020
     - changed admin panel, now can delete cache by panel
     - added few tick to generate recipe panel
   Bugfixes:
-    - fixed switch contain/equal in recipe selector
-    - fixed switch contain/equal in recipe selector
+    - fixed switch contain or equal in recipe selector
 ---------------------------------------------------------------------------------------------------
 Version: 0.10.2
 Date: 28. 01. 2020
@@ -97,7 +105,7 @@ Date: 24. 01. 2020
     - Modify for factorio 0.18
     - Changed pollution to display value, per minute in tooltip
   Bugfixes:
-    - fixed copy/past block for fuel and module
+    - fixed copy past block for fuel and module
     - fixed default factory from mod setting and the default set at 1
 ---------------------------------------------------------------------------------------------------
 Version: 0.10.0

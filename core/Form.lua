@@ -122,8 +122,11 @@ function Form:getPanel()
   GuiElement.setStyle(flow_panel, self.classname, "maximal_height")
 
   local header_panel = GuiElement.add(flow_panel, GuiFlowH("header_panel"))
-  local title_panel = GuiElement.add(header_panel, GuiFrameH("title_panel"):caption(self.panelCaption or self.classname))
+  header_panel.style.horizontally_stretchable = true
+  local title_panel = GuiElement.add(header_panel, GuiFrameH("title_panel"):style(helmod_frame_style.default):caption(self.panelCaption or self.classname))
+  title_panel.style.horizontally_stretchable = true
   title_panel.style.height = 40
+  
   local menu_panel = GuiElement.add(header_panel,  GuiFrameH("menu_panel"):style(helmod_frame_style.panel))
   --menu_panel.style.horizontal_spacing = 10
   menu_panel.style.horizontal_align = "right"

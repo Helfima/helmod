@@ -191,12 +191,17 @@ function GuiCellFactory:create(parent)
   end
 
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element", color, 3))
-  -- if self.m_by_factory then
-  --   local text_field = GuiElement.add(row3, GuiTextField(self.m_uri):text(factory.input or 0):style("helmod_textfield_element"):tooltip({"helmod_common.total"}))
-  --   text_field.style.height = 15
-  -- else
+  if self.m_by_factory then
+    local style = "helmod_textfield_element"
+    if factory.input ~= nil then
+      style = "helmod_textfield_element_red"
+    end
+    local text_field = GuiElement.add(row3, GuiTextField(self.m_uri):text(factory.input or factory.count or 0):style(style):tooltip({"helmod_common.total"}))
+    text_field.style.height = 15
+    
+  else
     GuiElement.add(row3, GuiLabel("label2", factory.name):caption(Format.formatNumberFactory(factory.count)):style("helmod_label_element"):tooltip({"helmod_common.total"}))
-  --end
+  end
   return cell
 end
 

@@ -326,7 +326,7 @@ function FluidSourcePrototype:getFuelCount()
   if factory_fuel == nil then return nil end
   local burner_effectivity = self:getEffectivity()
   if self.lua_prototype.fluid_usage_per_tick ~= nil and self.lua_prototype.fluid_usage_per_tick ~= 0 then
-    local fluid_usage = self:getFluidUsage()
+    local fluid_usage = self:getFluidUsagePerTick()*60
     local burner_count = fluid_usage
     local fuel_fluid = {type="fluid", name=factory_fuel:native().name, count=burner_count}
     return fuel_fluid
