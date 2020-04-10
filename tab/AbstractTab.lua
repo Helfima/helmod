@@ -134,7 +134,8 @@ function AbstractTab:getInfoPanel2()
 
   local options_panel = GuiElement.add(panel, GuiFlowV("options"))
   GuiElement.add(options_panel, GuiLabel("label-info"):caption({"helmod_button.options"}):style("helmod_label_title_frame"))
-  local options_scroll = GuiElement.add(options_panel, GuiScroll("options-scroll"):style(helmod_frame_style.scroll_pane))
+  --local options_scroll = GuiElement.add(options_panel, GuiScroll("options-scroll"):style(helmod_frame_style.scroll_pane))
+  local options_scroll = GuiElement.add(options_panel, GuiFlowV("options-scroll"))
 
   local info_panel = GuiElement.add(panel, GuiFlowV("info"))
   GuiElement.add(info_panel, GuiLabel("label-info"):caption({"helmod_common.information"}):style("helmod_label_title_frame"))

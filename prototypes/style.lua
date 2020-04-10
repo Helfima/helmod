@@ -816,8 +816,6 @@ default_gui["helmod_label_element_sm"] = {
 default_gui["helmod_label_help"] = {
   type = "label_style",
   parent = "helmod_label_default",
-  minimal_width = 380,
-  maximal_width = 380,
   single_line = false
 }
 
@@ -883,13 +881,14 @@ default_gui["helmod_label_help_menu_1"] = {
   parent = "helmod_label_help",
   font = "helmod_font_title_frame",
   hovered_font_color = {1, 0.74, 0.40},
-  clicked_font_color = {0.98, 0.66, 0.22}
+  clicked_font_color = {0.98, 0.66, 0.22},
+  top_padding = 2,
+  bottom_padding = 0
 }
 
 default_gui["helmod_label_help_menu_1_selected"] = {
   type = "label_style",
-  parent = "helmod_label_help",
-  font = "helmod_font_title_frame",
+  parent = "helmod_label_help_menu_1",
   font_color = {0.98, 0.66, 0.22}
 }
 
@@ -903,14 +902,15 @@ default_gui["helmod_label_help_menu_2"] = {
   parent = "helmod_label_help",
   hovered_font_color = {1, 0.74, 0.40},
   clicked_font_color = {0.98, 0.66, 0.22},
-  left_padding = 10
+  left_padding = 10,
+  top_padding = 0,
+  bottom_padding = 0
 }
 
 default_gui["helmod_label_help_menu_2_selected"] = {
   type = "label_style",
-  parent = "helmod_label_help",
-  font_color = {0.98, 0.66, 0.22},
-  left_padding = 10
+  parent = "helmod_label_help_menu_2",
+  font_color = {0.98, 0.66, 0.22}
 }
 
 -------------------------------------------------------------------------------

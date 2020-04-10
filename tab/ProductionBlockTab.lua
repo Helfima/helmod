@@ -83,10 +83,10 @@ function ProductionBlockTab:updateInfo(event)
     local element = model.blocks[current_block]
 
     -- block panel
-    GuiElement.add(block_table, GuiCellBlockInfo("block-count"):element(element):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(1))
-    GuiElement.add(block_table, GuiCellEnergy("block-power"):element(element):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2))
+    GuiElement.add(block_table, GuiCellBlockInfo("block-count"):element(element):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(1):byLimit(element.by_limit))
+    GuiElement.add(block_table, GuiCellEnergy("block-power"):element(element):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2):byLimit(element.by_limit))
     if User.getPreferenceSetting("display_pollution") then
-      GuiElement.add(block_table, GuiCellPollution("block-pollution"):element(element):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2))
+      GuiElement.add(block_table, GuiCellPollution("block-pollution"):element(element):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2):byLimit(element.by_limit))
     end
 
     local unlink_state = "right"
@@ -120,6 +120,13 @@ function ProductionBlockTab:updateInfo(event)
       solver_switch.enabled = false
       solver_switch.tooltip = {"tooltip.block-cannot-matrix-solver"}
     end
+
+    local block_limit = "right"
+    if element.by_limit == true then block_limit = "left" end
+    local block_switch_limit = GuiElement.add(options_scroll, GuiFlowH("block-switch"))
+    block_switch_limit.style.horizontal_spacing=10
+    GuiElement.add(block_switch_limit, GuiLabel("block-label-limit"):caption({"helmod_label.assembler-limitation"}))
+    GuiElement.add(block_switch_limit, GuiSwitch(self.classname, "block-switch-limit", current_block):state(block_limit):leftLabel({"gui.on"}):rightLabel({"gui.off"}))
   end
 end
 
@@ -199,7 +206,7 @@ function ProductionBlockTab:updateInput(event)
           else
             button_color = GuiElement.color_button_default_ingredient
           end
-          GuiElement.add(input_table, GuiCellElementM(self.classname, button_action, block.id, ingredient.name):element(ingredient):tooltip(button_tooltip):index(index):color(button_color))
+          GuiElement.add(input_table, GuiCellElementM(self.classname, button_action, block.id, ingredient.name):element(ingredient):tooltip(button_tooltip):index(index):color(button_color):byLimit(block.by_limit))
         end
       end
     end
@@ -287,7 +294,7 @@ function ProductionBlockTab:updateOutput(event)
           else
             button_color = GuiElement.color_button_default_product
           end
-          GuiElement.add(output_table, GuiCellElementM(self.classname, button_action, block.id, product.name):element(product):tooltip(button_tooltip):index(index):color(button_color))
+          GuiElement.add(output_table, GuiCellElementM(self.classname, button_action, block.id, product.name):element(product):tooltip(button_tooltip):index(index):color(button_color):byLimit(block.by_limit))
         end
       end
     end
@@ -463,24 +470,27 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
   --  local production_label = Format.formatPercent(production).."%"
   --  if block.solver == true then production_label = "" end
   local cell_recipe = GuiElement.add(gui_table, GuiTable("recipe", recipe.id):column(2):style(helmod_table_style.list))
-  GuiElement.add(cell_recipe, GuiCellRecipe("HMRecipeEdition", "OPEN", block.id, recipe.id):element(recipe):infoIcon(recipe.type):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):broken(recipe_prototype:native() == nil))
+  GuiElement.add(cell_recipe, GuiCellRecipe("HMRecipeEdition", "OPEN", block.id, recipe.id):element(recipe):infoIcon(recipe.type):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):broken(recipe_prototype:native() == nil):byLimit(block.by_limit))
   if recipe_prototype:native() == nil then
     Player.print("ERROR: Recipe ".. recipe.name .." not exist in game")
   end
   -- col energy
   local cell_energy = GuiElement.add(gui_table, GuiTable("energy", recipe.id):column(2):style(helmod_table_style.list))
-  GuiElement.add(cell_energy, GuiCellEnergy("HMRecipeEdition", "OPEN", block.id, recipe.id):element(recipe):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default))
+  GuiElement.add(cell_energy, GuiCellEnergy("HMRecipeEdition", "OPEN", block.id, recipe.id):element(recipe):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit))
 
   -- col pollution
   if User.getPreferenceSetting("display_pollution") then
     local cell_pollution = GuiElement.add(gui_table, GuiTable("pollution", recipe.id):column(2):style(helmod_table_style.list))
-    GuiElement.add(cell_pollution, GuiCellPollution("HMRecipeEdition", "OPEN", block.id, recipe.id):element(recipe):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default))
+    GuiElement.add(cell_pollution, GuiCellPollution("HMRecipeEdition", "OPEN", block.id, recipe.id):element(recipe):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit))
   end
   
   -- col factory
   local factory = recipe.factory
   local cell_factory = GuiElement.add(gui_table, GuiTable("factory", recipe.id):column(2):style(helmod_table_style.list))
-  local gui_cell_factory = GuiCellFactory("HMRecipeEdition", "OPEN", block.id, recipe.id):element(factory):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default)
+  local gui_cell_factory = GuiCellFactory("HMRecipeEdition", "OPEN", block.id, recipe.id):element(factory):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit)
+  if block.by_limit == true then
+    gui_cell_factory:byLimitUri(self.classname, "update-factory-limit", block.id, recipe.id)
+  end
   if block.by_factory == true then
     gui_cell_factory:byFactory(self.classname, "update-factory-number", block.id, recipe.id)
   end
@@ -489,8 +499,9 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
   -- col beacon
   local beacon = recipe.beacon
   local cell_beacon = GuiElement.add(gui_table, GuiTable("beacon", recipe.id):column(2):style(helmod_table_style.list))
-  GuiElement.add(cell_beacon, GuiCellFactory("HMRecipeEdition", "OPEN", block.id, recipe.id):element(beacon):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default))
-  
+  local gui_cell_beacon = GuiCellFactory("HMRecipeEdition", "OPEN", block.id, recipe.id):element(beacon):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit)
+  GuiElement.add(cell_beacon, gui_cell_beacon)
+
   for _,order in pairs(Model.getBlockOrder()) do
     if order == "products" then
       -- products
@@ -503,7 +514,7 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
         if block.count > 1 then
           product.limit_count = product.count / block.count
         end
-        GuiElement.add(cell_products, GuiCellElement(self.classname, "production-recipe-product-add", block.id, recipe.name):element(product):tooltip("tooltip.add-recipe"):index(index))
+        GuiElement.add(cell_products, GuiCellElement(self.classname, "production-recipe-product-add", block.id, recipe.name):element(product):tooltip("tooltip.add-recipe"):index(index):byLimit(block.by_limit))
       end
     else
       -- ingredients
@@ -516,7 +527,7 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
         if block.count > 1 then
           ingredient.limit_count = ingredient.count / block.count
         end
-        GuiElement.add(cell_ingredients, GuiCellElement(self.classname, "production-recipe-ingredient-add", block.id, recipe.name):element(ingredient):tooltip("tooltip.add-recipe"):color(GuiElement.color_button_add):index(index))
+        GuiElement.add(cell_ingredients, GuiCellElement(self.classname, "production-recipe-ingredient-add", block.id, recipe.name):element(ingredient):tooltip("tooltip.add-recipe"):color(GuiElement.color_button_add):index(index):byLimit(block.by_limit))
       end
     end
   end
@@ -548,10 +559,29 @@ function ProductionBlockTab:onEvent(event)
   if not(User.isWriter()) then return end
   
   if event.action == "update-factory-number" then
-    local value = GuiElement.getInputNumber(event.element)
-    ModelBuilder.updateFactoryNumber(event.item1, event.item2, value)
-    ModelCompute.update()
-    Controller:send("on_gui_update", event)
+    local text = event.element.text
+    local ok , err = pcall(function()
+      local value = formula(text) or 0
+      ModelBuilder.updateFactoryNumber(event.item1, event.item2, value)
+      ModelCompute.update()
+      Controller:send("on_gui_update", event)
+    end)
+    if not(ok) then
+      Player.print("Formula is not valid!")
+    end
+  end
+
+  if event.action == "update-factory-limit" then
+    local text = event.element.text
+    local ok , err = pcall(function()
+      local value = formula(text) or 0
+      ModelBuilder.updateFactoryLimit(event.item1, event.item2, value)
+      ModelCompute.update()
+      Controller:send("on_gui_update", event)
+    end)
+    if not(ok) then
+      Player.print("Formula is not valid!")
+    end
   end
 
   if event.action == "update-matrix-solver" then
@@ -616,6 +646,13 @@ function ProductionBlockTab:onEvent(event)
   if event.action == "block-switch-solver" then
     local switch_state = event.element.switch_state == "right"
     ModelBuilder.updateProductionBlockOption(event.item1, "solver", switch_state)
+    ModelCompute.update()
+    Controller:send("on_gui_update", event, self.classname)
+  end
+
+  if event.action == "block-switch-limit" then
+    local switch_state = event.element.switch_state == "left"
+    ModelBuilder.updateProductionBlockOption(event.item1, "by_limit", switch_state)
     ModelCompute.update()
     Controller:send("on_gui_update", event, self.classname)
   end

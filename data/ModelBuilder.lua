@@ -279,6 +279,26 @@ function ModelBuilder.updateFactoryNumber(item, key, value)
 end
 
 -------------------------------------------------------------------------------
+-- Update a factory limit
+--
+-- @function [parent=#ModelBuilder] updateFactoryLimit
+--
+-- @param #string item block_id
+-- @param #string key object name
+-- @param #number value
+--
+function ModelBuilder.updateFactoryLimit(item, key, value)
+  local object = Model.getObject(item, key)
+  if object ~= nil then
+    if value == 0 then
+      object.factory.limit = nil
+    else
+      object.factory.limit = value
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Update block matrix solver
 --
 -- @function [parent=#ModelBuilder] updateBlockMatrixSolver
@@ -687,7 +707,7 @@ function ModelBuilder.setBeaconBlock(block_id, current_recipe)
     for key, recipe in pairs(block.recipes) do
       local prototype_recipe = RecipePrototype(recipe)
       if default_beacon_mode ~= "category" or prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
-        Model.setBeacon(block_id, key, current_recipe.beacon.name, current_recipe.beacon.combo, current_recipe.beacon.factory)
+        Model.setBeacon(block_id, key, current_recipe.beacon.name, current_recipe.beacon.combo, current_recipe.beacon.per_factory, current_recipe.beacon.per_factory_constant)
         if User.getParameter("default_beacon_with_module") == true then
           ModelBuilder.setBeaconModulePriority(block_id, key, current_recipe.beacon.module_priority)
         end
@@ -907,6 +927,8 @@ function ModelBuilder.copyBlock(from_model, from_block)
           recipe_model.factory.module_priority = table.clone(recipe.factory.module_priority)
         end
         recipe_model.beacon = Model.newBeacon(recipe.beacon.name)
+        recipe_model.beacon.per_factory = recipe.beacon.per_factory
+        recipe_model.beacon.per_factory_constant = recipe.beacon.per_factory_constant
         recipe_model.beacon.modules = {}
         if recipe.beacon.modules ~= nil then
           for name,value in pairs(recipe.beacon.modules) do
@@ -990,6 +1012,12 @@ function ModelBuilder.updateBeacon(item, key, options)
     end
     if options.factory ~= nil then
       object.beacon.factory = options.factory
+    end
+    if options.per_factory ~= nil then
+      object.beacon.per_factory = options.per_factory
+    end
+    if options.per_factory_constant ~= nil then
+      object.beacon.per_factory_constant = options.per_factory_constant
     end
   end
 end

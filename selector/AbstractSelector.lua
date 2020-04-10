@@ -401,6 +401,7 @@ function AbstractSelector:translate(event)
   if not(Cache.isEmpty(self.classname, "list_translate")) or (event.continue and event.method == "translate") then
     if User.getModGlobalSetting("filter_translated_string_active") and (not(User.isTranslate()) or (event.continue and event.method == "translate")) then
       local list_translate = Cache.getData(self.classname, "list_translate")
+      local index_end = Model.countList(list_translate)
       local step_translate = User.getModGlobalSetting("user_cache_step") or 100
       local start_index = event.index_translate or 0
       local index = -1
@@ -414,6 +415,9 @@ function AbstractSelector:translate(event)
         if index >= start_index then
           Player.native().request_translation(localised_name)
         end
+      end
+      if index >= index_end then
+        return User.createNextEvent(nil, self.classname, "translate")
       end
       return User.createNextEvent(event, self.classname, "translate", index)
     else
@@ -534,6 +538,12 @@ function AbstractSelector:updateFilter(event)
       GuiElement.add(guiFilter, GuiLabel("filter_show_hidden"):caption({"helmod_recipe-edition-panel.filter-show-hidden"}))
     end
 
+    if self.hidden_player_crafting then
+      local filter_show_hidden_player_crafting = User.getSetting("filter_show_hidden_player_crafting")
+      GuiElement.add(guiFilter, GuiCheckBox(self.classname, "change-boolean-settings", "filter_show_hidden_player_crafting"):state(filter_show_hidden_player_crafting))
+      GuiElement.add(guiFilter, GuiLabel("filter_show_hidden_player_crafting"):caption({"helmod_recipe-edition-panel.filter-show-hidden-player-crafting"}))
+    end
+
     GuiElement.add(guiFilter, GuiLabel("filter-value"):caption({"helmod_common.filter"}))
     local cellFilter = GuiElement.add(guiFilter, GuiFrameH("cell-filter"):style(helmod_frame_style.hidden))
     if User.getModGlobalSetting("filter_on_text_changed") then
@@ -578,6 +588,7 @@ function AbstractSelector:createElementLists(event)
     local list = self:getListPrototype()
     local filter_show_disable = User.getSetting("filter_show_disable")
     local filter_show_hidden = User.getSetting("filter_show_hidden")
+    local filter_show_hidden_player_crafting = User.getSetting("filter_show_hidden_player_crafting")
     
     event.continue = false
     local step_list = User.getModGlobalSetting("user_cache_step") or 100
@@ -595,7 +606,10 @@ function AbstractSelector:createElementLists(event)
         if self:checkFilter(key) then
           for element_name, element in pairs(element) do
             local prototype = self:getPrototype(element)
-            if (not(self.disable_option) or (prototype:getEnabled() == true or filter_show_disable == true)) and (not(self.hidden_option) or (prototype:getHidden() == false or filter_show_hidden == true)) then
+            if (not(self.disable_option) or (prototype:getEnabled() == true or filter_show_disable == true)) and 
+              (not(self.hidden_option) or (prototype:getHidden() == false or filter_show_hidden == true)) and
+              (not(self.hidden_player_crafting) or (prototype:getHiddenPlayerCrafting() == false or filter_show_hidden_player_crafting == true)) then
+
               if list_group_elements[element.group] == nil then list_group_elements[element.group] = {} end
               if list_group_elements[element.group][element.subgroup] == nil then list_group_elements[element.group][element.subgroup] = {} end
               list_group_elements[element.group][element.subgroup][element_name] = element

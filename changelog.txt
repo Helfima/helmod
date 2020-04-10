@@ -1,6 +1,25 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.10.13
+Date: 10. 04. 2020
+  Changes:
+    - changed max per bloc by assembler limitation
+    - changed beacon ratio, ax+b where x is factory number
+    - added some unittest
+    - added recipe filter for player crafting
+    - updated help
+  Bugfixes:
+    - fixed void energy source
+    - fixed pause in MP on saved game with actived auto-pause
+    - fixed next_event in MP
+---------------------------------------------------------------------------------------------------
+Version: 0.10.12
+Date: 26. 03. 2020
+  Bugfixes:
+    - fixed computing by factory
+    - fixed power calculation
+---------------------------------------------------------------------------------------------------
 Version: 0.10.11
-Date: 18. 03. 2020
+Date: 19. 03. 2020
   Changes:
     - modified computing by factory
     - modified solver button by switch

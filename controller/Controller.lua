@@ -12,7 +12,6 @@ require "dialog.RecipeExplorer"
 
 require "edition.RecipeEdition"
 require "edition.ProductEdition"
-require "edition.EnergyEdition"
 require "edition.RuleEdition"
 require "edition.PreferenceEdition"
 
@@ -33,6 +32,7 @@ require "tab.StatisticTab"
 require "tab.PropertiesTab"
 require "tab.PrototypeFiltersTab"
 require "tab.AdminTab"
+require "tab.UnitTestTab"
 
 require "model.Prototype"
 require "model.ElectricPrototype"
@@ -92,6 +92,7 @@ function Controller:prepare()
   table.insert(forms, PropertiesTab("HMPropertiesTab"))
   table.insert(forms, PrototypeFiltersTab("HMPrototypeFiltersTab"))
   table.insert(forms, AdminTab("HMAdminTab"))
+  table.insert(forms, UnitTestTab("HMUnitTestTab"))
 
   table.insert(forms, EnergySelector("HMEnergySelector"))
   table.insert(forms, EntitySelector("HMEntitySelector"))
@@ -103,7 +104,6 @@ function Controller:prepare()
 
   table.insert(forms, RecipeEdition("HMRecipeEdition"))
   table.insert(forms, ProductEdition("HMProductEdition"))
-  --table.insert(forms, EnergyEdition("HMEnergyEdition"))
   table.insert(forms, RuleEdition("HMRuleEdition"))
   table.insert(forms, PreferenceEdition("HMPreferenceEdition"))
 
@@ -265,12 +265,12 @@ function Controller:onTick(event)
   if Player.native() ~= nil then
     local next_event = User.getParameter("next_event")
     if next_event ~= nil then
-      if (next_event.event.iteration or 0) < 6000 then
+      if (next_event.event.iteration or 0) < 200 then
         next_event.event.iteration = (next_event.event.iteration or 0) + 1
         Dispatcher:send(next_event.type_event, next_event.event, next_event.classname)
       else
         User.setParameter("next_event", nil)
-        event.message = {"", {"helmod_error.excessive-event-iteration"}, " (>6000)"}
+        event.message = {"", {"helmod_error.excessive-event-iteration"}, " (>200)"}
         Dispatcher:send("on_gui_error", event, next_event.classname)
       end
     end
@@ -773,13 +773,6 @@ function Controller:onEventAccessWrite(event)
     end
   end
 
-  if User.isActiveForm("HMEnergyTab") then
-    if event.action == "power-remove" then
-      ModelBuilder.removePower(event.item1)
-      self:send("on_gui_update", event)
-    end
-  end
-
   if event.action == "past-model" then
     if User.isActiveForm("HMProductionBlockTab") then
       ModelBuilder.pastModel(User.getParameter("copy_from_model_id"), User.getParameter("copy_from_block_id"))
@@ -830,9 +823,11 @@ function Controller:onEventAccessAdmin(event)
   end
 
   if event.action == "game-pause" then
-    User.setParameter("auto-pause", true)
-    game.tick_paused = true
-    self:send("on_gui_pause", event)
+    if not(game.is_multiplayer()) then
+      User.setParameter("auto-pause", true)
+      game.tick_paused = true
+      self:send("on_gui_pause", event)
+    end
   end
 
   if event.action == "game-play" then

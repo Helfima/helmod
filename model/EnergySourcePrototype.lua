@@ -47,6 +47,35 @@ function EnergySourcePrototype:getFuelCount()
   return nil
 end
 
+-------------------------------------------------------------------------------
+-- Return fuel fluid prototypes
+--
+-- @function [parent=#EnergySourcePrototype] getFuelPrototypes
+--
+function EnergySourcePrototype:getFuelPrototypes()
+  return nil
+end
+
+-------------------------------------------------------------------------------
+-- Return first fuel fluid prototype
+--
+-- @function [parent=#EnergySourcePrototype] getFirstFuelPrototype
+--
+-- @param #string name item name
+--
+function EnergySourcePrototype:getFirstFuelPrototype()
+  return nil
+end
+
+-------------------------------------------------------------------------------
+-- Return fuel prototype
+--
+-- @function [parent=#EnergySourcePrototype] getFuelPrototype
+--
+function EnergySourcePrototype:getFuelPrototype()
+  return nil
+end
+
 ElectricSourcePrototype = newclass(EnergySourcePrototype,function(base,lua_prototype)
   EnergySourcePrototype.init(base,lua_prototype)
 end)
@@ -61,6 +90,20 @@ end)
 function ElectricSourcePrototype:getBufferCapacity()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.buffer_capacity or 0
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
+-- Return buffer capacity
+--
+-- @function [parent=#ElectricSourcePrototype] getBufferCapacity
+--
+-- @return #number default 0
+--
+function ElectricSourcePrototype:getDrain()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.drain * 60 or 0
   end
   return 0
 end
@@ -325,9 +368,14 @@ function FluidSourcePrototype:getFuelCount()
   local factory_fuel = self:getFuelPrototype()
   if factory_fuel == nil then return nil end
   local burner_effectivity = self:getEffectivity()
-  if self.lua_prototype.fluid_usage_per_tick ~= nil and self.lua_prototype.fluid_usage_per_tick ~= 0 then
+  if factory_prototype:getType() ~= "assembling-machine" and self.lua_prototype.fluid_usage_per_tick ~= nil and self.lua_prototype.fluid_usage_per_tick ~= 0 then
     local fluid_usage = self:getFluidUsagePerTick()*60
     local burner_count = fluid_usage
+    local fuel_fluid = {type="fluid", name=factory_fuel:native().name, count=burner_count}
+    return fuel_fluid
+  elseif factory_prototype:getType() == "assembling-machine" then
+    local fuel_value = factory_fuel:getFuelValue()
+    local burner_count = energy_consumption*60/(fuel_value*burner_effectivity)
     local fuel_fluid = {type="fluid", name=factory_fuel:native().name, count=burner_count}
     return fuel_fluid
   else
@@ -338,7 +386,7 @@ function FluidSourcePrototype:getFuelCount()
   end
 end
 
-VoidSourcePrototype = newclass(FluidSourcePrototype,function(base, lua_prototype, factory)
+VoidSourcePrototype = newclass(EnergySourcePrototype,function(base, lua_prototype, factory)
   EnergySourcePrototype.init(base,lua_prototype, factory)
 end)
 

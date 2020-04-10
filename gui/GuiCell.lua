@@ -104,6 +104,26 @@ function GuiCell:onErrorOptions()
 end
 
 -------------------------------------------------------------------------------
+-- By Limit
+--
+-- @function [parent=#GuiCell] byLimit
+--
+function GuiCell:byLimit(by_limit)
+  self.m_by_limit = by_limit
+  return self
+end
+
+-------------------------------------------------------------------------------
+-- By Limit
+--
+-- @function [parent=#GuiCell] byLimit
+--
+function GuiCell:byLimitUri(...)
+  self.m_by_limit_uri = table.concat({...},"=")
+  return self
+end
+
+-------------------------------------------------------------------------------
 --
 -- @function [parent=#GuiCell] infoIcon
 -- @return #table
@@ -144,15 +164,13 @@ GuiCellFactory = newclass(GuiCell,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
--- Create cell
+-- By Factory
 --
--- @function [parent=#GuiCellFactory] create
---
--- @param #LuaGuiElement parent container for element
+-- @function [parent=#GuiCellFactory] byFactory
 --
 function GuiCellFactory:byFactory(...)
   self.m_by_factory = true
-  self.m_uri = table.concat({...},"=")
+  self.m_by_factory_uri = table.concat({...},"=")
 end
 
 -------------------------------------------------------------------------------
@@ -185,9 +203,24 @@ function GuiCellFactory:create(parent)
       end
     end
   end
-  if factory.limit_count ~= nil then
+
+  if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element", color, 2))
-    GuiElement.add(row2, GuiLabel("label1", factory.name):caption(Format.formatNumberFactory(factory.limit_count)):style("helmod_label_element"):tooltip({"helmod_common.per-sub-block"}))
+    local limit_value = factory.limit_count or 0
+    if type(factory.limit) == "number" and factory.limit > 0 then
+      limit_value = factory.limit
+    end
+    if self.m_by_limit_uri ~= nil then
+      local style = "helmod_textfield_element"
+      if type(factory.limit) == "number" and factory.limit > 0 then
+        style = "helmod_textfield_element_red"
+      end
+      local text_field = GuiElement.add(row2, GuiTextField(self.m_by_limit_uri):text(Format.formatNumberFactory(limit_value)):style(style):tooltip({"helmod_common.per-sub-block"}))
+      text_field.style.height = 15
+      text_field.style.width = 70
+    else
+      GuiElement.add(row2, GuiLabel("label2", factory.name):caption(Format.formatNumberFactory(limit_value)):style("helmod_label_element"):tooltip({"helmod_common.per-sub-block"}))
+    end
   end
 
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element", color, 3))
@@ -196,11 +229,11 @@ function GuiCellFactory:create(parent)
     if factory.input ~= nil then
       style = "helmod_textfield_element_red"
     end
-    local text_field = GuiElement.add(row3, GuiTextField(self.m_uri):text(factory.input or factory.count or 0):style(style):tooltip({"helmod_common.total"}))
+    local text_field = GuiElement.add(row3, GuiTextField(self.m_by_factory_uri):text(Format.formatNumberFactory(factory.input or factory.count or 0)):style(style):tooltip({"helmod_common.total"}))
     text_field.style.height = 15
-    
+    text_field.style.width = 70
   else
-    GuiElement.add(row3, GuiLabel("label2", factory.name):caption(Format.formatNumberFactory(factory.count)):style("helmod_label_element"):tooltip({"helmod_common.total"}))
+    GuiElement.add(row3, GuiLabel("label3", factory.name):caption(Format.formatNumberFactory(factory.count)):style("helmod_label_element"):tooltip({"helmod_common.total"}))
   end
   return cell
 end
@@ -433,7 +466,7 @@ function GuiCellEnergy:create(parent)
   local tooltip = GuiTooltipEnergyConsumption(self.options.tooltip):element(element)
   local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", "energy-white", "energy"):style("helmod_button_menu_flat"):tooltip(tooltip))
 
-  if element.limit_energy ~= nil then
+  if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element", color, 2))
     local caption2 = Format.formatNumberKilo(element.limit_energy or 0, "W")
     if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_energy) end
@@ -476,7 +509,7 @@ function GuiCellPollution:create(parent)
   local tooltip = GuiTooltipPollution(self.options.tooltip):element(element)
   local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", "gas-mask-white", "gas-mask"):style("helmod_button_menu_flat"):tooltip(tooltip))
 
-  if element.limit_pollution ~= nil then
+  if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element", color, 2))
     local caption2 = Format.formatNumber(element.limit_pollution or 0)
     if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_pollution) end
@@ -525,7 +558,7 @@ function GuiCellElement:create(parent)
     infoIcon(button, self.m_info_icon)
   end
   
-  if element.limit_count ~= nil then
+  if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element", color, 2))
     local caption2 = Format.formatNumberElement(element.limit_count)
     if element.type == "energy" then caption2 = Format.formatNumberKilo(element.limit_count, "W") end
@@ -573,7 +606,7 @@ function GuiCellElementSm:create(parent)
   end
   GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):sprite(element.type, element.name):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
 
-  if element.limit_count ~= nil then
+  if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_sm", color, 2))
     local caption2 = Format.formatNumberElement(element.limit_count)
     if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_count) end
@@ -625,7 +658,7 @@ function GuiCellElementM:create(parent)
     infoIcon(button, self.m_info_icon)
   end
   
-  if element.limit_count ~= nil then
+  if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_m", color, 2))
     local caption2 = Format.formatNumberElement(element.limit_count)
     if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_count) end

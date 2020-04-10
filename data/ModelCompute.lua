@@ -785,7 +785,9 @@ function ModelCompute.computeFactory(recipe)
   if recipe.factory.speed == 0 then count = 0 end
   recipe.factory.count = count
   if Model.countModulesModel(recipe.beacon) > 0 then
-    recipe.beacon.count = count/recipe.beacon.factory
+    local variant = recipe.beacon.per_factory or 0
+    local constant = recipe.beacon.per_factory_constant or 0
+    recipe.beacon.count = count*variant + constant
   else
     recipe.beacon.count = 0
   end
@@ -1214,6 +1216,27 @@ end
 -------------------------------------------------------------------------------
 -- Update model
 --
+-- @function [parent=#ModelCompute] updateVersion_0_9_35
+--
+function ModelCompute.updateVersion_0_9_35()
+  if ModelCompute.versionCompare("0.9.35") then
+    local model = Model.getModel()
+    if model.blocks ~= nil then
+      for _, block in pairs(model.blocks) do
+        for _,recipe in pairs(block.recipes) do
+          if recipe.beacon ~= nil then
+            recipe.beacon.per_factory = Format.round(1/recipe.beacon.factory, 3)
+            recipe.beacon.per_factory_constant = 0
+          end
+        end
+      end
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update model
+--
 -- @function [parent=#ModelCompute] check
 --
 function ModelCompute.check()
@@ -1222,6 +1245,7 @@ function ModelCompute.check()
     ModelCompute.updateVersion_0_9_3()
     ModelCompute.updateVersion_0_9_12()
     ModelCompute.updateVersion_0_9_27()
+    ModelCompute.updateVersion_0_9_35()
   end
 end
 

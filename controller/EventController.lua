@@ -348,6 +348,7 @@ function EventController.onPlayerCreated(event)
   if event ~= nil and event.player_index ~= nil then
     local player = Player.load(event).native()
     Controller:bindController(player)
+    User.setParameter("next_event", nil)
   end
 end
 
@@ -362,6 +363,7 @@ function EventController.onPlayerJoinedGame(event)
   if event ~= nil and event.player_index ~= nil then
     local player = Player.load(event).native()
     Controller:bindController(player)
+    User.setParameter("next_event", nil)
   end
 end
 

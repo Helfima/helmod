@@ -460,6 +460,24 @@ function RecipePrototype:getHidden()
 end
 
 -------------------------------------------------------------------------------
+-- Return hidden player crafting of Prototype
+--
+-- @function [parent=#RecipePrototype] getHiddenPlayerCrafting
+--
+-- @return #boolean
+--
+function RecipePrototype:getHiddenPlayerCrafting()
+  if self.lua_prototype ~= nil then
+    if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" then
+      return self.lua_prototype.hidden_from_player_crafting
+    else
+      return false
+    end
+  end
+  return false
+end
+
+-------------------------------------------------------------------------------
 -- Return emissions multiplier of Prototype
 --
 -- @function [parent=#RecipePrototype] getEmissionsMultiplier

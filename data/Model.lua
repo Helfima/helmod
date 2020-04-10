@@ -7,14 +7,14 @@
 local Model = {
   -- single-line comment
   classname = "HMModel",
-  version = "0.9.27",
-  -- 15�c
+  version = "0.9.35",
+  -- 15°c
   initial_temp = 15,
-  -- 200J/unit/�c
+  -- 200J/unit/°c
   fluid_energy_per_unit = 200,
   beacon_combo = 4,
-  beacon_factory = 1.2
-
+  beacon_factory = 0.5,
+  beacon_factory_constant = 3
 }
 
 -------------------------------------------------------------------------------
@@ -275,7 +275,8 @@ function Model.newBeacon(name, count)
   beaconModel.count = count or 0
   beaconModel.energy = 0
   beaconModel.combo = Model.beacon_combo
-  beaconModel.factory = Model.beacon_factory
+  beaconModel.per_factory = Model.beacon_factory
+  beaconModel.per_factory_constant = Model.beacon_factory_constant
   -- limit infini = 0
   beaconModel.limit = 0
   -- modules
@@ -573,14 +574,15 @@ end
 -- @param #number combo beacon combo
 -- @param #number factory beacon factory
 --
-function Model.setBeacon(item, key, name, combo, factory)
+function Model.setBeacon(item, key, name, combo, per_factory, per_factory_constant)
   local object = Model.getObject(item, key)
   if object ~= nil then
     local beacon_prototype = EntityPrototype(name)
     if beacon_prototype:native() ~= nil then
       object.beacon.name = name
       object.beacon.combo = combo or Model.beacon_combo
-      object.beacon.factory = factory or Model.beacon_factory
+      object.beacon.per_factory = per_factory or Model.beacon_factory
+      object.beacon.per_factory_constant = per_factory_constant or Model.beacon_factory_constant
       if Model.countModulesModel(object.beacon) >= beacon_prototype:getModuleInventorySize() then
         object.beacon.modules = {}
       end

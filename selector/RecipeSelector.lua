@@ -17,6 +17,7 @@ function RecipeSelector:afterInit()
   self.disable_option = true
   self.hidden_option = true
   self.product_option = true
+  self.hidden_player_crafting = true
 end
 
 -------------------------------------------------------------------------------

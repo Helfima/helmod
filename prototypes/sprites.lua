@@ -10,15 +10,20 @@ function sprite_help(name,width,height)
 end
 
 data:extend({
-  sprite_help("getting-start", 400, 203),
-  sprite_help("mod-settings-map", 150, 179),
-  sprite_help("mod-settings-player", 150, 179),
-  sprite_help("production-block", 300, 223),
-  sprite_help("production-line", 300, 200),
+  sprite_help("getting-start", 798, 237),
+  sprite_help("quick-start", 800, 431),
+  sprite_help("mod-settings-map", 395, 650),
+  sprite_help("mod-settings-player", 394, 654),
+  sprite_help("preferences-general", 600, 467),
+  sprite_help("preferences-module-priority", 601, 467),
+  sprite_help("preferences-items-logistic", 600, 467),
+  sprite_help("preferences-fluids-logistic", 599, 465),
+  sprite_help("production-block", 800, 378),
+  sprite_help("production-line", 800, 424),
   sprite_help("recipe-editor-factory", 200, 364),
   sprite_help("recipe-editor-module", 200, 366),
-  sprite_help("recipe-selector", 200, 319),
-  sprite_help("recipe-selector-all", 200, 321),
+  sprite_help("recipe-selector", 492, 491),
+  sprite_help("recipe-selector-all", 492, 683),
   sprite_help("compute-order", 300, 223)
 })
 

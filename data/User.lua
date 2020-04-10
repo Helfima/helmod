@@ -109,7 +109,8 @@ function User.getDefaultSettings()
     model_loop_limit = 1000,
     other_speed_panel=false,
     filter_show_disable=false,
-    filter_show_hidden=false
+    filter_show_hidden=false,
+    filter_show_hidden_player_crafting=false
   }
 end
 
@@ -368,7 +369,9 @@ function User.createNextEvent(event, classname, method, index)
   if event == nil then
     User.setParameter("next_event", nil)
     local auto_pause = User.getParameter("auto-pause")
-    game.tick_paused = auto_pause
+    if not(game.is_multiplayer()) then
+      game.tick_paused = auto_pause
+    end
     return {wait=false, method=method}
   end
   local index_name = string.format("index_%s",method)
