@@ -27,6 +27,13 @@ data:extend(
       key_sequence = "O",
       consuming = "script-only"
 
+    },
+    {
+      type = "custom-input",
+      name = "helmod-recipe-explorer-open",
+      key_sequence = "Y",
+      consuming = "script-only"
+
     }
   }
 )

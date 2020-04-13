@@ -110,6 +110,7 @@ end
 local data = {}
 data.energy = {}
 data.energy["base"] = {}
+data.energy["base"]["offshore-pump"] = {energy_type="none", max_power=0, fluid_consumption=0, pollution=0}
 data.energy["base"]["assembling-machine-1"] = {energy_type="electric", max_power=77500, fluid_consumption=0, pollution=4}
 data.energy["base"]["assembling-machine-2"] = {energy_type="electric", max_power=155000, fluid_consumption=0, pollution=3}
 data.energy["base"]["assembling-machine-3"] = {energy_type="electric", max_power=387500, fluid_consumption=0, pollution=2}

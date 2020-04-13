@@ -125,6 +125,52 @@ end
 
 -------------------------------------------------------------------------------
 --
+-- @function [parent=#GuiCell] overlay
+-- @param #string type
+-- @return #GuiCell
+--
+function GuiCell:overlay(type, name)
+  self.m_overlay_type = type
+  self.m_overlay_name = name
+  return self
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiCell] overlay
+-- @return #table
+--
+function overlay(button, type, name)
+  if type ~= nil then
+    local sprite = GuiElement.getSprite(type, name)
+    GuiElement.add(button, GuiSprite("overlay"):sprite(sprite))
+  end
+end
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiCell] mask
+-- @param #string type
+-- @return #GuiCell
+--
+function GuiCell:mask(color)
+  self.m_mask = color
+  return self
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiCell] mask
+-- @return #table
+--
+function mask(button, color)
+  if color ~= nil then
+    local mask = GuiElement.add(button, GuiFrameH("mask"):style("helmod_frame_colored", color, 4))
+    mask.style.width = 32
+    mask.style.height = 32
+  end
+end
+-------------------------------------------------------------------------------
+--
 -- @function [parent=#GuiCell] infoIcon
 -- @return #table
 --
@@ -263,6 +309,7 @@ function GuiCellRecipe:create(parent)
 
   local tooltip = GuiTooltipElement(self.options.tooltip):element(recipe)
   local recipe_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(recipe.type, recipe.name):tooltip(tooltip))
+  overlay(recipe_icon, self.m_overlay_type, self.m_overlay_name)
   if self.m_info_icon then
     infoIcon(recipe_icon, self.m_info_icon)
   end
@@ -275,7 +322,7 @@ function GuiCellRecipe:create(parent)
 
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
   GuiElement.add(row3, GuiLabel("label2", recipe.name):caption(Format.formatPercent(recipe.production or 1).."%"):style("helmod_label_element"):tooltip({"helmod_common.total"}))
-  return cell
+  return cell, recipe_icon
 end
 
 -------------------------------------------------------------------------------

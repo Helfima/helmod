@@ -687,7 +687,8 @@ function RecipeEdition:updateFactoryInfo(event)
       local localised_name = EntityPrototype(element.name):getLocalisedName()
       local color = nil
       if factory.name == element.name then color = GuiElement.color_button_edit end
-      GuiElement.add(factory_table_panel, GuiButtonSelectSprite(self.classname, "factory-select", block.id, recipe.id):sprite("entity", element.name):tooltip(localised_name):color(color))
+      local button = GuiElement.add(factory_table_panel, GuiButtonSelectSprite(self.classname, "factory-select", block.id, recipe.id):choose("entity", element.name):color(color))
+      button.locked = true
     end
 
     -- factory info

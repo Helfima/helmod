@@ -109,7 +109,8 @@ helmod_preferences = {
     localised_name = {"helmod_settings.default-factory-level"},
     localised_description = {"helmod_settings.default-factory-level-desc"},
     default_value = "1",
-    allowed_values = {"1","2","3","4","5","6","last"}
+    allowed_values = {"1","2","3","4","5","6","last"},
+    group = "general"
   },
   -- format number factory
   format_number_factory = {
@@ -117,7 +118,8 @@ helmod_preferences = {
     localised_name = {"helmod_settings.format-number-factory"},
     localised_description = {"helmod_settings.format-number-factory-desc"},
     default_value = "0",
-    allowed_values = {"0","0.0","0.00"}
+    allowed_values = {"0","0.0","0.00"},
+    group = "general"
   },
   -- format number element
   format_number_element = {
@@ -125,7 +127,8 @@ helmod_preferences = {
     localised_name = {"helmod_settings.format-number-element"},
     localised_description = {"helmod_settings.format-number-element-desc"},
     default_value = "0.0",
-    allowed_values = {"0","0.0","0.00"}
+    allowed_values = {"0","0.0","0.00"},
+    group = "general"
   },
   -- preference number line by scroll
   preference_number_line = {
@@ -133,7 +136,8 @@ helmod_preferences = {
     localised_name = {"helmod_settings.preference-number-line"},
     localised_description = {"helmod_settings.preference-number-line-desc"},
     default_value = 3,
-    allowed_values = {2,3,4,5}
+    allowed_values = {2,3,4,5},
+    group = "general"
   },
   -- preference number column by scroll
   preference_number_column = {
@@ -141,7 +145,8 @@ helmod_preferences = {
     localised_name = {"helmod_settings.preference-number-column"},
     localised_description = {"helmod_settings.preference-number-column-desc"},
     default_value = 6,
-    allowed_values = {6,7,8,9,10,11,12}
+    allowed_values = {6,7,8,9,10,11,12},
+    group = "general"
   },
   --display product cols
   display_product_cols = {
@@ -149,7 +154,8 @@ helmod_preferences = {
     localised_name = {"helmod_settings.display-product-cols"},
     localised_description = {"helmod_settings.display-product-cols-desc"},
     default_value = 5,
-    allowed_values = {5,6,7,8,9,10}
+    allowed_values = {5,6,7,8,9,10},
+    group = "general"
   },
   --display-ingredient-cols
   display_ingredient_cols = {
@@ -157,17 +163,60 @@ helmod_preferences = {
     localised_name = {"helmod_settings.display-ingredient-cols"},
     localised_description = {"helmod_settings.display-ingredient-cols-desc"},
     default_value = 5,
-    allowed_values = {5,6,7,8,9,10}
+    allowed_values = {5,6,7,8,9,10},
+    group = "general"
   },
   --display-pollution
   display_pollution = {
     type = "bool-setting",
     localised_name = {"helmod_settings.display-pollution"},
     localised_description = {"helmod_settings.display-pollution-desc"},
-    default_value = true
+    default_value = true,
+    group = "general"
+  },
+  --ui-auto-close
+  ui_auto_close = {
+    type = "bool-setting",
+    localised_name = {"helmod_settings.ui-auto-close"},
+    localised_description = {"helmod_settings.ui-auto-close-desc"},
+    default_value = false,
+    group = "ui",
+    items = {
+      HMRecipeEdition = true,
+      HMProductEdition = false,
+      HMRuleEdition = false,
+      HMPreferenceEdition = false,
+  
+      HMEnergySelector = true,
+      HMEntitySelector = true,
+      HMRecipeSelector = true,
+      HMTechnologySelector = true,
+      HMItemSelector = true,
+      HMFluidSelector = true
+    }
+  },
+  --ui-glue
+  ui_glue = {
+    type = "bool-setting",
+    localised_name = {"helmod_settings.ui-glue"},
+    localised_description = {"helmod_settings.ui-glue-desc"},
+    default_value = false,
+    group = "ui",
+    items = {
+      HMRecipeEdition = true,
+      HMProductEdition = false,
+      HMRuleEdition = false,
+      HMPreferenceEdition = false,
+  
+      HMEnergySelector = true,
+      HMEntitySelector = true,
+      HMRecipeSelector = true,
+      HMTechnologySelector = true,
+      HMItemSelector = true,
+      HMFluidSelector = true
+    }
   }
 }
-
 
 helmod_settings_mod = {
   debug_solver = {

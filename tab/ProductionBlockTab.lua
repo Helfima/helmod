@@ -178,7 +178,7 @@ function ProductionBlockTab:updateInput(event)
     local input_table = GuiElement.add(input_scroll, GuiTable("input-table"):column(GuiElement.getElementColumnNumber(50)-2):style("helmod_table_element"))
     if block.ingredients ~= nil then
       for index, lua_ingredient in pairs(block.ingredients) do
-        if all_visible == true or (lua_ingredient.state == 1 and not(block_by_product)) or lua_ingredient.count > ModelCompute.waste_value then
+        if all_visible == true or ((lua_ingredient.state or 0) == 1 and not(block_by_product)) or (lua_ingredient.count or 0) > ModelCompute.waste_value then
           local ingredient = Product(lua_ingredient):clone()
           ingredient.count = lua_ingredient.count
           if block.count > 1 then

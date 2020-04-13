@@ -25,6 +25,7 @@ function PreferenceEdition:onBind()
   Dispatcher:bind("on_gui_preference", self, self.updateFluidsLogistic)
   Dispatcher:bind("on_gui_preference", self, self.updateItemsLogistic)
   Dispatcher:bind("on_gui_preference", self, self.updatePriorityModule)
+  Dispatcher:bind("on_gui_preference", self, self.updateUI)
 end
 
 -------------------------------------------------------------------------------
@@ -120,6 +121,26 @@ function PreferenceEdition:getGeneralTab()
 end
 
 -------------------------------------------------------------------------------
+-- Get or create UI tab panel
+--
+-- @function [parent=#PreferenceEdition] getUITab
+--
+function PreferenceEdition:getUITab()
+  local content_panel = self:getTabPane()
+  local panel_name = "ui_tab_panel"
+  local scroll_name = "ui_scroll"
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[scroll_name]
+  end
+  local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption({"helmod_label.ui"}))
+  local scroll_panel = GuiElement.add(content_panel, GuiFlowV(scroll_name))
+  content_panel.add_tab(tab_panel,scroll_panel)
+  scroll_panel.style.horizontally_stretchable = true
+  scroll_panel.style.vertically_stretchable = true
+  return scroll_panel
+end
+
+-------------------------------------------------------------------------------
 -- Get or create priority module tab panel
 --
 -- @function [parent=#PreferenceEdition] getPriorityModuleTab
@@ -188,11 +209,60 @@ end
 --
 function PreferenceEdition:onUpdate(event)
   self:updateGeneral(event)
+  self:updateUI(event)
   self:updatePriorityModule(event)
   self:updateItemsLogistic(event)
   self:updateFluidsLogistic(event)
   if event.action == "OPEN" then
     self:setActiveTab(event.item1)
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update ui
+--
+-- @function [parent=#PreferenceEdition] updateUI
+--
+-- @param #LuaEvent event
+--
+function PreferenceEdition:updateUI(event)
+  local container_panel = self:getUITab()
+  container_panel.clear()
+
+  GuiElement.add(container_panel, GuiLabel("fluid_container_label"):caption({"helmod_label.ui"}):style("helmod_label_title_frame"))
+
+  local options_table = GuiElement.add(container_panel, GuiTable("options-table"):column(2))
+  options_table.vertical_centering = false
+  options_table.style.horizontal_spacing=10
+  options_table.style.vertical_spacing=5
+
+  for preference_type,preference in pairs(helmod_preferences) do
+    if preference.group == "ui" then
+      GuiElement.add(options_table, GuiLabel(self.classname, "label", preference_type):caption(preference.localised_name):tooltip(preference.localised_description))
+      local default_preference_type = User.getPreferenceSetting(preference_type)
+      if preference.allowed_values then
+        GuiElement.add(options_table, GuiDropDown(self.classname, "preference-setting", preference_type):items(preference.allowed_values, default_preference_type))
+      else
+        if preference.type == "bool-setting" then
+          GuiElement.add(options_table, GuiCheckBox(self.classname, "preference-setting", preference_type):state(default_preference_type))
+        end
+        if preference.type == "int-setting" or preference.type == "string-setting" then
+          GuiElement.add(options_table, GuiTextField(self.classname, "preference-setting", preference_type):text(default_preference_type))
+        end
+      end
+      for preference_name,checked in pairs(preference.items) do
+        local view = Controller:getView(preference_name)
+        if view ~= nil then
+          local localised_name = view.panelCaption
+          local default_preference_name = User.getPreferenceSetting(preference_type, preference_name)
+          GuiElement.add(options_table, GuiLabel(self.classname, "label", preference_type, preference_name):caption({"", "\t\t\t\t", helmod_tag.color.gold, localised_name, helmod_tag.color.close}))
+          local checkbox = GuiElement.add(options_table, GuiCheckBox(self.classname, "preference-setting", preference_type, preference_name):state(default_preference_name))
+          if default_preference_type ~= true then
+            checkbox.enabled = false
+          end
+        end
+      end
+    end
   end
 end
 
@@ -203,7 +273,6 @@ end
 --
 -- @param #LuaEvent event
 --
-
 function PreferenceEdition:updateGeneral(event)
   local container_panel = self:getGeneralTab()
   container_panel.clear()
@@ -216,16 +285,18 @@ function PreferenceEdition:updateGeneral(event)
   options_table.style.vertical_spacing=5
   
   for preference_name,preference in pairs(helmod_preferences) do
-    GuiElement.add(options_table, GuiLabel(self.classname, "label", preference_name):caption(preference.localised_name):tooltip(preference.localised_description))
-    local default_preference = User.getPreferenceSetting(preference_name)
-    if preference.allowed_values then
-      GuiElement.add(options_table, GuiDropDown(self.classname, "preference-setting", preference_name):items(preference.allowed_values, default_preference))
-    else
-      if preference.type == "bool-setting" then
-        GuiElement.add(options_table, GuiCheckBox(self.classname, "preference-setting", preference_name):state(default_preference))
-      end
-      if preference.type == "int-setting" or preference.type == "string-setting" then
-        GuiElement.add(options_table, GuiTextField(self.classname, "preference-setting", preference_name):text(default_preference))
+    if preference.group == "general" then
+      GuiElement.add(options_table, GuiLabel(self.classname, "label", preference_name):caption(preference.localised_name):tooltip(preference.localised_description))
+      local default_preference = User.getPreferenceSetting(preference_name)
+      if preference.allowed_values then
+        GuiElement.add(options_table, GuiDropDown(self.classname, "preference-setting", preference_name):items(preference.allowed_values, default_preference))
+      else
+        if preference.type == "bool-setting" then
+          GuiElement.add(options_table, GuiCheckBox(self.classname, "preference-setting", preference_name):state(default_preference))
+        end
+        if preference.type == "int-setting" or preference.type == "string-setting" then
+          GuiElement.add(options_table, GuiTextField(self.classname, "preference-setting", preference_name):text(default_preference))
+        end
       end
     end
   end
@@ -385,22 +456,32 @@ end
 --
 function PreferenceEdition:onEvent(event)
   if event.action == "preference-setting" then
-    local preference_name = event.item1
-    local preference = helmod_preferences[preference_name]
-    if preference ~= nil then
-      if preference.allowed_values then
-        local index = event.element.selected_index
-        User.setPreference(preference_name,preference.allowed_values[index])
-      else
-        if preference.type == "bool-setting" then
-          User.setPreference(preference_name, event.element.state)
+    local type = event.item1
+    local name = event.item2
+    if name == "" then
+      local preference = helmod_preferences[type]
+      if preference ~= nil then
+        if preference.allowed_values then
+          local index = event.element.selected_index
+          User.setPreference(type, nil,preference.allowed_values[index])
+        else
+          if preference.type == "bool-setting" then
+            User.setPreference(type, nil, event.element.state)
+          end
+          if preference.type == "int-setting" then
+            User.setPreference(type, nil, tonumber(event.element.text or preference.default_value))
+          end
+          if preference.type == "string-setting" then
+            User.setPreference(type, nil, event.element.text or preference.default_value)
+          end
         end
-        if preference.type == "int-setting" then
-          User.setPreference(preference_name, tonumber(event.element.text or preference.default_value))
-        end
-        if preference.type == "string-setting" then
-          User.setPreference(preference_name, event.element.text or preference.default_value)
-        end
+        Controller:send("on_gui_refresh", event)
+        Controller:send("on_gui_preference", event)
+      end
+    else
+      local preference = helmod_preferences[type]
+      if preference ~= nil then
+        User.setPreference(type, name, event.element.state)
       end
       Controller:send("on_gui_refresh", event)
       Controller:send("on_gui_preference", event)

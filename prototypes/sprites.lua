@@ -96,6 +96,7 @@ local list = {
   {name="copy"},
   {name="database"},
   {name="delete", sm=true},
+  {name="done"},
   {name="download"},
   {name="edit"},
   {name="end", sm=true},

@@ -152,12 +152,18 @@ end
 --
 -- @function [parent=#User] getPreference
 --
--- @param #string property
+-- @param #string type
+-- @param #string name
 --
-function User.getPreference(property)
+function User.getPreference(type, name)
   local preferences = User.get("preferences")
-  if preferences ~= nil and property ~= nil then
-    return preferences[property]
+  if preferences ~= nil and type ~= nil then
+    if name ~= nil and name ~= "" then
+      local preference_name = string.format("%s_%s", type, name)
+      return preferences[preference_name]
+    else
+      return preferences[type]
+    end
   end
   return preferences
 end
@@ -387,16 +393,22 @@ end
 --
 -- @function [parent=#User] setPreference
 --
--- @param #string property
+-- @param #string type
+-- @param #string name
 -- @param #object value
 --
-function User.setPreference(property, value)
-  if property == nil then
+function User.setPreference(type, name, value)
+  if type == nil then
     return nil
   end
   User.setVersion()
   local preferences = User.get("preferences")
-  preferences[property] = value
+  if name == nil then
+    preferences[type] = value
+  else
+    local preference_name = string.format("%s_%s", type, name)
+    preferences[preference_name] = value
+  end
   return value
 end
 
@@ -509,14 +521,25 @@ end
 --
 -- @function [parent=#User] getPreferenceSetting
 --
+-- @param #string type
 -- @param #string name
 --
-function User.getPreferenceSetting(name)
-  local property = User.getPreference(name)
-  if property ~= nil then
-    return property
+function User.getPreferenceSetting(type, name)
+  local preference_type = User.getPreference(type)
+  if name == nil then
+    if preference_type ~= nil then
+      return preference_type
+    else
+      return helmod_preferences[type].default_value
+    end
+  end
+  if preference_type == nil then return false end
+  local preference_name = User.getPreference(type, name)
+  if preference_name ~= nil then
+    return preference_name
   else
-    return helmod_preferences[name].default_value
+    if helmod_preferences[type].items == nil or helmod_preferences[type].items[name] == nil then return false end
+    return helmod_preferences[type].items[name]
   end
 end
 
@@ -572,11 +595,11 @@ end
 --
 function User.getLocationForm(classname)
   local navigate = User.getNavigate()
-  if string.find(classname, "Tab") then
-    if navigate[User.tab_name] == nil or navigate[User.tab_name]["location"] == nil then return {50,50} end
+  if string.find(classname, "Tab") or (User.getPreferenceSetting("ui_glue") == true and User.getPreferenceSetting("ui_glue", classname) == true) then
+    if navigate[User.tab_name] == nil or navigate[User.tab_name]["location"] == nil then return {x=50,y=50} end
     return navigate[User.tab_name]["location"]
   else
-    if navigate[classname] == nil or navigate[classname]["location"] == nil then return {200,100} end
+    if navigate[classname] == nil or navigate[classname]["location"] == nil then return {x=200,y=100} end
     return navigate[classname]["location"]
   end
 end
@@ -590,10 +613,12 @@ end
 --
 function User.setActiveForm(classname)
   local navigate = User.getNavigate()
-  if string.find(classname, "Edition") then
-    for form_name,form in pairs(navigate) do
-      if Controller.getView(form_name) ~= nil and form_name ~= classname and string.find(form_name, "Edition") then
-        Controller.getView(form_name):close()
+  if User.getPreferenceSetting("ui_auto_close") == true then
+    if User.getPreferenceSetting("ui_auto_close", classname) == true then
+      for form_name,form in pairs(navigate) do
+        if Controller:getView(form_name) ~= nil and form_name ~= classname and User.getPreferenceSetting("ui_auto_close", form_name) == true then
+          Controller:getView(form_name):close()
+        end
       end
     end
   end

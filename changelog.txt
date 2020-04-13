@@ -1,4 +1,21 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.10.15
+Date: 13. 04. 2020
+  Changes:
+    - added Done tag in pin panel
+    - added UI auto close (see preferences)
+    - added UI glue (see preferences)
+  Bugfixes:
+    - fixed error with offshore-pump
+---------------------------------------------------------------------------------------------------
+Version: 0.10.14
+Date: 11. 04. 2020
+  Changes:
+    - added hotkey to open/close Recipe Explorer
+  Bugfixes:
+    - fixed limit values in pin panel
+    - fixed error in Production Block Panel
+---------------------------------------------------------------------------------------------------
 Version: 0.10.13
 Date: 10. 04. 2020
   Changes:

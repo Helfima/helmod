@@ -68,30 +68,30 @@ end
 -- @return #GuiElement
 -- 
 function GuiElement:overlay(type, name)
-  if self.options.overlay == nil then self.options.overlay = {} end
+  if type == nil then return self end
   if name == nil then
-    table.insert(self.options.overlay, string.format("helmod-%s", type))
+    self.m_overlay = string.format("helmod-%s", type)
   elseif type ~= nil and name ~= nil then
     if type == "resource" then type = "item" end
     if Player.is_valid_sprite_path(string.format("%s/%s", type, name)) then
-      table.insert(self.options.overlay, string.format("%s/%s", type, name))
+      self.m_overlay = string.format("%s/%s", type, name)
     elseif Player.is_valid_sprite_path(string.format("%s/%s", "item", name)) then
-      table.insert(self.options.overlay, string.format("%s/%s", "item", name))
+      self.m_overlay = string.format("%s/%s", "item", name)
       Logging:warn(GuiButton.classname, "wrong type", type, name, "-> item")
     elseif Player.is_valid_sprite_path(string.format("%s/%s", "entity", name)) then
-      table.insert(self.options.overlay, string.format("%s/%s", "entity", name))
+      self.m_overlay = string.format("%s/%s", "entity", name)
       Logging:warn(GuiButton.classname, "wrong type", type, name, "-> entity")
     elseif Player.is_valid_sprite_path(string.format("%s/%s", "fluid", name)) then
-      table.insert(self.options.overlay, string.format("%s/%s", "fluid", name))
+      self.m_overlay = string.format("%s/%s", "fluid", name)
       Logging:warn(GuiButton.classname, "wrong type", type, name, "-> fluid")
     elseif Player.is_valid_sprite_path(string.format("%s/%s", "technology", name)) then
-      table.insert(self.options.overlay, string.format("%s/%s", "technology", name))
+      self.m_overlay = string.format("%s/%s", "technology", name)
       Logging:warn(GuiButton.classname, "wrong type", type, name, "-> technology")
     elseif Player.is_valid_sprite_path(string.format("%s/%s", "recipe", name)) then
-      table.insert(self.options.overlay, string.format("%s/%s", "recipe", name))
+      self.m_overlay = string.format("%s/%s", "recipe", name)
       Logging:warn(GuiButton.classname, "wrong type", type, name, "-> recipe")
     elseif Player.is_valid_sprite_path(string.format("%s/%s", "item-group", name)) then
-      table.insert(self.options.overlay, string.format("%s/%s", "item-group", name))
+      self.m_overlay = string.format("%s/%s", "item-group", name)
       Logging:warn(GuiButton.classname, "wrong type", type, name, "-> item-group")
     end
   end
@@ -203,135 +203,148 @@ function GuiElement.getDisplaySizes()
 end
 
 -------------------------------------------------------------------------------
+-- Get main sizes
+--
+-- @function [parent=#GuiElement] getMainSizes
+--
+-- return
+--
+function GuiElement.getMainSizes()
+  local width , height = GuiElement.getDisplaySizes()
+  local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
+  local display_ratio_vertictal = User.getModSetting("display_ratio_vertical")
+  if type(width) == "number" and  type(height) == "number" then
+    local width_main = math.ceil(width*display_ratio_horizontal)
+    local height_main = math.ceil(height*display_ratio_vertictal)
+    return width_main, height_main
+  end
+  return 800,600
+end
+
+-------------------------------------------------------------------------------
 -- Get style sizes
 --
 -- @function [parent=#GuiElement] getStyleSizes
 --
 function GuiElement.getStyleSizes()
-  local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
-  local display_ratio_vertictal = User.getModSetting("display_ratio_vertical")
-
-  local width , height = GuiElement.getDisplaySizes()
+  local width_main, height_main = GuiElement.getMainSizes()
   local style_sizes = {}
-  if type(width) == "number" and  type(height) == "number" then
-    local width_recipe_column_1 = 240
-    local width_recipe_column_2 = 250
-    local width_dialog = width_recipe_column_1 + width_recipe_column_2
-    local width_scroll = 8
-    local width_block_info = 320
-    local width_left_menu = 50
-    local height_block_header = 450
-    local height_selector_header = 230
-    local height_recipe_info = 220
-    local height_row_element = 160
 
-    local width_main = math.ceil(width*display_ratio_horizontal)
-    local height_main = math.ceil(height*display_ratio_vertictal)
+  local width_recipe_column_1 = 240
+  local width_recipe_column_2 = 250
+  local width_dialog = width_recipe_column_1 + width_recipe_column_2
+  local width_scroll = 8
+  local width_block_info = 320
+  local width_left_menu = 50
+  local height_block_header = 450
+  local height_selector_header = 230
+  local height_recipe_info = 220
+  local height_row_element = 160
 
-    style_sizes["Tab"] = {width = width_main,height = height_main}
-    style_sizes["HMRecipeExplorer"] = {
-      minimal_width = 300,
-      maximal_width = width_main,
-      minimal_height = 200,
-      maximal_height = height_main
-     }
-    
-    style_sizes["HMPinPanel"] = {
-      minimal_width = 50,
-      maximal_width = 450,
-      minimal_height = 0,
-      maximal_height = height_main
-     }
-    
-    style_sizes["HMSummaryPanel"] = {
-      minimal_width = 50,
-      maximal_width = 450,
-      minimal_height = 0,
-      maximal_height = height_main
-     }
-    
+  style_sizes["Tab"] = {width = width_main,height = height_main}
+  style_sizes["HMRecipeExplorer"] = {
+    minimal_width = 300,
+    maximal_width = width_main,
+    minimal_height = 200,
+    maximal_height = height_main
+    }
+  
+  style_sizes["HMPinPanel"] = {
+    minimal_width = 50,
+    maximal_width = 450,
+    minimal_height = 0,
+    maximal_height = height_main
+    }
+  
+  style_sizes["HMSummaryPanel"] = {
+    minimal_width = 50,
+    maximal_width = 450,
+    minimal_height = 0,
+    maximal_height = height_main
+    }
+  
 
-    style_sizes.main = {}
-    style_sizes.main.width = width_main
-    style_sizes.main.height = height_main
+  style_sizes.main = {}
+  style_sizes.main.width = width_main
+  style_sizes.main.height = height_main
 
-    style_sizes.dialog = {}
-    style_sizes.dialog.width = width_dialog
+  style_sizes.dialog = {}
+  style_sizes.dialog.width = width_dialog
 
-    style_sizes.data = {}
-    style_sizes.data.width = width_main - width_dialog - width_left_menu
+  style_sizes.data = {}
+  style_sizes.data.width = width_main - width_dialog - width_left_menu
 
-    style_sizes.power = {}
-    style_sizes.power.width = width_dialog/2
-    style_sizes.power.height = 200
+  style_sizes.power = {}
+  style_sizes.power.width = width_dialog/2
+  style_sizes.power.height = 200
 
-    style_sizes.edition_product_tool = {}
-    style_sizes.edition_product_tool.height = 150
+  style_sizes.edition_product_tool = {}
+  style_sizes.edition_product_tool.height = 150
 
-    style_sizes.data_section = {}
-    style_sizes.data_section.width = width_main - width_dialog - width_left_menu - 4*width_scroll
+  style_sizes.data_section = {}
+  style_sizes.data_section.width = width_main - width_dialog - width_left_menu - 4*width_scroll
 
-    style_sizes.recipe_selector = {}
-    style_sizes.recipe_selector.height = height_main - height_selector_header
+  style_sizes.recipe_selector = {}
+  style_sizes.recipe_selector.height = height_main - height_selector_header
 
-    style_sizes.scroll_recipe_selector = {}
-    style_sizes.scroll_recipe_selector.width = width_dialog - 20
-    style_sizes.scroll_recipe_selector.height = height_main - height_selector_header - 20
+  style_sizes.scroll_recipe_selector = {}
+  style_sizes.scroll_recipe_selector.width = width_dialog - 20
+  style_sizes.scroll_recipe_selector.height = height_main - height_selector_header - 20
 
-    style_sizes.recipe_product = {}
-    style_sizes.recipe_product.height = 77
+  style_sizes.recipe_product = {}
+  style_sizes.recipe_product.height = 77
 
-    style_sizes.recipe_tab = {}
-    style_sizes.recipe_tab.height = 32
+  style_sizes.recipe_tab = {}
+  style_sizes.recipe_tab.height = 32
 
-    style_sizes.recipe_module = {}
-    style_sizes.recipe_module.width = width_recipe_column_2 - width_scroll*2
-    style_sizes.recipe_module.height = 147
+  style_sizes.recipe_module = {}
+  style_sizes.recipe_module.width = width_recipe_column_2 - width_scroll*2
+  style_sizes.recipe_module.height = 147
 
-    style_sizes.recipe_info_object = {}
-    style_sizes.recipe_info_object.height = 155
+  style_sizes.recipe_info_object = {}
+  style_sizes.recipe_info_object.height = 155
 
-    style_sizes.recipe_edition_1 = {}
-    style_sizes.recipe_edition_1.width = width_recipe_column_1
-    style_sizes.recipe_edition_1.height = 250
+  style_sizes.recipe_edition_1 = {}
+  style_sizes.recipe_edition_1.width = width_recipe_column_1
+  style_sizes.recipe_edition_1.height = 250
 
-    style_sizes.recipe_edition_2 = {}
-    style_sizes.recipe_edition_2.width = width_recipe_column_2
+  style_sizes.recipe_edition_2 = {}
+  style_sizes.recipe_edition_2.width = width_recipe_column_2
 
-    style_sizes.scroll_help = {}
-    style_sizes.scroll_help.width = width_dialog - width_scroll
-    style_sizes.scroll_help.height = height_main - 125
+  style_sizes.scroll_help = {}
+  style_sizes.scroll_help.width = width_dialog - width_scroll
+  style_sizes.scroll_help.height = height_main - 125
 
 
-    -- block
-    local row_number = math.floor(Model.countModel()/GuiElement.getIndexColumnNumber())
-    style_sizes.block_data = {}
-    style_sizes.block_data.height = height_main - 122 - row_number*32
+  -- block
+  local row_number = math.floor(Model.countModel()/GuiElement.getIndexColumnNumber())
+  style_sizes.block_data = {}
+  style_sizes.block_data.height = height_main - 122 - row_number*32
 
-    style_sizes.block_info = {}
-    style_sizes.block_info.width = 500
-    style_sizes.block_info.height = 50*2+40
+  style_sizes.block_info = {}
+  style_sizes.block_info.width = 500
+  style_sizes.block_info.height = 50*2+40
 
-    style_sizes.scroll_block = {}
-    style_sizes.scroll_block.height = height_recipe_info - 34
+  style_sizes.scroll_block = {}
+  style_sizes.scroll_block.height = height_recipe_info - 34
 
-    -- input/output table
-    style_sizes.block_element = {}
-    style_sizes.block_element.height = height_row_element
-    style_sizes.block_element.width = width_main - width_dialog - width_block_info
+  -- input/output table
+  style_sizes.block_element = {}
+  style_sizes.block_element.height = height_row_element
+  style_sizes.block_element.width = width_main - width_dialog - width_block_info
 
-    -- input/output table
-    style_sizes.scroll_block_element = {}
-    style_sizes.scroll_block_element.height = height_row_element - 34
+  -- input/output table
+  style_sizes.scroll_block_element = {}
+  style_sizes.scroll_block_element.height = height_row_element - 34
 
-    -- recipe table
-    style_sizes.scroll_block_list = {}
-    style_sizes.scroll_block_list.minimal_width = width_main - width_dialog - width_scroll
-    style_sizes.scroll_block_list.maximal_width = width_main - width_dialog - width_scroll
+  -- recipe table
+  style_sizes.scroll_block_list = {}
+  style_sizes.scroll_block_list.minimal_width = width_main - width_dialog - width_scroll
+  style_sizes.scroll_block_list.maximal_width = width_main - width_dialog - width_scroll
 
-    style_sizes.scroll_block_list.minimal_height = height_main - height_block_header
-    style_sizes.scroll_block_list.maximal_height = height_main - height_block_header
-  end
+  style_sizes.scroll_block_list.minimal_height = height_main - height_block_header
+  style_sizes.scroll_block_list.maximal_height = height_main - height_block_header
+
   return style_sizes
 end
 

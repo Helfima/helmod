@@ -387,6 +387,38 @@ function Form:update(event)
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if self.auto_clear then content_panel.clear() end
   self:onUpdate(event)
+  self:updateLocation(event)
+end
+
+-------------------------------------------------------------------------------
+-- Update location
+--
+-- @function [parent=#Form] updateLocation
+--
+-- @param #LuaEvent event
+--
+function Form:updateLocation(event)
+  local width_main, height_main = GuiElement.getMainSizes()
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if User.getPreferenceSetting("ui_glue") == true and User.getPreferenceSetting("ui_glue", self.classname) == true then
+    local navigate = User.getNavigate()
+    local location = {x=50,y=50}
+    if navigate[User.tab_name] ~= nil or navigate[User.tab_name]["location"] ~= nil then
+      location = navigate[User.tab_name]["location"]
+    end
+    local location_x = location.x + width_main - 500
+    flow_panel.location = {location_x, y=location.y}
+  end
+
+  local location = flow_panel.location
+  if location.x < 0 or location.x > (width_main - 100) then
+    location.x = 0
+    flow_panel.location = location
+  end
+  if location.y < 0 or location.y > (height_main - 50) then
+    location.y = 50
+    flow_panel.location = location
+  end
 end
 
 -------------------------------------------------------------------------------

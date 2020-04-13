@@ -15,7 +15,6 @@ require "edition.ProductEdition"
 require "edition.RuleEdition"
 require "edition.PreferenceEdition"
 
-require "selector.ContainerSelector"
 require "selector.EnergySelector"
 require "selector.EntitySelector"
 require "selector.RecipeSelector"
@@ -85,7 +84,6 @@ function Controller:prepare()
 
   table.insert(forms, ProductionLineTab("HMProductionLineTab"))
   table.insert(forms, ProductionBlockTab("HMProductionBlockTab"))
-  --table.insert(forms, EnergyTab("HMEnergyTab"))
   table.insert(forms, ResourceTab("HMResourceTab"))
   table.insert(forms, SummaryTab("HMSummaryTab"))
   table.insert(forms, StatisticTab("HMStatisticTab"))
@@ -100,7 +98,6 @@ function Controller:prepare()
   table.insert(forms, TechnologySelector("HMTechnologySelector"))
   table.insert(forms, ItemSelector("HMItemSelector"))
   table.insert(forms, FluidSelector("HMFluidSelector"))
-  table.insert(forms, ContainerSelector("HMContainerSelector"))
 
   table.insert(forms, RecipeEdition("HMRecipeEdition"))
   table.insert(forms, ProductEdition("HMProductEdition"))
@@ -137,7 +134,6 @@ function Controller:on_init()
   table.insert(forms, TechnologySelector("HMTechnologySelector"))
   table.insert(forms, ItemSelector("HMItemSelector"))
   table.insert(forms, FluidSelector("HMFluidSelector"))
-  table.insert(forms, ContainerSelector("HMContainerSelector"))
   for _,form in pairs(forms) do
     form:prepare()
   end
@@ -402,6 +398,14 @@ function Controller:onGuiHotkey(event)
       self:openMainPanel()
     end
     self:send("on_gui_open", event, "HMRecipeSelector")
+  end
+  if event.input_name == "helmod-recipe-explorer-open" then
+    local view = Controller:getView("HMRecipeExplorer")
+    if not(view:isOpened()) then
+      self:send("on_gui_open", event, "HMRecipeExplorer")
+    else
+      view:close()
+    end
   end
 end
 

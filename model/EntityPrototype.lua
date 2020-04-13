@@ -134,7 +134,9 @@ function EntityPrototype:getEnergyConsumption()
     local drain = 0
     if energy_type == "electric" then
       local energy_prototype = self:getEnergySource()
-      drain = energy_prototype:getDrain()
+      if energy_prototype ~= nil then
+        drain = energy_prototype:getDrain()
+      end
     end
     return drain + self:getMaxEnergyUsage()
   end
@@ -398,7 +400,7 @@ function EntityPrototype:getEnergyType()
       end
     end
   end
-  return "electric"
+  return "none"
 end
 
 -------------------------------------------------------------------------------

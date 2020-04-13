@@ -94,7 +94,10 @@ function PinPanel:updateHeader(event)
   GuiElement.add(group1, GuiButton(self.classname, "change-level", "max"):sprite("menu", "maximize-window-white", "maximize-window"):style("helmod_button_menu"):tooltip({"helmod_button.maximize"}))
 
   local group2 = GuiElement.add(left_menu_panel, GuiFlowH("group2"))
-  GuiElement.add(group2, GuiButton("HMSummaryPanel=OPEN", pin_block_id):sprite("menu", "brief-white","brief"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
+  GuiElement.add(group2, GuiButton(self.classname, "recipe-done-remove"):sprite("menu", "checkmark-white","checkmark"):style("helmod_button_menu"):tooltip({"helmod_button.remove-done"}))
+
+  local group3 = GuiElement.add(left_menu_panel, GuiFlowH("group3"))
+  GuiElement.add(group3, GuiButton("HMSummaryPanel=OPEN", pin_block_id):sprite("menu", "brief-white","brief"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
 end
 
 -------------------------------------------------------------------------------
@@ -112,7 +115,7 @@ function PinPanel:updateInfo(event)
 
   infoPanel.clear()
 
-  local column = User.getSetting("display_pin_level") + 1
+  local column = User.getSetting("display_pin_level") + 2
 
   if pin_block_id ~= nil and model.blocks[pin_block_id] ~= nil then
     local block = model.blocks[pin_block_id]
@@ -140,6 +143,9 @@ function PinPanel:addProductionBlockHeader(itable)
   local model = Model.getModel()
 
   if display_pin_level > display_level.base then
+    local gui_done = GuiElement.add(itable, GuiFrameH("header-done"):style(helmod_frame_style.hidden))
+    GuiElement.add(gui_done, GuiLabel("header-done"):caption({"helmod_result-panel.col-header-done"}))
+
     local guiRecipe = GuiElement.add(itable, GuiFrameH("header-recipe"):style(helmod_frame_style.hidden))
     GuiElement.add(guiRecipe, GuiLabel("header-recipe"):caption({"helmod_result-panel.col-header-recipe"}))
   end
@@ -178,11 +184,24 @@ function PinPanel:addProductionBlockRow(gui_table, block, recipe)
   local display_pin_level = User.getSetting("display_pin_level")
   local recipe_prototype = RecipePrototype(recipe)
   if display_pin_level > display_level.base then
+    -- col done
+    local is_done = recipe.is_done or false
+    local icon = "checkmark"
+    local icon_white = "checkmark-white"
+    if is_done == true then
+      icon = "done"
+      icon_white = "done-white"
+    end
+    GuiElement.add(gui_table, GuiButton(self.classname, "recipe-done", recipe.id):sprite("menu", icon_white, icon):style("helmod_button_menu"):tooltip({"helmod_button.done"}))
     -- col recipe
     local cell_recipe = GuiElement.add(gui_table, GuiFrameH("recipe", recipe.id):style(helmod_frame_style.hidden))
-    GuiElement.add(cell_recipe, GuiCellRecipe(self.classname, "do_noting"):element(recipe):tooltip("tooltip.info-product"):color(GuiElement.color_button_default))
+    local button_recipe = GuiCellRecipe(self.classname, "do_noting"):element(recipe):tooltip("tooltip.info-product"):color(GuiElement.color_button_default)
+    if is_done == true then
+      button_recipe:overlay("done-white")
+    end
+    GuiElement.add(cell_recipe, button_recipe)
   end
-
+  local by_limit = block.count ~= 1
   if display_pin_level > display_level.products then
     -- products
     local cell_products = GuiElement.add(gui_table, GuiTable("products",recipe.id):column(3))
@@ -196,7 +215,7 @@ function PinPanel:addProductionBlockRow(gui_table, block, recipe)
         if block.count > 1 then
           product.limit_count = product.count / block.count
         end
-        GuiElement.add(cell_products, GuiCellElementSm(self.classname, "do_noting", "product"):index(index):element(product):tooltip("tooltip.info-product"):color(GuiElement.color_button_none))
+        GuiElement.add(cell_products, GuiCellElementSm(self.classname, "do_noting", "product"):index(index):element(product):tooltip("tooltip.info-product"):color(GuiElement.color_button_none):byLimit(by_limit))
       end
     end
   end
@@ -204,7 +223,7 @@ function PinPanel:addProductionBlockRow(gui_table, block, recipe)
   if display_pin_level > display_level.factory then
     -- col factory
     local factory = recipe.factory
-    GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "factory"):index(recipe.id):element(factory):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default))
+    GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "factory"):index(recipe.id):element(factory):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default):byLimit(by_limit))
   end
 
   if display_pin_level > display_level.ingredients then
@@ -220,7 +239,7 @@ function PinPanel:addProductionBlockRow(gui_table, block, recipe)
         if block.count > 1 then
           ingredient.limit_count = ingredient.count / block.count
         end
-        GuiElement.add(cell_ingredients, GuiCellElementSm(self.classname, "do_noting", "ingredient"):index(index):element(ingredient):tooltip("tooltip.info-product"):color(GuiElement.color_button_add))
+        GuiElement.add(cell_ingredients, GuiCellElementSm(self.classname, "do_noting", "ingredient"):index(index):element(ingredient):tooltip("tooltip.info-product"):color(GuiElement.color_button_add):byLimit(by_limit))
       end
     end
   end
@@ -233,7 +252,7 @@ function PinPanel:addProductionBlockRow(gui_table, block, recipe)
     else
       beacon.limit_count = nil
     end
-    GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "beacon"):index(recipe.id):element(beacon):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default))
+    GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "beacon"):index(recipe.id):element(beacon):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default):byLimit(by_limit))
   end
 
 end
@@ -263,6 +282,22 @@ function PinPanel:onEvent(event)
     if pin_block_id ~= nil and model.blocks[pin_block_id] ~= nil then
       local recipes = model.blocks[pin_block_id].recipes
       Player.setSmartTool(recipes[event.item1], event.item2)
+    end
+  end
+  if event.action == "recipe-done" then
+    if pin_block_id ~= nil and model.blocks[pin_block_id] ~= nil then
+      local recipes = model.blocks[pin_block_id].recipes
+      recipes[event.item1].is_done = not(recipes[event.item1].is_done)
+      self:updateInfo(event)
+    end
+  end
+  if event.action == "recipe-done-remove" then
+    if pin_block_id ~= nil and model.blocks[pin_block_id] ~= nil then
+      local recipes = model.blocks[pin_block_id].recipes
+      for _,recipe in pairs(recipes) do
+        recipe.is_done = nil
+      end
+      self:updateInfo(event)
     end
   end
 end

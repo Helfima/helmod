@@ -1230,6 +1230,7 @@ function ModelCompute.updateVersion_0_9_35()
           end
         end
       end
+      ModelCompute.update()
     end
   end
 end

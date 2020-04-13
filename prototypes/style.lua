@@ -1567,7 +1567,7 @@ local style_element_list = {
 --
 
 for _,style in pairs(style_element_list) do
-  for i = 1, 3 do
+  for i = 1, 4 do
     local style_name = table.concat({"helmod_frame_element",style.suffix,i},"_")
     local x = style.x + (i-1)*8
     local y = style.y
@@ -1598,7 +1598,7 @@ end
 --
 
 for _,style in pairs(style_element_list) do
-  for i = 1, 3 do
+  for i = 1, 4 do
     local style_name = table.concat({"helmod_frame_element_m",style.suffix,i},"_")
     local x = style.x + (i-1)*8
     local y = style.y
@@ -1629,7 +1629,7 @@ end
 --
 
 for _,style in pairs(style_element_list) do
-  for i = 1, 3 do
+  for i = 1, 4 do
     local style_name = table.concat({"helmod_frame_element_sm",style.suffix,i},"_")
     local x = style.x + (i-1)*8
     local y = style.y
@@ -1660,7 +1660,7 @@ end
 --
 
 for _,style in pairs(style_element_list) do
-  for i = 1, 3 do
+  for i = 1, 4 do
     local style_name = table.concat({"helmod_frame_product",style.suffix,i},"_")
     local x = style.x + (i-1)*8
     local y = style.y
@@ -1690,7 +1690,7 @@ end
 --
 
 for _,style in pairs(style_element_list) do
-  for i = 1, 3 do
+  for i = 1, 4 do
     local style_name = table.concat({"helmod_frame_colored",style.suffix,i},"_")
     local x = style.x + (i-1)*8
     local y = style.y

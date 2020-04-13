@@ -31,7 +31,6 @@ function GuiSprite:sprite(type, name)
   else
     self.options.sprite = string.format("%s/%s", type, name)
   end
-  local valid = Player.is_valid_sprite_path(self.options.sprite);
   return self
 end
 
