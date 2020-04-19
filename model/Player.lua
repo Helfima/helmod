@@ -637,7 +637,7 @@ end
 function Player.getEnergyMachines()
     local filters = {}
 
-  for _,type in pairs({EntityType.generator, EntityType.solar_panel, EntityType.boiler, EntityType.accumulator, EntityType.reactor, EntityType.offshore_pump, EntityType.seafloor_pump}) do
+  for _,type in pairs({"generator", "solar-panel", "boiler", "accumulator", "reactor", "offshore-pump", "seafloor-pump"}) do
     table.insert(filters, {filter="type", mode="or", invert=false, type=type})
   end
   return game.get_filtered_entity_prototypes(filters)
@@ -921,7 +921,7 @@ end
 function Player.getProductionsBeacon()
   local items = {}
   local filters = {}
-  table.insert(filters,{filter="type",type=EntityType.beacon,mode="or"})
+  table.insert(filters,{filter="type",type="beacon",mode="or"})
   table.insert(filters,{filter="hidden",invert=true,mode="and"})
 
   for _,item in pairs(game.get_filtered_entity_prototypes(filters)) do
@@ -944,11 +944,11 @@ function Player.getGenerators(type)
   local items = {}
   local filters = {}
   if type == "primary" then
-    table.insert(filters,{filter="type",type=EntityType.generator,mode="or"})
-    table.insert(filters,{filter="type",type=EntityType.solar_panel,mode="or"})
+    table.insert(filters,{filter="type",type="generator",mode="or"})
+    table.insert(filters,{filter="type",type="solar-panel",mode="or"})
   else
-    table.insert(filters,{filter="type",type=EntityType.boiler,mode="or"})
-    table.insert(filters,{filter="type",type=EntityType.accumulator,mode="or"})
+    table.insert(filters,{filter="type",type="boiler",mode="or"})
+    table.insert(filters,{filter="type",type="accumulator",mode="or"})
   end
 
   for _,item in pairs(game.get_filtered_entity_prototypes(filters)) do

@@ -398,24 +398,26 @@ end
 -- @param #LuaEvent event
 --
 function Form:updateLocation(event)
+  local width , height = GuiElement.getDisplaySizes()
   local width_main, height_main = GuiElement.getMainSizes()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if User.getPreferenceSetting("ui_glue") == true and User.getPreferenceSetting("ui_glue", self.classname) == true then
+    local offset = User.getPreferenceSetting("ui_glue_offset")
     local navigate = User.getNavigate()
     local location = {x=50,y=50}
     if navigate[User.tab_name] ~= nil or navigate[User.tab_name]["location"] ~= nil then
       location = navigate[User.tab_name]["location"]
     end
-    local location_x = location.x + width_main - 500
+    local location_x = location.x + width_main + offset
     flow_panel.location = {location_x, y=location.y}
   end
 
   local location = flow_panel.location
-  if location.x < 0 or location.x > (width_main - 100) then
+  if location.x < 0 or location.x > (width - 100) then
     location.x = 0
     flow_panel.location = location
   end
-  if location.y < 0 or location.y > (height_main - 50) then
+  if location.y < 0 or location.y > (height - 50) then
     location.y = 50
     flow_panel.location = location
   end

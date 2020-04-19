@@ -764,14 +764,15 @@ end
 --
 function ModelCompute.computeFactory(recipe)
   local recipe_prototype = RecipePrototype(recipe)
+  local factory_prototype = EntityPrototype(recipe.factory)
   local recipe_energy = recipe_prototype:getEnergy()
   -- effet speed
-  recipe.factory.speed = ModelCompute.speedFactory(recipe) * (1 + recipe.factory.effects.speed)
+  recipe.factory.speed = factory_prototype:speedFactory(recipe) * (1 + recipe.factory.effects.speed)
   -- cap speed creation maximum de 1 cycle par tick
-  if recipe_energy/recipe.factory.speed < 1/60 then recipe.factory.speed = 60*recipe_energy end
+  -- seulement sur les recipes normaux
+  if recipe.type == "recipe" and recipe_energy/recipe.factory.speed < 1/60 then recipe.factory.speed = 60*recipe_energy end
 
   -- effet consumption
-  local factory_prototype = EntityPrototype(recipe.factory)
   local energy_type = factory_prototype:getEnergyType()
   recipe.factory.energy = factory_prototype:getEnergyConsumption() * (1 + recipe.factory.effects.consumption)
 
@@ -826,19 +827,20 @@ end
 function ModelCompute.computeEnergyFactory(recipe)
   local model = Model.getModel()
   local recipe_prototype = RecipePrototype(recipe)
+  local factory_prototype = EntityPrototype(recipe.factory)
   local recipe_energy = recipe_prototype:getEnergy()
   -- effet speed
-  recipe.factory.speed = ModelCompute.speedFactory(recipe) * (1 + recipe.factory.effects.speed)
+  recipe.factory.speed = factory_prototype:speedFactory(recipe) * (1 + recipe.factory.effects.speed)
   -- cap speed creation maximum de 1 cycle par tick
-  if recipe.type ~= "fluid" and recipe_energy/recipe.factory.speed < 1/60 then recipe.factory.speed = 60*recipe_energy end
+  -- seulement sur les recipes normaux
+  if recipe.type == "recipe" and recipe_energy/recipe.factory.speed < 1/60 then recipe.factory.speed = 60*recipe_energy end
 
   -- effet consumption
-  local factory_prototype = EntityPrototype(recipe.factory)
   local energy_prototype = factory_prototype:getEnergySource()
       
   local energy_type = factory_prototype:getEnergyType()
   local gameDay = {day=12500,dust=5000,night=2500,dawn=2500}
-  if factory_prototype:getType() == EntityType.accumulator then
+  if factory_prototype:getType() == "accumulator" then
     local dark_time = (gameDay.dust/2 + gameDay.night + gameDay.dawn / 2 )
     recipe_energy = dark_time/60
   end
@@ -1068,62 +1070,6 @@ function ModelCompute.computeSummaryFactory(block)
           if block.summary.modules[module] == nil then block.summary.modules[module] = {name = module, type = "item", count = 0} end
           block.summary.modules[module].count = block.summary.modules[module].count + value * math.ceil(beacon.count)
         end
-      end
-    end
-  end
-end
-
--------------------------------------------------------------------------------
--- Compute power
---
--- @function [parent=#ModelCompute] computePower
---
--- @param key power id
---
-function ModelCompute.computePower(key)
-  local power = Model.getPower(key)
-  if power ~= nil then
-    local primary_prototype = EntityPrototype(power.primary.name)
-    local secondary_prototype = EntityPrototype(power.secondary.name)
-    if primary_prototype:getType() == EntityType.generator then
-      -- calcul primary
-      local count = math.ceil( power.power / primary_prototype:getEnergyConsumption() )
-      power.primary.count = count or 0
-      -- calcul secondary
-      if secondary_prototype:native() ~= nil and secondary_prototype:getType() == EntityType.boiler then
-        local count = 0
-        count = math.ceil( power.power / secondary_prototype:getEnergyConsumption() )
-        power.secondary.count = count or 0
-      else
-        power.secondary.count = 0
-      end
-    end
-    if primary_prototype:getType() == EntityType.solar_panel then
-      -- calcul primary
-      local count = math.ceil( power.power / primary_prototype:getEnergyConsumption() )
-      power.primary.count = count or 0
-      -- calcul secondary
-      if secondary_prototype:native() ~= nil and secondary_prototype:getType() == EntityType.accumulator then
-        local factor = 2
-        -- ajout energy pour accumulateur
-        local gameDay = {day=12500,dust=5000,night=2500,dawn=2500}
-        -- selon les aires il faut de l'accu en dehors du jour selon le trapese journalier
-        local accu= (gameDay.dust/factor + gameDay.night + gameDay.dawn / factor ) / ( gameDay.day )
-        -- puissance nominale la nuit
-        local energy_prototype = secondary_prototype:getEnergySource()
-        local count1 = power.power/ energy_prototype:getOutputFlowLimit()
-        -- puissance durant la penombre
-        -- formula (puissance*durree_penombre)/(60s*capacite)
-        local count2 = power.power*( gameDay.dust / factor + gameDay.night + gameDay.dawn / factor ) / ( 60 * energy_prototype:getBufferCapacity() )
-
-        if count1 > count2 then
-          power.secondary.count = count1 or 0
-        else
-          power.secondary.count = count2 or 0
-        end
-        power.primary.count = count*(1+accu) or 0
-      else
-        power.secondary.count = 0
       end
     end
   end

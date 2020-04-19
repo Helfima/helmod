@@ -191,12 +191,12 @@ function RecipePrototype:getRawProducts()
     elseif self.lua_type == "energy" then
       local products = {}
       local prototype = EntityPrototype(self.lua_prototype.name)
-      if prototype:getType() == EntityType.solar_panel then
+      if prototype:getType() == "solar-panel" then
         local amount = prototype:getEnergyConsumption()
         local product = {name="energy", type="energy", amount=amount}
         table.insert(products, product)
       end
-      if prototype:getType() == EntityType.boiler then
+      if prototype:getType() == "boiler" then
         local fluidboxes = prototype:getFluidboxPrototypes()
         if fluidboxes ~= nil then
           for _,fluidbox in pairs(fluidboxes) do
@@ -212,23 +212,23 @@ function RecipePrototype:getRawProducts()
           end
         end
       end
-      if prototype:getType() == EntityType.accumulator then
+      if prototype:getType() == "accumulator" then
         local energy_prototype = prototype:getEnergySource()
         local amount = energy_prototype:getBufferCapacity()
         local product = {name="energy", type="energy", amount=amount}
         table.insert(products, product)
       end
-      if prototype:getType() == EntityType.generator then
+      if prototype:getType() == "generator" then
         local amount = prototype:getEnergyConsumption()
         local product = {name="energy", type="energy", amount=amount}
         table.insert(products, product)
       end
-      if prototype:getType() == EntityType.reactor then
+      if prototype:getType() == "reactor" then
         local amount = prototype:getEnergyConsumption()
         local product = {name="steam-heat", type="energy", amount=amount}
         table.insert(products, product)
       end
-      if prototype:getType() == EntityType.offshore_pump or prototype:getType() == EntityType.seafloor_pump then
+      if prototype:getType() == "offshore-pump" or prototype:getType() == "seafloor-pump" then
         local amount = prototype:getPumpingSpeed()
         local product = {name="water", type="fluid", amount=amount, by_time=true}
         table.insert(products, product)
@@ -255,9 +255,9 @@ function RecipePrototype:getRawIngredients()
     elseif self.lua_type == "energy" then
       local ingredients = {}
       local prototype = EntityPrototype(self.lua_prototype.name)
-      if prototype:getType() == EntityType.solar_panel then
+      if prototype:getType() == "solar-panel" then
       end
-      if prototype:getType() == EntityType.boiler then
+      if prototype:getType() == "boiler" then
         local fluidboxes = prototype:getFluidboxPrototypes()
         if fluidboxes ~= nil then
           for _,fluidbox in pairs(fluidboxes) do
@@ -279,7 +279,7 @@ function RecipePrototype:getRawIngredients()
             table.insert(ingredients, ingredient)
         end
       end
-      if prototype:getType() == EntityType.accumulator then
+      if prototype:getType() == "accumulator" then
         local energy_prototype = prototype:getEnergySource()
         local gameDay = {day=12500,dust=5000,night=2500,dawn=2500}
         local dark_ratio = (gameDay.dust/2 + gameDay.night + gameDay.dawn / 2 ) / ( gameDay.day )
@@ -287,7 +287,7 @@ function RecipePrototype:getRawIngredients()
         local ingredient = {name="energy", type="energy", amount=amount}
         table.insert(ingredients, ingredient)
       end
-      if prototype:getType() == EntityType.generator then
+      if prototype:getType() == "generator" then
         local fluidboxes = prototype:getFluidboxPrototypes()
         if fluidboxes ~= nil then
           for _,fluidbox in pairs(fluidboxes) do

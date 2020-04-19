@@ -19,6 +19,18 @@ end)
 --
 -- @return #boolean
 --
+function FluidPrototype:getHeatCapacity()
+  if self.lua_prototype == nil then return 0 end
+  return self.lua_prototype.heat_capacity
+end
+
+-------------------------------------------------------------------------------
+-- Return fuel value
+--
+-- @function [parent=#FluidPrototype] getFuelValue
+--
+-- @return #boolean
+--
 function FluidPrototype:getFuelValue(temperature)
   if self.lua_prototype == nil then return 0 end
   if self.lua_prototype.name == "steam" then

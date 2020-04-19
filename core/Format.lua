@@ -51,7 +51,12 @@ end
 --
 function Format.round(val, decimal)
   if (decimal) then
-    return math.ceil( (val * 10^decimal)) / (10^decimal)
+    if decimal > 0 then
+      return math.ceil( (val * 10^decimal)) / (10^decimal)
+    else
+      local decimal = math.abs(decimal)
+      return math.floor( (val * 10^decimal)) / (10^decimal)
+    end
   else
     return math.ceil(val)
   end

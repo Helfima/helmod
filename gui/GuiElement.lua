@@ -378,7 +378,7 @@ function GuiElement.getElementColumnNumber(size)
   local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
   local width , height = GuiElement.getDisplaySizes()
   local width_main = math.ceil(width*display_ratio_horizontal)
-  return math.floor((width_main-600)/(2*size))
+  return math.max(5, math.floor((width_main-600)/(2*size)))
 end
 -------------------------------------------------------------------------------
 -- Set style

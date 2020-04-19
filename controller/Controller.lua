@@ -50,7 +50,6 @@ User = require "data.User"
 Model = require "data.Model"
 ModelCompute = require "data.ModelCompute"
 ModelBuilder = require "data.ModelBuilder"
-EntityType = require "model.EntityType"
 
 PrototypeFilters = require "model.PrototypeFilters"
 Converter = require "core.Converter"

@@ -8,6 +8,32 @@ EnergySourcePrototype = newclass(Prototype,function(base, lua_prototype, factory
   Prototype.init(base,lua_prototype)
   base.factory = factory
 end)
+
+-------------------------------------------------------------------------------
+-- Return usage priority
+--
+-- @function [parent=#EnergySourcePrototype] getUsagePriority
+--
+-- @return #string
+--
+function EnergySourcePrototype:getUsagePriority()
+  if self.lua_prototype ~= nil then
+    return "secondary-input"
+  end
+  return nil
+end
+
+-------------------------------------------------------------------------------
+-- Return type
+--
+-- @function [parent=#EnergySourcePrototype] getType
+--
+-- @return #string
+--
+function EnergySourcePrototype:getType()
+  return "none"
+end
+
 -------------------------------------------------------------------------------
 -- Return emissions
 --
@@ -19,6 +45,17 @@ function EnergySourcePrototype:getEmissions()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.emissions  or 2.7777777e-7
   end
+  return 0
+end
+
+-------------------------------------------------------------------------------
+-- Return drain energy
+--
+-- @function [parent=#EnergySourcePrototype] getDrain
+--
+-- @return #number default 0
+--
+function EnergySourcePrototype:getDrain()
   return 0
 end
 
@@ -81,6 +118,31 @@ ElectricSourcePrototype = newclass(EnergySourcePrototype,function(base,lua_proto
 end)
 
 -------------------------------------------------------------------------------
+-- Return type
+--
+-- @function [parent=#ElectricSourcePrototype] getType
+--
+-- @return #string
+--
+function ElectricSourcePrototype:getType()
+  return "electric"
+end
+
+-------------------------------------------------------------------------------
+-- Return usage priority
+--
+-- @function [parent=#ElectricSourcePrototype] getUsagePriority
+--
+-- @return #string
+--
+function ElectricSourcePrototype:getUsagePriority()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.usage_priority
+  end
+  return nil
+end
+
+-------------------------------------------------------------------------------
 -- Return buffer capacity
 --
 -- @function [parent=#ElectricSourcePrototype] getBufferCapacity
@@ -95,15 +157,15 @@ function ElectricSourcePrototype:getBufferCapacity()
 end
 
 -------------------------------------------------------------------------------
--- Return buffer capacity
+-- Return  drain energy
 --
--- @function [parent=#ElectricSourcePrototype] getBufferCapacity
+-- @function [parent=#ElectricSourcePrototype] getDrain
 --
 -- @return #number default 0
 --
 function ElectricSourcePrototype:getDrain()
   if self.lua_prototype ~= nil then
-    return self.lua_prototype.drain * 60 or 0
+    return (self.lua_prototype.drain or 0) * 60
   end
   return 0
 end
@@ -117,7 +179,7 @@ end
 --
 function ElectricSourcePrototype:getInputFlowLimit()
   if self.lua_prototype ~= nil then
-    return self.lua_prototype.input_flow_limit*60 or 0
+    return (self.lua_prototype.input_flow_limit or 0) * 60
   end
   return 0
 end
@@ -131,7 +193,7 @@ end
 --
 function ElectricSourcePrototype:getOutputFlowLimit()
   if self.lua_prototype ~= nil then
-    return self.lua_prototype.output_flow_limit*60 or 0
+    return (self.lua_prototype.output_flow_limit or 0) * 60
   end
   return 0
 end
@@ -139,6 +201,17 @@ end
 BurnerPrototype = newclass(EnergySourcePrototype,function(base,lua_prototype, factory)
   EnergySourcePrototype.init(base, lua_prototype, factory)
 end)
+
+-------------------------------------------------------------------------------
+-- Return type
+--
+-- @function [parent=#BurnerPrototype] getType
+--
+-- @return #string
+--
+function BurnerPrototype:getType()
+  return "burner"
+end
 
 -------------------------------------------------------------------------------
 -- Return fuel categories
@@ -275,6 +348,17 @@ FluidSourcePrototype = newclass(EnergySourcePrototype,function(base, lua_prototy
 end)
 
 -------------------------------------------------------------------------------
+-- Return type
+--
+-- @function [parent=#FluidSourcePrototype] getType
+--
+-- @return #string
+--
+function FluidSourcePrototype:getType()
+  return "fluid"
+end
+
+-------------------------------------------------------------------------------
 -- Return fuel fluid prototypes
 --
 -- @function [parent=#FluidSourcePrototype] getFuelPrototypes
@@ -390,7 +474,28 @@ VoidSourcePrototype = newclass(EnergySourcePrototype,function(base, lua_prototyp
   EnergySourcePrototype.init(base,lua_prototype, factory)
 end)
 
+-------------------------------------------------------------------------------
+-- Return type
+--
+-- @function [parent=#VoidSourcePrototype] getType
+--
+-- @return #string
+--
+function VoidSourcePrototype:getType()
+  return "void"
+end
+
 HeatSourcePrototype = newclass(EnergySourcePrototype,function(base, lua_prototype, factory)
   EnergySourcePrototype.init(base,lua_prototype, factory)
 end)
 
+-------------------------------------------------------------------------------
+-- Return type
+--
+-- @function [parent=#HeatSourcePrototype] getType
+--
+-- @return #string
+--
+function HeatSourcePrototype:getType()
+  return "heat"
+end

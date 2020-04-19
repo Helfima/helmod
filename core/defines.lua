@@ -51,6 +51,7 @@ helmod_tag.color.red_light = "[color=255,50,50]"
 helmod_tag.color.green = "[color=0,127,14]"
 helmod_tag.color.green_light = "[color=50,200,50]"
 helmod_tag.color.blue = "[color=66,141,255]"
+helmod_tag.color.blue_light = "[color=100,200,255]"
 helmod_tag.color.gold = "[color=255,230,192]"
 helmod_tag.color.orange = "[color=255,106,0]"
 
@@ -215,7 +216,14 @@ helmod_preferences = {
       HMItemSelector = true,
       HMFluidSelector = true
     }
-  }
+  },
+  ui_glue_offset = {
+    type = "int-setting",
+    localised_name = {"helmod_settings.ui-glue-offset"},
+    localised_description = {"helmod_settings.ui-glue-offset-desc"},
+    default_value = -500,
+    group = "ui"
+  },
 }
 
 helmod_settings_mod = {
