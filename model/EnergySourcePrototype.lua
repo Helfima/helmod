@@ -18,7 +18,7 @@ end)
 --
 function EnergySourcePrototype:getUsagePriority()
   if self.lua_prototype ~= nil then
-    return "secondary-input"
+    return "none"
   end
   return nil
 end
@@ -434,9 +434,48 @@ end
 --
 function FluidSourcePrototype:getFluidUsagePerTick()
   if self.lua_prototype ~= nil then
-    return self.lua_prototype.fluid_usage_per_tick or 1
+    return self.lua_prototype.fluid_usage_per_tick or 0
   end
   return 0
+end
+
+-------------------------------------------------------------------------------
+-- Return fluid usage
+--
+-- @function [parent=#FluidSourcePrototype] getFluidUsage
+--
+-- @return #number default 0
+--
+function FluidSourcePrototype:getFluidUsage()
+  return self:getFluidUsagePerTick() * 60
+end
+
+-------------------------------------------------------------------------------
+-- Return burns fluid
+--
+-- @function [parent=#FluidSourcePrototype] getBurnsFluid
+--
+-- @return #boolean default false
+--
+function FluidSourcePrototype:getBurnsFluid()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.burns_fluid or false
+  end
+  return false
+end
+
+-------------------------------------------------------------------------------
+-- Return fluidbox
+--
+-- @function [parent=#FluidSourcePrototype] getFluidbox
+--
+-- @return #boolean default false
+--
+function FluidSourcePrototype:getFluidbox()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.fluid_box
+  end
+  return nil
 end
 
 -------------------------------------------------------------------------------

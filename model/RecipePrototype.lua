@@ -192,24 +192,16 @@ function RecipePrototype:getRawProducts()
       local products = {}
       local prototype = EntityPrototype(self.lua_prototype.name)
       if prototype:getType() == "solar-panel" then
-        local amount = prototype:getEnergyConsumption()
+        local amount = prototype:getEnergyProduction()
         local product = {name="energy", type="energy", amount=amount}
         table.insert(products, product)
       end
       if prototype:getType() == "boiler" then
-        local fluidboxes = prototype:getFluidboxPrototypes()
-        if fluidboxes ~= nil then
-          for _,fluidbox in pairs(fluidboxes) do
-            local fluidbox_prototype = FluidboxPrototype(fluidbox)
-            if fluidbox_prototype:native() ~= nil and fluidbox_prototype:isOutput() then
-              local filter = fluidbox_prototype:native().filter
-              if filter ~= nil then
-                local amount = prototype:getFluidConsumption()
-                local product = {name=filter.name, type="fluid", amount=amount, by_time=true}
-                table.insert(products, product)
-              end
-            end
-          end
+        local amount = prototype:getFluidProduction()
+        local fluid_production = prototype:getFluidProductionPrototype()
+        if fluid_production ~= nil then
+          local product = {name=fluid_production.name, type="fluid", amount=amount, by_time=true}
+          table.insert(products, product)
         end
       end
       if prototype:getType() == "accumulator" then
@@ -219,12 +211,12 @@ function RecipePrototype:getRawProducts()
         table.insert(products, product)
       end
       if prototype:getType() == "generator" then
-        local amount = prototype:getEnergyConsumption()
+        local amount = prototype:getEnergyProduction()
         local product = {name="energy", type="energy", amount=amount}
         table.insert(products, product)
       end
       if prototype:getType() == "reactor" then
-        local amount = prototype:getEnergyConsumption()
+        local amount = prototype:getEnergyProduction()
         local product = {name="steam-heat", type="energy", amount=amount}
         table.insert(products, product)
       end
@@ -256,22 +248,14 @@ function RecipePrototype:getRawIngredients()
       local ingredients = {}
       local prototype = EntityPrototype(self.lua_prototype.name)
       if prototype:getType() == "solar-panel" then
+        -- nothing
       end
       if prototype:getType() == "boiler" then
-        local fluidboxes = prototype:getFluidboxPrototypes()
-        if fluidboxes ~= nil then
-          for _,fluidbox in pairs(fluidboxes) do
-            local fluidbox_prototype = FluidboxPrototype(fluidbox)
-            if fluidbox_prototype:native() ~= nil and fluidbox_prototype:isInput() then
-              local filter = fluidbox_prototype:native().filter
-              if filter ~= nil then
-                local amount = prototype:getFluidConsumption()
-                local ingredient = {name=filter.name, type="fluid", amount=amount, by_time=true}
-                table.insert(ingredients, ingredient)
-              end
-            end
-          end
-        end
+        -- water
+        local amount = prototype:getFluidProduction()
+        local ingredient = {name="water", type="fluid", amount=amount, by_time=true}
+        table.insert(ingredients, ingredient)
+        -- heat
         local energy_type = prototype:getEnergyType()
         if energy_type == "heat" then
             local amount = prototype:getEnergyConsumption()
@@ -288,19 +272,12 @@ function RecipePrototype:getRawIngredients()
         table.insert(ingredients, ingredient)
       end
       if prototype:getType() == "generator" then
-        local fluidboxes = prototype:getFluidboxPrototypes()
-        if fluidboxes ~= nil then
-          for _,fluidbox in pairs(fluidboxes) do
-            local fluidbox_prototype = FluidboxPrototype(fluidbox)
-            if fluidbox_prototype:native() ~= nil and fluidbox_prototype:isInput() then
-              local filter = fluidbox_prototype:native().filter
-              if filter ~= nil then
-                local amount = prototype:getFluidUsage()
-                local ingredient = {name=filter.name, type="fluid", amount=amount, by_time=true}
-                table.insert(ingredients, ingredient)
-              end
-            end
-          end
+        local amount = prototype:getFluidConsumption()
+        local fluid_fuel = prototype:getFluidUsagePrototype()
+        if fluid_fuel ~= nil and fluid_fuel:native() ~= nil then
+          local amount = prototype:getFluidUsage()
+          local ingredient = {name=fluid_fuel:native().name, type="fluid", amount=amount, by_time=true}
+          table.insert(ingredients, ingredient)
         end
       end
       return ingredients

@@ -29,6 +29,18 @@ end
 --
 -- @function [parent=#FluidPrototype] getFuelValue
 --
+-- @return #number
+--
+function FluidPrototype:getEmissionMultiplier()
+  if self.lua_prototype == nil then return 1 end
+  return self.lua_prototype.emissions_multiplier or 1
+end
+
+-------------------------------------------------------------------------------
+-- Return fuel value
+--
+-- @function [parent=#FluidPrototype] getFuelValue
+--
 -- @return #boolean
 --
 function FluidPrototype:getFuelValue(temperature)
@@ -37,7 +49,7 @@ function FluidPrototype:getFuelValue(temperature)
     local target_temperature = temperature or 165
     return (target_temperature-15)*200
   end
-  return self.lua_prototype.fuel_value*60
+  return self.lua_prototype.fuel_value
 end
 
 -------------------------------------------------------------------------------

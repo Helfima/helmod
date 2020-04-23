@@ -1,5 +1,6 @@
 require "tab.AbstractTab"
 local data = require "unit_test.Data"
+local data_bob_angel = require "unit_test.DataBobAngel"
 -------------------------------------------------------------------------------
 -- Class to build tab
 --
@@ -105,6 +106,9 @@ end
 -- @function [parent=#UnitTestTab] updateData
 --
 function UnitTestTab:updateData()
+  if game.active_mods["helmod"] then
+    data = data_bob_angel
+  end
   self:updateEnergy()
 end
 
@@ -116,19 +120,14 @@ end
 function UnitTestTab:updateEnergy()
   local tab_panel = self:getEnergyTab()
   
-  for mod, mod_data in pairs(data.energy) do
-    local mod_panel = GuiElement.add(tab_panel, GuiFlowV("mod", mod))
-    GuiElement.add(mod_panel, GuiLabel("mod-label"):caption(mod):style("helmod_label_title_frame"))
-    
-    local table_panel = GuiElement.add(mod_panel, GuiTable("list-table"):column(22))
-    table_panel.vertical_centering = false
-    table_panel.style.horizontal_spacing = 10
-    
-    self:addEnergyListHeader(table_panel)
+  local table_panel = GuiElement.add(tab_panel, GuiTable("list-table"):column(23))
+  table_panel.vertical_centering = false
+  table_panel.style.horizontal_spacing = 10
+  
+  self:addEnergyListHeader(table_panel)
 
-    for entity, test_data in pairs(mod_data) do
-      self:addEnergyListRow(table_panel, entity, test_data)
-    end
+  for entity, test_data in spairs(data.energy, function(t,a,b) return t[b]["energy_type_input"] < t[a]["energy_type_input"] end) do
+    self:addEnergyListRow(table_panel, entity, test_data)
   end
 end
 
@@ -162,23 +161,24 @@ function UnitTestTab:addEnergyListHeader(itable)
   self:addCellHeaderTooltip(itable, "name", "Name")
 
   -- **** Attributes ***
-  self:addCellHeaderTooltip(itable, "energy-usage-min", "EUmin", "Attribut Min Energy Usage")
-  self:addCellHeaderTooltip(itable, "energy-usage-max", "EUmax", "Attribut Max Energy Usage")
-  self:addCellHeaderTooltip(itable, "fluid-usage", "FU", "Attribut Fluid Usage /s")
-  self:addCellHeaderTooltip(itable, "effectivity", "E", "Attribut Effectivity")
-  self:addCellHeaderTooltip(itable, "target-temperature", "TT", "Attribut Target Temperature")
-  self:addCellHeaderTooltip(itable, "maximum-temperature", "MT", "Attribut Maximum Temperature")
+  self:addCellHeaderTooltip(itable, "energy-type", "ET", "Energy Type")
+  self:addCellHeaderTooltip(itable, "energy-usage-min", "EUmin", "Min Energy Usage")
+  self:addCellHeaderTooltip(itable, "energy-usage-max", "EUmax", "Max Energy Usage")
+  self:addCellHeaderTooltip(itable, "energy-usage-priority", "EUP", "Energy Usage Priority")
+  self:addCellHeaderTooltip(itable, "fluid-usage", "FU", "Fluid Usage /s")
+  self:addCellHeaderTooltip(itable, "fluid-burns", "FB", "Fluid Burns")
+  self:addCellHeaderTooltip(itable, "effectivity", "E", "Effectivity")
+  self:addCellHeaderTooltip(itable, "target-temperature", "TT", "Target Temperature")
+  self:addCellHeaderTooltip(itable, "maximum-temperature", "MT", "Maximum Temperature")
     -- **** Computed ***
   self:addCellHeaderTooltip(itable, "energy-type-input", "ETI", "Energy Type Input")
   self:addCellHeaderTooltip(itable, "energy-consumption", "EC", "Energy Consumption")
   self:addCellHeaderTooltip(itable, "fluid-consumption", "FC", "Fluid Consumption /s")
   self:addCellHeaderTooltip(itable, "fluid-fuel", "FF", "Fluid Fuel")
   self:addCellHeaderTooltip(itable, "fluid-capacity", "FJ", "Fluid Capacity J")
-  self:addCellHeaderTooltip(itable, "water-consumption", "WC", "Water Consumption /s")
-  self:addCellHeaderTooltip(itable, "steam-consumption", "SC", "Steam Consumption /s")
   self:addCellHeaderTooltip(itable, "energy-type-output", "ETO", "Energy Type Output")
   self:addCellHeaderTooltip(itable, "fluid-production", "FP", "Fluid Production /s")
-  self:addCellHeaderTooltip(itable, "steam-production", "SP", "Steam Production /s")
+  self:addCellHeaderTooltip(itable, "fluid-production-prototype", "FPP", "Fluid Production Prototype")
   self:addCellHeaderTooltip(itable, "energy-production", "EP", "Energy Production")
   self:addCellHeaderTooltip(itable, "pollution", "P", "Pollution")
   self:addCellHeaderTooltip(itable, "speed", "S", "Speed")
@@ -204,7 +204,15 @@ function UnitTestTab:addEnergyListRow(gui_table, entity, test_data)
     -- col Name
     GuiElement.add(gui_table, GuiLabel("name", entity):caption(lua_prototype.name))
 
+    local energy_source = prototype:getEnergySource()
     -- **** Attributes ***
+    -- col Energy Type
+    local energy_type = "nil"
+    if energy_source ~= nil then
+      energy_type = energy_source:getType()
+    end
+    local tag_color, tooltip = self:valueEquals(energy_type, test_data.energy_type, true)
+    GuiElement.add(gui_table, GuiLabel("energy-type", entity):caption({"", helmod_tag.font.default_bold, tag_color, energy_type, helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
     -- col Energy Usage Min
     local energy_usage_min = prototype:getMinEnergyUsage()
     local tag_color, tooltip = self:valueEquals(energy_usage_min, test_data.energy_usage_min, true)
@@ -213,10 +221,21 @@ function UnitTestTab:addEnergyListRow(gui_table, entity, test_data)
     local energy_usage_max = prototype:getMaxEnergyUsage()
     local tag_color, tooltip = self:valueEquals(energy_usage_max, test_data.energy_usage_max, true)
     GuiElement.add(gui_table, GuiLabel("energy-usage-max", entity):caption({"", helmod_tag.font.default_bold, tag_color, Format.formatNumberKilo(energy_usage_max, "W"), helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
-    -- col Fluid V /s
+    -- col Energy Usage Priority
+    local energy_usage_priority = energy_source:getUsagePriority()
+    local tag_color, tooltip = self:valueEquals(energy_usage_priority, test_data.energy_usage_priority, true)
+    GuiElement.add(gui_table, GuiLabel("energy-usage-priority", entity):caption({"", helmod_tag.font.default_bold, tag_color, energy_usage_priority, helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
+    -- col Fluid Usage /s
     local fluid_usage = math.floor(prototype:getFluidUsage())
     local tag_color, tooltip = self:valueEquals(fluid_usage, test_data.fluid_usage, true)
     GuiElement.add(gui_table, GuiLabel("fluid-usage", entity):caption({"", helmod_tag.font.default_bold, tag_color, fluid_usage, helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
+    -- col Fluid Burns
+    local fluid_burns = "none"
+    if energy_source ~= nil and energy_source:getType() == "fluid" then
+      fluid_burns = energy_source:getBurnsFluid()
+    end
+    local tag_color, tooltip = self:valueEquals(fluid_burns, test_data.fluid_burns, true)
+    GuiElement.add(gui_table, GuiLabel("fluid-burns", entity):caption({"", helmod_tag.font.default_bold, tag_color, fluid_burns, helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
     -- col Effectivity
     local effectivity = prototype:getEffectivity()
     local tag_color, tooltip = self:valueEquals(effectivity, test_data.effectivity, true)
@@ -240,13 +259,13 @@ function UnitTestTab:addEnergyListRow(gui_table, entity, test_data)
     local tag_color, tooltip = self:valueEquals(energy_consumption, test_data.energy_consumption)
     GuiElement.add(gui_table, GuiLabel("energy-consumption", entity):caption({"", helmod_tag.font.default_bold, tag_color, Format.formatNumberKilo(energy_consumption, "W"), helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
     -- col Fluid Consumption /s
-    local fluid_consumption = math.floor(prototype:getFluidConsumption())
+    local fluid_consumption = Format.round(prototype:getFluidConsumption(),-2)
     local tag_color, tooltip = self:valueEquals(fluid_consumption, test_data.fluid_consumption)
     GuiElement.add(gui_table, GuiLabel("fluid-consumption", entity):caption({"", helmod_tag.font.default_bold, tag_color, fluid_consumption, helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
     -- col Fluid Fuel
-    local fuel_prototype = prototype:getFluidUsagePrototype()
+    local fuel_prototype = prototype:getFluidFuelPrototype()
     local fluid_fuel = {name="none", capacity=0}
-    if fuel_prototype ~= nil then 
+    if fuel_prototype ~= nil and fuel_prototype:native() ~= nil then 
       fluid_fuel = {name=fuel_prototype:native().name, capacity=fuel_prototype:getHeatCapacity()}
     end
     local tag_color, tooltip = self:valueEquals(fluid_fuel.name, test_data.fluid_fuel.name)
@@ -254,26 +273,19 @@ function UnitTestTab:addEnergyListRow(gui_table, entity, test_data)
     -- col Fluid Capacity
     local tag_color, tooltip = self:valueEquals(fluid_fuel.capacity, test_data.fluid_fuel.capacity)
     GuiElement.add(gui_table, GuiLabel("fluid-capacity", entity):caption({"", helmod_tag.font.default_bold, tag_color, fluid_fuel.capacity, helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
-    -- col Water Consumption /s
-    local water_consumption = math.floor(prototype:getWaterConsumption())
-    local tag_color, tooltip = self:valueEquals(water_consumption, test_data.water_consumption)
-    GuiElement.add(gui_table, GuiLabel("water-consumption", entity):caption({"", helmod_tag.font.default_bold, tag_color, water_consumption, helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
-    -- col Steam Consumption /s
-    local steam_consumption = math.floor(prototype:getSteamConsumption())
-    local tag_color, tooltip = self:valueEquals(steam_consumption, test_data.steam_consumption)
-    GuiElement.add(gui_table, GuiLabel("steam-consumption", entity):caption({"", helmod_tag.font.default_bold, tag_color, steam_consumption, helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
     -- col Energy Type Output
     local energy_type_output = prototype:getEnergyTypeOutput()
     local tag_color, tooltip = self:valueEquals(energy_type_output, test_data.energy_type_output)
     GuiElement.add(gui_table, GuiLabel("energy-type-output", entity):caption({"", helmod_tag.font.default_bold, tag_color, energy_type_output, helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
     -- col Fluid Production /s
-    local fluid_production = math.floor(prototype:getFluidProduction())
-    local tag_color, tooltip = self:valueEquals(fluid_production, test_data.fluid_production)
-    GuiElement.add(gui_table, GuiLabel("fluid-production", entity):caption({"", helmod_tag.font.default_bold, tag_color, fluid_production, helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
-    -- col Steam Production /s
-    local steam_production = math.floor(prototype:getSteamProduction())
-    local tag_color, tooltip = self:valueEquals(steam_production, test_data.steam_production)
-    GuiElement.add(gui_table, GuiLabel("steam-production", entity):caption({"", helmod_tag.font.default_bold, tag_color, steam_production, helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
+    local fluid_production = {name="none", amount=math.floor(prototype:getFluidProduction())}
+    local fluid_production_prototype = prototype:getFluidProductionPrototype()
+    if fluid_production_prototype ~= nil then fluid_production.name =  fluid_production_prototype.name end
+    local tag_color, tooltip = self:valueEquals(fluid_production.amount, test_data.fluid_production.amount)
+    GuiElement.add(gui_table, GuiLabel("fluid-production", entity):caption({"", helmod_tag.font.default_bold, tag_color, fluid_production.amount, helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
+    -- col Fluid Production Prototype
+    local tag_color, tooltip = self:valueEquals(fluid_production.name, test_data.fluid_production.name)
+    GuiElement.add(gui_table, GuiLabel("fluid-production-prototype", entity):caption({"", helmod_tag.font.default_bold, tag_color, fluid_production.name, helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
     -- col Energy Production
     local energy_production = math.floor(prototype:getEnergyProduction())
     local tag_color, tooltip = self:valueEquals(energy_production, test_data.energy_production)
@@ -295,6 +307,9 @@ function UnitTestTab:valueEquals(current_value, target_value, attribute)
     local tag_color = helmod_tag.color.green_light
     if attribute then
       tag_color = helmod_tag.color.blue_light
+    end
+    if current_value == "none" then
+      tag_color = helmod_tag.color.white
     end
     local tooltip = {"","Success"}
     return tag_color, tooltip

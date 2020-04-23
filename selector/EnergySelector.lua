@@ -109,25 +109,29 @@ function EnergySelector:buildPrototypeTooltip(prototype)
   table.insert(tooltip, energy_name)
   --table.insert(tooltip, {"", "\n",entity_prototype:getType()})
   -- products
-  table.insert(tooltip, {"", "\n", "products"})
-  for _,product in pairs(recipe_prototype:getProducts()) do
-    if product.type == "energy" and product.name == "energy" then
-        table.insert(tooltip, {"", "\n", "[img=helmod-energy-white]", "x", Format.formatNumberKilo(product.amount,"W")})
-    elseif product.type == "energy" and product.name == "steam-heat" then
-        table.insert(tooltip, {"", "\n", "[img=helmod-steam-heat-white]", "x", Format.formatNumberKilo(product.amount,"W")})
-    else
-      table.insert(tooltip, {"", "\n", string.format("[%s=%s]", product.type, product.name), "x", product.amount})
+  if Model.countList(recipe_prototype:getProducts()) > 0 then
+    table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.products"}, ":", helmod_tag.color.close, helmod_tag.font.close})
+    for _,product in pairs(recipe_prototype:getProducts()) do
+      if product.type == "energy" and product.name == "energy" then
+          table.insert(tooltip, {"", "\n", "[img=helmod-energy-white]", helmod_tag.font.default_bold, " x ", Format.formatNumberKilo(product.amount,"W"), helmod_tag.font.close})
+      elseif product.type == "energy" and product.name == "steam-heat" then
+          table.insert(tooltip, {"", "\n", "[img=helmod-steam-heat-white]", helmod_tag.font.default_bold, " x ", Format.formatNumberKilo(product.amount,"W"), helmod_tag.font.close})
+      else
+        table.insert(tooltip, {"", "\n", string.format("[%s=%s]", product.type, product.name), helmod_tag.font.default_bold, " x ", Format.formatNumberElement(product.amount), helmod_tag.font.close})
+      end
     end
   end
   -- ingredients
-  table.insert(tooltip, {"", "\n", "ingredients"})
-  for _,ingredient in pairs(recipe_prototype:getIngredients()) do
-    if ingredient.type == "energy" and ingredient.name == "energy" then
-      table.insert(tooltip, {"", "\n", "[img=helmod-energy-white]", "x", Format.formatNumberKilo(ingredient.amount,"W")})
-    elseif ingredient.type == "energy" and ingredient.name == "steam-heat" then
-      table.insert(tooltip, {"", "\n", "[img=helmod-steam-heat-white]", "x", Format.formatNumberKilo(ingredient.amount,"W")})
-    else
-      table.insert(tooltip, {"", "\n", string.format("[%s=%s]", ingredient.type, ingredient.name), "x", ingredient.amount})
+  if Model.countList(recipe_prototype:getIngredients()) > 0 then
+    table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.ingredients"}, ":", helmod_tag.color.close, helmod_tag.font.close})
+    for _,ingredient in pairs(recipe_prototype:getIngredients()) do
+      if ingredient.type == "energy" and ingredient.name == "energy" then
+        table.insert(tooltip, {"", "\n", "[img=helmod-energy-white]", helmod_tag.font.default_bold, " x ", Format.formatNumberKilo(ingredient.amount,"W"), helmod_tag.font.close})
+      elseif ingredient.type == "energy" and ingredient.name == "steam-heat" then
+        table.insert(tooltip, {"", "\n", "[img=helmod-steam-heat-white]", helmod_tag.font.default_bold, " x ", Format.formatNumberKilo(ingredient.amount,"W"), helmod_tag.font.close})
+      else
+        table.insert(tooltip, {"", "\n", string.format("[%s=%s]", ingredient.type, ingredient.name), helmod_tag.font.default_bold, " x ", Format.formatNumberElement(ingredient.amount), helmod_tag.font.close})
+      end
     end
   end
   return tooltip
