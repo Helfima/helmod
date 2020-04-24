@@ -1,5 +1,6 @@
 require "tab.AbstractTab"
 local data = require "unit_test.Data"
+local data_pyanodons = require "unit_test.DataPyanodons"
 local data_bob_angel = require "unit_test.DataBobAngel"
 -------------------------------------------------------------------------------
 -- Class to build tab
@@ -106,8 +107,11 @@ end
 -- @function [parent=#UnitTestTab] updateData
 --
 function UnitTestTab:updateData()
-  if game.active_mods["helmod"] then
+  if game.active_mods["boblibrary"] then
     data = data_bob_angel
+  end
+  if game.active_mods["pyrawores"] then
+    data = data_pyanodons
   end
   self:updateEnergy()
 end
@@ -207,7 +211,7 @@ function UnitTestTab:addEnergyListRow(gui_table, entity, test_data)
     local energy_source = prototype:getEnergySource()
     -- **** Attributes ***
     -- col Energy Type
-    local energy_type = "nil"
+    local energy_type = "none"
     if energy_source ~= nil then
       energy_type = energy_source:getType()
     end
@@ -222,7 +226,10 @@ function UnitTestTab:addEnergyListRow(gui_table, entity, test_data)
     local tag_color, tooltip = self:valueEquals(energy_usage_max, test_data.energy_usage_max, true)
     GuiElement.add(gui_table, GuiLabel("energy-usage-max", entity):caption({"", helmod_tag.font.default_bold, tag_color, Format.formatNumberKilo(energy_usage_max, "W"), helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
     -- col Energy Usage Priority
-    local energy_usage_priority = energy_source:getUsagePriority()
+    local energy_usage_priority = "none"
+    if energy_source ~= nil then
+      energy_usage_priority = energy_source:getUsagePriority()
+    end
     local tag_color, tooltip = self:valueEquals(energy_usage_priority, test_data.energy_usage_priority, true)
     GuiElement.add(gui_table, GuiLabel("energy-usage-priority", entity):caption({"", helmod_tag.font.default_bold, tag_color, energy_usage_priority, helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
     -- col Fluid Usage /s
@@ -279,8 +286,8 @@ function UnitTestTab:addEnergyListRow(gui_table, entity, test_data)
     GuiElement.add(gui_table, GuiLabel("energy-type-output", entity):caption({"", helmod_tag.font.default_bold, tag_color, energy_type_output, helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
     -- col Fluid Production /s
     local fluid_production = {name="none", amount=math.floor(prototype:getFluidProduction())}
-    local fluid_production_prototype = prototype:getFluidProductionPrototype()
-    if fluid_production_prototype ~= nil then fluid_production.name =  fluid_production_prototype.name end
+    local fluid_production_filter = prototype:getFluidProductionFilter()
+    if fluid_production_filter ~= nil then fluid_production.name =  fluid_production_filter.name end
     local tag_color, tooltip = self:valueEquals(fluid_production.amount, test_data.fluid_production.amount)
     GuiElement.add(gui_table, GuiLabel("fluid-production", entity):caption({"", helmod_tag.font.default_bold, tag_color, fluid_production.amount, helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
     -- col Fluid Production Prototype

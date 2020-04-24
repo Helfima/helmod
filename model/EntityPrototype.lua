@@ -80,7 +80,7 @@ function EntityPrototype:getPowerExtract(temperature, heat_capacity)
     if temperature < 15 then
       temperature = 25
     end
-    if heat_capacity == nil then
+    if heat_capacity == nil or heat_capacity == 0 then
       heat_capacity = 200
     end
     return (temperature-15)*heat_capacity
@@ -129,40 +129,43 @@ end
 --
 function EntityPrototype:getEnergyConsumption()
   if self.lua_prototype ~= nil then
-    local energy_type = self:getEnergyTypeInput()
-    if self.lua_prototype.type == "reactor" or energy_type == "heat" then
-      return self:getMaxEnergyUsage()
+    local energy_prototype = self:getEnergySource()
+    local usage_priority = nil
+    if energy_prototype ~= nil then
+      usage_priority = energy_prototype:getUsagePriority()
     end
-    if self.lua_prototype.type == "generator" then
-      local fluid_usage = self:getFluidUsagePerTick() * 60
-      local effectivity = self:getEffectivity()
-      local maximum_temperature = self:getMaximumTemperature()
-      local power_extract = self:getPowerExtract(maximum_temperature)
-      -- [boiler.fluid_usage]x[boiler.fluid_usage]x[boiler.target_temperature]-15°c)x[200J/unit/°]
-      return fluid_usage * effectivity * power_extract
+    if usage_priority == "solar" then
+      return 0
     end
-    -- if self.lua_prototype.type == "solar-panel" and self.lua_prototype.production ~= nil then
-    --   return self.lua_prototype.production*60 or 0
-    -- end
-    if self.lua_prototype.type == "accumulator" then
-      local energy_prototype = self:getEnergySource()
+    if usage_priority == "managed-accumulator" then
       return energy_prototype:getInputFlowLimit()
     end
-    -- if energy_type == "heat" then
-    --   local fluid_usage = self:getFluidUsagePerTick() * 60
-    --   local effectivity = self:getEffectivity()
-    --   local target_temperature = self:getTargetTemperature()
-    --   local power_extract = self:getPowerExtract(maximum_temperature)
-    --   return fluid_usage * effectivity * power_extract
-    -- end
-    local drain = 0
-    if energy_type == "electric" then
-      local energy_prototype = self:getEnergySource()
+
+    local max_energy_usage = self:getMaxEnergyUsage()
+    if max_energy_usage > 0 then
+      local drain = 0
       if energy_prototype ~= nil then
         drain = energy_prototype:getDrain()
       end
+      return drain + self:getMaxEnergyUsage()
     end
-    return drain + self:getMaxEnergyUsage()
+
+    local energy_type = self:getEnergyTypeInput()
+    if energy_type == "heat" then
+      return self:getMaxEnergyUsage()
+    end
+    if energy_type == "fluid" then
+      local fluid_fuel = self:getFluidFuelPrototype()
+      local fuel_value = fluid_fuel:getFuelValue()
+      local heat_capacity = fluid_fuel:getHeatCapacity()
+
+      local fluid_usage = self:getFluidUsage()
+      local effectivity = self:getEffectivity()
+      local maximum_temperature = self:getMaximumTemperature()
+      local power_extract = self:getPowerExtract(maximum_temperature, heat_capacity)
+      -- [boiler.fluid_usage]x[boiler.fluid_usage]x[boiler.target_temperature]-15°c)x[200J/unit/°]
+      return fluid_usage * effectivity * power_extract
+    end
   end
   return 0
 end
@@ -180,16 +183,23 @@ end
 function EntityPrototype:getEnergyProduction()
   if self.lua_prototype ~= nil then
     local energy_prototype = self:getEnergySource()
-    local usage_priority = energy_prototype:getUsagePriority()
+    local usage_priority = nil
+    if energy_prototype ~= nil then
+      usage_priority = energy_prototype:getUsagePriority()
+    end
     if usage_priority == "solar" then
       return (self.lua_prototype.production or 0)*60
     end
     if usage_priority == "secondary-output" then
       if self:getEnergyTypeInput() == "fluid" then
+        local fluid_fuel = self:getFluidFuelPrototype()
+        local fuel_value = fluid_fuel:getFuelValue()
+        local heat_capacity = fluid_fuel:getHeatCapacity()
+
         local fluid_usage = self:getFluidUsage()
         local effectivity = self:getEffectivity()
         local maximum_temperature = self:getMaximumTemperature()
-        local power_extract = self:getPowerExtract(maximum_temperature)
+        local power_extract = self:getPowerExtract(maximum_temperature, heat_capacity)
         -- [boiler.fluid_usage]x[boiler.fluid_usage]x[boiler.target_temperature]-15°c)x[200J/unit/°]
         return fluid_usage * effectivity * power_extract
       end
@@ -358,55 +368,40 @@ end
 function EntityPrototype:getFluidConsumption()
   if self.lua_prototype ~= nil then
     local fluid_usage = self:getFluidUsage()
+    -- si l'entity a du fluid usage c'est forcement cette valeur
     if fluid_usage > 0 then
       return fluid_usage
     end
     local energy_type = self:getEnergyTypeInput()
     if energy_type == "fluid" then
       local energy_source = self:getEnergySource()
-      fluid_usage = energy_source:getFluidUsage()
-      if fluid_usage > 0 then
-        return fluid_usage
-      else
-        local fluid_fuel = self:getFluidFuelPrototype()
-        local fluel_value = fluid_fuel:getFuelValue()
-        local effectivity = self:getEffectivity()
-        local energy_consumption = self:getEnergyConsumption()
-        return energy_consumption / (effectivity * fluel_value)
-      end
-    end
-  end
-  return 0
-end
-
--------------------------------------------------------------------------------
--- Return fluid consumption
---
--- @function [parent=#EntityPrototype] getFluidConsumption
---
--- @return #number default 0
---
-function EntityPrototype:getFluidConsumption2()
-  if self.lua_prototype ~= nil then
-    local energy_type = self:getEnergyType()
-    if energy_type == "heat" then
-      -- @see https://wiki.factorio.com/Heat_exchanger
+      local energy_fluid_usage = energy_source:getFluidUsage()
+      local fluid_burns = energy_source:getBurnsFluid()
       local energy_consumption = self:getEnergyConsumption()
-      local max_energy_usage = self:getMaxEnergyUsage()
-      return 60 * max_energy_usage / energy_consumption
-    end
-    if self:getType() == "boiler" then
-      return self:getWaterConsumption()
-    end
-    if energy_type == "fluid" then
       local effectivity = self:getEffectivity()
-      local maximum_temperature = self:getMaximumTemperature()
-      local power_extract = self:getPowerExtract(maximum_temperature)
-      -- [boiler.fluid_usage]x[boiler.target_temperature]-15°c)x[200J/unit/°]
-      local max_energy_usage = self:getMaxEnergyUsage()
-      return max_energy_usage / (effectivity * power_extract)
+      local fluid_fuel = self:getFluidFuelPrototype()
+
+      if fluid_burns then
+        local fuel_value = fluid_fuel:getFuelValue()
+        -- si l'energy a du fluid usage en burns ca devient une limit
+        if energy_fluid_usage > 0 then
+          return math.min(energy_fluid_usage, energy_consumption / (effectivity * fuel_value))
+        else
+          return energy_consumption / (effectivity * fuel_value)
+        end
+      else
+        -- si l'energy a du fluid usage c'est forcement cette valeur
+        if energy_fluid_usage > 0 then
+          return energy_fluid_usage
+        else
+          local heat_capacity = fluid_fuel:getHeatCapacity()
+          local target_temperature = self:getTargetTemperature()
+          local power_extract = self:getPowerExtract(target_temperature, heat_capacity)
+          return energy_consumption / (effectivity * power_extract)
+        end
+      end
+      
     end
-    return self:getFluidUsage()
   end
   return 0
 end
@@ -421,6 +416,9 @@ end
 function EntityPrototype:getFluidProduction()
   local fluidbox = self:getFluidboxPrototype("output")
   if fluidbox ~= nil then
+    if self:getType() == "offshore-pump" then
+      return self:getPumpingSpeed()
+    end
     if self:getType() == "boiler" then
       local effectivity = self:getEffectivity()
       local target_temperature = self:getTargetTemperature()
@@ -433,13 +431,13 @@ function EntityPrototype:getFluidProduction()
 end
 
 -------------------------------------------------------------------------------
--- Return fluid production prototype
+-- Return fluid production filter
 --
--- @function [parent=#EntityPrototype] getFluidProductionPrototype
+-- @function [parent=#EntityPrototype] getFluidProductionFilter
 --
 -- @return #LuaFluidPrototype
 --
-function EntityPrototype:getFluidProductionPrototype()
+function EntityPrototype:getFluidProductionFilter()
   local fluidbox = self:getFluidboxPrototype("output")
   if fluidbox ~= nil then
     return fluidbox:getFilter()

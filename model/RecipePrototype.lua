@@ -198,7 +198,7 @@ function RecipePrototype:getRawProducts()
       end
       if prototype:getType() == "boiler" then
         local amount = prototype:getFluidProduction()
-        local fluid_production = prototype:getFluidProductionPrototype()
+        local fluid_production = prototype:getFluidProductionFilter()
         if fluid_production ~= nil then
           local product = {name=fluid_production.name, type="fluid", amount=amount, by_time=true}
           table.insert(products, product)
@@ -216,7 +216,7 @@ function RecipePrototype:getRawProducts()
         table.insert(products, product)
       end
       if prototype:getType() == "reactor" then
-        local amount = prototype:getEnergyProduction()
+        local amount = prototype:getEnergyConsumption()
         local product = {name="steam-heat", type="energy", amount=amount}
         table.insert(products, product)
       end
