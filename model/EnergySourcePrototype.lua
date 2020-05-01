@@ -292,8 +292,9 @@ function BurnerPrototype:getFuelCount()
   if factory_fuel == nil then return nil end
   local burner_effectivity = self:getEffectivity()
   local fuel_value = factory_fuel:getFuelValue()
-  local burner_count = energy_consumption/(fuel_value*burner_effectivity)*60
-  return {type="item", name=factory_fuel:native().name, count=burner_count}
+  local burner_count = energy_consumption/(fuel_value*burner_effectivity)
+  -- *60 for per tick?
+  return {type="item", name=factory_fuel:native().name, count=burner_count*60}
 end
 
 -------------------------------------------------------------------------------

@@ -328,13 +328,13 @@ function AbstractTab:updateMenuPanel(event)
   local action_panel = self:getLeftMenuPanel()
   action_panel.clear()
 
-  local group4 = GuiElement.add(action_panel, GuiFlowH("group4"))
+  local group0 = GuiElement.add(action_panel, GuiFlowH("group0"))
   for _, form in pairs(Controller.getViews()) do
     if string.find(form.classname, "Tab") and form:isVisible() and not(form:isSpecial()) then
       local icon_hovered, icon = form:getButtonSprites()
       local style = "helmod_button_menu"
       if User.isActiveForm(form.classname) then style = "helmod_button_menu_selected" end
-      GuiElement.add(group4, GuiButton(self.classname, "change-tab", form.classname):sprite("menu", icon_hovered, icon):style(style):tooltip(form:getButtonCaption()))
+      GuiElement.add(group0, GuiButton(self.classname, "change-tab", form.classname):sprite("menu", icon_hovered, icon):style(style):tooltip(form:getButtonCaption()))
     end
   end
 
@@ -397,6 +397,12 @@ function AbstractTab:updateMenuPanel(event)
     -- pin info
     if self.classname == "HMStatisticTab" then
       GuiElement.add(group3, GuiButton("HMStatusPanel", "OPEN", block_id):sprite("menu", "pin-white", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
+    end
+
+    -- pin info
+    local group4 = GuiElement.add(action_panel, GuiFlowH("group4"))
+    if self.classname == "HMUnitTestTab" then
+      GuiElement.add(group4, GuiButton("HMUnitTestTab", "reload-script"):sprite("menu", "settings-white", "settings"):style("helmod_button_menu"):tooltip("Reload script"))
     end
 
   end

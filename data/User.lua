@@ -404,6 +404,17 @@ function User.setPreference(type, name, value)
   User.setVersion()
   local preferences = User.get("preferences")
   if name == nil then
+    local preference = helmod_preferences[type]
+    if value == nil then
+      value = preference.default_value
+    end
+    if preference.minimum_value ~= nil and value < preference.minimum_value then
+      value = preference.default_value
+    end
+    if preference.maximum_value ~= nil and value > preference.maximum_value then
+      value = preference.default_value
+    end
+
     preferences[type] = value
   else
     local preference_name = string.format("%s_%s", type, name)
@@ -527,11 +538,17 @@ end
 function User.getPreferenceSetting(type, name)
   local preference_type = User.getPreference(type)
   if name == nil then
-    if preference_type ~= nil then
-      return preference_type
-    else
-      return helmod_preferences[type].default_value
+    local preference = helmod_preferences[type]
+    if preference_type == nil then
+      return preference.default_value
     end
+    if preference.minimum_value ~= nil and preference_type < preference.minimum_value then
+      return preference.default_value
+    end
+    if preference.maximum_value ~= nil and preference_type > preference.maximum_value then
+      return preference.default_value
+    end
+    return preference_type
   end
   if preference_type == nil then return false end
   local preference_name = User.getPreference(type, name)

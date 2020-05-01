@@ -221,7 +221,9 @@ helmod_preferences = {
     type = "int-setting",
     localised_name = {"helmod_settings.ui-glue-offset"},
     localised_description = {"helmod_settings.ui-glue-offset-desc"},
-    default_value = -500,
+    default_value = 0,
+    minimum_value = -1,
+    maximum_value = 1,
     group = "ui"
   },
 }

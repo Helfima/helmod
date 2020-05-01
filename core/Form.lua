@@ -408,7 +408,7 @@ function Form:updateLocation(event)
     if navigate[User.tab_name] ~= nil or navigate[User.tab_name]["location"] ~= nil then
       location = navigate[User.tab_name]["location"]
     end
-    local location_x = location.x + width_main + offset
+    local location_x = location.x + width_main + width*offset
     flow_panel.location = {location_x, y=location.y}
   end
 

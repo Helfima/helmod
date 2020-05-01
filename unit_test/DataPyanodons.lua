@@ -383,5 +383,25 @@ data.energy["gasturbinemk03"] = {
     speed=0,
     recipe={type="resource"}
 }
+data.energy["py-turbine"] = {
+    energy_type_input="fluid",
+    energy_usage_min=0,
+    energy_usage_max=0,
+    energy_usage_priority="secondary-output",
+    energy_consumption=21535200000,
+    energy_type_output="electric",
+    energy_production=21535200000,
+    effectivity=8,
+    target_temperature=0,
+    maximum_temperature=5000,
+    fluid_usage=540,
+    fluid_burns="none",
+    fluid_fuel = {name="pressured-steam", capacity=1000},
+    fluid_consumption=540,
+    fluid_production={name="none", amount=0},
+    pollution=0.02,
+    speed=0,
+    recipe={type="resource"}
+}
 
 return data

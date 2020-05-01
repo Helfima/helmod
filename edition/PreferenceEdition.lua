@@ -247,7 +247,11 @@ function PreferenceEdition:updateUI(event)
           GuiElement.add(options_table, GuiCheckBox(self.classname, "preference-setting", preference_type):state(default_preference_type))
         end
         if preference.type == "int-setting" or preference.type == "string-setting" then
-          GuiElement.add(options_table, GuiTextField(self.classname, "preference-setting", preference_type):text(default_preference_type))
+          local tooltip = nil
+          if preference.minimum_value then
+            tooltip = {"", {"helmod_settings.range-value"}, "[",preference.minimum_value,",",preference.maximum_value,"]"}
+          end
+          GuiElement.add(options_table, GuiTextField(self.classname, "preference-setting", preference_type):text(default_preference_type):tooltip(tooltip))
         end
       end
       if preference.items ~= nil then
@@ -471,7 +475,8 @@ function PreferenceEdition:onEvent(event)
             User.setPreference(type, nil, event.element.state)
           end
           if preference.type == "int-setting" then
-            User.setPreference(type, nil, tonumber(event.element.text or preference.default_value))
+            local value = tonumber(event.element.text or preference.default_value)
+            User.setPreference(type, nil, value)
           end
           if preference.type == "string-setting" then
             User.setPreference(type, nil, event.element.text or preference.default_value)

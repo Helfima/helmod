@@ -151,9 +151,6 @@ function EntityPrototype:getEnergyConsumption()
     end
 
     local energy_type = self:getEnergyTypeInput()
-    if energy_type == "heat" then
-      return self:getMaxEnergyUsage()
-    end
     if energy_type == "fluid" then
       local fluid_fuel = self:getFluidFuelPrototype()
       local fuel_value = fluid_fuel:getFuelValue()
@@ -162,6 +159,9 @@ function EntityPrototype:getEnergyConsumption()
       local fluid_usage = self:getFluidUsage()
       local effectivity = self:getEffectivity()
       local maximum_temperature = self:getMaximumTemperature()
+      if self.factory ~= nil and self.factory.temperature ~= nil then
+        maximum_temperature = self.factory.temperature
+      end
       local power_extract = self:getPowerExtract(maximum_temperature, heat_capacity)
       -- [boiler.fluid_usage]x[boiler.fluid_usage]x[boiler.target_temperature]-15°c)x[200J/unit/°]
       return fluid_usage * effectivity * power_extract
@@ -446,6 +446,34 @@ function EntityPrototype:getFluidProductionFilter()
 end
 
 -------------------------------------------------------------------------------
+-- Return fuel
+--
+-- @function [parent=#EntityPrototype] getFluel
+--
+-- @return #table
+--
+function EntityPrototype:getFluel(recipe)
+  if self.lua_prototype ~= nil then
+    local energy_prototype = factory_prototype:getEnergySource()
+    local energy_type = factory_prototype:getEnergyTypeInput()
+    if energy_type == "burner" then
+      local speed_factory = factory_prototype:speedFactory(recipe)
+      if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then
+        local fuel_count = energy_prototype:getFuelCount()
+        local factor = self:getEnergy()/speed_factory
+        return {name=fuel_count.name, type=fuel_count.type, amount=fuel_count.count*factor }
+      end
+    end
+    if energy_type == "fluid" then
+      if energy_prototype ~= nil and energy_prototype:getFluidFuelPrototype() ~= nil then
+        local fluid_fuel = energy_prototype:getFluidFuelPrototype()
+        local amount = energy_prototype:getFluidConsumption()
+        return {name=fluid_fuel.name, type=fluid_fuel.type, amount=amount}
+      end
+    end
+  end
+end
+-------------------------------------------------------------------------------
 -- Return module inventory size
 --
 -- @function [parent=#EntityPrototype] getModuleInventorySize
@@ -539,7 +567,6 @@ function EntityPrototype:speedFactory(recipe)
     local mining_time = recipe_prototype:getMineableMiningTime()
     return hardness * mining_speed / mining_time
   elseif recipe.type == "fluid" then
-    -- @see https://wiki.factorio.com/Power_production
     local pumping_speed = self:getPumpingSpeed()
     return pumping_speed
   elseif recipe.type == "technology" then

@@ -1,10 +1,12 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.10.16
-Date: 15. 04. 2020
+Date: 01. 05. 2020
   Changes:
-    - added UI glue offset (see preferences)
+    - added UI glue factor offset (see preferences)
   Bugfixes:
+    - fixed fluid energy calculation
     - fixed UI glue
+    - fixed Hotkey type
 ---------------------------------------------------------------------------------------------------
 Version: 0.10.15
 Date: 13. 04. 2020

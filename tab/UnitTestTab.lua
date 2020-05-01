@@ -337,3 +337,18 @@ function UnitTestTab:valueEquals(current_value, target_value, attribute)
     return tag_color, tooltip
   end
 end
+
+-------------------------------------------------------------------------------
+-- On event
+--
+-- @function [parent=#UnitTestTab] onEvent
+--
+-- @param #LuaEvent event
+--
+function UnitTestTab:onEvent(event)
+  if not(User.isAdmin()) then return end
+  if event.action == "reload-script" then
+    game.reload_script()
+    Controller:send("on_gui_update", event)
+  end
+end

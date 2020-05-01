@@ -360,12 +360,12 @@ end
 --
 -- @param #string item block_id
 -- @param #string key object name
--- @param #table options
+-- @param #number value
 --
-function ModelBuilder.updateTemperatureFactory(item, key, options)
+function ModelBuilder.updateTemperatureFactory(item, key, value)
   local object = Model.getObject(item, key)
   if object ~= nil then
-    object.factory.target_temperature = options.target_temperature or 0
+    object.factory.temperature = value or 0
   end
 end
 

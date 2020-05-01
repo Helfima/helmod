@@ -283,21 +283,22 @@ function RecipeEdition:onEvent(event)
     end
 
     if event.action == "factory-temperature" then
-      local options = {}
+      local factory_prototype = EntityPrototype(recipe.factory)
+      local temperature = factory_prototype:getMaximumTemperature()
 
       local text = event.element.text
       local ok , err = pcall(function()
-        options["target_temperature"] = formula(text) or 0
-
-        ModelBuilder.updateTemperatureFactory(block.id, recipe.id, options)
-        ModelCompute.update()
-        self:updateFactoryInfo(event)
-        self:updateHeader(event)
-        Controller:send("on_gui_refresh", event)
+        temperature = formula(text) or 0
       end)
       if not(ok) then
         Player.print("Formula is not valid!")
       end
+        
+      ModelBuilder.updateTemperatureFactory(block.id, recipe.id, temperature)
+      ModelCompute.update()
+      self:updateFactoryInfo(event)
+      self:updateHeader(event)
+      Controller:send("on_gui_refresh", event)
     end
 
     if event.action == "factory-fuel-update" then
@@ -712,27 +713,42 @@ function RecipeEdition:updateFactoryInfo(event)
     GuiElement.add(input_panel, GuiLabel("energy"):caption(Format.formatNumberKilo(factory.energy, "W").." ("..sign..Format.formatPercent(factory.effects.consumption).."%)"))
     
     -- burner
-    local energy_type = factory_prototype:getEnergyType()
+    local energy_type = factory_prototype:getEnergyTypeInput()
     if energy_type == "burner" or energy_type == "fluid" then
       local fuel_type = "item"
       if energy_type == "fluid" then
         fuel_type = "fluid"
       end
-      GuiElement.add(input_panel, GuiLabel("label-burner"):caption({"helmod_common.resource"}))
       local energy_prototype = factory_prototype:getEnergySource()
-      local fuel_list = energy_prototype:getFuelPrototypes()
-      local factory_fuel = energy_prototype:getFuelPrototype()
-      local items = {}
-      for _,item in pairs(fuel_list) do
-        table.insert(items,string.format("[%s=%s]", fuel_type, item.name))
+      local fuel_list = {}
+      local factory_fuel = nil
+
+      if energy_type == "fluid" then
+        factory_fuel = factory_prototype:getFluidFuelPrototype()
+        if energy_prototype ~= nil and energy_prototype:getType() == "fluid" then
+          fuel_list = energy_prototype:getFuelPrototypes()
+        else
+          fuel_list = {factory_fuel:native()}
+        end
+      else
+        local fuel_list = energy_prototype:getFuelPrototypes()
+        local factory_fuel = energy_prototype:getFuelPrototype()
       end
-      local default_fuel = string.format("[%s=%s]", fuel_type, factory_fuel:native().name)
-      GuiElement.add(input_panel, GuiDropDown(self.classname, "factory-fuel-update", block.id, recipe.id, fuel_type):items(items, default_fuel))
       
---      if factory_fuel:native().name == "steam" then
---        GuiElement.add(input_panel, GuiLabel("label-temperature"):caption({"helmod_common.temperature"}))
---        GuiElement.add(input_panel, GuiTextField(self.classname, "factory-temperature", block.id, recipe.id):text(factory.target_temperature or 165):isNumeric())
---      end
+      if factory_fuel ~= nil then
+        local items = {}
+        for _,item in pairs(fuel_list) do
+          table.insert(items,string.format("[%s=%s]", fuel_type, item.name))
+        end
+        local default_fuel = string.format("[%s=%s]", fuel_type, factory_fuel:native().name)
+        GuiElement.add(input_panel, GuiLabel("label-burner"):caption({"helmod_common.resource"}))
+        GuiElement.add(input_panel, GuiDropDown(self.classname, "factory-fuel-update", block.id, recipe.id, fuel_type):items(items, default_fuel))
+      end
+      -- local maximum_temperature = factory_prototype:getMaximumTemperature()
+      -- if maximum_temperature > 0 then
+      --   GuiElement.add(input_panel, GuiLabel("label-temperature"):caption({"helmod_common.temperature"}))
+      --   GuiElement.add(input_panel, GuiTextField(self.classname, "factory-temperature", block.id, recipe.id):text(factory.temperature or maximum_temperature):isNumeric())
+      -- end
     end
 
     local sign = ""

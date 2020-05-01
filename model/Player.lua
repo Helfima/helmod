@@ -544,6 +544,10 @@ function Player.getProductionsCrafting(category, lua_recipe)
     for key, lua_entity in pairs(Player.getOffshorePump()) do
       productions[lua_entity.name] = lua_entity
     end
+  elseif lua_recipe.name ~= nil and lua_recipe.name == "water-viscous-mud" then
+    for key, lua_entity in pairs(Player.getOffshorePump("water-viscous-mud")) do
+      productions[lua_entity.name] = lua_entity
+    end
   elseif lua_recipe.name ~= nil and lua_recipe.name == "steam" then
     for key, lua_entity in pairs(Player.getBoilers()) do
       productions[lua_entity.name] = lua_entity
@@ -664,11 +668,19 @@ end
 --
 -- @return #table list of modules
 --
-function Player.getOffshorePump()
+function Player.getOffshorePump(fluid_name)
+  if fluid_name == nil then fluid_name = "water" end
   local filters = {}
   table.insert(filters,{filter="type", type="offshore-pump" ,mode="or"})
-
-  return game.get_filtered_entity_prototypes(filters)
+  local entities = game.get_filtered_entity_prototypes(filters)
+  local offshore_pump = {}
+  for key,entity in pairs(entities) do
+    local fluidbox_prototype = EntityPrototype(entity):getFluidboxPrototype("output")
+    if fluidbox_prototype:getFilter() ~= nil and fluidbox_prototype:getFilter().name == fluid_name then
+      offshore_pump[key] = entity
+    end
+  end
+  return offshore_pump
 end
 
 -------------------------------------------------------------------------------

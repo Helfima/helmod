@@ -45,7 +45,7 @@ function FluidboxPrototype:getFilter()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.filter
   end
-  return false
+  return nil
 end
 
 -------------------------------------------------------------------------------
