@@ -706,7 +706,10 @@ function RecipeEdition:updateFactoryInfo(event)
     GuiElement.add(input_panel, GuiLabel("label-module-slots"):caption({"helmod_label.module-slots"}))
     GuiElement.add(input_panel, GuiLabel("module-slots"):caption(factory_prototype:getModuleInventorySize()))
 
-    GuiElement.add(input_panel, GuiLabel("label-energy"):caption({"helmod_label.energy"}))
+    -- energy
+    local cell_energy = GuiElement.add(input_panel, GuiFlowH("label-energy"))
+    GuiElement.add(cell_energy, GuiLabel("label-energy"):caption({"helmod_label.energy"}))
+    self:addAlert(cell_energy, factory, "consumption")
 
     local sign = ""
     if factory.effects.consumption > 0 then sign = "+" end
@@ -751,28 +754,51 @@ function RecipeEdition:updateFactoryInfo(event)
       -- end
     end
 
+    -- speed
     local sign = ""
     if factory.effects.speed > 0 then sign = "+" end
-    GuiElement.add(input_panel, GuiLabel("label-speed"):caption({"helmod_label.speed"}))
+    local cell_speed = GuiElement.add(input_panel, GuiFlowH("label-speed"))
+    GuiElement.add(cell_speed, GuiLabel("label-speed"):caption({"helmod_label.speed"}))
+    self:addAlert(cell_speed, factory, "speed")
     GuiElement.add(input_panel, GuiLabel("speed"):caption(Format.formatNumber(factory.speed).." ("..sign..Format.formatPercent(factory.effects.speed).."%)"))
 
+    -- productivity
     local sign = ""
     if factory.effects.productivity > 0 then sign = "+" end
-    GuiElement.add(input_panel, GuiLabel("label-productivity"):caption({"helmod_label.productivity"}))
-    
-    local productivity_tooltip = nil
-    if recipe.type == "resource" then
-    --productivity_tooltip = ({"gui-bonus.mining-drill-productivity-bonus"})
-    end
-    GuiElement.add(input_panel, GuiLabel("productivity"):caption(sign..Format.formatPercent(factory.effects.productivity).."%"):tooltip(productivity_tooltip))
+    local cell_productivity = GuiElement.add(input_panel, GuiFlowH("label-productivity"))
+    GuiElement.add(cell_productivity, GuiLabel("label-productivity"):caption({"helmod_label.productivity"}))
+    self:addAlert(cell_productivity, factory, "productivity")
+    GuiElement.add(input_panel, GuiLabel("productivity"):caption(sign..Format.formatPercent(factory.effects.productivity).."%"))
 
-    GuiElement.add(input_panel, GuiLabel("label-pollution"):caption({"helmod_common.pollution"}))
-    --GuiElement.add(input_panel, GuiLabel("pollution"):caption(factory_prototype:getPollution()))
+    -- pollution
+    local cell_pollution = GuiElement.add(input_panel, GuiFlowH("label-pollution"))
+    GuiElement.add(cell_pollution, GuiLabel("label-pollution"):caption({"helmod_common.pollution"}))
+    self:addAlert(cell_pollution, factory, "pollution")
     GuiElement.add(input_panel, GuiLabel("pollution"):caption({"helmod_si.per-minute", Format.formatNumberElement((factory.pollution*60 or 0))}))
     
-    --GuiElement.add(input_panel, GuiLabel("label-limit"):caption({"helmod_label.limit"}):tooltip({"tooltip.factory-limit"}))
-    --GuiElement.add(input_panel, GuiTextField(self.classname, "factory-update", block.id, recipe.id):text(factory.limit):tooltip({"tooltip.factory-limit"}))
+  end
+end
 
+-------------------------------------------------------------------------------
+-- Add alert information
+--
+-- @function [parent=#RecipeEdition] addAlert
+--
+-- @param #LuaEvent event
+--
+function RecipeEdition:addAlert(cell, factory, type)
+  if factory.cap ~= nil and factory.cap[type] ~= nil and factory.cap[type] > 0 then
+    local tooltip = {""}
+    if ModelCompute.cap_reason[type].cycle and bit32.band(factory.cap[type], ModelCompute.cap_reason[type].cycle) then
+      table.insert(tooltip, {string.format("helmod_cap_reason.%s-cycle", type)})
+    end
+    if ModelCompute.cap_reason[type].module_low and bit32.band(factory.cap[type], ModelCompute.cap_reason[type].module_low) then
+      table.insert(tooltip, {string.format("helmod_cap_reason.%s-module-low", type)})
+    end
+    if ModelCompute.cap_reason[type].module_high and bit32.band(factory.cap[type], ModelCompute.cap_reason[type].module_high) then
+      table.insert(tooltip, {string.format("helmod_cap_reason.%s-module-high", type)})
+    end
+    GuiElement.add(cell, GuiSprite("alert"):sprite("helmod-alert1"):tooltip(tooltip))
   end
 end
 

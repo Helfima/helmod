@@ -15,7 +15,24 @@ local ModelCompute = {
   initial_temp = 15,
   -- 200J/unit/°c
   fluid_energy_per_unit = 200,
-  waste_value = 0.00001
+  waste_value = 0.00001,
+
+  cap_reason = {
+    speed = {
+      cycle = 1,
+      module_low = 2,
+      module_high = 4
+    },
+    productivity = {
+      module_low = 1
+    },
+    consumption = {
+      module_low = 1
+    },
+    pollution = {
+      module_low = 1
+    }
+  }
 }
 
 -------------------------------------------------------------------------------
@@ -707,6 +724,7 @@ end
 function ModelCompute.computeModuleEffects(recipe)
   local factory = recipe.factory
   factory.effects = {speed = 0, productivity = 0, consumption = 0, pollution = 0}
+  factory.cap = {speed = 0, productivity = 0, consumption = 0, pollution = 0}
   -- effet module factory
   if factory.modules ~= nil then
     for module, value in pairs(factory.modules) do
@@ -739,19 +757,34 @@ function ModelCompute.computeModuleEffects(recipe)
     factory.effects.productivity = factory.effects.productivity + Player.getForce().mining_drill_productivity_bonus
   end
   -- cap la productivite
-  if factory.effects.productivity < 0  then factory.effects.productivity = 0 end
+  if factory.effects.productivity < 0  then
+    factory.effects.productivity = 0
+    factory.cap.productivity = factory.cap.productivity + ModelCompute.cap_reason.productivity.module_low
+  end
 
   -- cap la vitesse a self.capSpeed
-  if factory.effects.speed < ModelCompute.capSpeed  then factory.effects.speed = ModelCompute.capSpeed end
+  if factory.effects.speed < ModelCompute.capSpeed  then
+    factory.effects.speed = ModelCompute.capSpeed
+    factory.cap.speed = factory.cap.speed + ModelCompute.cap_reason.speed.module_low
+  end
   -- cap short integer max for %
   -- @see https://fr.wikipedia.org/wiki/Entier_court
-  if factory.effects.speed*100 > 32767 then factory.effects.speed = 32767/100 end
+  if factory.effects.speed*100 > 32767 then
+    factory.effects.speed = 32767/100
+    factory.cap.speed = factory.cap.speed + ModelCompute.cap_reason.speed.module_high
+  end
 
   -- cap l'energy a self.capEnergy
-  if factory.effects.consumption < ModelCompute.capEnergy  then factory.effects.consumption = ModelCompute.capEnergy end
+  if factory.effects.consumption < ModelCompute.capEnergy  then
+    factory.effects.consumption = ModelCompute.capEnergy
+    factory.cap.consumption = factory.cap.consumption + ModelCompute.cap_reason.consumption.module_low
+  end
 
   -- cap la pollution a self.capPollution
-  if factory.effects.pollution < ModelCompute.capPollution  then factory.effects.pollution = ModelCompute.capPollution end
+  if factory.effects.pollution < ModelCompute.capPollution  then
+    factory.effects.pollution = ModelCompute.capPollution
+    factory.cap.pollution = factory.cap.pollution + ModelCompute.cap_reason.polution.module_low
+  end
   return recipe
 end
 
@@ -770,7 +803,10 @@ function ModelCompute.computeFactory(recipe)
   recipe.factory.speed = factory_prototype:speedFactory(recipe) * (1 + recipe.factory.effects.speed)
   -- cap speed creation maximum de 1 cycle par tick
   -- seulement sur les recipes normaux
-  if recipe.type == "recipe" and recipe_energy/recipe.factory.speed < 1/60 then recipe.factory.speed = 60*recipe_energy end
+  if recipe.type == "recipe" and recipe_energy/recipe.factory.speed < 1/60 then 
+    recipe.factory.speed = 60*recipe_energy
+    recipe.factory.cap.speed = recipe.factory.cap.speed + ModelCompute.cap_reason.speed.cycle
+  end
 
   -- effet consumption
   local energy_type = factory_prototype:getEnergyType()

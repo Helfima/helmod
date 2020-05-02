@@ -145,6 +145,7 @@ for icon_row,icon in pairs(list) do
 end
 
 local list = {
+  {name="alert1", size=16, scale=1},
   {name="tooltip-add", size=24, scale=1},
   {name="tooltip-remove", size=24, scale=1},
   {name="tooltip-edit", size=48, scale=1},
