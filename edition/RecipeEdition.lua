@@ -731,8 +731,8 @@ function RecipeEdition:updateFactoryInfo(event)
           fuel_list = {factory_fuel:native()}
         end
       else
-        local fuel_list = energy_prototype:getFuelPrototypes()
-        local factory_fuel = energy_prototype:getFuelPrototype()
+        fuel_list = energy_prototype:getFuelPrototypes()
+        factory_fuel = energy_prototype:getFuelPrototype()
       end
       
       if factory_fuel ~= nil then
