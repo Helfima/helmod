@@ -5,38 +5,40 @@
 RecipePrototype = newclass(Prototype,function(base, object, object_type)
   base.classname = "HMRecipePrototype"
   base.is_voider = nil
-  if type(object) == "string" then
-    base.object_name = object
-    base.lua_type = object_type
-  elseif object.name ~= nil then
-    base.object_name = object.name
-    base.lua_type = object_type or object.type
-  end
-  if base.lua_type == nil or base.lua_type == "recipe" then
-    Prototype.init(base, Player.getRecipePrototype(base.object_name))
-    base.lua_type = "recipe"
-  elseif base.lua_type == "recipe-burnt" then
-    Prototype.init(base, Player.getRecipePrototype(base.object_name))
-    base.lua_type = "recipe-burnt"
-  elseif base.lua_type == "energy" then
-    Prototype.init(base, Player.getRecipeEntity(base.object_name))
-    base.lua_type = "energy"
-  elseif base.lua_type == "resource" then
-    Prototype.init(base, Player.getRecipeEntity(base.object_name))
-    base.lua_type = "resource"
-  elseif base.lua_type == "fluid" then
-    Prototype.init(base, Player.getRecipeFluid(base.object_name))
-    base.lua_type = "fluid"
-  elseif base.lua_type == "technology" then
-    Prototype.init(base, Player.getTechnology(base.object_name))
-    base.lua_type = "technology"
-  end
-  if base.lua_prototype == nil then
-    Logging:error("HMRecipePrototype", "recipe not found", type(object), object)
-    Logging:line("HMRecipePrototype", 3)
-    Logging:line("HMRecipePrototype", 4)
-    Logging:line("HMRecipePrototype", 5)
-    Logging:line("HMRecipePrototype", 6)
+  if object ~= nil then
+    if type(object) == "string" then
+      base.object_name = object
+      base.lua_type = object_type
+    elseif object.name ~= nil then
+      base.object_name = object.name
+      base.lua_type = object_type or object.type
+    end
+    if base.lua_type == nil or base.lua_type == "recipe" then
+      Prototype.init(base, Player.getRecipePrototype(base.object_name))
+      base.lua_type = "recipe"
+    elseif base.lua_type == "recipe-burnt" then
+      Prototype.init(base, Player.getRecipePrototype(base.object_name))
+      base.lua_type = "recipe-burnt"
+    elseif base.lua_type == "energy" then
+      Prototype.init(base, Player.getRecipeEntity(base.object_name))
+      base.lua_type = "energy"
+    elseif base.lua_type == "resource" then
+      Prototype.init(base, Player.getRecipeEntity(base.object_name))
+      base.lua_type = "resource"
+    elseif base.lua_type == "fluid" then
+      Prototype.init(base, Player.getRecipeFluid(base.object_name))
+      base.lua_type = "fluid"
+    elseif base.lua_type == "technology" then
+      Prototype.init(base, Player.getTechnology(base.object_name))
+      base.lua_type = "technology"
+    end
+    if base.lua_prototype == nil then
+      Logging:error("HMRecipePrototype", "recipe not found", type(object), object)
+      Logging:line("HMRecipePrototype", 3)
+      Logging:line("HMRecipePrototype", 4)
+      Logging:line("HMRecipePrototype", 5)
+      Logging:line("HMRecipePrototype", 6)
+    end
   end
 end)
 
@@ -318,11 +320,16 @@ function RecipePrototype:getIngredients(factory)
     local factory_prototype = EntityPrototype(factory)
     local energy_prototype = factory_prototype:getEnergySource()
     local energy_type = factory_prototype:getEnergyTypeInput()
-    
+    local speed_factory = 1
+    local consumption_effect = 1
+    if factory ~= nil then
+      speed_factory = factory.speed
+      consumption_effect = 1 + (factory.effects.consumption or 0)
+    end
+
     if self.lua_type ~= "energy" then
       -- recipe
       if energy_type == "burner" then
-        local speed_factory = factory_prototype:speedFactory({type=self.lua_type, name=self:native().name})
         if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then
           local fuel_count = energy_prototype:getFuelCount()
           local factor = self:getEnergy()/speed_factory
@@ -331,17 +338,17 @@ function RecipePrototype:getIngredients(factory)
         end
       end
       if energy_type == "fluid" then
-        local fluid_fuel = factory_prototype:getFluidFuelPrototype()
+        local fluid_fuel = factory_prototype:getFluidFuelPrototype(true)
         if fluid_fuel ~= nil and fluid_fuel:native() ~= nil then
           local amount = factory_prototype:getFluidConsumption()
-          local burner_ingredient = {name=fluid_fuel:native().name, type="fluid", amount=amount}
+          local factor = self:getEnergy()*consumption_effect/speed_factory
+          local burner_ingredient = {name=fluid_fuel:native().name, type="fluid", amount=amount*factor}
           table.insert(raw_ingredients, burner_ingredient)
         end
       end
     else
       -- recipe energy
       if energy_type == "burner" then
-        local speed_factory = factory_prototype:speedFactory({type=self.lua_type, name=self:native().name})
         if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then
           local fuel_count = energy_prototype:getFuelCount()
           local factor = self:getEnergy()/speed_factory
@@ -350,10 +357,11 @@ function RecipePrototype:getIngredients(factory)
         end
       end
       if energy_type == "fluid" then
-        local fluid_fuel = factory_prototype:getFluidFuelPrototype()
+        local fluid_fuel = factory_prototype:getFluidFuelPrototype(true)
         if fluid_fuel ~= nil and fluid_fuel:native() ~= nil then
           local amount = factory_prototype:getFluidConsumption()
-          local burner_ingredient = {name=fluid_fuel:native().name, type="fluid", amount=amount, by_time=true }
+          local factor = self:getEnergy()*consumption_effect/speed_factory
+          local burner_ingredient = {name=fluid_fuel:native().name, type="fluid", amount=amount*factor, by_time=true }
           table.insert(raw_ingredients, burner_ingredient)
         end
       end

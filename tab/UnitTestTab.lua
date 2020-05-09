@@ -2,6 +2,7 @@ require "tab.AbstractTab"
 local data = require "unit_test.Data"
 local data_pyanodons = require "unit_test.DataPyanodons"
 local data_bob_angel = require "unit_test.DataBobAngel"
+local data_krastorio2 = require "unit_test.DataKrastorio2"
 -------------------------------------------------------------------------------
 -- Class to build tab
 --
@@ -113,6 +114,9 @@ function UnitTestTab:updateData()
   if game.active_mods["pyrawores"] then
     data = data_pyanodons
   end
+  if game.active_mods["Krastorio2"] then
+    data = data_krastorio2
+  end
   self:updateEnergy()
 end
 
@@ -218,11 +222,11 @@ function UnitTestTab:addEnergyListRow(gui_table, entity, test_data)
     local tag_color, tooltip = self:valueEquals(energy_type, test_data.energy_type, true)
     GuiElement.add(gui_table, GuiLabel("energy-type", entity):caption({"", helmod_tag.font.default_bold, tag_color, energy_type, helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
     -- col Energy Usage Min
-    local energy_usage_min = prototype:getMinEnergyUsage()
+    local energy_usage_min = math.floor(prototype:getMinEnergyUsage())
     local tag_color, tooltip = self:valueEquals(energy_usage_min, test_data.energy_usage_min, true)
     GuiElement.add(gui_table, GuiLabel("energy-usage-min", entity):caption({"", helmod_tag.font.default_bold, tag_color, Format.formatNumberKilo(energy_usage_min, "W"), helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
     -- col Energy Usage Max
-    local energy_usage_max = prototype:getMaxEnergyUsage()
+    local energy_usage_max = math.floor(prototype:getMaxEnergyUsage())
     local tag_color, tooltip = self:valueEquals(energy_usage_max, test_data.energy_usage_max, true)
     GuiElement.add(gui_table, GuiLabel("energy-usage-max", entity):caption({"", helmod_tag.font.default_bold, tag_color, Format.formatNumberKilo(energy_usage_max, "W"), helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
     -- col Energy Usage Priority

@@ -370,9 +370,7 @@ function FluidSourcePrototype:getFuelPrototypes()
   if self.lua_prototype ~= nil and self.lua_prototype.fluid_box ~= nil and self.lua_prototype.fluid_box.filter ~= nil then
     return {self.lua_prototype.fluid_box.filter}
   else
-    local filters = {}
-    table.insert(filters, {filter="fuel-value", mode="or", invert=false, comparison=">", value=0})
-    local fuels = Player.getFluidPrototypes(filters)
+    local fuels = Player.getFluidFuelPrototypes()
     if not(FactorioV017) then
       return fuels
     else

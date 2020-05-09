@@ -70,6 +70,9 @@ function Product:clone()
     name = self.lua_prototype.name,
     amount = self:getElementAmount(),
     state = self.lua_prototype.state,
+    temperature = self.lua_prototype.temperature,
+    minimum_temperature  = self.lua_prototype.minimum_temperature,
+    maximum_temperature  = self.lua_prototype.maximum_temperature,
     by_time = self.lua_prototype.by_time
   }
   return prototype

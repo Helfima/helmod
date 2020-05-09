@@ -305,8 +305,21 @@ function RecipeEdition:onEvent(event)
 
       local index = event.element.selected_index
       local factory_prototype = EntityPrototype(recipe.factory)
-      local energy_prototype = factory_prototype:getEnergySource()
-      local fuel_list = energy_prototype:getFuelPrototypes()
+      local energy_type = factory_prototype:getEnergyTypeInput()
+      local fuel_list = {}
+      if energy_type == "burner" or energy_type == "fluid" then
+        local fuel_type = "item"
+        if energy_type == "fluid" then
+          fuel_type = "fluid"
+        end
+        local energy_prototype = factory_prototype:getEnergySource()
+
+        if energy_type == "fluid" then
+          fuel_list = factory_prototype:getFluidFuelPrototypes()
+        else
+          fuel_list = energy_prototype:getFuelPrototypes()
+        end
+      end
       local options = {}
       for _,item in pairs(fuel_list) do
         if index == 1 then
@@ -727,12 +740,8 @@ function RecipeEdition:updateFactoryInfo(event)
       local factory_fuel = nil
 
       if energy_type == "fluid" then
-        factory_fuel = factory_prototype:getFluidFuelPrototype()
-        if energy_prototype ~= nil and energy_prototype:getType() == "fluid" then
-          fuel_list = energy_prototype:getFuelPrototypes()
-        else
-          fuel_list = {factory_fuel:native()}
-        end
+        factory_fuel = factory_prototype:getFluidFuelPrototype(true)
+        fuel_list = factory_prototype:getFluidFuelPrototypes()
       else
         fuel_list = energy_prototype:getFuelPrototypes()
         factory_fuel = energy_prototype:getFuelPrototype()
@@ -1275,7 +1284,7 @@ function RecipeEdition:updateObjectInfo(event)
 
     local tablePanel = GuiElement.add(info_panel, GuiTable("table-input"):column(3))
     GuiElement.add(tablePanel, GuiLabel("label-production"):caption({"helmod_recipe-edition-panel.production"}))
-    GuiElement.add(tablePanel, GuiTextField(self.classname, "object-update", event.item1, recipe.id):text((recipe.production or 1)*100):style("helmod_textfield"))
+    GuiElement.add(tablePanel, GuiTextField(self.classname, "object-update", event.item1, recipe.id):text(Format.formatNumberElement((recipe.production or 1)*100)):style("helmod_textfield"))
 
   end
 end

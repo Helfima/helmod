@@ -1099,6 +1099,21 @@ function Player.getFluidPrototype(name)
 end
 
 -------------------------------------------------------------------------------
+-- Return fluid fuel prototype
+--
+-- @function [parent=#Player] getFuelPrototypes
+--
+-- @param #string name fluid name
+--
+-- @return #LuaFluidPrototype fluid prototype
+--
+function Player.getFluidFuelPrototypes()
+  local filters = {}
+  table.insert(filters, {filter="fuel-value", mode="or", invert=false, comparison=">", value=0})
+  return Player.getFluidPrototypes(filters)
+end
+
+-------------------------------------------------------------------------------
 -- Return items logistic
 --
 -- @function [parent=#Player] getItemsLogistic

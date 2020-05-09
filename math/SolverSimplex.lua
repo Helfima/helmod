@@ -27,7 +27,7 @@ function SolverSimplex:pivot(M, xrow, xcol)
       for icol,cell_value in pairs(row) do
         if icol >= self.col_start then
           if irow == xrow then
-            --Transformation de la ligne pivot : elle est divisee par l�element pivot
+            --Transformation de la ligne pivot : elle est divisee par l'element pivot
             Mx[irow][icol] = cell_value/pivot_value
           elseif icol == xcol then
             --Transformation de la colonne pivot : toutes les cases sauf la case pivot deviennent zero.
@@ -35,7 +35,12 @@ function SolverSimplex:pivot(M, xrow, xcol)
           else
             local B = M[irow][xcol]
             local D = M[xrow][icol]
-            Mx[irow][icol] = cell_value - ( B * D ) / pivot_value
+            local value = cell_value - ( B * D ) / pivot_value
+            if false and math.abs(value) < 1e-8 then
+              Mx[irow][icol] = 0
+            else
+              Mx[irow][icol] = value
+            end
           end
         else
           Mx[irow][icol] = cell_value
@@ -160,7 +165,7 @@ function SolverSimplex:prepare(M)
         else
           if icol == self.col_start then
             table.insert(row,math.pow(10,index)*10) -- important ne pas changer
-            --table.insert(row,10*index) -- important ne pas changer
+            --table.insert(row,1e6+index) -- important ne pas changer
           elseif icol == xcol then
             table.insert(row,1)
           else

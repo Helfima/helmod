@@ -72,6 +72,16 @@ end
 
 -------------------------------------------------------------------------------
 --
+-- @function [parent=#GuiCell] withProductInfo
+-- @return #GuiCell
+--
+function GuiCell:withProductInfo()
+  self.m_with_product_info = true
+  return self
+end
+
+-------------------------------------------------------------------------------
+--
 -- @function [parent=#GuiCell] withLogistic
 -- @return #GuiCell
 --
@@ -596,9 +606,9 @@ function GuiCellElement:create(parent)
 
   local tooltip = ""
   if element.type == "energy" then
-    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic()
+    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic():withProductInfo()
   else
-    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic()
+    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo()
   end
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type or "entity", element.name):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   if self.m_info_icon then
@@ -647,9 +657,9 @@ function GuiCellElementSm:create(parent)
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_sm", color, 1))
   local tooltip = ""
   if element.type == "energy" then
-    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic()
+    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic():withProductInfo()
   else
-    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic()
+    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo()
   end
   GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):sprite(element.type, element.name):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
 
@@ -696,9 +706,9 @@ function GuiCellElementM:create(parent)
 
   local tooltip = ""
   if element.type == "energy" then
-    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic()
+    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic():withProductInfo()
   else
-    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic()
+    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo()
   end
   local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(element.type or "entity", element.name):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   if self.m_info_icon then

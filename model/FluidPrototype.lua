@@ -43,12 +43,8 @@ end
 --
 -- @return #boolean
 --
-function FluidPrototype:getFuelValue(temperature)
+function FluidPrototype:getFuelValue()
   if self.lua_prototype == nil then return 0 end
-  if self.lua_prototype.name == "steam" then
-    local target_temperature = temperature or 165
-    return (target_temperature-15)*200
-  end
   return self.lua_prototype.fuel_value
 end
 

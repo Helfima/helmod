@@ -56,7 +56,7 @@ data.energy["fluid-reactor"] = {
     fluid_fuel = {name="deuterium", capacity=1000},
     fluid_consumption=1.52,
     fluid_production={name="none", amount=0},
-    pollution=1,
+    pollution=10,
     speed=0,
     recipe={type="recipe"}
 }
@@ -76,7 +76,7 @@ data.energy["fluid-reactor-3"] = {
     fluid_fuel = {name="deuterium", capacity=1000},
     fluid_consumption=2.53,
     fluid_production={name="none", amount=0},
-    pollution=1,
+    pollution=10,
     speed=0,
     recipe={type="recipe"}
 }
@@ -176,7 +176,7 @@ data.energy["oil-boiler"] = {
     fluid_fuel = {name="deuterium", capacity=1000},
     fluid_consumption=1.52,
     fluid_production={name="steam", amount=90},
-    pollution=2.25,
+    pollution=22.5,
     speed=0,
     recipe={type="recipe"}
 }
@@ -196,7 +196,7 @@ data.energy["oil-boiler-4"] = {
     fluid_fuel = {name="deuterium", capacity=1000},
     fluid_consumption=3.8,
     fluid_production={name="steam", amount=90},
-    pollution=0.7,
+    pollution=7.03,
     speed=0,
     recipe={type="recipe"}
 }

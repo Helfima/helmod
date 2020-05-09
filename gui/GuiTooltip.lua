@@ -48,6 +48,16 @@ end
 
 -------------------------------------------------------------------------------
 --
+-- @function [parent=#GuiTooltip] withProductInfo
+-- @return #GuiCell
+--
+function GuiTooltip:withProductInfo()
+  self.m_with_product_info = true
+  return self
+end
+
+-------------------------------------------------------------------------------
+--
 -- @function [parent=#GuiTooltip] appendEnergyConsumption
 -- @return #GuiCell
 --
@@ -116,6 +126,42 @@ function GuiTooltip:appendLogistic(tooltip, element)
         else
           table.insert(tooltip, {"", "\n", string.format("[%s=%s]", "entity", fluid_logistic), " ", helmod_tag.font.default_bold, " x ", total_value, helmod_tag.font.close})
         end
+      end
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiTooltip] appendProductInfo
+-- @return #GuiCell
+--
+function GuiTooltip:appendProductInfo(tooltip, element)
+  if self.m_with_product_info == true then
+    -- solid logistic
+    if element.type == 0 or element.type == "item" then
+      local item_prototype = ItemPrototype(element)
+      if item_prototype:getFuelValue() > 0 then
+        table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.fuel-value"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, Format.formatNumberKilo(item_prototype:getFuelValue() or 0, "J"), helmod_tag.font.close})
+      end
+    end
+    -- fluid logistic
+    if element.type == 1 or element.type == "fluid" then
+      local fluid_prototype = FluidPrototype(element)
+      if fluid_prototype:getHeatCapacity() > 0  then
+        table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.heat-capacity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, fluid_prototype:getHeatCapacity() or 0, "J", helmod_tag.font.close})
+      end
+      if fluid_prototype:getFuelValue() > 0  then
+        table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.fuel-value"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, Format.formatNumberKilo(fluid_prototype:getFuelValue() or 0, "J"), helmod_tag.font.close})
+      end
+      if element.temperature then
+        table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.temperature"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, element.temperature or 0, "°c", helmod_tag.font.close})
+      end
+      if element.minimum_temperature then
+        table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.temperature-min"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, element.minimum_temperature or 0, "°c", helmod_tag.font.close})
+      end
+      if element.maximum_temperature then
+        table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.temperature-max"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, element.maximum_temperature or 0, "°c", helmod_tag.font.close})
       end
     end
   end
@@ -208,6 +254,7 @@ function GuiTooltipElement:create()
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.quantity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, total_count or 0, helmod_tag.font.close})
     end
     
+    self:appendProductInfo(tooltip, element);
     self:appendEnergyConsumption(tooltip, element);
     self:appendFlow(tooltip, element);
     self:appendLogistic(tooltip, element);

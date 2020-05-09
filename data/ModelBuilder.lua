@@ -896,6 +896,7 @@ function ModelBuilder.copyBlock(from_model, from_block)
           to_block.index = index
           to_block.unlinked = from_block.unlinked
           to_block.solver = from_block.solver
+          to_block.isEnergy = from_block.isEnergy
           -- copy input
           if from_block.input ~= nil then
             for key,value in pairs(from_block.input) do
