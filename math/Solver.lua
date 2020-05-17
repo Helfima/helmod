@@ -4,15 +4,16 @@
 --
 Solver = newclass(function(base)
     base.debug_col = 11
-    base.col_start = 8
+    base.col_start = 9
     base.row_input = 2
     base.col_M = 2
-    base.col_F = 3
-    base.col_S = 4
-    base.col_R = 5
-    base.col_P = 6
-    base.col_E = 7
-    base.col_C = 8
+    base.col_Cn = 3
+    base.col_F = 4
+    base.col_S = 5
+    base.col_R = 6
+    base.col_P = 7
+    base.col_E = 8
+    base.col_C = 9
 end)
 
 -------------------------------------------------------------------------------

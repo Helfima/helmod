@@ -67,6 +67,22 @@ function sprite_icon_sm(name, width, height, white)
   }
 end
 
+function sprite_icon_tool(name, width, height)
+  local icon_name = "helmod-tool-"..name
+  local position = {112,0}
+  return {
+    type ="sprite",
+    name = icon_name,
+    filename = "__helmod__/graphics/icons/"..name..".png",
+    priority = "extra-high-no-scale",
+    width = width,
+    height = height,
+    position = position,
+    scale = 0.7,
+    shift = {0, 0}
+  }
+end
+
 function sprite_tooltip(name, size, scale)
   local icon_name = "helmod-"..name
   return {
@@ -115,12 +131,14 @@ local list = {
   {name="maximize-window"},
   {name="menu"},
   {name="minimize-window"},
+  {name="minus", sm=true, tool=true},
   {name="nuclear"},
   {name="ok"},
   {name="paste"},
   {name="pause"},
   {name="pin"},
   {name="play", sm=true},
+  {name="plus", sm=true, tool=true},
   {name="property"},
   {name="record", sm=true},
   {name="refresh", sm=true},
@@ -141,6 +159,9 @@ for icon_row,icon in pairs(list) do
   if icon.sm then
     table.insert(spite_icons, sprite_icon_sm(icon.name, 24, 24))
     table.insert(spite_icons, sprite_icon_sm(icon.name, 24, 24, true))
+  end
+  if icon.tool then
+    table.insert(spite_icons, sprite_icon_tool(icon.name, 15, 15))
   end
 end
 

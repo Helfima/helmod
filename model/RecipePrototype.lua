@@ -324,7 +324,9 @@ function RecipePrototype:getIngredients(factory)
     local consumption_effect = 1
     if factory ~= nil then
       speed_factory = factory.speed
-      consumption_effect = 1 + (factory.effects.consumption or 0)
+      if factory.effects ~= nil then
+        consumption_effect = 1 + (factory.effects.consumption or 0)
+      end
     end
 
     if self.lua_type ~= "energy" then

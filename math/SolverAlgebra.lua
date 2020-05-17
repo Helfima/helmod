@@ -23,12 +23,22 @@ function SolverAlgebra:getCol(M, xrow, invert)
   local zrow = M[#M]
   local xcol = 0
   local max = 0
+  local col_master = 0
+  local col_exclude = 0
+  if row[self.col_Cn] > 0 then
+    col_master = row[self.col_Cn]
+  end
+  if row[self.col_Cn] < 0 then
+    col_exclude = -row[self.col_Cn]
+  end
   -- on cherche la plus grande demande
   for icol,cell_value in pairs(row) do
     if icol > self.col_start and ((invert ~= true and cell_value > 0) or (invert == true and cell_value < 0)) then
       local Z = M[#M][icol]-M[self.row_input][icol] -- valeur demandee (input - Z)
       local C = -Z/cell_value
-      if C > max then
+      if (C > max and col_master == 0 and col_exclude == 0)
+        or (col_master ~= 0 and col_master == icol)
+        or (C > max and col_exclude ~= 0 and col_exclude ~= icol) then
         max = C
         xcol = icol
       end 

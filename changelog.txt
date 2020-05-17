@@ -1,9 +1,23 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.10.20
+Date: 17. 05. 2020
+  Changes:
+    - added Set or Unset master or exclude product (click with ctrl or shift on product)
+    - added add or remove max module with crtl key
+  Bugfixes:
+    - fixed critical error: 'polution' (a nil value)
+---------------------------------------------------------------------------------------------------
+Version: 0.10.19
+Date: 09. 05. 2020
+  Bugfixes:
+    - fixed critical error: 'effects' (a nil value)
+---------------------------------------------------------------------------------------------------
 Version: 0.10.18
 Date: 09. 05. 2020
   Changes:
     - added fluid information tooltip
   Bugfixes:
+    - fixed fluid consumption
     - fixed value near zero in the solver (epsilon)
 ---------------------------------------------------------------------------------------------------
 Version: 0.10.17

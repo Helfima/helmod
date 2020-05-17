@@ -391,14 +391,14 @@ function RecipeEdition:onEvent(event)
     end
 
     if event.action == "factory-module-select" then
-      ModelBuilder.addFactoryModule(block.id, recipe.id, event.item3)
+      ModelBuilder.addFactoryModule(block.id, recipe.id, event.item3, event.control)
       ModelCompute.update()
       self:update(event)
       Controller:send("on_gui_refresh", event)
     end
     
     if event.action == "factory-module-remove" then
-      ModelBuilder.removeFactoryModule(block.id, recipe.id, event.item3)
+      ModelBuilder.removeFactoryModule(block.id, recipe.id, event.item3, event.control)
       ModelCompute.update()
       self:update(event)
       Controller:send("on_gui_refresh", event)
@@ -461,14 +461,14 @@ function RecipeEdition:onEvent(event)
     end
 
     if event.action == "beacon-module-select" then
-      ModelBuilder.addBeaconModule(block.id, recipe.id, event.item3)
+      ModelBuilder.addBeaconModule(block.id, recipe.id, event.item3, event.control)
       ModelCompute.update()
       self:update(event)
       Controller:send("on_gui_refresh", event)
     end
     
     if event.action == "beacon-module-remove" then
-      ModelBuilder.removeBeaconModule(block.id, recipe.id, event.item3)
+      ModelBuilder.removeBeaconModule(block.id, recipe.id, event.item3, event.control)
       ModelCompute.update()
       self:update(event)
       Controller:send("on_gui_refresh", event)

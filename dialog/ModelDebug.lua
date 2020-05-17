@@ -70,6 +70,8 @@ function ModelDebug:buildMatrix(matrix_panel, matrix, pivot)
         if type(value) == "table" then
           if value.type == "none" then
             GuiElement.add(cell, GuiLabel("cell_value"):caption(value.name):tooltip(value.tooltip))
+          elseif value.type == "contraint" then
+            GuiElement.add(cell, GuiLabel("cell_value"):caption(value))
           else
             GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(value.type, value.name):tooltip(value.tooltip))
           end

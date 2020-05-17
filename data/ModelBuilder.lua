@@ -407,21 +407,26 @@ end
 --
 -- @param #string factory
 -- @param #string name module
+-- @param #boolean max
 --
-function ModelBuilder.addModulePriority(factory, name)
+function ModelBuilder.addModulePriority(factory, name, max)
   local module_priority = ModelBuilder.convertModuleToPriority(factory)
   local factory_prototype = EntityPrototype(factory)
   if Model.countModulesModel(factory) < factory_prototype:getModuleInventorySize() then
+    local count = 1
+    if max then
+      count = factory_prototype:getModuleInventorySize() - Model.countModulesModel(factory)
+    end
     local success = false
     -- parcours la priorite
     for i,priority in pairs(module_priority) do
       if priority.name == name then
-        priority.value = priority.value + 1
+        priority.value = priority.value + count
         success = true
       end
     end
     if success == false then
-      table.insert(module_priority, {name=name,value=1})
+      table.insert(module_priority, {name=name,value=count})
     end
   end
   return module_priority
@@ -434,15 +439,16 @@ end
 --
 -- @param #table factory
 -- @param #string name
+-- @param #boolean max
 --
-function ModelBuilder.removeModulePriority(factory, name)
+function ModelBuilder.removeModulePriority(factory, name, max)
   local module_priority = ModelBuilder.convertModuleToPriority(factory)
   local factory_prototype = EntityPrototype(factory)
   -- parcours la priorite
   local index = nil
   for i,priority in pairs(module_priority) do
     if priority.name == name then
-      if priority.value > 0 then
+      if priority.value > 1 and not(max) then
         priority.value = priority.value - 1
       else
         index = i
@@ -464,13 +470,14 @@ end
 -- @param #string block_id
 -- @param #string recipe_id
 -- @param #string name module
+-- @param #boolean max
 --
-function ModelBuilder.addFactoryModule(block_id, recipe_id, name)
+function ModelBuilder.addFactoryModule(block_id, recipe_id, name, max)
   local element = Model.getObject(block_id, recipe_id)
   local module = ItemPrototype(name)
   if element ~= nil and module:native() ~= nil then
     if Player.checkFactoryLimitationModule(module:native(), element) == true then
-      local module_priority = ModelBuilder.addModulePriority(element.factory, name)
+      local module_priority = ModelBuilder.addModulePriority(element.factory, name, max or false)
       ModelBuilder.setFactoryModulePriority(block_id, recipe_id, module_priority)
     end
   end
@@ -778,12 +785,13 @@ end
 -- @param #string block_id
 -- @param #string recipe_id
 -- @param #string name module
+-- @param #boolean max
 --
-function ModelBuilder.removeFactoryModule(block_id, recipe_id, name)
+function ModelBuilder.removeFactoryModule(block_id, recipe_id, name, max)
   local element = Model.getObject(block_id, recipe_id)
   local module = ItemPrototype(name)
   if element ~= nil and module:native() ~= nil then
-    local module_priority = ModelBuilder.removeModulePriority(element.factory, name)
+    local module_priority = ModelBuilder.removeModulePriority(element.factory, name, max or false)
     ModelBuilder.setFactoryModulePriority(block_id, recipe_id, module_priority)
   end
 end
@@ -1031,13 +1039,14 @@ end
 -- @param #string block_id
 -- @param #string recipe_id
 -- @param #string name module
+-- @param #boolean max
 --
-function ModelBuilder.addBeaconModule(block_id, recipe_id, name)
+function ModelBuilder.addBeaconModule(block_id, recipe_id, name, max)
   local element = Model.getObject(block_id, recipe_id)
   local module = ItemPrototype(name)
   if element ~= nil and module:native() ~= nil then
     if Player.checkFactoryLimitationModule(module:native(), element) == true then
-      local module_priority = ModelBuilder.addModulePriority(element.beacon, name)
+      local module_priority = ModelBuilder.addModulePriority(element.beacon, name, max or false)
       ModelBuilder.setBeaconModulePriority(block_id, recipe_id, module_priority)
     end
   end
@@ -1051,12 +1060,13 @@ end
 -- @param #string block_id
 -- @param #string recipe_id
 -- @param #string name module
+-- @param #boolean max
 --
-function ModelBuilder.removeBeaconModule(block_id, recipe_id, name)
+function ModelBuilder.removeBeaconModule(block_id, recipe_id, name, max)
   local element = Model.getObject(block_id, recipe_id)
   local module = ItemPrototype(name)
   if element ~= nil and module:native() ~= nil then
-    local module_priority = ModelBuilder.removeModulePriority(element.beacon, name)
+    local module_priority = ModelBuilder.removeModulePriority(element.beacon, name, max or false)
     ModelBuilder.setBeaconModulePriority(block_id, recipe_id, module_priority)
   end
 end
@@ -1262,6 +1272,26 @@ function ModelBuilder.addRule(mod, name, category, type, value, excluded, index)
   local rule = Model.newRule(mod, name, category, type, value, excluded, #Model.getRules())
   local rules = Model.getRules()
   table.insert(rules, rule)
+end
+
+-------------------------------------------------------------------------------
+-- Update recipe contraint
+--
+-- @function [parent=#ModelBuilder] updateRecipeContraint
+--
+-- @param #string item block_id
+-- @param #string key object name
+-- @param #table contraint
+--
+function ModelBuilder.updateRecipeContraint(item, key, contraint)
+  local recipe = Model.getObject(item, key)
+  if recipe ~= nil then
+    if recipe.contraint ~= nil and recipe.contraint.name == contraint.name and recipe.contraint.type == contraint.type then
+      recipe.contraint = nil
+    else
+      recipe.contraint = contraint
+    end
+  end
 end
 
 return ModelBuilder

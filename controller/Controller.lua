@@ -658,6 +658,7 @@ function Controller:onEventAccessWrite(event)
     model.time = helmod_base_times[index].value or 1
     ModelCompute.update()
     self:send("on_gui_update", event)
+    self:send("on_gui_close", event, "HMProductEdition")
   end
 
   if event.action == "product-selected" then
@@ -685,95 +686,6 @@ function Controller:onEventAccessWrite(event)
     ModelBuilder.unlinkProductionBlock(event.item1)
     ModelCompute.update()
     self:send("on_gui_update", event)
-  end
-
-  if event.action == "production-recipe-product-add" then
-    if event.button == defines.mouse_button_type.right then
-      self:send("on_gui_open", event, selector_name)
-    else
-      local recipes = Player.searchRecipe(event.item3, true)
-      if #recipes == 1 then
-        local recipe = recipes[1]
-        local new_recipe = ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type, 0)
-        ModelCompute.update()
-        User.setParameter("scroll_element", new_recipe.id)
-        self:send("on_gui_update", event)
-      else
-        -- pour ouvrir avec le filtre ingredient
-        event.button = defines.mouse_button_type.right
-        self:send("on_gui_open", event, selector_name)
-      end
-    end
-  end
-
-  if event.action == "production-recipe-ingredient-add" then
-    if event.button == defines.mouse_button_type.right then
-      self:send("on_gui_open", event, selector_name)
-    else
-      local recipes = Player.searchRecipe(event.item3)
-      if #recipes == 1 then
-        local recipe = recipes[1]
-        local new_recipe = ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type)
-        ModelCompute.update()
-        User.setParameter("scroll_element", new_recipe.id)
-        self:send("on_gui_update", event)
-      else
-        self:send("on_gui_open", event, selector_name)
-      end
-    end
-  end
-
-  if User.isActiveForm("HMProductionLineTab") then
-    if event.button == defines.mouse_button_type.right then
-      self:send("on_gui_open", event, "HMRecipeSelector")
-    else
-      if event.action == "production-block-product-add" then
-        local recipes = Player.searchRecipe(event.item2, true)
-        if #recipes == 1 then
-          local recipe = recipes[1]
-          ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type, 0)
-          ModelCompute.update()
-          User.setActiveForm("HMProductionBlockTab")
-          self:send("on_gui_refresh", event)
-        else
-          -- pour ouvrir avec le filtre ingredient
-          event.button = defines.mouse_button_type.right
-          self:send("on_gui_open", event,"HMRecipeSelector")
-        end
-      end
-      if event.action == "production-block-ingredient-add" then
-        local recipes = Player.searchRecipe(event.item2)
-        if #recipes == 1 then
-          local recipe = recipes[1]
-          ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type)
-          ModelCompute.update()
-          User.setActiveForm("HMProductionBlockTab")
-          self:send("on_gui_refresh", event)
-        else
-          self:send("on_gui_open", event,"HMRecipeSelector")
-        end
-      end
-    end
-
-    if event.action == "production-block-up" then
-      local step = 1
-      if event.shift then step = User.getModSetting("row_move_step") end
-      if event.control then step = 1000 end
-      ModelBuilder.upProductionBlock(event.item1, step)
-      ModelCompute.update()
-      User.setParameter("scroll_element", event.item1)
-      self:send("on_gui_update", event)
-    end
-
-    if event.action == "production-block-down" then
-      local step = 1
-      if event.shift then step = User.getModSetting("row_move_step") end
-      if event.control then step = 1000 end
-      ModelBuilder.downProductionBlock(event.item1, step)
-      ModelCompute.update()
-      User.setParameter("scroll_element", event.item1)
-      self:send("on_gui_update", event)
-    end
   end
 
   if event.action == "past-model" then

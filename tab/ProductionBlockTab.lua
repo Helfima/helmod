@@ -206,7 +206,7 @@ function ProductionBlockTab:updateInput(event)
           else
             button_color = GuiElement.color_button_default_ingredient
           end
-          GuiElement.add(input_table, GuiCellElementM(self.classname, button_action, block.id, ingredient.name):element(ingredient):tooltip(button_tooltip):index(index):color(button_color):byLimit(block.by_limit))
+          GuiElement.add(input_table, GuiCellElementM(self.classname, button_action, block.id, "none"):element(ingredient):tooltip(button_tooltip):index(index):color(button_color):byLimit(block.by_limit))
         end
       end
     end
@@ -294,7 +294,7 @@ function ProductionBlockTab:updateOutput(event)
           else
             button_color = GuiElement.color_button_default_product
           end
-          GuiElement.add(output_table, GuiCellElementM(self.classname, button_action, block.id, product.name):element(product):tooltip(button_tooltip):index(index):color(button_color):byLimit(block.by_limit))
+          GuiElement.add(output_table, GuiCellElementM(self.classname, button_action, block.id, "none"):element(product):tooltip(button_tooltip):index(index):color(button_color):byLimit(block.by_limit))
         end
       end
     end
@@ -508,26 +508,34 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
       local display_product_cols = User.getPreferenceSetting("display_product_cols")
       local cell_products = GuiElement.add(gui_table, GuiTable("products", recipe.id):column(display_product_cols):style(helmod_table_style.list))
       for index, lua_product in pairs(recipe_prototype:getProducts(recipe.factory)) do
+        local contraint_type = nil
         local product_prototype = Product(lua_product)
         local product = product_prototype:clone()
         product.count = product_prototype:countProduct(recipe)
         if block.count > 1 then
           product.limit_count = product.count / block.count
         end
-        GuiElement.add(cell_products, GuiCellElement(self.classname, "production-recipe-product-add", block.id, recipe.name):element(product):tooltip("tooltip.add-recipe"):index(index):byLimit(block.by_limit))
+        if block.by_product ~= false and recipe.contraint ~= nil and recipe.contraint.name == product.name then
+          contraint_type = recipe.contraint.type
+        end
+        GuiElement.add(cell_products, GuiCellElement(self.classname, "production-recipe-product-add", block.id, recipe.id):element(product):tooltip("tooltip.add-recipe"):index(index):byLimit(block.by_limit):contraintIcon(contraint_type))
       end
     else
       -- ingredients
       local display_ingredient_cols = User.getPreferenceSetting("display_ingredient_cols")
       local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients_", recipe.id):column(display_ingredient_cols):style(helmod_table_style.list))
       for index, lua_ingredient in pairs(recipe_prototype:getIngredients(recipe.factory)) do
+        local contraint_type = nil
         local ingredient_prototype = Product(lua_ingredient)
         local ingredient = ingredient_prototype:clone()
         ingredient.count = ingredient_prototype:countIngredient(recipe)
         if block.count > 1 then
           ingredient.limit_count = ingredient.count / block.count
         end
-        GuiElement.add(cell_ingredients, GuiCellElement(self.classname, "production-recipe-ingredient-add", block.id, recipe.name):element(ingredient):tooltip("tooltip.add-recipe"):color(GuiElement.color_button_add):index(index):byLimit(block.by_limit))
+        if block.by_product == false and recipe.contraint ~= nil and recipe.contraint.name == ingredient.name then
+          contraint_type = recipe.contraint.type
+        end
+        GuiElement.add(cell_ingredients, GuiCellElement(self.classname, "production-recipe-ingredient-add", block.id, recipe.id):element(ingredient):tooltip("tooltip.add-recipe"):color(GuiElement.color_button_add):index(index):byLimit(block.by_limit):contraintIcon(contraint_type))
       end
     end
   end
@@ -543,6 +551,13 @@ end
 -- @param #LuaEvent event
 --
 function ProductionBlockTab:onEvent(event)
+  local model = Model.getModel()
+  local current_block = User.getParameter("current_block")
+  local selector_name = "HMRecipeSelector"
+  if model.blocks[current_block] ~= nil and model.blocks[current_block].isEnergy then
+    selector_name = "HMEnergySelector"
+  end
+
   if event.action == "block-all-ingredient-visible" then
     local all_visible = User.getParameter("block_all_ingredient_visible")
     User.setParameter("block_all_ingredient_visible",not(all_visible))
@@ -557,7 +572,67 @@ function ProductionBlockTab:onEvent(event)
 
   -- user writer
   if not(User.isWriter()) then return end
-  
+
+  if event.action == "production-recipe-product-add" then
+    if event.control == false and event.shift == false then
+      if event.button == defines.mouse_button_type.right then
+        Controller:send("on_gui_open", event, selector_name)
+      else
+        local recipes = Player.searchRecipe(event.item3, true)
+        if #recipes == 1 then
+          local recipe = recipes[1]
+          local new_recipe = ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type, 0)
+          ModelCompute.update()
+          User.setParameter("scroll_element", new_recipe.id)
+          Controller:send("on_gui_update", event)
+        else
+          -- pour ouvrir avec le filtre ingredient
+          event.button = defines.mouse_button_type.right
+          Controller:send("on_gui_open", event, selector_name)
+        end
+      end
+    elseif event.control == true and event.item3 ~= "none" then
+      local contraint = {type="master", name=event.item3}
+      ModelBuilder.updateRecipeContraint(event.item1, event.item2, contraint)
+      ModelCompute.update()
+      Controller:send("on_gui_update", event)
+    elseif event.shift == true and event.item3 ~= "none" then
+      local contraint = {type="exclude", name=event.item3}
+      ModelBuilder.updateRecipeContraint(event.item1, event.item2, contraint)
+      ModelCompute.update()
+      Controller:send("on_gui_update", event)
+    end
+  end
+
+  if event.action == "production-recipe-ingredient-add" then
+    if event.control == false and event.shift == false then
+      if event.button == defines.mouse_button_type.right then
+        Controller:send("on_gui_open", event, selector_name)
+      else
+        local recipes = Player.searchRecipe(event.item3)
+        if #recipes == 1 then
+          local recipe = recipes[1]
+          local new_recipe = ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type)
+          ModelCompute.update()
+          User.setParameter("scroll_element", new_recipe.id)
+          Controller:send("on_gui_update", event)
+        else
+          Controller:send("on_gui_open", event, selector_name)
+        end
+      end
+    elseif event.control == true and event.item3 ~= "none" then
+      local contraint = {type="master", name=event.item3}
+      ModelBuilder.updateRecipeContraint(event.item1, event.item2, contraint)
+      ModelCompute.update()
+      Controller:send("on_gui_update", event)
+    elseif event.shift == true and event.item3 ~= "none" then
+      local contraint = {type="exclude", name=event.item3}
+      ModelBuilder.updateRecipeContraint(event.item1, event.item2, contraint)
+      ModelCompute.update()
+      Controller:send("on_gui_update", event)
+    end
+  end
+
   if event.action == "update-factory-number" then
     local text = event.element.text
     local ok , err = pcall(function()

@@ -287,6 +287,7 @@ function ModelCompute.getBlockMatrix(block)
     local rows = {}
     col_headers["B"] = {index=1, name="B", type="none", tooltip="Base"} -- Base
     col_headers["M"] = {index=1, name="M", type="none", tooltip="Matrix calculation"} -- Matrix calculation
+    col_headers["Cn"] = {index=1, name="Cn", type="none", tooltip="Contraint"} -- Contraint
     col_headers["F"] = {index=1, name="F", type="none", tooltip="Number factory"} -- Number factory
     col_headers["S"] = {index=1, name="S", type="none", tooltip="Speed factory"} -- Speed factory
     col_headers["R"] = {index=1, name="R", type="none", tooltip="Count recipe"} -- Count recipe
@@ -326,6 +327,11 @@ function ModelCompute.getBlockMatrix(block)
       table.insert(row_headers,{name=recipe.name, type=recipe.type, tooltip=recipe.name.."\nRecette"})
       row["B"] = {name=recipe.name, type=recipe.type, tooltip=recipe.name.."\nRecette"}
       row["M"] = 0 --recipe.matrix_solver or 0
+      if recipe.contraint ~= nil then
+        row["Cn"] = {type=recipe.contraint.type, name=recipe.contraint.name}
+      else
+        row["Cn"] = 0
+      end
       row["F"] = recipe.factory.input or 0
       row["S"] = recipe.factory.speed or 0
       row["R"] = 0
@@ -368,6 +374,9 @@ function ModelCompute.getBlockMatrix(block)
           col_headers[col_name] = {index=index, name=lua_product.name, type=lua_product.type, is_ingredient = false, tooltip=col_name.."\nProduit"}
           row[col_name] = lua_product.count * factor
           row_valid = true
+          if row["Cn"] ~= 0 and row["Cn"].name == name then
+            row["Cn"].name = col_name
+          end
         end
         -- prepare header ingredients
         for name, lua_ingredient in pairs(lua_ingredients) do
@@ -379,11 +388,11 @@ function ModelCompute.getBlockMatrix(block)
           -- cas de l'ingredient existant du cote produit
           if col_index[name] ~= nil and lua_products[name] ~= nil then
             -- cas de la valeur equivalente, on creer un nouveau element
-            if lua_products[name].count == lua_ingredients[name].count or recipe.type == "resource" or recipe.type == "energy" then
+            --if lua_products[name].count == lua_ingredients[name].count or recipe.type == "resource" or recipe.type == "energy" then
               index = col_index[name]+1
-            else
-              index = col_index[name]
-            end
+            --else
+            --  index = col_index[name]
+            --end
           end
           col_index[name] = index
 
@@ -406,6 +415,9 @@ function ModelCompute.getBlockMatrix(block)
           col_headers[col_name] = {index=index, name=lua_ingredient.name, type=lua_ingredient.type, is_ingredient = true, tooltip=col_name.."\nIngredient"}
           row[col_name] = ( row[col_name] or 0 ) - lua_ingredients[name].count * factor
           row_valid = true
+          if row["Cn"] ~= 0 and row["Cn"].name == name then
+            row["Cn"].name = col_name
+          end
         end
         -- prepare header products
         for name, lua_product in pairs(lua_products) do
@@ -416,11 +428,11 @@ function ModelCompute.getBlockMatrix(block)
           -- cas du produit existant du cote ingredient
           if col_index[name] ~= nil and lua_ingredients[name] ~= nil then
             -- cas de la valeur equivalente, on creer un nouveau element
-            if lua_products[name].count == lua_products[name].count or recipe.type == "resource" then
+            --if lua_products[name].count == lua_products[name].count or recipe.type == "resource" then
               index = col_index[name]+1
-            else
-              index = col_index[name]
-            end
+            --else
+            --  index = col_index[name]
+            --end
           end
           col_index[name] = index
 
@@ -441,19 +453,32 @@ function ModelCompute.getBlockMatrix(block)
     local mA = {}
     -- bluid header
     local rowH = {}
+    local col_cn = 3
     for column,header in pairs(col_headers) do
       table.insert(rowH, header)
     end
     table.insert(mA, rowH)
     -- bluid value
     for _,row in pairs(rows) do
+      local colx = 1
       local rowA = {}
       for column,_ in pairs(col_headers) do
+        if column == "Cn" then
+          col_cn = colx
+        end
         if row[column] ~= nil then
           table.insert(rowA, row[column])
         else
           table.insert(rowA, 0)
         end
+        if type(row["Cn"]) == "table" and row["Cn"].name == column then
+          if row["Cn"].type == "master" then
+            rowA[col_cn] = colx
+          else
+            rowA[col_cn] = -colx
+          end
+        end
+        colx =colx + 1
       end
       table.insert(mA, rowA)
     end
@@ -783,7 +808,7 @@ function ModelCompute.computeModuleEffects(recipe)
   -- cap la pollution a self.capPollution
   if factory.effects.pollution < ModelCompute.capPollution  then
     factory.effects.pollution = ModelCompute.capPollution
-    factory.cap.pollution = factory.cap.pollution + ModelCompute.cap_reason.polution.module_low
+    factory.cap.pollution = factory.cap.pollution + ModelCompute.cap_reason.pollution.module_low
   end
   return recipe
 end

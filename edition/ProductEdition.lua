@@ -91,7 +91,7 @@ function ProductEdition:onUpdate(event)
     if block.by_product == false then
       block_elements = block.ingredients
     end
-    local element_name = event.item2
+    local element_name = event.item3
     if block_elements ~= nil and block_elements[element_name] ~= nil then
       product = block_elements[element_name]
       product_count = product.input or 0

@@ -58,6 +58,28 @@ end
 
 -------------------------------------------------------------------------------
 --
+-- @function [parent=#GuiTooltip] withContraintInfo
+-- @return #GuiCell
+--
+function GuiTooltip:withContraintInfo()
+  self.m_with_contraint_info = true
+  return self
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiTooltip] appendContraint
+-- @return #GuiCell
+--
+function GuiTooltip:appendContraint(tooltip, element)
+  if self.m_with_contraint_info == true then
+    table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"tooltip.contraint-plus"}, helmod_tag.color.close})
+    table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"tooltip.contraint-minus"}, helmod_tag.color.close})
+  end
+end
+
+-------------------------------------------------------------------------------
+--
 -- @function [parent=#GuiTooltip] appendEnergyConsumption
 -- @return #GuiCell
 --
@@ -236,6 +258,7 @@ end)
 --
 function GuiTooltipElement:create()
   local tooltip = self._super.create(self)
+  --self:appendContraint(tooltip, element);
   local element = self.m_element
   if element ~= nil then
     local type = element.type

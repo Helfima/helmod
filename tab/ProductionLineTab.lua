@@ -193,6 +193,78 @@ function ProductionLineTab:updateData(event)
 end
 
 -------------------------------------------------------------------------------
+-- On event
+--
+-- @function [parent=#ProductionLineTab] onEvent
+--
+-- @param #LuaEvent event
+--
+function ProductionLineTab:onEvent(event)
+  local model = Model.getModel()
+  local current_block = User.getParameter("current_block")
+  local selector_name = "HMRecipeSelector"
+  if model.blocks[current_block] ~= nil and model.blocks[current_block].isEnergy then
+    selector_name = "HMEnergySelector"
+  end
+  -- user writer
+  if not(User.isWriter()) then return end
+  
+  if event.action == "production-block-product-add" then
+    if event.button == defines.mouse_button_type.right then
+      Controller:send("on_gui_open", event, "HMRecipeSelector")
+    else
+      local recipes = Player.searchRecipe(event.item2, true)
+      if #recipes == 1 then
+        local recipe = recipes[1]
+        ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type, 0)
+        ModelCompute.update()
+        User.setActiveForm("HMProductionBlockTab")
+        Controller:send("on_gui_refresh", event)
+      else
+        -- pour ouvrir avec le filtre ingredient
+        event.button = defines.mouse_button_type.right
+        Controller:send("on_gui_open", event,"HMRecipeSelector")
+      end
+    end
+  end
+  if event.action == "production-block-ingredient-add" then
+    if event.button == defines.mouse_button_type.right then
+      Controller:send("on_gui_open", event, "HMRecipeSelector")
+    else
+      local recipes = Player.searchRecipe(event.item2)
+      if #recipes == 1 then
+        local recipe = recipes[1]
+        ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type)
+        ModelCompute.update()
+        User.setActiveForm("HMProductionBlockTab")
+        Controller:send("on_gui_refresh", event)
+      else
+        Controller:send("on_gui_open", event,"HMRecipeSelector")
+      end
+    end
+  end
+
+  if event.action == "production-block-up" then
+    local step = 1
+    if event.shift then step = User.getModSetting("row_move_step") end
+    if event.control then step = 1000 end
+    ModelBuilder.upProductionBlock(event.item1, step)
+    ModelCompute.update()
+    User.setParameter("scroll_element", event.item1)
+    Controller:send("on_gui_update", event)
+  end
+
+  if event.action == "production-block-down" then
+    local step = 1
+    if event.shift then step = User.getModSetting("row_move_step") end
+    if event.control then step = 1000 end
+    ModelBuilder.downProductionBlock(event.item1, step)
+    ModelCompute.update()
+    User.setParameter("scroll_element", event.item1)
+    Controller:send("on_gui_update", event)
+  end
+end
+-------------------------------------------------------------------------------
 -- Add header data tab
 --
 -- @function [parent=#ProductionLineTab] addTableHeader

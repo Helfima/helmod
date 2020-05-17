@@ -103,6 +103,18 @@ end
 
 -------------------------------------------------------------------------------
 --
+-- @function [parent=#GuiCell] contraintIcon
+-- @param #string type
+-- @return #GuiCell
+--
+function GuiCell:contraintIcon(type)
+  self.m_with_contraint_info = true
+  self.m_contraint_icon = type
+  return self
+end
+
+-------------------------------------------------------------------------------
+--
 -- @function [parent=#GuiCell] onErrorOptions
 -- @return #table
 --
@@ -207,6 +219,22 @@ function infoIcon(button, type)
     local sprite = GuiElement.add(button, GuiSprite("info"):sprite("helmod-recipe-nuclear"):tooltip({tooltip}))
     sprite.style.top_padding = -4
     sprite.style.left_padding = -4
+  end
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiCell] contraintIcon
+-- @return #table
+--
+function contraintIcon(button, type)
+  if type == "master" then 
+    local sprite = GuiElement.add(button, GuiSprite("contraint"):sprite("helmod-tool-plus"))
+    sprite.style.top_padding = -4
+  end
+  if type == "exclude" then 
+    local sprite = GuiElement.add(button, GuiSprite("contraint"):sprite("helmod-tool-minus"))
+    sprite.style.top_padding = -4
   end
 end
 -------------------------------------------------------------------------------
@@ -613,6 +641,9 @@ function GuiCellElement:create(parent)
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type or "entity", element.name):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   if self.m_info_icon then
     infoIcon(button, self.m_info_icon)
+  end
+  if self.m_contraint_icon then
+    contraintIcon(button, self.m_contraint_icon)
   end
   
   if self.m_by_limit then
