@@ -249,7 +249,7 @@ function AbstractSelector:onEvent(event)
 
   local model = Model.getModel()
   if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
-    if User.getParameter(self.parameterTarget) == "HMPropertiesTab" then
+    if User.getParameter(self.parameterTarget) == "HMPropertiesPanel" then
       if event.action == "element-select" then
         local prototype_compare = User.getParameter("prototype_compare") or {}
         table.insert(prototype_compare, {type = event.item1, name = event.item2 })

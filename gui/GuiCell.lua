@@ -202,23 +202,30 @@ function infoIcon(button, type)
     local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({tooltip}))
     sprite.style.top_padding = -8
   end
+  if type == "rocket" then 
+    local tooltip = "tooltip.rocket-recipe"
+    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({tooltip}))
+    sprite.style.top_padding = -8
+  end
   if type == "resource" then 
     local tooltip = "tooltip.resource-recipe"
-    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("helmod-recipe-jewel"):tooltip({tooltip}))
+    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("helmod-tool-jewel"):tooltip({tooltip}))
     sprite.style.top_padding = -4
-    sprite.style.left_padding = -4
   end
   if type == "technology" then 
     local tooltip = "tooltip.technology-recipe"
-    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("helmod-recipe-graduation"):tooltip({tooltip}))
+    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("helmod-tool-graduation"):tooltip({tooltip}))
     sprite.style.top_padding = -4
-    sprite.style.left_padding = -4
   end
   if type == "energy" then 
     local tooltip = "tooltip.energy-recipe"
-    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("helmod-recipe-nuclear"):tooltip({tooltip}))
+    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("helmod-tool-nuclear"):tooltip({tooltip}))
     sprite.style.top_padding = -4
-    sprite.style.left_padding = -4
+  end
+  if type == "burnt" then 
+    local tooltip = "tooltip.burnt-product"
+    local sprite = GuiElement.add(button, GuiSprite("burnt"):sprite("helmod-tool-burnt"):tooltip({tooltip}))
+    sprite.style.top_padding = -4
   end
 end
 
@@ -639,6 +646,9 @@ function GuiCellElement:create(parent)
     tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo()
   end
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type or "entity", element.name):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
+  if element.burnt then
+    infoIcon(button, "burnt")
+  end
   if self.m_info_icon then
     infoIcon(button, self.m_info_icon)
   end

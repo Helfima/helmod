@@ -628,6 +628,7 @@ function Player.getProductionMachines()
   table.insert(filters,{filter="hidden",mode="and",invert=true})
   table.insert(filters,{filter="type", type="lab",mode="or"})
   table.insert(filters,{filter="type", type="mining-drill",mode="or"})
+  table.insert(filters,{filter="type", type="rocket-silo",mode="or"})
   return game.get_filtered_entity_prototypes(filters)
 end
 
@@ -810,6 +811,45 @@ end
 -------------------------------------------------------------------------------
 -- Return recipe
 --
+-- @function [parent=#Player] getRecipeRocket
+--
+-- @param #string name recipe name
+--
+-- @return #LuaRecipe recipe
+--
+function Player.getRecipeRocket(name)
+  -- Prepare launch = 15s
+  local rocket_part_prototype = RecipePrototype("rocket-part"):native()
+  local rocket_prototype = EntityPrototype("rocket-silo"):native()
+  local item_prototype = ItemPrototype(name)
+  local prototype = item_prototype:native()
+  local products = prototype.rocket_launch_products
+  local ingredients = rocket_part_prototype.ingredients
+  for _,ingredient in pairs(ingredients) do
+    ingredient.amount= ingredient.amount * rocket_prototype.rocket_parts_required
+  end
+  table.insert(ingredients, {name=name, type="item", amount=1})
+  local recipe = {}
+  recipe.category = "rocket-building"
+  recipe.enabled = true
+  recipe.energy = rocket_part_prototype.energy * rocket_prototype.rocket_parts_required + 15
+  recipe.force = {}
+  recipe.group = prototype.group
+  recipe.subgroup = prototype.subgroup
+  recipe.hidden = false
+  recipe.ingredients = ingredients
+  recipe.products = products
+  recipe.localised_description = prototype.localised_description
+  recipe.localised_name = prototype.localised_name
+  recipe.name = prototype.name
+  recipe.prototype = {}
+  recipe.valid = true
+  return recipe
+end
+
+-------------------------------------------------------------------------------
+-- Return recipe
+--
 -- @function [parent=#Player] getRecipeTechnology
 --
 -- @param #string name recipe name
@@ -821,7 +861,7 @@ function Player.getRecipeTechnology(name)
   local recipe = {}
   recipe.category = "technology"
   recipe.enabled = true
-  recipe.energy = 1
+  recipe.energy = technology_prototype.research_unit_energy/60
   recipe.force = technology_prototype.force
   recipe.group = {}
   recipe.subgroup = {}

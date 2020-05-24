@@ -102,6 +102,7 @@ local list = {
   {name="arrow-up", sm=true},
   {name="arrow-left"},
   {name="bug"},
+  {name="burnt", sm=true, tool=true},
   {name="brief"},
   {name="calculator"},
   {name="chart"},
@@ -121,18 +122,18 @@ local list = {
   {name="factory"},
   {name="filter", sm=true},
   {name="filter-edit"},
-  {name="graduation", sm=true},
+  {name="graduation", sm=true, tool=true},
   {name="gas-mask", sm=true},
   {name="hangar"},
   {name="help"},
   {name="info"},
-  {name="jewel"},
+  {name="jewel", sm=true, tool=true},
   {name="link", sm=true},
   {name="maximize-window"},
   {name="menu"},
   {name="minimize-window"},
   {name="minus", sm=true, tool=true},
-  {name="nuclear"},
+  {name="nuclear", sm=true, tool=true},
   {name="ok"},
   {name="paste"},
   {name="pause"},
@@ -177,10 +178,7 @@ local list = {
   {name="tooltip-record", size=32, scale=1},
   {name="tooltip-play", size=32, scale=1},
   {name="tooltip-end", size=32, scale=1},
-  {name="tooltip-erase", size=32, scale=1},
-  {name="recipe-jewel", size=16, scale=1},
-  {name="recipe-nuclear", size=16, scale=1},
-  {name="recipe-graduation", size=16, scale=1}
+  {name="tooltip-erase", size=32, scale=1}
 }
 for icon_row,icon in pairs(list) do
   table.insert(spite_icons, sprite_tooltip(icon.name, icon.size, icon.scale))

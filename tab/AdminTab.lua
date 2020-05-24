@@ -79,23 +79,31 @@ function AdminTab:getTabPane()
 end
 
 -------------------------------------------------------------------------------
--- Get or create cache tab panel
+-- Get or create tab panel
 --
--- @function [parent=#AdminTab] getCacheTab
+-- @function [parent=#AdminTab] getTab
 --
-function AdminTab:getCacheTab()
+function AdminTab:getTab(panel_name, caption)
   local content_panel = self:getTabPane()
-  local panel_name = "cache-tab-panel"
-  local scroll_name = "cache-scroll"
+  local scroll_name = "scroll-" .. panel_name
   if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
     return content_panel[scroll_name]
   end
-  local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption({"helmod_result-panel.cache-list"}))
+  local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption(caption))
   local scroll_panel = GuiElement.add(content_panel, GuiScroll(scroll_name):style(helmod_frame_style.scroll_pane):policy(true))
   content_panel.add_tab(tab_panel,scroll_panel)
   scroll_panel.style.horizontally_stretchable = true
   scroll_panel.style.vertically_stretchable = true
   return scroll_panel
+end
+
+-------------------------------------------------------------------------------
+-- Get or create cache tab panel
+--
+-- @function [parent=#AdminTab] getCacheTab
+--
+function AdminTab:getCacheTab()
+  return self:getTab("cache-tab-panel", {"helmod_result-panel.cache-list"})
 end
 
 -------------------------------------------------------------------------------
@@ -104,18 +112,7 @@ end
 -- @function [parent=#AdminTab] getRuleTab
 --
 function AdminTab:getRuleTab()
-  local content_panel = self:getTabPane()
-  local panel_name = "rule-tab-panel"
-  local scroll_name = "rule-scroll"
-  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
-    return content_panel[scroll_name]
-  end
-  local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption({"helmod_result-panel.rule-list"}))
-  local scroll_panel = GuiElement.add(content_panel, GuiScroll(scroll_name):style(helmod_frame_style.scroll_pane):policy(true))
-  content_panel.add_tab(tab_panel,scroll_panel)
-  scroll_panel.style.horizontally_stretchable = true
-  scroll_panel.style.vertically_stretchable = true
-  return scroll_panel
+  return self:getTab("rule-tab-panel", {"helmod_result-panel.rule-list"})
 end
 
 -------------------------------------------------------------------------------
@@ -124,18 +121,25 @@ end
 -- @function [parent=#AdminTab] getSheetTab
 --
 function AdminTab:getSheetTab()
-  local content_panel = self:getTabPane()
-  local panel_name = "sheet-tab-panel"
-  local scroll_name = "sheet-scroll"
-  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
-    return content_panel[scroll_name]
-  end
-  local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption({"helmod_result-panel.sheet-list"}))
-  local scroll_panel = GuiElement.add(content_panel, GuiScroll(scroll_name):style(helmod_frame_style.scroll_pane):policy(true))
-  content_panel.add_tab(tab_panel,scroll_panel)
-  scroll_panel.style.horizontally_stretchable = true
-  scroll_panel.style.vertically_stretchable = true
-  return scroll_panel
+  return self:getTab("sheet-tab-panel", {"helmod_result-panel.sheet-list"})
+end
+
+-------------------------------------------------------------------------------
+-- Get or create mods tab panel
+--
+-- @function [parent=#AdminTab] getModTab
+--
+function AdminTab:getModTab()
+  return self:getTab("mod-tab-panel", {"helmod_common.mod-list"})
+end
+
+-------------------------------------------------------------------------------
+-- Get or create gui tab panel
+--
+-- @function [parent=#AdminTab] getGuiTab
+--
+function AdminTab:getGuiTab()
+  return self:getTab("gui-tab-panel", {"helmod_common.gui-list"})
 end
 
 -------------------------------------------------------------------------------
@@ -147,6 +151,67 @@ function AdminTab:updateData()
   self:updateCache()
   self:updateRule()
   self:updateSheet()
+  self:updateMod()
+  self:updateGui()
+end
+
+-------------------------------------------------------------------------------
+-- Update data
+--
+-- @function [parent=#AdminTab] updateGui
+--
+function AdminTab:updateGui()
+  -- Rule List
+  local scroll_panel = self:getGuiTab()
+  
+  local table_panel = GuiElement.add(scroll_panel, GuiTable("list-table"):column(3):style("helmod_table_border"))
+  table_panel.vertical_centering = false
+  table_panel.style.horizontal_spacing = 5
+
+  self:addCellHeader(table_panel, "location", {"",helmod_tag.font.default_bold, {"helmod_common.location"}, helmod_tag.font.close})
+  self:addCellHeader(table_panel, "_name", {"",helmod_tag.font.default_bold, {"helmod_result-panel.col-header-name"}, helmod_tag.font.close})
+  self:addCellHeader(table_panel, "mod", {"",helmod_tag.font.default_bold, {"helmod_common.mod"}, helmod_tag.font.close})
+
+  local index = 0
+  for _,location in pairs({"top","left","center","screen","goal"}) do
+    for _, element in pairs(Player.getGui(location).children) do
+      if element.name == "mod_gui_button_flow" or element.name == "mod_gui_frame_flow" then
+        for _, element in pairs(element.children) do
+          GuiElement.add(table_panel, GuiLabel("location", index):caption(location))
+          GuiElement.add(table_panel, GuiLabel("_name", index):caption(element.name))
+          GuiElement.add(table_panel, GuiLabel("mod", index):caption(element.get_mod() or "base"))
+          index = index + 1
+        end
+      else
+        GuiElement.add(table_panel, GuiLabel("location", index):caption(location))
+        GuiElement.add(table_panel, GuiLabel("_name", index):caption(element.name))
+        GuiElement.add(table_panel, GuiLabel("mod", index):caption(element.get_mod() or "base"))
+        index = index + 1
+      end
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update data
+--
+-- @function [parent=#AdminTab] updateMod
+--
+function AdminTab:updateMod()
+  -- Rule List
+  local scroll_panel = self:getModTab()
+  
+  local table_panel = GuiElement.add(scroll_panel, GuiTable("list-table"):column(2):style("helmod_table_border"))
+  table_panel.vertical_centering = false
+  table_panel.style.horizontal_spacing = 50
+
+  self:addCellHeader(table_panel, "_name", {"",helmod_tag.font.default_bold, {"helmod_result-panel.col-header-name"}, helmod_tag.font.close})
+  self:addCellHeader(table_panel, "version", {"",helmod_tag.font.default_bold, {"helmod_common.version"}, helmod_tag.font.close})
+
+  for name, version in pairs(game.active_mods) do
+    GuiElement.add(table_panel, GuiLabel("_name", name):caption(name))
+    GuiElement.add(table_panel, GuiLabel("version", name):caption(version))
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -156,12 +221,12 @@ end
 --
 function AdminTab:updateCache()
   -- Rule List
-  local caches_panel = self:getCacheTab()
+  local scroll_panel = self:getCacheTab()
   
-  GuiElement.add(caches_panel, GuiLabel("warning"):caption({"", helmod_tag.color.orange, helmod_tag.font.default_large_bold, "Do not use this panel, unless absolutely necessary", helmod_tag.font.close, helmod_tag.color.close}))
-  GuiElement.add(caches_panel, GuiButton(self.classname, "generate-cache"):sprite("menu", "settings-white", "settings"):style("helmod_button_menu_sm_red"):tooltip("Generate missing cache"))
+  GuiElement.add(scroll_panel, GuiLabel("warning"):caption({"", helmod_tag.color.orange, helmod_tag.font.default_large_bold, "Do not use this panel, unless absolutely necessary", helmod_tag.font.close, helmod_tag.color.close}))
+  GuiElement.add(scroll_panel, GuiButton(self.classname, "generate-cache"):sprite("menu", "settings-white", "settings"):style("helmod_button_menu_sm_red"):tooltip("Generate missing cache"))
   
-  local table_panel = GuiElement.add(caches_panel, GuiTable("list-table"):column(2))
+  local table_panel = GuiElement.add(scroll_panel, GuiTable("list-table"):column(2))
   table_panel.vertical_centering = false
   table_panel.style.horizontal_spacing = 50
 
@@ -212,11 +277,11 @@ end
 --
 function AdminTab:updateRule()
   -- Rule List
-  local rule_panel = self:getRuleTab()
+  local scroll_panel = self:getRuleTab()
   local count_rule = #Model.getRules()
   if count_rule > 0 then
 
-    local result_table = GuiElement.add(rule_panel, GuiTable("list-data"):column(8):style("helmod_table-rule-odd"))
+    local result_table = GuiElement.add(scroll_panel, GuiTable("list-data"):column(8):style("helmod_table-rule-odd"))
 
     self:addRuleListHeader(result_table)
 
@@ -234,12 +299,12 @@ end
 --
 function AdminTab:updateSheet()
   -- Sheet List
-  local sheet_panel = self:getSheetTab()
+  local scroll_panel = self:getSheetTab()
 
   local count_model = Model.countModel()
   if count_model > 0 then
 
-    local result_table = GuiElement.add(sheet_panel, GuiTable("list-data"):column(3):style("helmod_table-odd"))
+    local result_table = GuiElement.add(scroll_panel, GuiTable("list-data"):column(3):style("helmod_table-odd"))
 
     self:addSheetListHeader(result_table)
 

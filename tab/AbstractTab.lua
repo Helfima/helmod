@@ -6,6 +6,7 @@
 
 AbstractTab = newclass(Form,function(base,classname)
   Form.init(base,classname)
+  base.add_special_button = true
 end)
 
 -------------------------------------------------------------------------------
@@ -341,13 +342,6 @@ function AbstractTab:updateMenuPanel(event)
   if self.classname == "HMAdminTab" then
     GuiElement.add(action_panel, GuiButton("HMRuleEdition", "OPEN"):caption({"helmod_result-panel.add-button-rule"}))
     GuiElement.add(action_panel, GuiButton(self.classname, "reset-rules"):caption({"helmod_result-panel.reset-button-rule"}))
-  elseif self.classname == "HMPropertiesTab" then
-    GuiElement.add(action_panel, GuiButton("HMEntitySelector", "OPEN", "HMPropertiesTab"):caption({"helmod_result-panel.select-button-entity"}))
-    GuiElement.add(action_panel, GuiButton("HMItemSelector", "OPEN", "HMPropertiesTab"):caption({"helmod_result-panel.select-button-item"}))
-    GuiElement.add(action_panel, GuiButton("HMFluidSelector", "OPEN", "HMPropertiesTab"):caption({"helmod_result-panel.select-button-fluid"}))
-    GuiElement.add(action_panel, GuiButton("HMRecipeSelector", "OPEN", "HMPropertiesTab"):caption({"helmod_result-panel.select-button-recipe"}))
-    GuiElement.add(action_panel, GuiButton("HMTechnologySelector", "OPEN", "HMPropertiesTab"):caption({"helmod_result-panel.select-button-technology"}))
-  elseif self.classname == "HMPrototypeFiltersTab" then
   else
     -- add recipe
     local group1 = GuiElement.add(action_panel, GuiFlowH("group1"))
@@ -398,13 +392,6 @@ function AbstractTab:updateMenuPanel(event)
     if self.classname == "HMStatisticTab" then
       GuiElement.add(group3, GuiButton("HMStatusPanel", "OPEN", block_id):sprite("menu", "pin-white", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
     end
-
-    -- pin info
-    local group4 = GuiElement.add(action_panel, GuiFlowH("group4"))
-    if self.classname == "HMUnitTestTab" then
-      GuiElement.add(group4, GuiButton("HMUnitTestTab", "reload-script"):sprite("menu", "settings-white", "settings"):style("helmod_button_menu"):tooltip("Reload script"))
-    end
-
   end
 
 

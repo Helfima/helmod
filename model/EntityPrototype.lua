@@ -230,6 +230,20 @@ function EntityPrototype:getEnergyProduction()
 end
 
 -------------------------------------------------------------------------------
+-- Return base productivity
+--
+-- @function [parent=#EntityPrototype] getBaseProductivity
+--
+-- @return #number default 0
+--
+function EntityPrototype:getBaseProductivity()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.base_productivity or 0
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
 -- Return effectivity
 --
 -- @function [parent=#EntityPrototype] getEffectivity

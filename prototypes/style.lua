@@ -1146,6 +1146,17 @@ default_gui["helmod_table_default"] = {
 -------------------------------------------------------------------------------
 -- Style of default
 --
+-- @field [parent=#Table] default
+
+default_gui["helmod_table_border"] = {
+  type = "table_style",
+  parent = "helmod_table_default",
+  border = border_image_set(),
+}
+
+-------------------------------------------------------------------------------
+-- Style of default
+--
 -- @field [parent=#Table] element
 
 default_gui["helmod_table_element"] = {

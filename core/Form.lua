@@ -260,13 +260,13 @@ end
 --
 function Form:open(event)
   self:onBeforeOpen(event)
-  if self:isOpened() then return true end
+  --if self:isOpened() then return true end
+  if self:isOpened() then self:close() end
   local parent_panel = self:getParentPanel()
   User.setActiveForm(self.classname)
   if parent_panel[self:getPanelName()] == nil then
     self:updateTopMenu(event)
     self:onOpen(event)
-    self:isOpened()
   end
   return true
 end
@@ -356,11 +356,15 @@ function Form:updateTopMenu(event)
       -- special tab
       local group1 = GuiElement.add(menu_panel, GuiFlowH("group1"))
       for _, form in pairs(Controller.getViews()) do
-        if string.find(self.classname, "Tab") and string.find(form.classname, "Tab") and form:isVisible() and form:isSpecial() then
+        if self.add_special_button == true and form:isVisible() and form:isSpecial() then
           local icon_hovered, icon = form:getButtonSprites()
           local style = "helmod_button_menu"
-          if User.isActiveForm(form.classname) then style = "helmod_button_menu_selected" end
-          GuiElement.add(group1, GuiButton(self.classname, "change-tab", form.classname):sprite("menu", icon_hovered, icon):style(style):tooltip(form:getButtonCaption()))
+          if string.find(form.classname, "Tab") then
+            if User.isActiveForm(form.classname) then style = "helmod_button_menu_selected" end
+            GuiElement.add(group1, GuiButton(self.classname, "change-tab", form.classname):sprite("menu", icon_hovered, icon):style(style):tooltip(form:getButtonCaption()))
+          else
+            GuiElement.add(group1, GuiButton(form.classname, "OPEN"):sprite("menu", icon_hovered, icon):style(style):tooltip(form.panelCaption))
+          end
         end
       end
       -- current button

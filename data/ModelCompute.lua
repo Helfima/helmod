@@ -389,10 +389,11 @@ function ModelCompute.getBlockMatrix(block)
           if col_index[name] ~= nil and lua_products[name] ~= nil then
             -- cas de la valeur equivalente, on creer un nouveau element
             --if lua_products[name].count == lua_ingredients[name].count or recipe.type == "resource" or recipe.type == "energy" then
+            if not(block.solver == true) then
               index = col_index[name]+1
-            --else
-            --  index = col_index[name]
-            --end
+            else
+              index = col_index[name]
+            end
           end
           col_index[name] = index
 
@@ -428,11 +429,11 @@ function ModelCompute.getBlockMatrix(block)
           -- cas du produit existant du cote ingredient
           if col_index[name] ~= nil and lua_ingredients[name] ~= nil then
             -- cas de la valeur equivalente, on creer un nouveau element
-            --if lua_products[name].count == lua_products[name].count or recipe.type == "resource" then
+            if not(block.solver == true) then
               index = col_index[name]+1
-            --else
-            --  index = col_index[name]
-            --end
+            else
+              index = col_index[name]
+            end
           end
           col_index[name] = index
 
@@ -628,9 +629,13 @@ function ModelCompute.computeBlock(block)
         sorter = function(t,a,b) return t[b].index < t[a].index end
       end
       for _, recipe in spairs(recipes,sorter) do
-        
-        recipe.count =  mC[row_index][my_solver.col_R]
-        recipe.production = mC[row_index][my_solver.col_P]
+        if mC[row_index][my_solver.col_R] > 0 then
+          recipe.count =  mC[row_index][my_solver.col_R]
+          recipe.production = mC[row_index][my_solver.col_P]
+        else
+          recipe.count = 0
+          recipe.production = 1
+        end
         row_index = row_index + 1
         -- calcul dependant du recipe count
         if block.isEnergy == true then
@@ -750,6 +755,7 @@ function ModelCompute.computeModuleEffects(recipe)
   local factory = recipe.factory
   factory.effects = {speed = 0, productivity = 0, consumption = 0, pollution = 0}
   factory.cap = {speed = 0, productivity = 0, consumption = 0, pollution = 0}
+  factory.effects.productivity = EntityPrototype(factory):getBaseProductivity()
   -- effet module factory
   if factory.modules ~= nil then
     for module, value in pairs(factory.modules) do
@@ -838,7 +844,7 @@ function ModelCompute.computeFactory(recipe)
   recipe.factory.energy = factory_prototype:getEnergyConsumption() * (1 + recipe.factory.effects.consumption)
 
   -- effet pollution
-  recipe.factory.pollution = factory_prototype:getPollution() * (1 + recipe.factory.effects.pollution)
+  recipe.factory.pollution = factory_prototype:getPollution() * (1 + recipe.factory.effects.pollution) * (1 + recipe.factory.effects.consumption)
   
   -- compte le nombre de machines necessaires
   local model = Model.getModel()

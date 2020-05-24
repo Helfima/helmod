@@ -103,7 +103,11 @@ function RecipeSelector:updateGroups(list_products, list_ingredients, list_trans
   for key, resource in pairs(Player.getResources()) do
     self:appendGroups(resource, "resource", list_products, list_ingredients, list_translate)
   end
-
+  for key, item in pairs(Player.getItemPrototypes()) do
+    if item.rocket_launch_products ~= nil and Model.countList(item.rocket_launch_products) > 0 then
+      self:appendGroups(item, "rocket", list_products, list_ingredients, list_translate)
+    end
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -125,6 +129,9 @@ function RecipeSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
   button.locked = true
   if prototype.type == "recipe-burnt" then
     local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({"tooltip.burnt-recipe"}))
+    sprite.style.top_padding = -8
+  elseif prototype.type == "rocket" then
+    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({"tooltip.rocket-recipe"}))
     sprite.style.top_padding = -8
   elseif prototype.type ~= "recipe" then
     local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({"tooltip.resource-recipe"}))

@@ -1,79 +1,107 @@
-require "tab.AbstractTab"
+-------------------------------------------------------------------------------
+-- Class to build UnitTestPanel panel
+--
+-- @module UnitTestPanel
+-- @extends #Form
+--
+
+UnitTestPanel = newclass(Form,function(base,classname)
+  Form.init(base,classname)
+  base.add_special_button = true
+end)
+
 local data = require "unit_test.Data"
 local data_pyanodons = require "unit_test.DataPyanodons"
 local data_bob_angel = require "unit_test.DataBobAngel"
 local data_krastorio2 = require "unit_test.DataKrastorio2"
 -------------------------------------------------------------------------------
--- Class to build tab
+-- On initialization
 --
--- @module UnitTestTab
--- @extends #AbstractTab
+-- @function [parent=#UnitTestPanel] onInit
 --
-
-UnitTestTab = newclass(AbstractTab)
-
--------------------------------------------------------------------------------
--- Return button caption
---
--- @function [parent=#UnitTestTab] getButtonCaption
---
--- @return #string
---
-function UnitTestTab:getButtonCaption()
-  return {"helmod_result-panel.tab-button-unittest"}
+function UnitTestPanel:onInit()
+  self.panelCaption = ({"helmod_result-panel.tab-button-unittest"})
+  self.help_button = false
 end
 
 -------------------------------------------------------------------------------
 -- Get Button Sprites
 --
--- @function [parent=#UnitTestTab] getButtonSprites
+-- @function [parent=#UnitTestPanel] getButtonSprites
 --
 -- @return boolean
 --
-function UnitTestTab:getButtonSprites()
+function UnitTestPanel:getButtonSprites()
   return "ok-white","ok"
 end
 
 -------------------------------------------------------------------------------
 -- Is visible
 --
--- @function [parent=#UnitTestTab] isVisible
+-- @function [parent=#UnitTestPanel] isVisible
 --
 -- @return boolean
 --
-function UnitTestTab:isVisible()
+function UnitTestPanel:isVisible()
   return Player.isAdmin()
 end
 
 -------------------------------------------------------------------------------
 -- Is special
 --
--- @function [parent=#UnitTestTab] isSpecial
+-- @function [parent=#UnitTestPanel] isSpecial
 --
 -- @return boolean
 --
-function UnitTestTab:isSpecial()
+function UnitTestPanel:isSpecial()
   return true
 end
 
 -------------------------------------------------------------------------------
--- Has index model (for Tab panel)
+-- Get or create menu panel
 --
--- @function [parent=#UnitTestTab] hasIndexModel
+-- @function [parent=#UnitTestPanel] getMenuPanel
 --
--- @return #boolean
+function UnitTestPanel:getMenuPanel()
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  local panel_name = "menu-panel"
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[panel_name]
+  end
+  local panel = GuiElement.add(content_panel, GuiFrameV(panel_name))
+  panel.style.vertically_stretchable = true
+  local width_main, height_main = GuiElement.getMainSizes()
+  panel.style.minimal_height = 40
+  panel.style.minimal_width = width_main
+  return panel
+end
+
+-------------------------------------------------------------------------------
+-- Get or create content panel
 --
-function UnitTestTab:hasIndexModel()
-  return false
+-- @function [parent=#UnitTestPanel] getContentPanel
+--
+function UnitTestPanel:getContentPanel()
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  local panel_name = "data-panel"
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[panel_name]
+  end
+  local panel = GuiElement.add(content_panel, GuiFrameV(panel_name))
+  panel.style.vertically_stretchable = true
+  local width_main, height_main = GuiElement.getMainSizes()
+  panel.style.minimal_height = height_main
+  panel.style.minimal_width = width_main
+  return panel
 end
 
 -------------------------------------------------------------------------------
 -- Get or create tab panel
 --
--- @function [parent=#UnitTestTab] getTabPane
+-- @function [parent=#UnitTestPanel] getTabPane
 --
-function UnitTestTab:getTabPane()
-  local content_panel = self:getResultPanel()
+function UnitTestPanel:getTabPane()
+  local content_panel = self:getContentPanel()
   local panel_name = "tab_panel"
   if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
     return content_panel[panel_name]
@@ -85,9 +113,9 @@ end
 -------------------------------------------------------------------------------
 -- Get or create energy tab panel
 --
--- @function [parent=#UnitTestTab] getEnergyTab
+-- @function [parent=#UnitTestPanel] getEnergyTab
 --
-function UnitTestTab:getEnergyTab()
+function UnitTestPanel:getEnergyTab()
   local content_panel = self:getTabPane()
   local panel_name = "energy-tab-panel"
   local scroll_name = "energy-scroll"
@@ -103,11 +131,28 @@ function UnitTestTab:getEnergyTab()
 end
 
 -------------------------------------------------------------------------------
--- Update data
+-- On event
 --
--- @function [parent=#UnitTestTab] updateData
+-- @function [parent=#UnitTestPanel] onEvent
 --
-function UnitTestTab:updateData()
+-- @param #LuaEvent event
+--
+function UnitTestPanel:onEvent(event)
+  if not(User.isAdmin()) then return end
+  if event.action == "reload-script" then
+    game.reload_script()
+    Controller:send("on_gui_update", event)
+  end
+end
+
+-------------------------------------------------------------------------------
+-- On update
+--
+-- @function [parent=#UnitTestPanel] onUpdate
+--
+-- @param #LuaEvent event
+--
+function UnitTestPanel:onUpdate(event)
   if game.active_mods["boblibrary"] then
     data = data_bob_angel
   end
@@ -117,15 +162,28 @@ function UnitTestTab:updateData()
   if game.active_mods["Krastorio2"] then
     data = data_krastorio2
   end
+  self:updateMenu()
   self:updateEnergy()
+end
+
+-------------------------------------------------------------------------------
+-- Update menu
+--
+-- @function [parent=#UnitTestPanel] updateMenu
+--
+function UnitTestPanel:updateMenu()
+  local menu_panel = self:getMenuPanel()
+  -- pin info
+  local group1 = GuiElement.add(menu_panel, GuiFlowH("group1"))
+  GuiElement.add(group1, GuiButton("HMUnitTestPanel", "reload-script"):sprite("menu", "refresh-white", "refresh"):style("helmod_button_menu"):tooltip("Reload script"))
 end
 
 -------------------------------------------------------------------------------
 -- Update energy
 --
--- @function [parent=#UnitTestTab] updateEnergy
+-- @function [parent=#UnitTestPanel] updateEnergy
 --
-function UnitTestTab:updateEnergy()
+function UnitTestPanel:updateEnergy()
   local tab_panel = self:getEnergyTab()
   
   local table_panel = GuiElement.add(tab_panel, GuiTable("list-table"):column(23))
@@ -142,14 +200,14 @@ end
 -------------------------------------------------------------------------------
 -- Add cell header with tooltip
 --
--- @function [parent=#UnitTestTab] addCellHeaderTooltip
+-- @function [parent=#UnitTestPanel] addCellHeaderTooltip
 --
 -- @param #LuaGuiElement guiTable
 -- @param #string name
 -- @param #string caption
 -- @param #string sorted
 --
-function UnitTestTab:addCellHeaderTooltip(guiTable, name, caption, tooltip)
+function UnitTestPanel:addCellHeaderTooltip(guiTable, name, caption, tooltip)
   local cell = GuiElement.add(guiTable, GuiFrameH("header", name):style(helmod_frame_style.hidden))
   GuiElement.add(cell, GuiLabel("label"):caption(caption):tooltip(tooltip))
 end
@@ -157,11 +215,11 @@ end
 -------------------------------------------------------------------------------
 -- Add energy List header
 --
--- @function [parent=#UnitTestTab] addEnergyListHeader
+-- @function [parent=#UnitTestPanel] addEnergyListHeader
 --
 -- @param #LuaGuiElement itable container for element
 --
-function UnitTestTab:addEnergyListHeader(itable)
+function UnitTestPanel:addEnergyListHeader(itable)
   -- col action
   self:addCellHeaderTooltip(itable, "entity", "Entity")
   -- data
@@ -195,12 +253,12 @@ end
 -------------------------------------------------------------------------------
 -- Add row energy List
 --
--- @function [parent=#UnitTestTab] addEnergyListRow
+-- @function [parent=#UnitTestPanel] addEnergyListRow
 --
 -- @param #LuaGuiElement itable container for element
 -- @param #table model
 --
-function UnitTestTab:addEnergyListRow(gui_table, entity, test_data)
+function UnitTestPanel:addEnergyListRow(gui_table, entity, test_data)
   local prototype = EntityPrototype(entity)
   local lua_prototype = prototype:native()
   if lua_prototype ~= nil then
@@ -313,7 +371,7 @@ function UnitTestTab:addEnergyListRow(gui_table, entity, test_data)
 
 end
 
-function UnitTestTab:valueEquals(current_value, target_value, attribute)
+function UnitTestPanel:valueEquals(current_value, target_value, attribute)
   if current_value == target_value then
     local tag_color = helmod_tag.color.green_light
     if attribute then
@@ -339,20 +397,5 @@ function UnitTestTab:valueEquals(current_value, target_value, attribute)
     end
     local tooltip = {"",string.format("Failed, value %s must be %s", display_current, display_target)}
     return tag_color, tooltip
-  end
-end
-
--------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#UnitTestTab] onEvent
---
--- @param #LuaEvent event
---
-function UnitTestTab:onEvent(event)
-  if not(User.isAdmin()) then return end
-  if event.action == "reload-script" then
-    game.reload_script()
-    Controller:send("on_gui_update", event)
   end
 end

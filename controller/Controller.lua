@@ -9,6 +9,9 @@ require "dialog.Settings"
 require "dialog.Download"
 require "dialog.Calculator"
 require "dialog.RecipeExplorer"
+require "dialog.PropertiesPanel"
+require "dialog.PrototypeFiltersPanel"
+require "dialog.UnitTestPanel"
 
 require "edition.RecipeEdition"
 require "edition.ProductEdition"
@@ -28,10 +31,7 @@ require "tab.ProductionLineTab"
 require "tab.ResourceTab"
 require "tab.SummaryTab"
 require "tab.StatisticTab"
-require "tab.PropertiesTab"
-require "tab.PrototypeFiltersTab"
 require "tab.AdminTab"
-require "tab.UnitTestTab"
 
 require "model.Prototype"
 require "model.ElectricPrototype"
@@ -80,16 +80,16 @@ function Controller:prepare()
   table.insert(forms, Download("HMDownload"))
   table.insert(forms, Calculator("HMCalculator"))
   table.insert(forms, RecipeExplorer("HMRecipeExplorer"))
+  table.insert(forms, PropertiesPanel("HMPropertiesPanel"))
+  table.insert(forms, PrototypeFiltersPanel("HMPrototypeFiltersPanel"))
+  table.insert(forms, UnitTestPanel("HMUnitTestPanel"))
 
   table.insert(forms, ProductionLineTab("HMProductionLineTab"))
   table.insert(forms, ProductionBlockTab("HMProductionBlockTab"))
   table.insert(forms, ResourceTab("HMResourceTab"))
   table.insert(forms, SummaryTab("HMSummaryTab"))
   table.insert(forms, StatisticTab("HMStatisticTab"))
-  table.insert(forms, PropertiesTab("HMPropertiesTab"))
-  table.insert(forms, PrototypeFiltersTab("HMPrototypeFiltersTab"))
   table.insert(forms, AdminTab("HMAdminTab"))
-  table.insert(forms, UnitTestTab("HMUnitTestTab"))
 
   table.insert(forms, EnergySelector("HMEnergySelector"))
   table.insert(forms, EntitySelector("HMEntitySelector"))
@@ -782,7 +782,6 @@ function Controller:onEventAccessAdmin(event)
       table.insert(forms, TechnologySelector("HMTechnologySelector"))
       table.insert(forms, ItemSelector("HMItemSelector"))
       table.insert(forms, FluidSelector("HMFluidSelector"))
-      table.insert(forms, ContainerSelector("HMContainerSelector"))
       for _,form in pairs(forms) do
         if event.item2 == form.classname then
           form:prepare()

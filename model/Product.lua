@@ -73,7 +73,8 @@ function Product:clone()
     temperature = self.lua_prototype.temperature,
     minimum_temperature  = self.lua_prototype.minimum_temperature,
     maximum_temperature  = self.lua_prototype.maximum_temperature,
-    by_time = self.lua_prototype.by_time
+    by_time = self.lua_prototype.by_time,
+    burnt = self.lua_prototype.burnt
   }
   return prototype
 end

@@ -1,4 +1,17 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.10.21
+Date: 24. 05. 2020
+  Changes:
+    - added base productivity machine consideration
+    - added rocket recipes
+    - added gui list tab in admin panel
+    - added mod list tab in admin panel
+  Bugfixes:
+    - fixed matrix solver input data
+    - fixed recipe count < 0, set count at 0
+    - fixed front panel when reopen
+    - fixed energy cost on pollution
+---------------------------------------------------------------------------------------------------
 Version: 0.10.20
 Date: 17. 05. 2020
   Changes:

@@ -31,6 +31,9 @@ RecipePrototype = newclass(Prototype,function(base, object, object_type)
     elseif base.lua_type == "technology" then
       Prototype.init(base, Player.getTechnology(base.object_name))
       base.lua_type = "technology"
+    elseif base.lua_type == "rocket" then
+      Prototype.init(base, Player.getRecipeRocket(base.object_name))
+      base.lua_type = "rocket"
     end
     if base.lua_prototype == nil then
       Logging:error("HMRecipePrototype", "recipe not found", type(object), object)
@@ -106,10 +109,8 @@ end
 -- @return #table
 --
 function RecipePrototype:getCategory()
-  if self.lua_prototype ~= nil and (self.lua_type == "recipe" or self.lua_type == "recipe-burnt" or self.lua_type == "resource" or self.lua_type == "fluid") then
+  if self.lua_prototype ~= nil then
     return self.lua_prototype.category or "crafting"
-  elseif self.lua_type == "technology" then
-    return "technology"
   end
   return nil
 end
@@ -186,7 +187,7 @@ end
 --
 function RecipePrototype:getRawProducts()
   if self.lua_prototype ~= nil then
-    if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" or self.lua_type == "resource" or self.lua_type == "fluid" then
+    if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" or self.lua_type == "resource" or self.lua_type == "fluid" or self.lua_type == "rocket" then
       return self.lua_prototype.products
     elseif self.lua_type == "technology" then
       return {{name=self.lua_prototype.name, type="technology", amount=1}}
@@ -242,7 +243,7 @@ end
 --
 function RecipePrototype:getRawIngredients()
   if self.lua_prototype ~= nil then
-    if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" or self.lua_type == "resource" or self.lua_type == "fluid" then
+    if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" or self.lua_type == "resource" or self.lua_type == "fluid" or self.lua_type == "rocket" then
       return self.lua_prototype.ingredients
     elseif self.lua_type == "technology" then
       return self.lua_prototype.research_unit_ingredients
@@ -335,7 +336,7 @@ function RecipePrototype:getIngredients(factory)
         if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then
           local fuel_count = energy_prototype:getFuelCount()
           local factor = self:getEnergy()/speed_factory
-          local burner_ingredient = {name=fuel_count.name, type=fuel_count.type, amount=fuel_count.count*factor }
+          local burner_ingredient = {name=fuel_count.name, type=fuel_count.type, amount=fuel_count.count*factor, burnt=true}
           table.insert(raw_ingredients, burner_ingredient)
         end
       end
@@ -344,7 +345,7 @@ function RecipePrototype:getIngredients(factory)
         if fluid_fuel ~= nil and fluid_fuel:native() ~= nil then
           local amount = factory_prototype:getFluidConsumption()
           local factor = self:getEnergy()*consumption_effect/speed_factory
-          local burner_ingredient = {name=fluid_fuel:native().name, type="fluid", amount=amount*factor}
+          local burner_ingredient = {name=fluid_fuel:native().name, type="fluid", amount=amount*factor, burnt=true}
           table.insert(raw_ingredients, burner_ingredient)
         end
       end
@@ -354,7 +355,7 @@ function RecipePrototype:getIngredients(factory)
         if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then
           local fuel_count = energy_prototype:getFuelCount()
           local factor = self:getEnergy()/speed_factory
-          local burner_ingredient = {name=fuel_count.name, type=fuel_count.type, amount=fuel_count.count*factor, by_time=true }
+          local burner_ingredient = {name=fuel_count.name, type=fuel_count.type, amount=fuel_count.count*factor, by_time=true, burnt=true}
           table.insert(raw_ingredients, burner_ingredient)
         end
       end
@@ -363,7 +364,7 @@ function RecipePrototype:getIngredients(factory)
         if fluid_fuel ~= nil and fluid_fuel:native() ~= nil then
           local amount = factory_prototype:getFluidConsumption()
           local factor = self:getEnergy()*consumption_effect/speed_factory
-          local burner_ingredient = {name=fluid_fuel:native().name, type="fluid", amount=amount*factor, by_time=true }
+          local burner_ingredient = {name=fluid_fuel:native().name, type="fluid", amount=amount*factor, by_time=true, burnt=true}
           table.insert(raw_ingredients, burner_ingredient)
         end
       end
@@ -381,12 +382,10 @@ end
 --
 function RecipePrototype:getEnergy()
   if self.lua_prototype ~= nil then
-    if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" or self.lua_type == "resource" or self.lua_type == "fluid" then
-      return self.lua_prototype.energy
-    elseif self.lua_type == "technology" then
-      return self.lua_prototype.research_unit_energy/60
-    elseif self.lua_type == "energy" then
+    if self.lua_type == "energy" then
       return 1
+    else
+      return self.lua_prototype.energy
     end
   end
   return 0
