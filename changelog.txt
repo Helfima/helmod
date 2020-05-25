@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.10.22
+Date: 26. 05. 2020
+  Changes:
+    - rollback on computing recipe with same product as ingredient
+  Bugfixes:
+    - fixed bug with properties and prototype filers panels
+    - fixed icon sheets use the width of main panel
+    - fixed translation problem when Real Name setting is On
+---------------------------------------------------------------------------------------------------
 Version: 0.10.21
 Date: 24. 05. 2020
   Changes:

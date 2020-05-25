@@ -372,21 +372,21 @@ helmod_settings_mod = {
     default_value = true,
     order = "d6"
   },
-  --properties-tab
-  properties_tab = {
+  --properties-panel
+  properties_panel = {
     type = "bool-setting",
     setting_type = "runtime-global",
-    localised_name = {"helmod_settings.properties-tab"},
-    localised_description = {"helmod_settings.properties-tab-desc"},
+    localised_name = {"helmod_settings.properties-panel"},
+    localised_description = {"helmod_settings.properties-panel-desc"},
     default_value = false,
     order = "e1"
   },
-  --prototype-filters-tab
-  prototype_filters_tab = {
+  --prototype-filters-panel
+  prototype_filters_panel = {
     type = "bool-setting",
     setting_type = "runtime-global",
-    localised_name = {"helmod_settings.prototype-filters-tab"},
-    localised_description = {"helmod_settings.prototype-filters-tab-desc"},
+    localised_name = {"helmod_settings.prototype-filters-panel"},
+    localised_description = {"helmod_settings.prototype-filters-panel-desc"},
     default_value = false,
     order = "e2"
   },

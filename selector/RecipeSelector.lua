@@ -63,20 +63,20 @@ function RecipeSelector:appendGroups(element, type, list_products, list_ingredie
 
   local lua_prototype = prototype:native()
   local prototype_name = string.format("%s-%s",type , lua_prototype.name)
-  for key, element in pairs(prototype:getRawProducts()) do
-    if list_products[element.name] == nil then list_products[element.name] = {} end
-    list_products[element.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
+  for key, raw_product in pairs(prototype:getRawProducts()) do
+    if list_products[raw_product.name] == nil then list_products[raw_product.name] = {} end
+    list_products[raw_product.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
     
-    local product = Product(element)
-    local localised_name = product:getLocalisedName()
+    local product = Product(raw_product)
+    local localised_name = product:getLocalisedName(true)
     has_burnt_result = product:hasBurntResult()
     if localised_name ~= nil and localised_name ~= "unknow" then
-      list_translate[element.name] = localised_name
+      list_translate[raw_product.name] = localised_name
     end
   end
-  for key, element in pairs(prototype:getRawIngredients()) do
-    if list_ingredients[element.name] == nil then list_ingredients[element.name] = {} end
-    list_ingredients[element.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
+  for key, raw_ingredient in pairs(prototype:getRawIngredients()) do
+    if list_ingredients[raw_ingredient.name] == nil then list_ingredients[raw_ingredient.name] = {} end
+    list_ingredients[raw_ingredient.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
   end
   return has_burnt_result
 end

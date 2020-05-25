@@ -453,13 +453,15 @@ function AbstractTab:updateIndexPanel(event)
           if element ~= nil then
             GuiElement.add(index_panel, GuiButtonSprite(self.classname, "change-model", imodel.id):sprite("recipe", element.name):tooltip(RecipePrototype(element):getLocalisedName()))
           else
-            GuiElement.add(index_panel, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", "help-white", "help"):style("helmod_button_menu_selected"))
+            local button = GuiElement.add(index_panel, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", "help-white", "help"):style("helmod_button_menu_selected"))
+            button.style.width = 36
           end
         else
           if element ~= nil then
             GuiElement.add(index_panel, GuiButtonSelectSprite(self.classname, "change-model", imodel.id):sprite("recipe", element.name):tooltip(RecipePrototype(element):getLocalisedName()))
           else
-            GuiElement.add(index_panel, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", "help-white", "help"):style("helmod_button_menu"))
+            local button = GuiElement.add(index_panel, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", "help-white", "help"):style("helmod_button_menu"))
+            button.style.width = 36
           end
         end
 

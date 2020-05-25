@@ -48,7 +48,7 @@ end
 -- @return boolean
 --
 function PropertiesPanel:isVisible()
-  return Player.isAdmin()
+  return User.getModGlobalSetting("properties_panel")
 end
 
 -------------------------------------------------------------------------------
@@ -209,6 +209,7 @@ end
 -- @param #LuaEvent event
 --
 function PropertiesPanel:updateData(event)
+  if not(self:isOpened()) then return end
   -- data
   local content_panel = self:getContentPanel()
   content_panel.clear()

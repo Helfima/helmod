@@ -270,7 +270,6 @@ function AbstractSelector:onEvent(event)
         local new_recipe = ModelBuilder.addRecipeIntoProductionBlock(event.item2, event.item1, index)
         ModelCompute.update()
         User.setParameter("scroll_element", new_recipe.id)
-        User.setActiveForm("HMProductionBlockTab")
         Controller:send("on_gui_refresh", event)
       end
       -- container selector
@@ -401,7 +400,7 @@ function AbstractSelector:translate(event)
   if not(Cache.isEmpty(self.classname, "list_translate")) or (event.continue and event.method == "translate") then
     if User.getModGlobalSetting("filter_translated_string_active") and (not(User.isTranslate()) or (event.continue and event.method == "translate")) then
       local list_translate = Cache.getData(self.classname, "list_translate")
-      local index_end = Model.countList(list_translate)
+      local index_end = Model.countList(list_translate)-1
       local step_translate = User.getModGlobalSetting("user_cache_step") or 100
       local start_index = event.index_translate or 0
       local index = -1

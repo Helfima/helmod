@@ -388,8 +388,7 @@ function ModelCompute.getBlockMatrix(block)
           -- cas de l'ingredient existant du cote produit
           if col_index[name] ~= nil and lua_products[name] ~= nil then
             -- cas de la valeur equivalente, on creer un nouveau element
-            --if lua_products[name].count == lua_ingredients[name].count or recipe.type == "resource" or recipe.type == "energy" then
-            if not(block.solver == true) then
+            if lua_products[name].count == lua_ingredients[name].count or recipe.type == "resource" or recipe.type == "energy" then
               index = col_index[name]+1
             else
               index = col_index[name]
@@ -429,7 +428,7 @@ function ModelCompute.getBlockMatrix(block)
           -- cas du produit existant du cote ingredient
           if col_index[name] ~= nil and lua_ingredients[name] ~= nil then
             -- cas de la valeur equivalente, on creer un nouveau element
-            if not(block.solver == true) then
+            if lua_products[name].count == lua_ingredients[name].count or recipe.type == "resource" or recipe.type == "energy" then
               index = col_index[name]+1
             else
               index = col_index[name]

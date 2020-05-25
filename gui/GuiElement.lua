@@ -361,7 +361,7 @@ function GuiElement.getIndexColumnNumber()
   local width , height = GuiElement.getDisplaySizes()
   local width_main = math.ceil(width*display_ratio_horizontal)
 
-  return math.ceil((width_main-650)/36)
+  return math.ceil((width_main - 50)/36)
 end
 
 -------------------------------------------------------------------------------

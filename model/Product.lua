@@ -16,9 +16,9 @@ Product.classname = "HMProduct"
 --
 -- @return #table
 --
-function Product:getLocalisedName()
+function Product:getLocalisedName(force)
   if self.lua_prototype ~= nil then
-    if not(User.getModGlobalSetting("display_real_name")) then
+    if not(User.getModGlobalSetting("display_real_name")) or force then
       local localisedName = self.lua_prototype.name
       if self.lua_prototype.type == 0 or self.lua_prototype.type == "item" then
         local item = Player.getItemPrototype(self.lua_prototype.name)

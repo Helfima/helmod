@@ -39,7 +39,7 @@ end
 -- @return boolean
 --
 function PrototypeFiltersPanel:isVisible()
-  return Player.isAdmin()
+  return User.getModGlobalSetting("prototype_filters_panel")
 end
 
 -------------------------------------------------------------------------------

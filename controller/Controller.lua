@@ -766,7 +766,7 @@ function Controller:onEventAccessAdmin(event)
     else
       Player.print("Not found to delete:", event.item1, event.item2, event.item3, event.item4)
     end
-    self:send("on_gui_refresh", event)
+    self:send("on_gui_refresh", event, event.classname)
   end
 
   if event.action == "refresh-cache" then
