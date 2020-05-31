@@ -268,7 +268,7 @@ function User.setDefaultBeacon(recipe)
   local category = recipe_prototype:getCategory()
   local beacon = recipe.beacon
   if category ~= nil then
-    default_beacon[category] = {name = beacon.name, combo = beacon.combo, factory = beacon.factory}
+    default_beacon[category] = {name = beacon.name, combo = beacon.combo, per_factory = beacon.per_factory, per_factory_constant = beacon.per_factory_constant}
     User.setParameter("default_beacon", default_beacon)
   end
 end

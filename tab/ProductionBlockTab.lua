@@ -529,6 +529,10 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
         local ingredient_prototype = Product(lua_ingredient)
         local ingredient = ingredient_prototype:clone()
         ingredient.count = ingredient_prototype:countIngredient(recipe)
+        -- si constant compte comme un produit (recipe rocket)
+        if ingredient.constant == true then
+          ingredient.count = ingredient_prototype:countProduct(recipe)
+        end
         if block.count > 1 then
           ingredient.limit_count = ingredient.count / block.count
         end

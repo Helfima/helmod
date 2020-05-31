@@ -351,6 +351,10 @@ function ModelCompute.getBlockMatrix(block)
       end
       for i, lua_ingredient in pairs(recipe_prototype:getIngredients(recipe.factory)) do
         local count = Product(lua_ingredient):getAmount()
+        -- si constant compte comme un produit (recipe rocket)
+        if lua_ingredient.constant then
+          count = Product(lua_ingredient):getAmount(recipe)
+        end
         if lua_ingredient.by_time == true then
           count = count * model.time
         end

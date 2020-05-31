@@ -95,7 +95,7 @@ function ModelBuilder.addRecipeIntoProductionBlock(key, type, index)
   
       local default_beacon = User.getDefaultBeacon(ModelRecipe)
       if default_beacon ~= nil then
-        Model.setBeacon(current_block, ModelRecipe.id, default_beacon.name, default_beacon.combo, default_beacon.factory)
+        Model.setBeacon(current_block, ModelRecipe.id, default_beacon.name, default_beacon.combo, default_beacon.per_factory, default_beacon.per_factory_constant)
       else
         local default_beacon_name = Model.getDefaultRecipeBeacon(lua_recipe.name)
         if default_beacon_name ~= nil then
@@ -635,7 +635,7 @@ function ModelBuilder.setFactoryBlock(block_id, current_recipe)
     for key, recipe in pairs(block.recipes) do
       local prototype_recipe = RecipePrototype(recipe)
       if (default_factory_mode ~= "category" and categories[prototype_recipe:getCategory()]) or prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
-        Model.setFactory(block_id, key, current_recipe.factory.name)
+        Model.setFactory(block_id, key, current_recipe.factory.name, current_recipe.factory.fuel)
         if User.getParameter("default_factory_with_module") == true then
           ModelBuilder.setFactoryModulePriority(block_id, key, current_recipe.factory.module_priority)
         end
@@ -1018,9 +1018,6 @@ function ModelBuilder.updateBeacon(item, key, options)
   if object ~= nil then
     if options.combo ~= nil then
       object.beacon.combo = options.combo
-    end
-    if options.factory ~= nil then
-      object.beacon.factory = options.factory
     end
     if options.per_factory ~= nil then
       object.beacon.per_factory = options.per_factory

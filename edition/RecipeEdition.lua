@@ -329,6 +329,7 @@ function RecipeEdition:onEvent(event)
       end
       ModelBuilder.updateFuelFactory(block.id, recipe.id, options)
       ModelCompute.update()
+      self:updateFactoryInfoTool(event)
       self:updateFactoryInfo(event)
       self:updateHeader(event)
       Controller:send("on_gui_refresh", event)
@@ -644,7 +645,7 @@ function RecipeEdition:updateFactoryInfoTool(event)
 
     local default_factory = User.getDefaultFactory(recipe)
     local record_style = "helmod_button_menu_sm"
-    if default_factory ~= nil and default_factory.name == factory.name  then record_style = "helmod_button_menu_sm_selected" end
+    if default_factory ~= nil and default_factory.name == factory.name  and default_factory.fuel == factory.fuel  then record_style = "helmod_button_menu_sm_selected" end
     GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool", block.id, recipe.id, "default"):sprite("menu", "record-white-sm", "record-sm"):style(record_style):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.set-default"):element(default_factory)))
     GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool", block.id, recipe.id, "block"):sprite("menu", "play-white-sm", "play-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.apply-block"):element(factory):tooltip("helmod_recipe-edition-panel.current-factory")))
     GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool", block.id, recipe.id, "line"):sprite("menu", "end-white-sm", "end-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.apply-line"):element(factory):tooltip("helmod_recipe-edition-panel.current-factory")))

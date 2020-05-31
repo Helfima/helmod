@@ -36,7 +36,7 @@ end
 function Command.parse(event)
   if event.command == "helmod" then
     if string.lower(event.parameters) == "close" then
-      Controller.onGuiClick({player_index=Player.native().index, element = {valid=true, name="HMController=CLOSE"}})
+      Controller:onGuiAction({player_index=Player.native().index, element = {valid=true, name="HMController=CLOSE"}})
     elseif string.lower(event.parameters) == "unittest" then
       UnitTest.run(event)
     elseif string.lower(event.parameters) == "resetuserui" then

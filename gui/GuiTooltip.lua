@@ -348,9 +348,13 @@ end)
 function GuiTooltipFactory:create()
   local tooltip = self._super.create(self)
   if self.m_element then
-    local type = "item"
-    local prototype = ItemPrototype(self.m_element.name)
+    local type = "entity"
+    local prototype = EntityPrototype(self.m_element)
     table.insert(tooltip, {"", "\n", string.format("[%s=%s]", type, self.m_element.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, prototype:getLocalisedName(), helmod_tag.font.close, helmod_tag.color.close})
+    local fuel = prototype:getFluel()
+    if fuel ~= nil then
+      table.insert(tooltip, {"", "\n", string.format("[%s=%s]", fuel.type, fuel.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close})
+    end
   end
   return tooltip
 end

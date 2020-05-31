@@ -480,6 +480,7 @@ function Player.checkFactoryLimitationModule(module, lua_recipe)
   local check_not_bypass = true
   local prototype = RecipePrototype(lua_recipe)
   local category = prototype:getCategory()
+  if category == "rocket-building" then return true end
   if rules_excluded[category] == nil then category = "standard" end
   check_not_bypass = Player.checkRules(check_not_bypass, rules_excluded, category, EntityPrototype(factory.name):native(), false)
   if Model.countList(module.limitations) > 0 and Player.getModuleBonus(module.name, "productivity") > 0 and check_not_bypass and model_filter_factory_module == true then
@@ -828,9 +829,9 @@ function Player.getRecipeRocket(name)
   for _,ingredient in pairs(ingredients) do
     ingredient.amount= ingredient.amount * rocket_prototype.rocket_parts_required
   end
-  table.insert(ingredients, {name=name, type="item", amount=1})
+  table.insert(ingredients, {name=name, type="item", amount=1, constant=true})
   local recipe = {}
-  recipe.category = "rocket-building"
+  recipe.category = rocket_part_prototype.category
   recipe.enabled = true
   recipe.energy = rocket_part_prototype.energy * rocket_prototype.rocket_parts_required + 15
   recipe.force = {}

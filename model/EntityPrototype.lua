@@ -534,26 +534,23 @@ end
 --
 -- @return #table
 --
-function EntityPrototype:getFluel(recipe)
+function EntityPrototype:getFluel()
   if self.lua_prototype ~= nil then
-    local energy_prototype = factory_prototype:getEnergySource()
-    local energy_type = factory_prototype:getEnergyTypeInput()
-    if energy_type == "burner" then
-      local speed_factory = factory_prototype:speedFactory(recipe)
-      if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then
-        local fuel_count = energy_prototype:getFuelCount()
-        local factor = self:getEnergy()/speed_factory
-        return {name=fuel_count.name, type=fuel_count.type, amount=fuel_count.count*factor }
-      end
-    end
+    local energy_prototype = self:getEnergySource()
+    local energy_type = self:getEnergyTypeInput()
     if energy_type == "fluid" then
-      if energy_prototype ~= nil and energy_prototype:getFluidFuelPrototype() ~= nil then
-        local fluid_fuel = energy_prototype:getFluidFuelPrototype()
-        local amount = energy_prototype:getFluidConsumption()
-        return {name=fluid_fuel.name, type=fluid_fuel.type, amount=amount}
+      local fuel = self:getFluidFuelPrototype(true)
+      if fuel ~= nil then
+        return {name=fuel:native().name, type="fluid"}
+      end
+    elseif energy_type == "burner" then
+      local fuel = energy_prototype:getFuelPrototype()
+      if fuel ~= nil then
+        return {name=fuel:native().name, type="item"}
       end
     end
   end
+  return nil
 end
 -------------------------------------------------------------------------------
 -- Return module inventory size

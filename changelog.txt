@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.10.23
+Date: 31. 05. 2020
+  Changes:
+    - added fuel info in tooltip recipe tool
+  Bugfixes:
+    - fixed apply fuel propagation and default
+    - fixed bug with beacon default
+    - fixed rocket recipe allow productivity modules
+---------------------------------------------------------------------------------------------------
 Version: 0.10.22
 Date: 26. 05. 2020
   Changes:
