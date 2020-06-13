@@ -421,6 +421,46 @@ end
 --
 -- @function [parent=#GuiTooltip] constructor
 -- @param #arg name
+-- @return #GuiTooltipBuilding
+--
+GuiTooltipBuilding = newclass(GuiTooltip,function(base,...)
+  GuiTooltip.init(base,...)
+  base.classname = "HMGuiTooltip"
+end)
+
+-------------------------------------------------------------------------------
+-- Create tooltip
+--
+-- @function [parent=#GuiTooltipBuilding] create
+--
+function GuiTooltipBuilding:create()
+  local tooltip = self._super.create(self)
+  if self.m_element then
+    local block = self.m_element
+    local type = "entity"
+    if block.summary ~= nil then
+      -- factories
+      for _, element in pairs(block.summary.factories) do
+        table.insert(tooltip, {"", "\n", string.format("[%s=%s]", element.type, element.name), " ", helmod_tag.font.default_bold, "x ", element.count, helmod_tag.font.close})
+      end
+
+      -- beacons
+      for _, element in pairs(block.summary.beacons) do
+        table.insert(tooltip, {"", "\n", string.format("[%s=%s]", element.type, element.name), " ", helmod_tag.font.default_bold, "x ", element.count, helmod_tag.font.close})
+      end
+
+      for _, element in pairs(block.summary.modules) do
+        table.insert(tooltip, {"", "\n", string.format("[%s=%s]", element.type, element.name), " ", helmod_tag.font.default_bold, "x ", element.count, helmod_tag.font.close})
+      end
+    end
+  end
+  return tooltip
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiTooltip] constructor
+-- @param #arg name
 -- @return #GuiTooltipBlock
 --
 GuiTooltipBlock = newclass(GuiTooltip,function(base,...)

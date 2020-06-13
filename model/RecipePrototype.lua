@@ -109,6 +109,9 @@ end
 -- @return #table
 --
 function RecipePrototype:getCategory()
+  if self.lua_type == "technology" then
+    return "technology"
+  end
   if self.lua_prototype ~= nil then
     return self.lua_prototype.category or "crafting"
   end
@@ -384,6 +387,8 @@ function RecipePrototype:getEnergy()
   if self.lua_prototype ~= nil then
     if self.lua_type == "energy" then
       return 1
+    elseif self.lua_type == "technology" then	
+      return self.lua_prototype.research_unit_energy/60
     else
       return self.lua_prototype.energy
     end

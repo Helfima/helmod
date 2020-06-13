@@ -77,10 +77,14 @@ function ProductionLineTab:updateInfo(event)
     if model.summary ~= nil then
       element_block.energy_total = model.summary.energy
       element_block.pollution_total = model.summary.pollution
+      element_block.summary = model.summary
     end
     GuiElement.add(block_info, GuiCellEnergy("block-power"):element(element_block):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2))
     if User.getPreferenceSetting("display_pollution") then
       GuiElement.add(block_info, GuiCellPollution("block-pollution"):element(element_block):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2))
+    end
+    if User.getPreferenceSetting("display_building") then
+      GuiElement.add(block_info, GuiCellBuilding("block-building"):element(element_block):tooltip("tooltip.info-building"):color(GuiElement.color_button_default):index(2))
     end
   end
 
@@ -165,6 +169,9 @@ function ProductionLineTab:updateData(event)
     -- data panel
     local extra_cols = 0
     if User.getPreferenceSetting("display_pollution") then
+      extra_cols = extra_cols + 1
+    end
+    if User.getPreferenceSetting("display_building") then
       extra_cols = extra_cols + 1
     end
     for _,parameter in pairs({"display_data_col_index","display_data_col_id","display_data_col_name"}) do
@@ -285,6 +292,9 @@ function ProductionLineTab:addTableHeader(itable)
   if User.getPreferenceSetting("display_pollution") then
     self:addCellHeader(itable, "pollution", {"helmod_common.pollution"})
   end
+  if User.getPreferenceSetting("display_building") then
+    self:addCellHeader(itable, "building", {"helmod_common.building"})
+  end
   self:addCellHeader(itable, "products", {"helmod_result-panel.col-header-output"})
   self:addCellHeader(itable, "ingredients", {"helmod_result-panel.col-header-input"})
 end
@@ -338,7 +348,7 @@ function ProductionLineTab:addTableRow(gui_table, block)
 
   -- col energy
   local cell_energy = GuiElement.add(gui_table, GuiTable(block.id, "energy"):column(1))
-  local element_block = {name=block.name, power=block.power, pollution_total=block.pollution_total}
+  local element_block = {name=block.name, power=block.power, pollution_total=block.pollution_total, summary=block.summary}
   GuiElement.add(cell_energy, GuiCellEnergy(self.classname, "change-tab", "HMProductionBlockTab", block.id):element(element_block):tooltip("tooltip.edit-block"):color(block_color))
 
   -- col pollution
@@ -347,6 +357,12 @@ function ProductionLineTab:addTableRow(gui_table, block)
     GuiElement.add(cell_pollution, GuiCellPollution(self.classname, "change-tab", "HMProductionBlockTab", block.id):element(element_block):tooltip("tooltip.edit-block"):color(block_color))
   end
   
+  -- col building
+  if User.getPreferenceSetting("display_building") then
+    local cell_building = GuiElement.add(gui_table, GuiTable(block.id, "building"):column(1))
+    GuiElement.add(cell_building, GuiCellBuilding(self.classname, "change-tab", "HMProductionBlockTab", block.id):element(element_block):tooltip("tooltip.info-building"):color(block_color))
+  end
+
   -- products
   local display_product_cols = User.getPreferenceSetting("display_product_cols") + 1
   local cell_products = GuiElement.add(gui_table, GuiTable("products", block.id):column(display_product_cols))

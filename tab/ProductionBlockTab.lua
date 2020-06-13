@@ -72,7 +72,7 @@ function ProductionBlockTab:updateInfo(event)
   info_scroll.clear()
   -- info panel
 
-  local block_table = GuiElement.add(info_scroll, GuiTable("output-table"):column(3))
+  local block_table = GuiElement.add(info_scroll, GuiTable("output-table"):column(4))
   block_table.style.horizontally_stretchable = false
   block_table.vertical_centering = false
   block_table.style.horizontal_spacing=10
@@ -86,7 +86,10 @@ function ProductionBlockTab:updateInfo(event)
     GuiElement.add(block_table, GuiCellBlockInfo("block-count"):element(element):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(1):byLimit(element.by_limit))
     GuiElement.add(block_table, GuiCellEnergy("block-power"):element(element):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2):byLimit(element.by_limit))
     if User.getPreferenceSetting("display_pollution") then
-      GuiElement.add(block_table, GuiCellPollution("block-pollution"):element(element):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2):byLimit(element.by_limit))
+      GuiElement.add(block_table, GuiCellPollution("block-pollution"):element(element):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(3):byLimit(element.by_limit))
+    end
+    if User.getPreferenceSetting("display_building") then
+      GuiElement.add(block_table, GuiCellBuilding("block-building"):element(element):tooltip("tooltip.info-building"):color(GuiElement.color_button_default):index(4):byLimit(element.by_limit))
     end
 
     local unlink_state = "right"
@@ -179,6 +182,7 @@ function ProductionBlockTab:updateInput(event)
     if block.ingredients ~= nil then
       for index, lua_ingredient in pairs(block.ingredients) do
         if all_visible == true or ((lua_ingredient.state or 0) == 1 and not(block_by_product)) or (lua_ingredient.count or 0) > ModelCompute.waste_value then
+          local contraint_type = nil
           local ingredient = Product(lua_ingredient):clone()
           ingredient.count = lua_ingredient.count
           if block.count > 1 then
@@ -198,6 +202,9 @@ function ProductionBlockTab:updateInput(event)
           if lua_ingredient.state == 1 then
             if not(block.unlinked) or block.by_factory == true then
               button_color = GuiElement.color_button_default_ingredient
+              if block.products_linked ~= nil and block.products_linked[lua_ingredient.name] then
+                contraint_type = "linked"
+              end
             else
               button_color = GuiElement.color_button_edit
             end
@@ -206,7 +213,7 @@ function ProductionBlockTab:updateInput(event)
           else
             button_color = GuiElement.color_button_default_ingredient
           end
-          GuiElement.add(input_table, GuiCellElementM(self.classname, button_action, block.id, "none"):element(ingredient):tooltip(button_tooltip):index(index):color(button_color):byLimit(block.by_limit))
+          GuiElement.add(input_table, GuiCellElementM(self.classname, button_action, block.id, "none"):element(ingredient):tooltip(button_tooltip):index(index):color(button_color):byLimit(block.by_limit):contraintIcon(contraint_type))
         end
       end
     end
@@ -262,6 +269,7 @@ function ProductionBlockTab:updateOutput(event)
     if block.products ~= nil then
       for index, lua_product in pairs(block.products) do
         if all_visible == true or ((lua_product.state or 0) == 1 and block_by_product) or (lua_product.count or 0) > ModelCompute.waste_value then
+          local contraint_type = nil
           local product = Product(lua_product):clone()
           product.count = lua_product.count
           if block.count > 1 then
@@ -277,6 +285,9 @@ function ProductionBlockTab:updateOutput(event)
             if not(block.unlinked) or block.by_factory == true then
               button_action = "product-info"
               button_tooltip = "tooltip.info-product"
+              if block.products_linked ~= nil and block.products_linked[lua_product.name] then
+                contraint_type = "linked"
+              end
             else
               button_action = "product-edition"
               button_tooltip = "tooltip.edit-product"
@@ -294,7 +305,7 @@ function ProductionBlockTab:updateOutput(event)
           else
             button_color = GuiElement.color_button_default_product
           end
-          GuiElement.add(output_table, GuiCellElementM(self.classname, button_action, block.id, "none"):element(product):tooltip(button_tooltip):index(index):color(button_color):byLimit(block.by_limit))
+          GuiElement.add(output_table, GuiCellElementM(self.classname, button_action, block.id, "none"):element(product):tooltip(button_tooltip):index(index):color(button_color):byLimit(block.by_limit):contraintIcon(contraint_type))
         end
       end
     end
@@ -632,6 +643,20 @@ function ProductionBlockTab:onEvent(event)
     elseif event.shift == true and event.item3 ~= "none" then
       local contraint = {type="exclude", name=event.item3}
       ModelBuilder.updateRecipeContraint(event.item1, event.item2, contraint)
+      ModelCompute.update()
+      Controller:send("on_gui_update", event)
+    end
+  end
+
+  if event.action == "product-info" and model.blocks[current_block] ~= nil then
+    local block = model.blocks[current_block]
+    if block.products_linked == nil then block.products_linked = {} end
+    if event.control == true and event.item3 ~= "none" then
+      block.products_linked[event.item3] = true
+      ModelCompute.update()
+      Controller:send("on_gui_update", event)
+    elseif event.shift == true and event.item3 ~= "none" then
+      block.products_linked[event.item3] = nil
       ModelCompute.update()
       Controller:send("on_gui_update", event)
     end

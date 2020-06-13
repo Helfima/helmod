@@ -97,9 +97,9 @@ function sprite_tooltip(name, size, scale)
 end
 
 local list = {
-  {name="arrow-down", sm=true},
+  {name="arrow-down", sm=true, tool=true},
   {name="arrow-right"},
-  {name="arrow-up", sm=true},
+  {name="arrow-up", sm=true, tool=true},
   {name="arrow-left"},
   {name="bug"},
   {name="burnt", sm=true, tool=true},
@@ -128,7 +128,7 @@ local list = {
   {name="help"},
   {name="info"},
   {name="jewel", sm=true, tool=true},
-  {name="link", sm=true},
+  {name="link", sm=true, tool=true},
   {name="maximize-window"},
   {name="menu"},
   {name="minimize-window"},

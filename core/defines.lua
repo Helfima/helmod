@@ -175,6 +175,14 @@ helmod_preferences = {
     default_value = true,
     group = "general"
   },
+  --display-building
+  display_building = {
+    type = "bool-setting",
+    localised_name = {"helmod_settings.display-building"},
+    localised_description = {"helmod_settings.display-building-desc"},
+    default_value = true,
+    group = "general"
+  },
   --ui-auto-close
   ui_auto_close = {
     type = "bool-setting",

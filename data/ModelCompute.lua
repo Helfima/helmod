@@ -120,11 +120,13 @@ function ModelCompute.update(check_unlink)
           end
           if block_elements ~= nil then
             for _,element in pairs(block_elements) do
-              if element.state ~= nil and element.state == 1 then
+              if (element.state ~= nil and element.state == 1) or (block.products_linked ~= nil and block.products_linked[element.name]) then
                 if input[element.name] ~= nil then
                   element.input = (input[element.name] or 0) * factor
                   --element.state = 0
                 end
+              else
+                element.input = 0
               end
             end
           end
@@ -668,6 +670,7 @@ function ModelCompute.computeBlock(block)
         block.count = 1
         block.limit_energy = nil
         block.limit_pollution = nil
+        block.limit_building = nil
         for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
           recipe.factory.limit_count = nil
           recipe.beacon.limit_count = nil
@@ -684,7 +687,6 @@ function ModelCompute.computeBlock(block)
           recipe.limit_pollution = recipe.pollution_total / block.count
         end
       end
-
       -- state = 0 => produit
       -- state = 1 => produit pilotant
       -- state = 2 => produit restant
@@ -1083,13 +1085,16 @@ function ModelCompute.createSummary()
   model.summary.factories = {}
   model.summary.beacons = {}
   model.summary.modules = {}
+  model.summary.building = 0
   local energy = 0
   local pollution = 0
+  local building = 0
 
   for _, block in pairs(model.blocks) do
     energy = energy + block.power
     pollution = pollution + (block.pollution_total or 0)
     ModelCompute.computeSummaryFactory(block)
+    building = building + block.summary.building
     for _,type in pairs({"factories", "beacons", "modules"}) do
       for _,element in pairs(block.summary[type]) do
         if model.summary[type][element.name] == nil then model.summary[type][element.name] = {name = element.name, type = "item", count = 0} end
@@ -1100,6 +1105,7 @@ function ModelCompute.createSummary()
   end
   model.summary.energy = energy
   model.summary.pollution = pollution
+  model.summary.building = building
 
   model.generators = {}
   -- formule 20 accumulateur /24 panneau solaire/1 MW
@@ -1117,12 +1123,13 @@ end
 --
 function ModelCompute.computeSummaryFactory(block)
   if block ~= nil then
-    block.summary = {factories={}, beacons={}, modules={}}
+    block.summary = {building = 0, factories={}, beacons={}, modules={}}
     for _, recipe in pairs(block.recipes) do
       -- calcul nombre factory
       local factory = recipe.factory
       if block.summary.factories[factory.name] == nil then block.summary.factories[factory.name] = {name = factory.name, type = "item", count = 0} end
       block.summary.factories[factory.name].count = block.summary.factories[factory.name].count + math.ceil(factory.count)
+      block.summary.building = block.summary.building + math.ceil(factory.count)
       -- calcul nombre de module factory
       if factory.modules ~= nil then
         for module, value in pairs(factory.modules) do
@@ -1134,6 +1141,7 @@ function ModelCompute.computeSummaryFactory(block)
       local beacon = recipe.beacon
       if block.summary.beacons[beacon.name] == nil then block.summary.beacons[beacon.name] = {name = beacon.name, type = "item", count = 0} end
       block.summary.beacons[beacon.name].count = block.summary.beacons[beacon.name].count + math.ceil(beacon.count)
+      block.summary.building = block.summary.building + math.ceil(beacon.count)
       -- calcul nombre de module beacon
       if beacon.modules ~= nil then
         for module, value in pairs(beacon.modules) do

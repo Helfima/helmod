@@ -235,6 +235,11 @@ end
 -- @return #table
 --
 function contraintIcon(button, type)
+  if type == "linked" then 
+    local sprite = GuiElement.add(button, GuiSprite("contraint"):sprite("helmod-tool-arrow-up"))
+    sprite.style.top_padding = -4
+    sprite.style.left_padding = 22
+  end
   if type == "master" then 
     local sprite = GuiElement.add(button, GuiSprite("contraint"):sprite("helmod-tool-plus"))
     sprite.style.top_padding = -4
@@ -594,7 +599,7 @@ function GuiCellPollution:create(parent)
   local color = self.m_color or "gray"
   local element = self.element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, "pollution", self.m_index))
-  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element", color, 1))
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
   row1.style.top_padding=4
   row1.style.bottom_padding=4
 
@@ -602,14 +607,57 @@ function GuiCellPollution:create(parent)
   local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", "gas-mask-white", "gas-mask"):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   if self.m_by_limit then
-    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element", color, 2))
+    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_product", color, 2))
     local caption2 = Format.formatNumber(element.limit_pollution or 0)
     if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_pollution) end
     GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element"):tooltip({"helmod_common.total"}))
   end
 
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element", color, 3))
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
   local caption3 = Format.formatNumber(element.pollution_total)
+  GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
+
+  return cell
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiCell] constructor
+-- @param #arg name
+-- @return #GuiCellBuilding
+--
+GuiCellBuilding = newclass(GuiCell,function(base,...)
+  GuiCell.init(base,...)
+end)
+
+-------------------------------------------------------------------------------
+-- Create cell
+--
+-- @function [parent=#GuiCellBuilding] create
+--
+-- @param #LuaGuiElement parent container for element
+--
+function GuiCellBuilding:create(parent)
+  local display_cell_mod = User.getModSetting("display_cell_mod")
+  local color = self.m_color or "gray"
+  local element = self.element or {}
+  local cell = GuiElement.add(parent, GuiFlowV(element.name, "building", self.m_index))
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
+  row1.style.top_padding=4
+  row1.style.bottom_padding=4
+
+  local tooltip = GuiTooltipBuilding(self.options.tooltip):element(element)
+  local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", "factory-white", "factory"):style("helmod_button_menu_flat"):tooltip(tooltip))
+
+  if self.m_by_limit then
+    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_product", color, 2))
+    local caption2 = Format.formatNumber(element.summary.limit_building or 0)
+    if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.summary.limit_building) end
+    GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element"):tooltip({"helmod_common.total"}))
+  end
+
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
+  local caption3 = Format.formatNumber(element.summary.building)
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
 
   return cell
@@ -754,6 +802,10 @@ function GuiCellElementM:create(parent)
   local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(element.type or "entity", element.name):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   if self.m_info_icon then
     infoIcon(button, self.m_info_icon)
+  end
+
+  if self.m_contraint_icon then
+    contraintIcon(button, self.m_contraint_icon)
   end
   
   if self.m_by_limit then

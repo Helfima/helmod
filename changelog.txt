@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.10.24
+Date: 13. 06. 2020
+  Changes:
+    - added optionnal buiding info
+    - added Set or Unset linked intermediate product on linked block (click with ctrl or shift on output product)
+  Bugfixes:
+    - fixed error when add technology recipe
+---------------------------------------------------------------------------------------------------
 Version: 0.10.23
 Date: 31. 05. 2020
   Changes:
