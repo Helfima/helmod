@@ -372,6 +372,7 @@ function PropertiesPanel:parseProperties(prototype, level, prototype_type)
   local isluaobject, error = pcall(function() local test = prototype:help() return true end)
   local object_type = type(prototype)
   if isluaobject then
+    local properties = {}
     local lua_type = string.match(prototype:help(), "Help for%s([^:]*)")
     if lua_type == "LuaEntityPrototype" and prototype.name == "character" then
       table.insert(properties, {name = "PLAYER.character_crafting_speed_modifier", chmod = "RW", value = Player.native().character_crafting_speed_modifier})

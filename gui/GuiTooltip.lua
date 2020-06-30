@@ -437,20 +437,35 @@ function GuiTooltipBuilding:create()
   local tooltip = self._super.create(self)
   if self.m_element then
     local block = self.m_element
-    local type = "entity"
+    local overflow = false
     if block.summary ~= nil then
       -- factories
       for _, element in pairs(block.summary.factories) do
-        table.insert(tooltip, {"", "\n", string.format("[%s=%s]", element.type, element.name), " ", helmod_tag.font.default_bold, "x ", element.count, helmod_tag.font.close})
+        if #tooltip < 19 then
+          table.insert(tooltip, {"", "\n", string.format("[%s=%s]", element.type, element.name), " ", helmod_tag.font.default_bold, "x ", element.count, helmod_tag.font.close})
+        else
+          overflow = true
+        end
       end
 
       -- beacons
       for _, element in pairs(block.summary.beacons) do
-        table.insert(tooltip, {"", "\n", string.format("[%s=%s]", element.type, element.name), " ", helmod_tag.font.default_bold, "x ", element.count, helmod_tag.font.close})
+        if #tooltip < 19 then
+          table.insert(tooltip, {"", "\n", string.format("[%s=%s]", element.type, element.name), " ", helmod_tag.font.default_bold, "x ", element.count, helmod_tag.font.close})
+        else
+          overflow = true
+        end
       end
 
       for _, element in pairs(block.summary.modules) do
-        table.insert(tooltip, {"", "\n", string.format("[%s=%s]", element.type, element.name), " ", helmod_tag.font.default_bold, "x ", element.count, helmod_tag.font.close})
+        if #tooltip < 19 then
+          table.insert(tooltip, {"", "\n", string.format("[%s=%s]", element.type, element.name), " ", helmod_tag.font.default_bold, "x ", element.count, helmod_tag.font.close})
+        else
+          overflow = true
+        end
+      end
+      if overflow then
+        table.insert(tooltip, {"", "\n", "..."})
       end
     end
   end
