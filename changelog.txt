@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.11.0
+Date: 25. 08. 2020
+  Changes:
+    - changed version to Factorio 1.0.0
+    - added preference to sort product
+  Bugfixes:
+    - fixed wrong value in the logistic info for pipe
+    - fixed bug in properties panel
+---------------------------------------------------------------------------------------------------
 Version: 0.10.25
 Date: 30. 06. 2020
   Bugfixes:

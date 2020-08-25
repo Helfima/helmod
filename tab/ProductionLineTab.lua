@@ -108,9 +108,8 @@ function ProductionLineTab:updateInput(event)
   if count_block > 0 then
 
     local input_table = GuiElement.add(input_scroll, GuiTable("input-table"):column(GuiElement.getElementColumnNumber(50)):style("helmod_table_element"))
-
     if model.ingredients ~= nil then
-      for index, element in pairs(model.ingredients) do
+      for index, element in spairs(model.ingredients, User.getProductSorter2()) do
         GuiElement.add(input_table, GuiCellElementM(self.classname, "production-block-ingredient-add", "new", element.name):element(element):tooltip("tooltip.add-recipe"):color(GuiElement.color_button_add):index(index))
       end
     end
@@ -139,7 +138,7 @@ function ProductionLineTab:updateOutput(event)
     -- ouput panel
     local output_table = GuiElement.add(output_scroll, GuiTable("output-table"):column(GuiElement.getElementColumnNumber(50)):style("helmod_table_element"))
     if model.products ~= nil then
-      for index, element in pairs(model.products) do
+      for index, element in spairs(model.products, User.getProductSorter2()) do
         GuiElement.add(output_table, GuiCellElementM(self.classname, "production-block-product-add", "new", element.name):element(element):tooltip("tooltip.add-recipe"):index(index))
       end
     end
@@ -363,12 +362,14 @@ function ProductionLineTab:addTableRow(gui_table, block)
     GuiElement.add(cell_building, GuiCellBuilding(self.classname, "change-tab", "HMProductionBlockTab", block.id):element(element_block):tooltip("tooltip.info-building"):color(block_color))
   end
 
+  local product_sorter = User.getProductSorter2()
+
   -- products
   local display_product_cols = User.getPreferenceSetting("display_product_cols") + 1
   local cell_products = GuiElement.add(gui_table, GuiTable("products", block.id):column(display_product_cols))
   cell_products.style.horizontally_stretchable = false
   if block.products ~= nil then
-    for index, product in pairs(block.products) do
+    for index, product in spairs(block.products, product_sorter) do
       if ((product.state or 0) == 1 and block_by_product)  or (product.count or 0) > ModelCompute.waste_value then
         local button_action = "production-block-product-add"
         local button_tooltip = "tooltip.product"
@@ -406,7 +407,7 @@ function ProductionLineTab:addTableRow(gui_table, block)
   local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients", block.id):column(display_ingredient_cols))
   cell_ingredients.style.horizontally_stretchable = false
   if block.ingredients ~= nil then
-    for index, ingredient in pairs(block.ingredients) do
+    for index, ingredient in spairs(block.ingredients, product_sorter) do
       if ((ingredient.state or 0) == 1 and not(block_by_product)) or (ingredient.count or 0) > ModelCompute.waste_value then
         local button_action = "production-block-ingredient-add"
         local button_tooltip = "tooltip.ingredient"

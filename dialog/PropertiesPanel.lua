@@ -220,9 +220,10 @@ function PropertiesPanel:updateData(event)
     local data = {}
     for _,prototype in pairs(prototype_compare) do
       local data_prototype = self:getPrototypeData(prototype)
+      local key = string.format("%s_%s", prototype.type, prototype.name)
       for _,properties in pairs(data_prototype) do
         if data[properties.name] == nil then data[properties.name] = {} end
-        data[properties.name][prototype.name] = properties
+        data[properties.name][key] = properties
       end
     end
     local result_table = GuiElement.add(content_panel, GuiTable("table-resources"):column(#prototype_compare+1):style("helmod_table-rule-odd"))
@@ -239,9 +240,10 @@ function PropertiesPanel:updateData(event)
             for index,prototype in pairs(prototype_compare) do
               -- col value
               local cell_value = GuiElement.add(result_table, GuiFrameH(property, prototype.name, index):style(helmod_frame_style.hidden))
-              if values[prototype.name] ~= nil then
-                local chmod = values[prototype.name].chmod
-                local value = self:tableToString(values[prototype.name].value)
+              local key = string.format("%s_%s", prototype.type, prototype.name)
+              if values[key] ~= nil then
+                local chmod = values[key].chmod
+                local value = self:tableToString(values[key].value)
                 GuiElement.add(cell_value, GuiLabel("prototype_chmod"):caption(string.format("[%s]:", chmod)))
                 local label_value = GuiElement.add(cell_value, GuiLabel("prototype_value"):caption(value):style("helmod_label_max_600"))
                 label_value.style.width = 400
@@ -476,7 +478,8 @@ end
 function PropertiesPanel:isNilLine(values, prototype_compare)
   local is_nil = true
   for index,prototype in pairs(prototype_compare) do
-    if values[prototype.name] ~= nil and values[prototype.name].value ~= "nil" then is_nil = false end
+    local key = string.format("%s_%s", prototype.type, prototype.name)
+    if values[key] ~= nil and values[key].value ~= "nil" then is_nil = false end
   end
   return is_nil
 end
@@ -493,11 +496,12 @@ function PropertiesPanel:isSameLine(values, prototype_compare)
   local is_same = true
   local compare = nil
   for index,prototype in pairs(prototype_compare) do
-    if values[prototype.name] ~= nil then
+    local key = string.format("%s_%s", prototype.type, prototype.name)
+    if values[key] ~= nil then
       if compare == nil then
-        compare = values[prototype.name].value
+        compare = values[key].value
       else
-        if values[prototype.name].value ~= compare then is_same = false end
+        if values[key].value ~= compare then is_same = false end
       end
     end
   end

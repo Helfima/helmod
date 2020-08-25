@@ -813,4 +813,34 @@ function User.resetCache(classname, name)
   end
 end
 
+-------------------------------------------------------------------------------
+-- Get Function Product Sorter
+--
+-- @function [parent=#User] getProductSorter
+--
+function User.getProductSorter()
+  local display_product_order = User.getPreferenceSetting("display_product_order")
+  if display_product_order == "name" then
+    return function(t,a,b) return t[b].name > t[a].name end
+  elseif display_product_order == "cost" then
+    return function(t,a,b) return t[b].amount < t[a].amount end
+  end
+  return nil
+end
+
+-------------------------------------------------------------------------------
+-- Get Function Product Sorter
+--
+-- @function [parent=#User] getProductSorter2
+--
+function User.getProductSorter2()
+  local display_product_order = User.getPreferenceSetting("display_product_order")
+  if display_product_order == "name" then
+    return function(t,a,b) return t[b].name > t[a].name end
+  elseif display_product_order == "cost" then
+    return function(t,a,b) return t[b].count < t[a].count end
+  end
+  return nil
+end
+
 return User

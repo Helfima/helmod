@@ -180,7 +180,7 @@ function ProductionBlockTab:updateInput(event)
     -- input panel
     local input_table = GuiElement.add(input_scroll, GuiTable("input-table"):column(GuiElement.getElementColumnNumber(50)-2):style("helmod_table_element"))
     if block.ingredients ~= nil then
-      for index, lua_ingredient in pairs(block.ingredients) do
+      for index, lua_ingredient in spairs(block.ingredients, User.getProductSorter2()) do
         if all_visible == true or ((lua_ingredient.state or 0) == 1 and not(block_by_product)) or (lua_ingredient.count or 0) > ModelCompute.waste_value then
           local contraint_type = nil
           local ingredient = Product(lua_ingredient):clone()
@@ -267,7 +267,7 @@ function ProductionBlockTab:updateOutput(event)
     -- ouput panel
     local output_table = GuiElement.add(output_scroll, GuiTable("output-table"):column(GuiElement.getElementColumnNumber(50)-2):style("helmod_table_element"))
     if block.products ~= nil then
-      for index, lua_product in pairs(block.products) do
+      for index, lua_product in spairs(block.products, User.getProductSorter2()) do
         if all_visible == true or ((lua_product.state or 0) == 1 and block_by_product) or (lua_product.count or 0) > ModelCompute.waste_value then
           local contraint_type = nil
           local product = Product(lua_product):clone()
@@ -518,7 +518,7 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
       -- products
       local display_product_cols = User.getPreferenceSetting("display_product_cols")
       local cell_products = GuiElement.add(gui_table, GuiTable("products", recipe.id):column(display_product_cols):style(helmod_table_style.list))
-      for index, lua_product in pairs(recipe_prototype:getProducts(recipe.factory)) do
+      for index, lua_product in spairs(recipe_prototype:getProducts(recipe.factory), User.getProductSorter()) do
         local contraint_type = nil
         local product_prototype = Product(lua_product)
         local product = product_prototype:clone()
@@ -535,7 +535,7 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
       -- ingredients
       local display_ingredient_cols = User.getPreferenceSetting("display_ingredient_cols")
       local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients_", recipe.id):column(display_ingredient_cols):style(helmod_table_style.list))
-      for index, lua_ingredient in pairs(recipe_prototype:getIngredients(recipe.factory)) do
+      for index, lua_ingredient in spairs(recipe_prototype:getIngredients(recipe.factory), User.getProductSorter()) do
         local contraint_type = nil
         local ingredient_prototype = Product(lua_ingredient)
         local ingredient = ingredient_prototype:clone()

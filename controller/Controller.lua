@@ -25,7 +25,6 @@ require "selector.TechnologySelector"
 require "selector.ItemSelector"
 require "selector.FluidSelector"
 
-require "tab.EnergyTab"
 require "tab.ProductionBlockTab"
 require "tab.ProductionLineTab"
 require "tab.ResourceTab"

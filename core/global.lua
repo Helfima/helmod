@@ -16,19 +16,17 @@
 -- @param #function order sort function.
 
 function spairs(t, order)
+	-- bypass
+	if order == nil then return pairs(t) end
 	-- collect the keys
 	local keys = {}
 	for k in pairs(t) do keys[#keys+1] = k end
 
 	-- if order function given, sort by it by passing the table and keys a, b,
 	-- otherwise just sort the keys
-	if order then
-		pcall(function()
-			table.sort(keys, function(a,b) return order(t, a, b) end)
-		end)
-	else
-		table.sort(keys)
-	end
+	pcall(function()
+		table.sort(keys, function(a,b) return order(t, a, b) end)
+	end)
 
 	-- return the iterator function
 	local i = 0

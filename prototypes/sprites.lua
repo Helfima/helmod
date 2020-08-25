@@ -98,7 +98,7 @@ end
 
 local list = {
   {name="arrow-down", sm=true, tool=true},
-  {name="arrow-right"},
+  {name="arrow-right", sm=true},
   {name="arrow-up", sm=true, tool=true},
   {name="arrow-left"},
   {name="bug"},
@@ -124,7 +124,7 @@ local list = {
   {name="filter-edit"},
   {name="graduation", sm=true, tool=true},
   {name="gas-mask", sm=true},
-  {name="hangar"},
+  {name="hangar", sm=true, tool=true},
   {name="help"},
   {name="info"},
   {name="jewel", sm=true, tool=true},

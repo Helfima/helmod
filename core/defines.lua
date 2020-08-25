@@ -149,6 +149,15 @@ helmod_preferences = {
     allowed_values = {6,7,8,9,10,11,12},
     group = "general"
   },
+  -- display product order
+  display_product_order = {
+    type = "string-setting",
+    localised_name = {"helmod_settings.display-product-order"},
+    localised_description = {"helmod_settings.display-product-order-desc"},
+    default_value = "natural",
+    allowed_values = {"natural","name","cost"},
+    group = "general"
+  },
   --display product cols
   display_product_cols = {
     type = "int-setting",

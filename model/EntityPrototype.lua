@@ -201,9 +201,13 @@ function EntityPrototype:getEnergyProduction()
     end
     if usage_priority == "secondary-output" then
       if self:getEnergyTypeInput() == "fluid" then
+        local heat_capacity = 200
+        local fuel_value = 0
         local fluid_fuel = self:getFluidFuelPrototype()
-        local fuel_value = fluid_fuel:getFuelValue()
-        local heat_capacity = fluid_fuel:getHeatCapacity()
+        if fluid_fuel ~= nil then
+          local fuel_value = fluid_fuel:getFuelValue()
+          heat_capacity = fluid_fuel:getHeatCapacity()
+        end
 
         local fluid_usage = self:getFluidUsage()
         local effectivity = self:getEffectivity()
