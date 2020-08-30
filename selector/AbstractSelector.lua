@@ -436,15 +436,12 @@ end
 -- @param #LuaEvent event
 --
 function AbstractSelector:onUpdate(event)
-  Logging:profilerStep("onUpdate", "** start **")
-  
   self:updateFilter(event)
-  Logging:profilerStep("onUpdate", "updateFilter")
+
   local response = {wait=false, method="none"}
   
   self:updateWaitMessage(string.format("Wait translate: %s", event.index_translate or 0))
   response = self:translate(event)
-  Logging:profilerStep("onUpdate", "** translate **")
   
   if response.wait == true then 
     return
@@ -452,18 +449,13 @@ function AbstractSelector:onUpdate(event)
   
   self:updateWaitMessage(string.format("Wait list build: %s", event.index_list or 0))
   response = self:createElementLists(event)
-  Logging:profilerStep("onUpdate", "createElementLists")
 
   if response.wait == true then 
     return
   end
   self:updateGroupSelector(event)
-  Logging:profilerStep("onUpdate", "updateGroupSelector")
 
   self:updateItemList(event)
-  Logging:profilerStep("onUpdate", "updateItemList")
-  
-  Logging:profilerStep("onUpdate", "** end **")
   
   end
 
@@ -724,7 +716,6 @@ function AbstractSelector:updateItemList(event)
   local list_subgroup = self:getListSubGroup()
   local list_item = self:getListItem()
   
-  Logging:profilerStep("updateItemList", "** start **")
   -- recuperation recipes et subgroupes
   local recipe_selector_list = GuiElement.add(item_list_panel, GuiFlowV("recipe_list"))
   if Model.countList(list_item) > 0 then
@@ -735,7 +726,6 @@ function AbstractSelector:updateItemList(event)
         local tooltip = self:buildPrototypeTooltip(prototype)
         self:buildPrototypeIcon(guiRecipeSubgroup, prototype, tooltip)
       end
-      Logging:profilerStep("updateItemList", "->subgroup", subgroup, Model.countList(list))
     end
   else
     event.message = "Empty list"

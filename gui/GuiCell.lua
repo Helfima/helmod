@@ -249,6 +249,56 @@ function contraintIcon(button, type)
     sprite.style.top_padding = -4
   end
 end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiCell] appendRowLogistic
+-- @return #GuiCell
+--
+function appendRowLogistic(parent, element)
+  -- solid logistic
+  if element.type == 0 or element.type == "item" then
+    local type = User.getParameter("logistic_row_item") or "belt"
+    local item_logistic = Player.getDefaultItemLogistic(type)
+    local item_prototype = Product(element)
+    local total_value = Format.formatNumberElement(item_prototype:countContainer(element.count, item_logistic))
+    
+    --local tooltip = GuiTooltipModule("tooltip.info-module"):element({type="item", name=name})
+    local logistic_cell = GuiElement.add(parent, GuiFlowH("logistic-cell", item_logistic))
+    local button = GuiElement.add(logistic_cell, GuiButtonSelectSpriteSm("sprite", item_logistic):choose("entity", item_logistic):color("flat"))
+    button.locked = true
+    if element.limit_count ~= nil and element.limit_count > 0 then
+      local limit_value = Format.formatNumberElement(item_prototype:countContainer(element.limit_count, item_logistic))
+      GuiElement.add(logistic_cell, GuiLabel("label", item_logistic):caption({"", "x", limit_value, "/", total_value}):style("helmod_label_element"))
+    else
+      GuiElement.add(logistic_cell, GuiLabel("label", item_logistic):caption({"", "x", total_value}):style("helmod_label_element"))
+    end
+  end
+  -- fluid logistic
+  if element.type == 1 or element.type == "fluid" then
+    local model = Model.getModel()
+    local type = User.getParameter("logistic_row_fluid") or "pipe"
+    local fluid_logistic = Player.getDefaultFluidLogistic(type)
+    local fluid_prototype = Product(element)
+    local count = element.count
+    if type == "pipe" then count = count / model.time end
+    local total_value = Format.formatNumberElement(fluid_prototype:countContainer(count, fluid_logistic))
+    
+    --local tooltip = GuiTooltipModule("tooltip.info-module"):element({type="item", name=name})
+    local logistic_cell = GuiElement.add(parent, GuiFlowH("logistic-cell", fluid_logistic))
+    local button = GuiElement.add(logistic_cell, GuiButtonSelectSpriteSm("sprite", fluid_logistic):choose("entity", fluid_logistic):color("flat"))
+    button.locked = true
+    if element.limit_count ~= nil and element.limit_count > 0 then
+      local limit_count = element.limit_count
+      if type == "pipe" then limit_count = limit_count / model.time end
+      local limit_value = Format.formatNumberElement(fluid_prototype:countContainer(limit_count, fluid_logistic))
+      GuiElement.add(logistic_cell, GuiLabel("label", fluid_logistic):caption({"", "x", limit_value, "/", total_value}):style("helmod_label_element"))
+    else
+      GuiElement.add(logistic_cell, GuiLabel("label", fluid_logistic):caption({"", "x", total_value}):style("helmod_label_element"))
+    end
+  end
+end
+
 -------------------------------------------------------------------------------
 --
 -- @function [parent=#GuiCell] constructor
@@ -283,11 +333,20 @@ function GuiCellFactory:create(parent)
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element", color, 1))
 
   local tooltip = GuiTooltipElement(self.options.tooltip):element(factory):withEnergy()
-  GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("entity", factory.name):tooltip(tooltip))
+  local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("entity", factory.name):tooltip(tooltip))
+
+  local cell_factory_info = GuiElement.add(row1, GuiTable("factory-info"):column(1):style("helmod_factory_info"))
+  if factory.per_factory then
+    local per_factory = factory.per_factory or 0
+    local per_factory_constant = factory.per_factory_constant or 0
+    GuiElement.add(cell_factory_info, GuiLabel("per_factory"):caption({"", "x", per_factory}):style("helmod_label_element"):tooltip({"tooltip.beacon-per-factory"}))
+    GuiElement.add(cell_factory_info, GuiLabel("per_factory_constant"):caption({"", "+", per_factory_constant}):style("helmod_label_element"):tooltip({"tooltip.beacon-per-factory-constant"}))
+  end
 
   local col_size = math.ceil(Model.countList(factory.modules)/2)
   if col_size < 2 then col_size = 1 end
   local cell_factory_module = GuiElement.add(row1, GuiTable("factory-modules"):column(col_size):style("helmod_factory_modules"))
+
   -- modules
   if factory.modules ~= nil then
     for name, count in pairs(factory.modules) do
@@ -718,6 +777,10 @@ function GuiCellElement:create(parent)
   if display_cell_mod == "by-kilo" then caption3 = Format.formatNumberKilo(element.count) end
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
 
+  if User.getParameter("display_logistic_row") == true then
+    local row4 = GuiElement.add(cell, GuiFrameV("row4"):style("helmod_frame_element", color, 4))
+    appendRowLogistic(row4, element)
+  end
   return cell
 end
 

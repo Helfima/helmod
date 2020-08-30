@@ -251,7 +251,7 @@ function GuiElement.getStyleSizes()
   
   style_sizes["HMPinPanel"] = {
     minimal_width = 50,
-    maximal_width = 450,
+    maximal_width = 500,
     minimal_height = 0,
     maximal_height = height_main
     }

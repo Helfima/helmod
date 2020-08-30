@@ -194,7 +194,7 @@ function Controller:cleanController(player)
       if children_name == "HMTab" then
         for _,form in pairs(self:getViews()) do
           if form:getPanelName() == "HMTab" then
-            form:close(true)
+            form:close()
           end
         end
       end
@@ -323,10 +323,6 @@ local pattern = "([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)"
 --
 function Controller:onGuiAction(event)
   if event.element ~= nil and (string.find(event.element.name,"^HM.*") or string.find(event.element.name,"^helmod.*")) then
-    Logging.profiler = false
-    Logging:profilerStart()
-    
-    Logging:profilerStep("onGuiAction", "** start **")
     if views == nil then self:prepare() end
   
     event.classname, event.action, event.item1, event.item2, event.item3, event.item4 = string.match(event.element.name,pattern)
@@ -346,8 +342,6 @@ function Controller:onGuiAction(event)
       end
       self:onGuiEvent(event)
     end
-    
-    Logging:profilerStop()
   end
 end
 
@@ -361,10 +355,8 @@ end
 function Controller:onGuiEvent(event)
   if event.action == "OPEN" then
     Controller:send("on_gui_open", event, event.classname)
-    Logging:profilerStep("onGuiAction", "on_gui_open")
   end
   Controller:send("on_gui_event", event, event.classname)
-    Logging:profilerStep("onGuiAction", "on_gui_event")
 end
 
 -------------------------------------------------------------------------------
@@ -558,6 +550,22 @@ function Controller:onEventAccessAll(event)
       order = {name=event.item1, ascendant=true}
     end
     User.setParameter("order", order)
+    self:send("on_gui_update", event)
+  end
+
+  if event.action == "change-logistic" then
+    local display_logistic_row = User.getParameter("display_logistic_row")
+    User.setParameter("display_logistic_row", not(display_logistic_row))
+    self:send("on_gui_update", event)
+  end
+
+  if event.action == "change-logistic-item" then
+    User.setParameter("logistic_row_item", event.item1)
+    self:send("on_gui_update", event)
+  end
+
+  if event.action == "change-logistic-fluid" then
+    User.setParameter("logistic_row_fluid", event.item1)
     self:send("on_gui_update", event)
   end
 

@@ -156,6 +156,7 @@ function GuiButtonSelectSprite:color(color)
   if color == "red" then style = "helmod_button_select_icon_red" end
   if color == "yellow" then style = "helmod_button_select_icon_yellow" end
   if color == "green" then style = "helmod_button_select_icon_green" end
+  if color == "flat" then style = "helmod_button_select_icon_flat" end
   self.options.style = style
   return self
 end
@@ -195,6 +196,7 @@ function GuiButtonSelectSpriteM:color(color)
   if color == "red" then style = "helmod_button_select_icon_m_red" end
   if color == "yellow" then style = "helmod_button_select_icon_m_yellow" end
   if color == "green" then style = "helmod_button_select_icon_m_green" end
+  if color == "flat" then style = "helmod_button_select_icon_m_flat" end
   self.options.style = style
   return self
 end
@@ -234,6 +236,7 @@ function GuiButtonSelectSpriteSm:color(color)
   if color == "red" then style = "helmod_button_select_icon_sm_red" end
   if color == "yellow" then style = "helmod_button_select_icon_sm_yellow" end
   if color == "green" then style = "helmod_button_select_icon_sm_green" end
+  if color == "flat" then style = "helmod_button_select_icon_sm_flat" end
   self.options.style = style
   return self
 end

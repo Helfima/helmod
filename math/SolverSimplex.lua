@@ -36,7 +36,7 @@ function SolverSimplex:pivot(M, xrow, xcol)
             local B = M[irow][xcol]
             local D = M[xrow][icol]
             local value = cell_value - ( B * D ) / pivot_value
-            if false and math.abs(value) < 1e-8 then
+            if math.abs(value) < 1e-8 then
               Mx[irow][icol] = 0
             else
               Mx[irow][icol] = value
@@ -164,8 +164,8 @@ function SolverSimplex:prepare(M)
           table.insert(row, Mx[1][xcol])
         else
           if icol == self.col_start then
-            table.insert(row,math.pow(10,index)*10) -- important ne pas changer
-            --table.insert(row,1e6+index) -- important ne pas changer
+            --table.insert(row,math.pow(10,index)*10) -- important ne pas changer
+            table.insert(row,1e4*index) -- important ne pas changer
           elseif icol == xcol then
             table.insert(row,1)
           else

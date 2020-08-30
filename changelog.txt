@@ -1,6 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.11.1
+Date: 2020-08-30
+  Changes:
+    - added new option for logistic info row
+    - added beacon config info in the row
+  Bugfixes:
+    - fixed lower value in simplex solver cause bad value
+---------------------------------------------------------------------------------------------------
 Version: 0.11.0
-Date: 25. 08. 2020
+Date: 2020-08-26
   Changes:
     - changed version to Factorio 1.0.0
     - added preference to sort product

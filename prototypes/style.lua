@@ -343,7 +343,8 @@ local style_list = {
   {suffix="",offset = 0},
   {suffix="_red",offset = 36},
   {suffix="_yellow",offset = 72},
-  {suffix="_green",offset = 108}
+  {suffix="_green",offset = 108},
+  {suffix="_flat"},
 }
 
 default_gui["helmod_button_icon"] = {
@@ -381,14 +382,22 @@ default_gui["helmod_button_slot"] = {
 --
 -- @field [parent=#Button] select_icon
 for _,style in pairs(style_list) do
-  default_gui["helmod_button_select_icon"..style.suffix] = {
-    type = "button_style",
-    parent = "helmod_button_icon",
-    default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
-    hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
-    clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
-    disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true)
-  }
+  if style.suffix == "_flat" then
+    default_gui["helmod_button_select_icon"..style.suffix] = {
+      type = "button_style",
+      parent = "helmod_button_icon",
+      default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=0,y=150}, {top=0,right=0,bottom=0,left=0}, true),
+    }
+  else
+    default_gui["helmod_button_select_icon"..style.suffix] = {
+      type = "button_style",
+      parent = "helmod_button_icon",
+      default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
+      hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
+      clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
+      disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true)
+    }
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -415,14 +424,22 @@ default_gui["helmod_button_icon_xxl"] = {
 -- @field [parent=#Button] select_icon_xxl
 
 for _,style in pairs(style_list) do
-  default_gui["helmod_button_select_icon_xxl"..style.suffix] = {
-    type = "button_style",
-    parent = "helmod_button_icon_xxl",
-    default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
-    hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
-    clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
-    disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true)
-  }
+  if style.suffix == "_flat" then
+    default_gui["helmod_button_select_icon_xxl"..style.suffix] = {
+      type = "button_style",
+      parent = "helmod_button_icon_xxl",
+      default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=0,y=150}, {top=0,right=0,bottom=0,left=0}, true),
+    }
+  else
+    default_gui["helmod_button_select_icon_xxl"..style.suffix] = {
+      type = "button_style",
+      parent = "helmod_button_icon_xxl",
+      default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
+      hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
+      clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
+      disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true)
+    }
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -466,14 +483,22 @@ default_gui["helmod_button_slot_m"] = {
 -- @field [parent=#Button] select_icon_m
 
 for _,style in pairs(style_list) do
-  default_gui["helmod_button_select_icon_m"..style.suffix] = {
-    type = "button_style",
-    parent = "helmod_button_icon_m",
-    default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
-    hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
-    clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
-    disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true)
-  }
+  if style.suffix == "_flat" then
+    default_gui["helmod_button_select_icon_m"..style.suffix] = {
+      type = "button_style",
+      parent = "helmod_button_icon_m",
+      default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=0,y=150}, {top=0,right=0,bottom=0,left=0}, true),
+    }
+  else
+    default_gui["helmod_button_select_icon_m"..style.suffix] = {
+      type = "button_style",
+      parent = "helmod_button_icon_m",
+      default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
+      hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
+      clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
+      disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true)
+    }
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -517,14 +542,22 @@ default_gui["helmod_button_slot_sm"] = {
 -- @field [parent=#Button] select_icon_sm
 
 for _,style in pairs(style_list) do
-  default_gui["helmod_button_select_icon_sm"..style.suffix] = {
-    type = "button_style",
-    parent = "helmod_button_icon_sm",
-    default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
-    hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
-    clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
-    disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true)
-  }
+  if style.suffix == "_flat" then
+    default_gui["helmod_button_select_icon_sm"..style.suffix] = {
+      type = "button_style",
+      parent = "helmod_button_icon_sm",
+      default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=0,y=150}, {top=0,right=0,bottom=0,left=0}, true),
+    }
+  else
+    default_gui["helmod_button_select_icon_sm"..style.suffix] = {
+      type = "button_style",
+      parent = "helmod_button_icon_sm",
+      default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
+      hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
+      clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true),
+      disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=icon_offset_y+style.offset}, {top=0,right=0,bottom=0,left=0}, true)
+    }
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -1241,7 +1274,21 @@ default_gui["helmod_table_rule"] = {
 default_gui["helmod_factory_modules"] = {
   type = "table_style",
   parent = "helmod_table_default",
-  minimal_width = 36
+  minimal_width = 36,
+  vertical_spacing = 0,
+  cell_spacing = 3
+}
+
+-------------------------------------------------------------------------------
+-- Style of factory modules
+--
+-- @field [parent=#Table] factory_modules
+
+default_gui["helmod_factory_info"] = {
+  type = "table_style",
+  parent = "helmod_table_default",
+  left_padding = -5,
+  cell_spacing = 3
 }
 
 -------------------------------------------------------------------------------

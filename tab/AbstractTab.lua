@@ -304,12 +304,14 @@ end
 --
 function AbstractTab:onUpdate(event)
   self:beforeUpdate(event)
+
   self:updateMenuPanel(event)
+
   self:updateIndexPanel(event)
+
   self:updateHeader(event)
 
   self:updateData(event)
-  
 end
 
 -------------------------------------------------------------------------------
@@ -391,6 +393,35 @@ function AbstractTab:updateMenuPanel(event)
     -- pin info
     if self.classname == "HMStatisticTab" then
       GuiElement.add(group3, GuiButton("HMStatusPanel", "OPEN", block_id):sprite("menu", "pin-white", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
+    end
+
+    -- logistics
+    local display_logistic_row = User.getParameter("display_logistic_row")
+    local logistic1 = GuiElement.add(action_panel, GuiFlowH("logistic1"))
+    local style = "helmod_button_menu"
+    if display_logistic_row == true then style = "helmod_button_menu_selected" end
+    GuiElement.add(logistic1, GuiButton(self.classname, "change-logistic"):sprite("menu", "container-white", "container"):style(style):tooltip({"tooltip.display-logistic-row"}))
+    
+    if display_logistic_row == true then
+      local logistic_row_item = User.getParameter("logistic_row_item") or "belt"
+      local logistic2 = GuiElement.add(action_panel, GuiFlowH("logistic2"))
+      for _,type in pairs({"inserter", "belt", "container", "transport"}) do
+        local item_logistic = Player.getDefaultItemLogistic(type)
+        local style = "helmod_button_menu"
+        if logistic_row_item == type then style = "helmod_button_menu_selected" end
+        local button = GuiElement.add(logistic2, GuiButton(self.classname, "change-logistic-item", type):sprite("sprite", item_logistic):style(style):tooltip({"tooltip.logistic-row-choose"}))
+        button.style.padding = {4,4,4,4}
+      end
+      
+      local logistic_row_fluid = User.getParameter("logistic_row_fluid") or "pipe"
+      local logistic3 = GuiElement.add(action_panel, GuiFlowH("logistic3"))
+      for _,type in pairs({"pipe", "container", "transport"}) do
+        local fluid_logistic = Player.getDefaultFluidLogistic(type)
+        local style = "helmod_button_menu"
+        if logistic_row_fluid == type then style = "helmod_button_menu_selected" end
+        local button = GuiElement.add(logistic3, GuiButton(self.classname, "change-logistic-fluid", type):sprite("sprite", fluid_logistic):style(style):tooltip({"tooltip.logistic-row-choose"}))
+        button.style.padding = {4,4,4,4}
+      end
     end
   end
 

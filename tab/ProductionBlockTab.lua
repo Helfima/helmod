@@ -324,7 +324,9 @@ function ProductionBlockTab:updateData(event)
   local current_block = User.getParameter("current_block") or "new"
 
   self:updateInfo(event)
+
   self:updateOutput(event)
+
   self:updateInput(event)
 
   -- data panel

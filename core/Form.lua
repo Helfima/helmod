@@ -471,8 +471,8 @@ end
 --
 -- @function [parent=#Form] close
 --
-function Form:close(force)
-  if not(force) and not(self:isOpened()) then return end
+function Form:close()
+  if not(self:isOpened()) then return end
   local flow_panel, content_panel, menu_panel = self:getPanel()
   User.setCloseForm(self.classname, flow_panel.location)
   self:onClose()

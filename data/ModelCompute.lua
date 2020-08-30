@@ -1,6 +1,7 @@
 require "math.Solver"
 require "math.SolverAlgebra"
 require "math.SolverSimplex"
+
 ------------------------------------------------------------------------------
 -- Description of the module.
 -- @module ModelCompute
@@ -160,7 +161,6 @@ function ModelCompute.update(check_unlink)
 
       end
     end
-
 
     ModelCompute.computeInputOutput()
     ModelCompute.computeResources()
