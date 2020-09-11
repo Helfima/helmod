@@ -419,7 +419,7 @@ function ModelCompute.getBlockMatrix(block)
 
           local col_name = name..index
           col_headers[col_name] = {index=index, name=lua_ingredient.name, type=lua_ingredient.type, is_ingredient = true, tooltip=col_name.."\nIngredient"}
-          row[col_name] = ( row[col_name] or 0 ) - lua_ingredients[name].count * factor
+          row[col_name] = -lua_ingredients[name].count * factor
           row_valid = true
           if row["Cn"] ~= 0 and row["Cn"].name == name then
             row["Cn"].name = col_name
@@ -444,7 +444,7 @@ function ModelCompute.getBlockMatrix(block)
 
           local col_name = name..index
           col_headers[col_name] = {index=index, name=lua_product.name, type=lua_product.type, is_ingredient = false, tooltip=col_name.."\nProduit"}
-          row[col_name] = lua_product.count * factor
+          row[col_name] = ( row[col_name] or 0 ) + lua_product.count * factor
           row_valid = true
         end
       end
@@ -1150,47 +1150,6 @@ function ModelCompute.computeSummaryFactory(block)
         end
       end
     end
-  end
-end
-
--------------------------------------------------------------------------------
--- Return spped factory for recipe
---
--- @function [parent=#ModelCompute] speedFactory
---
--- @param #table recipe
---
-function ModelCompute.speedFactory(recipe)
-  if recipe.name == "steam" then
-    -- @see https://wiki.factorio.com/Boiler
-    local factory_prototype = EntityPrototype(recipe.factory)
-    -- info energy 1J=1W
-    local power_extract = factory_prototype:getPowerExtract()
-    local power_usage = factory_prototype:getEnergyConsumption()
-    return power_usage/power_extract
-  elseif recipe.type == "resource" then
-    -- (mining power - ore mining hardness) * mining speed
-    -- @see https://wiki.factorio.com/Mining
-    local factory_prototype = EntityPrototype(recipe.factory)
-    local recipe_prototype = EntityPrototype(recipe.name)
-
-    local mining_speed = factory_prototype:getMiningSpeed()
-    local hardness = recipe_prototype:getMineableHardness()
-    local mining_time = recipe_prototype:getMineableMiningTime()
-    return hardness * mining_speed / mining_time
-  elseif recipe.type == "fluid" then
-    -- @see https://wiki.factorio.com/Power_production
-    local factory_prototype = EntityPrototype(recipe.factory)
-    local pumping_speed = factory_prototype:getPumpingSpeed()
-    return pumping_speed
-  elseif recipe.type == "technology" then
-    local bonus = Player.getForce().laboratory_speed_modifier or 1
-    return 1*bonus
-  elseif recipe.type == "energy" then
-    return 1
-  else
-    local factory_prototype = EntityPrototype(recipe.factory)
-    return factory_prototype:getCraftingSpeed()
   end
 end
 

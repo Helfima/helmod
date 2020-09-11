@@ -192,11 +192,7 @@ function Controller:cleanController(player)
         self:getView(children_name):close()
       end
       if children_name == "HMTab" then
-        for _,form in pairs(self:getViews()) do
-          if form:getPanelName() == "HMTab" then
-            form:close()
-          end
-        end
+        self:closeTab()
       end
     end
   end
@@ -207,13 +203,24 @@ end
 --
 -- @function [parent=#Controller] closeEditionOrSelector
 --
--- @param #LuaPlayer player
---
 function Controller:closeEditionOrSelector()
   local lua_gui_element = Player.getGui("screen")
   for _,children_name in pairs(lua_gui_element.children_names) do
     if self:getView(children_name) and (string.find(children_name,"Edition") ~= nil) then
       self:getView(children_name):close()
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- closeTab
+--
+-- @function [parent=#Controller] closeTab
+--
+function Controller:closeTab()
+  for _,form in pairs(self:getViews()) do
+    if form:getPanelName() == "HMTab" then
+      form:close()
     end
   end
 end
@@ -259,12 +266,12 @@ function Controller:onTick(event)
   if Player.native() ~= nil then
     local next_event = User.getParameter("next_event")
     if next_event ~= nil then
-      if (next_event.event.iteration or 0) < 200 then
+      if (next_event.event.iteration or 0) < 1000 then
         next_event.event.iteration = (next_event.event.iteration or 0) + 1
         Dispatcher:send(next_event.type_event, next_event.event, next_event.classname)
       else
         User.setParameter("next_event", nil)
-        event.message = {"", {"helmod_error.excessive-event-iteration"}, " (>200)"}
+        event.message = {"", {"helmod_error.excessive-event-iteration"}, " (>1000)"}
         Dispatcher:send("on_gui_error", event, next_event.classname)
       end
     end
@@ -540,6 +547,10 @@ function Controller:onEventAccessAll(event)
     end
     self:closeEditionOrSelector()
     self:send("on_gui_open", event, event.item1)
+  end
+
+  if event.action == "close-tab" then
+    self:closeTab()
   end
 
   if event.action == "change-sort" then

@@ -372,7 +372,11 @@ function Form:updateTopMenu(event)
       if self.help_button then
         GuiElement.add(group2, GuiButton("HMHelpPanel", "OPEN"):sprite("menu", "help-white", "help"):style("helmod_button_menu"):tooltip({"helmod_button.help"}))
       end
-      GuiElement.add(group2, GuiButton(self.classname, "CLOSE"):sprite("menu", "close-window-white", "close-window"):style("helmod_button_menu_red"):tooltip({"helmod_button.close"}))
+      if string.find(self.classname, "Tab") then
+        GuiElement.add(group2, GuiButton(self.classname, "close-tab"):sprite("menu", "close-window-white", "close-window"):style("helmod_button_menu_red"):tooltip({"helmod_button.close"}))
+      else
+        GuiElement.add(group2, GuiButton(self.classname, "CLOSE"):sprite("menu", "close-window-white", "close-window"):style("helmod_button_menu_red"):tooltip({"helmod_button.close"}))
+      end
     end
   else
     Logging:warn(self.classname, "self.panelCaption not found")
@@ -471,8 +475,8 @@ end
 --
 -- @function [parent=#Form] close
 --
-function Form:close()
-  if not(self:isOpened()) then return end
+function Form:close(force)
+  if not(self:isOpened()) and force ~= true then return end
   local flow_panel, content_panel, menu_panel = self:getPanel()
   User.setCloseForm(self.classname, flow_panel.location)
   self:onClose()

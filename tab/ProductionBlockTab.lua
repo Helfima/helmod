@@ -104,6 +104,15 @@ function ProductionBlockTab:updateInfo(event)
       unlink_switch.tooltip = {"tooltip.block-cannot-link-by-factory"}
     end
 
+    -- local block_compunting = GuiElement.add(options_scroll, GuiFlowH("block-computing"))
+    -- GuiElement.add(block_compunting, GuiLabel("block-label"):caption("Computing"))
+    -- local default_compunting = ""
+    -- local items = {}
+    -- table.insert(items,"by_element")
+    -- table.insert(items,"by_factory")
+    -- table.insert(items,"Matrix Solver")
+    -- GuiElement.add(block_compunting, GuiDropDown(self.classname, "change-computing", model_id):items(items, default_compunting))
+
     local element_state = "left"
     if element.by_product == false then element_state = "right" end
     GuiElement.add(options_scroll, GuiSwitch(self.classname, "block-switch-element", current_block):state(element_state):leftLabel({"helmod_label.input-product"}):rightLabel({"helmod_label.input-ingredient"}))
@@ -130,6 +139,7 @@ function ProductionBlockTab:updateInfo(event)
     block_switch_limit.style.horizontal_spacing=10
     GuiElement.add(block_switch_limit, GuiLabel("block-label-limit"):caption({"helmod_label.assembler-limitation"}))
     GuiElement.add(block_switch_limit, GuiSwitch(self.classname, "block-switch-limit", current_block):state(block_limit):leftLabel({"gui.on"}):rightLabel({"gui.off"}))
+
   end
 end
 

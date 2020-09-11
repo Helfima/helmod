@@ -23,6 +23,5 @@ Controller = require "controller.Controller"
 UnitTest = require "core.UnitTest"
 Command = require "core.Command"
 EventController = require "controller.EventController"
-
 -- attach events
 EventController.start()

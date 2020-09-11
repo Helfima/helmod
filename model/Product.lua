@@ -230,7 +230,6 @@ function Product:countContainer(count, container)
   if count == nil then return 0 end
   if self.lua_prototype.type == 0 or self.lua_prototype.type == "item" then
     local entity_prototype = EntityPrototype(container)
-    local cargo_wagon_size = entity_prototype:getInventorySize(1)
     if entity_prototype:getType() == "inserter" then
       local inserter_capacity = entity_prototype:getInserterCapacity()
       local inserter_speed = entity_prototype:getInserterRotationSpeed()
@@ -242,6 +241,8 @@ function Product:countContainer(count, container)
       local belt_speed = entity_prototype:getBeltSpeed()
       return count / (belt_speed * self.belt_ratio * (Model.getModel().time or 1))
     elseif entity_prototype:getType() ~= "logistic-robot" then
+      local cargo_wagon_size = entity_prototype:getInventorySize(1)
+      if cargo_wagon_size == nil then return 0 end
       if entity_prototype:getInventorySize(2) ~= nil and entity_prototype:getInventorySize(2) > entity_prototype:getInventorySize(1) then
         cargo_wagon_size = entity_prototype:getInventorySize(2)
       end
@@ -249,7 +250,7 @@ function Product:countContainer(count, container)
       if cargo_wagon_size * stack_size == 0 then return 0 end
       return count / (cargo_wagon_size * stack_size)
     else
-      cargo_wagon_size = entity_prototype:native().max_payload_size + (Player.getForce().worker_robots_storage_bonus or 0 )
+      local cargo_wagon_size = entity_prototype:native().max_payload_size + (Player.getForce().worker_robots_storage_bonus or 0 )
       return count / cargo_wagon_size
     end
   end

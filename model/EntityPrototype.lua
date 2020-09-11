@@ -646,11 +646,12 @@ function EntityPrototype:speedFactory(recipe)
   elseif recipe.type == "resource" then
     -- (mining power - ore mining hardness) * mining speed
     -- @see https://wiki.factorio.com/Mining
+    -- hardness removed
+    -- @see https://www.factorio.com/blog/post/fff-266
     local recipe_prototype = EntityPrototype(recipe.name)
     local mining_speed = self:getMiningSpeed()
-    local hardness = recipe_prototype:getMineableHardness()
     local mining_time = recipe_prototype:getMineableMiningTime()
-    return hardness * mining_speed / mining_time
+    return mining_speed / mining_time
   elseif recipe.type == "fluid" then
     local pumping_speed = self:getPumpingSpeed()
     return pumping_speed

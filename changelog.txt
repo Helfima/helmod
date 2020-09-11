@@ -1,4 +1,31 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.11.5
+Date: 2020-09-11
+  Bugfixes:
+    - fixed bug model error
+---------------------------------------------------------------------------------------------------
+Version: 0.11.4
+Date: 2020-09-11
+  Changes:
+    - changed translate loop generator (for selector)
+    - changed list loop generator (for selector)
+  Bugfixes:
+    - fixed bug by ingredient mode
+    - fixed main panel close button
+---------------------------------------------------------------------------------------------------
+Version: 0.11.3
+Date: 2020-09-06
+  Bugfixes:
+    - fixed remove new runtime cache that create few empty model
+---------------------------------------------------------------------------------------------------
+Version: 0.11.2
+Date: 2020-09-06
+  Bugfixes:
+    - fixed close form on the main panel
+    - fixed error on tooltip with logistic
+    - fixed wrong fuel value on tooltip
+    - fixed mining-drill speed
+---------------------------------------------------------------------------------------------------
 Version: 0.11.1
 Date: 2020-08-30
   Changes:

@@ -147,10 +147,13 @@ function Model.getModel()
   end
 
   model_id = User.getParameter("model_id")
-  local models = Model.getModels()
+  --local models = Model.getModels()
+  if global.models == nil then global.models = {} end
+  local models = global.models
   local model = models[model_id]
-  if model == nil then return Model.newModel() end
-
+  if model == nil then 
+    return Model.newModel()
+  end
   return model
 end
 

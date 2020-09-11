@@ -840,8 +840,7 @@ end
 -- @param #string from_block_id
 --
 function ModelBuilder.pastModel(from_model_id, from_block_id)
-  local model = Model.getModel()
-  local models = Model.getModels()
+  local models = global.models
   local from_model = models[from_model_id]
   local from_block = from_model.blocks[from_block_id]
 

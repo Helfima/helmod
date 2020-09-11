@@ -397,15 +397,62 @@ end
 -- @param #LuaEvent event
 --
 function AbstractSelector:translate(event)
+  -- List du cache non vide
+  if not(Cache.isEmpty(self.classname, "list_translate")) then
+    -- bluid table translate
+    if User.getModGlobalSetting("filter_translated_string_active") and not(User.isTranslate()) and event.continue ~= true then
+      local list_translate = Cache.getData(self.classname, "list_translate")
+      local table_translate = {}
+      local step_translate = User.getModGlobalSetting("user_cache_step") or 100
+      local index = 0
+      event.continue = true
+      local query_translate
+      for item_name,localised_name in pairs(list_translate) do
+        if index % step_translate == 0 then
+          query_translate = {index=index,list_translate={}}
+          table.insert(table_translate, query_translate)
+        end
+        table.insert(query_translate.list_translate, localised_name)
+        index = index + 1
+      end
+      event.table_translate = table_translate
+      return User.createNextEvent(event, self.classname, "translate")
+    end
+    -- execute loop
+    if event.continue and event.method == "translate" then
+      local query_translate = table.remove(event.table_translate)
+      self:updateWaitMessage(string.format("Wait translate: %s", query_translate.index or 0))
+      for _,localised_name in pairs(query_translate.list_translate) do
+        Player.native().request_translation(localised_name)
+      end
+      if #event.table_translate > 0 then
+        return User.createNextEvent(event, self.classname, "translate")
+      else
+        event.continue = false
+      end
+    end
+  end
+  return User.createNextEvent(nil, self.classname, "translate")
+end
+
+-------------------------------------------------------------------------------
+-- Translate
+--
+-- @function [parent=#AbstractSelector] translate
+--
+-- @param #LuaEvent event
+--
+function AbstractSelector:translate2(event)
   -- recuperation recipes
   if not(Cache.isEmpty(self.classname, "list_translate")) or (event.continue and event.method == "translate") then
     if User.getModGlobalSetting("filter_translated_string_active") and (not(User.isTranslate()) or (event.continue and event.method == "translate")) then
       local list_translate = Cache.getData(self.classname, "list_translate")
       local index_end = Model.countList(list_translate)-1
-      local step_translate = User.getModGlobalSetting("user_cache_step") or 100
+      local step_translate = 5 or User.getModGlobalSetting("user_cache_step") or 100
       local start_index = event.index_translate or 0
       local index = -1
       event.continue = false
+      self:updateWaitMessage(string.format("Wait translate: %s", start_index or 0))
       for item_name,localised_name in pairs(list_translate) do
         index = index + 1
         if index > start_index + step_translate then 
@@ -440,14 +487,12 @@ function AbstractSelector:onUpdate(event)
 
   local response = {wait=false, method="none"}
   
-  self:updateWaitMessage(string.format("Wait translate: %s", event.index_translate or 0))
   response = self:translate(event)
   
   if response.wait == true then 
     return
   end
   
-  self:updateWaitMessage(string.format("Wait list build: %s", event.index_list or 0))
   response = self:createElementLists(event)
 
   if response.wait == true then 
@@ -576,6 +621,89 @@ function AbstractSelector:createElementLists(event)
   local list_group = self:getListGroup()
   local list_subgroup = self:getListSubGroup()
 
+  if Model.countList(list_group) == 0 and event.continue ~= true then
+    local list = self:getListPrototype()
+    local step_list = User.getModGlobalSetting("user_cache_step") or 100
+    local index = 0
+    local table_element = {}
+    event.continue = true
+    -- list_products[element.name][type - lua_recipe.name]
+    for key, element in pairs(list) do
+      if index % step_list == 0 then
+        query_list = {index=index,list={}}
+        table.insert(table_element, query_list)
+      end
+      query_list.list[key] = element
+      index = index + 1
+    end
+    event.table_element = table_element
+    return User.createNextEvent(event, self.classname, "list")
+  end
+  -- execute loop
+  if event.continue and event.method == "list" then
+    local filter_show_disable = User.getSetting("filter_show_disable")
+    local filter_show_hidden = User.getSetting("filter_show_hidden")
+    local filter_show_hidden_player_crafting = User.getSetting("filter_show_hidden_player_crafting")
+    local query_list = table.remove(event.table_element)
+    self:updateWaitMessage(string.format("Wait list build: %s", query_list.index or 0))
+    for key, element in pairs(query_list.list) do
+      -- filter sur le nom element (product ou ingredient)
+      if self:checkFilter(key) then
+        for element_name, element in pairs(element) do
+          local prototype = self:getPrototype(element)
+          if (not(self.disable_option) or (prototype:getEnabled() == true or filter_show_disable == true)) and 
+            (not(self.hidden_option) or (prototype:getHidden() == false or filter_show_hidden == true)) and
+            (not(self.hidden_player_crafting) or (prototype:getHiddenPlayerCrafting() == false or filter_show_hidden_player_crafting == true)) then
+
+            if list_group_elements[element.group] == nil then list_group_elements[element.group] = {} end
+            if list_group_elements[element.group][element.subgroup] == nil then list_group_elements[element.group][element.subgroup] = {} end
+            list_group_elements[element.group][element.subgroup][element_name] = element
+
+            list_group[element.group] = prototype:getGroup()
+            list_subgroup[element.subgroup] = prototype:getSubgroup()
+          end
+        end
+      end
+    end
+    User.setCache(self.classname, "list_group", list_group)
+    User.setCache(self.classname, "list_subgroup", list_subgroup)
+    User.setCache(self.classname, "list_group_elements", list_group_elements)
+    if #event.table_element > 0 then
+      return User.createNextEvent(event, self.classname, "list")
+    else
+      event.continue = false
+    end
+  end
+  
+      
+  local list_item = self:getListItem()
+  local group_selected = User.getParameter("recipe_group_selected")
+  local list_group = self:getListGroup()
+
+  if list_group_elements[group_selected] then
+    list_item = list_group_elements[group_selected]
+  else
+    local group_selected,_ = next(list_group)
+    User.setParameter("recipe_group_selected", group_selected)
+    list_item = list_group_elements[group_selected]
+  end
+  User.setCache(self.classname, "list_item", list_item or {})
+  event.continue = false
+  return User.createNextEvent(nil, self.classname, "list")
+end
+
+-------------------------------------------------------------------------------
+-- Create element lists
+--
+-- @function [parent=#AbstractSelector] createElementLists
+--
+-- @return #table
+--
+function AbstractSelector:createElementLists2(event)
+  local list_group_elements = self:getListGroupElements()
+  local list_group = self:getListGroup()
+  local list_subgroup = self:getListSubGroup()
+
   if Model.countList(list_group) == 0 or (event.continue and event.method == "list") then
     local list = self:getListPrototype()
     local filter_show_disable = User.getSetting("filter_show_disable")
@@ -637,7 +765,6 @@ function AbstractSelector:createElementLists(event)
   event.index_list = nil
   return User.createNextEvent(nil, self.classname, "list")
 end
-
 -------------------------------------------------------------------------------
 -- Get prototype
 --

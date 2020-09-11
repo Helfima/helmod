@@ -20,7 +20,7 @@ end)
 --
 function ItemPrototype:getFuelValue()
   if self.lua_prototype == nil then return 0 end
-  return self.lua_prototype.fuel_value*60
+  return self.lua_prototype.fuel_value
 end
 
 -------------------------------------------------------------------------------

@@ -114,7 +114,7 @@ end
 -- @param #table event
 --
 function EventController.onLoad(event)
- Command.start()
+  Command.start()
 end
 
 -------------------------------------------------------------------------------

@@ -14,7 +14,7 @@ GuiCheckBox = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiCheckBox"
   base.options.type = "checkbox"
-  base.options.style = "helmod_textbox_default"
+  --base.options.style = "helmod_textbox_default"
 end)
 
 -------------------------------------------------------------------------------
