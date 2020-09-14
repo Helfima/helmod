@@ -337,7 +337,6 @@ function AbstractSelector:onEvent(event)
       Controller:send("on_gui_update", event, self.classname)
     end
   end
-
 end
 
 -------------------------------------------------------------------------------
@@ -436,46 +435,6 @@ function AbstractSelector:translate(event)
 end
 
 -------------------------------------------------------------------------------
--- Translate
---
--- @function [parent=#AbstractSelector] translate
---
--- @param #LuaEvent event
---
-function AbstractSelector:translate2(event)
-  -- recuperation recipes
-  if not(Cache.isEmpty(self.classname, "list_translate")) or (event.continue and event.method == "translate") then
-    if User.getModGlobalSetting("filter_translated_string_active") and (not(User.isTranslate()) or (event.continue and event.method == "translate")) then
-      local list_translate = Cache.getData(self.classname, "list_translate")
-      local index_end = Model.countList(list_translate)-1
-      local step_translate = 5 or User.getModGlobalSetting("user_cache_step") or 100
-      local start_index = event.index_translate or 0
-      local index = -1
-      event.continue = false
-      self:updateWaitMessage(string.format("Wait translate: %s", start_index or 0))
-      for item_name,localised_name in pairs(list_translate) do
-        index = index + 1
-        if index > start_index + step_translate then 
-          event.continue = true
-          break
-        end
-        if index >= start_index then
-          Player.native().request_translation(localised_name)
-        end
-      end
-      if index >= index_end then
-        return User.createNextEvent(nil, self.classname, "translate")
-      end
-      return User.createNextEvent(event, self.classname, "translate", index)
-    else
-      return User.createNextEvent(nil, self.classname, "translate")
-    end
-  else
-    return User.createNextEvent(nil, self.classname, "translate")
-  end
-end
-
--------------------------------------------------------------------------------
 -- On update
 --
 -- @function [parent=#AbstractSelector] onUpdate
@@ -562,27 +521,30 @@ function AbstractSelector:updateFilter(event)
     end
     GuiElement.add(panel, GuiSwitch(self.classname, "filter-contain-switch"):state(contain_position):rightLabel({"helmod_recipe-edition-panel.filter-contain-switch-left"}, {"tooltip.filter-contain-switch-left"}):leftLabel({"helmod_recipe-edition-panel.filter-contain-switch-right"}, {"tooltip.filter-contain-switch-right"}):tooltip({"helmod_recipe-edition-panel.filter-contain-switch"}))
 
-    local guiFilter = GuiElement.add(panel, GuiTable("filter"):column(2))
+    -- filter table
+    local filter_table = GuiElement.add(panel, GuiTable("filter"):column(2))
+    filter_table.vertical_centering = true
+
     if self.disable_option then
       local filter_show_disable = User.getSetting("filter_show_disable")
-      GuiElement.add(guiFilter, GuiCheckBox(self.classname, "change-boolean-settings", "filter_show_disable"):state(filter_show_disable))
-      GuiElement.add(guiFilter, GuiLabel("filter_show_disable"):caption({"helmod_recipe-edition-panel.filter-show-disable"}))
+      GuiElement.add(filter_table, GuiCheckBox(self.classname, "change-boolean-settings", "filter_show_disable"):state(filter_show_disable))
+      GuiElement.add(filter_table, GuiLabel("filter_show_disable"):caption({"helmod_recipe-edition-panel.filter-show-disable"}))
     end
 
     if self.hidden_option then
       local filter_show_hidden = User.getSetting("filter_show_hidden")
-      GuiElement.add(guiFilter, GuiCheckBox(self.classname, "change-boolean-settings", "filter_show_hidden"):state(filter_show_hidden))
-      GuiElement.add(guiFilter, GuiLabel("filter_show_hidden"):caption({"helmod_recipe-edition-panel.filter-show-hidden"}))
+      GuiElement.add(filter_table, GuiCheckBox(self.classname, "change-boolean-settings", "filter_show_hidden"):state(filter_show_hidden))
+      GuiElement.add(filter_table, GuiLabel("filter_show_hidden"):caption({"helmod_recipe-edition-panel.filter-show-hidden"}))
     end
 
     if self.hidden_player_crafting then
       local filter_show_hidden_player_crafting = User.getSetting("filter_show_hidden_player_crafting")
-      GuiElement.add(guiFilter, GuiCheckBox(self.classname, "change-boolean-settings", "filter_show_hidden_player_crafting"):state(filter_show_hidden_player_crafting))
-      GuiElement.add(guiFilter, GuiLabel("filter_show_hidden_player_crafting"):caption({"helmod_recipe-edition-panel.filter-show-hidden-player-crafting"}))
+      GuiElement.add(filter_table, GuiCheckBox(self.classname, "change-boolean-settings", "filter_show_hidden_player_crafting"):state(filter_show_hidden_player_crafting))
+      GuiElement.add(filter_table, GuiLabel("filter_show_hidden_player_crafting"):caption({"helmod_recipe-edition-panel.filter-show-hidden-player-crafting"}))
     end
 
-    GuiElement.add(guiFilter, GuiLabel("filter-value"):caption({"helmod_common.filter"}))
-    local cellFilter = GuiElement.add(guiFilter, GuiFrameH("cell-filter"):style(helmod_frame_style.hidden))
+    GuiElement.add(filter_table, GuiLabel("filter-value"):caption({"helmod_common.filter"}))
+    local cellFilter = GuiElement.add(filter_table, GuiFrameH("cell-filter"):style(helmod_frame_style.hidden))
     if User.getModGlobalSetting("filter_on_text_changed") then
       local text_filter = GuiElement.add(cellFilter, GuiTextField(self.classname, "recipe-filter", "filter-value=onchange"):text(filter_prototype):style())
       text_filter.lose_focus_on_confirm = false
@@ -591,7 +553,6 @@ function AbstractSelector:updateFilter(event)
       GuiElement.add(cellFilter, GuiTextField(self.classname, "recipe-filter", "filter-text"):text(filter_prototype):style())
       GuiElement.add(cellFilter, GuiButton(self.classname, "recipe-filter", "filter-button"):caption({"helmod_button.apply"}))
     end
-    
   end
 
   if self.product_option then
@@ -646,6 +607,7 @@ function AbstractSelector:createElementLists(event)
     local filter_show_hidden_player_crafting = User.getSetting("filter_show_hidden_player_crafting")
     local query_list = table.remove(event.table_element)
     self:updateWaitMessage(string.format("Wait list build: %s", query_list.index or 0))
+
     for key, element in pairs(query_list.list) do
       -- filter sur le nom element (product ou ingredient)
       if self:checkFilter(key) then
@@ -675,7 +637,6 @@ function AbstractSelector:createElementLists(event)
     end
   end
   
-      
   local list_item = self:getListItem()
   local group_selected = User.getParameter("recipe_group_selected")
   local list_group = self:getListGroup()
@@ -692,79 +653,6 @@ function AbstractSelector:createElementLists(event)
   return User.createNextEvent(nil, self.classname, "list")
 end
 
--------------------------------------------------------------------------------
--- Create element lists
---
--- @function [parent=#AbstractSelector] createElementLists
---
--- @return #table
---
-function AbstractSelector:createElementLists2(event)
-  local list_group_elements = self:getListGroupElements()
-  local list_group = self:getListGroup()
-  local list_subgroup = self:getListSubGroup()
-
-  if Model.countList(list_group) == 0 or (event.continue and event.method == "list") then
-    local list = self:getListPrototype()
-    local filter_show_disable = User.getSetting("filter_show_disable")
-    local filter_show_hidden = User.getSetting("filter_show_hidden")
-    local filter_show_hidden_player_crafting = User.getSetting("filter_show_hidden_player_crafting")
-    
-    event.continue = false
-    local step_list = User.getModGlobalSetting("user_cache_step") or 100
-    local start_index = event.index_list or 0
-    local index = -1
-    -- list_products[element.name][type - lua_recipe.name]
-    for key, element in pairs(list) do
-      index = index + 1
-      if index > start_index + step_list then 
-          event.continue = true
-          break
-      end
-      if index >= start_index then
-        -- filter sur le nom element (product ou ingredient)
-        if self:checkFilter(key) then
-          for element_name, element in pairs(element) do
-            local prototype = self:getPrototype(element)
-            if (not(self.disable_option) or (prototype:getEnabled() == true or filter_show_disable == true)) and 
-              (not(self.hidden_option) or (prototype:getHidden() == false or filter_show_hidden == true)) and
-              (not(self.hidden_player_crafting) or (prototype:getHiddenPlayerCrafting() == false or filter_show_hidden_player_crafting == true)) then
-
-              if list_group_elements[element.group] == nil then list_group_elements[element.group] = {} end
-              if list_group_elements[element.group][element.subgroup] == nil then list_group_elements[element.group][element.subgroup] = {} end
-              list_group_elements[element.group][element.subgroup][element_name] = element
-  
-              list_group[element.group] = prototype:getGroup()
-              list_subgroup[element.subgroup] = prototype:getSubgroup()
-            end
-          end
-        end
-      end
-    end
-    User.setCache(self.classname, "list_group", list_group)
-    User.setCache(self.classname, "list_subgroup", list_subgroup)
-    User.setCache(self.classname, "list_group_elements", list_group_elements)
-    if index + 1 < Model.countList(list) then
-      return User.createNextEvent(event, self.classname, "list", index)
-    end
-  end
-  
-      
-  local list_item = self:getListItem()
-  local group_selected = User.getParameter("recipe_group_selected")
-  local list_group = self:getListGroup()
-
-  if list_group_elements[group_selected] then
-    list_item = list_group_elements[group_selected]
-  else
-    local group_selected,_ = next(list_group)
-    User.setParameter("recipe_group_selected", group_selected)
-    list_item = list_group_elements[group_selected]
-  end
-  User.setCache(self.classname, "list_item", list_item or {})
-  event.index_list = nil
-  return User.createNextEvent(nil, self.classname, "list")
-end
 -------------------------------------------------------------------------------
 -- Get prototype
 --
@@ -907,9 +795,15 @@ function AbstractSelector.updateGroupSelector(self, event)
     if User.getParameter("recipe_group_selected") == group.name then
       color = "yellow"
     end
-    local tooltip = "item-group-name."..group.name
-    -- ajoute les icons de groupe
-    local action = GuiElement.add(gui_group_panel, GuiButtonSelectSpriteXxl(self.classname, "recipe-group"):sprite(self.sprite_type, group.name):tooltip({tooltip}):color(color))
+    if group.name ~= "helmod" then
+      local tooltip = "item-group-name."..group.name
+      -- ajoute les icons de groupe
+      local action = GuiElement.add(gui_group_panel, GuiButtonSelectSpriteXxl(self.classname, "recipe-group"):sprite(self.sprite_type, group.name):tooltip({tooltip}):color(color))
+    else
+      local tooltip = "helmod"
+      -- ajoute les icons de groupe
+      local action = GuiElement.add(gui_group_panel, GuiButtonSelectSpriteXxl(self.classname, "recipe-group", group.name):sprite("menu", "group"):tooltip({tooltip}):color(color))
+    end
   end
 
 end

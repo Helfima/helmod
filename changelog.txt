@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.11.6
+Date: 2020-09-14
+  Features:
+    - Added rich text tool
+  Changes:
+    - changed fake helmod recipes are now in helmod group (for selector)
+---------------------------------------------------------------------------------------------------
 Version: 0.11.5
 Date: 2020-09-11
   Bugfixes:

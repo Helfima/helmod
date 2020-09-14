@@ -259,7 +259,7 @@ default_gui["helmod_button_default"] = {
   type = "button_style",
   font = "helmod_font_normal",
   default_font_color={r=1, g=1, b=1},
-  align = "center",
+  horizontal_align = "center",
   top_padding = 2,
   right_padding = 2,
   bottom_padding = 2,
@@ -276,6 +276,16 @@ default_gui["helmod_button_default"] = {
   stretch_image_to_widget_size = true
 }
 
+-------------------------------------------------------------------------------
+-- Style of default
+--
+-- @field [parent=#Button] left
+
+default_gui["helmod_button_left"] = {
+  type = "button_style",
+  parent = "helmod_button_default",
+  horizontal_align = "left"
+}
 -------------------------------------------------------------------------------
 -- Style of default
 --

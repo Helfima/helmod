@@ -12,6 +12,7 @@ require "dialog.RecipeExplorer"
 require "dialog.PropertiesPanel"
 require "dialog.PrototypeFiltersPanel"
 require "dialog.UnitTestPanel"
+require "dialog.RichTextPanel"
 
 require "edition.RecipeEdition"
 require "edition.ProductEdition"
@@ -82,6 +83,7 @@ function Controller:prepare()
   table.insert(forms, PropertiesPanel("HMPropertiesPanel"))
   table.insert(forms, PrototypeFiltersPanel("HMPrototypeFiltersPanel"))
   table.insert(forms, UnitTestPanel("HMUnitTestPanel"))
+  table.insert(forms, RichTextPanel("HMRichTextPanel"))
 
   table.insert(forms, ProductionLineTab("HMProductionLineTab"))
   table.insert(forms, ProductionBlockTab("HMProductionBlockTab"))

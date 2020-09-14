@@ -26,6 +26,8 @@ function EventController.start()
   EventController.pcallEvent(defines.events.on_gui_value_changed, EventController.onGuiValueChanged)
   -- dropdown changed
   EventController.pcallEvent(defines.events.on_gui_selection_state_changed, EventController.onGuiSelectionStateChanged)
+  -- element choose changed
+  EventController.pcallEvent(defines.events.on_gui_elem_changed, EventController.onGuiElementChooseChanged)
   -- checked changed
   EventController.pcallEvent(defines.events.on_gui_checked_state_changed, EventController.onGuiCheckedStateChanged)
   EventController.pcallEvent(defines.events.on_player_created, EventController.onPlayerCreated)
@@ -289,6 +291,20 @@ end
 -- @param #table event
 --
 function EventController.onGuiValueChanged(event)
+  if event ~= nil and event.player_index ~= nil then
+    Player.load(event)
+    Dispatcher:send("on_gui_action", event, Controller.classname)
+  end
+end
+
+-------------------------------------------------------------------------------
+-- On element choose event
+--
+-- @function [parent=#EventController] onGuiElementChooseChanged
+--
+-- @param event
+--
+function EventController.onGuiElementChooseChanged(event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
     Dispatcher:send("on_gui_action", event, Controller.classname)

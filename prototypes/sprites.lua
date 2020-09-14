@@ -144,16 +144,29 @@ local list = {
   {name="record", sm=true},
   {name="refresh", sm=true},
   {name="robot"},
+  {name="save", sm=true},
   {name="search"},
   {name="services", sm=true},
   {name="settings", sm=true},
   {name="steam-heat"},
+  {name="text", sm=true},
   {name="time"},
   {name="unlink", sm=true},
   {name="upload"},
   {name="wrench"}
 }
 local spite_icons = {}
+
+table.insert(spite_icons, {
+  type ="sprite",
+  name = "helmod-group",
+  filename = "__helmod__/graphics/icons/helmod-group.png",
+  priority = "extra-high-no-scale",
+  width = 64,
+  height = 64,
+  scale = 1
+})
+
 for icon_row,icon in pairs(list) do
   table.insert(spite_icons, sprite_icon(icon.name, 32, 32))
   table.insert(spite_icons, sprite_icon(icon.name, 32, 32, true))
