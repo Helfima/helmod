@@ -758,7 +758,7 @@ function Player.getRecipeEntity(name)
   recipe.enabled = true
   recipe.energy = 1
   recipe.force = {}
-  recipe.group = prototype.group
+  recipe.group = {name="helmod"}
   recipe.subgroup = prototype.subgroup
   recipe.hidden = false
   recipe.ingredients = ingredients
@@ -796,7 +796,7 @@ function Player.getRecipeFluid(name)
   recipe.enabled = true
   recipe.energy = 1
   recipe.force = {}
-  recipe.group = prototype.group
+  recipe.group = {name="helmod"}
   recipe.subgroup = prototype.subgroup
   recipe.hidden = false
   recipe.ingredients = ingredients
@@ -835,7 +835,8 @@ function Player.getRecipeRocket(name)
   recipe.enabled = true
   recipe.energy = rocket_part_prototype.energy * rocket_prototype.rocket_parts_required + 15
   recipe.force = {}
-  recipe.group = prototype.group
+  --recipe.group = prototype.group
+  recipe.group = {name="helmod"}
   recipe.subgroup = prototype.subgroup
   recipe.hidden = false
   recipe.ingredients = ingredients

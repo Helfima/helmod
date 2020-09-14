@@ -354,7 +354,7 @@ function AbstractTab:updateMenuPanel(event)
 
     local groupPref = GuiElement.add(action_panel, GuiFlowH("groupPref"))
     GuiElement.add(groupPref, GuiButton("HMPreferenceEdition", "OPEN", block_id):sprite("menu", "services-white", "services"):style("helmod_button_menu"):tooltip({"helmod_button.preferences"}))
-    --GuiElement.add(groupPref, GuiButton("HMRichTextPanel", "OPEN", block_id):sprite("menu", "edit-white", "edit"):style("helmod_button_menu"):tooltip({"helmod_panel.RichText"}))
+    GuiElement.add(groupPref, GuiButton("HMRichTextPanel", "OPEN", block_id):sprite("menu", "text-white", "text"):style("helmod_button_menu"):tooltip({"helmod_panel.richtext"}))
     
     local group2 = GuiElement.add(action_panel, GuiFlowH("group2"))
     -- copy past

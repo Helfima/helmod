@@ -262,8 +262,15 @@ function GuiElement.getStyleSizes()
     minimal_height = 0,
     maximal_height = height_main
     }
-  
-
+    
+  style_sizes["HMRichTextPanel"] = {
+    minimal_width = 300,
+    maximal_width = 300,
+    minimal_height = 300,
+    maximal_height = height_main
+    }
+      
+      
   style_sizes.main = {}
   style_sizes.main.width = width_main
   style_sizes.main.height = height_main
