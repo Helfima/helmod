@@ -168,6 +168,7 @@ function overlay(button, type, name)
     GuiElement.add(button, GuiSprite("overlay"):sprite(sprite))
   end
 end
+
 -------------------------------------------------------------------------------
 --
 -- @function [parent=#GuiCell] mask
@@ -460,7 +461,7 @@ function GuiCellProduct:create(parent)
   if string.find(element.name, "helmod") then
     GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", element.hovered, element.sprite):style(element.name):tooltip({element.localised_name}))
   else
-    GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type, element.name):caption("X"..Product(element):getElementAmount()):tooltip({self.options.tooltip, Player.getLocalisedName(element)}))
+    GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type, element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip({self.options.tooltip, Player.getLocalisedName(element)}))
   end
 
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
@@ -494,7 +495,7 @@ function GuiCellProductSm:create(parent)
   if string.find(element.name, "helmod") then
     GuiElement.add(row1, GuiButton(unpack(self.name)):style(element.name):tooltip({element.localised_name}))
   else
-    GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):sprite(element.type, element.name):caption("X"..Product(element):getElementAmount()):tooltip({self.options.tooltip, Player.getLocalisedName(element)}))
+    GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):sprite(element.type, element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip({self.options.tooltip, Player.getLocalisedName(element)}))
   end
 
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
@@ -752,7 +753,8 @@ function GuiCellElement:create(parent)
   else
     tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo()
   end
-  local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type or "entity", element.name):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
+  local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type or "entity", element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
+  GuiElement.infoTemperature(row1, element)
   if element.burnt then
     infoIcon(button, "burnt")
   end
@@ -813,7 +815,7 @@ function GuiCellElementSm:create(parent)
   else
     tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo()
   end
-  GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):sprite(element.type, element.name):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
+  GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):sprite(element.type, element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
 
   if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_sm", color, 2))
@@ -862,7 +864,8 @@ function GuiCellElementM:create(parent)
   else
     tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo()
   end
-  local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(element.type or "entity", element.name):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
+  local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(element.type or "entity", element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
+  GuiElement.infoTemperature(row1, element)
   if self.m_info_icon then
     infoIcon(button, self.m_info_icon)
   end

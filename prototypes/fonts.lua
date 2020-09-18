@@ -60,15 +60,16 @@ data:extend(
   },
   {
     type = "font",
-    name = "helmod_font_small_bold",
+    name = "helmod_font_medium_bold_border",
     from = "default-bold",
-    size = 10
+    size = 11,
+    border = true
   },
   {
     type = "font",
-    name = "helmod_font_small2_bold",
+    name = "helmod_font_small_bold",
     from = "default-bold",
-    size = 8
+    size = 10
   },
   {
     type = "font",

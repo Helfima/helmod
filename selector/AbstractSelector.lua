@@ -800,9 +800,9 @@ function AbstractSelector.updateGroupSelector(self, event)
       -- ajoute les icons de groupe
       local action = GuiElement.add(gui_group_panel, GuiButtonSelectSpriteXxl(self.classname, "recipe-group"):sprite(self.sprite_type, group.name):tooltip({tooltip}):color(color))
     else
-      local tooltip = "helmod"
+      local tooltip = "Helmod"
       -- ajoute les icons de groupe
-      local action = GuiElement.add(gui_group_panel, GuiButtonSelectSpriteXxl(self.classname, "recipe-group", group.name):sprite("menu", "group"):tooltip({tooltip}):color(color))
+      local action = GuiElement.add(gui_group_panel, GuiButtonSelectSpriteXxl(self.classname, "recipe-group", group.name):sprite("menu", "group"):tooltip(tooltip):color(color))
     end
   end
 

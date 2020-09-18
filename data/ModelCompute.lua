@@ -121,9 +121,10 @@ function ModelCompute.update(check_unlink)
           end
           if block_elements ~= nil then
             for _,element in pairs(block_elements) do
-              if (element.state ~= nil and element.state == 1) or (block.products_linked ~= nil and block.products_linked[element.name]) then
-                if input[element.name] ~= nil then
-                  element.input = (input[element.name] or 0) * factor
+              local element_key = Product(element):getTableKey()
+              if (element.state ~= nil and element.state == 1) or (block.products_linked ~= nil and block.products_linked[element_key]) then
+                if input[element_key] ~= nil then
+                  element.input = (input[element_key] or 0) * factor
                   --element.state = 0
                 end
               else
@@ -144,18 +145,20 @@ function ModelCompute.update(check_unlink)
 
         -- consomme les ingredients
         for _,product in pairs(block.products) do
-          if input[product.name] == nil then
-            input[product.name] =  product.count
-          elseif input[product.name] ~= nil then
-            input[product.name] = input[product.name] + product.count
+          local element_key = Product(product):getTableKey()
+          if input[element_key] == nil then
+            input[element_key] =  product.count
+          elseif input[element_key] ~= nil then
+            input[element_key] = input[element_key] + product.count
           end
         end
         -- compte les ingredients
         for _,ingredient in pairs(block.ingredients) do
-          if input[ingredient.name] == nil then
-            input[ingredient.name] =  - ingredient.count
+          local element_key = Product(ingredient):getTableKey()
+          if input[element_key] == nil then
+            input[element_key] =  - ingredient.count
           else
-            input[ingredient.name] = input[ingredient.name] - ingredient.count
+            input[element_key] = input[element_key] - ingredient.count
           end
         end
 
@@ -287,6 +290,9 @@ function ModelCompute.getBlockMatrix(block)
     local col_headers = {}
     local col_index = {}
     local rows = {}
+    local ingredient_fluids = {}
+    local product_fluids = {}
+    
     col_headers["B"] = {index=1, name="B", type="none", tooltip="Base"} -- Base
     col_headers["M"] = {index=1, name="M", type="none", tooltip="Matrix calculation"} -- Matrix calculation
     col_headers["Cn"] = {index=1, name="Cn", type="none", tooltip="Contraint"} -- Contraint
@@ -326,8 +332,9 @@ function ModelCompute.getBlockMatrix(block)
       -- prepare le taux de production
       local production = 1
       if not(block.solver == true) and recipe.production ~= nil then production = recipe.production end
-      table.insert(row_headers,{name=recipe.name, type=recipe.type, tooltip=recipe.name.."\nRecette"})
-      row["B"] = {name=recipe.name, type=recipe.type, tooltip=recipe.name.."\nRecette"}
+      local row_header = {name=recipe.name, type=recipe.type, tooltip=recipe.name.."\nRecette"}
+      table.insert(row_headers,row_header)
+      row["B"] = row_header
       row["M"] = 0 --recipe.matrix_solver or 0
       if recipe.contraint ~= nil then
         row["Cn"] = {type=recipe.contraint.type, name=recipe.contraint.name}
@@ -345,107 +352,161 @@ function ModelCompute.getBlockMatrix(block)
       local lua_products = {}
       local lua_ingredients = {}
       for i, lua_product in pairs(recipe_prototype:getProducts(recipe.factory)) do
-        local count = Product(lua_product):getAmount(recipe)
+        local product = Product(lua_product)
+        local product_key = product:getTableKey()
+        local count = product:getAmount(recipe)
         if lua_product.by_time == true then
           count = count * model.time
         end
-        lua_products[lua_product.name] = {name=lua_product.name, type=lua_product.type, count = count}
+        lua_products[product_key] = {name=lua_product.name, type=lua_product.type, count = count, temperature=lua_product.temperature, minimum_temperature=lua_product.minimum_temperature, maximum_temperature=lua_product.maximum_temperature}
       end
       for i, lua_ingredient in pairs(recipe_prototype:getIngredients(recipe.factory)) do
-        local count = Product(lua_ingredient):getAmount()
+        local ingredient = Product(lua_ingredient)
+        local ingredient_key = ingredient:getTableKey()
+        local count = ingredient:getAmount()
         -- si constant compte comme un produit (recipe rocket)
         if lua_ingredient.constant then
-          count = Product(lua_ingredient):getAmount(recipe)
+          count = ingredient:getAmount(recipe)
         end
         if lua_ingredient.by_time == true then
           count = count * model.time
         end
-        if lua_ingredients[lua_ingredient.name] == nil then
-          lua_ingredients[lua_ingredient.name] = {name=lua_ingredient.name, type=lua_ingredient.type, count = count}
+        if lua_ingredients[ingredient_key] == nil then
+          lua_ingredients[ingredient_key] = {name=lua_ingredient.name, type=lua_ingredient.type, count = count, temperature=lua_ingredient.temperature, minimum_temperature=lua_ingredient.minimum_temperature, maximum_temperature=lua_ingredient.maximum_temperature}
         else
-          lua_ingredients[lua_ingredient.name].count = lua_ingredients[lua_ingredient.name].count + count
+          lua_ingredients[ingredient_key].count = lua_ingredients[ingredient_key].count + count
         end
       end
 
       if not(block.by_product == false) then
         -- prepare header products
         for name, lua_product in pairs(lua_products) do
+          local product = Product(lua_product)
+          local product_key = product:getTableKey()
           local index = 1
-          if col_index[name] ~= nil then
-            index = col_index[name]
+          if col_index[product_key] ~= nil then
+            index = col_index[product_key]
           end
-          col_index[name] = index
+          col_index[product_key] = index
 
-          local col_name = name..index
-          col_headers[col_name] = {index=index, name=lua_product.name, type=lua_product.type, is_ingredient = false, tooltip=col_name.."\nProduit"}
+          local col_name = product_key..index
+          local col_header = {index=index, key=product_key, name=lua_product.name, type=lua_product.type, is_ingredient = false, tooltip=col_name.."\nProduit", temperature=lua_product.temperature, minimum_temperature=lua_product.minimum_temperature, maximum_temperature=lua_product.maximum_temperature}
+          col_headers[col_name] = col_header
           row[col_name] = lua_product.count * factor
           row_valid = true
           if row["Cn"] ~= 0 and row["Cn"].name == name then
             row["Cn"].name = col_name
           end
+          -- lien fluide
+          if lua_product.type == "fluid" and product_key ~= lua_product.name and lua_product.temperature ~= nil then
+            for index,element in pairs(ingredient_fluids) do
+              if element.col_header.name == lua_product.name then
+                local T = lua_product.temperature
+                local Tmin = element.col_header.minimum_temperature 
+                local Tmax = element.col_header.maximum_temperature
+                if T >= Tmin and T <= Tmax then
+                  element.row[col_name] = element.row[element.col_name]
+                  element.row[element.col_name] = 0
+                  table.remove(ingredient_fluids, index)
+                  break
+                end
+              end
+            end
+          end
         end
         -- prepare header ingredients
         for name, lua_ingredient in pairs(lua_ingredients) do
+          local ingredient = Product(lua_ingredient)
+          local ingredient_key = ingredient:getTableKey()
           local index = 1
           -- cas normal de l'ingredient n'existant pas du cote produit
-          if col_index[name] ~= nil and lua_products[name] == nil then
-            index = col_index[name]
+          if col_index[ingredient_key] ~= nil and lua_products[ingredient_key] == nil then
+            index = col_index[ingredient_key]
           end
           -- cas de l'ingredient existant du cote produit
-          if col_index[name] ~= nil and lua_products[name] ~= nil then
+          if col_index[ingredient_key] ~= nil and lua_products[ingredient_key] ~= nil then
             -- cas de la valeur equivalente, on creer un nouveau element
-            if lua_products[name].count == lua_ingredients[name].count or recipe.type == "resource" or recipe.type == "energy" then
-              index = col_index[name]+1
+            if lua_products[ingredient_key].count == lua_ingredients[ingredient_key].count or recipe.type == "resource" or recipe.type == "energy" then
+              index = col_index[ingredient_key]+1
             else
-              index = col_index[name]
+              index = col_index[ingredient_key]
             end
           end
-          col_index[name] = index
+          col_index[ingredient_key] = index
 
-          local col_name = name..index
-          col_headers[col_name] = {index=index, name=lua_ingredient.name, type=lua_ingredient.type, is_ingredient = true, tooltip=col_name.."\nIngredient"}
-          row[col_name] = ( row[col_name] or 0 ) - lua_ingredients[name].count * factor
+          local col_name = ingredient_key..index
+          local col_header = {index=index, key=ingredient_key, name=lua_ingredient.name, type=lua_ingredient.type, is_ingredient = true, tooltip=col_name.."\nIngredient", temperature=lua_ingredient.temperature, minimum_temperature=lua_ingredient.minimum_temperature, maximum_temperature=lua_ingredient.maximum_temperature}
+          col_headers[col_name] = col_header
+          row[col_name] = ( row[col_name] or 0 ) - lua_ingredients[ingredient_key].count * factor
           row_valid = true
+          -- lien fluide
+          if lua_ingredient.type == "fluid" and ingredient_key ~= lua_ingredient.name and (lua_ingredient.minimum_temperature ~= nil or lua_ingredient.maximum_temperature ~= nil) then
+            table.insert(ingredient_fluids, {col_name=col_name,col_header=col_header, row=row})
+          end
         end
       else
         -- prepare header ingredients
         for name, lua_ingredient in pairs(lua_ingredients) do
+          local ingredient = Product(lua_ingredient)
+          local ingredient_key = ingredient:getTableKey()
           local index = 1
           -- cas normal de l'ingredient n'existant pas du cote produit
-          if col_index[name] ~= nil then
-            index = col_index[name]
+          if col_index[ingredient_key] ~= nil then
+            index = col_index[ingredient_key]
           end
-          col_index[name] = index
+          col_index[ingredient_key] = index
 
-          local col_name = name..index
-          col_headers[col_name] = {index=index, name=lua_ingredient.name, type=lua_ingredient.type, is_ingredient = true, tooltip=col_name.."\nIngredient"}
+          local col_name = ingredient_key..index
+          col_headers[col_name] = {index=index, key=ingredient_key, name=lua_ingredient.name, type=lua_ingredient.type, is_ingredient = true, tooltip=col_name.."\nIngredient", temperature=lua_ingredient.temperature, minimum_temperature=lua_ingredient.minimum_temperature, maximum_temperature=lua_ingredient.maximum_temperature}
           row[col_name] = -lua_ingredients[name].count * factor
           row_valid = true
           if row["Cn"] ~= 0 and row["Cn"].name == name then
             row["Cn"].name = col_name
           end
+          -- lien fluide
+          if lua_ingredient.type == "fluid" and ingredient_key ~= lua_ingredient.name and lua_ingredient.temperature ~= nil then
+            for index,element in pairs(ingredient_fluids) do
+              if element.col_header.name == lua_ingredient.name then
+                local T = element.col_header.temperature
+                local Tmin = lua_ingredient.minimum_temperature 
+                local Tmax = lua_ingredient.maximum_temperature
+                if T >= Tmin and T <= Tmax then
+                  element.row[col_name] = element.row[element.col_name]
+                  element.row[element.col_name] = 0
+                  table.remove(product_fluids, index)
+                  break
+                end
+              end
+            end
+          end
         end
         -- prepare header products
         for name, lua_product in pairs(lua_products) do
+          local product = Product(lua_product)
+          local product_key = product:getTableKey()
           local index = 1
-          if col_index[name] ~= nil then
-            index = col_index[name]
+          if col_index[product_key] ~= nil then
+            index = col_index[product_key]
           end
           -- cas du produit existant du cote ingredient
-          if col_index[name] ~= nil and lua_ingredients[name] ~= nil then
+          if col_index[product_key] ~= nil and lua_ingredients[product_key] ~= nil then
             -- cas de la valeur equivalente, on creer un nouveau element
-            if lua_products[name].count == lua_ingredients[name].count or recipe.type == "resource" or recipe.type == "energy" then
-              index = col_index[name]+1
+            if lua_products[product_key].count == lua_ingredients[product_key].count or recipe.type == "resource" or recipe.type == "energy" then
+              index = col_index[product_key]+1
             else
-              index = col_index[name]
+              index = col_index[product_key]
             end
           end
-          col_index[name] = index
+          col_index[product_key] = index
 
-          local col_name = name..index
-          col_headers[col_name] = {index=index, name=lua_product.name, type=lua_product.type, is_ingredient = false, tooltip=col_name.."\nProduit"}
+          local col_name = product_key..index
+          col_headers[col_name] = {index=index, key=product_key, name=lua_product.name, type=lua_product.type, is_ingredient = false, tooltip=col_name.."\nProduit", temperature=lua_product.temperature, minimum_temperature=lua_product.minimum_temperature, maximum_temperature=lua_product.maximum_temperature}
           row[col_name] = ( row[col_name] or 0 ) + lua_product.count * factor
           row_valid = true
+          -- lien fluide
+          if lua_product.type == "fluid" and product_key ~= lua_product.name and lua_product.temperature ~= nil then
+            table.insert(product_fluids, {col_name=col_name,col_header=col_header, row=row})
+          end
         end
       end
       if row_valid then
@@ -501,8 +562,8 @@ function ModelCompute.getBlockMatrix(block)
         if block.by_product == false then
           block_elements = block.ingredients
         end
-        if block_elements ~= nil and block_elements[col_header.name] ~= nil and not(input_ready[col_header.name]) and col_header.index == 1 then
-          table.insert(row_input, block_elements[col_header.name].input or 0)
+        if block_elements ~= nil and block_elements[col_header.key] ~= nil and not(input_ready[col_header.name]) and col_header.index == 1 then
+          table.insert(row_input, block_elements[col_header.key].input or 0)
           input_ready[col_header.name] = true
         else
           table.insert(row_input, 0)
@@ -538,10 +599,12 @@ function ModelCompute.prepareBlock(block)
       local lua_recipe = recipe_prototype:native()
 
       for i, lua_product in pairs(recipe_prototype:getProducts(recipe.factory)) do
-        block_products[lua_product.name] = {name=lua_product.name, type=lua_product.type, count = 0}
+        local product_key = Product(lua_product):getTableKey()
+        block_products[product_key] = {name=lua_product.name, type=lua_product.type, count = 0, temperature=lua_product.temperature, minimum_temperature=lua_product.minimum_temperature, maximum_temperature=lua_product.maximum_temperature}
       end
       for i, lua_ingredient in pairs(recipe_prototype:getIngredients(recipe.factory)) do
-        block_ingredients[lua_ingredient.name] = {name=lua_ingredient.name, type=lua_ingredient.type, count = 0}
+        local ingredient_key = Product(lua_ingredient):getTableKey()
+        block_ingredients[ingredient_key] = {name=lua_ingredient.name, type=lua_ingredient.type, count = 0, temperature=lua_ingredient.temperature, minimum_temperature=lua_ingredient.minimum_temperature, maximum_temperature=lua_ingredient.maximum_temperature}
       end
 
     end
@@ -550,12 +613,13 @@ function ModelCompute.prepareBlock(block)
     -- state = 1 => produit pilotant
     -- state = 2 => produit restant
     for i, block_product in pairs(block_products) do
+      local product_key = Product(block_product):getTableKey()
       -- recopie la valeur input
-      if block.products[block_product.name] ~= nil then
-        block_product.input = block.products[block_product.name].input
+      if block.products[product_key] ~= nil then
+        block_product.input = block.products[product_key].input
       end
       -- pose le status
-      if block_ingredients[block_product.name] == nil then
+      if block_ingredients[product_key] == nil then
         block_product.state = 1
       else
         block_product.state = 0
@@ -563,12 +627,13 @@ function ModelCompute.prepareBlock(block)
     end
 
     for i, block_ingredient in pairs(block_ingredients) do
+      local ingredient_key = Product(block_ingredient):getTableKey()
       -- recopie la valeur input
-      if block.ingredients[block_ingredient.name] ~= nil then
-        block_ingredient.input = block.ingredients[block_ingredient.name].input
+      if block.ingredients[ingredient_key] ~= nil then
+        block_ingredient.input = block.ingredients[ingredient_key].input
       end
       -- pose le status
-      if block_products[block_ingredient.name] ~= nil then
+      if block_products[ingredient_key] ~= nil then
         block_ingredient.state = 1
       else
         block_ingredient.state = 0
@@ -690,57 +755,56 @@ function ModelCompute.computeBlock(block)
       -- state = 0 => produit
       -- state = 1 => produit pilotant
       -- state = 2 => produit restant
+      -- state = 3 => produit surplus
 
       -- finalisation du bloc
       for icol,state in pairs(mC[#mC]) do
         if icol > my_solver.col_start then
           local Z = math.abs(mC[#mC-1][icol])
           local product_header = mC[1][icol]
+          local product_key = product_header.key
           local product = Product(product_header):clone()
           product.count = Z
           product.state = state
           if block.by_product == false then
             if state == 1 or state == 3 then
               -- element produit
-              if block.ingredients[product.name] == nil then
-              --block.products[product.name] = product
-              else
-                block.ingredients[product.name].count = block.ingredients[product.name].count + product.count
-                block.ingredients[product.name].state = state
+              if block.ingredients[product_key] ~= nil then
+                 block.ingredients[product_key].count = block.ingredients[product_key].count + product.count
+                block.ingredients[product_key].state = state
               end
-              -- element ingredient intermediaire
+              if block.products[product_key] ~= nil then
+                block.products[product_key].state = 0
+              end
             else
               -- element ingredient
-              if block.products[product.name] == nil then
-              --block.ingredients[product.name] = product
-              else
-                block.products[product.name].count = block.products[product.name].count + product.count
-                block.products[product.name].state = state
+              if block.products[product_key] ~= nil then
+                block.products[product_key].count = block.products[product_key].count + product.count
+                block.products[product_key].state = state
               end
-              if block.ingredients[product.name] ~= nil then
-                block.ingredients[product.name].state = state
+              if block.ingredients[product_key] ~= nil then
+                block.ingredients[product_key].state = state
               end
-              -- element produit intermediaire
             end
           else
             if state == 1 or state == 3 then
               -- element produit
-              if block.products[product.name] == nil then
-              --block.products[product.name] = product
-              else
-                block.products[product.name].count = block.products[product.name].count + product.count
-                block.products[product.name].state = state
+              if block.products[product_key] ~= nil then
+                block.products[product_key].count = block.products[product_key].count + product.count
+                block.products[product_key].state = state
               end
-              -- element ingredient intermediaire
+              if block.ingredients[product_key] ~= nil then
+                block.ingredients[product_key].state = 0
+              end
             else
               -- element ingredient
-              if block.ingredients[product.name] == nil then
-              --block.ingredients[product.name] = product
-              else
-                block.ingredients[product.name].count = block.ingredients[product.name].count + product.count
-                block.ingredients[product.name].state = state
+              if block.ingredients[product_key] ~= nil then
+                block.ingredients[product_key].count = block.ingredients[product_key].count + product.count
+                block.ingredients[product_key].state = state
               end
-              -- element produit intermediaire
+              if block.products[product_key] ~= nil then
+                block.products[product_key].state = state
+              end
             end
           end
         end
@@ -968,24 +1032,30 @@ function ModelCompute.computeInputOutput()
   for _, element in spairs(model.blocks, function(t,a,b) return t[b].index > t[a].index end) do
     -- count product
     if element.products ~= nil and Model.countList(element.products) then
-      for _, product in pairs(element.products) do
-        if model.products[product.name] == nil then
-          model.products[product.name] = Model.newIngredient(product.name, product.type)
-          model.products[product.name].index = index
+      for key, product in pairs(element.products) do
+        if model.products[key] == nil then
+          model.products[key] = Model.newIngredient(product.name, product.type)
+          model.products[key].temperature = product.temperature
+          model.products[key].minimum_temperature = product.minimum_temperature
+          model.products[key].maximum_temperature = product.maximum_temperature
+          model.products[key].index = index
           index = index + 1
         end
-        model.products[product.name].count = model.products[product.name].count + product.count
+        model.products[key].count = model.products[key].count + product.count
       end
     end
     -- count ingredient
     if element.ingredients ~= nil and Model.countList(element.ingredients) then
-      for _, ingredient in pairs(element.ingredients) do
-        if model.ingredients[ingredient.name] == nil then
-          model.ingredients[ingredient.name] = Model.newIngredient(ingredient.name, ingredient.type)
-          model.ingredients[ingredient.name].index = index
+      for key, ingredient in pairs(element.ingredients) do
+        if model.ingredients[key] == nil then
+          model.ingredients[key] = Model.newIngredient(ingredient.name, ingredient.type)
+          model.ingredients[key].temperature = ingredient.temperature
+          model.ingredients[key].minimum_temperature = ingredient.minimum_temperature
+          model.ingredients[key].maximum_temperature = ingredient.maximum_temperature
+          model.ingredients[key].index = index
           index = index + 1
         end
-        model.ingredients[ingredient.name].count = model.ingredients[ingredient.name].count + ingredient.count
+        model.ingredients[key].count = model.ingredients[key].count + ingredient.count
       end
     end
   end
@@ -993,19 +1063,19 @@ function ModelCompute.computeInputOutput()
   for _, element in spairs(model.blocks, function(t,a,b) return t[b].index > t[a].index end) do
     -- consomme les produits
     if element.ingredients ~= nil and Model.countList(element.ingredients) then
-      for _, ingredient in pairs(element.ingredients) do
-        if model.products[ingredient.name] ~= nil and element.mining_ingredient ~= ingredient.name then
-          model.products[ingredient.name].count = model.products[ingredient.name].count - ingredient.count
-          if model.products[ingredient.name].count < 0.01 then model.products[ingredient.name] = nil end
+      for key, ingredient in pairs(element.ingredients) do
+        if model.products[key] ~= nil and element.mining_ingredient ~= ingredient.name then
+          model.products[key].count = model.products[key].count - ingredient.count
+          if model.products[key].count < 0.01 then model.products[key] = nil end
         end
       end
     end
     -- consomme les ingredients
     if element.products ~= nil and Model.countList(element.products) then
-      for _, product in pairs(element.products) do
-        if model.ingredients[product.name] ~= nil then
-          model.ingredients[product.name].count = model.ingredients[product.name].count - product.count
-          if model.ingredients[product.name].count < 0.01 then model.ingredients[product.name] = nil end
+      for key, product in pairs(element.products) do
+        if model.ingredients[key] ~= nil then
+          model.ingredients[key].count = model.ingredients[key].count - product.count
+          if model.ingredients[key].count < 0.01 then model.ingredients[key] = nil end
         end
       end
     end

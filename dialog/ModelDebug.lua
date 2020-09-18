@@ -55,7 +55,8 @@ function ModelDebug:buildMatrix(matrix_panel, matrix, pivot)
   if matrix ~= nil then
     local num_col = #matrix[1]
 
-    local matrix_table = GuiElement.add(matrix_panel, GuiTable("matrix_data"):column(num_col):style("helmod_table-rule-odd"))
+    local matrix_table = GuiElement.add(matrix_panel, GuiTable("matrix_data"):column(num_col):style("helmod_table-odd"))
+    matrix_table.vertical_centering = false
 
     for irow,row in pairs(matrix) do
       for icol,value in pairs(row) do
@@ -73,7 +74,8 @@ function ModelDebug:buildMatrix(matrix_panel, matrix, pivot)
           elseif value.type == "contraint" then
             GuiElement.add(cell, GuiLabel("cell_value"):caption(value))
           else
-            GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(value.type, value.name):tooltip(value.tooltip))
+            local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(value.type, value.name):tooltip(value.tooltip))
+            GuiElement.infoTemperature(button, value, "helmod_label_overlay_m")
           end
         else
           GuiElement.add(cell, GuiLabel("cell_value"):caption(Format.formatNumber(value,4)))
@@ -170,27 +172,10 @@ function ModelDebug:updateDebugPanel(event)
     info_panel.clear()
     local block = model.blocks[current_block]
 
-    -- product
---    local product_panel = GuiElement.add(info_panel, GuiFrameV("product_panel"):style(helmod_frame_style.hidden):caption("Product data"))
---    local product_table = GuiElement.add(product_panel, GuiTable("product-data"):column(3):style("helmod_table-rule-odd"))
---    self:addCellHeader(product_table, "title", "Product")
---    self:addCellHeader(product_table, "value", {"helmod_result-panel.col-header-value"})
---    self:addCellHeader(product_table, "state", {"helmod_result-panel.col-header-state"})
---
---
---    if block.products ~= nil then
---      for _,product in pairs(block.products) do
---        GuiElement.add(product_table, GuiLabel(product.name, "title"):caption(product.name))
---        GuiElement.add(product_table, GuiLabel(product.name, "value"):caption(product.count))
---        GuiElement.add(product_table, GuiLabel(product.name, "state"):caption(product.state))
---      end
---    end
-
-
     if block.runtimes ~= nil then
       local scroll_panel = GuiElement.add(info_panel, GuiScroll("scroll_stage"))
-      scroll_panel.style.maximal_width = 800
-      scroll_panel.style.maximal_height = 700
+      scroll_panel.style.horizontally_squashable = true
+      scroll_panel.style.horizontally_stretchable = true
       local stage = User.getParameter("model_stage") or 1
       if block.runtimes[stage] == nil then
         stage = 1

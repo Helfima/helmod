@@ -29,10 +29,6 @@ function User.get(key)
     global["users"][user_name] = {}
   end
 
-  if global["users"][user_name].settings == nil then
-    global["users"][user_name]["settings"] = User.getDefaultSettings()
-  end
-
   if key ~= nil then
     if global["users"][user_name][key] == nil then
       global["users"][user_name][key] = {}
@@ -456,12 +452,27 @@ end
 -------------------------------------------------------------------------------
 -- Get user settings
 --
+-- @function [parent=#User] getSettings
+--
+-- @param #string property
+--
+function User.getSettings()
+  local data_user = User.get()
+  if data_user["settings"] == nil then
+    data_user["settings"] = User.getDefaultSettings()
+  end
+  return data_user["settings"]
+end
+
+-------------------------------------------------------------------------------
+-- Get user settings
+--
 -- @function [parent=#User] getSetting
 --
 -- @param #string property
 --
 function User.getSetting(property)
-  local settings = User.get("settings")
+  local settings = User.getSettings()
   if settings ~= nil and property ~= nil then
     local value = settings[property]
     if value == nil then

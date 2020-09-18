@@ -14,6 +14,7 @@ require "dialog.PrototypeFiltersPanel"
 require "dialog.UnitTestPanel"
 require "dialog.RichTextPanel"
 
+require "edition.ModelEdition"
 require "edition.RecipeEdition"
 require "edition.ProductEdition"
 require "edition.RuleEdition"
@@ -99,6 +100,7 @@ function Controller:prepare()
   table.insert(forms, ItemSelector("HMItemSelector"))
   table.insert(forms, FluidSelector("HMFluidSelector"))
 
+  table.insert(forms, ModelEdition("HMModelEdition"))
   table.insert(forms, RecipeEdition("HMRecipeEdition"))
   table.insert(forms, ProductEdition("HMProductEdition"))
   table.insert(forms, RuleEdition("HMRuleEdition"))
@@ -346,9 +348,6 @@ function Controller:onGuiAction(event)
         Controller:send("on_gui_close", event, event.classname)
       end
   
-      if event.action == "OPEN" then
-        User.setActiveForm(event.classname)
-      end
       self:onGuiEvent(event)
     end
   end
@@ -362,7 +361,8 @@ end
 -- @param #table event
 --
 function Controller:onGuiEvent(event)
-  if event.action == "OPEN" then
+  if event.action == "OPEN" and event.continue ~= true then
+    User.setActiveForm(event.classname)
     Controller:send("on_gui_open", event, event.classname)
   end
   Controller:send("on_gui_event", event, event.classname)
@@ -633,6 +633,7 @@ function Controller:onEventAccessRead(event)
         end
       end
     end
+    Controller:send("on_gui_refresh", event)
   end
 end
 

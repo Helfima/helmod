@@ -17,7 +17,7 @@ RecipePrototype = newclass(Prototype,function(base, object, object_type)
       Prototype.init(base, Player.getRecipePrototype(base.object_name))
       base.lua_type = "recipe"
     elseif base.lua_type == "recipe-burnt" then
-      Prototype.init(base, Player.getRecipePrototype(base.object_name))
+      Prototype.init(base, Player.getRecipeBurnt(base.object_name))
       base.lua_type = "recipe-burnt"
     elseif base.lua_type == "energy" then
       Prototype.init(base, Player.getRecipeEntity(base.object_name))
@@ -134,6 +134,7 @@ function RecipePrototype:getProducts(factory)
   else
     self.is_voider = false
   end
+  local factory_prototype = EntityPrototype(factory)
   local lua_products = {}
   for r, raw_product in pairs(raw_products) do
     local product_id = raw_product.type .. "/" .. raw_product.name
@@ -154,6 +155,12 @@ function RecipePrototype:getProducts(factory)
         lua_products[burnt_id] = {type=burnt_result.type,name=burnt_result.name,amount=lua_products[product_id].amount}
       end
     end
+    if factory ~= nil and factory.temperature_enabled == true and factory_prototype:getType() == "boiler" then
+      local fluid_production = factory_prototype:getFluidProductionFilter()
+      if lua_products[product_id] ~= nil and fluid_production.name == raw_product.name then
+        lua_products[product_id].temperature = factory_prototype:getTargetTemperature()
+      end
+    end
   end
   -- convert map to array
   local raw_products = {}
@@ -162,8 +169,7 @@ function RecipePrototype:getProducts(factory)
   end
   -- insert burnt
   if self.lua_type == "energy" then
-    local factory_prototype = EntityPrototype(factory)
-    if factory ~= nil and factory_prototype:getEnergyType() == "burnt" then
+    if factory ~= nil and factory_prototype:getEnergyType() == "burner" then
       local energy_prototype = factory_prototype:getEnergySource()
       if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then
         local fuel_count = energy_prototype:getFuelCount()
@@ -190,49 +196,63 @@ end
 --
 function RecipePrototype:getRawProducts()
   if self.lua_prototype ~= nil then
-    if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" or self.lua_type == "resource" or self.lua_type == "fluid" or self.lua_type == "rocket" then
-      return self.lua_prototype.products
+    if self.lua_type == "energy" then
+      return self:getEnergyProducts()
     elseif self.lua_type == "technology" then
       return {{name=self.lua_prototype.name, type="technology", amount=1}}
-    elseif self.lua_type == "energy" then
-      local products = {}
-      local prototype = EntityPrototype(self.lua_prototype.name)
-      if prototype:getType() == "solar-panel" then
-        local amount = prototype:getEnergyProduction()
-        local product = {name="energy", type="energy", amount=amount}
-        table.insert(products, product)
-      end
-      if prototype:getType() == "boiler" then
-        local amount = prototype:getFluidProduction()
-        local fluid_production = prototype:getFluidProductionFilter()
-        if fluid_production ~= nil then
-          local product = {name=fluid_production.name, type="fluid", amount=amount, by_time=true}
-          table.insert(products, product)
-        end
-      end
-      if prototype:getType() == "accumulator" then
-        local energy_prototype = prototype:getEnergySource()
-        local amount = energy_prototype:getOutputFlowLimit()
-        local product = {name="energy", type="energy", amount=amount}
-        table.insert(products, product)
-      end
-      if prototype:getType() == "generator" then
-        local amount = prototype:getEnergyProduction()
-        local product = {name="energy", type="energy", amount=amount}
-        table.insert(products, product)
-      end
-      if prototype:getType() == "reactor" then
-        local amount = prototype:getEnergyConsumption()
-        local product = {name="steam-heat", type="energy", amount=amount}
-        table.insert(products, product)
-      end
-      if prototype:getType() == "offshore-pump" or prototype:getType() == "seafloor-pump" then
-        local amount = prototype:getPumpingSpeed()
-        local product = {name="water", type="fluid", amount=amount, by_time=true}
-        table.insert(products, product)
-      end
-      return products
+    else
+      return self.lua_prototype.products
     end
+  end
+  return {}
+end
+
+-------------------------------------------------------------------------------
+-- Return products array of Prototype (may contain duplicate products)
+--
+-- @function [parent=#RecipePrototype] getEnergyProducts
+--
+-- @return #table
+--
+function RecipePrototype:getEnergyProducts()
+  if self.lua_prototype ~= nil then
+    local products = {}
+    local prototype = EntityPrototype(self.lua_prototype.name)
+    if prototype:getType() == "solar-panel" then
+      local amount = prototype:getEnergyProduction()
+      local product = {name="energy", type="energy", amount=amount}
+      table.insert(products, product)
+    end
+    if prototype:getType() == "boiler" then
+      local amount = prototype:getFluidProduction()
+      local fluid_production = prototype:getFluidProductionFilter()
+      if fluid_production ~= nil then
+        local product = {name=fluid_production.name, type="fluid", amount=amount, by_time=true}
+        table.insert(products, product)
+      end
+    end
+    if prototype:getType() == "accumulator" then
+      local energy_prototype = prototype:getEnergySource()
+      local amount = energy_prototype:getOutputFlowLimit()
+      local product = {name="energy", type="energy", amount=amount}
+      table.insert(products, product)
+    end
+    if prototype:getType() == "generator" then
+      local amount = prototype:getEnergyProduction()
+      local product = {name="energy", type="energy", amount=amount}
+      table.insert(products, product)
+    end
+    if prototype:getType() == "reactor" then
+      local amount = prototype:getEnergyConsumption()
+      local product = {name="steam-heat", type="energy", amount=amount}
+      table.insert(products, product)
+    end
+    if prototype:getType() == "offshore-pump" or prototype:getType() == "seafloor-pump" then
+      local amount = prototype:getPumpingSpeed()
+      local product = {name="water", type="fluid", amount=amount, by_time=true}
+      table.insert(products, product)
+    end
+    return products
   end
   return {}
 end
@@ -321,9 +341,6 @@ end
 function RecipePrototype:getIngredients(factory)
   local raw_ingredients = self:getRawIngredients()
   if self.lua_prototype ~= nil then
-    local factory_prototype = EntityPrototype(factory)
-    local energy_prototype = factory_prototype:getEnergySource()
-    local energy_type = factory_prototype:getEnergyTypeInput()
     local speed_factory = 1
     local consumption_effect = 1
     if factory ~= nil then
@@ -334,6 +351,9 @@ function RecipePrototype:getIngredients(factory)
     end
 
     if self.lua_type ~= "energy" then
+      local factory_prototype = EntityPrototype(factory)
+      local energy_prototype = factory_prototype:getEnergySource()
+      local energy_type = factory_prototype:getEnergyTypeInput()
       -- recipe
       if energy_type == "burner" then
         if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then

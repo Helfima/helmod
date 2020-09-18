@@ -352,10 +352,6 @@ function AbstractTab:updateMenuPanel(event)
     GuiElement.add(group1, GuiButton("HMEnergySelector", "OPEN", block_id):sprite("menu", "nuclear-white","nuclear"):style("helmod_button_menu"):tooltip({"helmod_result-panel.select-button-energy"}))
     GuiElement.add(group1, GuiButton("HMRecipeExplorer", "OPEN", block_id):sprite("menu", "search-white", "search"):style("helmod_button_menu"):tooltip({"helmod_button.explorer"}))
 
-    local groupPref = GuiElement.add(action_panel, GuiFlowH("groupPref"))
-    GuiElement.add(groupPref, GuiButton("HMPreferenceEdition", "OPEN", block_id):sprite("menu", "services-white", "services"):style("helmod_button_menu"):tooltip({"helmod_button.preferences"}))
-    GuiElement.add(groupPref, GuiButton("HMRichTextPanel", "OPEN", block_id):sprite("menu", "text-white", "text"):style("helmod_button_menu"):tooltip({"helmod_panel.richtext"}))
-    
     local group2 = GuiElement.add(action_panel, GuiFlowH("group2"))
     -- copy past
     GuiElement.add(group2, GuiButton(self.classname, "copy-model", model.id):sprite("menu", "copy-white", "copy"):style("helmod_button_menu"):tooltip({"helmod_button.copy"}))
@@ -394,13 +390,17 @@ function AbstractTab:updateMenuPanel(event)
       GuiElement.add(group3, GuiButton("HMStatusPanel", "OPEN", block_id):sprite("menu", "pin-white", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
     end
 
-    -- logistics
+    -- preferences
+    local groupPref = GuiElement.add(action_panel, GuiFlowH("groupPref"))
+    GuiElement.add(groupPref, GuiButton("HMModelEdition", "OPEN", block_id):sprite("menu", "edit-white", "edit"):style("helmod_button_menu"):tooltip({"helmod_button.preferences"}))
+    GuiElement.add(groupPref, GuiButton("HMPreferenceEdition", "OPEN", block_id):sprite("menu", "services-white", "services"):style("helmod_button_menu"):tooltip({"helmod_button.preferences"}))
+    
     local display_logistic_row = User.getParameter("display_logistic_row")
-    local logistic1 = GuiElement.add(action_panel, GuiFlowH("logistic1"))
     local style = "helmod_button_menu"
     if display_logistic_row == true then style = "helmod_button_menu_selected" end
-    GuiElement.add(logistic1, GuiButton(self.classname, "change-logistic"):sprite("menu", "container-white", "container"):style(style):tooltip({"tooltip.display-logistic-row"}))
+    GuiElement.add(groupPref, GuiButton(self.classname, "change-logistic"):sprite("menu", "container-white", "container"):style(style):tooltip({"tooltip.display-logistic-row"}))
     
+    -- logistics
     if display_logistic_row == true then
       local logistic_row_item = User.getParameter("logistic_row_item") or "belt"
       local logistic2 = GuiElement.add(action_panel, GuiFlowH("logistic2"))
@@ -429,6 +429,7 @@ function AbstractTab:updateMenuPanel(event)
   time_panel.clear()
 
   local group_special = GuiElement.add(time_panel, GuiFlowH("group_special"))
+  GuiElement.add(group_special, GuiButton("HMRichTextPanel", "OPEN", block_id):sprite("menu", "text-white", "text"):style("helmod_button_menu"):tooltip({"helmod_panel.richtext"}))
   GuiElement.add(group_special, GuiButton("HMCalculator", "OPEN"):sprite("menu", "calculator-white", "calculator"):style("helmod_button_menu"):tooltip({"helmod_calculator-panel.title"}))
   
   local items = {}
@@ -475,20 +476,32 @@ function AbstractTab:updateIndexPanel(event)
     index_panel.clear()
     if Model.countModel() > 0 then
       local i = 0
-      for _,imodel in pairs(models) do
+      local model_sorter = function(t,a,b) 
+        local elementB = Model.firstRecipe(t[b]["blocks"]) or {name="B"}
+        local elementA = Model.firstRecipe(t[a]["blocks"]) or {name="A"}
+        local order_by_name = elementB.name > elementA.name
+        if t[b]["group"] ~= nil and t[a]["group"] ~= nil then
+          return order_by_name and t[b]["group"] > t[a]["group"] 
+        else
+          return order_by_name and Model.countList(t[b]["blocks"]) < Model.countList(t[a]["blocks"]) 
+        end 
+      end
+      for _,imodel in spairs(models, model_sorter) do
         i = i + 1
         local style = "helmod_button_default"
         local element = Model.firstRecipe(imodel.blocks)
         if imodel.id == model_id then
           if element ~= nil then
-            GuiElement.add(index_panel, GuiButtonSprite(self.classname, "change-model", imodel.id):sprite("recipe", element.name):tooltip(RecipePrototype(element):getLocalisedName()))
+            local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
+            GuiElement.add(index_panel, GuiButtonSprite(self.classname, "change-model", imodel.id):sprite(element.type, element.name):tooltip(tooltip))
           else
             local button = GuiElement.add(index_panel, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", "help-white", "help"):style("helmod_button_menu_selected"))
             button.style.width = 36
           end
         else
           if element ~= nil then
-            GuiElement.add(index_panel, GuiButtonSelectSprite(self.classname, "change-model", imodel.id):sprite("recipe", element.name):tooltip(RecipePrototype(element):getLocalisedName()))
+            local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
+            GuiElement.add(index_panel, GuiButtonSelectSprite(self.classname, "change-model", imodel.id):sprite(element.type, element.name):tooltip(tooltip))
           else
             local button = GuiElement.add(index_panel, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", "help-white", "help"):style("helmod_button_menu"))
             button.style.width = 36

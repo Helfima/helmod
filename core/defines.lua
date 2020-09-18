@@ -54,6 +54,7 @@ helmod_tag.color.blue = "[color=66,141,255]"
 helmod_tag.color.blue_light = "[color=100,200,255]"
 helmod_tag.color.gold = "[color=255,230,192]"
 helmod_tag.color.orange = "[color=255,106,0]"
+helmod_tag.color.black = "[color=0,0,0]"
 
 helmod_tag.font = {}
 helmod_tag.font.close = "[/font]"

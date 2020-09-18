@@ -852,6 +852,37 @@ end
 -------------------------------------------------------------------------------
 -- Return recipe
 --
+-- @function [parent=#Player] getRecipeBurnt
+--
+-- @param #string name recipe name
+--
+-- @return #LuaRecipe recipe
+--
+function Player.getRecipeBurnt(name)
+  local recipe_prototype = Player.getRecipePrototype(name)
+  local recipe = {}
+  recipe.category = recipe_prototype.category
+  recipe.enabled = true
+  recipe.energy = recipe_prototype.energy
+  recipe.force = {}
+  --recipe.group = prototype.group
+  recipe.group = {name="helmod"}
+  recipe.subgroup = recipe_prototype.subgroup
+  recipe.hidden = false
+  recipe.ingredients = recipe_prototype.ingredients
+  recipe.products = recipe_prototype.products
+  recipe.localised_description = recipe_prototype.localised_description
+  recipe.localised_name = recipe_prototype.localised_name
+  recipe.name = recipe_prototype.name
+  recipe.prototype = {}
+  recipe.valid = true
+  recipe.hidden_from_player_crafting = recipe_prototype.hidden_from_player_crafting
+  return recipe
+end
+
+-------------------------------------------------------------------------------
+-- Return recipe
+--
 -- @function [parent=#Player] getRecipeTechnology
 --
 -- @param #string name recipe name
