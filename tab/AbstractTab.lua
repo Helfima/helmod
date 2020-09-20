@@ -476,17 +476,17 @@ function AbstractTab:updateIndexPanel(event)
     index_panel.clear()
     if Model.countModel() > 0 then
       local i = 0
-      local model_sorter = function(t,a,b) 
-        local elementB = Model.firstRecipe(t[b]["blocks"]) or {name="B"}
-        local elementA = Model.firstRecipe(t[a]["blocks"]) or {name="A"}
-        local order_by_name = elementB.name > elementA.name
-        if t[b]["group"] ~= nil and t[a]["group"] ~= nil then
-          return order_by_name and t[b]["group"] > t[a]["group"] 
-        else
-          return order_by_name and Model.countList(t[b]["blocks"]) < Model.countList(t[a]["blocks"]) 
-        end 
-      end
-      for _,imodel in spairs(models, model_sorter) do
+      -- local model_sorter = function(t,a,b) 
+      --   local elementB = Model.firstRecipe(t[b]["blocks"]) or {name="B"}
+      --   local elementA = Model.firstRecipe(t[a]["blocks"]) or {name="A"}
+      --   local order_by_name = elementB.name > elementA.name
+      --   if t[b]["group"] ~= nil and t[a]["group"] ~= nil then
+      --     return order_by_name and t[b]["group"] > t[a]["group"] 
+      --   else
+      --     return order_by_name and Model.countList(t[b]["blocks"]) < Model.countList(t[a]["blocks"]) 
+      --   end 
+      -- end
+      for _,imodel in pairs(models) do
         i = i + 1
         local style = "helmod_button_default"
         local element = Model.firstRecipe(imodel.blocks)

@@ -272,7 +272,6 @@ function GuiTooltipModel:create()
     local element_icon = string.format("[%s=%s]", type, first_block.name)
     table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=first_block.name}), helmod_tag.font.close, helmod_tag.color.close})
     table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.group"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, element.group or "", helmod_tag.font.close})
-    table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.group"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, element.id or "", helmod_tag.font.close})
     if element.note ~= nil and element.note ~= "" then
       table.insert(tooltip, {"", "\n", "----------------------"})
       table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, {"helmod_common.note"}, helmod_tag.font.close})
