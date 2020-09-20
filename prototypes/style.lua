@@ -824,6 +824,28 @@ default_gui["helmod_label_element"] = {
 -------------------------------------------------------------------------------
 -- Style of default
 --
+-- @field [parent=#Label] element
+
+default_gui["helmod_label_element_black"] = {
+  type = "label_style",
+  parent = "helmod_label_element",
+  font_color = {0, 0, 0}
+}
+
+-------------------------------------------------------------------------------
+-- Style of default
+--
+-- @field [parent=#Label] element
+
+default_gui["helmod_label_overlay"] = {
+  type = "label_style",
+  parent = "helmod_label_element",
+  font = "helmod_font_medium_bold_border"
+}
+
+-------------------------------------------------------------------------------
+-- Style of default
+--
 -- @field [parent=#Label] element_m
 
 default_gui["helmod_label_element_m"] = {
@@ -834,6 +856,28 @@ default_gui["helmod_label_element_m"] = {
   right_padding = 2,
   bottom_padding = 0,
   left_padding = 2
+}
+
+-------------------------------------------------------------------------------
+-- Style of default
+--
+-- @field [parent=#Label] element
+
+default_gui["helmod_label_element_black_m"] = {
+  type = "label_style",
+  parent = "helmod_label_element_m",
+  font_color = {0, 0, 0}
+}
+
+-------------------------------------------------------------------------------
+-- Style of default
+--
+-- @field [parent=#Label] element
+
+default_gui["helmod_label_overlay_m"] = {
+  type = "label_style",
+  parent = "helmod_label_element_m",
+  font = "helmod_font_small_bold_border"
 }
 
 -------------------------------------------------------------------------------
@@ -1543,6 +1587,21 @@ default_gui["helmod_frame_hidden"] = {
     position = {0, 0}
   }
 }
+
+function default_glow(tint_value, scale_value)
+  return
+    {
+      position = {57,64},
+      corner_size = 8,
+      tint = tint_value,
+      scale = scale_value,
+      draw_type = "outer"
+    }
+end
+
+default_shadow_color = {0, 0, 0, 0.35}
+default_shadow = default_glow(default_shadow_color, 0.5)
+
 -------------------------------------------------------------------------------
 -- Style of default
 --
@@ -1567,7 +1626,7 @@ default_gui["helmod_frame_default"] = {
   graphical_set =
   {
     base = {position = {0, 0}, corner_size = 8},
-    shadow = default_shadow
+    --shadow = default_shadow
   },
   flow_style = { type = "flow_style" },
   horizontal_flow_style = { type = "horizontal_flow_style" },
@@ -1583,19 +1642,6 @@ default_gui["helmod_frame_default"] = {
   border = {}
 }
 
-function default_glow(tint_value, scale_value)
-  return
-    {
-      position = {57,64},
-      corner_size = 8,
-      tint = tint_value,
-      scale = scale_value,
-      draw_type = "outer"
-    }
-end
-
-default_shadow_color = {0, 0, 0, 0.35}
-default_shadow = default_glow(default_shadow_color, 0.5)
 
 -------------------------------------------------------------------------------
 -- Style of default

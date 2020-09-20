@@ -95,6 +95,11 @@ end
 --
 -- @return #table
 --
+-- state = 0 => produit
+-- state = 1 => produit pilotant
+-- state = 2 => produit restant
+-- state = 3 => produit surplus
+
 function Solver:appendState(M)
     local srow = {}
     for irow,row in pairs(M) do

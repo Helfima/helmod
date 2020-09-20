@@ -9,6 +9,7 @@ Product = newclass(Prototype,function(base, object)
 end)
 
 Product.classname = "HMProduct"
+
 -------------------------------------------------------------------------------
 -- Return localised name of Prototype
 --
@@ -36,6 +37,41 @@ function Product:getLocalisedName(force)
     else
       return self.lua_prototype.name
     end
+  end
+  return "unknow"
+end
+
+-------------------------------------------------------------------------------
+-- Return table key
+--
+-- @function [parent=#Product] getTableKey
+--
+-- @return #table
+--
+function Product:getTableKey()
+  if self.lua_prototype ~= nil then
+    if self.lua_prototype.type == 1 or self.lua_prototype.type == "fluid" then
+      local T = self.lua_prototype.temperature
+      if T ~= nil then
+        return string.format("%s#%s", self.lua_prototype.name,T)
+      end
+      local Tmin = self.lua_prototype.minimum_temperature 
+      local Tmax = self.lua_prototype.maximum_temperature
+      if Tmin ~= nil or Tmax ~= nil then
+        Tmin = Tmin or -1e300
+        Tmax = Tmax or 1e300
+        if Tmin < -1e300 and Tmax < 1e300 then
+          return string.format("%s#inf#%s", self.lua_prototype.name, Tmax)
+        end
+        if Tmin > -1e300 and Tmax > 1e300 then
+          return string.format("%s#%s#inf", self.lua_prototype.name, Tmin)
+        end
+        if Tmin > -1e300 and Tmax < 1e300 then
+          return string.format("%s#%s#%s", self.lua_prototype.name, Tmin, Tmax)
+        end
+      end
+    end
+    return self.lua_prototype.name
   end
   return "unknow"
 end

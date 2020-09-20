@@ -142,6 +142,21 @@ function Form:getPanel()
 end
 
 -------------------------------------------------------------------------------
+-- Get or create frame panel
+--
+-- @function [parent=#Form] getFramePanel
+--
+function Form:getFramePanel(panel_name)
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[panel_name]
+  end
+  local frame_panel = GuiElement.add(content_panel, GuiFrameV(panel_name):style(helmod_frame_style.panel))
+  frame_panel.style.horizontally_stretchable = true
+  return frame_panel
+end
+
+-------------------------------------------------------------------------------
 -- Get the error panel
 --
 -- @function [parent=#Form] getErrorPanel

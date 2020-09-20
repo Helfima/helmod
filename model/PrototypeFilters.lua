@@ -141,7 +141,7 @@ function PrototypeFilters.initialization()
   -------------------------------------------------------------------------------
   -------------------------------------------------------------------------------
   local PrototypeFilterEntity = PrototypeFilters.addFilterType("entity")
-  PrototypeFilterEntity:addMapping(nil)
+  PrototypeFilterEntity:addMapping({["crafting-category"]="crafting_category"})
 
   PrototypeFilterEntity:addFilter("type", Player.getEntityPrototypeTypes())
   PrototypeFilterEntity:addFilter("name")
@@ -202,6 +202,7 @@ function PrototypeFilters.initialization()
   PrototypeFilterEntity:addFilter("build-base-evolution-requirement", "comparison")
   PrototypeFilterEntity:addFilter("selection-priority", "comparison")
   PrototypeFilterEntity:addFilter("emissions", "comparison")
+  PrototypeFilterEntity:addFilter("crafting-category", game.recipe_category_prototypes)
 
   -------------------------------------------------------------------------------
   -------------------------------------------------------------------------------

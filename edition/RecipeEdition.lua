@@ -352,6 +352,10 @@ function RecipeEdition:onEvent(event)
         User.setParameter("default_factory_mode", "category")
       elseif event.item3 == "module" then
         User.setParameter("default_factory_with_module", not(User.getParameter("default_factory_with_module")))
+      elseif event.item3 == "temperature" then
+        ModelBuilder.updateFactoryTemperature(block.id, recipe.id)
+        ModelCompute.update()
+        Controller:send("on_gui_refresh", event)
       end
       self:update(event)
     end
@@ -666,6 +670,11 @@ function RecipeEdition:updateFactoryInfoTool(event)
     local module_button_style = button_style
     if default_factory_with_module == true then module_button_style = selected_button_style end
     GuiElement.add(tool_panel2, GuiButton(self.classname, "factory-tool", block.id, recipe.id, "module"):caption("M"):style(module_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-module"}))
+    if factory_prototype:getType() == "boiler" then
+      local temperature_button_style = button_style
+      if factory.temperature_enabled == true then temperature_button_style = selected_button_style end
+      GuiElement.add(tool_panel2, GuiButton(self.classname, "factory-tool", block.id, recipe.id, "temperature"):caption("T"):style(temperature_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-temperature"}))
+    end
 
   end
 end
@@ -1283,7 +1292,7 @@ function RecipeEdition:updateObjectInfo(event)
       end
     end
 
-    local tablePanel = GuiElement.add(info_panel, GuiTable("table-input"):column(3))
+    local tablePanel = GuiElement.add(info_panel, GuiTable("table-input"):column(2))
     GuiElement.add(tablePanel, GuiLabel("label-production"):caption({"helmod_recipe-edition-panel.production"}))
     GuiElement.add(tablePanel, GuiTextField(self.classname, "object-update", event.item1, recipe.id):text(Format.formatNumberElement((recipe.production or 1)*100)):style("helmod_textfield"))
 

@@ -259,6 +259,21 @@ function ModelBuilder.updateFactory(item, key, options)
 end
 
 -------------------------------------------------------------------------------
+-- Update temperature factory
+--
+-- @function [parent=#ModelBuilder] updateFactoryTemperature
+--
+-- @param #string item block_id
+-- @param #string key object name
+--
+function ModelBuilder.updateFactoryTemperature(item, key)
+  local object = Model.getObject(item, key)
+  if object ~= nil then
+    object.factory.temperature_enabled = not(object.factory.temperature_enabled)
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Update a factory number
 --
 -- @function [parent=#ModelBuilder] updateFactoryNumber
@@ -904,12 +919,13 @@ function ModelBuilder.copyBlock(from_model, from_block)
           to_block.unlinked = from_block.unlinked
           to_block.solver = from_block.solver
           to_block.isEnergy = from_block.isEnergy
+          
           -- copy input
-          if from_block.input ~= nil then
-            for key,value in pairs(from_block.input) do
-              if to_block.input == nil then to_block.input = {} end
-              to_block.input[key] = value
-            end
+          if from_block.products ~= nil then
+            to_block.products = table.deepcopy(from_block.products)
+          end
+          if from_block.ingredients ~= nil then
+            to_block.ingredients = table.deepcopy(from_block.ingredients)
           end
 
           model.blocks[to_block.id] = to_block
@@ -935,6 +951,7 @@ function ModelBuilder.copyBlock(from_model, from_block)
           recipe_model.factory.module_priority = table.clone(recipe.factory.module_priority)
         end
         recipe_model.beacon = Model.newBeacon(recipe.beacon.name)
+        recipe_model.beacon.combo = recipe.beacon.combo
         recipe_model.beacon.per_factory = recipe.beacon.per_factory
         recipe_model.beacon.per_factory_constant = recipe.beacon.per_factory_constant
         recipe_model.beacon.modules = {}

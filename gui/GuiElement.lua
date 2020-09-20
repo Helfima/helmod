@@ -249,6 +249,12 @@ function GuiElement.getStyleSizes()
     maximal_height = height_main
     }
   
+  style_sizes["HMModelDebug"] = {
+    width = width_main,
+    minimal_height = 200,
+    maximal_height = height_main
+    }
+    
   style_sizes["HMPinPanel"] = {
     minimal_width = 50,
     maximal_width = 500,
@@ -452,3 +458,41 @@ function GuiElement.setInputText(element, value)
     element.text = value
   end
 end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiElement] infoTemperature
+--
+function GuiElement.infoTemperature(parent, element, style)
+  if element.type == "fluid" then
+    style = style or "helmod_label_element_black_m"
+    local T = element.temperature
+    local Tmin = element.minimum_temperature 
+    local Tmax = element.maximum_temperature 
+    if T ~= nil then
+      local caption = {"",  T, "°"}
+      GuiElement.add(parent, GuiLabel("temperature"):caption(caption):style(style))
+    end
+    if Tmin ~= nil or Tmax ~= nil then
+      Tmin = Tmin or -1e300
+      Tmax = Tmax or 1e300
+      if Tmin > -1e300 and Tmax > 1e300 then
+        local caption_min = {"",  "≥", Tmin, "°"}
+        GuiElement.add(parent, GuiLabel("temperature_min"):caption(caption_min):style(style))
+      end
+      if Tmin < -1e300 and Tmax < 1e300 then
+        local caption_max = {"", "≤", Tmax, "°"}
+        GuiElement.add(parent, GuiLabel("temperature_max"):caption(caption_max):style(style))
+      end
+      if Tmin > -1e300 and Tmax < 1e300 then
+        local caption_min = {"", "≥", Tmin, "°"}
+        GuiElement.add(parent, GuiLabel("temperature_min"):caption(caption_min):style(style))
+        local caption_max = {"", "≤", Tmax, "°"}
+        GuiElement.add(parent, GuiLabel("temperature_max"):caption(caption_max):style(style))
+      end
+      
+    end
+  end
+end
+
+

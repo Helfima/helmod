@@ -1,4 +1,23 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.11.8
+Date: 2020-09-18
+  Changes:
+    - Removed order production line by group (random order)
+---------------------------------------------------------------------------------------------------
+Version: 0.11.7
+Date: 2020-09-18
+  Features:
+    - Added temperature option in recipe edition
+    - Added production line edition (note, group ect..)
+  Changes:
+    - implemented fluid with temperature
+    - order production line by group
+    - moved preference and richtext icons
+  Bugfixes:
+    - fixed append burnt product of energy recipes
+    - fixed fake helmod burnt recipes are now in helmod group (for selector)
+    - fixed copy/paste and exchange block
+---------------------------------------------------------------------------------------------------
 Version: 0.11.6
 Date: 2020-09-14
   Features:

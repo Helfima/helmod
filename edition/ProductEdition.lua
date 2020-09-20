@@ -91,7 +91,7 @@ function ProductEdition:onUpdate(event)
     if block.by_product == false then
       block_elements = block.ingredients
     end
-    local element_name = event.item3
+    local element_name = event.item4
     if block_elements ~= nil and block_elements[element_name] ~= nil then
       product = block_elements[element_name]
       product_count = product.input or 0
@@ -133,7 +133,7 @@ function ProductEdition:updateInfo(event)
     
     GuiElement.add(table_panel, GuiLabel("quantity-label"):caption(caption))
     local cell, button
-    cell, input_quantity, button = GuiCellInput(self.classname, "product-update", event.item1, product.name):text(count):create(table_panel)
+    cell, input_quantity, button = GuiCellInput(self.classname, "product-update", event.item1, product.name, Product(product):getTableKey()):text(count):create(table_panel)
     input_quantity.focus()
     input_quantity.select_all()
     input_quantity.style.minimal_width = 100
@@ -192,7 +192,7 @@ function ProductEdition:onEvent(event)
           quantity = quantity * 1e6
         end
         if quantity == 0 then quantity = nil end
-        ModelBuilder.updateProduct(event.item1, event.item2, quantity)
+        ModelBuilder.updateProduct(event.item1, event.item3, quantity)
         ModelCompute.update()
         self:close()
         Controller:send("on_gui_refresh", event)
