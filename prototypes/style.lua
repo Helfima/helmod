@@ -686,7 +686,7 @@ default_gui["helmod_button_small_bold_start"] = {
 
 -------------------------------------------------------------------------------
 -- Style of button
---
+
 -- @field [parent=#Button] small_bold_middle
 
 default_gui["helmod_button_small_bold_middle"] = {

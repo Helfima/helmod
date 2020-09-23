@@ -269,43 +269,50 @@ end
 -- @param #LuaEvent event
 --
 function HelpPanel:updateContent(event)
-  local content_panel = self:getContentScrollPanel()
-  if content_panel then
-    content_panel.clear()
+  local scroll_panel = self:getContentScrollPanel()
+  if scroll_panel then
+    scroll_panel.clear()
   end
 
   local selected_help = User.getParameter("selected_help") or {section = "getting_start", content = "getting_start"}
   local section = help_data[selected_help.section]
   local content_selected = nil
   if section then
-    GuiElement.add(content_panel, GuiLabel(section.name, "name"):caption({string.format("helmod_help.%s", section.name)}):style("helmod_label_help_title"))
-    GuiElement.add(content_panel, GuiLabel(section.name, "desc"):caption({string.format("helmod_help.%s-desc", section.name)}):style("helmod_label_help"))
+    -- section panel
+    local section_caption_name = {string.format("helmod_help.%s", section.name)}
+    local section_caption_desc = {string.format("helmod_help.%s-desc", section.name)}
+    local section_panel = GuiElement.add(scroll_panel, GuiFlowV("section", section.name))
+    -- section header
+    GuiElement.add(section_panel, GuiLabel("header"):caption({"", "[font=heading-1]", section_caption_name, "[/font]"}):style("helmod_label_help"))
+    GuiElement.add(section_panel, GuiLabel(section.name, "desc"):caption({"", "\t\t\t",section_caption_desc}):style("helmod_label_help"))
     for key,content in pairs(section.content) do
-      local section_panel = GuiElement.add(content_panel, GuiFrameV(section.name, "panel", key):style(helmod_frame_style.section))
-      local section_title = GuiElement.add(section_panel, GuiLabel(section.name, "title", key):caption({string.format("helmod_help.%s", content.localised_text)}):style("helmod_label_help_title"))
+      local content_panel = GuiElement.add(section_panel, GuiFrameV(section.name, "panel", key):style(helmod_frame_style.section))
+      local content_title_name = {string.format("helmod_help.%s", content.localised_text)}
+      local content_title = GuiElement.add(content_panel, GuiLabel(section.name, "title", key):caption({"", "[font=heading-2]", content_title_name, "[/font]"}):style("helmod_label_help_title"))
       if content.desc then
-        GuiElement.add(section_panel, GuiLabel(section.name, "desc", key):caption({string.format("helmod_help.%s-desc", content.localised_text)}):style("helmod_label_help"))
+        GuiElement.add(content_panel, GuiLabel(section.name, "desc", key):caption({string.format("helmod_help.%s-desc", content.localised_text)}):style("helmod_label_help"))
       end
       if content.sprite then
-        GuiElement.add(section_panel, GuiSprite():sprite("helmod_"..content.sprite))
+        GuiElement.add(content_panel, GuiSprite():sprite("helmod_"..content.sprite))
       end
 
       local column = 1
-      local content_table = GuiElement.add(section_panel, GuiTable(section.name, "list", key):column(column):style("helmod_table-help"))
+      --local content_list = GuiElement.add(content_panel, GuiTable(section.name, "list", key):column(column):style("helmod_table-help"))
+      local content_list = GuiElement.add(content_panel, GuiFlowV(section.name, "list", key))
       for line=1, content.count do
         local localised_text = {string.format("helmod_help.%s-%s", content.localised_text, line)}
         if content.list == "number" then
-          GuiElement.add(content_table, GuiLabel(section.name, key, line):caption({"", line, ": ", localised_text}):style("helmod_label_help_text"))
+          GuiElement.add(content_list, GuiLabel(section.name, key, line):caption({"", "[font=default-bold]", line, ":[/font] ", localised_text}):style("helmod_label_help_text"))
         else
-          GuiElement.add(content_table, GuiLabel(section.name, key, line):caption(localised_text):style("helmod_label_help_normal"))
+          GuiElement.add(content_list, GuiLabel(section.name, key, line):caption(localised_text):style("helmod_label_help_normal"))
         end
       end
       if key == selected_help.content then
-        content_selected = section_title
+        content_selected = content_title
       end
     end
     if content_selected ~= nil then
-      content_panel.scroll_to_element(content_selected, "top-third")
+      scroll_panel.scroll_to_element(content_selected, "top-third")
     end
   end
 end

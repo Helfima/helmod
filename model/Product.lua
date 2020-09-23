@@ -257,10 +257,10 @@ end
 --
 -- @function [parent=#Product] countContainer
 --
--- @param #number count
--- @param #string container name
+--- @param count number
+--- @param container string
 --
--- @return #number
+--- @return number
 --
 function Product:countContainer(count, container)
   if count == nil then return 0 end

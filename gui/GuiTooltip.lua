@@ -129,11 +129,15 @@ function GuiTooltip:appendLogistic(tooltip, element)
         local item_logistic = Player.getDefaultItemLogistic(type)
         local item_prototype = Product(element)
         local total_value = Format.formatNumberElement(item_prototype:countContainer(element.count, item_logistic))
+        local info = ""
+        if type == "inserter" then
+          info = string.format(" (%s)", EntityPrototype(item_logistic):getInserterCapacity())
+        end
         if element.limit_count ~= nil and element.limit_count > 0 then
           local limit_value = Format.formatNumberElement(item_prototype:countContainer(element.limit_count, item_logistic))
-          table.insert(tooltip_section, {"", "\n", string.format("[%s=%s]", "entity", item_logistic), " ", helmod_tag.font.default_bold, " x ", limit_value, "/", total_value, helmod_tag.font.close})
+          table.insert(tooltip_section, {"", "\n", string.format("[%s=%s]", "entity", item_logistic), " ", helmod_tag.font.default_bold, " x ", limit_value, "/", total_value, helmod_tag.font.close, info})
         else
-          table.insert(tooltip_section, {"", "\n", string.format("[%s=%s]", "entity", item_logistic), " ", helmod_tag.font.default_bold, " x ", total_value, helmod_tag.font.close})
+          table.insert(tooltip_section, {"", "\n", string.format("[%s=%s]", "entity", item_logistic), " ", helmod_tag.font.default_bold, " x ", total_value, helmod_tag.font.close, info})
         end
       end
     end
@@ -392,6 +396,15 @@ function GuiTooltipFactory:create()
     local type = "entity"
     local prototype = EntityPrototype(self.m_element)
     table.insert(tooltip, {"", "\n", string.format("[%s=%s]", type, self.m_element.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, prototype:getLocalisedName(), helmod_tag.font.close, helmod_tag.color.close})
+    if self.m_element.combo then
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_label.beacon-on-factory"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, self.m_element.combo, helmod_tag.font.close})
+    end
+    if self.m_element.per_factory then
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_label.beacon-per-factory"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, self.m_element.per_factory, helmod_tag.font.close})
+    end
+    if self.m_element.per_factory_constant then
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_label.beacon-per-factory-constant"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, self.m_element.per_factory_constant, helmod_tag.font.close})
+    end
     local fuel = prototype:getFluel()
     if fuel ~= nil then
       table.insert(tooltip, {"", "\n", string.format("[%s=%s]", fuel.type, fuel.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close})
