@@ -349,11 +349,11 @@ function RecipePrototype:getIngredients(factory)
         consumption_effect = 1 + (factory.effects.consumption or 0)
       end
     end
-
+    local factory_prototype = EntityPrototype(factory)
+    local energy_prototype = factory_prototype:getEnergySource()
+    local energy_type = factory_prototype:getEnergyTypeInput()
+    
     if self.lua_type ~= "energy" then
-      local factory_prototype = EntityPrototype(factory)
-      local energy_prototype = factory_prototype:getEnergySource()
-      local energy_type = factory_prototype:getEnergyTypeInput()
       -- recipe
       if energy_type == "burner" then
         if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then

@@ -410,6 +410,77 @@ function ProductionBlockTab:updateData(event)
 end
 
 -------------------------------------------------------------------------------
+-- Build Navigator
+--
+-- @function [parent=#ProductionBlockTab] bluidNavigator
+--
+function ProductionBlockTab:bluidNavigator(scroll_panel1, current_block)
+  local model = Model.getModel()
+  local tree_panel = GuiElement.add(scroll_panel1, GuiTable("tree"):column(1):style(helmod_table_style.list))
+  tree_panel.vertical_centering = false
+
+  local last_element = nil
+  -- col recipe
+  local color = "gray"
+  local cell_recipe = GuiElement.add(tree_panel, GuiTable("recipe-new"):column(1):style(helmod_table_style.list))
+  if current_block == "new" then
+    last_element = cell_recipe
+    color = "orange"
+  end
+
+  -- bluid tree
+  local root_block = model.blocks[model.root_block]
+  if root_block ~= nil then
+    self:bluidLeaf(tree_panel, root_block, current_block, 0)
+    self:bluidTree(tree_panel, root_block, current_block, 1)
+    if last_element ~= nil then
+      scroll_panel1.scroll_to_element(last_element)
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Build Tree
+--
+-- @function [parent=#ProductionBlockTab] bluidTree
+--
+function ProductionBlockTab:bluidTree(tree_panel, block, current_block, level)
+  if block ~= nil and block.children ~= nil then
+    local model = Model.getModel()
+  
+    for _, children in spairs(block.children, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
+      if children.type == "block" then
+        local children_block = model.blocks[children.id]
+        self:bluidLeaf(tree_panel, children_block, current_block, level)
+        self:bluidTree(tree_panel, children_block, current_block, level + 1)
+      end
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Build Tree
+--
+-- @function [parent=#ProductionBlockTab] bluidTree
+--
+function ProductionBlockTab:bluidLeaf(tree_panel, block, current_block, level)
+  if block ~= nil then
+      local color = "gray"
+      local cell_tree = GuiElement.add(tree_panel, GuiTable("recipe", block.id):column(1):style(helmod_table_style.list))
+      if current_block == block.id then
+        --last_element = cell_tree
+        color = "orange"
+      end
+      if block.name == nil then
+        local cell_block = GuiElement.add(cell_tree, GuiButton(self.classname, "change-tab", "HMProductionBlockTab", block.id):sprite("menu", "hangar-white", "hangar"):style("helmod_button_menu"):tooltip("tooltip.edit-block"))
+      else
+        local cell_block = GuiElement.add(cell_tree, GuiCellBlock(self.classname, "change-tab", "HMProductionBlockTab", block.id):element(block):tooltip("tooltip.edit-block"):color(color))
+        cell_block.style.left_padding = 10 * level
+      end
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Add table header
 --
 -- @function [parent=#ProductionBlockTab] addTableHeader

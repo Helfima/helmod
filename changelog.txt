@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.11.9
+Date: 2020-09-24
+  Changes:
+    - changed tooltip information for beacon in edit recipe
+  Bugfixes:
+    - fixed energy recipes (steam missing)
+---------------------------------------------------------------------------------------------------
 Version: 0.11.8
 Date: 2020-09-18
   Changes:

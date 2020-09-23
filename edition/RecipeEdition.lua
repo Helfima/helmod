@@ -1064,9 +1064,6 @@ function RecipeEdition:updateBeaconInfo(event)
     GuiElement.add(input_panel, GuiLabel("label-combo"):caption({"helmod_label.beacon-on-factory"}):tooltip({"tooltip.beacon-on-factory"}))
     GuiElement.add(input_panel, GuiTextField(self.classname, "beacon-update", block_id, recipe_id, "combo"):text(beacon.combo):style("helmod_textfield"):tooltip({"tooltip.beacon-on-factory"}))
 
-    --GuiElement.add(input_panel, GuiLabel("label-factory"):caption({"helmod_label.factory-per-beacon"}):tooltip({"tooltip.factory-per-beacon"}))
-    --GuiElement.add(input_panel, GuiTextField(self.classname, "beacon-update", block_id, recipe_id, "factory"):text(beacon.factory):style("helmod_textfield"):tooltip({"tooltip.factory-per-beacon"}))
-
     GuiElement.add(input_panel, GuiLabel("label-by-factory"):caption({"helmod_label.beacon-per-factory"}):tooltip({"tooltip.beacon-per-factory"}))
     GuiElement.add(input_panel, GuiTextField(self.classname, "beacon-update", block_id, recipe_id, "per_factory"):text(beacon.per_factory):style("helmod_textfield"):tooltip({"tooltip.beacon-per-factory"}))
 
