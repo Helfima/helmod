@@ -10,6 +10,13 @@ PrototypeFiltersPanel = newclass(Form,function(base,classname)
   base.add_special_button = true
 end)
 
+local modes = nil
+local filter_types = nil
+local inverts = nil
+local comparisons = nil
+local collision_mask = {}
+local collision_mask_mode = {}
+
 -------------------------------------------------------------------------------
 -- On initialization
 --
@@ -199,12 +206,6 @@ function PrototypeFiltersPanel:onEvent(event)
   end
 end
 
-local modes = nil
-local filter_types = nil
-local inverts = nil
-local comparisons = nil
-local collision_mask = {}
-local collision_mask_mode = {}
 -------------------------------------------------------------------------------
 -- On update
 --

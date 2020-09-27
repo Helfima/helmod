@@ -429,7 +429,7 @@ function AbstractTab:updateMenuPanel(event)
   time_panel.clear()
 
   local group_special = GuiElement.add(time_panel, GuiFlowH("group_special"))
-  GuiElement.add(group_special, GuiButton("HMRichTextPanel", "OPEN", block_id):sprite("menu", "text-white", "text"):style("helmod_button_menu"):tooltip({"helmod_panel.richtext"}))
+  GuiElement.add(group_special, GuiButton("HMRichTextPanel", "OPEN"):sprite("menu", "text-white", "text"):style("helmod_button_menu"):tooltip({"helmod_panel.richtext"}))
   GuiElement.add(group_special, GuiButton("HMCalculator", "OPEN"):sprite("menu", "calculator-white", "calculator"):style("helmod_button_menu"):tooltip({"helmod_calculator-panel.title"}))
   
   local items = {}

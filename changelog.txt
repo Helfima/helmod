@@ -1,4 +1,19 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.11.11
+Date: 2020-09-27
+  Changes:
+    - Removed ingredient for all offshore-pump (ex: seafloor pump)
+  Bugfixes:
+    - fixed compunting ingredient fluid without temperature not consume fluid with temperature
+---------------------------------------------------------------------------------------------------
+Version: 0.11.10
+Date: 2020-09-24
+  Changes:
+    - Added some control tooltip information
+  Bugfixes:
+    - fixed error computing with contraint after switch Product input or Ingredient Input
+    - fixed translated name switch state (inverted)
+---------------------------------------------------------------------------------------------------
 Version: 0.11.9
 Date: 2020-09-24
   Changes:

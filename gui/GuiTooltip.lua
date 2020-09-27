@@ -68,13 +68,42 @@ end
 
 -------------------------------------------------------------------------------
 --
--- @function [parent=#GuiTooltip] appendContraint
+-- @function [parent=#GuiTooltip] appendContraintInfo
 -- @return #GuiCell
 --
-function GuiTooltip:appendContraint(tooltip, element)
+function GuiTooltip:appendContraintInfo(tooltip, element)
   if self.m_with_contraint_info == true then
-    table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"tooltip.contraint-plus"}, helmod_tag.color.close})
-    table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"tooltip.contraint-minus"}, helmod_tag.color.close})
+    local tooltip_section = {""}
+    table.insert(tooltip_section, {"", "\n", "----------------------"})
+    table.insert(tooltip_section, {"", "\n", helmod_tag.font.default_bold, {"tooltip.info-control"}, helmod_tag.font.close})
+    table.insert(tooltip_section, {"", "\n", "[img=helmod-tooltip-blank]", " ", {"tooltip.contraint-plus"}})
+    table.insert(tooltip_section, {"", "\n", "[img=helmod-tooltip-blank]", " ", {"tooltip.contraint-minus"}})
+    table.insert(tooltip, tooltip_section)
+  end
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiTooltip] withLinkIntermediateInfo
+-- @return #GuiCell
+--
+function GuiTooltip:withLinkIntermediateInfo()
+  self.m_with_link_intermediate_info = true
+  return self
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiTooltip] appendLinkInfo
+-- @return #GuiCell
+--
+function GuiTooltip:appendLinkIntermediateInfo(tooltip, element)
+  if self.m_with_link_intermediate_info == true then
+    local tooltip_section = {""}
+    table.insert(tooltip_section, {"", "\n", "----------------------"})
+    table.insert(tooltip_section, {"", "\n", helmod_tag.font.default_bold, {"tooltip.info-control"}, helmod_tag.font.close})
+    table.insert(tooltip_section, {"", "\n", "[img=helmod-tooltip-blank]", " ", {"tooltip.link-intermediate"}})
+    table.insert(tooltip, tooltip_section)
   end
 end
 
@@ -131,7 +160,7 @@ function GuiTooltip:appendLogistic(tooltip, element)
         local total_value = Format.formatNumberElement(item_prototype:countContainer(element.count, item_logistic))
         local info = ""
         if type == "inserter" then
-          info = string.format(" (%s)", EntityPrototype(item_logistic):getInserterCapacity())
+          info = {"", " (", {"helmod_common.capacity"}, string.format(":%s", EntityPrototype(item_logistic):getInserterCapacity()), ")"}
         end
         if element.limit_count ~= nil and element.limit_count > 0 then
           local limit_value = Format.formatNumberElement(item_prototype:countContainer(element.limit_count, item_logistic))
@@ -326,6 +355,8 @@ function GuiTooltipElement:create()
     self:appendEnergyConsumption(tooltip, element);
     self:appendFlow(tooltip, element);
     self:appendLogistic(tooltip, element);
+    self:appendContraintInfo(tooltip, element);
+    self:appendLinkIntermediateInfo(tooltip, element);
     self:appendDebug(tooltip, element)
 
   end

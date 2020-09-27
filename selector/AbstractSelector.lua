@@ -587,6 +587,7 @@ function AbstractSelector:createElementLists(event)
     local step_list = User.getModGlobalSetting("user_cache_step") or 100
     local index = 0
     local table_element = {}
+    local query_list = {}
     event.continue = true
     -- list_products[element.name][type - lua_recipe.name]
     for key, element in pairs(list) do
@@ -711,7 +712,7 @@ end
 --
 -- @param #LuaEvent event
 --
-function AbstractSelector:updateFailMessage(event)
+function AbstractSelector:updateFailMessage(message)
   local panel = self:getGroupsPanel()
   local item_list_panel = self:getItemListPanel()
   item_list_panel.clear()

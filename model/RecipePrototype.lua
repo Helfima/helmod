@@ -352,7 +352,10 @@ function RecipePrototype:getIngredients(factory)
     local factory_prototype = EntityPrototype(factory)
     local energy_prototype = factory_prototype:getEnergySource()
     local energy_type = factory_prototype:getEnergyTypeInput()
-    
+    if factory_prototype:getType() == "offshore-pump" then
+      return {}
+    end
+
     if self.lua_type ~= "energy" then
       -- recipe
       if energy_type == "burner" then

@@ -29,7 +29,7 @@ end
 -- @function [parent=#DispatcherController] unbind
 --
 function DispatcherController:unbind(event_type, class, class_handler)
-  if class == nil and handler == nil then
+  if class == nil and class_handler == nil then
     self.handlers[event_type] = nil
   elseif class_handler == nil and self.handlers[event_type] then
     self.handlers[event_type][class.classname] = nil

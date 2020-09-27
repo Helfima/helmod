@@ -108,8 +108,29 @@ end
 -- @return #GuiCell
 --
 function GuiCell:contraintIcon(type)
-  self.m_with_contraint_info = true
   self.m_contraint_icon = type
+  return self
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiCell] contraintInfo
+-- @param #boolean with
+-- @return #GuiCell
+--
+function GuiCell:contraintInfo(with)
+  self.m_with_contraint_info = with or false
+  return self
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiTooltip] withLinkIntermediateInfo
+-- @param #boolean with
+-- @return #GuiCell
+--
+function GuiCell:withLinkIntermediateInfo(with)
+  self.m_with_link_intermediate_info = with or false
   return self
 end
 
@@ -753,6 +774,9 @@ function GuiCellElement:create(parent)
   else
     tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo()
   end
+  if self.m_with_contraint_info == true then
+    tooltip:withContraintInfo()
+  end
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type or "entity", element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   GuiElement.infoTemperature(row1, element)
   if element.burnt then
@@ -864,6 +888,9 @@ function GuiCellElementM:create(parent)
   else
     tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo()
   end
+  if self.m_with_link_intermediate_info == true then
+    tooltip:withLinkIntermediateInfo()
+  end
   local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(element.type or "entity", element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   GuiElement.infoTemperature(row1, element)
   if self.m_info_icon then
@@ -956,16 +983,16 @@ function GuiCellLabel:create(parent)
 
   if display_cell_mod == "small-text"then
     -- small
-    GuiElement.add(cell, GuiLabel("label1"):caption(self.m_caption):style("helmod_label_icon_text_sm"):tooltip({"helmod_common.total"})).style["minimal_width"] = minimal_width or 45
+    GuiElement.add(cell, GuiLabel("label1"):caption(self.m_caption):style("helmod_label_icon_text_sm"):tooltip({"helmod_common.total"})).style["minimal_width"] = 45
   elseif display_cell_mod == "small-icon" then
     -- small
-    GuiElement.add(cell, GuiLabel("label1"):caption(self.m_caption):style("helmod_label_icon_sm"):tooltip({"helmod_common.total"})).style["minimal_width"] = minimal_width or 45
+    GuiElement.add(cell, GuiLabel("label1"):caption(self.m_caption):style("helmod_label_icon_sm"):tooltip({"helmod_common.total"})).style["minimal_width"] = 45
   elseif display_cell_mod == "by-kilo" then
     -- by-kilo
-    GuiElement.add(cell, GuiLabel("label1"):caption(self.m_caption):style("helmod_label_row_right"):tooltip({"helmod_common.total"})).style["minimal_width"] = minimal_width or 50
+    GuiElement.add(cell, GuiLabel("label1"):caption(self.m_caption):style("helmod_label_row_right"):tooltip({"helmod_common.total"})).style["minimal_width"] = 50
   else
     -- default
-    GuiElement.add(cell, GuiLabel("label1"):caption(self.m_caption):style("helmod_label_row_right"):tooltip({"helmod_common.total"})).style["minimal_width"] = minimal_width or 60
+    GuiElement.add(cell, GuiLabel("label1"):caption(self.m_caption):style("helmod_label_row_right"):tooltip({"helmod_common.total"})).style["minimal_width"] = 60
   end
   return cell
 end

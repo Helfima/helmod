@@ -122,7 +122,7 @@ function ModelCompute.update(check_unlink)
           if block_elements ~= nil then
             for _,element in pairs(block_elements) do
               local element_key = Product(element):getTableKey()
-              if (element.state ~= nil and element.state == 1) or (block.products_linked ~= nil and block.products_linked[element_key]) then
+              if (element.state ~= nil and element.state == 1) or (block.products_linked ~= nil and block.products_linked[element_key] == true) then
                 if input[element_key] ~= nil then
                   element.input = (input[element_key] or 0) * factor
                   --element.state = 0
@@ -402,9 +402,9 @@ function ModelCompute.getBlockMatrix(block)
             for index,element in pairs(ingredient_fluids) do
               if element.col_header.name == lua_product.name then
                 local T = lua_product.temperature
-                local Tmin = element.col_header.minimum_temperature 
-                local Tmax = element.col_header.maximum_temperature
-                if T >= Tmin and T <= Tmax then
+                local Tmin = element.col_header.minimum_temperature or -helmod_constant.max_float
+                local Tmax = element.col_header.maximum_temperature or helmod_constant.max_float
+                if T >= Tmin and T <= Tmax and element.col_header.temperature == nil then
                   element.row[col_name] = element.row[element.col_name]
                   element.row[element.col_name] = 0
                   table.remove(ingredient_fluids, index)
@@ -440,7 +440,7 @@ function ModelCompute.getBlockMatrix(block)
           row[col_name] = ( row[col_name] or 0 ) - lua_ingredients[ingredient_key].count * factor
           row_valid = true
           -- lien fluide
-          if lua_ingredient.type == "fluid" and ingredient_key ~= lua_ingredient.name and (lua_ingredient.minimum_temperature ~= nil or lua_ingredient.maximum_temperature ~= nil) then
+          if lua_ingredient.type == "fluid" then
             table.insert(ingredient_fluids, {col_name=col_name,col_header=col_header, row=row})
           end
         end
@@ -457,18 +457,19 @@ function ModelCompute.getBlockMatrix(block)
           col_index[ingredient_key] = index
 
           local col_name = ingredient_key..index
-          col_headers[col_name] = {index=index, key=ingredient_key, name=lua_ingredient.name, type=lua_ingredient.type, is_ingredient = true, tooltip=col_name.."\nIngredient", temperature=lua_ingredient.temperature, minimum_temperature=lua_ingredient.minimum_temperature, maximum_temperature=lua_ingredient.maximum_temperature}
+          local col_header = {index=index, key=ingredient_key, name=lua_ingredient.name, type=lua_ingredient.type, is_ingredient = true, tooltip=col_name.."\nIngredient", temperature=lua_ingredient.temperature, minimum_temperature=lua_ingredient.minimum_temperature, maximum_temperature=lua_ingredient.maximum_temperature}
+          col_headers[col_name] = col_header
           row[col_name] = -lua_ingredients[name].count * factor
           row_valid = true
           if row["Cn"] ~= 0 and row["Cn"].name == name then
             row["Cn"].name = col_name
           end
           -- lien fluide
-          if lua_ingredient.type == "fluid" and ingredient_key ~= lua_ingredient.name and lua_ingredient.temperature ~= nil then
+          if lua_ingredient.type == "fluid" and ingredient_key ~= lua_ingredient.name and lua_ingredient.minimum_temperature ~= nil and lua_ingredient.maximum_temperature ~= nil then
             for index,element in pairs(ingredient_fluids) do
               if element.col_header.name == lua_ingredient.name then
                 local T = element.col_header.temperature
-                local Tmin = lua_ingredient.minimum_temperature 
+                local Tmin = lua_ingredient.minimum_temperature
                 local Tmax = lua_ingredient.maximum_temperature
                 if T >= Tmin and T <= Tmax then
                   element.row[col_name] = element.row[element.col_name]
@@ -500,11 +501,12 @@ function ModelCompute.getBlockMatrix(block)
           col_index[product_key] = index
 
           local col_name = product_key..index
-          col_headers[col_name] = {index=index, key=product_key, name=lua_product.name, type=lua_product.type, is_ingredient = false, tooltip=col_name.."\nProduit", temperature=lua_product.temperature, minimum_temperature=lua_product.minimum_temperature, maximum_temperature=lua_product.maximum_temperature}
+          local col_header = {index=index, key=product_key, name=lua_product.name, type=lua_product.type, is_ingredient = false, tooltip=col_name.."\nProduit", temperature=lua_product.temperature, minimum_temperature=lua_product.minimum_temperature, maximum_temperature=lua_product.maximum_temperature}
+          col_headers[col_name] = col_header
           row[col_name] = ( row[col_name] or 0 ) + lua_product.count * factor
           row_valid = true
           -- lien fluide
-          if lua_product.type == "fluid" and product_key ~= lua_product.name and lua_product.temperature ~= nil then
+          if lua_product.type == "fluid" then
             table.insert(product_fluids, {col_name=col_name,col_header=col_header, row=row})
           end
         end
@@ -546,6 +548,9 @@ function ModelCompute.getBlockMatrix(block)
           end
         end
         colx =colx + 1
+      end
+      if type(rowA[col_cn]) == "table" then
+        rowA[col_cn] = 0
       end
       table.insert(mA, rowA)
     end
@@ -675,7 +680,11 @@ function ModelCompute.computeBlock(block)
         mC, runtimes = my_solver:solve(mA, debug, block.by_factory, time)
       end)
       if not(ok) then
-        Player.print("Matrix solver can not found solution!")
+        if block.solver == true and block.by_factory ~= true then
+          Player.print("Matrix solver can not found solution!")
+        else
+          Player.print("Algebraic solver can not found solution!")
+        end
       end
 
       if User.getModGlobalSetting("debug_solver") == true then

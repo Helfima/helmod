@@ -311,7 +311,7 @@ function BurnerPrototype:getJouleCount()
   local burner_effectivity = self:getEffectivity()
   -- 1W/h = 3600J
   local joule_count = energy_consumption * burner_effectivity / 3600
-  return {type="item", name=factory_fuel:native().name, count=burner_count, is_joule=true}
+  return {type="item", name=factory_fuel:native().name, count=joule_count, is_joule=true}
 end
 
 -------------------------------------------------------------------------------
@@ -370,20 +370,7 @@ function FluidSourcePrototype:getFuelPrototypes()
     return {self.lua_prototype.fluid_box.filter}
   else
     local fuels = Player.getFluidFuelPrototypes()
-    if not(FactorioV017) then
-      return fuels
-    else
-      -- adaptation pour Factorio V0.17
-      local result = {}
-      for key,fuel in pairs(fuels or {}) do
-        result[key] = fuel
-      end
-      local steam = Player.getFluidPrototype("steam")
-      if steam ~= nil then
-        result[steam.name] = steam
-      end
-      return result
-    end
+    return fuels
   end
 end
 

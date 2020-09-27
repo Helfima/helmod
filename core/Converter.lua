@@ -28,6 +28,19 @@ function Converter.trim(s)
   return (s:gsub("^%s*(.-)%s*$", "%1"))
 end
 
+-------------------------------------------------------------------------------
+-- Write table to string
+--
+-- @function [parent=#Converter] write
+--
+-- @param #table data_table
+--
+-- @return #string
+--
+function Converter.write2(data_table)
+  local data_string = serpent.dump(data_table)
+  return game.encode_string(data_string)
+end
 
 -------------------------------------------------------------------------------
 -- Write table to string
@@ -50,6 +63,33 @@ function Converter.write(data_table)
   end
   data_string = data_string .. "\n"
   return data_string
+end
+
+-------------------------------------------------------------------------------
+-- Read string to table
+--
+-- @function [parent=#Converter] read
+--
+-- @param #string data_string
+--
+-- @return #table
+--
+function Converter.read2(data_string)
+  if data_string == nil then return nil end
+  data_string = Converter.trim(data_string)
+  if (string.sub(data_string, 1, 8) ~= "do local") then
+    local ok , err = pcall(function()
+      data_string = game.decode_string(data_string)
+    end)
+    if not(ok) then
+      return nil
+    end
+  end
+  local status, data_table = pcall(loadstring, data_string)
+  if (status) then
+    return data_table()
+  end
+  return nil
 end
 
 -------------------------------------------------------------------------------

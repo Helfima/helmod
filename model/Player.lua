@@ -785,9 +785,6 @@ function Player.getRecipeFluid(name)
   local prototype = fluid_prototype:native()
   local products = {{name=prototype.name, type="fluid", amount=1}}
   local ingredients = {{name=prototype.name, type="fluid", amount=1}}
-  if prototype.name == "water" then
-    ingredients = {}
-  end
   if prototype.name == "steam" then
     ingredients = {{name="water", type="fluid", amount=1}}
   end

@@ -201,12 +201,14 @@ function ProductionBlockTab:updateInput(event)
           local button_action = "production-recipe-ingredient-add"
           local button_tooltip = "tooltip.ingredient"
           local button_color = GuiElement.color_button_default_ingredient
+          local with_link_intermediate = false
           if block_by_product then
             button_action = "production-recipe-ingredient-add"
             button_tooltip = "tooltip.add-recipe"
           else
             button_action = "product-edition"
             button_tooltip = "tooltip.edit-product"
+            with_link_intermediate = true
           end
           -- color
           if lua_ingredient.state == 1 then
@@ -223,7 +225,7 @@ function ProductionBlockTab:updateInput(event)
           else
             button_color = GuiElement.color_button_default_ingredient
           end
-          GuiElement.add(input_table, GuiCellElementM(self.classname, button_action, block.id, "none"):element(ingredient):tooltip(button_tooltip):index(index):color(button_color):byLimit(block.by_limit):contraintIcon(contraint_type))
+          GuiElement.add(input_table, GuiCellElementM(self.classname, button_action, block.id, "none"):element(ingredient):tooltip(button_tooltip):index(index):color(button_color):byLimit(block.by_limit):contraintIcon(contraint_type):withLinkIntermediateInfo(with_link_intermediate))
         end
       end
     end
@@ -288,9 +290,11 @@ function ProductionBlockTab:updateOutput(event)
           local button_action = "production-recipe-product-add"
           local button_tooltip = "tooltip.product"
           local button_color = GuiElement.color_button_default_product
+          local with_link_intermediate = true
           if not(block_by_product) then
             button_action = "production-recipe-product-add"
             button_tooltip = "tooltip.add-recipe"
+            with_link_intermediate = false
           else
             if not(block.unlinked) or block.by_factory == true then
               button_action = "product-info"
@@ -315,7 +319,7 @@ function ProductionBlockTab:updateOutput(event)
           else
             button_color = GuiElement.color_button_default_product
           end
-          GuiElement.add(output_table, GuiCellElementM(self.classname, button_action, block.id, "none"):element(product):tooltip(button_tooltip):index(index):color(button_color):byLimit(block.by_limit):contraintIcon(contraint_type))
+          GuiElement.add(output_table, GuiCellElementM(self.classname, button_action, block.id, "none"):element(product):tooltip(button_tooltip):index(index):color(button_color):byLimit(block.by_limit):contraintIcon(contraint_type):withLinkIntermediateInfo(with_link_intermediate))
         end
       end
     end
@@ -612,7 +616,7 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
         if block.by_product ~= false and recipe.contraint ~= nil and recipe.contraint.name == product.name then
           contraint_type = recipe.contraint.type
         end
-        GuiElement.add(cell_products, GuiCellElement(self.classname, "production-recipe-product-add", block.id, recipe.id):element(product):tooltip("tooltip.add-recipe"):index(index):byLimit(block.by_limit):contraintIcon(contraint_type))
+        GuiElement.add(cell_products, GuiCellElement(self.classname, "production-recipe-product-add", block.id, recipe.id):element(product):tooltip("tooltip.add-recipe"):index(index):byLimit(block.by_limit):contraintIcon(contraint_type):contraintInfo(block.solver ~= true and block.by_product ~= false))
       end
     else
       -- ingredients
@@ -633,7 +637,7 @@ function ProductionBlockTab:addTableRow(gui_table, block, recipe)
         if block.by_product == false and recipe.contraint ~= nil and recipe.contraint.name == ingredient.name then
           contraint_type = recipe.contraint.type
         end
-        GuiElement.add(cell_ingredients, GuiCellElement(self.classname, "production-recipe-ingredient-add", block.id, recipe.id):element(ingredient):tooltip("tooltip.add-recipe"):color(GuiElement.color_button_add):index(index):byLimit(block.by_limit):contraintIcon(contraint_type))
+        GuiElement.add(cell_ingredients, GuiCellElement(self.classname, "production-recipe-ingredient-add", block.id, recipe.id):element(ingredient):tooltip("tooltip.add-recipe"):color(GuiElement.color_button_add):index(index):byLimit(block.by_limit):contraintIcon(contraint_type):contraintInfo(block.solver ~= true and block.by_product == false))
       end
     end
   end
@@ -735,11 +739,7 @@ function ProductionBlockTab:onEvent(event)
     local block = model.blocks[current_block]
     if block.products_linked == nil then block.products_linked = {} end
     if event.control == true and event.item3 ~= "none" then
-      block.products_linked[event.item3] = true
-      ModelCompute.update()
-      Controller:send("on_gui_update", event)
-    elseif event.shift == true and event.item3 ~= "none" then
-      block.products_linked[event.item3] = nil
+      block.products_linked[event.item3] = not(block.products_linked[event.item3])
       ModelCompute.update()
       Controller:send("on_gui_update", event)
     end

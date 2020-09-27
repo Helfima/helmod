@@ -1,3 +1,7 @@
+helmod_constant = {
+  max_float = 1e300
+}
+
 helmod_base_times = {
   { value = 1, caption = "1s", tooltip={"helmod_si.seconde",1}},
   { value = 60, caption = "1", tooltip={"helmod_si.minute",1}},
