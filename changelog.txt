@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.11.12
+Date: 2020-09-28
+  Bugfixes:
+    - fixed overlay info for fluid recipe
+    - fixed water-viscous-mud recipe use offshore-pump instead of liquifier
+---------------------------------------------------------------------------------------------------
 Version: 0.11.11
 Date: 2020-09-27
   Changes:

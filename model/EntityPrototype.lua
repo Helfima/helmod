@@ -205,7 +205,7 @@ function EntityPrototype:getEnergyProduction()
         local fuel_value = 0
         local fluid_fuel = self:getFluidFuelPrototype()
         if fluid_fuel ~= nil then
-          local fuel_value = fluid_fuel:getFuelValue()
+          fuel_value = fluid_fuel:getFuelValue()
           heat_capacity = fluid_fuel:getHeatCapacity()
         end
 

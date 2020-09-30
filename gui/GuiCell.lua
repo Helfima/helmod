@@ -229,6 +229,11 @@ function infoIcon(button, type)
     local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({tooltip}))
     sprite.style.top_padding = -8
   end
+  if type == "fluid" then 
+    local tooltip = "tooltip.resource-recipe"
+    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({tooltip}))
+    sprite.style.top_padding = -8
+  end
   if type == "resource" then 
     local tooltip = "tooltip.resource-recipe"
     local sprite = GuiElement.add(button, GuiSprite("info"):sprite("helmod-tool-jewel"):tooltip({tooltip}))
