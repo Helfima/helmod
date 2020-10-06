@@ -74,7 +74,10 @@ function ModelDebug:buildMatrix(matrix_panel, matrix, pivot)
           elseif value.type == "contraint" then
             GuiElement.add(cell, GuiLabel("cell_value"):caption(value))
           else
-            local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(value.type, value.name):tooltip(value.tooltip))
+            local tooltip = {"", value.name}
+            table.insert(tooltip, {"", "\n", "column: ", value.icol})
+            table.insert(tooltip, {"", "\n", "is_product: ", value.is_product})
+            local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(value.type, value.name):tooltip(tooltip))
             GuiElement.infoTemperature(button, value, "helmod_label_overlay_m")
           end
         else

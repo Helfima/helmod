@@ -545,7 +545,7 @@ function Player.getProductionsCrafting(category, lua_recipe)
     for key, lua_entity in pairs(Player.getOffshorePump()) do
       productions[lua_entity.name] = lua_entity
     end
-  elseif lua_recipe.name ~= nil and lua_recipe.name == "water-viscous-mud" and lua_recipe.category ~= "liquifying" then
+  elseif lua_recipe.name ~= nil and lua_recipe.name == "water-viscous-mud" and lua_recipe.object_name ~= "LuaRecipePrototype" and lua_recipe.type ~= "recipe" then
     for key, lua_entity in pairs(Player.getOffshorePump("water-viscous-mud")) do
       productions[lua_entity.name] = lua_entity
     end

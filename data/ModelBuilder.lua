@@ -909,7 +909,7 @@ function ModelBuilder.copyBlock(from_model, from_block)
     local recipe_index = #from_recipe_ids
     for _, recipe_id in ipairs(from_recipe_ids) do
       local recipe = from_block.recipes[recipe_id]
-      local recipe_prototype = RecipePrototype.find(recipe)
+      local recipe_prototype = RecipePrototype(recipe)
       if recipe_prototype:native() ~= nil then
         -- ajoute le bloc si il n'existe pas
         if model.blocks[to_block_id] == nil then
@@ -919,6 +919,7 @@ function ModelBuilder.copyBlock(from_model, from_block)
           to_block.unlinked = from_block.unlinked
           to_block.solver = from_block.solver
           to_block.isEnergy = from_block.isEnergy
+          to_block.by_product = from_block.by_product
           
           -- copy input
           if from_block.products ~= nil then

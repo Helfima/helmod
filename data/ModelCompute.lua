@@ -290,8 +290,6 @@ function ModelCompute.getBlockMatrix(block)
     local col_headers = {}
     local col_index = {}
     local rows = {}
-    local ingredient_fluids = {}
-    local product_fluids = {}
     
     col_headers["B"] = {index=1, name="B", type="none", tooltip="Base"} -- Base
     col_headers["M"] = {index=1, name="M", type="none", tooltip="Matrix calculation"} -- Matrix calculation
@@ -303,8 +301,6 @@ function ModelCompute.getBlockMatrix(block)
     col_headers["E"] = {index=1, name="E", type="none", tooltip="Energy"} -- Energy
     col_headers["C"] = {index=1, name="C", type="none", tooltip="Coefficient"} -- Coefficient ou resultat
     -- begin loop recipes
-    local irow = 1
-
     local factor = 1
     local sorter = function(t,a,b) return t[b].index > t[a].index end
     if block.by_product == false then
@@ -397,22 +393,7 @@ function ModelCompute.getBlockMatrix(block)
           if row["Cn"] ~= 0 and row["Cn"].name == name then
             row["Cn"].name = col_name
           end
-          -- lien fluide
-          if lua_product.type == "fluid" and product_key ~= lua_product.name and lua_product.temperature ~= nil then
-            for index,element in pairs(ingredient_fluids) do
-              if element.col_header.name == lua_product.name then
-                local T = lua_product.temperature
-                local Tmin = element.col_header.minimum_temperature or -helmod_constant.max_float
-                local Tmax = element.col_header.maximum_temperature or helmod_constant.max_float
-                if T >= Tmin and T <= Tmax and element.col_header.temperature == nil then
-                  element.row[col_name] = element.row[element.col_name]
-                  element.row[element.col_name] = 0
-                  table.remove(ingredient_fluids, index)
-                  break
-                end
-              end
-            end
-          end
+          
         end
         -- prepare header ingredients
         for name, lua_ingredient in pairs(lua_ingredients) do
@@ -439,10 +420,7 @@ function ModelCompute.getBlockMatrix(block)
           col_headers[col_name] = col_header
           row[col_name] = ( row[col_name] or 0 ) - lua_ingredients[ingredient_key].count * factor
           row_valid = true
-          -- lien fluide
-          if lua_ingredient.type == "fluid" then
-            table.insert(ingredient_fluids, {col_name=col_name,col_header=col_header, row=row})
-          end
+          
         end
       else
         -- prepare header ingredients
@@ -464,22 +442,7 @@ function ModelCompute.getBlockMatrix(block)
           if row["Cn"] ~= 0 and row["Cn"].name == name then
             row["Cn"].name = col_name
           end
-          -- lien fluide
-          if lua_ingredient.type == "fluid" and ingredient_key ~= lua_ingredient.name and lua_ingredient.minimum_temperature ~= nil and lua_ingredient.maximum_temperature ~= nil then
-            for index,element in pairs(ingredient_fluids) do
-              if element.col_header.name == lua_ingredient.name then
-                local T = element.col_header.temperature
-                local Tmin = lua_ingredient.minimum_temperature
-                local Tmax = lua_ingredient.maximum_temperature
-                if T >= Tmin and T <= Tmax then
-                  element.row[col_name] = element.row[element.col_name]
-                  element.row[element.col_name] = 0
-                  table.remove(product_fluids, index)
-                  break
-                end
-              end
-            end
-          end
+          
         end
         -- prepare header products
         for name, lua_product in pairs(lua_products) do
@@ -505,10 +468,7 @@ function ModelCompute.getBlockMatrix(block)
           col_headers[col_name] = col_header
           row[col_name] = ( row[col_name] or 0 ) + lua_product.count * factor
           row_valid = true
-          -- lien fluide
-          if lua_product.type == "fluid" then
-            table.insert(product_fluids, {col_name=col_name,col_header=col_header, row=row})
-          end
+          
         end
       end
       if row_valid then
@@ -558,15 +518,15 @@ function ModelCompute.getBlockMatrix(block)
     local row_input = {}
     local row_z = {}
     local input_ready = {}
+    local block_elements = block.products
+    if block.by_product == false then
+      block_elements = block.ingredients
+    end
     for column,col_header in pairs(col_headers) do
       if col_header.name == "B" then
         table.insert(row_input, {name="Input", type="none"})
         table.insert(row_z, {name="Z", type="none"})
       else
-        local block_elements = block.products
-        if block.by_product == false then
-          block_elements = block.ingredients
-        end
         if block_elements ~= nil and block_elements[col_header.key] ~= nil and not(input_ready[col_header.name]) and col_header.index == 1 then
           table.insert(row_input, block_elements[col_header.key].input or 0)
           input_ready[col_header.name] = true
@@ -578,9 +538,85 @@ function ModelCompute.getBlockMatrix(block)
     end
     table.insert(mA, 2, row_input)
     table.insert(mA, row_z)
-
+    ModelCompute.linkTemperatureFluid(mA)
     return mA
   end
+end
+
+-------------------------------------------------------------------------------
+-- Link Temperature Fluid
+--
+-- @function [parent=#ModelCompute] linkTemperatureFluid
+--
+-- @param #table matrix
+--
+function ModelCompute.linkTemperatureFluid(mA)
+  local ingredient_fluids = {}
+  local product_fluids = {}
+  for column,col_header in pairs(mA[1]) do
+    col_header.icol = column
+    if col_header.type == "fluid" then
+      local is_product = true
+      -- check is_product
+      for irow,row in pairs(mA) do
+        if irow > 2 and irow < #mA then
+          local value = row[column]
+          if value < 0 then
+            is_product = false
+          end
+        end
+      end
+      col_header.is_product = is_product
+      if is_product == true then
+        product_fluids[col_header.key] = col_header
+      else
+        ingredient_fluids[col_header.key] = col_header
+      end
+    end
+  end
+  for _,product in pairs(product_fluids) do
+    local T = product.temperature
+    for key,ingredient in pairs(ingredient_fluids) do
+      if product.name == ingredient.name then
+        local T2 = ingredient.temperature
+        local T2min = ingredient.minimum_temperature
+        local T2max = ingredient.maximum_temperature
+        if T ~= nil or T2 ~= nil or T2min ~= nil or T2max ~= nil then
+          -- traitement seulement si une temperature
+          if T2min == nil and T2max == nil then
+            -- Temperature sans intervale
+            if T == nil or T2 == nil or T2 == T then
+              for irow,row in pairs(mA) do
+                if irow > 2 and irow < #mA and row[ingredient.icol] ~= 0 then
+                  row[product.icol] = row[ingredient.icol]
+                  row[ingredient.icol] = 0
+                end
+              end
+              ingredient_fluids[key] = nil
+              break
+            end
+          else
+            -- Temperature avec intervale
+            -- securise les valeurs
+            T = T or 25
+            T2min = T2min or -helmod_constant.max_float
+            T2max = T2max or helmod_constant.max_float
+            if T >= T2min and T <= T2max then
+              for irow,row in pairs(mA) do
+                if irow > 2 and irow < #mA and row[ingredient.icol] ~= 0 then
+                  row[product.icol] = row[ingredient.icol]
+                  row[ingredient.icol] = 0
+                end
+              end
+              ingredient_fluids[key] = nil
+              break
+            end
+          end
+        end
+      end
+    end
+  end
+  return mA
 end
 
 -------------------------------------------------------------------------------
@@ -597,12 +633,9 @@ function ModelCompute.prepareBlock(block)
     local block_ingredients = {}
     -- preparation
     for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
-      local row = {}
-
-      local row_valid = false
+      
       local recipe_prototype = RecipePrototype(recipe)
-      local lua_recipe = recipe_prototype:native()
-
+      
       for i, lua_product in pairs(recipe_prototype:getProducts(recipe.factory)) do
         local product_key = Product(lua_product):getTableKey()
         block_products[product_key] = {name=lua_product.name, type=lua_product.type, count = 0, temperature=lua_product.temperature, minimum_temperature=lua_product.minimum_temperature, maximum_temperature=lua_product.maximum_temperature}
@@ -700,7 +733,6 @@ function ModelCompute.computeBlock(block)
     if mC ~= nil then
       -- ratio pour le calcul du nombre de block
       local ratio = 1
-      local ratioRecipe = nil
       -- calcul ordonnee sur les recipes du block
       local row_index = my_solver.row_input + 1
       local sorter = function(t,a,b) return t[b].index > t[a].index end
@@ -730,7 +762,6 @@ function ModelCompute.computeBlock(block)
           local currentRatio = recipe.factory.limit/recipe.factory.count
           if currentRatio < ratio then
             ratio = currentRatio
-            ratioRecipe = recipe.index
             -- block number
             block.count = recipe.factory.count/recipe.factory.limit
             -- subblock energy

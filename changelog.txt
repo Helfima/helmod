@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.11.13
+Date: 2020-10-05
+  Changes:
+    - Changed solve choose fluid with tempearture
+  Bugfixes:
+    - fixed copy/paste and exchange block
+    - fixed problem with water-viscous-mud recipe to select machine in recipe edition
+---------------------------------------------------------------------------------------------------
 Version: 0.11.12
 Date: 2020-09-28
   Bugfixes:

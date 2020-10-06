@@ -5,7 +5,6 @@
 
 SolverSimplex = newclass(Solver,function(base, object)
   Solver.init(base, object)
-  base.isTax = false
 end)
 
 -------------------------------------------------------------------------------
@@ -121,19 +120,6 @@ function SolverSimplex:prepare(M)
   -- prepare les headers
   local Mx = self:clone(M)
   
-  if self.isTax then
-    -- ajoute la colonne Tax
-    for irow,row in pairs(Mx) do
-      if irow == 1 then
-        table.insert(Mx[1], {name="T", type="none"})
-      elseif irow <= self.row_input or irow == #Mx then
-        table.insert(row,0)
-      else
-        table.insert(row,-1)
-      end
-      Mx[irow] = row
-    end
-  end
   -- ajoute les recettes d'ingredient
   -- initialise l'analyse
   local ckeck_cols = {}
@@ -176,10 +162,6 @@ function SolverSimplex:prepare(M)
       table.insert(Mx, #Mx,row)
       index = index + 1
     end
-  end
-  if self.isTax then
-    -- valeur TAX
-    Mx[#Mx-1][self.col_start] = 1
   end
   -- ajoute les row en colonne
   local num_row = rawlen(M)-self.row_input-1
@@ -266,7 +248,6 @@ function SolverSimplex:tableCompute(Mx, Mi)
     if irow > self.row_input and irow < #Mx then
       -- colonne correspondant a la recette
       local icol = #Mx[1] + irow - self.row_input
-      if self.isTax then icol = icol + 1 end
       Mx[irow][self.col_R] = - Mi[#Mi][icol] -- moins la valeur affichee dans Z
       Mx[irow][self.col_P] = 0
     end
