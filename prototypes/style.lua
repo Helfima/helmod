@@ -276,6 +276,60 @@ default_gui["helmod_button_default"] = {
   stretch_image_to_widget_size = true
 }
 
+local corner_size2 = {8, 8}
+default_gui["helmod_button_help_menu"] = {
+  type = "button_style",
+  font = "helmod_font_bold",
+  horizontal_align = "left",
+  top_padding = 2,
+  right_padding = 2,
+  bottom_padding = 2,
+  left_padding = 2,
+  top_margin = 2,
+  bottom_margin = 0,
+  height = 28,
+  default_font_color={r=255/255, g=230/255, b=192/255},
+  default_graphical_set = compositionIcon("__core__/graphics/gui-new.png", corner_size2, {0, 0}),
+  hovered_font_color={r=0, g=0, b=0},
+  hovered_graphical_set = compositionIcon("__core__/graphics/gui-new.png", corner_size2, {34, 17}),
+  clicked_font_color={r=1, g=1, b=1},
+  clicked_graphical_set = compositionIcon("__core__/graphics/gui-new.png", corner_size2, {51, 17}),
+  disabled_font_color={r=0.5, g=0.5, b=0.5},
+  disabled_graphical_set = compositionIcon("__core__/graphics/gui-new.png", corner_size2, {17, 17}),
+  pie_progress_color = {r=1, g=1, b=1},
+  horizontally_squashable = "on",
+  horizontally_stretchable = "on"
+}
+
+default_gui["helmod_button_help_menu_selected"] = {
+  type = "button_style",
+  parent = "helmod_button_help_menu",
+  font = "helmod_font_bold",
+  default_font_color={r=0, g=0, b=0},
+  default_graphical_set = compositionIcon("__core__/graphics/gui-new.png", corner_size2, {51, 17}),
+  hovered_font_color={r=0, g=0, b=0},
+  hovered_graphical_set = compositionIcon("__core__/graphics/gui-new.png", corner_size2, {34, 17}),
+  clicked_font_color={r=1, g=1, b=1},
+  clicked_graphical_set = compositionIcon("__core__/graphics/gui-new.png", corner_size2, {51, 17}),
+  disabled_font_color={r=0.5, g=0.5, b=0.5},
+  disabled_graphical_set = compositionIcon("__core__/graphics/gui-new.png", corner_size2, {17, 17}),
+}
+
+default_gui["helmod_button_help_menu2"] = {
+  type = "button_style",
+  parent = "helmod_button_help_menu",
+  font = "helmod_font_normal",
+  default_font_color={r=1, g=1, b=1},
+  top_margin = 0,
+  left_padding = 20
+}
+
+default_gui["helmod_button_help_menu2_selected"] = {
+  type = "button_style",
+  parent = "helmod_button_help_menu_selected",
+  top_margin = 0,
+  left_padding = 20
+}
 -------------------------------------------------------------------------------
 -- Style of default
 --
@@ -903,21 +957,9 @@ default_gui["helmod_label_element_sm"] = {
 default_gui["helmod_label_help"] = {
   type = "label_style",
   parent = "helmod_label_default",
-  single_line = false
-}
-
--------------------------------------------------------------------------------
--- Style of text
---
--- @field [parent=#Label] help_number
-
-default_gui["helmod_label_help_number"] = {
-  type = "label_style",
-  parent = "helmod_label_default",
-  left_padding = 10,
-  align = "right",
-  minimal_width = 30,
-  single_line = false
+  single_line = false,
+  horizontally_squashable = "on",
+  horizontally_stretchable = "on"
 }
 
 -------------------------------------------------------------------------------
@@ -929,10 +971,9 @@ default_gui["helmod_label_help_text"] = {
   type = "label_style",
   parent = "helmod_label_default",
   left_padding = 10,
-  minimal_width = 350,
-  maximal_width = 350,
-  vertical_align = "top",
-  single_line = false
+  single_line = false,
+  horizontally_squashable = "on",
+  horizontally_stretchable = "on"
 }
 
 
@@ -945,17 +986,6 @@ default_gui["helmod_label_help_title"] = {
   type = "label_style",
   parent = "helmod_label_help",
   font = "helmod_font_title_frame"
-}
-
--------------------------------------------------------------------------------
--- Style of text
---
--- @field [parent=#Label] help_normal
-
-default_gui["helmod_label_help_normal"] = {
-  type = "label_style",
-  parent = "helmod_label_help",
-  left_padding = 10
 }
 
 -------------------------------------------------------------------------------

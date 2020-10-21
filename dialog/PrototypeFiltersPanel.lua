@@ -4,7 +4,6 @@
 -- @module PrototypeFiltersPanel
 -- @extends #Form
 --
-
 PrototypeFiltersPanel = newclass(Form,function(base,classname)
   Form.init(base,classname)
   base.add_special_button = true
@@ -16,6 +15,73 @@ local inverts = nil
 local comparisons = nil
 local collision_mask = {}
 local collision_mask_mode = {}
+local samples = {}
+local sample = {name="list of production machines", type="entity", value={}}
+table.insert(sample.value, { mode="and", filter="crafting-machine", invert="false"})
+table.insert(sample.value, { mode="and", filter="hidden", invert="true"})
+table.insert(sample.value, { mode="or", filter="type", invert="false", option="lab"})
+table.insert(sample.value, { mode="or", filter="type", invert="false", option="mining-drill"})
+table.insert(sample.value, { mode="or", filter="type", invert="false", option="rocket-silo"})
+table.insert(samples, sample)
+
+sample = {name="list of beacons", type="entity", value={}}
+table.insert(sample.value, { mode="and", filter="type", invert="false", option="beacon"})
+table.insert(sample.value, { mode="and", filter="hidden", invert="true"})
+table.insert(samples, sample)
+
+sample = {name="list of offshore-pumps", type="entity", value={}}
+table.insert(sample.value, { mode="and", filter="type", invert="false", option="offshore-pump"})
+table.insert(sample.value, { mode="and", filter="hidden", invert="true"})
+table.insert(samples, sample)
+
+sample = {name="list of modules", type="item", value={}}
+table.insert(sample.value, { mode="and", filter="type", invert="false", option="module"})
+table.insert(sample.value, { mode="and", filter="flag", invert="true", option="hidden"})
+table.insert(samples, sample)
+
+sample = {name="list of power machines", type="entity", value={}}
+for _,type in pairs({"generator", "solar-panel", "boiler", "accumulator", "reactor", "offshore-pump", "seafloor-pump"}) do
+  table.insert(sample.value, { mode="or", filter="type", invert="false", option=type})
+end
+table.insert(samples, sample)
+
+sample = {name="list of fuels", type="item", value={}}
+table.insert(sample.value, { mode="or", filter="fuel-value", invert="false", option={value=0,comparison=">"}})
+table.insert(samples, sample)
+
+sample = {name="Item logistic list of inserters", type="entity", value={}}
+table.insert(sample.value, { mode="or", filter="type", invert="false", option="inserter"})
+table.insert(samples, sample)
+
+sample = {name="Item logistic list of belts", type="entity", value={}}
+table.insert(sample.value, { mode="or", filter="type", invert="false", option="transport-belt"})
+table.insert(samples, sample)
+
+sample = {name="Item logistic list of containers", type="entity", value={}}
+table.insert(sample.value, { mode="or", filter="type", invert="false", option="container"})
+table.insert(sample.value, { mode="and", filter="minable", invert="false", option=nil})
+table.insert(sample.value, { mode="or", filter="type", invert="false", option="logistic-container"})
+table.insert(sample.value, { mode="and", filter="minable", invert="false", option=nil})
+table.insert(samples, sample)
+
+sample = {name="Item logistic list of transports", type="entity", value={}}
+table.insert(sample.value, { mode="or", filter="type", invert="false", option="cargo-wagon"})
+table.insert(sample.value, { mode="or", filter="type", invert="false", option="logistic-robot"})
+table.insert(sample.value, { mode="or", filter="type", invert="false", option="car"})
+table.insert(samples, sample)
+
+sample = {name="Fluid logistic list of pipes", type="entity", value={}}
+table.insert(sample.value, { mode="or", filter="type", invert="false", option="pipe"})
+table.insert(samples, sample)
+
+sample = {name="Fluid logistic list of containers", type="entity", value={}}
+table.insert(sample.value, { mode="or", filter="type", invert="false", option="storage-tank"})
+table.insert(sample.value, { mode="and", filter="minable", invert="false", option=nil})
+table.insert(samples, sample)
+
+sample = {name="Fluid logistic list of transports", type="entity", value={}}
+table.insert(sample.value, { mode="or", filter="type", invert="false", option="fluid-wagon"})
+table.insert(samples, sample)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -46,7 +112,7 @@ end
 -- @return boolean
 --
 function PrototypeFiltersPanel:isVisible()
-  return User.getModGlobalSetting("prototype_filters_panel")
+  return User.getModGlobalSetting("hidden_panels")
 end
 
 -------------------------------------------------------------------------------
@@ -93,7 +159,7 @@ function PrototypeFiltersPanel:getContentPanel()
   local panel = GuiElement.add(content_panel, GuiFrameV(panel_name))
   panel.style.vertically_stretchable = true
   local width_main, height_main = GuiElement.getMainSizes()
-  panel.style.minimal_height = height_main
+  panel.style.minimal_height = height_main-300
   panel.style.minimal_width = width_main
   return panel
 end
@@ -214,9 +280,6 @@ end
 -- @param #LuaEvent event
 --
 function PrototypeFiltersPanel:onUpdate(event)
-  local content_panel = self:getContentPanel()
-  content_panel.clear()
-
   -- prepare
   PrototypeFilters.initialization()
   modes = PrototypeFilters.getModes()
@@ -239,10 +302,11 @@ end
 --
 function PrototypeFiltersPanel:addHeaderFilter(itable)
   GuiElement.add(itable, GuiLabel("mode"):caption("Mode"))
+  GuiElement.add(itable, GuiLabel("invert"):caption("Invert"))
   GuiElement.add(itable, GuiLabel("filter"):caption("Filter"))
   GuiElement.add(itable, GuiLabel("option"):caption("Option"))
-  GuiElement.add(itable, GuiLabel("invert"):caption("Invert"))
-  GuiElement.add(itable, GuiLabel("action"):caption("action"))
+  GuiElement.add(itable, GuiLabel("result"):caption("String"))
+  GuiElement.add(itable, GuiLabel("action"):caption("Action"))
 end
 
 -------------------------------------------------------------------------------
@@ -254,12 +318,18 @@ end
 --
 function PrototypeFiltersPanel:addRowFilter(itable, prototype_filter, index)
   index = index or 0
+  -- type col
   local prototype_filter_type = User.getParameter("prototype_filter_type") or filter_types[1]
   local PrototypeFilter = PrototypeFilters.getFilterType(prototype_filter_type)
-  -- mode
+  -- mode col
   prototype_filter.mode = prototype_filter.mode or modes[1]
-  GuiElement.add(itable, GuiDropDown(self.classname, "change-filter-mode", index):items(modes, prototype_filter.mode))
-  -- filter
+  local button_mode = GuiElement.add(itable, GuiDropDown(self.classname, "change-filter-mode", index):items(modes, prototype_filter.mode))
+  button_mode.style.width = 80
+  -- invert col
+  prototype_filter.invert = prototype_filter.invert or inverts[1]
+  local button_invert = GuiElement.add(itable, GuiDropDown(self.classname, "change-filter-invert", index):items(inverts, prototype_filter.invert))
+  button_invert.style.width = 80
+  -- filter col
   local filters = PrototypeFilter:getFilters()
   prototype_filter.filter = prototype_filter.filter or filters[1]
   GuiElement.add(itable, GuiDropDown(self.classname, "change-prototype-filter", index):items(filters, prototype_filter.filter))
@@ -298,9 +368,11 @@ function PrototypeFiltersPanel:addRowFilter(itable, prototype_filter, index)
   else
     GuiElement.add(itable, GuiLabel("option-none", index):caption("None"))
   end
-
-  prototype_filter.invert = prototype_filter.invert or inverts[1]
-  GuiElement.add(itable, GuiDropDown(self.classname, "change-filter-invert", index):items(inverts, prototype_filter.invert))
+  -- result col
+  local filter_value = PrototypeFiltersPanel:convertFilter(prototype_filter)
+  local string_value = PrototypeFiltersPanel:tableToString(filter_value)
+  local text_field = GuiElement.add(itable, GuiTextField(self.classname, "change-textfield", index):text(string_value))
+  text_field.style.width = 400
   if index == 0 then
     GuiElement.add(itable, GuiButton(self.classname, "add-prototype-filter", index):caption("+"):style("helmod_button_small_bold"))
   else
@@ -315,15 +387,25 @@ end
 --
 function PrototypeFiltersPanel:updateFilter()
   -- data
-  local content_panel = self:getContentPanel()
+  local content_panel = self:getMenuPanel()
+  content_panel.clear()
   -- type
-  local type_table = GuiElement.add(content_panel, GuiTable("type-filter"):column(5))
+  local choose_panel = GuiElement.add(content_panel, GuiFlowH("choose-filter"))
+  choose_panel.style.horizontal_spacing = 5
   local prototype_filter_type = User.getParameter("prototype_filter_type") or filter_types[1]
-  GuiElement.add(type_table, GuiLabel("prototype"):caption("Type"))
-  GuiElement.add(type_table, GuiDropDown(self.classname, "change-prototype-filter-type"):items(filter_types, prototype_filter_type))
+  GuiElement.add(choose_panel, GuiLabel("prototype"):caption("Type"))
+  GuiElement.add(choose_panel, GuiDropDown(self.classname, "change-prototype-filter-type"):items(filter_types, prototype_filter_type))
+  GuiElement.add(choose_panel, GuiLabel("sample"):caption("Sample"))
+  local items = {}
+  table.insert(items, "Choose a sample")
+  for _,sample in pairs(samples) do
+    table.insert(items, sample.name)
+  end
+  GuiElement.add(choose_panel, GuiDropDown(self.classname, "choose-sample"):items(items))
 
 
-  local resultTable = GuiElement.add(content_panel, GuiTable("table-filter"):column(5))
+  local resultTable = GuiElement.add(content_panel, GuiTable("table-filter"):column(6))
+  self:addHeaderFilter(resultTable)
 
   local PrototypeFilter = PrototypeFilters.getFilterType(prototype_filter_type)
 
@@ -345,48 +427,83 @@ end
 --
 -- @function [parent=#PrototypeFiltersPanel] updateResult
 --
+function PrototypeFiltersPanel:convertFilter(prototype_filter)
+  local filter = {mode= prototype_filter.mode, invert=(prototype_filter.invert=="true"), filter=prototype_filter.filter  }
+    if prototype_filter.option ~= nil then
+      if prototype_filter.option.comparison ~= nil then
+        filter["comparison"] = prototype_filter.option.comparison
+        filter["value"] = prototype_filter.option.value
+      elseif prototype_filter.option.mask ~= nil then
+        filter["mask"] = prototype_filter.option.mask
+        filter["mask_mode"] = prototype_filter.option.mask_mode
+      else
+        filter[prototype_filter.filter] = prototype_filter.option
+      end
+    end
+    return filter
+end
+
+-------------------------------------------------------------------------------
+-- Table to string
+--
+-- @function [parent=#PrototypeFiltersPanel] tableToString
+--
+-- @param #table value
+--
+function PrototypeFiltersPanel:tableToString(value)
+  local string_value = serpent.line(value)
+  string_value = string.gsub(string_value, "},", "},\n")
+  return string_value
+end
+
+-------------------------------------------------------------------------------
+-- Update result
+--
+-- @function [parent=#PrototypeFiltersPanel] updateResult
+--
 function PrototypeFiltersPanel:updateResult()
   -- data
-  local scrollPanel = self:getContentPanel()
-
-  local resultTable = GuiElement.add(scrollPanel, GuiTable("table-filters"):column(5))
-  -- prototype filter
-  self:addHeaderFilter(resultTable)
+  local content_panel = self:getContentPanel()
+  content_panel.clear()
+  GuiElement.add(content_panel, GuiLabel("data-label"):caption({"helmod_common.filter"}):style("helmod_label_title_frame"))
 
   local prototype_filters = User.getParameter("prototype_filters") or {}
-  for index,filter in spairs(prototype_filters) do
-    self:addRowFilter(resultTable, filter, index)
-  end
-
-  local prototype_filters = User.getParameter("prototype_filters") or {}
-
 
   if Model.countList(prototype_filters) > 0 then
-    local elements_table = GuiElement.add(scrollPanel, GuiTable("table-elements"):column(20))
-    local prototype_filter_type = User.getParameter("prototype_filter_type") or filter_types[1]
+    local resultTable = GuiElement.add(content_panel, GuiTable("table-filters"):column(6))
+    -- prototype filter
+    self:addHeaderFilter(resultTable)
+
+    for index,filter in spairs(prototype_filters) do
+      self:addRowFilter(resultTable, filter, index)
+    end
+
+    local data_panel = GuiElement.add(content_panel, GuiFlowH("data"))
+    -- elements list
 
     local filters = {}
     for _,prototype_filter in pairs(prototype_filters) do
-      local filter = {filter=prototype_filter.filter, invert=(prototype_filter.invert=="true"), mode= prototype_filter.mode}
-      if prototype_filter.option ~= nil then
-        if prototype_filter.option.comparison ~= nil then
-          filter["comparison"] = prototype_filter.option.comparison
-          filter["value"] = prototype_filter.option.value
-        elseif prototype_filter.option.mask ~= nil then
-          filter["mask"] = prototype_filter.option.mask
-          filter["mask_mode"] = prototype_filter.option.mask_mode
-        else
-          filter[prototype_filter.filter] = prototype_filter.option
-        end
-      end
+      local filter = PrototypeFiltersPanel:convertFilter(prototype_filter)
       table.insert(filters, filter)
     end
+
+    -- text filter
+    local string_data = PrototypeFiltersPanel:tableToString(filters)
+    local text_box = GuiElement.add(data_panel, GuiTextBox("string-data"):text(string_data))
+    text_box.read_only=true
+    text_box.style.width = 400
+    text_box.style.height = 300
+
+    -- result filter
+    local elements_table = GuiElement.add(data_panel, GuiTable("table-elements"):column(20))
+    local prototype_filter_type = User.getParameter("prototype_filter_type") or filter_types[1]
 
     local PrototypeFilter = PrototypeFilters.getFilterType(prototype_filter_type)
     local elements = PrototypeFilter:getElements(filters)
     for key,element in pairs(elements) do
       GuiElement.add(elements_table, GuiButtonSprite("nothing"):sprite(prototype_filter_type, element.name):tooltip(element.localised_name))
     end
+
   end
 
 end
@@ -407,6 +524,36 @@ function PrototypeFiltersPanel:onEvent(event)
   local PrototypeFilter = PrototypeFilters.getFilterType(prototype_filter_type)
 
   local index = tonumber(event.item1) or 0
+
+  if event.action == "choose-sample" then
+    local selected_index = event.element.selected_index - 1
+    if selected_index > 0 and samples[selected_index] ~= nil then
+      local sample = samples[selected_index]
+      User.setParameter("prototype_filter_type", sample.type)
+      User.setParameter("prototype_filters", sample.value)
+      self:onUpdate()
+    end
+    return
+  end
+
+  if event.action == "add-prototype-filter" then
+    table.insert(prototype_filters, table.deepcopy(prototype_filter))
+    User.setParameter("prototype_filters", prototype_filters)
+    self:onUpdate()
+    return
+  end
+
+  if event.action == "remove-prototype-filter" then
+    if #prototype_filters == 1 then
+      prototype_filters = nil
+    else
+      table.remove(prototype_filters, index)
+    end
+    User.setParameter("prototype_filters", prototype_filters)
+    self:onUpdate()
+    return
+  end
+
   if index > 0 then
     prototype_filter = prototype_filters[index]
   end
@@ -474,23 +621,6 @@ function PrototypeFiltersPanel:onEvent(event)
     local selected_index = event.element.selected_index
     if prototype_filter.option == nil then prototype_filter.option = {mask=collision_mask[1]} end
     prototype_filter.option.mask_mode = collision_mask_mode[selected_index]
-  end
-
-  if event.action == "add-prototype-filter" then
-    table.insert(prototype_filters, prototype_filter)
-    User.setParameter("prototype_filters", prototype_filters)
-    prototype_filter = nil
-    self:onUpdate()
-  end
-
-  if event.action == "remove-prototype-filter" then
-    if #prototype_filters == 1 then
-      prototype_filters = nil
-    else
-      table.remove(prototype_filters, index)
-    end
-    User.setParameter("prototype_filters", prototype_filters)
-    self:onUpdate()
   end
 
   if prototype_filters ~= nil and index > 0 then

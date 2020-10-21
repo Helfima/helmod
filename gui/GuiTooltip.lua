@@ -58,51 +58,37 @@ end
 
 -------------------------------------------------------------------------------
 --
--- @function [parent=#GuiTooltip] withContraintInfo
+-- @function [parent=#GuiTooltip] withControlInfo
 -- @return #GuiCell
 --
-function GuiTooltip:withContraintInfo()
-  self.m_with_contraint_info = true
+function GuiTooltip:withControlInfo(control_info)
+  self.m_with_control_info = control_info
   return self
 end
 
 -------------------------------------------------------------------------------
 --
--- @function [parent=#GuiTooltip] appendContraintInfo
+-- @function [parent=#GuiTooltip] appendControlInfo
 -- @return #GuiCell
 --
-function GuiTooltip:appendContraintInfo(tooltip, element)
-  if self.m_with_contraint_info == true then
+function GuiTooltip:appendControlInfo(tooltip, element)
+  if self.m_with_control_info ~= nil then
     local tooltip_section = {""}
     table.insert(tooltip_section, {"", "\n", "----------------------"})
     table.insert(tooltip_section, {"", "\n", helmod_tag.font.default_bold, {"tooltip.info-control"}, helmod_tag.font.close})
-    table.insert(tooltip_section, {"", "\n", "[img=helmod-tooltip-blank]", " ", {"tooltip.contraint-plus"}})
-    table.insert(tooltip_section, {"", "\n", "[img=helmod-tooltip-blank]", " ", {"tooltip.contraint-minus"}})
-    table.insert(tooltip, tooltip_section)
-  end
-end
-
--------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] withLinkIntermediateInfo
--- @return #GuiCell
---
-function GuiTooltip:withLinkIntermediateInfo()
-  self.m_with_link_intermediate_info = true
-  return self
-end
-
--------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] appendLinkInfo
--- @return #GuiCell
---
-function GuiTooltip:appendLinkIntermediateInfo(tooltip, element)
-  if self.m_with_link_intermediate_info == true then
-    local tooltip_section = {""}
-    table.insert(tooltip_section, {"", "\n", "----------------------"})
-    table.insert(tooltip_section, {"", "\n", helmod_tag.font.default_bold, {"tooltip.info-control"}, helmod_tag.font.close})
-    table.insert(tooltip_section, {"", "\n", "[img=helmod-tooltip-blank]", " ", {"tooltip.link-intermediate"}})
+    if self.m_with_control_info == "contraint" then
+      table.insert(tooltip_section, {"", "\n", "[img=helmod-tooltip-blank]", " ", {"controls.contraint-plus"}})
+      table.insert(tooltip_section, {"", "\n", "[img=helmod-tooltip-blank]", " ", {"controls.contraint-minus"}})
+    end
+    if self.m_with_control_info == "link-intermediate" then
+      table.insert(tooltip_section, {"", "\n", "[img=helmod-tooltip-blank]", " ", {"controls.link-intermediate"}})
+    end
+    if self.m_with_control_info == "module-add" then
+      table.insert(tooltip_section, {"", "\n", "[img=helmod-tooltip-blank]", " ", {"controls.module-add"}})
+    end
+    if self.m_with_control_info == "module-remove" then
+      table.insert(tooltip_section, {"", "\n", "[img=helmod-tooltip-blank]", " ", {"controls.module-remove"}})
+    end
     table.insert(tooltip, tooltip_section)
   end
 end
@@ -339,7 +325,7 @@ function GuiTooltipElement:create()
     if type == "resource" or type == "energy" then type = "entity" end
     local element_icon = string.format("[%s=%s]", type, element.name)
     if type == "energy" and (element.name == "energy" or element.name == "steam-heat") then
-      element_icon = string.format("[img=helmod-%s-white]", type, element.name)
+      element_icon = string.format("[img=helmod-%s-white]", element.name)
     end
     table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=element.name}), helmod_tag.font.close, helmod_tag.color.close})
     -- quantity
@@ -355,8 +341,7 @@ function GuiTooltipElement:create()
     self:appendEnergyConsumption(tooltip, element);
     self:appendFlow(tooltip, element);
     self:appendLogistic(tooltip, element);
-    self:appendContraintInfo(tooltip, element);
-    self:appendLinkIntermediateInfo(tooltip, element);
+    self:appendControlInfo(tooltip, element);
     self:appendDebug(tooltip, element)
 
   end
@@ -387,7 +372,7 @@ function GuiTooltipEnergy:create()
     if element == "resource" then type = "entity" end
     local element_icon = string.format("[%s=%s]", type, element.name)
     if element.name == "energy" or element.name == "steam-heat" then
-      element_icon = string.format("[img=helmod-%s-white]", type, element.name)
+      element_icon = string.format("[img=helmod-%s-white]", element.name)
     end
     table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=element.name}), helmod_tag.font.close, helmod_tag.color.close})
     -- quantity
@@ -630,6 +615,7 @@ function GuiTooltipModule:create()
       if bonus_pollution ~= 0 then
         table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"description.pollution-bonus"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, bonus_pollution_positive, Format.formatPercent(bonus_pollution), "%", helmod_tag.font.close})
       end
+      self:appendControlInfo(tooltip, self.m_element.name);
     end
   end
   return tooltip

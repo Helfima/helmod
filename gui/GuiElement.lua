@@ -496,4 +496,19 @@ function GuiElement.infoTemperature(parent, element, style)
   end
 end
 
-
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiElement] infoTemperature
+--
+function GuiElement.infoRecipe(parent, element)
+  if element.type == "recipe-burnt" then
+    local sprite = GuiElement.add(parent, GuiSprite("recipe-info"):sprite("developer"):tooltip({"tooltip.burnt-recipe"}))
+    sprite.style.top_padding = -8
+  elseif element.type == "rocket" then
+    local sprite = GuiElement.add(parent, GuiSprite("recipe-info"):sprite("developer"):tooltip({"tooltip.rocket-recipe"}))
+    sprite.style.top_padding = -8
+  elseif element.type ~= "recipe" then
+    local sprite = GuiElement.add(parent, GuiSprite("recipe-info"):sprite("developer"):tooltip({"tooltip.resource-recipe"}))
+    sprite.style.top_padding = -8
+  end
+end

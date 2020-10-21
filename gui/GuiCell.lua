@@ -114,23 +114,12 @@ end
 
 -------------------------------------------------------------------------------
 --
--- @function [parent=#GuiCell] contraintInfo
--- @param #boolean with
+-- @function [parent=#GuiCell] controlInfo
+-- @param #string control_info
 -- @return #GuiCell
 --
-function GuiCell:contraintInfo(with)
-  self.m_with_contraint_info = with or false
-  return self
-end
-
--------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] withLinkIntermediateInfo
--- @param #boolean with
--- @return #GuiCell
---
-function GuiCell:withLinkIntermediateInfo(with)
-  self.m_with_link_intermediate_info = with or false
+function GuiCell:controlInfo(control_info)
+  self.m_with_control_info = control_info
   return self
 end
 
@@ -253,6 +242,13 @@ function infoIcon(button, type)
     local tooltip = "tooltip.burnt-product"
     local sprite = GuiElement.add(button, GuiSprite("burnt"):sprite("helmod-tool-burnt"):tooltip({tooltip}))
     sprite.style.top_padding = -4
+  end
+  if type == "block" then 
+    local tooltip = "tooltip.block-recipe"
+    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("helmod-tool-hangar"):tooltip({tooltip}))
+    sprite.style.top_padding = -2
+    sprite.style.left_padding = 22
+    sprite.ignored_by_interaction = true
   end
 end
 
@@ -555,10 +551,13 @@ function GuiCellBlock:create(parent)
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
 
+  local first_recipe = Model.firstRecipe(element.recipes)
   local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
-  local recipe_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("recipe", element.name):tooltip(tooltip))
-  if element.isEnergy then
-    infoIcon(recipe_icon, "energy")
+  local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
+  infoIcon(button, "block")
+
+  if first_recipe ~= nil then
+    GuiElement.infoRecipe(button, first_recipe)
   end
 
   if element.limit_count ~= nil then
@@ -603,7 +602,7 @@ function GuiCellBlockInfo:create(parent)
   row1.style.bottom_padding=4
 
   local tooltip = GuiTooltipBlock(self.options.tooltip):element(element)
-  GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", "hangar-white", "hangar"):style("helmod_button_menu_flat"):tooltip(tooltip))
+  local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", "hangar-white", "hangar"):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   if element.limit_count ~= nil then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_product", color, 2))
@@ -775,12 +774,9 @@ function GuiCellElement:create(parent)
 
   local tooltip = ""
   if element.type == "energy" then
-    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic():withProductInfo()
+    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
   else
-    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo()
-  end
-  if self.m_with_contraint_info == true then
-    tooltip:withContraintInfo()
+    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
   end
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type or "entity", element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   GuiElement.infoTemperature(row1, element)
@@ -889,12 +885,9 @@ function GuiCellElementM:create(parent)
 
   local tooltip = ""
   if element.type == "energy" then
-    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic():withProductInfo()
+    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
   else
-    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo()
-  end
-  if self.m_with_link_intermediate_info == true then
-    tooltip:withLinkIntermediateInfo()
+    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
   end
   local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(element.type or "entity", element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   GuiElement.infoTemperature(row1, element)

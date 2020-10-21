@@ -257,9 +257,6 @@ end
 -- @return #string localised name
 --
 function Player.getLocalisedName(element)
-  if User.getModGlobalSetting("display_real_name") then
-    return element.name
-  end
   local localisedName = element.name
   if element.type ~= nil then
     if element.type == "recipe" or element.type == "recipe-burnt" then
@@ -307,7 +304,7 @@ end
 --
 function Player.getRecipeLocalisedName(prototype)
   local element = Player.getRecipe(prototype.name)
-  if element ~= nil and not(User.getModGlobalSetting("display_real_name")) then
+  if element ~= nil then
     return element.localised_name
   end
   return prototype.name
@@ -324,7 +321,7 @@ end
 --
 function Player.getTechnologyLocalisedName(prototype)
   local element = Player.getTechnology(prototype.name)
-  if element ~= nil and not(User.getModGlobalSetting("display_real_name")) then
+  if element ~= nil then
     return element.localised_name
   end
   return element.name

@@ -173,10 +173,13 @@ function ProductionLineTab:updateData(event)
     if User.getPreferenceSetting("display_building") then
       extra_cols = extra_cols + 1
     end
-    for _,parameter in pairs({"display_data_col_index","display_data_col_id","display_data_col_name"}) do
-      if User.getModGlobalSetting(parameter) then
-        extra_cols = extra_cols + 1
-      end
+    
+    if User.getModGlobalSetting("display_hidden_column") == "All" then
+      extra_cols = extra_cols + 2
+    end
+    -- col name
+    if User.getModGlobalSetting("display_hidden_column") ~= "None" then
+      extra_cols = extra_cols + 1
     end
 
     local result_table = GuiElement.add(scroll_panel, GuiTable("list-data"):column(5 + extra_cols):style("helmod_table-odd"))
@@ -282,9 +285,13 @@ function ProductionLineTab:addTableHeader(itable)
 
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
   -- optionnal columns
-  self:addCellHeader(itable, "index", {"helmod_result-panel.col-header-index"},"index")
-  self:addCellHeader(itable, "id", {"helmod_result-panel.col-header-id"},"id")
-  self:addCellHeader(itable, "name", {"helmod_result-panel.col-header-name"},"name")
+  if User.getModGlobalSetting("display_hidden_column") == "All" then
+    self:addCellHeader(itable, "index", {"helmod_result-panel.col-header-index"},"index")
+    self:addCellHeader(itable, "id", {"helmod_result-panel.col-header-id"},"id")
+  end
+  if User.getModGlobalSetting("display_hidden_column") ~= "None" then
+    self:addCellHeader(itable, "name", {"helmod_result-panel.col-header-name"},"name")
+  end
   -- data columns
   self:addCellHeader(itable, "recipe", {"helmod_result-panel.col-header-production-block"},"index")
   self:addCellHeader(itable, "energy", {"helmod_common.energy-consumption"},"power")
@@ -325,17 +332,15 @@ function ProductionLineTab:addTableRow(gui_table, block)
     GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink", block.id):sprite("menu", "link-white-sm", "link-sm"):style("helmod_button_menu_sm_selected"):tooltip({"tooltip.unlink-element"}))
   end
 
-  -- col index
-  if User.getModGlobalSetting("display_data_col_index") then
-    GuiElement.add(gui_table, GuiCellLabel("cell_index", block.id):caption(block.index))
+  if User.getModGlobalSetting("display_hidden_column") == "All" then
+    -- col index
+    GuiElement.add(gui_table, GuiLabel("cell_index", block.id):caption(block.index))
+    -- col id
+    GuiElement.add(gui_table, GuiLabel("cell_id", block.id):caption(block.id))
   end
-  -- col id
-  if User.getModGlobalSetting("display_data_col_id") then
-    GuiElement.add(gui_table, GuiCellLabel("cell_id", block.id):caption(block.id))
-  end
-  -- col name
-  if User.getModGlobalSetting("display_data_col_name") then
-    GuiElement.add(gui_table, GuiCellLabel("cell_name", block.id):caption(block.name))
+  if User.getModGlobalSetting("display_hidden_column") ~= "None" then
+    -- col name
+    GuiElement.add(gui_table, GuiLabel("cell_name", block.id):caption(block.name))
   end
 
   -- col recipe

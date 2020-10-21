@@ -201,14 +201,14 @@ function ProductionBlockTab:updateInput(event)
           local button_action = "production-recipe-ingredient-add"
           local button_tooltip = "tooltip.ingredient"
           local button_color = GuiElement.color_button_default_ingredient
-          local with_link_intermediate = false
+          local control_info = "link-intermediate"
           if block_by_product then
             button_action = "production-recipe-ingredient-add"
             button_tooltip = "tooltip.add-recipe"
+            control_info = nil
           else
             button_action = "product-edition"
             button_tooltip = "tooltip.edit-product"
-            with_link_intermediate = true
           end
           -- color
           if lua_ingredient.state == 1 then
@@ -225,7 +225,7 @@ function ProductionBlockTab:updateInput(event)
           else
             button_color = GuiElement.color_button_default_ingredient
           end
-          GuiElement.add(input_table, GuiCellElementM(self.classname, button_action, block.id, "none"):element(ingredient):tooltip(button_tooltip):index(index):color(button_color):byLimit(block.by_limit):contraintIcon(contraint_type):withLinkIntermediateInfo(with_link_intermediate))
+          GuiElement.add(input_table, GuiCellElementM(self.classname, button_action, block.id, "none"):element(ingredient):tooltip(button_tooltip):index(index):color(button_color):byLimit(block.by_limit):contraintIcon(contraint_type):controlInfo(control_info))
         end
       end
     end
@@ -290,11 +290,11 @@ function ProductionBlockTab:updateOutput(event)
           local button_action = "production-recipe-product-add"
           local button_tooltip = "tooltip.product"
           local button_color = GuiElement.color_button_default_product
-          local with_link_intermediate = true
+          local control_info = "link-intermediate"
           if not(block_by_product) then
             button_action = "production-recipe-product-add"
             button_tooltip = "tooltip.add-recipe"
-            with_link_intermediate = false
+            control_info = nil
           else
             if not(block.unlinked) or block.by_factory == true then
               button_action = "product-info"
@@ -319,7 +319,7 @@ function ProductionBlockTab:updateOutput(event)
           else
             button_color = GuiElement.color_button_default_product
           end
-          GuiElement.add(output_table, GuiCellElementM(self.classname, button_action, block.id, "none"):element(product):tooltip(button_tooltip):index(index):color(button_color):byLimit(block.by_limit):contraintIcon(contraint_type):withLinkIntermediateInfo(with_link_intermediate))
+          GuiElement.add(output_table, GuiCellElementM(self.classname, button_action, block.id, "none"):element(product):tooltip(button_tooltip):index(index):color(button_color):byLimit(block.by_limit):contraintIcon(contraint_type):controlInfo(control_info))
         end
       end
     end
@@ -388,11 +388,13 @@ function ProductionBlockTab:updateData(event)
     if User.getPreferenceSetting("display_pollution") then
       extra_cols = extra_cols + 1
     end
-    for _,parameter in pairs({"display_data_col_index","display_data_col_id","display_data_col_name","display_data_col_type"}) do
-      if User.getModGlobalSetting(parameter) then
-        extra_cols = extra_cols + 1
-      end
+    if User.getModGlobalSetting("display_hidden_column") == "All" then
+      extra_cols = extra_cols + 2
     end
+    if User.getModGlobalSetting("display_hidden_column") ~= "None" then
+      extra_cols = extra_cols + 2
+    end
+
     local result_table = GuiElement.add(scroll_panel2, GuiTable("list-data"):column(7 + extra_cols):style("helmod_table-odd"))
     result_table.vertical_centering = false
     self:addTableHeader(result_table)
@@ -494,10 +496,14 @@ end
 function ProductionBlockTab:addTableHeader(itable)
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
   -- optionnal columns
-  self:addCellHeader(itable, "index", {"helmod_result-panel.col-header-index"},"index")
-  self:addCellHeader(itable, "id", {"helmod_result-panel.col-header-id"},"id")
-  self:addCellHeader(itable, "name", {"helmod_result-panel.col-header-name"},"name")
-  self:addCellHeader(itable, "type", {"helmod_result-panel.col-header-type"},"type")
+  if User.getModGlobalSetting("display_hidden_column") == "All" then
+    self:addCellHeader(itable, "index", {"helmod_result-panel.col-header-index"},"index")
+    self:addCellHeader(itable, "id", {"helmod_result-panel.col-header-id"},"id")
+  end
+  if User.getModGlobalSetting("display_hidden_column") ~= "None" then
+    self:addCellHeader(itable, "name", {"helmod_result-panel.col-header-name"},"name")
+    self:addCellHeader(itable, "type", {"helmod_result-panel.col-header-type"},"type")
+  end
   -- data columns
   self:addCellHeader(itable, "recipe", {"helmod_result-panel.col-header-recipe"},"index")
   self:addCellHeader(itable, "energy", {"helmod_common.energy-consumption"},"energy_total")
@@ -525,19 +531,16 @@ end
 --
 
 function ProductionBlockTab:addTableRowCommon(gui_table, element)
-  if User.getModGlobalSetting("display_data_col_index") then
-    GuiElement.add(gui_table, GuiLabel("value_index", element.id):caption(element.index):style("helmod_label_row_right_40"))
-  end
-  -- col id
-  if User.getModGlobalSetting("display_data_col_id") then
+  if User.getModGlobalSetting("display_hidden_column") == "All" then
+    -- col index
+    GuiElement.add(gui_table, GuiLabel("value_index", element.id):caption(element.index))
+    -- col id
     GuiElement.add(gui_table, GuiLabel("value_id", element.id):caption(element.id))
   end
-  -- col name
-  if User.getModGlobalSetting("display_data_col_name") then
+  if User.getModGlobalSetting("display_hidden_column") ~= "None" then
+    -- col name
     GuiElement.add(gui_table, GuiLabel("value_name", element.id):caption(element.name))
-  end
-  -- col type
-  if User.getModGlobalSetting("display_data_col_type") then
+    -- col type
     GuiElement.add(gui_table, GuiLabel("value_type", element.id):caption(element.type))
   end
 end
@@ -623,7 +626,11 @@ function ProductionBlockTab:addTableRowRecipe(gui_table, block, recipe)
         if block.by_product ~= false and recipe.contraint ~= nil and recipe.contraint.name == product.name then
           contraint_type = recipe.contraint.type
         end
-        GuiElement.add(cell_products, GuiCellElement(self.classname, "production-recipe-product-add", block.id, recipe.id):element(product):tooltip("tooltip.add-recipe"):index(index):byLimit(block.by_limit):contraintIcon(contraint_type):contraintInfo(block.solver ~= true and block.by_product ~= false))
+        local control_info = "contraint"
+        if not(block.solver ~= true and block.by_product ~= false) then
+          control_info = nil
+        end
+        GuiElement.add(cell_products, GuiCellElement(self.classname, "production-recipe-product-add", block.id, recipe.id):element(product):tooltip("tooltip.add-recipe"):index(index):byLimit(block.by_limit):contraintIcon(contraint_type):controlInfo(control_info))
       end
     else
       -- ingredients
@@ -644,7 +651,11 @@ function ProductionBlockTab:addTableRowRecipe(gui_table, block, recipe)
         if block.by_product == false and recipe.contraint ~= nil and recipe.contraint.name == ingredient.name then
           contraint_type = recipe.contraint.type
         end
-        GuiElement.add(cell_ingredients, GuiCellElement(self.classname, "production-recipe-ingredient-add", block.id, recipe.id):element(ingredient):tooltip("tooltip.add-recipe"):color(GuiElement.color_button_add):index(index):byLimit(block.by_limit):contraintIcon(contraint_type):contraintInfo(block.solver ~= true and block.by_product == false))
+        local control_info = "contraint"
+        if not(block.solver ~= true and block.by_product == false) then
+          control_info = nil
+        end
+        GuiElement.add(cell_ingredients, GuiCellElement(self.classname, "production-recipe-ingredient-add", block.id, recipe.id):element(ingredient):tooltip("tooltip.add-recipe"):color(GuiElement.color_button_add):index(index):byLimit(block.by_limit):contraintIcon(contraint_type):controlInfo(control_info))
       end
     end
   end

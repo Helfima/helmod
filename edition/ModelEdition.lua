@@ -17,6 +17,15 @@ function ModelEdition:onInit()
 end
 
 -------------------------------------------------------------------------------
+-- On Bind Dispatcher
+--
+-- @function [parent=#ModelEdition] onBind
+--
+function ModelEdition:onBind()
+  Dispatcher:bind("on_gui_refresh", self, self.update)
+end
+
+-------------------------------------------------------------------------------
 -- On update
 --
 -- @function [parent=#ModelEdition] onUpdate

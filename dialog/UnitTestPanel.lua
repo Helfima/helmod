@@ -43,7 +43,7 @@ end
 -- @return boolean
 --
 function UnitTestPanel:isVisible()
-  return Player.isAdmin()
+  return User.getModGlobalSetting("hidden_panels")
 end
 
 -------------------------------------------------------------------------------

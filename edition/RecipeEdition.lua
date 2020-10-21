@@ -891,9 +891,10 @@ function RecipeEdition:updateFactoryModulesActive(event)
 
     -- actived modules panel
     local module_table = GuiElement.add(tool_panel, GuiTable("modules"):column(6):style("helmod_table_recipe_modules"))
+    local control_info = "module-remove"
     for module, count in pairs(factory.modules) do
       local module_cell = GuiElement.add(module_table, GuiFlowH("module-cell", module))
-      local tooltip = GuiTooltipModule("tooltip.remove-module"):element({type="item", name=module})
+      local tooltip = GuiTooltipModule("tooltip.remove-module"):element({type="item", name=module}):withControlInfo(control_info)
       GuiElement.add(module_cell, GuiButtonSelectSprite(self.classname, "factory-module-remove", block.id, recipe.id, module):sprite("item", module):tooltip(tooltip))
       GuiElement.add(module_cell, GuiLabel("module-amount"):caption({"", "x", count}))
     end
@@ -967,10 +968,11 @@ function RecipeEdition:updateFactoryModulesPriority(factory_module_panel)
   -- module priority info
   local priority_table_panel = GuiElement.add(factory_module_panel, GuiTable("module-priority-table"):column(2))
   if priority_modules[factory_module_priority] ~= nil then
+    local control_info = "module-add"
     for index, element in pairs(priority_modules[factory_module_priority]) do
       local color = nil
       local module = ItemPrototype(element.name)
-      local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name})
+      local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name}):withControlInfo(control_info)
       if Player.checkFactoryLimitationModule(module:native(), recipe) == false then
         if module.limitation_message_key ~= nil then
           tooltip = {"item-limitation."..module.limitation_message_key}
@@ -1004,7 +1006,8 @@ function RecipeEdition:updateFactoryModulesSelector(factory_module_panel)
   local module_table_panel = GuiElement.add(module_scroll, GuiTable("module-selector-table"):column(6))
   for k, element in pairs(Player.getModules()) do
     local color = nil
-    local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name})
+    local control_info = "module-add"
+    local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name}):withControlInfo(control_info)
     local module = ItemPrototype(element.name)
     if Player.checkFactoryLimitationModule(module:native(), recipe) == false then
       if module.limitation_message_key ~= nil then
@@ -1158,9 +1161,10 @@ function RecipeEdition:updateBeaconModulesActive(event)
 
     -- actived modules panel
     local module_table = GuiElement.add(tool_panel, GuiTable("modules"):column(6):style("helmod_table_recipe_modules"))
+    local control_info = "module-remove"
     for module, count in pairs(beacon.modules) do
       local module_cell = GuiElement.add(module_table, GuiFlowH("module-cell", module))
-      local tooltip = GuiTooltipModule("tooltip.remove-module"):element({type="item", name=module})
+      local tooltip = GuiTooltipModule("tooltip.remove-module"):element({type="item", name=module}):withControlInfo(control_info)
       GuiElement.add(module_cell, GuiButtonSelectSprite(self.classname, "beacon-module-remove", block.id, recipe.id, module):sprite("item", module):tooltip(tooltip))
       GuiElement.add(module_cell, GuiLabel("module-amount"):caption({"", "x", count}))
     end
@@ -1234,9 +1238,10 @@ function RecipeEdition:updateBeaconModulesPriority(beacon_module_panel)
   -- module priority info
   local priority_table_panel = GuiElement.add(beacon_module_panel, GuiTable("module-priority-table"):column(2))
   if priority_modules[beacon_module_priority] ~= nil then
+    local control_info = "module-add"
     for index, element in pairs(priority_modules[beacon_module_priority]) do
       local color = nil
-      local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name})
+      local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name}):withControlInfo(control_info)
       local module = ItemPrototype(element.name)
       if Player.checkBeaconLimitationModule(module:native(), recipe) == false then
         if module.limitation_message_key ~= nil then
@@ -1271,9 +1276,10 @@ function RecipeEdition:updateBeaconModulesSelector(beacon_module_panel)
   local module_table_panel = GuiElement.add(module_scroll, GuiTable("module-selector-table"):column(6))
   for k, element in pairs(Player.getModules()) do
     local color = nil
-    local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name})
+    local control_info = "module-add"
+    local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name}):withControlInfo(control_info)
     local module = ItemPrototype(element.name)
-    if Player.checkFactoryLimitationModule(module:native(), recipe) == false then
+    if Player.checkBeaconLimitationModule(module:native(), recipe) == false then
       if module.limitation_message_key ~= nil then
         tooltip = {"item-limitation."..module.limitation_message_key}
       else

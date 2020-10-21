@@ -249,7 +249,7 @@ function PreferenceEdition:updateUI(event)
         if preference.type == "int-setting" or preference.type == "string-setting" then
           local tooltip = nil
           if preference.minimum_value then
-            tooltip = {"", {"helmod_settings.range-value"}, "[",preference.minimum_value,",",preference.maximum_value,"]"}
+            tooltip = {"", {"helmod_pref_settings.range-value"}, "[",preference.minimum_value,",",preference.maximum_value,"]"}
           end
           GuiElement.add(options_table, GuiTextField(self.classname, "preference-setting", preference_type):text(default_preference_type):tooltip(tooltip))
         end

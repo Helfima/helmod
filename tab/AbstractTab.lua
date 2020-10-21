@@ -431,7 +431,7 @@ function AbstractTab:updateMenuPanel(event)
   local group_special = GuiElement.add(time_panel, GuiFlowH("group_special"))
   GuiElement.add(group_special, GuiButton("HMRichTextPanel", "OPEN"):sprite("menu", "text-white", "text"):style("helmod_button_menu"):tooltip({"helmod_panel.richtext"}))
   GuiElement.add(group_special, GuiButton("HMCalculator", "OPEN"):sprite("menu", "calculator-white", "calculator"):style("helmod_button_menu"):tooltip({"helmod_calculator-panel.title"}))
-  
+
   local items = {}
   local default_time = 1
   for index,base_time in pairs(helmod_base_times) do
@@ -538,10 +538,8 @@ end
 -- @param #string sorted
 --
 function AbstractTab:addCellHeader(guiTable, name, caption, sorted)
-  if (name ~= "index" and name ~= "id" and name ~= "name" and name ~= "type") or User.getModGlobalSetting("display_data_col_"..name) then
-    local cell = GuiElement.add(guiTable, GuiFrameH("header", name):style(helmod_frame_style.hidden))
-    GuiElement.add(cell, GuiLabel("label"):caption(caption))
-  end
+  local cell = GuiElement.add(guiTable, GuiFrameH("header", name):style(helmod_frame_style.hidden))
+  GuiElement.add(cell, GuiLabel("label"):caption(caption))
 end
 
 -------------------------------------------------------------------------------
