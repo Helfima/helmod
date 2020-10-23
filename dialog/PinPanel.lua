@@ -84,19 +84,19 @@ end
 -- @param #LuaEvent event
 --
 function PinPanel:updateHeader(event)
-  local left_menu_panel = self:getLeftMenuPanel()
+  local action_panel = self:getMenuPanel()
   local pin_block_id = User.getParameter("pin_block_id")
-  left_menu_panel.clear()
-  local group1 = GuiElement.add(left_menu_panel, GuiFlowH("group1"))
+  action_panel.clear()
+  local group1 = GuiElement.add(action_panel, GuiFlowH("group1"))
   GuiElement.add(group1, GuiButton(self.classname, "change-level", "down"):sprite("menu", "arrow-left-white", "arrow-left"):style("helmod_button_menu"):tooltip({"helmod_button.decrease"}))
   GuiElement.add(group1, GuiButton(self.classname, "change-level", "up"):sprite("menu", "arrow-right-white", "arrow-right"):style("helmod_button_menu"):tooltip({"helmod_button.expand"}))
   GuiElement.add(group1, GuiButton(self.classname, "change-level", "min"):sprite("menu", "minimize-window-white", "minimize-window"):style("helmod_button_menu"):tooltip({"helmod_button.minimize"}))
   GuiElement.add(group1, GuiButton(self.classname, "change-level", "max"):sprite("menu", "maximize-window-white", "maximize-window"):style("helmod_button_menu"):tooltip({"helmod_button.maximize"}))
 
-  local group2 = GuiElement.add(left_menu_panel, GuiFlowH("group2"))
+  local group2 = GuiElement.add(action_panel, GuiFlowH("group2"))
   GuiElement.add(group2, GuiButton(self.classname, "recipe-done-remove"):sprite("menu", "checkmark-white","checkmark"):style("helmod_button_menu"):tooltip({"helmod_button.remove-done"}))
 
-  local group3 = GuiElement.add(left_menu_panel, GuiFlowH("group3"))
+  local group3 = GuiElement.add(action_panel, GuiFlowH("group3"))
   GuiElement.add(group3, GuiButton("HMSummaryPanel=OPEN", pin_block_id):sprite("menu", "brief-white","brief"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
 end
 

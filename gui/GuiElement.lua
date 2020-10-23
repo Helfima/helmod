@@ -270,8 +270,8 @@ function GuiElement.getStyleSizes()
     }
     
   style_sizes["HMRichTextPanel"] = {
-    minimal_width = 300,
-    maximal_width = 300,
+    minimal_width = 322,
+    maximal_width = 322,
     minimal_height = 300,
     maximal_height = height_main
     }
@@ -374,7 +374,7 @@ function GuiElement.getIndexColumnNumber()
   local width , height = GuiElement.getDisplaySizes()
   local width_main = math.ceil(width*display_ratio_horizontal)
 
-  return math.ceil((width_main - 50)/36)
+  return math.ceil((width_main - 100)/36)
 end
 
 -------------------------------------------------------------------------------

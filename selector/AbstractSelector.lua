@@ -153,7 +153,7 @@ function AbstractSelector:getSrollPanel()
   local main_panel = GuiElement.add(content_panel, GuiFrameV("main_panel"))
   GuiElement.setStyle(main_panel, "dialog", "width")
   GuiElement.setStyle(main_panel, "recipe_selector", "height")
-  local scroll_panel = GuiElement.add(main_panel, GuiScroll("scroll_panel"):style(helmod_frame_style.scroll_recipe_selector))
+  local scroll_panel = GuiElement.add(main_panel, GuiScroll("scroll_panel"):style("helmod_scroll_pane"))
   GuiElement.setStyle(scroll_panel, "scroll_recipe_selector", "width")
   GuiElement.setStyle(scroll_panel, "scroll_recipe_selector", "height")
   return scroll_panel
@@ -169,7 +169,7 @@ function AbstractSelector:getGroupsPanel()
   if scroll_panel["groups_panel"] ~= nil and scroll_panel["groups_panel"].valid then
     return scroll_panel["groups_panel"]
   end
-  return GuiElement.add(scroll_panel, GuiFrameV("groups_panel"):style(helmod_frame_style.hidden))
+  return GuiElement.add(scroll_panel, GuiFlowV("groups_panel"))
 end
 
 -------------------------------------------------------------------------------
@@ -182,7 +182,7 @@ function AbstractSelector:getFailPanel()
   if scroll_panel["groups_panel"] ~= nil and scroll_panel["groups_panel"].valid then
     return scroll_panel["groups_panel"]
   end
-  return GuiElement.add(scroll_panel, GuiFrameV("groups_panel"):style(helmod_frame_style.hidden))
+  return GuiElement.add(scroll_panel, GuiFlowV("groups_panel"))
 end
 
 -------------------------------------------------------------------------------
@@ -195,7 +195,7 @@ function AbstractSelector:getItemListPanel()
   if scroll_panel["item_list_panel"] ~= nil and scroll_panel["item_list_panel"].valid then
     return scroll_panel["item_list_panel"]
   end
-  return GuiElement.add(scroll_panel, GuiFrameV("item_list_panel"):style(helmod_frame_style.hidden))
+  return GuiElement.add(scroll_panel, GuiFlowV("item_list_panel"))
 end
 
 -------------------------------------------------------------------------------

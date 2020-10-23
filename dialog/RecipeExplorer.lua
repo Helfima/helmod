@@ -58,9 +58,9 @@ end
 -- @param #LuaEvent event
 --
 function RecipeExplorer:updateHeader(event)
-  local left_menu_panel = self:getLeftMenuPanel()
-  left_menu_panel.clear()
-  local group1 = GuiElement.add(left_menu_panel, GuiFlowH("group1"))
+  local action_panel, _ = self:getMenuPanel()
+  action_panel.clear()
+  local group1 = GuiElement.add(action_panel, GuiFlowH("group1"))
   GuiElement.add(group1, GuiButton(self.classname, "open-recipe-selector", self.classname):sprite("menu", "wrench-white", "wrench"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-recipe"}))
 end
 

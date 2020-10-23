@@ -17,35 +17,6 @@ function RuleEdition:onInit()
 end
 
 -------------------------------------------------------------------------------
--- Get or create rule panel
---
--- @function [parent=#RuleEdition] getRulePanel
---
--- @return #LuaGuiElement
---
-function RuleEdition:getRulePanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
-  if content_panel["rule_panel"] ~= nil and content_panel["rule_panel"].valid then
-    return content_panel["rule_panel"]
-  end
-  local table_panel = GuiElement.add(content_panel, GuiFrameV("rule_panel"):style(helmod_frame_style.panel))
-  return table_panel
-end
-
--------------------------------------------------------------------------------
--- Get or create action panel
---
--- @function [parent=#RuleEdition] getActionPanel
---
-function RuleEdition:getActionPanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
-  if content_panel["action_panel"] ~= nil and content_panel["action_panel"].valid then
-    return content_panel["action_panel"]
-  end
-  return GuiElement.add(content_panel, GuiFrameV("action_panel"):style(helmod_frame_style.panel))
-end
-
--------------------------------------------------------------------------------
 -- On update
 --
 -- @function [parent=#RuleEdition] onUpdate
@@ -61,8 +32,6 @@ local rule_mod = nil
 local rule_name = nil
 local rule_category = nil
 local rule_type = nil
-local rule_value = nil
-local rule_excluded = false
 -------------------------------------------------------------------------------
 -- Update rule
 --
@@ -71,7 +40,7 @@ local rule_excluded = false
 -- @param #LuaEvent event
 --
 function RuleEdition:updateRule(event)
-  local rule_panel = self:getRulePanel()
+  local rule_panel = self:getFramePanel("rule_panel")
   rule_panel.clear()
   local rule_table = GuiElement.add(rule_panel, GuiTable("list-data"):column(2):style(helmod_table_style.rule))
 
@@ -127,11 +96,10 @@ end
 -- @param #LuaEvent event
 --
 function RuleEdition:updateAction(event)
-  local action_panel = self:getActionPanel()
+  local action_panel = self:getFramePanel("action_panel")
   action_panel.clear()
   local action_panel = GuiElement.add(action_panel, GuiTable("table_action"):column(2))
   GuiElement.add(action_panel, GuiButton(self.classname, "save"):caption({"helmod_button.save"}))
-  GuiElement.add(action_panel, GuiButton(self.classname, "CLOSE"):caption({"helmod_button.close"}))
 end
 
 -------------------------------------------------------------------------------

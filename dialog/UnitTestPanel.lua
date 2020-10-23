@@ -123,7 +123,7 @@ function UnitTestPanel:getEnergyTab()
     return content_panel[scroll_name]
   end
   local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption({"helmod_unittest.energy-title"}))
-  local scroll_panel = GuiElement.add(content_panel, GuiScroll(scroll_name):style(helmod_frame_style.scroll_pane):policy(true))
+  local scroll_panel = GuiElement.add(content_panel, GuiScroll(scroll_name):style("helmod_scroll_pane"):policy(true))
   content_panel.add_tab(tab_panel,scroll_panel)
   scroll_panel.style.horizontally_stretchable = true
   scroll_panel.style.vertically_stretchable = true

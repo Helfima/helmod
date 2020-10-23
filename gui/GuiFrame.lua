@@ -14,7 +14,7 @@ GuiFrame = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiFrame"
   base.options.type = "frame"
-  base.options.style = helmod_frame_style.default
+  base.options.style = "helmod_frame"
 end)
 
 -------------------------------------------------------------------------------

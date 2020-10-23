@@ -7,7 +7,6 @@
 
 RecipeEdition = newclass(Form,function(base,classname)
   Form.init(base,classname)
-  base.content_verticaly = true
 end)
 
 local limit_display_height = 850

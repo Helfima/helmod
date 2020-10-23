@@ -132,9 +132,9 @@ end
 -- @param #LuaEvent event
 --
 function ModelDebug:updateHeader(event)
-  local left_menu_panel = self:getLeftMenuPanel()
-  left_menu_panel.clear()
-  local group1 = GuiElement.add(left_menu_panel, GuiFlowH("group1"))
+  local action_panel = self:getMenuPanel()
+  action_panel.clear()
+  local group1 = GuiElement.add(action_panel, GuiFlowH("group1"))
   GuiElement.add(group1, GuiButton(self.classname, "change-stage", "initial"):sprite("menu", "record-white", "record"):style("helmod_button_menu"):tooltip("Initial"))
   GuiElement.add(group1, GuiButton(self.classname, "change-stage", "previous"):sprite("menu", "arrow-left-white", "arrow-left"):style("helmod_button_menu"):tooltip("Previous Step"))
   GuiElement.add(group1, GuiButton(self.classname, "change-stage", "next"):sprite("menu", "arrow-right-white", "arrow-right"):style("helmod_button_menu"):tooltip("Next Step"))

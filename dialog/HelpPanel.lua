@@ -270,22 +270,24 @@ end
 -- @function [parent=#HelpPanel] getContentPanel
 --
 function HelpPanel:getContentPanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
-  local panel_name = "help-panel"
+  local panel = self:getFrameDeepPanel("help-panel", "horizontal")
   local panel_menu_name = "menu-panel"
-  local panel_scroll_name = "scroll-panel"
   local panel_content_name = "content-panel"
-  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
-    return content_panel[panel_name][panel_menu_name][panel_scroll_name] ,content_panel[panel_name][panel_content_name]
+
+  if panel[panel_menu_name] ~= nil and panel[panel_menu_name].valid then
+    return panel[panel_menu_name], panel[panel_content_name]
   end
-  local panel = GuiElement.add(content_panel, GuiFlowH(panel_name))
-  local menu_panel = GuiElement.add(panel, GuiFrameV(panel_menu_name))
-  local scroll_panel = GuiElement.add(menu_panel, GuiScroll(panel_scroll_name))
-  scroll_panel.style.vertically_stretchable = true
-  scroll_panel.style.minimal_width = 200
-  local content_panel = GuiElement.add(panel, GuiFrameV(panel_content_name))
+
+  local menu_panel = GuiElement.add(panel, GuiScroll(panel_menu_name))
+  menu_panel.style.vertically_stretchable = true
+  menu_panel.style.minimal_width = 200
+
+  local content_panel = GuiElement.add(panel, GuiScroll(panel_content_name))
+  GuiElement.setStyle(content_panel, "scroll_help", "height")
+  content_panel.style.minimal_width = 850
+  content_panel.style.maximal_width = 850
   content_panel.style.horizontally_stretchable = true
-  return scroll_panel, content_panel
+  return menu_panel, content_panel
 end
 
 -------------------------------------------------------------------------------
@@ -368,10 +370,8 @@ end
 -- @param #LuaEvent event
 --
 function HelpPanel:updateContent(event)
-  local scroll_panel = self:getContentScrollPanel()
-  if scroll_panel then
-    scroll_panel.clear()
-  end
+  local menu_panel, content_panel = self:getContentPanel()
+  content_panel.clear()
 
   local selected_help = User.getParameter("selected_help") or {section = "getting_start", content = "getting_start"}
   local section = help_data[selected_help.section]
@@ -380,13 +380,13 @@ function HelpPanel:updateContent(event)
     -- section panel
     local section_caption_name = {string.format("helmod_help.%s", section.name)}
     local section_caption_desc = {string.format("helmod_help.%s-desc", section.name)}
-    local section_panel = GuiElement.add(scroll_panel, GuiFlowV("section", section.name))
+    local section_panel = GuiElement.add(content_panel, GuiFlowV("section", section.name))
     section_panel.style.horizontally_stretchable = true
     -- section header
     GuiElement.add(section_panel, GuiLabel("header"):caption({"", "[font=heading-1]", section_caption_name, "[/font]"}):style("helmod_label_help"))
     GuiElement.add(section_panel, GuiLabel(section.name, "desc"):caption({"", "\t\t\t",section_caption_desc}):style("helmod_label_help"))
     for key,content in pairs(section.content) do
-      local content_panel = GuiElement.add(section_panel, GuiFrameV(section.name, "panel", key):style(helmod_frame_style.section))
+      local content_panel = GuiElement.add(section_panel, GuiFrameV(section.name, "panel", key):style("helmod_inside_frame"))
       content_panel.style.horizontally_stretchable = true
 
       local content_title_name = {string.format("helmod_help.%s", content.localised_text)}
@@ -416,7 +416,7 @@ function HelpPanel:updateContent(event)
       end
     end
     if content_selected ~= nil then
-      scroll_panel.scroll_to_element(content_selected, "top-third")
+      content_panel.scroll_to_element(content_selected, "top-third")
     end
   end
 end
