@@ -7,6 +7,8 @@
 
 HelpPanel = newclass(Form)
 
+local page_list = {}
+
 local help_data = {}
 help_data.getting_start = {
   name = "getting-start",
@@ -278,9 +280,11 @@ function HelpPanel:getContentPanel()
     return panel[panel_menu_name], panel[panel_content_name]
   end
 
-  local menu_panel = GuiElement.add(panel, GuiScroll(panel_menu_name))
+  local menu_panel = GuiElement.add(panel, GuiFlowV(panel_menu_name))
+  GuiElement.setStyle(menu_panel, "scroll_help", "height")
   menu_panel.style.vertically_stretchable = true
   menu_panel.style.minimal_width = 200
+  --menu_panel.style.padding=0
 
   local content_panel = GuiElement.add(panel, GuiScroll(panel_content_name))
   GuiElement.setStyle(content_panel, "scroll_help", "height")
@@ -318,7 +322,8 @@ end
 --
 function HelpPanel:onEvent(event)
   if event.action == "change-page" then
-    User.setParameter("selected_help", {section=event.item1 , content=event.item2})
+    local selected_index = event.element.selected_index
+    User.setParameter("selected_help", page_list[selected_index])
     self:onUpdate(event)
   end
 end
@@ -331,8 +336,28 @@ end
 -- @param #LuaEvent event
 --
 function HelpPanel:onUpdate(event)
+  self:generateList()
   self:updateMenu(event)
   self:updateContent(event)
+end
+
+-------------------------------------------------------------------------------
+-- Update about HelpPanel
+--
+-- @function [parent=#HelpPanel] updateMenu
+--
+-- @param #LuaEvent event
+--
+function HelpPanel:generateList()
+  page_list = {}
+  for key1,section in pairs(help_data) do
+    local caption_section = {"", helmod_tag.font.default_bold, helmod_tag.color.gold, {string.format("helmod_help.%s", section.name)}, helmod_tag.color.close, helmod_tag.font.close}
+    table.insert(page_list, {section = key1, content = nil, caption = caption_section})
+    for key2,content in pairs(section.content) do
+      local caption_content = {"", "\t\t\t", {string.format("helmod_help.%s", content.localised_text)}}
+      table.insert(page_list, {section = key1, content = key2, caption = caption_content})
+    end
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -345,21 +370,19 @@ end
 function HelpPanel:updateMenu(event)
   local menu_panel, content_panel = self:getContentPanel()
   menu_panel.clear()
-  local selected_help = User.getParameter("selected_help") or {section = "getting_start", content = "getting_start"}
-  for key,section in pairs(help_data) do
-    local style_section = "helmod_button_help_menu"
-    if key == selected_help.section and (selected_help.content == nil or selected_help.content =="") then style_section = style_section.."_selected" end
-    local caption_section = {string.format("helmod_help.%s", section.name)}
-    local group_panel = GuiElement.add(menu_panel, GuiFlowV(key))
-    group_panel.style.vertical_spacing = 0
-    GuiElement.add(group_panel, GuiButton(self.classname, "change-page", key):style(style_section):caption(caption_section))
-    for key2,content in pairs(section.content) do
-      local style_content = "helmod_button_help_menu2"
-      if key2 == selected_help.content then style_content = style_content.."_selected" end
-      local caption_content = {string.format("helmod_help.%s", content.localised_text)}
-      GuiElement.add(group_panel, GuiButton(self.classname, "change-page", key, key2):style(style_content):caption(caption_content))
+  local selected_help = User.getParameter("selected_help") or {section = "getting_start", content = nil}
+  local items = {}
+  local selected_item = nil
+  local scroll_index = 0
+  for index,page in pairs(page_list) do
+    table.insert(items, page.caption)
+    if page.section == selected_help.section and page.content == selected_help.content then
+      selected_item = page.caption
+      scroll_index = index
     end
   end
+  local list_box = GuiElement.add(menu_panel, GuiListBox(self.classname, "change-page"):items(items, selected_item))
+  list_box.scroll_to_item(scroll_index, "top-third")
 end
 
 -------------------------------------------------------------------------------
@@ -373,7 +396,7 @@ function HelpPanel:updateContent(event)
   local menu_panel, content_panel = self:getContentPanel()
   content_panel.clear()
 
-  local selected_help = User.getParameter("selected_help") or {section = "getting_start", content = "getting_start"}
+  local selected_help = User.getParameter("selected_help") or {section = "getting_start", content = nil}
   local section = help_data[selected_help.section]
   local content_selected = nil
   if section then
@@ -384,7 +407,7 @@ function HelpPanel:updateContent(event)
     section_panel.style.horizontally_stretchable = true
     -- section header
     GuiElement.add(section_panel, GuiLabel("header"):caption({"", "[font=heading-1]", section_caption_name, "[/font]"}):style("helmod_label_help"))
-    GuiElement.add(section_panel, GuiLabel(section.name, "desc"):caption({"", "\t\t\t",section_caption_desc}):style("helmod_label_help"))
+    local section_title = GuiElement.add(section_panel, GuiLabel(section.name, "desc"):caption({"", "\t\t\t",section_caption_desc}):style("helmod_label_help"))
     for key,content in pairs(section.content) do
       local content_panel = GuiElement.add(section_panel, GuiFrameV(section.name, "panel", key):style("helmod_inside_frame"))
       content_panel.style.horizontally_stretchable = true
@@ -399,7 +422,6 @@ function HelpPanel:updateContent(event)
       end
 
       local column = 1
-      --local content_list = GuiElement.add(content_panel, GuiTable(section.name, "list", key):column(column):style("helmod_table-help"))
       local content_list = GuiElement.add(content_panel, GuiFlowV(section.name, "list", key))
       content_list.style.horizontally_stretchable = true
 
@@ -417,6 +439,8 @@ function HelpPanel:updateContent(event)
     end
     if content_selected ~= nil then
       content_panel.scroll_to_element(content_selected, "top-third")
+    else
+      content_panel.scroll_to_element(section_title, "top-third")
     end
   end
 end

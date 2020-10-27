@@ -288,8 +288,7 @@ function appendRowLogistic(parent, element)
     
     --local tooltip = GuiTooltipModule("tooltip.info-module"):element({type="item", name=name})
     local logistic_cell = GuiElement.add(parent, GuiFlowH("logistic-cell", item_logistic))
-    local button = GuiElement.add(logistic_cell, GuiButtonSelectSpriteSm("sprite", item_logistic):choose("entity", item_logistic):color("flat"))
-    button.locked = true
+    GuiElement.add(logistic_cell, GuiButtonSelectSpriteSm("sprite", item_logistic):sprite("entity", item_logistic):color("flat"))
     if element.limit_count ~= nil and element.limit_count > 0 then
       local limit_value = Format.formatNumberElement(item_prototype:countContainer(element.limit_count, item_logistic))
       GuiElement.add(logistic_cell, GuiLabel("label", item_logistic):caption({"", "x", limit_value, "/", total_value}):style("helmod_label_element"))
@@ -309,8 +308,7 @@ function appendRowLogistic(parent, element)
     
     --local tooltip = GuiTooltipModule("tooltip.info-module"):element({type="item", name=name})
     local logistic_cell = GuiElement.add(parent, GuiFlowH("logistic-cell", fluid_logistic))
-    local button = GuiElement.add(logistic_cell, GuiButtonSelectSpriteSm("sprite", fluid_logistic):choose("entity", fluid_logistic):color("flat"))
-    button.locked = true
+    GuiElement.add(logistic_cell, GuiButtonSelectSpriteSm("sprite", fluid_logistic):sprite("entity", fluid_logistic):color("flat"))
     if element.limit_count ~= nil and element.limit_count > 0 then
       local limit_count = element.limit_count
       if type == "pipe" then limit_count = limit_count / model.time end

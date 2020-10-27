@@ -122,4 +122,29 @@ function Converter.read(data_string)
   return nil
 end
 
+-------------------------------------------------------------------------------
+-- Read string to table
+--
+-- @function [parent=#Converter] read
+--
+-- @param #string data_string
+--
+-- @return #table
+--
+function Converter.decode_string(data_string)
+  if data_string == nil then return nil end
+  data_string = Converter.trim(data_string)
+  if (string.sub(data_string, 1, 8) ~= "do local") then
+    local input = base64.dec(data_string)
+    local data_table = {}
+    local output = {}
+    local status, result = pcall(inflate.inflate_zlib, { input = input, output = function(byte) output[#output+1] = string.char(byte) end })
+    if (status) then
+      return table.concat(output)
+    else
+      return nil
+    end
+  end
+end
+
 return Converter

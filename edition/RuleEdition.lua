@@ -42,7 +42,7 @@ local rule_type = nil
 function RuleEdition:updateRule(event)
   local rule_panel = self:getFramePanel("rule_panel")
   rule_panel.clear()
-  local rule_table = GuiElement.add(rule_panel, GuiTable("list-data"):column(2):style(helmod_table_style.rule))
+  local rule_table = GuiElement.add(rule_panel, GuiTable("list-data"):column(2):style("helmod_table_rule"))
 
   -- mod
   local mod_list = {}

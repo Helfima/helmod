@@ -507,6 +507,9 @@ function GuiElement.infoRecipe(parent, element)
   elseif element.type == "rocket" then
     local sprite = GuiElement.add(parent, GuiSprite("recipe-info"):sprite("developer"):tooltip({"tooltip.rocket-recipe"}))
     sprite.style.top_padding = -8
+  elseif element.type == "technology" then
+    local sprite = GuiElement.add(parent, GuiSprite("recipe-info"):sprite("developer"):tooltip({"tooltip.technology-recipe"}))
+    sprite.style.top_padding = -8
   elseif element.type ~= "recipe" then
     local sprite = GuiElement.add(parent, GuiSprite("recipe-info"):sprite("developer"):tooltip({"tooltip.resource-recipe"}))
     sprite.style.top_padding = -8

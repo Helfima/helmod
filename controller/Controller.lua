@@ -765,6 +765,22 @@ function Controller:onEventAccessAdmin(event)
       self:send("on_gui_pause", event)
     end
   end
+  
+  if event.action == "string-decode" then
+    local parent = event.element.parent.parent
+    local decoded_textbox = parent["decoded-text"]
+    local encoded_textbox = parent["encoded-text"]
+    local input = string.sub(encoded_textbox.text,2)
+    local json = game.decode_string(input)
+    decoded_textbox.text = json
+  end
+
+  if event.action == "string-encode" then
+    local parent = event.element.parent.parent
+    local decoded_textbox = parent["decoded-text"]
+    local encoded_textbox = parent["encoded-text"]
+    encoded_textbox.text = "0"..game.encode_string(decoded_textbox.text)
+  end
 
   if event.action == "game-play" then
     User.setParameter("auto-pause", false)

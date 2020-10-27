@@ -182,7 +182,7 @@ function ProductionLineTab:updateData(event)
       extra_cols = extra_cols + 1
     end
 
-    local result_table = GuiElement.add(scroll_panel, GuiTable("list-data"):column(5 + extra_cols):style("helmod_table-odd"))
+    local result_table = GuiElement.add(scroll_panel, GuiTable("list-data"):column(5 + extra_cols):style("helmod_table_result"))
     result_table.style.horizontally_stretchable = false
     result_table.vertical_centering = false
 

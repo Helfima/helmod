@@ -56,10 +56,13 @@ end
 -- @function [parent=#AbstractTab] getInfoPanel
 --
 function AbstractTab:getInfoPanel()
-  local parent_panel = self:getResultPanel()
+  local parent_panel = self:getFramePanel("info-model")
   local panel_name = "info"
   if parent_panel[panel_name] ~= nil and parent_panel[panel_name].valid then
     return parent_panel[panel_name]["info"]["info-scroll"],parent_panel[panel_name]["output"]["output-scroll"],parent_panel[panel_name]["input"]["input-scroll"]
+  end
+  if parent_panel["label_panel"] == nil then
+    GuiElement.add(parent_panel, GuiLabel("label_panel"):caption(self:getButtonCaption()):style("heading_1_label"))
   end
   local panel = GuiElement.add(parent_panel, GuiFlowH(panel_name))
   panel.style.horizontally_stretchable = true
@@ -91,7 +94,7 @@ end
 -- @function [parent=#AbstractTab] getInfoPanel2
 --
 function AbstractTab:getInfoPanel2()
-  local _,parent_panel = self:getResultPanel2()
+  local _,parent_panel = self:getResultScrollPanel2()
   local panel_name = "info"
   if parent_panel[panel_name] ~= nil and parent_panel[panel_name].valid then
     return parent_panel[panel_name]["options"]["options-scroll"],parent_panel[panel_name]["info"]["info-scroll"],parent_panel[panel_name]["left-info"],parent_panel[panel_name]["right-info"]
@@ -116,23 +119,6 @@ function AbstractTab:getInfoPanel2()
   GuiElement.setStyle(right_panel, "block_info", "height")
 
   return options_scroll, info_scroll, left_panel, right_panel
-end
-
--------------------------------------------------------------------------------
--- Get or create info panel
---
--- @function [parent=#AbstractTab] getInfoPanel3
---
-function AbstractTab:getInfoPanel3()
-  local parent_panel = self:getResultPanel()
-  local panel_name = "info"
-  if parent_panel[panel_name] ~= nil and parent_panel[panel_name].valid then
-    return parent_panel[panel_name]["info"]["info-scroll"],parent_panel[panel_name]["output"]["output-scroll"],parent_panel[panel_name]["input"]["input-scroll"]
-  end
-  local panel = GuiElement.add(parent_panel, GuiFlowH(panel_name))
-  panel.style.horizontally_stretchable = true
-  panel.style.horizontal_spacing=10
-  return panel
 end
 
 -------------------------------------------------------------------------------
@@ -191,10 +177,7 @@ end
 -- @function [parent=#AbstractTab] getResultPanel
 --
 function AbstractTab:getResultPanel()
-  local panel = self:getFramePanel("result")
-  if panel["label_panel"] == nil then
-    GuiElement.add(panel, GuiLabel("label_panel"):caption(self:getButtonCaption()):style("heading_1_label"))
-  end
+  local panel = self:getFrameDeepPanel("result")
   panel.style.horizontally_stretchable = true
   panel.style.vertically_stretchable = true
   return panel
@@ -216,9 +199,8 @@ function AbstractTab:getResultPanel2()
   table_panel.style.horizontally_stretchable = true
   table_panel.style.vertically_stretchable = true
 
-  local panel1 = GuiElement.add(table_panel, GuiFrameV("result1"))
-  local panel2 = GuiElement.add(table_panel, GuiFrameV("result2"))
-  GuiElement.add(panel2, GuiLabel("label_panel"):caption(self:getButtonCaption()):style("heading_1_label"))
+  local panel1 = GuiElement.add(table_panel, GuiFlowV("result1"))
+  local panel2 = GuiElement.add(table_panel, GuiFlowV("result2"))
   panel2.style.horizontally_stretchable = true
   panel2.style.vertically_stretchable = true
   return panel1,panel2
@@ -248,15 +230,18 @@ end
 function AbstractTab:getResultScrollPanel2()
   local parent_panel1,parent_panel2 = self:getResultPanel2()
   if parent_panel1["header-data1"] ~= nil and parent_panel1["header-data1"].valid then
-    return parent_panel1["header-data1"],parent_panel2["header-data2"],parent_panel1["scroll-data1"],parent_panel2["scroll-data2"]
+    return parent_panel1["header-data1"],parent_panel2["header-data2"],parent_panel1["data1"]["scroll-data1"],parent_panel2["data2"]["scroll-data2"]
   end
-  local header_panel1 = GuiElement.add(parent_panel1, GuiFlowV("header-data1"))
-  local header_panel2 = GuiElement.add(parent_panel2, GuiFlowV("header-data2"))
-  local scroll_panel1 = GuiElement.add(parent_panel1, GuiScroll("scroll-data1"):style("helmod_scroll_pane"))
+  local header_panel1 = GuiElement.add(parent_panel1, GuiFrameV("header-data1"))
+  local header_panel2 = GuiElement.add(parent_panel2, GuiFrameV("header-data2"))
+  GuiElement.add(header_panel2, GuiLabel("label_panel"):caption(self:getButtonCaption()):style("heading_1_label"))
+  local data_panel1 = GuiElement.add(parent_panel1, GuiFrameV("data1"):style("helmod_deep_frame"))
+  local scroll_panel1 = GuiElement.add(data_panel1, GuiScroll("scroll-data1"):style("helmod_scroll_pane"))
   --scroll_panel1.style.horizontally_stretchable = true
   scroll_panel1.style.vertically_stretchable = true
   scroll_panel1.style.width = 70
-  local scroll_panel2 = GuiElement.add(parent_panel2, GuiScroll("scroll-data2"):style("helmod_scroll_pane"))
+  local data_panel2 = GuiElement.add(parent_panel2, GuiFrameV("data2"):style("helmod_deep_frame"))
+  local scroll_panel2 = GuiElement.add(data_panel2, GuiScroll("scroll-data2"):style("helmod_scroll_pane"))
   scroll_panel2.style.horizontally_stretchable = true
   scroll_panel2.style.vertically_stretchable = true
   return header_panel1,header_panel2,scroll_panel1,scroll_panel2
@@ -439,7 +424,7 @@ function AbstractTab:updateIndexPanel(event)
       -- index panel
     local index_panel = self:getFramePanel("model_index")
     index_panel.clear()
-    local table_index = GuiElement.add(index_panel, GuiTable("table_index"):column(GuiElement.getIndexColumnNumber()):style(helmod_table_style.list))
+    local table_index = GuiElement.add(index_panel, GuiTable("table_index"):column(GuiElement.getIndexColumnNumber()):style("helmod_table_list"))
     if Model.countModel() > 0 then
       local i = 0
       for _,imodel in pairs(models) do

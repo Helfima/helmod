@@ -349,13 +349,13 @@ function ProductionBlockTab:updateData(event)
   local back_button = GuiElement.add(header_panel1, GuiButton(self.classname, "change-tab", "HMProductionLineTab"):style("back_button"):caption("Back"))
   back_button.style.width = 70
 
-  local recipe_table = GuiElement.add(scroll_panel1, GuiTable("recipe-data"):column(1):style(helmod_table_style.list))
+  local recipe_table = GuiElement.add(scroll_panel1, GuiTable("recipe-data"):column(1):style("helmod_table_list"))
   recipe_table.vertical_centering = false
 
   local last_element = nil
   -- col recipe
   local color = "gray"
-  local cell_recipe = GuiElement.add(recipe_table, GuiTable("recipe-new"):column(1):style(helmod_table_style.list))
+  local cell_recipe = GuiElement.add(recipe_table, GuiTable("recipe-new"):column(1):style("helmod_table_list"))
   if current_block == "new" then
     last_element = cell_recipe
     color = "orange"
@@ -366,7 +366,7 @@ function ProductionBlockTab:updateData(event)
   for _, block in spairs(model.blocks, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
     -- col recipe
     local color = "gray"
-    local cell_recipe = GuiElement.add(recipe_table, GuiTable("recipe", block.id):column(1):style(helmod_table_style.list))
+    local cell_recipe = GuiElement.add(recipe_table, GuiTable("recipe", block.id):column(1):style("helmod_table_list"))
     if current_block == block.id then
       last_element = cell_recipe
       color = "orange"
@@ -395,7 +395,7 @@ function ProductionBlockTab:updateData(event)
       extra_cols = extra_cols + 2
     end
 
-    local result_table = GuiElement.add(scroll_panel2, GuiTable("list-data"):column(7 + extra_cols):style("helmod_table-odd"))
+    local result_table = GuiElement.add(scroll_panel2, GuiTable("list-data"):column(7 + extra_cols):style("helmod_table_result"))
     result_table.vertical_centering = false
     self:addTableHeader(result_table)
 
@@ -422,13 +422,13 @@ end
 --
 function ProductionBlockTab:bluidNavigator(scroll_panel1, current_block)
   local model = Model.getModel()
-  local tree_panel = GuiElement.add(scroll_panel1, GuiTable("tree"):column(1):style(helmod_table_style.list))
+  local tree_panel = GuiElement.add(scroll_panel1, GuiTable("tree"):column(1):style("helmod_table_list"))
   tree_panel.vertical_centering = false
 
   local last_element = nil
   -- col recipe
   local color = "gray"
-  local cell_recipe = GuiElement.add(tree_panel, GuiTable("recipe-new"):column(1):style(helmod_table_style.list))
+  local cell_recipe = GuiElement.add(tree_panel, GuiTable("recipe-new"):column(1):style("helmod_table_list"))
   if current_block == "new" then
     last_element = cell_recipe
     color = "orange"
@@ -472,7 +472,7 @@ end
 function ProductionBlockTab:bluidLeaf(tree_panel, block, current_block, level)
   if block ~= nil then
       local color = "gray"
-      local cell_tree = GuiElement.add(tree_panel, GuiTable("recipe", block.id):column(1):style(helmod_table_style.list))
+      local cell_tree = GuiElement.add(tree_panel, GuiTable("recipe", block.id):column(1):style("helmod_table_list"))
       if current_block == block.id then
         --last_element = cell_tree
         color = "orange"
@@ -558,7 +558,7 @@ function ProductionBlockTab:addTableRowRecipe(gui_table, block, recipe)
   --local lua_recipe = RecipePrototype(recipe):native()
 
   -- col action
-  local cell_action = GuiElement.add(gui_table, GuiTable("action", recipe.id):column(2):style(helmod_table_style.list))
+  local cell_action = GuiElement.add(gui_table, GuiTable("action", recipe.id):column(2):style("helmod_table_list"))
   if block.by_product == false then
     -- by ingredient
     GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-down", block.id, recipe.id):sprite("menu", "arrow-up-white-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.up-element", User.getModSetting("row_move_step")}))
@@ -577,24 +577,24 @@ function ProductionBlockTab:addTableRowRecipe(gui_table, block, recipe)
   --  local production = recipe.production or 1
   --  local production_label = Format.formatPercent(production).."%"
   --  if block.solver == true then production_label = "" end
-  local cell_recipe = GuiElement.add(gui_table, GuiTable("recipe", recipe.id):column(2):style(helmod_table_style.list))
+  local cell_recipe = GuiElement.add(gui_table, GuiTable("recipe", recipe.id):column(2):style("helmod_table_list"))
   GuiElement.add(cell_recipe, GuiCellRecipe("HMRecipeEdition", "OPEN", block.id, recipe.id):element(recipe):infoIcon(recipe.type):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):broken(recipe_prototype:native() == nil):byLimit(block.by_limit))
   if recipe_prototype:native() == nil then
     Player.print("ERROR: Recipe ".. recipe.name .." not exist in game")
   end
   -- col energy
-  local cell_energy = GuiElement.add(gui_table, GuiTable("energy", recipe.id):column(2):style(helmod_table_style.list))
+  local cell_energy = GuiElement.add(gui_table, GuiTable("energy", recipe.id):column(2):style("helmod_table_list"))
   GuiElement.add(cell_energy, GuiCellEnergy("HMRecipeEdition", "OPEN", block.id, recipe.id):element(recipe):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit))
 
   -- col pollution
   if User.getPreferenceSetting("display_pollution") then
-    local cell_pollution = GuiElement.add(gui_table, GuiTable("pollution", recipe.id):column(2):style(helmod_table_style.list))
+    local cell_pollution = GuiElement.add(gui_table, GuiTable("pollution", recipe.id):column(2):style("helmod_table_list"))
     GuiElement.add(cell_pollution, GuiCellPollution("HMRecipeEdition", "OPEN", block.id, recipe.id):element(recipe):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit))
   end
   
   -- col factory
   local factory = recipe.factory
-  local cell_factory = GuiElement.add(gui_table, GuiTable("factory", recipe.id):column(2):style(helmod_table_style.list))
+  local cell_factory = GuiElement.add(gui_table, GuiTable("factory", recipe.id):column(2):style("helmod_table_list"))
   local gui_cell_factory = GuiCellFactory("HMRecipeEdition", "OPEN", block.id, recipe.id):element(factory):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit)
   if block.by_limit == true then
     gui_cell_factory:byLimitUri(self.classname, "update-factory-limit", block.id, recipe.id)
@@ -606,7 +606,7 @@ function ProductionBlockTab:addTableRowRecipe(gui_table, block, recipe)
 
   -- col beacon
   local beacon = recipe.beacon
-  local cell_beacon = GuiElement.add(gui_table, GuiTable("beacon", recipe.id):column(2):style(helmod_table_style.list))
+  local cell_beacon = GuiElement.add(gui_table, GuiTable("beacon", recipe.id):column(2):style("helmod_table_list"))
   local gui_cell_beacon = GuiCellFactory("HMRecipeEdition", "OPEN", block.id, recipe.id):element(beacon):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit)
   GuiElement.add(cell_beacon, gui_cell_beacon)
 
@@ -614,7 +614,7 @@ function ProductionBlockTab:addTableRowRecipe(gui_table, block, recipe)
     if order == "products" then
       -- products
       local display_product_cols = User.getPreferenceSetting("display_product_cols")
-      local cell_products = GuiElement.add(gui_table, GuiTable("products", recipe.id):column(display_product_cols):style(helmod_table_style.list))
+      local cell_products = GuiElement.add(gui_table, GuiTable("products", recipe.id):column(display_product_cols):style("helmod_table_list"))
       for index, lua_product in spairs(recipe_prototype:getProducts(recipe.factory), User.getProductSorter()) do
         local contraint_type = nil
         local product_prototype = Product(lua_product)
@@ -635,7 +635,7 @@ function ProductionBlockTab:addTableRowRecipe(gui_table, block, recipe)
     else
       -- ingredients
       local display_ingredient_cols = User.getPreferenceSetting("display_ingredient_cols")
-      local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients_", recipe.id):column(display_ingredient_cols):style(helmod_table_style.list))
+      local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients_", recipe.id):column(display_ingredient_cols):style("helmod_table_list"))
       for index, lua_ingredient in spairs(recipe_prototype:getIngredients(recipe.factory), User.getProductSorter()) do
         local contraint_type = nil
         local ingredient_prototype = Product(lua_ingredient)

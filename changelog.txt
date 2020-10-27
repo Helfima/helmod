@@ -1,14 +1,15 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.11.14
-Date: 2020-10-21
+Date: 2020-10-24
   Changes:
     - Updated style panel
     - Updated help content, more information added
-    - Added some control tooltip information
+    - Added some control information in tooltip
     - Added steam heat ingredient for machine with heat energy
     - Changed UnitTest panel is a special panel and is hidden by default
   Bugfixes:
     - fixed switch button fire event, button of switch work now
+    - fixed bonus research for lab
 ---------------------------------------------------------------------------------------------------
 Version: 0.11.13
 Date: 2020-10-05

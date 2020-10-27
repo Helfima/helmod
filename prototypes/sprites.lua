@@ -10,8 +10,8 @@ function sprite_help(name,width,height)
 end
 
 data:extend({
-  sprite_help("getting-start", 798, 237),
-  sprite_help("quick-start", 800, 431),
+  sprite_help("getting-start", 798, 359),
+  sprite_help("quick-start", 800, 506),
   sprite_help("mod-settings-map", 478, 524),
   sprite_help("mod-settings-player", 415, 524),
   sprite_help("preferences-general", 500, 567),

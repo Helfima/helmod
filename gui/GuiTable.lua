@@ -14,7 +14,7 @@ GuiTable = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiTable"
   base.options.type = "table"
-  base.options.style = helmod_table_style.default
+  base.options.style = "helmod_table_default"
 end)
 
 -------------------------------------------------------------------------------

@@ -143,6 +143,15 @@ function AdminTab:getGuiTab()
 end
 
 -------------------------------------------------------------------------------
+-- Get or create conversion tab panel
+--
+-- @function [parent=#AdminTab] getConversionTab
+--
+function AdminTab:getConversionTab()
+  return self:getTab("conversion-tab-panel", "Conversion")
+end
+
+-------------------------------------------------------------------------------
 -- Update data
 --
 -- @function [parent=#AdminTab] updateData
@@ -153,8 +162,24 @@ function AdminTab:updateData()
   self:updateSheet()
   self:updateMod()
   self:updateGui()
+  self:updateConversion()
 end
 
+-------------------------------------------------------------------------------
+-- Update data
+--
+-- @function [parent=#AdminTab] updateConversion
+--
+function AdminTab:updateConversion()
+  -- Rule List
+  local scroll_panel = self:getConversionTab()
+  local table_panel = GuiElement.add(scroll_panel, GuiTable("list-table"):column(3))
+  GuiElement.add(table_panel, GuiTextBox("encoded-text"))
+  local actions = GuiElement.add(table_panel, GuiFlowV("actions"))
+  GuiElement.add(actions, GuiButton(self.classname, "string-decode"):caption("Decode ==>"))
+  GuiElement.add(actions, GuiButton(self.classname, "string-encode"):caption("<== Encode"))
+  GuiElement.add(table_panel, GuiTextBox("decoded-text"))
+end
 -------------------------------------------------------------------------------
 -- Update data
 --

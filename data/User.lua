@@ -11,6 +11,7 @@ local User = {
   tab_name = "HMTab"
 }
 
+local user_name
 -------------------------------------------------------------------------------
 -- Get global variable for user
 --
@@ -44,7 +45,10 @@ end
 -- @function [parent=#User] name
 --
 function User.name()
-  return Player.native().name or Player.native().index or "nil"
+  if user_name == nil then
+    user_name = Player.native().name or Player.native().index or "nil"
+  end
+  return user_name
 end
 
 -------------------------------------------------------------------------------

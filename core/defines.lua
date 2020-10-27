@@ -75,14 +75,6 @@ helmod_frame_style = {
   section = "helmod_frame_section"
 }
 
-helmod_table_style = {
-  default = "helmod_table_default",
-  panel = "helmod_table_panel",
-  list = "helmod_table_list",
-  tab = "helmod_table_tab",
-  rule = "helmod_table_rule"
-}
-
 helmod_rules = {}
 helmod_rules["production-crafting"] = {excluded_only=false ,categories={}}
 helmod_rules["production-crafting"].categories["standard"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}

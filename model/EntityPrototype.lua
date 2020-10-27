@@ -614,6 +614,20 @@ function EntityPrototype:getMiningSpeed()
 end
 
 -------------------------------------------------------------------------------
+-- Return researching speed
+--
+-- @function [parent=#EntityPrototype] getSearchingSpeed
+--
+-- @return #number default 0
+--
+function EntityPrototype:getResearchingSpeed()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.researching_speed or 1
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
 -- Return pumping speed
 --
 -- @function [parent=#EntityPrototype] getPumpingSpeed
@@ -656,8 +670,8 @@ function EntityPrototype:speedFactory(recipe)
     local pumping_speed = self:getPumpingSpeed()
     return pumping_speed
   elseif recipe.type == "technology" then
-    local bonus = Player.getForce().laboratory_speed_modifier or 1
-    return 1*bonus
+    local researching_speed = self:getResearchingSpeed()
+    return researching_speed
   elseif recipe.type == "energy" then
     return 1
   else
