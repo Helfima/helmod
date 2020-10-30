@@ -28,7 +28,7 @@ end
 function Download:onEvent(event)
   -- import
   if event.action == "download-model" then
-    local download_panel = self:getDownloadPanel()
+    local download_panel = event.element.parent
     local text_box = download_panel["data-text"]
     local data_table = Converter.read(text_box.text)
     if data_table ~= nil then

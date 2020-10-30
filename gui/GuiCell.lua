@@ -550,12 +550,14 @@ function GuiCellBlock:create(parent)
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
 
   local first_recipe = Model.firstRecipe(element.recipes)
-  local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
-  local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
-  infoIcon(button, "block")
-
   if first_recipe ~= nil then
+    local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
+    local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
+    infoIcon(button, "block")
     GuiElement.infoRecipe(button, first_recipe)
+  else
+    local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", "help-white", "help"))
+    button.style.width = 36
   end
 
   if element.limit_count ~= nil then

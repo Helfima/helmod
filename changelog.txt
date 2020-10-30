@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.11.15
+Date: 2020-10-30
+  Changes:
+    - Added hotkey to open/close RichText Panel: CONTROL + T
+  Bugfixes:
+    - fixed display block empty after remove last recipe
+    - fixed error on download panel
+---------------------------------------------------------------------------------------------------
 Version: 0.11.14
 Date: 2020-10-24
   Changes:

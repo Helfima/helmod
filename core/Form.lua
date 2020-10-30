@@ -14,6 +14,7 @@ Form = newclass(Object,function(base,classname)
   base.help_button = true
   base.auto_clear = true
   base.content_verticaly = true
+  base.debug = false
 end)
 
 -------------------------------------------------------------------------------
@@ -218,42 +219,6 @@ end
 --
 function Form:getFrameTabbedPanel(panel_name, direction)
   return self:getFramePanel(panel_name, "helmod_tabbed_frame", direction)
-end
-
--------------------------------------------------------------------------------
--- Get the error panel
---
--- @function [parent=#Form] getErrorPanel
---
--- @return #LuaGuiElement
---
-function Form:getErrorPanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
-  local panel_name = "error-panel"
-  if flow_panel[panel_name] ~= nil and flow_panel[panel_name].valid then
-    return flow_panel[panel_name]
-  end
-  local panel = GuiElement.add(flow_panel, GuiFrameV(panel_name))
-  panel.style.horizontally_stretchable = true
-  return panel
-end
-
--------------------------------------------------------------------------------
--- Get the message panel
---
--- @function [parent=#Form] getMessagePanel
---
--- @return #LuaGuiElement
---
-function Form:getMessagePanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
-  local panel_name = "message-panel"
-  if flow_panel[panel_name] ~= nil and flow_panel[panel_name].valid then
-    return flow_panel[panel_name]
-  end
-  local panel = GuiElement.add(flow_panel, GuiFrameV(panel_name))
-  panel.style.horizontally_stretchable = true
-  return panel
 end
 
 -------------------------------------------------------------------------------
@@ -470,10 +435,21 @@ end
 --
 function Form:update(event)
   if not(self:isOpened()) then return end
+  local profiler
+  if self.debug then 
+    profiler = game.create_profiler()
+    profiler.reset()
+  end
+  
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if self.auto_clear then content_panel.clear() end
   self:onUpdate(event)
   self:updateLocation(event)
+  
+  if self.debug then
+    log({"",self.classname, " ",profiler})
+    profiler.stop()
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -518,7 +494,7 @@ end
 --
 function Form:updateMessage(event)
   if not(self:isOpened()) then return end
-  local panel = self:getMessagePanel()
+  local panel = self:getFrameDeepPanel("message")
   panel.clear()
   GuiElement.add(panel, GuiLabel("message"):caption(event.message))
 end
@@ -532,7 +508,7 @@ end
 --
 function Form:updateError(event)
   if not(self:isOpened()) then return end
-  local panel = self:getErrorPanel()
+  local panel = self:getFrameDeepPanel("error")
   panel.clear()
   GuiElement.add(panel, GuiLabel("message"):caption(event.message or "Unknown error"):color("red"))
 end

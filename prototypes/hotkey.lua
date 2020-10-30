@@ -34,6 +34,13 @@ data:extend(
       key_sequence = "Y",
       consuming = "none"
 
+    },
+    {
+      type = "custom-input",
+      name = "helmod-richtext-open",
+      key_sequence = "CONTROL + T",
+      consuming = "none"
+
     }
   }
 )

@@ -406,6 +406,14 @@ function Controller:onGuiHotkey(event)
       view:close()
     end
   end
+  if event.input_name == "helmod-richtext-open" then
+    local view = Controller:getView("HMRichTextPanel")
+    if not(view:isOpened()) then
+      self:send("on_gui_open", event, "HMRichTextPanel")
+    else
+      view:close()
+    end
+  end
 end
 
 -------------------------------------------------------------------------------
