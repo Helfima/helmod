@@ -14,7 +14,6 @@ Form = newclass(Object,function(base,classname)
   base.help_button = true
   base.auto_clear = true
   base.content_verticaly = true
-  base.debug = false
 end)
 
 -------------------------------------------------------------------------------
@@ -435,21 +434,10 @@ end
 --
 function Form:update(event)
   if not(self:isOpened()) then return end
-  local profiler
-  if self.debug then 
-    profiler = game.create_profiler()
-    profiler.reset()
-  end
-  
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if self.auto_clear then content_panel.clear() end
   self:onUpdate(event)
   self:updateLocation(event)
-  
-  if self.debug then
-    log({"",self.classname, " ",profiler})
-    profiler.stop()
-  end
 end
 
 -------------------------------------------------------------------------------
