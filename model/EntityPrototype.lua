@@ -199,7 +199,7 @@ function EntityPrototype:getEnergyProduction()
     if usage_priority == "solar" then
       return (self.lua_prototype.production or 0)*60
     end
-    if usage_priority == "secondary-output" then
+    if usage_priority == "secondary-output" or usage_priority == "primary-output" then
       if self:getEnergyTypeInput() == "fluid" then
         local heat_capacity = 200
         local fuel_value = 0

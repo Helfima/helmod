@@ -89,6 +89,9 @@ function GuiTooltip:appendControlInfo(tooltip, element)
     if self.m_with_control_info == "module-remove" then
       table.insert(tooltip_section, {"", "\n", "[img=helmod-tooltip-blank]", " ", {"controls.module-remove"}})
     end
+    if self.m_with_control_info == "crafting-add" then
+      table.insert(tooltip_section, {"", "\n", "[img=helmod-tooltip-blank]", " ", {"controls.crafting-add"}})
+    end
     table.insert(tooltip, tooltip_section)
   end
 end

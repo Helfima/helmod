@@ -44,32 +44,13 @@ function ProductionLineTab:updateInfo(event)
   info_scroll.clear()
   -- info panel
 
-  local block_info = GuiElement.add(info_scroll, GuiFlowH("block-info"))
+  local info_panel = GuiElement.add(info_scroll, GuiFlowV("block-info"))
+  info_panel.style.horizontally_stretchable = false
+  info_panel.style.vertical_spacing=4
+  
+  local block_info = GuiElement.add(info_panel, GuiFlowH("information"))
   block_info.style.horizontally_stretchable = false
   block_info.style.horizontal_spacing=10
-  
-  local block_table = GuiElement.add(block_info, GuiTable("output-table"):column(2))
-
-  GuiElement.add(block_table, GuiLabel("label-owner"):caption({"helmod_result-panel.owner"}))
-  GuiElement.add(block_table, GuiLabel("value-owner"):caption(model.owner))
-
-  GuiElement.add(block_table, GuiLabel("label-share"):caption({"helmod_result-panel.share"}))
-
-  local tableAdminPanel = GuiElement.add(block_table, GuiTable("table"):column(9))
-  local model_read = false
-  if model.share ~= nil and  bit32.band(model.share, 1) > 0 then model_read = true end
-  GuiElement.add(tableAdminPanel, GuiCheckBox(self.classname, "share-model", "read", model.id):state(model_read):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
-  GuiElement.add(tableAdminPanel, GuiLabel(self.classname, "share-model-read"):caption("R"):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
-
-  local model_write = false
-  if model.share ~= nil and  bit32.band(model.share, 2) > 0 then model_write = true end
-  GuiElement.add(tableAdminPanel, GuiCheckBox(self.classname, "share-model", "write", model.id):state(model_write):tooltip({"tooltip.share-mod", {"helmod_common.writing"}}))
-  GuiElement.add(tableAdminPanel, GuiLabel(self.classname, "share-model-write"):caption("W"):tooltip({"tooltip.share-mod", {"helmod_common.writing"}}))
-
-  local model_delete = false
-  if model.share ~= nil and bit32.band(model.share, 4) > 0 then model_delete = true end
-  GuiElement.add(tableAdminPanel,GuiCheckBox( self.classname, "share-model", "delete", model.id):state(model_delete):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
-  GuiElement.add(tableAdminPanel, GuiLabel(self.classname, "share-model-delete"):caption("X"):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
 
   local count_block = Model.countBlocks()
   if count_block > 0 then
@@ -88,6 +69,8 @@ function ProductionLineTab:updateInfo(event)
     end
   end
 
+  self:addSharePanel(info_panel)
+  
 end
 
 -------------------------------------------------------------------------------
@@ -198,6 +181,12 @@ function ProductionLineTab:updateData(event)
       scroll_panel.scroll_to_element(last_element)
       User.setParameter("scroll_element", nil)
     end
+  else
+    local empty_panel = GuiElement.add(scroll_panel, GuiFlowH("empty"))
+    empty_panel.style.horizontal_spacing=10
+    local block_id = "new"
+    GuiElement.add(empty_panel, GuiButton("HMRecipeSelector", "OPEN", block_id):sprite("menu", "wrench-white", "wrench"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-recipe"}))
+    GuiElement.add(empty_panel, GuiLabel("label-explain"):caption({"helmod_label.first-recipe-explain"}):style("heading_1_label"))
   end
 end
 

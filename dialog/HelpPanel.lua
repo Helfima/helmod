@@ -354,7 +354,7 @@ function HelpPanel:generateList()
     local caption_section = {"", helmod_tag.font.default_bold, helmod_tag.color.gold, {string.format("helmod_help.%s", section.name)}, helmod_tag.color.close, helmod_tag.font.close}
     table.insert(page_list, {section = key1, content = nil, caption = caption_section})
     for key2,content in pairs(section.content) do
-      local caption_content = {"", "\t\t\t", {string.format("helmod_help.%s", content.localised_text)}}
+      local caption_content = {"", "   ", {string.format("helmod_help.%s", content.localised_text)}}
       table.insert(page_list, {section = key1, content = key2, caption = caption_content})
     end
   end
@@ -407,7 +407,7 @@ function HelpPanel:updateContent(event)
     section_panel.style.horizontally_stretchable = true
     -- section header
     GuiElement.add(section_panel, GuiLabel("header"):caption({"", "[font=heading-1]", section_caption_name, "[/font]"}):style("helmod_label_help"))
-    local section_title = GuiElement.add(section_panel, GuiLabel(section.name, "desc"):caption({"", "\t\t\t",section_caption_desc}):style("helmod_label_help"))
+    local section_title = GuiElement.add(section_panel, GuiLabel(section.name, "desc"):caption({"", "   ",section_caption_desc}):style("helmod_label_help"))
     for key,content in pairs(section.content) do
       local content_panel = GuiElement.add(section_panel, GuiFrameV(section.name, "panel", key):style("helmod_inside_frame"))
       content_panel.style.horizontally_stretchable = true

@@ -1,4 +1,4 @@
-local data = {}
+local data = {mod="BoB Angel"}
 data.energy = {}
 data.energy["burner-reactor"] = {
     energy_type_input="burner",

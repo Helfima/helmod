@@ -353,7 +353,7 @@ function GuiCellFactory:create(parent)
   local cell = GuiElement.add(parent, GuiFlowV(factory.name, self.m_index))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element", color, 1))
 
-  local tooltip = GuiTooltipElement(self.options.tooltip):element(factory):withEnergy()
+  local tooltip = GuiTooltipElement(self.options.tooltip):element(factory):withEnergy():withControlInfo(self.m_with_control_info)
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("entity", factory.name):tooltip(tooltip))
 
   local cell_factory_info = GuiElement.add(row1, GuiTable("factory-info"):column(1):style("helmod_factory_info"))

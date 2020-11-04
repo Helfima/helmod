@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.11.17
+Date: 2020-11-03
+  Changes:
+    - Added control to put item to crafting queue when ctrl+click on factory/beacon block icon
+    - Added production line tooltip on tab title
+  Bugfixes:
+    - Fixed bad indent char in help panel for some languages
+    - Fixed bad usage_priority use by some mods for generator power
+---------------------------------------------------------------------------------------------------
 Version: 0.11.16
 Date: 2020-10-31
   Bugfixes:

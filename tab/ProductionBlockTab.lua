@@ -595,7 +595,7 @@ function ProductionBlockTab:addTableRowRecipe(gui_table, block, recipe)
   -- col factory
   local factory = recipe.factory
   local cell_factory = GuiElement.add(gui_table, GuiTable("factory", recipe.id):column(2):style("helmod_table_list"))
-  local gui_cell_factory = GuiCellFactory("HMRecipeEdition", "OPEN", block.id, recipe.id):element(factory):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit)
+  local gui_cell_factory = GuiCellFactory(self.classname, "factory-action", block.id, recipe.id):element(factory):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit):controlInfo("crafting-add")
   if block.by_limit == true then
     gui_cell_factory:byLimitUri(self.classname, "update-factory-limit", block.id, recipe.id)
   end
@@ -607,7 +607,7 @@ function ProductionBlockTab:addTableRowRecipe(gui_table, block, recipe)
   -- col beacon
   local beacon = recipe.beacon
   local cell_beacon = GuiElement.add(gui_table, GuiTable("beacon", recipe.id):column(2):style("helmod_table_list"))
-  local gui_cell_beacon = GuiCellFactory("HMRecipeEdition", "OPEN", block.id, recipe.id):element(beacon):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit)
+  local gui_cell_beacon = GuiCellFactory(self.classname, "beacon-action", block.id, recipe.id):element(beacon):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit):controlInfo("crafting-add")
   GuiElement.add(cell_beacon, gui_cell_beacon)
 
   for _,order in pairs(Model.getBlockOrder()) do
@@ -816,6 +816,30 @@ function ProductionBlockTab:onEvent(event)
     local all_visible = User.getParameter("block_all_product_visible")
     User.setParameter("block_all_product_visible",not(all_visible))
     Controller:send("on_gui_update", event, self.classname)
+  end
+
+  if event.action == "factory-action" then
+    if event.control == true then
+      local recipe = Model.getObject(event.item1, event.item2)
+      if recipe ~= nil and recipe.factory ~= nil then
+        local factory = recipe.factory
+        Player.beginCrafting(factory.name, factory.count)
+      end
+    else
+      Controller:send("on_gui_open", event,"HMRecipeEdition")
+    end
+  end
+
+  if event.action == "beacon-action" then
+    if event.control == true then
+      local recipe = Model.getObject(event.item1, event.item2)
+      if recipe ~= nil and recipe.beacon ~= nil then
+        local beacon = recipe.beacon
+        Player.beginCrafting(beacon.name, beacon.count)
+      end
+    else
+      Controller:send("on_gui_open", event,"HMRecipeEdition")
+    end
   end
 
   -- user writer

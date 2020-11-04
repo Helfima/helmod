@@ -1,4 +1,4 @@
-local data = {}
+local data = {mod="Krastorio 2"}
 data.energy = {}
 data.energy["offshore-pump"] = {
     energy_type_input="none",

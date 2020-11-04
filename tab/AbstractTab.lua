@@ -61,16 +61,19 @@ function AbstractTab:getInfoPanel()
   if parent_panel[panel_name] ~= nil and parent_panel[panel_name].valid then
     return parent_panel[panel_name]["info"]["info-scroll"],parent_panel[panel_name]["output"]["output-scroll"],parent_panel[panel_name]["input"]["input-scroll"]
   end
-  if parent_panel["label_panel"] == nil then
-    GuiElement.add(parent_panel, GuiLabel("label_panel"):caption(self:getButtonCaption()):style("heading_1_label"))
-  end
+
+  local model = Model.getModel()
+
   local panel = GuiElement.add(parent_panel, GuiFlowH(panel_name))
   panel.style.horizontally_stretchable = true
   panel.style.horizontal_spacing=10
   GuiElement.setStyle(panel, "block_info", "height")
 
   local info_panel = GuiElement.add(panel, GuiFlowV("info"))
-  GuiElement.add(info_panel, GuiLabel("label-info"):caption({"helmod_common.information"}):style("helmod_label_title_frame"))
+
+  local tooltip = GuiTooltipModel("tooltip.info-model"):element(model)
+  GuiElement.add(info_panel, GuiLabel("label-info"):caption({"",self:getButtonCaption(), " [img=info]"}):style("heading_1_label"):tooltip(tooltip))
+
   GuiElement.setStyle(info_panel, "block_info", "width")
   local info_scroll = GuiElement.add(info_panel, GuiScroll("info-scroll"):style("helmod_scroll_pane"))
   info_scroll.style.horizontally_stretchable = true
@@ -99,13 +102,17 @@ function AbstractTab:getInfoPanel2()
   if parent_panel[panel_name] ~= nil and parent_panel[panel_name].valid then
     return parent_panel[panel_name]["options"]["options-scroll"],parent_panel[panel_name]["info"]["info-scroll"],parent_panel[panel_name]["left-info"],parent_panel[panel_name]["right-info"]
   end
+  local model = Model.getModel()
+
   local panel = GuiElement.add(parent_panel, GuiFlowH(panel_name))
   panel.style.horizontally_stretchable = true
   panel.style.horizontal_spacing=10
   GuiElement.setStyle(panel, "block_info", "height")
 
   local options_panel = GuiElement.add(panel, GuiFlowV("options"))
-  GuiElement.add(options_panel, GuiLabel("label-info"):caption({"helmod_button.options"}):style("helmod_label_title_frame"))
+
+  local tooltip = GuiTooltipModel("tooltip.info-model"):element(model)
+  GuiElement.add(options_panel, GuiLabel("label-info"):caption({"",self:getButtonCaption(), " [img=info]"}):style("heading_1_label"):tooltip(tooltip))
   local options_scroll = GuiElement.add(options_panel, GuiFlowV("options-scroll"))
 
   local info_panel = GuiElement.add(panel, GuiFlowV("info"))
@@ -234,7 +241,6 @@ function AbstractTab:getResultScrollPanel2()
   end
   local header_panel1 = GuiElement.add(parent_panel1, GuiFrameV("header-data1"))
   local header_panel2 = GuiElement.add(parent_panel2, GuiFrameV("header-data2"))
-  GuiElement.add(header_panel2, GuiLabel("label_panel"):caption(self:getButtonCaption()):style("heading_1_label"))
   local data_panel1 = GuiElement.add(parent_panel1, GuiFrameV("data1"):style("helmod_deep_frame"))
   local scroll_panel1 = GuiElement.add(data_panel1, GuiScroll("scroll-data1"):style("helmod_scroll_pane"))
   --scroll_panel1.style.horizontally_stretchable = true
@@ -345,7 +351,7 @@ function AbstractTab:updateMenuPanel(event)
 
     -- preferences
     local groupPref = GuiElement.add(left_panel, GuiFlowH("groupPref"))
-    GuiElement.add(groupPref, GuiButton("HMModelEdition", "OPEN", block_id):sprite("menu", "edit-white", "edit"):style("helmod_button_menu"):tooltip({"helmod_button.preferences"}))
+    GuiElement.add(groupPref, GuiButton("HMModelEdition", "OPEN", block_id):sprite("menu", "edit-white", "edit"):style("helmod_button_menu"):tooltip({"helmod_panel.model-edition"}))
     GuiElement.add(groupPref, GuiButton("HMPreferenceEdition", "OPEN", block_id):sprite("menu", "services-white", "services"):style("helmod_button_menu"):tooltip({"helmod_button.preferences"}))
     
     local display_logistic_row = User.getParameter("display_logistic_row")
@@ -457,6 +463,41 @@ function AbstractTab:updateIndexPanel(event)
   end
 end
 
+-------------------------------------------------------------------------------
+-- Update header
+--
+-- @function [parent=#AbstractTab] updateInfo
+--
+-- @param #LuaEvent event
+--
+function AbstractTab:addSharePanel(parent)
+  local model = Model.getModel()
+  -- info panel
+
+  local block_table = GuiElement.add(parent, GuiTable("share-table"):column(2))
+
+  GuiElement.add(block_table, GuiLabel("label-owner"):caption({"helmod_result-panel.owner"}))
+  GuiElement.add(block_table, GuiLabel("value-owner"):caption(model.owner))
+
+  GuiElement.add(block_table, GuiLabel("label-share"):caption({"helmod_result-panel.share"}))
+
+  local share_panel = GuiElement.add(block_table, GuiTable("table"):column(9))
+  local model_read = false
+  if model.share ~= nil and  bit32.band(model.share, 1) > 0 then model_read = true end
+  GuiElement.add(share_panel, GuiCheckBox(self.classname, "share-model", "read", model.id):state(model_read):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
+  GuiElement.add(share_panel, GuiLabel(self.classname, "share-model-read"):caption("R"):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
+
+  local model_write = false
+  if model.share ~= nil and  bit32.band(model.share, 2) > 0 then model_write = true end
+  GuiElement.add(share_panel, GuiCheckBox(self.classname, "share-model", "write", model.id):state(model_write):tooltip({"tooltip.share-mod", {"helmod_common.writing"}}))
+  GuiElement.add(share_panel, GuiLabel(self.classname, "share-model-write"):caption("W"):tooltip({"tooltip.share-mod", {"helmod_common.writing"}}))
+
+  local model_delete = false
+  if model.share ~= nil and bit32.band(model.share, 4) > 0 then model_delete = true end
+  GuiElement.add(share_panel,GuiCheckBox( self.classname, "share-model", "delete", model.id):state(model_delete):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
+  GuiElement.add(share_panel, GuiLabel(self.classname, "share-model-delete"):caption("X"):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
+
+end
 -------------------------------------------------------------------------------
 -- Before update
 --

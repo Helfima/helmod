@@ -89,6 +89,24 @@ function Player.getMainInventory()
 end
 
 -------------------------------------------------------------------------------
+-- Begin Crafting
+--
+-- @function [parent=#Player] beginCrafting
+--
+function Player.beginCrafting(item, count)
+  if Lua_player == nil then return nil end
+  local filters = {{filter = "has-product-item", elem_filters = {{filter = "name", name = item}}}}
+  local recipes = Player.getRecipePrototypes(filters)
+  if recipes ~= nil and Model.countList(recipes) > 0 then
+    local first_recipe = Model.firstRecipe(recipes)
+    local craft = {count=math.ceil(count),recipe=first_recipe.name,silent=false}
+    Lua_player.begin_crafting(craft)
+  else
+    Player.print("No recipe found for this craft!")
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Get smart tool
 --
 -- @function [parent=#Player] getSmartTool
@@ -345,7 +363,10 @@ end
 --
 -- @return #table recipes
 --
-function Player.getRecipePrototypes()
+function Player.getRecipePrototypes(filters)
+  if filters ~= nil then
+    return game.get_filtered_recipe_prototypes(filters)
+  end
   return game.recipe_prototypes
 end
 
