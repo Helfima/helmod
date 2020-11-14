@@ -675,7 +675,7 @@ function ModelCompute.computeBlock(block)
         mC, runtimes = my_solver:solve(mA, debug, block.by_factory, time)
       end)
       if not(ok) then
-        Player.print("Matrix solver can not found solution!")
+        Player.print("Matrix solver can not find solution!")
       end
 
       if User.getModGlobalSetting("debug_solver") == true then
