@@ -826,6 +826,7 @@ function ProductionBlockTab:onEvent(event)
         Player.beginCrafting(factory.name, factory.count)
       end
     else
+      event.action = "OPEN"
       Controller:send("on_gui_open", event,"HMRecipeEdition")
     end
   end
@@ -838,6 +839,7 @@ function ProductionBlockTab:onEvent(event)
         Player.beginCrafting(beacon.name, beacon.count)
       end
     else
+      event.action = "OPEN"
       Controller:send("on_gui_open", event,"HMRecipeEdition")
     end
   end

@@ -233,7 +233,19 @@ function RecipePrototype:getEnergyProducts()
     end
     if prototype:getType() == "accumulator" then
       local energy_prototype = prototype:getEnergySource()
-      local amount = energy_prototype:getOutputFlowLimit()
+      local capacity = energy_prototype:getBufferCapacity()
+      -- vanilla day=25000,dusk=5000,night=2500,dawn=5000
+      local day,dusk,night,dawn = Player.getGameDay()
+      local t1 = day-dusk-night-dawn
+      local t2 = night
+      local t3 = (dusk+dawn)/2
+      local T = day
+      -- E_acc = P * (t2 + t2 + 2 * (t3 * P/P')) / 2 = P * (t2 + t3*P/P')
+      -- P' = P * T / (t1 + t3)
+      -- @see https://forums.factorio.com/viewtopic.php?f=5&t=5594
+      local R = 60/(t2+t3*(t1+t3)/T)
+      local amount = capacity*R
+
       local product = {name="energy", type="energy", amount=amount}
       table.insert(products, product)
     end
@@ -286,9 +298,19 @@ function RecipePrototype:getRawIngredients()
         table.insert(ingredients, ingredient)
       end
       if prototype:getType() == "accumulator" then
-        local gameDay = {day=12500,dust=5000,night=2500,dawn=2500}
-        local dark_ratio = (gameDay.dust/2 + gameDay.night + gameDay.dawn / 2 ) / ( gameDay.day )
-        local amount = energy_source:getInputFlowLimit() * (1+dark_ratio)
+        local energy_prototype = prototype:getEnergySource()
+        local capacity = energy_prototype:getBufferCapacity()
+        -- vanilla day=25000,dusk=5000,night=2500,dawn=5000
+        local day,dusk,night,dawn = Player.getGameDay()
+        local t1 = day-dusk-night-dawn
+        local t2 = night
+        local t3 = (dusk+dawn)/2
+        local T = day
+        -- E_acc = P * (t2 + t2 + 2 * (t3 * P/P')) / 2 = P * (t2 + t3*P/P')
+        -- P' = P * T / (t1 + t3)
+        -- @see https://forums.factorio.com/viewtopic.php?f=5&t=5594
+        local R = 60/(t2+t3*(t1+t3)/T)
+        local amount = capacity*R*T/(t1+t3)
         local ingredient = {name="energy", type="energy", amount=amount}
         table.insert(ingredients, ingredient)
       end

@@ -1,6 +1,21 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.11.19
+Date: 2020-11-06
+  Changes:
+    - Added Japanese translation
+    - Updated Russian translation
+  Bugfixes:
+    - Fixed bad message when limitation message appear in the recipe edition
+    - Fixed scroll reset when you use the recipe edition
+    - Fixed accumulator power calculation
+---------------------------------------------------------------------------------------------------
+Version: 0.11.18
+Date: 2020-11-04
+  Bugfixes:
+    - Fixed error when open recipe edition by factory/beacon block icon
+---------------------------------------------------------------------------------------------------
 Version: 0.11.17
-Date: 2020-11-03
+Date: 2020-11-04
   Changes:
     - Added control to put item to crafting queue when ctrl+click on factory/beacon block icon
     - Added production line tooltip on tab title

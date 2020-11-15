@@ -1019,10 +1019,10 @@ function ModelCompute.computeEnergyFactory(recipe)
   local energy_prototype = factory_prototype:getEnergySource()
       
   local energy_type = factory_prototype:getEnergyType()
-  local gameDay = {day=12500,dust=5000,night=2500,dawn=2500}
+  local gameDay = {day=12500,dusk=5000,night=2500,dawn=2500}
   if factory_prototype:getType() == "accumulator" then
-    local dark_time = (gameDay.dust/2 + gameDay.night + gameDay.dawn / 2 )
-    recipe_energy = dark_time/60
+    local dark_time = (gameDay.dusk/2 + gameDay.night + gameDay.dawn / 2 )
+    --recipe_energy = dark_time
   end
   recipe.factory.energy = factory_prototype:getEnergyConsumption() * (1 + recipe.factory.effects.consumption)
 

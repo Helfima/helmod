@@ -51,6 +51,20 @@ function Player.set(player)
 end
 
 -------------------------------------------------------------------------------
+-- Get game day
+--
+-- @function [parent=#Player] getGameDay
+--
+function Player.getGameDay()
+  local surface = game.surfaces[1]
+  local day = surface.ticks_per_day
+  local dusk = surface.evening-surface.dusk
+  local night = surface.morning-surface.evening
+  local dawn = surface.dawn-surface.morning
+  return day, day*dusk, day*night, day*dawn
+end
+
+-------------------------------------------------------------------------------
 -- Set pipette
 --
 -- @function [parent=#Player] setPipette
