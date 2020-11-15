@@ -153,7 +153,7 @@ function AbstractSelector:getSrollPanel()
   local main_panel = GuiElement.add(content_panel, GuiFrameV("main_panel"))
   GuiElement.setStyle(main_panel, "dialog", "width")
   GuiElement.setStyle(main_panel, "recipe_selector", "height")
-  local scroll_panel = GuiElement.add(main_panel, GuiScroll("scroll_panel"):style(helmod_frame_style.scroll_recipe_selector))
+  local scroll_panel = GuiElement.add(main_panel, GuiScroll("scroll_panel"):style("helmod_scroll_pane"))
   GuiElement.setStyle(scroll_panel, "scroll_recipe_selector", "width")
   GuiElement.setStyle(scroll_panel, "scroll_recipe_selector", "height")
   return scroll_panel
@@ -169,7 +169,7 @@ function AbstractSelector:getGroupsPanel()
   if scroll_panel["groups_panel"] ~= nil and scroll_panel["groups_panel"].valid then
     return scroll_panel["groups_panel"]
   end
-  return GuiElement.add(scroll_panel, GuiFrameV("groups_panel"):style(helmod_frame_style.hidden))
+  return GuiElement.add(scroll_panel, GuiFlowV("groups_panel"))
 end
 
 -------------------------------------------------------------------------------
@@ -182,7 +182,7 @@ function AbstractSelector:getFailPanel()
   if scroll_panel["groups_panel"] ~= nil and scroll_panel["groups_panel"].valid then
     return scroll_panel["groups_panel"]
   end
-  return GuiElement.add(scroll_panel, GuiFrameV("groups_panel"):style(helmod_frame_style.hidden))
+  return GuiElement.add(scroll_panel, GuiFlowV("groups_panel"))
 end
 
 -------------------------------------------------------------------------------
@@ -195,7 +195,7 @@ function AbstractSelector:getItemListPanel()
   if scroll_panel["item_list_panel"] ~= nil and scroll_panel["item_list_panel"].valid then
     return scroll_panel["item_list_panel"]
   end
-  return GuiElement.add(scroll_panel, GuiFrameV("item_list_panel"):style(helmod_frame_style.hidden))
+  return GuiElement.add(scroll_panel, GuiFlowV("item_list_panel"))
 end
 
 -------------------------------------------------------------------------------
@@ -587,6 +587,7 @@ function AbstractSelector:createElementLists(event)
     local step_list = User.getModGlobalSetting("user_cache_step") or 100
     local index = 0
     local table_element = {}
+    local query_list = {}
     event.continue = true
     -- list_products[element.name][type - lua_recipe.name]
     for key, element in pairs(list) do
@@ -711,7 +712,7 @@ end
 --
 -- @param #LuaEvent event
 --
-function AbstractSelector:updateFailMessage(event)
+function AbstractSelector:updateFailMessage(message)
   local panel = self:getGroupsPanel()
   local item_list_panel = self:getItemListPanel()
   item_list_panel.clear()

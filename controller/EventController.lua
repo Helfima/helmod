@@ -26,6 +26,8 @@ function EventController.start()
   EventController.pcallEvent(defines.events.on_gui_value_changed, EventController.onGuiValueChanged)
   -- dropdown changed
   EventController.pcallEvent(defines.events.on_gui_selection_state_changed, EventController.onGuiSelectionStateChanged)
+  -- switch changed
+  EventController.pcallEvent(defines.events.on_gui_switch_state_changed, EventController.onGuiSwitchStateChanged)
   -- element choose changed
   EventController.pcallEvent(defines.events.on_gui_elem_changed, EventController.onGuiElementChooseChanged)
   -- checked changed
@@ -46,6 +48,7 @@ function EventController.start()
   EventController.pcallEvent("helmod-recipe-selector-open", EventController.onCustomInput)
   EventController.pcallEvent("helmod-production-line-open", EventController.onCustomInput)
   EventController.pcallEvent("helmod-recipe-explorer-open", EventController.onCustomInput)
+  EventController.pcallEvent("helmod-richtext-open", EventController.onCustomInput)
 end
 
 -------------------------------------------------------------------------------
@@ -235,6 +238,7 @@ function EventController.onStringTranslated(event)
   Controller:onStringTranslated(event)
 end
 
+
 -------------------------------------------------------------------------------
 -- On click event
 --
@@ -243,15 +247,9 @@ end
 -- @param #table event
 --
 function EventController.onGuiClick(event)
-  if event ~= nil and event.player_index ~= nil then
+  if event ~= nil and event.player_index ~= nil and event.element ~= nil and table.contains({"button", "sprite-button", "choose-elem-button"}, event.element.type) then
     Player.load(event)
-    local allowed = true
-    if event.element ~= nil and event.element.valid and (event.element.type == "textfield" or event.element.type == "drop-down" or event.element.type == "checkbox" or event.element.type == "radiobutton") then
-      allowed = false
-    end
-    if allowed then
-      Dispatcher:send("on_gui_action", event, Controller.classname)
-    end
+    Dispatcher:send("on_gui_action", event, Controller.classname)
   end
 end
 
@@ -319,6 +317,20 @@ end
 -- @param event
 --
 function EventController.onGuiSelectionStateChanged(event)
+  if event ~= nil and event.player_index ~= nil then
+    Player.load(event)
+    Dispatcher:send("on_gui_action", event, Controller.classname)
+  end
+end
+
+-------------------------------------------------------------------------------
+-- On dropdown event
+--
+-- @function [parent=#EventController] onGuiSwitchStateChanged
+--
+-- @param event
+--
+function EventController.onGuiSwitchStateChanged(event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
     Dispatcher:send("on_gui_action", event, Controller.classname)

@@ -59,12 +59,12 @@ function ResourceTab:addTableRow(guiTable, ingredient)
   local model = Model.getModel()
 
   -- col index
-  if User.getModGlobalSetting("display_data_col_index") then
+  if User.getModGlobalSetting("display_hidden_column") == "All" then
     local guiIndex = GuiElement.add(guiTable, GuiFrameH("index", ingredient.name):style(helmod_frame_style.hidden))
     GuiElement.add(guiIndex, GuiLabel("index"):caption(ingredient.index):style("helmod_label_row_right_40"))
   end
   -- col name
-  if User.getModGlobalSetting("display_data_col_name") then
+  if User.getModGlobalSetting("display_hidden_column") ~= "None" then
     local guiName = GuiElement.add(guiTable, GuiFrameH("name", ingredient.name):style(helmod_frame_style.hidden))
     GuiElement.add(guiName, GuiLabel("name", ingredient.name):caption(ingredient.name))
   end
@@ -97,10 +97,10 @@ function ResourceTab:updateData(event)
 
 
   local extra_cols = 0
-  if User.getModGlobalSetting("display_data_col_index") then
+  if User.getModGlobalSetting("display_hidden_column") == "All" then
     extra_cols = extra_cols + 1
   end
-  if User.getModGlobalSetting("display_data_col_name") then
+  if User.getModGlobalSetting("display_hidden_column") ~= "None" then
     extra_cols = extra_cols + 1
   end
   local resultTable = GuiElement.add(scrollPanel, GuiTable("table-resources"):column(3 + extra_cols))

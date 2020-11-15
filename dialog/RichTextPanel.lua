@@ -18,55 +18,6 @@ function RichTextPanel:onInit()
 end
 
 -------------------------------------------------------------------------------
--- Get or create history panel
---
--- @function [parent=#RichTextPanel] getHistoryPanel
---
-function RichTextPanel:getHistoryPanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
-  local panel_name = "history-panel"
-  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
-    return content_panel[panel_name]["scroll-panel"]
-  end
-  local mainPanel = GuiElement.add(content_panel, GuiFrameV(panel_name):style(helmod_frame_style.panel))
-  local scroll_panel = GuiElement.add(mainPanel, GuiScroll("scroll-panel"))
-  scroll_panel.style.horizontally_stretchable = true
-  return  scroll_panel
-end
-
--------------------------------------------------------------------------------
--- Get or create input panel
---
--- @function [parent=#RichTextPanel] getInputPanel
---
-function RichTextPanel:getInputPanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
-  local panel_name = "input-panel"
-  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
-    return content_panel[panel_name]
-  end
-  local panel = GuiElement.add(content_panel, GuiFrameV(panel_name):style(helmod_frame_style.panel))
-  panel.style.horizontally_stretchable = true
-  return panel
-end
-
--------------------------------------------------------------------------------
--- Get or create header panel
---
--- @function [parent=#RichTextPanel] getHeaderPanel
---
-function RichTextPanel:getHeaderPanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
-  local panel_name = "header-panel"
-  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
-    return content_panel[panel_name]
-  end
-  local panel = GuiElement.add(content_panel, GuiFrameV(panel_name):style(helmod_frame_style.panel))
-  panel.style.horizontally_stretchable = true
-  return panel
-end
-
--------------------------------------------------------------------------------
 -- On update
 --
 -- @function [parent=#RichTextPanel] onUpdate
@@ -87,7 +38,7 @@ end
 -- @param #LuaEvent event
 --
 function RichTextPanel:updateHeader(event)
-  local header_panel = self:getHeaderPanel()
+  local header_panel = self:getTopPanel()
   header_panel.clear()
   local element_list = {}
   table.insert(element_list, {type="item", localized_name={"helmod_common.item"}})
@@ -114,7 +65,7 @@ end
 -- @param #LuaEvent event
 --
 function RichTextPanel:updateInput(event)
-  local input_panel = self:getInputPanel()
+  local input_panel = self:getFramePanel("input-panel")
   local richtext_text = User.getParameter("richtext_text")
   input_panel.clear()
 
@@ -137,7 +88,7 @@ end
 -- @param #LuaEvent event
 --
 function RichTextPanel:updateHistory(event)
-  local history_panel = self:getHistoryPanel()
+  local history_panel = self:getScrollPanel("history-panel")
   local richtext_text = User.getParameter("richtext_text")
   history_panel.clear()
 

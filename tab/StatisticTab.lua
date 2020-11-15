@@ -42,10 +42,6 @@ function StatisticTab:updateData(event)
   -- data
   local scroll_panel = self:getResultScrollPanel({"helmod_result-panel.tab-title-statistic"})
   
-  -- resources
-  local element_panel = GuiElement.add(scroll_panel, GuiFrameV("resources"):style(helmod_frame_style.section):tooltip({"helmod_common.total"}))
-  GuiElement.setStyle(element_panel, "data_section", "width")
-
   local column = 2*8
 
   local result_table = GuiElement.add(scroll_panel, GuiTable("list-data"):column(column):style("helmod_table-odd"))

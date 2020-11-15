@@ -109,11 +109,12 @@ function Form:getPanel()
   if parent_panel[self:getPanelName()] ~= nil and parent_panel[self:getPanelName()].valid then
     return parent_panel[self:getPanelName()], parent_panel[self:getPanelName()]["content_panel"], parent_panel[self:getPanelName()]["header_panel"]["menu_panel"]
   end
-
-  local flow_panel = GuiElement.add(parent_panel, GuiFrameV(self:getPanelName()):style(helmod_frame_style.hidden))
+  -- main panel
+  local flow_panel = GuiElement.add(parent_panel, GuiFrameV(self:getPanelName()):style("frame"))
   flow_panel.style.horizontally_stretchable = true
   flow_panel.style.vertically_stretchable = true
   flow_panel.location = User.getLocationForm(self:getPanelName())
+  local width_main, height_main = GuiElement.getMainSizes()
   GuiElement.setStyle(flow_panel, self.classname, "width")
   GuiElement.setStyle(flow_panel, self.classname, "height")
   GuiElement.setStyle(flow_panel, self.classname, "minimal_width")
@@ -123,22 +124,53 @@ function Form:getPanel()
 
   local header_panel = GuiElement.add(flow_panel, GuiFlowH("header_panel"))
   header_panel.style.horizontally_stretchable = true
-  local title_panel = GuiElement.add(header_panel, GuiFrameH("title_panel"):style(helmod_frame_style.default):caption(self.panelCaption or self.classname))
+  -- header panel
+  local title_panel = GuiElement.add(header_panel, GuiFrameH("title_panel"):caption(self.panelCaption or self.classname):style("helmod_frame_header"))
   title_panel.style.horizontally_stretchable = true
-  title_panel.style.height = 40
-  
-  local menu_panel = GuiElement.add(header_panel,  GuiFrameH("menu_panel"):style(helmod_frame_style.panel))
+  title_panel.drag_target = flow_panel
+
+  local menu_panel = GuiElement.add(header_panel,  GuiFlowH("menu_panel"))
   --menu_panel.style.horizontal_spacing = 10
   menu_panel.style.horizontal_align = "right"
 
   local content_panel
-  if self.content_verticaly == true then
-    content_panel = GuiElement.add(flow_panel, GuiFlowV("content_panel"))
-  else
-    content_panel = GuiElement.add(flow_panel, GuiFlowH("content_panel"))
-  end
-  title_panel.drag_target = flow_panel
+  content_panel = GuiElement.add(flow_panel, GuiFrameV("content_panel"):style("inside_deep_frame"))
   return flow_panel, content_panel, menu_panel
+end
+
+-------------------------------------------------------------------------------
+-- Get or create scroll panel
+--
+-- @function [parent=#Form] getScrollPanel
+--
+function Form:getScrollPanel(panel_name)
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[panel_name]
+  end
+  local frame_panel = GuiElement.add(content_panel, GuiScroll(panel_name):style("helmod_scroll_pane"))
+  frame_panel.style.horizontally_stretchable = true
+  return frame_panel
+end
+
+-------------------------------------------------------------------------------
+-- Get or create flow panel
+--
+-- @function [parent=#Form] getFlowPanel
+--
+function Form:getFlowPanel(panel_name, direction)
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[panel_name]
+  end
+  local frame_panel = nil
+  if direction == "horizontal" then
+    frame_panel = GuiElement.add(content_panel, GuiFlowH(panel_name))
+  else
+    frame_panel = GuiElement.add(content_panel, GuiFlowV(panel_name))
+  end
+  frame_panel.style.horizontally_stretchable = true
+  return frame_panel
 end
 
 -------------------------------------------------------------------------------
@@ -146,49 +178,57 @@ end
 --
 -- @function [parent=#Form] getFramePanel
 --
-function Form:getFramePanel(panel_name)
+function Form:getFramePanel(panel_name, style, direction)
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
     return content_panel[panel_name]
   end
-  local frame_panel = GuiElement.add(content_panel, GuiFrameV(panel_name):style(helmod_frame_style.panel))
+  local frame_panel = nil
+  if direction == "horizontal" then
+    frame_panel = GuiElement.add(content_panel, GuiFrameH(panel_name):style(style or "helmod_frame"))
+  else
+    frame_panel = GuiElement.add(content_panel, GuiFrameV(panel_name):style(style or "helmod_frame"))
+  end
   frame_panel.style.horizontally_stretchable = true
   return frame_panel
 end
 
 -------------------------------------------------------------------------------
--- Get the error panel
+-- Get or create frame panel
 --
--- @function [parent=#Form] getErrorPanel
+-- @function [parent=#Form] getFrameInsidePanel
 --
--- @return #LuaGuiElement
---
-function Form:getErrorPanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
-  local panel_name = "error-panel"
-  if flow_panel[panel_name] ~= nil and flow_panel[panel_name].valid then
-    return flow_panel[panel_name]
-  end
-  local panel = GuiElement.add(flow_panel, GuiFrameV(panel_name))
-  panel.style.horizontally_stretchable = true
-  return panel
+function Form:getFrameInsidePanel(panel_name, direction)
+  return self:getFramePanel(panel_name, "helmod_inside_frame", direction)
 end
 
 -------------------------------------------------------------------------------
--- Get the message panel
+-- Get or create frame panel
 --
--- @function [parent=#Form] getMessagePanel
+-- @function [parent=#Form] getFrameDeepPanel
+--
+function Form:getFrameDeepPanel(panel_name, direction)
+  return self:getFramePanel(panel_name, "helmod_deep_frame", direction)
+end
+
+-------------------------------------------------------------------------------
+-- Get or create frame panel
+--
+-- @function [parent=#Form] getFrameDeepPanel
+--
+function Form:getFrameTabbedPanel(panel_name, direction)
+  return self:getFramePanel(panel_name, "helmod_tabbed_frame", direction)
+end
+
+-------------------------------------------------------------------------------
+-- Get the top panel
+--
+-- @function [parent=#Form] getTopPanel
 --
 -- @return #LuaGuiElement
 --
-function Form:getMessagePanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
-  local panel_name = "message-panel"
-  if flow_panel[panel_name] ~= nil and flow_panel[panel_name].valid then
-    return flow_panel[panel_name]
-  end
-  local panel = GuiElement.add(flow_panel, GuiFrameV(panel_name))
-  panel.style.horizontally_stretchable = true
+function Form:getTopPanel()
+  local panel = self:getFrameDeepPanel("top")
   return panel
 end
 
@@ -200,56 +240,43 @@ end
 -- @return #LuaGuiElement
 --
 function Form:getMenuPanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
+  local content_panel = self:getTopPanel()
   local panel_name = "menu"
+  local left_name = "left_menu"
+  local right_name = "right_menu"
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[panel_name][left_name], content_panel[panel_name][right_name]
+  end
+  local panel = GuiElement.add(content_panel, GuiFlowH(panel_name))
+  panel.style.horizontally_stretchable = true
+  panel.style.height = 32
+  
+  local left_panel = GuiElement.add(panel, GuiFlowH(left_name))
+  left_panel.style.horizontal_spacing = 10
+  
+  local right_panel = GuiElement.add(panel, GuiFlowH(right_name))
+  right_panel.style.horizontal_spacing = 10
+  right_panel.style.horizontally_stretchable = true
+  right_panel.style.horizontal_align = "right"
+  return left_panel, right_panel
+end
+
+-------------------------------------------------------------------------------
+-- Get the menu panel
+--
+-- @function [parent=#Form] getMenuPanel
+--
+-- @return #LuaGuiElement
+--
+function Form:getMenuSubPanel()
+  local content_panel = self:getTopPanel()
+  local panel_name = "sub_menu"
   if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
     return content_panel[panel_name]
   end
-  local panel = GuiElement.add(content_panel, GuiFrameH(panel_name))
+  local panel = GuiElement.add(content_panel, GuiFlowH(panel_name))
   panel.style.horizontally_stretchable = true
-  --panel.style.vertically_stretchable = true
-  panel.style.height = 40
-  return panel
-end
-
--------------------------------------------------------------------------------
--- Get the left menu panel
---
--- @function [parent=#Form] getLeftMenuPanel
---
--- @return #LuaGuiElement
---
-function Form:getLeftMenuPanel()
-  local parent_panel = self:getMenuPanel()
-  local panel_name = "left_menu"
-  if parent_panel[panel_name] ~= nil and parent_panel[panel_name].valid then
-    return parent_panel[panel_name]
-  end
-  local panel = GuiElement.add(parent_panel, GuiFlowH(panel_name))
-  panel.style.horizontal_spacing = 10
-  panel.style.horizontally_stretchable = true
-  --panel.style.vertically_stretchable = true
-  return panel
-end
-
--------------------------------------------------------------------------------
--- Get the right menu panel
---
--- @function [parent=#Form] getRightMenuPanel
---
--- @return #LuaGuiElement
---
-function Form:getRightMenuPanel()
-  local parent_panel = self:getMenuPanel()
-  local panel_name = "right_menu"
-  if parent_panel[panel_name] ~= nil and parent_panel[panel_name].valid then
-    return parent_panel[panel_name]
-  end
-  local panel = GuiElement.add(parent_panel, GuiFlowH(panel_name))
-  panel.style.horizontal_spacing = 10
-  --panel.style.horizontally_stretchable = true
-  --panel.style.vertically_stretchable = true
-  panel.style.horizontal_align = "right"
+  panel.style.minimal_height = 32
   return panel
 end
 
@@ -358,13 +385,13 @@ function Form:updateTopMenu(event)
       if string.find(self.classname, "Tab") then
         local group3 = GuiElement.add(menu_panel, GuiFlowH("group3"))
         if game.is_multiplayer() and not(game.tick_paused) then
-          local pause_button = GuiElement.add(group3, GuiButton("do-nothing"):sprite("menu", "play-white", "play"):style("helmod_button_menu_flat"):tooltip({"helmod_button.game-play-multiplayer"}))
+          local pause_button = GuiElement.add(group3, GuiButton("do-nothing"):sprite("menu", "play-white", "play"):style("helmod_frame_button"):tooltip({"helmod_button.game-play-multiplayer"}))
           pause_button.enabled = false
         else
           if game.tick_paused then
-            GuiElement.add(group3, GuiButton(self.classname, "game-play"):sprite("menu", "pause", "pause"):style("helmod_button_menu_actived_red"):tooltip({"helmod_button.game-pause"}))
+            GuiElement.add(group3, GuiButton(self.classname, "game-play"):sprite("menu", "pause", "pause"):style("helmod_frame_button_actived_red"):tooltip({"helmod_button.game-pause"}))
           else
-            GuiElement.add(group3, GuiButton(self.classname, "game-pause"):sprite("menu", "play-white", "play"):style("helmod_button_menu"):tooltip({"helmod_button.game-play"}))
+            GuiElement.add(group3, GuiButton(self.classname, "game-pause"):sprite("menu", "play-white", "play"):style("helmod_frame_button"):tooltip({"helmod_button.game-play"}))
           end
         end
       end
@@ -373,9 +400,9 @@ function Form:updateTopMenu(event)
       for _, form in pairs(Controller.getViews()) do
         if self.add_special_button == true and form:isVisible() and form:isSpecial() then
           local icon_hovered, icon = form:getButtonSprites()
-          local style = "helmod_button_menu"
+          local style = "helmod_frame_button"
           if string.find(form.classname, "Tab") then
-            if User.isActiveForm(form.classname) then style = "helmod_button_menu_selected" end
+            if User.isActiveForm(form.classname) then style = "helmod_frame_button_selected" end
             GuiElement.add(group1, GuiButton(self.classname, "change-tab", form.classname):sprite("menu", icon_hovered, icon):style(style):tooltip(form:getButtonCaption()))
           else
             GuiElement.add(group1, GuiButton(form.classname, "OPEN"):sprite("menu", icon_hovered, icon):style(style):tooltip(form.panelCaption))
@@ -385,12 +412,12 @@ function Form:updateTopMenu(event)
       -- current button
       local group2 = GuiElement.add(menu_panel, GuiFlowH("group2"))
       if self.help_button then
-        GuiElement.add(group2, GuiButton("HMHelpPanel", "OPEN"):sprite("menu", "help-white", "help"):style("helmod_button_menu"):tooltip({"helmod_button.help"}))
+        GuiElement.add(group2, GuiButton("HMHelpPanel", "OPEN"):sprite("menu", "help-white", "help"):style("helmod_frame_button"):tooltip({"helmod_button.help"}))
       end
       if string.find(self.classname, "Tab") then
-        GuiElement.add(group2, GuiButton(self.classname, "close-tab"):sprite("menu", "close-window-white", "close-window"):style("helmod_button_menu_red"):tooltip({"helmod_button.close"}))
+        GuiElement.add(group2, GuiButton(self.classname, "close-tab"):sprite("menu", "close-window-white", "close-window"):style("helmod_frame_button"):tooltip({"helmod_button.close"}))
       else
-        GuiElement.add(group2, GuiButton(self.classname, "CLOSE"):sprite("menu", "close-window-white", "close-window"):style("helmod_button_menu_red"):tooltip({"helmod_button.close"}))
+        GuiElement.add(group2, GuiButton(self.classname, "CLOSE"):sprite("menu", "close-window-white", "close-window"):style("helmod_frame_button"):tooltip({"helmod_button.close"}))
       end
     end
   else
@@ -455,7 +482,7 @@ end
 --
 function Form:updateMessage(event)
   if not(self:isOpened()) then return end
-  local panel = self:getMessagePanel()
+  local panel = self:getFrameDeepPanel("message")
   panel.clear()
   GuiElement.add(panel, GuiLabel("message"):caption(event.message))
 end
@@ -469,7 +496,7 @@ end
 --
 function Form:updateError(event)
   if not(self:isOpened()) then return end
-  local panel = self:getErrorPanel()
+  local panel = self:getFrameDeepPanel("error")
   panel.clear()
   GuiElement.add(panel, GuiLabel("message"):caption(event.message or "Unknown error"):color("red"))
 end

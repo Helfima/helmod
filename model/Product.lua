@@ -17,26 +17,22 @@ Product.classname = "HMProduct"
 --
 -- @return #table
 --
-function Product:getLocalisedName(force)
+function Product:getLocalisedName()
   if self.lua_prototype ~= nil then
-    if not(User.getModGlobalSetting("display_real_name")) or force then
-      local localisedName = self.lua_prototype.name
-      if self.lua_prototype.type == 0 or self.lua_prototype.type == "item" then
-        local item = Player.getItemPrototype(self.lua_prototype.name)
-        if item ~= nil then
-          localisedName = item.localised_name
-        end
+    local localisedName = self.lua_prototype.name
+    if self.lua_prototype.type == 0 or self.lua_prototype.type == "item" then
+      local item = Player.getItemPrototype(self.lua_prototype.name)
+      if item ~= nil then
+        localisedName = item.localised_name
       end
-      if self.lua_prototype.type == 1 or self.lua_prototype.type == "fluid" then
-        local item = Player.getFluidPrototype(self.lua_prototype.name)
-        if item ~= nil then
-          localisedName = item.localised_name
-        end
-      end
-      return localisedName
-    else
-      return self.lua_prototype.name
     end
+    if self.lua_prototype.type == 1 or self.lua_prototype.type == "fluid" then
+      local item = Player.getFluidPrototype(self.lua_prototype.name)
+      if item ~= nil then
+        localisedName = item.localised_name
+      end
+    end
+    return localisedName
   end
   return "unknow"
 end

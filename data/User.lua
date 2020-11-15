@@ -78,7 +78,7 @@ end
 -- @return #boolean
 --
 function User.isFilterTranslate()
-  return User.getModGlobalSetting("filter_translated_string_active") and (User.getParameter("filter-language") == nil or User.getParameter("filter-language") == "right")
+  return User.getModGlobalSetting("filter_translated_string_active") and (User.getParameter("filter-language") == nil or User.getParameter("filter-language") == "left")
 end
 
 -------------------------------------------------------------------------------

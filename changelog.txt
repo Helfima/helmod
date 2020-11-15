@@ -1,4 +1,82 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.11.19
+Date: 2020-11-06
+  Changes:
+    - Added Japanese translation
+    - Updated Russian translation
+  Bugfixes:
+    - Fixed bad message when limitation message appear in the recipe edition
+    - Fixed scroll reset when you use the recipe edition
+    - Fixed accumulator power calculation
+---------------------------------------------------------------------------------------------------
+Version: 0.11.18
+Date: 2020-11-04
+  Bugfixes:
+    - Fixed error when open recipe edition by factory/beacon block icon
+---------------------------------------------------------------------------------------------------
+Version: 0.11.17
+Date: 2020-11-04
+  Changes:
+    - Added control to put item to crafting queue when ctrl+click on factory/beacon block icon
+    - Added production line tooltip on tab title
+  Bugfixes:
+    - Fixed bad indent char in help panel for some languages
+    - Fixed bad usage_priority use by some mods for generator power
+---------------------------------------------------------------------------------------------------
+Version: 0.11.16
+Date: 2020-10-31
+  Bugfixes:
+    - fixed MP desync
+---------------------------------------------------------------------------------------------------
+Version: 0.11.15
+Date: 2020-10-30
+  Changes:
+    - Added hotkey to open/close RichText Panel: CONTROL + T
+  Bugfixes:
+    - fixed display block empty after remove last recipe
+    - fixed error on download panel
+---------------------------------------------------------------------------------------------------
+Version: 0.11.14
+Date: 2020-10-24
+  Changes:
+    - Updated style panel
+    - Updated help content, more information added
+    - Added some control information in tooltip
+    - Added steam heat ingredient for machine with heat energy
+    - Changed UnitTest panel is a special panel and is hidden by default
+  Bugfixes:
+    - fixed switch button fire event, button of switch work now
+    - fixed bonus research for lab
+---------------------------------------------------------------------------------------------------
+Version: 0.11.13
+Date: 2020-10-05
+  Changes:
+    - Changed solve choose fluid with tempearture
+  Bugfixes:
+    - fixed copy/paste and exchange block
+    - fixed problem with water-viscous-mud recipe to select machine in recipe edition
+---------------------------------------------------------------------------------------------------
+Version: 0.11.12
+Date: 2020-09-28
+  Bugfixes:
+    - fixed overlay info for fluid recipe
+    - fixed water-viscous-mud recipe use offshore-pump instead of liquifier
+---------------------------------------------------------------------------------------------------
+Version: 0.11.11
+Date: 2020-09-27
+  Changes:
+    - Removed ingredient for all offshore-pump (ex: seafloor pump)
+  Bugfixes:
+    - fixed compunting ingredient fluid without temperature not consume fluid with temperature
+---------------------------------------------------------------------------------------------------
+Version: 0.11.10
+Date: 2020-09-24
+  Changes:
+    - Added some control tooltip information
+  Bugfixes:
+    - fixed error computing with contraint after switch Product input or Ingredient Input
+    - fixed translated name switch state (inverted)
+---------------------------------------------------------------------------------------------------
 Version: 0.11.9
 Date: 2020-09-24
   Changes:

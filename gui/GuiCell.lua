@@ -108,8 +108,18 @@ end
 -- @return #GuiCell
 --
 function GuiCell:contraintIcon(type)
-  self.m_with_contraint_info = true
   self.m_contraint_icon = type
+  return self
+end
+
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiCell] controlInfo
+-- @param #string control_info
+-- @return #GuiCell
+--
+function GuiCell:controlInfo(control_info)
+  self.m_with_control_info = control_info
   return self
 end
 
@@ -208,6 +218,11 @@ function infoIcon(button, type)
     local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({tooltip}))
     sprite.style.top_padding = -8
   end
+  if type == "fluid" then 
+    local tooltip = "tooltip.resource-recipe"
+    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({tooltip}))
+    sprite.style.top_padding = -8
+  end
   if type == "resource" then 
     local tooltip = "tooltip.resource-recipe"
     local sprite = GuiElement.add(button, GuiSprite("info"):sprite("helmod-tool-jewel"):tooltip({tooltip}))
@@ -227,6 +242,13 @@ function infoIcon(button, type)
     local tooltip = "tooltip.burnt-product"
     local sprite = GuiElement.add(button, GuiSprite("burnt"):sprite("helmod-tool-burnt"):tooltip({tooltip}))
     sprite.style.top_padding = -4
+  end
+  if type == "block" then 
+    local tooltip = "tooltip.block-recipe"
+    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("helmod-tool-hangar"):tooltip({tooltip}))
+    sprite.style.top_padding = -2
+    sprite.style.left_padding = 22
+    sprite.ignored_by_interaction = true
   end
 end
 
@@ -266,8 +288,7 @@ function appendRowLogistic(parent, element)
     
     --local tooltip = GuiTooltipModule("tooltip.info-module"):element({type="item", name=name})
     local logistic_cell = GuiElement.add(parent, GuiFlowH("logistic-cell", item_logistic))
-    local button = GuiElement.add(logistic_cell, GuiButtonSelectSpriteSm("sprite", item_logistic):choose("entity", item_logistic):color("flat"))
-    button.locked = true
+    GuiElement.add(logistic_cell, GuiButtonSelectSpriteSm("sprite", item_logistic):sprite("entity", item_logistic):color("flat"))
     if element.limit_count ~= nil and element.limit_count > 0 then
       local limit_value = Format.formatNumberElement(item_prototype:countContainer(element.limit_count, item_logistic))
       GuiElement.add(logistic_cell, GuiLabel("label", item_logistic):caption({"", "x", limit_value, "/", total_value}):style("helmod_label_element"))
@@ -287,8 +308,7 @@ function appendRowLogistic(parent, element)
     
     --local tooltip = GuiTooltipModule("tooltip.info-module"):element({type="item", name=name})
     local logistic_cell = GuiElement.add(parent, GuiFlowH("logistic-cell", fluid_logistic))
-    local button = GuiElement.add(logistic_cell, GuiButtonSelectSpriteSm("sprite", fluid_logistic):choose("entity", fluid_logistic):color("flat"))
-    button.locked = true
+    GuiElement.add(logistic_cell, GuiButtonSelectSpriteSm("sprite", fluid_logistic):sprite("entity", fluid_logistic):color("flat"))
     if element.limit_count ~= nil and element.limit_count > 0 then
       local limit_count = element.limit_count
       if type == "pipe" then limit_count = limit_count / model.time end
@@ -333,7 +353,7 @@ function GuiCellFactory:create(parent)
   local cell = GuiElement.add(parent, GuiFlowV(factory.name, self.m_index))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element", color, 1))
 
-  local tooltip = GuiTooltipElement(self.options.tooltip):element(factory):withEnergy()
+  local tooltip = GuiTooltipElement(self.options.tooltip):element(factory):withEnergy():withControlInfo(self.m_with_control_info)
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("entity", factory.name):tooltip(tooltip))
 
   local cell_factory_info = GuiElement.add(row1, GuiTable("factory-info"):column(1):style("helmod_factory_info"))
@@ -529,10 +549,15 @@ function GuiCellBlock:create(parent)
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
 
-  local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
-  local recipe_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("recipe", element.name):tooltip(tooltip))
-  if element.isEnergy then
-    infoIcon(recipe_icon, "energy")
+  local first_recipe = Model.firstRecipe(element.recipes)
+  if first_recipe ~= nil then
+    local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
+    local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
+    infoIcon(button, "block")
+    GuiElement.infoRecipe(button, first_recipe)
+  else
+    local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", "help-white", "help"))
+    button.style.width = 36
   end
 
   if element.limit_count ~= nil then
@@ -577,7 +602,7 @@ function GuiCellBlockInfo:create(parent)
   row1.style.bottom_padding=4
 
   local tooltip = GuiTooltipBlock(self.options.tooltip):element(element)
-  GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", "hangar-white", "hangar"):style("helmod_button_menu_flat"):tooltip(tooltip))
+  local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", "hangar-white", "hangar"):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   if element.limit_count ~= nil then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_product", color, 2))
@@ -749,9 +774,9 @@ function GuiCellElement:create(parent)
 
   local tooltip = ""
   if element.type == "energy" then
-    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic():withProductInfo()
+    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
   else
-    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo()
+    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
   end
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type or "entity", element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   GuiElement.infoTemperature(row1, element)
@@ -860,9 +885,9 @@ function GuiCellElementM:create(parent)
 
   local tooltip = ""
   if element.type == "energy" then
-    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic():withProductInfo()
+    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
   else
-    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo()
+    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
   end
   local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(element.type or "entity", element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   GuiElement.infoTemperature(row1, element)
@@ -956,16 +981,16 @@ function GuiCellLabel:create(parent)
 
   if display_cell_mod == "small-text"then
     -- small
-    GuiElement.add(cell, GuiLabel("label1"):caption(self.m_caption):style("helmod_label_icon_text_sm"):tooltip({"helmod_common.total"})).style["minimal_width"] = minimal_width or 45
+    GuiElement.add(cell, GuiLabel("label1"):caption(self.m_caption):style("helmod_label_icon_text_sm"):tooltip({"helmod_common.total"})).style["minimal_width"] = 45
   elseif display_cell_mod == "small-icon" then
     -- small
-    GuiElement.add(cell, GuiLabel("label1"):caption(self.m_caption):style("helmod_label_icon_sm"):tooltip({"helmod_common.total"})).style["minimal_width"] = minimal_width or 45
+    GuiElement.add(cell, GuiLabel("label1"):caption(self.m_caption):style("helmod_label_icon_sm"):tooltip({"helmod_common.total"})).style["minimal_width"] = 45
   elseif display_cell_mod == "by-kilo" then
     -- by-kilo
-    GuiElement.add(cell, GuiLabel("label1"):caption(self.m_caption):style("helmod_label_row_right"):tooltip({"helmod_common.total"})).style["minimal_width"] = minimal_width or 50
+    GuiElement.add(cell, GuiLabel("label1"):caption(self.m_caption):style("helmod_label_row_right"):tooltip({"helmod_common.total"})).style["minimal_width"] = 50
   else
     -- default
-    GuiElement.add(cell, GuiLabel("label1"):caption(self.m_caption):style("helmod_label_row_right"):tooltip({"helmod_common.total"})).style["minimal_width"] = minimal_width or 60
+    GuiElement.add(cell, GuiLabel("label1"):caption(self.m_caption):style("helmod_label_row_right"):tooltip({"helmod_common.total"})).style["minimal_width"] = 60
   end
   return cell
 end

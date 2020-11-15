@@ -48,7 +48,7 @@ end
 -- @return boolean
 --
 function PropertiesPanel:isVisible()
-  return User.getModGlobalSetting("properties_panel")
+  return User.getModGlobalSetting("hidden_panels")
 end
 
 -------------------------------------------------------------------------------

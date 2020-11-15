@@ -68,7 +68,7 @@ function RecipeSelector:appendGroups(element, type, list_products, list_ingredie
     list_products[raw_product.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
     
     local product = Product(raw_product)
-    local localised_name = product:getLocalisedName(true)
+    local localised_name = product:getLocalisedName()
     has_burnt_result = product:hasBurntResult()
     if localised_name ~= nil and localised_name ~= "unknow" then
       list_translate[raw_product.name] = localised_name
@@ -127,14 +127,5 @@ function RecipeSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
   end
   local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select", prototype.type):choose(prototype.type, prototype.name):color(color))
   button.locked = true
-  if prototype.type == "recipe-burnt" then
-    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({"tooltip.burnt-recipe"}))
-    sprite.style.top_padding = -8
-  elseif prototype.type == "rocket" then
-    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({"tooltip.rocket-recipe"}))
-    sprite.style.top_padding = -8
-  elseif prototype.type ~= "recipe" then
-    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({"tooltip.resource-recipe"}))
-    sprite.style.top_padding = -8
-  end
+  GuiElement.infoRecipe(button, prototype)
 end

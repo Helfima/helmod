@@ -74,7 +74,10 @@ function ModelDebug:buildMatrix(matrix_panel, matrix, pivot)
           elseif value.type == "contraint" then
             GuiElement.add(cell, GuiLabel("cell_value"):caption(value))
           else
-            local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(value.type, value.name):tooltip(value.tooltip))
+            local tooltip = {"", value.name}
+            table.insert(tooltip, {"", "\n", "column: ", value.icol})
+            table.insert(tooltip, {"", "\n", "is_product: ", value.is_product})
+            local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(value.type, value.name):tooltip(tooltip))
             GuiElement.infoTemperature(button, value, "helmod_label_overlay_m")
           end
         else
@@ -129,9 +132,9 @@ end
 -- @param #LuaEvent event
 --
 function ModelDebug:updateHeader(event)
-  local left_menu_panel = self:getLeftMenuPanel()
-  left_menu_panel.clear()
-  local group1 = GuiElement.add(left_menu_panel, GuiFlowH("group1"))
+  local action_panel = self:getMenuPanel()
+  action_panel.clear()
+  local group1 = GuiElement.add(action_panel, GuiFlowH("group1"))
   GuiElement.add(group1, GuiButton(self.classname, "change-stage", "initial"):sprite("menu", "record-white", "record"):style("helmod_button_menu"):tooltip("Initial"))
   GuiElement.add(group1, GuiButton(self.classname, "change-stage", "previous"):sprite("menu", "arrow-left-white", "arrow-left"):style("helmod_button_menu"):tooltip("Previous Step"))
   GuiElement.add(group1, GuiButton(self.classname, "change-stage", "next"):sprite("menu", "arrow-right-white", "arrow-right"):style("helmod_button_menu"):tooltip("Next Step"))

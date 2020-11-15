@@ -14,6 +14,7 @@ local data = require "unit_test.Data"
 local data_pyanodons = require "unit_test.DataPyanodons"
 local data_bob_angel = require "unit_test.DataBobAngel"
 local data_krastorio2 = require "unit_test.DataKrastorio2"
+local data_space_ecploration = require "unit_test.DataSpaceExploration"
 -------------------------------------------------------------------------------
 -- On initialization
 --
@@ -43,7 +44,7 @@ end
 -- @return boolean
 --
 function UnitTestPanel:isVisible()
-  return Player.isAdmin()
+  return User.getModGlobalSetting("hidden_panels")
 end
 
 -------------------------------------------------------------------------------
@@ -123,7 +124,7 @@ function UnitTestPanel:getEnergyTab()
     return content_panel[scroll_name]
   end
   local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption({"helmod_unittest.energy-title"}))
-  local scroll_panel = GuiElement.add(content_panel, GuiScroll(scroll_name):style(helmod_frame_style.scroll_pane):policy(true))
+  local scroll_panel = GuiElement.add(content_panel, GuiScroll(scroll_name):style("helmod_scroll_pane"):policy(true))
   content_panel.add_tab(tab_panel,scroll_panel)
   scroll_panel.style.horizontally_stretchable = true
   scroll_panel.style.vertically_stretchable = true
@@ -162,6 +163,9 @@ function UnitTestPanel:onUpdate(event)
   if game.active_mods["Krastorio2"] then
     data = data_krastorio2
   end
+  if game.active_mods["space-exploration"] then
+    data = data_space_ecploration
+  end
   self:updateMenu()
   self:updateEnergy()
 end
@@ -185,7 +189,8 @@ end
 --
 function UnitTestPanel:updateEnergy()
   local tab_panel = self:getEnergyTab()
-  
+  GuiElement.add(tab_panel, GuiLabel("label"):caption(data.mod):style("heading_1_label"))
+
   local table_panel = GuiElement.add(tab_panel, GuiTable("list-table"):column(23))
   table_panel.vertical_centering = false
   table_panel.style.horizontal_spacing = 10

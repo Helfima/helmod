@@ -39,9 +39,6 @@ end
 --
 function Prototype:getLocalisedName()
   if self.lua_prototype ~= nil then
-    if User.getModGlobalSetting("display_real_name") then
-      return self.lua_prototype.name
-    end
     return self.lua_prototype.localised_name
   end
   return "unknow"

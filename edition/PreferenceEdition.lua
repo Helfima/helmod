@@ -54,18 +54,10 @@ end
 -- @function [parent=#PreferenceEdition] getPrefrencePanel
 --
 function PreferenceEdition:getPrefrencePanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
-  local panel_name = "preference_panel"
-  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
-    return content_panel[panel_name]
-  end
-  local panel = GuiElement.add(content_panel, GuiFrameV(panel_name))
-  --panel.style.height = 600
+  local panel = self:getFrameTabbedPanel("preference_panel")
   panel.style.minimal_width = 600
-
   panel.style.horizontally_stretchable = true
   panel.style.vertically_stretchable = true
-
   return panel
 end
 
@@ -80,7 +72,7 @@ function PreferenceEdition:getTabPane()
   if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
     return content_panel[panel_name]
   end
-  local panel = GuiElement.add(content_panel, GuiTabPane(panel_name))
+  local panel = GuiElement.add(content_panel, GuiTabPane(panel_name):style("helmod_tabbed_pane"))
   return panel
 end
 
@@ -249,7 +241,7 @@ function PreferenceEdition:updateUI(event)
         if preference.type == "int-setting" or preference.type == "string-setting" then
           local tooltip = nil
           if preference.minimum_value then
-            tooltip = {"", {"helmod_settings.range-value"}, "[",preference.minimum_value,",",preference.maximum_value,"]"}
+            tooltip = {"", {"helmod_pref_settings.range-value"}, "[",preference.minimum_value,",",preference.maximum_value,"]"}
           end
           GuiElement.add(options_table, GuiTextField(self.classname, "preference-setting", preference_type):text(default_preference_type):tooltip(tooltip))
         end

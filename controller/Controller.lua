@@ -406,6 +406,14 @@ function Controller:onGuiHotkey(event)
       view:close()
     end
   end
+  if event.input_name == "helmod-richtext-open" then
+    local view = Controller:getView("HMRichTextPanel")
+    if not(view:isOpened()) then
+      self:send("on_gui_open", event, "HMRichTextPanel")
+    else
+      view:close()
+    end
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -764,6 +772,22 @@ function Controller:onEventAccessAdmin(event)
       game.tick_paused = true
       self:send("on_gui_pause", event)
     end
+  end
+  
+  if event.action == "string-decode" then
+    local parent = event.element.parent.parent
+    local decoded_textbox = parent["decoded-text"]
+    local encoded_textbox = parent["encoded-text"]
+    local input = string.sub(encoded_textbox.text,2)
+    local json = game.decode_string(input)
+    decoded_textbox.text = json
+  end
+
+  if event.action == "string-encode" then
+    local parent = event.element.parent.parent
+    local decoded_textbox = parent["decoded-text"]
+    local encoded_textbox = parent["encoded-text"]
+    encoded_textbox.text = "0"..game.encode_string(decoded_textbox.text)
   end
 
   if event.action == "game-play" then

@@ -100,7 +100,7 @@ end
 -- @return #table
 --
 function SolverAlgebra:lineComputeByFactory(M, xrow, time)
-  if M == nil or xrow == 0 or xcol == 0 then return M end
+  if M == nil or xrow == 0 then return M end
   local row = M[xrow]
   local F = M[xrow][self.col_F]
   local S = M[xrow][self.col_S]

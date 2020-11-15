@@ -101,6 +101,13 @@ function compare_priority(a,b)
   return true
 end
 
+function table.contains(object, value)
+  for _,compare in pairs(object) do
+    if compare == value then return true end
+  end
+  return false
+end
+
 function table.deepcopy(object)
   local lookup_table = {}
   local function _copy(object)

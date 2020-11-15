@@ -270,8 +270,8 @@ function GuiElement.getStyleSizes()
     }
     
   style_sizes["HMRichTextPanel"] = {
-    minimal_width = 300,
-    maximal_width = 300,
+    minimal_width = 322,
+    maximal_width = 322,
     minimal_height = 300,
     maximal_height = height_main
     }
@@ -374,7 +374,7 @@ function GuiElement.getIndexColumnNumber()
   local width , height = GuiElement.getDisplaySizes()
   local width_main = math.ceil(width*display_ratio_horizontal)
 
-  return math.ceil((width_main - 50)/36)
+  return math.ceil((width_main - 100)/36)
 end
 
 -------------------------------------------------------------------------------
@@ -485,14 +485,33 @@ function GuiElement.infoTemperature(parent, element, style)
         GuiElement.add(parent, GuiLabel("temperature_max"):caption(caption_max):style(style))
       end
       if Tmin > -1e300 and Tmax < 1e300 then
+        local panel = GuiElement.add(parent, GuiFlowV("temperature"))
         local caption_min = {"", "≥", Tmin, "°"}
-        GuiElement.add(parent, GuiLabel("temperature_min"):caption(caption_min):style(style))
+        GuiElement.add(panel, GuiLabel("temperature_min"):caption(caption_min):style(style))
         local caption_max = {"", "≤", Tmax, "°"}
-        GuiElement.add(parent, GuiLabel("temperature_max"):caption(caption_max):style(style))
+        GuiElement.add(panel, GuiLabel("temperature_max"):caption(caption_max):style(style))
       end
       
     end
   end
 end
 
-
+-------------------------------------------------------------------------------
+--
+-- @function [parent=#GuiElement] infoTemperature
+--
+function GuiElement.infoRecipe(parent, element)
+  if element.type == "recipe-burnt" then
+    local sprite = GuiElement.add(parent, GuiSprite("recipe-info"):sprite("developer"):tooltip({"tooltip.burnt-recipe"}))
+    sprite.style.top_padding = -8
+  elseif element.type == "rocket" then
+    local sprite = GuiElement.add(parent, GuiSprite("recipe-info"):sprite("developer"):tooltip({"tooltip.rocket-recipe"}))
+    sprite.style.top_padding = -8
+  elseif element.type == "technology" then
+    local sprite = GuiElement.add(parent, GuiSprite("recipe-info"):sprite("developer"):tooltip({"tooltip.technology-recipe"}))
+    sprite.style.top_padding = -8
+  elseif element.type ~= "recipe" then
+    local sprite = GuiElement.add(parent, GuiSprite("recipe-info"):sprite("developer"):tooltip({"tooltip.resource-recipe"}))
+    sprite.style.top_padding = -8
+  end
+end

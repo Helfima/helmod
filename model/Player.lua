@@ -51,6 +51,20 @@ function Player.set(player)
 end
 
 -------------------------------------------------------------------------------
+-- Get game day
+--
+-- @function [parent=#Player] getGameDay
+--
+function Player.getGameDay()
+  local surface = game.surfaces[1]
+  local day = surface.ticks_per_day
+  local dusk = surface.evening-surface.dusk
+  local night = surface.morning-surface.evening
+  local dawn = surface.dawn-surface.morning
+  return day, day*dusk, day*night, day*dawn
+end
+
+-------------------------------------------------------------------------------
 -- Set pipette
 --
 -- @function [parent=#Player] setPipette
@@ -86,6 +100,24 @@ end
 function Player.getMainInventory()
   if Lua_player == nil then return nil end
   return Lua_player.get_main_inventory()
+end
+
+-------------------------------------------------------------------------------
+-- Begin Crafting
+--
+-- @function [parent=#Player] beginCrafting
+--
+function Player.beginCrafting(item, count)
+  if Lua_player == nil then return nil end
+  local filters = {{filter = "has-product-item", elem_filters = {{filter = "name", name = item}}}}
+  local recipes = Player.getRecipePrototypes(filters)
+  if recipes ~= nil and Model.countList(recipes) > 0 then
+    local first_recipe = Model.firstRecipe(recipes)
+    local craft = {count=math.ceil(count),recipe=first_recipe.name,silent=false}
+    Lua_player.begin_crafting(craft)
+  else
+    Player.print("No recipe found for this craft!")
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -257,9 +289,6 @@ end
 -- @return #string localised name
 --
 function Player.getLocalisedName(element)
-  if User.getModGlobalSetting("display_real_name") then
-    return element.name
-  end
   local localisedName = element.name
   if element.type ~= nil then
     if element.type == "recipe" or element.type == "recipe-burnt" then
@@ -307,7 +336,7 @@ end
 --
 function Player.getRecipeLocalisedName(prototype)
   local element = Player.getRecipe(prototype.name)
-  if element ~= nil and not(User.getModGlobalSetting("display_real_name")) then
+  if element ~= nil then
     return element.localised_name
   end
   return prototype.name
@@ -324,7 +353,7 @@ end
 --
 function Player.getTechnologyLocalisedName(prototype)
   local element = Player.getTechnology(prototype.name)
-  if element ~= nil and not(User.getModGlobalSetting("display_real_name")) then
+  if element ~= nil then
     return element.localised_name
   end
   return element.name
@@ -348,7 +377,10 @@ end
 --
 -- @return #table recipes
 --
-function Player.getRecipePrototypes()
+function Player.getRecipePrototypes(filters)
+  if filters ~= nil then
+    return game.get_filtered_recipe_prototypes(filters)
+  end
   return game.recipe_prototypes
 end
 
@@ -545,7 +577,7 @@ function Player.getProductionsCrafting(category, lua_recipe)
     for key, lua_entity in pairs(Player.getOffshorePump()) do
       productions[lua_entity.name] = lua_entity
     end
-  elseif lua_recipe.name ~= nil and lua_recipe.name == "water-viscous-mud" then
+  elseif lua_recipe.name ~= nil and lua_recipe.name == "water-viscous-mud" and lua_recipe.object_name ~= "LuaRecipePrototype" and lua_recipe.type ~= "recipe" then
     for key, lua_entity in pairs(Player.getOffshorePump("water-viscous-mud")) do
       productions[lua_entity.name] = lua_entity
     end
@@ -785,9 +817,6 @@ function Player.getRecipeFluid(name)
   local prototype = fluid_prototype:native()
   local products = {{name=prototype.name, type="fluid", amount=1}}
   local ingredients = {{name=prototype.name, type="fluid", amount=1}}
-  if prototype.name == "water" then
-    ingredients = {}
-  end
   if prototype.name == "steam" then
     ingredients = {{name="water", type="fluid", amount=1}}
   end

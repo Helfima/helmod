@@ -25,59 +25,16 @@ end
 --
 function Calculator:getColumnPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
-  if content_panel["main_panel"] ~= nil and content_panel["main_panel"].valid then
-    return content_panel["main_panel"]["display_panel1"], content_panel["main_panel"]["display_panel2"]
+  local panel_name = "main_panel"
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[panel_name]["display_panel1"], content_panel[panel_name]["display_panel2"]
   end
-  local panel = GuiElement.add(content_panel, GuiFlowH("main_panel"))
-  local display_panel1 = GuiElement.add(panel, GuiFlowV("display_panel1"))
-  local display_panel2 = GuiElement.add(panel, GuiFlowV("display_panel2"))
-  display_panel2.style.width=200
-
+  local panel = self:getFlowPanel(panel_name, "horizontal")
+  local display_panel1 = GuiElement.add(panel, GuiFrameV("display_panel1"))
+  display_panel1.style.vertically_stretchable = true
+  local display_panel2 = GuiElement.add(panel, GuiFrameV("display_panel2"))
+  display_panel2.style.vertically_stretchable = true
   return display_panel1, display_panel2
-end
-
--------------------------------------------------------------------------------
--- Get or create display panel
---
--- @function [parent=#Calculator] getDisplayPanel
---
-function Calculator:getDisplayPanel()
-  local display_panel1, display_panel2 = self:getColumnPanel()
-  if display_panel1["display"] ~= nil and display_panel1["display"].valid then
-    return display_panel1["display"]
-  end
-  return GuiElement.add(display_panel1, GuiFrameV("display"):style(helmod_frame_style.panel))
-end
-
--------------------------------------------------------------------------------
--- Get or create keyboard panel
---
--- @function [parent=#Calculator] getKeyboardPanel
---
-function Calculator:getKeyboardPanel()
-  local display_panel1, display_panel2 = self:getColumnPanel()
-  if display_panel1["keyboard"] ~= nil and display_panel1["keyboard"].valid then
-    return display_panel1["keyboard"]
-  end
-  local panel = GuiElement.add(display_panel1, GuiFrameV("keyboard"):style(helmod_frame_style.panel))
-  panel.style.horizontally_stretchable = true
-  return panel
-end
-
--------------------------------------------------------------------------------
--- Get or create history panel
---
--- @function [parent=#Calculator] getHistoryPanel
---
-function Calculator:getHistoryPanel()
-  local display_panel1, display_panel2 = self:getColumnPanel()
-  if display_panel2["history"] ~= nil and display_panel2["history"].valid then
-    return display_panel2["history"]
-  end
-  local panel = GuiElement.add(display_panel2, GuiFrameV("history"):style(helmod_frame_style.panel))
-  panel.style.horizontally_stretchable = true
-  panel.style.vertically_stretchable = true
-  return panel
 end
 
 -------------------------------------------------------------------------------
@@ -163,13 +120,13 @@ end
 -- @function [parent=#Calculator] updateDisplay
 --
 function Calculator:updateDisplay()
-  local keyboard_panel = self:getDisplayPanel()
+  local keyboard_panel = self:getFrameDeepPanel("display")
   keyboard_panel.clear()
 
   local calculator_value = User.getParameter("calculator_value") or 0
   display_panel = GuiElement.add(keyboard_panel, GuiTextField(self.classname, "compute"):text(calculator_value):style("helmod_textfield_calculator"))
   --display_panel.style.horizontally_stretchable = true
-  display_panel.style.width=155
+  display_panel.style.width=352
   display_panel.style.horizontal_align = "right"
   display_panel.focus()
 end
@@ -179,7 +136,7 @@ end
 -- @function [parent=#Calculator] updateKeyboard
 --
 function Calculator:updateKeyboard()
-  local keyboard_panel = self:getKeyboardPanel()
+  local _,keyboard_panel = self:getColumnPanel()
   keyboard_panel.clear()
 
   local table_panel = GuiElement.add(keyboard_panel, GuiTable("keys"):column(4))
@@ -230,8 +187,9 @@ end
 -- @function [parent=#Calculator] updateHistory
 --
 function Calculator:updateHistory()
-  local history_panel = self:getHistoryPanel()
+  local history_panel = self:getColumnPanel()
   history_panel.clear()
+  history_panel.style.width=200
 
   local calculator_history = User.getParameter("calculator_history") or {}
   for index, line in pairs(calculator_history) do
