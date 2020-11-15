@@ -714,7 +714,7 @@ function ModelCompute.computeBlock(block)
       end)
       if not(ok) then
         if block.solver == true and block.by_factory ~= true then
-          Player.print("Matrix solver can not found solution!")
+          Player.print("Matrix solver can not find solution!")
         else
           Player.print("Algebraic solver can not found solution!")
         end
