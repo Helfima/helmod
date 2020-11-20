@@ -846,13 +846,13 @@ end
 function RecipeEdition:addAlert(cell, factory, type)
   if factory.cap ~= nil and factory.cap[type] ~= nil and factory.cap[type] > 0 then
     local tooltip = {""}
-    if ModelCompute.cap_reason[type].cycle > 0 and bit32.band(factory.cap[type], ModelCompute.cap_reason[type].cycle) > 0 then
+    if ModelCompute.cap_reason[type].cycle ~= nil and ModelCompute.cap_reason[type].cycle > 0 and bit32.band(factory.cap[type], ModelCompute.cap_reason[type].cycle) > 0 then
       table.insert(tooltip, {string.format("helmod_cap_reason.%s-cycle", type)})
     end
-    if ModelCompute.cap_reason[type].module_low > 0 and bit32.band(factory.cap[type], ModelCompute.cap_reason[type].module_low) > 0 then
+    if ModelCompute.cap_reason[type].module_low ~= nil and ModelCompute.cap_reason[type].module_low > 0 and bit32.band(factory.cap[type], ModelCompute.cap_reason[type].module_low) > 0 then
       table.insert(tooltip, {string.format("helmod_cap_reason.%s-module-low", type)})
     end
-    if ModelCompute.cap_reason[type].module_high > 0 and bit32.band(factory.cap[type], ModelCompute.cap_reason[type].module_high) > 0 then
+    if ModelCompute.cap_reason[type].module_high ~= nil and ModelCompute.cap_reason[type].module_high > 0 and bit32.band(factory.cap[type], ModelCompute.cap_reason[type].module_high) > 0 then
       table.insert(tooltip, {string.format("helmod_cap_reason.%s-module-high", type)})
     end
     GuiElement.add(cell, GuiSprite("alert"):sprite("helmod-alert1"):tooltip(tooltip))

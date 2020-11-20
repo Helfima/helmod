@@ -158,6 +158,46 @@ function Model.getModel()
 end
 
 -------------------------------------------------------------------------------
+-- Get model
+--
+-- @function [parent=#Model] getModelById
+--
+-- @return #Model
+--
+function Model.getModelById(model_id)
+  if model_id ~= nil and global.models ~= nil then
+    return global.models[model_id]
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Get model
+--
+-- @function [parent=#Model] getModelByParameter
+--
+-- @return #Model
+--
+function Model.getModelByParameter(parameter)
+  if parameter ~= nil and parameter.model ~= nil and global.models ~= nil then
+    return global.models[parameter.model]
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Get block
+--
+-- @function [parent=#Model] getBlockByParameter
+--
+-- @return #Model
+--
+function Model.getBlockByParameter(parameter)
+  local model = Model.getModelByParameter(parameter)
+  if parameter ~= nil and parameter.model ~= nil and model ~= nil and model.blocks ~= nil then
+    return model.blocks[parameter.block], model
+  end
+end
+
+-------------------------------------------------------------------------------
 -- Get last model
 --
 -- @function [parent=#Model] getLastModel

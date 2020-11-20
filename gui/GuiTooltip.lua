@@ -326,6 +326,7 @@ function GuiTooltipElement:create()
   if element ~= nil then
     local type = element.type
     if type == "resource" or type == "energy" then type = "entity" end
+    if type == "rocket" then type = "item" end
     local element_icon = string.format("[%s=%s]", type, element.name)
     if type == "energy" and (element.name == "energy" or element.name == "steam-heat") then
       element_icon = string.format("[img=helmod-%s-white]", element.name)

@@ -61,17 +61,6 @@ end
 
 -------------------------------------------------------------------------------
 --
--- @function [parent=#GuiCell] broken
--- @param #boolean broken
--- @return #GuiCell
---
-function GuiCell:broken(broken)
-  self.m_broken = broken
-  return self
-end
-
--------------------------------------------------------------------------------
---
 -- @function [parent=#GuiCell] withProductInfo
 -- @return #GuiCell
 --
@@ -169,12 +158,12 @@ end
 
 -------------------------------------------------------------------------------
 --
--- @function [parent=#GuiCell] overlay
+-- @function [parent=#GuiCell] add_overlay
 -- @return #table
 --
-function overlay(button, type, name)
-  if type ~= nil then
-    local sprite = GuiElement.getSprite(type, name)
+function GuiCell:add_overlay(button)
+  if self.m_overlay_type ~= nil then
+    local sprite = GuiElement.getSprite(self.m_overlay_type, self.m_overlay_name)
     GuiElement.add(button, GuiSprite("overlay"):sprite(sprite))
   end
 end
@@ -185,29 +174,33 @@ end
 -- @param #string type
 -- @return #GuiCell
 --
-function GuiCell:mask(color)
-  self.m_mask = color
+function GuiCell:mask(mask)
+  self.m_mask = mask
   return self
 end
 
 -------------------------------------------------------------------------------
 --
--- @function [parent=#GuiCell] mask
+-- @function [parent=#GuiCell] add_mask
 -- @return #table
 --
-function mask(button, color)
-  if color ~= nil then
-    local mask = GuiElement.add(button, GuiFrameH("mask"):style("helmod_frame_colored", color, 4))
-    mask.style.width = 32
-    mask.style.height = 32
+function GuiCell:add_mask(button, color, size)
+  if self.m_mask == true then
+    local mask_frame = GuiElement.add(button, GuiFrameH("layer-mask"):style("helmod_frame_colored", color, 5))
+    mask_frame.style.width = size or 32
+    mask_frame.style.height = size or 32
+    mask_frame.ignored_by_interaction = true
   end
 end
+
 -------------------------------------------------------------------------------
 --
--- @function [parent=#GuiCell] infoIcon
+-- @function [parent=#GuiCell] add_infoIcon
 -- @return #table
 --
-function infoIcon(button, type)
+function GuiCell:add_infoIcon(button, info_icon)
+  local type = info_icon or self.m_info_icon
+  if type == nil then return end
   if type == "recipe-burnt" then 
     local tooltip = "tooltip.burnt-recipe"
     local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({tooltip}))
@@ -254,20 +247,21 @@ end
 
 -------------------------------------------------------------------------------
 --
--- @function [parent=#GuiCell] contraintIcon
+-- @function [parent=#GuiCell] add_contraintIcon
 -- @return #table
 --
-function contraintIcon(button, type)
-  if type == "linked" then 
+function GuiCell:add_contraintIcon(button)
+  if self.m_contraint_icon == nil then return end
+  if self.m_contraint_icon == "linked" then 
     local sprite = GuiElement.add(button, GuiSprite("contraint"):sprite("helmod-tool-arrow-up"))
     sprite.style.top_padding = -4
     sprite.style.left_padding = 22
   end
-  if type == "master" then 
+  if self.m_contraint_icon == "master" then 
     local sprite = GuiElement.add(button, GuiSprite("contraint"):sprite("helmod-tool-plus"))
     sprite.style.top_padding = -4
   end
-  if type == "exclude" then 
+  if self.m_contraint_icon == "exclude" then 
     local sprite = GuiElement.add(button, GuiSprite("contraint"):sprite("helmod-tool-minus"))
     sprite.style.top_padding = -4
   end
@@ -355,6 +349,8 @@ function GuiCellFactory:create(parent)
 
   local tooltip = GuiTooltipElement(self.options.tooltip):element(factory):withEnergy():withControlInfo(self.m_with_control_info)
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("entity", factory.name):tooltip(tooltip))
+  
+  self:add_mask(button, color)
 
   local cell_factory_info = GuiElement.add(row1, GuiTable("factory-info"):column(1):style("helmod_factory_info"))
   if factory.per_factory then
@@ -374,7 +370,10 @@ function GuiCellFactory:create(parent)
       if count > 0 then
         local module_cell = GuiElement.add(cell_factory_module, GuiFlowH("module-cell", name))
         local tooltip = GuiTooltipModule("tooltip.info-module"):element({type="item", name=name})
-        GuiElement.add(module_cell, GuiButtonSpriteSm("module"):sprite("item", name):tooltip(tooltip))
+        local module_icon = GuiElement.add(module_cell, GuiButtonSpriteSm("module"):sprite("item", name):tooltip(tooltip))
+        
+        self:add_mask(module_icon, color, 16)
+        
         GuiElement.add(module_cell, GuiLabel("module-amount"):caption({"", "x", count}):style("helmod_label_element"))
       end
     end
@@ -439,10 +438,10 @@ function GuiCellRecipe:create(parent)
 
   local tooltip = GuiTooltipElement(self.options.tooltip):element(recipe)
   local recipe_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(recipe.type, recipe.name):tooltip(tooltip))
-  overlay(recipe_icon, self.m_overlay_type, self.m_overlay_name)
-  if self.m_info_icon then
-    infoIcon(recipe_icon, self.m_info_icon)
-  end
+  
+  self:add_overlay(recipe_icon)
+  self:add_infoIcon(recipe_icon)
+  self:add_mask(recipe_icon, color)
     
   if self.m_broken == true then
     recipe_icon.tooltip = "ERROR: Recipe ".. recipe.name .." not exist in game"
@@ -481,9 +480,9 @@ function GuiCellProduct:create(parent)
   if string.find(element.name, "helmod") then
     GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", element.hovered, element.sprite):style(element.name):tooltip({element.localised_name}))
   else
-    GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type, element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip({self.options.tooltip, Player.getLocalisedName(element)}))
+    local product_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type, element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip({self.options.tooltip, Player.getLocalisedName(element)}))
+    self:add_mask(product_icon, color)
   end
-
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(Format.formatNumber(element.count, 5)):style("helmod_label_element"):tooltip({"helmod_common.total"}))
   return cell
@@ -553,7 +552,9 @@ function GuiCellBlock:create(parent)
   if first_recipe ~= nil then
     local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
     local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
-    infoIcon(button, "block")
+    
+    self:add_infoIcon(button, "block")
+    
     GuiElement.infoRecipe(button, first_recipe)
   else
     local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", "help-white", "help"))
@@ -780,16 +781,12 @@ function GuiCellElement:create(parent)
   end
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type or "entity", element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   GuiElement.infoTemperature(row1, element)
-  if element.burnt then
-    infoIcon(button, "burnt")
-  end
-  if self.m_info_icon then
-    infoIcon(button, self.m_info_icon)
-  end
-  if self.m_contraint_icon then
-    contraintIcon(button, self.m_contraint_icon)
-  end
   
+  if element.burnt then self:add_infoIcon(button, "burnt") end
+  self:add_infoIcon(button)
+  self:add_contraintIcon(button)
+  self:add_mask(button, color)
+
   if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element", color, 2))
     local caption2 = Format.formatNumberElement(element.limit_count)
@@ -831,7 +828,9 @@ end)
 function GuiCellElementSm:create(parent)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or GuiElement.color_button_none
+  if self.m_mask == true then color = "gray" end
   local element = self.element or {}
+
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_sm", color, 1))
   local tooltip = ""
@@ -840,7 +839,9 @@ function GuiCellElementSm:create(parent)
   else
     tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo()
   end
-  GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):sprite(element.type, element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
+  local button = GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):sprite(element.type, element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
+  
+  self:add_mask(button, color, 16)
 
   if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_sm", color, 2))
@@ -891,14 +892,11 @@ function GuiCellElementM:create(parent)
   end
   local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(element.type or "entity", element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   GuiElement.infoTemperature(row1, element)
-  if self.m_info_icon then
-    infoIcon(button, self.m_info_icon)
-  end
 
-  if self.m_contraint_icon then
-    contraintIcon(button, self.m_contraint_icon)
-  end
-  
+  self:add_infoIcon(button)
+  self:add_contraintIcon(button)
+  self:add_mask(button, color)
+
   if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_m", color, 2))
     local caption2 = Format.formatNumberElement(element.limit_count)
@@ -952,7 +950,6 @@ function GuiCellInput:create(parent)
   local cell = GuiElement.add(parent, GuiTable(unpack(cell_name)):column(2))
   local input = GuiElement.add(cell, GuiTextField(unpack(self.name)):text(self.m_text):tooltip({"tooltip.formula-allowed"}))
   local button = GuiElement.add(cell, GuiButton(unpack(button_name)):sprite("menu", "ok-white", "ok"):style("helmod_button_menu"):tooltip({"helmod_button.apply"}))
-  log("final")
   return cell, input, button
 end
 
