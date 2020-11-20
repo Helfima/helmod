@@ -34,7 +34,7 @@ end
 -- @param #LuaEvent event
 --
 function SummaryPanel:onBeforeOpen(event)
-  User.setParameter("summary_block_id", event.item1)
+  User.setParameter("summary_panel_object", {model=event.item1, block=event.item2})
 end
 
 -------------------------------------------------------------------------------
@@ -73,16 +73,12 @@ end
 --
 function SummaryPanel:updateInfo(event)
   local infoPanel = self:getInfoPanel()
-  local model = Model.getModel()
-  local summary_block_id = User.getParameter("summary_block_id")
-  local order = User.getParameter("order")
+  local summary_parameter = User.getParameter("summary_panel_object")
+  local block, model = Model.getBlockByParameter(summary_parameter)
 
   infoPanel.clear()
 
-  if summary_block_id ~= nil and model.blocks[summary_block_id] ~= nil then
-    local block = model.blocks[summary_block_id]
-
-    
+  if block ~= nil then
     if block.summary ~= nil then
       -- factories
       GuiElement.add(infoPanel, GuiLabel("factories_label"):caption({"helmod_common.factories"}):style("helmod_label_title_frame"))

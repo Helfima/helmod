@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.11.20
+Date: 2020-11-20
+  Changes:
+    - Updated pin panel style and add edit recipe access
+  Bugfixes:
+    - Fixed error with cap message when not exist
+    - Fixed pin panel model when change sheet
+---------------------------------------------------------------------------------------------------
 Version: 0.11.19
 Date: 2020-11-06
   Changes:

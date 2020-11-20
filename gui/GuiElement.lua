@@ -111,6 +111,7 @@ function GuiElement.getSprite(type, name)
     sprite = string.format("helmod-%s", type)
   elseif type ~= nil and name ~= nil then
     if type == "resource" then type = "entity" end
+    if type == "rocket" then type = "item" end
     if Player.is_valid_sprite_path(string.format("%s/%s", type, name)) then
       sprite = string.format("%s/%s", type, name)
     elseif Player.is_valid_sprite_path(string.format("%s/%s", "item", name)) then
@@ -257,7 +258,7 @@ function GuiElement.getStyleSizes()
     
   style_sizes["HMPinPanel"] = {
     minimal_width = 50,
-    maximal_width = 500,
+    maximal_width = 600,
     minimal_height = 0,
     maximal_height = height_main
     }
