@@ -76,7 +76,6 @@ end
 --
 function StatusPanel:updateHeader(event)
   local header_panel = self:getHeaderPanel()
-  local model = Model.getModel()
 
   GuiElement.add(header_panel, GuiButton(self.classname, "CLOSE"):sprite("menu", "close-white", "close"):style("helmod_button_menu_red"):caption({"helmod_button.close"}))
   GuiElement.add(header_panel, GuiButton(self.classname.."=UPDATE"):sprite("menu", "refresh-white", "refresh"):style("helmod_button_menu"):caption({"helmod_result-panel.refresh-button"}))
@@ -92,7 +91,6 @@ end
 --
 function StatusPanel:updateInfo(event)
   local info_panel = self:getInfoPanel()
-  local model = Model.getModel()
 
   info_panel.clear()
 

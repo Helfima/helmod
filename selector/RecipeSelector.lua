@@ -104,7 +104,7 @@ function RecipeSelector:updateGroups(list_products, list_ingredients, list_trans
     self:appendGroups(resource, "resource", list_products, list_ingredients, list_translate)
   end
   for key, item in pairs(Player.getItemPrototypes()) do
-    if item.rocket_launch_products ~= nil and Model.countList(item.rocket_launch_products) > 0 then
+    if item.rocket_launch_products ~= nil and table.size(item.rocket_launch_products) > 0 then
       self:appendGroups(item, "rocket", list_products, list_ingredients, list_translate)
     end
   end
@@ -118,6 +118,7 @@ end
 -- @param #table prototype
 --
 function RecipeSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
+  local model, block, recipe = self:getParameterObjects()
   local recipe_prototype = self:getPrototype(prototype)
   local color = nil
   if recipe_prototype:getCategory() == "crafting-handonly" then
@@ -125,7 +126,11 @@ function RecipeSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
   elseif recipe_prototype:getEnabled() == false then
     color = "red"
   end
-  local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select", prototype.type):choose(prototype.type, prototype.name):color(color))
+  local block_id = "new"
+  if block ~= nil then block_id = block.id end
+  local button_prototype = GuiButtonSelectSprite(self.classname, "element-select", prototype.type):choose(prototype.type, prototype.name):color(color)
+  local button = GuiElement.add(guiElement, button_prototype)
   button.locked = true
   GuiElement.infoRecipe(button, prototype)
 end
+

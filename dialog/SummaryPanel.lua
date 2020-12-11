@@ -1,11 +1,11 @@
 -------------------------------------------------------------------------------
--- Class to build pin tab dialog
+-- Class to build summary dialog
 --
 -- @module SummaryPanel
--- @extends #Form
+-- @extends #FormModel
 --
 
-SummaryPanel = newclass(Form)
+SummaryPanel = newclass(FormModel)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -27,33 +27,6 @@ function SummaryPanel:onBind()
 end
 
 -------------------------------------------------------------------------------
--- On before event
---
--- @function [parent=#SummaryPanel] onBeforeOpen
---
--- @param #LuaEvent event
---
-function SummaryPanel:onBeforeOpen(event)
-  User.setParameter("summary_panel_object", {model=event.item1, block=event.item2})
-end
-
--------------------------------------------------------------------------------
--- Get or create info panel
---
--- @function [parent=#SummaryPanel] getInfoPanel
---
-function SummaryPanel:getInfoPanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
-  if content_panel["info-panel"] ~= nil and content_panel["info-panel"].valid then
-    return content_panel["info-panel"]["scroll-panel"]
-  end
-  local mainPanel = GuiElement.add(content_panel, GuiFrameV("info-panel"):style(helmod_frame_style.panel))
-  mainPanel.style.horizontally_stretchable = true
-  local scroll_panel = GuiElement.add(mainPanel, GuiScroll("scroll-panel"))
-  return  scroll_panel
-end
-
--------------------------------------------------------------------------------
 -- On update
 --
 -- @function [parent=#SummaryPanel] onUpdate
@@ -72,36 +45,36 @@ end
 -- @param #LuaEvent event
 --
 function SummaryPanel:updateInfo(event)
-  local infoPanel = self:getInfoPanel()
-  local summary_parameter = User.getParameter("summary_panel_object")
-  local block, model = Model.getBlockByParameter(summary_parameter)
+  local info_panel = self:getScrollFramePanel("info-panel")
 
-  infoPanel.clear()
+  info_panel.clear()
+
+  local model, block, recipe = self:getParameterObjects()
 
   if block ~= nil then
     if block.summary ~= nil then
       -- factories
-      GuiElement.add(infoPanel, GuiLabel("factories_label"):caption({"helmod_common.factories"}):style("helmod_label_title_frame"))
-      local resultTable = GuiElement.add(infoPanel, GuiTable("table-factory"):column(4))
-      resultTable.style.horizontally_stretchable = false
+      GuiElement.add(info_panel, GuiLabel("factories_label"):caption({"helmod_common.factories"}):style("helmod_label_title_frame"))
+      local result_table = GuiElement.add(info_panel, GuiTable("table-factory"):column(4))
+      result_table.style.horizontally_stretchable = false
       for _, element in pairs(block.summary.factories) do
-        GuiElement.add(resultTable, GuiCellElementM("HMFactories=OPEN", block.id):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
+        GuiElement.add(result_table, GuiCellElementM("HMFactories=OPEN", block.id):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
       end
 
       -- beacons
-      GuiElement.add(infoPanel, GuiLabel("beacons_label"):caption({"helmod_common.beacons"}):style("helmod_label_title_frame"))
-      local resultTable = GuiElement.add(infoPanel, GuiTable("table-beacon"):column(4))
-      resultTable.style.horizontally_stretchable = false
+      GuiElement.add(info_panel, GuiLabel("beacons_label"):caption({"helmod_common.beacons"}):style("helmod_label_title_frame"))
+      local result_table = GuiElement.add(info_panel, GuiTable("table-beacon"):column(4))
+      result_table.style.horizontally_stretchable = false
       for _, element in pairs(block.summary.beacons) do
-        GuiElement.add(resultTable, GuiCellElementM("HMBeacons=OPEN", block.id):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
+        GuiElement.add(result_table, GuiCellElementM("HMBeacons=OPEN", block.id):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
       end
 
       -- modules
-      GuiElement.add(infoPanel, GuiLabel("modules_label"):caption({"helmod_common.modules"}):style("helmod_label_title_frame"))
-      local resultTable = GuiElement.add(infoPanel, GuiTable("table-modules"):column(4))
-      resultTable.style.horizontally_stretchable = false
+      GuiElement.add(info_panel, GuiLabel("modules_label"):caption({"helmod_common.modules"}):style("helmod_label_title_frame"))
+      local result_table = GuiElement.add(info_panel, GuiTable("table-modules"):column(4))
+      result_table.style.horizontally_stretchable = false
       for _, element in pairs(block.summary.modules) do
-        GuiElement.add(resultTable, GuiCellElementM("HMModules=OPEN", block.id):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
+        GuiElement.add(result_table, GuiCellElementM("HMModules=OPEN", block.id):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
       end
     end
   end

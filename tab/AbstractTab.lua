@@ -4,8 +4,8 @@
 -- @module AbstractTab
 --
 
-AbstractTab = newclass(Form,function(base,classname)
-  Form.init(base,classname)
+AbstractTab = newclass(FormModel,function(base,classname)
+  FormModel.init(base,classname)
   base.add_special_button = true
 end)
 
@@ -62,7 +62,7 @@ function AbstractTab:getInfoPanel()
     return parent_panel[panel_name]["info"]["info-scroll"],parent_panel[panel_name]["output"]["output-scroll"],parent_panel[panel_name]["input"]["input-scroll"]
   end
 
-  local model = Model.getModel()
+  local model = self:getParameterObjects()
 
   local panel = GuiElement.add(parent_panel, GuiFlowH(panel_name))
   panel.style.horizontally_stretchable = true
@@ -102,7 +102,7 @@ function AbstractTab:getInfoPanel2()
   if parent_panel[panel_name] ~= nil and parent_panel[panel_name].valid then
     return parent_panel[panel_name]["options"]["options-scroll"],parent_panel[panel_name]["info"]["info-scroll"],parent_panel[panel_name]["left-info"],parent_panel[panel_name]["right-info"]
   end
-  local model = Model.getModel()
+  local model = self:getParameterObjects()
 
   local panel = GuiElement.add(parent_panel, GuiFlowH(panel_name))
   panel.style.horizontally_stretchable = true
@@ -280,9 +280,7 @@ end
 -- @param #LuaEvent event
 --
 function AbstractTab:updateMenuPanel(event)
-  local model = Model.getModel()
-  local model_id = User.getParameter("model_id")
-  local current_block = User.getParameter("current_block")
+  local model, block = self:getParameterObjects()
 
   -- action panel
   local left_panel, right_panel = self:getMenuPanel()
@@ -295,7 +293,7 @@ function AbstractTab:updateMenuPanel(event)
       local icon_hovered, icon = form:getButtonSprites()
       local style = "helmod_button_menu"
       if User.isActiveForm(form.classname) then style = "helmod_button_menu_selected" end
-      GuiElement.add(group0, GuiButton(self.classname, "change-tab", form.classname):sprite("menu", icon_hovered, icon):style(style):tooltip(form:getButtonCaption()))
+      GuiElement.add(group0, GuiButton(self.classname, "change-tab", form.classname, model.id):sprite("menu", icon_hovered, icon):style(style):tooltip(form:getButtonCaption()))
     end
   end
 
@@ -305,11 +303,12 @@ function AbstractTab:updateMenuPanel(event)
   else
     -- add recipe
     local group1 = GuiElement.add(left_panel, GuiFlowH("group1"))
-    local block_id = current_block or "new"
-    GuiElement.add(group1, GuiButton("HMRecipeSelector", "OPEN", block_id):sprite("menu", "wrench-white", "wrench"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-recipe"}))
-    GuiElement.add(group1, GuiButton("HMTechnologySelector", "OPEN", block_id):sprite("menu", "graduation-white", "graduation"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-technology"}))
-    GuiElement.add(group1, GuiButton("HMEnergySelector", "OPEN", block_id):sprite("menu", "nuclear-white","nuclear"):style("helmod_button_menu"):tooltip({"helmod_result-panel.select-button-energy"}))
-    GuiElement.add(group1, GuiButton("HMRecipeExplorer", "OPEN", block_id):sprite("menu", "search-white", "search"):style("helmod_button_menu"):tooltip({"helmod_button.explorer"}))
+    local block_id = "new"
+    if block ~= nil then block_id = block.id end
+    GuiElement.add(group1, GuiButton("HMRecipeSelector", "OPEN", model.id, block_id):sprite("menu", "wrench-white", "wrench"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-recipe"}))
+    GuiElement.add(group1, GuiButton("HMTechnologySelector", "OPEN", model.id, block_id):sprite("menu", "graduation-white", "graduation"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-technology"}))
+    GuiElement.add(group1, GuiButton("HMEnergySelector", "OPEN", model.id, block_id):sprite("menu", "nuclear-white","nuclear"):style("helmod_button_menu"):tooltip({"helmod_result-panel.select-button-energy"}))
+    GuiElement.add(group1, GuiButton("HMRecipeExplorer", "OPEN", model.id, block_id):sprite("menu", "search-white", "search"):style("helmod_button_menu"):tooltip({"helmod_button.explorer"}))
 
     local group2 = GuiElement.add(left_panel, GuiFlowH("group2"))
     -- copy past
@@ -326,7 +325,7 @@ function AbstractTab:updateMenuPanel(event)
         GuiElement.add(group2, GuiButton(self.classname, "remove-model", model.id):sprite("menu", "delete-white", "delete"):style("helmod_button_menu_red"):tooltip({"helmod_result-panel.remove-button-production-line"}))
       end
       if self.classname == "HMProductionBlockTab" then
-        GuiElement.add(group2, GuiButton(self.classname, "production-block-remove", block_id):sprite("menu", "delete-white", "delete"):style("helmod_button_menu_red"):tooltip({"helmod_result-panel.remove-button-production-block"}))
+        GuiElement.add(group2, GuiButton(self.classname, "production-block-remove", model.id, block_id):sprite("menu", "delete-white", "delete"):style("helmod_button_menu_red"):tooltip({"helmod_result-panel.remove-button-production-block"}))
       end
     end
     -- refresh control
@@ -340,19 +339,19 @@ function AbstractTab:updateMenuPanel(event)
       -- Model Debug
       if User.getModGlobalSetting("debug_solver") == true then
         local groupDebug = GuiElement.add(left_panel, GuiFlowH("groupDebug"))
-        GuiElement.add(groupDebug, GuiButton("HMModelDebug", "OPEN", block_id):sprite("menu", "bug-white", "bug"):style("helmod_button_menu"):tooltip("Open Debug"))
+        GuiElement.add(groupDebug, GuiButton("HMModelDebug", "OPEN", model.id, block_id):sprite("menu", "bug-white", "bug"):style("helmod_button_menu"):tooltip("Open Debug"))
       end
       
     end
     -- pin info
     if self.classname == "HMStatisticTab" then
-      GuiElement.add(group3, GuiButton("HMStatusPanel", "OPEN", block_id):sprite("menu", "pin-white", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
+      GuiElement.add(group3, GuiButton("HMStatusPanel", "OPEN", model.id, block_id):sprite("menu", "pin-white", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
     end
 
     -- preferences
     local groupPref = GuiElement.add(left_panel, GuiFlowH("groupPref"))
-    GuiElement.add(groupPref, GuiButton("HMModelEdition", "OPEN", block_id):sprite("menu", "edit-white", "edit"):style("helmod_button_menu"):tooltip({"helmod_panel.model-edition"}))
-    GuiElement.add(groupPref, GuiButton("HMPreferenceEdition", "OPEN", block_id):sprite("menu", "services-white", "services"):style("helmod_button_menu"):tooltip({"helmod_button.preferences"}))
+    GuiElement.add(groupPref, GuiButton("HMModelEdition", "OPEN", model.id, block_id):sprite("menu", "edit-white", "edit"):style("helmod_button_menu"):tooltip({"helmod_panel.model-edition"}))
+    GuiElement.add(groupPref, GuiButton("HMPreferenceEdition", "OPEN", model.id, block_id):sprite("menu", "services-white", "services"):style("helmod_button_menu"):tooltip({"helmod_button.preferences"}))
     
     local display_logistic_row = User.getParameter("display_logistic_row")
     local style = "helmod_button_menu"
@@ -400,7 +399,7 @@ function AbstractTab:updateMenuPanel(event)
   local group_time = GuiElement.add(right_panel, GuiFlowH("group_time"))
   GuiElement.add(group_time, GuiLabel("label_time"):caption({"helmod_data-panel.base-time", ""}):style("helmod_label_title_frame"))
   
-  GuiElement.add(group_time, GuiDropDown(self.classname, "change-time", model_id):items(items, default_time))
+  GuiElement.add(group_time, GuiDropDown(self.classname, "change-time", model.id):items(items, default_time))
 
 end
 
@@ -425,19 +424,19 @@ end
 function AbstractTab:updateIndexPanel(event)
   if self:hasIndexModel() then
     local models = Model.getModels()
-    local model_id = User.getParameter("model_id")
+    local model = self:getParameterObjects()
   
       -- index panel
     local index_panel = self:getFramePanel("model_index")
     index_panel.clear()
     local table_index = GuiElement.add(index_panel, GuiTable("table_index"):column(GuiElement.getIndexColumnNumber()):style("helmod_table_list"))
-    if Model.countModel() > 0 then
+    if table.size(models) > 0 then
       local i = 0
       for _,imodel in pairs(models) do
         i = i + 1
         local style = "helmod_button_default"
         local element = Model.firstRecipe(imodel.blocks)
-        if imodel.id == model_id then
+        if imodel.id == model.id then
           if element ~= nil then
             local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
             GuiElement.add(table_index, GuiButtonSprite(self.classname, "change-model", imodel.id):sprite(element.type, element.name):tooltip(tooltip))
@@ -459,7 +458,7 @@ function AbstractTab:updateIndexPanel(event)
 
       end
     end
-    GuiElement.add(table_index, GuiButton(self.classname, "change-model", "new"):caption("+")).style.width=20
+    GuiElement.add(table_index, GuiButton(self.classname, "new-model"):caption("+")).style.width=20
   end
 end
 
@@ -470,9 +469,7 @@ end
 --
 -- @param #LuaEvent event
 --
-function AbstractTab:addSharePanel(parent)
-  local model = Model.getModel()
-  -- info panel
+function AbstractTab:addSharePanel(parent, model)
 
   local block_table = GuiElement.add(parent, GuiTable("share-table"):column(2))
 
@@ -484,17 +481,17 @@ function AbstractTab:addSharePanel(parent)
   local share_panel = GuiElement.add(block_table, GuiTable("table"):column(9))
   local model_read = false
   if model.share ~= nil and  bit32.band(model.share, 1) > 0 then model_read = true end
-  GuiElement.add(share_panel, GuiCheckBox(self.classname, "share-model", "read", model.id):state(model_read):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
+  GuiElement.add(share_panel, GuiCheckBox(self.classname, "share-model", model.id, "read"):state(model_read):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
   GuiElement.add(share_panel, GuiLabel(self.classname, "share-model-read"):caption("R"):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
 
   local model_write = false
   if model.share ~= nil and  bit32.band(model.share, 2) > 0 then model_write = true end
-  GuiElement.add(share_panel, GuiCheckBox(self.classname, "share-model", "write", model.id):state(model_write):tooltip({"tooltip.share-mod", {"helmod_common.writing"}}))
+  GuiElement.add(share_panel, GuiCheckBox(self.classname, "share-model", model.id, "write"):state(model_write):tooltip({"tooltip.share-mod", {"helmod_common.writing"}}))
   GuiElement.add(share_panel, GuiLabel(self.classname, "share-model-write"):caption("W"):tooltip({"tooltip.share-mod", {"helmod_common.writing"}}))
 
   local model_delete = false
   if model.share ~= nil and bit32.band(model.share, 4) > 0 then model_delete = true end
-  GuiElement.add(share_panel,GuiCheckBox( self.classname, "share-model", "delete", model.id):state(model_delete):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
+  GuiElement.add(share_panel,GuiCheckBox( self.classname, "share-model", model.id, "delete"):state(model_delete):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
   GuiElement.add(share_panel, GuiLabel(self.classname, "share-model-delete"):caption("X"):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
 
 end
@@ -540,4 +537,359 @@ end
 -- @param #LuaEvent event
 --
 function AbstractTab:updateData(event)
+end
+
+-------------------------------------------------------------------------------
+-- On event
+--
+-- @function [parent=#AbstractTab] onEvent
+--
+-- @param #LuaEvent event
+--
+function AbstractTab:onEvent(event)
+  local model, block, _ = self:getParameterObjects()
+
+  if block == nil then
+    block = model.blocks[event.item2]
+  end
+  -- ***************************
+  -- access for all
+  -- ***************************
+  self:onEventAccessAll(event, model, block)
+
+  -- ***************************
+  -- access admin or owner
+  -- ***************************
+
+  if User.isReader(model) then
+    self:onEventAccessRead(event, model, block)
+  end
+
+  -- *******************************
+  -- access admin or owner or write
+  -- *******************************
+
+  if User.isWriter(model) then
+    self:onEventAccessWrite(event, model, block)
+  end
+
+  -- ********************************
+  -- access admin or owner or delete
+  -- ********************************
+
+  if User.isDeleter(model) then
+    self:onEventAccessDelete(event, model, block)
+  end
+
+  -- *******************************
+  -- access admin only
+  -- *******************************
+
+  if User.isAdmin() then
+    self:onEventAccessAdmin(event, model, block)
+  end
+end
+
+-------------------------------------------------------------------------------
+-- On event
+--
+-- @function [parent=#AbstractTab] onEventAccessAll
+--
+-- @param #LuaEvent event
+--
+function AbstractTab:onEventAccessAll(event, model, block)
+  if event.action == "refresh-model" then
+    ModelCompute.update(model)
+    Controller:send("on_gui_update", event)
+  end
+
+  if event.action == "change-model" then
+    local current_tab = event.classname
+    ModelCompute.check(model)
+    Controller:send("on_gui_open", event, current_tab)
+  end
+  
+  if event.action == "new-model" then
+    local current_tab = "HMProductionLineTab"
+    local new_model = Model.newModel()
+    User.setParameter(self.parameter_objects, {name=self.parameter_objects, model=new_model.id})
+    Controller:send("on_gui_open", event, current_tab)
+  end
+  
+  if event.action == "change-tab" then
+    local current_tab = event.item1
+    local new_event = {classname = current_tab, item1 = event.item2}
+    if event.item1 == "HMProductionLineTab" then
+      new_event.item2 = "new"
+    else
+      new_event.item2 = event.item3
+    end
+    Controller:closeEditionOrSelector()
+    Controller:send("on_gui_open", new_event, current_tab)
+  end
+
+  if event.action == "close-tab" then
+    Controller:closeTab()
+  end
+
+  if event.action == "change-logistic" then
+    local display_logistic_row = User.getParameter("display_logistic_row")
+    User.setParameter("display_logistic_row", not(display_logistic_row))
+    Controller:send("on_gui_update", event)
+  end
+
+  if event.action == "change-logistic-item" then
+    User.setParameter("logistic_row_item", event.item1)
+    Controller:send("on_gui_update", event)
+  end
+
+  if event.action == "change-logistic-fluid" then
+    User.setParameter("logistic_row_fluid", event.item1)
+    Controller:send("on_gui_update", event)
+  end
+
+end
+
+-------------------------------------------------------------------------------
+-- On event
+--
+-- @function [parent=#AbstractTab] onEventAccessRead
+--
+-- @param #LuaEvent event
+--
+function AbstractTab:onEventAccessRead(event, model, block)
+  if event.action == "copy-model" then
+    if User.isActiveForm("HMProductionBlockTab") then
+      if block ~= nil then
+        User.setParameter("copy_from_block_id", block.id)
+        User.setParameter("copy_from_model_id", model.id)
+      end
+    end
+    if User.isActiveForm("HMProductionLineTab") then
+      User.setParameter("copy_from_block_id", nil)
+      User.setParameter("copy_from_model_id", model.id)
+    end
+    Controller:send("on_gui_update", event)
+  end
+  if event.action == "share-model" then
+    local access = event.item2
+    if model ~= nil then
+      if access == "read" then
+        if model.share == nil or not(bit32.band(model.share, 1) > 0) then
+          model.share = 1
+        else
+          model.share = 0
+        end
+      end
+      if access == "write" then
+        if model.share == nil or not(bit32.band(model.share, 2) > 0) then
+          model.share = 3
+        else
+          model.share = 1
+        end
+      end
+      if access == "delete" then
+        if model.share == nil or not(bit32.band(model.share, 4) > 0) then
+          model.share = 7
+        else
+          model.share = 3
+        end
+      end
+    end
+    Controller:send("on_gui_refresh", event)
+  end
+end
+
+-------------------------------------------------------------------------------
+-- On event
+--
+-- @function [parent=#AbstractTab] onEventAccessWrite
+--
+-- @param #LuaEvent event
+--
+function AbstractTab:onEventAccessWrite(event, model, block)
+  local selector_name = "HMRecipeSelector"
+  if block ~= nil and block.isEnergy then
+    selector_name = "HMEnergySelector"
+  end
+
+  if event.action == "change-tab" then
+    if event.item1 == "HMProductionBlockTab" and event.item2 == "new" then
+      Controller:send("on_gui_open", event,"HMRecipeSelector")
+    end
+  end
+
+  if event.action == "change-boolean-option" and block ~= nil then
+    ModelBuilder.updateProductionBlockOption(block, event.item1, not(block[event.item1]))
+    ModelCompute.update(model)
+    Controller:send("on_gui_update", event)
+  end
+
+  if event.action == "change-number-option" and block ~= nil then
+    local value = GuiElement.getInputNumber(event.element)
+    ModelBuilder.updateProductionBlockOption(block, event.item1, value)
+    ModelCompute.update(model)
+    Controller:send("on_gui_update", event)
+  end
+
+  if event.action == "change-time" then
+    local index = event.element.selected_index
+    model.time = helmod_base_times[index].value or 1
+    ModelCompute.update(model)
+    Controller:send("on_gui_update", event)
+    Controller:send("on_gui_close", event, "HMProductEdition")
+  end
+
+  if event.action == "product-selected" then
+    if event.button == defines.mouse_button_type.right then
+      Controller:send("on_gui_open", event,"HMRecipeSelector")
+    end
+  end
+
+  if event.action == "product-edition" then
+    if event.button == defines.mouse_button_type.right then
+      Controller:send("on_gui_open", event, selector_name)
+    else
+      Controller:send("on_gui_open", event, "HMProductEdition")
+    end
+  end
+
+  if event.action == "production-block-remove" then
+    ModelBuilder.removeProductionBlock(model, block)
+    ModelCompute.update(model)
+    Controller:send("on_gui_update", event)
+  end
+
+  if event.action == "production-block-unlink" then
+    ModelBuilder.unlinkProductionBlock(block)
+    ModelCompute.update(model)
+    Controller:send("on_gui_update", event)
+  end
+
+  if event.action == "past-model" then
+    local from_model_id = User.getParameter("copy_from_model_id")
+    local from_model = global.models[from_model_id]
+    if from_model ~= nil then
+      local from_block_id = User.getParameter("copy_from_block_id")
+      local from_block = from_model.blocks[from_block_id]
+      ModelBuilder.pastModel(model, from_model, from_block)
+      ModelCompute.update(model)
+      Controller:send("on_gui_update", event)
+    end
+  end
+
+end
+
+-------------------------------------------------------------------------------
+-- On event
+--
+-- @function [parent=#AbstractTab] onEventAccessDelete
+--
+-- @param #LuaEvent event
+--
+function AbstractTab:onEventAccessDelete(event, model, block)
+  if event.action == "remove-model" then
+    ModelBuilder.removeModel(event.item1)
+    User.setActiveForm("HMProductionLineTab")
+    Controller:send("on_gui_update", event)
+  end
+end
+
+-------------------------------------------------------------------------------
+-- On event
+--
+-- @function [parent=#AbstractTab] onEventAccessAdmin
+--
+-- @param #LuaEvent event
+--
+function AbstractTab:onEventAccessAdmin(event, model, block)
+  if event.action == "rule-remove" then
+    local rule_id = event.item1
+    if global.rules ~= nil then
+      table.remove(global.rules,rule_id)
+      table.reindex_list(global.rules)
+    end
+    Controller:send("on_gui_update", event)
+  end
+  if event.action == "reset-rules" then
+    Model.resetRules()
+    Controller:send("on_gui_update", event)
+  end
+
+  if event.action == "game-pause" then
+    if not(game.is_multiplayer()) then
+      User.setParameter("auto-pause", true)
+      game.tick_paused = true
+      Controller:send("on_gui_pause", event)
+    end
+  end
+  
+  if event.action == "string-decode" then
+    local parent = event.element.parent.parent
+    local decoded_textbox = parent["decoded-text"]
+    local encoded_textbox = parent["encoded-text"]
+    local input = string.sub(encoded_textbox.text,2)
+    local json = game.decode_string(input)
+    local result = Converter.indent(json)
+    decoded_textbox.text = result
+  end
+
+  if event.action == "string-encode" then
+    local parent = event.element.parent.parent
+    local decoded_textbox = parent["decoded-text"]
+    local encoded_textbox = parent["encoded-text"]
+    encoded_textbox.text = "0"..game.encode_string(decoded_textbox.text)
+  end
+
+  if event.action == "game-play" then
+    User.setParameter("auto-pause", false)
+    game.tick_paused = false
+    Controller:send("on_gui_pause", event)
+  end
+
+  if event.action == "delete-cache" then
+    if event.item1 ~= nil and global[event.item1] ~= nil then
+      if event.item2 == "" and event.item3 == "" and event.item4 == "" then
+        global[event.item1] = nil
+      elseif event.item3 == "" and event.item4 == "" then
+        global[event.item1][event.item2] = {}
+      elseif event.item4 == "" then
+        global[event.item1][event.item2][event.item3] = nil
+      else
+        global[event.item1][event.item2][event.item3][event.item4] = nil
+      end
+      Player.print("Deleted:", event.item1, event.item2, event.item3, event.item4)
+    else
+      Player.print("Not found to delete:", event.item1, event.item2, event.item3, event.item4)
+    end
+    Controller:send("on_gui_refresh", event, event.classname)
+  end
+
+  if event.action == "refresh-cache" then
+    global[event.item1][event.item2] = {}
+    
+    if event.item2 == "HMPlayer" then
+      Player.getResources()
+    else    
+      local forms = {}
+      table.insert(forms, EnergySelector("HMEnergySelector"))
+      table.insert(forms, EntitySelector("HMEntitySelector"))
+      table.insert(forms, RecipeSelector("HMRecipeSelector"))
+      table.insert(forms, TechnologySelector("HMTechnologySelector"))
+      table.insert(forms, ItemSelector("HMItemSelector"))
+      table.insert(forms, FluidSelector("HMFluidSelector"))
+      for _,form in pairs(forms) do
+        if event.item2 == form.classname then
+          form:prepare()
+        end
+      end
+    end
+    
+    Controller:send("on_gui_refresh", event)
+  end
+
+  if event.action == "generate-cache" then
+    Controller:on_init()
+    Controller:send("on_gui_refresh", event)
+  end
 end

@@ -30,7 +30,9 @@ GuiElement.color_button_rest = "red"
 -- @return #GuiElement
 -- 
 function GuiElement:style(...)
-  self.options.style = table.concat({...},"_")
+  if ... ~= nil then
+    self.options.style = table.concat({...},"_")
+  end
   return self
 end
 
@@ -186,6 +188,7 @@ function GuiElement.add(parent, gui_element)
   end)
   if not ok then
     element = parent.add(gui_element:onErrorOptions())
+    log(err)
   end
   return element
 end

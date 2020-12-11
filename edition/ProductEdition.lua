@@ -5,7 +5,7 @@
 -- @extends #AbstractEdition
 --
 
-ProductEdition = newclass(Form)
+ProductEdition = newclass(FormModel)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -83,9 +83,8 @@ local product_count = 0
 -- @param #LuaEvent event
 --
 function ProductEdition:onUpdate(event)
-  local model = Model.getModel()
+  local model, block, recipe = self:getParameterObjects()
   product = nil
-  local block = model.blocks[event.item1]
   if block ~= nil then
     local block_elements = block.products
     if block.by_product == false then
@@ -98,9 +97,9 @@ function ProductEdition:onUpdate(event)
     end
   end
 
-  self:updateInfo(event)
-  if block == nil or block.isEnergy ~= true then
-    self:updateTool(event)
+  self:updateInfo(model, block)
+  if block ~= nil and block.isEnergy ~= true then
+    self:updateTool(model, block)
   end
 end
 
@@ -109,17 +108,12 @@ end
 --
 -- @function [parent=#ProductEdition] updateInfo
 --
--- @param #LuaEvent event
---
 local input_quantity = nil
-function ProductEdition:updateInfo(event)
+function ProductEdition:updateInfo(model, block)
   local info_panel = self:getInfoPanel()
   if product ~= nil then
     info_panel.clear()
 
-    local model = Model.getModel()
-    local block = model.blocks[event.item1]
-    
     local table_panel = GuiElement.add(info_panel, GuiTable("input-table"):column(2))
     GuiElement.add(table_panel, GuiButtonSprite("product"):sprite(product.type, product.name))
     GuiElement.add(table_panel, GuiLabel("product-label"):caption(Player.getLocalisedName(product)))
@@ -133,7 +127,7 @@ function ProductEdition:updateInfo(event)
     
     GuiElement.add(table_panel, GuiLabel("quantity-label"):caption(caption))
     local cell, button
-    cell, input_quantity, button = GuiCellInput(self.classname, "product-update", event.item1, product.name, Product(product):getTableKey()):text(count):create(table_panel)
+    cell, input_quantity, button = GuiCellInput(self.classname, "product-update", model.id, block.id, product.name, Product(product):getTableKey()):text(count):create(table_panel)
     input_quantity.focus()
     input_quantity.select_all()
     input_quantity.style.minimal_width = 100
@@ -147,12 +141,12 @@ end
 --
 -- @param #LuaEvent event
 --
-function ProductEdition:updateAction(event)
+function ProductEdition:updateAction(model, block)
   local action_panel = self:getActionPanel()
   if product ~= nil then
     action_panel.clear()
     local action_panel = GuiElement.add(action_panel, GuiTable("table_action"):column(3))
-    GuiElement.add(action_panel, GuiButton(self.classname, "product-reset", event.item1, product.name):caption({"helmod_button.reset"}))
+    GuiElement.add(action_panel, GuiButton(self.classname, "product-reset", product.name):caption({"helmod_button.reset"}))
   end
 end
 
@@ -163,7 +157,7 @@ end
 --
 -- @param #LuaEvent event
 --
-function ProductEdition:updateTool(event)
+function ProductEdition:updateTool(model, block)
   local tool_panel = self:getToolPanel()
   tool_panel.clear()
   local table_panel = GuiElement.add(tool_panel, GuiTable("table-belt"):column(5))
@@ -179,12 +173,10 @@ end
 -- @param #LuaEvent event
 --
 function ProductEdition:onEvent(event)
-  local model = Model.getModel()
+  local model, block, recipe = self:getParameterObjects()
   if User.isWriter() then
     if event.action == "product-update" then
       local products = {}
-      local block = model.blocks[event.item1]
-
       local operation = input_quantity.text
       local ok , err = pcall(function()
         local quantity = formula(operation)
@@ -192,8 +184,8 @@ function ProductEdition:onEvent(event)
           quantity = quantity * 1e6
         end
         if quantity == 0 then quantity = nil end
-        ModelBuilder.updateProduct(event.item1, event.item3, quantity)
-        ModelCompute.update()
+        ModelBuilder.updateProduct(block, event.item3, quantity)
+        ModelCompute.update(model)
         self:close()
         Controller:send("on_gui_refresh", event)
       end)

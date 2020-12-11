@@ -2,10 +2,10 @@
 -- Class to build ModelDebug panel
 --
 -- @module ModelDebug
--- @extends #Form
+-- @extends #FormModel
 --
 
-ModelDebug = newclass(Form)
+ModelDebug = newclass(FormModel)
 
 local display_panel = nil
 
@@ -60,13 +60,14 @@ function ModelDebug:buildMatrix(matrix_panel, matrix, pivot)
 
     for irow,row in pairs(matrix) do
       for icol,value in pairs(row) do
-        local frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", "none", 1)
+        local frame
         if pivot ~= nil then
-          if matrix[1][icol].name == "T" then frame:style("helmod_frame_colored", GuiElement.color_button_default_ingredient, 2) end
-          if pivot.x == icol then frame:style("helmod_frame_colored", GuiElement.color_button_edit, 2) end
-          if pivot.y == irow then frame:style("helmod_frame_colored", GuiElement.color_button_none, 2) end
-          if pivot.x == icol and pivot.y == irow then frame:style("helmod_frame_colored", GuiElement.color_button_rest, 2) end
+          if matrix[1][icol].name == "T" then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_default_ingredient, 2) end
+          if pivot.x == icol then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_edit, 2) end
+          if pivot.y == irow then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_none, 2) end
+          if pivot.x == icol and pivot.y == irow then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_rest, 2) end
         end
+        if frame == nil then frame = GuiFlowH("cell", irow, icol) end
         local cell = GuiElement.add(matrix_table, frame)
         if type(value) == "table" then
           if value.type == "none" then
@@ -96,10 +97,9 @@ end
 -- @param #LuaEvent event
 --
 function ModelDebug:onEvent(event)
-  local model = Model.getModel()
-  local current_block = User.getParameter("current_block")
-  if model.blocks[current_block] ~= nil and model.blocks[current_block].runtimes ~= nil then
-    local runtimes = model.blocks[current_block].runtimes
+  local _, block = self:getParameterObjects()
+  if block ~= nil and block.runtimes ~= nil then
+    local runtimes = block.runtimes
     if event.action == "change-stage" then
       local stage = User.getParameter("model_stage") or 1
       if event.item1 == "initial" then stage = 1 end
@@ -151,7 +151,7 @@ end
 -- @param #string caption
 --
 function ModelDebug:addCellHeader(guiTable, name, caption)
-  local cell = GuiElement.add(guiTable, GuiFrameH("header", name):style(helmod_frame_style.hidden))
+  local cell = GuiElement.add(guiTable, GuiFlowH("header", name))
   GuiElement.add(cell, GuiLabel("label"):caption(caption))
 end
 
@@ -164,17 +164,12 @@ end
 --
 function ModelDebug:updateDebugPanel(event)
   local info_panel = self:getInfoPanel()
-  local model = Model.getModel()
+  local model, block = self:getParameterObjects()
 
-  local current_block = User.getParameter("current_block")
-
-  local countRecipes = Model.countBlockRecipes(current_block)
-
-  if countRecipes > 0 then
+  if block ~= nil then
 
     info_panel.clear()
-    local block = model.blocks[current_block]
-
+    
     if block.runtimes ~= nil then
       local scroll_panel = GuiElement.add(info_panel, GuiScroll("scroll_stage"))
       scroll_panel.style.horizontally_squashable = true

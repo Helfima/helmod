@@ -1,4 +1,5 @@
 require "mod-gui"
+require "core.tableExtends"
 require "core.global"
 require "core.class"
 require "core.defines"

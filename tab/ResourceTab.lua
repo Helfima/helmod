@@ -39,8 +39,12 @@ end
 --
 function ResourceTab:addTableHeader(itable)
   -- optionnal columns
-  self:addCellHeader(itable, "index", {"helmod_result-panel.col-header-index"},"index")
-  self:addCellHeader(itable, "name", {"helmod_result-panel.col-header-name"},"name")
+  if User.getModGlobalSetting("display_hidden_column") == "All" then
+    self:addCellHeader(itable, "index", {"helmod_result-panel.col-header-index"},"index")
+  end
+  if User.getModGlobalSetting("display_hidden_column") ~= "None" then
+    self:addCellHeader(itable, "name", {"helmod_result-panel.col-header-name"},"name")
+  end
   -- data columns
   self:addCellHeader(itable, "count", {"helmod_result-panel.col-header-total"},"count")
   self:addCellHeader(itable, "ingredient", {"helmod_result-panel.col-header-ingredient"}, "index")
@@ -56,8 +60,6 @@ end
 -- @param #table ingredient
 --
 function ResourceTab:addTableRow(guiTable, ingredient)
-  local model = Model.getModel()
-
   -- col index
   if User.getModGlobalSetting("display_hidden_column") == "All" then
     local guiIndex = GuiElement.add(guiTable, GuiFrameH("index", ingredient.name):style(helmod_frame_style.hidden))
@@ -78,7 +80,7 @@ function ResourceTab:addTableRow(guiTable, ingredient)
 
   -- col type
   local guiType = GuiElement.add(guiTable, GuiFrameH("type", ingredient.name):style(helmod_frame_style.hidden))
-  GuiElement.add(guiType, GuiLabel(ingredient.name):caption(ingredient.resource_category))
+  GuiElement.add(guiType, GuiLabel(ingredient.name):caption(ingredient.type))
 
 end
 
@@ -90,7 +92,7 @@ end
 -- @param #LuaEvent event
 -- 
 function ResourceTab:updateData(event)
-  local model = Model.getModel()
+  local model = self:getParameterObjects()
   local order = User.getParameter("order")
   -- data
   local scrollPanel = self:getResultScrollPanel({"helmod_result-panel.tab-title-energy"})

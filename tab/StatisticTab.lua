@@ -38,7 +38,6 @@ end
 -- @param #LuaEvent event
 --
 function StatisticTab:updateData(event)
-  local model = Model.getModel()
   -- data
   local scroll_panel = self:getResultScrollPanel({"helmod_result-panel.tab-title-statistic"})
   

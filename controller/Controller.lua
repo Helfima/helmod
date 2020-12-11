@@ -1,4 +1,5 @@
 require "core.Form"
+require "core.FormModel"
 
 require "dialog.HelpPanel"
 require "dialog.ModelDebug"
@@ -337,7 +338,6 @@ function Controller:onGuiAction(event)
     if views == nil then self:prepare() end
   
     event.classname, event.action, event.item1, event.item2, event.item3, event.item4 = string.match(event.element.name,pattern)
-    Controller:onEvent(event)
   
     if event.classname == self.classname and event.action == "CLOSE" then
       Controller:cleanController(Player.native())
@@ -442,20 +442,24 @@ end
 -- @function [parent=#Controller] openMainPanel
 --
 function Controller:openMainPanel()
-  local current_block = User.getParameter("current_block")
-  local model = Model.getModel()
-
   if self:isOpened() then
     self:cleanController(Player.native())
   else
-    ModelCompute.check()
-    local form_name
-    if current_block and model.blocks[current_block] then
-      form_name = "HMProductionBlockTab"
+    local current_tab = User.getParameter("current_tab") or "HMProductionLineTab"
+    local parameter_name = string.format("%s_%s", current_tab, "objects")
+    local parameter_objects = User.getParameter(parameter_name)
+    
+    local event = {name="OPEN"}
+    if parameter_objects == nil then
+      parameter_objects = {name=parameter_name}
     else
-      form_name = "HMProductionLineTab"
+      event.item2 = parameter_objects.block
     end
-    self:send("on_gui_open", {name="OPEN"}, form_name)
+    local model, block, recipe = Model.getParameterObjects(parameter_objects)
+    event.item1 = model.id
+    ModelCompute.check(model)
+    if block == nil and current_tab == "HMProductionBlockTab" then current_tab = "HMProductionLineTab" end
+    self:send("on_gui_open", event, current_tab)
   end
 end
 
@@ -476,371 +480,6 @@ function Controller:isOpened()
     end
   end
   return is_open
-end
-
--------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#Controller] onEvent
---
--- @param #LuaEvent event
---
-function Controller:onEvent(event)
-  local model = Model.getModel()
-
-  -- ***************************
-  -- access for all
-  -- ***************************
-  self:onEventAccessAll(event)
-
-  -- *******************************
-  -- access admin only
-  -- *******************************
-
-  if Player.isAdmin() then
-    self:onEventAccessAdmin(event)
-  end
-
-  -- *******************************
-  -- access admin or owner or write
-  -- *******************************
-
-  if User.isWriter() then
-    self:onEventAccessWrite(event)
-  end
-
-  -- ***************************
-  -- access admin or owner
-  -- ***************************
-
-  if Player.isAdmin() or model.owner == Player.native().name then
-    self:onEventAccessRead(event)
-  end
-
-  -- ********************************
-  -- access admin or owner or delete
-  -- ********************************
-
-  if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 4) > 0) then
-    self:onEventAccessDelete(event)
-  end
-
-end
-
--------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#Controller] onEventAccessAll
---
--- @param #LuaEvent event
---
-function Controller:onEventAccessAll(event)
-  if event.action == "refresh-model" then
-    ModelCompute.update()
-    self:send("on_gui_update", event)
-  end
-
-  if event.action == "change-model" then
-    User.setParameter("model_id", event.item1)
-    ModelCompute.check()
-    Model.getModel()
-    User.setActiveForm("HMProductionLineTab")
-    User.setParameter("current_block", "new")
-    self:send("on_gui_open", event,"HMProductionLineTab")
-  end
-
-  if event.action == "change-tab" then
-    if event.item1 == "HMProductionLineTab" then
-      User.setParameter("current_block", "new")
-    else
-      User.setParameter("current_block", event.item2)
-    end
-    self:closeEditionOrSelector()
-    self:send("on_gui_open", event, event.item1)
-  end
-
-  if event.action == "close-tab" then
-    self:closeTab()
-  end
-
-  if event.action == "change-sort" then
-    local order = User.getParameter("order")
-    if order.name == event.item1 then
-      order.ascendant = not(order.ascendant)
-    else
-      order = {name=event.item1, ascendant=true}
-    end
-    User.setParameter("order", order)
-    self:send("on_gui_update", event)
-  end
-
-  if event.action == "change-logistic" then
-    local display_logistic_row = User.getParameter("display_logistic_row")
-    User.setParameter("display_logistic_row", not(display_logistic_row))
-    self:send("on_gui_update", event)
-  end
-
-  if event.action == "change-logistic-item" then
-    User.setParameter("logistic_row_item", event.item1)
-    self:send("on_gui_update", event)
-  end
-
-  if event.action == "change-logistic-fluid" then
-    User.setParameter("logistic_row_fluid", event.item1)
-    self:send("on_gui_update", event)
-  end
-
-end
-
--------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#Controller] onEventAccessRead
---
--- @param #LuaEvent event
---
-function Controller:onEventAccessRead(event)
-  if event.action == "copy-model" then
-    local model_id = User.getParameter("model_id")
-    local current_block = User.getParameter("current_block")
-    if User.isActiveForm("HMProductionBlockTab") then
-      if current_block ~= nil and current_block ~= "new" then
-        User.setParameter("copy_from_block_id", current_block)
-        User.setParameter("copy_from_model_id", model_id)
-      end
-    end
-    if User.isActiveForm("HMProductionLineTab") then
-      User.setParameter("copy_from_block_id", nil)
-      User.setParameter("copy_from_model_id", model_id)
-    end
-    self:send("on_gui_update", event)
-  end
-  if event.action == "share-model" then
-    local models = Model.getModels(true)
-    local model = models[event.item2]
-    if model ~= nil then
-      if event.item1 == "read" then
-        if model.share == nil or not(bit32.band(model.share, 1) > 0) then
-          model.share = 1
-        else
-          model.share = 0
-        end
-      end
-      if event.item1 == "write" then
-        if model.share == nil or not(bit32.band(model.share, 2) > 0) then
-          model.share = 3
-        else
-          model.share = 1
-        end
-      end
-      if event.item1 == "delete" then
-        if model.share == nil or not(bit32.band(model.share, 4) > 0) then
-          model.share = 7
-        else
-          model.share = 3
-        end
-      end
-    end
-    Controller:send("on_gui_refresh", event)
-  end
-end
-
--------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#Controller] onEventAccessWrite
---
--- @param #LuaEvent event
---
-function Controller:onEventAccessWrite(event)
-  local model = Model.getModel()
-  local model_id = User.getParameter("model_id")
-  local current_block = User.getParameter("current_block")
-  local block = model.blocks[current_block] or {}
-  local selector_name = "HMRecipeSelector"
-  if model.blocks[current_block] ~= nil and model.blocks[current_block].isEnergy then
-    selector_name = "HMEnergySelector"
-  end
-
-  if event.action == "change-tab" then
-    if event.item1 == "HMProductionBlockTab" and event.item2 == "new" then
-      self:send("on_gui_open", event,"HMRecipeSelector")
-    end
-  end
-
-  if event.action == "change-boolean-option" and model.blocks ~= nil and model.blocks[current_block] ~= nil then
-    local element = model.blocks[current_block]
-    ModelBuilder.updateProductionBlockOption(current_block, event.item1, not(element[event.item1]))
-    ModelCompute.update()
-    self:send("on_gui_update", event)
-  end
-
-  if event.action == "change-number-option" and model.blocks ~= nil and model.blocks[current_block] ~= nil then
-    local value = GuiElement.getInputNumber(event.element)
-    ModelBuilder.updateProductionBlockOption(current_block, event.item1, value)
-    ModelCompute.update()
-    self:send("on_gui_update", event)
-  end
-
-  if event.action == "change-time" then
-    local index = event.element.selected_index
-    model.time = helmod_base_times[index].value or 1
-    ModelCompute.update()
-    self:send("on_gui_update", event)
-    self:send("on_gui_close", event, "HMProductEdition")
-  end
-
-  if event.action == "product-selected" then
-    if event.button == defines.mouse_button_type.right then
-      self:send("on_gui_open", event,"HMRecipeSelector")
-    end
-  end
-
-  if event.action == "product-edition" then
-    if event.button == defines.mouse_button_type.right then
-      self:send("on_gui_open", event, selector_name)
-    else
-      self:send("on_gui_open", event, "HMProductEdition")
-    end
-  end
-
-  if event.action == "production-block-remove" then
-    ModelBuilder.removeProductionBlock(event.item1)
-    ModelCompute.update()
-    User.setParameter("current_block","new")
-    self:send("on_gui_update", event)
-  end
-
-  if event.action == "production-block-unlink" then
-    ModelBuilder.unlinkProductionBlock(event.item1)
-    ModelCompute.update()
-    self:send("on_gui_update", event)
-  end
-
-  if event.action == "past-model" then
-    if User.isActiveForm("HMProductionBlockTab") then
-      ModelBuilder.pastModel(User.getParameter("copy_from_model_id"), User.getParameter("copy_from_block_id"))
-      ModelCompute.update()
-      self:send("on_gui_update", event)
-    end
-    if User.isActiveForm("HMProductionLineTab") then
-      ModelBuilder.pastModel(User.getParameter("copy_from_model_id"), User.getParameter("copy_from_block_id"))
-      ModelCompute.update()
-      User.setParameter("current_block","new")
-      self:send("on_gui_update", event)
-    end
-  end
-
-end
-
--------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#Controller] onEventAccessDelete
---
--- @param #LuaEvent event
---
-function Controller:onEventAccessDelete(event)
-  if event.action == "remove-model" then
-    ModelBuilder.removeModel(event.item1)
-    User.setActiveForm("HMProductionLineTab")
-    User.setParameter("current_block","new")
-    self:send("on_gui_update", event)
-  end
-end
-
--------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#Controller] onEventAccessAdmin
---
--- @param #LuaEvent event
---
-function Controller:onEventAccessAdmin(event)
-  if event.action == "rule-remove" then
-    ModelBuilder.removeRule(event.item1)
-    self:send("on_gui_update", event)
-  end
-  if event.action == "reset-rules" then
-    Model.resetRules()
-    self:send("on_gui_update", event)
-  end
-
-  if event.action == "game-pause" then
-    if not(game.is_multiplayer()) then
-      User.setParameter("auto-pause", true)
-      game.tick_paused = true
-      self:send("on_gui_pause", event)
-    end
-  end
-  
-  if event.action == "string-decode" then
-    local parent = event.element.parent.parent
-    local decoded_textbox = parent["decoded-text"]
-    local encoded_textbox = parent["encoded-text"]
-    local input = string.sub(encoded_textbox.text,2)
-    local json = game.decode_string(input)
-    decoded_textbox.text = json
-  end
-
-  if event.action == "string-encode" then
-    local parent = event.element.parent.parent
-    local decoded_textbox = parent["decoded-text"]
-    local encoded_textbox = parent["encoded-text"]
-    encoded_textbox.text = "0"..game.encode_string(decoded_textbox.text)
-  end
-
-  if event.action == "game-play" then
-    User.setParameter("auto-pause", false)
-    game.tick_paused = false
-    self:send("on_gui_pause", event)
-  end
-
-  if event.action == "delete-cache" then
-    if event.item1 ~= nil and global[event.item1] ~= nil then
-      if event.item2 == "" and event.item3 == "" and event.item4 == "" then
-        global[event.item1] = nil
-      elseif event.item3 == "" and event.item4 == "" then
-        global[event.item1][event.item2] = {}
-      elseif event.item4 == "" then
-        global[event.item1][event.item2][event.item3] = nil
-      else
-        global[event.item1][event.item2][event.item3][event.item4] = nil
-      end
-      Player.print("Deleted:", event.item1, event.item2, event.item3, event.item4)
-    else
-      Player.print("Not found to delete:", event.item1, event.item2, event.item3, event.item4)
-    end
-    self:send("on_gui_refresh", event, event.classname)
-  end
-
-  if event.action == "refresh-cache" then
-    global[event.item1][event.item2] = {}
-    
-    if event.item2 == "HMPlayer" then
-      Player.getResources()
-    else    
-      local forms = {}
-      table.insert(forms, EnergySelector("HMEnergySelector"))
-      table.insert(forms, EntitySelector("HMEntitySelector"))
-      table.insert(forms, RecipeSelector("HMRecipeSelector"))
-      table.insert(forms, TechnologySelector("HMTechnologySelector"))
-      table.insert(forms, ItemSelector("HMItemSelector"))
-      table.insert(forms, FluidSelector("HMFluidSelector"))
-      for _,form in pairs(forms) do
-        if event.item2 == form.classname then
-          form:prepare()
-        end
-      end
-    end
-    
-    self:send("on_gui_refresh", event)
-  end
-
-  if event.action == "generate-cache" then
-    Controller:on_init()
-    self:send("on_gui_refresh", event)
-  end
 end
 
 -------------------------------------------------------------------------------

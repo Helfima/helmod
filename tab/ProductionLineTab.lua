@@ -38,7 +38,7 @@ end
 -- @param #LuaEvent event
 --
 function ProductionLineTab:updateInfo(event)
-  local model = Model.getModel()
+  local model = self:getParameterObjects()
   -- data
   local info_scroll, output_scroll, input_scroll = self:getInfoPanel()
   info_scroll.clear()
@@ -52,7 +52,7 @@ function ProductionLineTab:updateInfo(event)
   block_info.style.horizontally_stretchable = false
   block_info.style.horizontal_spacing=10
 
-  local count_block = Model.countBlocks()
+  local count_block = table.size(model.blocks)
   if count_block > 0 then
     local element_block = {name=model.id, energy_total=0, pollution=0}
     if model.summary ~= nil then
@@ -69,7 +69,7 @@ function ProductionLineTab:updateInfo(event)
     end
   end
 
-  self:addSharePanel(info_panel)
+  self:addSharePanel(info_panel, model)
   
 end
 
@@ -81,18 +81,19 @@ end
 -- @param #LuaEvent event
 --
 function ProductionLineTab:updateInput(event)
-  local model = Model.getModel()
+  local model = self:getParameterObjects()
   -- data
   local info_scroll, output_scroll, input_scroll = self:getInfoPanel()
   input_scroll.clear()
   -- input panel
 
-  local count_block = Model.countBlocks()
+  local count_block = table.size(model.blocks)
   if count_block > 0 then
 
     local input_table = GuiElement.add(input_scroll, GuiTable("input-table"):column(GuiElement.getElementColumnNumber(50)):style("helmod_table_element"))
     if model.ingredients ~= nil then
       for index, element in spairs(model.ingredients, User.getProductSorter2()) do
+        element.time = model.time
         GuiElement.add(input_table, GuiCellElementM(self.classname, "production-block-ingredient-add", "new", element.name):element(element):tooltip("tooltip.add-recipe"):color(GuiElement.color_button_add):index(index))
       end
     end
@@ -108,20 +109,21 @@ end
 -- @param #LuaEvent event
 --
 function ProductionLineTab:updateOutput(event)
-  local model = Model.getModel()
+  local model = self:getParameterObjects()
   -- data
   local info_scroll, output_scroll, input_scroll = self:getInfoPanel()
   output_scroll.clear()
   -- ouput panel
 
   -- production block result
-  local count_block = Model.countBlocks()
+  local count_block = table.size(model.blocks)
   if count_block > 0 then
 
     -- ouput panel
     local output_table = GuiElement.add(output_scroll, GuiTable("output-table"):column(GuiElement.getElementColumnNumber(50)):style("helmod_table_element"))
     if model.products ~= nil then
       for index, element in spairs(model.products, User.getProductSorter2()) do
+        element.time = model.time
         GuiElement.add(output_table, GuiCellElementM(self.classname, "production-block-product-add", "new", element.name):element(element):tooltip("tooltip.add-recipe"):index(index))
       end
     end
@@ -137,7 +139,7 @@ end
 -- @param #LuaEvent event
 --
 function ProductionLineTab:updateData(event)
-  local model = Model.getModel()
+  local model = self:getParameterObjects()
 
   self:updateInfo(event)
   self:updateOutput(event)
@@ -146,7 +148,7 @@ function ProductionLineTab:updateData(event)
   -- data panel
   local scroll_panel = self:getResultScrollPanel()
 
-  local countBlock = Model.countBlocks()
+  local countBlock = table.size(model.blocks)
   if countBlock > 0 then
     -- data panel
     local extra_cols = 0
@@ -172,9 +174,9 @@ function ProductionLineTab:updateData(event)
     self:addTableHeader(result_table)
 
     local last_element = nil
-    for _, element in spairs(model.blocks, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
-      local element_cell = self:addTableRow(result_table, element)
-      if User.getParameter("scroll_element") == element.id then last_element = element_cell end
+    for _, block in spairs(model.blocks, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
+      local element_cell = self:addTableRow(result_table, model, block)
+      if User.getParameter("scroll_element") == block.id then last_element = element_cell end
     end
 
     if last_element ~= nil then
@@ -184,8 +186,7 @@ function ProductionLineTab:updateData(event)
   else
     local empty_panel = GuiElement.add(scroll_panel, GuiFlowH("empty"))
     empty_panel.style.horizontal_spacing=10
-    local block_id = "new"
-    GuiElement.add(empty_panel, GuiButton("HMRecipeSelector", "OPEN", block_id):sprite("menu", "wrench-white", "wrench"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-recipe"}))
+    GuiElement.add(empty_panel, GuiButton("HMRecipeSelector", "OPEN", model.id, "new"):sprite("menu", "wrench-white", "wrench"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-recipe"}))
     GuiElement.add(empty_panel, GuiLabel("label-explain"):caption({"helmod_label.first-recipe-explain"}):style("heading_1_label"))
   end
 end
@@ -198,26 +199,32 @@ end
 -- @param #LuaEvent event
 --
 function ProductionLineTab:onEvent(event)
-  local model = Model.getModel()
-  local current_block = User.getParameter("current_block")
+  AbstractTab.onEvent(self, event)
+  local model, block, _ = self:getParameterObjects(event)
+
+  if block == nil then
+    block = model.blocks[event.item2]
+  end
+
   local selector_name = "HMRecipeSelector"
-  if model.blocks[current_block] ~= nil and model.blocks[current_block].isEnergy then
+  if block ~= nil and block.isEnergy then
     selector_name = "HMEnergySelector"
   end
   -- user writer
   if not(User.isWriter()) then return end
   
   if event.action == "production-block-product-add" then
+    event.item2 = "new"
     if event.button == defines.mouse_button_type.right then
       Controller:send("on_gui_open", event, "HMRecipeSelector")
     else
-      local recipes = Player.searchRecipe(event.item2, true)
+      local recipes = Player.searchRecipe(event.item3, true)
       if #recipes == 1 then
         local recipe = recipes[1]
-        ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type, 0)
-        ModelCompute.update()
-        User.setActiveForm("HMProductionBlockTab")
-        Controller:send("on_gui_refresh", event)
+        local new_block = ModelBuilder.addRecipeIntoProductionBlock(model, nil, recipe.name, recipe.type, 0)
+        event.item2 = new_block.id
+        ModelCompute.update(model)
+        Controller:send("on_gui_open", event,"HMProductionBlockTab")
       else
         -- pour ouvrir avec le filtre ingredient
         event.button = defines.mouse_button_type.right
@@ -226,16 +233,17 @@ function ProductionLineTab:onEvent(event)
     end
   end
   if event.action == "production-block-ingredient-add" then
+    event.item2 = "new"
     if event.button == defines.mouse_button_type.right then
       Controller:send("on_gui_open", event, "HMRecipeSelector")
     else
-      local recipes = Player.searchRecipe(event.item2)
+      local recipes = Player.searchRecipe(event.item3)
       if #recipes == 1 then
         local recipe = recipes[1]
-        ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type)
-        ModelCompute.update()
-        User.setActiveForm("HMProductionBlockTab")
-        Controller:send("on_gui_refresh", event)
+        local new_block = ModelBuilder.addRecipeIntoProductionBlock(model, nil, recipe.name, recipe.type)
+        event.item2 = new_block.id
+        ModelCompute.update(model)
+        Controller:send("on_gui_open", event,"HMProductionBlockTab")
       else
         Controller:send("on_gui_open", event,"HMRecipeSelector")
       end
@@ -246,9 +254,9 @@ function ProductionLineTab:onEvent(event)
     local step = 1
     if event.shift then step = User.getModSetting("row_move_step") end
     if event.control then step = 1000 end
-    ModelBuilder.upProductionBlock(event.item1, step)
-    ModelCompute.update()
-    User.setParameter("scroll_element", event.item1)
+    ModelBuilder.upProductionBlock(model, block, step)
+    ModelCompute.update(model)
+    User.setParameter("scroll_element", block.id)
     Controller:send("on_gui_update", event)
   end
 
@@ -256,9 +264,9 @@ function ProductionLineTab:onEvent(event)
     local step = 1
     if event.shift then step = User.getModSetting("row_move_step") end
     if event.control then step = 1000 end
-    ModelBuilder.downProductionBlock(event.item1, step)
-    ModelCompute.update()
-    User.setParameter("scroll_element", event.item1)
+    ModelBuilder.downProductionBlock(model, block, step)
+    ModelCompute.update(model)
+    User.setParameter("scroll_element", block.id)
     Controller:send("on_gui_update", event)
   end
 end
@@ -270,8 +278,6 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function ProductionLineTab:addTableHeader(itable)
-  local model = Model.getModel()
-
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
   -- optionnal columns
   if User.getModGlobalSetting("display_hidden_column") == "All" then
@@ -302,9 +308,7 @@ end
 -- @param #LuaGuiElement gui_table
 -- @param #table block production block
 --
-function ProductionLineTab:addTableRow(gui_table, block)
-  local model = Model.getModel()
-
+function ProductionLineTab:addTableRow(gui_table, model, block)
   local unlinked = block.unlinked and true or false
   if block.index == 0 then unlinked = true end
   local block_by_product = not(block ~= nil and block.by_product == false)
@@ -312,13 +316,13 @@ function ProductionLineTab:addTableRow(gui_table, block)
   -- col action
   local cell_action = GuiElement.add(gui_table, GuiTable("action", block.id):column(2))
 
-  GuiElement.add(cell_action, GuiButton(self.classname, "production-block-up", block.id):sprite("menu", "arrow-up-white-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.up-element", User.getModSetting("row_move_step")}))
-  GuiElement.add(cell_action, GuiButton(self.classname, "production-block-remove", block.id):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
-  GuiElement.add(cell_action, GuiButton(self.classname, "production-block-down", block.id):sprite("menu", "arrow-down-white-sm", "arrow-down-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.down-element", User.getModSetting("row_move_step")}))
+  GuiElement.add(cell_action, GuiButton(self.classname, "production-block-up", model.id, block.id):sprite("menu", "arrow-up-white-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.up-element", User.getModSetting("row_move_step")}))
+  GuiElement.add(cell_action, GuiButton(self.classname, "production-block-remove", model.id, block.id):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
+  GuiElement.add(cell_action, GuiButton(self.classname, "production-block-down", model.id, block.id):sprite("menu", "arrow-down-white-sm", "arrow-down-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.down-element", User.getModSetting("row_move_step")}))
   if unlinked then
-    GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink", block.id):sprite("menu", "unlink-white-sm", "unlink-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.unlink-element"}))
+    GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink", model.id, block.id):sprite("menu", "unlink-white-sm", "unlink-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.unlink-element"}))
   else
-    GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink", block.id):sprite("menu", "link-white-sm", "link-sm"):style("helmod_button_menu_sm_selected"):tooltip({"tooltip.unlink-element"}))
+    GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink", model.id, block.id):sprite("menu", "link-white-sm", "link-sm"):style("helmod_button_menu_sm_selected"):tooltip({"tooltip.unlink-element"}))
   end
 
   if User.getModGlobalSetting("display_hidden_column") == "All" then
@@ -337,23 +341,23 @@ function ProductionLineTab:addTableRow(gui_table, block)
 
   local block_color = "gray"
   if not(block_by_product) then block_color = "orange" end
-  GuiElement.add(cell_recipe, GuiCellBlock(self.classname, "change-tab", "HMProductionBlockTab", block.id):element(block):infoIcon(block.type):tooltip("tooltip.edit-block"):color(block_color))
+  GuiElement.add(cell_recipe, GuiCellBlock(self.classname, "change-tab", "HMProductionBlockTab", model.id, block.id):element(block):infoIcon(block.type):tooltip("tooltip.edit-block"):color(block_color))
 
   -- col energy
   local cell_energy = GuiElement.add(gui_table, GuiTable(block.id, "energy"):column(1))
   local element_block = {name=block.name, power=block.power, pollution_total=block.pollution_total, summary=block.summary}
-  GuiElement.add(cell_energy, GuiCellEnergy(self.classname, "change-tab", "HMProductionBlockTab", block.id):element(element_block):tooltip("tooltip.edit-block"):color(block_color))
+  GuiElement.add(cell_energy, GuiCellEnergy(self.classname, "change-tab", "HMProductionBlockTab", model.id, block.id):element(element_block):tooltip("tooltip.edit-block"):color(block_color))
 
   -- col pollution
   if User.getPreferenceSetting("display_pollution") then
     local cell_pollution = GuiElement.add(gui_table, GuiTable(block.id, "pollution"):column(1))
-    GuiElement.add(cell_pollution, GuiCellPollution(self.classname, "change-tab", "HMProductionBlockTab", block.id):element(element_block):tooltip("tooltip.edit-block"):color(block_color))
+    GuiElement.add(cell_pollution, GuiCellPollution(self.classname, "change-tab", "HMProductionBlockTab", model.id, block.id):element(element_block):tooltip("tooltip.edit-block"):color(block_color))
   end
   
   -- col building
   if User.getPreferenceSetting("display_building") then
     local cell_building = GuiElement.add(gui_table, GuiTable(block.id, "building"):column(1))
-    GuiElement.add(cell_building, GuiCellBuilding(self.classname, "change-tab", "HMProductionBlockTab", block.id):element(element_block):tooltip("tooltip.info-building"):color(block_color))
+    GuiElement.add(cell_building, GuiCellBuilding(self.classname, "change-tab", "HMProductionBlockTab", model.id, block.id):element(element_block):tooltip("tooltip.info-building"):color(block_color))
   end
 
   local product_sorter = User.getProductSorter2()
@@ -365,6 +369,7 @@ function ProductionLineTab:addTableRow(gui_table, block)
   if block.products ~= nil then
     for index, product in spairs(block.products, product_sorter) do
       if ((product.state or 0) == 1 and block_by_product)  or (product.count or 0) > ModelCompute.waste_value then
+        product.time = model.time
         local button_action = "production-block-product-add"
         local button_tooltip = "tooltip.product"
         local button_color = GuiElement.color_button_default_product
@@ -392,7 +397,7 @@ function ProductionLineTab:addTableRow(gui_table, block)
         else
           button_color = GuiElement.color_button_default_product
         end
-        GuiElement.add(cell_products, GuiCellElement(self.classname, button_action, block.id, product.name):element(product):tooltip(button_tooltip):color(button_color):index(index))
+        GuiElement.add(cell_products, GuiCellElement(self.classname, button_action, model.id, block.id, product.name):element(product):tooltip(button_tooltip):color(button_color):index(index))
       end
     end
   end
@@ -403,6 +408,7 @@ function ProductionLineTab:addTableRow(gui_table, block)
   if block.ingredients ~= nil then
     for index, ingredient in spairs(block.ingredients, product_sorter) do
       if ((ingredient.state or 0) == 1 and not(block_by_product)) or (ingredient.count or 0) > ModelCompute.waste_value then
+        ingredient.time = model.time
         local button_action = "production-block-ingredient-add"
         local button_tooltip = "tooltip.ingredient"
         local button_color = GuiElement.color_button_default_ingredient
@@ -425,7 +431,7 @@ function ProductionLineTab:addTableRow(gui_table, block)
         else
           button_color = GuiElement.color_button_default_ingredient
         end
-        GuiElement.add(cell_ingredients, GuiCellElement(self.classname, button_action, block.id, ingredient.name):element(ingredient):tooltip(button_tooltip):color(button_color):index(index))
+        GuiElement.add(cell_ingredients, GuiCellElement(self.classname, button_action, model.id, block.id, ingredient.name):element(ingredient):tooltip(button_tooltip):color(button_color):index(index))
       end
     end
   end

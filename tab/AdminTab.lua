@@ -178,7 +178,8 @@ function AdminTab:updateConversion()
   local actions = GuiElement.add(table_panel, GuiFlowV("actions"))
   GuiElement.add(actions, GuiButton(self.classname, "string-decode"):caption("Decode ==>"))
   GuiElement.add(actions, GuiButton(self.classname, "string-encode"):caption("<== Encode"))
-  GuiElement.add(table_panel, GuiTextBox("decoded-text"))
+  local decoded_textbox = GuiElement.add(table_panel, GuiTextBox("decoded-text"))
+  decoded_textbox.style.height = 600
 end
 -------------------------------------------------------------------------------
 -- Update data
@@ -255,7 +256,7 @@ function AdminTab:updateCache()
   table_panel.vertical_centering = false
   table_panel.style.horizontal_spacing = 50
 
-  if Model.countList(Cache.get()) > 0 then
+  if table.size(Cache.get()) > 0 then
     local translate_panel = GuiElement.add(table_panel, GuiFlowV("global-caches"))
     GuiElement.add(translate_panel, GuiLabel("translate-label"):caption("Global caches"):style("helmod_label_title_frame"))
     local result_table = GuiElement.add(translate_panel, GuiTable("list-data"):column(3))
@@ -270,7 +271,7 @@ function AdminTab:updateCache()
   end
 
   local users_data = global["users"]
-  if Model.countList(users_data) > 0 then
+  if table.size(users_data) > 0 then
     local cache_panel = GuiElement.add(table_panel, GuiFlowV("user-caches"))
     GuiElement.add(cache_panel, GuiLabel("translate-label"):caption("User caches"):style("helmod_label_title_frame"))
     local result_table = GuiElement.add(cache_panel, GuiTable("list-data"):column(3))
@@ -326,15 +327,14 @@ function AdminTab:updateSheet()
   -- Sheet List
   local scroll_panel = self:getSheetTab()
 
-  local count_model = Model.countModel()
-  if count_model > 0 then
+  if table.size(global.models) > 0 then
 
     local result_table = GuiElement.add(scroll_panel, GuiTable("list-data"):column(3):style("helmod_table-odd"))
 
     self:addSheetListHeader(result_table)
 
     local i = 0
-    for _, element in spairs(Model.getModels(true), function(t,a,b) return t[b].owner > t[a].owner end) do
+    for _, element in spairs(global.models, function(t,a,b) return t[b].owner > t[a].owner end) do
       self:addSheetListRow(result_table, element)
     end
 
@@ -387,7 +387,7 @@ function AdminTab:addTranslateListRow(gui_table, user_name, user_data)
   GuiElement.add(gui_table, GuiLabel("owner", user_name):caption(user_name))
 
   -- col translated
-  GuiElement.add(gui_table, GuiLabel("total", user_name):caption(Model.countList(user_data.translated)))
+  GuiElement.add(gui_table, GuiLabel("total", user_name):caption(table.size(user_data.translated)))
 
 end
 
@@ -403,7 +403,7 @@ end
 function AdminTab:addCacheListRow(gui_table, class_name, key1, key2, key3, key4, data)
   local caption = ""
   if type(data) == "table" then
-    caption = Model.countList(data)
+    caption = table.size(data)
   else
     caption = data
   end

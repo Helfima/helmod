@@ -1,11 +1,11 @@
 -------------------------------------------------------------------------------
--- Class to build pin tab dialog
+-- Class to build pin dialog
 --
 -- @module PinPanel
--- @extends #Form
+-- @extends #FormModel
 --
 
-PinPanel = newclass(Form)
+PinPanel = newclass(FormModel)
 
 local display_pin_level_min = 0
 local display_pin_level_max = 4
@@ -38,33 +38,6 @@ function PinPanel:onInit()
 end
 
 -------------------------------------------------------------------------------
--- On before event
---
--- @function [parent=#PinPanel] onBeforeOpen
---
--- @param #LuaEvent event
---
-function PinPanel:onBeforeOpen(event)
-  User.setParameter("pin_panel_object", {model=event.item1, block=event.item2})
-end
-
--------------------------------------------------------------------------------
--- Get or create info panel
---
--- @function [parent=#PinPanel] getInfoPanel
---
-function PinPanel:getInfoPanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
-  if content_panel["info-panel"] ~= nil and content_panel["info-panel"].valid then
-    return content_panel["info-panel"]["scroll-panel"]
-  end
-  local mainPanel = GuiElement.add(content_panel, GuiFrameV("info-panel"):style(helmod_frame_style.panel))
-  local scroll_panel = GuiElement.add(mainPanel, GuiScroll("scroll-panel"))
-  scroll_panel.style.horizontally_stretchable = false
-  return  scroll_panel
-end
-
--------------------------------------------------------------------------------
 -- On update
 --
 -- @function [parent=#PinPanel] onUpdate
@@ -85,7 +58,6 @@ end
 --
 function PinPanel:updateHeader(event)
   local action_panel = self:getMenuPanel()
-  local pin_parameter = User.getParameter("pin_panel_object")
   action_panel.clear()
   local group1 = GuiElement.add(action_panel, GuiFlowH("group1"))
   GuiElement.add(group1, GuiButton(self.classname, "change-level", "down"):sprite("menu", "arrow-left-white", "arrow-left"):style("helmod_button_menu"):tooltip({"helmod_button.decrease"}))
@@ -96,8 +68,9 @@ function PinPanel:updateHeader(event)
   local group2 = GuiElement.add(action_panel, GuiFlowH("group2"))
   GuiElement.add(group2, GuiButton(self.classname, "recipe-done-remove"):sprite("menu", "checkmark-white","checkmark"):style("helmod_button_menu"):tooltip({"helmod_button.remove-done"}))
 
+  local parameter_objects = User.getParameter(self.parameter_objects)
   local group3 = GuiElement.add(action_panel, GuiFlowH("group3"))
-  GuiElement.add(group3, GuiButton("HMSummaryPanel=OPEN", pin_parameter.model, pin_parameter.block):sprite("menu", "brief-white","brief"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
+  GuiElement.add(group3, GuiButton("HMSummaryPanel=OPEN", parameter_objects.model, parameter_objects.block):sprite("menu", "brief-white","brief"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
 end
 
 -------------------------------------------------------------------------------
@@ -108,24 +81,21 @@ end
 -- @param #LuaEvent event
 --
 function PinPanel:updateInfo(event)
-  local infoPanel = self:getInfoPanel()
-  local pin_parameter = User.getParameter("pin_panel_object")
+  local infoPanel = self:getScrollFramePanel("info-panel")
   infoPanel.clear()
 
   local column = User.getSetting("display_pin_level") + 2
 
-  if pin_parameter ~= nil then
-    local block, model = Model.getBlockByParameter(pin_parameter)
+  local model, block, recipe = self:getParameterObjects()
 
-    if block ~= nil then
-      local resultTable = GuiElement.add(infoPanel, GuiTable("list-data"):column(column):style("helmod_table-odd"))
-      resultTable.vertical_centering = false
-      resultTable.style.horizontally_stretchable = false
+  if block ~= nil then
+    local resultTable = GuiElement.add(infoPanel, GuiTable("list-data"):column(column):style("helmod_table-odd"))
+    resultTable.vertical_centering = false
+    resultTable.style.horizontally_stretchable = false
 
-      self:addProductionBlockHeader(resultTable)
-      for _, recipe in spairs(block.recipes, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
-        self:addProductionBlockRow(resultTable, model, block, recipe)
-      end
+    self:addProductionBlockHeader(resultTable)
+    for _, recipe in spairs(block.recipes, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
+      self:addProductionBlockRow(resultTable, model, block, recipe)
     end
   end
 end
@@ -194,8 +164,8 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
     GuiElement.add(gui_table, GuiButton(self.classname, "recipe-done", recipe.id):sprite("menu", icon_white, icon):style("helmod_button_menu"):tooltip({"helmod_button.done"}))
     -- col recipe
     local cell_recipe = GuiElement.add(gui_table, GuiFrameH("recipe", recipe.id):style(helmod_frame_style.hidden))
-    --local button_recipe = GuiCellRecipe("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):infoIcon(recipe.type):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):mask(is_done)
-    local button_recipe = GuiCellRecipe(self.classname, "do_noting", "recipe"):element(recipe):infoIcon(recipe.type):tooltip("tooltip.info-product"):color(GuiElement.color_button_default):mask(is_done)
+    local button_recipe = GuiCellRecipe("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):infoIcon(recipe.type):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):mask(is_done)
+    --local button_recipe = GuiCellRecipe(self.classname, "do_noting", "recipe"):element(recipe):infoIcon(recipe.type):tooltip("tooltip.info-product"):color(GuiElement.color_button_default):mask(is_done)
     GuiElement.add(cell_recipe, button_recipe)
   end
   local by_limit = block.count ~= 1
@@ -208,7 +178,8 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
       for index, lua_product in pairs(lua_products) do
         local product_prototype = Product(lua_product)
         local product = product_prototype:clone()
-        product.count = product_prototype:countProduct(recipe)
+        product.time = model.time
+        product.count = product_prototype:countProduct(model, recipe)
         if block.count > 1 then
           product.limit_count = product.count / block.count
         end
@@ -232,7 +203,8 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
       for index, lua_ingredient in pairs(lua_ingredients) do
         local ingredient_prototype = Product(lua_ingredient)
         local ingredient = ingredient_prototype:clone()
-        ingredient.count = ingredient_prototype:countIngredient(recipe)
+        ingredient.time = model.time
+        ingredient.count = ingredient_prototype:countIngredient(model, recipe)
         if block.count > 1 then
           ingredient.limit_count = ingredient.count / block.count
         end
@@ -272,9 +244,8 @@ function PinPanel:onEvent(event)
     self:updateInfo(event)
   end
   
-  local pin_parameter = User.getParameter("pin_panel_object")
-  
-  local block = Model.getBlockByParameter(pin_parameter)
+  local model, block, recipe = self:getParameterObjects()
+
   if block == nil then return end
 
   if event.action == "pipette-entity" then

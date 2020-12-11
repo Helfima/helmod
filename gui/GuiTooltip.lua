@@ -121,9 +121,9 @@ end
 --
 function GuiTooltip:appendFlow(tooltip, element)
   if self.m_with_logistic == true then
-    local total_flow = Format.formatNumberElement(element.count/((Model.getModel().time or 1)/60))
+    local total_flow = Format.formatNumberElement(element.count/((element.time or 1)/60))
     if element.limit_count ~= nil then
-      local limit_flow = Format.formatNumberElement(element.limit_count/((Model.getModel().time or 1)/60))
+      local limit_flow = Format.formatNumberElement(element.limit_count/((element.time or 1)/60))
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.outflow"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, limit_flow or 0, "/", {"helmod_si.per-minute",total_flow or 0}, helmod_tag.font.close})
     else
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.outflow"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, {"helmod_si.per-minute",total_flow or 0}, helmod_tag.font.close})
@@ -146,13 +146,13 @@ function GuiTooltip:appendLogistic(tooltip, element)
       for _,type in pairs({"inserter", "belt", "container", "transport"}) do
         local item_logistic = Player.getDefaultItemLogistic(type)
         local item_prototype = Product(element)
-        local total_value = Format.formatNumberElement(item_prototype:countContainer(element.count, item_logistic))
+        local total_value = Format.formatNumberElement(item_prototype:countContainer(element.count, item_logistic, element.time))
         local info = ""
         if type == "inserter" then
           info = {"", " (", {"helmod_common.capacity"}, string.format(":%s", EntityPrototype(item_logistic):getInserterCapacity()), ")"}
         end
         if element.limit_count ~= nil and element.limit_count > 0 then
-          local limit_value = Format.formatNumberElement(item_prototype:countContainer(element.limit_count, item_logistic))
+          local limit_value = Format.formatNumberElement(item_prototype:countContainer(element.limit_count, item_logistic, element.time))
           table.insert(tooltip_section, {"", "\n", string.format("[%s=%s]", "entity", item_logistic), " ", helmod_tag.font.default_bold, " x ", limit_value, "/", total_value, helmod_tag.font.close, info})
         else
           table.insert(tooltip_section, {"", "\n", string.format("[%s=%s]", "entity", item_logistic), " ", helmod_tag.font.default_bold, " x ", total_value, helmod_tag.font.close, info})
@@ -161,17 +161,16 @@ function GuiTooltip:appendLogistic(tooltip, element)
     end
     -- fluid logistic
     if element.type == 1 or element.type == "fluid" then
-      local model = Model.getModel()
       for _,type in pairs({"pipe", "container", "transport"}) do
         local fluid_logistic = Player.getDefaultFluidLogistic(type)
         local fluid_prototype = Product(element)
         local count = element.count
-        if type == "pipe" then count = count / model.time end
-        local total_value = Format.formatNumberElement(fluid_prototype:countContainer(count, fluid_logistic))
+        if type == "pipe" then count = count / element.time end
+        local total_value = Format.formatNumberElement(fluid_prototype:countContainer(count, fluid_logistic, element.time))
         if element.limit_count ~= nil and element.limit_count > 0 then
           local limit_count = element.limit_count
-          if type == "pipe" then limit_count = limit_count / model.time end
-          local limit_value = Format.formatNumberElement(fluid_prototype:countContainer(limit_count, fluid_logistic))
+          if type == "pipe" then limit_count = limit_count / element.time end
+          local limit_value = Format.formatNumberElement(fluid_prototype:countContainer(limit_count, fluid_logistic, element.time))
           table.insert(tooltip_section, {"", "\n", string.format("[%s=%s]", "entity", fluid_logistic), " ", helmod_tag.font.default_bold, " x ", limit_value, "/", total_value, helmod_tag.font.close})
         else
           table.insert(tooltip_section, {"", "\n", string.format("[%s=%s]", "entity", fluid_logistic), " ", helmod_tag.font.default_bold, " x ", total_value, helmod_tag.font.close})
@@ -478,9 +477,9 @@ function GuiTooltipPollution:create()
   local tooltip = self._super.create(self)
   if self.m_element then
     local total_pollution = Format.formatNumberElement(self.m_element.pollution_total)
-    local total_flow = Format.formatNumberElement(self.m_element.pollution_total/((Model.getModel().time or 1)/60))
+    local total_flow = Format.formatNumberElement(self.m_element.pollution_total/((self.m_element.time or 1)/60))
     if self.m_element.limit_count ~= nil then
-      local limit_flow = Format.formatNumberElement(self.m_element.limit_pollution/((Model.getModel().time or 1)/60))
+      local limit_flow = Format.formatNumberElement(self.m_element.limit_pollution/((self.m_element.time or 1)/60))
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.pollution"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, total_pollution, helmod_tag.font.close})
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.outflow"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, limit_flow or 0, "/", {"helmod_si.per-minute",total_flow or 0}, helmod_tag.font.close})
     else

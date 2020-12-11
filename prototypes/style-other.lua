@@ -12,6 +12,17 @@ default_gui["helmod_textfield"] = {
 }
 
 -------------------------------------------------------------------------------
+-- Style of default
+--
+-- @field [parent=#Textfield] default
+default_gui["helmod_textfield_filter"] = {
+  type = "textbox_style",
+  parent = "search_textfield_with_fixed_width",
+  minimal_width = 200,
+  maximal_width = 200
+}
+
+-------------------------------------------------------------------------------
 -- Style of element
 --
 -- @field [parent=#Textfield] element

@@ -65,9 +65,30 @@ end
 --
 -- @return #boolean
 --
-function User.isWriter()
-  local model = Model.getModel()
+function User.isReader(model)
+  return Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 1) > 0)
+end
+
+-------------------------------------------------------------------------------
+-- Return is writer player
+--
+-- @function [parent=#User] isWriter
+--
+-- @return #boolean
+--
+function User.isWriter(model)
   return Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0)
+end
+
+-------------------------------------------------------------------------------
+-- Return is writer player
+--
+-- @function [parent=#User] isWriter
+--
+-- @return #boolean
+--
+function User.isDeleter(model)
+  return Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 4) > 0)
 end
 
 -------------------------------------------------------------------------------
@@ -730,7 +751,7 @@ end
 --
 function User.isTranslate()
   local translated = User.get("translated")
-  return translated ~= nil and Model.countList(translated) > 0
+  return translated ~= nil and table.size(translated) > 0
 end
 
 -------------------------------------------------------------------------------
@@ -852,6 +873,16 @@ function User.getProductSorter2()
     return function(t,a,b) return t[b].count < t[a].count end
   end
   return nil
+end
+
+-------------------------------------------------------------------------------
+-- Get Function Product Sorter
+--
+-- @function [parent=#User] getProductSorter2
+--
+function User.setParameterObjects(classname, model_id, block_id, recipe_id)
+  local parameter_objects = string.format("%s_%s", classname, "objects")
+  User.setParameter(parameter_objects, {name=parameter_objects, model=model_id, block=block_id, recipe=recipe_id})
 end
 
 return User

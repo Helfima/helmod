@@ -5,8 +5,8 @@
 -- @extends #Form
 --
 
-AbstractSelector = newclass(Form,function(base,classname)
-  Form.init(base,classname)
+AbstractSelector = newclass(FormModel,function(base,classname)
+  FormModel.init(base,classname)
   base.auto_clear = false
 end)
 
@@ -206,16 +206,16 @@ end
 -- @param #LuaEvent event
 --
 function AbstractSelector:onBeforeOpen(event)
-  
+  FormModel.onBeforeOpen(self, event)
   if event.action == "OPEN" then
     User.setParameter(self.parameterTarget, event.item1)
   end
   
-  if event.item3 ~= nil and event.item3 ~= "" then
+  if event.item4 ~= nil and event.item4 ~= "" then
     if User.isFilterTranslate()  then
-      User.setParameter("filter_prototype", User.getTranslate(event.item3))
+      User.setParameter("filter_prototype", User.getTranslate(event.item4))
     else
-      User.setParameter("filter_prototype", event.item3)
+      User.setParameter("filter_prototype", event.item4)
     end
     if event.reset ~= true then
       event.reset = true
@@ -246,13 +246,15 @@ end
 --
 function AbstractSelector:onEvent(event)
   local default_settings = User.getDefaultSettings()
+  local model, block, recipe = self:getParameterObjects()
+  local prototype_type = event.item1
+  local prototype_name = event.item2
 
-  local model = Model.getModel()
-  if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
+  if User.isWriter() then
     if User.getParameter(self.parameterTarget) == "HMPropertiesPanel" then
       if event.action == "element-select" then
         local prototype_compare = User.getParameter("prototype_compare") or {}
-        table.insert(prototype_compare, {type = event.item1, name = event.item2 })
+        table.insert(prototype_compare, {type = prototype_type, name = prototype_name })
         User.setParameter("prototype_compare", prototype_compare)
         self:close()
         Controller:send("on_gui_refresh", event)
@@ -264,29 +266,30 @@ function AbstractSelector:onEvent(event)
       end
     else
       -- classic selector
-      if event.action == "element-select" and event.item1 ~= "container" then
+      if event.action == "element-select" and prototype_type ~= "container" then
         local index = nil
         if self:getProductFilter() == false then index = 0 end
-        local new_recipe = ModelBuilder.addRecipeIntoProductionBlock(event.item2, event.item1, index)
-        ModelCompute.update()
+        local new_block, new_recipe = ModelBuilder.addRecipeIntoProductionBlock(model, block, prototype_name, prototype_type, index)
+        ModelCompute.update(model)
         User.setParameter("scroll_element", new_recipe.id)
         User.setActiveForm("HMProductionBlockTab")
+        User.setParameterObjects("HMProductionBlockTab", model.id, new_block.id, new_recipe.id)
         Controller:send("on_gui_refresh", event)
       end
       -- container selector
-      if event.action == "element-select" and event.item1 == "container" then
-        local type = EntityPrototype(event.item2):getType()
+      if event.action == "element-select" and prototype_type == "container" then
+        local type = EntityPrototype(prototype_name):getType()
         if type == "container" or type == "logistic-container" then
-          User.setParameter("container_solid",event.item2)
+          User.setParameter("container_solid", prototype_name)
         end
         if type == "storage-tank" then
-          User.setParameter("container_fluid",event.item2)
+          User.setParameter("container_fluid", prototype_name)
         end
         if type == "car" or type == "cargo-wagon" or type == "item-with-entity-data"  or type == "logistic-robot" or type == "transport-belt" then
-          User.setParameter("vehicle_solid",event.item2)
+          User.setParameter("vehicle_solid", prototype_name)
         end
         if type == "fluid-wagon" then
-          User.setParameter("vehicle_fluid",event.item2)
+          User.setParameter("vehicle_fluid", prototype_name)
         end
         Controller:send("on_gui_refresh", event)
       end
@@ -473,7 +476,6 @@ function AbstractSelector:onUpdate(event)
 -- @return boolean
 --
 function AbstractSelector:checkFilter(search)
-  local filter_prototype_product = self:getProductFilter()
   local filter_prototype = self:getFilter()
   if filter_prototype ~= nil and filter_prototype ~= "" then
     if User.isFilterTranslate()  then
@@ -546,11 +548,11 @@ function AbstractSelector:updateFilter(event)
     GuiElement.add(filter_table, GuiLabel("filter-value"):caption({"helmod_common.filter"}))
     local cellFilter = GuiElement.add(filter_table, GuiFrameH("cell-filter"):style(helmod_frame_style.hidden))
     if User.getModGlobalSetting("filter_on_text_changed") then
-      local text_filter = GuiElement.add(cellFilter, GuiTextField(self.classname, "recipe-filter", "filter-value=onchange"):text(filter_prototype):style())
+      local text_filter = GuiElement.add(cellFilter, GuiTextField(self.classname, "recipe-filter", "filter-value=onchange"):text(filter_prototype):style("helmod_textfield_filter"))
       text_filter.lose_focus_on_confirm = false
       text_filter.focus()
     else
-      GuiElement.add(cellFilter, GuiTextField(self.classname, "recipe-filter", "filter-text"):text(filter_prototype):style())
+      GuiElement.add(cellFilter, GuiTextField(self.classname, "recipe-filter", "filter-text"):text(filter_prototype):style("helmod_textfield_filter"))
       GuiElement.add(cellFilter, GuiButton(self.classname, "recipe-filter", "filter-button"):caption({"helmod_button.apply"}))
     end
   end
@@ -582,7 +584,7 @@ function AbstractSelector:createElementLists(event)
   local list_group = self:getListGroup()
   local list_subgroup = self:getListSubGroup()
 
-  if Model.countList(list_group) == 0 and event.continue ~= true then
+  if table.size(list_group) == 0 and event.continue ~= true then
     local list = self:getListPrototype()
     local step_list = User.getModGlobalSetting("user_cache_step") or 100
     local index = 0
@@ -734,7 +736,7 @@ function AbstractSelector:updateItemList(event)
   
   -- recuperation recipes et subgroupes
   local recipe_selector_list = GuiElement.add(item_list_panel, GuiFlowV("recipe_list"))
-  if Model.countList(list_item) > 0 then
+  if table.size(list_item) > 0 then
     for subgroup, list in spairs(list_item,function(t,a,b) return list_subgroup[b]["order"] > list_subgroup[a]["order"] end) do
       -- boucle subgroup
       local guiRecipeSubgroup = GuiElement.add(recipe_selector_list, GuiTable("recipe-table-", subgroup):column(10):style("helmod_table_recipe_selector"))
@@ -743,7 +745,7 @@ function AbstractSelector:updateItemList(event)
         self:buildPrototypeIcon(guiRecipeSubgroup, prototype, tooltip)
       end
     end
-  else
+else
     event.message = "Empty list"
     Dispatcher:send("on_gui_message", event, self.classname)
   end
@@ -797,9 +799,10 @@ function AbstractSelector.updateGroupSelector(self, event)
       color = "yellow"
     end
     if group.name ~= "helmod" then
-      local tooltip = "item-group-name."..group.name
+      --local tooltip = {"", "item-group-name."..group.name, "\nOrder=", group.order, "\nOrder in recipe=", group.order_in_recipe}
+      local tooltip = {"", "item-group-name."..group.name}
       -- ajoute les icons de groupe
-      local action = GuiElement.add(gui_group_panel, GuiButtonSelectSpriteXxl(self.classname, "recipe-group"):sprite(self.sprite_type, group.name):tooltip({tooltip}):color(color))
+      local action = GuiElement.add(gui_group_panel, GuiButtonSelectSpriteXxl(self.classname, "recipe-group"):sprite(self.sprite_type, group.name):tooltip(tooltip):color(color))
     else
       local tooltip = "Helmod"
       -- ajoute les icons de groupe

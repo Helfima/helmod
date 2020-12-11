@@ -2,12 +2,10 @@
 -- Class to build recipe edition dialog
 --
 -- @module RecipeEdition
--- @extends #AbstractEdition
+-- @extends #FormModel
 --
 
-RecipeEdition = newclass(Form,function(base,classname)
-  Form.init(base,classname)
-end)
+RecipeEdition = newclass(FormModel)
 
 local limit_display_height = 850
 
@@ -88,37 +86,6 @@ function RecipeEdition:getTabPanel()
     tab_panel.add_tab(beacon_tab_panel, beacon_panel)
     return factory_panel, beacon_panel
   end
-end
-
--------------------------------------------------------------------------------
--- Get object
---
--- @function [parent=#RecipeEdition] getObject
---
-function RecipeEdition:getObject()
-  local model = Model.getModel()
-  local element = User.getParameter("recipe_edition_object")
-  if element ~= nil and model.blocks[element.block] ~= nil and model.blocks[element.block].recipes[element.recipe] ~= nil then
-    return model.blocks[element.block].recipes[element.recipe]
-  end
-  return nil
-end
-
--------------------------------------------------------------------------------
--- Get objects
---
--- @function [parent=#RecipeEdition] getObjects
---
-function RecipeEdition:getObjects()
-  local model = Model.getModel()
-  local element = User.getParameter("recipe_edition_object")
-  local block = nil
-  local recipe = nil
-  if element ~= nil and model.blocks[element.block] ~= nil and model.blocks[element.block].recipes[element.recipe] ~= nil then
-    block = model.blocks[element.block]
-    recipe = model.blocks[element.block].recipes[element.recipe]
-  end
-  return block, recipe
 end
 
 -------------------------------------------------------------------------------
@@ -251,11 +218,11 @@ end
 -- @return #boolean if true the next call close dialog
 --
 function RecipeEdition:onBeforeOpen(event)
+  FormModel.onBeforeOpen(self, event)
   local close = (event.action == "OPEN") -- only on open event
   User.setParameter("module_list_refresh",false)
-  if event.action == "OPEN" and event.item1 ~= nil and event.item2 ~= nil then
-    local parameter_last = string.format("%s%s", event.item1, event.item2)
-    User.setParameter("recipe_edition_object", {block=event.item1, recipe=event.item2})
+  if event.action == "OPEN" then
+    local parameter_last = string.format("%s%s%s", event.item1, event.item2, event.item3)
     if User.getParameter(self.parameterLast) or User.getParameter(self.parameterLast) ~= parameter_last then
       close = false
       User.setParameter("factory_group_selected",nil)
@@ -279,44 +246,28 @@ function RecipeEdition:onEvent(event)
   local display_width, display_height = GuiElement.getDisplaySizes()
 
   if User.isWriter() then
-    local block, recipe = self:getObjects()
+    local model, block, recipe = self:getParameterObjects()
+    
+    if model == nil or block == nil or recipe == nil then return end
+
     User.setParameter("scroll_element", recipe.id)
     
-    if event.action == "object-update" then
-      local options = {}
+    if event.action == "recipe-update" then
       local text = event.element.text
-      options["production"] = (tonumber(text) or 100)/100
-      ModelBuilder.updateObject(block.id, recipe.id, options)
-      ModelCompute.update()
+      local production = (tonumber(text) or 100)/100
+      ModelBuilder.updateRecipeProduction(recipe, production)
+      ModelCompute.update(model)
       self:updateObjectInfo(event)
       Controller:send("on_gui_refresh", event)
     end
 
     if event.action == "factory-select" then
       -- item1=recipe item2=factory
-      Model.setFactory(block.id, recipe.id, event.item3)
-      ModelBuilder.applyFactoryModulePriority(block.id, recipe.id)
-      ModelCompute.update()
+      Model.setFactory(recipe, event.item4)
+      ModelBuilder.applyFactoryModulePriority(recipe)
+      ModelCompute.update(model)
       self:update(event)
       Controller:send("on_gui_refresh", event)
-    end
-
-    if event.action == "factory-update" then
-      local options = {}
-
-      local text = event.element.text
-      local ok , err = pcall(function()
-        options["limit"] = formula(text) or 0
-
-        ModelBuilder.updateFactory(block.id, recipe.id, options)
-        ModelCompute.update()
-        self:updateFactoryInfo(event)
-        self:updateHeader(event)
-        Controller:send("on_gui_refresh", event)
-      end)
-      if not(ok) then
-        Player.print("Formula is not valid!")
-      end
     end
 
     if event.action == "factory-temperature" then
@@ -331,8 +282,8 @@ function RecipeEdition:onEvent(event)
         Player.print("Formula is not valid!")
       end
         
-      ModelBuilder.updateTemperatureFactory(block.id, recipe.id, temperature)
-      ModelCompute.update()
+      ModelBuilder.updateTemperatureFactory(recipe, temperature)
+      ModelCompute.update(model)
       self:updateFactoryInfo(event)
       self:updateHeader(event)
       Controller:send("on_gui_refresh", event)
@@ -345,10 +296,6 @@ function RecipeEdition:onEvent(event)
       local energy_type = factory_prototype:getEnergyTypeInput()
       local fuel_list = {}
       if energy_type == "burner" or energy_type == "fluid" then
-        local fuel_type = "item"
-        if energy_type == "fluid" then
-          fuel_type = "fluid"
-        end
         local energy_prototype = factory_prototype:getEnergySource()
 
         if energy_type == "fluid" then
@@ -357,15 +304,15 @@ function RecipeEdition:onEvent(event)
           fuel_list = energy_prototype:getFuelPrototypes()
         end
       end
-      local options = {}
+      local fuel_name = nil
       for _,item in pairs(fuel_list) do
         if index == 1 then
-          options.fuel = item.name
+          fuel_name = item.name
           break end
         index = index - 1
       end
-      ModelBuilder.updateFuelFactory(block.id, recipe.id, options)
-      ModelCompute.update()
+      ModelBuilder.updateFuelFactory(recipe, fuel_name)
+      ModelCompute.update(model)
       self:updateFactoryInfoTool(event)
       self:updateFactoryInfo(event)
       self:updateHeader(event)
@@ -373,51 +320,51 @@ function RecipeEdition:onEvent(event)
     end
 
     if event.action == "factory-tool" then
-      if event.item3 == "default" then
+      if event.item4 == "default" then
         User.setDefaultFactory(recipe)
-      elseif event.item3 == "block" then
-        ModelBuilder.setFactoryBlock(block.id, recipe)
-        ModelCompute.update()
+      elseif event.item4 == "block" then
+        ModelBuilder.setFactoryBlock(block, recipe)
+        ModelCompute.update(model)
         Controller:send("on_gui_refresh", event)
-      elseif event.item3 == "line" then
-        ModelBuilder.setFactoryLine(recipe)
-        ModelCompute.update()
+      elseif event.item4 == "line" then
+        ModelBuilder.setFactoryLine(model, recipe)
+        ModelCompute.update(model)
         Controller:send("on_gui_refresh", event)
-      elseif event.item3 == "all" then
+      elseif event.item4 == "all" then
         User.setParameter("default_factory_mode", "all")
-      elseif event.item3 == "category" then
+      elseif event.item4 == "category" then
         User.setParameter("default_factory_mode", "category")
-      elseif event.item3 == "module" then
+      elseif event.item4 == "module" then
         User.setParameter("default_factory_with_module", not(User.getParameter("default_factory_with_module")))
-      elseif event.item3 == "temperature" then
-        ModelBuilder.updateFactoryTemperature(block.id, recipe.id)
-        ModelCompute.update()
+      elseif event.item4 == "temperature" then
+        ModelBuilder.updateFactoryTemperature(recipe)
+        ModelCompute.update(model)
         Controller:send("on_gui_refresh", event)
       end
       self:update(event)
     end
 
     if event.action == "factory-module-tool" then
-      if event.item3 == "default" then
+      if event.item4 == "default" then
         User.setDefaultFactoryModule(recipe)
-      elseif event.item3 == "block" then
-        ModelBuilder.setFactoryModuleBlock(block.id, recipe)
-        ModelCompute.update()
+      elseif event.item4 == "block" then
+        ModelBuilder.setFactoryModuleBlock(block, recipe)
+        ModelCompute.update(model)
         Controller:send("on_gui_refresh", event)
-      elseif event.item3 == "line" then
-        ModelBuilder.setFactoryModuleLine(recipe)
-        ModelCompute.update()
+      elseif event.item4 == "line" then
+        ModelBuilder.setFactoryModuleLine(model, recipe)
+        ModelCompute.update(model)
         Controller:send("on_gui_refresh", event)
-      elseif event.item3 == "erase" then
-        ModelBuilder.setFactoryModulePriority(block.id, recipe.id, nil)
-        ModelCompute.update()
+      elseif event.item4 == "erase" then
+        ModelBuilder.setFactoryModulePriority(recipe, nil)
+        ModelCompute.update(model)
         Controller:send("on_gui_refresh", event)
       end
       self:update(event)
     end
 
     if event.action == "factory-module-priority-select" then
-      User.setParameter("factory_module_priority", tonumber(event.item3))
+      User.setParameter("factory_module_priority", tonumber(event.item4))
       self:updateFactoryModules(event)
     end
 
@@ -425,69 +372,69 @@ function RecipeEdition:onEvent(event)
       local factory_module_priority = User.getParameter("factory_module_priority") or 1
       local priority_modules = User.getParameter("priority_modules")
       if factory_module_priority ~= nil and priority_modules ~= nil and priority_modules[factory_module_priority] ~= nil then
-        ModelBuilder.setFactoryModulePriority(block.id, recipe.id, priority_modules[factory_module_priority])
-        ModelCompute.update()
+        ModelBuilder.setFactoryModulePriority(recipe, priority_modules[factory_module_priority])
+        ModelCompute.update(model)
         self:update(event)
         Controller:send("on_gui_refresh", event)
       end
     end
 
     if event.action == "factory-module-select" then
-      ModelBuilder.addFactoryModule(block.id, recipe.id, event.item3, event.control)
-      ModelCompute.update()
+      ModelBuilder.addFactoryModule(recipe, event.item4, event.control)
+      ModelCompute.update(model)
       self:update(event)
       Controller:send("on_gui_refresh", event)
     end
     
     if event.action == "factory-module-remove" then
-      ModelBuilder.removeFactoryModule(block.id, recipe.id, event.item3, event.control)
-      ModelCompute.update()
+      ModelBuilder.removeFactoryModule(recipe, event.item4, event.control)
+      ModelCompute.update(model)
       self:update(event)
       Controller:send("on_gui_refresh", event)
     end
     
     if event.action == "beacon-tool" then
-      if event.item3 == "default" then
+      if event.item4 == "default" then
         User.setDefaultBeacon(recipe)
-      elseif event.item3 == "block" then
-        ModelBuilder.setBeaconBlock(block.id, recipe)
-        ModelCompute.update()
+      elseif event.item4 == "block" then
+        ModelBuilder.setBeaconBlock(block, recipe)
+        ModelCompute.update(model)
         Controller:send("on_gui_refresh", event)
-      elseif event.item3 == "line" then
-        ModelBuilder.setBeaconLine(recipe)
-        ModelCompute.update()
+      elseif event.item4 == "line" then
+        ModelBuilder.setBeaconLine(model, recipe)
+        ModelCompute.update(model)
         Controller:send("on_gui_refresh", event)
-      elseif event.item3 == "all" then
+      elseif event.item4 == "all" then
         User.setParameter("default_beacon_mode", "all")
-      elseif event.item3 == "category" then
+      elseif event.item4 == "category" then
         User.setParameter("default_beacon_mode", "category")
-      elseif event.item3 == "module" then
+      elseif event.item4 == "module" then
         User.setParameter("default_beacon_with_module", not(User.getParameter("default_beacon_with_module")))
       end
       self:update(event)
     end
 
     if event.action == "beacon-module-tool" then
-      if event.item3 == "default" then
+      if event.item4 == "default" then
         User.setDefaultBeaconModule(recipe)
-      elseif event.item3 == "block" then
-        ModelBuilder.setBeaconModuleBlock(block.id, recipe)
-        ModelCompute.update()
+      elseif event.item4 == "block" then
+        ModelBuilder.setBeaconModuleBlock(block, recipe)
+        ModelCompute.update(model)
         Controller:send("on_gui_refresh", event)
-      elseif event.item3 == "line" then
-        ModelBuilder.setBeaconModuleLine(recipe)
-        ModelCompute.update()
+      elseif event.item4 == "line" then
+        ModelBuilder.setBeaconModuleLine(model, recipe)
+        ModelCompute.update(model)
         Controller:send("on_gui_refresh", event)
-      elseif event.item3 == "erase" then
-        ModelBuilder.setBeaconModulePriority(block.id, recipe.id, nil)
-        ModelCompute.update()
+      elseif event.item4 == "erase" then
+        ModelBuilder.setBeaconModulePriority(recipe, nil)
+        ModelCompute.update(model)
         Controller:send("on_gui_refresh", event)
       end
       self:update(event)
     end
 
     if event.action == "beacon-module-priority-select" then
-      User.setParameter("beacon_module_priority", tonumber(event.item3))
+      User.setParameter("beacon_module_priority", tonumber(event.item4))
       self:updateBeaconModules(event)
     end
 
@@ -495,30 +442,30 @@ function RecipeEdition:onEvent(event)
       local beacon_module_priority = User.getParameter("beacon_module_priority") or 1
       local priority_modules = User.getParameter("priority_modules")
       if beacon_module_priority ~= nil and priority_modules ~= nil and priority_modules[beacon_module_priority] ~= nil then
-        ModelBuilder.setBeaconModulePriority(block.id, recipe.id, priority_modules[beacon_module_priority])
-        ModelCompute.update()
+        ModelBuilder.setBeaconModulePriority(recipe, priority_modules[beacon_module_priority])
+        ModelCompute.update(model)
         self:update(event)
         Controller:send("on_gui_refresh", event)
       end
     end
 
     if event.action == "beacon-module-select" then
-      ModelBuilder.addBeaconModule(block.id, recipe.id, event.item3, event.control)
-      ModelCompute.update()
+      ModelBuilder.addBeaconModule(recipe, event.item4, event.control)
+      ModelCompute.update(model)
       self:update(event)
       Controller:send("on_gui_refresh", event)
     end
     
     if event.action == "beacon-module-remove" then
-      ModelBuilder.removeBeaconModule(block.id, recipe.id, event.item3, event.control)
-      ModelCompute.update()
+      ModelBuilder.removeBeaconModule(recipe, event.item4, event.control)
+      ModelCompute.update(model)
       self:update(event)
       Controller:send("on_gui_refresh", event)
     end
     
     if event.action == "beacon-select" then
-      Model.setBeacon(block.id, recipe.id, event.item3)
-      ModelCompute.update()
+      Model.setBeacon(recipe, event.item4)
+      ModelCompute.update(model)
       self:update(event)
       Controller:send("on_gui_refresh", event)
     end
@@ -528,10 +475,10 @@ function RecipeEdition:onEvent(event)
       local text = event.element.text
       -- item3 = "combo" or "factory"
       local ok , err = pcall(function()
-        options[event.item3] = formula(text) or 0
+        options[event.item4] = formula(text) or 0
 
-        ModelBuilder.updateBeacon(block.id, recipe.id, options)
-        ModelCompute.update()
+        ModelBuilder.updateBeacon(recipe, options)
+        ModelCompute.update(model)
         self:updateBeaconInfo(event)
         if display_height >= limit_display_height or User.getParameter("factory_tab") then
           self:updateFactoryInfo(event)
@@ -575,15 +522,12 @@ end
 -- @param #LuaEvent event
 --
 function RecipeEdition:onOpen(event)
-  local object = self:getObject()
-
   if User.getParameter("module_panel") == nil then
     User.setParameter("module_panel", true)
   end
   if User.getParameter("factory_tab") == nil then
     User.setParameter("factory_tab", true)
   end
-
 end
 -------------------------------------------------------------------------------
 -- On update
@@ -593,7 +537,7 @@ end
 -- @param #LuaEvent event
 --
 function RecipeEdition:onUpdate(event)
-  local block, recipe = self:getObjects()
+  local model, block, recipe = self:getParameterObjects()
   -- header
   self:updateHeader(event)
   if recipe ~= nil then
@@ -625,7 +569,7 @@ end
 function RecipeEdition:updateTabMenu(event)
   local tab_left_panel = self:getTabLeftPanel()
   local tab_right_panel = self:getTabRightPanel()
-  local block, recipe = self:getObjects()
+  local model, block, recipe = self:getParameterObjects()
 
   local display_width, display_height = GuiElement.getDisplaySizes()
 
@@ -638,13 +582,13 @@ function RecipeEdition:updateTabMenu(event)
     if User.getParameter("factory_tab") == true then style = "helmod_button_tab_selected" end
 
     GuiElement.add(tab_left_panel, GuiFrameH(self.classname, "separator_factory"):style(helmod_frame_style.tab)).style.width = 5
-    GuiElement.add(tab_left_panel, GuiButton(self.classname, "edition-change-tab", block.id, recipe.id, "factory"):style(style):caption({"helmod_common.factory"}):tooltip({"helmod_common.factory"}))
+    GuiElement.add(tab_left_panel, GuiButton(self.classname, "edition-change-tab", model.id, block.id, recipe.id, "factory"):style(style):caption({"helmod_common.factory"}):tooltip({"helmod_common.factory"}))
 
     local style = "helmod_button_tab"
     if User.getParameter("factory_tab") == false then style = "helmod_button_tab_selected" end
 
     GuiElement.add(tab_left_panel, GuiFrameH(self.classname, "separator_beacon"):style(helmod_frame_style.tab)).style.width = 5
-    GuiElement.add(tab_left_panel, GuiButton(self.classname, "edition-change-tab", block.id, recipe.id, "beacon"):style(style):caption({"helmod_common.beacon"}):tooltip({"helmod_common.beacon"}))
+    GuiElement.add(tab_left_panel, GuiButton(self.classname, "edition-change-tab", model.id, block.id, recipe.id, "beacon"):style(style):caption({"helmod_common.beacon"}):tooltip({"helmod_common.beacon"}))
 
     GuiElement.add(tab_left_panel, GuiFrameH("tab_final"):style(helmod_frame_style.tab)).style.width = 100
   end
@@ -653,13 +597,13 @@ function RecipeEdition:updateTabMenu(event)
   if User.getParameter("module_panel") == false then style = "helmod_button_tab_selected" end
 
   GuiElement.add(tab_right_panel, GuiFrameH(self.classname, "separator_factory"):style(helmod_frame_style.tab)).style.width = 5
-  GuiElement.add(tab_right_panel, GuiButton(self.classname, "change-panel", block.id, recipe.id, "factory"):style(style):caption({"helmod_common.factory"}):tooltip({"tooltip.selector-factory"}))
+  GuiElement.add(tab_right_panel, GuiButton(self.classname, "change-panel", model.id, block.id, recipe.id, "factory"):style(style):caption({"helmod_common.factory"}):tooltip({"tooltip.selector-factory"}))
 
   local style = "helmod_button_tab"
   if User.getParameter("module_panel") == true then style = "helmod_button_tab_selected" end
 
   GuiElement.addGuiFrameH(tab_right_panel, self.classname.."_separator_module",helmod_frame_style.tab).style.width = 5
-  GuiElement.add(tab_right_panel, GuiButton(self.classname, "change-panel", block.id, recipe.id, "module"):style(style):caption({"helmod_common.module"}):tooltip({"tooltip.selector-module"}))
+  GuiElement.add(tab_right_panel, GuiButton(self.classname, "change-panel", model.id, block.id, recipe.id, "module"):style(style):caption({"helmod_common.module"}):tooltip({"tooltip.selector-module"}))
 
   GuiElement.add(tab_right_panel, GuiFrameH("tab_final"):style(helmod_frame_style.tab)).style.width = 100
 end
@@ -673,7 +617,7 @@ end
 --
 function RecipeEdition:updateFactoryInfoTool(event)
   local tool_panel, detail_panel = self:getFactoryInfoPanel()
-  local block, recipe = self:getObjects()
+  local model, block, recipe = self:getParameterObjects()
   if recipe ~= nil then
     local factory = recipe.factory
     local factory_prototype = EntityPrototype(factory)
@@ -689,9 +633,9 @@ function RecipeEdition:updateFactoryInfoTool(event)
     local default_factory = User.getDefaultFactory(recipe)
     local record_style = "helmod_button_menu_sm"
     if default_factory ~= nil and default_factory.name == factory.name  and default_factory.fuel == factory.fuel  then record_style = "helmod_button_menu_sm_selected" end
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool", block.id, recipe.id, "default"):sprite("menu", "record-white-sm", "record-sm"):style(record_style):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.set-default"):element(default_factory)))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool", block.id, recipe.id, "block"):sprite("menu", "play-white-sm", "play-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.apply-block"):element(factory):tooltip("helmod_recipe-edition-panel.current-factory")))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool", block.id, recipe.id, "line"):sprite("menu", "end-white-sm", "end-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.apply-line"):element(factory):tooltip("helmod_recipe-edition-panel.current-factory")))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool", model.id, block.id, recipe.id, "default"):sprite("menu", "record-white-sm", "record-sm"):style(record_style):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.set-default"):element(default_factory)))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool", model.id, block.id, recipe.id, "block"):sprite("menu", "play-white-sm", "play-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.apply-block"):element(factory):tooltip("helmod_recipe-edition-panel.current-factory")))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool", model.id, block.id, recipe.id, "line"):sprite("menu", "end-white-sm", "end-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.apply-line"):element(factory):tooltip("helmod_recipe-edition-panel.current-factory")))
 
     local tool_panel2 = GuiElement.add(tool_action_panel, GuiFlowH("tool2"))
     local button_style = "helmod_button_small_bold"
@@ -703,16 +647,16 @@ function RecipeEdition:updateFactoryInfoTool(event)
       all_button_style = selected_button_style
       category_button_style = button_style
     end
-    GuiElement.add(tool_panel2, GuiButton(self.classname, "factory-tool", block.id, recipe.id, "all"):caption("A"):style(all_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-all"}))
-    GuiElement.add(tool_panel2, GuiButton(self.classname, "factory-tool", block.id, recipe.id, "category"):caption("C"):style(category_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-category"}))
+    GuiElement.add(tool_panel2, GuiButton(self.classname, "factory-tool", model.id, block.id, recipe.id, "all"):caption("A"):style(all_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-all"}))
+    GuiElement.add(tool_panel2, GuiButton(self.classname, "factory-tool", model.id, block.id, recipe.id, "category"):caption("C"):style(category_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-category"}))
     local default_factory_with_module = User.getParameter("default_factory_with_module")
     local module_button_style = button_style
     if default_factory_with_module == true then module_button_style = selected_button_style end
-    GuiElement.add(tool_panel2, GuiButton(self.classname, "factory-tool", block.id, recipe.id, "module"):caption("M"):style(module_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-module"}))
+    GuiElement.add(tool_panel2, GuiButton(self.classname, "factory-tool", model.id, block.id, recipe.id, "module"):caption("M"):style(module_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-module"}))
     if factory_prototype:getType() == "boiler" then
       local temperature_button_style = button_style
       if factory.temperature_enabled == true then temperature_button_style = selected_button_style end
-      GuiElement.add(tool_panel2, GuiButton(self.classname, "factory-tool", block.id, recipe.id, "temperature"):caption("T"):style(temperature_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-temperature"}))
+      GuiElement.add(tool_panel2, GuiButton(self.classname, "factory-tool", model.id, block.id, recipe.id, "temperature"):caption("T"):style(temperature_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-temperature"}))
     end
 
   end
@@ -727,7 +671,7 @@ end
 --
 function RecipeEdition:updateFactoryInfo(event)
   local tool_panel, detail_panel = self:getFactoryInfoPanel()
-  local block, recipe = self:getObjects()
+  local model, block, recipe = self:getParameterObjects()
   if recipe ~= nil then
     local factory = recipe.factory
     local factory_prototype = EntityPrototype(factory)
@@ -749,7 +693,7 @@ function RecipeEdition:updateFactoryInfo(event)
     for key, element in pairs(factories) do
       local color = nil
       if factory.name == element.name then color = GuiElement.color_button_edit end
-      local button = GuiElement.add(factory_table_panel, GuiButtonSelectSprite(self.classname, "factory-select", block.id, recipe.id):choose("entity", element.name):color(color))
+      local button = GuiElement.add(factory_table_panel, GuiButtonSelectSprite(self.classname, "factory-select", model.id, block.id, recipe.id):choose("entity", element.name):color(color))
       button.locked = true
     end
 
@@ -802,7 +746,7 @@ function RecipeEdition:updateFactoryInfo(event)
         end
         local default_fuel = string.format("[%s=%s]", fuel_type, factory_fuel:native().name)
         GuiElement.add(input_panel, GuiLabel("label-burner"):caption({"helmod_common.resource"}))
-        GuiElement.add(input_panel, GuiDropDown(self.classname, "factory-fuel-update", block.id, recipe.id, fuel_type):items(items, default_fuel))
+        GuiElement.add(input_panel, GuiDropDown(self.classname, "factory-fuel-update", model.id, block.id, recipe.id, fuel_type):items(items, default_fuel))
       end
       -- local maximum_temperature = factory_prototype:getMaximumTemperature()
       -- if maximum_temperature > 0 then
@@ -869,7 +813,7 @@ end
 function RecipeEdition:updateFactoryModulesActive(event)
   if not(self:isOpened()) then return end
   local tool_panel, module_panel = self:getFactoryModulePanel()
-  local block, recipe = self:getObjects()
+  local model, block, recipe = self:getParameterObjects()
   if recipe ~= nil then
     local factory = recipe.factory
 
@@ -884,10 +828,10 @@ function RecipeEdition:updateFactoryModulesActive(event)
     local default_factory_module = User.getDefaultFactoryModule(recipe)
     local record_style = "helmod_button_menu_sm"
     if compare_priority(default_factory_module, factory.module_priority) then record_style = "helmod_button_menu_sm_selected" end
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-tool", block.id, recipe.id, "default"):sprite("menu", "record-white-sm", "record-sm"):style(record_style):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.set-default"):element(default_factory_module)))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-tool", block.id, recipe.id, "block"):sprite("menu", "play-white-sm", "play-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.apply-block"):element(factory.module_priority):tooltip("helmod_recipe-edition-panel.current-module")))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-tool", block.id, recipe.id, "line"):sprite("menu", "end-white-sm", "end-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.apply-line"):element(factory.module_priority):tooltip("helmod_recipe-edition-panel.current-module")))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-tool", block.id, recipe.id, "erase"):sprite("menu", "erase-white-sm", "erase-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.module-clear"):element(factory.module_priority)))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-tool", model.id, block.id, recipe.id, "default"):sprite("menu", "record-white-sm", "record-sm"):style(record_style):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.set-default"):element(default_factory_module)))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-tool", model.id, block.id, recipe.id, "block"):sprite("menu", "play-white-sm", "play-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.apply-block"):element(factory.module_priority):tooltip("helmod_recipe-edition-panel.current-module")))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-tool", model.id, block.id, recipe.id, "line"):sprite("menu", "end-white-sm", "end-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.apply-line"):element(factory.module_priority):tooltip("helmod_recipe-edition-panel.current-module")))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-tool", model.id, block.id, recipe.id, "erase"):sprite("menu", "erase-white-sm", "erase-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.module-clear"):element(factory.module_priority)))
 
     -- actived modules panel
     local module_table = GuiElement.add(tool_panel, GuiTable("modules"):column(6):style("helmod_table_recipe_modules"))
@@ -895,7 +839,7 @@ function RecipeEdition:updateFactoryModulesActive(event)
     for module, count in pairs(factory.modules) do
       local module_cell = GuiElement.add(module_table, GuiFlowH("module-cell", module))
       local tooltip = GuiTooltipModule("tooltip.remove-module"):element({type="item", name=module}):withControlInfo(control_info)
-      GuiElement.add(module_cell, GuiButtonSelectSprite(self.classname, "factory-module-remove", block.id, recipe.id, module):sprite("item", module):tooltip(tooltip))
+      GuiElement.add(module_cell, GuiButtonSelectSprite(self.classname, "factory-module-remove", model.id, block.id, recipe.id, module):sprite("item", module):tooltip(tooltip))
       GuiElement.add(module_cell, GuiLabel("module-amount"):caption({"", "x", count}))
     end
   end
@@ -911,7 +855,7 @@ end
 function RecipeEdition:updateFactoryModules(event)
   if not(self:isOpened()) then return end
   local tool_panel, module_panel = self:getFactoryModulePanel()
-  local block, recipe = self:getObjects()
+  local model, block, recipe = self:getParameterObjects()
   if recipe ~= nil then
     local factory_switch_priority = User.getParameter("factory_switch_priority")
   
@@ -919,7 +863,7 @@ function RecipeEdition:updateFactoryModules(event)
 
     local element_state = "left"
     if factory_switch_priority == true then element_state = "right" end
-    local factory_switch_module = GuiElement.add(module_panel, GuiSwitch(self.classname, "factory-switch-module", block.id, recipe.id):state(element_state):leftLabel({"helmod_recipe-edition-panel.selection-modules"}):rightLabel({"helmod_label.priority-modules"}))
+    local factory_switch_module = GuiElement.add(module_panel, GuiSwitch(self.classname, "factory-switch-module", model.id, block.id, recipe.id):state(element_state):leftLabel({"helmod_recipe-edition-panel.selection-modules"}):rightLabel({"helmod_label.priority-modules"}))
     if factory_switch_priority == true then
       -- module priority
       self:updateFactoryModulesPriority(module_panel)
@@ -940,10 +884,7 @@ end
 -- @param #string recipe_id
 --
 function RecipeEdition:updateFactoryModulesPriority(factory_module_panel)
-  local recipe = self:getObject()
-  local element = User.getParameter("recipe_edition_object")
-  local block_id = element.block
-  local recipe_id = element.recipe
+  local model, block, recipe = self:getParameterObjects()
   -- module priority
   local factory_module_priority = User.getParameter("factory_module_priority") or 1
   local priority_modules = User.getParameter("priority_modules") or {}
@@ -956,13 +897,13 @@ function RecipeEdition:updateFactoryModulesPriority(factory_module_panel)
   local tool_panel1 = GuiElement.add(tool_action_panel2, GuiFlowH("tool1"))
   local button_style = "helmod_button_small_bold"
   GuiElement.add(tool_panel1, GuiButton("HMPreferenceEdition", "OPEN", "priority_module"):sprite("menu", "services-white-sm", "services-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_button.preferences"}))
-  GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-priority-apply", block_id, recipe_id):sprite("menu", "arrow-up-white-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_recipe-edition-panel.apply-priority"}))
+  GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-priority-apply", model.id, block.id, recipe.id):sprite("menu", "arrow-up-white-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_recipe-edition-panel.apply-priority"}))
 
   local tool_panel2 = GuiElement.add(tool_action_panel2,  GuiTable("tool2"):column(6))
   for i, priority_module in pairs(priority_modules) do
     local button_style2 = button_style
     if factory_module_priority == i then button_style2 = "helmod_button_small_bold_selected" end
-    GuiElement.add(tool_panel2, GuiButton(self.classname, "factory-module-priority-select", block_id, recipe_id, i):caption(i):style(button_style2))
+    GuiElement.add(tool_panel2, GuiButton(self.classname, "factory-module-priority-select", model.id, block.id, recipe.id, i):caption(i):style(button_style2))
   end
 
   -- module priority info
@@ -981,7 +922,7 @@ function RecipeEdition:updateFactoryModulesPriority(factory_module_panel)
         end
         color = GuiElement.color_button_rest
       end
-      GuiElement.add(priority_table_panel, GuiButtonSelectSprite(self.classname, "factory-module-select", block_id, recipe_id):sprite("entity", element.name):color(color):index(index):tooltip(tooltip))
+      GuiElement.add(priority_table_panel, GuiButtonSelectSprite(self.classname, "factory-module-select", model.id, block.id, recipe.id):sprite("entity", element.name):color(color):index(index):tooltip(tooltip))
       GuiElement.add(priority_table_panel, GuiLabel("priority-value", index):caption({"", "x", element.value}))
     end
   end
@@ -997,10 +938,9 @@ end
 -- @param #string recipe_id
 --
 function RecipeEdition:updateFactoryModulesSelector(factory_module_panel)
-  local recipe = self:getObject()
-  local element = User.getParameter("recipe_edition_object")
-  local block_id = element.block
-  local recipe_id = element.recipe
+  local model, block, recipe = self:getParameterObjects()
+  local block_id = block.id
+  local recipe_id = recipe.id
   local module_scroll = GuiElement.add(factory_module_panel, GuiScroll("module-selector-scroll"))
   module_scroll.style.maximal_height = 118
   local module_table_panel = GuiElement.add(module_scroll, GuiTable("module-selector-table"):column(6))
@@ -1017,7 +957,7 @@ function RecipeEdition:updateFactoryModulesSelector(factory_module_panel)
       end
       color = GuiElement.color_button_rest
     end
-    GuiElement.add(module_table_panel, GuiButtonSelectSprite(self.classname, "factory-module-select", block_id, recipe_id):sprite("entity", element.name):color(color):tooltip(tooltip))
+    GuiElement.add(module_table_panel, GuiButtonSelectSprite(self.classname, "factory-module-select", model.id, block.id, recipe.id):sprite("entity", element.name):color(color):tooltip(tooltip))
   end
 end
 
@@ -1030,7 +970,7 @@ end
 --
 function RecipeEdition:updateBeaconInfo(event)
   local tool_panel, detail_panel = self:getBeaconInfoPanel()
-  local block, recipe = self:getObjects()
+  local model, block, recipe = self:getParameterObjects()
   if recipe ~= nil then
     local beacon = recipe.beacon
     local beacon_prototype = EntityPrototype(beacon)
@@ -1043,10 +983,9 @@ function RecipeEdition:updateBeaconInfo(event)
 
     local factory_table_panel = GuiElement.add(scroll_panel, GuiTable("beacon-table"):column(5))
     for key, element in pairs(factories) do
-      local localised_name = EntityPrototype(element.name):getLocalisedName()
       local color = nil
       if beacon.name == element.name then color = GuiElement.color_button_edit end
-      local button = GuiElement.add(factory_table_panel, GuiButtonSelectSprite(self.classname, "beacon-select", block.id, recipe.id):choose("entity", element.name):color(color))
+      local button = GuiElement.add(factory_table_panel, GuiButtonSelectSprite(self.classname, "beacon-select", model.id, block.id, recipe.id):choose("entity", element.name):color(color))
       button.locked = true
     end
 
@@ -1070,13 +1009,13 @@ function RecipeEdition:updateBeaconInfo(event)
     GuiElement.add(input_panel, GuiLabel("efficiency"):caption(beacon_prototype:getDistributionEffectivity()))
 
     GuiElement.add(input_panel, GuiLabel("label-combo"):caption({"helmod_label.beacon-on-factory"}):tooltip({"tooltip.beacon-on-factory"}))
-    GuiElement.add(input_panel, GuiTextField(self.classname, "beacon-update", block.id, recipe.id, "combo"):text(beacon.combo):style("helmod_textfield"):tooltip({"tooltip.beacon-on-factory"}))
+    GuiElement.add(input_panel, GuiTextField(self.classname, "beacon-update", model.id, block.id, recipe.id, "combo"):text(beacon.combo):style("helmod_textfield"):tooltip({"tooltip.beacon-on-factory"}))
 
     GuiElement.add(input_panel, GuiLabel("label-by-factory"):caption({"helmod_label.beacon-per-factory"}):tooltip({"tooltip.beacon-per-factory"}))
-    GuiElement.add(input_panel, GuiTextField(self.classname, "beacon-update", block.id, recipe.id, "per_factory"):text(beacon.per_factory):style("helmod_textfield"):tooltip({"tooltip.beacon-per-factory"}))
+    GuiElement.add(input_panel, GuiTextField(self.classname, "beacon-update", model.id, block.id, recipe.id, "per_factory"):text(beacon.per_factory):style("helmod_textfield"):tooltip({"tooltip.beacon-per-factory"}))
 
     GuiElement.add(input_panel, GuiLabel("label-by-factory-constant"):caption({"helmod_label.beacon-per-factory-constant"}):tooltip({"tooltip.beacon-per-factory-constant"}))
-    GuiElement.add(input_panel, GuiTextField(self.classname, "beacon-update", block.id, recipe.id, "per_factory_constant"):text(beacon.per_factory_constant):style("helmod_textfield"):tooltip({"tooltip.beacon-per-factory-constant"}))
+    GuiElement.add(input_panel, GuiTextField(self.classname, "beacon-update", model.id, block.id, recipe.id, "per_factory_constant"):text(beacon.per_factory_constant):style("helmod_textfield"):tooltip({"tooltip.beacon-per-factory-constant"}))
   end
 end
 
@@ -1089,10 +1028,9 @@ end
 --
 function RecipeEdition:updateBeaconInfoTool(event)
   local tool_panel, detail_panel = self:getBeaconInfoPanel()
-  local block, recipe = self:getObjects()
+  local model, block, recipe = self:getParameterObjects()
   if recipe ~= nil then
     local beacon = recipe.beacon
-    local beacon_prototype = EntityPrototype(beacon)
 
     tool_panel.clear()
 
@@ -1105,9 +1043,9 @@ function RecipeEdition:updateBeaconInfoTool(event)
     local default_beacon = User.getDefaultBeacon(recipe)
     local record_style = "helmod_button_menu_sm"
     if default_beacon ~= nil and default_beacon.name == beacon.name  then record_style = "helmod_button_menu_sm_selected" end
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-tool", block.id, recipe.id, "default"):sprite("menu", "record-white-sm", "record-sm"):style(record_style):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.set-default"):element(default_beacon)))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-tool", block.id, recipe.id, "block"):sprite("menu", "play-white-sm", "play-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.apply-block"):element(beacon):tooltip("helmod_recipe-edition-panel.current-beacon")))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-tool", block.id, recipe.id, "line"):sprite("menu", "end-white-sm", "end-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.apply-line"):element(beacon):tooltip("helmod_recipe-edition-panel.current-beacon")))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-tool", model.id, block.id, recipe.id, "default"):sprite("menu", "record-white-sm", "record-sm"):style(record_style):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.set-default"):element(default_beacon)))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-tool", model.id, block.id, recipe.id, "block"):sprite("menu", "play-white-sm", "play-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.apply-block"):element(beacon):tooltip("helmod_recipe-edition-panel.current-beacon")))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-tool", model.id, block.id, recipe.id, "line"):sprite("menu", "end-white-sm", "end-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.apply-line"):element(beacon):tooltip("helmod_recipe-edition-panel.current-beacon")))
 
     local tool_panel2 = GuiElement.add(tool_action_panel, GuiFlowH("tool2"))
     local button_style = "helmod_button_small_bold"
@@ -1119,12 +1057,12 @@ function RecipeEdition:updateBeaconInfoTool(event)
       all_button_style = selected_button_style
       category_button_style = button_style
     end
-    GuiElement.add(tool_panel2, GuiButton(self.classname, "beacon-tool", block.id, recipe.id, "all"):caption("A"):style(all_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-all"}))
-    GuiElement.add(tool_panel2, GuiButton(self.classname, "beacon-tool", block.id, recipe.id, "category"):caption("C"):style(category_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-category"}))
+    GuiElement.add(tool_panel2, GuiButton(self.classname, "beacon-tool", model.id, block.id, recipe.id, "all"):caption("A"):style(all_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-all"}))
+    GuiElement.add(tool_panel2, GuiButton(self.classname, "beacon-tool", model.id, block.id, recipe.id, "category"):caption("C"):style(category_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-category"}))
     local default_beacon_with_module = User.getParameter("default_beacon_with_module")
     local module_button_style = button_style
     if default_beacon_with_module == true then module_button_style = selected_button_style end
-    GuiElement.add(tool_panel2, GuiButton(self.classname, "beacon-tool", block.id, recipe.id, "module"):caption("M"):style(module_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-module"}))
+    GuiElement.add(tool_panel2, GuiButton(self.classname, "beacon-tool", model.id, block.id, recipe.id, "module"):caption("M"):style(module_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-module"}))
 
   end
 end
@@ -1139,7 +1077,7 @@ end
 function RecipeEdition:updateBeaconModulesActive(event)
   if not(self:isOpened()) then return end
   local tool_panel, module_panel = self:getBeaconModulePanel()
-  local block, recipe = self:getObjects()
+  local model, block, recipe = self:getParameterObjects()
   if recipe ~= nil then
     local beacon = recipe.beacon
 
@@ -1154,10 +1092,10 @@ function RecipeEdition:updateBeaconModulesActive(event)
     local default_beacon_module = User.getDefaultBeaconModule(recipe)
     local record_style = "helmod_button_menu_sm"
     if compare_priority(default_beacon_module, beacon.module_priority) then record_style = "helmod_button_menu_sm_selected" end
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool", block.id, recipe.id, "default"):sprite("menu", "record-white-sm", "record-sm"):style(record_style):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.set-default"):element(default_beacon_module)))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool", block.id, recipe.id, "block"):sprite("menu", "play-white-sm", "play-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.apply-block"):element(beacon.module_priority):tooltip("helmod_recipe-edition-panel.current-module")))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool", block.id, recipe.id, "line"):sprite("menu", "end-white-sm", "end-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.apply-line"):element(beacon.module_priority):tooltip("helmod_recipe-edition-panel.current-module")))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool", block.id, recipe.id, "erase"):sprite("menu", "erase-white-sm", "erase-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.module-clear"):element(beacon.module_priority)))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool", model.id, block.id, recipe.id, "default"):sprite("menu", "record-white-sm", "record-sm"):style(record_style):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.set-default"):element(default_beacon_module)))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool", model.id, block.id, recipe.id, "block"):sprite("menu", "play-white-sm", "play-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.apply-block"):element(beacon.module_priority):tooltip("helmod_recipe-edition-panel.current-module")))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool", model.id, block.id, recipe.id, "line"):sprite("menu", "end-white-sm", "end-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.apply-line"):element(beacon.module_priority):tooltip("helmod_recipe-edition-panel.current-module")))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool", model.id, block.id, recipe.id, "erase"):sprite("menu", "erase-white-sm", "erase-sm"):style("helmod_button_menu_sm"):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.module-clear"):element(beacon.module_priority)))
 
     -- actived modules panel
     local module_table = GuiElement.add(tool_panel, GuiTable("modules"):column(6):style("helmod_table_recipe_modules"))
@@ -1165,7 +1103,7 @@ function RecipeEdition:updateBeaconModulesActive(event)
     for module, count in pairs(beacon.modules) do
       local module_cell = GuiElement.add(module_table, GuiFlowH("module-cell", module))
       local tooltip = GuiTooltipModule("tooltip.remove-module"):element({type="item", name=module}):withControlInfo(control_info)
-      GuiElement.add(module_cell, GuiButtonSelectSprite(self.classname, "beacon-module-remove", block.id, recipe.id, module):sprite("item", module):tooltip(tooltip))
+      GuiElement.add(module_cell, GuiButtonSelectSprite(self.classname, "beacon-module-remove", model.id, block.id, recipe.id, module):sprite("item", module):tooltip(tooltip))
       GuiElement.add(module_cell, GuiLabel("module-amount"):caption({"", "x", count}))
     end
   end
@@ -1181,7 +1119,7 @@ end
 function RecipeEdition:updateBeaconModules(event)
   if not(self:isOpened()) then return end
   local tool_panel, module_panel = self:getBeaconModulePanel()
-  local block, recipe = self:getObjects()
+  local model, block, recipe = self:getParameterObjects()
   if recipe ~= nil then
 
     module_panel.clear()
@@ -1189,7 +1127,7 @@ function RecipeEdition:updateBeaconModules(event)
     local beacon_switch_priority = User.getParameter("beacon_switch_priority")
     local element_state = "left"
     if beacon_switch_priority == true then element_state = "right" end
-    local factory_switch_module = GuiElement.add(module_panel, GuiSwitch(self.classname, "beacon-switch-module", block.id, recipe.id):state(element_state):leftLabel({"helmod_recipe-edition-panel.selection-modules"}):rightLabel({"helmod_label.priority-modules"}))
+    local factory_switch_module = GuiElement.add(module_panel, GuiSwitch(self.classname, "beacon-switch-module", model.id, block.id, recipe.id):state(element_state):leftLabel({"helmod_recipe-edition-panel.selection-modules"}):rightLabel({"helmod_label.priority-modules"}))
     if beacon_switch_priority == true then
       -- module priority
       self:updateBeaconModulesPriority(module_panel)
@@ -1210,10 +1148,7 @@ end
 -- @param #string recipe_id
 --
 function RecipeEdition:updateBeaconModulesPriority(beacon_module_panel)
-  local recipe = self:getObject()
-  local element = User.getParameter("recipe_edition_object")
-  local block_id = element.block
-  local recipe_id = element.recipe
+  local model, block, recipe = self:getParameterObjects()
   -- module priority
   local beacon_module_priority = User.getParameter("beacon_module_priority") or 1
   local priority_modules = User.getParameter("priority_modules") or {}
@@ -1226,13 +1161,13 @@ function RecipeEdition:updateBeaconModulesPriority(beacon_module_panel)
   local tool_panel1 = GuiElement.add(tool_action_panel2, GuiFlowH("tool1"))
   local button_style = "helmod_button_small_bold"
   GuiElement.add(tool_panel1, GuiButton("HMPreferenceEdition", "OPEN", "priority_module"):sprite("menu", "services-white-sm", "services-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_button.preferences"}))
-  GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-priority-apply", block_id, recipe_id):sprite("menu", "arrow-up-white-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_recipe-edition-panel.apply-priority"}))
+  GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-priority-apply", model.id, block.id, recipe.id):sprite("menu", "arrow-up-white-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_recipe-edition-panel.apply-priority"}))
 
   local tool_panel2 = GuiElement.add(tool_action_panel2,  GuiTable("tool2"):column(6))
   for i, priority_module in pairs(priority_modules) do
     local button_style2 = button_style
     if beacon_module_priority == i then button_style2 = "helmod_button_small_bold_selected" end
-    GuiElement.add(tool_panel2, GuiButton(self.classname, "beacon-module-priority-select", block_id, recipe_id, i):caption(i):style(button_style2))
+    GuiElement.add(tool_panel2, GuiButton(self.classname, "beacon-module-priority-select", model.id, block.id, recipe.id, i):caption(i):style(button_style2))
   end
 
   -- module priority info
@@ -1251,7 +1186,7 @@ function RecipeEdition:updateBeaconModulesPriority(beacon_module_panel)
         end
         color = GuiElement.color_button_rest
       end
-      GuiElement.add(priority_table_panel, GuiButtonSelectSprite(self.classname, "beacon-module-select", block_id, recipe_id):sprite("entity", element.name):color(color):index(index):tooltip(tooltip))
+      GuiElement.add(priority_table_panel, GuiButtonSelectSprite(self.classname, "beacon-module-select", model.id, block.id, recipe.id):sprite("entity", element.name):color(color):index(index):tooltip(tooltip))
       GuiElement.add(priority_table_panel, GuiLabel("priority-value", index):caption({"", "x", element.value}))
     end
   end
@@ -1267,10 +1202,8 @@ end
 -- @param #string recipe_id
 --
 function RecipeEdition:updateBeaconModulesSelector(beacon_module_panel)
-  local recipe = self:getObject()
-  local element = User.getParameter("recipe_edition_object")
-  local block_id = element.block
-  local recipe_id = element.recipe
+  local model, block, recipe = self:getParameterObjects()
+  
   local module_scroll = GuiElement.add(beacon_module_panel, GuiScroll("module-selector-scroll"))
   module_scroll.style.maximal_height = 118
   local module_table_panel = GuiElement.add(module_scroll, GuiTable("module-selector-table"):column(6))
@@ -1287,7 +1220,7 @@ function RecipeEdition:updateBeaconModulesSelector(beacon_module_panel)
       end
       color = GuiElement.color_button_rest
     end
-    GuiElement.add(module_table_panel, GuiButtonSelectSprite(self.classname, "beacon-module-select", block_id, recipe_id):sprite("entity", element.name):color(color):tooltip(tooltip))
+    GuiElement.add(module_table_panel, GuiButtonSelectSprite(self.classname, "beacon-module-select", model.id, block.id, recipe.id):sprite("entity", element.name):color(color):tooltip(tooltip))
   end
 end
 
@@ -1311,12 +1244,8 @@ end
 --
 function RecipeEdition:updateObjectInfo(event)
   local info_panel = self:getObjectInfoPanel()
-  local model = Model.getModel()
-  local element = User.getParameter("recipe_edition_object")
-  local recipe = self:getObject()
-  if element ~= nil and recipe ~= nil then
-    local block_id = element.block
-    local recipe_id = element.recipe
+  local model, block, recipe = self:getParameterObjects()
+  if block ~= nil and recipe ~= nil then
     info_panel.clear()
 
     local recipe_prototype = RecipePrototype(recipe)
@@ -1351,7 +1280,7 @@ function RecipeEdition:updateObjectInfo(event)
     end
 
     -- ingredients
-    local cell_ingredients = GuiElement.add(recipe_table, GuiTable("ingredients_"..recipe.id, recipe.id):column(5):style("helmod_table_element"))
+    local cell_ingredients = GuiElement.add(recipe_table, GuiTable("ingredients", recipe.id):column(5):style("helmod_table_element"))
     local lua_ingredients = recipe_prototype:getIngredients(recipe.factory)
     if lua_ingredients ~= nil then
       for index, lua_ingredient in pairs(lua_ingredients) do
@@ -1364,7 +1293,7 @@ function RecipeEdition:updateObjectInfo(event)
 
     local tablePanel = GuiElement.add(info_panel, GuiTable("table-input"):column(2))
     GuiElement.add(tablePanel, GuiLabel("label-production"):caption({"helmod_recipe-edition-panel.production"}))
-    GuiElement.add(tablePanel, GuiTextField(self.classname, "object-update", event.item1, recipe.id):text(Format.formatNumberElement((recipe.production or 1)*100)):style("helmod_textfield"))
+    GuiElement.add(tablePanel, GuiTextField(self.classname, "recipe-update", model.id, block.id, recipe.id):text(Format.formatNumberElement((recipe.production or 1)*100)):style("helmod_textfield"))
 
   end
 end

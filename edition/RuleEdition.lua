@@ -147,7 +147,9 @@ function RuleEdition:onEvent(event)
       else
         rule_value = "all"
       end
-      ModelBuilder.addRule(rule_mod, rule_name, rule_category, rule_type, rule_value, rule_excluded)
+      local rule = Model.newRule(rule_mod, rule_name, rule_category, rule_type, rule_value, rule_excluded, #Model.getRules())
+      local rules = Model.getRules()
+      table.insert(rules, rule)
       self:close()
       Controller:send("on_gui_refresh", event)
     end

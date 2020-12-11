@@ -154,6 +154,22 @@ function Form:getScrollPanel(panel_name)
 end
 
 -------------------------------------------------------------------------------
+-- Get or create scroll panel
+--
+-- @function [parent=#Form] getScrollFramePanel
+--
+function Form:getScrollFramePanel(panel_name)
+  local frame_panel = self:getFramePanel(panel_name)
+  local scroll_name = "scroll-panel"
+  if frame_panel[scroll_name] ~= nil and frame_panel[scroll_name].valid then
+    return frame_panel[scroll_name]
+  end
+  local scroll_panel = GuiElement.add(frame_panel, GuiScroll(scroll_name))
+  scroll_panel.style.horizontally_stretchable = false
+  return  scroll_panel
+end
+
+-------------------------------------------------------------------------------
 -- Get or create flow panel
 --
 -- @function [parent=#Form] getFlowPanel
@@ -306,6 +322,9 @@ function Form:open(event)
   if self:isOpened() then self:close() end
   local parent_panel = self:getParentPanel()
   User.setActiveForm(self.classname)
+  if string.find(self.classname, "Tab") then
+    User.setParameter("current_tab", self.classname)
+  end
   if parent_panel[self:getPanelName()] == nil then
     self:updateTopMenu(event)
     self:onOpen(event)
@@ -485,6 +504,20 @@ function Form:updateMessage(event)
   local panel = self:getFrameDeepPanel("message")
   panel.clear()
   GuiElement.add(panel, GuiLabel("message"):caption(event.message))
+end
+
+-------------------------------------------------------------------------------
+-- Update tips
+--
+-- @function [parent=#Form] updateTips
+--
+-- @param #LuaEvent event
+--
+function Form:updateTips(message)
+  if not(self:isOpened()) then return end
+  local panel = self:getFramePanel("tips")
+  panel.clear()
+  GuiElement.add(panel, GuiLabel("tips"):caption(message))
 end
 
 -------------------------------------------------------------------------------
