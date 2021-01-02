@@ -1,5 +1,3 @@
-require "core.Object"
-
 -------------------------------------------------------------------------------
 -- Class to help to build form
 --
@@ -325,8 +323,8 @@ function Form:open(event)
   if string.find(self.classname, "Tab") then
     User.setParameter("current_tab", self.classname)
   end
+  self:updateTopMenu(event)
   if parent_panel[self:getPanelName()] == nil then
-    self:updateTopMenu(event)
     self:onOpen(event)
   end
   return true
@@ -455,6 +453,7 @@ function Form:update(event)
   if not(self:isOpened()) then return end
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if self.auto_clear then content_panel.clear() end
+  self:updateTopMenu(event)
   self:onUpdate(event)
   self:updateLocation(event)
 end

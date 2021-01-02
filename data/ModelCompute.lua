@@ -1258,7 +1258,7 @@ end
 --
 -- @function [parent=#ModelCompute] updateVersion_0_9_3
 --
-function ModelCompute.updateVersion_0_9_3()
+function ModelCompute.updateVersion_0_9_3(model)
   if ModelCompute.versionCompare(model, "0.9.3") then
     Model.resetRules()
   end

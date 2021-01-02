@@ -76,8 +76,8 @@ function RichTextPanel:updateInput(event)
   text_field.style.width = 200
   text_field.lose_focus_on_confirm = false
   text_field.focus()
-  GuiElement.add(text_panel, GuiButton(self.classname, "richtext-clear"):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_button.clear"}))
-  GuiElement.add(text_panel, GuiButton(self.classname, "richtext-save"):sprite("menu", "save-white-sm", "save-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_button.save"}))
+  GuiElement.add(text_panel, GuiButton(self.classname, "richtext-clear"):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_actived_red"):tooltip({"helmod_button.clear"}))
+  GuiElement.add(text_panel, GuiButton(self.classname, "richtext-save"):sprite("menu", "save-sm", "save-sm"):style("helmod_button_menu_sm_actived_green"):tooltip({"helmod_button.save"}))
 end
 
 -------------------------------------------------------------------------------
@@ -91,6 +91,7 @@ function RichTextPanel:updateHistory(event)
   local history_panel = self:getScrollPanel("history-panel")
   local richtext_text = User.getParameter("richtext_text")
   history_panel.clear()
+  history_panel.style.vertically_stretchable = true
 
   -- history
   local richtext_history = User.getParameter("richtext_history") or {}
@@ -98,7 +99,7 @@ function RichTextPanel:updateHistory(event)
   for index,value in pairs(richtext_history) do
     local button = GuiElement.add(table_panel, GuiButton(self.classname, "richtext-history-use", index):caption(value):style("helmod_button_left"):tooltip({"helmod_button.use"}))
     button.style.width = 250
-    GuiElement.add(table_panel, GuiButton(self.classname, "richtext-history-delete", index):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_button.delete"}))
+    GuiElement.add(table_panel, GuiButton(self.classname, "richtext-history-delete", index):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_actived_red"):tooltip({"helmod_button.delete"}))
   end
 end
 

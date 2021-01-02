@@ -691,13 +691,14 @@ end
 -- @function [parent=#ModelBuilder] pastModel
 --
 -- @param #table into_model
+-- @param #table into_block
 -- @param #table from_model
 -- @param #table from_block
 --
-function ModelBuilder.pastModel(into_model, from_model, from_block)
+function ModelBuilder.pastModel(into_model, into_block, from_model, from_block)
   if from_model ~= nil then
     if from_block ~= nil then
-      ModelBuilder.copyBlock(into_model, from_model, from_block)
+      ModelBuilder.copyBlock(into_model, into_block, from_model, from_block)
     else
       ModelBuilder.copyModel(into_model, from_model)
     end
@@ -715,7 +716,7 @@ end
 function ModelBuilder.copyModel(into_model, from_model)
   if from_model ~= nil then
     for _,from_block in spairs(from_model.blocks,function(t,a,b) return t[b].index > t[a].index end) do
-      ModelBuilder.copyBlock(into_model, from_model, from_block)
+      ModelBuilder.copyBlock(into_model, nil, from_model, from_block)
     end
   end
 end
@@ -729,7 +730,7 @@ end
 -- @param #table from_model
 -- @param #table from_block
 --
-function ModelBuilder.copyBlock(into_model, from_model, from_block)
+function ModelBuilder.copyBlock(into_model, into_block, from_model, from_block)
   if from_model ~= nil and from_block ~= nil then
     local from_recipe_ids = {}
     for recipe_id, recipe in spairs(from_block.recipes,function(t,a,b) return t[b].index > t[a].index end) do
@@ -741,24 +742,24 @@ function ModelBuilder.copyBlock(into_model, from_model, from_block)
       local recipe_prototype = RecipePrototype(recipe)
       if recipe_prototype:native() ~= nil then
         -- ajoute le bloc si il n'existe pas
-        if into_model.blocks[to_block_id] == nil then
-          local to_block = Model.newBlock(recipe_prototype:native())
+        if into_block == nil then
+          into_block = Model.newBlock(into_model, recipe_prototype:native())
           local index = table.size(into_model.blocks)
-          to_block.index = index
-          to_block.unlinked = from_block.unlinked
-          to_block.solver = from_block.solver
-          to_block.isEnergy = from_block.isEnergy
-          to_block.by_product = from_block.by_product
+          into_block.index = index
+          into_block.unlinked = from_block.unlinked
+          into_block.solver = from_block.solver
+          into_block.isEnergy = from_block.isEnergy
+          into_block.by_product = from_block.by_product
           
           -- copy input
           if from_block.products ~= nil then
-            to_block.products = table.deepcopy(from_block.products)
+            into_block.products = table.deepcopy(from_block.products)
           end
           if from_block.ingredients ~= nil then
-            to_block.ingredients = table.deepcopy(from_block.ingredients)
+            into_block.ingredients = table.deepcopy(from_block.ingredients)
           end
 
-          into_model.blocks[to_block.id] = to_block
+          into_model.blocks[into_block.id] = into_block
         end
 
 
@@ -791,12 +792,12 @@ function ModelBuilder.copyBlock(into_model, from_model, from_block)
         if recipe.beacon.module_priority ~= nil then
           recipe_model.beacon.module_priority = table.clone(recipe.beacon.module_priority)
         end
-        into_model.blocks[to_block_id].recipes[recipe_model.id] = recipe_model
+        into_block.recipes[recipe_model.id] = recipe_model
         recipe_index = recipe_index + 1
       end
     end
-    if into_model.blocks[to_block_id] ~= nil then
-      table.reindex_list(into_model.blocks[to_block_id].recipes)
+    if into_block ~= nil then
+      table.reindex_list(into_block.recipes)
     end
   end
 end

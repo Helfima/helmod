@@ -174,7 +174,7 @@ end
 --
 function ProductEdition:onEvent(event)
   local model, block, recipe = self:getParameterObjects()
-  if User.isWriter() then
+  if User.isWriter(model) then
     if event.action == "product-update" then
       local products = {}
       local operation = input_quantity.text

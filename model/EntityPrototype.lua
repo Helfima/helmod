@@ -197,6 +197,10 @@ function EntityPrototype:getEnergyProduction()
       usage_priority = energy_prototype:getUsagePriority()
     end
     if usage_priority == "solar" then
+      local active_mods = game.active_mods
+      if active_mods["base"] ~= "1.0.0" then
+        return (self.lua_prototype.max_energy_production or 0)*60
+      end
       return (self.lua_prototype.production or 0)*60
     end
     if usage_priority == "secondary-output" or usage_priority == "primary-output" then

@@ -132,7 +132,7 @@ local list = {
   {name="end", sm=true},
   {name="energy"},
   {name="erase", sm=true},
-  {name="factory"},
+  {name="factory", sm=true, tool=true},
   {name="filter", sm=true},
   {name="filter-edit"},
   {name="graduation", sm=true, tool=true},

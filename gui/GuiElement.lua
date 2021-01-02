@@ -339,8 +339,8 @@ function GuiElement.getStyleSizes()
   style_sizes.block_data.height = height_main - 122 - row_number*32
 
   style_sizes.block_info = {}
-  style_sizes.block_info.width = 500
-  style_sizes.block_info.height = 50*2+40
+  style_sizes.block_info.width = 310
+  style_sizes.block_info.height = 50*2+45
 
   style_sizes.scroll_block = {}
   style_sizes.scroll_block.height = height_recipe_info - 34

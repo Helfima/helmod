@@ -469,6 +469,24 @@ function RecipePrototype:getEnabled()
 end
 
 -------------------------------------------------------------------------------
+-- Return unlock of Prototype
+--
+-- @function [parent=#RecipePrototype] getUnlock
+--
+-- @return #boolean
+--
+function RecipePrototype:getUnlock()
+  if self.lua_prototype ~= nil then
+    if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" then
+      local unlock_recipes = Cache.getData("other", "unlock_recipes") or {}
+      return unlock_recipes[self.lua_prototype.name]
+    end
+    return true
+  end
+  return false
+end
+
+-------------------------------------------------------------------------------
 -- Return hidden of Prototype
 --
 -- @function [parent=#RecipePrototype] getHidden

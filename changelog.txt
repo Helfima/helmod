@@ -1,8 +1,14 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.11.21
-Date: 2020-12-11
+Date: 2021-01-02
+  Features:
+    - Added new filter in recipe selector: Show locked recipes
+    - Added quick access to change logistic item
   Changes:
     - Changed each panel using the model keeps its reference
+    - Changed few display styles
+    - Merged production line and production block tab
+    - Moved some icons in the production tab
 ---------------------------------------------------------------------------------------------------
 Version: 0.11.20
 Date: 2020-11-20

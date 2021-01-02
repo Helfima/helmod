@@ -1,3 +1,5 @@
+require "core.Object"
+require "core.FormBase"
 require "core.Form"
 require "core.FormModel"
 
@@ -15,6 +17,7 @@ require "dialog.PrototypeFiltersPanel"
 require "dialog.UnitTestPanel"
 require "dialog.RichTextPanel"
 
+require "edition.LogisticEdition"
 require "edition.ModelEdition"
 require "edition.RecipeEdition"
 require "edition.ProductEdition"
@@ -101,6 +104,7 @@ function Controller:prepare()
   table.insert(forms, ItemSelector("HMItemSelector"))
   table.insert(forms, FluidSelector("HMFluidSelector"))
 
+  table.insert(forms, LogisticEdition("HMLogisticEdition"))
   table.insert(forms, ModelEdition("HMModelEdition"))
   table.insert(forms, RecipeEdition("HMRecipeEdition"))
   table.insert(forms, ProductEdition("HMProductEdition"))
@@ -248,7 +252,7 @@ function Controller:bindController(player)
       if lua_gui_element["helmod_planner-command"] ~= nil then lua_gui_element["helmod_planner-command"].destroy() end
     end
     if lua_gui_element ~= nil and lua_gui_element["helmod_planner-command"] == nil and User.getModSetting("display_main_icon") then
-      local gui_button = GuiElement.add(lua_gui_element, GuiButton("helmod_planner-command"):sprite("menu", "calculator-white", "calculator"):style("helmod_button_menu"):tooltip({"helmod_planner-command"}))
+      local gui_button = GuiElement.add(lua_gui_element, GuiButton("helmod_planner-command"):sprite("menu", "calculator-white", "calculator"):style("helmod_button_menu_dark"):tooltip({"helmod_planner-command"}))
       gui_button.style.width = 37
       gui_button.style.height = 37
     end
@@ -445,7 +449,7 @@ function Controller:openMainPanel()
   if self:isOpened() then
     self:cleanController(Player.native())
   else
-    local current_tab = User.getParameter("current_tab") or "HMProductionLineTab"
+    local current_tab = User.getParameter("current_tab") or "HMProductionBlockTab"
     local parameter_name = string.format("%s_%s", current_tab, "objects")
     local parameter_objects = User.getParameter(parameter_name)
     
@@ -458,7 +462,6 @@ function Controller:openMainPanel()
     local model, block, recipe = Model.getParameterObjects(parameter_objects)
     event.item1 = model.id
     ModelCompute.check(model)
-    if block == nil and current_tab == "HMProductionBlockTab" then current_tab = "HMProductionLineTab" end
     self:send("on_gui_open", event, current_tab)
   end
 end

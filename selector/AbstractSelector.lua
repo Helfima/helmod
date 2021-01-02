@@ -250,7 +250,7 @@ function AbstractSelector:onEvent(event)
   local prototype_type = event.item1
   local prototype_name = event.item2
 
-  if User.isWriter() then
+  if User.isWriter(model) then
     if User.getParameter(self.parameterTarget) == "HMPropertiesPanel" then
       if event.action == "element-select" then
         local prototype_compare = User.getParameter("prototype_compare") or {}
@@ -274,6 +274,7 @@ function AbstractSelector:onEvent(event)
         User.setParameter("scroll_element", new_recipe.id)
         User.setActiveForm("HMProductionBlockTab")
         User.setParameterObjects("HMProductionBlockTab", model.id, new_block.id, new_recipe.id)
+        User.setParameterObjects(self.classname, model.id, new_block.id)
         Controller:send("on_gui_refresh", event)
       end
       -- container selector
@@ -545,6 +546,12 @@ function AbstractSelector:updateFilter(event)
       GuiElement.add(filter_table, GuiLabel("filter_show_hidden_player_crafting"):caption({"helmod_recipe-edition-panel.filter-show-hidden-player-crafting"}))
     end
 
+    if self.unlock_recipe then
+      local filter_show_lock_recipes = User.getSetting("filter_show_lock_recipes")
+      GuiElement.add(filter_table, GuiCheckBox(self.classname, "change-boolean-settings", "filter_show_lock_recipes"):state(filter_show_lock_recipes))
+      GuiElement.add(filter_table, GuiLabel("filter_show_lock_recipes"):caption({"helmod_recipe-edition-panel.filter-show-lock-recipes"}))
+    end
+
     GuiElement.add(filter_table, GuiLabel("filter-value"):caption({"helmod_common.filter"}))
     local cellFilter = GuiElement.add(filter_table, GuiFrameH("cell-filter"):style(helmod_frame_style.hidden))
     if User.getModGlobalSetting("filter_on_text_changed") then
@@ -605,6 +612,7 @@ function AbstractSelector:createElementLists(event)
   end
   -- execute loop
   if event.continue and event.method == "list" then
+    local filter_show_lock_recipes = User.getSetting("filter_show_lock_recipes")
     local filter_show_disable = User.getSetting("filter_show_disable")
     local filter_show_hidden = User.getSetting("filter_show_hidden")
     local filter_show_hidden_player_crafting = User.getSetting("filter_show_hidden_player_crafting")
@@ -616,7 +624,8 @@ function AbstractSelector:createElementLists(event)
       if self:checkFilter(key) then
         for element_name, element in pairs(element) do
           local prototype = self:getPrototype(element)
-          if (not(self.disable_option) or (prototype:getEnabled() == true or filter_show_disable == true)) and 
+          if (not(self.unlock_recipe) or (prototype:getUnlock() == true or filter_show_lock_recipes == true)) and 
+            (not(self.disable_option) or (prototype:getEnabled() == true or filter_show_disable == true)) and 
             (not(self.hidden_option) or (prototype:getHidden() == false or filter_show_hidden == true)) and
             (not(self.hidden_player_crafting) or (prototype:getHiddenPlayerCrafting() == false or filter_show_hidden_player_crafting == true)) then
 

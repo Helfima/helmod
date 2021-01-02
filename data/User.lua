@@ -127,7 +127,8 @@ function User.getDefaultSettings()
     other_speed_panel=false,
     filter_show_disable=false,
     filter_show_hidden=false,
-    filter_show_hidden_player_crafting=false
+    filter_show_hidden_player_crafting=false,
+    filter_show_lock_recipes=false
   }
 end
 
@@ -856,21 +857,6 @@ function User.getProductSorter()
     return function(t,a,b) return t[b].name > t[a].name end
   elseif display_product_order == "cost" then
     return function(t,a,b) return t[b].amount < t[a].amount end
-  end
-  return nil
-end
-
--------------------------------------------------------------------------------
--- Get Function Product Sorter
---
--- @function [parent=#User] getProductSorter2
---
-function User.getProductSorter2()
-  local display_product_order = User.getPreferenceSetting("display_product_order")
-  if display_product_order == "name" then
-    return function(t,a,b) return t[b].name > t[a].name end
-  elseif display_product_order == "cost" then
-    return function(t,a,b) return t[b].count < t[a].count end
   end
   return nil
 end

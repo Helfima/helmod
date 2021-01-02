@@ -123,8 +123,8 @@ end
 -- @param #LuaEvent event
 --
 function ModelEdition:onEvent(event)
-  if User.isWriter() then
-    local model = self:getParameterObjects()
+  local model = self:getParameterObjects()
+  if User.isWriter(model) then
     if event.action == "model-note" then
       local group_field_name = table.concat({self.classname, "group-text"},"=")
       local note_field_name = table.concat({self.classname, "note-text"},"=")

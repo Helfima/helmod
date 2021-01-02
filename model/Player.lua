@@ -390,7 +390,10 @@ end
 --
 -- @return #table technologies
 --
-function Player.getTechnologiePrototypes()
+function Player.getTechnologiePrototypes(filters)
+  if filters ~= nil then
+    return game.get_filtered_technology_prototypes(filters)
+  end
   return game.technology_prototypes
 end
 

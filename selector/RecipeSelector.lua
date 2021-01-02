@@ -14,6 +14,7 @@ RecipeSelector = newclass(AbstractSelector)
 -- @function [parent=#RecipeSelector] afterInit
 --
 function RecipeSelector:afterInit()
+  self.unlock_recipe = true
   self.disable_option = true
   self.hidden_option = true
   self.product_option = true
@@ -91,6 +92,7 @@ end
 -- @param #table list_translate
 --
 function RecipeSelector:updateGroups(list_products, list_ingredients, list_translate)
+  RecipeSelector:updateUnlockRecipesCache()
   for key, recipe in pairs(Player.getRecipePrototypes()) do
     local has_burnt_result = self:appendGroups(recipe, "recipe", list_products, list_ingredients, list_translate)
     if has_burnt_result == true then
@@ -109,6 +111,32 @@ function RecipeSelector:updateGroups(list_products, list_ingredients, list_trans
     end
   end
 end
+
+-------------------------------------------------------------------------------
+-- Update unlock recipes cache
+--
+-- @function [parent=#User] updateUnlockRecipesCache
+--
+function RecipeSelector:updateUnlockRecipesCache()
+  local unlock_recipes = {}
+  local filters = {{filter = "hidden", invert = true, mode = "or"},{filter = "has-effects", invert = false, mode = "and"}}
+  local technology_prototypes = Player.getTechnologiePrototypes(filters)
+  for _,technology in pairs(technology_prototypes) do
+      local modifiers = technology.effects
+      for _,modifier in pairs(modifiers) do
+          if modifier.type == "unlock-recipe" and modifier.recipe ~= nil then
+            unlock_recipes[modifier.recipe] = true
+          end
+      end
+  end
+  for _, recipe in pairs(Player.getRecipePrototypes()) do
+    if recipe.hidden ~= true and recipe.enabled == true then
+      unlock_recipes[recipe.name] = true
+    end
+  end
+  Cache.setData("other", "unlock_recipes", unlock_recipes)
+end
+
 
 -------------------------------------------------------------------------------
 -- Create prototype icon
