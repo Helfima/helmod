@@ -63,6 +63,20 @@ function Player.getGameDay()
   return day, day*dusk, day*night, day*dawn
 end
 
+------------------------------------------------------------------------------
+-- Get display sizes
+--
+-- @function [parent=#Form] getDisplaySizes
+--
+-- return
+--
+function Player.getDisplaySizes()
+  if Lua_player == nil then return 800,600 end
+  local display_resolution = Lua_player.display_resolution
+  local display_scale = Lua_player.display_scale
+  return display_resolution.width/display_scale, display_resolution.height/display_scale
+end
+
 -------------------------------------------------------------------------------
 -- Set pipette
 --

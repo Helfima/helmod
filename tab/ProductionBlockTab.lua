@@ -11,6 +11,15 @@ ProductionBlockTab = newclass(AbstractTab,function(base,classname)
 end)
 
 -------------------------------------------------------------------------------
+-- On initialization
+--
+-- @function [parent=#ProductionBlockTab] onInit
+--
+function ProductionBlockTab:onInit()
+  self.panelCaption = string.format("%s %s","Helmod",game.active_mods["helmod"])
+end
+
+-------------------------------------------------------------------------------
 -- Return button caption
 --
 -- @function [parent=#ProductionBlockTab] getButtonCaption
@@ -46,27 +55,6 @@ function ProductionBlockTab:isVisible()
 end
 
 -------------------------------------------------------------------------------
--- Has index model (for Tab panel)
---
--- @function [parent=#ProductionBlockTab] hasIndexModel
---
--- @return #boolean
---
-function ProductionBlockTab:hasIndexModel()
-  return true
-end
-
--------------------------------------------------------------------------------
--- Before update
---
--- @function [parent=#ProductionBlockTab] beforeUpdate
---
--- @param #LuaEvent event
---
-function ProductionBlockTab:beforeUpdate(event)
-end
-
--------------------------------------------------------------------------------
 -- Get or create result panel
 --
 -- @function [parent=#ProductionBlockTab] getResultPanel2
@@ -78,7 +66,7 @@ function ProductionBlockTab:getResultPanel()
   if panel[panel_name1] ~= nil and panel[panel_name1].valid then
     return panel[panel_name1], panel[panel_name2]
   end
-  local width_main, height_main = GuiElement.getMainSizes()
+  local width_main, height_main = User.getMainSizes()
   panel.style.natural_width = width_main-25
   local panel1 = GuiElement.add(panel, GuiFlowH(panel_name1))
   panel1.style.horizontally_stretchable = true
@@ -122,21 +110,27 @@ end
 --
 function ProductionBlockTab:getDataPanel()
   local panel1, panel2 = self:getResultPanel()
+  local menu_name = "menu-data"
   local header_name = "header-data"
   local panel_name = "panel-data"
   local scroll_name = "scroll-data"
-  if panel2[header_name] ~= nil and panel2[header_name].valid then
-    return panel2[header_name],panel2[panel_name][scroll_name]
+  if panel2[menu_name] ~= nil and panel2[menu_name].valid then
+    return panel2[menu_name],panel2[header_name],panel2[panel_name][scroll_name]
   end
+  local menu_panel = GuiElement.add(panel2, GuiFlowH(menu_name))
+  menu_panel.style.horizontally_stretchable = true
+
   local header_panel = GuiElement.add(panel2, GuiFlowH(header_name))
   header_panel.style.horizontally_stretchable = true
-  
+  header_panel.style.top_padding = 6
+  header_panel.style.bottom_padding = 6
+
   local data_panel = GuiElement.add(panel2, GuiFrameV(panel_name):style("helmod_deep_frame"))
   data_panel.style.padding = 0
   local scroll_panel = GuiElement.add(data_panel, GuiScroll(scroll_name):style("helmod_scroll_pane"))
   scroll_panel.style.horizontally_stretchable = true
   scroll_panel.style.vertically_stretchable = true
-  return header_panel, scroll_panel
+  return menu_panel, header_panel, scroll_panel
 end
 
 -------------------------------------------------------------------------------
@@ -145,40 +139,33 @@ end
 -- @function [parent=#ProductionBlockTab] getInfoPanel2
 --
 function ProductionBlockTab:getInfoPanel2()
-  local header_panel, scroll_panel = self:getDataPanel()
-  local options_name = "options"
-  local options_scroll_name = "options-scroll"
+  local menu_panel, header_panel, scroll_panel = self:getDataPanel()
   local info_name = "info"
   local info_scroll_name = "info-scroll"
   local left_name = "left-info"
   local right_name = "right-info"
-  if header_panel[options_name] ~= nil and header_panel[options_name].valid then
-    return header_panel[options_name][options_scroll_name],header_panel[info_name][info_scroll_name],header_panel[left_name],header_panel[right_name]
+  if header_panel[info_name] ~= nil and header_panel[info_name].valid then
+    return header_panel[info_name][info_scroll_name],header_panel[left_name],header_panel[right_name]
   end
   local model = self:getParameterObjects()
 
   header_panel.style.horizontal_spacing=10
-  GuiElement.setStyle(header_panel, "block_info", "height")
-
-  local options_panel = GuiElement.add(header_panel, GuiFlowV(options_name))
+  self:setStyle(header_panel, "block_info", "height")
 
   local tooltip = GuiTooltipModel("tooltip.info-model"):element(model)
-  GuiElement.add(options_panel, GuiLabel("label-info"):caption({"",self:getButtonCaption(), " [img=info]"}):style("heading_1_label"):tooltip(tooltip))
-  local options_scroll = GuiElement.add(options_panel, GuiScroll(options_scroll_name):style("helmod_scroll_pane"))
-  options_scroll.style.width = 320
 
   local info_panel = GuiElement.add(header_panel, GuiFlowV(info_name))
-  GuiElement.add(info_panel, GuiLabel("label-info"):caption({"helmod_common.information"}):style("helmod_label_title_frame"))
+  GuiElement.add(info_panel, GuiLabel("label-info"):caption({"",self:getButtonCaption(), " [img=info]"}):style("heading_1_label"):tooltip(tooltip))
   local info_scroll = GuiElement.add(info_panel, GuiScroll(info_scroll_name):style("helmod_scroll_pane"))
-  info_scroll.style.width = 270
+  info_scroll.style.width = 550
 
   local left_panel = GuiElement.add(header_panel, GuiFlowV(left_name))
-  GuiElement.setStyle(left_panel, "block_info", "height")
+  self:setStyle(left_panel, "block_info", "height")
 
   local right_panel = GuiElement.add(header_panel, GuiFlowV(right_name))
-  GuiElement.setStyle(right_panel, "block_info", "height")
+  self:setStyle(right_panel, "block_info", "height")
 
-  return options_scroll, info_scroll, left_panel, right_panel
+  return info_scroll, left_panel, right_panel
 end
 
 -------------------------------------------------------------------------------
@@ -187,7 +174,7 @@ end
 -- @function [parent=#ProductionBlockTab] getLeftInfoPanel2
 --
 function ProductionBlockTab:getLeftInfoPanel2()
-  local _, _, parent_panel, _ = self:getInfoPanel2()
+  local _, parent_panel, _ = self:getInfoPanel2()
   local panel_name = "left-scroll"
   local header_name = "left-header"
   local label_name = "left-label"
@@ -212,7 +199,7 @@ end
 -- @function [parent=#ProductionBlockTab] getRightInfoPanel2
 --
 function ProductionBlockTab:getRightInfoPanel2()
-  local _, _,  _, parent_panel = self:getInfoPanel2()
+  local _,  _, parent_panel = self:getInfoPanel2()
   local panel_name = "right-scroll"
   local header_name = "right-header"
   local label_name = "right-label"
@@ -232,114 +219,165 @@ function ProductionBlockTab:getRightInfoPanel2()
 end
 
 -------------------------------------------------------------------------------
--- Update info
+-- Get the menu panel
 --
--- @function [parent=#ProductionBlockTab] updateInfo
+-- @function [parent=#ProductionBlockTab] getSubMenuPanel
 --
--- @param #LuaEvent event
+-- @return #LuaGuiElement
 --
-function ProductionBlockTab:updateInfoBlock2(model, block)
-  local options_scroll, info_scroll, output_scroll, input_scroll = self:getInfoPanel2()
-  options_scroll.clear()
-  info_scroll.clear()
-  
-  -- production block result
-  if block ~= nil and table.size(block.recipes) > 0 then
-    local switches_panel = GuiElement.add(options_scroll, GuiFlowV("switches"))
-    switches_panel.style.vertical_spacing = 2
-
-    local unlink_state = "right"
-    if block.unlinked == true then unlink_state = "left" end
-    local unlink_switch = GuiElement.add(switches_panel, GuiSwitch(self.classname, "block-switch-unlink", model.id, block.id):state(unlink_state):leftLabel({"helmod_label.block-unlinked"}):rightLabel({"helmod_label.block-linked"}))
-    if block.index == 0 then
-      unlink_switch.enabled = false
-      unlink_switch.tooltip = {"tooltip.block-cannot-link-first"}
-    end
-    if block.by_factory == true then
-      unlink_switch.enabled = false
-      unlink_switch.tooltip = {"tooltip.block-cannot-link-by-factory"}
-    end
-
-    local element_state = "left"
-    if block.by_product == false then element_state = "right" end
-    GuiElement.add(switches_panel, GuiSwitch(self.classname, "block-switch-element", model.id, block.id):state(element_state):leftLabel({"helmod_label.input-product"}):rightLabel({"helmod_label.input-ingredient"}))
-
-    local by_factory_state = "left"
-    if block.by_factory == true then by_factory_state = "right" end
-    local by_factory_switch = GuiElement.add(switches_panel, GuiSwitch(self.classname, "block-switch-factory", model.id, block.id):state(by_factory_state):leftLabel({"helmod_label.compute-by-element"}):rightLabel({"helmod_label.compute-by-factory"}))
-    if block.solver == true then
-      by_factory_switch.enabled = false
-      by_factory_switch.tooltip = {"tooltip.block-cannot-by-factory"}
-    end
-
-    local matrix_solver = "left"
-    if block.solver == true then matrix_solver = "right" end
-    local solver_switch = GuiElement.add(switches_panel, GuiSwitch(self.classname, "block-switch-solver", model.id, block.id):state(matrix_solver):leftLabel({"helmod_label.algebraic-solver"}):rightLabel({"helmod_label.matrix-solver"}))
-    if block.by_factory == true then
-      solver_switch.enabled = false
-      solver_switch.tooltip = {"tooltip.block-cannot-matrix-solver"}
-    end
-
-    local block_limit = "right"
-    if block.by_limit == true then block_limit = "left" end
-    local block_switch_limit = GuiElement.add(switches_panel, GuiFlowH("block-switch"))
-    block_switch_limit.style.horizontal_spacing=10
-    GuiElement.add(block_switch_limit, GuiLabel("block-label-limit"):caption({"helmod_label.assembler-limitation"}))
-    GuiElement.add(block_switch_limit, GuiSwitch(self.classname, "block-switch-limit", model.id, block.id):state(block_limit):leftLabel({"gui.on"}):rightLabel({"gui.off"}))
-
-    -- block informations
-    local block_table = GuiElement.add(info_scroll, GuiTable("output-table"):column(4))
-    block_table.style.horizontally_stretchable = false
-    block_table.vertical_centering = false
-    block_table.style.horizontal_spacing=10
-  
-    GuiElement.add(block_table, GuiCellBlockInfo("block-count"):element(block):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(1):byLimit(block.by_limit))
-    GuiElement.add(block_table, GuiCellEnergy("block-power"):element(block):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2):byLimit(block.by_limit))
-    if User.getPreferenceSetting("display_pollution") then
-      GuiElement.add(block_table, GuiCellPollution("block-pollution"):element(block):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(3):byLimit(block.by_limit))
-    end
-    if User.getPreferenceSetting("display_building") then
-      GuiElement.add(block_table, GuiCellBuilding("block-building"):element(block):tooltip("tooltip.info-building"):color(GuiElement.color_button_default):index(4):byLimit(block.by_limit))
-    end
+function ProductionBlockTab:getSubMenuPanel()
+  local menu_panel, header_panel, scroll_panel = self:getDataPanel()
+  local panel_name = "menu"
+  local left_name = "left_menu"
+  local right_name = "right_menu"
+  if menu_panel[panel_name] ~= nil and menu_panel[panel_name].valid then
+    return menu_panel[panel_name][left_name], menu_panel[panel_name][right_name]
   end
+  local panel = GuiElement.add(menu_panel, GuiFrameH(panel_name):style("helmod_deep_frame"))
+  panel.style.horizontally_stretchable = true
+  panel.style.height = 38
 
+  local left_panel = GuiElement.add(panel, GuiFlowH(left_name))
+  left_panel.style.horizontal_spacing = 10
+
+  local right_panel = GuiElement.add(panel, GuiFlowH(right_name))
+  right_panel.style.horizontal_spacing = 10
+  right_panel.style.horizontally_stretchable = true
+  right_panel.style.horizontal_align = "right"
+  return left_panel, right_panel
 end
 
 -------------------------------------------------------------------------------
--- Update info
+-- Update
 --
--- @function [parent=#ProductionBlockTab] updateInfo
+-- @function [parent=#ProductionBlockTab] onUpdate
 --
 -- @param #LuaEvent event
 --
-function ProductionBlockTab:updateInfoBlock(model, block)
-  local options_scroll, info_scroll, output_scroll, input_scroll = self:getInfoPanel2()
-  options_scroll.clear()
-  info_scroll.clear()
-  -- info panel
+function ProductionBlockTab:onUpdate(event)
+  local model, block, _ = self:getParameterObjects()
+  self:updateIndexPanel(model)
 
-  
-  -- production block result
-  if block ~= nil and table.size(block.recipes) > 0 then
-    local unlinked = block.unlinked and true or false
-    if block.index == 0 then unlinked = true end
-    
-    local switches_panel = GuiElement.add(options_scroll, GuiFlowV("switches"))
-    switches_panel.style.vertical_spacing = 2
-    -- add recipe
-    local group1 = GuiElement.add(switches_panel, GuiFlowH("group1"))
-    group1.style.horizontal_spacing = 2
-    local block_id = "new"
-    if block ~= nil then block_id = block.id end
-    GuiElement.add(group1, GuiButton("HMRecipeSelector", "OPEN", model.id, block_id):sprite("menu", "wrench", "wrench"):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-recipe"}))
-    GuiElement.add(group1, GuiButton("HMTechnologySelector", "OPEN", model.id, block_id):sprite("menu", "graduation", "graduation"):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-technology"}))
-    GuiElement.add(group1, GuiButton("HMEnergySelector", "OPEN", model.id, block_id):sprite("menu", "nuclear","nuclear"):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.select-button-energy"}))
+  self:updateSubMenuPanel(model, block)
+
+  self:updateHeader(event)
+
+  self:updateData(event)
+end
+
+-------------------------------------------------------------------------------
+-- Update index panel
+--
+-- @function [parent=#ProductionBlockTab] updateIndexPanel
+--
+-- @param #LuaEvent event
+--
+function ProductionBlockTab:updateIndexPanel(model)
+  local models = Model.getModels()
+
+  -- index panel
+  local index_panel = self:getFrameDeepPanel("model_index")
+  index_panel.style.padding = 2
+  index_panel.clear()
+  local table_index = GuiElement.add(index_panel, GuiTable("table_index"):column(GuiElement.getIndexColumnNumber()):style("helmod_table_list"))
+  if table.size(models) > 0 then
+    local i = 0
+    for _,imodel in pairs(models) do
+      i = i + 1
+      local style = "helmod_button_default"
+      local element = Model.firstRecipe(imodel.blocks)
+      if imodel.id == model.id then
+        if element ~= nil then
+          local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
+          local button = GuiElement.add(table_index, GuiButtonSprite(self.classname, "change-model", imodel.id):sprite(element.type, element.name):style("helmod_button_menu_selected"):tooltip(tooltip))
+          button.style.width = 36
+          button.style.height = 36
+          button.style.padding = {-2,-2,-2,-2}
+        else
+          local button = GuiElement.add(table_index, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", "help-white", "help"):style("helmod_button_menu_selected"))
+          button.style.width = 36
+          --button.style.height = 36
+        end
+      else
+        if element ~= nil then
+          local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
+          GuiElement.add(table_index, GuiButtonSelectSprite(self.classname, "change-model", imodel.id):sprite(element.type, element.name):tooltip(tooltip):color())
+        else
+          local button = GuiElement.add(table_index, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", "help", "help"):style("helmod_button_menu"))
+          button.style.width = 36
+          --button.style.height = 36
+        end
+      end
+
+    end
+  end
+  GuiElement.add(table_index, GuiButton(self.classname, "new-model"):sprite("menu", "plus", "plus"):style("helmod_button_menu_green"):tooltip({"helmod_button.add-production-line"}))
+  --GuiElement.add(table_index, GuiButton("HMArrangeModels", "OPEN"):sprite("menu", "menu", "menu"):style("helmod_button_menu"):tooltip({"helmod_button.add-production-line"}))
+end
+
+-------------------------------------------------------------------------------
+-- Update menu panel
+--
+-- @function [parent=#ProductionBlockTab] updateMenuPanel
+--
+-- @param #table model
+-- @param #table block
+--
+function ProductionBlockTab:updateSubMenuPanel(model, block)
+  self:updateSubMenuLeftPanel(model, block)
+  self:updateSubMenuRightPanel(model, block)
+end
+-------------------------------------------------------------------------------
+-- Update menu panel
+--
+-- @function [parent=#ProductionBlockTab] updateMenuPanel
+--
+-- @param #table model
+-- @param #table block
+--
+function ProductionBlockTab:updateSubMenuLeftPanel(model, block)
+  if model == nil then return end
+  -- action panel
+  local left_panel, right_panel = self:getSubMenuPanel()
+  left_panel.clear()
+
+  local button_spacing = 2
+
+  -- add recipe
+  local group_selector = GuiElement.add(left_panel, GuiFlowH("group_selector"))
+  group_selector.style.horizontal_spacing = button_spacing
+  local block_id = "new"
+  if block ~= nil then block_id = block.id end
+  GuiElement.add(group_selector, GuiButton("HMRecipeSelector", "OPEN", model.id, block_id):sprite("menu", "wrench", "wrench"):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-recipe"}))
+  GuiElement.add(group_selector, GuiButton("HMTechnologySelector", "OPEN", model.id, block_id):sprite("menu", "graduation", "graduation"):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-technology"}))
+  GuiElement.add(group_selector, GuiButton("HMEnergySelector", "OPEN", model.id, block_id):sprite("menu", "nuclear","nuclear"):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.select-button-energy"}))
+
+  -- delete button
+  local group_delete = GuiElement.add(left_panel, GuiFlowH("group_delete"))
+  local delete_button = GuiElement.add(group_delete, GuiButton(self.classname, "production-block-remove", model.id, block_id):sprite("menu", "delete", "delete"):style("helmod_button_menu_actived_red"):tooltip({"helmod_result-panel.remove-button-production-block"}))
+  if not(User.isDeleter(model)) then
+      delete_button.enabled = false
+  end
+
+  -- Model Debug
+  if User.getModGlobalSetting("debug_solver") == true then
+    local group_debug = GuiElement.add(left_panel, GuiFlowH("group_debug"))
+    group_debug.style.horizontal_spacing = button_spacing
+    GuiElement.add(group_debug, GuiButton("HMModelDebug", "OPEN", model.id, block_id):sprite("menu", "bug", "bug"):style("helmod_button_menu"):tooltip("Open Debug"))
+  end
+
+  -- group tool
+  local group_tool = GuiElement.add(left_panel, GuiFlowH("group_tool"))
+  group_tool.style.horizontal_spacing = button_spacing
+  GuiElement.add(group_tool, GuiButton("HMSummaryPanel", "OPEN", model.id, block_id):sprite("menu", "brief","brief"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
+  if block ~= nil then
     -- unlinked button
     local linked_button
+    local unlinked = block.unlinked and true or false
     if unlinked or block.index == 0 then
-      linked_button = GuiElement.add(group1, GuiButton(self.classname, "production-block-unlink", model.id, block.id):sprite("menu", "unlink", "unlink"):style("helmod_button_menu"):tooltip({"tooltip.unlink-element"}))
+      linked_button = GuiElement.add(group_tool, GuiButton(self.classname, "production-block-unlink", model.id, block.id):sprite("menu", "unlink", "unlink"):style("helmod_button_menu"):tooltip({"tooltip.unlink-element"}))
     else
-      linked_button = GuiElement.add(group1, GuiButton(self.classname, "production-block-unlink", model.id, block.id):sprite("menu", "link-white", "link"):style("helmod_button_menu_selected"):tooltip({"tooltip.unlink-element"}))
+      linked_button = GuiElement.add(group_tool, GuiButton(self.classname, "production-block-unlink", model.id, block.id):sprite("menu", "link-white", "link"):style("helmod_button_menu_selected"):tooltip({"tooltip.unlink-element"}))
     end
     if block.index == 0 then
       linked_button.enabled = false
@@ -350,76 +388,110 @@ function ProductionBlockTab:updateInfoBlock(model, block)
       linked_button.tooltip = {"tooltip.block-cannot-link-by-factory"}
     end
 
-    GuiElement.add(group1, GuiButton("HMPinPanel", "OPEN", model.id, block_id):sprite("menu", "pin", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
-    GuiElement.add(group1, GuiButton("HMSummaryPanel", "OPEN", model.id, block_id):sprite("menu", "brief","brief"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
-    -- Model Debug
-    if User.getModGlobalSetting("debug_solver") == true then
-      local groupDebug = GuiElement.add(group1, GuiFlowH("groupDebug"))
-      GuiElement.add(groupDebug, GuiButton("HMModelDebug", "OPEN", model.id, block_id):sprite("menu", "bug", "bug"):style("helmod_button_menu"):tooltip("Open Debug"))
+    GuiElement.add(group_tool, GuiButton("HMPinPanel", "OPEN", model.id, block_id):sprite("menu", "pin", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
+  end
+
+end
+
+-------------------------------------------------------------------------------
+-- Update menu panel
+--
+-- @function [parent=#ProductionBlockTab] updateMenuPanel
+--
+-- @param #table model
+-- @param #table block
+--
+function ProductionBlockTab:updateSubMenuRightPanel(model, block)
+  if model == nil then return end
+  -- action panel
+  local left_panel, right_panel = self:getSubMenuPanel()
+  right_panel.clear()
+
+  local button_spacing = 2
+  local block_id = "new"
+  if block ~= nil then block_id = block.id end
+
+  -- logistics
+  local display_logistic_row = User.getParameter("display_logistic_row")
+  if display_logistic_row == true then
+    local logistic_row_item = User.getParameter("logistic_row_item") or "belt"
+    local logistic2 = GuiElement.add(right_panel, GuiFlowH("logistic2"))
+    logistic2.style.horizontal_spacing = button_spacing
+    for _,type in pairs({"inserter", "belt", "container", "transport"}) do
+      local item_logistic = Player.getDefaultItemLogistic(type)
+      local style = "helmod_button_menu"
+      if logistic_row_item == type then style = "helmod_button_menu_selected" end
+      local button = GuiElement.add(logistic2, GuiButton(self.classname, "change-logistic-item", type):sprite("sprite", item_logistic):style(style):tooltip({"tooltip.logistic-row-choose"}))
+      button.style.padding = {0,0,0,0}
     end
 
-    -- delete button
-    local delete_button = GuiElement.add(group1, GuiButton(self.classname, "production-block-remove", model.id, block_id):sprite("menu", "delete", "delete"):style("helmod_button_menu_actived_red"):tooltip({"helmod_result-panel.remove-button-production-block"}))
-    if not(User.isDeleter(model)) then
-        delete_button.enabled = false
+    local logistic_row_fluid = User.getParameter("logistic_row_fluid") or "pipe"
+    local logistic3 = GuiElement.add(right_panel, GuiFlowH("logistic3"))
+    logistic3.style.horizontal_spacing = button_spacing
+    for _,type in pairs({"pipe", "container", "transport"}) do
+      local fluid_logistic = Player.getDefaultFluidLogistic(type)
+      local style = "helmod_button_menu"
+      if logistic_row_fluid == type then style = "helmod_button_menu_selected" end
+      local button = GuiElement.add(logistic3, GuiButton(self.classname, "change-logistic-fluid", type):sprite("sprite", fluid_logistic):style(style):tooltip({"tooltip.logistic-row-choose"}))
+      button.style.padding = {0,0,0,0}
     end
-    
+  end
 
-    --[[ local unlink_state = "right"
-    if block.unlinked == true then unlink_state = "left" end
-    local unlink_switch = GuiElement.add(switches_panel, GuiSwitch(self.classname, "block-switch-unlink", model.id, block.id):state(unlink_state):leftLabel({"helmod_label.block-unlinked"}):rightLabel({"helmod_label.block-linked"}))
-    if block.index == 0 then
-      unlink_switch.enabled = false
-      unlink_switch.tooltip = {"tooltip.block-cannot-link-first"}
+  local group_pref = GuiElement.add(right_panel, GuiFlowH("group_pref"))
+  group_pref.style.horizontal_spacing = button_spacing
+  if display_logistic_row == true then
+    GuiElement.add(group_pref, GuiButton(self.classname, "change-logistic"):sprite("menu", "container-white", "container"):style("helmod_button_menu_selected"):tooltip({"tooltip.display-logistic-row"}))
+  else
+    GuiElement.add(group_pref, GuiButton(self.classname, "change-logistic"):sprite("menu", "container", "container"):style("helmod_button_menu"):tooltip({"tooltip.display-logistic-row"}))
+  end
+  GuiElement.add(group_pref, GuiButton("HMModelEdition", "OPEN", model.id, block_id):sprite("menu", "edit", "edit"):style("helmod_button_menu"):tooltip({"helmod_panel.model-edition"}))
+  GuiElement.add(group_pref, GuiButton("HMPreferenceEdition", "OPEN", model.id, block_id):sprite("menu", "services", "services"):style("helmod_button_menu"):tooltip({"helmod_button.preferences"}))
+
+  local group_action = GuiElement.add(right_panel, GuiFlowH("group_action"))
+  group_action.style.horizontal_spacing = button_spacing
+  -- copy past
+  GuiElement.add(group_action, GuiButton(self.classname, "copy-model", model.id, block_id):sprite("menu", "copy", "copy"):style("helmod_button_menu"):tooltip({"helmod_button.copy"}))
+  GuiElement.add(group_action, GuiButton(self.classname, "past-model", model.id, block_id):sprite("menu", "paste", "paste"):style("helmod_button_menu"):tooltip({"helmod_button.past"}))
+  -- download
+  if self.classname == "HMProductionBlockTab" then
+    GuiElement.add(group_action, GuiButton("HMDownload", "OPEN", "download"):sprite("menu", "download", "download"):style("helmod_button_menu"):tooltip({"helmod_result-panel.download-button-production-line"}))
+    GuiElement.add(group_action, GuiButton("HMDownload", "OPEN", "upload"):sprite("menu", "upload", "upload"):style("helmod_button_menu"):tooltip({"helmod_result-panel.upload-button-production-line"}))
+  end
+  -- refresh control
+  GuiElement.add(group_action, GuiButton(self.classname, "refresh-model", model.id):sprite("menu", "refresh", "refresh"):style("helmod_button_menu"):tooltip({"helmod_result-panel.refresh-button"}))
+
+  local items = {}
+  local default_time = 1
+  for index,base_time in pairs(helmod_base_times) do
+    table.insert(items,base_time.tooltip)
+    if model.time == base_time.value then
+      default_time = base_time.tooltip
     end
-    if block.by_factory == true then
-      unlink_switch.enabled = false
-      unlink_switch.tooltip = {"tooltip.block-cannot-link-by-factory"}
-    end ]]
+  end
 
-    local block_compunting = GuiElement.add(switches_panel, GuiFlowH("block-computing"))
-    block_compunting.style.horizontal_spacing=10
-    GuiElement.add(block_compunting, GuiLabel("block-label"):caption("Computing"))
-    local default_compunting = ""
-    local items = {}
-    table.insert(items,"by_element")
-    table.insert(items,"by_factory")
-    table.insert(items,"Matrix Solver")
-    local selector = GuiElement.add(block_compunting, GuiDropDown(self.classname, "change-computing", model.id, block.id):items(items, default_compunting))
-    selector.style.height = 24
-    selector.style.padding = {-3,0,0,0}
-    selector.style.margin = 0
-    selector.style.font = "helmod_font_default"
+  local group_time = GuiElement.add(right_panel, GuiFlowH("group_time"))
+  GuiElement.add(group_time, GuiLabel("label_time"):caption({"helmod_data-panel.base-time", ""}):style("helmod_label_title_frame"))
 
-    local element_state = "left"
-    if block.by_product == false then element_state = "right" end
-    GuiElement.add(switches_panel, GuiSwitch(self.classname, "block-switch-element", model.id, block.id):state(element_state):leftLabel({"helmod_label.input-product"}):rightLabel({"helmod_label.input-ingredient"}))
+  GuiElement.add(group_time, GuiDropDown(self.classname, "change-time", model.id):items(items, default_time))
+end
 
-    --[[ local by_factory_state = "left"
-    if block.by_factory == true then by_factory_state = "right" end
-    local by_factory_switch = GuiElement.add(switches_panel, GuiSwitch(self.classname, "block-switch-factory", model.id, block.id):state(by_factory_state):leftLabel({"helmod_label.compute-by-element"}):rightLabel({"helmod_label.compute-by-factory"}))
-    if block.solver == true then
-      by_factory_switch.enabled = false
-      by_factory_switch.tooltip = {"tooltip.block-cannot-by-factory"}
-    end
- ]]
-    --[[ local matrix_solver = "left"
-    if block.solver == true then matrix_solver = "right" end
-    local solver_switch = GuiElement.add(switches_panel, GuiSwitch(self.classname, "block-switch-solver", model.id, block.id):state(matrix_solver):leftLabel({"helmod_label.algebraic-solver"}):rightLabel({"helmod_label.matrix-solver"}))
-    if block.by_factory == true then
-      solver_switch.enabled = false
-      solver_switch.tooltip = {"tooltip.block-cannot-matrix-solver"}
-    end ]]
+-------------------------------------------------------------------------------
+-- Update info
+--
+-- @function [parent=#ProductionBlockTab] updateInfo
+--
+-- @param #LuaEvent event
+--
+function ProductionBlockTab:updateInfoBlock(model, block)
+  local info_scroll, output_scroll, input_scroll = self:getInfoPanel2()
+  info_scroll.clear()
+  -- info panel
 
-    local block_limit = "right"
-    if block.by_limit == true then block_limit = "left" end
-    local block_switch_limit = GuiElement.add(switches_panel, GuiFlowH("block-switch"))
-    block_switch_limit.style.horizontal_spacing=10
-    GuiElement.add(block_switch_limit, GuiLabel("block-label-limit"):caption({"helmod_label.assembler-limitation"}))
-    GuiElement.add(block_switch_limit, GuiSwitch(self.classname, "block-switch-limit", model.id, block.id):state(block_limit):leftLabel({"gui.on"}):rightLabel({"gui.off"}))
+  -- production block result
+  if block ~= nil and table.size(block.recipes) > 0 then
 
     -- block informations
-    local block_table = GuiElement.add(info_scroll, GuiTable("output-table"):column(4))
+    local block_table = GuiElement.add(info_scroll, GuiTable("output-table"):column(5))
     block_table.style.horizontally_stretchable = false
     block_table.vertical_centering = false
     block_table.style.horizontal_spacing=10
@@ -432,6 +504,41 @@ function ProductionBlockTab:updateInfoBlock(model, block)
     if User.getPreferenceSetting("display_building") then
       GuiElement.add(block_table, GuiCellBuilding("block-building"):element(block):tooltip("tooltip.info-building"):color(GuiElement.color_button_default):index(4):byLimit(block.by_limit))
     end
+
+    local switches_panel = GuiElement.add(block_table, GuiFlowV("switches"))
+    switches_panel.style.vertical_spacing = 2
+
+    local element_state = "left"
+    if block.by_product == false then element_state = "right" end
+    GuiElement.add(switches_panel, GuiSwitch(self.classname, "block-switch-element", model.id, block.id):state(element_state):leftLabel({"helmod_label.input-product"}):rightLabel({"helmod_label.input-ingredient"}))
+
+    local block_limit = "right"
+    if block.by_limit == true then block_limit = "left" end
+    local block_switch_limit = GuiElement.add(switches_panel, GuiFlowH("block-switch"))
+    block_switch_limit.style.horizontal_spacing=10
+    GuiElement.add(block_switch_limit, GuiLabel("block-label-limit"):caption({"helmod_label.assembler-limitation"}))
+    GuiElement.add(block_switch_limit, GuiSwitch(self.classname, "block-switch-limit", model.id, block.id):state(block_limit):leftLabel({"gui.on"}):rightLabel({"gui.off"}))
+
+    local block_compunting = GuiElement.add(switches_panel, GuiFlowH("block-computing"))
+    block_compunting.style.horizontal_spacing=10
+    local default_compunting = ""
+    local items = {}
+    table.insert(items,{"helmod_label.compute-by-element"})
+    table.insert(items,{"helmod_label.compute-by-factory"})
+    table.insert(items,{"helmod_label.matrix-solver"})
+    if block.solver == true then
+      default_compunting = items[3]
+    elseif block.by_factory == true then
+      default_compunting = items[2]
+    else
+      default_compunting = items[1]
+    end
+
+    local selector = GuiElement.add(block_compunting, GuiDropDown(self.classname, "change-computing", model.id, block.id):items(items, default_compunting))
+    selector.style.height = 24
+    selector.style.padding = {-3,0,0,0}
+    selector.style.margin = 0
+    selector.style.font = "helmod_font_default"
   end
 
 end
@@ -611,29 +718,14 @@ end
 --
 function ProductionBlockTab:updateInfoModel(model)
   -- data
-  local options_scroll, info_scroll, output_scroll, input_scroll = self:getInfoPanel2()
+  local info_scroll, output_scroll, input_scroll = self:getInfoPanel2()
   info_scroll.clear()
   -- info panel
 
-  -- add recipe
-  local group1 = GuiElement.add(options_scroll, GuiFlowH("group1"))
-  group1.style.horizontal_spacing = 2
-  local block_id = "new"
-
-  GuiElement.add(group1, GuiButton("HMRecipeSelector", "OPEN", model.id, "new"):sprite("menu", "wrench", "wrench"):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-recipe"}))
-  GuiElement.add(group1, GuiButton("HMTechnologySelector", "OPEN", model.id, "new"):sprite("menu", "graduation", "graduation"):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-technology"}))
-  GuiElement.add(group1, GuiButton("HMEnergySelector", "OPEN", model.id, "new"):sprite("menu", "nuclear","nuclear"):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.select-button-energy"}))
-  if User.isAdmin() or model.owner == User.name() or (model.share ~= nil and bit32.band(model.share, 4) > 0) then
-      GuiElement.add(group1, GuiButton(self.classname, "remove-model", model.id):sprite("menu", "delete", "delete"):style("helmod_button_menu_actived_red"):tooltip({"helmod_result-panel.remove-button-production-line"}))
-  end
-
-  self:addSharePanel(options_scroll, model)
-  
-  
   local info_panel = GuiElement.add(info_scroll, GuiFlowV("block-info"))
   info_panel.style.horizontally_stretchable = false
   info_panel.style.vertical_spacing=4
-  
+
   local block_info = GuiElement.add(info_panel, GuiFlowH("information"))
   block_info.style.horizontally_stretchable = false
   block_info.style.horizontal_spacing=10
@@ -654,7 +746,6 @@ function ProductionBlockTab:updateInfoModel(model)
       GuiElement.add(block_info, GuiCellBuilding("block-building"):element(element_block):tooltip("tooltip.info-building"):color(GuiElement.color_button_default):index(2))
     end
   end
-
 end
 
 -------------------------------------------------------------------------------
@@ -747,7 +838,7 @@ function ProductionBlockTab:updateDataBlock(model, block)
   self:updateInputBlock(model, block)
 
   -- data panel
-  local header_panel, scroll_panel = self:getDataPanel()
+  local menu_panel, header_panel, scroll_panel = self:getDataPanel()
   -- production block result
   if block ~= nil and table.size(block.recipes) > 0 then
     -- data panel
@@ -798,7 +889,7 @@ function ProductionBlockTab:updateDataModel(model)
   self:updateInputModel(model)
 
   -- data panel
-  local header_panel, scroll_panel = self:getDataPanel()
+  local menu_panel, header_panel, scroll_panel = self:getDataPanel()
   -- production block result
   if table.size(model.blocks) > 0 then
     -- data panel
@@ -1150,6 +1241,7 @@ function ProductionBlockTab:addTableRowBlock(gui_table, model, block)
         local button_action = "production-block-product-add"
         local button_tooltip = "tooltip.product"
         local button_color = GuiElement.color_button_default_product
+        product.time = model.time
         if not(block_by_product) then
           button_action = "production-block-product-add"
           button_tooltip = "tooltip.add-recipe"
@@ -1188,6 +1280,7 @@ function ProductionBlockTab:addTableRowBlock(gui_table, model, block)
         local button_action = "production-block-ingredient-add"
         local button_tooltip = "tooltip.ingredient"
         local button_color = GuiElement.color_button_default_ingredient
+        ingredient.time = model.time
         if block_by_product then
           button_action = "production-block-ingredient-add"
           button_tooltip = "tooltip.add-recipe"
@@ -1269,6 +1362,48 @@ function ProductionBlockTab:onEvent(event)
 
   -- user writer
   if not(User.isWriter(model)) then return end
+
+  if event.action == "change-computing" then
+    local index = event.element.selected_index
+    if index == 3 then
+      ModelBuilder.updateProductionBlockOption(block, "by_factory", false)
+      ModelBuilder.updateProductionBlockOption(block, "solver", true)
+    elseif index == 2 then
+      ModelBuilder.updateProductionBlockOption(block, "by_factory", true)
+      ModelBuilder.updateProductionBlockOption(block, "solver", false)
+    else
+      ModelBuilder.updateProductionBlockOption(block, "by_factory", false)
+      ModelBuilder.updateProductionBlockOption(block, "solver", false)
+    end
+    ModelCompute.update(model)
+    Controller:send("on_gui_update", event)
+  end
+
+  if event.action == "production-block-up" then
+    if block == nil then
+      block = model.blocks[event.item2]
+    end
+    local step = 1
+    if event.shift then step = User.getModSetting("row_move_step") end
+    if event.control then step = 1000 end
+    ModelBuilder.upProductionBlock(model, block, step)
+    ModelCompute.update(model)
+    User.setParameter("scroll_element", block.id)
+    Controller:send("on_gui_update", event)
+  end
+
+  if event.action == "production-block-down" then
+    if block == nil then
+      block = model.blocks[event.item2]
+    end
+    local step = 1
+    if event.shift then step = User.getModSetting("row_move_step") end
+    if event.control then step = 1000 end
+    ModelBuilder.downProductionBlock(model, block, step)
+    ModelCompute.update(model)
+    User.setParameter("scroll_element", block.id)
+    Controller:send("on_gui_update", event)
+  end
 
   if event.action == "production-recipe-product-add" then
     if event.control == false and event.shift == false then

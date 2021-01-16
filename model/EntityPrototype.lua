@@ -381,7 +381,7 @@ function EntityPrototype:getFluidFuelPrototype(current)
         local fluidboxes = self:getFluidboxPrototypes()
         if fluidboxes ~= nil then
           for _,fluidbox in pairs(fluidboxes) do
-            if fluidbox.production_type == "input-output" then
+            if fluidbox.production_type == "input-output" or fluidbox.production_type == "input" then
               if fluidbox.filter ~= nil then
                 return FluidPrototype(fluidbox.filter)
               else
@@ -421,12 +421,13 @@ end
 -- @return #FluidPrototype
 --
 function EntityPrototype:getFluidFuelPrototypes()
-  if self:getEnergyTypeInput() == "fluid" then
-    if self:getFluidUsage() > 0 then
+  local energy_source = self:getEnergySource()
+  if energy_source:getType() == "fluid" then
+    if not(energy_source:getBurnsFluid()) then
       local fluidboxes = self:getFluidboxPrototypes()
       if fluidboxes ~= nil then
         for _,fluidbox in pairs(fluidboxes) do
-          if fluidbox.production_type == "input-output" then
+          if fluidbox.production_type == "input-output" or fluidbox.production_type == "input" then
             if fluidbox.filter ~= nil then
               return {fluidbox.filter}
             else

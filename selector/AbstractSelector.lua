@@ -11,6 +11,26 @@ AbstractSelector = newclass(FormModel,function(base,classname)
 end)
 
 -------------------------------------------------------------------------------
+-- On Style
+--
+-- @function [parent=#AbstractSelector] onStyle
+--
+-- @param #table styles
+-- @param #number width_main
+-- @param #number height_main
+--
+function AbstractSelector:onStyle(styles, width_main, height_main)
+  styles.flow_panel = {
+    width = 490,
+    height = height_main
+  }
+  styles.block_info = {
+    width = 310,
+    height = 50*2+45
+  }
+end
+
+-------------------------------------------------------------------------------
 -- Return filter - filtre sur les prototypes
 --
 -- @function [parent=#AbstractSelector] getProductFilter
@@ -151,11 +171,10 @@ function AbstractSelector:getSrollPanel()
     return content_panel["main_panel"]["scroll_panel"]
   end
   local main_panel = GuiElement.add(content_panel, GuiFrameV("main_panel"))
-  GuiElement.setStyle(main_panel, "dialog", "width")
-  GuiElement.setStyle(main_panel, "recipe_selector", "height")
+  main_panel.style.horizontally_stretchable = true
   local scroll_panel = GuiElement.add(main_panel, GuiScroll("scroll_panel"):style("helmod_scroll_pane"))
-  GuiElement.setStyle(scroll_panel, "scroll_recipe_selector", "width")
-  GuiElement.setStyle(scroll_panel, "scroll_recipe_selector", "height")
+  scroll_panel.style.horizontally_stretchable = true
+  scroll_panel.style.vertically_stretchable = true
   return scroll_panel
 end
 

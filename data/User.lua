@@ -707,6 +707,25 @@ function User.isActiveForm(classname)
 end
 
 -------------------------------------------------------------------------------
+-- Get main sizes
+--
+-- @function [parent=#User] getMainSizes
+--
+-- return
+--
+function User.getMainSizes()
+  local width , height = Player.getDisplaySizes()
+  local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
+  local display_ratio_vertictal = User.getModSetting("display_ratio_vertical")
+  if type(width) == "number" and  type(height) == "number" then
+    local width_main = math.ceil(width*display_ratio_horizontal)
+    local height_main = math.ceil(height*display_ratio_vertictal)
+    return width_main, height_main
+  end
+  return 800,600
+end
+
+-------------------------------------------------------------------------------
 -- Is Active Form
 --
 -- @function [parent=#User] isActiveForm

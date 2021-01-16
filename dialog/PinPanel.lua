@@ -38,6 +38,24 @@ function PinPanel:onInit()
 end
 
 -------------------------------------------------------------------------------
+-- On Style
+--
+-- @function [parent=#PinPanel] onStyle
+--
+-- @param #table styles
+-- @param #number width_main
+-- @param #number height_main
+--
+function PinPanel:onStyle(styles, width_main, height_main)
+  styles.flow_panel = {
+    minimal_width = 50,
+    maximal_width = 600,
+    minimal_height = 0,
+    maximal_height = height_main
+    }
+end
+
+-------------------------------------------------------------------------------
 -- On update
 --
 -- @function [parent=#PinPanel] onUpdate
@@ -60,17 +78,20 @@ function PinPanel:updateHeader(event)
   local action_panel = self:getMenuPanel()
   action_panel.clear()
   local group1 = GuiElement.add(action_panel, GuiFlowH("group1"))
-  GuiElement.add(group1, GuiButton(self.classname, "change-level", "down"):sprite("menu", "arrow-left-white", "arrow-left"):style("helmod_button_menu"):tooltip({"helmod_button.decrease"}))
-  GuiElement.add(group1, GuiButton(self.classname, "change-level", "up"):sprite("menu", "arrow-right-white", "arrow-right"):style("helmod_button_menu"):tooltip({"helmod_button.expand"}))
-  GuiElement.add(group1, GuiButton(self.classname, "change-level", "min"):sprite("menu", "minimize-window-white", "minimize-window"):style("helmod_button_menu"):tooltip({"helmod_button.minimize"}))
-  GuiElement.add(group1, GuiButton(self.classname, "change-level", "max"):sprite("menu", "maximize-window-white", "maximize-window"):style("helmod_button_menu"):tooltip({"helmod_button.maximize"}))
+  GuiElement.add(group1, GuiButton(self.classname, "change-level", "down"):sprite("menu", "arrow-left", "arrow-left"):style("helmod_button_menu"):tooltip({"helmod_button.decrease"}))
+  GuiElement.add(group1, GuiButton(self.classname, "change-level", "up"):sprite("menu", "arrow-right", "arrow-right"):style("helmod_button_menu"):tooltip({"helmod_button.expand"}))
+  GuiElement.add(group1, GuiButton(self.classname, "change-level", "min"):sprite("menu", "minimize-window", "minimize-window"):style("helmod_button_menu"):tooltip({"helmod_button.minimize"}))
+  GuiElement.add(group1, GuiButton(self.classname, "change-level", "max"):sprite("menu", "maximize-window", "maximize-window"):style("helmod_button_menu"):tooltip({"helmod_button.maximize"}))
 
   local group2 = GuiElement.add(action_panel, GuiFlowH("group2"))
-  GuiElement.add(group2, GuiButton(self.classname, "recipe-done-remove"):sprite("menu", "checkmark-white","checkmark"):style("helmod_button_menu"):tooltip({"helmod_button.remove-done"}))
+  GuiElement.add(group2, GuiButton(self.classname, "recipe-done-remove"):sprite("menu", "checkmark","checkmark"):style("helmod_button_menu_actived_red"):tooltip({"helmod_button.remove-done"}))
 
   local parameter_objects = User.getParameter(self.parameter_objects)
   local group3 = GuiElement.add(action_panel, GuiFlowH("group3"))
-  GuiElement.add(group3, GuiButton("HMSummaryPanel=OPEN", parameter_objects.model, parameter_objects.block):sprite("menu", "brief-white","brief"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
+  GuiElement.add(group3, GuiButton("HMSummaryPanel", "OPEN", parameter_objects.model, parameter_objects.block):sprite("menu", "brief","brief"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
+
+  local group4 = GuiElement.add(action_panel, GuiFlowH("group4"))
+  GuiElement.add(group4, GuiButton("HMProductionBlockTab", "OPEN", parameter_objects.model, parameter_objects.block):sprite("menu", "factory","factory"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-production-block"}))
 end
 
 -------------------------------------------------------------------------------
@@ -158,10 +179,12 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
     local icon = "checkmark"
     local icon_white = "checkmark-white"
     if is_done == true then
+      GuiElement.add(gui_table, GuiButton(self.classname, "recipe-done", recipe.id):sprite("menu", "done-white", "done"):style("helmod_button_menu_selected_green"):tooltip({"helmod_button.done"}))
+    else
+      GuiElement.add(gui_table, GuiButton(self.classname, "recipe-done", recipe.id):sprite("menu", "checkmark", "checkmark"):style("helmod_button_menu_actived_green"):tooltip({"helmod_button.done"}))
       icon = "done"
       icon_white = "done-white"
     end
-    GuiElement.add(gui_table, GuiButton(self.classname, "recipe-done", recipe.id):sprite("menu", icon_white, icon):style("helmod_button_menu"):tooltip({"helmod_button.done"}))
     -- col recipe
     local cell_recipe = GuiElement.add(gui_table, GuiFrameH("recipe", recipe.id):style(helmod_frame_style.hidden))
     local button_recipe = GuiCellRecipe("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):infoIcon(recipe.type):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):mask(is_done)

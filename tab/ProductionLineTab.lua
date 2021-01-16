@@ -57,26 +57,26 @@ function ProductionLineTab:getInfoPanel()
   local panel = GuiElement.add(parent_panel, GuiFlowH(panel_name))
   panel.style.horizontally_stretchable = true
   panel.style.horizontal_spacing=10
-  GuiElement.setStyle(panel, "block_info", "height")
+  self:setStyle(panel, "block_info", "height")
 
   local info_panel = GuiElement.add(panel, GuiFlowV("info"))
 
   local tooltip = GuiTooltipModel("tooltip.info-model"):element(model)
   GuiElement.add(info_panel, GuiLabel("label-info"):caption({"",self:getButtonCaption(), " [img=info]"}):style("heading_1_label"):tooltip(tooltip))
 
-  GuiElement.setStyle(info_panel, "block_info", "width")
+  self:setStyle(info_panel, "block_info", "width")
   local info_scroll = GuiElement.add(info_panel, GuiScroll("info-scroll"):style("helmod_scroll_pane"))
   info_scroll.style.horizontally_stretchable = true
 
   local output_panel = GuiElement.add(panel, GuiFlowV("output"))
   GuiElement.add(output_panel, GuiLabel("label-info"):caption({"helmod_common.output"}):style("helmod_label_title_frame"))
-  GuiElement.setStyle(output_panel, "block_info", "height")
+  self:setStyle(output_panel, "block_info", "height")
   local output_scroll = GuiElement.add(output_panel, GuiScroll("output-scroll"):style("helmod_scroll_pane"))
 
 
   local input_panel = GuiElement.add(panel, GuiFlowV("input"))
   GuiElement.add(input_panel, GuiLabel("label-info"):caption({"helmod_common.input"}):style("helmod_label_title_frame"))
-  GuiElement.setStyle(input_panel, "block_info", "height")
+  self:setStyle(input_panel, "block_info", "height")
   local input_scroll = GuiElement.add(input_panel, GuiScroll("input-scroll"):style("helmod_scroll_pane"))
   return info_scroll, output_scroll, input_scroll
 end

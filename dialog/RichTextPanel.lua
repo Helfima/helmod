@@ -18,6 +18,46 @@ function RichTextPanel:onInit()
 end
 
 -------------------------------------------------------------------------------
+-- On Style
+--
+-- @function [parent=#RichTextPanel] onStyle
+--
+-- @param #table styles
+-- @param #number width_main
+-- @param #number height_main
+--
+function RichTextPanel:onStyle(styles, width_main, height_main)
+  styles.flow_panel = {
+    minimal_width = 322,
+    maximal_width = 322,
+    minimal_height = 300,
+    maximal_height = height_main
+  }
+end
+
+------------------------------------------------------------------------------
+-- Get Button Sprites
+--
+-- @function [parent=#RichTextPanel] getButtonSprites
+--
+-- @return boolean
+--
+function RichTextPanel:getButtonSprites()
+  return "text-white","text"
+end
+
+-------------------------------------------------------------------------------
+-- Is tool
+--
+-- @function [parent=#RichTextPanel] isTool
+--
+-- @return boolean
+--
+function RichTextPanel:isTool()
+  return true
+end
+
+-------------------------------------------------------------------------------
 -- On update
 --
 -- @function [parent=#RichTextPanel] onUpdate

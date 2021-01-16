@@ -17,6 +17,19 @@ function ModelEdition:onInit()
 end
 
 -------------------------------------------------------------------------------
+-- On Style
+--
+-- @function [parent=#ModelEdition] onStyle
+--
+-- @param #table styles
+-- @param #number width_main
+-- @param #number height_main
+--
+function ModelEdition:onStyle(styles, width_main, height_main)
+  styles.flow_panel = nil
+end
+
+-------------------------------------------------------------------------------
 -- On Bind Dispatcher
 --
 -- @function [parent=#ModelEdition] onBind

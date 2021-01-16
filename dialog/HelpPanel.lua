@@ -267,6 +267,27 @@ function HelpPanel:onInit()
 end
 
 -------------------------------------------------------------------------------
+-- On Style
+--
+-- @function [parent=#HelpPanel] onStyle
+--
+-- @param #table styles
+-- @param #number width_main
+-- @param #number height_main
+--
+function HelpPanel:onStyle(styles, width_main, height_main)
+  styles.flow_panel = {
+    height = height_main,
+  }
+  styles.menu_panel = {
+    width = 300,
+  }
+  styles.content_panel = {
+    width = 850,
+  }
+end
+
+-------------------------------------------------------------------------------
 -- Get or create content panel
 --
 -- @function [parent=#HelpPanel] getContentPanel
@@ -281,36 +302,13 @@ function HelpPanel:getContentPanel()
   end
 
   local menu_panel = GuiElement.add(panel, GuiFlowV(panel_menu_name))
-  GuiElement.setStyle(menu_panel, "scroll_help", "height")
   menu_panel.style.vertically_stretchable = true
-  menu_panel.style.minimal_width = 200
-  --menu_panel.style.padding=0
+  self:setStyle(menu_panel, "menu_panel", "width")
 
   local content_panel = GuiElement.add(panel, GuiScroll(panel_content_name))
-  GuiElement.setStyle(content_panel, "scroll_help", "height")
-  content_panel.style.minimal_width = 850
-  content_panel.style.maximal_width = 850
-  content_panel.style.horizontally_stretchable = true
+  self:setStyle(content_panel, "content_panel", "width")
+  menu_panel.style.vertically_stretchable = true
   return menu_panel, content_panel
-end
-
--------------------------------------------------------------------------------
--- Get or create result scroll panel
---
--- @function [parent=#HelpPanel] getContentScrollPanel
---
--- @param #string caption
---
-function HelpPanel:getContentScrollPanel(caption)
-  local menu_panel, content_panel = self:getContentPanel(caption)
-  if content_panel["scroll-content"] ~= nil and content_panel["scroll-content"].valid then
-    return content_panel["scroll-content"]
-  end
-  local scroll_panel = GuiElement.add(content_panel, GuiScroll("scroll-content"))
-  GuiElement.setStyle(scroll_panel, "scroll_help", "height")
-  scroll_panel.style.minimal_width = 850
-  scroll_panel.style.maximal_width = 850
-  return scroll_panel
 end
 
 -------------------------------------------------------------------------------

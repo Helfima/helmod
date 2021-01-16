@@ -1,13 +1,14 @@
 require "core.Object"
-require "core.FormBase"
 require "core.Form"
 require "core.FormModel"
 
+require "dialog.AdminPanel"
+require "dialog.ArrangeModels"
 require "dialog.HelpPanel"
 require "dialog.ModelDebug"
 require "dialog.PinPanel"
 require "dialog.SummaryPanel"
-require "dialog.StatusPanel"
+require "dialog.StatisticPanel"
 require "dialog.Settings"
 require "dialog.Download"
 require "dialog.Calculator"
@@ -34,9 +35,6 @@ require "selector.FluidSelector"
 require "tab.ProductionBlockTab"
 require "tab.ProductionLineTab"
 require "tab.ResourceTab"
-require "tab.SummaryTab"
-require "tab.StatisticTab"
-require "tab.AdminTab"
 
 require "model.Prototype"
 require "model.ElectricPrototype"
@@ -80,6 +78,8 @@ local nextEvent = nil
 function Controller:prepare()
 
   local forms = {}
+  table.insert(forms, AdminPanel("HMAdminPanel"))
+  table.insert(forms, ArrangeModels("HMArrangeModels"))
   table.insert(forms, HelpPanel("HMHelpPanel"))
   table.insert(forms, ModelDebug("HMModelDebug"))
   table.insert(forms, Download("HMDownload"))
@@ -93,9 +93,6 @@ function Controller:prepare()
   table.insert(forms, ProductionLineTab("HMProductionLineTab"))
   table.insert(forms, ProductionBlockTab("HMProductionBlockTab"))
   table.insert(forms, ResourceTab("HMResourceTab"))
-  table.insert(forms, SummaryTab("HMSummaryTab"))
-  table.insert(forms, StatisticTab("HMStatisticTab"))
-  table.insert(forms, AdminTab("HMAdminTab"))
 
   table.insert(forms, EnergySelector("HMEnergySelector"))
   table.insert(forms, EntitySelector("HMEntitySelector"))
@@ -113,7 +110,7 @@ function Controller:prepare()
 
   table.insert(forms, PinPanel("HMPinPanel"))
   table.insert(forms, SummaryPanel("HMSummaryPanel"))
-  table.insert(forms, StatusPanel("HMStatusPanel"))
+  table.insert(forms, StatisticPanel("HMStatisticPanel"))
 
   views = {}
   for _,form in pairs(forms) do
@@ -155,6 +152,7 @@ function Controller:bind()
   Dispatcher:bind("on_gui_event", self, self.onGuiEvent)
   Dispatcher:bind("on_gui_setting", self, self.onGuiSetting)
   Dispatcher:bind("on_gui_hotkey", self, self.onGuiHotkey)
+  Dispatcher:bind("on_gui_queue", self, self.onGuiQueue)
 end
 
 -------------------------------------------------------------------------------
@@ -256,10 +254,6 @@ function Controller:bindController(player)
       gui_button.style.width = 37
       gui_button.style.height = 37
     end
---    if User.getVersion() < User.version then
---      local message = string.format("%s %s: %s","Helmod",game.active_mods["helmod"], "Now every panel is draggable.")
---      Player.print(message)
---    end
     User.update()
   end
 end
@@ -284,9 +278,35 @@ function Controller:onTick(event)
         Dispatcher:send("on_gui_error", event, next_event.classname)
       end
     end
+
+    local event_queue = User.getParameter("event_queue")
+    if event_queue ~= nil then
+      local current_tick = game.tick
+      for _,event in pairs(event_queue) do
+          if current_tick - event.tick > 60 then
+            event.is_queue = true
+            Dispatcher:send("on_gui_action", event, Controller.classname)
+            event_queue[event.element.name] = nil
+          end
+      end
+      if table.size(event_queue) == 0 then
+        User.setParameter("event_queue", nil)
+      end
+    end
   end
 end
 
+-------------------------------------------------------------------------------
+-- On gui queue
+--
+-- @function [parent=#Controller] onGuiQueue
+--
+function Controller:onGuiQueue(event)
+  local event_queue = User.getParameter("event_queue") or {}
+  event.element = {name=event.element.name, text=event.element.text}
+  event_queue[event.element.name] = event
+  User.setParameter("event_queue", event_queue)
+end
 -------------------------------------------------------------------------------
 -- On tick
 --
@@ -394,7 +414,6 @@ function Controller:onGuiHotkey(event)
     if not(self:isOpened()) then
       self:openMainPanel()
     end
-    --Controller.sendEvent(Event.native(), "HMController", "change-tab", "HMProductionLineTab")
   end
   if event.input_name == "helmod-recipe-selector-open" then
     if not(self:isOpened()) then

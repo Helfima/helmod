@@ -38,6 +38,7 @@ function EventController.start()
   EventController.pcallEvent(defines.events.on_console_command, EventController.onConsoleCommand)
   --EventController.pcallEvent(defines.events.on_research_finished, EventController.onResearchFinished)
   --EventController.pcallEvent(defines.events.on_gui_closed, EventController.onGuiClosed)
+  EventController.pcallEvent(defines.events.on_gui_location_changed, EventController.onGuiLocationChanged)
   
   EventController.pcallEvent(defines.events.on_string_translated, EventController.onStringTranslated)
 
@@ -211,6 +212,20 @@ end
 --
 -- @param #table event
 --
+function EventController.onGuiLocationChanged(event)
+  if event ~= nil and event.player_index ~= nil then
+    Player.load(event)
+    Dispatcher:send("on_gui_location", event)
+  end
+end
+
+-------------------------------------------------------------------------------
+-- On tick
+--
+-- @function [parent=#EventController] onTick
+--
+-- @param #table event
+--
 function EventController.onTick(event)
   Controller:onTick(event)
 end
@@ -261,9 +276,14 @@ end
 -- @param #table event
 --
 function EventController.onGuiTextChanged(event)
-  if event ~= nil and event.player_index ~= nil and event.element ~= nil and string.find(event.element.name, "onchange") then
+  if event ~= nil and event.player_index ~= nil and event.element ~= nil then
     Player.load(event)
-    Dispatcher:send("on_gui_action", event, Controller.classname)
+    if string.find(event.element.name, "onchange") then
+      Dispatcher:send("on_gui_action", event, Controller.classname)
+    end
+    if string.find(event.element.name, "onqueue") then
+      Dispatcher:send("on_gui_queue", event, Controller.classname)
+    end
   end
 end
 

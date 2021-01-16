@@ -174,7 +174,7 @@ end
 --
 function PropertiesPanel:onUpdate(event)
   local flow_panel, content_panel, menu_panel = self:getPanel()
-  local width_main, height_main = GuiElement.getMainSizes()
+  local width_main, height_main = User.getMainSizes()
   flow_panel.style.height = height_main
   flow_panel.style.width = width_main
   

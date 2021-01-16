@@ -6,6 +6,7 @@
 --
 Form = newclass(Object,function(base,classname)
   Object.init(base,classname)
+  base:style()
   base.otherClose = true
   base.locate = "screen"
   base.panelClose = true
@@ -13,6 +14,39 @@ Form = newclass(Object,function(base,classname)
   base.auto_clear = true
   base.content_verticaly = true
 end)
+
+-------------------------------------------------------------------------------
+-- Style
+--
+-- @function [parent=#Form] style
+--
+function Form:style()
+  local width_main, height_main = User.getMainSizes()
+  self.styles = {
+    flow_panel ={
+      width = width_main,
+      height = height_main,
+      minimal_width = width_main,
+      minimal_height = height_main,
+      maximal_width = width_main,
+      maximal_height = height_main,
+    }
+  }
+  self:onStyle(self.styles, width_main, height_main)
+end
+
+-------------------------------------------------------------------------------
+-- On Style
+--
+-- @function [parent=#Form] onStyle
+--
+-- @param #table styles
+-- @param #number width_main
+-- @param #number height_main
+--
+function Form:onStyle(styles, width_main, height_main)
+  
+end
 
 -------------------------------------------------------------------------------
 -- Bind Dispatcher
@@ -73,6 +107,17 @@ function Form:isSpecial()
 end
 
 -------------------------------------------------------------------------------
+-- Is tool
+--
+-- @function [parent=#Form] isTool
+--
+-- @return boolean
+--
+function Form:isTool()
+  return false
+end
+
+-------------------------------------------------------------------------------
 -- Get panel name
 --
 -- @function [parent=#Form] getPanelName
@@ -96,6 +141,21 @@ function Form:getParentPanel()
 end
 
 -------------------------------------------------------------------------------
+-- Set style
+--
+-- @function [parent=#Form] setStyle
+--
+-- @param #LuaGuiElement element
+-- @param #string style
+-- @param #string property
+--
+function Form:setStyle(element, style, property)
+  if element.style ~= nil and self.styles ~= nil and self.styles[style] ~= nil and self.styles[style][property] ~= nil then
+    element.style[property] = self.styles[style][property]
+  end
+end
+
+--------------------------------------------------------------------------------
 -- Get the parent panel
 --
 -- @function [parent=#Form] getPanel
@@ -112,13 +172,12 @@ function Form:getPanel()
   flow_panel.style.horizontally_stretchable = true
   flow_panel.style.vertically_stretchable = true
   flow_panel.location = User.getLocationForm(self:getPanelName())
-  local width_main, height_main = GuiElement.getMainSizes()
-  GuiElement.setStyle(flow_panel, self.classname, "width")
-  GuiElement.setStyle(flow_panel, self.classname, "height")
-  GuiElement.setStyle(flow_panel, self.classname, "minimal_width")
-  GuiElement.setStyle(flow_panel, self.classname, "minimal_height")
-  GuiElement.setStyle(flow_panel, self.classname, "maximal_width")
-  GuiElement.setStyle(flow_panel, self.classname, "maximal_height")
+  self:setStyle(flow_panel, "flow_panel", "width")
+  self:setStyle(flow_panel, "flow_panel", "height")
+  self:setStyle(flow_panel, "flow_panel", "minimal_width")
+  self:setStyle(flow_panel, "flow_panel", "minimal_height")
+  self:setStyle(flow_panel, "flow_panel", "maximal_width")
+  self:setStyle(flow_panel, "flow_panel", "maximal_height")
 
   local header_panel = GuiElement.add(flow_panel, GuiFlowH("header_panel"))
   header_panel.style.horizontally_stretchable = true
@@ -128,11 +187,13 @@ function Form:getPanel()
   title_panel.drag_target = flow_panel
 
   local menu_panel = GuiElement.add(header_panel,  GuiFlowH("menu_panel"))
-  --menu_panel.style.horizontal_spacing = 10
+  menu_panel.style.horizontal_spacing = 10
   menu_panel.style.horizontal_align = "right"
 
   local content_panel
   content_panel = GuiElement.add(flow_panel, GuiFrameV("content_panel"):style("inside_deep_frame"))
+  content_panel.style.vertically_stretchable = true
+  content_panel.style.horizontally_stretchable = true
   return flow_panel, content_panel, menu_panel
 end
 
@@ -386,6 +447,20 @@ function Form:prepare(event)
 end
 
 -------------------------------------------------------------------------------
+-- Add cell header
+--
+-- @function [parent=#Form] addCellHeader
+--
+-- @param #LuaGuiElement guiTable
+-- @param #string name
+-- @param #string caption
+--
+function Form:addCellHeader(guiTable, name, caption)
+  local cell = GuiElement.add(guiTable, GuiFrameH("header", name):style(helmod_frame_style.hidden))
+  GuiElement.add(cell, GuiLabel("label"):caption(caption))
+end
+
+-------------------------------------------------------------------------------
 -- Update top menu
 --
 -- @function [parent=#Form] updateTopMenu
@@ -412,29 +487,45 @@ function Form:updateTopMenu(event)
           end
         end
       end
+
+      -- Tool button
+      local tool_group = GuiElement.add(menu_panel, GuiFlowH("tool_group"))
+      for _, form in pairs(Controller.getViews()) do
+        if self.add_special_button == true and form:isVisible() and form:isTool() then
+          local icon_hovered, icon = form:getButtonSprites()
+          local style = "helmod_frame_button"
+          if string.find(form.classname, "Tab") then
+            if User.isActiveForm(form.classname) then style = "helmod_frame_button_selected" end
+            GuiElement.add(tool_group, GuiButton(self.classname, "change-tab", form.classname):sprite("menu", icon_hovered, icon):style(style):tooltip(form:getButtonCaption()))
+          else
+            GuiElement.add(tool_group, GuiButton(form.classname, "OPEN"):sprite("menu", icon_hovered, icon):style(style):tooltip(form.panelCaption))
+          end
+        end
+      end
+      
       -- special tab
-      local group1 = GuiElement.add(menu_panel, GuiFlowH("group1"))
+      local special_group = GuiElement.add(menu_panel, GuiFlowH("special_group"))
       for _, form in pairs(Controller.getViews()) do
         if self.add_special_button == true and form:isVisible() and form:isSpecial() then
           local icon_hovered, icon = form:getButtonSprites()
           local style = "helmod_frame_button"
           if string.find(form.classname, "Tab") then
             if User.isActiveForm(form.classname) then style = "helmod_frame_button_selected" end
-            GuiElement.add(group1, GuiButton(self.classname, "change-tab", form.classname):sprite("menu", icon_hovered, icon):style(style):tooltip(form:getButtonCaption()))
+            GuiElement.add(special_group, GuiButton(self.classname, "change-tab", form.classname):sprite("menu", icon_hovered, icon):style(style):tooltip(form:getButtonCaption()))
           else
-            GuiElement.add(group1, GuiButton(form.classname, "OPEN"):sprite("menu", icon_hovered, icon):style(style):tooltip(form.panelCaption))
+            GuiElement.add(special_group, GuiButton(form.classname, "OPEN"):sprite("menu", icon_hovered, icon):style(style):tooltip(form.panelCaption))
           end
         end
       end
-      -- current button
-      local group2 = GuiElement.add(menu_panel, GuiFlowH("group2"))
+      -- Standard group
+      local standard_group = GuiElement.add(menu_panel, GuiFlowH("standard_group"))
       if self.help_button then
-        GuiElement.add(group2, GuiButton("HMHelpPanel", "OPEN"):sprite("menu", "help-white", "help"):style("helmod_frame_button"):tooltip({"helmod_button.help"}))
+        GuiElement.add(standard_group, GuiButton("HMHelpPanel", "OPEN"):sprite("menu", "help-white", "help"):style("helmod_frame_button"):tooltip({"helmod_button.help"}))
       end
       if string.find(self.classname, "Tab") then
-        GuiElement.add(group2, GuiButton(self.classname, "close-tab"):sprite("menu", "close-window-white", "close-window"):style("helmod_frame_button"):tooltip({"helmod_button.close"}))
+        GuiElement.add(standard_group, GuiButton(self.classname, "close-tab"):sprite("menu", "close-window-white", "close-window"):style("helmod_frame_button"):tooltip({"helmod_button.close"}))
       else
-        GuiElement.add(group2, GuiButton(self.classname, "CLOSE"):sprite("menu", "close-window-white", "close-window"):style("helmod_frame_button"):tooltip({"helmod_button.close"}))
+        GuiElement.add(standard_group, GuiButton(self.classname, "CLOSE"):sprite("menu", "close-window-white", "close-window"):style("helmod_frame_button"):tooltip({"helmod_button.close"}))
       end
     end
   else
@@ -466,8 +557,8 @@ end
 -- @param #LuaEvent event
 --
 function Form:updateLocation(event)
-  local width , height = GuiElement.getDisplaySizes()
-  local width_main, height_main = GuiElement.getMainSizes()
+  local width , height = Player.getDisplaySizes()
+  local width_main, height_main = User.getMainSizes()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if User.getPreferenceSetting("ui_glue") == true and User.getPreferenceSetting("ui_glue", self.classname) == true then
     local offset = User.getPreferenceSetting("ui_glue_offset")

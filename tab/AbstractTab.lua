@@ -127,105 +127,68 @@ function AbstractTab:updateMenuPanel(event)
     end
   end
 
-  if self.classname == "HMAdminTab" then
-    GuiElement.add(left_panel, GuiButton("HMRuleEdition", "OPEN"):caption({"helmod_result-panel.add-button-rule"}))
-    GuiElement.add(left_panel, GuiButton(self.classname, "reset-rules"):caption({"helmod_result-panel.reset-button-rule"}))
+  -- add recipe
+  local block_id = "new"
+  if block ~= nil then block_id = block.id end
+
+  local group2 = GuiElement.add(left_panel, GuiFlowH("group2"))
+  group2.style.horizontal_spacing = button_spacing
+  -- copy past
+  GuiElement.add(group2, GuiButton(self.classname, "copy-model", model.id):sprite("menu", "copy", "copy"):style("helmod_button_menu"):tooltip({"helmod_button.copy"}))
+  GuiElement.add(group2, GuiButton(self.classname, "past-model", model.id):sprite("menu", "paste", "paste"):style("helmod_button_menu"):tooltip({"helmod_button.past"}))
+  -- download
+  if self.classname == "HMProductionBlockTab" then
+    GuiElement.add(group2, GuiButton("HMDownload", "OPEN", "download"):sprite("menu", "download", "download"):style("helmod_button_menu"):tooltip({"helmod_result-panel.download-button-production-line"}))
+    GuiElement.add(group2, GuiButton("HMDownload", "OPEN", "upload"):sprite("menu", "upload", "upload"):style("helmod_button_menu"):tooltip({"helmod_result-panel.upload-button-production-line"}))
+  end
+  -- refresh control
+  GuiElement.add(group2, GuiButton(self.classname, "refresh-model", model.id):sprite("menu", "refresh", "refresh"):style("helmod_button_menu"):tooltip({"helmod_result-panel.refresh-button"}))
+
+  local group3 = GuiElement.add(left_panel, GuiFlowH("group3"))
+  group3.style.horizontal_spacing = button_spacing
+  -- pin info
+  if self.classname == "HMStatisticTab" then
+    GuiElement.add(group3, GuiButton("HMStatusPanel", "OPEN", model.id, block_id):sprite("menu", "pin", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
+  end
+
+  -- preferences
+  local groupPref = GuiElement.add(left_panel, GuiFlowH("groupPref"))
+  groupPref.style.horizontal_spacing = button_spacing
+  GuiElement.add(groupPref, GuiButton("HMModelEdition", "OPEN", model.id, block_id):sprite("menu", "edit", "edit"):style("helmod_button_menu"):tooltip({"helmod_panel.model-edition"}))
+  GuiElement.add(groupPref, GuiButton("HMPreferenceEdition", "OPEN", model.id, block_id):sprite("menu", "services", "services"):style("helmod_button_menu"):tooltip({"helmod_button.preferences"}))
+  
+  local display_logistic_row = User.getParameter("display_logistic_row")
+  if display_logistic_row == true then
+    GuiElement.add(groupPref, GuiButton(self.classname, "change-logistic"):sprite("menu", "container-white", "container"):style("helmod_button_menu_selected"):tooltip({"tooltip.display-logistic-row"}))
   else
-    -- add recipe
-    local block_id = "new"
-    if block ~= nil then block_id = block.id end
-
---[[     local group1 = GuiElement.add(left_panel, GuiFlowH("group1"))
-    group1.style.horizontal_spacing = button_spacing
-    GuiElement.add(group1, GuiButton("HMRecipeSelector", "OPEN", model.id, block_id):sprite("menu", "wrench", "wrench"):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-recipe"}))
-    GuiElement.add(group1, GuiButton("HMTechnologySelector", "OPEN", model.id, block_id):sprite("menu", "graduation", "graduation"):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-technology"}))
-    GuiElement.add(group1, GuiButton("HMEnergySelector", "OPEN", model.id, block_id):sprite("menu", "nuclear","nuclear"):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.select-button-energy"}))
- ]]
-    local group2 = GuiElement.add(left_panel, GuiFlowH("group2"))
-    group2.style.horizontal_spacing = button_spacing
-    -- copy past
-    GuiElement.add(group2, GuiButton(self.classname, "copy-model", model.id):sprite("menu", "copy", "copy"):style("helmod_button_menu"):tooltip({"helmod_button.copy"}))
-    GuiElement.add(group2, GuiButton(self.classname, "past-model", model.id):sprite("menu", "paste", "paste"):style("helmod_button_menu"):tooltip({"helmod_button.past"}))
-    -- download
-    if self.classname == "HMProductionBlockTab" then
-      GuiElement.add(group2, GuiButton("HMDownload", "OPEN", "download"):sprite("menu", "download", "download"):style("helmod_button_menu"):tooltip({"helmod_result-panel.download-button-production-line"}))
-      GuiElement.add(group2, GuiButton("HMDownload", "OPEN", "upload"):sprite("menu", "upload", "upload"):style("helmod_button_menu"):tooltip({"helmod_result-panel.upload-button-production-line"}))
-    end
-    -- delete control
-    --[[ if User.isAdmin() or model.owner == User.name() or (model.share ~= nil and bit32.band(model.share, 4) > 0) then
-      if self.classname == "HMProductionLineTab" then
-        GuiElement.add(group2, GuiButton(self.classname, "remove-model", model.id):sprite("menu", "delete", "delete"):style("helmod_button_menu_actived_red"):tooltip({"helmod_result-panel.remove-button-production-line"}))
-      end
-      if self.classname == "HMProductionBlockTab" then
-        GuiElement.add(group2, GuiButton(self.classname, "production-block-remove", model.id, block_id):sprite("menu", "delete", "delete"):style("helmod_button_menu_actived_red"):tooltip({"helmod_result-panel.remove-button-production-block"}))
-      end
-    end ]]
-    -- refresh control
-    GuiElement.add(group2, GuiButton(self.classname, "refresh-model", model.id):sprite("menu", "refresh", "refresh"):style("helmod_button_menu"):tooltip({"helmod_result-panel.refresh-button"}))
-
-    local group3 = GuiElement.add(left_panel, GuiFlowH("group3"))
-    group3.style.horizontal_spacing = button_spacing
-    -- pin control
-    --[[ if self.classname == "HMProductionBlockTab" then
-      GuiElement.add(group3, GuiButton("HMPinPanel", "OPEN", model.id, block_id):sprite("menu", "pin", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
-      GuiElement.add(group3, GuiButton("HMSummaryPanel", "OPEN", model.id, block_id):sprite("menu", "brief","brief"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
-      -- Model Debug
-      if User.getModGlobalSetting("debug_solver") == true then
-        local groupDebug = GuiElement.add(left_panel, GuiFlowH("groupDebug"))
-        GuiElement.add(groupDebug, GuiButton("HMModelDebug", "OPEN", model.id, block_id):sprite("menu", "bug", "bug"):style("helmod_button_menu"):tooltip("Open Debug"))
-      end
-      
-    end ]]
-    -- pin info
-    if self.classname == "HMStatisticTab" then
-      GuiElement.add(group3, GuiButton("HMStatusPanel", "OPEN", model.id, block_id):sprite("menu", "pin", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
-    end
-
-    -- preferences
-    local groupPref = GuiElement.add(left_panel, GuiFlowH("groupPref"))
-    groupPref.style.horizontal_spacing = button_spacing
-    GuiElement.add(groupPref, GuiButton("HMModelEdition", "OPEN", model.id, block_id):sprite("menu", "edit", "edit"):style("helmod_button_menu"):tooltip({"helmod_panel.model-edition"}))
-    GuiElement.add(groupPref, GuiButton("HMPreferenceEdition", "OPEN", model.id, block_id):sprite("menu", "services", "services"):style("helmod_button_menu"):tooltip({"helmod_button.preferences"}))
-    
-    local display_logistic_row = User.getParameter("display_logistic_row")
-    if display_logistic_row == true then
-      GuiElement.add(groupPref, GuiButton(self.classname, "change-logistic"):sprite("menu", "container-white", "container"):style("helmod_button_menu_selected"):tooltip({"tooltip.display-logistic-row"}))
-    else
-      GuiElement.add(groupPref, GuiButton(self.classname, "change-logistic"):sprite("menu", "container", "container"):style("helmod_button_menu"):tooltip({"tooltip.display-logistic-row"}))
+    GuiElement.add(groupPref, GuiButton(self.classname, "change-logistic"):sprite("menu", "container", "container"):style("helmod_button_menu"):tooltip({"tooltip.display-logistic-row"}))
+  end
+  
+  -- logistics
+  if display_logistic_row == true then
+    local logistic_row_item = User.getParameter("logistic_row_item") or "belt"
+    local logistic2 = GuiElement.add(left_panel, GuiFlowH("logistic2"))
+    logistic2.style.horizontal_spacing = button_spacing
+    for _,type in pairs({"inserter", "belt", "container", "transport"}) do
+      local item_logistic = Player.getDefaultItemLogistic(type)
+      local style = "helmod_button_menu"
+      if logistic_row_item == type then style = "helmod_button_menu_selected" end
+      local button = GuiElement.add(logistic2, GuiButton(self.classname, "change-logistic-item", type):sprite("sprite", item_logistic):style(style):tooltip({"tooltip.logistic-row-choose"}))
+      button.style.padding = {0,0,0,0}
     end
     
-    -- logistics
-    if display_logistic_row == true then
-      local logistic_row_item = User.getParameter("logistic_row_item") or "belt"
-      local logistic2 = GuiElement.add(left_panel, GuiFlowH("logistic2"))
-      logistic2.style.horizontal_spacing = button_spacing
-      for _,type in pairs({"inserter", "belt", "container", "transport"}) do
-        local item_logistic = Player.getDefaultItemLogistic(type)
-        local style = "helmod_button_menu"
-        if logistic_row_item == type then style = "helmod_button_menu_selected" end
-        local button = GuiElement.add(logistic2, GuiButton(self.classname, "change-logistic-item", type):sprite("sprite", item_logistic):style(style):tooltip({"tooltip.logistic-row-choose"}))
-        button.style.padding = {0,0,0,0}
-      end
-      
-      local logistic_row_fluid = User.getParameter("logistic_row_fluid") or "pipe"
-      local logistic3 = GuiElement.add(left_panel, GuiFlowH("logistic3"))
-      logistic3.style.horizontal_spacing = button_spacing
-      for _,type in pairs({"pipe", "container", "transport"}) do
-        local fluid_logistic = Player.getDefaultFluidLogistic(type)
-        local style = "helmod_button_menu"
-        if logistic_row_fluid == type then style = "helmod_button_menu_selected" end
-        local button = GuiElement.add(logistic3, GuiButton(self.classname, "change-logistic-fluid", type):sprite("sprite", fluid_logistic):style(style):tooltip({"tooltip.logistic-row-choose"}))
-        button.style.padding = {0,0,0,0}
-      end
+    local logistic_row_fluid = User.getParameter("logistic_row_fluid") or "pipe"
+    local logistic3 = GuiElement.add(left_panel, GuiFlowH("logistic3"))
+    logistic3.style.horizontal_spacing = button_spacing
+    for _,type in pairs({"pipe", "container", "transport"}) do
+      local fluid_logistic = Player.getDefaultFluidLogistic(type)
+      local style = "helmod_button_menu"
+      if logistic_row_fluid == type then style = "helmod_button_menu_selected" end
+      local button = GuiElement.add(logistic3, GuiButton(self.classname, "change-logistic-fluid", type):sprite("sprite", fluid_logistic):style(style):tooltip({"tooltip.logistic-row-choose"}))
+      button.style.padding = {0,0,0,0}
     end
   end
 
-
-  local group_special = GuiElement.add(right_panel, GuiFlowH("group_special"))
-  group_special.style.horizontal_spacing = button_spacing
-  GuiElement.add(group_special, GuiButton("HMRecipeExplorer", "OPEN"):sprite("menu", "search", "search"):style("helmod_button_menu"):tooltip({"helmod_button.explorer"}))
-  GuiElement.add(group_special, GuiButton("HMRichTextPanel", "OPEN"):sprite("menu", "text", "text"):style("helmod_button_menu"):tooltip({"helmod_panel.richtext"}))
-  GuiElement.add(group_special, GuiButton("HMCalculator", "OPEN"):sprite("menu", "calculator", "calculator"):style("helmod_button_menu"):tooltip({"helmod_calculator-panel.title"}))
 
   local items = {}
   local default_time = 1
@@ -303,6 +266,7 @@ function AbstractTab:updateIndexPanel(event)
       end
     end
     GuiElement.add(table_index, GuiButton(self.classname, "new-model"):sprite("menu", "plus", "plus"):style("helmod_button_menu_green"):tooltip({"helmod_button.add-production-line"}))
+    --GuiElement.add(table_index, GuiButton("HMArrangeModels", "OPEN"):sprite("menu", "menu", "menu"):style("helmod_button_menu"):tooltip({"helmod_button.add-production-line"}))
   end
 end
 
@@ -347,21 +311,6 @@ end
 -- @param #LuaEvent event
 --
 function AbstractTab:beforeUpdate(event)
-end
-
--------------------------------------------------------------------------------
--- Add cell header
---
--- @function [parent=#AbstractTab] addCellHeader
---
--- @param #LuaGuiElement guiTable
--- @param #string name
--- @param #string caption
--- @param #string sorted
---
-function AbstractTab:addCellHeader(guiTable, name, caption, sorted)
-  local cell = GuiElement.add(guiTable, GuiFrameH("header", name):style(helmod_frame_style.hidden))
-  GuiElement.add(cell, GuiLabel("label"):caption(caption))
 end
 
 -------------------------------------------------------------------------------
@@ -454,7 +403,7 @@ function AbstractTab:onEventAccessAll(event, model, block)
   end
   
   if event.action == "new-model" then
-    local current_tab = "HMProductionLineTab"
+    local current_tab = "HMProductionBlockTab"
     local new_model = Model.newModel()
     User.setParameter(self.parameter_objects, {name=self.parameter_objects, model=new_model.id})
     Controller:send("on_gui_open", event, current_tab)
@@ -467,11 +416,7 @@ function AbstractTab:onEventAccessAll(event, model, block)
   if event.action == "change-tab" then
     local current_tab = event.item1
     local new_event = {classname = current_tab, item1 = event.item2}
-    if event.item1 == "HMProductionLineTab" then
-      new_event.item2 = "new"
-    else
-      new_event.item2 = event.item3
-    end
+    new_event.item2 = event.item3
     Controller:closeEditionOrSelector()
     Controller:send("on_gui_open", new_event, current_tab)
   end
@@ -511,11 +456,10 @@ function AbstractTab:onEventAccessRead(event, model, block)
       if block ~= nil then
         User.setParameter("copy_from_block_id", block.id)
         User.setParameter("copy_from_model_id", model.id)
-      end
-    end
-    if User.isActiveForm("HMProductionLineTab") then
-      User.setParameter("copy_from_block_id", nil)
-      User.setParameter("copy_from_model_id", model.id)
+      else
+        User.setParameter("copy_from_block_id", nil)
+        User.setParameter("copy_from_model_id", model.id)
+        end
     end
     Controller:send("on_gui_update", event)
   end
@@ -605,11 +549,7 @@ function AbstractTab:onEventAccessWrite(event, model, block)
   if event.action == "production-block-remove" then
     ModelBuilder.removeProductionBlock(model, block)
     ModelCompute.update(model)
-    if table.size(model.blocks) > 0 then
-      Controller:send("on_gui_update", event)
-    else
-      Controller:send("on_gui_open", event,"HMProductionLineTab")
-    end
+    Controller:send("on_gui_update", event)
   end
 
   if event.action == "production-block-unlink" then
@@ -642,7 +582,7 @@ end
 function AbstractTab:onEventAccessDelete(event, model, block)
   if event.action == "remove-model" then
     ModelBuilder.removeModel(event.item1)
-    User.setActiveForm("HMProductionLineTab")
+    User.setActiveForm("HMProductionBlockTab")
     Controller:send("on_gui_update", event)
   end
 end
@@ -655,42 +595,12 @@ end
 -- @param #LuaEvent event
 --
 function AbstractTab:onEventAccessAdmin(event, model, block)
-  if event.action == "rule-remove" then
-    local rule_id = event.item1
-    if global.rules ~= nil then
-      table.remove(global.rules,rule_id)
-      table.reindex_list(global.rules)
-    end
-    Controller:send("on_gui_update", event)
-  end
-  if event.action == "reset-rules" then
-    Model.resetRules()
-    Controller:send("on_gui_update", event)
-  end
-
   if event.action == "game-pause" then
     if not(game.is_multiplayer()) then
       User.setParameter("auto-pause", true)
       game.tick_paused = true
       Controller:send("on_gui_pause", event)
     end
-  end
-  
-  if event.action == "string-decode" then
-    local parent = event.element.parent.parent
-    local decoded_textbox = parent["decoded-text"]
-    local encoded_textbox = parent["encoded-text"]
-    local input = string.sub(encoded_textbox.text,2)
-    local json = game.decode_string(input)
-    local result = Converter.indent(json)
-    decoded_textbox.text = result
-  end
-
-  if event.action == "string-encode" then
-    local parent = event.element.parent.parent
-    local decoded_textbox = parent["decoded-text"]
-    local encoded_textbox = parent["encoded-text"]
-    encoded_textbox.text = "0"..game.encode_string(decoded_textbox.text)
   end
 
   if event.action == "game-play" then
@@ -699,49 +609,4 @@ function AbstractTab:onEventAccessAdmin(event, model, block)
     Controller:send("on_gui_pause", event)
   end
 
-  if event.action == "delete-cache" then
-    if event.item1 ~= nil and global[event.item1] ~= nil then
-      if event.item2 == "" and event.item3 == "" and event.item4 == "" then
-        global[event.item1] = nil
-      elseif event.item3 == "" and event.item4 == "" then
-        global[event.item1][event.item2] = {}
-      elseif event.item4 == "" then
-        global[event.item1][event.item2][event.item3] = nil
-      else
-        global[event.item1][event.item2][event.item3][event.item4] = nil
-      end
-      Player.print("Deleted:", event.item1, event.item2, event.item3, event.item4)
-    else
-      Player.print("Not found to delete:", event.item1, event.item2, event.item3, event.item4)
-    end
-    Controller:send("on_gui_refresh", event, event.classname)
-  end
-
-  if event.action == "refresh-cache" then
-    global[event.item1][event.item2] = {}
-    
-    if event.item2 == "HMPlayer" then
-      Player.getResources()
-    else    
-      local forms = {}
-      table.insert(forms, EnergySelector("HMEnergySelector"))
-      table.insert(forms, EntitySelector("HMEntitySelector"))
-      table.insert(forms, RecipeSelector("HMRecipeSelector"))
-      table.insert(forms, TechnologySelector("HMTechnologySelector"))
-      table.insert(forms, ItemSelector("HMItemSelector"))
-      table.insert(forms, FluidSelector("HMFluidSelector"))
-      for _,form in pairs(forms) do
-        if event.item2 == form.classname then
-          form:prepare()
-        end
-      end
-    end
-    
-    Controller:send("on_gui_refresh", event)
-  end
-
-  if event.action == "generate-cache" then
-    Controller:on_init()
-    Controller:send("on_gui_refresh", event)
-  end
 end

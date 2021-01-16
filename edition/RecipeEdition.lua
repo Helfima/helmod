@@ -21,6 +21,19 @@ function RecipeEdition:onBind()
 end
 
 -------------------------------------------------------------------------------
+-- On Style
+--
+-- @function [parent=#RecipeEdition] onStyle
+--
+-- @param #table styles
+-- @param #number width_main
+-- @param #number height_main
+--
+function RecipeEdition:onStyle(styles, width_main, height_main)
+  styles.flow_panel = nil
+end
+
+-------------------------------------------------------------------------------
 -- On initialization
 --
 -- @function [parent=#RecipeEdition] onInit
@@ -53,7 +66,7 @@ end
 -- @function [parent=#RecipeEdition] getTabPanel
 --
 function RecipeEdition:getTabPanel()
-  local display_width, display_height = GuiElement.getDisplaySizes()
+  local display_width, display_height = Player.getDisplaySizes()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   local panel_name = "tab_panel"
   local factory_panel_name = "facory_panel"
@@ -244,7 +257,7 @@ end
 -- @param #LuaEvent event
 --
 function RecipeEdition:onEvent(event)
-  local display_width, display_height = GuiElement.getDisplaySizes()
+  local display_width, display_height = Player.getDisplaySizes()
 
   local model, block, recipe = self:getParameterObjects()
   if model == nil or block == nil or recipe == nil then return end
@@ -572,7 +585,7 @@ function RecipeEdition:updateTabMenu(event)
   local tab_right_panel = self:getTabRightPanel()
   local model, block, recipe = self:getParameterObjects()
 
-  local display_width, display_height = GuiElement.getDisplaySizes()
+  local display_width, display_height = Player.getDisplaySizes()
 
   tab_left_panel.clear()
   tab_right_panel.clear()
@@ -693,7 +706,7 @@ function RecipeEdition:updateFactoryInfo(event)
     end
 
     local factory_table_panel = GuiElement.add(scroll_panel, GuiTable("factory-table"):column(5))
-    for key, element in pairs(factories) do
+    for key, element in spairs(factories, function(t,a,b) return t[b].crafting_speed > t[a].crafting_speed end) do
       local color = nil
       if factory.name == element.name then color = GuiElement.color_button_edit end
       local button = GuiElement.add(factory_table_panel, GuiButtonSelectSprite(self.classname, "factory-select", model.id, block.id, recipe.id):choose("entity", element.name):color(color))
@@ -974,6 +987,7 @@ end
 -- @param #LuaEvent event
 --
 function RecipeEdition:updateBeaconInfo(event)
+  if event.is_queue == true then return end
   local tool_panel, detail_panel = self:getBeaconInfoPanel()
   local model, block, recipe = self:getParameterObjects()
   if recipe ~= nil then
@@ -1014,13 +1028,13 @@ function RecipeEdition:updateBeaconInfo(event)
     GuiElement.add(input_panel, GuiLabel("efficiency"):caption(beacon_prototype:getDistributionEffectivity()))
 
     GuiElement.add(input_panel, GuiLabel("label-combo"):caption({"helmod_label.beacon-on-factory"}):tooltip({"tooltip.beacon-on-factory"}))
-    GuiElement.add(input_panel, GuiTextField(self.classname, "beacon-update", model.id, block.id, recipe.id, "combo"):text(beacon.combo):style("helmod_textfield"):tooltip({"tooltip.beacon-on-factory"}))
+    GuiElement.add(input_panel, GuiTextField(self.classname, "beacon-update", model.id, block.id, recipe.id, "combo", "onqueue"):text(beacon.combo):style("helmod_textfield"):tooltip({"tooltip.beacon-on-factory"}))
 
     GuiElement.add(input_panel, GuiLabel("label-by-factory"):caption({"helmod_label.beacon-per-factory"}):tooltip({"tooltip.beacon-per-factory"}))
-    GuiElement.add(input_panel, GuiTextField(self.classname, "beacon-update", model.id, block.id, recipe.id, "per_factory"):text(beacon.per_factory):style("helmod_textfield"):tooltip({"tooltip.beacon-per-factory"}))
+    GuiElement.add(input_panel, GuiTextField(self.classname, "beacon-update", model.id, block.id, recipe.id, "per_factory", "onqueue"):text(beacon.per_factory):style("helmod_textfield"):tooltip({"tooltip.beacon-per-factory"}))
 
     GuiElement.add(input_panel, GuiLabel("label-by-factory-constant"):caption({"helmod_label.beacon-per-factory-constant"}):tooltip({"tooltip.beacon-per-factory-constant"}))
-    GuiElement.add(input_panel, GuiTextField(self.classname, "beacon-update", model.id, block.id, recipe.id, "per_factory_constant"):text(beacon.per_factory_constant):style("helmod_textfield"):tooltip({"tooltip.beacon-per-factory-constant"}))
+    GuiElement.add(input_panel, GuiTextField(self.classname, "beacon-update", model.id, block.id, recipe.id, "per_factory_constant", "onqueue"):text(beacon.per_factory_constant):style("helmod_textfield"):tooltip({"tooltip.beacon-per-factory-constant"}))
   end
 end
 

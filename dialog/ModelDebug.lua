@@ -19,6 +19,23 @@ function ModelDebug:onInit()
 end
 
 -------------------------------------------------------------------------------
+-- On Style
+--
+-- @function [parent=#ModelDebug] onStyle
+--
+-- @param #table styles
+-- @param #number width_main
+-- @param #number height_main
+--
+function ModelDebug:onStyle(styles, width_main, height_main)
+  styles.flow_panel = {
+    width = width_main,
+    minimal_height = 200,
+    maximal_height = height_main
+    }
+end
+
+-------------------------------------------------------------------------------
 -- On Bind Dispatcher
 --
 -- @function [parent=#ModelDebug] onBind

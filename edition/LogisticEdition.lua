@@ -17,6 +17,19 @@ function LogisticEdition:onInit()
 end
 
 -------------------------------------------------------------------------------
+-- On Style
+--
+-- @function [parent=#LogisticEdition] onStyle
+--
+-- @param #table styles
+-- @param #number width_main
+-- @param #number height_main
+--
+function LogisticEdition:onStyle(styles, width_main, height_main)
+  styles.flow_panel = nil
+end
+
+-------------------------------------------------------------------------------
 -- On Bind Dispatcher
 --
 -- @function [parent=#LogisticEdition] onBind
