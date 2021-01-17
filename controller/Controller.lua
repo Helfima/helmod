@@ -13,6 +13,7 @@ require "dialog.Settings"
 require "dialog.Download"
 require "dialog.Calculator"
 require "dialog.RecipeExplorer"
+require "dialog.ProductionPanel"
 require "dialog.PropertiesPanel"
 require "dialog.PrototypeFiltersPanel"
 require "dialog.UnitTestPanel"
@@ -31,10 +32,6 @@ require "selector.RecipeSelector"
 require "selector.TechnologySelector"
 require "selector.ItemSelector"
 require "selector.FluidSelector"
-
-require "tab.ProductionBlockTab"
-require "tab.ProductionLineTab"
-require "tab.ResourceTab"
 
 require "model.Prototype"
 require "model.ElectricPrototype"
@@ -85,14 +82,11 @@ function Controller:prepare()
   table.insert(forms, Download("HMDownload"))
   table.insert(forms, Calculator("HMCalculator"))
   table.insert(forms, RecipeExplorer("HMRecipeExplorer"))
+  table.insert(forms, ProductionPanel("HMProductionPanel"))
   table.insert(forms, PropertiesPanel("HMPropertiesPanel"))
   table.insert(forms, PrototypeFiltersPanel("HMPrototypeFiltersPanel"))
   table.insert(forms, UnitTestPanel("HMUnitTestPanel"))
   table.insert(forms, RichTextPanel("HMRichTextPanel"))
-
-  table.insert(forms, ProductionLineTab("HMProductionLineTab"))
-  table.insert(forms, ProductionBlockTab("HMProductionBlockTab"))
-  table.insert(forms, ResourceTab("HMResourceTab"))
 
   table.insert(forms, EnergySelector("HMEnergySelector"))
   table.insert(forms, EntitySelector("HMEntitySelector"))
@@ -192,14 +186,8 @@ function Controller:cleanController(player)
   for _,location in pairs({"center", "left", "top", "screen"}) do
     local lua_gui_element = player.gui[location]
     for _,children_name in pairs(lua_gui_element.children_names) do
-      if string.find(children_name,"helmod") then
+      if children_name ~= "HMPinPanel" and lua_gui_element[children_name].get_mod() == "helmod" then
         lua_gui_element[children_name].destroy()
-      end
-      if self:getView(children_name) and children_name ~= "HMPinPanel" then
-        self:getView(children_name):close()
-      end
-      if children_name == "HMTab" then
-        self:closeTab()
       end
     end
   end
@@ -215,19 +203,6 @@ function Controller:closeEditionOrSelector()
   for _,children_name in pairs(lua_gui_element.children_names) do
     if self:getView(children_name) and (string.find(children_name,"Edition") ~= nil) then
       self:getView(children_name):close()
-    end
-  end
-end
-
--------------------------------------------------------------------------------
--- closeTab
---
--- @function [parent=#Controller] closeTab
---
-function Controller:closeTab()
-  for _,form in pairs(self:getViews()) do
-    if form:getPanelName() == "HMTab" then
-      form:close()
     end
   end
 end
@@ -468,7 +443,7 @@ function Controller:openMainPanel()
   if self:isOpened() then
     self:cleanController(Player.native())
   else
-    local current_tab = User.getParameter("current_tab") or "HMProductionBlockTab"
+    local current_tab = "HMProductionPanel"
     local parameter_name = string.format("%s_%s", current_tab, "objects")
     local parameter_objects = User.getParameter(parameter_name)
     
@@ -493,15 +468,8 @@ end
 function Controller:isOpened()
   local lua_player = Player.native()
   if lua_player == nil then return false end
-  local gui_screen = Player.getGui("screen")
-  local is_open = false
-  for _,form_name in pairs(gui_screen.children_names) do
-    --if string.find(form_name,"Tab") and Controller.getView(form_name) then
-    if form_name == "HMTab" then
-      is_open = true
-    end
-  end
-  return is_open
+  local panel = self:getView("HMProductionPanel")
+  return panel:isOpened()
 end
 
 -------------------------------------------------------------------------------

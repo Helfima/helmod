@@ -381,9 +381,6 @@ function Form:open(event)
   if self:isOpened() then self:close() end
   local parent_panel = self:getParentPanel()
   User.setActiveForm(self.classname)
-  if string.find(self.classname, "Tab") then
-    User.setParameter("current_tab", self.classname)
-  end
   self:updateTopMenu(event)
   if parent_panel[self:getPanelName()] == nil then
     self:onOpen(event)
@@ -474,7 +471,7 @@ function Form:updateTopMenu(event)
     menu_panel.clear()
     if self.panelClose then
       -- pause game
-      if string.find(self.classname, "Tab") then
+      if string.find(self.classname, "ProductionPanel") then
         local group3 = GuiElement.add(menu_panel, GuiFlowH("group3"))
         if game.is_multiplayer() and not(game.tick_paused) then
           local pause_button = GuiElement.add(group3, GuiButton("do-nothing"):sprite("menu", "play-white", "play"):style("helmod_frame_button"):tooltip({"helmod_button.game-play-multiplayer"}))
@@ -493,13 +490,7 @@ function Form:updateTopMenu(event)
       for _, form in pairs(Controller.getViews()) do
         if self.add_special_button == true and form:isVisible() and form:isTool() then
           local icon_hovered, icon = form:getButtonSprites()
-          local style = "helmod_frame_button"
-          if string.find(form.classname, "Tab") then
-            if User.isActiveForm(form.classname) then style = "helmod_frame_button_selected" end
-            GuiElement.add(tool_group, GuiButton(self.classname, "change-tab", form.classname):sprite("menu", icon_hovered, icon):style(style):tooltip(form:getButtonCaption()))
-          else
-            GuiElement.add(tool_group, GuiButton(form.classname, "OPEN"):sprite("menu", icon_hovered, icon):style(style):tooltip(form.panelCaption))
-          end
+          GuiElement.add(tool_group, GuiButton(form.classname, "OPEN"):sprite("menu", icon_hovered, icon):style("helmod_frame_button"):tooltip(form.panelCaption))
         end
       end
       
@@ -508,13 +499,7 @@ function Form:updateTopMenu(event)
       for _, form in pairs(Controller.getViews()) do
         if self.add_special_button == true and form:isVisible() and form:isSpecial() then
           local icon_hovered, icon = form:getButtonSprites()
-          local style = "helmod_frame_button"
-          if string.find(form.classname, "Tab") then
-            if User.isActiveForm(form.classname) then style = "helmod_frame_button_selected" end
-            GuiElement.add(special_group, GuiButton(self.classname, "change-tab", form.classname):sprite("menu", icon_hovered, icon):style(style):tooltip(form:getButtonCaption()))
-          else
-            GuiElement.add(special_group, GuiButton(form.classname, "OPEN"):sprite("menu", icon_hovered, icon):style(style):tooltip(form.panelCaption))
-          end
+          GuiElement.add(special_group, GuiButton(form.classname, "OPEN"):sprite("menu", icon_hovered, icon):style("helmod_frame_button"):tooltip(form.panelCaption))
         end
       end
       -- Standard group
@@ -522,11 +507,7 @@ function Form:updateTopMenu(event)
       if self.help_button then
         GuiElement.add(standard_group, GuiButton("HMHelpPanel", "OPEN"):sprite("menu", "help-white", "help"):style("helmod_frame_button"):tooltip({"helmod_button.help"}))
       end
-      if string.find(self.classname, "Tab") then
-        GuiElement.add(standard_group, GuiButton(self.classname, "close-tab"):sprite("menu", "close-window-white", "close-window"):style("helmod_frame_button"):tooltip({"helmod_button.close"}))
-      else
-        GuiElement.add(standard_group, GuiButton(self.classname, "CLOSE"):sprite("menu", "close-window-white", "close-window"):style("helmod_frame_button"):tooltip({"helmod_button.close"}))
-      end
+      GuiElement.add(standard_group, GuiButton(self.classname, "CLOSE"):sprite("menu", "close-window-white", "close-window"):style("helmod_frame_button"):tooltip({"helmod_button.close"}))
     end
   else
     Logging:warn(self.classname, "self.panelCaption not found")
