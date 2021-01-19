@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------
-Version: 0.11.21
+Version: 0.12.1
 Date: 2021-01-19
   Features:
     - Added new filter in recipe selector: Show locked recipes
@@ -16,6 +16,11 @@ Date: 2021-01-19
     - Fixed fluid burnt source for entity
     - Fixed lab speed with speed module
     - Fixed group order in mod is different from game UI
+---------------------------------------------------------------------------------------------------
+Version: 0.12.1
+Date: 2021-11-25
+  Changes:
+    - Updated for factorio 1.0
 ---------------------------------------------------------------------------------------------------
 Version: 0.11.20
 Date: 2020-11-20
