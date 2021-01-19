@@ -26,7 +26,10 @@ end
 -- @param #number height_main
 --
 function PreferenceEdition:onStyle(styles, width_main, height_main)
-  styles.flow_panel = nil
+  styles.flow_panel = {
+    minimal_height = 500,
+    maximal_height = height_main,
+  }
 end
 
 -------------------------------------------------------------------------------

@@ -65,6 +65,21 @@ function ProductionPanel:isVisible()
 end
 
 -------------------------------------------------------------------------------
+-- On Style
+--
+-- @function [parent=#ProductionPanel] onStyle
+--
+-- @param #table styles
+-- @param #number width_main
+-- @param #number height_main
+--
+function ProductionPanel:onStyle(styles, width_main, height_main)
+  styles.block_info = {
+    height = 50*2+40,
+  }
+end
+
+-------------------------------------------------------------------------------
 -- Get or create result panel
 --
 -- @function [parent=#ProductionPanel] getResultPanel2
@@ -1200,7 +1215,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, block)
   local cell_action = GuiElement.add(gui_table, GuiTable("action", block.id):column(2))
 
   GuiElement.add(cell_action, GuiButton(self.classname, "production-block-up", model.id, block.id):sprite("menu", "arrow-up-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.up-element", User.getModSetting("row_move_step")}))
-  GuiElement.add(cell_action, GuiButton(self.classname, "production-block-remove", model.id, block.id):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
+  GuiElement.add(cell_action, GuiButton(self.classname, "remove-block", model.id, block.id):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
   GuiElement.add(cell_action, GuiButton(self.classname, "production-block-down", model.id, block.id):sprite("menu", "arrow-down-sm", "arrow-down-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.down-element", User.getModSetting("row_move_step")}))
   if unlinked then
     GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink", model.id, block.id):sprite("menu", "unlink-sm", "unlink-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.unlink-element"}))
