@@ -19,6 +19,46 @@ function RecipeExplorer:onInit()
 end
 
 -------------------------------------------------------------------------------
+-- On Style
+--
+-- @function [parent=#RecipeExplorer] onStyle
+--
+-- @param #table styles
+-- @param #number width_main
+-- @param #number height_main
+--
+function RecipeExplorer:onStyle(styles, width_main, height_main)
+  styles.flow_panel = {
+    minimal_width = 300,
+    maximal_width = width_main,
+    minimal_height = 200,
+    maximal_height = height_main
+  }
+end
+
+------------------------------------------------------------------------------
+-- Get Button Sprites
+--
+-- @function [parent=#RecipeExplorer] getButtonSprites
+--
+-- @return boolean
+--
+function RecipeExplorer:getButtonSprites()
+  return "search-white","search"
+end
+
+-------------------------------------------------------------------------------
+-- Is tool
+--
+-- @function [parent=#RecipeExplorer] isTool
+--
+-- @return boolean
+--
+function RecipeExplorer:isTool()
+  return true
+end
+
+-------------------------------------------------------------------------------
 -- On Bind Dispatcher
 --
 -- @function [parent=#RecipeExplorer] onBind
@@ -40,11 +80,7 @@ function RecipeExplorer:getInfoPanel()
   end
   local mainPanel = GuiElement.add(content_panel, GuiFrameV("info-panel"):style(helmod_frame_style.panel))
   mainPanel.style.horizontally_stretchable = true
-  GuiElement.setStyle(mainPanel, self.classname, "minimal_width")
-  GuiElement.setStyle(mainPanel, self.classname, "maximal_width")
-  GuiElement.setStyle(mainPanel, self.classname, "minimal_height")
-  GuiElement.setStyle(mainPanel, self.classname, "maximal_height")
-  mainPanel.style.horizontally_stretchable = true
+  mainPanel.style.vertically_stretchable = true
   local scroll_panel = GuiElement.add(mainPanel, GuiScroll("scroll-panel"))
   scroll_panel.style.horizontally_stretchable = false
   return  scroll_panel
@@ -61,7 +97,7 @@ function RecipeExplorer:updateHeader(event)
   local action_panel, _ = self:getMenuPanel()
   action_panel.clear()
   local group1 = GuiElement.add(action_panel, GuiFlowH("group1"))
-  GuiElement.add(group1, GuiButton(self.classname, "open-recipe-selector", self.classname):sprite("menu", "wrench-white", "wrench"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-recipe"}))
+  GuiElement.add(group1, GuiButton(self.classname, "open-recipe-selector", self.classname):sprite("menu", "wrench", "wrench"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-recipe"}))
 end
 
 -------------------------------------------------------------------------------
@@ -219,6 +255,7 @@ function RecipeExplorer:addCell(parent, recipe, index)
         local product_prototype = Product(lua_product)
         local product = product_prototype:clone()
         product.count = product_prototype:getElementAmount()
+        product.time = 1
         GuiElement.add(cell_products, GuiCellElementSm(self.classname, "add-parent", product.type, product.name, recipe.id or 0):element(product):tooltip("tooltip.add-recipe"):index(index):color(GuiElement.color_button_none))
       end
       -- recipe
@@ -234,6 +271,7 @@ function RecipeExplorer:addCell(parent, recipe, index)
         local ingredient_prototype = Product(lua_ingredient)
         local ingredient = ingredient_prototype:clone()
         ingredient.count = ingredient_prototype:getElementAmount()
+        ingredient.time = 1
         GuiElement.add(cell_ingredients, GuiCellElementSm(self.classname, "add-child", ingredient.type, ingredient.name, recipe.id or 0):element(ingredient):tooltip("tooltip.add-recipe"):index(index):color(GuiElement.color_button_add))
       end
       local cell_children = GuiElement.add(cell, GuiFlowV("cell-children"))

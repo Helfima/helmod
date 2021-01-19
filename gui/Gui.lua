@@ -1,4 +1,5 @@
 require "gui.GuiElement"
+require "gui.GuiEmptyWidget"
 require "gui.GuiButton"
 require "gui.GuiCell"
 require "gui.GuiCheckBox"

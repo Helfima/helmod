@@ -88,10 +88,6 @@ function toBinStr(x)
 end
 
 
-function table.clone(org)
-  return {table.unpack(org)}
-end
-
 function compare_priority(a,b)
   if a == nil or b == nil then return false end
   for k,v in pairs(a) do
@@ -99,32 +95,4 @@ function compare_priority(a,b)
     if b[k].name ~= v.name or b[k].value ~= v.value then return false end
   end
   return true
-end
-
-function table.contains(object, value)
-  for _,compare in pairs(object) do
-    if compare == value then return true end
-  end
-  return false
-end
-
-function table.deepcopy(object)
-  local lookup_table = {}
-  local function _copy(object)
-    if type(object) ~= "table" then
-      return object
-    -- don't copy factorio rich objects
-    elseif object.__self then
-      return object
-    elseif lookup_table[object] then
-      return lookup_table[object]
-    end
-    local new_table = {}
-    lookup_table[object] = new_table
-    for index, value in pairs(object) do
-      new_table[_copy(index)] = _copy(value)
-    end
-    return setmetatable(new_table, getmetatable(object))
-  end
-  return _copy(object)
 end

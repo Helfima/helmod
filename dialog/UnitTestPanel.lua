@@ -59,50 +59,12 @@ function UnitTestPanel:isSpecial()
 end
 
 -------------------------------------------------------------------------------
--- Get or create menu panel
---
--- @function [parent=#UnitTestPanel] getMenuPanel
---
-function UnitTestPanel:getMenuPanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
-  local panel_name = "menu-panel"
-  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
-    return content_panel[panel_name]
-  end
-  local panel = GuiElement.add(content_panel, GuiFrameV(panel_name))
-  panel.style.vertically_stretchable = true
-  local width_main, height_main = GuiElement.getMainSizes()
-  panel.style.minimal_height = 40
-  panel.style.minimal_width = width_main
-  return panel
-end
-
--------------------------------------------------------------------------------
--- Get or create content panel
---
--- @function [parent=#UnitTestPanel] getContentPanel
---
-function UnitTestPanel:getContentPanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
-  local panel_name = "data-panel"
-  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
-    return content_panel[panel_name]
-  end
-  local panel = GuiElement.add(content_panel, GuiFrameV(panel_name))
-  panel.style.vertically_stretchable = true
-  local width_main, height_main = GuiElement.getMainSizes()
-  panel.style.minimal_height = height_main
-  panel.style.minimal_width = width_main
-  return panel
-end
-
--------------------------------------------------------------------------------
 -- Get or create tab panel
 --
 -- @function [parent=#UnitTestPanel] getTabPane
 --
 function UnitTestPanel:getTabPane()
-  local content_panel = self:getContentPanel()
+  local content_panel = self:getFrameDeepPanel("panel")
   local panel_name = "tab_panel"
   if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
     return content_panel[panel_name]
@@ -112,23 +74,31 @@ function UnitTestPanel:getTabPane()
 end
 
 -------------------------------------------------------------------------------
--- Get or create energy tab panel
+-- Get or create tab panel
 --
--- @function [parent=#UnitTestPanel] getEnergyTab
+-- @function [parent=#UnitTestPanel] getTab
 --
-function UnitTestPanel:getEnergyTab()
+function UnitTestPanel:getTab(panel_name, caption)
   local content_panel = self:getTabPane()
-  local panel_name = "energy-tab-panel"
-  local scroll_name = "energy-scroll"
+  local scroll_name = "scroll-" .. panel_name
   if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
     return content_panel[scroll_name]
   end
-  local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption({"helmod_unittest.energy-title"}))
+  local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption(caption))
   local scroll_panel = GuiElement.add(content_panel, GuiScroll(scroll_name):style("helmod_scroll_pane"):policy(true))
   content_panel.add_tab(tab_panel,scroll_panel)
   scroll_panel.style.horizontally_stretchable = true
   scroll_panel.style.vertically_stretchable = true
   return scroll_panel
+end
+
+-------------------------------------------------------------------------------
+-- Get or create cache tab panel
+--
+-- @function [parent=#UnitTestPanel] getCacheTab
+--
+function UnitTestPanel:getEnergyTab()
+  return self:getTab("energy-tab-panel", {"helmod_unittest.energy-title"})
 end
 
 -------------------------------------------------------------------------------
@@ -179,7 +149,7 @@ function UnitTestPanel:updateMenu()
   local menu_panel = self:getMenuPanel()
   -- pin info
   local group1 = GuiElement.add(menu_panel, GuiFlowH("group1"))
-  GuiElement.add(group1, GuiButton("HMUnitTestPanel", "reload-script"):sprite("menu", "refresh-white", "refresh"):style("helmod_button_menu"):tooltip("Reload script"))
+  GuiElement.add(group1, GuiButton("HMUnitTestPanel", "reload-script"):sprite("menu", "refresh", "refresh"):style("helmod_button_menu"):tooltip("Reload script"))
 end
 
 -------------------------------------------------------------------------------

@@ -1,11 +1,11 @@
 -------------------------------------------------------------------------------
--- Class to build pin tab dialog
+-- Class to build summary dialog
 --
 -- @module SummaryPanel
--- @extends #Form
+-- @extends #FormModel
 --
 
-SummaryPanel = newclass(Form)
+SummaryPanel = newclass(FormModel)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -18,39 +18,30 @@ function SummaryPanel:onInit()
 end
 
 -------------------------------------------------------------------------------
+-- On Style
+--
+-- @function [parent=#SummaryPanel] onStyle
+--
+-- @param #table styles
+-- @param #number width_main
+-- @param #number height_main
+--
+function SummaryPanel:onStyle(styles, width_main, height_main)
+  styles.flow_panel = {
+    minimal_width = 100,
+    maximal_width = 800,
+    minimal_height = 0,
+    maximal_height = height_main
+  }
+end
+
+-------------------------------------------------------------------------------
 -- On Bind Dispatcher
 --
 -- @function [parent=#SummaryPanel] onBind
 --
 function SummaryPanel:onBind()
   Dispatcher:bind("on_gui_refresh", self, self.update)
-end
-
--------------------------------------------------------------------------------
--- On before event
---
--- @function [parent=#SummaryPanel] onBeforeOpen
---
--- @param #LuaEvent event
---
-function SummaryPanel:onBeforeOpen(event)
-  User.setParameter("summary_panel_object", {model=event.item1, block=event.item2})
-end
-
--------------------------------------------------------------------------------
--- Get or create info panel
---
--- @function [parent=#SummaryPanel] getInfoPanel
---
-function SummaryPanel:getInfoPanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
-  if content_panel["info-panel"] ~= nil and content_panel["info-panel"].valid then
-    return content_panel["info-panel"]["scroll-panel"]
-  end
-  local mainPanel = GuiElement.add(content_panel, GuiFrameV("info-panel"):style(helmod_frame_style.panel))
-  mainPanel.style.horizontally_stretchable = true
-  local scroll_panel = GuiElement.add(mainPanel, GuiScroll("scroll-panel"))
-  return  scroll_panel
 end
 
 -------------------------------------------------------------------------------
@@ -61,48 +52,108 @@ end
 -- @param #LuaEvent event
 --
 function SummaryPanel:onUpdate(event)
-  self:updateInfo(event)
+  local model, block, recipe = self:getParameterObjects()
+  if block ~= nil then
+    self:updateSummary(block.summary)
+  else
+    self:updateData(model)
+    self:updateSummary(model.summary)
+  end
 end
 
 -------------------------------------------------------------------------------
--- Update information
+-- Update data
 --
--- @function [parent=#SummaryPanel] updateInfo
+-- @function [parent=#SummaryPanel] updateData
 --
 -- @param #LuaEvent event
 --
-function SummaryPanel:updateInfo(event)
-  local infoPanel = self:getInfoPanel()
-  local summary_parameter = User.getParameter("summary_panel_object")
-  local block, model = Model.getBlockByParameter(summary_parameter)
+function SummaryPanel:updateData(model)
+  local data_panel = self:getScrollFramePanel("data-panel")
+  data_panel.clear()
 
-  infoPanel.clear()
+  if model ~= nil then
+    local resourcesPanel = GuiElement.add(data_panel, GuiFlowV("resources"))
+    GuiElement.add(resourcesPanel, GuiLabel("label"):caption({"helmod_common.resources"}):style("helmod_label_title_frame"))
 
-  if block ~= nil then
-    if block.summary ~= nil then
-      -- factories
-      GuiElement.add(infoPanel, GuiLabel("factories_label"):caption({"helmod_common.factories"}):style("helmod_label_title_frame"))
-      local resultTable = GuiElement.add(infoPanel, GuiTable("table-factory"):column(4))
-      resultTable.style.horizontally_stretchable = false
-      for _, element in pairs(block.summary.factories) do
-        GuiElement.add(resultTable, GuiCellElementM("HMFactories=OPEN", block.id):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
+    local resourcesTable = GuiElement.add(resourcesPanel, GuiTable("table-resources"):column(4))
+    GuiElement.add(resourcesTable, GuiLabel("header-ingredient"):caption({"helmod_result-panel.col-header-ingredient"}))
+    GuiElement.add(resourcesTable, GuiLabel("header-cargo-wagon"):caption({"helmod_result-panel.col-header-wagon"}))
+    GuiElement.add(resourcesTable, GuiLabel("header-chest"):caption({"helmod_result-panel.col-header-storage"}))
+
+    for _, resource in pairs(model.resources) do
+      -- ingredient
+      local guiIngredient = GuiElement.add(resourcesTable, GuiFrameH("ingredient", resource.name):style(helmod_frame_style.hidden))
+      GuiElement.add(guiIngredient, GuiLabel("count"):caption(Format.formatNumberElement(resource.count)):style("helmod_label_right_60"))
+      GuiElement.add(guiIngredient, GuiButtonSprite("HMIngredient", "OPEN"):sprite(Player.getItemIconType(resource), resource.name):tooltip(Player.getLocalisedName(resource)))
+
+      -- col wagon
+      local wagon = resource.wagon
+      local guiWagon = GuiElement.add(resourcesTable, GuiFrameH("wagon", resource.name):style(helmod_frame_style.hidden))
+      if wagon ~= nil then
+        GuiElement.add(guiWagon, GuiLabel("count"):caption(Format.formatNumberElement(wagon.limit_count).."/"..Format.formatNumberElement(wagon.count)):style("helmod_label_right_70"))
+        GuiElement.add(guiWagon, GuiButtonSprite("HMWagon", "OPEN"):sprite(wagon.type, wagon.name):style(Player.getLocalisedName(wagon)))
       end
 
-      -- beacons
-      GuiElement.add(infoPanel, GuiLabel("beacons_label"):caption({"helmod_common.beacons"}):style("helmod_label_title_frame"))
-      local resultTable = GuiElement.add(infoPanel, GuiTable("table-beacon"):column(4))
-      resultTable.style.horizontally_stretchable = false
-      for _, element in pairs(block.summary.beacons) do
-        GuiElement.add(resultTable, GuiCellElementM("HMBeacons=OPEN", block.id):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
+      -- col storage
+      local storage = resource.storage
+      local guiStorage = GuiElement.add(resourcesTable, GuiFrameH("storage", resource.name):style(helmod_frame_style.hidden))
+      if storage ~= nil then
+        GuiElement.add(guiStorage, GuiLabel("count"):caption(Format.formatNumberElement(storage.limit_count).."/"..Format.formatNumberElement(storage.count)):style("helmod_label_right_70"))
+        GuiElement.add(guiStorage, GuiButtonSprite("HMStorage", "OPEN"):sprite(storage.type, storage.name):tooltip(Player.getLocalisedName(storage)))
       end
+    end
+    -- generators
+    local energyPanel = GuiElement.add(data_panel, GuiFlowV("energy"))
+    GuiElement.add(energyPanel, GuiLineH("line"))
+    GuiElement.add(energyPanel, GuiLabel("label"):caption({"helmod_common.generators"}):style("helmod_label_title_frame"))
 
-      -- modules
-      GuiElement.add(infoPanel, GuiLabel("modules_label"):caption({"helmod_common.modules"}):style("helmod_label_title_frame"))
-      local resultTable = GuiElement.add(infoPanel, GuiTable("table-modules"):column(4))
-      resultTable.style.horizontally_stretchable = false
-      for _, element in pairs(block.summary.modules) do
-        GuiElement.add(resultTable, GuiCellElementM("HMModules=OPEN", block.id):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
+    local resultTable = GuiElement.add(energyPanel, GuiTable("table-energy"):column(2))
+
+    if model.generators ~= nil then
+      for _, item in pairs(model.generators) do
+        local guiCell = GuiElement.add(resultTable, GuiFrameH("cell", item.name):style(helmod_frame_style.hidden))
+        GuiElement.add(guiCell, GuiLabel(item.name):caption(Format.formatNumberKilo(item.count)):style("helmod_label_right_50"))
+        GuiElement.add(guiCell, GuiButtonSprite("HMGenerator", "OPEN"):sprite("item", item.name):tooltip(Player.getLocalisedName(item)))
       end
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update Summary
+--
+-- @function [parent=#SummaryPanel] updateSummary
+--
+-- @param #LuaEvent event
+--
+function SummaryPanel:updateSummary(summary)
+  local info_panel = self:getScrollFramePanel("summary-panel")
+  info_panel.clear()
+
+  if summary ~= nil then
+    -- factories
+    GuiElement.add(info_panel, GuiLabel("factories_label"):caption({"helmod_common.factories"}):style("helmod_label_title_frame"))
+    local result_table = GuiElement.add(info_panel, GuiTable("table-factory"):column(4))
+    result_table.style.horizontally_stretchable = false
+    for _, element in pairs(summary.factories) do
+      GuiElement.add(result_table, GuiCellElementM("HMFactories=OPEN"):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
+    end
+
+    -- beacons
+    GuiElement.add(info_panel, GuiLabel("beacons_label"):caption({"helmod_common.beacons"}):style("helmod_label_title_frame"))
+    local result_table = GuiElement.add(info_panel, GuiTable("table-beacon"):column(4))
+    result_table.style.horizontally_stretchable = false
+    for _, element in pairs(summary.beacons) do
+      GuiElement.add(result_table, GuiCellElementM("HMBeacons=OPEN"):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
+    end
+
+    -- modules
+    GuiElement.add(info_panel, GuiLabel("modules_label"):caption({"helmod_common.modules"}):style("helmod_label_title_frame"))
+    local result_table = GuiElement.add(info_panel, GuiTable("table-modules"):column(4))
+    result_table.style.horizontally_stretchable = false
+    for _, element in pairs(summary.modules) do
+      GuiElement.add(result_table, GuiCellElementM("HMModules=OPEN"):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
     end
   end
 end

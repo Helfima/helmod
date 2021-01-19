@@ -65,9 +65,30 @@ end
 --
 -- @return #boolean
 --
-function User.isWriter()
-  local model = Model.getModel()
+function User.isReader(model)
+  return Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 1) > 0)
+end
+
+-------------------------------------------------------------------------------
+-- Return is writer player
+--
+-- @function [parent=#User] isWriter
+--
+-- @return #boolean
+--
+function User.isWriter(model)
   return Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0)
+end
+
+-------------------------------------------------------------------------------
+-- Return is writer player
+--
+-- @function [parent=#User] isWriter
+--
+-- @return #boolean
+--
+function User.isDeleter(model)
+  return Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 4) > 0)
 end
 
 -------------------------------------------------------------------------------
@@ -106,7 +127,8 @@ function User.getDefaultSettings()
     other_speed_panel=false,
     filter_show_disable=false,
     filter_show_hidden=false,
-    filter_show_hidden_player_crafting=false
+    filter_show_hidden_player_crafting=false,
+    filter_show_lock_recipes=false
   }
 end
 
@@ -602,13 +624,10 @@ function User.setCloseForm(classname, location)
   local navigate = User.getNavigate()
   if navigate[classname] == nil then navigate[classname] = {} end
   navigate[classname]["open"] = false
-  if string.find(classname, "Tab") then
-    if navigate[User.tab_name] == nil then navigate[User.tab_name] = {} end
-    navigate[User.tab_name]["location"] = location
+  if string.find(classname, "HMProductionPanel") then
     game.tick_paused = false
-  else
-    navigate[classname]["location"] = location
   end
+  navigate[classname]["location"] = location
 end
 
 -------------------------------------------------------------------------------
@@ -650,19 +669,16 @@ function User.setActiveForm(classname)
       end
     end
   end
-  if string.find(classname, "Tab") then
-    if navigate[User.tab_name] == nil then navigate[User.tab_name] = {} end
-    navigate[User.tab_name]["open"] = true
-    navigate[User.tab_name]["name"] = classname
+  if string.find(classname, "HMProductionPanel") then
     if not(game.is_multiplayer()) and User.getParameter("auto-pause") then
       game.tick_paused = true
     else
       game.tick_paused = false
     end
-  else
-    if navigate[classname] == nil then navigate[classname] = {} end
-    navigate[classname]["open"] = true
   end
+
+  if navigate[classname] == nil then navigate[classname] = {} end
+  navigate[classname]["open"] = true
 end
 
 -------------------------------------------------------------------------------
@@ -682,6 +698,25 @@ function User.isActiveForm(classname)
     return navigate[classname]["open"] == true
   end
   return false
+end
+
+-------------------------------------------------------------------------------
+-- Get main sizes
+--
+-- @function [parent=#User] getMainSizes
+--
+-- return
+--
+function User.getMainSizes()
+  local width , height = Player.getDisplaySizes()
+  local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
+  local display_ratio_vertictal = User.getModSetting("display_ratio_vertical")
+  if type(width) == "number" and  type(height) == "number" then
+    local width_main = math.ceil(width*display_ratio_horizontal)
+    local height_main = math.ceil(height*display_ratio_vertictal)
+    return width_main, height_main
+  end
+  return 800,600
 end
 
 -------------------------------------------------------------------------------
@@ -730,7 +765,7 @@ end
 --
 function User.isTranslate()
   local translated = User.get("translated")
-  return translated ~= nil and Model.countList(translated) > 0
+  return translated ~= nil and table.size(translated) > 0
 end
 
 -------------------------------------------------------------------------------
@@ -844,14 +879,9 @@ end
 --
 -- @function [parent=#User] getProductSorter2
 --
-function User.getProductSorter2()
-  local display_product_order = User.getPreferenceSetting("display_product_order")
-  if display_product_order == "name" then
-    return function(t,a,b) return t[b].name > t[a].name end
-  elseif display_product_order == "cost" then
-    return function(t,a,b) return t[b].count < t[a].count end
-  end
-  return nil
+function User.setParameterObjects(classname, model_id, block_id, recipe_id)
+  local parameter_objects = string.format("%s_%s", classname, "objects")
+  User.setParameter(parameter_objects, {name=parameter_objects, model=model_id, block=block_id, recipe=recipe_id})
 end
 
 return User

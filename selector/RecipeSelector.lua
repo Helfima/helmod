@@ -14,6 +14,7 @@ RecipeSelector = newclass(AbstractSelector)
 -- @function [parent=#RecipeSelector] afterInit
 --
 function RecipeSelector:afterInit()
+  self.unlock_recipe = true
   self.disable_option = true
   self.hidden_option = true
   self.product_option = true
@@ -91,6 +92,7 @@ end
 -- @param #table list_translate
 --
 function RecipeSelector:updateGroups(list_products, list_ingredients, list_translate)
+  RecipeSelector:updateUnlockRecipesCache()
   for key, recipe in pairs(Player.getRecipePrototypes()) do
     local has_burnt_result = self:appendGroups(recipe, "recipe", list_products, list_ingredients, list_translate)
     if has_burnt_result == true then
@@ -104,11 +106,37 @@ function RecipeSelector:updateGroups(list_products, list_ingredients, list_trans
     self:appendGroups(resource, "resource", list_products, list_ingredients, list_translate)
   end
   for key, item in pairs(Player.getItemPrototypes()) do
-    if item.rocket_launch_products ~= nil and Model.countList(item.rocket_launch_products) > 0 then
+    if item.rocket_launch_products ~= nil and table.size(item.rocket_launch_products) > 0 then
       self:appendGroups(item, "rocket", list_products, list_ingredients, list_translate)
     end
   end
 end
+
+-------------------------------------------------------------------------------
+-- Update unlock recipes cache
+--
+-- @function [parent=#User] updateUnlockRecipesCache
+--
+function RecipeSelector:updateUnlockRecipesCache()
+  local unlock_recipes = {}
+  local filters = {{filter = "hidden", invert = true, mode = "or"},{filter = "has-effects", invert = false, mode = "and"}}
+  local technology_prototypes = Player.getTechnologiePrototypes(filters)
+  for _,technology in pairs(technology_prototypes) do
+      local modifiers = technology.effects
+      for _,modifier in pairs(modifiers) do
+          if modifier.type == "unlock-recipe" and modifier.recipe ~= nil then
+            unlock_recipes[modifier.recipe] = true
+          end
+      end
+  end
+  for _, recipe in pairs(Player.getRecipePrototypes()) do
+    if recipe.hidden ~= true and recipe.enabled == true then
+      unlock_recipes[recipe.name] = true
+    end
+  end
+  Cache.setData("other", "unlock_recipes", unlock_recipes)
+end
+
 
 -------------------------------------------------------------------------------
 -- Create prototype icon
@@ -118,6 +146,7 @@ end
 -- @param #table prototype
 --
 function RecipeSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
+  local model, block, recipe = self:getParameterObjects()
   local recipe_prototype = self:getPrototype(prototype)
   local color = nil
   if recipe_prototype:getCategory() == "crafting-handonly" then
@@ -125,7 +154,11 @@ function RecipeSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
   elseif recipe_prototype:getEnabled() == false then
     color = "red"
   end
-  local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select", prototype.type):choose(prototype.type, prototype.name):color(color))
+  local block_id = "new"
+  if block ~= nil then block_id = block.id end
+  local button_prototype = GuiButtonSelectSprite(self.classname, "element-select", prototype.type):choose(prototype.type, prototype.name):color(color)
+  local button = GuiElement.add(guiElement, button_prototype)
   button.locked = true
   GuiElement.infoRecipe(button, prototype)
 end
+

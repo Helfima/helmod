@@ -17,6 +17,22 @@ function PreferenceEdition:onInit()
 end
 
 -------------------------------------------------------------------------------
+-- On Style
+--
+-- @function [parent=#PreferenceEdition] onStyle
+--
+-- @param #table styles
+-- @param #number width_main
+-- @param #number height_main
+--
+function PreferenceEdition:onStyle(styles, width_main, height_main)
+  styles.flow_panel = {
+    minimal_height = 500,
+    maximal_height = height_main,
+  }
+end
+
+-------------------------------------------------------------------------------
 -- On Bind Dispatcher
 --
 -- @function [parent=#PreferenceEdition] onBind
@@ -491,7 +507,7 @@ function PreferenceEdition:onEvent(event)
     if event.item1 == "new" then
       local priority_modules = User.getParameter("priority_modules") or {}
       table.insert(priority_modules, {})
-      User.setParameter("configuration_priority", Model.countList(priority_modules))
+      User.setParameter("configuration_priority", table.size(priority_modules))
       User.setParameter("priority_modules", priority_modules)
     else
       User.setParameter("configuration_priority", tonumber(event.item1))
@@ -504,7 +520,7 @@ function PreferenceEdition:onEvent(event)
     local priority_modules = User.getParameter("priority_modules") or {}
     local configuration_priority = User.getParameter("configuration_priority")
     table.remove(priority_modules, configuration_priority)
-    User.setParameter("configuration_priority", Model.countList(priority_modules))
+    User.setParameter("configuration_priority", table.size(priority_modules))
     User.setParameter("priority_modules", priority_modules)
     self:updatePriorityModule(event)
     Controller:send("on_gui_priority_module", event)
@@ -513,7 +529,7 @@ function PreferenceEdition:onEvent(event)
   if event.action == "priority-module-select" then
     local configuration_priority = User.getParameter("configuration_priority") or 1
     local priority_modules = User.getParameter("priority_modules") or {}
-    if Model.countList(priority_modules) == 0 then
+    if table.size(priority_modules) == 0 then
       table.insert(priority_modules, {{name=event.item1, value=1}})
       User.setParameter("configuration_priority", 1)
       User.setParameter("priority_modules", priority_modules)

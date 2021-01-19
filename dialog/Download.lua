@@ -2,10 +2,10 @@
 -- Class to build Download panel
 --
 -- @module Download
--- @extends #Form
+-- @extends #FormModel
 --
 
-Download = newclass(Form)
+Download = newclass(FormModel)
 
 local transfert_mode = nil
 
@@ -34,8 +34,8 @@ function Download:onEvent(event)
     if data_table ~= nil then
       local model = Model.newModel()
       model.time = data_table.time
-      ModelBuilder.copyModel(data_table)
-      ModelCompute.update()
+      ModelBuilder.copyModel(model, data_table)
+      ModelCompute.update(model)
       Controller:send("on_gui_refresh", event)
     end
   end
@@ -60,12 +60,12 @@ end
 -- @param #LuaEvent event
 --
 function Download:updateDownload(event)
+  local model = self:getParameterObjects()
   local data_string = ""
   -- export
   if event.item1 == "upload" then
     local download_panel = self:getFramePanel("upload")
     download_panel.clear()
-    local model = Model.getModel() 
     data_string = Converter.write(model)
     local text_box = GuiElement.add(download_panel, GuiTextBox("data-text"):text(data_string))
   end

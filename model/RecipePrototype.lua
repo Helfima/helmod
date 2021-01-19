@@ -169,6 +169,14 @@ function RecipePrototype:getProducts(factory)
   end
   -- insert burnt
   if self.lua_type == "energy" then
+    if factory_prototype:getType() == "reactor" then
+      local bonus = factory_prototype:getNeighbourBonus()
+      for _, raw_product in pairs(raw_products) do
+        if raw_product.name == "steam-heat" then
+          raw_product.amount = raw_product.amount * (1 + bonus)
+        end
+      end
+    end
     if factory ~= nil and factory_prototype:getEnergyType() == "burner" then
       local energy_prototype = factory_prototype:getEnergySource()
       if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then
@@ -466,6 +474,24 @@ function RecipePrototype:getEnabled()
     end
   end
   return true
+end
+
+-------------------------------------------------------------------------------
+-- Return unlock of Prototype
+--
+-- @function [parent=#RecipePrototype] getUnlock
+--
+-- @return #boolean
+--
+function RecipePrototype:getUnlock()
+  if self.lua_prototype ~= nil then
+    if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" then
+      local unlock_recipes = Cache.getData("other", "unlock_recipes") or {}
+      return unlock_recipes[self.lua_prototype.name]
+    end
+    return true
+  end
+  return false
 end
 
 -------------------------------------------------------------------------------

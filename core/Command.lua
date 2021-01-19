@@ -43,8 +43,6 @@ function Command.parse(event)
           end
         end
       end
-    elseif string.lower(event.parameters) == "unittest" then
-      UnitTest.run(event)
     elseif string.lower(event.parameters) == "resetuserui" then
       User.reset()
       Player.print("User UI are reseted!")

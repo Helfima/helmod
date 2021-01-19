@@ -5,7 +5,7 @@
 -- @extends #AbstractEdition
 --
 
-ModelEdition = newclass(Form)
+ModelEdition = newclass(FormModel)
 
 -------------------------------------------------------------------------------
 -- On initialization
@@ -14,6 +14,22 @@ ModelEdition = newclass(Form)
 --
 function ModelEdition:onInit()
   self.panelCaption = ({"helmod_panel.model-edition"})
+end
+
+-------------------------------------------------------------------------------
+-- On Style
+--
+-- @function [parent=#ModelEdition] onStyle
+--
+-- @param #table styles
+-- @param #number width_main
+-- @param #number height_main
+--
+function ModelEdition:onStyle(styles, width_main, height_main)
+  styles.flow_panel = {
+    minimal_height = 500,
+    maximal_height = height_main,
+  }
 end
 
 -------------------------------------------------------------------------------
@@ -46,7 +62,7 @@ end
 -- @param #LuaEvent event
 --
 function ModelEdition:updateInfo(event)
-  local model = Model.getModel()
+  local model = self:getParameterObjects()
   local info_panel = self:getFramePanel("information")
   info_panel.clear()
   
@@ -67,7 +83,7 @@ end
 -- @param #LuaEvent event
 --
 function ModelEdition:updateShare(event)
-  local model = Model.getModel()
+  local model = self:getParameterObjects()
   local share_panel = self:getFramePanel("share")
   share_panel.clear()
 
@@ -79,17 +95,17 @@ function ModelEdition:updateShare(event)
   local model_read = false
   if model.share ~= nil and  bit32.band(model.share, 1) > 0 then model_read = true end
   GuiElement.add(tableAdminPanel, GuiLabel(self.classname, "share-model-read"):caption({"helmod_common.reading"}):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
-  GuiElement.add(tableAdminPanel, GuiCheckBox(self.classname, "share-model", "read", model.id):state(model_read):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
+  GuiElement.add(tableAdminPanel, GuiCheckBox(self.classname, "share-model", model.id, "read"):state(model_read):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
 
   local model_write = false
   if model.share ~= nil and  bit32.band(model.share, 2) > 0 then model_write = true end
   GuiElement.add(tableAdminPanel, GuiLabel(self.classname, "share-model-write"):caption({"helmod_common.writing"}):tooltip({"tooltip.share-mod", {"helmod_common.writing"}}))
-  GuiElement.add(tableAdminPanel, GuiCheckBox(self.classname, "share-model", "write", model.id):state(model_write):tooltip({"tooltip.share-mod", {"helmod_common.writing"}}))
+  GuiElement.add(tableAdminPanel, GuiCheckBox(self.classname, "share-model", model.id, "write"):state(model_write):tooltip({"tooltip.share-mod", {"helmod_common.writing"}}))
 
   local model_delete = false
   if model.share ~= nil and bit32.band(model.share, 4) > 0 then model_delete = true end
   GuiElement.add(tableAdminPanel, GuiLabel(self.classname, "share-model-delete"):caption({"helmod_common.removal"}):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
-  GuiElement.add(tableAdminPanel,GuiCheckBox( self.classname, "share-model", "delete", model.id):state(model_delete):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
+  GuiElement.add(tableAdminPanel,GuiCheckBox( self.classname, "share-model", model.id, "delete"):state(model_delete):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
 end
 
 -------------------------------------------------------------------------------
@@ -100,7 +116,7 @@ end
 -- @param #LuaEvent event
 --
 function ModelEdition:updateNote(event)
-  local model = Model.getModel()
+  local model = self:getParameterObjects()
   local note_panel = self:getFramePanel("note")
   note_panel.clear()
   local group_string = model.group or ""
@@ -123,8 +139,8 @@ end
 -- @param #LuaEvent event
 --
 function ModelEdition:onEvent(event)
-  if User.isWriter() then
-    local model = Model.getModel()
+  local model = self:getParameterObjects()
+  if User.isWriter(model) then
     if event.action == "model-note" then
       local group_field_name = table.concat({self.classname, "group-text"},"=")
       local note_field_name = table.concat({self.classname, "note-text"},"=")
@@ -135,6 +151,34 @@ function ModelEdition:onEvent(event)
       if event.element.parent ~= nil and event.element.parent[note_field_name] ~= nil then
         local note = event.element.parent[note_field_name].text
         model.note = note or ""
+      end
+      Controller:send("on_gui_refresh", event)
+    end
+
+    if event.action == "share-model" then
+      local access = event.item2
+      if model ~= nil then
+        if access == "read" then
+          if model.share == nil or not(bit32.band(model.share, 1) > 0) then
+            model.share = 1
+          else
+            model.share = 0
+          end
+        end
+        if access == "write" then
+          if model.share == nil or not(bit32.band(model.share, 2) > 0) then
+            model.share = 3
+          else
+            model.share = 1
+          end
+        end
+        if access == "delete" then
+          if model.share == nil or not(bit32.band(model.share, 4) > 0) then
+            model.share = 7
+          else
+            model.share = 3
+          end
+        end
       end
       Controller:send("on_gui_refresh", event)
     end

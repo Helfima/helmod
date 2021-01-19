@@ -69,6 +69,18 @@ function layeredIcon (filename, size, scale, shift, position)
   }
 end
 
+function default_glow(tint_value, scale_value)
+  return
+  {
+    position = {200, 128},
+    corner_size = 8,
+    tint = tint_value,
+    scale = scale_value,
+    draw_type = "outer"
+  }
+end
+default_dirt_color = {15, 7, 3, 100}
+default_dirt = default_glow(default_dirt_color, 0.5)
 -------------------------------------------------------------------------------
 -- Menu icon type
 --
@@ -81,28 +93,25 @@ end
 -- @param #string font
 -- @param #table hovered_font_color
 --
-function menuButtonIcon(name, icon_row, icon_col, size, suffix, font, hovered_font_color)
+function menuButtonIcon(name, icon_row, icon_col, size, suffix, font, default_font_color, hovered_font_color)
   local style_name = "helmod_button_"..name
   if suffix ~= nil then style_name = style_name.."_"..suffix end
   default_gui[style_name] = {
     type = "button_style",
-    parent = "helmod_button_default",
-    top_padding = 0,
-    right_padding = 0,
-    bottom_padding = 0,
-    left_padding = 0,
+    font = font or "helmod_font_normal",
+    default_font_color=default_font_color,
+    horizontal_align = "center",
+    padding = -4,
     width = size,
     height = size,
     scalable = false,
-    default_graphical_set = monolithIcon("__helmod__/graphics/icons/button.png", 32, 1, {0,0}, {x=(icon_col[1]-1)*32,y=(icon_row-1)*32}, {top=0,right=0,bottom=0,left=0}, true),
-    hovered_graphical_set = monolithIcon("__helmod__/graphics/icons/button.png", 32, 1, {0,0}, {x=(icon_col[2]-1)*32,y=(icon_row-1)*32}, {top=0,right=0,bottom=0,left=0}, true),
+    default_graphical_set = {base = {position = {x=icon_col[1],y=icon_row[1]}, border = 0, corner_size = 8, shadow = default_dirt}},
+    hovered_graphical_set = {base = {position = {x=icon_col[2],y=icon_row[2]}, border = 0, corner_size = 8, shadow = default_dirt}},
     hovered_font_color = hovered_font_color,
-    clicked_graphical_set = monolithIcon("__helmod__/graphics/icons/button.png", 32, 1, {0,0}, {x=(icon_col[3]-1)*32,y=(icon_row-1)*32}, {top=0,right=0,bottom=0,left=0}, true),
-    disabled_graphical_set = monolithIcon("__helmod__/graphics/icons/button.png", 32, 1, {0,0}, {x=(icon_col[4]-1)*32,y=(icon_row-1)*32}, {top=0,right=0,bottom=0,left=0}, true)
+    clicked_graphical_set = {base = {position = {x=icon_col[3],y=icon_row[3]}, border = 0, corner_size = 8, shadow = default_dirt}},
+    disabled_graphical_set = {base = {position = {x=icon_col[4],y=icon_row[4]}, border = 0, corner_size = 8, shadow = default_dirt}},
+    stretch_image_to_widget_size = false
   }
-  if font ~= nil then
-    default_gui[style_name].font = font
-  end
 end
 
 -------------------------------------------------------------------------------
@@ -114,29 +123,77 @@ end
 -- @param #number icon_row
 -- @param #string font
 --
-function menuButtonIcons(name, icon_row, font)
-  menuButtonIcon(name, icon_row, {1,2,1,1}, 32, nil, font, {r=0, g=0, b=0})
-  menuButtonIcon(name, icon_row, {1,2,1,1}, 24, "sm", font, {r=0, g=0, b=0})
+function menuButtonIcons(name, font)
+  local font = "helmod_font_normal"
+  local font_bold = "helmod_font_bold"
+  local font_white = {r=1, g=1, b=1}
+  local font_black = {r=0, g=0, b=0}
+  local icon_row = function(default, hovered, clicked, disabled) 
+    return {17 * (default - 1), 17 * (hovered - 1), 17 * (clicked - 1), 17 * (disabled - 1)}
+  end
+  local icon_col = function(default, hovered, clicked, disabled) 
+    if default == nil then return {570,570,570,570} end
+    return {17 * (default - 1), 17 * (hovered - 1), 17 * (clicked - 1), 386 + 17 * (disabled - 1)}
+  end
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(1,3,4,1), 32, "default", font, font_white, font_black)
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(1,3,4,1), 24, "sm_default", font, font_white, font_black)
 
-  menuButtonIcon(name, icon_row, {3,2,1,1}, 32, "actived_red", font, {r=1, g=0, b=0})
-  menuButtonIcon(name, icon_row, {3,2,1,1}, 24, "sm_actived_red", font, {r=1, g=0, b=0})
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(1,3,4,1), 32, nil, font, font_white, font_black)
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(1,3,4,1), 24, "sm", font, font_white, font_black)
 
-  menuButtonIcon(name, icon_row, {1,3,1,1}, 32, "red", font, {r=0, g=0, b=0})
-  menuButtonIcon(name, icon_row, {1,3,1,1}, 24, "sm_red", font, {r=0, g=0, b=0})
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(2,3,4,1), 32, "selected", font, font_black, font_black)
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(2,3,4,1), 24, "sm_selected", font, font_black, font_black)
 
-  menuButtonIcon(name, icon_row, {4,5,4,4}, 32, "selected", font, {r=1, g=1, b=1})
-  menuButtonIcon(name, icon_row, {4,5,4,4}, 24, "sm_selected", font, {r=1, g=1, b=1})
+  menuButtonIcon(name, icon_row(1,2,2,2), icon_col(1,3,4,1), 32, "dark", font, font_white, font_black)
+  menuButtonIcon(name, icon_row(1,2,2,2), icon_col(1,3,4,1), 24, "sm_dark", font, font_white, font_black)
 
-  menuButtonIcon(name, icon_row, {5,5,5,5}, 32, "selected_yellow", font, {r=0, g=0, b=0})
-  menuButtonIcon(name, icon_row, {5,5,5,5}, 24, "sm_selected_yellow", font, {r=0, g=0, b=0})
+  menuButtonIcon(name, icon_row(1,2,2,2), icon_col(3,3,4,1), 32, "dark_selected", font, font_white, font_black)
+  menuButtonIcon(name, icon_row(1,2,2,2), icon_col(3,3,4,1), 24, "sm_dark_selected", font, font_white, font_black)
 
-  menuButtonIcon(name, icon_row, {6,6,6,6}, 32, "selected_red", font, {r=0, g=0, b=0})
-  menuButtonIcon(name, icon_row, {6,6,6,6}, 24, "sm_selected_red", font, {r=0, g=0, b=0})
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(1,3,4,1), 32, "bold", font_bold, font_black, font_black)
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(1,3,4,1), 24, "sm_bold", font_bold, font_black, font_black)
 
-  menuButtonIcon(name, icon_row, {7,8,7,7}, 36, "flat2", font, {r=0, g=0, b=0})
-  menuButtonIcon(name, icon_row, {7,8,7,7}, 32, "flat", font, {r=0, g=0, b=0})
-  menuButtonIcon(name, icon_row, {7,8,7,7}, 24, "sm_flat", font, {r=0, g=0, b=0})
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(2,3,4,1), 32, "bold_selected", font_bold, font_white, font_black)
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(2,3,4,1), 24, "sm_bold_selected", font_bold, font_white, font_black)
+
+  menuButtonIcon(name, icon_row(1,2,2,2), icon_col(1,3,4,1), 32, "dark_bold", font_bold, font_white, font_black)
+  menuButtonIcon(name, icon_row(1,2,2,2), icon_col(1,3,4,1), 24, "sm_dark_bold", font_bold, font_white, font_black)
+
+  menuButtonIcon(name, icon_row(1,2,2,2), icon_col(3,3,4,1), 32, "dark_bold_selected", font_bold, font_white, font_black)
+  menuButtonIcon(name, icon_row(1,2,2,2), icon_col(3,3,4,1), 24, "sm_dark_bold_selected", font_bold, font_white, font_black)
+
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(1,9,10,2), 32, "red", font, font_white, font_white)
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(1,9,10,2), 24, "sm_red", font, font_white, font_white)
+
+  menuButtonIcon(name, icon_row(1,2,2,2), icon_col(1,9,10,2), 32, "dark_red", font, font_white, font_white)
+  menuButtonIcon(name, icon_row(1,2,2,2), icon_col(1,9,10,2), 24, "sm_dark_red", font, font_white, font_white)
+
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(9,11,10,2), 32, "actived_red", font, font_white, font_white)
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(9,11,10,2), 24, "sm_actived_red", font, font_white, font_white)
+
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(11,9,10,2), 32, "selected_red", font, font_white, font_white)
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(11,9,10,2), 24, "sm_selected_red", font, font_white, font_white)
+
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(1,7,8,3), 32, "green", font, font_white, font_black)
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(1,7,8,3), 24, "sm_green", font, font_white, font_black)
+
+  menuButtonIcon(name, icon_row(1,2,2,2), icon_col(1,7,8,3), 32, "dark_green", font, font_white, font_black)
+  menuButtonIcon(name, icon_row(1,2,2,2), icon_col(1,7,8,3), 24, "sm_dark_green", font, font_white, font_black)
+
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(5,7,8,3), 32, "actived_green", font, font_black, font_black)
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(5,7,8,3), 24, "sm_actived_green", font, font_black, font_black)
+
+  menuButtonIcon(name, icon_row(1,2,2,2), icon_col(1,7,8,3), 32, "selected_green", font, font_white, font_black)
+  menuButtonIcon(name, icon_row(1,2,2,2), icon_col(1,7,8,3), 24, "sm_selected_green", font, font_white, font_black)
+
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(1,3,4,1), 32, "selected_yellow", font, font_white, font_white)
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(1,3,4,1), 24, "sm_selected_yellow", font, font_white, font_white)
+
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(), 36, "flat2", font, font_white, font_white)
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(), 32, "flat", font, font_white, font_white)
+  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(), 24, "sm_flat", font, font_white, font_white)
 end
+menuButtonIcons("menu")
 
 -------------------------------------------------------------------------------
 -- Style of default
@@ -297,7 +354,7 @@ default_gui["helmod_button_icon_default"] = {
   disabled_graphical_set = compositionIcon("__core__/graphics/gui.png", {icon_corner_size, icon_corner_size}, {3 - icon_corner_size, 19 - icon_corner_size}),
 }
 
-menuButtonIcons("menu",1)
+
 -------------------------------------------------------------------------------
 -- Style of button
 --

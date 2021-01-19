@@ -17,6 +17,22 @@ function RuleEdition:onInit()
 end
 
 -------------------------------------------------------------------------------
+-- On Style
+--
+-- @function [parent=#RuleEdition] onStyle
+--
+-- @param #table styles
+-- @param #number width_main
+-- @param #number height_main
+--
+function RuleEdition:onStyle(styles, width_main, height_main)
+  styles.flow_panel = {
+    minimal_height = 500,
+    maximal_height = height_main,
+  }
+end
+
+-------------------------------------------------------------------------------
 -- On update
 --
 -- @function [parent=#RuleEdition] onUpdate
@@ -147,7 +163,9 @@ function RuleEdition:onEvent(event)
       else
         rule_value = "all"
       end
-      ModelBuilder.addRule(rule_mod, rule_name, rule_category, rule_type, rule_value, rule_excluded)
+      local rule = Model.newRule(rule_mod, rule_name, rule_category, rule_type, rule_value, rule_excluded, #Model.getRules())
+      local rules = Model.getRules()
+      table.insert(rules, rule)
       self:close()
       Controller:send("on_gui_refresh", event)
     end

@@ -197,6 +197,10 @@ function EntityPrototype:getEnergyProduction()
       usage_priority = energy_prototype:getUsagePriority()
     end
     if usage_priority == "solar" then
+      local active_mods = game.active_mods
+      if active_mods["base"] ~= "1.0.0" then
+        return (self.lua_prototype.max_energy_production or 0)*60
+      end
       return (self.lua_prototype.production or 0)*60
     end
     if usage_priority == "secondary-output" or usage_priority == "primary-output" then
@@ -377,7 +381,7 @@ function EntityPrototype:getFluidFuelPrototype(current)
         local fluidboxes = self:getFluidboxPrototypes()
         if fluidboxes ~= nil then
           for _,fluidbox in pairs(fluidboxes) do
-            if fluidbox.production_type == "input-output" then
+            if fluidbox.production_type == "input-output" or fluidbox.production_type == "input" then
               if fluidbox.filter ~= nil then
                 return FluidPrototype(fluidbox.filter)
               else
@@ -417,12 +421,13 @@ end
 -- @return #FluidPrototype
 --
 function EntityPrototype:getFluidFuelPrototypes()
-  if self:getEnergyTypeInput() == "fluid" then
-    if self:getFluidUsage() > 0 then
+  local energy_source = self:getEnergySource()
+  if energy_source:getType() == "fluid" then
+    if not(energy_source:getBurnsFluid()) then
       local fluidboxes = self:getFluidboxPrototypes()
       if fluidboxes ~= nil then
         for _,fluidbox in pairs(fluidboxes) do
-          if fluidbox.production_type == "input-output" then
+          if fluidbox.production_type == "input-output" or fluidbox.production_type == "input" then
             if fluidbox.filter ~= nil then
               return {fluidbox.filter}
             else
@@ -609,6 +614,33 @@ end
 function EntityPrototype:getMiningSpeed()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.mining_speed or 0
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
+-- Return neighbour bonus
+--
+-- @function [parent=#EntityPrototype] getNeighbourBonus
+--
+-- @return #number default 0
+--
+function EntityPrototype:getNeighbourBonus()
+  if self.lua_prototype ~= nil then
+    if self.factory == nil then
+      return self.lua_prototype.neighbour_bonus or 0
+    else
+      local bonus = self.lua_prototype.neighbour_bonus or 0
+      if self.factory.neighbour_bonus == 2 then
+        return bonus
+      elseif self.factory.neighbour_bonus == 4 then
+        return 2*bonus
+      elseif self.factory.neighbour_bonus == 8 then
+        return (2+3)*bonus/2
+      else
+        return 0
+      end
+    end
   end
   return 0
 end

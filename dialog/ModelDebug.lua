@@ -2,10 +2,10 @@
 -- Class to build ModelDebug panel
 --
 -- @module ModelDebug
--- @extends #Form
+-- @extends #FormModel
 --
 
-ModelDebug = newclass(Form)
+ModelDebug = newclass(FormModel)
 
 local display_panel = nil
 
@@ -16,6 +16,23 @@ local display_panel = nil
 --
 function ModelDebug:onInit()
   self.panelCaption = "Model Debug"
+end
+
+-------------------------------------------------------------------------------
+-- On Style
+--
+-- @function [parent=#ModelDebug] onStyle
+--
+-- @param #table styles
+-- @param #number width_main
+-- @param #number height_main
+--
+function ModelDebug:onStyle(styles, width_main, height_main)
+  styles.flow_panel = {
+    width = width_main,
+    minimal_height = 200,
+    maximal_height = height_main
+    }
 end
 
 -------------------------------------------------------------------------------
@@ -57,17 +74,19 @@ function ModelDebug:buildMatrix(matrix_panel, matrix, pivot)
 
     local matrix_table = GuiElement.add(matrix_panel, GuiTable("matrix_data"):column(num_col):style("helmod_table-odd"))
     matrix_table.vertical_centering = false
-
+    
     for irow,row in pairs(matrix) do
       for icol,value in pairs(row) do
-        local frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", "none", 1)
+        local frame = GuiFlowH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_none, 2)
         if pivot ~= nil then
-          if matrix[1][icol].name == "T" then frame:style("helmod_frame_colored", GuiElement.color_button_default_ingredient, 2) end
-          if pivot.x == icol then frame:style("helmod_frame_colored", GuiElement.color_button_edit, 2) end
-          if pivot.y == irow then frame:style("helmod_frame_colored", GuiElement.color_button_none, 2) end
-          if pivot.x == icol and pivot.y == irow then frame:style("helmod_frame_colored", GuiElement.color_button_rest, 2) end
+          if matrix[1][icol].name == "T" then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_default_ingredient, 2) end
+          if pivot.x == icol then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_edit, 2) end
+          if pivot.y == irow then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_none, 2) end
+          if pivot.x == icol and pivot.y == irow then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_rest, 2) end
         end
         local cell = GuiElement.add(matrix_table, frame)
+        cell.style.horizontally_stretchable = true
+        cell.style.vertically_stretchable = true
         if type(value) == "table" then
           if value.type == "none" then
             GuiElement.add(cell, GuiLabel("cell_value"):caption(value.name):tooltip(value.tooltip))
@@ -96,10 +115,9 @@ end
 -- @param #LuaEvent event
 --
 function ModelDebug:onEvent(event)
-  local model = Model.getModel()
-  local current_block = User.getParameter("current_block")
-  if model.blocks[current_block] ~= nil and model.blocks[current_block].runtimes ~= nil then
-    local runtimes = model.blocks[current_block].runtimes
+  local _, block = self:getParameterObjects()
+  if block ~= nil and block.runtimes ~= nil then
+    local runtimes = block.runtimes
     if event.action == "change-stage" then
       local stage = User.getParameter("model_stage") or 1
       if event.item1 == "initial" then stage = 1 end
@@ -135,10 +153,10 @@ function ModelDebug:updateHeader(event)
   local action_panel = self:getMenuPanel()
   action_panel.clear()
   local group1 = GuiElement.add(action_panel, GuiFlowH("group1"))
-  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "initial"):sprite("menu", "record-white", "record"):style("helmod_button_menu"):tooltip("Initial"))
-  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "previous"):sprite("menu", "arrow-left-white", "arrow-left"):style("helmod_button_menu"):tooltip("Previous Step"))
-  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "next"):sprite("menu", "arrow-right-white", "arrow-right"):style("helmod_button_menu"):tooltip("Next Step"))
-  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "final"):sprite("menu", "end-white", "end"):style("helmod_button_menu"):tooltip("Final"))
+  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "initial"):sprite("menu", "record", "record"):style("helmod_button_menu"):tooltip("Initial"))
+  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "previous"):sprite("menu", "arrow-left", "arrow-left"):style("helmod_button_menu"):tooltip("Previous Step"))
+  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "next"):sprite("menu", "arrow-right", "arrow-right"):style("helmod_button_menu"):tooltip("Next Step"))
+  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "final"):sprite("menu", "end", "end"):style("helmod_button_menu"):tooltip("Final"))
 end
 
 -------------------------------------------------------------------------------
@@ -151,7 +169,7 @@ end
 -- @param #string caption
 --
 function ModelDebug:addCellHeader(guiTable, name, caption)
-  local cell = GuiElement.add(guiTable, GuiFrameH("header", name):style(helmod_frame_style.hidden))
+  local cell = GuiElement.add(guiTable, GuiFlowH("header", name))
   GuiElement.add(cell, GuiLabel("label"):caption(caption))
 end
 
@@ -164,17 +182,12 @@ end
 --
 function ModelDebug:updateDebugPanel(event)
   local info_panel = self:getInfoPanel()
-  local model = Model.getModel()
+  local model, block = self:getParameterObjects()
 
-  local current_block = User.getParameter("current_block")
-
-  local countRecipes = Model.countBlockRecipes(current_block)
-
-  if countRecipes > 0 then
+  if block ~= nil then
 
     info_panel.clear()
-    local block = model.blocks[current_block]
-
+    
     if block.runtimes ~= nil then
       local scroll_panel = GuiElement.add(info_panel, GuiScroll("scroll_stage"))
       scroll_panel.style.horizontally_squashable = true

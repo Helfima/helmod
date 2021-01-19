@@ -147,4 +147,63 @@ function Converter.decode_string(data_string)
   end
 end
 
+-------------------------------------------------------------------------------
+-- Indent string
+--
+-- @function [parent=#Converter] indent
+--
+-- @param #string json
+--
+-- @return #string
+--
+function Converter.indent(json)
+  local table_value = game.json_to_table(json)
+  local result = Converter.indentTable(table_value, 0)
+  return result
+end
+
+function Converter.indentTable(input, level)
+  local indent_char = "    "
+  if type(input) == "table" then
+    local first = true
+    local is_array = true
+    local temp = ""
+    for key,value in pairs(input) do
+      if first == false then
+        temp = temp .. ",\n"
+      end
+      if type(key) == "string" then
+        is_array = false
+        temp = temp .. string.rep(indent_char, level)
+        temp = temp .. "\"" .. key .. "\": "
+        temp = temp .. Converter.indentTable(value, level + 1)
+      else
+        temp = temp .. string.rep(indent_char, level)
+        temp = temp .. Converter.indentTable(value, level + 1)
+      end
+      first = false
+    end
+    if is_array == true then
+      temp = "[\n" .. temp .. "\n"
+      temp = temp .. string.rep(indent_char, level-1)
+      temp = temp .. "]"
+      return temp
+    else
+      temp = "{\n" .. temp .. "\n"
+      temp = temp .. string.rep(indent_char, level-1)
+      temp = temp .. "}"
+      return temp
+    end
+  elseif type(input) == "string" then
+    return "\"" .. input .. "\""
+  elseif type(input) == "boolean" then
+    if input == true then
+      return "true"
+    else
+      return "false"
+    end
+  end
+  return input
+end
+
 return Converter

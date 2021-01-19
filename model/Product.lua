@@ -211,9 +211,8 @@ end
 --
 -- @return #number
 --
-function Product:factorByTime()
+function Product:factorByTime(model)
   if self.lua_prototype.by_time == true then
-    local model = Model.getModel()
     return model.time
   end
   return 1
@@ -228,10 +227,10 @@ end
 --
 -- @return #number
 --
-function Product:countProduct(recipe)
+function Product:countProduct(model, recipe)
   local amount = self:getElementAmount()
   local bonus_amount = self:getBonusAmount() -- if there are no catalyst amount = bonus_amount
-  return (amount + bonus_amount * self:getProductivityBonus(recipe) ) * recipe.count * self:factorByTime()
+  return (amount + bonus_amount * self:getProductivityBonus(recipe) ) * recipe.count * self:factorByTime(model)
 end
 
 -------------------------------------------------------------------------------
@@ -243,8 +242,8 @@ end
 --
 -- @return #number
 --
-function Product:countIngredient(recipe)
-  local amount = self:getElementAmount() * self:factorByTime()
+function Product:countIngredient(model, recipe)
+  local amount = self:getElementAmount() * self:factorByTime(model)
   return amount * recipe.count
 end
 
@@ -258,7 +257,7 @@ end
 --
 --- @return number
 --
-function Product:countContainer(count, container)
+function Product:countContainer(count, container, time)
   if count == nil then return 0 end
   if self.lua_prototype.type == 0 or self.lua_prototype.type == "item" then
     local entity_prototype = EntityPrototype(container)
@@ -267,11 +266,11 @@ function Product:countContainer(count, container)
       local inserter_speed = entity_prototype:getInserterRotationSpeed()
       -- temps pour 360� t=360/360*inserter_speed
       local inserter_time = 1 / inserter_speed
-      return count * inserter_time / (inserter_capacity * (Model.getModel().time or 1))
+      return count * inserter_time / (inserter_capacity * (time or 1))
     elseif entity_prototype:getType() == "transport-belt" then
       -- ratio = item_per_s / speed_belt (blue belt)
       local belt_speed = entity_prototype:getBeltSpeed()
-      return count / (belt_speed * self.belt_ratio * (Model.getModel().time or 1))
+      return count / (belt_speed * self.belt_ratio * (time or 1))
     elseif entity_prototype:getType() ~= "logistic-robot" then
       local cargo_wagon_size = entity_prototype:getInventorySize(1)
       if cargo_wagon_size == nil then return 0 end

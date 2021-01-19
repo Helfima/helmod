@@ -5,10 +5,30 @@
 -- @extends #Form
 --
 
-AbstractSelector = newclass(Form,function(base,classname)
-  Form.init(base,classname)
+AbstractSelector = newclass(FormModel,function(base,classname)
+  FormModel.init(base,classname)
   base.auto_clear = false
 end)
+
+-------------------------------------------------------------------------------
+-- On Style
+--
+-- @function [parent=#AbstractSelector] onStyle
+--
+-- @param #table styles
+-- @param #number width_main
+-- @param #number height_main
+--
+function AbstractSelector:onStyle(styles, width_main, height_main)
+  styles.flow_panel = {
+    width = 490,
+    height = height_main
+  }
+  styles.block_info = {
+    width = 310,
+    height = 50*2+45
+  }
+end
 
 -------------------------------------------------------------------------------
 -- Return filter - filtre sur les prototypes
@@ -151,11 +171,10 @@ function AbstractSelector:getSrollPanel()
     return content_panel["main_panel"]["scroll_panel"]
   end
   local main_panel = GuiElement.add(content_panel, GuiFrameV("main_panel"))
-  GuiElement.setStyle(main_panel, "dialog", "width")
-  GuiElement.setStyle(main_panel, "recipe_selector", "height")
+  main_panel.style.horizontally_stretchable = true
   local scroll_panel = GuiElement.add(main_panel, GuiScroll("scroll_panel"):style("helmod_scroll_pane"))
-  GuiElement.setStyle(scroll_panel, "scroll_recipe_selector", "width")
-  GuiElement.setStyle(scroll_panel, "scroll_recipe_selector", "height")
+  scroll_panel.style.horizontally_stretchable = true
+  scroll_panel.style.vertically_stretchable = true
   return scroll_panel
 end
 
@@ -206,16 +225,16 @@ end
 -- @param #LuaEvent event
 --
 function AbstractSelector:onBeforeOpen(event)
-  
+  FormModel.onBeforeOpen(self, event)
   if event.action == "OPEN" then
     User.setParameter(self.parameterTarget, event.item1)
   end
   
-  if event.item3 ~= nil and event.item3 ~= "" then
+  if event.item4 ~= nil and event.item4 ~= "" then
     if User.isFilterTranslate()  then
-      User.setParameter("filter_prototype", User.getTranslate(event.item3))
+      User.setParameter("filter_prototype", User.getTranslate(event.item4))
     else
-      User.setParameter("filter_prototype", event.item3)
+      User.setParameter("filter_prototype", event.item4)
     end
     if event.reset ~= true then
       event.reset = true
@@ -246,13 +265,15 @@ end
 --
 function AbstractSelector:onEvent(event)
   local default_settings = User.getDefaultSettings()
+  local model, block, recipe = self:getParameterObjects()
+  local prototype_type = event.item1
+  local prototype_name = event.item2
 
-  local model = Model.getModel()
-  if Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0) then
+  if User.isWriter(model) then
     if User.getParameter(self.parameterTarget) == "HMPropertiesPanel" then
       if event.action == "element-select" then
         local prototype_compare = User.getParameter("prototype_compare") or {}
-        table.insert(prototype_compare, {type = event.item1, name = event.item2 })
+        table.insert(prototype_compare, {type = prototype_type, name = prototype_name })
         User.setParameter("prototype_compare", prototype_compare)
         self:close()
         Controller:send("on_gui_refresh", event)
@@ -264,29 +285,31 @@ function AbstractSelector:onEvent(event)
       end
     else
       -- classic selector
-      if event.action == "element-select" and event.item1 ~= "container" then
+      if event.action == "element-select" and prototype_type ~= "container" then
         local index = nil
         if self:getProductFilter() == false then index = 0 end
-        local new_recipe = ModelBuilder.addRecipeIntoProductionBlock(event.item2, event.item1, index)
-        ModelCompute.update()
+        local new_block, new_recipe = ModelBuilder.addRecipeIntoProductionBlock(model, block, prototype_name, prototype_type, index)
+        ModelCompute.update(model)
         User.setParameter("scroll_element", new_recipe.id)
-        User.setActiveForm("HMProductionBlockTab")
+        User.setActiveForm("HMProductionPanel")
+        User.setParameterObjects("HMProductionPanel", model.id, new_block.id, new_recipe.id)
+        User.setParameterObjects(self.classname, model.id, new_block.id)
         Controller:send("on_gui_refresh", event)
       end
       -- container selector
-      if event.action == "element-select" and event.item1 == "container" then
-        local type = EntityPrototype(event.item2):getType()
+      if event.action == "element-select" and prototype_type == "container" then
+        local type = EntityPrototype(prototype_name):getType()
         if type == "container" or type == "logistic-container" then
-          User.setParameter("container_solid",event.item2)
+          User.setParameter("container_solid", prototype_name)
         end
         if type == "storage-tank" then
-          User.setParameter("container_fluid",event.item2)
+          User.setParameter("container_fluid", prototype_name)
         end
         if type == "car" or type == "cargo-wagon" or type == "item-with-entity-data"  or type == "logistic-robot" or type == "transport-belt" then
-          User.setParameter("vehicle_solid",event.item2)
+          User.setParameter("vehicle_solid", prototype_name)
         end
         if type == "fluid-wagon" then
-          User.setParameter("vehicle_fluid",event.item2)
+          User.setParameter("vehicle_fluid", prototype_name)
         end
         Controller:send("on_gui_refresh", event)
       end
@@ -473,7 +496,6 @@ function AbstractSelector:onUpdate(event)
 -- @return boolean
 --
 function AbstractSelector:checkFilter(search)
-  local filter_prototype_product = self:getProductFilter()
   local filter_prototype = self:getFilter()
   if filter_prototype ~= nil and filter_prototype ~= "" then
     if User.isFilterTranslate()  then
@@ -543,14 +565,20 @@ function AbstractSelector:updateFilter(event)
       GuiElement.add(filter_table, GuiLabel("filter_show_hidden_player_crafting"):caption({"helmod_recipe-edition-panel.filter-show-hidden-player-crafting"}))
     end
 
+    if self.unlock_recipe then
+      local filter_show_lock_recipes = User.getSetting("filter_show_lock_recipes")
+      GuiElement.add(filter_table, GuiCheckBox(self.classname, "change-boolean-settings", "filter_show_lock_recipes"):state(filter_show_lock_recipes))
+      GuiElement.add(filter_table, GuiLabel("filter_show_lock_recipes"):caption({"helmod_recipe-edition-panel.filter-show-lock-recipes"}))
+    end
+
     GuiElement.add(filter_table, GuiLabel("filter-value"):caption({"helmod_common.filter"}))
     local cellFilter = GuiElement.add(filter_table, GuiFrameH("cell-filter"):style(helmod_frame_style.hidden))
     if User.getModGlobalSetting("filter_on_text_changed") then
-      local text_filter = GuiElement.add(cellFilter, GuiTextField(self.classname, "recipe-filter", "filter-value=onchange"):text(filter_prototype):style())
+      local text_filter = GuiElement.add(cellFilter, GuiTextField(self.classname, "recipe-filter", "filter-value=onchange"):text(filter_prototype):style("helmod_textfield_filter"))
       text_filter.lose_focus_on_confirm = false
       text_filter.focus()
     else
-      GuiElement.add(cellFilter, GuiTextField(self.classname, "recipe-filter", "filter-text"):text(filter_prototype):style())
+      GuiElement.add(cellFilter, GuiTextField(self.classname, "recipe-filter", "filter-text"):text(filter_prototype):style("helmod_textfield_filter"))
       GuiElement.add(cellFilter, GuiButton(self.classname, "recipe-filter", "filter-button"):caption({"helmod_button.apply"}))
     end
   end
@@ -582,7 +610,7 @@ function AbstractSelector:createElementLists(event)
   local list_group = self:getListGroup()
   local list_subgroup = self:getListSubGroup()
 
-  if Model.countList(list_group) == 0 and event.continue ~= true then
+  if table.size(list_group) == 0 and event.continue ~= true then
     local list = self:getListPrototype()
     local step_list = User.getModGlobalSetting("user_cache_step") or 100
     local index = 0
@@ -603,6 +631,7 @@ function AbstractSelector:createElementLists(event)
   end
   -- execute loop
   if event.continue and event.method == "list" then
+    local filter_show_lock_recipes = User.getSetting("filter_show_lock_recipes")
     local filter_show_disable = User.getSetting("filter_show_disable")
     local filter_show_hidden = User.getSetting("filter_show_hidden")
     local filter_show_hidden_player_crafting = User.getSetting("filter_show_hidden_player_crafting")
@@ -614,7 +643,8 @@ function AbstractSelector:createElementLists(event)
       if self:checkFilter(key) then
         for element_name, element in pairs(element) do
           local prototype = self:getPrototype(element)
-          if (not(self.disable_option) or (prototype:getEnabled() == true or filter_show_disable == true)) and 
+          if (not(self.unlock_recipe) or (prototype:getUnlock() == true or filter_show_lock_recipes == true)) and 
+            (not(self.disable_option) or (prototype:getEnabled() == true or filter_show_disable == true)) and 
             (not(self.hidden_option) or (prototype:getHidden() == false or filter_show_hidden == true)) and
             (not(self.hidden_player_crafting) or (prototype:getHiddenPlayerCrafting() == false or filter_show_hidden_player_crafting == true)) then
 
@@ -734,7 +764,7 @@ function AbstractSelector:updateItemList(event)
   
   -- recuperation recipes et subgroupes
   local recipe_selector_list = GuiElement.add(item_list_panel, GuiFlowV("recipe_list"))
-  if Model.countList(list_item) > 0 then
+  if table.size(list_item) > 0 then
     for subgroup, list in spairs(list_item,function(t,a,b) return list_subgroup[b]["order"] > list_subgroup[a]["order"] end) do
       -- boucle subgroup
       local guiRecipeSubgroup = GuiElement.add(recipe_selector_list, GuiTable("recipe-table-", subgroup):column(10):style("helmod_table_recipe_selector"))
@@ -743,7 +773,7 @@ function AbstractSelector:updateItemList(event)
         self:buildPrototypeIcon(guiRecipeSubgroup, prototype, tooltip)
       end
     end
-  else
+else
     event.message = "Empty list"
     Dispatcher:send("on_gui_message", event, self.classname)
   end
@@ -797,9 +827,10 @@ function AbstractSelector.updateGroupSelector(self, event)
       color = "yellow"
     end
     if group.name ~= "helmod" then
-      local tooltip = "item-group-name."..group.name
+      --local tooltip = {"", "item-group-name."..group.name, "\nOrder=", group.order, "\nOrder in recipe=", group.order_in_recipe}
+      local tooltip = {"", "item-group-name."..group.name}
       -- ajoute les icons de groupe
-      local action = GuiElement.add(gui_group_panel, GuiButtonSelectSpriteXxl(self.classname, "recipe-group"):sprite(self.sprite_type, group.name):tooltip({tooltip}):color(color))
+      local action = GuiElement.add(gui_group_panel, GuiButtonSelectSpriteXxl(self.classname, "recipe-group"):sprite(self.sprite_type, group.name):tooltip(tooltip):color(color))
     else
       local tooltip = "Helmod"
       -- ajoute les icons de groupe

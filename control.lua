@@ -1,4 +1,5 @@
 require "mod-gui"
+require "core.tableExtends"
 require "core.global"
 require "core.class"
 require "core.defines"
@@ -20,7 +21,6 @@ Format = require "core.Format"
 require "gui.Gui"
 Player = require "model.Player"
 Controller = require "controller.Controller"
-UnitTest = require "core.UnitTest"
 Command = require "core.Command"
 EventController = require "controller.EventController"
 -- attach events

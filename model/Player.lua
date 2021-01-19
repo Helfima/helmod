@@ -31,7 +31,6 @@ end
 -- @return #Player
 --
 function Player.load(event)
-  --log("event.player_index="..(event.player_index or "nil"))
   Lua_player = game.players[event.player_index]
   return Player
 end
@@ -62,6 +61,20 @@ function Player.getGameDay()
   local night = surface.morning-surface.evening
   local dawn = surface.dawn-surface.morning
   return day, day*dusk, day*night, day*dawn
+end
+
+------------------------------------------------------------------------------
+-- Get display sizes
+--
+-- @function [parent=#Form] getDisplaySizes
+--
+-- return
+--
+function Player.getDisplaySizes()
+  if Lua_player == nil then return 800,600 end
+  local display_resolution = Lua_player.display_resolution
+  local display_scale = Lua_player.display_scale
+  return display_resolution.width/display_scale, display_resolution.height/display_scale
 end
 
 -------------------------------------------------------------------------------
@@ -111,7 +124,7 @@ function Player.beginCrafting(item, count)
   if Lua_player == nil then return nil end
   local filters = {{filter = "has-product-item", elem_filters = {{filter = "name", name = item}}}}
   local recipes = Player.getRecipePrototypes(filters)
-  if recipes ~= nil and Model.countList(recipes) > 0 then
+  if recipes ~= nil and table.size(recipes) > 0 then
     local first_recipe = Model.firstRecipe(recipes)
     local craft = {count=math.ceil(count),recipe=first_recipe.name,silent=false}
     Lua_player.begin_crafting(craft)
@@ -391,7 +404,10 @@ end
 --
 -- @return #table technologies
 --
-function Player.getTechnologiePrototypes()
+function Player.getTechnologiePrototypes(filters)
+  if filters ~= nil then
+    return game.get_filtered_technology_prototypes(filters)
+  end
   return game.technology_prototypes
 end
 
@@ -515,7 +531,7 @@ function Player.checkFactoryLimitationModule(module, lua_recipe)
   if category == "rocket-building" then return true end
   if rules_excluded[category] == nil then category = "standard" end
   check_not_bypass = Player.checkRules(check_not_bypass, rules_excluded, category, EntityPrototype(factory.name):native(), false)
-  if Model.countList(module.limitations) > 0 and Player.getModuleBonus(module.name, "productivity") > 0 and check_not_bypass and model_filter_factory_module == true then
+  if table.size(module.limitations) > 0 and Player.getModuleBonus(module.name, "productivity") > 0 and check_not_bypass and model_filter_factory_module == true then
     allowed = false
     for _, recipe_name in pairs(module.limitations) do
       if lua_recipe.name == recipe_name then allowed = true end
@@ -523,7 +539,7 @@ function Player.checkFactoryLimitationModule(module, lua_recipe)
   end
 
   local allowed_effects = EntityPrototype(factory):getAllowedEffects()
-  if Model.countList(module.limitations) > 0 and Player.getModuleBonus(module.name, "productivity") > 0 and ( allowed_effects ~= nil and not(allowed_effects.productivity)) and model_filter_factory_module == true then
+  if table.size(module.limitations) > 0 and Player.getModuleBonus(module.name, "productivity") > 0 and ( allowed_effects ~= nil and not(allowed_effects.productivity)) and model_filter_factory_module == true then
     allowed = false
   end
 
@@ -549,7 +565,7 @@ function Player.checkBeaconLimitationModule(module, lua_recipe)
   local allowed = true
   local model_filter_beacon_module = User.getModGlobalSetting("model_filter_beacon_module")
   local allowed_effects = EntityPrototype(beacon):getAllowedEffects()
-  if Model.countList(module.limitations) > 0 and Player.getModuleBonus(module.name, "productivity") > 0 and not(allowed_effects.productivity) and model_filter_beacon_module == true then
+  if table.size(module.limitations) > 0 and Player.getModuleBonus(module.name, "productivity") > 0 and not(allowed_effects.productivity) and model_filter_beacon_module == true then
     allowed = false
   end
   if beacon.module_slots ==  0 then
@@ -790,7 +806,7 @@ function Player.getRecipeEntity(name)
   recipe.enabled = true
   recipe.energy = 1
   recipe.force = {}
-  recipe.group = {name="helmod"}
+  recipe.group = {name="helmod", order="zzzz"}
   recipe.subgroup = prototype.subgroup
   recipe.hidden = false
   recipe.ingredients = ingredients
@@ -825,7 +841,7 @@ function Player.getRecipeFluid(name)
   recipe.enabled = true
   recipe.energy = 1
   recipe.force = {}
-  recipe.group = {name="helmod"}
+  recipe.group = {name="helmod", order="zzzz"}
   recipe.subgroup = prototype.subgroup
   recipe.hidden = false
   recipe.ingredients = ingredients
@@ -865,7 +881,7 @@ function Player.getRecipeRocket(name)
   recipe.energy = rocket_part_prototype.energy * rocket_prototype.rocket_parts_required + 15
   recipe.force = {}
   --recipe.group = prototype.group
-  recipe.group = {name="helmod"}
+  recipe.group = {name="helmod", order="zzzz"}
   recipe.subgroup = prototype.subgroup
   recipe.hidden = false
   recipe.ingredients = ingredients
@@ -895,7 +911,7 @@ function Player.getRecipeBurnt(name)
   recipe.energy = recipe_prototype.energy
   recipe.force = {}
   --recipe.group = prototype.group
-  recipe.group = {name="helmod"}
+  recipe.group = {name="helmod", order="zzzz"}
   recipe.subgroup = recipe_prototype.subgroup
   recipe.hidden = false
   recipe.ingredients = recipe_prototype.ingredients

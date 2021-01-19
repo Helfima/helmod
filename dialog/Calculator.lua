@@ -19,6 +19,41 @@ function Calculator:onInit()
 end
 
 -------------------------------------------------------------------------------
+-- On Style
+--
+-- @function [parent=#Calculator] onStyle
+--
+-- @param #table styles
+-- @param #number width_main
+-- @param #number height_main
+--
+function Calculator:onStyle(styles, width_main, height_main)
+  styles.flow_panel = nil
+end
+
+------------------------------------------------------------------------------
+-- Get Button Sprites
+--
+-- @function [parent=#Calculator] getButtonSprites
+--
+-- @return boolean
+--
+function Calculator:getButtonSprites()
+  return "calculator-white","calculator"
+end
+
+-------------------------------------------------------------------------------
+-- Is tool
+--
+-- @function [parent=#Calculator] isTool
+--
+-- @return boolean
+--
+function Calculator:isTool()
+  return true
+end
+
+-------------------------------------------------------------------------------
 -- Get or create column panel
 --
 -- @function [parent=#Calculator] getColumnPanel

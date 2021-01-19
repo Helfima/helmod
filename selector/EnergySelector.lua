@@ -109,7 +109,7 @@ function EnergySelector:buildPrototypeTooltip(prototype)
   table.insert(tooltip, energy_name)
   --table.insert(tooltip, {"", "\n",entity_prototype:getType()})
   -- products
-  if Model.countList(recipe_prototype:getProducts()) > 0 then
+  if table.size(recipe_prototype:getProducts()) > 0 then
     table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.products"}, ":", helmod_tag.color.close, helmod_tag.font.close})
     for _,product in pairs(recipe_prototype:getProducts()) do
       if product.type == "energy" and product.name == "energy" then
@@ -122,7 +122,7 @@ function EnergySelector:buildPrototypeTooltip(prototype)
     end
   end
   -- ingredients
-  if Model.countList(recipe_prototype:getIngredients()) > 0 then
+  if table.size(recipe_prototype:getIngredients()) > 0 then
     table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.ingredients"}, ":", helmod_tag.color.close, helmod_tag.font.close})
     for _,ingredient in pairs(recipe_prototype:getIngredients()) do
       if ingredient.type == "energy" and ingredient.name == "energy" then
