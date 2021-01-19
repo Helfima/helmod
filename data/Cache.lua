@@ -84,7 +84,7 @@ function Cache.isEmpty(classname, name)
     if type(data[classname][name]) == "string" then
       return data[classname][name] == ""
     else
-      return Model.countList(data[classname][name]) == 0
+      return table.size(data[classname][name]) == 0
     end
   end
   return true

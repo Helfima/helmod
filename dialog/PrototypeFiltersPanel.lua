@@ -139,7 +139,7 @@ function PrototypeFiltersPanel:getMenuPanel()
   end
   local panel = GuiElement.add(content_panel, GuiFrameV(panel_name))
   panel.style.vertically_stretchable = true
-  local width_main, height_main = GuiElement.getMainSizes()
+  local width_main, height_main = User.getMainSizes()
   panel.style.minimal_height = 40
   panel.style.minimal_width = width_main
   return panel
@@ -158,7 +158,7 @@ function PrototypeFiltersPanel:getContentPanel()
   end
   local panel = GuiElement.add(content_panel, GuiFrameV(panel_name))
   panel.style.vertically_stretchable = true
-  local width_main, height_main = GuiElement.getMainSizes()
+  local width_main, height_main = User.getMainSizes()
   panel.style.minimal_height = height_main-300
   panel.style.minimal_width = width_main
   return panel
@@ -362,7 +362,7 @@ function PrototypeFiltersPanel:addRowFilter(itable, prototype_filter, index)
     end
     GuiElement.add(collision_mask_cell, GuiDropDown(self.classname, "change-filter-option-collision-mask", index):items(collision_mask, mask))
     GuiElement.add(collision_mask_cell, GuiDropDown(self.classname, "change-filter-option-collision-mask-mode", index):items(collision_mask_mode, mask_mode))
-  elseif Model.countList(options) > 0 then
+  elseif table.size(options) > 0 then
     prototype_filter.option = prototype_filter.option or options[1]
     GuiElement.add(itable, GuiDropDown(self.classname, "change-filter-option", index):items(options, prototype_filter.option))
   else
@@ -469,7 +469,7 @@ function PrototypeFiltersPanel:updateResult()
 
   local prototype_filters = User.getParameter("prototype_filters") or {}
 
-  if Model.countList(prototype_filters) > 0 then
+  if table.size(prototype_filters) > 0 then
     local resultTable = GuiElement.add(content_panel, GuiTable("table-filters"):column(6))
     -- prototype filter
     self:addHeaderFilter(resultTable)

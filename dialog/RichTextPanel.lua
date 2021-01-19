@@ -18,6 +18,46 @@ function RichTextPanel:onInit()
 end
 
 -------------------------------------------------------------------------------
+-- On Style
+--
+-- @function [parent=#RichTextPanel] onStyle
+--
+-- @param #table styles
+-- @param #number width_main
+-- @param #number height_main
+--
+function RichTextPanel:onStyle(styles, width_main, height_main)
+  styles.flow_panel = {
+    minimal_width = 322,
+    maximal_width = 322,
+    minimal_height = 300,
+    maximal_height = height_main
+  }
+end
+
+------------------------------------------------------------------------------
+-- Get Button Sprites
+--
+-- @function [parent=#RichTextPanel] getButtonSprites
+--
+-- @return boolean
+--
+function RichTextPanel:getButtonSprites()
+  return "text-white","text"
+end
+
+-------------------------------------------------------------------------------
+-- Is tool
+--
+-- @function [parent=#RichTextPanel] isTool
+--
+-- @return boolean
+--
+function RichTextPanel:isTool()
+  return true
+end
+
+-------------------------------------------------------------------------------
 -- On update
 --
 -- @function [parent=#RichTextPanel] onUpdate
@@ -76,8 +116,8 @@ function RichTextPanel:updateInput(event)
   text_field.style.width = 200
   text_field.lose_focus_on_confirm = false
   text_field.focus()
-  GuiElement.add(text_panel, GuiButton(self.classname, "richtext-clear"):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_button.clear"}))
-  GuiElement.add(text_panel, GuiButton(self.classname, "richtext-save"):sprite("menu", "save-white-sm", "save-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_button.save"}))
+  GuiElement.add(text_panel, GuiButton(self.classname, "richtext-clear"):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_actived_red"):tooltip({"helmod_button.clear"}))
+  GuiElement.add(text_panel, GuiButton(self.classname, "richtext-save"):sprite("menu", "save-sm", "save-sm"):style("helmod_button_menu_sm_actived_green"):tooltip({"helmod_button.save"}))
 end
 
 -------------------------------------------------------------------------------
@@ -91,6 +131,7 @@ function RichTextPanel:updateHistory(event)
   local history_panel = self:getScrollPanel("history-panel")
   local richtext_text = User.getParameter("richtext_text")
   history_panel.clear()
+  history_panel.style.vertically_stretchable = true
 
   -- history
   local richtext_history = User.getParameter("richtext_history") or {}
@@ -98,7 +139,7 @@ function RichTextPanel:updateHistory(event)
   for index,value in pairs(richtext_history) do
     local button = GuiElement.add(table_panel, GuiButton(self.classname, "richtext-history-use", index):caption(value):style("helmod_button_left"):tooltip({"helmod_button.use"}))
     button.style.width = 250
-    GuiElement.add(table_panel, GuiButton(self.classname, "richtext-history-delete", index):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_button.delete"}))
+    GuiElement.add(table_panel, GuiButton(self.classname, "richtext-history-delete", index):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_actived_red"):tooltip({"helmod_button.delete"}))
   end
 end
 

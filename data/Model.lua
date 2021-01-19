@@ -27,27 +27,19 @@ local Model = {
 -- @return #table
 --
 function Model.getModels(bypass)
-  local model_id = User.getParameter("model_id")
   local display_all_sheet = User.getModGlobalSetting("display_all_sheet")
   local first_id = nil
-  local reset_model_id = true
   local models = {}
-  local global_models = global.models
   if Model.countModel() > 0 then
     for _,model in pairs(global.models) do
       if Player.isAdmin() and ( display_all_sheet or model.owner == "admin" or bypass ) then
         models[model.id] = model
         if first_id == nil then first_id = model.id end
-        if model_id == model.id then reset_model_id = false end
       elseif model.owner == Player.native().name or (model.share ~= nil and model.share > 0) then
         models[model.id] = model
         if first_id == nil then first_id = model.id end
-        if model_id == model.id then reset_model_id = false end
       end
     end
-  end
-  if reset_model_id == true then
-    User.setParameter("model_id",first_id)
   end
   return models
 end
@@ -59,10 +51,7 @@ end
 --
 -- @return #table
 --
-function Model.getBlockOrder()
-  local model = Model.getModel()
-  local current_block = User.getParameter("current_block")
-  local block = model.blocks[current_block]
+function Model.getBlockOrder(block)
   local order = {"products", "ingredients"}
   if block.by_product == false then order = {"ingredients", "products"} end
   return order
@@ -125,35 +114,9 @@ function Model.newModel()
   model.blocks = {}
   model.ingredients = {}
   model.resources = {}
-  model.powers = {}
   model.time = 1
   model.version = Model.version
   global.models[model.id] = model
-  User.setParameter("model_id",model.id)
-  return model
-end
-
--------------------------------------------------------------------------------
--- Get and initialize the model
---
--- @function [parent=#Model] getModel
---
--- @return #Model
---
-function Model.getModel()
-  local model_id = User.getParameter("model_id")
-  if model_id == "new" then
-    Model.newModel()
-  end
-
-  model_id = User.getParameter("model_id")
-  --local models = Model.getModels()
-  if global.models == nil then global.models = {} end
-  local models = global.models
-  local model = models[model_id]
-  if model == nil then 
-    return Model.newModel()
-  end
   return model
 end
 
@@ -177,23 +140,32 @@ end
 --
 -- @return #Model
 --
-function Model.getModelByParameter(parameter)
-  if parameter ~= nil and parameter.model ~= nil and global.models ~= nil then
-    return global.models[parameter.model]
-  end
-end
-
--------------------------------------------------------------------------------
--- Get block
---
--- @function [parent=#Model] getBlockByParameter
---
--- @return #Model
---
-function Model.getBlockByParameter(parameter)
-  local model = Model.getModelByParameter(parameter)
-  if parameter ~= nil and parameter.model ~= nil and model ~= nil and model.blocks ~= nil then
-    return model.blocks[parameter.block], model
+function Model.getParameterObjects(parameter)
+  if parameter ~= nil then
+    if global.models == nil then
+      -- initialisation
+      global.models = {}
+      local model = Model.newModel()
+      User.setParameter(parameter.name, {name=parameter.name, model=model.id})
+      return model
+    end
+    if parameter.model ~= nil and global.models[parameter.model] ~= nil then
+      local model = global.models[parameter.model]
+      local block, recipe
+      if model ~= nil and parameter.block ~= nil and model.blocks ~= nil then
+        block = model.blocks[parameter.block]
+        if block ~= nil and parameter.recipe ~= nil and block.recipes ~= nil then
+          recipe = block.recipes[parameter.recipe]
+        end
+      end
+      return model, block, recipe
+    else
+      -- initialisation parameter
+      local model = Model.getLastModel()
+      if model == nil then model = Model.newModel() end
+      User.setParameter(parameter.name, {name=parameter.name, model=model.id})
+      return model
+    end
   end
 end
 
@@ -214,77 +186,16 @@ function Model.getLastModel()
 end
 
 -------------------------------------------------------------------------------
--- Get Object
---
--- @function [parent=#Model] getObject
---
--- @param #string item block_id or resource
--- @param #string key object name
---
--- @return #table
---
-function Model.getObject(item, key)
-  local object = nil
-  local model = Model.getModel()
-  if item == "resource" then
-    object = model.resources[key]
-  elseif model.blocks[item] ~= nil and model.blocks[item].recipes[key] ~= nil then
-    object = model.blocks[item].recipes[key]
-  end
-  return object
-end
-
--------------------------------------------------------------------------------
--- Get Recipe
---
--- @function [parent=#Model] getRecipe
---
--- @param #string block_id block id
--- @param #string key object name
---
--- @return #Prototype
---
-function Model.getRecipe(block_id, key)
-  local object = nil
-  local model = Model.getModel()
-  if model.blocks[block_id] ~= nil and model.blocks[block_id].recipes[key] ~= nil then
-    object = model.blocks[block_id].recipes[key]
-  end
-  return RecipePrototype(object)
-end
-
--------------------------------------------------------------------------------
--- Get power
---
--- @function [parent=#Model] getPower
---
--- @param #string key power id
---
--- @return #table
---
-function Model.getPower(key)
-  local object = nil
-  local model = Model.getModel()
-  if model.powers ~= nil and model.powers[key] ~= nil then
-    object = model.powers[key]
-  end
-  return object
-end
-
-
-
--------------------------------------------------------------------------------
 -- Create model Production Block
 --
 -- @function [parent=#Model] newBlock
 --
--- @param #LuaRecipePrototype recipe
+-- @param #table model
+-- @param #table recipe
 --
 -- @return #table
 --
-function Model.newBlock(recipe)
-  local model = Model.getModel()
-
+function Model.newBlock(model, recipe)
   if model.block_id == nil then model.block_id = 0 end
   model.block_id = model.block_id + 1
 
@@ -352,46 +263,6 @@ function Model.newFactory(name, count)
 end
 
 -------------------------------------------------------------------------------
--- Create model Power
---
--- @function [parent=#Model] newPower
---
--- @return #table
---
-function Model.newPower()
-  local model = User.get("model")
-
-  if model.power_id == nil then model.power_id = 0 end
-  model.power_id = model.power_id + 1
-
-  local inputModel = {}
-  inputModel.id = "power_"..model.power_id
-  inputModel.power = 0
-  inputModel.primary = {}
-  inputModel.secondary = {}
-
-  return inputModel
-end
-
--------------------------------------------------------------------------------
--- Create model Generator
---
--- @function [parent=#Model] newGenerator
---
--- @param #string name
--- @param #number count
---
--- @return #table
---
-function Model.newGenerator(name, count)
-  local itemModel = {}
-  itemModel.name = name or "steam-engine"
-  itemModel.type = "item"
-  itemModel.count = count or 0
-  return itemModel
-end
-
--------------------------------------------------------------------------------
 -- Create model Ingredient
 --
 -- @function [parent=#Model] newIngredient
@@ -454,7 +325,7 @@ end
 function Model.countModulesModel(element)
   local count = 0
   if element ~= nil and element.modules ~= nil then
-    for name, value in pairs(element.modules) do
+    for _, value in pairs(element.modules) do
       count = count + value
     end
   end
@@ -466,13 +337,13 @@ end
 --
 -- @function [parent=#Model] newRecipe
 --
+-- @param #table model
 -- @param #string name
 -- @param #string type
 --
 -- @return #table
 --
-function Model.newRecipe(name, type)
-  local model = Model.getModel()
+function Model.newRecipe(model, name, type)
   if model.recipe_id == nil then model.recipe_id = 0 end
   model.recipe_id = model.recipe_id + 1
 
@@ -494,13 +365,13 @@ end
 --
 -- @function [parent=#Model] newResource
 --
+-- @param #table model
 -- @param #string name
 -- @param #number count
 --
 -- @return #table
 --
-function Model.newResource(name, type, count)
-  local model = Model.getModel()
+function Model.newResource(model, name, type, count)
   if model.resource_id == nil then model.resource_id = 0 end
   model.resource_id = model.resource_id + 1
 
@@ -519,69 +390,6 @@ function Model.newResource(name, type, count)
 end
 
 -------------------------------------------------------------------------------
--- Count recipes
---
--- @function [parent=#Model] countRepices
---
--- @return #number
---
-function Model.countRepices()
-  local model = Model.getModel()
-  return Model.countList(model.recipes)
-end
-
--------------------------------------------------------------------------------
--- Count ingredients
---
--- @function [parent=#Model] countIngredients
---
--- @return #number
---
-function Model.countIngredients()
-  local model = Model.getModel()
-  return Model.countList(model.ingredients)
-end
-
--------------------------------------------------------------------------------
--- Count blocks
---
--- @function [parent=#Model] countBlocks
---
--- @return #number
---
-function Model.countBlocks()
-  local model = Model.getModel()
-  return Model.countList(model.blocks)
-end
-
--------------------------------------------------------------------------------
--- Count powers
---
--- @function [parent=#Model] countPowers
---
--- @return #number
---
-function Model.countPowers()
-  local model = Model.getModel()
-  return Model.countList(model.powers)
-end
-
--------------------------------------------------------------------------------
--- Count block recipes
---
--- @function [parent=#Model] countBlockRecipes
---
--- @param #string blockId
---
--- @return #number
---
-function Model.countBlockRecipes(blockId)
-  local model = Model.getModel()
-  if model.blocks[blockId] == nil then return 0 end
-  return Model.countList(model.blocks[blockId].recipes)
-end
-
--------------------------------------------------------------------------------
 -- Count in list
 --
 -- @function [parent=#Model] countModel
@@ -589,21 +397,7 @@ end
 -- @return #number
 --
 function Model.countModel()
-  return Model.countList(global.models)
-end
-
--------------------------------------------------------------------------------
--- Count in list
---
--- @function [parent=#Model] countList
---
--- @param #table list
---
--- @return #number
---
-function Model.countList(list)
-  if list == nil then return 0 end
-  return table_size(list)
+  return table.size(global.models)
 end
 
 -------------------------------------------------------------------------------
@@ -611,23 +405,22 @@ end
 --
 -- @function [parent=#Model] setBeacon
 --
--- @param #string item block_id or resource
--- @param #string key object name
--- @param #string name beacon name
--- @param #number combo beacon combo
--- @param #number factory beacon factory
+-- @param #table recipe
+-- @param #string beacon_name
+-- @param #number combo
+-- @param #number per_factory
+-- @param #number per_factory_constant
 --
-function Model.setBeacon(item, key, name, combo, per_factory, per_factory_constant)
-  local object = Model.getObject(item, key)
-  if object ~= nil then
+function Model.setBeacon(recipe, name, combo, per_factory, per_factory_constant)
+  if recipe ~= nil then
     local beacon_prototype = EntityPrototype(name)
     if beacon_prototype:native() ~= nil then
-      object.beacon.name = name
-      object.beacon.combo = combo or Model.beacon_combo
-      object.beacon.per_factory = per_factory or Model.beacon_factory
-      object.beacon.per_factory_constant = per_factory_constant or Model.beacon_factory_constant
-      if Model.countModulesModel(object.beacon) >= beacon_prototype:getModuleInventorySize() then
-        object.beacon.modules = {}
+      recipe.beacon.name = name
+      recipe.beacon.combo = combo or Model.beacon_combo
+      recipe.beacon.per_factory = per_factory or Model.beacon_factory
+      recipe.beacon.per_factory_constant = per_factory_constant or Model.beacon_factory_constant
+      if Model.countModulesModel(recipe.beacon) >= beacon_prototype:getModuleInventorySize() then
+        recipe.beacon.modules = {}
       end
       
     end
@@ -639,81 +432,20 @@ end
 --
 -- @function [parent=#Model] setFactory
 --
--- @param #string block_id
--- @param #string recipe_id
+-- @param #table recipe
 -- @param #string factory_name
 -- @param #string factory_fuel
 --
-function Model.setFactory(block_id, recipe_id, factory_name, factory_fuel)
-  local object = Model.getObject(block_id, recipe_id)
-  if object ~= nil then
+function Model.setFactory(recipe, factory_name, factory_fuel)
+  if recipe ~= nil then
     local factory_prototype = EntityPrototype(factory_name)
     if factory_prototype:native() ~= nil then
-      object.factory.name = factory_name
-      object.factory.fuel = factory_fuel
-      if Model.countModulesModel(object.factory) >= factory_prototype:getModuleInventorySize() then
-        object.factory.modules = {}
+      recipe.factory.name = factory_name
+      recipe.factory.fuel = factory_fuel
+      if Model.countModulesModel(recipe.factory) >= factory_prototype:getModuleInventorySize() then
+        recipe.factory.modules = {}
       end
     end
-  end
-end
-
--------------------------------------------------------------------------------
--- Reindex list
---
--- @function [parent=#Model] reIndexList
---
--- @param #table list
---
-function Model.reIndexList(list)
-  local index = 0
-  for _,element in spairs(list,function(t,a,b) return t[b].index > t[a].index end) do
-    element.index = index
-    index = index + 1
-  end
-end
-
--------------------------------------------------------------------------------
--- Reset recipes
---
--- @function [parent=#Model] recipesReset
---
-function Model.recipesReset()
-  local model = Model.getModel()
-  for key, recipe in pairs(model.recipes) do
-    Model.recipeReset(recipe)
-  end
-end
-
--------------------------------------------------------------------------------
--- Reset recipe
---
--- @function [parent=#Model] recipeReset
---
--- @param #ModelRecipe recipe
---
-function Model.recipeReset(recipe)
-  if recipe.products ~= nil then
-    for index, product in pairs(recipe.products) do
-      product.count = 0
-    end
-  end
-  if recipe.ingredients ~= nil then
-    for index, ingredient in pairs(recipe.ingredients) do
-      ingredient.count = 0
-    end
-  end
-end
-
--------------------------------------------------------------------------------
--- Reset ingredients
---
--- @function [parent=#Model] ingredientsReset
---
-function Model.ingredientsReset()
-  local model = Model.getModel()
-  for k, ingredient in pairs(model.ingredients) do
-    model.ingredients[ingredient.name].count = 0;
   end
 end
 
@@ -741,28 +473,6 @@ function Model.lastRecipe(recipes)
   for _, recipe in spairs(recipes,function(t,a,b) return t[b].index < t[a].index end) do
     return recipe
   end
-end
-
--------------------------------------------------------------------------------
--- Get productions list
---
--- @function [parent=#Model] getRecipeByProduct
---
--- @param #ModelRecipe recipe
---
--- @return #table
---
-function Model.getRecipeByProduct(player, element)
-  local model = Model.getModel(player)
-  local recipes = {}
-  for key, recipe in pairs(model.recipes) do
-    for index, product in pairs(recipe.products) do
-      if product.name == element.name then
-        table.insert(recipes,recipe)
-      end
-    end
-  end
-  return recipes
 end
 
 -------------------------------------------------------------------------------
@@ -849,21 +559,6 @@ function Model.getDefaultPrototypeFactory(recipe_prototype)
     if last_factory ~= nil then return last_factory.name end
   end
   return nil
-end
-
--------------------------------------------------------------------------------
--- Set a beacon for recipe
---
--- @function [parent=#Model] setDefaultRecipeBeacon
---
--- @param #string item block_id or resource
--- @param #string key recipe name
--- @param #string name factory name
---
-function Model.setDefaultRecipeBeacon(item, key, name)
-  local object = Model.getObject(item, key)
-  local recipe = Model.getDefaultRecipe(object.name)
-  recipe.beacon = name
 end
 
 -------------------------------------------------------------------------------

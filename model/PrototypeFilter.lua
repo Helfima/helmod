@@ -41,7 +41,7 @@ end
 --
 function PrototypeFilter:getFilters()
   local filters = {}
-  if self.filters ~= nil and Model.countList(self.filters) > 0 then
+  if self.filters ~= nil and table.size(self.filters) > 0 then
     for key,options in spairs(self.filters,function(t,a,b) return b > a end) do
       table.insert(filters,key)
     end
@@ -62,7 +62,7 @@ function PrototypeFilter:getOptions(filter)
   if filters[filter] ~= nil then
     if type(filters[filter]) == "string" then
       return filters[filter]
-    elseif Model.countList(filters[filter]) > 0 then
+    elseif table.size(filters[filter]) > 0 then
       for key,option in spairs(filters[filter],function(t,a,b) return b > a end) do
         table.insert(options,key)
       end
