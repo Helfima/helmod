@@ -23,6 +23,7 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
   local lua_recipe = recipe_prototype:native()
 
   if lua_recipe ~= nil then
+    local block_types = true
     -- ajoute le bloc si il n'existe pas
     if block == nil or (block.isEnergy ~= true and recipe_type == "energy") or (block.isEnergy == true and recipe_type ~= "energy") then
       local modelBlock = Model.newBlock(model, lua_recipe)
@@ -34,10 +35,14 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
       model.blocks[modelBlock.id] = modelBlock
       -- check si le block est independant
       ModelCompute.checkUnlinkedBlock(model, modelBlock)
+      block_types = false
     end
 
     -- ajoute le recipe si il n'existe pas
     local ModelRecipe = Model.newRecipe(model, lua_recipe.name, recipe_type)
+    if not(block_types) then
+      block.type = ModelRecipe.type
+    end
     if index == nil then
       local recipe_index = table.size(block.recipes)
       ModelRecipe.index = recipe_index
@@ -1031,8 +1036,7 @@ end
 --
 -- @function [parent=#ModelBuilder] updateRecipeContraint
 --
--- @param #string item block_id
--- @param #string key object name
+-- @param #table recipe
 -- @param #table contraint
 --
 function ModelBuilder.updateRecipeContraint(recipe, contraint)
@@ -1042,6 +1046,20 @@ function ModelBuilder.updateRecipeContraint(recipe, contraint)
     else
       recipe.contraint = contraint
     end
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Update recipe Neighbour Bonus
+--
+-- @function [parent=#ModelBuilder] updateRecipeNeighbourBonus
+--
+-- @param #table recipe
+-- @param #number value
+--
+function ModelBuilder.updateRecipeNeighbourBonus(recipe, value)
+  if recipe ~= nil then
+    recipe.factory.neighbour_bonus = value
   end
 end
 

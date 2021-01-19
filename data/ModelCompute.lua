@@ -855,7 +855,8 @@ function ModelCompute.computeModuleEffects(recipe)
   local factory = recipe.factory
   factory.effects = {speed = 0, productivity = 0, consumption = 0, pollution = 0}
   factory.cap = {speed = 0, productivity = 0, consumption = 0, pollution = 0}
-  factory.effects.productivity = EntityPrototype(factory):getBaseProductivity()
+  local factory_prototype = EntityPrototype(factory)
+  factory.effects.productivity = factory_prototype:getBaseProductivity()
   -- effet module factory
   if factory.modules ~= nil then
     for module, value in pairs(factory.modules) do
@@ -892,6 +893,12 @@ function ModelCompute.computeModuleEffects(recipe)
     local bonus = Player.getForce().laboratory_speed_modifier or 0
     factory.effects.speed = factory.effects.speed + bonus * (1 + factory.effects.speed)
   end
+  -- nuclear reactor
+  if factory_prototype:getType() == "reactor" then
+    local bonus = factory_prototype:getNeighbourBonus()
+    factory.effects.consumption = factory.effects.consumption + bonus
+  end
+
   -- cap la productivite
   if factory.effects.productivity < 0  then
     factory.effects.productivity = 0

@@ -18,26 +18,22 @@ function EventController.start()
   script.on_load(EventController.onLoad)
   script.on_configuration_changed(EventController.onConfigurationChanged)
   EventController.pcallEvent(defines.events.on_tick, EventController.onTick)
-  EventController.pcallEvent(defines.events.on_gui_click, EventController.onGuiClick)
+  EventController.pcallEvent(defines.events.on_gui_click, EventController.onGuiClickButton)
   EventController.pcallEvent(defines.events.on_gui_text_changed, EventController.onGuiTextChanged)
   EventController.pcallEvent(defines.events.on_prepare, EventController.onPrepare)
-  
-  EventController.pcallEvent(defines.events.on_gui_confirmed, EventController.onGuiConfirmed)
-  EventController.pcallEvent(defines.events.on_gui_value_changed, EventController.onGuiValueChanged)
-  -- dropdown changed
-  EventController.pcallEvent(defines.events.on_gui_selection_state_changed, EventController.onGuiSelectionStateChanged)
-  -- switch changed
-  EventController.pcallEvent(defines.events.on_gui_switch_state_changed, EventController.onGuiSwitchStateChanged)
-  -- element choose changed
-  EventController.pcallEvent(defines.events.on_gui_elem_changed, EventController.onGuiElementChooseChanged)
-  -- checked changed
-  EventController.pcallEvent(defines.events.on_gui_checked_state_changed, EventController.onGuiCheckedStateChanged)
+
+  EventController.pcallEvent(defines.events.on_gui_confirmed, EventController.onGuiClick)
+  EventController.pcallEvent(defines.events.on_gui_value_changed, EventController.onGuiClick)
+  EventController.pcallEvent(defines.events.on_gui_selection_state_changed, EventController.onGuiClick)
+  EventController.pcallEvent(defines.events.on_gui_switch_state_changed, EventController.onGuiClick)
+  EventController.pcallEvent(defines.events.on_gui_elem_changed, EventController.onGuiClick)
+  EventController.pcallEvent(defines.events.on_gui_checked_state_changed, EventController.onGuiClick)
+  EventController.pcallEvent(defines.events.on_gui_selected_tab_changed, EventController.onGuiClick)
+
   EventController.pcallEvent(defines.events.on_player_created, EventController.onPlayerCreated)
   EventController.pcallEvent(defines.events.on_player_joined_game, EventController.onPlayerJoinedGame)
   EventController.pcallEvent(defines.events.on_runtime_mod_setting_changed, EventController.onRuntimeModSettingChanged)
   EventController.pcallEvent(defines.events.on_console_command, EventController.onConsoleCommand)
-  --EventController.pcallEvent(defines.events.on_research_finished, EventController.onResearchFinished)
-  --EventController.pcallEvent(defines.events.on_gui_closed, EventController.onGuiClosed)
   EventController.pcallEvent(defines.events.on_gui_location_changed, EventController.onGuiLocationChanged)
   
   EventController.pcallEvent(defines.events.on_string_translated, EventController.onStringTranslated)
@@ -190,6 +186,7 @@ function EventController.onConfigurationChanged(data)
     --initialise au chargement d'une partie existante
     for _,player in pairs(game.players) do
       Player.set(player)
+      Controller:cleanController(player)
       Controller:bindController(player)
     end
   end
@@ -261,8 +258,22 @@ end
 --
 -- @param #table event
 --
-function EventController.onGuiClick(event)
+function EventController.onGuiClickButton(event)
   if event ~= nil and event.player_index ~= nil and event.element ~= nil and table.contains({"button", "sprite-button", "choose-elem-button"}, event.element.type) then
+    Player.load(event)
+    Dispatcher:send("on_gui_action", event, Controller.classname)
+  end
+end
+
+-------------------------------------------------------------------------------
+-- On click event
+--
+-- @function [parent=#EventController] onGuiClick
+--
+-- @param #table event
+--
+function EventController.onGuiClick(event)
+  if event ~= nil and event.player_index ~= nil then
     Player.load(event)
     Dispatcher:send("on_gui_action", event, Controller.classname)
   end
@@ -284,91 +295,6 @@ function EventController.onGuiTextChanged(event)
     if string.find(event.element.name, "onqueue") then
       Dispatcher:send("on_gui_queue", event, Controller.classname)
     end
-  end
-end
-
--------------------------------------------------------------------------------
--- On confirmed
---
--- @function [parent=#EventController] onGuiConfirmed
---
--- @param #table event
---
-function EventController.onGuiConfirmed(event)
-  if event ~= nil and event.player_index ~= nil then
-    Player.load(event)
-    Dispatcher:send("on_gui_action", event, Controller.classname)
-  end
-end
-
--------------------------------------------------------------------------------
--- On value changed
---
--- @function [parent=#EventController] onGuiValueChanged
---
--- @param #table event
---
-function EventController.onGuiValueChanged(event)
-  if event ~= nil and event.player_index ~= nil then
-    Player.load(event)
-    Dispatcher:send("on_gui_action", event, Controller.classname)
-  end
-end
-
--------------------------------------------------------------------------------
--- On element choose event
---
--- @function [parent=#EventController] onGuiElementChooseChanged
---
--- @param event
---
-function EventController.onGuiElementChooseChanged(event)
-  if event ~= nil and event.player_index ~= nil then
-    Player.load(event)
-    Dispatcher:send("on_gui_action", event, Controller.classname)
-  end
-end
-
--------------------------------------------------------------------------------
--- On dropdown event
---
--- @function [parent=#EventController] onGuiSelectionStateChanged
---
--- @param event
---
-function EventController.onGuiSelectionStateChanged(event)
-  if event ~= nil and event.player_index ~= nil then
-    Player.load(event)
-    Dispatcher:send("on_gui_action", event, Controller.classname)
-  end
-end
-
--------------------------------------------------------------------------------
--- On dropdown event
---
--- @function [parent=#EventController] onGuiSwitchStateChanged
---
--- @param event
---
-function EventController.onGuiSwitchStateChanged(event)
-  if event ~= nil and event.player_index ~= nil then
-    Player.load(event)
-    Dispatcher:send("on_gui_action", event, Controller.classname)
-  end
-end
-
--------------------------------------------------------------------------------
--- On checkbox event
---
--- @function [parent=#EventController] onGuiCheckedStateChanged
---
--- @param event
---
-function EventController.onGuiCheckedStateChanged(event)
-  if event ~= nil and event.player_index ~= nil then
-    Player.load(event)
-    --Event.load(event, "checked")
-    Dispatcher:send("on_gui_action", event, Controller.classname)
   end
 end
 

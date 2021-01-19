@@ -1,18 +1,21 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.11.21
-Date: 2021-01-02
+Date: 2021-01-19
   Features:
     - Added new filter in recipe selector: Show locked recipes
     - Added quick access to change logistic item
+    - Added neighbour bonus choose for nuclear reactor in recipe edition
   Changes:
     - Removed all tab panels
     - Changed each panel using the model keeps its reference
     - Changed few display styles
     - Merged production line and production block tab
     - Moved some icons in the production tab
+    - Added option settings in the pinned panel
   Bugfixes:
     - Fixed fluid burnt source for entity
     - Fixed lab speed with speed module
+    - Fixed group order in mod is different from game UI
 ---------------------------------------------------------------------------------------------------
 Version: 0.11.20
 Date: 2020-11-20

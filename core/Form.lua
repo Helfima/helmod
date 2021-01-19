@@ -172,12 +172,7 @@ function Form:getPanel()
   flow_panel.style.horizontally_stretchable = true
   flow_panel.style.vertically_stretchable = true
   flow_panel.location = User.getLocationForm(self:getPanelName())
-  self:setStyle(flow_panel, "flow_panel", "width")
-  self:setStyle(flow_panel, "flow_panel", "height")
-  self:setStyle(flow_panel, "flow_panel", "minimal_width")
-  self:setStyle(flow_panel, "flow_panel", "minimal_height")
-  self:setStyle(flow_panel, "flow_panel", "maximal_width")
-  self:setStyle(flow_panel, "flow_panel", "maximal_height")
+  self:setFlowStyle(flow_panel)
 
   local header_panel = GuiElement.add(flow_panel, GuiFlowH("header_panel"))
   header_panel.style.horizontally_stretchable = true
@@ -195,6 +190,22 @@ function Form:getPanel()
   content_panel.style.vertically_stretchable = true
   content_panel.style.horizontally_stretchable = true
   return flow_panel, content_panel, menu_panel
+end
+
+-------------------------------------------------------------------------------
+-- Set style
+--
+-- @function [parent=#Form] setFlowStyle
+--
+-- @param #LuaGuiElement flow_panel
+--
+function Form:setFlowStyle(flow_panel)
+  self:setStyle(flow_panel, "flow_panel", "width")
+  self:setStyle(flow_panel, "flow_panel", "height")
+  self:setStyle(flow_panel, "flow_panel", "minimal_width")
+  self:setStyle(flow_panel, "flow_panel", "minimal_height")
+  self:setStyle(flow_panel, "flow_panel", "maximal_width")
+  self:setStyle(flow_panel, "flow_panel", "maximal_height")
 end
 
 -------------------------------------------------------------------------------
@@ -408,7 +419,27 @@ end
 --
 function Form:event(event)
   if not(self:isOpened()) then return end
+  self:onFormEvent(event)
   self:onEvent(event)
+end
+
+-------------------------------------------------------------------------------
+-- On form event
+--
+-- @function [parent=#Form] onFormEvent
+--
+-- @param #LuaEvent event
+--
+function Form:onFormEvent(event)
+  local flow_panel, content_panel, menu_panel = self:getPanel()
+  if event.action == "minimize-window" then
+    content_panel.visible = false
+    flow_panel.style.height = 50
+  end
+  if event.action == "maximize-window" then
+    content_panel.visible = true
+    self:setFlowStyle(flow_panel)
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -471,7 +502,7 @@ function Form:updateTopMenu(event)
     menu_panel.clear()
     if self.panelClose then
       -- pause game
-      if string.find(self.classname, "ProductionPanel") then
+      if string.find(self.classname, "HMProductionPanel") then
         local group3 = GuiElement.add(menu_panel, GuiFlowH("group3"))
         if game.is_multiplayer() and not(game.tick_paused) then
           local pause_button = GuiElement.add(group3, GuiButton("do-nothing"):sprite("menu", "play-white", "play"):style("helmod_frame_button"):tooltip({"helmod_button.game-play-multiplayer"}))
@@ -507,6 +538,8 @@ function Form:updateTopMenu(event)
       if self.help_button then
         GuiElement.add(standard_group, GuiButton("HMHelpPanel", "OPEN"):sprite("menu", "help-white", "help"):style("helmod_frame_button"):tooltip({"helmod_button.help"}))
       end
+      GuiElement.add(standard_group, GuiButton(self.classname, "minimize-window"):sprite("menu", "minimize-window-white", "minimize-window"):style("helmod_frame_button"):tooltip({"helmod_button.minimize"}))
+      GuiElement.add(standard_group, GuiButton(self.classname, "maximize-window"):sprite("menu", "maximize-window-white", "maximize-window"):style("helmod_frame_button"):tooltip({"helmod_button.maximize"}))
       GuiElement.add(standard_group, GuiButton(self.classname, "CLOSE"):sprite("menu", "close-window-white", "close-window"):style("helmod_frame_button"):tooltip({"helmod_button.close"}))
     end
   else

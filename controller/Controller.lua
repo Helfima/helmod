@@ -186,7 +186,10 @@ function Controller:cleanController(player)
   for _,location in pairs({"center", "left", "top", "screen"}) do
     local lua_gui_element = player.gui[location]
     for _,children_name in pairs(lua_gui_element.children_names) do
-      if children_name ~= "HMPinPanel" and lua_gui_element[children_name].get_mod() == "helmod" then
+      if children_name ~= "HMPinPanel" and self:getView(children_name) then
+        self:getView(children_name):close()
+      end
+      if children_name ~= "HMPinPanel" and lua_gui_element[children_name] ~= nil and lua_gui_element[children_name].get_mod() == "helmod" then
         lua_gui_element[children_name].destroy()
       end
     end
@@ -220,7 +223,7 @@ function Controller:bindController(player)
     if lua_gui_element["helmod_menu-main"] ~= nil then lua_gui_element["helmod_menu-main"].destroy() end
     if lua_gui_element["helmod_planner-command"] ~= nil then lua_gui_element["helmod_planner-command"].destroy() end
 
-    lua_gui_element = ModGui.get_button_flow(Player.native())
+    lua_gui_element = ModGui.get_button_flow(player)
     if not(User.getModSetting("display_main_icon")) or User.getVersion() < User.version then
       if lua_gui_element["helmod_planner-command"] ~= nil then lua_gui_element["helmod_planner-command"].destroy() end
     end
@@ -442,6 +445,7 @@ end
 function Controller:openMainPanel()
   if self:isOpened() then
     self:cleanController(Player.native())
+    game.tick_paused = false
   else
     local current_tab = "HMProductionPanel"
     local parameter_name = string.format("%s_%s", current_tab, "objects")

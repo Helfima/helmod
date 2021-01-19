@@ -79,10 +79,11 @@ end
 function AdminPanel:getTabPane()
   local content_panel = self:getFrameDeepPanel("panel")
   local panel_name = "tab_panel"
-  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
-    return content_panel[panel_name]
+  local name = table.concat({self.classname, "change-tab", panel_name},"=")
+  if content_panel[name] ~= nil and content_panel[name].valid then
+    return content_panel[name]
   end
-  local panel = GuiElement.add(content_panel, GuiTabPane(panel_name))
+  local panel = GuiElement.add(content_panel, GuiTabPane(self.classname, "change-tab", panel_name))
   return panel
 end
 
@@ -182,6 +183,8 @@ function AdminPanel:onUpdate(event)
   self:updateMod()
   self:updateGui()
   self:updateConversion()
+
+  self:getTabPane().selected_tab_index = User.getParameter("admin_selected_tab_index") or 1
 end
 
 -------------------------------------------------------------------------------
@@ -605,6 +608,10 @@ end
 -- @param #LuaEvent event
 --
 function AdminPanel:onEvent(event)
+  if event.action == "change-tab" then
+    User.setParameter("admin_selected_tab_index", event.element.selected_tab_index)
+  end
+  
   if not(User.isAdmin()) then return end
 
   if event.action == "rule-remove" then

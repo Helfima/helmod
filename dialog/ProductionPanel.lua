@@ -20,6 +20,16 @@ function ProductionPanel:onInit()
 end
 
 -------------------------------------------------------------------------------
+-- On Bind Dispatcher
+--
+-- @function [parent=#ProductionPanel] onBind
+--
+function ProductionPanel:onBind()
+  Dispatcher:bind("on_gui_refresh", self, self.update)
+  Dispatcher:bind("on_gui_pause", self, self.updateTopMenu)
+end
+
+-------------------------------------------------------------------------------
 -- Return button caption
 --
 -- @function [parent=#ProductionPanel] getButtonCaption
@@ -157,7 +167,7 @@ function ProductionPanel:getInfoPanel2()
   local info_panel = GuiElement.add(header_panel, GuiFlowV(info_name))
   GuiElement.add(info_panel, GuiLabel("label-info"):caption({"",self:getButtonCaption(), " [img=info]"}):style("heading_1_label"):tooltip(tooltip))
   local info_scroll = GuiElement.add(info_panel, GuiScroll(info_scroll_name):style("helmod_scroll_pane"))
-  info_scroll.style.width = 550
+  info_scroll.style.width = 300
 
   local left_panel = GuiElement.add(header_panel, GuiFlowV(left_name))
   self:setStyle(left_panel, "block_info", "height")
@@ -352,7 +362,9 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
 
   -- delete button
   local group_delete = GuiElement.add(left_panel, GuiFlowH("group_delete"))
-  local delete_button = GuiElement.add(group_delete, GuiButton(self.classname, "production-block-remove", model.id, block_id):sprite("menu", "delete", "delete"):style("helmod_button_menu_actived_red"):tooltip({"helmod_result-panel.remove-button-production-block"}))
+  local delete_action = "remove-block"
+  if block == nil then delete_action = "remove-model" end
+  local delete_button = GuiElement.add(group_delete, GuiButton(self.classname, delete_action, model.id, block_id):sprite("menu", "delete", "delete"):style("helmod_button_menu_actived_red"):tooltip({"helmod_result-panel.remove-button-production-block"}))
   if not(User.isDeleter(model)) then
       delete_button.enabled = false
   end
@@ -387,6 +399,41 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
     end
 
     GuiElement.add(group_tool, GuiButton("HMPinPanel", "OPEN", model.id, block_id):sprite("menu", "pin", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
+    
+    -- by limit
+    if block.by_limit == true then
+      GuiElement.add(group_tool, GuiButton(self.classname, "block-limit", model.id, block_id):sprite("menu", "limitation-white", "limitation"):style("helmod_button_menu_selected"):tooltip({"helmod_label.assembler-limitation"}))
+    else
+      GuiElement.add(group_tool, GuiButton(self.classname, "block-limit", model.id, block_id):sprite("menu", "limitation", "limitation"):style("helmod_button_menu"):tooltip({"helmod_label.assembler-limitation"}))
+    end
+
+    -- by product
+    if block.by_product == false then
+      GuiElement.add(group_tool, GuiButton(self.classname, "block-by-product", model.id, block_id):sprite("menu", "by_ingredient-white", "by_ingredient"):style("helmod_button_menu_selected"):tooltip({"helmod_label.input-product"}))
+    else
+      GuiElement.add(group_tool, GuiButton(self.classname, "block-by-product", model.id, block_id):sprite("menu", "by_product", "by_product"):style("helmod_button_menu"):tooltip({"helmod_label.input-ingredient"}))
+    end
+
+
+    -- computing
+    local block_compunting = GuiElement.add(group_tool, GuiFlowH("block-computing"))
+    block_compunting.style.horizontal_spacing=10
+    local default_compunting = ""
+    local items = {}
+    table.insert(items,{"helmod_label.compute-by-element"})
+    table.insert(items,{"helmod_label.compute-by-factory"})
+    table.insert(items,{"helmod_label.matrix-solver"})
+    if block.solver == true then
+      default_compunting = items[3]
+    elseif block.by_factory == true then
+      default_compunting = items[2]
+    else
+      default_compunting = items[1]
+    end
+
+    local selector = GuiElement.add(block_compunting, GuiDropDown(self.classname, "change-computing", model.id, block.id):items(items, default_compunting))
+    selector.style.font = "helmod_font_default"
+    selector.style.height = 32
   end
 
 end
@@ -493,7 +540,7 @@ function ProductionPanel:updateInfoBlock(model, block)
     block_table.style.horizontally_stretchable = false
     block_table.vertical_centering = false
     block_table.style.horizontal_spacing=10
-  
+
     GuiElement.add(block_table, GuiCellBlockInfo("block-count"):element(block):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(1):byLimit(block.by_limit))
     GuiElement.add(block_table, GuiCellEnergy("block-power"):element(block):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2):byLimit(block.by_limit))
     if User.getPreferenceSetting("display_pollution") then
@@ -502,43 +549,7 @@ function ProductionPanel:updateInfoBlock(model, block)
     if User.getPreferenceSetting("display_building") then
       GuiElement.add(block_table, GuiCellBuilding("block-building"):element(block):tooltip("tooltip.info-building"):color(GuiElement.color_button_default):index(4):byLimit(block.by_limit))
     end
-
-    local switches_panel = GuiElement.add(block_table, GuiFlowV("switches"))
-    switches_panel.style.vertical_spacing = 2
-
-    local element_state = "left"
-    if block.by_product == false then element_state = "right" end
-    GuiElement.add(switches_panel, GuiSwitch(self.classname, "block-switch-element", model.id, block.id):state(element_state):leftLabel({"helmod_label.input-product"}):rightLabel({"helmod_label.input-ingredient"}))
-
-    local block_limit = "right"
-    if block.by_limit == true then block_limit = "left" end
-    local block_switch_limit = GuiElement.add(switches_panel, GuiFlowH("block-switch"))
-    block_switch_limit.style.horizontal_spacing=10
-    GuiElement.add(block_switch_limit, GuiLabel("block-label-limit"):caption({"helmod_label.assembler-limitation"}))
-    GuiElement.add(block_switch_limit, GuiSwitch(self.classname, "block-switch-limit", model.id, block.id):state(block_limit):leftLabel({"gui.on"}):rightLabel({"gui.off"}))
-
-    local block_compunting = GuiElement.add(switches_panel, GuiFlowH("block-computing"))
-    block_compunting.style.horizontal_spacing=10
-    local default_compunting = ""
-    local items = {}
-    table.insert(items,{"helmod_label.compute-by-element"})
-    table.insert(items,{"helmod_label.compute-by-factory"})
-    table.insert(items,{"helmod_label.matrix-solver"})
-    if block.solver == true then
-      default_compunting = items[3]
-    elseif block.by_factory == true then
-      default_compunting = items[2]
-    else
-      default_compunting = items[1]
-    end
-
-    local selector = GuiElement.add(block_compunting, GuiDropDown(self.classname, "change-computing", model.id, block.id):items(items, default_compunting))
-    selector.style.height = 24
-    selector.style.padding = {-3,0,0,0}
-    selector.style.margin = 0
-    selector.style.font = "helmod_font_default"
   end
-
 end
 -------------------------------------------------------------------------------
 -- Update header
@@ -1370,16 +1381,14 @@ function ProductionPanel:onEventAccessAll(event, model, block)
   end
 
   if event.action == "change-model" then
-    local current_tab = event.classname
     ModelCompute.check(model)
-    Controller:send("on_gui_open", event, current_tab)
+    Controller:send("on_gui_open", event, self.classname)
   end
   
   if event.action == "new-model" then
-    local current_tab = "HMProductionBlockTab"
     local new_model = Model.newModel()
     User.setParameter(self.parameter_objects, {name=self.parameter_objects, model=new_model.id})
-    Controller:send("on_gui_open", event, current_tab)
+    Controller:send("on_gui_open", event, self.classname)
   end
   
   if event.action == "new-block" then
@@ -1517,12 +1526,6 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
     end
   end
 
-  if event.action == "production-block-remove" then
-    ModelBuilder.removeProductionBlock(model, block)
-    ModelCompute.update(model)
-    Controller:send("on_gui_update", event)
-  end
-
   if event.action == "production-block-unlink" then
     ModelBuilder.unlinkProductionBlock(block)
     ModelCompute.update(model)
@@ -1591,7 +1594,7 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
         local recipes = Player.searchRecipe(event.item4, true)
         if #recipes == 1 then
           local recipe = recipes[1]
-          local new_recipe = ModelBuilder.addRecipeIntoProductionBlock(recipe.name, recipe.type, 0)
+          local new_recipe = ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe.name, recipe.type, 0)
           ModelCompute.update(model)
           User.setParameter("scroll_element", new_recipe.id)
           Controller:send("on_gui_update", event)
@@ -1760,6 +1763,19 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
     ModelCompute.update(model)
     Controller:send("on_gui_update", event, self.classname)
   end
+
+  if event.action == "block-by-product" then
+    local by_product = block.by_product ~= false
+    ModelBuilder.updateProductionBlockOption(block, "by_product", not(by_product))
+    ModelCompute.update(model)
+    Controller:send("on_gui_update", event, self.classname)
+  end
+
+  if event.action == "block-limit" then
+    ModelBuilder.updateProductionBlockOption(block, "by_limit", not(block.by_limit))
+    ModelCompute.update(model)
+    Controller:send("on_gui_update", event, self.classname)
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -1772,9 +1788,15 @@ end
 function ProductionPanel:onEventAccessDelete(event, model, block)
   if event.action == "remove-model" then
     ModelBuilder.removeModel(event.item1)
-    User.setActiveForm("HMProductionBlockTab")
     Controller:send("on_gui_update", event)
   end
+
+  if event.action == "remove-block" then
+    ModelBuilder.removeProductionBlock(model, block)
+    ModelCompute.update(model)
+    Controller:send("on_gui_update", event)
+  end
+
 end
 
 -------------------------------------------------------------------------------

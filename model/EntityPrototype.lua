@@ -619,6 +619,33 @@ function EntityPrototype:getMiningSpeed()
 end
 
 -------------------------------------------------------------------------------
+-- Return neighbour bonus
+--
+-- @function [parent=#EntityPrototype] getNeighbourBonus
+--
+-- @return #number default 0
+--
+function EntityPrototype:getNeighbourBonus()
+  if self.lua_prototype ~= nil then
+    if self.factory == nil then
+      return self.lua_prototype.neighbour_bonus or 0
+    else
+      local bonus = self.lua_prototype.neighbour_bonus or 0
+      if self.factory.neighbour_bonus == 2 then
+        return bonus
+      elseif self.factory.neighbour_bonus == 4 then
+        return 2*bonus
+      elseif self.factory.neighbour_bonus == 8 then
+        return (2+3)*bonus/2
+      else
+        return 0
+      end
+    end
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
 -- Return researching speed
 --
 -- @function [parent=#EntityPrototype] getSearchingSpeed

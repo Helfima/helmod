@@ -278,6 +278,7 @@ end
 -- @return #GuiCell
 --
 function GuiCell:add_row_logistic(parent, element)
+  local tooltip = {"tooltip.logistic-row-choose"}
   -- solid logistic
   if element.type == 0 or element.type == "item" then
     local type = User.getParameter("logistic_row_item") or "belt"
@@ -287,7 +288,7 @@ function GuiCell:add_row_logistic(parent, element)
     
     --local tooltip = GuiTooltipModule("tooltip.info-module"):element({type="item", name=name})
     local logistic_cell = GuiElement.add(parent, GuiFlowH("logistic-cell", item_logistic))
-    GuiElement.add(logistic_cell, GuiButtonSelectSpriteSm("HMLogisticEdition", "OPEN", "item", item_logistic):sprite("entity", item_logistic):color("flat"))
+    GuiElement.add(logistic_cell, GuiButtonSelectSpriteSm("HMLogisticEdition", "OPEN", "item", item_logistic):sprite("entity", item_logistic):color("flat"):tooltip(tooltip))
     if element.limit_count ~= nil and element.limit_count > 0 then
       local limit_value = Format.formatNumberElement(item_prototype:countContainer(element.limit_count, item_logistic, element.time))
       GuiElement.add(logistic_cell, GuiLabel("label", item_logistic):caption({"", "x", limit_value, "/", total_value}):style("helmod_label_element"))
@@ -306,7 +307,7 @@ function GuiCell:add_row_logistic(parent, element)
     
     --local tooltip = GuiTooltipModule("tooltip.info-module"):element({type="item", name=name})
     local logistic_cell = GuiElement.add(parent, GuiFlowH("logistic-cell", fluid_logistic))
-    GuiElement.add(logistic_cell, GuiButtonSelectSpriteSm("HMLogisticEdition", "OPEN", "fluid", fluid_logistic):sprite("entity", fluid_logistic):color("flat"))
+    GuiElement.add(logistic_cell, GuiButtonSelectSpriteSm("HMLogisticEdition", "OPEN", "fluid", fluid_logistic):sprite("entity", fluid_logistic):color("flat"):tooltip(tooltip))
     if element.limit_count ~= nil and element.limit_count > 0 then
       local limit_count = element.limit_count
       if type == "pipe" then limit_count = limit_count / element.time end
@@ -608,7 +609,7 @@ function GuiCellModel:create(parent)
   if first_block ~= nil then
     local tooltip = GuiTooltipModel(self.options.tooltip):element(element)
     local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_block.type, first_block.name):tooltip(tooltip))
-    self:add_infoIcon(button, "root_block")
+    --self:add_infoIcon(button, "root_block")
   else
     local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", "help-white", "help"))
     button.style.width = 36

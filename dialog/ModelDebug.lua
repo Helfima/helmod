@@ -74,18 +74,19 @@ function ModelDebug:buildMatrix(matrix_panel, matrix, pivot)
 
     local matrix_table = GuiElement.add(matrix_panel, GuiTable("matrix_data"):column(num_col):style("helmod_table-odd"))
     matrix_table.vertical_centering = false
-
+    
     for irow,row in pairs(matrix) do
       for icol,value in pairs(row) do
-        local frame
+        local frame = GuiFlowH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_none, 2)
         if pivot ~= nil then
           if matrix[1][icol].name == "T" then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_default_ingredient, 2) end
           if pivot.x == icol then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_edit, 2) end
           if pivot.y == irow then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_none, 2) end
           if pivot.x == icol and pivot.y == irow then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_rest, 2) end
         end
-        if frame == nil then frame = GuiFlowH("cell", irow, icol) end
         local cell = GuiElement.add(matrix_table, frame)
+        cell.style.horizontally_stretchable = true
+        cell.style.vertically_stretchable = true
         if type(value) == "table" then
           if value.type == "none" then
             GuiElement.add(cell, GuiLabel("cell_value"):caption(value.name):tooltip(value.tooltip))
@@ -152,10 +153,10 @@ function ModelDebug:updateHeader(event)
   local action_panel = self:getMenuPanel()
   action_panel.clear()
   local group1 = GuiElement.add(action_panel, GuiFlowH("group1"))
-  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "initial"):sprite("menu", "record-white", "record"):style("helmod_button_menu"):tooltip("Initial"))
-  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "previous"):sprite("menu", "arrow-left-white", "arrow-left"):style("helmod_button_menu"):tooltip("Previous Step"))
-  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "next"):sprite("menu", "arrow-right-white", "arrow-right"):style("helmod_button_menu"):tooltip("Next Step"))
-  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "final"):sprite("menu", "end-white", "end"):style("helmod_button_menu"):tooltip("Final"))
+  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "initial"):sprite("menu", "record", "record"):style("helmod_button_menu"):tooltip("Initial"))
+  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "previous"):sprite("menu", "arrow-left", "arrow-left"):style("helmod_button_menu"):tooltip("Previous Step"))
+  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "next"):sprite("menu", "arrow-right", "arrow-right"):style("helmod_button_menu"):tooltip("Next Step"))
+  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "final"):sprite("menu", "end", "end"):style("helmod_button_menu"):tooltip("Final"))
 end
 
 -------------------------------------------------------------------------------

@@ -169,6 +169,14 @@ function RecipePrototype:getProducts(factory)
   end
   -- insert burnt
   if self.lua_type == "energy" then
+    if factory_prototype:getType() == "reactor" then
+      local bonus = factory_prototype:getNeighbourBonus()
+      for _, raw_product in pairs(raw_products) do
+        if raw_product.name == "steam-heat" then
+          raw_product.amount = raw_product.amount * (1 + bonus)
+        end
+      end
+    end
     if factory ~= nil and factory_prototype:getEnergyType() == "burner" then
       local energy_prototype = factory_prototype:getEnergySource()
       if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then

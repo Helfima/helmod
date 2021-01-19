@@ -67,6 +67,12 @@ function PinPanel:onUpdate(event)
   self:updateInfo(event)
 end
 
+local setting_options = {}
+table.insert(setting_options, {name="done", icon="checkmark-hide", icon_white="checkmark-hide-white", tooltip="tooltip.hide-show-done", column=0})
+table.insert(setting_options, {name="machine", icon="hangar-hide", icon_white="hangar-hide-white", tooltip="tooltip.hide-show-factory", column=1})
+table.insert(setting_options, {name="product", icon="jewel-hide", icon_white="jewel-hide-white", tooltip="tooltip.hide-show-product", column=2})
+table.insert(setting_options, {name="beacon", icon="beacon-hide", icon_white="beacon-hide-white", tooltip="tooltip.hide-show-beacon", column=1})
+
 -------------------------------------------------------------------------------
 -- Update information
 --
@@ -78,10 +84,18 @@ function PinPanel:updateHeader(event)
   local action_panel = self:getMenuPanel()
   action_panel.clear()
   local group1 = GuiElement.add(action_panel, GuiFlowH("group1"))
-  GuiElement.add(group1, GuiButton(self.classname, "change-level", "down"):sprite("menu", "arrow-left", "arrow-left"):style("helmod_button_menu"):tooltip({"helmod_button.decrease"}))
-  GuiElement.add(group1, GuiButton(self.classname, "change-level", "up"):sprite("menu", "arrow-right", "arrow-right"):style("helmod_button_menu"):tooltip({"helmod_button.expand"}))
-  GuiElement.add(group1, GuiButton(self.classname, "change-level", "min"):sprite("menu", "minimize-window", "minimize-window"):style("helmod_button_menu"):tooltip({"helmod_button.minimize"}))
-  GuiElement.add(group1, GuiButton(self.classname, "change-level", "max"):sprite("menu", "maximize-window", "maximize-window"):style("helmod_button_menu"):tooltip({"helmod_button.maximize"}))
+
+  -- setting options
+  
+  for _,setting_option in pairs(setting_options) do
+    local setting_name = string.format("pin_panel_column_hide_%s", setting_option.name)
+    local setting_value = User.getSetting(setting_name)
+    if setting_value == true then
+      GuiElement.add(group1, GuiButton(self.classname, "change-hide", setting_option.name):sprite("menu", setting_option.icon_white, setting_option.icon):style("helmod_button_menu_selected"):tooltip({setting_option.tooltip}))
+    else
+      GuiElement.add(group1, GuiButton(self.classname, "change-hide", setting_option.name):sprite("menu", setting_option.icon, setting_option.icon):style("helmod_button_menu"):tooltip({setting_option.tooltip}))
+    end
+  end
 
   local group2 = GuiElement.add(action_panel, GuiFlowH("group2"))
   GuiElement.add(group2, GuiButton(self.classname, "recipe-done-remove"):sprite("menu", "checkmark","checkmark"):style("helmod_button_menu_actived_red"):tooltip({"helmod_button.remove-done"}))
@@ -91,7 +105,7 @@ function PinPanel:updateHeader(event)
   GuiElement.add(group3, GuiButton("HMSummaryPanel", "OPEN", parameter_objects.model, parameter_objects.block):sprite("menu", "brief","brief"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
 
   local group4 = GuiElement.add(action_panel, GuiFlowH("group4"))
-  GuiElement.add(group4, GuiButton("HMProductionBlockTab", "OPEN", parameter_objects.model, parameter_objects.block):sprite("menu", "factory","factory"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-production-block"}))
+  GuiElement.add(group4, GuiButton("HMProductionPanel", "OPEN", parameter_objects.model, parameter_objects.block):sprite("menu", "factory","factory"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-production-block"}))
 end
 
 -------------------------------------------------------------------------------
@@ -105,7 +119,12 @@ function PinPanel:updateInfo(event)
   local infoPanel = self:getScrollFramePanel("info-panel")
   infoPanel.clear()
 
-  local column = User.getSetting("display_pin_level") + 2
+  local column = 2
+  for _,setting_option in pairs(setting_options) do
+    local setting_name = string.format("pin_panel_column_hide_%s", setting_option.name)
+    local setting_value = User.getSetting(setting_name)
+    if not(setting_value) then column = column + setting_option.column end
+  end
 
   local model, block, recipe = self:getParameterObjects()
 
@@ -116,7 +135,10 @@ function PinPanel:updateInfo(event)
 
     self:addProductionBlockHeader(resultTable)
     for _, recipe in spairs(block.recipes, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
-      self:addProductionBlockRow(resultTable, model, block, recipe)
+      local is_done = recipe.is_done or false
+      if not(is_done and User.getSetting("pin_panel_column_hide_done")) then
+        self:addProductionBlockRow(resultTable, model, block, recipe)
+      end
     end
   end
 end
@@ -129,35 +151,34 @@ end
 -- @param #LuaGuiElement itable container for element
 --
 function PinPanel:addProductionBlockHeader(itable)
-  local display_pin_level = User.getSetting("display_pin_level")
 
-  if display_pin_level > display_level.base then
-    local gui_done = GuiElement.add(itable, GuiFrameH("header-done"):style(helmod_frame_style.hidden))
-    GuiElement.add(gui_done, GuiLabel("header-done"):caption({"helmod_result-panel.col-header-done"}))
+  local gui_done = GuiElement.add(itable, GuiFrameH("header-done"):style(helmod_frame_style.hidden))
+  GuiElement.add(gui_done, GuiLabel("header-done"):caption({"helmod_result-panel.col-header-done"}))
 
-    local guiRecipe = GuiElement.add(itable, GuiFrameH("header-recipe"):style(helmod_frame_style.hidden))
-    GuiElement.add(guiRecipe, GuiLabel("header-recipe"):caption({"helmod_result-panel.col-header-recipe"}))
-  end
+  local guiRecipe = GuiElement.add(itable, GuiFrameH("header-recipe"):style(helmod_frame_style.hidden))
+  GuiElement.add(guiRecipe, GuiLabel("header-recipe"):caption({"helmod_result-panel.col-header-recipe"}))
 
-  if display_pin_level > display_level.products then
+  if not(User.getSetting("pin_panel_column_hide_product")) then
     local guiProducts = GuiElement.add(itable, GuiFrameH("header-products"):style(helmod_frame_style.hidden))
     GuiElement.add(guiProducts, GuiLabel("header-products"):caption({"helmod_result-panel.col-header-products"}))
   end
 
-  if display_pin_level > display_level.factory then
+  if not(User.getSetting("pin_panel_column_hide_machine")) then
     local guiFactory = GuiElement.add(itable, GuiFrameH("header-factory"):style(helmod_frame_style.hidden))
     GuiElement.add(guiFactory, GuiLabel("header-factory"):caption({"helmod_result-panel.col-header-factory"}))
   end
 
-  if display_pin_level > display_level.ingredients then
+  if not(User.getSetting("pin_panel_column_hide_product")) then
     local guiIngredients = GuiElement.add(itable, GuiFrameH("header-ingredients"):style(helmod_frame_style.hidden))
     GuiElement.add(guiIngredients, GuiLabel("header-ingredients"):caption({"helmod_result-panel.col-header-ingredients"}))
   end
 
-  if display_pin_level > display_level.beacon then
+  if not(User.getSetting("pin_panel_column_hide_beacon")) then
     local guiBeacon = GuiElement.add(itable, GuiFrameH("header-beacon"):style(helmod_frame_style.hidden))
     GuiElement.add(guiBeacon, GuiLabel("header-beacon"):caption({"helmod_result-panel.col-header-beacon"}))
   end
+
+  
 end
 
 -------------------------------------------------------------------------------
@@ -170,29 +191,23 @@ end
 -- @param #table element production recipe
 --
 function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
-  local display_pin_level = User.getSetting("display_pin_level")
   local recipe_prototype = RecipePrototype(recipe)
   local is_done = recipe.is_done or false
 
-  if display_pin_level > display_level.base then
-    -- col done
-    local icon = "checkmark"
-    local icon_white = "checkmark-white"
-    if is_done == true then
-      GuiElement.add(gui_table, GuiButton(self.classname, "recipe-done", recipe.id):sprite("menu", "done-white", "done"):style("helmod_button_menu_selected_green"):tooltip({"helmod_button.done"}))
-    else
-      GuiElement.add(gui_table, GuiButton(self.classname, "recipe-done", recipe.id):sprite("menu", "checkmark", "checkmark"):style("helmod_button_menu_actived_green"):tooltip({"helmod_button.done"}))
-      icon = "done"
-      icon_white = "done-white"
-    end
-    -- col recipe
-    local cell_recipe = GuiElement.add(gui_table, GuiFrameH("recipe", recipe.id):style(helmod_frame_style.hidden))
-    local button_recipe = GuiCellRecipe("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):infoIcon(recipe.type):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):mask(is_done)
-    --local button_recipe = GuiCellRecipe(self.classname, "do_noting", "recipe"):element(recipe):infoIcon(recipe.type):tooltip("tooltip.info-product"):color(GuiElement.color_button_default):mask(is_done)
-    GuiElement.add(cell_recipe, button_recipe)
+  -- col done
+  if is_done == true then
+    GuiElement.add(gui_table, GuiButton(self.classname, "recipe-done", recipe.id):sprite("menu", "done-white", "done"):style("helmod_button_menu_selected_green"):tooltip({"helmod_button.done"}))
+  else
+    GuiElement.add(gui_table, GuiButton(self.classname, "recipe-done", recipe.id):sprite("menu", "checkmark", "checkmark"):style("helmod_button_menu_actived_green"):tooltip({"helmod_button.done"}))
   end
+  -- col recipe
+  local cell_recipe = GuiElement.add(gui_table, GuiFrameH("recipe", recipe.id):style(helmod_frame_style.hidden))
+  local button_recipe = GuiCellRecipe("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):infoIcon(recipe.type):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):mask(is_done)
+  --local button_recipe = GuiCellRecipe(self.classname, "do_noting", "recipe"):element(recipe):infoIcon(recipe.type):tooltip("tooltip.info-product"):color(GuiElement.color_button_default):mask(is_done)
+  GuiElement.add(cell_recipe, button_recipe)
+
   local by_limit = block.count ~= 1
-  if display_pin_level > display_level.products then
+  if not(User.getSetting("pin_panel_column_hide_product")) then
     -- products
     local cell_products = GuiElement.add(gui_table, GuiTable("products",recipe.id):column(3))
     cell_products.style.horizontally_stretchable = false
@@ -211,13 +226,13 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
     end
   end
 
-  if display_pin_level > display_level.factory then
+  if not(User.getSetting("pin_panel_column_hide_machine")) then
     -- col factory
     local factory = recipe.factory
     GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "factory"):index(recipe.id):element(factory):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default):byLimit(by_limit):mask(is_done))
   end
 
-  if display_pin_level > display_level.ingredients then
+  if not(User.getSetting("pin_panel_column_hide_product")) then
     -- ingredients
     local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients", recipe.id):column(3))
     cell_ingredients.style.horizontally_stretchable = false
@@ -236,7 +251,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
     end
   end
 
-  if display_pin_level > display_level.beacon then
+  if not(User.getSetting("pin_panel_column_hide_beacon")) then
     -- col beacon
     local beacon = recipe.beacon
     if block.count > 1 then
@@ -258,13 +273,12 @@ end
 --
 function PinPanel:onEvent(event)
 
-  if event.action == "change-level" then
-    local display_pin_level = User.getSetting("display_pin_level")
-    if event.item1 == "down" and display_pin_level > display_pin_level_min  then User.setSetting("display_pin_level",display_pin_level - 1) end
-    if event.item1 == "up" and display_pin_level < display_pin_level_max  then User.setSetting("display_pin_level",display_pin_level + 1) end
-    if event.item1 == "min" then User.setSetting("display_pin_level",display_pin_level_min) end
-    if event.item1 == "max" then User.setSetting("display_pin_level",display_pin_level_max) end
-    self:updateInfo(event)
+  if event.action == "change-hide" then
+    local element = event.item1
+    local setting_name = string.format("pin_panel_column_hide_%s", element)
+    local setting_value = User.getSetting(setting_name)
+    User.setSetting(setting_name, not(setting_value))
+    self:onUpdate(event)
   end
   
   local model, block, recipe = self:getParameterObjects()

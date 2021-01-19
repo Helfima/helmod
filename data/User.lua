@@ -624,13 +624,10 @@ function User.setCloseForm(classname, location)
   local navigate = User.getNavigate()
   if navigate[classname] == nil then navigate[classname] = {} end
   navigate[classname]["open"] = false
-  if string.find(classname, "Tab") then
-    if navigate[User.tab_name] == nil then navigate[User.tab_name] = {} end
-    navigate[User.tab_name]["location"] = location
+  if string.find(classname, "HMProductionPanel") then
     game.tick_paused = false
-  else
-    navigate[classname]["location"] = location
   end
+  navigate[classname]["location"] = location
 end
 
 -------------------------------------------------------------------------------
@@ -672,19 +669,16 @@ function User.setActiveForm(classname)
       end
     end
   end
-  if string.find(classname, "Tab") then
-    if navigate[User.tab_name] == nil then navigate[User.tab_name] = {} end
-    navigate[User.tab_name]["open"] = true
-    navigate[User.tab_name]["name"] = classname
+  if string.find(classname, "HMProductionPanel") then
     if not(game.is_multiplayer()) and User.getParameter("auto-pause") then
       game.tick_paused = true
     else
       game.tick_paused = false
     end
-  else
-    if navigate[classname] == nil then navigate[classname] = {} end
-    navigate[classname]["open"] = true
   end
+
+  if navigate[classname] == nil then navigate[classname] = {} end
+  navigate[classname]["open"] = true
 end
 
 -------------------------------------------------------------------------------

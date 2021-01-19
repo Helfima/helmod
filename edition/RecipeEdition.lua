@@ -266,6 +266,15 @@ function RecipeEdition:onEvent(event)
 
     User.setParameter("scroll_element", recipe.id)
     
+    if event.action == "neighbour-bonus-update" then
+      local index = event.element.selected_index
+      local items = {1,2,4,8}
+      ModelBuilder.updateRecipeNeighbourBonus(recipe, items[index])
+      ModelCompute.update(model)
+      self:update(event)
+      Controller:send("on_gui_refresh", event)
+    end
+    
     if event.action == "recipe-update" then
       local text = event.element.text
       local production = (tonumber(text) or 100)/100
@@ -727,6 +736,25 @@ function RecipeEdition:updateFactoryInfo(event)
     GuiElement.add(input_panel, GuiLabel("label-module-slots"):caption({"helmod_label.module-slots"}))
     GuiElement.add(input_panel, GuiLabel("module-slots"):caption(factory_prototype:getModuleInventorySize()))
 
+    -- neighbour
+    if factory_prototype:getType() == "reactor" then
+      local items = {}
+      local default_neighbour = nil
+      local item = nil
+      for _,value in pairs({1,2,4,8}) do
+        item = {"", value, " ", {"entity-name.nuclear-reactor"}}
+        table.insert(items, item)
+        if default_neighbour == nil then
+          default_neighbour = item
+        end
+        if factory.neighbour_bonus == value then
+          default_neighbour = item
+        end
+      end
+      
+      GuiElement.add(input_panel, GuiLabel("label-neighbour"):caption({"description.neighbour-bonus"}))
+      GuiElement.add(input_panel, GuiDropDown(self.classname, "neighbour-bonus-update", model.id, block.id, recipe.id):items(items, default_neighbour))
+    end
     -- energy
     local cell_energy = GuiElement.add(input_panel, GuiFlowH("label-energy"))
     GuiElement.add(cell_energy, GuiLabel("label-energy"):caption({"helmod_label.energy"}))
