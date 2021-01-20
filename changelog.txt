@@ -1,4 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.11.23
+Date: 2021-01-20
+  Features:
+    - Added new button to convert a recipe to a block
+  Bugfixes:
+    - Fixed error in recipe edition when use energy
+    - Fixed cell appearance for energy product
+    - Fixed rule for locked recipe filter
+    - Fixed add recipe in production line view
+---------------------------------------------------------------------------------------------------
 Version: 0.11.22
 Date: 2021-01-19
   Bugfixes:
