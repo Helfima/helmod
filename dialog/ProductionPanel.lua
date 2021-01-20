@@ -790,7 +790,7 @@ function ProductionPanel:updateInputModel(model)
     if model.ingredients ~= nil then
       for index, element in spairs(model.ingredients, User.getProductSorter()) do
         element.time = model.time
-        GuiElement.add(input_table, GuiCellElementM(self.classname, "production-block-ingredient-add", "new", element.name):element(element):tooltip("tooltip.add-recipe"):color(GuiElement.color_button_add):index(index))
+        GuiElement.add(input_table, GuiCellElementM(self.classname, "production-recipe-ingredient-add", model.id, "new", element.name):element(element):tooltip("tooltip.add-recipe"):color(GuiElement.color_button_add):index(index))
       end
     end
 
@@ -817,7 +817,7 @@ function ProductionPanel:updateOutputModel(model)
     if model.products ~= nil then
       for index, element in spairs(model.products, User.getProductSorter()) do
         element.time = model.time
-        GuiElement.add(output_table, GuiCellElementM(self.classname, "production-block-product-add", "new", element.name):element(element):tooltip("tooltip.add-recipe"):index(index))
+        GuiElement.add(output_table, GuiCellElementM(self.classname, "production-recipe-product-add", model.id, "new", element.name):element(element):tooltip("tooltip.add-recipe"):index(index))
       end
     end
 
@@ -1103,7 +1103,11 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
     GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-remove", model.id, block.id, recipe.id):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
     GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-down", model.id, block.id, recipe.id):sprite("menu", "arrow-down-sm", "arrow-down-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.down-element", User.getModSetting("row_move_step")}))
   end
-  
+  -- conversion block
+  if recipe.index > 0 then
+    GuiElement.add(cell_action, GuiButton(self.classname, "conversion-recipe-block", model.id, block.id, recipe.id):sprite("menu", "hangar-sm", "hangar-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.conversion-recipe-block"}))
+  end
+
   -- common cols
   self:addTableRowCommon(gui_table, recipe)
   -- col recipe
@@ -1262,12 +1266,13 @@ function ProductionPanel:addTableRowBlock(gui_table, model, block)
   if block.products ~= nil then
     for index, product in spairs(block.products, product_sorter) do
       if ((product.state or 0) == 1 and block_by_product)  or (product.count or 0) > ModelCompute.waste_value then
-        local button_action = "production-block-product-add"
+        local block_id = "new"
+        local button_action = "production-recipe-product-add"
         local button_tooltip = "tooltip.product"
         local button_color = GuiElement.color_button_default_product
         product.time = model.time
         if not(block_by_product) then
-          button_action = "production-block-product-add"
+          button_action = "production-recipe-product-add"
           button_tooltip = "tooltip.add-recipe"
         else
           if not(block.unlinked) or block.by_factory == true then
@@ -1283,6 +1288,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, block)
           if not(block.unlinked) or block.by_factory == true then
             button_color = GuiElement.color_button_default_product
           else
+            block_id = block.id
             button_color = GuiElement.color_button_edit
           end
         elseif product.state == 3 then
@@ -1290,7 +1296,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, block)
         else
           button_color = GuiElement.color_button_default_product
         end
-        GuiElement.add(cell_products, GuiCellElement(self.classname, button_action, model.id, block.id, product.name):element(product):tooltip(button_tooltip):color(button_color):index(index))
+        GuiElement.add(cell_products, GuiCellElement(self.classname, button_action, model.id, block_id, product.name):element(product):tooltip(button_tooltip):color(button_color):index(index))
       end
     end
   end
@@ -1301,12 +1307,13 @@ function ProductionPanel:addTableRowBlock(gui_table, model, block)
   if block.ingredients ~= nil then
     for index, ingredient in spairs(block.ingredients, product_sorter) do
       if ((ingredient.state or 0) == 1 and not(block_by_product)) or (ingredient.count or 0) > ModelCompute.waste_value then
-        local button_action = "production-block-ingredient-add"
+        local block_id = "new"
+        local button_action = "production-recipe-ingredient-add"
         local button_tooltip = "tooltip.ingredient"
         local button_color = GuiElement.color_button_default_ingredient
         ingredient.time = model.time
         if block_by_product then
-          button_action = "production-block-ingredient-add"
+          button_action = "production-recipe-ingredient-add"
           button_tooltip = "tooltip.add-recipe"
         else
           button_action = "product-edition"
@@ -1317,6 +1324,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, block)
           if not(block.unlinked) or block.by_factory == true then
             button_color = GuiElement.color_button_default_ingredient
           else
+            block_id = block.id
             button_color = GuiElement.color_button_edit
           end
         elseif ingredient.state == 3 then
@@ -1324,7 +1332,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, block)
         else
           button_color = GuiElement.color_button_default_ingredient
         end
-        GuiElement.add(cell_ingredients, GuiCellElement(self.classname, button_action, model.id, block.id, ingredient.name):element(ingredient):tooltip(button_tooltip):color(button_color):index(index))
+        GuiElement.add(cell_ingredients, GuiCellElement(self.classname, button_action, model.id, block_id, ingredient.name):element(ingredient):tooltip(button_tooltip):color(button_color):index(index))
       end
     end
   end
@@ -1619,13 +1627,13 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
           Controller:send("on_gui_open", event, selector_name)
         end
       end
-    elseif event.control == true and event.item3 ~= "none" then
+    elseif block ~= nil and event.control == true and event.item3 ~= "none" then
       local contraint = {type="master", name=event.item4}
       local recipe = block.recipes[event.item3]
       ModelBuilder.updateRecipeContraint(recipe, contraint)
       ModelCompute.update(model)
       Controller:send("on_gui_update", event)
-    elseif event.shift == true and event.item3 ~= "none" then
+    elseif block ~= nil and event.shift == true and event.item3 ~= "none" then
       local contraint = {type="exclude", name=event.item4}
       local recipe = block.recipes[event.item3]
       ModelBuilder.updateRecipeContraint(recipe, contraint)
@@ -1650,13 +1658,13 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
           Controller:send("on_gui_open", event, selector_name)
         end
       end
-    elseif event.control == true and event.item4 ~= "none" then
+    elseif block ~= nil and event.control == true and event.item4 ~= "none" then
       local contraint = {type="master", name=event.item4}
       local recipe = block.recipes[event.item3]
       ModelBuilder.updateRecipeContraint(recipe, contraint)
       ModelCompute.update(model)
       Controller:send("on_gui_update", event)
-    elseif event.shift == true and event.item4 ~= "none" then
+    elseif block ~= nil and event.shift == true and event.item4 ~= "none" then
       local contraint = {type="exclude", name=event.item4}
       local recipe = block.recipes[event.item3]
       ModelBuilder.updateRecipeContraint(recipe, contraint)
@@ -1665,7 +1673,14 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
     end
   end
 
-  if event.action == "product-info" and block ~= nil then
+  if block ~= nil and event.action == "conversion-recipe-block" then
+    local recipe = block.recipes[event.item3]
+    ModelBuilder.convertRecipeToblock(model, block, recipe, event.control)
+    ModelCompute.update(model)
+    Controller:send("on_gui_update", event)
+  end
+
+  if block ~= nil and event.action == "product-info" then
     if block.products_linked == nil then block.products_linked = {} end
     if event.control == true and event.item4 ~= "none" then
       block.products_linked[event.item4] = not(block.products_linked[event.item4])

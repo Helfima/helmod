@@ -130,7 +130,7 @@ function RecipeSelector:updateUnlockRecipesCache()
       end
   end
   for _, recipe in pairs(Player.getRecipePrototypes()) do
-    if recipe.hidden ~= true and recipe.enabled == true then
+    if recipe.enabled == true then
       unlock_recipes[recipe.name] = true
     end
   end
