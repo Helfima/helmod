@@ -32,7 +32,7 @@ end
 function RecipeEdition:onStyle(styles, width_main, height_main)
   styles.flow_panel = {
     minimal_height = 100,
-    maximal_height = height_main,
+    maximal_height = math.max(height_main,800),
   }
 end
 

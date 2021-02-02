@@ -8,7 +8,7 @@ local User = {
   gui = "gui",
   prefixe = "helmod",
   version = "0.9.12",
-  tab_name = "HMTab"
+  tab_name = "HMProductionPanel"
 }
 
 -------------------------------------------------------------------------------
