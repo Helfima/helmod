@@ -387,6 +387,7 @@ end
 -- @param #LuaEvent event
 --
 function Form:open(event)
+  self:style()
   self:onBeforeOpen(event)
   --if self:isOpened() then return true end
   if self:isOpened() then self:close() end
@@ -578,7 +579,7 @@ function Form:updateLocation(event)
     local offset = User.getPreferenceSetting("ui_glue_offset")
     local navigate = User.getNavigate()
     local location = {x=50,y=50}
-    if navigate[User.tab_name] ~= nil or navigate[User.tab_name]["location"] ~= nil then
+    if navigate[User.tab_name] ~= nil and navigate[User.tab_name]["location"] ~= nil then
       location = navigate[User.tab_name]["location"]
     end
     local location_x = location.x + width_main + width*offset

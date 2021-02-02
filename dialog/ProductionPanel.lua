@@ -927,8 +927,11 @@ function ProductionPanel:updateDataModel(model)
     if User.getModGlobalSetting("display_hidden_column") ~= "None" then
       extra_cols = extra_cols + 2
     end
+    if User.getPreferenceSetting("display_building") then
+      extra_cols = extra_cols + 1
+    end
 
-    local result_table = GuiElement.add(scroll_panel, GuiTable("list-data"):column(7 + extra_cols):style("helmod_table_result"))
+    local result_table = GuiElement.add(scroll_panel, GuiTable("list-data"):column(5 + extra_cols):style("helmod_table_result"))
     result_table.vertical_centering = false
     self:addTableHeader(result_table)
 
@@ -1038,8 +1041,13 @@ function ProductionPanel:addTableHeader(itable, block)
   if User.getPreferenceSetting("display_pollution") then
     self:addCellHeader(itable, "pollution", {"helmod_common.pollution"})
   end
-  self:addCellHeader(itable, "factory", {"helmod_result-panel.col-header-factory"})
-  self:addCellHeader(itable, "beacon", {"helmod_result-panel.col-header-beacon"})
+  -- col building
+  if User.getPreferenceSetting("display_building") or block ~= nil then
+    self:addCellHeader(itable, "factory", {"helmod_result-panel.col-header-factory"})
+  end
+  if block ~= nil then
+    self:addCellHeader(itable, "beacon", {"helmod_result-panel.col-header-beacon"})
+  end
   if block ~= nil then
     for _,order in pairs(Model.getBlockOrder(block)) do
       if order == "products" then
@@ -1255,7 +1263,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, block)
   end
 
   -- col beacon
-  local cell_beacon = GuiElement.add(gui_table, GuiTable("beacon", block.id):column(2):style("helmod_table_list"))
+  --local cell_beacon = GuiElement.add(gui_table, GuiTable("beacon", block.id):column(2):style("helmod_table_list"))
   
   local product_sorter = User.getProductSorter()
 

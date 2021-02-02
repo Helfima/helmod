@@ -22,7 +22,7 @@ end)
 function AbstractSelector:onStyle(styles, width_main, height_main)
   styles.flow_panel = {
     width = 490,
-    height = height_main
+    height = math.max(height_main,800)
   }
   styles.block_info = {
     width = 310,

@@ -277,7 +277,7 @@ end
 --
 function HelpPanel:onStyle(styles, width_main, height_main)
   styles.flow_panel = {
-    height = height_main,
+    height = math.max(height_main,800),
   }
   styles.menu_panel = {
     width = 300,
