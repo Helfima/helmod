@@ -31,8 +31,8 @@ end
 --
 function RecipeEdition:onStyle(styles, width_main, height_main)
   styles.flow_panel = {
-    minimal_height = 500,
-    maximal_height = height_main,
+    minimal_height = 100,
+    maximal_height = math.max(height_main,800),
   }
 end
 
@@ -786,7 +786,7 @@ function RecipeEdition:updateFactoryInfo(event)
         factory_fuel = energy_prototype:getFuelPrototype()
       end
       
-      if factory_fuel ~= nil then
+      if fuel_list ~= nil and factory_fuel ~= nil then
         local items = {}
         for _,item in pairs(fuel_list) do
           table.insert(items,string.format("[%s=%s]", fuel_type, item.name))

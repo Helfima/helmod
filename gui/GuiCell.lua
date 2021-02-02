@@ -846,8 +846,9 @@ function GuiCellElement:create(parent)
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
 
   if User.getParameter("display_logistic_row") == true then
-    local row4 = GuiElement.add(cell, GuiFrameV("row4"):style("helmod_frame_element", color, 4))
+    local row4 = GuiElement.add(cell, GuiFrameH("row4"):style("helmod_frame_element", color, 4))
     self:add_row_logistic(row4, element)
+    GuiElement.add(row4, GuiLabel("label-empty"):caption(""):style("helmod_label_element"))
   end
   return cell
 end

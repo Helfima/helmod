@@ -1,11 +1,29 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.12.4
+Date: 2021-02-02
+  Changes:
+    - Removed beacon column in production line view
+  Bugfixes:
+    - Fixed bug on factory column in production line view
+    - Fixed some panel display size problem
+---------------------------------------------------------------------------------------------------
+Version: 0.12.3
+Date: 2021-01-20
+  Features:
+    - Added new button to convert a recipe to a block
+  Bugfixes:
+    - Fixed error in recipe edition when use energy
+    - Fixed cell appearance for energy product
+    - Fixed rule for locked recipe filter
+    - Fixed add recipe in production line view
+---------------------------------------------------------------------------------------------------
 Version: 0.12.2
 Date: 2021-01-19
   Bugfixes:
     - Fixed changelog error 
     - Fixed missing height style for product list in output and input 
     - Fixed delete block in production line view
-    - Fixed some edition views after minimize and maximize action
+    - Fixed edition views after minimize and maximize action
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.1
 Date: 2021-01-19
@@ -26,7 +44,7 @@ Date: 2021-01-19
     - Fixed group order in mod is different from game UI
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.0
-Date: 2021-11-25
+Date: 2020-11-25
   Changes:
     - Updated for factorio 1.0
 ---------------------------------------------------------------------------------------------------

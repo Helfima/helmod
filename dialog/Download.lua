@@ -19,6 +19,19 @@ function Download:onInit(parent)
 end
 
 -------------------------------------------------------------------------------
+-- On Style
+--
+-- @function [parent=#Download] onStyle
+--
+-- @param #table styles
+-- @param #number width_main
+-- @param #number height_main
+--
+function Download:onStyle(styles, width_main, height_main)
+  styles.flow_panel = nil
+end
+
+-------------------------------------------------------------------------------
 -- On event
 --
 -- @function [parent=#Download] onEvent
