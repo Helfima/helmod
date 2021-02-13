@@ -152,6 +152,24 @@ function AdminPanel:getGuiTab()
 end
 
 -------------------------------------------------------------------------------
+-- Get or create global tab panel
+--
+-- @function [parent=#AdminPanel] getGlobalTab
+--
+function AdminPanel:getGlobalTab()
+  return self:getTab("global-tab-panel", "Global")
+end
+
+-------------------------------------------------------------------------------
+-- is global tab panel
+--
+-- @function [parent=#AdminPanel] isGlobalTab
+--
+function AdminPanel:isGlobalTab()
+  return self:getTabPane()["global-tab-panel"] ~= nil
+end
+
+-------------------------------------------------------------------------------
 -- Get or create conversion tab panel
 --
 -- @function [parent=#AdminPanel] getConversionTab
@@ -183,6 +201,7 @@ function AdminPanel:onUpdate(event)
   self:updateMod()
   self:updateGui()
   self:updateConversion()
+  self:updateGlobal()
 
   self:getTabPane().selected_tab_index = User.getParameter("admin_selected_tab_index") or 1
 end
@@ -600,6 +619,67 @@ function AdminPanel:addSheetListRow(gui_table, model)
 
 end
 
+local color_name = "blue"
+local color_index = 1
+local bar_thickness = 2
+-------------------------------------------------------------------------------
+-- Update data
+--
+-- @function [parent=#AdminPanel] updateConversion
+--
+function AdminPanel:updateGlobal()
+  if self:isGlobalTab() then return end
+  local scroll_panel = self:getGlobalTab()
+  local root_branch = GuiElement.add(scroll_panel, GuiFlowV())
+  root_branch.style.vertically_stretchable = false
+  self:createTree(root_branch, {global=global}, true)
+end
+
+-------------------------------------------------------------------------------
+-- Create Tree
+--
+-- @function [parent=#AdminPanel] createTree
+--
+function AdminPanel:createTree(parent, list, expand)
+  local data_info = table.data_info(list)
+  local index = 1
+  local size = table.size(list)
+  for k,info in pairs(data_info) do
+    local tree_branch = GuiElement.add(parent, GuiFlowV())
+    local cell = GuiElement.add(tree_branch, GuiFlowH())
+    local hbar = GuiElement.add(cell, GuiFrameV("hbar"):style("helmod_frame_product", color_name, color_index))
+    hbar.style.width = 5
+    hbar.style.height = bar_thickness
+    hbar.style.top_margin=10
+    hbar.style.right_margin=5
+    if info.type == "table" then
+      local caption = {"", helmod_tag.font.default_bold, helmod_tag.color.green_light, k, helmod_tag.color.close, helmod_tag.font.close, " (", info.type,")"}
+      if expand then
+        GuiElement.add(cell, GuiLabel("global-end"):caption(caption))
+      else
+        local label = GuiElement.add(cell, GuiLabel(self.classname, "global-update", "bypass"):caption(caption))
+        label.tags = info
+      end
+    else
+      local caption = {"", helmod_tag.font.default_bold, helmod_tag.color.gold, k, helmod_tag.color.close, helmod_tag.font.close, "=", helmod_tag.font.default_bold, info.value, helmod_tag.font.close, " (", info.type,")"}
+      local label = GuiElement.add(cell, GuiLabel("global-end"):caption(caption))
+    end
+    local content = GuiElement.add(tree_branch, GuiFlowH("content"))
+    local vbar = GuiElement.add(content, GuiFrameV("vbar"):style("helmod_frame_product", color_name, color_index))
+    vbar.style.vertically_stretchable = true
+    vbar.style.width = bar_thickness
+    vbar.style.left_margin=15
+    vbar.style.bottom_margin=8
+    local next = GuiElement.add(content, GuiFlowV("next"))
+    if expand then
+      self:createTree(next, info.value, false)
+    else
+      content.visible = false
+    end
+    index = index + 1
+  end
+end
+
 -------------------------------------------------------------------------------
 -- On event
 --
@@ -613,6 +693,23 @@ function AdminPanel:onEvent(event)
   end
   
   if not(User.isAdmin()) then return end
+
+  if event.action == "global-update" then
+    local element = event.element
+    local parent = element.parent.parent
+    local parent_next = parent.content.next
+    local parent_bar = parent.content.vbar
+    if #parent_next.children > 0 then
+      for _,child in pairs(parent_next.children) do
+          child.destroy()
+      end
+      parent.content.visible = false
+    else
+      local list = element.tags.value
+      parent.content.visible = true
+      self:createTree(parent_next, list)
+    end
+  end
 
   if event.action == "rule-remove" then
     local rule_id = event.item1

@@ -78,29 +78,49 @@ function table.up_indexed_list(list, index, step)
 -- @param #number step
 --
 function table.down_indexed_list(list, index, step)
-    local list_count = table.size(list)
-    if list ~= nil and index + 1 < table.size(list) then
-      -- defaut step
-      if step == nil then step = 1 end
-      -- cap le step
-      if step > (list_count - index) then step = list_count - index - 1 end
-      for _,element in pairs(list) do
-        if element.index == index then
-          -- change l'index de l'element cible
-          element.index = element.index + step
-        elseif element.index > index and element.index <= index + step then
-          -- change les index compris entre index et la fin
-          element.index = element.index - 1
-        end
+  local list_count = table.size(list)
+  if list ~= nil and index + 1 < table.size(list) then
+    -- defaut step
+    if step == nil then step = 1 end
+    -- cap le step
+    if step > (list_count - index) then step = list_count - index - 1 end
+    for _,element in pairs(list) do
+      if element.index == index then
+        -- change l'index de l'element cible
+        element.index = element.index + step
+      elseif element.index > index and element.index <= index + step then
+        -- change les index compris entre index et la fin
+        element.index = element.index - 1
       end
     end
   end
+end
   
-  -------------------------------------------------------------------------------
-  -- Size list
-  --
-  function table.size(list)
-    if list == nil then return 0 end
-    return table_size(list)
+-------------------------------------------------------------------------------
+-- Size list
+--
+function table.size(list)
+  if list == nil then return 0 end
+  return table_size(list)
+end
+
+function table.data_help(list)
+  local result = {}
+  return result
+end
+
+function table.data_info(list)
+  if type(list) == 'table' and type(list.__self) == 'userdata' and list.object_name then
+    local result = {}
+    for k, v in pairs(table.data_help(list)) do
+      list[k] = {value=v,type=type(v)}
+    end
+    return result
+  elseif type(list) == 'table' then
+    local result = {}
+    for k, v in pairs(list) do
+      result[k] = {value=v,type=type(v)}
+    end
+    return result
   end
-    
+end

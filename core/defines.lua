@@ -179,6 +179,14 @@ helmod_preferences = {
     default_value = true,
     group = "general"
   },
+  --display-tips
+  display_tips = {
+    type = "bool-setting",
+    localised_name = {"helmod_pref_settings.display-tips"},
+    localised_description = {"helmod_pref_settings.display-tips-desc"},
+    default_value = true,
+    group = "general"
+  },
   --ui-auto-close
   ui_auto_close = {
     type = "bool-setting",

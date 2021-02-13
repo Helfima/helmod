@@ -259,7 +259,7 @@ end
 -- @param #table event
 --
 function EventController.onGuiClickButton(event)
-  if event ~= nil and event.player_index ~= nil and event.element ~= nil and table.contains({"button", "sprite-button", "choose-elem-button"}, event.element.type) then
+  if event ~= nil and event.player_index ~= nil and event.element ~= nil and (table.contains({"button", "sprite-button", "choose-elem-button"}, event.element.type) or string.find(event.element.name, "bypass")) then
     Player.load(event)
     Dispatcher:send("on_gui_action", event, Controller.classname)
   end

@@ -1,3 +1,4 @@
+if script.active_mods["gvv"] then require("__gvv__.gvv")() end
 require "mod-gui"
 require "core.tableExtends"
 require "core.global"

@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.12.5
+Date: 2021-02-13
+  Features:
+    - Added tips when open some panel
+  Bugfixes:
+    - Fixed clean top or left panel when helmod is the first
+---------------------------------------------------------------------------------------------------
 Version: 0.12.4
 Date: 2021-02-02
   Changes:
