@@ -8,7 +8,8 @@ local User = {
   gui = "gui",
   prefixe = "helmod",
   version = "0.9.12",
-  tab_name = "HMProductionPanel"
+  tab_name = "HMProductionPanel",
+  delay_tips = 60*10
 }
 
 -------------------------------------------------------------------------------
@@ -452,6 +453,9 @@ function User.getNavigate(property)
   local navigate = User.get("navigate")
   if navigate ~= nil and property ~= nil then
     return navigate[property]
+  elseif property ~= nil then
+    navigate[property] = {}
+    return navigate[property]
   end
   return navigate
 end
@@ -628,6 +632,7 @@ function User.setCloseForm(classname, location)
     game.tick_paused = false
   end
   navigate[classname]["location"] = location
+  navigate[classname]["tips"] = nil
 end
 
 -------------------------------------------------------------------------------
@@ -642,7 +647,7 @@ end
 --
 function User.getLocationForm(classname)
   local navigate = User.getNavigate()
-  if string.find(classname, "Tab") or (User.getPreferenceSetting("ui_glue") == true and User.getPreferenceSetting("ui_glue", classname) == true) then
+  if User.getPreferenceSetting("ui_glue") == true and User.getPreferenceSetting("ui_glue", classname) == true then
     if navigate[User.tab_name] == nil or navigate[User.tab_name]["location"] == nil then return {x=50,y=50} end
     return navigate[User.tab_name]["location"]
   else
@@ -682,25 +687,6 @@ function User.setActiveForm(classname)
 end
 
 -------------------------------------------------------------------------------
--- Is Active Form
---
--- @function [parent=#User] isActiveForm
---
--- @param #string classname
---
--- @return #boolean
---
-function User.isActiveForm(classname)
-  local navigate = User.getNavigate()
-  if string.find(classname, "Tab") and navigate[User.tab_name] ~= nil then
-    return navigate[User.tab_name]["open"] == true and navigate[User.tab_name]["name"] == classname
-  elseif navigate[classname] ~= nil then
-    return navigate[classname]["open"] == true
-  end
-  return false
-end
-
--------------------------------------------------------------------------------
 -- Get main sizes
 --
 -- @function [parent=#User] getMainSizes
@@ -720,9 +706,9 @@ function User.getMainSizes()
 end
 
 -------------------------------------------------------------------------------
--- Is Active Form
+-- update
 --
--- @function [parent=#User] isActiveForm
+-- @function [parent=#User] update
 --
 -- @param #string classname
 --

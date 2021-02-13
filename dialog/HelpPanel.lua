@@ -255,6 +255,22 @@ help_data.control.content.control = {
   list = "none",
   count = 3
 }
+help_data.tips = {
+  name = "tips",
+  content = {}
+}
+help_data.tips.content.production_line = {
+  localised_text = "tips-production-line",
+  desc = true,
+  list = "none",
+  count = 4
+}
+help_data.tips.content.production_block = {
+  localised_text = "tips-production-block",
+  desc = true,
+  list = "none",
+  count = 4
+}
 
 -------------------------------------------------------------------------------
 -- On initialization

@@ -147,6 +147,7 @@ function Controller:bind()
   Dispatcher:bind("on_gui_setting", self, self.onGuiSetting)
   Dispatcher:bind("on_gui_hotkey", self, self.onGuiHotkey)
   Dispatcher:bind("on_gui_queue", self, self.onGuiQueue)
+  Dispatcher:bind("on_gui_tips", self, self.onGuiTips)
 end
 
 -------------------------------------------------------------------------------
@@ -189,7 +190,7 @@ function Controller:cleanController(player)
       if children_name ~= "HMPinPanel" and self:getView(children_name) then
         self:getView(children_name):close()
       end
-      if children_name ~= "HMPinPanel" and lua_gui_element[children_name] ~= nil and lua_gui_element[children_name].get_mod() == "helmod" then
+      if children_name ~= "HMPinPanel" and not(string.find(children_name,"mod_gui")) and lua_gui_element[children_name] ~= nil and lua_gui_element[children_name].get_mod() == "helmod" then
         lua_gui_element[children_name].destroy()
       end
     end
@@ -261,11 +262,18 @@ function Controller:onTick(event)
     if event_queue ~= nil then
       local current_tick = game.tick
       for _,event in pairs(event_queue) do
+        if event.is_tips == true then
+          if current_tick - event.tick > User.delay_tips then
+            Dispatcher:send("on_gui_tips", event, Controller.classname)
+            event_queue[event.classname] = nil
+          end
+        else  
           if current_tick - event.tick > 60 then
             event.is_queue = true
             Dispatcher:send("on_gui_action", event, Controller.classname)
             event_queue[event.element.name] = nil
           end
+        end
       end
       if table.size(event_queue) == 0 then
         User.setParameter("event_queue", nil)
@@ -285,6 +293,19 @@ function Controller:onGuiQueue(event)
   event_queue[event.element.name] = event
   User.setParameter("event_queue", event_queue)
 end
+
+-------------------------------------------------------------------------------
+-- On gui tips
+--
+-- @function [parent=#Controller] onGuiTips
+--
+function Controller:onGuiTips(event)
+  local form = self:getView(event.classname)
+  if form ~= nil then
+    form:destroyTips()
+  end
+end
+
 -------------------------------------------------------------------------------
 -- On tick
 --

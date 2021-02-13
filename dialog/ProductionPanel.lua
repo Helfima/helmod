@@ -8,6 +8,7 @@
 ProductionPanel = newclass(FormModel,function(base,classname)
   FormModel.init(base,classname)
   base.add_special_button = true
+  base.has_tips = true
 end)
 
 -------------------------------------------------------------------------------
@@ -1469,14 +1470,12 @@ end
 --
 function ProductionPanel:onEventAccessRead(event, model, block)
   if event.action == "copy-model" then
-    if User.isActiveForm("HMProductionBlockTab") then
-      if block ~= nil then
-        User.setParameter("copy_from_block_id", block.id)
-        User.setParameter("copy_from_model_id", model.id)
-      else
-        User.setParameter("copy_from_block_id", nil)
-        User.setParameter("copy_from_model_id", model.id)
-        end
+    if block ~= nil then
+      User.setParameter("copy_from_block_id", block.id)
+      User.setParameter("copy_from_model_id", model.id)
+    else
+      User.setParameter("copy_from_block_id", nil)
+      User.setParameter("copy_from_model_id", model.id)
     end
     Controller:send("on_gui_update", event)
   end

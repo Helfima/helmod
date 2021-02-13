@@ -13,6 +13,11 @@ Form = newclass(Object,function(base,classname)
   base.help_button = true
   base.auto_clear = true
   base.content_verticaly = true
+  base.has_tips = false
+  base.list_tips = {
+    {name="tips-production-line", count=4},
+    {name="tips-production-block", count=4}
+  }
 end)
 
 -------------------------------------------------------------------------------
@@ -64,7 +69,6 @@ function Form:bind()
 
   Dispatcher:bind("on_gui_error", self, self.updateError)
   Dispatcher:bind("on_gui_message", self, self.updateMessage)
-
   self:onBind()
 end
 
@@ -373,7 +377,7 @@ end
 --
 function Form:isOpened()
   local parent_panel = self:getParentPanel()
-  if parent_panel[self:getPanelName()] ~= nil and User.isActiveForm(self.classname) then
+  if parent_panel[self:getPanelName()] ~= nil then
     return true
   end
   return false
@@ -389,8 +393,11 @@ end
 function Form:open(event)
   self:style()
   self:onBeforeOpen(event)
-  --if self:isOpened() then return true end
-  if self:isOpened() then self:close() end
+  if self:isOpened() then
+    local flow_panel = self:getPanel()
+    flow_panel.bring_to_front()
+    return true
+  end
   local parent_panel = self:getParentPanel()
   User.setActiveForm(self.classname)
   self:updateTopMenu(event)
@@ -436,6 +443,7 @@ function Form:onFormEvent(event)
   if event.action == "minimize-window" then
     content_panel.visible = false
     flow_panel.style.height = 50
+    flow_panel.style.minimal_width = 100
   end
   if event.action == "maximize-window" then
     content_panel.visible = true
@@ -562,6 +570,9 @@ function Form:update(event)
   self:updateTopMenu(event)
   self:onUpdate(event)
   self:updateLocation(event)
+  if self.has_tips and User.getPreferenceSetting("display_tips") then
+    self:updateTips("un tips")
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -612,6 +623,27 @@ function Form:updateMessage(event)
 end
 
 -------------------------------------------------------------------------------
+-- Get tips
+--
+-- @function [parent=#Form] getTips
+--
+-- @param #LuaEvent event
+--
+function Form:getTips()
+  local list_tips = {}
+  if self.list_tips ~= nil then
+    for _,tips in pairs(self.list_tips) do
+      for line = 1, tips.count, 1 do
+        local localised_text = {string.format("helmod_help.%s-%s", tips.name, line)}
+        table.insert(list_tips, localised_text)
+      end
+    end
+    local index = math.random(#list_tips)
+    return list_tips[index]
+  end
+  return nil
+end
+-------------------------------------------------------------------------------
 -- Update tips
 --
 -- @function [parent=#Form] updateTips
@@ -620,9 +652,35 @@ end
 --
 function Form:updateTips(message)
   if not(self:isOpened()) then return end
+  local navigate = User.getNavigate(self.classname)
+  local time_tips = navigate["tips"] or game.tick
+  if game.tick - time_tips > User.delay_tips then return end
+  local message = self:getTips()
+  if message == nil then return end
   local panel = self:getFramePanel("tips")
   panel.clear()
   GuiElement.add(panel, GuiLabel("tips"):caption(message))
+
+  local event_queue = User.getParameter("event_queue") or {}
+  local event = {tick=game.tick, is_tips=true, classname=self.classname}
+  event_queue[self.classname] = event
+  if time_tips == game.tick then
+    navigate["tips"] = game.tick
+    User.setParameter("event_queue", event_queue)
+  end
+end
+
+-------------------------------------------------------------------------------
+-- Destroy tips
+--
+-- @function [parent=#Form] destroyTips
+--
+-- @param #LuaEvent event
+--
+function Form:destroyTips()
+  if not(self:isOpened()) then return end
+  local panel = self:getFramePanel("tips")
+  panel.destroy()
 end
 
 -------------------------------------------------------------------------------
