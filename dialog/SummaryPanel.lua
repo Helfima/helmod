@@ -1,31 +1,20 @@
 -------------------------------------------------------------------------------
--- Class to build summary dialog
---
--- @module SummaryPanel
--- @extends #FormModel
---
-
+---Class to build summary dialog
+---@class SummaryPanel
 SummaryPanel = newclass(FormModel)
 
 -------------------------------------------------------------------------------
--- On initialization
---
--- @function [parent=#SummaryPanel] onInit
---
+---On initialization
 function SummaryPanel:onInit()
   self.panelCaption = ({"helmod_result-panel.tab-title-summary"})
   self.otherClose = false
 end
 
 -------------------------------------------------------------------------------
--- On Style
---
--- @function [parent=#SummaryPanel] onStyle
---
--- @param #table styles
--- @param #number width_main
--- @param #number height_main
---
+---On Style
+---@param styles table
+---@param width_main number
+---@param height_main number
 function SummaryPanel:onStyle(styles, width_main, height_main)
   styles.flow_panel = {
     minimal_width = 100,
@@ -36,21 +25,14 @@ function SummaryPanel:onStyle(styles, width_main, height_main)
 end
 
 -------------------------------------------------------------------------------
--- On Bind Dispatcher
---
--- @function [parent=#SummaryPanel] onBind
---
+---On Bind Dispatcher
 function SummaryPanel:onBind()
   Dispatcher:bind("on_gui_refresh", self, self.update)
 end
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#SummaryPanel] onUpdate
---
--- @param #LuaEvent event
---
+---On update
+---@param event LuaEvent
 function SummaryPanel:onUpdate(event)
   local model, block, recipe = self:getParameterObjects()
   if block ~= nil then
@@ -62,12 +44,8 @@ function SummaryPanel:onUpdate(event)
 end
 
 -------------------------------------------------------------------------------
--- Update data
---
--- @function [parent=#SummaryPanel] updateData
---
--- @param #LuaEvent event
---
+---Update data
+---@param model table
 function SummaryPanel:updateData(model)
   local data_panel = self:getScrollFramePanel("data-panel")
   data_panel.clear()
@@ -82,12 +60,12 @@ function SummaryPanel:updateData(model)
     GuiElement.add(resourcesTable, GuiLabel("header-chest"):caption({"helmod_result-panel.col-header-storage"}))
 
     for _, resource in pairs(model.resources) do
-      -- ingredient
+      ---ingredient
       local guiIngredient = GuiElement.add(resourcesTable, GuiFrameH("ingredient", resource.name):style(helmod_frame_style.hidden))
       GuiElement.add(guiIngredient, GuiLabel("count"):caption(Format.formatNumberElement(resource.count)):style("helmod_label_right_60"))
       GuiElement.add(guiIngredient, GuiButtonSprite("HMIngredient", "OPEN"):sprite(Player.getItemIconType(resource), resource.name):tooltip(Player.getLocalisedName(resource)))
 
-      -- col wagon
+      ---col wagon
       local wagon = resource.wagon
       local guiWagon = GuiElement.add(resourcesTable, GuiFrameH("wagon", resource.name):style(helmod_frame_style.hidden))
       if wagon ~= nil then
@@ -95,7 +73,7 @@ function SummaryPanel:updateData(model)
         GuiElement.add(guiWagon, GuiButtonSprite("HMWagon", "OPEN"):sprite(wagon.type, wagon.name):style(Player.getLocalisedName(wagon)))
       end
 
-      -- col storage
+      ---col storage
       local storage = resource.storage
       local guiStorage = GuiElement.add(resourcesTable, GuiFrameH("storage", resource.name):style(helmod_frame_style.hidden))
       if storage ~= nil then
@@ -103,7 +81,7 @@ function SummaryPanel:updateData(model)
         GuiElement.add(guiStorage, GuiButtonSprite("HMStorage", "OPEN"):sprite(storage.type, storage.name):tooltip(Player.getLocalisedName(storage)))
       end
     end
-    -- generators
+    ---generators
     local energyPanel = GuiElement.add(data_panel, GuiFlowV("energy"))
     GuiElement.add(energyPanel, GuiLineH("line"))
     GuiElement.add(energyPanel, GuiLabel("label"):caption({"helmod_common.generators"}):style("helmod_label_title_frame"))
@@ -121,18 +99,14 @@ function SummaryPanel:updateData(model)
 end
 
 -------------------------------------------------------------------------------
--- Update Summary
---
--- @function [parent=#SummaryPanel] updateSummary
---
--- @param #LuaEvent event
---
+---Update Summary
+---@param summary table
 function SummaryPanel:updateSummary(summary)
   local info_panel = self:getScrollFramePanel("summary-panel")
   info_panel.clear()
 
   if summary ~= nil then
-    -- factories
+    ---factories
     GuiElement.add(info_panel, GuiLabel("factories_label"):caption({"helmod_common.factories"}):style("helmod_label_title_frame"))
     local result_table = GuiElement.add(info_panel, GuiTable("table-factory"):column(4))
     result_table.style.horizontally_stretchable = false
@@ -140,7 +114,7 @@ function SummaryPanel:updateSummary(summary)
       GuiElement.add(result_table, GuiCellElementM("HMFactories=OPEN"):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
     end
 
-    -- beacons
+    ---beacons
     GuiElement.add(info_panel, GuiLabel("beacons_label"):caption({"helmod_common.beacons"}):style("helmod_label_title_frame"))
     local result_table = GuiElement.add(info_panel, GuiTable("table-beacon"):column(4))
     result_table.style.horizontally_stretchable = false
@@ -148,7 +122,7 @@ function SummaryPanel:updateSummary(summary)
       GuiElement.add(result_table, GuiCellElementM("HMBeacons=OPEN"):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
     end
 
-    -- modules
+    ---modules
     GuiElement.add(info_panel, GuiLabel("modules_label"):caption({"helmod_common.modules"}):style("helmod_label_title_frame"))
     local result_table = GuiElement.add(info_panel, GuiTable("table-modules"):column(4))
     result_table.style.horizontally_stretchable = false

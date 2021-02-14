@@ -1,9 +1,8 @@
----
--- Description of the module.
--- @module User
---
+-------------------------------------------------------------------------------
+---Description of the module.
+---@class User
 local User = {
-  -- single-line comment
+  ---single-line comment
   classname = "HMUser",
   gui = "gui",
   prefixe = "helmod",
@@ -13,14 +12,9 @@ local User = {
 }
 
 -------------------------------------------------------------------------------
--- Get global variable for user
---
--- @function [parent=#User] get
---
--- @param #string key
---
--- @return #table global
---
+---Get global variable for user
+---@param key string
+---@return any
 function User.get(key)
   if global["users"] == nil then
     global["users"] = {}
@@ -40,85 +34,60 @@ function User.get(key)
 end
 
 -------------------------------------------------------------------------------
--- Get Name
---
--- @function [parent=#User] name
---
+---Get Name
+---@return string
 function User.name()
   return Player.native().name or Player.native().index or "nil"
 end
 
 -------------------------------------------------------------------------------
--- Return is admin player
---
--- @function [parent=#User] isAdmin
---
--- @return #boolean
---
+---Return is admin player
+---@return boolean
 function User.isAdmin()
   return Player.native().admin
 end
 
 -------------------------------------------------------------------------------
--- Return is writer player
---
--- @function [parent=#User] isWriter
---
--- @return #boolean
---
+---Return is writer player
+---@param model table
+---@return boolean
 function User.isReader(model)
   return Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 1) > 0)
 end
 
 -------------------------------------------------------------------------------
--- Return is writer player
---
--- @function [parent=#User] isWriter
---
--- @return #boolean
---
+---Return is writer player
+---@param model table
+---@return boolean
 function User.isWriter(model)
   return Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 2) > 0)
 end
 
 -------------------------------------------------------------------------------
--- Return is writer player
---
--- @function [parent=#User] isWriter
---
--- @return #boolean
---
+---Return is writer player
+---@param model table
+---@return boolean
 function User.isDeleter(model)
   return Player.isAdmin() or model.owner == Player.native().name or (model.share ~= nil and bit32.band(model.share, 4) > 0)
 end
 
 -------------------------------------------------------------------------------
--- Return is filter translate
---
--- @function [parent=#User] isFilterTranslate
---
--- @return #boolean
---
+---Return is filter translate
+---@return boolean
 function User.isFilterTranslate()
   return User.getModGlobalSetting("filter_translated_string_active") and (User.getParameter("filter-language") == nil or User.getParameter("filter-language") == "left")
 end
 
 -------------------------------------------------------------------------------
--- Return is filter contain
---
--- @function [parent=#User] isFilterContain
---
--- @return #boolean
---
+---Return is filter contain
+---@return boolean
 function User.isFilterContain()
   return (User.getParameter("filter-contain") == nil or User.getParameter("filter-contain") == "left")
 end
 
 -------------------------------------------------------------------------------
--- Get default settings
---
--- @function [parent=#User] getDefaultSettings
---
+---Get default settings
+---@return table
 function User.getDefaultSettings()
   return {
     display_pin_beacon = false,
@@ -134,14 +103,9 @@ function User.getDefaultSettings()
 end
 
 -------------------------------------------------------------------------------
--- Get sorted style
---
--- @function [parent=#User] getSortedStyle
---
--- @param #string key
---
--- @return #string style
---
+---Get sorted style
+---@param key string
+---@return string
 function User.getSortedStyle(key)
   local user_order = User.getParameter()
   if user_order == nil then user_order = User.setParameter("order", {name="index",ascendant="true"})  end
@@ -152,12 +116,9 @@ function User.getSortedStyle(key)
 end
 
 -------------------------------------------------------------------------------
--- Get parameter
---
--- @function [parent=#User] getParameter
---
--- @param #string property
---
+---Get parameter
+---@param property string
+---@return any
 function User.getParameter(property)
   local parameter = User.get("parameter")
   if parameter ~= nil and property ~= nil then
@@ -167,13 +128,10 @@ function User.getParameter(property)
 end
 
 -------------------------------------------------------------------------------
--- Get preference
---
--- @function [parent=#User] getPreference
---
--- @param #string type
--- @param #string name
---
+---Get preference
+---@param type string
+---@param name string
+---@return any
 function User.getPreference(type, name)
   local preferences = User.get("preferences")
   if preferences ~= nil and type ~= nil then
@@ -188,12 +146,9 @@ function User.getPreference(type, name)
 end
 
 -------------------------------------------------------------------------------
--- Get default factory
---
--- @function [parent=#User] getDefaultFactory
---
--- @param #table recipe
---
+---Get default factory
+---@param recipe table
+---@return any
 function User.getDefaultFactory(recipe)
   local default_factory = User.getParameter("default_factory")
   local recipe_prototype = RecipePrototype(recipe)
@@ -205,12 +160,8 @@ function User.getDefaultFactory(recipe)
 end
 
 -------------------------------------------------------------------------------
--- Set default factory
---
--- @function [parent=#User] setDefaultFactory
---
--- @param #table recipe
---
+---Set default factory
+---@param recipe table
 function User.setDefaultFactory(recipe)
   local default_factory = User.getParameter("default_factory") or {}
   local recipe_prototype = RecipePrototype(recipe)
@@ -223,12 +174,9 @@ function User.setDefaultFactory(recipe)
 end
 
 -------------------------------------------------------------------------------
--- Get default factory module
---
--- @function [parent=#User] getDefaultFactoryModule
---
--- @param #table recipe
---
+---Get default factory module
+---@param recipe table
+---@return any
 function User.getDefaultFactoryModule(recipe)
   local default_factory_module = User.getParameter("default_factory_module")
   local recipe_prototype = RecipePrototype(recipe)
@@ -240,12 +188,8 @@ function User.getDefaultFactoryModule(recipe)
 end
 
 -------------------------------------------------------------------------------
--- Set default factory module
---
--- @function [parent=#User] setDefaultFactoryModule
---
--- @param #table recipe
---
+---Set default factory module
+---@param recipe table
 function User.setDefaultFactoryModule(recipe)
   local default_factory_module = User.getParameter("default_factory_module") or {}
   local recipe_prototype = RecipePrototype(recipe)
@@ -258,12 +202,9 @@ function User.setDefaultFactoryModule(recipe)
 end
 
 -------------------------------------------------------------------------------
--- Get default beacon
---
--- @function [parent=#User] getDefaultBeacon
---
--- @param #table recipe
---
+---Get default beacon
+---@param recipe table
+---@return any
 function User.getDefaultBeacon(recipe)
   local default_beacon = User.getParameter("default_beacon")
   local recipe_prototype = RecipePrototype(recipe)
@@ -275,12 +216,8 @@ function User.getDefaultBeacon(recipe)
 end
 
 -------------------------------------------------------------------------------
--- Set default beacon
---
--- @function [parent=#User] setDefaultBeacon
---
--- @param #table recipe
---
+---Set default beacon
+---@param recipe table
 function User.setDefaultBeacon(recipe)
   local default_beacon = User.getParameter("default_beacon") or {}
   local recipe_prototype = RecipePrototype(recipe)
@@ -293,12 +230,9 @@ function User.setDefaultBeacon(recipe)
 end
 
 -------------------------------------------------------------------------------
--- Get default beacon module
---
--- @function [parent=#User] getDefaultBeaconModule
---
--- @param #table recipe
---
+---Get default beacon module
+---@param recipe table
+---@return any
 function User.getDefaultBeaconModule(recipe)
   local default_beacon_module = User.getParameter("default_beacon_module")
   local recipe_prototype = RecipePrototype(recipe)
@@ -310,12 +244,8 @@ function User.getDefaultBeaconModule(recipe)
 end
 
 -------------------------------------------------------------------------------
--- Set default beacon module
---
--- @function [parent=#User] setDefaultBeaconModule
---
--- @param #table recipe
---
+---Set default beacon module
+---@param recipe table
 function User.setDefaultBeaconModule(recipe)
   local default_beacon_module = User.getParameter("default_beacon_module") or {}
   local recipe_prototype = RecipePrototype(recipe)
@@ -327,20 +257,16 @@ function User.setDefaultBeaconModule(recipe)
 end
 
 -------------------------------------------------------------------------------
--- Get version
---
--- @function [parent=#User] getVersion
---
+---Get version
+---@return string
 function User.getVersion()
   local parameter = User.get()
   return parameter["version"] or ""
 end
 
 -------------------------------------------------------------------------------
--- Set version
---
--- @function [parent=#User] setVersion
---
+---Set version
+---@return any
 function User.setVersion()
   local parameter = User.get()
   parameter["version"] = User.version
@@ -348,13 +274,10 @@ function User.setVersion()
 end
 
 -------------------------------------------------------------------------------
--- Set
---
--- @function [parent=#User] set
---
--- @param #string property
--- @param #object value
---
+---Set
+---@param property string
+---@param value any
+---@return any
 function User.set(property, value)
   User.setVersion()
   local parameter = User.get()
@@ -363,13 +286,10 @@ function User.set(property, value)
 end
 
 -------------------------------------------------------------------------------
--- Set parameter
---
--- @function [parent=#User] setParameter
---
--- @param #string property
--- @param #object value
---
+---Set parameter
+---@param property string
+---@param value any
+---@return nil
 function User.setParameter(property, value)
   if property == nil then
     return nil
@@ -381,15 +301,12 @@ function User.setParameter(property, value)
 end
 
 -------------------------------------------------------------------------------
--- Create next event
---
--- @function [parent=#User] createNextEvent
---
--- @param #table event
--- @param #string classname
--- @param #string method
--- @param #number index
---
+---Create next event
+---@param event table
+---@param classname string
+---@param method any
+---@param index any
+---@return table
 function User.createNextEvent(event, classname, method, index)
   if event == nil then
     User.setParameter("next_event", nil)
@@ -408,14 +325,11 @@ function User.createNextEvent(event, classname, method, index)
 end
 
 -------------------------------------------------------------------------------
--- Set preference
---
--- @function [parent=#User] setPreference
---
--- @param #string type
--- @param #string name
--- @param #object value
---
+---Set preference
+---@param type string
+---@param name string
+---@param value any
+---@return any
 function User.setPreference(type, name, value)
   if type == nil then
     return nil
@@ -443,12 +357,9 @@ function User.setPreference(type, name, value)
 end
 
 -------------------------------------------------------------------------------
--- Get navigate
---
--- @function [parent=#User] getNavigate
---
--- @param #string property
---
+---Get navigate
+---@param property string
+---@return table
 function User.getNavigate(property)
   local navigate = User.get("navigate")
   if navigate ~= nil and property ~= nil then
@@ -461,13 +372,10 @@ function User.getNavigate(property)
 end
 
 -------------------------------------------------------------------------------
--- Set navigate
---
--- @function [parent=#User] setNavigate
---
--- @param #string property
--- @param #object value
---
+---Set navigate
+---@param property string
+---@param value any
+---@return any
 function User.setNavigate(property, value)
   User.setVersion()
   local navigate = User.get("navigate")
@@ -476,12 +384,8 @@ function User.setNavigate(property, value)
 end
 
 -------------------------------------------------------------------------------
--- Get user settings
---
--- @function [parent=#User] getSettings
---
--- @param #string property
---
+---Get user settings
+---@return table
 function User.getSettings()
   local data_user = User.get()
   if data_user["settings"] == nil then
@@ -491,12 +395,9 @@ function User.getSettings()
 end
 
 -------------------------------------------------------------------------------
--- Get user settings
---
--- @function [parent=#User] getSetting
---
--- @param #string property
---
+---Get user settings
+---@param property string
+---@return any
 function User.getSetting(property)
   local settings = User.getSettings()
   if settings ~= nil and property ~= nil then
@@ -510,13 +411,10 @@ function User.getSetting(property)
 end
 
 -------------------------------------------------------------------------------
--- Set setting
---
--- @function [parent=#User] setSetting
---
--- @param #string property
--- @param #object value
---
+---Set setting
+---@param property string
+---@param value any
+---@return any
 function User.setSetting(property, value)
   User.setVersion()
   local settings = User.get("settings")
@@ -525,12 +423,9 @@ function User.setSetting(property, value)
 end
 
 -------------------------------------------------------------------------------
--- Get settings
---
--- @function [parent=#User] getModSetting
---
--- @param #string name
---
+---Get settings
+---@param name string
+---@return any
 function User.getModSetting(name)
   local property = nil
   local property_name = string.format("%s_%s",User.prefixe,name)
@@ -547,12 +442,9 @@ function User.getModSetting(name)
 end
 
 -------------------------------------------------------------------------------
--- Get settings
---
--- @function [parent=#User] getModGlobalSetting
---
--- @param #string name
---
+---Get settings
+---@param name string
+---@return any
 function User.getModGlobalSetting(name)
   local property = nil
   local property_name = string.format("%s_%s",User.prefixe,name)
@@ -565,13 +457,10 @@ function User.getModGlobalSetting(name)
 end
 
 -------------------------------------------------------------------------------
--- Get preference settings
---
--- @function [parent=#User] getPreferenceSetting
---
--- @param #string type
--- @param #string name
---
+---Get preference settings
+---@param type string
+---@param name string
+---@return any
 function User.getPreferenceSetting(type, name)
   local preference_type = User.getPreference(type)
   if name == nil then
@@ -598,32 +487,22 @@ function User.getPreferenceSetting(type, name)
 end
 
 -------------------------------------------------------------------------------
--- Reset global variable for user
---
--- @function [parent=#User] reset
---
+---Reset global variable for user
 function User.reset()
   local user_name = User.name()
   global["users"][user_name] = {}
 end
 
 -------------------------------------------------------------------------------
--- Reset global variable for all user
---
--- @function [parent=#User] resetAll
---
+---Reset global variable for all user
 function User.resetAll()
   global["users"] = {}
 end
 
 -------------------------------------------------------------------------------
--- Set Close Form
---
--- @function [parent=#User] setCloseForm
---
--- @param #string classname
--- @param #table location
---
+---Set Close Form
+---@param classname string
+---@param location table
 function User.setCloseForm(classname, location)
   local navigate = User.getNavigate()
   if navigate[classname] == nil then navigate[classname] = {} end
@@ -636,15 +515,9 @@ function User.setCloseForm(classname, location)
 end
 
 -------------------------------------------------------------------------------
--- Get location Form
---
--- @function [parent=#User] getLocationForm
---
--- @param #string classname
--- @param #table location
---
--- @return #table
---
+---Get location Form
+---@param classname string
+---@return table
 function User.getLocationForm(classname)
   local navigate = User.getNavigate()
   if User.getPreferenceSetting("ui_glue") == true and User.getPreferenceSetting("ui_glue", classname) == true then
@@ -657,12 +530,8 @@ function User.getLocationForm(classname)
 end
 
 -------------------------------------------------------------------------------
--- Set Active Form
---
--- @function [parent=#User] setActiveForm
---
--- @param #string classname
---
+---Set Active Form
+---@param classname string
 function User.setActiveForm(classname)
   local navigate = User.getNavigate()
   if User.getPreferenceSetting("ui_auto_close") == true then
@@ -687,12 +556,8 @@ function User.setActiveForm(classname)
 end
 
 -------------------------------------------------------------------------------
--- Get main sizes
---
--- @function [parent=#User] getMainSizes
---
--- return
---
+---Get main sizes
+---@return number, number
 function User.getMainSizes()
   local width , height = Player.getDisplaySizes()
   local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
@@ -706,14 +571,7 @@ function User.getMainSizes()
 end
 
 -------------------------------------------------------------------------------
--- update
---
--- @function [parent=#User] update
---
--- @param #string classname
---
--- @return #boolean
---
+---update
 function User.update()
   if User.getVersion() < User.version then
     User.reset()
@@ -721,12 +579,8 @@ function User.update()
 end
 
 -------------------------------------------------------------------------------
--- Add translate
---
--- @function [parent=#User] addTranslate
---
--- @param #table request {player_index=number, localised_string=#string, result=#string, translated=#boolean}
---
+---Add translate
+---@param request table --{player_index=number, localised_string=#string, result=#string, translated=#boolean}
 function User.addTranslate(request)
   if request.translated == true then
     local localised_string = request.localised_string
@@ -745,22 +599,17 @@ function User.addTranslate(request)
 end
 
 -------------------------------------------------------------------------------
--- Is translate
---
--- @function [parent=#User] isTranslate
---
+---Is translate
+---@return boolean
 function User.isTranslate()
   local translated = User.get("translated")
   return translated ~= nil and table.size(translated) > 0
 end
 
 -------------------------------------------------------------------------------
--- Get translate
---
--- @function [parent=#User] getTranslate
---
--- @param #string name
---
+---Get translate
+---@param name string
+---@return any
 function User.getTranslate(name)
   local translated = User.get("translated")
   if translated == nil or translated[name] == nil then return name end
@@ -768,25 +617,17 @@ function User.getTranslate(name)
 end
 
 -------------------------------------------------------------------------------
--- Reset translate
---
--- @function [parent=#User] resetTranslate
---
+---Reset translate
 function User.resetTranslate()
   local data_user = User.get()
   data_user["translated"] = {}
 end
 
 -------------------------------------------------------------------------------
--- Return Cache User
---
--- @function [parent=#User] getCache
---
--- @param #string classname
--- @param #string name
---
--- @return #table
---
+---Return Cache User
+---@param classname string
+---@param name string
+---@return table
 function User.getCache(classname, name)
   local data = User.get("cache")
   if classname == nil and name == nil then return data end
@@ -795,16 +636,10 @@ function User.getCache(classname, name)
 end
 
 -------------------------------------------------------------------------------
--- Set Cache User
---
--- @function [parent=#User] setCache
---
--- @param #string classname
--- @param #string name
--- @param #object value
---
--- @return #object
---
+---Set Cache User
+---@param classname string
+---@param name string
+---@param value any
 function User.setCache(classname, name, value)
   local data = User.get("cache")
   if data[classname] == nil then data[classname] = {} end
@@ -812,28 +647,19 @@ function User.setCache(classname, name, value)
 end
 
 -------------------------------------------------------------------------------
--- Has User Cache
---
--- @function [parent=#User] hasCache
---
--- @param #string classname
--- @param #string name
---
--- @return #boolean
---
+---Has User Cache
+---@param classname string
+---@param name string
+---@return boolean
 function User.hasCache(classname, name)
   local data = User.get("cache")
   return data[classname] ~= nil and data[classname][name] ~= nil
 end
 
 -------------------------------------------------------------------------------
--- Reset cache
---
--- @function [parent=#User] resetCache
---
--- @param #string classname
--- @param #string name
---
+---Reset cache
+---@param classname string
+---@param name string
 function User.resetCache(classname, name)
   local data = User.get("cache")
   if classname == nil and name == nil then
@@ -846,10 +672,8 @@ function User.resetCache(classname, name)
 end
 
 -------------------------------------------------------------------------------
--- Get Function Product Sorter
---
--- @function [parent=#User] getProductSorter
---
+---Get Function Product Sorter
+---@return function
 function User.getProductSorter()
   local display_product_order = User.getPreferenceSetting("display_product_order")
   if display_product_order == "name" then
@@ -861,10 +685,7 @@ function User.getProductSorter()
 end
 
 -------------------------------------------------------------------------------
--- Get Function Product Sorter
---
--- @function [parent=#User] getProductSorter2
---
+---Get Function Product Sorter
 function User.setParameterObjects(classname, model_id, block_id, recipe_id)
   local parameter_objects = string.format("%s_%s", classname, "objects")
   User.setParameter(parameter_objects, {name=parameter_objects, model=model_id, block=block_id, recipe=recipe_id})

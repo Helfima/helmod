@@ -1,22 +1,16 @@
----
--- Description of the module.
--- @module SolverSimplex
---
-
+-------------------------------------------------------------------------------
+---Description of the module.
+---@class SolverSimplex
 SolverSimplex = newclass(Solver,function(base, object)
   Solver.init(base, object)
 end)
 
 -------------------------------------------------------------------------------
--- Calcul pivot de gauss
---
--- @function [parent=#SolverSimplex] pivot
--- @param #table M
--- @param #number xrow
--- @param #number xcol
---
--- @return #table
---
+---Calcul pivot de gauss
+---@param M table
+---@param xrow number
+---@param xcol number
+---@return table
 function SolverSimplex:pivot(M, xrow, xcol)
   local Mx = {}
   local pivot_value = M[xrow][xcol]
@@ -57,33 +51,29 @@ function SolverSimplex:pivot(M, xrow, xcol)
 end
 
 -------------------------------------------------------------------------------
--- Retourne le pivot
---
--- @function [parent=#SolverSimplex] getPivot
--- @param #table M
---
--- @return #table
---
+---Retourne le pivot
+---@param M table
+---@return table
 function SolverSimplex:getPivot(M)
   local max_z_value = 0
   local xcol = nil
   local min_ratio_value = 0
   local xrow = nil
   local last_row = M[#M]
-  -- boucle sur la derniere ligne nommee Z
+  ---boucle sur la derniere ligne nommee Z
   for icol,z_value in pairs(last_row) do
-    -- on exclus les premieres colonnes
+    ---on exclus les premieres colonnes
     if icol > self.col_start then
       if z_value > max_z_value then
-        -- la valeur repond au critere, la colonne est eligible
-        -- on recherche le ligne
+        ---la valeur repond au critere, la colonne est eligible
+        ---on recherche le ligne
         min_ratio_value = nil
         for irow, current_row in pairs(M) do
           local x_value = M[irow][icol]
-          -- on n'utilise pas la derniere ligne
-          -- seule les cases positives sont prises en compte
+          ---on n'utilise pas la derniere ligne
+          ---seule les cases positives sont prises en compte
           if irow > self.row_input and irow < #M and x_value > 0 then
-            -- calcul du ratio base / x
+            ---calcul du ratio base / x
             local c_value = M[irow][self.col_start]
             local bx_ratio = c_value/x_value
             if min_ratio_value == nil or bx_ratio < min_ratio_value then
@@ -93,7 +83,7 @@ function SolverSimplex:getPivot(M)
           end
         end
         if min_ratio_value ~= nil then
-          -- le pivot est possible
+          ---le pivot est possible
           max_z_value = z_value
           xcol = icol
         end
@@ -101,27 +91,24 @@ function SolverSimplex:getPivot(M)
     end
   end
   if max_z_value == 0 then
-    -- il n'y a plus d'amelioration possible fin du programmme
+    ---il n'y a plus d'amelioration possible fin du programmme
     return false, xcol, xrow
   end
   return true, xcol, xrow
 end
 
 -------------------------------------------------------------------------------
--- Prepare la matrice
---
--- @function [parent=#SolverSimplex] prepare
---
--- @return #table
---
+---Prepare la matrice
+---@param M table
+---@return table
 function SolverSimplex:prepare(M)
-  -- ajoute la ligne Z
+  ---ajoute la ligne Z
   local irow = 1
-  -- prepare les headers
+  ---prepare les headers
   local Mx = self:clone(M)
   
-  -- ajoute les recettes d'ingredient
-  -- initialise l'analyse
+  ---ajoute les recettes d'ingredient
+  ---initialise l'analyse
   local ckeck_cols = {}
   for icol,_ in pairs(Mx[1]) do
     ckeck_cols[icol] = true
@@ -130,7 +117,7 @@ function SolverSimplex:prepare(M)
     if irow > self.row_input and irow < #Mx then
       for icol,cell in pairs(row) do
         if icol > self.col_start then
-          -- si une colonne est un produit au moins une fois on l'exclus
+          ---si une colonne est un produit au moins une fois on l'exclus
           if cell > 0 then
             ckeck_cols[icol] = false
           end
@@ -140,7 +127,7 @@ function SolverSimplex:prepare(M)
       end
     end
   end
-  -- ajout des faux recipe
+  ---ajout des faux recipe
   local index = 1
   for xcol,check in pairs(ckeck_cols) do
     if check then
@@ -150,8 +137,8 @@ function SolverSimplex:prepare(M)
           table.insert(row, Mx[1][xcol])
         else
           if icol == self.col_start then
-            --table.insert(row,math.pow(10,index)*10) -- important ne pas changer
-            table.insert(row,1e4*index) -- important ne pas changer
+            --table.insert(row,math.pow(10,index)*10) ---important ne pas changer
+            table.insert(row,1e4*index) ---important ne pas changer
           elseif icol == xcol then
             table.insert(row,1)
           else
@@ -163,16 +150,16 @@ function SolverSimplex:prepare(M)
       index = index + 1
     end
   end
-  -- ajoute les row en colonne
+  ---ajoute les row en colonne
   local num_row = rawlen(M)-self.row_input-1
   local num_col = rawlen(Mx[1])
   for xrow=1, num_row do
     for irow,row in pairs(Mx) do
       if irow == 1 then
-        -- ajoute le header
+        ---ajoute le header
         Mx[irow][num_col+xrow] = Mx[xrow+self.row_input][1];
       else
-        -- ajoute les valeurs
+        ---ajoute les valeurs
         if irow == xrow + self.row_input then
           Mx[irow][num_col+xrow] = 1
         else
@@ -182,7 +169,7 @@ function SolverSimplex:prepare(M)
     end
   end
   
-  -- initialise la ligne Z avec Z=input
+  ---initialise la ligne Z avec Z=input
   for icol,cell in pairs(Mx[self.row_input]) do
     if icol > self.col_start then
       Mx[#Mx][icol] = cell
@@ -193,13 +180,10 @@ function SolverSimplex:prepare(M)
 end
 
 -------------------------------------------------------------------------------
--- Calcul de la ligne
---
--- @function [parent=#SolverSimplex] lineCompute
--- @param #table M
---
--- @return #table
---
+---Calcul de la ligne
+---@param Mx table
+---@param xrow number
+---@return table
 function SolverSimplex:lineCompute(Mx, xrow)
   if Mx == nil or xrow == 0 then return Mx end
   local row = Mx[xrow]
@@ -208,7 +192,7 @@ function SolverSimplex:lineCompute(Mx, xrow)
   
   for icol,cell_value in pairs(row) do
     if cell_value ~= 0 and icol > self.col_start then
-      local Z = Mx[#Mx][icol] -- valeur demandee Z
+      local Z = Mx[#Mx][icol] ---valeur demandee Z
       local X = cell_value
 
       local C = -Z/X
@@ -223,9 +207,9 @@ function SolverSimplex:lineCompute(Mx, xrow)
   local C = Mx[xrow][self.col_start]
   for icol,cell_value in pairs(row) do
     if cell_value ~= 0 and icol > self.col_start then
-      local Z = Mx[#Mx][icol] -- valeur demandee Z
+      local Z = Mx[#Mx][icol] ---valeur demandee Z
       local X = cell_value
-      -- calcul du Z
+      ---calcul du Z
       Mx[#Mx][icol] = Z + X * P * C
     end
   end
@@ -233,34 +217,30 @@ function SolverSimplex:lineCompute(Mx, xrow)
 end
 
 -------------------------------------------------------------------------------
--- Calcul du tableau
---
--- @function [parent=#SolverSimplex] tableCompute
--- @param #table Mx matrix finale
--- @param #table Mi matrix intermediaire
---
--- @return #table
---
+---Calcul du tableau
+---@param Mx table --matrix finale
+---@param Mi table --matrix intermediaire
+---@return table
 function SolverSimplex:tableCompute(Mx, Mi)
   if Mx == nil then return Mx end
-  -- preparation de la colonne R et P
+  ---preparation de la colonne R et P
   for irow,_ in pairs(Mx) do
     if irow > self.row_input and irow < #Mx then
-      -- colonne correspondant a la recette
+      ---colonne correspondant a la recette
       local icol = #Mx[1] + irow - self.row_input
-      Mx[irow][self.col_R] = - Mi[#Mi][icol] -- moins la valeur affichee dans Z
+      Mx[irow][self.col_R] = - Mi[#Mi][icol] ---moins la valeur affichee dans Z
       Mx[irow][self.col_P] = 0
     end
   end
-  -- preparation input
-  -- ajoute la ligne Z avec Z=-input
+  ---preparation input
+  ---ajoute la ligne Z avec Z=-input
   for icol,cell in pairs(Mx[self.row_input]) do
     if icol > self.col_start then
       Mx[#Mx][icol] = 0-cell
     end
   end
   
-    -- initialise les valeurs des produits par second
+    ---initialise les valeurs des produits par second
   for irow,row in pairs(Mx) do
     if irow > self.row_input and irow < #Mx then
       local E = Mx[irow][self.col_E]
@@ -272,7 +252,7 @@ function SolverSimplex:tableCompute(Mx, Mi)
     end
   end
   
-  -- calcul du resultat
+  ---calcul du resultat
   for irow,_ in pairs(Mx) do
     if irow > self.row_input and irow < #Mx then
       Mx = self:lineCompute(Mx, irow)
@@ -282,12 +262,12 @@ function SolverSimplex:tableCompute(Mx, Mi)
 end
 
 -------------------------------------------------------------------------------
--- Resoud la matrice
---
--- @function [parent=#SolverSimplex] solve
---
--- @return #table
---
+---Resoud la matrice
+---@param Mbase table
+---@param debug boolean
+---@param by_factory boolean
+---@param time number
+---@return table, table
 function SolverSimplex:solve(Mbase, debug, by_factory, time)
   if Mbase ~= nil then
     local num_loop = 0
@@ -307,7 +287,7 @@ function SolverSimplex:solve(Mbase, debug, by_factory, time)
       end
       num_loop = num_loop + 1
     end
-    -- finalisation
+    ---finalisation
     local Mr = self:clone(Mbase)
     Mr = self:tableCompute(Mr, Mstep)
     Mr = self:finalize(Mr)

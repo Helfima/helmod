@@ -1,7 +1,6 @@
----
--- Description of the module.
--- @module Product
---
+-------------------------------------------------------------------------------
+---Description of the module.
+---@class Product
 Product = newclass(Prototype,function(base, object)
   Prototype.init(base, object)
   base.classname = "HMProduct"
@@ -11,12 +10,8 @@ end)
 Product.classname = "HMProduct"
 
 -------------------------------------------------------------------------------
--- Return localised name of Prototype
---
--- @function [parent=#Product] getLocalisedName
---
--- @return #table
---
+---Return localised name of Prototype
+---@return string
 function Product:getLocalisedName()
   if self.lua_prototype ~= nil then
     local localisedName = self.lua_prototype.name
@@ -38,12 +33,8 @@ function Product:getLocalisedName()
 end
 
 -------------------------------------------------------------------------------
--- Return table key
---
--- @function [parent=#Product] getTableKey
---
--- @return #table
---
+---Return table key
+---@return string
 function Product:getTableKey()
   if self.lua_prototype ~= nil then
     if self.lua_prototype.type == 1 or self.lua_prototype.type == "fluid" then
@@ -73,12 +64,8 @@ function Product:getTableKey()
 end
 
 -------------------------------------------------------------------------------
--- Return localised name of Prototype
---
--- @function [parent=#Product] getLocalisedName
---
--- @return #table
---
+---Has Burnt Result
+---@return boolean
 function Product:hasBurntResult()
   if self.lua_prototype ~= nil then
     if self.lua_prototype.type == 0 or self.lua_prototype.type == "item" then
@@ -90,12 +77,8 @@ function Product:hasBurntResult()
 end
 
 -------------------------------------------------------------------------------
--- Clone prototype model
---
--- @function [parent=#Product] clone
---
--- @return #table
---
+---Clone prototype model
+---@return table
 function Product:clone()
   local prototype = {
     type = self.lua_prototype.type,
@@ -113,21 +96,16 @@ function Product:clone()
 end
 
 -------------------------------------------------------------------------------
--- Get amount of element
---
--- @function [parent=#Product] getElementAmount
---
--- @return #number
---
--- @see http://lua-api.factorio.com/latest/Concepts.html#Product
---
+---Get amount of element
+---@see http://lua-api.factorio.com/latest/Concepts.html#Product
+---@return number
 function Product:getElementAmount()
   local element = self.lua_prototype
   if element == nil then return 0 end
 
   if element.amount ~= nil then
-    -- In 0.17, it seems probability can be used with just 'amount' and it
-    -- doesn't need to use amount_min/amount_max
+    ---In 0.17, it seems probability can be used with just 'amount' and it
+    ---doesn't need to use amount_min/amount_max
     if element.probability ~= nil then
       return element.amount * element.probability
     else
@@ -143,12 +121,8 @@ function Product:getElementAmount()
 end
 
 -------------------------------------------------------------------------------
--- Get amount of element for bonus
---
--- @function [parent=#Product] getBonusAmount
---
--- @return #number
---
+---Get amount of element for bonus
+---@return number
 function Product:getBonusAmount()
   local element = self.lua_prototype
   if element == nil then return 0 end
@@ -156,9 +130,9 @@ function Product:getBonusAmount()
   local catalyst_amount = element.catalyst_amount or 0
   local probability = element.probability or 1
   local amount = 0
-  -- If amount not specified, amount_min, amount_max and probability must all be specified.
-  -- Minimal amount of the item or fluid to give. Has no effect when amount is specified.
-  -- Maximum amount of the item or fluid to give. Has no effect when amount is specified.
+  ---If amount not specified, amount_min, amount_max and probability must all be specified.
+  ---Minimal amount of the item or fluid to give. Has no effect when amount is specified.
+  ---Maximum amount of the item or fluid to give. Has no effect when amount is specified.
   if element.probability ~= nil and element.amount_min ~= nil and  element.amount_max ~= nil then
     amount = (element.amount_min + element.amount_max) / 2
   end
@@ -173,29 +147,20 @@ function Product:getBonusAmount()
 end
 
 -------------------------------------------------------------------------------
--- Get type of element (item or fluid)
---
--- @function [parent=#Product] getType
---
--- @return #string
---
+---Get type of element (item or fluid)
+---@return string
 function Product:getType()
   if self.lua_prototype.type == 1 or self.lua_prototype.type == "fluid" then return "fluid" end
   return "item"
 end
 
 -------------------------------------------------------------------------------
--- Get amount of element
---
--- @function [parent=#Product] getAmount
---
--- @param #table recipe
---
--- @return #number
---
+---Get amount of element
+---@param recipe table
+---@return number
 function Product:getAmount(recipe)
   local amount = self:getElementAmount()
-  local bonus_amount = self:getBonusAmount() -- if there are no catalyst amount = bonus_amount
+  local bonus_amount = self:getBonusAmount() ---if there are no catalyst amount = bonus_amount
   if recipe == nil then
     return amount
   end
@@ -203,14 +168,9 @@ function Product:getAmount(recipe)
 end
 
 -------------------------------------------------------------------------------
--- Factor by time
---
--- @function [parent=#Product] factorByTime
---
--- @param #table recipe
---
--- @return #number
---
+---Factor by time
+---@param model table
+---@return number
 function Product:factorByTime(model)
   if self.lua_prototype.by_time == true then
     return model.time
@@ -219,44 +179,32 @@ function Product:factorByTime(model)
 end
 
 -------------------------------------------------------------------------------
--- Count product
---
--- @function [parent=#Product] countProduct
---
--- @param #table recipe
---
--- @return #number
---
+---Count product
+---@param model table
+---@param recipe table
+---@return number
 function Product:countProduct(model, recipe)
   local amount = self:getElementAmount()
-  local bonus_amount = self:getBonusAmount() -- if there are no catalyst amount = bonus_amount
+  local bonus_amount = self:getBonusAmount() ---if there are no catalyst amount = bonus_amount
   return (amount + bonus_amount * self:getProductivityBonus(recipe) ) * recipe.count * self:factorByTime(model)
 end
 
 -------------------------------------------------------------------------------
--- Count ingredient
---
--- @function [parent=#Product] countIngredient
---
--- @param #table recipe
---
--- @return #number
---
+---Count ingredient
+---@param model table
+---@param recipe table
+---@return number
 function Product:countIngredient(model, recipe)
   local amount = self:getElementAmount() * self:factorByTime(model)
   return amount * recipe.count
 end
 
 -------------------------------------------------------------------------------
--- Count container
---
--- @function [parent=#Product] countContainer
---
---- @param count number
---- @param container string
---
---- @return number
---
+---Count container
+---@param count number
+---@param container string
+---@param time number
+---@return number
 function Product:countContainer(count, container, time)
   if count == nil then return 0 end
   if self.lua_prototype.type == 0 or self.lua_prototype.type == "item" then
@@ -264,11 +212,11 @@ function Product:countContainer(count, container, time)
     if entity_prototype:getType() == "inserter" then
       local inserter_capacity = entity_prototype:getInserterCapacity()
       local inserter_speed = entity_prototype:getInserterRotationSpeed()
-      -- temps pour 360� t=360/360*inserter_speed
+      ---temps pour 360� t=360/360*inserter_speed
       local inserter_time = 1 / inserter_speed
       return count * inserter_time / (inserter_capacity * (time or 1))
     elseif entity_prototype:getType() == "transport-belt" then
-      -- ratio = item_per_s / speed_belt (blue belt)
+      ---ratio = item_per_s / speed_belt (blue belt)
       local belt_speed = entity_prototype:getBeltSpeed()
       return count / (belt_speed * self.belt_ratio * (time or 1))
     elseif entity_prototype:getType() ~= "logistic-robot" then
@@ -299,14 +247,9 @@ function Product:countContainer(count, container, time)
 end
 
 -------------------------------------------------------------------------------
--- Get the productivity bonus of the recipe
---
--- @function [parent=#Product] getProductivityBonus
---
--- @param #table recipe
---
--- @return #number
---
+---Get the productivity bonus of the recipe
+---@param recipe table
+---@return number
 function Product:getProductivityBonus(recipe)
   if recipe.isluaobject or recipe.factory == nil or recipe.factory.effects == nil then return 1 end
   local productivity = recipe.factory.effects.productivity

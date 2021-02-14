@@ -1,15 +1,6 @@
 -------------------------------------------------------------------------------
--- Class to help to build GuiDropDown
---
--- @module GuiDropDown
---
-
--------------------------------------------------------------------------------
---
--- @function [parent=#GuiDropDown] constructor
--- @param #arg name
--- @return #GuiDropDown
---
+---Class to help to build GuiDropDown
+---@class GuiDropDown
 GuiDropDown = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiDropDown"
@@ -17,12 +8,10 @@ GuiDropDown = newclass(GuiElement,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiDropDown] items
--- @param #table items
--- @param #number selected
--- @return #GuiDropDown
---
+---comment
+---@param items table
+---@param selected string|table
+---@return GuiDropDown
 function GuiDropDown:items(items, selected)
   local selected_index = 1
   if items ~= nil then

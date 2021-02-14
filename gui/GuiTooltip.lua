@@ -1,76 +1,57 @@
 -------------------------------------------------------------------------------
--- Class to help to build GuiTooltip
---
--- @module GuiTooltip
---
-
--------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] constructor
--- @param #arg name
--- @return #GuiTooltip
---
+---Class to help to build GuiTooltip
+---@class GuiTooltip
 GuiTooltip = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiTooltip"
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] element
--- @param #table element
--- @return #GuiCell
---
+---Set element
+---@param element table
+---@return GuiTooltip
 function GuiTooltip:element(element)
   self.m_element = element
   return self
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] withLogistic
--- @return #GuiCell
---
+---Set with logistic information
+---@return GuiTooltip
 function GuiTooltip:withLogistic()
   self.m_with_logistic = true
   return self
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] withEnergy
--- @return #GuiCell
---
+---Set with energy information
+---@return GuiTooltip
 function GuiTooltip:withEnergy()
   self.m_with_energy = true
   return self
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] withProductInfo
--- @return #GuiCell
---
+---Set with product information
+---@return GuiTooltip
 function GuiTooltip:withProductInfo()
   self.m_with_product_info = true
   return self
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] withControlInfo
--- @return #GuiCell
---
+---Set with control information
+---@param control_info string
+---@return GuiTooltip
 function GuiTooltip:withControlInfo(control_info)
   self.m_with_control_info = control_info
   return self
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] appendControlInfo
--- @return #GuiCell
---
+---Add control information
+---@param tooltip table
+---@param element table
 function GuiTooltip:appendControlInfo(tooltip, element)
   if self.m_with_control_info ~= nil then
     local tooltip_section = {""}
@@ -97,13 +78,12 @@ function GuiTooltip:appendControlInfo(tooltip, element)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] appendEnergyConsumption
--- @return #GuiCell
---
+---Add energy information
+---@param tooltip table
+---@param element table
 function GuiTooltip:appendEnergyConsumption(tooltip, element)
   if self.m_with_energy == true then
-    -- energy
+    ---energy
     local total_power = Format.formatNumberKilo(element.energy_total, "W")
     if element.limit_energy ~= nil then
       local limit_power = Format.formatNumberKilo(element.limit_energy, "W")
@@ -115,10 +95,9 @@ function GuiTooltip:appendEnergyConsumption(tooltip, element)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] appendFlow
--- @return #GuiCell
---
+---Add flow information
+---@param tooltip table
+---@param element table
 function GuiTooltip:appendFlow(tooltip, element)
   if self.m_with_logistic == true then
     local total_flow = Format.formatNumberElement(element.count/((element.time or 1)/60))
@@ -132,16 +111,15 @@ function GuiTooltip:appendFlow(tooltip, element)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] appendLogistic
--- @return #GuiCell
---
+---Add logistic information
+---@param tooltip table
+---@param element table
 function GuiTooltip:appendLogistic(tooltip, element)
   if self.m_with_logistic == true then
     local tooltip_section = {""}
     table.insert(tooltip_section, {"", "\n", "----------------------"})
     table.insert(tooltip_section, {"", "\n", helmod_tag.font.default_bold, {"tooltip.info-logistic"}, helmod_tag.font.close})
-    -- solid logistic
+    ---solid logistic
     if element.type == 0 or element.type == "item" then
       for _,type in pairs({"inserter", "belt", "container", "transport"}) do
         local item_logistic = Player.getDefaultItemLogistic(type)
@@ -159,7 +137,7 @@ function GuiTooltip:appendLogistic(tooltip, element)
         end
       end
     end
-    -- fluid logistic
+    ---fluid logistic
     if element.type == 1 or element.type == "fluid" then
       for _,type in pairs({"pipe", "container", "transport"}) do
         local fluid_logistic = Player.getDefaultFluidLogistic(type)
@@ -182,20 +160,19 @@ function GuiTooltip:appendLogistic(tooltip, element)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] appendProductInfo
--- @return #GuiCell
---
+---Add product information
+---@param tooltip table
+---@param element table
 function GuiTooltip:appendProductInfo(tooltip, element)
   if self.m_with_product_info == true then
-    -- solid logistic
+    ---solid logistic
     if element.type == 0 or element.type == "item" then
       local item_prototype = ItemPrototype(element)
       if item_prototype:getFuelValue() > 0 then
         table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.fuel-value"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, Format.formatNumberKilo(item_prototype:getFuelValue() or 0, "J"), helmod_tag.font.close})
       end
     end
-    -- fluid logistic
+    ---fluid logistic
     if element.type == 1 or element.type == "fluid" then
       local fluid_prototype = FluidPrototype(element)
       if fluid_prototype:getHeatCapacity() > 0  then
@@ -218,12 +195,11 @@ function GuiTooltip:appendProductInfo(tooltip, element)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] appendDebug
--- @return #GuiCell
---
+---Add debug information
+---@param tooltip table
+---@param element table
 function GuiTooltip:appendDebug(tooltip, element)
-    -- debug     
+    ---debug     
     if User.getModGlobalSetting("debug_solver") == true then
       table.insert(tooltip, {"", "\n", "----------------------"})
       table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Name", ": ", helmod_tag.font.default_bold, self.m_element.name or "nil", helmod_tag.font.close})
@@ -236,10 +212,8 @@ function GuiTooltip:appendDebug(tooltip, element)
     end
 end
 -------------------------------------------------------------------------------
--- Create tooltip
---
--- @function [parent=#GuiTooltip] create
---
+---Create tooltip
+---@return table
 function GuiTooltip:create()
   local tooltip = {""}
   if string.find(self.name[1], "edit[-]") then
@@ -269,21 +243,15 @@ function GuiTooltip:create()
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] constructor
--- @param #arg name
--- @return #GuiTooltipModel
---
+---@class GuiTooltipModel
 GuiTooltipModel = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
 end)
 
 -------------------------------------------------------------------------------
--- Create tooltip
---
--- @function [parent=#GuiTooltipModel] create
---
+---Create tooltip
+---@return table
 function GuiTooltipModel:create()
   local tooltip = self._super.create(self)
   local element = self.m_element
@@ -304,21 +272,15 @@ function GuiTooltipModel:create()
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] constructor
--- @param #arg name
--- @return #GuiTooltipElement
---
+---@class GuiTooltipElement
 GuiTooltipElement = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
 end)
 
 -------------------------------------------------------------------------------
--- Create tooltip
---
--- @function [parent=#GuiTooltipElement] create
---
+---Create tooltip
+---@return table
 function GuiTooltipElement:create()
   local tooltip = self._super.create(self)
   --self:appendContraint(tooltip, element);
@@ -332,7 +294,7 @@ function GuiTooltipElement:create()
       element_icon = string.format("[img=helmod-%s-white]", element.name)
     end
     table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=element.name}), helmod_tag.font.close, helmod_tag.color.close})
-    -- quantity
+    ---quantity
     local total_count = Format.formatNumberElement(element.count)
     if element.limit_count ~= nil then
       local limit_count = Format.formatNumberElement(element.limit_count)
@@ -353,21 +315,15 @@ function GuiTooltipElement:create()
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] constructor
--- @param #arg name
--- @return #GuiTooltipEnergy
---
+---@class GuiTooltipEnergy
 GuiTooltipEnergy = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
 end)
 
 -------------------------------------------------------------------------------
--- Create tooltip
---
--- @function [parent=#GuiTooltipEnergy] create
---
+---Create tooltip
+---@return table
 function GuiTooltipEnergy:create()
   local tooltip = self._super.create(self)
   local element = self.m_element
@@ -379,7 +335,7 @@ function GuiTooltipEnergy:create()
       element_icon = string.format("[img=helmod-%s-white]", element.name)
     end
     table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=element.name}), helmod_tag.font.close, helmod_tag.color.close})
-    -- quantity
+    ---quantity
     local total_count = Format.formatNumberKilo(element.count, "W")
     if element.limit_count ~= nil then
       local limit_count = Format.formatNumberElement(element.limit_count)
@@ -395,21 +351,15 @@ function GuiTooltipEnergy:create()
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] constructor
--- @param #arg name
--- @return #GuiTooltipFactory
---
+---@class GuiTooltipFactory
 GuiTooltipFactory = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
 end)
 
 -------------------------------------------------------------------------------
--- Create tooltip
---
--- @function [parent=#GuiTooltipFactory] create
---
+---Create tooltip
+---@return table
 function GuiTooltipFactory:create()
   local tooltip = self._super.create(self)
   if self.m_element then
@@ -434,21 +384,15 @@ function GuiTooltipFactory:create()
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] constructor
--- @param #arg name
--- @return #GuiTooltipEnergyConsumption
---
+---@class GuiTooltipEnergyConsumption
 GuiTooltipEnergyConsumption = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
 end)
 
 -------------------------------------------------------------------------------
--- Create tooltip
---
--- @function [parent=#GuiTooltipEnergyConsumption] create
---
+---Create tooltip
+---@return table
 function GuiTooltipEnergyConsumption:create()
   local tooltip = self._super.create(self)
   if self.m_element then
@@ -459,21 +403,15 @@ function GuiTooltipEnergyConsumption:create()
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] constructor
--- @param #arg name
--- @return #GuiTooltipPollution
---
+---@class GuiTooltipPollution
 GuiTooltipPollution = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
 end)
 
 -------------------------------------------------------------------------------
--- Create tooltip
---
--- @function [parent=#GuiTooltipPollution] create
---
+---Create tooltip
+---@return table
 function GuiTooltipPollution:create()
   local tooltip = self._super.create(self)
   if self.m_element then
@@ -492,28 +430,22 @@ function GuiTooltipPollution:create()
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] constructor
--- @param #arg name
--- @return #GuiTooltipBuilding
---
+---@class GuiTooltipBuilding
 GuiTooltipBuilding = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
 end)
 
 -------------------------------------------------------------------------------
--- Create tooltip
---
--- @function [parent=#GuiTooltipBuilding] create
---
+---Create tooltip
+---@return table
 function GuiTooltipBuilding:create()
   local tooltip = self._super.create(self)
   if self.m_element then
     local block = self.m_element
     local overflow = false
     if block.summary ~= nil then
-      -- factories
+      ---factories
       for _, element in pairs(block.summary.factories) do
         if #tooltip < 19 then
           table.insert(tooltip, {"", "\n", string.format("[%s=%s]", element.type, element.name), " ", helmod_tag.font.default_bold, "x ", element.count, helmod_tag.font.close})
@@ -522,7 +454,7 @@ function GuiTooltipBuilding:create()
         end
       end
 
-      -- beacons
+      ---beacons
       for _, element in pairs(block.summary.beacons) do
         if #tooltip < 19 then
           table.insert(tooltip, {"", "\n", string.format("[%s=%s]", element.type, element.name), " ", helmod_tag.font.default_bold, "x ", element.count, helmod_tag.font.close})
@@ -547,21 +479,15 @@ function GuiTooltipBuilding:create()
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] constructor
--- @param #arg name
--- @return #GuiTooltipBlock
---
+---@class GuiTooltipBlock
 GuiTooltipBlock = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
 end)
 
 -------------------------------------------------------------------------------
--- Create tooltip
---
--- @function [parent=#GuiTooltipBlock] create
---
+---Create tooltip
+---@return table
 function GuiTooltipBlock:create()
   local tooltip = self._super.create(self)
   if self.m_element then
@@ -572,21 +498,15 @@ function GuiTooltipBlock:create()
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] constructor
--- @param #arg name
--- @return #GuiTooltipModule
---
+---@class GuiTooltipModule
 GuiTooltipModule = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
 end)
 
 -------------------------------------------------------------------------------
--- Create tooltip
---
--- @function [parent=#GuiTooltipModule] create
---
+---Create tooltip
+---@return table
 function GuiTooltipModule:create()
   local tooltip = self._super.create(self)
   if self.m_element then
@@ -626,21 +546,15 @@ function GuiTooltipModule:create()
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTooltip] constructor
--- @param #arg name
--- @return #GuiTooltipPriority
---
+---@class GuiTooltipPriority
 GuiTooltipPriority = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
 end)
 
 -------------------------------------------------------------------------------
--- Create tooltip
---
--- @function [parent=#GuiTooltipModule] create
---
+---Create tooltip
+---@return table
 function GuiTooltipPriority:create()
   local tooltip = self._super.create(self)
   if self.m_element then

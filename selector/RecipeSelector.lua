@@ -1,17 +1,17 @@
 require "selector.AbstractSelector"
 -------------------------------------------------------------------------------
--- Class to build recipe selector
+---Class to build recipe selector
 --
--- @module RecipeSelector
--- @extends #AbstractSelector
+---@module RecipeSelector
+---@extends #AbstractSelector
 --
 
 RecipeSelector = newclass(AbstractSelector)
 
 -------------------------------------------------------------------------------
--- After initialization
+---After initialization
 --
--- @function [parent=#RecipeSelector] afterInit
+---@function [parent=#RecipeSelector] afterInit
 --
 function RecipeSelector:afterInit()
   self.unlock_recipe = true
@@ -22,42 +22,28 @@ function RecipeSelector:afterInit()
 end
 
 -------------------------------------------------------------------------------
--- Return caption
---
--- @function [parent=#RecipeSelector] getCaption
---
--- @param #Controller parent parent controller
---
-function RecipeSelector:getCaption(parent)
+---Return caption
+---@return table
+function RecipeSelector:getCaption()
   return {"helmod_selector-panel.recipe-title"}
 end
 
 -------------------------------------------------------------------------------
--- Get prototype
---
--- @function [parent=#RecipeSelector] getPrototype
---
--- @param element
--- @param type
---
--- @return #table
---
+---Get prototype
+---@param element table
+---@param type string
+---@return table
 function RecipeSelector:getPrototype(element, type)
   return RecipePrototype(element, type)
 end
 
 -------------------------------------------------------------------------------
--- Append groups
---
--- @function [parent=#RecipeSelector] appendGroups
---
--- @param #string element
--- @param #string type
--- @param #table list_products
--- @param #table list_ingredients
--- @param #table list_translate
--- 
-
+---Append groups
+---@param element string
+---@param type string
+---@param list_products table
+---@param list_ingredients table
+---@param list_translate table
 function RecipeSelector:appendGroups(element, type, list_products, list_ingredients, list_translate)
   local prototype = self:getPrototype(element, type)
   local has_burnt_result = false
@@ -83,14 +69,10 @@ function RecipeSelector:appendGroups(element, type, list_products, list_ingredie
 end
 
 -------------------------------------------------------------------------------
--- Update groups
---
--- @function [parent=#RecipeSelector] updateGroups
---
--- @param #table list_products
--- @param #table list_ingredients
--- @param #table list_translate
---
+---Update groups
+---@param list_products table
+---@param list_ingredients table
+---@param list_translate table
 function RecipeSelector:updateGroups(list_products, list_ingredients, list_translate)
   RecipeSelector:updateUnlockRecipesCache()
   for key, recipe in pairs(Player.getRecipePrototypes()) do
@@ -113,10 +95,7 @@ function RecipeSelector:updateGroups(list_products, list_ingredients, list_trans
 end
 
 -------------------------------------------------------------------------------
--- Update unlock recipes cache
---
--- @function [parent=#User] updateUnlockRecipesCache
---
+---Update unlock recipes cache
 function RecipeSelector:updateUnlockRecipesCache()
   local unlock_recipes = {}
   local filters = {{filter = "hidden", invert = true, mode = "or"},{filter = "has-effects", invert = false, mode = "and"}}
@@ -139,13 +118,11 @@ end
 
 
 -------------------------------------------------------------------------------
--- Create prototype icon
---
--- @function [parent=#RecipeSelector] buildPrototypeIcon
---
--- @param #table prototype
---
-function RecipeSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
+---Create prototype icon
+---@param gui_element GuiLuaElement
+---@param prototype table
+---@param tooltip table
+function RecipeSelector:buildPrototypeIcon(gui_element, prototype, tooltip)
   local model, block, recipe = self:getParameterObjects()
   local recipe_prototype = self:getPrototype(prototype)
   local color = nil
@@ -157,7 +134,7 @@ function RecipeSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
   local block_id = "new"
   if block ~= nil then block_id = block.id end
   local button_prototype = GuiButtonSelectSprite(self.classname, "element-select", prototype.type):choose(prototype.type, prototype.name):color(color)
-  local button = GuiElement.add(guiElement, button_prototype)
+  local button = GuiElement.add(gui_element, button_prototype)
   button.locked = true
   GuiElement.infoRecipe(button, prototype)
 end

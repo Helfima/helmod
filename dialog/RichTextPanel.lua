@@ -1,31 +1,20 @@
 -------------------------------------------------------------------------------
--- Class to build pin tab dialog
---
--- @module RichTextPanel
--- @extends #Form
---
-
+---Class to build pin tab dialog
+---@class RichTextPanel
 RichTextPanel = newclass(Form)
 
 -------------------------------------------------------------------------------
--- On initialization
---
--- @function [parent=#RichTextPanel] onInit
---
+---On initialization
 function RichTextPanel:onInit()
   self.panelCaption = ({"helmod_panel.richtext"})
   self.otherClose = false
 end
 
 -------------------------------------------------------------------------------
--- On Style
---
--- @function [parent=#RichTextPanel] onStyle
---
--- @param #table styles
--- @param #number width_main
--- @param #number height_main
---
+---On Style
+---@param styles table
+---@param width_main number
+---@param height_main number
 function RichTextPanel:onStyle(styles, width_main, height_main)
   styles.flow_panel = {
     minimal_width = 322,
@@ -36,34 +25,22 @@ function RichTextPanel:onStyle(styles, width_main, height_main)
 end
 
 ------------------------------------------------------------------------------
--- Get Button Sprites
---
--- @function [parent=#RichTextPanel] getButtonSprites
---
--- @return boolean
---
+---Get Button Sprites
+---@return string, string
 function RichTextPanel:getButtonSprites()
   return "text-white","text"
 end
 
 -------------------------------------------------------------------------------
--- Is tool
---
--- @function [parent=#RichTextPanel] isTool
---
--- @return boolean
---
+---Is tool
+---@return boolean
 function RichTextPanel:isTool()
   return true
 end
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#RichTextPanel] onUpdate
---
--- @param #LuaEvent event
---
+---On update
+---@param event LuaEvent
 function RichTextPanel:onUpdate(event)
   self:updateHeader(event)
   self:updateInput(event)
@@ -71,12 +48,8 @@ function RichTextPanel:onUpdate(event)
 end
 
 -------------------------------------------------------------------------------
--- Update information
---
--- @function [parent=#RichTextPanel] updateHeader
---
--- @param #LuaEvent event
---
+---Update information
+---@param event LuaEvent
 function RichTextPanel:updateHeader(event)
   local header_panel = self:getTopPanel()
   header_panel.clear()
@@ -98,18 +71,14 @@ function RichTextPanel:updateHeader(event)
 end
 
 -------------------------------------------------------------------------------
--- Update input
---
--- @function [parent=#RichTextPanel] updateInput
---
--- @param #LuaEvent event
---
+---Update input
+---@param event LuaEvent
 function RichTextPanel:updateInput(event)
   local input_panel = self:getFramePanel("input-panel")
   local richtext_text = User.getParameter("richtext_text")
   input_panel.clear()
 
-  -- rich text
+  ---rich text
   local text_panel = GuiElement.add(input_panel, GuiTable("text_panel"):column(3))
   text_panel.style.cell_padding = 3
   local text_field = GuiElement.add(text_panel, GuiTextField(self.classname, "input-text", "onchange"):text(richtext_text))
@@ -121,19 +90,15 @@ function RichTextPanel:updateInput(event)
 end
 
 -------------------------------------------------------------------------------
--- Update history
---
--- @function [parent=#RichTextPanel] updateHistory
---
--- @param #LuaEvent event
---
+---Update history
+---@param event LuaEvent
 function RichTextPanel:updateHistory(event)
   local history_panel = self:getScrollPanel("history-panel")
   local richtext_text = User.getParameter("richtext_text")
   history_panel.clear()
   history_panel.style.vertically_stretchable = true
 
-  -- history
+  ---history
   local richtext_history = User.getParameter("richtext_history") or {}
   local table_panel = GuiElement.add(history_panel, GuiTable("table_panel"):column(2))
   for index,value in pairs(richtext_history) do
@@ -144,12 +109,8 @@ function RichTextPanel:updateHistory(event)
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#RichTextPanel] onEvent
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
 function RichTextPanel:onEvent(event)
   if event.action == "element-select" then
     local element_type = event.element.elem_type

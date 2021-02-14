@@ -1,30 +1,19 @@
 -------------------------------------------------------------------------------
--- Class to build product edition dialog
---
--- @module ModelEdition
--- @extends #AbstractEdition
---
-
+---Class to build product edition dialog
+---@class ModelEdition
 ModelEdition = newclass(FormModel)
 
 -------------------------------------------------------------------------------
--- On initialization
---
--- @function [parent=#ModelEdition] onInit
---
+---On initialization
 function ModelEdition:onInit()
   self.panelCaption = ({"helmod_panel.model-edition"})
 end
 
 -------------------------------------------------------------------------------
--- On Style
---
--- @function [parent=#ModelEdition] onStyle
---
--- @param #table styles
--- @param #number width_main
--- @param #number height_main
---
+---On Style
+---@param styles table
+---@param width_main number
+---@param height_main number
 function ModelEdition:onStyle(styles, width_main, height_main)
   styles.flow_panel = {
     minimal_height = 500,
@@ -33,21 +22,14 @@ function ModelEdition:onStyle(styles, width_main, height_main)
 end
 
 -------------------------------------------------------------------------------
--- On Bind Dispatcher
---
--- @function [parent=#ModelEdition] onBind
---
+---On Bind Dispatcher
 function ModelEdition:onBind()
   Dispatcher:bind("on_gui_refresh", self, self.update)
 end
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#ModelEdition] onUpdate
---
--- @param #LuaEvent event
---
+---On update
+---@param event LuaEvent
 function ModelEdition:onUpdate(event)
   self:updateInfo(event)
   self:updateShare(event)
@@ -55,12 +37,8 @@ function ModelEdition:onUpdate(event)
 end
 
 -------------------------------------------------------------------------------
--- Update information
---
--- @function [parent=#ModelEdition] updateInfo
---
--- @param #LuaEvent event
---
+---Update information
+---@param event LuaEvent
 function ModelEdition:updateInfo(event)
   local model = self:getParameterObjects()
   local info_panel = self:getFramePanel("information")
@@ -76,12 +54,8 @@ function ModelEdition:updateInfo(event)
 end
 
 -------------------------------------------------------------------------------
--- Update share
---
--- @function [parent=#ModelEdition] updateShare
---
--- @param #LuaEvent event
---
+---Update share
+---@param event LuaEvent
 function ModelEdition:updateShare(event)
   local model = self:getParameterObjects()
   local share_panel = self:getFramePanel("share")
@@ -109,12 +83,8 @@ function ModelEdition:updateShare(event)
 end
 
 -------------------------------------------------------------------------------
--- Update note
---
--- @function [parent=#ModelEdition] updateNote
---
--- @param #LuaEvent event
---
+---Update note
+---@param event LuaEvent
 function ModelEdition:updateNote(event)
   local model = self:getParameterObjects()
   local note_panel = self:getFramePanel("note")
@@ -132,12 +102,8 @@ function ModelEdition:updateNote(event)
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#ModelEdition] onEvent
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
 function ModelEdition:onEvent(event)
   local model = self:getParameterObjects()
   if User.isWriter(model) then

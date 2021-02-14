@@ -1,15 +1,6 @@
 -------------------------------------------------------------------------------
--- Class to help to build GuiButton
---
--- @module GuiButton
---
-
--------------------------------------------------------------------------------
---
--- @function [parent=#GuiButton] constructor
--- @param #arg name
--- @return #GuiButton
---
+---Class to help to build GuiButton
+---@class GuiButton
 GuiButton = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiButton"
@@ -18,13 +9,11 @@ GuiButton = newclass(GuiElement,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiButton] sprite
--- @param #string type
--- @param #string name
--- @param #string hovered (change au survole)
--- @return #GuiButton
---
+---Set Sprite
+---@param type string
+---@param name string
+---@param hovered string
+---@return GuiButton
 function GuiButton:sprite(type, name, hovered)
   self.options.type = "sprite-button"
   self.is_caption = false
@@ -51,45 +40,37 @@ function GuiButton:sprite(type, name, hovered)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiButton] option
--- @param #string name
--- @param #string value
--- @return #GuiButton
---
+---Set option
+---@param name string
+---@param value any
+---@return GuiButton
 function GuiButton:option(name, value)
   self.options[name] = value
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiButton] index
--- @param #number index
--- @return #GuiButton
---
+---Set index
+---@param index number
+---@return GuiButton
 function GuiButton:index(index)
   self.m_index = index
   return self
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiButton] number
--- @param #number value
--- @return #GuiButton
---
+---Set index
+---@param value number
+---@return GuiButton
 function GuiButton:number(value)
   self.options.number = value
   return self
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiButton] choose
--- @param #string type
--- @param #string name
--- @return #GuiButton
---
+---Set Choose button style
+---@param type string
+---@param name string
+---@return GuiButton
 function GuiButton:choose(type, name)
   self.options.type = "choose-elem-button"
   --self.options.style = "slot_button"
@@ -103,10 +84,8 @@ function GuiButton:choose(type, name)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiButton] onErrorOptions
--- @return #table
---
+---Get options
+---@return table
 function GuiButton:onErrorOptions()
   local options = self:getOptions()
   options.style = "helmod_button_default"
@@ -122,11 +101,7 @@ function GuiButton:onErrorOptions()
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiButton] constructor
--- @param #arg name
--- @return #GuiButtonSprite
---
+---@class GuiButtonSprite
 GuiButtonSprite = newclass(GuiButton,function(base,...)
   GuiButton.init(base,...)
   base.options.style = "helmod_button_icon"
@@ -134,11 +109,7 @@ GuiButtonSprite = newclass(GuiButton,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiButton] constructor
--- @param #arg name
--- @return #GuiButtonSelectSprite
---
+---@class GuiButtonSelectSprite
 GuiButtonSelectSprite = newclass(GuiButton,function(base,...)
   GuiButton.init(base,...)
   base.options.style = "helmod_button_select_icon"
@@ -146,11 +117,9 @@ GuiButtonSelectSprite = newclass(GuiButton,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiButton] color
--- @param #string color
--- @return #GuiButtonSelectSprite
---
+---Set color
+---@param color string
+---@return GuiButtonSelectSprite
 function GuiButtonSelectSprite:color(color)
   local style = "helmod_button_select_icon"
   if color == "red" then style = "helmod_button_select_icon_red" end
@@ -162,11 +131,7 @@ function GuiButtonSelectSprite:color(color)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiButton] constructor
--- @param #arg name
--- @return #GuiButtonSpriteM
---
+---@class GuiButtonSpriteM
 GuiButtonSpriteM = newclass(GuiButton,function(base,...)
   GuiButton.init(base,...)
   base.options.style = "helmod_button_icon_m"
@@ -174,11 +139,7 @@ GuiButtonSpriteM = newclass(GuiButton,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiButton] constructor
--- @param #arg name
--- @return #GuiButtonSelectSpriteM
---
+---@class GuiButtonSelectSpriteM
 GuiButtonSelectSpriteM = newclass(GuiButton,function(base,...)
   GuiButton.init(base,...)
   base.options.style = "helmod_button_select_icon_m"
@@ -186,11 +147,9 @@ GuiButtonSelectSpriteM = newclass(GuiButton,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiButton] color
--- @param #string color
--- @return #GuiButtonSelectSpriteM
---
+---Set color
+---@param color string
+---@return GuiButtonSelectSpriteM
 function GuiButtonSelectSpriteM:color(color)
   local style = "helmod_button_select_icon_m"
   if color == "red" then style = "helmod_button_select_icon_m_red" end
@@ -202,11 +161,7 @@ function GuiButtonSelectSpriteM:color(color)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiButton] constructor
--- @param #arg name
--- @return #GuiButtonSpriteSm
---
+---@class GuiButtonSpriteSm
 GuiButtonSpriteSm = newclass(GuiButton,function(base,...)
   GuiButton.init(base,...)
   base.options.style = "helmod_button_icon_sm"
@@ -214,11 +169,7 @@ GuiButtonSpriteSm = newclass(GuiButton,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiButton] constructor
--- @param #arg name
--- @return #GuiButtonSelectSpriteSm
---
+---@class GuiButtonSelectSpriteSm
 GuiButtonSelectSpriteSm = newclass(GuiButton,function(base,...)
   GuiButton.init(base,...)
   base.options.style = "helmod_button_select_icon_sm"
@@ -226,11 +177,9 @@ GuiButtonSelectSpriteSm = newclass(GuiButton,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiButton] color
--- @param #string color
--- @return #GuiButtonSelectSpriteSm
---
+---Set color
+---@param color string
+---@return GuiButtonSelectSpriteSm
 function GuiButtonSelectSpriteSm:color(color)
   local style = "helmod_button_select_icon_sm"
   if color == "red" then style = "helmod_button_select_icon_sm_red" end
@@ -242,11 +191,7 @@ function GuiButtonSelectSpriteSm:color(color)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiButton] constructor
--- @param #arg name
--- @return #GuiButtonSpriteXxl
---
+---@class GuiButtonSpriteXxl
 GuiButtonSpriteXxl = newclass(GuiButton,function(base,...)
   GuiButton.init(base,...)
   base.options.style = "helmod_button_icon_xxl"
@@ -254,11 +199,7 @@ GuiButtonSpriteXxl = newclass(GuiButton,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiButton] constructor
--- @param #arg name
--- @return #GuiButtonSelectSpriteXxl
---
+---@class GuiButtonSelectSpriteXxl
 GuiButtonSelectSpriteXxl = newclass(GuiButton,function(base,...)
   GuiButton.init(base,...)
   base.options.style = "helmod_button_select_icon_xxl"
@@ -266,11 +207,9 @@ GuiButtonSelectSpriteXxl = newclass(GuiButton,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiButton] color
--- @param #string color
--- @return #GuiButtonSelectSpriteXxl
---
+---Set color
+---@param color string
+---@return GuiButtonSelectSpriteXxl
 function GuiButtonSelectSpriteXxl:color(color)
   local style = "helmod_button_select_icon_xxl"
   if color == "red" then style = "helmod_button_select_icon_xxl_red" end
@@ -279,8 +218,3 @@ function GuiButtonSelectSpriteXxl:color(color)
   self.options.style = style
   return self
 end
-
-
-
-
-

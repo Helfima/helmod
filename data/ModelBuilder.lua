@@ -1,30 +1,26 @@
 ------------------------------------------------------------------------------
--- Description of the module.
--- @module ModelBuilder
---
+---Description of the module.
+---@class ModelBuilder
 local ModelBuilder = {
-  -- single-line comment
+  ---single-line comment
   classname = "HMModelBuilder"
 }
 
 -------------------------------------------------------------------------------
--- Add a recipe into production block
---
--- @function [parent=#ModelBuilder] addRecipeIntoProductionBlock
---
--- @param #string key recipe name
--- @param #string type recipe type
--- @param #number index
---
--- @return recipe
---
+---Add a recipe into production block
+---@param model table
+---@param block table
+---@param recipe_name string
+---@param recipe_type string
+---@param index number
+---@return table, table
 function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, recipe_type, index)
   local recipe_prototype = RecipePrototype(recipe_name, recipe_type)
   local lua_recipe = recipe_prototype:native()
 
   if lua_recipe ~= nil then
     local block_types = true
-    -- ajoute le bloc si il n'existe pas
+    ---ajoute le bloc si il n'existe pas
     if block == nil or (block.isEnergy ~= true and recipe_type == "energy") or (block.isEnergy == true and recipe_type ~= "energy") then
       local modelBlock = Model.newBlock(model, lua_recipe)
       local block_index = table.size(model.blocks)
@@ -33,12 +29,12 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
       modelBlock.unlinked = false
       block = modelBlock
       model.blocks[modelBlock.id] = modelBlock
-      -- check si le block est independant
+      ---check si le block est independant
       ModelCompute.checkUnlinkedBlock(model, modelBlock)
       block_types = false
     end
 
-    -- ajoute le recipe si il n'existe pas
+    ---ajoute le recipe si il n'existe pas
     local ModelRecipe = Model.newRecipe(model, lua_recipe.name, recipe_type)
     if not(block_types) then
       block.type = ModelRecipe.type
@@ -55,7 +51,7 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
       end
     end
     ModelRecipe.count = 1
-    -- ajoute les produits du block
+    ---ajoute les produits du block
     for _, lua_product in pairs(recipe_prototype:getProducts()) do
       local product = Product(lua_product):clone()
       if block.products[lua_product.name] == nil then
@@ -68,7 +64,7 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
       end
     end
 
-    -- ajoute les ingredients du block
+    ---ajoute les ingredients du block
     for _, lua_ingredient in pairs(recipe_prototype:getIngredients()) do
       local ingredient = Product(lua_ingredient):clone()
       if block.ingredients[lua_ingredient.name] == nil then
@@ -117,12 +113,11 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
 end
 
 -------------------------------------------------------------------------------
--- Remove a model
---
--- @function [parent=#ModelBuilder] removeModel
---
--- @param #number model_id
---
+---Remove a model
+---@param model table
+---@param block table
+---@param recipe table
+---@param with_below boolean
 function ModelBuilder.convertRecipeToblock(model, block, recipe, with_below)
   local new_block = Model.newBlock(model, recipe)
   local block_index = table.size(model.blocks)
@@ -136,9 +131,9 @@ function ModelBuilder.convertRecipeToblock(model, block, recipe, with_below)
   local start_index = recipe.index
   for _, block_recipe in spairs(block.recipes, sorter) do
     if block_recipe.index >= start_index then
-      -- clean block
+      ---clean block
       block.recipes[block_recipe.id]=nil
-      -- add recipe
+      ---add recipe
       block_recipe.index = table.size(new_block.recipes)
       new_block.recipes[block_recipe.id]=block_recipe
 
@@ -150,28 +145,21 @@ function ModelBuilder.convertRecipeToblock(model, block, recipe, with_below)
   local block_products, block_ingredients = ModelCompute.prepareBlock(new_block)
   new_block.products = block_products
   new_block.ingredients = block_ingredients
-  -- check si le block est independant
+  ---check si le block est independant
   ModelCompute.checkUnlinkedBlock(model, new_block)
 end
 
 -------------------------------------------------------------------------------
--- Remove a model
---
--- @function [parent=#ModelBuilder] removeModel
---
--- @param #number model_id
---
+---Remove a model
+---@param model_id string
 function ModelBuilder.removeModel(model_id)
   global.models[model_id] = nil
 end
 
 -------------------------------------------------------------------------------
--- Update recipe production
---
--- @function [parent=#ModelBuilder] updateRecipeProduction
---
--- @param #number production
---
+---Update recipe production
+---@param recipe table
+---@param production number
 function ModelBuilder.updateRecipeProduction(recipe, production)
   if recipe ~= nil then
     recipe.production = production
@@ -179,12 +167,8 @@ function ModelBuilder.updateRecipeProduction(recipe, production)
 end
 
 -------------------------------------------------------------------------------
--- Update temperature factory
---
--- @function [parent=#ModelBuilder] updateFactoryTemperature
---
--- @param #table recipe
---
+---Update temperature factory
+---@param recipe table
 function ModelBuilder.updateFactoryTemperature(recipe)
   if recipe ~= nil then
     recipe.factory.temperature_enabled = not(recipe.factory.temperature_enabled)
@@ -192,13 +176,9 @@ function ModelBuilder.updateFactoryTemperature(recipe)
 end
 
 -------------------------------------------------------------------------------
--- Update a factory number
---
--- @function [parent=#ModelBuilder] updateFactoryNumber
---
--- @param #table recipe
--- @param #number value
---
+---Update a factory number
+---@param recipe table
+---@param value any
 function ModelBuilder.updateFactoryNumber(recipe, value)
   if recipe ~= nil then
     if value == 0 then
@@ -210,13 +190,9 @@ function ModelBuilder.updateFactoryNumber(recipe, value)
 end
 
 -------------------------------------------------------------------------------
--- Update a factory limit
---
--- @function [parent=#ModelBuilder] updateFactoryLimit
---
--- @param #table recipe
--- @param #number value
---
+---Update a factory limit
+---@param recipe table
+---@param value any
 function ModelBuilder.updateFactoryLimit(recipe, value)
   if recipe ~= nil then
     if value == 0 then
@@ -228,13 +204,9 @@ function ModelBuilder.updateFactoryLimit(recipe, value)
 end
 
 -------------------------------------------------------------------------------
--- Update block matrix solver
---
--- @function [parent=#ModelBuilder] updateBlockMatrixSolver
---
--- @param #table block
--- @param #number value
---
+---Update block matrix solver
+---@param block table
+---@param value any
 function ModelBuilder.updateBlockMatrixSolver(block, value)
   if block ~= nil then
     block.solver = value
@@ -242,13 +214,9 @@ function ModelBuilder.updateBlockMatrixSolver(block, value)
 end
 
 -------------------------------------------------------------------------------
--- Update recipe matrix solver
---
--- @function [parent=#ModelBuilder] updateMatrixSolver
---
--- @param #table block
--- @param #table recipe
---
+---Update recipe matrix solver
+---@param block table
+---@param recipe table
 function ModelBuilder.updateMatrixSolver(block, recipe)
   if block ~= nil then
     local recipes = block.recipes
@@ -280,12 +248,9 @@ function ModelBuilder.updateMatrixSolver(block, recipe)
 end
 
 -------------------------------------------------------------------------------
--- Update a factory
---
--- @function [parent=#ModelBuilder] updateTemperatureFactory
---
--- @param #number value
---
+---Update a factory
+---@param recipe table
+---@param value any
 function ModelBuilder.updateTemperatureFactory(recipe, value)
   if recipe ~= nil then
     recipe.factory.temperature = value or 0
@@ -293,13 +258,9 @@ function ModelBuilder.updateTemperatureFactory(recipe, value)
 end
 
 -------------------------------------------------------------------------------
--- Update a factory
---
--- @function [parent=#ModelBuilder] updateFuelFactory
---
--- @param #table recipe
--- @param #string fuel_name
---
+---Update a factory
+---@param recipe table
+---@param fuel_name string
 function ModelBuilder.updateFuelFactory(recipe, fuel_name)
   if recipe ~= nil and fuel_name ~= nil then
     recipe.factory.fuel = fuel_name or "coal"
@@ -307,12 +268,9 @@ function ModelBuilder.updateFuelFactory(recipe, fuel_name)
 end
 
 -------------------------------------------------------------------------------
--- Convert factory modules to a prority module
---
--- @function [parent=#ModelBuilder] convertModuleToPriority
---
--- @param #string factory
---
+---Convert factory modules to a prority module
+---@param factory table
+---@return table
 function ModelBuilder.convertModuleToPriority(factory)
   local module_priority = {}
   for name,value in pairs(factory.modules or {}) do
@@ -322,14 +280,11 @@ function ModelBuilder.convertModuleToPriority(factory)
 end
 
 -------------------------------------------------------------------------------
--- Add a module to prority module
---
--- @function [parent=#ModelBuilder] addModulePriority
---
--- @param #string factory
--- @param #string module_name
--- @param #boolean module_max
---
+---Add a module to prority module
+---@param factory table
+---@param module_name string
+---@param module_max number
+---@return table
 function ModelBuilder.addModulePriority(factory, module_name, module_max)
   local module_priority = ModelBuilder.convertModuleToPriority(factory)
   local factory_prototype = EntityPrototype(factory)
@@ -339,7 +294,7 @@ function ModelBuilder.addModulePriority(factory, module_name, module_max)
       count = factory_prototype:getModuleInventorySize() - Model.countModulesModel(factory)
     end
     local success = false
-    -- parcours la priorite
+    ---parcours la priorite
     for i,priority in pairs(module_priority) do
       if priority.name == module_name then
         priority.value = priority.value + count
@@ -354,17 +309,14 @@ function ModelBuilder.addModulePriority(factory, module_name, module_max)
 end
 
 -------------------------------------------------------------------------------
--- Remove module priority
---
--- @function [parent=#ModelBuilder] removeModulePriority
---
--- @param #table factory
--- @param #string module_name
--- @param #boolean module_max
---
+---Remove module priority
+---@param factory table
+---@param module_name string
+---@param module_max number
+---@return table
 function ModelBuilder.removeModulePriority(factory, module_name, module_max)
   local module_priority = ModelBuilder.convertModuleToPriority(factory)
-  -- parcours la priorite
+  ---parcours la priorite
   local index = nil
   for i,priority in pairs(module_priority) do
     if priority.name == module_name then
@@ -383,14 +335,10 @@ end
 
 
 -------------------------------------------------------------------------------
--- Add a module in factory
---
--- @function [parent=#ModelBuilder] addFactoryModule
---
--- @param #table recipe
--- @param #string module_name
--- @param #boolean module_max
---
+---Add a module in factory
+---@param recipe table
+---@param module_name string
+---@param module_max number
 function ModelBuilder.addFactoryModule(recipe, module_name, module_max)
   local module = ItemPrototype(module_name)
   if recipe ~= nil and module:native() ~= nil then
@@ -402,14 +350,11 @@ function ModelBuilder.addFactoryModule(recipe, module_name, module_max)
 end
 
 -------------------------------------------------------------------------------
--- Set a module in factory
---
--- @function [parent=#ModelBuilder] setFactoryModule
---
--- @param #table recipe
--- @param #string module_name
--- @param #number module_value
---
+---Set a module in factory
+---@param recipe table
+---@param module_name string
+---@param module_value number
+---@return boolean
 function ModelBuilder.setFactoryModule(recipe, module_name, module_value)
   if recipe ~= nil then
     return ModelBuilder.setModuleModel(recipe.factory, module_name, module_value)
@@ -418,13 +363,9 @@ function ModelBuilder.setFactoryModule(recipe, module_name, module_value)
 end
 
 -------------------------------------------------------------------------------
--- Set a module priority
---
--- @function [parent=#ModelBuilder] setModulePriority
---
--- @param #table element
--- @param #table module_priority
---
+---Set a module priority
+---@param element table
+---@param module_priority table
 function ModelBuilder.setModulePriority(element, module_priority)
   if element ~= nil then
     for i,priority in pairs(module_priority) do
@@ -438,13 +379,9 @@ function ModelBuilder.setModulePriority(element, module_priority)
 end
 
 -------------------------------------------------------------------------------
--- Set a module priority in factory
---
--- @function [parent=#ModelBuilder] setFactoryModulePriority
---
--- @param #table recipe
--- @param #table module_priority
---
+---Set a module priority in factory
+---@param recipe table
+---@param module_priority table
 function ModelBuilder.setFactoryModulePriority(recipe, module_priority)
   if recipe ~= nil then
     recipe.factory.modules = {}
@@ -469,10 +406,8 @@ function ModelBuilder.setFactoryModulePriority(recipe, module_priority)
 end
 
 -------------------------------------------------------------------------------
--- Apply a module priority in factory
---
--- @function [parent=#ModelBuilder] applyFactoryModulePriority
---
+---Apply a module priority in factory
+---@param recipe table
 function ModelBuilder.applyFactoryModulePriority(recipe)
   if recipe ~= nil then
     local module_priority = recipe.factory.module_priority
@@ -496,13 +431,9 @@ function ModelBuilder.applyFactoryModulePriority(recipe)
 end
 
 -------------------------------------------------------------------------------
--- Set a module priority in beacon
---
--- @function [parent=#ModelBuilder] setBeaconModulePriority
---
--- @param #table recipe
--- @param #table module_priority
---
+---Set a module priority in beacon
+---@param recipe table
+---@param module_priority table
 function ModelBuilder.setBeaconModulePriority(recipe, module_priority)
   if recipe ~= nil then
     recipe.beacon.modules = {}
@@ -527,13 +458,9 @@ function ModelBuilder.setBeaconModulePriority(recipe, module_priority)
 end
 
 -------------------------------------------------------------------------------
--- Set factory block
---
--- @function [parent=#ModelBuilder] setFactoryBlock
---
--- @param #string block_id
--- @param #table current_recipe recipe
---
+---Set factory block
+---@param block table
+---@param current_recipe table
 function ModelBuilder.setFactoryBlock(block, current_recipe)
   if current_recipe ~= nil then
     local default_factory_mode = User.getParameter("default_factory_mode")
@@ -551,13 +478,9 @@ function ModelBuilder.setFactoryBlock(block, current_recipe)
 end
 
 -------------------------------------------------------------------------------
--- Set factory line
---
--- @function [parent=#ModelBuilder] setFactoryLine
---
--- @param #table model
--- @param #table current_recipe
---
+---Set factory line
+---@param model table
+---@param current_recipe table
 function ModelBuilder.setFactoryLine(model, current_recipe)
   if current_recipe ~= nil then
     for _, block in pairs(model.blocks) do
@@ -567,13 +490,9 @@ function ModelBuilder.setFactoryLine(model, current_recipe)
 end
 
 -------------------------------------------------------------------------------
--- Set factory module block
---
--- @function [parent=#ModelBuilder] setFactoryModuleBlock
---
--- @param #table block
--- @param #table current_recipe
---
+---Set factory module block
+---@param block table
+---@param current_recipe table
 function ModelBuilder.setFactoryModuleBlock(block, current_recipe)
   if current_recipe ~= nil then
     local default_factory_mode = User.getParameter("default_factory_mode")
@@ -587,13 +506,9 @@ function ModelBuilder.setFactoryModuleBlock(block, current_recipe)
 end
 
 -------------------------------------------------------------------------------
--- Set factory module line
---
--- @function [parent=#ModelBuilder] setFactoryModuleLine
---
--- @param #table model
--- @param #table current_recipe
---
+---Set factory module line
+---@param model table
+---@param current_recipe table
 function ModelBuilder.setFactoryModuleLine(model, current_recipe)
   if current_recipe ~= nil then
     for _, block in pairs(model.blocks) do
@@ -603,13 +518,9 @@ function ModelBuilder.setFactoryModuleLine(model, current_recipe)
 end
 
 -------------------------------------------------------------------------------
--- Set beacon block
---
--- @function [parent=#ModelBuilder] setBeaconBlock
---
--- @param #table block
--- @param #table current_recipe recipe
---
+---Set beacon block
+---@param block table
+---@param current_recipe table
 function ModelBuilder.setBeaconBlock(block, current_recipe)
   if current_recipe ~= nil then
     local default_beacon_mode = User.getParameter("default_beacon_mode")
@@ -626,13 +537,9 @@ function ModelBuilder.setBeaconBlock(block, current_recipe)
 end
 
 -------------------------------------------------------------------------------
--- Set beacon line
---
--- @function [parent=#ModelBuilder] setBeaconLine
---
--- @param #table model
--- @param #table current_recipe
---
+---Set beacon line
+---@param model table
+---@param current_recipe any
 function ModelBuilder.setBeaconLine(model, current_recipe)
   if current_recipe ~= nil then
     for _, block in pairs(model.blocks) do
@@ -642,13 +549,9 @@ function ModelBuilder.setBeaconLine(model, current_recipe)
 end
 
 -------------------------------------------------------------------------------
--- Set beacon module block
---
--- @function [parent=#ModelBuilder] setBeaconModuleBlock
---
--- @param #table block
--- @param #table current_recipe recipe
---
+---Set beacon module block
+---@param block table
+---@param current_recipe table
 function ModelBuilder.setBeaconModuleBlock(block, current_recipe)
   if current_recipe ~= nil then
     local default_beacon_mode = User.getParameter("default_beacon_mode")
@@ -662,13 +565,9 @@ function ModelBuilder.setBeaconModuleBlock(block, current_recipe)
 end
 
 -------------------------------------------------------------------------------
--- Set beacon module line
---
--- @function [parent=#ModelBuilder] setBeaconModuleLine
---
--- @param #table model
--- @param #table current_recipe
---
+---Set beacon module line
+---@param model table
+---@param current_recipe table
 function ModelBuilder.setBeaconModuleLine(model, current_recipe)
   if current_recipe ~= nil then
     for _, block in pairs(model.blocks) do
@@ -678,14 +577,10 @@ function ModelBuilder.setBeaconModuleLine(model, current_recipe)
 end
 
 -------------------------------------------------------------------------------
--- Remove a module from factory
---
--- @function [parent=#ModelBuilder] removeFactoryModule
---
--- @param #table recipe
--- @param #string module_name
--- @param #boolean module_max
---
+---Remove a module from factory
+---@param recipe table
+---@param module_name string
+---@param module_max number
 function ModelBuilder.removeFactoryModule(recipe, module_name, module_max)
   local module = ItemPrototype(module_name)
   if recipe ~= nil and module:native() ~= nil then
@@ -695,13 +590,9 @@ function ModelBuilder.removeFactoryModule(recipe, module_name, module_max)
 end
 
 -------------------------------------------------------------------------------
--- Remove a production block
---
--- @function [parent=#ModelBuilder] removeProductionBlock
---
--- @param #table model
--- @param #table block
---
+---Remove a production block
+---@param model table
+---@param block table
 function ModelBuilder.removeProductionBlock(model, block)
   if block ~= nil then
     model.blocks[block.id] = nil
@@ -710,18 +601,14 @@ function ModelBuilder.removeProductionBlock(model, block)
 end
 
 -------------------------------------------------------------------------------
--- Remove a production recipe
---
--- @function [parent=#ModelBuilder] removeProductionRecipe
---
--- @param #table block
--- @param #table recipe
---
+---Remove a production recipe
+---@param block table
+---@param recipe table
 function ModelBuilder.removeProductionRecipe(block, recipe)
   if block ~= nil and block.recipes[recipe.id] ~= nil then
     block.recipes[recipe.id] = nil
     table.reindex_list(block.recipes)
-    -- change block name
+    ---change block name
     local first_recipe = Model.firstRecipe(block.recipes)
     if first_recipe ~= nil then
       block.name = first_recipe.name
@@ -729,15 +616,11 @@ function ModelBuilder.removeProductionRecipe(block, recipe)
   end
 end
 -------------------------------------------------------------------------------
--- Past model
---
--- @function [parent=#ModelBuilder] pastModel
---
--- @param #table into_model
--- @param #table into_block
--- @param #table from_model
--- @param #table from_block
---
+---Past model
+---@param into_model table
+---@param into_block table
+---@param from_model table
+---@param from_block table
 function ModelBuilder.pastModel(into_model, into_block, from_model, from_block)
   if from_model ~= nil then
     if from_block ~= nil then
@@ -749,13 +632,9 @@ function ModelBuilder.pastModel(into_model, into_block, from_model, from_block)
 end
 
 -------------------------------------------------------------------------------
--- Copy model
---
--- @function [parent=#ModelBuilder] copyModel
---
--- @param #table into_model
--- @param #table from_model
---
+---Copy model
+---@param into_model table
+---@param from_model table
 function ModelBuilder.copyModel(into_model, from_model)
   if from_model ~= nil then
     for _,from_block in spairs(from_model.blocks,function(t,a,b) return t[b].index > t[a].index end) do
@@ -765,14 +644,11 @@ function ModelBuilder.copyModel(into_model, from_model)
 end
 
 -------------------------------------------------------------------------------
--- Copy block
---
--- @function [parent=#ModelBuilder] copyBlock
---
--- @param #table into_model
--- @param #table from_model
--- @param #table from_block
---
+---Copy block
+---@param into_model table
+---@param into_block table
+---@param from_model table
+---@param from_block table
 function ModelBuilder.copyBlock(into_model, into_block, from_model, from_block)
   if from_model ~= nil and from_block ~= nil then
     local from_recipe_ids = {}
@@ -784,7 +660,7 @@ function ModelBuilder.copyBlock(into_model, into_block, from_model, from_block)
       local recipe = from_block.recipes[recipe_id]
       local recipe_prototype = RecipePrototype(recipe)
       if recipe_prototype:native() ~= nil then
-        -- ajoute le bloc si il n'existe pas
+        ---ajoute le bloc si il n'existe pas
         if into_block == nil then
           into_block = Model.newBlock(into_model, recipe_prototype:native())
           local index = table.size(into_model.blocks)
@@ -794,7 +670,7 @@ function ModelBuilder.copyBlock(into_model, into_block, from_model, from_block)
           into_block.isEnergy = from_block.isEnergy
           into_block.by_product = from_block.by_product
           
-          -- copy input
+          ---copy input
           if from_block.products ~= nil then
             into_block.products = table.deepcopy(from_block.products)
           end
@@ -846,14 +722,11 @@ function ModelBuilder.copyBlock(into_model, into_block, from_model, from_block)
 end
 
 -------------------------------------------------------------------------------
--- Set module model
---
--- @function [parent=#ModelBuilder] setModuleModel
---
--- @param #table factory
--- @param #string module_name
--- @param #number module_value
---
+---Set module model
+---@param factory table
+---@param module_name string
+---@param module_value number
+---@return boolean
 function ModelBuilder.setModuleModel(factory, module_name, module_value)
   local element_prototype = EntityPrototype(factory)
   if factory.modules ~= nil and factory.modules[module_name] == module_value then return false end
@@ -868,14 +741,11 @@ function ModelBuilder.setModuleModel(factory, module_name, module_value)
 end
 
 -------------------------------------------------------------------------------
--- Append module model
---
--- @function [parent=#ModelBuilder] appendModuleModel
---
--- @param #table factory
--- @param #string module_name
--- @param #number module_value
---
+---Append module model
+---@param factory table
+---@param module_name string
+---@param module_value number
+---@return boolean
 function ModelBuilder.appendModuleModel(factory, module_name, module_value)
   local factory_prototype = EntityPrototype(factory)
   if factory.modules ~= nil and factory.modules[module_name] == module_value then return false end
@@ -893,13 +763,9 @@ function ModelBuilder.appendModuleModel(factory, module_name, module_value)
 end
 
 -------------------------------------------------------------------------------
--- Update a beacon
---
--- @function [parent=#ModelBuilder] updateBeacon
---
--- @param #string recipe
--- @param #table options map attribute/valeur
---
+---Update a beacon
+---@param recipe table
+---@param options table
 function ModelBuilder.updateBeacon(recipe, options)
   if recipe ~= nil then
     if options.combo ~= nil then
@@ -915,14 +781,10 @@ function ModelBuilder.updateBeacon(recipe, options)
 end
 
 -------------------------------------------------------------------------------
--- Add a module in beacon
---
--- @function [parent=#ModelBuilder] addBeaconModule
---
--- @param #table recipe
--- @param #string module_name
--- @param #boolean module_max
---
+---Add a module in beacon
+---@param recipe table
+---@param module_name string
+---@param module_max number
 function ModelBuilder.addBeaconModule(recipe, module_name, module_max)
   local module = ItemPrototype(module_name)
   if recipe ~= nil and module:native() ~= nil then
@@ -934,15 +796,10 @@ function ModelBuilder.addBeaconModule(recipe, module_name, module_max)
 end
 
 -------------------------------------------------------------------------------
--- Remove a module in beacon
---
--- @function [parent=#ModelBuilder] removeBeaconModule
---
--- @param #string block_id
--- @param #string recipe_id
--- @param #string module_name
--- @param #boolean max
---
+---Remove a module in beacon
+---@param recipe table
+---@param module_name string
+---@param module_max numberS
 function ModelBuilder.removeBeaconModule(recipe, module_name, module_max)
   local module = ItemPrototype(module_name)
   if recipe ~= nil and module:native() ~= nil then
@@ -951,12 +808,8 @@ function ModelBuilder.removeBeaconModule(recipe, module_name, module_max)
   end
 end
 -------------------------------------------------------------------------------
--- Unlink a production block
---
--- @function [parent=#ModelBuilder] unlinkProductionBlock
---
--- @param #table block
---
+---Unlink a production block
+---@param block table
 function ModelBuilder.unlinkProductionBlock(block)
   if block ~= nil then
     block.unlinked = not(block.unlinked)
@@ -964,14 +817,10 @@ function ModelBuilder.unlinkProductionBlock(block)
 end
 
 -------------------------------------------------------------------------------
--- Update a product
---
--- @function [parent=#ModelBuilder] updateProduct
---
--- @param #table block
--- @param #string product_name
--- @param #number quantity
---
+---Update a product
+---@param block table
+---@param product_name string
+---@param quantity numberS
 function ModelBuilder.updateProduct(block, product_name, quantity)
   if block ~= nil then
     local block_elements = block.products
@@ -985,14 +834,10 @@ function ModelBuilder.updateProduct(block, product_name, quantity)
 end
 
 -------------------------------------------------------------------------------
--- Update a production block option
---
--- @function [parent=#ModelBuilder] updateProductionBlockOption
---
--- @param #table block
--- @param #string option
--- @param #number value
---
+---Update a production block option
+---@param block table
+---@param option string
+---@param value any
 function ModelBuilder.updateProductionBlockOption(block, option, value)
   if block ~= nil then
     block[option] = value
@@ -1000,14 +845,10 @@ function ModelBuilder.updateProductionBlockOption(block, option, value)
 end
 
 -------------------------------------------------------------------------------
--- Up a production block
---
--- @function [parent=#ModelBuilder] upProductionBlock
---
--- @param #table model
--- @param #table block
--- @param #number step
---
+---Up a production block
+---@param model table
+---@param block table
+---@param step number
 function ModelBuilder.upProductionBlock(model, block, step)
   if model ~= nil and block ~= nil then
     table.up_indexed_list(model.blocks, block.index, step)
@@ -1015,14 +856,10 @@ function ModelBuilder.upProductionBlock(model, block, step)
 end
 
 -------------------------------------------------------------------------------
--- Down a production block
---
--- @function [parent=#ModelBuilder] downProductionBlock
---
--- @param #table model
--- @param #table block
--- @param #number step
---
+---Down a production block
+---@param model table
+---@param block table
+---@param step number
 function ModelBuilder.downProductionBlock(model, block, step)
   if model ~= nil and block ~= nil then
     table.down_indexed_list(model.blocks, block.index, step)
@@ -1030,18 +867,14 @@ function ModelBuilder.downProductionBlock(model, block, step)
 end
 
 -------------------------------------------------------------------------------
--- Up a production recipe
---
--- @function [parent=#ModelBuilder] upProductionRecipe
---
--- @param #table block
--- @param #table recipe
--- @param #number step
---
+---Up a production recipe
+---@param block table
+---@param recipe table
+---@param step number
 function ModelBuilder.upProductionRecipe(block, recipe, step)
   if block ~= nil and block.recipes ~= nil and recipe ~= nil then
     table.up_indexed_list(block.recipes, recipe.index, step)
-    -- change block name
+    ---change block name
     local first_recipe = Model.firstRecipe(block.recipes)
     if first_recipe ~= nil then
       block.name = first_recipe.name
@@ -1050,18 +883,14 @@ function ModelBuilder.upProductionRecipe(block, recipe, step)
 end
 
 -------------------------------------------------------------------------------
--- Down a production recipe
---
--- @function [parent=#ModelBuilder] downProductionRecipe
---
--- @param #table block
--- @param #table recipe
--- @param #number step
---
+---Down a production recipe
+---@param block table
+---@param recipe table
+---@param step number
 function ModelBuilder.downProductionRecipe(block, recipe, step)
   if block ~= nil and block.recipes ~= nil and recipe ~= nil then
     table.down_indexed_list(block.recipes, recipe.index, step)
-    -- change block name
+    ---change block name
     local first_recipe = Model.firstRecipe(block.recipes)
     if first_recipe ~= nil then
       block.name = first_recipe.name
@@ -1070,13 +899,9 @@ function ModelBuilder.downProductionRecipe(block, recipe, step)
 end
 
 -------------------------------------------------------------------------------
--- Update recipe contraint
---
--- @function [parent=#ModelBuilder] updateRecipeContraint
---
--- @param #table recipe
--- @param #table contraint
---
+---Update recipe contraint
+---@param recipe table
+---@param contraint table
 function ModelBuilder.updateRecipeContraint(recipe, contraint)
   if recipe ~= nil then
     if recipe.contraint ~= nil and recipe.contraint.name == contraint.name and recipe.contraint.type == contraint.type then
@@ -1088,13 +913,9 @@ function ModelBuilder.updateRecipeContraint(recipe, contraint)
 end
 
 -------------------------------------------------------------------------------
--- Update recipe Neighbour Bonus
---
--- @function [parent=#ModelBuilder] updateRecipeNeighbourBonus
---
--- @param #table recipe
--- @param #number value
---
+---Update recipe Neighbour Bonus
+---@param recipe table
+---@param value number
 function ModelBuilder.updateRecipeNeighbourBonus(recipe, value)
   if recipe ~= nil then
     recipe.factory.neighbour_bonus = value

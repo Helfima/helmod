@@ -1,122 +1,93 @@
 -------------------------------------------------------------------------------
--- Class to help to build GuiSlider
---
--- @module GuiCell
---
-
--------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] constructor
--- @param #arg name
--- @return #GuiCell
---
+---Class to help to build GuiSlider
+---@class GuiCell
 GuiCell = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiCell"
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] element
--- @param #table element
--- @return #GuiCell
---
+---Set element
+---@param element table
+---@return GuiCell
 function GuiCell:element(element)
   self.element = element
   return self
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] index
--- @param #number index
--- @return #GuiCell
---
+---Set index
+---@param index number
+---@return GuiCell
 function GuiCell:index(index)
   self.m_index = index
   return self
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] color
--- @param #string color
--- @return #GuiCell
---
+---Set color
+---@param color string
+---@return GuiCell
 function GuiCell:color(color)
   self.m_color = color
   return self
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] broken
--- @param #boolean broken
--- @return #GuiCell
---
+---Set broken
+---@param broken boolean
+---@return GuiCell
 function GuiCell:broken(broken)
   self.m_broken = broken
   return self
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] withProductInfo
--- @return #GuiCell
---
+---Set width production information
+---@return GuiCell
 function GuiCell:withProductInfo()
   self.m_with_product_info = true
   return self
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] withLogistic
--- @return #GuiCell
---
+---Set width logistic information
+---@return GuiCell
 function GuiCell:withLogistic()
   self.m_with_logistic = true
   return self
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] infoIcon
--- @param #string type
--- @return #GuiCell
---
+---Set icon information
+---@param type string
+---@return GuiCell
 function GuiCell:infoIcon(type)
   self.m_info_icon = type
   return self
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] contraintIcon
--- @param #string type
--- @return #GuiCell
---
+---Set contraint information
+---@param type string
+---@return GuiCell
 function GuiCell:contraintIcon(type)
   self.m_contraint_icon = type
   return self
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] controlInfo
--- @param #string control_info
--- @return #GuiCell
---
+---Set control information
+---@param control_info string
+---@return GuiCell
 function GuiCell:controlInfo(control_info)
   self.m_with_control_info = control_info
   return self
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] onErrorOptions
--- @return #table
---
+---Get option when error
+---@return table
 function GuiCell:onErrorOptions()
   local options = self:getOptions()
   options.type = "button"
@@ -125,31 +96,27 @@ function GuiCell:onErrorOptions()
 end
 
 -------------------------------------------------------------------------------
--- By Limit
---
--- @function [parent=#GuiCell] byLimit
---
+---Set by_limit information
+---@param by_limit boolean
+---@return GuiCell
 function GuiCell:byLimit(by_limit)
   self.m_by_limit = by_limit
   return self
 end
 
 -------------------------------------------------------------------------------
--- By Limit
---
--- @function [parent=#GuiCell] byLimit
---
+---Set by_limit information
+---@return GuiCell
 function GuiCell:byLimitUri(...)
   self.m_by_limit_uri = table.concat({...},"=")
   return self
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] overlay
--- @param #string type
--- @return #GuiCell
---
+---Set overlay
+---@param type string
+---@param name string
+---@return GuiCell
 function GuiCell:overlay(type, name)
   self.m_overlay_type = type
   self.m_overlay_name = name
@@ -157,10 +124,8 @@ function GuiCell:overlay(type, name)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] add_overlay
--- @return #table
---
+---Add overlay
+---@param button LuaGuiElement
 function GuiCell:add_overlay(button)
   if self.m_overlay_type ~= nil then
     local sprite = GuiElement.getSprite(self.m_overlay_type, self.m_overlay_name)
@@ -169,21 +134,19 @@ function GuiCell:add_overlay(button)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] mask
--- @param #string type
--- @return #GuiCell
---
+---Set mask
+---@param mask boolean
+---@return table
 function GuiCell:mask(mask)
   self.m_mask = mask
-  return self
+  return GuiCell
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] add_mask
--- @return #table
---
+---Add mask
+---@param button LuaGuiElement
+---@param color string
+---@param size number
 function GuiCell:add_mask(button, color, size)
   if self.m_mask == true then
     local mask_frame = GuiElement.add(button, GuiFrameH("layer-mask"):style("helmod_frame_colored", color, 5))
@@ -194,10 +157,9 @@ function GuiCell:add_mask(button, color, size)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] add_infoIcon
--- @return #table
---
+---Add icon information
+---@param button LuaGuiElement
+---@param info_icon string
 function GuiCell:add_infoIcon(button, info_icon)
   local type = info_icon or self.m_info_icon
   if type == nil then return end
@@ -251,10 +213,8 @@ function GuiCell:add_infoIcon(button, info_icon)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] add_contraintIcon
--- @return #table
---
+---Add contraint information
+---@param button LuaGuiElement
 function GuiCell:add_contraintIcon(button)
   if self.m_contraint_icon == nil then return end
   if self.m_contraint_icon == "linked" then 
@@ -273,13 +233,12 @@ function GuiCell:add_contraintIcon(button)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] appendRowLogistic
--- @return #GuiCell
---
+---Add logistic information
+---@param parent LuaGuiElement
+---@param element table
 function GuiCell:add_row_logistic(parent, element)
   local tooltip = {"tooltip.logistic-row-choose"}
-  -- solid logistic
+  ---solid logistic
   if element.type == 0 or element.type == "item" then
     local type = User.getParameter("logistic_row_item") or "belt"
     local item_logistic = Player.getDefaultItemLogistic(type)
@@ -296,7 +255,7 @@ function GuiCell:add_row_logistic(parent, element)
       GuiElement.add(logistic_cell, GuiLabel("label", item_logistic):caption({"", "x", total_value}):style("helmod_label_element"))
     end
   end
-  -- fluid logistic
+  ---fluid logistic
   if element.type == 1 or element.type == "fluid" then
     local type = User.getParameter("logistic_row_fluid") or "pipe"
     local fluid_logistic = Player.getDefaultFluidLogistic(type)
@@ -320,32 +279,22 @@ function GuiCell:add_row_logistic(parent, element)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] constructor
--- @param #arg name
--- @return #GuiCellFactory
---
+---@class GuiCellFactory
 GuiCellFactory = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
 
 -------------------------------------------------------------------------------
--- By Factory
---
--- @function [parent=#GuiCellFactory] byFactory
---
+---By Factory
 function GuiCellFactory:byFactory(...)
   self.m_by_factory = true
   self.m_by_factory_uri = table.concat({...},"=")
 end
 
 -------------------------------------------------------------------------------
--- Create cell
---
--- @function [parent=#GuiCellFactory] create
---
--- @param #LuaGuiElement parent container for element
---
+---Create cell
+---@param parent LuaGuiElement --container for element
+---@return LuaGuiElement
 function GuiCellFactory:create(parent)
   local color = self.m_color or "gray"
   local factory = self.element or {}
@@ -369,7 +318,7 @@ function GuiCellFactory:create(parent)
   if col_size < 2 then col_size = 1 end
   local cell_factory_module = GuiElement.add(row1, GuiTable("factory-modules"):column(col_size):style("helmod_factory_modules"))
 
-  -- modules
+  ---modules
   if factory.modules ~= nil then
     for name, count in pairs(factory.modules) do
       if count > 0 then
@@ -419,22 +368,15 @@ function GuiCellFactory:create(parent)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] constructor
--- @param #arg name
--- @return #GuiCellRecipe
---
+---@class GuiCellRecipe
 GuiCellRecipe = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
 
 -------------------------------------------------------------------------------
--- Create cell
---
--- @function [parent=#GuiCellRecipe] create
---
--- @param #LuaGuiElement parent container for element
---
+---Create cell
+---@param parent LuaGuiElement --container for element
+---@return LuaGuiElement
 function GuiCellRecipe:create(parent)
   local color = self.m_color or "gray"
   local recipe = self.element or {}
@@ -460,22 +402,15 @@ function GuiCellRecipe:create(parent)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] constructor
--- @param #arg name
--- @return #GuiCellProduct
---
+---@class GuiCellProduct
 GuiCellProduct = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
 
 -------------------------------------------------------------------------------
--- Create cell
---
--- @function [parent=#GuiCellProduct] create
---
--- @param #LuaGuiElement parent container for element
---
+---Create cell
+---@param parent LuaGuiElement --container for element
+---@return LuaGuiElement
 function GuiCellProduct:create(parent)
   local color = self.m_color or "gray"
   local element = self.element or {}
@@ -494,22 +429,15 @@ function GuiCellProduct:create(parent)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] constructor
--- @param #arg name
--- @return #GuiCellProductSm
---
+---@class GuiCellProductSm
 GuiCellProductSm = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
 
 -------------------------------------------------------------------------------
--- Create cell
---
--- @function [parent=#GuiCellProductSm] create
---
--- @param #LuaGuiElement parent container for element
---
+---Create cell
+---@param parent LuaGuiElement --container for element
+---@return LuaGuiElement
 function GuiCellProductSm:create(parent)
   local color = self.m_color or "gray"
   local element = self.element or {}
@@ -530,22 +458,15 @@ function GuiCellProductSm:create(parent)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] constructor
--- @param #arg name
--- @return #GuiCellBlock
---
+---@class GuiCellBlock
 GuiCellBlock = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
 
 -------------------------------------------------------------------------------
--- Create cell
---
--- @function [parent=#GuiCellBlock] create
---
--- @param #LuaGuiElement parent container for element
---
+---Create cell
+---@param parent LuaGuiElement --container for element
+---@return LuaGuiElement
 function GuiCellBlock:create(parent)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or "gray"
@@ -582,24 +503,16 @@ function GuiCellBlock:create(parent)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] constructor
--- @param #arg name
--- @return #GuiCellModel
---
+---@class GuiCellModel
 GuiCellModel = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
 
 -------------------------------------------------------------------------------
--- Create cell
---
--- @function [parent=#GuiCellModel] create
---
--- @param #LuaGuiElement parent container for element
---
+---Create cell
+---@param parent LuaGuiElement --container for element
+---@return LuaGuiElement
 function GuiCellModel:create(parent)
-  local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or "gray"
   local element = self.element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
@@ -621,22 +534,15 @@ function GuiCellModel:create(parent)
   return cell
 end
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] constructor
--- @param #arg name
--- @return #GuiCellBlockInfo
---
+---@class GuiCellBlockInfo
 GuiCellBlockInfo = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
 
 -------------------------------------------------------------------------------
--- Create cell
---
--- @function [parent=#GuiCellBlockInfo] create
---
--- @param #LuaGuiElement parent container for element
---
+---Create cell
+---@param parent LuaGuiElement --container for element
+---@return LuaGuiElement
 function GuiCellBlockInfo:create(parent)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or "gray"
@@ -665,22 +571,15 @@ function GuiCellBlockInfo:create(parent)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] constructor
--- @param #arg name
--- @return #GuiCellEnergy
---
+---@class GuiCellEnergy
 GuiCellEnergy = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
 
 -------------------------------------------------------------------------------
--- Create cell
---
--- @function [parent=#GuiCellEnergy] create
---
--- @param #LuaGuiElement parent container for element
---
+---Create cell
+---@param parent LuaGuiElement --container for element
+---@return LuaGuiElement
 function GuiCellEnergy:create(parent)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or "gray"
@@ -708,22 +607,15 @@ function GuiCellEnergy:create(parent)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] constructor
--- @param #arg name
--- @return #GuiCellPollution
---
+---@class GuiCellPollution
 GuiCellPollution = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
 
 -------------------------------------------------------------------------------
--- Create cell
---
--- @function [parent=#GuiCellPollution] create
---
--- @param #LuaGuiElement parent container for element
---
+---Create cell
+---@param parent LuaGuiElement --container for element
+---@return LuaGuiElement
 function GuiCellPollution:create(parent)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or "gray"
@@ -751,22 +643,15 @@ function GuiCellPollution:create(parent)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] constructor
--- @param #arg name
--- @return #GuiCellBuilding
---
+---@class GuiCellBuilding
 GuiCellBuilding = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
 
 -------------------------------------------------------------------------------
--- Create cell
---
--- @function [parent=#GuiCellBuilding] create
---
--- @param #LuaGuiElement parent container for element
---
+---Create cell
+---@param parent LuaGuiElement --container for element
+---@return LuaGuiElement
 function GuiCellBuilding:create(parent)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or "gray"
@@ -794,22 +679,15 @@ function GuiCellBuilding:create(parent)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] constructor
--- @param #arg name
--- @return #GuiCellElement
---
+---@class GuiCellElement
 GuiCellElement = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
 
 -------------------------------------------------------------------------------
--- Create cell
---
--- @function [parent=#GuiCellElement] create
---
--- @param #LuaGuiElement parent container for element
---
+---Create cell
+---@param parent LuaGuiElement --container for element
+---@return LuaGuiElement
 function GuiCellElement:create(parent)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or GuiElement.color_button_none
@@ -854,22 +732,15 @@ function GuiCellElement:create(parent)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] constructor
--- @param #arg name
--- @return #GuiCellElementSm
---
+---@class GuiCellElementSm
 GuiCellElementSm = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
 
 -------------------------------------------------------------------------------
--- Create cell
---
--- @function [parent=#GuiCellElementSm] create
---
--- @param #LuaGuiElement parent container for element
---
+---Create cell
+---@param parent LuaGuiElement --container for element
+---@return LuaGuiElement
 function GuiCellElementSm:create(parent)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or GuiElement.color_button_none
@@ -906,22 +777,15 @@ function GuiCellElementSm:create(parent)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] constructor
--- @param #arg name
--- @return #GuiCellElementM
---
+---@class GuiCellElementM
 GuiCellElementM = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
 
 -------------------------------------------------------------------------------
--- Create cell
---
--- @function [parent=#GuiCellElementM] create
---
--- @param #LuaGuiElement parent container for element
---
+---Create cell
+---@param parent LuaGuiElement --container for element
+---@return LuaGuiElement
 function GuiCellElementM:create(parent)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or GuiElement.color_button_none
@@ -960,33 +824,23 @@ function GuiCellElementM:create(parent)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] constructor
--- @param #arg name
--- @return #GuiCellInput
---
+---@class GuiCellInput
 GuiCellInput = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCellInput] text
--- @param #string text
--- @return #GuiTextField
---
+---Set text
+---@return GuiCellInput
 function GuiCellInput:text(text)
   self.m_text = text
   return self
 end
 
 -------------------------------------------------------------------------------
--- Create cell
---
--- @function [parent=#GuiCellInput] create
---
--- @param #LuaGuiElement parent container for element
---
+---Create cell
+---@param parent LuaGuiElement --container for element
+---@return LuaGuiElement
 function GuiCellInput:create(parent)
   local cell_name = table.clone(self.name)
   table.insert(cell_name, "cell")
@@ -999,22 +853,15 @@ function GuiCellInput:create(parent)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCell] constructor
--- @param #arg name
--- @return #GuiCellLabel
---
+---@class GuiCellLabel
 GuiCellLabel = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
 
 -------------------------------------------------------------------------------
--- Create cell
---
--- @function [parent=#GuiCellLabel] create
---
--- @param #LuaGuiElement parent container for element
---
+---Create cell
+---@param parent LuaGuiElement --container for element
+---@return LuaGuiElement
 function GuiCellLabel:create(parent)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local cell_name = table.clone(self.name)
@@ -1022,19 +869,17 @@ function GuiCellLabel:create(parent)
   local cell = GuiElement.add(parent, GuiTable(unpack(cell_name)))
 
   if display_cell_mod == "small-text"then
-    -- small
+    ---small
     GuiElement.add(cell, GuiLabel("label1"):caption(self.m_caption):style("helmod_label_icon_text_sm"):tooltip({"helmod_common.total"})).style["minimal_width"] = 45
   elseif display_cell_mod == "small-icon" then
-    -- small
+    ---small
     GuiElement.add(cell, GuiLabel("label1"):caption(self.m_caption):style("helmod_label_icon_sm"):tooltip({"helmod_common.total"})).style["minimal_width"] = 45
   elseif display_cell_mod == "by-kilo" then
-    -- by-kilo
+    ---by-kilo
     GuiElement.add(cell, GuiLabel("label1"):caption(self.m_caption):style("helmod_label_row_right"):tooltip({"helmod_common.total"})).style["minimal_width"] = 50
   else
-    -- default
+    ---default
     GuiElement.add(cell, GuiLabel("label1"):caption(self.m_caption):style("helmod_label_row_right"):tooltip({"helmod_common.total"})).style["minimal_width"] = 60
   end
   return cell
 end
-
-

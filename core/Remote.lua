@@ -1,18 +1,13 @@
 ---
--- Description of the module.
--- @module Remote
--- 
+---Description of the module.
+---@class Remote
 local Remote = {
-  -- single-line comment
+  ---single-line comment
   classname = "HMRemote"
 }
 
 -------------------------------------------------------------------------------
--- Close panel
---
--- @function [parent=#Remote] close
---
--- 
+---Close panel
 function Remote.close()
   if game.player.admin then
      Controller.onGuiClick({player_index=game.player.index, element = {valid=true, name="HMController=CLOSE"}})
@@ -20,11 +15,7 @@ function Remote.close()
 end
 
 -------------------------------------------------------------------------------
--- Close panel
---
--- @function [parent=#Remote] test
---
--- 
+---Close panel
 function Remote.test()
   if game.player.admin then
      UnitTest.run({player_index=game.player.index})
@@ -32,10 +23,7 @@ function Remote.test()
 end
 
 -------------------------------------------------------------------------------
--- Clear panel
---
--- @function [parent=#Remote] clear
---
+---Clear panel
 function Remote.clear()
 if game.player.admin then
       for _,player in pairs(game.players) do
@@ -45,22 +33,15 @@ if game.player.admin then
 end
 
 -------------------------------------------------------------------------------
--- Export data
---
--- @function [parent=#Remote] export_data
---
--- @param #number level
--- 
+---Export data
+---@param level number
 function Remote.export_data(level)
     Logging.limit = level or 10
     game.write_file("helmod\\data.json", Logging:objectToString(global), false)
 end
 
 -------------------------------------------------------------------------------
--- cheat
---
--- @function [parent=#Remote] cheat
---
+---cheat
 function Remote.cheat(object, object_type)
 if game.player.admin and Logging.log > 0 then
       game.player.force.enable_all_recipes()

@@ -1,7 +1,5 @@
----
--- Description of the module.
--- @module ItemPrototype
--- 
+-------------------------------------------------------------------------------
+---@class ItemPrototype
 ItemPrototype = newclass(Prototype,function(base, object)
   if object ~= nil and type(object) == "string" then
     Prototype.init(base, Player.getItemPrototype(object))
@@ -12,24 +10,16 @@ ItemPrototype = newclass(Prototype,function(base, object)
 end)
 
 -------------------------------------------------------------------------------
--- Return fuel value
---
--- @function [parent=#ItemPrototype] getFuelValue
---
--- @return #boolean
---
+---Return fuel value
+---@return number
 function ItemPrototype:getFuelValue()
   if self.lua_prototype == nil then return 0 end
   return self.lua_prototype.fuel_value
 end
 
 -------------------------------------------------------------------------------
--- Return burnt result
---
--- @function [parent=#ItemPrototype] getBurntResult
---
--- @return #boolean
---
+---Return burnt result
+---@return number
 function ItemPrototype:getBurntResult()
   if self.lua_prototype == nil then return nil end
   if self:getFuelValue() > 0 then return self.lua_prototype.burnt_result end
@@ -37,24 +27,16 @@ function ItemPrototype:getBurntResult()
 end
 
 -------------------------------------------------------------------------------
--- Return fuel emissions multiplier
---
--- @function [parent=#ItemPrototype] getFuelEmissionsMultiplier
---
--- @return #boolean
---
+---Return fuel emissions multiplier
+---@return number
 function ItemPrototype:getFuelEmissionsMultiplier()
   if self.lua_prototype == nil then return 1 end
   return self.lua_prototype.fuel_emissions_multiplier or 1
 end
 
 -------------------------------------------------------------------------------
--- Return stack size
---
--- @function [parent=#ItemPrototype] stackSize
---
--- @return #number default 0
---
+---Return stack size
+---@return number
 function ItemPrototype:stackSize(index)
   if self.lua_prototype ~= nil then
     return self.lua_prototype.stack_size or 0

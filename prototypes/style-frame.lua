@@ -1,87 +1,67 @@
 local default_gui = data.raw["gui-style"].default
 
 -------------------------------------------------------------------------------
--- Name of display
+---Name of display
 --
--- |--------------------------------------------------|
--- | Flow.main                                        |
--- | |-----------------------|----------------------| |
--- | | Flow.info             | Flow.dialog          | |
--- | | |-------------------| | |------------------| | |
--- | | | Frame.main_menu   | | | Frame.dialog     | | |
--- | | |-------------------| | |                  | | |
--- | | | Frame.data        | | |                  | | |
--- | | |                   | | |                  | | |
--- | | |                   | | |                  | | |
--- | | |                   | | |                  | | |
--- | | |-------------------| | |------------------| | |
--- | |-----------------------|----------------------| |
--- |--------------------------------------------------|
+---|--------------------------------------------------|
+---| Flow.main                                        |
+---| |-----------------------|----------------------| |
+---| | Flow.info             | Flow.dialog          | |
+---| | |-------------------| | |------------------| | |
+---| | | Frame.main_menu   | | | Frame.dialog     | | |
+---| | |-------------------| | |                  | | |
+---| | | Frame.data        | | |                  | | |
+---| | |                   | | |                  | | |
+---| | |                   | | |                  | | |
+---| | |                   | | |                  | | |
+---| | |-------------------| | |------------------| | |
+---| |-----------------------|----------------------| |
+---|--------------------------------------------------|
 --
 
 local width_scroll=8
 local width_block_info=290
 local width_recipe_column=220
 
--------------------------------------------------------------------------------
--- Style of default
---
--- @field [parent=#Frame] default
-
 default_gui["helmod_frame"] = {
   type = "frame_style",
   parent = "frame",
-  -- marge interieure
+  ---marge interieure
   padding  = 4
 }
 
--------------------------------------------------------------------------------
--- Style of default
---
 default_gui["helmod_inside_frame"] = {
   type = "frame_style",
   parent = "inside_shallow_frame",
-  -- marge interieure
+  ---marge interieure
   padding = 4
 }
 
--------------------------------------------------------------------------------
--- Style of default
---
 default_gui["helmod_deep_frame"] = {
   type = "frame_style",
   parent = "inside_deep_frame",
-  -- marge interieure
+  ---marge interieure
   padding = 4
 }
 
--------------------------------------------------------------------------------
--- Style of default
---
 default_gui["helmod_scroll_pane"] = {
   type = "scroll_pane_style",
   parent = "scroll_pane",
-  -- marge interieure
+  ---marge interieure
   padding = 4,
   extra_padding_when_activated = 0
 }
 
--------------------------------------------------------------------------------
--- Style of default
---
 default_gui["helmod_tabbed_frame"] = {
   type = "frame_style",
   parent = "inside_deep_frame",
-  -- marge interieure
+  ---marge interieure
   top_padding = 4,
   right_padding = 0,
   left_padding = 0,
   bottom_padding = 0
 }
 
--------------------------------------------------------------------------------
--- Style of default
---
 default_gui["helmod_tabbed_pane"] = {
   type = "tabbed_pane_style",
   parent = "tabbed_pane",
@@ -104,18 +84,11 @@ default_gui["helmod_tabbed_pane"] = {
   }
 }
 
--- OLD
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--- Style of default
---
--- @field [parent=#Frame] default
-
+---OLD
 default_gui["helmod_frame_header"] = {
   type = "frame_style",
   parent = "frame",
-  -- marge interieure
+  ---marge interieure
   top_padding  = 0,
   right_padding = 0,
   bottom_padding = 0,
@@ -125,21 +98,17 @@ default_gui["helmod_frame_header"] = {
     base = {position = {4, 4}, corner_size = 4}
   }
 }
--------------------------------------------------------------------------------
--- Style of hidden
---
--- @field [parent=#Frame] hidden
 
 default_gui["helmod_frame_hidden"] = {
   type = "frame_style",
   font_color = {r=1, g=1, b=1},
-  -- marge interieure
+  ---marge interieure
   top_padding  = 0,
   right_padding = 0,
   bottom_padding = 0,
   left_padding = 0,
 
-  -- padding title
+  ---padding title
   title_top_padding = 0,
   title_left_padding = 0,
   title_bottom_padding = 4,
@@ -175,23 +144,18 @@ default_gui["helmod_frame_hidden"] = {
   }
 }
 
--------------------------------------------------------------------------------
--- Style of default
---
--- @field [parent=#Frame] default
-
 default_gui["helmod_frame_default"] = {
   type = "frame_style",
   font = "helmod_font_title_frame",
   font_color = {r=1, g=1, b=1},
 
-  -- padding of the title area of the frame, when the frame title
-  -- is empty, the area doesn't exist and these values are not used
+  ---padding of the title area of the frame, when the frame title
+  ---is empty, the area doesn't exist and these values are not used
   title_top_padding = 0,
   title_left_padding = 2,
   title_bottom_padding = 0,
   title_right_padding = 2,
-  -- padding of the content area of the frame
+  ---padding of the content area of the frame
   top_padding  = 0,
   right_padding = 0,
   bottom_padding = 4,
@@ -214,12 +178,6 @@ default_gui["helmod_frame_default"] = {
   use_header_filler = true,
   border = {}
 }
-
-
--------------------------------------------------------------------------------
--- Style of default
---
--- @field [parent=#Frame] default
 
 local panel_colors = {}
 panel_colors["blue"] = {329,48}
@@ -248,11 +206,6 @@ local style_element_list = {
   {suffix="none", x=0, y=72}
 }
 local style_element_max = 7
--------------------------------------------------------------------------------
--- Style of element
---
--- @field [parent=#Frame] element
---
 
 for _,style in pairs(style_element_list) do
   for i = 1, style_element_max do
@@ -279,12 +232,6 @@ for _,style in pairs(style_element_list) do
   end
 end
 
--------------------------------------------------------------------------------
--- Style of element
---
--- @field [parent=#Frame] element_m
---
-
 for _,style in pairs(style_element_list) do
   for i = 1, style_element_max do
     local style_name = table.concat({"helmod_frame_element_m",style.suffix,i},"_")
@@ -309,12 +256,6 @@ for _,style in pairs(style_element_list) do
     }
   end
 end
-
--------------------------------------------------------------------------------
--- Style of element
---
--- @field [parent=#Frame] element_sm
---
 
 for _,style in pairs(style_element_list) do
   for i = 1, style_element_max do
@@ -341,12 +282,6 @@ for _,style in pairs(style_element_list) do
   end
 end
 
--------------------------------------------------------------------------------
--- Style of product
---
--- @field [parent=#Frame] product
---
-
 for _,style in pairs(style_element_list) do
   for i = 1, style_element_max do
     local style_name = table.concat({"helmod_frame_product",style.suffix,i},"_")
@@ -371,12 +306,6 @@ for _,style in pairs(style_element_list) do
   end
 end
 
--------------------------------------------------------------------------------
--- Style of colored frame
---
--- @field [parent=#Frame] color
---
-
 for _,style in pairs(style_element_list) do
   for i = 1, style_element_max do
     local style_name = table.concat({"helmod_frame_colored",style.suffix,i},"_")
@@ -400,12 +329,6 @@ for _,style in pairs(style_element_list) do
   end
 end
 
--------------------------------------------------------------------------------
--- Style of panel
---
--- @field [parent=#Frame] panel
---
-
 default_gui["helmod_frame_panel"] = {
   type = "frame_style",
   parent = "helmod_frame_default",
@@ -427,12 +350,6 @@ default_gui["helmod_frame_panel"] = {
   use_header_filler = false
 }
 
--------------------------------------------------------------------------------
--- Style of recipe info
---
--- @field [parent=#Frame] recipe_info
---
-
 default_gui["helmod_frame_recipe_info"] = {
   type = "frame_style",
   parent = "helmod_frame_default",
@@ -440,31 +357,16 @@ default_gui["helmod_frame_recipe_info"] = {
   maximal_width = width_recipe_column
 }
 
--------------------------------------------------------------------------------
--- Style of default
---
--- @field [parent=#Flow] default
-
 default_gui["helmod_flow_default"] = {
   type = "flow_style",
   horizontal_spacing = 1,
   vertical_spacing = 1
 }
 
--------------------------------------------------------------------------------
--- Style of horizontal
---
--- @field [parent=#Flow] horizontal
-
 default_gui["helmod_flow_horizontal"] = {
   type = "horizontal_flow_style",
   horizontal_spacing = 0
 }
-
--------------------------------------------------------------------------------
--- Style of vertical
---
--- @field [parent=#Flow] vertical
 
 default_gui["helmod_flow_vertical"] = {
   type = "vertical_flow_style",

@@ -1,52 +1,33 @@
 -------------------------------------------------------------------------------
--- Class to build pin tab dialog
---
--- @module StatisticPanel
--- @extends #Form
---
-
+---Class to build pin tab dialog
+---@class StatisticPanel
 StatisticPanel = newclass(Form)
 
 -------------------------------------------------------------------------------
--- On initialization
---
--- @function [parent=#StatisticPanel] onInit
---
+---On initialization
 function StatisticPanel:onInit()
   self.panelCaption = ({"helmod_result-panel.tab-button-statistic"})
 end
 
 ------------------------------------------------------------------------------
--- Get Button Sprites
---
--- @function [parent=#StatisticPanel] getButtonSprites
---
--- @return boolean
---
+---Get Button Sprites
+---@return string, string
 function StatisticPanel:getButtonSprites()
   return "chart-white","chart"
 end
 
 -------------------------------------------------------------------------------
--- Is tool
---
--- @function [parent=#StatisticPanel] isTool
---
--- @return boolean
---
+---Is tool
+---@return boolean
 function StatisticPanel:isTool()
   return true
 end
 
 -------------------------------------------------------------------------------
--- On Style
---
--- @function [parent=#StatisticPanel] onStyle
---
--- @param #table styles
--- @param #number width_main
--- @param #number height_main
---
+---On Style
+---@param styles table
+---@param width_main number
+---@param height_main number
 function StatisticPanel:onStyle(styles, width_main, height_main)
   styles.flow_panel = {
     minimal_width = 322,
@@ -55,23 +36,15 @@ function StatisticPanel:onStyle(styles, width_main, height_main)
 end
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#StatisticPanel] onUpdate
---
--- @param #LuaEvent event
---
+---On update
+---@param event LuaEvent
 function StatisticPanel:onUpdate(event)
   self:updateInfo(event)
 end
 
 -------------------------------------------------------------------------------
--- Update information
---
--- @function [parent=#StatisticPanel] updateInfo
---
--- @param #LuaEvent event
---
+---Update information
+---@param event LuaEvent
 function StatisticPanel:updateInfo(event)
   local info_panel = self:getFramePanel("info_panel")
   info_panel.style.vertically_stretchable = true
@@ -99,24 +72,16 @@ function StatisticPanel:updateInfo(event)
 end
 
 -------------------------------------------------------------------------------
--- Add row data tab
---
--- @function [parent=#StatisticPanel] addRow
---
--- @param #LuaGuiElement guiTable
--- @param #table element
---
+---Add row data tab
+---@param guiTable LuaGuiElement
+---@param element table
 function StatisticPanel:addRow(guiTable, element)
   GuiElement.add(guiTable, GuiLabel("value", element.name):caption(Format.formatNumberElement(element.value)):style("helmod_label_right_60"))
   GuiElement.add(guiTable, GuiButtonSprite("element", element.name):sprite(element.type, element.name):tooltip(Player.getLocalisedName(element)))
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#StatisticPanel] onEvent
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
 function StatisticPanel:onEvent(event)
 end

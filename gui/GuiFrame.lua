@@ -1,15 +1,6 @@
 -------------------------------------------------------------------------------
--- Class to help to build frame
--- 
--- @module GuiFrame
---
-
--------------------------------------------------------------------------------
---
--- @function [parent=#GuiFrame] constructor
--- @param #arg name
--- @return #GuiFrame
---
+---Class to help to build frame
+---@class GuiFrame
 GuiFrame = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiFrame"
@@ -18,22 +9,14 @@ GuiFrame = newclass(GuiElement,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiFrameH] constructor
--- @param #arg name
--- @return #GuiFrameH
---
+---@class GuiFrameH
 GuiFrameH = newclass(GuiFrame,function(base,...)
   GuiFrame.init(base,...)
   base.options.direction = "horizontal"
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiFrameV] constructor
--- @param #arg name
--- @return #GuiFrameV
---
+---@class GuiFrameV
 GuiFrameV = newclass(GuiFrame,function(base,...)
   GuiFrame.init(base,...)
   base.options.direction = "vertical"

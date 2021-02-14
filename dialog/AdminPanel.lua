@@ -1,81 +1,53 @@
 -------------------------------------------------------------------------------
--- Class to build panel
---
--- @module AdminPanel
--- @extends #Form
---
-
+---Class to build panel
+---@class AdminPanel
 AdminPanel = newclass(Form,function(base,classname)
   Form.init(base,classname)
 end)
 
 -------------------------------------------------------------------------------
--- On Bind Dispatcher
---
--- @function [parent=#AdminPanel] onBind
---
+---On Bind Dispatcher
 function AdminPanel:onBind()
   Dispatcher:bind("on_gui_refresh", self, self.update)
 end
 
 -------------------------------------------------------------------------------
--- On initialization
---
--- @function [parent=#AdminPanel] onInit
---
+---On initialization
 function AdminPanel:onInit()
   self.panelCaption = ({"helmod_result-panel.tab-button-admin"})
 end
 
 -------------------------------------------------------------------------------
--- Return button caption
---
--- @function [parent=#AdminPanel] getButtonCaption
---
--- @return #string
---
+---Return button caption
+---@return table
 function AdminPanel:getButtonCaption()
   return {"helmod_result-panel.tab-button-admin"}
 end
 
 -------------------------------------------------------------------------------
--- Get Button Sprites
---
--- @function [parent=#AdminPanel] getButtonSprites
---
--- @return boolean
---
+---Get Button Sprites
+---@return string,string
 function AdminPanel:getButtonSprites()
   return "database-white","database"
 end
 
 -------------------------------------------------------------------------------
--- Is visible
---
--- @function [parent=#AdminPanel] isVisible
---
--- @return boolean
---
+---Is visible
+---@return boolean
 function AdminPanel:isVisible()
   return Player.isAdmin()
 end
 
 -------------------------------------------------------------------------------
--- Is special
---
--- @function [parent=#AdminPanel] isSpecial
---
--- @return boolean
---
+---Is special
+---@return boolean
 function AdminPanel:isSpecial()
   return true
 end
 
 -------------------------------------------------------------------------------
--- Get or create tab panel
---
--- @function [parent=#AdminPanel] getTabPane
---
+---Get or create tab panel
+---@return LuaGuiElement
 function AdminPanel:getTabPane()
   local content_panel = self:getFrameDeepPanel("panel")
   local panel_name = "tab_panel"
@@ -88,10 +60,10 @@ function AdminPanel:getTabPane()
 end
 
 -------------------------------------------------------------------------------
--- Get or create tab panel
---
--- @function [parent=#AdminPanel] getTab
---
+---Get or create tab panel
+---@param panel_name string
+---@param caption string
+---@return LuaGuiElement
 function AdminPanel:getTab(panel_name, caption)
   local content_panel = self:getTabPane()
   local scroll_name = "scroll-" .. panel_name
@@ -107,93 +79,71 @@ function AdminPanel:getTab(panel_name, caption)
 end
 
 -------------------------------------------------------------------------------
--- Get or create cache tab panel
---
--- @function [parent=#AdminPanel] getCacheTab
---
+---Get or create cache tab panel
+---@return LuaGuiElement
 function AdminPanel:getCacheTab()
   return self:getTab("cache-tab-panel", {"helmod_result-panel.cache-list"})
 end
 
 -------------------------------------------------------------------------------
--- Get or create rule tab panel
---
--- @function [parent=#AdminPanel] getRuleTab
---
+---Get or create rule tab panel
+---@return LuaGuiElement
 function AdminPanel:getRuleTab()
   return self:getTab("rule-tab-panel", {"helmod_result-panel.rule-list"})
 end
 
 -------------------------------------------------------------------------------
--- Get or create sheet tab panel
---
--- @function [parent=#AdminPanel] getSheetTab
---
+---Get or create sheet tab panel
+---@return LuaGuiElement
 function AdminPanel:getSheetTab()
   return self:getTab("sheet-tab-panel", {"helmod_result-panel.sheet-list"})
 end
 
 -------------------------------------------------------------------------------
--- Get or create mods tab panel
---
--- @function [parent=#AdminPanel] getModTab
---
+---Get or create mods tab panel
+---@return LuaGuiElement
 function AdminPanel:getModTab()
   return self:getTab("mod-tab-panel", {"helmod_common.mod-list"})
 end
 
 -------------------------------------------------------------------------------
--- Get or create gui tab panel
---
--- @function [parent=#AdminPanel] getGuiTab
---
+---Get or create gui tab panel
+---@return LuaGuiElement
 function AdminPanel:getGuiTab()
   return self:getTab("gui-tab-panel", {"helmod_common.gui-list"})
 end
 
 -------------------------------------------------------------------------------
--- Get or create global tab panel
---
--- @function [parent=#AdminPanel] getGlobalTab
---
+---Get or create global tab panel
+---@return LuaGuiElement
 function AdminPanel:getGlobalTab()
   return self:getTab("global-tab-panel", "Global")
 end
 
 -------------------------------------------------------------------------------
--- is global tab panel
---
--- @function [parent=#AdminPanel] isGlobalTab
---
+---is global tab panel
+---@return boolean
 function AdminPanel:isGlobalTab()
   return self:getTabPane()["global-tab-panel"] ~= nil
 end
 
 -------------------------------------------------------------------------------
--- Get or create conversion tab panel
---
--- @function [parent=#AdminPanel] getConversionTab
---
+---Get or create conversion tab panel
+---@return LuaGuiElement
 function AdminPanel:getConversionTab()
   return self:getTab("conversion-tab-panel", "Conversion")
 end
 
 -------------------------------------------------------------------------------
--- is conversion tab panel
---
--- @function [parent=#AdminPanel] isConversionTab
---
+---is conversion tab panel
+---@return boolean
 function AdminPanel:isConversionTab()
   return self:getTabPane()["conversion-tab-panel"] ~= nil
 end
 
 -------------------------------------------------------------------------------
--- Update data
---
--- @function [parent=#AdminPanel] onUpdate
---
--- @param #LuaEvent event
---
+---On Update
+---@param event LuaEvent
 function AdminPanel:onUpdate(event)
   self:updateCache()
   self:updateRule()
@@ -207,10 +157,7 @@ function AdminPanel:onUpdate(event)
 end
 
 -------------------------------------------------------------------------------
--- Update data
---
--- @function [parent=#AdminPanel] updateConversion
---
+---Update Conversion Tab
 function AdminPanel:updateConversion()
   if self:isConversionTab() then return end
   local scroll_panel = self:getConversionTab()
@@ -222,13 +169,11 @@ function AdminPanel:updateConversion()
   local decoded_textbox = GuiElement.add(table_panel, GuiTextBox("decoded-text"))
   decoded_textbox.style.height = 600
 end
+
 -------------------------------------------------------------------------------
--- Update data
---
--- @function [parent=#AdminPanel] updateGui
---
+---Update Gui Tab
 function AdminPanel:updateGui()
-  -- Rule List
+  ---Rule List
   local scroll_panel = self:getGuiTab()
   scroll_panel.clear()
 
@@ -261,12 +206,9 @@ function AdminPanel:updateGui()
 end
 
 -------------------------------------------------------------------------------
--- Update data
---
--- @function [parent=#AdminPanel] updateMod
---
+---Update Mod Tab
 function AdminPanel:updateMod()
-  -- Rule List
+  ---Rule List
   local scroll_panel = self:getModTab()
   scroll_panel.clear()
 
@@ -284,12 +226,9 @@ function AdminPanel:updateMod()
 end
 
 -------------------------------------------------------------------------------
--- Update data
---
--- @function [parent=#AdminPanel] updateCache
---
+---Update Cache Tab
 function AdminPanel:updateCache()
-  -- Rule List
+  ---Rule List
   local scroll_panel = self:getCacheTab()
   scroll_panel.clear()
 
@@ -341,12 +280,9 @@ function AdminPanel:updateCache()
 end
 
 -------------------------------------------------------------------------------
--- Update data
---
--- @function [parent=#AdminPanel] updateRule
---
+---Update Rule Tab
 function AdminPanel:updateRule()
-  -- Rule List
+  ---Rule List
   local scroll_panel = self:getRuleTab()
   scroll_panel.clear()
 
@@ -368,12 +304,9 @@ function AdminPanel:updateRule()
 end
 
 -------------------------------------------------------------------------------
--- Update data
---
--- @function [parent=#AdminPanel] updateSheet
---
+---Update Sheet Tab
 function AdminPanel:updateSheet()
-  -- Sheet List
+  ---Sheet List
   local scroll_panel = self:getSheetTab()
   scroll_panel.clear()
 
@@ -392,64 +325,53 @@ function AdminPanel:updateSheet()
 end
 
 -------------------------------------------------------------------------------
--- Add cahce List header
---
--- @function [parent=#AdminPanel] addTranslateListHeader
---
--- @param #LuaGuiElement itable container for element
---
+---Add Translate List header
+---@param itable LuaGuiElement
 function AdminPanel:addTranslateListHeader(itable)
-  -- col action
+  ---col action
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
-  -- data
+  ---data
   self:addCellHeader(itable, "header-owner", {"helmod_result-panel.col-header-owner"})
   self:addCellHeader(itable, "header-total", {"helmod_result-panel.col-header-total"})
 end
 
 -------------------------------------------------------------------------------
--- Add cahce List header
---
--- @function [parent=#AdminPanel] addCacheListHeader
---
--- @param #LuaGuiElement itable container for element
---
+---Add Cache List header
+---@param itable LuaGuiElement
 function AdminPanel:addCacheListHeader(itable)
-  -- col action
+  ---col action
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
-  -- data
+  ---data
   self:addCellHeader(itable, "header-owner", {"helmod_result-panel.col-header-owner"})
   self:addCellHeader(itable, "header-total", {"helmod_result-panel.col-header-total"})
 end
 
 -------------------------------------------------------------------------------
--- Add row translate List
---
--- @function [parent=#AdminPanel] addTranslateListRow
---
--- @param #LuaGuiElement itable container for element
--- @param #table model
---
-function AdminPanel:addTranslateListRow(gui_table, user_name, user_data)
-  -- col action
-  local cell_action = GuiElement.add(gui_table, GuiTable("action", user_name):column(4))
+---Add row translate List
+---@param itable LuaGuiElement
+---@param user_name string
+---@param user_data table
+function AdminPanel:addTranslateListRow(itable, user_name, user_data)
+  ---col action
+  local cell_action = GuiElement.add(itable, GuiTable("action", user_name):column(4))
 
-  -- col owner
-  GuiElement.add(gui_table, GuiLabel("owner", user_name):caption(user_name))
+  ---col owner
+  GuiElement.add(itable, GuiLabel("owner", user_name):caption(user_name))
 
-  -- col translated
-  GuiElement.add(gui_table, GuiLabel("total", user_name):caption(table.size(user_data.translated)))
+  ---col translated
+  GuiElement.add(itable, GuiLabel("total", user_name):caption(table.size(user_data.translated)))
 
 end
 
 -------------------------------------------------------------------------------
--- Add row Rule List
---
--- @function [parent=#AdminPanel] addCacheListRow
---
--- @param #LuaGuiElement itable container for element
--- @param #string class_name
--- @param #table data
---
+---Add row cache List
+---@param gui_table LuaGuiElement
+---@param class_name string
+---@param key1 string
+---@param key2 string
+---@param key3 string
+---@param key4 string
+---@param data table
 function AdminPanel:addCacheListRow(gui_table, class_name, key1, key2, key3, key4, data)
   local caption = ""
   if type(data) == "table" then
@@ -458,65 +380,61 @@ function AdminPanel:addCacheListRow(gui_table, class_name, key1, key2, key3, key
     caption = data
   end
 
-  -- col action
+  ---col action
   local cell_action = GuiElement.add(gui_table, GuiTable("action", string.format("%s-%s-%s-%s", key1, key2, key3, key4)):column(4))
   if key2 == nil and key3 == nil and key4 == nil then
     if class_name ~= "users" then
       GuiElement.add(cell_action, GuiButton(self.classname, "delete-cache", class_name, key1):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"helmod_button.remove"}))
       GuiElement.add(cell_action, GuiButton(self.classname, "refresh-cache", class_name, key1):sprite("menu", "refresh-sm", "refresh-sm"):style("helmod_button_menu_sm_red"):tooltip({"helmod_button.refresh"}))
-      -- col class
+      ---col class
       GuiElement.add(gui_table, GuiLabel("class", key1):caption({"", helmod_tag.color.orange, helmod_tag.font.default_large_bold, string.format("%s", key1), "[/font]", helmod_tag.color.close}))
     else
-      -- col class
+      ---col class
       GuiElement.add(gui_table, GuiLabel("class", key1):caption({"", helmod_tag.color.blue, helmod_tag.font.default_large_bold, string.format("%s", key1), "[/font]", helmod_tag.color.close}))
     end
   
-    -- col count
+    ---col count
     GuiElement.add(gui_table, GuiLabel("total", key1):caption({"", helmod_tag.font.default_semibold, caption, "[/font]"}))
   elseif key3 == nil and key4 == nil then
     if class_name == "users" and (key2 == "translated" or key2 == "cache") then
       GuiElement.add(cell_action, GuiButton(self.classname, "delete-cache", class_name, key1, key2):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
-      -- col class
+      ---col class
       GuiElement.add(gui_table, GuiLabel("class", key1, key2):caption({"", helmod_tag.color.orange, helmod_tag.font.default_bold, "|-" , key2, "[/font]", helmod_tag.color.close}))
     else
-      -- col class
+      ---col class
       GuiElement.add(gui_table, GuiLabel("class", key1, key2):caption({"", helmod_tag.font.default_bold, "|-" , key2, "[/font]"}))
     end
   
-    -- col count
+    ---col count
     GuiElement.add(gui_table, GuiLabel("total", key1, key2):caption({"", helmod_tag.font.default_semibold, caption, "[/font]"}))
   elseif key4 == nil then
     if class_name == "users" then
       GuiElement.add(cell_action, GuiButton(self.classname, "delete-cache", class_name, key1, key2, key3):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
-      -- col class
+      ---col class
       GuiElement.add(gui_table, GuiLabel("class", key1, key2, key3):caption({"", helmod_tag.color.orange, helmod_tag.font.default_bold, "|\t\t\t|-" , key3, "[/font]", helmod_tag.color.close}))
     else
-      -- col class
+      ---col class
       GuiElement.add(gui_table, GuiLabel("class", key1, key2, key3):caption({"", helmod_tag.font.default_bold, "|-" , key3, "[/font]"}))
     end
   
-    -- col count
+    ---col count
     GuiElement.add(gui_table, GuiLabel("total", key1, key2, key3):caption({"", helmod_tag.font.default_semibold, caption, "[/font]"}))
   else
     GuiElement.add(gui_table, GuiLabel("class", key1, key2, key3, key4):caption({"", helmod_tag.font.default_bold, "|\t\t\t|\t\t\t|-" , key4, "[/font]"}))
   
-    -- col count
+    ---col count
     GuiElement.add(gui_table, GuiLabel("total", key1, key2, key3, key4):caption({"", helmod_tag.font.default_semibold, caption, "[/font]"}))
   end
 
 end
 
 -------------------------------------------------------------------------------
--- Add rule List header
---
--- @function [parent=#AdminPanel] addRuleListHeader
---
--- @param #LuaGuiElement itable container for element
---
+---Add rule List header
+---@param itable LuaGuiElement
 function AdminPanel:addRuleListHeader(itable)
-  -- col action
+  ---col action
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
-  -- data
+  ---data
   self:addCellHeader(itable, "header-index", {"helmod_result-panel.col-header-index"})
   self:addCellHeader(itable, "header-mod", {"helmod_result-panel.col-header-mod"})
   self:addCellHeader(itable, "header-name", {"helmod_result-panel.col-header-name"})
@@ -527,66 +445,55 @@ function AdminPanel:addRuleListHeader(itable)
 end
 
 -------------------------------------------------------------------------------
--- Add row Rule List
---
--- @function [parent=#AdminPanel] addRuleListRow
---
--- @param #LuaGuiElement itable container for element
--- @param #table model
---
+---Add row Rule List
+---@param gui_table LuaGuiElement
+---@param rule table
+---@param rule_id number
 function AdminPanel:addRuleListRow(gui_table, rule, rule_id)
-  -- col action
+  ---col action
   local cell_action = GuiElement.add(gui_table, GuiTable("action", rule_id):column(4))
   GuiElement.add(cell_action, GuiButton(self.classname, "rule-remove", rule_id):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
 
-  -- col index
+  ---col index
   GuiElement.add(gui_table, GuiLabel("index", rule_id):caption(rule.index))
 
-  -- col mod
+  ---col mod
   GuiElement.add(gui_table, GuiLabel("mod", rule_id):caption(rule.mod))
 
-  -- col name
+  ---col name
   GuiElement.add(gui_table, GuiLabel("name", rule_id):caption(rule.name))
 
-  -- col category
+  ---col category
   GuiElement.add(gui_table, GuiLabel("category", rule_id):caption(rule.category))
 
-  -- col type
+  ---col type
   GuiElement.add(gui_table, GuiLabel("type", rule_id):caption(rule.type))
 
-  -- col value
+  ---col value
   GuiElement.add(gui_table, GuiLabel("value", rule_id):caption(rule.value))
 
-  -- col value
+  ---col value
   GuiElement.add(gui_table, GuiLabel("excluded", rule_id):caption(rule.excluded))
 
 end
 
 -------------------------------------------------------------------------------
--- Add Sheet List header
---
--- @function [parent=#AdminPanel] addSheetListHeader
---
--- @param #LuaGuiElement itable container for element
---
+---Add Sheet List header
+---@param itable LuaGuiElement
 function AdminPanel:addSheetListHeader(itable)
-  -- col action
+  ---col action
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
-  -- data owner
+  ---data owner
   self:addCellHeader(itable, "owner", {"helmod_result-panel.col-header-owner"})
   self:addCellHeader(itable, "element", {"helmod_result-panel.col-header-sheet"})
 end
 
 -------------------------------------------------------------------------------
--- Add row Sheet List
---
--- @function [parent=#AdminPanel] addSheetListRow
---
--- @param #LuaGuiElement itable container for element
--- @param #table model
---
+---Add row Sheet List
+---@param gui_table LuaGuiElement
+---@param model table
 function AdminPanel:addSheetListRow(gui_table, model)
-  -- col action
+  ---col action
   local cell_action = GuiElement.add(gui_table, GuiTable("action", model.id):column(4))
   if model.share ~= nil and bit32.band(model.share, 1) > 0 then
     GuiElement.add(cell_action, GuiButton(self.classname, "share-model", model.id, "read"):style("helmod_button_selected"):caption("R"):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
@@ -604,11 +511,11 @@ function AdminPanel:addSheetListRow(gui_table, model)
     GuiElement.add(cell_action, GuiButton(self.classname, "share-model", model.id, "delete"):style("helmod_button_default"):caption("X"):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
   end
 
-  -- col owner
+  ---col owner
   local cell_owner = GuiElement.add(gui_table, GuiFrameH("owner", model.id):style(helmod_frame_style.hidden))
   GuiElement.add(cell_owner, GuiLabel(model.id):caption(model.owner or "empty"):style("helmod_label_right_70"))
 
-  -- col element
+  ---col element
   local cell_element = GuiElement.add(gui_table, GuiFrameH("element", model.id):style(helmod_frame_style.hidden))
   local element = Model.firstRecipe(model.blocks)
   if element ~= nil then
@@ -623,10 +530,7 @@ local color_name = "blue"
 local color_index = 1
 local bar_thickness = 2
 -------------------------------------------------------------------------------
--- Update data
---
--- @function [parent=#AdminPanel] updateConversion
---
+---Update Global Table
 function AdminPanel:updateGlobal()
   if self:isGlobalTab() then return end
   local scroll_panel = self:getGlobalTab()
@@ -636,18 +540,31 @@ function AdminPanel:updateGlobal()
 end
 
 -------------------------------------------------------------------------------
--- Create Tree
---
--- @function [parent=#AdminPanel] createTree
---
+---Create Tree
+---@param parent LuaGuiElement
+---@param list table
+---@param expand boolean
 function AdminPanel:createTree(parent, list, expand)
   local data_info = table.data_info(list)
   local index = 1
   local size = table.size(list)
   for k,info in pairs(data_info) do
-    local tree_branch = GuiElement.add(parent, GuiFlowV())
-    local cell = GuiElement.add(tree_branch, GuiFlowH())
-    local hbar = GuiElement.add(cell, GuiFrameV("hbar"):style("helmod_frame_product", color_name, color_index))
+    local tree_branch = GuiElement.add(parent, GuiFlowH())
+    -- vertical bar
+    local vbar = GuiElement.add(tree_branch, GuiFrameV("vbar"):style("helmod_frame_product", color_name, color_index))
+    vbar.style.width = bar_thickness
+    vbar.style.left_margin=15
+    if index == size then
+      vbar.style.height = 12
+    else
+      vbar.style.vertically_stretchable = true
+      vbar.style.bottom_margin=0
+    end
+    -- content
+    local content = GuiElement.add(tree_branch, GuiFlowV("content"))
+    -- header
+    local header = GuiElement.add(content, GuiFlowH("header"))
+    local hbar = GuiElement.add(header, GuiFrameV("hbar"):style("helmod_frame_product", color_name, color_index))
     hbar.style.width = 5
     hbar.style.height = bar_thickness
     hbar.style.top_margin=10
@@ -655,38 +572,30 @@ function AdminPanel:createTree(parent, list, expand)
     if info.type == "table" then
       local caption = {"", helmod_tag.font.default_bold, helmod_tag.color.green_light, k, helmod_tag.color.close, helmod_tag.font.close, " (", info.type,")"}
       if expand then
-        GuiElement.add(cell, GuiLabel("global-end"):caption(caption))
+        GuiElement.add(header, GuiLabel("global-end"):caption(caption))
       else
-        local label = GuiElement.add(cell, GuiLabel(self.classname, "global-update", "bypass"):caption(caption))
+        local label = GuiElement.add(header, GuiLabel(self.classname, "global-update", "bypass"):caption(caption))
         label.tags = info
       end
     else
       local caption = {"", helmod_tag.font.default_bold, helmod_tag.color.gold, k, helmod_tag.color.close, helmod_tag.font.close, "=", helmod_tag.font.default_bold, info.value, helmod_tag.font.close, " (", info.type,")"}
-      local label = GuiElement.add(cell, GuiLabel("global-end"):caption(caption))
+      local label = GuiElement.add(header, GuiLabel("global-end"):caption(caption))
     end
-    local content = GuiElement.add(tree_branch, GuiFlowH("content"))
-    local vbar = GuiElement.add(content, GuiFrameV("vbar"):style("helmod_frame_product", color_name, color_index))
-    vbar.style.vertically_stretchable = true
-    vbar.style.width = bar_thickness
-    vbar.style.left_margin=15
-    vbar.style.bottom_margin=8
+    -- next
     local next = GuiElement.add(content, GuiFlowV("next"))
+
     if expand then
       self:createTree(next, info.value, false)
     else
-      content.visible = false
+      next.visible = false
     end
     index = index + 1
   end
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#AdminPanel] onEvent
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
 function AdminPanel:onEvent(event)
   if event.action == "change-tab" then
     User.setParameter("admin_selected_tab_index", event.element.selected_tab_index)
@@ -696,17 +605,16 @@ function AdminPanel:onEvent(event)
 
   if event.action == "global-update" then
     local element = event.element
-    local parent = element.parent.parent
-    local parent_next = parent.content.next
-    local parent_bar = parent.content.vbar
+    local content = element.parent.parent
+    local parent_next = content.next
     if #parent_next.children > 0 then
       for _,child in pairs(parent_next.children) do
           child.destroy()
       end
-      parent.content.visible = false
+      parent_next.visible = false
     else
       local list = element.tags.value
-      parent.content.visible = true
+      parent_next.visible = true
       self:createTree(parent_next, list)
     end
   end

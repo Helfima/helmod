@@ -1,72 +1,48 @@
 -------------------------------------------------------------------------------
--- Class to build PropertiesPanel panel
---
--- @module PropertiesPanel
--- @extends #Form
---
-
+---Class to build PropertiesPanel panel
+---@class PropertiesPanel
 PropertiesPanel = newclass(Form,function(base,classname)
   Form.init(base,classname)
   base.add_special_button = true
 end)
 
 -------------------------------------------------------------------------------
--- On initialization
---
--- @function [parent=#PropertiesPanel] onInit
---
+---On initialization
 function PropertiesPanel:onInit()
   self.panelCaption = ({"helmod_result-panel.tab-button-properties"})
   self.help_button = false
 end
 
 -------------------------------------------------------------------------------
--- On bind
---
--- @function [parent=#PropertiesPanel] onBind
---
+---On bind
 function PropertiesPanel:onBind()
   Dispatcher:bind("on_gui_refresh", self, self.updateData)
 end
 
 -------------------------------------------------------------------------------
--- Get Button Sprites
---
--- @function [parent=#PropertiesPanel] getButtonSprites
---
--- @return boolean
---
+---Get Button Sprites
+---@return string, string
 function PropertiesPanel:getButtonSprites()
   return "property-white","property"
 end
 
 -------------------------------------------------------------------------------
--- Is visible
---
--- @function [parent=#PropertiesPanel] isVisible
---
--- @return boolean
---
+---Is visible
+---@return boolean
 function PropertiesPanel:isVisible()
   return User.getModGlobalSetting("hidden_panels")
 end
 
 -------------------------------------------------------------------------------
--- Is special
---
--- @function [parent=#PropertiesPanel] isSpecial
---
--- @return boolean
---
+---Is special
+---@return boolean
 function PropertiesPanel:isSpecial()
   return true
 end
 
 -------------------------------------------------------------------------------
--- Get or create menu panel
---
--- @function [parent=#PropertiesPanel] getMenuPanel
---
+---Get or create menu panel
+---@return LuaGuiElement
 function PropertiesPanel:getMenuPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   local panel_name = "menu-panel"
@@ -80,10 +56,8 @@ function PropertiesPanel:getMenuPanel()
 end
 
 -------------------------------------------------------------------------------
--- Get or create header panel
---
--- @function [parent=#PropertiesPanel] getHeaderPanel
---
+---Get or create header panel
+---@return LuaGuiElement
 function PropertiesPanel:getHeaderPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   local panel_name = "header-panel"
@@ -97,10 +71,8 @@ function PropertiesPanel:getHeaderPanel()
 end
 
 -------------------------------------------------------------------------------
--- Get or create content panel
---
--- @function [parent=#PropertiesPanel] getContentPanel
---
+---Get or create content panel
+---@return LuaGuiElement
 function PropertiesPanel:getContentPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   local panel_name = "content"
@@ -118,12 +90,8 @@ function PropertiesPanel:getContentPanel()
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#PropertiesPanel] onEvent
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
 function PropertiesPanel:onEvent(event)
   if event.action == "element-delete" then
     local prototype_compare = User.getParameter("prototype_compare") or {}
@@ -166,12 +134,8 @@ function PropertiesPanel:onEvent(event)
 end
 
 -------------------------------------------------------------------------------
--- Update data
---
--- @function [parent=#PropertiesPanel] onUpdate
---
--- @param #LuaEvent event
---
+---Update data
+---@param event LuaEvent
 function PropertiesPanel:onUpdate(event)
   local flow_panel, content_panel, menu_panel = self:getPanel()
   local width_main, height_main = User.getMainSizes()
@@ -185,12 +149,8 @@ function PropertiesPanel:onUpdate(event)
 end
 
 -------------------------------------------------------------------------------
--- Update menu
---
--- @function [parent=#PropertiesPanel] updateMenu
---
--- @param #LuaEvent event
---
+---Update menu
+---@param event LuaEvent
 function PropertiesPanel:updateMenu(event)
   local action_panel = self:getMenuPanel()
   action_panel.clear()
@@ -202,18 +162,14 @@ function PropertiesPanel:updateMenu(event)
 end
 
 -------------------------------------------------------------------------------
--- Update data
---
--- @function [parent=#PropertiesPanel] updateData
---
--- @param #LuaEvent event
---
+---Update data
+---@param event LuaEvent
 function PropertiesPanel:updateData(event)
   if not(self:isOpened()) then return end
-  -- data
+  ---data
   local content_panel = self:getContentPanel()
   content_panel.clear()
-  -- data
+  ---data
   local filter = User.getParameter("filter-property")
   local prototype_compare = User.getParameter("prototype_compare")
   if prototype_compare ~= nil then
@@ -238,7 +194,7 @@ function PropertiesPanel:updateData(event)
             GuiElement.add(cell_name, GuiLabel("label"):caption(property))
   
             for index,prototype in pairs(prototype_compare) do
-              -- col value
+              ---col value
               local cell_value = GuiElement.add(result_table, GuiFrameH(property, prototype.name, index):style(helmod_frame_style.hidden))
               local key = string.format("%s_%s", prototype.type, prototype.name)
               if values[key] ~= nil then
@@ -257,15 +213,11 @@ function PropertiesPanel:updateData(event)
 end
 
 -------------------------------------------------------------------------------
--- Add cell header
---
--- @function [parent=#PropertiesPanel] addCellHeader
---
--- @param #LuaGuiElement guiTable
--- @param #string name
--- @param #string caption
--- @param #string sorted
---
+---Add cell header
+---@param guiTable LuaGuiElement
+---@param name string
+---@param caption string
+---@param sorted any
 function PropertiesPanel:addCellHeader(guiTable, name, caption, sorted)
   if (name ~= "index" and name ~= "id" and name ~= "name" and name ~= "type") or User.getModGlobalSetting("display_data_col_"..name) then
     local cell = GuiElement.add(guiTable, GuiFrameH("header", name):style(helmod_frame_style.hidden))
@@ -274,12 +226,9 @@ function PropertiesPanel:addCellHeader(guiTable, name, caption, sorted)
 end
 
 -------------------------------------------------------------------------------
--- Add table header
---
--- @function [parent=#PropertiesPanel] addTableHeader
---
--- @param #LuaGuiElement itable container for element
---
+---Add table header
+---@param itable LuaGuiElement
+---@param prototype_compare table
 function PropertiesPanel:addTableHeader(itable, prototype_compare)
   self:addCellHeader(itable, "property", {"helmod_result-panel.col-header-name"})
   for index,prototype in pairs(prototype_compare) do
@@ -326,24 +275,20 @@ function PropertiesPanel:addTableHeader(itable, prototype_compare)
 end
 
 -------------------------------------------------------------------------------
--- Update header
---
--- @function [parent=#PropertiesPanel] updateHeader
---
--- @param #LuaEvent event
---
+---Update header
+---@param event LuaEvent
 function PropertiesPanel:updateHeader(event)
   local info_panel = self:getHeaderPanel()
   info_panel.clear()
   local options_table = GuiElement.add(info_panel, GuiTable("options-table"):column(2))
-  -- nil values
+  ---nil values
   local switch_nil = "left"
   if User.getParameter("filter-nil-property") == true then
     switch_nil = "right"
   end
   GuiElement.add(options_table, GuiLabel("filter-nil-property"):caption("Hide nil values:"))
   local filter_switch = GuiElement.add(options_table, GuiSwitch(self.classname, "filter-nil-property-switch"):state(switch_nil):leftLabel("Off"):rightLabel("On"))
-  -- difference values
+  ---difference values
   local switch_nil = "left"
   if User.getParameter("filter-difference-property") == true then
     switch_nil = "right"
@@ -358,19 +303,18 @@ function PropertiesPanel:updateHeader(event)
 end
 
 -------------------------------------------------------------------------------
--- Parse Properties
---
--- @function [parent=#PropertiesPanel] parseProperties
---
--- @param #LuaObject prototype
---
+---Parse Properties
+---@param prototype table
+---@param level number
+---@param prototype_type table
+---@return table
 function PropertiesPanel:parseProperties(prototype, level, prototype_type)
   if prototype == nil then return "nil" end
   if level > 2 then 
     return prototype
     --return string.match(serpent.dump(prototype),"do local _=(.*);return _;end")
   end
-  -- special
+  ---special
   local isluaobject, error = pcall(function() local test = prototype:help() return true end)
   local object_type = type(prototype)
   if isluaobject then
@@ -427,12 +371,8 @@ function PropertiesPanel:parseProperties(prototype, level, prototype_type)
 end
 
 -------------------------------------------------------------------------------
--- Table to string
---
--- @function [parent=#PropertiesPanel] tableToString
---
--- @param #table value
---
+---Table to string
+---@param value table
 function PropertiesPanel:tableToString(value)
   if type(value) == "table" then
     local key2,_ = next(value)
@@ -468,13 +408,10 @@ function PropertiesPanel:tableToString(value)
   return value
 end
 -------------------------------------------------------------------------------
--- Is nil line
---
--- @function [parent=#PropertiesPanel] isNilLine
---
--- @param #table values
--- @param #table prototype_compare
---
+---Is nil line
+---@param values table
+---@param prototype_compare any
+---@return boolean
 function PropertiesPanel:isNilLine(values, prototype_compare)
   local is_nil = true
   for index,prototype in pairs(prototype_compare) do
@@ -485,13 +422,10 @@ function PropertiesPanel:isNilLine(values, prototype_compare)
 end
 
 -------------------------------------------------------------------------------
--- Is same line
---
--- @function [parent=#PropertiesPanel] isSameLine
---
--- @param #table values
--- @param #table prototype_compare
---
+---Is same line
+---@param values table
+---@param prototype_compare any
+---@return boolean
 function PropertiesPanel:isSameLine(values, prototype_compare)
   local is_same = true
   local compare = nil
@@ -509,14 +443,10 @@ function PropertiesPanel:isSameLine(values, prototype_compare)
 end
 
 -------------------------------------------------------------------------------
--- Get prototype data
---
--- @function [parent=#PropertiesPanel] getPrototypeData
---
--- @param #table prototype
---
+---Get prototype data
+---@param prototype table
 function PropertiesPanel:getPrototypeData(prototype)
-  -- data
+  ---data
   if prototype ~= nil then
     local lua_prototype = nil
     if prototype.type == "entity" then

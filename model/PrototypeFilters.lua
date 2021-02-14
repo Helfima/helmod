@@ -1,20 +1,15 @@
 require "model.PrototypeFilter"
----
--- Description of the module.
--- @module PrototypeFilters
---
+-------------------------------------------------------------------------------
+---Description of the module.
+---@class PrototypeFilters
 local PrototypeFilters = {
   classname = "HMPrototypeFilters"
 }
 
 local prototype_filters = {}
 -------------------------------------------------------------------------------
--- Get types
---
--- @function [parent=#PrototypeFilter] getTypes
---
--- @return #table
---
+---Get types
+---@return table
 function PrototypeFilters.getTypes()
   local types = {}
   for type,_ in pairs(prototype_filters) do
@@ -24,75 +19,49 @@ function PrototypeFilters.getTypes()
 end
 
 -------------------------------------------------------------------------------
--- Get modes
---
--- @function [parent=#PrototypeFilter] getModes
---
--- @return #table
---
+---Get modes
+---@return table
 function PrototypeFilters.getModes()
   local modes = {"or","and"}
   return modes
 end
 
 -------------------------------------------------------------------------------
--- Get inverts
---
--- @function [parent=#PrototypeFilter] getInverts
---
--- @return #table
---
+---Get inverts
+---@return table
 function PrototypeFilters.getInverts()
   local modes = {"false","true"}
   return modes
 end
 
 -------------------------------------------------------------------------------
--- Get comparison
---
--- @function [parent=#PrototypeFilter] getComparison
---
--- @return #table
---
+---Get comparison
+---@return table
 function PrototypeFilters.getComparison()
   local modes = {"<", ">", "=", "≥", "≤", "≠"}
   return modes
 end
 
 -------------------------------------------------------------------------------
--- Add filter type
---
--- @function [parent=#PrototypeFilter] addFilterType
---
--- @param #string filter
---
--- @return PrototypeFilter
---
+---Add filter type
+---@param filter string
+---@return PrototypeFilter
 function PrototypeFilters.addFilterType(filter)
   prototype_filters[filter] = PrototypeFilter(filter)
   return prototype_filters[filter]
 end
 
 -------------------------------------------------------------------------------
--- Get filter type
---
--- @function [parent=#PrototypeFilter] getFilterType
---
--- @param #string filter_type
---
--- @return PrototypeFilter
---
+---Get filter type
+---@param filter_type string
+---@return PrototypeFilter
 function PrototypeFilters.getFilterType(filter_type)
   return prototype_filters[filter_type]
 end
 
 -------------------------------------------------------------------------------
--- Get Collision Mask
---
--- @function [parent=#PrototypeFilter] getCollisionMask
---
--- @return #table
---
+---Get Collision Mask
+---@return table
 function PrototypeFilters.getCollisionMask()
   local collision_mask = {}
   table.insert(collision_mask, "ground-tile")
@@ -118,12 +87,8 @@ function PrototypeFilters.getCollisionMask()
 end
 
 -------------------------------------------------------------------------------
--- Get Collision Mask Mode
---
--- @function [parent=#PrototypeFilter] getCollisionMaskMode
---
--- @return #table
---
+---Get Collision Mask Mode
+---@return table
 function PrototypeFilters.getCollisionMaskMode()
   local collision_mask_mode = {}
   table.insert(collision_mask_mode, "collides")
@@ -132,10 +97,7 @@ function PrototypeFilters.getCollisionMaskMode()
 end
 
 -------------------------------------------------------------------------------
--- initialization
---
--- @function [parent=#PrototypeFilter] initialization
---
+---initialization
 function PrototypeFilters.initialization()
 
   -------------------------------------------------------------------------------

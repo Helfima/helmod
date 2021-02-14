@@ -1,15 +1,6 @@
 -------------------------------------------------------------------------------
--- Class to help to build GuiListBox
---
--- @module GuiListBox
---
-
--------------------------------------------------------------------------------
---
--- @function [parent=#GuiListBox] constructor
--- @param #arg name
--- @return #GuiListBox
---
+---Class to help to build GuiListBox
+---@class GuiListBox
 GuiListBox = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiListBox"
@@ -17,12 +8,10 @@ GuiListBox = newclass(GuiElement,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiListBox] items
--- @param #table items
--- @param #number selected
--- @return #GuiListBox
---
+---Set Items
+---@param items table
+---@param selected any
+---@return GuiListBox
 function GuiListBox:items(items, selected)
   local selected_index = 1
   if items ~= nil then

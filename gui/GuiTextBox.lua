@@ -1,15 +1,6 @@
 -------------------------------------------------------------------------------
--- Class to help to build GuiTextBox
---
--- @module GuiTextBox
---
-
--------------------------------------------------------------------------------
---
--- @function [parent=#GuiTextBox] constructor
--- @param #arg name
--- @return #GuiTextBox
---
+---Class to help to build GuiTextBox
+---@class GuiTextBox
 GuiTextBox = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiTextBox"
@@ -18,11 +9,9 @@ GuiTextBox = newclass(GuiElement,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTextBox] text
--- @param #string text
--- @return #GuiTextBox
---
+---Set text
+---@param text string
+---@return GuiTextBox
 function GuiTextBox:text(text)
   self.options.text = text
   return self

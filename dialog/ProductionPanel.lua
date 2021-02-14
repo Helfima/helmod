@@ -1,10 +1,6 @@
 -------------------------------------------------------------------------------
--- Class to build production panel
---
--- @module ProductionPanel
--- @extends #FormModel
---
-
+---Class to build production panel
+---@class ProductionPanel
 ProductionPanel = newclass(FormModel,function(base,classname)
   FormModel.init(base,classname)
   base.add_special_button = true
@@ -12,31 +8,21 @@ ProductionPanel = newclass(FormModel,function(base,classname)
 end)
 
 -------------------------------------------------------------------------------
--- On initialization
---
--- @function [parent=#ProductionPanel] onInit
---
+---On initialization
 function ProductionPanel:onInit()
   self.panelCaption = string.format("%s %s","Helmod",game.active_mods["helmod"])
 end
 
 -------------------------------------------------------------------------------
--- On Bind Dispatcher
---
--- @function [parent=#ProductionPanel] onBind
---
+---On Bind Dispatcher
 function ProductionPanel:onBind()
   Dispatcher:bind("on_gui_refresh", self, self.update)
   Dispatcher:bind("on_gui_pause", self, self.updateTopMenu)
 end
 
 -------------------------------------------------------------------------------
--- Return button caption
---
--- @function [parent=#ProductionPanel] getButtonCaption
---
--- @return #string
---
+---Return button caption
+---@return string
 function ProductionPanel:getButtonCaption()
   local model, block, recipe = self:getParameterObjects()
   if block == nil then return {"helmod_result-panel.tab-button-production-line"} end
@@ -44,36 +30,24 @@ function ProductionPanel:getButtonCaption()
 end
 
 -------------------------------------------------------------------------------
--- Get Button Sprites
---
--- @function [parent=#ProductionPanel] getButtonSprites
---
--- @return boolean
---
+---Get Button Sprites
+---@return string, string
 function ProductionPanel:getButtonSprites()
   return "factory-white","factory"
 end
 
 -------------------------------------------------------------------------------
--- Is visible
---
--- @function [parent=#ProductionPanel] isVisible
---
--- @return boolean
---
+---Is visible
+---@return boolean
 function ProductionPanel:isVisible()
   return true
 end
 
 -------------------------------------------------------------------------------
--- On Style
---
--- @function [parent=#ProductionPanel] onStyle
---
--- @param #table styles
--- @param #number width_main
--- @param #number height_main
---
+---On Style
+---@param styles table
+---@param width_main number
+---@param height_main number
 function ProductionPanel:onStyle(styles, width_main, height_main)
   styles.block_info = {
     height = 50*2+40,
@@ -81,10 +55,8 @@ function ProductionPanel:onStyle(styles, width_main, height_main)
 end
 
 -------------------------------------------------------------------------------
--- Get or create result panel
---
--- @function [parent=#ProductionPanel] getResultPanel2
---
+---Get or create result panel
+---@return LuaGuiElement
 function ProductionPanel:getResultPanel()
   local panel = self:getFramePanel("result", nil, "horizontal")
   local panel_name1 = "result1"
@@ -107,10 +79,8 @@ function ProductionPanel:getResultPanel()
 end
 
 -------------------------------------------------------------------------------
--- Get or create result scroll panel
---
--- @function [parent=#ProductionPanel] getNavigatorPanel
---
+---Get or create result scroll panel
+---@return LuaGuiElement
 function ProductionPanel:getNavigatorPanel()
   local panel1, panel2 = self:getResultPanel()
   local panel_name = "panel-navigator"
@@ -130,10 +100,8 @@ function ProductionPanel:getNavigatorPanel()
 end
 
 -------------------------------------------------------------------------------
--- Get or create result scroll panel
---
--- @function [parent=#ProductionPanel] getDataPanel
---
+---Get or create result scroll panel
+---@return LuaGuiElement, LuaGuiElement, LuaGuiElement
 function ProductionPanel:getDataPanel()
   local panel1, panel2 = self:getResultPanel()
   local menu_name = "menu-data"
@@ -160,10 +128,8 @@ function ProductionPanel:getDataPanel()
 end
 
 -------------------------------------------------------------------------------
--- Get or create info panel
---
--- @function [parent=#ProductionPanel] getInfoPanel2
---
+---Get or create info panel
+---@return LuaGuiElement, LuaGuiElement, LuaGuiElement
 function ProductionPanel:getInfoPanel2()
   local menu_panel, header_panel, scroll_panel = self:getDataPanel()
   local info_name = "info"
@@ -195,10 +161,8 @@ function ProductionPanel:getInfoPanel2()
 end
 
 -------------------------------------------------------------------------------
--- Get or create left info panel
---
--- @function [parent=#ProductionPanel] getLeftInfoPanel2
---
+---Get or create left info panel
+---@return LuaGuiElement, LuaGuiElement, LuaGuiElement
 function ProductionPanel:getLeftInfoPanel2()
   local _, parent_panel, _ = self:getInfoPanel2()
   local panel_name = "left-scroll"
@@ -220,10 +184,8 @@ function ProductionPanel:getLeftInfoPanel2()
 end
 
 -------------------------------------------------------------------------------
--- Get or create right info panel
---
--- @function [parent=#ProductionPanel] getRightInfoPanel2
---
+---Get or create right info panel
+---@return LuaGuiElement, LuaGuiElement, LuaGuiElement
 function ProductionPanel:getRightInfoPanel2()
   local _,  _, parent_panel = self:getInfoPanel2()
   local panel_name = "right-scroll"
@@ -245,12 +207,8 @@ function ProductionPanel:getRightInfoPanel2()
 end
 
 -------------------------------------------------------------------------------
--- Get the menu panel
---
--- @function [parent=#ProductionPanel] getSubMenuPanel
---
--- @return #LuaGuiElement
---
+---Get the menu panel
+---@return LuaGuiElement, LuaGuiElement
 function ProductionPanel:getSubMenuPanel()
   local menu_panel, header_panel, scroll_panel = self:getDataPanel()
   local panel_name = "menu"
@@ -274,12 +232,8 @@ function ProductionPanel:getSubMenuPanel()
 end
 
 -------------------------------------------------------------------------------
--- Update
---
--- @function [parent=#ProductionPanel] onUpdate
---
--- @param #LuaEvent event
---
+---Update
+---@param event LuaEvent
 function ProductionPanel:onUpdate(event)
   local model, block, _ = self:getParameterObjects()
   self:updateIndexPanel(model)
@@ -290,16 +244,12 @@ function ProductionPanel:onUpdate(event)
 end
 
 -------------------------------------------------------------------------------
--- Update index panel
---
--- @function [parent=#ProductionPanel] updateIndexPanel
---
--- @param #LuaEvent event
---
+---Update index panel
+---@param model table
 function ProductionPanel:updateIndexPanel(model)
   local models = Model.getModels()
 
-  -- index panel
+  ---index panel
   local index_panel = self:getFrameDeepPanel("model_index")
   index_panel.style.padding = 2
   index_panel.clear()
@@ -340,34 +290,26 @@ function ProductionPanel:updateIndexPanel(model)
 end
 
 -------------------------------------------------------------------------------
--- Update menu panel
---
--- @function [parent=#ProductionPanel] updateMenuPanel
---
--- @param #table model
--- @param #table block
---
+---Update menu panel
+---@param model table
+---@param block table
 function ProductionPanel:updateSubMenuPanel(model, block)
   self:updateSubMenuLeftPanel(model, block)
   self:updateSubMenuRightPanel(model, block)
 end
 -------------------------------------------------------------------------------
--- Update menu panel
---
--- @function [parent=#ProductionPanel] updateMenuPanel
---
--- @param #table model
--- @param #table block
---
+---Update menu panel
+---@param model table
+---@param block table
 function ProductionPanel:updateSubMenuLeftPanel(model, block)
   if model == nil then return end
-  -- action panel
+  ---action panel
   local left_panel, right_panel = self:getSubMenuPanel()
   left_panel.clear()
 
   local button_spacing = 2
 
-  -- add recipe
+  ---add recipe
   local group_selector = GuiElement.add(left_panel, GuiFlowH("group_selector"))
   group_selector.style.horizontal_spacing = button_spacing
   local block_id = "new"
@@ -376,7 +318,7 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
   GuiElement.add(group_selector, GuiButton("HMTechnologySelector", "OPEN", model.id, block_id):sprite("menu", "graduation", "graduation"):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-technology"}))
   GuiElement.add(group_selector, GuiButton("HMEnergySelector", "OPEN", model.id, block_id):sprite("menu", "nuclear","nuclear"):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.select-button-energy"}))
 
-  -- delete button
+  ---delete button
   local group_delete = GuiElement.add(left_panel, GuiFlowH("group_delete"))
   local delete_action = "remove-block"
   if block == nil then delete_action = "remove-model" end
@@ -385,19 +327,19 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
       delete_button.enabled = false
   end
 
-  -- Model Debug
+  ---Model Debug
   if User.getModGlobalSetting("debug_solver") == true then
     local group_debug = GuiElement.add(left_panel, GuiFlowH("group_debug"))
     group_debug.style.horizontal_spacing = button_spacing
     GuiElement.add(group_debug, GuiButton("HMModelDebug", "OPEN", model.id, block_id):sprite("menu", "bug", "bug"):style("helmod_button_menu"):tooltip("Open Debug"))
   end
 
-  -- group tool
+  ---group tool
   local group_tool = GuiElement.add(left_panel, GuiFlowH("group_tool"))
   group_tool.style.horizontal_spacing = button_spacing
   GuiElement.add(group_tool, GuiButton("HMSummaryPanel", "OPEN", model.id, block_id):sprite("menu", "brief","brief"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
   if block ~= nil then
-    -- unlinked button
+    ---unlinked button
     local linked_button
     local unlinked = block.unlinked and true or false
     if unlinked or block.index == 0 then
@@ -416,14 +358,14 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
 
     GuiElement.add(group_tool, GuiButton("HMPinPanel", "OPEN", model.id, block_id):sprite("menu", "pin", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
     
-    -- by limit
+    ---by limit
     if block.by_limit == true then
       GuiElement.add(group_tool, GuiButton(self.classname, "block-limit", model.id, block_id):sprite("menu", "limitation-white", "limitation"):style("helmod_button_menu_selected"):tooltip({"helmod_label.assembler-limitation"}))
     else
       GuiElement.add(group_tool, GuiButton(self.classname, "block-limit", model.id, block_id):sprite("menu", "limitation", "limitation"):style("helmod_button_menu"):tooltip({"helmod_label.assembler-limitation"}))
     end
 
-    -- by product
+    ---by product
     if block.by_product == false then
       GuiElement.add(group_tool, GuiButton(self.classname, "block-by-product", model.id, block_id):sprite("menu", "by_ingredient-white", "by_ingredient"):style("helmod_button_menu_selected"):tooltip({"helmod_label.input-product"}))
     else
@@ -431,7 +373,7 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
     end
 
 
-    -- computing
+    ---computing
     local block_compunting = GuiElement.add(group_tool, GuiFlowH("block-computing"))
     block_compunting.style.horizontal_spacing=10
     local default_compunting = ""
@@ -455,16 +397,12 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
 end
 
 -------------------------------------------------------------------------------
--- Update menu panel
---
--- @function [parent=#ProductionPanel] updateMenuPanel
---
--- @param #table model
--- @param #table block
---
+---Update menu panel
+---@param model table
+---@param block table
 function ProductionPanel:updateSubMenuRightPanel(model, block)
   if model == nil then return end
-  -- action panel
+  ---action panel
   local left_panel, right_panel = self:getSubMenuPanel()
   right_panel.clear()
 
@@ -472,7 +410,7 @@ function ProductionPanel:updateSubMenuRightPanel(model, block)
   local block_id = "new"
   if block ~= nil then block_id = block.id end
 
-  -- logistics
+  ---logistics
   local display_logistic_row = User.getParameter("display_logistic_row")
   if display_logistic_row == true then
     local logistic_row_item = User.getParameter("logistic_row_item") or "belt"
@@ -510,15 +448,15 @@ function ProductionPanel:updateSubMenuRightPanel(model, block)
 
   local group_action = GuiElement.add(right_panel, GuiFlowH("group_action"))
   group_action.style.horizontal_spacing = button_spacing
-  -- copy past
+  ---copy past
   GuiElement.add(group_action, GuiButton(self.classname, "copy-model", model.id, block_id):sprite("menu", "copy", "copy"):style("helmod_button_menu"):tooltip({"helmod_button.copy"}))
   GuiElement.add(group_action, GuiButton(self.classname, "past-model", model.id, block_id):sprite("menu", "paste", "paste"):style("helmod_button_menu"):tooltip({"helmod_button.past"}))
-  -- download
+  ---download
   if self.classname == "HMProductionPanel" then
     GuiElement.add(group_action, GuiButton("HMDownload", "OPEN", "download"):sprite("menu", "download", "download"):style("helmod_button_menu"):tooltip({"helmod_result-panel.download-button-production-line"}))
     GuiElement.add(group_action, GuiButton("HMDownload", "OPEN", "upload"):sprite("menu", "upload", "upload"):style("helmod_button_menu"):tooltip({"helmod_result-panel.upload-button-production-line"}))
   end
-  -- refresh control
+  ---refresh control
   GuiElement.add(group_action, GuiButton(self.classname, "refresh-model", model.id):sprite("menu", "refresh", "refresh"):style("helmod_button_menu"):tooltip({"helmod_result-panel.refresh-button"}))
 
   local items = {}
@@ -537,21 +475,18 @@ function ProductionPanel:updateSubMenuRightPanel(model, block)
 end
 
 -------------------------------------------------------------------------------
--- Update info
---
--- @function [parent=#ProductionPanel] updateInfo
---
--- @param #LuaEvent event
---
+---Update info
+---@param model table
+---@param block table
 function ProductionPanel:updateInfoBlock(model, block)
   local info_scroll, output_scroll, input_scroll = self:getInfoPanel2()
   info_scroll.clear()
-  -- info panel
+  ---info panel
 
-  -- production block result
+  ---production block result
   if block ~= nil and table.size(block.recipes) > 0 then
 
-    -- block informations
+    ---block informations
     local block_table = GuiElement.add(info_scroll, GuiTable("output-table"):column(5))
     block_table.style.horizontally_stretchable = false
     block_table.vertical_centering = false
@@ -568,12 +503,11 @@ function ProductionPanel:updateInfoBlock(model, block)
   end
 end
 -------------------------------------------------------------------------------
--- Update header
---
--- @function [parent=#ProductionPanel] updateInput
---
+---Update header
+---@param model table
+---@param block table
 function ProductionPanel:updateInputBlock(model, block)
-  -- data
+  ---data
   local block_by_product = not(block ~= nil and block.by_product == false)
 
   local left_label, left_tool, left_scroll = self:getLeftInfoPanel2()
@@ -596,14 +530,14 @@ function ProductionPanel:updateInputBlock(model, block)
     GuiElement.add(input_tool, GuiButton(self.classname, "block-all-ingredient-visible", model.id, block.id):sprite("menu", "filter-sm", "filter-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_button.all-product-visible"}))
   end
 
-  -- input panel
+  ---input panel
   input_label.caption = {"helmod_common.input"}
   input_scroll.clear()
 
-  -- production block result
+  ---production block result
   if block ~= nil and table.size(block.recipes) > 0 then
 
-    -- input panel
+    ---input panel
     local input_table = GuiElement.add(input_scroll, GuiTable("input-table"):column(GuiElement.getElementColumnNumber(50)-2):style("helmod_table_element"))
     if block.ingredients ~= nil then
       for index, lua_ingredient in spairs(block.ingredients, User.getProductSorter()) do
@@ -627,7 +561,7 @@ function ProductionPanel:updateInputBlock(model, block)
             button_action = "product-edition"
             button_tooltip = "tooltip.edit-product"
           end
-          -- color
+          ---color
           if lua_ingredient.state == 1 then
             if not(block.unlinked) or block.by_factory == true then
               button_color = GuiElement.color_button_default_ingredient
@@ -651,12 +585,11 @@ function ProductionPanel:updateInputBlock(model, block)
 end
 
 -------------------------------------------------------------------------------
--- Update header
---
--- @function [parent=#ProductionPanel] updateOutput
---
+---Update header
+---@param model table
+---@param block table
 function ProductionPanel:updateOutputBlock(model, block)
-  -- data
+  ---data
   local block_by_product = not(block ~= nil and block.by_product == false)
 
   local left_label, left_tool, left_scroll = self:getLeftInfoPanel2()
@@ -678,14 +611,14 @@ function ProductionPanel:updateOutputBlock(model, block)
     GuiElement.add(output_tool, GuiButton(self.classname, "block-all-product-visible", model.id, block.id):sprite("menu", "filter-sm", "filter-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_button.all-product-visible"}))
   end
 
-  -- ouput panel
+  ---ouput panel
   output_label.caption = {"helmod_common.output"}
   output_scroll.clear()
 
-  -- production block result
+  ---production block result
   if block ~= nil and table.size(block.recipes) > 0 then
 
-    -- ouput panel
+    ---ouput panel
     local output_table = GuiElement.add(output_scroll, GuiTable("output-table"):column(GuiElement.getElementColumnNumber(50)-2):style("helmod_table_element"))
     if block.products ~= nil then
       for index, lua_product in spairs(block.products, User.getProductSorter()) do
@@ -717,7 +650,7 @@ function ProductionPanel:updateOutputBlock(model, block)
               button_tooltip = "tooltip.edit-product"
             end
           end
-          -- color
+          ---color
           if lua_product.state == 1 then
             if not(block.unlinked) or block.by_factory == true then
               button_color = GuiElement.color_button_default_product
@@ -737,15 +670,13 @@ function ProductionPanel:updateOutputBlock(model, block)
 end
 
 -------------------------------------------------------------------------------
--- Update header
---
--- @function [parent=#ProductionPanel] updateInfo
---
+---Update header
+---@param model table
 function ProductionPanel:updateInfoModel(model)
-  -- data
+  ---data
   local info_scroll, output_scroll, input_scroll = self:getInfoPanel2()
   info_scroll.clear()
-  -- info panel
+  ---info panel
 
   local info_panel = GuiElement.add(info_scroll, GuiFlowV("block-info"))
   info_panel.style.horizontally_stretchable = false
@@ -774,15 +705,13 @@ function ProductionPanel:updateInfoModel(model)
 end
 
 -------------------------------------------------------------------------------
--- Update header
---
--- @function [parent=#ProductionPanel] updateInput
---
+---Update header
+---@param model table
 function ProductionPanel:updateInputModel(model)
-  -- data
+  ---data
   local right_label, right_tool, right_scroll = self:getRightInfoPanel2()
   right_scroll.clear()
-  -- input panel
+  ---input panel
 
   local count_block = table.size(model.blocks)
   if count_block > 0 then
@@ -799,21 +728,19 @@ function ProductionPanel:updateInputModel(model)
 end
 
 -------------------------------------------------------------------------------
--- Update header
---
--- @function [parent=#ProductionPanel] updateOutput
---
+---Update header
+---@param model table
 function ProductionPanel:updateOutputModel(model)
-  -- data
+  ---data
   local left_label, left_tool, left_scroll = self:getLeftInfoPanel2()
   left_scroll.clear()
-  -- ouput panel
+  ---ouput panel
 
-  -- production block result
+  ---production block result
   local count_block = table.size(model.blocks)
   if count_block > 0 then
 
-    -- ouput panel
+    ---ouput panel
     local output_table = GuiElement.add(left_scroll, GuiTable("output-table"):column(GuiElement.getElementColumnNumber(50)):style("helmod_table_element"))
     if model.products ~= nil then
       for index, element in spairs(model.products, User.getProductSorter()) do
@@ -825,19 +752,15 @@ function ProductionPanel:updateOutputModel(model)
   end
 end
 -------------------------------------------------------------------------------
--- Update data
---
--- @function [parent=#ProductionPanel] updateData
---
--- @param #LuaEvent event
---
+---Update data
+---@param event LuaEvent
 function ProductionPanel:updateData(event)
   local model, block, recipe = self:getParameterObjects()
 
   self:bluidNavigator(model, block)
 
   local last_element = nil
-  -- col recipe
+  ---col recipe
   if block == nil then
     self:updateDataModel(model)
   else
@@ -848,11 +771,9 @@ function ProductionPanel:updateData(event)
 end
 
 -------------------------------------------------------------------------------
--- Update data
---
--- @function [parent=#ProductionPanel] updateData
---
---
+---Update data
+---@param model table
+---@param block table
 function ProductionPanel:updateDataBlock(model, block)
   if block == nil then return end
   
@@ -862,11 +783,11 @@ function ProductionPanel:updateDataBlock(model, block)
 
   self:updateInputBlock(model, block)
 
-  -- data panel
+  ---data panel
   local menu_panel, header_panel, scroll_panel = self:getDataPanel()
-  -- production block result
+  ---production block result
   if block ~= nil and table.size(block.recipes) > 0 then
-    -- data panel
+    ---data panel
     local extra_cols = 0
     if User.getPreferenceSetting("display_pollution") then
       extra_cols = extra_cols + 1
@@ -898,12 +819,8 @@ function ProductionPanel:updateDataBlock(model, block)
   end
 end
 -------------------------------------------------------------------------------
--- Update data
---
--- @function [parent=#ProductionPanel] updateData
---
--- @param #LuaEvent event
---
+---Update data
+---@param model table
 function ProductionPanel:updateDataModel(model)
   if model == nil then return end
   
@@ -913,11 +830,11 @@ function ProductionPanel:updateDataModel(model)
 
   self:updateInputModel(model)
 
-  -- data panel
+  ---data panel
   local menu_panel, header_panel, scroll_panel = self:getDataPanel()
-  -- production block result
+  ---production block result
   if table.size(model.blocks) > 0 then
-    -- data panel
+    ---data panel
     local extra_cols = 0
     if User.getPreferenceSetting("display_pollution") then
       extra_cols = extra_cols + 1
@@ -947,15 +864,14 @@ function ProductionPanel:updateDataModel(model)
   --self:updateTips("test tips, non mé ho!!!")
 end
 -------------------------------------------------------------------------------
--- Build Navigator
---
--- @function [parent=#ProductionPanel] bluidNavigator
---
+---Build Navigator
+---@param model table
+---@param current_block table
 function ProductionPanel:bluidNavigator(model, current_block)
   local scroll_panel = self:getNavigatorPanel()
   local last_element = nil
 
-  -- bluid tree
+  ---bluid tree
   if model.blocks ~= nil then
     self:bluidRootLeaf(scroll_panel, model, current_block, 0)
     self:bluidTree(scroll_panel, model, model.blocks, current_block, 1)
@@ -966,10 +882,12 @@ function ProductionPanel:bluidNavigator(model, current_block)
 end
 
 -------------------------------------------------------------------------------
--- Build Tree
---
--- @function [parent=#ProductionPanel] bluidTree
---
+---Build Tree
+---@param tree_panel LuaGuiElement
+---@param model table
+---@param blocks table
+---@param current_block table
+---@param level number
 function ProductionPanel:bluidTree(tree_panel, model, blocks, current_block, level)
   if blocks ~= nil then
     for _, block in spairs(blocks, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
@@ -979,10 +897,12 @@ function ProductionPanel:bluidTree(tree_panel, model, blocks, current_block, lev
 end
 
 -------------------------------------------------------------------------------
--- Build Tree
---
--- @function [parent=#ProductionPanel] bluidTree
---
+---Build Tree
+---@param tree_panel LuaGuiElement
+---@param model table
+---@param block table
+---@param current_block table
+---@param level number
 function ProductionPanel:bluidLeaf(tree_panel, model, block, current_block, level)
   if block ~= nil then
       local color = "gray"
@@ -1001,10 +921,11 @@ function ProductionPanel:bluidLeaf(tree_panel, model, block, current_block, leve
 end
 
 -------------------------------------------------------------------------------
--- Build Tree
---
--- @function [parent=#ProductionPanel] bluidTree
---
+---Build Tree
+---@param tree_panel LuaGuiElement
+---@param model table
+---@param current_block table
+---@param level number
 function ProductionPanel:bluidRootLeaf(tree_panel, model, current_block, level)
   if model ~= nil then
       local color = "gray"
@@ -1019,15 +940,12 @@ function ProductionPanel:bluidRootLeaf(tree_panel, model, current_block, level)
 end
 
 -------------------------------------------------------------------------------
--- Add table header
---
--- @function [parent=#ProductionPanel] addTableHeader
---
--- @param #LuaGuiElement itable container for element
---
+---Add table header
+---@param itable LuaGuiElement
+---@param block table
 function ProductionPanel:addTableHeader(itable, block)
   self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
-  -- optionnal columns
+  ---optionnal columns
   if User.getModGlobalSetting("display_hidden_column") == "All" then
     self:addCellHeader(itable, "index", {"helmod_result-panel.col-header-index"},"index")
     self:addCellHeader(itable, "id", {"helmod_result-panel.col-header-id"},"id")
@@ -1036,13 +954,13 @@ function ProductionPanel:addTableHeader(itable, block)
     self:addCellHeader(itable, "name", {"helmod_result-panel.col-header-name"},"name")
     self:addCellHeader(itable, "type", {"helmod_result-panel.col-header-type"},"type")
   end
-  -- data columns
+  ---data columns
   self:addCellHeader(itable, "recipe", {"helmod_result-panel.col-header-recipe"},"index")
   self:addCellHeader(itable, "energy", {"helmod_common.energy-consumption"},"energy_total")
   if User.getPreferenceSetting("display_pollution") then
     self:addCellHeader(itable, "pollution", {"helmod_common.pollution"})
   end
-  -- col building
+  ---col building
   if User.getPreferenceSetting("display_building") or block ~= nil then
     self:addCellHeader(itable, "factory", {"helmod_result-panel.col-header-factory"})
   end
@@ -1064,81 +982,74 @@ function ProductionPanel:addTableHeader(itable, block)
 end
 
 -------------------------------------------------------------------------------
--- Add table row
---
--- @function [parent=#ProductionPanel] addTableRowCommon
---
--- @param #LuaGuiElement gui_table
--- @param #table block
---
-
+---Add table row
+---@param gui_table LuaGuiElement
+---@param element table
 function ProductionPanel:addTableRowCommon(gui_table, element)
   if User.getModGlobalSetting("display_hidden_column") == "All" then
-    -- col index
+    ---col index
     GuiElement.add(gui_table, GuiLabel("value_index", element.id):caption(element.index))
-    -- col id
+    ---col id
     GuiElement.add(gui_table, GuiLabel("value_id", element.id):caption(element.id))
   end
   if User.getModGlobalSetting("display_hidden_column") ~= "None" then
-    -- col name
+    ---col name
     GuiElement.add(gui_table, GuiLabel("value_name", element.id):caption(element.name))
-    -- col type
+    ---col type
     GuiElement.add(gui_table, GuiLabel("value_type", element.id):caption(element.type))
   end
 end
 -------------------------------------------------------------------------------
--- Add table row
---
--- @function [parent=#ProductionPanel] addTableRowRecipe
---
--- @param #LuaGuiElement gui_table
--- @param #table block
--- @param #table recipe production recipe
---
+---Add table row
+---@param gui_table LuaGuiElement
+---@param model table
+---@param block table
+---@param recipe table
+---@return LuaGuiElement
 function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
   local recipe_prototype = RecipePrototype(recipe)
   --local lua_recipe = RecipePrototype(recipe):native()
 
-  -- col action
+  ---col action
   local cell_action = GuiElement.add(gui_table, GuiTable("action", recipe.id):column(2):style("helmod_table_list"))
   if block.by_product == false then
-    -- by ingredient
+    ---by ingredient
     GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-down", model.id, block.id, recipe.id):sprite("menu", "arrow-up-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.up-element", User.getModSetting("row_move_step")}))
     GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-remove", model.id, block.id, recipe.id):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
     GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-up", model.id, block.id, recipe.id):sprite("menu", "arrow-down-sm", "arrow-down-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.down-element", User.getModSetting("row_move_step")}))
   else
-    -- by product
+    ---by product
     GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-up", model.id, block.id, recipe.id):sprite("menu", "arrow-up-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.up-element", User.getModSetting("row_move_step")}))
     GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-remove", model.id, block.id, recipe.id):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
     GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-down", model.id, block.id, recipe.id):sprite("menu", "arrow-down-sm", "arrow-down-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.down-element", User.getModSetting("row_move_step")}))
   end
-  -- conversion block
+  ---conversion block
   if recipe.index > 0 then
     GuiElement.add(cell_action, GuiButton(self.classname, "conversion-recipe-block", model.id, block.id, recipe.id):sprite("menu", "hangar-sm", "hangar-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.conversion-recipe-block"}))
   end
 
-  -- common cols
+  ---common cols
   self:addTableRowCommon(gui_table, recipe)
-  -- col recipe
-  --  local production = recipe.production or 1
-  --  local production_label = Format.formatPercent(production).."%"
-  --  if block.solver == true then production_label = "" end
+  ---col recipe
+  --- local production = recipe.production or 1
+  --- local production_label = Format.formatPercent(production).."%"
+  --- if block.solver == true then production_label = "" end
   local cell_recipe = GuiElement.add(gui_table, GuiTable("recipe", recipe.id):column(2):style("helmod_table_list"))
   GuiElement.add(cell_recipe, GuiCellRecipe("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):infoIcon(recipe.type):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):broken(recipe_prototype:native() == nil):byLimit(block.by_limit))
   if recipe_prototype:native() == nil then
     Player.print("ERROR: Recipe ".. recipe.name .." not exist in game")
   end
-  -- col energy
+  ---col energy
   local cell_energy = GuiElement.add(gui_table, GuiTable("energy", recipe.id):column(2):style("helmod_table_list"))
   GuiElement.add(cell_energy, GuiCellEnergy("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit))
 
-  -- col pollution
+  ---col pollution
   if User.getPreferenceSetting("display_pollution") then
     local cell_pollution = GuiElement.add(gui_table, GuiTable("pollution", recipe.id):column(2):style("helmod_table_list"))
     GuiElement.add(cell_pollution, GuiCellPollution("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit))
   end
   
-  -- col factory
+  ---col factory
   local factory = recipe.factory
   local cell_factory = GuiElement.add(gui_table, GuiTable("factory", recipe.id):column(2):style("helmod_table_list"))
   local gui_cell_factory = GuiCellFactory(self.classname, "factory-action", model.id, block.id, recipe.id):element(factory):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit):controlInfo("crafting-add")
@@ -1150,7 +1061,7 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
   end
   GuiElement.add(cell_factory, gui_cell_factory)
 
-  -- col beacon
+  ---col beacon
   local beacon = recipe.beacon
   local cell_beacon = GuiElement.add(gui_table, GuiTable("beacon", recipe.id):column(2):style("helmod_table_list"))
   local gui_cell_beacon = GuiCellFactory(self.classname, "beacon-action", model.id, block.id, recipe.id):element(beacon):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit):controlInfo("crafting-add")
@@ -1158,7 +1069,7 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 
   for _,order in pairs(Model.getBlockOrder(block)) do
     if order == "products" then
-      -- products
+      ---products
       local display_product_cols = User.getPreferenceSetting("display_product_cols")
       local cell_products = GuiElement.add(gui_table, GuiTable("products", recipe.id):column(display_product_cols):style("helmod_table_list"))
       for index, lua_product in spairs(recipe_prototype:getProducts(recipe.factory), User.getProductSorter()) do
@@ -1180,7 +1091,7 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
         GuiElement.add(cell_products, GuiCellElement(self.classname, "production-recipe-product-add", model.id, block.id, recipe.id):element(product):tooltip("tooltip.add-recipe"):index(index):byLimit(block.by_limit):contraintIcon(contraint_type):controlInfo(control_info))
       end
     else
-      -- ingredients
+      ---ingredients
       local display_ingredient_cols = User.getPreferenceSetting("display_ingredient_cols")
       local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients_", recipe.id):column(display_ingredient_cols):style("helmod_table_list"))
       for index, lua_ingredient in spairs(recipe_prototype:getIngredients(recipe.factory), User.getProductSorter()) do
@@ -1189,7 +1100,7 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
         local ingredient = ingredient_prototype:clone()
         ingredient.time = model.time
         ingredient.count = ingredient_prototype:countIngredient(model, recipe)
-        -- si constant compte comme un produit (recipe rocket)
+        ---si constant compte comme un produit (recipe rocket)
         if ingredient.constant == true then
           ingredient.count = ingredient_prototype:countProduct(model, recipe)
         end
@@ -1212,19 +1123,17 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 end
 
 -------------------------------------------------------------------------------
--- Add row data tab
---
--- @function [parent=#ProductionPanel] addTableRowBlock
---
--- @param #LuaGuiElement gui_table
--- @param #table block production block
---
+---Add row data tab
+---@param gui_table LuaGuiElement
+---@param model table
+---@param block table
+---@return LuaGuiElement
 function ProductionPanel:addTableRowBlock(gui_table, model, block)
   local unlinked = block.unlinked and true or false
   if block.index == 0 then unlinked = true end
   local block_by_product = not(block ~= nil and block.by_product == false)
   block.type = "recipe"
-  -- col action
+  ---col action
   local cell_action = GuiElement.add(gui_table, GuiTable("action", block.id):column(2))
 
   GuiElement.add(cell_action, GuiButton(self.classname, "production-block-up", model.id, block.id):sprite("menu", "arrow-up-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.up-element", User.getModSetting("row_move_step")}))
@@ -1236,39 +1145,39 @@ function ProductionPanel:addTableRowBlock(gui_table, model, block)
     GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink", model.id, block.id):sprite("menu", "link-white-sm", "link-sm"):style("helmod_button_menu_sm_selected"):tooltip({"tooltip.unlink-element"}))
   end
 
-  -- common cols
+  ---common cols
   self:addTableRowCommon(gui_table, block)
 
-  -- col recipe
+  ---col recipe
   local cell_recipe = GuiElement.add(gui_table, GuiTable("recipe", block.id):column(1):style("helmod_table_list"))
 
   local block_color = "gray"
   if not(block_by_product) then block_color = "orange" end
   GuiElement.add(cell_recipe, GuiCellBlock(self.classname, "change-block", model.id, block.id):element(block):infoIcon(block.type):tooltip("tooltip.edit-block"):color(block_color))
 
-  -- col energy
+  ---col energy
   local cell_energy = GuiElement.add(gui_table, GuiTable(block.id, "energy"):column(1):style("helmod_table_list"))
   local element_block = {name=block.name, power=block.power, pollution_total=block.pollution_total, summary=block.summary}
   GuiElement.add(cell_energy, GuiCellEnergy(self.classname, "change-block", model.id, block.id):element(element_block):tooltip("tooltip.edit-block"):color(block_color))
 
-  -- col pollution
+  ---col pollution
   if User.getPreferenceSetting("display_pollution") then
     local cell_pollution = GuiElement.add(gui_table, GuiTable(block.id, "pollution"):column(1):style("helmod_table_list"))
     GuiElement.add(cell_pollution, GuiCellPollution(self.classname, "change-block", model.id, block.id):element(element_block):tooltip("tooltip.edit-block"):color(block_color))
   end
   
-  -- col building
+  ---col building
   if User.getPreferenceSetting("display_building") then
     local cell_building = GuiElement.add(gui_table, GuiTable(block.id, "building"):column(1):style("helmod_table_list"))
     GuiElement.add(cell_building, GuiCellBuilding(self.classname, "change-block", model.id, block.id):element(element_block):tooltip("tooltip.info-building"):color(block_color))
   end
 
-  -- col beacon
+  ---col beacon
   --local cell_beacon = GuiElement.add(gui_table, GuiTable("beacon", block.id):column(2):style("helmod_table_list"))
   
   local product_sorter = User.getProductSorter()
 
-  -- products
+  ---products
   local display_product_cols = User.getPreferenceSetting("display_product_cols") + 1
   local cell_products = GuiElement.add(gui_table, GuiTable("products", block.id):column(display_product_cols):style("helmod_table_list"))
   cell_products.style.horizontally_stretchable = false
@@ -1292,7 +1201,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, block)
             button_tooltip = "tooltip.edit-product"
           end
         end
-        -- color
+        ---color
         if product.state == 1 then
           if not(block.unlinked) or block.by_factory == true then
             button_color = GuiElement.color_button_default_product
@@ -1309,7 +1218,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, block)
       end
     end
   end
-  -- ingredients
+  ---ingredients
   local display_ingredient_cols = User.getPreferenceSetting("display_ingredient_cols") + 2
   local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients", block.id):column(display_ingredient_cols))
   cell_ingredients.style.horizontally_stretchable = false
@@ -1328,7 +1237,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, block)
           button_action = "product-edition"
           button_tooltip = "tooltip.edit-product"
         end
-        -- color
+        ---color
         if ingredient.state == 1 then
           if not(block.unlinked) or block.by_factory == true then
             button_color = GuiElement.color_button_default_ingredient
@@ -1349,50 +1258,46 @@ function ProductionPanel:addTableRowBlock(gui_table, model, block)
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#ProductionPanel] onEvent
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
 function ProductionPanel:onEvent(event)
   local model, block, _ = self:getParameterObjects()
 
   if block == nil then
     block = model.blocks[event.item2]
   end
-  -- ***************************
-  -- access for all
-  -- ***************************
+  ---***************************
+  ---access for all
+  ---***************************
   self:onEventAccessAll(event, model, block)
 
-  -- ***************************
-  -- access admin or owner
-  -- ***************************
+  ---***************************
+  ---access admin or owner
+  ---***************************
 
   if User.isReader(model) then
     self:onEventAccessRead(event, model, block)
   end
 
-  -- *******************************
-  -- access admin or owner or write
-  -- *******************************
+  ---*******************************
+  ---access admin or owner or write
+  ---*******************************
 
   if User.isWriter(model) then
     self:onEventAccessWrite(event, model, block)
   end
 
-  -- ********************************
-  -- access admin or owner or delete
-  -- ********************************
+  ---********************************
+  ---access admin or owner or delete
+  ---********************************
 
   if User.isDeleter(model) then
     self:onEventAccessDelete(event, model, block)
   end
 
-  -- *******************************
-  -- access admin only
-  -- *******************************
+  ---*******************************
+  ---access admin only
+  ---*******************************
 
   if User.isAdmin() then
     self:onEventAccessAdmin(event, model, block)
@@ -1400,12 +1305,10 @@ function ProductionPanel:onEvent(event)
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#ProductionPanel] onEventAccessAll
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
+---@param model table
+---@param block table
 function ProductionPanel:onEventAccessAll(event, model, block)
   if event.action == "refresh-model" then
     ModelCompute.update(model)
@@ -1462,12 +1365,10 @@ function ProductionPanel:onEventAccessAll(event, model, block)
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#ProductionPanel] onEventAccessRead
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
+---@param model table
+---@param block table
 function ProductionPanel:onEventAccessRead(event, model, block)
   if event.action == "copy-model" then
     if block ~= nil then
@@ -1509,12 +1410,10 @@ function ProductionPanel:onEventAccessRead(event, model, block)
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#ProductionPanel] onEventAccessWrite
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
+---@param model table
+---@param block table
 function ProductionPanel:onEventAccessWrite(event, model, block)
   local selector_name = "HMRecipeSelector"
   if block ~= nil and block.isEnergy then
@@ -1629,7 +1528,7 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
           User.setParameter("scroll_element", new_recipe.id)
           Controller:send("on_gui_update", event)
         else
-          -- pour ouvrir avec le filtre ingredient
+          ---pour ouvrir avec le filtre ingredient
           event.button = defines.mouse_button_type.right
           Controller:send("on_gui_open", event, selector_name)
         end
@@ -1816,12 +1715,10 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#ProductionPanel] onEventAccessDelete
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
+---@param model table
+---@param block table
 function ProductionPanel:onEventAccessDelete(event, model, block)
   if event.action == "remove-model" then
     ModelBuilder.removeModel(event.item1)
@@ -1837,12 +1734,10 @@ function ProductionPanel:onEventAccessDelete(event, model, block)
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#ProductionPanel] onEventAccessAdmin
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
+---@param model table
+---@param block table
 function ProductionPanel:onEventAccessAdmin(event, model, block)
   if event.action == "game-pause" then
     if not(game.is_multiplayer()) then

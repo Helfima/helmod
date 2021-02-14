@@ -68,10 +68,8 @@ local pinLocate = "left"
 local nextEvent = nil
 
 -------------------------------------------------------------------------------
--- Initialization
---
--- @function [parent=#Controller] prepare
---
+---Prepare Views
+---
 function Controller:prepare()
 
   local forms = {}
@@ -115,10 +113,8 @@ function Controller:prepare()
 end
 
 -------------------------------------------------------------------------------
--- On initialization
---
--- @function [parent=#Controller] on_init
---
+---On initialization
+---
 function Controller:on_init()
   log("Controller:on_init()")
   local caches_data = Cache.get()
@@ -137,10 +133,8 @@ function Controller:on_init()
   end
 end
 -------------------------------------------------------------------------------
--- Bind Dispatcher
---
--- @function [parent=#Controller] bind
---
+---Bind Dispatcher
+---
 function Controller:bind()
   Dispatcher:bind("on_gui_action", self, self.onGuiAction)
   Dispatcher:bind("on_gui_event", self, self.onGuiEvent)
@@ -151,38 +145,32 @@ function Controller:bind()
 end
 
 -------------------------------------------------------------------------------
--- Get views
---
--- @function [parent=#Controller] getViews
---
--- @return #table
---
+--- Get views
+---
+---@return table
+---
 function Controller:getViews()
   if views == nil then Controller.prepare() end
   return views
 end
 
 -------------------------------------------------------------------------------
--- Initialization
---
--- @function [parent=#Controller] getView
---
--- @param #string name
---
--- @return #table
---
+---Get View
+---
+---@param name string
+---
+---@return table
+---
 function Controller:getView(name)
   if views == nil then Controller.prepare() end
   return views[name]
 end
 
 -------------------------------------------------------------------------------
--- Cleanup
---
--- @function [parent=#Controller] cleanController
---
--- @param #LuaPlayer player
---
+---Cleanup
+---
+---@param player table
+---
 function Controller:cleanController(player)
   for _,location in pairs({"center", "left", "top", "screen"}) do
     local lua_gui_element = player.gui[location]
@@ -198,10 +186,8 @@ function Controller:cleanController(player)
 end
 
 -------------------------------------------------------------------------------
--- closeEditionOrSelector
---
--- @function [parent=#Controller] closeEditionOrSelector
---
+---closeEditionOrSelector
+---
 function Controller:closeEditionOrSelector()
   local lua_gui_element = Player.getGui("screen")
   for _,children_name in pairs(lua_gui_element.children_names) do
@@ -212,12 +198,10 @@ function Controller:closeEditionOrSelector()
 end
 
 -------------------------------------------------------------------------------
--- Bind all controllers
---
--- @function [parent=#Controller] bindController
---
--- @param #LuaPlayer player
---
+---Bind all controllers
+---
+---@param player table
+---
 function Controller:bindController(player)
   if player ~= nil then
     local lua_gui_element = Player.getGui("top")
@@ -238,12 +222,10 @@ function Controller:bindController(player)
 end
 
 -------------------------------------------------------------------------------
--- On tick
---
--- @function [parent=#Controller] onTick
---
--- @param #table event
---
+---On tick
+---
+---@param event table
+---
 function Controller:onTick(event)
   if Player.native() ~= nil then
     local next_event = User.getParameter("next_event")
@@ -283,10 +265,10 @@ function Controller:onTick(event)
 end
 
 -------------------------------------------------------------------------------
--- On gui queue
---
--- @function [parent=#Controller] onGuiQueue
---
+---On gui queue
+---
+---@param event table
+---
 function Controller:onGuiQueue(event)
   local event_queue = User.getParameter("event_queue") or {}
   event.element = {name=event.element.name, text=event.element.text}
@@ -295,10 +277,10 @@ function Controller:onGuiQueue(event)
 end
 
 -------------------------------------------------------------------------------
--- On gui tips
---
--- @function [parent=#Controller] onGuiTips
---
+---On gui tips
+---
+---@param event table
+---
 function Controller:onGuiTips(event)
   local form = self:getView(event.classname)
   if form ~= nil then
@@ -307,12 +289,10 @@ function Controller:onGuiTips(event)
 end
 
 -------------------------------------------------------------------------------
--- On tick
---
--- @function [parent=#Controller] onNthTick
---
--- @param #table NthTickEvent {tick=#number, nth_tick=#number}
---
+---On tick
+---
+---@param NthTickEvent table {tick=#number, nth_tick=#number}
+---
 function Controller:onNthTick(NthTickEvent)
   if Player.native() ~= nil then
     local next_event = User.getParameter("next_event")
@@ -326,23 +306,19 @@ function Controller:onNthTick(NthTickEvent)
 end
 
 -------------------------------------------------------------------------------
--- On string translated
---
--- @function [parent=#Controller] onStringTranslated
---
--- @param #table event {player_index=number, localised_ string=#string,result=#string, translated=#boolean}
---
+---On string translated
+---
+---@param event table {player_index=number, localised_ string=string, result=string, translated=boolean}
+---
 function Controller:onStringTranslated(event)
   User.addTranslate(event)
 end
 
 -------------------------------------------------------------------------------
--- On gui closed
---
--- @function [parent=#Controller] onGuiClosed
---
--- @param #table event
---
+---On gui closed
+---
+---@param event table
+---
 function Controller:onGuiClosed(event)
   self:cleanController(Player.native())
 end
@@ -350,12 +326,10 @@ end
 local pattern = "([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)"
 
 -------------------------------------------------------------------------------
--- On gui action
---
--- @function [parent=#Controller] onGuiAction
---
--- @param #table event
---
+---On gui action
+---
+---@param event table
+---
 function Controller:onGuiAction(event)
   if event.element ~= nil and (string.find(event.element.name,"^HM.*") or string.find(event.element.name,"^helmod.*")) then
     if views == nil then self:prepare() end
@@ -377,12 +351,10 @@ function Controller:onGuiAction(event)
 end
 
 -------------------------------------------------------------------------------
--- On gui event
---
--- @function [parent=#Controller] onGuiEvent
---
--- @param #table event
---
+---On gui event
+---
+---@param event table
+---
 function Controller:onGuiEvent(event)
   if event.action == "OPEN" and event.continue ~= true then
     User.setActiveForm(event.classname)
@@ -392,12 +364,10 @@ function Controller:onGuiEvent(event)
 end
 
 -------------------------------------------------------------------------------
--- On gui hotkey
---
--- @function [parent=#Controller] onGuiHotkey
---
--- @param #table event
---
+---On gui hotkey
+---
+---@param event table
+---
 function Controller:onGuiHotkey(event)
   if views == nil then self:prepare() end
 
@@ -439,12 +409,10 @@ function Controller:onGuiHotkey(event)
 end
 
 -------------------------------------------------------------------------------
--- On gui setting
---
--- @function [parent=#Controller] onGuiSetting
---
--- @param #table event
---
+---On gui setting
+---
+---@param event table
+---
 function Controller:onGuiSetting(event)
   if views == nil then self:prepare() end
 
@@ -459,10 +427,8 @@ function Controller:onGuiSetting(event)
 end
 
 -------------------------------------------------------------------------------
--- Prepare main display
---
--- @function [parent=#Controller] openMainPanel
---
+---Prepare main display
+---
 function Controller:openMainPanel()
   if self:isOpened() then
     self:cleanController(Player.native())
@@ -486,10 +452,9 @@ function Controller:openMainPanel()
 end
 
 -------------------------------------------------------------------------------
--- Is opened main panel
---
--- @function [parent=#Controller] isOpened
---
+---Is opened main panel
+---@return boolean
+---
 function Controller:isOpened()
   local lua_player = Player.native()
   if lua_player == nil then return false end
@@ -498,10 +463,11 @@ function Controller:isOpened()
 end
 
 -------------------------------------------------------------------------------
--- Send
---
--- @function [parent=#Controller] send
---
+---Send event
+---@param event_type string
+---@param data table
+---@param classname string
+---
 function Controller:send(event_type, data, classname)
   if classname ~= nil then data.classname = classname end
   Dispatcher:send(event_type, data, classname)

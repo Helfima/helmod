@@ -1,7 +1,6 @@
----
--- Description of the module.
--- @module Solver
---
+-------------------------------------------------------------------------------
+---Description of the module.
+---@class Solver
 Solver = newclass(function(base)
     base.debug_col = 11
     base.col_start = 9
@@ -17,13 +16,9 @@ Solver = newclass(function(base)
 end)
 
 -------------------------------------------------------------------------------
--- Clone la matrice
---
--- @function [parent=#Solver] clone
--- @param #table M
---
--- @return #table
---
+---Clone la matrice
+---@param M table
+---@return table
 function Solver:clone(M)
     local Mx = {}
     local num_row = rawlen(M)
@@ -38,18 +33,14 @@ function Solver:clone(M)
 end
   
 -------------------------------------------------------------------------------
--- Prepare la matrice
---
--- @function [parent=#Solver] prepare
--- @param #table M
---
--- @return #table
---
+---Prepare la matrice
+---@param M table
+---@return table
 function Solver:prepare(M)
     local Mx = self:clone(M)
     local irow = 1
     local row = {}
-    -- ajoute la ligne Z avec Z=-input
+    ---ajoute la ligne Z avec Z=-input
     for icol,cell in pairs(Mx[self.row_input]) do
       if icol > self.col_start then
         Mx[#Mx][icol] = 0-cell
@@ -59,15 +50,11 @@ function Solver:prepare(M)
 end
 
 -------------------------------------------------------------------------------
--- Finalise la matrice
---
--- @function [parent=#Solver] finalize
--- @param #table M
---
--- @return #table
---
+---Finalise la matrice
+---@param M table
+---@return table
 function Solver:finalize(M)
-    -- finalize la ligne Z reinject le input Z=Z+input
+    ---finalize la ligne Z reinject le input Z=Z+input
     for icol,cell in pairs(M[#M]) do
       if icol > self.col_start then
         M[#M][icol] = M[#M][icol] + M[self.row_input][icol]
@@ -77,10 +64,12 @@ function Solver:finalize(M)
 end
 
 -------------------------------------------------------------------------------
--- Add runtime
---
--- @function [parent=#Solver] addRuntime
---
+---Add runtime
+---@param debug boolean
+---@param runtime table
+---@param name string
+---@param matrix table
+---@param pivot table
 function Solver:addRuntime(debug, runtime, name, matrix, pivot)
     if debug == true then
         table.insert(runtime, {name=name, matrix=self:clone(matrix), pivot=pivot})
@@ -88,18 +77,13 @@ function Solver:addRuntime(debug, runtime, name, matrix, pivot)
 end
 
 -------------------------------------------------------------------------------
--- Ajoute la ligne State
---
--- @function [parent=#Solver] appendState
--- @param #table M
---
--- @return #table
---
--- state = 0 => produit
--- state = 1 => produit pilotant
--- state = 2 => produit restant
--- state = 3 => produit surplus
-
+---Ajoute la ligne State
+---state = 0 => produit
+---state = 1 => produit pilotant
+---state = 2 => produit restant
+---state = 3 => produit surplus
+---@param M table
+---@return table
 function Solver:appendState(M)
     local srow = {}
     for irow,row in pairs(M) do

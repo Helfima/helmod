@@ -1,57 +1,37 @@
 require "selector.AbstractSelector"
 -------------------------------------------------------------------------------
--- Class to build technology selector
---
--- @module TechnologySelector
--- @extends #AbstractSelector
---
-
+---Class to build technology selector
+---@class TechnologySelector
 TechnologySelector = newclass(AbstractSelector)
 
 -------------------------------------------------------------------------------
--- After initialization
---
--- @function [parent=#TechnologySelector] afterInit
---
+---After initialization
 function TechnologySelector:afterInit()
   self.disable_option = true
   self.sprite_type = nil
 end
 
 -------------------------------------------------------------------------------
--- Return caption
---
--- @function [parent=#TechnologySelector] getCaption
---
--- @param #Controller parent parent controller
---
-function TechnologySelector:getCaption(parent)
+---Return caption
+---@return table
+function TechnologySelector:getCaption()
   return {"helmod_selector-panel.technology-title"}
 end
 
 -------------------------------------------------------------------------------
--- Get prototype
---
--- @function [parent=#TechnologySelector] getPrototype
---
--- @param element
--- @param type
---
--- @return #table
---
+---Get prototype
+---@param element table
+---@param type string
+---@return table
 function TechnologySelector:getPrototype(element, type)
   return Technology(element, type)
 end
 
 -------------------------------------------------------------------------------
--- Update groups
---
--- @function [parent=#TechnologySelector] updateGroups
---
--- @param #table list_products
--- @param #table list_ingredients
--- @param #table list_translate
---
+---Update groups
+---@param list_products table
+---@param list_ingredients table
+---@param list_translate table
 function TechnologySelector:updateGroups(list_products, list_ingredients, list_translate)
   for key, technology in pairs(Player.getTechnologiePrototypes()) do
     self:appendGroups(technology, "technology", list_products, list_ingredients, list_translate)
@@ -59,10 +39,7 @@ function TechnologySelector:updateGroups(list_products, list_ingredients, list_t
 end
 
 -------------------------------------------------------------------------------
--- Build prototype icon
---
--- @function [parent=#TechnologySelector] buildPrototypeIcon
---
+---Build prototype icon
 function TechnologySelector:buildPrototypeIcon(guiElement, prototype, tooltip)
   local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select", "technology"):choose(prototype.type, prototype.name))
   button.locked = true

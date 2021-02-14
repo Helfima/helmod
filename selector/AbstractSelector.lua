@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
--- Classe to build selector dialog
+---Classe to build selector dialog
 --
--- @module AbstractSelector
--- @extends #Form
+---@module AbstractSelector
+---@extends #Form
 --
 
 AbstractSelector = newclass(FormModel,function(base,classname)
@@ -11,14 +11,10 @@ AbstractSelector = newclass(FormModel,function(base,classname)
 end)
 
 -------------------------------------------------------------------------------
--- On Style
---
--- @function [parent=#AbstractSelector] onStyle
---
--- @param #table styles
--- @param #number width_main
--- @param #number height_main
---
+---On Style
+---@param styles table
+---@param width_main number
+---@param height_main number
 function AbstractSelector:onStyle(styles, width_main, height_main)
   styles.flow_panel = {
     width = 490,
@@ -31,12 +27,8 @@ function AbstractSelector:onStyle(styles, width_main, height_main)
 end
 
 -------------------------------------------------------------------------------
--- Return filter - filtre sur les prototypes
---
--- @function [parent=#AbstractSelector] getProductFilter
---
--- @return #table
---
+---Return filter - filtre sur les prototypes
+---@return table
 function AbstractSelector:getProductFilter()
   local filter_prototype_product = User.getParameter("filter_prototype_product")
   if filter_prototype_product == nil then filter_prototype_product = true end
@@ -44,23 +36,15 @@ function AbstractSelector:getProductFilter()
 end
 
 -------------------------------------------------------------------------------
--- Return filter - filtre sur les prototypes
---
--- @function [parent=#AbstractSelector] getFilter
---
--- @return #table
---
+---Return filter - filtre sur les prototypes
+---@return table
 function AbstractSelector:getFilter()
   return User.getParameter("filter_prototype")
 end
 
 -------------------------------------------------------------------------------
--- Return list prototype
---
--- @function [parent=#AbstractSelector] getListPrototype
---
--- @return #table
---
+---Return list prototype
+---@return table
 function AbstractSelector:getListPrototype()
   if self:getProductFilter() and not(Cache.isEmpty(self.classname, "list_products")) then
     return Cache.getData(self.classname, "list_products") or {}
@@ -69,75 +53,51 @@ function AbstractSelector:getListPrototype()
 end
 
 -------------------------------------------------------------------------------
--- Return list group
---
--- @function [parent=#AbstractSelector] getListGroup
---
--- @return #table
---
+---Return list group
+---@return table
 function AbstractSelector:getListGroup()
   return User.getCache(self.classname, "list_group") or {}
 end
 
 -------------------------------------------------------------------------------
--- Return list subgroup
---
--- @function [parent=#AbstractSelector] getListSubGroup
---
--- @return #table
---
+---Return list subgroup
+---@return table
 function AbstractSelector:getListSubGroup()
   return User.getCache(self.classname, "list_subgroup") or {}
 end
 
 -------------------------------------------------------------------------------
--- Return list item
---
--- @function [parent=#AbstractSelector] getListItem
---
--- @return #table
---
+---Return list item
+---@return table
 function AbstractSelector:getListItem()
   return User.getCache(self.classname, "list_item") or {}
 end
 
 -------------------------------------------------------------------------------
--- Return list group elements
---
--- @function [parent=#AbstractSelector] getListGroupElements
---
--- @return #table
---
+---Return list group elements
+---@return table
 function AbstractSelector:getListGroupElements()
   return User.getCache(self.classname, "list_group_elements") or {}
 end
 
 -------------------------------------------------------------------------------
--- Return caption
---
--- @function [parent=#AbstractSelector] getCaption
---
+---Return caption
+---@return table
 function AbstractSelector:getCaption()
   return {"helmod_selector-panel.recipe-title"}
 end
 
 -------------------------------------------------------------------------------
--- On initialization
---
--- @function [parent=#AbstractSelector] onInit
---
+---On initialization
 function AbstractSelector:onInit()
-  self.panelCaption = self:getCaption() -- obligatoire sinon le panneau ne s'affiche pas
+  self.panelCaption = self:getCaption() ---obligatoire sinon le panneau ne s'affiche pas
   self.sprite_type = "item-group"
   self:afterInit()
   self.parameterTarget = string.format("%s_%s",self.classname,"target")
 end
 
 -------------------------------------------------------------------------------
--- After initialization
---
--- @function [parent=#AbstractSelector] afterInit
---
+---After initialization
 function AbstractSelector:afterInit()
   self.disable_option = false
   self.hidden_option = false
@@ -145,10 +105,8 @@ function AbstractSelector:afterInit()
 end
 
 -------------------------------------------------------------------------------
--- Get or create filter panel
---
--- @function [parent=#AbstractSelector] getFilterPanel
---
+---Get or create filter panel
+---@return LuaGuiElement
 function AbstractSelector:getFilterPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["filter-panel"] ~= nil and content_panel["filter-panel"].valid then
@@ -161,10 +119,8 @@ function AbstractSelector:getFilterPanel()
 end
 
 -------------------------------------------------------------------------------
--- Get or create scroll panel
---
--- @function [parent=#AbstractSelector] getSrollPanel
---
+---Get or create scroll panel
+---@return LuaGuiElement
 function AbstractSelector:getSrollPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["main_panel"] ~= nil and content_panel["main_panel"].valid then
@@ -179,10 +135,8 @@ function AbstractSelector:getSrollPanel()
 end
 
 -------------------------------------------------------------------------------
--- Get or create groups panel
---
--- @function [parent=#AbstractSelector] getGroupsPanel
---
+---Get or create groups panel
+---@return LuaGuiElement
 function AbstractSelector:getGroupsPanel()
   local scroll_panel = self:getSrollPanel()
   if scroll_panel["groups_panel"] ~= nil and scroll_panel["groups_panel"].valid then
@@ -192,10 +146,8 @@ function AbstractSelector:getGroupsPanel()
 end
 
 -------------------------------------------------------------------------------
--- Get or create groups panel
---
--- @function [parent=#AbstractSelector] getGroupsPanel
---
+---Get or create groups panel
+---@return LuaGuiElement
 function AbstractSelector:getFailPanel()
   local scroll_panel = self:getSrollPanel()
   if scroll_panel["groups_panel"] ~= nil and scroll_panel["groups_panel"].valid then
@@ -205,10 +157,8 @@ function AbstractSelector:getFailPanel()
 end
 
 -------------------------------------------------------------------------------
--- Get or create item list panel
---
--- @function [parent=#AbstractSelector] getItemListPanel
---
+---Get or create item list panel
+---@return LuaGuiElement
 function AbstractSelector:getItemListPanel()
   local scroll_panel = self:getSrollPanel()
   if scroll_panel["item_list_panel"] ~= nil and scroll_panel["item_list_panel"].valid then
@@ -218,12 +168,8 @@ function AbstractSelector:getItemListPanel()
 end
 
 -------------------------------------------------------------------------------
--- On before open
---
--- @function [parent=#AbstractSelector] onBeforeOpen
---
--- @param #LuaEvent event
---
+---On before open
+---@param event LuaEvent
 function AbstractSelector:onBeforeOpen(event)
   FormModel.onBeforeOpen(self, event)
   if event.action == "OPEN" then
@@ -257,12 +203,8 @@ function AbstractSelector:onBeforeOpen(event)
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#AbstractSelector] onEvent
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
 function AbstractSelector:onEvent(event)
   local default_settings = User.getDefaultSettings()
   local model, block, recipe = self:getParameterObjects()
@@ -284,7 +226,7 @@ function AbstractSelector:onEvent(event)
         self:close()
       end
     else
-      -- classic selector
+      ---classic selector
       if event.action == "element-select" and prototype_type ~= "container" then
         local index = nil
         if self:getProductFilter() == false then index = 0 end
@@ -296,7 +238,7 @@ function AbstractSelector:onEvent(event)
         User.setParameterObjects(self.classname, model.id, new_block.id)
         Controller:send("on_gui_refresh", event)
       end
-      -- container selector
+      ---container selector
       if event.action == "element-select" and prototype_type == "container" then
         local type = EntityPrototype(prototype_name):getType()
         if type == "container" or type == "logistic-container" then
@@ -363,10 +305,7 @@ function AbstractSelector:onEvent(event)
 end
 
 -------------------------------------------------------------------------------
--- Reset groups
---
--- @function [parent=#AbstractSelector] resetGroups
---
+---Reset groups
 function AbstractSelector:resetGroups()
   User.resetCache(self.classname, "list_group")
   User.resetCache(self.classname, "list_subgroup")
@@ -374,27 +313,18 @@ function AbstractSelector:resetGroups()
 end
 
 -------------------------------------------------------------------------------
--- Update groups
---
--- @function [parent=#AbstractSelector] updateGroups
---
--- @param #LuaEvent event
---
--- @return {list_group, list_subgroup, list_prototype}
---
+---Update groups
+---@param event LuaEvent
+---@return table, table, table --list_group, list_subgroup, list_prototype
 function AbstractSelector:updateGroups(event)
   return {},{},{}
 end
 
 -------------------------------------------------------------------------------
--- Prepare
---
--- @function [parent=#AbstractSelector] prepare
---
--- @param #LuaEvent event
---
+---Prepare
+---@param event LuaEvent
 function AbstractSelector:prepare(event)
-  -- recuperation recipes
+  ---recuperation recipes
   if Cache.isEmpty(self.classname, "list_ingredients") then
     local list_products = {}
     local list_ingredients = {}
@@ -412,16 +342,12 @@ function AbstractSelector:prepare(event)
 end
 
 -------------------------------------------------------------------------------
--- Translate
---
--- @function [parent=#AbstractSelector] translate
---
--- @param #LuaEvent event
---
+---Translate
+---@param event LuaEvent
 function AbstractSelector:translate(event)
-  -- List du cache non vide
+  ---List du cache non vide
   if not(Cache.isEmpty(self.classname, "list_translate")) then
-    -- bluid table translate
+    ---bluid table translate
     if User.getModGlobalSetting("filter_translated_string_active") and not(User.isTranslate()) and event.continue ~= true then
       local list_translate = Cache.getData(self.classname, "list_translate")
       local table_translate = {}
@@ -440,7 +366,7 @@ function AbstractSelector:translate(event)
       event.table_translate = table_translate
       return User.createNextEvent(event, self.classname, "translate")
     end
-    -- execute loop
+    ---execute loop
     if event.continue and event.method == "translate" then
       local query_translate = table.remove(event.table_translate)
       self:updateWaitMessage(string.format("Wait translate: %s", query_translate.index or 0))
@@ -458,12 +384,8 @@ function AbstractSelector:translate(event)
 end
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#AbstractSelector] onUpdate
---
--- @param #LuaEvent event
---
+---On update
+---@param event LuaEvent
 function AbstractSelector:onUpdate(event)
   self:updateFilter(event)
 
@@ -487,14 +409,9 @@ function AbstractSelector:onUpdate(event)
   end
 
 -------------------------------------------------------------------------------
--- Check filter
---
--- @function [parent=#AbstractSelector] checkFilter
---
--- @param #element
---
--- @return boolean
---
+---Check filter
+---@param search string
+---@return boolean
 function AbstractSelector:checkFilter(search)
   local filter_prototype = self:getFilter()
   if filter_prototype ~= nil and filter_prototype ~= "" then
@@ -511,12 +428,8 @@ function AbstractSelector:checkFilter(search)
 end
 
 -------------------------------------------------------------------------------
--- Update filter
---
--- @function [parent=#AbstractSelector] updateFilter
---
--- @param #LuaEvent event
---
+---Update filter
+---@param event LuaEvent
 function AbstractSelector:updateFilter(event)
   local panel = self:getFilterPanel()
   local filter_prototype = self:getFilter()
@@ -526,7 +439,7 @@ function AbstractSelector:updateFilter(event)
       GuiElement.add(panel, GuiSwitch(self.classname, "recipe-filter-switch"):state("left"):leftLabel({"helmod_recipe-edition-panel.filter-by-product"}):rightLabel({"helmod_recipe-edition-panel.filter-by-ingredient"}))
     end
 
-    -- switch language
+    ---switch language
     local switch_position = "left"
     if User.getModGlobalSetting("filter_translated_string_active") and User.getParameter("filter-language") ~= nil then
       switch_position = User.getParameter("filter-language")
@@ -536,14 +449,14 @@ function AbstractSelector:updateFilter(event)
       filter_switch.enabled = false
       filter_switch.switch_state = "right"
     end
-    -- switch contain
+    ---switch contain
     local contain_position = "left"
     if User.getParameter("filter-contain") ~= nil then
       contain_position = User.getParameter("filter-contain")
     end
     GuiElement.add(panel, GuiSwitch(self.classname, "filter-contain-switch"):state(contain_position):rightLabel({"helmod_recipe-edition-panel.filter-contain-switch-left"}, {"tooltip.filter-contain-switch-left"}):leftLabel({"helmod_recipe-edition-panel.filter-contain-switch-right"}, {"tooltip.filter-contain-switch-right"}):tooltip({"helmod_recipe-edition-panel.filter-contain-switch"}))
 
-    -- filter table
+    ---filter table
     local filter_table = GuiElement.add(panel, GuiTable("filter"):column(2))
     filter_table.vertical_centering = true
 
@@ -599,12 +512,9 @@ function AbstractSelector:updateFilter(event)
 end
 
 -------------------------------------------------------------------------------
--- Create element lists
---
--- @function [parent=#AbstractSelector] createElementLists
---
--- @return #table
---
+---Create element lists
+---@param event LuaEvent
+---@return table
 function AbstractSelector:createElementLists(event)
   local list_group_elements = self:getListGroupElements()
   local list_group = self:getListGroup()
@@ -617,7 +527,7 @@ function AbstractSelector:createElementLists(event)
     local table_element = {}
     local query_list = {}
     event.continue = true
-    -- list_products[element.name][type - lua_recipe.name]
+    ---list_products[element.name][type - lua_recipe.name]
     for key, element in pairs(list) do
       if index % step_list == 0 then
         query_list = {index=index,list={}}
@@ -629,7 +539,7 @@ function AbstractSelector:createElementLists(event)
     event.table_element = table_element
     return User.createNextEvent(event, self.classname, "list")
   end
-  -- execute loop
+  ---execute loop
   if event.continue and event.method == "list" then
     local filter_show_lock_recipes = User.getSetting("filter_show_lock_recipes")
     local filter_show_disable = User.getSetting("filter_show_disable")
@@ -639,7 +549,7 @@ function AbstractSelector:createElementLists(event)
     self:updateWaitMessage(string.format("Wait list build: %s", query_list.index or 0))
 
     for key, element in pairs(query_list.list) do
-      -- filter sur le nom element (product ou ingredient)
+      ---filter sur le nom element (product ou ingredient)
       if self:checkFilter(key) then
         for element_name, element in pairs(element) do
           local prototype = self:getPrototype(element)
@@ -685,29 +595,20 @@ function AbstractSelector:createElementLists(event)
 end
 
 -------------------------------------------------------------------------------
--- Get prototype
---
--- @function [parent=#AbstractSelector] getPrototype
---
--- @param element
--- @param type
---
--- @return #table
---
+---Get prototype
+---@param element table
+---@param type string
+---@return table
 function AbstractSelector:getPrototype(element, type)
 end
 
 -------------------------------------------------------------------------------
--- Append groups
---
--- @function [parent=#AbstractSelector] appendGroups
---
--- @param #string element
--- @param #string type
--- @param #table list_products
--- @param #table list_ingredients
--- @param #table list_translate
---
+---Append groups
+---@param element string
+---@param type string
+---@param list_products table
+---@param list_ingredients table
+---@param list_translate table
 function AbstractSelector:appendGroups(element, type, list_products, list_ingredients, list_translate)
   local prototype = self:getPrototype(element)
   local lua_prototype = prototype:native()
@@ -722,12 +623,8 @@ function AbstractSelector:appendGroups(element, type, list_products, list_ingred
 end
 
 -------------------------------------------------------------------------------
--- Update wait message
---
--- @function [parent=#AbstractSelector] updateWaitMessage
---
--- @param #LuaEvent event
---
+---Update wait message
+---@param message string
 function AbstractSelector:updateWaitMessage(message)
   local panel = self:getGroupsPanel()
   local item_list_panel = self:getItemListPanel()
@@ -736,12 +633,8 @@ function AbstractSelector:updateWaitMessage(message)
 end
 
 -------------------------------------------------------------------------------
--- Update fail message
---
--- @function [parent=#AbstractSelector] updateFailMessage
---
--- @param #LuaEvent event
---
+---Update fail message
+---@param message string
 function AbstractSelector:updateFailMessage(message)
   local panel = self:getGroupsPanel()
   local item_list_panel = self:getItemListPanel()
@@ -750,23 +643,19 @@ function AbstractSelector:updateFailMessage(message)
 end
 
 -------------------------------------------------------------------------------
--- Update item list
---
--- @function [parent=#AbstractSelector] updateItemList
---
--- @param #LuaEvent event
---
+---Update item list
+---@param event LuaEvent
 function AbstractSelector:updateItemList(event)
   local item_list_panel = self:getItemListPanel()
   item_list_panel.clear()
   local list_subgroup = self:getListSubGroup()
   local list_item = self:getListItem()
   
-  -- recuperation recipes et subgroupes
+  ---recuperation recipes et subgroupes
   local recipe_selector_list = GuiElement.add(item_list_panel, GuiFlowV("recipe_list"))
   if table.size(list_item) > 0 then
     for subgroup, list in spairs(list_item,function(t,a,b) return list_subgroup[b]["order"] > list_subgroup[a]["order"] end) do
-      -- boucle subgroup
+      ---boucle subgroup
       local guiRecipeSubgroup = GuiElement.add(recipe_selector_list, GuiTable("recipe-table-", subgroup):column(10):style("helmod_table_recipe_selector"))
       for key, prototype in spairs(list,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
         local tooltip = self:buildPrototypeTooltip(prototype)
@@ -781,45 +670,40 @@ else
 end
 
 -------------------------------------------------------------------------------
--- Build prototype tooltip
---
--- @function [parent=#AbstractSelector] buildPrototypeTooltip
---
+---Build prototype tooltip
+---@param prototype table
+---@return table
 function AbstractSelector:buildPrototypeTooltip(prototype)
-  -- initalize tooltip
+  ---initalize tooltip
   local tooltip = ""
   return tooltip
 end
 
 -------------------------------------------------------------------------------
--- Build prototype icon
---
--- @function [parent=#AbstractSelector] buildPrototypeIcon
---
-function AbstractSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
-  GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "recipe-select"):sprite(prototype.type, prototype.name):tooltip(tooltip))
+---Build prototype icon
+---@param gui_element GuiLuaElement
+---@param prototype table
+---@param tooltip table
+function AbstractSelector:buildPrototypeIcon(gui_element, prototype, tooltip)
+  GuiElement.add(gui_element, GuiButtonSelectSprite(self.classname, "recipe-select"):sprite(prototype.type, prototype.name):tooltip(tooltip))
 end
 
 -------------------------------------------------------------------------------
--- Update group selector
---
--- @function [parent=#AbstractSelector] updateGroupSelector
---
--- @param #LuaEvent event
---
+---Update group selector
+---@param event LuaEvent
 function AbstractSelector.updateGroupSelector(self, event)
   local panel = self:getGroupsPanel()
 
   panel.clear()
   local list_group = self:getListGroup()
 
-  -- ajouter de la table des groupes de recipe
+  ---ajouter de la table des groupes de recipe
   local gui_group_panel = GuiElement.add(panel, GuiTable("recipe-groups"):column(6):style("helmod_table_recipe_selector"))
 
   local group_selected = User.getParameter("recipe_group_selected")
 
   for _, group in spairs(list_group,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
-    -- set le groupe
+    ---set le groupe
     local group_selected = User.getParameter("recipe_group_selected")
     if group_selected == nil then User.setParameter("recipe_group_selected",group.name) end
     local color = nil
@@ -829,11 +713,11 @@ function AbstractSelector.updateGroupSelector(self, event)
     if group.name ~= "helmod" then
       --local tooltip = {"", "item-group-name."..group.name, "\nOrder=", group.order, "\nOrder in recipe=", group.order_in_recipe}
       local tooltip = {"", "item-group-name."..group.name}
-      -- ajoute les icons de groupe
+      ---ajoute les icons de groupe
       local action = GuiElement.add(gui_group_panel, GuiButtonSelectSpriteXxl(self.classname, "recipe-group"):sprite(self.sprite_type, group.name):tooltip(tooltip):color(color))
     else
       local tooltip = "Helmod"
-      -- ajoute les icons de groupe
+      ---ajoute les icons de groupe
       local action = GuiElement.add(gui_group_panel, GuiButtonSelectSpriteXxl(self.classname, "recipe-group", group.name):sprite("menu", "group"):tooltip(tooltip):color(color))
     end
   end

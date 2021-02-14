@@ -1,17 +1,17 @@
 require "selector.AbstractSelector"
 -------------------------------------------------------------------------------
--- Class to build container selector
+---Class to build container selector
 --
--- @module EnergySelector
--- @extends #AbstractSelector
+---@module EnergySelector
+---@extends #AbstractSelector
 --
 
 EnergySelector = newclass(AbstractSelector)
 
 -------------------------------------------------------------------------------
--- After initialization
+---After initialization
 --
--- @function [parent=#EnergySelector] afterInit
+---@function [parent=#EnergySelector] afterInit
 --
 function EnergySelector:afterInit()
   self.disable_option = true
@@ -20,42 +20,28 @@ function EnergySelector:afterInit()
 end
 
 -------------------------------------------------------------------------------
--- Return caption
---
--- @function [parent=#EnergySelector] getCaption
---
--- @param #Controller parent parent controller
---
-function EnergySelector:getCaption(parent)
+---Return caption
+---@return table
+function EnergySelector:getCaption()
   return {"helmod_selector-panel.energy-title"}
 end
 
 -------------------------------------------------------------------------------
--- Get prototype
---
--- @function [parent=#EnergySelector] getPrototype
---
--- @param element
--- @param type
---
--- @return #table
---
+---Get prototype
+---@param element table
+---@param type string
+---@return table
 function EnergySelector:getPrototype(element, type)
   return RecipePrototype(element, type)
 end
 
 -------------------------------------------------------------------------------
--- Append groups
---
--- @function [parent=#EnergySelector] appendGroups
---
--- @param #string element
--- @param #string type
--- @param #table list_products
--- @param #table list_ingredients
--- @param #table list_translate
--- 
-
+---Append groups
+---@param element string
+---@param type string
+---@param list_products table
+---@param list_ingredients table
+---@param list_translate table
 function EnergySelector:appendGroups(element, type, list_products, list_ingredients, list_translate)
   local prototype = self:getPrototype(element, type)
 
@@ -78,14 +64,10 @@ function EnergySelector:appendGroups(element, type, list_products, list_ingredie
 end
 
 -------------------------------------------------------------------------------
--- Update groups
---
--- @function [parent=#EnergySelector] updateGroups
---
--- @param #table list_products
--- @param #table list_ingredients
--- @param #table list_translate
---
+---Update groups
+---@param list_products table
+---@param list_ingredients table
+---@param list_translate table
 function EnergySelector:updateGroups(list_products, list_ingredients, list_translate)
   for key, entity in pairs(Player.getEnergyMachines()) do
     self:appendGroups(entity, "energy", list_products, list_ingredients, list_translate)
@@ -93,22 +75,18 @@ function EnergySelector:updateGroups(list_products, list_ingredients, list_trans
 end
 
 -------------------------------------------------------------------------------
--- Build prototype tooltip
---
--- @function [parent=#EnergySelector] buildPrototypeTooltip
---
--- @param #LuaPrototype prototype
---
+---Build prototype tooltip
+---@param prototype table
+---@return table
 function EnergySelector:buildPrototypeTooltip(prototype)
-  -- initalize tooltip
+  ---initalize tooltip
   local recipe_prototype = RecipePrototype(prototype.name, "energy")
-  local lua_prototype = recipe_prototype:native()
   local entity_prototype = EntityPrototype(prototype)
   local energy_name = entity_prototype:getLocalisedName()
   local tooltip = {""}
   table.insert(tooltip, energy_name)
   --table.insert(tooltip, {"", "\n",entity_prototype:getType()})
-  -- products
+  ---products
   if table.size(recipe_prototype:getProducts()) > 0 then
     table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.products"}, ":", helmod_tag.color.close, helmod_tag.font.close})
     for _,product in pairs(recipe_prototype:getProducts()) do
@@ -121,7 +99,7 @@ function EnergySelector:buildPrototypeTooltip(prototype)
       end
     end
   end
-  -- ingredients
+  ---ingredients
   if table.size(recipe_prototype:getIngredients()) > 0 then
     table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.ingredients"}, ":", helmod_tag.color.close, helmod_tag.font.close})
     for _,ingredient in pairs(recipe_prototype:getIngredients()) do
@@ -138,11 +116,11 @@ function EnergySelector:buildPrototypeTooltip(prototype)
 end
 
 -------------------------------------------------------------------------------
--- Build prototype icon
---
--- @function [parent=#EnergySelector] buildPrototypeIcon
---
-function EnergySelector:buildPrototypeIcon(guiElement, prototype, tooltip)
-  local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select", "energy"):choose("entity", prototype.name):color():tooltip(tooltip))
+---Build prototype icon
+---@param gui_element GuiLuaElement
+---@param prototype table
+---@param tooltip table
+function EnergySelector:buildPrototypeIcon(gui_element, prototype, tooltip)
+  local button = GuiElement.add(gui_element, GuiButtonSelectSprite(self.classname, "element-select", "energy"):choose("entity", prototype.name):color():tooltip(tooltip))
   button.locked = true
 end

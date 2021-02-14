@@ -1,37 +1,23 @@
 -------------------------------------------------------------------------------
--- Class to build ArrangeModels panel
---
--- @module ArrangeModels
--- @extends #Form
---
-
+---Class to build ArrangeModels panel
+---@class Form
 ArrangeModels = newclass(Form)
 
 -------------------------------------------------------------------------------
--- Initialization
---
--- @function [parent=#ArrangeModels] init
---
+---Initialization
 function ArrangeModels:onInit()
   self.panelCaption = ({"helmod_panel.arrange-models"})
 end
 
 -------------------------------------------------------------------------------
--- On Bind Dispatcher
---
--- @function [parent=#ArrangeModels] onBind
---
+---On Bind Dispatcher
 function ArrangeModels:onBind()
   Dispatcher:bind("on_gui_location", self, self.updateLocation)
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#ArrangeModels] onEvent
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
 function ArrangeModels:onEvent(event)
 
 end
@@ -39,12 +25,8 @@ end
 local elements = nil
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#ArrangeModels] onUpdate
---
--- @param #LuaEvent event
---
+---On update
+---@param event LuaEvent
 function ArrangeModels:onUpdate(event)
   local panel = self:getFramePanel("models")
   panel.style.height = 300
@@ -61,12 +43,9 @@ function ArrangeModels:onUpdate(event)
 end
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#ArrangeModels] addModelFrame
---
--- @param #LuaEvent event
---
+---On update
+---@param index number
+---@param model table
 function ArrangeModels:addModelFrame(index, model)
   local parent_panel = self:getPanel()
   local element = Model.firstRecipe(model.blocks)
@@ -102,12 +81,8 @@ function ArrangeModels:addModelFrame(index, model)
 end
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#ArrangeModels] updateLocation
---
--- @param #LuaEvent event
---
+---On update
+---@param event LuaEvent
 function ArrangeModels:updateLocation(event)
   if elements == nil then return end
   local frame = event.element
@@ -120,12 +95,7 @@ function ArrangeModels:updateLocation(event)
 end
 
 -------------------------------------------------------------------------------
--- On close dialog
---
--- @function [parent=#Form] onClose
---
--- @return #boolean if true the next call close dialog
---
+---On close dialog
 function ArrangeModels:onClose()
   local screen = Player.getGui("screen")
   for _, frame in pairs(screen.children) do

@@ -1,42 +1,27 @@
 -------------------------------------------------------------------------------
--- Class Object
---
--- @module Prototype
---
+---@class Prototype
 Prototype = newclass(function(base, lua_prototype)
   base.lua_prototype = lua_prototype
 end)
 
 -------------------------------------------------------------------------------
--- Return factorio player
---
--- @function [parent=#Prototype] native
---
--- @return #LuaFluidPrototype
---
+---Return factorio player
+---@return LuaPrototype
 function Prototype:native()
   return self.lua_prototype
 end
 
 -------------------------------------------------------------------------------
--- Return valid
---
--- @function [parent=#Prototype] getValid
---
--- @return #boolean
---
+---Return valid
+---@return boolean
 function Prototype:getValid()
   if self.lua_prototype == nil then return false end
   return self.lua_prototype.valid
 end
 
 -------------------------------------------------------------------------------
--- Return localised name
---
--- @function [parent=#Prototype] getLocalisedName
---
--- @return #number default 0
---
+---Return localised name
+---@return string
 function Prototype:getLocalisedName()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.localised_name
@@ -45,38 +30,25 @@ function Prototype:getLocalisedName()
 end
 
 -------------------------------------------------------------------------------
--- Return type
---
--- @function [parent=#Prototype] getType
---
--- @return #string
---
+---Return type
+---@return string
 function Prototype:getType()
   if self.lua_prototype == nil then return nil end
   return self.lua_prototype.type
 end
 
 -------------------------------------------------------------------------------
--- Return group
---
--- @function [parent=#Prototype] getGroup
---
--- @return #string
---
+---Return group
+---@return table
 function Prototype:getGroup()
   if self.lua_prototype == nil then return {} end
   return self.lua_prototype.group
 end
 
 -------------------------------------------------------------------------------
--- Return group
---
--- @function [parent=#Prototype] getGroup
---
--- @return #string
---
+---Return subgroup
+---@return table
 function Prototype:getSubgroup()
   if self.lua_prototype == nil then return {} end
   return self.lua_prototype.subgroup
 end
-

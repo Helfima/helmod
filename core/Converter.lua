@@ -3,61 +3,45 @@ local deflate = require "lib.zlib-deflate"
 local base64 = require "lib.base64"
 
 ---
--- Description of the module.
--- @module Converter
---
+---Description of the module.
+---@class Converter
 local Converter = {
-  -- single-line comment
+  ---single-line comment
   classname = "HMConverter",
-  -- use gzip
+  ---use gzip
   compressed = true,
-  -- length of line
+  ---length of line
   line_length = 120
 }
 
 -------------------------------------------------------------------------------
--- Trim string
---
--- @function [parent=#Converter] trim
---
--- @param #string s
---
--- @return #string
---
+---Trim string
+---@param s string
+---@return string
 function Converter.trim(s)
   return (s:gsub("^%s*(.-)%s*$", "%1"))
 end
 
 -------------------------------------------------------------------------------
--- Write table to string
---
--- @function [parent=#Converter] write
---
--- @param #table data_table
---
--- @return #string
---
+---Write table to string
+---@param data_table table
+---@return string
 function Converter.write2(data_table)
   local data_string = serpent.dump(data_table)
   return game.encode_string(data_string)
 end
 
 -------------------------------------------------------------------------------
--- Write table to string
---
--- @function [parent=#Converter] write
---
--- @param #table data_table
---
--- @return #string
---
+---Write table to string
+---@param data_table table
+---@return string
 function Converter.write(data_table)
   local data_string = serpent.dump(data_table)
   if (Converter.compressed) then
     data_string = deflate.gzip(data_string)
     data_string = base64.enc(data_string)
     if (Converter.line_length > 0) then
-      -- Add line breaks
+      ---Add line breaks
       data_string = data_string:gsub( ("%S"):rep(Converter.line_length), "%1\n" )
     end
   end
@@ -66,14 +50,9 @@ function Converter.write(data_table)
 end
 
 -------------------------------------------------------------------------------
--- Read string to table
---
--- @function [parent=#Converter] read
---
--- @param #string data_string
---
--- @return #table
---
+---Read string to table
+---@param data_string string
+---@return table
 function Converter.read2(data_string)
   if data_string == nil then return nil end
   data_string = Converter.trim(data_string)
@@ -93,14 +72,9 @@ function Converter.read2(data_string)
 end
 
 -------------------------------------------------------------------------------
--- Read string to table
---
--- @function [parent=#Converter] read
---
--- @param #string data_string
---
--- @return #table
---
+---Read string to table
+---@param data_string string
+---@return table
 function Converter.read(data_string)
   if data_string == nil then return nil end
   data_string = Converter.trim(data_string)
@@ -123,14 +97,9 @@ function Converter.read(data_string)
 end
 
 -------------------------------------------------------------------------------
--- Read string to table
---
--- @function [parent=#Converter] read
---
--- @param #string data_string
---
--- @return #table
---
+---Read string to table
+---@param data_string string
+---@return table
 function Converter.decode_string(data_string)
   if data_string == nil then return nil end
   data_string = Converter.trim(data_string)
@@ -148,20 +117,20 @@ function Converter.decode_string(data_string)
 end
 
 -------------------------------------------------------------------------------
--- Indent string
---
--- @function [parent=#Converter] indent
---
--- @param #string json
---
--- @return #string
---
+---Indent string
+---@param json string
+---@return string
 function Converter.indent(json)
   local table_value = game.json_to_table(json)
   local result = Converter.indentTable(table_value, 0)
   return result
 end
 
+-------------------------------------------------------------------------------
+---Indent table
+---@param input any
+---@param level number
+---@return string
 function Converter.indentTable(input, level)
   local indent_char = "    "
   if type(input) == "table" then
