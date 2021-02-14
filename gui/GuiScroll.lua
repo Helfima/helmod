@@ -1,15 +1,6 @@
 -------------------------------------------------------------------------------
--- Class to help to build GuiScroll
---
--- @module GuiScroll
---
-
--------------------------------------------------------------------------------
---
--- @function [parent=#GuiScroll] constructor
--- @param #arg name
--- @return #GuiScroll
---
+---Class to help to build GuiScroll
+---@class GuiScroll
 GuiScroll = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiScroll"
@@ -18,11 +9,9 @@ GuiScroll = newclass(GuiElement,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiScroll] policy
--- @param #boolean policy scroll horizontally
--- @return #GuiScroll
---
+---Set policy
+---@param policy string
+---@return GuiScroll
 function GuiScroll:policy(policy)
   self.options.horizontal_scroll_policy = "auto"
   if policy == true then

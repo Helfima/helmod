@@ -1,28 +1,19 @@
 -------------------------------------------------------------------------------
--- Class to build settings panel
---
--- @module Settings
--- @extends #Form
---
-
+---Class to build settings panel
+---@class Settings
 Settings = newclass(Form)
 
 local dropdown = {}
 
 -------------------------------------------------------------------------------
--- On initialization
---
--- @function [parent=#Settings] onInit
---
+---On initialization
 function Settings:onInit()
   self.panelCaption = ({"helmod_settings-panel.title"})
 end
 
 -------------------------------------------------------------------------------
--- Get or create about settings panel
---
--- @function [parent=#Settings] getAboutSettingsPanel
---
+---Get or create about settings panel
+---@return LuaGuiElement
 function Settings:getAboutSettingsPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["about-settings"] ~= nil and content_panel["about-settings"].valid then
@@ -32,23 +23,15 @@ function Settings:getAboutSettingsPanel()
 end
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#Settings] onUpdate
---
--- @param #LuaEvent event
---
+---On update
+---@param event LuaEvent
 function Settings:onUpdate(event)
   self:updateAboutSettings(event)
 end
 
 -------------------------------------------------------------------------------
--- Update about settings
---
--- @function [parent=#Settings] updateAboutSettings
---
--- @param #LuaEvent event
---
+---Update about settings
+---@param event LuaEvent
 function Settings:updateAboutSettings(event)
   local aboutSettingsPanel = self:getAboutSettingsPanel()
 

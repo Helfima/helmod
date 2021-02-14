@@ -1,15 +1,6 @@
 -------------------------------------------------------------------------------
--- Class to help to build GuiLine
---
--- @module GuiLine
---
-
--------------------------------------------------------------------------------
---
--- @function [parent=#GuiLine] constructor
--- @param #arg name
--- @return #GuiLine
---
+---Class to help to build GuiLine
+---@class GuiLine
 GuiLine = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiLine"
@@ -18,22 +9,14 @@ GuiLine = newclass(GuiElement,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiLine] constructor
--- @param #arg name
--- @return #GuiLineH
---
+---@class GuiLineH
 GuiLineH = newclass(GuiLine,function(base,...)
   GuiLine.init(base,...)
   base.options.direction = "horizontal"
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiLine] constructor
--- @param #arg name
--- @return #GuiLineV
---
+---@class GuiLineV
 GuiLineV = newclass(GuiLine,function(base,...)
   GuiLine.init(base,...)
   base.options.direction = "vertical"

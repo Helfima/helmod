@@ -1,10 +1,7 @@
 require "core.Object"
 
 -------------------------------------------------------------------------------
---
--- @module PrototypeFilter
--- @extends Object#Object
---
+---@class PrototypeFilter
 PrototypeFilter = newclass(Object,function(base,type)
   Object.init(base,"PrototypeFilter")
   base.type = type
@@ -12,13 +9,9 @@ PrototypeFilter = newclass(Object,function(base,type)
 end)
 
 -------------------------------------------------------------------------------
--- Add filter
---
--- @function [parent=#PrototypeFilter] addFilter
---
--- @param #string filter name
--- @param #table options
---
+---Add filter
+---@param filter string
+---@param options table
 function PrototypeFilter:addFilter(filter, options)
   if self.filters[filter] == nil then self.filters[filter] = {} end
   if options ~= nil then
@@ -33,12 +26,8 @@ function PrototypeFilter:addFilter(filter, options)
 end
 
 -------------------------------------------------------------------------------
--- Get filters
---
--- @function [parent=#PrototypeFilter] getFilters
---
--- @return #table
---
+---Get filters
+---@return table
 function PrototypeFilter:getFilters()
   local filters = {}
   if self.filters ~= nil and table.size(self.filters) > 0 then
@@ -50,12 +39,9 @@ function PrototypeFilter:getFilters()
 end
 
 -------------------------------------------------------------------------------
--- Get options
---
--- @function [parent=#PrototypeFilter] getOptions
---
--- @return #table
---
+---Get options
+---@param filter string
+---@return table
 function PrototypeFilter:getOptions(filter)
   local options = {}
   local filters = self.filters
@@ -72,36 +58,23 @@ function PrototypeFilter:getOptions(filter)
 end
 
 -------------------------------------------------------------------------------
--- Add mapping
---
--- @function [parent=#PrototypeFilter] addMapping
---
--- @param #table mapping
---
+---Add mapping
+---@param mapping table
 function PrototypeFilter:addMapping(mapping)
   self.mapping = mapping
 end
 
 -------------------------------------------------------------------------------
--- Set Game Function
---
--- @function [parent=#PrototypeFilter] setGameFunction
---
--- @param #string game_function
---
+---Set Game Function
+---@param game_function function
 function PrototypeFilter:setGameFunction(game_function)
   self.game_function = game_function
 end
 
 -------------------------------------------------------------------------------
--- Get elements
---
--- @function [parent=#PrototypeFilter] getElements
---
--- @param  filters
---
--- @return #table
---
+---Get elements
+---@param filters table
+---@return table
 function PrototypeFilter:getElements(filters)
   if self.mapping ~= nil then
     for key,filter in pairs(filters) do

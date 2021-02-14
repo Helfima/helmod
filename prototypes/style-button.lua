@@ -1,9 +1,13 @@
 local default_gui = data.raw["gui-style"].default
 
---
--- @see https://forums.factorio.com/viewtopic.php?f=28&t=24292
---
-
+---Sprite
+---@see https://forums.factorio.com/viewtopic.php?f=28&t=24292
+---@param filename any
+---@param size any
+---@param scale any
+---@param shift any
+---@param position table
+---@return table
 function sprite(filename, size, scale, shift, position)
   return {
     filename = filename,
@@ -18,6 +22,13 @@ function sprite(filename, size, scale, shift, position)
   }
 end
 
+---Sprite
+---@param filename any
+---@param size any
+---@param scale any
+---@param shift any
+---@param position any
+---@return table
 function spriteIcon(filename, size, scale, shift, position)
   return {
     type = "sprite",
@@ -25,6 +36,15 @@ function spriteIcon(filename, size, scale, shift, position)
   }
 end
 
+---Monolith Icon
+---@param filename any
+---@param size any
+---@param scale any
+---@param shift any
+---@param position any
+---@param border table
+---@param stretch any
+---@return table
 function monolithIcon(filename, size, scale, shift, position, border, stretch)
   return {
     filename = filename,
@@ -38,6 +58,11 @@ function monolithIcon(filename, size, scale, shift, position, border, stretch)
   }
 end
 
+---Composition Icon
+---@param filename any
+---@param corner_size any
+---@param position any
+---@return table
 function compositionIcon(filename, corner_size, position)
   return {
     type = "composition",
@@ -48,14 +73,19 @@ function compositionIcon(filename, corner_size, position)
   }
 end
 
---
--- @see https://forums.factorio.com/viewtopic.php?f=28&t=24294
---
+---Layered Icon
+---@see https://forums.factorio.com/viewtopic.php?f=28&t=24294
+---@param filename any
+---@param size any
+---@param scale any
+---@param shift any
+---@param position any
+---@return table
 function layeredIcon (filename, size, scale, shift, position)
   return {
     type = "layered",
     layers = {
-      { -- the border and background are a composition
+      { ---the border and background are a composition
         type = "composition",
         filename = "__core__/graphics/gui.png",
         corner_size = {3, 3},
@@ -69,6 +99,10 @@ function layeredIcon (filename, size, scale, shift, position)
   }
 end
 
+---Default glow
+---@param tint_value any
+---@param scale_value any
+---@return table
 function default_glow(tint_value, scale_value)
   return
   {
@@ -81,18 +115,15 @@ function default_glow(tint_value, scale_value)
 end
 default_dirt_color = {15, 7, 3, 100}
 default_dirt = default_glow(default_dirt_color, 0.5)
+
 -------------------------------------------------------------------------------
--- Menu icon type
---
--- @function menuButtonIcon
---
--- @param #string name
--- @param #number icon_row
--- @param #table icon_col
--- @param #string suffix
--- @param #string font
--- @param #table hovered_font_color
---
+---Menu Button Icon
+---@param name sprite
+---@param icon_row number
+---@param icon_col table
+---@param suffix string
+---@param font string
+---@param hovered_font_color table
 function menuButtonIcon(name, icon_row, icon_col, size, suffix, font, default_font_color, hovered_font_color)
   local style_name = "helmod_button_"..name
   if suffix ~= nil then style_name = style_name.."_"..suffix end
@@ -115,14 +146,9 @@ function menuButtonIcon(name, icon_row, icon_col, size, suffix, font, default_fo
 end
 
 -------------------------------------------------------------------------------
--- Menu icons
---
--- @function menuButtonIcons
---
--- @param #string name
--- @param #number icon_row
--- @param #string font
---
+---Menu button icons
+---@param name string
+---@param font string
 function menuButtonIcons(name, font)
   local font = "helmod_font_normal"
   local font_bold = "helmod_font_bold"
@@ -195,10 +221,6 @@ function menuButtonIcons(name, font)
 end
 menuButtonIcons("menu")
 
--------------------------------------------------------------------------------
--- Style of default
---
--- @field [parent=#Button] default
 default_gui["helmod_frame_button"] = {
   type = "button_style",
   parent = "frame_action_button",
@@ -223,10 +245,6 @@ default_gui["helmod_frame_button_actived_red"] = {
     shadow = {position = {440, 24}, corner_size = 8, draw_type = "outer"}
   },
 }
--------------------------------------------------------------------------------
--- Style of default
---
--- @field [parent=#Button] default
 
 local corner_size = {3, 3}
 default_gui["helmod_button_default"] = {
@@ -304,20 +322,11 @@ default_gui["helmod_button_help_menu2_selected"] = {
   top_margin = 0,
   left_padding = 20
 }
--------------------------------------------------------------------------------
--- Style of default
---
--- @field [parent=#Button] left
-
 default_gui["helmod_button_left"] = {
   type = "button_style",
   parent = "helmod_button_default",
   horizontal_align = "left"
 }
--------------------------------------------------------------------------------
--- Style of default
---
--- @field [parent=#Button] selected
 
 default_gui["helmod_button_selected"] = {
   type = "button_style",
@@ -340,10 +349,6 @@ default_gui["helmod_button_selected"] = {
 }
 
 local icon_corner_size = 1
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] icon_default
 
 default_gui["helmod_button_icon_default"] = {
   type = "button_style",
@@ -353,12 +358,6 @@ default_gui["helmod_button_icon_default"] = {
   clicked_graphical_set = compositionIcon("__core__/graphics/gui.png", {icon_corner_size, icon_corner_size}, {3 - icon_corner_size, 43 - icon_corner_size}),
   disabled_graphical_set = compositionIcon("__core__/graphics/gui.png", {icon_corner_size, icon_corner_size}, {3 - icon_corner_size, 19 - icon_corner_size}),
 }
-
-
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] icon
 
 local icon_sm_size=16
 local icon_sm_padding=1
@@ -398,11 +397,6 @@ default_gui["helmod_button_icon"] = {
   scalable = false
 }
 
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] slot
-
 default_gui["helmod_button_slot"] = {
   type = "button_style",
   parent = "slot_button",
@@ -415,10 +409,6 @@ default_gui["helmod_button_slot"] = {
   scalable = false
 }
 
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] select_icon
 for _,style in pairs(style_list) do
   if style.suffix == "_flat" then
     default_gui["helmod_button_select_icon"..style.suffix] = {
@@ -437,11 +427,6 @@ for _,style in pairs(style_list) do
     }
   end
 end
-
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] icon_xxl
 
 default_gui["helmod_button_icon_xxl"] = {
   type = "button_style",
@@ -456,11 +441,6 @@ default_gui["helmod_button_icon_xxl"] = {
   scalable = false
 }
 
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] select_icon_xxl
-
 for _,style in pairs(style_list) do
   if style.suffix == "_flat" then
     default_gui["helmod_button_select_icon_xxl"..style.suffix] = {
@@ -479,11 +459,6 @@ for _,style in pairs(style_list) do
     }
   end
 end
-
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] icon_m
 
 default_gui["helmod_button_icon_m"] = {
   type = "button_style",
@@ -498,11 +473,6 @@ default_gui["helmod_button_icon_m"] = {
   scalable = false
 }
 
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] slot_m
-
 default_gui["helmod_button_slot_m"] = {
   type = "button_style",
   parent = "slot_button",
@@ -514,11 +484,6 @@ default_gui["helmod_button_slot_m"] = {
   left_padding = icon_m_padding,
   scalable = false
 }
-
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] select_icon_m
 
 for _,style in pairs(style_list) do
   if style.suffix == "_flat" then
@@ -538,11 +503,6 @@ for _,style in pairs(style_list) do
     }
   end
 end
-
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] icon_sm
 
 default_gui["helmod_button_icon_sm"] = {
   type = "button_style",
@@ -557,11 +517,6 @@ default_gui["helmod_button_icon_sm"] = {
   scalable = false
 }
 
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] slot_sm
-
 default_gui["helmod_button_slot_sm"] = {
   type = "button_style",
   parent = "slot_button",
@@ -573,11 +528,6 @@ default_gui["helmod_button_slot_sm"] = {
   left_padding = icon_sm_padding,
   scalable = false
 }
-
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] select_icon_sm
 
 for _,style in pairs(style_list) do
   if style.suffix == "_flat" then
@@ -597,11 +547,6 @@ for _,style in pairs(style_list) do
     }
   end
 end
-
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] bold
 
 default_gui["helmod_button_bold"] = {
   type = "button_style",
@@ -617,11 +562,6 @@ default_gui["helmod_button_bold"] = {
   left_padding = 2
 }
 
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] bold_selected
-
 default_gui["helmod_button_bold_selected"] = {
   type = "button_style",
   parent = "helmod_button_selected",
@@ -635,11 +575,6 @@ default_gui["helmod_button_bold_selected"] = {
   bottom_padding = 2,
   left_padding = 2
 }
-
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] calculator
 
 default_gui["helmod_button_calculator"] = {
   type = "button_style",
@@ -655,11 +590,6 @@ default_gui["helmod_button_calculator"] = {
   left_padding = 2
 }
 
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] small_bold
-
 default_gui["helmod_button_small_bold"] = {
   type = "button_style",
   parent = "helmod_button_default",
@@ -673,11 +603,6 @@ default_gui["helmod_button_small_bold"] = {
   bottom_padding = 2,
   left_padding = 2
 }
-
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] small_bold_selected
 
 default_gui["helmod_button_small_bold_selected"] = {
   type = "button_style",
@@ -693,11 +618,6 @@ default_gui["helmod_button_small_bold_selected"] = {
   left_padding = 2
 }
 
--------------------------------------------------------------------------------
--- Style of button
---
--- @field [parent=#Button] small_bold_start
-
 default_gui["helmod_button_small_bold_start"] = {
   type = "button_style",
   parent = "helmod_button_default",
@@ -711,11 +631,6 @@ default_gui["helmod_button_small_bold_start"] = {
   bottom_padding = 2,
   left_padding = 2
 }
-
--------------------------------------------------------------------------------
--- Style of button
-
--- @field [parent=#Button] small_bold_middle
 
 default_gui["helmod_button_small_bold_middle"] = {
   type = "button_style",
@@ -746,11 +661,6 @@ default_gui["helmod_button_small_bold_end"] = {
 }
 
 
--------------------------------------------------------------------------------
--- Style of tab
---
--- @field [parent=#Button] tab
-
 default_gui["helmod_button_tab"] = {
   type = "button_style",
   font = "helmod_font_normal",
@@ -771,11 +681,6 @@ default_gui["helmod_button_tab"] = {
   pie_progress_color = {r=1, g=1, b=1}
 }
 
-
--------------------------------------------------------------------------------
--- Style of selected tab
---
--- @field [parent=#Button] tab_selected
 
 default_gui["helmod_button_tab_selected"] = {
   type = "button_style",

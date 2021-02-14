@@ -1,8 +1,6 @@
----
--- Description of the module.
--- @module EntityPrototype
---
-
+-------------------------------------------------------------------------------
+---Description of the module.
+---@class EntityPrototype
 EntityPrototype = newclass(Prototype,function(base, object)
   if object ~= nil and type(object) == "string" then
     Prototype.init(base, Player.getEntityPrototype(object))
@@ -14,48 +12,33 @@ EntityPrototype = newclass(Prototype,function(base, object)
 end)
 
 local temperature_limit = 165
+
 -------------------------------------------------------------------------------
--- Return type
---
--- @function [parent=#EntityPrototype] getType
---
--- @return #table
---
+---Return type
+---@return string
 function EntityPrototype:getType()
   if self.lua_prototype == nil then return nil end
   return self.lua_prototype.type
 end
 
 -------------------------------------------------------------------------------
--- Return Allowed Effects
---
--- @function [parent=#EntityPrototype] getAllowedEffects
---
--- @return #table
---
+---Return Allowed Effects
+---@return table
 function EntityPrototype:getAllowedEffects()
   if self.lua_prototype == nil then return nil end
   return self.lua_prototype.allowed_effects
 end
 
 -------------------------------------------------------------------------------
--- Return ingredient_count
---
--- @function [parent=#EntityPrototype] getIngredientCount
---
--- @return #number
---
+---Return ingredient_count
+---@return number
 function EntityPrototype:getIngredientCount()
   return self.lua_prototype.ingredient_count or 6
 end
 
 -------------------------------------------------------------------------------
--- Return energy usage per second
---
--- @function [parent=#EntityPrototype] getEnergyUsage
---
--- @return #number default 0
---
+---Return energy usage per second
+---@return number --default 0
 function EntityPrototype:getEnergyUsage()
   if self.lua_prototype ~= nil and self.lua_prototype.energy_usage ~= nil then
     return self.lua_prototype.energy_usage*60
@@ -64,15 +47,10 @@ function EntityPrototype:getEnergyUsage()
 end
 
 -------------------------------------------------------------------------------
--- Return extract power of fluid (boiler) in J
---
--- @function [parent=#EntityPrototype] getPowerExtract
---
--- @param #number temperature
--- @param #number heat_capacity
---
--- @return #number default 0
---
+---Return extract power of fluid (boiler) in J
+---@param temperature number
+---@param heat_capacity number
+---@return number --default 0
 function EntityPrototype:getPowerExtract(temperature, heat_capacity)
   if self.lua_prototype ~= nil then
     if temperature == nil then
@@ -90,12 +68,8 @@ function EntityPrototype:getPowerExtract(temperature, heat_capacity)
 end
 
 -------------------------------------------------------------------------------
--- Return max energy usage per second
---
--- @function [parent=#EntityPrototype] getMaxEnergyUsage
---
--- @return #number default 0
---
+---Return max energy usage per second
+---@return number --default 0
 function EntityPrototype:getMaxEnergyUsage()
   if self.lua_prototype ~= nil and self.lua_prototype.max_energy_usage ~= nil then
     return self.lua_prototype.max_energy_usage*60
@@ -104,12 +78,8 @@ function EntityPrototype:getMaxEnergyUsage()
 end
 
 -------------------------------------------------------------------------------
--- Return min energy usage per second
---
--- @function [parent=#EntityPrototype] getMinEnergyUsage
---
--- @return #number default 0
---
+---Return min energy usage per second
+---@return number --default 0
 function EntityPrototype:getMinEnergyUsage()
   local energy_prototype = self:getEnergySource()
   if energy_prototype ~= nil then
@@ -119,15 +89,11 @@ function EntityPrototype:getMinEnergyUsage()
 end
 
 -------------------------------------------------------------------------------
--- Return nominal energy for generator
--- @see https://wiki.factorio.com/Power_production
--- @see https://wiki.factorio.com/Liquids/Hot
--- @see https://wiki.factorio.com/Tutorial:Applied_power_math
---
--- @function [parent=#EntityPrototype] getEnergyConsumption
---
--- @return #number default 0
---
+---Return nominal energy for generator
+---@see https://wiki.factorio.com/Power_production
+---@see https://wiki.factorio.com/Liquids/Hot
+---@see https://wiki.factorio.com/Tutorial:Applied_power_math
+---@return number --default 0
 function EntityPrototype:getEnergyConsumption()
   if self.lua_prototype ~= nil then
     local energy_prototype = self:getEnergySource()
@@ -158,7 +124,7 @@ function EntityPrototype:getEnergyConsumption()
       local fluid_usage = self:getFluidUsage()
       local effectivity = self:getEffectivity()
       local maximum_temperature = self:getMaximumTemperature()
-      -- une temperature trop basse = burnt
+      ---une temperature trop basse = burnt
       if fuel_value > 0 and maximum_temperature < temperature_limit then
         return fluid_usage * effectivity * fuel_value
       else
@@ -166,12 +132,12 @@ function EntityPrototype:getEnergyConsumption()
         if self.factory ~= nil and self.factory.temperature ~= nil then
           maximum_temperature = self.factory.temperature
         end
-        -- calcul avec un heat minimum de 200
+        ---calcul avec un heat minimum de 200
         if heat_capacity < 200 then
           heat_capacity = 200
         end
         local power_extract = self:getPowerExtract(maximum_temperature, heat_capacity)
-        -- [boiler.fluid_usage]x[boiler.fluid_usage]x[boiler.target_temperature]-15°c)x[200J/unit/°]
+        ---[boiler.fluid_usage]x[boiler.fluid_usage]x[boiler.target_temperature]-15°c)x[200J/unit/°]
         return fluid_usage * effectivity * power_extract
       end
     end
@@ -180,15 +146,11 @@ function EntityPrototype:getEnergyConsumption()
 end
 
 -------------------------------------------------------------------------------
--- Return nominal energy for generator
--- @see https://wiki.factorio.com/Power_production
--- @see https://wiki.factorio.com/Liquids/Hot
--- @see https://wiki.factorio.com/Tutorial:Applied_power_math
---
--- @function [parent=#EntityPrototype] getEnergyProduction
---
--- @return #number default 0
---
+---Return nominal energy for generator
+---@see https://wiki.factorio.com/Power_production
+---@see https://wiki.factorio.com/Liquids/Hot
+---@see https://wiki.factorio.com/Tutorial:Applied_power_math
+---@return number --default 0
 function EntityPrototype:getEnergyProduction()
   if self.lua_prototype ~= nil then
     local energy_prototype = self:getEnergySource()
@@ -216,16 +178,16 @@ function EntityPrototype:getEnergyProduction()
         local fluid_usage = self:getFluidUsage()
         local effectivity = self:getEffectivity()
         local maximum_temperature = self:getMaximumTemperature()
-        -- une temperature trop basse = burnt
+        ---une temperature trop basse = burnt
         if fuel_value > 0 and maximum_temperature < temperature_limit then
           return fluid_usage * effectivity * fuel_value
         else
-          -- calcul avec un heat minimum de 200
+          ---calcul avec un heat minimum de 200
           if heat_capacity < 200 then
             heat_capacity = 200
           end
           local power_extract = self:getPowerExtract(maximum_temperature, heat_capacity)
-          -- [boiler.fluid_usage]x[boiler.fluid_usage]x[boiler.target_temperature]-15°c)x[200J/unit/°]
+          ---[boiler.fluid_usage]x[boiler.fluid_usage]x[boiler.target_temperature]-15°c)x[200J/unit/°]
           return fluid_usage * effectivity * power_extract
         end
       end
@@ -238,12 +200,8 @@ function EntityPrototype:getEnergyProduction()
 end
 
 -------------------------------------------------------------------------------
--- Return base productivity
---
--- @function [parent=#EntityPrototype] getBaseProductivity
---
--- @return #number default 0
---
+---Return base productivity
+---@return number --default 0
 function EntityPrototype:getBaseProductivity()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.base_productivity or 0
@@ -252,12 +210,8 @@ function EntityPrototype:getBaseProductivity()
 end
 
 -------------------------------------------------------------------------------
--- Return effectivity
---
--- @function [parent=#EntityPrototype] getEffectivity
---
--- @return #number default 1
---
+---Return effectivity
+---@return number --default 1
 function EntityPrototype:getEffectivity()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.effectivity or 1
@@ -266,12 +220,8 @@ function EntityPrototype:getEffectivity()
 end
 
 -------------------------------------------------------------------------------
--- Return distribution effectivity
---
--- @function [parent=#EntityPrototype] getDistributionEffectivity
---
--- @return #number default 1
---
+---Return distribution effectivity
+---@return number --default 1
 function EntityPrototype:getDistributionEffectivity()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.distribution_effectivity or 1
@@ -279,12 +229,8 @@ function EntityPrototype:getDistributionEffectivity()
 end
 
 -------------------------------------------------------------------------------
--- Return maximum temperature
---
--- @function [parent=#EntityPrototype] getMaximumTemperature
---
--- @return #number default 0
---
+---Return maximum temperature
+---@return number --default 0
 function EntityPrototype:getMaximumTemperature()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.maximum_temperature or 0
@@ -293,12 +239,8 @@ function EntityPrototype:getMaximumTemperature()
 end
 
 -------------------------------------------------------------------------------
--- Return traget temperature
---
--- @function [parent=#EntityPrototype] getTargetTemperature
---
--- @return #number default 0
---
+---Return traget temperature
+---@return number --default 0
 function EntityPrototype:getTargetTemperature()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.target_temperature or 0
@@ -307,12 +249,8 @@ function EntityPrototype:getTargetTemperature()
 end
 
 --------------------------------------------------------------------------------
--- Return fluid capacity (container)
---
--- @function [parent=#EntityPrototype] getFluidCapacity
---
--- @return #number default 0
---
+---Return fluid capacity (container)
+---@return number --default 0
 function EntityPrototype:getFluidCapacity()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.fluid_capacity or 0
@@ -321,12 +259,8 @@ function EntityPrototype:getFluidCapacity()
 end
 
 -------------------------------------------------------------------------------
--- Return fluid usage per tick
---
--- @function [parent=#EntityPrototype] getFluidUsagePerTick
---
--- @return #number default 0
---
+---Return fluid usage per tick
+---@return number --default 0
 function EntityPrototype:getFluidUsagePerTick()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.fluid_usage_per_tick or 0
@@ -335,23 +269,15 @@ function EntityPrototype:getFluidUsagePerTick()
 end
 
 -------------------------------------------------------------------------------
--- Return fluid usage
---
--- @function [parent=#EntityPrototype] getFluidUsage
---
--- @return #number default 0
---
+---Return fluid usage
+---@return number --default 0
 function EntityPrototype:getFluidUsage()
   return self:getFluidUsagePerTick() * 60
 end
 
 -------------------------------------------------------------------------------
--- Return fluid usage prototype (for generator)
---
--- @function [parent=#EntityPrototype] getFluidUsagePrototype
---
--- @return #number default 0
---
+---Return fluid usage prototype (for generator)
+---@return FluidPrototype
 function EntityPrototype:getFluidUsagePrototype()
   if self.lua_prototype.type == "generator" then
     local fluidboxes = self:getFluidboxPrototypes()
@@ -366,12 +292,8 @@ function EntityPrototype:getFluidUsagePrototype()
 end
 
 -------------------------------------------------------------------------------
--- Return fluid fuel prototype
---
--- @function [parent=#EntityPrototype] getFluidFuelPrototype
---
--- @return #FluidPrototype
---
+---Return fluid fuel prototype
+---@return FluidPrototype
 function EntityPrototype:getFluidFuelPrototype(current)
   if self:getEnergyTypeInput() == "fluid" then
     if current == true and self.factory ~= nil and self.factory.fuel ~= nil then
@@ -414,12 +336,8 @@ function EntityPrototype:getFluidFuelPrototype(current)
 end
 
 -------------------------------------------------------------------------------
--- Return fluid fuel prototype
---
--- @function [parent=#EntityPrototype] getFluidFuelPrototype
---
--- @return #FluidPrototype
---
+---Return fluid fuel prototype
+---@return FluidPrototype
 function EntityPrototype:getFluidFuelPrototypes()
   local energy_source = self:getEnergySource()
   if energy_source:getType() == "fluid" then
@@ -444,18 +362,14 @@ function EntityPrototype:getFluidFuelPrototypes()
 end
 
 -------------------------------------------------------------------------------
--- Return fluid consumption
---
--- @function [parent=#EntityPrototype] getFluidConsumption
---
--- @return #number default 0
---
+---Return fluid consumption
+---@return number --default 0
 function EntityPrototype:getFluidConsumption()
   if self.lua_prototype ~= nil then
     local fluid_usage = self:getFluidUsage()
     local fluid_fuel = self:getFluidFuelPrototype(true)
       
-    -- si l'entity a du fluid usage c'est forcement cette valeur
+    ---si l'entity a du fluid usage c'est forcement cette valeur
     if fluid_usage > 0 then
       return fluid_usage
     end
@@ -470,7 +384,7 @@ function EntityPrototype:getFluidConsumption()
       local fuel_value = fluid_fuel:getFuelValue()
 
       if fluid_burns then
-        -- si l'energy a du fluid usage en burns ca devient une limit
+        ---si l'energy a du fluid usage en burns ca devient une limit
         if energy_fluid_usage > 0 then
           return math.min(energy_fluid_usage, energy_consumption / (effectivity * fuel_value))
         else
@@ -479,7 +393,7 @@ function EntityPrototype:getFluidConsumption()
       elseif fuel_value > 0 and maximum_temperature < temperature_limit then
         return energy_consumption / (effectivity * fuel_value)
       else
-        -- si l'energy a du fluid usage c'est forcement cette valeur
+        ---si l'energy a du fluid usage c'est forcement cette valeur
         if energy_fluid_usage > 0 then
           return energy_fluid_usage
         else
@@ -496,12 +410,8 @@ function EntityPrototype:getFluidConsumption()
 end
 
 -------------------------------------------------------------------------------
--- Return fluid production
---
--- @function [parent=#EntityPrototype] getFluidProduction
---
--- @return #number default 0
---
+---Return fluid production
+---@return number --default 0
 function EntityPrototype:getFluidProduction()
   local fluidbox = self:getFluidboxPrototype("output")
   if fluidbox ~= nil then
@@ -522,12 +432,8 @@ function EntityPrototype:getFluidProduction()
 end
 
 -------------------------------------------------------------------------------
--- Return fluid production filter
---
--- @function [parent=#EntityPrototype] getFluidProductionFilter
---
--- @return #LuaFluidPrototype
---
+---Return fluid production filter
+---@return LuaFluidPrototype
 function EntityPrototype:getFluidProductionFilter()
   local fluidbox = self:getFluidboxPrototype("output")
   if fluidbox ~= nil then
@@ -537,12 +443,8 @@ function EntityPrototype:getFluidProductionFilter()
 end
 
 -------------------------------------------------------------------------------
--- Return fuel
---
--- @function [parent=#EntityPrototype] getFluel
---
--- @return #table
---
+---Return fuel
+---@return table
 function EntityPrototype:getFluel()
   if self.lua_prototype ~= nil then
     local energy_prototype = self:getEnergySource()
@@ -562,12 +464,8 @@ function EntityPrototype:getFluel()
   return nil
 end
 -------------------------------------------------------------------------------
--- Return module inventory size
---
--- @function [parent=#EntityPrototype] getModuleInventorySize
---
--- @return #number default 0
---
+---Return module inventory size
+---@return number --default 0
 function EntityPrototype:getModuleInventorySize()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.module_inventory_size or 0
@@ -576,12 +474,8 @@ function EntityPrototype:getModuleInventorySize()
 end
 
 -------------------------------------------------------------------------------
--- Return crafting categories
---
--- @function [parent=#EntityPrototype] getCraftingCategories
---
--- @return #number default 0
---
+---Return crafting categories
+---@return table
 function EntityPrototype:getCraftingCategories()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.crafting_categories or {}
@@ -590,12 +484,8 @@ function EntityPrototype:getCraftingCategories()
 end
 
 -------------------------------------------------------------------------------
--- Return crafting speed
---
--- @function [parent=#EntityPrototype] getCraftingSpeed
---
--- @return #number default 0
---
+---Return crafting speed
+---@return number --default 0
 function EntityPrototype:getCraftingSpeed()
   if self.lua_prototype ~= nil then
     if self.lua_prototype.name == "character" then return Player.getCraftingSpeed() end
@@ -605,12 +495,8 @@ function EntityPrototype:getCraftingSpeed()
 end
 
 -------------------------------------------------------------------------------
--- Return mining speed
---
--- @function [parent=#EntityPrototype] getMiningSpeed
---
--- @return #number default 0
---
+---Return mining speed
+---@return number --default 0
 function EntityPrototype:getMiningSpeed()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.mining_speed or 0
@@ -619,12 +505,8 @@ function EntityPrototype:getMiningSpeed()
 end
 
 -------------------------------------------------------------------------------
--- Return neighbour bonus
---
--- @function [parent=#EntityPrototype] getNeighbourBonus
---
--- @return #number default 0
---
+---Return neighbour bonus
+---@return number --default 0
 function EntityPrototype:getNeighbourBonus()
   if self.lua_prototype ~= nil then
     if self.factory == nil then
@@ -646,12 +528,8 @@ function EntityPrototype:getNeighbourBonus()
 end
 
 -------------------------------------------------------------------------------
--- Return researching speed
---
--- @function [parent=#EntityPrototype] getSearchingSpeed
---
--- @return #number default 0
---
+---Return researching speed
+---@return number --default 0
 function EntityPrototype:getResearchingSpeed()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.researching_speed or 1
@@ -660,12 +538,8 @@ function EntityPrototype:getResearchingSpeed()
 end
 
 -------------------------------------------------------------------------------
--- Return pumping speed
---
--- @function [parent=#EntityPrototype] getPumpingSpeed
---
--- @return #number default 0
---
+---Return pumping speed
+---@return number --default 0
 function EntityPrototype:getPumpingSpeed()
   if self.lua_prototype ~= nil then
     return (self.lua_prototype.pumping_speed or 0)*60 
@@ -674,26 +548,22 @@ function EntityPrototype:getPumpingSpeed()
 end
 
 -------------------------------------------------------------------------------
--- Return spped factory for recipe
---
--- @function [parent=#EntityPrototype] speedFactory
---
--- @param #table recipe
---
+---Return spped factory for recipe
+---@return number
 function EntityPrototype:speedFactory(recipe)
   if recipe.name == "steam" then
-    -- @see https://wiki.factorio.com/Boiler
-    -- info energy 1J=1W
+    ---@see https://wiki.factorio.com/Boiler
+    ---info energy 1J=1W
     local fluid_prototype = FluidPrototype("steam")
     local heat_capacity = fluid_prototype:getHeatCapacity()
     local power_extract = self:getPowerExtract(165, heat_capacity)
     local power_usage = self:getEnergyConsumption()
     return power_usage/power_extract
   elseif recipe.type == "resource" then
-    -- (mining power - ore mining hardness) * mining speed
-    -- @see https://wiki.factorio.com/Mining
-    -- hardness removed
-    -- @see https://www.factorio.com/blog/post/fff-266
+    ---(mining power - ore mining hardness) * mining speed
+    ---@see https://wiki.factorio.com/Mining
+    ---hardness removed
+    ---@see https://www.factorio.com/blog/post/fff-266
     local recipe_prototype = EntityPrototype(recipe.name)
     local mining_speed = self:getMiningSpeed()
     local mining_time = recipe_prototype:getMineableMiningTime()
@@ -711,12 +581,8 @@ function EntityPrototype:speedFactory(recipe)
   end
 end
 -------------------------------------------------------------------------------
--- Return energy type (electric or burner)
---
--- @function [parent=#EntityPrototype] getEnergyType
---
--- @return #string default electric
---
+---Return energy type (electric or burner)
+---@return string
 function EntityPrototype:getEnergyType()
   if self.lua_prototype ~= nil then
     if self.lua_prototype.burner_prototype ~= nil then return "burner" end
@@ -729,12 +595,8 @@ function EntityPrototype:getEnergyType()
 end
 
 -------------------------------------------------------------------------------
--- Return energy type (electric or burner)
---
--- @function [parent=#EntityPrototype] getEnergyType
---
--- @return #string default electric
---
+---Return energy type (electric or burner)
+---@return string
 function EntityPrototype:getEnergyTypeInput()
   if self.lua_prototype ~= nil then
     local fluid_usage = self:getFluidUsage()
@@ -754,12 +616,8 @@ function EntityPrototype:getEnergyTypeInput()
 end
 
 -------------------------------------------------------------------------------
--- Return energy type (electric or burner)
---
--- @function [parent=#EntityPrototype] getEnergyType
---
--- @return #string default electric
---
+---Return energy type (electric or burner)
+---@return string
 function EntityPrototype:getEnergyTypeOutput()
   if self.lua_prototype ~= nil then
     if self:getType() == "reactor" then
@@ -777,12 +635,8 @@ function EntityPrototype:getEnergyTypeOutput()
 end
 
 -------------------------------------------------------------------------------
--- Return energy source
---
--- @function [parent=#EntityPrototype] getEnergySource
---
--- @return #EnergySourcePrototype
---
+---Return energy source
+---@return EnergySourcePrototype
 function EntityPrototype:getEnergySource()
   if self.lua_prototype ~= nil then
     if self.lua_prototype.burner_prototype ~= nil then return BurnerPrototype(self.lua_prototype.burner_prototype, self.factory) end
@@ -795,12 +649,8 @@ function EntityPrototype:getEnergySource()
 end
 
 -------------------------------------------------------------------------------
--- Return mineable property hardness
---
--- @function [parent=#EntityPrototype] getMineableHardness
---
--- @return #number default 1
---
+---Return mineable property hardness
+---@return number --default 1
 function EntityPrototype:getMineableHardness()
   if self.lua_prototype ~= nil and self.lua_prototype.mineable_properties ~= nil then
     return self.lua_prototype.mineable_properties.hardness or 1
@@ -809,12 +659,8 @@ function EntityPrototype:getMineableHardness()
 end
 
 -------------------------------------------------------------------------------
--- Return mineable property mining time
---
--- @function [parent=#EntityPrototype] getMineableMiningTime
---
--- @return #number default 0.5
---
+---Return mineable property mining time
+---@return number --default 0.5
 function EntityPrototype:getMineableMiningTime()
   if self.lua_prototype ~= nil and self.lua_prototype.mineable_properties ~= nil then
     return self.lua_prototype.mineable_properties.mining_time or 0.5
@@ -823,12 +669,8 @@ function EntityPrototype:getMineableMiningTime()
 end
 
 -------------------------------------------------------------------------------
--- Return mineable property required fluid
---
--- @function [parent=#EntityPrototype] getMineableMiningFluidRequired
---
--- @return #string
---
+---Return mineable property required fluid
+---@return string
 function EntityPrototype:getMineableMiningFluidRequired()
   if self.lua_prototype ~= nil and self.lua_prototype.mineable_properties ~= nil then
     return self.lua_prototype.mineable_properties.required_fluid
@@ -837,12 +679,8 @@ function EntityPrototype:getMineableMiningFluidRequired()
 end
 
 -------------------------------------------------------------------------------
--- Return mineable property amount fluid
---
--- @function [parent=#EntityPrototype] getMineableMiningFluidAmount
---
--- @return #string
---
+---Return mineable property amount fluid
+---@return number --default 0
 function EntityPrototype:getMineableMiningFluidAmount()
   if self.lua_prototype ~= nil and self.lua_prototype.mineable_properties ~= nil then
     return self.lua_prototype.mineable_properties.fluid_amount/10
@@ -851,12 +689,8 @@ function EntityPrototype:getMineableMiningFluidAmount()
 end
 
 -------------------------------------------------------------------------------
--- Return mineable property products
---
--- @function [parent=#EntityPrototype] getMineableMiningProducts
---
--- @return #string
---
+---Return mineable property products
+---@return table
 function EntityPrototype:getMineableMiningProducts()
   if self.lua_prototype ~= nil and self.lua_prototype.mineable_properties ~= nil then
     return self.lua_prototype.mineable_properties.products or {}
@@ -865,12 +699,8 @@ function EntityPrototype:getMineableMiningProducts()
 end
 
 -------------------------------------------------------------------------------
--- Return inventory size
---
--- @function [parent=#EntityPrototype] getInventorySize
---
--- @return #number default 0
---
+---Return inventory size
+---@return number --default 0
 function EntityPrototype:getInventorySize(index)
   if self.lua_prototype ~= nil then
     return self.lua_prototype.get_inventory_size(index or 1)
@@ -879,12 +709,8 @@ function EntityPrototype:getInventorySize(index)
 end
 
 -------------------------------------------------------------------------------
--- Return fluid boxe prototypes
---
--- @function [parent=#EntityPrototype] getFluidboxPrototypes
---
--- @return #number default 0
---
+---Return fluid boxe prototypes
+---@return number --default 0
 function EntityPrototype:getFluidboxPrototypes()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.fluidbox_prototypes
@@ -893,12 +719,8 @@ function EntityPrototype:getFluidboxPrototypes()
 end
 
 -------------------------------------------------------------------------------
--- Return fluidbox prototype
---
--- @function [parent=#EntityPrototype] getFluidboxPrototype
---
--- @return #FluidboxPrototype
---
+---Return fluidbox prototype
+---@return FluidboxPrototype
 function EntityPrototype:getFluidboxPrototype(production_type)
   if self.lua_prototype ~= nil then
     local fluidboxes = self:getFluidboxPrototypes()
@@ -915,12 +737,8 @@ function EntityPrototype:getFluidboxPrototype(production_type)
 end
 
 -------------------------------------------------------------------------------
--- Return inserter capacity
---
--- @function [parent=#EntityPrototype] getInserterCapacity
---
--- @return #number default 0
---
+---Return inserter capacity
+---@return number --default 0
 function EntityPrototype:getInserterCapacity()
   if self.lua_prototype ~= nil then
     local stack_bonus = 0
@@ -935,12 +753,8 @@ function EntityPrototype:getInserterCapacity()
 end
 
 -------------------------------------------------------------------------------
--- Return inserter rotation speed �/s
---
--- @function [parent=#EntityPrototype] getInserterRotationSpeed
---
--- @return #number default 0
---
+---Return inserter rotation speed /s
+---@return number --default 0
 function EntityPrototype:getInserterRotationSpeed()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.inserter_rotation_speed*60
@@ -949,12 +763,8 @@ function EntityPrototype:getInserterRotationSpeed()
 end
 
 -------------------------------------------------------------------------------
--- Return belt speed
---
--- @function [parent=#EntityPrototype] getBeltSpeed
---
--- @return #number default 0
---
+---Return belt speed
+---@return number --default 0
 function EntityPrototype:getBeltSpeed()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.belt_speed or 0
@@ -963,12 +773,8 @@ function EntityPrototype:getBeltSpeed()
 end
 
 -------------------------------------------------------------------------------
--- Return pollution
---
--- @function [parent=#EntityPrototype] getPollution
---
--- @return #number default 0
---
+---Return pollution
+---@return number --default 0
 function EntityPrototype:getPollution()
   if self.lua_prototype ~= nil then
     local energy_usage = self:getEnergyConsumption()

@@ -1,30 +1,19 @@
 -------------------------------------------------------------------------------
--- Class to build product edition dialog
---
--- @module PreferenceEdition
--- @extends #AbstractEdition
---
-
+---Class to build product edition dialog
+---@class PreferenceEdition
 PreferenceEdition = newclass(Form)
 
 -------------------------------------------------------------------------------
--- On initialization
---
--- @function [parent=#PreferenceEdition] onInit
---
+---On initialization
 function PreferenceEdition:onInit()
   self.panelCaption = ({"helmod_preferences-edition-panel.title"})
 end
 
 -------------------------------------------------------------------------------
--- On Style
---
--- @function [parent=#PreferenceEdition] onStyle
---
--- @param #table styles
--- @param #number width_main
--- @param #number height_main
---
+---On Style
+---@param styles table
+---@param width_main number
+---@param height_main number
 function PreferenceEdition:onStyle(styles, width_main, height_main)
   styles.flow_panel = {
     minimal_height = 500,
@@ -33,10 +22,7 @@ function PreferenceEdition:onStyle(styles, width_main, height_main)
 end
 
 -------------------------------------------------------------------------------
--- On Bind Dispatcher
---
--- @function [parent=#PreferenceEdition] onBind
---
+---On Bind Dispatcher
 function PreferenceEdition:onBind()
   Dispatcher:bind("on_gui_preference", self, self.updateFluidsLogistic)
   Dispatcher:bind("on_gui_preference", self, self.updateItemsLogistic)
@@ -45,30 +31,24 @@ function PreferenceEdition:onBind()
 end
 
 -------------------------------------------------------------------------------
--- On scroll width
---
--- @function [parent=#PreferenceEdition] getSrollWidth
---
+---On scroll width
+---@return number
 function PreferenceEdition:getSrollWidth()
   local number_column = User.getPreferenceSetting("preference_number_column")
   return 38 * (number_column or 6) + 20
 end
 
 -------------------------------------------------------------------------------
--- On scroll height
---
--- @function [parent=#PreferenceEdition] getSrollHeight
---
+---On scroll height
+---@return number
 function PreferenceEdition:getSrollHeight()
   local number_line = User.getPreferenceSetting("preference_number_line")
   return 38 * (number_line or 3) + 4
 end
 
 -------------------------------------------------------------------------------
--- Get or create preference panel
---
--- @function [parent=#PreferenceEdition] getPrefrencePanel
---
+---Get or create preference panel
+---@return LuaGuiElement
 function PreferenceEdition:getPrefrencePanel()
   local panel = self:getFrameTabbedPanel("preference_panel")
   panel.style.minimal_width = 600
@@ -78,10 +58,8 @@ function PreferenceEdition:getPrefrencePanel()
 end
 
 -------------------------------------------------------------------------------
--- Get or create tab panel
---
--- @function [parent=#PreferenceEdition] getTabPane
---
+---Get or create tab panel
+---@return LuaGuiElement
 function PreferenceEdition:getTabPane()
   local content_panel = self:getPrefrencePanel()
   local panel_name = "tab_panel"
@@ -93,12 +71,8 @@ function PreferenceEdition:getTabPane()
 end
 
 -------------------------------------------------------------------------------
--- Set active tab panel
---
--- @function [parent=#PreferenceEdition] setActiveTab
--- 
--- @param #string tab_name
---
+---Set active tab panel
+---@param tab_name string
 function PreferenceEdition:setActiveTab(tab_name)
   local content_panel = self:getTabPane()
   for index,tab in pairs(content_panel.tabs) do
@@ -109,10 +83,8 @@ function PreferenceEdition:setActiveTab(tab_name)
 end
 
 -------------------------------------------------------------------------------
--- Get or create general tab panel
---
--- @function [parent=#PreferenceEdition] getGeneralTab
---
+---Get or create general tab panel
+---@return LuaGuiElement
 function PreferenceEdition:getGeneralTab()
   local content_panel = self:getTabPane()
   local panel_name = "general_tab_panel"
@@ -129,10 +101,8 @@ function PreferenceEdition:getGeneralTab()
 end
 
 -------------------------------------------------------------------------------
--- Get or create UI tab panel
---
--- @function [parent=#PreferenceEdition] getUITab
---
+---Get or create UI tab panel
+---@return LuaGuiElement
 function PreferenceEdition:getUITab()
   local content_panel = self:getTabPane()
   local panel_name = "ui_tab_panel"
@@ -149,10 +119,8 @@ function PreferenceEdition:getUITab()
 end
 
 -------------------------------------------------------------------------------
--- Get or create priority module tab panel
---
--- @function [parent=#PreferenceEdition] getPriorityModuleTab
---
+---Get or create priority module tab panel
+---@return LuaGuiElement
 function PreferenceEdition:getPriorityModuleTab()
   local content_panel = self:getTabPane()
   local panel_name = "priority_module_tab_panel"
@@ -169,10 +137,8 @@ function PreferenceEdition:getPriorityModuleTab()
 end
 
 -------------------------------------------------------------------------------
--- Get or create solid container tab panel
---
--- @function [parent=#PreferenceEdition] getSolidContainerTab
---
+---Get or create solid container tab panel
+---@return LuaGuiElement
 function PreferenceEdition:getSolidContainerTab()
   local content_panel = self:getTabPane()
   local panel_name = "solid_container_tab_panel"
@@ -189,10 +155,8 @@ function PreferenceEdition:getSolidContainerTab()
 end
 
 -------------------------------------------------------------------------------
--- Get or create fluid container tab panel
---
--- @function [parent=#PreferenceEdition] getFluidContainerTab
---
+---Get or create fluid container tab panel
+---@return LuaGuiElement
 function PreferenceEdition:getFluidContainerTab()
   local content_panel = self:getTabPane()
   local panel_name = "fluid_container_tab_panel"
@@ -209,12 +173,8 @@ function PreferenceEdition:getFluidContainerTab()
 end
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#PreferenceEdition] onUpdate
---
--- @param #LuaEvent event
---
+---On update
+---@param event LuaEvent
 function PreferenceEdition:onUpdate(event)
   self:updateGeneral(event)
   self:updateUI(event)
@@ -227,12 +187,8 @@ function PreferenceEdition:onUpdate(event)
 end
 
 -------------------------------------------------------------------------------
--- Update ui
---
--- @function [parent=#PreferenceEdition] updateUI
---
--- @param #LuaEvent event
---
+---Update ui
+---@param event LuaEvent
 function PreferenceEdition:updateUI(event)
   local container_panel = self:getUITab()
   container_panel.clear()
@@ -281,12 +237,8 @@ function PreferenceEdition:updateUI(event)
 end
 
 -------------------------------------------------------------------------------
--- Update general
---
--- @function [parent=#PreferenceEdition] updateGeneral
---
--- @param #LuaEvent event
---
+---Update general
+---@param event LuaEvent
 function PreferenceEdition:updateGeneral(event)
   local container_panel = self:getGeneralTab()
   container_panel.clear()
@@ -316,13 +268,8 @@ function PreferenceEdition:updateGeneral(event)
   end
 end
 -------------------------------------------------------------------------------
--- Update priority module
---
--- @function [parent=#PreferenceEdition] updatePriorityModule
---
--- @param #LuaEvent event
---
-
+---Update priority module
+---@param event LuaEvent
 function PreferenceEdition:updatePriorityModule(event)
   local number_column = User.getPreferenceSetting("preference_number_column")
   local priority_module_panel = self:getPriorityModuleTab()
@@ -334,7 +281,7 @@ function PreferenceEdition:updatePriorityModule(event)
   configuration_table_panel.vertical_centering = false
 
   local configuration_panel = GuiElement.add(configuration_table_panel, GuiFlowV("configuration"))
-  -- configuration select
+  ---configuration select
   local tool_panel = GuiElement.add(configuration_panel, GuiFlowH("tool"))
   tool_panel.style.width = 200
   local conf_table_panel = GuiElement.add(tool_panel, GuiTable("configuration-table"):column(6))
@@ -348,7 +295,7 @@ function PreferenceEdition:updatePriorityModule(event)
   end
   GuiElement.add(conf_table_panel, GuiButton(self.classname, "configuration-priority-select", "new"):caption("+"):style(button_style))
   GuiElement.add(conf_table_panel, GuiButton(self.classname, "configuration-priority-remove", "new"):caption("-"):style(button_style))
-  -- module priority
+  ---module priority
   local priority_table_panel = GuiElement.add(configuration_panel, GuiTable("module-priority-table"):column(3))
   if priority_modules[configuration_priority] ~= nil then
     for index, element in pairs(priority_modules[configuration_priority]) do
@@ -359,7 +306,7 @@ function PreferenceEdition:updatePriorityModule(event)
     end
   end
   
-  -- module selector
+  ---module selector
   local module_scroll = GuiElement.add(configuration_table_panel, GuiScroll("module-selector-scroll"))
   module_scroll.style.maximal_height = self:getSrollHeight()
   module_scroll.style.minimal_width = self:getSrollWidth()
@@ -371,13 +318,8 @@ function PreferenceEdition:updatePriorityModule(event)
 end
 
 -------------------------------------------------------------------------------
--- Update items logistic
---
--- @function [parent=#PreferenceEdition] updateItemsLogistic
---
--- @param #LuaEvent event
---
-
+---Update items logistic
+---@param event LuaEvent
 function PreferenceEdition:updateItemsLogistic(event)
   local number_column = User.getPreferenceSetting("preference_number_column")
   local container_panel = self:getSolidContainerTab()
@@ -410,13 +352,8 @@ function PreferenceEdition:updateItemsLogistic(event)
 end
 
 -------------------------------------------------------------------------------
--- Update fluids logistic
---
--- @function [parent=#PreferenceEdition] updateFluidsLogistic
---
--- @param #LuaEvent event
---
-
+---Update fluids logistic
+---@param event LuaEvent
 function PreferenceEdition:updateFluidsLogistic(event)
   local number_column = User.getPreferenceSetting("preference_number_column")
   local container_panel = self:getFluidContainerTab()
@@ -462,12 +399,8 @@ function PreferenceEdition:updateFluidsLogistic(event)
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#PreferenceEdition] onEvent
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
 function PreferenceEdition:onEvent(event)
   if event.action == "preference-setting" then
     local type = event.item1

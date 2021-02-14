@@ -1,47 +1,30 @@
 require "selector.AbstractSelector"
 -------------------------------------------------------------------------------
--- Class to build container selector
---
--- @module ContainerSelector
--- @extends #AbstractSelector
---
-
+---Class to build container selector
+---@class ContainerSelector
 ContainerSelector = newclass(AbstractSelector)
 
 -------------------------------------------------------------------------------
--- Return caption
---
--- @function [parent=#ContainerSelector] getCaption
---
--- @param #Controller parent parent controller
---
-function ContainerSelector:getCaption(parent)
+---Return caption
+---@return table
+function ContainerSelector:getCaption()
   return {"helmod_selector-panel.container-title"}
 end
 
 -------------------------------------------------------------------------------
--- Get prototype
---
--- @function [parent=#ContainerSelector] getPrototype
---
--- @param element
--- @param type
---
--- @return #table
---
+---Get prototype
+---@param element table
+---@param type string
+---@return table
 function ContainerSelector:getPrototype(element, type)
   return EntityPrototype(element, type)
 end
 
 -------------------------------------------------------------------------------
--- Update groups
---
--- @function [parent=#ContainerSelector] updateGroups
---
--- @param #table list_products
--- @param #table list_ingredients
--- @param #table list_translate
---
+---Update groups
+---@param list_products table
+---@param list_ingredients table
+---@param list_translate table
 function ContainerSelector:updateGroups(list_products, list_ingredients, list_translate)
   local filters = {}
   for _,type in pairs({"storage-tank", "container", "logistic-container", "cargo-wagon", "fluid-wagon", "item-with-entity-data", "car", "logistic-robot", "transport-belt"}) do
@@ -53,25 +36,22 @@ function ContainerSelector:updateGroups(list_products, list_ingredients, list_tr
 end
 
 -------------------------------------------------------------------------------
--- Build prototype tooltip
---
--- @function [parent=#ContainerSelector] buildPrototypeTooltip
---
--- @param #LuaPrototype prototype
---
+---Build prototype tooltip
+---@param prototype table
+---@return table
 function ContainerSelector:buildPrototypeTooltip(prototype)
-  -- initalize tooltip
+  ---initalize tooltip
   local entity_prototype = EntityPrototype(prototype)
   local tooltip = entity_prototype:getLocalisedName()
   return tooltip
 end
 
 -------------------------------------------------------------------------------
--- Build prototype icon
---
--- @function [parent=#ContainerSelector] buildPrototypeIcon
---
-function ContainerSelector:buildPrototypeIcon(guiElement, prototype, tooltip)
-  local button = GuiElement.add(guiElement, GuiButtonSelectSprite(self.classname, "element-select", "container"):choose(prototype.type, prototype.name):color())
+---Build prototype icon
+---@param gui_element GuiLuaElement
+---@param prototype table
+---@param tooltip table
+function ContainerSelector:buildPrototypeIcon(gui_element, prototype, tooltip)
+  local button = GuiElement.add(gui_element, GuiButtonSelectSprite(self.classname, "element-select", "container"):choose(prototype.type, prototype.name):color())
   button.locked = true
 end

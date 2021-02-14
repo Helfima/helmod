@@ -1,20 +1,21 @@
 require "core.Object"
 
 -------------------------------------------------------------------------------
--- Class DispatcherController
---
--- @module DispatcherController
---
+---Class DispatcherController
+---
+---@class DispatcherController
+---
 DispatcherController = newclass(Object,function(base,classname)
   Object.init(base,classname)
   base.handlers = {}
 end)
 
 -------------------------------------------------------------------------------
--- Bind
---
--- @function [parent=#DispatcherController] bind
---
+---Bind
+---@param event_type string
+---@param class table
+---@param class_handler string
+---
 function DispatcherController:bind(event_type, class, class_handler)
   if self.handlers[event_type] == nil then self.handlers[event_type] = {} end
   if self.handlers[event_type][class.classname] == nil then
@@ -24,10 +25,11 @@ function DispatcherController:bind(event_type, class, class_handler)
 end
 
 -------------------------------------------------------------------------------
--- Unbind
---
--- @function [parent=#DispatcherController] unbind
---
+---Unbind
+---@param event_type string
+---@param class table
+---@param class_handler string
+---
 function DispatcherController:unbind(event_type, class, class_handler)
   if class == nil and class_handler == nil then
     self.handlers[event_type] = nil
@@ -45,10 +47,11 @@ function DispatcherController:unbind(event_type, class, class_handler)
 end
 
 -------------------------------------------------------------------------------
--- Send
---
--- @function [parent=#DispatcherController] send
---
+---Send
+---@param event_type string
+---@param data table
+---@param classname string
+---
 function DispatcherController:send(event_type, data, classname)
   local ok , err = pcall(function()
     data.type = event_type

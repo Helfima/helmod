@@ -1,59 +1,41 @@
----
--- Description of the module.
--- @module Player
---
+-------------------------------------------------------------------------------
+---Description of the module.
+---@class Player
 local Player = {
-  -- single-line comment
+  ---single-line comment
   classname = "HMPlayer"
 }
 
 local Lua_player = nil
 
 -------------------------------------------------------------------------------
--- Print message
---
--- @function [parent=#Player] print
---
--- @param #arg message
---
+---Print message
 function Player.print(...)
   if Lua_player ~= nil then
     Lua_player.print(table.concat({...}," "))
   end
 end
 -------------------------------------------------------------------------------
--- Load factorio player
---
--- @function [parent=#Player] load
---
--- @param #LuaEvent event
---
--- @return #Player
---
+---Load factorio player
+---@param event LuaEvent
+---@return Player
 function Player.load(event)
   Lua_player = game.players[event.player_index]
   return Player
 end
 
 -------------------------------------------------------------------------------
--- Set factorio player
---
--- @function [parent=#Player] set
---
--- @param #LuaPlayer player
---
--- @return #Player
---
+---Set factorio player
+---@param player LuaPlayer
+---@return Player
 function Player.set(player)
   Lua_player = player
   return Player
 end
 
 -------------------------------------------------------------------------------
--- Get game day
---
--- @function [parent=#Player] getGameDay
---
+---Get game day
+---@return number, number, number, number
 function Player.getGameDay()
   local surface = game.surfaces[1]
   local day = surface.ticks_per_day
@@ -64,12 +46,8 @@ function Player.getGameDay()
 end
 
 ------------------------------------------------------------------------------
--- Get display sizes
---
--- @function [parent=#Form] getDisplaySizes
---
--- return
---
+---Get display sizes
+---@return number, number
 function Player.getDisplaySizes()
   if Lua_player == nil then return 800,600 end
   local display_resolution = Lua_player.display_resolution
@@ -78,48 +56,34 @@ function Player.getDisplaySizes()
 end
 
 -------------------------------------------------------------------------------
--- Set pipette
---
--- @function [parent=#Player] setPipette
---
--- @param #string entity
---
--- @return #table
---
+---Set pipette
+---@param entity any
+---@return any
 function Player.setPipette(entity)
   if Lua_player == nil then return nil end
   return Lua_player.pipette_entity(entity)
 end
 
 -------------------------------------------------------------------------------
--- Get character crafting speed
---
--- @function [parent=#Player] getCraftingSpeed
---
--- @return #LuaInventory
---
+---Get character crafting speed
+---@return number
 function Player.getCraftingSpeed()
   if Lua_player == nil then return 0 end
   return 1 + Lua_player.character_crafting_speed_modifier
 end
 
 -------------------------------------------------------------------------------
--- Get main inventory
---
--- @function [parent=#Player] getMainInventory
---
--- @return #LuaInventory
---
+---Get main inventory
+---@return any
 function Player.getMainInventory()
   if Lua_player == nil then return nil end
   return Lua_player.get_main_inventory()
 end
 
 -------------------------------------------------------------------------------
--- Begin Crafting
---
--- @function [parent=#Player] beginCrafting
---
+---Begin Crafting
+---@param item string
+---@param count number
 function Player.beginCrafting(item, count)
   if Lua_player == nil then return nil end
   local filters = {{filter = "has-product-item", elem_filters = {{filter = "name", name = item}}}}
@@ -134,12 +98,8 @@ function Player.beginCrafting(item, count)
 end
 
 -------------------------------------------------------------------------------
--- Get smart tool
---
--- @function [parent=#Player] getSmartTool
---
--- @return #LuaItemStack
---
+---Get smart tool
+---@return LuaItemStack
 function Player.getSmartTool()
   if Lua_player == nil then return nil end
   local inventory = Player.getMainInventory()
@@ -162,10 +122,10 @@ function Player.getSmartTool()
 end
 
 -------------------------------------------------------------------------------
--- Set smart tool
---
--- @function [parent=#Player] setSmartTool
---
+---Set smart tool
+---@param recipe table
+---@param type string
+---@return any
 function Player.setSmartTool(recipe, type)
   if Lua_player == nil then return nil end
   local tool_stack = Player.getSmartTool()
@@ -193,75 +153,47 @@ function Player.setSmartTool(recipe, type)
 end
 
 -------------------------------------------------------------------------------
--- Is valid sprite path
---
--- @function [parent=#Player] is_valid_sprite_path
---
--- @param #string sprite_path
---
--- @return #boolean
---
+---Is valid sprite path
+---@param sprite_path string
+---@return boolean
 function Player.is_valid_sprite_path(sprite_path)
   if Lua_player == nil then return false end
   return Lua_player.gui.is_valid_sprite_path(sprite_path)
 end
 
 -------------------------------------------------------------------------------
--- Return factorio player
---
--- @function [parent=#Player] native
---
--- @return #Lua_player
---
+---Return factorio player
+---@return LuaPlayer
 function Player.native()
   return Lua_player
 end
 
 -------------------------------------------------------------------------------
--- Return admin player
---
--- @function [parent=#Player] isAdmin
---
--- @return #boolean
---
+---Return admin player
+---@return boolean
 function Player.isAdmin()
   return Lua_player.admin
 end
 
 -------------------------------------------------------------------------------
--- Get gui
---
--- @function [parent=#Player] getGui
---
--- @param location
---
--- @return #LuaGuiElement
---
+---Get gui
+---@param location string
+---@return LuaGuiElement
 function Player.getGui(location)
   return Lua_player.gui[location]
 end
 
 -------------------------------------------------------------------------------
--- Return force's player
---
--- @function [parent=#Player] getForce
---
---
--- @return #table force
---
+---Return force's player
+---@return LuaForce
 function Player.getForce()
   return Lua_player.force
 end
 
 -------------------------------------------------------------------------------
--- Return item type
---
--- @function [parent=#Player] getItemIconType
---
--- @param #table factorio prototype
---
--- @return #string item type
---
+---Return item type
+---@param element LuaPrototype
+---@return string
 function Player.getItemIconType(element)
   local item = Player.getItemPrototype(element.name)
   if item ~= nil then
@@ -276,14 +208,9 @@ function Player.getItemIconType(element)
 end
 
 -------------------------------------------------------------------------------
--- Return entity type
---
--- @function [parent=#Player] getEntityIconType
---
--- @param #table factorio prototype
---
--- @return #string item type
---
+---Return entity type
+---@param element LuaPrototype
+---@return string
 function Player.getEntityIconType(element)
   local item = Player.getEntityPrototype(element.name)
   if item ~= nil then
@@ -293,14 +220,9 @@ function Player.getEntityIconType(element)
 end
 
 -------------------------------------------------------------------------------
--- Return localised name
---
--- @function [parent=#Player] getLocalisedName
---
--- @param #table element factorio prototype
---
--- @return #string localised name
---
+---Return localised name
+---@param element LuaPrototype
+---@return string|table
 function Player.getLocalisedName(element)
   local localisedName = element.name
   if element.type ~= nil then
@@ -339,14 +261,9 @@ function Player.getLocalisedName(element)
 end
 
 -------------------------------------------------------------------------------
--- Return localised name
---
--- @function [parent=#Player] getRecipeLocalisedName
---
--- @param #LuaPrototype prototype factorio prototype
---
--- @return #string localised name
---
+---Return localised name
+---@param prototype LuaPrototype
+---@return string|table
 function Player.getRecipeLocalisedName(prototype)
   local element = Player.getRecipe(prototype.name)
   if element ~= nil then
@@ -356,14 +273,9 @@ function Player.getRecipeLocalisedName(prototype)
 end
 
 -------------------------------------------------------------------------------
--- Return localised name
---
--- @function [parent=#Player] getTechnologyLocalisedName
---
--- @param #LuaPrototype prototype factorio prototype
---
--- @return #string localised name
---
+---Return localised name
+---@param prototype LuaPrototype
+---@return string|table
 function Player.getTechnologyLocalisedName(prototype)
   local element = Player.getTechnology(prototype.name)
   if element ~= nil then
@@ -373,23 +285,16 @@ function Player.getTechnologyLocalisedName(prototype)
 end
 
 -------------------------------------------------------------------------------
--- Return recipes
---
--- @function [parent=#Player] getRecipes
---
--- @return #table recipes
---
+---Return recipes
+---@return table
 function Player.getRecipes()
   return Player.getForce().recipes
 end
 
 -------------------------------------------------------------------------------
--- Return recipe prototypes
---
--- @function [parent=#Player] getRecipePrototypes
---
--- @return #table recipes
---
+---Return recipe prototypes
+---@param filters table
+---@return table
 function Player.getRecipePrototypes(filters)
   if filters ~= nil then
     return game.get_filtered_recipe_prototypes(filters)
@@ -398,12 +303,9 @@ function Player.getRecipePrototypes(filters)
 end
 
 -------------------------------------------------------------------------------
--- Return technologie prototypes
---
--- @function [parent=#Player] getTechnologiePrototypes
---
--- @return #table technologies
---
+---Return technologie prototypes
+---@param filters table
+---@return table
 function Player.getTechnologiePrototypes(filters)
   if filters ~= nil then
     return game.get_filtered_technology_prototypes(filters)
@@ -412,25 +314,16 @@ function Player.getTechnologiePrototypes(filters)
 end
 
 -------------------------------------------------------------------------------
--- Return technology prototype
---
--- @function [parent=#Player] getTechnologyPrototype
---
--- @param #string name technology name
---
--- @return #LuaPrototype factorio prototype
---
+---Return technology prototype
+---@param name string
+---@return LuaTechnologyPrototype
 function Player.getTechnologyPrototype(name)
   return game.technology_prototypes[name]
 end
 
 -------------------------------------------------------------------------------
--- Return technologies
---
--- @function [parent=#Player] getTechnologies
---
--- @return #table technologies
---
+---Return technologies
+---@return table
 function Player.getTechnologies()
   local technologies = {}
   for _,technology in pairs(Player.getForce().technologies) do
@@ -440,28 +333,18 @@ function Player.getTechnologies()
 end
 
 -------------------------------------------------------------------------------
--- Return technology
---
--- @function [parent=#Player] getTechnology
---
--- @param #string name technology name
---
--- @return #LuaPrototype factorio prototype
---
+---Return technology
+---@param name string
+---@return LuaTechnology
 function Player.getTechnology(name)
   local technology = Player.getForce().technologies[name]
   return technology
 end
 
 -------------------------------------------------------------------------------
--- Return rule
---
--- @function [parent=#Player] getRules
---
--- @param #string rule_name
---
--- @return #table, #table rules_included, rules_excluded
---
+---Return rule
+---@param rule_name string
+---@return table, table --rules_included, rules_excluded
 function Player.getRules(rule_name)
   local rules_included = {}
   local rules_excluded = {}
@@ -482,18 +365,13 @@ function Player.getRules(rule_name)
 end
 
 -------------------------------------------------------------------------------
--- Return rule
---
--- @function [parent=#Player] checkRules
---
--- @param #boolean check
--- @param #table rules
--- @param #string category
--- @param #lua_entity lua_entity
--- @param #boolean included
---
--- @return #boolean
---
+---Return rule
+---@param check boolean
+---@param rules table
+---@param category string
+---@param lua_entity table
+---@param included boolean
+---@return boolean
 function Player.checkRules(check, rules, category, lua_entity, included)
   if rules[category] then
     if rules[category]["entity-name"] and (rules[category]["entity-name"]["all"] or rules[category]["entity-name"][lua_entity.name]) then
@@ -510,15 +388,10 @@ function Player.checkRules(check, rules, category, lua_entity, included)
 end
 
 -------------------------------------------------------------------------------
--- Check factory limitation module
---
--- @function [parent=#Player] checkFactoryLimitationModule
---
--- @param #lua_item_prototype module
--- @param #table lua_recipe
---
--- @return #table list of productions
---
+---Check factory limitation module
+---@param module table
+---@param lua_recipe table
+---@return boolean
 function Player.checkFactoryLimitationModule(module, lua_recipe)
   if Player.getModuleBonus(module.name, "productivity") <= 0 then return true end
   local rules_included, rules_excluded = Player.getRules("module-limitation")
@@ -550,17 +423,11 @@ function Player.checkFactoryLimitationModule(module, lua_recipe)
 end
 
 -------------------------------------------------------------------------------
--- Check beacon limitation module
---
--- @function [parent=#Player] checkBeaconLimitationModule
---
--- @param #lua_item_prototype module
--- @param #table lua_recipe
---
--- @return #table list of productions
---
+---Check beacon limitation module
+---@param module table
+---@param lua_recipe table
+---@return boolean
 function Player.checkBeaconLimitationModule(module, lua_recipe)
-  local model_filter_factory_module = User.getModGlobalSetting("model_filter_factory_module")
   local beacon = lua_recipe.beacon
   local allowed = true
   local model_filter_beacon_module = User.getModGlobalSetting("model_filter_beacon_module")
@@ -575,15 +442,10 @@ function Player.checkBeaconLimitationModule(module, lua_recipe)
 end
 
 -------------------------------------------------------------------------------
--- Return list of productions
---
--- @function [parent=#Player] getProductionsCrafting
---
--- @param #string category filter
--- @param #string lua_recipe
---
--- @return #table list of productions
---
+---Return list of productions
+---@param category string
+---@param lua_recipe table
+---@return table
 function Player.getProductionsCrafting(category, lua_recipe)
   local productions = {}
   local rules_included, rules_excluded = Player.getRules("production-crafting")
@@ -606,20 +468,20 @@ function Player.getProductionsCrafting(category, lua_recipe)
       local check = false
       if category ~= nil then
         if not(rules_included[category]) and not(rules_included[category]) then
-          -- standard recipe
+          ---standard recipe
           if lua_entity.crafting_categories ~= nil and lua_entity.crafting_categories[category] then
             local recipe_ingredient_count = RecipePrototype(lua_recipe, "recipe"):getIngredientCount()
             local factory_ingredient_count = EntityPrototype(lua_entity):getIngredientCount()
             if factory_ingredient_count >= recipe_ingredient_count then
               check = true
             end
-            -- resolve rule excluded
+            ---resolve rule excluded
             check = Player.checkRules(check, rules_excluded, "standard", lua_entity, false)
           end
         else
-          -- resolve rule included
+          ---resolve rule included
           check = Player.checkRules(check, rules_included, category, lua_entity, true)
-          -- resolve rule excluded
+          ---resolve rule excluded
           check = Player.checkRules(check, rules_excluded, category, lua_entity, false)
         end
       else
@@ -627,7 +489,7 @@ function Player.getProductionsCrafting(category, lua_recipe)
           check = true
         end
       end
-      -- resource filter
+      ---resource filter
       if check then
         if lua_recipe.name ~= nil then
           local lua_entity_filter = Player.getEntityPrototype(lua_recipe.name)
@@ -636,7 +498,7 @@ function Player.getProductionsCrafting(category, lua_recipe)
           end
         end
       end
-      -- ok to add entity
+      ---ok to add entity
       if check then
         productions[lua_entity.name] = lua_entity
       end
@@ -646,12 +508,8 @@ function Player.getProductionsCrafting(category, lua_recipe)
 end
 
 -------------------------------------------------------------------------------
--- Return list of modules
---
--- @function [parent=#Player] getModules
---
--- @return #table list of modules
---
+---Return list of modules
+---@return table
 function Player.getModules()
   local items = {}
   local filters = {}
@@ -665,12 +523,8 @@ function Player.getModules()
 end
 
 -------------------------------------------------------------------------------
--- Return list of production machines
---
--- @function [parent=#Player] getProductionMachines
---
--- @return #table list of modules
---
+---Return list of production machines
+---@return table
 function Player.getProductionMachines()
   local filters = {}
   table.insert(filters,{filter="crafting-machine",mode="and"})
@@ -682,12 +536,8 @@ function Player.getProductionMachines()
 end
 
 -------------------------------------------------------------------------------
--- Return list of energy machines
---
--- @function [parent=#Player] getEnergyMachines
---
--- @return #table list of modules
---
+---Return list of energy machines
+---@return table
 function Player.getEnergyMachines()
     local filters = {}
 
@@ -698,12 +548,8 @@ function Player.getEnergyMachines()
 end
 
 -------------------------------------------------------------------------------
--- Return list of boilers
---
--- @function [parent=#Player] getBoilers
---
--- @return #table list of modules
---
+---Return list of boilers
+---@return table
 function Player.getBoilers()
   local filters = {}
   table.insert(filters,{filter="type", type="boiler" ,mode="or"})
@@ -712,12 +558,8 @@ function Player.getBoilers()
 end
 
 -------------------------------------------------------------------------------
--- Return list of Offshore-Pump
---
--- @function [parent=#Player] getOffshorePump
---
--- @return #table list of modules
---
+---Return list of Offshore-Pump
+---@return table
 function Player.getOffshorePump(fluid_name)
   if fluid_name == nil then fluid_name = "water" end
   local filters = {}
@@ -734,19 +576,14 @@ function Player.getOffshorePump(fluid_name)
 end
 
 -------------------------------------------------------------------------------
--- Return module bonus (default return: bonus = 0 )
---
--- @function [parent=#Player] getModuleBonus
---
--- @param #string module module name
--- @param #string effect effect name
---
--- @return #number
---
+---Return module bonus (default return: bonus = 0 )
+---@param module string
+---@param effect string
+---@return number
 function Player.getModuleBonus(module, effect)
   if module == nil then return 0 end
   local bonus = 0
-  -- search module
+  ---search module
   local module = Player.getItemPrototype(module)
   if module ~= nil and module.module_effects ~= nil and module.module_effects[effect] ~= nil then
     bonus = module.module_effects[effect].bonus
@@ -755,41 +592,26 @@ function Player.getModuleBonus(module, effect)
 end
 
 -------------------------------------------------------------------------------
--- Return recipe prototype
---
--- @function [parent=#Player] getRecipePrototype
---
--- @param #string name recipe name
---
--- @return #LuaRecipe recipe
---
+---Return recipe prototype
+---@param name string
+---@return LuaRecipe
 function Player.getRecipePrototype(name)
   if name == nil then return nil end
   return game.recipe_prototypes[name]
 end
 
 -------------------------------------------------------------------------------
--- Return recipe
---
--- @function [parent=#Player] getRecipe
---
--- @param #string name recipe name
---
--- @return #LuaRecipe recipe
---
+---Return recipe
+---@param name string
+---@return LuaRecipe
 function Player.getRecipe(name)
   return Player.getForce().recipes[name]
 end
 
 -------------------------------------------------------------------------------
--- Return resource recipe
---
--- @function [parent=#Player] getRecipeEntity
---
--- @param #string name recipe name
---
--- @return #LuaRecipe recipe
---
+---Return resource recipe
+---@param name string
+---@return table
 function Player.getRecipeEntity(name)
   local entity_prototype = EntityPrototype(name)
   local prototype = entity_prototype:native()
@@ -820,14 +642,9 @@ function Player.getRecipeEntity(name)
 end
 
 -------------------------------------------------------------------------------
--- Return recipe
---
--- @function [parent=#Player] getRecipeFluid
---
--- @param #string name recipe name
---
--- @return #LuaRecipe recipe
---
+---Return recipe
+---@param name string
+---@return table
 function Player.getRecipeFluid(name)
   local fluid_prototype = FluidPrototype(name)
   local prototype = fluid_prototype:native()
@@ -855,16 +672,11 @@ function Player.getRecipeFluid(name)
 end
 
 -------------------------------------------------------------------------------
--- Return recipe
---
--- @function [parent=#Player] getRecipeRocket
---
--- @param #string name recipe name
---
--- @return #LuaRecipe recipe
---
+---Return recipe
+---@param name string
+---@return table
 function Player.getRecipeRocket(name)
-  -- Prepare launch = 15s
+  ---Prepare launch = 15s
   local rocket_part_prototype = RecipePrototype("rocket-part"):native()
   local rocket_prototype = EntityPrototype("rocket-silo"):native()
   local item_prototype = ItemPrototype(name)
@@ -895,14 +707,9 @@ function Player.getRecipeRocket(name)
 end
 
 -------------------------------------------------------------------------------
--- Return recipe
---
--- @function [parent=#Player] getRecipeBurnt
---
--- @param #string name recipe name
---
--- @return #LuaRecipe recipe
---
+---Return recipe
+---@param name string
+---@return table
 function Player.getRecipeBurnt(name)
   local recipe_prototype = Player.getRecipePrototype(name)
   local recipe = {}
@@ -926,14 +733,9 @@ function Player.getRecipeBurnt(name)
 end
 
 -------------------------------------------------------------------------------
--- Return recipe
---
--- @function [parent=#Player] getRecipeTechnology
---
--- @param #string name recipe name
---
--- @return #LuaRecipe recipe
---
+---Return recipe
+---@param name string
+---@return table
 function Player.getRecipeTechnology(name)
   local technology_prototype = Player.getTechnology(name)
   local recipe = {}
@@ -955,18 +757,13 @@ function Player.getRecipeTechnology(name)
 end
 
 -------------------------------------------------------------------------------
--- Return list of recipes
---
--- @function [parent=#Player] searchRecipe
---
--- @param #string element_name
--- @param #boolean by_ingredient
---
--- @return #table list of recipes
---
+---Return list of recipes
+---@param element_name string
+---@param by_ingredient boolean
+---@return table
 function Player.searchRecipe(element_name, by_ingredient)
   local recipes = {}
-  -- recherche dans les produits des recipes
+  ---recherche dans les produits des recipes
   for key, recipe in pairs(Player.getRecipes()) do
     local elements = recipe.products or {}
     if by_ingredient == true then elements = recipe.ingredients or {} end
@@ -976,7 +773,7 @@ function Player.searchRecipe(element_name, by_ingredient)
       end
     end
   end
-  -- recherche dans les resource
+  ---recherche dans les resource
   for key, resource in pairs(Player.getResources()) do
     local elements = EntityPrototype(resource):getMineableMiningProducts()
     for key, element in pairs(elements) do
@@ -986,7 +783,7 @@ function Player.searchRecipe(element_name, by_ingredient)
       end
     end
   end
-  -- recherche dans les fluids
+  ---recherche dans les fluids
   for key, fluid in pairs(Player.getFluidPrototypes()) do
     if fluid.name == element_name then
       table.insert(recipes,{name=fluid.name, type="fluid"})
@@ -996,14 +793,9 @@ function Player.searchRecipe(element_name, by_ingredient)
 end
 
 -------------------------------------------------------------------------------
--- Return entity prototypes
---
--- @function [parent=#Player] getEntityPrototypes
---
--- @param #table filters  sample: {{filter="type", mode="or", invert=false type="transport-belt"}}
---
--- @return #LuaEntityPrototype entity prototype
---
+---Return entity prototypes
+---@param filters table --{{filter="type", mode="or", invert=false type="transport-belt"}}
+---@return table
 function Player.getEntityPrototypes(filters)
   if filters ~= nil then
     return game.get_filtered_entity_prototypes(filters)
@@ -1012,12 +804,8 @@ function Player.getEntityPrototypes(filters)
 end
 
 -------------------------------------------------------------------------------
--- Return entity prototype types
---
--- @function [parent=#Player] getEntityPrototypeTypes
---
--- @return #table
---
+---Return entity prototype types
+---@return table
 function Player.getEntityPrototypeTypes()
   local types = {}
   for _,entity in pairs(game.entity_prototypes) do
@@ -1028,26 +816,17 @@ function Player.getEntityPrototypeTypes()
 end
 
 -------------------------------------------------------------------------------
--- Return entity prototype
---
--- @function [parent=#Player] getEntityPrototype
---
--- @param #string name entity name
---
--- @return #LuaEntityPrototype entity prototype
---
+---Return entity prototype
+---@param name string
+---@return LuaEntityPrototype
 function Player.getEntityPrototype(name)
   if name == nil then return nil end
   return game.entity_prototypes[name]
 end
 
 -------------------------------------------------------------------------------
--- Return beacon production
---
--- @function [parent=#Player] getProductionsBeacon
---
--- @return #table items prototype
---
+---Return beacon production
+---@return table
 function Player.getProductionsBeacon()
   local items = {}
   local filters = {}
@@ -1061,14 +840,9 @@ function Player.getProductionsBeacon()
 end
 
 -------------------------------------------------------------------------------
--- Return generators
---
--- @function [parent=#Player] getGenerators
---
--- @param #string type type primary or secondary
---
--- @return #table items prototype
---
+---Return generators
+---@param type string
+---@return table
 function Player.getGenerators(type)
   if type == nil then type = "primary" end
   local items = {}
@@ -1088,13 +862,8 @@ function Player.getGenerators(type)
 end
 
 -------------------------------------------------------------------------------
--- Return resources list
---
--- @function [parent=#Player] getResources
---
--- @return #table entity prototype
---
-
+---Return resources list
+---@return table
 function Player.getResources()
   local cache_resources = Cache.getData(Player.classname, "resources")
   if cache_resources ~= nil then return cache_resources end
@@ -1109,14 +878,9 @@ function Player.getResources()
 end
 
 -------------------------------------------------------------------------------
--- Return item prototypes
---
--- @function [parent=#Player] getItemPrototypes
---
--- @param #table filters  sample: {{filter="fuel-category", mode="or", invert=false,["fuel-category"]="chemical"}}
---
--- @return #LuaItemPrototype item prototype
---
+---Return item prototypes
+---@param filters table --{{filter="fuel-category", mode="or", invert=false,["fuel-category"]="chemical"}}
+---@return table
 function Player.getItemPrototypes(filters)
   if filters ~= nil then
     return game.get_filtered_item_prototypes(filters)
@@ -1125,12 +889,8 @@ function Player.getItemPrototypes(filters)
 end
 
 -------------------------------------------------------------------------------
--- Return item prototype types
---
--- @function [parent=#Player] getItemPrototypeTypes
---
--- @return #table
---
+---Return item prototype types
+---@return table
 function Player.getItemPrototypeTypes()
   local types = {}
   for _,entity in pairs(game.item_prototypes) do
@@ -1141,28 +901,18 @@ function Player.getItemPrototypeTypes()
 end
 
 -------------------------------------------------------------------------------
--- Return item prototype
---
--- @function [parent=#Player] getItemPrototype
---
--- @param #string name item name
---
--- @return #LuaItemPrototype item prototype
---
+---Return item prototype
+---@param name string
+---@return LuaItemPrototype
 function Player.getItemPrototype(name)
   if name == nil then return nil end
   return game.item_prototypes[name]
 end
 
 -------------------------------------------------------------------------------
--- Return fluid prototypes
---
--- @function [parent=#Player] getFluidPrototypes
---
--- @param #table filters  sample: {{filter="type", mode="or", invert=false type="transport-belt"}}
---
--- @return #LuaFluidPrototype fluid prototype
---
+---Return fluid prototypes
+---@param filters table --{{filter="type", mode="or", invert=false type="transport-belt"}}
+---@return table
 function Player.getFluidPrototypes(filters)
   if filters ~= nil then
     return game.get_filtered_fluid_prototypes(filters)
@@ -1171,12 +921,8 @@ function Player.getFluidPrototypes(filters)
 end
 
 -------------------------------------------------------------------------------
--- Return fluid prototype types
---
--- @function [parent=#Player] getFluidPrototypeTypes
---
--- @return #table
---
+---Return fluid prototype types
+---@return table
 function Player.getFluidPrototypeTypes()
   local types = {}
   for _,entity in pairs(game.fluid_prototypes) do
@@ -1187,12 +933,8 @@ function Player.getFluidPrototypeTypes()
 end
 
 -------------------------------------------------------------------------------
--- Return fluid prototype subgroups
---
--- @function [parent=#Player] getFluidPrototypeSubgroups
---
--- @return #table
---
+---Return fluid prototype subgroups
+---@return table
 function Player.getFluidPrototypeSubgroups()
   local types = {}
   for _,entity in pairs(game.fluid_prototypes) do
@@ -1203,28 +945,17 @@ function Player.getFluidPrototypeSubgroups()
 end
 
 -------------------------------------------------------------------------------
--- Return fluid prototype
---
--- @function [parent=#Player] getFluidPrototype
---
--- @param #string name fluid name
---
--- @return #LuaFluidPrototype fluid prototype
---
+---Return fluid prototype
+---@param name string
+---@return LuaFluidPrototype
 function Player.getFluidPrototype(name)
   if name == nil then return nil end
   return game.fluid_prototypes[name]
 end
 
 -------------------------------------------------------------------------------
--- Return fluid fuel prototype
---
--- @function [parent=#Player] getFuelPrototypes
---
--- @param #string name fluid name
---
--- @return #LuaFluidPrototype fluid prototype
---
+---Return fluid fuel prototype
+---@return table
 function Player.getFluidFuelPrototypes()
   local filters = {}
   table.insert(filters, {filter="fuel-value", mode="or", invert=false, comparison=">", value=0})
@@ -1232,14 +963,9 @@ function Player.getFluidFuelPrototypes()
 end
 
 -------------------------------------------------------------------------------
--- Return items logistic
---
--- @function [parent=#Player] getItemsLogistic
---
--- @param type belt, container or transport
---
--- @return #table
---
+---Return items logistic
+---@param type string --belt, container or transport
+---@return table
 function Player.getItemsLogistic(type)
   local filters = {}
   if type == "inserter" then
@@ -1255,14 +981,9 @@ function Player.getItemsLogistic(type)
 end
 
 -------------------------------------------------------------------------------
--- Return default item logistic
---
--- @function [parent=#Player] getDefaultItemLogistic
---
--- @param type belt, container or transport
---
--- @return #table
---
+---Return default item logistic
+---@param type string --belt, container or transport
+---@return table
 function Player.getDefaultItemLogistic(type)
   local default = User.getParameter(string.format("items_logistic_%s", type))
   if default == nil then 
@@ -1276,14 +997,9 @@ function Player.getDefaultItemLogistic(type)
 end
 
 -------------------------------------------------------------------------------
--- Return fluids logistic
---
--- @function [parent=#Player] getFluidsLogistic
---
--- @param type pipe, container or transport
---
--- @return #table
---
+---Return fluids logistic
+---@param type string --pipe, container or transport
+---@return table
 function Player.getFluidsLogistic(type)
   local filters = {}
   if type == "pipe" then
@@ -1297,14 +1013,9 @@ function Player.getFluidsLogistic(type)
 end
 
 -------------------------------------------------------------------------------
--- Return default fluid logistic
---
--- @function [parent=#Player] getDefaultFluidLogistic
---
--- @param type pipe, container or transport
---
--- @return #table
---
+---Return default fluid logistic
+---@param type string --pipe, container or transport
+---@return table
 function Player.getDefaultFluidLogistic(type)
   local default = User.getParameter(string.format("fluids_logistic_%s", type))
   if default == nil then 
@@ -1318,13 +1029,9 @@ function Player.getDefaultFluidLogistic(type)
 end
 
 -------------------------------------------------------------------------------
--- Return number
---
--- @function [parent=#Player] parseNumber
---
--- @param #string name
--- @param #string property
---
+---Return number
+---@param number string
+---@return number
 function Player.parseNumber(number)
   if number == nil then return 0 end
   local value = string.match(number,"[0-9.]*",1)

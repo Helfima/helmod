@@ -1,62 +1,43 @@
 -------------------------------------------------------------------------------
--- Class to build Calculator panel
---
--- @module Calculator
--- @extends #Form
---
-
+---Class to build Calculator panel
+---@class Calculator
 Calculator = newclass(Form)
 
 local display_panel = nil
 
 -------------------------------------------------------------------------------
--- Initialization
---
--- @function [parent=#Calculator] init
---
+---Initialization
 function Calculator:onInit()
   self.panelCaption = ({"helmod_calculator-panel.title"})
 end
 
 -------------------------------------------------------------------------------
--- On Style
---
--- @function [parent=#Calculator] onStyle
---
--- @param #table styles
--- @param #number width_main
--- @param #number height_main
---
+---On Style
+---@param styles table
+---@param width_main number
+---@param height_main number
 function Calculator:onStyle(styles, width_main, height_main)
   styles.flow_panel = nil
 end
 
 ------------------------------------------------------------------------------
--- Get Button Sprites
---
--- @function [parent=#Calculator] getButtonSprites
---
--- @return boolean
---
+---Get Button Sprites
+---@return string, string
 function Calculator:getButtonSprites()
   return "calculator-white","calculator"
 end
 
 -------------------------------------------------------------------------------
--- Is tool
---
--- @function [parent=#Calculator] isTool
---
--- @return boolean
---
+---Is tool
+---@return boolean
 function Calculator:isTool()
   return true
 end
 
 -------------------------------------------------------------------------------
--- Get or create column panel
+---Get or create column panel
 --
--- @function [parent=#Calculator] getColumnPanel
+---@function [parent=#Calculator] getColumnPanel
 --
 function Calculator:getColumnPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
@@ -73,14 +54,10 @@ function Calculator:getColumnPanel()
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#Calculator] onEvent
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
 function Calculator:onEvent(event)
-  -- import
+  ---import
   if event.action == "compute" then
     local text = event.element.text
     local ok , err = pcall(function()
@@ -120,13 +97,9 @@ function Calculator:onEvent(event)
 end
 
 -------------------------------------------------------------------------------
--- Add history
---
--- @function [parent=#Calculator] addHistory
---
--- @param #string calculator_value
--- @param #number result
---
+---Add history
+---@param calculator_value string
+---@param result number
 function Calculator:addHistory(calculator_value, result)
   if calculator_value ~= result then
     local calculator_history = User.getParameter("calculator_history") or {}
@@ -137,12 +110,8 @@ function Calculator:addHistory(calculator_value, result)
 end
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#Calculator] onUpdate
---
--- @param #LuaEvent event
---
+---On update
+---@param event LuaEvent
 function Calculator:onUpdate(event)
   self:updateDisplay()
   self:updateKeyboard()
@@ -150,10 +119,7 @@ function Calculator:onUpdate(event)
 end
 
 -------------------------------------------------------------------------------
--- Update display
---
--- @function [parent=#Calculator] updateDisplay
---
+---Update display
 function Calculator:updateDisplay()
   local keyboard_panel = self:getFrameDeepPanel("display")
   keyboard_panel.clear()
@@ -166,10 +132,7 @@ function Calculator:updateDisplay()
   display_panel.focus()
 end
 -------------------------------------------------------------------------------
--- Update keyboard
---
--- @function [parent=#Calculator] updateKeyboard
---
+---Update keyboard
 function Calculator:updateKeyboard()
   local _,keyboard_panel = self:getColumnPanel()
   keyboard_panel.clear()
@@ -217,10 +180,7 @@ function Calculator:updateKeyboard()
 end
 
 -------------------------------------------------------------------------------
--- Update history
---
--- @function [parent=#Calculator] updateHistory
---
+---Update history
 function Calculator:updateHistory()
   local history_panel = self:getColumnPanel()
   history_panel.clear()

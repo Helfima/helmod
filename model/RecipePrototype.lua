@@ -1,7 +1,6 @@
 ---
--- Description of the module.
--- @module RecipePrototype
---
+---Description of the module.
+---@class RecipePrototype
 RecipePrototype = newclass(Prototype,function(base, object, object_type)
   base.classname = "HMRecipePrototype"
   base.is_voider = nil
@@ -46,14 +45,9 @@ RecipePrototype = newclass(Prototype,function(base, object, object_type)
 end)
 
 -------------------------------------------------------------------------------
--- Try to find prototype
---
--- @function [parent=#RecipePrototype] find
---
--- @param #object object prototype
---
--- @return #RecipePrototype
---
+---Try to find prototype
+---@param object table --prototype
+---@return RecipePrototype
 function RecipePrototype.find(object)
   local object_name = nil
   if type(object) == "string" then
@@ -79,35 +73,24 @@ function RecipePrototype.find(object)
 end
 
 -------------------------------------------------------------------------------
--- Return type Prototype
---
--- @function [parent=#RecipePrototype] getType
---
--- @return #lua_type
---
+---Return type Prototype
+---@return string
 function RecipePrototype:getType()
   return self.lua_type
 end
 
 -------------------------------------------------------------------------------
--- Return if recipe void ingredient
--- for flare stack/clarifier ect...
--- @function [parent=#RecipePrototype] isVoid
---
--- @return #boolean
---
+---Return if recipe void ingredient
+---for flare stack/clarifier ect...
+---@return boolean
 function RecipePrototype:isVoid()
   if self.is_voider == nil then self:getProducts() end
   return self.is_voider
 end
 
 -------------------------------------------------------------------------------
--- Return category of Prototype
---
--- @function [parent=#RecipePrototype] getCategory
---
--- @return #table
---
+---Return category of Prototype
+---@return string
 function RecipePrototype:getCategory()
   if self.lua_type == "technology" then
     return "technology"
@@ -119,15 +102,11 @@ function RecipePrototype:getCategory()
 end
 
 -------------------------------------------------------------------------------
--- Return products array of Prototype (duplicates are combined into one entry)
---
--- @function [parent=#RecipePrototype] getProducts
---
--- @return #table
---
+---Return products array of Prototype (duplicates are combined into one entry)
+---@return table
 function RecipePrototype:getProducts(factory)
   local raw_products = self:getRawProducts()
-  -- if recipe is a voider
+  ---if recipe is a voider
   if #raw_products == 1 and Product(raw_products[1]):getElementAmount() == 0 then
     self.is_voider = true
     return {}
@@ -139,8 +118,8 @@ function RecipePrototype:getProducts(factory)
   for r, raw_product in pairs(raw_products) do
     local product_id = raw_product.type .. "/" .. raw_product.name
     if lua_products[product_id] ~= nil then
-      -- make a new product table for the combined result
-      -- combine product amounts, averaging in variable and probabilistic outputs
+      ---make a new product table for the combined result
+      ---combine product amounts, averaging in variable and probabilistic outputs
       local amount_a = Product(lua_products[product_id]):getElementAmount()
       local amount_b = Product(raw_product):getElementAmount()
       lua_products[product_id] = {type=raw_product.type,name=raw_product.name,amount=amount_a + amount_b}
@@ -162,12 +141,12 @@ function RecipePrototype:getProducts(factory)
       end
     end
   end
-  -- convert map to array
+  ---convert map to array
   local raw_products = {}
   for _, lua_product in pairs(lua_products) do
     table.insert(raw_products,lua_product)
   end
-  -- insert burnt
+  ---insert burnt
   if self.lua_type == "energy" then
     if factory_prototype:getType() == "reactor" then
       local bonus = factory_prototype:getNeighbourBonus()
@@ -196,12 +175,8 @@ function RecipePrototype:getProducts(factory)
 end
 
 -------------------------------------------------------------------------------
--- Return products array of Prototype (may contain duplicate products)
---
--- @function [parent=#RecipePrototype] getRawProducts
---
--- @return #table
---
+---Return products array of Prototype (may contain duplicate products)
+---@return table
 function RecipePrototype:getRawProducts()
   if self.lua_prototype ~= nil then
     if self.lua_type == "energy" then
@@ -216,12 +191,8 @@ function RecipePrototype:getRawProducts()
 end
 
 -------------------------------------------------------------------------------
--- Return products array of Prototype (may contain duplicate products)
---
--- @function [parent=#RecipePrototype] getEnergyProducts
---
--- @return #table
---
+---Return products array of Prototype (may contain duplicate products)
+---@return table
 function RecipePrototype:getEnergyProducts()
   if self.lua_prototype ~= nil then
     local products = {}
@@ -242,15 +213,15 @@ function RecipePrototype:getEnergyProducts()
     if prototype:getType() == "accumulator" then
       local energy_prototype = prototype:getEnergySource()
       local capacity = energy_prototype:getBufferCapacity()
-      -- vanilla day=25000,dusk=5000,night=2500,dawn=5000
+      ---vanilla day=25000,dusk=5000,night=2500,dawn=5000
       local day,dusk,night,dawn = Player.getGameDay()
       local t1 = day-dusk-night-dawn
       local t2 = night
       local t3 = (dusk+dawn)/2
       local T = day
-      -- E_acc = P * (t2 + t2 + 2 * (t3 * P/P')) / 2 = P * (t2 + t3*P/P')
-      -- P' = P * T / (t1 + t3)
-      -- @see https://forums.factorio.com/viewtopic.php?f=5&t=5594
+      ---E_acc = P * (t2 + t2 + 2 * (t3 * P/P')) / 2 = P * (t2 + t3*P/P')
+      ---P' = P * T / (t1 + t3)
+      ---@see https://forums.factorio.com/viewtopic.php?f=5&t=5594
       local R = 60/(t2+t3*(t1+t3)/T)
       local amount = capacity*R
 
@@ -278,12 +249,8 @@ function RecipePrototype:getEnergyProducts()
 end
 
 -------------------------------------------------------------------------------
--- Return products array of Prototype (may contain duplicate products)
---
--- @function [parent=#RecipePrototype] getRawIngredients
---
--- @return #table
---
+---Return products array of Prototype (may contain duplicate products)
+---@return table
 function RecipePrototype:getRawIngredients()
   if self.lua_prototype ~= nil then
     if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" or self.lua_type == "resource" or self.lua_type == "fluid" or self.lua_type == "rocket" then
@@ -300,7 +267,7 @@ function RecipePrototype:getRawIngredients()
       end
 
       if prototype:getType() == "boiler" then
-        -- water
+        ---water
         local amount = prototype:getFluidProduction()
         local ingredient = {name="water", type="fluid", amount=amount, by_time=true}
         table.insert(ingredients, ingredient)
@@ -308,15 +275,15 @@ function RecipePrototype:getRawIngredients()
       if prototype:getType() == "accumulator" then
         local energy_prototype = prototype:getEnergySource()
         local capacity = energy_prototype:getBufferCapacity()
-        -- vanilla day=25000,dusk=5000,night=2500,dawn=5000
+        ---vanilla day=25000,dusk=5000,night=2500,dawn=5000
         local day,dusk,night,dawn = Player.getGameDay()
         local t1 = day-dusk-night-dawn
         local t2 = night
         local t3 = (dusk+dawn)/2
         local T = day
-        -- E_acc = P * (t2 + t2 + 2 * (t3 * P/P')) / 2 = P * (t2 + t3*P/P')
-        -- P' = P * T / (t1 + t3)
-        -- @see https://forums.factorio.com/viewtopic.php?f=5&t=5594
+        ---E_acc = P * (t2 + t2 + 2 * (t3 * P/P')) / 2 = P * (t2 + t3*P/P')
+        ---P' = P * T / (t1 + t3)
+        ---@see https://forums.factorio.com/viewtopic.php?f=5&t=5594
         local R = 60/(t2+t3*(t1+t3)/T)
         local amount = capacity*R*T/(t1+t3)
         local ingredient = {name="energy", type="energy", amount=amount}
@@ -342,12 +309,8 @@ function RecipePrototype:getRawIngredients()
 end
 
 -------------------------------------------------------------------------------
--- Return solid ingredient number of Prototype
---
--- @function [parent=#RecipePrototype] getIngredientCount
---
--- @return #number
---
+---Return solid ingredient number of Prototype
+---@return number
 function RecipePrototype:getIngredientCount(factory)
   local count = 0
   if self.lua_prototype ~= nil and self:getIngredients(factory) ~= nil then
@@ -360,14 +323,9 @@ function RecipePrototype:getIngredientCount(factory)
   return count
 end
 -------------------------------------------------------------------------------
--- Return ingredients array of Prototype
---
--- @function [parent=#RecipePrototype] getIngredients
---
--- @param factory
---
--- @return #table
---
+---Return ingredients array of Prototype
+---@param factory table
+---@return table
 function RecipePrototype:getIngredients(factory)
   local raw_ingredients = self:getRawIngredients()
   if self.lua_prototype ~= nil then
@@ -387,7 +345,7 @@ function RecipePrototype:getIngredients(factory)
     end
 
     if self.lua_type ~= "energy" then
-      -- recipe
+      ---recipe
       if energy_type == "burner" then
         if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then
           local fuel_count = energy_prototype:getFuelCount()
@@ -411,7 +369,7 @@ function RecipePrototype:getIngredients(factory)
         end
       end
     else
-      -- recipe energy
+      ---recipe energy
       if energy_type == "burner" then
         if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then
           local fuel_count = energy_prototype:getFuelCount()
@@ -435,12 +393,8 @@ function RecipePrototype:getIngredients(factory)
 end
 
 -------------------------------------------------------------------------------
--- Return energy of Prototype
---
--- @function [parent=#RecipePrototype] getEnergy
---
--- @return #table
---
+---Return energy of Prototype
+---@return number
 function RecipePrototype:getEnergy()
   if self.lua_prototype ~= nil then
     if self.lua_type == "energy" then
@@ -455,12 +409,8 @@ function RecipePrototype:getEnergy()
 end
 
 -------------------------------------------------------------------------------
--- Return enable of Prototype
---
--- @function [parent=#RecipePrototype] getEnabled
---
--- @return #boolean
---
+---Return enable of Prototype
+---@return boolean
 function RecipePrototype:getEnabled()
   if self.lua_prototype ~= nil then
     if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" then
@@ -477,12 +427,8 @@ function RecipePrototype:getEnabled()
 end
 
 -------------------------------------------------------------------------------
--- Return unlock of Prototype
---
--- @function [parent=#RecipePrototype] getUnlock
---
--- @return #boolean
---
+---Return unlock of Prototype
+---@return boolean
 function RecipePrototype:getUnlock()
   if self.lua_prototype ~= nil then
     if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" then
@@ -495,12 +441,8 @@ function RecipePrototype:getUnlock()
 end
 
 -------------------------------------------------------------------------------
--- Return hidden of Prototype
---
--- @function [parent=#RecipePrototype] getHidden
---
--- @return #boolean
---
+---Return hidden of Prototype
+---@return boolean
 function RecipePrototype:getHidden()
   if self.lua_prototype ~= nil then
     if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" or self.lua_type == "resource" then
@@ -515,12 +457,8 @@ function RecipePrototype:getHidden()
 end
 
 -------------------------------------------------------------------------------
--- Return hidden player crafting of Prototype
---
--- @function [parent=#RecipePrototype] getHiddenPlayerCrafting
---
--- @return #boolean
---
+---Return hidden player crafting of Prototype
+---@return boolean
 function RecipePrototype:getHiddenPlayerCrafting()
   if self.lua_prototype ~= nil then
     if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" then
@@ -533,12 +471,8 @@ function RecipePrototype:getHiddenPlayerCrafting()
 end
 
 -------------------------------------------------------------------------------
--- Return emissions multiplier of Prototype
---
--- @function [parent=#RecipePrototype] getEmissionsMultiplier
---
--- @return #number
---
+---Return emissions multiplier of Prototype
+---@return number
 function RecipePrototype:getEmissionsMultiplier()
   if self.lua_prototype ~= nil then
     local prototype = Player.getRecipePrototype(self.lua_prototype.name)

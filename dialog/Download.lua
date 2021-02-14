@@ -1,45 +1,30 @@
 -------------------------------------------------------------------------------
--- Class to build Download panel
---
--- @module Download
--- @extends #FormModel
---
-
+---Class to build Download panel
+---@class Download
 Download = newclass(FormModel)
 
 local transfert_mode = nil
 
 -------------------------------------------------------------------------------
--- Initialization
---
--- @function [parent=#Download] init
---
-function Download:onInit(parent)
+---Initialization
+function Download:onInit()
   self.panelCaption = ({"helmod_download-panel.title"})
 end
 
 -------------------------------------------------------------------------------
--- On Style
---
--- @function [parent=#Download] onStyle
---
--- @param #table styles
--- @param #number width_main
--- @param #number height_main
---
+---On Style
+---@param styles table
+---@param width_main number
+---@param height_main number
 function Download:onStyle(styles, width_main, height_main)
   styles.flow_panel = nil
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#Download] onEvent
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
 function Download:onEvent(event)
-  -- import
+  ---import
   if event.action == "download-model" then
     local download_panel = event.element.parent
     local text_box = download_panel["data-text"]
@@ -55,34 +40,26 @@ function Download:onEvent(event)
 end
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#Download] Download
---
--- @param #LuaEvent event
---
+---On update
+---@param event LuaEvent
 function Download:onUpdate(event)
   self:updateDownload(event)
 end
 
 -------------------------------------------------------------------------------
--- Update about Download
---
--- @function [parent=#Download] updateDownload
---
--- @param #LuaEvent event
---
+---Update about Download
+---@param event LuaEvent
 function Download:updateDownload(event)
   local model = self:getParameterObjects()
   local data_string = ""
-  -- export
+  ---export
   if event.item1 == "upload" then
     local download_panel = self:getFramePanel("upload")
     download_panel.clear()
     data_string = Converter.write(model)
     local text_box = GuiElement.add(download_panel, GuiTextBox("data-text"):text(data_string))
   end
-  -- import
+  ---import
   if event.item1 == "download" then
     local download_panel = self:getFramePanel("download")
     download_panel.clear()

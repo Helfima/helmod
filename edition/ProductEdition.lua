@@ -1,30 +1,19 @@
 -------------------------------------------------------------------------------
--- Class to build product edition dialog
---
--- @module ProductEdition
--- @extends #AbstractEdition
---
-
+---Class to build product edition dialog
+---@class ProductEdition
 ProductEdition = newclass(FormModel)
 
 -------------------------------------------------------------------------------
--- On initialization
---
--- @function [parent=#ProductEdition] onInit
---
+---On initialization
 function ProductEdition:onInit()
   self.panelCaption = ({"helmod_product-edition-panel.title"})
 end
 
 -------------------------------------------------------------------------------
--- On Style
---
--- @function [parent=#ProductEdition] onStyle
---
--- @param #table styles
--- @param #number width_main
--- @param #number height_main
---
+---On Style
+---@param styles table
+---@param width_main number
+---@param height_main number
 function ProductEdition:onStyle(styles, width_main, height_main)
   styles.flow_panel = {
     minimal_height = 100,
@@ -33,10 +22,8 @@ function ProductEdition:onStyle(styles, width_main, height_main)
 end
 
 -------------------------------------------------------------------------------
--- Get or create info panel
---
--- @function [parent=#ProductEdition] getInfoPanel
---
+---Get or create info panel
+---@return LuaGuiElement
 function ProductEdition:getInfoPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["info"] ~= nil and content_panel["info"].valid then
@@ -48,10 +35,8 @@ function ProductEdition:getInfoPanel()
 end
 
 -------------------------------------------------------------------------------
--- Get or create tool panel
---
--- @function [parent=#ProductEdition] getToolPanel
---
+---Get or create tool panel
+---@return LuaGuiElement
 function ProductEdition:getToolPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["tool_panel"] ~= nil and content_panel["tool_panel"].valid then
@@ -63,10 +48,8 @@ function ProductEdition:getToolPanel()
 end
 
 -------------------------------------------------------------------------------
--- Get or create action panel
---
--- @function [parent=#ProductEdition] getActionPanel
---
+---Get or create action panel
+---@return LuaGuiElement
 function ProductEdition:getActionPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["action_panel"] ~= nil and content_panel["action_panel"].valid then
@@ -78,12 +61,8 @@ function ProductEdition:getActionPanel()
 end
 
 -------------------------------------------------------------------------------
--- After open
---
--- @function [parent=#ProductEdition] after_open
---
--- @param #LuaEvent event
---
+---After open
+---@param event LuaEvent
 function ProductEdition:after_open(event)
   self:getInfoPanel()
 end
@@ -92,12 +71,8 @@ local product = nil
 local product_count = 0
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#ProductEdition] onUpdate
---
--- @param #LuaEvent event
---
+---On update
+---@param event LuaEvent
 function ProductEdition:onUpdate(event)
   local model, block, recipe = self:getParameterObjects()
   product = nil
@@ -120,10 +95,9 @@ function ProductEdition:onUpdate(event)
 end
 
 -------------------------------------------------------------------------------
--- Update information
---
--- @function [parent=#ProductEdition] updateInfo
---
+---Update information
+---@param model table
+---@param block table
 local input_quantity = nil
 function ProductEdition:updateInfo(model, block)
   local info_panel = self:getInfoPanel()
@@ -151,12 +125,9 @@ function ProductEdition:updateInfo(model, block)
 end
 
 -------------------------------------------------------------------------------
--- Update action
---
--- @function [parent=#ProductEdition] updateAction
---
--- @param #LuaEvent event
---
+---Update action
+---@param model table
+---@param block table
 function ProductEdition:updateAction(model, block)
   local action_panel = self:getActionPanel()
   if product ~= nil then
@@ -167,12 +138,9 @@ function ProductEdition:updateAction(model, block)
 end
 
 -------------------------------------------------------------------------------
--- Update tool
---
--- @function [parent=#ProductEdition] updateTool
---
--- @param #LuaEvent event
---
+---Update tool
+---@param model table
+---@param block table
 function ProductEdition:updateTool(model, block)
   local tool_panel = self:getToolPanel()
   tool_panel.clear()
@@ -182,12 +150,8 @@ function ProductEdition:updateTool(model, block)
   end
 end
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#ProductEdition] onEvent
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
 function ProductEdition:onEvent(event)
   local model, block, recipe = self:getParameterObjects()
   if User.isWriter(model) then

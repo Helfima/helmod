@@ -1,8 +1,6 @@
----
--- Description of the module.
--- @module FluidPrototype
--- 
-
+-------------------------------------------------------------------------------
+---Description of the module.
+---@class FluidPrototype
 FluidPrototype = newclass(Prototype,function(base, object)
   if object ~= nil and type(object) == "string" then
     Prototype.init(base, Player.getFluidPrototype(object))
@@ -13,50 +11,33 @@ FluidPrototype = newclass(Prototype,function(base, object)
 end)
 
 -------------------------------------------------------------------------------
--- Return fuel value
---
--- @function [parent=#FluidPrototype] getFuelValue
---
--- @return #boolean
---
+---Return fuel value
+---@return number
 function FluidPrototype:getHeatCapacity()
   if self.lua_prototype == nil then return 0 end
   return self.lua_prototype.heat_capacity
 end
 
 -------------------------------------------------------------------------------
--- Return fuel value
---
--- @function [parent=#FluidPrototype] getFuelValue
---
--- @return #number
---
+---Return fuel value
+---@return number
 function FluidPrototype:getEmissionMultiplier()
   if self.lua_prototype == nil then return 1 end
   return self.lua_prototype.emissions_multiplier or 1
 end
 
 -------------------------------------------------------------------------------
--- Return fuel value
---
--- @function [parent=#FluidPrototype] getFuelValue
---
--- @return #boolean
---
+---Return fuel value
+---@return number
 function FluidPrototype:getFuelValue()
   if self.lua_prototype == nil then return 0 end
   return self.lua_prototype.fuel_value
 end
 
 -------------------------------------------------------------------------------
--- Return fuel emissions multiplier
---
--- @function [parent=#FluidPrototype] getFuelEmissionsMultiplier
---
--- @return #boolean
---
+---Return fuel emissions multiplier
+---@return number
 function FluidPrototype:getFuelEmissionsMultiplier()
   if self.lua_prototype == nil then return 1 end
   return self.lua_prototype.emissions_multiplier or 1
 end
-

@@ -1,10 +1,5 @@
 local default_gui = data.raw["gui-style"].default
 
--------------------------------------------------------------------------------
--- Style of default
---
--- @field [parent=#Table] default
-
 default_gui["helmod_table_default"] = {
   type = "table_style",
   horizontal_spacing = 2,
@@ -17,21 +12,11 @@ default_gui["helmod_table_default"] = {
   vertical_align = "top"
 }
 
--------------------------------------------------------------------------------
--- Style of default
---
--- @field [parent=#Table] default
-
 default_gui["helmod_table_border"] = {
   type = "table_style",
   parent = "helmod_table_default",
   border = border_image_set(),
 }
-
--------------------------------------------------------------------------------
--- Style of default
---
--- @field [parent=#Table] default
 
 default_gui["helmod_table_result"] = {
   type = "table_style",
@@ -55,21 +40,12 @@ default_gui["helmod_table_result"] = {
     opacity = 1
   }
 }
--------------------------------------------------------------------------------
--- Style of default
---
--- @field [parent=#Table] element
 
 default_gui["helmod_table_element"] = {
   type = "table_style",
   parent = "helmod_table_default",
   horizontally_stretchable = "off"
 }
-
--------------------------------------------------------------------------------
--- Style of panel
---
--- @field [parent=#Table] panel
 
 default_gui["helmod_table_panel"] = {
   type = "table_style",
@@ -81,11 +57,6 @@ default_gui["helmod_table_panel"] = {
   left_padding = 0,
   vertical_align = "top"
 }
-
--------------------------------------------------------------------------------
--- Style of list
---
--- @field [parent=#Table] list
 
 default_gui["helmod_table_list"] = {
   type = "table_style",
@@ -100,11 +71,6 @@ default_gui["helmod_table_list"] = {
   horizontally_stretchable = "off"
 }
 
--------------------------------------------------------------------------------
--- Style of tab
---
--- @field [parent=#Table] tab
-
 default_gui["helmod_table_tab"] = {
   type = "table_style",
   horizontal_spacing = 0,
@@ -116,11 +82,6 @@ default_gui["helmod_table_tab"] = {
   left_padding = 0,
   vertical_align = "top"
 }
-
--------------------------------------------------------------------------------
--- Style of rule
---
--- @field [parent=#Table] rule
 
 default_gui["helmod_table_rule"] = {
   type = "table_style",
@@ -134,11 +95,6 @@ default_gui["helmod_table_rule"] = {
   vertical_align = "top"
 }
 
--------------------------------------------------------------------------------
--- Style of factory modules
---
--- @field [parent=#Table] factory_modules
-
 default_gui["helmod_factory_modules"] = {
   type = "table_style",
   parent = "helmod_table_default",
@@ -147,11 +103,6 @@ default_gui["helmod_factory_modules"] = {
   cell_spacing = 3
 }
 
--------------------------------------------------------------------------------
--- Style of factory modules
---
--- @field [parent=#Table] factory_modules
-
 default_gui["helmod_factory_info"] = {
   type = "table_style",
   parent = "helmod_table_default",
@@ -159,32 +110,17 @@ default_gui["helmod_factory_info"] = {
   cell_spacing = 3
 }
 
--------------------------------------------------------------------------------
--- Style of beacon modules
---
--- @field [parent=#Table] beacon_modules
-
 default_gui["helmod_beacon_modules"] = {
   type = "table_style",
   parent = "helmod_table_default",
   minimal_width = 18
 }
 
--------------------------------------------------------------------------------
--- Style of recipe modules
---
--- @field [parent=#Table] recipe_modules
-
 default_gui["helmod_table_recipe_modules"] = {
   type = "table_style",
   parent = "table",
   minimal_height = 36
 }
-
--------------------------------------------------------------------------------
--- Style of recipe selector
---
--- @field [parent=#Table] recipe_selector
 
 default_gui["helmod_table_recipe_selector"] = {
   type = "table_style",
@@ -195,11 +131,6 @@ default_gui["helmod_table_recipe_selector"] = {
   bottom_padding = 1,
   left_padding = 0
 }
-
--------------------------------------------------------------------------------
--- Style of recipe table
---
--- @field [parent=#Table] odd
 
 default_gui["helmod_table-odd"] = {
   type = "table_style",
@@ -221,11 +152,6 @@ default_gui["helmod_table-odd"] = {
     opacity = 0.7
   }
 }
-
--------------------------------------------------------------------------------
--- Style of recipe table
---
--- @field [parent=#Table] rule_odd
 
 default_gui["helmod_table-rule-odd"] = {
   type = "table_style",

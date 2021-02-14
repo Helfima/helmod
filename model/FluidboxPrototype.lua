@@ -1,18 +1,12 @@
 require "model.Prototype"
 -------------------------------------------------------------------------------
--- Class Object
---
--- @module FluidboxPrototype
---
+---Class Object
+---@Class FluidboxPrototype
 FluidboxPrototype = newclass(Prototype)
 
 -------------------------------------------------------------------------------
--- Is input
---
--- @function [parent=#FluidboxPrototype] isInput
---
--- @return #boolean
---
+---Is input
+---@return boolean
 function FluidboxPrototype:isInput()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.production_type ~= "output"
@@ -21,12 +15,8 @@ function FluidboxPrototype:isInput()
 end
 
 -------------------------------------------------------------------------------
--- Is output
---
--- @function [parent=#FluidboxPrototype] isOutput
---
--- @return #boolean
---
+---Is output
+---@return boolean
 function FluidboxPrototype:isOutput()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.production_type == "output"
@@ -35,12 +25,8 @@ function FluidboxPrototype:isOutput()
 end
 
 -------------------------------------------------------------------------------
--- Return filter
---
--- @function [parent=#FluidboxPrototype] getFilter
---
--- @return #boolean
---
+---Return filter
+---@return string
 function FluidboxPrototype:getFilter()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.filter
@@ -49,12 +35,8 @@ function FluidboxPrototype:getFilter()
 end
 
 -------------------------------------------------------------------------------
--- Return data
---
--- @function [parent=#FluidboxPrototype] toData
---
--- @return #table
---
+---Return data
+---@return table
 function FluidboxPrototype:toData()
   local data = {}
   local entity = self.lua_prototype.entity
@@ -85,12 +67,8 @@ function FluidboxPrototype:toData()
 end
 
 -------------------------------------------------------------------------------
--- Return string
---
--- @function [parent=#FluidboxPrototype] toString
---
--- @return #string
---
+---Return string
+---@return string
 function FluidboxPrototype:toString()
   return game.table_to_json(self:toData())
 end

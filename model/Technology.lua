@@ -1,6 +1,6 @@
 ---
 -- Description of the module.
--- @module Technology
+-- @class Technology
 -- 
 Technology = newclass(Prototype,function(base, object)
   if object ~= nil and type(object) == "string" then
@@ -14,9 +14,7 @@ end)
 -------------------------------------------------------------------------------
 -- Return enable of Prototype
 --
--- @function [parent=#Technology] getEnabled
---
--- @return #boolean
+-- @return boolean
 --
 function Technology:getEnabled()
   if self.lua_prototype ~= nil then
@@ -28,9 +26,7 @@ end
 -------------------------------------------------------------------------------
 -- Return level
 --
--- @function [parent=#Technology] getLevel
---
--- @return #number
+-- @return number
 --
 function Technology:getLevel()
   if self.lua_prototype == nil then return 0 end
@@ -40,9 +36,7 @@ end
 -------------------------------------------------------------------------------
 -- Return formula
 --
--- @function [parent=#Technology] getFormula
---
--- @return #string
+-- @return string
 --
 function Technology:getFormula()
   if self.lua_prototype == nil then return nil end
@@ -52,9 +46,7 @@ end
 -------------------------------------------------------------------------------
 -- Return ingredients
 --
--- @function [parent=#Technology] getIngredients
---
--- @return #table
+-- @return table
 --
 function Technology:getIngredients()
   if self.lua_prototype == nil then return {} end
@@ -64,9 +56,7 @@ end
 -------------------------------------------------------------------------------
 -- Return group
 --
--- @function [parent=#Technology] getGroup
---
--- @return #table
+-- @return table
 --
 function Technology:getGroup()
   if self.lua_prototype == nil then return {} end
@@ -78,9 +68,7 @@ end
 -------------------------------------------------------------------------------
 -- Return group
 --
--- @function [parent=#Technology] getSubgroup
---
--- @return #table
+-- @return table
 --
 function Technology:getSubgroup()
   return {name="default"}
@@ -89,9 +77,7 @@ end
 -------------------------------------------------------------------------------
 -- Return isResearched
 --
--- @function [parent=#Technology] isResearched
---
--- @return #boolean
+-- @return boolean
 --
 function Technology:isResearched()
   if self.lua_prototype == nil then return false end

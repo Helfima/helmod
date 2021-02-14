@@ -1,30 +1,20 @@
 -------------------------------------------------------------------------------
--- Class to build rule edition dialog
---
--- @module RuleEdition
---
-
+---Class to build rule edition dialog
+---@class RuleEdition
 RuleEdition = newclass(Form)
 
 -------------------------------------------------------------------------------
--- On initialization
---
--- @function [parent=#RuleEdition] onInit
---
+---On initialization
 function RuleEdition:onInit()
   self.panelCaption = ({"helmod_rule-edition-panel.title"})
   self.parameterLast = string.format("%s_%s",self.classname,"last")
 end
 
 -------------------------------------------------------------------------------
--- On Style
---
--- @function [parent=#RuleEdition] onStyle
---
--- @param #table styles
--- @param #number width_main
--- @param #number height_main
---
+---On Style
+---@param styles table
+---@param width_main number
+---@param height_main number
 function RuleEdition:onStyle(styles, width_main, height_main)
   styles.flow_panel = {
     minimal_height = 500,
@@ -33,12 +23,8 @@ function RuleEdition:onStyle(styles, width_main, height_main)
 end
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#RuleEdition] onUpdate
---
--- @param #LuaEvent event
---
+---On update
+---@param event LuaEvent
 function RuleEdition:onUpdate(event)
   self:updateRule(event)
   self:updateAction(event)
@@ -49,18 +35,14 @@ local rule_name = nil
 local rule_category = nil
 local rule_type = nil
 -------------------------------------------------------------------------------
--- Update rule
---
--- @function [parent=#RuleEdition] updateRule
---
--- @param #LuaEvent event
---
+---Update rule
+---@param event LuaEvent
 function RuleEdition:updateRule(event)
   local rule_panel = self:getFramePanel("rule_panel")
   rule_panel.clear()
   local rule_table = GuiElement.add(rule_panel, GuiTable("list-data"):column(2):style("helmod_table_rule"))
 
-  -- mod
+  ---mod
   local mod_list = {}
   for name, version in pairs(game.active_mods) do
     table.insert(mod_list, name)
@@ -69,7 +51,7 @@ function RuleEdition:updateRule(event)
   GuiElement.add(rule_table, GuiLabel("label-mod"):caption({"helmod_rule-edition-panel.mod"}))
   GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown", "mod"):items(mod_list, rule_mod))
 
-  -- name
+  ---name
   local helmod_rule_manes = {}
   for name,rule in pairs(helmod_rules) do
     table.insert(helmod_rule_manes,name)
@@ -78,7 +60,7 @@ function RuleEdition:updateRule(event)
   GuiElement.add(rule_table, GuiLabel("label-name"):caption({"helmod_rule-edition-panel.name"}))
   GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown", "name"):items(helmod_rule_manes, rule_name))
 
-  -- category
+  ---category
   local helmod_rule_categories = {}
   for name,rule in pairs(helmod_rules[rule_name].categories) do
     table.insert(helmod_rule_categories,name)
@@ -87,7 +69,7 @@ function RuleEdition:updateRule(event)
   GuiElement.add(rule_table, GuiLabel("label-category"):caption({"helmod_rule-edition-panel.category"}))
   GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown", "category"):items(helmod_rule_categories, rule_category))
 
-  -- type
+  ---type
   local helmod_rule_types = helmod_rules[rule_name].categories[rule_category]
   if rule_type == nil then rule_type = helmod_rule_types[1] end
   GuiElement.add(rule_table, GuiLabel("label-type"):caption({"helmod_rule-edition-panel.type"}))
@@ -105,12 +87,8 @@ function RuleEdition:updateRule(event)
 end
 
 -------------------------------------------------------------------------------
--- Update action
---
--- @function [parent=#RuleEdition] updateAction
---
--- @param #LuaEvent event
---
+---Update action
+---@param event LuaEvent
 function RuleEdition:updateAction(event)
   local action_panel = self:getFramePanel("action_panel")
   action_panel.clear()
@@ -119,12 +97,8 @@ function RuleEdition:updateAction(event)
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#RuleEdition] onEvent
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
 function RuleEdition:onEvent(event)
   if User.isAdmin() then
     if event.action == "dropdown" then

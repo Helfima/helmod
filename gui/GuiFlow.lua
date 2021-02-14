@@ -1,15 +1,6 @@
 -------------------------------------------------------------------------------
--- Class to help to build flow
--- 
--- @module GuiFlow
---
-
--------------------------------------------------------------------------------
---
--- @function [parent=#GuiFlow] constructor
--- @param #arg name
--- @return #GuiFlow
---
+---Class to help to build flow
+---@class GuiFlow
 GuiFlow = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiFlow"
@@ -17,11 +8,7 @@ GuiFlow = newclass(GuiElement,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiFlowH] constructor
--- @param #arg name
--- @return #GuiFlowH
---
+---@class GuiFlowH
 GuiFlowH = newclass(GuiFlow,function(base,...)
   GuiFlow.init(base,...)
   base.options.direction = "horizontal"
@@ -29,14 +16,9 @@ GuiFlowH = newclass(GuiFlow,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiFlowV] constructor
--- @param #arg name
--- @return #GuiFlowV
---
+---@class GuiFlowV
 GuiFlowV = newclass(GuiFlow,function(base,...)
   GuiFlow.init(base,...)
   base.options.direction = "vertical"
   base.options.style = helmod_flow_style.vertical
 end)
-

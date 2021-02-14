@@ -1,22 +1,16 @@
 ---
--- Description of the module.
--- @module Format
---
+---Description of the module.
+---@class Format
 local Format = {
-  -- single-line comment
+  ---single-line comment
   classname = "HMFormat"
 }
 
 -------------------------------------------------------------------------------
--- Format the number
---
--- @function [parent=#Format] formatNumber
---
--- @param #number n the number
--- @param #number decimal
---
--- @return #number the formated number
---
+---Format the number
+---@param n number the number
+---@param decimal number
+---@return number --formated number
 function Format.formatNumber(n, decimal)
   local separator = " "
   if n == nil then return 0 end
@@ -32,23 +26,15 @@ function Format.formatNumber(n, decimal)
 end
 
 -------------------------------------------------------------------------------
--- Format the number
---
--- @see http://lua-users.org/wiki/FormattingNumbers
---
--- @details Round up unless the number is lower than x.02, then round down.
---   Since this is used mostly to format factory/resource numbers this gives
---   the minimum necessary amount rounded to a proper number of decimal places,
---   but drops small surpluses from floating point.
---
--- @function [parent=#Format] round
---
--- @param #number val the number
--- @param #number decimal the number
---
--- @return #number the formated number
---
---
+---Format the number
+---@see http://lua-users.org/wiki/FormattingNumbers
+---@details Round up unless the number is lower than x.02, then round down.
+---  Since this is used mostly to format factory/resource numbers this gives
+---  the minimum necessary amount rounded to a proper number of decimal places,
+---  but drops small surpluses from floating point.
+---@param val number the number
+---@param decimal number
+---@return number --formated number
 function Format.round(val, decimal)
   if (decimal) then
     if decimal >= 0 then
@@ -63,15 +49,10 @@ function Format.round(val, decimal)
 end
 
 -------------------------------------------------------------------------------
--- Format the number
---
--- @function [parent=#Format] formatNumberKilo
---
--- @param #number n the number
--- @param #string suffix
---
--- @return #number the formated number
---
+---Format the number
+---@param value number the number
+---@param suffix string
+---@return string --formated number
 function Format.formatNumberKilo(value, suffix)
   if suffix == nil then suffix = "" end
   if value == nil then
@@ -88,26 +69,18 @@ function Format.formatNumberKilo(value, suffix)
 end
 
 -------------------------------------------------------------------------------
--- Format the number
---
--- @function [parent=#Format] formatPercent
---
--- @param #number n the number
---
--- @return #number the formated number
---
+---Format the number
+---@param num number
+---@return number
 function Format.formatPercent(num)
   local mult = 10^3
   return math.floor(num * mult + 0.5) / 10
 end
 
 -------------------------------------------------------------------------------
--- Format number for factory
---
--- @function [parent=#Format] formatNumberFactory
---
--- @param #number number
---
+---Format number for factory
+---@param number number
+---@return number
 function Format.formatNumberFactory(number)
   local decimal = 2
   local format_number = User.getPreferenceSetting("format_number_factory")
@@ -118,12 +91,9 @@ function Format.formatNumberFactory(number)
 end
 
 -------------------------------------------------------------------------------
--- Format number for element product or ingredient
---
--- @function [parent=#Format] formatNumberElement
---
--- @param #number number
---
+---Format number for element product or ingredient
+---@param number number
+---@return number
 function Format.formatNumberElement(number)
   local decimal = 2
   local format_number = User.getPreferenceSetting("format_number_element")

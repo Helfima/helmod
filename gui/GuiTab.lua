@@ -1,15 +1,6 @@
 -------------------------------------------------------------------------------
--- Class to help to build GuiTab
---
--- @module GuiTab
---
-
--------------------------------------------------------------------------------
---
--- @function [parent=#GuiTab] constructor
--- @param #arg name
--- @return #GuiTab
---
+---Class to help to build GuiTab
+---@class GuiTabPane
 GuiTabPane = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiTabPane"
@@ -17,11 +8,7 @@ GuiTabPane = newclass(GuiElement,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTab] constructor
--- @param #arg name
--- @return #GuiTab
---
+---@class GuiTab
 GuiTab = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiTab"

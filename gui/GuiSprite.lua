@@ -1,15 +1,6 @@
 -------------------------------------------------------------------------------
--- Class to help to build GuiSprite
---
--- @module GuiSlider
---
-
--------------------------------------------------------------------------------
---
--- @function [parent=#GuiSprite] constructor
--- @param #arg name
--- @return #GuiSprite
---
+---Class to help to build GuiSprite
+---@class GuiSprite
 GuiSprite = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiSprite"
@@ -17,12 +8,10 @@ GuiSprite = newclass(GuiElement,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiSprite] sprite
--- @param #string type
--- @param #string name
--- @return #GuiSprite
---
+---Set sprite
+---@param type string
+---@param name string
+---@return GuiSprite
 function GuiSprite:sprite(type, name)
   if type == "menu" then
     self.options.sprite = GuiElement.getSprite(name)
@@ -33,5 +22,3 @@ function GuiSprite:sprite(type, name)
   end
   return self
 end
-
-

@@ -1,32 +1,21 @@
 -------------------------------------------------------------------------------
--- Class to build ModelDebug panel
---
--- @module ModelDebug
--- @extends #FormModel
---
-
+---Class to build ModelDebug panel
+---@class ModelDebug
 ModelDebug = newclass(FormModel)
 
 local display_panel = nil
 
 -------------------------------------------------------------------------------
--- Initialization
---
--- @function [parent=#ModelDebug] init
---
+---Initialization
 function ModelDebug:onInit()
   self.panelCaption = "Model Debug"
 end
 
 -------------------------------------------------------------------------------
--- On Style
---
--- @function [parent=#ModelDebug] onStyle
---
--- @param #table styles
--- @param #number width_main
--- @param #number height_main
---
+---On Style
+---@param styles table
+---@param width_main number
+---@param height_main number
 function ModelDebug:onStyle(styles, width_main, height_main)
   styles.flow_panel = {
     width = width_main,
@@ -36,19 +25,14 @@ function ModelDebug:onStyle(styles, width_main, height_main)
 end
 
 -------------------------------------------------------------------------------
--- On Bind Dispatcher
---
--- @function [parent=#ModelDebug] onBind
---
+---On Bind Dispatcher
 function ModelDebug:onBind()
   Dispatcher:bind("on_gui_refresh", self, self.update)
 end
 
 -------------------------------------------------------------------------------
--- Get or create info panel
---
--- @function [parent=#ModelDebug] getInfoPanel
---
+---Get or create info panel
+---@return LuaGuiElement
 function ModelDebug:getInfoPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["info-panel"] ~= nil and content_panel["info-panel"].valid then
@@ -60,14 +44,10 @@ function ModelDebug:getInfoPanel()
 end
 
 -------------------------------------------------------------------------------
--- Build matrix
---
--- @function [parent=#ModelDebug] buildMatrix
---
--- @param #GuiElement matrix_panel
--- @param #table matrix
--- @param #table pivot
---
+---Build matrix
+---@param matrix_panel LuaGuiElement
+---@param matrix table
+---@param pivot table
 function ModelDebug:buildMatrix(matrix_panel, matrix, pivot)
   if matrix ~= nil then
     local num_col = #matrix[1]
@@ -108,12 +88,8 @@ function ModelDebug:buildMatrix(matrix_panel, matrix, pivot)
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#ModelDebug] onEvent
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
 function ModelDebug:onEvent(event)
   local _, block = self:getParameterObjects()
   if block ~= nil and block.runtimes ~= nil then
@@ -131,24 +107,16 @@ function ModelDebug:onEvent(event)
 end
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#ModelDebug] onUpdate
---
--- @param #LuaEvent event
---
+---On update
+---@param event LuaEvent
 function ModelDebug:onUpdate(event)
   self:updateHeader(event)
   self:updateDebugPanel(event)
 end
 
 -------------------------------------------------------------------------------
--- Update information
---
--- @function [parent=#ModelDebug] updateHeader
---
--- @param #LuaEvent event
---
+---Update information
+---@param event LuaEvent
 function ModelDebug:updateHeader(event)
   local action_panel = self:getMenuPanel()
   action_panel.clear()
@@ -160,26 +128,18 @@ function ModelDebug:updateHeader(event)
 end
 
 -------------------------------------------------------------------------------
--- Add cell header
---
--- @function [parent=#ModelDebug] addCellHeader
---
--- @param #LuaGuiElement guiTable
--- @param #string name
--- @param #string caption
---
+---Add cell header
+---@param guiTable LuaGuiElement
+---@param name string
+---@param caption string
 function ModelDebug:addCellHeader(guiTable, name, caption)
   local cell = GuiElement.add(guiTable, GuiFlowH("header", name))
   GuiElement.add(cell, GuiLabel("label"):caption(caption))
 end
 
 -------------------------------------------------------------------------------
--- Update debug panel
---
--- @function [parent=#ModelDebug] updateDebugPanel
---
--- @param #LuaEvent event
---
+---Update debug panel
+---@param event LuaEvent
 function ModelDebug:updateDebugPanel(event)
   local info_panel = self:getInfoPanel()
   local model, block = self:getParameterObjects()
@@ -205,10 +165,7 @@ function ModelDebug:updateDebugPanel(event)
 end
 
 -------------------------------------------------------------------------------
--- Update display
---
--- @function [parent=#ModelDebug] updateDisplay
---
+---Update display
 function ModelDebug:updateDisplay()
   local content_panel = self:getInfoPanel()
   content_panel.clear()

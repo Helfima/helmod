@@ -1,14 +1,6 @@
----
--- Description of the module.
--- 
--- @module GuiElement
---
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiElement] constructor
--- @param #arg name
--- @return #GuiElement
--- 
+---Description of the module.
+---@class GuiElement
 GuiElement = newclass(function(base,...)
   base.name = {...}
   base.classname = "HMGuiElement"
@@ -23,12 +15,10 @@ GuiElement.color_button_none = "blue"
 GuiElement.color_button_edit = "green"
 GuiElement.color_button_add = "yellow"
 GuiElement.color_button_rest = "red"
+
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiElement] style
--- @param #list style
--- @return #GuiElement
--- 
+---Set style
+---@return GuiElement
 function GuiElement:style(...)
   if ... ~= nil then
     self.options.style = table.concat({...},"_")
@@ -37,22 +27,18 @@ function GuiElement:style(...)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiElement] caption
--- @param #string caption
--- @return #GuiElement
--- 
+---Set caption
+---@param caption string
+---@return GuiElement
 function GuiElement:caption(caption)
   self.m_caption = caption
   return self
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiElement] tooltip
--- @param #string tooltip
--- @return #GuiElement
--- 
+---Set tooltip
+---@param tooltip table
+---@return GuiElement
 function GuiElement:tooltip(tooltip)
   if tooltip ~= nil and tooltip.classname == "HMGuiTooltip" then
     self.options.tooltip = tooltip:create()
@@ -63,12 +49,10 @@ function GuiElement:tooltip(tooltip)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiElement] overlay
--- @param #string type
--- @param #string name
--- @return #GuiElement
--- 
+---Set overlay
+---@param type string
+---@param name string
+---@return GuiElement
 function GuiElement:overlay(type, name)
   if type == nil then return self end
   if name == nil then
@@ -101,12 +85,10 @@ function GuiElement:overlay(type, name)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiElement] getSprite
--- @param #string type
--- @param #string name
--- @return #GuiElement
--- 
+---Get sprite string
+---@param type string
+---@param name string
+---@return string
 function GuiElement.getSprite(type, name)
   local sprite = ""
   if name == nil then
@@ -140,10 +122,8 @@ function GuiElement.getSprite(type, name)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiElement] getOptions
--- @return #table
--- 
+---Get options
+---@return table
 function GuiElement:getOptions()
   if self.m_index ~= nil then
     table.insert(self.name, self.m_index)
@@ -156,10 +136,8 @@ function GuiElement:getOptions()
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiElement] onErrorOptions
--- @return #table
--- 
+---Get option when error
+---@return table
 function GuiElement:onErrorOptions()
   local options = self:getOptions()
   options.style = nil
@@ -167,15 +145,10 @@ function GuiElement:onErrorOptions()
 end
 
 -------------------------------------------------------------------------------
--- Add a element
---
--- @function [parent=#GuiElement] add
---
--- @param #LuaGuiElement parent container for element
--- @param #GuiElement gui_element
---
--- @return #LuaGuiElement the LuaGuiElement added
---
+---Add a element
+---@param parent LuaGuiElement --container for element
+---@param gui_element GuiElement
+---@return LuaGuiElement --the LuaGuiElement added
 function GuiElement.add(parent, gui_element)
   local element = nil
   local ok , err = pcall(function()
@@ -194,12 +167,8 @@ function GuiElement.add(parent, gui_element)
 end
 
 -------------------------------------------------------------------------------
--- Get Index column number
---
--- @function [parent=#GuiElement] getIndexColumnNumber
---
--- @return #number
---
+---Get Index column number
+---@return number
 function GuiElement.getIndexColumnNumber()
 
   local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
@@ -210,14 +179,9 @@ function GuiElement.getIndexColumnNumber()
 end
 
 -------------------------------------------------------------------------------
--- Get Element column number
---
--- @function [parent=#GuiElement] getElementColumnNumber
---
--- @param #number size
---
--- @return #number
---
+---Get Element column number
+---@param size number
+---@return number
 function GuiElement.getElementColumnNumber(size)
 
   local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
@@ -227,14 +191,9 @@ function GuiElement.getElementColumnNumber(size)
 end
 
 -------------------------------------------------------------------------------
--- Get the number of textfield input
---
--- @function [parent=#GuiElement] getInputNumber
---
--- @param #LuaGuiElement element textfield input
---
--- @return #number number of textfield input
---
+---Get the number of textfield input
+---@param element LuaGuiElement --textfield input
+---@return number --number of textfield input
 function GuiElement.getInputNumber(element)
   local count = 0
   if element ~= nil then
@@ -245,12 +204,9 @@ function GuiElement.getInputNumber(element)
 end
 
 -------------------------------------------------------------------------------
--- Get dropdown selection
---
--- @function [parent=#GuiElement] getDropdownSelection
---
--- @param #LuaGuiElement element
---
+---Get dropdown selection
+---@param element LuaGuiElement
+---@return string|table
 function GuiElement.getDropdownSelection(element)
   if element.selected_index == 0 then return nil end
   if #element.items == 0 then return nil end
@@ -258,15 +214,9 @@ function GuiElement.getDropdownSelection(element)
 end
 
 -------------------------------------------------------------------------------
--- Set the text of textfield input
---
--- @function [parent=#GuiElement] setInputText
---
--- @param #LuaGuiElement element textfield input
--- @param #number value
---
--- @return #number number of textfield input
---
+---Set the text of textfield input
+---@param element LuaGuiElement
+---@param value string
 function GuiElement.setInputText(element, value)
   if element ~= nil and element.text ~= nil then
     element.text = value
@@ -274,9 +224,10 @@ function GuiElement.setInputText(element, value)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiElement] infoTemperature
---
+---Add temperature information
+---@param parent LuaGuiElement
+---@param element table
+---@param style string
 function GuiElement.infoTemperature(parent, element, style)
   if element.type == "fluid" then
     style = style or "helmod_label_element_black_m"
@@ -311,9 +262,9 @@ function GuiElement.infoTemperature(parent, element, style)
 end
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiElement] infoTemperature
---
+---Add recipe information
+---@param parent LuaGuiElement
+---@param element table
 function GuiElement.infoRecipe(parent, element)
   if element.type == "recipe-burnt" then
     local sprite = GuiElement.add(parent, GuiSprite("recipe-info"):sprite("developer"):tooltip({"tooltip.burnt-recipe"}))

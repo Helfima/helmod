@@ -1,34 +1,23 @@
----
--- Description of the module.
--- @module Cache
---
+-------------------------------------------------------------------------------
+---@class Cache
 local Cache = {
-  -- single-line comment
+  ---single-line comment
   classname = "HMCache"
 }
 
 -------------------------------------------------------------------------------
--- Return Cache
---
--- @function [parent=#Cache] get
---
--- @return #table
---
+---Return Cache
+---@return table
 function Cache.get()
   if global.caches == nil then global.caches = {} end
   return global.caches
 end
 
 -------------------------------------------------------------------------------
--- Return data Cache
---
--- @function [parent=#Cache] getData
---
--- @param #string classname
--- @param #string name
---
--- @return #table
---
+---Return data Cache
+---@param classname string
+---@param name string
+---@return any
 function Cache.getData(classname, name)
   local data = Cache.get()
   if classname == nil and name == nil then return data end
@@ -37,16 +26,11 @@ function Cache.getData(classname, name)
 end
 
 -------------------------------------------------------------------------------
--- Set data Cache
---
--- @function [parent=#Cache] setData
---
--- @param #string classname
--- @param #string name
--- @param #object value
---
--- @return #object
---
+---Set data Cache
+---@param classname string
+---@param name string
+---@param value any
+---@return any
 function Cache.setData(classname, name, value)
   local data = Cache.get()
   if data[classname] == nil then data[classname] = {} end
@@ -54,30 +38,20 @@ function Cache.setData(classname, name, value)
 end
 
 -------------------------------------------------------------------------------
--- Has data
---
--- @function [parent=#Cache] hasData
---
--- @param #string classname
--- @param #string name
---
--- @return #boolean
---
+---Has data
+---@param classname string
+---@param name string
+---@return boolean
 function Cache.hasData(classname, name)
   local data = Cache.get()
   return data[classname] ~= nil and data[classname][name] ~= nil
 end
 
 -------------------------------------------------------------------------------
--- Is empty
---
--- @function [parent=#Cache] isEmpty
---
--- @param #string classname
--- @param #string name
---
--- @return #boolean
---
+---Is empty
+---@param classname string
+---@param name string
+---@return boolean
 function Cache.isEmpty(classname, name)
   local data = Cache.get()
   if data[classname] ~= nil and data[classname][name] ~= nil then
@@ -91,13 +65,9 @@ function Cache.isEmpty(classname, name)
 end
 
 -------------------------------------------------------------------------------
--- Reset data
---
--- @function [parent=#Cache] reset
---
--- @param #string classname
--- @param #string name
---
+---Reset data
+---@param classname string
+---@param name string
 function Cache.reset(classname, name)
   local data = Cache.get()
   if classname == nil and name == nil then

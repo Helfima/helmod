@@ -1,46 +1,31 @@
 -------------------------------------------------------------------------------
--- Class Object
---
--- @module Runtime
---
+---Class Object
+---@class Runtime
 Runtime = newclass(function(base)
     base.classname = "HMRuntime"
     base.caches = {}
 end)
   
 -------------------------------------------------------------------------------
--- Get runtime variable
---
--- @function [parent=#Runtime] get
---
--- @param #string key
---
+---Clear
 function Runtime:clear()
     self.caches = {}
 end
 
 -------------------------------------------------------------------------------
--- Get runtime variable
---
--- @function [parent=#Runtime] get
---
--- @param #string key
---
--- @return #table
---
+---Get runtime variable
+---@param key string
+---@return table
 function Runtime:get(key)
     if self.caches[key] == nil then self.caches[key] = {} end
     return self.caches[key]
 end
 
 -------------------------------------------------------------------------------
--- Set parameter
---
--- @function [parent=#Runtime] setParameter
---
--- @param #string property
--- @param #object value
---
+---Set parameter
+---@param property string
+---@param value any
+---@return any
 function Runtime:setParameter(property, value)
     if property == nil then
         return nil
@@ -50,13 +35,10 @@ function Runtime:setParameter(property, value)
     return value
 end
 
-  -------------------------------------------------------------------------------
--- Get parameter
---
--- @function [parent=#Runtime] getParameter
---
--- @param #string property
---
+-------------------------------------------------------------------------------
+---Get parameter
+---@param property string
+---@return any
 function Runtime:getParameter(property)
     local parameter = self:get("parameter")
     if parameter ~= nil and property ~= nil then

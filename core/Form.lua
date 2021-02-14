@@ -1,9 +1,5 @@
 -------------------------------------------------------------------------------
--- Class to help to build form
---
--- @module Form
--- @extends Object#Object
---
+---Class to help to build form
 Form = newclass(Object,function(base,classname)
   Object.init(base,classname)
   base:style()
@@ -21,10 +17,7 @@ Form = newclass(Object,function(base,classname)
 end)
 
 -------------------------------------------------------------------------------
--- Style
---
--- @function [parent=#Form] style
---
+---Style
 function Form:style()
   local width_main, height_main = User.getMainSizes()
   self.styles = {
@@ -41,23 +34,16 @@ function Form:style()
 end
 
 -------------------------------------------------------------------------------
--- On Style
---
--- @function [parent=#Form] onStyle
---
--- @param #table styles
--- @param #number width_main
--- @param #number height_main
---
+---On Style
+---@param styles table
+---@param width_main number
+---@param height_main number
 function Form:onStyle(styles, width_main, height_main)
   
 end
 
 -------------------------------------------------------------------------------
--- Bind Dispatcher
---
--- @function [parent=#Form] bind
---
+---Bind Dispatcher
 function Form:bind()
   Dispatcher:bind("on_gui_event", self, self.event)
 
@@ -73,86 +59,56 @@ function Form:bind()
 end
 
 -------------------------------------------------------------------------------
--- On Bind Dispatcher
---
--- @function [parent=#Form] onBind
---
+---On Bind Dispatcher
 function Form:onBind()
 end
 
 -------------------------------------------------------------------------------
--- On initialization
---
--- @function [parent=#Form] onInit
---
+---On initialization
 function Form:onInit()
 end
 
 -------------------------------------------------------------------------------
--- Is visible
---
--- @function [parent=#Form] isVisible
---
--- @return boolean
---
+---Is visible
+---@return boolean
 function Form:isVisible()
   return true
 end
 
 -------------------------------------------------------------------------------
--- Is special
---
--- @function [parent=#Form] isSpecial
---
--- @return boolean
---
+---Is special
+---@return boolean
 function Form:isSpecial()
   return false
 end
 
 -------------------------------------------------------------------------------
--- Is tool
---
--- @function [parent=#Form] isTool
---
--- @return boolean
---
+---Is tool
+---@return boolean
 function Form:isTool()
   return false
 end
 
 -------------------------------------------------------------------------------
--- Get panel name
---
--- @function [parent=#Form] getPanelName
---
--- @return #LuaGuiElement
---
+---Get panel name
+---@return string
 function Form:getPanelName()
   return self.classname
 end
 
 -------------------------------------------------------------------------------
--- Get the parent panel
---
--- @function [parent=#Form] getParentPanel
---
--- @return #LuaGuiElement
---
+---Get the parent panel
+---@return LuaGuiElement
 function Form:getParentPanel()
   local lua_player = Player.native()
   return lua_player.gui[self.locate]
 end
 
 -------------------------------------------------------------------------------
--- Set style
---
--- @function [parent=#Form] setStyle
---
--- @param #LuaGuiElement element
--- @param #string style
--- @param #string property
---
+---Set style
+---@param element LuaGuiElement
+---@param style string
+---@param property string
 function Form:setStyle(element, style, property)
   if element.style ~= nil and self.styles ~= nil and self.styles[style] ~= nil and self.styles[style][property] ~= nil then
     element.style[property] = self.styles[style][property]
@@ -160,18 +116,14 @@ function Form:setStyle(element, style, property)
 end
 
 --------------------------------------------------------------------------------
--- Get the parent panel
---
--- @function [parent=#Form] getPanel
---
--- @return #LuaGuiElement
---
+---Get the parent panel
+---@return LuaGuiElement
 function Form:getPanel()
   local parent_panel = self:getParentPanel()
   if parent_panel[self:getPanelName()] ~= nil and parent_panel[self:getPanelName()].valid then
     return parent_panel[self:getPanelName()], parent_panel[self:getPanelName()]["content_panel"], parent_panel[self:getPanelName()]["header_panel"]["menu_panel"]
   end
-  -- main panel
+  ---main panel
   local flow_panel = GuiElement.add(parent_panel, GuiFrameV(self:getPanelName()):style("frame"))
   flow_panel.style.horizontally_stretchable = true
   flow_panel.style.vertically_stretchable = true
@@ -180,7 +132,7 @@ function Form:getPanel()
 
   local header_panel = GuiElement.add(flow_panel, GuiFlowH("header_panel"))
   header_panel.style.horizontally_stretchable = true
-  -- header panel
+  ---header panel
   local title_panel = GuiElement.add(header_panel, GuiFrameH("title_panel"):caption(self.panelCaption or self.classname):style("helmod_frame_header"))
   title_panel.style.horizontally_stretchable = true
   title_panel.drag_target = flow_panel
@@ -197,12 +149,8 @@ function Form:getPanel()
 end
 
 -------------------------------------------------------------------------------
--- Set style
---
--- @function [parent=#Form] setFlowStyle
---
--- @param #LuaGuiElement flow_panel
---
+---Set style
+---@param flow_panel LuaGuiElement
 function Form:setFlowStyle(flow_panel)
   self:setStyle(flow_panel, "flow_panel", "width")
   self:setStyle(flow_panel, "flow_panel", "height")
@@ -213,10 +161,9 @@ function Form:setFlowStyle(flow_panel)
 end
 
 -------------------------------------------------------------------------------
--- Get or create scroll panel
---
--- @function [parent=#Form] getScrollPanel
---
+---Get or create scroll panel
+---@param panel_name string
+---@return LuaGuiElement
 function Form:getScrollPanel(panel_name)
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
@@ -228,10 +175,9 @@ function Form:getScrollPanel(panel_name)
 end
 
 -------------------------------------------------------------------------------
--- Get or create scroll panel
---
--- @function [parent=#Form] getScrollFramePanel
---
+---Get or create scroll panel
+---@param panel_name string
+---@return LuaGuiElement
 function Form:getScrollFramePanel(panel_name)
   local frame_panel = self:getFramePanel(panel_name)
   local scroll_name = "scroll-panel"
@@ -244,10 +190,9 @@ function Form:getScrollFramePanel(panel_name)
 end
 
 -------------------------------------------------------------------------------
--- Get or create flow panel
---
--- @function [parent=#Form] getFlowPanel
---
+---Get or create flow panel
+---@param panel_name string
+---@return LuaGuiElement
 function Form:getFlowPanel(panel_name, direction)
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
@@ -264,10 +209,11 @@ function Form:getFlowPanel(panel_name, direction)
 end
 
 -------------------------------------------------------------------------------
--- Get or create frame panel
---
--- @function [parent=#Form] getFramePanel
---
+---Get or create frame panel
+---@param panel_name string
+---@param style string
+---@param direction string --horizontal, vertical
+---@return LuaGuiElement
 function Form:getFramePanel(panel_name, style, direction)
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
@@ -284,51 +230,43 @@ function Form:getFramePanel(panel_name, style, direction)
 end
 
 -------------------------------------------------------------------------------
--- Get or create frame panel
---
--- @function [parent=#Form] getFrameInsidePanel
---
+---Get or create frame panel
+---@param panel_name string
+---@param direction string --horizontal, vertical
+---@return LuaGuiElement
 function Form:getFrameInsidePanel(panel_name, direction)
   return self:getFramePanel(panel_name, "helmod_inside_frame", direction)
 end
 
 -------------------------------------------------------------------------------
--- Get or create frame panel
---
--- @function [parent=#Form] getFrameDeepPanel
---
+---Get or create frame panel
+---@param panel_name string
+---@param direction string --horizontal, vertical
+---@return LuaGuiElement
 function Form:getFrameDeepPanel(panel_name, direction)
   return self:getFramePanel(panel_name, "helmod_deep_frame", direction)
 end
 
 -------------------------------------------------------------------------------
--- Get or create frame panel
---
--- @function [parent=#Form] getFrameDeepPanel
---
+---Get or create frame panel
+---@param panel_name string
+---@param direction string --horizontal, vertical
+---@return LuaGuiElement
 function Form:getFrameTabbedPanel(panel_name, direction)
   return self:getFramePanel(panel_name, "helmod_tabbed_frame", direction)
 end
 
 -------------------------------------------------------------------------------
--- Get the top panel
---
--- @function [parent=#Form] getTopPanel
---
--- @return #LuaGuiElement
---
+---Get the top panel
+---@return LuaGuiElement
 function Form:getTopPanel()
   local panel = self:getFrameDeepPanel("top")
   return panel
 end
 
 -------------------------------------------------------------------------------
--- Get the menu panel
---
--- @function [parent=#Form] getMenuPanel
---
--- @return #LuaGuiElement
---
+---Get the menu panel
+---@return LuaGuiElement, LuaGuiElement
 function Form:getMenuPanel()
   local content_panel = self:getTopPanel()
   local panel_name = "menu"
@@ -352,12 +290,8 @@ function Form:getMenuPanel()
 end
 
 -------------------------------------------------------------------------------
--- Get the menu panel
---
--- @function [parent=#Form] getMenuPanel
---
--- @return #LuaGuiElement
---
+---Get the menu panel
+---@return LuaGuiElement
 function Form:getMenuSubPanel()
   local content_panel = self:getTopPanel()
   local panel_name = "sub_menu"
@@ -371,10 +305,8 @@ function Form:getMenuSubPanel()
 end
 
 -------------------------------------------------------------------------------
--- Is opened panel
---
--- @function [parent=#Form] isOpened
---
+---Is opened panel
+---@return boolean
 function Form:isOpened()
   local parent_panel = self:getParentPanel()
   if parent_panel[self:getPanelName()] ~= nil then
@@ -384,12 +316,8 @@ function Form:isOpened()
 end
 
 -------------------------------------------------------------------------------
--- Build first container
---
--- @function [parent=#Form] open
---
--- @param #LuaEvent event
---
+---Build first container
+---@return boolean
 function Form:open(event)
   self:style()
   self:onBeforeOpen(event)
@@ -408,23 +336,15 @@ function Form:open(event)
 end
 
 -------------------------------------------------------------------------------
--- On before open
---
--- @function [parent=#Form] onBeforeOpen
---
--- @param #LuaEvent event
---
+---On before open
+---@return boolean
 function Form:onBeforeOpen(event)
   return false
 end
 
 -------------------------------------------------------------------------------
--- Event
---
--- @function [parent=#Form] event
---
--- @param #LuaEvent event
---
+---Event
+---@param event LuaEvent
 function Form:event(event)
   if not(self:isOpened()) then return end
   self:onFormEvent(event)
@@ -432,12 +352,8 @@ function Form:event(event)
 end
 
 -------------------------------------------------------------------------------
--- On form event
---
--- @function [parent=#Form] onFormEvent
---
--- @param #LuaEvent event
---
+---On form event
+---@param event LuaEvent
 function Form:onFormEvent(event)
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if event.action == "minimize-window" then
@@ -452,65 +368,45 @@ function Form:onFormEvent(event)
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#Form] onEvent
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
 function Form:onEvent(event)
 end
 
 -------------------------------------------------------------------------------
--- On open
---
--- @function [parent=#Form] onOpen
---
--- @param #LuaEvent event
---
+---On open
+---@param event LuaEvent
 function Form:onOpen(event)
   return false
 end
 
 -------------------------------------------------------------------------------
--- Prepare
---
--- @function [parent=#Form] prepare
---
--- @param #LuaEvent event
---
+---Prepare
+---@param event LuaEvent
 function Form:prepare(event)
   return false
 end
 
 -------------------------------------------------------------------------------
--- Add cell header
---
--- @function [parent=#Form] addCellHeader
---
--- @param #LuaGuiElement guiTable
--- @param #string name
--- @param #string caption
---
+---Add cell header
+---@param guiTable LuaGuiElement
+---@param name string
+---@param caption string
 function Form:addCellHeader(guiTable, name, caption)
   local cell = GuiElement.add(guiTable, GuiFrameH("header", name):style(helmod_frame_style.hidden))
   GuiElement.add(cell, GuiLabel("label"):caption(caption))
 end
 
 -------------------------------------------------------------------------------
--- Update top menu
---
--- @function [parent=#Form] updateTopMenu
---
--- @param #LuaEvent event
---
+---Update top menu
+---@param event LuaEvent
 function Form:updateTopMenu(event)
-  -- ajoute un menu
+  ---ajoute un menu
   if self.panelCaption ~= nil then
     local flow_panel, content_panel, menu_panel = self:getPanel()
     menu_panel.clear()
     if self.panelClose then
-      -- pause game
+      ---pause game
       if string.find(self.classname, "HMProductionPanel") then
         local group3 = GuiElement.add(menu_panel, GuiFlowH("group3"))
         if game.is_multiplayer() and not(game.tick_paused) then
@@ -525,7 +421,7 @@ function Form:updateTopMenu(event)
         end
       end
 
-      -- Tool button
+      ---Tool button
       local tool_group = GuiElement.add(menu_panel, GuiFlowH("tool_group"))
       for _, form in pairs(Controller.getViews()) do
         if self.add_special_button == true and form:isVisible() and form:isTool() then
@@ -534,7 +430,7 @@ function Form:updateTopMenu(event)
         end
       end
       
-      -- special tab
+      ---special tab
       local special_group = GuiElement.add(menu_panel, GuiFlowH("special_group"))
       for _, form in pairs(Controller.getViews()) do
         if self.add_special_button == true and form:isVisible() and form:isSpecial() then
@@ -542,7 +438,7 @@ function Form:updateTopMenu(event)
           GuiElement.add(special_group, GuiButton(form.classname, "OPEN"):sprite("menu", icon_hovered, icon):style("helmod_frame_button"):tooltip(form.panelCaption))
         end
       end
-      -- Standard group
+      ---Standard group
       local standard_group = GuiElement.add(menu_panel, GuiFlowH("standard_group"))
       if self.help_button then
         GuiElement.add(standard_group, GuiButton("HMHelpPanel", "OPEN"):sprite("menu", "help-white", "help"):style("helmod_frame_button"):tooltip({"helmod_button.help"}))
@@ -557,12 +453,8 @@ function Form:updateTopMenu(event)
 end
 
 -------------------------------------------------------------------------------
--- Update
---
--- @function [parent=#Form] update
---
--- @param #LuaEvent event
---
+---Update
+---@param event LuaEvent
 function Form:update(event)
   if not(self:isOpened()) then return end
   local flow_panel, content_panel, menu_panel = self:getPanel()
@@ -576,12 +468,8 @@ function Form:update(event)
 end
 
 -------------------------------------------------------------------------------
--- Update location
---
--- @function [parent=#Form] updateLocation
---
--- @param #LuaEvent event
---
+---Update location
+---@param event LuaEvent
 function Form:updateLocation(event)
   local width , height = Player.getDisplaySizes()
   local width_main, height_main = User.getMainSizes()
@@ -609,12 +497,8 @@ function Form:updateLocation(event)
 end
 
 -------------------------------------------------------------------------------
--- Update message
---
--- @function [parent=#Form] updateMessage
---
--- @param #LuaEvent event
---
+---Update message
+---@param event LuaEvent
 function Form:updateMessage(event)
   if not(self:isOpened()) then return end
   local panel = self:getFrameDeepPanel("message")
@@ -623,12 +507,8 @@ function Form:updateMessage(event)
 end
 
 -------------------------------------------------------------------------------
--- Get tips
---
--- @function [parent=#Form] getTips
---
--- @param #LuaEvent event
---
+---Get tips
+---@return string
 function Form:getTips()
   local list_tips = {}
   if self.list_tips ~= nil then
@@ -644,12 +524,8 @@ function Form:getTips()
   return nil
 end
 -------------------------------------------------------------------------------
--- Update tips
---
--- @function [parent=#Form] updateTips
---
--- @param #LuaEvent event
---
+---Update tips
+---@param message string
 function Form:updateTips(message)
   if not(self:isOpened()) then return end
   local navigate = User.getNavigate(self.classname)
@@ -671,12 +547,7 @@ function Form:updateTips(message)
 end
 
 -------------------------------------------------------------------------------
--- Destroy tips
---
--- @function [parent=#Form] destroyTips
---
--- @param #LuaEvent event
---
+---Destroy tips
 function Form:destroyTips()
   if not(self:isOpened()) then return end
   local panel = self:getFramePanel("tips")
@@ -684,12 +555,8 @@ function Form:destroyTips()
 end
 
 -------------------------------------------------------------------------------
--- Update error
---
--- @function [parent=#Form] updateError
---
--- @param #LuaEvent event
---
+---Update error
+---@param event LuaEvent
 function Form:updateError(event)
   if not(self:isOpened()) then return end
   local panel = self:getFrameDeepPanel("error")
@@ -698,21 +565,15 @@ function Form:updateError(event)
 end
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#Form] onUpdate
---
--- @param #LuaEvent event
---
+---On update
+---@param event LuaEvent
 function Form:onUpdate(event)
 
 end
 
 -------------------------------------------------------------------------------
--- Close dialog
---
--- @function [parent=#Form] close
---
+---Close dialog
+---@param force boolean
 function Form:close(force)
   if not(self:isOpened()) and force ~= true then return end
   local flow_panel, content_panel, menu_panel = self:getPanel()
@@ -722,11 +583,6 @@ function Form:close(force)
 end
 
 -------------------------------------------------------------------------------
--- On close dialog
---
--- @function [parent=#Form] onClose
---
--- @return #boolean if true the next call close dialog
---
+---On close dialog
 function Form:onClose()
 end

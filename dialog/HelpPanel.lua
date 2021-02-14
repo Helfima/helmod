@@ -1,10 +1,6 @@
 -------------------------------------------------------------------------------
--- Class to build HelpPanel panel
---
--- @module HelpPanel
--- @extends #Form
---
-
+---Class to build HelpPanel panel
+---@class HelpPanel
 HelpPanel = newclass(Form)
 
 local page_list = {}
@@ -273,24 +269,17 @@ help_data.tips.content.production_block = {
 }
 
 -------------------------------------------------------------------------------
--- On initialization
---
--- @function [parent=#HelpPanel] onInit
---
+---On initialization
 function HelpPanel:onInit()
   self.panelCaption = ({"helmod_help.panel-title"})
   self.help_button = false
 end
 
 -------------------------------------------------------------------------------
--- On Style
---
--- @function [parent=#HelpPanel] onStyle
---
--- @param #table styles
--- @param #number width_main
--- @param #number height_main
---
+---On Style
+---@param styles table
+---@param width_main number
+---@param height_main number
 function HelpPanel:onStyle(styles, width_main, height_main)
   styles.flow_panel = {
     height = math.max(height_main,800),
@@ -304,10 +293,8 @@ function HelpPanel:onStyle(styles, width_main, height_main)
 end
 
 -------------------------------------------------------------------------------
--- Get or create content panel
---
--- @function [parent=#HelpPanel] getContentPanel
---
+---Get or create content panel
+---@return LuaGuiElement
 function HelpPanel:getContentPanel()
   local panel = self:getFrameDeepPanel("help-panel", "horizontal")
   local panel_menu_name = "menu-panel"
@@ -328,12 +315,8 @@ function HelpPanel:getContentPanel()
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#HelpPanel] onEvent
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
 function HelpPanel:onEvent(event)
   if event.action == "change-page" then
     local selected_index = event.element.selected_index
@@ -343,12 +326,8 @@ function HelpPanel:onEvent(event)
 end
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#HelpPanel] onUpdate
---
--- @param #LuaEvent event
---
+---On update
+---@param event LuaEvent
 function HelpPanel:onUpdate(event)
   self:generateList()
   self:updateMenu(event)
@@ -356,12 +335,7 @@ function HelpPanel:onUpdate(event)
 end
 
 -------------------------------------------------------------------------------
--- Update about HelpPanel
---
--- @function [parent=#HelpPanel] updateMenu
---
--- @param #LuaEvent event
---
+---Update about HelpPanel
 function HelpPanel:generateList()
   page_list = {}
   for key1,section in pairs(help_data) do
@@ -375,12 +349,8 @@ function HelpPanel:generateList()
 end
 
 -------------------------------------------------------------------------------
--- Update about HelpPanel
---
--- @function [parent=#HelpPanel] updateMenu
---
--- @param #LuaEvent event
---
+---Update about HelpPanel
+---@param event LuaEvent
 function HelpPanel:updateMenu(event)
   local menu_panel, content_panel = self:getContentPanel()
   menu_panel.clear()
@@ -400,12 +370,8 @@ function HelpPanel:updateMenu(event)
 end
 
 -------------------------------------------------------------------------------
--- Update about HelpPanel
---
--- @function [parent=#HelpPanel] updateContent
---
--- @param #LuaEvent event
---
+---Update about HelpPanel
+---@param event LuaEvent
 function HelpPanel:updateContent(event)
   local menu_panel, content_panel = self:getContentPanel()
   content_panel.clear()
@@ -414,12 +380,12 @@ function HelpPanel:updateContent(event)
   local section = help_data[selected_help.section]
   local content_selected = nil
   if section then
-    -- section panel
+    ---section panel
     local section_caption_name = {string.format("helmod_help.%s", section.name)}
     local section_caption_desc = {string.format("helmod_help.%s-desc", section.name)}
     local section_panel = GuiElement.add(content_panel, GuiFlowV("section", section.name))
     section_panel.style.horizontally_stretchable = true
-    -- section header
+    ---section header
     GuiElement.add(section_panel, GuiLabel("header"):caption({"", "[font=heading-1]", section_caption_name, "[/font]"}):style("helmod_label_help"))
     local section_title = GuiElement.add(section_panel, GuiLabel(section.name, "desc"):caption({"", "   ",section_caption_desc}):style("helmod_label_help"))
     for key,content in pairs(section.content) do

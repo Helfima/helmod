@@ -1,15 +1,6 @@
 -------------------------------------------------------------------------------
--- Class to help to build GuiCheckBox
---
--- @module GuiCheckBox
---
-
--------------------------------------------------------------------------------
---
--- @function [parent=#GuiCheckBox] constructor
--- @param #arg name
--- @return #GuiCheckBox
---
+---Class to help to build GuiCheckBox
+---@class GuiCheckBox
 GuiCheckBox = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiCheckBox"
@@ -18,11 +9,9 @@ GuiCheckBox = newclass(GuiElement,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiCheckBox] state
--- @param #boolean state
--- @return #GuiCheckBox
---
+---Set state
+---@param state boolean
+---@return GuiCheckBox
 function GuiCheckBox:state(state)
   self.options.state = state
   return self

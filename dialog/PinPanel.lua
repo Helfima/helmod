@@ -1,10 +1,6 @@
 -------------------------------------------------------------------------------
--- Class to build pin dialog
---
--- @module PinPanel
--- @extends #FormModel
---
-
+---Class to build pin dialog
+---@class PinPanel
 PinPanel = newclass(FormModel)
 
 local display_pin_level_min = 0
@@ -19,33 +15,23 @@ local display_level = {
 }
 
 -------------------------------------------------------------------------------
--- On Bind Dispatcher
---
--- @function [parent=#PinPanel] onBind
---
+---On Bind Dispatcher
 function PinPanel:onBind()
   Dispatcher:bind("on_gui_refresh", self, self.update)
 end
 
 -------------------------------------------------------------------------------
--- On initialization
---
--- @function [parent=#PinPanel] onInit
---
+---On initialization
 function PinPanel:onInit()
   self.panelCaption = ({"helmod_pin-tab-panel.title"})
   self.otherClose = false
 end
 
 -------------------------------------------------------------------------------
--- On Style
---
--- @function [parent=#PinPanel] onStyle
---
--- @param #table styles
--- @param #number width_main
--- @param #number height_main
---
+---On Style
+---@param styles table
+---@param width_main number
+---@param height_main number
 function PinPanel:onStyle(styles, width_main, height_main)
   styles.flow_panel = {
     minimal_width = 50,
@@ -56,12 +42,8 @@ function PinPanel:onStyle(styles, width_main, height_main)
 end
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#PinPanel] onUpdate
---
--- @param #LuaEvent event
---
+---On update
+---@param event LuaEvent
 function PinPanel:onUpdate(event)
   self:updateHeader(event)
   self:updateInfo(event)
@@ -74,18 +56,14 @@ table.insert(setting_options, {name="product", icon="jewel-hide", icon_white="je
 table.insert(setting_options, {name="beacon", icon="beacon-hide", icon_white="beacon-hide-white", tooltip="tooltip.hide-show-beacon", column=1})
 
 -------------------------------------------------------------------------------
--- Update information
---
--- @function [parent=#PinPanel] updateHeader
---
--- @param #LuaEvent event
---
+---Update header
+---@param event LuaEvent
 function PinPanel:updateHeader(event)
   local action_panel = self:getMenuPanel()
   action_panel.clear()
   local group1 = GuiElement.add(action_panel, GuiFlowH("group1"))
 
-  -- setting options
+  ---setting options
   
   for _,setting_option in pairs(setting_options) do
     local setting_name = string.format("pin_panel_column_hide_%s", setting_option.name)
@@ -109,12 +87,8 @@ function PinPanel:updateHeader(event)
 end
 
 -------------------------------------------------------------------------------
--- Update information
---
--- @function [parent=#PinPanel] updateInfo
---
--- @param #LuaEvent event
---
+---Update information
+---@param event LuaEvent
 function PinPanel:updateInfo(event)
   local infoPanel = self:getScrollFramePanel("info-panel")
   infoPanel.clear()
@@ -144,12 +118,8 @@ function PinPanel:updateInfo(event)
 end
 
 -------------------------------------------------------------------------------
--- Add header data tab
---
--- @function [parent=#PinPanel] addProductionBlockHeader
---
--- @param #LuaGuiElement itable container for element
---
+---Add header data tab
+---@param itable LuaGuiElement
 function PinPanel:addProductionBlockHeader(itable)
 
   local gui_done = GuiElement.add(itable, GuiFrameH("header-done"):style(helmod_frame_style.hidden))
@@ -182,25 +152,22 @@ function PinPanel:addProductionBlockHeader(itable)
 end
 
 -------------------------------------------------------------------------------
--- Add row data tab
---
--- @function [parent=#PinPanel] addProductionBlockRow
---
--- @param #LuaGuiElement gui_table
--- @param #string blockId
--- @param #table element production recipe
---
+---Add row data tab
+---@param gui_table LuaGuiElement
+---@param model table
+---@param block table
+---@param recipe table
 function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
   local recipe_prototype = RecipePrototype(recipe)
   local is_done = recipe.is_done or false
 
-  -- col done
+  ---col done
   if is_done == true then
     GuiElement.add(gui_table, GuiButton(self.classname, "recipe-done", recipe.id):sprite("menu", "done-white", "done"):style("helmod_button_menu_selected_green"):tooltip({"helmod_button.done"}))
   else
     GuiElement.add(gui_table, GuiButton(self.classname, "recipe-done", recipe.id):sprite("menu", "checkmark", "checkmark"):style("helmod_button_menu_actived_green"):tooltip({"helmod_button.done"}))
   end
-  -- col recipe
+  ---col recipe
   local cell_recipe = GuiElement.add(gui_table, GuiFrameH("recipe", recipe.id):style(helmod_frame_style.hidden))
   local button_recipe = GuiCellRecipe("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):infoIcon(recipe.type):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):mask(is_done)
   --local button_recipe = GuiCellRecipe(self.classname, "do_noting", "recipe"):element(recipe):infoIcon(recipe.type):tooltip("tooltip.info-product"):color(GuiElement.color_button_default):mask(is_done)
@@ -208,7 +175,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
 
   local by_limit = block.count ~= 1
   if not(User.getSetting("pin_panel_column_hide_product")) then
-    -- products
+    ---products
     local cell_products = GuiElement.add(gui_table, GuiTable("products",recipe.id):column(3))
     cell_products.style.horizontally_stretchable = false
     local lua_products = recipe_prototype:getProducts(recipe.factory)
@@ -227,13 +194,13 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
   end
 
   if not(User.getSetting("pin_panel_column_hide_machine")) then
-    -- col factory
+    ---col factory
     local factory = recipe.factory
     GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "factory"):index(recipe.id):element(factory):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default):byLimit(by_limit):mask(is_done))
   end
 
   if not(User.getSetting("pin_panel_column_hide_product")) then
-    -- ingredients
+    ---ingredients
     local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients", recipe.id):column(3))
     cell_ingredients.style.horizontally_stretchable = false
     local lua_ingredients = recipe_prototype:getIngredients(recipe.factory)
@@ -252,7 +219,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
   end
 
   if not(User.getSetting("pin_panel_column_hide_beacon")) then
-    -- col beacon
+    ---col beacon
     local beacon = recipe.beacon
     if block.count > 1 then
       beacon.limit_count = beacon.count / block.count
@@ -265,12 +232,8 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#PinPanel] onEvent
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
 function PinPanel:onEvent(event)
 
   if event.action == "change-hide" then

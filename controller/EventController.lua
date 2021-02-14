@@ -1,18 +1,14 @@
 ---
--- Description of the module.
--- @module EventController
---
+---Description of the module.
+---@class EventController
 local EventController = {
-  -- single-line comment
+  ---single-line comment
   classname = "HMEventController"
 }
 
 defines.events.on_prepare=script.generate_event_name()
 -------------------------------------------------------------------------------
--- Start
---
--- @function [parent=#EventController] start
---
+---Start
 function EventController.start()
   script.on_init(EventController.onInit)
   script.on_load(EventController.onLoad)
@@ -39,7 +35,7 @@ function EventController.start()
   EventController.pcallEvent(defines.events.on_string_translated, EventController.onStringTranslated)
 
   --EventController.pcallNthTick(10, EventController.onNthTick)
-  -- event hotkey
+  ---event hotkey
   EventController.pcallEvent("helmod-close", EventController.onCustomInput)
   EventController.pcallEvent("helmod-open-close", EventController.onCustomInput)
   EventController.pcallEvent("helmod-recipe-selector-open", EventController.onCustomInput)
@@ -49,12 +45,8 @@ function EventController.start()
 end
 
 -------------------------------------------------------------------------------
--- On input valid
---
--- @function [parent=#EventController] onInputValid
---
--- @param  #table event
---
+---On input valid
+---@param  event LuaEvent
 function EventController.onCustomInput(event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
@@ -63,13 +55,9 @@ function EventController.onCustomInput(event)
 end
 
 -------------------------------------------------------------------------------
--- EventController callback
---
--- @function [parent=#EventController] pcallNthTick
---
--- @param #number tick
--- @param #function callback
---
+---EventController callback
+---@param tick number
+---@param callback function
 function EventController.pcallNthTick(tick, callback)
   local ok , err = pcall(function()
     script.on_nth_tick(tick,callback)
@@ -81,13 +69,9 @@ function EventController.pcallNthTick(tick, callback)
 end
 
 -------------------------------------------------------------------------------
--- EventController callback
---
--- @function [parent=#EventController] pcallEvent
---
--- @param #event_type event
--- @param #function callback
---
+---EventController callback
+---@param event_type string
+---@param callback function
 function EventController.pcallEvent(event_type, callback)
   local ok , err = pcall(function()
     script.on_event(event_type,callback)
@@ -99,45 +83,30 @@ function EventController.pcallEvent(event_type, callback)
 end
 
 -------------------------------------------------------------------------------
--- On init
---
--- @function [parent=#EventController] onInit
---
+---On init
 function EventController.onInit()
   Command.start()
   Controller:on_init()
 end
 
 -------------------------------------------------------------------------------
--- On load
---
--- @function [parent=#EventController] onLoad
---
--- @param #table event
---
+---On load
+---@param event LuaEvent
 function EventController.onLoad(event)
   Command.start()
 end
 
 -------------------------------------------------------------------------------
--- On console command
---
--- @function [parent=#EventController] onConsoleCommand
---
--- @param #table event
---
+---On Research Finished
+---@param event LuaEvent
 function EventController.onResearchFinished(event)
   --Cache.reset()
   --Player.print("Caches are reseted!")
 end
 
 -------------------------------------------------------------------------------
--- On console command
---
--- @function [parent=#EventController] onConsoleCommand
---
--- @param #table event
---
+---On console command
+---@param event LuaEvent
 function EventController.onConsoleCommand(event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
@@ -146,14 +115,9 @@ function EventController.onConsoleCommand(event)
 end
 
 -------------------------------------------------------------------------------
--- On load
---
--- @function [parent=#EventController] onGuiClosed
---
--- @param #table event
---
--- @deprecated
---
+---On load
+---@deprecated
+---@param event LuaEvent
 function EventController.onGuiClosed(event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
@@ -162,20 +126,17 @@ function EventController.onGuiClosed(event)
 end
 
 -------------------------------------------------------------------------------
--- On configuration changed
---
--- @function [parent=#EventController] onConfigurationChanged
---
--- @param #table data
---
--- Data sample:
--- data = {
---  "old_version":"0.14.17","new_version":"0.14.20",
---  "mod_changes":{
---    "base":{"old_version":"0.14.17","new_version":"0.14.20"},
---    "helmod":{"old_version":"0.2.14","new_version":"0.2.16"}
---  }
--- }
+---On configuration changed
+---@param data table
+---Data sample:
+---data = {
+--- "old_version":"0.14.17",
+--- "new_version":"0.14.20",
+--- "mod_changes":{
+---   "base":{"old_version":"0.14.17","new_version":"0.14.20"},
+---   "helmod":{"old_version":"0.2.14","new_version":"0.2.16"}
+--- }
+---}
 --
 function EventController.onConfigurationChanged(data)
   log("EventController.onConfigurationChanged(data)")
@@ -203,12 +164,8 @@ function EventController.onConfigurationChanged(data)
 end
 
 -------------------------------------------------------------------------------
--- On tick
---
--- @function [parent=#EventController] onTick
---
--- @param #table event
---
+---On Location Changed
+---@param event LuaEvent
 function EventController.onGuiLocationChanged(event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
@@ -217,34 +174,22 @@ function EventController.onGuiLocationChanged(event)
 end
 
 -------------------------------------------------------------------------------
--- On tick
---
--- @function [parent=#EventController] onTick
---
--- @param #table event
---
+---On tick
+---@param event LuaEvent
 function EventController.onTick(event)
   Controller:onTick(event)
 end
 
 -------------------------------------------------------------------------------
--- On nth tick
---
--- @function [parent=#EventController] onNthTick
---
--- @param #table NthTickEvent {tick=#number, nth_tick=#number}
---
+---On nth tick
+---@param NthTickEvent table {tick=number, nth_tick=number}
 function EventController.onNthTick(NthTickEvent)
   Controller:onNthTick(NthTickEvent)
 end
 
 -------------------------------------------------------------------------------
--- On string translated
---
--- @function [parent=#EventController] onStringTranslated
---
--- @param #table event {player_index=number, localised_ string=#string,result=#string, translated=#boolean}
---
+---On string translated
+---@param event table {player_index=number, localised_ string=string, result=string, translated=boolean}
 function EventController.onStringTranslated(event)
   Player.load(event)
   Controller:onStringTranslated(event)
@@ -252,12 +197,10 @@ end
 
 
 -------------------------------------------------------------------------------
--- On click event
---
--- @function [parent=#EventController] onGuiClick
---
--- @param #table event
---
+---On click button
+---@param event LuaEvent
+---Filter allowed element: "button", "sprite-button", "choose-elem-button"
+---Bypass: add bypass in element.name
 function EventController.onGuiClickButton(event)
   if event ~= nil and event.player_index ~= nil and event.element ~= nil and (table.contains({"button", "sprite-button", "choose-elem-button"}, event.element.type) or string.find(event.element.name, "bypass")) then
     Player.load(event)
@@ -266,12 +209,8 @@ function EventController.onGuiClickButton(event)
 end
 
 -------------------------------------------------------------------------------
--- On click event
---
--- @function [parent=#EventController] onGuiClick
---
--- @param #table event
---
+---On click event
+---@param event LuaEvent
 function EventController.onGuiClick(event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
@@ -280,12 +219,8 @@ function EventController.onGuiClick(event)
 end
 
 -------------------------------------------------------------------------------
--- On text changed
---
--- @function [parent=#EventController] onGuiTextChanged
---
--- @param #table event
---
+---On text changed
+---@param event LuaEvent
 function EventController.onGuiTextChanged(event)
   if event ~= nil and event.player_index ~= nil and event.element ~= nil then
     Player.load(event)
@@ -299,12 +234,8 @@ function EventController.onGuiTextChanged(event)
 end
 
 -------------------------------------------------------------------------------
--- On runtime mod settings
---
--- @function [parent=#EventController] onRuntimeModSettingChanged
---
--- @param event
---
+---On runtime mod settings
+---@param event LuaEvent
 function EventController.onRuntimeModSettingChanged(event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
@@ -313,12 +244,8 @@ function EventController.onRuntimeModSettingChanged(event)
 end
 
 -------------------------------------------------------------------------------
--- On player created
---
--- @function [parent=#EventController] onPlayerCreated
---
--- @param #table event
---
+---On player created
+---@param event LuaEvent
 function EventController.onPlayerCreated(event)
   if event ~= nil and event.player_index ~= nil then
     local player = Player.load(event).native()
@@ -328,12 +255,8 @@ function EventController.onPlayerCreated(event)
 end
 
 -------------------------------------------------------------------------------
--- On player join game
---
--- @function [parent=#EventController] onPlayerJoinedGame
---
--- @param #table event
---
+---On player join game
+---@param event LuaEvent
 function EventController.onPlayerJoinedGame(event)
   if event ~= nil and event.player_index ~= nil then
     local player = Player.load(event).native()
@@ -343,12 +266,8 @@ function EventController.onPlayerJoinedGame(event)
 end
 
 -------------------------------------------------------------------------------
--- On prepare
---
--- @function [parent=#EventController] onPrepare
---
--- @param #table event
---
+---On prepare
+---@param event LuaEvent
 function EventController.onPrepare(event)
   if event ~= nil and event.player_index ~= nil then
     event.tick = game.tick

@@ -1,32 +1,21 @@
 -------------------------------------------------------------------------------
--- Class to build RecipeExplorer panel
---
--- @module RecipeExplorer
--- @extends #Form
---
-
+---Class to build RecipeExplorer panel
+---@class RecipeExplorer
 RecipeExplorer = newclass(Form)
 
 local display_panel = nil
 
 -------------------------------------------------------------------------------
--- Initialization
---
--- @function [parent=#RecipeExplorer] init
---
+---Initialization
 function RecipeExplorer:onInit()
   self.panelCaption = ({"helmod_recipe-explorer-panel.title"})
 end
 
 -------------------------------------------------------------------------------
--- On Style
---
--- @function [parent=#RecipeExplorer] onStyle
---
--- @param #table styles
--- @param #number width_main
--- @param #number height_main
---
+---On Style
+---@param styles table
+---@param width_main number
+---@param height_main number
 function RecipeExplorer:onStyle(styles, width_main, height_main)
   styles.flow_panel = {
     minimal_width = 300,
@@ -37,42 +26,28 @@ function RecipeExplorer:onStyle(styles, width_main, height_main)
 end
 
 ------------------------------------------------------------------------------
--- Get Button Sprites
---
--- @function [parent=#RecipeExplorer] getButtonSprites
---
--- @return boolean
---
+---Get Button Sprites
+---@return string, string
 function RecipeExplorer:getButtonSprites()
   return "search-white","search"
 end
 
 -------------------------------------------------------------------------------
--- Is tool
---
--- @function [parent=#RecipeExplorer] isTool
---
--- @return boolean
---
+---Is tool
+---@return boolean
 function RecipeExplorer:isTool()
   return true
 end
 
 -------------------------------------------------------------------------------
--- On Bind Dispatcher
---
--- @function [parent=#RecipeExplorer] onBind
---
+---On Bind Dispatcher
 function RecipeExplorer:onBind()
   Dispatcher:bind("on_gui_refresh", self, self.update)
   --Dispatcher:bind("on_gui_selected", self, self.event)
 end
 
 -------------------------------------------------------------------------------
--- Get or create info panel
---
--- @function [parent=#RecipeExplorer] getInfoPanel
---
+---Get or create info panel
 function RecipeExplorer:getInfoPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if content_panel["info-panel"] ~= nil and content_panel["info-panel"].valid then
@@ -87,12 +62,8 @@ function RecipeExplorer:getInfoPanel()
 end
 
 -------------------------------------------------------------------------------
--- Update information
---
--- @function [parent=#RecipeExplorer] updateHeader
---
--- @param #LuaEvent event
---
+---Update information
+---@param event LuaEvent
 function RecipeExplorer:updateHeader(event)
   local action_panel, _ = self:getMenuPanel()
   action_panel.clear()
@@ -101,27 +72,23 @@ function RecipeExplorer:updateHeader(event)
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#RecipeExplorer] onEvent
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
 function RecipeExplorer:onEvent(event)
   local recipe_explore = User.getParameter("explore_recipe")
---  if event.action == "add-parent" then
---    local recipes = Player.searchRecipe(event.item3, true)
---    if #recipes == 1 then
---      local recipe = recipes[1]
---      
---      User.setParameter("scroll_element", new_recipe.id)
---      self:send("on_gui_update", event)
---    else
---      -- pour ouvrir avec le filtre ingredient
---      event.button = defines.mouse_button_type.right
---      Dispatcher:send("on_gui_open", event, "HMRecipeSelector")
---    end
---  end
+--- if event.action == "add-parent" then
+---   local recipes = Player.searchRecipe(event.item3, true)
+---   if #recipes == 1 then
+---     local recipe = recipes[1]
+---     
+---     User.setParameter("scroll_element", new_recipe.id)
+---     self:send("on_gui_update", event)
+---   else
+---     ---pour ouvrir avec le filtre ingredient
+---     event.button = defines.mouse_button_type.right
+---     Dispatcher:send("on_gui_open", event, "HMRecipeSelector")
+---   end
+--- end
   if event.action == "remove-child" then
     self:removeRecipe(recipe_explore, event.item3)
     self:updateDisplay()
@@ -143,14 +110,14 @@ function RecipeExplorer:onEvent(event)
       Dispatcher:send("on_gui_open", event, "HMRecipeSelector")
     end
   end
-  -- from RecipeSelector
+  ---from RecipeSelector
   if event.action == "open-recipe-selector" then
     User.setParameter("explore_recipe_id", nil)
     event.item1 = self.classname
     event.action = "OPEN"
     Dispatcher:send("on_gui_open", event, "HMRecipeSelector")
   end  
-  -- from RecipeSelector
+  ---from RecipeSelector
   if event.action == "element-select" then
     local explore_recipe_id = User.getParameter("explore_recipe_id")
     if explore_recipe_id == nil then
@@ -164,12 +131,10 @@ function RecipeExplorer:onEvent(event)
 end
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#RecipeExplorer] onUpdate
---
--- @param #LuaEvent event
---
+---On update
+---@param parent table
+---@param recipe any
+---@param id any
 function RecipeExplorer:addRecipe(parent, recipe, id)
   if parent.id == tonumber(id or 0) then
     if parent.children == nil then parent.children = {} end
@@ -182,12 +147,9 @@ function RecipeExplorer:addRecipe(parent, recipe, id)
 end
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#RecipeExplorer] onUpdate
---
--- @param #LuaEvent event
---
+---On update
+---@param parent table
+---@param id any
 function RecipeExplorer:removeRecipe(parent, id)
   if parent.children then
     local index_remove = nil
@@ -207,22 +169,15 @@ function RecipeExplorer:removeRecipe(parent, id)
 end
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#RecipeExplorer] onUpdate
---
--- @param #LuaEvent event
---
+---On update
+---@param event LuaEvent
 function RecipeExplorer:onUpdate(event)
   self:updateHeader(event)
   self:updateDisplay()
 end
 
 -------------------------------------------------------------------------------
--- Update display
---
--- @function [parent=#RecipeExplorer] updateDisplay
---
+---Update display
 function RecipeExplorer:updateDisplay()
   local content_panel = self:getInfoPanel()
   content_panel.clear()
@@ -231,13 +186,10 @@ function RecipeExplorer:updateDisplay()
 end
 
 -------------------------------------------------------------------------------
--- Add cell
---
--- @function [parent=#RecipeExplorer] addCell
---
--- @param #LuaGuiElement parent
--- @param #table recipe
---
+---Add cell
+---@param parent any
+---@param recipe table
+---@param index any
 function RecipeExplorer:addCell(parent, recipe, index)
   if recipe ~= nil then
     local recipe_prototype = RecipePrototype(recipe)
@@ -249,7 +201,7 @@ function RecipeExplorer:addCell(parent, recipe, index)
       cell_recipe.style.horizontally_stretchable = false
       local cell_table = GuiElement.add(cell_recipe, GuiTable("cell-table"):column(3))
       cell_table.style.horizontal_spacing=5
-      -- products
+      ---products
       local cell_products = GuiElement.add(cell_table, GuiFlowV("cell-products"))
       for index, lua_product in pairs(recipe_prototype:getProducts(recipe.factory)) do
         local product_prototype = Product(lua_product)
@@ -258,14 +210,14 @@ function RecipeExplorer:addCell(parent, recipe, index)
         product.time = 1
         GuiElement.add(cell_products, GuiCellElementSm(self.classname, "add-parent", product.type, product.name, recipe.id or 0):element(product):tooltip("tooltip.add-recipe"):index(index):color(GuiElement.color_button_none))
       end
-      -- recipe
+      ---recipe
       local button = GuiElement.add(cell_table, GuiButtonSprite(self.classname, "remove-child", recipe.type, recipe.name, recipe.id or 0):choose(recipe.type, recipe.name))
       button.locked = true
       if recipe.type ~= "recipe" then
         local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({"tooltip.resource-recipe"}))
         sprite.style.top_padding = -8
       end
-      -- ingredients
+      ---ingredients
       local cell_ingredients = GuiElement.add(cell_table, GuiFlowV("cell-ingredients"))
       for index, lua_ingredient in pairs(recipe_prototype:getIngredients(recipe.factory)) do
         local ingredient_prototype = Product(lua_ingredient)

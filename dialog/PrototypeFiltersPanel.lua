@@ -1,9 +1,6 @@
 -------------------------------------------------------------------------------
--- Class to build PrototypeFiltersPanel panel
---
--- @module PrototypeFiltersPanel
--- @extends #Form
---
+---Class to build PrototypeFiltersPanel panel
+---@class PrototypeFiltersPanel
 PrototypeFiltersPanel = newclass(Form,function(base,classname)
   Form.init(base,classname)
   base.add_special_button = true
@@ -84,53 +81,36 @@ table.insert(sample.value, { mode="or", filter="type", invert="false", option="f
 table.insert(samples, sample)
 
 -------------------------------------------------------------------------------
--- On initialization
---
--- @function [parent=#PrototypeFiltersPanel] onInit
---
+---On initialization
 function PrototypeFiltersPanel:onInit()
   self.panelCaption = ({"helmod_result-panel.tab-button-prototype-filters"})
   self.help_button = false
 end
 
 -------------------------------------------------------------------------------
--- Get Button Sprites
---
--- @function [parent=#PrototypeFiltersPanel] getButtonSprites
---
--- @return boolean
---
+---Get Button Sprites
+---@return string, string
 function PrototypeFiltersPanel:getButtonSprites()
   return "filter-edit-white","filter-edit"
 end
 
 -------------------------------------------------------------------------------
--- Is visible
---
--- @function [parent=#PrototypeFiltersPanel] isVisible
---
--- @return boolean
---
+---Is visible
+---@return boolean
 function PrototypeFiltersPanel:isVisible()
   return User.getModGlobalSetting("hidden_panels")
 end
 
 -------------------------------------------------------------------------------
--- Is special
---
--- @function [parent=#PrototypeFiltersPanel] isSpecial
---
--- @return boolean
---
+---Is special
+---@return boolean
 function PrototypeFiltersPanel:isSpecial()
   return true
 end
 
 -------------------------------------------------------------------------------
--- Get or create menu panel
---
--- @function [parent=#PrototypeFiltersPanel] getMenuPanel
---
+---Get or create menu panel
+---@return LuaGuiElement
 function PrototypeFiltersPanel:getMenuPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   local panel_name = "menu-panel"
@@ -146,10 +126,8 @@ function PrototypeFiltersPanel:getMenuPanel()
 end
 
 -------------------------------------------------------------------------------
--- Get or create content panel
---
--- @function [parent=#PrototypeFiltersPanel] getContentPanel
---
+---Get or create content panel
+---@return LuaGuiElement
 function PrototypeFiltersPanel:getContentPanel()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   local panel_name = "data-panel"
@@ -165,12 +143,8 @@ function PrototypeFiltersPanel:getContentPanel()
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#PrototypeFiltersPanel] onEvent
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
 function PrototypeFiltersPanel:onEvent(event)
   local prototype_filter = User.getParameter("prototype_filter")
   local prototype_filters = User.getParameter("prototype_filters") or {}
@@ -273,14 +247,10 @@ function PrototypeFiltersPanel:onEvent(event)
 end
 
 -------------------------------------------------------------------------------
--- On update
---
--- @function [parent=#PrototypeFiltersPanel] onUpdate
---
--- @param #LuaEvent event
---
+---On update
+---@param event LuaEvent
 function PrototypeFiltersPanel:onUpdate(event)
-  -- prepare
+  ---prepare
   PrototypeFilters.initialization()
   modes = PrototypeFilters.getModes()
   filter_types = PrototypeFilters.getTypes()
@@ -288,18 +258,14 @@ function PrototypeFiltersPanel:onUpdate(event)
   comparisons = PrototypeFilters.getComparison()
   collision_mask = PrototypeFilters.getCollisionMask()
   collision_mask_mode = PrototypeFilters.getCollisionMaskMode()
-  -- update
+  ---update
   self:updateFilter()
   self:updateResult()
 end
 
 -------------------------------------------------------------------------------
--- Update header filter
---
--- @function [parent=#PrototypeFiltersPanel] addHeaderFilter
---
--- @param #LuaGuiElement itable container for element
---
+---Update header filter
+---@param itable LuaGuiElement
 function PrototypeFiltersPanel:addHeaderFilter(itable)
   GuiElement.add(itable, GuiLabel("mode"):caption("Mode"))
   GuiElement.add(itable, GuiLabel("invert"):caption("Invert"))
@@ -310,26 +276,24 @@ function PrototypeFiltersPanel:addHeaderFilter(itable)
 end
 
 -------------------------------------------------------------------------------
--- Update row filter
---
--- @function [parent=#PrototypeFiltersPanel] addRowFilter
---
--- @param #LuaGuiElement itable container for element
---
+---Update row filter
+---@param itable LuaGuiElement
+---@param prototype_filter table
+---@param index number
 function PrototypeFiltersPanel:addRowFilter(itable, prototype_filter, index)
   index = index or 0
-  -- type col
+  ---type col
   local prototype_filter_type = User.getParameter("prototype_filter_type") or filter_types[1]
   local PrototypeFilter = PrototypeFilters.getFilterType(prototype_filter_type)
-  -- mode col
+  ---mode col
   prototype_filter.mode = prototype_filter.mode or modes[1]
   local button_mode = GuiElement.add(itable, GuiDropDown(self.classname, "change-filter-mode", index):items(modes, prototype_filter.mode))
   button_mode.style.width = 80
-  -- invert col
+  ---invert col
   prototype_filter.invert = prototype_filter.invert or inverts[1]
   local button_invert = GuiElement.add(itable, GuiDropDown(self.classname, "change-filter-invert", index):items(inverts, prototype_filter.invert))
   button_invert.style.width = 80
-  -- filter col
+  ---filter col
   local filters = PrototypeFilter:getFilters()
   prototype_filter.filter = prototype_filter.filter or filters[1]
   GuiElement.add(itable, GuiDropDown(self.classname, "change-prototype-filter", index):items(filters, prototype_filter.filter))
@@ -368,7 +332,7 @@ function PrototypeFiltersPanel:addRowFilter(itable, prototype_filter, index)
   else
     GuiElement.add(itable, GuiLabel("option-none", index):caption("None"))
   end
-  -- result col
+  ---result col
   local filter_value = PrototypeFiltersPanel:convertFilter(prototype_filter)
   local string_value = PrototypeFiltersPanel:tableToString(filter_value)
   local text_field = GuiElement.add(itable, GuiTextField(self.classname, "change-textfield", index):text(string_value))
@@ -381,15 +345,12 @@ function PrototypeFiltersPanel:addRowFilter(itable, prototype_filter, index)
 end
 
 -------------------------------------------------------------------------------
--- Update filter
---
--- @function [parent=#PrototypeFiltersPanel] updateFilter
---
+---Update filter
 function PrototypeFiltersPanel:updateFilter()
-  -- data
+  ---data
   local content_panel = self:getMenuPanel()
   content_panel.clear()
-  -- type
+  ---type
   local choose_panel = GuiElement.add(content_panel, GuiFlowH("choose-filter"))
   choose_panel.style.horizontal_spacing = 5
   local prototype_filter_type = User.getParameter("prototype_filter_type") or filter_types[1]
@@ -423,10 +384,9 @@ function PrototypeFiltersPanel:updateFilter()
 end
 
 -------------------------------------------------------------------------------
--- Update result
---
--- @function [parent=#PrototypeFiltersPanel] updateResult
---
+---Update result
+---@param prototype_filter table
+---@return table
 function PrototypeFiltersPanel:convertFilter(prototype_filter)
   local filter = {mode= prototype_filter.mode, invert=(prototype_filter.invert=="true"), filter=prototype_filter.filter  }
     if prototype_filter.option ~= nil then
@@ -444,12 +404,9 @@ function PrototypeFiltersPanel:convertFilter(prototype_filter)
 end
 
 -------------------------------------------------------------------------------
--- Table to string
---
--- @function [parent=#PrototypeFiltersPanel] tableToString
---
--- @param #table value
---
+---Table to string
+---@param value table
+---@return string
 function PrototypeFiltersPanel:tableToString(value)
   local string_value = serpent.line(value)
   string_value = string.gsub(string_value, "},", "},\n")
@@ -457,12 +414,9 @@ function PrototypeFiltersPanel:tableToString(value)
 end
 
 -------------------------------------------------------------------------------
--- Update result
---
--- @function [parent=#PrototypeFiltersPanel] updateResult
---
+---Update result
 function PrototypeFiltersPanel:updateResult()
-  -- data
+  ---data
   local content_panel = self:getContentPanel()
   content_panel.clear()
   GuiElement.add(content_panel, GuiLabel("data-label"):caption({"helmod_common.filter"}):style("helmod_label_title_frame"))
@@ -471,7 +425,7 @@ function PrototypeFiltersPanel:updateResult()
 
   if table.size(prototype_filters) > 0 then
     local resultTable = GuiElement.add(content_panel, GuiTable("table-filters"):column(6))
-    -- prototype filter
+    ---prototype filter
     self:addHeaderFilter(resultTable)
 
     for index,filter in spairs(prototype_filters) do
@@ -479,7 +433,7 @@ function PrototypeFiltersPanel:updateResult()
     end
 
     local data_panel = GuiElement.add(content_panel, GuiFlowH("data"))
-    -- elements list
+    ---elements list
 
     local filters = {}
     for _,prototype_filter in pairs(prototype_filters) do
@@ -487,14 +441,14 @@ function PrototypeFiltersPanel:updateResult()
       table.insert(filters, filter)
     end
 
-    -- text filter
+    ---text filter
     local string_data = PrototypeFiltersPanel:tableToString(filters)
     local text_box = GuiElement.add(data_panel, GuiTextBox("string-data"):text(string_data))
     text_box.read_only=true
     text_box.style.width = 400
     text_box.style.height = 300
 
-    -- result filter
+    ---result filter
     local elements_table = GuiElement.add(data_panel, GuiTable("table-elements"):column(20))
     local prototype_filter_type = User.getParameter("prototype_filter_type") or filter_types[1]
 
@@ -509,12 +463,8 @@ function PrototypeFiltersPanel:updateResult()
 end
 
 -------------------------------------------------------------------------------
--- On event
---
--- @function [parent=#PrototypeFiltersPanel] onEvent
---
--- @param #LuaEvent event
---
+---On event
+---@param event LuaEvent
 function PrototypeFiltersPanel:onEvent(event)
   local prototype_filter = User.getParameter("prototype_filter")
   local prototype_filters = User.getParameter("prototype_filters") or {}

@@ -1,15 +1,6 @@
 -------------------------------------------------------------------------------
--- Class to help to build GuiTable
---
--- @module GuiTable
---
-
--------------------------------------------------------------------------------
---
--- @function [parent=#GuiTable] constructor
--- @param #arg name
--- @return #GuiTable
---
+---Class to help to build GuiTable
+---@class GuiTable
 GuiTable = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiTable"
@@ -18,11 +9,9 @@ GuiTable = newclass(GuiElement,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
---
--- @function [parent=#GuiTable] column
--- @param #number column_count
--- @return #GuiTable
---
+---Set column
+---@param column_count number
+---@return GuiTable
 function GuiTable:column(column_count)
   self.options.column_count = column_count
   return self

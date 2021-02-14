@@ -1,6 +1,6 @@
 ---
 -- Description of the module.
--- @module Command
+-- @class Command
 --
 local Command = {
   -- single-line comment
@@ -10,8 +10,6 @@ local Command = {
 -------------------------------------------------------------------------------
 -- Start
 --
--- @function [parent=#Command] start
---
 function Command.start()
   commands.add_command("helmod","helmod commands", Command.run)
 end
@@ -20,8 +18,6 @@ end
 -------------------------------------------------------------------------------
 -- Run
 --
--- @function [parent=#Command] run
---
 function Command.run(event)
 -- do nothing
 end
@@ -29,9 +25,7 @@ end
 -------------------------------------------------------------------------------
 -- Parse
 --
--- @function [parent=#Command] parse
---
--- @param #LuaEvent event
+-- @param event table
 --
 function Command.parse(event)
   if event.command == "helmod" then
