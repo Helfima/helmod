@@ -453,8 +453,8 @@ function ProductionPanel:updateSubMenuRightPanel(model, block)
   GuiElement.add(group_action, GuiButton(self.classname, "past-model", model.id, block_id):sprite("menu", "paste", "paste"):style("helmod_button_menu"):tooltip({"helmod_button.past"}))
   ---download
   if self.classname == "HMProductionPanel" then
-    GuiElement.add(group_action, GuiButton("HMDownload", "OPEN", "download"):sprite("menu", "download", "download"):style("helmod_button_menu"):tooltip({"helmod_result-panel.download-button-production-line"}))
-    GuiElement.add(group_action, GuiButton("HMDownload", "OPEN", "upload"):sprite("menu", "upload", "upload"):style("helmod_button_menu"):tooltip({"helmod_result-panel.upload-button-production-line"}))
+    GuiElement.add(group_action, GuiButton("HMDownload", "OPEN", model.id, "download"):sprite("menu", "download", "download"):style("helmod_button_menu"):tooltip({"helmod_result-panel.download-button-production-line"}))
+    GuiElement.add(group_action, GuiButton("HMDownload", "OPEN", model.id, "upload"):sprite("menu", "upload", "upload"):style("helmod_button_menu"):tooltip({"helmod_result-panel.upload-button-production-line"}))
   end
   ---refresh control
   GuiElement.add(group_action, GuiButton(self.classname, "refresh-model", model.id):sprite("menu", "refresh", "refresh"):style("helmod_button_menu"):tooltip({"helmod_result-panel.refresh-button"}))
