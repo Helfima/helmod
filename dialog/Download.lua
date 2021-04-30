@@ -53,14 +53,14 @@ function Download:updateDownload(event)
   local model = self:getParameterObjects()
   local data_string = ""
   ---export
-  if event.item1 == "upload" then
+  if event.item2 == "upload" then
     local download_panel = self:getFramePanel("upload")
     download_panel.clear()
     data_string = Converter.write(model)
     local text_box = GuiElement.add(download_panel, GuiTextBox("data-text"):text(data_string))
   end
   ---import
-  if event.item1 == "download" then
+  if event.item2 == "download" then
     local download_panel = self:getFramePanel("download")
     download_panel.clear()
     local text_box = GuiElement.add(download_panel, GuiTextBox("data-text"):text(data_string))
