@@ -191,6 +191,16 @@ function Player.getForce()
 end
 
 -------------------------------------------------------------------------------
+---Sets the toggle state of the shotcut tool/icon
+---@param state boolean
+function Player.setShortcutState(state)
+  if Lua_player ~= nil then
+    Lua_player.set_shortcut_toggled("helmod-shortcut", state)
+  end
+end
+
+
+-------------------------------------------------------------------------------
 ---Return item type
 ---@param element LuaPrototype
 ---@return string

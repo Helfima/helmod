@@ -332,6 +332,11 @@ function Form:open(event)
   if parent_panel[self:getPanelName()] == nil then
     self:onOpen(event)
   end
+
+  if self.classname == "HMProductionPanel" then
+    Player.setShortcutState(true)
+  end
+
   return true
 end
 
@@ -580,6 +585,10 @@ function Form:close(force)
   User.setCloseForm(self.classname, flow_panel.location)
   self:onClose()
   flow_panel.destroy()
+
+  if self.classname == "HMProductionPanel" then
+    Player.setShortcutState(false)
+  end
 end
 
 -------------------------------------------------------------------------------

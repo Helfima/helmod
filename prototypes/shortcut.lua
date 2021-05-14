@@ -3,6 +3,7 @@ data:extend(
   {
     type = "shortcut",
     name = "helmod-shortcut",
+    toggleable = true,
     order = "a[mod]-helmod",
     action = "lua",
     localised_name = {"helmod_planner-command"},
