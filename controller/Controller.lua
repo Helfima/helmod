@@ -140,6 +140,7 @@ function Controller:bind()
   Dispatcher:bind("on_gui_event", self, self.onGuiEvent)
   Dispatcher:bind("on_gui_setting", self, self.onGuiSetting)
   Dispatcher:bind("on_gui_hotkey", self, self.onGuiHotkey)
+  Dispatcher:bind("on_gui_shortcut", self, self.onGuiShortcut)
   Dispatcher:bind("on_gui_queue", self, self.onGuiQueue)
   Dispatcher:bind("on_gui_tips", self, self.onGuiTips)
 end
@@ -405,6 +406,20 @@ function Controller:onGuiHotkey(event)
     else
       view:close()
     end
+  end
+end
+
+
+-------------------------------------------------------------------------------
+---On gui shortcut
+---
+---@param event table
+---
+function Controller:onGuiShortcut(event)
+  if views == nil then self:prepare() end
+
+  if event.prototype_name == "helmod-shortcut" then
+    self:openMainPanel()
   end
 end
 
