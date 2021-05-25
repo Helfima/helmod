@@ -31,8 +31,10 @@ function EventController.start()
   EventController.pcallEvent(defines.events.on_runtime_mod_setting_changed, EventController.onRuntimeModSettingChanged)
   EventController.pcallEvent(defines.events.on_console_command, EventController.onConsoleCommand)
   EventController.pcallEvent(defines.events.on_gui_location_changed, EventController.onGuiLocationChanged)
-  
+
   EventController.pcallEvent(defines.events.on_string_translated, EventController.onStringTranslated)
+
+  EventController.pcallEvent(defines.events.on_lua_shortcut, EventController.onShortcut)
 
   --EventController.pcallNthTick(10, EventController.onNthTick)
   ---event hotkey
@@ -51,6 +53,16 @@ function EventController.onCustomInput(event)
   if event ~= nil and event.player_index ~= nil then
     Player.load(event)
     Dispatcher:send("on_gui_hotkey", event, Controller.classname)
+  end
+end
+
+-------------------------------------------------------------------------------
+---On shortcut clicked
+---@param  event LuaEvent
+function EventController.onShortcut(event)
+  if event ~= nil and event.player_index ~= nil then
+    Player.load(event)
+    Dispatcher:send("on_gui_shortcut", event, Controller.classname)
   end
 end
 
