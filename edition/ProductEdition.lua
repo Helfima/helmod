@@ -82,8 +82,17 @@ function ProductEdition:onUpdate(event)
       block_elements = block.ingredients
     end
     local element_name = event.item4
-    if block_elements ~= nil and block_elements[element_name] ~= nil then
-      product = block_elements[element_name]
+    if block_elements ~= nil then
+      if block_elements[element_name] ~= nil then
+        product = block_elements[element_name]
+      else
+        -- Maybe product key contains temperature (ex. "steam#165")
+        for key, value in pairs(block_elements) do
+          if value.name == element_name then
+            product = value
+          end
+        end
+      end
       product_count = product.input or 0
     end
   end

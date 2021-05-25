@@ -827,8 +827,16 @@ function ModelBuilder.updateProduct(block, product_name, quantity)
     if block.by_product == false then
       block_elements = block.ingredients
     end
-    if block_elements ~= nil and block_elements[product_name] ~= nil then
-      block_elements[product_name].input = quantity
+    if block_elements ~= nil then
+      if block_elements[product_name] ~= nil then
+        block_elements[product_name].input = quantity
+      else
+        for key, value in pairs(block_elements) do
+          if value.name == product_name then
+            value.input = quantity
+          end
+        end
+      end
     end
   end
 end
