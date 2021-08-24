@@ -562,7 +562,8 @@ end
 ---@return table
 function Player.getBoilers()
   local filters = {}
-  table.insert(filters,{filter="type", type="boiler" ,mode="or"})
+  table.insert(filters,{filter="type", type="boiler", mode="or"})
+  table.insert(filters,{filter="flag", flag="hidden", mode="and", invert=true})
 
   return game.get_filtered_entity_prototypes(filters)
 end
