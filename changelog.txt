@@ -3,6 +3,7 @@ Version: 0.12.6
 Date: 2021-02-13
   Bugfixes:
     - Fixed upload/download
+    - Fixed "Show hidden" filter in energy selector
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.5
 Date: 2021-02-13

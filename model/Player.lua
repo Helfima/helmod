@@ -640,7 +640,7 @@ function Player.getRecipeEntity(name)
   recipe.force = {}
   recipe.group = {name="helmod", order="zzzz"}
   recipe.subgroup = prototype.subgroup
-  recipe.hidden = false
+  recipe.hidden = prototype.flags["hidden"] or false
   recipe.ingredients = ingredients
   recipe.products = entity_prototype:getMineableMiningProducts()
   recipe.localised_description = prototype.localised_description
