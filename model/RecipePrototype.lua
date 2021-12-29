@@ -445,7 +445,7 @@ end
 ---@return boolean
 function RecipePrototype:getHidden()
   if self.lua_prototype ~= nil then
-    if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" or self.lua_type == "resource" then
+    if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" or self.lua_type == "resource" or self.lua_type == "energy" then
       return self.lua_prototype.hidden
     elseif self.lua_type == "technology" then
       return false
