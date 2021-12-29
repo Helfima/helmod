@@ -87,9 +87,11 @@ function RecipeSelector:updateGroups(list_products, list_ingredients, list_trans
   for key, resource in pairs(Player.getResources()) do
     self:appendGroups(resource, "resource", list_products, list_ingredients, list_translate)
   end
-  for key, item in pairs(Player.getItemPrototypes()) do
-    if item.rocket_launch_products ~= nil and table.size(item.rocket_launch_products) > 0 then
-      self:appendGroups(item, "rocket", list_products, list_ingredients, list_translate)
+  if Player.getRecipePrototype("rocket-part") ~= nil and Player.getRecipePrototype("rocket-silo") ~= nil then
+    for key, item in pairs(Player.getItemPrototypes()) do
+      if item.rocket_launch_products ~= nil and table.size(item.rocket_launch_products) > 0 then
+        self:appendGroups(item, "rocket", list_products, list_ingredients, list_translate)
+      end
     end
   end
 end

@@ -1,13 +1,19 @@
 ---------------------------------------------------------------------------------------------------
-Version: 0.12.6
-Date: 2021-02-13
+Version: 0.12.6 - Contibutor: KoharaKazuya,Astorin,veger,KiwiHawk
+Date: 2021-12-29
+  Features:
+    - Add shortcut icon to toolbar to open/close planner
   Changes:
     - Invalid modules are no longer listed in Edit Recipe: Module selection
+    - Updated Japanese translation
+    - Updated Russian translation
+    - Updated English translation
   Bugfixes:
     - Fixed upload/download
     - Fixed invalid modules showing as available in Edit Recipe
     - Fixed "Show hidden" filter in energy selector
     - Fixed hidden boilers showing in Edit Recipe for steam
+    - Fixed error when rocket-part recipe removed
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.5
 Date: 2021-02-13

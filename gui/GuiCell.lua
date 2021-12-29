@@ -139,7 +139,7 @@ end
 ---@return table
 function GuiCell:mask(mask)
   self.m_mask = mask
-  return GuiCell
+  return self
 end
 
 -------------------------------------------------------------------------------

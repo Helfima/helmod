@@ -19,7 +19,7 @@ function GuiSlider:values(minimum_value, maximum_value, value, value_step)
   self.options.maximum_value = maximum_value
   self.options.value = value or minimum_value
   self.options.value_step = value_step or 1
-  return GuiSlider
+  return self
 end
 
 -------------------------------------------------------------------------------
