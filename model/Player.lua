@@ -582,7 +582,8 @@ end
 ---@return table
 function Player.getBoilers()
   local filters = {}
-  table.insert(filters,{filter="type", type="boiler" ,mode="or"})
+  table.insert(filters,{filter="type", type="boiler", mode="or"})
+  table.insert(filters,{filter="flag", flag="hidden", mode="and", invert=true})
 
   return game.get_filtered_entity_prototypes(filters)
 end
@@ -660,7 +661,7 @@ function Player.getRecipeEntity(name)
   recipe.force = {}
   recipe.group = {name="helmod", order="zzzz"}
   recipe.subgroup = prototype.subgroup
-  recipe.hidden = false
+  recipe.hidden = prototype.flags["hidden"] or false
   recipe.ingredients = ingredients
   recipe.products = entity_prototype:getMineableMiningProducts()
   recipe.localised_description = prototype.localised_description

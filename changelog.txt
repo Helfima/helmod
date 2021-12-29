@@ -6,6 +6,8 @@ Date: 2021-02-13
   Bugfixes:
     - Fixed upload/download
     - Fixed invalid modules showing as available in Edit Recipe
+    - Fixed "Show hidden" filter in energy selector
+    - Fixed hidden boilers showing in Edit Recipe for steam
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.5
 Date: 2021-02-13
