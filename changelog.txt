@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.12.7
+Date: 2021-12-29
+  Bugfixes:
+    - Fixed error when flags attribut missing in prototype
+---------------------------------------------------------------------------------------------------
 Version: 0.12.6 - Contibutor: KoharaKazuya,Astorin,veger,KiwiHawk
 Date: 2021-12-29
   Features:
