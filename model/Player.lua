@@ -403,7 +403,6 @@ end
 ---@param lua_recipe table
 ---@return boolean
 function Player.checkFactoryLimitationModule(module, lua_recipe)
-  if Player.getModuleBonus(module.name, "productivity") <= 0 then return true end
   local rules_included, rules_excluded = Player.getRules("module-limitation")
   local model_filter_factory_module = User.getModGlobalSetting("model_filter_factory_module")
   local factory = lua_recipe.factory
@@ -414,16 +413,22 @@ function Player.checkFactoryLimitationModule(module, lua_recipe)
   if category == "rocket-building" then return true end
   if rules_excluded[category] == nil then category = "standard" end
   check_not_bypass = Player.checkRules(check_not_bypass, rules_excluded, category, EntityPrototype(factory.name):native(), false)
-  if table.size(module.limitations) > 0 and Player.getModuleBonus(module.name, "productivity") > 0 and check_not_bypass and model_filter_factory_module == true then
+  if table.size(module.limitations) > 0 and check_not_bypass and model_filter_factory_module == true then
     allowed = false
     for _, recipe_name in pairs(module.limitations) do
-      if lua_recipe.name == recipe_name then allowed = true end
+      if lua_recipe.name == recipe_name then
+        allowed = true
+      end
     end
   end
 
   local allowed_effects = EntityPrototype(factory):getAllowedEffects()
-  if table.size(module.limitations) > 0 and Player.getModuleBonus(module.name, "productivity") > 0 and ( allowed_effects ~= nil and not(allowed_effects.productivity)) and model_filter_factory_module == true then
-    allowed = false
+  if allowed_effects ~= nil and model_filter_factory_module == true then
+    for _, effect in pairs({"speed", "productivity", "consumption", "pollution"}) do
+      if (Player.getModuleBonus(module.name, effect) ~= 0) and (not allowed_effects[effect]) then
+        allowed = false
+      end
+    end
   end
 
   if factory.module_slots ==  0 then
@@ -441,10 +446,25 @@ function Player.checkBeaconLimitationModule(module, lua_recipe)
   local beacon = lua_recipe.beacon
   local allowed = true
   local model_filter_beacon_module = User.getModGlobalSetting("model_filter_beacon_module")
-  local allowed_effects = EntityPrototype(beacon):getAllowedEffects()
-  if table.size(module.limitations) > 0 and Player.getModuleBonus(module.name, "productivity") > 0 and not(allowed_effects.productivity) and model_filter_beacon_module == true then
+
+  if table.size(module.limitations) > 0 and model_filter_beacon_module == true then
     allowed = false
+    for _, recipe_name in pairs(module.limitations) do
+      if lua_recipe.name == recipe_name then
+        allowed = true
+      end
+    end
   end
+
+  local allowed_effects = EntityPrototype(beacon):getAllowedEffects()
+  if allowed_effects ~= nil and model_filter_beacon_module == true then
+    for _, effect in pairs({"speed", "productivity", "consumption", "pollution"}) do
+      if (Player.getModuleBonus(module.name, effect) ~= 0) and (not allowed_effects[effect]) then
+        allowed = false
+      end
+    end
+  end
+
   if beacon.module_slots ==  0 then
     allowed = false
   end

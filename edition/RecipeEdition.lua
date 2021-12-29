@@ -883,10 +883,10 @@ function RecipeEdition:updateFactoryModulesPriority(factory_module_panel)
       local module = ItemPrototype(element.name)
       local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name}):withControlInfo(control_info)
       if Player.checkFactoryLimitationModule(module:native(), recipe) == false then
-        if module.limitation_message_key ~= nil then
-          tooltip = {"item-limitation."..module.limitation_message_key}
+        if (module:native().limitation_message_key ~= nil) and (module:native().limitation_message_key ~= "") then
+          tooltip = {"item-limitation."..module:native().limitation_message_key}
         else
-          tooltip = {"item-limitation.production-module-usable-only-on-intermediates"}
+          tooltip = ""
         end
         color = GuiElement.color_button_rest
       end
@@ -907,19 +907,12 @@ function RecipeEdition:updateFactoryModulesSelector(factory_module_panel)
   module_scroll.style.maximal_height = 118
   local module_table_panel = GuiElement.add(module_scroll, GuiTable("module-selector-table"):column(6))
   for k, element in pairs(Player.getModules()) do
-    local color = nil
     local control_info = "module-add"
     local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name}):withControlInfo(control_info)
     local module = ItemPrototype(element.name)
-    if Player.checkFactoryLimitationModule(module:native(), recipe) == false then
-      if module.limitation_message_key ~= nil then
-        tooltip = {"item-limitation."..module.limitation_message_key}
-      else
-        tooltip = {"item-limitation.production-module-usable-only-on-intermediates"}
-      end
-      color = GuiElement.color_button_rest
+    if Player.checkFactoryLimitationModule(module:native(), recipe) == true then
+      GuiElement.add(module_table_panel, GuiButtonSelectSprite(self.classname, "factory-module-select", model.id, block.id, recipe.id):sprite("entity", element.name):tooltip(tooltip))
     end
-    GuiElement.add(module_table_panel, GuiButtonSelectSprite(self.classname, "factory-module-select", model.id, block.id, recipe.id):sprite("entity", element.name):color(color):tooltip(tooltip))
   end
 end
 
@@ -1124,10 +1117,10 @@ function RecipeEdition:updateBeaconModulesPriority(beacon_module_panel)
       local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name}):withControlInfo(control_info)
       local module = ItemPrototype(element.name)
       if Player.checkBeaconLimitationModule(module:native(), recipe) == false then
-        if module.limitation_message_key ~= nil then
-          tooltip = {"item-limitation."..module.limitation_message_key}
+        if (module:native().limitation_message_key ~= nil) and (module:native().limitation_message_key ~= "") then
+          tooltip = {"item-limitation."..module:native().limitation_message_key}
         else
-          tooltip = {"item-limitation.production-module-usable-only-on-intermediates"}
+          tooltip = ""
         end
         color = GuiElement.color_button_rest
       end
@@ -1147,19 +1140,12 @@ function RecipeEdition:updateBeaconModulesSelector(beacon_module_panel)
   module_scroll.style.maximal_height = 118
   local module_table_panel = GuiElement.add(module_scroll, GuiTable("module-selector-table"):column(6))
   for k, element in pairs(Player.getModules()) do
-    local color = nil
     local control_info = "module-add"
     local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name}):withControlInfo(control_info)
     local module = ItemPrototype(element.name)
-    if Player.checkBeaconLimitationModule(module:native(), recipe) == false then
-      if module.limitation_message_key ~= nil then
-        tooltip = {"item-limitation."..module.limitation_message_key}
-      else
-        tooltip = {"item-limitation.production-module-usable-only-on-intermediates"}
-      end
-      color = GuiElement.color_button_rest
+    if Player.checkBeaconLimitationModule(module:native(), recipe) == true then
+      GuiElement.add(module_table_panel, GuiButtonSelectSprite(self.classname, "beacon-module-select", model.id, block.id, recipe.id):sprite("entity", element.name):tooltip(tooltip))
     end
-    GuiElement.add(module_table_panel, GuiButtonSelectSprite(self.classname, "beacon-module-select", model.id, block.id, recipe.id):sprite("entity", element.name):color(color):tooltip(tooltip))
   end
 end
 
