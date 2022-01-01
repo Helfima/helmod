@@ -173,7 +173,12 @@ function BurnerPrototype:getFuelPrototypes()
   for fuel_category,_ in pairs(self:getFuelCategories()) do
     table.insert(filters, {filter="fuel-category", mode="or", invert=false,["fuel-category"]=fuel_category})
   end
-  return Player.getItemPrototypes(filters)
+  
+  local items = {}
+  for _, fuel in pairs(Player.getItemPrototypes(filters)) do
+    table.insert(items, ItemPrototype(fuel))
+  end
+  return items
 end
 
 -------------------------------------------------------------------------------
@@ -183,7 +188,7 @@ function BurnerPrototype:getFirstFuelPrototype()
   local fuel_items = self:getFuelPrototypes()
   local first_fuel = nil
   for _,fuel_item in pairs(fuel_items) do
-    if first_fuel == nil or fuel_item.name == "coal" then
+    if first_fuel == nil or fuel_item:native().name == "coal" then
       first_fuel = fuel_item
     end
   end
@@ -194,12 +199,14 @@ end
 ---Return fuel prototype
 ---@return ItemPrototype
 function BurnerPrototype:getFuelPrototype()
-  local fuel = self.factory.fuel
-  if fuel == nil then
-    local first_fuel = self:getFirstFuelPrototype()
-    fuel = first_fuel.name
+  local fuel_name = self.factory.fuel
+  local fuel = nil
+  if fuel_name == nil then
+    fuel = self:getFirstFuelPrototype()
+  else
+    fuel = ItemPrototype(fuel_name)
   end
-  return ItemPrototype(fuel)
+  return fuel
 end
 
 -------------------------------------------------------------------------------
@@ -268,12 +275,19 @@ end
 ---Return fuel fluid prototypes
 ---@return table
 function FluidSourcePrototype:getFuelPrototypes()
-  if self.lua_prototype ~= nil and self.lua_prototype.fluid_box ~= nil and self.lua_prototype.fluid_box.filter ~= nil then
-    return {self.lua_prototype.fluid_box.filter}
-  else
-    local fuels = Player.getFluidFuelPrototypes()
-    return fuels
+  if self.lua_prototype ~= nil then
+    local fluidbox = self.lua_prototype.fluid_box
+    if fluidbox ~= nil and fluidbox.filter ~= nil then
+      if self:getBurnsFluid() then
+        return {FluidPrototype(fluidbox.filter)}
+      else
+        return Player.getFluidTemperaturePrototypes(fluidbox.filter)
+      end
+    end
   end
+
+  local fuels = Player.getFluidFuelPrototypes()
+  return fuels
 end
 
 -------------------------------------------------------------------------------
@@ -285,6 +299,7 @@ function FluidSourcePrototype:getFirstFuelPrototype()
   for _,fuel_item in pairs(fuel_items) do
     if first_fuel == nil then
       first_fuel = fuel_item
+      break
     end
   end
   return first_fuel
@@ -294,12 +309,17 @@ end
 ---Return fuel prototype
 ---@return FluidPrototype
 function FluidSourcePrototype:getFuelPrototype()
-  local fuel = self.factory.fuel
-  if fuel == nil then
-    local first_fuel = self:getFirstFuelPrototype()
-    fuel = first_fuel.name
+  local fuel_name = self.factory.fuel
+  local fuel = nil
+  if fuel_name == nil then
+    fuel = self:getFirstFuelPrototype()
+  elseif type(fuel_name) == "string" then
+    fuel = FluidPrototype(fuel_name)
+  else
+    fuel = FluidPrototype(fuel_name.name)
+    fuel:setTemperature(fuel_name.temperature)
   end
-  return FluidPrototype(fuel)
+  return fuel
 end
 
 -------------------------------------------------------------------------------

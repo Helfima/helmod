@@ -260,10 +260,10 @@ end
 -------------------------------------------------------------------------------
 ---Update a factory
 ---@param recipe table
----@param fuel_name string
-function ModelBuilder.updateFuelFactory(recipe, fuel_name)
-  if recipe ~= nil and fuel_name ~= nil then
-    recipe.factory.fuel = fuel_name or "coal"
+---@param fuel string or table: {name = string, temperature = number}
+function ModelBuilder.updateFuelFactory(recipe, fuel)
+  if recipe ~= nil and fuel ~= nil then
+    recipe.factory.fuel = fuel
   end
 end
 

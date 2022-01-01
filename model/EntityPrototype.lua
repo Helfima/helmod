@@ -297,7 +297,15 @@ end
 function EntityPrototype:getFluidFuelPrototype(current)
   if self:getEnergyTypeInput() == "fluid" then
     if current == true and self.factory ~= nil and self.factory.fuel ~= nil then
-      return FluidPrototype(self.factory.fuel)
+      local fuel_name = self.factory.fuel
+      local fuel = nil
+      if type(fuel_name) == "string" then
+        fuel = FluidPrototype(fuel_name)
+      else
+        fuel = FluidPrototype(fuel_name.name)
+        fuel:setTemperature(fuel_name.temperature)
+      end
+      return fuel
     else
       if self:getFluidUsage() > 0 then
         local fluidboxes = self:getFluidboxPrototypes()
@@ -310,7 +318,7 @@ function EntityPrototype:getFluidFuelPrototype(current)
                 local fuels = Player.getFluidFuelPrototypes()
                 local first = nil
                 for _,fuel in pairs(fuels) do
-                  if first == nil or first.fuel_value > fuel.fuel_value then
+                  if (first == nil) or (first:getFuelValue() > fuel:getFuelValue()) then
                     first = fuel
                   end
                 end
@@ -341,15 +349,13 @@ end
 function EntityPrototype:getFluidFuelPrototypes()
   local energy_source = self:getEnergySource()
   if energy_source:getType() == "fluid" then
-    if not(energy_source:getBurnsFluid()) then
+    if not energy_source:getBurnsFluid() then
       local fluidboxes = self:getFluidboxPrototypes()
       if fluidboxes ~= nil then
         for _,fluidbox in pairs(fluidboxes) do
           if fluidbox.production_type == "input-output" or fluidbox.production_type == "input" then
             if fluidbox.filter ~= nil then
-              return {fluidbox.filter}
-            else
-              return Player.getFluidFuelPrototypes()
+              return Player.getFluidTemperaturePrototypes(fluidbox.filter)
             end
           end
         end
@@ -452,7 +458,7 @@ function EntityPrototype:getFluel()
     if energy_type == "fluid" then
       local fuel = self:getFluidFuelPrototype(true)
       if fuel ~= nil then
-        return {name=fuel:native().name, type="fluid"}
+        return {name=fuel:native().name, type="fluid", temperature=fuel.temperature}
       end
     elseif energy_type == "burner" then
       local fuel = energy_prototype:getFuelPrototype()

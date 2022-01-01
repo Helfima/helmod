@@ -349,7 +349,7 @@ end
 ---Set a factory
 ---@param recipe table
 ---@param factory_name string
----@param factory_fuel string
+---@param factory_fuel table
 function Model.setFactory(recipe, factory_name, factory_fuel)
   if recipe ~= nil then
     local factory_prototype = EntityPrototype(factory_name)

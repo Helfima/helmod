@@ -993,7 +993,13 @@ end
 function Player.getFluidFuelPrototypes()
   local filters = {}
   table.insert(filters, {filter="fuel-value", mode="or", invert=false, comparison=">", value=0})
-  return Player.getFluidPrototypes(filters)
+  
+  local items = {}
+  
+  for _, fluid in pairs(Player.getFluidPrototypes(filters)) do
+    table.insert(items, FluidPrototype(fluid))
+  end
+  return items
 end
 
 -------------------------------------------------------------------------------
@@ -1085,6 +1091,56 @@ function Player.parseNumber(number)
   elseif string.lower(power) == "gj" then
     return tonumber(value)*1000*1000*1000
   end
+end
+
+-------------------------------------------------------------------------------
+---Return fluid prototypes with temperature
+---@param fluid LuaFluidPrototype
+---@return table
+function Player.getFluidTemperaturePrototypes(fluid)
+
+  -- Find all ways of making this fluid
+
+  local temperatures = {}
+
+  -- Recipes
+  local filters = {}
+  table.insert(filters, {filter = "hidden", invert = true, mode = "and"})
+  table.insert(filters, {filter = "has-product-fluid", elem_filters = {{filter = "name", name = fluid.name}}, mode = "and"})
+  local prototypes = game.get_filtered_recipe_prototypes(filters)
+
+  for recipe_name, recipe in pairs(prototypes) do
+    for product_name, product in pairs(recipe.products) do
+      if product.name == fluid_name and product.temperature then
+        temperatures[product.temperature] = true
+      end
+    end
+  end
+
+  -- Boilers
+  local filters = {}
+  table.insert(filters, {filter = "type", type = "boiler", mode = "and"})
+  table.insert(filters, {filter = "flag", flag = "hidden", mode = "and", invert = true})
+  local boilers = game.get_filtered_entity_prototypes(filters)
+
+  for boiler_name, boiler in pairs(boilers) do
+    for _, fluidbox in pairs(boiler.fluidbox_prototypes) do
+      if (fluidbox.production_type == "output") and fluidbox.filter and (fluidbox.filter.name == fluid.name) then
+        temperatures[boiler.target_temperature] = true
+      end
+    end
+  end
+
+  -- Build result table of FluidPrototype
+  local items = {}
+  local item
+  for temperature, _ in pairs(temperatures) do
+    item = FluidPrototype(fluid)
+    item:setTemperature(temperature)
+    table.insert(items, item)
+  end
+
+  return items
 end
 
 return Player

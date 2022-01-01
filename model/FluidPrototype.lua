@@ -41,3 +41,17 @@ function FluidPrototype:getFuelEmissionsMultiplier()
   if self.lua_prototype == nil then return 1 end
   return self.lua_prototype.emissions_multiplier or 1
 end
+
+-------------------------------------------------------------------------------
+---Return temperature
+---@return number
+function FluidPrototype:getTemperature()
+  return self.temperature
+end
+
+-------------------------------------------------------------------------------
+---Return fluid temperature
+---@return number or nil
+function FluidPrototype:setTemperature(value)
+  self.temperature = value
+end

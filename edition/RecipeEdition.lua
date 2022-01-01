@@ -246,7 +246,6 @@ function RecipeEdition:onEvent(event)
     end
 
     if event.action == "factory-select" then
-      ---item1=recipe item2=factory
       Model.setFactory(recipe, event.item4)
       ModelBuilder.applyFactoryModulePriority(recipe)
       ModelCompute.update(model)
@@ -279,23 +278,25 @@ function RecipeEdition:onEvent(event)
       local factory_prototype = EntityPrototype(recipe.factory)
       local energy_type = factory_prototype:getEnergyTypeInput()
       local fuel_list = {}
-      if energy_type == "burner" or energy_type == "fluid" then
+      if energy_type == "burner" then
         local energy_prototype = factory_prototype:getEnergySource()
-
-        if energy_type == "fluid" then
-          fuel_list = factory_prototype:getFluidFuelPrototypes()
-        else
-          fuel_list = energy_prototype:getFuelPrototypes()
-        end
+        fuel_list = energy_prototype:getFuelPrototypes()
+      elseif energy_type == "fluid" then
+        fuel_list = factory_prototype:getFluidFuelPrototypes()
       end
-      local fuel_name = nil
+      local fuel = nil
       for _,item in pairs(fuel_list) do
         if index == 1 then
-          fuel_name = item.name
-          break end
+          if energy_type == "fluid" then
+            fuel = {name = item:native().name, temperature = item.temperature}
+          else
+            fuel = item:native().name
+          end
+          break
+        end
         index = index - 1
       end
-      ModelBuilder.updateFuelFactory(recipe, fuel_name)
+      ModelBuilder.updateFuelFactory(recipe, fuel)
       ModelCompute.update(model)
       self:updateFactoryInfoTool(event)
       self:updateFactoryInfo(event)
@@ -724,9 +725,19 @@ function RecipeEdition:updateFactoryInfo(event)
       if fuel_list ~= nil and factory_fuel ~= nil then
         local items = {}
         for _,item in pairs(fuel_list) do
-          table.insert(items,string.format("[%s=%s]", fuel_type, item.name))
+          if (energy_type == "fluid") and (not energy_prototype:getBurnsFluid()) then
+            table.insert(items,string.format("[%s=%s] %s °C", fuel_type, item:native().name, item.temperature))
+          else
+            table.insert(items,string.format("[%s=%s]", fuel_type, item:native().name))
+          end
         end
-        local default_fuel = string.format("[%s=%s]", fuel_type, factory_fuel:native().name)
+        
+        local default_fuel
+        if (energy_type == "fluid") and (not energy_prototype:getBurnsFluid()) then
+          default_fuel = string.format("[%s=%s] %s °C", fuel_type, factory_fuel:native().name, factory_fuel.temperature)
+        else
+          default_fuel = string.format("[%s=%s]", fuel_type, factory_fuel:native().name)
+        end
         GuiElement.add(input_panel, GuiLabel("label-burner"):caption({"helmod_common.resource"}))
         GuiElement.add(input_panel, GuiDropDown(self.classname, "factory-fuel-update", model.id, block.id, recipe.id, fuel_type):items(items, default_fuel))
       end
