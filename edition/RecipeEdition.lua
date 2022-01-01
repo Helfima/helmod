@@ -726,7 +726,7 @@ function RecipeEdition:updateFactoryInfo(event)
         local items = {}
         for _,item in pairs(fuel_list) do
           if (energy_type == "fluid") and (not energy_prototype:getBurnsFluid()) then
-            table.insert(items,string.format("[%s=%s] %s °C", fuel_type, item:native().name, item.temperature))
+            table.insert(items,string.format("[%s=%s] %s Â°C", fuel_type, item:native().name, item.temperature))
           else
             table.insert(items,string.format("[%s=%s]", fuel_type, item:native().name))
           end
@@ -734,7 +734,7 @@ function RecipeEdition:updateFactoryInfo(event)
         
         local default_fuel
         if (energy_type == "fluid") and (not energy_prototype:getBurnsFluid()) then
-          default_fuel = string.format("[%s=%s] %s °C", fuel_type, factory_fuel:native().name, factory_fuel.temperature)
+          default_fuel = string.format("[%s=%s] %s Â°C", fuel_type, factory_fuel:native().name, factory_fuel.temperature)
         else
           default_fuel = string.format("[%s=%s]", fuel_type, factory_fuel:native().name)
         end
