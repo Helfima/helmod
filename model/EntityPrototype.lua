@@ -91,7 +91,7 @@ end
 -------------------------------------------------------------------------------
 ---Return nominal energy for generator
 ---@see https://wiki.factorio.com/Power_production
----@see https://wiki.factorio.com/Liquids/Hot
+---@see https://wiki.factorio.com/Steam_engine
 ---@see https://wiki.factorio.com/Tutorial:Applied_power_math
 ---@return number --default 0
 function EntityPrototype:getEnergyConsumption()
