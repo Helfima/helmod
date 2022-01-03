@@ -253,25 +253,6 @@ function RecipeEdition:onEvent(event)
       Controller:send("on_gui_refresh", event)
     end
 
-    if event.action == "factory-temperature" then
-      local factory_prototype = EntityPrototype(recipe.factory)
-      local temperature = factory_prototype:getMaximumTemperature()
-
-      local text = event.element.text
-      local ok , err = pcall(function()
-        temperature = formula(text) or 0
-      end)
-      if not(ok) then
-        Player.print("Formula is not valid!")
-      end
-        
-      ModelBuilder.updateTemperatureFactory(recipe, temperature)
-      ModelCompute.update(model)
-      self:updateFactoryInfo(event)
-      self:updateHeader(event)
-      Controller:send("on_gui_refresh", event)
-    end
-
     if event.action == "factory-fuel-update" then
 
       local index = event.element.selected_index
@@ -298,7 +279,9 @@ function RecipeEdition:onEvent(event)
       end
       ModelBuilder.updateFuelFactory(recipe, fuel)
       ModelCompute.update(model)
-      self:updateFactoryInfoTool(event)
+      if recipe.type ~= "energy" then
+        self:updateFactoryInfoTool(event)
+      end
       self:updateFactoryInfo(event)
       self:updateHeader(event)
       Controller:send("on_gui_refresh", event)
@@ -321,10 +304,6 @@ function RecipeEdition:onEvent(event)
         User.setParameter("default_factory_mode", "category")
       elseif event.item4 == "module" then
         User.setParameter("default_factory_with_module", not(User.getParameter("default_factory_with_module")))
-      elseif event.item4 == "temperature" then
-        ModelBuilder.updateFactoryTemperature(recipe)
-        ModelCompute.update(model)
-        Controller:send("on_gui_refresh", event)
       end
       self:update(event)
     end
@@ -522,9 +501,6 @@ function RecipeEdition:onUpdate(event)
       self:updateFactoryInfo(event)
       self:updateFactoryModulesActive(event)
       self:updateFactoryModules(event)
-    end
-
-    if recipe.type ~= "energy" then
       self:updateBeaconInfoTool(event)
       self:updateBeaconInfo(event)
       self:updateBeaconModulesActive(event)
@@ -621,12 +597,6 @@ function RecipeEdition:updateFactoryInfoTool(event)
     local module_button_style = button_style
     if default_factory_with_module == true then module_button_style = selected_button_style end
     GuiElement.add(tool_panel2, GuiButton(self.classname, "factory-tool", model.id, block.id, recipe.id, "module"):caption("M"):style(module_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-module"}))
-    if factory_prototype:getType() == "boiler" then
-      local temperature_button_style = button_style
-      if factory.temperature_enabled == true then temperature_button_style = selected_button_style end
-      GuiElement.add(tool_panel2, GuiButton(self.classname, "factory-tool", model.id, block.id, recipe.id, "temperature"):caption("T"):style(temperature_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-temperature"}))
-    end
-
   end
 end
 
@@ -715,25 +685,25 @@ function RecipeEdition:updateFactoryInfo(event)
       local factory_fuel = nil
 
       if energy_type == "fluid" then
-        factory_fuel = factory_prototype:getFluidFuelPrototype(true)
         fuel_list = factory_prototype:getFluidFuelPrototypes()
+        factory_fuel = factory_prototype:getFluidFuelPrototype(true)
       else
         fuel_list = energy_prototype:getFuelPrototypes()
         factory_fuel = energy_prototype:getFuelPrototype()
       end
-      
+
       if fuel_list ~= nil and factory_fuel ~= nil then
         local items = {}
         for _,item in pairs(fuel_list) do
-          if (energy_type == "fluid") and (not energy_prototype:getBurnsFluid()) then
+          if (energy_type == "fluid") and item.temperature then
             table.insert(items,string.format("[%s=%s] %s °C", fuel_type, item:native().name, item.temperature))
           else
             table.insert(items,string.format("[%s=%s]", fuel_type, item:native().name))
           end
         end
-        
+
         local default_fuel
-        if (energy_type == "fluid") and (not energy_prototype:getBurnsFluid()) then
+        if (energy_type == "fluid") and factory_fuel.temperature then
           default_fuel = string.format("[%s=%s] %s °C", fuel_type, factory_fuel:native().name, factory_fuel.temperature)
         else
           default_fuel = string.format("[%s=%s]", fuel_type, factory_fuel:native().name)
@@ -741,11 +711,6 @@ function RecipeEdition:updateFactoryInfo(event)
         GuiElement.add(input_panel, GuiLabel("label-burner"):caption({"helmod_common.resource"}))
         GuiElement.add(input_panel, GuiDropDown(self.classname, "factory-fuel-update", model.id, block.id, recipe.id, fuel_type):items(items, default_fuel))
       end
-      ---local maximum_temperature = factory_prototype:getMaximumTemperature()
-      ---if maximum_temperature > 0 then
-      ---  GuiElement.add(input_panel, GuiLabel("label-temperature"):caption({"helmod_common.temperature"}))
-      ---  GuiElement.add(input_panel, GuiTextField(self.classname, "factory-temperature", block.id, recipe.id):text(factory.temperature or maximum_temperature):isNumeric())
-      ---end
     end
 
     ---speed

@@ -80,6 +80,12 @@ function EnergySourcePrototype:getFuelPrototype()
 end
 
 -------------------------------------------------------------------------------
+---Return speed modifier
+---@return number
+function EnergySourcePrototype:getSpeedModifier()
+  return 1
+end
+-------------------------------------------------------------------------------
 ---@class ElectricSourcePrototype
 ElectricSourcePrototype = newclass(EnergySourcePrototype,function(base,lua_prototype)
   EnergySourcePrototype.init(base,lua_prototype)
@@ -384,6 +390,37 @@ function FluidSourcePrototype:getFuelCount()
     local fuel_fluid = {type="fluid", name=factory_fuel:native().name, count=burner_count}
     return fuel_fluid
   end
+end
+
+-------------------------------------------------------------------------------
+---Return maximum temperature
+---@return number --default 0
+function FluidSourcePrototype:getMaximumTemperature()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.maximum_temperature or 0
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
+---Return speed modifier
+---@return number --default 1
+function FluidSourcePrototype:getSpeedModifier()
+  if self.lua_prototype ~= nil then
+    if not self:getBurnsFluid() then
+      local maximum_temperature = self:getMaximumTemperature()
+      
+      if maximum_temperature > 15 then
+        maximum_temperature = maximum_temperature - 15
+        local fluid_fuel = self:getFuelPrototype()
+        local fuel_temperature = fluid_fuel:getTemperature() - 15
+        local effectivity = self:getEffectivity()
+
+        return math.min(1, fuel_temperature / maximum_temperature * effectivity)
+      end
+    end
+  end
+  return 1
 end
 
 -------------------------------------------------------------------------------

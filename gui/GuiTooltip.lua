@@ -377,7 +377,11 @@ function GuiTooltipFactory:create()
     end
     local fuel = prototype:getFluel()
     if fuel ~= nil then
-      table.insert(tooltip, {"", "\n", string.format("[%s=%s]", fuel.type, fuel.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close})
+      if fuel.temperature then
+        table.insert(tooltip, {"", "\n", string.format("[%s=%s] %s °C", fuel.type, fuel.name, fuel.temperature), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close})
+      else
+        table.insert(tooltip, {"", "\n", string.format("[%s=%s]", fuel.type, fuel.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close})
+      end
     end
   end
   return tooltip

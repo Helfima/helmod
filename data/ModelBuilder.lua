@@ -167,15 +167,6 @@ function ModelBuilder.updateRecipeProduction(recipe, production)
 end
 
 -------------------------------------------------------------------------------
----Update temperature factory
----@param recipe table
-function ModelBuilder.updateFactoryTemperature(recipe)
-  if recipe ~= nil then
-    recipe.factory.temperature_enabled = not(recipe.factory.temperature_enabled)
-  end
-end
-
--------------------------------------------------------------------------------
 ---Update a factory number
 ---@param recipe table
 ---@param value any
@@ -244,16 +235,6 @@ function ModelBuilder.updateMatrixSolver(block, recipe)
       end
     end
     
-  end
-end
-
--------------------------------------------------------------------------------
----Update a factory
----@param recipe table
----@param value any
-function ModelBuilder.updateTemperatureFactory(recipe, value)
-  if recipe ~= nil then
-    recipe.factory.temperature = value or 0
   end
 end
 

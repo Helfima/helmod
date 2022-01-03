@@ -134,7 +134,7 @@ function RecipePrototype:getProducts(factory)
         lua_products[burnt_id] = {type=burnt_result.type,name=burnt_result.name,amount=lua_products[product_id].amount}
       end
     end
-    if factory ~= nil and factory.temperature_enabled == true and factory_prototype:getType() == "boiler" then
+    if factory ~= nil and factory_prototype:getType() == "boiler" then
       local fluid_production = factory_prototype:getFluidProductionFilter()
       if lua_products[product_id] ~= nil and fluid_production.name == raw_product.name then
         lua_products[product_id].temperature = factory_prototype:getTargetTemperature()
@@ -170,7 +170,6 @@ function RecipePrototype:getProducts(factory)
       end
     end
   end
-
   return raw_products
 end
 
@@ -332,7 +331,6 @@ function RecipePrototype:getIngredients(factory)
     local speed_factory = 1
     local consumption_effect = 1
     if factory ~= nil then
-      speed_factory = factory.speed
       if factory.effects ~= nil then
         consumption_effect = 1 + (factory.effects.consumption or 0)
       end
@@ -349,7 +347,7 @@ function RecipePrototype:getIngredients(factory)
       if energy_type == "burner" then
         if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then
           local fuel_count = energy_prototype:getFuelCount()
-          local factor = self:getEnergy()/speed_factory
+          local factor = self:getEnergy()
           local burner_ingredient = {name=fuel_count.name, type=fuel_count.type, amount=fuel_count.count*factor, burnt=true}
           table.insert(raw_ingredients, burner_ingredient)
         end
@@ -361,8 +359,8 @@ function RecipePrototype:getIngredients(factory)
         local fluid_fuel = factory_prototype:getFluidFuelPrototype(true)
         if fluid_fuel ~= nil and fluid_fuel:native() ~= nil then
           local amount = factory_prototype:getFluidConsumption()
-          local factor = self:getEnergy()*consumption_effect/speed_factory
-          local burner_ingredient = {name=fluid_fuel:native().name, type="fluid", amount=amount*factor, burnt=true}
+          local factor = self:getEnergy()*consumption_effect
+          local burner_ingredient = {name=fluid_fuel:native().name, type="fluid", amount=amount*factor, burnt=true, temperature=fluid_fuel.temperature}
           table.insert(raw_ingredients, burner_ingredient)
         end
       end
@@ -371,7 +369,7 @@ function RecipePrototype:getIngredients(factory)
       if energy_type == "burner" then
         if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then
           local fuel_count = energy_prototype:getFuelCount()
-          local factor = self:getEnergy()/speed_factory
+          local factor = self:getEnergy()
           local burner_ingredient = {name=fuel_count.name, type=fuel_count.type, amount=fuel_count.count*factor, by_time=true, burnt=true}
           table.insert(raw_ingredients, burner_ingredient)
         end
@@ -379,8 +377,8 @@ function RecipePrototype:getIngredients(factory)
         local fluid_fuel = factory_prototype:getFluidFuelPrototype(true)
         if fluid_fuel ~= nil and fluid_fuel:native() ~= nil then
           local amount = factory_prototype:getFluidConsumption()
-          local factor = self:getEnergy()*consumption_effect/speed_factory
-          local burner_ingredient = {name=fluid_fuel:native().name, type="fluid", amount=amount*factor, by_time=true, burnt=true}
+          local factor = self:getEnergy() * consumption_effect
+          local burner_ingredient = {name=fluid_fuel:native().name, type="fluid", amount=amount*factor, by_time=true, burnt=true, temperature=fluid_fuel.temperature}
           table.insert(raw_ingredients, burner_ingredient)
         end
       end
