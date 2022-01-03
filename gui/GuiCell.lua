@@ -449,7 +449,8 @@ function GuiCellProductSm:create(parent)
   else
     GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):sprite(element.type, element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip({self.options.tooltip, Player.getLocalisedName(element)}))
   end
-
+  GuiElement.infoTemperature(row1, element)
+  
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
   local caption3 = Format.formatNumber(element.count, 5)
   if element.type == "energy" then caption3 = Format.formatNumberKilo(element.count, "W") end
