@@ -594,7 +594,7 @@ end
 function Player.getOffshorePump(fluid_name)
   if fluid_name == nil then fluid_name = "water" end
   local filters = {}
-  table.insert(filters,{filter="type", type="offshore-pump" ,mode="or"})
+  table.insert(filters, {filter="type", type="offshore-pump", mode="or"})
   local entities = game.get_filtered_entity_prototypes(filters)
   local offshore_pump = {}
   for key,entity in pairs(entities) do
@@ -992,8 +992,9 @@ end
 ---@return table
 function Player.getFluidFuelPrototypes()
   local filters = {}
-  table.insert(filters, {filter="fuel-value", mode="or", invert=false, comparison=">", value=0})
-  
+  table.insert(filters, {filter = "hidden", invert = true, mode = "and"})
+  table.insert(filters, {filter = "fuel-value", mode= "and", invert = false, comparison = ">", value = 0})
+
   local items = {}
   
   for _, fluid in pairs(Player.getFluidPrototypes(filters)) do
