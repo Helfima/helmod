@@ -85,6 +85,7 @@ end
 function EnergySourcePrototype:getSpeedModifier()
   return 1
 end
+
 -------------------------------------------------------------------------------
 ---@class ElectricSourcePrototype
 ElectricSourcePrototype = newclass(EnergySourcePrototype,function(base,lua_prototype)

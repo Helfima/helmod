@@ -105,7 +105,6 @@ function EnergySelector:buildPrototypeTooltip(prototype)
   ---ingredients
   local ingredients = recipe_prototype:getIngredients(prototype)
   if table.size(ingredients) > 0 then
-    --log(serpent.block(ingredients, {comment = true, refcomment = true, tablecomment = false}))
     table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.ingredients"}, ":", helmod_tag.color.close, helmod_tag.font.close})
     for _,ingredient in pairs(ingredients) do
       if ingredient.type == "energy" and ingredient.name == "energy" then

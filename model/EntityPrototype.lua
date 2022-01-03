@@ -524,7 +524,7 @@ function EntityPrototype:getCraftingSpeed()
     local energy_prototype = self:getEnergySource()
     local speedModifier = energy_prototype:getSpeedModifier()
 
-    return (self.lua_prototype.crafting_speed or 0) * speedModifier
+    return (self.lua_prototype.crafting_speed or 1) * speedModifier
   end
   return 0
 end
