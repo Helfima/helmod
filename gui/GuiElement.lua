@@ -125,9 +125,6 @@ end
 ---Get options
 ---@return table
 function GuiElement:getOptions()
-  if self.m_index ~= nil then
-    table.insert(self.name, self.m_index)
-  end
   self.options.name = table.concat(self.name,"=")
   if self.is_caption then
     self.options.caption = self.m_caption

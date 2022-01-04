@@ -81,7 +81,7 @@ function ProductEdition:onUpdate(event)
     if block.by_product == false then
       block_elements = block.ingredients
     end
-    local element_name = event.item4
+    local element_name = event.item5
     if block_elements ~= nil and block_elements[element_name] ~= nil then
       product = block_elements[element_name]
       product_count = product.input or 0
@@ -164,7 +164,7 @@ function ProductEdition:onEvent(event)
           quantity = quantity * 1e6
         end
         if quantity == 0 then quantity = nil end
-        ModelBuilder.updateProduct(block, event.item3, quantity)
+        ModelBuilder.updateProduct(block, event.item4, quantity)
         ModelCompute.update(model)
         self:close()
         Controller:send("on_gui_refresh", event)

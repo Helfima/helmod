@@ -54,6 +54,7 @@ end
 ---@return GuiButton
 function GuiButton:index(index)
   self.m_index = index
+  table.insert(self.name, index)
   return self
 end
 

@@ -494,9 +494,9 @@ function ModelCompute.getBlockMatrix(block)
         table.insert(row_input, {name="Input", type="none"})
         table.insert(row_z, {name="Z", type="none"})
       else
-        if block_elements ~= nil and block_elements[col_header.key] ~= nil and not(input_ready[col_header.name]) and col_header.index == 1 then
+        if block_elements ~= nil and block_elements[col_header.key] ~= nil and not(input_ready[col_header.key]) and col_header.index == 1 then
           table.insert(row_input, block_elements[col_header.key].input or 0)
-          input_ready[col_header.name] = true
+          input_ready[col_header.key] = true
         else
           table.insert(row_input, 0)
         end

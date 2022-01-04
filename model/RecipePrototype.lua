@@ -328,7 +328,6 @@ end
 function RecipePrototype:getIngredients(factory)
   local raw_ingredients = self:getRawIngredients()
   if self.lua_prototype ~= nil then
-    local speed_factory = 1
     local consumption_effect = 1
     if factory ~= nil then
       if factory.effects ~= nil then
