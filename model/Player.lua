@@ -1101,6 +1101,7 @@ end
 function Player.getFluidTemperaturePrototypes(fluid)
 
   -- Find all ways of making this fluid
+  --log(serpent.block(fluid, {comment = true, refcomment = true, tablecomment = false}))
 
   local temperatures = {}
 
@@ -1112,7 +1113,7 @@ function Player.getFluidTemperaturePrototypes(fluid)
 
   for recipe_name, recipe in pairs(prototypes) do
     for product_name, product in pairs(recipe.products) do
-      if product.name == fluid_name and product.temperature then
+      if product.name == fluid.name and product.temperature then
         temperatures[product.temperature] = true
       end
     end
