@@ -137,6 +137,7 @@ function RecipePrototype:getProducts(factory)
     if factory ~= nil and factory_prototype:getType() == "boiler" then
       local fluid_production = factory_prototype:getFluidProductionFilter()
       if lua_products[product_id] ~= nil and fluid_production.name == raw_product.name then
+        lua_products[product_id].amount = factory_prototype:getFluidProduction()
         lua_products[product_id].temperature = factory_prototype:getTargetTemperature()
       end
     end

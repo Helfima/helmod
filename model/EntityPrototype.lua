@@ -589,7 +589,7 @@ function EntityPrototype:speedFactory(recipe)
   if self.lua_prototype.type == "boiler" then
     ---@see https://wiki.factorio.com/Boiler
     ---info energy 1J=1W
-    return self:getSpeedModifier()
+    return 1
   elseif recipe.type == "resource" then
     ---(mining power - ore mining hardness) * mining speed
     ---@see https://wiki.factorio.com/Mining
