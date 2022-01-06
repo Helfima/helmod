@@ -110,7 +110,7 @@ function ProductEdition:updateInfo(model, block)
 
     local caption = {"helmod_common.quantity"}
     local count = product_count or 0
-    if block.isEnergy then
+    if (product.name == "steam-heat") or (product.name == "energy") then
       caption = {"", {"helmod_common.quantity"}, "(MW)"}
       count = count/1e6
     end
@@ -160,7 +160,7 @@ function ProductEdition:onEvent(event)
       local operation = input_quantity.text
       local ok , err = pcall(function()
         local quantity = formula(operation)
-        if block ~= nil and block.isEnergy then
+        if (event.item4 == "steam-heat") or (event.item4 == "energy") then
           quantity = quantity * 1e6
         end
         if quantity == 0 then quantity = nil end
