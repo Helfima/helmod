@@ -184,10 +184,10 @@ function GuiTooltip:appendProductInfo(tooltip, element)
       if element.temperature then
         table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.temperature"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, element.temperature or 0, "°c", helmod_tag.font.close})
       end
-      if element.minimum_temperature then
+      if element.minimum_temperature and (element.minimum_temperature >= -1e300) then
         table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.temperature-min"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, element.minimum_temperature or 0, "°c", helmod_tag.font.close})
       end
-      if element.maximum_temperature then
+      if element.maximum_temperature and (element.maximum_temperature <= 1e300) then
         table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.temperature-max"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, element.maximum_temperature or 0, "°c", helmod_tag.font.close})
       end
     end

@@ -263,7 +263,17 @@ function Player.getLocalisedName(element)
     if element.type == 1 or element.type == "fluid" then
       local item = Player.getFluidPrototype(element.name)
       if item ~= nil then
-        localisedName = item.localised_name
+        if element.temperature then
+          localisedName = {"helmod_common.fluid-temperature", item.localised_name, element.temperature}
+        elseif (element.minimum_temperature and (element.minimum_temperature >= -1e300)) and (element.maximum_temperature and (element.maximum_temperature <= 1e300)) then
+          localisedName = {"helmod_common.fluid-temperature-range", item.localised_name, element.minimum_temperature, element.maximum_temperature}
+        elseif (element.minimum_temperature and (element.minimum_temperature >= -1e300)) then
+          localisedName = {"helmod_common.fluid-temperature-min", item.localised_name, element.minimum_temperature}
+        elseif (element.maximum_temperature and (element.maximum_temperature <= 1e300)) then
+          localisedName = {"helmod_common.fluid-temperature-max", item.localised_name, element.maximum_temperature}
+        else
+          localisedName = item.localised_name
+        end
       end
     end
   end
