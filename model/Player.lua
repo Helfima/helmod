@@ -1111,7 +1111,6 @@ end
 function Player.getFluidTemperaturePrototypes(fluid)
 
   -- Find all ways of making this fluid
-  --log(serpent.block(fluid, {comment = true, refcomment = true, tablecomment = false}))
 
   local temperatures = {}
 
