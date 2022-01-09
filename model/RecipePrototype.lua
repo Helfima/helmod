@@ -445,7 +445,10 @@ function RecipePrototype:getHidden()
     elseif self.lua_type == "technology" then
       return false
     elseif self.lua_type == "fluid" then
-      return not(self.lua_prototype.name == "water" or self.lua_prototype.name == "steam")
+      for _, entity in pairs(Player.getOffshorePump(self.lua_prototype.name)) do
+        return false
+      end
+      return self.lua_prototype.name ~= "steam"
     end
   end
   return false
