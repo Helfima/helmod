@@ -492,7 +492,7 @@ function Player.getProductionsCrafting(category, lua_recipe)
   if category == "crafting-handonly" then
     productions["character"] = game.entity_prototypes["character"]
   elseif lua_recipe.name ~= nil and lua_recipe.name == "water" then
-    for key, lua_entity in pairs(Player.getOffshorePump()) do
+    for key, lua_entity in pairs(Player.getOffshorePump("water")) do
       productions[lua_entity.name] = lua_entity
     end
   elseif lua_recipe.name ~= nil and lua_recipe.name == "water-viscous-mud" and lua_recipe.object_name ~= "LuaRecipePrototype" and lua_recipe.type ~= "recipe" then
@@ -616,14 +616,12 @@ end
 ---Return list of Offshore-Pump
 ---@return table
 function Player.getOffshorePump(fluid_name)
-  if fluid_name == nil then fluid_name = "water" end
   local filters = {}
   table.insert(filters, {filter="type", type="offshore-pump", mode="or"})
   local entities = game.get_filtered_entity_prototypes(filters)
   local offshore_pump = {}
   for key,entity in pairs(entities) do
-    local fluidbox_prototype = EntityPrototype(entity):getFluidboxPrototype("output")
-    if fluidbox_prototype:getFilter() ~= nil and fluidbox_prototype:getFilter().name == fluid_name then
+    if entity.fluid.name == fluid_name then
       offshore_pump[key] = entity
     end
   end
@@ -712,7 +710,7 @@ function Player.getRecipeFluid(name)
     ingredients = {{name="water", type="fluid", amount=1}}
   end
   local recipe = {}
-  recipe.category = "chemistry"
+  recipe.category = prototype.name
   recipe.enabled = true
   recipe.energy = 1
   recipe.force = {}
