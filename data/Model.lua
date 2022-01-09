@@ -428,6 +428,9 @@ end
 function Model.getDefaultPrototypeFactory(recipe_prototype)
   local category = recipe_prototype:getCategory()
   if category ~= nil then
+    if recipe_prototype:getType() == "fluid" then
+      category = "fluid"
+    end
     local factories = Player.getProductionsCrafting(category, recipe_prototype:native())
     local default_factory_level = User.getPreferenceSetting("default_factory_level")
     local factory_level = 1

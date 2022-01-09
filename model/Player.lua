@@ -491,12 +491,8 @@ function Player.getProductionsCrafting(category, lua_recipe)
   local rules_included, rules_excluded = Player.getRules("production-crafting")
   if category == "crafting-handonly" then
     productions["character"] = game.entity_prototypes["character"]
-  elseif lua_recipe.name ~= nil and lua_recipe.name == "water" then
-    for key, lua_entity in pairs(Player.getOffshorePump("water")) do
-      productions[lua_entity.name] = lua_entity
-    end
-  elseif lua_recipe.name ~= nil and lua_recipe.name == "water-viscous-mud" and lua_recipe.object_name ~= "LuaRecipePrototype" and lua_recipe.type ~= "recipe" then
-    for key, lua_entity in pairs(Player.getOffshorePump("water-viscous-mud")) do
+  elseif lua_recipe.name ~= nil and category == "fluid" then
+    for key, lua_entity in pairs(Player.getOffshorePump(lua_recipe.name)) do
       productions[lua_entity.name] = lua_entity
     end
   elseif lua_recipe.name ~= nil and lua_recipe.name == "steam" then

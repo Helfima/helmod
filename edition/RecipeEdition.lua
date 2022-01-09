@@ -619,6 +619,8 @@ function RecipeEdition:updateFactoryInfo(event)
     local factories = {}
     if recipe.type == "energy" then
       factories[recipe.factory.name] = recipe.factory
+    elseif recipe.type == "fluid" then
+      factories = Player.getProductionsCrafting("fluid", recipe)
     else
       factories = Player.getProductionsCrafting(category, recipe)
     end
