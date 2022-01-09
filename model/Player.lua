@@ -579,12 +579,26 @@ end
 ---Return list of energy machines
 ---@return table
 function Player.getEnergyMachines()
-    local filters = {}
+  local machines = {}
 
-  for _,type in pairs({"generator", "solar-panel", "boiler", "accumulator", "reactor", "offshore-pump", "seafloor-pump"}) do
+  local filters = {}
+  for _,type in pairs({"generator", "solar-panel", "boiler", "accumulator", "reactor"}) do
     table.insert(filters, {filter="type", mode="or", invert=false, type=type})
   end
-  return game.get_filtered_entity_prototypes(filters)
+  for entity_name, entity in pairs(game.get_filtered_entity_prototypes(filters)) do
+    machines[entity_name] = entity
+  end
+
+  filters = {}  
+  table.insert(filters, {filter="type", mode="or", invert=false, type="offshore-pump"})
+  local offshore_pumps = game.get_filtered_entity_prototypes(filters)
+  for entity_name, entity in pairs(offshore_pumps) do
+    if entity.fluid.name == "water" then
+      machines[entity_name] = entity
+    end
+  end
+
+  return machines
 end
 
 -------------------------------------------------------------------------------
