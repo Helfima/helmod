@@ -62,7 +62,7 @@ function Technology:getGroup()
   if self.lua_prototype == nil then return {} end
   local group_name = "normal"
   if self.lua_prototype.research_unit_count_formula ~= nil then group_name = "infinite" end
-  return {name=group_name}
+  return {name = group_name, localised_name = group_name}
 end
 
 -------------------------------------------------------------------------------

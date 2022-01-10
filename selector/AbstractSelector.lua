@@ -711,8 +711,7 @@ function AbstractSelector.updateGroupSelector(self, event)
       color = "yellow"
     end
     if group.name ~= "helmod" then
-      --local tooltip = {"", "item-group-name."..group.name, "\nOrder=", group.order, "\nOrder in recipe=", group.order_in_recipe}
-      local tooltip = {"", "item-group-name."..group.name}
+      local tooltip = group.localised_name
       ---ajoute les icons de groupe
       local action = GuiElement.add(gui_group_panel, GuiButtonSelectSpriteXxl(self.classname, "recipe-group"):sprite(self.sprite_type, group.name):tooltip(tooltip):color(color))
     else
