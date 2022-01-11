@@ -217,18 +217,15 @@ end
 ---@param button LuaGuiElement
 function GuiCell:add_contraintIcon(button)
   if self.m_contraint_icon == nil then return end
-  if self.m_contraint_icon == "linked" then 
+  if self.m_contraint_icon == "linked" then
     local sprite = GuiElement.add(button, GuiSprite("contraint"):sprite("helmod-tool-arrow-up"))
-    sprite.style.top_padding = -4
     sprite.style.left_padding = 22
   end
-  if self.m_contraint_icon == "master" then 
+  if self.m_contraint_icon == "master" then
     local sprite = GuiElement.add(button, GuiSprite("contraint"):sprite("helmod-tool-plus"))
-    sprite.style.top_padding = -4
   end
-  if self.m_contraint_icon == "exclude" then 
+  if self.m_contraint_icon == "exclude" then
     local sprite = GuiElement.add(button, GuiSprite("contraint"):sprite("helmod-tool-minus"))
-    sprite.style.top_padding = -4
   end
 end
 
