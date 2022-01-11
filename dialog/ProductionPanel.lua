@@ -1132,7 +1132,6 @@ function ProductionPanel:addTableRowBlock(gui_table, model, block)
   local unlinked = block.unlinked and true or false
   if block.index == 0 then unlinked = true end
   local block_by_product = not(block ~= nil and block.by_product == false)
-  block.type = "recipe"
   ---col action
   local cell_action = GuiElement.add(gui_table, GuiTable("action", block.id):column(2))
 

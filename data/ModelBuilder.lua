@@ -593,6 +593,7 @@ function ModelBuilder.removeProductionRecipe(block, recipe)
     local first_recipe = Model.firstRecipe(block.recipes)
     if first_recipe ~= nil then
       block.name = first_recipe.name
+      block.type = first_recipe.type
     end
   end
 end
@@ -859,6 +860,7 @@ function ModelBuilder.upProductionRecipe(block, recipe, step)
     local first_recipe = Model.firstRecipe(block.recipes)
     if first_recipe ~= nil then
       block.name = first_recipe.name
+      block.type = first_recipe.type
     end
   end
 end
@@ -875,6 +877,7 @@ function ModelBuilder.downProductionRecipe(block, recipe, step)
     local first_recipe = Model.firstRecipe(block.recipes)
     if first_recipe ~= nil then
       block.name = first_recipe.name
+      block.type = first_recipe.type
     end
   end
 end
