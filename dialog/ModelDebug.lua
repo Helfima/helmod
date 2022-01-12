@@ -75,7 +75,6 @@ function ModelDebug:buildMatrix(matrix_panel, matrix, pivot)
           else
             local tooltip = {"", value.name}
             table.insert(tooltip, {"", "\n", "column: ", value.icol})
-            table.insert(tooltip, {"", "\n", "is_product: ", value.is_product})
             local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(value.type, value.name):tooltip(tooltip))
             GuiElement.infoTemperature(button, value, "helmod_label_overlay_m")
           end

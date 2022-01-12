@@ -474,7 +474,7 @@ function ModelCompute.getBlockMatrix(block)
             rowA[col_cn] = -colx
           end
         end
-        colx =colx + 1
+        colx = colx + 1
       end
       if type(rowA[col_cn]) == "table" then
         rowA[col_cn] = 0
@@ -489,7 +489,7 @@ function ModelCompute.getBlockMatrix(block)
     if block.by_product == false then
       block_elements = block.ingredients
     end
-    for column,col_header in pairs(col_headers) do
+    for column, col_header in pairs(col_headers) do
       if col_header.name == "B" then
         table.insert(row_input, {name="Input", type="none"})
         table.insert(row_z, {name="Z", type="none"})
@@ -503,9 +503,14 @@ function ModelCompute.getBlockMatrix(block)
         table.insert(row_z, 0)
       end
     end
+    
+    for icol, col_header in pairs(mA[1]) do
+      col_header.icol = icol
+    end
+    
     table.insert(mA, 2, row_input)
+    mA = ModelCompute.linkTemperatureFluid(mA)
     table.insert(mA, row_z)
-    ModelCompute.linkTemperatureFluid(mA)
     return mA
   end
 end
@@ -515,48 +520,140 @@ end
 ---@param mA table
 ---@return table
 function ModelCompute.linkTemperatureFluid(mA)
-  local ingredient_fluids = {}
-  local product_fluids = {}
-  for column,col_header in pairs(mA[1]) do
-    col_header.icol = column
+  ---Build a table of fluids with temperature
+  local fluids = {}
+  for icol, col_header in pairs(mA[1]) do
     if col_header.type == "fluid" then
-      local is_product = true
-      ---check is_product
-      for irow,row in pairs(mA) do
-        if irow > 2 and irow < #mA then
-          local value = row[column]
-          if value < 0 then
-            is_product = false
+      fluids[col_header.name] = fluids[col_header.name] or {}
+      fluids[col_header.name][col_header.key] = col_header
+    end
+  end
+  for fluid_name, fluid_keys in pairs(fluids) do
+    ---Remove if there is only one temperature for a fluid
+    if table.size(fluid_keys) <= 1 then
+      fluids[fluid_name] = nil
+    end
+  end
+
+  ---Create blank row
+  local template_row = {}
+  table.insert(template_row, {name = "helmod-temperature-convert", tooltip = "", type = "recipe"}) --B
+  table.insert(template_row, 0) -- M
+  table.insert(template_row, 0) -- Cn
+  table.insert(template_row, 0) -- F
+  table.insert(template_row, 1) -- S
+  table.insert(template_row, 0) -- R
+  table.insert(template_row, 1) -- P
+  table.insert(template_row, 1) -- E
+  table.insert(template_row, 0) -- C
+  for icol, col_header in pairs(mA[1]) do
+    if col_header.key then
+      table.insert(template_row, 0)
+    end
+  end
+
+  local mA2 = {}
+  local ingredient_fluids = {}
+
+  for irow, row in pairs(mA) do
+    if irow > 2 then
+      local product_fluids = {}
+      local row1 = table.clone(template_row)
+      local row2 = table.clone(template_row)
+
+      for icol, cell in pairs(row) do
+        local col_header = mA[1][icol]
+        if col_header.key then
+          if (cell ~= 0) and (col_header.type == "fluid") and fluids[col_header.name] then
+            if cell > 0 then
+              product_fluids[col_header.key] = col_header
+            else
+              ingredient_fluids[col_header.key] = col_header
+            end
           end
         end
       end
-      col_header.is_product = is_product
-      if is_product == true then
-        product_fluids[col_header.key] = col_header
-      else
-        ingredient_fluids[col_header.key] = col_header
+
+      local convert = false
+      for product_key, product in pairs(product_fluids) do
+        local T = product.temperature
+        local linked_fluids = fluids[product.name]
+        
+        for ingredient_key, ingredient in pairs(linked_fluids) do
+          if product_key ~= ingredient_key then
+            local T2 = ingredient.temperature
+            local T2min = ingredient.minimum_temperature
+            local T2max = ingredient.maximum_temperature
+            if T ~= nil or T2 ~= nil or T2min ~= nil or T2max ~= nil then
+              ---traitement seulement si une temperature
+              if T2min == nil and T2max == nil then
+                ---Temperature sans intervale
+                if T == nil or T2 == nil or T2 == T then
+                  row1[product.icol] = -1
+                  row2[product.icol] = 1
+                  row1[ingredient.icol] = 1
+                  row2[ingredient.icol] = -1
+                  ingredient_fluids[ingredient_key] = nil
+                  convert = true
+                  break
+                end
+              else
+                ---Temperature avec intervale
+                ---securise les valeurs
+                T = T or 25
+                T2min = T2min or -helmod_constant.max_float
+                T2max = T2max or helmod_constant.max_float
+                if T >= T2min and T <= T2max then
+                  row1[product.icol] = -1
+                  row2[product.icol] = 1
+                  row1[ingredient.icol] = 1
+                  row2[ingredient.icol] = -1
+                  ingredient_fluids[ingredient_key] = nil
+                  convert = true
+                  break
+                end
+              end
+            end
+          end
+        end
       end
+      
+      if convert then
+        table.insert(mA2, row1)
+        table.insert(mA2, table.clone(row))
+        table.insert(mA2, row2)
+      else
+        table.insert(mA2, table.clone(row))
+      end
+    else
+      table.insert(mA2, table.clone(row))
     end
   end
-  for _,product in pairs(product_fluids) do
-    local T = product.temperature
-    for key,ingredient in pairs(ingredient_fluids) do
-      if product.name == ingredient.name then
-        local T2 = ingredient.temperature
-        local T2min = ingredient.minimum_temperature
-        local T2max = ingredient.maximum_temperature
+
+  ---Add conversion recipes for any remaining ingredients
+  for ingredient_key, ingredient in pairs(ingredient_fluids) do
+    local row1 = table.clone(template_row)
+    local row2 = table.clone(template_row)
+    
+    local convert = false
+    local T2 = ingredient.temperature
+    local T2min = ingredient.minimum_temperature
+    local T2max = ingredient.maximum_temperature
+    local linked_fluids = fluids[ingredient.name]
+    
+    for product_key, product in pairs(linked_fluids) do
+      if product_key ~= ingredient_key then
+        local T = product.temperature
         if T ~= nil or T2 ~= nil or T2min ~= nil or T2max ~= nil then
           ---traitement seulement si une temperature
           if T2min == nil and T2max == nil then
             ---Temperature sans intervale
             if T == nil or T2 == nil or T2 == T then
-              for irow,row in pairs(mA) do
-                if irow > 2 and irow < #mA and row[ingredient.icol] ~= 0 then
-                  row[product.icol] = row[ingredient.icol]
-                  row[ingredient.icol] = 0
-                end
-              end
-              ingredient_fluids[key] = nil
+              row1[product.icol] = -1
+              row2[product.icol] = 1
+              row1[ingredient.icol] = 1
+              row2[ingredient.icol] = -1
+              convert = true
               break
             end
           else
@@ -566,21 +663,26 @@ function ModelCompute.linkTemperatureFluid(mA)
             T2min = T2min or -helmod_constant.max_float
             T2max = T2max or helmod_constant.max_float
             if T >= T2min and T <= T2max then
-              for irow,row in pairs(mA) do
-                if irow > 2 and irow < #mA and row[ingredient.icol] ~= 0 then
-                  row[product.icol] = row[ingredient.icol]
-                  row[ingredient.icol] = 0
-                end
-              end
-              ingredient_fluids[key] = nil
+              row1[product.icol] = -1
+              row2[product.icol] = 1
+              row1[ingredient.icol] = 1
+              row2[ingredient.icol] = -1
+              ingredient_fluids[ingredient_key] = nil
+              convert = true
               break
             end
           end
         end
       end
     end
+
+    if convert then
+      table.insert(mA2, row1)
+      table.insert(mA2, row2)    
+    end
   end
-  return mA
+
+  return mA2
 end
 
 -------------------------------------------------------------------------------
@@ -688,6 +790,13 @@ function ModelCompute.computeBlock(block)
       end
     end
     if mC ~= nil then
+      ---remove temperature convert lines
+      for i=#mC, 1, -1 do
+        if mC[i][1].name == "helmod-temperature-convert" then
+          table.remove(mC, i)
+        end
+      end
+
       ---ratio pour le calcul du nombre de block
       local ratio = 1
       ---calcul ordonnee sur les recipes du block
