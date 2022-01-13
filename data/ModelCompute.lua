@@ -509,7 +509,7 @@ function ModelCompute.getBlockMatrix(block)
     end
     
     table.insert(mA, 2, row_input)
-    mA = ModelCompute.linkTemperatureFluid(mA)
+    mA = ModelCompute.linkTemperatureFluid(mA, block.by_product)
     table.insert(mA, row_z)
     return mA
   end
@@ -518,8 +518,9 @@ end
 -------------------------------------------------------------------------------
 ---Link Temperature Fluid
 ---@param mA table
+---@param by_product boolean
 ---@return table
-function ModelCompute.linkTemperatureFluid(mA)
+function ModelCompute.linkTemperatureFluid(mA, by_product)
   ---Build a table of fluids with temperature
   local fluids = {}
   for icol, col_header in pairs(mA[1]) do
@@ -553,13 +554,11 @@ function ModelCompute.linkTemperatureFluid(mA)
   end
 
   local mA2 = {}
-  local ingredient_fluids = {}
 
   for irow, row in pairs(mA) do
     if irow > 2 then
+      local ingredient_fluids = {}
       local product_fluids = {}
-      local row1 = table.clone(template_row)
-      local row2 = table.clone(template_row)
 
       for icol, cell in pairs(row) do
         local col_header = mA[1][icol]
@@ -574,115 +573,106 @@ function ModelCompute.linkTemperatureFluid(mA)
         end
       end
 
-      local convert = false
+      ---Convert any Z into product
       for product_key, product in pairs(product_fluids) do
-        local T = product.temperature
         local linked_fluids = fluids[product.name]
-        
         for ingredient_key, ingredient in pairs(linked_fluids) do
-          if product_key ~= ingredient_key then
-            local T2 = ingredient.temperature
-            local T2min = ingredient.minimum_temperature
-            local T2max = ingredient.maximum_temperature
-            if T ~= nil or T2 ~= nil or T2min ~= nil or T2max ~= nil then
-              ---traitement seulement si une temperature
-              if T2min == nil and T2max == nil then
-                ---Temperature sans intervale
-                if T == nil or T2 == nil or T2 == T then
-                  row1[product.icol] = -1
-                  row2[product.icol] = 1
-                  row1[ingredient.icol] = 1
-                  row2[ingredient.icol] = -1
-                  ingredient_fluids[ingredient_key] = nil
-                  convert = true
-                  break
-                end
-              else
-                ---Temperature avec intervale
-                ---securise les valeurs
-                T = T or 25
-                T2min = T2min or -helmod_constant.max_float
-                T2max = T2max or helmod_constant.max_float
-                if T >= T2min and T <= T2max then
-                  row1[product.icol] = -1
-                  row2[product.icol] = 1
-                  row1[ingredient.icol] = 1
-                  row2[ingredient.icol] = -1
-                  ingredient_fluids[ingredient_key] = nil
-                  convert = true
-                  break
-                end
-              end
-            end
+          if ModelCompute.checkLinkedTemperatureFluid(product, ingredient, by_product) then
+            local new_row = table.clone(template_row)
+            new_row[product.icol] = -1
+            new_row[ingredient.icol] = 1
+            table.insert(mA2, new_row)
           end
         end
       end
-      
-      if convert then
-        table.insert(mA2, row1)
-        table.insert(mA2, table.clone(row))
-        table.insert(mA2, row2)
-      else
-        table.insert(mA2, table.clone(row))
+
+      table.insert(mA2, table.clone(row))
+
+      ---Convert any overflow product back into Z
+      for product_key, product in pairs(product_fluids) do
+        local linked_fluids = fluids[product.name]
+        for ingredient_key, ingredient in pairs(linked_fluids) do
+          if ModelCompute.checkLinkedTemperatureFluid(product, ingredient, by_product) then
+            local new_row = table.clone(template_row)
+            new_row[product.icol] = 1
+            new_row[ingredient.icol] = -1
+            table.insert(mA2, new_row)
+          end
+        end
+      end
+
+      ---If an ingredient has already been made in this block
+      ---Convert any Z into ingredient
+      ---Convert any unmet ingredient back into Z
+      for ingredient_key, ingredient in pairs(ingredient_fluids) do
+        local linked_fluids = fluids[ingredient.name]
+        for product_key, product in pairs(linked_fluids) do
+          if ModelCompute.checkLinkedTemperatureFluid(product, ingredient, by_product) then
+            local new_row = table.clone(template_row)
+            new_row[product.icol] = -1
+            new_row[ingredient.icol] = 1
+            table.insert(mA2, new_row)
+            local new_row = table.clone(template_row)
+            new_row[product.icol] = 1
+            new_row[ingredient.icol] = -1
+            table.insert(mA2, new_row)
+          end
+        end
       end
     else
       table.insert(mA2, table.clone(row))
     end
   end
 
-  ---Add conversion recipes for any remaining ingredients
-  for ingredient_key, ingredient in pairs(ingredient_fluids) do
-    local row1 = table.clone(template_row)
-    local row2 = table.clone(template_row)
-    
-    local convert = false
+  return mA2
+end
+
+-------------------------------------------------------------------------------
+---Check Linked Temperature Fluid
+---@param product table
+---@param ingredient table
+---@param by_product boolean
+---@return boolean
+function ModelCompute.checkLinkedTemperatureFluid(item1, item2, by_product)
+  local result = false
+
+  local product, ingredient
+  if by_product ~= false then
+    product = item1
+    ingredient = item2
+  else
+    product = item1
+    ingredient = item2
+  end
+
+  if product.key ~= ingredient.key then
+    local T = product.temperature
+    local Tmin = product.minimum_temperature
+    local Tmax = product.maximum_temperature
     local T2 = ingredient.temperature
     local T2min = ingredient.minimum_temperature
     local T2max = ingredient.maximum_temperature
-    local linked_fluids = fluids[ingredient.name]
-    
-    for product_key, product in pairs(linked_fluids) do
-      if product_key ~= ingredient_key then
-        local T = product.temperature
-        if T ~= nil or T2 ~= nil or T2min ~= nil or T2max ~= nil then
-          ---traitement seulement si une temperature
-          if T2min == nil and T2max == nil then
-            ---Temperature sans intervale
-            if T == nil or T2 == nil or T2 == T then
-              row1[product.icol] = -1
-              row2[product.icol] = 1
-              row1[ingredient.icol] = 1
-              row2[ingredient.icol] = -1
-              convert = true
-              break
-            end
-          else
-            ---Temperature avec intervale
-            ---securise les valeurs
-            T = T or 25
-            T2min = T2min or -helmod_constant.max_float
-            T2max = T2max or helmod_constant.max_float
-            if T >= T2min and T <= T2max then
-              row1[product.icol] = -1
-              row2[product.icol] = 1
-              row1[ingredient.icol] = 1
-              row2[ingredient.icol] = -1
-              ingredient_fluids[ingredient_key] = nil
-              convert = true
-              break
-            end
-          end
+    if T ~= nil or T2 ~= nil or T2min ~= nil or T2max ~= nil then
+      ---traitement seulement si une temperature
+      if T2min == nil and T2max == nil then
+        ---Temperature sans intervale
+        if T == nil or T2 == nil or T2 == T then
+          result = true
+        end
+      else
+        ---Temperature avec intervale
+        ---securise les valeurs
+        T = T or 25
+        T2min = T2min or -helmod_constant.max_float
+        T2max = T2max or helmod_constant.max_float
+        if T >= T2min and T <= T2max then
+          result = true
         end
       end
     end
-
-    if convert then
-      table.insert(mA2, row1)
-      table.insert(mA2, row2)    
-    end
   end
 
-  return mA2
+  return result
 end
 
 -------------------------------------------------------------------------------
