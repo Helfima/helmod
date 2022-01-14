@@ -521,21 +521,6 @@ end
 ---@param by_product boolean
 ---@return table
 function ModelCompute.linkTemperatureFluid(mA, by_product)
-  ---Build a table of fluids with temperature
-  local fluids = {}
-  for icol, col_header in pairs(mA[1]) do
-    if col_header.type == "fluid" then
-      fluids[col_header.name] = fluids[col_header.name] or {}
-      fluids[col_header.name][col_header.key] = col_header
-    end
-  end
-  for fluid_name, fluid_keys in pairs(fluids) do
-    ---Remove if there is only one temperature for a fluid
-    if table.size(fluid_keys) <= 1 then
-      fluids[fluid_name] = nil
-    end
-  end
-
   ---Create blank row
   local template_row = {}
   table.insert(template_row, {name = "helmod-temperature-convert", tooltip = "", type = "recipe"}) --B
@@ -554,6 +539,8 @@ function ModelCompute.linkTemperatureFluid(mA, by_product)
   end
 
   local mA2 = {}
+  local block_ingredient_fluids = {}
+  local block_product_fluids = {}
 
   for irow, row in pairs(mA) do
     if irow > 2 then
@@ -562,20 +549,20 @@ function ModelCompute.linkTemperatureFluid(mA, by_product)
 
       for icol, cell in pairs(row) do
         local col_header = mA[1][icol]
-        if col_header.key then
-          if (cell ~= 0) and (col_header.type == "fluid") and fluids[col_header.name] then
-            if cell > 0 then
-              product_fluids[col_header.key] = col_header
-            else
-              ingredient_fluids[col_header.key] = col_header
-            end
+        if (col_header.key ~= nil) and (col_header.type == "fluid") then
+          if cell > 0 then
+            block_product_fluids[col_header.name] = block_product_fluids[col_header.name] or {}
+            block_product_fluids[col_header.name][col_header.key] = col_header
+            product_fluids[col_header.key] = col_header
+          elseif cell < 0 then
+            ingredient_fluids[col_header.key] = col_header
           end
         end
       end
 
       ---Convert any Z into product
       for product_key, product in pairs(product_fluids) do
-        local linked_fluids = fluids[product.name]
+        local linked_fluids = block_ingredient_fluids[product.name] or {}
         for ingredient_key, ingredient in pairs(linked_fluids) do
           if ModelCompute.checkLinkedTemperatureFluid(product, ingredient, by_product) then
             local new_row = table.clone(template_row)
@@ -590,7 +577,7 @@ function ModelCompute.linkTemperatureFluid(mA, by_product)
 
       ---Convert any overflow product back into Z
       for product_key, product in pairs(product_fluids) do
-        local linked_fluids = fluids[product.name]
+        local linked_fluids = block_ingredient_fluids[product.name] or {}
         for ingredient_key, ingredient in pairs(linked_fluids) do
           if ModelCompute.checkLinkedTemperatureFluid(product, ingredient, by_product) then
             local new_row = table.clone(template_row)
@@ -605,7 +592,10 @@ function ModelCompute.linkTemperatureFluid(mA, by_product)
       ---Convert any Z into ingredient
       ---Convert any unmet ingredient back into Z
       for ingredient_key, ingredient in pairs(ingredient_fluids) do
-        local linked_fluids = fluids[ingredient.name]
+        block_ingredient_fluids[ingredient.name] = block_ingredient_fluids[ingredient.name] or {}
+        block_ingredient_fluids[ingredient.name][ingredient.key] = ingredient
+
+        local linked_fluids = block_product_fluids[ingredient.name] or {}
         for product_key, product in pairs(linked_fluids) do
           if ModelCompute.checkLinkedTemperatureFluid(product, ingredient, by_product) then
             local new_row = table.clone(template_row)
@@ -641,14 +631,12 @@ function ModelCompute.checkLinkedTemperatureFluid(item1, item2, by_product)
     product = item1
     ingredient = item2
   else
-    product = item1
-    ingredient = item2
+    product = item2
+    ingredient = item1
   end
 
   if product.key ~= ingredient.key then
     local T = product.temperature
-    local Tmin = product.minimum_temperature
-    local Tmax = product.maximum_temperature
     local T2 = ingredient.temperature
     local T2min = ingredient.minimum_temperature
     local T2max = ingredient.maximum_temperature
