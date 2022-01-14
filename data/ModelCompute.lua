@@ -134,7 +134,7 @@ function ModelCompute.update(model)
         for _,product in pairs(block.products) do
           local element_key = Product(product):getTableKey()
           if input[element_key] == nil then
-            input[element_key] =  product.count
+            input[element_key] = product.count
           elseif input[element_key] ~= nil then
             input[element_key] = input[element_key] + product.count
           end
@@ -143,7 +143,7 @@ function ModelCompute.update(model)
         for _,ingredient in pairs(block.ingredients) do
           local element_key = Product(ingredient):getTableKey()
           if input[element_key] == nil then
-            input[element_key] =  - ingredient.count
+            input[element_key] = - ingredient.count
           else
             input[element_key] = input[element_key] - ingredient.count
           end
@@ -1139,9 +1139,13 @@ function ModelCompute.computeInputOutput(model)
     ---consomme les produits
     if element.ingredients ~= nil and table.size(element.ingredients) then
       for key, ingredient in pairs(element.ingredients) do
-        if model.products[key] ~= nil and element.mining_ingredient ~= ingredient.name then
-          model.products[key].count = model.products[key].count - ingredient.count
-          if model.products[key].count < 0.01 then model.products[key] = nil end
+        if element.mining_ingredient ~= ingredient.name then
+          if model.products[key] ~= nil then
+            model.products[key].count = model.products[key].count - ingredient.count
+          end
+          if model.ingredients[key].count < 0.01 then
+            model.ingredients[key] = nil
+          end
         end
       end
     end
@@ -1150,7 +1154,9 @@ function ModelCompute.computeInputOutput(model)
       for key, product in pairs(element.products) do
         if model.ingredients[key] ~= nil then
           model.ingredients[key].count = model.ingredients[key].count - product.count
-          if model.ingredients[key].count < 0.01 then model.ingredients[key] = nil end
+        end
+        if model.products[key].count < 0.01 then
+          model.products[key] = nil
         end
       end
     end
