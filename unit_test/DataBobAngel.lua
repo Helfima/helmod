@@ -323,12 +323,12 @@ data.energy["steam-turbine-3"] = {
 data.energy["bob-burner-generator"] = {
     energy_type_input="burner",
     energy_usage_min=0,
-    energy_usage_max=400000,
+    energy_usage_max=533333,
     energy_usage_priority="none",
-    energy_consumption=400000,
-    energy_type_output="none",
-    energy_production=0,
-    effectivity=1,
+    energy_consumption=533333,
+    energy_type_output="electric",
+    energy_production=400000,
+    effectivity=0.75,
     target_temperature=0,
     maximum_temperature=0,
     fluid_usage=0,
@@ -336,8 +336,8 @@ data.energy["bob-burner-generator"] = {
     fluid_fuel = {name="none", capacity=0},
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
-    pollution=14.99,
-    speed=0,
+    pollution=15,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["fluid-generator"] = {

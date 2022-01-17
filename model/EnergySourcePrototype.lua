@@ -43,12 +43,9 @@ end
 
 -------------------------------------------------------------------------------
 ---Return effectivity
----@return number --default 0
+---@return number --default 1
 function EnergySourcePrototype:getEffectivity()
-  if self.lua_prototype ~= nil then
-    return self.lua_prototype.effectivity or 1
-  end
-  return 0
+  return 1
 end
 
 -------------------------------------------------------------------------------
@@ -266,6 +263,16 @@ function BurnerPrototype:toString()
 end
 
 -------------------------------------------------------------------------------
+---Return effectivity
+---@return number --default 1
+function BurnerPrototype:getEffectivity()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.effectivity or 1
+  end
+  return 1
+end
+
+-------------------------------------------------------------------------------
 ---@class FluidSourcePrototype
 FluidSourcePrototype = newclass(EnergySourcePrototype,function(base, lua_prototype, factory)
   EnergySourcePrototype.init(base,lua_prototype, factory)
@@ -304,9 +311,8 @@ function FluidSourcePrototype:getFirstFuelPrototype()
   local fuel_items = self:getFuelPrototypes()
   local first_fuel = nil
   for _,fuel_item in pairs(fuel_items) do
-    if first_fuel == nil then
+    if (first_fuel == nil) or (first_fuel:getFuelValue() < fuel_item:getFuelValue()) then
       first_fuel = fuel_item
-      break
     end
   end
   return first_fuel
@@ -420,6 +426,16 @@ function FluidSourcePrototype:getSpeedModifier()
         return math.min(1, fuel_temperature / maximum_temperature * effectivity)
       end
     end
+  end
+  return 1
+end
+
+-------------------------------------------------------------------------------
+---Return effectivity
+---@return number --default 1
+function BurnerPrototype:getEffectivity()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.effectivity or 1
   end
   return 1
 end

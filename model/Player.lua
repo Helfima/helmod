@@ -578,7 +578,7 @@ function Player.getEnergyMachines()
   local machines = {}
 
   local filters = {}
-  for _,type in pairs({"generator", "solar-panel", "boiler", "accumulator", "reactor"}) do
+  for _,type in pairs({"generator", "solar-panel", "boiler", "accumulator", "reactor", "burner-generator"}) do
     table.insert(filters, {filter="type", mode="or", invert=false, type=type})
   end
   for entity_name, entity in pairs(game.get_filtered_entity_prototypes(filters)) do

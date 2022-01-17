@@ -70,7 +70,7 @@ end
 ---@return number --default 0
 function EntityPrototype:getMaxEnergyUsage()
   if self.lua_prototype ~= nil and self.lua_prototype.max_energy_usage ~= nil then
-    return self.lua_prototype.max_energy_usage*60
+    return self.lua_prototype.max_energy_usage * 60 / self:getEffectivity()
   end
   return 0
 end
@@ -127,7 +127,8 @@ function EntityPrototype:getEnergyConsumption()
 
     if fuel_value > 0 then
       -- e.g. fluid burning generator
-      return fluid_usage * effectivity * fuel_value
+      local max_energy_production = (self.lua_prototype.max_energy_production or 0) * 60
+      return math.min(fluid_usage * fuel_value, max_energy_production / effectivity)
     else
       -- e.g. steam engine
       local maximum_temperature = self:getMaximumTemperature()
@@ -144,7 +145,6 @@ function EntityPrototype:getEnergyConsumption()
       return fluid_usage * effectivity * power_extract
     end
   end
-
   return 0
 end
 
@@ -156,43 +156,14 @@ end
 ---@return number --default 0
 function EntityPrototype:getEnergyProduction()
   if self.lua_prototype ~= nil then
-    local energy_prototype = self:getEnergySource()
-    local usage_priority = nil
+    local energy_prototype = self:getElectricEnergySource()
     if energy_prototype ~= nil then
-      usage_priority = energy_prototype:getUsagePriority()
-    end
-    if usage_priority == "solar" then
-      local active_mods = game.active_mods
-      if active_mods["base"] ~= "1.0.0" then
-        return (self.lua_prototype.max_energy_production or 0)*60
+      local usage_priority = energy_prototype:getUsagePriority()
+      if usage_priority == "managed-accumulator" then
+        return energy_prototype:getOutputFlowLimit()
+      else
+        return (self.lua_prototype.max_energy_production or 0) * 60
       end
-      return (self.lua_prototype.production or 0)*60
-    end
-    if usage_priority == "secondary-output" or usage_priority == "primary-output" then
-      if self:getEnergyTypeInput() == "fluid" then
-        local heat_capacity = 200
-        local fuel_value = 0
-        local fluid_fuel = self:getFluidFuelPrototype(true)
-        if fluid_fuel ~= nil then
-          fuel_value = fluid_fuel:getFuelValue()
-          heat_capacity = fluid_fuel:getHeatCapacity()
-        end
-
-        local fluid_usage = self:getFluidUsage()
-        local effectivity = self:getEffectivity()
-        local maximum_temperature = self:getMaximumTemperature()
-
-        ---calcul avec un heat minimum de 200
-        if heat_capacity < 200 then
-          heat_capacity = 200
-        end
-        local power_extract = self:getPowerExtract(maximum_temperature, heat_capacity)
-        ---[boiler.fluid_usage]x[boiler.fluid_usage]x[boiler.target_temperature]-15°c)x[200J/unit/°]
-        return fluid_usage * effectivity * power_extract
-      end
-    end
-    if usage_priority == "managed-accumulator" then
-      return energy_prototype:getOutputFlowLimit()
     end
   end
   return 0
@@ -213,7 +184,12 @@ end
 ---@return number --default 1
 function EntityPrototype:getEffectivity()
   if self.lua_prototype ~= nil then
-    return self.lua_prototype.effectivity or 1
+    local effectivity = self.lua_prototype.effectivity or 1
+    local energy_prototype = self:getEnergySource()
+    if energy_prototype ~= nil then
+      effectivity = effectivity * energy_prototype:getEffectivity()
+    end
+    return effectivity
   end
   return 1
 end
@@ -617,10 +593,10 @@ end
 function EntityPrototype:getEnergyType()
   if self.lua_prototype ~= nil then
     if self.lua_prototype.burner_prototype ~= nil then return "burner" end
-    if self.lua_prototype.electric_energy_source_prototype ~= nil then return "electric" end
     if self.lua_prototype.heat_energy_source_prototype ~= nil then return "heat" end
     if self.lua_prototype.fluid_energy_source_prototype ~= nil then return "fluid" end
     if self.lua_prototype.void_energy_source_prototype ~= nil then return "void" end
+    if self.lua_prototype.electric_energy_source_prototype ~= nil then return "electric" end
   end
   return "none"
 end
@@ -654,7 +630,7 @@ function EntityPrototype:getEnergyTypeOutput()
     if self:getType() == "reactor" then
       return "heat"
     end
-    local energy_prototype = self:getEnergySource()
+    local energy_prototype = self:getElectricEnergySource()
     if energy_prototype ~= nil then
       local usage_priority = energy_prototype:getUsagePriority()
       if usage_priority == "secondary-output" or usage_priority == "managed-accumulator" or usage_priority == "solar" then
@@ -671,10 +647,10 @@ end
 function EntityPrototype:getEnergySource()
   if self.lua_prototype ~= nil then
     if self.lua_prototype.burner_prototype ~= nil then return BurnerPrototype(self.lua_prototype.burner_prototype, self.factory) end
-    if self.lua_prototype.electric_energy_source_prototype ~= nil then return ElectricSourcePrototype(self.lua_prototype.electric_energy_source_prototype, self.factory) end
     if self.lua_prototype.heat_energy_source_prototype ~= nil then return HeatSourcePrototype(self.lua_prototype.heat_energy_source_prototype, self.factory) end
     if self.lua_prototype.fluid_energy_source_prototype ~= nil then return FluidSourcePrototype(self.lua_prototype.fluid_energy_source_prototype, self.factory) end
     if self.lua_prototype.void_energy_source_prototype ~= nil then return VoidSourcePrototype(self.lua_prototype.void_energy_source_prototype, self.factory) end
+    if self.lua_prototype.electric_energy_source_prototype ~= nil then return self:getElectricEnergySource() end
   end
   return nil
 end
@@ -825,7 +801,8 @@ function EntityPrototype:getPollution()
     if energy_prototype ~= nil then
       emission = energy_prototype:getEmissions()
     end
-    return energy_usage * emission * emission_multiplier
+    local effectivity = self:getEffectivity()
+    return energy_usage * emission * emission_multiplier * effectivity
   end
   return 0
 end
@@ -866,4 +843,14 @@ function EntityPrototype:getSpeedModifier()
   end
 
   return 1
+end
+
+-------------------------------------------------------------------------------
+---Return electric energy source
+---@return ElectricSourcePrototype --default nil
+function EntityPrototype:getElectricEnergySource()
+  if self.lua_prototype ~= nil and self.lua_prototype.electric_energy_source_prototype ~= nil then
+    return ElectricSourcePrototype(self.lua_prototype.electric_energy_source_prototype, self.factory)
+  end
+  return nil
 end

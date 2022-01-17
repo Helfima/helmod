@@ -201,16 +201,14 @@ function RecipePrototype:getEnergyProducts()
       local amount = prototype:getEnergyProduction()
       local product = {name="energy", type="energy", amount=amount}
       table.insert(products, product)
-    end
-    if prototype:getType() == "boiler" then
+    elseif prototype:getType() == "boiler" then
       local amount = prototype:getFluidProduction()
       local fluid_production = prototype:getFluidProductionFilter()
       if fluid_production ~= nil then
         local product = {name=fluid_production.name, type="fluid", amount=amount, by_time=true}
         table.insert(products, product)
       end
-    end
-    if prototype:getType() == "accumulator" then
+    elseif prototype:getType() == "accumulator" then
       local energy_prototype = prototype:getEnergySource()
       local capacity = energy_prototype:getBufferCapacity()
       ---vanilla day=25000,dusk=5000,night=2500,dawn=5000
@@ -227,18 +225,15 @@ function RecipePrototype:getEnergyProducts()
 
       local product = {name="energy", type="energy", amount=amount}
       table.insert(products, product)
-    end
-    if prototype:getType() == "generator" then
+    elseif prototype:getType() == "generator" or prototype:getType() == "burner-generator"then
       local amount = prototype:getEnergyProduction()
       local product = {name="energy", type="energy", amount=amount}
       table.insert(products, product)
-    end
-    if prototype:getType() == "reactor" then
+    elseif prototype:getType() == "reactor" then
       local amount = prototype:getEnergyConsumption()
       local product = {name="steam-heat", type="energy", amount=amount}
       table.insert(products, product)
-    end
-    if prototype:getType() == "offshore-pump" or prototype:getType() == "seafloor-pump" then
+    elseif prototype:getType() == "offshore-pump" then
       local amount = prototype:getPumpingSpeed()
       local product = {name="water", type="fluid", amount=amount, by_time=true}
       table.insert(products, product)
