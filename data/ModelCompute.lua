@@ -1143,9 +1143,6 @@ function ModelCompute.computeInputOutput(model)
           if model.products[key] ~= nil then
             model.products[key].count = model.products[key].count - ingredient.count
           end
-          if model.ingredients[key].count < 0.01 then
-            model.ingredients[key] = nil
-          end
         end
       end
     end
@@ -1155,10 +1152,19 @@ function ModelCompute.computeInputOutput(model)
         if model.ingredients[key] ~= nil then
           model.ingredients[key].count = model.ingredients[key].count - product.count
         end
-        if model.products[key].count < 0.01 then
-          model.products[key] = nil
-        end
       end
+    end
+  end
+
+  for key, ingredient in pairs(model.ingredients) do
+    if ingredient.count < 0.01 then
+      model.ingredients[key] = nil
+    end
+  end
+
+  for key, product in pairs(model.products) do
+    if product.count < 0.01 then
+      model.products[key] = nil
     end
   end
 end
