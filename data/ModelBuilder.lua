@@ -57,38 +57,40 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
     local block_products
     local block_ingredients
 
-    if block.by_product == true then
-      recipe_products = recipe_prototype:getProducts()
-      recipe_ingredients = recipe_prototype:getIngredients()
-      block_products = block.products
-      block_ingredients = block.ingredients
-    else
+    if block.by_product == false then
       recipe_products = recipe_prototype:getIngredients()
       recipe_ingredients = recipe_prototype:getProducts()
       block_products = block.ingredients
       block_ingredients = block.products
+    else
+      recipe_products = recipe_prototype:getProducts()
+      recipe_ingredients = recipe_prototype:getIngredients()
+      block_products = block.products
+      block_ingredients = block.ingredients
     end
 
     ---ajoute les produits du block
     for _, lua_product in pairs(recipe_products) do
       local product = Product(lua_product):clone()
-      if block_products[lua_product.name] == nil then
-        if block_ingredients[lua_product.name] ~= nil then
+      local element_key = Product(lua_product):getTableKey()
+      if block_products[element_key] == nil then
+        if block_ingredients[element_key] ~= nil then
           product.state = 2
         else
           product.state = 1
         end
-        block_products[lua_product.name] = product
+        block_products[element_key] = product
       end
     end
 
     ---ajoute les ingredients du block
     for _, lua_ingredient in pairs(recipe_ingredients) do
       local ingredient = Product(lua_ingredient):clone()
-      if block_ingredients[lua_ingredient.name] == nil then
-        block_ingredients[lua_ingredient.name] = ingredient
-        if block_products[lua_ingredient.name] ~= nil and block_products[lua_ingredient.name].state == 1 then
-          block_products[lua_ingredient.name].state = 2
+      local element_key = Product(lua_ingredient):getTableKey()
+      if block_ingredients[element_key] == nil then
+        block_ingredients[element_key] = ingredient
+        if block_products[element_key] ~= nil and block_products[element_key].state == 1 then
+          block_products[element_key].state = 2
         end
       end
     end
