@@ -131,7 +131,7 @@ function ModelCompute.update(model)
         ModelCompute.computeBlock(block)
 
         ---consomme les ingredients
-        for _,product in pairs(block.products) do
+        for _, product in pairs(block.products) do
           local element_key = Product(product):getTableKey()
           if input[element_key] == nil then
             input[element_key] = product.count
@@ -140,15 +140,21 @@ function ModelCompute.update(model)
           end
         end
         ---compte les ingredients
-        for _,ingredient in pairs(block.ingredients) do
+        for _, ingredient in pairs(block.ingredients) do
           local element_key = Product(ingredient):getTableKey()
           if input[element_key] == nil then
-            input[element_key] = - ingredient.count
+            input[element_key] = -ingredient.count
           else
             input[element_key] = input[element_key] - ingredient.count
           end
         end
-
+        ---consume energy
+        local element_key = "energy"
+        if input[element_key] == nil then
+          input[element_key] = -block.power
+        else
+          input[element_key] = input[element_key] - block.power
+        end
       end
     end
 

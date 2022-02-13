@@ -8,16 +8,17 @@ Date: ???
     - Fixed incorrect or missing info in multiple tooltips
     - Fixed hidden items and items with a fuel value of 0 being listed as fuel
     - Fixed energy block quantaties always being in MW
-    - Fixed exclude constraint overlay not bein drawn
+    - Fixed exclude constraint overlay not being drawn
     - Fixed fluids with temperature not editable
     - Fixed offshore pump recipes other than water being hidden
     - Fixed default machine for offshore pump recipes
     - Fixed offshore pump recipes other than water being shown in energy block
+    - Fixed energy consumption not linking between blocks
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.7
 Date: 2021-12-29
   Bugfixes:
-    - Fixed error when flags attribut missing in prototype
+    - Fixed error when flags attribute missing in prototype
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.6
 Date: 2021-12-29
