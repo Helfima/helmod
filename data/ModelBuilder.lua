@@ -51,26 +51,44 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
       end
     end
     ModelRecipe.count = 1
+
+    local recipe_products
+    local recipe_ingredients
+    local block_products
+    local block_ingredients
+
+    if block.by_product == true then
+      recipe_products = recipe_prototype:getProducts()
+      recipe_ingredients = recipe_prototype:getIngredients()
+      block_products = block.products
+      block_ingredients = block.ingredients
+    else
+      recipe_products = recipe_prototype:getIngredients()
+      recipe_ingredients = recipe_prototype:getProducts()
+      block_products = block.ingredients
+      block_ingredients = block.products
+    end
+
     ---ajoute les produits du block
-    for _, lua_product in pairs(recipe_prototype:getProducts()) do
+    for _, lua_product in pairs(recipe_products) do
       local product = Product(lua_product):clone()
-      if block.products[lua_product.name] == nil then
-        if block.ingredients[lua_product.name] ~= nil then
+      if block_products[lua_product.name] == nil then
+        if block_ingredients[lua_product.name] ~= nil then
           product.state = 2
         else
           product.state = 1
         end
-        block.products[lua_product.name] = product
+        block_products[lua_product.name] = product
       end
     end
 
     ---ajoute les ingredients du block
-    for _, lua_ingredient in pairs(recipe_prototype:getIngredients()) do
+    for _, lua_ingredient in pairs(recipe_ingredients) do
       local ingredient = Product(lua_ingredient):clone()
-      if block.ingredients[lua_ingredient.name] == nil then
-        block.ingredients[lua_ingredient.name] = ingredient
-        if block.products[lua_ingredient.name] ~= nil and block.products[lua_ingredient.name].state == 1 then
-          block.products[lua_ingredient.name].state = 2
+      if block_ingredients[lua_ingredient.name] == nil then
+        block_ingredients[lua_ingredient.name] = ingredient
+        if block_products[lua_ingredient.name] ~= nil and block_products[lua_ingredient.name].state == 1 then
+          block_products[lua_ingredient.name].state = 2
         end
       end
     end
@@ -823,6 +841,13 @@ end
 function ModelBuilder.updateProductionBlockOption(block, option, value)
   if block ~= nil then
     block[option] = value
+    ---reset states
+    for _, product in pairs(block.products) do
+      product.state = 1
+    end
+    for _, ingredient in pairs(block.ingredients) do
+      ingredient.state = 1
+    end
   end
 end
 
