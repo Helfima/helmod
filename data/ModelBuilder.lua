@@ -671,6 +671,7 @@ function ModelBuilder.copyBlock(into_model, into_block, from_model, from_block)
           into_block.solver = from_block.solver
           into_block.isEnergy = from_block.isEnergy
           into_block.by_product = from_block.by_product
+          into_block.type = from_block.type
           
           ---copy input
           if from_block.products ~= nil then
@@ -712,6 +713,9 @@ function ModelBuilder.copyBlock(into_model, into_block, from_model, from_block)
         end
         if recipe.beacon.module_priority ~= nil then
           recipe_model.beacon.module_priority = table.clone(recipe.beacon.module_priority)
+        end
+        if recipe.contraint ~= nil then
+          recipe_model.contraint = table.deepcopy(recipe.contraint)
         end
         into_block.recipes[recipe_model.id] = recipe_model
         recipe_index = recipe_index + 1

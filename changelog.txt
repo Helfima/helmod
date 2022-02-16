@@ -16,6 +16,7 @@ Date: ???
     - Fixed offshore pump recipes other than water being shown in energy block
     - Fixed energy consumption not linking between blocks
     - Fixed ingredient quantities not updating in a linked Ingredient Input block
+    - Fixed recipe constraints not being copied
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.7
 Date: 2021-12-29
