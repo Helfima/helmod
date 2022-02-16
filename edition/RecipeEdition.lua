@@ -700,7 +700,7 @@ function RecipeEdition:updateFactoryInfo(event)
           if (energy_type == "fluid") and item.temperature then
             table.insert(items,string.format("[%s=%s] %s °C", fuel_type, item:native().name, item.temperature))
           else
-            table.insert(items,string.format("[%s=%s]", fuel_type, item:native().name))
+            table.insert(items,string.format("[%s=%s] %s", fuel_type, item:native().name, Format.formatNumberKilo(item:getFuelValue(), "J")))
           end
         end
 
