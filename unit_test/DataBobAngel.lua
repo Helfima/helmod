@@ -1,6 +1,7 @@
 local data = {mod="BoB Angel"}
 data.energy = {}
 data.energy["burner-reactor"] = {
+    energy_type="burner",
     energy_type_input="burner",
     energy_usage_min=0,
     energy_usage_max=5400000,
@@ -17,10 +18,11 @@ data.energy["burner-reactor"] = {
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
     pollution=15,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["burner-reactor-3"] = {
+    energy_type="burner",
     energy_type_input="burner",
     energy_usage_min=0,
     energy_usage_max=9000000,
@@ -37,10 +39,11 @@ data.energy["burner-reactor-3"] = {
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
     pollution=15,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["fluid-reactor"] = {
+    energy_type="fluid",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=5400000,
@@ -56,11 +59,12 @@ data.energy["fluid-reactor"] = {
     fluid_fuel = {name="deuterium", capacity=1000},
     fluid_consumption=1.52,
     fluid_production={name="none", amount=0},
-    pollution=10,
-    speed=0,
+    pollution=1,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["fluid-reactor-3"] = {
+    energy_type="fluid",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=9000000,
@@ -76,11 +80,12 @@ data.energy["fluid-reactor-3"] = {
     fluid_fuel = {name="deuterium", capacity=1000},
     fluid_consumption=2.53,
     fluid_production={name="none", amount=0},
-    pollution=10,
-    speed=0,
+    pollution=1,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["nuclear-reactor"] = {
+    energy_type="burner",
     energy_type_input="burner",
     energy_usage_min=0,
     energy_usage_max=54000000,
@@ -97,10 +102,11 @@ data.energy["nuclear-reactor"] = {
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["nuclear-reactor-3"] = {
+    energy_type="burner",
     energy_type_input="burner",
     energy_usage_min=0,
     energy_usage_max=90000000,
@@ -117,10 +123,11 @@ data.energy["nuclear-reactor-3"] = {
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["boiler"] = {
+    energy_type="burner",
     energy_type_input="burner",
     energy_usage_min=0,
     energy_usage_max=1800000,
@@ -137,10 +144,11 @@ data.energy["boiler"] = {
     fluid_consumption=0,
     fluid_production={name="steam", amount=60},
     pollution=30,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["boiler-5"] = {
+    energy_type="burner",
     energy_type_input="burner",
     energy_usage_min=0,
     energy_usage_max=9000000,
@@ -157,10 +165,11 @@ data.energy["boiler-5"] = {
     fluid_consumption=0,
     fluid_production={name="steam", amount=60},
     pollution=9.37,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["oil-boiler"] = {
+    energy_type="fluid",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=5400000,
@@ -176,11 +185,12 @@ data.energy["oil-boiler"] = {
     fluid_fuel = {name="deuterium", capacity=1000},
     fluid_consumption=1.52,
     fluid_production={name="steam", amount=90},
-    pollution=22.5,
-    speed=0,
+    pollution=2.25,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["oil-boiler-4"] = {
+    energy_type="fluid",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=13500000,
@@ -196,11 +206,12 @@ data.energy["oil-boiler-4"] = {
     fluid_fuel = {name="deuterium", capacity=1000},
     fluid_consumption=3.8,
     fluid_production={name="steam", amount=90},
-    pollution=7.03,
-    speed=0,
+    pollution=0.7,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["heat-exchanger"] = {
+    energy_type="heat",
     energy_type_input="heat",
     energy_usage_min=0,
     energy_usage_max=10800000,
@@ -217,10 +228,11 @@ data.energy["heat-exchanger"] = {
     fluid_consumption=0,
     fluid_production={name="steam", amount=120},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["heat-exchanger-3"] = {
+    energy_type="heat",
     energy_type_input="heat",
     energy_usage_min=0,
     energy_usage_max=18000000,
@@ -237,10 +249,11 @@ data.energy["heat-exchanger-3"] = {
     fluid_consumption=0,
     fluid_production={name="steam", amount=120},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["steam-engine"] = {
+    energy_type="electric",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -257,10 +270,11 @@ data.energy["steam-engine"] = {
     fluid_consumption=30,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["steam-engine-5"] = {
+    energy_type="electric",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -277,10 +291,11 @@ data.energy["steam-engine-5"] = {
     fluid_consumption=30,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["steam-turbine"] = {
+    energy_type="electric",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -297,10 +312,11 @@ data.energy["steam-turbine"] = {
     fluid_consumption=60,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["steam-turbine-3"] = {
+    energy_type="electric",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -317,10 +333,11 @@ data.energy["steam-turbine-3"] = {
     fluid_consumption=60,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["bob-burner-generator"] = {
+    energy_type="burner",
     energy_type_input="burner",
     energy_usage_min=0,
     energy_usage_max=533333,
@@ -341,6 +358,7 @@ data.energy["bob-burner-generator"] = {
     recipe={type="recipe"}
 }
 data.energy["fluid-generator"] = {
+    energy_type="electric",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -353,14 +371,15 @@ data.energy["fluid-generator"] = {
     maximum_temperature=165,
     fluid_usage=60,
     fluid_burns="none",
-    fluid_fuel = {name="none", capacity=0},
+    fluid_fuel = {name="deuterium", capacity=1000},
     fluid_consumption=60,
     fluid_production={name="none", amount=0},
-    pollution=20,
-    speed=0,
+    pollution=2,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["fluid-generator-3"] = {
+    energy_type="electric",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -373,14 +392,15 @@ data.energy["fluid-generator-3"] = {
     maximum_temperature=165,
     fluid_usage=120,
     fluid_burns="none",
-    fluid_fuel = {name="none", capacity=0},
+    fluid_fuel = {name="deuterium", capacity=1000},
     fluid_consumption=120,
     fluid_production={name="none", amount=0},
-    pollution=10,
-    speed=0,
+    pollution=1,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["solar-panel-small"] = {
+    energy_type="electric",
     energy_type_input="none",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -397,10 +417,11 @@ data.energy["solar-panel-small"] = {
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["solar-panel-large-3"] = {
+    energy_type="electric",
     energy_type_input="none",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -417,10 +438,11 @@ data.energy["solar-panel-large-3"] = {
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["fast-accumulator"] = {
+    energy_type="electric",
     energy_type_input="electric",
     energy_usage_min=0,
     energy_usage_max=240000,
@@ -437,10 +459,11 @@ data.energy["fast-accumulator"] = {
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["slow-accumulator-2"] = {
+    energy_type="electric",
     energy_type_input="electric",
     energy_usage_min=0,
     energy_usage_max=360000,
@@ -457,10 +480,11 @@ data.energy["slow-accumulator-2"] = {
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["burner-assembling-machine"] = {
+    energy_type="burner",
     energy_type_input="burner",
     energy_usage_min=0,
     energy_usage_max=60000,
@@ -481,11 +505,12 @@ data.energy["burner-assembling-machine"] = {
     recipe={type="recipe"}
 }
 data.energy["steam-assembling-machine"] = {
+    energy_type="fluid",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=300000,
     energy_usage_priority="none",
-    energy_consumption=300000,
+    energy_consumption=60000,
     energy_type_output="none",
     energy_production=0,
     effectivity=1,
@@ -496,8 +521,8 @@ data.energy["steam-assembling-machine"] = {
     fluid_fuel = {name="steam", capacity=200},
     fluid_consumption=2,
     fluid_production={name="none", amount=0},
-    pollution=10,
-    speed=2,
+    pollution=1,
+    speed=0.4,
     recipe={type="recipe"}
 }
 
