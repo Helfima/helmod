@@ -29,7 +29,7 @@ end
 ---@return number --default 0
 function EnergySourcePrototype:getEmissions()
   if self.lua_prototype ~= nil then
-    return self.lua_prototype.emissions  or 2.7777777e-7
+    return self.lua_prototype.emissions or 2.7777777e-7
   end
   return 0
 end

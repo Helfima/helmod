@@ -784,26 +784,37 @@ end
 ---@return number --default 0
 function EntityPrototype:getPollution()
   if self.lua_prototype ~= nil then
-    local energy_usage = self:getEnergyConsumption()
+
+    local energy_usage
     local energy_type = self:getEnergyTypeInput()
     if energy_type == "electric" then
       energy_usage = self:getMaxEnergyUsage()
+    else
+      energy_usage = self:getEnergyConsumption()
     end
+
+    local energy_prototype = self:getEnergySource()
     local emission_multiplier = 1
     local emission = 0
-    if energy_type == "fluid" then
-      local fluid_fuel = self:getFluidFuelPrototype()
-      if fluid_fuel ~= nil then
-        emission_multiplier = fluid_fuel:getEmissionMultiplier()
-      end
-    end
-    local energy_prototype = self:getEnergySource()
+
     if energy_prototype ~= nil then
+      local fuel
+      if (energy_type == "fluid") and (self:getBurnsFluid() == true) then
+        fuel = self:getFluidFuelPrototype()
+      elseif energy_type == "burner" then
+        fuel = energy_prototype:getFuelPrototype()
+      end
+
+      if fuel ~= nil then
+        emission_multiplier = fuel:getFuelEmissionsMultiplier() * self:getEffectivity()
+      end
       emission = energy_prototype:getEmissions()
+
     end
-    local effectivity = self:getEffectivity()
-    return energy_usage * emission * emission_multiplier * effectivity
+
+    return energy_usage * emission * emission_multiplier
   end
+
   return 0
 end
 
@@ -851,6 +862,23 @@ end
 function EntityPrototype:getElectricEnergySource()
   if self.lua_prototype ~= nil and self.lua_prototype.electric_energy_source_prototype ~= nil then
     return ElectricSourcePrototype(self.lua_prototype.electric_energy_source_prototype, self.factory)
+  end
+  return nil
+end
+
+-------------------------------------------------------------------------------
+---Return burns fluid
+---@return boolean
+function EntityPrototype:getBurnsFluid()
+  if self.lua_prototype.type == "generator" then
+    local fluid_fuel = self:getFluidFuelPrototype(true)
+    local fuel_value = fluid_fuel:getFuelValue()
+    return fuel_value > 0
+  elseif self:getEnergyType() == "fluid" then
+    energy_prototype = self:getEnergySource()
+    if energy_prototype ~= nil then
+      return energy_prototype:getBurnsFluid()
+    end
   end
   return nil
 end
