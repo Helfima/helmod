@@ -1,6 +1,7 @@
 local data = {mod="Krastorio 2"}
 data.energy = {}
 data.energy["offshore-pump"] = {
+    energy_type="none",
     energy_type_input="none",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -17,10 +18,11 @@ data.energy["offshore-pump"] = {
     fluid_consumption=0,
     fluid_production={name="water", amount=1250},
     pollution=0,
-    speed=1251,
+    speed=1250,
     recipe={type="fluid"}
 }
 data.energy["assembling-machine-1"] = {
+    energy_type="electric",
     energy_type_input="electric",
     energy_usage_min=2500,
     energy_usage_max=75000,
@@ -41,6 +43,7 @@ data.energy["assembling-machine-1"] = {
     recipe={type="recipe"}
 }
 data.energy["assembling-machine-2"] = {
+    energy_type="electric",
     energy_type_input="electric",
     energy_usage_min=4166,
     energy_usage_max=125000,
@@ -61,6 +64,7 @@ data.energy["assembling-machine-2"] = {
     recipe={type="recipe"}
 }
 data.energy["assembling-machine-3"] = {
+    energy_type="electric",
     energy_type_input="electric",
     energy_usage_min=6666,
     energy_usage_max=200000,
@@ -81,6 +85,7 @@ data.energy["assembling-machine-3"] = {
     recipe={type="recipe"}
 }
 data.energy["boiler"] = {
+    energy_type="burner",
     energy_type_input="burner",
     energy_usage_min=0,
     energy_usage_max=1500000,
@@ -96,11 +101,12 @@ data.energy["boiler"] = {
     fluid_fuel = {name="none", capacity=0},
     fluid_consumption=0,
     fluid_production={name="steam", amount=20},
-    pollution=20,
-    speed=20,
+    pollution=49.99,
+    speed=1,
     recipe={name="steam"}
 }
 data.energy["steam-engine"] = {
+    energy_type="electric",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -112,15 +118,16 @@ data.energy["steam-engine"] = {
     target_temperature=0,
     maximum_temperature=165,
     fluid_usage=10,
-    fluid_burns="none",
+    fluid_burns=false,
     fluid_fuel = {name="steam", capacity=500},
     fluid_consumption=10,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["heat-exchanger"] = {
+    energy_type="heat",
     energy_type_input="heat",
     energy_usage_min=0,
     energy_usage_max=50000000,
@@ -137,10 +144,11 @@ data.energy["heat-exchanger"] = {
     fluid_consumption=0,
     fluid_production={name="steam", amount=250},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="resource"}
 }
 data.energy["steam-turbine"] = {
+    energy_type="electric",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -152,15 +160,16 @@ data.energy["steam-turbine"] = {
     target_temperature=0,
     maximum_temperature=415,
     fluid_usage=50,
-    fluid_burns="none",
+    fluid_burns=false,
     fluid_fuel = {name="steam", capacity=500},
     fluid_consumption=50,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["nuclear-reactor"] = {
+    energy_type="burner",
     energy_type_input="burner",
     energy_usage_min=0,
     energy_usage_max=250000000,
@@ -177,11 +186,12 @@ data.energy["nuclear-reactor"] = {
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 
 data.energy["solar-panel"] = {
+    energy_type="electric",
     energy_type_input="none",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -198,11 +208,12 @@ data.energy["solar-panel"] = {
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 
 data.energy["accumulator"] = {
+    energy_type="electric",
     energy_type_input="electric",
     energy_usage_min=0,
     energy_usage_max=600000,
@@ -219,10 +230,11 @@ data.energy["accumulator"] = {
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["kr-gas-power-station"] = {
+    energy_type="electric",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -234,12 +246,12 @@ data.energy["kr-gas-power-station"] = {
     target_temperature=0,
     maximum_temperature=25,
     fluid_usage=6,
-    fluid_burns="none",
-    fluid_fuel = {name="biomethanol", capacity=1000},
+    fluid_burns=true,
+    fluid_fuel = {name="petroleum-gas", capacity=100},
     fluid_consumption=6,
     fluid_production={name="none", amount=0},
-    pollution=30,
-    speed=0,
+    pollution=37.5,
+    speed=1,
     recipe={type="recipe"}
 }
 return data

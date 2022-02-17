@@ -1,6 +1,7 @@
 local data = {mod="Space Exploration"}
 data.energy = {}
 data.energy["offshore-pump"] = {
+    energy_type="none",
     energy_type_input="none",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -21,6 +22,7 @@ data.energy["offshore-pump"] = {
     recipe={type="fluid"}
 }
 data.energy["assembling-machine-1"] = {
+    energy_type="electric",
     energy_type_input="electric",
     energy_usage_min=2500,
     energy_usage_max=75000,
@@ -41,6 +43,7 @@ data.energy["assembling-machine-1"] = {
     recipe={type="recipe"}
 }
 data.energy["assembling-machine-2"] = {
+    energy_type="electric",
     energy_type_input="electric",
     energy_usage_min=5000,
     energy_usage_max=150000,
@@ -61,6 +64,7 @@ data.energy["assembling-machine-2"] = {
     recipe={type="recipe"}
 }
 data.energy["assembling-machine-3"] = {
+    energy_type="electric",
     energy_type_input="electric",
     energy_usage_min=12500,
     energy_usage_max=375000,
@@ -81,6 +85,7 @@ data.energy["assembling-machine-3"] = {
     recipe={type="recipe"}
 }
 data.energy["boiler"] = {
+    energy_type="burner",
     energy_type_input="burner",
     energy_usage_min=0,
     energy_usage_max=1800000,
@@ -97,10 +102,11 @@ data.energy["boiler"] = {
     fluid_consumption=0,
     fluid_production={name="steam", amount=60},
     pollution=30,
-    speed=60,
+    speed=1,
     recipe={name="steam"}
 }
 data.energy["steam-engine"] = {
+    energy_type="electric",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -112,15 +118,16 @@ data.energy["steam-engine"] = {
     target_temperature=0,
     maximum_temperature=165,
     fluid_usage=30,
-    fluid_burns="none",
+    fluid_burns=false,
     fluid_fuel = {name="steam", capacity=200},
     fluid_consumption=30,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["heat-exchanger"] = {
+    energy_type="heat",
     energy_type_input="heat",
     energy_usage_min=0,
     energy_usage_max=10000000,
@@ -137,10 +144,11 @@ data.energy["heat-exchanger"] = {
     fluid_consumption=0,
     fluid_production={name="steam", amount=103},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="resource"}
 }
 data.energy["steam-turbine"] = {
+    energy_type="electric",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -152,35 +160,37 @@ data.energy["steam-turbine"] = {
     target_temperature=0,
     maximum_temperature=500,
     fluid_usage=60,
-    fluid_burns="none",
+    fluid_burns=false,
     fluid_fuel = {name="steam", capacity=200},
     fluid_consumption=60,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["se-fluid-burner-generator"] = {
+    energy_type="electric",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=0,
     energy_usage_priority="secondary-output",
-    energy_consumption=200000,
+    energy_consumption=2666666,
     energy_type_output="electric",
-    energy_production=200000,
+    energy_production=2000000,
     effectivity=0.75,
     target_temperature=0,
     maximum_temperature=1000,
     fluid_usage=60,
-    fluid_burns="none",
-    fluid_fuel = {name="se-liquid-rocket-fuel", capacity=100},
+    fluid_burns=true,
+    fluid_fuel = {name="se-antimatter-stream", capacity=10},
     fluid_consumption=60,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["nuclear-reactor"] = {
+    energy_type="burner",
     energy_type_input="burner",
     energy_usage_min=0,
     energy_usage_max=40000000,
@@ -197,11 +207,12 @@ data.energy["nuclear-reactor"] = {
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 
 data.energy["solar-panel"] = {
+    energy_type="electric",
     energy_type_input="none",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -218,18 +229,19 @@ data.energy["solar-panel"] = {
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 
 data.energy["accumulator"] = {
+    energy_type="electric",
     energy_type_input="electric",
     energy_usage_min=0,
-    energy_usage_max=300000,
+    energy_usage_max=250000,
     energy_usage_priority="managed-accumulator",
-    energy_consumption=300000,
+    energy_consumption=250000,
     energy_type_output="electric",
-    energy_production=300000,
+    energy_production=500000,
     effectivity=1,
     target_temperature=0,
     maximum_temperature=0,
@@ -239,7 +251,7 @@ data.energy["accumulator"] = {
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 return data

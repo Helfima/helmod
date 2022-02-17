@@ -17,7 +17,7 @@ data.energy["burner-reactor"] = {
     fluid_fuel = {name="none", capacity=0},
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
-    pollution=15,
+    pollution=30,
     speed=1,
     recipe={type="recipe"}
 }
@@ -38,7 +38,7 @@ data.energy["burner-reactor-3"] = {
     fluid_fuel = {name="none", capacity=0},
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
-    pollution=15,
+    pollution=30,
     speed=1,
     recipe={type="recipe"}
 }
@@ -143,7 +143,7 @@ data.energy["boiler"] = {
     fluid_fuel = {name="none", capacity=0},
     fluid_consumption=0,
     fluid_production={name="steam", amount=60},
-    pollution=30,
+    pollution=60,
     speed=1,
     recipe={type="recipe"}
 }
@@ -164,7 +164,7 @@ data.energy["boiler-5"] = {
     fluid_fuel = {name="none", capacity=0},
     fluid_consumption=0,
     fluid_production={name="steam", amount=60},
-    pollution=9.37,
+    pollution=18.75,
     speed=1,
     recipe={type="recipe"}
 }
@@ -265,7 +265,7 @@ data.energy["steam-engine"] = {
     target_temperature=0,
     maximum_temperature=165,
     fluid_usage=30,
-    fluid_burns="none",
+    fluid_burns=false,
     fluid_fuel = {name="steam", capacity=200},
     fluid_consumption=30,
     fluid_production={name="none", amount=0},
@@ -286,7 +286,7 @@ data.energy["steam-engine-5"] = {
     target_temperature=0,
     maximum_temperature=765,
     fluid_usage=30,
-    fluid_burns="none",
+    fluid_burns=false,
     fluid_fuel = {name="steam", capacity=200},
     fluid_consumption=30,
     fluid_production={name="none", amount=0},
@@ -307,7 +307,7 @@ data.energy["steam-turbine"] = {
     target_temperature=0,
     maximum_temperature=465,
     fluid_usage=60,
-    fluid_burns="none",
+    fluid_burns=false,
     fluid_fuel = {name="steam", capacity=200},
     fluid_consumption=60,
     fluid_production={name="none", amount=0},
@@ -328,7 +328,7 @@ data.energy["steam-turbine-3"] = {
     target_temperature=0,
     maximum_temperature=765,
     fluid_usage=60,
-    fluid_burns="none",
+    fluid_burns=false,
     fluid_fuel = {name="steam", capacity=200},
     fluid_consumption=60,
     fluid_production={name="none", amount=0},
@@ -353,7 +353,7 @@ data.energy["bob-burner-generator"] = {
     fluid_fuel = {name="none", capacity=0},
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
-    pollution=15,
+    pollution=30,
     speed=1,
     recipe={type="recipe"}
 }
@@ -370,7 +370,7 @@ data.energy["fluid-generator"] = {
     target_temperature=0,
     maximum_temperature=165,
     fluid_usage=60,
-    fluid_burns="none",
+    fluid_burns=true,
     fluid_fuel = {name="deuterium", capacity=1000},
     fluid_consumption=60,
     fluid_production={name="none", amount=0},
@@ -391,7 +391,7 @@ data.energy["fluid-generator-3"] = {
     target_temperature=0,
     maximum_temperature=165,
     fluid_usage=120,
-    fluid_burns="none",
+    fluid_burns=true,
     fluid_fuel = {name="deuterium", capacity=1000},
     fluid_consumption=120,
     fluid_production={name="none", amount=0},
@@ -500,7 +500,7 @@ data.energy["burner-assembling-machine"] = {
     fluid_fuel = {name="none", capacity=0},
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
-    pollution=4,
+    pollution=8,
     speed=0.25,
     recipe={type="recipe"}
 }
