@@ -116,7 +116,6 @@ end
 ---On initialization
 ---
 function Controller:on_init()
-  log("Controller:on_init()")
   local caches_data = Cache.get()
   if caches_data["HMPlayer"] == nil then
     Player.getResources()

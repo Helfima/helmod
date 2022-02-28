@@ -149,7 +149,6 @@ end
 function GuiElement.add(parent, gui_element)
   local element = nil
   local ok , err = pcall(function()
-    --log(gui_element.classname)
     if gui_element.classname ~= "HMGuiCell" then
       element = parent.add(gui_element:getOptions())
     else
