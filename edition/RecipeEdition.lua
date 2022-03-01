@@ -708,7 +708,7 @@ function RecipeEdition:updateFactoryInfo(event)
         if (energy_type == "fluid") and factory_fuel.temperature then
           default_fuel = string.format("[%s=%s] %s °C", fuel_type, factory_fuel:native().name, factory_fuel.temperature)
         else
-          default_fuel = string.format("[%s=%s]", fuel_type, factory_fuel:native().name)
+          default_fuel = string.format("[%s=%s] %s", fuel_type, factory_fuel:native().name, Format.formatNumberKilo(factory_fuel:getFuelValue(), "J"))
         end
         GuiElement.add(input_panel, GuiLabel("label-burner"):caption({"helmod_common.resource"}))
         GuiElement.add(input_panel, GuiDropDown(self.classname, "factory-fuel-update", model.id, block.id, recipe.id, fuel_type):items(items, default_fuel))
