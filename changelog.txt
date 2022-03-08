@@ -1,10 +1,13 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.8
-Date: ???
+Date: 2022-08-03
+  Info:
+    - Contributors: KiwiHawk, x2605
   Changes:
     - Steam temperature can be selected for steam powered entities
     - Added support for burner generators
     - Added fuel value to list of available fuels
+    - Added Korean translation
   Bugfixes:
     - Fixed incorrect or missing info in multiple tooltips
     - Fixed hidden items and items with a fuel value of 0 being listed as fuel
@@ -26,7 +29,7 @@ Date: 2021-12-29
 Version: 0.12.6
 Date: 2021-12-29
   Info:
-    - Contibutors: KoharaKazuya, Astorin, veger, KiwiHawk
+    - Contributors: KoharaKazuya, Astorin, veger, KiwiHawk
   Features:
     - Add shortcut icon to toolbar to open/close planner
   Changes:
