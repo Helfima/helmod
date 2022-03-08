@@ -151,7 +151,6 @@ end
 ---}
 --
 function EventController.onConfigurationChanged(data)
-  log("EventController.onConfigurationChanged(data)")
   if not data or not data.mod_changes then
     return
   end

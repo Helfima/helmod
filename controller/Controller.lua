@@ -116,7 +116,6 @@ end
 ---On initialization
 ---
 function Controller:on_init()
-  log("Controller:on_init()")
   local caches_data = Cache.get()
   if caches_data["HMPlayer"] == nil then
     Player.getResources()
@@ -324,7 +323,7 @@ function Controller:onGuiClosed(event)
   self:cleanController(Player.native())
 end
 
-local pattern = "([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)"
+local pattern = "([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)"
 
 -------------------------------------------------------------------------------
 ---On gui action
@@ -334,9 +333,9 @@ local pattern = "([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)"
 function Controller:onGuiAction(event)
   if event.element ~= nil and (string.find(event.element.name,"^HM.*") or string.find(event.element.name,"^helmod.*")) then
     if views == nil then self:prepare() end
-  
-    event.classname, event.action, event.item1, event.item2, event.item3, event.item4 = string.match(event.element.name,pattern)
-  
+
+    event.classname, event.action, event.item1, event.item2, event.item3, event.item4, event.item5 = string.match(event.element.name,pattern)
+
     if event.classname == self.classname and event.action == "CLOSE" then
       Controller:cleanController(Player.native())
     elseif event.classname == "helmod_planner-command" then

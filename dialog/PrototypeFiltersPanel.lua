@@ -37,7 +37,7 @@ table.insert(sample.value, { mode="and", filter="flag", invert="true", option="h
 table.insert(samples, sample)
 
 sample = {name="list of power machines", type="entity", value={}}
-for _,type in pairs({"generator", "solar-panel", "boiler", "accumulator", "reactor", "offshore-pump", "seafloor-pump"}) do
+for _,type in pairs({"generator", "solar-panel", "boiler", "accumulator", "reactor", "burner-generator", "offshore-pump"}) do
   table.insert(sample.value, { mode="or", filter="type", invert="false", option=type})
 end
 table.insert(samples, sample)

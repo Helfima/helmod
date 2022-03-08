@@ -1,11 +1,32 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.12.8
+Date: ???
+  Changes:
+    - Steam temperature can be selected for steam powered entities
+    - Added support for burner generators
+    - Added fuel value to list of available fuels
+  Bugfixes:
+    - Fixed incorrect or missing info in multiple tooltips
+    - Fixed hidden items and items with a fuel value of 0 being listed as fuel
+    - Fixed energy block quantities always being in MW
+    - Fixed exclude constraint overlay not being drawn
+    - Fixed fluids with temperature not editable
+    - Fixed offshore pump recipes other than water being hidden
+    - Fixed default machine for offshore pump recipes
+    - Fixed offshore pump recipes other than water being shown in energy block
+    - Fixed energy consumption not linking between blocks
+    - Fixed ingredient quantities not updating in a linked Ingredient Input block
+    - Fixed recipe constraints not being copied
+---------------------------------------------------------------------------------------------------
 Version: 0.12.7
 Date: 2021-12-29
   Bugfixes:
-    - Fixed error when flags attribut missing in prototype
+    - Fixed error when flags attribute missing in prototype
 ---------------------------------------------------------------------------------------------------
-Version: 0.12.6 - Contibutor: KoharaKazuya,Astorin,veger,KiwiHawk
+Version: 0.12.6
 Date: 2021-12-29
+  Info:
+    - Contibutors: KoharaKazuya, Astorin, veger, KiwiHawk
   Features:
     - Add shortcut icon to toolbar to open/close planner
   Changes:

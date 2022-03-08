@@ -95,9 +95,9 @@ function User.getDefaultSettings()
     model_auto_compute = false,
     model_loop_limit = 1000,
     other_speed_panel=false,
-    filter_show_disable=false,
+    filter_show_disable=true,
     filter_show_hidden=false,
-    filter_show_hidden_player_crafting=false,
+    filter_show_hidden_player_crafting=true,
     filter_show_lock_recipes=false
   }
 end

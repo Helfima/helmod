@@ -225,8 +225,8 @@ function UnitTestPanel:addEnergyListRow(itable, entity, test_data)
     GuiElement.add(itable, GuiLabel("fluid-usage", entity):caption({"", helmod_tag.font.default_bold, tag_color, fluid_usage, helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
     ---col Fluid Burns
     local fluid_burns = "none"
-    if energy_source ~= nil and energy_source:getType() == "fluid" then
-      fluid_burns = energy_source:getBurnsFluid()
+    if energy_source ~= nil and prototype:getEnergyTypeInput() == "fluid" then
+      fluid_burns = prototype:getBurnsFluid()
     end
     local tag_color, tooltip = self:valueEquals(fluid_burns, test_data.fluid_burns, true)
     GuiElement.add(itable, GuiLabel("fluid-burns", entity):caption({"", helmod_tag.font.default_bold, tag_color, fluid_burns, helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
@@ -289,7 +289,7 @@ function UnitTestPanel:addEnergyListRow(itable, entity, test_data)
     local tag_color, tooltip = self:valueEquals(pollution, test_data.pollution)
     GuiElement.add(itable, GuiLabel("pollution", entity):caption({"", helmod_tag.font.default_bold, tag_color, Format.formatNumber(pollution), helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
     ---col Speed
-    local speed = prototype:speedFactory(test_data.recipe)
+    local speed = Format.round(prototype:speedFactory(test_data.recipe), -2)
     local tag_color, tooltip = self:valueEquals(speed, test_data.speed)
     GuiElement.add(itable, GuiLabel("speed", entity):caption({"", helmod_tag.font.default_bold, tag_color, Format.formatNumber(speed), helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
   end

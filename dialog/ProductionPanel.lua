@@ -502,6 +502,7 @@ function ProductionPanel:updateInfoBlock(model, block)
     end
   end
 end
+
 -------------------------------------------------------------------------------
 ---Update header
 ---@param model table
@@ -558,16 +559,21 @@ function ProductionPanel:updateInputBlock(model, block)
             button_tooltip = "tooltip.add-recipe"
             control_info = nil
           else
-            button_action = "product-edition"
-            button_tooltip = "tooltip.edit-product"
+            if not(block.unlinked) or block.by_factory == true then
+              button_action = "product-info"
+              button_tooltip = "tooltip.info-product"
+              if block.products_linked ~= nil and block.products_linked[lua_ingredient.name] then
+                contraint_type = "linked"
+              end
+            else
+              button_action = "product-edition"
+              button_tooltip = "tooltip.edit-product"
+            end
           end
           ---color
           if lua_ingredient.state == 1 then
             if not(block.unlinked) or block.by_factory == true then
               button_color = GuiElement.color_button_default_ingredient
-              if block.products_linked ~= nil and block.products_linked[lua_ingredient.name] then
-                contraint_type = "linked"
-              end
             else
               button_color = GuiElement.color_button_edit
             end
@@ -603,6 +609,7 @@ function ProductionPanel:updateOutputBlock(model, block)
     output_scroll = right_scroll
     output_tool = right_tool
   end
+
   output_tool.clear()
   local all_visible = User.getParameter("block_all_product_visible")
   if all_visible == true then
@@ -634,7 +641,7 @@ function ProductionPanel:updateOutputBlock(model, block)
           local button_tooltip = "tooltip.product"
           local button_color = GuiElement.color_button_default_product
           local control_info = "link-intermediate"
-          if not(block_by_product) then
+          if not block_by_product then
             button_action = "production-recipe-product-add"
             button_tooltip = "tooltip.add-recipe"
             control_info = nil
@@ -1132,7 +1139,6 @@ function ProductionPanel:addTableRowBlock(gui_table, model, block)
   local unlinked = block.unlinked and true or false
   if block.index == 0 then unlinked = true end
   local block_by_product = not(block ~= nil and block.by_product == false)
-  block.type = "recipe"
   ---col action
   local cell_action = GuiElement.add(gui_table, GuiTable("action", block.id):column(2))
 

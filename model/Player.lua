@@ -263,7 +263,17 @@ function Player.getLocalisedName(element)
     if element.type == 1 or element.type == "fluid" then
       local item = Player.getFluidPrototype(element.name)
       if item ~= nil then
-        localisedName = item.localised_name
+        if element.temperature then
+          localisedName = {"helmod_common.fluid-temperature", item.localised_name, element.temperature}
+        elseif (element.minimum_temperature and (element.minimum_temperature >= -1e300)) and (element.maximum_temperature and (element.maximum_temperature <= 1e300)) then
+          localisedName = {"helmod_common.fluid-temperature-range", item.localised_name, element.minimum_temperature, element.maximum_temperature}
+        elseif (element.minimum_temperature and (element.minimum_temperature >= -1e300)) then
+          localisedName = {"helmod_common.fluid-temperature-min", item.localised_name, element.minimum_temperature}
+        elseif (element.maximum_temperature and (element.maximum_temperature <= 1e300)) then
+          localisedName = {"helmod_common.fluid-temperature-max", item.localised_name, element.maximum_temperature}
+        else
+          localisedName = item.localised_name
+        end
       end
     end
   end
@@ -481,16 +491,12 @@ function Player.getProductionsCrafting(category, lua_recipe)
   local rules_included, rules_excluded = Player.getRules("production-crafting")
   if category == "crafting-handonly" then
     productions["character"] = game.entity_prototypes["character"]
-  elseif lua_recipe.name ~= nil and lua_recipe.name == "water" then
-    for key, lua_entity in pairs(Player.getOffshorePump()) do
-      productions[lua_entity.name] = lua_entity
-    end
-  elseif lua_recipe.name ~= nil and lua_recipe.name == "water-viscous-mud" and lua_recipe.object_name ~= "LuaRecipePrototype" and lua_recipe.type ~= "recipe" then
-    for key, lua_entity in pairs(Player.getOffshorePump("water-viscous-mud")) do
-      productions[lua_entity.name] = lua_entity
-    end
   elseif lua_recipe.name ~= nil and lua_recipe.name == "steam" then
     for key, lua_entity in pairs(Player.getBoilers()) do
+      productions[lua_entity.name] = lua_entity
+    end
+  elseif lua_recipe.name ~= nil and category == "fluid" then
+    for key, lua_entity in pairs(Player.getOffshorePump(lua_recipe.name)) do
       productions[lua_entity.name] = lua_entity
     end
   else
@@ -569,12 +575,26 @@ end
 ---Return list of energy machines
 ---@return table
 function Player.getEnergyMachines()
-    local filters = {}
+  local machines = {}
 
-  for _,type in pairs({"generator", "solar-panel", "boiler", "accumulator", "reactor", "offshore-pump", "seafloor-pump"}) do
+  local filters = {}
+  for _,type in pairs({"generator", "solar-panel", "boiler", "accumulator", "reactor", "burner-generator"}) do
     table.insert(filters, {filter="type", mode="or", invert=false, type=type})
   end
-  return game.get_filtered_entity_prototypes(filters)
+  for entity_name, entity in pairs(game.get_filtered_entity_prototypes(filters)) do
+    machines[entity_name] = entity
+  end
+
+  filters = {}  
+  table.insert(filters, {filter="type", mode="or", invert=false, type="offshore-pump"})
+  local offshore_pumps = game.get_filtered_entity_prototypes(filters)
+  for entity_name, entity in pairs(offshore_pumps) do
+    if entity.fluid.name == "water" then
+      machines[entity_name] = entity
+    end
+  end
+
+  return machines
 end
 
 -------------------------------------------------------------------------------
@@ -592,14 +612,12 @@ end
 ---Return list of Offshore-Pump
 ---@return table
 function Player.getOffshorePump(fluid_name)
-  if fluid_name == nil then fluid_name = "water" end
   local filters = {}
-  table.insert(filters,{filter="type", type="offshore-pump" ,mode="or"})
+  table.insert(filters, {filter="type", type="offshore-pump", mode="or"})
   local entities = game.get_filtered_entity_prototypes(filters)
   local offshore_pump = {}
   for key,entity in pairs(entities) do
-    local fluidbox_prototype = EntityPrototype(entity):getFluidboxPrototype("output")
-    if fluidbox_prototype:getFilter() ~= nil and fluidbox_prototype:getFilter().name == fluid_name then
+    if entity.fluid.name == fluid_name then
       offshore_pump[key] = entity
     end
   end
@@ -688,7 +706,7 @@ function Player.getRecipeFluid(name)
     ingredients = {{name="water", type="fluid", amount=1}}
   end
   local recipe = {}
-  recipe.category = "chemistry"
+  recipe.category = prototype.name
   recipe.enabled = true
   recipe.energy = 1
   recipe.force = {}
@@ -992,8 +1010,15 @@ end
 ---@return table
 function Player.getFluidFuelPrototypes()
   local filters = {}
-  table.insert(filters, {filter="fuel-value", mode="or", invert=false, comparison=">", value=0})
-  return Player.getFluidPrototypes(filters)
+  table.insert(filters, {filter = "hidden", invert = true, mode = "and"})
+  table.insert(filters, {filter = "fuel-value", mode= "and", invert = false, comparison = ">", value = 0})
+
+  local items = {}
+  
+  for _, fluid in pairs(Player.getFluidPrototypes(filters)) do
+    table.insert(items, FluidPrototype(fluid))
+  end
+  return items
 end
 
 -------------------------------------------------------------------------------
@@ -1085,6 +1110,56 @@ function Player.parseNumber(number)
   elseif string.lower(power) == "gj" then
     return tonumber(value)*1000*1000*1000
   end
+end
+
+-------------------------------------------------------------------------------
+---Return fluid prototypes with temperature
+---@param fluid LuaFluidPrototype
+---@return table
+function Player.getFluidTemperaturePrototypes(fluid)
+
+  -- Find all ways of making this fluid
+
+  local temperatures = {}
+
+  -- Recipes
+  local filters = {}
+  table.insert(filters, {filter = "hidden", invert = true, mode = "and"})
+  table.insert(filters, {filter = "has-product-fluid", elem_filters = {{filter = "name", name = fluid.name}}, mode = "and"})
+  local prototypes = game.get_filtered_recipe_prototypes(filters)
+
+  for recipe_name, recipe in pairs(prototypes) do
+    for product_name, product in pairs(recipe.products) do
+      if product.name == fluid.name and product.temperature then
+        temperatures[product.temperature] = true
+      end
+    end
+  end
+
+  -- Boilers
+  local filters = {}
+  table.insert(filters, {filter = "type", type = "boiler", mode = "and"})
+  table.insert(filters, {filter = "flag", flag = "hidden", mode = "and", invert = true})
+  local boilers = game.get_filtered_entity_prototypes(filters)
+
+  for boiler_name, boiler in pairs(boilers) do
+    for _, fluidbox in pairs(boiler.fluidbox_prototypes) do
+      if (fluidbox.production_type == "output") and fluidbox.filter and (fluidbox.filter.name == fluid.name) then
+        temperatures[boiler.target_temperature] = true
+      end
+    end
+  end
+
+  -- Build result table of FluidPrototype
+  local items = {}
+  local item
+  for temperature, _ in pairs(temperatures) do
+    item = FluidPrototype(fluid)
+    item:setTemperature(temperature)
+    table.insert(items, item)
+  end
+
+  return items
 end
 
 return Player

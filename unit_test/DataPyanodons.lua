@@ -1,6 +1,7 @@
 local data = {mod="Pyanodons"}
 data.energy = {}
 data.energy["offshore-pump"] = {
+    energy_type="none",
     energy_type_input="none",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -21,6 +22,7 @@ data.energy["offshore-pump"] = {
     recipe={type="fluid"}
 }
 data.energy["assembling-machine-1"] = {
+    energy_type="electric",
     energy_type_input="electric",
     energy_usage_min=2500,
     energy_usage_max=75000,
@@ -41,6 +43,7 @@ data.energy["assembling-machine-1"] = {
     recipe={type="recipe"}
 }
 data.energy["assembling-machine-2"] = {
+    energy_type="electric",
     energy_type_input="electric",
     energy_usage_min=5000,
     energy_usage_max=150000,
@@ -61,6 +64,7 @@ data.energy["assembling-machine-2"] = {
     recipe={type="recipe"}
 }
 data.energy["assembling-machine-3"] = {
+    energy_type="electric",
     energy_type_input="electric",
     energy_usage_min=12500,
     energy_usage_max=375000,
@@ -81,6 +85,7 @@ data.energy["assembling-machine-3"] = {
     recipe={type="recipe"}
 }
 data.energy["boiler"] = {
+    energy_type="burner",
     energy_type_input="burner",
     energy_usage_min=0,
     energy_usage_max=1800000,
@@ -97,30 +102,32 @@ data.energy["boiler"] = {
     fluid_consumption=0,
     fluid_production={name="steam", amount=60},
     pollution=30,
-    speed=60,
+    speed=1,
     recipe={name="steam"}
 }
 data.energy["steam-engine"] = {
+    energy_type="electric",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=0,
     energy_usage_priority="secondary-output",
-    energy_consumption=900000,
+    energy_consumption=2910000,
     energy_type_output="electric",
-    energy_production=900000,
+    energy_production=2910000,
     effectivity=1,
     target_temperature=0,
-    maximum_temperature=165,
+    maximum_temperature=500,
     fluid_usage=30,
-    fluid_burns="none",
+    fluid_burns=false,
     fluid_fuel = {name="steam", capacity=200},
     fluid_consumption=30,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["heat-exchanger"] = {
+    energy_type="heat",
     energy_type_input="heat",
     energy_usage_min=0,
     energy_usage_max=10000000,
@@ -137,30 +144,32 @@ data.energy["heat-exchanger"] = {
     fluid_consumption=0,
     fluid_production={name="steam", amount=103},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="resource"}
 }
 data.energy["steam-turbine"] = {
+    energy_type="electric",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=0,
     energy_usage_priority="secondary-output",
     energy_consumption=5820000,
     energy_type_output="electric",
-    energy_production=5820000,
+    energy_production=11820000,
     effectivity=1,
     target_temperature=0,
-    maximum_temperature=500,
+    maximum_temperature=2000,
     fluid_usage=60,
-    fluid_burns="none",
+    fluid_burns=false,
     fluid_fuel = {name="steam", capacity=200},
     fluid_consumption=60,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 data.energy["nuclear-reactor"] = {
+    energy_type="burner",
     energy_type_input="burner",
     energy_usage_min=0,
     energy_usage_max=40000000,
@@ -177,11 +186,12 @@ data.energy["nuclear-reactor"] = {
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 
 data.energy["solar-panel"] = {
+    energy_type="electric",
     energy_type_input="none",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -198,11 +208,12 @@ data.energy["solar-panel"] = {
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 
 data.energy["accumulator"] = {
+    energy_type="electric",
     energy_type_input="electric",
     energy_usage_min=0,
     energy_usage_max=300000,
@@ -219,16 +230,17 @@ data.energy["accumulator"] = {
     fluid_consumption=0,
     fluid_production={name="none", amount=0},
     pollution=0,
-    speed=0,
+    speed=1,
     recipe={type="recipe"}
 }
 
 data.energy["glassworks-mk01"] = {
+    energy_type="fluid",
     energy_type_input="fluid",
     energy_usage_min=0,
-    energy_usage_max=27000000,
+    energy_usage_max=10000000,
     energy_usage_priority="none",
-    energy_consumption=27000000,
+    energy_consumption=10000000,
     energy_type_output="none",
     energy_production=0,
     effectivity=1,
@@ -236,19 +248,20 @@ data.energy["glassworks-mk01"] = {
     maximum_temperature=0,
     fluid_usage=0,
     fluid_burns=true,
-    fluid_fuel = {name="methanol", capacity=1000},
-    fluid_consumption=27,
+    fluid_fuel = {name="diesel", capacity=1000},
+    fluid_consumption=6.66,
     fluid_production={name="none", amount=0},
     pollution=10,
     speed=1,
     recipe={type="recipe"}
 }
 data.energy["glassworks-mk02"] = {
+    energy_type="fluid",
     energy_type_input="fluid",
     energy_usage_min=0,
-    energy_usage_max=33000000,
+    energy_usage_max=30000000,
     energy_usage_priority="none",
-    energy_consumption=33000000,
+    energy_consumption=30000000,
     energy_type_output="none",
     energy_production=0,
     effectivity=1,
@@ -256,19 +269,20 @@ data.energy["glassworks-mk02"] = {
     maximum_temperature=0,
     fluid_usage=0,
     fluid_burns=true,
-    fluid_fuel = {name="methanol", capacity=1000},
-    fluid_consumption=33,
+    fluid_fuel = {name="diesel", capacity=1000},
+    fluid_consumption=20,
     fluid_production={name="none", amount=0},
     pollution=10,
     speed=2,
     recipe={type="recipe"}
 }
 data.energy["glassworks-mk03"] = {
+    energy_type="fluid",
     energy_type_input="fluid",
     energy_usage_min=0,
-    energy_usage_max=41000000,
+    energy_usage_max=40000000,
     energy_usage_priority="none",
-    energy_consumption=41000000,
+    energy_consumption=40000000,
     energy_type_output="none",
     energy_production=0,
     effectivity=1,
@@ -276,19 +290,20 @@ data.energy["glassworks-mk03"] = {
     maximum_temperature=0,
     fluid_usage=0,
     fluid_burns=true,
-    fluid_fuel = {name="methanol", capacity=1000},
-    fluid_consumption=41,
+    fluid_fuel = {name="diesel", capacity=1000},
+    fluid_consumption=26.66,
     fluid_production={name="none", amount=0},
     pollution=10,
     speed=3,
     recipe={type="recipe"}
 }
 data.energy["glassworks-mk04"] = {
+    energy_type="fluid",
     energy_type_input="fluid",
     energy_usage_min=0,
-    energy_usage_max=48000000,
+    energy_usage_max=50000000,
     energy_usage_priority="none",
-    energy_consumption=48000000,
+    energy_consumption=50000000,
     energy_type_output="none",
     energy_production=0,
     effectivity=1,
@@ -296,14 +311,15 @@ data.energy["glassworks-mk04"] = {
     maximum_temperature=0,
     fluid_usage=0,
     fluid_burns=true,
-    fluid_fuel = {name="methanol", capacity=1000},
-    fluid_consumption=48,
+    fluid_fuel = {name="diesel", capacity=1000},
+    fluid_consumption=33.33,
     fluid_production={name="none", amount=0},
     pollution=10,
     speed=4,
     recipe={type="recipe"}
 }
 data.energy["oil-boiler-mk01"] = {
+    energy_type="fluid",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=1800000,
@@ -316,14 +332,15 @@ data.energy["oil-boiler-mk01"] = {
     maximum_temperature=0,
     fluid_usage=0,
     fluid_burns=true,
-    fluid_fuel = {name="methanol", capacity=1000},
-    fluid_consumption=1.8,
+    fluid_fuel = {name="diesel", capacity=1000},
+    fluid_consumption=1.2,
     fluid_production={name="steam", amount=60},
     pollution=30,
-    speed=0,
+    speed=1,
     recipe={type="resource"}
 }
 data.energy["gasturbinemk01"] = {
+    energy_type="electric",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -335,15 +352,16 @@ data.energy["gasturbinemk01"] = {
     target_temperature=0,
     maximum_temperature=1000,
     fluid_usage=60,
-    fluid_burns="none",
+    fluid_burns=false,
     fluid_fuel = {name="combustion-mixture1", capacity=1000},
     fluid_consumption=60,
     fluid_production={name="none", amount=0},
     pollution=0.06,
-    speed=0,
-    recipe={type="resource"}
+    speed=1,
+    recipe={type="recipe"}
 }
 data.energy["gasturbinemk02"] = {
+    energy_type="electric",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -355,15 +373,16 @@ data.energy["gasturbinemk02"] = {
     target_temperature=0,
     maximum_temperature=1000,
     fluid_usage=60,
-    fluid_burns="none",
+    fluid_burns=false,
     fluid_fuel = {name="combustion-mixture1", capacity=1000},
     fluid_consumption=60,
     fluid_production={name="none", amount=0},
     pollution=0.06,
-    speed=0,
-    recipe={type="resource"}
+    speed=1,
+    recipe={type="recipe"}
 }
 data.energy["gasturbinemk03"] = {
+    energy_type="electric",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -375,15 +394,16 @@ data.energy["gasturbinemk03"] = {
     target_temperature=0,
     maximum_temperature=1000,
     fluid_usage=90,
-    fluid_burns="none",
+    fluid_burns=false,
     fluid_fuel = {name="combustion-mixture1", capacity=1000},
     fluid_consumption=90,
     fluid_production={name="none", amount=0},
     pollution=0.06,
-    speed=0,
-    recipe={type="resource"}
+    speed=1,
+    recipe={type="recipe"}
 }
 data.energy["py-turbine"] = {
+    energy_type="electric",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=0,
@@ -395,13 +415,13 @@ data.energy["py-turbine"] = {
     target_temperature=0,
     maximum_temperature=5000,
     fluid_usage=540,
-    fluid_burns="none",
+    fluid_burns=false,
     fluid_fuel = {name="pressured-steam", capacity=1000},
     fluid_consumption=540,
     fluid_production={name="none", amount=0},
     pollution=0.02,
-    speed=0,
-    recipe={type="resource"}
+    speed=1,
+    recipe={type="recipe"}
 }
 
 return data

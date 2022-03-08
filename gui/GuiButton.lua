@@ -28,7 +28,6 @@ function GuiButton:sprite(type, name, hovered)
       self.options.hovered_sprite = GuiElement.getSprite(hovered)
     end
     table.insert(self.name, name)
-    table.insert(self.name, type)
   else
     self.options.sprite = GuiElement.getSprite(type, name)
     if hovered then
@@ -54,6 +53,7 @@ end
 ---@return GuiButton
 function GuiButton:index(index)
   self.m_index = index
+  table.insert(self.name, index)
   return self
 end
 

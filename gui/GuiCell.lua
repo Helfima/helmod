@@ -217,18 +217,15 @@ end
 ---@param button LuaGuiElement
 function GuiCell:add_contraintIcon(button)
   if self.m_contraint_icon == nil then return end
-  if self.m_contraint_icon == "linked" then 
+  if self.m_contraint_icon == "linked" then
     local sprite = GuiElement.add(button, GuiSprite("contraint"):sprite("helmod-tool-arrow-up"))
-    sprite.style.top_padding = -4
     sprite.style.left_padding = 22
   end
-  if self.m_contraint_icon == "master" then 
+  if self.m_contraint_icon == "master" then
     local sprite = GuiElement.add(button, GuiSprite("contraint"):sprite("helmod-tool-plus"))
-    sprite.style.top_padding = -4
   end
-  if self.m_contraint_icon == "exclude" then 
+  if self.m_contraint_icon == "exclude" then
     local sprite = GuiElement.add(button, GuiSprite("contraint"):sprite("helmod-tool-minus"))
-    sprite.style.top_padding = -4
   end
 end
 
@@ -449,7 +446,8 @@ function GuiCellProductSm:create(parent)
   else
     GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):sprite(element.type, element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip({self.options.tooltip, Player.getLocalisedName(element)}))
   end
-
+  GuiElement.infoTemperature(row1, element)
+  
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
   local caption3 = Format.formatNumber(element.count, 5)
   if element.type == "energy" then caption3 = Format.formatNumberKilo(element.count, "W") end

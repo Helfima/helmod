@@ -57,7 +57,7 @@ function ModelDebug:buildMatrix(matrix_panel, matrix, pivot)
     
     for irow,row in pairs(matrix) do
       for icol,value in pairs(row) do
-        local frame = GuiFlowH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_none, 2)
+        local frame = GuiFlowH("cell", irow, icol):style("helmod_flow_horizontal")
         if pivot ~= nil then
           if matrix[1][icol].name == "T" then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_default_ingredient, 2) end
           if pivot.x == icol then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_edit, 2) end
@@ -75,7 +75,6 @@ function ModelDebug:buildMatrix(matrix_panel, matrix, pivot)
           else
             local tooltip = {"", value.name}
             table.insert(tooltip, {"", "\n", "column: ", value.icol})
-            table.insert(tooltip, {"", "\n", "is_product: ", value.is_product})
             local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(value.type, value.name):tooltip(tooltip))
             GuiElement.infoTemperature(button, value, "helmod_label_overlay_m")
           end
