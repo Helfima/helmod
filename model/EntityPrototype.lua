@@ -123,6 +123,9 @@ function EntityPrototype:getEnergyConsumption()
     local fluid_usage = self:getFluidUsage()
     local effectivity = self:getEffectivity()
     local fluid_fuel = self:getFluidFuelPrototype(true)
+    if fluid_fuel == nil then
+      return 0
+    end
     local fuel_value = fluid_fuel:getFuelValue()
 
     if fuel_value > 0 then
@@ -365,6 +368,9 @@ function EntityPrototype:getFluidConsumption()
     local energy_type = self:getEnergyTypeInput()
     if energy_type == "fluid" then
       local fluid_fuel = self:getFluidFuelPrototype(true)
+      if fluid_fuel == nil then
+        return 0
+      end
       local energy_prototype = self:getEnergySource()
       local energy_fluid_usage = energy_prototype:getFluidUsage()
       local fluid_burns = energy_prototype:getBurnsFluid()
@@ -835,6 +841,9 @@ function EntityPrototype:getSpeedModifier()
     local fluid_usage = self:getFluidUsage()
     local effectivity = self:getEffectivity()
     local fluid_fuel = self:getFluidFuelPrototype(true)
+    if fluid_fuel == nil then
+      return 1
+    end
     local fuel_value = fluid_fuel:getFuelValue()
 
     if fuel_value > 0 then
@@ -872,6 +881,9 @@ end
 function EntityPrototype:getBurnsFluid()
   if self.lua_prototype.type == "generator" then
     local fluid_fuel = self:getFluidFuelPrototype(true)
+    if fluid_fuel == nil then
+      return false
+    end
     local fuel_value = fluid_fuel:getFuelValue()
     return fuel_value > 0
   elseif self:getEnergyType() == "fluid" then
