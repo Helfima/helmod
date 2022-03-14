@@ -51,26 +51,46 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
       end
     end
     ModelRecipe.count = 1
+
+    local recipe_products
+    local recipe_ingredients
+    local block_products
+    local block_ingredients
+
+    if block.by_product == false then
+      recipe_products = recipe_prototype:getIngredients()
+      recipe_ingredients = recipe_prototype:getProducts()
+      block_products = block.ingredients
+      block_ingredients = block.products
+    else
+      recipe_products = recipe_prototype:getProducts()
+      recipe_ingredients = recipe_prototype:getIngredients()
+      block_products = block.products
+      block_ingredients = block.ingredients
+    end
+
     ---ajoute les produits du block
-    for _, lua_product in pairs(recipe_prototype:getProducts()) do
+    for _, lua_product in pairs(recipe_products) do
       local product = Product(lua_product):clone()
-      if block.products[lua_product.name] == nil then
-        if block.ingredients[lua_product.name] ~= nil then
+      local element_key = Product(lua_product):getTableKey()
+      if block_products[element_key] == nil then
+        if block_ingredients[element_key] ~= nil then
           product.state = 2
         else
           product.state = 1
         end
-        block.products[lua_product.name] = product
+        block_products[element_key] = product
       end
     end
 
     ---ajoute les ingredients du block
-    for _, lua_ingredient in pairs(recipe_prototype:getIngredients()) do
+    for _, lua_ingredient in pairs(recipe_ingredients) do
       local ingredient = Product(lua_ingredient):clone()
-      if block.ingredients[lua_ingredient.name] == nil then
-        block.ingredients[lua_ingredient.name] = ingredient
-        if block.products[lua_ingredient.name] ~= nil and block.products[lua_ingredient.name].state == 1 then
-          block.products[lua_ingredient.name].state = 2
+      local element_key = Product(lua_ingredient):getTableKey()
+      if block_ingredients[element_key] == nil then
+        block_ingredients[element_key] = ingredient
+        if block_products[element_key] ~= nil and block_products[element_key].state == 1 then
+          block_products[element_key].state = 2
         end
       end
     end
@@ -167,15 +187,6 @@ function ModelBuilder.updateRecipeProduction(recipe, production)
 end
 
 -------------------------------------------------------------------------------
----Update temperature factory
----@param recipe table
-function ModelBuilder.updateFactoryTemperature(recipe)
-  if recipe ~= nil then
-    recipe.factory.temperature_enabled = not(recipe.factory.temperature_enabled)
-  end
-end
-
--------------------------------------------------------------------------------
 ---Update a factory number
 ---@param recipe table
 ---@param value any
@@ -250,20 +261,10 @@ end
 -------------------------------------------------------------------------------
 ---Update a factory
 ---@param recipe table
----@param value any
-function ModelBuilder.updateTemperatureFactory(recipe, value)
-  if recipe ~= nil then
-    recipe.factory.temperature = value or 0
-  end
-end
-
--------------------------------------------------------------------------------
----Update a factory
----@param recipe table
----@param fuel_name string
-function ModelBuilder.updateFuelFactory(recipe, fuel_name)
-  if recipe ~= nil and fuel_name ~= nil then
-    recipe.factory.fuel = fuel_name or "coal"
+---@param fuel string or table: {name = string, temperature = number}
+function ModelBuilder.updateFuelFactory(recipe, fuel)
+  if recipe ~= nil and fuel ~= nil then
+    recipe.factory.fuel = fuel
   end
 end
 
@@ -612,6 +613,7 @@ function ModelBuilder.removeProductionRecipe(block, recipe)
     local first_recipe = Model.firstRecipe(block.recipes)
     if first_recipe ~= nil then
       block.name = first_recipe.name
+      block.type = first_recipe.type
     end
   end
 end
@@ -669,6 +671,7 @@ function ModelBuilder.copyBlock(into_model, into_block, from_model, from_block)
           into_block.solver = from_block.solver
           into_block.isEnergy = from_block.isEnergy
           into_block.by_product = from_block.by_product
+          into_block.type = from_block.type
           
           ---copy input
           if from_block.products ~= nil then
@@ -710,6 +713,9 @@ function ModelBuilder.copyBlock(into_model, into_block, from_model, from_block)
         end
         if recipe.beacon.module_priority ~= nil then
           recipe_model.beacon.module_priority = table.clone(recipe.beacon.module_priority)
+        end
+        if recipe.contraint ~= nil then
+          recipe_model.contraint = table.deepcopy(recipe.contraint)
         end
         into_block.recipes[recipe_model.id] = recipe_model
         recipe_index = recipe_index + 1
@@ -841,6 +847,13 @@ end
 function ModelBuilder.updateProductionBlockOption(block, option, value)
   if block ~= nil then
     block[option] = value
+    ---reset states
+    for _, product in pairs(block.products) do
+      product.state = 1
+    end
+    for _, ingredient in pairs(block.ingredients) do
+      ingredient.state = 1
+    end
   end
 end
 
@@ -878,6 +891,7 @@ function ModelBuilder.upProductionRecipe(block, recipe, step)
     local first_recipe = Model.firstRecipe(block.recipes)
     if first_recipe ~= nil then
       block.name = first_recipe.name
+      block.type = first_recipe.type
     end
   end
 end
@@ -894,6 +908,7 @@ function ModelBuilder.downProductionRecipe(block, recipe, step)
     local first_recipe = Model.firstRecipe(block.recipes)
     if first_recipe ~= nil then
       block.name = first_recipe.name
+      block.type = first_recipe.type
     end
   end
 end

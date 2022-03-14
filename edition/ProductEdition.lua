@@ -81,7 +81,7 @@ function ProductEdition:onUpdate(event)
     if block.by_product == false then
       block_elements = block.ingredients
     end
-    local element_name = event.item4
+    local element_name = event.item5
     if block_elements ~= nil and block_elements[element_name] ~= nil then
       product = block_elements[element_name]
       product_count = product.input or 0
@@ -110,7 +110,7 @@ function ProductEdition:updateInfo(model, block)
 
     local caption = {"helmod_common.quantity"}
     local count = product_count or 0
-    if block.isEnergy then
+    if (product.name == "steam-heat") or (product.name == "energy") then
       caption = {"", {"helmod_common.quantity"}, "(MW)"}
       count = count/1e6
     end
@@ -160,11 +160,11 @@ function ProductEdition:onEvent(event)
       local operation = input_quantity.text
       local ok , err = pcall(function()
         local quantity = formula(operation)
-        if block ~= nil and block.isEnergy then
+        if (event.item4 == "steam-heat") or (event.item4 == "energy") then
           quantity = quantity * 1e6
         end
         if quantity == 0 then quantity = nil end
-        ModelBuilder.updateProduct(block, event.item3, quantity)
+        ModelBuilder.updateProduct(block, event.item4, quantity)
         ModelCompute.update(model)
         self:close()
         Controller:send("on_gui_refresh", event)

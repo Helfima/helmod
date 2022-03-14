@@ -125,9 +125,6 @@ end
 ---Get options
 ---@return table
 function GuiElement:getOptions()
-  if self.m_index ~= nil then
-    table.insert(self.name, self.m_index)
-  end
   self.options.name = table.concat(self.name,"=")
   if self.is_caption then
     self.options.caption = self.m_caption
@@ -152,7 +149,6 @@ end
 function GuiElement.add(parent, gui_element)
   local element = nil
   local ok , err = pcall(function()
-    --log(gui_element.classname)
     if gui_element.classname ~= "HMGuiCell" then
       element = parent.add(gui_element:getOptions())
     else

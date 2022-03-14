@@ -87,26 +87,32 @@ function EnergySelector:buildPrototypeTooltip(prototype)
   table.insert(tooltip, energy_name)
   --table.insert(tooltip, {"", "\n",entity_prototype:getType()})
   ---products
-  if table.size(recipe_prototype:getProducts()) > 0 then
+  local products = recipe_prototype:getProducts(prototype)
+  if table.size(products) > 0 then
     table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.products"}, ":", helmod_tag.color.close, helmod_tag.font.close})
-    for _,product in pairs(recipe_prototype:getProducts()) do
+    for _,product in pairs(products) do
       if product.type == "energy" and product.name == "energy" then
           table.insert(tooltip, {"", "\n", "[img=helmod-energy-white]", helmod_tag.font.default_bold, " x ", Format.formatNumberKilo(product.amount,"W"), helmod_tag.font.close})
       elseif product.type == "energy" and product.name == "steam-heat" then
           table.insert(tooltip, {"", "\n", "[img=helmod-steam-heat-white]", helmod_tag.font.default_bold, " x ", Format.formatNumberKilo(product.amount,"W"), helmod_tag.font.close})
+      elseif product.temperature then
+        table.insert(tooltip, {"", "\n", string.format("[%s=%s]", product.type, product.name), helmod_tag.font.default_bold, string.format(" %s °C x ", product.temperature), Format.formatNumberElement(product.amount), helmod_tag.font.close})
       else
         table.insert(tooltip, {"", "\n", string.format("[%s=%s]", product.type, product.name), helmod_tag.font.default_bold, " x ", Format.formatNumberElement(product.amount), helmod_tag.font.close})
       end
     end
   end
   ---ingredients
-  if table.size(recipe_prototype:getIngredients()) > 0 then
+  local ingredients = recipe_prototype:getIngredients(prototype)
+  if table.size(ingredients) > 0 then
     table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.ingredients"}, ":", helmod_tag.color.close, helmod_tag.font.close})
-    for _,ingredient in pairs(recipe_prototype:getIngredients()) do
+    for _,ingredient in pairs(ingredients) do
       if ingredient.type == "energy" and ingredient.name == "energy" then
         table.insert(tooltip, {"", "\n", "[img=helmod-energy-white]", helmod_tag.font.default_bold, " x ", Format.formatNumberKilo(ingredient.amount,"W"), helmod_tag.font.close})
       elseif ingredient.type == "energy" and ingredient.name == "steam-heat" then
         table.insert(tooltip, {"", "\n", "[img=helmod-steam-heat-white]", helmod_tag.font.default_bold, " x ", Format.formatNumberKilo(ingredient.amount,"W"), helmod_tag.font.close})
+      elseif ingredient.temperature then
+        table.insert(tooltip, {"", "\n", string.format("[%s=%s]", ingredient.type, ingredient.name), helmod_tag.font.default_bold, string.format(" %s °C x ", ingredient.temperature), Format.formatNumberElement(ingredient.amount), helmod_tag.font.close})
       else
         table.insert(tooltip, {"", "\n", string.format("[%s=%s]", ingredient.type, ingredient.name), helmod_tag.font.default_bold, " x ", Format.formatNumberElement(ingredient.amount), helmod_tag.font.close})
       end
