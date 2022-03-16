@@ -162,11 +162,32 @@ function EntityPrototype:getEnergyProduction()
     local energy_prototype = self:getElectricEnergySource()
     if energy_prototype ~= nil then
       local usage_priority = energy_prototype:getUsagePriority()
+      local production
       if usage_priority == "managed-accumulator" then
-        return energy_prototype:getOutputFlowLimit()
+        production = energy_prototype:getOutputFlowLimit()
       else
-        return (self.lua_prototype.max_energy_production or 0) * 60
+        production = (self.lua_prototype.max_energy_production or 0) * 60
       end
+      
+      local effectivity = 1
+      
+      if self.lua_prototype.type == "generator" then
+        local fluid_usage = self:getFluidUsage()
+        local fluid_fuel = self:getFluidFuelPrototype(true)
+        if fluid_fuel ~= nil then
+          local fuel_value = fluid_fuel:getFuelValue()
+          if fuel_value == 0 then
+            -- e.g. steam engine
+            local maximum_temperature = self:getMaximumTemperature()
+            if maximum_temperature > 15 then
+              maximum_temperature = maximum_temperature - 15
+              local fuel_temperature = fluid_fuel:getTemperature() - 15
+              effectivity = math.min(1, fuel_temperature / maximum_temperature)
+            end
+          end
+        end
+      end
+      return production * effectivity
     end
   end
   return 0
@@ -357,7 +378,7 @@ end
 function EntityPrototype:getFluidConsumption()
   if self.lua_prototype ~= nil then
     local fluid_usage = self:getFluidUsage()
-      
+
     ---si l'entity a du fluid usage c'est forcement cette valeur
     ---if the entity has fluid usage it must be this value
     if fluid_usage > 0 then
@@ -835,31 +856,6 @@ function EntityPrototype:getSpeedModifier()
   local energy_prototype = self:getEnergySource()
   if (energy_prototype ~= nil) and (energy_prototype:getType() == "fluid") then
     return energy_prototype:getSpeedModifier()
-  end
-
-  if self.lua_prototype.type == "generator" then
-    local fluid_usage = self:getFluidUsage()
-    local effectivity = self:getEffectivity()
-    local fluid_fuel = self:getFluidFuelPrototype(true)
-    if fluid_fuel == nil then
-      return 1
-    end
-    local fuel_value = fluid_fuel:getFuelValue()
-
-    if fuel_value > 0 then
-      -- e.g. fluid burning generator
-      return 1
-    else
-      -- e.g. steam engine
-      local maximum_temperature = self:getMaximumTemperature()
-      
-      if maximum_temperature > 15 then
-        maximum_temperature = maximum_temperature - 15
-        local fuel_temperature = fluid_fuel:getTemperature() - 15
-
-        return math.min(1, fuel_temperature / maximum_temperature * effectivity)
-      end
-    end
   end
 
   return 1

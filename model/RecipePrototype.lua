@@ -103,9 +103,10 @@ end
 
 -------------------------------------------------------------------------------
 ---Return products array of Prototype (duplicates are combined into one entry)
+---@param factory table
 ---@return table
 function RecipePrototype:getProducts(factory)
-  local raw_products = self:getRawProducts()
+  local raw_products = self:getRawProducts(factory)
   ---if recipe is a voider
   if #raw_products == 1 and Product(raw_products[1]):getElementAmount() == 0 then
     self.is_voider = true
@@ -176,11 +177,12 @@ end
 
 -------------------------------------------------------------------------------
 ---Return products array of Prototype (may contain duplicate products)
+---@param factory table
 ---@return table
-function RecipePrototype:getRawProducts()
+function RecipePrototype:getRawProducts(factory)
   if self.lua_prototype ~= nil then
     if self.lua_type == "energy" then
-      return self:getEnergyProducts()
+      return self:getEnergyProducts(factory)
     elseif self.lua_type == "technology" then
       return {{name=self.lua_prototype.name, type="technology", amount=1}}
     else
@@ -192,11 +194,17 @@ end
 
 -------------------------------------------------------------------------------
 ---Return products array of Prototype (may contain duplicate products)
+---@param factory table
 ---@return table
-function RecipePrototype:getEnergyProducts()
+function RecipePrototype:getEnergyProducts(factory)
   if self.lua_prototype ~= nil then
     local products = {}
-    local prototype = EntityPrototype(self.lua_prototype.name)
+    local prototype
+    if factory ~= nil then
+      prototype = EntityPrototype(factory)
+    else
+      prototype = EntityPrototype(self.lua_prototype.name)
+    end
     if prototype:getType() == "solar-panel" then
       local amount = prototype:getEnergyProduction()
       local product = {name="energy", type="energy", amount=amount}
