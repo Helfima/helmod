@@ -169,25 +169,37 @@ function EntityPrototype:getEnergyProduction()
         production = (self.lua_prototype.max_energy_production or 0) * 60
       end
       
-      local effectivity = 1
-      
       if self.lua_prototype.type == "generator" then
-        local fluid_usage = self:getFluidUsage()
+        local effectivity = self:getEffectivity()
         local fluid_fuel = self:getFluidFuelPrototype(true)
         if fluid_fuel ~= nil then
-          local fuel_value = fluid_fuel:getFuelValue()
-          if fuel_value == 0 then
-            -- e.g. steam engine
+          if self:getBurnsFluid() == true then
+            -- Fluid burning generator
+            local consumption = self:getFluidConsumption()
+            local fuel_value = fluid_fuel:getFuelValue()
+            return consumption * fuel_value * effectivity
+          else
+            -- Steam engine
             local maximum_temperature = self:getMaximumTemperature()
             if maximum_temperature > 15 then
               maximum_temperature = maximum_temperature - 15
               local fuel_temperature = fluid_fuel:getTemperature() - 15
-              effectivity = math.min(1, fuel_temperature / maximum_temperature)
+              effectivity = math.min(1, fuel_temperature / maximum_temperature) * effectivity
             end
           end
         end
+        return production * effectivity
+      else
+        return production
       end
-      return production * effectivity
+    elseif self.lua_prototype.type == "reactor" then
+      local max_energy_usage = self:getMaxEnergyUsage()
+      local effectivity = 1
+      local energy_prototype = self:getEnergySource()
+      if energy_prototype ~= nil then
+        effectivity = energy_prototype:getEffectivity()
+      end
+      return max_energy_usage * effectivity
     end
   end
   return 0
@@ -377,17 +389,31 @@ end
 ---@return number --default 0
 function EntityPrototype:getFluidConsumption()
   if self.lua_prototype ~= nil then
-    local fluid_usage = self:getFluidUsage()
-
-    ---si l'entity a du fluid usage c'est forcement cette valeur
-    ---if the entity has fluid usage it must be this value
-    if fluid_usage > 0 then
-      ---Steam engine
-      return fluid_usage
-    end
-
     local energy_type = self:getEnergyTypeInput()
-    if energy_type == "fluid" then
+    local effectivity = self:getEffectivity()
+
+    if self.lua_prototype.type == "generator" then
+      local max_fluid_usage = self:getFluidUsage()
+      if self:getBurnsFluid() == true then
+        -- Fluid burning generators will only consume as much fluid as it needs for max power output
+        -- This is capped at max fluid usage
+        -- Power output may be less than max if input fluid fuel value is very low
+        local fluid_fuel = self:getFluidFuelPrototype(true)
+        if fluid_fuel == nil then
+          return 0
+        end
+        local fuel_value = fluid_fuel:getFuelValue()
+        local max_energy_production = (self.lua_prototype.max_energy_production or 0) * 60
+        local consumption = max_energy_production / fuel_value / effectivity
+
+        return math.min(max_fluid_usage, consumption)
+      else
+        ---Steam engine
+        ---si l'entity a du fluid usage c'est forcement cette valeur
+        ---if the entity has fluid usage it must be this value
+        return max_fluid_usage / effectivity
+      end
+    elseif energy_type == "fluid" then
       local fluid_fuel = self:getFluidFuelPrototype(true)
       if fluid_fuel == nil then
         return 0
@@ -396,8 +422,6 @@ function EntityPrototype:getFluidConsumption()
       local energy_fluid_usage = energy_prototype:getFluidUsage()
       local fluid_burns = energy_prototype:getBurnsFluid()
       local energy_consumption = self:getEnergyConsumption()
-      local effectivity = self:getEffectivity()
-      local maximum_temperature = self:getMaximumTemperature()
       local fuel_value = fluid_fuel:getFuelValue()
 
       if fluid_burns then
@@ -406,7 +430,7 @@ function EntityPrototype:getFluidConsumption()
         if energy_fluid_usage > 0 then
           return math.min(energy_fluid_usage, energy_consumption / (effectivity * fuel_value))
         else
-          return energy_consumption / (effectivity * fuel_value)
+          return energy_consumption / fuel_value
         end
       else
         ---si l'energy a du fluid usage c'est forcement cette valeur
@@ -451,13 +475,21 @@ function EntityPrototype:getFluidProduction()
       return self:getPumpingSpeed()
     end
     if self:getType() == "boiler" then
-      local effectivity = self:getEffectivity()
+      local energy_prototype = self:getEnergySource()
+      local effectivity
+      if energy_prototype ~= nil then
+        effectivity = energy_prototype:getEffectivity()
+      else
+        effectivity = 1
+      end
+
       local fluid_prototype = FluidPrototype(fluidbox:getFilter())
       local heat_capacity = fluid_prototype:getHeatCapacity()
       local target_temperature = self:getTargetTemperature()
       local power_extract = self:getPowerExtract(target_temperature, heat_capacity)
       local energy_consumption = self:getEnergyConsumption()
-      return energy_consumption / (effectivity * power_extract)
+
+      return (energy_consumption * effectivity) / power_extract
     end
   end
   return 0

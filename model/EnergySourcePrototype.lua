@@ -222,9 +222,8 @@ function BurnerPrototype:getFuelCount()
   local energy_consumption = factory_prototype:getEnergyConsumption()
   local factory_fuel = self:getFuelPrototype()
   if factory_fuel == nil then return nil end
-  local burner_effectivity = self:getEffectivity()
   local fuel_value = factory_fuel:getFuelValue()
-  local burner_count = energy_consumption/(fuel_value*burner_effectivity)
+  local burner_count = energy_consumption/fuel_value
   return {type="item", name=factory_fuel:native().name, count=burner_count}
 end
 
@@ -236,9 +235,8 @@ function BurnerPrototype:getJouleCount()
   local energy_consumption = factory_prototype:getEnergyConsumption()
   local factory_fuel = self:getFuelPrototype()
   if factory_fuel == nil then return nil end
-  local burner_effectivity = self:getEffectivity()
   ---1W/h = 3600J
-  local joule_count = energy_consumption * burner_effectivity / 3600
+  local joule_count = energy_consumption / 3600
   return {type="item", name=factory_fuel:native().name, count=joule_count, is_joule=true}
 end
 
@@ -381,7 +379,6 @@ function FluidSourcePrototype:getFuelCount()
   local energy_consumption = factory_prototype:getEnergyConsumption()
   local factory_fuel = self:getFuelPrototype()
   if factory_fuel == nil then return nil end
-  local burner_effectivity = self:getEffectivity()
   if factory_prototype:getType() ~= "assembling-machine" and self.lua_prototype.fluid_usage_per_tick ~= nil and self.lua_prototype.fluid_usage_per_tick ~= 0 then
     local fluid_usage = self:getFluidUsagePerTick()*60
     local burner_count = fluid_usage
@@ -389,12 +386,12 @@ function FluidSourcePrototype:getFuelCount()
     return fuel_fluid
   elseif factory_prototype:getType() == "assembling-machine" then
     local fuel_value = factory_fuel:getFuelValue()
-    local burner_count = energy_consumption*60/(fuel_value*burner_effectivity)
+    local burner_count = energy_consumption*60/fuel_value
     local fuel_fluid = {type="fluid", name=factory_fuel:native().name, count=burner_count}
     return fuel_fluid
   else
     local fuel_value = factory_fuel:getFuelValue()
-    local burner_count = energy_consumption/(fuel_value*burner_effectivity)
+    local burner_count = energy_consumption/fuel_value
     local fuel_fluid = {type="fluid", name=factory_fuel:native().name, count=burner_count}
     return fuel_fluid
   end
@@ -434,7 +431,7 @@ end
 -------------------------------------------------------------------------------
 ---Return effectivity
 ---@return number --default 1
-function BurnerPrototype:getEffectivity()
+function FluidSourcePrototype:getEffectivity()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.effectivity or 1
   end
