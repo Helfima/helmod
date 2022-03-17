@@ -598,6 +598,12 @@ function ModelBuilder.removeProductionBlock(model, block)
   if block ~= nil then
     model.blocks[block.id] = nil
     table.reindex_list(model.blocks)
+    for _, block in pairs(model.blocks) do
+      if block.index == 0 then
+        block.unlinked = true
+        break
+      end
+    end
   end
 end
 
@@ -667,7 +673,11 @@ function ModelBuilder.copyBlock(into_model, into_block, from_model, from_block)
           into_block = Model.newBlock(into_model, recipe_prototype:native())
           local index = table.size(into_model.blocks)
           into_block.index = index
-          into_block.unlinked = from_block.unlinked
+          if index == 0 then
+            into_block.unlinked = true
+          else
+            into_block.unlinked = from_block.unlinked
+          end
           into_block.solver = from_block.solver
           into_block.isEnergy = from_block.isEnergy
           into_block.by_product = from_block.by_product
@@ -865,6 +875,9 @@ end
 function ModelBuilder.upProductionBlock(model, block, step)
   if model ~= nil and block ~= nil then
     table.up_indexed_list(model.blocks, block.index, step)
+    if block.index == 0 then
+      block.unlinked = true
+    end
   end
 end
 
@@ -876,6 +889,12 @@ end
 function ModelBuilder.downProductionBlock(model, block, step)
   if model ~= nil and block ~= nil then
     table.down_indexed_list(model.blocks, block.index, step)
+    for _, block in pairs(model.blocks) do
+      if block.index == 0 then
+        block.unlinked = true
+        break
+      end
+    end
   end
 end
 
