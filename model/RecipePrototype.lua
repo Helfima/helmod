@@ -207,7 +207,7 @@ function RecipePrototype:getEnergyProducts(factory)
     end
     if prototype:getType() == "solar-panel" then
       local amount = prototype:getEnergyProduction()
-      local product = {name="energy", type="energy", amount=amount}
+      local product = {name="energy", type="energy", amount=amount, by_time=true}
       table.insert(products, product)
     elseif prototype:getType() == "boiler" then
       local amount = prototype:getFluidProduction()
@@ -231,7 +231,7 @@ function RecipePrototype:getEnergyProducts(factory)
       local R = 60/(t2+t3*(t1+t3)/T)
       local amount = capacity*R
 
-      local product = {name="energy", type="energy", amount=amount}
+      local product = {name="energy", type="energy", amount=amount, by_time=true}
       table.insert(products, product)
     elseif prototype:getType() == "generator" or prototype:getType() == "burner-generator"then
       local amount = prototype:getEnergyProduction()
@@ -239,7 +239,7 @@ function RecipePrototype:getEnergyProducts(factory)
       table.insert(products, product)
     elseif prototype:getType() == "reactor" then
       local amount = prototype:getEnergyConsumption()
-      local product = {name="steam-heat", type="energy", amount=amount}
+      local product = {name="steam-heat", type="energy", amount=amount, by_time=true}
       table.insert(products, product)
     elseif prototype:getType() == "offshore-pump" then
       local amount = prototype:getPumpingSpeed()
@@ -289,7 +289,7 @@ function RecipePrototype:getRawIngredients()
         ---@see https://forums.factorio.com/viewtopic.php?f=5&t=5594
         local R = 60/(t2+t3*(t1+t3)/T)
         local amount = capacity*R*T/(t1+t3)
-        local ingredient = {name="energy", type="energy", amount=amount}
+        local ingredient = {name="energy", type="energy", amount=amount, by_time=true}
         table.insert(ingredients, ingredient)
       end
 
@@ -301,7 +301,7 @@ function RecipePrototype:getRawIngredients()
       end
       if energy_type == "heat" then
         local amount = prototype:getEnergyConsumption()
-        local ingredient = {name="steam-heat", type="energy", amount=amount}
+        local ingredient = {name="steam-heat", type="energy", amount=amount, by_time=true}
         table.insert(ingredients, ingredient)
       end
 

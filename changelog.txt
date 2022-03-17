@@ -3,6 +3,7 @@ Version: 0.12.10
 Date: ???
   Bugfixes:
     - Fixed steam engine's fluid consumption when input fluid is below maximum temperature
+    - Solar panels, accumulators, heat exchangers, reactors and heat sources were ignoring selected Base time
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.9
 Date: 2022-03-09
