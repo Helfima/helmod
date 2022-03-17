@@ -3,7 +3,7 @@ Version: 0.12.10
 Date: ???
   Bugfixes:
     - Fixed steam engine's fluid consumption when input fluid is below maximum temperature
-    - Solar panels, accumulators, heat exchangers, reactors and heat sources were ignoring selected Base time
+    - Most energy recipes were ignoring selected Base time
     - Efficiency was being applied twice to burner electric generators
     - Fluid consumption efficiency was being ignored
     - Fluid consumption was not capped when burning a fluid with a high fuel value

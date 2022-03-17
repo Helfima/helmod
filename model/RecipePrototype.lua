@@ -235,7 +235,7 @@ function RecipePrototype:getEnergyProducts(factory)
       table.insert(products, product)
     elseif prototype:getType() == "generator" or prototype:getType() == "burner-generator"then
       local amount = prototype:getEnergyProduction()
-      local product = {name="energy", type="energy", amount=amount}
+      local product = {name="energy", type="energy", amount=amount, by_time=true}
       table.insert(products, product)
     elseif prototype:getType() == "reactor" then
       local amount = prototype:getEnergyProduction()
