@@ -10,6 +10,8 @@ Date: ???
     - Power production was not capped when burning a fluid with a very low fuel value
     - Prevented first block from being linked
     - Production line / block icon issues
+    - Fuel consumption for burner machines was ignoring efficiency modules
+    - Heat consumption for heat powered machines was ignoring efficiency modules and machine speed
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.9
 Date: 2022-03-09
