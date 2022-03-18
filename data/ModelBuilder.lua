@@ -626,6 +626,8 @@ function ModelBuilder.removeProductionRecipe(block, recipe)
     if first_recipe ~= nil then
       block.name = first_recipe.name
       block.type = first_recipe.type
+    else
+      block.name = ""
     end
   end
 end

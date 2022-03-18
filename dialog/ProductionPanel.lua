@@ -261,7 +261,7 @@ function ProductionPanel:updateIndexPanel(model)
       local style = "helmod_button_default"
       local element = Model.firstRecipe(imodel.blocks)
       if imodel.id == model.id then
-        if element ~= nil then
+        if element ~= nil and element.name ~= "" then
           local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
           local button = GuiElement.add(table_index, GuiButtonSprite(self.classname, "change-model", imodel.id):sprite(element.type, element.name):style("helmod_button_menu_selected"):tooltip(tooltip))
           button.style.width = 36

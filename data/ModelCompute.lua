@@ -89,7 +89,10 @@ function ModelCompute.update(model)
       block.time = model.time
       ---premiere recette
       local _,recipe = next(block.recipes)
-      if recipe ~= nil then
+      if recipe == nil then
+        block.ingredients = {}
+        block.products = {}
+      else
 
         ---state = 0 => produit
         ---state = 1 => produit pilotant
