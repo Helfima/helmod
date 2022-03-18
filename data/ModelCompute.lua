@@ -798,7 +798,6 @@ function ModelCompute.computeBlock(block)
           recipe.production = mC[row_index][my_solver.col_P]
         else
           recipe.count = 0
-          recipe.production = 1
         end
         row_index = row_index + 1
         ---calcul dependant du recipe count
