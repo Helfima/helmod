@@ -143,6 +143,7 @@ function ModelBuilder.convertRecipeToblock(model, block, recipe, with_below)
   local block_index = table.size(model.blocks)
   new_block.isEnergy = recipe.type == "energy"
   new_block.index = block_index
+  new_block.type = block.type
   new_block.unlinked = false
   model.blocks[new_block.id] = new_block
   
