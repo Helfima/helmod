@@ -249,7 +249,7 @@ function UnitTestPanel:addEnergyListRow(itable, entity, test_data)
     local tag_color, tooltip = self:valueEquals(energy_type_input, test_data.energy_type_input)
     GuiElement.add(itable, GuiLabel("energy-type-input", entity):caption({"", helmod_tag.font.default_bold, tag_color, energy_type_input, helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
     ---col Energy Consumption
-    local energy_consumption = math.floor(prototype:getEnergyConsumption())
+    local energy_consumption = math.floor(prototype:getEnergyConsumption() + prototype:getMinEnergyUsage())
     local tag_color, tooltip = self:valueEquals(energy_consumption, test_data.energy_consumption)
     GuiElement.add(itable, GuiLabel("energy-consumption", entity):caption({"", helmod_tag.font.default_bold, tag_color, Format.formatNumberKilo(energy_consumption, "W"), helmod_tag.color.close, helmod_tag.font.close}):tooltip(tooltip))
     ---col Fluid Consumption /s

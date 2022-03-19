@@ -96,7 +96,7 @@ function EntityPrototype:getEnergyConsumption()
   if self.lua_prototype == nil then
     return 0
   end
-  
+
   local energy_prototype = self:getEnergySource()
   local usage_priority = nil
   if energy_prototype ~= nil then
@@ -111,12 +111,10 @@ function EntityPrototype:getEnergyConsumption()
 
   local max_energy_usage = self:getMaxEnergyUsage()
   if max_energy_usage > 0 then
-    local drain = 0
     if energy_prototype ~= nil then
-      drain = energy_prototype:getDrain()
       max_energy_usage = max_energy_usage * energy_prototype:getSpeedModifier()
     end
-    return drain + max_energy_usage
+    return max_energy_usage
   end
 
   if self.lua_prototype.type == "generator" then

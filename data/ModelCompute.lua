@@ -1036,7 +1036,10 @@ function ModelCompute.computeFactory(recipe)
       fuel_emissions_multiplier = fuel_prototype:getFuelEmissionsMultiplier()
     end
   else
-    recipe.factory.energy_total = math.ceil(recipe.factory.count*recipe.factory.energy)
+    recipe.factory.energy_total = recipe.factory.count * recipe.factory.energy
+    local drain = factory_prototype:getMinEnergyUsage()
+    recipe.factory.energy_total = math.ceil(recipe.factory.energy_total + (math.ceil(recipe.factory.count) * drain))
+    recipe.factory.energy = recipe.factory.energy + drain
   end
   recipe.factory.pollution_total = recipe.factory.pollution * recipe.factory.count * recipe.time
   
