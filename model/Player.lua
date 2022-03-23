@@ -620,6 +620,9 @@ function Player.getEnergyMachines()
   local filters = {}
   for _,type in pairs({"generator", "solar-panel", "boiler", "accumulator", "reactor", "burner-generator"}) do
     table.insert(filters, {filter="type", mode="or", invert=false, type=type})
+    table.insert(filters, {filter="hidden", mode="and", invert=true})
+    table.insert(filters, {filter="type", mode="or", invert=false, type=type})
+    table.insert(filters, {filter="flag", flag="player-creation", mode="and"})
   end
   for entity_name, entity in pairs(game.get_filtered_entity_prototypes(filters)) do
     machines[entity_name] = entity
@@ -627,10 +630,36 @@ function Player.getEnergyMachines()
 
   filters = {}  
   table.insert(filters, {filter="type", mode="or", invert=false, type="offshore-pump"})
+  table.insert(filters, {filter="hidden", mode="and", invert=true})
+  table.insert(filters, {filter="type", mode="or", invert=false, type="offshore-pump"})
+  table.insert(filters, {filter="flag", flag="player-creation", mode="and"})
   local offshore_pumps = game.get_filtered_entity_prototypes(filters)
   for entity_name, entity in pairs(offshore_pumps) do
     if entity.fluid.name == "water" then
       machines[entity_name] = entity
+    end
+  end
+
+  -- Exclude machines placed only by a hidden item
+  for entity_name, entity in pairs(machines) do
+    local item_filters = {}
+    for _, item in pairs(entity.items_to_place_this or {}) do
+      if type(item) == "string" then
+        table.insert(item_filters, {filter="name", name=item, mode="or"})
+      elseif item.name then
+        table.insert(item_filters, {filter="name", name=item.name, mode="or"})
+      end
+    end
+    local items = game.get_filtered_item_prototypes(item_filters)
+    local show = #items == 0
+    for _, item in pairs(items) do
+      if not item.has_flag("hidden") then
+        show = true
+        break
+      end
+    end
+    if show ~= true then
+      machines[entity_name] = nil
     end
   end
 
