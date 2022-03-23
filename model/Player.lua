@@ -562,13 +562,53 @@ end
 ---Return list of production machines
 ---@return table
 function Player.getProductionMachines()
+  local cache_machines = Cache.getData(Player.classname, "machines")
+  if cache_machines ~= nil then
+    return cache_machines
+  end
+
+  local machines = {}
   local filters = {}
-  table.insert(filters,{filter="crafting-machine",mode="and"})
-  table.insert(filters,{filter="hidden",mode="and",invert=true})
-  table.insert(filters,{filter="type", type="lab",mode="or"})
-  table.insert(filters,{filter="type", type="mining-drill",mode="or"})
-  table.insert(filters,{filter="type", type="rocket-silo",mode="or"})
-  return game.get_filtered_entity_prototypes(filters)
+  table.insert(filters, {filter="crafting-machine", mode="or"})
+  table.insert(filters, {filter="hidden", mode="and", invert=true})
+  table.insert(filters, {filter="crafting-machine", mode="or"})
+  table.insert(filters, {filter="flag", flag="player-creation", mode="and"})
+  table.insert(filters, {filter="type", type="lab", mode="or"})
+  table.insert(filters, {filter="hidden", mode="and", invert=true})
+  table.insert(filters, {filter="type", type="lab", mode="or"})
+  table.insert(filters, {filter="flag", flag="player-creation", mode="and"})
+  table.insert(filters, {filter="type", type="mining-drill", mode="or"})
+  table.insert(filters, {filter="hidden", mode="and", invert=true})
+  table.insert(filters, {filter="type", type="mining-drill", mode="or"})
+  table.insert(filters, {filter="flag", flag="player-creation", mode="and"})
+  table.insert(filters, {filter="type", type="rocket-silo", mode="or"})
+  table.insert(filters, {filter="hidden", mode="and", invert=true})
+  table.insert(filters, {filter="type", type="rocket-silo", mode="or"})
+  table.insert(filters, {filter="flag", flag="player-creation", mode="and"})
+  local entities = game.get_filtered_entity_prototypes(filters)
+  for _, entity in pairs(entities) do
+    local item_filters = {}
+    for _, item in pairs(entity.items_to_place_this or {}) do
+      if type(item) == "string" then
+        table.insert(item_filters, {filter="name", name=item, mode="or"})
+      elseif item.name then
+        table.insert(item_filters, {filter="name", name=item.name, mode="or"})
+      end
+    end
+    local items = game.get_filtered_item_prototypes(item_filters)
+    local show = #items == 0
+    for _, item in pairs(items) do
+      if not item.has_flag("hidden") then
+        show = true
+        break
+      end
+    end
+    if show == true then
+      table.insert(machines, entity)
+    end
+  end
+  Cache.setData(Player.classname, "machines", machines)
+  return machines
 end
 
 -------------------------------------------------------------------------------
@@ -602,9 +642,10 @@ end
 ---@return table
 function Player.getBoilers()
   local filters = {}
-  table.insert(filters,{filter="type", type="boiler", mode="or"})
-  table.insert(filters,{filter="flag", flag="hidden", mode="and", invert=true})
-
+  table.insert(filters, {filter="type", type="boiler", mode="or"})
+  table.insert(filters, {filter="flag", flag="hidden", mode="and", invert=true})
+  table.insert(filters, {filter="type", type="boiler", mode="or"})
+  table.insert(filters, {filter="flag", flag="player-creation", mode="and"})
   return game.get_filtered_entity_prototypes(filters)
 end
 
