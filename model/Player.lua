@@ -544,6 +544,33 @@ function Player.getProductionsCrafting(category, lua_recipe)
 end
 
 -------------------------------------------------------------------------------
+---Remove entities from table that are placed only by a hidden item
+---@param entities table
+function Player.ExcludePlacedByHidden(entities)
+  for entity_name, entity in pairs(entities) do
+    local item_filters = {}
+    for _, item in pairs(entity.items_to_place_this or {}) do
+      if type(item) == "string" then
+        table.insert(item_filters, {filter="name", name=item, mode="or"})
+      elseif item.name then
+        table.insert(item_filters, {filter="name", name=item.name, mode="or"})
+      end
+    end
+    local items = game.get_filtered_item_prototypes(item_filters)
+    local show = #items == 0
+    for _, item in pairs(items) do
+      if not item.has_flag("hidden") then
+        show = true
+        break
+      end
+    end
+    if show ~= true then
+      entities[entity_name] = nil
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
 ---Return list of modules
 ---@return table
 function Player.getModules()
@@ -562,12 +589,11 @@ end
 ---Return list of production machines
 ---@return table
 function Player.getProductionMachines()
-  local cache_machines = Cache.getData(Player.classname, "machines")
+  local cache_machines = Cache.getData(Player.classname, "list_machines")
   if cache_machines ~= nil then
     return cache_machines
   end
 
-  local machines = {}
   local filters = {}
   table.insert(filters, {filter="crafting-machine", mode="or"})
   table.insert(filters, {filter="hidden", mode="and", invert=true})
@@ -585,30 +611,17 @@ function Player.getProductionMachines()
   table.insert(filters, {filter="hidden", mode="and", invert=true})
   table.insert(filters, {filter="type", type="rocket-silo", mode="or"})
   table.insert(filters, {filter="flag", flag="player-creation", mode="and"})
-  local entities = game.get_filtered_entity_prototypes(filters)
-  for _, entity in pairs(entities) do
-    local item_filters = {}
-    for _, item in pairs(entity.items_to_place_this or {}) do
-      if type(item) == "string" then
-        table.insert(item_filters, {filter="name", name=item, mode="or"})
-      elseif item.name then
-        table.insert(item_filters, {filter="name", name=item.name, mode="or"})
-      end
-    end
-    local items = game.get_filtered_item_prototypes(item_filters)
-    local show = #items == 0
-    for _, item in pairs(items) do
-      if not item.has_flag("hidden") then
-        show = true
-        break
-      end
-    end
-    if show == true then
-      table.insert(machines, entity)
-    end
+  local prototypes = game.get_filtered_entity_prototypes(filters)
+  Player.ExcludePlacedByHidden(prototypes)
+  
+  local list_machines = {}
+  for prototype_name, lua_prototype in pairs(prototypes) do
+    local machine = {name=lua_prototype.name, group=(lua_prototype.group or {}).name, subgroup=(lua_prototype.subgroup or {}).name, type=lua_prototype.type, order=lua_prototype.order, crafting_categories=lua_prototype.crafting_categories, resource_categories=lua_prototype.resource_categories}
+    table.insert(list_machines, machine)
   end
-  Cache.setData(Player.classname, "machines", machines)
-  return machines
+
+  Cache.setData(Player.classname, "list_machines", list_machines)
+  return list_machines
 end
 
 -------------------------------------------------------------------------------
@@ -640,29 +653,7 @@ function Player.getEnergyMachines()
     end
   end
 
-  -- Exclude machines placed only by a hidden item
-  for entity_name, entity in pairs(machines) do
-    local item_filters = {}
-    for _, item in pairs(entity.items_to_place_this or {}) do
-      if type(item) == "string" then
-        table.insert(item_filters, {filter="name", name=item, mode="or"})
-      elseif item.name then
-        table.insert(item_filters, {filter="name", name=item.name, mode="or"})
-      end
-    end
-    local items = game.get_filtered_item_prototypes(item_filters)
-    local show = #items == 0
-    for _, item in pairs(items) do
-      if not item.has_flag("hidden") then
-        show = true
-        break
-      end
-    end
-    if show ~= true then
-      machines[entity_name] = nil
-    end
-  end
-
+  Player.ExcludePlacedByHidden(machines)
   return machines
 end
 
@@ -675,7 +666,10 @@ function Player.getBoilers()
   table.insert(filters, {filter="flag", flag="hidden", mode="and", invert=true})
   table.insert(filters, {filter="type", type="boiler", mode="or"})
   table.insert(filters, {filter="flag", flag="player-creation", mode="and"})
-  return game.get_filtered_entity_prototypes(filters)
+  local boilers = game.get_filtered_entity_prototypes(filters)
+
+  Player.ExcludePlacedByHidden(boilers)
+  return boilers
 end
 
 -------------------------------------------------------------------------------
@@ -686,7 +680,7 @@ function Player.getOffshorePump(fluid_name)
   table.insert(filters, {filter="type", type="offshore-pump", mode="or"})
   local entities = game.get_filtered_entity_prototypes(filters)
   local offshore_pump = {}
-  for key,entity in pairs(entities) do
+  for key, entity in pairs(entities) do
     if entity.fluid.name == fluid_name then
       offshore_pump[key] = entity
     end
@@ -962,28 +956,6 @@ function Player.getProductionsBeacon()
 end
 
 -------------------------------------------------------------------------------
----Return generators
----@param type string
----@return table
-function Player.getGenerators(type)
-  if type == nil then type = "primary" end
-  local items = {}
-  local filters = {}
-  if type == "primary" then
-    table.insert(filters,{filter="type",type="generator",mode="or"})
-    table.insert(filters,{filter="type",type="solar-panel",mode="or"})
-  else
-    table.insert(filters,{filter="type",type="boiler",mode="or"})
-    table.insert(filters,{filter="type",type="accumulator",mode="or"})
-  end
-
-  for _,item in pairs(game.get_filtered_entity_prototypes(filters)) do
-    table.insert(items,item)
-  end
-  return items
-end
-
--------------------------------------------------------------------------------
 ---Return resources list
 ---@return table
 function Player.getResources()
@@ -1207,10 +1179,7 @@ function Player.getFluidTemperaturePrototypes(fluid)
   end
 
   -- Boilers
-  local filters = {}
-  table.insert(filters, {filter = "type", type = "boiler", mode = "and"})
-  table.insert(filters, {filter = "flag", flag = "hidden", mode = "and", invert = true})
-  local boilers = game.get_filtered_entity_prototypes(filters)
+  local boilers = Player:getBoilers()
 
   for boiler_name, boiler in pairs(boilers) do
     for _, fluidbox in pairs(boiler.fluidbox_prototypes) do
