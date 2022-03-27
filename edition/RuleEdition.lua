@@ -118,7 +118,7 @@ function RuleEdition:onEvent(event)
     end
 
     if event.action == "save" then
-      local rule_panel = self:getRulePanel()
+      local rule_panel = self:getFramePanel("rule_panel")
       local rule_table = rule_panel["list-data"]
 
       local rule_value = rule_table["choose=value"].elem_value
