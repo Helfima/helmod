@@ -544,9 +544,11 @@ function Player.getProductionsCrafting(category, lua_recipe)
 end
 
 -------------------------------------------------------------------------------
----Remove entities from table that are placed only by a hidden item
+---Excludes entities that are placed only by a hidden item
 ---@param entities table
+---@return table
 function Player.ExcludePlacedByHidden(entities)
+  local results = {}
   for entity_name, entity in pairs(entities) do
     local item_filters = {}
     for _, item in pairs(entity.items_to_place_this or {}) do
@@ -564,10 +566,11 @@ function Player.ExcludePlacedByHidden(entities)
         break
       end
     end
-    if show ~= true then
-      entities[entity_name] = nil
+    if show == true then
+      results[entity_name] = entity
     end
   end
+  return results
 end
 
 -------------------------------------------------------------------------------
@@ -612,7 +615,7 @@ function Player.getProductionMachines()
   table.insert(filters, {filter="type", type="rocket-silo", mode="or"})
   table.insert(filters, {filter="flag", flag="player-creation", mode="and"})
   local prototypes = game.get_filtered_entity_prototypes(filters)
-  Player.ExcludePlacedByHidden(prototypes)
+  prototypes = Player.ExcludePlacedByHidden(prototypes)
   
   local list_machines = {}
   for prototype_name, lua_prototype in pairs(prototypes) do
@@ -653,7 +656,7 @@ function Player.getEnergyMachines()
     end
   end
 
-  Player.ExcludePlacedByHidden(machines)
+  machines = Player.ExcludePlacedByHidden(machines)
   return machines
 end
 
@@ -668,7 +671,7 @@ function Player.getBoilers()
   table.insert(filters, {filter="flag", flag="player-creation", mode="and"})
   local boilers = game.get_filtered_entity_prototypes(filters)
 
-  Player.ExcludePlacedByHidden(boilers)
+  boilers = Player.ExcludePlacedByHidden(boilers)
   return boilers
 end
 
