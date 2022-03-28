@@ -16,6 +16,7 @@ Date: ???
     - Heat consumption for heat powered machines was ignoring efficiency modules and machine speed
     - Power reduction from efficiency modules was being applied to machine's idle power draw
     - Hidden entities were not being shown
+    - Disabled offshore pumps were being shown
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.9
 Date: 2022-03-09

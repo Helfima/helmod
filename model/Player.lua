@@ -685,7 +685,12 @@ function Player.getOffshorePump(fluid_name)
   local offshore_pump = {}
   for key, entity in pairs(entities) do
     if entity.fluid.name == fluid_name then
-      offshore_pump[key] = entity
+      for _, fluidbox in pairs(entity.fluidbox_prototypes) do
+        if #fluidbox.pipe_connections > 0 then
+          offshore_pump[key] = entity
+          break
+        end
+      end
     end
   end
   return offshore_pump
