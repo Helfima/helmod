@@ -491,12 +491,11 @@ function Player.getProductionsCrafting(category, lua_recipe)
   local rules_included, rules_excluded = Player.getRules("production-crafting")
   if category == "crafting-handonly" then
     productions["character"] = game.entity_prototypes["character"]
-  elseif lua_recipe.name ~= nil and lua_recipe.name == "steam" then
-    for key, lua_entity in pairs(Player.getBoilers()) do
+  elseif lua_recipe.name ~= nil and category == "fluid" then
+    for key, lua_entity in pairs(Player.getOffshorePumps(lua_recipe.name)) do
       productions[lua_entity.name] = lua_entity
     end
-  elseif lua_recipe.name ~= nil and category == "fluid" then
-    for key, lua_entity in pairs(Player.getOffshorePump(lua_recipe.name)) do
+    for key, lua_entity in pairs(Player.getBoilers(lua_recipe.name)) do
       productions[lua_entity.name] = lua_entity
     end
   else
@@ -662,23 +661,40 @@ end
 
 -------------------------------------------------------------------------------
 ---Return list of boilers
+---@param fluid_name string
 ---@return table
-function Player.getBoilers()
+function Player.getBoilers(fluid_name)
   local filters = {}
   table.insert(filters, {filter="type", type="boiler", mode="or"})
   table.insert(filters, {filter="flag", flag="hidden", mode="and", invert=true})
   table.insert(filters, {filter="type", type="boiler", mode="or"})
   table.insert(filters, {filter="flag", flag="player-creation", mode="and"})
-  local boilers = game.get_filtered_entity_prototypes(filters)
+  local prototypes = game.get_filtered_entity_prototypes(filters)
 
-  boilers = Player.ExcludePlacedByHidden(boilers)
-  return boilers
+  prototypes = Player.ExcludePlacedByHidden(prototypes)
+
+  if fluid_name == nil then
+    return prototypes
+  else
+    local boilers = {}
+    for boiler_name, boiler in pairs(prototypes) do
+      for _, fluidbox in pairs(boiler.fluidbox_prototypes) do
+        if (fluidbox.production_type == "output") and fluidbox.filter and (fluidbox.filter.name == fluid_name) then
+          boilers[boiler_name] = boiler
+          break
+        end
+      end
+    end
+
+    return boilers
+  end
 end
 
 -------------------------------------------------------------------------------
 ---Return list of Offshore-Pump
+---@param fluid_name string
 ---@return table
-function Player.getOffshorePump(fluid_name)
+function Player.getOffshorePumps(fluid_name)
   local filters = {}
   table.insert(filters, {filter="type", type="offshore-pump", mode="or"})
   local entities = game.get_filtered_entity_prototypes(filters)
