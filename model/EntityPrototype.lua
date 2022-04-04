@@ -592,7 +592,7 @@ end
 ---@return number --default 0
 function EntityPrototype:getMiningSpeed()
   if self.lua_prototype ~= nil then
-    return self.lua_prototype.mining_speed or 0
+    return (self.lua_prototype.mining_speed or 0) * self:getSpeedModifier()
   end
   return 0
 end

@@ -22,6 +22,7 @@ Date: ???
     - Fixed boiler fluid consumption / production when fluid product has a minimum temperature of not 15 degrees
     - Over production of fluid with temperature was not being included in totals
     - Fluids with temperature were not available to select as a factory resource if all recipes that produce it were hidden
+    - Fixe steam powered mining drills not scaling speed with steam temperature
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.9
 Date: 2022-03-09
