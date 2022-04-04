@@ -666,7 +666,7 @@ end
 function Player.getBoilers(fluid_name)
   local filters = {}
   table.insert(filters, {filter="type", type="boiler", mode="or"})
-  table.insert(filters, {filter="flag", flag="hidden", mode="and", invert=true})
+  table.insert(filters, {filter="hidden", mode="and", invert=true})
   table.insert(filters, {filter="type", type="boiler", mode="or"})
   table.insert(filters, {filter="flag", flag="player-creation", mode="and"})
   local prototypes = game.get_filtered_entity_prototypes(filters)
@@ -1204,7 +1204,7 @@ function Player.getFluidTemperaturePrototypes(fluid)
   end
 
   -- Boilers
-  local boilers = Player:getBoilers()
+  local boilers = Player.getBoilers()
 
   for boiler_name, boiler in pairs(boilers) do
     for _, fluidbox in pairs(boiler.fluidbox_prototypes) do

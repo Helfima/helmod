@@ -1033,7 +1033,9 @@ function ModelCompute.computeFactory(recipe)
     if energy_type == "burner" or energy_type == "fluid" then
       local energy_prototype = EntityPrototype(recipe.factory):getEnergySource()
       local fuel_prototype = energy_prototype:getFuelPrototype()
-      fuel_emissions_multiplier = fuel_prototype:getFuelEmissionsMultiplier()
+      if fuel_prototype ~= nil then
+        fuel_emissions_multiplier = fuel_prototype:getFuelEmissionsMultiplier()
+      end
     end
   else
     recipe.factory.energy_total = recipe.factory.count * recipe.factory.energy
