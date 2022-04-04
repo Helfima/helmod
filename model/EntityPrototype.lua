@@ -929,15 +929,10 @@ end
 ---Return burns fluid
 ---@return boolean
 function EntityPrototype:getBurnsFluid()
-  if self.lua_prototype.type == "generator" then
-    local fluid_fuel = self:getFluidFuelPrototype(true)
-    if fluid_fuel == nil then
-      return false
-    end
-    local fuel_value = fluid_fuel:getFuelValue()
-    return fuel_value > 0
+  if self.lua_prototype ~= nil and self.lua_prototype.type == "generator" then
+    return self.lua_prototype.burns_fluid
   elseif self:getEnergyType() == "fluid" then
-    energy_prototype = self:getEnergySource()
+    local energy_prototype = self:getEnergySource()
     if energy_prototype ~= nil then
       return energy_prototype:getBurnsFluid()
     end
