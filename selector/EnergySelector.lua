@@ -57,7 +57,9 @@ function EnergySelector:appendGroups(element, type, list_products, list_ingredie
     end
   end
   for key, element in pairs(prototype:getRawIngredients()) do
-    if list_ingredients[element.name] == nil then list_ingredients[element.name] = {} end
+    if list_ingredients[element.name] == nil then
+      list_ingredients[element.name] = {}
+    end
     list_ingredients[element.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
   end
 

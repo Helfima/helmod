@@ -522,7 +522,7 @@ end
 function EntityPrototype:getFluidConsumptionFilter()
   if self.lua_prototype ~= nil and self.lua_prototype.type == "boiler" then
     local fluidbox = self.lua_prototype.fluidbox_prototypes[1]
-    if fluidbox ~= nil then
+    if fluidbox ~= nil and fluidbox.filter ~= nil then
       return fluidbox.filter.name
     end
   end
