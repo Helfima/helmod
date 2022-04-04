@@ -263,19 +263,13 @@ function RecipePrototype:getRawIngredients()
     elseif self.lua_type == "energy" then
       local ingredients = {}
       local prototype = EntityPrototype(self.lua_prototype.name)
-      local energy_source = prototype:getEnergySource()
-      local usage_priority = "none"
-      if energy_source ~= nil then
-        energy_source:getUsagePriority()
-      end
 
       if prototype:getType() == "boiler" then
         ---water
         local amount = prototype:getFluidProduction()
         local ingredient = {name="water", type="fluid", amount=amount, by_time=true}
         table.insert(ingredients, ingredient)
-      end
-      if prototype:getType() == "accumulator" then
+      elseif prototype:getType() == "accumulator" then
         local energy_prototype = prototype:getEnergySource()
         local capacity = energy_prototype:getBufferCapacity()
         ---vanilla day=25000,dusk=5000,night=2500,dawn=5000
@@ -298,8 +292,7 @@ function RecipePrototype:getRawIngredients()
         local amount = prototype:getEnergyConsumption()
         local ingredient = {name="energy", type="energy", amount=amount}
         table.insert(ingredients, ingredient)
-      end
-      if energy_type == "heat" then
+      elseif energy_type == "heat" then
         local amount = prototype:getEnergyConsumption()
         local ingredient = {name="steam-heat", type="energy", amount=amount, by_time=true}
         table.insert(ingredients, ingredient)
