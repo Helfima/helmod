@@ -55,3 +55,11 @@ end
 function FluidPrototype:setTemperature(value)
   self.temperature = value
 end
+
+-------------------------------------------------------------------------------
+---Return minimum temperature
+---@return number
+function FluidPrototype:getMinimumTemperature()
+  if self.lua_prototype == nil then return 15 end
+  return self.lua_prototype.default_temperature
+end

@@ -1092,7 +1092,9 @@ function ModelCompute.computeEnergyFactory(recipe)
     recipe.factory.energy_total = 0
     if energy_type == "burner" or energy_type == "fluid" then
       local fuel_prototype = energy_prototype:getFuelPrototype()
-      fuel_emissions_multiplier = fuel_prototype:getFuelEmissionsMultiplier()
+      if fuel_prototype ~= nil then
+        fuel_emissions_multiplier = fuel_prototype:getFuelEmissionsMultiplier()
+      end
     end
   end
   recipe.factory.pollution_total = recipe.factory.pollution * recipe.factory.count * recipe.time

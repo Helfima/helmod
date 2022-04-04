@@ -18,6 +18,8 @@ Date: ???
     - Hidden entities were not being shown
     - Disabled boilers and offshore pumps were being shown
     - Block constraints were not working for fluids with temperature
+    - Fixed boilers not showing fluid ingredients other than water
+    - Fixed boiler fluid consumption / production when fluid product has a minimum temperature of not 15 degrees
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.9
 Date: 2022-03-09

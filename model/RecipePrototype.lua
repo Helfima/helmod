@@ -265,9 +265,9 @@ function RecipePrototype:getRawIngredients()
       local prototype = EntityPrototype(self.lua_prototype.name)
 
       if prototype:getType() == "boiler" then
-        ---water
         local amount = prototype:getFluidProduction()
-        local ingredient = {name="water", type="fluid", amount=amount, by_time=true}
+        local name = prototype:getFluidConsumptionFilter()
+        local ingredient = {name=name, type="fluid", amount=amount, by_time=true}
         table.insert(ingredients, ingredient)
       elseif prototype:getType() == "accumulator" then
         local energy_prototype = prototype:getEnergySource()
