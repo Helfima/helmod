@@ -1190,7 +1190,8 @@ function Player.getFluidTemperaturePrototypes(fluid)
 
   -- Recipes
   local filters = {}
-  table.insert(filters, {filter = "hidden", invert = true, mode = "and"})
+  ---Hidden fluids do need to be included unfortunately. Only real alternative would be to add a setting.
+  ---table.insert(filters, {filter = "hidden", invert = true, mode = "and"})
   table.insert(filters, {filter = "has-product-fluid", elem_filters = {{filter = "name", name = fluid.name}}, mode = "and"})
   local prototypes = game.get_filtered_recipe_prototypes(filters)
 

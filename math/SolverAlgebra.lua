@@ -67,12 +67,14 @@ function SolverAlgebra:lineCompute(M, xrow, xcol)
   local Z = M[#M][xcol] ---valeur demandee Z
   local V = M[xrow][xcol] ---valeur produite
   local C = -Z/V ---coefficient
-  M[xrow][self.col_C] = C
-  M[xrow][self.col_R] = P * C
-  for icol,cell_value in pairs(row) do
-    if icol > self.col_start then
-      local X = M[xrow][icol]
-      M[#M][icol] = M[#M][icol] + X * P * C
+  if Z < 0 then
+    M[xrow][self.col_C] = C
+    M[xrow][self.col_R] = P * C
+    for icol, cell_value in pairs(row) do
+      if icol > self.col_start then
+        local X = M[xrow][icol]
+        M[#M][icol] = M[#M][icol] + X * P * C
+      end
     end
   end
   return M
