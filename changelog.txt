@@ -17,6 +17,7 @@ Date: ???
     - Power reduction from efficiency modules was being applied to machine's idle power draw
     - Hidden entities were not being shown
     - Disabled boilers and offshore pumps were being shown
+    - Block constraints were not working for fluids with temperature
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.9
 Date: 2022-03-09
@@ -184,7 +185,7 @@ Date: 2020-10-24
 Version: 0.11.13
 Date: 2020-10-05
   Changes:
-    - Changed solve choose fluid with tempearture
+    - Changed solve choose fluid with temperature
   Bugfixes:
     - fixed copy/paste and exchange block
     - fixed problem with water-viscous-mud recipe to select machine in recipe edition

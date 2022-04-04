@@ -562,7 +562,7 @@ function ProductionPanel:updateInputBlock(model, block)
             if not(block.unlinked) or block.by_factory == true then
               button_action = "product-info"
               button_tooltip = "tooltip.info-product"
-              if block.products_linked ~= nil and block.products_linked[lua_ingredient.name] then
+              if block.products_linked ~= nil and block.products_linked[Product(lua_ingredient):getTableKey()] then
                 contraint_type = "linked"
               end
             else
@@ -645,17 +645,15 @@ function ProductionPanel:updateOutputBlock(model, block)
             button_action = "production-recipe-product-add"
             button_tooltip = "tooltip.add-recipe"
             control_info = nil
-          else
-            if not(block.unlinked) or block.by_factory == true then
-              button_action = "product-info"
-              button_tooltip = "tooltip.info-product"
-              if block.products_linked ~= nil and block.products_linked[lua_product.name] then
-                contraint_type = "linked"
-              end
-            else
-              button_action = "product-edition"
-              button_tooltip = "tooltip.edit-product"
+          elseif not(block.unlinked) or block.by_factory == true then
+            button_action = "product-info"
+            button_tooltip = "tooltip.info-product"
+            if block.products_linked ~= nil and block.products_linked[Product(lua_product):getTableKey()] then
+              contraint_type = "linked"
             end
+          else
+            button_action = "product-edition"
+            button_tooltip = "tooltip.edit-product"
           end
           ---color
           if lua_product.state == 1 then
@@ -1603,8 +1601,8 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 
   if block ~= nil and event.action == "product-info" then
     if block.products_linked == nil then block.products_linked = {} end
-    if event.control == true and event.item4 ~= "none" then
-      block.products_linked[event.item4] = not(block.products_linked[event.item4])
+    if event.control == true and event.item5 ~= "none" then
+      block.products_linked[event.item5] = not(block.products_linked[event.item5])
       ModelCompute.update(model)
       Controller:send("on_gui_update", event)
     end
