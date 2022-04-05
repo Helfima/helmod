@@ -837,6 +837,16 @@ end
 function ModelBuilder.unlinkProductionBlock(block)
   if block ~= nil then
     block.unlinked = not(block.unlinked)
+    if not block.unlinked then
+      for i, ingredient in pairs(block.ingredients) do
+        ingredient.input = 0
+        ingredient.count = 0
+      end
+      for i, product in pairs(block.products) do
+        product.input = 0
+        product.count = 0
+      end
+    end
   end
 end
 
