@@ -1223,6 +1223,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, block)
             button_color = GuiElement.color_button_edit
           end
         elseif product.state == 3 then
+          block_id = block.id
           button_color = GuiElement.color_button_rest
         else
           button_color = GuiElement.color_button_default_product

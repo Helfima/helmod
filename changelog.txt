@@ -25,6 +25,8 @@ Date: ???
     - Fluids with temperature were not available to select as a factory resource if all recipes that produce it were hidden
     - Fixed steam powered mining drills not scaling speed with steam temperature
     - Fixed output quantities of unlinked products not reset when a block was linked
+    - Block output quantity for overproduced (red) items could not be set from Production Line screen
+    - Fixed block icon not updating after adding a recipe to an empty block
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.9
 Date: 2022-03-09

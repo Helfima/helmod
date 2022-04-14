@@ -49,11 +49,11 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
           recipe.index = recipe.index + 1
         end
       end
-      if index == 0 then
-        ---change block name
-        block.name = ModelRecipe.name
-        block.type = ModelRecipe.type
-      end
+    end
+    if ModelRecipe.index == 0 then
+      ---change block name
+      block.name = ModelRecipe.name
+      block.type = ModelRecipe.type
     end
     ModelRecipe.count = 1
 
