@@ -205,10 +205,12 @@ function RecipePrototype:getEnergyProducts(factory)
     else
       prototype = EntityPrototype(self.lua_prototype.name)
     end
-    if prototype:getType() == "solar-panel" then
+    if prototype:getType() == "solar-panel" or prototype:getType() == "electric-energy-interface" then
       local amount = prototype:getEnergyProduction()
-      local product = {name="energy", type="energy", amount=amount, by_time=true}
-      table.insert(products, product)
+      if amount > 0 then
+        local product = {name="energy", type="energy", amount=amount, by_time=true}
+        table.insert(products, product)
+      end
     elseif prototype:getType() == "boiler" then
       local fluid_production = prototype:getFluidProductionFilter()
       if fluid_production ~= nil then
@@ -292,8 +294,10 @@ function RecipePrototype:getRawIngredients()
       local energy_type = prototype:getEnergyTypeInput()
       if prototype:getType() ~= "accumulator" and energy_type == "electric" then
         local amount = prototype:getEnergyConsumption()
-        local ingredient = {name="energy", type="energy", amount=amount}
-        table.insert(ingredients, ingredient)
+        if amount > 0 then
+          local ingredient = {name="energy", type="energy", amount=amount, by_time=true}
+          table.insert(ingredients, ingredient)
+        end
       elseif energy_type == "heat" then
         local amount = prototype:getEnergyConsumption()
         local ingredient = {name="steam-heat", type="energy", amount=amount, by_time=true}

@@ -3,6 +3,7 @@ Version: 0.12.10
 Date: ???
   Changes:
     - Added cache for available machines to improve performance
+    - Added support for wind turbines
   Bugfixes:
     - Fixed steam engine's fluid consumption when input fluid is below maximum temperature
     - Most energy recipes were ignoring selected Base time

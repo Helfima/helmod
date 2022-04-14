@@ -548,8 +548,10 @@ end
 ---@return table
 function Player.ExcludePlacedByHidden(entities)
   local results = {}
+
   for entity_name, entity in pairs(entities) do
     local item_filters = {}
+
     for _, item in pairs(entity.items_to_place_this or {}) do
       if type(item) == "string" then
         table.insert(item_filters, {filter="name", name=item, mode="or"})
@@ -557,18 +559,27 @@ function Player.ExcludePlacedByHidden(entities)
         table.insert(item_filters, {filter="name", name=item.name, mode="or"})
       end
     end
-    local items = game.get_filtered_item_prototypes(item_filters)
-    local show = #items == 0
-    for _, item in pairs(items) do
-      if not item.has_flag("hidden") then
-        show = true
-        break
+
+    local show = false
+
+    if #item_filters > 0 then
+      local items = game.get_filtered_item_prototypes(item_filters)
+      for _, item in pairs(items) do
+        if not item.has_flag("hidden") then
+          show = true
+          break
+        end
       end
     end
+
     if show == true then
+      if entity_name == "hidden-electric-energy-interface" then
+        log(entity_name)
+      end
       results[entity_name] = entity
     end
   end
+
   return results
 end
 
@@ -633,7 +644,7 @@ function Player.getEnergyMachines()
   local machines = {}
 
   local filters = {}
-  for _,type in pairs({"generator", "solar-panel", "boiler", "accumulator", "reactor", "burner-generator"}) do
+  for _, type in pairs({"generator", "solar-panel", "boiler", "accumulator", "reactor", "burner-generator", "electric-energy-interface"}) do
     table.insert(filters, {filter="type", mode="or", invert=false, type=type})
     table.insert(filters, {filter="hidden", mode="and", invert=true})
     table.insert(filters, {filter="type", mode="or", invert=false, type=type})
