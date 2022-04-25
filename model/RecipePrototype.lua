@@ -338,6 +338,16 @@ function RecipePrototype:getIngredients(factory)
       return {}
     end
 
+    if self.lua_type == "fluid" and factory_prototype:getType() == "boiler" then
+      local name = factory_prototype:getFluidConsumptionFilter()
+      if name ~= nil then
+        local amount = factory_prototype:getFluidProduction()
+        local ingredient = {name=name, type="fluid", amount=amount}
+        raw_ingredients = {}
+        table.insert(raw_ingredients, ingredient)
+      end
+    end
+
     if self.lua_type ~= "energy" then
       local consumption_effect = 1
       if factory ~= nil then
