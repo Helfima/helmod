@@ -30,6 +30,7 @@ Date: ???
     - Fixed block icon not updating after adding a recipe to an empty block
     - Fixed list of machines being compressed in edit recipe screen
     - Fixed error when trying to get a blueprint for a deleted recipe
+    - Fixed mining drills with no fluidbox could be selected for ores which require a mining fluid
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.9
 Date: 2022-03-09
