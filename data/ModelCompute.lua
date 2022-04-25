@@ -1027,16 +1027,8 @@ function ModelCompute.computeFactory(recipe)
   local beacon_prototype = EntityPrototype(recipe.beacon)
   recipe.beacon.energy = beacon_prototype:getEnergyUsage()
   ---calcul des totaux
-  local fuel_emissions_multiplier = 1
   if energy_type ~= "electric" then
     recipe.factory.energy_total = 0
-    if energy_type == "burner" or energy_type == "fluid" then
-      local energy_prototype = EntityPrototype(recipe.factory):getEnergySource()
-      local fuel_prototype = energy_prototype:getFuelPrototype()
-      if fuel_prototype ~= nil then
-        fuel_emissions_multiplier = fuel_prototype:getFuelEmissionsMultiplier()
-      end
-    end
   else
     recipe.factory.energy_total = recipe.factory.count * recipe.factory.energy
     local drain = factory_prototype:getMinEnergyUsage()
@@ -1047,7 +1039,7 @@ function ModelCompute.computeFactory(recipe)
   
   recipe.beacon.energy_total = math.ceil(recipe.beacon.count*recipe.beacon.energy)
   recipe.energy_total = recipe.factory.energy_total + recipe.beacon.energy_total
-  recipe.pollution_total = recipe.factory.pollution_total * fuel_emissions_multiplier * recipe_prototype:getEmissionsMultiplier()
+  recipe.pollution_total = recipe.factory.pollution_total * recipe_prototype:getEmissionsMultiplier()
   ---arrondi des valeurs
   recipe.factory.speed = recipe.factory.speed
   recipe.factory.energy = math.ceil(recipe.factory.energy)
@@ -1087,22 +1079,15 @@ function ModelCompute.computeEnergyFactory(recipe)
   if recipe.factory.speed == 0 then count = 0 end
   recipe.factory.count = count
   ---calcul des totaux
-  local fuel_emissions_multiplier = 1
   if energy_type == "electric" then
     recipe.factory.energy_total = 0
   else
     recipe.factory.energy_total = 0
-    if energy_type == "burner" or energy_type == "fluid" then
-      local fuel_prototype = energy_prototype:getFuelPrototype()
-      if fuel_prototype ~= nil then
-        fuel_emissions_multiplier = fuel_prototype:getFuelEmissionsMultiplier()
-      end
-    end
   end
   recipe.factory.pollution_total = recipe.factory.pollution * recipe.factory.count * recipe.time
   
   recipe.energy_total = recipe.factory.energy_total
-  recipe.pollution_total = recipe.factory.pollution_total * fuel_emissions_multiplier * recipe_prototype:getEmissionsMultiplier()
+  recipe.pollution_total = recipe.factory.pollution_total * recipe_prototype:getEmissionsMultiplier()
   ---arrondi des valeurs
   recipe.factory.speed = recipe.factory.speed
   recipe.factory.energy = math.ceil(recipe.factory.energy)

@@ -32,6 +32,7 @@ Date: ???
     - Fixed error when trying to get a blueprint for a deleted recipe
     - Fixed mining drills with no fluidbox could be selected for ores which require a mining fluid
     - Fixed boiler's fluid consumption when in a recipe block (not energy)
+    - Fixed pollution modifier from fuel being applied twice
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.9
 Date: 2022-03-09
