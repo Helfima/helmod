@@ -27,6 +27,7 @@ Date: ???
     - Fixed output quantities of unlinked products not reset when a block was linked
     - Block output quantity for overproduced (red) items could not be set from Production Line screen
     - Fixed block icon not updating after adding a recipe to an empty block
+    - Fixed list of machines being compressed in edit recipe screen
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.9
 Date: 2022-03-09
