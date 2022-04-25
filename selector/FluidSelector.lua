@@ -9,6 +9,12 @@ require "selector.AbstractSelector"
 FluidSelector = newclass(AbstractSelector)
 
 -------------------------------------------------------------------------------
+---After initialization
+function FluidSelector:afterInit()
+  self.hidden_option = true
+end
+
+-------------------------------------------------------------------------------
 ---Return caption
 ---@return table
 function FluidSelector:getCaption()

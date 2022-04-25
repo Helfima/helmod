@@ -9,6 +9,12 @@ require "selector.AbstractSelector"
 ItemSelector = newclass(AbstractSelector)
 
 -------------------------------------------------------------------------------
+---After initialization
+function ItemSelector:afterInit()
+  self.hidden_option = true
+end
+
+-------------------------------------------------------------------------------
 ---Return caption
 ---@return table
 function ItemSelector:getCaption()

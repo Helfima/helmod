@@ -43,3 +43,13 @@ function ItemPrototype:stackSize(index)
   end
   return 0
 end
+
+-------------------------------------------------------------------------------
+---Return hidden of Prototype
+---@return boolean
+function ItemPrototype:getHidden()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.has_flag("hidden")
+  end
+  return false
+end
