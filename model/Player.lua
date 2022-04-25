@@ -101,7 +101,9 @@ end
 ---Get smart tool
 ---@return LuaItemStack
 function Player.getSmartTool()
-  if Lua_player == nil then return nil end
+  if Lua_player == nil then
+    return nil
+  end
   local inventory = Player.getMainInventory()
   local tool_stack = nil
   for i = 1, #inventory do
@@ -126,8 +128,10 @@ end
 ---@param recipe table
 ---@param type string
 ---@return any
-function Player.setSmartTool(recipe, type)
-  if Lua_player == nil then return nil end
+function Player.setSmartTool(recipe, type)  
+  if Lua_player == nil or recipe == nil then
+    return nil
+  end
   local tool_stack = Player.getSmartTool()
   if tool_stack ~= nil then
     tool_stack.clear_blueprint()

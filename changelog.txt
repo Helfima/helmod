@@ -29,6 +29,7 @@ Date: ???
     - Block output quantity for overproduced (red) items could not be set from Production Line screen
     - Fixed block icon not updating after adding a recipe to an empty block
     - Fixed list of machines being compressed in edit recipe screen
+    - Fixed error when trying to get a blueprint for a deleted recipe
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.9
 Date: 2022-03-09
