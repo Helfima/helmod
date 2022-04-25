@@ -614,6 +614,7 @@ function RecipeEdition:updateFactoryInfo(event)
 
     ---factory selection
     local scroll_panel = GuiElement.add(detail_panel, GuiScroll("factory-scroll"):policy(true))
+    scroll_panel.style.maximal_height = 118
     local recipe_prototype = RecipePrototype(recipe)
     local category = recipe_prototype:getCategory()
     local factories = {}
@@ -909,6 +910,7 @@ function RecipeEdition:updateBeaconInfo(event)
     
     ---factory selection
     local scroll_panel = GuiElement.add(detail_panel, GuiScroll("beacon-scroll"):policy(true))
+    scroll_panel.style.maximal_height = 118
     local factories = Player.getProductionsBeacon()
 
     local factory_table_panel = GuiElement.add(scroll_panel, GuiTable("beacon-table"):column(5))

@@ -261,7 +261,7 @@ function ProductionPanel:updateIndexPanel(model)
       local style = "helmod_button_default"
       local element = Model.firstRecipe(imodel.blocks)
       if imodel.id == model.id then
-        if element ~= nil then
+        if element ~= nil and element.name ~= "" then
           local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
           local button = GuiElement.add(table_index, GuiButtonSprite(self.classname, "change-model", imodel.id):sprite(element.type, element.name):style("helmod_button_menu_selected"):tooltip(tooltip))
           button.style.width = 36
@@ -562,7 +562,7 @@ function ProductionPanel:updateInputBlock(model, block)
             if not(block.unlinked) or block.by_factory == true then
               button_action = "product-info"
               button_tooltip = "tooltip.info-product"
-              if block.products_linked ~= nil and block.products_linked[lua_ingredient.name] then
+              if block.products_linked ~= nil and block.products_linked[Product(lua_ingredient):getTableKey()] then
                 contraint_type = "linked"
               end
             else
@@ -645,17 +645,15 @@ function ProductionPanel:updateOutputBlock(model, block)
             button_action = "production-recipe-product-add"
             button_tooltip = "tooltip.add-recipe"
             control_info = nil
-          else
-            if not(block.unlinked) or block.by_factory == true then
-              button_action = "product-info"
-              button_tooltip = "tooltip.info-product"
-              if block.products_linked ~= nil and block.products_linked[lua_product.name] then
-                contraint_type = "linked"
-              end
-            else
-              button_action = "product-edition"
-              button_tooltip = "tooltip.edit-product"
+          elseif not(block.unlinked) or block.by_factory == true then
+            button_action = "product-info"
+            button_tooltip = "tooltip.info-product"
+            if block.products_linked ~= nil and block.products_linked[Product(lua_product):getTableKey()] then
+              contraint_type = "linked"
             end
+          else
+            button_action = "product-edition"
+            button_tooltip = "tooltip.edit-product"
           end
           ---color
           if lua_product.state == 1 then
@@ -1145,10 +1143,19 @@ function ProductionPanel:addTableRowBlock(gui_table, model, block)
   GuiElement.add(cell_action, GuiButton(self.classname, "production-block-up", model.id, block.id):sprite("menu", "arrow-up-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.up-element", User.getModSetting("row_move_step")}))
   GuiElement.add(cell_action, GuiButton(self.classname, "remove-block", model.id, block.id):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
   GuiElement.add(cell_action, GuiButton(self.classname, "production-block-down", model.id, block.id):sprite("menu", "arrow-down-sm", "arrow-down-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.down-element", User.getModSetting("row_move_step")}))
+  local linked_button
   if unlinked then
-    GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink", model.id, block.id):sprite("menu", "unlink-sm", "unlink-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.unlink-element"}))
+    linked_button = GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink", model.id, block.id):sprite("menu", "unlink-sm", "unlink-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.unlink-element"}))
   else
-    GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink", model.id, block.id):sprite("menu", "link-white-sm", "link-sm"):style("helmod_button_menu_sm_selected"):tooltip({"tooltip.unlink-element"}))
+    linked_button = GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink", model.id, block.id):sprite("menu", "link-white-sm", "link-sm"):style("helmod_button_menu_sm_selected"):tooltip({"tooltip.unlink-element"}))
+  end
+  if block.index == 0 then
+    linked_button.enabled = false
+    linked_button.tooltip = {"tooltip.block-cannot-link-first"}
+  end
+  if block.by_factory == true then
+    linked_button.enabled = false
+    linked_button.tooltip = {"tooltip.block-cannot-link-by-factory"}
   end
 
   ---common cols
@@ -1216,6 +1223,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, block)
             button_color = GuiElement.color_button_edit
           end
         elseif product.state == 3 then
+          block_id = block.id
           button_color = GuiElement.color_button_rest
         else
           button_color = GuiElement.color_button_default_product
@@ -1594,8 +1602,8 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 
   if block ~= nil and event.action == "product-info" then
     if block.products_linked == nil then block.products_linked = {} end
-    if event.control == true and event.item4 ~= "none" then
-      block.products_linked[event.item4] = not(block.products_linked[event.item4])
+    if event.control == true and event.item5 ~= "none" then
+      block.products_linked[event.item5] = not(block.products_linked[event.item5])
       ModelCompute.update(model)
       Controller:send("on_gui_update", event)
     end

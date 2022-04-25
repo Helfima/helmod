@@ -1,4 +1,34 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.12.10
+Date: ???
+  Changes:
+    - Added cache for available machines to improve performance
+    - Added support for wind turbines
+  Bugfixes:
+    - Fixed steam engine's fluid consumption when input fluid is below maximum temperature
+    - Most energy recipes were ignoring selected Base time
+    - Efficiency was being applied twice to burner electric generators
+    - Fluid consumption efficiency was being ignored
+    - Fluid consumption was not capped when burning a fluid with a high fuel value
+    - Power production was not capped when burning a fluid with a very low fuel value
+    - Prevented first block from being linked
+    - Production line / block icon issues
+    - Fuel consumption for burner machines was ignoring efficiency modules
+    - Heat consumption for heat powered machines was ignoring efficiency modules and machine speed
+    - Power reduction from efficiency modules was being applied to machine's idle power draw
+    - Hidden entities were not being shown
+    - Disabled boilers and offshore pumps were being shown
+    - Block constraints were not working for fluids with temperature
+    - Fixed boilers not showing fluid ingredients other than water
+    - Fixed boiler fluid consumption / production when fluid product has a minimum temperature of not 15 degrees
+    - Over production of fluid with temperature was not being included in totals
+    - Fluids with temperature were not available to select as a factory resource if all recipes that produce it were hidden
+    - Fixed steam powered mining drills not scaling speed with steam temperature
+    - Fixed output quantities of unlinked products not reset when a block was linked
+    - Block output quantity for overproduced (red) items could not be set from Production Line screen
+    - Fixed block icon not updating after adding a recipe to an empty block
+    - Fixed list of machines being compressed in edit recipe screen
+---------------------------------------------------------------------------------------------------
 Version: 0.12.9
 Date: 2022-03-09
   Bugfixes:
@@ -165,7 +195,7 @@ Date: 2020-10-24
 Version: 0.11.13
 Date: 2020-10-05
   Changes:
-    - Changed solve choose fluid with tempearture
+    - Changed solve choose fluid with temperature
   Bugfixes:
     - fixed copy/paste and exchange block
     - fixed problem with water-viscous-mud recipe to select machine in recipe edition

@@ -50,6 +50,11 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
         end
       end
     end
+    if ModelRecipe.index == 0 then
+      ---change block name
+      block.name = ModelRecipe.name
+      block.type = ModelRecipe.type
+    end
     ModelRecipe.count = 1
 
     local recipe_products
@@ -143,6 +148,7 @@ function ModelBuilder.convertRecipeToblock(model, block, recipe, with_below)
   local block_index = table.size(model.blocks)
   new_block.isEnergy = recipe.type == "energy"
   new_block.index = block_index
+  new_block.type = block.type
   new_block.unlinked = false
   model.blocks[new_block.id] = new_block
   
@@ -598,6 +604,12 @@ function ModelBuilder.removeProductionBlock(model, block)
   if block ~= nil then
     model.blocks[block.id] = nil
     table.reindex_list(model.blocks)
+    for _, block in pairs(model.blocks) do
+      if block.index == 0 then
+        block.unlinked = true
+        break
+      end
+    end
   end
 end
 
@@ -614,6 +626,8 @@ function ModelBuilder.removeProductionRecipe(block, recipe)
     if first_recipe ~= nil then
       block.name = first_recipe.name
       block.type = first_recipe.type
+    else
+      block.name = ""
     end
   end
 end
@@ -667,7 +681,11 @@ function ModelBuilder.copyBlock(into_model, into_block, from_model, from_block)
           into_block = Model.newBlock(into_model, recipe_prototype:native())
           local index = table.size(into_model.blocks)
           into_block.index = index
-          into_block.unlinked = from_block.unlinked
+          if index == 0 then
+            into_block.unlinked = true
+          else
+            into_block.unlinked = from_block.unlinked
+          end
           into_block.solver = from_block.solver
           into_block.isEnergy = from_block.isEnergy
           into_block.by_product = from_block.by_product
@@ -819,6 +837,16 @@ end
 function ModelBuilder.unlinkProductionBlock(block)
   if block ~= nil then
     block.unlinked = not(block.unlinked)
+    if not block.unlinked then
+      for i, ingredient in pairs(block.ingredients) do
+        ingredient.input = 0
+        ingredient.count = 0
+      end
+      for i, product in pairs(block.products) do
+        product.input = 0
+        product.count = 0
+      end
+    end
   end
 end
 
@@ -865,6 +893,9 @@ end
 function ModelBuilder.upProductionBlock(model, block, step)
   if model ~= nil and block ~= nil then
     table.up_indexed_list(model.blocks, block.index, step)
+    if block.index == 0 then
+      block.unlinked = true
+    end
   end
 end
 
@@ -876,6 +907,12 @@ end
 function ModelBuilder.downProductionBlock(model, block, step)
   if model ~= nil and block ~= nil then
     table.down_indexed_list(model.blocks, block.index, step)
+    for _, block in pairs(model.blocks) do
+      if block.index == 0 then
+        block.unlinked = true
+        break
+      end
+    end
   end
 end
 

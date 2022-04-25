@@ -89,7 +89,10 @@ function ModelCompute.update(model)
       block.time = model.time
       ---premiere recette
       local _,recipe = next(block.recipes)
-      if recipe ~= nil then
+      if recipe == nil then
+        block.ingredients = {}
+        block.products = {}
+      else
 
         ---state = 0 => produit
         ---state = 1 => produit pilotant
@@ -795,7 +798,6 @@ function ModelCompute.computeBlock(block)
           recipe.production = mC[row_index][my_solver.col_P]
         else
           recipe.count = 0
-          recipe.production = 1
         end
         row_index = row_index + 1
         ---calcul dependant du recipe count
@@ -1031,10 +1033,15 @@ function ModelCompute.computeFactory(recipe)
     if energy_type == "burner" or energy_type == "fluid" then
       local energy_prototype = EntityPrototype(recipe.factory):getEnergySource()
       local fuel_prototype = energy_prototype:getFuelPrototype()
-      fuel_emissions_multiplier = fuel_prototype:getFuelEmissionsMultiplier()
+      if fuel_prototype ~= nil then
+        fuel_emissions_multiplier = fuel_prototype:getFuelEmissionsMultiplier()
+      end
     end
   else
-    recipe.factory.energy_total = math.ceil(recipe.factory.count*recipe.factory.energy)
+    recipe.factory.energy_total = recipe.factory.count * recipe.factory.energy
+    local drain = factory_prototype:getMinEnergyUsage()
+    recipe.factory.energy_total = math.ceil(recipe.factory.energy_total + (math.ceil(recipe.factory.count) * drain))
+    recipe.factory.energy = recipe.factory.energy + drain
   end
   recipe.factory.pollution_total = recipe.factory.pollution * recipe.factory.count * recipe.time
   
@@ -1087,7 +1094,9 @@ function ModelCompute.computeEnergyFactory(recipe)
     recipe.factory.energy_total = 0
     if energy_type == "burner" or energy_type == "fluid" then
       local fuel_prototype = energy_prototype:getFuelPrototype()
-      fuel_emissions_multiplier = fuel_prototype:getFuelEmissionsMultiplier()
+      if fuel_prototype ~= nil then
+        fuel_emissions_multiplier = fuel_prototype:getFuelEmissionsMultiplier()
+      end
     end
   end
   recipe.factory.pollution_total = recipe.factory.pollution * recipe.factory.count * recipe.time

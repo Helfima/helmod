@@ -257,7 +257,10 @@ function GuiTooltipModel:create()
   local element = self.m_element
   local first_block = Model.firstRecipe(element.blocks or {})
   if first_block ~= nil then
-    local type = "recipe"
+    local type = first_block.type
+    if type == "resource" or type == "energy" then type = "entity" end
+    if type == "rocket" then type = "item" end
+    if type == "recipe-burnt" then type = "recipe" end
     local element_icon = string.format("[%s=%s]", type, first_block.name)
     table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=first_block.name}), helmod_tag.font.close, helmod_tag.color.close})
     table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_result-panel.col-header-owner"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, element.owner or "", helmod_tag.font.close})
@@ -290,9 +293,6 @@ function GuiTooltipElement:create()
     if type == "rocket" then type = "item" end
     if type == "recipe-burnt" then type = "recipe" end
     local element_icon = string.format("[%s=%s]", type, element.name)
-    if type == "energy" and (element.name == "energy" or element.name == "steam-heat") then
-      element_icon = string.format("[img=helmod-%s-white]", element.name)
-    end
     table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=element.name}), helmod_tag.font.close, helmod_tag.color.close})
     ---quantity
     local total_count = Format.formatNumberElement(element.count)

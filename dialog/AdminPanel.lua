@@ -672,6 +672,7 @@ function AdminPanel:onEvent(event)
     
     if event.item2 == "HMPlayer" then
       Player.getResources()
+      Player.getProductionMachines()
     else    
       local forms = {}
       table.insert(forms, EnergySelector("HMEnergySelector"))
