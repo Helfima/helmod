@@ -584,9 +584,6 @@ function Player.ExcludePlacedByHidden(entities)
     end
 
     if show == true then
-      if entity_name == "hidden-electric-energy-interface" then
-        log(entity_name)
-      end
       results[entity_name] = entity
     end
   end
