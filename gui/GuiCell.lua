@@ -156,6 +156,7 @@ function GuiCell:add_mask(button, color, size)
   end
 end
 
+local sprite_info_size = 16
 -------------------------------------------------------------------------------
 ---Add icon information
 ---@param button LuaGuiElement
@@ -165,43 +166,76 @@ function GuiCell:add_infoIcon(button, info_icon)
   if type == nil then return end
   if type == "recipe-burnt" then 
     local tooltip = "tooltip.burnt-recipe"
-    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({tooltip}))
+    local sprite_name = defines.sprite_info.developer
+    local sprite = GuiElement.add(button, GuiSprite("info"):sprite(sprite_name):tooltip({tooltip}))
     sprite.style.top_padding = -8
+    sprite.style.width = sprite_info_size
+    sprite.style.height = sprite_info_size
+    sprite.style.stretch_image_to_widget_size = false
   end
   if type == "rocket" then 
     local tooltip = "tooltip.rocket-recipe"
-    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({tooltip}))
+    local sprite_name = defines.sprite_info.developer
+    local sprite = GuiElement.add(button, GuiSprite("info"):sprite(sprite_name):tooltip({tooltip}))
     sprite.style.top_padding = -8
+    sprite.style.width = sprite_info_size
+    sprite.style.height = sprite_info_size
+    sprite.style.stretch_image_to_widget_size = false
   end
   if type == "fluid" then 
     local tooltip = "tooltip.resource-recipe"
-    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({tooltip}))
+    local sprite_name = defines.sprite_info.developer
+    local sprite = GuiElement.add(button, GuiSprite("info"):sprite(sprite_name):tooltip({tooltip}))
     sprite.style.top_padding = -8
+    sprite.style.width = sprite_info_size
+    sprite.style.height = sprite_info_size
+    sprite.style.stretch_image_to_widget_size = false
   end
   if type == "resource" then 
     local tooltip = "tooltip.resource-recipe"
-    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("helmod-tool-jewel"):tooltip({tooltip}))
-    sprite.style.top_padding = -4
+    local sprite_name = defines.sprite_info.developer
+    local sprite = GuiElement.add(button, GuiSprite("info"):sprite(sprite_name):tooltip({tooltip}))
+    sprite.style.top_padding = -8
+    sprite.style.width = sprite_info_size
+    sprite.style.height = sprite_info_size
+    sprite.style.stretch_image_to_widget_size = false
   end
   if type == "technology" then 
     local tooltip = "tooltip.technology-recipe"
-    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("helmod-tool-graduation"):tooltip({tooltip}))
+    local sprite_name = GuiElement.getSprite(defines.sprite_info.education)
+    local sprite = GuiElement.add(button, GuiSprite("education"):sprite(sprite_name):tooltip({tooltip}))
     sprite.style.top_padding = -4
+    sprite.style.width = sprite_info_size
+    sprite.style.height = sprite_info_size
+    sprite.style.stretch_image_to_widget_size = true
   end
   if type == "energy" then 
     local tooltip = "tooltip.energy-recipe"
-    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("helmod-tool-nuclear"):tooltip({tooltip}))
+    local sprite_name = GuiElement.getSprite(defines.sprite_info.energy)
+    local sprite = GuiElement.add(button, GuiSprite("energy"):sprite(sprite_name):tooltip({tooltip}))
     sprite.style.top_padding = -4
+    sprite.style.width = sprite_info_size
+    sprite.style.height = sprite_info_size
+    sprite.style.stretch_image_to_widget_size = true
   end
   if type == "burnt" then 
     local tooltip = "tooltip.burnt-product"
-    local sprite = GuiElement.add(button, GuiSprite("burnt"):sprite("helmod-tool-burnt"):tooltip({tooltip}))
+    local sprite_name = GuiElement.getSprite(defines.sprite_info.burnt)
+    local sprite = GuiElement.add(button, GuiSprite("burnt"):sprite(sprite_name):tooltip({tooltip}))
     sprite.style.top_padding = -4
+    sprite.style.width = sprite_info_size
+    sprite.style.height = sprite_info_size
+    sprite.style.stretch_image_to_widget_size = true
   end
-  if type == "block" then
-    local sprite = GuiElement.add(button, GuiSprite("info"):sprite("helmod-tool-hangar"))
+  --- obselete
+  if false and type == "block" then
+    local sprite_name = GuiElement.getSprite(defines.sprite_info.block)
+    local sprite = GuiElement.add(button, GuiSprite("block"):sprite(sprite_name))
     sprite.style.top_padding = -2
     sprite.style.left_padding = 22
+    sprite.style.width = sprite_info_size
+    sprite.style.height = sprite_info_size
+    sprite.style.stretch_image_to_widget_size = true
     sprite.ignored_by_interaction = true
   end
   if type == "root_block" then
@@ -209,6 +243,9 @@ function GuiCell:add_infoIcon(button, info_icon)
     sprite.style.top_padding = -2
     sprite.style.left_padding = 22
     sprite.ignored_by_interaction = true
+    sprite.style.width = sprite_info_size
+    sprite.style.height = sprite_info_size
+    sprite.style.stretch_image_to_widget_size = true
   end
 end
 
@@ -218,14 +255,28 @@ end
 function GuiCell:add_contraintIcon(button)
   if self.m_contraint_icon == nil then return end
   if self.m_contraint_icon == "linked" then
-    local sprite = GuiElement.add(button, GuiSprite("contraint"):sprite("helmod-tool-arrow-up"))
-    sprite.style.left_padding = 22
+    local sprite_name = GuiElement.getSprite(defines.sprite_info.linked)
+    local sprite = GuiElement.add(button, GuiSprite("contraint"):sprite(sprite_name))
+    sprite.ignored_by_interaction = true
+    sprite.style.width = sprite_info_size
+    sprite.style.height = sprite_info_size
+    sprite.style.stretch_image_to_widget_size = true
   end
   if self.m_contraint_icon == "master" then
-    local sprite = GuiElement.add(button, GuiSprite("contraint"):sprite("helmod-tool-plus"))
+    local sprite_name = GuiElement.getSprite(defines.sprite_info.master)
+    local sprite = GuiElement.add(button, GuiSprite("contraint"):sprite(sprite_name))
+    sprite.style.width = sprite_info_size
+    sprite.style.height = sprite_info_size
+    sprite.style.stretch_image_to_widget_size = true
+    sprite.ignored_by_interaction = true
   end
   if self.m_contraint_icon == "exclude" then
-    local sprite = GuiElement.add(button, GuiSprite("contraint"):sprite("helmod-tool-minus"))
+    local sprite_name = GuiElement.getSprite(defines.sprite_info.exclude)
+    local sprite = GuiElement.add(button, GuiSprite("contraint"):sprite(sprite_name))
+    sprite.style.width = sprite_info_size
+    sprite.style.height = sprite_info_size
+    sprite.style.stretch_image_to_widget_size = true
+    sprite.ignored_by_interaction = true
   end
 end
 
@@ -481,7 +532,7 @@ function GuiCellBlock:create(parent)
     
     GuiElement.infoRecipe(button, first_recipe)
   else
-    local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", "help-white", "help"))
+    local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black))
     button.style.width = 36
   end
 
@@ -522,7 +573,7 @@ function GuiCellModel:create(parent)
     local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_block.type, first_block.name):tooltip(tooltip))
     --self:add_infoIcon(button, "root_block")
   else
-    local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", "help-white", "help"))
+    local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black))
     button.style.width = 36
   end
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
@@ -551,7 +602,7 @@ function GuiCellBlockInfo:create(parent)
   row1.style.bottom_padding=4
 
   local tooltip = GuiTooltipBlock(self.options.tooltip):element(element)
-  local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", "hangar-white", "hangar"):style("helmod_button_menu_flat"):tooltip(tooltip))
+  local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", defines.sprites.home.white, defines.sprites.home.black):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   if element.limit_count ~= nil then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_product", color, 2))
@@ -588,7 +639,7 @@ function GuiCellEnergy:create(parent)
   row1.style.bottom_padding=4
 
   local tooltip = GuiTooltipEnergyConsumption(self.options.tooltip):element(element)
-  local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", "energy-white", "energy"):style("helmod_button_menu_flat"):tooltip(tooltip))
+  local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", defines.sprites.event.white, defines.sprites.event.black):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element", color, 2))
@@ -624,7 +675,7 @@ function GuiCellPollution:create(parent)
   row1.style.bottom_padding=4
 
   local tooltip = GuiTooltipPollution(self.options.tooltip):element(element)
-  local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", "gas-mask-white", "gas-mask"):style("helmod_button_menu_flat"):tooltip(tooltip))
+  local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", defines.sprites.skull.white, defines.sprites.skull.black):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_product", color, 2))
@@ -660,7 +711,7 @@ function GuiCellBuilding:create(parent)
   row1.style.bottom_padding=4
 
   local tooltip = GuiTooltipBuilding(self.options.tooltip):element(element)
-  local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", "factory-white", "factory"):style("helmod_button_menu_flat"):tooltip(tooltip))
+  local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", defines.sprites.factory.white, defines.sprites.factory.black):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_product", color, 2))
@@ -846,7 +897,7 @@ function GuiCellInput:create(parent)
   table.insert(button_name, "validation")
   local cell = GuiElement.add(parent, GuiTable(unpack(cell_name)):column(2))
   local input = GuiElement.add(cell, GuiTextField(unpack(self.name)):text(self.m_text):tooltip({"tooltip.formula-allowed"}))
-  local button = GuiElement.add(cell, GuiButton(unpack(button_name)):sprite("menu", "ok-white", "ok"):style("helmod_button_menu"):tooltip({"helmod_button.apply"}))
+  local button = GuiElement.add(cell, GuiButton(unpack(button_name)):sprite("menu", defines.sprites.status_ok.white, defines.sprites.status_ok.black):style("helmod_button_menu"):tooltip({"helmod_button.apply"}))
   return cell, input, button
 end
 

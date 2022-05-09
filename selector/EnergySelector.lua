@@ -93,10 +93,9 @@ function EnergySelector:buildPrototypeTooltip(prototype)
   if table.size(products) > 0 then
     table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.products"}, ":", helmod_tag.color.close, helmod_tag.font.close})
     for _,product in pairs(products) do
-      if product.type == "energy" and product.name == "energy" then
-          table.insert(tooltip, {"", "\n", "[img=helmod-energy-white]", helmod_tag.font.default_bold, " x ", Format.formatNumberKilo(product.amount,"W"), helmod_tag.font.close})
-      elseif product.type == "energy" and product.name == "steam-heat" then
-          table.insert(tooltip, {"", "\n", "[img=helmod-steam-heat-white]", helmod_tag.font.default_bold, " x ", Format.formatNumberKilo(product.amount,"W"), helmod_tag.font.close})
+      if product.type == "energy" and defines.sprite_tooltips[product.name] ~= nil then
+        local sprite = GuiElement.getSprite(defines.sprite_tooltips[product.name])
+        table.insert(tooltip, {"", "\n", string.format("[img=%s]", sprite), helmod_tag.font.default_bold, " x ", Format.formatNumberKilo(product.amount,"W"), helmod_tag.font.close})
       elseif product.temperature then
         table.insert(tooltip, {"", "\n", string.format("[%s=%s]", product.type, product.name), helmod_tag.font.default_bold, string.format(" %s °C x ", product.temperature), Format.formatNumberElement(product.amount), helmod_tag.font.close})
       else
@@ -109,10 +108,9 @@ function EnergySelector:buildPrototypeTooltip(prototype)
   if table.size(ingredients) > 0 then
     table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.ingredients"}, ":", helmod_tag.color.close, helmod_tag.font.close})
     for _,ingredient in pairs(ingredients) do
-      if ingredient.type == "energy" and ingredient.name == "energy" then
-        table.insert(tooltip, {"", "\n", "[img=helmod-energy-white]", helmod_tag.font.default_bold, " x ", Format.formatNumberKilo(ingredient.amount,"W"), helmod_tag.font.close})
-      elseif ingredient.type == "energy" and ingredient.name == "steam-heat" then
-        table.insert(tooltip, {"", "\n", "[img=helmod-steam-heat-white]", helmod_tag.font.default_bold, " x ", Format.formatNumberKilo(ingredient.amount,"W"), helmod_tag.font.close})
+      if ingredient.type == "energy" and defines.sprite_tooltips[ingredient.name] ~= nil then
+        local sprite = GuiElement.getSprite(defines.sprite_tooltips[ingredient.name])
+        table.insert(tooltip, {"", "\n", string.format("[img=%s]", sprite), helmod_tag.font.default_bold, " x ", Format.formatNumberKilo(ingredient.amount,"W"), helmod_tag.font.close})
       elseif ingredient.temperature then
         table.insert(tooltip, {"", "\n", string.format("[%s=%s]", ingredient.type, ingredient.name), helmod_tag.font.default_bold, string.format(" %s °C x ", ingredient.temperature), Format.formatNumberElement(ingredient.amount), helmod_tag.font.close})
       else

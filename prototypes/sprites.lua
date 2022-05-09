@@ -109,72 +109,6 @@ function sprite_tooltip(name, size, scale)
   }
 end
 
-local list = {
-  {name="arrow-down", sm=true, tool=true},
-  {name="arrow-right", sm=true},
-  {name="arrow-up", sm=true, tool=true},
-  {name="arrow-left"},
-  {name="beacon-hide", sm=true},
-  {name="bug"},
-  {name="burnt", sm=true, tool=true},
-  {name="brief"},
-  {name="by_ingredient", sm=true},
-  {name="by_product", sm=true},
-  {name="calculator"},
-  {name="chart"},
-  {name="checkmark", sm=true},
-  {name="checkmark-hide", sm=true},
-  {name="clock"},
-  {name="close-window"},
-  {name="container"},
-  {name="copy"},
-  {name="database"},
-  {name="delete", sm=true},
-  {name="done"},
-  {name="download"},
-  {name="edit"},
-  {name="end", sm=true},
-  {name="energy"},
-  {name="erase", sm=true},
-  {name="factory", sm=true, tool=true},
-  {name="filter", sm=true},
-  {name="filter-edit"},
-  {name="graduation", sm=true, tool=true},
-  {name="gas-mask", sm=true},
-  {name="hangar", sm=true, tool=true},
-  {name="hangar-hide", sm=true},
-  {name="help"},
-  {name="info"},
-  {name="jewel", sm=true, tool=true},
-  {name="jewel-hide", sm=true},
-  {name="limitation", sm=true, tool=true},
-  {name="link", sm=true, tool=true},
-  {name="maximize-window"},
-  {name="menu"},
-  {name="minimize-window"},
-  {name="minus", sm=true, tool=true},
-  {name="nuclear", sm=true, tool=true},
-  {name="ok"},
-  {name="paste"},
-  {name="pause"},
-  {name="pin"},
-  {name="play", sm=true},
-  {name="plus", sm=true, tool=true},
-  {name="property"},
-  {name="record", sm=true},
-  {name="refresh", sm=true},
-  {name="robot"},
-  {name="save", sm=true},
-  {name="search"},
-  {name="services", sm=true},
-  {name="settings", sm=true},
-  {name="steam-heat"},
-  {name="text", sm=true},
-  {name="time"},
-  {name="unlink", sm=true},
-  {name="upload"},
-  {name="wrench"}
-}
 local spite_icons = {}
 
 table.insert(spite_icons, {
@@ -187,33 +121,28 @@ table.insert(spite_icons, {
   scale = 1
 })
 
-for icon_row,icon in pairs(list) do
-  table.insert(spite_icons, sprite_icon(icon.name, 32, 32))
-  table.insert(spite_icons, sprite_icon(icon.name, 32, 32, true))
-  if icon.sm then
-    table.insert(spite_icons, sprite_icon_sm(icon.name, 24, 24))
-    table.insert(spite_icons, sprite_icon_sm(icon.name, 24, 24, true))
-  end
-  if icon.tool then
-    table.insert(spite_icons, sprite_icon_tool(icon.name, 15, 15))
-  end
-end
-
 local list = {
   {name="alert1", size=16, scale=1},
-  {name="tooltip-add", size=24, scale=1},
-  {name="tooltip-remove", size=24, scale=1},
-  {name="tooltip-edit", size=48, scale=1},
-  {name="tooltip-energy", size=32, scale=1},
   {name="tooltip-blank", size=24, scale=1},
-  {name="tooltip-pipette", size=24, scale=1},
-  {name="tooltip-info", size=32, scale=1},
-  {name="tooltip-record", size=32, scale=1},
-  {name="tooltip-play", size=32, scale=1},
-  {name="tooltip-end", size=32, scale=1},
-  {name="tooltip-erase", size=32, scale=1}
 }
 for icon_row,icon in pairs(list) do
   table.insert(spite_icons, sprite_tooltip(icon.name, icon.size, icon.scale))
+end
+
+function sprite_mipmap(name, size, count)
+  local icon_name = "helmod-"..name
+  return {
+    type ="sprite",
+    name = icon_name,
+    filename = "__helmod__/graphics/icons/"..name..".png",
+    size = size,
+    mipmap_count = count,
+    flags = {"gui-icon"}
+  }
+end
+
+local mipmaps = require("prototypes.sprites_builded")
+for icon_row,icon in pairs(mipmaps) do
+  table.insert(spite_icons, sprite_mipmap(icon.name, icon.size, icon.count))
 end
 data:extend(spite_icons)

@@ -217,25 +217,34 @@ end
 function GuiTooltip:create()
   local tooltip = {""}
   if string.find(self.name[1], "edit[-]") then
-    table.insert(tooltip, {"", "[img=helmod-tooltip-edit]", " ", helmod_tag.color.yellow, helmod_tag.font.default_bold, self.name, helmod_tag.font.close, helmod_tag.color.close})
+    local sprite_name = GuiElement.getSprite(defines.sprite_tooltip.edit)
+    table.insert(tooltip, {"", string.format("[img=%s]", sprite_name), " ", helmod_tag.color.yellow, helmod_tag.font.default_bold, self.name, helmod_tag.font.close, helmod_tag.color.close})
   elseif string.find(self.name[1], "add[-]") then
-    table.insert(tooltip, {"", "[img=helmod-tooltip-add]", " ", helmod_tag.color.yellow, helmod_tag.font.default_bold, self.name, helmod_tag.font.close, helmod_tag.color.close})
+    local sprite_name = GuiElement.getSprite(defines.sprite_tooltip.add)
+    table.insert(tooltip, {"", string.format("[img=%s]", sprite_name), " ", helmod_tag.color.yellow, helmod_tag.font.default_bold, self.name, helmod_tag.font.close, helmod_tag.color.close})
   elseif string.find(self.name[1], "remove[-]") then
-    table.insert(tooltip, {"", "[img=helmod-tooltip-remove]", " ", helmod_tag.color.yellow, helmod_tag.font.default_bold, self.name, helmod_tag.font.close, helmod_tag.color.close})
+    local sprite_name = GuiElement.getSprite(defines.sprite_tooltip.remove)
+    table.insert(tooltip, {"", string.format("[img=%s]", sprite_name), " ", helmod_tag.color.yellow, helmod_tag.font.default_bold, self.name, helmod_tag.font.close, helmod_tag.color.close})
   elseif string.find(self.name[1], "info[-]") then
-    table.insert(tooltip, {"", "[img=helmod-tooltip-info]", " ", helmod_tag.color.white, helmod_tag.font.default_bold, self.name, helmod_tag.font.close, helmod_tag.color.close})
+    local sprite_name = GuiElement.getSprite(defines.sprite_tooltip.info)
+    table.insert(tooltip, {"", string.format("[img=%s]", sprite_name), " ", helmod_tag.color.white, helmod_tag.font.default_bold, self.name, helmod_tag.font.close, helmod_tag.color.close})
   elseif string.find(self.name[1], "set[-]default") then
-    table.insert(tooltip, {"", "[img=helmod-tooltip-record]", " ", helmod_tag.color.yellow, helmod_tag.font.default_bold, self.name, helmod_tag.font.close, helmod_tag.color.close})
+    local sprite_name = GuiElement.getSprite(defines.sprite_tooltip.favorite)
+    table.insert(tooltip, {"", string.format("[img=%s]", sprite_name), " ", helmod_tag.color.yellow, helmod_tag.font.default_bold, self.name, helmod_tag.font.close, helmod_tag.color.close})
   elseif string.find(self.name[1], "apply[-]block") then
+    local sprite_name = GuiElement.getSprite(defines.sprite_tooltip.expand_right)
     table.insert(self.name, {self.options.tooltip})
-    table.insert(tooltip, {"", "[img=helmod-tooltip-play]", " ", helmod_tag.color.yellow, helmod_tag.font.default_bold, self.name, helmod_tag.font.close, helmod_tag.color.close})
+    table.insert(tooltip, {"", string.format("[img=%s]", sprite_name), " ", helmod_tag.color.yellow, helmod_tag.font.default_bold, self.name, helmod_tag.font.close, helmod_tag.color.close})
   elseif string.find(self.name[1], "apply[-]line") then
+    local sprite_name = GuiElement.getSprite(defines.sprite_tooltip.expand_right_group)
     table.insert(self.name, {self.options.tooltip})
-    table.insert(tooltip, {"", "[img=helmod-tooltip-end]", " ", helmod_tag.color.yellow, helmod_tag.font.default_bold, self.name, helmod_tag.font.close, helmod_tag.color.close})
+    table.insert(tooltip, {"", string.format("[img=%s]", sprite_name), " ", helmod_tag.color.yellow, helmod_tag.font.default_bold, self.name, helmod_tag.font.close, helmod_tag.color.close})
   elseif string.find(self.name[1], "module[-]clear") then
-    table.insert(tooltip, {"", "[img=helmod-tooltip-erase]", " ", helmod_tag.color.yellow, helmod_tag.font.default_bold, self.name, helmod_tag.font.close, helmod_tag.color.close})
+    local sprite_name = GuiElement.getSprite(defines.sprite_tooltip.erase)
+    table.insert(tooltip, {"", string.format("[img=%s]", sprite_name), " ", helmod_tag.color.yellow, helmod_tag.font.default_bold, self.name, helmod_tag.font.close, helmod_tag.color.close})
   elseif string.find(self.name[1], "pipette") then
-    table.insert(tooltip, {"", "[img=helmod-tooltip-pipette]", " ", helmod_tag.color.yellow, helmod_tag.font.default_bold, self.name, helmod_tag.font.close, helmod_tag.color.close})
+    local sprite_name = GuiElement.getSprite(defines.sprite_tooltip.pipette)
+    table.insert(tooltip, {"", string.format("[img=%s]", sprite_name), " ", helmod_tag.color.yellow, helmod_tag.font.default_bold, self.name, helmod_tag.font.close, helmod_tag.color.close})
   else
     table.insert(tooltip, {"", "[img=helmod-tooltip-blank]", " ", helmod_tag.font.default_bold, self.name, helmod_tag.font.close})
   end
@@ -331,8 +340,9 @@ function GuiTooltipEnergy:create()
     local type = element.type
     if element == "resource" then type = "entity" end
     local element_icon = string.format("[%s=%s]", type, element.name)
-    if element.name == "energy" or element.name == "steam-heat" then
-      element_icon = string.format("[img=helmod-%s-white]", element.name)
+    if defines.sprite_tooltips[element.name] ~= nil then
+      local sprite = GuiElement.getSprite(defines.sprite_tooltips[element.name])
+      element_icon = string.format("[img=%s]", sprite)
     end
     table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=element.name}), helmod_tag.font.close, helmod_tag.color.close})
     ---quantity

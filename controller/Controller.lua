@@ -213,7 +213,7 @@ function Controller:bindController(player)
       if lua_gui_element["helmod_planner-command"] ~= nil then lua_gui_element["helmod_planner-command"].destroy() end
     end
     if lua_gui_element ~= nil and lua_gui_element["helmod_planner-command"] == nil and User.getModSetting("display_main_icon") then
-      local gui_button = GuiElement.add(lua_gui_element, GuiButton("helmod_planner-command"):sprite("menu", "calculator-white", "calculator"):style("helmod_button_menu_dark"):tooltip({"helmod_planner-command"}))
+      local gui_button = GuiElement.add(lua_gui_element, GuiButton("helmod_planner-command"):sprite("menu", defines.sprites.calculator.white, defines.sprites.calculator.black):style("helmod_button_menu_dark"):tooltip({"helmod_planner-command"}))
       gui_button.style.width = 37
       gui_button.style.height = 37
     end

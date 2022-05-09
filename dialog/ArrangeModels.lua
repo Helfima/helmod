@@ -72,7 +72,7 @@ function ArrangeModels:addModelFrame(index, model)
   if element ~= nil then
     button = GuiElement.add(grip, GuiButtonSelectSprite(self.classname, "move-flow", model.id):sprite(element.type, element.name):tooltip(tooltip):color())
   else
-    button = GuiElement.add(grip, GuiButton(self.classname, "move-flow", model.id):sprite("menu", "help", "help"):style("helmod_button_menu"))
+    button = GuiElement.add(grip, GuiButton(self.classname, "move-flow", model.id):sprite("menu", defines.sprites.status_help.black, defines.sprites.status_help.black):style("helmod_button_menu"))
     button.style.width = 36
     --button.style.height = 36
   end

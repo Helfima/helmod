@@ -29,7 +29,7 @@ end
 ---Get Button Sprites
 ---@return string, string
 function RecipeExplorer:getButtonSprites()
-  return "search-white","search"
+  return defines.sprites.search.white, defines.sprites.search.black
 end
 
 -------------------------------------------------------------------------------
@@ -68,7 +68,7 @@ function RecipeExplorer:updateHeader(event)
   local action_panel, _ = self:getMenuPanel()
   action_panel.clear()
   local group1 = GuiElement.add(action_panel, GuiFlowH("group1"))
-  GuiElement.add(group1, GuiButton(self.classname, "open-recipe-selector", self.classname):sprite("menu", "wrench", "wrench"):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-recipe"}))
+  GuiElement.add(group1, GuiButton(self.classname, "open-recipe-selector", self.classname):sprite("menu", defines.sprites.script.black, defines.sprites.script.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-recipe"}))
 end
 
 -------------------------------------------------------------------------------

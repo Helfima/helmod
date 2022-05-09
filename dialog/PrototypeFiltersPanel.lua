@@ -91,7 +91,7 @@ end
 ---Get Button Sprites
 ---@return string, string
 function PrototypeFiltersPanel:getButtonSprites()
-  return "filter-edit-white","filter-edit"
+  return defines.sprites.database_method.white,defines.sprites.database_method.black
 end
 
 -------------------------------------------------------------------------------
@@ -340,7 +340,7 @@ function PrototypeFiltersPanel:addRowFilter(itable, prototype_filter, index)
   if index == 0 then
     GuiElement.add(itable, GuiButton(self.classname, "add-prototype-filter", index):caption("+"):style("helmod_button_small_bold"))
   else
-    GuiElement.add(itable, GuiButton(self.classname, "remove-prototype-filter", index):sprite("menu", "delete-white-sm", "delete-sm"):style("helmod_button_menu_sm_red"))
+    GuiElement.add(itable, GuiButton(self.classname, "remove-prototype-filter", index):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"))
   end
 end
 

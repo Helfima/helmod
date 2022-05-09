@@ -24,7 +24,7 @@ end
 ---Get Button Sprites
 ---@return string, string
 function Calculator:getButtonSprites()
-  return "calculator-white","calculator"
+  return defines.sprites.calculator.white,defines.sprites.calculator.black
 end
 
 -------------------------------------------------------------------------------

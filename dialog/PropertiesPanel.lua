@@ -23,7 +23,7 @@ end
 ---Get Button Sprites
 ---@return string, string
 function PropertiesPanel:getButtonSprites()
-  return "property-white","property"
+  return defines.sprites.database_schema.white,defines.sprites.database_schema.black
 end
 
 -------------------------------------------------------------------------------

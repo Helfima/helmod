@@ -1,3 +1,32 @@
+require "core.defines_builded"
+
+defines.sprite_tooltips = {}
+defines.sprite_tooltips["energy"] = defines.sprites.event.white
+defines.sprite_tooltips["steam-heat"] = defines.sprites.steam_heat.white
+
+defines.sprite_info = {}
+--- sprite info
+defines.sprite_info["developer"] = "developer"
+defines.sprite_info["education"] = defines.sprites.info_education.blue
+defines.sprite_info["burnt"] = defines.sprites.info_fire.blue
+defines.sprite_info["block"] = defines.sprites.home.white
+defines.sprite_info["energy"] = defines.sprites.info_energy.blue
+--- sprite contraint
+defines.sprite_info["linked"] = defines.sprites.info_arrow_top.red
+defines.sprite_info["master"] = defines.sprites.info_add.red
+defines.sprite_info["exclude"] = defines.sprites.info_remove.red
+
+defines.sprite_tooltip = {}
+defines.sprite_tooltip["info"] = defines.sprites.tooltip_information.white
+defines.sprite_tooltip["edit"] = defines.sprites.tooltip_edit.yellow
+defines.sprite_tooltip["add"] = defines.sprites.tooltip_add.yellow
+defines.sprite_tooltip["remove"] = defines.sprites.tooltip_remove.yellow
+defines.sprite_tooltip["erase"] = defines.sprites.tooltip_erase.yellow
+defines.sprite_tooltip["favorite"] = defines.sprites.tooltip_favorite.yellow
+defines.sprite_tooltip["expand_right"] = defines.sprites.tooltip_expand_right.yellow
+defines.sprite_tooltip["expand_right_group"] = defines.sprites.tooltip_expand_right_group.yellow
+defines.sprite_tooltip["pipette"] = defines.sprites.tooltip_pipette.yellow
+
 helmod_constant = {
   max_float = 1e300
 }

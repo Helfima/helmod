@@ -13,7 +13,7 @@ end
 ---Get Button Sprites
 ---@return string, string
 function StatisticPanel:getButtonSprites()
-  return "chart-white","chart"
+  return defines.sprites.column_chart.white,defines.sprites.column_chart.black
 end
 
 -------------------------------------------------------------------------------

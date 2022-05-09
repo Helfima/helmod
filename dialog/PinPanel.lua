@@ -50,10 +50,10 @@ function PinPanel:onUpdate(event)
 end
 
 local setting_options = {}
-table.insert(setting_options, {name="done", icon="checkmark-hide", icon_white="checkmark-hide-white", tooltip="tooltip.hide-show-done", column=0})
-table.insert(setting_options, {name="machine", icon="hangar-hide", icon_white="hangar-hide-white", tooltip="tooltip.hide-show-factory", column=1})
-table.insert(setting_options, {name="product", icon="jewel-hide", icon_white="jewel-hide-white", tooltip="tooltip.hide-show-product", column=2})
-table.insert(setting_options, {name="beacon", icon="beacon-hide", icon_white="beacon-hide-white", tooltip="tooltip.hide-show-beacon", column=1})
+table.insert(setting_options, {name="done", icon=defines.sprites.status_ok.white, icon_white=defines.sprites.status_ok.black, tooltip="tooltip.hide-show-done", column=0})
+table.insert(setting_options, {name="machine", icon=defines.sprites.factory.white, icon_white=defines.sprites.factory.black, tooltip="tooltip.hide-show-factory", column=1})
+table.insert(setting_options, {name="product", icon=defines.sprites.jewel.white, icon_white=defines.sprites.jewel.black, tooltip="tooltip.hide-show-product", column=2})
+table.insert(setting_options, {name="beacon", icon=defines.sprites.beacon.white, icon_white=defines.sprites.beacon.black, tooltip="tooltip.hide-show-beacon", column=1})
 
 -------------------------------------------------------------------------------
 ---Update header
@@ -69,21 +69,21 @@ function PinPanel:updateHeader(event)
     local setting_name = string.format("pin_panel_column_hide_%s", setting_option.name)
     local setting_value = User.getSetting(setting_name)
     if setting_value == true then
-      GuiElement.add(group1, GuiButton(self.classname, "change-hide", setting_option.name):sprite("menu", setting_option.icon_white, setting_option.icon):style("helmod_button_menu_selected"):tooltip({setting_option.tooltip}))
+      GuiElement.add(group1, GuiButton(self.classname, "change-hide", setting_option.name):sprite("menu", setting_option.icon_white, setting_option.icon):style("helmod_button_menu"):tooltip({setting_option.tooltip}))
     else
-      GuiElement.add(group1, GuiButton(self.classname, "change-hide", setting_option.name):sprite("menu", setting_option.icon, setting_option.icon):style("helmod_button_menu"):tooltip({setting_option.tooltip}))
+      GuiElement.add(group1, GuiButton(self.classname, "change-hide", setting_option.name):sprite("menu", setting_option.icon, setting_option.icon):style("helmod_button_menu_selected"):tooltip({setting_option.tooltip}))
     end
   end
 
   local group2 = GuiElement.add(action_panel, GuiFlowH("group2"))
-  GuiElement.add(group2, GuiButton(self.classname, "recipe-done-remove"):sprite("menu", "checkmark","checkmark"):style("helmod_button_menu_actived_red"):tooltip({"helmod_button.remove-done"}))
+  GuiElement.add(group2, GuiButton(self.classname, "recipe-done-remove"):sprite("menu", defines.sprites.checkmark.black,defines.sprites.checkmark.black):style("helmod_button_menu_actived_red"):tooltip({"helmod_button.remove-done"}))
 
   local parameter_objects = User.getParameter(self.parameter_objects)
   local group3 = GuiElement.add(action_panel, GuiFlowH("group3"))
-  GuiElement.add(group3, GuiButton("HMSummaryPanel", "OPEN", parameter_objects.model, parameter_objects.block):sprite("menu", "brief","brief"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
+  GuiElement.add(group3, GuiButton("HMSummaryPanel", "OPEN", parameter_objects.model, parameter_objects.block):sprite("menu", defines.sprites.list_view.black, defines.sprites.list_view.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
 
   local group4 = GuiElement.add(action_panel, GuiFlowH("group4"))
-  GuiElement.add(group4, GuiButton("HMProductionPanel", "OPEN", parameter_objects.model, parameter_objects.block):sprite("menu", "factory","factory"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-production-block"}))
+  GuiElement.add(group4, GuiButton("HMProductionPanel", "OPEN", parameter_objects.model, parameter_objects.block):sprite("menu", defines.sprites.home.black,defines.sprites.home.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-production-block"}))
 end
 
 -------------------------------------------------------------------------------
@@ -163,9 +163,9 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
 
   ---col done
   if is_done == true then
-    GuiElement.add(gui_table, GuiButton(self.classname, "recipe-done", recipe.id):sprite("menu", "done-white", "done"):style("helmod_button_menu_selected_green"):tooltip({"helmod_button.done"}))
+    GuiElement.add(gui_table, GuiButton(self.classname, "recipe-done", recipe.id):sprite("menu", defines.sprites.status_ok.black, defines.sprites.status_ok.black):style("helmod_button_menu_selected_green"):tooltip({"helmod_button.done"}))
   else
-    GuiElement.add(gui_table, GuiButton(self.classname, "recipe-done", recipe.id):sprite("menu", "checkmark", "checkmark"):style("helmod_button_menu_actived_green"):tooltip({"helmod_button.done"}))
+    GuiElement.add(gui_table, GuiButton(self.classname, "recipe-done", recipe.id):sprite("menu", defines.sprites.checkmark.black, defines.sprites.checkmark.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_button.done"}))
   end
   ---col recipe
   local cell_recipe = GuiElement.add(gui_table, GuiFrameH("recipe", recipe.id):style(helmod_frame_style.hidden))

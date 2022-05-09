@@ -415,13 +415,13 @@ function Form:updateTopMenu(event)
       if string.find(self.classname, "HMProductionPanel") then
         local group3 = GuiElement.add(menu_panel, GuiFlowH("group3"))
         if game.is_multiplayer() and not(game.tick_paused) then
-          local pause_button = GuiElement.add(group3, GuiButton("do-nothing"):sprite("menu", "play-white", "play"):style("helmod_frame_button"):tooltip({"helmod_button.game-play-multiplayer"}))
+          local pause_button = GuiElement.add(group3, GuiButton("do-nothing"):sprite("menu", defines.sprites.run.white, defines.sprites.run.black):style("helmod_frame_button"):tooltip({"helmod_button.game-play-multiplayer"}))
           pause_button.enabled = false
         else
           if game.tick_paused then
-            GuiElement.add(group3, GuiButton(self.classname, "game-play"):sprite("menu", "pause", "pause"):style("helmod_frame_button_actived_red"):tooltip({"helmod_button.game-pause"}))
+            GuiElement.add(group3, GuiButton(self.classname, "game-play"):sprite("menu", defines.sprites.pause.black, defines.sprites.pause.black):style("helmod_frame_button_actived_red"):tooltip({"helmod_button.game-pause"}))
           else
-            GuiElement.add(group3, GuiButton(self.classname, "game-pause"):sprite("menu", "play-white", "play"):style("helmod_frame_button"):tooltip({"helmod_button.game-play"}))
+            GuiElement.add(group3, GuiButton(self.classname, "game-pause"):sprite("menu", defines.sprites.run.white, defines.sprites.run.black):style("helmod_frame_button"):tooltip({"helmod_button.game-play"}))
           end
         end
       end
@@ -446,11 +446,11 @@ function Form:updateTopMenu(event)
       ---Standard group
       local standard_group = GuiElement.add(menu_panel, GuiFlowH("standard_group"))
       if self.help_button then
-        GuiElement.add(standard_group, GuiButton("HMHelpPanel", "OPEN"):sprite("menu", "help-white", "help"):style("helmod_frame_button"):tooltip({"helmod_button.help"}))
+        GuiElement.add(standard_group, GuiButton("HMHelpPanel", "OPEN"):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black):style("helmod_frame_button"):tooltip({"helmod_button.help"}))
       end
-      GuiElement.add(standard_group, GuiButton(self.classname, "minimize-window"):sprite("menu", "minimize-window-white", "minimize-window"):style("helmod_frame_button"):tooltip({"helmod_button.minimize"}))
-      GuiElement.add(standard_group, GuiButton(self.classname, "maximize-window"):sprite("menu", "maximize-window-white", "maximize-window"):style("helmod_frame_button"):tooltip({"helmod_button.maximize"}))
-      GuiElement.add(standard_group, GuiButton(self.classname, "CLOSE"):sprite("menu", "close-window-white", "close-window"):style("helmod_frame_button"):tooltip({"helmod_button.close"}))
+      GuiElement.add(standard_group, GuiButton(self.classname, "minimize-window"):sprite("menu", defines.sprites.minimize.white, defines.sprites.minimize.black):style("helmod_frame_button"):tooltip({"helmod_button.minimize"}))
+      GuiElement.add(standard_group, GuiButton(self.classname, "maximize-window"):sprite("menu", defines.sprites.maximize.white, defines.sprites.maximize.black):style("helmod_frame_button"):tooltip({"helmod_button.maximize"}))
+      GuiElement.add(standard_group, GuiButton(self.classname, "CLOSE"):sprite("menu", defines.sprites.close.white, defines.sprites.close.black):style("helmod_frame_button"):tooltip({"helmod_button.close"}))
     end
   else
     Logging:warn(self.classname, "self.panelCaption not found")

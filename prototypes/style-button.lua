@@ -132,7 +132,7 @@ function menuButtonIcon(name, icon_row, icon_col, size, suffix, font, default_fo
     font = font or "helmod_font_normal",
     default_font_color=default_font_color,
     horizontal_align = "center",
-    padding = -4,
+    padding = -2,
     width = size,
     height = size,
     scalable = false,
@@ -225,7 +225,7 @@ default_gui["helmod_frame_button"] = {
   type = "button_style",
   parent = "frame_action_button",
   size = 32,
-  padding = -4,
+  padding = -2,
 }
 default_gui["helmod_frame_button_selected"] = {
   type = "button_style",

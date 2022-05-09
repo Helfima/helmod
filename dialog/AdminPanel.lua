@@ -28,7 +28,7 @@ end
 ---Get Button Sprites
 ---@return string,string
 function AdminPanel:getButtonSprites()
-  return "database-white","database"
+  return defines.sprites.database_settings.white,defines.sprites.database_settings.black
 end
 
 -------------------------------------------------------------------------------
@@ -233,7 +233,7 @@ function AdminPanel:updateCache()
   scroll_panel.clear()
 
   GuiElement.add(scroll_panel, GuiLabel("warning"):caption({"", helmod_tag.color.orange, helmod_tag.font.default_large_bold, "Do not use this panel, unless absolutely necessary", helmod_tag.font.close, helmod_tag.color.close}))
-  GuiElement.add(scroll_panel, GuiButton(self.classname, "generate-cache"):sprite("menu", "settings", "settings"):style("helmod_button_menu_sm_red"):tooltip("Generate missing cache"))
+  GuiElement.add(scroll_panel, GuiButton(self.classname, "generate-cache"):sprite("menu", defines.sprites.process.black, defines.sprites.process.black):style("helmod_button_menu_sm_red"):tooltip("Generate missing cache"))
   
   local table_panel = GuiElement.add(scroll_panel, GuiTable("list-table"):column(2))
   table_panel.vertical_centering = false
@@ -384,8 +384,8 @@ function AdminPanel:addCacheListRow(gui_table, class_name, key1, key2, key3, key
   local cell_action = GuiElement.add(gui_table, GuiTable("action", string.format("%s-%s-%s-%s", key1, key2, key3, key4)):column(4))
   if key2 == nil and key3 == nil and key4 == nil then
     if class_name ~= "users" then
-      GuiElement.add(cell_action, GuiButton(self.classname, "delete-cache", class_name, key1):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"helmod_button.remove"}))
-      GuiElement.add(cell_action, GuiButton(self.classname, "refresh-cache", class_name, key1):sprite("menu", "refresh-sm", "refresh-sm"):style("helmod_button_menu_sm_red"):tooltip({"helmod_button.refresh"}))
+      GuiElement.add(cell_action, GuiButton(self.classname, "delete-cache", class_name, key1):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"):tooltip({"helmod_button.remove"}))
+      GuiElement.add(cell_action, GuiButton(self.classname, "refresh-cache", class_name, key1):sprite("menu", defines.sprites.refresh.black, defines.sprites.refresh.black):style("helmod_button_menu_sm_red"):tooltip({"helmod_button.refresh"}))
       ---col class
       GuiElement.add(gui_table, GuiLabel("class", key1):caption({"", helmod_tag.color.orange, helmod_tag.font.default_large_bold, string.format("%s", key1), "[/font]", helmod_tag.color.close}))
     else
@@ -397,7 +397,7 @@ function AdminPanel:addCacheListRow(gui_table, class_name, key1, key2, key3, key
     GuiElement.add(gui_table, GuiLabel("total", key1):caption({"", helmod_tag.font.default_semibold, caption, "[/font]"}))
   elseif key3 == nil and key4 == nil then
     if class_name == "users" and (key2 == "translated" or key2 == "cache") then
-      GuiElement.add(cell_action, GuiButton(self.classname, "delete-cache", class_name, key1, key2):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
+      GuiElement.add(cell_action, GuiButton(self.classname, "delete-cache", class_name, key1, key2):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
       ---col class
       GuiElement.add(gui_table, GuiLabel("class", key1, key2):caption({"", helmod_tag.color.orange, helmod_tag.font.default_bold, "|-" , key2, "[/font]", helmod_tag.color.close}))
     else
@@ -409,7 +409,7 @@ function AdminPanel:addCacheListRow(gui_table, class_name, key1, key2, key3, key
     GuiElement.add(gui_table, GuiLabel("total", key1, key2):caption({"", helmod_tag.font.default_semibold, caption, "[/font]"}))
   elseif key4 == nil then
     if class_name == "users" then
-      GuiElement.add(cell_action, GuiButton(self.classname, "delete-cache", class_name, key1, key2, key3):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
+      GuiElement.add(cell_action, GuiButton(self.classname, "delete-cache", class_name, key1, key2, key3):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
       ---col class
       GuiElement.add(gui_table, GuiLabel("class", key1, key2, key3):caption({"", helmod_tag.color.orange, helmod_tag.font.default_bold, "|\t\t\t|-" , key3, "[/font]", helmod_tag.color.close}))
     else
@@ -452,7 +452,7 @@ end
 function AdminPanel:addRuleListRow(gui_table, rule, rule_id)
   ---col action
   local cell_action = GuiElement.add(gui_table, GuiTable("action", rule_id):column(4))
-  GuiElement.add(cell_action, GuiButton(self.classname, "rule-remove", rule_id):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
+  GuiElement.add(cell_action, GuiButton(self.classname, "rule-remove", rule_id):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
 
   ---col index
   GuiElement.add(gui_table, GuiLabel("index", rule_id):caption(rule.index))
@@ -521,7 +521,7 @@ function AdminPanel:addSheetListRow(gui_table, model)
   if element ~= nil then
     GuiElement.add(cell_element, GuiButtonSprite(self.classname, "donothing", model.id):sprite("recipe", element.name):tooltip(RecipePrototype(element):getLocalisedName()))
   else
-    GuiElement.add(cell_element, GuiButton(self.classname, "donothing", model.id):sprite("menu", "help-white", "help"):style("helmod_button_menu_selected"))
+    GuiElement.add(cell_element, GuiButton(self.classname, "donothing", model.id):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black):style("helmod_button_menu_selected"))
   end
 
 end

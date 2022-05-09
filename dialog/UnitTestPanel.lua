@@ -22,7 +22,7 @@ end
 ---Get Button Sprites
 ---@return boolean
 function UnitTestPanel:getButtonSprites()
-  return "ok-white","ok"
+  return defines.sprites.database_test.white,defines.sprites.database_test.black
 end
 
 -------------------------------------------------------------------------------
@@ -70,10 +70,17 @@ function UnitTestPanel:getTab(panel_name, caption)
 end
 
 -------------------------------------------------------------------------------
----Get or create cache tab panel
+---Get or create energy tab panel
 ---@return LuaGuiElement
 function UnitTestPanel:getEnergyTab()
   return self:getTab("energy-tab-panel", {"helmod_unittest.energy-title"})
+end
+
+-------------------------------------------------------------------------------
+---Get or create sprite tab panel
+---@return LuaGuiElement
+function UnitTestPanel:getSpriteTab()
+  return self:getTab("sprite-tab-panel", {"helmod_unittest.sprite-title"})
 end
 
 -------------------------------------------------------------------------------
@@ -105,6 +112,7 @@ function UnitTestPanel:onUpdate(event)
   end
   self:updateMenu()
   self:updateEnergy()
+  self:updateSprite()
 end
 
 -------------------------------------------------------------------------------
@@ -113,7 +121,22 @@ function UnitTestPanel:updateMenu()
   local menu_panel = self:getMenuPanel()
   ---pin info
   local group1 = GuiElement.add(menu_panel, GuiFlowH("group1"))
-  GuiElement.add(group1, GuiButton("HMUnitTestPanel", "reload-script"):sprite("menu", "refresh", "refresh"):style("helmod_button_menu"):tooltip("Reload script"))
+  GuiElement.add(group1, GuiButton("HMUnitTestPanel", "reload-script"):sprite("menu", defines.sprites.refresh.black, defines.sprites.refresh.black):style("helmod_button_menu"):tooltip("Reload script"))
+end
+
+-------------------------------------------------------------------------------
+---Update energy
+function UnitTestPanel:updateSprite()
+  local tab_panel = self:getSpriteTab()
+  local table_panel = GuiElement.add(tab_panel, GuiTable("list-table"):column(2))
+  for sprite_name, sprites in pairs(defines.sprites) do
+    local col1 = GuiElement.add(table_panel, GuiFrameH("info", sprite_name):style(helmod_frame_style.hidden))
+    GuiElement.add(col1, GuiLabel("label"):caption(sprite_name))
+    local col2 = GuiElement.add(table_panel, GuiFrameH("buttons", sprite_name):style(helmod_frame_style.hidden))
+    for color_name, sprite in pairs(sprites) do
+      GuiElement.add(col2, GuiButton("do_noting", sprite_name, color_name):sprite("menu", sprite, sprite):style("helmod_button_menu"):tooltip(string.format("defines.sprites.%s.%s", sprite_name, color_name)))
+    end
+  end
 end
 
 -------------------------------------------------------------------------------

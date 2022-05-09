@@ -22,8 +22,8 @@ function GuiButton:sprite(type, name, hovered)
     if hovered then
       self.options.hovered_sprite = GuiElement.getSprite(hovered)
     end
-  elseif type == "energy" and (name == "energy" or name == "steam-heat") then
-    self.options.sprite = GuiElement.getSprite(string.format("%s-white", name))
+  elseif type == "energy" and defines.sprite_tooltips[name] ~= nil then
+    self.options.sprite = GuiElement.getSprite(defines.sprite_tooltips[name])
     if hovered then
       self.options.hovered_sprite = GuiElement.getSprite(hovered)
     end

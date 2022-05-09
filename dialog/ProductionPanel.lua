@@ -254,6 +254,7 @@ function ProductionPanel:updateIndexPanel(model)
   index_panel.style.padding = 2
   index_panel.clear()
   local table_index = GuiElement.add(index_panel, GuiTable("table_index"):column(GuiElement.getIndexColumnNumber()):style("helmod_table_list"))
+  GuiElement.add(table_index, GuiButton(self.classname, "new-model"):sprite("menu", defines.sprites.add_table.black, defines.sprites.add_table.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_button.add-production-line"}))
   if table.size(models) > 0 then
     local i = 0
     for _,imodel in pairs(models) do
@@ -268,7 +269,7 @@ function ProductionPanel:updateIndexPanel(model)
           button.style.height = 36
           button.style.padding = {-2,-2,-2,-2}
         else
-          local button = GuiElement.add(table_index, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", "help-white", "help"):style("helmod_button_menu_selected"))
+          local button = GuiElement.add(table_index, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black):style("helmod_button_menu_selected"))
           button.style.width = 36
           --button.style.height = 36
         end
@@ -277,7 +278,7 @@ function ProductionPanel:updateIndexPanel(model)
           local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
           GuiElement.add(table_index, GuiButtonSelectSprite(self.classname, "change-model", imodel.id):sprite(element.type, element.name):tooltip(tooltip):color())
         else
-          local button = GuiElement.add(table_index, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", "help", "help"):style("helmod_button_menu"))
+          local button = GuiElement.add(table_index, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", defines.sprites.status_help.black, defines.sprites.status_help.black):style("helmod_button_menu"))
           button.style.width = 36
           --button.style.height = 36
         end
@@ -285,7 +286,6 @@ function ProductionPanel:updateIndexPanel(model)
 
     end
   end
-  GuiElement.add(table_index, GuiButton(self.classname, "new-model"):sprite("menu", "plus", "plus"):style("helmod_button_menu_green"):tooltip({"helmod_button.add-production-line"}))
   --GuiElement.add(table_index, GuiButton("HMArrangeModels", "OPEN"):sprite("menu", "menu", "menu"):style("helmod_button_menu"):tooltip({"helmod_button.add-production-line"}))
 end
 
@@ -314,15 +314,15 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
   group_selector.style.horizontal_spacing = button_spacing
   local block_id = "new"
   if block ~= nil then block_id = block.id end
-  GuiElement.add(group_selector, GuiButton("HMRecipeSelector", "OPEN", model.id, block_id):sprite("menu", "wrench", "wrench"):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-recipe"}))
-  GuiElement.add(group_selector, GuiButton("HMTechnologySelector", "OPEN", model.id, block_id):sprite("menu", "graduation", "graduation"):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-technology"}))
-  GuiElement.add(group_selector, GuiButton("HMEnergySelector", "OPEN", model.id, block_id):sprite("menu", "nuclear","nuclear"):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.select-button-energy"}))
+  GuiElement.add(group_selector, GuiButton("HMRecipeSelector", "OPEN", model.id, block_id):sprite("menu", defines.sprites.script.black, defines.sprites.script.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-recipe"}))
+  GuiElement.add(group_selector, GuiButton("HMTechnologySelector", "OPEN", model.id, block_id):sprite("menu", defines.sprites.education.black, defines.sprites.education.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-technology"}))
+  GuiElement.add(group_selector, GuiButton("HMEnergySelector", "OPEN", model.id, block_id):sprite("menu", defines.sprites.event.black, defines.sprites.event.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.select-button-energy"}))
 
   ---delete button
   local group_delete = GuiElement.add(left_panel, GuiFlowH("group_delete"))
   local delete_action = "remove-block"
   if block == nil then delete_action = "remove-model" end
-  local delete_button = GuiElement.add(group_delete, GuiButton(self.classname, delete_action, model.id, block_id):sprite("menu", "delete", "delete"):style("helmod_button_menu_actived_red"):tooltip({"helmod_result-panel.remove-button-production-block"}))
+  local delete_button = GuiElement.add(group_delete, GuiButton(self.classname, delete_action, model.id, block_id):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_actived_red"):tooltip({"helmod_result-panel.remove-button-production-block"}))
   if not(User.isDeleter(model)) then
       delete_button.enabled = false
   end
@@ -331,21 +331,21 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
   if User.getModGlobalSetting("debug_solver") == true then
     local group_debug = GuiElement.add(left_panel, GuiFlowH("group_debug"))
     group_debug.style.horizontal_spacing = button_spacing
-    GuiElement.add(group_debug, GuiButton("HMModelDebug", "OPEN", model.id, block_id):sprite("menu", "bug", "bug"):style("helmod_button_menu"):tooltip("Open Debug"))
+    GuiElement.add(group_debug, GuiButton("HMModelDebug", "OPEN", model.id, block_id):sprite("menu", defines.sprites.run_test.black, defines.sprites.run_test.black):style("helmod_button_menu"):tooltip("Open Debug"))
   end
 
   ---group tool
   local group_tool = GuiElement.add(left_panel, GuiFlowH("group_tool"))
   group_tool.style.horizontal_spacing = button_spacing
-  GuiElement.add(group_tool, GuiButton("HMSummaryPanel", "OPEN", model.id, block_id):sprite("menu", "brief","brief"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
+  GuiElement.add(group_tool, GuiButton("HMSummaryPanel", "OPEN", model.id, block_id):sprite("menu", defines.sprites.list_view.black,defines.sprites.list_view.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
   if block ~= nil then
     ---unlinked button
     local linked_button
     local unlinked = block.unlinked and true or false
     if unlinked or block.index == 0 then
-      linked_button = GuiElement.add(group_tool, GuiButton(self.classname, "production-block-unlink", model.id, block.id):sprite("menu", "unlink", "unlink"):style("helmod_button_menu"):tooltip({"tooltip.unlink-element"}))
+      linked_button = GuiElement.add(group_tool, GuiButton(self.classname, "production-block-unlink", model.id, block.id):sprite("menu", defines.sprites.unplugged.black, defines.sprites.unplugged.black):style("helmod_button_menu"):tooltip({"tooltip.unlink-element"}))
     else
-      linked_button = GuiElement.add(group_tool, GuiButton(self.classname, "production-block-unlink", model.id, block.id):sprite("menu", "link-white", "link"):style("helmod_button_menu_selected"):tooltip({"tooltip.unlink-element"}))
+      linked_button = GuiElement.add(group_tool, GuiButton(self.classname, "production-block-unlink", model.id, block.id):sprite("menu", defines.sprites.plugged.white, defines.sprites.plugged.black):style("helmod_button_menu_selected"):tooltip({"tooltip.unlink-element"}))
     end
     if block.index == 0 then
       linked_button.enabled = false
@@ -356,20 +356,20 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
       linked_button.tooltip = {"tooltip.block-cannot-link-by-factory"}
     end
 
-    GuiElement.add(group_tool, GuiButton("HMPinPanel", "OPEN", model.id, block_id):sprite("menu", "pin", "pin"):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
+    GuiElement.add(group_tool, GuiButton("HMPinPanel", "OPEN", model.id, block_id):sprite("menu", defines.sprites.push_pin.black, defines.sprites.push_pin.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
     
     ---by limit
     if block.by_limit == true then
-      GuiElement.add(group_tool, GuiButton(self.classname, "block-limit", model.id, block_id):sprite("menu", "limitation-white", "limitation"):style("helmod_button_menu_selected"):tooltip({"helmod_label.assembler-limitation"}))
+      GuiElement.add(group_tool, GuiButton(self.classname, "block-limit", model.id, block_id):sprite("menu", defines.sprites.gauge_round.white, defines.sprites.gauge_round.black):style("helmod_button_menu_selected"):tooltip({"helmod_label.assembler-limitation"}))
     else
-      GuiElement.add(group_tool, GuiButton(self.classname, "block-limit", model.id, block_id):sprite("menu", "limitation", "limitation"):style("helmod_button_menu"):tooltip({"helmod_label.assembler-limitation"}))
+      GuiElement.add(group_tool, GuiButton(self.classname, "block-limit", model.id, block_id):sprite("menu", defines.sprites.gauge_round.black, defines.sprites.gauge_round.black):style("helmod_button_menu"):tooltip({"helmod_label.assembler-limitation"}))
     end
 
     ---by product
     if block.by_product == false then
-      GuiElement.add(group_tool, GuiButton(self.classname, "block-by-product", model.id, block_id):sprite("menu", "by_ingredient-white", "by_ingredient"):style("helmod_button_menu_selected"):tooltip({"helmod_label.input-product"}))
+      GuiElement.add(group_tool, GuiButton(self.classname, "block-by-product", model.id, block_id):sprite("menu", defines.sprites.graph_bottom_to_top.white, defines.sprites.graph_bottom_to_top.black):style("helmod_button_menu_selected"):tooltip({"helmod_label.input-product"}))
     else
-      GuiElement.add(group_tool, GuiButton(self.classname, "block-by-product", model.id, block_id):sprite("menu", "by_product", "by_product"):style("helmod_button_menu"):tooltip({"helmod_label.input-ingredient"}))
+      GuiElement.add(group_tool, GuiButton(self.classname, "block-by-product", model.id, block_id):sprite("menu", defines.sprites.graph_top_to_bottom.black, defines.sprites.graph_top_to_bottom.black):style("helmod_button_menu"):tooltip({"helmod_label.input-ingredient"}))
     end
 
 
@@ -439,25 +439,25 @@ function ProductionPanel:updateSubMenuRightPanel(model, block)
   local group_pref = GuiElement.add(right_panel, GuiFlowH("group_pref"))
   group_pref.style.horizontal_spacing = button_spacing
   if display_logistic_row == true then
-    GuiElement.add(group_pref, GuiButton(self.classname, "change-logistic"):sprite("menu", "container-white", "container"):style("helmod_button_menu_selected"):tooltip({"tooltip.display-logistic-row"}))
+    GuiElement.add(group_pref, GuiButton(self.classname, "change-logistic"):sprite("menu", defines.sprites.transport.white, defines.sprites.transport.black):style("helmod_button_menu_selected"):tooltip({"tooltip.display-logistic-row"}))
   else
-    GuiElement.add(group_pref, GuiButton(self.classname, "change-logistic"):sprite("menu", "container", "container"):style("helmod_button_menu"):tooltip({"tooltip.display-logistic-row"}))
+    GuiElement.add(group_pref, GuiButton(self.classname, "change-logistic"):sprite("menu", defines.sprites.transport.black, defines.sprites.transport.black):style("helmod_button_menu"):tooltip({"tooltip.display-logistic-row"}))
   end
-  GuiElement.add(group_pref, GuiButton("HMModelEdition", "OPEN", model.id, block_id):sprite("menu", "edit", "edit"):style("helmod_button_menu"):tooltip({"helmod_panel.model-edition"}))
-  GuiElement.add(group_pref, GuiButton("HMPreferenceEdition", "OPEN", model.id, block_id):sprite("menu", "services", "services"):style("helmod_button_menu"):tooltip({"helmod_button.preferences"}))
+  GuiElement.add(group_pref, GuiButton("HMModelEdition", "OPEN", model.id, block_id):sprite("menu", defines.sprites.edit_document.black, defines.sprites.edit_document.black):style("helmod_button_menu"):tooltip({"helmod_panel.model-edition"}))
+  GuiElement.add(group_pref, GuiButton("HMPreferenceEdition", "OPEN", model.id, block_id):sprite("menu", defines.sprites.process.black, defines.sprites.process.black):style("helmod_button_menu"):tooltip({"helmod_button.preferences"}))
 
   local group_action = GuiElement.add(right_panel, GuiFlowH("group_action"))
   group_action.style.horizontal_spacing = button_spacing
   ---copy past
-  GuiElement.add(group_action, GuiButton(self.classname, "copy-model", model.id, block_id):sprite("menu", "copy", "copy"):style("helmod_button_menu"):tooltip({"helmod_button.copy"}))
-  GuiElement.add(group_action, GuiButton(self.classname, "past-model", model.id, block_id):sprite("menu", "paste", "paste"):style("helmod_button_menu"):tooltip({"helmod_button.past"}))
+  GuiElement.add(group_action, GuiButton(self.classname, "copy-model", model.id, block_id):sprite("menu", defines.sprites.copy.black, defines.sprites.copy.black):style("helmod_button_menu"):tooltip({"helmod_button.copy"}))
+  GuiElement.add(group_action, GuiButton(self.classname, "past-model", model.id, block_id):sprite("menu", defines.sprites.paste.black, defines.sprites.paste.black):style("helmod_button_menu"):tooltip({"helmod_button.past"}))
   ---download
   if self.classname == "HMProductionPanel" then
-    GuiElement.add(group_action, GuiButton("HMDownload", "OPEN", model.id, "download"):sprite("menu", "download", "download"):style("helmod_button_menu"):tooltip({"helmod_result-panel.download-button-production-line"}))
-    GuiElement.add(group_action, GuiButton("HMDownload", "OPEN", model.id, "upload"):sprite("menu", "upload", "upload"):style("helmod_button_menu"):tooltip({"helmod_result-panel.upload-button-production-line"}))
+    GuiElement.add(group_action, GuiButton("HMDownload", "OPEN", model.id, "download"):sprite("menu", defines.sprites.download_document.black, defines.sprites.download_document.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.download-button-production-line"}))
+    GuiElement.add(group_action, GuiButton("HMDownload", "OPEN", model.id, "upload"):sprite("menu", defines.sprites.upload_document.black, defines.sprites.upload_document.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.upload-button-production-line"}))
   end
   ---refresh control
-  GuiElement.add(group_action, GuiButton(self.classname, "refresh-model", model.id):sprite("menu", "refresh", "refresh"):style("helmod_button_menu"):tooltip({"helmod_result-panel.refresh-button"}))
+  GuiElement.add(group_action, GuiButton(self.classname, "refresh-model", model.id):sprite("menu", defines.sprites.refresh.black, defines.sprites.refresh.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.refresh-button"}))
 
   local items = {}
   local default_time = 1
@@ -526,9 +526,9 @@ function ProductionPanel:updateInputBlock(model, block)
   input_tool.clear()
   local all_visible = User.getParameter("block_all_ingredient_visible")
   if all_visible == true then
-    GuiElement.add(input_tool, GuiButton(self.classname, "block-all-ingredient-visible", model.id, block.id):sprite("menu", "filter-white-sm", "filter-sm"):style("helmod_button_menu_sm_selected"):tooltip({"helmod_button.all-product-visible"}))
+    GuiElement.add(input_tool, GuiButton(self.classname, "block-all-ingredient-visible", model.id, block.id):sprite("menu", defines.sprites.filter.white, defines.sprites.filter.black):style("helmod_button_menu_sm_selected"):tooltip({"helmod_button.all-product-visible"}))
   else
-    GuiElement.add(input_tool, GuiButton(self.classname, "block-all-ingredient-visible", model.id, block.id):sprite("menu", "filter-sm", "filter-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_button.all-product-visible"}))
+    GuiElement.add(input_tool, GuiButton(self.classname, "block-all-ingredient-visible", model.id, block.id):sprite("menu", defines.sprites.filter.black, defines.sprites.filter.black):style("helmod_button_menu_sm"):tooltip({"helmod_button.all-product-visible"}))
   end
 
   ---input panel
@@ -613,9 +613,9 @@ function ProductionPanel:updateOutputBlock(model, block)
   output_tool.clear()
   local all_visible = User.getParameter("block_all_product_visible")
   if all_visible == true then
-    GuiElement.add(output_tool, GuiButton(self.classname, "block-all-product-visible", model.id, block.id):sprite("menu", "filter-white-sm", "filter-sm"):style("helmod_button_menu_sm_selected"):tooltip({"helmod_button.all-product-visible"}))
+    GuiElement.add(output_tool, GuiButton(self.classname, "block-all-product-visible", model.id, block.id):sprite("menu", defines.sprites.filter.white, defines.sprites.filter.black):style("helmod_button_menu_sm_selected"):tooltip({"helmod_button.all-product-visible"}))
   else
-    GuiElement.add(output_tool, GuiButton(self.classname, "block-all-product-visible", model.id, block.id):sprite("menu", "filter-sm", "filter-sm"):style("helmod_button_menu_sm"):tooltip({"helmod_button.all-product-visible"}))
+    GuiElement.add(output_tool, GuiButton(self.classname, "block-all-product-visible", model.id, block.id):sprite("menu", defines.sprites.filter.black, defines.sprites.filter.black):style("helmod_button_menu_sm"):tooltip({"helmod_button.all-product-visible"}))
   end
 
   ---ouput panel
@@ -917,7 +917,7 @@ function ProductionPanel:bluidLeaf(tree_panel, model, block, current_block, leve
         color = "orange"
       end
       if block.name == nil then
-        local cell_block = GuiElement.add(cell_tree, GuiButton(self.classname, "HMProductionPanel", model.id, block.id):sprite("menu", "hangar-white", "hangar"):style("helmod_button_menu"):tooltip("tooltip.edit-block"))
+        local cell_block = GuiElement.add(cell_tree, GuiButton(self.classname, "HMProductionPanel", model.id, block.id):sprite("menu", defines.sprites.home.black, defines.sprites.home.black):style("helmod_button_menu"):tooltip("tooltip.edit-block"))
       else
         local cell_block = GuiElement.add(cell_tree, GuiCellBlock(self.classname, "change-block", model.id, block.id):element(block):tooltip("tooltip.edit-block"):color(color))
         cell_block.style.left_padding = 10 * level
@@ -1019,18 +1019,18 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
   local cell_action = GuiElement.add(gui_table, GuiTable("action", recipe.id):column(2):style("helmod_table_list"))
   if block.by_product == false then
     ---by ingredient
-    GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-down", model.id, block.id, recipe.id):sprite("menu", "arrow-up-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.up-element", User.getModSetting("row_move_step")}))
-    GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-remove", model.id, block.id, recipe.id):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
-    GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-up", model.id, block.id, recipe.id):sprite("menu", "arrow-down-sm", "arrow-down-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.down-element", User.getModSetting("row_move_step")}))
+    GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-down", model.id, block.id, recipe.id):sprite("menu", defines.sprites.arrow_top.black, defines.sprites.arrow_top.black):style("helmod_button_menu_sm"):tooltip({"tooltip.up-element", User.getModSetting("row_move_step")}))
+    GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-remove", model.id, block.id, recipe.id):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
+    GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-up", model.id, block.id, recipe.id):sprite("menu", defines.sprites.arrow_bottom.black, defines.sprites.arrow_bottom.black):style("helmod_button_menu_sm"):tooltip({"tooltip.down-element", User.getModSetting("row_move_step")}))
   else
     ---by product
-    GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-up", model.id, block.id, recipe.id):sprite("menu", "arrow-up-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.up-element", User.getModSetting("row_move_step")}))
-    GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-remove", model.id, block.id, recipe.id):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
-    GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-down", model.id, block.id, recipe.id):sprite("menu", "arrow-down-sm", "arrow-down-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.down-element", User.getModSetting("row_move_step")}))
+    GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-up", model.id, block.id, recipe.id):sprite("menu", defines.sprites.arrow_top.black, defines.sprites.arrow_top.black):style("helmod_button_menu_sm"):tooltip({"tooltip.up-element", User.getModSetting("row_move_step")}))
+    GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-remove", model.id, block.id, recipe.id):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
+    GuiElement.add(cell_action, GuiButton(self.classname, "production-recipe-down", model.id, block.id, recipe.id):sprite("menu", defines.sprites.arrow_bottom.black, defines.sprites.arrow_bottom.black):style("helmod_button_menu_sm"):tooltip({"tooltip.down-element", User.getModSetting("row_move_step")}))
   end
   ---conversion block
   if recipe.index > 0 then
-    GuiElement.add(cell_action, GuiButton(self.classname, "conversion-recipe-block", model.id, block.id, recipe.id):sprite("menu", "hangar-sm", "hangar-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.conversion-recipe-block"}))
+    GuiElement.add(cell_action, GuiButton(self.classname, "conversion-recipe-block", model.id, block.id, recipe.id):sprite("menu", defines.sprites.home.black, defines.sprites.home.black):style("helmod_button_menu_sm"):tooltip({"tooltip.conversion-recipe-block"}))
   end
 
   ---common cols
@@ -1140,14 +1140,14 @@ function ProductionPanel:addTableRowBlock(gui_table, model, block)
   ---col action
   local cell_action = GuiElement.add(gui_table, GuiTable("action", block.id):column(2))
 
-  GuiElement.add(cell_action, GuiButton(self.classname, "production-block-up", model.id, block.id):sprite("menu", "arrow-up-sm", "arrow-up-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.up-element", User.getModSetting("row_move_step")}))
-  GuiElement.add(cell_action, GuiButton(self.classname, "remove-block", model.id, block.id):sprite("menu", "delete-sm", "delete-sm"):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
-  GuiElement.add(cell_action, GuiButton(self.classname, "production-block-down", model.id, block.id):sprite("menu", "arrow-down-sm", "arrow-down-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.down-element", User.getModSetting("row_move_step")}))
+  GuiElement.add(cell_action, GuiButton(self.classname, "production-block-up", model.id, block.id):sprite("menu", defines.sprites.arrow_top.black, defines.sprites.arrow_top.black):style("helmod_button_menu_sm"):tooltip({"tooltip.up-element", User.getModSetting("row_move_step")}))
+  GuiElement.add(cell_action, GuiButton(self.classname, "remove-block", model.id, block.id):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
+  GuiElement.add(cell_action, GuiButton(self.classname, "production-block-down", model.id, block.id):sprite("menu", defines.sprites.arrow_bottom.black, defines.sprites.arrow_bottom.black):style("helmod_button_menu_sm"):tooltip({"tooltip.down-element", User.getModSetting("row_move_step")}))
   local linked_button
   if unlinked then
-    linked_button = GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink", model.id, block.id):sprite("menu", "unlink-sm", "unlink-sm"):style("helmod_button_menu_sm"):tooltip({"tooltip.unlink-element"}))
+    linked_button = GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink", model.id, block.id):sprite("menu", defines.sprites.unplugged.black, defines.sprites.unplugged.black):style("helmod_button_menu_sm"):tooltip({"tooltip.unlink-element"}))
   else
-    linked_button = GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink", model.id, block.id):sprite("menu", "link-white-sm", "link-sm"):style("helmod_button_menu_sm_selected"):tooltip({"tooltip.unlink-element"}))
+    linked_button = GuiElement.add(cell_action, GuiButton(self.classname, "production-block-unlink", model.id, block.id):sprite("menu", defines.sprites.plugged.white, defines.sprites.plugged.black):style("helmod_button_menu_sm_selected"):tooltip({"tooltip.unlink-element"}))
   end
   if block.index == 0 then
     linked_button.enabled = false
