@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.10
 Date: ???
+  Features:
+    - Added beacon settings preferences
   Changes:
     - Added cache for available machines to improve performance
     - Added support for wind turbines

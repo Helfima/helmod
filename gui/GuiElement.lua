@@ -262,17 +262,31 @@ end
 ---@param parent LuaGuiElement
 ---@param element table
 function GuiElement.infoRecipe(parent, element)
+  local sprite_name = nil
+  local tooltip = nil
   if element.type == "recipe-burnt" then
-    local sprite = GuiElement.add(parent, GuiSprite("recipe-info"):sprite("developer"):tooltip({"tooltip.burnt-recipe"}))
-    sprite.style.top_padding = -8
+    sprite_name = GuiElement.getSprite(defines.sprite_info.burnt)
+    tooltip = {"tooltip.burnt-recipe"}
   elseif element.type == "rocket" then
-    local sprite = GuiElement.add(parent, GuiSprite("recipe-info"):sprite("developer"):tooltip({"tooltip.rocket-recipe"}))
-    sprite.style.top_padding = -8
+    sprite_name = GuiElement.getSprite(defines.sprite_info.developer)
+    tooltip = {"tooltip.rocket-recipe"}
   elseif element.type == "technology" then
-    local sprite = GuiElement.add(parent, GuiSprite("recipe-info"):sprite("developer"):tooltip({"tooltip.technology-recipe"}))
-    sprite.style.top_padding = -8
+    sprite_name = GuiElement.getSprite(defines.sprite_info.education)
+    tooltip = {"tooltip.technology-recipe"}
+  elseif element.type == "energy" then
+    sprite_name = GuiElement.getSprite(defines.sprite_info.energy)
+    tooltip = {"tooltip.energy-recipe"}
   elseif element.type ~= "recipe" then
-    local sprite = GuiElement.add(parent, GuiSprite("recipe-info"):sprite("developer"):tooltip({"tooltip.resource-recipe"}))
-    sprite.style.top_padding = -8
+    sprite_name = GuiElement.getSprite(defines.sprite_info.developer)
+    tooltip = {"tooltip.resource-recipe"}
+  end
+  if sprite_name ~= nil then
+    local container = GuiElement.add(parent, GuiFlow("recipe-info"))
+    container.style.top_padding = -4
+
+    local sprite = GuiElement.add(container, GuiSprite("recipe-info"):sprite(sprite_name):tooltip(tooltip))
+    sprite.style.width = defines.sprite_size
+    sprite.style.height = defines.sprite_size
+    sprite.style.stretch_image_to_widget_size = true
   end
 end

@@ -237,7 +237,7 @@ function Product:countContainer(count, container, time)
     local entity_prototype = EntityPrototype(container)
     if entity_prototype:getType() == "pipe" then
       local fluids_logistic_maximum_flow = User.getParameter("fluids_logistic_maximum_flow")
-      return count / (fluids_logistic_maximum_flow or helmod_logistic_flow_default)
+      return count / (fluids_logistic_maximum_flow or defines.constant.logistic_flow_default)
     else
       local cargo_wagon_size = EntityPrototype(container):getFluidCapacity()
       if cargo_wagon_size == 0 then return 0 end

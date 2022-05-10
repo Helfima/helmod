@@ -83,7 +83,7 @@ function PinPanel:updateHeader(event)
   GuiElement.add(group3, GuiButton("HMSummaryPanel", "OPEN", parameter_objects.model, parameter_objects.block):sprite("menu", defines.sprites.list_view.black, defines.sprites.list_view.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
 
   local group4 = GuiElement.add(action_panel, GuiFlowH("group4"))
-  GuiElement.add(group4, GuiButton("HMProductionPanel", "OPEN", parameter_objects.model, parameter_objects.block):sprite("menu", defines.sprites.home.black,defines.sprites.home.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-production-block"}))
+  GuiElement.add(group4, GuiButton("HMProductionPanel", "OPEN", parameter_objects.model, parameter_objects.block):sprite("menu", defines.sprites.hangar.black,defines.sprites.hangar.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-production-block"}))
 end
 
 -------------------------------------------------------------------------------

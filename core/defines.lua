@@ -1,15 +1,17 @@
 require "core.defines_builded"
 
+defines.sprite_size=14
+
 defines.sprite_tooltips = {}
 defines.sprite_tooltips["energy"] = defines.sprites.event.white
 defines.sprite_tooltips["steam-heat"] = defines.sprites.steam_heat.white
 
 defines.sprite_info = {}
 --- sprite info
-defines.sprite_info["developer"] = "developer"
+defines.sprite_info["developer"] = defines.sprites.info_settings.blue
 defines.sprite_info["education"] = defines.sprites.info_education.blue
 defines.sprite_info["burnt"] = defines.sprites.info_fire.blue
-defines.sprite_info["block"] = defines.sprites.home.white
+defines.sprite_info["block"] = defines.sprites.info_hangar.white
 defines.sprite_info["energy"] = defines.sprites.info_energy.blue
 --- sprite contraint
 defines.sprite_info["linked"] = defines.sprites.info_arrow_top.red
@@ -27,11 +29,9 @@ defines.sprite_tooltip["expand_right"] = defines.sprites.tooltip_expand_right.ye
 defines.sprite_tooltip["expand_right_group"] = defines.sprites.tooltip_expand_right_group.yellow
 defines.sprite_tooltip["pipette"] = defines.sprites.tooltip_pipette.yellow
 
-helmod_constant = {
-  max_float = 1e300
-}
-
-helmod_base_times = {
+defines.constant = {}
+defines.constant.max_float = 1e300
+defines.constant.base_times = {
   { value = 1, caption = "1s", tooltip={"helmod_si.seconde",1}},
   { value = 60, caption = "1", tooltip={"helmod_si.minute",1}},
   { value = 300, caption = "5", tooltip={"helmod_si.minute",5}},
@@ -42,10 +42,9 @@ helmod_base_times = {
   { value = 3600*12, caption = "12h", tooltip={"helmod_si.hour",12}},
   { value = 3600*24, caption = "24h", tooltip={"helmod_si.hour",24}}
 }
+defines.constant.logistic_flow_default = 3000
 
-helmod_logistic_flow_default = 3000
-
-helmod_logistic_flow = {
+defines.constant.logistic_flow = {
   {pipe=1, flow=6000},
   {pipe=2, flow=3000},
   {pipe=3, flow=2250},
@@ -67,59 +66,17 @@ helmod_logistic_flow = {
   {pipe=1000, flow=230}
 }
 
-helmod_flow_style = {
-  flow = "flow",
-  horizontal = "helmod_flow_horizontal",
-  vertical = "helmod_flow_vertical"
-}
+defines.constant.beacon_combo = 4
+defines.constant.beacon_factory = 0.5
+defines.constant.beacon_constant = 3
 
-helmod_tag = {}
-helmod_tag.color = {}
-helmod_tag.color.close = "[/color]"
-helmod_tag.color.white = "[color=255,255,255]"
-helmod_tag.color.gray = "[color=229,229,229]"
-helmod_tag.color.yellow = "[color=255,222,61]"
-helmod_tag.color.red = "[color=255,0,0]"
-helmod_tag.color.red_light = "[color=255,50,50]"
-helmod_tag.color.green = "[color=0,127,14]"
-helmod_tag.color.green_light = "[color=50,200,50]"
-helmod_tag.color.blue = "[color=66,141,255]"
-helmod_tag.color.blue_light = "[color=100,200,255]"
-helmod_tag.color.gold = "[color=255,230,192]"
-helmod_tag.color.orange = "[color=255,106,0]"
-helmod_tag.color.black = "[color=0,0,0]"
+if script ~= nil and script.active_mods["space-exploration"] then
+  defines.constant.beacon_combo = 1
+  defines.constant.beacon_factory = 0.25
+  defines.constant.beacon_constant = 0
+end
 
-helmod_tag.font = {}
-helmod_tag.font.close = "[/font]"
-helmod_tag.font.default_bold = "[font=default-bold]"
-helmod_tag.font.default_semibold = "[font=default-semibold]"
-helmod_tag.font.default_large_bold = "[font=default-large-bold]"
-
-helmod_frame_style = {
-  default = "helmod_frame_default",
-  hidden = "helmod_frame_hidden",
-  panel = "helmod_frame_panel",
-  cell = "helmod_frame_hidden",
-  tab = "helmod_frame_tab",
-  section = "helmod_frame_section"
-}
-
-helmod_rules = {}
-helmod_rules["production-crafting"] = {excluded_only=false ,categories={}}
-helmod_rules["production-crafting"].categories["standard"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
-helmod_rules["production-crafting"].categories["crafting-handonly"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
-helmod_rules["production-crafting"].categories["extraction-machine"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
-helmod_rules["production-crafting"].categories["energy"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
-helmod_rules["production-crafting"].categories["technology"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
-
-helmod_rules["module-limitation"] = {excluded_only=true ,categories={}}
-helmod_rules["module-limitation"].categories["standard"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
-helmod_rules["module-limitation"].categories["extraction-machine"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
-helmod_rules["module-limitation"].categories["technology"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
-
-helmod_display_cell_mod = {"default", "small-text", "small-icon", "by-kilo"}
-
-helmod_preferences = {
+defines.constant.preferences = {
   -- factory level
   default_factory_level = {
     type = "string-setting",
@@ -216,6 +173,30 @@ helmod_preferences = {
     default_value = true,
     group = "general"
   },
+  --beacon-affecting-one
+  beacon_affecting_one = {
+    type = "float-setting",
+    localised_name = {"helmod_pref_settings.beacon-affecting-one"},
+    localised_description = {"helmod_pref_settings.beacon-affecting-one-desc"},
+    default_value = defines.constant.beacon_combo,
+    group = "general"
+  },
+  --beacon-affecting-one
+  beacon_by_factory = {
+    type = "float-setting",
+    localised_name = {"helmod_pref_settings.beacon-by-factory"},
+    localised_description = {"helmod_pref_settings.beacon-by-factory-desc"},
+    default_value = defines.constant.beacon_factory,
+    group = "general"
+  },
+  --beacon-constant
+  beacon_constant = {
+    type = "float-setting",
+    localised_name = {"helmod_pref_settings.beacon-constant"},
+    localised_description = {"helmod_pref_settings.beacon-constant-desc"},
+    default_value = defines.constant.beacon_constant,
+    group = "general"
+  },
   --ui-auto-close
   ui_auto_close = {
     type = "bool-setting",
@@ -269,7 +250,7 @@ helmod_preferences = {
   },
 }
 
-helmod_settings_mod = {
+defines.constant.settings_mod = {
   -- display_ratio_horizontal
   display_ratio_horizontal = {
     type = "double-setting",
@@ -425,3 +406,53 @@ helmod_settings_mod = {
     order = "f2"
   }
 }
+
+helmod_flow_style = {
+  flow = "flow",
+  horizontal = "helmod_flow_horizontal",
+  vertical = "helmod_flow_vertical"
+}
+
+helmod_tag = {}
+helmod_tag.color = {}
+helmod_tag.color.close = "[/color]"
+helmod_tag.color.white = "[color=255,255,255]"
+helmod_tag.color.gray = "[color=229,229,229]"
+helmod_tag.color.yellow = "[color=255,222,61]"
+helmod_tag.color.red = "[color=255,0,0]"
+helmod_tag.color.red_light = "[color=255,50,50]"
+helmod_tag.color.green = "[color=0,127,14]"
+helmod_tag.color.green_light = "[color=50,200,50]"
+helmod_tag.color.blue = "[color=66,141,255]"
+helmod_tag.color.blue_light = "[color=100,200,255]"
+helmod_tag.color.gold = "[color=255,230,192]"
+helmod_tag.color.orange = "[color=255,106,0]"
+helmod_tag.color.black = "[color=0,0,0]"
+
+helmod_tag.font = {}
+helmod_tag.font.close = "[/font]"
+helmod_tag.font.default_bold = "[font=default-bold]"
+helmod_tag.font.default_semibold = "[font=default-semibold]"
+helmod_tag.font.default_large_bold = "[font=default-large-bold]"
+
+helmod_frame_style = {
+  default = "helmod_frame_default",
+  hidden = "helmod_frame_hidden",
+  panel = "helmod_frame_panel",
+  cell = "helmod_frame_hidden",
+  tab = "helmod_frame_tab",
+  section = "helmod_frame_section"
+}
+
+helmod_rules = {}
+helmod_rules["production-crafting"] = {excluded_only=false ,categories={}}
+helmod_rules["production-crafting"].categories["standard"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
+helmod_rules["production-crafting"].categories["crafting-handonly"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
+helmod_rules["production-crafting"].categories["extraction-machine"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
+helmod_rules["production-crafting"].categories["energy"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
+helmod_rules["production-crafting"].categories["technology"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
+
+helmod_rules["module-limitation"] = {excluded_only=true ,categories={}}
+helmod_rules["module-limitation"].categories["standard"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
+helmod_rules["module-limitation"].categories["extraction-machine"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
+helmod_rules["module-limitation"].categories["technology"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}

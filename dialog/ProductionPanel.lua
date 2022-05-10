@@ -461,7 +461,7 @@ function ProductionPanel:updateSubMenuRightPanel(model, block)
 
   local items = {}
   local default_time = 1
-  for index,base_time in pairs(helmod_base_times) do
+  for index,base_time in pairs(defines.constant.base_times) do
     table.insert(items,base_time.tooltip)
     if model.time == base_time.value then
       default_time = base_time.tooltip
@@ -917,7 +917,7 @@ function ProductionPanel:bluidLeaf(tree_panel, model, block, current_block, leve
         color = "orange"
       end
       if block.name == nil then
-        local cell_block = GuiElement.add(cell_tree, GuiButton(self.classname, "HMProductionPanel", model.id, block.id):sprite("menu", defines.sprites.home.black, defines.sprites.home.black):style("helmod_button_menu"):tooltip("tooltip.edit-block"))
+        local cell_block = GuiElement.add(cell_tree, GuiButton(self.classname, "HMProductionPanel", model.id, block.id):sprite("menu", defines.sprites.hangar.black, defines.sprites.hangar.black):style("helmod_button_menu"):tooltip("tooltip.edit-block"))
       else
         local cell_block = GuiElement.add(cell_tree, GuiCellBlock(self.classname, "change-block", model.id, block.id):element(block):tooltip("tooltip.edit-block"):color(color))
         cell_block.style.left_padding = 10 * level
@@ -1030,7 +1030,7 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
   end
   ---conversion block
   if recipe.index > 0 then
-    GuiElement.add(cell_action, GuiButton(self.classname, "conversion-recipe-block", model.id, block.id, recipe.id):sprite("menu", defines.sprites.home.black, defines.sprites.home.black):style("helmod_button_menu_sm"):tooltip({"tooltip.conversion-recipe-block"}))
+    GuiElement.add(cell_action, GuiButton(self.classname, "conversion-recipe-block", model.id, block.id, recipe.id):sprite("menu", defines.sprites.hangar.black, defines.sprites.hangar.black):style("helmod_button_menu_sm"):tooltip({"tooltip.conversion-recipe-block"}))
   end
 
   ---common cols
@@ -1449,7 +1449,7 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 
   if event.action == "change-time" then
     local index = event.element.selected_index
-    model.time = helmod_base_times[index].value or 1
+    model.time = defines.constant.base_times[index].value or 1
     ModelCompute.update(model)
     Controller:send("on_gui_update", event)
     Controller:send("on_gui_close", event, "HMProductEdition")

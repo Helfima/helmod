@@ -1,6 +1,6 @@
 require("core.defines")
 
-for settings_name,settings in pairs(helmod_settings_mod) do
+for settings_name,settings in pairs(defines.constant.settings_mod) do
   local name = "helmod_"..settings_name
   local current_settings = {
     type = settings.type,

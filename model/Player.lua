@@ -506,11 +506,12 @@ function Player.getProductionsCrafting(category, lua_recipe)
     for key, lua_entity in pairs(Player.getProductionMachines()) do
       local check = false
       if category ~= nil then
-        if not(rules_included[category]) and not(rules_included[category]) then
+        if not(rules_included[category]) then
           ---standard recipe
           if lua_entity.crafting_categories ~= nil and lua_entity.crafting_categories[category] then
             local recipe_ingredient_count = RecipePrototype(lua_recipe, "recipe"):getIngredientCount()
             local factory_ingredient_count = EntityPrototype(lua_entity):getIngredientCount()
+            --- check ingredient limitation
             if factory_ingredient_count >= recipe_ingredient_count then
               check = true
             end
@@ -524,6 +525,7 @@ function Player.getProductionsCrafting(category, lua_recipe)
           check = Player.checkRules(check, rules_excluded, category, lua_entity, false)
         end
       else
+        --- take all production if category is nil
         if lua_entity.group ~= nil and lua_entity.group.name == "production" then
           check = true
         end

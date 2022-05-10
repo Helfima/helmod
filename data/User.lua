@@ -337,7 +337,7 @@ function User.setPreference(type, name, value)
   User.setVersion()
   local preferences = User.get("preferences")
   if name == nil then
-    local preference = helmod_preferences[type]
+    local preference = defines.constant.preferences[type]
     if value == nil then
       value = preference.default_value
     end
@@ -437,7 +437,7 @@ function User.getModSetting(name)
   if property ~= nil then
     return property.value
   else
-    return helmod_settings_mod[name].default_value
+    return defines.constant.settings_mod[name].default_value
   end
 end
 
@@ -452,7 +452,7 @@ function User.getModGlobalSetting(name)
   if property ~= nil then
     return property.value
   else
-    return helmod_settings_mod[name].default_value
+    return defines.constant.settings_mod[name].default_value
   end
 end
 
@@ -464,7 +464,7 @@ end
 function User.getPreferenceSetting(type, name)
   local preference_type = User.getPreference(type)
   if name == nil then
-    local preference = helmod_preferences[type]
+    local preference = defines.constant.preferences[type]
     if preference_type == nil then
       return preference.default_value
     end
@@ -481,8 +481,8 @@ function User.getPreferenceSetting(type, name)
   if preference_name ~= nil then
     return preference_name
   else
-    if helmod_preferences[type].items == nil or helmod_preferences[type].items[name] == nil then return false end
-    return helmod_preferences[type].items[name]
+    if defines.constant.preferences[type].items == nil or defines.constant.preferences[type].items[name] == nil then return false end
+    return defines.constant.preferences[type].items[name]
   end
 end
 

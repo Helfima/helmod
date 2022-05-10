@@ -185,9 +185,9 @@ function Model.newBeacon(name, count)
   beaconModel.type = "item"
   beaconModel.count = count or 0
   beaconModel.energy = 0
-  beaconModel.combo = Model.beacon_combo
-  beaconModel.per_factory = Model.beacon_factory
-  beaconModel.per_factory_constant = Model.beacon_factory_constant
+  beaconModel.combo = User.getPreferenceSetting("beacon_affecting_one")
+  beaconModel.per_factory = User.getPreferenceSetting("beacon_by_factory")
+  beaconModel.per_factory_constant = User.getPreferenceSetting("beacon_constant")
   ---limit infini = 0
   beaconModel.limit = 0
   ---modules
@@ -335,9 +335,9 @@ function Model.setBeacon(recipe, name, combo, per_factory, per_factory_constant)
     local beacon_prototype = EntityPrototype(name)
     if beacon_prototype:native() ~= nil then
       recipe.beacon.name = name
-      recipe.beacon.combo = combo or Model.beacon_combo
-      recipe.beacon.per_factory = per_factory or Model.beacon_factory
-      recipe.beacon.per_factory_constant = per_factory_constant or Model.beacon_factory_constant
+      recipe.beacon.combo = combo or User.getPreferenceSetting("beacon_affecting_one")
+      recipe.beacon.per_factory = per_factory or User.getPreferenceSetting("beacon_by_factory")
+      recipe.beacon.per_factory_constant = per_factory_constant or User.getPreferenceSetting("beacon_constant")
       if Model.countModulesModel(recipe.beacon) >= beacon_prototype:getModuleInventorySize() then
         recipe.beacon.modules = {}
       end

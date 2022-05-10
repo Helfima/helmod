@@ -200,7 +200,7 @@ function PreferenceEdition:updateUI(event)
   options_table.style.horizontal_spacing=10
   options_table.style.vertical_spacing=5
 
-  for preference_type,preference in pairs(helmod_preferences) do
+  for preference_type,preference in pairs(defines.constant.preferences) do
     if preference.group == "ui" then
       GuiElement.add(options_table, GuiLabel(self.classname, "label", preference_type):caption(preference.localised_name):tooltip(preference.localised_description))
       local default_preference_type = User.getPreferenceSetting(preference_type)
@@ -250,7 +250,7 @@ function PreferenceEdition:updateGeneral(event)
   options_table.style.horizontal_spacing=10
   options_table.style.vertical_spacing=5
   
-  for preference_name,preference in pairs(helmod_preferences) do
+  for preference_name,preference in pairs(defines.constant.preferences) do
     if preference.group == "general" then
       GuiElement.add(options_table, GuiLabel(self.classname, "label", preference_name):caption(preference.localised_name):tooltip(preference.localised_description))
       local default_preference = User.getPreferenceSetting(preference_name)
@@ -260,7 +260,7 @@ function PreferenceEdition:updateGeneral(event)
         if preference.type == "bool-setting" then
           GuiElement.add(options_table, GuiCheckBox(self.classname, "preference-setting", preference_name):state(default_preference))
         end
-        if preference.type == "int-setting" or preference.type == "string-setting" then
+        if preference.type == "int-setting" or preference.type == "float-setting" or preference.type == "string-setting" then
           GuiElement.add(options_table, GuiTextField(self.classname, "preference-setting", preference_name):text(default_preference))
         end
       end
@@ -371,10 +371,10 @@ function PreferenceEdition:updateFluidsLogistic(event)
   local fluids_logistic_maximum_flow = User.getParameter("fluids_logistic_maximum_flow")
   local default_flow = nil
   local items = {}
-  for _,element in pairs(helmod_logistic_flow) do
+  for _,element in pairs(defines.constant.logistic_flow) do
     local flow = {"helmod_preferences-edition-panel.fluids-logistic-flow", element.pipe, element.flow}
     table.insert(items, flow)
-    if fluids_logistic_maximum_flow ~= nil and fluids_logistic_maximum_flow == element.flow or element.flow == helmod_logistic_flow_default then
+    if fluids_logistic_maximum_flow ~= nil and fluids_logistic_maximum_flow == element.flow or element.flow == defines.constant.logistic_flow_default then
       default_flow = flow
     end
   end
@@ -406,7 +406,7 @@ function PreferenceEdition:onEvent(event)
     local type = event.item1
     local name = event.item2
     if name == "" then
-      local preference = helmod_preferences[type]
+      local preference = defines.constant.preferences[type]
       if preference ~= nil then
         if preference.allowed_values then
           local index = event.element.selected_index
@@ -415,7 +415,7 @@ function PreferenceEdition:onEvent(event)
           if preference.type == "bool-setting" then
             User.setPreference(type, nil, event.element.state)
           end
-          if preference.type == "int-setting" then
+          if preference.type == "int-setting" or preference.type == "float-setting" then
             local value = tonumber(event.element.text or preference.default_value)
             User.setPreference(type, nil, value)
           end
@@ -427,7 +427,7 @@ function PreferenceEdition:onEvent(event)
         Controller:send("on_gui_preference", event)
       end
     else
-      local preference = helmod_preferences[type]
+      local preference = defines.constant.preferences[type]
       if preference ~= nil then
         User.setPreference(type, name, event.element.state)
       end
@@ -512,7 +512,7 @@ function PreferenceEdition:onEvent(event)
   
   if event.action == "fluids-logistic-flow" then
     local index = event.element.selected_index
-    local fluids_logistic_maximum_flow = helmod_logistic_flow[index].flow
+    local fluids_logistic_maximum_flow = defines.constant.logistic_flow[index].flow
     User.setParameter("fluids_logistic_maximum_flow", fluids_logistic_maximum_flow)
     Controller:send("on_gui_refresh", event)
   end

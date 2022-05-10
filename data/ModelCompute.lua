@@ -660,8 +660,8 @@ function ModelCompute.checkLinkedTemperatureFluid(item1, item2, by_product)
         ---Temperature avec intervale
         ---securise les valeurs
         T = T or 25
-        T2min = T2min or -helmod_constant.max_float
-        T2max = T2max or helmod_constant.max_float
+        T2min = T2min or -defines.constant.max_float
+        T2max = T2max or defines.constant.max_float
         if T >= T2min and T <= T2max then
           result = true
         end
