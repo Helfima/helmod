@@ -13,26 +13,27 @@ RecipePrototype = newclass(Prototype,function(base, object, object_type)
       base.lua_type = object_type or object.type
     end
     if base.lua_type == nil or base.lua_type == "recipe" then
-      Prototype.init(base, Player.getRecipePrototype(base.object_name))
+      Prototype.init(base, Player.getRecipe(base.object_name))
       base.lua_type = "recipe"
     elseif base.lua_type == "recipe-burnt" then
-      Prototype.init(base, Player.getRecipeBurnt(base.object_name))
-      base.lua_type = "recipe-burnt"
+      Prototype.init(base, Player.getBurntRecipe(base.object_name))
     elseif base.lua_type == "energy" then
-      Prototype.init(base, Player.getRecipeEntity(base.object_name))
-      base.lua_type = "energy"
+      Prototype.init(base, Player.getEnergyRecipe(base.object_name))
     elseif base.lua_type == "resource" then
-      Prototype.init(base, Player.getRecipeEntity(base.object_name))
-      base.lua_type = "resource"
+      Prototype.init(base, Player.getResourceRecipe(base.object_name))
     elseif base.lua_type == "fluid" then
-      Prototype.init(base, Player.getRecipeFluid(base.object_name))
-      base.lua_type = "fluid"
+      Prototype.init(base, Player.getFluidRecipe(base.object_name))
+    elseif base.lua_type == "boiler" then
+      local recipe = Player.getBoilerRecipe(base.object_name)
+      Prototype.init(base, recipe)
+      base.input_fluid_name = recipe.input_fluid_name
+      base.output_fluid_temperature = recipe.output_fluid_temperature
+      base.output_fluid_name = recipe.output_fluid_name
     elseif base.lua_type == "technology" then
       Prototype.init(base, Player.getTechnology(base.object_name))
-      base.lua_type = "technology"
     elseif base.lua_type == "rocket" then
-      Prototype.init(base, Player.getRecipeRocket(base.object_name))
-      base.lua_type = "rocket"
+      local recipe = Player.getRocketRecipe(base.object_name)
+      Prototype.init(base, recipe)
     end
     if base.lua_prototype == nil then
       Logging:error("HMRecipePrototype", "recipe not found", type(object), object)
@@ -55,10 +56,10 @@ function RecipePrototype.find(object)
   elseif object.name ~= nil then
     object_name = object.name
   end
-  local lua_prototype = Player.getRecipe(object_name)
+  local lua_prototype = Player.getPlayerRecipe(object_name)
   local lua_type = "recipe"
   if lua_prototype == nil then
-    lua_prototype = Player.getTechnology(object_name)
+    lua_prototype = Player.getPlayerTechnology(object_name)
     lua_type = "technology"
   end
   if lua_prototype == nil then
@@ -338,7 +339,7 @@ function RecipePrototype:getIngredients(factory)
       return {}
     end
 
-    if self.lua_type == "fluid" and factory_prototype:getType() == "boiler" then
+    if self.lua_type == "boiler" then
       local name = factory_prototype:getFluidConsumptionFilter()
       if name ~= nil then
         local amount = factory_prototype:getFluidProduction()
@@ -422,7 +423,7 @@ end
 function RecipePrototype:getEnabled()
   if self.lua_prototype ~= nil then
     if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" then
-      local lua_recipe = Player.getRecipe(self.lua_prototype.name)
+      local lua_recipe = Player.getPlayerRecipe(self.lua_prototype.name)
       if lua_recipe == nil then return false end
       return lua_recipe.enabled
     elseif self.lua_type == "resource" or self.lua_type == "fluid" then
@@ -458,13 +459,16 @@ function RecipePrototype:getHidden()
     elseif self.lua_type == "technology" then
       return false
     elseif self.lua_type == "fluid" then
-      for _, entity in pairs(Player.getOffshorePumps(self.lua_prototype.name)) do
+      local entities = Player.getOffshorePumps(self.lua_prototype.name)
+      for _, entity in pairs(entities) do
         return false
       end
-      for _, entity in pairs(Player.getBoilers(self.lua_prototype.name)) do
+      return false
+    elseif self.lua_type == "boiler" then
+      for _, entity in pairs(Player.getBoilersForRecipe(self.lua_prototype.name)) do
         return false
       end
-      return true
+      return false
     end
   end
   return false
@@ -489,9 +493,45 @@ end
 ---@return number
 function RecipePrototype:getEmissionsMultiplier()
   if self.lua_prototype ~= nil then
-    local prototype = Player.getRecipePrototype(self.lua_prototype.name)
+    local prototype = Player.getRecipe(self.lua_prototype.name)
     if prototype == nil then return 1 end
     return prototype.emissions_multiplier or 1
   end
   return 1
+end
+
+-------------------------------------------------------------------------------
+---Return true if result item has a burnt result
+---@return boolean
+function RecipePrototype:getHasBurntResult()
+  if self.lua_prototype ~= nil then
+    for key, raw_product in pairs(self:getRawProducts(self.lua_prototype)) do
+      local product = Product(raw_product)
+      if product:hasBurntResult() == true then
+        return true
+      end
+    end
+  end
+  return false
+end
+
+---@return string, string
+function RecipePrototype:getIcon()
+  local icon_name = self.lua_prototype.name
+  local icon_type = self.lua_type
+
+  if self.lua_type == "recipe-burnt" then
+    icon_type = "recipe"
+  elseif self.lua_type == "resource" then
+    icon_type = "entity"
+  elseif self.lua_type == "rocket" then
+    icon_type = "item"
+  elseif self.lua_type == "energy" then
+    icon_type = "entity"
+  elseif self.lua_type == "boiler" then
+    icon_type = "fluid"
+    icon_name = self.output_fluid_name
+  end
+
+  return icon_name, icon_type
 end

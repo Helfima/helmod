@@ -36,8 +36,9 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
 
     ---ajoute le recipe si il n'existe pas
     local ModelRecipe = Model.newRecipe(model, lua_recipe.name, recipe_type)
+    local icon_name, icon_type = recipe_prototype:getIcon()
     if not(block_types) then
-      block.type = ModelRecipe.type
+      block.type = icon_type
     end
     if index == nil then
       local recipe_index = table.size(block.recipes)
@@ -52,54 +53,10 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
     end
     if ModelRecipe.index == 0 then
       ---change block name
-      block.name = ModelRecipe.name
-      block.type = ModelRecipe.type
+      block.name = icon_name
+      block.type = icon_type
     end
     ModelRecipe.count = 1
-
-    local recipe_products
-    local recipe_ingredients
-    local block_products
-    local block_ingredients
-
-    if block.by_product == false then
-      recipe_products = recipe_prototype:getIngredients()
-      recipe_ingredients = recipe_prototype:getProducts()
-      block_products = block.ingredients
-      block_ingredients = block.products
-    else
-      recipe_products = recipe_prototype:getProducts()
-      recipe_ingredients = recipe_prototype:getIngredients()
-      block_products = block.products
-      block_ingredients = block.ingredients
-    end
-
-    ---ajoute les produits du block
-    for _, lua_product in pairs(recipe_products) do
-      local product = Product(lua_product):clone()
-      local element_key = Product(lua_product):getTableKey()
-      if block_products[element_key] == nil then
-        if block_ingredients[element_key] ~= nil then
-          product.state = 2
-        else
-          product.state = 1
-        end
-        block_products[element_key] = product
-      end
-    end
-
-    ---ajoute les ingredients du block
-    for _, lua_ingredient in pairs(recipe_ingredients) do
-      local ingredient = Product(lua_ingredient):clone()
-      local element_key = Product(lua_ingredient):getTableKey()
-      if block_ingredients[element_key] == nil then
-        block_ingredients[element_key] = ingredient
-        if block_products[element_key] ~= nil and block_products[element_key].state == 1 then
-          block_products[element_key].state = 2
-        end
-      end
-    end
-    block.recipes[ModelRecipe.id] = ModelRecipe
 
     if recipe_type ~= "energy" then
       local default_factory = User.getDefaultFactory(ModelRecipe)
@@ -132,6 +89,50 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
     else
       Model.setFactory(ModelRecipe, recipe_name)
     end
+
+    local recipe_products
+    local recipe_ingredients
+    local block_products
+    local block_ingredients
+
+    if block.by_product == false then
+      recipe_products = recipe_prototype:getIngredients(ModelRecipe.factory)
+      recipe_ingredients = recipe_prototype:getProducts()
+      block_products = block.ingredients
+      block_ingredients = block.products
+    else
+      recipe_products = recipe_prototype:getProducts()
+      recipe_ingredients = recipe_prototype:getIngredients(ModelRecipe.factory)
+      block_products = block.products
+      block_ingredients = block.ingredients
+    end
+
+    ---ajoute les produits du block
+    for _, lua_product in pairs(recipe_products) do
+      local product = Product(lua_product):clone()
+      local element_key = Product(lua_product):getTableKey()
+      if block_products[element_key] == nil then
+        if block_ingredients[element_key] ~= nil then
+          product.state = 2
+        else
+          product.state = 1
+        end
+        block_products[element_key] = product
+      end
+    end
+
+    ---ajoute les ingredients du block
+    for _, lua_ingredient in pairs(recipe_ingredients) do
+      local ingredient = Product(lua_ingredient):clone()
+      local element_key = Product(lua_ingredient):getTableKey()
+      if block_ingredients[element_key] == nil then
+        block_ingredients[element_key] = ingredient
+        if block_products[element_key] ~= nil and block_products[element_key].state == 1 then
+          block_products[element_key].state = 2
+        end
+      end
+    end
+    block.recipes[ModelRecipe.id] = ModelRecipe
 
     return block, ModelRecipe
   end
@@ -624,8 +625,10 @@ function ModelBuilder.removeProductionRecipe(block, recipe)
     ---change block name
     local first_recipe = Model.firstRecipe(block.recipes)
     if first_recipe ~= nil then
-      block.name = first_recipe.name
-      block.type = first_recipe.type
+      local recipe_prototype = RecipePrototype(first_recipe)
+      local icon_name, icon_type = recipe_prototype:getIcon()
+      block.name = icon_name
+      block.type = icon_type
     else
       block.name = ""
     end
@@ -927,8 +930,10 @@ function ModelBuilder.upProductionRecipe(block, recipe, step)
     ---change block name
     local first_recipe = Model.firstRecipe(block.recipes)
     if first_recipe ~= nil then
-      block.name = first_recipe.name
-      block.type = first_recipe.type
+      local recipe_prototype = RecipePrototype(first_recipe)
+      local icon_name, icon_type = recipe_prototype:getIcon()
+      block.name = icon_name
+      block.type = icon_type
     end
   end
 end
@@ -944,8 +949,10 @@ function ModelBuilder.downProductionRecipe(block, recipe, step)
     ---change block name
     local first_recipe = Model.firstRecipe(block.recipes)
     if first_recipe ~= nil then
-      block.name = first_recipe.name
-      block.type = first_recipe.type
+      local recipe_prototype = RecipePrototype(first_recipe)
+      local icon_name, icon_type = recipe_prototype:getIcon()
+      block.name = icon_name
+      block.type = icon_type
     end
   end
 end

@@ -284,6 +284,44 @@ function GuiTooltipModel:create()
 end
 
 -------------------------------------------------------------------------------
+---@class GuiTooltipRecipe
+GuiTooltipRecipe = newclass(GuiTooltip,function(base,...)
+  GuiTooltip.init(base,...)
+  base.classname = "HMGuiTooltip"
+end)
+
+-------------------------------------------------------------------------------
+---Create tooltip
+---@return table
+function GuiTooltipRecipe:create()
+  local tooltip = self._super.create(self)
+  local element = self.m_element
+  if element ~= nil then
+    local recipe_prototype = RecipePrototype(element)
+    local icon_name, icon_type = recipe_prototype:getIcon()
+    local element_icon = string.format("[%s=%s]", icon_type, icon_name)
+    table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=icon_type, name=icon_name}), helmod_tag.font.close, helmod_tag.color.close})
+    ---quantity
+    local total_count = Format.formatNumberElement(element.count)
+    if element.limit_count ~= nil then
+      local limit_count = Format.formatNumberElement(element.limit_count)
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.quantity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, limit_count or 0, "/", total_count, helmod_tag.font.close})
+    else
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.quantity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, total_count or 0, helmod_tag.font.close})
+    end
+    
+    self:appendProductInfo(tooltip, element);
+    self:appendEnergyConsumption(tooltip, element);
+    self:appendFlow(tooltip, element);
+    self:appendLogistic(tooltip, element);
+    self:appendControlInfo(tooltip, element);
+    self:appendDebug(tooltip, element)
+
+  end
+  return tooltip
+end
+
+-------------------------------------------------------------------------------
 ---@class GuiTooltipElement
 GuiTooltipElement = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
@@ -301,6 +339,7 @@ function GuiTooltipElement:create()
     if type == "resource" or type == "energy" then type = "entity" end
     if type == "rocket" then type = "item" end
     if type == "recipe-burnt" then type = "recipe" end
+    if type == "boiler" then type = "fluid" end
     local element_icon = string.format("[%s=%s]", type, element.name)
     table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=element.name}), helmod_tag.font.close, helmod_tag.color.close})
     ---quantity
