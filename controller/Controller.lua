@@ -204,13 +204,15 @@ end
 ---
 function Controller:bindController(player)
   if player ~= nil then
+    local main_icon_version = 1
     local lua_gui_element = Player.getGui("top")
     if lua_gui_element["helmod_menu-main"] ~= nil then lua_gui_element["helmod_menu-main"].destroy() end
     if lua_gui_element["helmod_planner-command"] ~= nil then lua_gui_element["helmod_planner-command"].destroy() end
 
     lua_gui_element = ModGui.get_button_flow(player)
-    if not(User.getModSetting("display_main_icon")) or User.getVersion() ~= User.version then
+    if not(User.getModSetting("display_main_icon")) or User.getParameter("main_icon_version") ~= main_icon_version then
       if lua_gui_element["helmod_planner-command"] ~= nil then lua_gui_element["helmod_planner-command"].destroy() end
+      User.setParameter("main_icon_version", main_icon_version)
     end
     if lua_gui_element ~= nil and lua_gui_element["helmod_planner-command"] == nil and User.getModSetting("display_main_icon") then
       local gui_button = GuiElement.add(lua_gui_element, GuiButton("helmod_planner-command"):sprite("menu", defines.sprites.calculator.white, defines.sprites.calculator.black):style("helmod_button_menu_dark"):tooltip({"helmod_planner-command"}))

@@ -6,7 +6,7 @@ local User = {
   classname = "HMUser",
   gui = "gui",
   prefixe = "helmod",
-  version = "0.12.10",
+  version = "0.9.12",
   tab_name = "HMProductionPanel",
   delay_tips = 60*10
 }
@@ -573,7 +573,7 @@ end
 -------------------------------------------------------------------------------
 ---update
 function User.update()
-  if User.getVersion() < User.version then
+  if User.getVersion() ~= User.version then
     User.reset()
   end
 end
