@@ -8,6 +8,7 @@ Date: ???
     - Added support for wind turbines
     - Added "Show hidden" option to item selector and fluid selector
     - Updated icons
+    - List of available fuels for a recipe is now sorted. Either by temperature or by joules
   Bugfixes:
     - Fixed steam engine's fluid consumption when input fluid is below maximum temperature
     - Most energy recipes were ignoring selected Base time

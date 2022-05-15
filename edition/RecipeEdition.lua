@@ -697,16 +697,18 @@ function RecipeEdition:updateFactoryInfo(event)
 
       if fuel_list ~= nil and factory_fuel ~= nil then
         local items = {}
-        for _,item in pairs(fuel_list) do
-          if (energy_type == "fluid") and item.temperature then
-            table.insert(items,string.format("[%s=%s] %s °C", fuel_type, item:native().name, item.temperature))
-          else
-            table.insert(items,string.format("[%s=%s] %s", fuel_type, item:native().name, Format.formatNumberKilo(item:getFuelValue(), "J")))
+        if (energy_type == "fluid") and (not factory_prototype:getBurnsFluid()) then
+          for _,item in spairs(fuel_list, function(t,a,b) return t[b].temperature > t[a].temperature end) do
+            table.insert(items, string.format("[%s=%s] %s °C", fuel_type, item:native().name, item.temperature))
+          end
+        else
+          for _,item in spairs(fuel_list, function(t,a,b) return t[b]:getFuelValue() > t[a]:getFuelValue() end) do
+            table.insert(items, string.format("[%s=%s] %s", fuel_type, item:native().name, Format.formatNumberKilo(item:getFuelValue(), "J")))
           end
         end
 
         local default_fuel
-        if (energy_type == "fluid") and factory_fuel.temperature then
+        if (energy_type == "fluid") and (not factory_prototype:getBurnsFluid()) then
           default_fuel = string.format("[%s=%s] %s °C", fuel_type, factory_fuel:native().name, factory_fuel.temperature)
         else
           default_fuel = string.format("[%s=%s] %s", fuel_type, factory_fuel:native().name, Format.formatNumberKilo(factory_fuel:getFuelValue(), "J"))
