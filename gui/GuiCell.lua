@@ -167,7 +167,7 @@ function GuiCell:add_infoIcon(button, info_icon)
   local tooltip = nil
   if type == "recipe-burnt" then 
     tooltip = "tooltip.burnt-recipe"
-    sprite_name = GuiElement.getSprite(defines.sprite_info.developer)
+    sprite_name = GuiElement.getSprite(defines.sprite_info.burnt)
   end
   if type == "rocket" then 
     tooltip = "tooltip.rocket-recipe"
@@ -187,17 +187,14 @@ function GuiCell:add_infoIcon(button, info_icon)
   end
   if type == "energy" then 
     tooltip = "tooltip.energy-recipe"
-    sprite_name = GuiElement.getSprite(defines.sprite_info.energy)
-    
+    sprite_name = GuiElement.getSprite(defines.sprite_info.energy)    
   end
   if type == "burnt" then 
     tooltip = "tooltip.burnt-product"
-    sprite_name = GuiElement.getSprite(defines.sprite_info.burnt)
-    
+    sprite_name = GuiElement.getSprite(defines.sprite_info.burnt)    
   end
   if type == "block" then
-    sprite_name = GuiElement.getSprite(defines.sprite_info.block)
-    
+    sprite_name = GuiElement.getSprite(defines.sprite_info.block)    
   end
   if sprite_name ~= nil then
     local container = GuiElement.add(button, GuiFlow(type))
@@ -393,9 +390,11 @@ function GuiCellRecipe:create(parent)
   local recipe = self.element or {}
   local cell = GuiElement.add(parent, GuiFlowV(recipe.name, self.m_index))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
-
-  local tooltip = GuiTooltipElement(self.options.tooltip):element(recipe)
-  local recipe_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(recipe.type, recipe.name):tooltip(tooltip))
+  
+  local recipe_prototype = RecipePrototype(recipe)
+  local icon_name, icon_type = recipe_prototype:getIcon()
+  local tooltip = GuiTooltipRecipe(self.options.tooltip):element(recipe)
+  local recipe_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(icon_type, icon_name):tooltip(tooltip))
   
   self:add_overlay(recipe_icon)
   self:add_infoIcon(recipe_icon)

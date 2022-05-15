@@ -4,9 +4,9 @@
 -- 
 Technology = newclass(Prototype,function(base, object)
   if object ~= nil and type(object) == "string" then
-    Prototype.init(base, Player.getTechnologyPrototype(object))
+    Prototype.init(base, Player.getTechnology(object))
   elseif object ~= nil and object.name ~= nil then
-    Prototype.init(base, Player.getTechnologyPrototype(object.name))
+    Prototype.init(base, Player.getTechnology(object.name))
   end
   base.classname = "HMTechnology"
 end)
@@ -81,6 +81,6 @@ end
 --
 function Technology:isResearched()
   if self.lua_prototype == nil then return false end
-  local technology = Player.getTechnology(self.lua_prototype.name)
+  local technology = Player.getPlayerTechnology(self.lua_prototype.name)
   return technology.researched
 end

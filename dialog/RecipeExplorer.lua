@@ -211,7 +211,8 @@ function RecipeExplorer:addCell(parent, recipe, index)
         GuiElement.add(cell_products, GuiCellElementSm(self.classname, "add-parent", product.type, product.name, recipe.id or 0):element(product):tooltip("tooltip.add-recipe"):index(index):color(GuiElement.color_button_none))
       end
       ---recipe
-      local button = GuiElement.add(cell_table, GuiButtonSprite(self.classname, "remove-child", recipe.type, recipe.name, recipe.id or 0):choose(recipe.type, recipe.name))
+      local icon_name, icon_type = recipe_prototype:getIcon()
+      local button = GuiElement.add(cell_table, GuiButtonSprite(self.classname, "remove-child", recipe.type, recipe.name, recipe.id or 0):choose(icon_type, icon_name, recipe_prototype.name))
       button.locked = true
       if recipe.type ~= "recipe" then
         local sprite = GuiElement.add(button, GuiSprite("info"):sprite("developer"):tooltip({"tooltip.resource-recipe"}))

@@ -52,7 +52,7 @@ end
 ---@param block table
 function ModelCompute.checkUnlinkedBlock(model, block)
   local unlinked = true
-  local recipe = Player.getRecipe(block.name)
+  local recipe = Player.getPlayerRecipe(block.name)
   if recipe ~= nil then
     if model.blocks ~= nil then
       for _, current_block in spairs(model.blocks,function(t,a,b) return t[b].index > t[a].index end) do

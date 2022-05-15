@@ -87,7 +87,7 @@ end
 function Player.beginCrafting(item, count)
   if Lua_player == nil then return nil end
   local filters = {{filter = "has-product-item", elem_filters = {{filter = "name", name = item}}}}
-  local recipes = Player.getRecipePrototypes(filters)
+  local recipes = game.get_filtered_recipe_prototypes(filters)
   if recipes ~= nil and table.size(recipes) > 0 then
     local first_recipe = Model.firstRecipe(recipes)
     local craft = {count=math.ceil(count),recipe=first_recipe.name,silent=false}
@@ -203,7 +203,6 @@ function Player.setShortcutState(state)
   end
 end
 
-
 -------------------------------------------------------------------------------
 ---Return item type
 ---@param element LuaPrototype
@@ -222,18 +221,6 @@ function Player.getItemIconType(element)
 end
 
 -------------------------------------------------------------------------------
----Return entity type
----@param element LuaPrototype
----@return string
-function Player.getEntityIconType(element)
-  local item = Player.getEntityPrototype(element.name)
-  if item ~= nil then
-    return "entity"
-  end
-  return Player.getItemIconType(element)
-end
-
--------------------------------------------------------------------------------
 ---Return localised name
 ---@param element LuaPrototype
 ---@return string|table
@@ -241,13 +228,13 @@ function Player.getLocalisedName(element)
   local localisedName = element.name
   if element.type ~= nil then
     if element.type == "recipe" or element.type == "recipe-burnt" then
-      local recipe = Player.getRecipe(element.name)
+      local recipe = Player.getPlayerRecipe(element.name)
       if recipe ~= nil then
         localisedName = recipe.localised_name
       end
     end
     if element.type == "technology" then
-      local technology = Player.getTechnology(element.name)
+      local technology = Player.getPlayerTechnology(element.name)
       if technology ~= nil then
         localisedName = technology.localised_name
       end
@@ -289,7 +276,7 @@ end
 ---@param prototype LuaPrototype
 ---@return string|table
 function Player.getRecipeLocalisedName(prototype)
-  local element = Player.getRecipe(prototype.name)
+  local element = Player.getPlayerRecipe(prototype.name)
   if element ~= nil then
     return element.localised_name
   end
@@ -301,7 +288,7 @@ end
 ---@param prototype LuaPrototype
 ---@return string|table
 function Player.getTechnologyLocalisedName(prototype)
-  local element = Player.getTechnology(prototype.name)
+  local element = Player.getPlayerTechnology(prototype.name)
   if element ~= nil then
     return element.localised_name
   end
@@ -311,18 +298,17 @@ end
 -------------------------------------------------------------------------------
 ---Return recipes
 ---@return table
-function Player.getRecipes()
-  return Player.getForce().recipes
+function Player.getPlayerRecipes()
+  if Lua_player ~= nil then
+    return Player.getForce().recipes
+  end
+  return {}
 end
 
 -------------------------------------------------------------------------------
 ---Return recipe prototypes
----@param filters table
 ---@return table
-function Player.getRecipePrototypes(filters)
-  if filters ~= nil then
-    return game.get_filtered_recipe_prototypes(filters)
-  end
+function Player.getRecipes()
   return game.recipe_prototypes
 end
 
@@ -330,7 +316,7 @@ end
 ---Return technologie prototypes
 ---@param filters table
 ---@return table
-function Player.getTechnologiePrototypes(filters)
+function Player.getTechnologies(filters)
   if filters ~= nil then
     return game.get_filtered_technology_prototypes(filters)
   end
@@ -341,28 +327,34 @@ end
 ---Return technology prototype
 ---@param name string
 ---@return LuaTechnologyPrototype
-function Player.getTechnologyPrototype(name)
+function Player.getTechnology(name)
   return game.technology_prototypes[name]
 end
 
 -------------------------------------------------------------------------------
 ---Return technologies
 ---@return table
-function Player.getTechnologies()
-  local technologies = {}
-  for _,technology in pairs(Player.getForce().technologies) do
-    technologies[technology.name] = technology
+function Player.getPlayerTechnologies()
+  if Lua_player ~= nil then
+    local technologies = {}
+    for _,technology in pairs(Player.getForce().technologies) do
+      technologies[technology.name] = technology
+    end
+    return technologies
   end
-  return technologies
+  return {}
 end
 
 -------------------------------------------------------------------------------
 ---Return technology
 ---@param name string
 ---@return LuaTechnology
-function Player.getTechnology(name)
-  local technology = Player.getForce().technologies[name]
-  return technology
+function Player.getPlayerTechnology(name)
+  if Lua_player ~= nil then
+    local technology = Player.getForce().technologies[name]
+    return technology
+  end
+  return nil
 end
 
 -------------------------------------------------------------------------------
@@ -497,9 +489,6 @@ function Player.getProductionsCrafting(category, lua_recipe)
     productions["character"] = game.entity_prototypes["character"]
   elseif lua_recipe.name ~= nil and category == "fluid" then
     for key, lua_entity in pairs(Player.getOffshorePumps(lua_recipe.name)) do
-      productions[lua_entity.name] = lua_entity
-    end
-    for key, lua_entity in pairs(Player.getBoilers(lua_recipe.name)) do
       productions[lua_entity.name] = lua_entity
     end
   else
@@ -712,6 +701,47 @@ function Player.getBoilers(fluid_name)
 end
 
 -------------------------------------------------------------------------------
+---Return table of boiler recipes
+---@return table
+function Player.getBoilersForRecipe(recipe_prototype)
+  local boilers = {}
+
+  for boiler_name, boiler in pairs(Player.getBoilers()) do
+    ---Check temperature
+    if boiler.target_temperature ~= recipe_prototype.output_fluid_temperature then
+      goto continue
+    end
+
+    ---Check input fluid
+    local input_fluid
+    local fluidbox = boiler.fluidbox_prototypes[1]
+    if fluidbox.filter then
+      input_fluid = fluidbox.filter.name
+    end
+    if input_fluid ~= recipe_prototype.input_fluid_name then
+      goto continue
+    end
+
+    ---Check output fluid
+    local output_fluid
+    for _, fluidbox in pairs(boiler.fluidbox_prototypes) do
+      if fluidbox.filter and fluidbox.production_type == "output" then
+        output_fluid = fluidbox.filter.name
+      end
+    end
+    if output_fluid ~= recipe_prototype.output_fluid_name then
+      goto continue
+    end
+    
+    boilers[boiler_name] = boiler
+
+    ::continue::
+  end
+
+  return boilers
+end
+
+-------------------------------------------------------------------------------
 ---Return list of Offshore-Pump
 ---@param fluid_name string
 ---@return table
@@ -753,7 +783,7 @@ end
 ---Return recipe prototype
 ---@param name string
 ---@return LuaRecipe
-function Player.getRecipePrototype(name)
+function Player.getRecipe(name)
   if name == nil then return nil end
   return game.recipe_prototypes[name]
 end
@@ -762,20 +792,15 @@ end
 ---Return recipe
 ---@param name string
 ---@return LuaRecipe
-function Player.getRecipe(name)
-  return Player.getForce().recipes[name]
+function Player.getPlayerRecipe(name)
+  if Lua_player ~= nil then
+    return Player.getForce().recipes[name]
+  end
+  return nil
 end
 
--------------------------------------------------------------------------------
----Return resource recipe
----@param name string
----@return table
-function Player.getRecipeEntity(name)
-  local entity_prototype = EntityPrototype(name)
+function Player.buildResourceRecipe(entity_prototype)
   local prototype = entity_prototype:native()
-  local type = "item"
-  if name == "crude-oil" then type = "entity" end
-  --local ingredients = {{name=prototype.name, type=type, amount=1}}
   local ingredients = {}
   if entity_prototype:getMineableMiningFluidRequired() then
     local fluid_ingredient = {name=entity_prototype:getMineableMiningFluidRequired(), type="fluid", amount=entity_prototype:getMineableMiningFluidAmount()}
@@ -787,7 +812,7 @@ function Player.getRecipeEntity(name)
   recipe.energy = 1
   recipe.force = {}
   recipe.group = {name="helmod", order="zzzz"}
-  recipe.subgroup = prototype.subgroup
+  recipe.subgroup = {name="resource", order="aaaa"}
   recipe.hidden = false
   if prototype.flags ~= nil then
     recipe.hidden = prototype.flags["hidden"] or false
@@ -799,63 +824,216 @@ function Player.getRecipeEntity(name)
   recipe.name = prototype.name
   recipe.prototype = {}
   recipe.valid = true
+
   return recipe
 end
 
 -------------------------------------------------------------------------------
----Return recipe
+---Return resource recipes
+---@return table
+function Player.getResourceRecipes()
+  local recipes = {}
+
+  for key, prototype in pairs(game.entity_prototypes) do
+    if prototype.name ~= nil and prototype.resource_category ~= nil then
+      recipe = Player.buildResourceRecipe(EntityPrototype(prototype))
+      recipes[recipe.name] = recipe
+    end
+  end
+
+  return recipes
+end
+
+-------------------------------------------------------------------------------
+---Return resource recipe
 ---@param name string
 ---@return table
-function Player.getRecipeFluid(name)
-  local fluid_prototype = FluidPrototype(name)
-  local prototype = fluid_prototype:native()
-  local products = {{name=prototype.name, type="fluid", amount=1}}
-  local ingredients = {{name=prototype.name, type="fluid", amount=1}}
-  if prototype.name == "steam" then
-    ingredients = {{name="water", type="fluid", amount=1}}
-  end
+function Player.getResourceRecipe(name)
+  local entity_prototype = EntityPrototype(name)
+  local recipe = Player.buildResourceRecipe(entity_prototype)
+
+  return recipe
+end
+
+-------------------------------------------------------------------------------
+---Return energy recipe
+---@param name string
+---@return table
+function Player.getEnergyRecipe(name)
+  local entity_prototype = EntityPrototype(name)
+  local prototype = entity_prototype:native()
   local recipe = {}
-  recipe.category = prototype.name
+  recipe.category = "energy"
   recipe.enabled = true
   recipe.energy = 1
   recipe.force = {}
   recipe.group = {name="helmod", order="zzzz"}
-  recipe.subgroup = prototype.subgroup
+  recipe.subgroup = {name="energy", order="aaaa"}
   recipe.hidden = false
-  recipe.ingredients = ingredients
-  recipe.products = products
+  if prototype.flags ~= nil then
+    recipe.hidden = prototype.flags["hidden"] or false
+  end
+  recipe.ingredients = {}
+  recipe.products = {}
   recipe.localised_description = prototype.localised_description
   recipe.localised_name = prototype.localised_name
   recipe.name = prototype.name
   recipe.prototype = {}
   recipe.valid = true
+
   return recipe
+end
+
+-------------------------------------------------------------------------------
+---Return table of fluid recipes
+---@return table
+function Player.getFluidRecipes()
+  local recipes = {}
+
+  ---Offshore pumps
+  local filters = {}
+  table.insert(filters, {filter="type", type="offshore-pump", mode="or"})
+  local entities = game.get_filtered_entity_prototypes(filters)
+  for key, entity in pairs(entities) do
+    for _, fluidbox in pairs(entity.fluidbox_prototypes) do
+      if #fluidbox.pipe_connections > 0 then
+        local recipe = Player.buildFluidRecipe(entity.fluid.name, {}, nil)
+        recipe.subgroup = {name="offshore-pump", order="bbbb"}
+        if not recipes[entity.fluid.name] then
+          recipes[entity.fluid.name] = recipe
+        end
+        if entity.has_flag("hidden") then
+          recipes[entity.fluid.name].hidden = true
+        end
+      end
+    end
+  end
+
+  return recipes
 end
 
 -------------------------------------------------------------------------------
 ---Return recipe
 ---@param name string
 ---@return table
-function Player.getRecipeRocket(name)
+function Player.getFluidRecipe(name)
+  local recipes = Player.getFluidRecipes()
+  return recipes[name]
+end
+
+-------------------------------------------------------------------------------
+---Return table of boiler recipes
+---@return table
+function Player.getBoilerRecipes()
+  local recipes = {}
+
+  ---Boilers
+  local boilers = Player.getBoilers()
+
+  for boiler_name, boiler in pairs(boilers) do
+    local input_fluid
+    local output_fluid
+
+    local fluidbox = boiler.fluidbox_prototypes[1]
+    if fluidbox.filter then
+      input_fluid = fluidbox.filter.name
+    end
+
+    for _, fluidbox in pairs(boiler.fluidbox_prototypes) do
+      if fluidbox.filter and fluidbox.production_type == "output" then
+        output_fluid = fluidbox.filter.name
+      end
+    end
+
+    if input_fluid ~= nil and output_fluid ~= nil then
+      local ingredients = {{name=input_fluid, type="fluid", amount=1}}
+      local fluid_prototype = FluidPrototype(output_fluid)
+      local recipe = Player.buildFluidRecipe(fluid_prototype, ingredients, boiler.target_temperature)
+      recipe.subgroup = {name="boiler", order="cccc"}
+      recipe.input_fluid_name = input_fluid
+      recipe.output_fluid_name = output_fluid
+      recipe.output_fluid_temperature = boiler.target_temperature
+
+      if not recipes[recipe.name] then
+        recipes[recipe.name] = recipe
+      end
+      if boiler.has_flag("hidden") then
+        recipes[recipe.name].hidden = true
+      end
+    end
+  end
+
+  return recipes
+end
+
+-------------------------------------------------------------------------------
+---Return recipe
+---@param name string
+---@return table
+function Player.getBoilerRecipe(name)
+  local recipes = Player.getBoilerRecipes()
+  return recipes[name]
+end
+
+-------------------------------------------------------------------------------
+---Return recipe
+---@param ingredients table
+---@param fluid string|table
+---@param temperature number
+---@return table
+function Player.buildFluidRecipe(fluid, ingredients, temperature)
+  local fluid_prototype
+  if type(fluid) == "string" then
+    fluid_prototype = FluidPrototype(fluid)
+  else
+    fluid_prototype = fluid
+  end
+
+  local prototype = fluid_prototype:native()
+  local products = {{name=prototype.name, type="fluid", amount=1, temperature=temperature}}
+  local recipe = {}
+  recipe.enabled = true
+  recipe.energy = 1
+  recipe.force = {}
+  recipe.group = {name="helmod", order="zzzz"}
+  recipe.subgroup = {}
+  recipe.hidden = false
+  recipe.ingredients = ingredients
+  recipe.products = products
+  recipe.localised_description = prototype.localised_description
+  recipe.localised_name = prototype.localised_name
+  if temperature ~= nil then
+    recipe.name = string.format("%s#%s", prototype.name, temperature)
+  else
+    recipe.name = prototype.name
+  end
+  if #ingredients > 0 then
+    recipe.name = string.format("%s->%s", ingredients[1].name, recipe.name)
+  end
+  recipe.category = recipe.name
+  recipe.prototype = {}
+  recipe.valid = true
+
+  return recipe
+end
+
+function Player.buildRocketRecipe(prototype)
   ---Prepare launch = 15s
   local rocket_part_prototype = RecipePrototype("rocket-part"):native()
   local rocket_prototype = EntityPrototype("rocket-silo"):native()
-  local item_prototype = ItemPrototype(name)
-  local prototype = item_prototype:native()
   local products = prototype.rocket_launch_products
   local ingredients = rocket_part_prototype.ingredients
   for _,ingredient in pairs(ingredients) do
     ingredient.amount= ingredient.amount * rocket_prototype.rocket_parts_required
   end
-  table.insert(ingredients, {name=name, type="item", amount=1, constant=true})
+  table.insert(ingredients, {name=prototype.name, type="item", amount=1, constant=true})
   local recipe = {}
   recipe.category = rocket_part_prototype.category
   recipe.enabled = true
   recipe.energy = rocket_part_prototype.energy * rocket_prototype.rocket_parts_required + 15
   recipe.force = {}
-  --recipe.group = prototype.group
   recipe.group = {name="helmod", order="zzzz"}
-  recipe.subgroup = prototype.subgroup
+  recipe.subgroup = {name="rocket", order="dddd"}
   recipe.hidden = false
   recipe.ingredients = ingredients
   recipe.products = products
@@ -864,6 +1042,36 @@ function Player.getRecipeRocket(name)
   recipe.name = prototype.name
   recipe.prototype = {}
   recipe.valid = true
+
+  return recipe
+end
+
+-------------------------------------------------------------------------------
+---Return table of recipe
+---@return table
+function Player.getRocketRecipes()
+  local recipes = {}
+  
+  if Player.getRecipe("rocket-part") ~= nil and Player.getRecipe("rocket-silo") ~= nil then
+    for key, item_prototype in pairs(Player.getItemPrototypes()) do
+      if item_prototype.rocket_launch_products ~= nil and table.size(item_prototype.rocket_launch_products) > 0 then
+        local recipe = Player.buildRocketRecipe(item_prototype)
+        recipes[recipe.name] = recipe
+      end
+    end
+  end
+  return recipes
+end
+
+-------------------------------------------------------------------------------
+---Return recipe
+---@param name string
+---@return table
+function Player.getRocketRecipe(name)
+  local item_prototype = ItemPrototype(name)
+  local prototype = item_prototype:native()
+  local recipe = Player.buildRocketRecipe(prototype)
+
   return recipe
 end
 
@@ -871,16 +1079,15 @@ end
 ---Return recipe
 ---@param name string
 ---@return table
-function Player.getRecipeBurnt(name)
-  local recipe_prototype = Player.getRecipePrototype(name)
+function Player.getBurntRecipe(name)
+  local recipe_prototype = Player.getRecipe(name)
   local recipe = {}
   recipe.category = recipe_prototype.category
   recipe.enabled = true
   recipe.energy = recipe_prototype.energy
   recipe.force = {}
-  --recipe.group = prototype.group
   recipe.group = {name="helmod", order="zzzz"}
-  recipe.subgroup = recipe_prototype.subgroup
+  recipe.subgroup = {name="recipe-burnt", order="eeee"}
   recipe.hidden = false
   recipe.ingredients = recipe_prototype.ingredients
   recipe.products = recipe_prototype.products
@@ -890,30 +1097,7 @@ function Player.getRecipeBurnt(name)
   recipe.prototype = {}
   recipe.valid = true
   recipe.hidden_from_player_crafting = recipe_prototype.hidden_from_player_crafting
-  return recipe
-end
 
--------------------------------------------------------------------------------
----Return recipe
----@param name string
----@return table
-function Player.getRecipeTechnology(name)
-  local technology_prototype = Player.getTechnology(name)
-  local recipe = {}
-  recipe.category = "technology"
-  recipe.enabled = true
-  recipe.energy = technology_prototype.research_unit_energy/60
-  recipe.force = technology_prototype.force
-  recipe.group = {}
-  recipe.subgroup = {}
-  recipe.hidden = false
-  recipe.ingredients = {}
-  recipe.products = {}
-  recipe.localised_description = technology_prototype.localised_description
-  recipe.localised_name = technology_prototype.localised_name
-  recipe.name = technology_prototype.name
-  recipe.prototype = technology_prototype.prototype
-  recipe.valid = true
   return recipe
 end
 
@@ -925,7 +1109,7 @@ end
 function Player.searchRecipe(element_name, by_ingredient)
   local recipes = {}
   ---recherche dans les produits des recipes
-  for key, recipe in pairs(Player.getRecipes()) do
+  for key, recipe in pairs(Player.getPlayerRecipes()) do
     local elements = recipe.products or {}
     if by_ingredient == true then elements = recipe.ingredients or {} end
     for k, element in pairs(elements) do
@@ -945,9 +1129,14 @@ function Player.searchRecipe(element_name, by_ingredient)
     end
   end
   ---recherche dans les fluids
-  for key, fluid in pairs(Player.getFluidPrototypes()) do
-    if fluid.name == element_name then
-      table.insert(recipes,{name=fluid.name, type="fluid"})
+  for key, recipe in pairs(Player.getFluidRecipes()) do
+    if recipe.name == element_name then
+      table.insert(recipes, {name=recipe.name, type="fluid"})
+    end
+  end
+  for key, recipe in pairs(Player.getBoilerRecipes()) do
+    if recipe.name == element_name then
+      table.insert(recipes, {name=recipe.name, type="boiler"})
     end
   end
   return recipes
