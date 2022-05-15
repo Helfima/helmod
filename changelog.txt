@@ -9,6 +9,7 @@ Date: ???
     - Added "Show hidden" option to item selector and fluid selector
     - Updated icons
     - List each available temperature of steam separately in the recipe selector
+    - List of available fuels for a recipe is now sorted. Either by temperature or by joules
   Bugfixes:
     - Fixed steam engine's fluid consumption when input fluid is below maximum temperature
     - Most energy recipes were ignoring selected Base time

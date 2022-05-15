@@ -209,7 +209,7 @@ function Controller:bindController(player)
     if lua_gui_element["helmod_planner-command"] ~= nil then lua_gui_element["helmod_planner-command"].destroy() end
 
     lua_gui_element = ModGui.get_button_flow(player)
-    if not(User.getModSetting("display_main_icon")) or User.getVersion() < User.version then
+    if not(User.getModSetting("display_main_icon")) or User.getVersion() ~= User.version then
       if lua_gui_element["helmod_planner-command"] ~= nil then lua_gui_element["helmod_planner-command"].destroy() end
     end
     if lua_gui_element ~= nil and lua_gui_element["helmod_planner-command"] == nil and User.getModSetting("display_main_icon") then
