@@ -143,7 +143,7 @@ function RecipeSelector:buildPrototypeTooltipLine(item)
     table.insert(line, helmod_tag.font.close)
     table.insert(line, item.name)
    else
-    table.insert(line, string.format("[%s=%s]", item.type, item.name))
+    table.insert(line, string.format("[%s=%s] ", item.type, item.name))
     table.insert(line, {string.format("%s-name.%s", item.type, item.name)})
     if item.temperature then
       table.insert(line, string.format(" (%s °C)", item.temperature))
@@ -158,7 +158,7 @@ end
 ---@param prototype table
 ---@return table
 function RecipeSelector:buildPrototypeTooltip(prototype)
-  if prototype.type ~= "boiler" then
+  if prototype.type ~= "boiler" and prototype.type ~= "fluid" then
     return ""
   end
   ---initalize tooltip
@@ -183,12 +183,17 @@ function RecipeSelector:buildPrototypeTooltip(prototype)
     end
   end
   ---made in
-  local boilers = Player.getBoilersForRecipe(recipe_prototype)
-  if table.size(boilers) > 0 then
+  local entities = ""
+  if prototype.type == "boiler" then
+    entities = Player.getBoilersForRecipe(recipe_prototype)
+  elseif prototype.type == "fluid" then
+    entities = Player.getOffshorePumps(prototype.name)
+  end
+  if table.size(entities) > 0 then
     table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.made-in"}, ":", helmod_tag.color.close, helmod_tag.font.close})
-    for _, boiler in pairs(boilers) do
-      local entity_prototype = EntityPrototype(boiler)
-      table.insert(tooltip, {"", "\n", string.format("[%s=%s]", "entity", boiler.name), entity_prototype:getLocalisedName()})
+    for _, entity in pairs(entities) do
+      local entity_prototype = EntityPrototype(entity)
+      table.insert(tooltip, {"", "\n", string.format("[%s=%s] ", "entity", entity.name), entity_prototype:getLocalisedName()})
     end
   end
   return tooltip

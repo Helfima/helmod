@@ -90,7 +90,7 @@ function EnergySelector:buildPrototypeTooltipLine(item)
     quantity = Format.formatNumberKilo(item.amount, "W")
     detail = item.name
    else
-    icon = string.format("[%s=%s]", item.type, item.name)
+    icon = string.format("[%s=%s] ", item.type, item.name)
     quantity = Format.formatNumberElement(item.amount)
     detail = {string.format("%s-name.%s", item.type, item.name)}
   end
