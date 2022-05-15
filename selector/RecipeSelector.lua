@@ -217,5 +217,8 @@ function RecipeSelector:buildPrototypeIcon(gui_element, prototype, tooltip)
   local button_prototype = GuiButtonSelectSprite(self.classname, "element-select", prototype.type):choose(icon_type, icon_name, prototype.name):color(color):tooltip(tooltip)
   local button = GuiElement.add(gui_element, button_prototype)
   button.locked = true
+  if prototype.type == "boiler" then
+    prototype.output_fluid_temperature = recipe_prototype.output_fluid_temperature
+  end
   GuiElement.infoRecipe(button, prototype)
 end

@@ -279,8 +279,7 @@ function GuiElement.infoRecipe(parent, element)
     tooltip = {"tooltip.energy-recipe"}
   elseif element.type == "boiler" then
     local style = "helmod_label_element_black_m"
-    local T = string.gsub(element.name, ".*#", "")
-    local caption = {"",  T, "°"}
+    local caption = {"",  element.output_fluid_temperature, "°"}
     local label = GuiElement.add(parent, GuiLabel("temperature"):caption(caption):style(style))
     label.style.top_padding = -5
   elseif element.type ~= "recipe" then
