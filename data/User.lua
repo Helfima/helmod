@@ -6,7 +6,7 @@ local User = {
   classname = "HMUser",
   gui = "gui",
   prefixe = "helmod",
-  version = "0.9.12",
+  version = "0.12.10",
   tab_name = "HMProductionPanel",
   delay_tips = 60*10
 }
