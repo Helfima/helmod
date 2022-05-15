@@ -662,7 +662,7 @@ function AbstractSelector:updateItemList(event)
         self:buildPrototypeIcon(guiRecipeSubgroup, prototype, tooltip)
       end
     end
-else
+  else
     event.message = "Empty list"
     Dispatcher:send("on_gui_message", event, self.classname)
   end

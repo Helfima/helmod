@@ -130,6 +130,71 @@ function RecipeSelector:updateUnlockRecipesCache()
 end
 
 -------------------------------------------------------------------------------
+---Build prototype tooltip line
+---@param ingredient / product table
+---@return table
+function RecipeSelector:buildPrototypeTooltipLine(item)
+  local line = {"", "\n"}
+  if item.type == "energy" then
+    local sprite = GuiElement.getSprite(defines.sprite_tooltips[item.name])
+    table.insert(line, string.format("[img=%s]", sprite))
+    table.insert(line, helmod_tag.font.default_bold)
+    table.insert(line, Format.formatNumberKilo(item.amount,"W"))
+    table.insert(line, helmod_tag.font.close)
+    table.insert(line, item.name)
+   else
+    table.insert(line, string.format("[%s=%s]", item.type, item.name))
+    table.insert(line, {string.format("%s-name.%s", item.type, item.name)})
+    if item.temperature then
+      table.insert(line, string.format(" (%s °C)", item.temperature))
+    end
+  end
+
+  return line
+end
+
+-------------------------------------------------------------------------------
+---Build prototype tooltip
+---@param prototype table
+---@return table
+function RecipeSelector:buildPrototypeTooltip(prototype)
+  if prototype.type ~= "boiler" then
+    return ""
+  end
+  ---initalize tooltip
+  local recipe_prototype = RecipePrototype(prototype.name, prototype.type)
+  local recipe_name = recipe_prototype:getLocalisedName()
+  local tooltip = {""}
+  table.insert(tooltip, {"", helmod_tag.font.default_bold, recipe_name, helmod_tag.font.close})
+  ---ingredients
+  local ingredients = recipe_prototype:getIngredients()
+  if table.size(ingredients) > 0 then
+    table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.ingredients"}, ":", helmod_tag.color.close, helmod_tag.font.close})
+    for _, ingredient in pairs(ingredients) do
+      table.insert(tooltip, RecipeSelector:buildPrototypeTooltipLine(ingredient))
+    end
+  end
+  ---products
+  local products = recipe_prototype:getProducts()
+  if table.size(products) > 0 then
+    table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.products"}, ":", helmod_tag.color.close, helmod_tag.font.close})
+    for _, product in pairs(products) do
+      table.insert(tooltip, RecipeSelector:buildPrototypeTooltipLine(product))
+    end
+  end
+  ---made in
+  local boilers = Player.getBoilersForRecipe(recipe_prototype)
+  if table.size(boilers) > 0 then
+    table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.made-in"}, ":", helmod_tag.color.close, helmod_tag.font.close})
+    for _, boiler in pairs(boilers) do
+      local entity_prototype = EntityPrototype(boiler)
+      table.insert(tooltip, {"", "\n", string.format("[%s=%s]", "entity", boiler.name), entity_prototype:getLocalisedName()})
+    end
+  end
+  return tooltip
+end
+
+-------------------------------------------------------------------------------
 ---Create prototype icon
 ---@param gui_element GuiLuaElement
 ---@param prototype table
@@ -144,9 +209,8 @@ function RecipeSelector:buildPrototypeIcon(gui_element, prototype, tooltip)
     color = "red"
   end
   local icon_name, icon_type = recipe_prototype:getIcon()
-  local button_prototype = GuiButtonSelectSprite(self.classname, "element-select", prototype.type):choose(icon_type, icon_name, prototype.name):color(color)
+  local button_prototype = GuiButtonSelectSprite(self.classname, "element-select", prototype.type):choose(icon_type, icon_name, prototype.name):color(color):tooltip(tooltip)
   local button = GuiElement.add(gui_element, button_prototype)
   button.locked = true
   GuiElement.infoRecipe(button, prototype)
 end
-

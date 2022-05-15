@@ -259,7 +259,7 @@ end
 ---@return table
 function RecipePrototype:getRawIngredients()
   if self.lua_prototype ~= nil then
-    if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" or self.lua_type == "resource" or self.lua_type == "fluid" or self.lua_type == "rocket" then
+    if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" or self.lua_type == "resource" or self.lua_type == "fluid" or self.lua_type == "rocket" or self.lua_type == "boiler" then
       return self.lua_prototype.ingredients
     elseif self.lua_type == "technology" then
       return self.lua_prototype.research_unit_ingredients

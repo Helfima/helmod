@@ -77,6 +77,31 @@ function EnergySelector:updateGroups(list_products, list_ingredients, list_trans
 end
 
 -------------------------------------------------------------------------------
+---Build prototype tooltip line
+---@param ingredient / product table
+---@return table
+function EnergySelector:buildPrototypeTooltipLine(item)
+  local icon
+  local quantity
+  local detail
+  if item.type == "energy" then
+    local sprite = GuiElement.getSprite(defines.sprite_tooltips[item.name])
+    icon = string.format("[img=%s]", sprite)
+    quantity = Format.formatNumberKilo(item.amount, "W")
+    detail = item.name
+   else
+    icon = string.format("[%s=%s]", item.type, item.name)
+    quantity = Format.formatNumberElement(item.amount)
+    detail = {string.format("%s-name.%s", item.type, item.name)}
+  end
+  local line = {"", "\n", icon, helmod_tag.font.default_bold, quantity, " x ", helmod_tag.font.close, detail}
+  if item.temperature then
+    table.insert(line, string.format(" (%s °C)", item.temperature))
+  end
+  return line
+end
+
+-------------------------------------------------------------------------------
 ---Build prototype tooltip
 ---@param prototype table
 ---@return table
@@ -86,36 +111,21 @@ function EnergySelector:buildPrototypeTooltip(prototype)
   local entity_prototype = EntityPrototype(prototype)
   local energy_name = entity_prototype:getLocalisedName()
   local tooltip = {""}
-  table.insert(tooltip, energy_name)
-  --table.insert(tooltip, {"", "\n",entity_prototype:getType()})
-  ---products
-  local products = recipe_prototype:getProducts(prototype)
-  if table.size(products) > 0 then
-    table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.products"}, ":", helmod_tag.color.close, helmod_tag.font.close})
-    for _,product in pairs(products) do
-      if product.type == "energy" and defines.sprite_tooltips[product.name] ~= nil then
-        local sprite = GuiElement.getSprite(defines.sprite_tooltips[product.name])
-        table.insert(tooltip, {"", "\n", string.format("[img=%s]", sprite), helmod_tag.font.default_bold, " x ", Format.formatNumberKilo(product.amount,"W"), helmod_tag.font.close})
-      elseif product.temperature then
-        table.insert(tooltip, {"", "\n", string.format("[%s=%s]", product.type, product.name), helmod_tag.font.default_bold, string.format(" %s °C x ", product.temperature), Format.formatNumberElement(product.amount), helmod_tag.font.close})
-      else
-        table.insert(tooltip, {"", "\n", string.format("[%s=%s]", product.type, product.name), helmod_tag.font.default_bold, " x ", Format.formatNumberElement(product.amount), helmod_tag.font.close})
-      end
-    end
-  end
+  table.insert(tooltip, {"", helmod_tag.font.default_bold, energy_name, helmod_tag.font.close})
   ---ingredients
   local ingredients = recipe_prototype:getIngredients(prototype)
   if table.size(ingredients) > 0 then
     table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.ingredients"}, ":", helmod_tag.color.close, helmod_tag.font.close})
-    for _,ingredient in pairs(ingredients) do
-      if ingredient.type == "energy" and defines.sprite_tooltips[ingredient.name] ~= nil then
-        local sprite = GuiElement.getSprite(defines.sprite_tooltips[ingredient.name])
-        table.insert(tooltip, {"", "\n", string.format("[img=%s]", sprite), helmod_tag.font.default_bold, " x ", Format.formatNumberKilo(ingredient.amount,"W"), helmod_tag.font.close})
-      elseif ingredient.temperature then
-        table.insert(tooltip, {"", "\n", string.format("[%s=%s]", ingredient.type, ingredient.name), helmod_tag.font.default_bold, string.format(" %s °C x ", ingredient.temperature), Format.formatNumberElement(ingredient.amount), helmod_tag.font.close})
-      else
-        table.insert(tooltip, {"", "\n", string.format("[%s=%s]", ingredient.type, ingredient.name), helmod_tag.font.default_bold, " x ", Format.formatNumberElement(ingredient.amount), helmod_tag.font.close})
-      end
+    for _, ingredient in pairs(ingredients) do
+      table.insert(tooltip, EnergySelector:buildPrototypeTooltipLine(ingredient))
+    end
+  end
+  ---products
+  local products = recipe_prototype:getProducts(prototype)
+  if table.size(products) > 0 then
+    table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.products"}, ":", helmod_tag.color.close, helmod_tag.font.close})
+    for _, product in pairs(products) do
+      table.insert(tooltip, EnergySelector:buildPrototypeTooltipLine(product))
     end
   end
   return tooltip
