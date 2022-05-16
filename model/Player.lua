@@ -409,14 +409,27 @@ end
 ---@param lua_recipe table
 ---@return boolean
 function Player.checkFactoryLimitationModule(module, lua_recipe)
+  local factory = lua_recipe.factory
+  if factory.module_slots ==  0 then
+    return false
+  end
+
   local rules_included, rules_excluded = Player.getRules("module-limitation")
   local model_filter_factory_module = User.getModGlobalSetting("model_filter_factory_module")
-  local factory = lua_recipe.factory
   local allowed = true
   local check_not_bypass = true
   local prototype = RecipePrototype(lua_recipe)
   local category = prototype:getCategory()
-  if category == "rocket-building" then return true end
+  if category == "rocket-building" and lua_recipe.name ~= "rocket-part" then
+    local rocket_recipe = RecipePrototype("rocket-part")
+    if rocket_recipe.lua_prototype ~= nil then
+      rocket_recipe.name = "rocket-part"
+      rocket_recipe.factory = lua_recipe.factory
+      allowed = Player.checkFactoryLimitationModule(module, rocket_recipe)
+      return allowed
+    end
+    return true
+  end
   if rules_excluded[category] == nil then category = "standard" end
   check_not_bypass = Player.checkRules(check_not_bypass, rules_excluded, category, EntityPrototype(factory.name):native(), false)
   if table.size(module.limitations) > 0 and check_not_bypass and model_filter_factory_module == true then
@@ -437,9 +450,6 @@ function Player.checkFactoryLimitationModule(module, lua_recipe)
     end
   end
 
-  if factory.module_slots ==  0 then
-    allowed = false
-  end
   return allowed
 end
 
