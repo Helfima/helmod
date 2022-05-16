@@ -120,7 +120,7 @@ function EntityPrototype:getEnergyConsumption()
   if energy_prototype ~= nil then
     usage_priority = energy_prototype:getUsagePriority()
   end
-  if usage_priority == "solar" then
+  if usage_priority == "solar" or usage_priority == "primary-output" or usage_priority == "secondary-output" then
     return 0
   end
   if usage_priority == "managed-accumulator" then
