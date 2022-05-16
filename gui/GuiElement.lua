@@ -49,6 +49,14 @@ function GuiElement:tooltip(tooltip)
 end
 
 -------------------------------------------------------------------------------
+---Set ignored by interaction
+---@return GuiElement
+function GuiElement:ignored_by_interaction()
+  self.options.ignored_by_interaction = true
+  return self
+end
+
+-------------------------------------------------------------------------------
 ---Set overlay
 ---@param type string
 ---@param name string
@@ -280,7 +288,7 @@ function GuiElement.infoRecipe(parent, element)
   elseif element.type == "boiler" then
     local style = "helmod_temperature_blue_m"
     local caption = {"", element.output_fluid_temperature, "°"}
-    local label = GuiElement.add(parent, GuiLabel("temperature"):caption(caption):style(style))
+    local label = GuiElement.add(parent, GuiLabel("temperature"):caption(caption):style(style):ignored_by_interaction())
     label.style.top_padding = -5
   elseif element.type ~= "recipe" then
     sprite_name = GuiElement.getSprite(defines.sprite_info.developer)
