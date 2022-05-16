@@ -133,6 +133,13 @@ default_gui["helmod_label_element_black_m"] = {
   font_color = {0, 0, 0}
 }
 
+default_gui["helmod_temperature_blue_m"] = {
+  type = "label_style",
+  parent = "label",
+  font = "helmod_font_temperature",
+  font_color = {0.42, 0.81, 0.93}
+}
+
 default_gui["helmod_label_overlay_m"] = {
   type = "label_style",
   parent = "helmod_label_element_m",

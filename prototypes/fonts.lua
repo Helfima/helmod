@@ -118,12 +118,18 @@ data:extend(
     name = "helmod_font_big_bold",
     from = "default-bold",
     size = 16
-  }
-  ,
+  },
   {
     type = "font",
     name = "helmod_font_calculator",
     from = "default-bold",
     size = 20
+  },
+  {
+    type = "font",
+    name = "helmod_font_temperature",
+    from = "default-bold",
+    size = 12,
+    border = true
   }
 })
