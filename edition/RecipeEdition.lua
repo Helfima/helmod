@@ -238,7 +238,7 @@ function RecipeEdition:onEvent(event)
     
     if event.action == "recipe-update" then
       local text = event.element.text
-      local production = (tonumber(text) or 100)/100
+      local production = (formula(text) or 100)/100
       ModelBuilder.updateRecipeProduction(recipe, production)
       ModelCompute.update(model)
       self:updateObjectInfo(event)
