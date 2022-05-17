@@ -167,7 +167,7 @@ function RecipePrototype:getProducts(factory)
           local item = ItemPrototype(fuel_count.name)
           local burnt_result = item:getBurntResult()
           if burnt_result ~= nil then
-            table.insert(raw_products, {type=burnt_result.type, name=burnt_result.name, amount=fuel_count.count, by_time=true})
+            table.insert(raw_products, {type=burnt_result.type, name=burnt_result.name, amount=fuel_count.count})
           end
         end
       end
@@ -209,14 +209,14 @@ function RecipePrototype:getEnergyProducts(factory)
     if prototype:getType() == "solar-panel" or prototype:getType() == "electric-energy-interface" then
       local amount = prototype:getEnergyProduction()
       if amount > 0 then
-        local product = {name="energy", type="energy", amount=amount, by_time=true}
+        local product = {name="energy", type="energy", amount=amount}
         table.insert(products, product)
       end
     elseif prototype:getType() == "boiler" then
       local fluid_production = prototype:getFluidProductionFilter()
       if fluid_production ~= nil then
         local amount = prototype:getFluidProduction()
-        local product = {name=fluid_production.name, type="fluid", amount=amount, by_time=true}
+        local product = {name=fluid_production.name, type="fluid", amount=amount}
         table.insert(products, product)
       end
     elseif prototype:getType() == "accumulator" then
@@ -234,19 +234,19 @@ function RecipePrototype:getEnergyProducts(factory)
       local R = 60/(t2+t3*(t1+t3)/T)
       local amount = capacity*R
 
-      local product = {name="energy", type="energy", amount=amount, by_time=true}
+      local product = {name="energy", type="energy", amount=amount}
       table.insert(products, product)
     elseif prototype:getType() == "generator" or prototype:getType() == "burner-generator"then
       local amount = prototype:getEnergyProduction()
-      local product = {name="energy", type="energy", amount=amount, by_time=true}
+      local product = {name="energy", type="energy", amount=amount}
       table.insert(products, product)
     elseif prototype:getType() == "reactor" then
       local amount = prototype:getEnergyProduction()
-      local product = {name="steam-heat", type="energy", amount=amount, by_time=true}
+      local product = {name="steam-heat", type="energy", amount=amount}
       table.insert(products, product)
     elseif prototype:getType() == "offshore-pump" then
       local amount = prototype:getPumpingSpeed()
-      local product = {name="water", type="fluid", amount=amount, by_time=true}
+      local product = {name="water", type="fluid", amount=amount}
       table.insert(products, product)
     end
     return products
@@ -271,7 +271,7 @@ function RecipePrototype:getRawIngredients()
         local name = prototype:getFluidConsumptionFilter()
         if name ~= nil then
           local amount = prototype:getFluidProduction()
-          local ingredient = {name=name, type="fluid", amount=amount, by_time=true}
+          local ingredient = {name=name, type="fluid", amount=amount}
           table.insert(ingredients, ingredient)
         end
       elseif prototype:getType() == "accumulator" then
@@ -288,7 +288,7 @@ function RecipePrototype:getRawIngredients()
         ---@see https://forums.factorio.com/viewtopic.php?f=5&t=5594
         local R = 60/(t2+t3*(t1+t3)/T)
         local amount = capacity*R*T/(t1+t3)
-        local ingredient = {name="energy", type="energy", amount=amount, by_time=true}
+        local ingredient = {name="energy", type="energy", amount=amount}
         table.insert(ingredients, ingredient)
       end
 
@@ -296,12 +296,12 @@ function RecipePrototype:getRawIngredients()
       if prototype:getType() ~= "accumulator" and energy_type == "electric" then
         local amount = prototype:getEnergyConsumption()
         if amount > 0 then
-          local ingredient = {name="energy", type="energy", amount=amount, by_time=true}
+          local ingredient = {name="energy", type="energy", amount=amount}
           table.insert(ingredients, ingredient)
         end
       elseif energy_type == "heat" then
         local amount = prototype:getEnergyConsumption()
-        local ingredient = {name="steam-heat", type="energy", amount=amount, by_time=true}
+        local ingredient = {name="steam-heat", type="energy", amount=amount}
         table.insert(ingredients, ingredient)
       end
 
@@ -384,7 +384,7 @@ function RecipePrototype:getIngredients(factory)
         if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then
           local fuel_count = energy_prototype:getFuelCount()
           local factor = self:getEnergy()
-          local burner_ingredient = {name=fuel_count.name, type=fuel_count.type, amount=fuel_count.count*factor, by_time=true, burnt=true}
+          local burner_ingredient = {name=fuel_count.name, type=fuel_count.type, amount=fuel_count.count*factor, burnt=true}
           table.insert(raw_ingredients, burner_ingredient)
         end
       elseif energy_type == "fluid" then
@@ -392,7 +392,7 @@ function RecipePrototype:getIngredients(factory)
         if fluid_fuel ~= nil and fluid_fuel:native() ~= nil then
           local amount = factory_prototype:getFluidConsumption()
           local factor = self:getEnergy()
-          local burner_ingredient = {name=fluid_fuel:native().name, type="fluid", amount=amount*factor, by_time=true, burnt=true, temperature=fluid_fuel.temperature}
+          local burner_ingredient = {name=fluid_fuel:native().name, type="fluid", amount=amount*factor, burnt=true, temperature=fluid_fuel.temperature}
           table.insert(raw_ingredients, burner_ingredient)
         end
       end

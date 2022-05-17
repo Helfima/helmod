@@ -232,26 +232,22 @@ function Player.getLocalisedName(element)
       if recipe ~= nil then
         localisedName = recipe.localised_name
       end
-    end
-    if element.type == "technology" then
+    elseif element.type == "technology" then
       local technology = Player.getPlayerTechnology(element.name)
       if technology ~= nil then
         localisedName = technology.localised_name
       end
-    end
-    if element.type == "entity" or element.type == "resource" then
+    elseif element.type == "entity" or element.type == "resource" then
       local item = Player.getEntityPrototype(element.name)
       if item ~= nil then
         localisedName = item.localised_name
       end
-    end
-    if element.type == 0 or element.type == "item" then
+    elseif element.type == 0 or element.type == "item" then
       local item = Player.getItemPrototype(element.name)
       if item ~= nil then
         localisedName = item.localised_name
       end
-    end
-    if element.type == 1 or element.type == "fluid" then
+    elseif element.type == 1 or element.type == "fluid" then
       local item = Player.getFluidPrototype(element.name)
       if item ~= nil then
         if element.temperature then
@@ -266,6 +262,8 @@ function Player.getLocalisedName(element)
           localisedName = item.localised_name
         end
       end
+    elseif element.type == "energy" then
+      localisedName = {string.format("helmod_common.%s", element.name)}
     end
   end
   return localisedName
@@ -653,7 +651,7 @@ function Player.getEnergyMachines()
   local machines = {}
 
   local filters = {}
-  for _, type in pairs({"generator", "solar-panel", "boiler", "accumulator", "reactor", "burner-generator", "electric-energy-interface"}) do
+  for _, type in pairs({"generator", "solar-panel", "accumulator", "reactor", "burner-generator", "electric-energy-interface"}) do
     table.insert(filters, {filter="type", mode="or", invert=false, type=type})
     table.insert(filters, {filter="hidden", mode="and", invert=true})
     table.insert(filters, {filter="type", mode="or", invert=false, type=type})
@@ -661,18 +659,6 @@ function Player.getEnergyMachines()
   end
   for entity_name, entity in pairs(game.get_filtered_entity_prototypes(filters)) do
     machines[entity_name] = entity
-  end
-
-  filters = {}  
-  table.insert(filters, {filter="type", mode="or", invert=false, type="offshore-pump"})
-  table.insert(filters, {filter="hidden", mode="and", invert=true})
-  table.insert(filters, {filter="type", mode="or", invert=false, type="offshore-pump"})
-  table.insert(filters, {filter="flag", flag="player-creation", mode="and"})
-  local offshore_pumps = game.get_filtered_entity_prototypes(filters)
-  for entity_name, entity in pairs(offshore_pumps) do
-    if entity.fluid.name == "water" then
-      machines[entity_name] = entity
-    end
   end
 
   machines = Player.ExcludePlacedByHidden(machines)

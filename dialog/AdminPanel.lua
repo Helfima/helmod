@@ -675,7 +675,6 @@ function AdminPanel:onEvent(event)
       Player.getProductionMachines()
     else    
       local forms = {}
-      table.insert(forms, EnergySelector("HMEnergySelector"))
       table.insert(forms, EntitySelector("HMEntitySelector"))
       table.insert(forms, RecipeSelector("HMRecipeSelector"))
       table.insert(forms, TechnologySelector("HMTechnologySelector"))

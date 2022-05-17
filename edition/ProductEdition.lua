@@ -89,7 +89,7 @@ function ProductEdition:onUpdate(event)
   end
 
   self:updateInfo(model, block)
-  if block ~= nil and block.isEnergy ~= true then
+  if product ~= nil and product.type ~= "fluid" and product.type ~= "energy" then
     self:updateTool(model, block)
   end
 end

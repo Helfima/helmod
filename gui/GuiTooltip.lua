@@ -208,7 +208,6 @@ function GuiTooltip:appendDebug(tooltip, element)
       table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Amount", ": ", helmod_tag.font.default_bold, self.m_element.amount or 0, helmod_tag.font.close})
       table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Count", ": ", helmod_tag.font.default_bold, self.m_element.count or 0, helmod_tag.font.close})
       table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Count limit", ": ", helmod_tag.font.default_bold, self.m_element.limit_count or 0, helmod_tag.font.close})
-      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "By Time", ": ", helmod_tag.font.default_bold, self.m_element.by_time or "false", helmod_tag.font.close})
     end
 end
 -------------------------------------------------------------------------------

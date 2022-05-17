@@ -21,10 +21,9 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
   if lua_recipe ~= nil then
     local block_types = true
     ---ajoute le bloc si il n'existe pas
-    if block == nil or (block.isEnergy ~= true and recipe_type == "energy") or (block.isEnergy == true and recipe_type ~= "energy") then
+    if block == nil then
       local modelBlock = Model.newBlock(model, lua_recipe)
       local block_index = table.size(model.blocks)
-      modelBlock.isEnergy = recipe_type == "energy"
       modelBlock.index = block_index
       modelBlock.unlinked = false
       block = modelBlock
@@ -147,7 +146,6 @@ end
 function ModelBuilder.convertRecipeToblock(model, block, recipe, with_below)
   local new_block = Model.newBlock(model, recipe)
   local block_index = table.size(model.blocks)
-  new_block.isEnergy = recipe.type == "energy"
   new_block.index = block_index
   new_block.type = block.type
   new_block.unlinked = false
@@ -690,7 +688,6 @@ function ModelBuilder.copyBlock(into_model, into_block, from_model, from_block)
             into_block.unlinked = from_block.unlinked
           end
           into_block.solver = from_block.solver
-          into_block.isEnergy = from_block.isEnergy
           into_block.by_product = from_block.by_product
           into_block.type = from_block.type
           

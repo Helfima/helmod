@@ -105,6 +105,9 @@ function RecipeSelector:updateGroups(list_products, list_ingredients, list_trans
   for key, recipe in pairs(Player.getRocketRecipes()) do
     self:appendGroups(recipe, "rocket", list_products, list_ingredients, list_translate)
   end
+  for key, entity in pairs(Player.getEnergyMachines()) do
+    self:appendGroups(entity, "energy", list_products, list_ingredients, list_translate)
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -131,24 +134,28 @@ end
 
 -------------------------------------------------------------------------------
 ---Build prototype tooltip line
----@param ingredient / product table
+---@param item ingredient / product table
+---@param displayQuantity boolean
 ---@return table
-function RecipeSelector:buildPrototypeTooltipLine(item)
+function RecipeSelector:buildPrototypeTooltipLine(item, displayQuantity)
   local line = {"", "\n"}
   if item.type == "energy" then
     local sprite = GuiElement.getSprite(defines.sprite_tooltips[item.name])
-    table.insert(line, string.format("[img=%s]", sprite))
+    table.insert(line, string.format("[img=%s] ", sprite))
     table.insert(line, helmod_tag.font.default_bold)
-    table.insert(line, Format.formatNumberKilo(item.amount,"W"))
+    table.insert(line, Format.formatNumberKilo(item.amount, "W"))
+    table.insert(line, " x ")
     table.insert(line, helmod_tag.font.close)
-    table.insert(line, item.name)
-   else
+  else
     table.insert(line, string.format("[%s=%s] ", item.type, item.name))
-    table.insert(line, {string.format("%s-name.%s", item.type, item.name)})
-    if item.temperature then
-      table.insert(line, string.format(" (%s °C)", item.temperature))
+    if displayQuantity then
+      table.insert(line, helmod_tag.font.default_bold)
+      table.insert(line, Format.formatNumberElement(item.amount))
+      table.insert(line, " x ")
+      table.insert(line, helmod_tag.font.close)    
     end
   end
+  table.insert(line, Player.getLocalisedName(item))
 
   return line
 end
@@ -158,44 +165,63 @@ end
 ---@param prototype table
 ---@return table
 function RecipeSelector:buildPrototypeTooltip(prototype)
-  if prototype.type ~= "boiler" and prototype.type ~= "fluid" then
-    return ""
-  end
   ---initalize tooltip
-  local recipe_prototype = RecipePrototype(prototype.name, prototype.type)
-  local recipe_name = recipe_prototype:getLocalisedName()
-  local tooltip = {""}
-  table.insert(tooltip, {"", helmod_tag.font.default_bold, recipe_name, helmod_tag.font.close})
-  ---ingredients
-  local ingredients = recipe_prototype:getIngredients()
-  if table.size(ingredients) > 0 then
-    table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.ingredients"}, ":", helmod_tag.color.close, helmod_tag.font.close})
-    for _, ingredient in pairs(ingredients) do
-      table.insert(tooltip, RecipeSelector:buildPrototypeTooltipLine(ingredient))
+  local tooltip = ""
+
+  if prototype.type == "boiler" or prototype.type == "fluid" or prototype.type == "energy" then
+
+    local recipe_prototype = RecipePrototype(prototype.name, prototype.type)
+    local recipe_name
+    local displayQuantity = false
+    local factory = nil
+    if prototype.type == "energy" then
+      local entity_prototype = EntityPrototype(prototype)
+      recipe_name = entity_prototype:getLocalisedName()
+      factory = prototype
+      displayQuantity = true
+    else
+      recipe_name = recipe_prototype:getLocalisedName()
     end
-  end
-  ---products
-  local products = recipe_prototype:getProducts()
-  if table.size(products) > 0 then
-    table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.products"}, ":", helmod_tag.color.close, helmod_tag.font.close})
-    for _, product in pairs(products) do
-      table.insert(tooltip, RecipeSelector:buildPrototypeTooltipLine(product))
+    tooltip = {""}
+
+    ---heading
+    table.insert(tooltip, {"", helmod_tag.font.default_bold, recipe_name, helmod_tag.font.close})
+
+    ---ingredients
+    local ingredients = recipe_prototype:getIngredients(factory)
+    if table.size(ingredients) > 0 then
+      table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.ingredients"}, ":", helmod_tag.color.close, helmod_tag.font.close})
+      for _, ingredient in pairs(ingredients) do
+        table.insert(tooltip, RecipeSelector:buildPrototypeTooltipLine(ingredient, displayQuantity))
+      end
     end
-  end
-  ---made in
-  local entities = ""
-  if prototype.type == "boiler" then
-    entities = Player.getBoilersForRecipe(recipe_prototype)
-  elseif prototype.type == "fluid" then
-    entities = Player.getOffshorePumps(prototype.name)
-  end
-  if table.size(entities) > 0 then
-    table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.made-in"}, ":", helmod_tag.color.close, helmod_tag.font.close})
-    for _, entity in pairs(entities) do
-      local entity_prototype = EntityPrototype(entity)
-      table.insert(tooltip, {"", "\n", string.format("[%s=%s] ", "entity", entity.name), entity_prototype:getLocalisedName()})
+
+    ---products
+    local products = recipe_prototype:getProducts(factory)
+    if table.size(products) > 0 then
+      table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.products"}, ":", helmod_tag.color.close, helmod_tag.font.close})
+      for _, product in pairs(products) do
+        table.insert(tooltip, RecipeSelector:buildPrototypeTooltipLine(product, displayQuantity))
+      end
     end
+
+    ---made in
+    local entities = {}
+    if prototype.type == "boiler" then
+      entities = Player.getBoilersForRecipe(recipe_prototype)
+    elseif prototype.type == "fluid" then
+      entities = Player.getOffshorePumps(prototype.name)
+    end
+    if table.size(entities) > 0 then
+      table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.made-in"}, ":", helmod_tag.color.close, helmod_tag.font.close})
+      for _, entity in pairs(entities) do
+        local entity_prototype = EntityPrototype(entity)
+        table.insert(tooltip, {"", "\n", string.format("[%s=%s] ", "entity", entity.name), entity_prototype:getLocalisedName()})
+      end
+    end
+
   end
+
   return tooltip
 end
 
@@ -213,9 +239,17 @@ function RecipeSelector:buildPrototypeIcon(gui_element, prototype, tooltip)
   elseif recipe_prototype:getEnabled() == false then
     color = "red"
   end
+
   local icon_name, icon_type = recipe_prototype:getIcon()
   local button_prototype = GuiButtonSelectSprite(self.classname, "element-select", prototype.type):choose(icon_type, icon_name, prototype.name):color(color):tooltip(tooltip)
-  local button = GuiElement.add(gui_element, button_prototype)
+
+  local button
+  if prototype.type == "energy" then
+    button = GuiElement.add(gui_element, GuiButtonSelectSprite(self.classname, "element-select", "energy"):choose("entity", prototype.name):color():tooltip(tooltip))
+  else
+    button = GuiElement.add(gui_element, button_prototype)
+  end
+
   button.locked = true
   if prototype.type == "boiler" then
     prototype.output_fluid_temperature = recipe_prototype.output_fluid_temperature

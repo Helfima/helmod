@@ -88,7 +88,6 @@ function Product:clone()
     temperature = self.lua_prototype.temperature,
     minimum_temperature  = self.lua_prototype.minimum_temperature,
     maximum_temperature  = self.lua_prototype.maximum_temperature,
-    by_time = self.lua_prototype.by_time,
     burnt = self.lua_prototype.burnt,
     constant = self.lua_prototype.constant
   }
@@ -168,17 +167,6 @@ function Product:getAmount(recipe)
 end
 
 -------------------------------------------------------------------------------
----Factor by time
----@param model table
----@return number
-function Product:factorByTime(model)
-  if self.lua_prototype.by_time == true then
-    return model.time
-  end
-  return 1
-end
-
--------------------------------------------------------------------------------
 ---Count product
 ---@param model table
 ---@param recipe table
@@ -186,7 +174,7 @@ end
 function Product:countProduct(model, recipe)
   local amount = self:getElementAmount()
   local bonus_amount = self:getBonusAmount() ---if there are no catalyst amount = bonus_amount
-  return (amount + bonus_amount * self:getProductivityBonus(recipe) ) * recipe.count * self:factorByTime(model)
+  return (amount + bonus_amount * self:getProductivityBonus(recipe) ) * recipe.count
 end
 
 -------------------------------------------------------------------------------
@@ -195,7 +183,7 @@ end
 ---@param recipe table
 ---@return number
 function Product:countIngredient(model, recipe)
-  local amount = self:getElementAmount() * self:factorByTime(model)
+  local amount = self:getElementAmount()
   return amount * recipe.count
 end
 
