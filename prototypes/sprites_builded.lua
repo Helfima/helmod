@@ -148,5 +148,6 @@ local mipmaps = {
 {name="hangar_white", size=64, count=4},
 {name="info_hangar_white", size=64, count=4},
 {name="info_settings_blue", size=64, count=4},
+{name="info_rocket_blue", size=64, count=4},
 }
 return mipmaps

@@ -277,7 +277,7 @@ function GuiElement.infoRecipe(parent, element)
     sprite_name = GuiElement.getSprite(defines.sprite_info.burnt)
     tooltip = {"tooltip.burnt-recipe"}
   elseif element.type == "rocket" then
-    sprite_name = GuiElement.getSprite(defines.sprite_info.developer)
+    sprite_name = GuiElement.getSprite(defines.sprite_info.rocket)
     tooltip = {"tooltip.rocket-recipe"}
   elseif element.type == "technology" then
     sprite_name = GuiElement.getSprite(defines.sprite_info.education)
