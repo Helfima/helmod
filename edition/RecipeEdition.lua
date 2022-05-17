@@ -1156,17 +1156,17 @@ function RecipeEdition:updateObjectInfo(event)
     recipe_table.vertical_centering = false
 
     GuiElement.add(recipe_table, GuiLabel("header-recipe"):caption({"helmod_result-panel.col-header-recipe"}))
-    GuiElement.add(recipe_table, GuiLabel("header-energy"):caption({"helmod_result-panel.col-header-energy"}))
+    GuiElement.add(recipe_table, GuiLabel("header-duration"):caption({"helmod_result-panel.col-header-duration"}))
     GuiElement.add(recipe_table, GuiLabel("header-products"):caption({"helmod_result-panel.col-header-products"}))
     GuiElement.add(recipe_table, GuiLabel("header-ingredients"):caption({"helmod_result-panel.col-header-ingredients"}))
     local cell_recipe = GuiElement.add(recipe_table, GuiFrameH("recipe", recipe.id):style(helmod_frame_style.hidden))
     GuiElement.add(cell_recipe, GuiCellRecipe(self.classname, "do_noting"):element(recipe):tooltip("helmod_common.recipe"):color("gray"))
 
 
-    ---energy
-    local cell_energy = GuiElement.add(recipe_table, GuiFrameH("energy", recipe.id):style(helmod_frame_style.hidden))
-    local element_energy = {name = "helmod_button_menu_flat", hovered = defines.sprites.time.white, sprite = defines.sprites.time.white , count = recipe_prototype:getEnergy(),localised_name = "helmod_label.energy"}
-    GuiElement.add(cell_energy, GuiCellProduct(self.classname, "do_noting"):element(element_energy):tooltip("tooltip.product"):color("gray"))
+    ---duration
+    local cell_duration = GuiElement.add(recipe_table, GuiFrameH("duration", recipe.id):style(helmod_frame_style.hidden))
+    local element_duration = {name = "helmod_button_menu_flat", hovered = defines.sprites.time.white, sprite = defines.sprites.time.white , count = recipe_prototype:getEnergy(),localised_name = "helmod_label.duration"}
+    GuiElement.add(cell_duration, GuiCellProduct(self.classname, "do_noting"):element(element_duration):tooltip("tooltip.product"):color("gray"))
 
     ---products
     local cell_products = GuiElement.add(recipe_table, GuiTable("products", recipe.id):column(3):style("helmod_table_element"))
