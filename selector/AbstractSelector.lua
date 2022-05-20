@@ -591,6 +591,7 @@ function AbstractSelector:createElementLists(event)
   end
   User.setCache(self.classname, "list_item", list_item or {})
   event.continue = false
+
   return User.createNextEvent(nil, self.classname, "list")
 end
 
@@ -654,7 +655,7 @@ function AbstractSelector:updateItemList(event)
   ---recuperation recipes et subgroupes
   local recipe_selector_list = GuiElement.add(item_list_panel, GuiFlowV("recipe_list"))
   if table.size(list_item) > 0 then
-    for subgroup, list in spairs(list_item,function(t,a,b) return list_subgroup[b]["order"] > list_subgroup[a]["order"] end) do
+    for subgroup, list in spairs(list_item, function(t,a,b) return list_subgroup[b]["order"] > list_subgroup[a]["order"] end) do
       ---boucle subgroup
       local guiRecipeSubgroup = GuiElement.add(recipe_selector_list, GuiTable("recipe-table-", subgroup):column(10):style("helmod_table_recipe_selector"))
       for key, prototype in spairs(list,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
@@ -710,15 +711,15 @@ function AbstractSelector.updateGroupSelector(self, event)
     if User.getParameter("recipe_group_selected") == group.name then
       color = "yellow"
     end
-    if group.name ~= "helmod" then
-      local tooltip = group.localised_name
-      ---ajoute les icons de groupe
-      local action = GuiElement.add(gui_group_panel, GuiButtonSelectSpriteXxl(self.classname, "recipe-group"):sprite(self.sprite_type, group.name):tooltip(tooltip):color(color))
+    local tooltip
+    if group.name == "helmod" then
+      tooltip = "Helmod"
     else
-      local tooltip = "Helmod"
-      ---ajoute les icons de groupe
-      local action = GuiElement.add(gui_group_panel, GuiButtonSelectSpriteXxl(self.classname, "recipe-group", group.name):sprite("menu", "group"):tooltip(tooltip):color(color))
+      tooltip = group.localised_name
     end
+
+    ---ajoute les icons de groupe
+    local action = GuiElement.add(gui_group_panel, GuiButtonSelectSpriteXxl(self.classname, "recipe-group"):sprite(self.sprite_type, group.name):tooltip(tooltip):color(color))
   end
 
 end

@@ -808,7 +808,7 @@ function Player.buildResourceRecipe(entity_prototype)
   recipe.energy = 1
   recipe.force = {}
   recipe.group = {name="helmod", order="zzzz"}
-  recipe.subgroup = {name="resource", order="aaaa"}
+  recipe.subgroup = {name="helmod-resource", order="aaaa"}
   recipe.hidden = false
   if prototype.flags ~= nil then
     recipe.hidden = prototype.flags["hidden"] or false
@@ -864,7 +864,7 @@ function Player.getEnergyRecipe(name)
   recipe.energy = 1
   recipe.force = {}
   recipe.group = {name="helmod", order="zzzz"}
-  recipe.subgroup = {name="energy", order="aaaa"}
+  recipe.subgroup = {name="helmod-energy", order="dddd"}
   recipe.hidden = false
   if prototype.flags ~= nil then
     recipe.hidden = prototype.flags["hidden"] or false
@@ -894,7 +894,7 @@ function Player.getFluidRecipes()
     for _, fluidbox in pairs(entity.fluidbox_prototypes) do
       if #fluidbox.pipe_connections > 0 then
         local recipe = Player.buildFluidRecipe(entity.fluid.name, {}, nil)
-        recipe.subgroup = {name="offshore-pump", order="bbbb"}
+        recipe.subgroup = {name="helmod-fluid", order="bbbb"}
         if not recipes[entity.fluid.name] then
           recipes[entity.fluid.name] = recipe
         end
@@ -945,7 +945,7 @@ function Player.getBoilerRecipes()
       local ingredients = {{name=input_fluid, type="fluid", amount=1}}
       local fluid_prototype = FluidPrototype(output_fluid)
       local recipe = Player.buildFluidRecipe(fluid_prototype, ingredients, boiler.target_temperature)
-      recipe.subgroup = {name="boiler", order="cccc"}
+      recipe.subgroup = {name="helmod-boiler", order="cccc"}
       recipe.input_fluid_name = input_fluid
       recipe.output_fluid_name = output_fluid
       recipe.output_fluid_temperature = boiler.target_temperature
@@ -1029,7 +1029,7 @@ function Player.buildRocketRecipe(prototype)
   recipe.energy = rocket_part_prototype.energy * rocket_prototype.rocket_parts_required + 15
   recipe.force = {}
   recipe.group = {name="helmod", order="zzzz"}
-  recipe.subgroup = {name="rocket", order="dddd"}
+  recipe.subgroup = {name="helmod-rocket", order="eeee"}
   recipe.hidden = false
   recipe.ingredients = ingredients
   recipe.products = products
@@ -1083,7 +1083,7 @@ function Player.getBurntRecipe(name)
   recipe.energy = recipe_prototype.energy
   recipe.force = {}
   recipe.group = {name="helmod", order="zzzz"}
-  recipe.subgroup = {name="recipe-burnt", order="eeee"}
+  recipe.subgroup = {name="helmod-recipe-burnt", order="ffff"}
   recipe.hidden = false
   recipe.ingredients = recipe_prototype.ingredients
   recipe.products = recipe_prototype.products

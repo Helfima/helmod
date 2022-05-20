@@ -212,13 +212,6 @@ function RecipePrototype:getEnergyProducts(factory)
         local product = {name="energy", type="energy", amount=amount}
         table.insert(products, product)
       end
-    elseif prototype:getType() == "boiler" then
-      local fluid_production = prototype:getFluidProductionFilter()
-      if fluid_production ~= nil then
-        local amount = prototype:getFluidProduction()
-        local product = {name=fluid_production.name, type="fluid", amount=amount}
-        table.insert(products, product)
-      end
     elseif prototype:getType() == "accumulator" then
       local energy_prototype = prototype:getEnergySource()
       local capacity = energy_prototype:getBufferCapacity()
@@ -244,10 +237,6 @@ function RecipePrototype:getEnergyProducts(factory)
       local amount = prototype:getEnergyProduction()
       local product = {name="steam-heat", type="energy", amount=amount}
       table.insert(products, product)
-    elseif prototype:getType() == "offshore-pump" then
-      local amount = prototype:getPumpingSpeed()
-      local product = {name="water", type="fluid", amount=amount}
-      table.insert(products, product)
     end
     return products
   end
@@ -267,14 +256,7 @@ function RecipePrototype:getRawIngredients()
       local ingredients = {}
       local prototype = EntityPrototype(self.lua_prototype.name)
 
-      if prototype:getType() == "boiler" then
-        local name = prototype:getFluidConsumptionFilter()
-        if name ~= nil then
-          local amount = prototype:getFluidProduction()
-          local ingredient = {name=name, type="fluid", amount=amount}
-          table.insert(ingredients, ingredient)
-        end
-      elseif prototype:getType() == "accumulator" then
+      if prototype:getType() == "accumulator" then
         local energy_prototype = prototype:getEnergySource()
         local capacity = energy_prototype:getBufferCapacity()
         ---vanilla day=25000,dusk=5000,night=2500,dawn=5000
@@ -335,6 +317,7 @@ function RecipePrototype:getIngredients(factory)
     local factory_prototype = EntityPrototype(factory)
     local energy_prototype = factory_prototype:getEnergySource()
     local energy_type = factory_prototype:getEnergyTypeInput()
+
     if factory_prototype:getType() == "offshore-pump" then
       return {}
     end
