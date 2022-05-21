@@ -277,7 +277,7 @@ function GuiElement.infoRecipe(parent, element)
     sprite_name = GuiElement.getSprite(defines.sprite_info.burnt)
     tooltip = {"tooltip.burnt-recipe"}
   elseif element.type == "rocket" then
-    sprite_name = GuiElement.getSprite(defines.sprite_info.developer)
+    sprite_name = GuiElement.getSprite(defines.sprite_info.rocket)
     tooltip = {"tooltip.rocket-recipe"}
   elseif element.type == "technology" then
     sprite_name = GuiElement.getSprite(defines.sprite_info.education)
@@ -287,7 +287,7 @@ function GuiElement.infoRecipe(parent, element)
     tooltip = {"tooltip.energy-recipe"}
   elseif element.type == "boiler" then
     local style = "helmod_temperature_blue_m"
-    local caption = {"", element.output_fluid_temperature, "°"}
+    local caption = Format.formatNumberKilo(element.output_fluid_temperature, "°")
     local label = GuiElement.add(parent, GuiLabel("temperature"):caption(caption):style(style):ignored_by_interaction())
     label.style.top_padding = -5
   elseif element.type ~= "recipe" then

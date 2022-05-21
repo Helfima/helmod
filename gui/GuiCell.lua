@@ -171,7 +171,7 @@ function GuiCell:add_infoIcon(button, info_icon)
   end
   if type == "rocket" then 
     tooltip = "tooltip.rocket-recipe"
-    sprite_name = GuiElement.getSprite(defines.sprite_info.developer)
+    sprite_name = GuiElement.getSprite(defines.sprite_info.rocket)
   end
   if type == "fluid" then 
     tooltip = "tooltip.resource-recipe"

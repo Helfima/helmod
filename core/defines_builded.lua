@@ -231,3 +231,5 @@ defines.sprites.info_hangar = {}
 defines.sprites.info_hangar.white = "info_hangar_white"
 defines.sprites.info_settings = {}
 defines.sprites.info_settings.blue = "info_settings_blue"
+defines.sprites.info_rocket = {}
+defines.sprites.info_rocket.blue = "info_rocket_blue"

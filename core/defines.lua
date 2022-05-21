@@ -13,6 +13,7 @@ defines.sprite_info["education"] = defines.sprites.info_education.blue
 defines.sprite_info["burnt"] = defines.sprites.info_fire.blue
 defines.sprite_info["block"] = defines.sprites.info_hangar.white
 defines.sprite_info["energy"] = defines.sprites.info_energy.blue
+defines.sprite_info["rocket"] = defines.sprites.info_rocket.blue
 --- sprite contraint
 defines.sprite_info["linked"] = defines.sprites.info_arrow_top.red
 defines.sprite_info["master"] = defines.sprites.info_add.red
