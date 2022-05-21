@@ -180,7 +180,7 @@ function BurnerPrototype:getFuelPrototypes()
   end
   
   local items = {}
-  for _, fuel in pairs(Player.getItemPrototypes(filters)) do
+  for _, fuel in spairs(Player.getItemPrototypes(filters), function(t,a,b) return t[b].fuel_value > t[a].fuel_value end) do
     table.insert(items, ItemPrototype(fuel))
   end
   return items

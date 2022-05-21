@@ -700,11 +700,11 @@ function RecipeEdition:updateFactoryInfo(event)
       if fuel_list ~= nil and factory_fuel ~= nil then
         local items = {}
         if (energy_type == "fluid") and (not factory_prototype:getBurnsFluid()) then
-          for _,item in spairs(fuel_list, function(t,a,b) return t[b].temperature > t[a].temperature end) do
+          for _,item in pairs(fuel_list) do
             table.insert(items, string.format("[%s=%s] %s °C", fuel_type, item:native().name, item.temperature))
           end
         else
-          for _,item in spairs(fuel_list, function(t,a,b) return t[b]:getFuelValue() > t[a]:getFuelValue() end) do
+          for _,item in pairs(fuel_list) do
             table.insert(items, string.format("[%s=%s] %s", fuel_type, item:native().name, Format.formatNumberKilo(item:getFuelValue(), "J")))
           end
         end

@@ -1287,7 +1287,7 @@ function Player.getFluidFuelPrototypes()
 
   local items = {}
   
-  for _, fluid in pairs(Player.getFluidPrototypes(filters)) do
+  for _, fluid in spairs(Player.getFluidPrototypes(filters), function(t,a,b) return t[b].fuel_value > t[a].fuel_value end) do
     table.insert(items, FluidPrototype(fluid))
   end
   return items
@@ -1423,7 +1423,7 @@ function Player.getFluidTemperaturePrototypes(fluid)
   -- Build result table of FluidPrototype
   local items = {}
   local item
-  for temperature, _ in pairs(temperatures) do
+  for temperature, _ in spairs(temperatures, function(t,a,b) return b > a end) do
     item = FluidPrototype(fluid)
     item:setTemperature(temperature)
     table.insert(items, item)
