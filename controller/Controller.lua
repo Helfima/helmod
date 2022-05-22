@@ -26,7 +26,6 @@ require "edition.ProductEdition"
 require "edition.RuleEdition"
 require "edition.PreferenceEdition"
 
-require "selector.EnergySelector"
 require "selector.EntitySelector"
 require "selector.RecipeSelector"
 require "selector.TechnologySelector"
@@ -86,7 +85,6 @@ function Controller:prepare()
   table.insert(forms, UnitTestPanel("HMUnitTestPanel"))
   table.insert(forms, RichTextPanel("HMRichTextPanel"))
 
-  table.insert(forms, EnergySelector("HMEnergySelector"))
   table.insert(forms, EntitySelector("HMEntitySelector"))
   table.insert(forms, RecipeSelector("HMRecipeSelector"))
   table.insert(forms, TechnologySelector("HMTechnologySelector"))
@@ -121,7 +119,6 @@ function Controller:on_init()
     Player.getResources()
   end
   local forms = {}
-  table.insert(forms, EnergySelector("HMEnergySelector"))
   table.insert(forms, EntitySelector("HMEntitySelector"))
   table.insert(forms, RecipeSelector("HMRecipeSelector"))
   table.insert(forms, TechnologySelector("HMTechnologySelector"))

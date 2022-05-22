@@ -232,26 +232,22 @@ function Player.getLocalisedName(element)
       if recipe ~= nil then
         localisedName = recipe.localised_name
       end
-    end
-    if element.type == "technology" then
+    elseif element.type == "technology" then
       local technology = Player.getPlayerTechnology(element.name)
       if technology ~= nil then
         localisedName = technology.localised_name
       end
-    end
-    if element.type == "entity" or element.type == "resource" then
+    elseif element.type == "entity" or element.type == "resource" then
       local item = Player.getEntityPrototype(element.name)
       if item ~= nil then
         localisedName = item.localised_name
       end
-    end
-    if element.type == 0 or element.type == "item" then
+    elseif element.type == 0 or element.type == "item" then
       local item = Player.getItemPrototype(element.name)
       if item ~= nil then
         localisedName = item.localised_name
       end
-    end
-    if element.type == 1 or element.type == "fluid" then
+    elseif element.type == 1 or element.type == "fluid" then
       local item = Player.getFluidPrototype(element.name)
       if item ~= nil then
         if element.temperature then
@@ -266,6 +262,8 @@ function Player.getLocalisedName(element)
           localisedName = item.localised_name
         end
       end
+    elseif element.type == "energy" then
+      localisedName = {string.format("helmod_common.%s", element.name)}
     end
   end
   return localisedName
@@ -653,7 +651,7 @@ function Player.getEnergyMachines()
   local machines = {}
 
   local filters = {}
-  for _, type in pairs({"generator", "solar-panel", "boiler", "accumulator", "reactor", "burner-generator", "electric-energy-interface"}) do
+  for _, type in pairs({"generator", "solar-panel", "accumulator", "reactor", "burner-generator", "electric-energy-interface"}) do
     table.insert(filters, {filter="type", mode="or", invert=false, type=type})
     table.insert(filters, {filter="hidden", mode="and", invert=true})
     table.insert(filters, {filter="type", mode="or", invert=false, type=type})
@@ -661,18 +659,6 @@ function Player.getEnergyMachines()
   end
   for entity_name, entity in pairs(game.get_filtered_entity_prototypes(filters)) do
     machines[entity_name] = entity
-  end
-
-  filters = {}  
-  table.insert(filters, {filter="type", mode="or", invert=false, type="offshore-pump"})
-  table.insert(filters, {filter="hidden", mode="and", invert=true})
-  table.insert(filters, {filter="type", mode="or", invert=false, type="offshore-pump"})
-  table.insert(filters, {filter="flag", flag="player-creation", mode="and"})
-  local offshore_pumps = game.get_filtered_entity_prototypes(filters)
-  for entity_name, entity in pairs(offshore_pumps) do
-    if entity.fluid.name == "water" then
-      machines[entity_name] = entity
-    end
   end
 
   machines = Player.ExcludePlacedByHidden(machines)
@@ -822,7 +808,7 @@ function Player.buildResourceRecipe(entity_prototype)
   recipe.energy = 1
   recipe.force = {}
   recipe.group = {name="helmod", order="zzzz"}
-  recipe.subgroup = {name="resource", order="aaaa"}
+  recipe.subgroup = {name="helmod-resource", order="aaaa"}
   recipe.hidden = false
   if prototype.flags ~= nil then
     recipe.hidden = prototype.flags["hidden"] or false
@@ -878,7 +864,7 @@ function Player.getEnergyRecipe(name)
   recipe.energy = 1
   recipe.force = {}
   recipe.group = {name="helmod", order="zzzz"}
-  recipe.subgroup = {name="energy", order="aaaa"}
+  recipe.subgroup = {name="helmod-energy", order="dddd"}
   recipe.hidden = false
   if prototype.flags ~= nil then
     recipe.hidden = prototype.flags["hidden"] or false
@@ -908,7 +894,7 @@ function Player.getFluidRecipes()
     for _, fluidbox in pairs(entity.fluidbox_prototypes) do
       if #fluidbox.pipe_connections > 0 then
         local recipe = Player.buildFluidRecipe(entity.fluid.name, {}, nil)
-        recipe.subgroup = {name="offshore-pump", order="bbbb"}
+        recipe.subgroup = {name="helmod-fluid", order="bbbb"}
         if not recipes[entity.fluid.name] then
           recipes[entity.fluid.name] = recipe
         end
@@ -959,7 +945,7 @@ function Player.getBoilerRecipes()
       local ingredients = {{name=input_fluid, type="fluid", amount=1}}
       local fluid_prototype = FluidPrototype(output_fluid)
       local recipe = Player.buildFluidRecipe(fluid_prototype, ingredients, boiler.target_temperature)
-      recipe.subgroup = {name="boiler", order="cccc"}
+      recipe.subgroup = {name="helmod-boiler", order="cccc"}
       recipe.input_fluid_name = input_fluid
       recipe.output_fluid_name = output_fluid
       recipe.output_fluid_temperature = boiler.target_temperature
@@ -1043,7 +1029,7 @@ function Player.buildRocketRecipe(prototype)
   recipe.energy = rocket_part_prototype.energy * rocket_prototype.rocket_parts_required + 15
   recipe.force = {}
   recipe.group = {name="helmod", order="zzzz"}
-  recipe.subgroup = {name="rocket", order="dddd"}
+  recipe.subgroup = {name="helmod-rocket", order="eeee"}
   recipe.hidden = false
   recipe.ingredients = ingredients
   recipe.products = products
@@ -1097,7 +1083,7 @@ function Player.getBurntRecipe(name)
   recipe.energy = recipe_prototype.energy
   recipe.force = {}
   recipe.group = {name="helmod", order="zzzz"}
-  recipe.subgroup = {name="recipe-burnt", order="eeee"}
+  recipe.subgroup = {name="helmod-recipe-burnt", order="ffff"}
   recipe.hidden = false
   recipe.ingredients = recipe_prototype.ingredients
   recipe.products = recipe_prototype.products
@@ -1301,7 +1287,7 @@ function Player.getFluidFuelPrototypes()
 
   local items = {}
   
-  for _, fluid in pairs(Player.getFluidPrototypes(filters)) do
+  for _, fluid in spairs(Player.getFluidPrototypes(filters), function(t,a,b) return t[b].fuel_value > t[a].fuel_value end) do
     table.insert(items, FluidPrototype(fluid))
   end
   return items
@@ -1437,7 +1423,7 @@ function Player.getFluidTemperaturePrototypes(fluid)
   -- Build result table of FluidPrototype
   local items = {}
   local item
-  for temperature, _ in pairs(temperatures) do
+  for temperature, _ in spairs(temperatures, function(t,a,b) return b > a end) do
     item = FluidPrototype(fluid)
     item:setTemperature(temperature)
     table.insert(items, item)

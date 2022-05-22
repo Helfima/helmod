@@ -286,7 +286,7 @@ function ModelCompute.getBlockMatrix(block)
     for _, recipe in spairs(recipes,sorter) do
       recipe.time = block.time
       ModelCompute.computeModuleEffects(recipe)
-      if block.isEnergy == true then
+      if recipe.type == "energy" then
         ModelCompute.computeEnergyFactory(recipe)
       else
         ModelCompute.computeFactory(recipe)
@@ -327,9 +327,6 @@ function ModelCompute.getBlockMatrix(block)
         local product = Product(lua_product)
         local product_key = product:getTableKey()
         local count = product:getAmount(recipe)
-        if lua_product.by_time == true then
-          count = count * block.time
-        end
         lua_products[product_key] = {name=lua_product.name, type=lua_product.type, count = count, temperature=lua_product.temperature, minimum_temperature=lua_product.minimum_temperature, maximum_temperature=lua_product.maximum_temperature}
       end
       for i, lua_ingredient in pairs(recipe_prototype:getIngredients(recipe.factory)) do
@@ -339,9 +336,6 @@ function ModelCompute.getBlockMatrix(block)
         ---si constant compte comme un produit (recipe rocket)
         if lua_ingredient.constant then
           count = ingredient:getAmount(recipe)
-        end
-        if lua_ingredient.by_time == true then
-          count = count * block.time
         end
         if lua_ingredients[ingredient_key] == nil then
           lua_ingredients[ingredient_key] = {name=lua_ingredient.name, type=lua_ingredient.type, count = count, temperature=lua_ingredient.temperature, minimum_temperature=lua_ingredient.minimum_temperature, maximum_temperature=lua_ingredient.maximum_temperature}
@@ -754,9 +748,7 @@ function ModelCompute.computeBlock(block)
       end
       ---activate debug
       local ok , err = pcall(function()
-        local time = block.time
-        if block.isEnergy then time = 1 end
-        mC, runtimes = my_solver:solve(mA, debug, block.by_factory, time)
+        mC, runtimes = my_solver:solve(mA, debug, block.by_factory, block.time)
       end)
       if not(ok) then
         if block.solver == true and block.by_factory ~= true then
@@ -801,7 +793,7 @@ function ModelCompute.computeBlock(block)
         end
         row_index = row_index + 1
         ---calcul dependant du recipe count
-        if block.isEnergy == true then
+        if recipe.type == "energy" then
           ModelCompute.computeEnergyFactory(recipe)
         else
           ModelCompute.computeFactory(recipe)

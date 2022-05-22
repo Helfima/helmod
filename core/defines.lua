@@ -211,7 +211,6 @@ defines.constant.preferences = {
       HMRuleEdition = false,
       HMPreferenceEdition = false,
   
-      HMEnergySelector = true,
       HMEntitySelector = true,
       HMRecipeSelector = true,
       HMTechnologySelector = true,
@@ -232,7 +231,6 @@ defines.constant.preferences = {
       HMRuleEdition = false,
       HMPreferenceEdition = false,
   
-      HMEnergySelector = true,
       HMEntitySelector = true,
       HMRecipeSelector = true,
       HMTechnologySelector = true,
