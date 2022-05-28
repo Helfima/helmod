@@ -286,7 +286,7 @@ function ProductionPanel:updateIndexPanel(model)
 
     end
   end
-  --GuiElement.add(table_index, GuiButton("HMArrangeModels", "OPEN"):sprite("menu", "menu", "menu"):style("helmod_button_menu"):tooltip({"helmod_button.add-production-line"}))
+  --GuiElement.add(table_index, GuiButton("HMArrangeModels", "OPEN"):sprite("menu", defines.sprites.list_view.black, defines.sprites.list_view.black):style("helmod_button_menu"):tooltip({"helmod_button.add-production-line"}))
 end
 
 -------------------------------------------------------------------------------

@@ -3,6 +3,7 @@ Version: 0.12.10
 Date: ???
   Features:
     - Added beacon settings preferences
+    - Added replace entities in admin conversion for blueprint
   Changes:
     - Added cache for available machines to improve performance
     - Added support for wind turbines

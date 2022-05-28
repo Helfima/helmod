@@ -161,13 +161,31 @@ end
 function AdminPanel:updateConversion()
   if self:isConversionTab() then return end
   local scroll_panel = self:getConversionTab()
-  local table_panel = GuiElement.add(scroll_panel, GuiTable("list-table"):column(3))
+  local table_panel = GuiElement.add(scroll_panel, GuiTable("list-table"):column(5))
+  table_panel.style.cell_padding = 5
+  
+  GuiElement.add(table_panel, GuiLabel("label-encoded-text"):caption("Encoded Text"))
+  GuiElement.add(table_panel, GuiLabel("label-actions"):caption("Actions"))
+  GuiElement.add(table_panel, GuiLabel("label-decoded-text"):caption("Decoded Text"))
+  GuiElement.add(table_panel, GuiLabel("label-entities"):caption("Entities Replacement"))
+  GuiElement.add(table_panel, GuiLabel("label-content"):caption("Content"))
+
   GuiElement.add(table_panel, GuiTextBox("encoded-text"))
+  
   local actions = GuiElement.add(table_panel, GuiFlowV("actions"))
   GuiElement.add(actions, GuiButton(self.classname, "string-decode"):caption("Decode ==>"))
   GuiElement.add(actions, GuiButton(self.classname, "string-encode"):caption("<== Encode"))
+  
   local decoded_textbox = GuiElement.add(table_panel, GuiTextBox("decoded-text"))
   decoded_textbox.style.height = 600
+
+  local entities_view = GuiElement.add(table_panel, GuiFlowV("entities"))
+  entities_view.style.height = 600
+
+  local tree_view = GuiElement.add(table_panel, GuiScroll("tree_view"))
+  tree_view.style.height = 600
+  local root_branch = GuiElement.add(tree_view, GuiFlowV("content"))
+  root_branch.style.vertically_stretchable = false
 end
 
 -------------------------------------------------------------------------------
@@ -594,6 +612,18 @@ function AdminPanel:createTree(parent, list, expand)
 end
 
 -------------------------------------------------------------------------------
+---Create Tree
+---@param parent LuaGuiElement
+---@param data table
+function AdminPanel:createReplacerEntities(parent, entities)
+  parent.clear()
+  local table_panel = GuiElement.add(parent, GuiTable("list-table"):column(2))
+  for name,entity in pairs(entities) do
+    GuiElement.add(table_panel, GuiButtonSelectSprite(self.classname, "do-nothing", name):sprite("entity", name))
+    GuiElement.add(table_panel, GuiButtonSelectSprite(self.classname, "replace-select", name):choose("entity"):color("gray"))
+  end
+end
+-------------------------------------------------------------------------------
 ---On event
 ---@param event LuaEvent
 function AdminPanel:onEvent(event)
@@ -640,6 +670,30 @@ function AdminPanel:onEvent(event)
     local json = game.decode_string(input)
     local result = Converter.indent(json)
     decoded_textbox.text = result
+
+    local tree_view = parent["tree_view"]["content"]
+    local data = game.json_to_table(json)
+    tree_view.clear()
+    self:createTree(tree_view, data)
+
+    local entities_view = parent["entities"]
+    local entities = Blueprint.get_entities(data)
+    self:createReplacerEntities(entities_view, entities)
+  end
+
+  if event.action == "replace-select" then
+    local parent = event.element.parent.parent.parent
+    local decoded_textbox = parent["decoded-text"]
+    local decoded_text = decoded_textbox.text
+
+    local entity_name = event.item1
+    local new_entity = event.element.elem_value
+    if new_entity ~= nil and new_entity ~= "" then
+      local pattern = string.gsub(entity_name, "-", "%%-")
+      local result = string.gsub(decoded_text, pattern, new_entity)
+      decoded_textbox.text = result
+    end
+
   end
 
   if event.action == "string-encode" then

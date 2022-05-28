@@ -21,6 +21,25 @@ table.insert(sample.value, { mode="or", filter="type", invert="false", option="m
 table.insert(sample.value, { mode="or", filter="type", invert="false", option="rocket-silo"})
 table.insert(samples, sample)
 
+local sample = {name="list of production machines II", type="entity", value={}}
+table.insert(sample.value, {filter="crafting-machine", mode="or"})
+table.insert(sample.value, {filter="hidden", mode="and", invert="true"})
+table.insert(sample.value, {filter="crafting-machine", mode="or"})
+table.insert(sample.value, {filter="flag", flag="player-creation", mode="and"})
+table.insert(sample.value, {filter="type", type="lab", mode="or"})
+table.insert(sample.value, {filter="hidden", mode="and", invert="true"})
+table.insert(sample.value, {filter="type", type="lab", mode="or"})
+table.insert(sample.value, {filter="flag", flag="player-creation", mode="and"})
+table.insert(sample.value, {filter="type", type="mining-drill", mode="or"})
+table.insert(sample.value, {filter="hidden", mode="and", invert="true"})
+table.insert(sample.value, {filter="type", type="mining-drill", mode="or"})
+table.insert(sample.value, {filter="flag", flag="player-creation", mode="and"})
+table.insert(sample.value, {filter="type", type="rocket-silo", mode="or"})
+table.insert(sample.value, {filter="hidden", mode="and", invert="true"})
+table.insert(sample.value, {filter="type", type="rocket-silo", mode="or"})
+table.insert(sample.value, {filter="flag", flag="player-creation", mode="and"})
+table.insert(samples, sample)
+
 sample = {name="list of beacons", type="entity", value={}}
 table.insert(sample.value, { mode="and", filter="type", invert="false", option="beacon"})
 table.insert(sample.value, { mode="and", filter="hidden", invert="true"})

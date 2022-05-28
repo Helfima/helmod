@@ -52,6 +52,7 @@ ModelBuilder = require "data.ModelBuilder"
 
 PrototypeFilters = require "model.PrototypeFilters"
 Converter = require "core.Converter"
+Blueprint = require "core.Blueprint"
 
 PLANNER_COMMAND = "helmod_planner-command"
 

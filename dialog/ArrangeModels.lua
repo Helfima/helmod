@@ -25,21 +25,51 @@ end
 local elements = nil
 
 -------------------------------------------------------------------------------
+---On Style
+---@param styles table
+---@param width_main number
+---@param height_main number
+function ArrangeModels:onStyle(styles, width_main, height_main)
+  styles.flow_panel = {
+    minimal_width = 50,
+    maximal_width = width_main,
+    minimal_height = 100,
+    maximal_height = 100
+    }
+end
+
+-------------------------------------------------------------------------------
 ---On update
 ---@param event LuaEvent
 function ArrangeModels:onUpdate(event)
-  local panel = self:getFramePanel("models")
-  panel.style.height = 300
-  panel.style.horizontally_stretchable = true
+  local parent_panel = self:getPanel()
   if elements == nil then
     elements = {}
     local models = Model.getModels()
     local index = 0
+    local table_index = GuiElement.add(parent_panel, GuiTable("table_index"):column(GuiElement.getIndexColumnNumber()):style("helmod_table_list"))
     for _,model in pairs(models) do
-        self:addModelFrame(index, model)
+        self:addModelButton(table_index, model, index)
         index = index + 1
     end
   end
+end
+
+-------------------------------------------------------------------------------
+---On update
+---@param index number
+---@param model table
+function ArrangeModels:addModelButton(parent_panel, model, index)
+  local element = Model.firstRecipe(model.blocks)
+  local button
+  if element ~= nil then
+    button = GuiElement.add(parent_panel, GuiButtonSelectSprite(self.classname, "move-item", model.id, index):sprite(element.type, element.name):tooltip(tooltip):color())
+  else
+    button = GuiElement.add(parent_panel, GuiButton(self.classname, "move-item", model.id, index):sprite("menu", defines.sprites.status_help.black, defines.sprites.status_help.black):style("helmod_button_menu"))
+    button.style.width = 36
+    --button.style.height = 36
+  end
+  button.style.padding = 0
 end
 
 -------------------------------------------------------------------------------
@@ -102,4 +132,28 @@ function ArrangeModels:onClose()
       if frame.name:find(self.classname) then frame.destroy() end
   end
   elements = nil
+end
+
+-------------------------------------------------------------------------------
+---On close dialog
+function ArrangeModels:Clean()
+  local screen = Player.getGui("screen")
+  for _, frame in pairs(screen.children) do
+      if frame.name:find(string.format("%s-%s", self.classname, "flow")) then frame.destroy() end
+  end
+  elements = nil
+end
+
+-------------------------------------------------------------------------------
+---On event
+---@param event LuaEvent
+function ArrangeModels:onEvent(event)
+  local models = Model.getModels()
+  if event.action == "move-item" then
+    self:Clean()
+    local model_id = event.item1
+    local model = models[model_id]
+    local index = event.item2
+    self:addModelFrame(index, model)
+  end
 end
