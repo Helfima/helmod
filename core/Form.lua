@@ -335,6 +335,7 @@ function Form:open(event)
 
   if self.classname == "HMProductionPanel" then
     Player.setShortcutState(true)
+    Player.native().opened = self:getPanel()
   end
 
   return true
