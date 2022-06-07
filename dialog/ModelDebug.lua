@@ -120,10 +120,10 @@ function ModelDebug:updateHeader(event)
   local action_panel = self:getMenuPanel()
   action_panel.clear()
   local group1 = GuiElement.add(action_panel, GuiFlowH("group1"))
-  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "initial"):sprite("menu", "record", "record"):style("helmod_button_menu"):tooltip("Initial"))
-  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "previous"):sprite("menu", "arrow-left", "arrow-left"):style("helmod_button_menu"):tooltip("Previous Step"))
-  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "next"):sprite("menu", "arrow-right", "arrow-right"):style("helmod_button_menu"):tooltip("Next Step"))
-  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "final"):sprite("menu", "end", "end"):style("helmod_button_menu"):tooltip("Final"))
+  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "initial"):sprite("menu", defines.sprites.expand_left_group.black, defines.sprites.expand_left_group.black):style("helmod_button_menu"):tooltip("Initial"))
+  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "previous"):sprite("menu", defines.sprites.expand_left.black, defines.sprites.expand_left.black):style("helmod_button_menu"):tooltip("Previous Step"))
+  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "next"):sprite("menu", defines.sprites.expand_right.black, defines.sprites.expand_right.black):style("helmod_button_menu"):tooltip("Next Step"))
+  GuiElement.add(group1, GuiButton(self.classname, "change-stage", "final"):sprite("menu", defines.sprites.expand_right_group.black, defines.sprites.expand_right_group.black):style("helmod_button_menu"):tooltip("Final"))
 end
 
 -------------------------------------------------------------------------------
