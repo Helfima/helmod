@@ -41,6 +41,7 @@ Date: ???
     - Fixed boiler's fluid consumption when in a recipe block (not energy)
     - Fixed pollution modifier from fuel being applied twice
     - Fixed module restrictions not being applied for rocket recipes
+    - Fixed handling of recipes producing a single fluid at multiple temperatures
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.9
 Date: 2022-03-09

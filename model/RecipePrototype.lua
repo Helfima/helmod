@@ -119,6 +119,9 @@ function RecipePrototype:getProducts(factory)
   local lua_products = {}
   for r, raw_product in pairs(raw_products) do
     local product_id = raw_product.type .. "/" .. raw_product.name
+    if raw_product.temperature then
+      product_id = product_id .. "#" .. raw_product.temperature
+    end
     if lua_products[product_id] ~= nil then
       ---make a new product table for the combined result
       ---combine product amounts, averaging in variable and probabilistic outputs
