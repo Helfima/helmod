@@ -37,6 +37,34 @@ function Model.getModels(bypass)
 end
 
 -------------------------------------------------------------------------------
+---Get models
+---@param bypass boolean
+---@return table
+function Model.getModelsByOwner(bypass)
+  local models = Model.getModels(bypass)
+  local models_by_owner = {}
+  for _, model in pairs(models) do
+    if models_by_owner[model.owner] == nil then models_by_owner[model.owner] = {} end
+    table.insert(models_by_owner[model.owner], model)
+  end
+  return models_by_owner
+end
+
+-------------------------------------------------------------------------------
+---Get models
+---@return table
+function Model.getModelsOwner()
+  local models = Model.getModels()
+  local models_owner = {}
+  for _, model in pairs(models) do
+    if model.owner == Player.native().name then
+      table.insert(models_owner, model)
+    end
+  end
+  return models_owner
+end
+
+-------------------------------------------------------------------------------
 ---Get block order
 ---@param block table
 ---@return table

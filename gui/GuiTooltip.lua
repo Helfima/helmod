@@ -32,6 +32,14 @@ function GuiTooltip:withEnergy()
 end
 
 -------------------------------------------------------------------------------
+---Set with effect information
+---@return GuiTooltip
+function GuiTooltip:withEffectInfo(value)
+  self.m_with_effect_info = value
+  return self
+end
+
+-------------------------------------------------------------------------------
 ---Set with product information
 ---@return GuiTooltip
 function GuiTooltip:withProductInfo()
@@ -100,6 +108,15 @@ end
 ---@param element table
 function GuiTooltip:appendFlow(tooltip, element)
   if self.m_with_logistic == true then
+    if element.type == "item" then
+      local item_prototype = ItemPrototype(element.name)
+      local stack_size = 0
+      if item_prototype ~= nil then
+        stack_size = item_prototype:stackSize()
+      end
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.stack-size"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, stack_size or 0, helmod_tag.font.close})      
+    end
+
     local total_flow = Format.formatNumberElement(element.count/((element.time or 1)/60))
     if element.limit_count ~= nil then
       local limit_flow = Format.formatNumberElement(element.limit_count/((element.time or 1)/60))
@@ -107,6 +124,36 @@ function GuiTooltip:appendFlow(tooltip, element)
     else
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.outflow"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, {"helmod_si.per-minute",total_flow or 0}, helmod_tag.font.close})
     end
+  end
+end
+
+-------------------------------------------------------------------------------
+---Add flow information
+---@param tooltip table
+---@param element table
+function GuiTooltip:appendEffectInfo(tooltip, element)
+  if self.m_with_effect_info == true then
+    ---energy
+    local sign = ""
+    if element.effects.consumption > 0 then sign = "+" end
+    local energy = Format.formatNumberKilo(element.energy, "W").." ("..sign..Format.formatPercent(element.effects.consumption).."%)"
+    table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_label.energy"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, energy or 0, helmod_tag.font.close})
+
+    ---speed
+    local sign = ""
+    if element.effects.speed > 0 then sign = "+" end
+    local speed = Format.formatNumber(element.speed).." ("..sign..Format.formatPercent(element.effects.speed).."%)"
+    table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_label.speed"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, speed or 0, helmod_tag.font.close})
+
+    ---productivity
+    local sign = ""
+    if element.effects.productivity > 0 then sign = "+" end
+    local productivity = sign..Format.formatPercent(element.effects.productivity).."%"
+    table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_label.productivity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, productivity or 0, helmod_tag.font.close})
+
+    ---pollution
+    local pollution = Format.formatNumberElement((element.pollution or 0)*60 )
+    table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_label.pollution"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, pollution or 0, helmod_tag.font.close})
   end
 end
 
@@ -352,6 +399,7 @@ function GuiTooltipElement:create()
     
     self:appendProductInfo(tooltip, element);
     self:appendEnergyConsumption(tooltip, element);
+    self:appendEffectInfo(tooltip, element);
     self:appendFlow(tooltip, element);
     self:appendLogistic(tooltip, element);
     self:appendControlInfo(tooltip, element);

@@ -247,46 +247,52 @@ end
 ---Update index panel
 ---@param model table
 function ProductionPanel:updateIndexPanel(model)
-  local models = Model.getModels()
-
+  local sorter = function(t,a,b) return t[b]["index"] > t[a]["index"] end
+  local models_by_owner = Model.getModelsByOwner()
   ---index panel
   local index_panel = self:getFrameDeepPanel("model_index")
   index_panel.style.padding = 2
   index_panel.clear()
   local table_index = GuiElement.add(index_panel, GuiTable("table_index"):column(GuiElement.getIndexColumnNumber()):style("helmod_table_list"))
   GuiElement.add(table_index, GuiButton(self.classname, "new-model"):sprite("menu", defines.sprites.add_table.black, defines.sprites.add_table.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_button.add-production-line"}))
-  if table.size(models) > 0 then
+  if table.size(models_by_owner) > 0 then
     local i = 0
-    for _,imodel in pairs(models) do
-      i = i + 1
-      local style = "helmod_button_default"
-      local element = Model.firstRecipe(imodel.blocks)
-      if imodel.id == model.id then
-        if element ~= nil and element.name ~= "" then
-          local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
-          local button = GuiElement.add(table_index, GuiButtonSprite(self.classname, "change-model", imodel.id):sprite(element.type, element.name):style("helmod_button_menu_selected"):tooltip(tooltip))
-          button.style.width = 36
-          button.style.height = 36
-          button.style.padding = {-2,-2,-2,-2}
+    for _,models in pairs(models_by_owner) do
+      local is_first = true
+      if models[1] ~= nil and models[1].index == nil  then
+        table.reindex_list(models)
+      end
+      for _,imodel in spairs(models, sorter) do
+        i = i + 1
+        local element = Model.firstRecipe(imodel.blocks)
+        local button = nil
+        if imodel.id == model.id then
+          if element ~= nil and element.name ~= "" then
+            local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
+            button = GuiElement.add(table_index, GuiButtonSprite(self.classname, "change-model", imodel.id):sprite(element.type, element.name):style("helmod_button_menu_selected"):tooltip(tooltip))
+            button.style.width = 36
+            button.style.height = 36
+            button.style.padding = {-2,-2,-2,-2}
+          else
+            button = GuiElement.add(table_index, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black):style("helmod_button_menu_selected"))
+            button.style.width = 36
+          end
         else
-          local button = GuiElement.add(table_index, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black):style("helmod_button_menu_selected"))
-          button.style.width = 36
-          --button.style.height = 36
+          if element ~= nil then
+            local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
+            button = GuiElement.add(table_index, GuiButtonSelectSprite(self.classname, "change-model", imodel.id):sprite(element.type, element.name):tooltip(tooltip):color())
+          else
+            button = GuiElement.add(table_index, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", defines.sprites.status_help.black, defines.sprites.status_help.black):style("helmod_button_menu"))
+            button.style.width = 36
+          end
         end
-      else
-        if element ~= nil then
-          local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
-          GuiElement.add(table_index, GuiButtonSelectSprite(self.classname, "change-model", imodel.id):sprite(element.type, element.name):tooltip(tooltip):color())
-        else
-          local button = GuiElement.add(table_index, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", defines.sprites.status_help.black, defines.sprites.status_help.black):style("helmod_button_menu"))
-          button.style.width = 36
-          --button.style.height = 36
+        if button ~= nil and is_first then
+          button.style.left_margin = 3
+          is_first = false
         end
       end
-
     end
   end
-  --GuiElement.add(table_index, GuiButton("HMArrangeModels", "OPEN"):sprite("menu", defines.sprites.list_view.black, defines.sprites.list_view.black):style("helmod_button_menu"):tooltip({"helmod_button.add-production-line"}))
 end
 
 -------------------------------------------------------------------------------
@@ -442,8 +448,15 @@ function ProductionPanel:updateSubMenuRightPanel(model, block)
   else
     GuiElement.add(group_pref, GuiButton(self.classname, "change-logistic"):sprite("menu", defines.sprites.transport.black, defines.sprites.transport.black):style("helmod_button_menu"):tooltip({"tooltip.display-logistic-row"}))
   end
-  GuiElement.add(group_pref, GuiButton("HMModelEdition", "OPEN", model.id, block_id):sprite("menu", defines.sprites.edit_document.black, defines.sprites.edit_document.black):style("helmod_button_menu"):tooltip({"helmod_panel.model-edition"}))
   GuiElement.add(group_pref, GuiButton("HMPreferenceEdition", "OPEN", model.id, block_id):sprite("menu", defines.sprites.process.black, defines.sprites.process.black):style("helmod_button_menu"):tooltip({"helmod_button.preferences"}))
+
+  local group_models = GuiElement.add(right_panel, GuiFlowH("group_models"))
+  group_models.style.horizontal_spacing = button_spacing
+  GuiElement.add(group_models, GuiButton("HMModelEdition", "OPEN", model.id, block_id):sprite("menu", defines.sprites.edit_document.black, defines.sprites.edit_document.black):style("helmod_button_menu"):tooltip({"helmod_panel.model-edition"}))
+  local button_model_up = GuiElement.add(group_models, GuiButton(self.classname, "model-index-up", model.id, block_id):sprite("menu", defines.sprites.arrow_left.black, defines.sprites.arrow_left.black):style("helmod_button_menu"):tooltip({"helmod_panel.model-index-up"}))
+  button_model_up.enabled = model.owner == Player.native().name
+  local button_model_down = GuiElement.add(group_models, GuiButton(self.classname, "model-index-down", model.id, block_id):sprite("menu", defines.sprites.arrow_right.black, defines.sprites.arrow_right.black):style("helmod_button_menu"):tooltip({"helmod_panel.model-index-down"}))
+  button_model_down.enabled = model.owner == Player.native().name
 
   local group_action = GuiElement.add(right_panel, GuiFlowH("group_action"))
   group_action.style.horizontal_spacing = button_spacing
@@ -1429,6 +1442,22 @@ end
 ---@param block table
 function ProductionPanel:onEventAccessWrite(event, model, block)
   local selector_name = "HMRecipeSelector"
+  
+  if event.action == "model-index-up" and model ~= nil then
+    if model.owner == Player.native().name then
+      local models = Model.getModelsOwner()
+      table.up_indexed_list(models, model.index, 1)
+      self:updateIndexPanel(model)
+    end
+  end
+
+  if event.action == "model-index-down" and model ~= nil then
+    if model.owner == Player.native().name then
+      local models = Model.getModelsOwner()
+      table.down_indexed_list(models, model.index, 1)
+      self:updateIndexPanel(model)
+    end
+  end
 
   if event.action == "change-boolean-option" and block ~= nil then
     ModelBuilder.updateProductionBlockOption(block, event.item1, not(block[event.item1]))

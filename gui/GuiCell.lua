@@ -309,7 +309,7 @@ function GuiCellFactory:create(parent)
   local cell = GuiElement.add(parent, GuiFlowV(factory.name, self.m_index))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element", color, 1))
 
-  local tooltip = GuiTooltipElement(self.options.tooltip):element(factory):withEnergy():withControlInfo(self.m_with_control_info)
+  local tooltip = GuiTooltipElement(self.options.tooltip):element(factory):withEnergy():withEffectInfo(factory.effects ~= nil):withControlInfo(self.m_with_control_info)
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("entity", factory.name):tooltip(tooltip))
   
   self:add_mask(button, color)

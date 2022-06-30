@@ -10,6 +10,8 @@ AbstractSelector = newclass(FormModel,function(base,classname)
   base.auto_clear = false
 end)
 
+local limit_display_height = 850
+
 -------------------------------------------------------------------------------
 ---On Style
 ---@param styles table
@@ -138,11 +140,25 @@ end
 ---Get or create groups panel
 ---@return LuaGuiElement
 function AbstractSelector:getGroupsPanel()
-  local scroll_panel = self:getSrollPanel()
-  if scroll_panel["groups_panel"] ~= nil and scroll_panel["groups_panel"].valid then
-    return scroll_panel["groups_panel"]
+  local display_width, display_height = Player.getDisplaySizes()
+  if display_height >= limit_display_height then
+    --- affichage normal
+    local flow_panel, content_panel, menu_panel = self:getPanel()
+    --local content_panel = self:getSrollPanel()
+    if content_panel["groups_panel"] ~= nil and content_panel["groups_panel"].valid then
+      return content_panel["groups_panel"]
+    end
+    local group_panel = GuiElement.add(content_panel, GuiFrameV("groups_panel"))
+    group_panel.style.horizontally_stretchable = true
+    return group_panel
+  else
+    --- affichage full scroll
+    local content_panel = self:getSrollPanel()
+    if content_panel["groups_panel"] ~= nil and content_panel["groups_panel"].valid then
+      return content_panel["groups_panel"]
+    end
+    return GuiElement.add(content_panel, GuiFlowV("groups_panel"))
   end
-  return GuiElement.add(scroll_panel, GuiFlowV("groups_panel"))
 end
 
 -------------------------------------------------------------------------------

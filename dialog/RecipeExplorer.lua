@@ -76,31 +76,36 @@ end
 ---@param event LuaEvent
 function RecipeExplorer:onEvent(event)
   local recipe_explore = User.getParameter("explore_recipe")
---- if event.action == "add-parent" then
----   local recipes = Player.searchRecipe(event.item3, true)
----   if #recipes == 1 then
----     local recipe = recipes[1]
----     
----     User.setParameter("scroll_element", new_recipe.id)
----     self:send("on_gui_update", event)
----   else
----     ---pour ouvrir avec le filtre ingredient
----     event.button = defines.mouse_button_type.right
----     Dispatcher:send("on_gui_open", event, "HMRecipeSelector")
----   end
---- end
   if event.action == "remove-child" then
     self:removeRecipe(recipe_explore, event.item3)
     self:updateDisplay()
   end
   
+  if event.action == "add-parent" then
+    User.setParameter("explore_recipe_mode", "add-parent")
+    local recipes = Player.searchRecipe(event.item2, true)
+    if #recipes == 1 then
+      local recipe = recipes[1]
+      local new_recipe = {type = recipe.type, name = recipe.name, id=game.tick }
+      self:addRecipe(new_recipe, recipe_explore, event.item3)
+      self:updateDisplay()
+    else
+      User.setParameter("explore_recipe_id", event.item3)
+      event.item1 = self.classname
+      event.item3 = event.item2
+      event.action = "OPEN"
+      event.button = defines.mouse_button_type.right
+      Dispatcher:send("on_gui_open", event, "HMRecipeSelector")
+    end
+  end
+
   if event.action == "add-child" then
+    User.setParameter("explore_recipe_mode", "add-child")
     local recipes = Player.searchRecipe(event.item2)
     if #recipes == 1 then
       local recipe = recipes[1]
       local new_recipe = {type = recipe.type, name = recipe.name, id=game.tick }
       self:addRecipe(recipe_explore, new_recipe, event.item3)
-      --User.setParameter("explore_recipe", recipe_explore)
       self:updateDisplay()
     else
       User.setParameter("explore_recipe_id", event.item3)
@@ -112,19 +117,27 @@ function RecipeExplorer:onEvent(event)
   end
   ---from RecipeSelector
   if event.action == "open-recipe-selector" then
+    User.setParameter("explore_recipe_mode", "add-child")
     User.setParameter("explore_recipe_id", nil)
     event.item1 = self.classname
     event.action = "OPEN"
     Dispatcher:send("on_gui_open", event, "HMRecipeSelector")
   end  
+
   ---from RecipeSelector
   if event.action == "element-select" then
+    local explore_recipe_mode = User.getParameter("explore_recipe_mode")
     local explore_recipe_id = User.getParameter("explore_recipe_id")
+    local new_recipe = {type = event.item1, name = event.item2, id=game.tick }
     if explore_recipe_id == nil then
-      User.setParameter("explore_recipe", {type = event.item1, name = event.item2, id=game.tick })
+      User.setParameter("explore_recipe", new_recipe)
     else
-      self:addRecipe(recipe_explore, {type = event.item1, name = event.item2, id=game.tick }, explore_recipe_id)
-      --User.setParameter("explore_recipe", recipe_explore)
+      if explore_recipe_mode == "add-parent" then
+        self:addRecipe(new_recipe, recipe_explore, explore_recipe_id)
+        User.setParameter("explore_recipe", new_recipe)
+      else
+        self:addRecipe(recipe_explore, new_recipe, explore_recipe_id)
+      end
     end
     self:updateDisplay()
   end
@@ -136,12 +149,24 @@ end
 ---@param recipe any
 ---@param id any
 function RecipeExplorer:addRecipe(parent, recipe, id)
-  if parent.id == tonumber(id or 0) then
-    if parent.children == nil then parent.children = {} end
-    table.insert(parent.children, recipe)
-  elseif parent.children then
-    for _,child in pairs(parent.children) do
-      self:addRecipe(child, recipe, id)
+  local explore_recipe_mode = User.getParameter("explore_recipe_mode")
+  if explore_recipe_mode == "add-parent" then
+    if recipe.id == tonumber(id or 0) then
+      if parent.children == nil then parent.children = {} end
+      table.insert(parent.children, recipe)
+    elseif recipe.children then
+      for _,child in pairs(recipe.children) do
+        self:addRecipe(parent, child, id)
+      end
+    end
+  else
+    if parent.id == tonumber(id or 0) then
+      if parent.children == nil then parent.children = {} end
+      table.insert(parent.children, recipe)
+    elseif parent.children then
+      for _,child in pairs(parent.children) do
+        self:addRecipe(child, recipe, id)
+      end
     end
   end
 end

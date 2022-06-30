@@ -4,6 +4,10 @@ Date: ???
   Features:
     - Added beacon settings preferences
     - Added replace entities in admin conversion for blueprint
+    - Added new parent selection (where use) in Explorer Recipe
+    - Added reorder production ligne and group by owner
+    - Added machine bonus in tooltip information
+    - Added stack size in tooltip information
   Changes:
     - Added cache for available machines to improve performance
     - Added support for wind turbines
