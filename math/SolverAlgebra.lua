@@ -27,9 +27,11 @@ function SolverAlgebra:getCol(M, xrow, invert)
   ---on cherche la plus grande demande
   for icol,cell_value in pairs(row) do
     if icol > self.col_start and ((invert ~= true and cell_value > 0) or (invert == true and cell_value < 0)) then
-      local Z = M[#M][icol]-M[self.row_input][icol] ---valeur demandee (input - Z)
+      local zvalue = M[#M][icol]
+      local Z = zvalue-M[self.row_input][icol] ---valeur demandee (Z-input)
       local C = -Z/cell_value
-      if (C > max and col_master == 0 and col_exclude == 0)
+      -- if zvalue = 0 the choose is already use
+      if (C > max and zvalue ~= 0 and col_master == 0 and col_exclude == 0)
         or (col_master ~= 0 and col_master == icol)
         or (C > max and col_exclude ~= 0 and col_exclude ~= icol) then
         max = C

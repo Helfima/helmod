@@ -16,6 +16,7 @@ Date: ???
     - List each available temperature of steam separately in the recipe selector
     - List of available fuels for a recipe is now sorted. Either by temperature or by joules
     - Combined energy selector with recipe selector. Energy production and regular recipes can now be in the same block
+    - Changed group of filter removed of scroll
   Bugfixes:
     - Fixed steam engine's fluid consumption when input fluid is below maximum temperature
     - Most energy recipes were ignoring selected Base time
@@ -46,6 +47,7 @@ Date: ???
     - Fixed pollution modifier from fuel being applied twice
     - Fixed module restrictions not being applied for rocket recipes
     - Fixed handling of recipes producing a single fluid at multiple temperatures
+    - Fixed recipes not linking in some cases
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.9
 Date: 2022-03-09

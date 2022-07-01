@@ -116,7 +116,6 @@ function AbstractSelector:getFilterPanel()
   end
   local panel = GuiElement.add(content_panel, GuiFrameV("filter-panel"))
   panel.style.horizontally_stretchable = true
-  GuiElement.add(panel, GuiLabel("frame_title"):caption({"helmod_common.filter"}):style("helmod_label_title_frame"))
   return panel
 end
 
@@ -277,6 +276,18 @@ function AbstractSelector:onEvent(event)
   if event.action == "recipe-group" then
     User.setParameter("recipe_group_selected",event.item1)
     Controller:send("on_gui_update", event, self.classname)
+  end
+
+  if event.action == "change-options-visibility" then
+    local options_visible_name = "filter_options_visible"
+    local filter_options_visible = User.getSetting(options_visible_name)
+    if filter_options_visible == nil then filter_options_visible = true end
+    
+    local panel = self:getFilterPanel()
+    panel["filter-options"].visible = not(filter_options_visible)
+    User.setSetting(options_visible_name, not(filter_options_visible))
+
+    self:updateFilter(event)
   end
 
   if event.action == "change-boolean-settings" then
@@ -449,10 +460,34 @@ end
 function AbstractSelector:updateFilter(event)
   local panel = self:getFilterPanel()
   local filter_prototype = self:getFilter()
+  local filter_options_visible = User.getSetting("filter_options_visible")
 
-  if panel["filter"] == nil then
+  if panel["options-menu"] == nil then
+    local options_menu = GuiElement.add(panel, GuiFlowH("options-menu"))
+    local options_left = GuiElement.add(options_menu, GuiFlowH("options-left"))
+    GuiElement.add(options_left, GuiLabel("frame_title"):caption({"helmod_button.options"}):style("helmod_label_title_frame"))
+    
+    local options_right = GuiElement.add(options_menu, GuiFlowH("options-right"))
+    options_right.style.horizontal_align = "right"
+    options_right.style.horizontally_stretchable = true
+  end
+
+  if panel["options-menu"] ~= nil then
+    local options_right = panel["options-menu"]["options-right"]
+    options_right.clear()
+    if filter_options_visible == true or filter_options_visible == nil then
+      GuiElement.add(options_right, GuiButton(self.classname, "change-options-visibility"):sprite("menu", defines.sprites.arrow_top.black, defines.sprites.arrow_top.black):style("helmod_button_menu_sm"))
+    else
+      GuiElement.add(options_right, GuiButton(self.classname, "change-options-visibility"):sprite("menu", defines.sprites.arrow_bottom.black, defines.sprites.arrow_bottom.black):style("helmod_button_menu_sm"))
+    end
+  end
+
+  if panel["filter-options"] == nil then
+    local options_panel = GuiElement.add(panel, GuiFlowV("filter-options"))
+    options_panel.visible = filter_options_visible
+
     if self.product_option then
-      GuiElement.add(panel, GuiSwitch(self.classname, "recipe-filter-switch"):state("left"):leftLabel({"helmod_recipe-edition-panel.filter-by-product"}):rightLabel({"helmod_recipe-edition-panel.filter-by-ingredient"}))
+      GuiElement.add(options_panel, GuiSwitch(self.classname, "recipe-filter-switch"):state("left"):leftLabel({"helmod_recipe-edition-panel.filter-by-product"}):rightLabel({"helmod_recipe-edition-panel.filter-by-ingredient"}))
     end
 
     ---switch language
@@ -460,7 +495,7 @@ function AbstractSelector:updateFilter(event)
     if User.getModGlobalSetting("filter_translated_string_active") and User.getParameter("filter-language") ~= nil then
       switch_position = User.getParameter("filter-language")
     end
-    local filter_switch = GuiElement.add(panel, GuiSwitch(self.classname, "filter-language-switch"):state(switch_position):rightLabel({"helmod_recipe-edition-panel.filter-language-switch-left"}, {"tooltip.filter-language-switch-left"}):leftLabel({"helmod_recipe-edition-panel.filter-language-switch-right"}, {"tooltip.filter-language-switch-right"}):tooltip({"helmod_recipe-edition-panel.filter-language-switch"}))
+    local filter_switch = GuiElement.add(options_panel, GuiSwitch(self.classname, "filter-language-switch"):state(switch_position):rightLabel({"helmod_recipe-edition-panel.filter-language-switch-left"}, {"tooltip.filter-language-switch-left"}):leftLabel({"helmod_recipe-edition-panel.filter-language-switch-right"}, {"tooltip.filter-language-switch-right"}):tooltip({"helmod_recipe-edition-panel.filter-language-switch"}))
     if not(User.getModGlobalSetting("filter_translated_string_active")) then
       filter_switch.enabled = false
       filter_switch.switch_state = "right"
@@ -470,10 +505,10 @@ function AbstractSelector:updateFilter(event)
     if User.getParameter("filter-contain") ~= nil then
       contain_position = User.getParameter("filter-contain")
     end
-    GuiElement.add(panel, GuiSwitch(self.classname, "filter-contain-switch"):state(contain_position):rightLabel({"helmod_recipe-edition-panel.filter-contain-switch-left"}, {"tooltip.filter-contain-switch-left"}):leftLabel({"helmod_recipe-edition-panel.filter-contain-switch-right"}, {"tooltip.filter-contain-switch-right"}):tooltip({"helmod_recipe-edition-panel.filter-contain-switch"}))
+    GuiElement.add(options_panel, GuiSwitch(self.classname, "filter-contain-switch"):state(contain_position):rightLabel({"helmod_recipe-edition-panel.filter-contain-switch-left"}, {"tooltip.filter-contain-switch-left"}):leftLabel({"helmod_recipe-edition-panel.filter-contain-switch-right"}, {"tooltip.filter-contain-switch-right"}):tooltip({"helmod_recipe-edition-panel.filter-contain-switch"}))
 
     ---filter table
-    local filter_table = GuiElement.add(panel, GuiTable("filter"):column(2))
+    local filter_table = GuiElement.add(options_panel, GuiTable("filter"):column(2))
     filter_table.vertical_centering = true
 
     if self.disable_option then
@@ -500,31 +535,33 @@ function AbstractSelector:updateFilter(event)
       GuiElement.add(filter_table, GuiLabel("filter_show_lock_recipes"):caption({"helmod_recipe-edition-panel.filter-show-lock-recipes"}))
     end
 
-    GuiElement.add(filter_table, GuiLabel("filter-value"):caption({"helmod_common.filter"}))
-    local cellFilter = GuiElement.add(filter_table, GuiFrameH("cell-filter"):style(helmod_frame_style.hidden))
+    ---filter
+    local filter_box_panel = GuiElement.add(panel, GuiFlowH("filter-box-panel"))
+
+    local label_filter_value = GuiElement.add(filter_box_panel, GuiLabel("filter-value"):caption({"helmod_common.filter"}))
+    label_filter_value.style.margin = {5,5,0,0}
     if User.getModGlobalSetting("filter_on_text_changed") then
-      local text_filter = GuiElement.add(cellFilter, GuiTextField(self.classname, "recipe-filter", "filter-value=onchange"):text(filter_prototype):style("helmod_textfield_filter"))
+      local text_filter = GuiElement.add(filter_box_panel, GuiTextField(self.classname, "recipe-filter", "filter-value=onchange"):text(filter_prototype):style("helmod_textfield_filter"))
       text_filter.lose_focus_on_confirm = false
       text_filter.focus()
     else
-      GuiElement.add(cellFilter, GuiTextField(self.classname, "recipe-filter", "filter-text"):text(filter_prototype):style("helmod_textfield_filter"))
-      GuiElement.add(cellFilter, GuiButton(self.classname, "recipe-filter", "filter-button"):caption({"helmod_button.apply"}))
+      GuiElement.add(filter_box_panel, GuiTextField(self.classname, "recipe-filter", "filter-text"):text(filter_prototype):style("helmod_textfield_filter"))
+      GuiElement.add(filter_box_panel, GuiButton(self.classname, "recipe-filter", "filter-button"):caption({"helmod_button.apply"}))
     end
-  end
 
+  end
   if self.product_option then
-    local switch_by_product = "right"
-    if self:getProductFilter() == true then switch_by_product = "left" end
-    panel[self.classname.."=recipe-filter-switch"].switch_state = switch_by_product
-    if filter_prototype ~= nil then
-      if User.getModGlobalSetting("filter_on_text_changed") then
-        panel["filter"]["cell-filter"][self.classname.."=recipe-filter=filter-value=onchange"].text = filter_prototype
-      else
-        panel["filter"]["cell-filter"][self.classname.."=recipe-filter=filter-text"].text = filter_prototype
+      local switch_by_product = "right"
+      if self:getProductFilter() == true then switch_by_product = "left" end
+      panel["filter-options"][self.classname.."=recipe-filter-switch"].switch_state = switch_by_product
+      if filter_prototype ~= nil then
+        if User.getModGlobalSetting("filter_on_text_changed") then
+          panel["filter-box-panel"][self.classname.."=recipe-filter=filter-value=onchange"].text = filter_prototype
+        else
+          panel["filter-box-panel"][self.classname.."=recipe-filter=filter-text"].text = filter_prototype
+        end
       end
-    end
   end
-
 end
 
 -------------------------------------------------------------------------------
@@ -716,8 +753,6 @@ function AbstractSelector.updateGroupSelector(self, event)
 
   ---ajouter de la table des groupes de recipe
   local gui_group_panel = GuiElement.add(panel, GuiTable("recipe-groups"):column(6):style("helmod_table_recipe_selector"))
-
-  local group_selected = User.getParameter("recipe_group_selected")
 
   for _, group in spairs(list_group,function(t,a,b) return t[b]["order"] > t[a]["order"] end) do
     ---set le groupe
