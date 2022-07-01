@@ -68,7 +68,9 @@ function RecipeExplorer:updateHeader(event)
   local action_panel, _ = self:getMenuPanel()
   action_panel.clear()
   local group1 = GuiElement.add(action_panel, GuiFlowH("group1"))
-  GuiElement.add(group1, GuiButton(self.classname, "open-recipe-selector", self.classname):sprite("menu", defines.sprites.script.black, defines.sprites.script.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.add-button-recipe"}))
+  group1.style.horizontal_spacing = 10
+  GuiElement.add(group1, GuiButton(self.classname, "open-recipe-selector", self.classname):sprite("menu", defines.sprites.script.black, defines.sprites.script.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-recipe"}))
+  GuiElement.add(group1, GuiButton(self.classname, "generate-block", self.classname):sprite("menu", defines.sprites.settings.black, defines.sprites.settings.black):style("helmod_button_menu"):tooltip({"helmod_recipe-explorer-panel.generate-block"}))
 end
 
 -------------------------------------------------------------------------------
@@ -81,6 +83,16 @@ function RecipeExplorer:onEvent(event)
     self:updateDisplay()
   end
   
+  if event.action == "generate-block" then
+    local parameter_name = string.format("%s_%s", "HMProductionPanel", "objects")
+    local parameter_objects = User.getParameter(parameter_name)
+    local model, _, _ = Model.getParameterObjects(parameter_objects)
+    local block = self:generateBlock(model, nil, recipe_explore)
+    ModelCompute.update(model)
+    User.setParameter(parameter_name, {name=parameter_name, model=model.id, block=block.id})
+    Controller:send("on_gui_update", event)
+  end
+
   if event.action == "add-parent" then
     User.setParameter("explore_recipe_mode", "add-parent")
     local recipes = Player.searchRecipe(event.item2, true)
@@ -141,6 +153,16 @@ function RecipeExplorer:onEvent(event)
     end
     self:updateDisplay()
   end
+end
+
+function RecipeExplorer:generateBlock(model, block, recipe)
+  block = ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe.name, recipe.type)
+  if recipe.children then
+    for _,child in pairs(recipe.children) do
+      self:generateBlock(model, block, child)
+    end
+  end
+  return block
 end
 
 -------------------------------------------------------------------------------

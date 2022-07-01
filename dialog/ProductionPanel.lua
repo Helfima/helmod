@@ -1562,7 +1562,7 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
         local recipes = Player.searchRecipe(event.item4, true)
         if #recipes == 1 then
           local recipe = recipes[1]
-          local new_recipe = ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe.name, recipe.type, 0)
+          local _,new_recipe = ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe.name, recipe.type, 0)
           ModelCompute.update(model)
           User.setParameter("scroll_element", new_recipe.id)
           Controller:send("on_gui_update", event)
@@ -1595,7 +1595,7 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
         local recipes = Player.searchRecipe(event.item4)
         if #recipes == 1 then
           local recipe = recipes[1]
-          local new_recipe = ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe.name, recipe.type)
+          local _,new_recipe = ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe.name, recipe.type)
           ModelCompute.update(model)
           User.setParameter("scroll_element", new_recipe.id)
           Controller:send("on_gui_update", event)
