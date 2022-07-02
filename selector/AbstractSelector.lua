@@ -139,8 +139,8 @@ end
 ---Get or create groups panel
 ---@return LuaGuiElement
 function AbstractSelector:getGroupsPanel()
-  local display_width, display_height = Player.getDisplaySizes()
-  if display_height >= limit_display_height then
+  local filter_scroll_groups = User.getSetting("filter_scroll_groups")
+  if filter_scroll_groups == false then
     --- affichage normal
     local flow_panel, content_panel, menu_panel = self:getPanel()
     --local content_panel = self:getSrollPanel()
@@ -288,6 +288,13 @@ function AbstractSelector:onEvent(event)
     User.setSetting(options_visible_name, not(filter_options_visible))
 
     self:updateFilter(event)
+  end
+
+  if event.action == "change-sroll-groups" then
+    User.setSetting("filter_scroll_groups", event.item1 == "true")
+    local flow_panel, content_panel, menu_panel = self:getPanel()
+    content_panel.clear()
+    Controller:send("on_gui_update", event, self.classname)
   end
 
   if event.action == "change-boolean-settings" then
@@ -461,6 +468,7 @@ function AbstractSelector:updateFilter(event)
   local panel = self:getFilterPanel()
   local filter_prototype = self:getFilter()
   local filter_options_visible = User.getSetting("filter_options_visible")
+  local filter_scroll_groups = User.getSetting("filter_scroll_groups")
 
   if panel["options-menu"] == nil then
     local options_menu = GuiElement.add(panel, GuiFlowH("options-menu"))
@@ -470,12 +478,26 @@ function AbstractSelector:updateFilter(event)
     local options_right = GuiElement.add(options_menu, GuiFlowH("options-right"))
     options_right.style.horizontal_align = "right"
     options_right.style.horizontally_stretchable = true
+    options_right.style.horizontal_spacing = 5
   end
 
   if panel["options-menu"] ~= nil then
     local options_right = panel["options-menu"]["options-right"]
     options_right.clear()
-    if filter_options_visible == true or filter_options_visible == nil then
+
+    local group_sroll = GuiElement.add(options_right, GuiFlowH("group_sroll"))
+    group_sroll.style.horizontal_spacing = 2
+    if filter_scroll_groups ~= false then
+      GuiElement.add(group_sroll, GuiButton(self.classname, "change-sroll-groups", "true"):sprite("menu", defines.sprites.two_rows.black, defines.sprites.two_rows.black):style("helmod_button_menu_sm_selected"))
+      GuiElement.add(group_sroll, GuiButton(self.classname, "change-sroll-groups", "false"):sprite("menu", defines.sprites.three_rows.black, defines.sprites.three_rows.black):style("helmod_button_menu_sm"))
+    else
+      GuiElement.add(group_sroll, GuiButton(self.classname, "change-sroll-groups", "true"):sprite("menu", defines.sprites.two_rows.black, defines.sprites.two_rows.black):style("helmod_button_menu_sm"))
+      GuiElement.add(group_sroll, GuiButton(self.classname, "change-sroll-groups", "false"):sprite("menu", defines.sprites.three_rows.black, defines.sprites.three_rows.black):style("helmod_button_menu_sm_selected"))
+    end
+    
+    local group_visible = GuiElement.add(options_right, GuiFlowH("group_visible"))
+    group_visible.style.horizontal_spacing = 2
+    if filter_options_visible ~= false then
       GuiElement.add(options_right, GuiButton(self.classname, "change-options-visibility"):sprite("menu", defines.sprites.arrow_top.black, defines.sprites.arrow_top.black):style("helmod_button_menu_sm"))
     else
       GuiElement.add(options_right, GuiButton(self.classname, "change-options-visibility"):sprite("menu", defines.sprites.arrow_bottom.black, defines.sprites.arrow_bottom.black):style("helmod_button_menu_sm"))
@@ -484,7 +506,7 @@ function AbstractSelector:updateFilter(event)
 
   if panel["filter-options"] == nil then
     local options_panel = GuiElement.add(panel, GuiFlowV("filter-options"))
-    options_panel.visible = filter_options_visible
+    options_panel.visible = filter_options_visible ~= false
 
     if self.product_option then
       GuiElement.add(options_panel, GuiSwitch(self.classname, "recipe-filter-switch"):state("left"):leftLabel({"helmod_recipe-edition-panel.filter-by-product"}):rightLabel({"helmod_recipe-edition-panel.filter-by-ingredient"}))
