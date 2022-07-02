@@ -259,9 +259,7 @@ function ProductionPanel:updateIndexPanel(model)
     local i = 0
     for _,models in pairs(models_by_owner) do
       local is_first = true
-      if models[1] ~= nil and models[1].index == nil  then
-        table.reindex_list(models)
-      end
+      table.reindex_list(models)
       for _,imodel in spairs(models, sorter) do
         i = i + 1
         local element = Model.firstRecipe(imodel.blocks)
