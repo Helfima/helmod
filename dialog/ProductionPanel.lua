@@ -1480,12 +1480,16 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 
   if event.action == "product-selected" then
     if event.button == defines.mouse_button_type.right then
+      -- Set Parameter Target for the selector return
+      User.setParameter("HMRecipeSelector_target", self.classname)
       Controller:send("on_gui_open", event,"HMRecipeSelector")
     end
   end
 
   if event.action == "product-edition" then
     if event.button == defines.mouse_button_type.right then
+      -- Set Parameter Target for the selector return
+      User.setParameter("HMRecipeSelector_target", self.classname)
       Controller:send("on_gui_open", event, selector_name)
     else
       Controller:send("on_gui_open", event, "HMProductEdition")
@@ -1555,6 +1559,8 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
   if event.action == "production-recipe-product-add" then
     if event.control == false and event.shift == false then
       if event.button == defines.mouse_button_type.right then
+        -- Set Parameter Target for the selector return
+        User.setParameter("HMRecipeSelector_target", self.classname)
         Controller:send("on_gui_open", event, selector_name)
       else
         local recipes = Player.searchRecipe(event.item4, true)
@@ -1565,6 +1571,8 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
           User.setParameter("scroll_element", new_recipe.id)
           Controller:send("on_gui_update", event)
         else
+          -- Set Parameter Target for the selector return
+          User.setParameter("HMRecipeSelector_target", self.classname)
           ---pour ouvrir avec le filtre ingredient
           event.button = defines.mouse_button_type.right
           Controller:send("on_gui_open", event, selector_name)
@@ -1588,6 +1596,8 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
   if event.action == "production-recipe-ingredient-add" then
     if event.control == false and event.shift == false then
       if event.button == defines.mouse_button_type.right then
+        -- Set Parameter Target for the selector return
+        User.setParameter("HMRecipeSelector_target", self.classname)
         Controller:send("on_gui_open", event, selector_name)
       else
         local recipes = Player.searchRecipe(event.item4)
@@ -1598,6 +1608,8 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
           User.setParameter("scroll_element", new_recipe.id)
           Controller:send("on_gui_update", event)
         else
+          -- Set Parameter Target for the selector return
+          User.setParameter("HMRecipeSelector_target", self.classname)
           Controller:send("on_gui_open", event, selector_name)
         end
       end

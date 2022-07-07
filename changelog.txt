@@ -49,6 +49,7 @@ Date: ???
     - Fixed module restrictions not being applied for rocket recipes
     - Fixed handling of recipes producing a single fluid at multiple temperatures
     - Fixed recipes not linking in some cases
+    - Fixed bad panel target when Recipe Selector used in Recipe Explorer
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.9
 Date: 2022-03-09
