@@ -122,6 +122,7 @@ function Model.newModel()
   model.resources = {}
   model.time = 1
   model.version = Model.version
+  model.index = table.size(global.models)
   global.models[model.id] = model
   return model
 end
