@@ -2,13 +2,12 @@
 Version: 0.12.10
 Date: ???
   Features:
-    - Added beacon settings preferences
-    - Added replace entities in admin conversion for blueprint
-    - Added new parent selection (where use) in Explorer Recipe
-    - Added button to generate bloc in Explorer Recipe
-    - Added reorder production ligne and group by owner
-    - Added machine bonus in tooltip information
+    - Added default beacon settings in preferences
+    - Added conversion feature to administration panel. Replaces entities in a blueprint
+    - Added buttons to move production lines left and right and to group production lines by owner
+    - Added machine bonus in tooltip information (Energy, Speed, Productivity, Pollution)
     - Added stack size in tooltip information
+    - Combined energy selector with recipe selector. Energy production and regular recipes can now be in the same block
   Changes:
     - Added cache for available machines to improve performance
     - Added support for wind turbines
@@ -16,8 +15,10 @@ Date: ???
     - Updated icons
     - List each available temperature of steam separately in the recipe selector
     - List of available fuels for a recipe is now sorted. Either by temperature or by joules
-    - Combined energy selector with recipe selector. Energy production and regular recipes can now be in the same block
-    - Changed group of filter panel can be or not in scroll
+    - Added button to selectors to show / hide filter options
+    - Added buttons to selectors that toggle if category tabs are included in scroll
+    - Added new parent selection (where use) in Recipe Explorer
+    - Added button to generate block in Recipe Explorer
   Bugfixes:
     - Fixed steam engine's fluid consumption when input fluid is below maximum temperature
     - Most energy recipes were ignoring selected Base time
