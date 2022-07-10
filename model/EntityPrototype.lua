@@ -72,7 +72,9 @@ function EntityPrototype:getTemperatureEnergy(fluid_fuel, maximum_temperature)
     local heat_capacity = fluid_fuel:getHeatCapacity()
     local minimum_temperature = fluid_fuel:getMinimumTemperature()
     local temperature
-    if maximum_temperature > 0 then
+    if not fluid_fuel.temperature then
+      temperature = minimum_temperature
+    elseif maximum_temperature > 0 then
       temperature = math.min(maximum_temperature, fluid_fuel.temperature)
     else
       temperature = fluid_fuel.temperature
@@ -145,7 +147,7 @@ function EntityPrototype:getEnergyConsumption()
     local fuel_value = fluid_fuel:getFuelValue()
     local max_energy_production = (self.lua_prototype.max_energy_production or 0) * 60
 
-    if fuel_value == 0 then
+    if self.lua_prototype.burns_fluid ~= true then
       ---Steam engine
       local maximum_temperature = self:getMaximumTemperature()
       fuel_value = self:getTemperatureEnergy(fluid_fuel, maximum_temperature)
@@ -295,7 +297,7 @@ function EntityPrototype:getFluidFuelPrototype(current)
   if self:getEnergyTypeInput() ~= "fluid" then
     return nil
   end
-  
+
   if current == true and self.factory ~= nil and self.factory.fuel ~= nil then
     local fuel_name = self.factory.fuel
     local fuel = nil
@@ -319,7 +321,7 @@ function EntityPrototype:getFluidFuelPrototype(current)
       for _, fluidbox in pairs(fluidboxes) do
         if fluidbox.production_type == "input-output" or fluidbox.production_type == "input" then
           if fluidbox.filter ~= nil then
-            if fluidbox.filter.fuel_value > 0 then
+            if self.lua_prototype.burns_fluid == true then
               return FluidPrototype(fluidbox.filter)
             else
               local maximum_temperature = self:getMaximumTemperature()
@@ -370,7 +372,7 @@ function EntityPrototype:getFluidFuelPrototypes()
       for _, fluidbox in pairs(fluidboxes) do
         if fluidbox.production_type == "input-output" or fluidbox.production_type == "input" then
           if fluidbox.filter ~= nil then
-            if fluidbox.filter.fuel_value > 0 then
+            if self.lua_prototype.burns_fluid == true then
               return {FluidPrototype(fluidbox.filter)}
             else
               return Player.getFluidTemperaturePrototypes(fluidbox.filter)
