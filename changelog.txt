@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.10
-Date: ???
+Date: 2022-07-11
   Features:
     - Added default beacon settings in preferences
     - Added conversion feature to administration panel. Replaces entities in a blueprint
