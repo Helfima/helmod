@@ -59,38 +59,42 @@ end
 
 if global.models then
   for _, model in pairs(global.models) do
-    for _, block in pairs(model.blocks) do
-      for _, recipe in pairs(block.recipes) do
+    if model.blocks then
+      for _, block in pairs(model.blocks) do
+        if block.recipes then
+          for _, recipe in pairs(block.recipes) do
 
-        ---Find fluid recipes that no longer exist
-        if (recipe.type == "fluid") and recipe.factory and (not fluid_recipes[recipe.name]) then
+            ---Find fluid recipes that no longer exist
+            if (recipe.type == "fluid") and recipe.factory and (not fluid_recipes[recipe.name]) then
 
-          ---Check if fluid recipe should be replaced with a boiler recipe
-          local recipe_name = FindRecipeNameForBoiler(recipe.factory.name)
-          if recipe_name then
-            recipe.type = "boiler"
-            recipe.name = recipe_name
-          end
+              ---Check if fluid recipe should be replaced with a boiler recipe
+              local recipe_name = FindRecipeNameForBoiler(recipe.factory.name)
+              if recipe_name then
+                recipe.type = "boiler"
+                recipe.name = recipe_name
+              end
 
-        elseif recipe.type == "energy" then
+            elseif recipe.type == "energy" then
 
-          local prototype = EntityPrototype(recipe.factory)
+              local prototype = EntityPrototype(recipe.factory)
 
-          if prototype:getType() == "boiler" then
-            local recipe_name = FindRecipeNameForBoiler(recipe.factory.name)
-            if recipe_name then
-              recipe.type = "boiler"
-              recipe.name = recipe_name
+              if prototype:getType() == "boiler" then
+                local recipe_name = FindRecipeNameForBoiler(recipe.factory.name)
+                if recipe_name then
+                  recipe.type = "boiler"
+                  recipe.name = recipe_name
+                end
+
+              elseif prototype:getType() == "offshore-pump" then
+                local recipe_name = FindRecipeNameForOffshorePump(recipe.factory.name)
+                if recipe_name then
+                  recipe.type = "fluid"
+                  recipe.name = recipe_name
+                end
+              end
+
             end
-
-          elseif prototype:getType() == "offshore-pump" then
-            local recipe_name = FindRecipeNameForOffshorePump(recipe.factory.name)
-            if recipe_name then
-              recipe.type = "fluid"
-              recipe.name = recipe_name
-            end
           end
-
         end
       end
     end
