@@ -215,11 +215,14 @@ function RecipeSelector:buildPrototypeTooltip(prototype)
     if table.size(entities) > 0 then
       table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.made-in"}, ":", helmod_tag.color.close, helmod_tag.font.close})
       for _, entity in pairs(entities) do
+        if #tooltip >= 19 then
+          table.insert(tooltip, {"", "\n", "..."})
+          break
+        end
         local entity_prototype = EntityPrototype(entity)
         table.insert(tooltip, {"", "\n", string.format("[%s=%s] ", "entity", entity.name), entity_prototype:getLocalisedName()})
       end
     end
-
   end
 
   return tooltip
