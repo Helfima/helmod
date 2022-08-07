@@ -479,31 +479,39 @@ end
 ---Return fluid production
 ---@return number --default 0
 function EntityPrototype:getFluidProduction()
-  local fluidbox = self:getFluidboxPrototype("output")
-  if fluidbox ~= nil then
-    if self:getType() == "offshore-pump" then
-      return self:getPumpingSpeed()
+  if self:getType() == "offshore-pump" then
+
+    return self:getPumpingSpeed()
+
+  elseif self:getType() == "boiler" then
+
+    local energy_prototype = self:getEnergySource()
+    local effectivity
+    if energy_prototype ~= nil then
+      effectivity = energy_prototype:getEffectivity()
+    else
+      effectivity = 1
     end
-    if self:getType() == "boiler" then
-      local energy_prototype = self:getEnergySource()
-      local effectivity
-      if energy_prototype ~= nil then
-        effectivity = energy_prototype:getEffectivity()
-      else
-        effectivity = 1
+
+    local fluidboxes = self:getFluidboxPrototypes()
+    if fluidboxes ~= nil then
+      for _, fluidbox in pairs(fluidboxes) do
+        if fluidbox.production_type == "input-output" or fluidbox.production_type == "input" then
+
+          local fluid_prototype = FluidPrototype(fluidbox.filter)
+          local heat_capacity = fluid_prototype:getHeatCapacity()
+          
+          local minimum_temperature = fluid_prototype:getMinimumTemperature()
+          local target_temperature = self:getTargetTemperature()
+          local power_extract = self:getPowerExtract(minimum_temperature, target_temperature, heat_capacity)
+          local energy_consumption = self:getEnergyConsumption()
+
+          return (energy_consumption * effectivity) / power_extract
+        end
       end
-
-      local fluid_prototype = FluidPrototype(fluidbox:getFilter())
-      local heat_capacity = fluid_prototype:getHeatCapacity()
-      
-      local minimum_temperature = fluid_prototype:getMinimumTemperature()
-      local target_temperature = self:getTargetTemperature()
-      local power_extract = self:getPowerExtract(minimum_temperature, target_temperature, heat_capacity)
-      local energy_consumption = self:getEnergyConsumption()
-
-      return (energy_consumption * effectivity) / power_extract
     end
   end
+
   return 0
 end
 
