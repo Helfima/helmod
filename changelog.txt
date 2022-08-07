@@ -3,6 +3,7 @@ Version: 0.12.12
 Date: ???
   Bugfixes:
     - Boilers were using heat capacity and default temperature of output fluid instead of input fluid
+    - Burnt result was not being added to recipe products
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.11
 Date: 2022-07-22

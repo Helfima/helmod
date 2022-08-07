@@ -147,12 +147,13 @@ function RecipePrototype:getProducts(factory)
       end
     end
   end
+
   ---convert map to array
   local raw_products = {}
   for _, lua_product in pairs(lua_products) do
     table.insert(raw_products,lua_product)
   end
-  ---insert burnt
+
   if self.lua_type == "energy" then
     if factory_prototype:getType() == "reactor" then
       local bonus = factory_prototype:getNeighbourBonus()
@@ -162,20 +163,31 @@ function RecipePrototype:getProducts(factory)
         end
       end
     end
-    if factory ~= nil and factory_prototype:getEnergyType() == "burner" then
-      local energy_prototype = factory_prototype:getEnergySource()
-      if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then
-        local fuel_count = energy_prototype:getFuelCount()
-        if fuel_count ~= nil and fuel_count.type == "item" then
-          local item = ItemPrototype(fuel_count.name)
-          local burnt_result = item:getBurntResult()
-          if burnt_result ~= nil then
-            table.insert(raw_products, {type=burnt_result.type, name=burnt_result.name, amount=fuel_count.count})
+  end
+
+  ---insert burnt
+  if factory ~= nil and factory_prototype:getEnergyType() == "burner" then
+    local energy_prototype = factory_prototype:getEnergySource()
+    if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then
+      local fuel_count = energy_prototype:getFuelCount()
+      if fuel_count ~= nil and fuel_count.type == "item" then
+        local item = ItemPrototype(fuel_count.name)
+        local burnt_result = item:getBurntResult()
+        if burnt_result ~= nil then
+          local factor = 1
+          if self.lua_type ~= "energy" then
+            local consumption_effect = 1
+            if factory.effects ~= nil then
+              consumption_effect = 1 + (factory.effects.consumption or 0)
+            end
+            factor = self:getEnergy() * consumption_effect / factory.speed
           end
+          table.insert(raw_products, {type=burnt_result.type, name=burnt_result.name, amount=fuel_count.count*factor, catalyst_amount=fuel_count.count*factor})
         end
       end
     end
   end
+
   return raw_products
 end
 
