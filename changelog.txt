@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.12
 Date: ???
+  Changes:
+    - Updated Russian locale
   Bugfixes:
     - Boilers were using heat capacity and default temperature of output fluid instead of input fluid
     - Burnt result was not being added to recipe products
