@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.12
-Date: ???
+Date: 2022-08-21
   Changes:
     - Updated Russian locale
     - Hidden items will no longer be selectable as fuel
