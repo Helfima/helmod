@@ -4,6 +4,7 @@ Date: ???
   Changes:
     - Updated Russian locale
     - Hidden items will no longer be selectable as fuel
+    - Added linking of block intermediate products to copy / paste
   Bugfixes:
     - Boilers were using heat capacity and default temperature of output fluid instead of input fluid
     - Burnt result was not being added to recipe products

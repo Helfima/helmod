@@ -741,6 +741,9 @@ function ModelBuilder.copyBlock(into_model, into_block, from_model, from_block)
     end
     if into_block ~= nil then
       table.reindex_list(into_block.recipes)
+      if from_block.products_linked ~= nil then
+        into_block.products_linked = table.deepcopy(from_block.products_linked)
+      end
     end
   end
 end
