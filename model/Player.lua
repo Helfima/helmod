@@ -810,7 +810,7 @@ function Player.buildResourceRecipe(entity_prototype)
   recipe.group = {name="helmod", order="zzzz"}
   recipe.subgroup = {name="helmod-resource", order="aaaa"}
   recipe.hidden = false
-  if prototype.flags ~= nil then
+  if prototype and prototype.flags ~= nil then
     recipe.hidden = prototype.flags["hidden"] or false
   end
   recipe.ingredients = ingredients
