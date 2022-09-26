@@ -5,6 +5,7 @@ Date: ???
     - Updated German locale
   Bugfixes:
     - Fixed crash after mod update removes a resource #428
+    - Recipe selector sometimes being shown unnecessarily #430
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.12
 Date: 2022-08-21

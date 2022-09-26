@@ -1107,10 +1107,13 @@ function Player.searchRecipe(element_name, by_ingredient)
   ---recherche dans les produits des recipes
   for key, recipe in pairs(Player.getPlayerRecipes()) do
     local elements = recipe.products or {}
-    if by_ingredient == true then elements = recipe.ingredients or {} end
+    if by_ingredient == true then
+      elements = recipe.ingredients or {}
+    end
     for k, element in pairs(elements) do
       if element.name == element_name then
         table.insert(recipes,{name=recipe.name, type="recipe"})
+        break
       end
     end
   end
