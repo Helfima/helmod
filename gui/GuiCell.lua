@@ -463,7 +463,7 @@ function GuiCellProductSm:create(parent)
   
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
   local caption3 = Format.formatNumber(element.count, 5)
-  if element.type == "energy" then caption3 = Format.formatNumberKilo(element.count, "W") end
+  if element.type == "energy" then caption3 = Format.formatNumberKilo(element.count, "J") end
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element_sm"):tooltip({"helmod_common.total"}))
   return cell
 end
@@ -604,13 +604,13 @@ function GuiCellEnergy:create(parent)
 
   if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element", color, 2))
-    local caption2 = Format.formatNumberKilo(element.limit_energy or 0, "W")
+    local caption2 = Format.formatNumberKilo(element.limit_energy or 0, "J")
     if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_energy) end
     GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element"):tooltip({"helmod_common.total"}))
   end
 
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element", color, 3))
-  local caption3 = Format.formatNumberKilo(element.energy_total or element.power, "W")
+  local caption3 = Format.formatNumberKilo(element.energy_total or element.power, "J")
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
 
   return cell
@@ -722,14 +722,14 @@ function GuiCellElement:create(parent)
   if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element", color, 2))
     local caption2 = Format.formatNumberElement(element.limit_count)
-    if element.type == "energy" then caption2 = Format.formatNumberKilo(element.limit_count, "W") end
+    if element.type == "energy" then caption2 = Format.formatNumberKilo(element.limit_count, "J") end
     if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_count) end
     GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element"):tooltip({"helmod_common.total"}))
   end
 
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element", color, 3))
   local caption3 = Format.formatNumberElement(element.count)
-  if element.type == "energy" then caption3 = Format.formatNumberKilo(element.count, "W") end
+  if element.type == "energy" then caption3 = Format.formatNumberKilo(element.count, "J") end
   if display_cell_mod == "by-kilo" then caption3 = Format.formatNumberKilo(element.count) end
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
 
@@ -773,14 +773,14 @@ function GuiCellElementSm:create(parent)
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_sm", color, 2))
     local caption2 = Format.formatNumberElement(element.limit_count)
     if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_count) end
-    if element.type == "energy" then caption2 = Format.formatNumberKilo(element.limit_count, "W") end
+    if element.type == "energy" then caption2 = Format.formatNumberKilo(element.limit_count, "J") end
     GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element_sm"):tooltip({"helmod_common.total"}))
   end
 
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_sm", color, 3))
   local caption3 = Format.formatNumberElement(element.count)
   if display_cell_mod == "by-kilo" then caption3 = Format.formatNumberKilo(element.count) end
-  if element.type == "energy" then caption3 = Format.formatNumberKilo(element.count, "W") end
+  if element.type == "energy" then caption3 = Format.formatNumberKilo(element.count, "J") end
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element_sm"):tooltip({"helmod_common.total"}))
 
   return cell
@@ -820,14 +820,14 @@ function GuiCellElementM:create(parent)
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_m", color, 2))
     local caption2 = Format.formatNumberElement(element.limit_count)
     if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_count) end
-    if element.type == "energy" then caption2 = Format.formatNumberKilo(element.limit_count, "W") end
+    if element.type == "energy" then caption2 = Format.formatNumberKilo(element.limit_count, "J") end
     GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element_m"):tooltip({"helmod_common.total"}))
   end
 
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_m", color, 3))
   local caption3 = Format.formatNumberElement(element.count)
   if display_cell_mod == "by-kilo" then caption3 = Format.formatNumberKilo(element.count) end
-  if element.type == "energy" then caption3 = Format.formatNumberKilo(element.count, "W") end
+  if element.type == "energy" then caption3 = Format.formatNumberKilo(element.count, "J") end
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element_m"):tooltip({"helmod_common.total"}))
 
   return cell

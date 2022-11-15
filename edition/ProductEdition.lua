@@ -111,7 +111,7 @@ function ProductEdition:updateInfo(model, block)
     local caption = {"helmod_common.quantity"}
     local count = product_count or 0
     if (product.name == "steam-heat") or (product.name == "energy") then
-      caption = {"", {"helmod_common.quantity"}, "(MW)"}
+      caption = {"", {"helmod_common.quantity"}, " (MJ)"}
       count = count/1e6
     end
     

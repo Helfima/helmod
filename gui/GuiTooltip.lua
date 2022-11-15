@@ -432,7 +432,7 @@ function GuiTooltipEnergy:create()
     end
     table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=element.name}), helmod_tag.font.close, helmod_tag.color.close})
     ---quantity
-    local total_count = Format.formatNumberKilo(element.count, "W")
+    local total_count = Format.formatNumberKilo(element.count, "J")
     if element.limit_count ~= nil then
       local limit_count = Format.formatNumberElement(element.limit_count)
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.quantity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, limit_count or 0, "/", total_count, helmod_tag.font.close})
@@ -496,7 +496,7 @@ end)
 function GuiTooltipEnergyConsumption:create()
   local tooltip = self._super.create(self)
   if self.m_element then
-    local power = Format.formatNumberKilo(self.m_element.energy_total or self.m_element.power, "W")
+    local power = Format.formatNumberKilo(self.m_element.energy_total or self.m_element.power, "J")
     table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.energy-consumption"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, power, helmod_tag.font.close})
   end
   return tooltip

@@ -1067,7 +1067,7 @@ function ModelCompute.computeEnergyFactory(recipe)
   
   ---compte le nombre de machines necessaires
   ---[ratio recipe] * [effort necessaire du recipe] / ([la vitesse de la factory]
-  local count = recipe.count*recipe_energy/recipe.factory.speed
+  local count = recipe.count*recipe_energy/(recipe.factory.speed * recipe.time)
   if recipe.factory.speed == 0 then count = 0 end
   recipe.factory.count = count
   ---calcul des totaux
