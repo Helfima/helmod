@@ -3,7 +3,9 @@ Version: 0.12.13
 Date: ???
   Changes:
     - Updated German locale
+    - Power and heat has a suffix of Watts rather than Joules if related to selected Base time #426
   Bugfixes:
+    - Fixed number of power machines when using Base time > 1s #426
     - Fixed crash after mod update removes a resource #428
     - Recipe selector sometimes being shown unnecessarily #430
 ---------------------------------------------------------------------------------------------------
