@@ -7,6 +7,7 @@ Date: ???
   Bugfixes:
     - Fixed number of power machines when using Base time > 1s #426
     - Fixed crash after mod update removes a resource #428
+    - Fixed Compute by Factory using output products quantity #429
     - Recipe selector sometimes being shown unnecessarily #430
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.12
