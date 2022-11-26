@@ -6,15 +6,10 @@ require "math.SolverSimplex"
 ---Description of the module.
 ---@class ModelCompute
 local ModelCompute = {
-  ---single-line comment
   classname = "HMModelCompute",
   capEnergy = -0.8,
   capSpeed = -0.8,
   capPollution = -0.8,
-  ---15°c
-  initial_temp = 15,
-  ---200J/unit/°c
-  fluid_energy_per_unit = 200,
   waste_value = 0.00001,
 
   cap_reason = {

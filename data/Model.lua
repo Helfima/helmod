@@ -5,10 +5,6 @@ local Model = {
   ---single-line comment
   classname = "HMModel",
   version = "0.9.35",
-  ---15°c
-  initial_temp = 15,
-  ---200J/unit/°c
-  fluid_energy_per_unit = 200,
   beacon_combo = 4,
   beacon_factory = 0.5,
   beacon_factory_constant = 3
