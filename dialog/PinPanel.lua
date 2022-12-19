@@ -108,8 +108,7 @@ function PinPanel:updateInfo(event)
   self:addProductionBlockHeader(resultTable)
   if block ~= nil then
     self:addRecipes(resultTable,model,block)
-  end
-  if block == nil then
+  else
     for _, iterBlock in spairs(model.blocks) do
       self:addRecipes(resultTable,model,iterBlock)
     end
