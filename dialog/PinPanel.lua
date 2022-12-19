@@ -102,21 +102,33 @@ function PinPanel:updateInfo(event)
 
   local model, block, recipe = self:getParameterObjects()
 
+  local resultTable = GuiElement.add(infoPanel, GuiTable("list-data"):column(column):style("helmod_table-odd"))
+  resultTable.vertical_centering = false
+  resultTable.style.horizontally_stretchable = false
+  self:addProductionBlockHeader(resultTable)
   if block ~= nil then
-    local resultTable = GuiElement.add(infoPanel, GuiTable("list-data"):column(column):style("helmod_table-odd"))
-    resultTable.vertical_centering = false
-    resultTable.style.horizontally_stretchable = false
+    self:addRecipes(resultTable,model,block)
+  end
+  if block == nil then
+    for _, iterBlock in spairs(model.blocks) do
+      self:addRecipes(resultTable,model,iterBlock)
+    end
+  end 
+end
 
-    self:addProductionBlockHeader(resultTable)
-    for _, recipe in spairs(block.recipes, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
-      local is_done = recipe.is_done or false
-      if not(is_done and User.getSetting("pin_panel_column_hide_done")) then
-        self:addProductionBlockRow(resultTable, model, block, recipe)
-      end
+-------------------------------------------------------------------------------
+---Add recipes of given block
+---@param resultTable GuiTable
+---@param model any
+---@param block any
+function PinPanel:addRecipes(resultTable,model,block)
+  for _, recipe in spairs(block.recipes, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
+    local is_done = recipe.is_done or false
+    if not(is_done and User.getSetting("pin_panel_column_hide_done")) then
+      self:addProductionBlockRow(resultTable, model, block, recipe)
     end
   end
 end
-
 -------------------------------------------------------------------------------
 ---Add header data tab
 ---@param itable LuaGuiElement
