@@ -3,6 +3,8 @@ Version: 0.12.14
 Date: ???
   Changes:
     - Updated Russian locale
+  Bugfixes:
+    - Machine speed calculated incorrectly when fuel temperature below 15 degrees #442
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.13
 Date: 2022-11-26

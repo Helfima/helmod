@@ -416,17 +416,17 @@ function FluidSourcePrototype:getSpeedModifier()
     if not self:getBurnsFluid() then
       local maximum_temperature = self:getMaximumTemperature()
       
-      if maximum_temperature > 15 then
-        maximum_temperature = maximum_temperature - 15
-        local fluid_fuel = self:getFuelPrototype()
-        if fluid_fuel == nil then
-          return 1
-        end
-        local fuel_temperature = fluid_fuel:getTemperature() - 15
-        local effectivity = self:getEffectivity()
-
-        return math.min(1, fuel_temperature / maximum_temperature * effectivity)
+      local fluid_fuel = self:getFuelPrototype()
+      if fluid_fuel == nil then
+        return 1
       end
+
+      local minimum_temperature = fluid_fuel:getMinimumTemperature()
+      maximum_temperature = maximum_temperature - minimum_temperature
+      local fuel_temperature = fluid_fuel:getTemperature() - minimum_temperature
+      local effectivity = self:getEffectivity()
+
+      return math.min(1, fuel_temperature / maximum_temperature * effectivity)
     end
   end
   return 1
