@@ -944,33 +944,33 @@ function ModelCompute.computeModuleEffects(recipe)
   end
 
   ---cap la productivite
-  if factory.effects.productivity < 0  then
+  if factory.effects.productivity < 0 then
     factory.effects.productivity = 0
-    factory.cap.productivity = factory.cap.productivity + ModelCompute.cap_reason.productivity.module_low
+    factory.cap.productivity = bit32.bor(factory.cap.productivity, ModelCompute.cap_reason.productivity.module_low)
   end
 
   ---cap la vitesse a self.capSpeed
-  if factory.effects.speed < ModelCompute.capSpeed  then
+  if factory.effects.speed < ModelCompute.capSpeed then
     factory.effects.speed = ModelCompute.capSpeed
-    factory.cap.speed = factory.cap.speed + ModelCompute.cap_reason.speed.module_low
+    factory.cap.speed = bit32.bor(factory.cap.speed, ModelCompute.cap_reason.speed.module_low)
   end
   ---cap short integer max for %
   ---@see https://fr.wikipedia.org/wiki/Entier_court
   if factory.effects.speed*100 > 32767 then
     factory.effects.speed = 32767/100
-    factory.cap.speed = factory.cap.speed + ModelCompute.cap_reason.speed.module_high
+    factory.cap.speed = bit32.bor(factory.cap.speed, ModelCompute.cap_reason.speed.module_high)
   end
 
   ---cap l'energy a self.capEnergy
-  if factory.effects.consumption < ModelCompute.capEnergy  then
+  if factory.effects.consumption < ModelCompute.capEnergy then
     factory.effects.consumption = ModelCompute.capEnergy
-    factory.cap.consumption = factory.cap.consumption + ModelCompute.cap_reason.consumption.module_low
+    factory.cap.consumption = bit32.bor(factory.cap.consumption, ModelCompute.cap_reason.consumption.module_low)
   end
 
   ---cap la pollution a self.capPollution
-  if factory.effects.pollution < ModelCompute.capPollution  then
+  if factory.effects.pollution < ModelCompute.capPollution then
     factory.effects.pollution = ModelCompute.capPollution
-    factory.cap.pollution = factory.cap.pollution + ModelCompute.cap_reason.pollution.module_low
+    factory.cap.pollution = bit32.bor(factory.cap.pollution, ModelCompute.cap_reason.pollution.module_low)
   end
   return recipe
 end
@@ -988,7 +988,7 @@ function ModelCompute.computeFactory(recipe)
   ---seulement sur les recipes normaux
   if recipe.type == "recipe" and recipe_energy/recipe.factory.speed < 1/60 then 
     recipe.factory.speed = 60*recipe_energy
-    recipe.factory.cap.speed = recipe.factory.cap.speed + ModelCompute.cap_reason.speed.cycle
+    recipe.factory.cap.speed = bit32.bor(recipe.factory.cap.speed, ModelCompute.cap_reason.speed.cycle)
   end
 
   ---effet consumption
