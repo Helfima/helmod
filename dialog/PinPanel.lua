@@ -174,20 +174,38 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
 
   ---col done
   if is_done == true then
-    GuiElement.add(gui_table, GuiButton(self.classname, "recipe-done", recipe.id):sprite("menu", defines.sprites.status_ok.black, defines.sprites.status_ok.black):style("helmod_button_menu_selected_green"):tooltip({"helmod_button.done"}))
+    GuiElement.add(
+      gui_table,
+      GuiButton(self.classname, "recipe-done", recipe.id, "", block.id)
+        :sprite("menu", defines.sprites.status_ok.black, defines.sprites.status_ok.black)
+        :style("helmod_button_menu_selected_green")
+        :tooltip({ "helmod_button.done" })
+    )
   else
-    GuiElement.add(gui_table, GuiButton(self.classname, "recipe-done", recipe.id):sprite("menu", defines.sprites.checkmark.black, defines.sprites.checkmark.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_button.done"}))
+    GuiElement.add(
+      gui_table,
+      GuiButton(self.classname, "recipe-done", recipe.id,"", block.id)
+        :sprite("menu", defines.sprites.checkmark.black, defines.sprites.checkmark.black)
+        :style("helmod_button_menu_actived_green")
+        :tooltip({ "helmod_button.done" })
+    )
   end
   ---col recipe
-  local cell_recipe = GuiElement.add(gui_table, GuiFrameH("recipe", recipe.id):style(helmod_frame_style.hidden))
-  local button_recipe = GuiCellRecipe("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):infoIcon(recipe.type):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):mask(is_done)
+  local cell_recipe =
+    GuiElement.add(gui_table, GuiFrameH("recipe", recipe.id, "", block.id):style(helmod_frame_style.hidden))
+  local button_recipe = GuiCellRecipe("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id)
+    :element(recipe)
+    :infoIcon(recipe.type)
+    :tooltip("tooltip.edit-recipe")
+    :color(GuiElement.color_button_default)
+    :mask(is_done)
   --local button_recipe = GuiCellRecipe(self.classname, "do_noting", "recipe"):element(recipe):infoIcon(recipe.type):tooltip("tooltip.info-product"):color(GuiElement.color_button_default):mask(is_done)
   GuiElement.add(cell_recipe, button_recipe)
 
   local by_limit = block.count ~= 1
   if not(User.getSetting("pin_panel_column_hide_product")) then
     ---products
-    local cell_products = GuiElement.add(gui_table, GuiTable("products",recipe.id):column(3))
+    local cell_products = GuiElement.add(gui_table, GuiTable("products",recipe.id, block.id):column(3))
     cell_products.style.horizontally_stretchable = false
     local lua_products = recipe_prototype:getProducts(recipe.factory)
     if lua_products ~= nil then
@@ -207,12 +225,21 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
   if not(User.getSetting("pin_panel_column_hide_machine")) then
     ---col factory
     local factory = recipe.factory
-    GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "factory"):index(recipe.id):element(factory):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default):byLimit(by_limit):mask(is_done))
+    GuiElement.add(
+      gui_table,
+      GuiCellFactory(self.classname, "pipette-entity", recipe.id, "factory", block.id)
+        :index(recipe.id)
+        :element(factory)
+        :tooltip("controls.smart-pipette")
+        :color(GuiElement.color_button_default)
+        :byLimit(by_limit)
+        :mask(is_done)
+    )
   end
 
   if not(User.getSetting("pin_panel_column_hide_product")) then
     ---ingredients
-    local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients", recipe.id):column(3))
+    local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients", recipe.id, block.id):column(3))
     cell_ingredients.style.horizontally_stretchable = false
     local lua_ingredients = recipe_prototype:getIngredients(recipe.factory)
     if lua_ingredients ~= nil then
@@ -237,7 +264,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
     else
       beacon.limit_count = nil
     end
-    GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "beacon"):index(recipe.id):element(beacon):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default):byLimit(by_limit):mask(is_done))
+    GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "beacon", block.id):index(recipe.id):element(beacon):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default):byLimit(by_limit):mask(is_done))
   end
 
 end
@@ -257,7 +284,12 @@ function PinPanel:onEvent(event)
   
   local model, block, recipe = self:getParameterObjects()
 
-  if block == nil then return end
+  if block == nil and (event.item3 ~= nil and event.item3:find("^block_")) then
+    block = model.blocks[event.item3]
+  end
+  if block == nil then
+    return
+  end
 
   if event.action == "pipette-entity" then
     local recipes = block.recipes
