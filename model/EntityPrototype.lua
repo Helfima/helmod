@@ -140,7 +140,7 @@ function EntityPrototype:getEnergyConsumption()
   if self.lua_prototype.type == "generator" then
     local fluid_usage = self:getFluidUsage()
     local effectivity = self:getEffectivity()
-    local fluid_fuel = self:getFluidFuelPrototype(true)
+    local fluid_fuel = self:getFluidFuelPrototype()
     if fluid_fuel == nil then
       return 0
     end
@@ -178,7 +178,7 @@ function EntityPrototype:getEnergyProduction()
       
       if self.lua_prototype.type == "generator" then
         local effectivity = self:getEffectivity()
-        local fluid_fuel = self:getFluidFuelPrototype(true)
+        local fluid_fuel = self:getFluidFuelPrototype()
         if fluid_fuel ~= nil then
           local consumption = self:getFluidConsumption()
           local fuel_value
@@ -293,12 +293,12 @@ end
 -------------------------------------------------------------------------------
 ---Return fluid fuel prototype
 ---@return FluidPrototype
-function EntityPrototype:getFluidFuelPrototype(current)
+function EntityPrototype:getFluidFuelPrototype()
   if self:getEnergyTypeInput() ~= "fluid" then
     return nil
   end
 
-  if current == true and self.factory ~= nil and self.factory.fuel ~= nil then
+  if self.factory ~= nil and self.factory.fuel ~= nil then
     local fuel_name = self.factory.fuel
     local fuel = nil
     if type(fuel_name) == "string" then
@@ -398,7 +398,7 @@ function EntityPrototype:getFluidConsumption()
 
     if self.lua_prototype.type == "generator" then
 
-      local fluid_fuel = self:getFluidFuelPrototype(true)
+      local fluid_fuel = self:getFluidFuelPrototype()
       if fluid_fuel == nil then
         return 0
       end
@@ -423,7 +423,7 @@ function EntityPrototype:getFluidConsumption()
       return math.min(max_fluid_usage, consumption)
 
     elseif energy_type == "fluid" then
-      local fluid_fuel = self:getFluidFuelPrototype(true)
+      local fluid_fuel = self:getFluidFuelPrototype()
       if fluid_fuel == nil then
         return 0
       end
@@ -547,7 +547,7 @@ function EntityPrototype:getFluel()
     local energy_prototype = self:getEnergySource()
     local energy_type = self:getEnergyTypeInput()
     if energy_type == "fluid" then
-      local fuel = self:getFluidFuelPrototype(true)
+      local fuel = self:getFluidFuelPrototype()
       if fuel ~= nil then
         return {name=fuel:native().name, type="fluid", temperature=fuel.temperature}
       end
