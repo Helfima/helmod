@@ -7,6 +7,7 @@ Date: ???
     - Fixed Limitation warning messages in Edit Recipe dialog #447
     - Fixed fluid fuel pollution modifier being ignored #451
     - Fixed productivity being incorrectly applied to some recipe products #452
+    - Fixed machine selection of Numal reef from Pyanodon's mods #453
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.14
 Date: 2022-11-30
