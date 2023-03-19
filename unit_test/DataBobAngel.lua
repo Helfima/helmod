@@ -214,13 +214,13 @@ data.energy["heat-exchanger"] = {
     energy_type="heat",
     energy_type_input="heat",
     energy_usage_min=0,
-    energy_usage_max=10800000,
+    energy_usage_max=7200000,
     energy_usage_priority="none",
-    energy_consumption=10800000,
+    energy_consumption=7200000,
     energy_type_output="none",
     energy_production=0,
     effectivity=1,
-    target_temperature=465,
+    target_temperature=315,
     maximum_temperature=0,
     fluid_usage=0,
     fluid_burns="none",
@@ -231,7 +231,7 @@ data.energy["heat-exchanger"] = {
     speed=1,
     recipe={type="recipe"}
 }
-data.energy["heat-exchanger-3"] = {
+data.energy["heat-exchanger-4"] = {
     energy_type="heat",
     energy_type_input="heat",
     energy_usage_min=0,
