@@ -572,7 +572,11 @@ function Player.ExcludePlacedByHidden(entities)
 
     local show = false
 
-    if #item_filters > 0 then
+    if #item_filters == 0 then
+      -- Has no items to place it. Probably placed by script.
+      -- e.g. Numal reef from Py
+      show = true
+    else
       local items = game.get_filtered_item_prototypes(item_filters)
       for _, item in pairs(items) do
         if not item.has_flag("hidden") then
