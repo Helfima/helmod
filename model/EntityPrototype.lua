@@ -394,7 +394,6 @@ end
 function EntityPrototype:getFluidConsumption()
   if self.lua_prototype ~= nil then
     local energy_type = self:getEnergyTypeInput()
-    local effectivity = self:getEffectivity()
 
     if self.lua_prototype.type == "generator" then
 
@@ -419,6 +418,7 @@ function EntityPrototype:getFluidConsumption()
       ---Generators will only consume as much fluid as they need for max power output
       ---This is capped at max fluid usage
       ---Power output may be less than max if input fluid fuel value is very low
+      local effectivity = self:getEffectivity()
       local consumption = max_energy_production / fuel_value / effectivity
       return math.min(max_fluid_usage, consumption)
 
@@ -430,6 +430,8 @@ function EntityPrototype:getFluidConsumption()
       local energy_prototype = self:getEnergySource()
       local energy_fluid_usage = energy_prototype:getFluidUsage()
       local fluid_burns = energy_prototype:getBurnsFluid()
+      -- effectivity is already applied to energy_consumption
+      -- getEnergyConsumption calls getMaxEnergyUsage
       local energy_consumption = self:getEnergyConsumption()
       local fuel_value = fluid_fuel:getFuelValue()
 
@@ -437,7 +439,7 @@ function EntityPrototype:getFluidConsumption()
         ---si l'energy a du fluid usage en burns ca devient une limit
         ---if the energy source burns fluid and has fluid usage it becomes a limit
         if energy_fluid_usage > 0 then
-          return math.min(energy_fluid_usage, energy_consumption / (effectivity * fuel_value))
+          return math.min(energy_fluid_usage, energy_consumption / fuel_value)
         else
           return energy_consumption / fuel_value
         end
@@ -466,7 +468,7 @@ function EntityPrototype:getFluidConsumption()
 
           local power_extract = self:getPowerExtract(minimum_temperature, target_temperature, heat_capacity)
 
-          return energy_consumption / (effectivity * power_extract)
+          return energy_consumption / power_extract
         end
       end
       
