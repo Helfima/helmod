@@ -54,8 +54,8 @@ function formula(operation)
   if operation == nil or operation == "" then return 0 end
   local allowed = false
   for i=1, string.len(operation) do
-  	if not(string.find(operation,"[0-9.()/*-+%%^]+",i)) then
-  	 error({code=1})
+  	if operation:find("^[0-9.()/*%-+%%^ ]+$") == nil then
+  	 error({code=1}) -- invalid formula
   	end
   end
   return load("return " .. operation)()
