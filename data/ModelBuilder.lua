@@ -153,9 +153,15 @@ function ModelBuilder.convertRecipeToblock(model, block, recipe, with_below)
   
   local sorter = function(t,a,b) return t[b]["index"] > t[a]["index"] end
   if block.by_product == false then sorter = function(t,a,b) return t[b]["index"] < t[a]["index"] end end
+  if block.by_product == nil then
+    block.by_product = true
+  end
   local start_index = recipe.index
   for _, block_recipe in spairs(block.recipes, sorter) do
-    if block_recipe.index >= start_index then
+    if
+      (block.by_product and block_recipe.index >= start_index)
+      or ((not block.by_product) and block_recipe.index <= start_index)
+    then
       ---clean block
       block.recipes[block_recipe.id]=nil
       ---add recipe
