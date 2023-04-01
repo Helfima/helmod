@@ -278,7 +278,7 @@ function ModelCompute.getBlockMatrix(block)
     end
     
     for _, recipe in spairs(recipes,sorter) do
-      recipe.time = block.time
+      recipe.base_time = block.time
       ModelCompute.computeModuleEffects(recipe)
       if recipe.type == "energy" then
         ModelCompute.computeEnergyFactory(recipe)
@@ -293,7 +293,6 @@ function ModelCompute.getBlockMatrix(block)
 
       ---la recette n'existe plus
       if recipe_prototype:native() == nil then return end
-      
           
       ---prepare le taux de production
       local production = 1
@@ -981,13 +980,14 @@ end
 function ModelCompute.computeFactory(recipe)
   local recipe_prototype = RecipePrototype(recipe)
   local factory_prototype = EntityPrototype(recipe.factory)
-  local recipe_energy = recipe_prototype:getEnergy()
+  recipe.time = recipe_prototype:getEnergy()
   ---effet speed
-  recipe.factory.speed = factory_prototype:speedFactory(recipe) * (1 + recipe.factory.effects.speed)
+  recipe.factory.speed_total = factory_prototype:speedFactory(recipe) * (1 + recipe.factory.effects.speed)
+  recipe.factory.speed = recipe.factory.speed_total
   ---cap speed creation maximum de 1 cycle par tick
   ---seulement sur les recipes normaux
-  if recipe.type == "recipe" and recipe_energy/recipe.factory.speed < 1/60 then 
-    recipe.factory.speed = 60*recipe_energy
+  if recipe.type == "recipe" and recipe.time / recipe.factory.speed < 1/60 then 
+    recipe.factory.speed = 60 * recipe.time
     recipe.factory.cap.speed = bit32.bor(recipe.factory.cap.speed, ModelCompute.cap_reason.speed.cycle)
   end
 
@@ -1000,7 +1000,7 @@ function ModelCompute.computeFactory(recipe)
   
   ---compte le nombre de machines necessaires
   ---[ratio recipe] * [effort necessaire du recipe] / ([la vitesse de la factory] * [le temps en second])
-  local count = recipe.count*recipe_energy/(recipe.factory.speed * recipe.time)
+  local count = recipe.count * recipe.time / (recipe.factory.speed * recipe.base_time)
   if recipe.factory.speed == 0 then count = 0 end
   recipe.factory.count = count
   if Model.countModulesModel(recipe.beacon) > 0 then
@@ -1021,7 +1021,7 @@ function ModelCompute.computeFactory(recipe)
     recipe.factory.energy_total = math.ceil(recipe.factory.energy_total + (math.ceil(recipe.factory.count) * drain))
     recipe.factory.energy = recipe.factory.energy + drain
   end
-  recipe.factory.pollution_total = recipe.factory.pollution * recipe.factory.count * recipe.time
+  recipe.factory.pollution_total = recipe.factory.pollution * recipe.factory.count * recipe.base_time
   
   recipe.beacon.energy_total = math.ceil(recipe.beacon.count*recipe.beacon.energy)
   recipe.energy_total = recipe.factory.energy_total + recipe.beacon.energy_total
@@ -1043,7 +1043,9 @@ function ModelCompute.computeEnergyFactory(recipe)
   recipe.factory.speed = factory_prototype:speedFactory(recipe) * (1 + recipe.factory.effects.speed)
   ---cap speed creation maximum de 1 cycle par tick
   ---seulement sur les recipes normaux
-  if recipe.type == "recipe" and recipe_energy/recipe.factory.speed < 1/60 then recipe.factory.speed = 60*recipe_energy end
+  if recipe.type == "recipe" and recipe_energy / recipe.factory.speed < 1/60 then
+    recipe.factory.speed = 60 * recipe_energy
+  end
 
   ---effet consumption
   local energy_prototype = factory_prototype:getEnergySource()
@@ -1061,7 +1063,7 @@ function ModelCompute.computeEnergyFactory(recipe)
   
   ---compte le nombre de machines necessaires
   ---[ratio recipe] * [effort necessaire du recipe] / ([la vitesse de la factory]
-  local count = recipe.count*recipe_energy/(recipe.factory.speed * recipe.time)
+  local count = recipe.count * recipe_energy / (recipe.factory.speed * recipe.base_time)
   if recipe.factory.speed == 0 then count = 0 end
   recipe.factory.count = count
   ---calcul des totaux
@@ -1070,7 +1072,7 @@ function ModelCompute.computeEnergyFactory(recipe)
   else
     recipe.factory.energy_total = 0
   end
-  recipe.factory.pollution_total = recipe.factory.pollution * recipe.factory.count * recipe.time
+  recipe.factory.pollution_total = recipe.factory.pollution * recipe.factory.count * recipe.base_time
   
   recipe.energy_total = recipe.factory.energy_total
   recipe.pollution_total = recipe.factory.pollution_total * recipe_prototype:getEmissionsMultiplier()

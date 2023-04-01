@@ -3,6 +3,7 @@ Version: 0.12.16
 Date: ???
   Bugfixes:
     - Fixed formula parser pattern #450
+    - Fixed productivity calculation when recipe speed exceeds 1 craft per tick cap #455
     - Fixed "convert recipe to block" for "ingredient input" mode #457
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.15
