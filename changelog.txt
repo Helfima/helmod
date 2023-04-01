@@ -2,8 +2,8 @@
 Version: 0.12.16
 Date: ???
   Bugfixes:
-    - Fix formula parser pattern #450
-    - Fix "convert recipe to block" for "ingredient input"-mode
+    - Fixed formula parser pattern #450
+    - Fixed "convert recipe to block" for "ingredient input" mode #457
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.15
 Date: 2023-03-19

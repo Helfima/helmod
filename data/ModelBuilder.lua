@@ -148,25 +148,25 @@ function ModelBuilder.convertRecipeToblock(model, block, recipe, with_below)
   local block_index = table.size(model.blocks)
   new_block.index = block_index
   new_block.type = block.type
-  new_block.unlinked = false
+  new_block.unlinked = block.by_factory and true or false
+  new_block.by_factory = block.by_factory
+  new_block.by_product = block.by_product
+  new_block.by_limit = block.by_limit
   model.blocks[new_block.id] = new_block
-  
+
   local sorter = function(t,a,b) return t[b]["index"] > t[a]["index"] end
   if block.by_product == false then sorter = function(t,a,b) return t[b]["index"] < t[a]["index"] end end
-  if block.by_product == nil then
-    block.by_product = true
-  end
   local start_index = recipe.index
   for _, block_recipe in spairs(block.recipes, sorter) do
     if
-      (block.by_product and block_recipe.index >= start_index)
-      or ((not block.by_product) and block_recipe.index <= start_index)
+      (block_recipe.index == start_index)
+      or ((block.by_product == false) == (block_recipe.index < start_index))
     then
       ---clean block
-      block.recipes[block_recipe.id]=nil
+      block.recipes[block_recipe.id] = nil
       ---add recipe
       block_recipe.index = table.size(new_block.recipes)
-      new_block.recipes[block_recipe.id]=block_recipe
+      new_block.recipes[block_recipe.id] = block_recipe
 
       if with_below ~= true then
         break
