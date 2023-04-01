@@ -1082,6 +1082,7 @@ function ModelCompute.computeEnergyFactory(recipe)
   
   recipe.beacon.energy_total = 0
   recipe.beacon.energy = 0
+  recipe.time = 1
 end
 
 -------------------------------------------------------------------------------
