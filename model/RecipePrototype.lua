@@ -311,10 +311,11 @@ end
 -------------------------------------------------------------------------------
 ---Return solid ingredient number of Prototype
 ---@return number
-function RecipePrototype:getIngredientCount(factory)
+function RecipePrototype:getIngredientCount()
   local count = 0
-  if self.lua_prototype ~= nil and self:getIngredients(factory) ~= nil then
-    for _,lua_ingredient in pairs(self:getIngredients(factory)) do
+  local ingredients = self:getIngredients()
+  if self.lua_prototype ~= nil and ingredients ~= nil then
+    for _, lua_ingredient in pairs(ingredients) do
       if Product(lua_ingredient):getType() == "item" then
         count = count + 1
       end

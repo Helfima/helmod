@@ -476,10 +476,16 @@ end
 function ModelBuilder.setFactoryBlock(block, current_recipe)
   if current_recipe ~= nil then
     local default_factory_mode = User.getParameter("default_factory_mode")
-    local categories = EntityPrototype(current_recipe.factory.name):getCraftingCategories()
+    local factory_prototype = EntityPrototype(current_recipe.factory.name)
+    local categories = factory_prototype:getCraftingCategories()
+    local factory_ingredient_count = factory_prototype:getIngredientCount()
     for _, recipe in pairs(block.recipes) do
       local prototype_recipe = RecipePrototype(recipe)
-      if (default_factory_mode ~= "category" and categories[prototype_recipe:getCategory()]) or prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
+      local recipe_ingredient_count = prototype_recipe:getIngredientCount()
+      --- check ingredient limitation
+      if factory_ingredient_count < recipe_ingredient_count then
+        -- Skip
+      elseif (default_factory_mode ~= "category" and categories[prototype_recipe:getCategory()]) or prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
         Model.setFactory(recipe, current_recipe.factory.name, current_recipe.factory.fuel)
         if User.getParameter("default_factory_with_module") == true then
           ModelBuilder.setFactoryModulePriority(recipe, current_recipe.factory.module_priority)

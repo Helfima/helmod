@@ -5,6 +5,7 @@ Date: ???
     - Fixed formula parser pattern #450
     - Fixed productivity calculation when recipe speed exceeds 1 craft per tick cap #455
     - Fixed "convert recipe to block" for "ingredient input" mode #457
+    - Fixed edit recipe ">" and ">>" buttons ignoring factory max ingredient counts #458
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.15
 Date: 2023-03-19

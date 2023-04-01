@@ -31,7 +31,7 @@ end
 ---Return ingredient_count
 ---@return number
 function EntityPrototype:getIngredientCount()
-  return self.lua_prototype.ingredient_count or 6
+  return self.lua_prototype.ingredient_count or 255
 end
 
 -------------------------------------------------------------------------------
