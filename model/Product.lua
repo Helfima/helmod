@@ -142,7 +142,7 @@ function Product:getBonusAmount()
   if amount >= catalyst_amount then
     return (amount - catalyst_amount) * probability
   end
-  return amount * probability
+  return 0
 end
 
 -------------------------------------------------------------------------------

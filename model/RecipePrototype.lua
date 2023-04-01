@@ -368,7 +368,7 @@ function RecipePrototype:getIngredients(factory)
         local ingredient = {name="steam-heat", type="energy", amount=amount*factor}
         table.insert(raw_ingredients, ingredient)
       elseif energy_type == "fluid" then
-        local fluid_fuel = factory_prototype:getFluidFuelPrototype(true)
+        local fluid_fuel = factory_prototype:getFluidFuelPrototype()
         if fluid_fuel ~= nil and fluid_fuel:native() ~= nil then
           local amount = factory_prototype:getFluidConsumption()
           local factor = self:getEnergy() * consumption_effect / factory.speed
@@ -386,7 +386,7 @@ function RecipePrototype:getIngredients(factory)
           table.insert(raw_ingredients, burner_ingredient)
         end
       elseif energy_type == "fluid" then
-        local fluid_fuel = factory_prototype:getFluidFuelPrototype(true)
+        local fluid_fuel = factory_prototype:getFluidFuelPrototype()
         if fluid_fuel ~= nil and fluid_fuel:native() ~= nil then
           local amount = factory_prototype:getFluidConsumption()
           local factor = self:getEnergy()

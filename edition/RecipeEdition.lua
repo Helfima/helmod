@@ -691,7 +691,7 @@ function RecipeEdition:updateFactoryInfo(event)
 
       if energy_type == "fluid" then
         fuel_list = factory_prototype:getFluidFuelPrototypes()
-        factory_fuel = factory_prototype:getFluidFuelPrototype(true)
+        factory_fuel = factory_prototype:getFluidFuelPrototype()
       else
         fuel_list = energy_prototype:getFuelPrototypes()
         factory_fuel = energy_prototype:getFuelPrototype()

@@ -415,6 +415,9 @@ function FluidSourcePrototype:getSpeedModifier()
   if self.lua_prototype ~= nil then
     if not self:getBurnsFluid() then
       local maximum_temperature = self:getMaximumTemperature()
+      if maximum_temperature == 0 then
+        return 1
+      end
       
       local fluid_fuel = self:getFuelPrototype()
       if fluid_fuel == nil then
