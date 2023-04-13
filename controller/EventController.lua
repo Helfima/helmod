@@ -82,7 +82,7 @@ end
 
 -------------------------------------------------------------------------------
 ---EventController callback
----@param event_type string
+---@param event_type string|defines.events
 ---@param callback function
 function EventController.pcallEvent(event_type, callback)
   local ok , err = pcall(function()
