@@ -6,7 +6,7 @@ Date: ???
     - Fixed productivity calculation when recipe speed exceeds 1 craft per tick cap #455
     - Fixed "convert recipe to block" for "ingredient input" mode #457
     - Fixed edit recipe ">" and ">>" buttons ignoring factory max ingredient counts #458
-    - Fixed lost items in the hand stack when call Helmod Smart Tool
+    - Fixed items being destroyed by creating a Helmod Smart Tool while holding an item in hand #459
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.15
 Date: 2023-03-19
