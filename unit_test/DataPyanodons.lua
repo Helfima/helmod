@@ -130,34 +130,33 @@ data.energy["heat-exchanger"] = {
     energy_type="heat",
     energy_type_input="heat",
     energy_usage_min=0,
-    energy_usage_max=122220000,
+    energy_usage_max=125000000,
     energy_usage_priority="none",
-    energy_consumption=122220000,
+    energy_consumption=125000000,
     energy_type_output="none",
     energy_production=0,
     effectivity=1,
-    target_temperature=500,
+    target_temperature=2000,
     maximum_temperature=0,
     fluid_usage=0,
     fluid_burns="none",
     fluid_fuel = {name="none", capacity=0},
     fluid_consumption=0,
-    fluid_production={name="steam", amount=120},
+    fluid_production={name="steam", amount=29},--amount=30 but rounded
     pollution=0,
     speed=1,
     recipe={type="resource"}
 }
---[[
 data.energy["steam-turbine"] = {
     energy_type="electric",
     energy_type_input="fluid",
     energy_usage_min=0,
     energy_usage_max=0,
     energy_usage_priority="secondary-output",
-    energy_consumption=29100000,
+    energy_consumption=119100000,
     energy_type_output="electric",
-    energy_production=291000000,--1191000000 --Steam Turbine can acccept up to 2000 degree steam but there's no way to produce steam hotter than 500 degrees
-    effectivity=10,
+    energy_production=119100000,
+    effectivity=1,
     target_temperature=0,
     maximum_temperature=2000,
     fluid_usage=60,
@@ -169,7 +168,6 @@ data.energy["steam-turbine"] = {
     speed=1,
     recipe={type="recipe"}
 }
---]]
 data.energy["nuclear-reactor"] = {
     energy_type="burner",
     energy_type_input="burner",
