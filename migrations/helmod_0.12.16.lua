@@ -19,7 +19,6 @@ if global.models then
       end
       -- Force recalculation of recipe.factory.speed_total and recipe.factory.speed
       -- Model and Block totals will be updated
-      Player.try_load_by_name(model.owner)
       ModelCompute.update(model)
     end
   end
