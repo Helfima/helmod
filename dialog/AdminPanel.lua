@@ -163,11 +163,12 @@ function AdminPanel:updateConversion()
   local scroll_panel = self:getConversionTab()
   local table_panel = GuiElement.add(scroll_panel, GuiTable("list-table"):column(5))
   table_panel.style.cell_padding = 5
+  table_panel.vertical_centering = false
   
   GuiElement.add(table_panel, GuiLabel("label-encoded-text"):caption("Encoded Text"))
   GuiElement.add(table_panel, GuiLabel("label-actions"):caption("Actions"))
   GuiElement.add(table_panel, GuiLabel("label-decoded-text"):caption("Decoded Text"))
-  GuiElement.add(table_panel, GuiLabel("label-entities"):caption("Entities Replacement"))
+  GuiElement.add(table_panel, GuiLabel("label-replacement"):caption("Replacement"))
   GuiElement.add(table_panel, GuiLabel("label-content"):caption("Content"))
 
   GuiElement.add(table_panel, GuiTextBox("encoded-text"))
@@ -179,8 +180,12 @@ function AdminPanel:updateConversion()
   local decoded_textbox = GuiElement.add(table_panel, GuiTextBox("decoded-text"))
   decoded_textbox.style.height = 600
 
-  local entities_view = GuiElement.add(table_panel, GuiFlowV("entities"))
-  entities_view.style.height = 600
+  local elements_panel = GuiElement.add(table_panel, GuiFlowV("elements"))
+  GuiElement.add(elements_panel, GuiLabel("label-entities"):caption("Entities"))
+  local entities_view = GuiElement.add(elements_panel, GuiFlowV("entities"))
+  GuiElement.add(elements_panel, GuiLabel("label-tiles"):caption("Tiles"))
+  local tiles_view = GuiElement.add(elements_panel, GuiFlowV("tiles"))
+  GuiElement.add(elements_panel, GuiButton(self.classname, "apply_replace"):caption("Apply"))
 
   local tree_view = GuiElement.add(table_panel, GuiScroll("tree_view"))
   tree_view.style.height = 600
@@ -617,10 +622,23 @@ end
 ---@param data table
 function AdminPanel:createReplacerEntities(parent, entities)
   parent.clear()
-  local table_panel = GuiElement.add(parent, GuiTable("list-table"):column(2))
   for name,entity in pairs(entities) do
-    GuiElement.add(table_panel, GuiButtonSelectSprite(self.classname, "do-nothing", name):sprite("entity", name))
-    GuiElement.add(table_panel, GuiButtonSelectSprite(self.classname, "replace-select", name):choose("entity"):color("gray"))
+    local entity_cell = GuiElement.add(parent, GuiFlowH("entity", name))
+    GuiElement.add(entity_cell, GuiButtonSelectSprite("original"):sprite("entity", name))
+    GuiElement.add(entity_cell, GuiButtonSelectSprite("replacement"):choose("entity"):color("gray"))
+  end
+end
+
+-------------------------------------------------------------------------------
+---Create Tree
+---@param parent LuaGuiElement
+---@param data table
+function AdminPanel:createReplacerTiles(parent, tiles)
+  parent.clear()
+  for name,tile in pairs(tiles) do
+    local tile_cell = GuiElement.add(parent, GuiFlowH("tile", name))
+    GuiElement.add(tile_cell, GuiButtonSelectSprite("original"):sprite("tile", name))
+    GuiElement.add(tile_cell, GuiButtonSelectSprite("replacement"):choose("tile"):color("gray"))
   end
 end
 -------------------------------------------------------------------------------
@@ -676,24 +694,42 @@ function AdminPanel:onEvent(event)
     tree_view.clear()
     self:createTree(tree_view, data)
 
-    local entities_view = parent["entities"]
+    local entities_view = parent["elements"]["entities"]
     local entities = Blueprint.get_entities(data)
     self:createReplacerEntities(entities_view, entities)
+
+    local tiles_view = parent["elements"]["tiles"]
+    local tiles = Blueprint.get_tiles(data)
+    self:createReplacerTiles(tiles_view, tiles)
   end
 
-  if event.action == "replace-select" then
-    local parent = event.element.parent.parent.parent
+  if event.action == "apply_replace" then
+    local parent = event.element.parent.parent
     local decoded_textbox = parent["decoded-text"]
     local decoded_text = decoded_textbox.text
 
-    local entity_name = event.item1
-    local new_entity = event.element.elem_value
-    if new_entity ~= nil and new_entity ~= "" then
-      local pattern = string.gsub(entity_name, "-", "%%-")
-      local result = string.gsub(decoded_text, pattern, new_entity)
-      decoded_textbox.text = result
+    local entities_view = parent["elements"]["entities"]
+    for _, element in pairs(entities_view.children) do
+      local _, name_original = string.match(element.children_names[1],"([^=]*)=?([^=]*)")
+      local replacement_name = element.children_names[2]
+      local name_replacement = element[replacement_name].elem_value
+      if name_replacement ~= nil and name_replacement ~= "" then
+        local pattern = string.gsub(name_original, "-", "%%-")
+        decoded_text = string.gsub(decoded_text, pattern, name_replacement)
+      end
     end
 
+    local tiles_view = parent["elements"]["tiles"]
+    for _, element in pairs(tiles_view.children) do
+      local _, name_original = string.match(element.children_names[1],"([^=]*)=?([^=]*)")
+      local replacement_name = element.children_names[2]
+      local name_replacement = element[replacement_name].elem_value
+      if name_replacement ~= nil and name_replacement ~= "" then
+        local pattern = string.gsub(name_original, "-", "%%-")
+        decoded_text = string.gsub(decoded_text, pattern, name_replacement)
+      end
+    end
+    decoded_textbox.text = decoded_text
   end
 
   if event.action == "string-encode" then

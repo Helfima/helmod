@@ -25,6 +25,23 @@ function Player.load(event)
 end
 
 -------------------------------------------------------------------------------
+---Load factorio player by name or first
+---@param player_name string
+---@return Player
+function Player.try_load_by_name(player_name)
+  for _, player in pairs(game.players) do
+    if Lua_player == nil then
+      Lua_player = player
+    end
+    if player.name == player_name then
+      Lua_player = player
+      break
+    end
+  end
+  return Player
+end
+
+-------------------------------------------------------------------------------
 ---Set factorio player
 ---@param player LuaPlayer
 ---@return Player
