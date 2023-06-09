@@ -57,7 +57,7 @@ end
 ---@param runtime table
 ---@param name string
 ---@param matrix Matrix
----@param pivot table
+---@param pivot? table
 function SolverMatrix:add_runtime(debug, runtime, name, matrix, pivot)
     if debug == true then
         local clone = table.deepcopy(matrix)

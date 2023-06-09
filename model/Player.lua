@@ -874,7 +874,7 @@ function Player.getEnergyRecipe(name)
   recipe.group = {name="helmod", order="zzzz"}
   recipe.subgroup = {name="helmod-energy", order="dddd"}
   recipe.hidden = false
-  if prototype.flags ~= nil then
+  if prototype ~= nil and prototype.flags ~= nil then
     recipe.hidden = prototype.flags["hidden"] or false
   end
   recipe.ingredients = {}
@@ -1022,19 +1022,13 @@ function Player.buildFluidRecipe(fluid, ingredients, temperature)
 end
 
 function Player.buildRocketRecipe(prototype)
-  ---Prepare launch = 15s
-  local rocket_part_prototype = RecipePrototype("rocket-part"):native()
-  local rocket_prototype = EntityPrototype("rocket-silo"):native()
   local products = prototype.rocket_launch_products
-  local ingredients = rocket_part_prototype.ingredients
-  for _,ingredient in pairs(ingredients) do
-    ingredient.amount= ingredient.amount * rocket_prototype.rocket_parts_required
-  end
+  local ingredients = {}
   table.insert(ingredients, {name=prototype.name, type="item", amount=1, constant=true})
   local recipe = {}
-  recipe.category = rocket_part_prototype.category
+  recipe.category = "rocket-building"
   recipe.enabled = true
-  recipe.energy = rocket_part_prototype.energy * rocket_prototype.rocket_parts_required + 15
+  recipe.energy = 1
   recipe.force = {}
   recipe.group = {name="helmod", order="zzzz"}
   recipe.subgroup = {name="helmod-rocket", order="eeee"}
