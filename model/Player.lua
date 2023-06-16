@@ -25,6 +25,23 @@ function Player.load(event)
 end
 
 -------------------------------------------------------------------------------
+---Load factorio player by name or first
+---@param player_name string
+---@return Player
+function Player.try_load_by_name(player_name)
+  for _, player in pairs(game.players) do
+    if Lua_player == nil then
+      Lua_player = player
+    end
+    if player.name == player_name then
+      Lua_player = player
+      break
+    end
+  end
+  return Player
+end
+
+-------------------------------------------------------------------------------
 ---Set factorio player
 ---@param player LuaPlayer
 ---@return Player
@@ -100,27 +117,20 @@ end
 -------------------------------------------------------------------------------
 ---Get smart tool
 ---@return LuaItemStack
-function Player.getSmartTool()
+function Player.getSmartTool(entities)
   if Lua_player == nil then
     return nil
   end
-  local inventory = Player.getMainInventory()
-  local tool_stack = nil
-  for i = 1, #inventory do
-    local stack = inventory[i]
-    if stack.valid_for_read and stack.is_blueprint and stack.name == "blueprint" and stack.label == "Helmod Smart Tool" then
-      if stack.is_blueprint_setup() then
-        if Lua_player.cursor_stack.swap_stack(stack) then
-            return Lua_player.cursor_stack
-        end
-      else
-        Lua_player.cursor_stack.swap_stack(stack)
-        return Lua_player.cursor_stack
-      end
-    end
-  end
-  Lua_player.cursor_stack.set_stack("blueprint")
-  return Lua_player.cursor_stack
+  local script_inventory = game.create_inventory(1)
+  local tool_stack = script_inventory[1]
+  tool_stack.set_stack({name="blueprint"})
+  tool_stack.set_blueprint_entities(entities)
+  tool_stack.label = "Helmod Smart Tool"
+
+  Lua_player.add_to_clipboard(tool_stack)
+  Lua_player.activate_paste()
+  script_inventory.destroy()
+  return tool_stack
 end
 
 -------------------------------------------------------------------------------
@@ -132,11 +142,6 @@ function Player.setSmartTool(recipe, type)
   if Lua_player == nil or recipe == nil then
     return nil
   end
-  local tool_stack = Player.getSmartTool()
-  if tool_stack ~= nil then
-    tool_stack.clear_blueprint()
-    tool_stack.label = "Helmod Smart Tool"
-    tool_stack.allow_manual_label_change = false
     local factory = recipe[type]
     local modules = {}
     for name,value in pairs(factory.modules or {}) do
@@ -151,9 +156,8 @@ function Player.setSmartTool(recipe, type)
     if type == "factory" then
       entity.recipe = recipe.name
     end
-    tool_stack.set_blueprint_entities({entity})
-  
-  end
+
+    Player.getSmartTool({entity})
 end
 
 -------------------------------------------------------------------------------
@@ -870,7 +874,7 @@ function Player.getEnergyRecipe(name)
   recipe.group = {name="helmod", order="zzzz"}
   recipe.subgroup = {name="helmod-energy", order="dddd"}
   recipe.hidden = false
-  if prototype.flags ~= nil then
+  if prototype ~= nil and prototype.flags ~= nil then
     recipe.hidden = prototype.flags["hidden"] or false
   end
   recipe.ingredients = {}
@@ -1018,24 +1022,25 @@ function Player.buildFluidRecipe(fluid, ingredients, temperature)
 end
 
 function Player.buildRocketRecipe(prototype)
-  ---Prepare launch = 15s
-  local rocket_part_prototype = RecipePrototype("rocket-part"):native()
-  local rocket_prototype = EntityPrototype("rocket-silo"):native()
+  if prototype == nil then return nil end
   local products = prototype.rocket_launch_products
-  local ingredients = rocket_part_prototype.ingredients
-  for _,ingredient in pairs(ingredients) do
-    ingredient.amount= ingredient.amount * rocket_prototype.rocket_parts_required
-  end
+  local ingredients = {}
+  local item_prototype = ItemPrototype(prototype.name)
+  local stack_size = item_prototype:stackSize()
   table.insert(ingredients, {name=prototype.name, type="item", amount=1, constant=true})
   local recipe = {}
-  recipe.category = rocket_part_prototype.category
+  recipe.category = "rocket-building"
   recipe.enabled = true
-  recipe.energy = rocket_part_prototype.energy * rocket_prototype.rocket_parts_required + 15
+  recipe.energy = 1
   recipe.force = {}
   recipe.group = {name="helmod", order="zzzz"}
   recipe.subgroup = {name="helmod-rocket", order="eeee"}
   recipe.hidden = false
   recipe.ingredients = ingredients
+  for key, product in pairs(products) do
+    local product_prototype = ItemPrototype(product.name)
+    local i=0
+  end
   recipe.products = products
   recipe.localised_description = prototype.localised_description
   recipe.localised_name = prototype.localised_name

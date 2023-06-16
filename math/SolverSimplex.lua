@@ -268,7 +268,7 @@ end
 ---@param by_factory boolean
 ---@param time number
 ---@return table, table
-function SolverSimplex:solve(Mbase, debug, by_factory, time)
+function SolverSimplex:solveMatrix(Mbase, debug, by_factory, time)
   if Mbase ~= nil then
     local num_loop = 0
     local runtime = {}

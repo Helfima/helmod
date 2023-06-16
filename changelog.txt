@@ -1,4 +1,20 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.12.16
+Date: 2023-06-16
+  Changes:
+    - Moved all matrix calculation in solver
+    - Added a reworked solver to a next step, not yet actived
+    - Added a menu to switch flat or tab in recipe edition
+  Bugfixes:
+    - Fixed formula parser pattern #450
+    - Fixed productivity calculation when recipe speed exceeds 1 craft per tick cap #455
+    - Fixed "convert recipe to block" for "ingredient input" mode #457
+    - Fixed edit recipe ">" and ">>" buttons ignoring factory max ingredient counts #458
+    - Fixed items being destroyed by creating a Helmod Smart Tool while holding an item in hand #459
+    - Fixed rocket part in rocket recipe when silo changed
+    - Fixed turn the limit off in the pinned panel
+    - Fixed Space Science Production
+---------------------------------------------------------------------------------------------------
 Version: 0.12.15
 Date: 2023-03-19
   Changes:

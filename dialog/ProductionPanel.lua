@@ -335,6 +335,8 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
     local group_debug = GuiElement.add(left_panel, GuiFlowH("group_debug"))
     group_debug.style.horizontal_spacing = button_spacing
     GuiElement.add(group_debug, GuiButton("HMModelDebug", "OPEN", model.id, block_id):sprite("menu", defines.sprites.run_test.black, defines.sprites.run_test.black):style("helmod_button_menu"):tooltip("Open Debug"))
+    local solver_selected = User.getParameter("solver_selected") or "normal"
+    GuiElement.add(group_debug, GuiButton(self.classname, "solver_switch"):style("helmod_button_default"):caption(solver_selected))
   end
 
   ---group tool
@@ -1386,6 +1388,17 @@ function ProductionPanel:onEventAccessAll(event, model, block)
     User.setParameter("block_all_product_visible",not(all_visible))
     Controller:send("on_gui_update", event, self.classname)
   end
+
+  if event.action == "solver_switch" then
+    local solver_selected = User.getParameter("solver_selected") or "normal"
+    if solver_selected == "normal" then
+      User.setParameter("solver_selected", "matrix")
+    else
+      User.setParameter("solver_selected", "normal")
+    end
+    Controller:send("on_gui_update", event, self.classname)
+  end
+
 end
 
 -------------------------------------------------------------------------------
@@ -1801,5 +1814,4 @@ function ProductionPanel:onEventAccessAdmin(event, model, block)
     game.tick_paused = false
     Controller:send("on_gui_pause", event)
   end
-
 end
