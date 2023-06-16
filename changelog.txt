@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.16
-Date: ???
+Date: 2023-06-16
   Changes:
     - Moved all matrix calculation in solver
     - Added a reworked solver to a next step, not yet actived
