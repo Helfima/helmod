@@ -9,7 +9,7 @@ if global.models then
 
             -- Set recipe.time
             local recipe_prototype = RecipePrototype(recipe)
-            recipe.time = recipe_prototype:getEnergy()
+            recipe.time = recipe_prototype:getEnergy(recipe.factory)
 
             --if recipe.type ~= "energy" then
               --ModelCompute.computeFactory(recipe)

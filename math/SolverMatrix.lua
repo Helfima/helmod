@@ -339,7 +339,7 @@ function SolverMatrix.get_block_matrix(block)
             rowParameters.factory_speed = recipe.factory.speed or 0
             rowParameters.recipe_count = 0
             rowParameters.recipe_production = production
-            rowParameters.recipe_energy = recipe_prototype:getEnergy()
+            rowParameters.recipe_energy = recipe_prototype:getEnergy(recipe.factory)
             rowParameters.coefficient = 0
 
             ---preparation

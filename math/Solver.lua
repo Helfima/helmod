@@ -342,7 +342,7 @@ function Solver.getBlockMatrix(block)
             row["S"] = recipe.factory.speed or 0
             row["R"] = 0
             row["P"] = production
-            row["E"] = recipe_prototype:getEnergy()
+            row["E"] = recipe_prototype:getEnergy(recipe.factory)
             row["C"] = 0
 
             ---preparation

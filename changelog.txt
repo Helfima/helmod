@@ -13,6 +13,7 @@ Date: ???
     - Fixed items being destroyed by creating a Helmod Smart Tool while holding an item in hand #459
     - Fixed rocket part in rocket recipe when silo changed
     - Fixed turn the limit off in the pinned panel
+    - Fixed Space Science Production
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.15
 Date: 2023-03-19

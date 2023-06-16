@@ -383,9 +383,14 @@ end
 function ModelCompute.computeFactory(recipe)
     local recipe_prototype = RecipePrototype(recipe)
     local factory_prototype = EntityPrototype(recipe.factory)
-    recipe.time = recipe_prototype:getEnergy()
+    recipe.time = recipe_prototype:getEnergy(recipe.factory)
+
     ---effet speed
     recipe.factory.speed_total = factory_prototype:speedFactory(recipe) * (1 + recipe.factory.effects.speed)
+    if recipe.type == "rocket" then
+        local speed_penalty = recipe_prototype:getRocketPenalty(recipe.factory)
+        recipe.factory.speed_total = recipe.factory.speed_total * speed_penalty
+    end
     recipe.factory.speed = recipe.factory.speed_total
     ---cap speed creation maximum de 1 cycle par tick
     ---seulement sur les recipes normaux
@@ -442,7 +447,7 @@ end
 function ModelCompute.computeEnergyFactory(recipe)
     local recipe_prototype = RecipePrototype(recipe)
     local factory_prototype = EntityPrototype(recipe.factory)
-    local recipe_energy = recipe_prototype:getEnergy()
+    local recipe_energy = recipe_prototype:getEnergy(recipe.factory)
     ---effet speed
     recipe.factory.speed = factory_prototype:speedFactory(recipe) * (1 + recipe.factory.effects.speed)
     ---cap speed creation maximum de 1 cycle par tick

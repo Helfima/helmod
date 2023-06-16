@@ -1211,7 +1211,7 @@ function RecipeEdition:updateObjectInfo(event)
 
     ---duration
     local cell_duration = GuiElement.add(recipe_table, GuiFrameH("duration", recipe.id):style(helmod_frame_style.hidden))
-    local element_duration = {name = "helmod_button_menu_flat", hovered = defines.sprites.time.white, sprite = defines.sprites.time.white , count = recipe_prototype:getEnergy(),localised_name = "helmod_label.duration"}
+    local element_duration = {name = "helmod_button_menu_flat", hovered = defines.sprites.time.white, sprite = defines.sprites.time.white , count = recipe_prototype:getEnergy(recipe.factory),localised_name = "helmod_label.duration"}
     GuiElement.add(cell_duration, GuiCellProduct(self.classname, "do_noting"):element(element_duration):tooltip("tooltip.product"):color("gray"))
 
     ---products
