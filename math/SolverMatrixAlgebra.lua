@@ -135,7 +135,7 @@ function SolverMatrixAlgebra:solve_matrix(matrix_base, debug, by_factory, time)
             local start_row = 0
             for irow, row in pairs(Mstep.rows) do
                 if irow < #Mstep.rows then
-                    local parameters = Mstep.parameters[xrow]
+                    local parameters = Mstep.parameters[irow]
                     local factory_count = parameters.factory_count
                     if factory_count > 0 then
                         if start_row == 0 then start_row = irow end

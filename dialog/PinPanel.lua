@@ -173,7 +173,6 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
   --local button_recipe = GuiCellRecipe(self.classname, "do_noting", "recipe"):element(recipe):infoIcon(recipe.type):tooltip("tooltip.info-product"):color(GuiElement.color_button_default):mask(is_done)
   GuiElement.add(cell_recipe, button_recipe)
 
-  local by_limit = block.count ~= 1
   if not(User.getSetting("pin_panel_column_hide_product")) then
     ---products
     local cell_products = GuiElement.add(gui_table, GuiTable("products",recipe.id):column(3))
@@ -188,7 +187,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
         if block.count > 1 then
           product.limit_count = product.count / block.count
         end
-        GuiElement.add(cell_products, GuiCellElementSm(self.classname, "do_noting", "product"):index(index):element(product):tooltip("tooltip.info-product"):color(GuiElement.color_button_none):byLimit(by_limit):mask(is_done))
+        GuiElement.add(cell_products, GuiCellElementSm(self.classname, "do_noting", "product"):index(index):element(product):tooltip("tooltip.info-product"):color(GuiElement.color_button_none):byLimit(block.by_limit):mask(is_done))
       end
     end
   end
@@ -196,7 +195,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
   if not(User.getSetting("pin_panel_column_hide_machine")) then
     ---col factory
     local factory = recipe.factory
-    GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "factory"):index(recipe.id):element(factory):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default):byLimit(by_limit):mask(is_done))
+    GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "factory"):index(recipe.id):element(factory):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default):byLimit(block.by_limit):mask(is_done))
   end
 
   if not(User.getSetting("pin_panel_column_hide_product")) then
@@ -213,7 +212,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
         if block.count > 1 then
           ingredient.limit_count = ingredient.count / block.count
         end
-        GuiElement.add(cell_ingredients, GuiCellElementSm(self.classname, "do_noting", "ingredient"):index(index):element(ingredient):tooltip("tooltip.info-product"):color(GuiElement.color_button_add):byLimit(by_limit):mask(is_done))
+        GuiElement.add(cell_ingredients, GuiCellElementSm(self.classname, "do_noting", "ingredient"):index(index):element(ingredient):tooltip("tooltip.info-product"):color(GuiElement.color_button_add):byLimit(block.by_limit):mask(is_done))
       end
     end
   end
@@ -226,7 +225,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
     else
       beacon.limit_count = nil
     end
-    GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "beacon"):index(recipe.id):element(beacon):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default):byLimit(by_limit):mask(is_done))
+    GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "beacon"):index(recipe.id):element(beacon):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default):byLimit(block.by_limit):mask(is_done))
   end
 
 end
