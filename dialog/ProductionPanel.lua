@@ -343,6 +343,7 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
   local group_tool = GuiElement.add(left_panel, GuiFlowH("group_tool"))
   group_tool.style.horizontal_spacing = button_spacing
   GuiElement.add(group_tool, GuiButton("HMSummaryPanel", "OPEN", model.id, block_id):sprite("menu", defines.sprites.list_view.black,defines.sprites.list_view.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
+  GuiElement.add(group_tool, GuiButton("HMPinPanel", "OPEN", model.id, block_id):sprite("menu", defines.sprites.push_pin.black, defines.sprites.push_pin.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
   if block ~= nil then
     ---unlinked button
     local linked_button
@@ -361,7 +362,6 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
       linked_button.tooltip = {"tooltip.block-cannot-link-by-factory"}
     end
 
-    GuiElement.add(group_tool, GuiButton("HMPinPanel", "OPEN", model.id, block_id):sprite("menu", defines.sprites.push_pin.black, defines.sprites.push_pin.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin"}))
     
     ---by limit
     if block.by_limit == true then

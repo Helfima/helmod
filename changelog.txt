@@ -27,6 +27,7 @@ Version: 0.12.14
 Date: 2022-11-30
   Changes:
     - Updated Russian locale
+    - Added Pin-Feature for productionlines
   Bugfixes:
     - Machine speed calculated incorrectly when fuel temperature below 15 degrees #442
 ---------------------------------------------------------------------------------------------------
