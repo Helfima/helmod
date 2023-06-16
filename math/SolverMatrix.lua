@@ -19,24 +19,34 @@ end
 ---@return Matrix
 function SolverMatrix:prepare(matrix)
     local matrix_clone = self:clone(matrix)
+    self:prepare_z_and_objectives(matrix_clone, false)
+    return matrix_clone
+end
+
+-------------------------------------------------------------------------------
+---Prepare Z et objectives
+---@param matrix Matrix
+---@param reverse boolean reverse objective sign
+function SolverMatrix:prepare_z_and_objectives(matrix, reverse)
     local row = {}
     local objective_values = {}
     ---ajoute la ligne Z avec Z=-input
-    for _, column in pairs(matrix_clone.columns) do
-        local objective = matrix_clone.objectives[column.key]
+    for _, column in pairs(matrix.columns) do
+        local objective = matrix.objectives[column.key]
         local objective_value = 0
         if objective ~= nil then
             objective_value = objective.value
+        end
+        if reverse then
+            objective_value = -objective_value
         end
         local value = 0 - objective_value
         table.insert(row, value)
         table.insert(objective_values, objective_value)
     end
-    matrix_clone.objective_values = objective_values
-    table.insert(matrix_clone.rows, row)
-    return matrix_clone
+    matrix.objective_values = objective_values
+    table.insert(matrix.rows, row)
 end
-
 -------------------------------------------------------------------------------
 ---Finalise la matrice
 ---@param matrix Matrix
@@ -142,9 +152,12 @@ function SolverMatrix:solve(block, debug)
 
     if mC ~= nil then
         ---remove temperature convert lines
-        for i = #mC, 1, -1 do
-            if mC[i][1].name == "helmod-temperature-convert" then
-                table.remove(mC, i)
+        ---necessary to retieve the right value
+        for i = #mC.headers, 1, -1 do
+            if mC.headers[i].name == "helmod-temperature-convert" then
+                table.remove(mC.rows, i)
+                table.remove(mC.headers, i)
+                table.remove(mC.parameters, i)
             end
         end
 
@@ -513,9 +526,169 @@ function SolverMatrix.get_block_matrix(block)
             end
         end
 
+        matrix = SolverMatrix.linkTemperatureFluid(matrix, block.by_product)
         matrix.objectives = objectives
-
         return matrix
     end
     return nil
+end
+
+-------------------------------------------------------------------------------
+---Link Temperature Fluid
+---@param matrix table
+---@param by_product boolean
+---@return table
+function SolverMatrix.linkTemperatureFluid(matrix, by_product)
+    ---Create blank parameters
+    local template_parameters = MatrixRowParameters()
+    template_parameters.factory_count = 0
+    template_parameters.factory_speed = 1
+    template_parameters.recipe_count = 0
+    template_parameters.recipe_production = 1
+    template_parameters.recipe_energy = 1
+    template_parameters.coefficient = 0
+
+    ---Create blank row
+    local template_row = {}
+    for _, column in pairs(matrix.columns) do
+        table.insert(template_row, 0)
+    end
+
+    local mA2 = Matrix()
+    local block_ingredient_fluids = {}
+    local block_product_fluids = {}
+
+    for irow, row in pairs(matrix.rows) do
+        local rowParameters = matrix.parameters[irow]
+        local rowHeader = matrix.headers[irow]
+        local rowMatrix = MatrixRow(rowHeader.type, rowHeader.name, rowHeader.tooltip)
+        rowMatrix.columns = matrix.columns
+        rowMatrix.columnIndex = matrix.columnIndex
+        rowMatrix.values = row
+        
+
+        local ingredient_fluids = {}
+        local product_fluids = {}
+
+        for icol, column in pairs(matrix.columns) do
+            local cell_value = row[icol] or 0
+            local product = column.product
+            if (column.key ~= nil) and (product.type == "fluid") then
+                if cell_value > 0 then
+                    block_product_fluids[product.name] = block_product_fluids[product.name] or {}
+                    block_product_fluids[product.name][column.key] = column
+                    product_fluids[column.key] = column
+                elseif cell_value < 0 then
+                    ingredient_fluids[column.key] = column
+                end
+            end
+        end
+
+        ---Convert any Z into product
+        for _, product_fluid in pairs(product_fluids) do
+            local product = product_fluid.product
+            local linked_fluids = block_ingredient_fluids[product.name] or {}
+            for _, linked_fluid in pairs(linked_fluids) do
+                if SolverMatrix.checkLinkedTemperatureFluid(product_fluid, linked_fluid, by_product) then
+                    local parameters = MatrixRowParameters()
+                    local new_row = MatrixRow("recipe", "helmod-temperature-convert", "")
+                    new_row:add_value(product_fluid, -1)
+                    new_row:add_value(linked_fluid, 1)
+                    mA2:add_row(new_row, parameters)
+                end
+            end
+        end
+
+        -- Insert the row
+        mA2:add_row(rowMatrix, rowParameters)
+
+        ---Convert any overflow product back into Z
+        for _, product_fluid in pairs(product_fluids) do
+            local product = product_fluid.product
+            local linked_fluids = block_ingredient_fluids[product.name] or {}
+            for _, linked_fluid in pairs(linked_fluids) do
+                if SolverMatrix.checkLinkedTemperatureFluid(product_fluid, linked_fluid, by_product) then
+                    local parameters = MatrixRowParameters()
+                    local new_row = MatrixRow("recipe", "helmod-temperature-convert", "")
+                    new_row:add_value(product_fluid, 1)
+                    new_row:add_value(linked_fluid, -1)
+                    mA2:add_row(new_row, parameters)
+                end
+            end
+        end
+
+        ---If an ingredient has already been made in this block
+        ---Convert any Z into ingredient
+        ---Convert any unmet ingredient back into Z
+        for _, ingredient_fluid in pairs(ingredient_fluids) do
+            local product = ingredient_fluid.product
+            block_ingredient_fluids[product.name] = block_ingredient_fluids[product.name] or {}
+            block_ingredient_fluids[product.name][ingredient_fluid.key] = ingredient_fluid
+
+            local linked_fluids = block_product_fluids[product.name] or {}
+            for _, linked_fluid in pairs(linked_fluids) do
+                if SolverMatrix.checkLinkedTemperatureFluid(linked_fluid, ingredient_fluid, by_product) then
+                    local parameters = MatrixRowParameters()
+                    local new_row = MatrixRow("recipe", "helmod-temperature-convert", "")
+                    new_row:add_value(linked_fluid, -1)
+                    new_row:add_value(ingredient_fluid, 1)
+                    mA2:add_row(new_row, parameters)
+
+                    local parameters = MatrixRowParameters()
+                    local new_row = MatrixRow("recipe", "helmod-temperature-convert", "")
+                    new_row:add_value(linked_fluid, 1)
+                    new_row:add_value(ingredient_fluid, -1)
+                    mA2:add_row(new_row, parameters)
+                end
+            end
+        end
+    end
+
+    return mA2
+end
+
+-------------------------------------------------------------------------------
+---Check Linked Temperature Fluid
+---@param item1 table
+---@param item2 table
+---@param by_product boolean
+---@return boolean
+function SolverMatrix.checkLinkedTemperatureFluid(item1, item2, by_product)
+    local result = false
+
+    local product, ingredient
+    if by_product ~= false then
+        product = item1
+        ingredient = item2
+    else
+        product = item2
+        ingredient = item1
+    end
+
+    if product.key ~= ingredient.key then
+        local T = product.product.temperature
+        local T2 = ingredient.product.temperature
+        local T2min = ingredient.product.minimum_temperature
+        local T2max = ingredient.product.maximum_temperature
+        if T ~= nil or T2 ~= nil or T2min ~= nil or T2max ~= nil then
+            ---traitement seulement si une temperature
+            if T2min == nil and T2max == nil then
+                ---Temperature sans intervale
+                if T == nil or T2 == nil or T2 == T then
+                    result = true
+                end
+            else
+                ---Temperature avec intervale
+                ---securise les valeurs
+                T = T or 25
+                T2min = T2min or -defines.constant.max_float
+                T2max = T2max or defines.constant.max_float
+                if T >= T2min and T <= T2max then
+                    result = true
+                end
+            end
+        end
+    end
+
+    return result
 end

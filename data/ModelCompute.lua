@@ -1,6 +1,7 @@
 require "math.Matrix"
 require "math.SolverMatrix"
 require "math.SolverMatrixAlgebra"
+require "math.SolverMatrixSimplex"
 
 require "math.Solver"
 require "math.SolverAlgebra"
@@ -15,7 +16,7 @@ local ModelCompute = {
     capSpeed = -0.8,
     capPollution = -0.8,
     waste_value = 0.00001,
-    new_solver = true,
+    new_solver = false,
     cap_reason = {
         speed = {
             cycle = 1,
@@ -272,8 +273,10 @@ function ModelCompute.computeBlock(block)
 
         local debug = User.getModGlobalSetting("debug_solver")
         local selected_solvers = { algebra = SolverAlgebra, simplex = SolverSimplex }
-        if ModelCompute.new_solver == true then
-            selected_solvers = { algebra = SolverMatrixAlgebra, simplex = SolverMatrixAlgebra }
+
+        local solver_selected = User.getParameter("solver_selected") or "normal"
+        if solver_selected ~= "normal" then
+            selected_solvers = { algebra = SolverMatrixAlgebra, simplex = SolverMatrixSimplex }
         end
         if block.solver == true and block.by_factory ~= true then
             my_solver = selected_solvers.simplex()

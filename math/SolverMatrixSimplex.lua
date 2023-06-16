@@ -1,80 +1,82 @@
 -------------------------------------------------------------------------------
 ---Description of the module.
 ---@class SolverMatrixSimplex : SolverMatrix
-SolverMatrixSimplex = newclass(Solver, function(base, object)
-	Solver.init(base, object)
+SolverMatrixSimplex = newclass(SolverMatrix, function(base, object)
+	SolverMatrix.init(base, object)
 end)
 
 -------------------------------------------------------------------------------
 ---Calcul pivot de gauss
----@param M table
----@param xrow number
----@param xcol number
----@return table
-function SolverMatrixSimplex:pivot(M, xrow, xcol)
-	local Mx = {}
-	local pivot_value = M[xrow][xcol]
-	for irow, row in pairs(M) do
-		Mx[irow] = {}
-		if irow > self.row_input then
-			for icol, cell_value in pairs(row) do
-				if icol >= self.col_start then
-					if irow == xrow then
-						--Transformation de la ligne pivot : elle est divisee par l'element pivot
-						Mx[irow][icol] = cell_value / pivot_value
-					elseif icol == xcol then
-						--Transformation de la colonne pivot : toutes les cases sauf la case pivot deviennent zero.
-						Mx[irow][icol] = 0
-					else
-						local B = M[irow][xcol]
-						local D = M[xrow][icol]
-						local value = cell_value - (B * D) / pivot_value
-						if math.abs(value) < 1e-8 then
-							Mx[irow][icol] = 0
-						else
-							Mx[irow][icol] = value
-						end
-					end
+---@param matrix Matrix
+---@param xrow integer
+---@param xcol integer
+---@return Matrix
+function SolverMatrixSimplex:pivot(matrix, xrow, xcol)
+	local rows = matrix.rows
+
+	local matrix_clone = self:clone(matrix)
+	matrix_clone.rows = {}
+	local rows_clone = matrix_clone.rows
+	local pivot_value = rows[xrow][xcol]
+	for irow, row in pairs(rows) do
+		local parameters = matrix_clone.parameters[xrow]
+		parameters.coefficient = parameters.coefficient / pivot_value
+		rows_clone[irow] = {}
+		for icol, column in pairs(matrix.columns) do
+			local cell_value = row[icol] or 0
+			if irow == xrow then
+				--Transformation de la ligne pivot : elle est divisee par l'element pivot
+				rows_clone[irow][icol] = cell_value / pivot_value
+			elseif icol == xcol then
+				--Transformation de la colonne pivot : toutes les cases sauf la case pivot deviennent zero.
+				rows_clone[irow][icol] = 0
+			else
+				local B = rows[irow][xcol] or 0
+				local D = rows[xrow][icol] or 0
+				local value = cell_value - (B * D) / pivot_value
+				if math.abs(value) < 1e-8 then
+					rows_clone[irow][icol] = 0
 				else
-					Mx[irow][icol] = cell_value
+					rows_clone[irow][icol] = value
 				end
-			end
-		else
-			for icol, cell_value in pairs(row) do
-				Mx[irow][icol] = cell_value
 			end
 		end
 	end
-	Mx[xrow][1] = M[1][xcol]
-	Mx[1][xcol] = M[xrow][1]
-	return Mx
+	-- swap base
+	matrix_clone.headers[xrow] = matrix.columns[xcol]
+	matrix_clone.columns[xcol] = matrix.headers[xrow]
+	return matrix_clone
 end
 
 -------------------------------------------------------------------------------
 ---Retourne le pivot
----@param M table
----@return table
-function SolverMatrixSimplex:get_pivot(M)
+---@param matrix Matrix
+---@return boolean, integer, integer
+function SolverMatrixSimplex:get_pivot(matrix)
+	local rows = matrix.rows
+	local zrow = matrix.rows[#matrix.rows]
+
 	local max_z_value = 0
 	local xcol = nil
 	local min_ratio_value = 0
 	local xrow = nil
-	local last_row = M[#M]
 	---boucle sur la derniere ligne nommee Z
-	for icol, z_value in pairs(last_row) do
-		---on exclus les premieres colonnes
-		if icol > self.col_start then
+	for icol, column in pairs(matrix.columns) do
+		-- exclusion de la colonne coefficient
+		if icol > 1 then
+			local z_value = zrow[icol] or 0
 			if z_value > max_z_value then
 				---la valeur repond au critere, la colonne est eligible
 				---on recherche le ligne
 				min_ratio_value = nil
-				for irow, current_row in pairs(M) do
-					local x_value = M[irow][icol]
+				for irow, current_row in pairs(rows) do
+					local parameters = matrix.parameters[irow]
+					local x_value = rows[irow][icol]
 					---on n'utilise pas la derniere ligne
 					---seule les cases positives sont prises en compte
-					if irow > self.row_input and irow < #M and x_value > 0 then
+					if irow < #rows and x_value > 0 then
 						---calcul du ratio base / x
-						local c_value = M[irow][self.col_start]
+						local c_value = parameters.coefficient
 						local bx_ratio = c_value / x_value
 						if min_ratio_value == nil or bx_ratio < min_ratio_value then
 							min_ratio_value = bx_ratio
@@ -99,29 +101,30 @@ end
 
 -------------------------------------------------------------------------------
 ---Prepare la matrice
----@param M table
----@return table
-function SolverMatrixSimplex:prepare(M)
+---@param matrix Matrix
+---@return Matrix
+function SolverMatrixSimplex:prepare(matrix)
 	---ajoute la ligne Z
 	local irow = 1
 	---prepare les headers
-	local Mx = self:clone(M)
+	local matrix_clone = self:clone(matrix)
+	local rows = matrix_clone.rows
+	local headers = matrix_clone.headers
+	local columns = matrix_clone.columns
+	local parameters = matrix_clone.parameters
 
 	---ajoute les recettes d'ingredient
 	---initialise l'analyse
 	local ckeck_cols = {}
-	for icol, _ in pairs(Mx[1]) do
+	for icol, column in pairs(columns) do
 		ckeck_cols[icol] = true
 	end
-	for irow, row in pairs(Mx) do
-		if irow > self.row_input and irow < #Mx then
-			for icol, cell in pairs(row) do
-				if icol > self.col_start then
-					---si une colonne est un produit au moins une fois on l'exclus
-					if cell > 0 then
-						ckeck_cols[icol] = false
-					end
-				else
+	for irow, row in pairs(rows) do
+		if irow <= #rows then
+			for icol, column in pairs(columns) do
+				local cell_value = row[icol] or 0
+				---si une colonne est un produit au moins une fois on l'exclus
+				if cell_value > 0 then
 					ckeck_cols[icol] = false
 				end
 			end
@@ -131,134 +134,151 @@ function SolverMatrixSimplex:prepare(M)
 	local index = 1
 	for xcol, check in pairs(ckeck_cols) do
 		if check then
-			local row = {}
-			for icol, header in pairs(Mx[1]) do
-				if header.name == "B" then
-					table.insert(row, Mx[1][xcol])
+			-- Add new header
+			local new_header = table.deepcopy(columns[xcol])
+			table.insert(headers, new_header)
+			-- Add coefficient value
+			local rowParameters = MatrixRowParameters()
+			rowParameters.base = new_header
+			rowParameters.contraint = nil
+			rowParameters.factory_count = 0
+            rowParameters.factory_speed = 0
+            rowParameters.recipe_count = 0
+            rowParameters.recipe_production = 1
+            rowParameters.recipe_energy = 1
+            rowParameters.coefficient = 1e4 * index --important ne pas changer
+			--rowParameters.coefficient = math.pow(10,index)*10
+			table.insert(parameters, rowParameters)
+			local new_row = {}
+			for icol, column in pairs(columns) do
+				if icol == xcol then
+					table.insert(new_row, 1)
 				else
-					if icol == self.col_start then
-						--table.insert(row,math.pow(10,index)*10) ---important ne pas changer
-						table.insert(row, 1e4 * index) ---important ne pas changer
-					elseif icol == xcol then
-						table.insert(row, 1)
-					else
-						table.insert(row, 0)
-					end
+					table.insert(new_row, 0)
 				end
 			end
-			table.insert(Mx, #Mx, row)
+			table.insert(rows, new_row)
 			index = index + 1
 		end
 	end
+	self:prepare_z_and_objectives(matrix_clone, true)
+
+	-- ajout colonne coefficient
+	local new_column = {type="none", name="C"}
+	table.insert(columns, 1, new_column)
+	for irow, row in pairs(rows) do
+		local parameters = matrix_clone.parameters[irow]
+		local C = 0
+		if parameters ~= nil and parameters.coefficient ~= nil then
+			C = parameters.coefficient or 0
+		end
+		table.insert(row, 1, C)
+	end
+
 	---ajoute les row en colonne
-	local num_row = rawlen(M) - self.row_input - 1
-	local num_col = rawlen(Mx[1])
-	for xrow = 1, num_row do
-		for irow, row in pairs(Mx) do
-			if irow == 1 then
-				---ajoute le header
-				Mx[irow][num_col + xrow] = Mx[xrow + self.row_input][1];
+	local num_row = rawlen(matrix.rows)
+	local num_col = rawlen(matrix_clone.columns)
+	for icol = 1, num_row do
+		-- Add new column
+		local new_column = table.deepcopy(matrix_clone.headers[icol])
+		table.insert(columns, new_column)
+		for irow, row in pairs(rows) do
+			---ajoute les valeurs
+			if irow == icol then
+				rows[irow][num_col + icol] = 1
 			else
-				---ajoute les valeurs
-				if irow == xrow + self.row_input then
-					Mx[irow][num_col + xrow] = 1
-				else
-					Mx[irow][num_col + xrow] = 0
-				end
+				rows[irow][num_col + icol] = 0
 			end
 		end
 	end
 
-	---initialise la ligne Z avec Z=input
-	for icol, cell in pairs(Mx[self.row_input]) do
-		if icol > self.col_start then
-			Mx[#Mx][icol] = cell
-		end
-	end
-
-	return Mx
+	return matrix_clone
 end
 
 -------------------------------------------------------------------------------
 ---Calcul de la ligne
----@param Mx table
----@param xrow number
----@return table
-function SolverMatrixSimplex:line_compute(Mx, xrow)
-	if Mx == nil or xrow == 0 then return Mx end
-	local row = Mx[xrow]
-	local R = row[self.col_R]
-	local E = row[self.col_E]
+---@param matrix Matrix
+---@param xrow integer
+---@return Matrix
+function SolverMatrixSimplex:line_compute(matrix, xrow)
+	if matrix == nil or xrow == 0 then return matrix end
+	local row = matrix.rows[xrow]
+    local parameters = matrix.parameters[xrow]
+    local zrow = matrix.rows[#matrix.rows]
+	local R = parameters.recipe_count
+	local E = parameters.recipe_energy
 
-	for icol, cell_value in pairs(row) do
-		if cell_value ~= 0 and icol > self.col_start then
-			local Z = Mx[#Mx][icol] ---valeur demandee Z
+	for icol, column in pairs(matrix.columns) do
+		local cell_value = row[icol] or 0
+		if cell_value ~= 0 then
+			local Z = zrow[icol] ---valeur demandee Z
 			local X = cell_value
 
 			local C = -Z / X
-			if C > 0 and C > Mx[xrow][self.col_C] then
-				Mx[xrow][self.col_C] = C
-				Mx[xrow][self.col_P] = R * E / C
+			if C > 0 and C > parameters.coefficient then
+				parameters.coefficient = C
+				parameters.recipe_production = R * E / C
 			end
 		end
 	end
 
-	local P = Mx[xrow][self.col_P]
-	local C = Mx[xrow][self.col_start]
-	for icol, cell_value in pairs(row) do
-		if cell_value ~= 0 and icol > self.col_start then
-			local Z = Mx[#Mx][icol] ---valeur demandee Z
+	local P = parameters.recipe_production
+	local C = parameters.coefficient
+	for icol, column in pairs(matrix.columns) do
+		local cell_value = row[icol] or 0
+		if cell_value ~= 0 then
+			local Z = zrow[icol] ---valeur demandee Z
 			local X = cell_value
 			---calcul du Z
-			Mx[#Mx][icol] = Z + X * P * C
+			zrow[icol] = Z + X * P * C
 		end
 	end
-	return Mx
+	return matrix
 end
 
 -------------------------------------------------------------------------------
 ---Calcul du tableau
----@param Mx table --matrix finale
----@param Mi table --matrix intermediaire
----@return table
-function SolverMatrixSimplex:table_compute(Mx, Mi)
-	if Mx == nil then return Mx end
-	---preparation de la colonne R et P
-	for irow, _ in pairs(Mx) do
-		if irow > self.row_input and irow < #Mx then
-			---colonne correspondant a la recette
-			local icol = #Mx[1] + irow - self.row_input
-			Mx[irow][self.col_R] = -Mi[#Mi][icol] ---moins la valeur affichee dans Z
-			Mx[irow][self.col_P] = 0
-		end
-	end
+---@param matrix Matrix --matrix finale
+---@param matrix_result Matrix --matrix intermediaire
+---@return Matrix
+function SolverMatrixSimplex:table_compute(matrix, matrix_result)
+	if matrix == nil then return matrix end
+	local zrow = matrix_result.rows[#matrix_result.rows]
+
 	---preparation input
-	---ajoute la ligne Z avec Z=-input
-	for icol, cell in pairs(Mx[self.row_input]) do
-		if icol > self.col_start then
-			Mx[#Mx][icol] = 0 - cell
+	self:prepare_z_and_objectives(matrix, false)
+
+	---preparation de la colonne R et P
+	for irow, _ in pairs(matrix.rows) do
+		if irow < #matrix.rows then
+			---colonne correspondant a la recette
+			local icol = #matrix_result.columns - #matrix.headers + irow
+
+			local parameters = matrix.parameters[irow]
+			parameters.recipe_count = -zrow[icol] ---moins la valeur affichee dans Z
+			parameters.recipe_production = 0
 		end
 	end
 
 	---initialise les valeurs des produits par second
-	for irow, row in pairs(Mx) do
-		if irow > self.row_input and irow < #Mx then
-			local E = Mx[irow][self.col_E]
-			for icol, cell in pairs(row) do
-				if icol > self.col_start then
-					Mx[irow][icol] = cell / E
-				end
+	for irow, row in pairs(matrix.rows) do
+		if irow < #matrix.rows then
+			local parameters = matrix.parameters[irow]
+			local E = parameters.recipe_energy
+			for icol, column in pairs(matrix.columns) do
+				local cell_value = row[icol] or 0
+				row[icol] = cell_value / E
 			end
 		end
 	end
 
 	---calcul du resultat
-	for irow, _ in pairs(Mx) do
-		if irow > self.row_input and irow < #Mx then
-			Mx = self:line_compute(Mx, irow)
+	for irow, _ in pairs(matrix.rows) do
+		if irow < #matrix.rows then
+			matrix = self:line_compute(matrix, irow)
 		end
 	end
-	return Mx
+	return matrix
 end
 
 -------------------------------------------------------------------------------
@@ -267,7 +287,7 @@ end
 ---@param debug boolean
 ---@param by_factory boolean
 ---@param time number
----@return table, table
+---@return Matrix, {[integer] : Matrix}
 function SolverMatrixSimplex:solve_matrix(Mbase, debug, by_factory, time)
 	if Mbase ~= nil then
 		local num_loop = 0
@@ -288,11 +308,11 @@ function SolverMatrixSimplex:solve_matrix(Mbase, debug, by_factory, time)
 			num_loop = num_loop + 1
 		end
 		---finalisation
-		local Mr = self:clone(Mbase)
-		Mr = self:table_compute(Mr, Mstep)
-		Mr = self:finalize(Mr)
-		Mr = self:append_state(Mr)
-		self:add_runtime(debug, runtime, "final", Mr)
-		return Mr, runtime
+		local matrix_result = self:clone(Mbase)
+		matrix_result = self:table_compute(matrix_result, Mstep)
+		matrix_result = self:finalize(matrix_result)
+		matrix_result = self:apply_state(matrix_result)
+		self:add_runtime(debug, runtime, "final", matrix_result)
+		return matrix_result, runtime
 	end
 end

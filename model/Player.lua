@@ -1022,8 +1022,11 @@ function Player.buildFluidRecipe(fluid, ingredients, temperature)
 end
 
 function Player.buildRocketRecipe(prototype)
+  if prototype == nil then return nil end
   local products = prototype.rocket_launch_products
   local ingredients = {}
+  local item_prototype = ItemPrototype(prototype.name)
+  local stack_size = item_prototype:stackSize()
   table.insert(ingredients, {name=prototype.name, type="item", amount=1, constant=true})
   local recipe = {}
   recipe.category = "rocket-building"
@@ -1034,6 +1037,10 @@ function Player.buildRocketRecipe(prototype)
   recipe.subgroup = {name="helmod-rocket", order="eeee"}
   recipe.hidden = false
   recipe.ingredients = ingredients
+  for key, product in pairs(products) do
+    local product_prototype = ItemPrototype(product.name)
+    local i=0
+  end
   recipe.products = products
   recipe.localised_description = prototype.localised_description
   recipe.localised_name = prototype.localised_name

@@ -1,6 +1,9 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.16
 Date: ???
+  Changes:
+    - Moved all matrix calculation in solver
+    - Added a reworked solver to a next step, not yet actived
   Bugfixes:
     - Fixed formula parser pattern #450
     - Fixed productivity calculation when recipe speed exceeds 1 craft per tick cap #455

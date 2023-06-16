@@ -85,6 +85,12 @@ end
 ---@field recipe_energy number
 ---@field coefficient number
 MatrixRowParameters = newclass(function(base)
+  base.factory_count = 0
+  base.factory_speed = 1
+  base.recipe_count = 0
+  base.recipe_production = 1
+  base.recipe_energy = 1
+  base.coefficient = 0
 end)
 
 -------------------------------------------------------------------------------
@@ -127,7 +133,7 @@ end
 
 -------------------------------------------------------------------------------
 ---@param row MatrixRow
----@param parameters MatrixRow
+---@param parameters MatrixRowParameters
 function Matrix:add_row(row, parameters)
   local irow = #self.headers + 1
   self.headers[irow] = row.header
