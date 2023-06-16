@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 ---Class to build recipe edition dialog
----@class RecipeEdition
+---@class RecipeEdition : FormModel
 RecipeEdition = newclass(FormModel)
 
 local limit_display_height = 850
@@ -45,17 +45,27 @@ function RecipeEdition:getObjectInfoPanel()
   return panel
 end
 
+function RecipeEdition:getRecipeEditionScrollGroups()
+  local display_width, display_height = Player.getDisplaySizes()
+  local recipe_edition_scroll_groups = User.getSetting("recipe_edition_scroll_groups")
+  if recipe_edition_scroll_groups == nil then
+    recipe_edition_scroll_groups = display_height >= limit_display_height
+  end
+  return recipe_edition_scroll_groups
+end
 -------------------------------------------------------------------------------
 ---Get or create tab panel
 ---@return LuaGuiElement, LuaGuiElement
 function RecipeEdition:getTabPanel()
-  local display_width, display_height = Player.getDisplaySizes()
+  
   local flow_panel, content_panel, menu_panel = self:getPanel()
   local panel_name = "tab_panel"
   local factory_panel_name = "facory_panel"
   local beacon_panel_name = "beacon_panel"
 
-  if display_height >= limit_display_height then
+  local recipe_edition_scroll_groups = self:getRecipeEditionScrollGroups()
+
+  if recipe_edition_scroll_groups then
     ---affichage normal
     if content_panel[factory_panel_name] ~= nil and content_panel[factory_panel_name].valid then
       return content_panel[factory_panel_name], content_panel[beacon_panel_name]
@@ -222,6 +232,13 @@ function RecipeEdition:onEvent(event)
 
   local model, block, recipe = self:getParameterObjects()
   if model == nil or block == nil or recipe == nil then return end
+
+  if event.action == "change-sroll-groups" then
+    User.setSetting("recipe_edition_scroll_groups", event.item1 == "true")
+    Controller:send("on_gui_update", event, self.classname)
+  end
+
+
   if User.isWriter(model) then
     
 
@@ -560,10 +577,10 @@ end
 function RecipeEdition:updateFactoryInfoTool(event)
   local tool_panel, detail_panel = self:getFactoryInfoPanel()
   local model, block, recipe = self:getParameterObjects()
+
   if recipe ~= nil then
     local factory = recipe.factory
     local factory_prototype = EntityPrototype(factory)
-
     tool_panel.clear()
 
     ---factory tool
@@ -1155,8 +1172,31 @@ function RecipeEdition:updateObjectInfo(event)
   if block ~= nil and recipe ~= nil then
     info_panel.clear()
 
+    local panel = GuiElement.add(info_panel, GuiFlowH("options_panel"))
+    panel.style.horizontally_stretchable = true
+
+    local left_panel = GuiElement.add(panel, GuiFlowH("left_panel"))
+
+    local right_panel = GuiElement.add(panel, GuiFlowH(right_name))
+    right_panel.style.horizontal_spacing = 10
+    right_panel.style.horizontally_stretchable = true
+    right_panel.style.horizontal_align = "right"
+
+
+    local group_sroll = GuiElement.add(right_panel, GuiFlowH("group_sroll"))
+    group_sroll.style.horizontal_spacing = 2
+
+    local recipe_edition_scroll_groups = self:getRecipeEditionScrollGroups()
+    if recipe_edition_scroll_groups == true then
+      GuiElement.add(group_sroll, GuiButton(self.classname, "change-sroll-groups", "false"):sprite("menu", defines.sprites.two_rows.black, defines.sprites.two_rows.black):style("helmod_button_menu_sm"))
+      GuiElement.add(group_sroll, GuiButton(self.classname, "change-sroll-groups", "true"):sprite("menu", defines.sprites.three_rows.black, defines.sprites.three_rows.black):style("helmod_button_menu_sm_selected"))
+    else
+      GuiElement.add(group_sroll, GuiButton(self.classname, "change-sroll-groups", "false"):sprite("menu", defines.sprites.two_rows.black, defines.sprites.two_rows.black):style("helmod_button_menu_sm_selected"))
+      GuiElement.add(group_sroll, GuiButton(self.classname, "change-sroll-groups", "true"):sprite("menu", defines.sprites.three_rows.black, defines.sprites.three_rows.black):style("helmod_button_menu_sm"))
+    end
+
     local recipe_prototype = RecipePrototype(recipe)
-    local recipe_table = GuiElement.add(info_panel, GuiTable("list-data"):column(4))
+    local recipe_table = GuiElement.add(left_panel, GuiTable("list-data"):column(4))
     recipe_table.style.horizontally_stretchable = false
     recipe_table.style.horizontal_spacing = 10
     recipe_table.vertical_centering = false

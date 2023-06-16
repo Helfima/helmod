@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 ---Class to build form with current model
----@class FormModel
+---@class FormModel : Form
 FormModel = newclass(Form,function(base,classname)
     Form.init(base,classname)
     base.parameter_objects = string.format("%s_%s", classname, "objects")
