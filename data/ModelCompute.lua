@@ -81,6 +81,17 @@ end
 -------------------------------------------------------------------------------
 ---Update model
 ---@param model table
+function ModelCompute.try_update(model)
+    local ok , err = pcall(function()
+        ModelCompute.update(model)
+    end)
+    if not(ok) then
+        log(err)
+    end
+end
+-------------------------------------------------------------------------------
+---Update model
+---@param model table
 function ModelCompute.update(model)
     if model ~= nil and model.blocks ~= nil then
         ---calcul les blocks
