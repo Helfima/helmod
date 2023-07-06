@@ -7,20 +7,25 @@ if global.models then
             -- Rename time to base_time
             recipe.base_time = recipe.time
 
-            -- Set recipe.time
-            local recipe_prototype = RecipePrototype(recipe)
-            recipe.time = recipe_prototype:getEnergy(recipe.factory)
+            local ok , err = pcall(function()
+              -- Set recipe.time
+              local recipe_prototype = RecipePrototype(recipe)
+              recipe.time = recipe_prototype:getEnergy(recipe.factory)
 
-            --if recipe.type ~= "energy" then
-              --ModelCompute.computeFactory(recipe)
-            --end
+              --if recipe.type ~= "energy" then
+                --ModelCompute.computeFactory(recipe)
+              --end
+            end)
+            if not(ok) then
+              log(err)
+            end
           end
         end
       end
       -- Force recalculation of recipe.factory.speed_total and recipe.factory.speed
       -- Model and Block totals will be updated
       Player.try_load_by_name(model.owner)
-      ModelCompute.update(model)
+      ModelCompute.try_update(model)
     end
   end
 end

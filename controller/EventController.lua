@@ -154,24 +154,29 @@ function EventController.onConfigurationChanged(data)
   if not data or not data.mod_changes then
     return
   end
-  if data.mod_changes["helmod"] then
-    --initialise au chargement d'une partie existante
+  local ok , err = pcall(function()
+    if data.mod_changes["helmod"] then
+      --initialise au chargement d'une partie existante
+      for _,player in pairs(game.players) do
+        Player.set(player)
+        Controller:cleanController(player)
+        Controller:bindController(player)
+      end
+    end
+    
+    Cache.reset()
+  
     for _,player in pairs(game.players) do
       Player.set(player)
-      Controller:cleanController(player)
-      Controller:bindController(player)
+      User.resetCache()
+      User.resetTranslate()
     end
+    
+    Controller:on_init()
+  end)
+  if not(ok) then
+    log(err)
   end
-  
-  Cache.reset()
-
-  for _,player in pairs(game.players) do
-    Player.set(player)
-    User.resetCache()
-    User.resetTranslate()
-  end
-  
-  Controller:on_init()
 end
 
 -------------------------------------------------------------------------------

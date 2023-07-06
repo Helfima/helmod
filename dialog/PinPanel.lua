@@ -184,7 +184,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
         local product = product_prototype:clone()
         product.time = model.time
         product.count = product_prototype:countProduct(model, recipe)
-        if block.count > 1 then
+        if block.by_limit == true and block.count > 1 then
           product.limit_count = product.count / block.count
         end
         GuiElement.add(cell_products, GuiCellElementSm(self.classname, "do_noting", "product"):index(index):element(product):tooltip("tooltip.info-product"):color(GuiElement.color_button_none):byLimit(block.by_limit):mask(is_done))
@@ -209,7 +209,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
         local ingredient = ingredient_prototype:clone()
         ingredient.time = model.time
         ingredient.count = ingredient_prototype:countIngredient(model, recipe)
-        if block.count > 1 then
+        if block.by_limit == true and block.count > 1 then
           ingredient.limit_count = ingredient.count / block.count
         end
         GuiElement.add(cell_ingredients, GuiCellElementSm(self.classname, "do_noting", "ingredient"):index(index):element(ingredient):tooltip("tooltip.info-product"):color(GuiElement.color_button_add):byLimit(block.by_limit):mask(is_done))
@@ -220,7 +220,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
   if not(User.getSetting("pin_panel_column_hide_beacon")) then
     ---col beacon
     local beacon = recipe.beacon
-    if block.count > 1 then
+    if block.by_limit == true and block.count > 1 then
       beacon.limit_count = beacon.count / block.count
     else
       beacon.limit_count = nil

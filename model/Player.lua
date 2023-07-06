@@ -805,6 +805,7 @@ end
 
 function Player.buildResourceRecipe(entity_prototype)
   local prototype = entity_prototype:native()
+  if prototype == nil then return nil end
   local ingredients = {}
   if entity_prototype:getMineableMiningFluidRequired() then
     local fluid_ingredient = {name=entity_prototype:getMineableMiningFluidRequired(), type="fluid", amount=entity_prototype:getMineableMiningFluidAmount()}
@@ -840,8 +841,10 @@ function Player.getResourceRecipes()
 
   for key, prototype in pairs(game.entity_prototypes) do
     if prototype.name ~= nil and prototype.resource_category ~= nil then
-      recipe = Player.buildResourceRecipe(EntityPrototype(prototype))
-      recipes[recipe.name] = recipe
+      local recipe = Player.buildResourceRecipe(EntityPrototype(prototype))
+      if recipe ~= nil then
+        recipes[recipe.name] = recipe
+      end
     end
   end
 

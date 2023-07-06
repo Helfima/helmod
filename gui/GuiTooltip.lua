@@ -171,16 +171,17 @@ function GuiTooltip:appendLogistic(tooltip, element)
       for _,type in pairs({"inserter", "belt", "container", "transport"}) do
         local item_logistic = Player.getDefaultItemLogistic(type)
         local item_prototype = Product(element)
-        local total_value = Format.formatNumberElement(item_prototype:countContainer(element.count, item_logistic, element.time))
+        local total_value = item_prototype:countContainer(element.count, item_logistic, element.time)
+        local formated_total_value = Format.formatNumberElement(total_value)
         local info = ""
         if type == "inserter" then
           info = {"", " (", {"helmod_common.capacity"}, string.format(":%s", EntityPrototype(item_logistic):getInserterCapacity()), ")"}
         end
         if element.limit_count ~= nil and element.limit_count > 0 then
           local limit_value = Format.formatNumberElement(item_prototype:countContainer(element.limit_count, item_logistic, element.time))
-          table.insert(tooltip_section, {"", "\n", string.format("[%s=%s]", "entity", item_logistic), " ", helmod_tag.font.default_bold, " x ", limit_value, "/", total_value, helmod_tag.font.close, info})
+          table.insert(tooltip_section, {"", "\n", string.format("[%s=%s]", "entity", item_logistic), " ", helmod_tag.font.default_bold, " x ", limit_value, "/", formated_total_value, helmod_tag.font.close, info})
         else
-          table.insert(tooltip_section, {"", "\n", string.format("[%s=%s]", "entity", item_logistic), " ", helmod_tag.font.default_bold, " x ", total_value, helmod_tag.font.close, info})
+          table.insert(tooltip_section, {"", "\n", string.format("[%s=%s]", "entity", item_logistic), " ", helmod_tag.font.default_bold, " x ", formated_total_value, helmod_tag.font.close, info})
         end
       end
     end
@@ -191,14 +192,15 @@ function GuiTooltip:appendLogistic(tooltip, element)
         local fluid_prototype = Product(element)
         local count = element.count
         if type == "pipe" then count = count / element.time end
-        local total_value = Format.formatNumberElement(fluid_prototype:countContainer(count, fluid_logistic, element.time))
+        local total_value = fluid_prototype:countContainer(count, fluid_logistic, element.time)
+        local formated_total_value = Format.formatNumberElement(total_value)
         if element.limit_count ~= nil and element.limit_count > 0 then
           local limit_count = element.limit_count
           if type == "pipe" then limit_count = limit_count / element.time end
           local limit_value = Format.formatNumberElement(fluid_prototype:countContainer(limit_count, fluid_logistic, element.time))
-          table.insert(tooltip_section, {"", "\n", string.format("[%s=%s]", "entity", fluid_logistic), " ", helmod_tag.font.default_bold, " x ", limit_value, "/", total_value, helmod_tag.font.close})
+          table.insert(tooltip_section, {"", "\n", string.format("[%s=%s]", "entity", fluid_logistic), " ", helmod_tag.font.default_bold, " x ", limit_value, "/", formated_total_value, helmod_tag.font.close})
         else
-          table.insert(tooltip_section, {"", "\n", string.format("[%s=%s]", "entity", fluid_logistic), " ", helmod_tag.font.default_bold, " x ", total_value, helmod_tag.font.close})
+          table.insert(tooltip_section, {"", "\n", string.format("[%s=%s]", "entity", fluid_logistic), " ", helmod_tag.font.default_bold, " x ", formated_total_value, helmod_tag.font.close})
         end
       end
     end

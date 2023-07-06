@@ -81,6 +81,17 @@ end
 -------------------------------------------------------------------------------
 ---Update model
 ---@param model table
+function ModelCompute.try_update(model)
+    local ok , err = pcall(function()
+        ModelCompute.update(model)
+    end)
+    if not(ok) then
+        log(err)
+    end
+end
+-------------------------------------------------------------------------------
+---Update model
+---@param model table
 function ModelCompute.update(model)
     if model ~= nil and model.blocks ~= nil then
         ---calcul les blocks
@@ -93,6 +104,10 @@ function ModelCompute.update(model)
                 block.ingredients = {}
                 block.products = {}
             else
+                
+                ---prepare bloc
+                ModelCompute.prepareBlock(block)
+                
                 ---state = 0 => produit
                 ---state = 1 => produit pilotant
                 ---state = 2 => produit restant
@@ -101,6 +116,7 @@ function ModelCompute.update(model)
                     if block.products == nil then
                         ModelCompute.computeBlock(block)
                     end
+                    
                     ---prepare les inputs
                     local factor = -1
                     local block_elements = block.products
@@ -122,10 +138,6 @@ function ModelCompute.update(model)
                         end
                     end
                 end
-                ---prepare bloc
-                local block_products, block_ingredients = ModelCompute.prepareBlock(block)
-                block.products = block_products
-                block.ingredients = block_ingredients
 
                 ModelCompute.computeBlockCleanInput(block)
 
@@ -190,8 +202,6 @@ end
 -------------------------------------------------------------------------------
 ---Prepare production block
 ---@param block table
----@return table
----@return table
 function ModelCompute.prepareBlock(block)
     local recipes = block.recipes
     if recipes ~= nil then
@@ -255,7 +265,8 @@ function ModelCompute.prepareBlock(block)
                 block_ingredient.state = 0
             end
         end
-        return block_products, block_ingredients
+        block.products = block_products
+        block.ingredients = block_ingredients
     end
 end
 

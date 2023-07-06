@@ -1095,7 +1095,7 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
         local product = product_prototype:clone()
         product.time = model.time
         product.count = product_prototype:countProduct(model, recipe)
-        if block.count > 1 then
+        if block.by_limit == true and block.count > 1 then
           product.limit_count = product.count / block.count
         end
         if block.by_product ~= false and recipe.contraint ~= nil and recipe.contraint.name == product.name then
@@ -1121,7 +1121,7 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
         if ingredient.constant == true then
           ingredient.count = ingredient_prototype:countProduct(model, recipe)
         end
-        if block.count > 1 then
+        if block.by_limit == true and block.count > 1 then
           ingredient.limit_count = ingredient.count / block.count
         end
         if block.by_product == false and recipe.contraint ~= nil and recipe.contraint.name == ingredient.name then
