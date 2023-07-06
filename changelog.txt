@@ -5,6 +5,7 @@ Date: 2023-07-06
     - Fixed crash while applying migration helmod_0.12.16.lua
     - Fixed crash in onConfigurationChanged for scenario edit
     - Fixed assembly limitation display turn off in logistic row and tooltip
+    - Fixed linked matrix solved line with extra outputs doesn't automatically update #464
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.16
 Date: 2023-06-16
