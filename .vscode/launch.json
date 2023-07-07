@@ -7,14 +7,12 @@
         {
             "type": "factoriomod",
             "request": "launch",
-            "name": "Factorio Mod Debug",
-            "factorioPath": "E:/Perso/Factorio_Test/Factorio_1.1.x/bin/x64/factorio.exe"
+            "name": "Factorio Mod Debug"
         },
         {
             "type": "factoriomod",
             "request": "launch",
             "name": "Factorio Mod Debug (Settings & Data)",
-            "factorioPath": "",
             "hookSettings": true,
             "hookData": true
         },
@@ -22,7 +20,6 @@
             "type": "factoriomod",
             "request": "launch",
             "name": "Factorio Mod Debug (Profile)",
-            "factorioPath": "",
             "hookMode": "profile"
         }
     ]

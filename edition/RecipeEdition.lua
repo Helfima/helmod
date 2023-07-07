@@ -165,12 +165,24 @@ function RecipeEdition:getBeaconTablePanel()
   table_panel.vertical_centering = false
   local info_panel = GuiElement.add(table_panel, GuiFlowV(info_name))
   info_panel.style.minimal_width = 250
-  GuiElement.add(info_panel, GuiLabel("beacon_label"):caption({"helmod_common.beacon"}):style("helmod_label_title_frame"))
   
   local module_panel = GuiElement.add(table_panel, GuiFlowV(module_name))
 
   module_panel.style.minimal_width = 300
   return info_panel, module_panel
+end
+
+-------------------------------------------------------------------------------
+---Get or create beacon selection panel
+---@return LuaGuiElement
+function RecipeEdition:getBeaconSelectionPanel()
+  local info_panel, module_panel = self:getBeaconTablePanel()
+  local selection_name = "beacon_selection"
+  if info_panel[selection_name] ~= nil and info_panel[selection_name].valid then
+    return info_panel[selection_name]
+  end
+  local selection_panel = GuiElement.add(info_panel, GuiFlowV(selection_name))
+  return selection_panel
 end
 
 -------------------------------------------------------------------------------
@@ -374,6 +386,28 @@ function RecipeEdition:onEvent(event)
       Controller:send("on_gui_refresh", event)
     end
     
+    if event.action == "beacon-select" then
+      User.setParameter("current_beacon_selection", tonumber(event.item4))
+      self:update(event)
+    end
+
+    if event.action == "beacon-add" then
+      if recipe.beacons == nil then recipe.beacons = {} end
+      local new_beacon = Model.newBeacon()
+      table.insert(recipe.beacons, new_beacon)
+      User.setParameter("current_beacon_selection", #recipe.beacons)
+      self:update(event)
+    end
+
+    if event.action == "beacon-remove" then
+      local current_key = User.getParameter("current_beacon_selection") or 1
+      if #recipe.beacons > 1 then
+        table.remove(recipe.beacons, current_key)
+      end
+      User.setParameter("current_beacon_selection", #recipe.beacons)
+      self:update(event)
+    end
+
     if event.action == "beacon-tool" then
       if event.item4 == "default" then
         User.setDefaultBeacon(recipe)
@@ -518,6 +552,7 @@ function RecipeEdition:onUpdate(event)
       self:updateFactoryInfo(event)
       self:updateFactoryModulesActive(event)
       self:updateFactoryModules(event)
+      self:updateBeaconSelection(event)
       self:updateBeaconInfoTool(event)
       self:updateBeaconInfo(event)
       self:updateBeaconModulesActive(event)
@@ -978,6 +1013,37 @@ function RecipeEdition:updateBeaconInfo(event)
   end
 end
 
+---Update beacon tool
+---@param event LuaEvent
+function RecipeEdition:updateBeaconSelection(event)
+  local selection_panel = self:getBeaconSelectionPanel()
+  local model, block, recipe = self:getParameterObjects()
+  
+  local tool_panel = GuiElement.add(selection_panel, GuiFlowH("tool1"))
+  tool_panel.style.horizontal_spacing = 5
+  
+  GuiElement.add(tool_panel, GuiLabel("beacon_label"):caption({"helmod_common.beacon"}):style("helmod_label_title_frame"))
+  if recipe ~= nil then
+    local selection_panel = GuiElement.add(tool_panel, GuiFlowH("selections"))
+    selection_panel.style.horizontal_spacing = 2
+    selection_panel.style.horizontally_stretchable = true
+    selection_panel.style.horizontal_align = "right"
+    selection_panel.style.right_margin = 10
+
+    local beacons = recipe.beacons or {recipe.beacon}
+    local current_beacon_selection = User.getParameter("current_beacon_selection") or 1
+    for key, beacon in pairs(beacons) do
+      local style = "helmod_button_menu_sm_bold"
+      if current_beacon_selection == key then
+        style = "helmod_button_menu_sm_bold_selected"
+      end
+      GuiElement.add(selection_panel, GuiButton(self.classname, "beacon-select", model.id, block.id, recipe.id, key):caption(key):style(style))
+    end
+
+    GuiElement.add(selection_panel, GuiButton(self.classname, "beacon-add", model.id, block.id, recipe.id):sprite("menu", defines.sprites.add.black, defines.sprites.add.black):style("helmod_button_menu_sm"))
+    GuiElement.add(selection_panel, GuiButton(self.classname, "beacon-remove", model.id, block.id, recipe.id):sprite("menu", defines.sprites.remove.black, defines.sprites.remove.black):style("helmod_button_menu_sm"))
+  end
+end
 -------------------------------------------------------------------------------
 ---Update beacon tool
 ---@param event LuaEvent
@@ -985,7 +1051,9 @@ function RecipeEdition:updateBeaconInfoTool(event)
   local tool_panel, detail_panel = self:getBeaconInfoPanel()
   local model, block, recipe = self:getParameterObjects()
   if recipe ~= nil then
-    local beacon = recipe.beacon
+    local beacons = recipe.beacons or {recipe.beacon}
+    local current_beacon_selection = User.getParameter("current_beacon_selection") or 1
+    local beacon = beacons[current_beacon_selection]
 
     tool_panel.clear()
 
@@ -1032,7 +1100,9 @@ function RecipeEdition:updateBeaconModulesActive(event)
   local tool_panel, module_panel = self:getBeaconModulePanel()
   local model, block, recipe = self:getParameterObjects()
   if recipe ~= nil then
-    local beacon = recipe.beacon
+    local beacons = recipe.beacons or {recipe.beacon}
+    local current_beacon_selection = User.getParameter("current_beacon_selection") or 1
+    local beacon = beacons[current_beacon_selection]
 
     tool_panel.clear()
     GuiElement.add(tool_panel, GuiLabel("module_label"):caption({"helmod_recipe-edition-panel.current-modules"}):style("helmod_label_title_frame"))
