@@ -241,7 +241,7 @@ function ModelCompute.prepareBlock(block)
         for i, block_product in pairs(block_products) do
             local product_key = Product(block_product):getTableKey()
             ---recopie la valeur input
-            if block.by_factory ~= true and block.products[product_key] ~= nil then
+            if block.by_factory ~= true and block.products ~= nil and block.products[product_key] ~= nil then
                 block_product.input = block.products[product_key].input
             end
             ---pose le status
@@ -255,7 +255,7 @@ function ModelCompute.prepareBlock(block)
         for i, block_ingredient in pairs(block_ingredients) do
             local ingredient_key = Product(block_ingredient):getTableKey()
             ---recopie la valeur input
-            if block.by_factory ~= true and block.ingredients[ingredient_key] ~= nil then
+            if block.by_factory ~= true and block.ingredients ~= nil and block.ingredients[ingredient_key] ~= nil then
                 block_ingredient.input = block.ingredients[ingredient_key].input
             end
             ---pose le status
