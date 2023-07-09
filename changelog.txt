@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.12.18
+Date: 2023-07-09
+  Bugfixes:
+    - Fixed error ModelCompute.lua:244 after changer execution order of ModelCompute.prepareBlock
+---------------------------------------------------------------------------------------------------
 Version: 0.12.17
 Date: 2023-07-06
   Bugfixes:
