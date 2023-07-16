@@ -66,7 +66,7 @@ end
 ---Get display sizes
 ---@return number, number
 function Player.getDisplaySizes()
-  if Lua_player == nil then return 800,600 end
+  if Lua_player == nil or not Lua_player.valid then return 800,600 end
   local display_resolution = Lua_player.display_resolution
   local display_scale = Lua_player.display_scale
   return display_resolution.width/display_scale, display_resolution.height/display_scale
@@ -819,14 +819,16 @@ function Player.buildResourceRecipe(entity_prototype)
   recipe.group = {name="helmod", order="zzzz"}
   recipe.subgroup = {name="helmod-resource", order="aaaa"}
   recipe.hidden = false
-  if prototype and prototype.flags ~= nil then
-    recipe.hidden = prototype.flags["hidden"] or false
+  if prototype then
+    if prototype.flags ~= nil then
+      recipe.hidden = prototype.flags["hidden"] or false
+    end
+    recipe.localised_description = prototype.localised_description
+    recipe.localised_name = prototype.localised_name
+    recipe.name = prototype.name
   end
   recipe.ingredients = ingredients
   recipe.products = entity_prototype:getMineableMiningProducts()
-  recipe.localised_description = prototype.localised_description
-  recipe.localised_name = prototype.localised_name
-  recipe.name = prototype.name
   recipe.prototype = {}
   recipe.valid = true
 
