@@ -422,17 +422,20 @@ function Player.checkFactoryLimitationModule(module, lua_recipe)
   local check_not_bypass = true
   local prototype = RecipePrototype(lua_recipe)
   local category = prototype:getCategory()
-  if category == "rocket-building" and lua_recipe.name ~= "rocket-part" then
-    local rocket_recipe = RecipePrototype("rocket-part")
+  local rocket_part_recipe = Player.getRocketPartRecipe(lua_recipe.factory)
+  if category == rocket_part_recipe.category and lua_recipe.name ~= rocket_part_recipe.name then
+    local rocket_recipe = RecipePrototype(rocket_part_recipe.name)
     if rocket_recipe.lua_prototype ~= nil then
-      rocket_recipe.name = "rocket-part"
+      rocket_recipe.name = rocket_part_recipe.name
       rocket_recipe.factory = lua_recipe.factory
       allowed = Player.checkFactoryLimitationModule(module, rocket_recipe)
       return allowed
     end
     return true
   end
-  if rules_excluded[category] == nil then category = "standard" end
+  if rules_excluded[category] == nil then
+    category = "standard"
+  end
   check_not_bypass = Player.checkRules(check_not_bypass, rules_excluded, category, EntityPrototype(factory.name):native(), false)
   if table.size(module.limitations) > 0 and check_not_bypass and model_filter_factory_module == true then
     allowed = false
@@ -1026,6 +1029,34 @@ function Player.buildFluidRecipe(fluid, ingredients, temperature)
   return recipe
 end
 
+function Player.getRocketPartRecipe(factory)
+  -- Get rocket silos
+  local silos = {}
+  if factory and factory.name then
+    silos = {game.entity_prototypes[factory.name]}
+  else
+    local entity_filters = {
+      {filter = "type", invert = false, mode = "and", type = "rocket-silo"},
+      {filter = "hidden", invert = true, mode = "and"},
+    }
+    silos = game.get_filtered_entity_prototypes(entity_filters)
+  end
+
+  -- Get rocket silo fixed recipes
+  local rocket_part_recipes = {}
+  for _, silo_prototype in pairs(silos) do
+    if silo_prototype.fixed_recipe then
+      table.insert(rocket_part_recipes, game.recipe_prototypes[silo_prototype.fixed_recipe])
+    end
+  end
+  
+  if #rocket_part_recipes == 0 then
+    return nil
+  else
+    return rocket_part_recipes[1]
+  end
+end
+
 function Player.buildRocketRecipe(prototype)
   if prototype == nil then return nil end
   local products = prototype.rocket_launch_products
@@ -1034,7 +1065,7 @@ function Player.buildRocketRecipe(prototype)
   local stack_size = item_prototype:stackSize()
   table.insert(ingredients, {name=prototype.name, type="item", amount=1, constant=true})
   local recipe = {}
-  recipe.category = "rocket-building"
+  recipe.category = Player.getRocketPartRecipe().category
   recipe.enabled = true
   recipe.energy = 1
   recipe.force = {}
@@ -1062,7 +1093,7 @@ end
 function Player.getRocketRecipes()
   local recipes = {}
   
-  if Player.getRecipe("rocket-part") ~= nil and Player.getRecipe("rocket-silo") ~= nil then
+  if Player.getRocketPartRecipe() ~= nil then
     for key, item_prototype in pairs(Player.getItemPrototypes()) do
       if item_prototype.rocket_launch_products ~= nil and table.size(item_prototype.rocket_launch_products) > 0 then
         local recipe = Player.buildRocketRecipe(item_prototype)

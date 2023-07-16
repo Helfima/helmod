@@ -3,6 +3,7 @@ Version: 0.12.19
 Date: ???
   Bugfixes:
     - Fixed blocks not linking correctly when in ingredient input mode #467
+    - Fixed error with Nullius rocket recipes #468
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.18
 Date: 2023-07-09
