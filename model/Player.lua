@@ -423,7 +423,7 @@ function Player.checkFactoryLimitationModule(module, lua_recipe)
   local prototype = RecipePrototype(lua_recipe)
   local category = prototype:getCategory()
   local rocket_part_recipe = Player.getRocketPartRecipe(lua_recipe.factory)
-  if category == rocket_part_recipe.category and lua_recipe.name ~= rocket_part_recipe.name then
+  if rocket_part_recipe and category == rocket_part_recipe.category and lua_recipe.name ~= rocket_part_recipe.name then
     local rocket_recipe = RecipePrototype(rocket_part_recipe.name)
     if rocket_recipe.lua_prototype ~= nil then
       rocket_recipe.name = rocket_part_recipe.name
