@@ -552,6 +552,7 @@ function RecipeEdition:onUpdate(event)
       self:updateFactoryInfo(event)
       self:updateFactoryModulesActive(event)
       self:updateFactoryModules(event)
+      
       self:updateBeaconSelection(event)
       self:updateBeaconInfoTool(event)
       self:updateBeaconInfo(event)
@@ -965,7 +966,7 @@ function RecipeEdition:updateBeaconInfo(event)
   local tool_panel, detail_panel = self:getBeaconInfoPanel()
   local model, block, recipe = self:getParameterObjects()
   if recipe ~= nil then
-    local beacon = recipe.beacon
+    local beacon = ModelBuilder.getCurrentBeacon(recipe)
     local beacon_prototype = EntityPrototype(beacon)
 
     detail_panel.clear()
@@ -1030,9 +1031,9 @@ function RecipeEdition:updateBeaconSelection(event)
     selection_panel.style.horizontal_align = "right"
     selection_panel.style.right_margin = 10
 
-    local beacons = recipe.beacons or {recipe.beacon}
+    local beacon = ModelBuilder.getCurrentBeacon(recipe)
     local current_beacon_selection = User.getParameter("current_beacon_selection") or 1
-    for key, beacon in pairs(beacons) do
+    for key, beacon in pairs(recipe.beacons) do
       local style = "helmod_button_menu_sm_bold"
       if current_beacon_selection == key then
         style = "helmod_button_menu_sm_bold_selected"
@@ -1044,6 +1045,7 @@ function RecipeEdition:updateBeaconSelection(event)
     GuiElement.add(selection_panel, GuiButton(self.classname, "beacon-remove", model.id, block.id, recipe.id):sprite("menu", defines.sprites.remove.black, defines.sprites.remove.black):style("helmod_button_menu_sm"))
   end
 end
+
 -------------------------------------------------------------------------------
 ---Update beacon tool
 ---@param event LuaEvent
@@ -1051,9 +1053,7 @@ function RecipeEdition:updateBeaconInfoTool(event)
   local tool_panel, detail_panel = self:getBeaconInfoPanel()
   local model, block, recipe = self:getParameterObjects()
   if recipe ~= nil then
-    local beacons = recipe.beacons or {recipe.beacon}
-    local current_beacon_selection = User.getParameter("current_beacon_selection") or 1
-    local beacon = beacons[current_beacon_selection]
+    local beacon = ModelBuilder.getCurrentBeacon(recipe)
 
     tool_panel.clear()
 

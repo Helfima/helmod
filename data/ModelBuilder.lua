@@ -802,6 +802,32 @@ function ModelBuilder.appendModuleModel(factory, module_name, module_value)
 end
 
 -------------------------------------------------------------------------------
+---Return current beacon if not exist initialise
+---@param recipe table
+---@return table
+function ModelBuilder.getCurrentBeacon(recipe)
+  if recipe.beacons == nil then
+    recipe.beacons = {}
+    if recipe.beacon ~= nil then
+      table.insert(recipe.beacons, recipe.beacon)
+    else
+      local new_beacon = Model.newBeacon()
+      table.insert(recipe.beacons, new_beacon)
+    end
+  end
+  local beacons = recipe.beacons
+  local current_beacon_selection = User.getParameter("current_beacon_selection") or 1
+  local beacon = nil
+  if #beacons >= current_beacon_selection then
+    beacon = beacons[current_beacon_selection]
+  else
+    User.setParameter("current_beacon_selection", 1)
+    beacon = beacons[1]
+  end
+  return beacon
+end
+
+-------------------------------------------------------------------------------
 ---Update a beacon
 ---@param recipe table
 ---@param options table
