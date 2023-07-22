@@ -1,6 +1,9 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.19
 Date: ???
+  Changes:
+    - Added rules to hide Transport Drones depots #470
+    - Any recipe with no machines available to craft it will be considered locked #470
   Bugfixes:
     - Fixed blocks not linking correctly when in ingredient input mode #467
     - Fixed hidden machines showing when editing a recipe #466
