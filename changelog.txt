@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.19
-Date: ???
+Date: 2023-07-30
   Changes:
     - Added rules to hide Transport Drones depots #470
     - Any recipe with no machines available to craft it will be considered locked #470
