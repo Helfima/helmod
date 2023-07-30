@@ -202,20 +202,38 @@ end
 ---
 function Controller:bindController(player)
   if player ~= nil then
-    local main_icon_version = 1
     local lua_gui_element = Player.getGui("top")
-    if lua_gui_element["helmod_menu-main"] ~= nil then lua_gui_element["helmod_menu-main"].destroy() end
-    if lua_gui_element["helmod_planner-command"] ~= nil then lua_gui_element["helmod_planner-command"].destroy() end
-
-    lua_gui_element = ModGui.get_button_flow(player)
-    if not(User.getModSetting("display_main_icon")) or User.getParameter("main_icon_version") ~= main_icon_version then
-      if lua_gui_element["helmod_planner-command"] ~= nil then lua_gui_element["helmod_planner-command"].destroy() end
-      User.setParameter("main_icon_version", main_icon_version)
+    if lua_gui_element["helmod_planner-command"] ~= nil then
+      lua_gui_element["helmod_planner-command"].destroy()
     end
-    if lua_gui_element ~= nil and lua_gui_element["helmod_planner-command"] == nil and User.getModSetting("display_main_icon") then
-      local gui_button = GuiElement.add(lua_gui_element, GuiButton("helmod_planner-command"):sprite("menu", defines.sprites.calculator.white, defines.sprites.calculator.black):style("helmod_button_menu_dark"):tooltip({"helmod_planner-command"}))
-      gui_button.style.width = 37
-      gui_button.style.height = 37
+
+    -- Destroy gui button
+    if lua_gui_element["helmod_planner-command"] ~= nil then
+      lua_gui_element["helmod_planner-command"].destroy()
+    end
+
+    local flow = lua_gui_element.mod_gui_button_flow or (lua_gui_element.mod_gui_top_frame and lua_gui_element.mod_gui_top_frame.mod_gui_inner_frame)
+
+    if flow and flow["helmod_planner-command"] then
+      flow["helmod_planner-command"].destroy()
+      -- Remove empty frame if we're the only thing there, remove the parent frame if we just removed the only child
+      if #flow.children_names == 0 then
+        local parent = flow.parent
+        flow.destroy()
+        if parent and parent.name ~= "top" and #parent.children_names == 0 then
+          parent.destroy()
+        end
+      end
+    end
+
+    -- Create gui button
+    if User.getModSetting("display_main_icon") then
+      lua_gui_element = ModGui.get_button_flow(player)
+      if lua_gui_element ~= nil then
+        local gui_button = GuiElement.add(lua_gui_element, GuiButton("helmod_planner-command"):sprite("menu", defines.sprites.calculator.white, defines.sprites.calculator.black):style("helmod_button_menu_dark"):tooltip({"helmod_planner-command"}))
+        gui_button.style.width = 37
+        gui_button.style.height = 37
+      end
     end
     User.update()
   end

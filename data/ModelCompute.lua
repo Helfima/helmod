@@ -259,7 +259,7 @@ function ModelCompute.prepareBlock(block)
                 block_ingredient.input = block.ingredients[ingredient_key].input
             end
             ---pose le status
-            if block_products[ingredient_key] ~= nil then
+            if block_products[ingredient_key] == nil then
                 block_ingredient.state = 1
             else
                 block_ingredient.state = 0
