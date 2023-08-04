@@ -1079,10 +1079,16 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
   GuiElement.add(cell_factory, gui_cell_factory)
 
   ---col beacon
-  local beacon = recipe.beacon
-  local cell_beacon = GuiElement.add(gui_table, GuiTable("beacon", recipe.id):column(2):style("helmod_table_list"))
-  local gui_cell_beacon = GuiCellFactory(self.classname, "beacon-action", model.id, block.id, recipe.id):element(beacon):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit):controlInfo("crafting-add")
-  GuiElement.add(cell_beacon, gui_cell_beacon)
+  local beacons = recipe.beacons
+  local cell_beacons = GuiElement.add(gui_table, GuiFlowH("beacon", recipe.id))
+  cell_beacons.style.horizontally_stretchable = false
+  cell_beacons.style.horizontal_spacing = 2
+  if beacons ~= nil then
+    for index, beacon in pairs(beacons) do
+      local gui_cell_beacon = GuiCellFactory(self.classname, "beacon-action", model.id, block.id, recipe.id, index):element(beacon):index(index):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit):controlInfo("crafting-add")
+      GuiElement.add(cell_beacons, gui_cell_beacon)
+    end
+  end
 
   for _,order in pairs(Model.getBlockOrder(block)) do
     if order == "products" then

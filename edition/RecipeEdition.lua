@@ -400,9 +400,9 @@ function RecipeEdition:onEvent(event)
     end
 
     if event.action == "beacon-remove" then
-      local current_key = User.getParameter("current_beacon_selection") or 1
+      local current_beacon_selection = User.getParameter("current_beacon_selection") or 1
       if #recipe.beacons > 1 then
-        table.remove(recipe.beacons, current_key)
+        table.remove(recipe.beacons, current_beacon_selection)
       end
       User.setParameter("current_beacon_selection", #recipe.beacons)
       self:update(event)
@@ -441,7 +441,8 @@ function RecipeEdition:onEvent(event)
         ModelCompute.update(model)
         Controller:send("on_gui_refresh", event)
       elseif event.item4 == "erase" then
-        ModelBuilder.setBeaconModulePriority(recipe, nil)
+        local beacon = ModelBuilder.getCurrentBeacon(recipe)
+        ModelBuilder.setBeaconModulePriority(beacon, recipe.name, nil)
         ModelCompute.update(model)
         Controller:send("on_gui_refresh", event)
       end
@@ -457,7 +458,8 @@ function RecipeEdition:onEvent(event)
       local beacon_module_priority = User.getParameter("beacon_module_priority") or 1
       local priority_modules = User.getParameter("priority_modules")
       if beacon_module_priority ~= nil and priority_modules ~= nil and priority_modules[beacon_module_priority] ~= nil then
-        ModelBuilder.setBeaconModulePriority(recipe, priority_modules[beacon_module_priority])
+        local beacon = ModelBuilder.getCurrentBeacon(recipe)
+        ModelBuilder.setBeaconModulePriority(beacon, recipe.name, priority_modules[beacon_module_priority])
         ModelCompute.update(model)
         self:update(event)
         Controller:send("on_gui_refresh", event)
@@ -1064,7 +1066,7 @@ function RecipeEdition:updateBeaconInfoTool(event)
     local tool_panel1 = GuiElement.add(tool_action_panel, GuiFlowH("tool1"))
     tool_panel1.style.horizontal_spacing = tool_spacing
 
-    local default_beacon = User.getDefaultBeacon(recipe)
+    local default_beacon = User.getCurrentDefaultBeacon(recipe)
     local record_style = "helmod_button_menu_sm"
     if default_beacon ~= nil and default_beacon.name == beacon.name  then record_style = "helmod_button_menu_sm_selected" end
     GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-tool", model.id, block.id, recipe.id, "default"):sprite("menu", defines.sprites.favorite.black, defines.sprites.favorite.black):style(record_style):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.set-default"):element(default_beacon)))
@@ -1100,9 +1102,7 @@ function RecipeEdition:updateBeaconModulesActive(event)
   local tool_panel, module_panel = self:getBeaconModulePanel()
   local model, block, recipe = self:getParameterObjects()
   if recipe ~= nil then
-    local beacons = recipe.beacons or {recipe.beacon}
-    local current_beacon_selection = User.getParameter("current_beacon_selection") or 1
-    local beacon = beacons[current_beacon_selection]
+    local beacon = ModelBuilder.getCurrentBeacon(recipe)
 
     tool_panel.clear()
     GuiElement.add(tool_panel, GuiLabel("module_label"):caption({"helmod_recipe-edition-panel.current-modules"}):style("helmod_label_title_frame"))
@@ -1113,7 +1113,7 @@ function RecipeEdition:updateBeaconModulesActive(event)
     tool_action_panel.style.bottom_padding = 10
     local tool_panel1 = GuiElement.add(tool_action_panel, GuiFlowH("tool1"))
     tool_panel1.style.horizontal_spacing = tool_spacing
-    local default_beacon_module = User.getDefaultBeaconModule(recipe)
+    local default_beacon_module = User.getCurrentDefaultBeaconModules(recipe)
     local record_style = "helmod_button_menu_sm"
     if compare_priority(default_beacon_module, beacon.module_priority) then record_style = "helmod_button_menu_sm_selected" end
     GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool", model.id, block.id, recipe.id, "default"):sprite("menu", defines.sprites.favorite.black, defines.sprites.favorite.black):style(record_style):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.set-default"):element(default_beacon_module)))
@@ -1163,6 +1163,7 @@ end
 ---@param beacon_module_panel LuaGuiElement
 function RecipeEdition:updateBeaconModulesPriority(beacon_module_panel)
   local model, block, recipe = self:getParameterObjects()
+  local beacon = ModelBuilder.getCurrentBeacon(recipe)
   ---module priority
   local beacon_module_priority = User.getParameter("beacon_module_priority") or 1
   local priority_modules = User.getParameter("priority_modules") or {}
@@ -1193,7 +1194,7 @@ function RecipeEdition:updateBeaconModulesPriority(beacon_module_panel)
       local color = nil
       local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name}):withControlInfo(control_info)
       local module = ItemPrototype(element.name)
-      if Player.checkBeaconLimitationModule(module:native(), recipe) == false then
+      if Player.checkBeaconLimitationModule(beacon, recipe.name, module:native()) == false then
         if (module:native().limitation_message_key ~= nil) and (module:native().limitation_message_key ~= "") then
           tooltip = {"item-limitation."..module:native().limitation_message_key}
         else
@@ -1212,6 +1213,7 @@ end
 ---@param beacon_module_panel LuaGuiElement
 function RecipeEdition:updateBeaconModulesSelector(beacon_module_panel)
   local model, block, recipe = self:getParameterObjects()
+  local beacon = ModelBuilder.getCurrentBeacon(recipe)
   
   local module_scroll = GuiElement.add(beacon_module_panel, GuiScroll("module-selector-scroll"))
   module_scroll.style.maximal_height = 118
@@ -1220,7 +1222,7 @@ function RecipeEdition:updateBeaconModulesSelector(beacon_module_panel)
     local control_info = "module-add"
     local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name}):withControlInfo(control_info)
     local module = ItemPrototype(element.name)
-    if Player.checkBeaconLimitationModule(module:native(), recipe) == true then
+    if Player.checkBeaconLimitationModule(beacon, recipe.name, module:native()) == true then
       GuiElement.add(module_table_panel, GuiButtonSelectSprite(self.classname, "beacon-module-select", model.id, block.id, recipe.id):sprite("entity", element.name):tooltip(tooltip))
     end
   end
