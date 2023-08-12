@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.20
 Date: 2023-??-??
+  Changes:
+    - Added Chinese translations (thank you luaotix!) #476
   Bugfixes:
     - Fixed few errors in the reworked solver, not yet actived
 ---------------------------------------------------------------------------------------------------
