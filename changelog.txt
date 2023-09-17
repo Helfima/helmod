@@ -5,6 +5,7 @@ Date: 2023-??-??
     - Added Chinese translations (thank you luaotix!) #476
   Bugfixes:
     - Fixed few errors in the reworked solver, not yet actived
+    - Fixed beacon modules not being selectable for resource recipes with Pyanodon's #478
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.19
 Date: 2023-07-30
