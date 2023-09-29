@@ -187,7 +187,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
         if block.by_limit == true and block.count > 1 then
           product.limit_count = product.count / block.count
         end
-        GuiElement.add(cell_products, GuiCellElementSm(self.classname, "do_noting", "product"):index(index):element(product):tooltip("tooltip.info-product"):color(GuiElement.color_button_none):byLimit(block.by_limit):mask(is_done))
+        GuiElement.add(cell_products, GuiCellElementSm(self.classname,  "pipette-item"):index(index):element(product):tooltip("controls.smart-pipette"):color(GuiElement.color_button_none):byLimit(block.by_limit):mask(is_done))
       end
     end
   end
@@ -212,7 +212,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
         if block.by_limit == true and block.count > 1 then
           ingredient.limit_count = ingredient.count / block.count
         end
-        GuiElement.add(cell_ingredients, GuiCellElementSm(self.classname, "do_noting", "ingredient"):index(index):element(ingredient):tooltip("tooltip.info-product"):color(GuiElement.color_button_add):byLimit(block.by_limit):mask(is_done))
+        GuiElement.add(cell_ingredients, GuiCellElementSm(self.classname,  "pipette-item"):index(index):element(ingredient):tooltip("controls.smart-pipette"):color(GuiElement.color_button_add):byLimit(block.by_limit):mask(is_done))
       end
     end
   end
@@ -250,6 +250,9 @@ function PinPanel:onEvent(event)
   if event.action == "pipette-entity" then
     local recipes = block.recipes
     Player.setSmartTool(recipes[event.item1], event.item2)
+  end
+  if event.action == "pipette-item" then
+    Player.setSmartToolConstantCombinator( event.item1)
   end
   if event.action == "recipe-done" then
     local recipes = block.recipes
