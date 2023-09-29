@@ -161,6 +161,34 @@ function Player.setSmartTool(recipe, type)
 end
 
 -------------------------------------------------------------------------------
+---Set smart tool for an item
+---@param signal string
+---@return any
+function Player.setSmartToolConstantCombinator(signal)
+  if Lua_player == nil or signal == nil then
+    return nil
+  end
+  local entity = {
+    entity_number = 1,
+    name = "constant-combinator",
+    position = {0, 0},
+    control_behavior= {
+      filters = {
+        {
+          signal= {
+            type = "item",
+            name = signal
+          },
+          count= 1,
+          index= 1
+        }
+      }
+    }
+  }
+  Player.getSmartTool({entity})
+end
+
+-------------------------------------------------------------------------------
 ---Is valid sprite path
 ---@param sprite_path string
 ---@return boolean
