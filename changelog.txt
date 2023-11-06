@@ -1,8 +1,9 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.20
-Date: 2023-??-??
+Date: ???
   Changes:
     - Added Chinese translations (thank you luaotix!) #476
+    - Added partial Brazilian Portugese translations (thank you luis das artimanhas!) #484
   Bugfixes:
     - Fixed few errors in the reworked solver, not yet actived
     - Fixed beacon modules not being selectable for resource recipes with Pyanodon's #478
