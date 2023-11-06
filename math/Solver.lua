@@ -467,8 +467,7 @@ function Solver.getBlockMatrix(block)
                         index = index,
                         key = ingredient_key,
                         name = lua_ingredient.name,
-                        type = lua_ingredient
-                            .type,
+                        type = lua_ingredient.type,
                         is_ingredient = true,
                         tooltip = col_name .. "\nIngredient",
                         temperature = lua_ingredient.temperature,

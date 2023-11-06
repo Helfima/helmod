@@ -101,27 +101,12 @@ default_gui["helmod_frame_header"] = {
 
 default_gui["helmod_frame_hidden"] = {
   type = "frame_style",
-  font_color = {r=1, g=1, b=1},
   ---marge interieure
   top_padding  = 0,
   right_padding = 0,
   bottom_padding = 0,
   left_padding = 0,
 
-  ---padding title
-  title_top_padding = 0,
-  title_left_padding = 0,
-  title_bottom_padding = 4,
-  title_right_padding = 0,
-
-  font = "helmod_font_title_frame",
-
-
-  flow_style = {
-    type = "flow_style",
-    horizontal_spacing = 0,
-    vertical_spacing = 0
-  },
   horizontal_flow_style =
   {
     type = "horizontal_flow_style",
@@ -137,7 +122,6 @@ default_gui["helmod_frame_hidden"] = {
   {
     type = "composition",
     filename = "__helmod__/graphics/gui.png",
-    priority = "extra-high-no-scale",
     load_in_minimal_mode = true,
     corner_size = {1, 1},
     position = {0, 0}
@@ -146,15 +130,6 @@ default_gui["helmod_frame_hidden"] = {
 
 default_gui["helmod_frame_default"] = {
   type = "frame_style",
-  font = "helmod_font_title_frame",
-  font_color = {r=1, g=1, b=1},
-
-  ---padding of the title area of the frame, when the frame title
-  ---is empty, the area doesn't exist and these values are not used
-  title_top_padding = 0,
-  title_left_padding = 2,
-  title_bottom_padding = 0,
-  title_right_padding = 2,
   ---padding of the content area of the frame
   top_padding  = 0,
   right_padding = 0,
@@ -165,7 +140,6 @@ default_gui["helmod_frame_default"] = {
     base = {position = {0, 0}, corner_size = 8},
     --shadow = default_shadow
   },
-  flow_style = { type = "flow_style" },
   horizontal_flow_style = { type = "horizontal_flow_style" },
   vertical_flow_style = { type = "vertical_flow_style"  },
   header_flow_style = { type = "horizontal_flow_style", vertical_align = "center", maximal_height = 24},
@@ -336,17 +310,6 @@ default_gui["helmod_frame_panel"] = {
   right_padding = 0,
   bottom_padding = 0,
   left_padding = 0,
-  horizontal_flow =
-  {
-    type = "horizontal_flow_style",
-    horizontal_spacing = 0
-  },
-
-  vertical_flow =
-  {
-    type = "vertical_flow_style",
-    vertical_spacing = 0
-  },
   use_header_filler = false
 }
 
