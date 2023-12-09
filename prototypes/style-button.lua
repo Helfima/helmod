@@ -67,7 +67,6 @@ function compositionIcon(filename, corner_size, position)
   return {
     type = "composition",
     filename = filename,
-    priority = "extra-high-no-scale",
     corner_size = corner_size,
     position = position
   }
@@ -135,13 +134,11 @@ function menuButtonIcon(name, icon_row, icon_col, size, suffix, font, default_fo
     padding = -2,
     width = size,
     height = size,
-    scalable = false,
-    default_graphical_set = {base = {position = {x=icon_col[1],y=icon_row[1]}, border = 0, corner_size = 8, shadow = default_dirt}},
-    hovered_graphical_set = {base = {position = {x=icon_col[2],y=icon_row[2]}, border = 0, corner_size = 8, shadow = default_dirt}},
+    default_graphical_set = {base = {position = {x=icon_col[1],y=icon_row[1]}, corner_size = 8}},
+    hovered_graphical_set = {base = {position = {x=icon_col[2],y=icon_row[2]}, corner_size = 8}},
     hovered_font_color = hovered_font_color,
-    clicked_graphical_set = {base = {position = {x=icon_col[3],y=icon_row[3]}, border = 0, corner_size = 8, shadow = default_dirt}},
-    disabled_graphical_set = {base = {position = {x=icon_col[4],y=icon_row[4]}, border = 0, corner_size = 8, shadow = default_dirt}},
-    stretch_image_to_widget_size = false
+    clicked_graphical_set = {base = {position = {x=icon_col[3],y=icon_row[3]}, corner_size = 8}},
+    disabled_graphical_set = {base = {position = {x=icon_col[4],y=icon_row[4]}, corner_size = 8}},
   }
 end
 
@@ -265,7 +262,6 @@ default_gui["helmod_button_default"] = {
   disabled_font_color={r=0.5, g=0.5, b=0.5},
   disabled_graphical_set = compositionIcon("__core__/graphics/gui.png", corner_size, {0, 16}),
   pie_progress_color = {r=1, g=1, b=1},
-  stretch_image_to_widget_size = true
 }
 
 local corner_size2 = {8, 8}
@@ -332,7 +328,6 @@ default_gui["helmod_button_selected"] = {
   type = "button_style",
   font = "helmod_font_normal",
   default_font_color={r=1, g=1, b=1},
-  align = "center",
   top_padding = 2,
   right_padding = 2,
   bottom_padding = 2,
@@ -394,7 +389,6 @@ default_gui["helmod_button_icon"] = {
   bottom_padding = icon_padding,
   left_padding = icon_padding,
   default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=0,y=60}, {top=0,right=0,bottom=0,left=0}, true),
-  scalable = false
 }
 
 default_gui["helmod_button_slot"] = {
@@ -406,7 +400,6 @@ default_gui["helmod_button_slot"] = {
   right_padding = icon_padding,
   bottom_padding = icon_padding,
   left_padding = icon_padding,
-  scalable = false
 }
 
 for _,style in pairs(style_list) do
@@ -438,7 +431,6 @@ default_gui["helmod_button_icon_xxl"] = {
   bottom_padding = icon_xxl_padding,
   left_padding = icon_xxl_padding,
   default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=0,y=60}, {top=0,right=0,bottom=0,left=0}, true),
-  scalable = false
 }
 
 for _,style in pairs(style_list) do
@@ -470,7 +462,6 @@ default_gui["helmod_button_icon_m"] = {
   bottom_padding = icon_m_padding,
   left_padding = icon_m_padding,
   default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=0,y=60}, {top=0,right=0,bottom=0,left=0}, true),
-  scalable = false
 }
 
 default_gui["helmod_button_slot_m"] = {
@@ -482,7 +473,6 @@ default_gui["helmod_button_slot_m"] = {
   right_padding = icon_m_padding,
   bottom_padding = icon_m_padding,
   left_padding = icon_m_padding,
-  scalable = false
 }
 
 for _,style in pairs(style_list) do
@@ -514,7 +504,6 @@ default_gui["helmod_button_icon_sm"] = {
   bottom_padding = icon_sm_padding,
   left_padding = icon_sm_padding,
   default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=0,y=60}, {top=0,right=0,bottom=0,left=0}, true),
-  scalable = false
 }
 
 default_gui["helmod_button_slot_sm"] = {
@@ -526,7 +515,6 @@ default_gui["helmod_button_slot_sm"] = {
   right_padding = icon_sm_padding,
   bottom_padding = icon_sm_padding,
   left_padding = icon_sm_padding,
-  scalable = false
 }
 
 for _,style in pairs(style_list) do
@@ -665,7 +653,6 @@ default_gui["helmod_button_tab"] = {
   type = "button_style",
   font = "helmod_font_normal",
   default_font_color={r=1, g=1, b=1},
-  align = "center",
   top_padding = 2,
   right_padding = 8,
   bottom_padding = 2,
@@ -686,7 +673,6 @@ default_gui["helmod_button_tab_selected"] = {
   type = "button_style",
   font = "helmod_font_normal",
   default_font_color={r=1, g=1, b=1},
-  align = "center",
   top_padding = 2,
   right_padding = 8,
   bottom_padding = 2,

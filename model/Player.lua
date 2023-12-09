@@ -470,7 +470,7 @@ function Player.checkBeaconLimitationModule(module, lua_recipe)
   local allowed = true
   local model_filter_beacon_module = User.getModGlobalSetting("model_filter_beacon_module")
 
-  if table.size(module.limitations) > 0 and model_filter_beacon_module == true then
+  if table.size(module.limitations) > 0 and model_filter_beacon_module == true and lua_recipe.type ~= "resource" then
     allowed = false
     for _, recipe_name in pairs(module.limitations) do
       if lua_recipe.name == recipe_name then

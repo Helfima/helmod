@@ -452,7 +452,7 @@ function SolverMatrix.get_block_matrix(block)
                     local col_name = ingredient_key .. index
 
                     local col_header = MatrixHeader()
-                    col_header.name = col_name
+                    col_header.sysname = col_name
                     col_header.tooltip = col_name .. "\nIngredient"
                     col_header.index = index
                     col_header.key = ingredient_key
@@ -497,7 +497,7 @@ function SolverMatrix.get_block_matrix(block)
                     col_header.product = lua_product
 
                     local cell_value = row:get_value(col_header) or 0
-                    cell_value = cell_value - lua_product.count * factor
+                    cell_value = cell_value + lua_product.count * factor
                     row:add_value(col_header, cell_value)
 
                     row_valid = true
