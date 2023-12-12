@@ -176,10 +176,10 @@ function ProductEdition:onEvent(event)
     if event.action == "element-select" then
       local belt_speed = EntityPrototype(event.item1):getBeltSpeed()
 
-      local text = string.format("%s*1", belt_speed * Product().belt_ratio)
+      local text = string.format("%s*%s", belt_speed * Product().belt_ratio, model.time)
       GuiElement.setInputText(input_quantity, text)
       input_quantity.focus()
-      input_quantity.select(string.len(text), string.len(text))
+      input_quantity.select(1, string.len(text))
     end
   end
 end

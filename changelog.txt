@@ -2,6 +2,7 @@
 Version: 0.12.20
 Date: ???
   Changes:
+    - Selecting a transport belt to enter an ingredient/product quantity now respects base time #473
     - Added Chinese translations (thank you luaotix!) #476
     - Added partial Brazilian Portugese translations (thank you luis das artimanhas!) #484
   Bugfixes:
