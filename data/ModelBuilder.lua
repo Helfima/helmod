@@ -61,24 +61,18 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
             local default_factory = User.getDefaultFactory(ModelRecipe)
             if default_factory ~= nil then
                 Model.setFactory(ModelRecipe, default_factory.name, default_factory.fuel)
+                ModelBuilder.setFactoryModulePriority(ModelRecipe, default_factory.module_priority)
             else
                 local default_factory_name = Model.getDefaultPrototypeFactory(recipe_prototype)
                 if default_factory_name ~= nil then
                     Model.setFactory(ModelRecipe, default_factory_name)
                 end
             end
-            local default_factory_module = User.getDefaultFactoryModule(ModelRecipe)
-            if default_factory_module ~= nil then
-                ModelBuilder.setFactoryModulePriority(ModelRecipe, default_factory_module)
-            end
 
             local default_beacons = User.getDefaultBeacons(ModelRecipe)
             if default_beacons ~= nil then
                 Model.setBeacons(ModelRecipe, default_beacons)
-                local default_beacons_modules = User.getDefaultBeaconsModules(ModelRecipe)
-                if default_beacons_modules ~= nil then
-                    ModelBuilder.setBeaconsModulesPriority(ModelRecipe, default_beacons_modules)
-                end
+                ModelBuilder.setBeaconsModulesPriority(ModelRecipe, default_beacons.module_priority)
             end
         else
             Model.setFactory(ModelRecipe, recipe_name)
@@ -265,8 +259,8 @@ end
 
 -------------------------------------------------------------------------------
 ---Update a factory
----@param recipe table
----@param fuel string or table: {name = string, temperature = number}
+---@param recipe RecipeData
+---@param fuel string | FuelData
 function ModelBuilder.updateFuelFactory(recipe, fuel)
     if recipe ~= nil and fuel ~= nil then
         recipe.factory.fuel = fuel
@@ -341,7 +335,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Add a module in factory
----@param recipe table
+---@param recipe RecipeData
 ---@param module_name string
 ---@param module_max number
 function ModelBuilder.addFactoryModule(recipe, module_name, module_max)
@@ -356,7 +350,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Set a module in factory
----@param recipe table
+---@param recipe RecipeData
 ---@param module_name string
 ---@param module_value number
 ---@return boolean
@@ -385,7 +379,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Set a module priority in factory
----@param recipe table
+---@param recipe RecipeData
 ---@param module_priority table
 function ModelBuilder.setFactoryModulePriority(recipe, module_priority)
     if recipe ~= nil then
@@ -412,7 +406,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Apply a module priority in factory
----@param recipe table
+---@param recipe RecipeData
 function ModelBuilder.applyFactoryModulePriority(recipe)
     if recipe ~= nil then
         local module_priority = recipe.factory.module_priority
@@ -479,12 +473,10 @@ end
 -------------------------------------------------------------------------------
 ---Set factory block
 ---@param block table
----@param current_recipe table
+---@param current_recipe RecipeData
 function ModelBuilder.setFactoryBlock(block, current_recipe)
     if current_recipe ~= nil then
-        local default_factory_mode = User.getParameter("default_factory_mode")
         local factory_prototype = EntityPrototype(current_recipe.factory.name)
-        local categories = factory_prototype:getCraftingCategories()
         local factory_ingredient_count = factory_prototype:getIngredientCount()
         for _, recipe in pairs(block.recipes) do
             local prototype_recipe = RecipePrototype(recipe)
@@ -492,11 +484,9 @@ function ModelBuilder.setFactoryBlock(block, current_recipe)
             --- check ingredient limitation
             if factory_ingredient_count < recipe_ingredient_count then
                 -- Skip
-            elseif (default_factory_mode ~= "category" and categories[prototype_recipe:getCategory()]) or prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
+            elseif prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
                 Model.setFactory(recipe, current_recipe.factory.name, current_recipe.factory.fuel)
-                if User.getParameter("default_factory_with_module") == true then
-                    ModelBuilder.setFactoryModulePriority(recipe, current_recipe.factory.module_priority)
-                end
+                ModelBuilder.setFactoryModulePriority(recipe, current_recipe.factory.module_priority)
             end
         end
     end
@@ -505,7 +495,7 @@ end
 -------------------------------------------------------------------------------
 ---Set factory line
 ---@param model table
----@param current_recipe table
+---@param current_recipe RecipeData
 function ModelBuilder.setFactoryLine(model, current_recipe)
     if current_recipe ~= nil then
         for _, block in pairs(model.blocks) do
@@ -517,13 +507,12 @@ end
 -------------------------------------------------------------------------------
 ---Set factory module block
 ---@param block table
----@param current_recipe table
+---@param current_recipe RecipeData
 function ModelBuilder.setFactoryModuleBlock(block, current_recipe)
     if current_recipe ~= nil then
-        local default_factory_mode = User.getParameter("default_factory_mode")
         for key, recipe in pairs(block.recipes) do
             local prototype_recipe = RecipePrototype(recipe)
-            if default_factory_mode ~= "category" or prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
+            if prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
                 ModelBuilder.setFactoryModulePriority(recipe, current_recipe.factory.module_priority)
             end
         end
@@ -533,7 +522,7 @@ end
 -------------------------------------------------------------------------------
 ---Set factory module line
 ---@param model table
----@param current_recipe table
+---@param current_recipe RecipeData
 function ModelBuilder.setFactoryModuleLine(model, current_recipe)
     if current_recipe ~= nil then
         for _, block in pairs(model.blocks) do
@@ -545,17 +534,20 @@ end
 -------------------------------------------------------------------------------
 ---Set beacon block
 ---@param block table
----@param current_recipe table
+---@param current_recipe RecipeData
 function ModelBuilder.setBeaconBlock(block, current_recipe)
     if current_recipe ~= nil then
-        local default_beacon_mode = User.getParameter("default_beacon_mode")
         for key, recipe in pairs(block.recipes) do
-            local prototype_recipe = RecipePrototype(recipe)
-            if default_beacon_mode ~= "category" or prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
-                Model.setBeacon(recipe, current_recipe.beacon.name, current_recipe.beacon.combo,
-                    current_recipe.beacon.per_factory, current_recipe.beacon.per_factory_constant)
-                if User.getParameter("default_beacon_with_module") == true then
-                    ModelBuilder.setBeaconModulePriority(recipe, current_recipe.beacon.module_priority)
+            if recipe ~= current_recipe then
+                local prototype_recipe = RecipePrototype(recipe)
+                if prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
+                    recipe.beacons = {}
+                    if current_recipe.beacons ~= nil then
+                        for key, current_beacon in pairs(current_recipe.beacons) do
+                            local beacon = Model.addBeacon(recipe, current_beacon.name, current_beacon.combo,current_beacon.per_factory, current_beacon.per_factory_constant)
+                            ModelBuilder.setBeaconModulePriority(beacon, current_recipe.name, current_beacon.module_priority)
+                        end
+                    end
                 end
             end
         end
@@ -565,7 +557,7 @@ end
 -------------------------------------------------------------------------------
 ---Set beacon line
 ---@param model table
----@param current_recipe any
+---@param current_recipe RecipeData
 function ModelBuilder.setBeaconLine(model, current_recipe)
     if current_recipe ~= nil then
         for _, block in pairs(model.blocks) do
@@ -577,14 +569,19 @@ end
 -------------------------------------------------------------------------------
 ---Set beacon module block
 ---@param block table
----@param current_recipe table
+---@param current_recipe RecipeData
 function ModelBuilder.setBeaconModuleBlock(block, current_recipe)
     if current_recipe ~= nil then
-        local default_beacon_mode = User.getParameter("default_beacon_mode")
         for key, recipe in pairs(block.recipes) do
-            local prototype_recipe = RecipePrototype(recipe)
-            if default_beacon_mode ~= "category" or prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
-                ModelBuilder.setBeaconModulePriority(recipe, current_recipe.beacon.module_priority)
+            if recipe ~= current_recipe and recipe.beacons ~= nil then
+                local prototype_recipe = RecipePrototype(recipe)
+                if prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory()
+                    and #recipe.beacons == #current_recipe.beacons then
+                    for index, current_beacon in pairs(current_recipe.beacons) do
+                        local beacon = recipe.beacons[index]
+                        ModelBuilder.setBeaconModulePriority(beacon, current_recipe.name, current_beacon.module_priority)
+                    end
+                end
             end
         end
     end
@@ -593,7 +590,7 @@ end
 -------------------------------------------------------------------------------
 ---Set beacon module line
 ---@param model table
----@param current_recipe table
+---@param current_recipe RecipeData
 function ModelBuilder.setBeaconModuleLine(model, current_recipe)
     if current_recipe ~= nil then
         for _, block in pairs(model.blocks) do
@@ -604,7 +601,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Remove a module from factory
----@param recipe table
+---@param recipe RecipeData
 ---@param module_name string
 ---@param module_max number
 function ModelBuilder.removeFactoryModule(recipe, module_name, module_max)
@@ -635,7 +632,7 @@ end
 -------------------------------------------------------------------------------
 ---Remove a production recipe
 ---@param block table
----@param recipe table
+---@param recipe RecipeData
 function ModelBuilder.removeProductionRecipe(block, recipe)
     if block ~= nil and block.recipes[recipe.id] ~= nil then
         block.recipes[recipe.id] = nil
@@ -723,36 +720,17 @@ function ModelBuilder.copyBlock(into_model, into_block, from_model, from_block)
                     into_model.blocks[into_block.id] = into_block
                 end
 
-
                 local recipe_model = Model.newRecipe(into_model, recipe.name, recipe_prototype:getType())
                 recipe_model.index = recipe_index
                 recipe_model.production = recipe.production or 1
-                recipe_model.factory = Model.newFactory(recipe.factory.name)
-                recipe_model.factory.limit = recipe.factory.limit
-                recipe_model.factory.fuel = recipe.factory.fuel
-                recipe_model.factory.input = recipe.factory.input
-                recipe_model.factory.modules = {}
-                if recipe.factory.modules ~= nil then
-                    for name, value in pairs(recipe.factory.modules) do
-                        recipe_model.factory.modules[name] = value
+                recipe_model.factory = ModelBuilder.cloneFactory(recipe.factory)
+                if recipe.beacons ~= nil then
+                    recipe_model.beacons = {}
+                    for _, beacon in pairs(recipe.beacons) do
+                        table.insert(recipe_model.beacons, ModelBuilder.cloneBeacon(beacon))
                     end
                 end
-                if recipe.factory.module_priority ~= nil then
-                    recipe_model.factory.module_priority = table.clone(recipe.factory.module_priority)
-                end
-                recipe_model.beacon = Model.newBeacon(recipe.beacon.name)
-                recipe_model.beacon.combo = recipe.beacon.combo
-                recipe_model.beacon.per_factory = recipe.beacon.per_factory
-                recipe_model.beacon.per_factory_constant = recipe.beacon.per_factory_constant
-                recipe_model.beacon.modules = {}
-                if recipe.beacon.modules ~= nil then
-                    for name, value in pairs(recipe.beacon.modules) do
-                        recipe_model.beacon.modules[name] = value
-                    end
-                end
-                if recipe.beacon.module_priority ~= nil then
-                    recipe_model.beacon.module_priority = table.clone(recipe.beacon.module_priority)
-                end
+
                 if recipe.contraint ~= nil then
                     recipe_model.contraint = table.deepcopy(recipe.contraint)
                 end
@@ -767,6 +745,46 @@ function ModelBuilder.copyBlock(into_model, into_block, from_model, from_block)
             end
         end
     end
+end
+
+---Clone factory
+---@param factory FactoryData
+---@return FactoryData
+function ModelBuilder.cloneFactory(factory)
+    local new_factory = Model.newFactory(factory.name)
+    new_factory.limit = factory.limit
+    new_factory.fuel = factory.fuel
+    new_factory.input = factory.input
+    new_factory.modules = {}
+    if factory.modules ~= nil then
+        for name, value in pairs(factory.modules) do
+            new_factory.modules[name] = value
+        end
+    end
+    if factory.module_priority ~= nil then
+        new_factory.module_priority = table.clone(factory.module_priority)
+    end
+    return new_factory
+end
+
+---Clone beacon
+---@param beacon FactoryData
+---@return FactoryData
+function ModelBuilder.cloneBeacon(beacon)
+    local new_beacon = Model.newBeacon(beacon.name)
+    new_beacon.combo = beacon.combo
+    new_beacon.per_factory = beacon.per_factory
+    new_beacon.per_factory_constant = beacon.per_factory_constant
+    new_beacon.modules = {}
+    if beacon.modules ~= nil then
+        for name, value in pairs(beacon.modules) do
+            new_beacon.modules[name] = value
+        end
+    end
+    if beacon.module_priority ~= nil then
+        new_beacon.module_priority = table.clone(beacon.module_priority)
+    end
+    return new_beacon
 end
 
 -------------------------------------------------------------------------------

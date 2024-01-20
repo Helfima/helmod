@@ -165,24 +165,12 @@ function RecipeEdition:getBeaconTablePanel()
   table_panel.vertical_centering = false
   local info_panel = GuiElement.add(table_panel, GuiFlowV(info_name))
   info_panel.style.minimal_width = 250
-  
+  GuiElement.add(info_panel, GuiLabel("beacon_label"):caption({"helmod_common.beacon"}):style("helmod_label_title_frame"))
+
   local module_panel = GuiElement.add(table_panel, GuiFlowV(module_name))
 
   module_panel.style.minimal_width = 300
   return info_panel, module_panel
-end
-
--------------------------------------------------------------------------------
----Get or create beacon selection panel
----@return LuaGuiElement
-function RecipeEdition:getBeaconSelectionPanel()
-  local info_panel, module_panel = self:getBeaconTablePanel()
-  local selection_name = "beacon_selection"
-  if info_panel[selection_name] ~= nil and info_panel[selection_name].valid then
-    return info_panel[selection_name]
-  end
-  local selection_panel = GuiElement.add(info_panel, GuiFlowV(selection_name))
-  return selection_panel
 end
 
 -------------------------------------------------------------------------------
@@ -327,20 +315,12 @@ function RecipeEdition:onEvent(event)
         ModelBuilder.setFactoryLine(model, recipe)
         ModelCompute.update(model)
         Controller:send("on_gui_refresh", event)
-      elseif event.item4 == "all" then
-        User.setParameter("default_factory_mode", "all")
-      elseif event.item4 == "category" then
-        User.setParameter("default_factory_mode", "category")
-      elseif event.item4 == "module" then
-        User.setParameter("default_factory_with_module", not(User.getParameter("default_factory_with_module")))
       end
       self:update(event)
     end
 
     if event.action == "factory-module-tool" then
-      if event.item4 == "default" then
-        User.setDefaultFactoryModule(recipe)
-      elseif event.item4 == "block" then
+      if event.item4 == "block" then
         ModelBuilder.setFactoryModuleBlock(block, recipe)
         ModelCompute.update(model)
         Controller:send("on_gui_refresh", event)
@@ -410,7 +390,7 @@ function RecipeEdition:onEvent(event)
 
     if event.action == "beacon-tool" then
       if event.item4 == "default" then
-        User.setDefaultBeacon(recipe)
+        User.setDefaultBeacons(recipe)
       elseif event.item4 == "block" then
         ModelBuilder.setBeaconBlock(block, recipe)
         ModelCompute.update(model)
@@ -419,20 +399,12 @@ function RecipeEdition:onEvent(event)
         ModelBuilder.setBeaconLine(model, recipe)
         ModelCompute.update(model)
         Controller:send("on_gui_refresh", event)
-      elseif event.item4 == "all" then
-        User.setParameter("default_beacon_mode", "all")
-      elseif event.item4 == "category" then
-        User.setParameter("default_beacon_mode", "category")
-      elseif event.item4 == "module" then
-        User.setParameter("default_beacon_with_module", not(User.getParameter("default_beacon_with_module")))
       end
       self:update(event)
     end
 
     if event.action == "beacon-module-tool" then
-      if event.item4 == "default" then
-        User.setDefaultBeaconModule(recipe)
-      elseif event.item4 == "block" then
+      if event.item4 == "block" then
         ModelBuilder.setBeaconModuleBlock(block, recipe)
         ModelCompute.update(model)
         Controller:send("on_gui_refresh", event)
@@ -481,7 +453,8 @@ function RecipeEdition:onEvent(event)
     end
     
     if event.action == "beacon-select" then
-      Model.setBeacon(recipe, event.item4)
+      local current_beacon_selection = User.getParameter("current_beacon_selection") or 1
+      Model.setBeacon(recipe, current_beacon_selection, event.item4)
       ModelCompute.update(model)
       self:update(event)
       Controller:send("on_gui_refresh", event)
@@ -555,7 +528,6 @@ function RecipeEdition:onUpdate(event)
       self:updateFactoryModulesActive(event)
       self:updateFactoryModules(event)
       
-      self:updateBeaconSelection(event)
       self:updateBeaconInfoTool(event)
       self:updateBeaconInfo(event)
       self:updateBeaconModulesActive(event)
@@ -635,23 +607,6 @@ function RecipeEdition:updateFactoryInfoTool(event)
     GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool", model.id, block.id, recipe.id, "block"):sprite("menu", defines.sprites.expand_right.black, defines.sprites.expand_right.black):style("helmod_button_menu_sm"):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.apply-block"):element(factory):tooltip("helmod_recipe-edition-panel.current-factory")))
     GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool", model.id, block.id, recipe.id, "line"):sprite("menu", defines.sprites.expand_right_group.black, defines.sprites.expand_right_group.black):style("helmod_button_menu_sm"):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.apply-line"):element(factory):tooltip("helmod_recipe-edition-panel.current-factory")))
 
-    local tool_panel2 = GuiElement.add(tool_action_panel, GuiFlowH("tool2"))
-    tool_panel2.style.horizontal_spacing = tool_spacing
-    local button_style = "helmod_button_menu_sm_bold"
-    local selected_button_style = "helmod_button_menu_sm_bold_selected"
-    local default_factory_mode = User.getParameter("default_factory_mode")
-    local all_button_style = button_style
-    local category_button_style = selected_button_style
-    if default_factory_mode ~= "category" then
-      all_button_style = selected_button_style
-      category_button_style = button_style
-    end
-    GuiElement.add(tool_panel2, GuiButton(self.classname, "factory-tool", model.id, block.id, recipe.id, "all"):caption("A"):style(all_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-all"}))
-    GuiElement.add(tool_panel2, GuiButton(self.classname, "factory-tool", model.id, block.id, recipe.id, "category"):caption("C"):style(category_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-category"}))
-    local default_factory_with_module = User.getParameter("default_factory_with_module")
-    local module_button_style = button_style
-    if default_factory_with_module == true then module_button_style = selected_button_style end
-    GuiElement.add(tool_panel2, GuiButton(self.classname, "factory-tool", model.id, block.id, recipe.id, "module"):caption("M"):style(module_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-module"}))
   end
 end
 
@@ -846,10 +801,6 @@ function RecipeEdition:updateFactoryModulesActive(event)
     tool_action_panel.style.bottom_padding = 10
     local tool_panel1 = GuiElement.add(tool_action_panel, GuiFlowH("tool1"))
     tool_panel1.style.horizontal_spacing = tool_spacing
-    local default_factory_module = User.getDefaultFactoryModule(recipe)
-    local record_style = "helmod_button_menu_sm"
-    if compare_priority(default_factory_module, factory.module_priority) then record_style = "helmod_button_menu_sm_selected" end
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-tool", model.id, block.id, recipe.id, "default"):sprite("menu", defines.sprites.favorite.black, defines.sprites.favorite.black):style(record_style):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.set-default"):element(default_factory_module)))
     GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-tool", model.id, block.id, recipe.id, "block"):sprite("menu", defines.sprites.expand_right.black, defines.sprites.expand_right.black):style("helmod_button_menu_sm"):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.apply-block"):element(factory.module_priority):tooltip("helmod_recipe-edition-panel.current-module")))
     GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-tool", model.id, block.id, recipe.id, "line"):sprite("menu", defines.sprites.expand_right_group.black, defines.sprites.expand_right_group.black):style("helmod_button_menu_sm"):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.apply-line"):element(factory.module_priority):tooltip("helmod_recipe-edition-panel.current-module")))
     GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-module-tool", model.id, block.id, recipe.id, "erase"):sprite("menu", defines.sprites.eraser.black, defines.sprites.eraser.black):style("helmod_button_menu_sm"):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.module-clear"):element(factory.module_priority)))
@@ -1016,38 +967,6 @@ function RecipeEdition:updateBeaconInfo(event)
   end
 end
 
----Update beacon tool
----@param event LuaEvent
-function RecipeEdition:updateBeaconSelection(event)
-  local selection_panel = self:getBeaconSelectionPanel()
-  local model, block, recipe = self:getParameterObjects()
-  
-  local tool_panel = GuiElement.add(selection_panel, GuiFlowH("tool1"))
-  tool_panel.style.horizontal_spacing = 5
-  
-  GuiElement.add(tool_panel, GuiLabel("beacon_label"):caption({"helmod_common.beacon"}):style("helmod_label_title_frame"))
-  if recipe ~= nil then
-    local selection_panel = GuiElement.add(tool_panel, GuiFlowH("selections"))
-    selection_panel.style.horizontal_spacing = 2
-    selection_panel.style.horizontally_stretchable = true
-    selection_panel.style.horizontal_align = "right"
-    selection_panel.style.right_margin = 10
-
-    local beacon = ModelBuilder.getCurrentBeacon(recipe)
-    local current_beacon_selection = User.getParameter("current_beacon_selection") or 1
-    for key, beacon in pairs(recipe.beacons) do
-      local style = "helmod_button_menu_sm_bold"
-      if current_beacon_selection == key then
-        style = "helmod_button_menu_sm_bold_selected"
-      end
-      GuiElement.add(selection_panel, GuiButton(self.classname, "beacon-select", model.id, block.id, recipe.id, key):caption(key):style(style))
-    end
-
-    GuiElement.add(selection_panel, GuiButton(self.classname, "beacon-add", model.id, block.id, recipe.id):sprite("menu", defines.sprites.add.black, defines.sprites.add.black):style("helmod_button_menu_sm"))
-    GuiElement.add(selection_panel, GuiButton(self.classname, "beacon-remove", model.id, block.id, recipe.id):sprite("menu", defines.sprites.remove.black, defines.sprites.remove.black):style("helmod_button_menu_sm"))
-  end
-end
-
 -------------------------------------------------------------------------------
 ---Update beacon tool
 ---@param event LuaEvent
@@ -1066,31 +985,27 @@ function RecipeEdition:updateBeaconInfoTool(event)
     local tool_panel1 = GuiElement.add(tool_action_panel, GuiFlowH("tool1"))
     tool_panel1.style.horizontal_spacing = tool_spacing
 
+    local default_beacons = User.getDefaultBeacons(recipe)
     local default_beacon = User.getCurrentDefaultBeacon(recipe)
     local record_style = "helmod_button_menu_sm"
     if default_beacon ~= nil and default_beacon.name == beacon.name  then record_style = "helmod_button_menu_sm_selected" end
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-tool", model.id, block.id, recipe.id, "default"):sprite("menu", defines.sprites.favorite.black, defines.sprites.favorite.black):style(record_style):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.set-default"):element(default_beacon)))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-tool", model.id, block.id, recipe.id, "block"):sprite("menu", defines.sprites.expand_right.black, defines.sprites.expand_right.black):style("helmod_button_menu_sm"):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.apply-block"):element(beacon):tooltip("helmod_recipe-edition-panel.current-beacon")))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-tool", model.id, block.id, recipe.id, "line"):sprite("menu", defines.sprites.expand_right_group.black, defines.sprites.expand_right_group.black):style("helmod_button_menu_sm"):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.apply-line"):element(beacon):tooltip("helmod_recipe-edition-panel.current-beacon")))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-tool", model.id, block.id, recipe.id, "default"):sprite("menu", defines.sprites.favorite.black, defines.sprites.favorite.black):style(record_style):tooltip(GuiTooltipBeacons("helmod_recipe-edition-panel.set-default"):element(default_beacons)))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-tool", model.id, block.id, recipe.id, "block"):sprite("menu", defines.sprites.expand_right.black, defines.sprites.expand_right.black):style("helmod_button_menu_sm"):tooltip(GuiTooltipBeacons("helmod_recipe-edition-panel.apply-block"):element(recipe.beacons):tooltip("helmod_recipe-edition-panel.current-beacon")))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-tool", model.id, block.id, recipe.id, "line"):sprite("menu", defines.sprites.expand_right_group.black, defines.sprites.expand_right_group.black):style("helmod_button_menu_sm"):tooltip(GuiTooltipBeacons("helmod_recipe-edition-panel.apply-line"):element(recipe.beacons):tooltip("helmod_recipe-edition-panel.current-beacon")))
 
-    local tool_panel2 = GuiElement.add(tool_action_panel, GuiFlowH("tool2"))
-    tool_panel2.style.horizontal_spacing = tool_spacing
-    local button_style = "helmod_button_menu_sm_bold"
-    local selected_button_style = "helmod_button_menu_sm_bold_selected"
-    local default_beacon_mode = User.getParameter("default_beacon_mode")
-    local all_button_style = button_style
-    local category_button_style = selected_button_style
-    if default_beacon_mode ~= "category" then
-      all_button_style = selected_button_style
-      category_button_style = button_style
+    local selection_panel = GuiElement.add(tool_action_panel, GuiFlowH("tool2"))
+    selection_panel.style.horizontal_spacing = tool_spacing
+
+    local current_beacon_selection = User.getParameter("current_beacon_selection") or 1
+    GuiElement.add(selection_panel, GuiButton(self.classname, "beacon-remove", model.id, block.id, recipe.id):sprite("menu", defines.sprites.remove.black, defines.sprites.remove.black):style("helmod_button_menu_sm"))
+    GuiElement.add(selection_panel, GuiButton(self.classname, "beacon-add", model.id, block.id, recipe.id):sprite("menu", defines.sprites.add.black, defines.sprites.add.black):style("helmod_button_menu_sm"))
+    for key, beacon in pairs(recipe.beacons) do
+      local style = "helmod_button_menu_sm_bold"
+      if current_beacon_selection == key then
+        style = "helmod_button_menu_sm_bold_selected"
+      end
+      GuiElement.add(selection_panel, GuiButton(self.classname, "beacon-select", model.id, block.id, recipe.id, key):caption(key):style(style))
     end
-    GuiElement.add(tool_panel2, GuiButton(self.classname, "beacon-tool", model.id, block.id, recipe.id, "all"):caption("A"):style(all_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-all"}))
-    GuiElement.add(tool_panel2, GuiButton(self.classname, "beacon-tool", model.id, block.id, recipe.id, "category"):caption("C"):style(category_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-category"}))
-    local default_beacon_with_module = User.getParameter("default_beacon_with_module")
-    local module_button_style = button_style
-    if default_beacon_with_module == true then module_button_style = selected_button_style end
-    GuiElement.add(tool_panel2, GuiButton(self.classname, "beacon-tool", model.id, block.id, recipe.id, "module"):caption("M"):style(module_button_style):tooltip({"helmod_recipe-edition-panel.apply-option-module"}))
-
   end
 end
 
@@ -1113,12 +1028,8 @@ function RecipeEdition:updateBeaconModulesActive(event)
     tool_action_panel.style.bottom_padding = 10
     local tool_panel1 = GuiElement.add(tool_action_panel, GuiFlowH("tool1"))
     tool_panel1.style.horizontal_spacing = tool_spacing
-    local default_beacon_module = User.getCurrentDefaultBeaconModules(recipe)
-    local record_style = "helmod_button_menu_sm"
-    if compare_priority(default_beacon_module, beacon.module_priority) then record_style = "helmod_button_menu_sm_selected" end
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool", model.id, block.id, recipe.id, "default"):sprite("menu", defines.sprites.favorite.black, defines.sprites.favorite.black):style(record_style):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.set-default"):element(default_beacon_module)))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool", model.id, block.id, recipe.id, "block"):sprite("menu", defines.sprites.expand_right.black, defines.sprites.expand_right.black):style("helmod_button_menu_sm"):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.apply-block"):element(beacon.module_priority):tooltip("helmod_recipe-edition-panel.current-module")))
-    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool", model.id, block.id, recipe.id, "line"):sprite("menu", defines.sprites.expand_right_group.black, defines.sprites.expand_right_group.black):style("helmod_button_menu_sm"):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.apply-line"):element(beacon.module_priority):tooltip("helmod_recipe-edition-panel.current-module")))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool", model.id, block.id, recipe.id, "block"):sprite("menu", defines.sprites.expand_right.black, defines.sprites.expand_right.black):style("helmod_button_menu_sm"):tooltip(GuiTooltipPriorities("helmod_recipe-edition-panel.apply-block"):element(recipe.beacons):tooltip("helmod_recipe-edition-panel.current-module")))
+    GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool", model.id, block.id, recipe.id, "line"):sprite("menu", defines.sprites.expand_right_group.black, defines.sprites.expand_right_group.black):style("helmod_button_menu_sm"):tooltip(GuiTooltipPriorities("helmod_recipe-edition-panel.apply-line"):element(recipe.beacons):tooltip("helmod_recipe-edition-panel.current-module")))
     GuiElement.add(tool_panel1, GuiButton(self.classname, "beacon-module-tool", model.id, block.id, recipe.id, "erase"):sprite("menu", defines.sprites.eraser.black, defines.sprites.eraser.black):style("helmod_button_menu_sm"):tooltip(GuiTooltipPriority("helmod_recipe-edition-panel.module-clear"):element(beacon.module_priority)))
 
     ---actived modules panel

@@ -2,6 +2,9 @@
 ---@field name string
 ---@field value uint
 
+---@class FuelData
+---@field name string
+---@field temperature number
 
 ---@class ModuleEffectsData
 ---@field speed number
@@ -16,6 +19,7 @@
 ---@field count number
 ---@field energy number
 ---@field speed number
+---@field fuel string | FuelData
 ---@field limit number
 ---Dictionnary {[module.name] : int}
 ---@field modules {[string] : uint}

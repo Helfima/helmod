@@ -324,22 +324,25 @@ function ModelCompute.computeModuleEffects(recipe)
         end
     end
     ---effet module beacon
-    local beacon = recipe.beacon
-    if beacon.modules ~= nil then
-        for module, value in pairs(beacon.modules) do
-            local speed_bonus = Player.getModuleBonus(module, "speed")
-            local productivity_bonus = Player.getModuleBonus(module, "productivity")
-            local consumption_bonus = Player.getModuleBonus(module, "consumption")
-            local pollution_bonus = Player.getModuleBonus(module, "pollution")
-            local distribution_effectivity = EntityPrototype(beacon):getDistributionEffectivity()
-            factory.effects.speed = factory.effects.speed + value * speed_bonus * distribution_effectivity * beacon
-            .combo
-            factory.effects.productivity = factory.effects.productivity +
-                value * productivity_bonus * distribution_effectivity * beacon.combo
-            factory.effects.consumption = factory.effects.consumption +
-                value * consumption_bonus * distribution_effectivity * beacon.combo
-            factory.effects.pollution = factory.effects.pollution +
-                value * pollution_bonus * distribution_effectivity * beacon.combo
+    if recipe.beacons ~= nil then
+        for _, beacon in pairs(recipe.beacons) do
+            if beacon.modules ~= nil then
+                for module, value in pairs(beacon.modules) do
+                    local speed_bonus = Player.getModuleBonus(module, "speed")
+                    local productivity_bonus = Player.getModuleBonus(module, "productivity")
+                    local consumption_bonus = Player.getModuleBonus(module, "consumption")
+                    local pollution_bonus = Player.getModuleBonus(module, "pollution")
+                    local distribution_effectivity = EntityPrototype(beacon):getDistributionEffectivity()
+                    factory.effects.speed = factory.effects.speed + value * speed_bonus * distribution_effectivity * beacon
+                    .combo
+                    factory.effects.productivity = factory.effects.productivity +
+                        value * productivity_bonus * distribution_effectivity * beacon.combo
+                    factory.effects.consumption = factory.effects.consumption +
+                        value * consumption_bonus * distribution_effectivity * beacon.combo
+                    factory.effects.pollution = factory.effects.pollution +
+                        value * pollution_bonus * distribution_effectivity * beacon.combo
+                end
+            end
         end
     end
     if recipe.type == "resource" then
@@ -423,16 +426,7 @@ function ModelCompute.computeFactory(recipe)
     local count = recipe.count * recipe.time / (recipe.factory.speed * recipe.base_time)
     if recipe.factory.speed == 0 then count = 0 end
     recipe.factory.count = count
-    if Model.countModulesModel(recipe.beacon) > 0 then
-        local variant = recipe.beacon.per_factory or 0
-        local constant = recipe.beacon.per_factory_constant or 0
-        recipe.beacon.count = count * variant + constant
-    else
-        recipe.beacon.count = 0
-    end
-    local beacon_prototype = EntityPrototype(recipe.beacon)
-    recipe.beacon.energy = beacon_prototype:getEnergyUsage()
-    ---calcul des totaux
+
     if energy_type ~= "electric" then
         recipe.factory.energy_total = 0
     else
@@ -441,15 +435,32 @@ function ModelCompute.computeFactory(recipe)
         recipe.factory.energy_total = math.ceil(recipe.factory.energy_total + (math.ceil(recipe.factory.count) * drain))
         recipe.factory.energy = recipe.factory.energy + drain
     end
-    recipe.factory.pollution_total = recipe.factory.pollution * recipe.factory.count * recipe.base_time
-
-    recipe.beacon.energy_total = math.ceil(recipe.beacon.count * recipe.beacon.energy)
-    recipe.energy_total = recipe.factory.energy_total + recipe.beacon.energy_total
-    recipe.pollution_total = recipe.factory.pollution_total * recipe_prototype:getEmissionsMultiplier()
     ---arrondi des valeurs
     recipe.factory.speed = recipe.factory.speed
     recipe.factory.energy = math.ceil(recipe.factory.energy)
-    recipe.beacon.energy = math.ceil(recipe.beacon.energy)
+
+    local beacons_energy_total = 0
+    if recipe.beacons ~= nil then
+        for _, beacon in pairs(recipe.beacons) do
+            if Model.countModulesModel(beacon) > 0 then
+                local variant = beacon.per_factory or 0
+                local constant = beacon.per_factory_constant or 0
+                beacon.count = count * variant + constant
+            else
+                beacon.count = 0
+            end
+            local beacon_prototype = EntityPrototype(beacon)
+            beacon.energy = beacon_prototype:getEnergyUsage()
+            beacon.energy_total = math.ceil(beacon.count * beacon.energy)
+            beacon.energy = math.ceil(beacon.energy)
+            beacons_energy_total = beacons_energy_total + beacon.energy_total
+        end
+    end
+
+    --- totaux
+    recipe.factory.pollution_total = recipe.factory.pollution * recipe.factory.count * recipe.base_time
+    recipe.pollution_total = recipe.factory.pollution_total * recipe_prototype:getEmissionsMultiplier()
+    recipe.energy_total = recipe.factory.energy_total + beacons_energy_total
 end
 
 -------------------------------------------------------------------------------

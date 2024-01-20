@@ -311,7 +311,7 @@ function Model.newRecipe(model, name, type)
   recipeModel.count = 0
   recipeModel.production = 1
   recipeModel.factory = Model.newFactory()
-  recipeModel.beacon = Model.newBeacon()
+  recipeModel.beacons = {}
 
   return recipeModel
 end
@@ -335,8 +335,6 @@ function Model.newResource(model, name, type, count)
   resourceModel.type = type
   resourceModel.name = name
   resourceModel.count = count
-  resourceModel.factory = Model.newFactory()
-  resourceModel.beacon = Model.newBeacon()
 
   return resourceModel
 end
@@ -355,16 +353,44 @@ end
 ---@param combo number
 ---@param per_factory number
 ---@param per_factory_constant number
-function Model.setBeacon(recipe, name, combo, per_factory, per_factory_constant)
+---@return table
+function Model.addBeacon(recipe, name, combo, per_factory, per_factory_constant)
   if recipe ~= nil then
     local beacon_prototype = EntityPrototype(name)
     if beacon_prototype:native() ~= nil then
-      recipe.beacon.name = name
-      recipe.beacon.combo = combo or User.getPreferenceSetting("beacon_affecting_one")
-      recipe.beacon.per_factory = per_factory or User.getPreferenceSetting("beacon_by_factory")
-      recipe.beacon.per_factory_constant = per_factory_constant or User.getPreferenceSetting("beacon_constant")
-      if Model.countModulesModel(recipe.beacon) >= beacon_prototype:getModuleInventorySize() then
-        recipe.beacon.modules = {}
+      local beacon = {}
+      beacon.name = name
+      beacon.combo = combo or User.getPreferenceSetting("beacon_affecting_one")
+      beacon.per_factory = per_factory or User.getPreferenceSetting("beacon_by_factory")
+      beacon.per_factory_constant = per_factory_constant or User.getPreferenceSetting("beacon_constant")
+      beacon.modules = {}
+      if recipe.beacons == nil then recipe.beacons = {} end
+      table.insert(recipe.beacons, beacon)
+      return beacon
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+---Set the beacon
+---@param recipe table
+---@param index number
+---@param name string
+---@param combo number
+---@param per_factory number
+---@param per_factory_constant number
+function Model.setBeacon(recipe, index, name, combo, per_factory, per_factory_constant)
+  if recipe ~= nil and recipe.beacons ~= nil then
+    local beacon_prototype = EntityPrototype(name)
+    if beacon_prototype:native() ~= nil then
+      local beacon = {}
+      beacon.name = name
+      beacon.combo = combo or User.getPreferenceSetting("beacon_affecting_one")
+      beacon.per_factory = per_factory or User.getPreferenceSetting("beacon_by_factory")
+      beacon.per_factory_constant = per_factory_constant or User.getPreferenceSetting("beacon_constant")
+      beacon.modules = {}
+      if recipe.beacons[index] ~= nil then
+        recipe.beacons[index] = beacon
       end
     end
   end

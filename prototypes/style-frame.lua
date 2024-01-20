@@ -299,7 +299,7 @@ for _,style in pairs(style_element_list) do
       right_padding = 0,
       bottom_padding = 2,
       left_padding = 0,
-      width = 50,
+      minimal_width = 50,
       horizontally_stretchable = "on",
       vertically_stretchable = "off"
     }

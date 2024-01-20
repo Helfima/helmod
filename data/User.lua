@@ -174,34 +174,6 @@ function User.setDefaultFactory(recipe)
 end
 
 -------------------------------------------------------------------------------
----Get default factory module
----@param recipe table
----@return any
-function User.getDefaultFactoryModule(recipe)
-  local default_factory_module = User.getParameter("default_factory_module")
-  local recipe_prototype = RecipePrototype(recipe)
-  local category = recipe_prototype:getCategory()
-  if category ~= nil and default_factory_module ~= nil and default_factory_module[category] ~= nil then
-    return default_factory_module[category]
-  end
-  return nil
-end
-
--------------------------------------------------------------------------------
----Set default factory module
----@param recipe table
-function User.setDefaultFactoryModule(recipe)
-  local default_factory_module = User.getParameter("default_factory_module") or {}
-  local recipe_prototype = RecipePrototype(recipe)
-  local category = recipe_prototype:getCategory()
-  local factory = recipe.factory
-  if category ~= nil then
-    default_factory_module[category] = factory.module_priority
-    User.setParameter("default_factory_module", default_factory_module)
-  end
-end
-
--------------------------------------------------------------------------------
 ---Get default beacons
 ---@param recipe RecipeData
 ---@return any
@@ -233,46 +205,14 @@ function User.setDefaultBeacons(recipe)
   local recipe_prototype = RecipePrototype(recipe)
   local category = recipe_prototype:getCategory()
   local beacons = recipe.beacons
+  local default_category = {}
   if category ~= nil then
-    default_beacons[category] = table.deepcopy(beacons)
+    for _, beacon in pairs(beacons) do
+      local default_beacon = {name = beacon.name, combo = beacon.combo, per_factory = beacon.per_factory, per_factory_constant = beacon.per_factory_constant, module_priority = beacon.module_priority}
+      table.insert(default_category, default_beacon)
+    end
+    default_beacons[category] = default_category
     User.setParameter("default_beacons", default_beacons)
-  end
-end
-
--------------------------------------------------------------------------------
----Get default beacons modules
----@param recipe table
----@return any
-function User.getDefaultBeaconsModules(recipe)
-  local default_beacon_modules = User.getParameter("default_beacons_modules")
-  local recipe_prototype = RecipePrototype(recipe)
-  local category = recipe_prototype:getCategory()
-  if category ~= nil and default_beacon_modules ~= nil and default_beacon_modules[category] ~= nil then
-    return default_beacon_modules[category]
-  end
-  return nil
-end
-
--------------------------------------------------------------------------------
----Get default beacons modules
----@param recipe table
----@return any
-function User.getCurrentDefaultBeaconModules(recipe)
-  local default_beacon_modules = User.getDefaultBeaconsModules(recipe) or {}
-  local current_beacon_selection = User.getParameter("current_beacon_selection") or 1
-  return  default_beacon_modules[current_beacon_selection] or {}
-end
-
--------------------------------------------------------------------------------
----Set default beacons modules
----@param recipe table
-function User.setDefaultBeaconsModules(recipe)
-  local default_beacon_modules = User.getParameter("default_beacon_modules") or {}
-  local recipe_prototype = RecipePrototype(recipe)
-  local category = recipe_prototype:getCategory()
-  if category ~= nil then
-    default_beacon_modules[category] = recipe.beacon.module_priority
-    User.setParameter("default_beacon_modules", default_beacon_modules)
   end
 end
 
