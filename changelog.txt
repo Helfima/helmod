@@ -1,10 +1,13 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.20
 Date: ???
+  Features:
+    - Now we can use few beacons
   Changes:
     - Selecting a transport belt to enter an ingredient/product quantity now respects base time #473
     - Added Chinese translations (thank you luaotix!) #476
     - Added partial Brazilian Portugese translations (thank you luis das artimanhas!) #484
+    - Simpliied propagation menu, now that propagate with module only on the same category of recipe
   Bugfixes:
     - Fixed few errors in the reworked solver, not yet actived
     - Fixed beacon modules not being selectable for resource recipes with Pyanodon's #478
