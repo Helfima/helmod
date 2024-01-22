@@ -461,29 +461,60 @@ end)
 function GuiTooltipFactory:create()
   local tooltip = self._super.create(self)
   if self.m_element then
-    local type = "entity"
-    local prototype = EntityPrototype(self.m_element)
-    table.insert(tooltip, {"", "\n", string.format("[%s=%s]", type, self.m_element.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, prototype:getLocalisedName(), helmod_tag.font.close, helmod_tag.color.close})
-    if self.m_element.combo then
-      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_label.beacon-on-factory"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, self.m_element.combo, helmod_tag.font.close})
-    end
-    if self.m_element.per_factory then
-      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_label.beacon-per-factory"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, self.m_element.per_factory, helmod_tag.font.close})
-    end
-    if self.m_element.per_factory_constant then
-      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_label.beacon-per-factory-constant"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, self.m_element.per_factory_constant, helmod_tag.font.close})
-    end
-    local fuel = prototype:getFluel()
-    if fuel ~= nil then
+    GuiTooltipFactory.AppendFactory(tooltip, self.m_element)
+  end
+  return tooltip
+end
+
+function GuiTooltipFactory.AppendFactory(tooltip, element)
+  local type = "entity"
+  local prototype = EntityPrototype(element)
+  table.insert(tooltip, {"", "\n", string.format("[%s=%s]", type, element.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, prototype:getLocalisedName(), helmod_tag.font.close, helmod_tag.color.close})
+  if element.combo then
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_label.beacon-on-factory"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, element.combo, helmod_tag.font.close})
+  end
+  if element.per_factory then
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_label.beacon-per-factory"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, element.per_factory, helmod_tag.font.close})
+  end
+  if element.per_factory_constant then
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_label.beacon-per-factory-constant"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, element.per_factory_constant, helmod_tag.font.close})
+  end
+  local fuel = prototype:getFluel()
+  if fuel ~= nil then
       if fuel.temperature then
-        table.insert(tooltip, {"", "\n", string.format("[%s=%s] %s °C", fuel.type, fuel.name, fuel.temperature), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close})
+      table.insert(tooltip, {"", "\n", string.format("[%s=%s] %s °C", fuel.type, fuel.name, fuel.temperature), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close})
       else
-        table.insert(tooltip, {"", "\n", string.format("[%s=%s]", fuel.type, fuel.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close})
+      table.insert(tooltip, {"", "\n", string.format("[%s=%s]", fuel.type, fuel.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close})
       end
+  end
+  if element.module_priority then
+      for _, module_priority in pairs(element.module_priority) do
+      local module_prototype = ItemPrototype(module_priority.name)
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", string.format("[%s=%s]", "item", module_priority.name), " ", helmod_tag.font.default_bold, module_priority.value, " x ", helmod_tag.font.close, " ", helmod_tag.color.gold, module_prototype:getLocalisedName(), helmod_tag.color.close})
+      end
+  end
+end
+
+-------------------------------------------------------------------------------
+---@class GuiTooltipBeacons
+GuiTooltipBeacons = newclass(GuiTooltip,function(base,...)
+  GuiTooltip.init(base,...)
+  base.classname = "HMGuiTooltip"
+end)
+
+-------------------------------------------------------------------------------
+---Create tooltip
+---@return table
+function GuiTooltipBeacons:create()
+  local tooltip = self._super.create(self)
+  if self.m_element then
+    for _, beacon in pairs(self.m_element) do
+      GuiTooltipFactory.AppendFactory(tooltip, beacon)
     end
   end
   return tooltip
 end
+
 
 -------------------------------------------------------------------------------
 ---@class GuiTooltipEnergyConsumption
@@ -666,4 +697,36 @@ function GuiTooltipPriority:create()
     end
   end
   return tooltip
+end
+
+-------------------------------------------------------------------------------
+---@class GuiTooltipPriorities
+GuiTooltipPriorities = newclass(GuiTooltip,function(base,...)
+  GuiTooltip.init(base,...)
+  base.classname = "HMGuiTooltip"
+end)
+
+-------------------------------------------------------------------------------
+---Create tooltip
+---@return table
+function GuiTooltipPriorities:create()
+  local tooltip = self._super.create(self)
+  if self.m_element then
+    for i,factory in pairs(self.m_element) do
+      GuiTooltipPriorities.AppendPriority(tooltip, factory)
+    end
+  end
+  return tooltip
+end
+
+function GuiTooltipPriorities.AppendPriority(tooltip, element)
+  local type = "entity"
+  local prototype = EntityPrototype(element)
+  table.insert(tooltip, {"", "\n", string.format("[%s=%s]", type, element.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, prototype:getLocalisedName(), helmod_tag.font.close, helmod_tag.color.close})
+  if element.module_priority then
+      for _, module_priority in pairs(element.module_priority) do
+      local module_prototype = ItemPrototype(module_priority.name)
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", string.format("[%s=%s]", "item", module_priority.name), " ", helmod_tag.font.default_bold, module_priority.value, " x ", helmod_tag.font.close, " ", helmod_tag.color.gold, module_prototype:getLocalisedName(), helmod_tag.color.close})
+      end
+  end
 end

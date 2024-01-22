@@ -245,7 +245,7 @@ end
 ---@param event table
 ---
 function Controller:onTick(event)
-  if Player.native() ~= nil then
+  if Player.native() ~= nil and Player.native().valid then
     local next_event = User.getParameter("next_event")
     if next_event ~= nil then
       if (next_event.event.iteration or 0) < 1000 then
@@ -478,7 +478,6 @@ function Controller:openMainPanel()
     end
     local model, block, recipe = Model.getParameterObjects(parameter_objects)
     event.item1 = model.id
-    ModelCompute.check(model)
     self:send("on_gui_open", event, current_tab)
   end
 end

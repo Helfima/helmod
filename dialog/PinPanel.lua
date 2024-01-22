@@ -219,13 +219,20 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
 
   if not(User.getSetting("pin_panel_column_hide_beacon")) then
     ---col beacon
-    local beacon = recipe.beacon
-    if block.by_limit == true and block.count > 1 then
-      beacon.limit_count = beacon.count / block.count
-    else
-      beacon.limit_count = nil
+    local beacons = recipe.beacons
+    local cell_beacons = GuiElement.add(gui_table, GuiFlowH("beacon", recipe.id))
+    cell_beacons.style.horizontally_stretchable = false
+    cell_beacons.style.horizontal_spacing = 2
+    if beacons ~= nil then
+      for index, beacon in pairs(beacons) do
+        if block.by_limit == true and block.count > 1 then
+          beacon.limit_count = beacon.count / block.count
+        else
+          beacon.limit_count = nil
+        end
+        GuiElement.add(cell_beacons, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "beacon"):index(index):element(beacon):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default):byLimit(block.by_limit):mask(is_done))
+      end
     end
-    GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "beacon"):index(recipe.id):element(beacon):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default):byLimit(block.by_limit):mask(is_done))
   end
 
 end

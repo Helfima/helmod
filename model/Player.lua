@@ -462,18 +462,18 @@ end
 
 -------------------------------------------------------------------------------
 ---Check beacon limitation module
----@param module table
----@param lua_recipe table
+---@param beacon FactoryData
+---@param recipe_name string
+---@param module LuaItemPrototype
 ---@return boolean
-function Player.checkBeaconLimitationModule(module, lua_recipe)
-  local beacon = lua_recipe.beacon
+function Player.checkBeaconLimitationModule(beacon, recipe_name, module)
   local allowed = true
   local model_filter_beacon_module = User.getModGlobalSetting("model_filter_beacon_module")
 
   if table.size(module.limitations) > 0 and model_filter_beacon_module == true and lua_recipe.type ~= "resource" then
     allowed = false
-    for _, recipe_name in pairs(module.limitations) do
-      if lua_recipe.name == recipe_name then
+    for _, module_recipe_name in pairs(module.limitations) do
+      if module_recipe_name == recipe_name then
         allowed = true
       end
     end
