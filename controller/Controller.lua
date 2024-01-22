@@ -460,7 +460,6 @@ function Controller:openMainPanel()
     end
     local model, block, recipe = Model.getParameterObjects(parameter_objects)
     event.item1 = model.id
-    ModelCompute.check(model)
     self:send("on_gui_open", event, current_tab)
   end
 end

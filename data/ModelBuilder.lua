@@ -71,8 +71,10 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
 
             local default_beacons = User.getDefaultBeacons(ModelRecipe)
             if default_beacons ~= nil then
-                Model.setBeacons(ModelRecipe, default_beacons)
-                ModelBuilder.setBeaconsModulesPriority(ModelRecipe, default_beacons.module_priority)
+                for _, default_beacon in pairs(default_beacons) do
+                    local beacon = Model.addBeacon(ModelRecipe, default_beacon.name, default_beacon.combo, default_beacon.per_factory, default_beacon.per_factory_constant)
+                    ModelBuilder.setBeaconModulePriority(beacon, ModelRecipe.name, default_beacon.module_priority)
+                end
             end
         else
             Model.setFactory(ModelRecipe, recipe_name)

@@ -210,7 +210,11 @@ function SolverMatrix:solve(block, debug)
             block.limit_building = nil
             for _, recipe in spairs(recipes, function(t, a, b) return t[b].index > t[a].index end) do
                 recipe.factory.limit_count = nil
-                recipe.beacon.limit_count = nil
+                if recipe.beacons ~= nil then
+                    for _, beacon in pairs(recipe.beacons) do
+                        beacon.limit_count = nil
+                    end
+                end
                 recipe.limit_energy = nil
                 recipe.limit_pollution = nil
             end
@@ -219,7 +223,11 @@ function SolverMatrix:solve(block, debug)
             block.limit_pollution = block.pollution_total / block.count
             for _, recipe in spairs(recipes, function(t, a, b) return t[b].index > t[a].index end) do
                 recipe.factory.limit_count = recipe.factory.count / block.count
-                recipe.beacon.limit_count = recipe.beacon.count / block.count
+                if recipe.beacons ~= nil then
+                    for _, beacon in pairs(recipe.beacons) do
+                        beacon.limit_count = beacon.count / block.count
+                    end
+                end
                 recipe.limit_energy = recipe.energy_total / block.count
                 recipe.limit_pollution = recipe.pollution_total / block.count
             end

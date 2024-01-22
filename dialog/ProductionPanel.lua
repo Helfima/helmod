@@ -1348,7 +1348,6 @@ function ProductionPanel:onEventAccessAll(event, model, block)
   end
 
   if event.action == "change-model" then
-    ModelCompute.check(model)
     Controller:send("on_gui_open", event, self.classname)
   end
   
@@ -1440,8 +1439,9 @@ function ProductionPanel:onEventAccessRead(event, model, block)
   if event.action == "beacon-action" then
     if event.control == true then
       local recipe = block.recipes[event.item3]
-      if recipe ~= nil and recipe.beacon ~= nil then
-        local beacon = recipe.beacon
+      local index = tonumber(event.item4)
+      if recipe ~= nil and recipe.beacons ~= nil and recipe.beacons[index] ~= nil then
+        local beacon = recipe.beacons[index]
         Player.beginCrafting(beacon.name, beacon.count)
       end
     else

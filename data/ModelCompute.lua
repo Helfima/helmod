@@ -511,8 +511,13 @@ function ModelCompute.computeEnergyFactory(recipe)
     recipe.factory.speed = recipe.factory.speed
     recipe.factory.energy = math.ceil(recipe.factory.energy)
 
-    recipe.beacon.energy_total = 0
-    recipe.beacon.energy = 0
+    if recipe.beacons then
+        for _, beacon in pairs(recipe.beacons) do
+            beacon.energy_total = 0
+            beacon.energy = 0
+        end
+    end
+    
     recipe.time = 1
 end
 
@@ -721,113 +726,36 @@ function ModelCompute.computeSummaryFactory(block)
                 end
             end
             ---calcul nombre beacon
-            local beacon = recipe.beacon
-            if block.summary.beacons[beacon.name] == nil then
-                block.summary.beacons[beacon.name] = {
-                    name = beacon.name,
-                    type = "item",
-                    count = 0
-                }
-            end
-            block.summary.beacons[beacon.name].count = block.summary.beacons[beacon.name].count + math.ceil(beacon.count)
-            block.summary.building = block.summary.building + math.ceil(beacon.count)
-            ---calcul nombre de module beacon
-            if beacon.modules ~= nil then
-                for module, value in pairs(beacon.modules) do
-                    if block.summary.modules[module] == nil then
-                        block.summary.modules[module] = {
-                            name = module,
+            local beacons = recipe.beacons
+            if beacons ~= nil then
+                for _, beacon in pairs(beacons) do
+                    if block.summary.beacons[beacon.name] == nil then
+                        block.summary.beacons[beacon.name] = {
+                            name = beacon.name,
                             type = "item",
                             count = 0
                         }
                     end
-                    block.summary.modules[module].count = block.summary.modules[module].count +
-                    value * math.ceil(beacon.count)
-                end
-            end
-        end
-    end
-end
-
--------------------------------------------------------------------------------
----Update model
----@param model table
-function ModelCompute.updateVersion_0_9_3(model)
-    if ModelCompute.versionCompare(model, "0.9.3") then
-        Model.resetRules()
-    end
-end
-
--------------------------------------------------------------------------------
----Update model
----@param model table
-function ModelCompute.updateVersion_0_9_12(model)
-    if ModelCompute.versionCompare(model, "0.9.12") then
-        if model.blocks ~= nil then
-            for _, block in pairs(model.blocks) do
-                for _, element in pairs(block.products) do
-                    if block.input ~= nil and block.input[element.name] ~= nil then
-                        element.input = block.input[element.name]
+                    block.summary.beacons[beacon.name].count = block.summary.beacons[beacon.name].count + math.ceil(beacon.count)
+                    block.summary.building = block.summary.building + math.ceil(beacon.count)
+                    ---calcul nombre de module beacon
+                    if beacon.modules ~= nil then
+                        for module, value in pairs(beacon.modules) do
+                            if block.summary.modules[module] == nil then
+                                block.summary.modules[module] = {
+                                    name = module,
+                                    type = "item",
+                                    count = 0
+                                }
+                            end
+                            block.summary.modules[module].count = block.summary.modules[module].count +
+                            value * math.ceil(beacon.count)
+                        end
                     end
                 end
             end
         end
     end
-end
-
--------------------------------------------------------------------------------
----Update model
----@param model table
-function ModelCompute.updateVersion_0_9_27(model)
-    if ModelCompute.versionCompare(model, "0.9.27") then
-        ModelCompute.update(model)
-    end
-end
-
--------------------------------------------------------------------------------
----Update model
----@param model table
-function ModelCompute.updateVersion_0_9_35(model)
-    if ModelCompute.versionCompare(model, "0.9.35") then
-        if model.blocks ~= nil then
-            for _, block in pairs(model.blocks) do
-                for _, recipe in pairs(block.recipes) do
-                    if recipe.beacon ~= nil then
-                        recipe.beacon.per_factory = Format.round(1 / recipe.beacon.factory, 3)
-                        recipe.beacon.per_factory_constant = 0
-                    end
-                end
-            end
-            ModelCompute.update(model)
-        end
-    end
-end
-
--------------------------------------------------------------------------------
----Update model
----@param model table
-function ModelCompute.check(model)
-    if model ~= nil and (model.version == nil or model.version ~= Model.version) then
-        ModelCompute.updateVersion_0_9_3(model)
-        ModelCompute.updateVersion_0_9_12(model)
-        ModelCompute.updateVersion_0_9_27(model)
-        ModelCompute.updateVersion_0_9_35(model)
-    end
-end
-
--------------------------------------------------------------------------------
----Update model
----@param model table
----@param version string
----@return boolean
-function ModelCompute.versionCompare(model, version)
-    local vm1, vm2, vm3 = string.match(model.version, "([0-9]+)[.]([0-9]+)[.]([0-9]+)")
-    local v1, v2, v3 = string.match(version, "([0-9]+)[.]([0-9]+)[.]([0-9]+)")
-    if tonumber(vm1) <= tonumber(v1) and tonumber(vm2) <= tonumber(v2) and tonumber(vm3) < tonumber(v3) then
-        Player.print("Helmod information: Model is updated to version " .. Model.version)
-        return true
-    end
-    return false
 end
 
 return ModelCompute

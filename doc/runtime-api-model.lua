@@ -30,6 +30,10 @@
 ---@field speed_total number
 ---@field module_priority {[uint] : ModulePriorityData}
 
+---@class BeaconData : FactoryData
+---@field combo number
+---@field per_factory number
+---@field per_factory_constant number
 
 ---@class RecipeData
 ---@field id string
@@ -39,7 +43,7 @@
 ---@field count number
 ---@field production number
 ---@field factory FactoryData
----@field beacons {[uint] : FactoryData}
+---@field beacons {[uint] : BeaconData}
 ---@field time uint
 ---@field energy_total number
 ---@field polution_total number

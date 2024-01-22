@@ -168,7 +168,14 @@ function User.setDefaultFactory(recipe)
   local category = recipe_prototype:getCategory()
   local factory = recipe.factory
   if category ~= nil then
-    default_factory[category] = {name = factory.name, fuel = factory.fuel}
+    local default_factory = {name = factory.name, fuel = factory.fuel}
+    if factory.module_priority ~= nil then
+      default_factory.module_priority = {}
+      for _, priority in pairs(factory.module_priority) do
+        table.insert(default_factory.module_priority, {name = priority.name, value = priority.value})
+      end
+    end
+    default_factory[category] = default_factory
     User.setParameter("default_factory", default_factory)
   end
 end
@@ -176,7 +183,7 @@ end
 -------------------------------------------------------------------------------
 ---Get default beacons
 ---@param recipe RecipeData
----@return any
+---@return {[uint] : BeaconData}
 function User.getDefaultBeacons(recipe)
   local default_beacons = User.getParameter("default_beacons")
   local recipe_prototype = RecipePrototype(recipe)
@@ -208,7 +215,13 @@ function User.setDefaultBeacons(recipe)
   local default_category = {}
   if category ~= nil then
     for _, beacon in pairs(beacons) do
-      local default_beacon = {name = beacon.name, combo = beacon.combo, per_factory = beacon.per_factory, per_factory_constant = beacon.per_factory_constant, module_priority = beacon.module_priority}
+      local default_beacon = {name = beacon.name, combo = beacon.combo, per_factory = beacon.per_factory, per_factory_constant = beacon.per_factory_constant}
+      if beacon.module_priority ~= nil then
+        default_beacon.module_priority = {}
+        for _, priority in pairs(beacon.module_priority) do
+          table.insert(default_beacon.module_priority, {name = priority.name, value = priority.value})
+        end
+      end
       table.insert(default_category, default_beacon)
     end
     default_beacons[category] = default_category
