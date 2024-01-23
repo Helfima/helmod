@@ -414,7 +414,7 @@ function RecipeEdition:onEvent(event)
         Controller:send("on_gui_refresh", event)
       elseif event.item4 == "erase" then
         local beacon = ModelBuilder.getCurrentBeacon(recipe)
-        ModelBuilder.setBeaconModulePriority(beacon, recipe.name, nil)
+        ModelBuilder.setBeaconModulePriority(beacon, recipe, nil)
         ModelCompute.update(model)
         Controller:send("on_gui_refresh", event)
       end
@@ -431,7 +431,7 @@ function RecipeEdition:onEvent(event)
       local priority_modules = User.getParameter("priority_modules")
       if beacon_module_priority ~= nil and priority_modules ~= nil and priority_modules[beacon_module_priority] ~= nil then
         local beacon = ModelBuilder.getCurrentBeacon(recipe)
-        ModelBuilder.setBeaconModulePriority(beacon, recipe.name, priority_modules[beacon_module_priority])
+        ModelBuilder.setBeaconModulePriority(beacon, recipe, priority_modules[beacon_module_priority])
         ModelCompute.update(model)
         self:update(event)
         Controller:send("on_gui_refresh", event)
@@ -439,14 +439,16 @@ function RecipeEdition:onEvent(event)
     end
 
     if event.action == "beacon-module-select" then
-      ModelBuilder.addBeaconModule(recipe, event.item4, event.control)
+      local beacon = ModelBuilder.getCurrentBeacon(recipe)
+      ModelBuilder.addBeaconModule(beacon, recipe, event.item4, event.control)
       ModelCompute.update(model)
       self:update(event)
       Controller:send("on_gui_refresh", event)
     end
     
     if event.action == "beacon-module-remove" then
-      ModelBuilder.removeBeaconModule(recipe, event.item4, event.control)
+      local beacon = ModelBuilder.getCurrentBeacon(recipe)
+      ModelBuilder.removeBeaconModule(beacon, recipe, event.item4, event.control)
       ModelCompute.update(model)
       self:update(event)
       Controller:send("on_gui_refresh", event)
@@ -466,8 +468,8 @@ function RecipeEdition:onEvent(event)
       ---item3 = "combo" or "factory"
       local ok , err = pcall(function()
         options[event.item4] = formula(text) or 0
-
-        ModelBuilder.updateBeacon(recipe, options)
+        local beacon = ModelBuilder.getCurrentBeacon(recipe)
+        ModelBuilder.updateBeacon(beacon, recipe, options)
         ModelCompute.update(model)
         self:updateBeaconInfo(event)
         if display_height >= limit_display_height or User.getParameter("factory_tab") then
@@ -932,7 +934,7 @@ function RecipeEdition:updateBeaconInfo(event)
     local factory_table_panel = GuiElement.add(scroll_panel, GuiTable("beacon-table"):column(5))
     for key, element in pairs(factories) do
       local color = nil
-      if beacon.name == element.name then color = GuiElement.color_button_edit end
+      if beacon ~= nil and beacon.name == element.name then color = GuiElement.color_button_edit end
       local button = GuiElement.add(factory_table_panel, GuiButtonSelectSprite(self.classname, "beacon-select", model.id, block.id, recipe.id):choose("entity", element.name):color(color))
       button.locked = true
     end
@@ -1105,7 +1107,7 @@ function RecipeEdition:updateBeaconModulesPriority(beacon_module_panel)
       local color = nil
       local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name}):withControlInfo(control_info)
       local module = ItemPrototype(element.name)
-      if Player.checkBeaconLimitationModule(beacon, recipe.name, module:native()) == false then
+      if Player.checkBeaconLimitationModule(beacon, recipe, module:native()) == false then
         if (module:native().limitation_message_key ~= nil) and (module:native().limitation_message_key ~= "") then
           tooltip = {"item-limitation."..module:native().limitation_message_key}
         else
@@ -1133,7 +1135,7 @@ function RecipeEdition:updateBeaconModulesSelector(beacon_module_panel)
     local control_info = "module-add"
     local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name}):withControlInfo(control_info)
     local module = ItemPrototype(element.name)
-    if Player.checkBeaconLimitationModule(beacon, recipe.name, module:native()) == true then
+    if Player.checkBeaconLimitationModule(beacon, recipe, module:native()) == true then
       GuiElement.add(module_table_panel, GuiButtonSelectSprite(self.classname, "beacon-module-select", model.id, block.id, recipe.id):sprite("entity", element.name):tooltip(tooltip))
     end
   end

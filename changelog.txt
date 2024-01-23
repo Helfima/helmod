@@ -11,6 +11,8 @@ Date: ???
   Bugfixes:
     - Fixed few errors in the reworked solver, not yet actived
     - Fixed beacon modules not being selectable for resource recipes with Pyanodon's #478
+    - Fixed Error helmod::on_tick after kick player #490
+    - Fixed Matrix solver with omni fuel #415
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.19
 Date: 2023-07-30

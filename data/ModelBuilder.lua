@@ -73,7 +73,7 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
             if default_beacons ~= nil then
                 for _, default_beacon in pairs(default_beacons) do
                     local beacon = Model.addBeacon(ModelRecipe, default_beacon.name, default_beacon.combo, default_beacon.per_factory, default_beacon.per_factory_constant)
-                    ModelBuilder.setBeaconModulePriority(beacon, ModelRecipe.name, default_beacon.module_priority)
+                    ModelBuilder.setBeaconModulePriority(beacon, ModelRecipe, default_beacon.module_priority)
                 end
             end
         else
@@ -439,7 +439,7 @@ function ModelBuilder.setBeaconsModulesPriority(recipe, modules_priority)
         local beacons = recipe.beacons
         for index, beacon in ipairs(beacons) do
             local module_priority = modules_priority[index]
-            ModelBuilder.setBeaconModulePriority(beacon, recipe.name, module_priority)
+            ModelBuilder.setBeaconModulePriority(beacon, recipe, module_priority)
         end
     end
 end
@@ -447,9 +447,9 @@ end
 -------------------------------------------------------------------------------
 ---Set a module priority in beacon
 ---@param beacon FactoryData
----@param recipe_name string
+---@param recipe RecipeData
 ---@param module_priority {[uint] : ModulePriorityData}
-function ModelBuilder.setBeaconModulePriority(beacon, recipe_name, module_priority)
+function ModelBuilder.setBeaconModulePriority(beacon, recipe, module_priority)
     if beacon ~= nil then
         beacon.modules = {}
         if module_priority == nil then
@@ -459,7 +459,7 @@ function ModelBuilder.setBeaconModulePriority(beacon, recipe_name, module_priori
             local first = true
             for _, priority in pairs(module_priority) do
                 local module = ItemPrototype(priority.name)
-                if Player.checkBeaconLimitationModule(beacon, recipe_name, module:native()) == true then
+                if Player.checkBeaconLimitationModule(beacon, recipe, module:native()) == true then
                     if first then
                         ModelBuilder.setModuleModel(beacon, priority.name, priority.value)
                         first = false
@@ -547,7 +547,7 @@ function ModelBuilder.setBeaconBlock(block, current_recipe)
                     if current_recipe.beacons ~= nil then
                         for key, current_beacon in pairs(current_recipe.beacons) do
                             local beacon = Model.addBeacon(recipe, current_beacon.name, current_beacon.combo,current_beacon.per_factory, current_beacon.per_factory_constant)
-                            ModelBuilder.setBeaconModulePriority(beacon, current_recipe.name, current_beacon.module_priority)
+                            ModelBuilder.setBeaconModulePriority(beacon, current_recipe, current_beacon.module_priority)
                         end
                     end
                 end
@@ -581,7 +581,7 @@ function ModelBuilder.setBeaconModuleBlock(block, current_recipe)
                     and #recipe.beacons == #current_recipe.beacons then
                     for index, current_beacon in pairs(current_recipe.beacons) do
                         local beacon = recipe.beacons[index]
-                        ModelBuilder.setBeaconModulePriority(beacon, current_recipe.name, current_beacon.module_priority)
+                        ModelBuilder.setBeaconModulePriority(beacon, current_recipe, current_beacon.module_priority)
                     end
                 end
             end
@@ -791,7 +791,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Set module model
----@param factory table
+---@param factory FactoryData
 ---@param module_name string
 ---@param module_value number
 ---@return boolean
@@ -810,7 +810,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Append module model
----@param factory table
+---@param factory FactoryData
 ---@param module_name string
 ---@param module_value number
 ---@return boolean
@@ -832,10 +832,10 @@ end
 
 -------------------------------------------------------------------------------
 ---Return current beacon if not exist initialise
----@param recipe table
----@return table
+---@param recipe RecipeData
+---@return BeaconData
 function ModelBuilder.getCurrentBeacon(recipe)
-    if recipe.beacons == nil then
+    if recipe.beacons == nil or #recipe.beacons == 0 then
         recipe.beacons = {}
         if recipe.beacon ~= nil then
             table.insert(recipe.beacons, recipe.beacon)
@@ -858,47 +858,50 @@ end
 
 -------------------------------------------------------------------------------
 ---Update a beacon
----@param recipe table
+---@param beacon BeaconData
+---@param recipe RecipeData
 ---@param options table
-function ModelBuilder.updateBeacon(recipe, options)
+function ModelBuilder.updateBeacon(beacon, recipe, options)
     if recipe ~= nil then
         if options.combo ~= nil then
-            recipe.beacon.combo = options.combo
+            beacon.combo = options.combo
         end
         if options.per_factory ~= nil then
-            recipe.beacon.per_factory = options.per_factory
+            beacon.per_factory = options.per_factory
         end
         if options.per_factory_constant ~= nil then
-            recipe.beacon.per_factory_constant = options.per_factory_constant
+            beacon.per_factory_constant = options.per_factory_constant
         end
     end
 end
 
 -------------------------------------------------------------------------------
 ---Add a module in beacon
----@param recipe table
+---@param beacon BeaconData
+---@param recipe RecipeData
 ---@param module_name string
 ---@param module_max number
-function ModelBuilder.addBeaconModule(recipe, module_name, module_max)
+function ModelBuilder.addBeaconModule(beacon, recipe, module_name, module_max)
     local module = ItemPrototype(module_name)
     if recipe ~= nil and module:native() ~= nil then
         if Player.checkFactoryLimitationModule(module:native(), recipe) == true then
-            local module_priority = ModelBuilder.addModulePriority(recipe.beacon, module_name, module_max or false)
-            ModelBuilder.setBeaconModulePriority(recipe, module_priority)
+            local module_priority = ModelBuilder.addModulePriority(beacon, module_name, module_max or false)
+            ModelBuilder.setBeaconModulePriority(beacon, recipe, module_priority)
         end
     end
 end
 
 -------------------------------------------------------------------------------
 ---Remove a module in beacon
----@param recipe table
+---@param beacon BeaconData
+---@param recipe RecipeData
 ---@param module_name string
----@param module_max numberS
-function ModelBuilder.removeBeaconModule(recipe, module_name, module_max)
+---@param module_max number
+function ModelBuilder.removeBeaconModule(beacon, recipe, module_name, module_max)
     local module = ItemPrototype(module_name)
     if recipe ~= nil and module:native() ~= nil then
-        local module_priority = ModelBuilder.removeModulePriority(recipe.beacon, module_name, module_max or false)
-        ModelBuilder.setBeaconModulePriority(recipe, module_priority)
+        local module_priority = ModelBuilder.removeModulePriority(beacon, module_name, module_max or false)
+        ModelBuilder.setBeaconModulePriority(beacon, recipe, module_priority)
     end
 end
 
@@ -925,7 +928,7 @@ end
 ---Update a product
 ---@param block table
 ---@param product_name string
----@param quantity numberS
+---@param quantity number
 function ModelBuilder.updateProduct(block, product_name, quantity)
     if block ~= nil then
         local block_elements = block.products
@@ -990,7 +993,7 @@ end
 -------------------------------------------------------------------------------
 ---Up a production recipe
 ---@param block table
----@param recipe table
+---@param recipe RecipeData
 ---@param step number
 function ModelBuilder.upProductionRecipe(block, recipe, step)
     if block ~= nil and block.recipes ~= nil and recipe ~= nil then
@@ -1009,7 +1012,7 @@ end
 -------------------------------------------------------------------------------
 ---Down a production recipe
 ---@param block table
----@param recipe table
+---@param recipe RecipeData
 ---@param step number
 function ModelBuilder.downProductionRecipe(block, recipe, step)
     if block ~= nil and block.recipes ~= nil and recipe ~= nil then
@@ -1027,7 +1030,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Update recipe contraint
----@param recipe table
+---@param recipe RecipeData
 ---@param contraint table
 function ModelBuilder.updateRecipeContraint(recipe, contraint)
     if recipe ~= nil then
