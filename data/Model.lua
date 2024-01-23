@@ -315,6 +315,7 @@ function Model.newRecipe(model, name, type)
   recipeModel.production = 1
   recipeModel.factory = Model.newFactory()
   recipeModel.beacons = {}
+  table.insert(recipeModel.beacons, Model.newBeacon())
 
   return recipeModel
 end
