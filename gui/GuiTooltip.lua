@@ -315,6 +315,7 @@ function GuiTooltipModel:create()
   local first_block = Model.firstRecipe(element.blocks or {})
   if first_block ~= nil then
     local type = first_block.type
+    if type == nil then type = "entity" end
     if type == "resource" or type == "energy" then type = "entity" end
     if type == "rocket" then type = "item" end
     if type == "recipe-burnt" then type = "recipe" end
@@ -384,11 +385,12 @@ function GuiTooltipElement:create()
   local element = self.m_element
   if element ~= nil then
     local type = element.type
+    if type == nil then type = "entity" end
     if type == "resource" or type == "energy" then type = "entity" end
     if type == "rocket" then type = "item" end
     if type == "recipe-burnt" then type = "recipe" end
     if type == "boiler" then type = "fluid" end
-    local element_icon = string.format("[%s=%s]", type, element.name)
+    local element_icon = GuiElement.getSprite(type, element.name, "[%s=%s]")
     table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=element.name}), helmod_tag.font.close, helmod_tag.color.close})
     ---quantity
     local total_count = Format.formatNumberElement(element.count)
@@ -426,8 +428,9 @@ function GuiTooltipEnergy:create()
   local element = self.m_element
   if element ~= nil then
     local type = element.type
+    if type == nil then type = "entity" end
     if element == "resource" then type = "entity" end
-    local element_icon = string.format("[%s=%s]", type, element.name)
+    local element_icon = GuiElement.getSprite(type, element.name, "[%s=%s]")
     if defines.sprite_tooltips[element.name] ~= nil then
       local sprite = GuiElement.getSprite(defines.sprite_tooltips[element.name])
       element_icon = string.format("[img=%s]", sprite)
@@ -469,7 +472,8 @@ end
 function GuiTooltipFactory.AppendFactory(tooltip, element)
   local type = "entity"
   local prototype = EntityPrototype(element)
-  table.insert(tooltip, {"", "\n", string.format("[%s=%s]", type, element.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, prototype:getLocalisedName(), helmod_tag.font.close, helmod_tag.color.close})
+  local element_sprite = GuiElement.getSprite(type, element.name, "[%s=%s]")
+  table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, prototype:getLocalisedName(), helmod_tag.font.close, helmod_tag.color.close})
   if element.combo then
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_label.beacon-on-factory"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, element.combo, helmod_tag.font.close})
   end
@@ -509,7 +513,9 @@ function GuiTooltipBeacons:create()
   local tooltip = self._super.create(self)
   if self.m_element then
     for _, beacon in pairs(self.m_element) do
-      GuiTooltipFactory.AppendFactory(tooltip, beacon)
+      local beacon_tooltip = {""}
+      table.insert(tooltip, beacon_tooltip)
+      GuiTooltipFactory.AppendFactory(beacon_tooltip, beacon)
     end
   end
   return tooltip

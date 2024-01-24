@@ -230,7 +230,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
         else
           beacon.limit_count = nil
         end
-        GuiElement.add(cell_beacons, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "beacon"):index(index):element(beacon):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default):byLimit(block.by_limit):mask(is_done))
+        GuiElement.add(cell_beacons, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "beacons", index):index(index):element(beacon):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default):byLimit(block.by_limit):mask(is_done))
       end
     end
   end
@@ -256,7 +256,8 @@ function PinPanel:onEvent(event)
 
   if event.action == "pipette-entity" then
     local recipes = block.recipes
-    Player.setSmartTool(recipes[event.item1], event.item2)
+    local index = tonumber(event.item3)
+    Player.setSmartTool(recipes[event.item1], event.item2, index)
   end
   if event.action == "recipe-done" then
     local recipes = block.recipes

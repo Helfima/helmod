@@ -137,12 +137,16 @@ end
 ---Set smart tool
 ---@param recipe table
 ---@param type string
+---@param index number
 ---@return any
-function Player.setSmartTool(recipe, type)  
-  if Lua_player == nil or recipe == nil then
-    return nil
-  end
+function Player.setSmartTool(recipe, type, index)  
+    if Lua_player == nil or recipe == nil then
+      return nil
+    end
     local factory = recipe[type]
+    if index ~= nil then
+      factory = factory[index]
+    end
     local modules = {}
     for name,value in pairs(factory.modules or {}) do
       modules[name] = value
