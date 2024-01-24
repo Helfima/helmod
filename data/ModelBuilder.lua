@@ -674,6 +674,9 @@ end
 ---@param from_model table
 function ModelBuilder.copyModel(into_model, from_model)
     if from_model ~= nil then
+        if from_model.parameters ~= nil then
+            into_model.parameters = table.deepcopy(from_model.parameters)
+        end
         for _, from_block in spairs(from_model.blocks, function(t, a, b) return t[b].index > t[a].index end) do
             ModelBuilder.copyBlock(into_model, nil, from_model, from_block)
         end

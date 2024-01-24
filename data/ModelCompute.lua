@@ -94,6 +94,7 @@ end
 ---@param model table
 function ModelCompute.update(model)
     if model ~= nil and model.blocks ~= nil then
+        Model.appendParameters(model)
         ---calcul les blocks
         local input = {}
         for _, block in spairs(model.blocks, function(t, a, b) return t[b].index > t[a].index end) do
@@ -141,7 +142,8 @@ function ModelCompute.update(model)
 
                 ModelCompute.computeBlockCleanInput(block)
 
-                ModelCompute.computeBlock(block)
+                
+                ModelCompute.computeBlock(block, model.parameters)
 
                 ---consomme les ingredients
                 for _, product in pairs(block.products) do
@@ -273,7 +275,7 @@ end
 -------------------------------------------------------------------------------
 ---Compute production block
 ---@param block table
-function ModelCompute.computeBlock(block)
+function ModelCompute.computeBlock(block, parameters)
     local recipes = block.recipes
     block.power = 0
     block.count = 1
@@ -285,8 +287,8 @@ function ModelCompute.computeBlock(block)
         local debug = User.getModGlobalSetting("debug_solver")
         local selected_solvers = { algebra = SolverAlgebra, simplex = SolverSimplex }
 
-        local solver_selected = User.getParameter("solver_selected") or "normal"
-        if solver_selected ~= "normal" then
+        local solver_selected = User.getParameter("solver_selected") or defines.constant.default_solver
+        if solver_selected ~= defines.constant.solvers.normal then
             selected_solvers = { algebra = SolverMatrixAlgebra, simplex = SolverMatrixSimplex }
         end
         if block.solver == true and block.by_factory ~= true then
@@ -295,7 +297,7 @@ function ModelCompute.computeBlock(block)
             my_solver = selected_solvers.algebra()
         end
 
-        my_solver:solve(block, debug)
+        my_solver:solve(block, parameters, debug)
         
     end
 end
@@ -303,13 +305,20 @@ end
 --------------------------------------------------------------------------------
 ---Compute module effects of factory
 ---@param recipe table
+---@param parameters ParametersData
 ---@return table
-function ModelCompute.computeModuleEffects(recipe)
+function ModelCompute.computeModuleEffects(recipe, parameters)
     local factory = recipe.factory
     factory.effects = { speed = 0, productivity = 0, consumption = 0, pollution = 0 }
+    if parameters ~= nil then
+        factory.effects.speed = parameters.effects.speed
+        factory.effects.productivity = parameters.effects.productivity
+        factory.effects.consumption = parameters.effects.consumption
+        factory.effects.pollution = parameters.effects.pollution
+    end
     factory.cap = { speed = 0, productivity = 0, consumption = 0, pollution = 0 }
     local factory_prototype = EntityPrototype(factory)
-    factory.effects.productivity = factory_prototype:getBaseProductivity()
+    factory.effects.productivity = factory.effects.productivity + factory_prototype:getBaseProductivity()
     ---effet module factory
     if factory.modules ~= nil then
         for module, value in pairs(factory.modules) do

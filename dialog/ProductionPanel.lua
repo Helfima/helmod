@@ -335,7 +335,7 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
     local group_debug = GuiElement.add(left_panel, GuiFlowH("group_debug"))
     group_debug.style.horizontal_spacing = button_spacing
     GuiElement.add(group_debug, GuiButton("HMModelDebug", "OPEN", model.id, block_id):sprite("menu", defines.sprites.run_test.black, defines.sprites.run_test.black):style("helmod_button_menu"):tooltip("Open Debug"))
-    local solver_selected = User.getParameter("solver_selected") or "normal"
+    local solver_selected = User.getParameter("solver_selected") or defines.constant.default_solver
     GuiElement.add(group_debug, GuiButton(self.classname, "solver_switch"):style("helmod_button_default"):caption(solver_selected))
   end
 
@@ -453,6 +453,7 @@ function ProductionPanel:updateSubMenuRightPanel(model, block)
   local group_models = GuiElement.add(right_panel, GuiFlowH("group_models"))
   group_models.style.horizontal_spacing = button_spacing
   GuiElement.add(group_models, GuiButton("HMModelEdition", "OPEN", model.id, block_id):sprite("menu", defines.sprites.edit_document.black, defines.sprites.edit_document.black):style("helmod_button_menu"):tooltip({"helmod_panel.model-edition"}))
+  GuiElement.add(group_models, GuiButton("HMParametersEdition", "OPEN", model.id, block_id):sprite("menu", defines.sprites.parameter.black, defines.sprites.parameter.black):style("helmod_button_menu"):tooltip({"helmod_panel.model-parameters"}))
   local button_model_up = GuiElement.add(group_models, GuiButton(self.classname, "model-index-up", model.id, block_id):sprite("menu", defines.sprites.arrow_left.black, defines.sprites.arrow_left.black):style("helmod_button_menu"):tooltip({"helmod_panel.model-index-up"}))
   button_model_up.enabled = model.owner == Player.native().name
   local button_model_down = GuiElement.add(group_models, GuiButton(self.classname, "model-index-down", model.id, block_id):sprite("menu", defines.sprites.arrow_right.black, defines.sprites.arrow_right.black):style("helmod_button_menu"):tooltip({"helmod_panel.model-index-down"}))
@@ -1395,11 +1396,11 @@ function ProductionPanel:onEventAccessAll(event, model, block)
   end
 
   if event.action == "solver_switch" then
-    local solver_selected = User.getParameter("solver_selected") or "normal"
-    if solver_selected == "normal" then
-      User.setParameter("solver_selected", "matrix")
+    local solver_selected = User.getParameter("solver_selected") or defines.constant.default_solver
+    if solver_selected == defines.constant.solvers.normal then
+      User.setParameter("solver_selected", defines.constant.solvers.matrix)
     else
-      User.setParameter("solver_selected", "normal")
+      User.setParameter("solver_selected", defines.constant.solvers.normal)
     end
     Controller:send("on_gui_update", event, self.classname)
   end

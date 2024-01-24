@@ -104,6 +104,13 @@ function Model.resetRules()
   table.insert(global.rules, {index=17, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="buffer-depot", excluded = true})
 end
 
+
+---Return effects on a table
+---@return ModuleEffectsData
+function Model.newEffects()
+  return { speed = 0, productivity = 0, consumption = 0, pollution = 0 }
+end
+
 -------------------------------------------------------------------------------
 ---Get and initialize the model
 ---@return table
@@ -122,8 +129,22 @@ function Model.newModel()
   model.time = 1
   model.version = Model.version
   model.index = table.size(global.models)
+  Model.appendParameters(model)
   global.models[model.id] = model
   return model
+end
+
+---Append parameters
+---@param model ModelData
+function Model.appendParameters(model)
+  if model ~= nil then
+    if model.parameters == nil then
+      model.parameters = {}
+    end
+    if model.parameters.effects == nil then
+      model.parameters.effects = Model.newEffects()
+    end
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -138,7 +159,7 @@ end
 -------------------------------------------------------------------------------
 ---Get parameter objects
 ---@param parameter table --{name=parameter.name, model=model.id, block=block.id, recipe=recipe.id}
----@return table, table, table -- model, block, recipe
+---@return ModelData, BlockData, RecipeData
 function Model.getParameterObjects(parameter)
   if parameter ~= nil then
     if global.models == nil then

@@ -112,7 +112,7 @@ function SolverMatrix:apply_state(matrix)
 end
 
 -------------------------------------------------------------------------------
----Resoud la matrice
+---Abstract Resoud la matrice
 ---@param matrix_base Matrix
 ---@param debug boolean
 ---@param by_factory boolean
@@ -123,13 +123,14 @@ end
 -------------------------------------------------------------------------------
 ---Return a matrix of block
 ---@param block table
+---@param parameters ParametersData
 ---@param debug boolean
 ---@return table
-function SolverMatrix:solve(block, debug)
+function SolverMatrix:solve(block, parameters, debug)
     local mC, runtimes
 
     local ok, err = pcall(function()
-        local mA = SolverMatrix.get_block_matrix(block)
+        local mA = SolverMatrix.get_block_matrix(block, parameters)
         if mA ~= nil then
             mC, runtimes = self:solve_matrix(mA, debug, block.by_factory, block.time)
         end
@@ -301,8 +302,9 @@ end
 -------------------------------------------------------------------------------
 ---Return a matrix of block
 ---@param block table
+---@param parameters ParametersData
 ---@return table
-function SolverMatrix.get_block_matrix(block)
+function SolverMatrix.get_block_matrix(block, parameters)
     local recipes = block.recipes
     if recipes ~= nil then
         local matrix = Matrix()
@@ -317,7 +319,7 @@ function SolverMatrix.get_block_matrix(block)
 
         for _, recipe in spairs(recipes, sorter) do
             recipe.base_time = block.time
-            ModelCompute.computeModuleEffects(recipe)
+            ModelCompute.computeModuleEffects(recipe, parameters)
             if recipe.type == "energy" then
                 ModelCompute.computeEnergyFactory(recipe)
             else

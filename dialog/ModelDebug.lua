@@ -131,8 +131,8 @@ function ModelDebug:updateDebugPanel(event)
             local runtime = block.runtimes[stage]
             local ma_panel = GuiElement.add(scroll_panel,
                 GuiFrameV("stage_panel"):style(helmod_frame_style.hidden):caption(runtime.name))
-            local solver_selected = User.getParameter("solver_selected") or "normal"
-            if solver_selected == "normal" then
+            local solver_selected = User.getParameter("solver_selected") or defines.constant.default_solver
+            if solver_selected == defines.constant.solvers.normal then
                 self:buildTableSolver(ma_panel, runtime.matrix, runtime.pivot)
             else
                 self:buildTableSolverMatrix(ma_panel, runtime.matrix, runtime.pivot)

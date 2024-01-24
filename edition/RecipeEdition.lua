@@ -368,7 +368,9 @@ function RecipeEdition:onEvent(event)
     
     if event.action == "beacon-select" then
       User.setParameter("current_beacon_selection", tonumber(event.item4))
+      ModelCompute.update(model)
       self:update(event)
+      Controller:send("on_gui_refresh", event)
     end
 
     if event.action == "beacon-add" then
@@ -376,7 +378,9 @@ function RecipeEdition:onEvent(event)
       local new_beacon = Model.newBeacon()
       table.insert(recipe.beacons, new_beacon)
       User.setParameter("current_beacon_selection", #recipe.beacons)
+      ModelCompute.update(model)
       self:update(event)
+      Controller:send("on_gui_refresh", event)
     end
 
     if event.action == "beacon-remove" then
@@ -385,7 +389,9 @@ function RecipeEdition:onEvent(event)
         table.remove(recipe.beacons, current_beacon_selection)
       end
       User.setParameter("current_beacon_selection", #recipe.beacons)
+      ModelCompute.update(model)
       self:update(event)
+      Controller:send("on_gui_refresh", event)
     end
 
     if event.action == "beacon-tool" then
@@ -454,7 +460,7 @@ function RecipeEdition:onEvent(event)
       Controller:send("on_gui_refresh", event)
     end
     
-    if event.action == "beacon-select" then
+    if event.action == "beacon-choose" then
       local current_beacon_selection = User.getParameter("current_beacon_selection") or 1
       Model.setBeacon(recipe, current_beacon_selection, event.item4)
       ModelCompute.update(model)
@@ -935,7 +941,7 @@ function RecipeEdition:updateBeaconInfo(event)
     for key, element in pairs(factories) do
       local color = nil
       if beacon ~= nil and beacon.name == element.name then color = GuiElement.color_button_edit end
-      local button = GuiElement.add(factory_table_panel, GuiButtonSelectSprite(self.classname, "beacon-select", model.id, block.id, recipe.id):choose("entity", element.name):color(color))
+      local button = GuiElement.add(factory_table_panel, GuiButtonSelectSprite(self.classname, "beacon-choose", model.id, block.id, recipe.id):choose("entity", element.name):color(color))
       button.locked = true
     end
 

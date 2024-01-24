@@ -1,3 +1,16 @@
+---@class LuaEvent : EventData
+---@field classname string
+---@field element LuaGuiElement
+---@field action string
+---@field item1 string
+---@field item2 string
+---@field item3 string
+---@field item4 string
+---@field item5 string
+---@field alt boolean
+---@field control boolean
+---@field shift boolean
+
 ---@class ModulePriorityData
 ---@field name string
 ---@field value uint
@@ -23,7 +36,7 @@
 ---@field limit number
 ---Dictionnary {[module.name] : int}
 ---@field modules {[string] : uint}
----@field effects ModuleEffects
+---@field effects ModuleEffectsData
 ---@field cap ModuleEffects
 ---@field energy_total number
 ---@field polution_total number
@@ -49,3 +62,25 @@
 ---@field polution_total number
 ---@field is_done boolean
 ---@field base_time uint
+
+---@class ParametersData
+---@field effects ModuleEffectsData
+
+---@class BlockData
+
+---@class ModelData
+---@field id string
+---@field index_id number
+---@field time number
+---@field version number
+---@field owner string
+---@field block_id number
+---@field recipe_id number
+---@field resource_id number
+---@field blocks any
+---@field ingredients any
+---@field products any
+---@field ressources any
+---@field summary any
+---@field generators any
+---@field parameters ParametersData
