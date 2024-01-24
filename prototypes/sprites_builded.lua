@@ -157,5 +157,7 @@ local mipmaps = {
 {name="two_rows_black", size=64, count=4},
 {name="three_rows_white", size=64, count=4},
 {name="three_rows_black", size=64, count=4},
+{name="parameter_white", size=64, count=4},
+{name="parameter_black", size=64, count=4},
 }
 return mipmaps

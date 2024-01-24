@@ -58,34 +58,37 @@ function SolverMatrixSimplex:get_pivot(matrix)
 
 	local max_z_value = 0
 	local xcol = nil
-	local min_ratio_value = 0
+	local ratio_value = 0
+	local max_value = 0
 	local xrow = nil
-	---boucle sur la derniere ligne nommee Z
+	-- boucle sur la derniere ligne nommee Z
 	for icol, column in pairs(matrix.columns) do
 		-- exclusion de la colonne coefficient
 		if icol > 1 then
 			local z_value = zrow[icol] or 0
 			if z_value > max_z_value then
-				---la valeur repond au critere, la colonne est eligible
-				---on recherche le ligne
-				min_ratio_value = nil
+				-- la valeur repond au critere, la colonne est eligible
+				-- on recherche le ligne
+				ratio_value = nil
 				for irow, current_row in pairs(rows) do
 					local parameters = matrix.parameters[irow]
 					local x_value = rows[irow][icol]
-					---on n'utilise pas la derniere ligne
-					---seule les cases positives sont prises en compte
+					-- on n'utilise pas la derniere ligne
+					-- seule les cases positives sont prises en compte
 					if irow < #rows and x_value > 0 then
-						---calcul du ratio base / x
+						-- calcul du ratio base / x
 						local c_value = parameters.coefficient
 						local bx_ratio = c_value / x_value
-						if min_ratio_value == nil or bx_ratio < min_ratio_value then
-							min_ratio_value = bx_ratio
+						-- prend la premier valeur ou le plus grand ratio sinon la plus grande valeur
+						if ratio_value == nil or bx_ratio > ratio_value or c_value > max_value then
+							ratio_value = bx_ratio
+							max_value = c_value
 							xrow = irow
 						end
 					end
 				end
-				if min_ratio_value ~= nil then
-					---le pivot est possible
+				if ratio_value ~= nil then
+					-- le pivot est possible
 					max_z_value = z_value
 					xcol = icol
 				end
@@ -93,7 +96,7 @@ function SolverMatrixSimplex:get_pivot(matrix)
 		end
 	end
 	if max_z_value == 0 then
-		---il n'y a plus d'amelioration possible fin du programmme
+		-- il n'y a plus d'amelioration possible fin du programmme
 		return false, xcol, xrow
 	end
 	return true, xcol, xrow

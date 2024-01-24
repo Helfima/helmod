@@ -1,4 +1,22 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.12.20
+Date: 2024-01-24
+  Features:
+    - Now we can use few beacons
+    - Now we can add global effects on production line
+  Changes:
+    - Selecting a transport belt to enter an ingredient/product quantity now respects base time #473
+    - Added Chinese translations (thank you luaotix!) #476
+    - Added partial Brazilian Portugese translations (thank you luis das artimanhas!) #484
+    - Simpliied propagation menu, now that propagate with module only on the same category of recipe
+    - Actived by default reworked solver to improve it
+  Bugfixes:
+    - Fixed beacon modules not being selectable for resource recipes with Pyanodon's #478
+    - Fixed Error helmod::on_tick after kick player #490
+    - Fixed Matrix solver with omni fuel #415/#425
+    - Fixed logistic items overflow in the Logstic Edition panel
+    - Fixed Pyanodon AL upgrade techs #345
+---------------------------------------------------------------------------------------------------
 Version: 0.12.19
 Date: 2023-07-30
   Changes:

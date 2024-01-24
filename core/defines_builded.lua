@@ -245,3 +245,6 @@ defines.sprites.two_rows.black = "two_rows_black"
 defines.sprites.three_rows = {}
 defines.sprites.three_rows.white = "three_rows_white"
 defines.sprites.three_rows.black = "three_rows_black"
+defines.sprites.parameter = {}
+defines.sprites.parameter.white = "parameter_white"
+defines.sprites.parameter.black = "parameter_black"

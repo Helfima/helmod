@@ -104,6 +104,13 @@ function Model.resetRules()
   table.insert(global.rules, {index=17, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="buffer-depot", excluded = true})
 end
 
+
+---Return effects on a table
+---@return ModuleEffectsData
+function Model.newEffects()
+  return { speed = 0, productivity = 0, consumption = 0, pollution = 0 }
+end
+
 -------------------------------------------------------------------------------
 ---Get and initialize the model
 ---@return table
@@ -122,8 +129,22 @@ function Model.newModel()
   model.time = 1
   model.version = Model.version
   model.index = table.size(global.models)
+  Model.appendParameters(model)
   global.models[model.id] = model
   return model
+end
+
+---Append parameters
+---@param model ModelData
+function Model.appendParameters(model)
+  if model ~= nil then
+    if model.parameters == nil then
+      model.parameters = {}
+    end
+    if model.parameters.effects == nil then
+      model.parameters.effects = Model.newEffects()
+    end
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -138,7 +159,7 @@ end
 -------------------------------------------------------------------------------
 ---Get parameter objects
 ---@param parameter table --{name=parameter.name, model=model.id, block=block.id, recipe=recipe.id}
----@return table, table, table -- model, block, recipe
+---@return ModelData, BlockData, RecipeData
 function Model.getParameterObjects(parameter)
   if parameter ~= nil then
     if global.models == nil then
@@ -314,7 +335,8 @@ function Model.newRecipe(model, name, type)
   recipeModel.count = 0
   recipeModel.production = 1
   recipeModel.factory = Model.newFactory()
-  recipeModel.beacon = Model.newBeacon()
+  recipeModel.beacons = {}
+  table.insert(recipeModel.beacons, Model.newBeacon())
 
   return recipeModel
 end
@@ -338,8 +360,6 @@ function Model.newResource(model, name, type, count)
   resourceModel.type = type
   resourceModel.name = name
   resourceModel.count = count
-  resourceModel.factory = Model.newFactory()
-  resourceModel.beacon = Model.newBeacon()
 
   return resourceModel
 end
@@ -358,16 +378,44 @@ end
 ---@param combo number
 ---@param per_factory number
 ---@param per_factory_constant number
-function Model.setBeacon(recipe, name, combo, per_factory, per_factory_constant)
+---@return BeaconData
+function Model.addBeacon(recipe, name, combo, per_factory, per_factory_constant)
   if recipe ~= nil then
     local beacon_prototype = EntityPrototype(name)
     if beacon_prototype:native() ~= nil then
-      recipe.beacon.name = name
-      recipe.beacon.combo = combo or User.getPreferenceSetting("beacon_affecting_one")
-      recipe.beacon.per_factory = per_factory or User.getPreferenceSetting("beacon_by_factory")
-      recipe.beacon.per_factory_constant = per_factory_constant or User.getPreferenceSetting("beacon_constant")
-      if Model.countModulesModel(recipe.beacon) >= beacon_prototype:getModuleInventorySize() then
-        recipe.beacon.modules = {}
+      local beacon = {}
+      beacon.name = name
+      beacon.combo = combo or User.getPreferenceSetting("beacon_affecting_one")
+      beacon.per_factory = per_factory or User.getPreferenceSetting("beacon_by_factory")
+      beacon.per_factory_constant = per_factory_constant or User.getPreferenceSetting("beacon_constant")
+      beacon.modules = {}
+      if recipe.beacons == nil then recipe.beacons = {} end
+      table.insert(recipe.beacons, beacon)
+      return beacon
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+---Set the beacon
+---@param recipe table
+---@param index number
+---@param name string
+---@param combo number
+---@param per_factory number
+---@param per_factory_constant number
+function Model.setBeacon(recipe, index, name, combo, per_factory, per_factory_constant)
+  if recipe ~= nil and recipe.beacons ~= nil then
+    local beacon_prototype = EntityPrototype(name)
+    if beacon_prototype:native() ~= nil then
+      local beacon = {}
+      beacon.name = name
+      beacon.combo = combo or User.getPreferenceSetting("beacon_affecting_one")
+      beacon.per_factory = per_factory or User.getPreferenceSetting("beacon_by_factory")
+      beacon.per_factory_constant = per_factory_constant or User.getPreferenceSetting("beacon_constant")
+      beacon.modules = {}
+      if recipe.beacons[index] ~= nil then
+        recipe.beacons[index] = beacon
       end
     end
   end
@@ -495,6 +543,63 @@ function Model.getDefaultRecipeBeacon(key)
     return nil
   end
   return default.recipes[key].beacon
+end
+
+---Compare module priorities
+---@param module_priorities1 {[uint] : ModulePriorityData}
+---@param module_priorities2 {[uint] : ModulePriorityData}
+function Model.compareModulePriorities(module_priorities1, module_priorities2)
+  if module_priorities1 == nil or module_priorities2 == nil then return false end
+  if #module_priorities1 ~= #module_priorities2 then return false end
+    for i = 1, #module_priorities1, 1 do
+      local module_priority1 = module_priorities1[i]
+      local module_priority2 = module_priorities2[i]
+      if module_priority1.name ~= module_priority2.name then return false end
+      if module_priority1.value ~= module_priority2.value then return false end
+    end
+  return true
+end
+
+---Compare 2 factories
+---@param factory1 FactoryData
+---@param factory2 FactoryData
+---@return boolean
+function Model.compareFactory(factory1, factory2)
+  if factory1 == nil or factory2 == nil then return false end
+  if factory1.name ~= factory2.name then return false end
+  if factory1.fuel ~= factory2.fuel then return false end
+  if Model.compareModulePriorities(factory1.module_priority, factory2.module_priority) == false then return false end
+  return true
+end
+
+---Compare 2 factories
+---@param beacon1 BeaconData
+---@param beacon2 BeaconData
+---@return boolean
+function Model.compareBeacon(beacon1, beacon2)
+  if beacon1 == nil or beacon2 == nil then return false end
+  if beacon1.name ~= beacon2.name then return false end
+  if beacon1.fuel ~= beacon2.fuel then return false end
+  if beacon1.combo ~= beacon2.combo then return false end
+  if beacon1.per_factory ~= beacon2.per_factory then return false end
+  if beacon1.per_factory_constant ~= beacon2.per_factory_constant then return false end
+  if Model.compareModulePriorities(beacon1.module_priority, beacon2.module_priority) == false then return false end
+  return true
+end
+
+---Compare 2 factories
+---@param beacons1 {[uint] : BeaconData}
+---@param beacons2 {[uint] : BeaconData}
+---@return boolean
+function Model.compareBeacons(beacons1, beacons2)
+  if beacons1 == nil or beacons2 == nil then return false end
+  if #beacons1 ~= #beacons2 then return false end
+  for i = 1, #beacons1, 1 do
+    local beacon1 = beacons1[i]
+    local beacon2 = beacons2[i]
+    if Model.compareBeacon(beacon1, beacon2) == false then return false end
+  end
+  return true
 end
 
 return Model

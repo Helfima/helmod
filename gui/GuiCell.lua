@@ -353,7 +353,7 @@ function GuiCellFactory:create(parent)
         style = "helmod_textfield_element_red"
       end
       local text_field = GuiElement.add(row2, GuiTextField(self.m_by_limit_uri):text(Format.formatNumberFactory(limit_value)):style(style):tooltip({"helmod_common.per-sub-block"}))
-      text_field.style.height = 15
+      text_field.style.height = 19
       text_field.style.width = 70
     else
       GuiElement.add(row2, GuiLabel("label2", factory.name):caption(Format.formatNumberFactory(limit_value)):style("helmod_label_element"):tooltip({"helmod_common.per-sub-block"}))
@@ -367,7 +367,7 @@ function GuiCellFactory:create(parent)
       style = "helmod_textfield_element_red"
     end
     local text_field = GuiElement.add(row3, GuiTextField(self.m_by_factory_uri):text(Format.formatNumberFactory(factory.input or factory.count or 0)):style(style):tooltip({"helmod_common.total"}))
-    text_field.style.height = 15
+    text_field.style.height = 19
     text_field.style.width = 70
   else
     GuiElement.add(row3, GuiLabel("label3", factory.name):caption(Format.formatNumberFactory(factory.count)):style("helmod_label_element"):tooltip({"helmod_common.total"}))
@@ -627,6 +627,7 @@ end)
 ---@param parent LuaGuiElement --container for element
 ---@return LuaGuiElement
 function GuiCellPollution:create(parent)
+  local width = 60
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or "gray"
   local element = self.element or {}
@@ -634,18 +635,21 @@ function GuiCellPollution:create(parent)
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
   row1.style.top_padding=4
   row1.style.bottom_padding=4
+  row1.style.minimal_width=width
 
   local tooltip = GuiTooltipPollution(self.options.tooltip):element(element)
   local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", defines.sprites.skull.white, defines.sprites.skull.black):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_product", color, 2))
+    row2.style.minimal_width=width
     local caption2 = Format.formatNumber(element.limit_pollution or 0)
     if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_pollution) end
     GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element"):tooltip({"helmod_common.total"}))
   end
 
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
+  row3.style.minimal_width=width
   local caption3 = Format.formatNumber(element.pollution_total)
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
 

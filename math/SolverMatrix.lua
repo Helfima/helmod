@@ -112,7 +112,7 @@ function SolverMatrix:apply_state(matrix)
 end
 
 -------------------------------------------------------------------------------
----Resoud la matrice
+---Abstract Resoud la matrice
 ---@param matrix_base Matrix
 ---@param debug boolean
 ---@param by_factory boolean
@@ -123,13 +123,14 @@ end
 -------------------------------------------------------------------------------
 ---Return a matrix of block
 ---@param block table
+---@param parameters ParametersData
 ---@param debug boolean
 ---@return table
-function SolverMatrix:solve(block, debug)
+function SolverMatrix:solve(block, parameters, debug)
     local mC, runtimes
 
     local ok, err = pcall(function()
-        local mA = SolverMatrix.get_block_matrix(block)
+        local mA = SolverMatrix.get_block_matrix(block, parameters)
         if mA ~= nil then
             mC, runtimes = self:solve_matrix(mA, debug, block.by_factory, block.time)
         end
@@ -210,7 +211,11 @@ function SolverMatrix:solve(block, debug)
             block.limit_building = nil
             for _, recipe in spairs(recipes, function(t, a, b) return t[b].index > t[a].index end) do
                 recipe.factory.limit_count = nil
-                recipe.beacon.limit_count = nil
+                if recipe.beacons ~= nil then
+                    for _, beacon in pairs(recipe.beacons) do
+                        beacon.limit_count = nil
+                    end
+                end
                 recipe.limit_energy = nil
                 recipe.limit_pollution = nil
             end
@@ -219,7 +224,11 @@ function SolverMatrix:solve(block, debug)
             block.limit_pollution = block.pollution_total / block.count
             for _, recipe in spairs(recipes, function(t, a, b) return t[b].index > t[a].index end) do
                 recipe.factory.limit_count = recipe.factory.count / block.count
-                recipe.beacon.limit_count = recipe.beacon.count / block.count
+                if recipe.beacons ~= nil then
+                    for _, beacon in pairs(recipe.beacons) do
+                        beacon.limit_count = beacon.count / block.count
+                    end
+                end
                 recipe.limit_energy = recipe.energy_total / block.count
                 recipe.limit_pollution = recipe.pollution_total / block.count
             end
@@ -293,8 +302,9 @@ end
 -------------------------------------------------------------------------------
 ---Return a matrix of block
 ---@param block table
+---@param parameters ParametersData
 ---@return table
-function SolverMatrix.get_block_matrix(block)
+function SolverMatrix.get_block_matrix(block, parameters)
     local recipes = block.recipes
     if recipes ~= nil then
         local matrix = Matrix()
@@ -309,7 +319,7 @@ function SolverMatrix.get_block_matrix(block)
 
         for _, recipe in spairs(recipes, sorter) do
             recipe.base_time = block.time
-            ModelCompute.computeModuleEffects(recipe)
+            ModelCompute.computeModuleEffects(recipe, parameters)
             if recipe.type == "energy" then
                 ModelCompute.computeEnergyFactory(recipe)
             else
@@ -452,7 +462,7 @@ function SolverMatrix.get_block_matrix(block)
                     local col_name = ingredient_key .. index
 
                     local col_header = MatrixHeader()
-                    col_header.name = col_name
+                    col_header.sysname = col_name
                     col_header.tooltip = col_name .. "\nIngredient"
                     col_header.index = index
                     col_header.key = ingredient_key
@@ -497,7 +507,7 @@ function SolverMatrix.get_block_matrix(block)
                     col_header.product = lua_product
 
                     local cell_value = row:get_value(col_header) or 0
-                    cell_value = cell_value - lua_product.count * factor
+                    cell_value = cell_value + lua_product.count * factor
                     row:add_value(col_header, cell_value)
 
                     row_valid = true
