@@ -16,6 +16,7 @@ end
 -------------------------------------------------------------------------------
 ---On Bind Dispatcher
 function ProductionPanel:onBind()
+  Dispatcher:bind("on_gui_recipe_update", self, self.update)
   Dispatcher:bind("on_gui_refresh", self, self.update)
   Dispatcher:bind("on_gui_pause", self, self.updateTopMenu)
 end
