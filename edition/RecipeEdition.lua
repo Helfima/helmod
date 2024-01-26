@@ -59,7 +59,6 @@ end
 function RecipeEdition:getTabPanel()
   
   local flow_panel, content_panel, menu_panel = self:getPanel()
-  local panel_name = "tab_panel"
   local factory_panel_name = "facory_panel"
   local beacon_panel_name = "beacon_panel"
 
@@ -78,19 +77,24 @@ function RecipeEdition:getTabPanel()
 
     return factory_panel, beacon_panel
   else
-    ---affichage tab
+    local recipe_edition_tab = User.getParameter("recipe_edition_tab") or 1
+    local panel_name = table.concat({self.classname, "change-tab"},"=")
+  ---affichage tab
     if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
       return content_panel[panel_name][panel_name][factory_panel_name], content_panel[panel_name][panel_name][beacon_panel_name]
     end
+
+    
     local panel = GuiElement.add(content_panel, GuiFrameH(panel_name))
     local tab_panel = GuiElement.add(panel, GuiTabPane(panel_name))
-    local factory_tab_panel = GuiElement.add(tab_panel, GuiTab("factory-tab"):caption({"helmod_common.factory"}))
+    local factory_tab_panel = GuiElement.add(tab_panel, GuiTab(self.classname, "change-tab", "factory"):caption({"helmod_common.factory"}))
     local factory_panel = GuiElement.add(tab_panel, GuiFlowV(factory_panel_name))
     tab_panel.add_tab(factory_tab_panel, factory_panel)
 
-    local beacon_tab_panel = GuiElement.add(tab_panel, GuiTab("beacon-tab"):caption({"helmod_common.beacon"}))
+    local beacon_tab_panel = GuiElement.add(tab_panel, GuiTab(self.classname, "change-tab", "beacon"):caption({"helmod_common.beacon"}))
     local beacon_panel = GuiElement.add(tab_panel, GuiFlowV(beacon_panel_name))
     tab_panel.add_tab(beacon_tab_panel, beacon_panel)
+    tab_panel.selected_tab_index = recipe_edition_tab
     return factory_panel, beacon_panel
   end
 end
@@ -238,10 +242,12 @@ function RecipeEdition:onEvent(event)
     Controller:send("on_gui_update", event, self.classname)
   end
 
+  if event.action == "change-tab" then
+    local recipe_edition_tab = event.element.selected_tab_index
+    User.setParameter("recipe_edition_tab", recipe_edition_tab)
+  end
 
   if User.isWriter(model) then
-    
-
     User.setParameter("scroll_element", recipe.id)
     
     if event.action == "neighbour-bonus-update" then
@@ -250,7 +256,7 @@ function RecipeEdition:onEvent(event)
       ModelBuilder.updateRecipeNeighbourBonus(recipe, items[index])
       ModelCompute.update(model)
       self:update(event)
-      Controller:send("on_gui_refresh", event)
+      Controller:send("on_gui_recipe_update", event)
     end
     
     if event.action == "recipe-update" then
@@ -259,7 +265,7 @@ function RecipeEdition:onEvent(event)
       ModelBuilder.updateRecipeProduction(recipe, production)
       ModelCompute.update(model)
       self:updateObjectInfo(event)
-      Controller:send("on_gui_refresh", event)
+      Controller:send("on_gui_recipe_update", event)
     end
 
     if event.action == "factory-select" then
@@ -267,7 +273,7 @@ function RecipeEdition:onEvent(event)
       ModelBuilder.applyFactoryModulePriority(recipe)
       ModelCompute.update(model)
       self:update(event)
-      Controller:send("on_gui_refresh", event)
+      Controller:send("on_gui_recipe_update", event)
     end
 
     if event.action == "factory-fuel-update" then
@@ -301,7 +307,7 @@ function RecipeEdition:onEvent(event)
       end
       self:updateFactoryInfo(event)
       self:updateHeader(event)
-      Controller:send("on_gui_refresh", event)
+      Controller:send("on_gui_recipe_update", event)
     end
 
     if event.action == "factory-tool" then
@@ -310,30 +316,27 @@ function RecipeEdition:onEvent(event)
       elseif event.item4 == "block" then
         ModelBuilder.setFactoryBlock(block, recipe)
         ModelCompute.update(model)
-        Controller:send("on_gui_refresh", event)
       elseif event.item4 == "line" then
         ModelBuilder.setFactoryLine(model, recipe)
         ModelCompute.update(model)
-        Controller:send("on_gui_refresh", event)
       end
       self:update(event)
+      Controller:send("on_gui_recipe_update", event)
     end
 
     if event.action == "factory-module-tool" then
       if event.item4 == "block" then
         ModelBuilder.setFactoryModuleBlock(block, recipe)
         ModelCompute.update(model)
-        Controller:send("on_gui_refresh", event)
       elseif event.item4 == "line" then
         ModelBuilder.setFactoryModuleLine(model, recipe)
         ModelCompute.update(model)
-        Controller:send("on_gui_refresh", event)
       elseif event.item4 == "erase" then
         ModelBuilder.setFactoryModulePriority(recipe, nil)
         ModelCompute.update(model)
-        Controller:send("on_gui_refresh", event)
       end
       self:update(event)
+      Controller:send("on_gui_recipe_update", event)
     end
 
     if event.action == "factory-module-priority-select" then
@@ -348,7 +351,7 @@ function RecipeEdition:onEvent(event)
         ModelBuilder.setFactoryModulePriority(recipe, priority_modules[factory_module_priority])
         ModelCompute.update(model)
         self:update(event)
-        Controller:send("on_gui_refresh", event)
+        Controller:send("on_gui_recipe_update", event)
       end
     end
 
@@ -356,21 +359,21 @@ function RecipeEdition:onEvent(event)
       ModelBuilder.addFactoryModule(recipe, event.item4, event.control)
       ModelCompute.update(model)
       self:update(event)
-      Controller:send("on_gui_refresh", event)
+      Controller:send("on_gui_recipe_update", event)
     end
     
     if event.action == "factory-module-remove" then
       ModelBuilder.removeFactoryModule(recipe, event.item4, event.control)
       ModelCompute.update(model)
       self:update(event)
-      Controller:send("on_gui_refresh", event)
+      Controller:send("on_gui_recipe_update", event)
     end
     
     if event.action == "beacon-select" then
       User.setParameter("current_beacon_selection", tonumber(event.item4))
       ModelCompute.update(model)
       self:update(event)
-      Controller:send("on_gui_refresh", event)
+      Controller:send("on_gui_recipe_update", event)
     end
 
     if event.action == "beacon-add" then
@@ -380,7 +383,7 @@ function RecipeEdition:onEvent(event)
       User.setParameter("current_beacon_selection", #recipe.beacons)
       ModelCompute.update(model)
       self:update(event)
-      Controller:send("on_gui_refresh", event)
+      Controller:send("on_gui_recipe_update", event)
     end
 
     if event.action == "beacon-remove" then
@@ -391,7 +394,7 @@ function RecipeEdition:onEvent(event)
       User.setParameter("current_beacon_selection", #recipe.beacons)
       ModelCompute.update(model)
       self:update(event)
-      Controller:send("on_gui_refresh", event)
+      Controller:send("on_gui_recipe_update", event)
     end
 
     if event.action == "beacon-tool" then
@@ -400,31 +403,28 @@ function RecipeEdition:onEvent(event)
       elseif event.item4 == "block" then
         ModelBuilder.setBeaconBlock(block, recipe)
         ModelCompute.update(model)
-        Controller:send("on_gui_refresh", event)
       elseif event.item4 == "line" then
         ModelBuilder.setBeaconLine(model, recipe)
         ModelCompute.update(model)
-        Controller:send("on_gui_refresh", event)
       end
       self:update(event)
+      Controller:send("on_gui_recipe_update", event)
     end
 
     if event.action == "beacon-module-tool" then
       if event.item4 == "block" then
         ModelBuilder.setBeaconModuleBlock(block, recipe)
         ModelCompute.update(model)
-        Controller:send("on_gui_refresh", event)
       elseif event.item4 == "line" then
         ModelBuilder.setBeaconModuleLine(model, recipe)
         ModelCompute.update(model)
-        Controller:send("on_gui_refresh", event)
       elseif event.item4 == "erase" then
         local beacon = ModelBuilder.getCurrentBeacon(recipe)
         ModelBuilder.setBeaconModulePriority(beacon, recipe, nil)
         ModelCompute.update(model)
-        Controller:send("on_gui_refresh", event)
       end
       self:update(event)
+      Controller:send("on_gui_recipe_update", event)
     end
 
     if event.action == "beacon-module-priority-select" then
@@ -440,7 +440,7 @@ function RecipeEdition:onEvent(event)
         ModelBuilder.setBeaconModulePriority(beacon, recipe, priority_modules[beacon_module_priority])
         ModelCompute.update(model)
         self:update(event)
-        Controller:send("on_gui_refresh", event)
+        Controller:send("on_gui_recipe_update", event)
       end
     end
 
@@ -449,7 +449,7 @@ function RecipeEdition:onEvent(event)
       ModelBuilder.addBeaconModule(beacon, recipe, event.item4, event.control)
       ModelCompute.update(model)
       self:update(event)
-      Controller:send("on_gui_refresh", event)
+      Controller:send("on_gui_recipe_update", event)
     end
     
     if event.action == "beacon-module-remove" then
@@ -457,7 +457,7 @@ function RecipeEdition:onEvent(event)
       ModelBuilder.removeBeaconModule(beacon, recipe, event.item4, event.control)
       ModelCompute.update(model)
       self:update(event)
-      Controller:send("on_gui_refresh", event)
+      Controller:send("on_gui_recipe_update", event)
     end
     
     if event.action == "beacon-choose" then
@@ -465,7 +465,7 @@ function RecipeEdition:onEvent(event)
       Model.setBeacon(recipe, current_beacon_selection, event.item4)
       ModelCompute.update(model)
       self:update(event)
-      Controller:send("on_gui_refresh", event)
+      Controller:send("on_gui_recipe_update", event)
     end
 
     if event.action == "beacon-update" then
@@ -481,7 +481,7 @@ function RecipeEdition:onEvent(event)
         if display_height >= limit_display_height or User.getParameter("factory_tab") then
           self:updateFactoryInfo(event)
         end
-        Controller:send("on_gui_refresh", event)
+        Controller:send("on_gui_recipe_update", event)
       end)
       if not(ok) then
         Player.print("Formula is not valid!")
@@ -610,7 +610,7 @@ function RecipeEdition:updateFactoryInfoTool(event)
 
     local default_factory = User.getDefaultFactory(recipe)
     local record_style = "helmod_button_menu_sm_default"
-    if Model.compareFactory(default_factory, factory)  then record_style = "helmod_button_menu_sm_selected" end
+    if Model.compareFactory(default_factory, factory, Model.factoryHasModule(factory))  then record_style = "helmod_button_menu_sm_selected" end
     GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool", model.id, block.id, recipe.id, "default"):sprite("menu", defines.sprites.favorite.black, defines.sprites.favorite.black):style(record_style):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.set-default"):element(default_factory)))
     GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool", model.id, block.id, recipe.id, "block"):sprite("menu", defines.sprites.expand_right.black, defines.sprites.expand_right.black):style("helmod_button_menu_sm"):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.apply-block"):element(factory):tooltip("helmod_recipe-edition-panel.current-factory")))
     GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool", model.id, block.id, recipe.id, "line"):sprite("menu", defines.sprites.expand_right_group.black, defines.sprites.expand_right_group.black):style("helmod_button_menu_sm"):tooltip(GuiTooltipFactory("helmod_recipe-edition-panel.apply-line"):element(factory):tooltip("helmod_recipe-edition-panel.current-factory")))
@@ -937,12 +937,18 @@ function RecipeEdition:updateBeaconInfo(event)
     scroll_panel.style.maximal_height = 118
     local factories = Player.getProductionsBeacon()
 
+    local last_element = nil
     local factory_table_panel = GuiElement.add(scroll_panel, GuiTable("beacon-table"):column(5))
     for key, element in pairs(factories) do
       local color = nil
       if beacon ~= nil and beacon.name == element.name then color = GuiElement.color_button_edit end
       local button = GuiElement.add(factory_table_panel, GuiButtonSelectSprite(self.classname, "beacon-choose", model.id, block.id, recipe.id):choose("entity", element.name):color(color))
       button.locked = true
+      if beacon ~= nil and beacon.name == element.name then last_element = button end
+    end
+
+    if last_element ~= nil then
+      scroll_panel.scroll_to_element(last_element)
     end
 
     ---beacon info
