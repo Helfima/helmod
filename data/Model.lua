@@ -542,6 +542,16 @@ function Model.getDefaultRecipeBeacon(key)
   return default.recipes[key].beacon
 end
 
+---Check if factory has module
+---@param factory FactoryData
+---@return boolean
+function Model.factoryHasModule(factory)
+  if factory == nil then return false end
+  if factory.modules == nil then return false end
+  if factory.modules ~= nil and #factory.modules then return false end
+  return true
+end
+
 ---Compare module priorities
 ---@param module_priorities1 {[uint] : ModulePriorityData}
 ---@param module_priorities2 {[uint] : ModulePriorityData}
@@ -560,27 +570,29 @@ end
 ---Compare 2 factories
 ---@param factory1 FactoryData
 ---@param factory2 FactoryData
+---@param with_priority boolean
 ---@return boolean
-function Model.compareFactory(factory1, factory2)
+function Model.compareFactory(factory1, factory2, with_priority)
   if factory1 == nil or factory2 == nil then return false end
   if factory1.name ~= factory2.name then return false end
   if factory1.fuel ~= factory2.fuel then return false end
-  if Model.compareModulePriorities(factory1.module_priority, factory2.module_priority) == false then return false end
+  if with_priority and Model.compareModulePriorities(factory1.module_priority, factory2.module_priority) == false then return false end
   return true
 end
 
 ---Compare 2 factories
 ---@param beacon1 BeaconData
 ---@param beacon2 BeaconData
+---@param with_priority boolean
 ---@return boolean
-function Model.compareBeacon(beacon1, beacon2)
+function Model.compareBeacon(beacon1, beacon2, with_priority)
   if beacon1 == nil or beacon2 == nil then return false end
   if beacon1.name ~= beacon2.name then return false end
   if beacon1.fuel ~= beacon2.fuel then return false end
   if beacon1.combo ~= beacon2.combo then return false end
   if beacon1.per_factory ~= beacon2.per_factory then return false end
   if beacon1.per_factory_constant ~= beacon2.per_factory_constant then return false end
-  if Model.compareModulePriorities(beacon1.module_priority, beacon2.module_priority) == false then return false end
+  if with_priority and Model.compareModulePriorities(beacon1.module_priority, beacon2.module_priority) == false then return false end
   return true
 end
 
@@ -594,7 +606,8 @@ function Model.compareBeacons(beacons1, beacons2)
   for i = 1, #beacons1, 1 do
     local beacon1 = beacons1[i]
     local beacon2 = beacons2[i]
-    if Model.compareBeacon(beacon1, beacon2) == false then return false end
+    local with_priority = Model.factoryHasModule(beacon1) or Model.factoryHasModule(beacon2)
+    if Model.compareBeacon(beacon1, beacon2, with_priority) == false then return false end
   end
   return true
 end

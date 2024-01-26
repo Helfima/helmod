@@ -3,6 +3,8 @@ Version: 0.12.22
 Date: 2024-01-26
   Bugfixes:
     - Fix recipe edition tab change after few action
+    - Fix the default assembler controle is wrong when no module
+    - Fix recursive table for parameter.default_factory
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.21
 Date: 2024-01-24

@@ -168,14 +168,14 @@ function User.setDefaultFactory(recipe)
   local category = recipe_prototype:getCategory()
   local factory = recipe.factory
   if category ~= nil then
-    local default_factory = {name = factory.name, fuel = factory.fuel}
+    local default_category = {name = factory.name, fuel = factory.fuel}
     if factory.module_priority ~= nil then
-      default_factory.module_priority = {}
+      default_category.module_priority = {}
       for _, priority in pairs(factory.module_priority) do
-        table.insert(default_factory.module_priority, {name = priority.name, value = priority.value})
+        table.insert(default_category.module_priority, {name = priority.name, value = priority.value})
       end
     end
-    default_factory[category] = default_factory
+    default_factory[category] = default_category
     User.setParameter("default_factory", default_factory)
   end
 end
