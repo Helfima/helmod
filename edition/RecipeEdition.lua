@@ -46,10 +46,10 @@ function RecipeEdition:getObjectInfoPanel()
 end
 
 function RecipeEdition:getRecipeEditionScrollGroups()
-  local display_width, display_height = Player.getDisplaySizes()
+  local width , height, scale = Player.getDisplaySizes()
   local recipe_edition_scroll_groups = User.getSetting("recipe_edition_scroll_groups")
   if recipe_edition_scroll_groups == nil then
-    recipe_edition_scroll_groups = display_height >= limit_display_height
+    recipe_edition_scroll_groups = height/scale >= limit_display_height
   end
   return recipe_edition_scroll_groups
 end
@@ -232,7 +232,7 @@ end
 ---On event
 ---@param event LuaEvent
 function RecipeEdition:onEvent(event)
-  local display_width, display_height = Player.getDisplaySizes()
+  local display_width, display_height, scale = Player.getDisplaySizes()
 
   local model, block, recipe = self:getParameterObjects()
   if model == nil or block == nil or recipe == nil then return end
@@ -478,7 +478,7 @@ function RecipeEdition:onEvent(event)
         ModelBuilder.updateBeacon(beacon, recipe, options)
         ModelCompute.update(model)
         self:updateBeaconInfo(event)
-        if display_height >= limit_display_height or User.getParameter("factory_tab") then
+        if display_height/scale >= limit_display_height or User.getParameter("factory_tab") then
           self:updateFactoryInfo(event)
         end
         Controller:send("on_gui_recipe_update", event)
@@ -552,13 +552,13 @@ function RecipeEdition:updateTabMenu(event)
   local tab_right_panel = self:getTabRightPanel()
   local model, block, recipe = self:getParameterObjects()
 
-  local display_width, display_height = Player.getDisplaySizes()
+  local display_width, display_height, scale = Player.getDisplaySizes()
 
   tab_left_panel.clear()
   tab_right_panel.clear()
 
   ---left tab
-  if display_height < limit_display_height then
+  if display_height/scale < limit_display_height then
     local style = "helmod_button_tab"
     if User.getParameter("factory_tab") == true then style = "helmod_button_tab_selected" end
 

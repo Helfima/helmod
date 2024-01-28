@@ -65,7 +65,9 @@ function ProductionPanel:getResultPanel()
   if panel[panel_name1] ~= nil and panel[panel_name1].valid then
     return panel[panel_name1], panel[panel_name2]
   end
-  local width_main, height_main = User.getMainSizes()
+  local display_width, display_height, scale = User.getMainSizes()
+  local width_main = display_width/scale
+  local height_main = display_height/scale
   panel.style.natural_width = width_main-25
   local panel1 = GuiElement.add(panel, GuiFlowH(panel_name1))
   panel1.style.horizontally_stretchable = true

@@ -64,12 +64,12 @@ end
 
 ------------------------------------------------------------------------------
 ---Get display sizes
----@return number, number
+---@return number, number, number
 function Player.getDisplaySizes()
-  if Lua_player == nil or not Lua_player.valid then return 800,600 end
+  if Lua_player == nil or not Lua_player.valid then return 800,600,1 end
   local display_resolution = Lua_player.display_resolution
   local display_scale = Lua_player.display_scale
-  return display_resolution.width/display_scale, display_resolution.height/display_scale
+  return display_resolution.width, display_resolution.height, display_scale
 end
 
 -------------------------------------------------------------------------------
