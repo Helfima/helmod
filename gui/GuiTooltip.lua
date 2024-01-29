@@ -319,8 +319,8 @@ function GuiTooltipModel:create()
     if type == "resource" or type == "energy" then type = "entity" end
     if type == "rocket" then type = "item" end
     if type == "recipe-burnt" then type = "recipe" end
-    local element_icon = string.format("[%s=%s]", type, first_block.name)
-    table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=first_block.name}), helmod_tag.font.close, helmod_tag.color.close})
+    local element_sprite = GuiElement.getSprite(type, first_block.name, "[%s=%s]")
+    table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=first_block.name}), helmod_tag.font.close, helmod_tag.color.close})
     table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_result-panel.col-header-owner"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, element.owner or "", helmod_tag.font.close})
     table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.group"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, element.group or "", helmod_tag.font.close})
     if element.note ~= nil and element.note ~= "" then
@@ -348,8 +348,8 @@ function GuiTooltipRecipe:create()
   if element ~= nil then
     local recipe_prototype = RecipePrototype(element)
     local icon_name, icon_type = recipe_prototype:getIcon()
-    local element_icon = string.format("[%s=%s]", icon_type, icon_name)
-    table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=icon_type, name=icon_name}), helmod_tag.font.close, helmod_tag.color.close})
+    local element_sprite = GuiElement.getSprite(icon_type, icon_name, "[%s=%s]")
+    table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=icon_type, name=icon_name}), helmod_tag.font.close, helmod_tag.color.close})
     ---quantity
     local total_count = Format.formatNumberElement(element.count)
     if element.limit_count ~= nil then
@@ -486,9 +486,9 @@ function GuiTooltipFactory.AppendFactory(tooltip, element)
   local fuel = prototype:getFluel()
   if fuel ~= nil then
       if fuel.temperature then
-      table.insert(tooltip, {"", "\n", string.format("[%s=%s] %s °C", fuel.type, fuel.name, fuel.temperature), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close})
+        table.insert(tooltip, {"", "\n", string.format("[%s=%s] %s °C", fuel.type, fuel.name, fuel.temperature), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close})
       else
-      table.insert(tooltip, {"", "\n", string.format("[%s=%s]", fuel.type, fuel.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close})
+        table.insert(tooltip, {"", "\n", string.format("[%s=%s]", fuel.type, fuel.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close})
       end
   end
   if element.module_priority then
@@ -587,7 +587,8 @@ function GuiTooltipBuilding:create()
       ---factories
       for _, element in pairs(block.summary.factories) do
         if #tooltip < 19 then
-          table.insert(tooltip, {"", "\n", string.format("[%s=%s]", element.type, element.name), " ", helmod_tag.font.default_bold, "x ", element.count, helmod_tag.font.close})
+          local element_sprite = GuiElement.getSprite(element.type, element.name, "[%s=%s]")
+          table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.font.default_bold, "x ", element.count, helmod_tag.font.close})
         else
           overflow = true
         end
@@ -596,7 +597,8 @@ function GuiTooltipBuilding:create()
       ---beacons
       for _, element in pairs(block.summary.beacons) do
         if #tooltip < 19 then
-          table.insert(tooltip, {"", "\n", string.format("[%s=%s]", element.type, element.name), " ", helmod_tag.font.default_bold, "x ", element.count, helmod_tag.font.close})
+          local element_sprite = GuiElement.getSprite(element.type, element.name, "[%s=%s]")
+          table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.font.default_bold, "x ", element.count, helmod_tag.font.close})
         else
           overflow = true
         end
@@ -604,7 +606,8 @@ function GuiTooltipBuilding:create()
 
       for _, element in pairs(block.summary.modules) do
         if #tooltip < 19 then
-          table.insert(tooltip, {"", "\n", string.format("[%s=%s]", element.type, element.name), " ", helmod_tag.font.default_bold, "x ", element.count, helmod_tag.font.close})
+          local element_sprite = GuiElement.getSprite(element.type, element.name, "[%s=%s]")
+          table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.font.default_bold, "x ", element.count, helmod_tag.font.close})
         else
           overflow = true
         end
@@ -652,7 +655,8 @@ function GuiTooltipModule:create()
     local module_prototype = ItemPrototype(self.m_element.name)
     local module = module_prototype:native()
     if module ~= nil then
-      table.insert(tooltip, {"", "\n", string.format("[%s=%s]", self.m_element.type, self.m_element.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, module_prototype:getLocalisedName(), helmod_tag.font.close, helmod_tag.color.close})
+      local element_sprite = GuiElement.getSprite(self.m_element.type, self.m_element.name, "[%s=%s]")
+      table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, module_prototype:getLocalisedName(), helmod_tag.font.close, helmod_tag.color.close})
       local bonus_consumption = Player.getModuleBonus(module.name, "consumption")
       local bonus_speed = Player.getModuleBonus(module.name, "speed")
       local bonus_productivity = Player.getModuleBonus(module.name, "productivity")
@@ -699,7 +703,8 @@ function GuiTooltipPriority:create()
   if self.m_element then
     for i,priority in pairs(self.m_element) do
       local module_prototype = ItemPrototype(priority.name)
-      table.insert(tooltip, {"", "\n", string.format("[%s=%s]", "item", priority.name), " ", helmod_tag.font.default_bold, priority.value, " x ", helmod_tag.font.close, helmod_tag.color.gold, module_prototype:getLocalisedName(), helmod_tag.color.close})
+      local element_sprite = GuiElement.getSprite("item", priority.name, "[%s=%s]")
+      table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.font.default_bold, priority.value, " x ", helmod_tag.font.close, helmod_tag.color.gold, module_prototype:getLocalisedName(), helmod_tag.color.close})
     end
   end
   return tooltip
@@ -728,7 +733,8 @@ end
 function GuiTooltipPriorities.AppendPriority(tooltip, element)
   local type = "entity"
   local prototype = EntityPrototype(element)
-  table.insert(tooltip, {"", "\n", string.format("[%s=%s]", type, element.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, prototype:getLocalisedName(), helmod_tag.font.close, helmod_tag.color.close})
+  local element_sprite = GuiElement.getSprite(type, element.name, "[%s=%s]")
+  table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, prototype:getLocalisedName(), helmod_tag.font.close, helmod_tag.color.close})
   if element.module_priority then
       for _, module_priority in pairs(element.module_priority) do
       local module_prototype = ItemPrototype(module_priority.name)
