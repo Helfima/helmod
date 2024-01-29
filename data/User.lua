@@ -530,17 +530,17 @@ end
 
 -------------------------------------------------------------------------------
 ---Get main sizes
----@return number, number
+---@return number, number, number
 function User.getMainSizes()
-  local width , height = Player.getDisplaySizes()
+  local width , height, scale = Player.getDisplaySizes()
   local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
   local display_ratio_vertictal = User.getModSetting("display_ratio_vertical")
   if type(width) == "number" and  type(height) == "number" then
     local width_main = math.ceil(width*display_ratio_horizontal)
     local height_main = math.ceil(height*display_ratio_vertictal)
-    return width_main, height_main
+    return width_main, height_main, scale
   end
-  return 800,600
+  return 800, 600, scale
 end
 
 -------------------------------------------------------------------------------

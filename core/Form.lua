@@ -19,7 +19,9 @@ end)
 -------------------------------------------------------------------------------
 ---Style
 function Form:style()
-  local width_main, height_main = User.getMainSizes()
+  local display_width, display_height, scale = User.getMainSizes()
+  local width_main = display_width/scale
+  local height_main = display_height/scale
   self.styles = {
     flow_panel ={
       width = width_main,
@@ -477,8 +479,8 @@ end
 ---Update location
 ---@param event LuaEvent
 function Form:updateLocation(event)
-  local width , height = Player.getDisplaySizes()
-  local width_main, height_main = User.getMainSizes()
+  local display_width, display_height, scale = Player.getDisplaySizes()
+  local width_main, height_main, scale = User.getMainSizes()
   local flow_panel, content_panel, menu_panel = self:getPanel()
   if User.getPreferenceSetting("ui_glue") == true and User.getPreferenceSetting("ui_glue", self.classname) == true then
     local offset = User.getPreferenceSetting("ui_glue_offset")
@@ -487,16 +489,16 @@ function Form:updateLocation(event)
     if navigate[User.tab_name] ~= nil and navigate[User.tab_name]["location"] ~= nil then
       location = navigate[User.tab_name]["location"]
     end
-    local location_x = location.x + width_main + width*offset
+    local location_x = location.x + width_main/scale + display_width*offset/scale
     flow_panel.location = {location_x, y=location.y}
   end
 
   local location = flow_panel.location
-  if location.x < 0 or location.x > (width - 100) then
+  if location.x < 0 or location.x > (display_width - 50)/scale then
     location.x = 0
     flow_panel.location = location
   end
-  if location.y < 0 or location.y > (height - 50) then
+  if location.y < 0 or location.y > (display_height - 50)/scale then
     location.y = 50
     flow_panel.location = location
   end

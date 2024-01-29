@@ -181,8 +181,8 @@ end
 function GuiElement.getIndexColumnNumber()
 
   local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
-  local width , height = Player.getDisplaySizes()
-  local width_main = math.ceil(width*display_ratio_horizontal)
+  local width , height, scale = Player.getDisplaySizes()
+  local width_main = math.ceil(width*display_ratio_horizontal/scale)
 
   return math.ceil((width_main - 100)/36)
 end
@@ -194,8 +194,8 @@ end
 function GuiElement.getElementColumnNumber(size)
 
   local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
-  local width , height = Player.getDisplaySizes()
-  local width_main = math.ceil(width*display_ratio_horizontal)
+  local width , height, scale = Player.getDisplaySizes()
+  local width_main = math.ceil(width*display_ratio_horizontal/scale)
   return math.max(5, math.floor((width_main-600)/(2*size)))
 end
 
