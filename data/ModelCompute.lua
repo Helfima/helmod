@@ -713,7 +713,7 @@ function ModelCompute.computeSummaryFactory(block)
             if block.summary.factories[factory.name] == nil then
                 block.summary.factories[factory.name] = {
                     name = factory.name,
-                    type = "item",
+                    type = factory.type or "entity",
                     count = 0
                 }
             end
@@ -741,7 +741,7 @@ function ModelCompute.computeSummaryFactory(block)
                     if block.summary.beacons[beacon.name] == nil then
                         block.summary.beacons[beacon.name] = {
                             name = beacon.name,
-                            type = "item",
+                            type = beacon.type or "entity",
                             count = 0
                         }
                     end
