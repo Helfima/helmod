@@ -251,7 +251,7 @@ function SolverMatrixSimplex:table_compute(matrix, matrix_result)
 	---preparation input
 	self:prepare_z_and_objectives(matrix, false)
 
-	---preparation de la colonne R et P
+	---preparation du resultat
 	for irow, _ in pairs(matrix.rows) do
 		if irow < #matrix.rows then
 			---colonne correspondant a la recette
