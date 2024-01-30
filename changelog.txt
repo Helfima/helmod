@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
-Version: 0.12.??
-Date: 2024-01-29
+Version: 0.12.23
+Date: 2024-01-30
   Bugfixes:
     - Fix relocation form with UI scale
     - Fix not found tooltip sprite
