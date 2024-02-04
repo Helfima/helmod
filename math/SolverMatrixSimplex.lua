@@ -263,6 +263,15 @@ function SolverMatrixSimplex:table_compute(matrix, matrix_result)
 		end
 	end
 
+	---remove recipe helmod-temperature-convert
+	for irow = #matrix_result.headers, 1, -1 do
+		local header = matrix_result.headers[irow]
+		if header.name == "helmod-temperature-convert" then
+			table.remove(matrix_result.headers, irow)
+			table.remove(matrix_result.rows, irow)
+		end
+	end
+
 	---initialise les valeurs des produits par second
 	for irow, row in pairs(matrix.rows) do
 		if irow < #matrix.rows then
