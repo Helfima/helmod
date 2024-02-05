@@ -25,7 +25,6 @@
 ---@field consumption number
 ---@field pollution number
 
-
 ---@class FactoryData
 ---@field name string
 ---@field type string
@@ -48,6 +47,12 @@
 ---@field per_factory number
 ---@field per_factory_constant number
 
+---@class ProductData
+---@field name string
+---@field type string
+---@field count number
+---@field state number
+
 ---@class RecipeData
 ---@field id string
 ---@field index uint
@@ -67,6 +72,21 @@
 ---@field effects ModuleEffectsData
 
 ---@class BlockData
+---@field id string
+---@field index number
+---@field name string
+---@field type string
+---@field owner string
+---@field count number
+---@field power number
+---@field pollution_total number
+---@field isEnergy boolean
+---@field unlinked boolean
+---@field by_product boolean
+---@field time number
+---@field ingredients {[string] : ProductData}
+---@field products {[string] : ProductData}
+---@field recipes {[string] : RecipeData}
 
 ---@class ModelData
 ---@field id string
@@ -77,9 +97,9 @@
 ---@field block_id number
 ---@field recipe_id number
 ---@field resource_id number
----@field blocks any
----@field ingredients any
----@field products any
+---@field blocks {[string] : BlockData}
+---@field ingredients {[string] : ProductData}
+---@field products {[string] : ProductData}
 ---@field ressources any
 ---@field summary any
 ---@field generators any
