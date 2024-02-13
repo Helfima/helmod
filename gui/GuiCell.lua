@@ -567,14 +567,16 @@ function GuiCellBlockInfo:create(parent)
 
   if element.limit_count ~= nil then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_product", color, 2))
-    local caption2 = Format.formatNumberFactory(element.limit_count)
-    if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_count) end
+    local limit_count = element.limit_count or 0
+    local caption2 = Format.formatNumberFactory(limit_count)
+    if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(limit_count) end
     GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element"):tooltip({"helmod_common.total"}))
   end
 
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
-  local caption3 = Format.formatNumberFactory(element.count)
-  if display_cell_mod == "by-kilo" then caption3 = Format.formatNumberKilo(element.count) end
+  local count = element.count or 0
+  local caption3 = Format.formatNumberFactory(count)
+  if display_cell_mod == "by-kilo" then caption3 = Format.formatNumberKilo(count) end
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
 
   return cell
@@ -680,13 +682,21 @@ function GuiCellBuilding:create(parent)
 
   if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_product", color, 2))
-    local caption2 = Format.formatNumber(element.summary.limit_building or 0)
-    if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.summary.limit_building) end
+    local limit_building = 0
+    if element.summary ~= nil then
+      limit_building = element.summary.limit_building or 0
+    end
+    local caption2 = Format.formatNumber(limit_building)
+    if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(limit_building) end
     GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element"):tooltip({"helmod_common.total"}))
   end
 
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
-  local caption3 = Format.formatNumber(element.summary.building)
+  local building = 0
+  if element.summary ~= nil then
+    building = element.summary.building or 0
+  end
+  local caption3 = Format.formatNumber(building)
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
 
   return cell

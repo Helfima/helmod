@@ -633,7 +633,7 @@ end)
 function GuiTooltipBlock:create()
   local tooltip = self._super.create(self)
   if self.m_element then
-    local quantity = self.m_element.count
+    local quantity = self.m_element.count or 0
     table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.quantity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, quantity, helmod_tag.font.close})
   end
   return tooltip

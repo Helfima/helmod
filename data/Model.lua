@@ -121,6 +121,7 @@ function Model.newModel()
   if owner == nil or owner == "" then owner = "admin" end
   global.model_id = global.model_id + 1
   local model = {}
+  model.class = "Model"
   model.id = "model_"..global.model_id
   model.owner = owner
   model.blocks = {}
@@ -230,6 +231,7 @@ end
 ---@return table
 function Model.newBeacon(name, count)
   local beaconModel = {}
+  beaconModel.class = "Beacon"
   beaconModel.name = name or "beacon"
   beaconModel.type = "entity"
   beaconModel.count = count or 0
@@ -251,6 +253,7 @@ end
 ---@return table
 function Model.newFactory(name, count)
   local factoryModel = {}
+  factoryModel.class = "Factory"
   factoryModel.name = name or "assembling-machine-1"
   factoryModel.type = "entity"
   factoryModel.count = count or 0
@@ -290,7 +293,7 @@ end
 ---@param value string
 ---@param excluded boolean
 ---@param index number
----@return Table
+---@return table
 function Model.newRule(mod, name, category, type, value, excluded, index)
   local rule_model = {}
   rule_model.mod = mod
@@ -328,6 +331,7 @@ function Model.newRecipe(model, name, type)
   model.recipe_id = model.recipe_id + 1
 
   local recipeModel = {}
+  recipeModel.class = "Recipe"
   recipeModel.id = "R"..model.recipe_id
   recipeModel.index = 1
   recipeModel.name = name

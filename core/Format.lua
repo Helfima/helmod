@@ -51,7 +51,7 @@ end
 -------------------------------------------------------------------------------
 ---Format the number
 ---@param value number the number
----@param suffix string
+---@param suffix? string
 ---@return string --formated number
 function Format.formatNumberKilo(value, suffix)
   if suffix == nil then suffix = "" end

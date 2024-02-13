@@ -137,7 +137,11 @@ end
 ---Get options
 ---@return table
 function GuiElement:getOptions()
-  self.options.name = table.concat(self.name,"=")
+  if type(self.name) == "table" then
+    self.options.name = table.concat(self.name,"=")
+  else
+    self.options.name = self.name
+  end
   if self.is_caption then
     self.options.caption = self.m_caption
   end
