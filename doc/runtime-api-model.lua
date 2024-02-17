@@ -52,6 +52,7 @@
 ---@field type string
 ---@field count number
 ---@field state number
+---@field input number
 
 ---@class RecipeData
 ---@field id string
@@ -83,10 +84,12 @@
 ---@field isEnergy boolean
 ---@field unlinked boolean
 ---@field by_product boolean
+---@field by_factory boolean
+---@field by_limit boolean
 ---@field time number
 ---@field ingredients {[string] : ProductData}
 ---@field products {[string] : ProductData}
----@field recipes {[string] : RecipeData}
+---@field recipes {[string] : RecipeData | BlockData}
 
 ---@class ModelData
 ---@field id string
@@ -97,6 +100,7 @@
 ---@field block_id number
 ---@field recipe_id number
 ---@field resource_id number
+---@field block_root BlockData
 ---@field blocks {[string] : BlockData}
 ---@field ingredients {[string] : ProductData}
 ---@field products {[string] : ProductData}

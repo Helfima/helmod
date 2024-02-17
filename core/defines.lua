@@ -30,6 +30,11 @@ defines.sprite_tooltip["expand_right"] = defines.sprites.tooltip_expand_right.ye
 defines.sprite_tooltip["expand_right_group"] = defines.sprites.tooltip_expand_right_group.yellow
 defines.sprite_tooltip["pipette"] = defines.sprites.tooltip_pipette.yellow
 
+defines.sorters = {}
+defines.sorters.block = {}
+defines.sorters.block.sort = function(t, a, b) return t[b]["index"] > t[a]["index"] end
+defines.sorters.block.reverse = function(t, a, b) return t[b]["index"] < t[a]["index"] end
+
 defines.constant = {}
 defines.constant.solvers = {}
 defines.constant.solvers.normal = "normal"
@@ -406,7 +411,7 @@ defines.constant.settings_mod = {
     localised_name = {"helmod_map_settings.display-hidden-column"},
     localised_description = {"helmod_map_settings.display-hidden-column-desc"},
     default_value = "None",
-    allowed_values = {"None","Type and Name","All"},
+    allowed_values = {"None", "Index and Id", "Type and Name", "All"},
     order = "f2"
   }
 }

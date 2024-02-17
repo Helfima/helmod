@@ -129,12 +129,39 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
 end
 
 -------------------------------------------------------------------------------
----Remove a model
----@param model table
----@param block table
----@param recipe table
+---Move down block in the tree
+---@param model ModelData
+---@param parent BlockData
+---@param block BlockData
 ---@param with_below boolean
-function ModelBuilder.convertRecipeToblock(model, block, recipe, with_below)
+function ModelBuilder.updateTreeBlockDown(model, parent, block, with_below)
+end
+
+-------------------------------------------------------------------------------
+---Move down block in the tree
+---@param model ModelData
+---@param parent BlockData
+---@param block BlockData
+---@param with_below boolean
+function ModelBuilder.updateTreeBlockUp(model, parent, block, with_below)
+end
+
+-------------------------------------------------------------------------------
+---Move down recipe in the tree
+---@param model ModelData
+---@param block BlockData
+---@param recipe RecipeData
+---@param with_below boolean
+function ModelBuilder.updateTreeRecipeDown(model, block, recipe, with_below)
+end
+
+-------------------------------------------------------------------------------
+---Move up recipe in the tree
+---@param model ModelData
+---@param block BlockData
+---@param recipe RecipeData
+---@param with_below boolean
+function ModelBuilder.updateTreeRecipeUp(model, block, recipe, with_below)
     local new_block = Model.newBlock(model, recipe)
     local block_index = table.size(model.blocks)
     new_block.index = block_index
@@ -145,28 +172,36 @@ function ModelBuilder.convertRecipeToblock(model, block, recipe, with_below)
     new_block.by_limit = block.by_limit
     model.blocks[new_block.id] = new_block
 
-    local sorter = function(t, a, b) return t[b]["index"] > t[a]["index"] end
-    if block.by_product == false then sorter = function(t, a, b) return t[b]["index"] < t[a]["index"] end end
+    local sorter = defines.sorters.block.sort
+    if block.by_product == false then sorter = defines.sorters.block.reverse end
     local start_index = recipe.index
-    for _, block_recipe in spairs(block.recipes, sorter) do
-        if
-            (block_recipe.index == start_index)
-            or ((block.by_product == false) == (block_recipe.index < start_index))
-        then
-            ---clean block
-            block.recipes[block_recipe.id] = nil
-            ---add recipe
-            block_recipe.index = table.size(new_block.recipes)
-            new_block.recipes[block_recipe.id] = block_recipe
-
+    local started = false
+    for _, child in spairs(block.recipes, sorter) do
+        if started == true then
             if with_below ~= true then
                 break
             end
+            -- update index
+            child.index = table.size(new_block.recipes)
+            -- clean block
+            block.recipes[child.id] = nil
+            -- add child
+            new_block.recipes[child.id] = child
+        end
+        if child == recipe and started == false then
+            -- clean block
+            block.recipes[child.id] = nil
+            -- update index
+            new_block.index = child.index
+            child.index = table.size(new_block.recipes)
+            -- add block
+            block.recipes[new_block.id] = new_block
+            new_block.recipes[child.id] = child
+            started = true
         end
     end
-    local block_products, block_ingredients = ModelCompute.prepareBlock(new_block)
-    new_block.products = block_products
-    new_block.ingredients = block_ingredients
+
+    ModelCompute.prepareBlockElements(new_block)
     ---check si le block est independant
     ModelCompute.checkUnlinkedBlock(model, new_block)
 end

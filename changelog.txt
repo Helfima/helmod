@@ -1,5 +1,12 @@
 ---------------------------------------------------------------------------------------------------
-Version: 0.12.??
+Version: 1.0.0
+Date: 2024-03-01
+  Features:
+    - Major change: Production Line is a tree of Production Blocks and recipes
+  Changes:
+    - Model version set 1
+---------------------------------------------------------------------------------------------------
+Version: 0.12.23
 Date: 2024-01-29
   Bugfixes:
     - Fix relocation form with UI scale

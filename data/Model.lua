@@ -4,7 +4,7 @@
 local Model = {
   ---single-line comment
   classname = "HMModel",
-  version = "0.9.35",
+  version = 1,
   beacon_combo = 4,
   beacon_factory = 0.5,
   beacon_factory_constant = 3
@@ -204,24 +204,28 @@ end
 
 -------------------------------------------------------------------------------
 ---Create model Production Block
----@param model table
----@param recipe table
----@return table
+---@param model ModelData
+---@param recipe RecipeData
+---@return BlockData
 function Model.newBlock(model, recipe)
   if model.block_id == nil then model.block_id = 0 end
   model.block_id = model.block_id + 1
 
-  local inputModel = {}
-  inputModel.id = "block_"..model.block_id
-  inputModel.name = recipe.name
-  inputModel.owner = Player.native().name
-  inputModel.count = 1
-  inputModel.power = 0
-  inputModel.ingredients = {}
-  inputModel.products = {}
-  inputModel.recipes = {}
+  local blockModel = {}
+  blockModel.class = "Block"
+  blockModel.id = "block_"..model.block_id
+  blockModel.index = 1
+  blockModel.name = recipe.name
+  blockModel.owner = Player.native().name
+  blockModel.count = 1
+  blockModel.power = 0
+  blockModel.ingredients = {}
+  blockModel.products = {}
+  blockModel.recipes = {}
+  blockModel.energy_total = 0
+  blockModel.pollution_total = 0
 
-  return inputModel
+  return blockModel
 end
 
 -------------------------------------------------------------------------------
