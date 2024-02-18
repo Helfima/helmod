@@ -19,26 +19,23 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
     local lua_recipe = recipe_prototype:native()
 
     if lua_recipe ~= nil then
-        local block_types = true
         ---ajoute le bloc si il n'existe pas
-        if block == nil then
-            local modelBlock = Model.newBlock(model, lua_recipe)
-            local block_index = table.size(model.blocks)
-            modelBlock.index = block_index
-            modelBlock.unlinked = false
-            block = modelBlock
-            model.blocks[modelBlock.id] = modelBlock
-            ---check si le block est independant
-            ModelCompute.checkUnlinkedBlock(model, modelBlock)
-            block_types = false
-        end
+        -- if block == nil then
+        --     local modelBlock = Model.newBlock(model, lua_recipe)
+        --     local block_index = table.size(model.blocks)
+        --     modelBlock.index = block_index
+        --     modelBlock.unlinked = false
+        --     block = modelBlock
+        --     model.blocks[modelBlock.id] = modelBlock
+        --     ---check si le block est independant
+        --     ModelCompute.checkUnlinkedBlock(model, modelBlock)
+        --     block_types = false
+        -- end
 
-        ---ajoute le recipe si il n'existe pas
+        -- add recipe
         local ModelRecipe = Model.newRecipe(model, lua_recipe.name, recipe_type)
         local icon_name, icon_type = recipe_prototype:getIcon()
-        if not (block_types) then
-            block.type = icon_type
-        end
+        
         if index == nil then
             local recipe_index = table.size(block.recipes)
             ModelRecipe.index = recipe_index
@@ -50,11 +47,13 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
                 end
             end
         end
+        
         if ModelRecipe.index == 0 then
             ---change block name
             block.name = icon_name
             block.type = icon_type
         end
+        
         ModelRecipe.count = 1
 
         if recipe_type ~= "energy" then
@@ -80,48 +79,8 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
             Model.setFactory(ModelRecipe, recipe_name)
         end
 
-        local recipe_products
-        local recipe_ingredients
-        local block_products
-        local block_ingredients
-
-        if block.by_product == false then
-            recipe_products = recipe_prototype:getIngredients(ModelRecipe.factory)
-            recipe_ingredients = recipe_prototype:getProducts()
-            block_products = block.ingredients
-            block_ingredients = block.products
-        else
-            recipe_products = recipe_prototype:getProducts()
-            recipe_ingredients = recipe_prototype:getIngredients(ModelRecipe.factory)
-            block_products = block.products
-            block_ingredients = block.ingredients
-        end
-
-        ---ajoute les produits du block
-        for _, lua_product in pairs(recipe_products) do
-            local product = Product(lua_product):clone()
-            local element_key = Product(lua_product):getTableKey()
-            if block_products[element_key] == nil then
-                if block_ingredients[element_key] ~= nil then
-                    product.state = 2
-                else
-                    product.state = 1
-                end
-                block_products[element_key] = product
-            end
-        end
-
-        ---ajoute les ingredients du block
-        for _, lua_ingredient in pairs(recipe_ingredients) do
-            local ingredient = Product(lua_ingredient):clone()
-            local element_key = Product(lua_ingredient):getTableKey()
-            if block_ingredients[element_key] == nil then
-                block_ingredients[element_key] = ingredient
-                if block_products[element_key] ~= nil and block_products[element_key].state == 1 then
-                    block_products[element_key].state = 2
-                end
-            end
-        end
+        ModelCompute.prepareBlockElements(block)
+        
         block.recipes[ModelRecipe.id] = ModelRecipe
 
         return block, ModelRecipe
@@ -135,6 +94,7 @@ end
 ---@param block BlockData
 ---@param with_below boolean
 function ModelBuilder.updateTreeBlockDown(model, parent, block, with_below)
+    ModelBuilder.updateTreeRecipeDown(model, parent, block, with_below)
 end
 
 -------------------------------------------------------------------------------
@@ -153,6 +113,40 @@ end
 ---@param recipe RecipeData
 ---@param with_below boolean
 function ModelBuilder.updateTreeRecipeDown(model, block, recipe, with_below)
+    local parent_block = model.blocks[block.parent_id] or model.block_root
+
+    local sorter = defines.sorters.block.sort
+    if block.by_product == false then sorter = defines.sorters.block.reverse end
+    local start_index = recipe.index
+    local started = false
+    for _, child in spairs(block.recipes, sorter) do
+        if started == true then
+            if with_below ~= true then
+                break
+            end
+           -- clean block
+           block.recipes[child.id] = nil
+           -- update index
+           child.index = table.size(parent_block.recipes)
+           -- add into block
+           parent_block.recipes[child.id] = child
+           child.parent_id = parent_block.id
+        end
+        if child == recipe and started == false then
+            -- clean block
+            block.recipes[child.id] = nil
+            -- update index
+            child.index = table.size(parent_block.recipes)
+            -- add into block
+            parent_block.recipes[child.id] = child
+            child.parent_id = parent_block.id
+            started = true
+        end
+    end
+
+    ModelCompute.prepareBlockElements(parent_block)
+    ModelCompute.prepareBlockElements(block)
+    
 end
 
 -------------------------------------------------------------------------------
@@ -165,7 +159,6 @@ function ModelBuilder.updateTreeRecipeUp(model, block, recipe, with_below)
     local new_block = Model.newBlock(model, recipe)
     local block_index = table.size(model.blocks)
     new_block.index = block_index
-    new_block.type = block.type
     new_block.unlinked = block.by_factory and true or false
     new_block.by_factory = block.by_factory
     new_block.by_product = block.by_product
@@ -196,6 +189,7 @@ function ModelBuilder.updateTreeRecipeUp(model, block, recipe, with_below)
             child.index = table.size(new_block.recipes)
             -- add block
             block.recipes[new_block.id] = new_block
+            new_block.parent_id = block.id
             new_block.recipes[child.id] = child
             started = true
         end
@@ -650,44 +644,6 @@ function ModelBuilder.removeFactoryModule(recipe, module_name, module_max)
 end
 
 -------------------------------------------------------------------------------
----Remove a production block
----@param model table
----@param block table
-function ModelBuilder.removeProductionBlock(model, block)
-    if block ~= nil then
-        model.blocks[block.id] = nil
-        table.reindex_list(model.blocks)
-        for _, block in pairs(model.blocks) do
-            if block.index == 0 then
-                block.unlinked = true
-                break
-            end
-        end
-    end
-end
-
--------------------------------------------------------------------------------
----Remove a production recipe
----@param block table
----@param recipe RecipeData
-function ModelBuilder.removeProductionRecipe(block, recipe)
-    if block ~= nil and block.recipes[recipe.id] ~= nil then
-        block.recipes[recipe.id] = nil
-        table.reindex_list(block.recipes)
-        ---change block name
-        local first_recipe = Model.firstRecipe(block.recipes)
-        if first_recipe ~= nil then
-            local recipe_prototype = RecipePrototype(first_recipe)
-            local icon_name, icon_type = recipe_prototype:getIcon()
-            block.name = icon_name
-            block.type = icon_type
-        else
-            block.name = ""
-        end
-    end
-end
-
--------------------------------------------------------------------------------
 ---Past model
 ---@param into_model table
 ---@param into_block table
@@ -944,25 +900,6 @@ function ModelBuilder.removeBeaconModule(beacon, recipe, module_name, module_max
 end
 
 -------------------------------------------------------------------------------
----Unlink a production block
----@param block table
-function ModelBuilder.unlinkProductionBlock(block)
-    if block ~= nil then
-        block.unlinked = not (block.unlinked)
-        if not block.unlinked then
-            for i, ingredient in pairs(block.ingredients) do
-                ingredient.input = 0
-                ingredient.count = 0
-            end
-            for i, product in pairs(block.products) do
-                product.input = 0
-                product.count = 0
-            end
-        end
-    end
-end
-
--------------------------------------------------------------------------------
 ---Update a product
 ---@param block table
 ---@param product_name string
@@ -998,34 +935,30 @@ function ModelBuilder.updateProductionBlockOption(block, option, value)
 end
 
 -------------------------------------------------------------------------------
----Up a production block
----@param model table
----@param block table
----@param step number
-function ModelBuilder.upProductionBlock(model, block, step)
-    if model ~= nil and block ~= nil then
-        table.up_indexed_list(model.blocks, block.index, step)
-        if block.index == 0 then
-            block.unlinked = true
-        end
+---Remove a child of block
+---@param block BlockData
+---@param child RecipeData | BlockData
+function ModelBuilder.blockChildRemove(model, block, child)
+    if block ~= nil and block.recipes ~= nil and block.recipes[child.id] ~= nil then
+        ModelBuilder.blockChildDeepRemove(model, child)
+        block.recipes[child.id] = nil
+        table.reindex_list(block.recipes)
+        ---change block name
+        ModelBuilder.blockUpdateIcon(block)
     end
 end
 
 -------------------------------------------------------------------------------
----Down a production block
----@param model table
----@param block table
----@param step number
-function ModelBuilder.downProductionBlock(model, block, step)
-    if model ~= nil and block ~= nil then
-        table.down_indexed_list(model.blocks, block.index, step)
-        for _, block in pairs(model.blocks) do
-            if block.index == 0 then
-                block.unlinked = true
-                break
-            end
+---Remove all child block of block
+---@param child RecipeData | BlockData
+function ModelBuilder.blockChildDeepRemove(model, child)
+    local is_block = string.find(child.id, "block")
+    if is_block and child ~= nil and child.recipes ~= nil then
+        for _, subChild in pairs(child.recipes) do
+            ModelBuilder.blockChildDeepRemove(model, subChild)
         end
     end
+    model.blocks[child.id] = nil
 end
 
 -------------------------------------------------------------------------------
@@ -1033,17 +966,11 @@ end
 ---@param block table
 ---@param recipe RecipeData
 ---@param step number
-function ModelBuilder.upProductionRecipe(block, recipe, step)
+function ModelBuilder.blockChildUp(block, recipe, step)
     if block ~= nil and block.recipes ~= nil and recipe ~= nil then
         table.up_indexed_list(block.recipes, recipe.index, step)
         ---change block name
-        local first_recipe = Model.firstRecipe(block.recipes)
-        if first_recipe ~= nil then
-            local recipe_prototype = RecipePrototype(first_recipe)
-            local icon_name, icon_type = recipe_prototype:getIcon()
-            block.name = icon_name
-            block.type = icon_type
-        end
+        ModelBuilder.blockUpdateIcon(block)
     end
 end
 
@@ -1052,16 +979,42 @@ end
 ---@param block table
 ---@param recipe RecipeData
 ---@param step number
-function ModelBuilder.downProductionRecipe(block, recipe, step)
+function ModelBuilder.blockChildDown(block, recipe, step)
     if block ~= nil and block.recipes ~= nil and recipe ~= nil then
         table.down_indexed_list(block.recipes, recipe.index, step)
         ---change block name
+        ModelBuilder.blockUpdateIcon(block)
+    end
+end
+
+-------------------------------------------------------------------------------
+---Down a production recipe
+---@param block table
+function ModelBuilder.blockUpdateIcon(block)
+    if block ~= nil and block.recipes ~= nil then
         local first_recipe = Model.firstRecipe(block.recipes)
         if first_recipe ~= nil then
-            local recipe_prototype = RecipePrototype(first_recipe)
-            local icon_name, icon_type = recipe_prototype:getIcon()
-            block.name = icon_name
-            block.type = icon_type
+            block.name = first_recipe.name
+            block.type = first_recipe.type
+        end
+    end
+end
+
+-------------------------------------------------------------------------------
+---Unlink a block
+---@param block table
+function ModelBuilder.blockUnlink(block)
+    if block ~= nil then
+        block.unlinked = not (block.unlinked)
+        if not block.unlinked then
+            for i, ingredient in pairs(block.ingredients) do
+                ingredient.input = 0
+                ingredient.count = 0
+            end
+            for i, product in pairs(block.products) do
+                product.input = 0
+                product.count = 0
+            end
         end
     end
 end

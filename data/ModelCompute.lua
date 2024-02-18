@@ -352,7 +352,7 @@ function ModelCompute.prepareBlockElements(block)
             local child_ingredients = nil
             if is_block then
                 child_products = child.products
-                child_ingredients = child.products
+                child_ingredients = child.ingredients
             else
                 local recipe_prototype = RecipePrototype(child)
                 child_products = recipe_prototype:getProducts(child.factory)

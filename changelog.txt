@@ -3,6 +3,7 @@ Version: 1.0.0
 Date: 2024-03-01
   Features:
     - Major change: Production Line is a tree of Production Blocks and recipes
+    - Added move row into parent block or new block
   Changes:
     - Model version set 1
 ---------------------------------------------------------------------------------------------------

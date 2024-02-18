@@ -529,7 +529,7 @@ function GuiCellModel:create(parent)
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
 
-  local first_block = Model.firstRecipe(element.blocks)
+  local first_block = element.block_root or Model.firstRecipe(element.blocks)
   if first_block ~= nil and first_block.name ~= "" then
     local tooltip = GuiTooltipModel(self.options.tooltip):element(element)
     local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_block.type, first_block.name):tooltip(tooltip))

@@ -124,6 +124,7 @@ function Model.newModel()
   model.class = "Model"
   model.id = "model_"..global.model_id
   model.owner = owner
+  model.block_root = Model.newBlock(model, { name = model.id, energy_total = 0, pollution_total = 0, summary = {} })
   model.blocks = {}
   model.ingredients = {}
   model.resources = {}
@@ -173,19 +174,23 @@ function Model.getParameterObjects(parameter)
     if parameter.model ~= nil and global.models[parameter.model] ~= nil then
       local model = global.models[parameter.model]
       local block, recipe
-      if model ~= nil and parameter.block ~= nil and model.blocks ~= nil then
+      if parameter.block ~= nil and model ~= nil and model.blocks ~= nil then
         block = model.blocks[parameter.block]
-        if block ~= nil and parameter.recipe ~= nil and block.recipes ~= nil then
-          recipe = block.recipes[parameter.recipe]
+        if block == nil and parameter.block == model.block_root.id then
+          block = model.block_root
         end
+      end
+      if parameter.recipe ~= nil and block ~= nil and  block.recipes ~= nil then
+        recipe = block.recipes[parameter.recipe]
       end
       return model, block, recipe
     else
       ---initialisation parameter
       local model = Model.getLastModel()
       if model == nil then model = Model.newModel() end
-      User.setParameter(parameter.name, {name=parameter.name, model=model.id})
-      return model
+      local parameterObjects = {name=parameter.name, model=model.id, block = model.block_root.id}
+      User.setParameter(parameter.name, parameterObjects)
+      return model, model.block_root, nil
     end
   end
 end
@@ -214,8 +219,9 @@ function Model.newBlock(model, recipe)
   local blockModel = {}
   blockModel.class = "Block"
   blockModel.id = "block_"..model.block_id
-  blockModel.index = 1
+  blockModel.index = 0
   blockModel.name = recipe.name
+  blockModel.type = recipe.type
   blockModel.owner = Player.native().name
   blockModel.count = 1
   blockModel.power = 0
@@ -326,7 +332,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Create model Recipe
----@param model table
+---@param model ModelData
 ---@param name string
 ---@param type string
 ---@return table
@@ -351,7 +357,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Create model Resource
----@param model table
+---@param model ModelData
 ---@param name string
 ---@param type string
 ---@param count number
@@ -381,7 +387,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Set the beacon
----@param recipe table
+---@param recipe RecipeData
 ---@param name string
 ---@param combo number
 ---@param per_factory number
@@ -404,7 +410,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Set the beacon
----@param recipe table
+---@param recipe RecipeData
 ---@param index number
 ---@param name string
 ---@param combo number
@@ -428,9 +434,9 @@ end
 
 -------------------------------------------------------------------------------
 ---Set a factory
----@param recipe table
+---@param recipe RecipeData
 ---@param factory_name string
----@param factory_fuel table
+---@param factory_fuel string | FuelData
 function Model.setFactory(recipe, factory_name, factory_fuel)
   if recipe ~= nil then
     local factory_prototype = EntityPrototype(factory_name)
@@ -446,8 +452,8 @@ end
 
 -------------------------------------------------------------------------------
 ---Return first recipe of block
----@param recipes table
----@return table
+---@param recipes {[string] : RecipeData | BlockData}
+---@return RecipeData | BlockData
 function Model.firstRecipe(recipes)
   for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
     return recipe
@@ -456,8 +462,8 @@ end
 
 -------------------------------------------------------------------------------
 ---Return last recipe of block
----@param recipes table
----@return table
+---@param recipes {[string] : RecipeData | BlockData}
+---@return RecipeData | BlockData
 function Model.lastRecipe(recipes)
   for _, recipe in spairs(recipes,function(t,a,b) return t[b].index < t[a].index end) do
     return recipe
