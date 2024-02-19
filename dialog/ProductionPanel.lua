@@ -1361,17 +1361,23 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 
 	---products
 	local display_product_cols = User.getPreferenceSetting("display_product_cols") + 1
-	local cell_products = GuiElement.add(gui_table,
-		GuiTable("products", block.id):column(display_product_cols):style("helmod_table_list"))
+	local cell_products = GuiElement.add(gui_table, GuiTable("products", block.id):column(display_product_cols):style("helmod_table_list"))
 	cell_products.style.horizontally_stretchable = false
 	if block.products ~= nil then
-		for index, product in spairs(block.products, product_sorter) do
-			if ((product.state or 0) == 1 and block_by_product) or (product.count or 0) > ModelCompute.waste_value then
+		for index, lua_product in spairs(block.products, product_sorter) do
+			if ((lua_product.state or 0) == 1 and block_by_product) or (lua_product.count or 0) > ModelCompute.waste_value then
 				local block_id = "new"
 				local button_action = "production-recipe-product-add"
 				local button_tooltip = "tooltip.product"
 				local button_color = GuiElement.color_button_default_product
+				local product_prototype = Product(lua_product)
+				local product = product_prototype:clone()
 				product.time = model.time
+				product.count = lua_product.count * block.count
+				if block.by_limit == true and block.count > 1 then
+					product.limit_count = product.count / block.count
+				end
+
 				if not (block_by_product) then
 					button_action = "production-recipe-product-add"
 					button_tooltip = "tooltip.add-recipe"
@@ -1398,6 +1404,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 				else
 					button_color = GuiElement.color_button_default_product
 				end
+				
 				GuiElement.add(cell_products, GuiCellElement(self.classname, button_action, model.id, parent.id, block_id, product.name):element(product):tooltip(button_tooltip):color(button_color):index(index))
 			end
 		end
@@ -1407,13 +1414,20 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 	local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients", block.id):column(display_ingredient_cols))
 	cell_ingredients.style.horizontally_stretchable = false
 	if block.ingredients ~= nil then
-		for index, ingredient in spairs(block.ingredients, product_sorter) do
-			if ((ingredient.state or 0) == 1 and not (block_by_product)) or (ingredient.count or 0) > ModelCompute.waste_value then
+		for index, lua_ingredient in spairs(block.ingredients, product_sorter) do
+			if ((lua_ingredient.state or 0) == 1 and not (block_by_product)) or (lua_ingredient.count or 0) > ModelCompute.waste_value then
 				local block_id = "new"
 				local button_action = "production-recipe-ingredient-add"
 				local button_tooltip = "tooltip.ingredient"
 				local button_color = GuiElement.color_button_default_ingredient
+				local ingredient_prototype = Product(lua_ingredient)
+				local ingredient = ingredient_prototype:clone()
 				ingredient.time = model.time
+				ingredient.count = lua_ingredient.count * block.count
+				if block.by_limit == true and block.count > 1 then
+					ingredient.limit_count = ingredient.count / block.count
+				end
+
 				if block_by_product then
 					button_action = "production-recipe-ingredient-add"
 					button_tooltip = "tooltip.add-recipe"

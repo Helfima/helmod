@@ -307,29 +307,54 @@ function ModelCompute.prepareBlockObjectives(model, block)
         local children = block.recipes
         for _, child in spairs(children, defines.sorters.block.sort) do
             local is_block = child.recipes ~= nil
-            local child_products = nil
             if is_block then
-                child_products = child.products
-                for _, lua_product in pairs(child_products) do
+                local child_elements = nil
+                local factor = 1
+                if block.by_product == false then
+                    child_elements = child.ingredients
+                    factor = 1
+                else
+                    child_elements = child.products
+                end
+                for _, lua_product in pairs(child_elements) do
                     local product = Product(lua_product)
                     local element_key = product:getTableKey()
-                    local count = lua_product.count
-                    local objective = {}
-                    objective.key = element_key
-                    objective.value = count
-                    objectives_block[element_key] = objective
+                    local state = 0
+                    if block_elements[element_key] ~= nil then
+                        state = block_elements[element_key].state
+                    end
+                    if state == 1 then
+                        local count = lua_product.count
+                        local objective = {}
+                        objective.key = element_key
+                        objective.value = count * factor
+                        objectives_block[element_key] = objective
+                    end
                 end
             else
                 local recipe_prototype = RecipePrototype(child)
-                child_products = recipe_prototype:getProducts(child.factory)
-                for _, lua_product in pairs(child_products) do
+                local child_elements = nil
+                local factor = 1
+                if block.by_product == false then
+                    child_elements = recipe_prototype:getIngredients(child.factory)
+                    factor = 1
+                else
+                    child_elements = recipe_prototype:getProducts(child.factory)
+                end
+                for _, lua_product in pairs(child_elements) do
                     local product = Product(lua_product)
                     local element_key = product:getTableKey()
-                    local count = product:getAmount(child)
-                    local objective = {}
-                    objective.key = element_key
-                    objective.value = count
-                    objectives_block[element_key] = objective
+                    local state = 0
+                    if block_elements[element_key] ~= nil then
+                        state = block_elements[element_key].state
+                    end
+                    if state == 1 then
+                        local count = product:getAmount()
+                        local objective = {}
+                        objective.key = element_key
+                        objective.value = count * factor
+                        objectives_block[element_key] = objective
+                    end
                 end
             end
         end
