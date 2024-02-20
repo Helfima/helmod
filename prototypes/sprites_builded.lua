@@ -159,5 +159,14 @@ local mipmaps = {
 {name="three_rows_black", size=64, count=4},
 {name="parameter_white", size=64, count=4},
 {name="parameter_black", size=64, count=4},
+{name="branch_white", size=64, count=4},
+{name="branch_black", size=64, count=4},
+{name="branch_blue", size=64, count=4},
+{name="branch_next_white", size=64, count=4},
+{name="branch_next_black", size=64, count=4},
+{name="branch_next_blue", size=64, count=4},
+{name="branch_end_white", size=64, count=4},
+{name="branch_end_black", size=64, count=4},
+{name="branch_end_blue", size=64, count=4},
 }
 return mipmaps

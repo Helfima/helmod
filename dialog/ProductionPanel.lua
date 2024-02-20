@@ -994,35 +994,73 @@ local bar_thickness = 2
 function ProductionPanel:bluidTree(parent, model, parent_block, current_block)
 	if parent_block ~= nil and parent_block.recipes ~= nil then
 		local blocks = {}
-		for _, recipe in spairs(parent_block.recipes, function(t, a, b) return t[b]["index"] > t[a]["index"] end) do
-			local is_block = string.find(recipe.id, "block")
+		local sorter = defines.sorters.block.sort
+		for _, child in spairs(parent_block.recipes, sorter) do
+			local is_block = string.find(child.id, "block")
 			if is_block then
-				table.insert(blocks, recipe)
+				table.insert(blocks, child)
+				local has_sub_block = false
+				for _, sub_child in spairs(child.recipes, sorter) do
+					local is_sub_blocks = string.find(sub_child.id, "block")
+					has_sub_block = has_sub_block or is_sub_blocks
+				end
+				child.has_sub_block = has_sub_block
 			end
 		end
 		local index = 1
 		local size = table.size(blocks)
 
-		for _, block in spairs(blocks, function(t, a, b) return t[b]["index"] > t[a]["index"] end) do
+		for _, block in pairs(blocks) do
 			local tree_branch = GuiElement.add(parent, GuiFlowH())
-			-- vertical bar
-			local vbar = GuiElement.add(tree_branch, GuiFrameV("vbar"):style("helmod_frame_product", color_name, color_index))
-			vbar.style.width = bar_thickness
-			vbar.style.left_margin = 5
-			if index == size then
-				vbar.style.height = 12
-			else
-				vbar.style.vertically_stretchable = true
-				vbar.style.bottom_margin = 0
-			end
-			local hbar = GuiElement.add(tree_branch, GuiFrameV("hbar"):style("helmod_frame_product", color_name, color_index))
-			hbar.style.width = 5
-			hbar.style.height = bar_thickness
-			hbar.style.top_margin = 10
-			hbar.style.right_margin = 5
+			
+			local tree_control = GuiElement.add(tree_branch, GuiFlowV("control"))
+			tree_control.style.width = 16
+			tree_control.style.margin = 0
+			tree_control.style.padding = 0
 
+			local tree_action = GuiElement.add(tree_control, GuiSprite("previous"):sprite("menu", defines.sprites.branch_next.blue))
+			tree_action.resize_to_sprite = false
+			tree_action.style.width = 16
+			tree_action.style.height = 16
+
+			local action_caption = "+"
+			if block.expanded then
+				action_caption = "-"
+			end
+			if block.has_sub_block then
+				if index == size then
+					local tree_action = GuiElement.add(tree_control, GuiButton(self.classname, "block-expand-or-collapse", model.id, block.id):caption(action_caption):style("helmod_button_menu_sm_bold"))
+					tree_action.style.width = 16
+					tree_action.style.height = 16
+				else
+					local tree_action = GuiElement.add(tree_control, GuiButton(self.classname, "block-expand-or-collapse", model.id, block.id):caption(action_caption):style("helmod_button_menu_sm_bold"))
+					tree_action.style.width = 16
+					tree_action.style.height = 16
+					local tree_action = GuiElement.add(tree_control, GuiSprite("next"):sprite("menu", defines.sprites.branch_next.blue))
+					tree_action.resize_to_sprite = false
+					tree_action.style.width = 16
+					tree_action.style.vertically_stretchable = true
+				end
+			else
+				if index == size then
+					local tree_action = GuiElement.add(tree_control, GuiSprite("action"):sprite("menu", defines.sprites.branch_end.blue))
+					tree_action.resize_to_sprite = false
+					tree_action.style.width = 16
+					tree_action.style.height = 16
+				else
+					local tree_action = GuiElement.add(tree_control, GuiSprite("action"):sprite("menu", defines.sprites.branch.blue))
+					tree_action.resize_to_sprite = false
+					tree_action.style.width = 16
+					tree_action.style.height = 16
+					local tree_action = GuiElement.add(tree_control, GuiSprite("next"):sprite("menu", defines.sprites.branch_next.blue))
+					tree_action.resize_to_sprite = false
+					tree_action.style.width = 16
+					tree_action.style.vertically_stretchable = true
+				end
+			end
 			-- content
 			local content = GuiElement.add(tree_branch, GuiFlowV("content"))
+			content.style.margin = 2
 			-- header
 			local header = GuiElement.add(content, GuiFlowH("header"))
 
@@ -1031,7 +1069,9 @@ function ProductionPanel:bluidTree(parent, model, parent_block, current_block)
 			-- next
 			local next = GuiElement.add(content, GuiFlowV("next"))
 
-			self:bluidTree(next, model, block, current_block)
+			if block.expanded then
+				self:bluidTree(next, model, block, current_block)
+			end
 			index = index + 1
 		end
 	end
@@ -1047,7 +1087,10 @@ end
 function ProductionPanel:bluidLeaf(tree_panel, model, block, current_block, level)
 	if block ~= nil then
 		local color = "gray"
-		local cell_tree = GuiElement.add(tree_panel, GuiTable("block", block.id):column(1):style("helmod_table_list"))
+		local background = GuiElement.add(tree_panel, GuiFrame("block", block.id):style("helmod_frame_product", "gray", 1))
+		background.style.padding = 1
+		background.style.horizontally_stretchable = false
+		local cell_tree = GuiElement.add(background, GuiTable("block", block.id):column(1):style("helmod_table_list"))
 		if current_block ~= nil and current_block.id == block.id then
 			--last_element = cell_tree
 			color = "orange"
@@ -1070,7 +1113,10 @@ end
 function ProductionPanel:bluidRootLeaf(tree_panel, model, current_block, level)
 	if model ~= nil then
 		local color = "gray"
-		local cell_tree = GuiElement.add(tree_panel, GuiTable("model", model.id, model.block_root.id):column(1):style("helmod_table_list"))
+		local background = GuiElement.add(tree_panel, GuiFrame("model", model.id, model.block_root.id):style("helmod_frame_product", "gray", 1))
+		background.style.padding = 1
+		background.style.horizontally_stretchable = false
+		local cell_tree = GuiElement.add(background, GuiTable("model", model.id, model.block_root.id):column(1):style("helmod_table_list"))
 		if current_block == nil or current_block ~= nil and current_block.id == model.block_root.id then
 			--last_element = cell_tree
 			color = "orange"
@@ -1566,6 +1612,12 @@ function ProductionPanel:onEventAccessAll(event, model, block)
 		else
 			User.setParameter("solver_selected", defines.constant.solvers.normal)
 		end
+		Controller:send("on_gui_update", event, self.classname)
+	end
+
+	if event.action == "block-expand-or-collapse" then
+		local child_block = model.blocks[event.item2]
+		child_block.expanded = not(child_block.expanded)
 		Controller:send("on_gui_update", event, self.classname)
 	end
 end

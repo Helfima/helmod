@@ -335,3 +335,34 @@ default_gui["helmod_flow_vertical"] = {
   type = "vertical_flow_style",
   vertical_spacing = 0
 }
+
+local style_branch_list = {
+  {suffix="branch", x=32, y=0},
+  {suffix="branch_end", x=40, y=0},
+  {suffix="branch_next", x=48, y=0}
+}
+local style_branch_max = 7
+
+for _,style in pairs(style_branch_list) do
+  local style_name = table.concat({"helmod_frame",style.suffix},"_")
+  local x = style.x
+  local y = style.y
+
+  default_gui[style_name] = {
+    type = "frame_style",
+    graphical_set = {
+      filename = "__helmod__/graphics/gui.png",
+      corner_size = 2,
+      position = {x,y}
+    },
+    top_padding  = 0,
+    right_padding = 0,
+    bottom_padding = 0,
+    left_padding = 0,
+
+    width = 16,
+    height = 16,
+    horizontally_stretchable = "off",
+    vertically_stretchable = "off"
+  }
+end
