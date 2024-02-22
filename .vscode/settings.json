@@ -1,4 +1,5 @@
 {
+    "editor.wordWrap": "off",
     "factorio.versions": [
         {
             "name": "last",

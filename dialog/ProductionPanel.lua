@@ -584,15 +584,9 @@ function ProductionPanel:updateInputBlock(model, block)
 	input_tool.clear()
 	local all_visible = User.getParameter("block_all_ingredient_visible")
 	if all_visible == true then
-		GuiElement.add(input_tool,
-			GuiButton(self.classname, "block-all-ingredient-visible", model.id, block.id):sprite("menu",
-				defines.sprites.filter.white, defines.sprites.filter.black):style("helmod_button_menu_sm_selected")
-			:tooltip({ "helmod_button.all-product-visible" }))
+		GuiElement.add(input_tool, GuiButton(self.classname, "block-all-ingredient-visible", model.id, block.id):sprite("menu",defines.sprites.filter.white, defines.sprites.filter.black):style("helmod_button_menu_sm_selected"):tooltip({ "helmod_button.all-product-visible" }))
 	else
-		GuiElement.add(input_tool,
-			GuiButton(self.classname, "block-all-ingredient-visible", model.id, block.id):sprite("menu",
-				defines.sprites.filter.black, defines.sprites.filter.black):style("helmod_button_menu_sm"):tooltip({
-				"helmod_button.all-product-visible" }))
+		GuiElement.add(input_tool, GuiButton(self.classname, "block-all-ingredient-visible", model.id, block.id):sprite("menu", defines.sprites.filter.black, defines.sprites.filter.black):style("helmod_button_menu_sm"):tooltip({"helmod_button.all-product-visible" }))
 	end
 
 	---input panel
@@ -616,7 +610,7 @@ function ProductionPanel:updateInputBlock(model, block)
 					end
 					local button_action = "production-recipe-ingredient-add"
 					local button_tooltip = "tooltip.ingredient"
-					local button_color = GuiElement.color_button_default_ingredient
+					local ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_default)
 					local control_info = "link-intermediate"
 					if block_by_product then
 						button_action = "production-recipe-ingredient-add"
@@ -637,19 +631,16 @@ function ProductionPanel:updateInputBlock(model, block)
 					---color
 					if lua_ingredient.state == 1 then
 						if not (block.unlinked) or block.by_factory == true then
-							button_color = GuiElement.color_button_default_ingredient
+							ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_default)
 						else
-							button_color = GuiElement.color_button_edit
+							ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_driving)
 						end
 					elseif lua_ingredient.state == 3 then
-						button_color = GuiElement.color_button_rest
+						ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_overflow)
 					else
-						button_color = GuiElement.color_button_default_ingredient
+						ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_default)
 					end
-					GuiElement.add(input_table,
-						GuiCellElementM(self.classname, button_action, model.id, block.id, "none"):element(ingredient)
-						:tooltip(button_tooltip):index(index):color(button_color):byLimit(block.by_limit):contraintIcon(
-						contraint_type):controlInfo(control_info))
+					GuiElement.add(input_table, GuiCellElementM(self.classname, button_action, model.id, block.id, "none"):element(ingredient):tooltip(button_tooltip):index(index):color(ingredient_color):byLimit(block.by_limit):contraintIcon(contraint_type):controlInfo(control_info))
 				end
 			end
 		end
@@ -679,15 +670,9 @@ function ProductionPanel:updateOutputBlock(model, block)
 	output_tool.clear()
 	local all_visible = User.getParameter("block_all_product_visible")
 	if all_visible == true then
-		GuiElement.add(output_tool,
-			GuiButton(self.classname, "block-all-product-visible", model.id, block.id):sprite("menu",
-				defines.sprites.filter.white, defines.sprites.filter.black):style("helmod_button_menu_sm_selected")
-			:tooltip({ "helmod_button.all-product-visible" }))
+		GuiElement.add(output_tool, GuiButton(self.classname, "block-all-product-visible", model.id, block.id):sprite("menu", defines.sprites.filter.white, defines.sprites.filter.black):style("helmod_button_menu_sm_selected"):tooltip({ "helmod_button.all-product-visible" }))
 	else
-		GuiElement.add(output_tool,
-			GuiButton(self.classname, "block-all-product-visible", model.id, block.id):sprite("menu",
-				defines.sprites.filter.black, defines.sprites.filter.black):style("helmod_button_menu_sm"):tooltip({
-				"helmod_button.all-product-visible" }))
+		GuiElement.add(output_tool, GuiButton(self.classname, "block-all-product-visible", model.id, block.id):sprite("menu", defines.sprites.filter.black, defines.sprites.filter.black):style("helmod_button_menu_sm"):tooltip({"helmod_button.all-product-visible" }))
 	end
 
 	---ouput panel
@@ -711,7 +696,7 @@ function ProductionPanel:updateOutputBlock(model, block)
 					end
 					local button_action = "production-recipe-product-add"
 					local button_tooltip = "tooltip.product"
-					local button_color = GuiElement.color_button_default_product
+					local product_color = User.getThumbnailColor(defines.thumbnails_color.product_default)
 					local control_info = "link-intermediate"
 					if not block_by_product then
 						button_action = "production-recipe-product-add"
@@ -730,19 +715,16 @@ function ProductionPanel:updateOutputBlock(model, block)
 					---color
 					if lua_product.state == 1 then
 						if not (block.unlinked) or block.by_factory == true then
-							button_color = GuiElement.color_button_default_product
+							product_color = User.getThumbnailColor(defines.thumbnails_color.product_default)
 						else
-							button_color = GuiElement.color_button_edit
+							product_color = User.getThumbnailColor(defines.thumbnails_color.product_driving)
 						end
 					elseif lua_product.state == 3 then
-						button_color = GuiElement.color_button_rest
+						product_color = User.getThumbnailColor(defines.thumbnails_color.product_overflow)
 					else
-						button_color = GuiElement.color_button_default_product
+						product_color = User.getThumbnailColor(defines.thumbnails_color.product_default)
 					end
-					GuiElement.add(output_table,
-						GuiCellElementM(self.classname, button_action, model.id, block.id, "none"):element(product)
-						:tooltip(button_tooltip):index(index):color(button_color):byLimit(block.by_limit):contraintIcon(
-						contraint_type):controlInfo(control_info))
+					GuiElement.add(output_table, GuiCellElementM(self.classname, button_action, model.id, block.id, "none"):element(product):tooltip(button_tooltip):index(index):color(product_color):byLimit(block.by_limit):contraintIcon(contraint_type):controlInfo(control_info))
 				end
 			end
 		end
@@ -1086,19 +1068,19 @@ end
 ---@param level number
 function ProductionPanel:bluidLeaf(tree_panel, model, block, current_block, level)
 	if block ~= nil then
-		local color = "gray"
-		local background = GuiElement.add(tree_panel, GuiFrame("block", block.id):style("helmod_frame_product", "gray", 1))
+		local block_color = User.getThumbnailColor(defines.thumbnails_color.block_default)
+		local background = GuiElement.add(tree_panel, GuiFrame("block", block.id):style("helmod_frame_element_w50", "gray", 1))
 		background.style.padding = 1
 		background.style.horizontally_stretchable = false
 		local cell_tree = GuiElement.add(background, GuiTable("block", block.id):column(1):style("helmod_table_list"))
 		if current_block ~= nil and current_block.id == block.id then
 			--last_element = cell_tree
-			color = "orange"
+			block_color = User.getThumbnailColor(defines.thumbnails_color.block_selected)
 		end
 		if block.name == nil then
 			local cell_block = GuiElement.add(cell_tree, GuiButton(self.classname, "HMProductionPanel", model.id, block.id):sprite("menu", defines.sprites.hangar.black, defines.sprites.hangar.black):style("helmod_button_menu"):tooltip("tooltip.edit-block"))
 		else
-			local cell_block = GuiElement.add(cell_tree, GuiCellBlock(self.classname, "change-block", model.id, block.id):element(block):tooltip("tooltip.edit-block"):color(color))
+			local cell_block = GuiElement.add(cell_tree, GuiCellBlockM(self.classname, "change-block", model.id, block.id):element(block):tooltip("tooltip.edit-block"):color(block_color))
 			cell_block.style.left_padding = 10 * level
 		end
 	end
@@ -1112,16 +1094,16 @@ end
 ---@param level number
 function ProductionPanel:bluidRootLeaf(tree_panel, model, current_block, level)
 	if model ~= nil then
-		local color = "gray"
-		local background = GuiElement.add(tree_panel, GuiFrame("model", model.id, model.block_root.id):style("helmod_frame_product", "gray", 1))
+		local block_color = User.getThumbnailColor(defines.thumbnails_color.block_default)
+		local background = GuiElement.add(tree_panel, GuiFrame("model", model.id, model.block_root.id):style("helmod_frame_element_w50", "gray", 1))
 		background.style.padding = 1
 		background.style.horizontally_stretchable = false
 		local cell_tree = GuiElement.add(background, GuiTable("model", model.id, model.block_root.id):column(1):style("helmod_table_list"))
 		if current_block == nil or current_block ~= nil and current_block.id == model.block_root.id then
 			--last_element = cell_tree
-			color = "orange"
+			block_color = User.getThumbnailColor(defines.thumbnails_color.block_selected)
 		end
-		local cell_block = GuiElement.add(cell_tree, GuiCellModel(self.classname, "change-block", model.id, model.block_root.id):element(model):tooltip("tooltip.info-model"):color(color))
+		local cell_block = GuiElement.add(cell_tree, GuiCellModel(self.classname, "change-block", model.id, model.block_root.id):element(model):tooltip("tooltip.info-model"):color(block_color))
 		cell_block.style.left_padding = 10 * level
 	end
 end
@@ -1223,28 +1205,29 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 		--GuiElement.add(cell_action, GuiButton(self.classname, "conversion-recipe-block", model.id, block.id, recipe.id):sprite("menu", defines.sprites.hangar.black, defines.sprites.hangar.black):style("helmod_button_menu_sm"):tooltip({ "tooltip.conversion-recipe-block" }))
 	end
 
+	local recipe_color = User.getThumbnailColor(defines.thumbnails_color.recipe_default)
 	---common cols
 	self:addTableRowCommon(gui_table, recipe)
 	---col recipe
 	local cell_recipe = GuiElement.add(gui_table, GuiTable("recipe", recipe.id):column(2):style("helmod_table_list"))
-	GuiElement.add(cell_recipe, GuiCellRecipe("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):infoIcon(recipe.type) :tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):broken(recipe_prototype:native() == nil) :byLimit(block.by_limit))
+	GuiElement.add(cell_recipe, GuiCellRecipe("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):infoIcon(recipe.type) :tooltip("tooltip.edit-recipe"):color(recipe_color):broken(recipe_prototype:native() == nil) :byLimit(block.by_limit))
 	if recipe_prototype:native() == nil then
 		Player.print("ERROR: Recipe " .. recipe.name .. " not exist in game")
 	end
 	---col energy
 	local cell_energy = GuiElement.add(gui_table, GuiTable("energy", recipe.id):column(2):style("helmod_table_list"))
-	GuiElement.add(cell_energy, GuiCellEnergy("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):tooltip( "tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit))
+	GuiElement.add(cell_energy, GuiCellEnergy("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):tooltip( "tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit))
 
 	---col pollution
 	if User.getPreferenceSetting("display_pollution") then
 		local cell_pollution = GuiElement.add(gui_table, GuiTable("pollution", recipe.id):column(2):style("helmod_table_list"))
-		GuiElement.add(cell_pollution, GuiCellPollution("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):tooltip( "tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit))
+		GuiElement.add(cell_pollution, GuiCellPollution("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):tooltip( "tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit))
 	end
 
 	---col factory
 	local factory = recipe.factory
 	local cell_factory = GuiElement.add(gui_table, GuiTable("factory", recipe.id):column(2):style("helmod_table_list"))
-	local gui_cell_factory = GuiCellFactory(self.classname, "factory-action", model.id, block.id, recipe.id):element(factory):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit):controlInfo( "crafting-add")
+	local gui_cell_factory = GuiCellFactory(self.classname, "factory-action", model.id, block.id, recipe.id):element(factory):tooltip("tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit):controlInfo( "crafting-add")
 	if block.by_limit == true then
 		gui_cell_factory:byLimitUri(self.classname, "update-factory-limit", model.id, block.id, recipe.id)
 	end
@@ -1260,7 +1243,7 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 	cell_beacons.style.horizontal_spacing = 2
 	if beacons ~= nil then
 		for index, beacon in pairs(beacons) do
-			local gui_cell_beacon = GuiCellFactory(self.classname, "beacon-action", model.id, block.id, recipe.id, index):element(beacon):index(index):tooltip("tooltip.edit-recipe"):color(GuiElement.color_button_default):byLimit(block.by_limit):controlInfo("crafting-add")
+			local gui_cell_beacon = GuiCellFactory(self.classname, "beacon-action", model.id, block.id, recipe.id, index):element(beacon):index(index):tooltip("tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit):controlInfo("crafting-add")
 			GuiElement.add(cell_beacons, gui_cell_beacon)
 		end
 	end
@@ -1286,7 +1269,8 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				if not (block.solver ~= true and block.by_product ~= false) then
 					control_info = nil
 				end
-				GuiElement.add(cell_products, GuiCellElement(self.classname, "production-recipe-product-add", model.id, block.id, recipe.id):element(product):tooltip("tooltip.add-recipe"):index(index):byLimit(block.by_limit):contraintIcon(contraint_type):controlInfo(control_info))
+				local product_color = User.getThumbnailColor(defines.thumbnails_color.product_default)
+				GuiElement.add(cell_products, GuiCellElement(self.classname, "production-recipe-product-add", model.id, block.id, recipe.id):element(product):tooltip("tooltip.add-recipe"):color(product_color):index(index):byLimit(block.by_limit):contraintIcon(contraint_type):controlInfo(control_info))
 			end
 		else
 			---ingredients
@@ -1312,7 +1296,8 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				if not (block.solver ~= true and block.by_product == false) then
 					control_info = nil
 				end
-				GuiElement.add(cell_ingredients, GuiCellElement(self.classname, "production-recipe-ingredient-add", model.id, block.id, recipe.id):element(ingredient):tooltip("tooltip.add-recipe"):color(GuiElement.color_button_add):index(index):byLimit(block.by_limit):contraintIcon(contraint_type):controlInfo(control_info))
+				local ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_default)
+				GuiElement.add(cell_ingredients, GuiCellElement(self.classname, "production-recipe-ingredient-add", model.id, block.id, recipe.id):element(ingredient):tooltip("tooltip.add-recipe"):color(ingredient_color):index(index):byLimit(block.by_limit):contraintIcon(contraint_type):controlInfo(control_info))
 			end
 		end
 	end
@@ -1334,6 +1319,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 	---col action
 	local cell_action = GuiElement.add(gui_table, GuiTable("action", block.id):column(3))
     local block_child_remove_confirm = User.getParameter("block_child_remove_confirm")
+	local thumbnails_color = User.getParameter("thumbnails_color") or {}
     
     if block.id == block_child_remove_confirm then
         GuiElement.add(cell_action, GuiButton(self.classname, "block-child-remove-confirmed", model.id, parent.id, block.id):sprite("menu", defines.sprites.checkmark.black, defines.sprites.checkmark.black):style("helmod_button_menu_sm_actived_green"):tooltip({ "tooltip.remove-element_confirm" }))
@@ -1377,8 +1363,8 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 	---col recipe
 	local cell_recipe = GuiElement.add(gui_table, GuiTable("recipe", block.id):column(1):style("helmod_table_list"))
 
-	local block_color = "gray"
-	if not (block_by_product) then block_color = "orange" end
+	local block_color = User.getThumbnailColor(defines.thumbnails_color.block_default)
+	if not (block_by_product) then block_color = User.getThumbnailColor(defines.thumbnails_color.block_reverted) end
 	GuiElement.add(cell_recipe, GuiCellBlock(self.classname, "change-block", model.id, block.id):element(block):infoIcon(block.type):tooltip("tooltip.edit-block"):color(block_color))
 
 	---col energy
@@ -1415,7 +1401,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 				local block_id = "new"
 				local button_action = "production-recipe-product-add"
 				local button_tooltip = "tooltip.product"
-				local button_color = GuiElement.color_button_default_product
+				local product_color = User.getThumbnailColor(defines.thumbnails_color.product_default)
 				local product_prototype = Product(lua_product)
 				local product = product_prototype:clone()
 				product.time = model.time
@@ -1439,19 +1425,19 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 				---color
 				if product.state == 1 then
 					if not (block.unlinked) or block.by_factory == true then
-						button_color = GuiElement.color_button_default_product
+						product_color = User.getThumbnailColor(defines.thumbnails_color.product_default)
 					else
 						block_id = block.id
-						button_color = GuiElement.color_button_edit
+						product_color = User.getThumbnailColor(defines.thumbnails_color.product_driving)
 					end
 				elseif product.state == 3 then
 					block_id = block.id
-					button_color = GuiElement.color_button_rest
+					product_color = User.getThumbnailColor(defines.thumbnails_color.product_overflow)
 				else
-					button_color = GuiElement.color_button_default_product
+					product_color = User.getThumbnailColor(defines.thumbnails_color.product_default)
 				end
 				
-				GuiElement.add(cell_products, GuiCellElement(self.classname, button_action, model.id, parent.id, block_id, product.name):element(product):tooltip(button_tooltip):color(button_color):index(index))
+				GuiElement.add(cell_products, GuiCellElement(self.classname, button_action, model.id, parent.id, block_id, product.name):element(product):tooltip(button_tooltip):color(product_color):index(index))
 			end
 		end
 	end
@@ -1465,7 +1451,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 				local block_id = "new"
 				local button_action = "production-recipe-ingredient-add"
 				local button_tooltip = "tooltip.ingredient"
-				local button_color = GuiElement.color_button_default_ingredient
+				local ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_default)
 				local ingredient_prototype = Product(lua_ingredient)
 				local ingredient = ingredient_prototype:clone()
 				ingredient.time = model.time
@@ -1484,17 +1470,18 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 				---color
 				if ingredient.state == 1 then
 					if not (block.unlinked) or block.by_factory == true then
-						button_color = GuiElement.color_button_default_ingredient
+						ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_default)
 					else
 						block_id = block.id
-						button_color = GuiElement.color_button_edit
+						ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_driving)
 					end
 				elseif ingredient.state == 3 then
-					button_color = GuiElement.color_button_rest
+					ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_overflow)
 				else
-					button_color = GuiElement.color_button_default_ingredient
+					ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_default)
 				end
-				GuiElement.add(cell_ingredients, GuiCellElement(self.classname, button_action, model.id, parent.id, block_id, ingredient.name):element(ingredient):tooltip(button_tooltip):color(button_color):index(index))
+				
+				GuiElement.add(cell_ingredients, GuiCellElement(self.classname, button_action, model.id, parent.id, block_id, ingredient.name):element(ingredient):tooltip(button_tooltip):color(ingredient_color):index(index))
 			end
 		end
 	end

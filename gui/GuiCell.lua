@@ -307,7 +307,9 @@ function GuiCellFactory:create(parent)
   local color = self.m_color or "gray"
   local factory = self.element or {}
   local cell = GuiElement.add(parent, GuiFlowV(factory.name, self.m_index))
-  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element", color, 1))
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w80", color, 1))
+  row1.style.top_padding=2
+  row1.style.bottom_padding=3
 
   local tooltip = GuiTooltipElement(self.options.tooltip):element(factory):withEnergy():withEffectInfo(factory.effects ~= nil):withControlInfo(self.m_with_control_info)
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("entity", factory.name):tooltip(tooltip))
@@ -315,11 +317,13 @@ function GuiCellFactory:create(parent)
   self:add_mask(button, color)
 
   local cell_factory_info = GuiElement.add(row1, GuiTable("factory-info"):column(1):style("helmod_factory_info"))
+  cell_factory_info.style.margin = 0
+  cell_factory_info.style.padding = 0
   if factory.per_factory then
     local per_factory = factory.per_factory or 0
     local per_factory_constant = factory.per_factory_constant or 0
     GuiElement.add(cell_factory_info, GuiLabel("per_factory"):caption({"", "x", per_factory}):style("helmod_label_element"):tooltip({"tooltip.beacon-per-factory"}))
-    GuiElement.add(cell_factory_info, GuiLabel("per_factory_constant"):caption({"", "+", per_factory_constant}):style("helmod_label_element"):tooltip({"tooltip.beacon-per-factory-constant"}))
+    GuiElement.add(cell_factory_info, GuiLabel("per_factory_constant"):caption({"", "+", per_factory_constant}):style("helmod_label_element2"):tooltip({"tooltip.beacon-per-factory-constant"}))
   end
 
   local col_size = math.ceil(table.size(factory.modules)/2)
@@ -342,7 +346,7 @@ function GuiCellFactory:create(parent)
   end
 
   if self.m_by_limit then
-    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element", color, 2))
+    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_w80", color, 2))
     local limit_value = factory.limit_count or 0
     if type(factory.limit) == "number" and factory.limit > 0 then
       limit_value = factory.limit
@@ -360,7 +364,7 @@ function GuiCellFactory:create(parent)
     end
   end
 
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element", color, 3))
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w80", color, 3))
   if self.m_by_factory then
     local style = "helmod_textfield_element"
     if factory.input ~= nil then
@@ -389,8 +393,10 @@ function GuiCellRecipe:create(parent)
   local color = self.m_color or "gray"
   local recipe = self.element or {}
   local cell = GuiElement.add(parent, GuiFlowV(recipe.name, self.m_index))
-  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
-  
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
+  row1.style.top_padding=2
+  row1.style.bottom_padding=3
+
   local recipe_prototype = RecipePrototype(recipe)
   local icon_name, icon_type = recipe_prototype:getIcon()
   local tooltip = GuiTooltipRecipe(self.options.tooltip):element(recipe)
@@ -403,10 +409,10 @@ function GuiCellRecipe:create(parent)
   if self.m_broken == true then
     recipe_icon.tooltip = "ERROR: Recipe ".. recipe.name .." not exist in game"
     recipe_icon.sprite = "utility/warning_icon"
-    row1.style = "helmod_frame_product_red_1"
+    row1.style = "helmod_frame_element_w50_red_1"
   end
 
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
   GuiElement.add(row3, GuiLabel("label2", recipe.name):caption(Format.formatPercent(recipe.production or 1).."%"):style("helmod_label_element"):tooltip({"helmod_common.total"}))
   return cell, recipe_icon
 end
@@ -425,7 +431,7 @@ function GuiCellProduct:create(parent)
   local color = self.m_color or "gray"
   local element = self.element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
-  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
 
   if string.find(element.name, "helmod") then
     GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", element.hovered, element.sprite):style(element.name):tooltip({element.localised_name}))
@@ -433,7 +439,7 @@ function GuiCellProduct:create(parent)
     local product_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type, element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip({self.options.tooltip, Player.getLocalisedName(element)}))
     self:add_mask(product_icon, color)
   end
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(Format.formatNumber(element.count, 5)):style("helmod_label_element"):tooltip({"helmod_common.total"}))
   return cell
 end
@@ -452,7 +458,7 @@ function GuiCellProductSm:create(parent)
   local color = self.m_color or "gray"
   local element = self.element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
-  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
 
   if string.find(element.name, "helmod") then
     GuiElement.add(row1, GuiButton(unpack(self.name)):style(element.name):tooltip({element.localised_name}))
@@ -461,7 +467,7 @@ function GuiCellProductSm:create(parent)
   end
   GuiElement.infoTemperature(row1, element)
   
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
   local caption3 = Format.formatNumber(element.count, 5)
   if element.type == "energy" then caption3 = Format.formatNumberKilo(element.count, "J") end
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element_sm"):tooltip({"helmod_common.total"}))
@@ -480,10 +486,12 @@ end)
 ---@return LuaGuiElement
 function GuiCellBlock:create(parent)
   local display_cell_mod = User.getModSetting("display_cell_mod")
-  local color = self.m_color or "gray"
+  local color = self.m_color or "silver"
   local element = self.element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
-  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
+  row1.style.top_padding=2
+  row1.style.bottom_padding=3
 
   local first_recipe = Model.firstRecipe(element.recipes)
   if first_recipe ~= nil then
@@ -499,16 +507,63 @@ function GuiCellBlock:create(parent)
   end
 
   if element.limit_count ~= nil then
-    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_product", color, 2))
+    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_w50", color, 2))
     local caption2 = Format.formatNumberFactory(element.limit_count)
     if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_count) end
     GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element"):tooltip({"helmod_common.total"}))
   end
 
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
   local caption3 = Format.formatNumberFactory(element.count)
   if display_cell_mod == "by-kilo" then caption3 = Format.formatNumberKilo(element.count) end
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
+
+  return cell
+end
+
+-------------------------------------------------------------------------------
+---@class GuiCellBlockM
+GuiCellBlockM = newclass(GuiCell,function(base,...)
+  GuiCell.init(base,...)
+end)
+
+-------------------------------------------------------------------------------
+---Create cell
+---@param parent LuaGuiElement --container for element
+---@return LuaGuiElement
+function GuiCellBlockM:create(parent)
+  local display_cell_mod = User.getModSetting("display_cell_mod")
+  local color = self.m_color or "silver"
+  local element = self.element or {}
+  local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
+  row1.style.top_padding=2
+  row1.style.bottom_padding=3
+
+  local first_recipe = Model.firstRecipe(element.recipes)
+  if first_recipe ~= nil then
+    local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
+    local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
+    
+    self:add_infoIcon(button, "block")
+    
+    GuiElement.infoRecipe(button, first_recipe)
+  else
+    local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black))
+    button.style.width = 36
+  end
+
+  if element.limit_count ~= nil then
+    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_w50", color, 2))
+    local caption2 = Format.formatNumberFactory(element.limit_count)
+    if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_count) end
+    GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element_m"):tooltip({"helmod_common.total"}))
+  end
+
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
+  local caption3 = Format.formatNumberFactory(element.count)
+  if display_cell_mod == "by-kilo" then caption3 = Format.formatNumberKilo(element.count) end
+  GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element_m"):tooltip({"helmod_common.total"}))
 
   return cell
 end
@@ -527,7 +582,7 @@ function GuiCellModel:create(parent)
   local color = self.m_color or "gray"
   local element = self.element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
-  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
 
   local first_block = element.block_root or Model.firstRecipe(element.blocks)
   if first_block ~= nil and first_block.name ~= "" then
@@ -537,7 +592,7 @@ function GuiCellModel:create(parent)
     local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black))
     button.style.width = 36
   end
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
   local caption3 = Format.formatNumberFactory(table.size(element.blocks))
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
 
@@ -558,7 +613,7 @@ function GuiCellBlockInfo:create(parent)
   local color = self.m_color or "gray"
   local element = self.element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
-  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
   row1.style.top_padding=4
   row1.style.bottom_padding=4
 
@@ -566,14 +621,14 @@ function GuiCellBlockInfo:create(parent)
   local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", defines.sprites.hangar.white, defines.sprites.hangar.black):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   if element.limit_count ~= nil then
-    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_product", color, 2))
+    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_w50", color, 2))
     local limit_count = element.limit_count or 0
     local caption2 = Format.formatNumberFactory(limit_count)
     if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(limit_count) end
     GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element"):tooltip({"helmod_common.total"}))
   end
 
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
   local count = element.count or 0
   local caption3 = Format.formatNumberFactory(count)
   if display_cell_mod == "by-kilo" then caption3 = Format.formatNumberKilo(count) end
@@ -597,7 +652,7 @@ function GuiCellEnergy:create(parent)
   local color = self.m_color or "gray"
   local element = self.element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, "energy", self.m_index))
-  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element", color, 1))
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w80", color, 1))
   row1.style.top_padding=4
   row1.style.bottom_padding=4
 
@@ -605,13 +660,13 @@ function GuiCellEnergy:create(parent)
   local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", defines.sprites.event.white, defines.sprites.event.black):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   if self.m_by_limit then
-    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element", color, 2))
+    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_w80", color, 2))
     local caption2 = Format.formatNumberKilo(element.limit_energy or 0, "J")
     if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_energy) end
     GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element"):tooltip({"helmod_common.total"}))
   end
 
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element", color, 3))
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w80", color, 3))
   local caption3 = Format.formatNumberKilo(element.energy_total or element.power, "J")
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
 
@@ -634,7 +689,7 @@ function GuiCellPollution:create(parent)
   local color = self.m_color or "gray"
   local element = self.element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, "pollution", self.m_index))
-  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
   row1.style.top_padding=4
   row1.style.bottom_padding=4
   row1.style.minimal_width=width
@@ -643,14 +698,14 @@ function GuiCellPollution:create(parent)
   local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", defines.sprites.skull.white, defines.sprites.skull.black):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   if self.m_by_limit then
-    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_product", color, 2))
+    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_w50", color, 2))
     row2.style.minimal_width=width
     local caption2 = Format.formatNumber(element.limit_pollution or 0)
     if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_pollution) end
     GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element"):tooltip({"helmod_common.total"}))
   end
 
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
   row3.style.minimal_width=width
   local caption3 = Format.formatNumber(element.pollution_total)
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
@@ -673,7 +728,7 @@ function GuiCellBuilding:create(parent)
   local color = self.m_color or "gray"
   local element = self.element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, "building", self.m_index))
-  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_product", color, 1))
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
   row1.style.top_padding=4
   row1.style.bottom_padding=4
 
@@ -681,7 +736,7 @@ function GuiCellBuilding:create(parent)
   local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", defines.sprites.factory.white, defines.sprites.factory.black):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   if self.m_by_limit then
-    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_product", color, 2))
+    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_w50", color, 2))
     local limit_building = 0
     if element.summary ~= nil then
       limit_building = element.summary.limit_building or 0
@@ -691,7 +746,7 @@ function GuiCellBuilding:create(parent)
     GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element"):tooltip({"helmod_common.total"}))
   end
 
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_product", color, 3))
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
   local building = 0
   if element.summary ~= nil then
     building = element.summary.building or 0
@@ -699,6 +754,38 @@ function GuiCellBuilding:create(parent)
   local caption3 = Format.formatNumber(building)
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
 
+  return cell
+end
+
+-------------------------------------------------------------------------------
+---@class GuiCellThumbnail
+GuiCellThumbnail = newclass(GuiCell,function(base,...)
+  GuiCell.init(base,...)
+end)
+
+-------------------------------------------------------------------------------
+---Create cell
+---@param parent LuaGuiElement --container for element
+---@return LuaGuiElement
+function GuiCellThumbnail:create(parent)
+  local color = self.m_color or GuiElement.color_button_none
+  local element = self.element or {}
+  local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index or 1))
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w80", color, 1))
+
+  local tooltip = self.options.tooltip
+  local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", element.sprite1, element.sprite2):tooltip(tooltip))
+  
+  local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_w80", color, 2))
+  local caption2 = Format.formatNumberElement(100)
+  GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element"):tooltip({"helmod_common.total"}))
+
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w80", color, 3))
+  local caption3 = Format.formatNumberElement(1000)
+  GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
+
+  local row4 = GuiElement.add(cell, GuiFrameH("row4"):style("helmod_frame_element_w80", color, 4))
+  GuiElement.add(row4, GuiLabel("label-empty"):caption("XXX"):style("helmod_label_element"))
   return cell
 end
 
@@ -717,7 +804,7 @@ function GuiCellElement:create(parent)
   local color = self.m_color or GuiElement.color_button_none
   local element = self.element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index or 1))
-  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element", color, 1))
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w80", color, 1))
 
   local tooltip = ""
   if element.type == "energy" then
@@ -734,21 +821,21 @@ function GuiCellElement:create(parent)
   self:add_mask(button, color)
 
   if self.m_by_limit then
-    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element", color, 2))
+    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_w80", color, 2))
     local caption2 = Format.formatNumberElement(element.limit_count)
     if element.type == "energy" then caption2 = Format.formatNumberKilo(element.limit_count, "J") end
     if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_count) end
     GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element"):tooltip({"helmod_common.total"}))
   end
 
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element", color, 3))
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w80", color, 3))
   local caption3 = Format.formatNumberElement(element.count)
   if element.type == "energy" then caption3 = Format.formatNumberKilo(element.count, "J") end
   if display_cell_mod == "by-kilo" then caption3 = Format.formatNumberKilo(element.count) end
   GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
 
   if User.getParameter("display_logistic_row") == true then
-    local row4 = GuiElement.add(cell, GuiFrameH("row4"):style("helmod_frame_element", color, 4))
+    local row4 = GuiElement.add(cell, GuiFrameH("row4"):style("helmod_frame_element_w80", color, 4))
     self:add_row_logistic(row4, element)
     GuiElement.add(row4, GuiLabel("label-empty"):caption(""):style("helmod_label_element"))
   end
@@ -815,7 +902,7 @@ function GuiCellElementM:create(parent)
   local color = self.m_color or GuiElement.color_button_none
   local element = self.element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index or 1))
-  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_m", color, 1))
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
 
   local tooltip = ""
   if element.type == "energy" then
@@ -831,14 +918,14 @@ function GuiCellElementM:create(parent)
   self:add_mask(button, color)
 
   if self.m_by_limit then
-    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_m", color, 2))
+    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_w50", color, 2))
     local caption2 = Format.formatNumberElement(element.limit_count)
     if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.limit_count) end
     if element.type == "energy" then caption2 = Format.formatNumberKilo(element.limit_count, "J") end
     GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element_m"):tooltip({"helmod_common.total"}))
   end
 
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_m", color, 3))
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
   local caption3 = Format.formatNumberElement(element.count)
   if display_cell_mod == "by-kilo" then caption3 = Format.formatNumberKilo(element.count) end
   if element.type == "energy" then caption3 = Format.formatNumberKilo(element.count, "J") end

@@ -108,3 +108,16 @@
 ---@field summary any
 ---@field generators any
 ---@field parameters ParametersData
+
+---@class ThumbnailsColorData
+---@field default string
+---@field block_default string
+---@field block_selected string
+---@field block_reverted string
+---@field recipe_default string
+---@field product_default string
+---@field product_driving string
+---@field product_overflow string
+---@field ingredient_default string
+---@field ingredient_driving string
+---@field ingredient_overflow string
