@@ -258,18 +258,19 @@ function ModelCompute.finalizeBlock(block, factor)
                 recipe.count_deep = recipe.count * block.count_deep
                 
                 recipe.factory.count = recipe.factory.amount * recipe.count
-                recipe.factory.count_deep = recipe.factory.amount * recipe.count * block.count_deep
+                recipe.factory.count_deep = recipe.factory.count * block.count_deep
 
                 for _, beacon in pairs(recipe.beacons) do
-                    beacon.count = beacon.amount * recipe.count
-                    beacon.count_deep = beacon.amount * recipe.count * block.count_deep
+                    local constant = beacon.per_factory_constant or 0
+                    beacon.count = beacon.amount * recipe.count + constant
+                    beacon.count_deep = beacon.count * block.count_deep
                 end
                 
                 recipe.power = recipe.energy_total * recipe.count
-                recipe.power_deep = recipe.energy_total * recipe.count * block.count_deep
+                recipe.power_deep = recipe.power * block.count_deep
                 
                 recipe.pollution = recipe.pollution_amount * recipe.count
-                recipe.pollution_deep = recipe.pollution_amount * recipe.count * block.count_deep
+                recipe.pollution_deep = recipe.pollution * block.count_deep
                 
                 block.power = block.power + recipe.power * block.count
                 block.power_deep = block.power_deep + recipe.power_deep
@@ -636,8 +637,9 @@ function ModelCompute.computeFactory(recipe)
         for _, beacon in pairs(recipe.beacons) do
             if Model.countModulesModel(beacon) > 0 then
                 local variant = beacon.per_factory or 0
-                local constant = beacon.per_factory_constant or 0
-                beacon.amount = count * variant + constant
+                -- @see ModelCompute.finalizeBlock where beacon.per_factory_constant used
+                -- per_factory_constant for 1 block
+                beacon.amount = count * variant
             else
                 beacon.amount = 0
             end

@@ -585,6 +585,7 @@ function GuiCellBlock:create(parent)
     button.style.width = 36
   end
 
+  local width = 50
   self:add_row_label(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
   self:add_row_label(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
 
@@ -592,7 +593,7 @@ function GuiCellBlock:create(parent)
 end
 
 -------------------------------------------------------------------------------
----@class GuiCellBlockM
+---@class GuiCellBlockM : GuiCell
 GuiCellBlockM = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
@@ -623,21 +624,9 @@ function GuiCellBlockM:create(parent)
     button.style.width = 36
   end
 
-  element.count_deep = element.count_deep or 1
-  
-  if element.count_deep ~= element.count then
-    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_w50", color, 2):tooltip({"helmod_common.quantity"}))
-    local caption2 = Format.formatNumberFactory(element.count)
-    if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(element.count) end
-    GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element_m"):tooltip({"helmod_common.quantity"}))
-  end
-
-  -- total deep count
-  local count = element.count_deep
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3):tooltip({"helmod_common.total"}))
-  local caption3 = Format.formatNumberFactory(count)
-  if display_cell_mod == "by-kilo" then caption3 = Format.formatNumberKilo(count) end
-  GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element_m"):tooltip({"helmod_common.total"}))
+  local width = 30
+  self:add_row_label_m(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
+  self:add_row_label_m(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
 
   return cell
 end
