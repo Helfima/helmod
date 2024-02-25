@@ -600,13 +600,14 @@ function ProductionPanel:updateInputBlock(model, block)
 			GuiTable("input-table"):column(GuiElement.getElementColumnNumber(50) - 2):style("helmod_table_element"))
 		if block.ingredients ~= nil then
 			for index, lua_ingredient in spairs(block.ingredients, User.getProductSorter()) do
-				if all_visible == true or ((lua_ingredient.state or 0) == 1 and not (block_by_product)) or (lua_ingredient.count or 0) > ModelCompute.waste_value then
+				if all_visible == true or ((lua_ingredient.state or 0) == 1 and not (block_by_product)) or (lua_ingredient.amount or 0) > ModelCompute.waste_value then
 					local contraint_type = nil
 					local ingredient = Product(lua_ingredient):clone()
 					ingredient.time = model.time
-					ingredient.count = lua_ingredient.count
+					ingredient.count = lua_ingredient.amount
+					ingredient.count_deep = lua_ingredient.amount * block.count_deep
 					if block.count > 1 then
-						ingredient.limit_count = lua_ingredient.count / block.count
+						ingredient.limit_count = lua_ingredient.amount / block.count
 					end
 					local button_action = "production-recipe-ingredient-add"
 					local button_tooltip = "tooltip.ingredient"
@@ -686,13 +687,14 @@ function ProductionPanel:updateOutputBlock(model, block)
 			GuiTable("output-table"):column(GuiElement.getElementColumnNumber(50) - 2):style("helmod_table_element"))
 		if block.products ~= nil then
 			for index, lua_product in spairs(block.products, User.getProductSorter()) do
-				if all_visible == true or ((lua_product.state or 0) == 1 and block_by_product) or (lua_product.count or 0) > ModelCompute.waste_value then
+				if all_visible == true or ((lua_product.state or 0) == 1 and block_by_product) or (lua_product.amount or 0) > ModelCompute.waste_value then
 					local contraint_type = nil
 					local product = Product(lua_product):clone()
 					product.time = model.time
-					product.count = lua_product.count
+					product.count = lua_product.amount
+					product.count_deep = lua_product.amount * block.count_deep
 					if block.count > 1 then
-						product.limit_count = lua_product.count / block.count
+						product.limit_count = lua_product.amount / block.count
 					end
 					local button_action = "production-recipe-product-add"
 					local button_tooltip = "tooltip.product"
@@ -702,7 +704,7 @@ function ProductionPanel:updateOutputBlock(model, block)
 						button_action = "production-recipe-product-add"
 						button_tooltip = "tooltip.add-recipe"
 						control_info = nil
-					elseif not (block.unlinked) or block.by_factory == true then
+					elseif not (block.unlinked or true) or block.by_factory == true then
 						button_action = "product-info"
 						button_tooltip = "tooltip.info-product"
 						if block.products_linked ~= nil and block.products_linked[Product(lua_product):getTableKey()] then
@@ -714,7 +716,7 @@ function ProductionPanel:updateOutputBlock(model, block)
 					end
 					---color
 					if lua_product.state == 1 then
-						if not (block.unlinked) or block.by_factory == true then
+						if not (block.unlinked or true) or block.by_factory == true then
 							product_color = User.getThumbnailColor(defines.thumbnails_color.product_default)
 						else
 							product_color = User.getThumbnailColor(defines.thumbnails_color.product_driving)
@@ -750,10 +752,10 @@ function ProductionPanel:updateInfoModel(model)
 
 	local count_block = table.size(model.blocks)
 	if count_block > 0 then
-		local element_block = { name = model.id, energy_total = 0, pollution = 0 }
+		local element_block = { name = model.id, power = 0, pollution = 0 }
 		if model.summary ~= nil then
-			element_block.energy_total = model.summary.energy
-			element_block.pollution_total = model.summary.pollution
+			element_block.power = model.summary.energy
+			element_block.pollution = model.summary.pollution
 			element_block.summary = model.summary
 		end
 		GuiElement.add(block_info, GuiCellEnergy("block-power"):element(element_block):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2))
@@ -819,10 +821,10 @@ function ProductionPanel:updateData(event)
 	if model.block_root == nil then
         -- TODO this is must be in update file --
 		local first_block = Model.firstRecipe(model.blocks)
-        local element_block = first_block or { name = model.id, energy_total = 0, pollution_total = 0, summary = {} }
+        local element_block = first_block or { name = model.id, power = 0, pollution = 0, summary = {} }
 		local block_root = Model.newBlock(model, element_block)
-		block_root.energy_total = 0
-		block_root.pollution_total = 0
+		block_root.power = 0
+		block_root.pollution = 0
 		--block_root.summary = {}
         local index = 0
 		for key, block in pairs(model.blocks) do
@@ -1258,7 +1260,8 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				local product_prototype = Product(lua_product)
 				local product = product_prototype:clone()
 				product.time = model.time
-				product.count = product_prototype:countProduct(model, recipe)
+				product.count = product_prototype:countProduct(recipe)
+				product.count_deep = product_prototype:countDeepProduct(recipe)
 				if block.by_limit == true and block.count > 1 then
 					product.limit_count = product.count / block.count
 				end
@@ -1281,10 +1284,11 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				local ingredient_prototype = Product(lua_ingredient)
 				local ingredient = ingredient_prototype:clone()
 				ingredient.time = model.time
-				ingredient.count = ingredient_prototype:countIngredient(model, recipe)
+				ingredient.count = ingredient_prototype:countIngredient(recipe)
+				ingredient.count_deep = ingredient_prototype:countDeepIngredient(recipe)
 				---si constant compte comme un produit (recipe rocket)
 				if ingredient.constant == true then
-					ingredient.count = ingredient_prototype:countProduct(model, recipe)
+					ingredient.count = ingredient_prototype:countProduct(recipe)
 				end
 				if block.by_limit == true and block.count > 1 then
 					ingredient.limit_count = ingredient.count / block.count
@@ -1369,19 +1373,18 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 
 	---col energy
 	local cell_energy = GuiElement.add(gui_table, GuiTable(block.id, "energy"):column(1):style("helmod_table_list"))
-	local element_block = { name = block.name, power = block.power, pollution_total = block.pollution_total, summary = block.summary }
-	GuiElement.add(cell_energy, GuiCellEnergy(self.classname, "change-block", model.id, block.id):element(element_block):tooltip("tooltip.edit-block"):color(block_color))
+	GuiElement.add(cell_energy, GuiCellEnergy(self.classname, "change-block", model.id, block.id):element(block):tooltip("tooltip.edit-block"):color(block_color))
 
 	---col pollution
 	if User.getPreferenceSetting("display_pollution") then
 		local cell_pollution = GuiElement.add(gui_table, GuiTable(block.id, "pollution"):column(1):style("helmod_table_list"))
-		GuiElement.add(cell_pollution, GuiCellPollution(self.classname, "change-block", model.id, block.id):element(element_block):tooltip("tooltip.edit-block"):color(block_color))
+		GuiElement.add(cell_pollution, GuiCellPollution(self.classname, "change-block", model.id, block.id):element(block):tooltip("tooltip.edit-block"):color(block_color))
 	end
 
 	---col building
 	if User.getPreferenceSetting("display_building") then
 		local cell_building = GuiElement.add(gui_table, GuiTable(block.id, "building"):column(1):style("helmod_table_list"))
-		GuiElement.add(cell_building, GuiCellBuilding(self.classname, "change-block", model.id, block.id):element(element_block):tooltip("tooltip.info-building"):color(block_color))
+		GuiElement.add(cell_building, GuiCellBuilding(self.classname, "change-block", model.id, block.id):element(block):tooltip("tooltip.info-building"):color(block_color))
 	end
 
 	---col beacon
@@ -1391,97 +1394,104 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 
 	local product_sorter = User.getProductSorter()
 
-	---products
-	local display_product_cols = User.getPreferenceSetting("display_product_cols") + 1
-	local cell_products = GuiElement.add(gui_table, GuiTable("products", block.id):column(display_product_cols):style("helmod_table_list"))
-	cell_products.style.horizontally_stretchable = false
-	if block.products ~= nil then
-		for index, lua_product in spairs(block.products, product_sorter) do
-			if ((lua_product.state or 0) == 1 and block_by_product) or (lua_product.count or 0) > ModelCompute.waste_value then
-				local block_id = "new"
-				local button_action = "production-recipe-product-add"
-				local button_tooltip = "tooltip.product"
-				local product_color = User.getThumbnailColor(defines.thumbnails_color.product_default)
-				local product_prototype = Product(lua_product)
-				local product = product_prototype:clone()
-				product.time = model.time
-				product.count = lua_product.count * block.count
-				if block.by_limit == true and block.count > 1 then
-					product.limit_count = product.count / block.count
-				end
+	for _, order in pairs(Model.getBlockOrder(parent)) do
+		if order == "products" then
+			---products
+			local display_product_cols = User.getPreferenceSetting("display_product_cols") + 1
+			local cell_products = GuiElement.add(gui_table, GuiTable("products", block.id):column(display_product_cols):style("helmod_table_list"))
+			cell_products.style.horizontally_stretchable = false
+			if block.products ~= nil then
+				for index, lua_product in spairs(block.products, product_sorter) do
+					if ((lua_product.state or 0) == 1 and block_by_product) or (lua_product.amount or 0) > ModelCompute.waste_value then
+						local block_id = "new"
+						local button_action = "production-recipe-product-add"
+						local button_tooltip = "tooltip.product"
+						local product_color = User.getThumbnailColor(defines.thumbnails_color.product_default)
+						local product_prototype = Product(lua_product)
+						local product = product_prototype:clone()
+						product.time = model.time
+						product.count = lua_product.amount * block.count
+						product.count_deep = lua_product.amount * block.count_deep
+						if block.by_limit == true and block.count > 1 then
+							product.limit_count = product.amount / block.count
+						end
 
-				if not (block_by_product) then
-					button_action = "production-recipe-product-add"
-					button_tooltip = "tooltip.add-recipe"
-				else
-					if not (block.unlinked) or block.by_factory == true then
-						button_action = "product-info"
-						button_tooltip = "tooltip.info-product"
-					else
-						button_action = "product-edition"
-						button_tooltip = "tooltip.edit-product"
+						if not (block_by_product) then
+							button_action = "production-recipe-product-add"
+							button_tooltip = "tooltip.add-recipe"
+						else
+							if not (block.unlinked) or block.by_factory == true then
+								button_action = "product-info"
+								button_tooltip = "tooltip.info-product"
+							else
+								button_action = "product-edition"
+								button_tooltip = "tooltip.edit-product"
+							end
+						end
+						---color
+						if product.state == 1 then
+							if not (block.unlinked) or block.by_factory == true then
+								product_color = User.getThumbnailColor(defines.thumbnails_color.product_default)
+							else
+								block_id = block.id
+								product_color = User.getThumbnailColor(defines.thumbnails_color.product_driving)
+							end
+						elseif product.state == 3 then
+							block_id = block.id
+							product_color = User.getThumbnailColor(defines.thumbnails_color.product_overflow)
+						else
+							product_color = User.getThumbnailColor(defines.thumbnails_color.product_default)
+						end
+						
+						GuiElement.add(cell_products, GuiCellElement(self.classname, button_action, model.id, parent.id, block_id, product.name):element(product):tooltip(button_tooltip):color(product_color):index(index))
 					end
 				end
-				---color
-				if product.state == 1 then
-					if not (block.unlinked) or block.by_factory == true then
-						product_color = User.getThumbnailColor(defines.thumbnails_color.product_default)
-					else
-						block_id = block.id
-						product_color = User.getThumbnailColor(defines.thumbnails_color.product_driving)
-					end
-				elseif product.state == 3 then
-					block_id = block.id
-					product_color = User.getThumbnailColor(defines.thumbnails_color.product_overflow)
-				else
-					product_color = User.getThumbnailColor(defines.thumbnails_color.product_default)
-				end
-				
-				GuiElement.add(cell_products, GuiCellElement(self.classname, button_action, model.id, parent.id, block_id, product.name):element(product):tooltip(button_tooltip):color(product_color):index(index))
 			end
-		end
-	end
-	---ingredients
-	local display_ingredient_cols = User.getPreferenceSetting("display_ingredient_cols") + 2
-	local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients", block.id):column(display_ingredient_cols))
-	cell_ingredients.style.horizontally_stretchable = false
-	if block.ingredients ~= nil then
-		for index, lua_ingredient in spairs(block.ingredients, product_sorter) do
-			if ((lua_ingredient.state or 0) == 1 and not (block_by_product)) or (lua_ingredient.count or 0) > ModelCompute.waste_value then
-				local block_id = "new"
-				local button_action = "production-recipe-ingredient-add"
-				local button_tooltip = "tooltip.ingredient"
-				local ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_default)
-				local ingredient_prototype = Product(lua_ingredient)
-				local ingredient = ingredient_prototype:clone()
-				ingredient.time = model.time
-				ingredient.count = lua_ingredient.count * block.count
-				if block.by_limit == true and block.count > 1 then
-					ingredient.limit_count = ingredient.count / block.count
-				end
+		else
+			---ingredients
+			local display_ingredient_cols = User.getPreferenceSetting("display_ingredient_cols") + 2
+			local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients", block.id):column(display_ingredient_cols))
+			cell_ingredients.style.horizontally_stretchable = false
+			if block.ingredients ~= nil then
+				for index, lua_ingredient in spairs(block.ingredients, product_sorter) do
+					if ((lua_ingredient.state or 0) == 1 and not (block_by_product)) or (lua_ingredient.amount or 0) > ModelCompute.waste_value then
+						local block_id = "new"
+						local button_action = "production-recipe-ingredient-add"
+						local button_tooltip = "tooltip.ingredient"
+						local ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_default)
+						local ingredient_prototype = Product(lua_ingredient)
+						local ingredient = ingredient_prototype:clone()
+						ingredient.time = model.time
+						ingredient.count = lua_ingredient.amount * block.count
+						ingredient.count_deep = lua_ingredient.amount * block.count_deep
+						if block.by_limit == true and block.count > 1 then
+							ingredient.limit_count = ingredient.amount / block.count
+						end
 
-				if block_by_product then
-					button_action = "production-recipe-ingredient-add"
-					button_tooltip = "tooltip.add-recipe"
-				else
-					button_action = "product-edition"
-					button_tooltip = "tooltip.edit-product"
-				end
-				---color
-				if ingredient.state == 1 then
-					if not (block.unlinked) or block.by_factory == true then
-						ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_default)
-					else
-						block_id = block.id
-						ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_driving)
+						if block_by_product then
+							button_action = "production-recipe-ingredient-add"
+							button_tooltip = "tooltip.add-recipe"
+						else
+							button_action = "product-edition"
+							button_tooltip = "tooltip.edit-product"
+						end
+						---color
+						if ingredient.state == 1 then
+							if not (block.unlinked) or block.by_factory == true then
+								ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_default)
+							else
+								block_id = block.id
+								ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_driving)
+							end
+						elseif ingredient.state == 3 then
+							ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_overflow)
+						else
+							ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_default)
+						end
+						
+						GuiElement.add(cell_ingredients, GuiCellElement(self.classname, button_action, model.id, parent.id, block_id, ingredient.name):element(ingredient):tooltip(button_tooltip):color(ingredient_color):index(index))
 					end
-				elseif ingredient.state == 3 then
-					ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_overflow)
-				else
-					ingredient_color = User.getThumbnailColor(defines.thumbnails_color.ingredient_default)
 				end
-				
-				GuiElement.add(cell_ingredients, GuiCellElement(self.classname, button_action, model.id, parent.id, block_id, ingredient.name):element(ingredient):tooltip(button_tooltip):color(ingredient_color):index(index))
 			end
 		end
 	end

@@ -183,7 +183,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
         local product_prototype = Product(lua_product)
         local product = product_prototype:clone()
         product.time = model.time
-        product.count = product_prototype:countProduct(model, recipe)
+        product.count = product_prototype:countProduct(recipe)
         if block.by_limit == true and block.count > 1 then
           product.limit_count = product.count / block.count
         end
@@ -208,7 +208,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
         local ingredient_prototype = Product(lua_ingredient)
         local ingredient = ingredient_prototype:clone()
         ingredient.time = model.time
-        ingredient.count = ingredient_prototype:countIngredient(model, recipe)
+        ingredient.count = ingredient_prototype:countIngredient(recipe)
         if block.by_limit == true and block.count > 1 then
           ingredient.limit_count = ingredient.count / block.count
         end

@@ -190,15 +190,15 @@ function Solver:solve(block, parameters, debug)
                 ModelCompute.computeFactory(recipe)
             end
 
-            block.power = block.power + recipe.energy_total
-            block.pollution_total = block.pollution_total + recipe.pollution_total
+            block.power = block.power + recipe.power
+            block.pollution = block.pollution + recipe.pollution
 
             if type(recipe.factory.limit) == "number" and recipe.factory.limit > 0 then
-                local currentRatio = recipe.factory.limit / recipe.factory.count
+                local currentRatio = recipe.factory.limit / recipe.factory.amount
                 if currentRatio < ratio then
                     ratio = currentRatio
                     ---block number
-                    block.count = recipe.factory.count / recipe.factory.limit
+                    block.count = recipe.factory.amount / recipe.factory.limit
                     ---subblock energy
                     if block.count ~= nil and block.count > 0 then
                     end
@@ -223,16 +223,16 @@ function Solver:solve(block, parameters, debug)
             end
         else
             block.limit_energy = block.power / block.count
-            block.limit_pollution = block.pollution_total / block.count
+            block.limit_pollution = block.pollution / block.count
             for _, recipe in spairs(recipes, function(t, a, b) return t[b].index > t[a].index end) do
-                recipe.factory.limit_count = recipe.factory.count / block.count
+                recipe.factory.limit_count = recipe.factory.amount / block.count
                 if recipe.beacons ~= nil then
                     for _, beacon in pairs(recipe.beacons) do
                         beacon.limit_count = beacon.count / block.count
                     end
                 end
-                recipe.limit_energy = recipe.energy_total / block.count
-                recipe.limit_pollution = recipe.pollution_total / block.count
+                recipe.limit_energy = recipe.power / block.count
+                recipe.limit_pollution = recipe.pollution / block.count
             end
         end
         ---state = 0 => produit

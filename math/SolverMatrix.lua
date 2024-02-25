@@ -166,10 +166,6 @@ function SolverMatrix:solve(block, parameters, debug)
         local ratio = 1
         ---calcul ordonnee sur les recipes du block
         local row_index = 1
-        local sorter = function(t, a, b) return t[b].index > t[a].index end
-        if block.by_product == false then
-            sorter = function(t, a, b) return t[b].index < t[a].index end
-        end
 
         local children = block.recipes
         for _, child in spairs(children, defines.sorters.block.sort) do
@@ -192,22 +188,22 @@ function SolverMatrix:solve(block, parameters, debug)
                 else
                     ModelCompute.computeFactory(recipe)
                 end
-                block.power = block.power + recipe.energy_total
-                block.pollution_total = block.pollution_total + recipe.pollution_total
-
+    
                 if type(recipe.factory.limit) == "number" and recipe.factory.limit > 0 then
-                    local currentRatio = recipe.factory.limit / recipe.factory.count
+                    local currentRatio = recipe.factory.limit / recipe.factory.amount
                     if currentRatio < ratio then
                         ratio = currentRatio
                         ---block number
-                        block.count = recipe.factory.count / recipe.factory.limit
+                        block.count = recipe.factory.amount / recipe.factory.limit
                     end
                 end
             end
         end
 
+        --block.power = block.power * block.count
+        --block.pollution = block.pollution * block.count
+        
         if block.count <= 1 then
-            block.count = 1
             block.limit_energy = nil
             block.limit_pollution = nil
             block.limit_building = nil
@@ -227,21 +223,19 @@ function SolverMatrix:solve(block, parameters, debug)
                 end
             end
         else
-            block.limit_energy = block.power / block.count
-            block.limit_pollution = block.pollution_total / block.count
             for _, child in spairs(children, defines.sorters.block.sort) do
                 local is_block = child.recipes ~= nil
                 if is_block then
                 else
                     local recipe = child
-                    recipe.factory.limit_count = recipe.factory.count / block.count
+                    recipe.factory.limit_count = recipe.factory.amount / block.count
                     if recipe.beacons ~= nil then
                         for _, beacon in pairs(recipe.beacons) do
                             beacon.limit_count = beacon.count / block.count
                         end
                     end
-                    recipe.limit_energy = recipe.energy_total / block.count
-                    recipe.limit_pollution = recipe.pollution_total / block.count
+                    recipe.limit_energy = recipe.power / block.count
+                    recipe.limit_pollution = recipe.pollution / block.count
                 end
             end
         end
@@ -259,14 +253,13 @@ function SolverMatrix:solve(block, parameters, debug)
                 local product_header = mC.columns[icol]
                 local product_key = product_header.key
                 local product = Product(product_header):clone()
-                product.count = Z
+                product.amount = Z
                 product.state = state
                 if block.by_product == false then
                     if state == 1 or state == 3 then
                         ---element produit
                         if block.ingredients[product_key] ~= nil then
-                            block.ingredients[product_key].count = block.ingredients[product_key].count +
-                                product.count
+                            block.ingredients[product_key].amount = block.ingredients[product_key].amount + product.amount
                             block.ingredients[product_key].state = state
                         end
                         if block.products[product_key] ~= nil then
@@ -275,7 +268,7 @@ function SolverMatrix:solve(block, parameters, debug)
                     else
                         ---element ingredient
                         if block.products[product_key] ~= nil then
-                            block.products[product_key].count = block.products[product_key].count + product.count
+                            block.products[product_key].amount = block.products[product_key].amount + product.amount
                             block.products[product_key].state = state
                         end
                         if block.ingredients[product_key] ~= nil then
@@ -286,7 +279,7 @@ function SolverMatrix:solve(block, parameters, debug)
                     if state == 1 or state == 3 then
                         ---element produit
                         if block.products[product_key] ~= nil then
-                            block.products[product_key].count = block.products[product_key].count + product.count
+                            block.products[product_key].amount = block.products[product_key].amount + product.amount
                             block.products[product_key].state = state
                         end
                         if block.ingredients[product_key] ~= nil then
@@ -295,8 +288,7 @@ function SolverMatrix:solve(block, parameters, debug)
                     else
                         ---element ingredient
                         if block.ingredients[product_key] ~= nil then
-                            block.ingredients[product_key].count = block.ingredients[product_key].count +
-                                product.count
+                            block.ingredients[product_key].amount = block.ingredients[product_key].amount + product.amount
                             block.ingredients[product_key].state = state
                         end
                         if block.products[product_key] ~= nil then
@@ -399,16 +391,16 @@ function SolverMatrix.get_block_matrix(block, parameters)
             for i, lua_product in pairs(child_products) do
                 local product = Product(lua_product)
                 local product_key = product:getTableKey()
-                local count = 0
+                local product_amount = 0
                 if is_block then
-                    count = lua_product.count or 0
+                    product_amount = lua_product.amount or 0
                 else
-                    count = product:getAmount(child)
+                    product_amount = product:getAmount(child)
                 end
                 lua_products[product_key] = {
                     name = lua_product.name,
                     type = lua_product.type,
-                    count = count,
+                    amount = product_amount,
                     temperature = lua_product.temperature,
                     minimum_temperature = lua_product.minimum_temperature,
                     maximum_temperature = lua_product.maximum_temperature
@@ -417,14 +409,14 @@ function SolverMatrix.get_block_matrix(block, parameters)
             for i, lua_ingredient in pairs(child_ingredients) do
                 local ingredient = Product(lua_ingredient)
                 local ingredient_key = ingredient:getTableKey()
-                local count = 0
+                local ingredient_amount = 0
                 if is_block then
-                    count = lua_ingredient.count or 0
+                    ingredient_amount = lua_ingredient.amount or 0
                 else
-                    count = ingredient:getAmount()
+                    ingredient_amount = ingredient:getAmount()
                     ---si constant compte comme un produit (recipe rocket)
                     if lua_ingredient.constant then
-                        count = ingredient:getAmount(child)
+                        ingredient_amount = ingredient:getAmount(child)
                     end
                 end
                 
@@ -432,13 +424,13 @@ function SolverMatrix.get_block_matrix(block, parameters)
                     lua_ingredients[ingredient_key] = {
                         name = lua_ingredient.name,
                         type = lua_ingredient.type,
-                        count = count,
+                        amount = ingredient_amount,
                         temperature = lua_ingredient.temperature,
                         minimum_temperature = lua_ingredient.minimum_temperature,
                         maximum_temperature = lua_ingredient.maximum_temperature
                     }
                 else
-                    lua_ingredients[ingredient_key].count = lua_ingredients[ingredient_key].count + count
+                    lua_ingredients[ingredient_key].amount = lua_ingredients[ingredient_key].amount + ingredient_amount
                 end
             end
 
@@ -463,7 +455,7 @@ function SolverMatrix.get_block_matrix(block, parameters)
                     col_header.is_ingredient = false
                     col_header.product = lua_product
 
-                    local cell_value = lua_product.count * factor
+                    local cell_value = lua_product.amount * factor
                     row:add_value(col_header, cell_value)
 
                     if rowParameters.contraint ~= nil and rowParameters.contraint.name == name then
@@ -484,7 +476,7 @@ function SolverMatrix.get_block_matrix(block, parameters)
                     ---cas de l'ingredient existant du cote produit
                     if col_index[ingredient_key] ~= nil and lua_products[ingredient_key] ~= nil then
                         ---cas de la valeur equivalente, on creer un nouveau element
-                        if lua_products[ingredient_key].count == lua_ingredients[ingredient_key].count or child_type == "resource" or child_type == "energy" then
+                        if lua_products[ingredient_key].amount == lua_ingredients[ingredient_key].amount or child_type == "resource" or child_type == "energy" then
                             index = col_index[ingredient_key] + 1
                         else
                             index = col_index[ingredient_key]
@@ -503,7 +495,7 @@ function SolverMatrix.get_block_matrix(block, parameters)
                     col_header.product = lua_ingredient
 
                     local cell_value = row:get_value(col_header) or 0
-                    cell_value = cell_value - lua_ingredients[ingredient_key].count * factor
+                    cell_value = cell_value - lua_ingredients[ingredient_key].amount * factor
                     row:add_value(col_header, cell_value)
 
                     row_valid = true
@@ -530,7 +522,7 @@ function SolverMatrix.get_block_matrix(block, parameters)
                     col_header.is_ingredient = true
                     col_header.product = lua_ingredient
 
-                    local cell_value = -lua_ingredient.count * factor
+                    local cell_value = -lua_ingredient.amount * factor
                     row:add_value(col_header, cell_value)
 
                     if rowParameters.contraint ~= nil and rowParameters.contraint.name == name then
@@ -549,7 +541,7 @@ function SolverMatrix.get_block_matrix(block, parameters)
                     ---cas du produit existant du cote ingredient
                     if col_index[product_key] ~= nil and lua_ingredients[product_key] ~= nil then
                         ---cas de la valeur equivalente, on creer un nouveau element
-                        if lua_products[product_key].count == lua_ingredients[product_key].count or child_type == "resource" or child_type == "energy" then
+                        if lua_products[product_key].amount == lua_ingredients[product_key].amount or child_type == "resource" or child_type == "energy" then
                             index = col_index[product_key] + 1
                         else
                             index = col_index[product_key]
@@ -568,7 +560,7 @@ function SolverMatrix.get_block_matrix(block, parameters)
                     col_header.product = lua_product
 
                     local cell_value = row:get_value(col_header) or 0
-                    cell_value = cell_value + lua_product.count * factor
+                    cell_value = cell_value + lua_product.amount * factor
                     row:add_value(col_header, cell_value)
 
                     row_valid = true

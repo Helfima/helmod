@@ -124,7 +124,7 @@ function Model.newModel()
   model.class = "Model"
   model.id = "model_"..global.model_id
   model.owner = owner
-  model.block_root = Model.newBlock(model, { name = model.id, energy_total = 0, pollution_total = 0, summary = {} })
+  model.block_root = Model.newBlock(model, { name = model.id, energy_total = 0, pollution = 0, summary = {} })
   model.blocks = {}
   model.ingredients = {}
   model.resources = {}
@@ -228,8 +228,7 @@ function Model.newBlock(model, recipe)
   blockModel.ingredients = {}
   blockModel.products = {}
   blockModel.recipes = {}
-  blockModel.energy_total = 0
-  blockModel.pollution_total = 0
+  blockModel.pollution = 0
 
   return blockModel
 end

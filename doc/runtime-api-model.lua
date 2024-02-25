@@ -28,7 +28,9 @@
 ---@class FactoryData
 ---@field name string
 ---@field type string
+---@field amount number
 ---@field count number
+---@field count_deep number
 ---@field energy number
 ---@field speed number
 ---@field fuel string | FuelData
@@ -51,6 +53,7 @@
 ---@field name string
 ---@field type string
 ---@field count number
+---@field count_deep number
 ---@field state number
 ---@field input number
 
@@ -60,17 +63,26 @@
 ---@field name string
 ---@field type string
 ---@field count number
+---@field count_deep number
 ---@field production number
 ---@field factory FactoryData
 ---@field beacons {[uint] : BeaconData}
 ---@field time uint
 ---@field energy_total number
----@field polution_total number
+---@field power number
+---@field power_deep number
+---@field pollution_amount number
+---@field pollution number
+---@field pollution_deep number
 ---@field is_done boolean
 ---@field base_time uint
 
 ---@class ParametersData
 ---@field effects ModuleEffectsData
+
+---@class ObjectiveData
+---@field key string
+---@field value number
 
 ---@class BlockData
 ---@field id string
@@ -79,8 +91,11 @@
 ---@field type string
 ---@field owner string
 ---@field count number
+---@field count_deep number
 ---@field power number
----@field pollution_total number
+---@field power_deep number
+---@field pollution number
+---@field pollution_deep number
 ---@field isEnergy boolean
 ---@field unlinked boolean
 ---@field by_product boolean
@@ -90,6 +105,8 @@
 ---@field ingredients {[string] : ProductData}
 ---@field products {[string] : ProductData}
 ---@field recipes {[string] : RecipeData | BlockData}
+---@field has_input boolean
+---@field objectives {[string] : ObjectiveData}
 
 ---@class ModelData
 ---@field id string
