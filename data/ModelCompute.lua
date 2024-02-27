@@ -295,7 +295,7 @@ function ModelCompute.prepareBlockObjectives(block)
     end
     local objectives_block = {}
 
-    local factor = -1
+    local factor = 1
     local block_elements = block.products
     if block.by_product == false then
         block_elements = block.ingredients
@@ -307,7 +307,7 @@ function ModelCompute.prepareBlockObjectives(block)
             local objective = {}
             if element.input ~= nil then
                 objective.key = element_key
-                objective.value = element.input
+                objective.value = element.input * factor
                 objectives_block[element_key] = objective
             end
         end

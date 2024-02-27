@@ -1334,7 +1334,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
         local uri_button_remove = "block-child-remove"
         local uri_button_bottom = "block-child-down"
         ---by product
-        if block.by_product == false then
+        if parent.by_product == false then
             uri_button_top = "block-child-down"
             uri_button_remove = "block-child-remove"
             uri_button_bottom = "block-child-up"
@@ -1758,34 +1758,6 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 			ModelBuilder.updateProductionBlockOption(block, "by_factory", false)
 			ModelBuilder.updateProductionBlockOption(block, "solver", false)
 		end
-		ModelCompute.update(model)
-		Controller:send("on_gui_update", event)
-	end
-
-	if event.action == "tree-block-down" then
-		local chid_block = model.blocks[event.item3]
-		ModelBuilder.updateTreeBlockDown(model, block, chid_block, event.control)
-		ModelCompute.update(model)
-		Controller:send("on_gui_update", event)
-	end
-
-	if event.action == "tree-block-up" then
-		local chid_block = block.recipes[event.item3]
-		ModelBuilder.updateTreeBlockUp(model, block, chid_block, event.control)
-		ModelCompute.update(model)
-		Controller:send("on_gui_update", event)
-	end
-
-	if event.action == "tree-recipe-down" then
-		local chid_recipe = block.recipes[event.item3]
-		ModelBuilder.updateTreeRecipeDown(model, block, chid_recipe, event.control)
-		ModelCompute.update(model)
-		Controller:send("on_gui_update", event)
-	end
-
-	if event.action == "tree-recipe-up" then
-		local chid_recipe = block.recipes[event.item3]
-		ModelBuilder.updateTreeRecipeUp(model, block, chid_recipe, event.control)
 		ModelCompute.update(model)
 		Controller:send("on_gui_update", event)
 	end

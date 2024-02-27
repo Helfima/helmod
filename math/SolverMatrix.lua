@@ -162,13 +162,18 @@ function SolverMatrix:solve(block, parameters, debug)
             end
         end
 
+        local sorter = defines.sorters.block.sort
+        if block.by_product == false then
+            sorter = defines.sorters.block.reverse
+        end
+
         ---ratio pour le calcul du nombre de block
         local ratio = 1
         ---calcul ordonnee sur les recipes du block
         local row_index = 1
 
         local children = block.recipes
-        for _, child in spairs(children, defines.sorters.block.sort) do
+        for _, child in spairs(children, sorter) do
             local is_block = child.recipes ~= nil
             local parameters = mC.parameters[row_index]
             if parameters.recipe_count > 0 then
