@@ -1839,8 +1839,8 @@ end
 -------------------------------------------------------------------------------
 ---On event
 ---@param event LuaEvent
----@param model table
----@param block table
+---@param model ModelData
+---@param block BlockData
 function ProductionPanel:onEventAccessDelete(event, model, block)
 	if event.action == "block-remove-confirmed" then
 		if block.parent_id == nil then
@@ -1851,7 +1851,7 @@ function ProductionPanel:onEventAccessDelete(event, model, block)
 			event.item1 = nil
 			event.item2 = nil
         else
-            local parent_block = model.blocks[block.parent_id]
+            local parent_block = model.blocks[block.parent_id] or model.block_root
             ModelBuilder.blockChildRemove(model, parent_block, block)
 			ModelCompute.update(model)
 			event.item2 = block.parent_id
