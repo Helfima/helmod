@@ -125,6 +125,7 @@ function Model.newModel()
   model.id = "model_"..global.model_id
   model.owner = owner
   model.block_root = Model.newBlock(model, { name = model.id, energy_total = 0, pollution = 0, summary = {} })
+  model.block_root.parent_id = model.id
   model.blocks = {}
   model.ingredients = {}
   model.resources = {}
@@ -179,6 +180,9 @@ function Model.getParameterObjects(parameter)
         if block == nil and parameter.block == model.block_root.id then
           block = model.block_root
         end
+      end
+      if block == nil then
+        block = model.block_root
       end
       if parameter.recipe ~= nil and block ~= nil and  block.recipes ~= nil then
         recipe = block.recipes[parameter.recipe]
