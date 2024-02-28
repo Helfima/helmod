@@ -19,19 +19,6 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
     local lua_recipe = recipe_prototype:native()
 
     if lua_recipe ~= nil then
-        ---ajoute le bloc si il n'existe pas
-        -- if block == nil then
-        --     local modelBlock = Model.newBlock(model, lua_recipe)
-        --     local block_index = table.size(model.blocks)
-        --     modelBlock.index = block_index
-        --     modelBlock.unlinked = false
-        --     block = modelBlock
-        --     model.blocks[modelBlock.id] = modelBlock
-        --     ---check si le block est independant
-        --     ModelCompute.checkUnlinkedBlock(model, modelBlock)
-        --     block_types = false
-        -- end
-
         -- add recipe
         local ModelRecipe = Model.newRecipe(model, lua_recipe.name, recipe_type)
         local icon_name, icon_type = recipe_prototype:getIcon()
@@ -247,7 +234,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Update block matrix solver
----@param block table
+---@param block BlockData
 ---@param value any
 function ModelBuilder.updateBlockMatrixSolver(block, value)
     if block ~= nil then
@@ -257,7 +244,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Update recipe matrix solver
----@param block table
+---@param block BlockData
 ---@param recipe table
 function ModelBuilder.updateMatrixSolver(block, recipe)
     if block ~= nil then
@@ -503,7 +490,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Set factory block
----@param block table
+---@param block BlockData
 ---@param current_recipe RecipeData
 function ModelBuilder.setFactoryBlock(block, current_recipe)
     if current_recipe ~= nil then
@@ -525,7 +512,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Set factory line
----@param model table
+---@param model ModelData
 ---@param current_recipe RecipeData
 function ModelBuilder.setFactoryLine(model, current_recipe)
     if current_recipe ~= nil then
@@ -537,7 +524,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Set factory module block
----@param block table
+---@param block BlockData
 ---@param current_recipe RecipeData
 function ModelBuilder.setFactoryModuleBlock(block, current_recipe)
     if current_recipe ~= nil then
@@ -552,7 +539,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Set factory module line
----@param model table
+---@param model ModelData
 ---@param current_recipe RecipeData
 function ModelBuilder.setFactoryModuleLine(model, current_recipe)
     if current_recipe ~= nil then
@@ -564,7 +551,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Set beacon block
----@param block table
+---@param block BlockData
 ---@param current_recipe RecipeData
 function ModelBuilder.setBeaconBlock(block, current_recipe)
     if current_recipe ~= nil then
@@ -587,7 +574,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Set beacon line
----@param model table
+---@param model ModelData
 ---@param current_recipe RecipeData
 function ModelBuilder.setBeaconLine(model, current_recipe)
     if current_recipe ~= nil then
@@ -599,7 +586,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Set beacon module block
----@param block table
+---@param block BlockData
 ---@param current_recipe RecipeData
 function ModelBuilder.setBeaconModuleBlock(block, current_recipe)
     if current_recipe ~= nil then
@@ -620,7 +607,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Set beacon module line
----@param model table
+---@param model ModelData
 ---@param current_recipe RecipeData
 function ModelBuilder.setBeaconModuleLine(model, current_recipe)
     if current_recipe ~= nil then
@@ -645,9 +632,9 @@ end
 
 -------------------------------------------------------------------------------
 ---Past model
----@param into_model table
+---@param into_model ModelData
 ---@param into_block table
----@param from_model table
+---@param from_model ModelData
 ---@param from_block table
 function ModelBuilder.pastModel(into_model, into_block, from_model, from_block)
     if from_model ~= nil then
@@ -661,8 +648,8 @@ end
 
 -------------------------------------------------------------------------------
 ---Copy model
----@param into_model table
----@param from_model table
+---@param into_model ModelData
+---@param from_model ModelData
 function ModelBuilder.copyModel(into_model, from_model)
     if from_model ~= nil then
         if from_model.parameters ~= nil then
@@ -676,9 +663,9 @@ end
 
 -------------------------------------------------------------------------------
 ---Copy block
----@param into_model table
+---@param into_model ModelData
 ---@param into_block table
----@param from_model table
+---@param from_model ModelData
 ---@param from_block table
 function ModelBuilder.copyBlock(into_model, into_block, from_model, from_block)
     if from_model ~= nil and from_block ~= nil then
@@ -901,7 +888,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Update a product
----@param block table
+---@param block BlockData
 ---@param product_name string
 ---@param quantity number
 function ModelBuilder.updateProduct(block, product_name, quantity)
@@ -918,7 +905,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Update a production block option
----@param block table
+---@param block BlockData
 ---@param option string
 ---@param value any
 function ModelBuilder.updateProductionBlockOption(block, option, value)
@@ -935,7 +922,35 @@ function ModelBuilder.updateProductionBlockOption(block, option, value)
 end
 
 -------------------------------------------------------------------------------
+---Rebuild parent of block
+---@param model ModelData
+function ModelBuilder.rebuildParentBlockOfModel(model)
+    if model.block_root ~= nil then
+        if model.block_root.recipes ~= nil then
+            model.block_root.parent_id = model.id
+            for _, subChild in pairs(model.block_root.recipes) do
+                ModelBuilder.rebuildParentBlockOfBlock(model.block_root, subChild)
+            end        
+        end
+    end
+end
+
+-------------------------------------------------------------------------------
+---Rebuild parent of block
+---@param parent BlockData
+---@param child BlockData | RecipeData
+function ModelBuilder.rebuildParentBlockOfBlock(parent, child)
+    child.parent_id = parent.id
+    if child.recipes ~= nil then
+        for _, subChild in pairs(child.recipes) do
+            ModelBuilder.rebuildParentBlockOfBlock(child, subChild)
+        end        
+    end
+end
+
+-------------------------------------------------------------------------------
 ---Remove a child of block
+---@param model ModelData
 ---@param block BlockData
 ---@param child RecipeData | BlockData
 function ModelBuilder.blockChildRemove(model, block, child)
@@ -950,6 +965,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Remove all child block of block
+---@param model ModelData
 ---@param child RecipeData | BlockData
 function ModelBuilder.blockChildDeepRemove(model, child)
     local is_block = string.find(child.id, "block")
@@ -963,7 +979,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Up a production recipe
----@param block table
+---@param block BlockData
 ---@param recipe RecipeData
 ---@param step number
 function ModelBuilder.blockChildUp(block, recipe, step)
@@ -976,7 +992,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Down a production recipe
----@param block table
+---@param block BlockData
 ---@param recipe RecipeData
 ---@param step number
 function ModelBuilder.blockChildDown(block, recipe, step)
@@ -989,7 +1005,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Down a production recipe
----@param block table
+---@param block BlockData
 function ModelBuilder.blockUpdateIcon(block)
     if block ~= nil and block.recipes ~= nil then
         local first_recipe = Model.firstRecipe(block.recipes)
@@ -1002,7 +1018,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Unlink a block
----@param block table
+---@param block BlockData
 function ModelBuilder.blockUnlink(block)
     if block ~= nil then
         block.unlinked = not (block.unlinked)

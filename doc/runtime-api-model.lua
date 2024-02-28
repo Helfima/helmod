@@ -89,6 +89,7 @@
 ---@field index number
 ---@field name string
 ---@field type string
+---@field parent_id string
 ---@field owner string
 ---@field count number
 ---@field count_deep number

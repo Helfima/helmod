@@ -335,11 +335,15 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
 
 	---delete button
 	local group_delete = GuiElement.add(left_panel, GuiFlowH("group_delete"))
-	local delete_action = "remove-block"
-	if block == nil then delete_action = "remove-model" end
-	local delete_button = GuiElement.add(group_delete, GuiButton(self.classname, delete_action, model.id, block_id):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_actived_red"):tooltip({"helmod_result-panel.remove-button-production-block" }))
-	if not (User.isDeleter(model)) then
-		delete_button.enabled = false
+	local block_remove_confirm = User.getParameter("block_remove_confirm")
+	if block.id == block_remove_confirm then
+		GuiElement.add(group_delete, GuiButton(self.classname, "block-remove-confirmed", model.id, block_id):sprite("menu", defines.sprites.checkmark.black, defines.sprites.checkmark.black):style("helmod_button_menu_sm_actived_green"):tooltip({ "tooltip.remove-block-confirm" }))
+        GuiElement.add(group_delete, GuiButton(self.classname, "block-remove-canceled", model.id, block_id):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_actived_red"):tooltip({ "tooltip.remove-block-cancel" }))
+	else
+		local delete_button = GuiElement.add(group_delete, GuiButton(self.classname, "block-remove", model.id, block_id):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_actived_red"):tooltip({"helmod_result-panel.remove-button-production-block" }))
+		if not (User.isDeleter(model)) then
+			delete_button.enabled = false
+		end
 	end
 
 	---Model Debug
@@ -734,85 +738,6 @@ function ProductionPanel:updateOutputBlock(model, block)
 end
 
 -------------------------------------------------------------------------------
----Update header
----@param model table
-function ProductionPanel:updateInfoModel(model)
-	---data
-	local info_scroll, output_scroll, input_scroll = self:getInfoPanel2()
-	info_scroll.clear()
-	---info panel
-
-	local info_panel = GuiElement.add(info_scroll, GuiFlowV("block-info"))
-	info_panel.style.horizontally_stretchable = false
-	info_panel.style.vertical_spacing = 4
-
-	local block_info = GuiElement.add(info_panel, GuiFlowH("information"))
-	block_info.style.horizontally_stretchable = false
-	block_info.style.horizontal_spacing = 10
-
-	local count_block = table.size(model.blocks)
-	if count_block > 0 then
-		local element_block = { name = model.id, power = 0, pollution = 0 }
-		if model.summary ~= nil then
-			element_block.power = model.summary.energy
-			element_block.pollution = model.summary.pollution
-			element_block.summary = model.summary
-		end
-		GuiElement.add(block_info, GuiCellEnergy("block-power"):element(element_block):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2))
-		if User.getPreferenceSetting("display_pollution") then
-			GuiElement.add(block_info, GuiCellPollution("block-pollution"):element(element_block):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2))
-		end
-		if User.getPreferenceSetting("display_building") then
-			GuiElement.add(block_info, GuiCellBuilding("block-building"):element(element_block):tooltip("tooltip.info-building"):color(GuiElement.color_button_default):index(2))
-		end
-	end
-end
-
--------------------------------------------------------------------------------
----Update header
----@param model table
-function ProductionPanel:updateInputModel(model)
-	---data
-	local right_label, right_tool, right_scroll = self:getRightInfoPanel2()
-	right_scroll.clear()
-	---input panel
-
-	local count_block = table.size(model.blocks)
-	if count_block > 0 then
-		local input_table = GuiElement.add(right_scroll, GuiTable("input-table"):column(GuiElement.getElementColumnNumber(50)):style("helmod_table_element"))
-		if model.ingredients ~= nil then
-			for index, element in spairs(model.ingredients, User.getProductSorter()) do
-				element.time = model.time
-				GuiElement.add(input_table, GuiCellElementM(self.classname, "production-recipe-ingredient-add", model.id, "new", element.name):element(element):tooltip("tooltip.add-recipe"):color(GuiElement.color_button_add):index(index))
-			end
-		end
-	end
-end
-
--------------------------------------------------------------------------------
----Update header
----@param model table
-function ProductionPanel:updateOutputModel(model)
-	---data
-	local left_label, left_tool, left_scroll = self:getLeftInfoPanel2()
-	left_scroll.clear()
-	---ouput panel
-
-	---production block result
-	local count_block = table.size(model.blocks)
-	if count_block > 0 then
-		---ouput panel
-		local output_table = GuiElement.add(left_scroll, GuiTable("output-table"):column(GuiElement.getElementColumnNumber(50)):style("helmod_table_element"))
-		if model.products ~= nil then
-			for index, element in spairs(model.products, User.getProductSorter()) do
-				element.time = model.time
-				GuiElement.add(output_table, GuiCellElementM(self.classname, "production-recipe-product-add", model.id, "new", element.name):element(element):tooltip("tooltip.add-recipe"):index(index))
-			end
-		end
-	end
-end
-
--------------------------------------------------------------------------------
 ---Update data
 ---@param event LuaEvent
 function ProductionPanel:updateData(event)
@@ -898,50 +823,6 @@ function ProductionPanel:updateDataBlock(model, block)
 		if last_element ~= nil then
 			scroll_panel.scroll_to_element(last_element)
 			User.setParameter("scroll_element", nil)
-		end
-	end
-end
-
--------------------------------------------------------------------------------
----Update data
----@param model table
-function ProductionPanel:updateDataModel(model)
-	if model == nil then return end
-
-	self:updateInfoModel(model)
-
-	self:updateOutputModel(model)
-
-	self:updateInputModel(model)
-
-	---data panel
-	local menu_panel, header_panel, scroll_panel = self:getDataPanel()
-	---production block result
-	if table.size(model.blocks) > 0 then
-		---data panel
-		local extra_cols = 0
-		if User.getPreferenceSetting("display_pollution") then
-			extra_cols = extra_cols + 1
-		end
-		if User.getModGlobalSetting("display_hidden_column") == "All" then
-			extra_cols = extra_cols + 2
-		end
-		if User.getModGlobalSetting("display_hidden_column") ~= "None" then
-			extra_cols = extra_cols + 2
-		end
-		if User.getPreferenceSetting("display_building") then
-			extra_cols = extra_cols + 1
-		end
-
-		local result_table = GuiElement.add(scroll_panel,
-			GuiTable("list-data"):column(5 + extra_cols):style("helmod_table_result"))
-		result_table.vertical_centering = false
-		self:addTableHeader(result_table)
-
-		local sorter = function(t, a, b) return t[b]["index"] > t[a]["index"] end
-		local last_element = nil
-		for _, block in spairs(model.blocks, sorter) do
-			local block_cell = self:addTableRowBlock(result_table, model, block)
 		end
 	end
 end
@@ -1326,8 +1207,8 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 	local thumbnails_color = User.getParameter("thumbnails_color") or {}
     
     if block.id == block_child_remove_confirm then
-        GuiElement.add(cell_action, GuiButton(self.classname, "block-child-remove-confirmed", model.id, parent.id, block.id):sprite("menu", defines.sprites.checkmark.black, defines.sprites.checkmark.black):style("helmod_button_menu_sm_actived_green"):tooltip({ "tooltip.remove-element_confirm" }))
-        GuiElement.add(cell_action, GuiButton(self.classname, "block-child-remove-canceled", model.id, parent.id, block.id):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_actived_red"):tooltip({ "tooltip.remove-element_cancel" }))
+        GuiElement.add(cell_action, GuiButton(self.classname, "block-child-remove-confirmed", model.id, parent.id, block.id):sprite("menu", defines.sprites.checkmark.black, defines.sprites.checkmark.black):style("helmod_button_menu_sm_actived_green"):tooltip({ "tooltip.remove-element-confirm" }))
+        GuiElement.add(cell_action, GuiButton(self.classname, "block-child-remove-canceled", model.id, parent.id, block.id):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_actived_red"):tooltip({ "tooltip.remove-element-cancel" }))
     else
         ---by ingredient
         local uri_button_top = "block-child-up"
@@ -1856,13 +1737,6 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 		end
 	end
 
-	if block ~= nil and event.action == "conversion-recipe-block" then
-		local recipe = block.recipes[event.item3]
-		ModelBuilder.convertRecipeToblock(model, block, recipe, event.control)
-		ModelCompute.update(model)
-		Controller:send("on_gui_update", event)
-	end
-
 	if block ~= nil and event.action == "product-info" then
 		if block.products_linked == nil then block.products_linked = {} end
 		if event.control == true and event.item5 ~= "none" then
@@ -1968,9 +1842,30 @@ end
 ---@param model table
 ---@param block table
 function ProductionPanel:onEventAccessDelete(event, model, block)
-	if event.action == "remove-model" then
-		ModelBuilder.removeModel(event.item1)
-		Controller:send("on_gui_update", event)
+	if event.action == "block-remove-confirmed" then
+		if block.parent_id == nil then
+			ModelBuilder.rebuildParentBlockOfModel(model)
+		end
+		if model.id == block.parent_id then
+            ModelBuilder.removeModel(model.id)
+			event.item1 = nil
+			event.item2 = nil
+        else
+            local parent_block = model.blocks[block.parent_id]
+            ModelBuilder.blockChildRemove(model, parent_block, block)
+			ModelCompute.update(model)
+			event.item2 = block.parent_id
+        end
+		Controller:send("on_gui_open", event, self.classname)
+    end
+
+    if event.action == "block-remove-canceled" then
+        Controller:send("on_gui_update", event, self.classname)
+    end
+
+	if event.action == "block-remove" then
+		User.setParameter("block_remove_confirm", block.id)
+		Controller:send("on_gui_update", event, self.classname)
 	end
 
     if event.action == "block-child-remove-confirmed" then
@@ -2003,6 +1898,9 @@ end
 ---On event
 ---@param event LuaEvent
 function ProductionPanel:onEventAutoCancel(event)
+    if event.action ~= "block-remove" and event.action ~= "block-remove-confirmed" then
+        User.setParameter("block_remove_confirm", nil)
+    end
     if event.action ~= "block-child-remove" and event.action ~= "block-child-remove-confirmed" then
         User.setParameter("block_child_remove_confirm", nil)
     end
