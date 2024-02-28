@@ -305,7 +305,7 @@ function ModelCompute.prepareBlockObjectives(block)
         for _, element in pairs(block_elements) do
             local element_key = Product(element):getTableKey()
             local objective = {}
-            if element.input ~= nil then
+            if element.input ~= nil and element.input > 0 then
                 objective.key = element_key
                 objective.value = element.input * factor
                 objectives_block[element_key] = objective
