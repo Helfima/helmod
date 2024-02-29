@@ -20,6 +20,7 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
 
     if lua_recipe ~= nil then
         -- add recipe
+        ---@type RecipeData
         local ModelRecipe = Model.newRecipe(model, lua_recipe.name, recipe_type)
         local icon_name, icon_type = recipe_prototype:getIcon()
         
@@ -57,6 +58,7 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
 
             local default_beacons = User.getDefaultBeacons(ModelRecipe)
             if default_beacons ~= nil then
+                ModelRecipe.beacons = {}
                 for _, default_beacon in pairs(default_beacons) do
                     local beacon = Model.addBeacon(ModelRecipe, default_beacon.name, default_beacon.combo, default_beacon.per_factory, default_beacon.per_factory_constant)
                     ModelBuilder.setBeaconModulePriority(beacon, ModelRecipe, default_beacon.module_priority)

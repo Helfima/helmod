@@ -1642,6 +1642,34 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 		ModelCompute.update(model)
 		Controller:send("on_gui_update", event)
 	end
+	
+	if event.action == "tree-block-down" then
+		local chid_block = model.blocks[event.item3]
+		ModelBuilder.updateTreeBlockDown(model, block, chid_block, event.control)
+		ModelCompute.update(model)
+		Controller:send("on_gui_update", event)
+	end
+
+	if event.action == "tree-block-up" then
+		local chid_block = block.recipes[event.item3]
+		ModelBuilder.updateTreeBlockUp(model, block, chid_block, event.control)
+		ModelCompute.update(model)
+		Controller:send("on_gui_update", event)
+	end
+
+	if event.action == "tree-recipe-down" then
+		local chid_recipe = block.recipes[event.item3]
+		ModelBuilder.updateTreeRecipeDown(model, block, chid_recipe, event.control)
+		ModelCompute.update(model)
+		Controller:send("on_gui_update", event)
+	end
+
+	if event.action == "tree-recipe-up" then
+		local chid_recipe = block.recipes[event.item3]
+		ModelBuilder.updateTreeRecipeUp(model, block, chid_recipe, event.control)
+		ModelCompute.update(model)
+		Controller:send("on_gui_update", event)
+	end
 
 	if event.action == "block-child-up" then
 		local step = 1
