@@ -233,14 +233,18 @@ end
 ---Finalize input block
 ---@param block BlockData
 function ModelCompute.finalizeBlock(block, factor)
+    block.count_limit = 0
     block.power = 0
+    block.power_limit = 0
     block.power_deep = 0
     block.pollution = 0
+    block.pollution_limit = 0
     block.pollution_deep = 0
     
     block.count_deep = block.count * factor
     local children = block.recipes
     if children ~= nil and table.size(children) > 0 then
+        local ratio_limit = -1
         -- compute block children
         for _, child in spairs(children, defines.sorters.block.sort) do
             local is_block = child.recipes ~= nil
@@ -255,21 +259,30 @@ function ModelCompute.finalizeBlock(block, factor)
             else
                 ---@type RecipeData
                 local recipe = child
+                recipe.count_limit = 0
                 recipe.count_deep = recipe.count * block.count_deep
                 
                 recipe.factory.count = recipe.factory.amount * recipe.count
+                recipe.factory.count_limit = 0
                 recipe.factory.count_deep = recipe.factory.count * block.count_deep
 
                 for _, beacon in pairs(recipe.beacons) do
-                    local constant = beacon.per_factory_constant or 0
+                    local constant = 0
+                    -- add constant only if has a beacon
+                    if beacon.amount > 0 then
+                        constant = beacon.per_factory_constant or 0
+                    end
                     beacon.count = beacon.amount * recipe.count + constant
+                    beacon.count_limit = 0
                     beacon.count_deep = beacon.count * block.count_deep
                 end
                 
                 recipe.power = recipe.energy_total * recipe.count
+                recipe.power_limit = 0
                 recipe.power_deep = recipe.power * block.count_deep
                 
                 recipe.pollution = recipe.pollution_amount * recipe.count
+                recipe.pollution_limit = 0
                 recipe.pollution_deep = recipe.pollution * block.count_deep
                 
                 block.power = block.power + recipe.power * block.count
@@ -277,6 +290,35 @@ function ModelCompute.finalizeBlock(block, factor)
 
                 block.pollution = block.pollution + recipe.pollution * block.count
                 block.pollution_deep = block.pollution_deep + recipe.pollution_deep
+
+                if type(recipe.factory.limit) == "number" and recipe.factory.limit > 0 then
+                    local current_ratio = recipe.factory.limit / recipe.factory.count
+                    if ratio_limit > current_ratio or ratio_limit == -1 then
+                        ratio_limit = current_ratio
+                    end
+                end
+            end
+        end
+
+        if ratio_limit > 0 then
+            block.count_limit = ratio_limit
+            block.power_limit = block.power * ratio_limit
+            block.pollution_limit = block.pollution * ratio_limit
+            for _, child in spairs(children, defines.sorters.block.sort) do
+                local is_block = child.recipes ~= nil
+                if is_block then
+                else
+                    local recipe = child
+                    recipe.count_limit = recipe.count * ratio_limit
+                    recipe.factory.count_limit = recipe.factory.count * ratio_limit
+                    if recipe.beacons ~= nil then
+                        for _, beacon in pairs(recipe.beacons) do
+                            beacon.count_limit = beacon.count * ratio_limit
+                        end
+                    end
+                    recipe.power_limit = recipe.power * ratio_limit
+                    recipe.pollution_limit = recipe.pollution * ratio_limit
+                end
             end
         end
     end

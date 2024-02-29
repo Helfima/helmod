@@ -195,55 +195,9 @@ function Solver:solve(block, parameters, debug)
                 else
                     ModelCompute.computeFactory(recipe)
                 end
-
-                if type(recipe.factory.limit) == "number" and recipe.factory.limit > 0 then
-                    local currentRatio = recipe.factory.limit / recipe.factory.amount
-                    if currentRatio < ratio then
-                        ratio = currentRatio
-                        ---block number
-                        block.count = recipe.factory.amount / recipe.factory.limit
-                    end
-                end
             end
         end
 
-        if block.count <= 1 then
-            block.count = 1
-            block.limit_energy = nil
-            block.limit_pollution = nil
-            block.limit_building = nil
-            for _, child in spairs(children, defines.sorters.block.sort) do
-                local is_block = child.recipes ~= nil
-                if is_block then
-                else
-                    local recipe = child
-                    recipe.factory.limit_count = nil
-                    if recipe.beacons ~= nil then
-                        for _, beacon in pairs(recipe.beacons) do
-                            beacon.limit_count = nil
-                        end
-                    end
-                    recipe.limit_energy = nil
-                    recipe.limit_pollution = nil
-                end
-            end
-        else
-            for _, child in spairs(children, defines.sorters.block.sort) do
-                local is_block = child.recipes ~= nil
-                if is_block then
-                else
-                    local recipe = child
-                    recipe.factory.limit_count = recipe.factory.amount / block.count
-                    if recipe.beacons ~= nil then
-                        for _, beacon in pairs(recipe.beacons) do
-                            beacon.limit_count = beacon.count / block.count
-                        end
-                    end
-                    recipe.limit_energy = recipe.power / block.count
-                    recipe.limit_pollution = recipe.pollution / block.count
-                end
-            end
-        end
         ---state = 0 => produit
         ---state = 1 => produit pilotant
         ---state = 2 => produit restant

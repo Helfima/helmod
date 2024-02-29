@@ -256,7 +256,7 @@ function GuiTooltip:appendDebug(tooltip, element)
       table.insert(tooltip, {"", "\n", "[img=developer]", " ", "State", ": ", helmod_tag.font.default_bold, self.m_element.state or 0, helmod_tag.font.close})
       table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Amount", ": ", helmod_tag.font.default_bold, self.m_element.amount or 0, helmod_tag.font.close})
       table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Count", ": ", helmod_tag.font.default_bold, self.m_element.count or 0, helmod_tag.font.close})
-      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Count limit", ": ", helmod_tag.font.default_bold, self.m_element.limit_count or 0, helmod_tag.font.close})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Count limit", ": ", helmod_tag.font.default_bold, self.m_element.count_limit or 0, helmod_tag.font.close})
       table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Count deep", ": ", helmod_tag.font.default_bold, self.m_element.count_deep or 0, helmod_tag.font.close})
     end
 end
@@ -395,9 +395,9 @@ function GuiTooltipElement:create()
     table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=element.name}), helmod_tag.font.close, helmod_tag.color.close})
     ---quantity
     local total_count = Format.formatNumberElement(element.count)
-    if element.limit_count ~= nil then
-      local limit_count = Format.formatNumberElement(element.limit_count)
-      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.quantity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, limit_count or 0, "/", total_count, helmod_tag.font.close})
+    if element.count_limit ~= nil then
+      local count_limit = Format.formatNumberElement(element.count_limit)
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.quantity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, count_limit or 0, "/", total_count, helmod_tag.font.close})
     else
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.quantity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, total_count or 0, helmod_tag.font.close})
     end

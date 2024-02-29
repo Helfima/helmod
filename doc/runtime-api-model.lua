@@ -30,6 +30,7 @@
 ---@field type string
 ---@field amount number
 ---@field count number
+---@field count_limit number
 ---@field count_deep number
 ---@field energy number
 ---@field speed number
@@ -53,6 +54,7 @@
 ---@field name string
 ---@field type string
 ---@field count number
+---@field count_limit number
 ---@field count_deep number
 ---@field state number
 ---@field input number
@@ -63,6 +65,7 @@
 ---@field name string
 ---@field type string
 ---@field count number
+---@field count_limit number
 ---@field count_deep number
 ---@field production number
 ---@field factory FactoryData
@@ -70,9 +73,11 @@
 ---@field time uint
 ---@field energy_total number
 ---@field power number
+---@field power_limit number
 ---@field power_deep number
 ---@field pollution_amount number
 ---@field pollution number
+---@field pollution_limit number
 ---@field pollution_deep number
 ---@field is_done boolean
 ---@field base_time uint
@@ -92,10 +97,13 @@
 ---@field parent_id string
 ---@field owner string
 ---@field count number
+---@field count_limit number
 ---@field count_deep number
 ---@field power number
+---@field power_limit number
 ---@field power_deep number
 ---@field pollution number
+---@field pollution_limit number
 ---@field pollution_deep number
 ---@field isEnergy boolean
 ---@field unlinked boolean

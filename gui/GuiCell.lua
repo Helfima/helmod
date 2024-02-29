@@ -420,9 +420,11 @@ function GuiCellFactory:create(parent)
     end
   end
 
+  local width = 80
+
   if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_w80", color, 2))
-    local limit_value = factory.limit_count or 0
+    local limit_value = factory.count_limit or factory.count
     if type(factory.limit) == "number" and factory.limit > 0 then
       limit_value = factory.limit
     end
@@ -437,10 +439,8 @@ function GuiCellFactory:create(parent)
     else
       GuiElement.add(row2, GuiLabel("label2", factory.name):caption(Format.formatNumberFactory(limit_value)):style("helmod_label_element"):tooltip({"helmod_common.per-sub-block"}))
     end
-  end
-
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w80", color, 3))
-  if self.m_by_factory then
+  elseif self.m_by_factory then
+    local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w80", color, 3))
     local style = "helmod_textfield_element"
     if factory.input ~= nil then
       style = "helmod_textfield_element_red"
@@ -449,9 +449,9 @@ function GuiCellFactory:create(parent)
     text_field.style.height = 19
     text_field.style.width = 70
   else
-    GuiElement.add(row3, GuiLabel("label3", factory.name):caption(Format.formatNumberFactory(factory.count)):style("helmod_label_element"):tooltip({"helmod_common.total"}))
+    self:add_row_label(cell, width, "row3", factory.count, color, 3, {"helmod_common.quantity"})
   end
-  local width = 80
+
   self:add_row_label(cell, width, "row4", factory.count_deep, color, 3, {"helmod_common.total"})
 
   return cell
@@ -563,7 +563,6 @@ end)
 ---@param parent LuaGuiElement --container for element
 ---@return LuaGuiElement
 function GuiCellBlock:create(parent)
-  local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or "silver"
   ---@type BlockData
   local element = self.m_element or {}
@@ -586,7 +585,11 @@ function GuiCellBlock:create(parent)
   end
 
   local width = 50
-  self:add_row_label(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
+  if self.m_by_limit then
+    self:add_row_label(cell, width, "row2", element.count_limit or 0, color, 2, {"helmod_common.quantity"})
+  else
+    self:add_row_label(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
+  end
   self:add_row_label(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
 
   return cell
@@ -673,7 +676,6 @@ end)
 ---@param parent LuaGuiElement --container for element
 ---@return LuaGuiElement
 function GuiCellBlockInfo:create(parent)
-  local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or "gray"
   local element = self.m_element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
@@ -685,7 +687,11 @@ function GuiCellBlockInfo:create(parent)
   local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", defines.sprites.hangar.white, defines.sprites.hangar.black):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   local width = 50
-  self:add_row_label(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
+  if self.m_by_limit then
+    self:add_row_label(cell, width, "row2", element.count_limit or 0, color, 2, {"helmod_common.quantity"})
+  else
+    self:add_row_label(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
+  end
   self:add_row_label(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
 
   return cell
@@ -702,7 +708,6 @@ end)
 ---@param parent LuaGuiElement --container for element
 ---@return LuaGuiElement
 function GuiCellEnergy:create(parent)
-  local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or "gray"
   local element = self.m_element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, "energy", self.m_index))
@@ -714,7 +719,11 @@ function GuiCellEnergy:create(parent)
   local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", defines.sprites.event.white, defines.sprites.event.black):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   local width = 80
-  self:add_row_label(cell, width, "row2", {element.power, "W"}, color, 2, {"helmod_common.quantity"})
+  if self.m_by_limit then
+    self:add_row_label(cell, width, "row2", {element.power_limit, "W"}, color, 2, {"helmod_common.quantity"})
+  else
+    self:add_row_label(cell, width, "row2", {element.power, "W"}, color, 2, {"helmod_common.quantity"})
+  end
   self:add_row_label(cell, width, "row3", {element.power_deep, "W"}, color, 3, {"helmod_common.total"})
 
   return cell
@@ -743,7 +752,11 @@ function GuiCellPollution:create(parent)
   local tooltip = GuiTooltipPollution(self.options.tooltip):element(element)
   local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", defines.sprites.skull.white, defines.sprites.skull.black):style("helmod_button_menu_flat"):tooltip(tooltip))
 
-  self:add_row_label(cell, width, "row2", element.pollution, color, 2, {"helmod_common.quantity"})
+  if self.m_by_limit then
+    self:add_row_label(cell, width, "row2", element.pollution_limit, color, 2, {"helmod_common.quantity"})
+  else
+    self:add_row_label(cell, width, "row2", element.pollution, color, 2, {"helmod_common.quantity"})
+  end
   self:add_row_label(cell, width, "row3", element.pollution_deep, color, 3, {"helmod_common.total"})
 
   return cell
@@ -836,7 +849,6 @@ end)
 ---@param parent LuaGuiElement --container for element
 ---@return LuaGuiElement
 function GuiCellElement:create(parent)
-  local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or GuiElement.color_button_none
   local element = self.m_element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index or 1))
@@ -858,10 +870,18 @@ function GuiCellElement:create(parent)
 
   local width = 80
   if element.type == "energy" then
-    self:add_row_label(cell, width, "row2", {element.count or 0, "J"}, color, 2, {"helmod_common.quantity"})
+    if self.m_by_limit then
+      self:add_row_label(cell, width, "row2", {element.count_limit or 0, "J"}, color, 2, {"helmod_common.quantity"})
+    else
+      self:add_row_label(cell, width, "row2", {element.count or 0, "J"}, color, 2, {"helmod_common.quantity"})
+    end
     self:add_row_label(cell, width, "row3", {element.count_deep or 0, "J"}, color, 3, {"helmod_common.total"})
   else
-    self:add_row_label(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
+    if self.m_by_limit then
+      self:add_row_label(cell, width, "row2", element.count_limit or 0, color, 2, {"helmod_common.quantity"})
+    else
+      self:add_row_label(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
+    end
     self:add_row_label(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
   end
 
@@ -884,7 +904,6 @@ end)
 ---@param parent LuaGuiElement --container for element
 ---@return LuaGuiElement
 function GuiCellElementSm:create(parent)
-  local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or GuiElement.color_button_none
   if self.m_mask == true then color = "gray" end
   local element = self.m_element or {}
@@ -903,10 +922,18 @@ function GuiCellElementSm:create(parent)
 
   local width = 30
   if element.type == "energy" then
-    self:add_row_label_sm(cell, width, "row2", {element.count or 0, "J"}, color, 2, {"helmod_common.quantity"})
+    if self.m_by_limit then
+      self:add_row_label_sm(cell, width, "row2", {element.count_limit or 0, "J"}, color, 2, {"helmod_common.quantity"})
+    else
+      self:add_row_label_sm(cell, width, "row2", {element.count or 0, "J"}, color, 2, {"helmod_common.quantity"})
+    end
     self:add_row_label_sm(cell, width, "row3", {element.count_deep or 0, "J"}, color, 3, {"helmod_common.total"})
   else
-    self:add_row_label_sm(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
+    if self.m_by_limit then
+      self:add_row_label_sm(cell, width, "row2", element.count_limit or 0, color, 2, {"helmod_common.quantity"})
+    else
+      self:add_row_label_sm(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
+    end
     self:add_row_label_sm(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
   end
   return cell
@@ -923,7 +950,6 @@ end)
 ---@param parent LuaGuiElement --container for element
 ---@return LuaGuiElement
 function GuiCellElementM:create(parent)
-  local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or GuiElement.color_button_none
   local element = self.m_element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index or 1))
@@ -944,10 +970,18 @@ function GuiCellElementM:create(parent)
 
   local width = 50
   if element.type == "energy" then
-    self:add_row_label_m(cell, width, "row2", {element.count or 0, "J"}, color, 2, {"helmod_common.quantity"})
+    if self.m_by_limit then
+      self:add_row_label_m(cell, width, "row2", {element.count_limit or 0, "J"}, color, 2, {"helmod_common.quantity"})
+    else
+      self:add_row_label_m(cell, width, "row2", {element.count or 0, "J"}, color, 2, {"helmod_common.quantity"})
+    end
     self:add_row_label_m(cell, width, "row3", {element.count_deep or 0, "J"}, color, 3, {"helmod_common.total"})
   else
-    self:add_row_label_m(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
+    if self.m_by_limit then
+      self:add_row_label_m(cell, width, "row2", element.count_limit or 0, color, 2, {"helmod_common.quantity"})
+    else
+      self:add_row_label_m(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
+    end
     self:add_row_label_m(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
   end
 

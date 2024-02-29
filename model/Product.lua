@@ -171,9 +171,17 @@ end
 ---@param recipe RecipeData
 ---@return number
 function Product:countProduct(recipe)
-  local amount = self:getElementAmount()
-  local bonus_amount = self:getBonusAmount() ---if there are no catalyst amount = bonus_amount
-  return (amount + bonus_amount * self:getProductivityBonus(recipe) ) * recipe.count
+  local amount = self:getAmount(recipe)
+  return amount * recipe.count
+end
+
+-------------------------------------------------------------------------------
+---Count product
+---@param recipe RecipeData
+---@return number
+function Product:countLimitProduct(recipe)
+  local amount = self:getAmount(recipe)
+  return amount * recipe.count_limit
 end
 
 -------------------------------------------------------------------------------
@@ -181,9 +189,8 @@ end
 ---@param recipe RecipeData
 ---@return number
 function Product:countDeepProduct(recipe)
-  local amount = self:getElementAmount()
-  local bonus_amount = self:getBonusAmount() ---if there are no catalyst amount = bonus_amount
-  return (amount + bonus_amount * self:getProductivityBonus(recipe) ) * recipe.count_deep
+  local amount = self:getAmount(recipe)
+  return amount * recipe.count_deep
 end
 
 -------------------------------------------------------------------------------
@@ -193,6 +200,15 @@ end
 function Product:countIngredient(recipe)
   local amount = self:getElementAmount()
   return amount * recipe.count
+end
+
+-------------------------------------------------------------------------------
+---Count ingredient
+---@param recipe RecipeData
+---@return number
+function Product:countLimitIngredient(recipe)
+  local amount = self:getElementAmount()
+  return amount * recipe.count_limit
 end
 
 -------------------------------------------------------------------------------
