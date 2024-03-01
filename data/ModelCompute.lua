@@ -3,10 +3,6 @@ require "math.SolverMatrix"
 require "math.SolverMatrixAlgebra"
 require "math.SolverMatrixSimplex"
 
-require "math.Solver"
-require "math.SolverAlgebra"
-require "math.SolverSimplex"
-
 ------------------------------------------------------------------------------
 ---Description of the module.
 ---@class ModelCompute
@@ -511,21 +507,22 @@ function ModelCompute.computeBlock(block, parameters)
     block.pollution = 0
 
     if children ~= nil then
+        local solver_selected = User.getParameter("solver_selected")
         local my_solver
 
-        local debug = User.getModGlobalSetting("debug_solver")
-        local selected_solvers = { algebra = SolverAlgebra, simplex = SolverSimplex }
-
-        local solver_selected = User.getParameter("solver_selected") or defines.constant.default_solver
-        if solver_selected ~= defines.constant.solvers.normal then
-            selected_solvers = { algebra = SolverMatrixAlgebra, simplex = SolverMatrixSimplex }
+        local solvers = {}
+        solvers[defines.constant.solvers.default] = { algebra = SolverMatrixAlgebra, simplex = SolverMatrixSimplex }
+        local selected_solver = solvers[defines.constant.solvers.default]
+        if solvers[solver_selected] ~= nil then
+            selected_solver = solvers[solver_selected]
         end
         if block.solver == true and block.by_factory ~= true then
-            my_solver = selected_solvers.simplex()
+            my_solver = selected_solver.simplex()
         else
-            my_solver = selected_solvers.algebra()
+            my_solver = selected_solver.algebra()
         end
 
+        local debug = User.getModGlobalSetting("debug_solver")
         my_solver:solve(block, parameters, debug)
         
     end

@@ -350,8 +350,14 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
 		local group_debug = GuiElement.add(left_panel, GuiFlowH("group_debug"))
 		group_debug.style.horizontal_spacing = button_spacing
 		GuiElement.add(group_debug, GuiButton("HMModelDebug", "OPEN", model.id, block_id):sprite("menu", defines.sprites.run_test.black, defines.sprites.run_test.black):style("helmod_button_menu"):tooltip("Open Debug"))
-		local solver_selected = User.getParameter("solver_selected") or defines.constant.default_solver
-		GuiElement.add(group_debug, GuiButton(self.classname, "solver_switch"):style("helmod_button_default"):caption(solver_selected))
+		local default_solver = User.getParameter("solver_selected") or defines.constant.solvers.default
+		local items = {}
+		for _, value in pairs(defines.constant.solvers) do
+			table.insert(items, value)
+		end
+		local selector = GuiElement.add(group_debug, GuiDropDown(self.classname, "solver_switch"):items(items, default_solver))
+		selector.style.font = "helmod_font_default"
+		selector.style.height = 32
 	end
 
 	---group tool
@@ -409,8 +415,7 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
 			default_compunting = items[1]
 		end
 
-		local selector = GuiElement.add(block_compunting,
-			GuiDropDown(self.classname, "change-computing", model.id, block.id):items(items, default_compunting))
+		local selector = GuiElement.add(block_compunting, GuiDropDown(self.classname, "change-computing", model.id, block.id):items(items, default_compunting))
 		selector.style.font = "helmod_font_default"
 		selector.style.height = 32
 	end
@@ -1441,16 +1446,6 @@ function ProductionPanel:onEventAccessAll(event, model, block)
 		Controller:send("on_gui_update", event, self.classname)
 	end
 
-	if event.action == "solver_switch" then
-		local solver_selected = User.getParameter("solver_selected") or defines.constant.default_solver
-		if solver_selected == defines.constant.solvers.normal then
-			User.setParameter("solver_selected", defines.constant.solvers.matrix)
-		else
-			User.setParameter("solver_selected", defines.constant.solvers.normal)
-		end
-		Controller:send("on_gui_update", event, self.classname)
-	end
-
 	if event.action == "block-expand-or-collapse" then
 		local child_block = model.blocks[event.item2]
 		child_block.expanded = not(child_block.expanded)
@@ -1511,6 +1506,19 @@ end
 ---@param block table
 function ProductionPanel:onEventAccessWrite(event, model, block)
 	local selector_name = "HMRecipeSelector"
+
+	if event.action == "solver_switch" then
+		local index = event.element.selected_index
+		local i_solver = 1
+		for _, value in pairs(defines.constant.solvers) do
+			if index == i_solver then
+				User.setParameter("solver_selected", value)
+				break
+			end
+			i_solver = i_solver + 1
+		end
+		Controller:send("on_gui_update", event, self.classname)
+	end
 
 	if event.action == "model-index-up" and model ~= nil then
 		if model.owner == Player.native().name then

@@ -175,9 +175,8 @@ defines.thumbnails_color.ingredient_overflow = "ingredient_overflow"
 
 defines.constant = {}
 defines.constant.solvers = {}
-defines.constant.solvers.normal = "normal"
-defines.constant.solvers.matrix = "matrix"
-defines.constant.default_solver = defines.constant.solvers.matrix
+defines.constant.solvers.default = "matrix"
+
 defines.constant.rocket_deploy_delay = 2434 / 60
 defines.constant.max_float = 1e300
 defines.constant.base_times = {
