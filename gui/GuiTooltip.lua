@@ -313,7 +313,7 @@ end)
 function GuiTooltipModel:create()
   local tooltip = self._super.create(self)
   local element = self.m_element
-  local first_block = Model.firstRecipe(element.blocks or {})
+  local first_block = Model.firstChild(element.blocks or {})
   if first_block ~= nil then
     local type = first_block.type
     if type == nil then type = "entity" end

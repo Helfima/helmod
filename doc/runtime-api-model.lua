@@ -26,6 +26,7 @@
 ---@field pollution number
 
 ---@class FactoryData
+---@field class string
 ---@field name string
 ---@field type string
 ---@field amount number
@@ -60,6 +61,7 @@
 ---@field input number
 
 ---@class RecipeData
+---@field class string
 ---@field id string
 ---@field index uint
 ---@field name string
@@ -90,6 +92,7 @@
 ---@field value number
 
 ---@class BlockData
+---@field class string
 ---@field id string
 ---@field index number
 ---@field name string
@@ -113,7 +116,7 @@
 ---@field time number
 ---@field ingredients {[string] : ProductData}
 ---@field products {[string] : ProductData}
----@field recipes {[string] : RecipeData | BlockData}
+---@field children {[string] : RecipeData | BlockData}
 ---@field has_input boolean
 ---@field objectives {[string] : ObjectiveData}
 

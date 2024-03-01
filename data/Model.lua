@@ -184,8 +184,8 @@ function Model.getParameterObjects(parameter)
       if block == nil then
         block = model.block_root
       end
-      if parameter.recipe ~= nil and block ~= nil and  block.recipes ~= nil then
-        recipe = block.recipes[parameter.recipe]
+      if parameter.recipe ~= nil and block ~= nil and  block.children ~= nil then
+        recipe = block.children[parameter.recipe]
       end
       return model, block, recipe
     else
@@ -212,11 +212,22 @@ function Model.getLastModel()
 end
 
 -------------------------------------------------------------------------------
+---Retrun true if is a block
+---@param child RecipeData | BlockData
+---@return boolean
+function Model.isBlock(child)
+  if child.class == "Block" then
+    return true
+  else
+    return child.children ~= nil
+  end
+end
+-------------------------------------------------------------------------------
 ---Create model Production Block
 ---@param model ModelData
----@param recipe RecipeData
+---@param child RecipeData | BlockData
 ---@return BlockData
-function Model.newBlock(model, recipe)
+function Model.newBlock(model, child)
   if model.block_id == nil then model.block_id = 0 end
   model.block_id = model.block_id + 1
 
@@ -224,14 +235,18 @@ function Model.newBlock(model, recipe)
   blockModel.class = "Block"
   blockModel.id = "block_"..model.block_id
   blockModel.index = 0
-  blockModel.name = recipe.name
-  blockModel.type = recipe.type
-  blockModel.owner = Player.native().name
+  blockModel.name = child.name
+  blockModel.type = child.type
+  if Player.native() == nil then
+    blockModel.owner = model.owner
+  else
+    blockModel.owner = Player.native().name
+  end
   blockModel.count = 1
   blockModel.power = 0
   blockModel.ingredients = {}
   blockModel.products = {}
-  blockModel.recipes = {}
+  blockModel.children = {}
   blockModel.pollution = 0
 
   return blockModel
@@ -455,21 +470,21 @@ end
 
 -------------------------------------------------------------------------------
 ---Return first recipe of block
----@param recipes {[string] : RecipeData | BlockData}
+---@param children {[string] : RecipeData | BlockData}
 ---@return RecipeData | BlockData
-function Model.firstRecipe(recipes)
-  for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
-    return recipe
+function Model.firstChild(children)
+  for _, child in spairs(children, defines.sorters.block.sort) do
+    return child
   end
 end
 
 -------------------------------------------------------------------------------
 ---Return last recipe of block
----@param recipes {[string] : RecipeData | BlockData}
+---@param children {[string] : RecipeData | BlockData}
 ---@return RecipeData | BlockData
-function Model.lastRecipe(recipes)
-  for _, recipe in spairs(recipes,function(t,a,b) return t[b].index < t[a].index end) do
-    return recipe
+function Model.lastChild(children)
+  for _, child in spairs(children, defines.sorters.block.sort) do
+    return child
   end
 end
 

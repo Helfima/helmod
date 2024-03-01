@@ -108,7 +108,7 @@ function PinPanel:updateInfo(event)
     resultTable.style.horizontally_stretchable = false
 
     self:addProductionBlockHeader(resultTable)
-    for _, recipe in spairs(block.recipes, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
+    for _, recipe in spairs(block.children, defines.sorters.block.sort) do
       local is_done = recipe.is_done or false
       if not(is_done and User.getSetting("pin_panel_column_hide_done")) then
         self:addProductionBlockRow(resultTable, model, block, recipe)
@@ -255,19 +255,19 @@ function PinPanel:onEvent(event)
   if block == nil then return end
 
   if event.action == "pipette-entity" then
-    local recipes = block.recipes
+    local children = block.children
     local index = tonumber(event.item3)
-    Player.setSmartTool(recipes[event.item1], event.item2, index)
+    Player.setSmartTool(children[event.item1], event.item2, index)
   end
   if event.action == "recipe-done" then
-    local recipes = block.recipes
-    recipes[event.item1].is_done = not(recipes[event.item1].is_done)
+    local children = block.children
+    children[event.item1].is_done = not(children[event.item1].is_done)
     self:updateInfo(event)
   end
   if event.action == "recipe-done-remove" then
-    local recipes = block.recipes
-    for _,recipe in pairs(recipes) do
-      recipe.is_done = nil
+    local children = block.children
+    for _,child in pairs(children) do
+      child.is_done = nil
     end
     self:updateInfo(event)
   end

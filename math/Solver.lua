@@ -175,9 +175,9 @@ function Solver:solve(block, parameters, debug)
         ---calcul ordonnee sur les recipes du block
         local row_index = self.row_input + 1
 
-        local children = block.recipes
+        local children = block.children
         for _, child in spairs(children, sorter) do
-            local is_block = child.recipes ~= nil
+            local is_block = Model.isBlock(child)
             if mC[row_index][self.col_R] > 0 then
                 child.count = mC[row_index][self.col_R]
                 child.production = mC[row_index][self.col_P]
@@ -266,7 +266,7 @@ end
 ---@param parameters ParametersData
 ---@return table
 function Solver.getBlockMatrix(block, parameters)
-    local children = block.recipes
+    local children = block.children
     if children ~= nil then
         local row_headers = {}
         local col_headers = {}
@@ -291,7 +291,7 @@ function Solver.getBlockMatrix(block, parameters)
         end
 
         for _, child in spairs(children, sorter) do
-            local is_block = child.recipes ~= nil
+            local is_block = Model.isBlock(child)
             local production = 1
             local child_name = nil
             local child_type = nil

@@ -25,13 +25,13 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
         local icon_name, icon_type = recipe_prototype:getIcon()
         
         if index == nil then
-            local recipe_index = table.size(block.recipes)
-            ModelRecipe.index = recipe_index
+            local child_index = table.size(block.children)
+            ModelRecipe.index = child_index
         else
             ModelRecipe.index = index
-            for _, recipe in pairs(block.recipes) do
-                if recipe.index >= index then
-                    recipe.index = recipe.index + 1
+            for _, child in pairs(block.children) do
+                if child.index >= index then
+                    child.index = child.index + 1
                 end
             end
         end
@@ -70,7 +70,7 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
 
         ModelCompute.prepareBlockElements(block)
         
-        block.recipes[ModelRecipe.id] = ModelRecipe
+        block.children[ModelRecipe.id] = ModelRecipe
 
         return block, ModelRecipe
     end
@@ -108,26 +108,26 @@ function ModelBuilder.updateTreeRecipeDown(model, block, recipe, with_below)
     if block.by_product == false then sorter = defines.sorters.block.reverse end
     local start_index = recipe.index
     local started = false
-    for _, child in spairs(block.recipes, sorter) do
+    for _, child in spairs(block.children, sorter) do
         if started == true then
             if with_below ~= true then
                 break
             end
            -- clean block
-           block.recipes[child.id] = nil
+           block.children[child.id] = nil
            -- update index
-           child.index = table.size(parent_block.recipes)
+           child.index = table.size(parent_block.children)
            -- add into block
-           parent_block.recipes[child.id] = child
+           parent_block.children[child.id] = child
            child.parent_id = parent_block.id
         end
         if child == recipe and started == false then
             -- clean block
-            block.recipes[child.id] = nil
+            block.children[child.id] = nil
             -- update index
-            child.index = table.size(parent_block.recipes)
+            child.index = table.size(parent_block.children)
             -- add into block
-            parent_block.recipes[child.id] = child
+            parent_block.children[child.id] = child
             child.parent_id = parent_block.id
             started = true
         end
@@ -158,28 +158,28 @@ function ModelBuilder.updateTreeRecipeUp(model, block, recipe, with_below)
     if block.by_product == false then sorter = defines.sorters.block.reverse end
     local start_index = recipe.index
     local started = false
-    for _, child in spairs(block.recipes, sorter) do
+    for _, child in spairs(block.children, sorter) do
         if started == true then
             if with_below ~= true then
                 break
             end
             -- update index
-            child.index = table.size(new_block.recipes)
+            child.index = table.size(new_block.children)
             -- clean block
-            block.recipes[child.id] = nil
+            block.children[child.id] = nil
             -- add child
-            new_block.recipes[child.id] = child
+            new_block.children[child.id] = child
         end
         if child == recipe and started == false then
             -- clean block
-            block.recipes[child.id] = nil
+            block.children[child.id] = nil
             -- update index
             new_block.index = child.index
-            child.index = table.size(new_block.recipes)
+            child.index = table.size(new_block.children)
             -- add block
-            block.recipes[new_block.id] = new_block
+            block.children[new_block.id] = new_block
             new_block.parent_id = block.id
-            new_block.recipes[child.id] = child
+            new_block.children[child.id] = child
             started = true
         end
     end
@@ -250,10 +250,10 @@ end
 ---@param recipe table
 function ModelBuilder.updateMatrixSolver(block, recipe)
     if block ~= nil then
-        local recipes = block.recipes
-        local sorter = function(t, a, b) return t[b].index > t[a].index end
+        local recipes = block.children
+        local sorter = defines.sorters.block.sort
         if block.by_product == false then
-            sorter = function(t, a, b) return t[b].index < t[a].index end
+            sorter = defines.sorters.block.reverse
         end
         local apply = false
         local matrix_solver = 0
@@ -498,15 +498,18 @@ function ModelBuilder.setFactoryBlock(block, current_recipe)
     if current_recipe ~= nil then
         local factory_prototype = EntityPrototype(current_recipe.factory.name)
         local factory_ingredient_count = factory_prototype:getIngredientCount()
-        for _, recipe in pairs(block.recipes) do
-            local prototype_recipe = RecipePrototype(recipe)
-            local recipe_ingredient_count = prototype_recipe:getIngredientCount()
-            --- check ingredient limitation
-            if factory_ingredient_count < recipe_ingredient_count then
-                -- Skip
-            elseif prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
-                Model.setFactory(recipe, current_recipe.factory.name, current_recipe.factory.fuel)
-                ModelBuilder.setFactoryModulePriority(recipe, current_recipe.factory.module_priority)
+        for _, child in pairs(block.children) do
+            if child.children == nil then
+                local recipe = child
+                local prototype_recipe = RecipePrototype(recipe)
+                local recipe_ingredient_count = prototype_recipe:getIngredientCount()
+                --- check ingredient limitation
+                if factory_ingredient_count < recipe_ingredient_count then
+                    -- Skip
+                elseif prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
+                    Model.setFactory(recipe, current_recipe.factory.name, current_recipe.factory.fuel)
+                    ModelBuilder.setFactoryModulePriority(recipe, current_recipe.factory.module_priority)
+                end
             end
         end
     end
@@ -530,10 +533,13 @@ end
 ---@param current_recipe RecipeData
 function ModelBuilder.setFactoryModuleBlock(block, current_recipe)
     if current_recipe ~= nil then
-        for key, recipe in pairs(block.recipes) do
-            local prototype_recipe = RecipePrototype(recipe)
-            if prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
-                ModelBuilder.setFactoryModulePriority(recipe, current_recipe.factory.module_priority)
+        for key, child in pairs(block.children) do
+            if child.children == nil then
+                local recipe = child
+                local prototype_recipe = RecipePrototype(recipe)
+                if prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
+                    ModelBuilder.setFactoryModulePriority(recipe, current_recipe.factory.module_priority)
+                end
             end
         end
     end
@@ -557,15 +563,18 @@ end
 ---@param current_recipe RecipeData
 function ModelBuilder.setBeaconBlock(block, current_recipe)
     if current_recipe ~= nil then
-        for key, recipe in pairs(block.recipes) do
-            if recipe ~= current_recipe then
-                local prototype_recipe = RecipePrototype(recipe)
-                if prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
-                    recipe.beacons = {}
-                    if current_recipe.beacons ~= nil then
-                        for key, current_beacon in pairs(current_recipe.beacons) do
-                            local beacon = Model.addBeacon(recipe, current_beacon.name, current_beacon.combo,current_beacon.per_factory, current_beacon.per_factory_constant)
-                            ModelBuilder.setBeaconModulePriority(beacon, current_recipe, current_beacon.module_priority)
+        for key, child in pairs(block.children) do
+            if child.children == nil then
+                local recipe = child
+                if recipe ~= current_recipe then
+                    local prototype_recipe = RecipePrototype(recipe)
+                    if prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
+                        recipe.beacons = {}
+                        if current_recipe.beacons ~= nil then
+                            for key, current_beacon in pairs(current_recipe.beacons) do
+                                local beacon = Model.addBeacon(recipe, current_beacon.name, current_beacon.combo,current_beacon.per_factory, current_beacon.per_factory_constant)
+                                ModelBuilder.setBeaconModulePriority(beacon, current_recipe, current_beacon.module_priority)
+                            end
                         end
                     end
                 end
@@ -592,14 +601,17 @@ end
 ---@param current_recipe RecipeData
 function ModelBuilder.setBeaconModuleBlock(block, current_recipe)
     if current_recipe ~= nil then
-        for key, recipe in pairs(block.recipes) do
-            if recipe ~= current_recipe and recipe.beacons ~= nil then
-                local prototype_recipe = RecipePrototype(recipe)
-                if prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory()
-                    and #recipe.beacons == #current_recipe.beacons then
-                    for index, current_beacon in pairs(current_recipe.beacons) do
-                        local beacon = recipe.beacons[index]
-                        ModelBuilder.setBeaconModulePriority(beacon, current_recipe, current_beacon.module_priority)
+        for key, child in pairs(block.children) do
+            if child.children == nil then
+                local recipe = child
+                if recipe ~= current_recipe and recipe.beacons ~= nil then
+                    local prototype_recipe = RecipePrototype(recipe)
+                    if prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory()
+                        and #recipe.beacons == #current_recipe.beacons then
+                        for index, current_beacon in pairs(current_recipe.beacons) do
+                            local beacon = recipe.beacons[index]
+                            ModelBuilder.setBeaconModulePriority(beacon, current_recipe, current_beacon.module_priority)
+                        end
                     end
                 end
             end
@@ -635,16 +647,13 @@ end
 -------------------------------------------------------------------------------
 ---Past model
 ---@param into_model ModelData
----@param into_block table
----@param from_model ModelData
----@param from_block table
-function ModelBuilder.pastModel(into_model, into_block, from_model, from_block)
-    if from_model ~= nil then
-        if from_block ~= nil then
-            ModelBuilder.copyBlock(into_model, into_block, from_model, from_block)
-        else
-            ModelBuilder.copyModel(into_model, from_model)
-        end
+---@param into_block BlockData
+---@param from_data ModelData | BlockData
+function ModelBuilder.pastModel(into_model, into_block, from_data)
+    if Model.isBlock(from_data) then
+        ModelBuilder.copyBlock(into_model, into_block, from_data)
+    else
+        ModelBuilder.copyModel(into_model, from_data)
     end
 end
 
@@ -657,74 +666,62 @@ function ModelBuilder.copyModel(into_model, from_model)
         if from_model.parameters ~= nil then
             into_model.parameters = table.deepcopy(from_model.parameters)
         end
-        for _, from_block in spairs(from_model.blocks, function(t, a, b) return t[b].index > t[a].index end) do
-            ModelBuilder.copyBlock(into_model, nil, from_model, from_block)
-        end
+        ModelBuilder.copyBlock(into_model, into_model.block_root, from_model.block_root)
     end
 end
 
 -------------------------------------------------------------------------------
 ---Copy block
 ---@param into_model ModelData
----@param into_block table
----@param from_model ModelData
----@param from_block table
-function ModelBuilder.copyBlock(into_model, into_block, from_model, from_block)
-    if from_model ~= nil and from_block ~= nil then
-        local from_recipe_ids = {}
-        for recipe_id, recipe in spairs(from_block.recipes, function(t, a, b) return t[b].index > t[a].index end) do
-            table.insert(from_recipe_ids, recipe_id)
+---@param into_block BlockData
+---@param from_block BlockData
+function ModelBuilder.copyBlock(into_model, into_block, from_block)
+    if from_block ~= nil then
+        local from_child_ids = {}
+        for child_id, child in spairs(from_block.children, defines.sorters.block.sort) do
+            table.insert(from_child_ids, child_id)
         end
-        local recipe_index = #from_recipe_ids
-        for _, recipe_id in ipairs(from_recipe_ids) do
-            local recipe = from_block.recipes[recipe_id]
-            local recipe_prototype = RecipePrototype(recipe)
-            if recipe_prototype:native() ~= nil then
-                ---ajoute le bloc si il n'existe pas
-                if into_block == nil then
-                    into_block = Model.newBlock(into_model, recipe_prototype:native())
-                    local index = table.size(into_model.blocks)
-                    into_block.index = index
-                    if index == 0 then
-                        into_block.unlinked = true
-                    else
-                        into_block.unlinked = from_block.unlinked
+        local child_index = #from_child_ids
+        for _, child_id in ipairs(from_child_ids) do
+            local child = from_block.children[child_id]
+            local is_block = Model.isBlock(child)
+            if is_block then
+                local new_block = Model.newBlock(into_model, child)
+                new_block.index = child_index
+                new_block.unlinked = child.by_factory and true or false
+                new_block.by_factory = child.by_factory
+                new_block.by_product = child.by_product
+                new_block.by_limit = child.by_limit
+                into_model.blocks[new_block.id] = new_block
+                ModelBuilder.copyBlock(into_model, new_block, child)
+                into_block.children[new_block.id] = new_block
+                child_index = child_index + 1
+            else
+                local recipe = child
+                local recipe_prototype = RecipePrototype(recipe)
+                if recipe_prototype:native() ~= nil then
+                    local recipe_model = Model.newRecipe(into_model, recipe.name, recipe_prototype:getType())
+                    recipe_model.index = child_index
+                    recipe_model.production = recipe.production or 1
+                    recipe_model.factory = ModelBuilder.copyFactory(recipe.factory)
+                    if recipe.beacons ~= nil then
+                        recipe_model.beacons = {}
+                        for _, beacon in pairs(recipe.beacons) do
+                            table.insert(recipe_model.beacons, ModelBuilder.copyBeacon(beacon))
+                        end
                     end
-                    into_block.solver = from_block.solver
-                    into_block.by_product = from_block.by_product
-                    into_block.type = from_block.type
 
-                    ---copy input
-                    if from_block.products ~= nil then
-                        into_block.products = table.deepcopy(from_block.products)
+                    if recipe.contraint ~= nil then
+                        recipe_model.contraint = table.deepcopy(recipe.contraint)
                     end
-                    if from_block.ingredients ~= nil then
-                        into_block.ingredients = table.deepcopy(from_block.ingredients)
-                    end
-
-                    into_model.blocks[into_block.id] = into_block
+                    into_block.children[recipe_model.id] = recipe_model
+                    child_index = child_index + 1
                 end
-
-                local recipe_model = Model.newRecipe(into_model, recipe.name, recipe_prototype:getType())
-                recipe_model.index = recipe_index
-                recipe_model.production = recipe.production or 1
-                recipe_model.factory = ModelBuilder.cloneFactory(recipe.factory)
-                if recipe.beacons ~= nil then
-                    recipe_model.beacons = {}
-                    for _, beacon in pairs(recipe.beacons) do
-                        table.insert(recipe_model.beacons, ModelBuilder.cloneBeacon(beacon))
-                    end
-                end
-
-                if recipe.contraint ~= nil then
-                    recipe_model.contraint = table.deepcopy(recipe.contraint)
-                end
-                into_block.recipes[recipe_model.id] = recipe_model
-                recipe_index = recipe_index + 1
             end
+            
         end
         if into_block ~= nil then
-            table.reindex_list(into_block.recipes)
+            table.reindex_list(into_block.children)
             if from_block.products_linked ~= nil then
                 into_block.products_linked = table.deepcopy(from_block.products_linked)
             end
@@ -732,10 +729,16 @@ function ModelBuilder.copyBlock(into_model, into_block, from_model, from_block)
     end
 end
 
----Clone factory
+---Copy recipe
+---@param recipe RecipeData
+---@return RecipeData
+function ModelBuilder.copyRecipe(recipe)
+end
+
+---Copy factory
 ---@param factory FactoryData
 ---@return FactoryData
-function ModelBuilder.cloneFactory(factory)
+function ModelBuilder.copyFactory(factory)
     local new_factory = Model.newFactory(factory.name)
     new_factory.limit = factory.limit
     new_factory.fuel = factory.fuel
@@ -752,10 +755,10 @@ function ModelBuilder.cloneFactory(factory)
     return new_factory
 end
 
----Clone beacon
+---Copy beacon
 ---@param beacon FactoryData
 ---@return FactoryData
-function ModelBuilder.cloneBeacon(beacon)
+function ModelBuilder.copyBeacon(beacon)
     local new_beacon = Model.newBeacon(beacon.name)
     new_beacon.combo = beacon.combo
     new_beacon.per_factory = beacon.per_factory
@@ -928,9 +931,9 @@ end
 ---@param model ModelData
 function ModelBuilder.rebuildParentBlockOfModel(model)
     if model.block_root ~= nil then
-        if model.block_root.recipes ~= nil then
+        if model.block_root.children ~= nil then
             model.block_root.parent_id = model.id
-            for _, subChild in pairs(model.block_root.recipes) do
+            for _, subChild in pairs(model.block_root.children) do
                 ModelBuilder.rebuildParentBlockOfBlock(model.block_root, subChild)
             end        
         end
@@ -943,8 +946,8 @@ end
 ---@param child BlockData | RecipeData
 function ModelBuilder.rebuildParentBlockOfBlock(parent, child)
     child.parent_id = parent.id
-    if child.recipes ~= nil then
-        for _, subChild in pairs(child.recipes) do
+    if child.children ~= nil then
+        for _, subChild in pairs(child.children) do
             ModelBuilder.rebuildParentBlockOfBlock(child, subChild)
         end        
     end
@@ -956,10 +959,10 @@ end
 ---@param block BlockData
 ---@param child RecipeData | BlockData
 function ModelBuilder.blockChildRemove(model, block, child)
-    if block ~= nil and block.recipes ~= nil and block.recipes[child.id] ~= nil then
+    if block ~= nil and block.children ~= nil and block.children[child.id] ~= nil then
         ModelBuilder.blockChildDeepRemove(model, child)
-        block.recipes[child.id] = nil
-        table.reindex_list(block.recipes)
+        block.children[child.id] = nil
+        table.reindex_list(block.children)
         ---change block name
         ModelBuilder.blockUpdateIcon(block)
     end
@@ -970,9 +973,9 @@ end
 ---@param model ModelData
 ---@param child RecipeData | BlockData
 function ModelBuilder.blockChildDeepRemove(model, child)
-    local is_block = string.find(child.id, "block")
-    if is_block and child ~= nil and child.recipes ~= nil then
-        for _, subChild in pairs(child.recipes) do
+    local is_block = Model.isBlock(child)
+    if is_block and child ~= nil and child.children ~= nil then
+        for _, subChild in pairs(child.children) do
             ModelBuilder.blockChildDeepRemove(model, subChild)
         end
     end
@@ -985,8 +988,8 @@ end
 ---@param recipe RecipeData
 ---@param step number
 function ModelBuilder.blockChildUp(block, recipe, step)
-    if block ~= nil and block.recipes ~= nil and recipe ~= nil then
-        table.up_indexed_list(block.recipes, recipe.index, step)
+    if block ~= nil and block.children ~= nil and recipe ~= nil then
+        table.up_indexed_list(block.children, recipe.index, step)
         ---change block name
         ModelBuilder.blockUpdateIcon(block)
     end
@@ -998,8 +1001,8 @@ end
 ---@param recipe RecipeData
 ---@param step number
 function ModelBuilder.blockChildDown(block, recipe, step)
-    if block ~= nil and block.recipes ~= nil and recipe ~= nil then
-        table.down_indexed_list(block.recipes, recipe.index, step)
+    if block ~= nil and block.children ~= nil and recipe ~= nil then
+        table.down_indexed_list(block.children, recipe.index, step)
         ---change block name
         ModelBuilder.blockUpdateIcon(block)
     end
@@ -1009,8 +1012,8 @@ end
 ---Down a production recipe
 ---@param block BlockData
 function ModelBuilder.blockUpdateIcon(block)
-    if block ~= nil and block.recipes ~= nil then
-        local first_recipe = Model.firstRecipe(block.recipes)
+    if block ~= nil and block.children ~= nil then
+        local first_recipe = Model.firstChild(block.children)
         if first_recipe ~= nil then
             block.name = first_recipe.name
             block.type = first_recipe.type

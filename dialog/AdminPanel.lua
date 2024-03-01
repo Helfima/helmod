@@ -540,7 +540,7 @@ function AdminPanel:addSheetListRow(gui_table, model)
 
   ---col element
   local cell_element = GuiElement.add(gui_table, GuiFrameH("element", model.id):style(helmod_frame_style.hidden))
-  local element = Model.firstRecipe(model.blocks)
+  local element = Model.firstChild(model.blocks)
   if element ~= nil then
     GuiElement.add(cell_element, GuiButtonSprite(self.classname, "donothing", model.id):sprite("recipe", element.name):tooltip(RecipePrototype(element):getLocalisedName()))
   else

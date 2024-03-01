@@ -110,7 +110,7 @@ end
 ---@param block BlockData
 function ModelCompute.updateBlock(model, block)
     block.time = model.time
-    local children = block.recipes
+    local children = block.children
 
     -- check if block has child
     local _, child = next(children)
@@ -121,7 +121,7 @@ function ModelCompute.updateBlock(model, block)
     else
         -- compute block children
         for _, child in spairs(children, defines.sorters.block.sort) do
-            local is_block = child.recipes ~= nil
+            local is_block = Model.isBlock(child)
             if is_block then
                 ModelCompute.updateBlock(model, child)
             end
@@ -147,7 +147,7 @@ function ModelCompute.update2(model)
         for _, block in spairs(model.blocks, function(t, a, b) return t[b].index > t[a].index end) do
             block.time = model.time
             ---premiere recette
-            local _, recipe = next(block.recipes)
+            local _, recipe = next(block.children)
             if recipe == nil then
                 block.ingredients = {}
                 block.products = {}
@@ -242,12 +242,12 @@ function ModelCompute.finalizeBlock(block, factor)
     block.pollution_deep = 0
     
     block.count_deep = block.count * factor
-    local children = block.recipes
+    local children = block.children
     if children ~= nil and table.size(children) > 0 then
         local ratio_limit = -1
         -- compute block children
         for _, child in spairs(children, defines.sorters.block.sort) do
-            local is_block = child.recipes ~= nil
+            local is_block = Model.isBlock(child)
             if is_block then
                 ModelCompute.finalizeBlock(child, block.count_deep)
 
@@ -266,15 +266,17 @@ function ModelCompute.finalizeBlock(block, factor)
                 recipe.factory.count_limit = 0
                 recipe.factory.count_deep = recipe.factory.count * block.count_deep
 
-                for _, beacon in pairs(recipe.beacons) do
-                    local constant = 0
-                    -- add constant only if has a beacon
-                    if beacon.amount > 0 then
-                        constant = beacon.per_factory_constant or 0
+                if recipe.beacons ~= nil then
+                    for _, beacon in pairs(recipe.beacons) do
+                        local constant = 0
+                        -- add constant only if has a beacon
+                        if beacon.amount > 0 then
+                            constant = beacon.per_factory_constant or 0
+                        end
+                        beacon.count = beacon.amount * recipe.count + constant
+                        beacon.count_limit = 0
+                        beacon.count_deep = beacon.count * block.count_deep
                     end
-                    beacon.count = beacon.amount * recipe.count + constant
-                    beacon.count_limit = 0
-                    beacon.count_deep = beacon.count * block.count_deep
                 end
                 
                 recipe.power = recipe.energy_total * recipe.count
@@ -305,7 +307,7 @@ function ModelCompute.finalizeBlock(block, factor)
             block.power_limit = block.power * ratio_limit
             block.pollution_limit = block.pollution * ratio_limit
             for _, child in spairs(children, defines.sorters.block.sort) do
-                local is_block = child.recipes ~= nil
+                local is_block = Model.isBlock(child)
                 if is_block then
                 else
                     local recipe = child
@@ -358,9 +360,9 @@ function ModelCompute.prepareBlockObjectives(block)
     block.has_input = objectives_size > 0
     -- if empty objectives create from the children
     if objectives_size == 0 then
-        local children = block.recipes
+        local children = block.children
         for _, child in spairs(children, defines.sorters.block.sort) do
-            local is_block = child.recipes ~= nil
+            local is_block = Model.isBlock(child)
             if is_block then
                 local child_elements = nil
                 local factor = 1
@@ -378,7 +380,7 @@ function ModelCompute.prepareBlockObjectives(block)
                         state = block_elements[element_key].state
                     end
                     if state == 1 then
-                        local count = lua_product.count
+                        local count = lua_product.amount
                         local objective = {}
                         objective.key = element_key
                         objective.value = count * factor
@@ -420,13 +422,13 @@ end
 ---Prepare products and ingredients of block
 ---@param block BlockData
 function ModelCompute.prepareBlockElements(block)
-    local children = block.recipes
+    local children = block.children
     if children ~= nil then
         local block_products = {}
         local block_ingredients = {}
         -- prepare
         for _, child in spairs(children, defines.sorters.block.sort) do
-            local is_block = child.recipes ~= nil
+            local is_block = Model.isBlock(child)
             local child_products = nil
             local child_ingredients = nil
             if is_block then
@@ -503,12 +505,12 @@ end
 ---Compute production block
 ---@param block table
 function ModelCompute.computeBlock(block, parameters)
-    local recipes = block.recipes
+    local children = block.children
     block.power = 0
     block.count = 1
     block.pollution = 0
 
-    if recipes ~= nil then
+    if children ~= nil then
         local my_solver
 
         local debug = User.getModGlobalSetting("debug_solver")
@@ -934,7 +936,7 @@ end
 function ModelCompute.computeSummaryFactory(block)
     if block ~= nil then
         block.summary = { building = 0, factories = {}, beacons = {}, modules = {} }
-        for _, recipe in pairs(block.recipes) do
+        for _, child in pairs(block.children) do
             ---calcul nombre factory
             local factory = recipe.factory
             if block.summary.factories[factory.name] == nil then

@@ -106,7 +106,7 @@ function Player.beginCrafting(item, count)
   local filters = {{filter = "has-product-item", elem_filters = {{filter = "name", name = item}}}}
   local recipes = game.get_filtered_recipe_prototypes(filters)
   if recipes ~= nil and table.size(recipes) > 0 then
-    local first_recipe = Model.firstRecipe(recipes)
+    local first_recipe = Model.firstChild(recipes)
     local craft = {count=math.ceil(count),recipe=first_recipe.name,silent=false}
     Lua_player.begin_crafting(craft)
   else

@@ -299,6 +299,7 @@ function GuiCell:add_row_label(parent, width, name, count, color, color_level, t
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local row = GuiElement.add(parent, GuiFrameH(name):style("helmod_frame_element_w50", color, color_level))
   row.style.minimal_width=width
+  row.style.height = 18
   -- total deep count
   local caption = nil
   if type(count) == "table" then
@@ -324,6 +325,7 @@ function GuiCell:add_row_label_m(parent, width, name, count, color, color_level,
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local row = GuiElement.add(parent, GuiFrameH(name):style("helmod_frame_element_w50", color, color_level))
   row.style.minimal_width=width
+  row.style.height = 15
   -- total deep count
   local caption = nil
   if type(count) == "table" then
@@ -349,6 +351,7 @@ function GuiCell:add_row_label_sm(parent, width, name, count, color, color_level
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local row = GuiElement.add(parent, GuiFrameH(name):style("helmod_frame_element_w50", color, color_level))
   row.style.minimal_width=width
+  row.style.height = 15
   -- total deep count
   local caption = nil
   if type(count) == "table" then
@@ -434,7 +437,7 @@ function GuiCellFactory:create(parent)
         style = "helmod_textfield_element_red"
       end
       local text_field = GuiElement.add(row2, GuiTextField(self.m_by_limit_uri):text(Format.formatNumberFactory(limit_value)):style(style):tooltip({"helmod_common.per-sub-block"}))
-      text_field.style.height = 19
+      text_field.style.height = 16
       text_field.style.width = 70
     else
       GuiElement.add(row2, GuiLabel("label2", factory.name):caption(Format.formatNumberFactory(limit_value)):style("helmod_label_element"):tooltip({"helmod_common.per-sub-block"}))
@@ -446,7 +449,7 @@ function GuiCellFactory:create(parent)
       style = "helmod_textfield_element_red"
     end
     local text_field = GuiElement.add(row3, GuiTextField(self.m_by_factory_uri):text(Format.formatNumberFactory(factory.input or factory.count or 0)):style(style):tooltip({"helmod_common.total"}))
-    text_field.style.height = 19
+    text_field.style.height = 16
     text_field.style.width = 70
   else
     self:add_row_label(cell, width, "row3", factory.count, color, 3, {"helmod_common.quantity"})
@@ -571,7 +574,7 @@ function GuiCellBlock:create(parent)
   row1.style.top_padding=2
   row1.style.bottom_padding=3
 
-  local first_recipe = Model.firstRecipe(element.recipes)
+  local first_recipe = Model.firstChild(element.children)
   if first_recipe ~= nil then
     local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
     local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
@@ -614,7 +617,7 @@ function GuiCellBlockM:create(parent)
   row1.style.top_padding=2
   row1.style.bottom_padding=3
 
-  local first_recipe = Model.firstRecipe(element.recipes)
+  local first_recipe = Model.firstChild(element.children)
   if first_recipe ~= nil then
     local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
     local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
@@ -650,7 +653,7 @@ function GuiCellModel:create(parent)
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
 
-  local first_block = element.block_root or Model.firstRecipe(element.blocks)
+  local first_block = element.block_root or Model.firstChild(element.blocks)
   if first_block ~= nil and first_block.name ~= "" then
     local tooltip = GuiTooltipModel(self.options.tooltip):element(element)
     local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_block.type, first_block.name):tooltip(tooltip))
