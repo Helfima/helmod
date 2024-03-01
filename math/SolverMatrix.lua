@@ -211,6 +211,9 @@ function SolverMatrix:solve(block, parameters, debug)
                 local product_key = product_header.key
                 local product = Product(product_header):clone()
                 product.amount = Z
+                if math.abs(product.amount) < 1e-10 then
+                    product.amount = 0
+                end
                 product.state = state
                 if block.by_product == false then
                     if state == 1 or state == 3 then

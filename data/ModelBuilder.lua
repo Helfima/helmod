@@ -666,6 +666,8 @@ function ModelBuilder.copyModel(into_model, from_model)
         if from_model.parameters ~= nil then
             into_model.parameters = table.deepcopy(from_model.parameters)
         end
+        into_model.block_root.name = from_model.block_root.name
+        into_model.block_root.type = from_model.block_root.type
         ModelBuilder.copyBlock(into_model, into_model.block_root, from_model.block_root)
     end
 end
