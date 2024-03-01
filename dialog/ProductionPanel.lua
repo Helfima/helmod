@@ -1107,9 +1107,6 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				product.count = product_prototype:countProduct(recipe)
 				product.count_limit = product_prototype:countLimitProduct(recipe)
 				product.count_deep = product_prototype:countDeepProduct(recipe)
-				if block.by_limit == true and block.count > 1 then
-					product.limit_count = product.count / block.count
-				end
 				if block.by_product ~= false and recipe.contraint ~= nil and recipe.contraint.name == product.name then
 					contraint_type = recipe.contraint.type
 				end

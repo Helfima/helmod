@@ -912,7 +912,7 @@ function GuiCellElementSm:create(parent)
   local element = self.m_element or {}
 
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
-  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_sm", color, 1))
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w30", color, 1))
   local tooltip = ""
   if element.type == "energy" then
     tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic():withProductInfo()
