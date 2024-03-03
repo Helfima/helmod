@@ -384,6 +384,13 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
 
 		GuiElement.add(group_tool, GuiButton("HMPinPanel", "OPEN", model.id, block_id):sprite("menu", defines.sprites.push_pin.black, defines.sprites.push_pin.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin" }))
 
+		local display_count_deep = User.getParameter("display_count_deep")
+		if display_count_deep then
+			GuiElement.add(group_tool, GuiButton(self.classname, "display-count-deep", model.id, block_id):sprite("menu", defines.sprites.three_rows.white, defines.sprites.three_rows.black):style("helmod_button_menu_selected"):tooltip({ "tooltip.display-deep-count" }))
+		else
+			GuiElement.add(group_tool, GuiButton(self.classname, "display-count-deep", model.id, block_id):sprite("menu", defines.sprites.two_rows.black, defines.sprites.two_rows.black):style("helmod_button_menu"):tooltip({ "tooltip.display-deep-count" }))
+		end
+
 		---by limit
 		if block.by_limit == true then
 			GuiElement.add(group_tool, GuiButton(self.classname, "block-limit", model.id, block_id):sprite("menu", defines.sprites.gauge_round.white, defines.sprites.gauge_round.black):style("helmod_button_menu_selected"):tooltip({ "helmod_label.assembler-limitation" }))
@@ -524,13 +531,14 @@ function ProductionPanel:updateInfoBlock(model, block)
 		block_table.vertical_centering = false
 		block_table.style.horizontal_spacing = 10
 
-		GuiElement.add(block_table, GuiCellBlockInfo("block-count"):element(block):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(1):byLimit(block.by_limit))
-		GuiElement.add(block_table, GuiCellEnergy("block-power"):element(block):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(2):byLimit(block.by_limit))
+		local default_color = User.getThumbnailColor(defines.thumbnail_color.names.default)
+		GuiElement.add(block_table, GuiCellBlockInfo("block-count"):element(block):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):color(default_color):index(1):byLimit(block.by_limit))
+		GuiElement.add(block_table, GuiCellEnergy("block-power"):element(block):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):color(default_color):index(2):byLimit(block.by_limit))
 		if User.getPreferenceSetting("display_pollution") then
-			GuiElement.add(block_table, GuiCellPollution("block-pollution"):element(block):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):index(3):byLimit(block.by_limit))
+			GuiElement.add(block_table, GuiCellPollution("block-pollution"):element(block):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):color(default_color):index(3):byLimit(block.by_limit))
 		end
 		if User.getPreferenceSetting("display_building") then
-			GuiElement.add(block_table, GuiCellBuilding("block-building"):element(block):tooltip("tooltip.info-building"):color(GuiElement.color_button_default):index(4):byLimit(block.by_limit))
+			GuiElement.add(block_table, GuiCellBuilding("block-building"):element(block):tooltip("tooltip.info-building"):color(GuiElement.color_button_default):color(default_color):index(4):byLimit(block.by_limit))
 		end
 	end
 end
@@ -1452,6 +1460,12 @@ function ProductionPanel:onEventAccessAll(event, model, block)
 	if event.action == "block-expand-or-collapse" then
 		local child_block = model.blocks[event.item2]
 		child_block.expanded = not(child_block.expanded)
+		Controller:send("on_gui_update", event, self.classname)
+	end
+
+	if event.action == "display-count-deep" then
+		local display_count_deep = User.getParameter("display_count_deep")
+		User.setParameter("display_count_deep", not (display_count_deep))
 		Controller:send("on_gui_update", event, self.classname)
 	end
 end

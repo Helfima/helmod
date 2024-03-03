@@ -424,7 +424,6 @@ function GuiCellFactory:create(parent)
   end
 
   local width = 80
-
   if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_w80", color, 2))
     local limit_value = factory.count_limit or factory.count
@@ -455,7 +454,10 @@ function GuiCellFactory:create(parent)
     self:add_row_label(cell, width, "row3", factory.count, color, 2, {"helmod_common.quantity"})
   end
 
-  self:add_row_label(cell, width, "row4", factory.count_deep, color, 3, {"helmod_common.total"})
+  local display_count_deep = User.getParameter("display_count_deep")
+  if display_count_deep then
+    self:add_row_label(cell, width, "row4", factory.count_deep, color, 3, {"helmod_common.total"})
+  end
 
   return cell
 end
@@ -520,8 +522,11 @@ function GuiCellProduct:create(parent)
     local product_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type, element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip({self.options.tooltip, Player.getLocalisedName(element)}))
     self:add_mask(product_icon, color)
   end
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
-  GuiElement.add(row3, GuiLabel("label2", element.name):caption(Format.formatNumber(element.count, 5)):style("helmod_label_element"):tooltip({"helmod_common.total"}))
+  local display_count_deep = User.getParameter("display_count_deep")
+  if display_count_deep then
+    local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
+    GuiElement.add(row3, GuiLabel("label2", element.name):caption(Format.formatNumber(element.count, 5)):style("helmod_label_element"):tooltip({"helmod_common.total"}))
+  end
   return cell
 end
 
@@ -548,10 +553,13 @@ function GuiCellProductSm:create(parent)
   end
   GuiElement.infoTemperature(row1, element)
   
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
-  local caption3 = Format.formatNumber(element.count, 5)
-  if element.type == "energy" then caption3 = Format.formatNumberKilo(element.count, "J") end
-  GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element_sm"):tooltip({"helmod_common.total"}))
+  local display_count_deep = User.getParameter("display_count_deep")
+  if display_count_deep then
+    local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
+    local caption3 = Format.formatNumber(element.count, 5)
+    if element.type == "energy" then caption3 = Format.formatNumberKilo(element.count, "J") end
+    GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element_sm"):tooltip({"helmod_common.total"}))
+  end
   return cell
 end
 
@@ -593,7 +601,10 @@ function GuiCellBlock:create(parent)
   else
     self:add_row_label(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
   end
-  self:add_row_label(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
+  local display_count_deep = User.getParameter("display_count_deep")
+  if display_count_deep then
+    self:add_row_label(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
+  end
 
   return cell
 end
@@ -609,7 +620,6 @@ end)
 ---@param parent LuaGuiElement --container for element
 ---@return LuaGuiElement
 function GuiCellBlockM:create(parent)
-  local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or "silver"
   local element = self.m_element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
@@ -632,7 +642,11 @@ function GuiCellBlockM:create(parent)
 
   local width = 30
   self:add_row_label_m(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
-  self:add_row_label_m(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
+
+  local display_count_deep = User.getParameter("display_count_deep")
+  if display_count_deep then
+    self:add_row_label_m(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
+  end
 
   return cell
 end
@@ -695,7 +709,11 @@ function GuiCellBlockInfo:create(parent)
   else
     self:add_row_label(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
   end
-  self:add_row_label(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
+
+  local display_count_deep = User.getParameter("display_count_deep")
+  if display_count_deep then
+    self:add_row_label(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
+  end
 
   return cell
 end
@@ -727,7 +745,11 @@ function GuiCellEnergy:create(parent)
   else
     self:add_row_label(cell, width, "row2", {element.power, "W"}, color, 2, {"helmod_common.quantity"})
   end
-  self:add_row_label(cell, width, "row3", {element.power_deep, "W"}, color, 3, {"helmod_common.total"})
+
+  local display_count_deep = User.getParameter("display_count_deep")
+  if display_count_deep then
+    self:add_row_label(cell, width, "row3", {element.power_deep, "W"}, color, 3, {"helmod_common.total"})
+  end
 
   return cell
 end
@@ -760,7 +782,10 @@ function GuiCellPollution:create(parent)
   else
     self:add_row_label(cell, width, "row2", element.pollution, color, 2, {"helmod_common.quantity"})
   end
-  self:add_row_label(cell, width, "row3", element.pollution_deep, color, 3, {"helmod_common.total"})
+  local display_count_deep = User.getParameter("display_count_deep")
+  if display_count_deep then
+    self:add_row_label(cell, width, "row3", element.pollution_deep, color, 3, {"helmod_common.total"})
+  end
 
   return cell
 end
@@ -787,24 +812,17 @@ function GuiCellBuilding:create(parent)
   local tooltip = GuiTooltipBuilding(self.options.tooltip):element(element)
   local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", defines.sprites.factory.white, defines.sprites.factory.black):style("helmod_button_menu_flat"):tooltip(tooltip))
 
-  if self.m_by_limit then
-    local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_w50", color, 2))
-    local limit_building = 0
-    if element.summary ~= nil then
-      limit_building = element.summary.limit_building or 0
-    end
-    local caption2 = Format.formatNumber(limit_building)
-    if display_cell_mod == "by-kilo" then caption2 = Format.formatNumberKilo(limit_building) end
-    GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element"):tooltip({"helmod_common.total"}))
-  end
-
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
   local building = 0
   if element.summary ~= nil then
     building = element.summary.building or 0
   end
-  local caption3 = Format.formatNumber(building)
-  GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
+  local width = 50
+  self:add_row_label(cell, width, "row2", building, color, 2, {"helmod_common.quantity"})
+
+  local display_count_deep = User.getParameter("display_count_deep")
+  if display_count_deep then
+    self:add_row_label(cell, width, "row3", building, color, 3, {"helmod_common.total"})
+  end
 
   return cell
 end
@@ -871,6 +889,7 @@ function GuiCellElement:create(parent)
   self:add_contraintIcon(button)
   self:add_mask(button, color)
 
+  local display_count_deep = User.getParameter("display_count_deep")
   local width = 80
   if element.type == "energy" then
     if self.m_by_limit then
@@ -878,14 +897,18 @@ function GuiCellElement:create(parent)
     else
       self:add_row_label(cell, width, "row2", {element.count or 0, "J"}, color, 2, {"helmod_common.quantity"})
     end
-    self:add_row_label(cell, width, "row3", {element.count_deep or 0, "J"}, color, 3, {"helmod_common.total"})
+    if display_count_deep then
+      self:add_row_label(cell, width, "row3", {element.count_deep or 0, "J"}, color, 3, {"helmod_common.total"})
+    end
   else
     if self.m_by_limit then
       self:add_row_label(cell, width, "row2", element.count_limit or 0, color, 2, {"helmod_common.quantity"})
     else
       self:add_row_label(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
     end
-    self:add_row_label(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
+    if display_count_deep then
+      self:add_row_label(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
+    end
   end
 
   if User.getParameter("display_logistic_row") == true then
@@ -923,6 +946,7 @@ function GuiCellElementSm:create(parent)
   
   self:add_mask(button, color, 16)
 
+  local display_count_deep = User.getParameter("display_count_deep")
   local width = 30
   if element.type == "energy" then
     if self.m_by_limit then
@@ -930,14 +954,18 @@ function GuiCellElementSm:create(parent)
     else
       self:add_row_label_sm(cell, width, "row2", {element.count or 0, "J"}, color, 2, {"helmod_common.quantity"})
     end
-    self:add_row_label_sm(cell, width, "row3", {element.count_deep or 0, "J"}, color, 3, {"helmod_common.total"})
+    if display_count_deep then
+      self:add_row_label_sm(cell, width, "row3", {element.count_deep or 0, "J"}, color, 3, {"helmod_common.total"})
+    end
   else
     if self.m_by_limit then
       self:add_row_label_sm(cell, width, "row2", element.count_limit or 0, color, 2, {"helmod_common.quantity"})
     else
       self:add_row_label_sm(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
     end
-    self:add_row_label_sm(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
+    if display_count_deep then
+      self:add_row_label_sm(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
+    end
   end
   return cell
 end
@@ -971,6 +999,7 @@ function GuiCellElementM:create(parent)
   self:add_contraintIcon(button)
   self:add_mask(button, color)
 
+  local display_count_deep = User.getParameter("display_count_deep")
   local width = 50
   if element.type == "energy" then
     if self.m_by_limit then
@@ -978,14 +1007,18 @@ function GuiCellElementM:create(parent)
     else
       self:add_row_label_m(cell, width, "row2", {element.count or 0, "J"}, color, 2, {"helmod_common.quantity"})
     end
-    self:add_row_label_m(cell, width, "row3", {element.count_deep or 0, "J"}, color, 3, {"helmod_common.total"})
+    if display_count_deep then
+      self:add_row_label_m(cell, width, "row3", {element.count_deep or 0, "J"}, color, 3, {"helmod_common.total"})
+    end
   else
     if self.m_by_limit then
       self:add_row_label_m(cell, width, "row2", element.count_limit or 0, color, 2, {"helmod_common.quantity"})
     else
       self:add_row_label_m(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
     end
-    self:add_row_label_m(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
+    if display_count_deep then
+      self:add_row_label_m(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
+    end
   end
 
   return cell
