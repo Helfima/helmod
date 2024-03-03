@@ -255,14 +255,14 @@ end
 -------------------------------------------------------------------------------
 ---Create model Beacon
 ---@param name string
----@param count number
+---@param amount number
 ---@return table
-function Model.newBeacon(name, count)
+function Model.newBeacon(name, amount)
   local beaconModel = {}
   beaconModel.class = "Beacon"
   beaconModel.name = name or "beacon"
   beaconModel.type = "entity"
-  beaconModel.count = count or 0
+  beaconModel.amount = amount or 0
   beaconModel.energy = 0
   beaconModel.combo = User.getPreferenceSetting("beacon_affecting_one")
   beaconModel.per_factory = User.getPreferenceSetting("beacon_by_factory")
@@ -277,14 +277,14 @@ end
 -------------------------------------------------------------------------------
 ---Create model Factory
 ---@param name string
----@param count number
+---@param amount number
 ---@return table
-function Model.newFactory(name, count)
+function Model.newFactory(name, amount)
   local factoryModel = {}
   factoryModel.class = "Factory"
   factoryModel.name = name or "assembling-machine-1"
   factoryModel.type = "entity"
-  factoryModel.count = count or 0
+  factoryModel.amount = amount or 0
   factoryModel.energy = 0
   factoryModel.speed = 0
   ---limit infini = 0

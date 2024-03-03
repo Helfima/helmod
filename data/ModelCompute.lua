@@ -267,6 +267,9 @@ function ModelCompute.finalizeBlock(block, factor)
                 if recipe.beacons ~= nil then
                     for _, beacon in pairs(recipe.beacons) do
                         local constant = 0
+                        if beacon.amount == nil then
+                            beacon.amount = 0
+                        end
                         -- add constant only if has a beacon
                         if beacon.amount > 0 then
                             constant = beacon.per_factory_constant or 0
@@ -729,7 +732,7 @@ function ModelCompute.computeEnergyFactory(recipe)
     recipe.factory.energy = factory_prototype:getEnergyConsumption() * (1 + recipe.factory.effects.consumption)
 
     ---effet pollution
-    recipe.factory.pollution = factory_prototype:getPollution() * (1 + recipe.factory.effects.pollution)
+    recipe.factory.pollution_amount = factory_prototype:getPollution() * (1 + recipe.factory.effects.pollution)
 
     ---compte le nombre de machines necessaires
     ---[ratio recipe] * [effort necessaire du recipe] / ([la vitesse de la factory]
@@ -742,10 +745,10 @@ function ModelCompute.computeEnergyFactory(recipe)
     else
         recipe.factory.energy_total = 0
     end
-    recipe.factory.pollution_total = recipe.factory.pollution * recipe.factory.amount * recipe.base_time
+    recipe.factory.pollution_total = recipe.factory.pollution_amount * recipe.factory.amount * recipe.base_time
 
     recipe.energy_total = recipe.factory.energy_total
-    recipe.pollution = recipe.factory.pollution_total * recipe_prototype:getEmissionsMultiplier()
+    recipe.pollution_amount = recipe.factory.pollution_total * recipe_prototype:getEmissionsMultiplier()
     ---arrondi des valeurs
     recipe.factory.speed = recipe.factory.speed
     recipe.factory.energy = math.ceil(recipe.factory.energy)
