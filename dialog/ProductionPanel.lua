@@ -276,7 +276,7 @@ function ProductionPanel:updateIndexPanel(model)
                 local element = imodel.block_root
 				local button = nil
 				if imodel.id == model.id then
-					if element ~= nil and element.name ~= "" then
+					if element ~= nil and element.type ~= nil then
 						local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
 						button = GuiElement.add(table_index, GuiButtonSprite(self.classname, "change-model", imodel.id):sprite(element.type, element.name):style("helmod_button_menu_selected"):tooltip(tooltip))
 						button.style.width = 36
@@ -287,7 +287,7 @@ function ProductionPanel:updateIndexPanel(model)
 						button.style.width = 36
 					end
 				else
-					if element ~= nil then
+					if element ~= nil and element.type ~= nil then
 						local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
 						button = GuiElement.add(table_index, GuiButtonSelectSprite(self.classname, "change-model", imodel.id):sprite(element.type, element.name):tooltip(tooltip):color())
 					else
@@ -954,8 +954,13 @@ function ProductionPanel:bluidRootLeaf(tree_panel, model, current_block, level)
 			--last_element = cell_tree
 			block_color = User.getThumbnailColor(defines.thumbnail_color.names.block_selected)
 		end
-		local cell_block = GuiElement.add(cell_tree, GuiCellModel(self.classname, "change-block", model.id, model.block_root.id):element(model):tooltip("tooltip.info-model"):color(block_color))
-		cell_block.style.left_padding = 10 * level
+		if model ~= nil and model.block_root.type ~= nil then
+			local cell_block = GuiElement.add(cell_tree, GuiCellModel(self.classname, "change-block", model.id, model.block_root.id):element(model):tooltip("tooltip.info-model"):color(block_color))
+			cell_block.style.left_padding = 10 * level
+		else
+			local cell_block = GuiElement.add(cell_tree, GuiButton(self.classname, "change-block", model.id, model.block_root.id):sprite("menu", defines.sprites.status_help.black, defines.sprites.status_help.black):style("helmod_button_menu_flat"))
+			cell_block.style.left_padding = 10 * level
+		end
 	end
 end
 
@@ -1191,7 +1196,6 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
         GuiElement.add(cell_action, GuiButton(self.classname, uri_button_remove, model.id, parent.id, block.id):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"):tooltip({ "tooltip.remove-element" }))
 
         local tree_up = GuiElement.add(cell_action, GuiButton(self.classname, "tree-block-up", model.id, parent.id, block.id):sprite("menu", defines.sprites.arrow_right.black, defines.sprites.arrow_right.black):style("helmod_button_menu_sm"):tooltip({ "tooltip.down-element-in-tree", User.getModSetting("row_move_step") }))
-        tree_up.enabled = false
         GuiElement.add(cell_action, GuiButton(self.classname, uri_button_bottom, model.id, parent.id, block.id):sprite("menu", defines.sprites.arrow_bottom.black, defines.sprites.arrow_bottom.black):style("helmod_button_menu_sm"):tooltip({ "tooltip.down-element", User.getModSetting("row_move_step") }))
         local linked_button
         if unlinked then
@@ -1460,12 +1464,7 @@ end
 function ProductionPanel:onEventAccessRead(event, model, block)
 	if event.action == "copy-block" then
 		if block ~= nil then
-			local data = nil
-			if model.block_root.id == block.id then
-				data = Converter.write(model)
-			else
-				data = Converter.write(block)
-			end
+			local data = Converter.write(block)
 			User.setParameter("copy_past", data)
 		end
 	end
@@ -1623,14 +1622,14 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 
 	if event.action == "tree-recipe-down" then
 		local chid_recipe = block.children[event.item3]
-		ModelBuilder.updateTreeRecipeDown(model, block, chid_recipe, event.control)
+		ModelBuilder.updateTreeChildDown(model, block, chid_recipe, event.control)
 		ModelCompute.update(model)
 		Controller:send("on_gui_update", event)
 	end
 
 	if event.action == "tree-recipe-up" then
 		local chid_recipe = block.children[event.item3]
-		ModelBuilder.updateTreeRecipeUp(model, block, chid_recipe, event.control)
+		ModelBuilder.updateTreeChildUp(model, block, chid_recipe, event.control)
 		ModelCompute.update(model)
 		Controller:send("on_gui_update", event)
 	end

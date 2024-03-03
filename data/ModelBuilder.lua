@@ -83,7 +83,7 @@ end
 ---@param block BlockData
 ---@param with_below boolean
 function ModelBuilder.updateTreeBlockDown(model, parent, block, with_below)
-    ModelBuilder.updateTreeRecipeDown(model, parent, block, with_below)
+    ModelBuilder.updateTreeChildDown(model, parent, block, with_below)
 end
 
 -------------------------------------------------------------------------------
@@ -93,44 +93,48 @@ end
 ---@param block BlockData
 ---@param with_below boolean
 function ModelBuilder.updateTreeBlockUp(model, parent, block, with_below)
+    ModelBuilder.updateTreeChildUp(model, parent, block, with_below)
 end
 
 -------------------------------------------------------------------------------
----Move down recipe in the tree
+---Move down child in the tree
 ---@param model ModelData
 ---@param block BlockData
----@param recipe RecipeData
+---@param child RecipeData | BlockData
 ---@param with_below boolean
-function ModelBuilder.updateTreeRecipeDown(model, block, recipe, with_below)
+function ModelBuilder.updateTreeChildDown(model, block, child, with_below)
     local parent_block = model.blocks[block.parent_id] or model.block_root
 
     local sorter = defines.sorters.block.sort
     if block.by_product == false then sorter = defines.sorters.block.reverse end
-    local start_index = recipe.index
     local started = false
-    for _, child in spairs(block.children, sorter) do
+    for _, block_child in spairs(block.children, sorter) do
         if started == true then
             if with_below ~= true then
                 break
             end
            -- clean block
-           block.children[child.id] = nil
+           block.children[block_child.id] = nil
            -- update index
-           child.index = table.size(parent_block.children)
+           block_child.index = table.size(parent_block.children)
            -- add into block
-           parent_block.children[child.id] = child
-           child.parent_id = parent_block.id
+           parent_block.children[block_child.id] = block_child
+           block_child.parent_id = parent_block.id
         end
-        if child == recipe and started == false then
+        if block_child == child and started == false then
             -- clean block
-            block.children[child.id] = nil
+            block.children[block_child.id] = nil
             -- update index
-            child.index = table.size(parent_block.children)
+            block_child.index = table.size(parent_block.children)
             -- add into block
-            parent_block.children[child.id] = child
-            child.parent_id = parent_block.id
+            parent_block.children[block_child.id] = block_child
+            block_child.parent_id = parent_block.id
             started = true
         end
+    end
+
+    if table.size(block.children) then
+        ModelBuilder.blockChildRemove(model, parent_block, block)
     end
 
     ModelCompute.prepareBlockElements(parent_block)
@@ -139,13 +143,13 @@ function ModelBuilder.updateTreeRecipeDown(model, block, recipe, with_below)
 end
 
 -------------------------------------------------------------------------------
----Move up recipe in the tree
+---Move up child in the tree
 ---@param model ModelData
 ---@param block BlockData
----@param recipe RecipeData
+---@param child RecipeData | BlockData
 ---@param with_below boolean
-function ModelBuilder.updateTreeRecipeUp(model, block, recipe, with_below)
-    local new_block = Model.newBlock(model, recipe)
+function ModelBuilder.updateTreeChildUp(model, block, child, with_below)
+    local new_block = Model.newBlock(model, child)
     local block_index = table.size(model.blocks)
     new_block.index = block_index
     new_block.unlinked = block.by_factory and true or false
@@ -153,33 +157,33 @@ function ModelBuilder.updateTreeRecipeUp(model, block, recipe, with_below)
     new_block.by_product = block.by_product
     new_block.by_limit = block.by_limit
     model.blocks[new_block.id] = new_block
+    child.parent_id = new_block.id
 
     local sorter = defines.sorters.block.sort
     if block.by_product == false then sorter = defines.sorters.block.reverse end
-    local start_index = recipe.index
     local started = false
-    for _, child in spairs(block.children, sorter) do
+    for _, block_child in spairs(block.children, sorter) do
         if started == true then
             if with_below ~= true then
                 break
             end
             -- update index
-            child.index = table.size(new_block.children)
+            block_child.index = table.size(new_block.children)
             -- clean block
-            block.children[child.id] = nil
+            block.children[block_child.id] = nil
             -- add child
-            new_block.children[child.id] = child
+            new_block.children[block_child.id] = block_child
         end
-        if child == recipe and started == false then
+        if block_child == child and started == false then
             -- clean block
-            block.children[child.id] = nil
+            block.children[block_child.id] = nil
             -- update index
-            new_block.index = child.index
-            child.index = table.size(new_block.children)
+            new_block.index = block_child.index
+            block_child.index = table.size(new_block.children)
             -- add block
             block.children[new_block.id] = new_block
             new_block.parent_id = block.id
-            new_block.children[child.id] = child
+            new_block.children[block_child.id] = block_child
             started = true
         end
     end
@@ -501,14 +505,16 @@ function ModelBuilder.setFactoryBlock(block, current_recipe)
         for _, child in pairs(block.children) do
             if child.children == nil then
                 local recipe = child
-                local prototype_recipe = RecipePrototype(recipe)
-                local recipe_ingredient_count = prototype_recipe:getIngredientCount()
-                --- check ingredient limitation
-                if factory_ingredient_count < recipe_ingredient_count then
-                    -- Skip
-                elseif prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
-                    Model.setFactory(recipe, current_recipe.factory.name, current_recipe.factory.fuel)
-                    ModelBuilder.setFactoryModulePriority(recipe, current_recipe.factory.module_priority)
+                if recipe ~= current_recipe then
+                    local prototype_recipe = RecipePrototype(recipe)
+                    local recipe_ingredient_count = prototype_recipe:getIngredientCount()
+                    --- check ingredient limitation
+                    if factory_ingredient_count < recipe_ingredient_count then
+                        -- Skip
+                    elseif prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
+                        Model.setFactory(recipe, current_recipe.factory.name, current_recipe.factory.fuel)
+                        ModelBuilder.setFactoryModulePriority(recipe, current_recipe.factory.module_priority)
+                    end
                 end
             end
         end
@@ -521,6 +527,7 @@ end
 ---@param current_recipe RecipeData
 function ModelBuilder.setFactoryLine(model, current_recipe)
     if current_recipe ~= nil then
+        ModelBuilder.setFactoryBlock(model.block_root, current_recipe)
         for _, block in pairs(model.blocks) do
             ModelBuilder.setFactoryBlock(block, current_recipe)
         end
@@ -536,9 +543,11 @@ function ModelBuilder.setFactoryModuleBlock(block, current_recipe)
         for key, child in pairs(block.children) do
             if child.children == nil then
                 local recipe = child
-                local prototype_recipe = RecipePrototype(recipe)
-                if prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
-                    ModelBuilder.setFactoryModulePriority(recipe, current_recipe.factory.module_priority)
+                if recipe ~= current_recipe then
+                    local prototype_recipe = RecipePrototype(recipe)
+                    if prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
+                        ModelBuilder.setFactoryModulePriority(recipe, current_recipe.factory.module_priority)
+                    end
                 end
             end
         end
