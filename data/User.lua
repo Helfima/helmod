@@ -685,17 +685,17 @@ end
 function User.getThumbnailsColor()
     ---@type ThumbnailsColorData
     local thumbnails_color = User.getParameter("thumbnails_color") or {}
-    thumbnails_color.default = thumbnails_color.default or "gray"
-    thumbnails_color.block_default = thumbnails_color.block_default or "gray"
-    thumbnails_color.block_selected = thumbnails_color.block_selected or "orange"
-    thumbnails_color.block_reverted = thumbnails_color.block_reverted or "orange"
-    thumbnails_color.recipe_default = thumbnails_color.recipe_default or "gray"
-    thumbnails_color.product_default = thumbnails_color.product_default or "blue"
-    thumbnails_color.product_driving = thumbnails_color.product_driving or "green"
-    thumbnails_color.product_overflow = thumbnails_color.product_overflow or "red"
-    thumbnails_color.ingredient_default = thumbnails_color.ingredient_default or "yellow"
-    thumbnails_color.ingredient_driving = thumbnails_color.ingredient_driving or "green"
-    thumbnails_color.ingredient_overflow = thumbnails_color.ingredient_overflow or "red"
+    thumbnails_color.default = thumbnails_color.default or defines.thumbnail_color.values.default
+    thumbnails_color.block_default = thumbnails_color.block_default or defines.thumbnail_color.values.block_default
+    thumbnails_color.block_selected = thumbnails_color.block_selected or defines.thumbnail_color.values.block_selected
+    thumbnails_color.block_reverted = thumbnails_color.block_reverted or defines.thumbnail_color.values.block_reverted
+    thumbnails_color.recipe_default = thumbnails_color.recipe_default or defines.thumbnail_color.values.recipe_default
+    thumbnails_color.product_default = thumbnails_color.product_default or defines.thumbnail_color.values.product_default
+    thumbnails_color.product_driving = thumbnails_color.product_driving or defines.thumbnail_color.values.product_driving
+    thumbnails_color.product_overflow = thumbnails_color.product_overflow or defines.thumbnail_color.values.product_overflow
+    thumbnails_color.ingredient_default = thumbnails_color.ingredient_default or defines.thumbnail_color.values.ingredient_default
+    thumbnails_color.ingredient_driving = thumbnails_color.ingredient_driving or defines.thumbnail_color.values.ingredient_driving
+    thumbnails_color.ingredient_overflow = thumbnails_color.ingredient_overflow or defines.thumbnail_color.values.ingredient_overflow
     return thumbnails_color
 end
 

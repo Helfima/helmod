@@ -302,8 +302,13 @@ function SolverMatrix.get_block_matrix(block, parameters)
                 child_type = child.type
                 child_tooltip = child.name .. "\nBlock"
 
-                child_products = child.products
-                child_ingredients = child.ingredients
+                if child.by_product == false then
+                    child_products = child.ingredients
+                    child_ingredients = child.products
+                else
+                    child_products = child.products
+                    child_ingredients = child.ingredients
+                end
             else
                 local recipe = child
                 -- check recipe doesn't exist

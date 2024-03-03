@@ -443,7 +443,7 @@ function GuiCellFactory:create(parent)
       GuiElement.add(row2, GuiLabel("label2", factory.name):caption(Format.formatNumberFactory(limit_value)):style("helmod_label_element"):tooltip({"helmod_common.per-sub-block"}))
     end
   elseif self.m_by_factory then
-    local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w80", color, 3))
+    local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w80", color, 2))
     local style = "helmod_textfield_element"
     if factory.input ~= nil then
       style = "helmod_textfield_element_red"
@@ -452,7 +452,7 @@ function GuiCellFactory:create(parent)
     text_field.style.height = 16
     text_field.style.width = 70
   else
-    self:add_row_label(cell, width, "row3", factory.count, color, 3, {"helmod_common.quantity"})
+    self:add_row_label(cell, width, "row3", factory.count, color, 2, {"helmod_common.quantity"})
   end
 
   self:add_row_label(cell, width, "row4", factory.count_deep, color, 3, {"helmod_common.total"})
