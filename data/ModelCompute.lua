@@ -229,7 +229,7 @@ end
 ---Finalize input block
 ---@param block BlockData
 function ModelCompute.finalizeBlock(block, factor)
-    block.count_limit = 0
+    block.count_limit = block.count
     block.power = 0
     block.power_limit = 0
     block.power_deep = 0
@@ -248,18 +248,20 @@ function ModelCompute.finalizeBlock(block, factor)
                 ModelCompute.finalizeBlock(child, block.count_deep)
 
                 block.power = block.power + child.power * block.count
+                block.power_limit = block.power
                 block.power_deep = block.power_deep + child.power_deep
 
                 block.pollution = block.pollution + child.pollution * block.count
+                block.pollution_limit = block.pollution
                 block.pollution_deep = block.pollution_deep + child.pollution_deep
             else
                 ---@type RecipeData
                 local recipe = child
-                recipe.count_limit = 0
+                recipe.count_limit = recipe.count
                 recipe.count_deep = recipe.count * block.count_deep
                 
                 recipe.factory.count = recipe.factory.amount * recipe.count
-                recipe.factory.count_limit = 0
+                recipe.factory.count_limit = recipe.factory.count
                 recipe.factory.count_deep = recipe.factory.count * block.count_deep
 
                 if recipe.beacons ~= nil then
@@ -270,23 +272,25 @@ function ModelCompute.finalizeBlock(block, factor)
                             constant = beacon.per_factory_constant or 0
                         end
                         beacon.count = beacon.amount * recipe.count + constant
-                        beacon.count_limit = 0
+                        beacon.count_limit = beacon.count
                         beacon.count_deep = beacon.count * block.count_deep
                     end
                 end
                 
                 recipe.power = recipe.energy_total * recipe.count
-                recipe.power_limit = 0
+                recipe.power_limit = recipe.power
                 recipe.power_deep = recipe.power * block.count_deep
                 
                 recipe.pollution = recipe.pollution_amount * recipe.count
-                recipe.pollution_limit = 0
+                recipe.pollution_limit = recipe.pollution
                 recipe.pollution_deep = recipe.pollution * block.count_deep
                 
                 block.power = block.power + recipe.power * block.count
+                block.power_limit = block.power
                 block.power_deep = block.power_deep + recipe.power_deep
 
                 block.pollution = block.pollution + recipe.pollution * block.count
+                block.pollution_limit = block.pollution
                 block.pollution_deep = block.pollution_deep + recipe.pollution_deep
 
                 if type(recipe.factory.limit) == "number" and recipe.factory.limit > 0 then
