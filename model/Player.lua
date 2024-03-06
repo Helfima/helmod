@@ -547,7 +547,7 @@ function Player.getProductionsCrafting(category, lua_recipe)
           if lua_entity_filter ~= nil then
             if lua_entity.resource_categories ~= nil and not(lua_entity.resource_categories[lua_entity_filter.resource_category]) then
               check = false
-            elseif lua_entity_filter.mineable_properties and lua_entity_filter.mineable_properties.required_fluid then
+            elseif lua_entity.type == "mining-drill" and lua_entity_filter.mineable_properties and lua_entity_filter.mineable_properties.required_fluid then
               local fluidboxes = EntityPrototype(lua_entity):getFluidboxPrototypes()
               if #fluidboxes == 0 then
                 check = false
