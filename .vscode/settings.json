@@ -1,4 +1,5 @@
 {
+    "editor.wordWrap": "off",
     "factorio.versions": [
         {
             "name": "last",
@@ -28,5 +29,6 @@
     "Lua.runtime.special": {
         "__object_name": "type"
     },
-    "Lua.runtime.plugin": "c:/Users/Helfima/AppData/Roaming/Code/User/workspaceStorage/514fe0eed8db4a5c5d40fa46e5c1b506/justarandomgeek.factoriomod-debug/sumneko-3rd/factorio/plugin.lua"
+    "Lua.runtime.plugin": "c:/Users/Helfima/AppData/Roaming/Code/User/workspaceStorage/514fe0eed8db4a5c5d40fa46e5c1b506/justarandomgeek.factoriomod-debug/sumneko-3rd/factorio/plugin.lua",
+    "Lua.workspace.checkThirdParty": "ApplyInMemory"
 }

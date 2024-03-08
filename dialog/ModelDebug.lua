@@ -85,18 +85,10 @@ function ModelDebug:updateHeader(event)
     local action_panel = self:getMenuPanel()
     action_panel.clear()
     local group1 = GuiElement.add(action_panel, GuiFlowH("group1"))
-    GuiElement.add(group1,
-        GuiButton(self.classname, "change-stage", "initial"):sprite("menu", defines.sprites.expand_left_group.black,
-            defines.sprites.expand_left_group.black):style("helmod_button_menu"):tooltip("Initial"))
-    GuiElement.add(group1,
-        GuiButton(self.classname, "change-stage", "previous"):sprite("menu", defines.sprites.expand_left.black,
-            defines.sprites.expand_left.black):style("helmod_button_menu"):tooltip("Previous Step"))
-    GuiElement.add(group1,
-        GuiButton(self.classname, "change-stage", "next"):sprite("menu", defines.sprites.expand_right.black,
-            defines.sprites.expand_right.black):style("helmod_button_menu"):tooltip("Next Step"))
-    GuiElement.add(group1,
-        GuiButton(self.classname, "change-stage", "final"):sprite("menu", defines.sprites.expand_right_group.black,
-            defines.sprites.expand_right_group.black):style("helmod_button_menu"):tooltip("Final"))
+    GuiElement.add(group1, GuiButton(self.classname, "change-stage", "initial"):sprite("menu", defines.sprites.expand_left_group.black, defines.sprites.expand_left_group.black):style("helmod_button_menu"):tooltip("Initial"))
+    GuiElement.add(group1, GuiButton(self.classname, "change-stage", "previous"):sprite("menu", defines.sprites.expand_left.black, defines.sprites.expand_left.black):style("helmod_button_menu"):tooltip("Previous Step"))
+    GuiElement.add(group1, GuiButton(self.classname, "change-stage", "next"):sprite("menu", defines.sprites.expand_right.black, defines.sprites.expand_right.black):style("helmod_button_menu"):tooltip("Next Step"))
+    GuiElement.add(group1, GuiButton(self.classname, "change-stage", "final"):sprite("menu", defines.sprites.expand_right_group.black, defines.sprites.expand_right_group.black):style("helmod_button_menu"):tooltip("Final"))
 end
 
 -------------------------------------------------------------------------------
@@ -129,8 +121,7 @@ function ModelDebug:updateDebugPanel(event)
                 User.setParameter("model_stage", stage)
             end
             local runtime = block.runtimes[stage]
-            local ma_panel = GuiElement.add(scroll_panel,
-                GuiFrameV("stage_panel"):style(helmod_frame_style.hidden):caption(runtime.name))
+            local ma_panel = GuiElement.add(scroll_panel, GuiFrameV("stage_panel"):style(helmod_frame_style.hidden):caption(runtime.name))
             local solver_selected = User.getParameter("solver_selected") or defines.constant.default_solver
             if solver_selected == defines.constant.solvers.normal then
                 self:buildTableSolver(ma_panel, runtime.matrix, runtime.pivot)
@@ -160,12 +151,9 @@ function ModelDebug:buildTableSolver(matrix_panel, matrix, pivot)
                 if pivot ~= nil then
                     if matrix[1][icol].name == "T" then frame = GuiFrameH("cell", irow, icol):style(
                         "helmod_frame_colored", GuiElement.color_button_default_ingredient, 2) end
-                    if pivot.x == icol then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored",
-                            GuiElement.color_button_edit, 2) end
-                    if pivot.y == irow then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored",
-                            GuiElement.color_button_none, 2) end
-                    if pivot.x == icol and pivot.y == irow then frame = GuiFrameH("cell", irow, icol):style(
-                        "helmod_frame_colored", GuiElement.color_button_rest, 2) end
+                    if pivot.x == icol then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_edit, 2) end
+                    if pivot.y == irow then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_none, 2) end
+                    if pivot.x == icol and pivot.y == irow then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_rest, 2) end
                 end
                 local cell = GuiElement.add(matrix_table, frame)
                 cell.style.horizontally_stretchable = true
@@ -178,8 +166,7 @@ function ModelDebug:buildTableSolver(matrix_panel, matrix, pivot)
                     else
                         local tooltip = { "", value.name }
                         table.insert(tooltip, { "", "\n", "column: ", value.icol })
-                        local button = GuiElement.add(cell,
-                            GuiButtonSprite("cell_value"):sprite(value.type, value.name):tooltip(tooltip))
+                        local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(value.type, value.name):tooltip(tooltip))
                         GuiElement.infoTemperature(button, value, "helmod_label_overlay_m")
                     end
                 else
@@ -197,12 +184,9 @@ end
 function ModelDebug:getFrameColored(irow, icol, pivot)
     local frame = GuiFlowH("cell", irow, icol):style("helmod_flow_horizontal")
     if pivot ~= nil then
-        if pivot.x == icol then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored",
-                GuiElement.color_button_edit, 2) end
-        if pivot.y == irow then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored",
-                GuiElement.color_button_none, 2) end
-        if pivot.x == icol and pivot.y == irow then frame = GuiFrameH("cell", irow, icol):style(
-            "helmod_frame_colored", GuiElement.color_button_rest, 2) end
+        if pivot.x == icol then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_edit, 2) end
+        if pivot.y == irow then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_none, 2) end
+        if pivot.x == icol and pivot.y == irow then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_rest, 2) end
     end
     return frame
 end
@@ -228,13 +212,11 @@ function ModelDebug:getCellHeader(matrix_table, frame, header)
     elseif header.product ~= nil then
         local tooltip = { "", header.product.name }
         table.insert(tooltip, { "", "\n", "column: ", header.icol })
-        local button = GuiElement.add(cell,
-            GuiButtonSprite("cell_value"):sprite(header.product.type, header.product.name):tooltip(tooltip))
+        local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(header.product.type, header.product.name):tooltip(tooltip))
         GuiElement.infoTemperature(button, header.product, "helmod_label_overlay_m")
     else
         local tooltip = { "", header.name }
-        local button = GuiElement.add(cell,
-            GuiButtonSprite("cell_value"):sprite(header.type, header.name):tooltip(tooltip))
+        local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(header.type, header.name):tooltip(tooltip))
         GuiElement.infoTemperature(button, header, "helmod_label_overlay_m")
     end
 end

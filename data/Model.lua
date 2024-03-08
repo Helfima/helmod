@@ -4,7 +4,7 @@
 local Model = {
   ---single-line comment
   classname = "HMModel",
-  version = "0.9.35",
+  version = 1,
   beacon_combo = 4,
   beacon_factory = 0.5,
   beacon_factory_constant = 3
@@ -121,8 +121,11 @@ function Model.newModel()
   if owner == nil or owner == "" then owner = "admin" end
   global.model_id = global.model_id + 1
   local model = {}
+  model.class = "Model"
   model.id = "model_"..global.model_id
   model.owner = owner
+  model.block_root = Model.newBlock(model, { name = model.id, energy_total = 0, pollution = 0, summary = {} })
+  model.block_root.parent_id = model.id
   model.blocks = {}
   model.ingredients = {}
   model.resources = {}
@@ -172,19 +175,26 @@ function Model.getParameterObjects(parameter)
     if parameter.model ~= nil and global.models[parameter.model] ~= nil then
       local model = global.models[parameter.model]
       local block, recipe
-      if model ~= nil and parameter.block ~= nil and model.blocks ~= nil then
+      if parameter.block ~= nil and model ~= nil and model.blocks ~= nil then
         block = model.blocks[parameter.block]
-        if block ~= nil and parameter.recipe ~= nil and block.recipes ~= nil then
-          recipe = block.recipes[parameter.recipe]
+        if block == nil and parameter.block == model.block_root.id then
+          block = model.block_root
         end
+      end
+      if block == nil then
+        block = model.block_root
+      end
+      if parameter.recipe ~= nil and block ~= nil and  block.children ~= nil then
+        recipe = block.children[parameter.recipe]
       end
       return model, block, recipe
     else
       ---initialisation parameter
       local model = Model.getLastModel()
       if model == nil then model = Model.newModel() end
-      User.setParameter(parameter.name, {name=parameter.name, model=model.id})
-      return model
+      local parameterObjects = {name=parameter.name, model=model.id, block = model.block_root.id}
+      User.setParameter(parameter.name, parameterObjects)
+      return model, model.block_root, nil
     end
   end
 end
@@ -203,36 +213,88 @@ end
 
 -------------------------------------------------------------------------------
 ---Create model Production Block
----@param model table
----@param recipe table
----@return table
-function Model.newBlock(model, recipe)
+---@param model ModelData
+---@param child RecipeData | BlockData
+---@return BlockData
+function Model.newBlock(model, child)
   if model.block_id == nil then model.block_id = 0 end
   model.block_id = model.block_id + 1
 
-  local inputModel = {}
-  inputModel.id = "block_"..model.block_id
-  inputModel.name = recipe.name
-  inputModel.owner = Player.native().name
-  inputModel.count = 1
-  inputModel.power = 0
-  inputModel.ingredients = {}
-  inputModel.products = {}
-  inputModel.recipes = {}
+  local blockModel = {}
+  blockModel.class = "Block"
+  blockModel.id = "block_"..model.block_id
+  blockModel.index = 0
+  blockModel.name = child.name
+  blockModel.type = child.type
+  if Player.native() == nil then
+    blockModel.owner = model.owner
+  else
+    blockModel.owner = Player.native().name
+  end
+  blockModel.count = 1
+  blockModel.power = 0
+  blockModel.ingredients = {}
+  blockModel.products = {}
+  blockModel.children = {}
+  blockModel.pollution = 0
 
-  return inputModel
+  return blockModel
+end
+
+-------------------------------------------------------------------------------
+---Retrun true if is a block
+---@param child RecipeData | BlockData
+---@return boolean
+function Model.isBlock(child)
+  if child.class == "Block" then
+    return true
+  else
+    return child.children ~= nil
+  end
+end
+
+-------------------------------------------------------------------------------
+---Retrun true if is expand block for this player
+---@param block BlockData
+---@return boolean
+function Model.isExpandBlock(block)
+  if block.class == "Block" then
+    local player_name = Player.getName()
+    if type(block.expanded) ~= "table" then
+      block.expanded = {}
+      block.expanded[player_name] = false
+    end
+    return block.expanded[player_name]
+  end
+  return false
+end
+
+-------------------------------------------------------------------------------
+---Set expand block for this player
+---@param block BlockData
+---@param value boolean
+function Model.setExpandBlock(block, value)
+  if block.class == "Block" then
+    local player_name = Player.getName()
+    if type(block.expanded) ~= "table" then
+      block.expanded = {}
+      block.expanded[player_name] = false
+    end
+    block.expanded[player_name] = value
+  end
 end
 
 -------------------------------------------------------------------------------
 ---Create model Beacon
 ---@param name string
----@param count number
+---@param amount number
 ---@return table
-function Model.newBeacon(name, count)
+function Model.newBeacon(name, amount)
   local beaconModel = {}
+  beaconModel.class = "Beacon"
   beaconModel.name = name or "beacon"
   beaconModel.type = "entity"
-  beaconModel.count = count or 0
+  beaconModel.amount = amount or 0
   beaconModel.energy = 0
   beaconModel.combo = User.getPreferenceSetting("beacon_affecting_one")
   beaconModel.per_factory = User.getPreferenceSetting("beacon_by_factory")
@@ -247,13 +309,14 @@ end
 -------------------------------------------------------------------------------
 ---Create model Factory
 ---@param name string
----@param count number
+---@param amount number
 ---@return table
-function Model.newFactory(name, count)
+function Model.newFactory(name, amount)
   local factoryModel = {}
+  factoryModel.class = "Factory"
   factoryModel.name = name or "assembling-machine-1"
   factoryModel.type = "entity"
-  factoryModel.count = count or 0
+  factoryModel.amount = amount or 0
   factoryModel.energy = 0
   factoryModel.speed = 0
   ---limit infini = 0
@@ -290,7 +353,7 @@ end
 ---@param value string
 ---@param excluded boolean
 ---@param index number
----@return Table
+---@return table
 function Model.newRule(mod, name, category, type, value, excluded, index)
   local rule_model = {}
   rule_model.mod = mod
@@ -319,7 +382,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Create model Recipe
----@param model table
+---@param model ModelData
 ---@param name string
 ---@param type string
 ---@return table
@@ -328,6 +391,7 @@ function Model.newRecipe(model, name, type)
   model.recipe_id = model.recipe_id + 1
 
   local recipeModel = {}
+  recipeModel.class = "Recipe"
   recipeModel.id = "R"..model.recipe_id
   recipeModel.index = 1
   recipeModel.name = name
@@ -343,7 +407,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Create model Resource
----@param model table
+---@param model ModelData
 ---@param name string
 ---@param type string
 ---@param count number
@@ -373,7 +437,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Set the beacon
----@param recipe table
+---@param recipe RecipeData
 ---@param name string
 ---@param combo number
 ---@param per_factory number
@@ -396,7 +460,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Set the beacon
----@param recipe table
+---@param recipe RecipeData
 ---@param index number
 ---@param name string
 ---@param combo number
@@ -420,9 +484,9 @@ end
 
 -------------------------------------------------------------------------------
 ---Set a factory
----@param recipe table
+---@param recipe RecipeData
 ---@param factory_name string
----@param factory_fuel table
+---@param factory_fuel string | FuelData
 function Model.setFactory(recipe, factory_name, factory_fuel)
   if recipe ~= nil then
     local factory_prototype = EntityPrototype(factory_name)
@@ -438,21 +502,21 @@ end
 
 -------------------------------------------------------------------------------
 ---Return first recipe of block
----@param recipes table
----@return table
-function Model.firstRecipe(recipes)
-  for _, recipe in spairs(recipes,function(t,a,b) return t[b].index > t[a].index end) do
-    return recipe
+---@param children {[string] : RecipeData | BlockData}
+---@return RecipeData | BlockData
+function Model.firstChild(children)
+  for _, child in spairs(children, defines.sorters.block.sort) do
+    return child
   end
 end
 
 -------------------------------------------------------------------------------
 ---Return last recipe of block
----@param recipes table
----@return table
-function Model.lastRecipe(recipes)
-  for _, recipe in spairs(recipes,function(t,a,b) return t[b].index < t[a].index end) do
-    return recipe
+---@param children {[string] : RecipeData | BlockData}
+---@return RecipeData | BlockData
+function Model.lastChild(children)
+  for _, child in spairs(children, defines.sorters.block.sort) do
+    return child
   end
 end
 

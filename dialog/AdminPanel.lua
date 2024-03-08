@@ -540,7 +540,7 @@ function AdminPanel:addSheetListRow(gui_table, model)
 
   ---col element
   local cell_element = GuiElement.add(gui_table, GuiFrameH("element", model.id):style(helmod_frame_style.hidden))
-  local element = Model.firstRecipe(model.blocks)
+  local element = Model.firstChild(model.blocks)
   if element ~= nil then
     GuiElement.add(cell_element, GuiButtonSprite(self.classname, "donothing", model.id):sprite("recipe", element.name):tooltip(RecipePrototype(element):getLocalisedName()))
   else
@@ -574,7 +574,7 @@ function AdminPanel:createTree(parent, list, expand)
   for k,info in pairs(data_info) do
     local tree_branch = GuiElement.add(parent, GuiFlowH())
     -- vertical bar
-    local vbar = GuiElement.add(tree_branch, GuiFrameV("vbar"):style("helmod_frame_product", color_name, color_index))
+    local vbar = GuiElement.add(tree_branch, GuiFrameV("vbar"):style("helmod_frame_element_w50", color_name, color_index))
     vbar.style.width = bar_thickness
     vbar.style.left_margin=15
     if index == size then
@@ -587,7 +587,7 @@ function AdminPanel:createTree(parent, list, expand)
     local content = GuiElement.add(tree_branch, GuiFlowV("content"))
     -- header
     local header = GuiElement.add(content, GuiFlowH("header"))
-    local hbar = GuiElement.add(header, GuiFrameV("hbar"):style("helmod_frame_product", color_name, color_index))
+    local hbar = GuiElement.add(header, GuiFrameV("hbar"):style("helmod_frame_element_w50", color_name, color_index))
     hbar.style.width = 5
     hbar.style.height = bar_thickness
     hbar.style.top_margin=10

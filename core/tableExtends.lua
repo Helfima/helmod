@@ -60,6 +60,7 @@ end
 ---@param step number
 function table.up_indexed_list(list, index, step)
     if list ~= nil and index > 0 then
+      table.reindex_list(list)
       ---defaut step
       if step == nil then step = 1 end
       ---cap le step
@@ -84,6 +85,7 @@ function table.up_indexed_list(list, index, step)
 function table.down_indexed_list(list, index, step)
   local list_count = table.size(list)
   if list ~= nil and index + 1 < table.size(list) then
+    table.reindex_list(list)
     ---defaut step
     if step == nil then step = 1 end
     ---cap le step
