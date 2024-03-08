@@ -3,10 +3,6 @@ require "math.SolverMatrix"
 require "math.SolverMatrixAlgebra"
 require "math.SolverMatrixSimplex"
 
-require "math.Solver"
-require "math.SolverAlgebra"
-require "math.SolverSimplex"
-
 ------------------------------------------------------------------------------
 ---Description of the module.
 ---@class ModelCompute
@@ -89,10 +85,57 @@ function ModelCompute.try_update(model)
         log(err)
     end
 end
+
+-------------------------------------------------------------------------------
+---Update model
+---@param model ModelData
+function ModelCompute.update(model)
+    if model ~= nil and model.blocks ~= nil then
+        -- Add parameters
+        Model.appendParameters(model)
+        model.input = {}
+        ModelCompute.updateBlock(model, model.block_root)
+        ModelCompute.finalizeBlock(model.block_root, 1)
+        model.version = Model.version
+    end
+end
+
+-------------------------------------------------------------------------------
+---Update model
+---@param model ModelData
+---@param block BlockData
+function ModelCompute.updateBlock(model, block)
+    block.time = model.time
+    local children = block.children
+
+    -- check if block has child
+    local _, child = next(children)
+    if child == nil then
+        -- empty block
+        block.ingredients = {}
+        block.products = {}
+    else
+        -- compute block children
+        for _, child in spairs(children, defines.sorters.block.sort) do
+            local is_block = Model.isBlock(child)
+            if is_block then
+                ModelCompute.updateBlock(model, child)
+            end
+        end
+        ---prepare block
+        ModelCompute.prepareBlockElements(block)
+
+        ModelCompute.prepareBlockObjectives(block)
+
+        ModelCompute.computeBlock(block, model.parameters)
+        
+    end
+end
+
 -------------------------------------------------------------------------------
 ---Update model
 ---@param model table
-function ModelCompute.update(model)
+function ModelCompute.update2(model)
     if model ~= nil and model.blocks ~= nil then
         Model.appendParameters(model)
         ---calcul les blocks
@@ -100,14 +143,14 @@ function ModelCompute.update(model)
         for _, block in spairs(model.blocks, function(t, a, b) return t[b].index > t[a].index end) do
             block.time = model.time
             ---premiere recette
-            local _, recipe = next(block.recipes)
+            local _, recipe = next(block.children)
             if recipe == nil then
                 block.ingredients = {}
                 block.products = {}
             else
                 
-                ---prepare bloc
-                ModelCompute.prepareBlock(block)
+                ---prepare block
+                ModelCompute.prepareBlockElements(block)
                 
                 ---state = 0 => produit
                 ---state = 1 => produit pilotant
@@ -145,7 +188,7 @@ function ModelCompute.update(model)
                 
                 ModelCompute.computeBlock(block, model.parameters)
 
-                ---consomme les ingredients
+                ---consume ingredients
                 for _, product in pairs(block.products) do
                     local element_key = Product(product):getTableKey()
                     if input[element_key] == nil then
@@ -154,7 +197,7 @@ function ModelCompute.update(model)
                         input[element_key] = input[element_key] + product.count
                     end
                 end
-                ---compte les ingredients
+                ---count ingredients
                 for _, ingredient in pairs(block.ingredients) do
                     local element_key = Product(ingredient):getTableKey()
                     if input[element_key] == nil then
@@ -183,18 +226,103 @@ function ModelCompute.update(model)
 end
 
 -------------------------------------------------------------------------------
----Compute production block
----@param block table
-function ModelCompute.computeBlockCleanInput(block)
-    local recipes = block.recipes
-    if recipes ~= nil then
-        if block.input ~= nil then
-            ---state = 0 => produit
-            ---state = 1 => produit pilotant
-            ---state = 2 => produit restant
-            for product_name, quantity in pairs(block.input) do
-                if block.products[product_name] == nil or not (bit32.band(block.products[product_name].state, 1)) then
-                    block.input[product_name] = nil
+---Finalize input block
+---@param block BlockData
+function ModelCompute.finalizeBlock(block, factor)
+    block.count_limit = block.count
+    block.power = 0
+    block.power_limit = 0
+    block.power_deep = 0
+    block.pollution = 0
+    block.pollution_limit = 0
+    block.pollution_deep = 0
+    
+    block.count_deep = block.count * factor
+    local children = block.children
+    if children ~= nil and table.size(children) > 0 then
+        local ratio_limit = -1
+        -- compute block children
+        for _, child in spairs(children, defines.sorters.block.sort) do
+            local is_block = Model.isBlock(child)
+            if is_block then
+                ModelCompute.finalizeBlock(child, block.count_deep)
+
+                block.power = block.power + child.power * block.count
+                block.power_limit = block.power
+                block.power_deep = block.power_deep + child.power_deep
+
+                block.pollution = block.pollution + child.pollution * block.count
+                block.pollution_limit = block.pollution
+                block.pollution_deep = block.pollution_deep + child.pollution_deep
+            else
+                ---@type RecipeData
+                local recipe = child
+                recipe.count_limit = recipe.count
+                recipe.count_deep = recipe.count * block.count_deep
+                
+                recipe.factory.count = recipe.factory.amount * recipe.count
+                recipe.factory.count_limit = recipe.factory.count
+                recipe.factory.count_deep = recipe.factory.count * block.count_deep
+
+                if recipe.beacons ~= nil then
+                    for _, beacon in pairs(recipe.beacons) do
+                        local constant = 0
+                        if beacon.amount == nil then
+                            beacon.amount = 0
+                        end
+                        -- add constant only if has a beacon
+                        if beacon.amount > 0 then
+                            constant = beacon.per_factory_constant or 0
+                        end
+                        beacon.count = beacon.amount * recipe.count + constant
+                        beacon.count_limit = beacon.count
+                        beacon.count_deep = beacon.count * block.count_deep
+                    end
+                end
+                
+                recipe.power = recipe.energy_total * recipe.count
+                recipe.power_limit = recipe.power
+                recipe.power_deep = recipe.power * block.count_deep
+                
+                recipe.pollution = recipe.pollution_amount * recipe.count
+                recipe.pollution_limit = recipe.pollution
+                recipe.pollution_deep = recipe.pollution * block.count_deep
+                
+                block.power = block.power + recipe.power * block.count
+                block.power_limit = block.power
+                block.power_deep = block.power_deep + recipe.power_deep
+
+                block.pollution = block.pollution + recipe.pollution * block.count
+                block.pollution_limit = block.pollution
+                block.pollution_deep = block.pollution_deep + recipe.pollution_deep
+
+                if type(recipe.factory.limit) == "number" and recipe.factory.limit > 0 then
+                    local current_ratio = recipe.factory.limit / recipe.factory.count
+                    if ratio_limit > current_ratio or ratio_limit == -1 then
+                        ratio_limit = current_ratio
+                    end
+                end
+            end
+        end
+
+        if ratio_limit > 0 then
+            block.count_limit = ratio_limit
+            block.power_limit = block.power * ratio_limit
+            block.pollution_limit = block.pollution * ratio_limit
+            for _, child in spairs(children, defines.sorters.block.sort) do
+                local is_block = Model.isBlock(child)
+                if is_block then
+                else
+                    local recipe = child
+                    recipe.count_limit = recipe.count * ratio_limit
+                    recipe.factory.count_limit = recipe.factory.count * ratio_limit
+                    if recipe.beacons ~= nil then
+                        for _, beacon in pairs(recipe.beacons) do
+                            beacon.count_limit = beacon.count * ratio_limit
+                        end
+                    end
+                    recipe.power_limit = recipe.power * ratio_limit
+                    recipe.pollution_limit = recipe.pollution * ratio_limit
                 end
             end
         end
@@ -202,51 +330,155 @@ function ModelCompute.computeBlockCleanInput(block)
 end
 
 -------------------------------------------------------------------------------
----Prepare production block
----@param block table
-function ModelCompute.prepareBlock(block)
-    local recipes = block.recipes
-    if recipes ~= nil then
+---Prepare objectives of block
+---@param block BlockData
+function ModelCompute.prepareBlockObjectives(block)
+    -- state = 0 => product
+    -- state = 1 => main product
+    -- state = 2 => remaining product
+    -- prepare input
+    if block.products == nil then
+        ModelCompute.computeBlock(block)
+    end
+    local objectives_block = {}
+
+    local factor = 1
+    local block_elements = block.products
+    if block.by_product == false then
+        block_elements = block.ingredients
+        factor = 1
+    end
+    if block_elements ~= nil then
+        for _, element in pairs(block_elements) do
+            local element_key = Product(element):getTableKey()
+            local objective = {}
+            if element.input ~= nil and element.input > 0 then
+                objective.key = element_key
+                objective.value = element.input * factor
+                objectives_block[element_key] = objective
+            end
+        end
+    end
+    local objectives_size = table.size(objectives_block)
+    block.has_input = objectives_size > 0
+    -- if empty objectives create from the children
+    if objectives_size == 0 then
+        local children = block.children
+        for _, child in spairs(children, defines.sorters.block.sort) do
+            local is_block = Model.isBlock(child)
+            if is_block then
+                local child_elements = nil
+                local factor = 1
+                if block.by_product == false then
+                    child_elements = child.ingredients
+                    factor = 1
+                else
+                    child_elements = child.products
+                end
+                for _, lua_product in pairs(child_elements) do
+                    local product = Product(lua_product)
+                    local element_key = product:getTableKey()
+                    local state = 0
+                    if block_elements[element_key] ~= nil then
+                        state = block_elements[element_key].state
+                    end
+                    if state == 1 then
+                        local count = lua_product.amount
+                        local objective = {}
+                        objective.key = element_key
+                        objective.value = count * factor
+                        objectives_block[element_key] = objective
+                    end
+                end
+            else
+                local recipe_prototype = RecipePrototype(child)
+                local child_elements = nil
+                local factor = 1
+                if block.by_product == false then
+                    child_elements = recipe_prototype:getIngredients(child.factory)
+                    factor = 1
+                else
+                    child_elements = recipe_prototype:getProducts(child.factory)
+                end
+                for _, lua_product in pairs(child_elements) do
+                    local product = Product(lua_product)
+                    local element_key = product:getTableKey()
+                    local state = 0
+                    if block_elements[element_key] ~= nil then
+                        state = block_elements[element_key].state
+                    end
+                    if state == 1 then
+                        local count = product:getAmount()
+                        local objective = {}
+                        objective.key = element_key
+                        objective.value = count * factor
+                        objectives_block[element_key] = objective
+                    end
+                end
+            end
+        end
+    end
+    block.objectives = objectives_block
+end
+
+-------------------------------------------------------------------------------
+---Prepare products and ingredients of block
+---@param block BlockData
+function ModelCompute.prepareBlockElements(block)
+    local children = block.children
+    if children ~= nil then
         local block_products = {}
         local block_ingredients = {}
-        ---preparation
-        for _, recipe in spairs(recipes, function(t, a, b) return t[b].index > t[a].index end) do
-            local recipe_prototype = RecipePrototype(recipe)
-
-            for i, lua_product in pairs(recipe_prototype:getProducts(recipe.factory)) do
+        -- prepare
+        for _, child in spairs(children, defines.sorters.block.sort) do
+            local is_block = Model.isBlock(child)
+            local child_products = nil
+            local child_ingredients = nil
+            if is_block then
+                child_products = child.products
+                child_ingredients = child.ingredients
+            else
+                local recipe_prototype = RecipePrototype(child)
+                child_products = recipe_prototype:getProducts(child.factory)
+                child_ingredients = recipe_prototype:getIngredients(child.factory)
+            end
+            -- prepare products
+            for _, lua_product in pairs(child_products) do
                 local product_key = Product(lua_product):getTableKey()
                 block_products[product_key] = {
                     name = lua_product.name,
                     type = lua_product.type,
-                    count = 0,
+                    amount = 0,
                     temperature = lua_product.temperature,
                     minimum_temperature = lua_product.minimum_temperature,
                     maximum_temperature = lua_product.maximum_temperature
                 }
             end
-            for i, lua_ingredient in pairs(recipe_prototype:getIngredients(recipe.factory)) do
+            -- prepare ingredients
+            for _, lua_ingredient in pairs(child_ingredients) do
                 local ingredient_key = Product(lua_ingredient):getTableKey()
                 block_ingredients[ingredient_key] = {
                     name = lua_ingredient.name,
                     type = lua_ingredient.type,
-                    count = 0,
+                    amount = 0,
                     temperature = lua_ingredient.temperature,
                     minimum_temperature = lua_ingredient.minimum_temperature,
                     maximum_temperature = lua_ingredient.maximum_temperature
                 }
             end
         end
-        ---preparation state
-        ---state = 0 => produit
-        ---state = 1 => produit pilotant
-        ---state = 2 => produit restant
+
+        -- prepare state
+        -- state = 0 => product
+        -- state = 1 => main product
+        -- state = 2 => remaining product
         for i, block_product in pairs(block_products) do
             local product_key = Product(block_product):getTableKey()
-            ---recopie la valeur input
+            -- copy input value
             if block.by_factory ~= true and block.products ~= nil and block.products[product_key] ~= nil then
                 block_product.input = block.products[product_key].input
             end
-            ---pose le status
+            -- set state
             if block_ingredients[product_key] == nil then
                 block_product.state = 1
             else
@@ -256,11 +488,11 @@ function ModelCompute.prepareBlock(block)
 
         for i, block_ingredient in pairs(block_ingredients) do
             local ingredient_key = Product(block_ingredient):getTableKey()
-            ---recopie la valeur input
+            -- copy input value
             if block.by_factory ~= true and block.ingredients ~= nil and block.ingredients[ingredient_key] ~= nil then
                 block_ingredient.input = block.ingredients[ingredient_key].input
             end
-            ---pose le status
+            -- set state
             if block_products[ingredient_key] == nil then
                 block_ingredient.state = 1
             else
@@ -276,27 +508,28 @@ end
 ---Compute production block
 ---@param block table
 function ModelCompute.computeBlock(block, parameters)
-    local recipes = block.recipes
+    local children = block.children
     block.power = 0
     block.count = 1
-    block.pollution_total = 0
+    block.pollution = 0
 
-    if recipes ~= nil then
+    if children ~= nil then
+        local solver_selected = User.getParameter("solver_selected")
         local my_solver
 
-        local debug = User.getModGlobalSetting("debug_solver")
-        local selected_solvers = { algebra = SolverAlgebra, simplex = SolverSimplex }
-
-        local solver_selected = User.getParameter("solver_selected") or defines.constant.default_solver
-        if solver_selected ~= defines.constant.solvers.normal then
-            selected_solvers = { algebra = SolverMatrixAlgebra, simplex = SolverMatrixSimplex }
+        local solvers = {}
+        solvers[defines.constant.solvers.default] = { algebra = SolverMatrixAlgebra, simplex = SolverMatrixSimplex }
+        local selected_solver = solvers[defines.constant.solvers.default]
+        if solvers[solver_selected] ~= nil then
+            selected_solver = solvers[solver_selected]
         end
         if block.solver == true and block.by_factory ~= true then
-            my_solver = selected_solvers.simplex()
+            my_solver = selected_solver.simplex()
         else
-            my_solver = selected_solvers.algebra()
+            my_solver = selected_solver.algebra()
         end
 
+        local debug = User.getModGlobalSetting("debug_solver")
         my_solver:solve(block, parameters, debug)
         
     end
@@ -304,9 +537,9 @@ end
 
 --------------------------------------------------------------------------------
 ---Compute module effects of factory
----@param recipe table
+---@param recipe RecipeData
 ---@param parameters ParametersData
----@return table
+---@return RecipeData
 function ModelCompute.computeModuleEffects(recipe, parameters)
     local factory = recipe.factory
     factory.effects = { speed = 0, productivity = 0, consumption = 0, pollution = 0 }
@@ -427,21 +660,20 @@ function ModelCompute.computeFactory(recipe)
     recipe.factory.energy = factory_prototype:getEnergyConsumption() * (1 + recipe.factory.effects.consumption)
 
     ---effet pollution
-    recipe.factory.pollution = factory_prototype:getPollution() * (1 + recipe.factory.effects.pollution) *
-        (1 + recipe.factory.effects.consumption)
+    recipe.factory.pollution = factory_prototype:getPollution() * (1 + recipe.factory.effects.pollution) * (1 + recipe.factory.effects.consumption)
 
     ---compte le nombre de machines necessaires
     ---[ratio recipe] * [effort necessaire du recipe] / ([la vitesse de la factory] * [le temps en second])
-    local count = recipe.count * recipe.time / (recipe.factory.speed * recipe.base_time)
+    local count = recipe.time / (recipe.factory.speed * recipe.base_time)
     if recipe.factory.speed == 0 then count = 0 end
-    recipe.factory.count = count
+    recipe.factory.amount = count
 
     if energy_type ~= "electric" then
         recipe.factory.energy_total = 0
     else
-        recipe.factory.energy_total = recipe.factory.count * recipe.factory.energy
+        recipe.factory.energy_total = recipe.factory.amount * recipe.factory.energy
         local drain = factory_prototype:getMinEnergyUsage()
-        recipe.factory.energy_total = math.ceil(recipe.factory.energy_total + (math.ceil(recipe.factory.count) * drain))
+        recipe.factory.energy_total = math.ceil(recipe.factory.energy_total + (math.ceil(recipe.factory.amount) * drain))
         recipe.factory.energy = recipe.factory.energy + drain
     end
     ---arrondi des valeurs
@@ -453,22 +685,23 @@ function ModelCompute.computeFactory(recipe)
         for _, beacon in pairs(recipe.beacons) do
             if Model.countModulesModel(beacon) > 0 then
                 local variant = beacon.per_factory or 0
-                local constant = beacon.per_factory_constant or 0
-                beacon.count = count * variant + constant
+                -- @see ModelCompute.finalizeBlock where beacon.per_factory_constant used
+                -- per_factory_constant for 1 block
+                beacon.amount = count * variant
             else
-                beacon.count = 0
+                beacon.amount = 0
             end
             local beacon_prototype = EntityPrototype(beacon)
             beacon.energy = beacon_prototype:getEnergyUsage()
-            beacon.energy_total = math.ceil(beacon.count * beacon.energy)
+            beacon.energy_total = math.ceil(beacon.amount * beacon.energy)
             beacon.energy = math.ceil(beacon.energy)
             beacons_energy_total = beacons_energy_total + beacon.energy_total
         end
     end
 
     --- totaux
-    recipe.factory.pollution_total = recipe.factory.pollution * recipe.factory.count * recipe.base_time
-    recipe.pollution_total = recipe.factory.pollution_total * recipe_prototype:getEmissionsMultiplier()
+    recipe.factory.pollution_total = recipe.factory.pollution * recipe.factory.amount * recipe.base_time
+    recipe.pollution_amount = recipe.factory.pollution_total * recipe_prototype:getEmissionsMultiplier()
     recipe.energy_total = recipe.factory.energy_total + beacons_energy_total
 end
 
@@ -499,23 +732,23 @@ function ModelCompute.computeEnergyFactory(recipe)
     recipe.factory.energy = factory_prototype:getEnergyConsumption() * (1 + recipe.factory.effects.consumption)
 
     ---effet pollution
-    recipe.factory.pollution = factory_prototype:getPollution() * (1 + recipe.factory.effects.pollution)
+    recipe.factory.pollution_amount = factory_prototype:getPollution() * (1 + recipe.factory.effects.pollution)
 
     ---compte le nombre de machines necessaires
     ---[ratio recipe] * [effort necessaire du recipe] / ([la vitesse de la factory]
-    local count = recipe.count * recipe_energy / (recipe.factory.speed * recipe.base_time)
+    local count = recipe_energy / (recipe.factory.speed * recipe.base_time)
     if recipe.factory.speed == 0 then count = 0 end
-    recipe.factory.count = count
+    recipe.factory.amount = count
     ---calcul des totaux
     if energy_type == "electric" then
         recipe.factory.energy_total = 0
     else
         recipe.factory.energy_total = 0
     end
-    recipe.factory.pollution_total = recipe.factory.pollution * recipe.factory.count * recipe.base_time
+    recipe.factory.pollution_total = recipe.factory.pollution_amount * recipe.factory.amount * recipe.base_time
 
     recipe.energy_total = recipe.factory.energy_total
-    recipe.pollution_total = recipe.factory.pollution_total * recipe_prototype:getEmissionsMultiplier()
+    recipe.pollution_amount = recipe.factory.pollution_total * recipe_prototype:getEmissionsMultiplier()
     ---arrondi des valeurs
     recipe.factory.speed = recipe.factory.speed
     recipe.factory.energy = math.ceil(recipe.factory.energy)
@@ -672,7 +905,7 @@ function ModelCompute.createSummary(model)
 
     for _, block in pairs(model.blocks) do
         energy = energy + block.power
-        pollution = pollution + (block.pollution_total or 0)
+        pollution = pollution + (block.pollution or 0)
         ModelCompute.computeSummaryFactory(block)
         building = building + block.summary.building
         for _, type in pairs({ "factories", "beacons", "modules" }) do
@@ -707,7 +940,7 @@ end
 function ModelCompute.computeSummaryFactory(block)
     if block ~= nil then
         block.summary = { building = 0, factories = {}, beacons = {}, modules = {} }
-        for _, recipe in pairs(block.recipes) do
+        for _, child in pairs(block.children) do
             ---calcul nombre factory
             local factory = recipe.factory
             if block.summary.factories[factory.name] == nil then

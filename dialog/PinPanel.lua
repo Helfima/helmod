@@ -100,7 +100,7 @@ function PinPanel:updateInfo(event)
     if not(setting_value) then column = column + setting_option.column end
   end
 
-  local model, block, recipe = self:getParameterObjects()
+  local model, block, _ = self:getParameterObjects()
 
   if block ~= nil then
     local resultTable = GuiElement.add(infoPanel, GuiTable("list-data"):column(column):style("helmod_table-odd"))
@@ -108,10 +108,11 @@ function PinPanel:updateInfo(event)
     resultTable.style.horizontally_stretchable = false
 
     self:addProductionBlockHeader(resultTable)
-    for _, recipe in spairs(block.recipes, function(t,a,b) return t[b]["index"] > t[a]["index"] end) do
-      local is_done = recipe.is_done or false
-      if not(is_done and User.getSetting("pin_panel_column_hide_done")) then
-        self:addProductionBlockRow(resultTable, model, block, recipe)
+    for _, child in spairs(block.children, defines.sorters.block.sort) do
+      local is_block = Model.isBlock(child)
+      local is_done = child.is_done or false
+      if not(is_block) and not(is_done and User.getSetting("pin_panel_column_hide_done")) then
+        self:addProductionBlockRow(resultTable, model, block, child)
       end
     end
   end
@@ -183,7 +184,9 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
         local product_prototype = Product(lua_product)
         local product = product_prototype:clone()
         product.time = model.time
-        product.count = product_prototype:countProduct(model, recipe)
+        product.count = product_prototype:countProduct(recipe)
+				product.count_limit = product_prototype:countLimitProduct(recipe)
+				product.count_deep = product_prototype:countDeepProduct(recipe)
         if block.by_limit == true and block.count > 1 then
           product.limit_count = product.count / block.count
         end
@@ -208,10 +211,9 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
         local ingredient_prototype = Product(lua_ingredient)
         local ingredient = ingredient_prototype:clone()
         ingredient.time = model.time
-        ingredient.count = ingredient_prototype:countIngredient(model, recipe)
-        if block.by_limit == true and block.count > 1 then
-          ingredient.limit_count = ingredient.count / block.count
-        end
+        ingredient.count = ingredient_prototype:countIngredient(recipe)
+				ingredient.count_limit = ingredient_prototype:countLimitIngredient(recipe)
+				ingredient.count_deep = ingredient_prototype:countDeepIngredient(recipe)
         GuiElement.add(cell_ingredients, GuiCellElementSm(self.classname, "do_noting", "ingredient"):index(index):element(ingredient):tooltip("tooltip.info-product"):color(GuiElement.color_button_add):byLimit(block.by_limit):mask(is_done))
       end
     end
@@ -255,19 +257,19 @@ function PinPanel:onEvent(event)
   if block == nil then return end
 
   if event.action == "pipette-entity" then
-    local recipes = block.recipes
+    local children = block.children
     local index = tonumber(event.item3)
-    Player.setSmartTool(recipes[event.item1], event.item2, index)
+    Player.setSmartTool(children[event.item1], event.item2, index)
   end
   if event.action == "recipe-done" then
-    local recipes = block.recipes
-    recipes[event.item1].is_done = not(recipes[event.item1].is_done)
+    local children = block.children
+    children[event.item1].is_done = not(children[event.item1].is_done)
     self:updateInfo(event)
   end
   if event.action == "recipe-done-remove" then
-    local recipes = block.recipes
-    for _,recipe in pairs(recipes) do
-      recipe.is_done = nil
+    local children = block.children
+    for _,child in pairs(children) do
+      child.is_done = nil
     end
     self:updateInfo(event)
   end

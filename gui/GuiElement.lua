@@ -137,7 +137,11 @@ end
 ---Get options
 ---@return table
 function GuiElement:getOptions()
-  self.options.name = table.concat(self.name,"=")
+  if type(self.name) == "table" then
+    self.options.name = table.concat(self.name,"=")
+  else
+    self.options.name = self.name
+  end
   if self.is_caption then
     self.options.caption = self.m_caption
   end
@@ -169,6 +173,8 @@ function GuiElement.add(parent, gui_element)
   end)
   if not ok then
     element = parent.add(gui_element:onErrorOptions())
+    element.tooltip = err
+    element.style.width = 80
     log(err)
     log(debug.traceback())
   end

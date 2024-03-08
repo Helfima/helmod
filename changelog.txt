@@ -1,6 +1,14 @@
+Version: 1.0.0
+Date: 2024-03-08
+  Features:
+    - Major change: Production Line is a tree of Production Blocks and recipes
+    - Added move row into parent block or new block
+    - Added a preference tab for the thumbnail colors
+  Changes:
+    - Model version set 1
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.23
-Date: 2024-01-30
+Date: 2024-01-29
   Bugfixes:
     - Fix relocation form with UI scale
     - Fix not found tooltip sprite

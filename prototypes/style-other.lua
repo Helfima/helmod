@@ -29,14 +29,14 @@ default_gui["helmod_textfield_element_green"] = {
       {
         filename = "__helmod__/graphics/gui.png",
         corner_size = 3,
-        position = {8, 80},
+        position = {8, 16},
         scale = 1
       },
       active_background =
       {
         filename = "__helmod__/graphics/gui.png",
         corner_size = 3,
-        position = {0, 80},
+        position = {0, 16},
         scale = 1
       }
 }
@@ -48,14 +48,14 @@ default_gui["helmod_textfield_element_red"] = {
       {
         filename = "__helmod__/graphics/gui.png",
         corner_size = 3,
-        position = {8, 88},
+        position = {8, 24},
         scale = 1
       },
       active_background =
       {
         filename = "__helmod__/graphics/gui.png",
         corner_size = 3,
-        position = {0, 88},
+        position = {0, 24},
         scale = 1
       }
 }
@@ -100,6 +100,16 @@ default_gui["helmod_label_element"] = {
   parent = "label",
   font = "helmod_font_normal",
   top_padding = -3,
+  right_padding = 2,
+  bottom_padding = 0,
+  left_padding = 2
+}
+
+default_gui["helmod_label_element2"] = {
+  type = "label_style",
+  parent = "label",
+  font = "helmod_font_normal",
+  top_padding = -4,
   right_padding = 2,
   bottom_padding = 0,
   left_padding = 2

@@ -1,4 +1,130 @@
 require "core.defines_builded"
+require "core.defines_builded2"
+
+defines.styles = {}
+defines.styles.mod_gui_button = "frame_button"
+
+defines.styles.frame = {}
+defines.styles.frame.default = "frame"
+defines.styles.frame.bordered = "bordered_frame"
+defines.styles.frame.inside_deep = "inside_deep_frame"
+defines.styles.frame.inner_outer = "inner_frame_in_outer_frame"
+defines.styles.frame.invisible ="invisible_frame"
+defines.styles.frame.action_button ="frame_action_button"
+defines.styles.frame.inner_padding = "inside_shallow_frame_with_padding"
+defines.styles.frame.inner = "inside_shallow_frame"
+defines.styles.frame.inner_tab = "inside_deep_frame_for_tabs"
+defines.styles.frame.subheader_frame ="subheader_frame"
+defines.styles.frame.tabbed_pane = "tabbed_pane"
+defines.styles.frame.tab_scroll_pane = "tab_scroll_pane"
+
+
+defines.styles.label = {}
+defines.styles.label.default = "label"
+defines.styles.label.frame_title = "frame_title"
+defines.styles.label.heading_1 = "heading_1_label"
+defines.styles.label.heading_2 = "heading_2_label"
+
+defines.styles.flow = {}
+defines.styles.flow.default = "helmod_flow_default"
+defines.styles.flow.horizontal = "helmod_flow_horizontal"
+defines.styles.flow.vertical = "helmod_flow_vertical"
+
+defines.styles.button = {}
+defines.styles.button.menu_default = "helmod_button_menu_default"
+defines.styles.button.menu_sm_default = "helmod_button_menu_sm_default"
+defines.styles.button.menu_tool_default = "helmod_button_menu_tool_default"
+defines.styles.button.menu = "helmod_button_menu"
+defines.styles.button.menu_sm = "helmod_button_menu_sm"
+defines.styles.button.menu_tool = "helmod_button_menu_tool"
+defines.styles.button.menu_selected = "helmod_button_menu_selected"
+defines.styles.button.menu_sm_selected = "helmod_button_menu_sm_selected"
+defines.styles.button.menu_tool_selected = "helmod_button_menu_tool_selected"
+defines.styles.button.menu_dark = "helmod_button_menu_dark"
+defines.styles.button.menu_sm_dark = "helmod_button_menu_sm_dark"
+defines.styles.button.menu_tool_dark = "helmod_button_menu_tool_dark"
+defines.styles.button.menu_dark_selected = "helmod_button_menu_dark_selected"
+defines.styles.button.menu_sm_dark_selected = "helmod_button_menu_sm_dark_selected"
+defines.styles.button.menu_tool_dark_selected = "helmod_button_menu_tool_dark_selected"
+defines.styles.button.menu_bold = "helmod_button_menu_bold"
+defines.styles.button.menu_sm_bold = "helmod_button_menu_sm_bold"
+defines.styles.button.menu_tool_bold = "helmod_button_menu_tool_bold"
+defines.styles.button.menu_bold_selected = "helmod_button_menu_bold_selected"
+defines.styles.button.menu_sm_bold_selected = "helmod_button_menu_sm_bold_selected"
+defines.styles.button.menu_tool_bold_selected = "helmod_button_menu_tool_bold_selected"
+defines.styles.button.menu_dark_bold = "helmod_button_menu_dark_bold"
+defines.styles.button.menu_sm_dark_bold = "helmod_button_menu_sm_dark_bold"
+defines.styles.button.menu_tool_dark_bold = "helmod_button_menu_tool_dark_bold"
+defines.styles.button.menu_dark_bold_selected = "helmod_button_menu_dark_bold_selected"
+defines.styles.button.menu_sm_dark_bold_selected = "helmod_button_menu_sm_dark_bold_selected"
+defines.styles.button.menu_tool_dark_bold_selected = "helmod_button_menu_tool_dark_bold_selected"
+defines.styles.button.menu_red = "helmod_button_menu_red"
+defines.styles.button.menu_sm_red = "helmod_button_menu_sm_red"
+defines.styles.button.menu_tool_red = "helmod_button_menu_tool_red"
+defines.styles.button.menu_dark_red = "helmod_button_menu_dark_red"
+defines.styles.button.menu_sm_dark_red = "helmod_button_menu_sm_dark_red"
+defines.styles.button.menu_tool_dark_red = "helmod_button_menu_tool_dark_red"
+defines.styles.button.menu_actived_red = "helmod_button_menu_actived_red"
+defines.styles.button.menu_sm_actived_red = "helmod_button_menu_sm_actived_red"
+defines.styles.button.menu_tool_actived_red = "helmod_button_menu_tool_actived_red"
+defines.styles.button.menu_selected_red = "helmod_button_menu_selected_red"
+defines.styles.button.menu_sm_selected_red = "helmod_button_menu_sm_selected_red"
+defines.styles.button.menu_tool_selected_red = "helmod_button_menu_tool_selected_red"
+defines.styles.button.menu_green = "helmod_button_menu_green"
+defines.styles.button.menu_sm_green = "helmod_button_menu_sm_green"
+defines.styles.button.menu_tool_green = "helmod_button_menu_tool_green"
+defines.styles.button.menu_dark_green = "helmod_button_menu_dark_green"
+defines.styles.button.menu_sm_dark_green = "helmod_button_menu_sm_dark_green"
+defines.styles.button.menu_tool_dark_green = "helmod_button_menu_tool_dark_green"
+defines.styles.button.menu_actived_green = "helmod_button_menu_actived_green"
+defines.styles.button.menu_sm_actived_green = "helmod_button_menu_sm_actived_green"
+defines.styles.button.menu_tool_actived_green = "helmod_button_menu_tool_actived_green"
+defines.styles.button.menu_selected_green = "helmod_button_menu_selected_green"
+defines.styles.button.menu_sm_selected_green = "helmod_button_menu_sm_selected_green"
+defines.styles.button.menu_tool_selected_green = "helmod_button_menu_tool_selected_green"
+defines.styles.button.menu_selected_yellow = "helmod_button_menu_selected_yellow"
+defines.styles.button.menu_sm_selected_yellow = "helmod_button_menu_sm_selected_yellow"
+defines.styles.button.menu_tool_selected_yellow = "helmod_button_menu_tool_selected_yellow"
+defines.styles.button.menu_flat2 = "helmod_button_menu_flat2"
+defines.styles.button.menu_flat = "helmod_button_menu_flat"
+defines.styles.button.menu_sm_flat = "helmod_button_menu_sm_flat"
+
+defines.styles.button.default = "helmod_button_default"
+defines.styles.button.selected = "helmod_button_selected"
+defines.styles.button.icon_default = "helmod_button_icon_default"
+
+defines.styles.button.icon = "helmod_button_icon"
+defines.styles.button.icon_xxl = "helmod_button_icon_xxl"
+defines.styles.button.icon_m = "helmod_button_icon_m"
+defines.styles.button.icon_sm = "helmod_button_icon_sm"
+
+defines.styles.button.slot = "helmod_button_slot"
+defines.styles.button.slot_m = "helmod_button_slot_m"
+defines.styles.button.slot_sm = "helmod_button_slot_sm"
+
+defines.styles.button.select_icon = "helmod_button_select_icon"
+defines.styles.button.select_icon_green = "helmod_button_select_icon_green"
+defines.styles.button.select_icon_yellow = "helmod_button_select_icon_yellow"
+defines.styles.button.select_icon_red = "helmod_button_select_icon_red"
+defines.styles.button.select_icon_flat = "helmod_button_select_icon_flat"
+
+defines.styles.button.select_icon_xxl = "helmod_button_select_icon_xxl"
+defines.styles.button.select_icon_xxl_green = "helmod_button_select_icon_xxl_green"
+defines.styles.button.select_icon_xxl_yellow = "helmod_button_select_icon_xxl_yellow"
+defines.styles.button.select_icon_xxl_red = "helmod_button_select_icon_xxl_red"
+defines.styles.button.select_icon_xxl_flat = "helmod_button_select_icon_xxl_flat"
+
+defines.styles.button.select_icon_m = "helmod_button_select_icon_m"
+defines.styles.button.select_icon_m_green = "helmod_button_select_icon_m_green"
+defines.styles.button.select_icon_m_yellow = "helmod_button_select_icon_m_yellow"
+defines.styles.button.select_icon_m_red = "helmod_button_select_icon_m_red"
+defines.styles.button.select_icon_m_flat = "helmod_button_select_icon_m_flat"
+
+defines.styles.button.select_icon_sm = "helmod_button_select_icon_sm"
+defines.styles.button.select_icon_sm_green = "helmod_button_select_icon_sm_green"
+defines.styles.button.select_icon_sm_yellow = "helmod_button_select_icon_sm_yellow"
+defines.styles.button.select_icon_sm_red = "helmod_button_select_icon_sm_red"
+defines.styles.button.select_icon_sm_flat = "helmod_button_select_icon_sm_flat"
 
 defines.sprite_size=14
 
@@ -30,11 +156,42 @@ defines.sprite_tooltip["expand_right"] = defines.sprites.tooltip_expand_right.ye
 defines.sprite_tooltip["expand_right_group"] = defines.sprites.tooltip_expand_right_group.yellow
 defines.sprite_tooltip["pipette"] = defines.sprites.tooltip_pipette.yellow
 
+defines.sorters = {}
+defines.sorters.block = {}
+defines.sorters.block.sort = function(t, a, b) return t[b]["index"] > t[a]["index"] end
+defines.sorters.block.reverse = function(t, a, b) return t[b]["index"] < t[a]["index"] end
+
+defines.thumbnail_color = {}
+defines.thumbnail_color.names = {}
+defines.thumbnail_color.names.default = "default"
+defines.thumbnail_color.names.block_default = "block_default"
+defines.thumbnail_color.names.block_selected = "block_selected"
+defines.thumbnail_color.names.block_reverted = "block_reverted"
+defines.thumbnail_color.names.recipe_default = "recipe_default"
+defines.thumbnail_color.names.product_default = "product_default"
+defines.thumbnail_color.names.product_driving = "product_driving"
+defines.thumbnail_color.names.product_overflow = "product_overflow"
+defines.thumbnail_color.names.ingredient_default = "ingredient_default"
+defines.thumbnail_color.names.ingredient_driving = "ingredient_driving"
+defines.thumbnail_color.names.ingredient_overflow = "ingredient_overflow"
+
+defines.thumbnail_color.values = {}
+defines.thumbnail_color.values.default = "gray"
+defines.thumbnail_color.values.block_default = "T200_9"
+defines.thumbnail_color.values.block_selected = "T35_4"
+defines.thumbnail_color.values.block_reverted = "T30_6"
+defines.thumbnail_color.values.recipe_default = "G40_3"
+defines.thumbnail_color.values.product_default = "T200_4"
+defines.thumbnail_color.values.product_driving = "T125_5"
+defines.thumbnail_color.values.product_overflow = "T10_4"
+defines.thumbnail_color.values.ingredient_default = "T40_4"
+defines.thumbnail_color.values.ingredient_driving = "T125_5"
+defines.thumbnail_color.values.ingredient_overflow = "T10_4"
+
 defines.constant = {}
 defines.constant.solvers = {}
-defines.constant.solvers.normal = "normal"
-defines.constant.solvers.matrix = "matrix"
-defines.constant.default_solver = defines.constant.solvers.matrix
+defines.constant.solvers.default = "matrix"
+
 defines.constant.rocket_deploy_delay = 2434 / 60
 defines.constant.max_float = 1e300
 defines.constant.base_times = {
@@ -406,7 +563,7 @@ defines.constant.settings_mod = {
     localised_name = {"helmod_map_settings.display-hidden-column"},
     localised_description = {"helmod_map_settings.display-hidden-column-desc"},
     default_value = "None",
-    allowed_values = {"None","Type and Name","All"},
+    allowed_values = {"None", "Index and Id", "Type and Name", "All"},
     order = "f2"
   }
 }
