@@ -1883,7 +1883,8 @@ function ProductionPanel:onEventAccessDelete(event, model, block)
         local is_block = Model.isBlock(child)
         if is_block then
             User.setParameter("block_child_remove_confirm", child.id)
-            Controller:send("on_gui_update", event, self.classname)
+			User.setParameter("scroll_element", child.id)
+		    Controller:send("on_gui_update", event, self.classname)
         else
             -- remove recipe from block
             ModelBuilder.blockChildRemove(model, block, child)
