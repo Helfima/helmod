@@ -120,6 +120,7 @@
 ---@field has_input boolean
 ---@field objectives {[string] : ObjectiveData}
 ---@field expanded {[string] : boolean}
+---@field summary any
 
 ---@class ModelData
 ---@field id string

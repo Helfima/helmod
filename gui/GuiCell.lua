@@ -792,7 +792,7 @@ function GuiCellPollution:create(parent)
 end
 
 -------------------------------------------------------------------------------
----@class GuiCellBuilding
+---@class GuiCellBuilding : GuiCell
 GuiCellBuilding = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
@@ -810,19 +810,28 @@ function GuiCellBuilding:create(parent)
   row1.style.top_padding=4
   row1.style.bottom_padding=4
 
-  local tooltip = GuiTooltipBuilding(self.options.tooltip):element(element)
+  local tooltip = GuiTooltipBuilding(self.options.tooltip):element(element):byLimit(self.m_by_limit)
   local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", defines.sprites.factory.white, defines.sprites.factory.black):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   local building = 0
+  local building_limit = 0
+  local building_deep = 0
   if element.summary ~= nil then
     building = element.summary.building or 0
+    building_limit = element.summary.building_limit or 0
+    building_deep = element.summary.building_deep or 0
   end
   local width = 50
-  self:add_row_label(cell, width, "row2", building, color, 2, {"helmod_common.quantity"})
+  if self.m_by_limit then
+    self:add_row_label(cell, width, "row2", math.ceil(building_limit), color, 2, {"helmod_common.quantity"})
+  else
+    self:add_row_label(cell, width, "row2", math.ceil(building), color, 2, {"helmod_common.quantity"})
+  end
 
   local display_count_deep = User.getParameter("display_count_deep")
   if display_count_deep then
-    self:add_row_label(cell, width, "row3", building, color, 3, {"helmod_common.total"})
+    local count = math.ceil(building)
+    self:add_row_label(cell, width, "row3",  math.ceil(building_deep), color, 3, {"helmod_common.total"})
   end
 
   return cell

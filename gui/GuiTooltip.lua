@@ -57,6 +57,15 @@ function GuiTooltip:withControlInfo(control_info)
 end
 
 -------------------------------------------------------------------------------
+---Set by_limit information
+---@param by_limit boolean
+---@return GuiTooltip
+function GuiTooltip:byLimit(by_limit)
+  self.m_by_limit = by_limit
+  return self
+end
+
+-------------------------------------------------------------------------------
 ---Add control information
 ---@param tooltip table
 ---@param element table
@@ -589,7 +598,12 @@ function GuiTooltipBuilding:create()
       for _, element in pairs(block.summary.factories) do
         if #tooltip < 19 then
           local element_sprite = GuiElement.getSprite(element.type, element.name, "[%s=%s]")
-          table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.font.default_bold, "x ", element.count, helmod_tag.font.close})
+          
+          if self.m_by_limit then
+            table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.font.default_bold, "x ", math.ceil(element.count_limit), helmod_tag.font.close})
+          else
+            table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.font.default_bold, "x ", math.ceil(element.count), helmod_tag.font.close})
+          end
         else
           overflow = true
         end
@@ -599,7 +613,11 @@ function GuiTooltipBuilding:create()
       for _, element in pairs(block.summary.beacons) do
         if #tooltip < 19 then
           local element_sprite = GuiElement.getSprite(element.type, element.name, "[%s=%s]")
-          table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.font.default_bold, "x ", element.count, helmod_tag.font.close})
+          if self.m_by_limit then
+            table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.font.default_bold, "x ", math.ceil(element.count_limit), helmod_tag.font.close})
+          else
+            table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.font.default_bold, "x ", math.ceil(element.count), helmod_tag.font.close})
+          end
         else
           overflow = true
         end
@@ -608,7 +626,11 @@ function GuiTooltipBuilding:create()
       for _, element in pairs(block.summary.modules) do
         if #tooltip < 19 then
           local element_sprite = GuiElement.getSprite(element.type, element.name, "[%s=%s]")
-          table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.font.default_bold, "x ", element.count, helmod_tag.font.close})
+          if self.m_by_limit then
+            table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.font.default_bold, "x ", math.ceil(element.count_limit), helmod_tag.font.close})
+          else
+            table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.font.default_bold, "x ", math.ceil(element.count), helmod_tag.font.close})
+          end
         else
           overflow = true
         end

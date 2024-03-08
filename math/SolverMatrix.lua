@@ -176,7 +176,7 @@ function SolverMatrix:solve(block, parameters, debug)
         for _, child in spairs(children, sorter) do
             local is_block = Model.isBlock(child)
             local parameters = mC.parameters[row_index]
-            if parameters.recipe_count > 0 then
+            if parameters ~= nil and parameters.recipe_count > 0 then
                 child.count = parameters.recipe_count
                 child.production = parameters.recipe_production
             else
