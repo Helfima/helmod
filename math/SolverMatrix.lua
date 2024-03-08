@@ -594,6 +594,7 @@ function SolverMatrix.linkTemperatureFluid(matrix, by_product)
             end
         end
 
+        local coefficient = 0
         ---Convert any Z into product
         for _, product_fluid in pairs(product_fluids) do
             local product = product_fluid.product
@@ -601,7 +602,11 @@ function SolverMatrix.linkTemperatureFluid(matrix, by_product)
             for _, linked_fluid in pairs(linked_fluids) do
                 if SolverMatrix.checkLinkedTemperatureFluid(product_fluid, linked_fluid, by_product) then
                     local parameters = MatrixRowParameters()
+                    parameters.coefficient = coefficient
                     local new_row = MatrixRow("recipe", "helmod-temperature-convert", "")
+                    new_row.header.is_ingredient = false
+                    new_row.header.primary = product_fluid.product
+                    new_row.header.secondary = linked_fluid.product
                     new_row:add_value(product_fluid, -1)
                     new_row:add_value(linked_fluid, 1)
                     mA2:add_row(new_row, parameters)
@@ -619,7 +624,11 @@ function SolverMatrix.linkTemperatureFluid(matrix, by_product)
             for _, linked_fluid in pairs(linked_fluids) do
                 if SolverMatrix.checkLinkedTemperatureFluid(product_fluid, linked_fluid, by_product) then
                     local parameters = MatrixRowParameters()
+                    parameters.coefficient = coefficient
                     local new_row = MatrixRow("recipe", "helmod-temperature-convert", "")
+                    new_row.header.is_ingredient = false
+                    new_row.header.primary = linked_fluid.product
+                    new_row.header.secondary = product_fluid.product
                     new_row:add_value(product_fluid, 1)
                     new_row:add_value(linked_fluid, -1)
                     mA2:add_row(new_row, parameters)
@@ -639,13 +648,20 @@ function SolverMatrix.linkTemperatureFluid(matrix, by_product)
             for _, linked_fluid in pairs(linked_fluids) do
                 if SolverMatrix.checkLinkedTemperatureFluid(linked_fluid, ingredient_fluid, by_product) then
                     local parameters = MatrixRowParameters()
+                    parameters.coefficient = coefficient
                     local new_row = MatrixRow("recipe", "helmod-temperature-convert", "")
+                    new_row.header.is_ingredient = true
+                    new_row.header.primary = linked_fluid.product
+                    new_row.header.secondary = ingredient_fluid.product
                     new_row:add_value(linked_fluid, -1)
                     new_row:add_value(ingredient_fluid, 1)
                     mA2:add_row(new_row, parameters)
 
                     local parameters = MatrixRowParameters()
                     local new_row = MatrixRow("recipe", "helmod-temperature-convert", "")
+                    new_row.header.is_ingredient = true
+                    new_row.header.primary = ingredient_fluid.product
+                    new_row.header.secondary = linked_fluid.product
                     new_row:add_value(linked_fluid, 1)
                     new_row:add_value(ingredient_fluid, -1)
                     mA2:add_row(new_row, parameters)
