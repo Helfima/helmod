@@ -8,8 +8,7 @@
         }
     ],
     "Lua.workspace.library": [
-        "d:\\Perso\\Factorio_Test\\Factorio_1.1.x\\data",
-        "c:/Users/Helfima/AppData/Roaming/Code/User/workspaceStorage/514fe0eed8db4a5c5d40fa46e5c1b506/justarandomgeek.factoriomod-debug/sumneko-3rd/factorio/library"
+        "d:\\Perso\\Factorio_Test\\Factorio_1.1.x\\data"
     ],
     "Lua.workspace.userThirdParty": [
         "c:\\Users\\Helfima\\AppData\\Roaming\\Code\\User\\workspaceStorage\\514fe0eed8db4a5c5d40fa46e5c1b506\\justarandomgeek.factoriomod-debug\\sumneko-3rd"
