@@ -242,7 +242,7 @@ function RecipeExplorer:addCell(parent, recipe, index)
     local recipe_prototype = RecipePrototype(recipe)
     if recipe_prototype:native() ~= nil then
       local cell = GuiElement.add(parent, GuiTable("cell-recipe", index):column(2))
-      local cell_recipe = GuiElement.add(cell, GuiFrameH("cell-recipe"):style("helmod_frame_element", "gray", 1))
+      local cell_recipe = GuiElement.add(cell, GuiFrameH("cell-recipe"):style("helmod_frame_element_w80", "gray", 1))
       cell_recipe.style.padding=5
       
       cell_recipe.style.horizontally_stretchable = false
