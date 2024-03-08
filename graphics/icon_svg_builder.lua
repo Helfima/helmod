@@ -1346,7 +1346,7 @@ local sprites = {
             {transform="scale(0.25)", d="m 34,30 h 30 v 4 H 34 Z"},
             {transform="scale(0.25)", d="m 30,0 h 4 v 64 h -4 z"},
         }},
-        build=true
+        build=false
     }
     ,{
         name="branch_next",
@@ -1361,7 +1361,7 @@ local sprites = {
         },{
             {transform="scale(0.25)", d="m 30,0 h 4 v 64 h -4 z"},
         }},
-        build=true
+        build=false
     }
     ,{
         name="branch_end",
@@ -1376,6 +1376,36 @@ local sprites = {
         },{
             {transform="scale(0.25)", d="m 30,0 h 4 v 34 h -4 z"},
             {transform="scale(0.25)", d="m 34,30 h 30 v 4 H 34 Z"},
+        }},
+        build=false
+    }
+    ,{
+        name="collapse",
+        size=64,
+        count=4,
+        colors = {
+            gray=true,
+            black=true
+        },
+        paths={{
+        },{
+            {d="M 12.8,7V 9 H 3.2 V 7 Z"},
+            {d="M 1,1 V 15 H 15 V 1 Z M 2,2 H 14 V 14 H 2 Z"},
+        }},
+        build=true
+    }
+    ,{
+        name="expand",
+        size=64,
+        count=4,
+        colors = {
+            gray=true,
+            black=true
+        },
+        paths={{
+        },{
+            {d="M 12.5,7 V 9 H 9 L 9,12.5 7,12.5 7,9 H 3.6 V 7 H 7 V 3.4 H 9 V 7 Z"},
+            {d="M 1,1 V 15 H 15 V 1 Z M 2,2 H 14 V 14 H 2 Z"},
         }},
         build=true
     }
@@ -1452,9 +1482,10 @@ current_file=string.gsub(current_file, "@", "")
 local current_dir = string.gsub(current_file, "^(.+\\)[^\\]+$", "%1");
 local colors = {
     black = {"#FFFFFF", "#000000"},
+    gray = {"#DDDDDD", "#C0C0C0"},
     white = {"#000000", "#FFFFFF"},
     red = {"#000000", "#FF0000"},
-    blue = {"#000000", "#6CCEED"},
+    blue = {"#AAAAAA", "#6CCEED"},
     yellow = {"#000000", "#FCDC3B"}
 }
 -------------------------------------------------------------------------------

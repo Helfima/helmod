@@ -587,7 +587,7 @@ function GuiCellBlock:create(parent)
     local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
     local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
     
-    self:add_infoIcon(button, "block")
+    --self:add_infoIcon(button, "block")
     
     GuiElement.infoRecipe(button, first_recipe)
   else
@@ -626,13 +626,14 @@ function GuiCellBlockM:create(parent)
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
   row1.style.top_padding=2
   row1.style.bottom_padding=3
+  row1.style.width = 36
 
   local first_recipe = Model.firstChild(element.children)
   if first_recipe ~= nil then
     local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
     local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
     
-    self:add_infoIcon(button, "block")
+    --self:add_infoIcon(button, "block")
     
     GuiElement.infoRecipe(button, first_recipe)
   else
@@ -640,7 +641,7 @@ function GuiCellBlockM:create(parent)
     button.style.width = 36
   end
 
-  local width = 30
+  local width = 36
   self:add_row_label_m(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
 
   local display_count_deep = User.getParameter("display_count_deep")

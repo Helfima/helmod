@@ -119,6 +119,7 @@
 ---@field children {[string] : RecipeData | BlockData}
 ---@field has_input boolean
 ---@field objectives {[string] : ObjectiveData}
+---@field expanded {[string] : boolean}
 
 ---@class ModelData
 ---@field id string

@@ -212,17 +212,6 @@ function Model.getLastModel()
 end
 
 -------------------------------------------------------------------------------
----Retrun true if is a block
----@param child RecipeData | BlockData
----@return boolean
-function Model.isBlock(child)
-  if child.class == "Block" then
-    return true
-  else
-    return child.children ~= nil
-  end
-end
--------------------------------------------------------------------------------
 ---Create model Production Block
 ---@param model ModelData
 ---@param child RecipeData | BlockData
@@ -250,6 +239,49 @@ function Model.newBlock(model, child)
   blockModel.pollution = 0
 
   return blockModel
+end
+
+-------------------------------------------------------------------------------
+---Retrun true if is a block
+---@param child RecipeData | BlockData
+---@return boolean
+function Model.isBlock(child)
+  if child.class == "Block" then
+    return true
+  else
+    return child.children ~= nil
+  end
+end
+
+-------------------------------------------------------------------------------
+---Retrun true if is expand block for this player
+---@param block BlockData
+---@return boolean
+function Model.isExpandBlock(block)
+  if block.class == "Block" then
+    local player_name = Player.getName()
+    if type(block.expanded) ~= "table" then
+      block.expanded = {}
+      block.expanded[player_name] = false
+    end
+    return block.expanded[player_name]
+  end
+  return false
+end
+
+-------------------------------------------------------------------------------
+---Set expand block for this player
+---@param block BlockData
+---@param value boolean
+function Model.setExpandBlock(block, value)
+  if block.class == "Block" then
+    local player_name = Player.getName()
+    if type(block.expanded) ~= "table" then
+      block.expanded = {}
+      block.expanded[player_name] = false
+    end
+    block.expanded[player_name] = value
+  end
 end
 
 -------------------------------------------------------------------------------

@@ -181,6 +181,18 @@ function Player.native()
 end
 
 -------------------------------------------------------------------------------
+---Return player name or unknown
+---@return string
+function Player.getName()
+  local player_name = "unknown"
+  if Lua_player ~= nil then
+    player_name = Lua_player.name
+  end
+  return player_name
+end
+
+
+-------------------------------------------------------------------------------
 ---Return admin player
 ---@return boolean
 function Player.isAdmin()
