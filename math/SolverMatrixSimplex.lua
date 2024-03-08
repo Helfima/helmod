@@ -271,7 +271,7 @@ function SolverMatrixSimplex:table_compute(matrix, matrix_result)
 			table.remove(matrix_result.rows, irow)
 		end
 	end
-	
+
 	---initialise les valeurs des produits par second
 	for irow, row in pairs(matrix.rows) do
 		if irow < #matrix.rows then

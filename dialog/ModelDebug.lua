@@ -202,6 +202,7 @@ function ModelDebug:getCellHeader(matrix_table, frame, header)
     elseif header.primary ~= nil then
         local tooltip = { "", header.primary.name }
         table.insert(tooltip, { "", "\n", "column: ", header.icol })
+
         local button = GuiElement.add(cell, GuiButtonSprite("cell_primary"):sprite(header.primary.type, header.primary.name):tooltip(tooltip))
         GuiElement.infoTemperature(button, header.primary, "helmod_label_overlay_m")
 

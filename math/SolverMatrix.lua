@@ -677,6 +677,7 @@ function SolverMatrix.linkTemperatureFluid(matrix, by_product)
                     mA2:add_row(new_row, parameters)
 
                     local parameters = MatrixRowParameters()
+                    parameters.coefficient = coefficient
                     local new_row = MatrixRow("recipe", "helmod-temperature-convert", "")
                     new_row.header.is_ingredient = true
                     new_row.header.primary = ingredient_fluid.product
