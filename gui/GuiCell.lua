@@ -829,7 +829,7 @@ function GuiCellBuilding:create(parent)
 end
 
 -------------------------------------------------------------------------------
----@class GuiCellThumbnail
+---@class GuiCellThumbnail : GuiCell
 GuiCellThumbnail = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
@@ -847,16 +847,11 @@ function GuiCellThumbnail:create(parent)
   local tooltip = self.options.tooltip
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", element.sprite1, element.sprite2):tooltip(tooltip))
   
-  local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_w80", color, 2))
-  local caption2 = Format.formatNumberElement(100)
-  GuiElement.add(row2, GuiLabel("label1", element.name):caption(caption2):style("helmod_label_element"):tooltip({"helmod_common.total"}))
+  local width = 50
+  self:add_row_label(cell, width, "row2", 10, color, 2, {"helmod_common.quantity"})
+  self:add_row_label(cell, width, "row3", 100, color, 3, {"helmod_common.total"})
+  self:add_row_label(cell, width, "row4", 1000, color, 4, {"helmod_common.total"})
 
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w80", color, 3))
-  local caption3 = Format.formatNumberElement(1000)
-  GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element"):tooltip({"helmod_common.total"}))
-
-  local row4 = GuiElement.add(cell, GuiFrameH("row4"):style("helmod_frame_element_w80", color, 4))
-  GuiElement.add(row4, GuiLabel("label-empty"):caption("XXX"):style("helmod_label_element"))
   return cell
 end
 

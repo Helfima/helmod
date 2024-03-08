@@ -182,7 +182,7 @@ function PreferenceEdition:getThumbnailColorTab()
     if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
         return content_panel[scroll_name]
     end
-    local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption("Thumbnail-color"))
+    local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption({"helmod_preferences-edition-panel.thumbnail-color"}))
     local scroll_panel = GuiElement.add(content_panel, GuiScroll(scroll_name):style(defines.styles.frame.tab_scroll_pane))
     content_panel.add_tab(tab_panel, scroll_panel)
     scroll_panel.style.horizontally_stretchable = true
@@ -211,6 +211,7 @@ end
 function PreferenceEdition:updateUI(event)
     local container_panel = self:getUITab()
     container_panel.clear()
+    container_panel.style.padding = 5
 
     GuiElement.add(container_panel, GuiLabel("fluid_container_label"):caption({ "helmod_label.ui" }):style("helmod_label_title_frame"))
 
@@ -261,6 +262,7 @@ end
 function PreferenceEdition:updateGeneral(event)
     local container_panel = self:getGeneralTab()
     container_panel.clear()
+    container_panel.style.padding = 5
 
     GuiElement.add(container_panel, GuiLabel("fluid_container_label"):caption({ "helmod_label.general" }):style("helmod_label_title_frame"))
 
@@ -294,6 +296,7 @@ function PreferenceEdition:updatePriorityModule(event)
     local number_column = User.getPreferenceSetting("preference_number_column")
     local priority_module_panel = self:getPriorityModuleTab()
     priority_module_panel.clear()
+    priority_module_panel.style.padding = 5
 
     GuiElement.add(priority_module_panel, GuiLabel("priority_module_label"):caption({ "helmod_label.priority-modules" }):style("helmod_label_title_frame"))
 
@@ -344,6 +347,7 @@ function PreferenceEdition:updateItemsLogistic(event)
     local number_column = User.getPreferenceSetting("preference_number_column")
     local container_panel = self:getSolidContainerTab()
     container_panel.clear()
+    container_panel.style.padding = 5
 
     GuiElement.add(container_panel, GuiLabel("solid_container_label"):caption({ "helmod_preferences-edition-panel.items-logistic-default" }):style("helmod_label_title_frame"))
 
@@ -379,6 +383,7 @@ function PreferenceEdition:updateFluidsLogistic(event)
     local number_column = User.getPreferenceSetting("preference_number_column")
     local container_panel = self:getFluidContainerTab()
     container_panel.clear()
+    container_panel.style.padding = 5
 
     GuiElement.add(container_panel, GuiLabel("fluid_container_label"):caption({ "helmod_preferences-edition-panel.fluids-logistic-default" }):style("helmod_label_title_frame"))
 
@@ -428,25 +433,40 @@ end
 ---@param fake_element table
 function PreferenceEdition:updateThumbnailCell(stack_panel, label, parameter, fake_element)
     local cell_panel = GuiElement.add(stack_panel, GuiFlowV(parameter))
-    GuiElement.add(cell_panel, GuiLabel("cell_label"):caption(label):style(defines.styles.label.heading_2))
+    local localized_label = {"helmod_preferences-edition-panel.thumbnail-color-"..label}
+    GuiElement.add(cell_panel, GuiLabel("cell_label"):caption(localized_label):style(defines.styles.label.default))
     local color_change_confirm = User.getParameter("color_change_confirm")
     local thumbnails_color = User.getThumbnailsColor()
     local thumbnail_color = thumbnails_color[parameter]
     if color_change_confirm == parameter then
+
+        local menu_panel = GuiElement.add(cell_panel, GuiFrameH("menu"):style(defines.styles.frame.inside_deep))
+        menu_panel.style.width = 215
+        menu_panel.style.margin = 5
+        --menu_panel.style.padding = 3
+        local menu_panel_right = GuiElement.add(menu_panel, GuiFlowH("menu-right"))
+        menu_panel_right.style.horizontally_stretchable = true
+        local menu_panel_left = GuiElement.add(menu_panel, GuiFlowH("menu-left"))
+        GuiElement.add(menu_panel_right, GuiButton(self.classname, "thumbnail-cancel", parameter):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_actived_red"):tooltip({ "helmod_preferences-edition-panel.thumbnail-color-modify-cancel" }))
+        GuiElement.add(menu_panel_left, GuiButton(self.classname, "thumbnail-default", parameter):sprite("menu", defines.sprites.refresh.black, defines.sprites.refresh.black):style("helmod_button_menu_sm_actived_red"):tooltip({ "helmod_preferences-edition-panel.thumbnail-color-modify-default" }))
+
         local last_element = nil
         local options_scroll = GuiElement.add(cell_panel, GuiScroll("options-scroll"))
+        options_scroll.style.margin = 5
+        --options_scroll.style.padding = 3
         options_scroll.style.width = 215
         options_scroll.style.height = 215
+
         local options_color = GuiElement.add(options_scroll, GuiTable("options-table"):column(10))
         options_color.style.horizontally_stretchable = false
         for code, frame_color in pairs(defines.frame_colors) do
             for _, value in ipairs(frame_color) do
                 local button = nil
                 if value == thumbnail_color then
-                    button = GuiElement.add(options_color, GuiButtonSelectSpriteSm(self.classname, "select-thumbnail", parameter, value):tooltip(value))
+                    button = GuiElement.add(options_color, GuiButtonSelectSpriteSm(self.classname, "thumbnail-select", parameter, value):tooltip(value))
                     last_element = button
                 else
-                    button = GuiElement.add(options_color, GuiButtonSpriteSm(self.classname, "select-thumbnail", parameter, value):tooltip(value))
+                    button = GuiElement.add(options_color, GuiButtonSpriteSm(self.classname, "thumbnail-select", parameter, value):tooltip(value))
                 end
                 local frame = GuiElement.add(button, GuiFrame("color"):style("helmod_frame_element_w30", value, 1))
                 frame.style.width = 14
@@ -459,7 +479,7 @@ function PreferenceEdition:updateThumbnailCell(stack_panel, label, parameter, fa
             options_scroll.scroll_to_element(last_element)
         end
     else
-        local thumbnail = GuiElement.add(cell_panel, GuiCellThumbnail(self.classname, "change-thumbnail", parameter):element(fake_element):color(thumbnail_color):tooltip(thumbnail_color))
+        local thumbnail = GuiElement.add(cell_panel, GuiCellThumbnail(self.classname, "thumbnail-change", parameter):element(fake_element):color(thumbnail_color):tooltip(thumbnail_color))
         thumbnail.style.horizontally_stretchable = false
     end
 end
@@ -470,57 +490,82 @@ end
 function PreferenceEdition:updateThumbnailColor(event)
     local container_panel = self:getThumbnailColorTab()
     container_panel.clear()
+    container_panel.style.padding = 5
 
-    local blocks_panel = GuiElement.add(container_panel, GuiFrameV("blocks"):style(defines.styles.frame.bordered))
+    local menu_panel = GuiElement.add(container_panel, GuiFrameH("menu"):style(defines.styles.frame.inside_deep))
+    menu_panel.style.horizontally_stretchable = true
+    menu_panel.style.horizontal_align = "left"
+    menu_panel.style.margin = 5
+    menu_panel.style.padding = 3
+    local menu_panel_right = GuiElement.add(menu_panel, GuiFlowH("menu-right"))
+    menu_panel_right.style.horizontally_stretchable = true
+    local menu_panel_left = GuiElement.add(menu_panel, GuiFlowH("menu-left"))
+    local button = GuiElement.add(menu_panel_left, GuiButton(self.classname, "thumbnail-default", "all"):sprite("menu", defines.sprites.refresh.black, defines.sprites.refresh.black):style("helmod_button_menu_sm_actived_red"):tooltip({ "helmod_preferences-edition-panel.thumbnail-color-modify-all-default" }))
+
+    local blocks_panel = GuiElement.add(container_panel, GuiFrameV("blocks"):caption({"helmod_common.blocks"}):style(defines.styles.frame.bordered))
     blocks_panel.style.horizontally_stretchable = true
-    GuiElement.add(blocks_panel, GuiLabel("cell_label"):caption("Blocks"):style(defines.styles.label.frame_title))
     local blocks_stack = GuiElement.add(blocks_panel, GuiFlowH("stack"))
     local fake_block = { name = "block1", sprite1 = defines.sprites.hangar.white, sprite2 = defines.sprites.hangar.white }
 
-    self:updateThumbnailCell(blocks_stack, "Default", "block_default", fake_block)
-    self:updateThumbnailCell(blocks_stack, "Selected", "block_selected", fake_block)
-    self:updateThumbnailCell(blocks_stack, "Reverted", "block_reverted", fake_block)
+    self:updateThumbnailCell(blocks_stack, "default", "block_default", fake_block)
+    self:updateThumbnailCell(blocks_stack, "selected", "block_selected", fake_block)
+    self:updateThumbnailCell(blocks_stack, "reverted", "block_reverted", fake_block)
     
-    local recipes_panel = GuiElement.add(container_panel, GuiFrameV("recipes"):style(defines.styles.frame.bordered))
+    local recipes_panel = GuiElement.add(container_panel, GuiFrameV("recipes"):caption({"helmod_common.recipes"}):style(defines.styles.frame.bordered))
     recipes_panel.style.horizontally_stretchable = true
-    GuiElement.add(recipes_panel, GuiLabel("recipe_label"):caption("Recipe"):style(defines.styles.label.frame_title))
     local recipes_stack = GuiElement.add(recipes_panel, GuiFlowH("stack"))
     local fake_recipe = { name = "recipe1", sprite1 = defines.sprites.script.white, sprite2 = defines.sprites.script.white }
 
-    self:updateThumbnailCell(recipes_stack, "Default", "recipe_default", fake_recipe)
+    self:updateThumbnailCell(recipes_stack, "default", "recipe_default", fake_recipe)
 
 
-    local products_panel = GuiElement.add(container_panel, GuiFrameV("products"):style(defines.styles.frame.bordered))
+    local products_panel = GuiElement.add(container_panel, GuiFrameV("products"):caption({"helmod_common.products"}):style(defines.styles.frame.bordered))
     products_panel.style.horizontally_stretchable = true
-    GuiElement.add(products_panel, GuiLabel("product_label"):caption("Product"):style(defines.styles.label.frame_title))
     local products_stack = GuiElement.add(products_panel, GuiFlowH("stack"))
     local fake_product = { name = "product1", sprite1 = defines.sprites.jewel.white, sprite2 = defines.sprites.jewel.white }
 
-    self:updateThumbnailCell(products_stack, "Default", "product_default", fake_product)
-    self:updateThumbnailCell(products_stack, "Driving", "product_driving", fake_product)
-    self:updateThumbnailCell(products_stack, "Overflow", "product_overflow", fake_product)
+    self:updateThumbnailCell(products_stack, "default", "product_default", fake_product)
+    self:updateThumbnailCell(products_stack, "driving", "product_driving", fake_product)
+    self:updateThumbnailCell(products_stack, "overflow", "product_overflow", fake_product)
 
-    local ingredients_panel = GuiElement.add(container_panel, GuiFrameV("ingredients"):style(defines.styles.frame.bordered))
+    local ingredients_panel = GuiElement.add(container_panel, GuiFrameV("ingredients"):caption({"helmod_common.ingredients"}):style(defines.styles.frame.bordered))
     ingredients_panel.style.horizontally_stretchable = true
-    GuiElement.add(ingredients_panel, GuiLabel("ingredient_label"):caption("Ingredient"):style(defines.styles.label.frame_title))
     local ingredients_stack = GuiElement.add(ingredients_panel, GuiFlowH("stack"))
     local fake_ingredient = { name = "ingredient1", sprite1 = defines.sprites.jewel.white, sprite2 = defines.sprites.jewel.white }
 
-    self:updateThumbnailCell(ingredients_stack, "Default", "ingredient_default", fake_ingredient)
-    self:updateThumbnailCell(ingredients_stack, "Driving", "ingredient_driving", fake_ingredient)
-    self:updateThumbnailCell(ingredients_stack, "Overflow", "ingredient_overflow", fake_ingredient)
+    self:updateThumbnailCell(ingredients_stack, "default", "ingredient_default", fake_ingredient)
+    self:updateThumbnailCell(ingredients_stack, "driving", "ingredient_driving", fake_ingredient)
+    self:updateThumbnailCell(ingredients_stack, "overflow", "ingredient_overflow", fake_ingredient)
 end
 
 -------------------------------------------------------------------------------
 ---On event
 ---@param event LuaEvent
 function PreferenceEdition:onEvent(event)
-    if event.action == "change-thumbnail" then
+    if event.action == "thumbnail-default" then
+        local thumbnails_color = User.getThumbnailsColor()
+        if event.item1 == "all" then
+            thumbnails_color = {}
+        else
+            thumbnails_color[event.item1] = nil
+        end
+        User.setThumbnailsColor(thumbnails_color)
+        User.setParameter("color_change_confirm", nil)
+        self:updateThumbnailColor(event)
+        Controller:send("on_gui_refresh", event)
+    end
+
+    if event.action == "thumbnail-cancel" then
+        User.setParameter("color_change_confirm", nil)
+        self:updateThumbnailColor(event)
+    end
+
+    if event.action == "thumbnail-change" then
         User.setParameter("color_change_confirm", event.item1)
         self:updateThumbnailColor(event)
     end
 
-    if event.action == "select-thumbnail" then
+    if event.action == "thumbnail-select" then
         local thumbnails_color = User.getThumbnailsColor()
         thumbnails_color[event.item1] = event.item2
         User.setThumbnailsColor(thumbnails_color)

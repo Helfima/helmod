@@ -20,6 +20,7 @@ defines.styles.frame.tab_scroll_pane = "tab_scroll_pane"
 
 
 defines.styles.label = {}
+defines.styles.label.default = "label"
 defines.styles.label.frame_title = "frame_title"
 defines.styles.label.heading_1 = "heading_1_label"
 defines.styles.label.heading_2 = "heading_2_label"
