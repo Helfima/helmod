@@ -1,8 +1,13 @@
 ---------------------------------------------------------------------------------------------------
-Version: 1.0.x
+Version: 1.0.3
 Date: 2023-03-19
   Changes:
     - Updated RU locale #503
+    - Allow set 0 for input in the block
+    - Added button to clear all inputs of block
+  Bugfixes:
+    - Fix the initial value
+    - Fix display ols solver in the ModelDebug dialog
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.2
 Date: 2024-03-09

@@ -522,11 +522,8 @@ function GuiCellProduct:create(parent)
     local product_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type, element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip({self.options.tooltip, Player.getLocalisedName(element)}))
     self:add_mask(product_icon, color)
   end
-  local display_count_deep = User.getParameter("display_count_deep")
-  if display_count_deep then
-    local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
-    GuiElement.add(row3, GuiLabel("label2", element.name):caption(Format.formatNumber(element.count, 5)):style("helmod_label_element"):tooltip({"helmod_common.total"}))
-  end
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
+  GuiElement.add(row3, GuiLabel("label2", element.name):caption(Format.formatNumber(element.count, 5)):style("helmod_label_element"):tooltip({"helmod_common.total"}))
   return cell
 end
 
@@ -553,13 +550,10 @@ function GuiCellProductSm:create(parent)
   end
   GuiElement.infoTemperature(row1, element)
   
-  local display_count_deep = User.getParameter("display_count_deep")
-  if display_count_deep then
-    local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
-    local caption3 = Format.formatNumber(element.count, 5)
-    if element.type == "energy" then caption3 = Format.formatNumberKilo(element.count, "J") end
-    GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element_sm"):tooltip({"helmod_common.total"}))
-  end
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
+  local caption3 = Format.formatNumber(element.count, 5)
+  if element.type == "energy" then caption3 = Format.formatNumberKilo(element.count, "J") end
+  GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element_sm"):tooltip({"helmod_common.total"}))
   return cell
 end
 
