@@ -133,7 +133,7 @@ function ModelBuilder.updateTreeChildDown(model, block, child, with_below)
         end
     end
 
-    if table.size(block.children) then
+    if table.size(block.children) == 0 then
         ModelBuilder.blockChildRemove(model, parent_block, block)
     end
 
@@ -500,6 +500,8 @@ end
 ---@param current_recipe RecipeData
 function ModelBuilder.setFactoryBlock(block, current_recipe)
     if current_recipe ~= nil then
+        local default_factory_mode = User.getParameter("default_factory_mode")
+        local categories = EntityPrototype(current_recipe.factory.name):getCraftingCategories()
         local factory_prototype = EntityPrototype(current_recipe.factory.name)
         local factory_ingredient_count = factory_prototype:getIngredientCount()
         for _, child in pairs(block.children) do
@@ -511,7 +513,7 @@ function ModelBuilder.setFactoryBlock(block, current_recipe)
                     --- check ingredient limitation
                     if factory_ingredient_count < recipe_ingredient_count then
                         -- Skip
-                    elseif prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
+                    elseif (default_factory_mode ~= "category" and categories[prototype_recipe:getCategory()]) or prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
                         Model.setFactory(recipe, current_recipe.factory.name, current_recipe.factory.fuel)
                         ModelBuilder.setFactoryModulePriority(recipe, current_recipe.factory.module_priority)
                     end
@@ -572,12 +574,13 @@ end
 ---@param current_recipe RecipeData
 function ModelBuilder.setBeaconBlock(block, current_recipe)
     if current_recipe ~= nil then
+        local default_beacon_mode = User.getParameter("default_beacon_mode")
         for key, child in pairs(block.children) do
             if child.children == nil then
                 local recipe = child
                 if recipe ~= current_recipe then
                     local prototype_recipe = RecipePrototype(recipe)
-                    if prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
+                    if default_beacon_mode ~= "category" or prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
                         recipe.beacons = {}
                         if current_recipe.beacons ~= nil then
                             for key, current_beacon in pairs(current_recipe.beacons) do

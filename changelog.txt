@@ -1,6 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.4
+Date: 2024-03-09
+  Changes:
+    - Restore in edition recipe, the propagation mode: all or category
+  Bugfixes:
+    - Fix tree child down delete the source block
+---------------------------------------------------------------------------------------------------
 Version: 1.0.3
-Date: 2023-03-19
+Date: 2024-03-09
   Changes:
     - Updated RU locale #503
     - Allow set 0 for input in the block
