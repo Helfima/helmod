@@ -616,37 +616,41 @@ function AbstractSelector:createElementLists(event)
   end
   ---execute loop
   if event.continue and event.method == "list" then
-    local filter_show_lock_recipes = User.getSetting("filter_show_lock_recipes")
-    local filter_show_disable = User.getSetting("filter_show_disable")
-    local filter_show_hidden = User.getSetting("filter_show_hidden")
-    local filter_show_hidden_player_crafting = User.getSetting("filter_show_hidden_player_crafting")
-    local query_list = table.remove(event.table_element)
-    self:updateWaitMessage(string.format("Wait list build: %s", query_list.index or 0))
+    if event.table_element ~= nil and #event.table_element > 0 then
+      local filter_show_lock_recipes = User.getSetting("filter_show_lock_recipes")
+      local filter_show_disable = User.getSetting("filter_show_disable")
+      local filter_show_hidden = User.getSetting("filter_show_hidden")
+      local filter_show_hidden_player_crafting = User.getSetting("filter_show_hidden_player_crafting")
+      local query_list = table.remove(event.table_element)
+      if query_list ~= nil then
+        self:updateWaitMessage(string.format("Wait list build: %s", query_list.index or 0))
 
-    for key, element in pairs(query_list.list) do
-      ---filter sur le nom element (product ou ingredient)
-      if self:checkFilter(key) then
-        for element_name, element in pairs(element) do
-          local prototype = self:getPrototype(element)
-          if (not(self.unlock_recipe) or (prototype:getUnlock() == true or filter_show_lock_recipes == true)) and 
-            (not(self.disable_option) or (prototype:getEnabled() == true or filter_show_disable == true)) and 
-            (not(self.hidden_option) or (prototype:getHidden() == false or filter_show_hidden == true)) and
-            (not(self.hidden_player_crafting) or (prototype:getHiddenPlayerCrafting() == false or filter_show_hidden_player_crafting == true)) then
+        for key, element in pairs(query_list.list) do
+          ---filter sur le nom element (product ou ingredient)
+          if self:checkFilter(key) then
+            for element_name, element in pairs(element) do
+              local prototype = self:getPrototype(element)
+              if (not(self.unlock_recipe) or (prototype:getUnlock() == true or filter_show_lock_recipes == true)) and 
+                (not(self.disable_option) or (prototype:getEnabled() == true or filter_show_disable == true)) and 
+                (not(self.hidden_option) or (prototype:getHidden() == false or filter_show_hidden == true)) and
+                (not(self.hidden_player_crafting) or (prototype:getHiddenPlayerCrafting() == false or filter_show_hidden_player_crafting == true)) then
 
-            if list_group_elements[element.group] == nil then list_group_elements[element.group] = {} end
-            if list_group_elements[element.group][element.subgroup] == nil then list_group_elements[element.group][element.subgroup] = {} end
-            list_group_elements[element.group][element.subgroup][element_name] = element
+                if list_group_elements[element.group] == nil then list_group_elements[element.group] = {} end
+                if list_group_elements[element.group][element.subgroup] == nil then list_group_elements[element.group][element.subgroup] = {} end
+                list_group_elements[element.group][element.subgroup][element_name] = element
 
-            list_group[element.group] = prototype:getGroup()
-            list_subgroup[element.subgroup] = prototype:getSubgroup()
+                list_group[element.group] = prototype:getGroup()
+                list_subgroup[element.subgroup] = prototype:getSubgroup()
+              end
+            end
           end
         end
+        User.setCache(self.classname, "list_group", list_group)
+        User.setCache(self.classname, "list_subgroup", list_subgroup)
+        User.setCache(self.classname, "list_group_elements", list_group_elements)
       end
     end
-    User.setCache(self.classname, "list_group", list_group)
-    User.setCache(self.classname, "list_subgroup", list_subgroup)
-    User.setCache(self.classname, "list_group_elements", list_group_elements)
-    if #event.table_element > 0 then
+    if event.table_element ~= nil and #event.table_element > 0 then
       return User.createNextEvent(event, self.classname, "list")
     else
       event.continue = false

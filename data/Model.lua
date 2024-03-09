@@ -177,12 +177,16 @@ function Model.getParameterObjects(parameter)
       local block, recipe
       if parameter.block ~= nil and model ~= nil and model.blocks ~= nil then
         block = model.blocks[parameter.block]
-        if block == nil and parameter.block == model.block_root.id then
+        if block == nil and model.block_root ~= nil and parameter.block == model.block_root.id then
           block = model.block_root
         end
       end
-      if block == nil then
+      if block == nil and model.block_root ~= nil then
         block = model.block_root
+      end
+      if block == nil and model.block_root == nil then
+        block = Model.newBlock(model, { name = model.id, energy_total = 0, pollution = 0, summary = {} })
+        model.block_root = block
       end
       if parameter.recipe ~= nil and block ~= nil and  block.children ~= nil then
         recipe = block.children[parameter.recipe]
