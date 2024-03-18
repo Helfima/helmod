@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.5
+Date: 2024-03-18
+  Bugfixes:
+    - Fix model.block_root missing on the last block (probably migration issue)
+    - Fix preference format number is not used
+---------------------------------------------------------------------------------------------------
 Version: 1.0.4
 Date: 2024-03-09
   Changes:

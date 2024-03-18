@@ -302,6 +302,7 @@ function SolverMatrix.get_block_matrix(block, parameters)
                 child_type = child.type
                 child_tooltip = child.name .. "\nBlock"
 
+                --- TODO fix product by ingredient
                 if child.by_product == false then
                     child_products = child.ingredients
                     child_ingredients = child.products
@@ -359,6 +360,9 @@ function SolverMatrix.get_block_matrix(block, parameters)
                 local product_amount = 0
                 if is_block then
                     product_amount = lua_product.amount or 0
+                    -- if child.by_product == false then
+                    --     product_amount = -product_amount
+                    -- end
                 else
                     product_amount = product:getAmount(child)
                 end
@@ -377,6 +381,9 @@ function SolverMatrix.get_block_matrix(block, parameters)
                 local ingredient_amount = 0
                 if is_block then
                     ingredient_amount = lua_ingredient.amount or 0
+                    -- if child.by_product == false then
+                    --     ingredient_amount = -ingredient_amount
+                    -- end
                 else
                     ingredient_amount = ingredient:getAmount()
                     ---si constant compte comme un produit (recipe rocket)

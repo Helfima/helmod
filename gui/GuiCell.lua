@@ -295,7 +295,8 @@ end
 ---@param color string
 ---@param color_level int
 ---@param tooltip any
-function GuiCell:add_row_label(parent, width, name, count, color, color_level, tooltip)
+---@param format_number string
+function GuiCell:add_row_label(parent, width, name, count, color, color_level, tooltip, format_number)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local row = GuiElement.add(parent, GuiFrameH(name):style("helmod_frame_element_w50", color, color_level))
   row.style.minimal_width=width
@@ -307,7 +308,11 @@ function GuiCell:add_row_label(parent, width, name, count, color, color_level, t
   elseif display_cell_mod == "by-kilo" then
     caption = Format.formatNumberKilo(count)
   else
-    caption = Format.formatNumber(count)
+    if format_number == nil then
+      format_number = User.getPreferenceSetting("format_number_element")
+    end
+    local decimal = Format.decimalFromString(format_number)
+    caption = Format.formatNumber(count, decimal)
   end
   GuiElement.add(row, GuiLabel("label2", name):caption(caption):style("helmod_label_element"):tooltip(tooltip))
 end
@@ -321,7 +326,8 @@ end
 ---@param color string
 ---@param color_level int
 ---@param tooltip any
-function GuiCell:add_row_label_m(parent, width, name, count, color, color_level, tooltip)
+---@param format_number string
+function GuiCell:add_row_label_m(parent, width, name, count, color, color_level, tooltip, format_number)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local row = GuiElement.add(parent, GuiFrameH(name):style("helmod_frame_element_w50", color, color_level))
   row.style.minimal_width=width
@@ -333,7 +339,11 @@ function GuiCell:add_row_label_m(parent, width, name, count, color, color_level,
   elseif display_cell_mod == "by-kilo" then
     caption = Format.formatNumberKilo(count)
   else
-    caption = Format.formatNumber(count)
+    if format_number == nil then
+      format_number = User.getPreferenceSetting("format_number_element")
+    end
+    local decimal = Format.decimalFromString(format_number)
+    caption = Format.formatNumber(count, decimal)
   end
   GuiElement.add(row, GuiLabel("label2", name):caption(caption):style("helmod_label_element_m"):tooltip(tooltip))
 end
@@ -347,7 +357,8 @@ end
 ---@param color string
 ---@param color_level int
 ---@param tooltip any
-function GuiCell:add_row_label_sm(parent, width, name, count, color, color_level, tooltip)
+---@param format_number string
+function GuiCell:add_row_label_sm(parent, width, name, count, color, color_level, tooltip, format_number)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local row = GuiElement.add(parent, GuiFrameH(name):style("helmod_frame_element_w50", color, color_level))
   row.style.minimal_width=width
@@ -359,7 +370,11 @@ function GuiCell:add_row_label_sm(parent, width, name, count, color, color_level
   elseif display_cell_mod == "by-kilo" then
     caption = Format.formatNumberKilo(count)
   else
-    caption = Format.formatNumber(count)
+    if format_number == nil then
+      format_number = User.getPreferenceSetting("format_number_element")
+    end
+    local decimal = Format.decimalFromString(format_number)
+    caption = Format.formatNumber(count, decimal)
   end
   GuiElement.add(row, GuiLabel("label2", name):caption(caption):style("helmod_label_element_sm"):tooltip(tooltip))
 end
@@ -423,6 +438,7 @@ function GuiCellFactory:create(parent)
     end
   end
 
+  local format_number = User.getPreferenceSetting("format_number_factory")
   local width = 80
   if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_w80", color, 2))
@@ -451,12 +467,12 @@ function GuiCellFactory:create(parent)
     text_field.style.height = 16
     text_field.style.width = 70
   else
-    self:add_row_label(cell, width, "row3", factory.count, color, 2, {"helmod_common.quantity"})
+    self:add_row_label(cell, width, "row3", factory.count, color, 2, {"helmod_common.quantity"}, format_number)
   end
 
   local display_count_deep = User.getParameter("display_count_deep")
   if display_count_deep then
-    self:add_row_label(cell, width, "row4", factory.count_deep, color, 3, {"helmod_common.total"})
+    self:add_row_label(cell, width, "row4", factory.count_deep, color, 3, {"helmod_common.total"}, format_number)
   end
 
   return cell
