@@ -321,7 +321,6 @@ function SolverMatrix.get_block_matrix(block, parameters)
                 child_tooltip = recipe.name .. "\nRecette"
                 child_recipe_energy = recipe_prototype:getEnergy(recipe.factory)
                 child_factory_count = recipe.factory.input or 0
-                child_factory_speed = recipe.factory.speed or 0
 
                 recipe.base_time = block.time
                 ModelCompute.computeModuleEffects(recipe, parameters)
@@ -330,6 +329,8 @@ function SolverMatrix.get_block_matrix(block, parameters)
                 else
                     ModelCompute.computeFactory(recipe)
                 end
+                
+                child_factory_speed = recipe.factory.speed or 0
 
                 child_products = recipe_prototype:getProducts(recipe.factory)
                 child_ingredients = recipe_prototype:getIngredients(recipe.factory)
