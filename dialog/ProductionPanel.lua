@@ -1583,7 +1583,7 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 	end
 
 	if event.action == "block-reset-input" then
-		local chid_block = model.blocks[event.item2]
+		local chid_block = model.blocks[event.item2] or model.block_root
         ModelCompute.clearBlockInputs(chid_block)
 		ModelCompute.update(model)
 		Controller:send("on_gui_update", event)

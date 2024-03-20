@@ -260,13 +260,14 @@ function GuiTooltip:appendDebug(tooltip, element)
     ---debug     
     if User.getModGlobalSetting("debug_solver") == true then
       table.insert(tooltip, {"", "\n", "----------------------"})
-      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Name", ": ", helmod_tag.font.default_bold, self.m_element.name or "nil", helmod_tag.font.close})
-      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Type", ": ", helmod_tag.font.default_bold, self.m_element.type or "nil", helmod_tag.font.close})
-      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "State", ": ", helmod_tag.font.default_bold, self.m_element.state or 0, helmod_tag.font.close})
-      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Amount", ": ", helmod_tag.font.default_bold, self.m_element.amount or 0, helmod_tag.font.close})
-      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Count", ": ", helmod_tag.font.default_bold, self.m_element.count or 0, helmod_tag.font.close})
-      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Count limit", ": ", helmod_tag.font.default_bold, self.m_element.count_limit or 0, helmod_tag.font.close})
-      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Count deep", ": ", helmod_tag.font.default_bold, self.m_element.count_deep or 0, helmod_tag.font.close})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Id", ": ", helmod_tag.font.default_bold, element.id or "nil", helmod_tag.font.close})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Name", ": ", helmod_tag.font.default_bold, element.name or "nil", helmod_tag.font.close})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Type", ": ", helmod_tag.font.default_bold, element.type or "nil", helmod_tag.font.close})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "State", ": ", helmod_tag.font.default_bold, element.state or 0, helmod_tag.font.close})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Amount", ": ", helmod_tag.font.default_bold, element.amount or 0, helmod_tag.font.close})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Count", ": ", helmod_tag.font.default_bold, element.count or 0, helmod_tag.font.close})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Count limit", ": ", helmod_tag.font.default_bold, element.count_limit or 0, helmod_tag.font.close})
+      table.insert(tooltip, {"", "\n", "[img=developer]", " ", "Count deep", ": ", helmod_tag.font.default_bold, element.count_deep or 0, helmod_tag.font.close})
     end
 end
 -------------------------------------------------------------------------------
@@ -322,7 +323,7 @@ end)
 function GuiTooltipModel:create()
   local tooltip = self._super.create(self)
   local element = self.m_element
-  local first_block = Model.firstChild(element.blocks or {})
+  local first_block = element.block_root or Model.firstChild(element.blocks or {})
   if first_block ~= nil then
     local type = first_block.type
     if type == nil then type = "entity" end
@@ -338,6 +339,7 @@ function GuiTooltipModel:create()
       table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, {"helmod_common.note"}, helmod_tag.font.close})
       table.insert(tooltip, {"", "\n", element.note or ""})
     end
+    self:appendDebug(tooltip, element.block_root)
   end
   return tooltip
 end
