@@ -196,6 +196,10 @@ function Model.getParameterObjects(parameter)
       ---initialisation parameter
       local model = Model.getLastModel()
       if model == nil then model = Model.newModel() end
+      if model.block_root == nil then
+        local block = Model.newBlock(model, { name = model.id, energy_total = 0, pollution = 0, summary = {} })
+        model.block_root = block
+      end
       local parameterObjects = {name=parameter.name, model=model.id, block = model.block_root.id}
       User.setParameter(parameter.name, parameterObjects)
       return model, model.block_root, nil

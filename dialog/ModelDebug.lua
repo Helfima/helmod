@@ -122,61 +122,7 @@ function ModelDebug:updateDebugPanel(event)
             end
             local runtime = block.runtimes[stage]
             local ma_panel = GuiElement.add(scroll_panel, GuiFrameV("stage_panel"):style(helmod_frame_style.hidden):caption(runtime.name))
-            local solver_selected = User.getParameter("solver_selected") or defines.constant.default_solver
-            if solver_selected == defines.constant.solvers.normal then
-                self:buildTableSolver(ma_panel, runtime.matrix, runtime.pivot)
-            else
-                self:buildTableSolverMatrix(ma_panel, runtime.matrix, runtime.pivot)
-            end
-        end
-    end
-end
-
--------------------------------------------------------------------------------
----Build matrix
----@param matrix_panel LuaGuiElement
----@param matrix table
----@param pivot table
-function ModelDebug:buildTableSolver(matrix_panel, matrix, pivot)
-    if matrix ~= nil then
-        local num_col = #matrix[1]
-
-        local matrix_table = GuiElement.add(matrix_panel,
-            GuiTable("matrix_data"):column(num_col):style("helmod_table-odd"))
-        matrix_table.vertical_centering = false
-
-        for irow, row in pairs(matrix) do
-            for icol, value in pairs(row) do
-                local frame = GuiFlowH("cell", irow, icol):style("helmod_flow_horizontal")
-                if pivot ~= nil then
-                    if matrix[1][icol].name == "T" then frame = GuiFrameH("cell", irow, icol):style(
-                        "helmod_frame_colored", GuiElement.color_button_default_ingredient, 2) end
-                    if pivot.x == icol then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_edit, 2) end
-                    if pivot.y == irow then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_none, 2) end
-                    if pivot.x == icol and pivot.y == irow then frame = GuiFrameH("cell", irow, icol):style("helmod_frame_colored", GuiElement.color_button_rest, 2) end
-                end
-                local cell = GuiElement.add(matrix_table, frame)
-                cell.style.horizontally_stretchable = true
-                cell.style.vertically_stretchable = true
-                if type(value) == "table" then
-                    if value.type == "none" then
-                        GuiElement.add(cell, GuiLabel("cell_value"):caption(value.name):tooltip(value.tooltip))
-                    elseif value.type == "contraint" then
-                        GuiElement.add(cell, GuiLabel("cell_value"):caption(value))
-                    else
-                        local tooltip = { "", value.name }
-                        table.insert(tooltip, { "", "\n", "column: ", value.icol })
-                        local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(value.type, value.name):tooltip(tooltip))
-                        GuiElement.infoTemperature(button, value, "helmod_label_overlay_m")
-                    end
-                else
-                    local gui_label = GuiLabel("cell_value"):caption(Format.formatNumber(value, 4))
-                    if cell_value ~= 0 then
-                        gui_label:style("heading_2_label")
-                    end
-                    GuiElement.add(cell, gui_label)
-                end
-            end
+            self:buildTableSolverMatrix(ma_panel, runtime.matrix, runtime.pivot)
         end
     end
 end
@@ -240,6 +186,8 @@ end
 function ModelDebug:buildTableSolverMatrix(matrix_panel, matrix, pivot)
     if matrix ~= nil then
         local parameter_columns = {}
+        table.insert(parameter_columns, {type="none", name="BP", tooltip="by_product", property="by_product"})
+        table.insert(parameter_columns, {type="none", name="V", tooltip="voider", property="voider"})
         table.insert(parameter_columns, {type="none", name="Cn", tooltip="Contraint", property="contraint"})
         table.insert(parameter_columns, {type="none", name="FC", tooltip="Factory Count", property="factory_count"})
         table.insert(parameter_columns, {type="none", name="FS", tooltip="Factory Speed", property="factory_speed"})

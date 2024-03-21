@@ -295,7 +295,8 @@ end
 ---@param color string
 ---@param color_level int
 ---@param tooltip any
-function GuiCell:add_row_label(parent, width, name, count, color, color_level, tooltip)
+---@param format_number string
+function GuiCell:add_row_label(parent, width, name, count, color, color_level, tooltip, format_number)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local row = GuiElement.add(parent, GuiFrameH(name):style("helmod_frame_element_w50", color, color_level))
   row.style.minimal_width=width
@@ -307,7 +308,11 @@ function GuiCell:add_row_label(parent, width, name, count, color, color_level, t
   elseif display_cell_mod == "by-kilo" then
     caption = Format.formatNumberKilo(count)
   else
-    caption = Format.formatNumber(count)
+    if format_number == nil then
+      format_number = User.getPreferenceSetting("format_number_element")
+    end
+    local decimal = Format.decimalFromString(format_number)
+    caption = Format.formatNumber(count, decimal)
   end
   GuiElement.add(row, GuiLabel("label2", name):caption(caption):style("helmod_label_element"):tooltip(tooltip))
 end
@@ -321,7 +326,8 @@ end
 ---@param color string
 ---@param color_level int
 ---@param tooltip any
-function GuiCell:add_row_label_m(parent, width, name, count, color, color_level, tooltip)
+---@param format_number string
+function GuiCell:add_row_label_m(parent, width, name, count, color, color_level, tooltip, format_number)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local row = GuiElement.add(parent, GuiFrameH(name):style("helmod_frame_element_w50", color, color_level))
   row.style.minimal_width=width
@@ -333,7 +339,11 @@ function GuiCell:add_row_label_m(parent, width, name, count, color, color_level,
   elseif display_cell_mod == "by-kilo" then
     caption = Format.formatNumberKilo(count)
   else
-    caption = Format.formatNumber(count)
+    if format_number == nil then
+      format_number = User.getPreferenceSetting("format_number_element")
+    end
+    local decimal = Format.decimalFromString(format_number)
+    caption = Format.formatNumber(count, decimal)
   end
   GuiElement.add(row, GuiLabel("label2", name):caption(caption):style("helmod_label_element_m"):tooltip(tooltip))
 end
@@ -347,7 +357,8 @@ end
 ---@param color string
 ---@param color_level int
 ---@param tooltip any
-function GuiCell:add_row_label_sm(parent, width, name, count, color, color_level, tooltip)
+---@param format_number string
+function GuiCell:add_row_label_sm(parent, width, name, count, color, color_level, tooltip, format_number)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local row = GuiElement.add(parent, GuiFrameH(name):style("helmod_frame_element_w50", color, color_level))
   row.style.minimal_width=width
@@ -359,7 +370,11 @@ function GuiCell:add_row_label_sm(parent, width, name, count, color, color_level
   elseif display_cell_mod == "by-kilo" then
     caption = Format.formatNumberKilo(count)
   else
-    caption = Format.formatNumber(count)
+    if format_number == nil then
+      format_number = User.getPreferenceSetting("format_number_element")
+    end
+    local decimal = Format.decimalFromString(format_number)
+    caption = Format.formatNumber(count, decimal)
   end
   GuiElement.add(row, GuiLabel("label2", name):caption(caption):style("helmod_label_element_sm"):tooltip(tooltip))
 end
@@ -423,6 +438,7 @@ function GuiCellFactory:create(parent)
     end
   end
 
+  local format_number = User.getPreferenceSetting("format_number_factory")
   local width = 80
   if self.m_by_limit then
     local row2 = GuiElement.add(cell, GuiFrameH("row2"):style("helmod_frame_element_w80", color, 2))
@@ -451,12 +467,12 @@ function GuiCellFactory:create(parent)
     text_field.style.height = 16
     text_field.style.width = 70
   else
-    self:add_row_label(cell, width, "row3", factory.count, color, 2, {"helmod_common.quantity"})
+    self:add_row_label(cell, width, "row3", factory.count, color, 2, {"helmod_common.quantity"}, format_number)
   end
 
   local display_count_deep = User.getParameter("display_count_deep")
   if display_count_deep then
-    self:add_row_label(cell, width, "row4", factory.count_deep, color, 3, {"helmod_common.total"})
+    self:add_row_label(cell, width, "row4", factory.count_deep, color, 3, {"helmod_common.total"}, format_number)
   end
 
   return cell
@@ -522,11 +538,8 @@ function GuiCellProduct:create(parent)
     local product_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type, element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip({self.options.tooltip, Player.getLocalisedName(element)}))
     self:add_mask(product_icon, color)
   end
-  local display_count_deep = User.getParameter("display_count_deep")
-  if display_count_deep then
-    local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
-    GuiElement.add(row3, GuiLabel("label2", element.name):caption(Format.formatNumber(element.count, 5)):style("helmod_label_element"):tooltip({"helmod_common.total"}))
-  end
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
+  GuiElement.add(row3, GuiLabel("label2", element.name):caption(Format.formatNumber(element.count, 5)):style("helmod_label_element"):tooltip({"helmod_common.total"}))
   return cell
 end
 
@@ -553,13 +566,10 @@ function GuiCellProductSm:create(parent)
   end
   GuiElement.infoTemperature(row1, element)
   
-  local display_count_deep = User.getParameter("display_count_deep")
-  if display_count_deep then
-    local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
-    local caption3 = Format.formatNumber(element.count, 5)
-    if element.type == "energy" then caption3 = Format.formatNumberKilo(element.count, "J") end
-    GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element_sm"):tooltip({"helmod_common.total"}))
-  end
+  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
+  local caption3 = Format.formatNumber(element.count, 5)
+  if element.type == "energy" then caption3 = Format.formatNumberKilo(element.count, "J") end
+  GuiElement.add(row3, GuiLabel("label2", element.name):caption(caption3):style("helmod_label_element_sm"):tooltip({"helmod_common.total"}))
   return cell
 end
 
@@ -668,7 +678,7 @@ function GuiCellModel:create(parent)
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
 
-  local first_block = element.block_root or Model.firstChild(element.blocks)
+  local first_block = element.block_root or Model.firstChild(element.blocks or {})
   if first_block ~= nil and first_block.name ~= "" then
     local tooltip = GuiTooltipModel(self.options.tooltip):element(element)
     local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_block.type, first_block.name):tooltip(tooltip))

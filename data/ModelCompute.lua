@@ -129,99 +129,8 @@ function ModelCompute.updateBlock(model, block)
 
         ModelCompute.computeBlock(block, model.parameters)
         
-    end
-end
-
--------------------------------------------------------------------------------
----Update model
----@param model table
-function ModelCompute.update2(model)
-    if model ~= nil and model.blocks ~= nil then
-        Model.appendParameters(model)
-        ---calcul les blocks
-        local input = {}
-        for _, block in spairs(model.blocks, function(t, a, b) return t[b].index > t[a].index end) do
-            block.time = model.time
-            ---premiere recette
-            local _, recipe = next(block.children)
-            if recipe == nil then
-                block.ingredients = {}
-                block.products = {}
-            else
-                
-                ---prepare block
-                ModelCompute.prepareBlockElements(block)
-                
-                ---state = 0 => produit
-                ---state = 1 => produit pilotant
-                ---state = 2 => produit restant
-                ---prepare input
-                if not (block.unlinked) then
-                    if block.products == nil then
-                        ModelCompute.computeBlock(block)
-                    end
-                    
-                    ---prepare les inputs
-                    local factor = -1
-                    local block_elements = block.products
-                    if block.by_product == false then
-                        block_elements = block.ingredients
-                        factor = 1
-                    end
-                    if block_elements ~= nil then
-                        for _, element in pairs(block_elements) do
-                            local element_key = Product(element):getTableKey()
-                            if (element.state ~= nil and element.state == 1) or (block.products_linked ~= nil and block.products_linked[element_key] == true) then
-                                if input[element_key] ~= nil then
-                                    element.input = (input[element_key] or 0) * factor
-                                    --element.state = 0
-                                end
-                            else
-                                element.input = 0
-                            end
-                        end
-                    end
-                end
-
-                ModelCompute.computeBlockCleanInput(block)
-
-                
-                ModelCompute.computeBlock(block, model.parameters)
-
-                ---consume ingredients
-                for _, product in pairs(block.products) do
-                    local element_key = Product(product):getTableKey()
-                    if input[element_key] == nil then
-                        input[element_key] = product.count
-                    elseif input[element_key] ~= nil then
-                        input[element_key] = input[element_key] + product.count
-                    end
-                end
-                ---count ingredients
-                for _, ingredient in pairs(block.ingredients) do
-                    local element_key = Product(ingredient):getTableKey()
-                    if input[element_key] == nil then
-                        input[element_key] = -ingredient.count
-                    else
-                        input[element_key] = input[element_key] - ingredient.count
-                    end
-                end
-                ---consume energy
-                local element_key = "energy"
-                if input[element_key] == nil then
-                    input[element_key] = -block.power
-                else
-                    input[element_key] = input[element_key] - block.power
-                end
-            end
-        end
-
-        ModelCompute.computeInputOutput(model)
-        ModelCompute.computeResources(model)
-
-        ---genere un bilan
-        ModelCompute.createSummary(model)
-        model.version = Model.version
+        -- TODO
+        --ModelCompute.computeResources(model)
     end
 end
 
@@ -418,6 +327,28 @@ function ModelCompute.finalizeBlock(block, factor)
 end
 
 -------------------------------------------------------------------------------
+---Clear all inputs of block
+---@param block BlockData
+function ModelCompute.clearBlockInputs(block)
+    -- state = 0 => product
+    -- state = 1 => main product
+    -- state = 2 => remaining product
+    -- prepare input
+    if block.products == nil then
+        ModelCompute.computeBlock(block)
+    end
+    local block_elements = block.products
+    if block.by_product == false then
+        block_elements = block.ingredients
+    end
+    if block_elements ~= nil then
+        for _, element in pairs(block_elements) do
+            element.input = nil
+        end
+    end
+end
+
+-------------------------------------------------------------------------------
 ---Prepare objectives of block
 ---@param block BlockData
 function ModelCompute.prepareBlockObjectives(block)
@@ -440,7 +371,7 @@ function ModelCompute.prepareBlockObjectives(block)
         for _, element in pairs(block_elements) do
             local element_key = Product(element):getTableKey()
             local objective = {}
-            if element.input ~= nil and element.input > 0 then
+            if element.input ~= nil then
                 objective.key = element_key
                 objective.value = element.input * factor
                 objectives_block[element_key] = objective
@@ -477,6 +408,7 @@ function ModelCompute.prepareBlockObjectives(block)
                         objective.value = count * factor
                         objectives_block[element_key] = objective
                     end
+                    break
                 end
             else
                 local recipe_prototype = RecipePrototype(child)
@@ -502,6 +434,7 @@ function ModelCompute.prepareBlockObjectives(block)
                         objective.value = count * factor
                         objectives_block[element_key] = objective
                     end
+                    break
                 end
             end
         end
@@ -849,79 +782,6 @@ function ModelCompute.computeEnergyFactory(recipe)
     end
     
     recipe.time = 1
-end
-
--------------------------------------------------------------------------------
----Compute input and output
----@param model table
-function ModelCompute.computeInputOutput(model)
-    model.products = {}
-    model.ingredients = {}
-
-    local index = 1
-    for _, element in spairs(model.blocks, function(t, a, b) return t[b].index > t[a].index end) do
-        ---count product
-        if element.products ~= nil and table.size(element.products) then
-            for key, product in pairs(element.products) do
-                if model.products[key] == nil then
-                    model.products[key] = Model.newIngredient(product.name, product.type)
-                    model.products[key].temperature = product.temperature
-                    model.products[key].minimum_temperature = product.minimum_temperature
-                    model.products[key].maximum_temperature = product.maximum_temperature
-                    model.products[key].index = index
-                    index = index + 1
-                end
-                model.products[key].count = model.products[key].count + product.count
-            end
-        end
-        ---count ingredient
-        if element.ingredients ~= nil and table.size(element.ingredients) then
-            for key, ingredient in pairs(element.ingredients) do
-                if model.ingredients[key] == nil then
-                    model.ingredients[key] = Model.newIngredient(ingredient.name, ingredient.type)
-                    model.ingredients[key].temperature = ingredient.temperature
-                    model.ingredients[key].minimum_temperature = ingredient.minimum_temperature
-                    model.ingredients[key].maximum_temperature = ingredient.maximum_temperature
-                    model.ingredients[key].index = index
-                    index = index + 1
-                end
-                model.ingredients[key].count = model.ingredients[key].count + ingredient.count
-            end
-        end
-    end
-
-    for _, element in spairs(model.blocks, function(t, a, b) return t[b].index > t[a].index end) do
-        ---consomme les produits
-        if element.ingredients ~= nil and table.size(element.ingredients) then
-            for key, ingredient in pairs(element.ingredients) do
-                if element.mining_ingredient ~= ingredient.name then
-                    if model.products[key] ~= nil then
-                        model.products[key].count = model.products[key].count - ingredient.count
-                    end
-                end
-            end
-        end
-        ---consomme les ingredients
-        if element.products ~= nil and table.size(element.products) then
-            for key, product in pairs(element.products) do
-                if model.ingredients[key] ~= nil then
-                    model.ingredients[key].count = model.ingredients[key].count - product.count
-                end
-            end
-        end
-    end
-
-    for key, ingredient in pairs(model.ingredients) do
-        if ingredient.count < 0.01 then
-            model.ingredients[key] = nil
-        end
-    end
-
-    for key, product in pairs(model.products) do
-        if product.count < 0.01 then
-            model.products[key] = nil
-        end
-    end
 end
 
 -------------------------------------------------------------------------------

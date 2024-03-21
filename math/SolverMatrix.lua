@@ -302,13 +302,14 @@ function SolverMatrix.get_block_matrix(block, parameters)
                 child_type = child.type
                 child_tooltip = child.name .. "\nBlock"
 
-                if child.by_product == false then
-                    child_products = child.ingredients
-                    child_ingredients = child.products
-                else
+                --- TODO fix product by ingredient
+                -- if child.by_product == false then
+                --     child_products = child.ingredients
+                --     child_ingredients = child.products
+                -- else
                     child_products = child.products
                     child_ingredients = child.ingredients
-                end
+                --end
             else
                 local recipe = child
                 -- check recipe doesn't exist
@@ -320,7 +321,6 @@ function SolverMatrix.get_block_matrix(block, parameters)
                 child_tooltip = recipe.name .. "\nRecette"
                 child_recipe_energy = recipe_prototype:getEnergy(recipe.factory)
                 child_factory_count = recipe.factory.input or 0
-                child_factory_speed = recipe.factory.speed or 0
 
                 recipe.base_time = block.time
                 ModelCompute.computeModuleEffects(recipe, parameters)
@@ -329,6 +329,8 @@ function SolverMatrix.get_block_matrix(block, parameters)
                 else
                     ModelCompute.computeFactory(recipe)
                 end
+                
+                child_factory_speed = recipe.factory.speed or 0
 
                 child_products = recipe_prototype:getProducts(recipe.factory)
                 child_ingredients = recipe_prototype:getIngredients(recipe.factory)
@@ -349,6 +351,11 @@ function SolverMatrix.get_block_matrix(block, parameters)
             rowParameters.recipe_production = production
             rowParameters.recipe_energy = child_recipe_energy
             rowParameters.coefficient = 0
+            rowParameters.voider = 0
+            rowParameters.by_product = 0
+            if not (child.by_product == false) then
+                rowParameters.by_product = 1
+            end
 
             ---preparation
             local lua_products = {}
@@ -464,6 +471,9 @@ function SolverMatrix.get_block_matrix(block, parameters)
                     row:add_value(col_header, cell_value)
 
                     row_valid = true
+                end
+                if row.values ~= nil and #row.values == 1 and row.values[1] < 0 then
+                    rowParameters.voider = 1
                 end
             else
                 ---prepare header ingredients

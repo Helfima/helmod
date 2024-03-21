@@ -654,6 +654,7 @@ function ProductionPanel:updateOutputBlock(model, block)
 	else
 		GuiElement.add(output_tool, GuiButton(self.classname, "block-all-product-visible", model.id, block.id):sprite("menu", defines.sprites.filter.black, defines.sprites.filter.black):style("helmod_button_menu_sm"):tooltip({"helmod_button.all-product-visible" }))
 	end
+	GuiElement.add(output_tool, GuiButton(self.classname, "block-reset-input", model.id, block.id):sprite("menu", defines.sprites.eraser.black, defines.sprites.eraser.black):style("helmod_button_menu_sm"):tooltip({"helmod_button.clear" }))
 
 	---ouput panel
 	output_label.caption = { "helmod_common.output" }
@@ -1579,6 +1580,13 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 		else
 			Controller:send("on_gui_open", event, "HMProductEdition")
 		end
+	end
+
+	if event.action == "block-reset-input" then
+		local chid_block = model.blocks[event.item2] or model.block_root
+        ModelCompute.clearBlockInputs(chid_block)
+		ModelCompute.update(model)
+		Controller:send("on_gui_update", event)
 	end
 
 	if event.action == "block-unlink" then

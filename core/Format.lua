@@ -78,6 +78,14 @@ function Format.formatPercent(num)
 end
 
 -------------------------------------------------------------------------------
+---Return decimal from a string, 0.00 return 2 decimal
+---@param value string
+---@return number
+function Format.decimalFromString(value)
+  local _, c = value:gsub("0","")
+  return c - 1
+end
+-------------------------------------------------------------------------------
 ---Format number for factory
 ---@param number number
 ---@return number

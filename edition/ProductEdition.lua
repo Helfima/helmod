@@ -159,11 +159,14 @@ function ProductEdition:onEvent(event)
       local products = {}
       local operation = input_quantity.text
       local ok , err = pcall(function()
-        local quantity = formula(operation)
-        if (event.item4 == "steam-heat") or (event.item4 == "energy") then
-          quantity = quantity * 1e6
+        local quantity = nil 
+        if operation ~= "" then
+          quantity = formula(operation)
+          if (event.item4 == "steam-heat") or (event.item4 == "energy") then
+            quantity = quantity * 1e6
+          end
+          --if quantity == 0 then quantity = nil end
         end
-        if quantity == 0 then quantity = nil end
         ModelBuilder.updateProduct(block, event.item4, quantity)
         ModelCompute.update(model)
         self:close()

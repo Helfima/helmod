@@ -255,7 +255,7 @@ defines.constant.preferences = {
     localised_name = {"helmod_pref_settings.format-number-factory"},
     localised_description = {"helmod_pref_settings.format-number-factory-desc"},
     default_value = "0",
-    allowed_values = {"0","0.0","0.00"},
+    allowed_values = {"0","0.0","0.00","0.000","0.0000"},
     group = "general"
   },
   -- format number element
@@ -264,7 +264,7 @@ defines.constant.preferences = {
     localised_name = {"helmod_pref_settings.format-number-element"},
     localised_description = {"helmod_pref_settings.format-number-element-desc"},
     default_value = "0.0",
-    allowed_values = {"0","0.0","0.00"},
+    allowed_values = {"0","0.0","0.00","0.000","0.0000"},
     group = "general"
   },
   -- preference number line by scroll
