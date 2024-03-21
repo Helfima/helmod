@@ -351,6 +351,11 @@ function SolverMatrix.get_block_matrix(block, parameters)
             rowParameters.recipe_production = production
             rowParameters.recipe_energy = child_recipe_energy
             rowParameters.coefficient = 0
+            rowParameters.voider = 0
+            rowParameters.by_product = 0
+            if not (child.by_product == false) then
+                rowParameters.by_product = 1
+            end
 
             ---preparation
             local lua_products = {}
@@ -361,9 +366,6 @@ function SolverMatrix.get_block_matrix(block, parameters)
                 local product_amount = 0
                 if is_block then
                     product_amount = lua_product.amount or 0
-                    -- if child.by_product == false then
-                    --     product_amount = -product_amount
-                    -- end
                 else
                     product_amount = product:getAmount(child)
                 end
@@ -382,9 +384,6 @@ function SolverMatrix.get_block_matrix(block, parameters)
                 local ingredient_amount = 0
                 if is_block then
                     ingredient_amount = lua_ingredient.amount or 0
-                    -- if child.by_product == false then
-                    --     ingredient_amount = -ingredient_amount
-                    -- end
                 else
                     ingredient_amount = ingredient:getAmount()
                     ---si constant compte comme un produit (recipe rocket)
@@ -472,6 +471,9 @@ function SolverMatrix.get_block_matrix(block, parameters)
                     row:add_value(col_header, cell_value)
 
                     row_valid = true
+                end
+                if row.values ~= nil and #row.values == 1 and row.values[1] < 0 then
+                    rowParameters.voider = 1
                 end
             else
                 ---prepare header ingredients

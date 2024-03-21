@@ -1,9 +1,10 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.7
-Date: 2024-03-20
+Date: 2024-03-21
   Bugfixes:
     - Fix remove input value on root block
-    - Fix ingredient input block in a block (partial) 
+    - Fix ingredient input block in a block to consume product (computing by element)
+    - Fix voider recipe to consume product (computing by element)
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.6
 Date: 2024-03-19
