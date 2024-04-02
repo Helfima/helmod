@@ -137,7 +137,7 @@ function ModelDebug:getFrameColored(irow, icol, pivot)
     return frame
 end
 
-function ModelDebug:getCellHeader(matrix_table, frame, header)
+function ModelDebug:getCellHeader(matrix_table, frame, header, sum)
     local cell = GuiElement.add(matrix_table, frame)
     cell.style.horizontally_stretchable = true
     cell.style.vertically_stretchable = true
@@ -147,18 +147,18 @@ function ModelDebug:getCellHeader(matrix_table, frame, header)
         GuiElement.add(cell, GuiLabel("cell_value"):caption(header))
     elseif header.primary ~= nil then
         local tooltip = { "", header.primary.name }
-        table.insert(tooltip, { "", "\n", "column: ", header.icol })
+        table.insert(tooltip, { "", "\n", "sum: ", sum })
 
         local button = GuiElement.add(cell, GuiButtonSprite("cell_primary"):sprite(header.primary.type, header.primary.name):tooltip(tooltip))
         GuiElement.infoTemperature(button, header.primary, "helmod_label_overlay_m")
 
         local tooltip = { "", header.secondary.name }
-        table.insert(tooltip, { "", "\n", "column: ", header.icol })
+        table.insert(tooltip, { "", "\n", "sum: ", sum })
         local button = GuiElement.add(cell, GuiButtonSprite("cell_secondary"):sprite(header.secondary.type, header.secondary.name):tooltip(tooltip))
         GuiElement.infoTemperature(button, header.secondary, "helmod_label_overlay_m")
     elseif header.product ~= nil then
         local tooltip = { "", header.product.name }
-        table.insert(tooltip, { "", "\n", "column: ", header.icol })
+        table.insert(tooltip, { "", "\n", "sum: ", sum })
         local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(header.product.type, header.product.name):tooltip(tooltip))
         GuiElement.infoTemperature(button, header.product, "helmod_label_overlay_m")
     else
@@ -210,7 +210,11 @@ function ModelDebug:buildTableSolverMatrix(matrix_panel, matrix, pivot)
 
         for icol, column in pairs(matrix.columns) do
             local frame = self:getFrameColored(0, icol, nil)
-            self:getCellHeader(matrix_table, frame, column)
+            local sum = 0
+            if matrix.column_sum ~= nil then
+                sum = matrix.column_sum[column.key] or 0
+            end
+            self:getCellHeader(matrix_table, frame, column, sum)
         end
 
         for irow, row in pairs(matrix.rows) do

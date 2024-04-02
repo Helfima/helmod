@@ -191,6 +191,24 @@ function PreferenceEdition:getThumbnailColorTab()
 end
 
 -------------------------------------------------------------------------------
+---Get or create UI tab panel
+---@return LuaGuiElement
+function PreferenceEdition:getDebugTab()
+    local content_panel = self:getTabPane()
+    local panel_name = "debug_tab_panel"
+    local scroll_name = "debug_scroll"
+    if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+        return content_panel[scroll_name]
+    end
+    local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption("Debug"))
+    local scroll_panel = GuiElement.add(content_panel, GuiScroll(scroll_name):style(defines.styles.frame.tab_scroll_pane))
+    content_panel.add_tab(tab_panel, scroll_panel)
+    scroll_panel.style.horizontally_stretchable = true
+    scroll_panel.style.vertically_stretchable = true
+    return scroll_panel
+end
+
+-------------------------------------------------------------------------------
 ---On update
 ---@param event LuaEvent
 function PreferenceEdition:onUpdate(event)
@@ -200,8 +218,42 @@ function PreferenceEdition:onUpdate(event)
     self:updateItemsLogistic(event)
     self:updateFluidsLogistic(event)
     self:updateThumbnailColor(event)
+    if User.getModGlobalSetting("debug_solver") == true then
+        self:updateDebug(event)
+    end
     if event.action == "OPEN" then
         self:setActiveTab(event.item1)
+    end
+end
+
+-------------------------------------------------------------------------------
+---Update ui
+---@param event LuaEvent
+function PreferenceEdition:updateDebug(event)
+    local container_panel = self:getDebugTab()
+    container_panel.clear()
+    container_panel.style.padding = 5
+
+    local options_table = GuiElement.add(container_panel, GuiTable("options-table"):column(2))
+    options_table.vertical_centering = false
+    options_table.style.horizontal_spacing = 10
+    options_table.style.vertical_spacing = 5
+
+    for preference_name, preference in pairs(defines.constant.preferences) do
+        if preference.group == "debug" then
+            GuiElement.add(options_table, GuiLabel(self.classname, "label", preference_name):caption(preference.localised_name):tooltip(preference.localised_description))
+            local default_preference = User.getPreferenceSetting(preference_name)
+            if preference.allowed_values then
+                GuiElement.add(options_table,  GuiDropDown(self.classname, "preference-setting", preference_name):items(preference.allowed_values, default_preference))
+            else
+                if preference.type == "bool-setting" then
+                    GuiElement.add(options_table, GuiCheckBox(self.classname, "preference-setting", preference_name):state(default_preference))
+                end
+                if preference.type == "int-setting" or preference.type == "float-setting" or preference.type == "string-setting" then
+                    GuiElement.add(options_table, GuiTextField(self.classname, "preference-setting", preference_name):text(default_preference))
+                end
+            end
+        end
     end
 end
 
@@ -448,7 +500,7 @@ function PreferenceEdition:updateThumbnailCell(stack_panel, label, parameter, fa
         menu_panel_right.style.horizontally_stretchable = true
         local menu_panel_left = GuiElement.add(menu_panel, GuiFlowH("menu-left"))
         GuiElement.add(menu_panel_right, GuiButton(self.classname, "thumbnail-cancel", parameter):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_actived_red"):tooltip({ "helmod_preferences-edition-panel.thumbnail-color-modify-cancel" }))
-        GuiElement.add(menu_panel_left, GuiButton(self.classname, "thumbnail-default", parameter):sprite("menu", defines.sprites.refresh.black, defines.sprites.refresh.black):style("helmod_button_menu_sm_actived_red"):tooltip({ "helmod_preferences-edition-panel.thumbnail-color-modify-default" }))
+        GuiElement.add(menu_panel_left, GuiButton(self.classname, "thumbnail-default", parameter):sprite("utility", "reset"):style("helmod_button_menu_sm_actived_red"):tooltip({ "helmod_preferences-edition-panel.thumbnail-color-modify-default" }))
 
         local last_element = nil
         local options_scroll = GuiElement.add(cell_panel, GuiScroll("options-scroll"))
@@ -500,7 +552,7 @@ function PreferenceEdition:updateThumbnailColor(event)
     local menu_panel_right = GuiElement.add(menu_panel, GuiFlowH("menu-right"))
     menu_panel_right.style.horizontally_stretchable = true
     local menu_panel_left = GuiElement.add(menu_panel, GuiFlowH("menu-left"))
-    local button = GuiElement.add(menu_panel_left, GuiButton(self.classname, "thumbnail-default", "all"):sprite("menu", defines.sprites.refresh.black, defines.sprites.refresh.black):style("helmod_button_menu_sm_actived_red"):tooltip({ "helmod_preferences-edition-panel.thumbnail-color-modify-all-default" }))
+    local button = GuiElement.add(menu_panel_left, GuiButton(self.classname, "thumbnail-default", "all"):sprite("utility", "reset"):style("helmod_button_menu_sm_actived_red"):tooltip({ "helmod_preferences-edition-panel.thumbnail-color-modify-all-default" }))
 
     local blocks_panel = GuiElement.add(container_panel, GuiFrameV("blocks"):caption({"helmod_common.blocks"}):style(defines.styles.frame.bordered))
     blocks_panel.style.horizontally_stretchable = true

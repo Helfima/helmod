@@ -272,6 +272,8 @@ function SolverMatrix.get_block_matrix(block, parameters)
     local children = block.children
     if children ~= nil then
         local matrix = Matrix()
+        matrix.column_sum = {}
+
         local col_index = {}
         local factor = 1
         local sorter = defines.sorters.block.sort
@@ -427,8 +429,11 @@ function SolverMatrix.get_block_matrix(block, parameters)
                     col_header.is_ingredient = false
                     col_header.product = lua_product
 
-                    local cell_value = lua_product.amount * factor
+                    local value = lua_product.amount * factor
+                    local cell_value = value
                     row:add_value(col_header, cell_value)
+
+                    matrix.column_sum[product_key] = ( matrix.column_sum[product_key] or 0 ) + value
 
                     if rowParameters.contraint ~= nil and rowParameters.contraint.name == name then
                         rowParameters.contraint.name = col_name
@@ -467,8 +472,11 @@ function SolverMatrix.get_block_matrix(block, parameters)
                     col_header.product = lua_ingredient
 
                     local cell_value = row:get_value(col_header) or 0
-                    cell_value = cell_value - lua_ingredients[ingredient_key].amount * factor
+                    local value = - lua_ingredients[ingredient_key].amount * factor
+                    cell_value = cell_value + value
                     row:add_value(col_header, cell_value)
+
+                    matrix.column_sum[ingredient_key] = ( matrix.column_sum[ingredient_key] or 0 ) + value
 
                     row_valid = true
                 end
@@ -497,8 +505,11 @@ function SolverMatrix.get_block_matrix(block, parameters)
                     col_header.is_ingredient = true
                     col_header.product = lua_ingredient
 
-                    local cell_value = -lua_ingredient.amount * factor
+                    local value = -lua_ingredient.amount * factor
+                    local cell_value = value
                     row:add_value(col_header, cell_value)
+
+                    matrix.column_sum[ingredient_key] = ( matrix.column_sum[ingredient_key] or 0 ) + value
 
                     if rowParameters.contraint ~= nil and rowParameters.contraint.name == name then
                         rowParameters.contraint.name = col_name
@@ -534,9 +545,12 @@ function SolverMatrix.get_block_matrix(block, parameters)
                     col_header.is_ingredient = false
                     col_header.product = lua_product
 
+                    local value = lua_product.amount * factor
                     local cell_value = row:get_value(col_header) or 0
-                    cell_value = cell_value + lua_product.amount * factor
+                    cell_value = cell_value + value
                     row:add_value(col_header, cell_value)
+
+                    matrix.column_sum[product_key] = ( matrix.column_sum[product_key] or 0 ) + value
 
                     row_valid = true
                 end
@@ -594,6 +608,7 @@ function SolverMatrix.linkTemperatureFluid(matrix, by_product)
     end
 
     local mA2 = Matrix()
+    mA2.column_sum = matrix.column_sum
     local block_ingredient_fluids = {}
     local block_product_fluids = {}
 

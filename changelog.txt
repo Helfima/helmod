@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.8
+Date: 2024-04-02
+  Changes:
+    - When a block have not input, block count is 1
+  Bugfixes:
+    - Fix logistic row when Assembler limitation enabled #513
+    - Fix block unlink, action no longer modifies inputs to 0
+---------------------------------------------------------------------------------------------------
 Version: 1.0.7
 Date: 2024-03-21
   Bugfixes:
