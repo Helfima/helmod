@@ -183,6 +183,18 @@ end
 ---Finalize input block
 ---@param block BlockData
 function ModelCompute.finalizeBlock(block, factor)
+    local one_block_factor_enable = User.getPreferenceSetting("one_block_factor_enable")
+    local one_block_factor = 1
+    if one_block_factor_enable and block.has_input ~= true then
+        one_block_factor = block.count
+        block.count = 1
+        for _, product in pairs(block.products) do
+            product.amount = product.amount * one_block_factor
+        end
+        for _, ingredient in pairs(block.ingredients) do
+            ingredient.amount = ingredient.amount * one_block_factor
+        end
+    end
     block.count_limit = block.count
     block.power = 0
     block.power_limit = 0
@@ -198,6 +210,7 @@ function ModelCompute.finalizeBlock(block, factor)
         local ratio_limit = -1
         -- compute block children
         for _, child in spairs(children, defines.sorters.block.sort) do
+            child.count = child.count * one_block_factor
             local is_block = Model.isBlock(child)
             if is_block then
                 ModelCompute.finalizeBlock(child, block.count_deep)

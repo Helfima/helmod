@@ -244,45 +244,35 @@ end
 ---Add logistic information
 ---@param parent LuaGuiElement
 ---@param element table
-function GuiCell:add_row_logistic(parent, element)
+function GuiCell:add_row_logistic(parent, width, name, count, color, color_level, element)
+  local row = GuiElement.add(parent, GuiFrameH(name):style("helmod_frame_element_w50", color, color_level))
+  row.style.minimal_width=width
+  row.style.height = 18
+
   local tooltip = {"tooltip.logistic-row-choose"}
   ---solid logistic
   if element.type == 0 or element.type == "item" then
     local type = User.getParameter("logistic_row_item") or "belt"
     local item_logistic = Player.getDefaultItemLogistic(type)
     local item_prototype = Product(element)
-    local total_value = Format.formatNumberElement(item_prototype:countContainer(element.count, item_logistic, element.time))
     
-    --local tooltip = GuiTooltipModule("tooltip.info-module"):element({type="item", name=name})
-    local logistic_cell = GuiElement.add(parent, GuiFlowH("logistic-cell", item_logistic))
+    local logistic_cell = GuiElement.add(row, GuiFlowH("logistic-cell", item_logistic))
     GuiElement.add(logistic_cell, GuiButtonSelectSpriteSm("HMLogisticEdition", "OPEN", "item", item_logistic):sprite("entity", item_logistic):color("flat"):tooltip(tooltip))
-    if element.limit_count ~= nil and element.limit_count > 0 then
-      local limit_value = Format.formatNumberElement(item_prototype:countContainer(element.limit_count, item_logistic, element.time))
-      GuiElement.add(logistic_cell, GuiLabel("label", item_logistic):caption({"", "x", limit_value, "/", total_value}):style("helmod_label_element"))
-    else
-      GuiElement.add(logistic_cell, GuiLabel("label", item_logistic):caption({"", "x", total_value}):style("helmod_label_element"))
-    end
+    local value = Format.formatNumberElement(item_prototype:countContainer(count, item_logistic, element.time))
+    GuiElement.add(logistic_cell, GuiLabel("label", item_logistic):caption({"", "x", value}):style("helmod_label_element"))
   end
   ---fluid logistic
   if element.type == 1 or element.type == "fluid" then
     local type = User.getParameter("logistic_row_fluid") or "pipe"
     local fluid_logistic = Player.getDefaultFluidLogistic(type)
     local fluid_prototype = Product(element)
-    local count = element.count
-    if type == "pipe" then count = count / element.time end
-    local total_value = Format.formatNumberElement(fluid_prototype:countContainer(count, fluid_logistic, element.time))
     
-    --local tooltip = GuiTooltipModule("tooltip.info-module"):element({type="item", name=name})
-    local logistic_cell = GuiElement.add(parent, GuiFlowH("logistic-cell", fluid_logistic))
+    if type == "pipe" then count = count / element.time end
+    
+    local logistic_cell = GuiElement.add(row, GuiFlowH("logistic-cell", fluid_logistic))
     GuiElement.add(logistic_cell, GuiButtonSelectSpriteSm("HMLogisticEdition", "OPEN", "fluid", fluid_logistic):sprite("entity", fluid_logistic):color("flat"):tooltip(tooltip))
-    if element.limit_count ~= nil and element.limit_count > 0 then
-      local limit_count = element.limit_count
-      if type == "pipe" then limit_count = limit_count / element.time end
-      local limit_value = Format.formatNumberElement(fluid_prototype:countContainer(limit_count, fluid_logistic, element.time))
-      GuiElement.add(logistic_cell, GuiLabel("label", fluid_logistic):caption({"", "x", limit_value, "/", total_value}):style("helmod_label_element"))
-    else
-      GuiElement.add(logistic_cell, GuiLabel("label", fluid_logistic):caption({"", "x", total_value}):style("helmod_label_element"))
-    end
+    local value = Format.formatNumberElement(fluid_prototype:countContainer(count, fluid_logistic, element.time))
+    GuiElement.add(logistic_cell, GuiLabel("label", fluid_logistic):caption({"", "x", value}):style("helmod_label_element"))
   end
 end
 
@@ -295,7 +285,7 @@ end
 ---@param color string
 ---@param color_level int
 ---@param tooltip any
----@param format_number string
+---@param format_number? string
 function GuiCell:add_row_label(parent, width, name, count, color, color_level, tooltip, format_number)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local row = GuiElement.add(parent, GuiFrameH(name):style("helmod_frame_element_w50", color, color_level))
@@ -927,9 +917,11 @@ function GuiCellElement:create(parent)
   end
 
   if User.getParameter("display_logistic_row") == true then
-    local row4 = GuiElement.add(cell, GuiFrameH("row5"):style("helmod_frame_element_w80", color, 4))
-    self:add_row_logistic(row4, element)
-    GuiElement.add(row4, GuiLabel("label-empty"):caption(""):style("helmod_label_element"))
+    if self.m_by_limit then
+      self:add_row_logistic(cell, width, "row4", element.count_limit or 0, color, 4, element)
+    else
+      self:add_row_logistic(cell, width, "row4", element.count or 0, color, 4, element)
+    end
   end
   return cell
 end

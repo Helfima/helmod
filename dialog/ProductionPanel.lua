@@ -663,8 +663,7 @@ function ProductionPanel:updateOutputBlock(model, block)
 	---production block result
 	if block ~= nil and table.size(block.children) > 0 then
 		---ouput panel
-		local output_table = GuiElement.add(output_scroll,
-			GuiTable("output-table"):column(GuiElement.getElementColumnNumber(50) - 2):style("helmod_table_element"))
+		local output_table = GuiElement.add(output_scroll, GuiTable("output-table"):column(GuiElement.getElementColumnNumber(50) - 2):style("helmod_table_element"))
 		if block.products ~= nil then
 			for index, lua_product in spairs(block.products, User.getProductSorter()) do
 				if all_visible == true or ((lua_product.state or 0) == 1 and block_by_product) or (lua_product.amount or 0) > ModelCompute.waste_value then
@@ -684,6 +683,7 @@ function ProductionPanel:updateOutputBlock(model, block)
 						button_tooltip = "tooltip.add-recipe"
 						control_info = nil
 					elseif not (block.unlinked or true) or block.by_factory == true then
+						-- TODO disable solver can't do that
 						button_action = "product-info"
 						button_tooltip = "tooltip.info-product"
 						if block.products_linked ~= nil and block.products_linked[Product(lua_product):getTableKey()] then
@@ -692,6 +692,9 @@ function ProductionPanel:updateOutputBlock(model, block)
 					else
 						button_action = "product-edition"
 						button_tooltip = "tooltip.edit-product"
+						if block.products_linked ~= nil and block.products_linked[Product(lua_product):getTableKey()] then
+							contraint_type = "linked"
+						end
 					end
 					---color
 					if lua_product.state == 1 then
@@ -1578,7 +1581,23 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 			User.setParameter("HMRecipeSelector_target", self.classname)
 			Controller:send("on_gui_open", event, selector_name)
 		else
-			Controller:send("on_gui_open", event, "HMProductEdition")
+			if event.control == true and event.item5 ~= "none" then
+				if block.products_linked == nil then block.products_linked = {} end
+				block.products_linked[event.item5] = not (block.products_linked[event.item5])
+				ModelCompute.update(model)
+				Controller:send("on_gui_update", event)
+			else
+				Controller:send("on_gui_open", event, "HMProductEdition")
+			end
+		end
+	end
+
+	if block ~= nil and event.action == "product-info" then
+		if block.products_linked == nil then block.products_linked = {} end
+		if event.control == true and event.item5 ~= "none" then
+			block.products_linked[event.item5] = not (block.products_linked[event.item5])
+			ModelCompute.update(model)
+			Controller:send("on_gui_update", event)
 		end
 	end
 
@@ -1739,15 +1758,6 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 			local contraint = { type = "exclude", name = event.item4 }
 			local recipe = block.children[event.item3]
 			ModelBuilder.updateRecipeContraint(recipe, contraint)
-			ModelCompute.update(model)
-			Controller:send("on_gui_update", event)
-		end
-	end
-
-	if block ~= nil and event.action == "product-info" then
-		if block.products_linked == nil then block.products_linked = {} end
-		if event.control == true and event.item5 ~= "none" then
-			block.products_linked[event.item5] = not (block.products_linked[event.item5])
 			ModelCompute.update(model)
 			Controller:send("on_gui_update", event)
 		end

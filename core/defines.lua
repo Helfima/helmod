@@ -409,6 +409,14 @@ defines.constant.preferences = {
     maximum_value = 1,
     group = "ui"
   },
+  --one_block_factor_enable
+  one_block_factor_enable = {
+    type = "bool-setting",
+    localised_name = "one_block_factor_enable",
+    localised_description = "one_block_factor_enable",
+    default_value = true,
+    group = "debug"
+  },
 }
 
 defines.constant.settings_mod = {
