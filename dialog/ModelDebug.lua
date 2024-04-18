@@ -50,7 +50,11 @@ function ModelDebug:onEvent(event)
     local _, block = self:getParameterObjects()
     if block ~= nil then
         local runtimes = block.runtimes
-        if block.runtimes ~= nil then
+        local model_matrix = User.getParameter("model_matrix")
+        if model_matrix ~= nil and block.blocks_linked ~= nil and block.blocks_linked[model_matrix] ~= nil then
+            runtimes = block.blocks_linked[model_matrix].runtimes
+        end
+        if runtimes ~= nil then
             if event.action == "change-stage" then
                 local stage = User.getParameter("model_stage") or 1
                 if event.item1 == "initial" then stage = 1 end
@@ -86,8 +90,6 @@ end
 ---@param event LuaEvent
 function ModelDebug:onBeforeOpen(event)
     FormModel.onBeforeOpen(self, event)
-    local model, block = self:getParameterObjects()
-    ModelCompute.computeBlock(block)
 end
 -------------------------------------------------------------------------------
 ---On update
@@ -114,7 +116,7 @@ function ModelDebug:updateHeader(event)
         local group2 = GuiElement.add(action_panel, GuiFlowH("group2"))
         local default_matrix = "master"
         local model_matrix = User.getParameter("model_matrix")
-        if model_matrix ~= nil and block.blocks_linked[model_matrix] ~= nil then
+        if model_matrix ~= nil and block.blocks_linked ~= nil and block.blocks_linked[model_matrix] ~= nil then
             default_matrix = model_matrix
         end
         local items = {"master"}
@@ -146,7 +148,7 @@ function ModelDebug:updateDebugPanel(event)
         info_panel.clear()
         local runtimes = block.runtimes
         local model_matrix = User.getParameter("model_matrix")
-        if model_matrix ~= nil and block.blocks_linked[model_matrix] ~= nil then
+        if model_matrix ~= nil and block.blocks_linked ~= nil and block.blocks_linked[model_matrix] ~= nil then
             runtimes = block.blocks_linked[model_matrix].runtimes
         end
         if runtimes ~= nil then
@@ -161,6 +163,9 @@ function ModelDebug:updateDebugPanel(event)
             local runtime = runtimes[stage]
             local ma_panel = GuiElement.add(scroll_panel, GuiFrameV("stage_panel"):style(helmod_frame_style.hidden):caption(runtime.name))
             self:buildTableSolverMatrix(ma_panel, runtime.matrix, runtime.pivot)
+            if runtime.pivot ~= nil then
+                GuiElement.add(scroll_panel, GuiLabel("stage_pivot"):caption({"","Pivot:", runtime.pivot.x, ",", runtime.pivot.y}))
+            end
         end
     end
 end

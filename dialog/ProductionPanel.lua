@@ -1527,6 +1527,7 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 			end
 			i_solver = i_solver + 1
 		end
+		ModelCompute.update(model)
 		Controller:send("on_gui_update", event, self.classname)
 	end
 

@@ -127,6 +127,7 @@ end
 ---@param debug boolean
 ---@return BlockData
 function SolverEvo:solve(block, parameters, debug)
+    block.blocks_linked = nil
     if block.products_linked ~= nil then
         -- build and compute reduced matrix when there are linked products
         local blocks_linked = {}
@@ -134,15 +135,16 @@ function SolverEvo:solve(block, parameters, debug)
             if linked == true then
                 -- work on full copy
                 local linked_block = table.deepcopy(block)
-                local children = linked_block.children
-                linked_block.children = {}
+                linked_block.contraint = nil
                 linked_block.objectives = {}
+                local children = linked_block.children
                 local sorter = defines.sorters.block.sort
                 if block.by_product == false then
                     sorter = defines.sorters.block.reverse
                 end
                 local child_products = nil
                 local child_ingredients = nil
+                local exit_for = false
                 for _, child in spairs(children, sorter) do
                     local is_block = Model.isBlock(child)
                     if is_block then
@@ -156,26 +158,23 @@ function SolverEvo:solve(block, parameters, debug)
                         child_products = recipe_prototype:getProducts(recipe.factory)
                         child_ingredients = recipe_prototype:getIngredients(recipe.factory)
                     end
-                    if linked_block.started == true then
-                        -- add the last row after found child by product_name
-                        linked_block.children[child.id] = child
-                    else 
-                        for i, lua_product in pairs(child_products) do
-                            -- search the product with the name of linked product
-                            if lua_product.name == product_name then
-                                local factor = 1
-                                local product = Product(lua_product)
-                                local element_key = product:getTableKey()
-                                local objective = {}
-                                objective.key = element_key
-                                objective.value = lua_product.amount * factor
-                                linked_block.objectives[element_key] = objective
-                                linked_block.children[child.id] = child
-                                linked_block.started = true
-                                linked_block.product_linked=lua_product
-                                break
-                            end
+                    for i, lua_product in pairs(child_products) do
+                        -- search the product with the name of linked product
+                        if lua_product.name == product_name then
+                            local factor = 1
+                            local product = Product(lua_product)
+                            local element_key = product:getTableKey()
+                            local objective = {}
+                            objective.key = element_key
+                            objective.value = lua_product.amount * factor
+                            linked_block.objectives[element_key] = objective
+                            exit_for = true
+                            linked_block.product_linked=lua_product
+                            break
                         end
+                    end
+                    if exit_for == true then
+                        break
                     end
                 end
                 blocks_linked[product_name] = self:solve_block(linked_block, parameters, debug)
@@ -183,7 +182,7 @@ function SolverEvo:solve(block, parameters, debug)
         end
         block.blocks_linked = blocks_linked
     end
-   return self:solve_block(block, parameters, debug)
+    return self:solve_block(block, parameters, debug)
 end
 -------------------------------------------------------------------------------
 ---Return a matrix of block
@@ -210,10 +209,9 @@ function SolverEvo:solve_block(block, parameters, debug)
             Player.print(err)
         end
     end
+    block.runtimes = nil
     if debug then
         block.runtimes = runtimes
-    else
-        block.runtimes = nil
     end
 
     if mC ~= nil then
@@ -232,10 +230,15 @@ function SolverEvo:solve_block(block, parameters, debug)
             sorter = defines.sorters.block.reverse
         end
 
+        -- build map to find parameter index by key
         local parameters_index = {}
         for index, header in pairs(mC.headers) do
-            if parameters_index[header.name] == nil then
-                parameters_index[header.name] = index
+            local key = header.name
+            if header.product_linked ~= nil then
+                key = header.name .. "_" .. header.product_linked.name
+            end
+            if parameters_index[key] == nil then
+                parameters_index[key] = index
             end
         end
 
@@ -250,9 +253,9 @@ function SolverEvo:solve_block(block, parameters, debug)
             else
                 child.count = 0
             end
-            row_index = row_index + 1
             
             if is_block then
+                self:solve_block_append(child, mC, parameters_index)
             else
                 local recipe = child
                 ---calcul dependant du recipe count
@@ -264,71 +267,125 @@ function SolverEvo:solve_block(block, parameters, debug)
             end
         end
 
-        -- state = 0 => produit
-        -- state = 1 => produit pilotant
-        -- state = 2 => produit restant
-        -- state = 3 => produit surplus
+        
+    end
+    self:solve_block_finalize(block, mC)
+    return block
+end
 
-        -- finalisation du bloc
-        for icol, state in pairs(mC.states) do
-            if icol > 0 then
-                local rows = mC.rows
-                local zrow = rows[#mC.rows]
-                local Z = math.abs(zrow[icol])
-                local product_header = mC.columns[icol]
-                local product_key = product_header.key
-                local product = Product(product_header):clone()
-                product.amount = Z
-                if math.abs(product.amount) < 1e-10 then
-                    product.amount = 0
+---Append linked block values
+---@param block BlockData
+---@param matrix Matrix
+---@param parameters_index any
+function SolverEvo:solve_block_append(block, matrix, parameters_index)
+    -- append linked block values
+    if block.blocks_linked ~= nil then
+        for key, linked_block in pairs(block.blocks_linked) do
+            -- search the count of linked block
+            local parameter_key = linked_block.name .. "_" .. key
+            local row_index = parameters_index[parameter_key]
+            local parameters = matrix.parameters[row_index]
+            local count = 0
+            if parameters ~= nil and parameters.recipe_count > 0 then
+                count = parameters.recipe_count / block.count
+            end
+            local linked_children = linked_block.children
+            local sorter = defines.sorters.block.sort
+            if block.by_product == false then
+                sorter = defines.sorters.block.reverse
+            end
+            -- Set count on each child
+            for key, child_linked in spairs(linked_children, sorter) do
+                local child = block.children[key]
+                if child ~= nil then
+                    child.count = child.count + child_linked.count * count
                 end
-                product.state = state
-                if block.by_product == false then
-                    if state == 1 or state == 3 then
-                        -- element produit
-                        if block.ingredients[product_key] ~= nil then
-                            block.ingredients[product_key].amount = block.ingredients[product_key].amount + product.amount
-                            block.ingredients[product_key].state = state
-                        end
-                        if block.products[product_key] ~= nil then
-                            block.products[product_key].state = 0
-                        end
-                    else
-                        -- element ingredient
-                        if block.products[product_key] ~= nil then
-                            block.products[product_key].amount = block.products[product_key].amount + product.amount
-                            block.products[product_key].state = state
-                        end
-                        if block.ingredients[product_key] ~= nil then
-                            block.ingredients[product_key].state = state
-                        end
+            end
+            -- Append values
+            for product_key, product in pairs(linked_block.products) do
+                block.products[product_key].amount = block.products[product_key].amount + product.amount * count
+                if block.by_product ~= false then
+                    if block.products[product_key].amount > 0 and block.products[product_key].state == 2 then
+                        block.products[product_key].state = 3
                     end
-                else
-                    if state == 1 or state == 3 then
-                        -- element produit
-                        if block.products[product_key] ~= nil then
-                            block.products[product_key].amount = block.products[product_key].amount + product.amount
-                            block.products[product_key].state = state
-                        end
-                        if block.ingredients[product_key] ~= nil then
-                            block.ingredients[product_key].state = 0
-                        end
-                    else
-                        -- element ingredient
-                        if block.ingredients[product_key] ~= nil then
-                            block.ingredients[product_key].amount = block.ingredients[product_key].amount + product.amount
-                            block.ingredients[product_key].state = state
-                        end
-                        if block.products[product_key] ~= nil then
-                            block.products[product_key].state = state
-                        end
+                end
+            end
+            for product_key, ingredient in pairs(linked_block.ingredients) do
+                block.ingredients[product_key].amount = block.ingredients[product_key].amount + ingredient.amount * count
+                if block.by_product == false then
+                    if block.ingredients[product_key].amount > 0 and block.ingredients[product_key].state == 2 then
+                        block.ingredients[product_key].state = 3
                     end
                 end
             end
         end
     end
+end
 
-    return block
+---Finalize the block
+---@param block any
+---@param matrix any
+function SolverEvo:solve_block_finalize(block, matrix)
+    -- state = 0 => produit
+    -- state = 1 => produit pilotant
+    -- state = 2 => produit restant
+    -- state = 3 => produit surplus
+    for icol, state in pairs(matrix.states) do
+        if icol > 0 then
+            local rows = matrix.rows
+            local zrow = rows[#matrix.rows]
+            local Z = math.abs(zrow[icol])
+            local product_header = matrix.columns[icol]
+            local product_key = product_header.key
+            local product = Product(product_header):clone()
+            product.amount = Z
+            if math.abs(product.amount) < 1e-10 then
+                product.amount = 0
+            end
+            product.state = state
+            if block.by_product == false then
+                if state == 1 or state == 3 then
+                    -- element produit
+                    if block.ingredients[product_key] ~= nil then
+                        block.ingredients[product_key].amount = block.ingredients[product_key].amount + product.amount
+                        block.ingredients[product_key].state = state
+                    end
+                    if block.products[product_key] ~= nil then
+                        block.products[product_key].state = 0
+                    end
+                else
+                    -- element ingredient
+                    if block.products[product_key] ~= nil then
+                        block.products[product_key].amount = block.products[product_key].amount + product.amount
+                        block.products[product_key].state = state
+                    end
+                    if block.ingredients[product_key] ~= nil then
+                        block.ingredients[product_key].state = state
+                    end
+                end
+            else
+                if state == 1 or state == 3 then
+                    -- element produit
+                    if block.products[product_key] ~= nil then
+                        block.products[product_key].amount = block.products[product_key].amount + product.amount
+                        block.products[product_key].state = state
+                    end
+                    if block.ingredients[product_key] ~= nil then
+                        block.ingredients[product_key].state = 0
+                    end
+                else
+                    -- element ingredient
+                    if block.ingredients[product_key] ~= nil then
+                        block.ingredients[product_key].amount = block.ingredients[product_key].amount + product.amount
+                        block.ingredients[product_key].state = state
+                    end
+                    if block.products[product_key] ~= nil then
+                        block.products[product_key].state = state
+                    end
+                end
+            end
+        end
+    end
 end
 
 -------------------------------------------------------------------------------
