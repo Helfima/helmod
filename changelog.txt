@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.9
+Date: 2024-04-04
+  Bugfixes:
+    - Fix product display with scrolling input section down
+    - Fix block count is not 1 if computing by factory used
+    - Fix add contraint on a sub-block product
+---------------------------------------------------------------------------------------------------
 Version: 1.0.8
 Date: 2024-04-02
   Changes:

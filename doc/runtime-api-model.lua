@@ -54,6 +54,7 @@
 ---@class ProductData
 ---@field name string
 ---@field type string
+---@field amount number
 ---@field count number
 ---@field count_limit number
 ---@field count_deep number
@@ -120,6 +121,9 @@
 ---@field has_input boolean
 ---@field objectives {[string] : ObjectiveData}
 ---@field expanded {[string] : boolean}
+---@field products_linked {[string] : boolean}
+---@field blocks_linked {[string] : BlockData}
+---@field runtimes {[uint] : Matrix}
 ---@field summary any
 
 ---@class ModelData

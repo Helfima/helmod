@@ -157,10 +157,8 @@ function ProductionPanel:getInfoPanel2()
 	info_scroll.style.width = 300
 
 	local left_panel = GuiElement.add(header_panel, GuiFlowV(left_name))
-	self:setStyle(left_panel, "block_info", "height")
 
 	local right_panel = GuiElement.add(header_panel, GuiFlowV(right_name))
-	self:setStyle(right_panel, "block_info", "height")
 
 	return info_scroll, left_panel, right_panel
 end
@@ -1225,22 +1223,22 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 
 	local block_color = User.getThumbnailColor(defines.thumbnail_color.names.block_default)
 	if not (block_by_product) then block_color = User.getThumbnailColor(defines.thumbnail_color.names.block_reverted) end
-	GuiElement.add(cell_recipe, GuiCellBlock(self.classname, "change-block", model.id, block.id):element(block):infoIcon(block.type):tooltip("tooltip.edit-block"):color(block_color))
+	GuiElement.add(cell_recipe, GuiCellBlock(self.classname, "row-change-block", model.id, block.id):element(block):infoIcon(block.type):tooltip("tooltip.edit-block"):color(block_color))
 
 	---col energy
 	local cell_energy = GuiElement.add(gui_table, GuiTable(block.id, "energy"):column(1):style("helmod_table_list"))
-	GuiElement.add(cell_energy, GuiCellEnergy(self.classname, "change-block", model.id, block.id):element(block):tooltip("tooltip.edit-block"):color(block_color))
+	GuiElement.add(cell_energy, GuiCellEnergy(self.classname, "row-change-block", model.id, block.id):element(block):tooltip("tooltip.edit-block"):color(block_color))
 
 	---col pollution
 	if User.getPreferenceSetting("display_pollution") then
 		local cell_pollution = GuiElement.add(gui_table, GuiTable(block.id, "pollution"):column(1):style("helmod_table_list"))
-		GuiElement.add(cell_pollution, GuiCellPollution(self.classname, "change-block", model.id, block.id):element(block):tooltip("tooltip.edit-block"):color(block_color))
+		GuiElement.add(cell_pollution, GuiCellPollution(self.classname, "row-change-block", model.id, block.id):element(block):tooltip("tooltip.edit-block"):color(block_color))
 	end
 
 	---col building
 	if User.getPreferenceSetting("display_building") then
 		local cell_building = GuiElement.add(gui_table, GuiTable(block.id, "building"):column(1):style("helmod_table_list"))
-		GuiElement.add(cell_building, GuiCellBuilding(self.classname, "change-block", model.id, block.id):element(block):tooltip("tooltip.info-building"):color(block_color))
+		GuiElement.add(cell_building, GuiCellBuilding(self.classname, "row-change-block", model.id, block.id):element(block):tooltip("tooltip.info-building"):color(block_color))
 	end
 
 	---col beacon
@@ -1259,7 +1257,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 			if block.products ~= nil then
 				for index, lua_product in spairs(block.products, product_sorter) do
 					if ((lua_product.state or 0) == 1 and block_by_product) or (lua_product.amount or 0) > ModelCompute.waste_value then
-						local block_id = "new"
+						local contraint_type = nil
 						local button_action = "production-recipe-product-add"
 						local button_tooltip = "tooltip.product"
 						local product_color = User.getThumbnailColor(defines.thumbnail_color.names.product_default)
@@ -1270,17 +1268,15 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						product.count_limit = lua_product.amount * block.count_limit
 						product.count_deep = lua_product.amount * block.count_deep
 
-						if not (block_by_product) then
+						if not (block_by_product) or not (block.unlinked) or block.by_factory == true then
 							button_action = "production-recipe-product-add"
 							button_tooltip = "tooltip.add-recipe"
 						else
-							if not (block.unlinked) or block.by_factory == true then
-								button_action = "product-info"
-								button_tooltip = "tooltip.info-product"
-							else
-								button_action = "product-edition"
-								button_tooltip = "tooltip.edit-product"
-							end
+							button_action = "product-edition"
+							button_tooltip = "tooltip.edit-product"
+						end
+						if block.by_product ~= false and block.contraint ~= nil and block.contraint.name == product.name then
+							contraint_type = block.contraint.type
 						end
 						---color
 						if product.state == 1 then
@@ -1291,13 +1287,12 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 								product_color = User.getThumbnailColor(defines.thumbnail_color.names.product_driving)
 							end
 						elseif product.state == 3 then
-							block_id = block.id
 							product_color = User.getThumbnailColor(defines.thumbnail_color.names.product_overflow)
 						else
 							product_color = User.getThumbnailColor(defines.thumbnail_color.names.product_default)
 						end
 						
-						GuiElement.add(cell_products, GuiCellElement(self.classname, button_action, model.id, parent.id, block_id, product.name):element(product):tooltip(button_tooltip):color(product_color):index(index))
+						GuiElement.add(cell_products, GuiCellElement(self.classname, button_action, model.id, parent.id, block.id, product.name):element(product):tooltip(button_tooltip):color(product_color):index(index):contraintIcon(contraint_type))
 					end
 				end
 			end
@@ -1309,7 +1304,6 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 			if block.ingredients ~= nil then
 				for index, lua_ingredient in spairs(block.ingredients, product_sorter) do
 					if ((lua_ingredient.state or 0) == 1 and not (block_by_product)) or (lua_ingredient.amount or 0) > ModelCompute.waste_value then
-						local block_id = "new"
 						local button_action = "production-recipe-ingredient-add"
 						local button_tooltip = "tooltip.ingredient"
 						local ingredient_color = User.getThumbnailColor(defines.thumbnail_color.names.ingredient_default)
@@ -1332,7 +1326,6 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 							if not (block.unlinked) or block.by_factory == true then
 								ingredient_color = User.getThumbnailColor(defines.thumbnail_color.names.ingredient_default)
 							else
-								block_id = block.id
 								ingredient_color = User.getThumbnailColor(defines.thumbnail_color.names.ingredient_driving)
 							end
 						elseif ingredient.state == 3 then
@@ -1341,7 +1334,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 							ingredient_color = User.getThumbnailColor(defines.thumbnail_color.names.ingredient_default)
 						end
 						
-						GuiElement.add(cell_ingredients, GuiCellElement(self.classname, button_action, model.id, parent.id, block_id, ingredient.name):element(ingredient):tooltip(button_tooltip):color(ingredient_color):index(index))
+						GuiElement.add(cell_ingredients, GuiCellElement(self.classname, button_action, model.id, parent.id, block.id, ingredient.name):element(ingredient):tooltip(button_tooltip):color(ingredient_color):index(index))
 					end
 				end
 			end
@@ -1421,7 +1414,14 @@ function ProductionPanel:onEventAccessAll(event, model, block)
 		Controller:send("on_gui_open", event, "HMRecipeSelector")
 	end
 
+	-- used in navigation menu
 	if event.action == "change-block" then
+		Controller:closeEditionOrSelector()
+		Controller:send("on_gui_open", event, self.classname)
+	end
+
+	-- used in row of blocks
+	if event.action == "row-change-block" then
 		Controller:closeEditionOrSelector()
 		Controller:send("on_gui_open", event, self.classname)
 	end
