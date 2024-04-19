@@ -401,6 +401,8 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
 			GuiElement.add(group_tool, GuiButton(self.classname, "block-by-product", model.id, block_id):sprite("menu", defines.sprites.graph_top_to_bottom.black, defines.sprites.graph_top_to_bottom.black):style("helmod_button_menu"):tooltip({ "helmod_label.input-ingredient" }))
 		end
 
+		-- reset production %
+		GuiElement.add(group_tool, GuiButton(self.classname, "reset-production", model.id, block_id):sprite("menu", defines.sprites.reset.black, defines.sprites.reset.black):style("helmod_button_menu"):tooltip({ "helmod_button.reset-block-production" }))
 
 		---computing
 		local block_compunting = GuiElement.add(group_tool, GuiFlowH("block-computing"))
@@ -1120,8 +1122,8 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				product.count = product_prototype:countProduct(recipe)
 				product.count_limit = product_prototype:countLimitProduct(recipe)
 				product.count_deep = product_prototype:countDeepProduct(recipe)
-				if block.by_product ~= false and recipe.contraint ~= nil and recipe.contraint.name == product.name then
-					contraint_type = recipe.contraint.type
+				if block.by_product ~= false and recipe.contraints ~= nil and recipe.contraints[product.name] ~= nil then
+					contraint_type = recipe.contraints[product.name].type
 				end
 				local control_info = "contraint"
 				if not (block.solver ~= true and block.by_product ~= false) then
@@ -1275,8 +1277,8 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 							button_action = "product-edition"
 							button_tooltip = "tooltip.edit-product"
 						end
-						if block.by_product ~= false and block.contraint ~= nil and block.contraint.name == product.name then
-							contraint_type = block.contraint.type
+						if parent.by_product ~= false and block.contraints ~= nil and block.contraints[product.name] ~= nil then
+							contraint_type = block.contraints[product.name].type
 						end
 						---color
 						if product.state == 1 then
@@ -1516,6 +1518,12 @@ end
 ---@param block table
 function ProductionPanel:onEventAccessWrite(event, model, block)
 	local selector_name = "HMRecipeSelector"
+	
+	if event.action == "reset-production" then
+		ModelBuilder.updateBlockChildrenProduction(block, 1)
+		ModelCompute.update(model)
+		Controller:send("on_gui_update", event, self.classname)
+	end
 
 	if event.action == "solver_switch" then
 		local index = event.element.selected_index
@@ -1716,14 +1724,14 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 			end
 		elseif block ~= nil and event.control == true and event.item3 ~= "none" then
 			local contraint = { type = "master", name = event.item4 }
-			local recipe = block.children[event.item3]
-			ModelBuilder.updateRecipeContraint(recipe, contraint)
+			local child = block.children[event.item3]
+			ModelBuilder.updateChildContraint(child, contraint)
 			ModelCompute.update(model)
 			Controller:send("on_gui_update", event)
 		elseif block ~= nil and event.shift == true and event.item3 ~= "none" then
 			local contraint = { type = "exclude", name = event.item4 }
-			local recipe = block.children[event.item3]
-			ModelBuilder.updateRecipeContraint(recipe, contraint)
+			local child = block.children[event.item3]
+			ModelBuilder.updateChildContraint(child, contraint)
 			ModelCompute.update(model)
 			Controller:send("on_gui_update", event)
 		end
@@ -1751,14 +1759,14 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 			end
 		elseif block ~= nil and event.control == true and event.item4 ~= "none" then
 			local contraint = { type = "master", name = event.item4 }
-			local recipe = block.children[event.item3]
-			ModelBuilder.updateRecipeContraint(recipe, contraint)
+			local child = block.children[event.item3]
+			ModelBuilder.updateChildContraint(child, contraint)
 			ModelCompute.update(model)
 			Controller:send("on_gui_update", event)
 		elseif block ~= nil and event.shift == true and event.item4 ~= "none" then
 			local contraint = { type = "exclude", name = event.item4 }
-			local recipe = block.children[event.item3]
-			ModelBuilder.updateRecipeContraint(recipe, contraint)
+			local child = block.children[event.item3]
+			ModelBuilder.updateChildContraint(child, contraint)
 			ModelCompute.update(model)
 			Controller:send("on_gui_update", event)
 		end
@@ -1790,19 +1798,6 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 		if not (ok) then
 			Player.print("Formula is not valid!")
 		end
-	end
-
-	if event.action == "update-matrix-solver" then
-		local recipe = block.children[event.item3]
-		ModelBuilder.updateMatrixSolver(block, recipe)
-		ModelCompute.update(model)
-		Controller:send("on_gui_update", event)
-	end
-
-	if event.action == "production-block-solver" then
-		ModelBuilder.updateBlockMatrixSolver(block)
-		ModelCompute.update(model)
-		Controller:send("on_gui_update", event)
 	end
 
 	if event.action == "block-switch-unlink" then

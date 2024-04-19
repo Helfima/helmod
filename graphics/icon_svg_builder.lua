@@ -1392,7 +1392,7 @@ local sprites = {
             {d="M 12.8,7V 9 H 3.2 V 7 Z"},
             {d="M 1,1 V 15 H 15 V 1 Z M 2,2 H 14 V 14 H 2 Z"},
         }},
-        build=true
+        build=false
     }
     ,{
         name="expand",
@@ -1407,8 +1407,24 @@ local sprites = {
             {d="M 12.5,7 V 9 H 9 L 9,12.5 7,12.5 7,9 H 3.6 V 7 H 7 V 3.4 H 9 V 7 Z"},
             {d="M 1,1 V 15 H 15 V 1 Z M 2,2 H 14 V 14 H 2 Z"},
         }},
+        build=false
+    }
+    ,{
+        name="reset",
+        size=64,
+        count=4,
+        colors = {
+            black=true,
+            white=true
+        },
+        paths={{
+            
+        },{
+            {transform="matrix(1,0,0,-1,0,16.018502)", d="M 15,8 A 7,7 0 1 1 3.12,3 H 1 V 1 H 7 V 7 H 5 V 4 A 5,5 0 1 0 10.764,3.831 L 11.871,2.165 A 6.989,6.989 0 0 1 15,8 Z"}
+        }},
         build=true
     }
+
 }
 
 -------------------------------------------------------------------------------

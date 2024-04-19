@@ -211,6 +211,18 @@ function ModelBuilder.updateRecipeProduction(recipe, production)
 end
 
 -------------------------------------------------------------------------------
+---Update recipe production
+---@param block BlockData
+---@param production number
+function ModelBuilder.updateBlockChildrenProduction(block, production)
+    if block ~= nil then
+        for _, child in pairs(block.children) do
+            child.production = production
+        end
+    end
+end
+
+-------------------------------------------------------------------------------
 ---Update a factory number
 ---@param recipe table
 ---@param value any
@@ -234,49 +246,6 @@ function ModelBuilder.updateFactoryLimit(recipe, value)
             recipe.factory.limit = nil
         else
             recipe.factory.limit = value
-        end
-    end
-end
-
--------------------------------------------------------------------------------
----Update block matrix solver
----@param block BlockData
----@param value any
-function ModelBuilder.updateBlockMatrixSolver(block, value)
-    if block ~= nil then
-        block.solver = value
-    end
-end
-
--------------------------------------------------------------------------------
----Update recipe matrix solver
----@param block BlockData
----@param recipe table
-function ModelBuilder.updateMatrixSolver(block, recipe)
-    if block ~= nil then
-        local recipes = block.children
-        local sorter = defines.sorters.block.sort
-        if block.by_product == false then
-            sorter = defines.sorters.block.reverse
-        end
-        local apply = false
-        local matrix_solver = 0
-        for _, current_recipe in spairs(recipes, sorter) do
-            if apply == true and current_recipe.matrix_solver == matrix_solver then
-                apply = false
-            end
-            if apply == true and current_recipe.matrix_solver ~= matrix_solver then
-                current_recipe.matrix_solver = matrix_solver
-            end
-            if current_recipe.id == recipe.id then
-                if current_recipe.matrix_solver == 0 then
-                    matrix_solver = 1
-                else
-                    matrix_solver = 0
-                end
-                current_recipe.matrix_solver = matrix_solver
-                apply = true
-            end
         end
     end
 end
@@ -1056,15 +1025,20 @@ function ModelBuilder.blockUnlink(block)
 end
 
 -------------------------------------------------------------------------------
----Update recipe contraint
----@param recipe RecipeData
----@param contraint table
-function ModelBuilder.updateRecipeContraint(recipe, contraint)
-    if recipe ~= nil then
-        if recipe.contraint ~= nil and recipe.contraint.name == contraint.name and recipe.contraint.type == contraint.type then
-            recipe.contraint = nil
+---Update child contraint
+---@param child RecipeData | BlockData
+---@param contraint ContraintData
+function ModelBuilder.updateChildContraint(child, contraint)
+    if child ~= nil then
+        if child.contraints == nil then child.contraints = {} end
+        if child.contraints[contraint.name] ~= nil then
+            if child.contraints[contraint.name].type == contraint.type then
+                child.contraints[contraint.name] = nil
+            else
+                child.contraints[contraint.name] = contraint
+            end
         else
-            recipe.contraint = contraint
+            child.contraints[contraint.name] = contraint
         end
     end
 end

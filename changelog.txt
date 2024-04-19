@@ -1,6 +1,9 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.9
 Date: 2024-04-19
+  Changes:
+    - Added a reset button to set 100% production on the current block
+    - Allowed add multi contraints on a row
   Bugfixes:
     - Fix linked products restored
     - Fix product display with scrolling input section down

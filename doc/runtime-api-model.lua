@@ -19,6 +19,10 @@
 ---@field name string
 ---@field temperature number
 
+---@class ContraintData
+---@field name string
+---@field type string
+
 ---@class ModuleEffectsData
 ---@field speed number
 ---@field productivity number
@@ -84,6 +88,7 @@
 ---@field pollution_deep number
 ---@field is_done boolean
 ---@field base_time uint
+---@field contraints {[string] : ContraintData}
 
 ---@class ParametersData
 ---@field effects ModuleEffectsData
@@ -124,6 +129,7 @@
 ---@field products_linked {[string] : boolean}
 ---@field blocks_linked {[string] : BlockData}
 ---@field runtimes {[uint] : Matrix}
+---@field contraints {[string] : ContraintData}
 ---@field summary any
 
 ---@class ModelData

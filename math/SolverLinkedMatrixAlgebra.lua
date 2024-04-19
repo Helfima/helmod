@@ -40,14 +40,22 @@ function SolverLinkedMatrixAlgebra:get_col(matrix, xrow, invert)
             end
             local Z = zvalue
             local C = -Z / cell_value
-            -- contraint
-            local has_contraint = parameters.contraint ~= nil
-            local is_master = parameters.contraint ~= nil and parameters.contraint.type == "master" and parameters.contraint.name == column.sysname
-            local is_exclude = parameters.contraint ~= nil and parameters.contraint.type == "exclude" and parameters.contraint.name ~= column.sysname
+            -- contraints
+            local has_contraint = parameters.contraints ~= nil
+            local is_master = false
+            local not_exclude = true
+            if parameters.contraints ~= nil and column.product ~= nil and parameters.contraints[column.product.name] then
+                local contraint = parameters.contraints[column.product.name]
+                if contraint.type == "master" then
+                    is_master = true
+                else
+                    not_exclude = false
+                end
+            end
             -- if zvalue = 0 the choose is already use
             if (C > max and zvalue ~= 0 and has_contraint == false)
                 or (is_master)
-                or (C > max and is_exclude) then
+                or (C > max and not_exclude) then
                 max = C
                 xcol = icol
             end

@@ -503,8 +503,8 @@ function SolverLinkedMatrix:add_matrix_row(matrix, child, child_info, is_block, 
     end
 
     rowParameters.base = row.header
-    if child.contraint ~= nil then
-        rowParameters.contraint = { type = child.contraint.type, name = child.contraint.name }
+    if child.contraints ~= nil then
+        rowParameters.contraints = table.deepcopy(child.contraints)
     end
     rowParameters.factory_count = child_info.factory_count
     rowParameters.factory_speed = child_info.factory_speed
@@ -594,10 +594,6 @@ function SolverLinkedMatrix:add_matrix_row(matrix, child, child_info, is_block, 
 
             matrix.column_sum[product_key] = ( matrix.column_sum[product_key] or 0 ) + value
 
-            if rowParameters.contraint ~= nil and rowParameters.contraint.name == name then
-                rowParameters.contraint.name = col_name
-            end
-
             row_valid = true
         end
         ---prepare header ingredients
@@ -672,9 +668,6 @@ function SolverLinkedMatrix:add_matrix_row(matrix, child, child_info, is_block, 
 
             matrix.column_sum[ingredient_key] = ( matrix.column_sum[ingredient_key] or 0 ) + value
 
-            if rowParameters.contraint ~= nil and rowParameters.contraint.name == name then
-                rowParameters.contraint.name = col_name
-            end
             row_valid = true
         end
         ---prepare header products
