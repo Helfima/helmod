@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 ---Description of the module.
----@class SolverEvoSimplex : SolverEvo
-SolverEvoSimplex = newclass(SolverEvo, function(base, object)
-	SolverEvo.init(base, object)
+---@class SolverLinkedMatrixSimplex : SolverLinkedMatrix
+SolverLinkedMatrixSimplex = newclass(SolverLinkedMatrix, function(base, object)
+	SolverLinkedMatrix.init(base, object)
 end)
 
 -------------------------------------------------------------------------------
@@ -11,7 +11,7 @@ end)
 ---@param xrow integer
 ---@param xcol integer
 ---@return Matrix
-function SolverEvoSimplex:pivot(matrix, xrow, xcol)
+function SolverLinkedMatrixSimplex:pivot(matrix, xrow, xcol)
 	local rows = matrix.rows
 
 	local matrix_clone = self:clone(matrix)
@@ -52,7 +52,7 @@ end
 ---Retourne le pivot
 ---@param matrix Matrix
 ---@return boolean, integer, integer
-function SolverEvoSimplex:get_pivot(matrix)
+function SolverLinkedMatrixSimplex:get_pivot(matrix)
 	local rows = matrix.rows
 	local zrow = matrix.rows[#matrix.rows]
 
@@ -106,7 +106,7 @@ end
 ---Prepare la matrice
 ---@param matrix Matrix
 ---@return Matrix
-function SolverEvoSimplex:prepare(matrix)
+function SolverLinkedMatrixSimplex:prepare(matrix)
 	---ajoute la ligne Z
 	local irow = 1
 	---prepare les headers
@@ -203,7 +203,7 @@ end
 ---@param matrix Matrix
 ---@param xrow integer
 ---@return Matrix
-function SolverEvoSimplex:line_compute(matrix, xrow)
+function SolverLinkedMatrixSimplex:line_compute(matrix, xrow)
 	if matrix == nil or xrow == 0 then return matrix end
 	local row = matrix.rows[xrow]
     local parameters = matrix.parameters[xrow]
@@ -244,7 +244,7 @@ end
 ---@param matrix Matrix --matrix finale
 ---@param matrix_result Matrix --matrix intermediaire
 ---@return Matrix
-function SolverEvoSimplex:table_compute(matrix, matrix_result)
+function SolverLinkedMatrixSimplex:table_compute(matrix, matrix_result)
 	if matrix == nil then return matrix end
 	local zrow = matrix_result.rows[#matrix_result.rows]
 
@@ -300,7 +300,7 @@ end
 ---@param by_factory boolean
 ---@param time number
 ---@return Matrix, {[integer] : Matrix}
-function SolverEvoSimplex:solve_matrix(Mbase, debug, by_factory, time)
+function SolverLinkedMatrixSimplex:solve_matrix(Mbase, debug, by_factory, time)
 	if Mbase ~= nil then
 		local num_loop = 0
 		local runtime = {}

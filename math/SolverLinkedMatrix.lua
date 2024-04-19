@@ -1,14 +1,14 @@
 -------------------------------------------------------------------------------
 ---Description of the module.
----@class SolverEvo
-SolverEvo = newclass(function(base)
+---@class SolverLinkedMatrix
+SolverLinkedMatrix = newclass(function(base)
 end)
 
 -------------------------------------------------------------------------------
 ---Clone la matrice
 ---@param matrix Matrix
 ---@return Matrix
-function SolverEvo:clone(matrix)
+function SolverLinkedMatrix:clone(matrix)
     local matrix_clone = table.deepcopy(matrix)
     return matrix_clone
 end
@@ -17,7 +17,7 @@ end
 ---Prepare la matrice
 ---@param matrix Matrix
 ---@return Matrix
-function SolverEvo:prepare(matrix)
+function SolverLinkedMatrix:prepare(matrix)
     local matrix_clone = self:clone(matrix)
     self:prepare_z_and_objectives(matrix_clone, false)
     return matrix_clone
@@ -27,7 +27,7 @@ end
 ---Prepare Z et objectives
 ---@param matrix Matrix
 ---@param reverse boolean reverse objective sign
-function SolverEvo:prepare_z_and_objectives(matrix, reverse)
+function SolverLinkedMatrix:prepare_z_and_objectives(matrix, reverse)
     local row = {}
     local objective_values = {}
     ---ajoute la ligne Z avec Z=-input
@@ -51,7 +51,7 @@ end
 ---Finalise la matrice
 ---@param matrix Matrix
 ---@return Matrix
-function SolverEvo:finalize(matrix)
+function SolverLinkedMatrix:finalize(matrix)
     ---finalize la ligne Z reinject le input Z=Z+input
     local zrow = matrix.rows[#matrix.rows]
     for icol, column in pairs(matrix.columns) do
@@ -68,7 +68,7 @@ end
 ---@param name string
 ---@param matrix Matrix
 ---@param pivot? table
-function SolverEvo:add_runtime(debug, runtime, name, matrix, pivot)
+function SolverLinkedMatrix:add_runtime(debug, runtime, name, matrix, pivot)
     if debug == true then
         local clone = table.deepcopy(matrix)
         table.insert(runtime, { name = name, matrix = clone, pivot = pivot })
@@ -83,7 +83,7 @@ end
 ---state = 3 => produit surplus
 ---@param matrix Matrix
 ---@return Matrix
-function SolverEvo:apply_state(matrix)
+function SolverLinkedMatrix:apply_state(matrix)
     local states = {}
     for irow, row in pairs(matrix.rows) do
         if irow < #matrix.rows then
@@ -118,7 +118,7 @@ end
 ---@param by_factory boolean
 ---@param time number
 ---@return Matrix, table
-function SolverEvo:solve_matrix(matrix_base, debug, by_factory, time)
+function SolverLinkedMatrix:solve_matrix(matrix_base, debug, by_factory, time)
 end
 -------------------------------------------------------------------------------
 ---Return a matrix of block
@@ -126,7 +126,7 @@ end
 ---@param parameters ParametersData
 ---@param debug boolean
 ---@return BlockData
-function SolverEvo:solve(block, parameters, debug)
+function SolverLinkedMatrix:solve(block, parameters, debug)
     block.blocks_linked = nil
     if block.products_linked ~= nil then
         -- build and compute reduced matrix when there are linked products
@@ -190,7 +190,7 @@ end
 ---@param parameters ParametersData
 ---@param debug boolean
 ---@return BlockData
-function SolverEvo:solve_block(block, parameters, debug)
+function SolverLinkedMatrix:solve_block(block, parameters, debug)
     local mC, runtimes
 
     local ok, err = pcall(function()
@@ -277,7 +277,7 @@ end
 ---@param block BlockData
 ---@param matrix Matrix
 ---@param parameters_index any
-function SolverEvo:solve_block_append(block, matrix, parameters_index)
+function SolverLinkedMatrix:solve_block_append(block, matrix, parameters_index)
     -- append linked block values
     if block.blocks_linked ~= nil then
         for key, linked_block in pairs(block.blocks_linked) do
@@ -325,7 +325,7 @@ end
 ---Finalize the block
 ---@param block any
 ---@param matrix any
-function SolverEvo:solve_block_finalize(block, matrix)
+function SolverLinkedMatrix:solve_block_finalize(block, matrix)
     -- state = 0 => produit
     -- state = 1 => produit pilotant
     -- state = 2 => produit restant
@@ -393,7 +393,7 @@ end
 ---@param block BlockData
 ---@param parameters ParametersData
 ---@return table
-function SolverEvo:get_block_matrix(block, parameters)
+function SolverLinkedMatrix:get_block_matrix(block, parameters)
     local children = block.children
     if children ~= nil then
         local matrix = Matrix()
@@ -493,7 +493,7 @@ end
 ---@param by_product boolean
 ---@param production number
 ---@param factor number
-function SolverEvo:add_matrix_row(matrix, child, child_info, is_block, col_index, by_product, production, factor)
+function SolverLinkedMatrix:add_matrix_row(matrix, child, child_info, is_block, col_index, by_product, production, factor)
 
     local row_valid = false
     local rowParameters = MatrixRowParameters()
@@ -727,7 +727,7 @@ end
 ---@param matrix table
 ---@param by_product boolean
 ---@return table
-function SolverEvo:linkTemperatureFluid(matrix, by_product)
+function SolverLinkedMatrix:linkTemperatureFluid(matrix, by_product)
     ---Create blank parameters
     local template_parameters = MatrixRowParameters()
     template_parameters.factory_count = 0
@@ -861,7 +861,7 @@ end
 ---@param item2 table
 ---@param by_product boolean
 ---@return boolean
-function SolverEvo:checkLinkedTemperatureFluid(item1, item2, by_product)
+function SolverLinkedMatrix:checkLinkedTemperatureFluid(item1, item2, by_product)
     local result = false
 
     local product, ingredient

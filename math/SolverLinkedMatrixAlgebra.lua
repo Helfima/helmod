@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 ---Description of the module.
----@class SolverEvoAlgebra : SolverEvo
-SolverEvoAlgebra = newclass(SolverEvo, function(base, object)
-    SolverEvo.init(base, object)
+---@class SolverLinkedMatrixAlgebra : SolverLinkedMatrix
+SolverLinkedMatrixAlgebra = newclass(SolverLinkedMatrix, function(base, object)
+    SolverLinkedMatrix.init(base, object)
 end)
 
 -------------------------------------------------------------------------------
@@ -11,7 +11,7 @@ end)
 ---@param xrow integer
 ---@param invert boolean
 ---@return integer
-function SolverEvoAlgebra:get_col(matrix, xrow, invert)
+function SolverLinkedMatrixAlgebra:get_col(matrix, xrow, invert)
     local row = matrix.rows[xrow]
     local parameters = matrix.parameters[xrow]
     local zrow = matrix.rows[#matrix.rows]
@@ -62,7 +62,7 @@ end
 ---@param xrow integer
 ---@param xcol integer
 ---@return Matrix
-function SolverEvoAlgebra:line_compute(matrix, xrow, xcol)
+function SolverLinkedMatrixAlgebra:line_compute(matrix, xrow, xcol)
     if matrix == nil or xrow == 0 or xcol == 0 then return matrix end
     local row = matrix.rows[xrow]
     local parameters = matrix.parameters[xrow]
@@ -89,7 +89,7 @@ end
 ---@param xrow integer
 ---@param time number
 ---@return Matrix
-function SolverEvoAlgebra:line_compute_by_factory(matrix, xrow, time)
+function SolverLinkedMatrixAlgebra:line_compute_by_factory(matrix, xrow, time)
     if matrix == nil or xrow == 0 then return matrix end
     local row = matrix.rows[xrow]
     local parameters = matrix.parameters[xrow]
@@ -118,7 +118,7 @@ end
 ---@param by_factory boolean
 ---@param time number
 ---@return Matrix, table
-function SolverEvoAlgebra:solve_matrix(matrix_base, debug, by_factory, time)
+function SolverLinkedMatrixAlgebra:solve_matrix(matrix_base, debug, by_factory, time)
     if matrix_base ~= nil then
         local num_loop = 0
         local icol = 0

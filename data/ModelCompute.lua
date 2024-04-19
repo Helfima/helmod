@@ -2,9 +2,9 @@ require "math.Matrix"
 require "math.SolverMatrix"
 require "math.SolverMatrixAlgebra"
 require "math.SolverMatrixSimplex"
-require "math.SolverEvo"
-require "math.SolverEvoAlgebra"
-require "math.SolverEvoSimplex"
+require "math.SolverLinkedMatrix"
+require "math.SolverLinkedMatrixAlgebra"
+require "math.SolverLinkedMatrixSimplex"
 
 ------------------------------------------------------------------------------
 ---Description of the module.
@@ -555,8 +555,8 @@ function ModelCompute.computeBlock(block, parameters)
         local my_solver
 
         local solvers = {}
-        solvers[defines.constant.solvers.default] = { algebra = SolverMatrixAlgebra, simplex = SolverMatrixSimplex }
-        solvers[defines.constant.solvers.evo] = { algebra = SolverEvoAlgebra, simplex = SolverEvoSimplex }
+        solvers[defines.constant.solvers.matrix] = { algebra = SolverMatrixAlgebra, simplex = SolverMatrixSimplex }
+        solvers[defines.constant.solvers.default] = { algebra = SolverLinkedMatrixAlgebra, simplex = SolverLinkedMatrixSimplex }
         local selected_solver = solvers[defines.constant.solvers.default]
         if solvers[solver_selected] ~= nil then
             selected_solver = solvers[solver_selected]
@@ -882,7 +882,7 @@ function ModelCompute.createSummary(model)
                         count = 0
                     }
                 end
-                model.summary[type][element.name].count = model.summary[type][element.name].count + element.count
+                model.summary[type][element.name].count = model.summary[type][element.name].count + math.ceil(element.count)
             end
         end
     end
