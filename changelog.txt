@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.9
 Date: 2024-04-19
+  Info:
+    - Contraints on a row must be redo
   Changes:
     - Added a reset button to set 100% production on the current block
     - Allowed add multi contraints on a row
