@@ -190,7 +190,8 @@ defines.thumbnail_color.values.ingredient_overflow = "T10_4"
 
 defines.constant = {}
 defines.constant.solvers = {}
-defines.constant.solvers.default = "matrix"
+defines.constant.solvers.default = "linked matrix"
+defines.constant.solvers.matrix = "matrix"
 
 defines.constant.rocket_deploy_delay = 2434 / 60
 defines.constant.max_float = 1e300

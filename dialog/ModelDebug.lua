@@ -48,17 +48,40 @@ end
 ---@param event LuaEvent
 function ModelDebug:onEvent(event)
     local _, block = self:getParameterObjects()
-    if block ~= nil and block.runtimes ~= nil then
+    if block ~= nil then
         local runtimes = block.runtimes
-        if event.action == "change-stage" then
-            local stage = User.getParameter("model_stage") or 1
-            if event.item1 == "initial" then stage = 1 end
-            if event.item1 == "previous" and stage > 1 then stage = stage - 1 end
-            if event.item1 == "next" and stage < #runtimes then stage = stage + 1 end
-            if event.item1 == "final" then stage = #runtimes end
-            User.setParameter("model_stage", stage)
+        local model_matrix = User.getParameter("model_matrix")
+        if model_matrix ~= nil and block.blocks_linked ~= nil and block.blocks_linked[model_matrix] ~= nil then
+            runtimes = block.blocks_linked[model_matrix].runtimes
         end
-        self:onUpdate(event)
+        if runtimes ~= nil then
+            if event.action == "change-stage" then
+                local stage = User.getParameter("model_stage") or 1
+                if event.item1 == "initial" then stage = 1 end
+                if event.item1 == "previous" and stage > 1 then stage = stage - 1 end
+                if event.item1 == "next" and stage < #runtimes then stage = stage + 1 end
+                if event.item1 == "final" then stage = #runtimes end
+                User.setParameter("model_stage", stage)
+                self:onUpdate(event)
+            end
+        end
+
+        if event.action == "change-matrix" then
+            local index = event.element.selected_index
+            if index > 1 then
+                local i_matrix = 2
+                for key, _ in pairs(block.blocks_linked) do
+                    if index == i_matrix then
+                        User.setParameter("model_matrix", key)
+                        break
+                    end
+                    i_matrix = i_matrix + 1
+                end
+            else
+                User.setParameter("model_matrix", "master")
+            end
+            Controller:send("on_gui_update", event, self.classname)
+        end
     end
 end
 
@@ -67,8 +90,6 @@ end
 ---@param event LuaEvent
 function ModelDebug:onBeforeOpen(event)
     FormModel.onBeforeOpen(self, event)
-    local model, block = self:getParameterObjects()
-    ModelCompute.computeBlock(block)
 end
 -------------------------------------------------------------------------------
 ---On update
@@ -82,6 +103,7 @@ end
 ---Update information
 ---@param event LuaEvent
 function ModelDebug:updateHeader(event)
+    local model, block = self:getParameterObjects()
     local action_panel = self:getMenuPanel()
     action_panel.clear()
     local group1 = GuiElement.add(action_panel, GuiFlowH("group1"))
@@ -89,6 +111,20 @@ function ModelDebug:updateHeader(event)
     GuiElement.add(group1, GuiButton(self.classname, "change-stage", "previous"):sprite("menu", defines.sprites.expand_left.black, defines.sprites.expand_left.black):style("helmod_button_menu"):tooltip("Previous Step"))
     GuiElement.add(group1, GuiButton(self.classname, "change-stage", "next"):sprite("menu", defines.sprites.expand_right.black, defines.sprites.expand_right.black):style("helmod_button_menu"):tooltip("Next Step"))
     GuiElement.add(group1, GuiButton(self.classname, "change-stage", "final"):sprite("menu", defines.sprites.expand_right_group.black, defines.sprites.expand_right_group.black):style("helmod_button_menu"):tooltip("Final"))
+
+    if block.blocks_linked ~= nil then
+        local group2 = GuiElement.add(action_panel, GuiFlowH("group2"))
+        local default_matrix = "master"
+        local model_matrix = User.getParameter("model_matrix")
+        if model_matrix ~= nil and block.blocks_linked ~= nil and block.blocks_linked[model_matrix] ~= nil then
+            default_matrix = model_matrix
+        end
+        local items = {"master"}
+		for key, _ in pairs(block.blocks_linked) do
+			table.insert(items, key)
+		end
+        GuiElement.add(group2, GuiDropDown(self.classname, "change-matrix"):items(items, default_matrix))
+    end
 end
 
 -------------------------------------------------------------------------------
@@ -110,19 +146,26 @@ function ModelDebug:updateDebugPanel(event)
 
     if block ~= nil then
         info_panel.clear()
-
-        if block.runtimes ~= nil then
+        local runtimes = block.runtimes
+        local model_matrix = User.getParameter("model_matrix")
+        if model_matrix ~= nil and block.blocks_linked ~= nil and block.blocks_linked[model_matrix] ~= nil then
+            runtimes = block.blocks_linked[model_matrix].runtimes
+        end
+        if runtimes ~= nil then
             local scroll_panel = GuiElement.add(info_panel, GuiScroll("scroll_stage"))
             scroll_panel.style.horizontally_squashable = true
             scroll_panel.style.horizontally_stretchable = true
             local stage = User.getParameter("model_stage") or 1
-            if block.runtimes[stage] == nil then
+            if runtimes[stage] == nil then
                 stage = 1
                 User.setParameter("model_stage", stage)
             end
-            local runtime = block.runtimes[stage]
+            local runtime = runtimes[stage]
             local ma_panel = GuiElement.add(scroll_panel, GuiFrameV("stage_panel"):style(helmod_frame_style.hidden):caption(runtime.name))
             self:buildTableSolverMatrix(ma_panel, runtime.matrix, runtime.pivot)
+            if runtime.pivot ~= nil then
+                GuiElement.add(scroll_panel, GuiLabel("stage_pivot"):caption({"","Pivot:", runtime.pivot.x, ",", runtime.pivot.y}))
+            end
         end
     end
 end
@@ -160,7 +203,13 @@ function ModelDebug:getCellHeader(matrix_table, frame, header, sum)
         local tooltip = { "", header.product.name }
         table.insert(tooltip, { "", "\n", "sum: ", sum })
         local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(header.product.type, header.product.name):tooltip(tooltip))
+        GuiElement.add(button, GuiLabel("label_index"):caption(header.index))
         GuiElement.infoTemperature(button, header.product, "helmod_label_overlay_m")
+    elseif header.product_linked ~= nil then
+        local tooltip = { "", header.name }
+        local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(header.type, header.name):tooltip(tooltip))
+        GuiElement.infoTemperature(button, header, "helmod_label_overlay_m")
+        GuiElement.add(button, GuiButtonSpriteSm("linked"):sprite(header.product_linked.type, header.product_linked.name))
     else
         local tooltip = { "", header.name }
         local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(header.type, header.name):tooltip(tooltip))

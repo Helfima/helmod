@@ -77,7 +77,7 @@ end
 -------------------------------------------------------------------------------
 ---@class MatrixRowParameters
 ---@field base string
----@field contraint table
+---@field contraints table
 ---@field factory_count number
 ---@field factory_speed number
 ---@field recipe_count number

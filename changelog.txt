@@ -1,4 +1,17 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.9
+Date: 2024-04-19
+  Info:
+    - Contraints on a row must be redo
+  Changes:
+    - Added a reset button to set 100% production on the current block
+    - Allowed add multi contraints on a row
+  Bugfixes:
+    - Fix linked products restored
+    - Fix product display with scrolling input section down
+    - Fix block count is not 1 if computing by factory used
+    - Fix add contraint on a sub-block product
+---------------------------------------------------------------------------------------------------
 Version: 1.0.8
 Date: 2024-04-02
   Changes:

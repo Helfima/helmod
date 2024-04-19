@@ -2,6 +2,9 @@ require "math.Matrix"
 require "math.SolverMatrix"
 require "math.SolverMatrixAlgebra"
 require "math.SolverMatrixSimplex"
+require "math.SolverLinkedMatrix"
+require "math.SolverLinkedMatrixAlgebra"
+require "math.SolverLinkedMatrixSimplex"
 
 ------------------------------------------------------------------------------
 ---Description of the module.
@@ -185,7 +188,7 @@ end
 function ModelCompute.finalizeBlock(block, factor)
     local one_block_factor_enable = User.getPreferenceSetting("one_block_factor_enable")
     local one_block_factor = 1
-    if one_block_factor_enable and block.has_input ~= true then
+    if block.by_limit ~= true and block.by_factory ~= true and one_block_factor_enable and block.has_input ~= true then
         one_block_factor = block.count
         block.count = 1
         for _, product in pairs(block.products) do
@@ -552,7 +555,8 @@ function ModelCompute.computeBlock(block, parameters)
         local my_solver
 
         local solvers = {}
-        solvers[defines.constant.solvers.default] = { algebra = SolverMatrixAlgebra, simplex = SolverMatrixSimplex }
+        solvers[defines.constant.solvers.matrix] = { algebra = SolverMatrixAlgebra, simplex = SolverMatrixSimplex }
+        solvers[defines.constant.solvers.default] = { algebra = SolverLinkedMatrixAlgebra, simplex = SolverLinkedMatrixSimplex }
         local selected_solver = solvers[defines.constant.solvers.default]
         if solvers[solver_selected] ~= nil then
             selected_solver = solvers[solver_selected]
@@ -878,7 +882,7 @@ function ModelCompute.createSummary(model)
                         count = 0
                     }
                 end
-                model.summary[type][element.name].count = model.summary[type][element.name].count + element.count
+                model.summary[type][element.name].count = model.summary[type][element.name].count + math.ceil(element.count)
             end
         end
     end

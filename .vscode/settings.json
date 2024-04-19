@@ -1,5 +1,4 @@
 {
-    "editor.wordWrap": "off",
     "factorio.versions": [
         {
             "name": "last",
@@ -11,23 +10,7 @@
         "d:\\Perso\\Factorio_Test\\Factorio_1.1.x\\data"
     ],
     "Lua.workspace.userThirdParty": [
-        "c:\\Users\\Helfima\\AppData\\Roaming\\Code\\User\\workspaceStorage\\514fe0eed8db4a5c5d40fa46e5c1b506\\justarandomgeek.factoriomod-debug\\sumneko-3rd"
+        "c:\\Users\\Helfima\\AppData\\Roaming\\Code\\User\\workspaceStorage\\9227b2889b7b66a476ad6a7c6b052c18\\justarandomgeek.factoriomod-debug\\sumneko-3rd"
     ],
-    "Lua.runtime.builtin": {
-        "io": "disable",
-        "os": "disable",
-        "math": "disable",
-        "debug": "disable",
-        "coroutine": "disable",
-        "package": "disable"
-    },
-    "Lua.runtime.version": "Lua 5.2",
-    "Lua.diagnostics.globals": [
-        "__Profiler"
-    ],
-    "Lua.runtime.special": {
-        "__object_name": "type"
-    },
-    "Lua.runtime.plugin": "c:/Users/Helfima/AppData/Roaming/Code/User/workspaceStorage/514fe0eed8db4a5c5d40fa46e5c1b506/justarandomgeek.factoriomod-debug/sumneko-3rd/factorio/plugin.lua",
     "Lua.workspace.checkThirdParty": "ApplyInMemory"
 }

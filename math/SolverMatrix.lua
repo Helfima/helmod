@@ -122,15 +122,15 @@ function SolverMatrix:solve_matrix(matrix_base, debug, by_factory, time)
 end
 -------------------------------------------------------------------------------
 ---Return a matrix of block
----@param block table
+---@param block BlockData
 ---@param parameters ParametersData
 ---@param debug boolean
----@return table
+---@return BlockData
 function SolverMatrix:solve(block, parameters, debug)
     local mC, runtimes
 
     local ok, err = pcall(function()
-        local mA = SolverMatrix.get_block_matrix(block, parameters)
+        local mA = SolverMatrix:get_block_matrix(block, parameters)
         if mA ~= nil then
             mC, runtimes = self:solve_matrix(mA, debug, block.by_factory, block.time)
         end
@@ -167,8 +167,6 @@ function SolverMatrix:solve(block, parameters, debug)
             sorter = defines.sorters.block.reverse
         end
 
-        ---ratio pour le calcul du nombre de block
-        local ratio = 1
         ---calcul ordonnee sur les recipes du block
         local row_index = 1
 
@@ -265,10 +263,10 @@ end
 
 -------------------------------------------------------------------------------
 ---Return a matrix of block
----@param block table
+---@param block BlockData
 ---@param parameters ParametersData
 ---@return table
-function SolverMatrix.get_block_matrix(block, parameters)
+function SolverMatrix:get_block_matrix(block, parameters)
     local children = block.children
     if children ~= nil then
         local matrix = Matrix()
@@ -446,14 +444,15 @@ function SolverMatrix.get_block_matrix(block, parameters)
                     local ingredient = Product(lua_ingredient)
                     local ingredient_key = ingredient:getTableKey()
                     local index = 1
-                    ---cas normal de l'ingredient n'existant pas du cote produit
+                    ---default case
                     if col_index[ingredient_key] ~= nil and lua_products[ingredient_key] == nil then
                         index = col_index[ingredient_key]
                     end
-                    ---cas de l'ingredient existant du cote produit
+                    ---case where the ingredient exist in the product side
                     if col_index[ingredient_key] ~= nil and lua_products[ingredient_key] ~= nil then
-                        ---cas de la valeur equivalente, on creer un nouveau element
-                        if lua_products[ingredient_key].amount == lua_ingredients[ingredient_key].amount or child_type == "resource" or child_type == "energy" then
+                        ---case of the equivalent value, we create a new element
+                        if lua_products[ingredient_key].amount > 0 and lua_ingredients[ingredient_key].amount> 0 and
+                            lua_products[ingredient_key].amount == lua_ingredients[ingredient_key].amount or child_type == "resource" or child_type == "energy" then
                             index = col_index[ingredient_key] + 1
                         else
                             index = col_index[ingredient_key]
@@ -489,7 +488,7 @@ function SolverMatrix.get_block_matrix(block, parameters)
                     local ingredient = Product(lua_ingredient)
                     local ingredient_key = ingredient:getTableKey()
                     local index = 1
-                    ---cas normal de l'ingredient n'existant pas du cote produit
+                    ---default case
                     if col_index[ingredient_key] ~= nil then
                         index = col_index[ingredient_key]
                     end
@@ -524,10 +523,11 @@ function SolverMatrix.get_block_matrix(block, parameters)
                     if col_index[product_key] ~= nil then
                         index = col_index[product_key]
                     end
-                    ---cas du produit existant du cote ingredient
+                    --- case where the product exist in the ingredient side
                     if col_index[product_key] ~= nil and lua_ingredients[product_key] ~= nil then
-                        ---cas de la valeur equivalente, on creer un nouveau element
-                        if lua_products[product_key].amount == lua_ingredients[product_key].amount or child_type == "resource" or child_type == "energy" then
+                        ---case of the equivalent value, we create a new element
+                        if lua_products[product_key].amount > 0 and lua_ingredients[product_key].amount > 0 and 
+                            lua_products[product_key].amount == lua_ingredients[product_key].amount or child_type == "resource" or child_type == "energy" then
                             index = col_index[product_key] + 1
                         else
                             index = col_index[product_key]
@@ -562,24 +562,7 @@ function SolverMatrix.get_block_matrix(block, parameters)
 
         ---end loop recipes
 
-        local objectives = {}
-        local input_ready = {}
-        local block_elements = block.products
-        if block.by_product == false then
-            block_elements = block.ingredients
-        end
-        for _, column in pairs(matrix.columns) do
-            if block_elements ~= nil and block_elements[column.key] ~= nil and not (input_ready[column.key]) and column.index == 1 then
-                local objective = {}
-                objective.value = block_elements[column.key].input or 0
-                objective.key = column.key
-                objectives[column.key] = objective
-                input_ready[column.key] = true
-            end
-        end
-
-        matrix = SolverMatrix.linkTemperatureFluid(matrix, block.by_product)
-        matrix.objectives = objectives
+        matrix = self:linkTemperatureFluid(matrix, block.by_product)
         matrix.objectives = block.objectives
         return matrix
     end
@@ -591,7 +574,7 @@ end
 ---@param matrix table
 ---@param by_product boolean
 ---@return table
-function SolverMatrix.linkTemperatureFluid(matrix, by_product)
+function SolverMatrix:linkTemperatureFluid(matrix, by_product)
     ---Create blank parameters
     local template_parameters = MatrixRowParameters()
     template_parameters.factory_count = 0
@@ -644,7 +627,7 @@ function SolverMatrix.linkTemperatureFluid(matrix, by_product)
             local product = product_fluid.product
             local linked_fluids = block_ingredient_fluids[product.name] or {}
             for _, linked_fluid in pairs(linked_fluids) do
-                if SolverMatrix.checkLinkedTemperatureFluid(product_fluid, linked_fluid, by_product) then
+                if self:checkLinkedTemperatureFluid(product_fluid, linked_fluid, by_product) then
                     local parameters = MatrixRowParameters()
                     parameters.coefficient = coefficient
                     local new_row = MatrixRow("recipe", "helmod-temperature-convert", "")
@@ -666,7 +649,7 @@ function SolverMatrix.linkTemperatureFluid(matrix, by_product)
             local product = product_fluid.product
             local linked_fluids = block_ingredient_fluids[product.name] or {}
             for _, linked_fluid in pairs(linked_fluids) do
-                if SolverMatrix.checkLinkedTemperatureFluid(product_fluid, linked_fluid, by_product) then
+                if self:checkLinkedTemperatureFluid(product_fluid, linked_fluid, by_product) then
                     local parameters = MatrixRowParameters()
                     parameters.coefficient = coefficient
                     local new_row = MatrixRow("recipe", "helmod-temperature-convert", "")
@@ -690,7 +673,7 @@ function SolverMatrix.linkTemperatureFluid(matrix, by_product)
 
             local linked_fluids = block_product_fluids[product.name] or {}
             for _, linked_fluid in pairs(linked_fluids) do
-                if SolverMatrix.checkLinkedTemperatureFluid(linked_fluid, ingredient_fluid, by_product) then
+                if self:checkLinkedTemperatureFluid(linked_fluid, ingredient_fluid, by_product) then
                     local parameters = MatrixRowParameters()
                     parameters.coefficient = coefficient
                     local new_row = MatrixRow("recipe", "helmod-temperature-convert", "")
@@ -724,7 +707,7 @@ end
 ---@param item2 table
 ---@param by_product boolean
 ---@return boolean
-function SolverMatrix.checkLinkedTemperatureFluid(item1, item2, by_product)
+function SolverMatrix:checkLinkedTemperatureFluid(item1, item2, by_product)
     local result = false
 
     local product, ingredient
