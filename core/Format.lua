@@ -51,7 +51,7 @@ end
 -------------------------------------------------------------------------------
 ---Format the number
 ---@param value number the number
----@param suffix string
+---@param suffix? string
 ---@return string --formated number
 function Format.formatNumberKilo(value, suffix)
   if suffix == nil then suffix = "" end
@@ -77,6 +77,14 @@ function Format.formatPercent(num)
   return math.floor(num * mult + 0.5) / 10
 end
 
+-------------------------------------------------------------------------------
+---Return decimal from a string, 0.00 return 2 decimal
+---@param value string
+---@return number
+function Format.decimalFromString(value)
+  local _, c = value:gsub("0","")
+  return c - 1
+end
 -------------------------------------------------------------------------------
 ---Format number for factory
 ---@param number number

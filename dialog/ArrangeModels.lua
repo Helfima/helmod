@@ -60,7 +60,7 @@ end
 ---@param index number
 ---@param model table
 function ArrangeModels:addModelButton(parent_panel, model, index)
-  local element = Model.firstRecipe(model.blocks)
+  local element = Model.firstChild(model.blocks)
   local button
   if element ~= nil then
     button = GuiElement.add(parent_panel, GuiButtonSelectSprite(self.classname, "move-item", model.id, index):sprite(element.type, element.name):tooltip(tooltip):color())
@@ -78,7 +78,7 @@ end
 ---@param model table
 function ArrangeModels:addModelFrame(index, model)
   local parent_panel = self:getPanel()
-  local element = Model.firstRecipe(model.blocks)
+  local element = Model.firstChild(model.blocks)
   local screen = Player.getGui("screen")
   
   local flow = GuiElement.add(screen, GuiFrameV(self.classname, "flow", model.id):style("frame"))

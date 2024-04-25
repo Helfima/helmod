@@ -1,12 +1,116 @@
 ---------------------------------------------------------------------------------------------------
-Version: 0.12.20
-Date: ???
+Version: 1.0.9
+Date: 2024-04-19
+  Info:
+    - Contraints on a row must be redo
   Changes:
+    - Added a reset button to set 100% production on the current block
+    - Allowed add multi contraints on a row
+  Bugfixes:
+    - Fix linked products restored
+    - Fix product display with scrolling input section down
+    - Fix block count is not 1 if computing by factory used
+    - Fix add contraint on a sub-block product
+---------------------------------------------------------------------------------------------------
+Version: 1.0.8
+Date: 2024-04-02
+  Changes:
+    - When a block have not input, block count is 1
+  Bugfixes:
+    - Fix logistic row when Assembler limitation enabled #513
+    - Fix block unlink, action no longer modifies inputs to 0
+---------------------------------------------------------------------------------------------------
+Version: 1.0.7
+Date: 2024-03-21
+  Bugfixes:
+    - Fix remove input value on root block
+    - Fix ingredient input block in a block to consume product (computing by element)
+    - Fix voider recipe to consume product (computing by element)
+---------------------------------------------------------------------------------------------------
+Version: 1.0.6
+Date: 2024-03-19
+  Bugfixes:
+    - Fix computing by factory update when change module
+---------------------------------------------------------------------------------------------------
+Version: 1.0.5
+Date: 2024-03-18
+  Bugfixes:
+    - Fix model.block_root missing on the last block (probably migration issue)
+    - Fix preference format number is not used
+---------------------------------------------------------------------------------------------------
+Version: 1.0.4
+Date: 2024-03-09
+  Changes:
+    - Restore in edition recipe, the propagation mode: all or category
+  Bugfixes:
+    - Fix tree child down delete the source block
+---------------------------------------------------------------------------------------------------
+Version: 1.0.3
+Date: 2024-03-09
+  Changes:
+    - Updated RU locale #503
+    - Allow set 0 for input in the block
+    - Added button to clear all inputs of block
+  Bugfixes:
+    - Fix the initial value
+    - Fix display ols solver in the ModelDebug dialog
+---------------------------------------------------------------------------------------------------
+Version: 1.0.2
+Date: 2024-03-09
+  Bugfixes:
+    - Fix missing model.block_root
+---------------------------------------------------------------------------------------------------
+Version: 1.0.1
+Date: 2024-03-09
+  Bugfixes:
+    - Fix upgrade 1.0.0
+    - Fix error when query_list = nil in AbstractSelector
+---------------------------------------------------------------------------------------------------
+Version: 1.0.0
+Date: 2024-03-08
+  Features:
+    - Major change: Production Line is a tree of Production Blocks and recipes
+    - Added move row into parent block or new block
+    - Added a preference tab for the thumbnail colors
+  Changes:
+    - Model version set 1
+---------------------------------------------------------------------------------------------------
+Version: 0.12.23
+Date: 2024-01-29
+  Bugfixes:
+    - Fix relocation form with UI scale
+    - Fix not found tooltip sprite
+---------------------------------------------------------------------------------------------------
+Version: 0.12.22
+Date: 2024-01-26
+  Bugfixes:
+    - Fix recipe edition tab change after few action
+    - Fix the default assembler controle is wrong when no module
+    - Fix recursive table for parameter.default_factory
+---------------------------------------------------------------------------------------------------
+Version: 0.12.21
+Date: 2024-01-24
+  Bugfixes:
+    - Fix beacons tooltip generating error: localized string 21 > 20 (limit)
+    - Fix smart tool in pin panel
+---------------------------------------------------------------------------------------------------
+Version: 0.12.20
+Date: 2024-01-24
+  Features:
+    - Now we can use few beacons
+    - Now we can add global effects on production line
+  Changes:
+    - Selecting a transport belt to enter an ingredient/product quantity now respects base time #473
     - Added Chinese translations (thank you luaotix!) #476
     - Added partial Brazilian Portugese translations (thank you luis das artimanhas!) #484
+    - Simpliied propagation menu, now that propagate with module only on the same category of recipe
+    - Actived by default reworked solver to improve it
   Bugfixes:
-    - Fixed few errors in the reworked solver, not yet actived
     - Fixed beacon modules not being selectable for resource recipes with Pyanodon's #478
+    - Fixed Error helmod::on_tick after kick player #490
+    - Fixed Matrix solver with omni fuel #415/#425
+    - Fixed logistic items overflow in the Logstic Edition panel
+    - Fixed Pyanodon AL upgrade techs #345
 ---------------------------------------------------------------------------------------------------
 Version: 0.12.19
 Date: 2023-07-30

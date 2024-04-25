@@ -112,7 +112,7 @@ function SolverMatrix:apply_state(matrix)
 end
 
 -------------------------------------------------------------------------------
----Resoud la matrice
+---Abstract Resoud la matrice
 ---@param matrix_base Matrix
 ---@param debug boolean
 ---@param by_factory boolean
@@ -122,14 +122,15 @@ function SolverMatrix:solve_matrix(matrix_base, debug, by_factory, time)
 end
 -------------------------------------------------------------------------------
 ---Return a matrix of block
----@param block table
+---@param block BlockData
+---@param parameters ParametersData
 ---@param debug boolean
----@return table
-function SolverMatrix:solve(block, debug)
+---@return BlockData
+function SolverMatrix:solve(block, parameters, debug)
     local mC, runtimes
 
     local ok, err = pcall(function()
-        local mA = SolverMatrix.get_block_matrix(block)
+        local mA = SolverMatrix:get_block_matrix(block, parameters)
         if mA ~= nil then
             mC, runtimes = self:solve_matrix(mA, debug, block.by_factory, block.time)
         end
@@ -161,69 +162,38 @@ function SolverMatrix:solve(block, debug)
             end
         end
 
-        ---ratio pour le calcul du nombre de block
-        local ratio = 1
-        ---calcul ordonnee sur les recipes du block
-        local row_index = 1
-        local sorter = function(t, a, b) return t[b].index > t[a].index end
+        local sorter = defines.sorters.block.sort
         if block.by_product == false then
-            sorter = function(t, a, b) return t[b].index < t[a].index end
+            sorter = defines.sorters.block.reverse
         end
 
-        local recipes = block.recipes
-        for _, recipe in spairs(recipes, sorter) do
+        ---calcul ordonnee sur les recipes du block
+        local row_index = 1
+
+        local children = block.children
+        for _, child in spairs(children, sorter) do
+            local is_block = Model.isBlock(child)
             local parameters = mC.parameters[row_index]
-            if parameters.recipe_count > 0 then
-                recipe.count = parameters.recipe_count
-                recipe.production = parameters.recipe_production
+            if parameters ~= nil and parameters.recipe_count > 0 then
+                child.count = parameters.recipe_count
+                child.production = parameters.recipe_production
             else
-                recipe.count = 0
+                child.count = 0
             end
             row_index = row_index + 1
-            ---calcul dependant du recipe count
-            if recipe.type == "energy" then
-                ModelCompute.computeEnergyFactory(recipe)
+            
+            if is_block then
             else
-                ModelCompute.computeFactory(recipe)
-            end
-
-            block.power = block.power + recipe.energy_total
-            block.pollution_total = block.pollution_total + recipe.pollution_total
-
-            if type(recipe.factory.limit) == "number" and recipe.factory.limit > 0 then
-                local currentRatio = recipe.factory.limit / recipe.factory.count
-                if currentRatio < ratio then
-                    ratio = currentRatio
-                    ---block number
-                    block.count = recipe.factory.count / recipe.factory.limit
-                    ---subblock energy
-                    if block.count ~= nil and block.count > 0 then
-                    end
+                local recipe = child
+                ---calcul dependant du recipe count
+                if child.type == "energy" then
+                    ModelCompute.computeEnergyFactory(recipe)
+                else
+                    ModelCompute.computeFactory(recipe)
                 end
             end
         end
 
-        if block.count <= 1 then
-            block.count = 1
-            block.limit_energy = nil
-            block.limit_pollution = nil
-            block.limit_building = nil
-            for _, recipe in spairs(recipes, function(t, a, b) return t[b].index > t[a].index end) do
-                recipe.factory.limit_count = nil
-                recipe.beacon.limit_count = nil
-                recipe.limit_energy = nil
-                recipe.limit_pollution = nil
-            end
-        else
-            block.limit_energy = block.power / block.count
-            block.limit_pollution = block.pollution_total / block.count
-            for _, recipe in spairs(recipes, function(t, a, b) return t[b].index > t[a].index end) do
-                recipe.factory.limit_count = recipe.factory.count / block.count
-                recipe.beacon.limit_count = recipe.beacon.count / block.count
-                recipe.limit_energy = recipe.energy_total / block.count
-                recipe.limit_pollution = recipe.pollution_total / block.count
-            end
-        end
         ---state = 0 => produit
         ---state = 1 => produit pilotant
         ---state = 2 => produit restant
@@ -238,14 +208,16 @@ function SolverMatrix:solve(block, debug)
                 local product_header = mC.columns[icol]
                 local product_key = product_header.key
                 local product = Product(product_header):clone()
-                product.count = Z
+                product.amount = Z
+                if math.abs(product.amount) < 1e-10 then
+                    product.amount = 0
+                end
                 product.state = state
                 if block.by_product == false then
                     if state == 1 or state == 3 then
                         ---element produit
                         if block.ingredients[product_key] ~= nil then
-                            block.ingredients[product_key].count = block.ingredients[product_key].count +
-                                product.count
+                            block.ingredients[product_key].amount = block.ingredients[product_key].amount + product.amount
                             block.ingredients[product_key].state = state
                         end
                         if block.products[product_key] ~= nil then
@@ -254,7 +226,7 @@ function SolverMatrix:solve(block, debug)
                     else
                         ---element ingredient
                         if block.products[product_key] ~= nil then
-                            block.products[product_key].count = block.products[product_key].count + product.count
+                            block.products[product_key].amount = block.products[product_key].amount + product.amount
                             block.products[product_key].state = state
                         end
                         if block.ingredients[product_key] ~= nil then
@@ -265,7 +237,7 @@ function SolverMatrix:solve(block, debug)
                     if state == 1 or state == 3 then
                         ---element produit
                         if block.products[product_key] ~= nil then
-                            block.products[product_key].count = block.products[product_key].count + product.count
+                            block.products[product_key].amount = block.products[product_key].amount + product.amount
                             block.products[product_key].state = state
                         end
                         if block.ingredients[product_key] ~= nil then
@@ -274,8 +246,7 @@ function SolverMatrix:solve(block, debug)
                     else
                         ---element ingredient
                         if block.ingredients[product_key] ~= nil then
-                            block.ingredients[product_key].count = block.ingredients[product_key].count +
-                                product.count
+                            block.ingredients[product_key].amount = block.ingredients[product_key].amount + product.amount
                             block.ingredients[product_key].state = state
                         end
                         if block.products[product_key] ~= nil then
@@ -292,82 +263,146 @@ end
 
 -------------------------------------------------------------------------------
 ---Return a matrix of block
----@param block table
+---@param block BlockData
+---@param parameters ParametersData
 ---@return table
-function SolverMatrix.get_block_matrix(block)
-    local recipes = block.recipes
-    if recipes ~= nil then
+function SolverMatrix:get_block_matrix(block, parameters)
+    local children = block.children
+    if children ~= nil then
         local matrix = Matrix()
+        matrix.column_sum = {}
+
         local col_index = {}
-        ---begin loop recipes
         local factor = 1
-        local sorter = function(t, a, b) return t[b].index > t[a].index end
+        local sorter = defines.sorters.block.sort
         if block.by_product == false then
             factor = -factor
-            sorter = function(t, a, b) return t[b].index < t[a].index end
+            sorter = defines.sorters.block.reverse
         end
 
-        for _, recipe in spairs(recipes, sorter) do
-            recipe.base_time = block.time
-            ModelCompute.computeModuleEffects(recipe)
-            if recipe.type == "energy" then
-                ModelCompute.computeEnergyFactory(recipe)
-            else
-                ModelCompute.computeFactory(recipe)
-            end
-
+        ---begin loop children
+        for _, child in spairs(children, sorter) do
+            local is_block = Model.isBlock(child)
+            local child_name = nil
+            local child_type = nil
+            local child_tooltip = nil
+            local child_products = nil
+            local child_ingredients = nil
+            local child_recipe_energy = 1
+            local child_factory_count = 0
+            local child_factory_speed = 1
 
             local row_valid = false
-            local recipe_prototype = RecipePrototype(recipe)
-            local lua_recipe = recipe_prototype:native()
-
-            ---la recette n'existe plus
-            if recipe_prototype:native() == nil then return end
-
-            ---prepare le taux de production
+            -- prepare production %
             local production = 1
-            if not (block.solver == true) and recipe.production ~= nil then production = recipe.production end
+            if not (block.solver == true) and child.production ~= nil then production = child.production end
+
+            if is_block then
+                child_name = child.name
+                child_type = child.type
+                child_tooltip = child.name .. "\nBlock"
+
+                --- TODO fix product by ingredient
+                -- if child.by_product == false then
+                --     child_products = child.ingredients
+                --     child_ingredients = child.products
+                -- else
+                    child_products = child.products
+                    child_ingredients = child.ingredients
+                --end
+            else
+                local recipe = child
+                -- check recipe doesn't exist
+                local recipe_prototype = RecipePrototype(recipe)
+                if recipe_prototype:native() == nil then return end
+
+                child_name = recipe.name
+                child_type = recipe.type
+                child_tooltip = recipe.name .. "\nRecette"
+                child_recipe_energy = recipe_prototype:getEnergy(recipe.factory)
+                child_factory_count = recipe.factory.input or 0
+
+                recipe.base_time = block.time
+                ModelCompute.computeModuleEffects(recipe, parameters)
+                if recipe.type == "energy" then
+                    ModelCompute.computeEnergyFactory(recipe)
+                else
+                    ModelCompute.computeFactory(recipe)
+                end
+                
+                child_factory_speed = recipe.factory.speed or 0
+
+                child_products = recipe_prototype:getProducts(recipe.factory)
+                child_ingredients = recipe_prototype:getIngredients(recipe.factory)
+            end
+
+            
 
             local rowParameters = MatrixRowParameters()
-            local row = MatrixRow(recipe.type, recipe.name, recipe.name .. "\nRecette")
+            local row = MatrixRow(child_type, child_name, child_tooltip)
 
             rowParameters.base = row.header
-            if recipe.contraint ~= nil then
-                rowParameters.contraint = { type = recipe.contraint.type, name = recipe.contraint.name }
+            if child.contraint ~= nil then
+                rowParameters.contraint = { type = child.contraint.type, name = child.contraint.name }
             end
-            rowParameters.factory_count = recipe.factory.input or 0
-            rowParameters.factory_speed = recipe.factory.speed or 0
+            rowParameters.factory_count = child_factory_count
+            rowParameters.factory_speed = child_factory_speed
             rowParameters.recipe_count = 0
             rowParameters.recipe_production = production
-            rowParameters.recipe_energy = recipe_prototype:getEnergy(recipe.factory)
+            rowParameters.recipe_energy = child_recipe_energy
             rowParameters.coefficient = 0
+            rowParameters.voider = 0
+            rowParameters.by_product = 0
+            if not (child.by_product == false) then
+                rowParameters.by_product = 1
+            end
 
             ---preparation
             local lua_products = {}
             local lua_ingredients = {}
-            for i, lua_product in pairs(recipe_prototype:getProducts(recipe.factory)) do
+            for i, lua_product in pairs(child_products) do
                 local product = Product(lua_product)
                 local product_key = product:getTableKey()
-                local count = product:getAmount(recipe)
-                lua_products[product_key] = { name = lua_product.name, type = lua_product.type, count = count,
-                    temperature = lua_product.temperature, minimum_temperature = lua_product.minimum_temperature,
-                    maximum_temperature = lua_product.maximum_temperature }
+                local product_amount = 0
+                if is_block then
+                    product_amount = lua_product.amount or 0
+                else
+                    product_amount = product:getAmount(child)
+                end
+                lua_products[product_key] = {
+                    name = lua_product.name,
+                    type = lua_product.type,
+                    amount = product_amount,
+                    temperature = lua_product.temperature,
+                    minimum_temperature = lua_product.minimum_temperature,
+                    maximum_temperature = lua_product.maximum_temperature
+                }
             end
-            for i, lua_ingredient in pairs(recipe_prototype:getIngredients(recipe.factory)) do
+            for i, lua_ingredient in pairs(child_ingredients) do
                 local ingredient = Product(lua_ingredient)
                 local ingredient_key = ingredient:getTableKey()
-                local count = ingredient:getAmount()
-                ---si constant compte comme un produit (recipe rocket)
-                if lua_ingredient.constant then
-                    count = ingredient:getAmount(recipe)
-                end
-                if lua_ingredients[ingredient_key] == nil then
-                    lua_ingredients[ingredient_key] = { name = lua_ingredient.name, type = lua_ingredient.type,
-                        count = count, temperature = lua_ingredient.temperature,
-                        minimum_temperature = lua_ingredient.minimum_temperature,
-                        maximum_temperature = lua_ingredient.maximum_temperature }
+                local ingredient_amount = 0
+                if is_block then
+                    ingredient_amount = lua_ingredient.amount or 0
                 else
-                    lua_ingredients[ingredient_key].count = lua_ingredients[ingredient_key].count + count
+                    ingredient_amount = ingredient:getAmount()
+                    ---si constant compte comme un produit (recipe rocket)
+                    if lua_ingredient.constant then
+                        ingredient_amount = ingredient:getAmount(child)
+                    end
+                end
+                
+                if lua_ingredients[ingredient_key] == nil then
+                    lua_ingredients[ingredient_key] = {
+                        name = lua_ingredient.name,
+                        type = lua_ingredient.type,
+                        amount = ingredient_amount,
+                        temperature = lua_ingredient.temperature,
+                        minimum_temperature = lua_ingredient.minimum_temperature,
+                        maximum_temperature = lua_ingredient.maximum_temperature
+                    }
+                else
+                    lua_ingredients[ingredient_key].amount = lua_ingredients[ingredient_key].amount + ingredient_amount
                 end
             end
 
@@ -392,8 +427,11 @@ function SolverMatrix.get_block_matrix(block)
                     col_header.is_ingredient = false
                     col_header.product = lua_product
 
-                    local cell_value = lua_product.count * factor
+                    local value = lua_product.amount * factor
+                    local cell_value = value
                     row:add_value(col_header, cell_value)
+
+                    matrix.column_sum[product_key] = ( matrix.column_sum[product_key] or 0 ) + value
 
                     if rowParameters.contraint ~= nil and rowParameters.contraint.name == name then
                         rowParameters.contraint.name = col_name
@@ -406,14 +444,15 @@ function SolverMatrix.get_block_matrix(block)
                     local ingredient = Product(lua_ingredient)
                     local ingredient_key = ingredient:getTableKey()
                     local index = 1
-                    ---cas normal de l'ingredient n'existant pas du cote produit
+                    ---default case
                     if col_index[ingredient_key] ~= nil and lua_products[ingredient_key] == nil then
                         index = col_index[ingredient_key]
                     end
-                    ---cas de l'ingredient existant du cote produit
+                    ---case where the ingredient exist in the product side
                     if col_index[ingredient_key] ~= nil and lua_products[ingredient_key] ~= nil then
-                        ---cas de la valeur equivalente, on creer un nouveau element
-                        if lua_products[ingredient_key].count == lua_ingredients[ingredient_key].count or recipe.type == "resource" or recipe.type == "energy" then
+                        ---case of the equivalent value, we create a new element
+                        if lua_products[ingredient_key].amount > 0 and lua_ingredients[ingredient_key].amount> 0 and
+                            lua_products[ingredient_key].amount == lua_ingredients[ingredient_key].amount or child_type == "resource" or child_type == "energy" then
                             index = col_index[ingredient_key] + 1
                         else
                             index = col_index[ingredient_key]
@@ -432,10 +471,16 @@ function SolverMatrix.get_block_matrix(block)
                     col_header.product = lua_ingredient
 
                     local cell_value = row:get_value(col_header) or 0
-                    cell_value = cell_value - lua_ingredients[ingredient_key].count * factor
+                    local value = - lua_ingredients[ingredient_key].amount * factor
+                    cell_value = cell_value + value
                     row:add_value(col_header, cell_value)
 
+                    matrix.column_sum[ingredient_key] = ( matrix.column_sum[ingredient_key] or 0 ) + value
+
                     row_valid = true
+                end
+                if row.values ~= nil and #row.values == 1 and row.values[1] < 0 then
+                    rowParameters.voider = 1
                 end
             else
                 ---prepare header ingredients
@@ -443,7 +488,7 @@ function SolverMatrix.get_block_matrix(block)
                     local ingredient = Product(lua_ingredient)
                     local ingredient_key = ingredient:getTableKey()
                     local index = 1
-                    ---cas normal de l'ingredient n'existant pas du cote produit
+                    ---default case
                     if col_index[ingredient_key] ~= nil then
                         index = col_index[ingredient_key]
                     end
@@ -459,8 +504,11 @@ function SolverMatrix.get_block_matrix(block)
                     col_header.is_ingredient = true
                     col_header.product = lua_ingredient
 
-                    local cell_value = -lua_ingredient.count * factor
+                    local value = -lua_ingredient.amount * factor
+                    local cell_value = value
                     row:add_value(col_header, cell_value)
+
+                    matrix.column_sum[ingredient_key] = ( matrix.column_sum[ingredient_key] or 0 ) + value
 
                     if rowParameters.contraint ~= nil and rowParameters.contraint.name == name then
                         rowParameters.contraint.name = col_name
@@ -475,10 +523,11 @@ function SolverMatrix.get_block_matrix(block)
                     if col_index[product_key] ~= nil then
                         index = col_index[product_key]
                     end
-                    ---cas du produit existant du cote ingredient
+                    --- case where the product exist in the ingredient side
                     if col_index[product_key] ~= nil and lua_ingredients[product_key] ~= nil then
-                        ---cas de la valeur equivalente, on creer un nouveau element
-                        if lua_products[product_key].count == lua_ingredients[product_key].count or recipe.type == "resource" or recipe.type == "energy" then
+                        ---case of the equivalent value, we create a new element
+                        if lua_products[product_key].amount > 0 and lua_ingredients[product_key].amount > 0 and 
+                            lua_products[product_key].amount == lua_ingredients[product_key].amount or child_type == "resource" or child_type == "energy" then
                             index = col_index[product_key] + 1
                         else
                             index = col_index[product_key]
@@ -496,9 +545,12 @@ function SolverMatrix.get_block_matrix(block)
                     col_header.is_ingredient = false
                     col_header.product = lua_product
 
+                    local value = lua_product.amount * factor
                     local cell_value = row:get_value(col_header) or 0
-                    cell_value = cell_value + lua_product.count * factor
+                    cell_value = cell_value + value
                     row:add_value(col_header, cell_value)
+
+                    matrix.column_sum[product_key] = ( matrix.column_sum[product_key] or 0 ) + value
 
                     row_valid = true
                 end
@@ -510,24 +562,8 @@ function SolverMatrix.get_block_matrix(block)
 
         ---end loop recipes
 
-        local objectives = {}
-        local input_ready = {}
-        local block_elements = block.products
-        if block.by_product == false then
-            block_elements = block.ingredients
-        end
-        for _, column in pairs(matrix.columns) do
-            if block_elements ~= nil and block_elements[column.key] ~= nil and not (input_ready[column.key]) and column.index == 1 then
-                local objective = {}
-                objective.value = block_elements[column.key].input or 0
-                objective.key = column.key
-                objectives[column.key] = objective
-                input_ready[column.key] = true
-            end
-        end
-
-        matrix = SolverMatrix.linkTemperatureFluid(matrix, block.by_product)
-        matrix.objectives = objectives
+        matrix = self:linkTemperatureFluid(matrix, block.by_product)
+        matrix.objectives = block.objectives
         return matrix
     end
     return nil
@@ -538,7 +574,7 @@ end
 ---@param matrix table
 ---@param by_product boolean
 ---@return table
-function SolverMatrix.linkTemperatureFluid(matrix, by_product)
+function SolverMatrix:linkTemperatureFluid(matrix, by_product)
     ---Create blank parameters
     local template_parameters = MatrixRowParameters()
     template_parameters.factory_count = 0
@@ -555,6 +591,7 @@ function SolverMatrix.linkTemperatureFluid(matrix, by_product)
     end
 
     local mA2 = Matrix()
+    mA2.column_sum = matrix.column_sum
     local block_ingredient_fluids = {}
     local block_product_fluids = {}
 
@@ -584,14 +621,19 @@ function SolverMatrix.linkTemperatureFluid(matrix, by_product)
             end
         end
 
+        local coefficient = 0
         ---Convert any Z into product
         for _, product_fluid in pairs(product_fluids) do
             local product = product_fluid.product
             local linked_fluids = block_ingredient_fluids[product.name] or {}
             for _, linked_fluid in pairs(linked_fluids) do
-                if SolverMatrix.checkLinkedTemperatureFluid(product_fluid, linked_fluid, by_product) then
+                if self:checkLinkedTemperatureFluid(product_fluid, linked_fluid, by_product) then
                     local parameters = MatrixRowParameters()
+                    parameters.coefficient = coefficient
                     local new_row = MatrixRow("recipe", "helmod-temperature-convert", "")
+                    new_row.header.is_ingredient = false
+                    new_row.header.primary = product_fluid.product
+                    new_row.header.secondary = linked_fluid.product
                     new_row:add_value(product_fluid, -1)
                     new_row:add_value(linked_fluid, 1)
                     mA2:add_row(new_row, parameters)
@@ -607,9 +649,13 @@ function SolverMatrix.linkTemperatureFluid(matrix, by_product)
             local product = product_fluid.product
             local linked_fluids = block_ingredient_fluids[product.name] or {}
             for _, linked_fluid in pairs(linked_fluids) do
-                if SolverMatrix.checkLinkedTemperatureFluid(product_fluid, linked_fluid, by_product) then
+                if self:checkLinkedTemperatureFluid(product_fluid, linked_fluid, by_product) then
                     local parameters = MatrixRowParameters()
+                    parameters.coefficient = coefficient
                     local new_row = MatrixRow("recipe", "helmod-temperature-convert", "")
+                    new_row.header.is_ingredient = false
+                    new_row.header.primary = linked_fluid.product
+                    new_row.header.secondary = product_fluid.product
                     new_row:add_value(product_fluid, 1)
                     new_row:add_value(linked_fluid, -1)
                     mA2:add_row(new_row, parameters)
@@ -627,15 +673,23 @@ function SolverMatrix.linkTemperatureFluid(matrix, by_product)
 
             local linked_fluids = block_product_fluids[product.name] or {}
             for _, linked_fluid in pairs(linked_fluids) do
-                if SolverMatrix.checkLinkedTemperatureFluid(linked_fluid, ingredient_fluid, by_product) then
+                if self:checkLinkedTemperatureFluid(linked_fluid, ingredient_fluid, by_product) then
                     local parameters = MatrixRowParameters()
+                    parameters.coefficient = coefficient
                     local new_row = MatrixRow("recipe", "helmod-temperature-convert", "")
+                    new_row.header.is_ingredient = true
+                    new_row.header.primary = linked_fluid.product
+                    new_row.header.secondary = ingredient_fluid.product
                     new_row:add_value(linked_fluid, -1)
                     new_row:add_value(ingredient_fluid, 1)
                     mA2:add_row(new_row, parameters)
 
                     local parameters = MatrixRowParameters()
+                    parameters.coefficient = coefficient
                     local new_row = MatrixRow("recipe", "helmod-temperature-convert", "")
+                    new_row.header.is_ingredient = true
+                    new_row.header.primary = ingredient_fluid.product
+                    new_row.header.secondary = linked_fluid.product
                     new_row:add_value(linked_fluid, 1)
                     new_row:add_value(ingredient_fluid, -1)
                     mA2:add_row(new_row, parameters)
@@ -653,7 +707,7 @@ end
 ---@param item2 table
 ---@param by_product boolean
 ---@return boolean
-function SolverMatrix.checkLinkedTemperatureFluid(item1, item2, by_product)
+function SolverMatrix:checkLinkedTemperatureFluid(item1, item2, by_product)
     local result = false
 
     local product, ingredient

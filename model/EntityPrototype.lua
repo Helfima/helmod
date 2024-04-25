@@ -656,7 +656,7 @@ end
 ---Return speed factory for recipe
 ---@return number
 function EntityPrototype:speedFactory(recipe)
-  if self.lua_prototype.type == "boiler" then
+  if self.lua_prototype and self.lua_prototype.type == "boiler" then
     ---@see https://wiki.factorio.com/Boiler
     ---info energy 1J=1W
     return 1

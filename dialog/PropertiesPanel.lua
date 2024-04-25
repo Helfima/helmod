@@ -138,7 +138,9 @@ end
 ---@param event LuaEvent
 function PropertiesPanel:onUpdate(event)
   local flow_panel, content_panel, menu_panel = self:getPanel()
-  local width_main, height_main = User.getMainSizes()
+  local display_width, display_height, scale = User.getMainSizes()
+  local width_main = display_width/scale
+  local height_main = display_height/scale
   flow_panel.style.height = height_main
   flow_panel.style.width = width_main
   

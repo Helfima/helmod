@@ -25,7 +25,7 @@ default_gui["helmod_table_result"] = {
     type = "composition",
     filename = "__helmod__/graphics/gui.png",
     corner_size = {1, 1},
-    position = {8, 72},
+    position = {8, 32},
     opacity = 1
   },
   odd_row_graphical_set =
@@ -33,7 +33,7 @@ default_gui["helmod_table_result"] = {
     type = "composition",
     filename = "__helmod__/graphics/gui.png",
     corner_size = {1, 1},
-    position = {0, 72},
+    position = {0, 32},
     opacity = 1
   }
 }
@@ -156,7 +156,7 @@ default_gui["helmod_table-rule-odd"] = {
     type = "composition",
     filename = "__helmod__/graphics/gui.png",
     corner_size = {1, 1},
-    position = {16, 56},
+    position = {0, 32},
     opacity = 1
   }
 }
