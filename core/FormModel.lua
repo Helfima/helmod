@@ -15,7 +15,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Get objects with current parameter
----@return model, block, recipe
+---@return ModelData, BlockData, RecipeData
 function FormModel:getParameterObjects()
     local parameter_objects = User.getParameter(self.parameter_objects)
     local model, block, recipe = Model.getParameterObjects(parameter_objects)

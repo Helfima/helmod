@@ -55,7 +55,7 @@ end
 ---@param event LuaEvent
 function LogisticEdition:updateItemsLogistic(event)
   local number_column = User.getPreferenceSetting("preference_number_column")
-  local container_panel = self:getFramePanel("information")
+  local container_panel = self:getScrollPanel("information")
   container_panel.clear()
 
   if event.item1 == "item" then

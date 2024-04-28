@@ -4,7 +4,6 @@ default_gui["helmod_table_default"] = {
   type = "table_style",
   horizontal_spacing = 2,
   vertical_spacing = 2,
-  cell_spacing = 4,
   top_padding = 0,
   right_padding = 1,
   bottom_padding = 0,
@@ -25,18 +24,16 @@ default_gui["helmod_table_result"] = {
   {
     type = "composition",
     filename = "__helmod__/graphics/gui.png",
-    priority = "extra-high-no-scale",
     corner_size = {1, 1},
-    position = {8, 72},
+    position = {8, 32},
     opacity = 1
   },
   odd_row_graphical_set =
   {
     type = "composition",
     filename = "__helmod__/graphics/gui.png",
-    priority = "extra-high-no-scale",
     corner_size = {1, 1},
-    position = {0, 72},
+    position = {0, 32},
     opacity = 1
   }
 }
@@ -62,7 +59,6 @@ default_gui["helmod_table_list"] = {
   type = "table_style",
   horizontal_spacing = 1,
   vertical_spacing = 1,
-  cell_spacing = 1,
   top_padding = 0,
   right_padding = 0,
   bottom_padding = 0,
@@ -75,7 +71,6 @@ default_gui["helmod_table_tab"] = {
   type = "table_style",
   horizontal_spacing = 0,
   vertical_spacing = 0,
-  cell_spacing = 0,
   top_padding = 0,
   right_padding = 0,
   bottom_padding = 0,
@@ -87,7 +82,6 @@ default_gui["helmod_table_rule"] = {
   type = "table_style",
   horizontal_spacing = 2,
   vertical_spacing = 2,
-  cell_spacing = 0,
   top_padding = 0,
   right_padding = 10,
   bottom_padding = 0,
@@ -100,14 +94,12 @@ default_gui["helmod_factory_modules"] = {
   parent = "helmod_table_default",
   minimal_width = 36,
   vertical_spacing = 0,
-  cell_spacing = 3
 }
 
 default_gui["helmod_factory_info"] = {
   type = "table_style",
   parent = "helmod_table_default",
   left_padding = -5,
-  cell_spacing = 3
 }
 
 default_gui["helmod_beacon_modules"] = {
@@ -140,13 +132,10 @@ default_gui["helmod_table-odd"] = {
   vertical_align = "top",
   horizontal_spacing = 3,
   vertical_spacing = 2,
-  horizontal_padding = 1,
-  vertical_padding = 1,
   odd_row_graphical_set =
   {
     type = "composition",
     filename = "__core__/graphics/gui.png",
-    priority = "extra-high-no-scale",
     corner_size = {1, 1},
     position = {78, 18},
     opacity = 0.7
@@ -162,15 +151,12 @@ default_gui["helmod_table-rule-odd"] = {
   vertical_align = "top",
   horizontal_spacing = 10,
   vertical_spacing = 2,
-  horizontal_padding = 3,
-  vertical_padding = 1,
   odd_row_graphical_set =
   {
     type = "composition",
     filename = "__helmod__/graphics/gui.png",
-    priority = "extra-high-no-scale",
     corner_size = {1, 1},
-    position = {16, 56},
+    position = {0, 32},
     opacity = 1
   }
 }

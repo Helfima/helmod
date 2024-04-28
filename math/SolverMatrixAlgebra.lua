@@ -13,6 +13,7 @@ end)
 ---@return integer
 function SolverMatrixAlgebra:get_col(matrix, xrow, invert)
     local row = matrix.rows[xrow]
+    local parameters = matrix.parameters[xrow]
     local zrow = matrix.rows[#matrix.rows]
     local xcol = 0
     local max = 0
@@ -27,33 +28,28 @@ function SolverMatrixAlgebra:get_col(matrix, xrow, invert)
     ---on cherche la plus grande demande
     for icol, column in pairs(matrix.columns) do
         local cell_value = row[icol] or 0
+        if parameters.by_product == 0 or parameters.voider == 1 then
+            -- to consume value we must use -value
+            cell_value = -cell_value
+        end
         if ((invert ~= true and cell_value > 0) or (invert == true and cell_value < 0)) then
-            local objective = matrix.objective_values[icol] or 0
             local zvalue = zrow[icol]
-            local Z = zvalue - objective ---valeur demandee (Z-input)
+            if parameters.by_product == 0 or parameters.voider == 1 then
+                -- to consume value we must use -value
+                zvalue = -zvalue
+            end
+            local Z = zvalue
             local C = -Z / cell_value
+            -- contraint
+            local has_contraint = parameters.contraint ~= nil
+            local is_master = parameters.contraint ~= nil and parameters.contraint.type == "master" and parameters.contraint.name == column.sysname
+            local is_exclude = parameters.contraint ~= nil and parameters.contraint.type == "exclude" and parameters.contraint.name ~= column.sysname
             -- if zvalue = 0 the choose is already use
-            if (C > max and zvalue ~= 0 and col_master == 0 and col_exclude == 0)
-                or (col_master ~= 0 and col_master == icol)
-                or (C > max and col_exclude ~= 0 and col_exclude ~= icol) then
+            if (C > max and zvalue ~= 0 and has_contraint == false)
+                or (is_master)
+                or (C > max and is_exclude) then
                 max = C
                 xcol = icol
-            end
-        end
-    end
-    ---cas des voider
-    if xcol == 0 then
-        for icol, column in pairs(matrix.columns) do
-            local cell_value = row[icol] or 0
-            if ((invert ~= true and cell_value > 0) or (invert == true and cell_value < 0)) then
-                local objective = matrix.objective_values[icol] or 0
-                local zvalue = zrow[icol]
-                local Z = zvalue - objective ---valeur demandee (Z-input)
-                local C = -Z / cell_value
-                if C > max then
-                    max = C
-                    xcol = icol
-                end
             end
         end
     end
@@ -76,7 +72,7 @@ function SolverMatrixAlgebra:line_compute(matrix, xrow, xcol)
     local Z = zrow[xcol]                ---valeur demandee Z
     local V = row[xcol]                 ---valeur produite
     local C = -Z / V                    ---coefficient
-    if Z < 0 then
+    if Z < 0 or parameters.by_product == 0 or parameters.voider == 1 then
         parameters.coefficient = C
         parameters.recipe_count = P * C
         for icol, cell_value in pairs(row) do

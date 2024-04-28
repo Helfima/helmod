@@ -1,0 +1,164 @@
+---@class LuaEvent : EventData
+---@field classname string
+---@field element LuaGuiElement
+---@field action string
+---@field item1 string
+---@field item2 string
+---@field item3 string
+---@field item4 string
+---@field item5 string
+---@field alt boolean
+---@field control boolean
+---@field shift boolean
+
+---@class ModulePriorityData
+---@field name string
+---@field value uint
+
+---@class FuelData
+---@field name string
+---@field temperature number
+
+---@class ContraintData
+---@field name string
+---@field type string
+
+---@class ModuleEffectsData
+---@field speed number
+---@field productivity number
+---@field consumption number
+---@field pollution number
+
+---@class FactoryData
+---@field class string
+---@field name string
+---@field type string
+---@field amount number
+---@field count number
+---@field count_limit number
+---@field count_deep number
+---@field energy number
+---@field speed number
+---@field fuel string | FuelData
+---@field limit number
+---Dictionnary {[module.name] : int}
+---@field modules {[string] : uint}
+---@field effects ModuleEffectsData
+---@field cap ModuleEffects
+---@field energy_total number
+---@field polution_total number
+---@field speed_total number
+---@field module_priority {[uint] : ModulePriorityData}
+
+---@class BeaconData : FactoryData
+---@field combo number
+---@field per_factory number
+---@field per_factory_constant number
+
+---@class ProductData
+---@field name string
+---@field type string
+---@field amount number
+---@field count number
+---@field count_limit number
+---@field count_deep number
+---@field state number
+---@field input number
+
+---@class RecipeData
+---@field class string
+---@field id string
+---@field index uint
+---@field name string
+---@field type string
+---@field count number
+---@field count_limit number
+---@field count_deep number
+---@field production number
+---@field factory FactoryData
+---@field beacons {[uint] : BeaconData}
+---@field time uint
+---@field energy_total number
+---@field power number
+---@field power_limit number
+---@field power_deep number
+---@field pollution_amount number
+---@field pollution number
+---@field pollution_limit number
+---@field pollution_deep number
+---@field is_done boolean
+---@field base_time uint
+---@field contraints {[string] : ContraintData}
+
+---@class ParametersData
+---@field effects ModuleEffectsData
+
+---@class ObjectiveData
+---@field key string
+---@field value number
+
+---@class BlockData
+---@field class string
+---@field id string
+---@field index number
+---@field name string
+---@field type string
+---@field parent_id string
+---@field owner string
+---@field count number
+---@field count_limit number
+---@field count_deep number
+---@field power number
+---@field power_limit number
+---@field power_deep number
+---@field pollution number
+---@field pollution_limit number
+---@field pollution_deep number
+---@field isEnergy boolean
+---@field unlinked boolean
+---@field by_product boolean
+---@field by_factory boolean
+---@field by_limit boolean
+---@field time number
+---@field ingredients {[string] : ProductData}
+---@field products {[string] : ProductData}
+---@field children {[string] : RecipeData | BlockData}
+---@field has_input boolean
+---@field objectives {[string] : ObjectiveData}
+---@field expanded {[string] : boolean}
+---@field products_linked {[string] : boolean}
+---@field blocks_linked {[string] : BlockData}
+---@field runtimes {[uint] : Matrix}
+---@field contraints {[string] : ContraintData}
+---@field summary any
+
+---@class ModelData
+---@field id string
+---@field index_id number
+---@field time number
+---@field version number
+---@field owner string
+---@field block_id number
+---@field recipe_id number
+---@field resource_id number
+---@field block_root BlockData
+---@field blocks {[string] : BlockData}
+---@field ingredients {[string] : ProductData}
+---@field products {[string] : ProductData}
+---@field ressources any
+---@field summary any
+---@field generators any
+---@field parameters ParametersData
+
+---@class ThumbnailsColorData
+---@field default string
+---@field block_default string
+---@field block_selected string
+---@field block_reverted string
+---@field recipe_default string
+---@field product_default string
+---@field product_driving string
+---@field product_overflow string
+---@field ingredient_default string
+---@field ingredient_driving string
+---@field ingredient_overflow string

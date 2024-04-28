@@ -77,7 +77,7 @@ end
 -------------------------------------------------------------------------------
 ---@class MatrixRowParameters
 ---@field base string
----@field contraint table
+---@field contraints table
 ---@field factory_count number
 ---@field factory_speed number
 ---@field recipe_count number
@@ -100,6 +100,8 @@ end)
 ---@field rows {[integer] : {[integer] : number}}
 ---@field columnIndex {[string] : integer}
 ---@field parameters {[integer] : MatrixRowParameters}
+---@field objectives {[string] : number}
+---@field objective_values {[integer] : number}
 
 Matrix = newclass(function(base)
   base.columns = {}

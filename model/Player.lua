@@ -64,12 +64,12 @@ end
 
 ------------------------------------------------------------------------------
 ---Get display sizes
----@return number, number
+---@return number, number, number
 function Player.getDisplaySizes()
-  if Lua_player == nil or not Lua_player.valid then return 800,600 end
+  if Lua_player == nil or not Lua_player.valid then return 800,600,1 end
   local display_resolution = Lua_player.display_resolution
   local display_scale = Lua_player.display_scale
-  return display_resolution.width/display_scale, display_resolution.height/display_scale
+  return display_resolution.width, display_resolution.height, display_scale
 end
 
 -------------------------------------------------------------------------------
@@ -106,7 +106,7 @@ function Player.beginCrafting(item, count)
   local filters = {{filter = "has-product-item", elem_filters = {{filter = "name", name = item}}}}
   local recipes = game.get_filtered_recipe_prototypes(filters)
   if recipes ~= nil and table.size(recipes) > 0 then
-    local first_recipe = Model.firstRecipe(recipes)
+    local first_recipe = Model.firstChild(recipes)
     local craft = {count=math.ceil(count),recipe=first_recipe.name,silent=false}
     Lua_player.begin_crafting(craft)
   else
@@ -137,12 +137,16 @@ end
 ---Set smart tool
 ---@param recipe table
 ---@param type string
+---@param index number
 ---@return any
-function Player.setSmartTool(recipe, type)  
-  if Lua_player == nil or recipe == nil then
-    return nil
-  end
+function Player.setSmartTool(recipe, type, index)  
+    if Lua_player == nil or recipe == nil then
+      return nil
+    end
     local factory = recipe[type]
+    if index ~= nil then
+      factory = factory[index]
+    end
     local modules = {}
     for name,value in pairs(factory.modules or {}) do
       modules[name] = value
@@ -203,6 +207,18 @@ end
 function Player.native()
   return Lua_player
 end
+
+-------------------------------------------------------------------------------
+---Return player name or unknown
+---@return string
+function Player.getName()
+  local player_name = "unknown"
+  if Lua_player ~= nil then
+    player_name = Lua_player.name
+  end
+  return player_name
+end
+
 
 -------------------------------------------------------------------------------
 ---Return admin player
@@ -436,7 +452,7 @@ end
 -------------------------------------------------------------------------------
 ---Check factory limitation module
 ---@param module table
----@param lua_recipe table
+---@param lua_recipe RecipeData
 ---@return boolean
 function Player.checkFactoryLimitationModule(module, lua_recipe)
   local factory = lua_recipe.factory
@@ -490,18 +506,18 @@ end
 
 -------------------------------------------------------------------------------
 ---Check beacon limitation module
----@param module table
----@param lua_recipe table
+---@param beacon FactoryData
+---@param recipe RecipeData
+---@param module LuaItemPrototype
 ---@return boolean
-function Player.checkBeaconLimitationModule(module, lua_recipe)
-  local beacon = lua_recipe.beacon
+function Player.checkBeaconLimitationModule(beacon, recipe, module)
   local allowed = true
   local model_filter_beacon_module = User.getModGlobalSetting("model_filter_beacon_module")
 
-  if table.size(module.limitations) > 0 and model_filter_beacon_module == true then
+  if table.size(module.limitations) > 0 and model_filter_beacon_module == true and recipe.type ~= "resource" then
     allowed = false
-    for _, recipe_name in pairs(module.limitations) do
-      if lua_recipe.name == recipe_name then
+    for _, module_recipe_name in pairs(module.limitations) do
+      if module_recipe_name == recipe.name then
         allowed = true
       end
     end
@@ -571,7 +587,7 @@ function Player.getProductionsCrafting(category, lua_recipe)
           if lua_entity_filter ~= nil then
             if lua_entity.resource_categories ~= nil and not(lua_entity.resource_categories[lua_entity_filter.resource_category]) then
               check = false
-            elseif lua_entity_filter.mineable_properties and lua_entity_filter.mineable_properties.required_fluid then
+            elseif lua_entity.type == "mining-drill" and lua_entity_filter.mineable_properties and lua_entity_filter.mineable_properties.required_fluid then
               local fluidboxes = EntityPrototype(lua_entity):getFluidboxPrototypes()
               if #fluidboxes == 0 then
                 check = false
