@@ -80,6 +80,9 @@ function SolverLinkedMatrixAlgebra:line_compute(matrix, xrow, xcol)
     local Z = zrow[xcol]                ---valeur demandee Z
     local V = row[xcol]                 ---valeur produite
     local C = -Z / V                    ---coefficient
+    if parameters.unlinked == 1 then
+        C = 1
+    end
     if Z < 0 or parameters.by_product == 0 or parameters.voider == 1 then
         parameters.coefficient = C
         parameters.recipe_count = P * C

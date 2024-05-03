@@ -233,7 +233,7 @@ function SolverLinkedMatrix:solve_block(block, parameters, debug)
         -- build map to find parameter index by key
         local parameters_index = {}
         for index, header in pairs(mC.headers) do
-            local key = header.name
+            local key = header.child_id
             if header.product_linked ~= nil then
                 key = header.name .. "_" .. header.product_linked.name
             end
@@ -245,7 +245,7 @@ function SolverLinkedMatrix:solve_block(block, parameters, debug)
         local children = block.children
         for _, child in spairs(children, sorter) do
             local is_block = Model.isBlock(child)
-            local row_index = parameters_index[child.name]
+            local row_index = parameters_index[child.id]
             local parameters = mC.parameters[row_index]
             if parameters ~= nil and parameters.recipe_count > 0 then
                 child.count = parameters.recipe_count
@@ -498,6 +498,7 @@ function SolverLinkedMatrix:add_matrix_row(matrix, child, child_info, is_block, 
     local row_valid = false
     local rowParameters = MatrixRowParameters()
     local row = MatrixRow(child_info.type, child_info.name, child_info.tooltip)
+    row.header.child_id = child.id
     if child.product_linked then
         row.header.product_linked = child.product_linked
     end
@@ -513,6 +514,10 @@ function SolverLinkedMatrix:add_matrix_row(matrix, child, child_info, is_block, 
     rowParameters.recipe_energy = child_info.recipe_energy
     rowParameters.coefficient = 0
     rowParameters.voider = 0
+    rowParameters.unlinked = 0
+    if child.unlinked == true then
+        rowParameters.unlinked = 1
+    end
     rowParameters.by_product = 0
     if not (child.by_product == false) then
         rowParameters.by_product = 1
@@ -745,6 +750,7 @@ function SolverLinkedMatrix:linkTemperatureFluid(matrix, by_product)
         local rowParameters = matrix.parameters[irow]
         local rowHeader = matrix.headers[irow]
         local rowMatrix = MatrixRow(rowHeader.type, rowHeader.name, rowHeader.tooltip)
+        rowMatrix.header.child_id = rowHeader.child_id
         rowMatrix.header.product_linked = rowHeader.product_linked
         rowMatrix.columns = matrix.columns
         rowMatrix.columnIndex = matrix.columnIndex

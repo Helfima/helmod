@@ -235,6 +235,7 @@ end
 function ModelDebug:buildTableSolverMatrix(matrix_panel, matrix, pivot)
     if matrix ~= nil then
         local parameter_columns = {}
+        table.insert(parameter_columns, {type="none", name="UL", tooltip="unlinked", property="unlinked"})
         table.insert(parameter_columns, {type="none", name="BP", tooltip="by_product", property="by_product"})
         table.insert(parameter_columns, {type="none", name="V", tooltip="voider", property="voider"})
         table.insert(parameter_columns, {type="none", name="Cn", tooltip="Contraint", property="contraint"})

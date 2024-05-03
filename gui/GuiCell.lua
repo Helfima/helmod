@@ -523,7 +523,7 @@ function GuiCellProduct:create(parent)
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
 
   if string.find(element.name, "helmod") then
-    GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", element.hovered, element.sprite):style(element.name):tooltip({element.localised_name}))
+    GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", element.hovered, element.sprite):tooltip({element.localised_name}))
   else
     local product_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type, element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip({self.options.tooltip, Player.getLocalisedName(element)}))
     self:add_mask(product_icon, color)
