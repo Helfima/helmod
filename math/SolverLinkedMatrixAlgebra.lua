@@ -61,6 +61,7 @@ function SolverLinkedMatrixAlgebra:get_col(matrix, xrow, invert)
             end
         end
     end
+    parameters.pivot = xcol
     return xcol
 end
 

@@ -1118,6 +1118,7 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 			local cell_products = GuiElement.add(gui_table, GuiTable("products", recipe.id):column(display_product_cols):style("helmod_table_list"))
 			for index, lua_product in spairs(recipe_prototype:getProducts(recipe.factory), User.getProductSorter()) do
 				local contraint_type = nil
+				local is_pivot = false
 				local product_prototype = Product(lua_product)
 				local product = product_prototype:clone()
 				product.time = model.time
@@ -1131,8 +1132,15 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				if not (block.solver ~= true and block.by_product ~= false) then
 					control_info = nil
 				end
+				if recipe.pivot ~= nil  then
+					local pivot = recipe.pivot
+					if pivot.type == lua_product.type and pivot.name == lua_product.name then
+						is_pivot = true
+					end
+				end
 				local product_color = User.getThumbnailColor(defines.thumbnail_color.names.product_default)
-				GuiElement.add(cell_products, GuiCellElement(self.classname, "production-recipe-product-add", model.id, block.id, recipe.id):element(product):tooltip("tooltip.add-recipe"):color(product_color):index(index):byLimit(block.by_limit):contraintIcon(contraint_type):controlInfo(control_info))
+				GuiElement.add(cell_products, GuiCellElement(self.classname, "production-recipe-product-add", model.id, block.id, recipe.id):element(product):tooltip("tooltip.add-recipe")
+				:color(product_color):index(index):byLimit(block.by_limit):contraintIcon(contraint_type):isPivot(is_pivot):controlInfo(control_info))
 			end
 		else
 			---ingredients
@@ -1262,6 +1270,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 				for index, lua_product in spairs(block.products, product_sorter) do
 					if ((lua_product.state or 0) == 1 and block_by_product) or (lua_product.amount or 0) > ModelCompute.waste_value then
 						local contraint_type = nil
+						local is_pivot = false
 						local button_action = "production-recipe-product-add"
 						local button_tooltip = "tooltip.product"
 						local product_color = User.getThumbnailColor(defines.thumbnail_color.names.product_default)
@@ -1295,8 +1304,14 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						else
 							product_color = User.getThumbnailColor(defines.thumbnail_color.names.product_default)
 						end
-						
-						GuiElement.add(cell_products, GuiCellElement(self.classname, button_action, model.id, parent.id, block.id, product.name):element(product):tooltip(button_tooltip):color(product_color):index(index):contraintIcon(contraint_type))
+						if block.pivot ~= nil  then
+							local pivot = block.pivot
+							if pivot.type == lua_product.type and pivot.name == lua_product.name then
+								is_pivot = true
+							end
+						end
+						GuiElement.add(cell_products, GuiCellElement(self.classname, button_action, model.id, parent.id, block.id, product.name):element(product)
+						:tooltip(button_tooltip):color(product_color):index(index):contraintIcon(contraint_type):isPivot(is_pivot))
 					end
 				end
 			end

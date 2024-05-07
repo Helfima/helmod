@@ -1,8 +1,10 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.10
-Date: 2024-04-29
+Date: 2024-05-07
   Features:
     - Added a new tool 'CreatedOrWhereUsedPanel'
+    - Added a asterisk icon on the product with input
+    - Added a dot icon on the product who is pivot
   Changes:
     - When a block is unliked, the row count is 1
   Bugfixes:

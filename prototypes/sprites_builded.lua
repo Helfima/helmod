@@ -174,5 +174,9 @@ local mipmaps = {
 {name="reset_black", size=64, count=4},
 {name="reset_white", size=64, count=4},
 {name="rocket_blue", size=64, count=4},
+{name="pick_cursor_red", size=64, count=4},
+{name="pick_cursor_blue", size=64, count=4},
+{name="asterisk_red", size=64, count=4},
+{name="asterisk_blue", size=64, count=4},
 }
 return mipmaps

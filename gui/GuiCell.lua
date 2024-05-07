@@ -77,11 +77,20 @@ function GuiCell:contraintIcon(type)
 end
 
 -------------------------------------------------------------------------------
----Set contraint information
+---Set input information
 ---@param has_input boolean
 ---@return GuiCell
 function GuiCell:hasInput(has_input)
   self.m_has_input = has_input
+  return self
+end
+
+-------------------------------------------------------------------------------
+---Set pivot information
+---@param is_pivot boolean
+---@return GuiCell
+function GuiCell:isPivot(is_pivot)
+  self.m_is_pivot = is_pivot
   return self
 end
 
@@ -254,7 +263,7 @@ end
 ---@param button LuaGuiElement
 function GuiCell:add_inputIcon(button)
   if self.m_has_input ~= true then return end
-  local sprite_name = GuiElement.getSprite(defines.sprites.status_information.white)
+  local sprite_name = GuiElement.getSprite(defines.sprites.asterisk.red)
   if sprite_name ~= nil then
     local sprite = GuiElement.add(button, GuiSprite("has_input"):sprite(sprite_name))
     sprite.style.width = defines.sprite_size
@@ -263,6 +272,22 @@ function GuiCell:add_inputIcon(button)
     sprite.ignored_by_interaction = true
   end
 end
+
+-------------------------------------------------------------------------------
+---Add pivot information
+---@param button LuaGuiElement
+function GuiCell:add_pivotIcon(button)
+  if self.m_is_pivot ~= true then return end
+  local sprite_name = GuiElement.getSprite(defines.sprites.pick_cursor.red)
+  if sprite_name ~= nil then
+    local sprite = GuiElement.add(button, GuiSprite("is_pivot"):sprite(sprite_name))
+    sprite.style.width = defines.sprite_size
+    sprite.style.height = defines.sprite_size
+    sprite.style.stretch_image_to_widget_size = true
+    sprite.ignored_by_interaction = true
+  end
+end
+
 -------------------------------------------------------------------------------
 ---Add logistic information
 ---@param parent LuaGuiElement
@@ -916,6 +941,7 @@ function GuiCellElement:create(parent)
   self:add_infoIcon(button)
   self:add_contraintIcon(button)
   self:add_inputIcon(button)
+  self:add_pivotIcon(button)
   self:add_mask(button, color)
 
   local display_count_deep = User.getParameter("display_count_deep")

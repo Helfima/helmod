@@ -247,6 +247,16 @@ function SolverLinkedMatrix:solve_block(block, parameters, debug)
             local is_block = Model.isBlock(child)
             local row_index = parameters_index[child.id]
             local parameters = mC.parameters[row_index]
+            -- retrieve pivot name
+            if parameters.pivot ~= nil then
+                local xcol = parameters.pivot
+                local colum_pivot = mC.columns[xcol]
+                if colum_pivot ~= nil  then
+                    child.pivot = {type=colum_pivot.product.type, name=colum_pivot.product.name}
+                else
+                    child.pivot = nil       
+                end
+            end
             if parameters ~= nil and parameters.recipe_count > 0 then
                 child.count = parameters.recipe_count
                 child.production = parameters.recipe_production
