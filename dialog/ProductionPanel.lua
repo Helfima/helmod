@@ -582,6 +582,7 @@ function ProductionPanel:updateInputBlock(model, block)
 			for index, lua_ingredient in spairs(block.ingredients, User.getProductSorter()) do
 				if all_visible == true or ((lua_ingredient.state or 0) == 1 and not (block_by_product)) or (lua_ingredient.amount or 0) > ModelCompute.waste_value then
 					local contraint_type = nil
+					local has_input = lua_ingredient.input ~= nil
 					local ingredient = Product(lua_ingredient):clone()
 					ingredient.time = model.time
 					ingredient.count = lua_ingredient.amount
@@ -620,7 +621,7 @@ function ProductionPanel:updateInputBlock(model, block)
 					else
 						ingredient_color = User.getThumbnailColor(defines.thumbnail_color.names.ingredient_default)
 					end
-					GuiElement.add(input_table, GuiCellElementM(self.classname, button_action, model.id, block.id, "none"):element(ingredient):tooltip(button_tooltip):index(index):color(ingredient_color):byLimit(block.by_limit):contraintIcon(contraint_type):controlInfo(control_info))
+					GuiElement.add(input_table, GuiCellElementM(self.classname, button_action, model.id, block.id, "none"):element(ingredient):tooltip(button_tooltip):index(index):color(ingredient_color):byLimit(block.by_limit):contraintIcon(contraint_type):hasInput(has_input):controlInfo(control_info))
 				end
 			end
 		end
@@ -668,6 +669,7 @@ function ProductionPanel:updateOutputBlock(model, block)
 			for index, lua_product in spairs(block.products, User.getProductSorter()) do
 				if all_visible == true or ((lua_product.state or 0) == 1 and block_by_product) or (lua_product.amount or 0) > ModelCompute.waste_value then
 					local contraint_type = nil
+					local has_input = lua_product.input ~= nil
 					local product = Product(lua_product):clone()
 					product.time = model.time
 					product.count = lua_product.amount
@@ -708,7 +710,7 @@ function ProductionPanel:updateOutputBlock(model, block)
 					else
 						product_color = User.getThumbnailColor(defines.thumbnail_color.names.product_default)
 					end
-					GuiElement.add(output_table, GuiCellElementM(self.classname, button_action, model.id, block.id, "none"):element(product):tooltip(button_tooltip):index(index):color(product_color):byLimit(block.by_limit):contraintIcon(contraint_type):controlInfo(control_info))
+					GuiElement.add(output_table, GuiCellElementM(self.classname, button_action, model.id, block.id, "none"):element(product):tooltip(button_tooltip):index(index):color(product_color):byLimit(block.by_limit):contraintIcon(contraint_type):hasInput(has_input):controlInfo(control_info))
 				end
 			end
 		end

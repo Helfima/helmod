@@ -77,6 +77,15 @@ function GuiCell:contraintIcon(type)
 end
 
 -------------------------------------------------------------------------------
+---Set contraint information
+---@param has_input boolean
+---@return GuiCell
+function GuiCell:hasInput(has_input)
+  self.m_has_input = has_input
+  return self
+end
+
+-------------------------------------------------------------------------------
 ---Set control information
 ---@param control_info string
 ---@return GuiCell
@@ -240,6 +249,20 @@ function GuiCell:add_contraintIcon(button)
   end
 end
 
+-------------------------------------------------------------------------------
+---Add input information
+---@param button LuaGuiElement
+function GuiCell:add_inputIcon(button)
+  if self.m_has_input ~= true then return end
+  local sprite_name = GuiElement.getSprite(defines.sprites.status_information.white)
+  if sprite_name ~= nil then
+    local sprite = GuiElement.add(button, GuiSprite("has_input"):sprite(sprite_name))
+    sprite.style.width = defines.sprite_size
+    sprite.style.height = defines.sprite_size
+    sprite.style.stretch_image_to_widget_size = true
+    sprite.ignored_by_interaction = true
+  end
+end
 -------------------------------------------------------------------------------
 ---Add logistic information
 ---@param parent LuaGuiElement
@@ -892,6 +915,7 @@ function GuiCellElement:create(parent)
   if element.burnt then self:add_infoIcon(button, "burnt") end
   self:add_infoIcon(button)
   self:add_contraintIcon(button)
+  self:add_inputIcon(button)
   self:add_mask(button, color)
 
   local display_count_deep = User.getParameter("display_count_deep")
@@ -1004,6 +1028,7 @@ function GuiCellElementM:create(parent)
 
   self:add_infoIcon(button)
   self:add_contraintIcon(button)
+  self:add_inputIcon(button)
   self:add_mask(button, color)
 
   local display_count_deep = User.getParameter("display_count_deep")

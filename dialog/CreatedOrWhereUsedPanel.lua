@@ -39,7 +39,7 @@ function CreatedOrWhereUsedPanel:getButtonSprites()
 ---@param height_main number
 function CreatedOrWhereUsedPanel:onStyle(styles, width_main, height_main)
     styles.flow_panel = {
-        minimal_width = 900,
+        minimal_width = width_main,
         minimal_height = 0,
         maximal_height = height_main
         }
