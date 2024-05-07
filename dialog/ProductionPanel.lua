@@ -1186,7 +1186,6 @@ end
 ---@return LuaGuiElement
 function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 	local unlinked = block.unlinked and true or false
-	if block.index == 0 then unlinked = true end
 	local block_by_product = not (block ~= nil and block.by_product == false)
 	---col action
 	local cell_action = GuiElement.add(gui_table, GuiTable("action", block.id):column(3))
@@ -1217,10 +1216,6 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
             linked_button = GuiElement.add(cell_action, GuiButton(self.classname, "block-unlink", model.id, block.id):sprite("menu", defines.sprites.unplugged.black, defines.sprites.unplugged.black):style("helmod_button_menu_sm"):tooltip({"tooltip.unlink-element" }))
         else
             linked_button = GuiElement.add(cell_action, GuiButton(self.classname, "block-unlink", model.id, block.id):sprite("menu", defines.sprites.plugged.white, defines.sprites.plugged.black):style("helmod_button_menu_sm_selected"):tooltip({ "tooltip.unlink-element" }))
-        end
-        if block.index == 0 then
-            linked_button.enabled = false
-            linked_button.tooltip = { "tooltip.block-cannot-link-first" }
         end
         if block.by_factory == true then
             linked_button.enabled = false
@@ -1269,6 +1264,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 			if block.products ~= nil then
 				for index, lua_product in spairs(block.products, product_sorter) do
 					if ((lua_product.state or 0) == 1 and block_by_product) or (lua_product.amount or 0) > ModelCompute.waste_value then
+						local parent_id = parent.id
 						local contraint_type = nil
 						local is_pivot = false
 						local button_action = "production-recipe-product-add"
@@ -1287,6 +1283,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						else
 							button_action = "product-edition"
 							button_tooltip = "tooltip.edit-product"
+							parent_id = block.id
 						end
 						if parent.by_product ~= false and block.contraints ~= nil and block.contraints[product.name] ~= nil then
 							contraint_type = block.contraints[product.name].type
@@ -1310,7 +1307,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 								is_pivot = true
 							end
 						end
-						GuiElement.add(cell_products, GuiCellElement(self.classname, button_action, model.id, parent.id, block.id, product.name):element(product)
+						GuiElement.add(cell_products, GuiCellElement(self.classname, button_action, model.id, parent_id, block.id, product.name):element(product)
 						:tooltip(button_tooltip):color(product_color):index(index):contraintIcon(contraint_type):isPivot(is_pivot))
 					end
 				end

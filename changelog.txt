@@ -1,12 +1,14 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.10
-Date: 2024-05-07
+Date: 2024-05-08
   Features:
     - Added a new tool 'CreatedOrWhereUsedPanel'
     - Added a asterisk icon on the product with input
     - Added a dot icon on the product who is pivot
   Changes:
-    - When a block is unliked, the row count is 1
+    - First block can be linked/unlinked
+    - When a block is unlinked, the row count is 1
+    - When a block is unlinked, the product edition modify the row block value
   Bugfixes:
     - Fix row count when child has same name, now that use child id
 ---------------------------------------------------------------------------------------------------
