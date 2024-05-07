@@ -240,6 +240,11 @@ function AbstractSelector:onEvent(event)
         Controller:send("on_gui_event", event, "HMRecipeExplorer")
         self:close()
       end
+    elseif User.getParameter(self.parameterTarget) == "HMCreatedOrWhereUsedPanel" then
+      if event.action == "element-select" then
+        Controller:send("on_gui_event", event, "HMCreatedOrWhereUsedPanel")
+        self:close()
+      end
     else
       ---classic selector
       if event.action == "element-select" and prototype_type ~= "container" then

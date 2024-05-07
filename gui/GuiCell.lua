@@ -77,6 +77,24 @@ function GuiCell:contraintIcon(type)
 end
 
 -------------------------------------------------------------------------------
+---Set input information
+---@param has_input boolean
+---@return GuiCell
+function GuiCell:hasInput(has_input)
+  self.m_has_input = has_input
+  return self
+end
+
+-------------------------------------------------------------------------------
+---Set pivot information
+---@param is_pivot boolean
+---@return GuiCell
+function GuiCell:isPivot(is_pivot)
+  self.m_is_pivot = is_pivot
+  return self
+end
+
+-------------------------------------------------------------------------------
 ---Set control information
 ---@param control_info string
 ---@return GuiCell
@@ -159,8 +177,8 @@ end
 -------------------------------------------------------------------------------
 ---Add icon information
 ---@param button LuaGuiElement
----@param info_icon string
-function GuiCell:add_infoIcon(button, info_icon)
+---@param info_icon? string
+function GuiCell:add_icon_info(button, info_icon)
   local type = info_icon or self.m_info_icon
   if type == nil then return end
   local sprite_name = nil
@@ -217,9 +235,28 @@ function GuiCell:add_infoIcon(button, info_icon)
 end
 
 -------------------------------------------------------------------------------
+---Add icon on button
+---@param button LuaGuiElement
+---@param sprite_name string
+function GuiCell:add_icon_button(button, sprite_name)
+  if sprite_name == nil then return end
+  local mask_name = "mask_infos"
+  local mask_frame = button[mask_name]
+  if mask_frame == nil then
+    mask_frame = GuiElement.add(button, GuiFlowH(mask_name))
+    mask_frame.ignored_by_interaction = true
+  end
+  local sprite = GuiElement.add(mask_frame, GuiSprite(sprite_name):sprite(sprite_name))
+  sprite.style.width = defines.sprite_size
+  sprite.style.height = defines.sprite_size
+  sprite.style.stretch_image_to_widget_size = true
+  sprite.ignored_by_interaction = true
+end
+
+-------------------------------------------------------------------------------
 ---Add contraint information
 ---@param button LuaGuiElement
-function GuiCell:add_contraintIcon(button)
+function GuiCell:add_icon_contraint(button)
   if self.m_contraint_icon == nil then return end
   local sprite_name = nil
   if self.m_contraint_icon == "linked" then
@@ -231,13 +268,25 @@ function GuiCell:add_contraintIcon(button)
   if self.m_contraint_icon == "exclude" then
     sprite_name = GuiElement.getSprite(defines.sprite_info.exclude)
   end
-  if sprite_name ~= nil then
-    local sprite = GuiElement.add(button, GuiSprite("contraint"):sprite(sprite_name))
-    sprite.style.width = defines.sprite_size
-    sprite.style.height = defines.sprite_size
-    sprite.style.stretch_image_to_widget_size = true
-    sprite.ignored_by_interaction = true
-  end
+  self:add_icon_button(button, sprite_name)
+end
+
+-------------------------------------------------------------------------------
+---Add input information
+---@param button LuaGuiElement
+function GuiCell:add_icon_input(button)
+  if self.m_has_input ~= true then return end
+  local sprite_name = GuiElement.getSprite(defines.sprites.asterisk.red)
+  self:add_icon_button(button, sprite_name)
+end
+
+-------------------------------------------------------------------------------
+---Add pivot information
+---@param button LuaGuiElement
+function GuiCell:add_icon_pivot(button)
+  if self.m_is_pivot ~= true then return end
+  local sprite_name = GuiElement.getSprite(defines.sprites.pick_cursor.red)
+  self:add_icon_button(button, sprite_name)
 end
 
 -------------------------------------------------------------------------------
@@ -492,7 +541,7 @@ function GuiCellRecipe:create(parent)
   local recipe_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(icon_type, icon_name):tooltip(tooltip))
   
   self:add_overlay(recipe_icon)
-  self:add_infoIcon(recipe_icon)
+  self:add_icon_info(recipe_icon)
   self:add_mask(recipe_icon, color)
     
   if self.m_broken == true then
@@ -523,7 +572,7 @@ function GuiCellProduct:create(parent)
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
 
   if string.find(element.name, "helmod") then
-    GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", element.hovered, element.sprite):style(element.name):tooltip({element.localised_name}))
+    GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", element.hovered, element.sprite):tooltip({element.localised_name}))
   else
     local product_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type, element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip({self.options.tooltip, Player.getLocalisedName(element)}))
     self:add_mask(product_icon, color)
@@ -587,8 +636,6 @@ function GuiCellBlock:create(parent)
     local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
     local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
     
-    --self:add_infoIcon(button, "block")
-    
     GuiElement.infoRecipe(button, first_recipe)
   else
     local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black))
@@ -632,8 +679,6 @@ function GuiCellBlockM:create(parent)
   if first_recipe ~= nil then
     local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
     local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
-    
-    --self:add_infoIcon(button, "block")
     
     GuiElement.infoRecipe(button, first_recipe)
   else
@@ -889,9 +934,11 @@ function GuiCellElement:create(parent)
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type or "entity", element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   GuiElement.infoTemperature(row1, element)
   
-  if element.burnt then self:add_infoIcon(button, "burnt") end
-  self:add_infoIcon(button)
-  self:add_contraintIcon(button)
+  if element.burnt then self:add_icon_info(button, "burnt") end
+  self:add_icon_info(button)
+  self:add_icon_pivot(button)
+  self:add_icon_contraint(button)
+  self:add_icon_input(button)
   self:add_mask(button, color)
 
   local display_count_deep = User.getParameter("display_count_deep")
@@ -1002,8 +1049,9 @@ function GuiCellElementM:create(parent)
   local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(element.type or "entity", element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   GuiElement.infoTemperature(row1, element)
 
-  self:add_infoIcon(button)
-  self:add_contraintIcon(button)
+  self:add_icon_info(button)
+  self:add_icon_contraint(button)
+  self:add_icon_input(button)
   self:add_mask(button, color)
 
   local display_count_deep = User.getParameter("display_count_deep")
