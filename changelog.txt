@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.11
+Date: 2024-05-27
+  Changes:
+    - Add locale for new tool 'CreatedOrWhereUsedPanel'
+    - Add change element in new tool 'CreatedOrWhereUsedPanel' when click on product or ingredient
+  Bugfixes:
+    - Removed consumer computing by default when block is by_product
+---------------------------------------------------------------------------------------------------
 Version: 1.0.10
 Date: 2024-05-08
   Features:

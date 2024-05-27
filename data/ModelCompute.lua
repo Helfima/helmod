@@ -211,8 +211,12 @@ function ModelCompute.finalizeBlock(block, factor)
     local children = block.children
     if children ~= nil and table.size(children) > 0 then
         local ratio_limit = -1
+        local sorter = defines.sorters.block.sort
+        if block.by_product == false then
+            sorter = defines.sorters.block.reverse
+        end
         -- compute block children
-        for _, child in spairs(children, defines.sorters.block.sort) do
+        for _, child in spairs(children, sorter) do
             child.count = child.count * one_block_factor
             local is_block = Model.isBlock(child)
             if is_block then
