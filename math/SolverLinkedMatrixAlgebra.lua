@@ -28,13 +28,13 @@ function SolverLinkedMatrixAlgebra:get_col(matrix, xrow, invert)
     ---on cherche la plus grande demande
     for icol, column in pairs(matrix.columns) do
         local cell_value = row[icol] or 0
-        if parameters.by_product == 0 or parameters.voider == 1 then
+        if parameters.consumer == 1 or parameters.voider == 1 then
             -- to consume value we must use -value
             cell_value = -cell_value
         end
         if ((invert ~= true and cell_value > 0) or (invert == true and cell_value < 0)) then
             local zvalue = zrow[icol]
-            if parameters.by_product == 0 or parameters.voider == 1 then
+            if parameters.consumer == 1 or parameters.voider == 1 then
                 -- to consume value we must use -value
                 zvalue = -zvalue
             end

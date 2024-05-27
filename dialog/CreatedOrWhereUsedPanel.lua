@@ -13,8 +13,7 @@ function CreatedOrWhereUsedPanel:onBind()
 -------------------------------------------------------------------------------
 ---On initialization
 function CreatedOrWhereUsedPanel:onInit()
-    self.panelCaption = ({"CreatedOrWhereUsedPanel"})
-    self.panelCaption = "CreatedOrWhereUsedPanel"
+    self.panelCaption = ({"helmod_created-or-where-used-panel.title"})
     self.otherClose = false
 end
 
@@ -62,7 +61,11 @@ function CreatedOrWhereUsedPanel:updateInfo(event)
     content_panel.clear()
     local item = User.getParameter("CreatedOrWhereUsed_item")
     if item ~= nil then
-        
+
+        local element_panel = GuiElement.add(content_panel, GuiFrameV("current-element"):caption({"helmod_created-or-where-used-panel.current-element"}):style(defines.styles.frame.bordered))
+        local element_icon = GuiElement.add(element_panel, GuiButtonSelectSprite("current-element"):choose(item.type, item.name, item.name):color("flat"))
+        element_icon.locked = true
+
         local created_filter = "has-product-item"
         if item.type == "fluid" then
             created_filter = "has-product-fluid"
@@ -70,7 +73,7 @@ function CreatedOrWhereUsedPanel:updateInfo(event)
         local created_recipes= game.get_filtered_recipe_prototypes({{filter = created_filter, elem_filters = {{filter = "name", name = item.name}}}})
 
         local created_count = #created_recipes
-        local created_panel = GuiElement.add(content_panel, GuiFrameV("product_recipes"):caption({"", "Created", " (",created_count,")"}):style(defines.styles.frame.bordered))
+        local created_panel = GuiElement.add(content_panel, GuiFrameV("product_recipes"):caption({"helmod_created-or-where-used-panel.created",created_count}):style(defines.styles.frame.bordered))
         created_panel.style.horizontally_stretchable = true
         self:AddTableRecipes(created_panel, created_recipes)
 
@@ -82,7 +85,7 @@ function CreatedOrWhereUsedPanel:updateInfo(event)
         local where_used_recipes= game.get_filtered_recipe_prototypes({{filter = where_used_filter, elem_filters = {{filter = "name", name = item.name}}}})
 
         local where_used_count = #where_used_recipes
-        local where_used_panel = GuiElement.add(content_panel, GuiFrameV("where_used_recipes"):caption({"", "Where used", " (",where_used_count,")"}):style(defines.styles.frame.bordered))
+        local where_used_panel = GuiElement.add(content_panel, GuiFrameV("where_used_recipes"):caption({"helmod_created-or-where-used-panel.where-used", where_used_count}):style(defines.styles.frame.bordered))
         where_used_panel.style.horizontally_stretchable = true
         self:AddTableRecipes(where_used_panel, where_used_recipes)
         
@@ -124,7 +127,7 @@ function CreatedOrWhereUsedPanel:AddTableRecipes(parent, recipes)
             local product_prototype = Product(lua_product)
             local product = product_prototype:clone()
             product.count = product_prototype:getElementAmount()
-            GuiElement.add(cell_products, GuiCellProduct("recipe-product", index):element(product):tooltip("tooltip.product"):color(GuiElement.color_button_none))
+            GuiElement.add(cell_products, GuiCellProduct(self.classname,"element-select", product.type, product.name, index):element(product):color(GuiElement.color_button_none))
         end
 
         local cell_ingredients = GuiElement.add(recipes_table, GuiFlowH())
@@ -134,7 +137,7 @@ function CreatedOrWhereUsedPanel:AddTableRecipes(parent, recipes)
             local ingredient_prototype = Product(lua_ingredient)
             local ingredient = ingredient_prototype:clone()
             ingredient.count = ingredient_prototype:getElementAmount()
-            GuiElement.add(cell_ingredients, GuiCellProduct("recipe-ingredient", index):element(ingredient):tooltip("tooltip.ingredient"):color(GuiElement.color_button_add))
+            GuiElement.add(cell_ingredients, GuiCellProduct(self.classname, "element-select", ingredient.type, ingredient.name, index):element(ingredient):color(GuiElement.color_button_add))
         end
     end
 end
