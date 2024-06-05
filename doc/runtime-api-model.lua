@@ -89,6 +89,7 @@
 ---@field is_done boolean
 ---@field base_time uint
 ---@field contraints {[string] : ContraintData}
+---@field consumer boolean
 
 ---@class ParametersData
 ---@field effects ModuleEffectsData
@@ -131,6 +132,7 @@
 ---@field runtimes {[uint] : Matrix}
 ---@field contraints {[string] : ContraintData}
 ---@field summary any
+---@field consumer boolean
 
 ---@class ModelData
 ---@field id string

@@ -369,10 +369,6 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
 		else
 			linked_button = GuiElement.add(group_tool, GuiButton(self.classname, "block-unlink", model.id, block.id):sprite("menu", defines.sprites.plugged.white, defines.sprites.plugged.black):style("helmod_button_menu_selected"):tooltip({ "tooltip.unlink-element" }))
 		end
-		if block.index == 0 then
-			linked_button.enabled = false
-			linked_button.tooltip = { "tooltip.block-cannot-link-first" }
-		end
 		if block.by_factory == true then
 			linked_button.enabled = false
 			linked_button.tooltip = { "tooltip.block-cannot-link-by-factory" }
@@ -399,6 +395,13 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
 			GuiElement.add(group_tool, GuiButton(self.classname, "block-by-product", model.id, block_id):sprite("menu", defines.sprites.graph_bottom_to_top.white, defines.sprites.graph_bottom_to_top.black):style("helmod_button_menu_selected"):tooltip({ "helmod_label.input-product" }))
 		else
 			GuiElement.add(group_tool, GuiButton(self.classname, "block-by-product", model.id, block_id):sprite("menu", defines.sprites.graph_top_to_bottom.black, defines.sprites.graph_top_to_bottom.black):style("helmod_button_menu"):tooltip({ "helmod_label.input-ingredient" }))
+		end
+
+		---consumer
+		if block.consumer == true then
+			GuiElement.add(group_tool, GuiButton(self.classname, "block-consumer", model.id, block_id):sprite("menu", defines.sprites.cookie_cutter.white, defines.sprites.cookie_cutter.black):style("helmod_button_menu_selected"):tooltip({ "helmod_label.block-no-consumer" }))
+		else
+			GuiElement.add(group_tool, GuiButton(self.classname, "block-consumer", model.id, block_id):sprite("menu", defines.sprites.cookie_cutter.black, defines.sprites.cookie_cutter.black):style("helmod_button_menu"):tooltip({ "helmod_label.block-consumer" }))
 		end
 
 		-- reset production %
@@ -568,6 +571,9 @@ function ProductionPanel:updateInputBlock(model, block)
 	else
 		GuiElement.add(input_tool, GuiButton(self.classname, "block-all-ingredient-visible", model.id, block.id):sprite("menu", defines.sprites.filter.black, defines.sprites.filter.black):style("helmod_button_menu_sm"):tooltip({"helmod_button.all-product-visible" }))
 	end
+	if block_by_product == false then
+		GuiElement.add(input_tool, GuiButton(self.classname, "block-reset-input", model.id, block.id):sprite("menu", defines.sprites.eraser.black, defines.sprites.eraser.black):style("helmod_button_menu_sm"):tooltip({"helmod_button.clear" }))
+	end
 
 	---input panel
 	input_label.caption = { "helmod_common.input" }
@@ -655,7 +661,9 @@ function ProductionPanel:updateOutputBlock(model, block)
 	else
 		GuiElement.add(output_tool, GuiButton(self.classname, "block-all-product-visible", model.id, block.id):sprite("menu", defines.sprites.filter.black, defines.sprites.filter.black):style("helmod_button_menu_sm"):tooltip({"helmod_button.all-product-visible" }))
 	end
-	GuiElement.add(output_tool, GuiButton(self.classname, "block-reset-input", model.id, block.id):sprite("menu", defines.sprites.eraser.black, defines.sprites.eraser.black):style("helmod_button_menu_sm"):tooltip({"helmod_button.clear" }))
+	if block_by_product ~= false then
+		GuiElement.add(output_tool, GuiButton(self.classname, "block-reset-input", model.id, block.id):sprite("menu", defines.sprites.eraser.black, defines.sprites.eraser.black):style("helmod_button_menu_sm"):tooltip({"helmod_button.clear" }))
+	end
 
 	---ouput panel
 	output_label.caption = { "helmod_common.output" }
@@ -1848,10 +1856,17 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 		ModelCompute.update(model)
 		Controller:send("on_gui_update", event, self.classname)
 	end
-
+	
 	if event.action == "block-by-product" then
 		local by_product = block.by_product ~= false
 		ModelBuilder.updateProductionBlockOption(block, "by_product", not (by_product))
+		ModelCompute.update(model)
+		Controller:send("on_gui_update", event, self.classname)
+	end
+
+	if event.action == "block-consumer" then
+		local consumer = block.consumer
+		ModelBuilder.updateProductionBlockOption(block, "consumer", not (consumer))
 		ModelCompute.update(model)
 		Controller:send("on_gui_update", event, self.classname)
 	end

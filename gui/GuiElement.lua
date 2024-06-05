@@ -301,7 +301,7 @@ function GuiElement.infoRecipe(parent, element)
     local label = GuiElement.add(parent, GuiLabel("temperature"):caption(caption):style(style):ignored_by_interaction())
     label.style.top_padding = -5
   elseif element.type ~= "recipe" then
-    sprite_name = GuiElement.getSprite(defines.sprite_info.developer)
+    sprite_name = GuiElement.getSprite(defines.sprite_info.mining)
     tooltip = {"tooltip.resource-recipe"}
   end
   if sprite_name ~= nil then
