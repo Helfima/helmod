@@ -11,6 +11,7 @@ Date: 2024-05-27
     - Added option consumer for a block (use with ingredient input mode)
   Bugfixes:
     - Removed consumer computing by default when block is by_product
+    - Fix summary factory computing
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.10
 Date: 2024-05-08
