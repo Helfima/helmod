@@ -436,6 +436,7 @@ function SolverLinkedMatrix:get_block_matrix(block, parameters)
 
                 child_info.products = child.products
                 child_info.ingredients = child.ingredients
+                child_info.consumer = child.consumer
 
                 self:add_matrix_row(matrix, child, child_info, is_block, col_index, block.by_product, production, factor)
 
@@ -449,6 +450,7 @@ function SolverLinkedMatrix:get_block_matrix(block, parameters)
                         child_linked_info.recipe_energy = 1
                         child_linked_info.factory_count = 0
                         child_linked_info.factory_speed = 1
+                        child_linked_info.consumer = child.consumer
 
                         child_linked_info.products = child_linked.products
                         child_linked_info.ingredients = child_linked.ingredients
@@ -466,6 +468,7 @@ function SolverLinkedMatrix:get_block_matrix(block, parameters)
                 child_info.tooltip = recipe.name .. "\nRecette"
                 child_info.recipe_energy = recipe_prototype:getEnergy(recipe.factory)
                 child_info.factory_count = recipe.factory.input or 0
+                child_info.consumer = recipe.consumer
 
                 recipe.base_time = block.time
                 ModelCompute.computeModuleEffects(recipe, parameters)
@@ -525,6 +528,10 @@ function SolverLinkedMatrix:add_matrix_row(matrix, child, child_info, is_block, 
     rowParameters.coefficient = 0
     rowParameters.voider = 0
     rowParameters.unlinked = 0
+    rowParameters.consumer = 0
+    if child_info.consumer == true then
+        rowParameters.consumer = 1
+    end
     if child.unlinked == true then
         rowParameters.unlinked = 1
     end

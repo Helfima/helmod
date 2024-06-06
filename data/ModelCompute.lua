@@ -154,11 +154,13 @@ function ModelCompute.createSummaryFactory(block, factory)
         block.summary.factories[factory.name] = summary_factory
     end
     
-    summary_factory.count = summary_factory.count + factory.count
+    local factory_ceil = math.ceil(factory.count)
+
+    summary_factory.count = summary_factory.count + factory_ceil
     summary_factory.count_limit = summary_factory.count
     summary_factory.count_deep = summary_factory.count * block.count_deep
 
-    block.summary.building = block.summary.building + factory.count
+    block.summary.building = block.summary.building + factory_ceil
     block.summary.building_limit = block.summary.building
     block.summary.building_deep = block.summary.building * block.count_deep
     ---summary factory module
@@ -175,7 +177,7 @@ function ModelCompute.createSummaryFactory(block, factory)
                 }
                 block.summary.modules[module] = summary_module
             end
-            summary_module.count = summary_module.count + value * factory.count
+            summary_module.count = summary_module.count + value * factory_ceil
             summary_module.count_limit = summary_module.count
             summary_module.count_limit = summary_module.count * block.count_deep
         end
@@ -857,119 +859,6 @@ function ModelCompute.computeResources(model)
         end
     end
     model.resources = resources
-end
-
--------------------------------------------------------------------------------
----Compute energy, speed, number total
----@param model table
-function ModelCompute.createSummary(model)
-    model.summary = {}
-    model.summary.factories = {}
-    model.summary.beacons = {}
-    model.summary.modules = {}
-    model.summary.building = 0
-    local energy = 0
-    local pollution = 0
-    local building = 0
-
-    for _, block in pairs(model.blocks) do
-        energy = energy + block.power
-        pollution = pollution + (block.pollution or 0)
-        ModelCompute.computeSummaryFactory(block)
-        building = building + block.summary.building
-        for _, type in pairs({ "factories", "beacons", "modules" }) do
-            for _, element in pairs(block.summary[type]) do
-                if model.summary[type][element.name] == nil then
-                    model.summary[type][element.name] = {
-                        name = element.name,
-                        type = "item",
-                        count = 0
-                    }
-                end
-                model.summary[type][element.name].count = model.summary[type][element.name].count + math.ceil(element.count)
-            end
-        end
-    end
-    model.summary.energy = energy
-    model.summary.pollution = pollution
-    model.summary.building = building
-
-    model.generators = {}
-    ---formule 20 accumulateur /24 panneau solaire/1 MW
-    model.generators["accumulator"] = { name = "accumulator", type = "item",
-        count = 20 * math.ceil(energy / (1000 * 1000)) }
-    model.generators["solar-panel"] = { name = "solar-panel", type = "item",
-        count = 24 * math.ceil(energy / (1000 * 1000)) }
-    model.generators["steam-engine"] = { name = "steam-engine", type = "item", count = math.ceil(energy / (510 * 1000)) }
-end
-
--------------------------------------------------------------------------------
----Compute summary factory
----@param block table
-function ModelCompute.computeSummaryFactory(block)
-    if block ~= nil then
-        block.summary = { building = 0, factories = {}, beacons = {}, modules = {} }
-        for _, child in pairs(block.children) do
-            local is_block = Model.isBlock(child)
-            if is_block then
-            else
-                ---@type RecipeData
-                local recipe = child
-                ---calcul nombre factory
-                local factory = recipe.factory
-                if block.summary.factories[factory.name] == nil then
-                    block.summary.factories[factory.name] = {
-                        name = factory.name,
-                        type = factory.type or "entity",
-                        count = 0
-                    }
-                end
-                block.summary.factories[factory.name].count = block.summary.factories[factory.name].count + math.ceil(factory.count)
-                block.summary.building = block.summary.building + math.ceil(factory.count)
-                ---calcul nombre de module factory
-                if factory.modules ~= nil then
-                    for module, value in pairs(factory.modules) do
-                        if block.summary.modules[module] == nil then
-                            block.summary.modules[module] = {
-                                name = module,
-                                type = "item",
-                                count = 0
-                            }
-                        end
-                        block.summary.modules[module].count = block.summary.modules[module].count + value * math.ceil(factory.count)
-                    end
-                end
-                ---calcul nombre beacon
-                local beacons = recipe.beacons
-                if beacons ~= nil then
-                    for _, beacon in pairs(beacons) do
-                        if block.summary.beacons[beacon.name] == nil then
-                            block.summary.beacons[beacon.name] = {
-                                name = beacon.name,
-                                type = beacon.type or "entity",
-                                count = 0
-                            }
-                        end
-                        block.summary.beacons[beacon.name].count = block.summary.beacons[beacon.name].count + math.ceil(beacon.count)
-                        block.summary.building = block.summary.building + math.ceil(beacon.count)
-                        ---calcul nombre de module beacon
-                        if beacon.modules ~= nil then
-                            for module, value in pairs(beacon.modules) do
-                                if block.summary.modules[module] == nil then
-                                    block.summary.modules[module] = {
-                                        name = module,
-                                        type = "item",
-                                        count = 0
-                                    }
-                                end
-                                block.summary.modules[module].count = block.summary.modules[module].count + value * math.ceil(beacon.count)
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
 end
 
 return ModelCompute

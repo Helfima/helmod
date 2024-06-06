@@ -190,7 +190,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
         if block.by_limit == true and block.count > 1 then
           product.limit_count = product.count / block.count
         end
-        GuiElement.add(cell_products, GuiCellElementSm(self.classname, "do_noting", "product"):index(index):element(product):tooltip("tooltip.info-product"):color(GuiElement.color_button_none):byLimit(block.by_limit):mask(is_done))
+        GuiElement.add(cell_products, GuiCellElementSm(self.classname, "pipette-item", recipe.id, "product", index):index(index):element(product):tooltip("controls.smart-pipette"):color(GuiElement.color_button_none):byLimit(block.by_limit):mask(is_done))
       end
     end
   end
@@ -214,7 +214,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
         ingredient.count = ingredient_prototype:countIngredient(recipe)
 				ingredient.count_limit = ingredient_prototype:countLimitIngredient(recipe)
 				ingredient.count_deep = ingredient_prototype:countDeepIngredient(recipe)
-        GuiElement.add(cell_ingredients, GuiCellElementSm(self.classname, "do_noting", "ingredient"):index(index):element(ingredient):tooltip("tooltip.info-product"):color(GuiElement.color_button_add):byLimit(block.by_limit):mask(is_done))
+        GuiElement.add(cell_ingredients, GuiCellElementSm(self.classname, "pipette-item", recipe.id, "ingredient", index):index(index):element(ingredient):tooltip("controls.smart-pipette"):color(GuiElement.color_button_add):byLimit(block.by_limit):mask(is_done))
       end
     end
   end
@@ -261,11 +261,22 @@ function PinPanel:onEvent(event)
     local index = tonumber(event.item3)
     Player.setSmartTool(children[event.item1], event.item2, index)
   end
+  
+  if event.action == "pipette-item" then
+    local children = block.children
+    local index = tonumber(event.item3)
+    if event.control == true then
+      index = -1
+    end
+    Player.setSmartToolConstantCombinator(children[event.item1], event.item2, index)
+  end
+  
   if event.action == "recipe-done" then
     local children = block.children
     children[event.item1].is_done = not(children[event.item1].is_done)
     self:updateInfo(event)
   end
+  
   if event.action == "recipe-done-remove" then
     local children = block.children
     for _,child in pairs(children) do

@@ -140,28 +140,80 @@ end
 ---@param index number
 ---@return any
 function Player.setSmartTool(recipe, type, index)  
-    if Lua_player == nil or recipe == nil then
-      return nil
-    end
-    local factory = recipe[type]
-    if index ~= nil then
-      factory = factory[index]
-    end
-    local modules = {}
-    for name,value in pairs(factory.modules or {}) do
-      modules[name] = value
-    end
-    local entity = {
-      entity_number = 1,
-      name = factory.name,
-      position = {0, 0},
-      items = modules
-    }
-    if type == "factory" then
-      entity.recipe = recipe.name
-    end
+  if Lua_player == nil or recipe == nil then
+    return nil
+  end
+  local factory = recipe[type]
+  if index ~= nil then
+    factory = factory[index]
+  end
+  local modules = {}
+  for name,value in pairs(factory.modules or {}) do
+    modules[name] = value
+  end
+  local entity = {
+    entity_number = 1,
+    name = factory.name,
+    position = {0, 0},
+    items = modules
+  }
+  if type == "factory" then
+    entity.recipe = recipe.name
+  end
 
-    Player.getSmartTool({entity})
+  Player.getSmartTool({entity})
+end
+
+-------------------------------------------------------------------------------
+---Set smart tool
+---@param recipe table
+---@param type string
+---@param index number
+---@return any
+function Player.setSmartToolConstantCombinator(recipe, type, index)
+  if Lua_player == nil or recipe == nil then
+    return nil
+  end
+  local elements = nil
+  local recipe_prototype = RecipePrototype(recipe)
+  if type == "product" then
+    elements = recipe_prototype:getProducts(recipe.factory)
+  else
+    elements = recipe_prototype:getIngredients(recipe.factory)
+  end
+  if elements == nil then
+    return nil
+  end
+  local filters = {}
+  for id, element in pairs(elements) do
+    if index == -1 or id == index then
+      local signal_index = 1
+      if index == -1 then
+        signal_index = id
+      end
+      local product_prototype = Product(element)
+      local count = product_prototype:countProduct(recipe)
+      local filter = {
+        signal= {
+          type = element.type,
+          name = element.name
+        },
+        count= math.ceil(count),
+        index= signal_index
+      }
+      table.insert(filters, filter)
+    end
+  end
+  local entity = {
+    entity_number = 1,
+    name = "constant-combinator",
+    position = {0, 0},
+    control_behavior= {
+      filters = filters
+    }
+  }
+
+  Player.getSmartTool({entity})
 end
 
 -------------------------------------------------------------------------------

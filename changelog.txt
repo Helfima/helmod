@@ -1,11 +1,17 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.11
 Date: 2024-05-27
+  Features:
+    - Added pipette tool on product or ingredient of pin panel
   Changes:
-    - Add locale for new tool 'CreatedOrWhereUsedPanel'
-    - Add change element in new tool 'CreatedOrWhereUsedPanel' when click on product or ingredient
+    - Added locale for new tool 'CreatedOrWhereUsedPanel'
+    - Added change element in new tool 'CreatedOrWhereUsedPanel' when click on product or ingredient
+    - First block can be link/unlink
+    - Changed icon for mining recipe
+    - Added option consumer for a block (use with ingredient input mode)
   Bugfixes:
     - Removed consumer computing by default when block is by_product
+    - Fix summary factory computing
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.10
 Date: 2024-05-08
