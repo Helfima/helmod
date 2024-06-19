@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.12
+Date: 2024-06-09
+  Bugfixes:
+    - Fix flow value per minute in tooltip of product
+    - Fix remove linked product if not exist in block products
+    - Fix compute unliked block in parent block
+---------------------------------------------------------------------------------------------------
 Version: 1.0.11
 Date: 2024-05-27
   Features:

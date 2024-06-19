@@ -443,7 +443,7 @@ function GuiCellFactory:create(parent)
   row1.style.top_padding=2
   row1.style.bottom_padding=3
 
-  local tooltip = GuiTooltipElement(self.options.tooltip):element(factory):withEnergy():withEffectInfo(factory.effects ~= nil):withControlInfo(self.m_with_control_info)
+  local tooltip = GuiTooltipElement(self.options.tooltip):element(factory):byLimit(self.m_by_limit):withEnergy():withEffectInfo(factory.effects ~= nil):withControlInfo(self.m_with_control_info)
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("entity", factory.name):tooltip(tooltip))
   
   self:add_mask(button, color)
@@ -933,9 +933,9 @@ function GuiCellElement:create(parent)
 
   local tooltip = ""
   if element.type == "energy" then
-    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
+    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
   else
-    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
+    tooltip = GuiTooltipElement(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
   end
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type or "entity", element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   GuiElement.infoTemperature(row1, element)
@@ -998,9 +998,9 @@ function GuiCellElementSm:create(parent)
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w30", color, 1))
   local tooltip = ""
   if element.type == "energy" then
-    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic():withProductInfo()
+    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo()
   else
-    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo()
+    tooltip = GuiTooltipElement(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo()
   end
   local button = GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):sprite(element.type, element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   
@@ -1048,9 +1048,9 @@ function GuiCellElementM:create(parent)
 
   local tooltip = ""
   if element.type == "energy" then
-    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
+    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
   else
-    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
+    tooltip = GuiTooltipElement(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
   end
   local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(element.type or "entity", element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   GuiElement.infoTemperature(row1, element)

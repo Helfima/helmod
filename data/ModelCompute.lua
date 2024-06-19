@@ -334,10 +334,12 @@ function ModelCompute.finalizeBlock(block, factor)
                     recipe.count_limit = recipe.count * ratio_limit
                     if recipe.factory ~= nil then
                         recipe.factory.count_limit = recipe.factory.count * ratio_limit
+                        recipe.factory.energy_limit = recipe.factory.energy_total * ratio_limit
                     end
                     if recipe.beacons ~= nil then
                         for _, beacon in pairs(recipe.beacons) do
                             beacon.count_limit = beacon.count * ratio_limit
+                            beacon.energy_limit = beacon.energy_total * ratio_limit
                         end
                     end
                     recipe.power_limit = recipe.power * ratio_limit

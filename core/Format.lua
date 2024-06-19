@@ -90,11 +90,8 @@ end
 ---@param number number
 ---@return number
 function Format.formatNumberFactory(number)
-  local decimal = 2
   local format_number = User.getPreferenceSetting("format_number_factory")
-  if format_number == "0" then decimal = 0 end
-  if format_number == "0.0" then decimal = 1 end
-  if format_number == "0.00" then decimal = 2 end
+  local decimal = Format.decimalFromString(format_number)
   return Format.formatNumber(number, decimal)
 end
 
@@ -103,11 +100,8 @@ end
 ---@param number number
 ---@return number
 function Format.formatNumberElement(number)
-  local decimal = 2
   local format_number = User.getPreferenceSetting("format_number_element")
-  if format_number == "0" then decimal = 0 end
-  if format_number == "0.0" then decimal = 1 end
-  if format_number == "0.00" then decimal = 2 end
+  local decimal = Format.decimalFromString(format_number)
   return Format.formatNumber(number, decimal)
 end
 return Format

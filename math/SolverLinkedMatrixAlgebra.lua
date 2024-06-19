@@ -14,6 +14,9 @@ end)
 function SolverLinkedMatrixAlgebra:get_col(matrix, xrow, invert)
     local row = matrix.rows[xrow]
     local parameters = matrix.parameters[xrow]
+    if parameters.unlinked == 1 then
+        return 1
+    end
     local zrow = matrix.rows[#matrix.rows]
     local xcol = 0
     local max = 0
@@ -84,7 +87,7 @@ function SolverLinkedMatrixAlgebra:line_compute(matrix, xrow, xcol)
     if parameters.unlinked == 1 then
         C = 1
     end
-    if Z < 0 or parameters.by_product == 0 or parameters.voider == 1 then
+    if Z < 0 or parameters.by_product == 0 or parameters.voider == 1 or parameters.unlinked == 1 then
         parameters.coefficient = C
         parameters.recipe_count = P * C
         for icol, cell_value in pairs(row) do
