@@ -592,8 +592,8 @@ function ProductionPanel:updateInputBlock(model, block)
 					local ingredient = Product(lua_ingredient):clone()
 					ingredient.time = model.time
 					ingredient.count = lua_ingredient.amount
-					ingredient.count_limit = lua_ingredient.amount * block.count_limit
-					ingredient.count_deep = lua_ingredient.amount * block.count_deep
+					ingredient.count_limit = lua_ingredient.amount * (block.count_limit or 0)
+					ingredient.count_deep = lua_ingredient.amount * (block.count_deep or 0)
 
 					local button_action = "production-recipe-ingredient-add"
 					local button_tooltip = "tooltip.ingredient"
@@ -681,8 +681,8 @@ function ProductionPanel:updateOutputBlock(model, block)
 					local product = Product(lua_product):clone()
 					product.time = model.time
 					product.count = lua_product.amount
-					product.count_limit = lua_product.amount * block.count_limit
-					product.count_deep = lua_product.amount * block.count_deep
+					product.count_limit = lua_product.amount * (block.count_limit or 0)
+					product.count_deep = lua_product.amount * (block.count_deep or 0)
 
 					local button_action = "production-recipe-product-add"
 					local button_tooltip = "tooltip.product"
@@ -1166,9 +1166,6 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				if ingredient.constant == true then
 					ingredient.count = ingredient_prototype:countProduct(recipe)
 				end
-				if block.by_limit == true and block.count > 1 then
-					ingredient.limit_count = ingredient.count / block.count
-				end
 				if block.by_product == false and recipe.contraint ~= nil and recipe.contraint.name == ingredient.name then
 					contraint_type = recipe.contraint.type
 				end
@@ -1281,9 +1278,9 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						local product_prototype = Product(lua_product)
 						local product = product_prototype:clone()
 						product.time = model.time
-						product.count = lua_product.amount * block.count
-						product.count_limit = lua_product.amount * block.count_limit
-						product.count_deep = lua_product.amount * block.count_deep
+						product.count = lua_product.amount * (block.count or 0)
+						product.count_limit = lua_product.amount * (block.count_limit or 0)
+						product.count_deep = lua_product.amount * (block.count_deep or 0)
 
 						if not (block_by_product) or not (block.unlinked) or block.by_factory == true then
 							button_action = "production-recipe-product-add"
@@ -1334,9 +1331,9 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						local ingredient_prototype = Product(lua_ingredient)
 						local ingredient = ingredient_prototype:clone()
 						ingredient.time = model.time
-						ingredient.count = lua_ingredient.amount * block.count
-						ingredient.count_limit = lua_ingredient.amount * block.count_limit
-						ingredient.count_deep = lua_ingredient.amount * block.count_deep
+						ingredient.count = lua_ingredient.amount * (block.count or 0)
+						ingredient.count_limit = lua_ingredient.amount * (block.count_limit or 0)
+						ingredient.count_deep = lua_ingredient.amount * (block.count_deep or 0)
 
 						if block_by_product then
 							button_action = "production-recipe-ingredient-add"

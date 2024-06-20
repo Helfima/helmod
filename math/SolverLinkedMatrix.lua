@@ -340,6 +340,9 @@ end
 ---@param block any
 ---@param matrix any
 function SolverLinkedMatrix:solve_block_finalize(block, matrix)
+    if matrix == nil or matrix.states == nil then
+        return
+    end
     -- state = 0 => produit
     -- state = 1 => produit pilotant
     -- state = 2 => produit restant

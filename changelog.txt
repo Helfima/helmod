@@ -5,6 +5,8 @@ Date: 2024-06-09
     - Fix flow value per minute in tooltip of product
     - Fix remove linked product if not exist in block products
     - Fix compute unliked block in parent block
+    - Fix apply module priority when change beacon
+    - Fix modules comparation to check if the factory is the default
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.11
 Date: 2024-05-27

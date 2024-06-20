@@ -477,6 +477,7 @@ function RecipeEdition:onEvent(event)
     if event.action == "beacon-choose" then
       local current_beacon_selection = User.getParameter("current_beacon_selection") or 1
       Model.setBeacon(recipe, current_beacon_selection, event.item4)
+      ModelBuilder.applyBeaconModulePriority(recipe)
       ModelCompute.update(model)
       self:update(event)
       Controller:send("on_gui_recipe_update", event)
@@ -760,7 +761,7 @@ function RecipeEdition:updateFactoryInfo(event)
           default_fuel = string.format("[%s=%s] %s", fuel_type, factory_fuel:native().name, Format.formatNumberKilo(factory_fuel:getFuelValue(), "J"))
         end
         GuiElement.add(input_panel, GuiLabel("label-burner"):caption({"helmod_common.resource"}))
-        GuiElement.add(input_panel, GuiDropDown(self.classname, "factory-fuel-update", model.id, block.id, recipe.id, fuel_type):items(items, default_fuel))
+        GuiElement.add(input_panel, GuiDropDown(self.classname, "factory-fuel-update", model.id, block.id, recipe.id, fuel_type):items(items, default_fuel):tooltip(factory_fuel:native().localised_name))
       end
     end
 

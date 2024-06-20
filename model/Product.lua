@@ -172,7 +172,7 @@ end
 ---@return number
 function Product:countProduct(recipe)
   local amount = self:getAmount(recipe)
-  return amount * recipe.count
+  return amount * (recipe.count or 0)
 end
 
 -------------------------------------------------------------------------------
@@ -181,7 +181,7 @@ end
 ---@return number
 function Product:countLimitProduct(recipe)
   local amount = self:getAmount(recipe)
-  return amount * recipe.count_limit
+  return amount * (recipe.count_limit or 0)
 end
 
 -------------------------------------------------------------------------------
@@ -190,7 +190,7 @@ end
 ---@return number
 function Product:countDeepProduct(recipe)
   local amount = self:getAmount(recipe)
-  return amount * recipe.count_deep
+  return amount * (recipe.count_deep or 0)
 end
 
 -------------------------------------------------------------------------------
@@ -199,7 +199,7 @@ end
 ---@return number
 function Product:countIngredient(recipe)
   local amount = self:getElementAmount()
-  return amount * recipe.count
+  return amount * (recipe.count or 0)
 end
 
 -------------------------------------------------------------------------------
@@ -208,7 +208,7 @@ end
 ---@return number
 function Product:countLimitIngredient(recipe)
   local amount = self:getElementAmount()
-  return amount * recipe.count_limit
+  return amount * (recipe.count_limit or 0)
 end
 
 -------------------------------------------------------------------------------
@@ -217,7 +217,7 @@ end
 ---@return number
 function Product:countDeepIngredient(recipe)
   local amount = self:getElementAmount()
-  return amount * recipe.count_deep
+  return amount * (recipe.count_deep or 0)
 end
 
 -------------------------------------------------------------------------------
