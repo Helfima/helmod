@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.12
 Date: 2024-06-09
+  Changes:
+    - Updated Getting Start help section
   Bugfixes:
     - Fix flow value per minute in tooltip of product
     - Fix remove linked product if not exist in block products
