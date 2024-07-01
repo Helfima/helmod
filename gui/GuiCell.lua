@@ -687,6 +687,12 @@ function GuiCellBlockM:create(parent)
     local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
     
     GuiElement.infoRecipe(button, first_recipe)
+    local recipe_prototype = RecipePrototype(element.name, first_recipe.type)
+    if recipe_prototype:native() == nil then
+      button.tooltip = "ERROR: Recipe ".. element.name .." not exist in game"
+      button.sprite = "utility/warning_icon"
+      row1.style = "helmod_frame_element_w30_red_1"
+    end
   else
     local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black))
     button.style.width = 36

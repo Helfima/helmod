@@ -112,7 +112,7 @@ function CreatedOrWhereUsedPanel:AddTableRecipes(parent, recipes)
         local button_prototype = GuiButtonSelectSprite("recipe.name", recipe.name):choose(icon_type, icon_name, recipe.name):color(color)
         GuiElement.add(cell, button_prototype)
         --GuiElement.add(cell, GuiLabel("recipe.name"):caption(recipe.localised_name))
-
+        
         ---duration
         local cell_duration = GuiElement.add(recipes_table, GuiFlowH())
         cell_duration.style.horizontally_stretchable = false

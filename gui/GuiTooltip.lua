@@ -566,8 +566,9 @@ end)
 function GuiTooltipPollution:create()
   local tooltip = self._super.create(self)
   if self.m_element then
-    local total_pollution = Format.formatNumberElement(self.m_element.pollution)
-    local total_flow = Format.formatNumberElement(self.m_element.pollution/((self.m_element.time or 1)/60))
+    local pollution = self.m_element.pollution or 0
+    local total_pollution = Format.formatNumberElement(pollution)
+    local total_flow = Format.formatNumberElement(pollution/((self.m_element.time or 1)/60))
     if self.m_by_limit then
       local limit_flow = Format.formatNumberElement(self.m_element.pollution_limit/((self.m_element.time or 1)/60))
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.pollution"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, total_pollution, helmod_tag.font.close})
