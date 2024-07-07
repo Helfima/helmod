@@ -9,6 +9,7 @@ Date: 2024-06-09
     - Fix compute unliked block in parent block
     - Fix apply module priority when change beacon
     - Fix modules comparation to check if the factory is the default
+    - Fix input product in ingredient mod
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.11
 Date: 2024-05-27

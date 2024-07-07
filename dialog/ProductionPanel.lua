@@ -604,7 +604,7 @@ function ProductionPanel:updateInputBlock(model, block)
 						button_tooltip = "tooltip.add-recipe"
 						control_info = nil
 					else
-						if not (block.unlinked) or block.by_factory == true then
+						if not (block.unlinked or true) or block.by_factory == true then
 							button_action = "product-info"
 							button_tooltip = "tooltip.info-product"
 							if block.products_linked ~= nil and block.products_linked[Product(lua_ingredient):getTableKey()] then
