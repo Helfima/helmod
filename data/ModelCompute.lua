@@ -112,7 +112,10 @@ function ModelCompute.updateBlock(model, block)
     local children = block.children
 
     -- check if block has child
-    local _, child = next(children)
+    local _, child
+    if children ~= nil then
+        _, child = next(children)
+    end
     if child == nil then
         -- empty block
         block.ingredients = {}
@@ -190,9 +193,10 @@ end
 function ModelCompute.finalizeBlock(block, factor)
     local one_block_factor_enable = User.getPreferenceSetting("one_block_factor_enable")
     local one_block_factor = 1
-    if block.by_limit ~= true and block.by_factory ~= true and one_block_factor_enable and block.has_input ~= true then
+    if block.by_factory ~= true and one_block_factor_enable and block.has_input ~= true then
         one_block_factor = block.count
         block.count = 1
+        block.count_limit = 1
         for _, product in pairs(block.products) do
             product.amount = product.amount * one_block_factor
         end
@@ -220,6 +224,7 @@ function ModelCompute.finalizeBlock(block, factor)
         -- compute block children
         for _, child in spairs(children, sorter) do
             child.count = child.count * one_block_factor
+            child.count_limit = child.count
             local is_block = Model.isBlock(child)
             if is_block then
                 ModelCompute.finalizeBlock(child, block.count_deep)
@@ -312,6 +317,7 @@ function ModelCompute.finalizeBlock(block, factor)
         end
 
         if ratio_limit > 0 then
+            block.count_ratio_limit = ratio_limit
             block.count_limit = ratio_limit
             block.power_limit = block.power * ratio_limit
             block.pollution_limit = block.pollution * ratio_limit
@@ -329,6 +335,9 @@ function ModelCompute.finalizeBlock(block, factor)
             for _, child in spairs(children, defines.sorters.block.sort) do
                 local is_block = Model.isBlock(child)
                 if is_block then
+                    --child.count_limit = child.count * ratio_limit
+                    --child.power_limit = child.power * ratio_limit
+                    --child.pollution_limit = child.pollution * ratio_limit
                 else
                     local recipe = child
                     recipe.count_limit = recipe.count * ratio_limit
