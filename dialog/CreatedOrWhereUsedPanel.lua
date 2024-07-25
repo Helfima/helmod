@@ -62,9 +62,22 @@ function CreatedOrWhereUsedPanel:updateInfo(event)
     local item = User.getParameter("CreatedOrWhereUsed_item")
     if item ~= nil then
 
-        local element_panel = GuiElement.add(content_panel, GuiFrameV("current-element"):caption({"helmod_created-or-where-used-panel.current-element"}):style(defines.styles.frame.bordered))
+        local headers_table = GuiElement.add(content_panel, GuiTable("headers"):column(2))
+        headers_table.vertical_centering = false
+        headers_table.style.cell_padding = 2
+
+        local element_panel = GuiElement.add(headers_table, GuiFrameV("current-element"):caption({"helmod_created-or-where-used-panel.current-element"}):style(defines.styles.frame.bordered))
         local element_icon = GuiElement.add(element_panel, GuiButtonSelectSprite("current-element"):choose(item.type, item.name, item.name):color("flat"))
         element_icon.locked = true
+
+        local element_panel = GuiElement.add(headers_table, GuiFrameV("recent-elements"):caption({"helmod_created-or-where-used-panel.recent-elements"}):style(defines.styles.frame.bordered))
+        local recent_cell = GuiElement.add(element_panel, GuiFlowH())
+        local recent_items = User.getParameter("CreatedOrWhereUsed_recent")
+        for index, recent_item in pairs(recent_items) do
+            local element_icon = GuiElement.add(recent_cell, GuiButtonSelectSprite(self.classname, "element-select", recent_item.type, recent_item.name, recent_item.id):choose(recent_item.type, recent_item.name, recent_item.name):color("flat"))
+            element_icon.locked = true
+        end
+        
 
         local created_filter = "has-product-item"
         if item.type == "fluid" then
@@ -93,13 +106,14 @@ function CreatedOrWhereUsedPanel:updateInfo(event)
 end
 
 function CreatedOrWhereUsedPanel:AddTableRecipes(parent, recipes)
-    local recipes_table = GuiElement.add(parent, GuiTable("product_recipes"):column(4))
+    local recipes_table = GuiElement.add(parent, GuiTable("product_recipes"):column(5))
     recipes_table.vertical_centering = false
     recipes_table.style.cell_padding = 2
     GuiElement.add(recipes_table, GuiLabel("header-recipe"):caption({"helmod_result-panel.col-header-recipe"}))
     GuiElement.add(recipes_table, GuiLabel("header-duration"):caption({"helmod_result-panel.col-header-duration"}))
     GuiElement.add(recipes_table, GuiLabel("header-products"):caption({"helmod_result-panel.col-header-products"}))
     GuiElement.add(recipes_table, GuiLabel("header-ingredients"):caption({"helmod_result-panel.col-header-ingredients"}))
+    GuiElement.add(recipes_table, GuiLabel("header-factories"):caption({"helmod_result-panel.col-header-technologies"}))
 
     for _, recipe in pairs(recipes) do
         local color = nil
@@ -110,8 +124,8 @@ function CreatedOrWhereUsedPanel:AddTableRecipes(parent, recipes)
         -- recipe
         local cell = GuiElement.add(recipes_table, GuiFlowH())
         local button_prototype = GuiButtonSelectSprite("recipe.name", recipe.name):choose(icon_type, icon_name, recipe.name):color(color)
-        GuiElement.add(cell, button_prototype)
-        --GuiElement.add(cell, GuiLabel("recipe.name"):caption(recipe.localised_name))
+        local button = GuiElement.add(cell, button_prototype)
+        button.enabled = false
         
         ---duration
         local cell_duration = GuiElement.add(recipes_table, GuiFlowH())
@@ -139,6 +153,18 @@ function CreatedOrWhereUsedPanel:AddTableRecipes(parent, recipes)
             ingredient.count = ingredient_prototype:getElementAmount()
             GuiElement.add(cell_ingredients, GuiCellProduct(self.classname, "element-select", ingredient.type, ingredient.name, index):element(ingredient):color(GuiElement.color_button_add))
         end
+
+        local technologies = self:getTechnology(recipe)
+
+        local cell_technology = GuiElement.add(recipes_table, GuiFlowH())
+        cell_technology.style.horizontally_stretchable = false
+        cell_technology.style.horizontal_spacing = 2
+
+        for index, technology in pairs(technologies) do
+            local button_technology = GuiButtonSelectSprite("technology.name", technology.name):choose("technology", technology.name, technology.name):color(color)
+            local gui_technology = GuiElement.add(cell_technology, button_technology)
+            gui_technology.enabled = false
+        end
     end
 end
 -------------------------------------------------------------------------------
@@ -161,7 +187,33 @@ function CreatedOrWhereUsedPanel:onEvent(event)
     ---from RecipeSelector
     if event.action == "element-select" then
         local new_item = {type = event.item1, name = event.item2, id=game.tick }
+        self:addRecent(new_item)
         User.setParameter("CreatedOrWhereUsed_item", new_item)
         Controller:send("on_gui_refresh", event)
     end
+end
+
+function CreatedOrWhereUsedPanel:addRecent(item)
+    local limit = 20
+    local recent_items = User.getParameter("CreatedOrWhereUsed_recent") or {}
+    local can_insert = true
+    for _, recent_item in pairs(recent_items) do
+        if recent_item.type == item.type and recent_item.name == item.name then
+            can_insert = false
+            break; 
+        end
+    end
+    if can_insert then
+        table.insert(recent_items, 1, item)
+        if #recent_items >= limit then
+            table.remove(recent_items, limit)
+        end
+    end
+    User.setParameter("CreatedOrWhereUsed_recent", recent_items)
+end
+
+function CreatedOrWhereUsedPanel:getTechnology(recipe)
+    local filter = {filter="unlocks-recipe", recipe=recipe.name}
+    local technologies = game.get_filtered_technology_prototypes({filter})
+    return technologies
 end
