@@ -1306,7 +1306,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						else
 							product_color = User.getThumbnailColor(defines.thumbnail_color.names.product_default)
 						end
-						if block.pivot ~= nil  then
+						if parent.by_product ~= false and block.pivot ~= nil  then
 							local pivot = block.pivot
 							if pivot.type == lua_product.type and pivot.name == lua_product.name then
 								is_pivot = true
@@ -1325,6 +1325,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 			if block.ingredients ~= nil then
 				for index, lua_ingredient in spairs(block.ingredients, product_sorter) do
 					if ((lua_ingredient.state or 0) == 1 and not (block_by_product)) or (lua_ingredient.amount or 0) > ModelCompute.waste_value then
+						local parent_id = parent.id
 						local button_action = "production-recipe-ingredient-add"
 						local button_tooltip = "tooltip.ingredient"
 						local ingredient_color = User.getThumbnailColor(defines.thumbnail_color.names.ingredient_default)
@@ -1335,12 +1336,13 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						ingredient.count_limit = lua_ingredient.amount * (block.count_limit or 0)
 						ingredient.count_deep = lua_ingredient.amount * (block.count_deep or 0)
 
-						if block_by_product then
+						if block_by_product == true or not (block.unlinked) or block.by_factory == true then
 							button_action = "production-recipe-ingredient-add"
 							button_tooltip = "tooltip.add-recipe"
 						else
 							button_action = "product-edition"
 							button_tooltip = "tooltip.edit-product"
+							parent_id = block.id
 						end
 						---color
 						if ingredient.state == 1 then
@@ -1354,8 +1356,14 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						else
 							ingredient_color = User.getThumbnailColor(defines.thumbnail_color.names.ingredient_default)
 						end
-						
-						GuiElement.add(cell_ingredients, GuiCellElement(self.classname, button_action, model.id, parent.id, block.id, ingredient.name):element(ingredient):tooltip(button_tooltip):color(ingredient_color):index(index))
+						if not(block_by_product) and block.pivot ~= nil  then
+							local pivot = block.pivot
+							if pivot.type == ingredient.type and pivot.name == ingredient.name then
+								is_pivot = true
+							end
+						end
+						GuiElement.add(cell_ingredients, GuiCellElement(self.classname, button_action, model.id, parent_id, block.id, ingredient.name):element(ingredient)
+						:tooltip(button_tooltip):color(ingredient_color):index(index):isPivot(is_pivot))
 					end
 				end
 			end
