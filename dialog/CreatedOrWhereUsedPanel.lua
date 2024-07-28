@@ -72,7 +72,7 @@ function CreatedOrWhereUsedPanel:updateInfo(event)
 
         local element_panel = GuiElement.add(headers_table, GuiFrameV("recent-elements"):caption({"helmod_created-or-where-used-panel.recent-elements"}):style(defines.styles.frame.bordered))
         local recent_cell = GuiElement.add(element_panel, GuiFlowH())
-        local recent_items = User.getParameter("CreatedOrWhereUsed_recent")
+        local recent_items = User.getParameter("CreatedOrWhereUsed_recent") or {}
         for index, recent_item in pairs(recent_items) do
             local element_icon = GuiElement.add(recent_cell, GuiButtonSelectSprite(self.classname, "element-select", recent_item.type, recent_item.name, recent_item.id):choose(recent_item.type, recent_item.name, recent_item.name):color("flat"))
             element_icon.locked = true
