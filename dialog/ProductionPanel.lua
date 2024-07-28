@@ -1156,6 +1156,7 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 			local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients_", recipe.id):column(display_ingredient_cols):style("helmod_table_list"))
 			for index, lua_ingredient in spairs(recipe_prototype:getIngredients(recipe.factory), User.getProductSorter()) do
 				local contraint_type = nil
+				local is_pivot = false
 				local ingredient_prototype = Product(lua_ingredient)
 				local ingredient = ingredient_prototype:clone()
 				ingredient.time = model.time
@@ -1173,8 +1174,15 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				if not (block.solver ~= true and block.by_product == false) then
 					control_info = nil
 				end
+				if recipe.pivot ~= nil  then
+					local pivot = recipe.pivot
+					if pivot.type == lua_ingredient.type and pivot.name == lua_ingredient.name then
+						is_pivot = true
+					end
+				end
 				local ingredient_color = User.getThumbnailColor(defines.thumbnail_color.names.ingredient_default)
-				GuiElement.add(cell_ingredients, GuiCellElement(self.classname, "production-recipe-ingredient-add", model.id, block.id, recipe.id):element(ingredient):tooltip("tooltip.add-recipe"):color(ingredient_color):index(index):byLimit(block.by_limit):contraintIcon(contraint_type):controlInfo(control_info))
+				GuiElement.add(cell_ingredients, GuiCellElement(self.classname, "production-recipe-ingredient-add", model.id, block.id, recipe.id):element(ingredient):tooltip("tooltip.add-recipe")
+				:color(ingredient_color):index(index):byLimit(block.by_limit):contraintIcon(contraint_type):isPivot(is_pivot):controlInfo(control_info))
 			end
 		end
 	end
