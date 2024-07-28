@@ -102,8 +102,8 @@ function GuiTooltip:appendEnergyConsumption(tooltip, element)
   if self.m_with_energy == true then
     ---energy
     local total_power = Format.formatNumberKilo(element.energy_total, "W")
-    if element.limit_energy ~= nil then
-      local limit_power = Format.formatNumberKilo(element.limit_energy, "W")
+    if self.m_by_limit then
+      local limit_power = Format.formatNumberKilo(element.energy_limit, "W")
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.energy-consumption"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, limit_power or 0, "/", total_power, helmod_tag.font.close})
     else
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.energy-consumption"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, total_power or 0, helmod_tag.font.close})
@@ -127,11 +127,11 @@ function GuiTooltip:appendFlow(tooltip, element)
     end
 
     local total_flow = Format.formatNumberElement(element.count/((element.time or 1)/60))
-    if element.limit_count ~= nil then
-      local limit_flow = Format.formatNumberElement(element.limit_count/((element.time or 1)/60))
-      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.outflow"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, limit_flow or 0, "/", {"helmod_si.per-minute",total_flow or 0}, helmod_tag.font.close})
+    if self.m_by_limit then
+      local limit_flow = Format.formatNumberElement(element.count_limit/((element.time or 1)/60))
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.outflow-per-minute"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, limit_flow or 0, "/", total_flow, helmod_tag.font.close})
     else
-      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.outflow"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, {"helmod_si.per-minute",total_flow or 0}, helmod_tag.font.close})
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.outflow-per-minute"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, total_flow, helmod_tag.font.close})
     end
   end
 end
@@ -186,8 +186,8 @@ function GuiTooltip:appendLogistic(tooltip, element)
         if type == "inserter" then
           info = {"", " (", {"helmod_common.capacity"}, string.format(":%s", EntityPrototype(item_logistic):getInserterCapacity()), ")"}
         end
-        if element.limit_count ~= nil and element.limit_count > 0 then
-          local limit_value = Format.formatNumberElement(item_prototype:countContainer(element.limit_count, item_logistic, element.time))
+        if self.m_by_limit then
+          local limit_value = Format.formatNumberElement(item_prototype:countContainer(element.count_limit, item_logistic, element.time))
           table.insert(tooltip_section, {"", "\n", string.format("[%s=%s]", "entity", item_logistic), " ", helmod_tag.font.default_bold, " x ", limit_value, "/", formated_total_value, helmod_tag.font.close, info})
         else
           table.insert(tooltip_section, {"", "\n", string.format("[%s=%s]", "entity", item_logistic), " ", helmod_tag.font.default_bold, " x ", formated_total_value, helmod_tag.font.close, info})
@@ -203,8 +203,8 @@ function GuiTooltip:appendLogistic(tooltip, element)
         if type == "pipe" then count = count / element.time end
         local total_value = fluid_prototype:countContainer(count, fluid_logistic, element.time)
         local formated_total_value = Format.formatNumberElement(total_value)
-        if element.limit_count ~= nil and element.limit_count > 0 then
-          local limit_count = element.limit_count
+        if self.m_by_limit then
+          local limit_count = element.count_limit
           if type == "pipe" then limit_count = limit_count / element.time end
           local limit_value = Format.formatNumberElement(fluid_prototype:countContainer(limit_count, fluid_logistic, element.time))
           table.insert(tooltip_section, {"", "\n", string.format("[%s=%s]", "entity", fluid_logistic), " ", helmod_tag.font.default_bold, " x ", limit_value, "/", formated_total_value, helmod_tag.font.close})
@@ -364,8 +364,8 @@ function GuiTooltipRecipe:create()
     table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=icon_type, name=icon_name}), helmod_tag.font.close, helmod_tag.color.close})
     ---quantity
     local total_count = Format.formatNumberElement(element.count)
-    if element.limit_count ~= nil then
-      local limit_count = Format.formatNumberElement(element.limit_count)
+    if self.m_by_limit then
+      local limit_count = Format.formatNumberElement(element.count_limit)
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.quantity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, limit_count or 0, "/", total_count, helmod_tag.font.close})
     else
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.quantity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, total_count or 0, helmod_tag.font.close})
@@ -406,7 +406,7 @@ function GuiTooltipElement:create()
     table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=element.name}), helmod_tag.font.close, helmod_tag.color.close})
     ---quantity
     local total_count = Format.formatNumberElement(element.count)
-    if element.count_limit ~= nil then
+    if self.m_by_limit then
       local count_limit = Format.formatNumberElement(element.count_limit)
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.quantity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, count_limit or 0, "/", total_count, helmod_tag.font.close})
     else
@@ -450,8 +450,8 @@ function GuiTooltipEnergy:create()
     table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=element.name}), helmod_tag.font.close, helmod_tag.color.close})
     ---quantity
     local total_count = Format.formatNumberKilo(element.count, "J")
-    if element.limit_count ~= nil then
-      local limit_count = Format.formatNumberElement(element.limit_count)
+    if self.m_by_limit then
+      local limit_count = Format.formatNumberElement(element.count_limit)
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.quantity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, limit_count or 0, "/", total_count, helmod_tag.font.close})
     else
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.quantity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, total_count or 0, helmod_tag.font.close})
@@ -547,9 +547,13 @@ end)
 function GuiTooltipEnergyConsumption:create()
   local tooltip = self._super.create(self)
   if self.m_element then
-    local power = Format.formatNumberKilo(self.m_element.energy_total or self.m_element.power, "J")
-    table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.energy-consumption"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, power, helmod_tag.font.close})
-  end
+    if self.m_by_limit then
+      local power = Format.formatNumberKilo(self.m_element.energy_total or self.m_element.power_limit, "W")
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.energy-consumption"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, power, helmod_tag.font.close})
+    else
+      local power = Format.formatNumberKilo(self.m_element.energy_total or self.m_element.power, "W")
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.energy-consumption"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, power, helmod_tag.font.close})
+    end  end
   return tooltip
 end
 
@@ -566,15 +570,18 @@ end)
 function GuiTooltipPollution:create()
   local tooltip = self._super.create(self)
   if self.m_element then
-    local total_pollution = Format.formatNumberElement(self.m_element.pollution)
-    local total_flow = Format.formatNumberElement(self.m_element.pollution/((self.m_element.time or 1)/60))
-    if self.m_element.limit_count ~= nil then
-      local limit_flow = Format.formatNumberElement(self.m_element.limit_pollution/((self.m_element.time or 1)/60))
-      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.pollution"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, total_pollution, helmod_tag.font.close})
-      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.outflow"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, limit_flow or 0, "/", {"helmod_si.per-minute",total_flow or 0}, helmod_tag.font.close})
+    local pollution = self.m_element.pollution or 0
+    local pollution_limit = self.m_element.pollution_limit or 0
+    local total_pollution = Format.formatNumberElement(pollution)
+    local limit_pollution = Format.formatNumberElement(pollution_limit)
+    local total_flow = Format.formatNumberElement(pollution/((self.m_element.time or 1)/60))
+    if self.m_by_limit then
+      local limit_flow = Format.formatNumberElement(pollution_limit/((self.m_element.time or 1)/60))
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.pollution"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, limit_pollution, helmod_tag.font.close})
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.outflow-per-minute"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, limit_flow or 0, "/", total_flow, helmod_tag.font.close})
     else
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.pollution"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, total_pollution, helmod_tag.font.close})
-      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.outflow"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, {"helmod_si.per-minute",total_flow or 0}, helmod_tag.font.close})
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.outflow-per-minute"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, total_flow, helmod_tag.font.close})
     end
     end
   return tooltip
@@ -659,7 +666,13 @@ function GuiTooltipBlock:create()
   local tooltip = self._super.create(self)
   if self.m_element then
     local quantity = self.m_element.count or 0
-    table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.quantity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, quantity, helmod_tag.font.close})
+    if self.m_by_limit then
+      local quantity = self.m_element.count_limit or 0
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.quantity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, quantity, helmod_tag.font.close})
+    else
+      local quantity = self.m_element.count or 0
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_common.quantity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, quantity, helmod_tag.font.close})
+    end
   end
   return tooltip
 end

@@ -132,6 +132,10 @@ function SolverLinkedMatrix:solve(block, parameters, debug)
         -- build and compute reduced matrix when there are linked products
         local blocks_linked = {}
         for product_name, linked in pairs(block.products_linked) do
+            if block.products[product_name] == nil then
+                block.products_linked[product_name] = nil
+                linked = false
+            end
             if linked == true then
                 -- work on full copy
                 local linked_block = table.deepcopy(block)
@@ -336,6 +340,9 @@ end
 ---@param block any
 ---@param matrix any
 function SolverLinkedMatrix:solve_block_finalize(block, matrix)
+    if matrix == nil or matrix.states == nil then
+        return
+    end
     -- state = 0 => produit
     -- state = 1 => produit pilotant
     -- state = 2 => produit restant

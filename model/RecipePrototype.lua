@@ -558,6 +558,7 @@ end
 
 ---@return string, string
 function RecipePrototype:getIcon()
+    if self.lua_prototype == nil then return "utility","warning_icon" end
     local icon_name = self.lua_prototype.name
     local icon_type = self.lua_type
 

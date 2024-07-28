@@ -15,14 +15,14 @@ help_data.getting_start.content.getting_start = {
   localised_text = "getting-start-panel",
   desc = false,
   list = "number",
-  count = 4
+  count = 5
 }
 help_data.getting_start.content.quick_start = {
   sprite = "quick-start",
   localised_text = "quick-start",
   desc = true,
   list = "number",
-  count = 8
+  count = 9
 }
 help_data.mod_settings = {
   name = "mod-settings",
@@ -389,7 +389,7 @@ function HelpPanel:updateContent(event)
     GuiElement.add(section_panel, GuiLabel("header"):caption({"", "[font=heading-1]", section_caption_name, "[/font]"}):style("helmod_label_help"))
     local section_title = GuiElement.add(section_panel, GuiLabel(section.name, "desc"):caption({"", "   ",section_caption_desc}):style("helmod_label_help"))
     for key,content in pairs(section.content) do
-      local content_panel = GuiElement.add(section_panel, GuiFrameV(section.name, "panel", key):style("helmod_inside_frame"))
+      local content_panel = GuiElement.add(section_panel, GuiFrameV(section.name, "panel", key))
       content_panel.style.horizontally_stretchable = true
 
       local content_title_name = {string.format("helmod_help.%s", content.localised_text)}
@@ -398,7 +398,7 @@ function HelpPanel:updateContent(event)
         GuiElement.add(content_panel, GuiLabel(section.name, "desc", key):caption({string.format("helmod_help.%s-desc", content.localised_text)}):style("helmod_label_help_text"))
       end
       if content.sprite then
-        GuiElement.add(content_panel, GuiSprite():sprite("helmod_"..content.sprite))
+        local sprite = GuiElement.add(content_panel, GuiSprite():sprite("helmod_"..content.sprite))
       end
 
       local column = 1

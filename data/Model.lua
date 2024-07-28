@@ -484,6 +484,9 @@ function Model.setBeacon(recipe, index, name, combo, per_factory, per_factory_co
       beacon.per_factory = per_factory or User.getPreferenceSetting("beacon_by_factory")
       beacon.per_factory_constant = per_factory_constant or User.getPreferenceSetting("beacon_constant")
       if recipe.beacons[index] ~= nil then
+        local old_beacon = recipe.beacons[index]
+        local module_priority = old_beacon.module_priority
+        beacon.module_priority = module_priority
         recipe.beacons[index] = beacon
       end
     end
@@ -620,7 +623,7 @@ end
 function Model.factoryHasModule(factory)
   if factory == nil then return false end
   if factory.modules == nil then return false end
-  if factory.modules ~= nil and #factory.modules then return false end
+  if factory.modules ~= nil and table.size(factory.modules) == 0 then return false end
   return true
 end
 

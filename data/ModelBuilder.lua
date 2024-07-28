@@ -403,33 +403,18 @@ end
 function ModelBuilder.applyFactoryModulePriority(recipe)
     if recipe ~= nil then
         local module_priority = recipe.factory.module_priority
-        if module_priority == nil then
-            recipe.factory.modules = {}
-        else
-            local first = true
-            for i, priority in pairs(module_priority) do
-                local module = ItemPrototype(priority.name)
-                if Player.checkFactoryLimitationModule(module:native(), recipe) == true then
-                    if first then
-                        ModelBuilder.setModuleModel(recipe.factory, priority.name, priority.value)
-                        first = false
-                    else
-                        ModelBuilder.appendModuleModel(recipe.factory, priority.name, priority.value)
-                    end
-                end
-            end
-        end
+        ModelBuilder.setFactoryModulePriority(recipe, module_priority)
     end
 end
 
----Set a module priority in beacons
+-------------------------------------------------------------------------------
+---Apply a module priority in factory
 ---@param recipe RecipeData
----@param modules_priority {[uint] : {[uint] : ModulePriorityData}}
-function ModelBuilder.setBeaconsModulesPriority(recipe, modules_priority)
+function ModelBuilder.applyBeaconModulePriority(recipe)
     if recipe ~= nil then
         local beacons = recipe.beacons
         for index, beacon in ipairs(beacons) do
-            local module_priority = modules_priority[index]
+            local module_priority = beacon.module_priority
             ModelBuilder.setBeaconModulePriority(beacon, recipe, module_priority)
         end
     end

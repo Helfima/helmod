@@ -365,7 +365,7 @@ end
 ---@param color string
 ---@param color_level int
 ---@param tooltip any
----@param format_number string
+---@param format_number? string
 function GuiCell:add_row_label_m(parent, width, name, count, color, color_level, tooltip, format_number)
   local display_cell_mod = User.getModSetting("display_cell_mod")
   local row = GuiElement.add(parent, GuiFrameH(name):style("helmod_frame_element_w50", color, color_level))
@@ -443,7 +443,7 @@ function GuiCellFactory:create(parent)
   row1.style.top_padding=2
   row1.style.bottom_padding=3
 
-  local tooltip = GuiTooltipElement(self.options.tooltip):element(factory):withEnergy():withEffectInfo(factory.effects ~= nil):withControlInfo(self.m_with_control_info)
+  local tooltip = GuiTooltipElement(self.options.tooltip):element(factory):byLimit(self.m_by_limit):withEnergy():withEffectInfo(factory.effects ~= nil):withControlInfo(self.m_with_control_info)
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("entity", factory.name):tooltip(tooltip))
   
   self:add_mask(button, color)
@@ -636,6 +636,13 @@ function GuiCellBlock:create(parent)
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
   row1.style.top_padding=2
   row1.style.bottom_padding=3
+  
+  local data = {
+    count = element.count or 0,
+    count_limit = element.count_limit or 0,
+    count_deep = element.count_deep or 0,
+    time = element.time
+  }
 
   local first_recipe = Model.firstChild(element.children)
   if first_recipe ~= nil then
@@ -650,13 +657,13 @@ function GuiCellBlock:create(parent)
 
   local width = 50
   if self.m_by_limit then
-    self:add_row_label(cell, width, "row2", element.count_limit or 0, color, 2, {"helmod_common.quantity"})
+    self:add_row_label(cell, width, "row2", data.count_limit, color, 2, {"helmod_common.quantity"})
   else
-    self:add_row_label(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
+    self:add_row_label(cell, width, "row2", data.count, color, 2, {"helmod_common.quantity"})
   end
   local display_count_deep = User.getParameter("display_count_deep")
   if display_count_deep then
-    self:add_row_label(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
+    self:add_row_label(cell, width, "row3", data.count_deep, color, 3, {"helmod_common.total"})
   end
 
   return cell
@@ -680,6 +687,13 @@ function GuiCellBlockM:create(parent)
   row1.style.top_padding=2
   row1.style.bottom_padding=3
   row1.style.width = 36
+  
+  local data = {
+    count = element.count or 0,
+    count_limit = element.count_limit or 0,
+    count_deep = element.count_deep or 0,
+    time = element.time
+  }
 
   local first_recipe = Model.firstChild(element.children)
   if first_recipe ~= nil then
@@ -687,17 +701,27 @@ function GuiCellBlockM:create(parent)
     local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
     
     GuiElement.infoRecipe(button, first_recipe)
+    local recipe_prototype = RecipePrototype(element.name, first_recipe.type)
+    if recipe_prototype:native() == nil then
+      button.tooltip = "ERROR: Recipe ".. element.name .." not exist in game"
+      button.sprite = "utility/warning_icon"
+      row1.style = "helmod_frame_element_w30_red_1"
+    end
   else
     local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black))
     button.style.width = 36
   end
 
   local width = 36
-  self:add_row_label_m(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
+  if self.m_by_limit then
+    self:add_row_label_m(cell, width, "row2", data.count_limit, color, 2, {"helmod_common.quantity"})
+  else
+    self:add_row_label_m(cell, width, "row2", data.count, color, 2, {"helmod_common.quantity"})
+  end
 
   local display_count_deep = User.getParameter("display_count_deep")
   if display_count_deep then
-    self:add_row_label_m(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
+    self:add_row_label_m(cell, width, "row3", data.count_deep, color, 3, {"helmod_common.total"})
   end
 
   return cell
@@ -751,20 +775,27 @@ function GuiCellBlockInfo:create(parent)
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
   row1.style.top_padding=4
   row1.style.bottom_padding=4
+  
+  local data = {
+    count = element.count or 0,
+    count_limit = element.count_limit or 0,
+    count_deep = element.count_deep or 0,
+    time = element.time
+  }
 
-  local tooltip = GuiTooltipBlock(self.options.tooltip):element(element)
+  local tooltip = GuiTooltipBlock(self.options.tooltip):element(data):byLimit(self.m_by_limit)
   local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", defines.sprites.hangar.white, defines.sprites.hangar.black):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   local width = 50
   if self.m_by_limit then
-    self:add_row_label(cell, width, "row2", element.count_limit or 0, color, 2, {"helmod_common.quantity"})
+    self:add_row_label(cell, width, "row2", data.count_limit, color, 2, {"helmod_common.quantity"})
   else
-    self:add_row_label(cell, width, "row2", element.count or 0, color, 2, {"helmod_common.quantity"})
+    self:add_row_label(cell, width, "row2", data.count, color, 2, {"helmod_common.quantity"})
   end
 
   local display_count_deep = User.getParameter("display_count_deep")
   if display_count_deep then
-    self:add_row_label(cell, width, "row3", element.count_deep or 0, color, 3, {"helmod_common.total"})
+    self:add_row_label(cell, width, "row3", data.count_deep, color, 3, {"helmod_common.total"})
   end
 
   return cell
@@ -788,19 +819,26 @@ function GuiCellEnergy:create(parent)
   row1.style.top_padding=4
   row1.style.bottom_padding=4
 
-  local tooltip = GuiTooltipEnergyConsumption(self.options.tooltip):element(element)
+  local data = {
+    power = element.power or 0,
+    power_limit = element.power_limit or 0,
+    power_deep = element.power_deep or 0,
+    time = element.time
+  }
+
+  local tooltip = GuiTooltipEnergyConsumption(self.options.tooltip):element(data):byLimit(self.m_by_limit)
   local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", defines.sprites.event.white, defines.sprites.event.black):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   local width = 80
   if self.m_by_limit then
-    self:add_row_label(cell, width, "row2", {element.power_limit, "W"}, color, 2, {"helmod_common.quantity"})
+    self:add_row_label(cell, width, "row2", {data.power_limit, "W"}, color, 2, {"helmod_common.quantity"})
   else
-    self:add_row_label(cell, width, "row2", {element.power, "W"}, color, 2, {"helmod_common.quantity"})
+    self:add_row_label(cell, width, "row2", {data.power, "W"}, color, 2, {"helmod_common.quantity"})
   end
 
   local display_count_deep = User.getParameter("display_count_deep")
   if display_count_deep then
-    self:add_row_label(cell, width, "row3", {element.power_deep, "W"}, color, 3, {"helmod_common.total"})
+    self:add_row_label(cell, width, "row3", {data.power_deep, "W"}, color, 3, {"helmod_common.total"})
   end
 
   return cell
@@ -826,17 +864,24 @@ function GuiCellPollution:create(parent)
   row1.style.bottom_padding=4
   row1.style.minimal_width=width
 
-  local tooltip = GuiTooltipPollution(self.options.tooltip):element(element)
+  local data = {
+    pollution = element.pollution or 0,
+    pollution_limit = element.pollution_limit or 0,
+    pollution_deep = element.pollution_deep or 0,
+    time = element.time
+  }
+
+  local tooltip = GuiTooltipPollution(self.options.tooltip):element(data):byLimit(self.m_by_limit)
   local button = GuiElement.add(row1, GuiButton(unpack(self.name)):sprite("menu", defines.sprites.skull.white, defines.sprites.skull.black):style("helmod_button_menu_flat"):tooltip(tooltip))
 
   if self.m_by_limit then
-    self:add_row_label(cell, width, "row2", element.pollution_limit, color, 2, {"helmod_common.quantity"})
+    self:add_row_label(cell, width, "row2", data.pollution_limit, color, 2, {"helmod_common.quantity"})
   else
-    self:add_row_label(cell, width, "row2", element.pollution, color, 2, {"helmod_common.quantity"})
+    self:add_row_label(cell, width, "row2", data.pollution, color, 2, {"helmod_common.quantity"})
   end
   local display_count_deep = User.getParameter("display_count_deep")
   if display_count_deep then
-    self:add_row_label(cell, width, "row3", element.pollution_deep, color, 3, {"helmod_common.total"})
+    self:add_row_label(cell, width, "row3", data.pollution_deep, color, 3, {"helmod_common.total"})
   end
 
   return cell
@@ -933,9 +978,9 @@ function GuiCellElement:create(parent)
 
   local tooltip = ""
   if element.type == "energy" then
-    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
+    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
   else
-    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
+    tooltip = GuiTooltipElement(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
   end
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(element.type or "entity", element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   GuiElement.infoTemperature(row1, element)
@@ -998,9 +1043,9 @@ function GuiCellElementSm:create(parent)
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w30", color, 1))
   local tooltip = ""
   if element.type == "energy" then
-    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic():withProductInfo()
+    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo()
   else
-    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo()
+    tooltip = GuiTooltipElement(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo()
   end
   local button = GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):sprite(element.type, element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   
@@ -1048,9 +1093,9 @@ function GuiCellElementM:create(parent)
 
   local tooltip = ""
   if element.type == "energy" then
-    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
+    tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
   else
-    tooltip = GuiTooltipElement(self.options.tooltip):element(element):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
+    tooltip = GuiTooltipElement(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
   end
   local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(element.type or "entity", element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
   GuiElement.infoTemperature(row1, element)

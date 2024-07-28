@@ -592,8 +592,8 @@ function ProductionPanel:updateInputBlock(model, block)
 					local ingredient = Product(lua_ingredient):clone()
 					ingredient.time = model.time
 					ingredient.count = lua_ingredient.amount
-					ingredient.count_limit = lua_ingredient.amount * block.count_limit
-					ingredient.count_deep = lua_ingredient.amount * block.count_deep
+					ingredient.count_limit = lua_ingredient.amount * (block.count_limit or 0)
+					ingredient.count_deep = lua_ingredient.amount * (block.count_deep or 0)
 
 					local button_action = "production-recipe-ingredient-add"
 					local button_tooltip = "tooltip.ingredient"
@@ -604,7 +604,7 @@ function ProductionPanel:updateInputBlock(model, block)
 						button_tooltip = "tooltip.add-recipe"
 						control_info = nil
 					else
-						if not (block.unlinked) or block.by_factory == true then
+						if not (block.unlinked or true) or block.by_factory == true then
 							button_action = "product-info"
 							button_tooltip = "tooltip.info-product"
 							if block.products_linked ~= nil and block.products_linked[Product(lua_ingredient):getTableKey()] then
@@ -681,8 +681,8 @@ function ProductionPanel:updateOutputBlock(model, block)
 					local product = Product(lua_product):clone()
 					product.time = model.time
 					product.count = lua_product.amount
-					product.count_limit = lua_product.amount * block.count_limit
-					product.count_deep = lua_product.amount * block.count_deep
+					product.count_limit = lua_product.amount * (block.count_limit or 0)
+					product.count_deep = lua_product.amount * (block.count_deep or 0)
 
 					local button_action = "production-recipe-product-add"
 					local button_tooltip = "tooltip.product"
@@ -1156,6 +1156,7 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 			local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients_", recipe.id):column(display_ingredient_cols):style("helmod_table_list"))
 			for index, lua_ingredient in spairs(recipe_prototype:getIngredients(recipe.factory), User.getProductSorter()) do
 				local contraint_type = nil
+				local is_pivot = false
 				local ingredient_prototype = Product(lua_ingredient)
 				local ingredient = ingredient_prototype:clone()
 				ingredient.time = model.time
@@ -1166,9 +1167,6 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				if ingredient.constant == true then
 					ingredient.count = ingredient_prototype:countProduct(recipe)
 				end
-				if block.by_limit == true and block.count > 1 then
-					ingredient.limit_count = ingredient.count / block.count
-				end
 				if block.by_product == false and recipe.contraint ~= nil and recipe.contraint.name == ingredient.name then
 					contraint_type = recipe.contraint.type
 				end
@@ -1176,8 +1174,15 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				if not (block.solver ~= true and block.by_product == false) then
 					control_info = nil
 				end
+				if recipe.pivot ~= nil  then
+					local pivot = recipe.pivot
+					if pivot.type == lua_ingredient.type and pivot.name == lua_ingredient.name then
+						is_pivot = true
+					end
+				end
 				local ingredient_color = User.getThumbnailColor(defines.thumbnail_color.names.ingredient_default)
-				GuiElement.add(cell_ingredients, GuiCellElement(self.classname, "production-recipe-ingredient-add", model.id, block.id, recipe.id):element(ingredient):tooltip("tooltip.add-recipe"):color(ingredient_color):index(index):byLimit(block.by_limit):contraintIcon(contraint_type):controlInfo(control_info))
+				GuiElement.add(cell_ingredients, GuiCellElement(self.classname, "production-recipe-ingredient-add", model.id, block.id, recipe.id):element(ingredient):tooltip("tooltip.add-recipe")
+				:color(ingredient_color):index(index):byLimit(block.by_limit):contraintIcon(contraint_type):isPivot(is_pivot):controlInfo(control_info))
 			end
 		end
 	end
@@ -1281,9 +1286,9 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						local product_prototype = Product(lua_product)
 						local product = product_prototype:clone()
 						product.time = model.time
-						product.count = lua_product.amount * block.count
-						product.count_limit = lua_product.amount * block.count_limit
-						product.count_deep = lua_product.amount * block.count_deep
+						product.count = lua_product.amount * (block.count or 0)
+						product.count_limit = lua_product.amount * (block.count_limit or 0)
+						product.count_deep = lua_product.amount * (block.count_deep or 0)
 
 						if not (block_by_product) or not (block.unlinked) or block.by_factory == true then
 							button_action = "production-recipe-product-add"
@@ -1309,7 +1314,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						else
 							product_color = User.getThumbnailColor(defines.thumbnail_color.names.product_default)
 						end
-						if block.pivot ~= nil  then
+						if parent.by_product ~= false and block.pivot ~= nil  then
 							local pivot = block.pivot
 							if pivot.type == lua_product.type and pivot.name == lua_product.name then
 								is_pivot = true
@@ -1328,22 +1333,24 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 			if block.ingredients ~= nil then
 				for index, lua_ingredient in spairs(block.ingredients, product_sorter) do
 					if ((lua_ingredient.state or 0) == 1 and not (block_by_product)) or (lua_ingredient.amount or 0) > ModelCompute.waste_value then
+						local parent_id = parent.id
 						local button_action = "production-recipe-ingredient-add"
 						local button_tooltip = "tooltip.ingredient"
 						local ingredient_color = User.getThumbnailColor(defines.thumbnail_color.names.ingredient_default)
 						local ingredient_prototype = Product(lua_ingredient)
 						local ingredient = ingredient_prototype:clone()
 						ingredient.time = model.time
-						ingredient.count = lua_ingredient.amount * block.count
-						ingredient.count_limit = lua_ingredient.amount * block.count_limit
-						ingredient.count_deep = lua_ingredient.amount * block.count_deep
+						ingredient.count = lua_ingredient.amount * (block.count or 0)
+						ingredient.count_limit = lua_ingredient.amount * (block.count_limit or 0)
+						ingredient.count_deep = lua_ingredient.amount * (block.count_deep or 0)
 
-						if block_by_product then
+						if block_by_product == true or not (block.unlinked) or block.by_factory == true then
 							button_action = "production-recipe-ingredient-add"
 							button_tooltip = "tooltip.add-recipe"
 						else
 							button_action = "product-edition"
 							button_tooltip = "tooltip.edit-product"
+							parent_id = block.id
 						end
 						---color
 						if ingredient.state == 1 then
@@ -1357,8 +1364,14 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						else
 							ingredient_color = User.getThumbnailColor(defines.thumbnail_color.names.ingredient_default)
 						end
-						
-						GuiElement.add(cell_ingredients, GuiCellElement(self.classname, button_action, model.id, parent.id, block.id, ingredient.name):element(ingredient):tooltip(button_tooltip):color(ingredient_color):index(index))
+						if not(block_by_product) and block.pivot ~= nil  then
+							local pivot = block.pivot
+							if pivot.type == ingredient.type and pivot.name == ingredient.name then
+								is_pivot = true
+							end
+						end
+						GuiElement.add(cell_ingredients, GuiCellElement(self.classname, button_action, model.id, parent_id, block.id, ingredient.name):element(ingredient)
+						:tooltip(button_tooltip):color(ingredient_color):index(index):isPivot(is_pivot))
 					end
 				end
 			end
