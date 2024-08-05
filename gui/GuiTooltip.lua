@@ -311,7 +311,7 @@ function GuiTooltip:create()
 end
 
 -------------------------------------------------------------------------------
----@class GuiTooltipModel
+---@class GuiTooltipModel : GuiTooltip
 GuiTooltipModel = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
@@ -345,7 +345,7 @@ function GuiTooltipModel:create()
 end
 
 -------------------------------------------------------------------------------
----@class GuiTooltipRecipe
+---@class GuiTooltipRecipe : GuiTooltip
 GuiTooltipRecipe = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
@@ -383,7 +383,7 @@ function GuiTooltipRecipe:create()
 end
 
 -------------------------------------------------------------------------------
----@class GuiTooltipElement
+---@class GuiTooltipElement : GuiTooltip
 GuiTooltipElement = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
@@ -426,7 +426,7 @@ function GuiTooltipElement:create()
 end
 
 -------------------------------------------------------------------------------
----@class GuiTooltipEnergy
+---@class GuiTooltipEnergy : GuiTooltip
 GuiTooltipEnergy = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
@@ -464,7 +464,7 @@ function GuiTooltipEnergy:create()
 end
 
 -------------------------------------------------------------------------------
----@class GuiTooltipFactory
+---@class GuiTooltipFactory : GuiTooltip
 GuiTooltipFactory = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
@@ -512,7 +512,7 @@ function GuiTooltipFactory.AppendFactory(tooltip, element)
 end
 
 -------------------------------------------------------------------------------
----@class GuiTooltipBeacons
+---@class GuiTooltipBeacons : GuiTooltip
 GuiTooltipBeacons = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
@@ -535,7 +535,7 @@ end
 
 
 -------------------------------------------------------------------------------
----@class GuiTooltipEnergyConsumption
+---@class GuiTooltipEnergyConsumption : GuiTooltip
 GuiTooltipEnergyConsumption = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
@@ -558,7 +558,7 @@ function GuiTooltipEnergyConsumption:create()
 end
 
 -------------------------------------------------------------------------------
----@class GuiTooltipPollution
+---@class GuiTooltipPollution : GuiTooltip
 GuiTooltipPollution = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
@@ -588,7 +588,7 @@ function GuiTooltipPollution:create()
 end
 
 -------------------------------------------------------------------------------
----@class GuiTooltipBuilding
+---@class GuiTooltipBuilding : GuiTooltip
 GuiTooltipBuilding = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
@@ -653,7 +653,7 @@ function GuiTooltipBuilding:create()
 end
 
 -------------------------------------------------------------------------------
----@class GuiTooltipBlock
+---@class GuiTooltipBlock : GuiTooltip
 GuiTooltipBlock = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
@@ -678,7 +678,7 @@ function GuiTooltipBlock:create()
 end
 
 -------------------------------------------------------------------------------
----@class GuiTooltipModule
+---@class GuiTooltipModule : GuiTooltip
 GuiTooltipModule = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
@@ -727,7 +727,7 @@ function GuiTooltipModule:create()
 end
 
 -------------------------------------------------------------------------------
----@class GuiTooltipPriority
+---@class GuiTooltipPriority : GuiTooltip
 GuiTooltipPriority = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"
@@ -749,7 +749,7 @@ function GuiTooltipPriority:create()
 end
 
 -------------------------------------------------------------------------------
----@class GuiTooltipPriorities
+---@class GuiTooltipPriorities : GuiTooltip
 GuiTooltipPriorities = newclass(GuiTooltip,function(base,...)
   GuiTooltip.init(base,...)
   base.classname = "HMGuiTooltip"

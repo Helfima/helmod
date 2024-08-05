@@ -556,11 +556,23 @@ function User.update()
     end
 end
 
+function User.queryTranslate(localised_string)
+    local translated_ids = User.get("translated_ids") or {}
+    local translated_id = Player.native().request_translation(localised_string)
+    translated_ids[translated_id] = true
+    User.set("translated_ids", translated_ids)
+end
 -------------------------------------------------------------------------------
 ---Add translate
----@param request table --{player_index=number, localised_string=#string, result=#string, translated=#boolean}
+---@param request EventData.on_string_translated --{player_index=number, localised_string=#string, result=#string, translated=#boolean}
 function User.addTranslate(request)
     if request.translated == true then
+        local translated_ids = User.get("translated_ids") or {}
+        -- skip if is not helmod request
+        if translated_ids[request.id] ~= true then return end
+        translated_ids[request.id] = nil
+        User.set("translated_ids", translated_ids)
+
         local localised_string = request.localised_string
         local string_translated = request.result
         if type(localised_string) == "table" then

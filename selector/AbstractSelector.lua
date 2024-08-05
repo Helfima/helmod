@@ -410,7 +410,7 @@ function AbstractSelector:translate(event)
       local query_translate = table.remove(event.table_translate)
       self:updateWaitMessage(string.format("Wait translate: %s", query_translate.index or 0))
       for _,localised_name in pairs(query_translate.list_translate) do
-        Player.native().request_translation(localised_name)
+        User.queryTranslate(localised_name)
       end
       if #event.table_translate > 0 then
         return User.createNextEvent(event, self.classname, "translate")
