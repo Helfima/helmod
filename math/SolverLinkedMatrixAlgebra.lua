@@ -20,15 +20,7 @@ function SolverLinkedMatrixAlgebra:get_col(matrix, xrow, invert)
     local zrow = matrix.rows[#matrix.rows]
     local xcol = 0
     local max = 0
-    local col_master = -1
-    local col_exclude = -1
-    -- if row[self.col_Cn] > 0 then
-    --     col_master = row[self.col_Cn]
-    -- end
-    -- if row[self.col_Cn] < 0 then
-    --     col_exclude = -row[self.col_Cn]
-    -- end
-    ---on cherche la plus grande demande
+    local has_master = false
     for icol, column in pairs(matrix.columns) do
         local cell_value = row[icol] or 0
         if parameters.consumer == 1 or parameters.voider == 1 then
@@ -46,19 +38,20 @@ function SolverLinkedMatrixAlgebra:get_col(matrix, xrow, invert)
             -- contraints
             local has_contraint = parameters.contraints ~= nil
             local is_master = false
-            local not_exclude = true
+            local is_exclude = false
             if parameters.contraints ~= nil and column.product ~= nil and parameters.contraints[column.product.name] then
                 local contraint = parameters.contraints[column.product.name]
                 if contraint.type == "master" then
                     is_master = true
+                    has_master = true
                 else
-                    not_exclude = false
+                    is_exclude = true
                 end
             end
             -- if zvalue = 0 the choose is already use
             if (C > max and zvalue ~= 0 and has_contraint == false)
                 or (is_master)
-                or (C > max and not_exclude) then
+                or (C > max and is_exclude == false and has_master == false) then
                 max = C
                 xcol = icol
             end

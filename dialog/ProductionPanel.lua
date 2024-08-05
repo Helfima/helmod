@@ -1320,8 +1320,12 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 								is_pivot = true
 							end
 						end
+						local control_info = "contraint"
+						if not (parent.solver ~= true and parent.by_product ~= false) then
+							control_info = nil
+						end
 						GuiElement.add(cell_products, GuiCellElement(self.classname, button_action, model.id, parent_id, block.id, product.name):element(product)
-						:tooltip(button_tooltip):color(product_color):index(index):contraintIcon(contraint_type):isPivot(is_pivot))
+						:tooltip(button_tooltip):color(product_color):index(index):contraintIcon(contraint_type):isPivot(is_pivot):controlInfo(control_info))
 					end
 				end
 			end
@@ -1334,6 +1338,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 				for index, lua_ingredient in spairs(block.ingredients, product_sorter) do
 					if ((lua_ingredient.state or 0) == 1 and not (block_by_product)) or (lua_ingredient.amount or 0) > ModelCompute.waste_value then
 						local parent_id = parent.id
+						local is_pivot = false
 						local button_action = "production-recipe-ingredient-add"
 						local button_tooltip = "tooltip.ingredient"
 						local ingredient_color = User.getThumbnailColor(defines.thumbnail_color.names.ingredient_default)
@@ -1370,8 +1375,12 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 								is_pivot = true
 							end
 						end
+						local control_info = "contraint"
+						if not (parent.solver ~= true and parent.by_product == false) then
+							control_info = nil
+						end
 						GuiElement.add(cell_ingredients, GuiCellElement(self.classname, button_action, model.id, parent_id, block.id, ingredient.name):element(ingredient)
-						:tooltip(button_tooltip):color(ingredient_color):index(index):isPivot(is_pivot))
+						:tooltip(button_tooltip):color(ingredient_color):index(index):isPivot(is_pivot):controlInfo(control_info))
 					end
 				end
 			end
@@ -1762,12 +1771,14 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 			local child = block.children[event.item3]
 			ModelBuilder.updateChildContraint(child, contraint)
 			ModelCompute.update(model)
+			User.setParameter("scroll_element", child.id)
 			Controller:send("on_gui_update", event)
 		elseif block ~= nil and event.shift == true and event.item3 ~= "none" then
 			local contraint = { type = "exclude", name = event.item4 }
 			local child = block.children[event.item3]
 			ModelBuilder.updateChildContraint(child, contraint)
 			ModelCompute.update(model)
+			User.setParameter("scroll_element", child.id)
 			Controller:send("on_gui_update", event)
 		end
 	end
@@ -1797,12 +1808,14 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 			local child = block.children[event.item3]
 			ModelBuilder.updateChildContraint(child, contraint)
 			ModelCompute.update(model)
+			User.setParameter("scroll_element", child.id)
 			Controller:send("on_gui_update", event)
 		elseif block ~= nil and event.shift == true and event.item4 ~= "none" then
 			local contraint = { type = "exclude", name = event.item4 }
 			local child = block.children[event.item3]
 			ModelBuilder.updateChildContraint(child, contraint)
 			ModelCompute.update(model)
+			User.setParameter("scroll_element", child.id)
 			Controller:send("on_gui_update", event)
 		end
 	end
