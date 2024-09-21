@@ -252,7 +252,7 @@ function SolverLinkedMatrix:solve_block(block, parameters, debug)
             local row_index = parameters_index[child.id]
             local parameters = mC.parameters[row_index]
             -- retrieve pivot name
-            if parameters.pivot ~= nil then
+            if parameters ~= nil and parameters.pivot ~= nil then
                 local xcol = parameters.pivot
                 local colum_pivot = mC.columns[xcol]
                 if colum_pivot ~= nil  then
