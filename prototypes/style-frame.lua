@@ -76,7 +76,7 @@ default_gui["helmod_tabbed_pane"] = {
     },
     tab_container =
     {
-        type = "horizontal_flow_style",
+        type = "table_style",
         horizontally_stretchable = "on",
         left_padding = 4,
         right_padding = 4,

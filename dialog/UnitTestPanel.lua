@@ -98,16 +98,16 @@ end
 ---On update
 ---@param event LuaEvent
 function UnitTestPanel:onUpdate(event)
-  if game.active_mods["boblibrary"] then
+  if script.active_mods["boblibrary"] then
     data = data_bob_angel
   end
-  if game.active_mods["pyrawores"] then
+  if script.active_mods["pyrawores"] then
     data = data_pyanodons
   end
-  if game.active_mods["Krastorio2"] then
+  if script.active_mods["Krastorio2"] then
     data = data_krastorio2
   end
-  if game.active_mods["space-exploration"] then
+  if script.active_mods["space-exploration"] then
     data = data_space_ecploration
   end
   self:updateMenu()

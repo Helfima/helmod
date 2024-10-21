@@ -1,5 +1,5 @@
-if global.models then
-    for _, model in pairs(global.models) do
+if storage.models then
+    for _, model in pairs(storage.models) do
         if model.blocks ~= nil and table.size(model.blocks) > 0 and model.block_root == nil then
             local first = Model.firstChild(model.blocks)
             model.block_root = Model.newBlock(model, { name = model.id, energy_total = 0, pollution = 0, summary = {} })

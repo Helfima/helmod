@@ -38,7 +38,7 @@ function Settings:updateAboutSettings(event)
   local dataSettingsTable = GuiElement.add(aboutSettingsPanel, GuiTable("settings"):column(2))
 
   GuiElement.add(dataSettingsTable, GuiLabel(self.classname, "version-label"):caption({"helmod_settings-panel.mod-version"}))
-  GuiElement.add(dataSettingsTable, GuiLabel(self.classname, "version"):caption(game.active_mods["helmod"]))
+  GuiElement.add(dataSettingsTable, GuiLabel(self.classname, "version"):caption(script.active_mods["helmod"]))
 
   GuiElement.add(aboutSettingsPanel, GuiLabel(self.classname, "info"):caption({"helmod_settings-panel.mod-info"}):style("helmod_label_help"))
 end

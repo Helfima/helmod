@@ -83,7 +83,7 @@ function CreatedOrWhereUsedPanel:updateInfo(event)
         if item.type == "fluid" then
             created_filter = "has-product-fluid"
         end
-        local created_recipes= game.get_filtered_recipe_prototypes({{filter = created_filter, elem_filters = {{filter = "name", name = item.name}}}})
+        local created_recipes= prototypes.get_recipe_filtered({{filter = created_filter, elem_filters = {{filter = "name", name = item.name}}}})
 
         local created_count = #created_recipes
         local created_panel = GuiElement.add(content_panel, GuiFrameV("product_recipes"):caption({"helmod_created-or-where-used-panel.created",created_count}):style(defines.styles.frame.bordered))
@@ -95,7 +95,7 @@ function CreatedOrWhereUsedPanel:updateInfo(event)
         if item.type == "fluid" then
             where_used_filter = "has-ingredient-fluid"
         end
-        local where_used_recipes= game.get_filtered_recipe_prototypes({{filter = where_used_filter, elem_filters = {{filter = "name", name = item.name}}}})
+        local where_used_recipes= prototypes.get_recipe_filtered({{filter = where_used_filter, elem_filters = {{filter = "name", name = item.name}}}})
 
         local where_used_count = #where_used_recipes
         local where_used_panel = GuiElement.add(content_panel, GuiFrameV("where_used_recipes"):caption({"helmod_created-or-where-used-panel.where-used", where_used_count}):style(defines.styles.frame.bordered))
@@ -214,6 +214,6 @@ end
 
 function CreatedOrWhereUsedPanel:getTechnology(recipe)
     local filter = {filter="unlocks-recipe", recipe=recipe.name}
-    local technologies = game.get_filtered_technology_prototypes({filter})
+    local technologies = prototypes.get_technology_filtered({filter})
     return technologies
 end

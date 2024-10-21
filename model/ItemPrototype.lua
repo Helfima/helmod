@@ -49,7 +49,7 @@ end
 ---@return boolean
 function ItemPrototype:getHidden()
   if self.lua_prototype ~= nil then
-    return self.lua_prototype.has_flag("hidden")
+    return self.lua_prototype.hidden
   end
   return false
 end

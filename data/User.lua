@@ -16,21 +16,21 @@ local User = {
 ---@param key string
 ---@return any
 function User.get(key)
-    if global["users"] == nil then
-        global["users"] = {}
+    if storage["users"] == nil then
+        storage["users"] = {}
     end
     local user_name = User.name()
-    if global["users"][user_name] == nil then
-        global["users"][user_name] = {}
+    if storage["users"][user_name] == nil then
+        storage["users"][user_name] = {}
     end
 
     if key ~= nil then
-        if global["users"][user_name][key] == nil then
-            global["users"][user_name][key] = {}
+        if storage["users"][user_name][key] == nil then
+            storage["users"][user_name][key] = {}
         end
-        return global["users"][user_name][key]
+        return storage["users"][user_name][key]
     end
-    return global["users"][user_name]
+    return storage["users"][user_name]
 end
 
 -------------------------------------------------------------------------------
@@ -288,7 +288,7 @@ end
 function User.createNextEvent(event, classname, method, index)
     if event == nil then
         User.setParameter("next_event", nil)
-        local auto_pause = User.getParameter("auto-pause")
+        local auto_pause = User.getParameter("auto-pause") or false
         if not (game.is_multiplayer()) then
             game.tick_paused = auto_pause
         end
@@ -468,13 +468,13 @@ end
 ---Reset global variable for user
 function User.reset()
     local user_name = User.name()
-    global["users"][user_name] = {}
+    storage["users"][user_name] = {}
 end
 
 -------------------------------------------------------------------------------
 ---Reset global variable for all user
 function User.resetAll()
-    global["users"] = {}
+    storage["users"] = {}
 end
 
 -------------------------------------------------------------------------------

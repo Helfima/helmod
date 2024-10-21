@@ -10,7 +10,7 @@ end)
 -------------------------------------------------------------------------------
 ---On initialization
 function ProductionPanel:onInit()
-	self.panelCaption = string.format("%s %s", "Helmod", game.active_mods["helmod"])
+	self.panelCaption = string.format("%s %s", "Helmod", script.active_mods["helmod"])
 end
 
 -------------------------------------------------------------------------------

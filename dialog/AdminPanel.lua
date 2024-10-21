@@ -242,7 +242,7 @@ function AdminPanel:updateMod()
   self:addCellHeader(table_panel, "_name", {"",helmod_tag.font.default_bold, {"helmod_result-panel.col-header-name"}, helmod_tag.font.close})
   self:addCellHeader(table_panel, "version", {"",helmod_tag.font.default_bold, {"helmod_common.version"}, helmod_tag.font.close})
 
-  for name, version in pairs(game.active_mods) do
+  for name, version in pairs(script.active_mods) do
     GuiElement.add(table_panel, GuiLabel("_name", name):caption(name))
     GuiElement.add(table_panel, GuiLabel("version", name):caption(version))
   end
@@ -333,14 +333,14 @@ function AdminPanel:updateSheet()
   local scroll_panel = self:getSheetTab()
   scroll_panel.clear()
 
-  if table.size(global.models) > 0 then
+  if table.size(storage.models) > 0 then
 
     local result_table = GuiElement.add(scroll_panel, GuiTable("list-data"):column(3):style("helmod_table-odd"))
 
     self:addSheetListHeader(result_table)
 
     local i = 0
-    for _, element in spairs(global.models, function(t,a,b) return t[b].owner > t[a].owner end) do
+    for _, element in spairs(storage.models, function(t,a,b) return t[b].owner > t[a].owner end) do
       self:addSheetListRow(result_table, element)
     end
 
@@ -669,9 +669,9 @@ function AdminPanel:onEvent(event)
 
   if event.action == "rule-remove" then
     local rule_id = event.item1
-    if global.rules ~= nil then
-      table.remove(global.rules,rule_id)
-      table.reindex_list(global.rules)
+    if storage.rules ~= nil then
+      table.remove(storage.rules,rule_id)
+      table.reindex_list(storage.rules)
     end
     Controller:send("on_gui_update", event)
   end
@@ -787,7 +787,7 @@ function AdminPanel:onEvent(event)
 
   if event.action == "share-model" then
     local access = event.item2
-    local model = global.models[event.item1]
+    local model = storage.models[event.item1]
     if model ~= nil then
       if access == "read" then
         if model.share == nil or not(bit32.band(model.share, 1) > 0) then

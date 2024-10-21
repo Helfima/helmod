@@ -290,7 +290,7 @@ function ModelCompute.finalizeBlock(block, factor)
                         ModelCompute.createSummaryFactory(block, beacon)
                     end
                 end
-                
+                if recipe.energy_total == nil then recipe.energy_total = 0 end
                 recipe.power = recipe.energy_total * recipe.count
                 recipe.power_limit = recipe.power
                 recipe.power_deep = recipe.power * block.count_deep
@@ -606,7 +606,9 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
     end
     factory.cap = { speed = 0, productivity = 0, consumption = 0, pollution = 0 }
     local factory_prototype = EntityPrototype(factory)
-    factory.effects.productivity = factory.effects.productivity + factory_prototype:getBaseProductivity()
+    local base_effect = factory_prototype:getBaseEffect()
+    local base_productivity = base_effect["productivity"] or 0
+    factory.effects.productivity = factory.effects.productivity + base_productivity
     ---effet module factory
     if factory.modules ~= nil then
         for module, value in pairs(factory.modules) do

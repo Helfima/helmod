@@ -44,7 +44,7 @@ function RuleEdition:updateRule(event)
 
   ---mod
   local mod_list = {}
-  for name, version in pairs(game.active_mods) do
+  for name, version in pairs(script.active_mods) do
     table.insert(mod_list, name)
   end
   if rule_mod == nil then rule_mod = mod_list[1] end

@@ -2,21 +2,18 @@ local default_gui = data.raw["gui-style"].default
 
 default_gui["helmod_textfield"] = {
   type = "textbox_style",
-  parent = "search_textfield_with_fixed_width",
   minimal_width = 70,
   maximal_width = 70
 }
 
 default_gui["helmod_textfield_filter"] = {
   type = "textbox_style",
-  parent = "search_textfield_with_fixed_width",
   minimal_width = 200,
   maximal_width = 200
 }
 
 default_gui["helmod_textfield_element"] = {
   type = "textbox_style",
-  parent = "search_textfield_with_fixed_width",
   font = "helmod_font_normal",
   minimal_width = 50,
   maximal_width = 50
