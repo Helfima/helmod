@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 ---Class to build PropertiesPanel panel
----@class PropertiesPanel
+---@class PropertiesPanel : Form
 PropertiesPanel = newclass(Form,function(base,classname)
   Form.init(base,classname)
   base.add_special_button = true
@@ -41,15 +41,61 @@ function PropertiesPanel:isSpecial()
 end
 
 -------------------------------------------------------------------------------
+---Get or create tab panel
+---@return LuaGuiElement
+function PropertiesPanel:getTabPane()
+  local content_panel = self:getFrameDeepPanel("panel")
+  local panel_name = "tab_panel"
+  local name = table.concat({self.classname, "change-tab", panel_name},"=")
+  if content_panel[name] ~= nil and content_panel[name].valid then
+    return content_panel[name]
+  end
+  local panel = GuiElement.add(content_panel, GuiTabPane(self.classname, "change-tab", panel_name))
+  return panel
+end
+
+-------------------------------------------------------------------------------
+---Get or create tab panel
+---@param panel_name string
+---@param caption string
+---@return LuaGuiElement
+function PropertiesPanel:getTab(panel_name, caption)
+  local content_panel = self:getTabPane()
+  local scroll_name = "scroll-" .. panel_name
+  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+    return content_panel[scroll_name]
+  end
+  local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption(caption))
+  local scroll_panel = GuiElement.add(content_panel, GuiScroll(scroll_name):style("helmod_scroll_pane"):policy(true))
+  content_panel.add_tab(tab_panel,scroll_panel)
+  scroll_panel.style.horizontally_stretchable = true
+  scroll_panel.style.vertically_stretchable = true
+  return scroll_panel
+end
+
+-------------------------------------------------------------------------------
+---Get or create conversion tab panel
+---@return LuaGuiElement
+function PropertiesPanel:getPropertiesTab()
+  return self:getTab("properties-tab-panel", "Properties")
+end
+
+-------------------------------------------------------------------------------
+---Get or create conversion tab panel
+---@return LuaGuiElement
+function PropertiesPanel:getRuntimeApiTab()
+  return self:getTab("runtime-api-tab-panel", "Runtime API")
+end
+
+-------------------------------------------------------------------------------
 ---Get or create menu panel
 ---@return LuaGuiElement
-function PropertiesPanel:getMenuPanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
+function PropertiesPanel:getMenuPanel(scroll_panel)
   local panel_name = "menu-panel"
-  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
-    return content_panel[panel_name]
+  if scroll_panel[panel_name] ~= nil and scroll_panel[panel_name].valid then
+    return scroll_panel[panel_name]
   end
-  local panel = GuiElement.add(content_panel, GuiFrameH(panel_name))
+  local panel = GuiElement.add(scroll_panel, GuiFrameH(panel_name))
   panel.style.horizontally_stretchable = true
   --panel.style.vertically_stretchable = true
   return panel
@@ -58,13 +104,12 @@ end
 -------------------------------------------------------------------------------
 ---Get or create header panel
 ---@return LuaGuiElement
-function PropertiesPanel:getHeaderPanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
+function PropertiesPanel:getHeaderPanel(scroll_panel)
   local panel_name = "header-panel"
-  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
-    return content_panel[panel_name]
+  if scroll_panel[panel_name] ~= nil and scroll_panel[panel_name].valid then
+    return scroll_panel[panel_name]
   end
-  local panel = GuiElement.add(content_panel, GuiFrameV(panel_name))
+  local panel = GuiElement.add(scroll_panel, GuiFrameV(panel_name))
   panel.style.horizontally_stretchable = true
   --panel.style.vertically_stretchable = true
   return panel
@@ -73,20 +118,19 @@ end
 -------------------------------------------------------------------------------
 ---Get or create content panel
 ---@return LuaGuiElement
-function PropertiesPanel:getContentPanel()
-  local flow_panel, content_panel, menu_panel = self:getPanel()
+function PropertiesPanel:getContentPanel(scroll_panel)
   local panel_name = "content"
   local scroll_name = "data-panel"
-  if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
-    return content_panel[panel_name][scroll_name]
+  if scroll_panel[panel_name] ~= nil and scroll_panel[panel_name].valid then
+    return scroll_panel[panel_name][scroll_name]
   end
-  local panel = GuiElement.add(content_panel, GuiFrameV(panel_name))
+  local panel = GuiElement.add(scroll_panel, GuiFrameV(panel_name))
   panel.style.horizontally_stretchable = true
   panel.style.vertically_stretchable = true
-  local scroll_panel = GuiElement.add(panel, GuiScroll(scroll_name))
-  scroll_panel.style.horizontally_stretchable = true
-  scroll_panel.style.vertically_stretchable = true
-  return scroll_panel
+  local scroll_panel2 = GuiElement.add(panel, GuiScroll(scroll_name))
+  scroll_panel2.style.horizontally_stretchable = true
+  scroll_panel2.style.vertically_stretchable = true
+  return scroll_panel2
 end
 
 -------------------------------------------------------------------------------
@@ -131,6 +175,16 @@ function PropertiesPanel:onEvent(event)
     User.setParameter("filter-property", filter)
     self:updateData(event)
   end
+
+  if event.action == "import-runtime-api" then
+    local element = event.element
+    local textbox = element.parent["json_string"]
+    local json_string = textbox.text
+    local api = helpers.json_to_table(json_string)
+    if api ~= nil then
+      Cache.setData(self.classname, "runtime_api", api)
+    end
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -144,17 +198,45 @@ function PropertiesPanel:onUpdate(event)
   flow_panel.style.height = height_main
   flow_panel.style.width = width_main
   
-  self:updateMenu(event)
-  self:updateHeader(event)
-  self:updateData(event)
-  
+
+  self:updateProperties(event)
+  self:updateRuntimeApi(event)
 end
 
 -------------------------------------------------------------------------------
 ---Update menu
 ---@param event LuaEvent
+function PropertiesPanel:updateRuntimeApi(event)
+  local scroll_panel = self:getRuntimeApiTab()
+  scroll_panel.clear()
+  local url_frame = GuiElement.add(scroll_panel, GuiFlowH())
+  url_frame.style.horizontal_spacing = 5
+  GuiElement.add(url_frame, GuiLabel("json_label"):caption("URL to find Runtime API"))
+  local json_url = GuiElement.add(url_frame, GuiTextField("json_url"):text("https://lua-api.factorio.com/latest/runtime-api.json"))
+  json_url.style.width = 600
+
+  local json_frame = GuiElement.add(scroll_panel, GuiFlowV())
+  json_frame.style.vertical_spacing = 5
+  local json_string = GuiElement.add(json_frame, GuiTextBox("json_string"))
+  json_string.style.width = 600
+  GuiElement.add(json_frame, GuiButton(self.classname, "import-runtime-api"):caption("Import Runtime API"))
+end
+
+-------------------------------------------------------------------------------
+---Update menu
+---@param event LuaEvent
+function PropertiesPanel:updateProperties(event)
+  local scroll_panel = self:getPropertiesTab()
+  self:updateMenu(event)
+  self:updateHeader(event)
+  self:updateData(event)
+end
+-------------------------------------------------------------------------------
+---Update menu
+---@param event LuaEvent
 function PropertiesPanel:updateMenu(event)
-  local action_panel = self:getMenuPanel()
+  local scroll_panel = self:getPropertiesTab()
+  local action_panel = self:getMenuPanel(scroll_panel)
   action_panel.clear()
   GuiElement.add(action_panel, GuiButton("HMEntitySelector", "OPEN", "HMPropertiesPanel"):caption({"helmod_result-panel.select-button-entity"}))
   GuiElement.add(action_panel, GuiButton("HMItemSelector", "OPEN", "HMPropertiesPanel"):caption({"helmod_result-panel.select-button-item"}))
@@ -168,8 +250,9 @@ end
 ---@param event LuaEvent
 function PropertiesPanel:updateData(event)
   if not(self:isOpened()) then return end
+  local scroll_panel = self:getPropertiesTab()
   ---data
-  local content_panel = self:getContentPanel()
+  local content_panel = self:getContentPanel(scroll_panel)
   content_panel.clear()
   ---data
   local filter = User.getParameter("filter-property")
@@ -202,7 +285,7 @@ function PropertiesPanel:updateData(event)
               if values[key] ~= nil then
                 local chmod = values[key].chmod
                 local value = self:tableToString(values[key].value)
-                GuiElement.add(cell_value, GuiLabel("prototype_chmod"):caption(string.format("[%s]:", chmod)))
+                --GuiElement.add(cell_value, GuiLabel("prototype_chmod"):caption(string.format("[%s]:", chmod)))
                 local label_value = GuiElement.add(cell_value, GuiLabel("prototype_value"):caption(value):style("helmod_label_max_600"))
                 label_value.style.width = 400
               end
@@ -280,7 +363,8 @@ end
 ---Update header
 ---@param event LuaEvent
 function PropertiesPanel:updateHeader(event)
-  local info_panel = self:getHeaderPanel()
+  local scroll_panel = self:getPropertiesTab()
+  local info_panel = self:getHeaderPanel(scroll_panel)
   info_panel.clear()
   local options_table = GuiElement.add(info_panel, GuiTable("options-table"):column(2))
   ---nil values
@@ -304,72 +388,49 @@ function PropertiesPanel:updateHeader(event)
   filter_field.style.width = 300
 end
 
+---Return attributes of classe
+---@param object_name any
+---@return unknown
+function PropertiesPanel:getClasseAttributes(object_name)
+  local runtime_api = Cache.getData(self.classname, "runtime_api")
+  for _, value in pairs(runtime_api["classes"]) do
+    if value.name == object_name then
+      return value.attributes
+    end
+  end
+  return {}
+end
 -------------------------------------------------------------------------------
 ---Parse Properties
 ---@param prototype table
 ---@param level number
 ---@param prototype_type table
 ---@return table
-function PropertiesPanel:parseProperties(prototype, level, prototype_type)
+function PropertiesPanel:parseProperties(prototype, level)
   if prototype == nil then return "nil" end
+  local object_name = prototype.object_name
   if level > 2 then 
-    return prototype
-    --return string.match(serpent.dump(prototype),"do local _=(.*);return _;end")
+    return object_name
   end
-  ---special
-  local isluaobject, error = pcall(function() local test = prototype:help() return true end)
-  local object_type = type(prototype)
-  if isluaobject then
-    local properties = {}
-    local lua_type = string.match(prototype:help(), "Help for%s([^:]*)")
-    if lua_type == "LuaEntityPrototype" and prototype.name == "character" then
-      table.insert(properties, {name = "PLAYER.character_crafting_speed_modifier", chmod = "RW", value = Player.native().character_crafting_speed_modifier})
-      table.insert(properties, {name = "PLAYER.character_mining_speed_modifier", chmod = "RW", value = Player.native().character_mining_speed_modifier})
-      table.insert(properties, {name = "PLAYER.character_additional_mining_categories", chmod = "RW", value = string.match(serpent.dump(Player.native().character_additional_mining_categories),"do local _=(.*);return _;end")})
-      table.insert(properties, {name = "PLAYER.character_running_speed_modifier", chmod = "RW", value = Player.native().character_running_speed_modifier})
-      table.insert(properties, {name = "PLAYER.character_build_distance_bonus", chmod = "RW", value = Player.native().character_build_distance_bonus})
-      table.insert(properties, {name = "PLAYER.character_item_drop_distance_bonus", chmod = "RW", value = Player.native().character_item_drop_distance_bonus})
-      table.insert(properties, {name = "PLAYER.character_reach_distance_bonus", chmod = "RW", value = Player.native().character_reach_distance_bonus})
-      table.insert(properties, {name = "PLAYER.character_resource_reach_distance_bonus", chmod = "RW", value = Player.native().character_resource_reach_distance_bonus})
-      table.insert(properties, {name = "PLAYER.character_item_pickup_distance_bonus", chmod = "RW", value = Player.native().character_item_pickup_distance_bonus})
-      table.insert(properties, {name = "PLAYER.character_loot_pickup_distance_bonus", chmod = "RW", value = Player.native().character_loot_pickup_distance_bonus})
-      table.insert(properties, {name = "PLAYER.character_inventory_slots_bonus", chmod = "RW", value = Player.native().character_inventory_slots_bonus})
-      table.insert(properties, {name = "PLAYER.character_logistic_slot_count_bonus", chmod = "RW", value = Player.native().character_logistic_slot_count_bonus})
-      table.insert(properties, {name = "PLAYER.character_trash_slot_count_bonus", chmod = "RW", value = Player.native().character_trash_slot_count_bonus})
-      table.insert(properties, {name = "PLAYER.character_maximum_following_robot_count_bonus", chmod = "RW", value = Player.native().character_maximum_following_robot_count_bonus})
-      table.insert(properties, {name = "PLAYER.character_health_bonus", chmod = "RW", value = Player.native().character_health_bonus})
-    end
-    if (lua_type == "LuaEntityPrototype" or lua_type == "LuaItemPrototype") and prototype.type == "inserter" then
-      table.insert(properties, {name = "FORCE.inserter_stack_size_bonus", chmod = "RW", value = Player.getForce().inserter_stack_size_bonus})
-      table.insert(properties, {name = "FORCE.stack_inserter_capacity_bonus", chmod = "RW", value = Player.getForce().stack_inserter_capacity_bonus})
-    end
-    if lua_type == "LuaFluidBoxPrototype" then
-      return FluidboxPrototype(prototype):toData()
-    end
   
-    local help_string = string.gmatch(prototype:help(),"(%S+) [[](RW?)[]]")
-    local properties = {}
-    for key, chmod in help_string do
-      local value = nil
-        pcall( function()
-          value = self:parseProperties(prototype[key], level + 1, nil)
-        end)
-        if level == 0 then
-          table.insert(properties, {name = key, chmod = chmod, value = value})
-        else
-          properties[key]=value
-        end
+  local properties = {}
+  local attributes = self:getClasseAttributes(object_name)
+  for _, attribute in pairs(attributes) do
+    local attribute_name = attribute.name
+    local content = nil
+    pcall(function ()
+      content = prototype[attribute_name]
+      if content ~= nil and content.object_name then
+        content = self:parseProperties(content, level+1)
+      end
+    end)
+    local chmod = "R"
+    if content == nil  then
+      content = "nil"
     end
-    return properties
-  elseif object_type == "table" then
-    local properties = {}
-    for key,value in pairs(prototype) do
-      properties[key] = self:parseProperties(value, level + 1, nil)
-    end
-    return properties
-  else
-    return prototype
+    table.insert(properties, {name = attribute_name, chmod = chmod, value = content})
   end
+  return properties
 end
 
 -------------------------------------------------------------------------------
@@ -458,22 +519,12 @@ function PropertiesPanel:getPrototypeData(prototype)
     elseif prototype.type == "fluid" then
       lua_prototype = FluidPrototype(prototype):native()
     elseif string.find(prototype.type, "recipe") then
-      local recipe_prototype = RecipePrototype(prototype)
-      lua_prototype = recipe_prototype:native()
-      if recipe_prototype:getType() ~= "recipe" then
-        function lua_prototype:help()
-          local help = "Help for LuaRecipePrototype:Methods:help(...)Values:"
-          for key,_ in pairs(lua_prototype) do
-            help = string.format("%s %s [R]", help, key)
-          end
-          return help
-        end
-      end
+      lua_prototype = RecipePrototype(prototype):native()
     elseif prototype.type == "technology" then
       lua_prototype = Technology(prototype):native()
     end
     if lua_prototype ~= nil then
-      return self:parseProperties(lua_prototype, 0, prototype.type)
+      return self:parseProperties(lua_prototype, 0)
     end
   end
   return {}

@@ -646,7 +646,7 @@ end
 ---@return number --default 0
 function EntityPrototype:getResearchingSpeed()
   if self.lua_prototype ~= nil then
-    return self.lua_prototype.researching_speed or 1
+    return self.lua_prototype.get_researching_speed() or 1
   end
   return 0
 end
