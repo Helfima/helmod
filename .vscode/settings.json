@@ -1,16 +1,16 @@
 {
-    "factorio.versions": [
-        {
-            "name": "last",
-            "factorioPath": "d:\\Perso\\Factorio_Test\\Factorio_1.1.x\\bin\\x64\\factorio.exe",
-            "active": true
-        }
-    ],
     "Lua.workspace.library": [
         "d:\\Perso\\Factorio_Test\\Factorio_1.1.x\\data"
     ],
     "Lua.workspace.userThirdParty": [
         "c:\\Users\\Helfima\\AppData\\Roaming\\Code\\User\\workspaceStorage\\9227b2889b7b66a476ad6a7c6b052c18\\justarandomgeek.factoriomod-debug\\sumneko-3rd"
     ],
-    "Lua.workspace.checkThirdParty": "ApplyInMemory"
+    "Lua.workspace.checkThirdParty": "ApplyInMemory",
+    "factorio.versions": [
+        {
+            "name": "v2",
+            "factorioPath": "d:\\Perso\\Factorio_Test\\Factorio_2.0.7\\bin\\x64\\factorio.exe",
+            "active": true
+        }
+    ]
 }

@@ -104,7 +104,7 @@ end
 function Player.beginCrafting(item, count)
   if Lua_player == nil then return nil end
   local filters = {{filter = "has-product-item", elem_filters = {{filter = "name", name = item}}}}
-  local recipes = game.get_filtered_recipe_prototypes(filters)
+  local recipes = prototypes.get_recipe_filtered(filters)
   if recipes ~= nil and table.size(recipes) > 0 then
     local first_recipe = Model.firstChild(recipes)
     local craft = {count=math.ceil(count),recipe=first_recipe.name,silent=false}
@@ -222,7 +222,7 @@ end
 ---@return boolean
 function Player.is_valid_sprite_path(sprite_path)
   if Lua_player == nil then return false end
-  return Lua_player.gui.is_valid_sprite_path(sprite_path)
+  return helpers.is_valid_sprite_path(sprite_path)
 end
 
 -------------------------------------------------------------------------------
@@ -379,7 +379,7 @@ end
 ---Return recipe prototypes
 ---@return table
 function Player.getRecipes()
-  return game.recipe_prototypes
+  return prototypes.recipe
 end
 
 -------------------------------------------------------------------------------
@@ -388,9 +388,9 @@ end
 ---@return table
 function Player.getTechnologies(filters)
   if filters ~= nil then
-    return game.get_filtered_technology_prototypes(filters)
+    return prototypes.get_technology_filtered(filters)
   end
-  return game.technology_prototypes
+  return prototypes.technology
 end
 
 -------------------------------------------------------------------------------
@@ -398,7 +398,7 @@ end
 ---@param name string
 ---@return LuaTechnologyPrototype
 function Player.getTechnology(name)
-  return game.technology_prototypes[name]
+  return prototypes.technology[name]
 end
 
 -------------------------------------------------------------------------------
@@ -435,7 +435,7 @@ function Player.getRules(rule_name)
   local rules_included = {}
   local rules_excluded = {}
   for rule_id, rule in spairs(Model.getRules(), function(t,a,b) return t[b].index > t[a].index end) do
-    if game.active_mods[rule.mod] and rule.name == rule_name then
+    if script.active_mods[rule.mod] and rule.name == rule_name then
       if rule.excluded then
         if rules_excluded[rule.category] == nil then rules_excluded[rule.category] = {} end
         if rules_excluded[rule.category][rule.type] == nil then rules_excluded[rule.category][rule.type] = {} end
@@ -507,14 +507,14 @@ function Player.checkFactoryLimitationModule(module, lua_recipe)
     category = "standard"
   end
   check_not_bypass = Player.checkRules(check_not_bypass, rules_excluded, category, EntityPrototype(factory.name):native(), false)
-  if table.size(module.limitations) > 0 and check_not_bypass and model_filter_factory_module == true then
-    allowed = false
-    for _, recipe_name in pairs(module.limitations) do
-      if lua_recipe.name == recipe_name then
-        allowed = true
-      end
-    end
-  end
+  -- if table.size(module.limitations) > 0 and check_not_bypass and model_filter_factory_module == true then
+  --   allowed = false
+  --   for _, recipe_name in pairs(module.limitations) do
+  --     if lua_recipe.name == recipe_name then
+  --       allowed = true
+  --     end
+  --   end
+  -- end
 
   local allowed_effects = EntityPrototype(factory):getAllowedEffects()
   if allowed_effects ~= nil and model_filter_factory_module == true then
@@ -538,14 +538,14 @@ function Player.checkBeaconLimitationModule(beacon, recipe, module)
   local allowed = true
   local model_filter_beacon_module = User.getModGlobalSetting("model_filter_beacon_module")
 
-  if table.size(module.limitations) > 0 and model_filter_beacon_module == true and recipe.type ~= "resource" then
-    allowed = false
-    for _, module_recipe_name in pairs(module.limitations) do
-      if module_recipe_name == recipe.name then
-        allowed = true
-      end
-    end
-  end
+  -- if table.size(module.limitations) > 0 and model_filter_beacon_module == true and recipe.type ~= "resource" then
+  --   allowed = false
+  --   for _, module_recipe_name in pairs(module.limitations) do
+  --     if module_recipe_name == recipe.name then
+  --       allowed = true
+  --     end
+  --   end
+  -- end
 
   local allowed_effects = EntityPrototype(beacon):getAllowedEffects()
   if allowed_effects ~= nil and model_filter_beacon_module == true then
@@ -571,7 +571,7 @@ function Player.getProductionsCrafting(category, lua_recipe)
   local productions = {}
   local rules_included, rules_excluded = Player.getRules("production-crafting")
   if category == "crafting-handonly" then
-    productions["character"] = game.entity_prototypes["character"]
+    productions["character"] = prototypes.entity["character"]
   elseif lua_recipe.name ~= nil and category == "fluid" then
     for key, lua_entity in pairs(Player.getOffshorePumps(lua_recipe.name)) do
       productions[lua_entity.name] = lua_entity
@@ -654,9 +654,9 @@ function Player.ExcludePlacedByHidden(entities)
       -- e.g. Numal reef from Py
       show = true
     else
-      local items = game.get_filtered_item_prototypes(item_filters)
+      local items = prototypes.get_item_filtered(item_filters)
       for _, item in pairs(items) do
-        if not item.has_flag("hidden") then
+        if not item.hidden then
           show = true
           break
         end
@@ -678,9 +678,8 @@ function Player.getModules()
   local items = {}
   local filters = {}
   table.insert(filters,{filter="type",type="module",mode="or"})
-  table.insert(filters,{filter="flag",flag="hidden",mode="and", invert=true})
 
-  for _,item in pairs(game.get_filtered_item_prototypes(filters)) do
+  for _,item in pairs(prototypes.get_item_filtered(filters)) do
     table.insert(items,item)
   end
   return items
@@ -704,7 +703,7 @@ function Player.getProductionMachines()
   table.insert(filters, {filter="hidden", mode="and", invert=true})
   table.insert(filters, {filter="type", type="rocket-silo", mode="or"})
   table.insert(filters, {filter="hidden", mode="and", invert=true})
-  local prototypes = game.get_filtered_entity_prototypes(filters)
+  local prototypes = prototypes.get_entity_filtered(filters)
   prototypes = Player.ExcludePlacedByHidden(prototypes)
   
   local list_machines = {}
@@ -730,7 +729,7 @@ function Player.getEnergyMachines()
     table.insert(filters, {filter="type", mode="or", invert=false, type=type})
     table.insert(filters, {filter="flag", flag="player-creation", mode="and"})
   end
-  for entity_name, entity in pairs(game.get_filtered_entity_prototypes(filters)) do
+  for entity_name, entity in pairs(prototypes.get_entity_filtered(filters)) do
     machines[entity_name] = entity
   end
 
@@ -748,7 +747,7 @@ function Player.getBoilers(fluid_name)
   table.insert(filters, {filter="hidden", mode="and", invert=true})
   table.insert(filters, {filter="type", type="boiler", mode="or"})
   table.insert(filters, {filter="flag", flag="player-creation", mode="and"})
-  local prototypes = game.get_filtered_entity_prototypes(filters)
+  local prototypes = prototypes.get_entity_filtered(filters)
 
   prototypes = Player.ExcludePlacedByHidden(prototypes)
 
@@ -817,7 +816,7 @@ end
 function Player.getOffshorePumps(fluid_name)
   local filters = {}
   table.insert(filters, {filter="type", type="offshore-pump", mode="or"})
-  local entities = game.get_filtered_entity_prototypes(filters)
+  local entities = prototypes.get_entity_filtered(filters)
   local offshore_pump = {}
   for key, entity in pairs(entities) do
     if entity.fluid.name == fluid_name then
@@ -843,7 +842,7 @@ function Player.getModuleBonus(module, effect)
   ---search module
   local module = Player.getItemPrototype(module)
   if module ~= nil and module.module_effects ~= nil and module.module_effects[effect] ~= nil then
-    bonus = module.module_effects[effect].bonus
+    bonus = module.module_effects[effect]
   end
   return bonus
 end
@@ -854,7 +853,7 @@ end
 ---@return LuaRecipe
 function Player.getRecipe(name)
   if name == nil then return nil end
-  return game.recipe_prototypes[name]
+  return prototypes.recipe[name]
 end
 
 -------------------------------------------------------------------------------
@@ -886,7 +885,7 @@ function Player.buildResourceRecipe(entity_prototype)
   recipe.hidden = false
   if prototype then
     if prototype.flags ~= nil then
-      recipe.hidden = prototype.flags["hidden"] or false
+      recipe.hidden = prototype.hidden or false
     end
     recipe.localised_description = prototype.localised_description
     recipe.localised_name = prototype.localised_name
@@ -906,7 +905,7 @@ end
 function Player.getResourceRecipes()
   local recipes = {}
 
-  for key, prototype in pairs(game.entity_prototypes) do
+  for key, prototype in pairs(prototypes.entity) do
     if prototype.name ~= nil and prototype.resource_category ~= nil then
       local recipe = Player.buildResourceRecipe(EntityPrototype(prototype))
       if recipe ~= nil then
@@ -945,7 +944,7 @@ function Player.getEnergyRecipe(name)
   recipe.subgroup = {name="helmod-energy", order="dddd"}
   recipe.hidden = false
   if prototype ~= nil and prototype.flags ~= nil then
-    recipe.hidden = prototype.flags["hidden"] or false
+    recipe.hidden = prototype.hidden or false
   end
   recipe.ingredients = {}
   recipe.products = {}
@@ -967,7 +966,7 @@ function Player.getFluidRecipes()
   ---Offshore pumps
   local filters = {}
   table.insert(filters, {filter="type", type="offshore-pump", mode="or"})
-  local entities = game.get_filtered_entity_prototypes(filters)
+  local entities = prototypes.get_entity_filtered(filters)
   for key, entity in pairs(entities) do
     for _, fluidbox in pairs(entity.fluidbox_prototypes) do
       if #fluidbox.pipe_connections > 0 then
@@ -976,7 +975,7 @@ function Player.getFluidRecipes()
         if not recipes[entity.fluid.name] then
           recipes[entity.fluid.name] = recipe
         end
-        if entity.has_flag("hidden") then
+        if entity.hidden then
           recipes[entity.fluid.name].hidden = true
         end
       end
@@ -1031,7 +1030,7 @@ function Player.getBoilerRecipes()
       if not recipes[recipe.name] then
         recipes[recipe.name] = recipe
       end
-      if boiler.has_flag("hidden") then
+      if boiler.hidden then
         recipes[recipe.name].hidden = true
       end
     end
@@ -1095,20 +1094,20 @@ function Player.getRocketPartRecipe(factory)
   -- Get rocket silos
   local silos = {}
   if factory and factory.name then
-    silos = {game.entity_prototypes[factory.name]}
+    silos = {prototypes.entity[factory.name]}
   else
     local entity_filters = {
       {filter = "type", invert = false, mode = "and", type = "rocket-silo"},
       {filter = "hidden", invert = true, mode = "and"},
     }
-    silos = game.get_filtered_entity_prototypes(entity_filters)
+    silos = prototypes.get_entity_filtered(entity_filters)
   end
 
   -- Get rocket silo fixed recipes
   local rocket_part_recipes = {}
   for _, silo_prototype in pairs(silos) do
     if silo_prototype.fixed_recipe then
-      table.insert(rocket_part_recipes, game.recipe_prototypes[silo_prototype.fixed_recipe])
+      table.insert(rocket_part_recipes, prototypes.recipe[silo_prototype.fixed_recipe])
     end
   end
   
@@ -1234,12 +1233,12 @@ function Player.searchRecipe(element_name, by_ingredient)
       end
     end
   end
-  ---recherche dans les fluids
-  for key, recipe in pairs(Player.getFluidRecipes()) do
-    if recipe.name == element_name then
-      table.insert(recipes, {name=recipe.name, type="fluid"})
-    end
-  end
+  -- recherche dans les fluids
+  -- for key, recipe in pairs(Player.getFluidRecipes()) do
+  --   if recipe.name == element_name then
+  --     table.insert(recipes, {name=recipe.name, type="fluid"})
+  --   end
+  -- end
   for key, recipe in pairs(Player.getBoilerRecipes()) do
     if recipe.name == element_name then
       table.insert(recipes, {name=recipe.name, type="boiler"})
@@ -1254,9 +1253,9 @@ end
 ---@return table
 function Player.getEntityPrototypes(filters)
   if filters ~= nil then
-    return game.get_filtered_entity_prototypes(filters)
+    return prototypes.get_entity_filtered(filters)
   end
-  return game.entity_prototypes
+  return prototypes.entity
 end
 
 -------------------------------------------------------------------------------
@@ -1264,7 +1263,7 @@ end
 ---@return table
 function Player.getEntityPrototypeTypes()
   local types = {}
-  for _,entity in pairs(game.entity_prototypes) do
+  for _,entity in pairs(prototypes.entity) do
     local type = entity.type
     types[type] = true
   end
@@ -1277,7 +1276,7 @@ end
 ---@return LuaEntityPrototype
 function Player.getEntityPrototype(name)
   if name == nil then return nil end
-  return game.entity_prototypes[name]
+  return prototypes.entity[name]
 end
 
 -------------------------------------------------------------------------------
@@ -1289,7 +1288,7 @@ function Player.getProductionsBeacon()
   table.insert(filters,{filter="type",type="beacon",mode="or"})
   table.insert(filters,{filter="hidden",invert=true,mode="and"})
 
-  for _,item in pairs(game.get_filtered_entity_prototypes(filters)) do
+  for _,item in pairs(prototypes.get_entity_filtered(filters)) do
     table.insert(items,item)
   end
   return items
@@ -1302,7 +1301,7 @@ function Player.getResources()
   local cache_resources = Cache.getData(Player.classname, "resources")
   if cache_resources ~= nil then return cache_resources end
   local items = {}
-  for _,item in pairs(game.entity_prototypes) do
+  for _,item in pairs(prototypes.entity) do
     if item.name ~= nil and item.resource_category ~= nil then
       table.insert(items,item)
     end
@@ -1317,9 +1316,9 @@ end
 ---@return table
 function Player.getItemPrototypes(filters)
   if filters ~= nil then
-    return game.get_filtered_item_prototypes(filters)
+    return prototypes.get_item_filtered(filters)
   end
-  return game.item_prototypes
+  return prototypes.item
 end
 
 -------------------------------------------------------------------------------
@@ -1327,7 +1326,7 @@ end
 ---@return table
 function Player.getItemPrototypeTypes()
   local types = {}
-  for _,entity in pairs(game.item_prototypes) do
+  for _,entity in pairs(prototypes.item) do
     local type = entity.type
     types[type] = true
   end
@@ -1340,7 +1339,7 @@ end
 ---@return LuaItemPrototype
 function Player.getItemPrototype(name)
   if name == nil then return nil end
-  return game.item_prototypes[name]
+  return prototypes.item[name]
 end
 
 -------------------------------------------------------------------------------
@@ -1349,9 +1348,9 @@ end
 ---@return table
 function Player.getFluidPrototypes(filters)
   if filters ~= nil then
-    return game.get_filtered_fluid_prototypes(filters)
+    return prototypes.get_fluid_filtered(filters)
   end
-  return game.fluid_prototypes
+  return prototypes.fluid
 end
 
 -------------------------------------------------------------------------------
@@ -1359,7 +1358,7 @@ end
 ---@return table
 function Player.getFluidPrototypeTypes()
   local types = {}
-  for _,entity in pairs(game.fluid_prototypes) do
+  for _,entity in pairs(prototypes.fluid) do
     local type = entity.type
     types[type] = true
   end
@@ -1371,7 +1370,7 @@ end
 ---@return table
 function Player.getFluidPrototypeSubgroups()
   local types = {}
-  for _,entity in pairs(game.fluid_prototypes) do
+  for _,entity in pairs(prototypes.fluid) do
     local type = entity.subgroup.name
     types[type] = true
   end
@@ -1384,7 +1383,7 @@ end
 ---@return LuaFluidPrototype
 function Player.getFluidPrototype(name)
   if name == nil then return nil end
-  return game.fluid_prototypes[name]
+  return prototypes.fluid[name]
 end
 
 -------------------------------------------------------------------------------
@@ -1509,7 +1508,7 @@ function Player.getFluidTemperaturePrototypes(fluid)
   ---Hidden fluids do need to be included unfortunately. Only real alternative would be to add a setting.
   ---table.insert(filters, {filter = "hidden", invert = true, mode = "and"})
   table.insert(filters, {filter = "has-product-fluid", elem_filters = {{filter = "name", name = fluid.name}}, mode = "and"})
-  local prototypes = game.get_filtered_recipe_prototypes(filters)
+  local prototypes = prototypes.get_recipe_filtered(filters)
 
   for recipe_name, recipe in pairs(prototypes) do
     for product_name, product in pairs(recipe.products) do

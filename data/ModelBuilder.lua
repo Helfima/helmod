@@ -197,7 +197,7 @@ end
 ---Remove a model
 ---@param model_id string
 function ModelBuilder.removeModel(model_id)
-    global.models[model_id] = nil
+    storage.models[model_id] = nil
 end
 
 -------------------------------------------------------------------------------

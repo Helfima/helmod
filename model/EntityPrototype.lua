@@ -89,8 +89,10 @@ end
 ---Return max energy usage per second
 ---@return number --default 0
 function EntityPrototype:getMaxEnergyUsage()
-  if self.lua_prototype ~= nil and self.lua_prototype.max_energy_usage ~= nil then
-    return self.lua_prototype.max_energy_usage * 60 / self:getEffectivity()
+  if self.lua_prototype ~= nil then
+    local qualities = prototypes.quality
+    local max_energy_usage = self.lua_prototype.get_max_energy_usage()
+    return max_energy_usage * 60 / self:getEffectivity()
   end
   return 0
 end
@@ -173,7 +175,7 @@ function EntityPrototype:getEnergyProduction()
       if usage_priority == "managed-accumulator" then
         production = energy_prototype:getOutputFlowLimit()
       else
-        production = (self.lua_prototype.max_energy_production or 0) * 60
+        production = (self.lua_prototype.max_power_output or 0) * 60
       end
       
       if self.lua_prototype.type == "generator" then
@@ -209,14 +211,21 @@ function EntityPrototype:getEnergyProduction()
   return 0
 end
 
+local empty_effect ={
+  consumption=0,
+  speed=0,
+  productivity=0,
+  pollution=0,
+  quality=0
+}
 -------------------------------------------------------------------------------
----Return base productivity
----@return number --default 0
-function EntityPrototype:getBaseProductivity()
-  if self.lua_prototype ~= nil then
-    return self.lua_prototype.base_productivity or 0
+---Return base effect
+---@return table
+function EntityPrototype:getBaseEffect()
+  if self.lua_prototype ~= nil and self.lua_prototype.effect_receiver ~= nil then
+    return self.lua_prototype.effect_receiver.base_effect or empty_effect
   end
-  return 0
+  return empty_effect
 end
 
 -------------------------------------------------------------------------------
@@ -403,7 +412,7 @@ function EntityPrototype:getFluidConsumption()
       end
 
       local max_fluid_usage = self:getFluidUsage()
-      local max_energy_production = (self.lua_prototype.max_energy_production or 0) * 60
+      local max_energy_production = (self.lua_prototype.max_power_output or 0) * 60
 
       local fuel_value
       if self:getBurnsFluid() == true then
@@ -594,7 +603,7 @@ function EntityPrototype:getCraftingSpeed()
     local energy_prototype = self:getEnergySource()
     local speedModifier = energy_prototype:getSpeedModifier()
 
-    return (self.lua_prototype.crafting_speed or 1) * speedModifier
+    return (self.lua_prototype.get_crafting_speed() or 1) * speedModifier
   end
   return 0
 end
@@ -637,7 +646,7 @@ end
 ---@return number --default 0
 function EntityPrototype:getResearchingSpeed()
   if self.lua_prototype ~= nil then
-    return self.lua_prototype.researching_speed or 1
+    return self.lua_prototype.get_researching_speed() or 1
   end
   return 0
 end
@@ -843,7 +852,7 @@ end
 function EntityPrototype:getInserterCapacity()
   if self.lua_prototype ~= nil then
     local stack_bonus = 0
-    if self.lua_prototype.stack == true then
+    if self.lua_prototype.bulk == true then
       stack_bonus = Player.getForce().stack_inserter_capacity_bonus or 0
     else
       stack_bonus = Player.getForce().inserter_stack_size_bonus or 0
@@ -858,7 +867,8 @@ end
 ---@return number --default 0
 function EntityPrototype:getInserterRotationSpeed()
   if self.lua_prototype ~= nil then
-    return self.lua_prototype.inserter_rotation_speed*60
+    local rotation_speed = self.lua_prototype.get_inserter_rotation_speed()
+    return rotation_speed*60
   end
   return 0
 end
@@ -902,7 +912,9 @@ function EntityPrototype:getPollution()
       if fuel ~= nil then
         emission_multiplier = fuel:getFuelEmissionsMultiplier()
       end
-      emission = energy_prototype:getEmissions() * self:getEffectivity()
+      local emissions = energy_prototype:getEmissions()
+      local emission_pollution = emissions["pollution"] or 2.7777777e-7
+      emission = emission_pollution * self:getEffectivity()
     end
 
     return energy_usage * emission * emission_multiplier

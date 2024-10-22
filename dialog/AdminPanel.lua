@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 ---Class to build panel
----@class AdminPanel
+---@class AdminPanel : Form
 AdminPanel = newclass(Form,function(base,classname)
   Form.init(base,classname)
 end)
@@ -242,7 +242,7 @@ function AdminPanel:updateMod()
   self:addCellHeader(table_panel, "_name", {"",helmod_tag.font.default_bold, {"helmod_result-panel.col-header-name"}, helmod_tag.font.close})
   self:addCellHeader(table_panel, "version", {"",helmod_tag.font.default_bold, {"helmod_common.version"}, helmod_tag.font.close})
 
-  for name, version in pairs(game.active_mods) do
+  for name, version in pairs(script.active_mods) do
     GuiElement.add(table_panel, GuiLabel("_name", name):caption(name))
     GuiElement.add(table_panel, GuiLabel("version", name):caption(version))
   end
@@ -276,7 +276,7 @@ function AdminPanel:updateCache()
     end
   end
 
-  local users_data = global["users"]
+  local users_data = storage["users"]
   if table.size(users_data) > 0 then
     local cache_panel = GuiElement.add(table_panel, GuiFlowV("user-caches"))
     GuiElement.add(cache_panel, GuiLabel("translate-label"):caption("User caches"):style("helmod_label_title_frame"))
@@ -333,14 +333,14 @@ function AdminPanel:updateSheet()
   local scroll_panel = self:getSheetTab()
   scroll_panel.clear()
 
-  if table.size(global.models) > 0 then
+  if table.size(storage.models) > 0 then
 
     local result_table = GuiElement.add(scroll_panel, GuiTable("list-data"):column(3):style("helmod_table-odd"))
 
     self:addSheetListHeader(result_table)
 
     local i = 0
-    for _, element in spairs(global.models, function(t,a,b) return t[b].owner > t[a].owner end) do
+    for _, element in spairs(storage.models, function(t,a,b) return t[b].owner > t[a].owner end) do
       self:addSheetListRow(result_table, element)
     end
 
@@ -559,7 +559,7 @@ function AdminPanel:updateGlobal()
   local scroll_panel = self:getGlobalTab()
   local root_branch = GuiElement.add(scroll_panel, GuiFlowV())
   root_branch.style.vertically_stretchable = false
-  self:createTree(root_branch, {global=global}, true)
+  self:createTree(root_branch, {storage=storage}, true)
 end
 
 -------------------------------------------------------------------------------
@@ -669,9 +669,9 @@ function AdminPanel:onEvent(event)
 
   if event.action == "rule-remove" then
     local rule_id = event.item1
-    if global.rules ~= nil then
-      table.remove(global.rules,rule_id)
-      table.reindex_list(global.rules)
+    if storage.rules ~= nil then
+      table.remove(storage.rules,rule_id)
+      table.reindex_list(storage.rules)
     end
     Controller:send("on_gui_update", event)
   end
@@ -685,12 +685,12 @@ function AdminPanel:onEvent(event)
     local decoded_textbox = parent["decoded-text"]
     local encoded_textbox = parent["encoded-text"]
     local input = string.sub(encoded_textbox.text,2)
-    local json = game.decode_string(input)
+    local json = helpers.decode_string(input)
     local result = Converter.indent(json)
     decoded_textbox.text = result
 
     local tree_view = parent["tree_view"]["content"]
-    local data = game.json_to_table(json)
+    local data = helpers.json_to_table(json)
     tree_view.clear()
     self:createTree(tree_view, data)
 
@@ -736,19 +736,19 @@ function AdminPanel:onEvent(event)
     local parent = event.element.parent.parent
     local decoded_textbox = parent["decoded-text"]
     local encoded_textbox = parent["encoded-text"]
-    encoded_textbox.text = "0"..game.encode_string(decoded_textbox.text)
+    encoded_textbox.text = "0"..helpers.encode_string(decoded_textbox.text)
   end
 
   if event.action == "delete-cache" then
-    if event.item1 ~= nil and global[event.item1] ~= nil then
+    if event.item1 ~= nil and storage[event.item1] ~= nil then
       if event.item2 == "" and event.item3 == "" and event.item4 == "" then
-        global[event.item1] = nil
+        storage[event.item1] = nil
       elseif event.item3 == "" and event.item4 == "" then
-        global[event.item1][event.item2] = {}
+        storage[event.item1][event.item2] = {}
       elseif event.item4 == "" then
-        global[event.item1][event.item2][event.item3] = nil
+        storage[event.item1][event.item2][event.item3] = nil
       else
-        global[event.item1][event.item2][event.item3][event.item4] = nil
+        storage[event.item1][event.item2][event.item3][event.item4] = nil
       end
       Player.print("Deleted:", event.item1, event.item2, event.item3, event.item4)
     else
@@ -758,7 +758,7 @@ function AdminPanel:onEvent(event)
   end
 
   if event.action == "refresh-cache" then
-    global[event.item1][event.item2] = {}
+    storage[event.item1][event.item2] = {}
     
     if event.item2 == "HMPlayer" then
       Player.getResources()
@@ -787,7 +787,7 @@ function AdminPanel:onEvent(event)
 
   if event.action == "share-model" then
     local access = event.item2
-    local model = global.models[event.item1]
+    local model = storage.models[event.item1]
     if model ~= nil then
       if access == "read" then
         if model.share == nil or not(bit32.band(model.share, 1) > 0) then

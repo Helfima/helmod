@@ -85,25 +85,25 @@ function PrototypeFilter:getElements(filters)
     end
   end
   if self.type == "entity" then
-    return game.get_filtered_entity_prototypes(filters)
+    return prototypes.get_entity_filtered(filters)
   elseif self.type == "item" then
-    return game.get_filtered_item_prototypes(filters)
+    return prototypes.get_item_filtered(filters)
   elseif self.type == "equipment" then
-    return game.get_filtered_equipment_prototypes(filters)
+    return prototypes.get_equipment_filtered(filters)
   elseif self.type == "mod" then
-    return game.get_filtered_mod_setting_prototypes(filters)
+    return prototypes.get_mod_setting_filtered(filters)
   elseif self.type == "achievement" then
-    return game.get_filtered_achievement_prototypes(filters)
+    return prototypes.get_achievement_filtered(filters)
   elseif self.type == "tile" then
-    return game.get_filtered_tile_prototypes(filters)
+    return prototypes.get_tile_filtered(filters)
   elseif self.type == "decorative" then
-    return game.get_filtered_decorative_prototypes(filters)
+    return prototypes.get_decorative_filtered(filters)
   elseif self.type == "fluid" then
-    return game.get_filtered_fluid_prototypes(filters)
+    return prototypes.get_fluid_filtered(filters)
   elseif self.type == "recipe" then
-    return game.get_filtered_recipe_prototypes(filters)
+    return prototypes.get_recipe_filtered(filters)
   elseif self.type == "technology" then
-    return game.get_filtered_technology_prototypes(filters)
+    return prototypes.get_technology_filtered(filters)
   end
   return {}
 end

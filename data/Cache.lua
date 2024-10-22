@@ -9,8 +9,8 @@ local Cache = {
 ---Return Cache
 ---@return table
 function Cache.get()
-  if global.caches == nil then global.caches = {} end
-  return global.caches
+  if storage.caches == nil then storage.caches = {} end
+  return storage.caches
 end
 
 -------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ end
 function Cache.reset(classname, name)
   local data = Cache.get()
   if classname == nil and name == nil then
-    global.caches = {}
+    storage.caches = {}
   elseif data[classname] ~= nil and name == nil then
     data[classname] = nil
   elseif data[classname] ~= nil then

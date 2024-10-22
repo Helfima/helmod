@@ -212,9 +212,9 @@ function menuButtonIcons(name, font)
   menuButtonIcon(name, icon_row(2,2,2,2), icon_col(1,3,4,1), 32, "selected_yellow", font, font_white, font_white)
   menuButtonIcon(name, icon_row(2,2,2,2), icon_col(1,3,4,1), 24, "sm_selected_yellow", font, font_white, font_white)
 
-  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(), 36, "flat2", font, font_white, font_white)
-  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(), 32, "flat", font, font_white, font_white)
-  menuButtonIcon(name, icon_row(2,2,2,2), icon_col(), 24, "sm_flat", font, font_white, font_white)
+  menuButtonIcon(name, icon_row(3,3,3,3), icon_col(), 36, "flat2", font, font_white, font_white)
+  menuButtonIcon(name, icon_row(3,3,3,3), icon_col(), 32, "flat", font, font_white, font_white)
+  menuButtonIcon(name, icon_row(3,3,3,3), icon_col(), 24, "sm_flat", font, font_white, font_white)
 end
 menuButtonIcons("menu")
 

@@ -1,11 +1,11 @@
 {
   "name": "helmod",
-  "version": "1.0.14",
+  "version": "2.0.0",
   "title": "Helmod: Assistant for planning your factory",
   "author": "Helfima",
   "contact": "Helfima",
   "homepage": "https://github.com/Helfima/helmod",
   "description": "Assistant for planning your factory. Can calculate required ingredients, products, machines, modules, and beacons. Can also calculate power production / consumption.",
-  "dependencies": ["base >= 1.1.57"],
-  "factorio_version": "1.1"
+  "dependencies": ["base >= 2.0.7"],
+  "factorio_version": "2.0"
 }

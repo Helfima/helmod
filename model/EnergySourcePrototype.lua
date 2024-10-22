@@ -26,10 +26,10 @@ end
 
 -------------------------------------------------------------------------------
 ---Return emissions
----@return number --default 0
+---@return table
 function EnergySourcePrototype:getEmissions()
   if self.lua_prototype ~= nil then
-    return self.lua_prototype.emissions or 2.7777777e-7
+    return self.lua_prototype.emissions_per_joule or {}
   end
   return 0
 end
@@ -177,7 +177,6 @@ function BurnerPrototype:getFuelPrototypes()
   for fuel_category,_ in pairs(self:getFuelCategories()) do
     table.insert(filters, {filter = "fuel-value",    mode = "or",  invert = false, comparison = ">", value = 0})
     table.insert(filters, {filter = "fuel-category", mode = "and", invert = false, ["fuel-category"] = fuel_category})
-    table.insert(filters, {filter = "flag",          mode = "and", invert = true,  flag = "hidden"})
   end
   
   local items = {}

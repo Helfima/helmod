@@ -24,7 +24,7 @@ end
 ---@return string
 function Converter.write(data_table)
   local data_string = serpent.dump(data_table)
-  return game.encode_string(data_string)
+  return helpers.encode_string(data_string)
 end
 
 -------------------------------------------------------------------------------
@@ -36,7 +36,7 @@ function Converter.read(data_string)
   data_string = Converter.trim(data_string)
   if (string.sub(data_string, 1, 8) ~= "do local") then
     local ok , err = pcall(function()
-      data_string = game.decode_string(data_string)
+      data_string = helpers.decode_string(data_string)
     end)
     if not(ok) then
       return nil
@@ -54,7 +54,7 @@ end
 ---@param json string
 ---@return string
 function Converter.indent(json)
-  local table_value = game.json_to_table(json)
+  local table_value = helpers.json_to_table(json)
   local result = Converter.indentTable(table_value, 0)
   return result
 end

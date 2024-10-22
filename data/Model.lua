@@ -19,7 +19,7 @@ function Model.getModels(bypass)
   local first_id = nil
   local models = {}
   if Model.countModel() > 0 then
-    for _,model in pairs(global.models) do
+    for _,model in pairs(storage.models) do
       if Player.isAdmin() and ( display_all_sheet or model.owner == "admin" or bypass ) then
         models[model.id] = model
         if first_id == nil then first_id = model.id end
@@ -74,34 +74,35 @@ end
 ---Get rules
 ---@return table
 function Model.getRules()
-  if global.rules == nil then
+  if storage.rules == nil then
     Model.resetRules()
   end
-  return global.rules
+  return storage.rules
 end
 
 -------------------------------------------------------------------------------
 ---Reset rules
 function Model.resetRules()
-  global.rules = {}
-  table.insert(global.rules, {index=0, mod="base", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="extraction-machine", excluded = false})
-  table.insert(global.rules, {index=1, mod="base", name="production-crafting", category="extraction-machine", type="entity-type", value="mining-drill", excluded = false})
-  table.insert(global.rules, {index=2, mod="base", name="production-crafting", category="energy", type="entity-subgroup", value="energy", excluded = false})
-  table.insert(global.rules, {index=3, mod="base", name="production-crafting", category="technology", type="entity-type", value="lab", excluded = false})
-  table.insert(global.rules, {index=4, mod="base", name="module-limitation", category="extraction-machine", type="entity-type", value="mining-drill", excluded = true})
-  table.insert(global.rules, {index=5, mod="base", name="module-limitation", category="technology", type="entity-type", value="lab", excluded = true})
-  table.insert(global.rules, {index=6, mod="ShinyIcons", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="shinyminer1", excluded = false})
-  table.insert(global.rules, {index=7, mod="ShinyIcons", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="shinyminer2", excluded = false})
-  table.insert(global.rules, {index=8, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="dyworld-extraction-burner", excluded = false})
-  table.insert(global.rules, {index=9, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="dyworld-drills-electric", excluded = false})
-  table.insert(global.rules, {index=10, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="dyworld-drills-burner", excluded = false})
-  table.insert(global.rules, {index=11, mod="DyWorld", name="production-crafting", category="standard", type="entity-name", value="assembling-machine-1", excluded = true})
-  table.insert(global.rules, {index=12, mod="DyWorld", name="production-crafting", category="standard", type="entity-name", value="assembling-machine-2", excluded = true})
-  table.insert(global.rules, {index=13, mod="DyWorld", name="production-crafting", category="standard", type="entity-name", value="assembling-machine-3", excluded = true})
-  table.insert(global.rules, {index=14, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-group", value="production", excluded = true})
-  table.insert(global.rules, {index=15, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="supply-depot", excluded = true})
-  table.insert(global.rules, {index=16, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="request-depot", excluded = true})
-  table.insert(global.rules, {index=17, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="buffer-depot", excluded = true})
+  local rules = {}
+  table.insert(rules, {index=0, mod="base", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="extraction-machine", excluded = false})
+  table.insert(rules, {index=1, mod="base", name="production-crafting", category="extraction-machine", type="entity-type", value="mining-drill", excluded = false})
+  table.insert(rules, {index=2, mod="base", name="production-crafting", category="energy", type="entity-subgroup", value="energy", excluded = false})
+  table.insert(rules, {index=3, mod="base", name="production-crafting", category="technology", type="entity-type", value="lab", excluded = false})
+  table.insert(rules, {index=4, mod="base", name="module-limitation", category="extraction-machine", type="entity-type", value="mining-drill", excluded = true})
+  table.insert(rules, {index=5, mod="base", name="module-limitation", category="technology", type="entity-type", value="lab", excluded = true})
+  table.insert(rules, {index=6, mod="ShinyIcons", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="shinyminer1", excluded = false})
+  table.insert(rules, {index=7, mod="ShinyIcons", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="shinyminer2", excluded = false})
+  table.insert(rules, {index=8, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="dyworld-extraction-burner", excluded = false})
+  table.insert(rules, {index=9, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="dyworld-drills-electric", excluded = false})
+  table.insert(rules, {index=10, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="dyworld-drills-burner", excluded = false})
+  table.insert(rules, {index=11, mod="DyWorld", name="production-crafting", category="standard", type="entity-name", value="assembling-machine-1", excluded = true})
+  table.insert(rules, {index=12, mod="DyWorld", name="production-crafting", category="standard", type="entity-name", value="assembling-machine-2", excluded = true})
+  table.insert(rules, {index=13, mod="DyWorld", name="production-crafting", category="standard", type="entity-name", value="assembling-machine-3", excluded = true})
+  table.insert(rules, {index=14, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-group", value="production", excluded = true})
+  table.insert(rules, {index=15, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="supply-depot", excluded = true})
+  table.insert(rules, {index=16, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="request-depot", excluded = true})
+  table.insert(rules, {index=17, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="buffer-depot", excluded = true})
+  storage.rules = rules
 end
 
 
@@ -115,14 +116,14 @@ end
 ---Get and initialize the model
 ---@return table
 function Model.newModel()
-  if global.model_id == nil then global.model_id = 1 end
-  if global.models == nil then global.models = {} end
+  if storage.model_id == nil then storage.model_id = 1 end
+  if storage.models == nil then storage.models = {} end
   local owner = Player.native().name
   if owner == nil or owner == "" then owner = "admin" end
-  global.model_id = global.model_id + 1
+  storage.model_id = storage.model_id + 1
   local model = {}
   model.class = "Model"
-  model.id = "model_"..global.model_id
+  model.id = "model_"..storage.model_id
   model.owner = owner
   model.block_root = Model.newBlock(model, { name = model.id, energy_total = 0, pollution = 0, summary = {} })
   model.block_root.parent_id = model.id
@@ -131,9 +132,9 @@ function Model.newModel()
   model.resources = {}
   model.time = 1
   model.version = Model.version
-  model.index = table.size(global.models)
+  model.index = table.size(storage.models)
   Model.appendParameters(model)
-  global.models[model.id] = model
+  storage.models[model.id] = model
   return model
 end
 
@@ -154,8 +155,8 @@ end
 ---Get model
 ---@return table
 function Model.getModelById(model_id)
-  if model_id ~= nil and global.models ~= nil then
-    return global.models[model_id]
+  if model_id ~= nil and storage.models ~= nil then
+    return storage.models[model_id]
   end
 end
 
@@ -165,15 +166,15 @@ end
 ---@return ModelData, BlockData, RecipeData
 function Model.getParameterObjects(parameter)
   if parameter ~= nil then
-    if global.models == nil then
+    if storage.models == nil then
       ---initialisation
-      global.models = {}
+      storage.models = {}
       local model = Model.newModel()
       User.setParameter(parameter.name, {name=parameter.name, model=model.id})
       return model
     end
-    if parameter.model ~= nil and global.models[parameter.model] ~= nil then
-      local model = global.models[parameter.model]
+    if parameter.model ~= nil and storage.models[parameter.model] ~= nil then
+      local model = storage.models[parameter.model]
       local block, recipe
       if parameter.block ~= nil and model ~= nil and model.blocks ~= nil then
         block = model.blocks[parameter.block]
@@ -440,7 +441,7 @@ end
 ---Count in list
 ---@return number
 function Model.countModel()
-  return table.size(global.models)
+  return table.size(storage.models)
 end
 
 -------------------------------------------------------------------------------
