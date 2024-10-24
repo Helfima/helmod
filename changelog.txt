@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.1
+Date: 2024-10-24
+  Bugfixes:
+    - Fix error when choose a energy recipe
+    - Fix error when trying to select the logistic entity with new bulk inserter
+---------------------------------------------------------------------------------------------------
 Version: 2.0.0
 Date: 2024-10-21
   Changes:

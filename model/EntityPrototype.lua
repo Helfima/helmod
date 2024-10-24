@@ -147,7 +147,7 @@ function EntityPrototype:getEnergyConsumption()
       return 0
     end
     local fuel_value = fluid_fuel:getFuelValue()
-    local max_energy_production = (self.lua_prototype.max_energy_production or 0) * 60
+    local max_energy_production = (self.lua_prototype.max_power_output or 0) * 60
 
     if self.lua_prototype.burns_fluid ~= true then
       ---Steam engine
@@ -853,7 +853,7 @@ function EntityPrototype:getInserterCapacity()
   if self.lua_prototype ~= nil then
     local stack_bonus = 0
     if self.lua_prototype.bulk == true then
-      stack_bonus = Player.getForce().stack_inserter_capacity_bonus or 0
+      stack_bonus = Player.getForce().bulk_inserter_capacity_bonus or 0
     else
       stack_bonus = Player.getForce().inserter_stack_size_bonus or 0
     end
