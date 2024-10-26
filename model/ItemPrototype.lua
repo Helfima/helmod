@@ -10,6 +10,22 @@ ItemPrototype = newclass(Prototype,function(base, object)
 end)
 
 -------------------------------------------------------------------------------
+---Return module effect
+---@return table
+function ItemPrototype:getModuleEffects()
+  if self.lua_prototype == nil then return {} end
+  return self.lua_prototype.module_effects
+end
+
+-------------------------------------------------------------------------------
+---Return Category
+---@return string
+function ItemPrototype:getCategory()
+  if self.lua_prototype == nil then return nil end
+  return self.lua_prototype.category
+end
+
+-------------------------------------------------------------------------------
 ---Return fuel value
 ---@return number
 function ItemPrototype:getFuelValue()

@@ -81,6 +81,22 @@ function RecipePrototype:getType()
 end
 
 -------------------------------------------------------------------------------
+---Return Allowed Effects
+---@return table
+function RecipePrototype:getAllowedEffects()
+    if self.lua_prototype == nil then return {} end
+    return self.lua_prototype.allowed_effects
+end
+
+-------------------------------------------------------------------------------
+---Return Allowed Module Categories
+---@return table
+function RecipePrototype:getAllowedModuleCategories()
+    if self.lua_prototype == nil then return nil end
+    return self.lua_prototype.allowed_module_categories
+  end
+
+  -------------------------------------------------------------------------------
 ---Return if recipe void ingredient
 ---for flare stack/clarifier ect...
 ---@return boolean
@@ -143,7 +159,7 @@ function RecipePrototype:getProducts(factory)
         if factory ~= nil and factory_prototype:getType() == "boiler" then
             local fluid_production = factory_prototype:getFluidProductionFilter()
             if lua_products[product_id] ~= nil and fluid_production.name == raw_product.name then
-                lua_products[product_id].amount = factory_prototype:getFluidProduction()
+                lua_products[product_id].amount = factory_prototype:getFluidProduction() * 10
                 lua_products[product_id].temperature = factory_prototype:getTargetTemperature()
             end
         end

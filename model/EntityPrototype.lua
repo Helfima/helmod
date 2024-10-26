@@ -28,6 +28,14 @@ function EntityPrototype:getAllowedEffects()
 end
 
 -------------------------------------------------------------------------------
+---Return Allowed Module Categories
+---@return table
+function EntityPrototype:getAllowedModuleCategories()
+  if self.lua_prototype == nil then return nil end
+  return self.lua_prototype.allowed_module_categories
+end
+
+-------------------------------------------------------------------------------
 ---Return ingredient_count
 ---@return number
 function EntityPrototype:getIngredientCount()
@@ -249,6 +257,18 @@ end
 function EntityPrototype:getDistributionEffectivity()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.distribution_effectivity or 1
+  end return 1
+end
+
+-------------------------------------------------------------------------------
+---Return profile effectivity
+---@return number --default 0
+function EntityPrototype:getProfileEffectivity(profile_count)
+  if self.lua_prototype ~= nil or profile_count == 0 then
+    if profile_count > #self.lua_prototype.profile then
+      return self.lua_prototype.profile[#self.lua_prototype.profile]
+    end
+    return self.lua_prototype.profile[profile_count]
   end return 1
 end
 

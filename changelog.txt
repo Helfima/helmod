@@ -1,4 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.2
+Date: 2024-10-24
+  Changes:
+    - Implemented profile beacon distribution
+    - Reworked allowed modules
+    - Boilers recipes produce 10x the input
+    - Added info on Quality in some tooltips
+  Bugfixes:
+    - Fix formatted value on production % of recipe edition cause a error when the value has space
+---------------------------------------------------------------------------------------------------
 Version: 2.0.1
 Date: 2024-10-24
   Bugfixes:

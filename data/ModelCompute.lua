@@ -597,12 +597,13 @@ end
 ---@return RecipeData
 function ModelCompute.computeModuleEffects(recipe, parameters)
     local factory = recipe.factory
-    factory.effects = { speed = 0, productivity = 0, consumption = 0, pollution = 0 }
+    factory.effects = { speed = 0, productivity = 0, consumption = 0, pollution = 0, quality = 0 }
     if parameters ~= nil then
         factory.effects.speed = parameters.effects.speed
         factory.effects.productivity = parameters.effects.productivity
         factory.effects.consumption = parameters.effects.consumption
         factory.effects.pollution = parameters.effects.pollution
+        factory.effects.quality = parameters.effects.quality or 0
     end
     factory.cap = { speed = 0, productivity = 0, consumption = 0, pollution = 0 }
     local factory_prototype = EntityPrototype(factory)
@@ -616,30 +617,38 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
             local productivity_bonus = Player.getModuleBonus(module, "productivity")
             local consumption_bonus = Player.getModuleBonus(module, "consumption")
             local pollution_bonus = Player.getModuleBonus(module, "pollution")
+            local quality_bonus = Player.getModuleBonus(module, "quality")
             factory.effects.speed = factory.effects.speed + value * speed_bonus
             factory.effects.productivity = factory.effects.productivity + value * productivity_bonus
             factory.effects.consumption = factory.effects.consumption + value * consumption_bonus
             factory.effects.pollution = factory.effects.pollution + value * pollution_bonus
+            factory.effects.quality = factory.effects.quality + value * quality_bonus
         end
     end
     ---effet module beacon
     if recipe.beacons ~= nil then
+        local profile_count = 0
+        for _, beacon in pairs(recipe.beacons) do
+            if beacon.modules ~= nil then
+                profile_count = profile_count + beacon.combo
+            end
+        end
         for _, beacon in pairs(recipe.beacons) do
             if beacon.modules ~= nil then
                 for module, value in pairs(beacon.modules) do
+                    local prototype_beacon = EntityPrototype(beacon);
                     local speed_bonus = Player.getModuleBonus(module, "speed")
                     local productivity_bonus = Player.getModuleBonus(module, "productivity")
                     local consumption_bonus = Player.getModuleBonus(module, "consumption")
                     local pollution_bonus = Player.getModuleBonus(module, "pollution")
-                    local distribution_effectivity = EntityPrototype(beacon):getDistributionEffectivity()
-                    factory.effects.speed = factory.effects.speed + value * speed_bonus * distribution_effectivity * beacon
-                    .combo
-                    factory.effects.productivity = factory.effects.productivity +
-                        value * productivity_bonus * distribution_effectivity * beacon.combo
-                    factory.effects.consumption = factory.effects.consumption +
-                        value * consumption_bonus * distribution_effectivity * beacon.combo
-                    factory.effects.pollution = factory.effects.pollution +
-                        value * pollution_bonus * distribution_effectivity * beacon.combo
+                    local quality_bonus = Player.getModuleBonus(module, "quality")
+                    local distribution_effectivity = prototype_beacon:getDistributionEffectivity()
+                    local profile_effectivity = prototype_beacon:getProfileEffectivity(profile_count)
+                    factory.effects.speed = factory.effects.speed + value * speed_bonus * distribution_effectivity * profile_effectivity * beacon.combo
+                    factory.effects.productivity = factory.effects.productivity + value * productivity_bonus * distribution_effectivity * profile_effectivity * beacon.combo
+                    factory.effects.consumption = factory.effects.consumption + value * consumption_bonus * distribution_effectivity * profile_effectivity * beacon.combo
+                    factory.effects.pollution = factory.effects.pollution + value * pollution_bonus * distribution_effectivity * profile_effectivity * beacon.combo
+                    factory.effects.quality = factory.effects.quality + value * quality_bonus * distribution_effectivity * profile_effectivity * beacon.combo
                 end
             end
         end

@@ -1277,7 +1277,8 @@ function RecipeEdition:updateObjectInfo(event)
 
     local tablePanel = GuiElement.add(info_panel, GuiTable("table-input"):column(2))
     GuiElement.add(tablePanel, GuiLabel("label-production"):caption({"helmod_recipe-edition-panel.production"}))
-    GuiElement.add(tablePanel, GuiTextField(self.classname, "recipe-update", model.id, block.id, recipe.id):text(Format.formatNumberElement((recipe.production or 1)*100)):style("helmod_textfield"))
+    local production_value = (recipe.production or 1)*100
+    GuiElement.add(tablePanel, GuiTextField(self.classname, "recipe-update", model.id, block.id, recipe.id):text(production_value):style("helmod_textfield"))
 
   end
 end
