@@ -96,7 +96,7 @@ end
 ---Get sprite string
 ---@param type string
 ---@param name string
----@param format string
+---@param format string?
 ---@return string
 function GuiElement.getSprite(type, name, format)
   local sprite = ""
@@ -276,6 +276,24 @@ function GuiElement.infoTemperature(parent, element, style)
   end
 end
 
+-------------------------------------------------------------------------------
+---Add quality mmask
+---@param parent LuaGuiElement
+---@param quality string
+---@param size number?
+function GuiElement.maskQuality(parent, quality, size)
+  if quality == nil or quality == "normal" then
+    return
+  end
+  local sprite_name = GuiElement.getSprite("quality", "rare")
+  local container = GuiElement.add(parent, GuiFlow("quality-info"))
+  container.style.top_padding = 20
+  local mask_frame = GuiElement.add(container, GuiSprite("quality-info"):sprite(sprite_name))
+  mask_frame.style.width = size or 12
+  mask_frame.style.height = size or 12
+  mask_frame.style.stretch_image_to_widget_size = true
+  mask_frame.ignored_by_interaction = true
+end
 -------------------------------------------------------------------------------
 ---Add recipe information
 ---@param parent LuaGuiElement

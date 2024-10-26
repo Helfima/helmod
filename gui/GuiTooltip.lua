@@ -160,9 +160,19 @@ function GuiTooltip:appendEffectInfo(tooltip, element)
     local productivity = sign..Format.formatPercent(element.effects.productivity).."%"
     table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_label.productivity"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, productivity or 0, helmod_tag.font.close})
 
+    ---quality
+    if Player.hasFeatureQuality() then
+      if element.effects.quality == nil then element.effects.quality = 0 end
+      local sign = ""
+      if element.effects.quality > 0 then sign = "+" end
+      local quality = sign..Format.formatPercent(element.effects.quality).."%"
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_label.quality"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, quality or 0, helmod_tag.font.close})
+    end
+
     ---pollution
     local pollution = Format.formatNumberElement((element.pollution or 0)*60 )
     table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_label.pollution"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, pollution or 0, helmod_tag.font.close})
+
   end
 end
 
@@ -699,6 +709,7 @@ function GuiTooltipModule:create()
       local bonus_speed = Player.getModuleBonus(module.name, "speed")
       local bonus_productivity = Player.getModuleBonus(module.name, "productivity")
       local bonus_pollution = Player.getModuleBonus(module.name, "pollution")
+      local bonus_quality = Player.getModuleBonus(module.name, "quality")
 
       local bonus_consumption_positive = "+"
       if bonus_consumption <= 0 then bonus_consumption_positive = "" end
@@ -714,6 +725,13 @@ function GuiTooltipModule:create()
       if bonus_productivity <= 0 then bonus_productivity_positive = "" end
       if bonus_productivity ~= 0 then
         table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"description.productivity-bonus"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, bonus_productivity_positive, Format.formatPercent(bonus_productivity), "%", helmod_tag.font.close})
+      end
+      if Player.hasFeatureQuality() then
+        local bonus_quality_positive = "+"
+        if bonus_quality <= 0 then bonus_quality_positive = "" end
+        if bonus_quality ~= 0 then
+          table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"description.quality-bonus"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, bonus_quality_positive, Format.formatPercent(bonus_quality), "%", helmod_tag.font.close})
+        end
       end
       local bonus_pollution_positive = "+"
       if bonus_pollution <= 0 then bonus_pollution_positive = "" end

@@ -14,7 +14,8 @@
             "request": "launch",
             "name": "Factorio Mod Debug (Settings & Data)",
             "hookSettings": true,
-            "hookData": true
+            "hookData": true,
+            
         },
         {
             "type": "factoriomod",

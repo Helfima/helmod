@@ -445,7 +445,7 @@ function GuiCellFactory:create(parent)
 
   local tooltip = GuiTooltipElement(self.options.tooltip):element(factory):byLimit(self.m_by_limit):withEnergy():withEffectInfo(factory.effects ~= nil):withControlInfo(self.m_with_control_info)
   local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("entity", factory.name):tooltip(tooltip))
-  
+  GuiElement.maskQuality(button, factory.quality)
   self:add_mask(button, color)
 
   local cell_factory_info = GuiElement.add(row1, GuiTable("factory-info"):column(1):style("helmod_factory_info"))

@@ -28,6 +28,14 @@ function EntityPrototype:getAllowedEffects()
 end
 
 -------------------------------------------------------------------------------
+---Return Allowed Module Categories
+---@return table
+function EntityPrototype:getAllowedModuleCategories()
+  if self.lua_prototype == nil then return nil end
+  return self.lua_prototype.allowed_module_categories
+end
+
+-------------------------------------------------------------------------------
 ---Return ingredient_count
 ---@return number
 function EntityPrototype:getIngredientCount()
@@ -147,7 +155,7 @@ function EntityPrototype:getEnergyConsumption()
       return 0
     end
     local fuel_value = fluid_fuel:getFuelValue()
-    local max_energy_production = (self.lua_prototype.max_energy_production or 0) * 60
+    local max_energy_production = (self.lua_prototype.max_power_output or 0) * 60
 
     if self.lua_prototype.burns_fluid ~= true then
       ---Steam engine
@@ -249,6 +257,18 @@ end
 function EntityPrototype:getDistributionEffectivity()
   if self.lua_prototype ~= nil then
     return self.lua_prototype.distribution_effectivity or 1
+  end return 1
+end
+
+-------------------------------------------------------------------------------
+---Return profile effectivity
+---@return number --default 0
+function EntityPrototype:getProfileEffectivity(profile_count)
+  if self.lua_prototype ~= nil or profile_count == 0 then
+    if profile_count > #self.lua_prototype.profile then
+      return self.lua_prototype.profile[#self.lua_prototype.profile]
+    end
+    return self.lua_prototype.profile[profile_count]
   end return 1
 end
 
@@ -853,7 +873,7 @@ function EntityPrototype:getInserterCapacity()
   if self.lua_prototype ~= nil then
     local stack_bonus = 0
     if self.lua_prototype.bulk == true then
-      stack_bonus = Player.getForce().stack_inserter_capacity_bonus or 0
+      stack_bonus = Player.getForce().bulk_inserter_capacity_bonus or 0
     else
       stack_bonus = Player.getForce().inserter_stack_size_bonus or 0
     end

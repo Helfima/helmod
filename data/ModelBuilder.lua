@@ -66,6 +66,7 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
             end
         else
             Model.setFactory(ModelRecipe, recipe_name)
+            ModelRecipe.time = recipe_prototype:getEnergy(ModelRecipe.factory)
         end
 
         ModelCompute.prepareBlockElements(block)
