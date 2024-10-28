@@ -266,10 +266,11 @@ end
 function EntityPrototype:getProfileEffectivity(profile_count)
   if self.lua_prototype ~= nil or profile_count == 0 then
     if profile_count > #self.lua_prototype.profile then
-      return self.lua_prototype.profile[#self.lua_prototype.profile]
+      return self.lua_prototype.profile[#self.lua_prototype.profile] or 1
     end
-    return self.lua_prototype.profile[profile_count]
-  end return 1
+    return self.lua_prototype.profile[profile_count] or 1
+  end
+  return 1
 end
 
 -------------------------------------------------------------------------------

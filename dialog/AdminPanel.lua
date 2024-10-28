@@ -242,7 +242,6 @@ function AdminPanel:updateMod()
   self:addCellHeader(table_panel, "_name", {"",helmod_tag.font.default_bold, {"helmod_result-panel.col-header-name"}, helmod_tag.font.close})
   self:addCellHeader(table_panel, "version", {"",helmod_tag.font.default_bold, {"helmod_common.version"}, helmod_tag.font.close})
 
-  local feature_flags = script.feature_flags
   for name, version in pairs(script.active_mods) do
     GuiElement.add(table_panel, GuiLabel("_name", name):caption(name))
     GuiElement.add(table_panel, GuiLabel("version", name):caption(version))

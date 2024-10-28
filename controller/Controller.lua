@@ -4,6 +4,7 @@ require "core.FormModel"
 
 require "dialog.AdminPanel"
 require "dialog.ArrangeModels"
+require "dialog.BugRepportPanel"
 require "dialog.CreatedOrWhereUsedPanel"
 require "dialog.HelpPanel"
 require "dialog.ModelDebug"
@@ -77,6 +78,7 @@ function Controller:prepare()
   local forms = {}
   table.insert(forms, AdminPanel("HMAdminPanel"))
   table.insert(forms, ArrangeModels("HMArrangeModels"))
+  table.insert(forms, BugReportPanel("HMBugReportPanel"))
   table.insert(forms, CreatedOrWhereUsedPanel("HMCreatedOrWhereUsedPanel"))
   table.insert(forms, HelpPanel("HMHelpPanel"))
   table.insert(forms, ModelDebug("HMModelDebug"))

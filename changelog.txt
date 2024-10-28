@@ -1,4 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.3
+Date: 2024-10-28
+  Changes:
+    - Added a panel to repport last error
+    - Updated locale DE
+    - Updated locale RU
+    - Remove catch error message in solver to see the error line
+  Bugfixes:
+    - Fix error when beacon.profile is empty
+---------------------------------------------------------------------------------------------------
 Version: 2.0.2
 Date: 2024-10-24
   Changes:

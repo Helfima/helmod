@@ -204,14 +204,7 @@ function SolverLinkedMatrix:solve_block(block, parameters, debug)
         end
     end)
     if not (ok) then
-        if block.solver == true and block.by_factory ~= true then
-            Player.print("Matrix solver can not find solution!")
-        else
-            Player.print("Algebraic solver can not find solution!")
-        end
-        if debug then
-            Player.print(err)
-        end
+        Player.repportError(err)
     end
     block.runtimes = nil
     if debug then
