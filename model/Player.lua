@@ -17,6 +17,20 @@ function Player.print(...)
 end
 
 -------------------------------------------------------------------------------
+---Repport error
+function Player.repportError(...)
+    Player.print(...)
+    log(...)
+    storage[Lua_player.index] = ...
+end
+
+-------------------------------------------------------------------------------
+---Get last error
+function Player.getLastError()
+    return storage[Lua_player.index]
+end
+
+-------------------------------------------------------------------------------
 ---Load factorio player
 ---@param event LuaEvent
 ---@return Player
