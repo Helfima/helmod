@@ -161,19 +161,40 @@ function Player.setSmartTool(recipe, type, index)
     if Lua_player == nil or recipe == nil then
         return nil
     end
-    local factory = recipe[type]
+    local inventory_indexes = {}
+    inventory_indexes["beacon"] = defines.inventory.beacon_modules
+    inventory_indexes["rocket-silo"] = defines.inventory.rocket_silo_modules
+    inventory_indexes["mining-drill"] = defines.inventory.mining_drill_modules
+    inventory_indexes["lab"] = defines.inventory.lab_modules
+    inventory_indexes["assembling-machine"] = defines.inventory.assembling_machine_modules
+    inventory_indexes["furnace"] = defines.inventory.furnace_modules
+    local machine = nil
     if index ~= nil then
-        factory = factory[index]
+        machine = recipe[type][index]
+    else
+        machine = recipe[type]
     end
+    local prototype = EntityPrototype(machine)
+    local prototype_type = prototype:getType()
+    local inventory_index = inventory_indexes[prototype_type] or 0
     local modules = {}
-    for name, value in pairs(factory.modules or {}) do
-        modules[name] = value
+    local stack_index = 0
+    for name, value in pairs(machine.modules or {}) do
+        if modules[name] == nil then modules[name] = {id={name=name,quality=nil},items={in_inventory={}}} end
+        for i = 1, value, 1 do
+            table.insert(modules[name].items.in_inventory,{inventory=inventory_index, stack=stack_index})
+            stack_index = stack_index + 1
+        end
+    end
+    local items = {}
+    for _, value in pairs(modules) do
+        table.insert(items,value)
     end
     local entity = {
         entity_number = 1,
-        name = factory.name,
+        name = machine.name,
         position = { 0, 0 },
-        items = modules
+        items = items
     }
     if type == "factory" then
         entity.recipe = recipe.name
