@@ -657,10 +657,6 @@ function ModelBuilder.copyBlock(into_model, into_block, from_block)
             if is_block then
                 local new_block = Model.newBlock(into_model, child)
                 new_block.index = child_index
-                new_block.unlinked = child.by_factory and true or false
-                new_block.by_factory = child.by_factory
-                new_block.by_product = child.by_product
-                new_block.by_limit = child.by_limit
                 into_model.blocks[new_block.id] = new_block
                 ModelBuilder.copyBlock(into_model, new_block, child)
                 into_block.children[new_block.id] = new_block
@@ -680,8 +676,8 @@ function ModelBuilder.copyBlock(into_model, into_block, from_block)
                         end
                     end
 
-                    if recipe.contraint ~= nil then
-                        recipe_model.contraint = table.deepcopy(recipe.contraint)
+                    if recipe.contraints ~= nil then
+                        recipe_model.contraints = table.deepcopy(recipe.contraints)
                     end
                     into_block.children[recipe_model.id] = recipe_model
                     child_index = child_index + 1
@@ -691,9 +687,23 @@ function ModelBuilder.copyBlock(into_model, into_block, from_block)
         end
         if into_block ~= nil then
             table.reindex_list(into_block.children)
+            into_block.unlinked = from_block.unlinked
+            into_block.by_factory = from_block.by_factory
+            into_block.by_product = from_block.by_product
+            into_block.by_limit = from_block.by_limit
+            if from_block.products ~= nil then
+                into_block.products = table.deepcopy(from_block.products)
+            end
+            if from_block.ingredients ~= nil then
+                into_block.ingredients = table.deepcopy(from_block.ingredients)
+            end
             if from_block.products_linked ~= nil then
                 into_block.products_linked = table.deepcopy(from_block.products_linked)
             end
+            if from_block.contraints ~= nil then
+                into_block.contraints = table.deepcopy(from_block.contraints)
+            end
+            
         end
     end
 end

@@ -96,7 +96,6 @@ function ModelCompute.update(model)
     if model ~= nil and model.blocks ~= nil then
         -- Add parameters
         Model.appendParameters(model)
-        model.input = {}
         ModelCompute.updateBlock(model, model.block_root)
         ModelCompute.finalizeBlock(model.block_root, 1)
         model.version = Model.version
@@ -597,13 +596,14 @@ end
 ---@return RecipeData
 function ModelCompute.computeModuleEffects(recipe, parameters)
     local factory = recipe.factory
-    factory.effects = { speed = 0, productivity = 0, consumption = 0, pollution = 0, quality = 0 }
+    local recipe_productivity = Player.getRecipeProductivityBonus(recipe.name)
+    factory.effects = { speed = 0, productivity = recipe_productivity, consumption = 0, pollution = 0, quality = 0 }
     if parameters ~= nil then
-        factory.effects.speed = parameters.effects.speed
-        factory.effects.productivity = parameters.effects.productivity
-        factory.effects.consumption = parameters.effects.consumption
-        factory.effects.pollution = parameters.effects.pollution
-        factory.effects.quality = parameters.effects.quality or 0
+        factory.effects.speed = factory.effects.speed + (parameters.effects.speed or 0)
+        factory.effects.productivity = factory.effects.productivity + (parameters.effects.productivity or 0)
+        factory.effects.consumption = factory.effects.consumption + (parameters.effects.consumption or 0)
+        factory.effects.pollution = factory.effects.pollution + (parameters.effects.pollution or 0)
+        factory.effects.quality = factory.effects.quality + (parameters.effects.quality or 0)
     end
     factory.cap = { speed = 0, productivity = 0, consumption = 0, pollution = 0 }
     local factory_prototype = EntityPrototype(factory)

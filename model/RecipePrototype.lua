@@ -89,6 +89,22 @@ function RecipePrototype:getAllowedEffects()
 end
 
 -------------------------------------------------------------------------------
+---Return Allowed Effects
+---@return table | nil
+function RecipePrototype:getAllowedEffectMessage(effect_name)
+    if self.lua_prototype == nil then return nil end
+    if self.lua_prototype.effect_limitation_messages ~= nil then
+        local message_name = string.format("allow_%s_message", effect_name)
+        local effect_limitation_messages = self.lua_prototype.effect_limitation_messages
+        return effect_limitation_messages[message_name]
+    else
+        local message_name = string.format("item-limitation.%s-effect", effect_name)
+        return {message_name}
+    end
+    return nil
+end
+
+-------------------------------------------------------------------------------
 ---Return Allowed Module Categories
 ---@return table
 function RecipePrototype:getAllowedModuleCategories()
@@ -516,9 +532,9 @@ function RecipePrototype:getHidden()
         elseif self.lua_type == "technology" then
             return false
         elseif self.lua_type == "fluid" then
-            local entities = Player.getOffshorePumps(self.lua_prototype.name)
-            for _, entity in pairs(entities) do
-                return false
+            local fluid = Player.getFluidPrototype(self.lua_prototype.name)
+            if fluid ~= nil then
+                return fluid.hidden
             end
             return false
         elseif self.lua_type == "boiler" then

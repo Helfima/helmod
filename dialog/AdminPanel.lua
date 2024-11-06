@@ -770,6 +770,7 @@ function AdminPanel:onEvent(event)
       table.insert(forms, TechnologySelector("HMTechnologySelector"))
       table.insert(forms, ItemSelector("HMItemSelector"))
       table.insert(forms, FluidSelector("HMFluidSelector"))
+      table.insert(forms, TileSelector("HMTileSelector"))
       for _,form in pairs(forms) do
         if event.item2 == form.classname then
           form:prepare()

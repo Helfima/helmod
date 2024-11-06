@@ -913,8 +913,10 @@ function RecipeEdition:updateFactoryModulesPriority(factory_module_panel)
       local module = ItemPrototype(element.name)
       local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name}):withControlInfo(control_info)
       if Player.checkFactoryLimitationModule(module:native(), recipe) == false then
-        if (module:native().limitation_message_key ~= nil) and (module:native().limitation_message_key ~= "") then
-          tooltip = {"item-limitation."..module:native().limitation_message_key}
+        local limitation_message = Player.getFactoryLimitationModuleMessage(module:native(), recipe);
+        
+        if limitation_message ~= nil then
+          tooltip = limitation_message
         else
           tooltip = ""
         end
