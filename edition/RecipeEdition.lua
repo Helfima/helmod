@@ -542,7 +542,7 @@ function RecipeEdition:onUpdate(event)
   local model, block, recipe = self:getParameterObjects()
   ---header
   self:updateHeader(event)
-  if recipe ~= nil then
+  if recipe ~= nil and recipe.type ~= "spoiling" then
     if recipe.type == "energy" then
       self:updateFactoryInfo(event)
     else
@@ -669,6 +669,8 @@ function RecipeEdition:updateFactoryInfo(event)
       factories = Player.getProductionsCrafting("fluid", recipe)
     elseif recipe.type == "boiler" then
       factories = Player.getBoilersForRecipe(recipe_prototype)
+    elseif recipe.type == "agricultural" then
+      factories = Player.getAgriculturalTowers()
     else
       factories = Player.getProductionsCrafting(category, recipe)
     end
@@ -1162,8 +1164,10 @@ function RecipeEdition:updateBeaconModulesPriority(beacon_module_panel)
       local tooltip = GuiTooltipModule("tooltip.add-module"):element({type="item", name=element.name}):withControlInfo(control_info)
       local module = ItemPrototype(element.name)
       if Player.checkBeaconLimitationModule(beacon, recipe, module:native()) == false then
-        if (module:native().limitation_message_key ~= nil) and (module:native().limitation_message_key ~= "") then
-          tooltip = {"item-limitation."..module:native().limitation_message_key}
+        local limitation_message = Player.getBeaconLimitationModuleMessage(module:native(), recipe);
+        
+        if limitation_message ~= nil then
+          tooltip = limitation_message
         else
           tooltip = ""
         end

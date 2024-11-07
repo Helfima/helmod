@@ -1,9 +1,15 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.6
+Date: 2024-11-07
+  Changes:
+    - Added agricultural recipe for agricultural-tower
+    - Added spoil recipe
+---------------------------------------------------------------------------------------------------
 Version: 2.0.5
 Date: 2024-11-06
   Changes:
     - Reworked custom fluid recipe created by offshore-pump
-    - Implemented productivity bonus on recipe when technoly researched (need refresh sheet)
+    - Implemented productivity bonus on recipe when technology researched (need refresh sheet)
   Bugfixes:
     - Fix error on accumulator recipe
     - Fix search recipe in boiler recipes when click a ingredient or a product

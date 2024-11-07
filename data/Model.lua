@@ -407,9 +407,9 @@ function Model.newRecipe(model, name, type)
   recipeModel.type = type or "recipe"
   recipeModel.count = 0
   recipeModel.production = 1
-  recipeModel.factory = Model.newFactory()
+  --recipeModel.factory = Model.newFactory()
   recipeModel.beacons = {}
-  table.insert(recipeModel.beacons, Model.newBeacon())
+  --table.insert(recipeModel.beacons, Model.newBeacon())
 
   return recipeModel
 end
@@ -503,6 +503,13 @@ function Model.setFactory(recipe, factory_name, factory_fuel)
   if recipe ~= nil then
     local factory_prototype = EntityPrototype(factory_name)
     if factory_prototype:native() ~= nil then
+      if recipe.factory == nil then
+        recipe.factory = Model.newFactory()
+        if recipe.beacons == nil or #recipe.beacons == 0 then
+          recipe.beacons = {}
+          table.insert(recipe.beacons, Model.newBeacon())
+        end
+      end
       recipe.factory.name = factory_name
       recipe.factory.fuel = factory_fuel
       if Model.countModulesModel(recipe.factory) >= factory_prototype:getModuleInventorySize() then
@@ -582,6 +589,8 @@ function Model.getDefaultPrototypeFactory(recipe_prototype)
       factories = Player.getBoilersForRecipe(recipe_prototype)
     elseif recipe_prototype:getType() == "fluid" then
       factories = Player.getProductionsCrafting("fluid", recipe_prototype:native())
+    elseif recipe_prototype:getType() == "agricultural" then
+      factories = Player.getAgriculturalTowers()
     else
       factories = Player.getProductionsCrafting(category, recipe_prototype:native())
     end

@@ -108,6 +108,12 @@ function RecipeSelector:updateGroups(list_products, list_ingredients, list_trans
   for key, entity in pairs(Player.getEnergyMachines()) do
     self:appendGroups(entity, "energy", list_products, list_ingredients, list_translate)
   end
+  for key, recipe in pairs(Player.getAgriculturalRecipes()) do
+    self:appendGroups(recipe, "agricultural", list_products, list_ingredients, list_translate)
+  end
+  for key, recipe in pairs(Player.getSpoilableRecipes()) do
+    self:appendGroups(recipe, "spoiling", list_products, list_ingredients, list_translate)
+  end
 end
 
 -------------------------------------------------------------------------------

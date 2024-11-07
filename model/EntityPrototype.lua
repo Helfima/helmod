@@ -707,6 +707,18 @@ function EntityPrototype:speedFactory(recipe)
     return researching_speed
   elseif recipe.type == "energy" then
     return self:getSpeedModifier()
+  elseif recipe.type == "agricultural" then
+    local growth_grid_tile_size = self.lua_prototype.growth_grid_tile_size or 3
+    local tile_width = self.lua_prototype.tile_width or 3
+    local tile_height = self.lua_prototype.tile_height or 3
+    local machine_area = tile_width*tile_height
+    local logistic_area = 9 -- area necessary for input/output and power
+    local max_grid_tile_size = 21
+    local max_area = max_grid_tile_size * max_grid_tile_size
+    local growing_area = growth_grid_tile_size * growth_grid_tile_size
+    local growable_area = max_area - machine_area - logistic_area
+    local speed = growable_area/growing_area
+    return speed
   else
     return self:getCraftingSpeed()
   end

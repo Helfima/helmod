@@ -199,6 +199,14 @@ function GuiCell:add_icon_info(button, info_icon)
     tooltip = "tooltip.resource-recipe"
     sprite_name = GuiElement.getSprite(defines.sprite_info.mining)
   end
+  if type == "agricultural" then 
+    tooltip = "tooltip.resource-recipe"
+    sprite_name = GuiElement.getSprite(defines.sprite_info.developer)
+  end
+  if type == "spoiling" then 
+    tooltip = "tooltip.resource-recipe"
+    sprite_name = GuiElement.getSprite(defines.sprite_info.developer)
+  end
   if type == "technology" then 
     tooltip = "tooltip.technology-recipe"
     sprite_name = GuiElement.getSprite(defines.sprite_info.education)

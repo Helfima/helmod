@@ -582,7 +582,7 @@ function Player.checkFactoryLimitationModule(module, lua_recipe)
 end
 
 -------------------------------------------------------------------------------
----Check factory limitation module
+---Get factory limitation message
 ---@param module table
 ---@param lua_recipe RecipeData
 ---@return table | nil
@@ -702,6 +702,65 @@ function Player.checkBeaconLimitationModule(beacon, lua_recipe, module)
     end
 
     return true
+end
+
+-------------------------------------------------------------------------------
+---Get beacon limitation message
+---@param beacon FactoryData
+---@param lua_recipe RecipeData
+---@param module LuaItemPrototype
+---@return table | nil
+function Player.getBeaconLimitationModuleMessage(beacon, lua_recipe, module)
+    local factory = lua_recipe.factory
+    local factory_prototype = EntityPrototype(factory)
+    local factory_module_slots= factory_prototype:getModuleInventorySize()
+    if factory_module_slots == 0 then
+        return {"helmod_limitation.no-module-slot"}
+    end
+    local model_filter_beacon_module = User.getModGlobalSetting("model_filter_beacon_module")
+    if model_filter_beacon_module == false then
+        return nil
+    end
+
+    if lua_recipe.type ~= "resource" then
+        local module_prototype = ItemPrototype(module)
+        local module_effects = module_prototype:getModuleEffects()
+        local module_category = module_prototype:getCategory()
+        local recipe_prototype = RecipePrototype(lua_recipe)
+        local recipe_allowed_effects = recipe_prototype:getAllowedEffects()
+        local entity_prototype = EntityPrototype(beacon)
+        local entity_allowed_effects = entity_prototype:getAllowedEffects()
+        local recipe_allowed_module_categories = recipe_prototype:getAllowedModuleCategories()
+        local entity_allowed_module_categories = entity_prototype:getAllowedModuleCategories()
+        
+        for effect_name, value in pairs(module_effects) do
+            local positive_effect = Player.checkPositiveEffect(effect_name, value)
+            if table.size(recipe_allowed_effects) > 0 then
+                local recipe_allowed_effect = recipe_allowed_effects[effect_name]
+                if recipe_allowed_effect == false and positive_effect == true then
+                    return recipe_prototype:getAllowedEffectMessage(effect_name)
+                end
+            end
+            if table.size(entity_allowed_effects) > 0 then
+                local entity_allowed_effect = entity_allowed_effects[effect_name]
+                if entity_allowed_effect == false and positive_effect == true then
+                    return recipe_prototype:getAllowedEffectMessage(effect_name)
+                end
+            end
+        end
+        if recipe_allowed_module_categories ~= nil then
+            if not(recipe_allowed_module_categories[module_category])  then
+                return {"helmod_limitation.not-allowed-category-module", module_category}
+            end
+        end
+        if entity_allowed_module_categories ~= nil then
+            if not(entity_allowed_module_categories[module_category])  then
+                return {"helmod_limitation.not-allowed-category-module", module_category}
+            end
+        end
+    end
+
+    return nil
 end
 
 -------------------------------------------------------------------------------
@@ -844,6 +903,8 @@ function Player.getProductionMachines()
     table.insert(filters, { filter = "type", type = "mining-drill", mode = "or" })
     table.insert(filters, { filter = "hidden", mode = "and", invert = true })
     table.insert(filters, { filter = "type", type = "rocket-silo", mode = "or" })
+    table.insert(filters, { filter = "hidden", mode = "and", invert = true })
+    table.insert(filters, { filter = "type", type = "agricultural-tower", mode = "or" })
     table.insert(filters, { filter = "hidden", mode = "and", invert = true })
     local prototypes = prototypes.get_entity_filtered(filters)
     prototypes = Player.ExcludePlacedByHidden(prototypes)
@@ -1122,6 +1183,168 @@ end
 ---@return table
 function Player.getFluidRecipe(name)
     local recipes = Player.getFluidRecipes()
+    return recipes[name]
+end
+
+-------------------------------------------------------------------------------
+---Return table of Agricultural Towers
+---@return table
+function Player.getAgriculturalTowers()
+    local filters = {}
+    table.insert(filters, { filter = "type", type = "agricultural-tower", mode = "or" })
+    table.insert(filters, { filter = "hidden", mode = "and", invert = true })
+    table.insert(filters, { filter = "type", type = "agricultural-tower", mode = "or" })
+    table.insert(filters, { filter = "flag", flag = "player-creation", mode = "and" })
+    local prototypes = prototypes.get_entity_filtered(filters)
+
+    prototypes = Player.ExcludePlacedByHidden(prototypes)
+    return prototypes
+end
+
+-------------------------------------------------------------------------------
+---Return table filter of Plants for Agricultural Towers
+---@return table
+function Player.getPlantsFilter()
+    local filters = {}
+    table.insert(filters, { filter = "type", type = "plant", mode = "or" })
+    table.insert(filters, { filter = "hidden", mode = "and", invert = true })
+    return filters
+end
+
+-------------------------------------------------------------------------------
+---Return table of Plants for Agricultural Towers
+---@return table
+function Player.getPlants()
+    local filters = Player.getPlantsFilter()
+    local prototypes = prototypes.get_entity_filtered(filters)
+
+    prototypes = Player.ExcludePlacedByHidden(prototypes)
+    return prototypes
+end
+
+-------------------------------------------------------------------------------
+---Return table of Seeds for Agricultural Towers
+---@return table
+function Player.getSeeds()
+    local plants_filters = Player.getPlantsFilter()
+    local filters = {}
+    table.insert(filters, { filter = "type", type = "item", mode = "or"})
+    table.insert(filters, { filter = "place-result", elem_filters=plants_filters, mode = "and"})
+    table.insert(filters, { filter = "hidden", mode = "and", invert = true })
+    local prototypes = prototypes.get_item_filtered(filters)
+    return prototypes
+end
+
+-------------------------------------------------------------------------------
+---Return table of Agricultural recipes for Agricultural Towers
+---@return table
+function Player.getAgriculturalRecipes()
+    local recipes = {}
+    local items = Player.getSeeds()
+    for _, prototype in pairs(items) do
+        local ingredients = { { name = prototype.name, type = "item", amount = 1 } }
+        local plant_prototype = prototype.plant_result
+        local mineable_properties = plant_prototype.mineable_properties
+        local products = mineable_properties.products
+        local recipe = {}
+        recipe.enabled = true
+        recipe.energy = plant_prototype.growth_ticks / 60
+        recipe.force = {}
+        recipe.group = { name = "helmod", order = "zzzz" }
+        recipe.subgroup = { name = "helmod-farming-1", order = "cccc" }
+        recipe.hidden = false
+        recipe.ingredients = ingredients
+        recipe.products = products
+        recipe.localised_description = prototype.localised_description
+        recipe.localised_name = prototype.localised_name
+        recipe.name = prototype.name
+        recipe.category = "farming"
+        recipe.prototype = {}
+        recipe.valid = true
+
+        if not recipes[recipe.name] then
+            recipes[recipe.name] = recipe
+        end
+        if recipe.hidden then
+            recipes[recipe.name].hidden = true
+        end
+    end
+
+    return recipes
+end
+
+-------------------------------------------------------------------------------
+---Return recipe of Agricultural recipes for Agricultural Towers
+---@param name string
+---@return table
+function Player.getAgriculturalRecipe(name)
+    local recipes = Player.getAgriculturalRecipes()
+    return recipes[name]
+end
+
+-------------------------------------------------------------------------------
+---Return table of spoilable items
+---@return table
+function Player.getSpoilableItems()
+    local prototypes = {}
+    for _, prototype in pairs(Player.getItemPrototypes()) do
+        if prototype.get_spoil_ticks() > 0 then
+            table.insert(prototypes, prototype)
+        end
+    end
+    return prototypes
+end
+
+-------------------------------------------------------------------------------
+---Return table of Spoilable recipes
+---@return table
+function Player.getSpoilableRecipes()
+    local recipes = {}
+    local items = Player.getSpoilableItems()
+    for _, prototype in pairs(items) do
+        local ingredients = { { name = prototype.name, type = "item", amount = 1 } }
+        local spoil_result = prototype.spoil_result
+        local products = {}
+        if spoil_result ~= nil then
+            local product = { name = spoil_result.name, type = "item", amount = 1 }
+            table.insert(products, product)
+        else
+            local i = 0
+        end
+        
+        local recipe = {}
+        recipe.enabled = true
+        recipe.energy = prototype.get_spoil_ticks() / 60
+        recipe.force = {}
+        recipe.group = { name = "helmod", order = "zzzz" }
+        recipe.subgroup = { name = "helmod-farming-2", order = "dddd" }
+        recipe.hidden = false
+        recipe.ingredients = ingredients
+        recipe.products = products
+        recipe.localised_description = prototype.localised_description
+        recipe.localised_name = prototype.localised_name
+        recipe.name = prototype.name
+        recipe.category = "spoiling"
+        recipe.prototype = {}
+        recipe.valid = true
+
+        if not recipes[recipe.name] then
+            recipes[recipe.name] = recipe
+        end
+        if recipe.hidden then
+            recipes[recipe.name].hidden = true
+        end
+    end
+
+    return recipes
+end
+
+-------------------------------------------------------------------------------
+---Return Spoilable recipe
+---@param name string
+---@return table
+function Player.getSpoilableRecipe(name)
+    local recipes = Player.getSpoilableRecipes()
     return recipes[name]
 end
 
@@ -1449,7 +1672,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Return item prototypes
----@param filters table --{{filter="fuel-category", mode="or", invert=false,["fuel-category"]="chemical"}}
+---@param filters? table --{{filter="fuel-category", mode="or", invert=false,["fuel-category"]="chemical"}}
 ---@return table
 function Player.getItemPrototypes(filters)
     if filters ~= nil then

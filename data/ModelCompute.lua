@@ -595,6 +595,7 @@ end
 ---@param parameters ParametersData
 ---@return RecipeData
 function ModelCompute.computeModuleEffects(recipe, parameters)
+    if recipe.factory == nil then return end
     local factory = recipe.factory
     local recipe_productivity = Player.getRecipeProductivityBonus(recipe.name)
     factory.effects = { speed = 0, productivity = recipe_productivity, consumption = 0, pollution = 0, quality = 0 }
@@ -703,6 +704,9 @@ end
 ---Compute energy, speed, number of factory for recipes
 ---@param recipe table
 function ModelCompute.computeFactory(recipe)
+    recipe.pollution_amount = 0
+    recipe.energy_total = 0
+    if recipe.factory == nil then return end
     local recipe_prototype = RecipePrototype(recipe)
     local factory_prototype = EntityPrototype(recipe.factory)
     recipe.time = recipe_prototype:getEnergy(recipe.factory)

@@ -34,6 +34,10 @@ RecipePrototype = newclass(Prototype, function(base, object, object_type)
         elseif base.lua_type == "rocket" then
             local recipe = Player.getRocketRecipe(base.object_name)
             Prototype.init(base, recipe)
+        elseif base.lua_type == "agricultural" then
+            Prototype.init(base, Player.getAgriculturalRecipe(base.object_name))
+        elseif base.lua_type == "spoiling" then
+            Prototype.init(base, Player.getSpoilableRecipe(base.object_name))
         end
         if base.lua_prototype == nil then
             Logging:error("HMRecipePrototype", "recipe not found", type(object), object)
@@ -338,6 +342,8 @@ function RecipePrototype:getRawIngredients()
             end
 
             return ingredients
+        else
+            return self.lua_prototype.ingredients
         end
     end
     return {}
@@ -605,6 +611,10 @@ function RecipePrototype:getIcon()
     elseif self.lua_type == "boiler" then
         icon_type = "fluid"
         icon_name = self.output_fluid_name
+    elseif self.lua_type == "agricultural" then
+        icon_type = "item"
+    elseif self.lua_type == "spoiling" then
+        icon_type = "item"
     end
 
     return icon_name, icon_type
