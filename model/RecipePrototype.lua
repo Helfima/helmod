@@ -89,6 +89,7 @@ end
 ---@return table
 function RecipePrototype:getAllowedEffects()
     if self.lua_prototype == nil then return {} end
+    if self.lua_prototype.object_name == "LuaTechnologyPrototype" then return {} end
     return self.lua_prototype.allowed_effects
 end
 
@@ -97,6 +98,7 @@ end
 ---@return table | nil
 function RecipePrototype:getAllowedEffectMessage(effect_name)
     if self.lua_prototype == nil then return nil end
+    if self.lua_prototype.object_name == "LuaTechnologyPrototype" then return nil end
     if self.lua_prototype.effect_limitation_messages ~= nil then
         local message_name = string.format("allow_%s_message", effect_name)
         local effect_limitation_messages = self.lua_prototype.effect_limitation_messages
@@ -113,6 +115,7 @@ end
 ---@return table
 function RecipePrototype:getAllowedModuleCategories()
     if self.lua_prototype == nil then return nil end
+    if self.lua_prototype.object_name == "LuaTechnologyPrototype" then return nil end
     return self.lua_prototype.allowed_module_categories
   end
 
