@@ -1,6 +1,10 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.7
 Date: 2024-11-14
+  Features:
+    - Added quality selector for machine and module in recipe edition
+  Changes:
+    - Changed default Amount affect one = 1, Beacon by factory = 1/8 and Constant beacon = 0 (new game)
   Bugfixes:
     - Fix error on accumulator recipe
 ---------------------------------------------------------------------------------------------------

@@ -1,8 +1,7 @@
 -------------------------------------------------------------------------------
 -- Class Object
---
--- @module Object
---
+---@class Object
+---@field classname string
 Object = newclass(function(base,classname)
   base.classname = classname
   base:onInit()

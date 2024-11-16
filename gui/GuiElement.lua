@@ -1,10 +1,14 @@
 -------------------------------------------------------------------------------
 ---Description of the module.
 ---@class GuiElement
+---@field name table
+---@field classname string
+---@field options table
 GuiElement = newclass(function(base,...)
   base.name = {...}
   base.classname = "HMGuiElement"
   base.options = {}
+  base.post_action = {}
   base.is_caption = true
 end)
 GuiElement.classname = "HMGuiElement"
@@ -166,7 +170,12 @@ function GuiElement.add(parent, gui_element)
   local element = nil
   local ok , err = pcall(function()
     if gui_element.classname ~= "HMGuiCell" then
-      element = parent.add(gui_element:getOptions())
+      local options = gui_element:getOptions()
+      element = parent.add(options)
+      if gui_element.apply_elem_value then
+        element.elem_value = options.elem_value
+      end
+      GuiElement.addPostAction(element, gui_element)
     else
       element = gui_element:create(parent)
     end
@@ -179,6 +188,19 @@ function GuiElement.add(parent, gui_element)
     log(debug.traceback())
   end
   return element
+end
+
+-------------------------------------------------------------------------------
+---Add a post action on element
+---@param parent LuaGuiElement --container for element
+---@param gui_element GuiElement
+function GuiElement.addPostAction(parent, gui_element)
+  if gui_element.post_action == nil then return end
+  for action_name, action in pairs(gui_element.post_action) do
+    if action_name == "mask_quality" then
+      GuiElement.maskQuality(parent, action.quality, action.size)
+    end
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -276,6 +298,13 @@ function GuiElement.infoTemperature(parent, element, style)
   end
 end
 
+function GuiElement.rgbColorTag(color)
+  local r = math.floor(color.r * 256)
+  local g = math.floor(color.g * 256)
+  local b = math.floor(color.b * 256)
+  return string.format("[color=%s,%s,%s]", r, g, b)
+end
+
 -------------------------------------------------------------------------------
 ---Add quality mmask
 ---@param parent LuaGuiElement
@@ -285,15 +314,50 @@ function GuiElement.maskQuality(parent, quality, size)
   if quality == nil or quality == "normal" then
     return
   end
-  local sprite_name = GuiElement.getSprite("quality", "rare")
+  local sprite_name = GuiElement.getSprite("quality", quality)
   local container = GuiElement.add(parent, GuiFlow("quality-info"))
-  container.style.top_padding = 20
+  local style_name = parent.style.name
   local mask_frame = GuiElement.add(container, GuiSprite("quality-info"):sprite(sprite_name))
-  mask_frame.style.width = size or 12
-  mask_frame.style.height = size or 12
+  if string.find(style_name, "_sm") then
+    container.style.top_padding = 8
+    mask_frame.style.width = size or 8
+    mask_frame.style.height = size or 8
+  elseif string.find(style_name, "_m") then
+    container.style.top_padding = 12
+    mask_frame.style.width = size or 10
+    mask_frame.style.height = size or 10
+  else
+    container.style.top_padding = 20
+    mask_frame.style.width = size or 12
+    mask_frame.style.height = size or 12
+  end
   mask_frame.style.stretch_image_to_widget_size = true
   mask_frame.ignored_by_interaction = true
 end
+
+-------------------------------------------------------------------------------
+---Add quality selector
+---@param parent LuaGuiElement
+---@param quality string
+---@return LuaGuiElement
+function GuiElement.addQualitySelector(parent, quality, ...)
+  local quality_options = GuiElement.add(parent, GuiFlowH())
+  quality_options.style.horizontal_spacing = 2
+  local qualities = Player.getQualityPrototypes();
+  for _, lua_quality in pairs(qualities) do
+      if lua_quality.hidden == false then
+          local style = defines.styles.button.select_icon_m
+          if quality == lua_quality.name then
+              style = defines.styles.button.select_icon_m_green
+          end
+          local localized_name = lua_quality.localised_name
+          local button = GuiElement.add(quality_options, GuiButton(...):sprite("quality", lua_quality.name):style(style):tooltip(localized_name))
+          --button.locked = true
+      end
+  end
+  return quality_options
+end
+
 -------------------------------------------------------------------------------
 ---Add recipe information
 ---@param parent LuaGuiElement

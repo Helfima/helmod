@@ -180,6 +180,22 @@ end
 ---Add logistic information
 ---@param tooltip table
 ---@param element table
+function GuiTooltip.appendQuality(tooltip, element)
+  if Player.hasFeatureQuality() and element.quality ~= nil then
+    local quality = Player.getQualityPrototype(element.quality)
+    if quality ~= nil and quality.level > 0 then
+      local localised_name = quality.localised_name
+      local color = quality.color
+      local color_tag = GuiElement.rgbColorTag(color)
+      table.insert(tooltip, {"", "\n", string.format("[%s=%s]", "quality", element.quality), " ", helmod_tag.font.default_bold, color_tag, localised_name, helmod_tag.color.close, helmod_tag.font.close})
+    end
+  end
+end
+
+-------------------------------------------------------------------------------
+---Add logistic information
+---@param tooltip table
+---@param element table
 function GuiTooltip:appendLogistic(tooltip, element)
   if self.m_with_logistic == true then
     local tooltip_section = {""}
@@ -414,6 +430,9 @@ function GuiTooltipElement:create()
     if type == "boiler" then type = "fluid" end
     local element_icon = GuiElement.getSprite(type, element.name, "[%s=%s]")
     table.insert(tooltip, {"", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({type=type, name=element.name}), helmod_tag.font.close, helmod_tag.color.close})
+    
+    GuiTooltip.appendQuality(tooltip, element)
+    
     ---quantity
     local total_count = Format.formatNumberElement(element.count)
     if self.m_by_limit then
@@ -496,6 +515,9 @@ function GuiTooltipFactory.AppendFactory(tooltip, element)
   local prototype = EntityPrototype(element)
   local element_sprite = GuiElement.getSprite(type, element.name, "[%s=%s]")
   table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, prototype:getLocalisedName(), helmod_tag.font.close, helmod_tag.color.close})
+  -- [item=assembling-machine-3,quality=epic]
+  GuiTooltip.appendQuality(tooltip, element)
+
   if element.combo then
       table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", helmod_tag.color.gold, {"helmod_label.beacon-on-factory"}, ": ", helmod_tag.color.close, helmod_tag.font.default_bold, element.combo, helmod_tag.font.close})
   end
@@ -515,8 +537,9 @@ function GuiTooltipFactory.AppendFactory(tooltip, element)
   end
   if element.module_priority then
       for _, module_priority in pairs(element.module_priority) do
-      local module_prototype = ItemPrototype(module_priority.name)
-      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", string.format("[%s=%s]", "item", module_priority.name), " ", helmod_tag.font.default_bold, module_priority.value, " x ", helmod_tag.font.close, " ", helmod_tag.color.gold, module_prototype:getLocalisedName(), helmod_tag.color.close})
+        local module_prototype = ItemPrototype(module_priority.name)
+        local amount = module_priority.amount or 0
+        table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", string.format("[%s=%s]", "item", module_priority.name), " ", helmod_tag.font.default_bold, amount, " x ", helmod_tag.font.close, " ", helmod_tag.color.gold, module_prototype:getLocalisedName(), helmod_tag.color.close})
       end
   end
 end
@@ -705,11 +728,15 @@ function GuiTooltipModule:create()
     if module ~= nil then
       local element_sprite = GuiElement.getSprite(self.m_element.type, self.m_element.name, "[%s=%s]")
       table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, module_prototype:getLocalisedName(), helmod_tag.font.close, helmod_tag.color.close})
-      local bonus_consumption = Player.getModuleBonus(module.name, "consumption")
-      local bonus_speed = Player.getModuleBonus(module.name, "speed")
-      local bonus_productivity = Player.getModuleBonus(module.name, "productivity")
-      local bonus_pollution = Player.getModuleBonus(module.name, "pollution")
-      local bonus_quality = Player.getModuleBonus(module.name, "quality")
+      
+      GuiTooltip.appendQuality(tooltip, self.m_element)
+    
+      local module_effects = Player.getModuleEffects(self.m_element)
+      local bonus_consumption = module_effects.consumption
+      local bonus_speed = module_effects.speed
+      local bonus_productivity = module_effects.productivity
+      local bonus_pollution = module_effects.pollution
+      local bonus_quality = module_effects.quality
 
       local bonus_consumption_positive = "+"
       if bonus_consumption <= 0 then bonus_consumption_positive = "" end
@@ -760,7 +787,8 @@ function GuiTooltipPriority:create()
     for i,priority in pairs(self.m_element) do
       local module_prototype = ItemPrototype(priority.name)
       local element_sprite = GuiElement.getSprite("item", priority.name, "[%s=%s]")
-      table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.font.default_bold, priority.value, " x ", helmod_tag.font.close, helmod_tag.color.gold, module_prototype:getLocalisedName(), helmod_tag.color.close})
+      local amount = priority.amount or 0
+      table.insert(tooltip, {"", "\n", element_sprite, " ", helmod_tag.font.default_bold, amount, " x ", helmod_tag.font.close, helmod_tag.color.gold, module_prototype:getLocalisedName(), helmod_tag.color.close})
     end
   end
   return tooltip
@@ -794,7 +822,8 @@ function GuiTooltipPriorities.AppendPriority(tooltip, element)
   if element.module_priority then
       for _, module_priority in pairs(element.module_priority) do
       local module_prototype = ItemPrototype(module_priority.name)
-      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", string.format("[%s=%s]", "item", module_priority.name), " ", helmod_tag.font.default_bold, module_priority.value, " x ", helmod_tag.font.close, " ", helmod_tag.color.gold, module_prototype:getLocalisedName(), helmod_tag.color.close})
+      local amount = module_priority.amount or 0
+      table.insert(tooltip, {"", "\n", "[img=helmod-tooltip-blank]", " ", string.format("[%s=%s]", "item", module_priority.name), " ", helmod_tag.font.default_bold, amount, " x ", helmod_tag.font.close, " ", helmod_tag.color.gold, module_prototype:getLocalisedName(), helmod_tag.color.close})
       end
   end
 end

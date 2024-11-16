@@ -144,16 +144,18 @@ end
 ---@param block BlockData
 function ModelCompute.createSummaryFactory(block, factory)
     ---summary factory
-    local summary_factory = block.summary.factories[factory.name]
+    local factory_key = Model.getQualityElementKey(factory)
+    local summary_factory = block.summary.factories[factory_key]
     if summary_factory == nil then
         summary_factory = {
             name = factory.name,
+            quality = factory.quality,
             type = factory.type or "entity",
             count = 0,
             count_limit = 0,
             count_deep = 0
         }
-        block.summary.factories[factory.name] = summary_factory
+        block.summary.factories[factory_key] = summary_factory
     end
     
     local factory_ceil = math.ceil(factory.count)
@@ -167,19 +169,21 @@ function ModelCompute.createSummaryFactory(block, factory)
     block.summary.building_deep = block.summary.building * block.count_deep
     ---summary factory module
     if factory.modules ~= nil then
-        for module, value in pairs(factory.modules) do
-            local summary_module = block.summary.modules[module]
+        for _, module in pairs(factory.modules) do
+            local module_key = Model.getQualityElementKey(module)
+            local summary_module = block.summary.modules[module_key]
             if summary_module == nil then
                 summary_module = {
-                    name = module,
+                    name = module.name,
+                    quality = module.quality,
                     type = "item",
                     count = 0,
                     count_limit = 0,
                     count_deep = 0
                 }
-                block.summary.modules[module] = summary_module
+                block.summary.modules[module_key] = summary_module
             end
-            summary_module.count = summary_module.count + value * factory_ceil
+            summary_module.count = summary_module.count + module.amount * factory_ceil
             summary_module.count_limit = summary_module.count
             summary_module.count_limit = summary_module.count * block.count_deep
         end
@@ -613,17 +617,14 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
     factory.effects.productivity = factory.effects.productivity + base_productivity
     ---effet module factory
     if factory.modules ~= nil then
-        for module, value in pairs(factory.modules) do
-            local speed_bonus = Player.getModuleBonus(module, "speed")
-            local productivity_bonus = Player.getModuleBonus(module, "productivity")
-            local consumption_bonus = Player.getModuleBonus(module, "consumption")
-            local pollution_bonus = Player.getModuleBonus(module, "pollution")
-            local quality_bonus = Player.getModuleBonus(module, "quality")
-            factory.effects.speed = factory.effects.speed + value * speed_bonus
-            factory.effects.productivity = factory.effects.productivity + value * productivity_bonus
-            factory.effects.consumption = factory.effects.consumption + value * consumption_bonus
-            factory.effects.pollution = factory.effects.pollution + value * pollution_bonus
-            factory.effects.quality = factory.effects.quality + value * quality_bonus
+        for _, module in pairs(factory.modules) do
+            local module_effects = Player.getModuleEffects(module)
+            local amount = module.amount
+            factory.effects.speed = factory.effects.speed + amount * module_effects.speed
+            factory.effects.productivity = factory.effects.productivity + amount * module_effects.productivity
+            factory.effects.consumption = factory.effects.consumption + amount * module_effects.consumption
+            factory.effects.pollution = factory.effects.pollution + amount * module_effects.pollution
+            factory.effects.quality = factory.effects.quality + amount * module_effects.quality
         end
     end
     ---effet module beacon
@@ -636,20 +637,18 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
         end
         for _, beacon in pairs(recipe.beacons) do
             if beacon.modules ~= nil then
-                for module, value in pairs(beacon.modules) do
+                for _, module in pairs(beacon.modules) do
+                    local module_effects = Player.getModuleEffects(module)
+                    local amount = module.amount
                     local prototype_beacon = EntityPrototype(beacon);
-                    local speed_bonus = Player.getModuleBonus(module, "speed")
-                    local productivity_bonus = Player.getModuleBonus(module, "productivity")
-                    local consumption_bonus = Player.getModuleBonus(module, "consumption")
-                    local pollution_bonus = Player.getModuleBonus(module, "pollution")
-                    local quality_bonus = Player.getModuleBonus(module, "quality")
                     local distribution_effectivity = prototype_beacon:getDistributionEffectivity()
                     local profile_effectivity = prototype_beacon:getProfileEffectivity(profile_count)
-                    factory.effects.speed = factory.effects.speed + value * speed_bonus * distribution_effectivity * profile_effectivity * beacon.combo
-                    factory.effects.productivity = factory.effects.productivity + value * productivity_bonus * distribution_effectivity * profile_effectivity * beacon.combo
-                    factory.effects.consumption = factory.effects.consumption + value * consumption_bonus * distribution_effectivity * profile_effectivity * beacon.combo
-                    factory.effects.pollution = factory.effects.pollution + value * pollution_bonus * distribution_effectivity * profile_effectivity * beacon.combo
-                    factory.effects.quality = factory.effects.quality + value * quality_bonus * distribution_effectivity * profile_effectivity * beacon.combo
+
+                    factory.effects.speed = factory.effects.speed + amount * module_effects.speed * distribution_effectivity * profile_effectivity * beacon.combo
+                    factory.effects.productivity = factory.effects.productivity + amount * module_effects.productivity * distribution_effectivity * profile_effectivity * beacon.combo
+                    factory.effects.consumption = factory.effects.consumption + amount * module_effects.consumption * distribution_effectivity * profile_effectivity * beacon.combo
+                    factory.effects.pollution = factory.effects.pollution + amount * module_effects.pollution * distribution_effectivity * profile_effectivity * beacon.combo
+                    factory.effects.quality = factory.effects.quality + amount * module_effects.quality * distribution_effectivity * profile_effectivity * beacon.combo
                 end
             end
         end

@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------
----@class Prototype
+---@class Prototype : Object
 Prototype = newclass(function(base, lua_prototype)
   base.lua_prototype = lua_prototype
 end)
