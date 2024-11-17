@@ -231,15 +231,9 @@ defines.constant.logistic_flow = {
   {pipe=1000, flow=230}
 }
 
-defines.constant.beacon_combo = 4
-defines.constant.beacon_factory = 0.5
-defines.constant.beacon_constant = 3
-
-if script ~= nil and script.active_mods["space-exploration"] then
-  defines.constant.beacon_combo = 1
-  defines.constant.beacon_factory = 0.25
-  defines.constant.beacon_constant = 0
-end
+defines.constant.beacon_combo = 1
+defines.constant.beacon_factory = 1/8
+defines.constant.beacon_constant = 0
 
 defines.constant.preferences = {
   -- factory level

@@ -18,16 +18,26 @@ end
 
 -------------------------------------------------------------------------------
 ---Repport error
+function Player.getStorageDebug()
+    if storage.debug == nil then
+        storage.debug = {}
+    end
+    return storage.debug
+end
+-------------------------------------------------------------------------------
+---Repport error
 function Player.repportError(...)
     Player.print(...)
     log(...)
-    storage[Lua_player.index] = ...
+    local storage_debug = Player.getStorageDebug()
+    storage_debug[Lua_player.index] = ...
 end
 
 -------------------------------------------------------------------------------
 ---Get last error
 function Player.getLastError()
-    return storage[Lua_player.index]
+    local storage_debug = Player.getStorageDebug()
+    return storage_debug[Lua_player.index]
 end
 
 -------------------------------------------------------------------------------
@@ -65,9 +75,6 @@ function Player.set(player)
     return Player
 end
 
-function Player.hasFeatureQuality()
-    return script.feature_flags["quality"]
-end
 -------------------------------------------------------------------------------
 ---Get game day
 ---@return number, number, number, number
@@ -1029,19 +1036,34 @@ function Player.getOffshorePumps()
 end
 
 -------------------------------------------------------------------------------
----Return module bonus (default return: bonus = 0 )
----@param module string
----@param effect string
----@return number
-function Player.getModuleBonus(module, effect)
-    if module == nil then return 0 end
-    local bonus = 0
-    ---search module
-    local module = Player.getItemPrototype(module)
-    if module ~= nil and module.module_effects ~= nil and module.module_effects[effect] ~= nil then
-        bonus = module.module_effects[effect]
+---Return module effects
+---@param module ModuleData
+---@return ModuleEffectsData
+function Player.getModuleEffects(module)
+    local module_effects = { speed = 0, productivity = 0, consumption = 0, pollution = 0, quality = 0 }
+    if module == nil then return module_effects end
+    local multiplier = 1
+    -- search quality
+    local quality = Player.getQualityPrototype(module.quality)
+    if quality ~= nil then
+        multiplier = multiplier + (quality.level * 0.3)
     end
-    return bonus
+    -- search module
+    local module = Player.getItemPrototype(module.name)
+    for effect_name, effect_value in pairs(module.module_effects) do
+        if Player.checkPositiveEffect(effect_name, effect_value) then
+            -- quality has positive effect
+            module_effects[effect_name] = effect_value * multiplier
+        else
+            -- quality has no effect
+            module_effects[effect_name] = effect_value
+        end
+        if effect_name == "quality" then
+            -- fix quality value, in game is 10x
+            module_effects[effect_name] = module_effects[effect_name] / 10
+        end
+    end
+    return module_effects
 end
 
 -------------------------------------------------------------------------------
@@ -1919,6 +1941,26 @@ function Player.getFluidTemperaturePrototypes(fluid)
     end
 
     return items
+end
+
+function Player.hasFeatureQuality()
+    return script.feature_flags["quality"]
+end
+
+-------------------------------------------------------------------------------
+---Return quality prototypes
+---@return LuaQualityPrototype
+function Player.getQualityPrototypes()
+    return prototypes.quality
+end
+
+-------------------------------------------------------------------------------
+---Return quality prototype
+---@param name string
+---@return LuaQualityPrototype
+function Player.getQualityPrototype(name)
+    if name == nil then return nil end
+    return prototypes.quality[name]
 end
 
 return Player

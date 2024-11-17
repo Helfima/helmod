@@ -1,5 +1,6 @@
 -------------------------------------------------------------------------------
 ---Class to help to build form
+---@class Form : Object
 Form = newclass(Object,function(base,classname)
   Object.init(base,classname)
   base:style()

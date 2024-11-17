@@ -4,7 +4,7 @@
 local Model = {
   ---single-line comment
   classname = "HMModel",
-  version = 1,
+  version = 2,
   beacon_combo = 4,
   beacon_factory = 0.5,
   beacon_factory_constant = 3
@@ -382,13 +382,34 @@ end
 function Model.countModulesModel(element)
   local count = 0
   if element ~= nil and element.modules ~= nil then
-    for _, value in pairs(element.modules) do
-      count = count + value
+    for _, module in pairs(element.modules) do
+      count = count + module.amount
     end
   end
   return count
 end
 
+-------------------------------------------------------------------------------
+---Return quality element key
+---@param element table
+---@return string
+function Model.getQualityElementKey(element)
+  return string.format("%s-%s", element.name, element.quality)
+end
+
+-------------------------------------------------------------------------------
+---Compare modules
+---@param module1 ModuleData
+---@param module2 ModuleData
+---@param with_amount? boolean
+---@return boolean
+function Model.compareModules(module1, module2, with_amount)
+  if with_amount == true then
+    return module1.name == module2.name and module1.quality == module2.quality and module1.amount == module2.amount
+  else
+    return module1.name == module2.name and module1.quality == module2.quality
+  end
+end
 -------------------------------------------------------------------------------
 ---Create model Recipe
 ---@param model ModelData
@@ -448,15 +469,17 @@ end
 ---Set the beacon
 ---@param recipe RecipeData
 ---@param name string
+---@param quality string
 ---@param combo number
 ---@param per_factory number
 ---@param per_factory_constant number
 ---@return BeaconData
-function Model.addBeacon(recipe, name, combo, per_factory, per_factory_constant)
+function Model.addBeacon(recipe, name, quality, combo, per_factory, per_factory_constant)
   if recipe ~= nil then
     local beacon_prototype = EntityPrototype(name)
     if beacon_prototype:native() ~= nil then
       local beacon = Model.newBeacon(name, 0)
+      beacon.quality = quality
       beacon.combo = combo or User.getPreferenceSetting("beacon_affecting_one")
       beacon.per_factory = per_factory or User.getPreferenceSetting("beacon_by_factory")
       beacon.per_factory_constant = per_factory_constant or User.getPreferenceSetting("beacon_constant")
@@ -498,9 +521,13 @@ end
 ---Set a factory
 ---@param recipe RecipeData
 ---@param factory_name string
----@param factory_fuel string | FuelData
-function Model.setFactory(recipe, factory_name, factory_fuel)
+---@param factory_quality? string
+---@param factory_fuel? string | FuelData
+function Model.setFactory(recipe, factory_name, factory_quality, factory_fuel)
   if recipe ~= nil then
+    if factory_quality == "" then
+      factory_quality = nil
+    end
     local factory_prototype = EntityPrototype(factory_name)
     if factory_prototype:native() ~= nil then
       if recipe.factory == nil then
@@ -511,6 +538,7 @@ function Model.setFactory(recipe, factory_name, factory_fuel)
         end
       end
       recipe.factory.name = factory_name
+      recipe.factory.quality = factory_quality
       recipe.factory.fuel = factory_fuel
       if Model.countModulesModel(recipe.factory) >= factory_prototype:getModuleInventorySize() then
         recipe.factory.modules = {}
