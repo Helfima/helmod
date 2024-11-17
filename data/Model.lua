@@ -4,7 +4,7 @@
 local Model = {
   ---single-line comment
   classname = "HMModel",
-  version = 1,
+  version = 2,
   beacon_combo = 4,
   beacon_factory = 0.5,
   beacon_factory_constant = 3

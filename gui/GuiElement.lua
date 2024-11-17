@@ -99,8 +99,8 @@ end
 -------------------------------------------------------------------------------
 ---Get sprite string
 ---@param type string
----@param name string
----@param format string?
+---@param name? string
+---@param format? string
 ---@return string
 function GuiElement.getSprite(type, name, format)
   local sprite = ""
@@ -137,6 +137,25 @@ function GuiElement.getSprite(type, name, format)
   return sprite
 end
 
+-------------------------------------------------------------------------------
+---Get sprite string
+---@param type string
+---@param name string
+---@param quality string?
+---@return string
+function GuiElement.getSpriteWithQuality(type, name, quality)
+  local sprite = ""
+  if type == "resource" then type = "entity" end
+  if type == "rocket" then type = "item" end
+  if Player.is_valid_sprite_path(string.format("%s/%s", type, name)) then
+    if quality == nil then
+      sprite = string.format("[%s=%s]", type, name)
+    else
+      sprite = string.format("[%s=%s,quality=%s]", type, name, quality)
+    end
+  end
+  return sprite
+end
 -------------------------------------------------------------------------------
 ---Get options
 ---@return table
