@@ -51,11 +51,15 @@ function BugReportPanel:updateInfo(event)
     info_panel.clear()
 
     local last_error = Player.getLastError()
-    if last_error ~= nil then
         local repport = {}
-        table.insert(repport,"```")
-        table.insert(repport,"---- Error ----")
-        table.insert(repport,last_error)
+
+        if last_error ~= nil then
+            table.insert(repport,"```")
+            table.insert(repport,"---- Error ----")
+            table.insert(repport,last_error)
+        else
+            GuiElement.add(info_panel, GuiLabel("no_error"):caption({"helmod_bug-repport-panel.no_error"}))
+        end
         
         table.insert(repport,"---- Feature Flags ----")
         for feature_flag, value in pairs(script.feature_flags) do
@@ -70,9 +74,6 @@ function BugReportPanel:updateInfo(event)
     
         local message = table.concat(repport,"\n")
         local textbox = GuiElement.add(info_panel, GuiTextBox("bug_repport"):text(message))
-    else
-        GuiElement.add(info_panel, GuiLabel("no_error"):caption({"helmod_bug-repport-panel.no_error"}))
-    end
 end
 
 -------------------------------------------------------------------------------

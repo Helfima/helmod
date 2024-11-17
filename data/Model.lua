@@ -391,6 +391,17 @@ end
 
 -------------------------------------------------------------------------------
 ---Return quality element key
+---@param model ModelData
+---@return ModelInfosData
+function Model.getModelInfos(model)
+  if model.infos == nil then
+    model.infos = {}
+  end
+  return model.infos
+end
+
+-------------------------------------------------------------------------------
+---Return quality element key
 ---@param element table
 ---@return string
 function Model.getQualityElementKey(element)

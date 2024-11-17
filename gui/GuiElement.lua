@@ -156,6 +156,30 @@ function GuiElement.getSpriteWithQuality(type, name, quality)
   end
   return sprite
 end
+
+-------------------------------------------------------------------------------
+---Set caption
+---@param element LuaGuiElement
+---@return table
+function GuiElement.getElementTags(element)
+  if element ~= nil then
+    return element.tags or {}
+  end
+  return {}
+end
+
+-------------------------------------------------------------------------------
+---Set caption
+---@param element LuaGuiElement
+---@return string | nil
+function GuiElement.getElementQuality(element)
+  local tags = GuiElement.getElementTags(element)
+  if tags ~= nil then
+    return tags.quality
+  end
+  return nil
+end
+
 -------------------------------------------------------------------------------
 ---Get options
 ---@return table
@@ -217,7 +241,9 @@ function GuiElement.addPostAction(parent, gui_element)
       GuiElement.maskQuality(parent, action.quality, action.size)
     end
     if action_name == "apply_elem_value" then
+      if action ~= nil and action.name ~= nil then
         parent.elem_value = action
+      end
     end
   end
 end
@@ -360,8 +386,11 @@ end
 ---@param quality string
 ---@return LuaGuiElement
 function GuiElement.addQualitySelector(parent, quality, ...)
-  local quality_options = GuiElement.add(parent, GuiFlowH())
-  quality_options.style.horizontal_spacing = 2
+  local scroll_panel = GuiElement.add(parent, GuiScroll("quality-scroll"):policy(true))
+  scroll_panel.style.maximal_height = 64
+  scroll_panel.style.bottom_margin = 5
+  local quality_options = GuiElement.add(scroll_panel, GuiTable("quality-table"):column(6))
+  quality_options.style.cell_padding = 1
   local qualities = Player.getQualityPrototypes();
   for _, lua_quality in pairs(qualities) do
       if lua_quality.hidden == false then

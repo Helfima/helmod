@@ -750,9 +750,15 @@ function GuiCellModel:create(parent)
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
 
+  local tooltip = GuiTooltipModel(self.options.tooltip):element(element)
+  local model_infos = Model.getModelInfos(element)
+
   local first_block = element.block_root or Model.firstChild(element.blocks or {})
-  if first_block ~= nil and first_block.name ~= "" then
-    local tooltip = GuiTooltipModel(self.options.tooltip):element(element)
+  if false and model_infos.primary_icon ~= nil then
+    local primary_icon = model_infos.primary_icon
+    local button = GuiElement.add(row1, GuiButtonSelectSprite(unpack(self.name)):choose(primary_icon.type, primary_icon.name):tooltip(tooltip):style(defines.styles.button.menu_flat))
+    button.locked = true
+  elseif first_block ~= nil and first_block.name ~= "" then
     local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_block.type, first_block.name):tooltip(tooltip))
   else
     local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black))

@@ -552,6 +552,9 @@ function GuiTooltipModel:create()
 		local element_label = Player.getLocalisedName({ type = type, name = first_block.name })
 		GuiTooltip.appendLineTitle(tooltip, type, first_block.name, element_label)
 		
+		local model_infos = Model.getModelInfos(element)
+
+		GuiTooltip.appendLine(tooltip, nil, { "helmod_panel.model-title" }, model_infos.title or "")
 		GuiTooltip.appendLine(tooltip, nil, { "helmod_result-panel.col-header-owner" }, element.owner)
 		GuiTooltip.appendLine(tooltip, nil, { "helmod_common.group" }, element.group or "")
 		

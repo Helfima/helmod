@@ -270,7 +270,8 @@ function RecipeEdition:onEvent(event)
         end
 
         if event.action == "factory-select" then
-            Model.setFactory(recipe, event.item4, event.item5)
+            local element_quality = GuiElement.getElementQuality(event.element)
+            Model.setFactory(recipe, event.item4, element_quality)
             ModelBuilder.applyFactoryModulePriority(recipe)
             ModelCompute.update(model)
             self:update(event)
@@ -366,14 +367,16 @@ function RecipeEdition:onEvent(event)
         end
 
         if event.action == "factory-module-select" then
-            ModelBuilder.addFactoryModule(recipe, event.item4, event.item5, event.control)
+            local element_quality = GuiElement.getElementQuality(event.element)
+            ModelBuilder.addFactoryModule(recipe, event.item4, element_quality, event.control)
             ModelCompute.update(model)
             self:update(event)
             Controller:send("on_gui_recipe_update", event)
         end
 
         if event.action == "factory-module-remove" then
-            ModelBuilder.removeFactoryModule(recipe, event.item4, event.item5, event.control)
+            local element_quality = GuiElement.getElementQuality(event.element)
+            ModelBuilder.removeFactoryModule(recipe, event.item4, element_quality, event.control)
             ModelCompute.update(model)
             self:update(event)
             Controller:send("on_gui_recipe_update", event)
@@ -466,7 +469,8 @@ function RecipeEdition:onEvent(event)
 
         if event.action == "beacon-module-select" then
             local beacon = ModelBuilder.getCurrentBeacon(recipe)
-            ModelBuilder.addBeaconModule(beacon, recipe, event.item4, event.item5, event.control)
+            local element_quality = GuiElement.getElementQuality(event.element)
+            ModelBuilder.addBeaconModule(beacon, recipe, event.item4, element_quality, event.control)
             ModelCompute.update(model)
             self:update(event)
             Controller:send("on_gui_recipe_update", event)
@@ -474,7 +478,8 @@ function RecipeEdition:onEvent(event)
 
         if event.action == "beacon-module-remove" then
             local beacon = ModelBuilder.getCurrentBeacon(recipe)
-            ModelBuilder.removeBeaconModule(beacon, recipe, event.item4, event.item5, event.control)
+            local element_quality = GuiElement.getElementQuality(event.element)
+            ModelBuilder.removeBeaconModule(beacon, recipe, event.item4, element_quality, event.control)
             ModelCompute.update(model)
             self:update(event)
             Controller:send("on_gui_recipe_update", event)
@@ -717,6 +722,7 @@ function RecipeEdition:updateFactoryInfo(event)
 
         ---factory selection
         local scroll_panel = GuiElement.add(detail_panel, GuiScroll("factory-scroll"):policy(true))
+        scroll_panel.style.minimal_height = 40
         scroll_panel.style.maximal_height = 118
         local recipe_prototype = RecipePrototype(recipe)
         local category = recipe_prototype:getCategory()
@@ -845,6 +851,16 @@ function RecipeEdition:updateFactoryInfo(event)
         GuiElement.add(cell_productivity, GuiLabel("label-productivity"):caption({ "helmod_label.productivity" }))
         self:addAlert(cell_productivity, factory, "productivity")
         GuiElement.add(input_panel, GuiLabel("productivity"):caption(sign .. Format.formatPercent(factory.effects.productivity) .. "%"))
+
+        if Player.hasFeatureQuality() then
+            ---quality
+            local sign = ""
+            if factory.effects.quality > 0 then sign = "+" end
+            local cell_productivity = GuiElement.add(input_panel, GuiFlowH("label-quality"))
+            GuiElement.add(cell_productivity, GuiLabel("label-quality"):caption({ "helmod_label.quality" }))
+            self:addAlert(cell_productivity, factory, "quality")
+            GuiElement.add(input_panel, GuiLabel("quality"):caption(sign .. Format.formatPercent(factory.effects.quality) .. "%"))
+        end
 
         ---pollution
         local cell_pollution = GuiElement.add(input_panel, GuiFlowH("label-pollution"))
@@ -1047,6 +1063,7 @@ function RecipeEdition:updateBeaconInfo(event)
 
         ---beacon selection
         local scroll_panel = GuiElement.add(detail_panel, GuiScroll("beacon-scroll"):policy(true))
+        scroll_panel.style.minimal_height = 40
         scroll_panel.style.maximal_height = 118
         local factories = Player.getProductionsBeacon()
 

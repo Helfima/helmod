@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.8
+Date: 2024-11-17
+  Changes:
+    - Changed bug report, we can copy the game settings when no error
+    - Added scroll for quality selector
+    - Added quality information for machine in Edit Recipe panel
+  Bugfixes:
+    - Fix some UI panel broken with the addition of quality
+---------------------------------------------------------------------------------------------------
 Version: 2.0.7
 Date: 2024-11-17
   Features:

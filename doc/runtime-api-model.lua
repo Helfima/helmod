@@ -11,9 +11,14 @@
 ---@field control boolean
 ---@field shift boolean
 
----@class ModuleData
----@field name string
+---@class ElementData
 ---@field type string
+---@field name string
+---@field quality string
+
+---@class ModuleData
+---@field type string
+---@field name string
 ---@field quality string
 ---@field amount number
 
@@ -140,11 +145,17 @@
 ---@field summary any
 ---@field consumer boolean
 
+---@class ModelInfosData
+---@field title string
+---@field primary_icon ElementData
+---@field secondary_icon ElementData
+
 ---@class ModelData
 ---@field id string
 ---@field index_id number
 ---@field time number
 ---@field version number
+---@field infos ModelInfosData
 ---@field owner string
 ---@field block_id number
 ---@field recipe_id number
