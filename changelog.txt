@@ -8,6 +8,7 @@ Date: 2024-11-17
     - Changed all tooltips to implement quality
     - Changed default Amount affect one = 1, Beacon by factory = 1/8 and Constant beacon = 0 (new game)
     - Model version modified at 2, migration to implement quality in the modules
+    - Updated RU locale
   Bugfixes:
     - Fix error on accumulator recipe
     - Fix Downloading a Production Line with spoiling recipe attempts to index a null factory
