@@ -525,6 +525,9 @@ end
 ---@param factory_fuel? string | FuelData
 function Model.setFactory(recipe, factory_name, factory_quality, factory_fuel)
   if recipe ~= nil then
+    if factory_quality == "" then
+      factory_quality = nil
+    end
     local factory_prototype = EntityPrototype(factory_name)
     if factory_prototype:native() ~= nil then
       if recipe.factory == nil then

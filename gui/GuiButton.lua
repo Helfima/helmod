@@ -118,9 +118,11 @@ end
 function GuiButton:choose_with_quality(element_type, element_name, element_quality)
     self.options.type = "choose-elem-button"
     self.options.elem_type = string.format("%s-with-quality", element_type)
-    self.options.elem_value = { name = element_name, quality = element_quality }
-    self.apply_elem_value = true
+    self.post_action["apply_elem_value"] = { name = element_name, quality = element_quality }
     table.insert(self.name, element_name)
+    if element_quality ~= nil then
+        table.insert(self.name, element_quality)
+    end
     return self
 end
 

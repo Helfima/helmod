@@ -682,7 +682,9 @@ function ModelBuilder.copyBlock(into_model, into_block, from_block)
                     local recipe_model = Model.newRecipe(into_model, recipe.name, recipe_prototype:getType())
                     recipe_model.index = child_index
                     recipe_model.production = recipe.production or 1
-                    recipe_model.factory = ModelBuilder.copyFactory(recipe.factory)
+                    if recipe.factory ~= nil then
+                        recipe_model.factory = ModelBuilder.copyFactory(recipe.factory)
+                    end
                     if recipe.beacons ~= nil then
                         recipe_model.beacons = {}
                         for _, beacon in pairs(recipe.beacons) do
@@ -705,6 +707,8 @@ function ModelBuilder.copyBlock(into_model, into_block, from_block)
             into_block.by_factory = from_block.by_factory
             into_block.by_product = from_block.by_product
             into_block.by_limit = from_block.by_limit
+            into_block.solver = from_block.solver
+            into_block.consumer = from_block.consumer
             if from_block.products ~= nil then
                 into_block.products = table.deepcopy(from_block.products)
             end

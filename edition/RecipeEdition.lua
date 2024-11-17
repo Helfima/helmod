@@ -270,7 +270,7 @@ function RecipeEdition:onEvent(event)
         end
 
         if event.action == "factory-select" then
-            Model.setFactory(recipe, event.item4)
+            Model.setFactory(recipe, event.item4, event.item5)
             ModelBuilder.applyFactoryModulePriority(recipe)
             ModelCompute.update(model)
             self:update(event)

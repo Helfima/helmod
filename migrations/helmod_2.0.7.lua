@@ -1,8 +1,10 @@
-function migration_priority(priority_module)
-    if priority_module == nil then return end
-    for _, module in pairs(priority_module) do
-        module.amount = module.value
-        module.value = nil
+function migration_priority(module_priority)
+    if module_priority == nil then return end
+    for _, module in pairs(module_priority) do
+        if module.amount == nil then 
+            module.amount = module.value
+            module.value = nil
+        end
     end
 end
 
@@ -29,8 +31,8 @@ function migration_factory(factory)
         local new_modules = migration_modules(factory.modules)
         factory.modules = new_modules
     end
-    if factory.priority_module then
-        migration_priority(factory.priority_module)
+    if factory.module_priority then
+        migration_priority(factory.module_priority)
     end
 end
 

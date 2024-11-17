@@ -191,9 +191,6 @@ function GuiElement.add(parent, gui_element)
     if gui_element.classname ~= "HMGuiCell" then
       local options = gui_element:getOptions()
       element = parent.add(options)
-      if gui_element.apply_elem_value then
-        element.elem_value = options.elem_value
-      end
       GuiElement.addPostAction(element, gui_element)
     else
       element = gui_element:create(parent)
@@ -218,6 +215,9 @@ function GuiElement.addPostAction(parent, gui_element)
   for action_name, action in pairs(gui_element.post_action) do
     if action_name == "mask_quality" then
       GuiElement.maskQuality(parent, action.quality, action.size)
+    end
+    if action_name == "apply_elem_value" then
+        parent.elem_value = action
     end
   end
 end
