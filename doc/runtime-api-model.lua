@@ -11,6 +11,12 @@
 ---@field control boolean
 ---@field shift boolean
 
+---@class ModuleData
+---@field name string
+---@field type string
+---@field quality string
+---@field amount number
+
 ---@class ModulePriorityData
 ---@field name string
 ---@field value uint
@@ -28,6 +34,7 @@
 ---@field productivity number
 ---@field consumption number
 ---@field pollution number
+---@field quality number
 
 ---@class FactoryData
 ---@field class string
@@ -41,14 +48,13 @@
 ---@field speed number
 ---@field fuel string | FuelData
 ---@field limit number
----Dictionnary {[module.name] : int}
----@field modules {[string] : uint}
+---@field modules {[uint] : ModuleData}
 ---@field effects ModuleEffectsData
 ---@field cap ModuleEffects
 ---@field energy_total number
 ---@field polution_total number
 ---@field speed_total number
----@field module_priority {[uint] : ModulePriorityData}
+---@field module_priorities {[uint] : ModuleData}
 
 ---@class BeaconData : FactoryData
 ---@field combo number

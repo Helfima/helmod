@@ -61,6 +61,7 @@ function ParametersEdition:updateEffects(event)
 
     GuiElement.add(block_table, GuiLabel("label-pollution"):caption({ "description.pollution-bonus" }))
     GuiElement.add(block_table, GuiTextField(self.classname, "change-effect", "pollution"):text(Format.formatNumberElement((effects.pollution or 1)*100)):style("helmod_textfield"))
+
 end
 
 -------------------------------------------------------------------------------

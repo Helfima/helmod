@@ -18,16 +18,26 @@ end
 
 -------------------------------------------------------------------------------
 ---Repport error
+function Player.getStorageDebug()
+    if storage.debug == nil then
+        storage.debug = {}
+    end
+    return storage.debug
+end
+-------------------------------------------------------------------------------
+---Repport error
 function Player.repportError(...)
     Player.print(...)
     log(...)
-    storage[Lua_player.index] = ...
+    local storage_debug = Player.getStorageDebug()
+    storage_debug[Lua_player.index] = ...
 end
 
 -------------------------------------------------------------------------------
 ---Get last error
 function Player.getLastError()
-    return storage[Lua_player.index]
+    local storage_debug = Player.getStorageDebug()
+    return storage_debug[Lua_player.index]
 end
 
 -------------------------------------------------------------------------------
@@ -65,9 +75,6 @@ function Player.set(player)
     return Player
 end
 
-function Player.hasFeatureQuality()
-    return script.feature_flags["quality"]
-end
 -------------------------------------------------------------------------------
 ---Get game day
 ---@return number, number, number, number
@@ -161,19 +168,40 @@ function Player.setSmartTool(recipe, type, index)
     if Lua_player == nil or recipe == nil then
         return nil
     end
-    local factory = recipe[type]
+    local inventory_indexes = {}
+    inventory_indexes["beacon"] = defines.inventory.beacon_modules
+    inventory_indexes["rocket-silo"] = defines.inventory.rocket_silo_modules
+    inventory_indexes["mining-drill"] = defines.inventory.mining_drill_modules
+    inventory_indexes["lab"] = defines.inventory.lab_modules
+    inventory_indexes["assembling-machine"] = defines.inventory.assembling_machine_modules
+    inventory_indexes["furnace"] = defines.inventory.furnace_modules
+    local machine = nil
     if index ~= nil then
-        factory = factory[index]
+        machine = recipe[type][index]
+    else
+        machine = recipe[type]
     end
+    local prototype = EntityPrototype(machine)
+    local prototype_type = prototype:getType()
+    local inventory_index = inventory_indexes[prototype_type] or 0
     local modules = {}
-    for name, value in pairs(factory.modules or {}) do
-        modules[name] = value
+    local stack_index = 0
+    for name, value in pairs(machine.modules or {}) do
+        if modules[name] == nil then modules[name] = {id={name=name,quality=nil},items={in_inventory={}}} end
+        for i = 1, value, 1 do
+            table.insert(modules[name].items.in_inventory,{inventory=inventory_index, stack=stack_index})
+            stack_index = stack_index + 1
+        end
+    end
+    local items = {}
+    for _, value in pairs(modules) do
+        table.insert(items,value)
     end
     local entity = {
         entity_number = 1,
-        name = factory.name,
+        name = machine.name,
         position = { 0, 0 },
-        items = modules
+        items = items
     }
     if type == "factory" then
         entity.recipe = recipe.name
@@ -403,6 +431,16 @@ function Player.getRecipes()
 end
 
 -------------------------------------------------------------------------------
+---Return recipe productivity
+---@return number
+function Player.getRecipeProductivityBonus(recipe_name)
+    local force = Player.getForce()
+    local recipe_force = force.recipes[recipe_name]
+    if recipe_force == nil then return 0 end
+    return recipe_force.productivity_bonus or 0
+end
+
+-------------------------------------------------------------------------------
 ---Return technologie prototypes
 ---@param filters table
 ---@return table
@@ -550,6 +588,63 @@ function Player.checkFactoryLimitationModule(module, lua_recipe)
     return true
 end
 
+-------------------------------------------------------------------------------
+---Get factory limitation message
+---@param module table
+---@param lua_recipe RecipeData
+---@return table | nil
+function Player.getFactoryLimitationModuleMessage(module, lua_recipe)
+    local factory = lua_recipe.factory
+    local factory_prototype = EntityPrototype(factory)
+    local factory_module_slots= factory_prototype:getModuleInventorySize()
+    if factory_module_slots == 0 then
+        return {"helmod_limitation.no-module-slot"}
+    end
+    local model_filter_factory_module = User.getModGlobalSetting("model_filter_factory_module")
+    if model_filter_factory_module == false then
+        return nil
+    end
+
+    if lua_recipe.type ~= "resource" then
+        local module_prototype = ItemPrototype(module)
+        local module_effects = module_prototype:getModuleEffects()
+        local module_category = module_prototype:getCategory()
+        local recipe_prototype = RecipePrototype(lua_recipe)
+        local recipe_allowed_effects = recipe_prototype:getAllowedEffects()
+        local entity_prototype = EntityPrototype(factory)
+        local entity_allowed_effects = entity_prototype:getAllowedEffects()
+        local recipe_allowed_module_categories = recipe_prototype:getAllowedModuleCategories()
+        local entity_allowed_module_categories = entity_prototype:getAllowedModuleCategories()
+        
+        for effect_name, value in pairs(module_effects) do
+            local positive_effect = Player.checkPositiveEffect(effect_name, value)
+            if table.size(recipe_allowed_effects) > 0 then
+                local recipe_allowed_effect = recipe_allowed_effects[effect_name]
+                if recipe_allowed_effect == false and positive_effect == true then
+                    return recipe_prototype:getAllowedEffectMessage(effect_name)
+                end
+            end
+            if table.size(entity_allowed_effects) > 0 then
+                local entity_allowed_effect = entity_allowed_effects[effect_name]
+                if entity_allowed_effect == false and positive_effect == true then
+                    return recipe_prototype:getAllowedEffectMessage(effect_name)
+                end
+            end
+        end
+        if recipe_allowed_module_categories ~= nil then
+            if not(recipe_allowed_module_categories[module_category])  then
+                return {"helmod_limitation.not-allowed-category-module", module_category}
+            end
+        end
+        if entity_allowed_module_categories ~= nil then
+            if not(entity_allowed_module_categories[module_category])  then
+                return {"helmod_limitation.not-allowed-category-module", module_category}
+            end
+        end
+    end
+    return nil
+end
+
 local is_effect_positive = {speed=true, productivity=true, quality=true,
                             consumption=false, pollution=false}
 function Player.checkPositiveEffect(name, value)
@@ -617,6 +712,65 @@ function Player.checkBeaconLimitationModule(beacon, lua_recipe, module)
 end
 
 -------------------------------------------------------------------------------
+---Get beacon limitation message
+---@param beacon FactoryData
+---@param lua_recipe RecipeData
+---@param module LuaItemPrototype
+---@return table | nil
+function Player.getBeaconLimitationModuleMessage(beacon, lua_recipe, module)
+    local factory = lua_recipe.factory
+    local factory_prototype = EntityPrototype(factory)
+    local factory_module_slots= factory_prototype:getModuleInventorySize()
+    if factory_module_slots == 0 then
+        return {"helmod_limitation.no-module-slot"}
+    end
+    local model_filter_beacon_module = User.getModGlobalSetting("model_filter_beacon_module")
+    if model_filter_beacon_module == false then
+        return nil
+    end
+
+    if lua_recipe.type ~= "resource" then
+        local module_prototype = ItemPrototype(module)
+        local module_effects = module_prototype:getModuleEffects()
+        local module_category = module_prototype:getCategory()
+        local recipe_prototype = RecipePrototype(lua_recipe)
+        local recipe_allowed_effects = recipe_prototype:getAllowedEffects()
+        local entity_prototype = EntityPrototype(beacon)
+        local entity_allowed_effects = entity_prototype:getAllowedEffects()
+        local recipe_allowed_module_categories = recipe_prototype:getAllowedModuleCategories()
+        local entity_allowed_module_categories = entity_prototype:getAllowedModuleCategories()
+        
+        for effect_name, value in pairs(module_effects) do
+            local positive_effect = Player.checkPositiveEffect(effect_name, value)
+            if table.size(recipe_allowed_effects) > 0 then
+                local recipe_allowed_effect = recipe_allowed_effects[effect_name]
+                if recipe_allowed_effect == false and positive_effect == true then
+                    return recipe_prototype:getAllowedEffectMessage(effect_name)
+                end
+            end
+            if table.size(entity_allowed_effects) > 0 then
+                local entity_allowed_effect = entity_allowed_effects[effect_name]
+                if entity_allowed_effect == false and positive_effect == true then
+                    return recipe_prototype:getAllowedEffectMessage(effect_name)
+                end
+            end
+        end
+        if recipe_allowed_module_categories ~= nil then
+            if not(recipe_allowed_module_categories[module_category])  then
+                return {"helmod_limitation.not-allowed-category-module", module_category}
+            end
+        end
+        if entity_allowed_module_categories ~= nil then
+            if not(entity_allowed_module_categories[module_category])  then
+                return {"helmod_limitation.not-allowed-category-module", module_category}
+            end
+        end
+    end
+
+    return nil
+end
+
+-------------------------------------------------------------------------------
 ---Return list of productions
 ---@param category string
 ---@param lua_recipe table
@@ -627,7 +781,7 @@ function Player.getProductionsCrafting(category, lua_recipe)
     if category == "crafting-handonly" then
         productions["character"] = prototypes.entity["character"]
     elseif lua_recipe.name ~= nil and category == "fluid" then
-        for key, lua_entity in pairs(Player.getOffshorePumps(lua_recipe.name)) do
+        for key, lua_entity in pairs(Player.getOffshorePumps()) do
             productions[lua_entity.name] = lua_entity
         end
     else
@@ -757,6 +911,8 @@ function Player.getProductionMachines()
     table.insert(filters, { filter = "hidden", mode = "and", invert = true })
     table.insert(filters, { filter = "type", type = "rocket-silo", mode = "or" })
     table.insert(filters, { filter = "hidden", mode = "and", invert = true })
+    table.insert(filters, { filter = "type", type = "agricultural-tower", mode = "or" })
+    table.insert(filters, { filter = "hidden", mode = "and", invert = true })
     local prototypes = prototypes.get_entity_filtered(filters)
     prototypes = Player.ExcludePlacedByHidden(prototypes)
 
@@ -867,40 +1023,47 @@ end
 
 -------------------------------------------------------------------------------
 ---Return list of Offshore-Pump
----@param fluid_name string
 ---@return table
-function Player.getOffshorePumps(fluid_name)
+function Player.getOffshorePumps()
     local filters = {}
     table.insert(filters, { filter = "type", type = "offshore-pump", mode = "or" })
     local entities = prototypes.get_entity_filtered(filters)
     local offshore_pump = {}
     for key, entity in pairs(entities) do
-        if entity.fluid.name == fluid_name then
-            for _, fluidbox in pairs(entity.fluidbox_prototypes) do
-                if #fluidbox.pipe_connections > 0 then
-                    offshore_pump[key] = entity
-                    break
-                end
-            end
-        end
+        offshore_pump[key] = entity
     end
     return offshore_pump
 end
 
 -------------------------------------------------------------------------------
----Return module bonus (default return: bonus = 0 )
----@param module string
----@param effect string
----@return number
-function Player.getModuleBonus(module, effect)
-    if module == nil then return 0 end
-    local bonus = 0
-    ---search module
-    local module = Player.getItemPrototype(module)
-    if module ~= nil and module.module_effects ~= nil and module.module_effects[effect] ~= nil then
-        bonus = module.module_effects[effect]
+---Return module effects
+---@param module ModuleData
+---@return ModuleEffectsData
+function Player.getModuleEffects(module)
+    local module_effects = { speed = 0, productivity = 0, consumption = 0, pollution = 0, quality = 0 }
+    if module == nil then return module_effects end
+    local multiplier = 1
+    -- search quality
+    local quality = Player.getQualityPrototype(module.quality)
+    if quality ~= nil then
+        multiplier = multiplier + (quality.level * 0.3)
     end
-    return bonus
+    -- search module
+    local module = Player.getItemPrototype(module.name)
+    for effect_name, effect_value in pairs(module.module_effects) do
+        if Player.checkPositiveEffect(effect_name, effect_value) then
+            -- quality has positive effect
+            module_effects[effect_name] = effect_value * multiplier
+        else
+            -- quality has no effect
+            module_effects[effect_name] = effect_value
+        end
+        if effect_name == "quality" then
+            -- fix quality value, in game is 10x
+            module_effects[effect_name] = module_effects[effect_name] / 10
+        end
+    end
+    return module_effects
 end
 
 -------------------------------------------------------------------------------
@@ -1020,25 +1183,19 @@ end
 function Player.getFluidRecipes()
     local recipes = {}
 
-    ---Offshore pumps
-    local filters = {}
-    table.insert(filters, { filter = "type", type = "offshore-pump", mode = "or" })
-    local entities = prototypes.get_entity_filtered(filters)
-    for key, entity in pairs(entities) do
-        for _, fluidbox in pairs(entity.fluidbox_prototypes) do
-            if #fluidbox.pipe_connections > 0 then
-                local recipe = Player.buildFluidRecipe(entity.fluid.name, {}, nil)
-                recipe.subgroup = { name = "helmod-fluid", order = "bbbb" }
-                if not recipes[entity.fluid.name] then
-                    recipes[entity.fluid.name] = recipe
-                end
-                if entity.hidden then
-                    recipes[entity.fluid.name].hidden = true
-                end
+    local tiles = Player.getTilePrototypes()
+    for _, tile in pairs(tiles) do
+        if tile.fluid then
+            local recipe = Player.buildFluidRecipe(tile.fluid.name, {}, nil)
+            recipe.subgroup = { name = "helmod-fluid", order = "bbbb" }
+            if not recipes[tile.fluid.name] then
+                recipes[tile.fluid.name] = recipe
+            end
+            if tile.hidden then
+                recipes[tile.fluid.name].hidden = true
             end
         end
     end
-
     return recipes
 end
 
@@ -1048,6 +1205,168 @@ end
 ---@return table
 function Player.getFluidRecipe(name)
     local recipes = Player.getFluidRecipes()
+    return recipes[name]
+end
+
+-------------------------------------------------------------------------------
+---Return table of Agricultural Towers
+---@return table
+function Player.getAgriculturalTowers()
+    local filters = {}
+    table.insert(filters, { filter = "type", type = "agricultural-tower", mode = "or" })
+    table.insert(filters, { filter = "hidden", mode = "and", invert = true })
+    table.insert(filters, { filter = "type", type = "agricultural-tower", mode = "or" })
+    table.insert(filters, { filter = "flag", flag = "player-creation", mode = "and" })
+    local prototypes = prototypes.get_entity_filtered(filters)
+
+    prototypes = Player.ExcludePlacedByHidden(prototypes)
+    return prototypes
+end
+
+-------------------------------------------------------------------------------
+---Return table filter of Plants for Agricultural Towers
+---@return table
+function Player.getPlantsFilter()
+    local filters = {}
+    table.insert(filters, { filter = "type", type = "plant", mode = "or" })
+    table.insert(filters, { filter = "hidden", mode = "and", invert = true })
+    return filters
+end
+
+-------------------------------------------------------------------------------
+---Return table of Plants for Agricultural Towers
+---@return table
+function Player.getPlants()
+    local filters = Player.getPlantsFilter()
+    local prototypes = prototypes.get_entity_filtered(filters)
+
+    prototypes = Player.ExcludePlacedByHidden(prototypes)
+    return prototypes
+end
+
+-------------------------------------------------------------------------------
+---Return table of Seeds for Agricultural Towers
+---@return table
+function Player.getSeeds()
+    local plants_filters = Player.getPlantsFilter()
+    local filters = {}
+    table.insert(filters, { filter = "type", type = "item", mode = "or"})
+    table.insert(filters, { filter = "place-result", elem_filters=plants_filters, mode = "and"})
+    table.insert(filters, { filter = "hidden", mode = "and", invert = true })
+    local prototypes = prototypes.get_item_filtered(filters)
+    return prototypes
+end
+
+-------------------------------------------------------------------------------
+---Return table of Agricultural recipes for Agricultural Towers
+---@return table
+function Player.getAgriculturalRecipes()
+    local recipes = {}
+    local items = Player.getSeeds()
+    for _, prototype in pairs(items) do
+        local ingredients = { { name = prototype.name, type = "item", amount = 1 } }
+        local plant_prototype = prototype.plant_result
+        local mineable_properties = plant_prototype.mineable_properties
+        local products = mineable_properties.products
+        local recipe = {}
+        recipe.enabled = true
+        recipe.energy = plant_prototype.growth_ticks / 60
+        recipe.force = {}
+        recipe.group = { name = "helmod", order = "zzzz" }
+        recipe.subgroup = { name = "helmod-farming-1", order = "cccc" }
+        recipe.hidden = false
+        recipe.ingredients = ingredients
+        recipe.products = products
+        recipe.localised_description = prototype.localised_description
+        recipe.localised_name = prototype.localised_name
+        recipe.name = prototype.name
+        recipe.category = "farming"
+        recipe.prototype = {}
+        recipe.valid = true
+
+        if not recipes[recipe.name] then
+            recipes[recipe.name] = recipe
+        end
+        if recipe.hidden then
+            recipes[recipe.name].hidden = true
+        end
+    end
+
+    return recipes
+end
+
+-------------------------------------------------------------------------------
+---Return recipe of Agricultural recipes for Agricultural Towers
+---@param name string
+---@return table
+function Player.getAgriculturalRecipe(name)
+    local recipes = Player.getAgriculturalRecipes()
+    return recipes[name]
+end
+
+-------------------------------------------------------------------------------
+---Return table of spoilable items
+---@return table
+function Player.getSpoilableItems()
+    local prototypes = {}
+    for _, prototype in pairs(Player.getItemPrototypes()) do
+        if prototype.get_spoil_ticks() > 0 then
+            table.insert(prototypes, prototype)
+        end
+    end
+    return prototypes
+end
+
+-------------------------------------------------------------------------------
+---Return table of Spoilable recipes
+---@return table
+function Player.getSpoilableRecipes()
+    local recipes = {}
+    local items = Player.getSpoilableItems()
+    for _, prototype in pairs(items) do
+        local ingredients = { { name = prototype.name, type = "item", amount = 1 } }
+        local spoil_result = prototype.spoil_result
+        local products = {}
+        if spoil_result ~= nil then
+            local product = { name = spoil_result.name, type = "item", amount = 1 }
+            table.insert(products, product)
+        else
+            local i = 0
+        end
+        
+        local recipe = {}
+        recipe.enabled = true
+        recipe.energy = prototype.get_spoil_ticks() / 60
+        recipe.force = {}
+        recipe.group = { name = "helmod", order = "zzzz" }
+        recipe.subgroup = { name = "helmod-farming-2", order = "dddd" }
+        recipe.hidden = false
+        recipe.ingredients = ingredients
+        recipe.products = products
+        recipe.localised_description = prototype.localised_description
+        recipe.localised_name = prototype.localised_name
+        recipe.name = prototype.name
+        recipe.category = "spoiling"
+        recipe.prototype = {}
+        recipe.valid = true
+
+        if not recipes[recipe.name] then
+            recipes[recipe.name] = recipe
+        end
+        if recipe.hidden then
+            recipes[recipe.name].hidden = true
+        end
+    end
+
+    return recipes
+end
+
+-------------------------------------------------------------------------------
+---Return Spoilable recipe
+---@param name string
+---@return table
+function Player.getSpoilableRecipe(name)
+    local recipes = Player.getSpoilableRecipes()
     return recipes[name]
 end
 
@@ -1292,13 +1611,18 @@ function Player.searchRecipe(element_name, by_ingredient)
         end
     end
     -- recherche dans les fluids
-    -- for key, recipe in pairs(Player.getFluidRecipes()) do
-    --   if recipe.name == element_name then
-    --     table.insert(recipes, {name=recipe.name, type="fluid"})
-    --   end
-    -- end
-    for key, recipe in pairs(Player.getBoilerRecipes()) do
-        if recipe.name == element_name then
+    for key, recipe in pairs(Player.getFluidRecipes()) do
+      if recipe.name == element_name then
+        table.insert(recipes, {name=recipe.name, type="fluid"})
+      end
+    end
+    local boiler_recipes = Player.getBoilerRecipes()
+    for key, recipe in pairs(boiler_recipes) do
+        local fluid_name = recipe.output_fluid_name
+        if by_ingredient == true then
+            fluid_name = recipe.input_fluid_name
+        end
+        if fluid_name == element_name then
             table.insert(recipes, { name = recipe.name, type = "boiler" })
         end
     end
@@ -1370,7 +1694,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Return item prototypes
----@param filters table --{{filter="fuel-category", mode="or", invert=false,["fuel-category"]="chemical"}}
+---@param filters? table --{{filter="fuel-category", mode="or", invert=false,["fuel-category"]="chemical"}}
 ---@return table
 function Player.getItemPrototypes(filters)
     if filters ~= nil then
@@ -1389,6 +1713,26 @@ function Player.getItemPrototypeTypes()
         types[type] = true
     end
     return types
+end
+
+-------------------------------------------------------------------------------
+---Return tile prototypes
+---@param filters? table --{{filter="fuel-category", mode="or", invert=false,["fuel-category"]="chemical"}}
+---@return table
+function Player.getTilePrototypes(filters)
+    if filters ~= nil then
+        return prototypes.get_tile_filtered(filters)
+    end
+    return prototypes.tile
+end
+
+-------------------------------------------------------------------------------
+---Return tile prototype
+---@param name string
+---@return LuaTilePrototype
+function Player.getTilePrototype(name)
+    if name == nil then return nil end
+    return prototypes.tile[name]
 end
 
 -------------------------------------------------------------------------------
@@ -1597,6 +1941,26 @@ function Player.getFluidTemperaturePrototypes(fluid)
     end
 
     return items
+end
+
+function Player.hasFeatureQuality()
+    return script.feature_flags["quality"]
+end
+
+-------------------------------------------------------------------------------
+---Return quality prototypes
+---@return LuaQualityPrototype
+function Player.getQualityPrototypes()
+    return prototypes.quality
+end
+
+-------------------------------------------------------------------------------
+---Return quality prototype
+---@param name string
+---@return LuaQualityPrototype
+function Player.getQualityPrototype(name)
+    if name == nil then return nil end
+    return prototypes.quality[name]
 end
 
 return Player

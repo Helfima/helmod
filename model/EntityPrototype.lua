@@ -1,6 +1,7 @@
 -------------------------------------------------------------------------------
 ---Description of the module.
----@class EntityPrototype
+---@class EntityPrototype : Prototype
+---@field lua_prototype LuaEntityPrototype
 EntityPrototype = newclass(Prototype,function(base, object)
   if object ~= nil and type(object) == "string" then
     Prototype.init(base, Player.getEntityPrototype(object))
@@ -256,10 +257,26 @@ end
 ---@return number --default 1
 function EntityPrototype:getDistributionEffectivity()
   if self.lua_prototype ~= nil then
-    return self.lua_prototype.distribution_effectivity or 1
+    local distribution_effectivity = self.lua_prototype.distribution_effectivity or 1
+    local distribution_effectivity_bonus_per_quality_level = self:getDistributionEffectivityBonusPerQualityLevel()
+    local quality = Player.getQualityPrototype(self.factory.quality)
+    local quality_level = 0
+    if quality ~= nil then
+      quality_level = quality.level
+    end
+    distribution_effectivity = distribution_effectivity + distribution_effectivity_bonus_per_quality_level * quality_level
+    return distribution_effectivity
   end return 1
 end
 
+-------------------------------------------------------------------------------
+---Return distribution effectivity
+---@return number --default 1
+function EntityPrototype:getDistributionEffectivityBonusPerQualityLevel()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.distribution_effectivity_bonus_per_quality_level or 0
+  end
+end
 -------------------------------------------------------------------------------
 ---Return profile effectivity
 ---@return number --default 0
@@ -624,7 +641,7 @@ function EntityPrototype:getCraftingSpeed()
     local energy_prototype = self:getEnergySource()
     local speedModifier = energy_prototype:getSpeedModifier()
 
-    return (self.lua_prototype.get_crafting_speed() or 1) * speedModifier
+    return (self.lua_prototype.get_crafting_speed(self.factory.quality) or 1) * speedModifier
   end
   return 0
 end
@@ -667,7 +684,7 @@ end
 ---@return number --default 0
 function EntityPrototype:getResearchingSpeed()
   if self.lua_prototype ~= nil then
-    return self.lua_prototype.get_researching_speed() or 1
+    return self.lua_prototype.get_researching_speed(self.factory.quality) or 1
   end
   return 0
 end
@@ -707,6 +724,18 @@ function EntityPrototype:speedFactory(recipe)
     return researching_speed
   elseif recipe.type == "energy" then
     return self:getSpeedModifier()
+  elseif recipe.type == "agricultural" then
+    local growth_grid_tile_size = self.lua_prototype.growth_grid_tile_size or 3
+    local tile_width = self.lua_prototype.tile_width or 3
+    local tile_height = self.lua_prototype.tile_height or 3
+    local machine_area = tile_width*tile_height
+    local logistic_area = 9 -- area necessary for input/output and power
+    local max_grid_tile_size = 21
+    local max_area = max_grid_tile_size * max_grid_tile_size
+    local growing_area = growth_grid_tile_size * growth_grid_tile_size
+    local growable_area = max_area - machine_area - logistic_area
+    local speed = growable_area/growing_area
+    return speed
   else
     return self:getCraftingSpeed()
   end

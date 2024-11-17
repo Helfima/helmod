@@ -34,6 +34,10 @@ RecipePrototype = newclass(Prototype, function(base, object, object_type)
         elseif base.lua_type == "rocket" then
             local recipe = Player.getRocketRecipe(base.object_name)
             Prototype.init(base, recipe)
+        elseif base.lua_type == "agricultural" then
+            Prototype.init(base, Player.getAgriculturalRecipe(base.object_name))
+        elseif base.lua_type == "spoiling" then
+            Prototype.init(base, Player.getSpoilableRecipe(base.object_name))
         end
         if base.lua_prototype == nil then
             Logging:error("HMRecipePrototype", "recipe not found", type(object), object)
@@ -85,7 +89,25 @@ end
 ---@return table
 function RecipePrototype:getAllowedEffects()
     if self.lua_prototype == nil then return {} end
+    if self.lua_prototype.object_name == "LuaTechnologyPrototype" then return {} end
     return self.lua_prototype.allowed_effects
+end
+
+-------------------------------------------------------------------------------
+---Return Allowed Effects
+---@return table | nil
+function RecipePrototype:getAllowedEffectMessage(effect_name)
+    if self.lua_prototype == nil then return nil end
+    if self.lua_prototype.object_name == "LuaTechnologyPrototype" then return nil end
+    if self.lua_prototype.effect_limitation_messages ~= nil then
+        local message_name = string.format("allow_%s_message", effect_name)
+        local effect_limitation_messages = self.lua_prototype.effect_limitation_messages
+        return effect_limitation_messages[message_name]
+    else
+        local message_name = string.format("item-limitation.%s-effect", effect_name)
+        return {message_name}
+    end
+    return nil
 end
 
 -------------------------------------------------------------------------------
@@ -93,6 +115,7 @@ end
 ---@return table
 function RecipePrototype:getAllowedModuleCategories()
     if self.lua_prototype == nil then return nil end
+    if self.lua_prototype.object_name == "LuaTechnologyPrototype" then return nil end
     return self.lua_prototype.allowed_module_categories
   end
 
@@ -322,6 +345,8 @@ function RecipePrototype:getRawIngredients()
             end
 
             return ingredients
+        else
+            return self.lua_prototype.ingredients
         end
     end
     return {}
@@ -516,9 +541,9 @@ function RecipePrototype:getHidden()
         elseif self.lua_type == "technology" then
             return false
         elseif self.lua_type == "fluid" then
-            local entities = Player.getOffshorePumps(self.lua_prototype.name)
-            for _, entity in pairs(entities) do
-                return false
+            local fluid = Player.getFluidPrototype(self.lua_prototype.name)
+            if fluid ~= nil then
+                return fluid.hidden
             end
             return false
         elseif self.lua_type == "boiler" then
@@ -589,6 +614,10 @@ function RecipePrototype:getIcon()
     elseif self.lua_type == "boiler" then
         icon_type = "fluid"
         icon_name = self.output_fluid_name
+    elseif self.lua_type == "agricultural" then
+        icon_type = "item"
+    elseif self.lua_type == "spoiling" then
+        icon_type = "item"
     end
 
     return icon_name, icon_type

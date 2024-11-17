@@ -184,6 +184,7 @@ function PropertiesPanel:onEvent(event)
         if api ~= nil then
             Cache.setData(self.classname, "runtime_api", api)
         end
+        self:updateData(event)
     end
 end
 
@@ -209,18 +210,21 @@ end
 function PropertiesPanel:updateRuntimeApi(event)
     local scroll_panel = self:getRuntimeApiTab()
     scroll_panel.clear()
-    local url_frame = GuiElement.add(scroll_panel, GuiFlowH())
-    url_frame.style.horizontal_spacing = 5
-    GuiElement.add(url_frame, GuiLabel("json_label"):caption("URL to find Runtime API"))
-    local json_url = GuiElement.add(url_frame,
-        GuiTextField("json_url"):text("https://lua-api.factorio.com/latest/runtime-api.json"))
-    json_url.style.width = 600
 
-    local json_frame = GuiElement.add(scroll_panel, GuiFlowV())
-    json_frame.style.vertical_spacing = 5
-    local json_string = GuiElement.add(json_frame, GuiTextBox("json_string"))
+    
+    local json_table = GuiElement.add(scroll_panel, GuiTable("table-resources"):column(3))
+    json_table.style.cell_padding = 5
+    
+    GuiElement.add(json_table, GuiLabel("json_label"):caption("URL to find Runtime API"))
+    local json_url = GuiElement.add(json_table, GuiTextField("json_url"):text("https://lua-api.factorio.com/latest/runtime-api.json"))
+    json_url.style.width = 600
+    GuiElement.add(json_table, GuiFlow())
+
+    GuiElement.add(json_table, GuiLabel("json_string_label"):caption("Json String"))
+    local json_string = GuiElement.add(json_table, GuiTextField("json_string"))
     json_string.style.width = 600
-    GuiElement.add(json_frame, GuiButton(self.classname, "import-runtime-api"):caption("Import Runtime API"))
+
+    GuiElement.add(json_table, GuiButton(self.classname, "import-runtime-api"):caption("Import Runtime API"))
 end
 
 -------------------------------------------------------------------------------
@@ -249,6 +253,7 @@ function PropertiesPanel:updateMenu(event)
     GuiElement.add(action_panel, GuiButton("HMFluidSelector", "OPEN", "HMPropertiesPanel"):caption({ "helmod_result-panel.select-button-fluid" }))
     GuiElement.add(action_panel, GuiButton("HMRecipeSelector", "OPEN", "HMPropertiesPanel"):caption({ "helmod_result-panel.select-button-recipe" }))
     GuiElement.add(action_panel, GuiButton("HMTechnologySelector", "OPEN", "HMPropertiesPanel"):caption({"helmod_result-panel.select-button-technology" }))
+    GuiElement.add(action_panel, GuiButton("HMTileSelector", "OPEN", "HMPropertiesPanel"):caption({ "helmod_result-panel.select-button-tile" }))
 end
 
 -------------------------------------------------------------------------------
@@ -282,8 +287,7 @@ function PropertiesPanel:updateData(event)
                 data[properties.name][key] = properties
             end
         end
-        local result_table = GuiElement.add(content_panel,
-            GuiTable("table-resources"):column(#prototype_compare + 1):style("helmod_table-rule-odd"))
+        local result_table = GuiElement.add(content_panel, GuiTable("table-resources"):column(#prototype_compare + 1):style("helmod_table-rule-odd"))
 
         self:addTableHeader(result_table, prototype_compare)
 
@@ -348,13 +352,17 @@ function PropertiesPanel:addTableHeader(itable, prototype_compare)
             icon_type = "fluid"
             localised_name = fluid_prototype:getLocalisedName()
         elseif string.find(prototype.type, "recipe") then
-            local recipe_protoype = RecipePrototype(prototype)
-            icon_type = recipe_protoype:getType()
-            localised_name = recipe_protoype:getLocalisedName()
+            local recipe_prototype = RecipePrototype(prototype)
+            icon_type = recipe_prototype:getType()
+            localised_name = recipe_prototype:getLocalisedName()
         elseif prototype.type == "technology" then
-            local technology_protoype = Technology(prototype)
+            local technology_prototype = Technology(prototype)
             icon_type = "technology"
-            localised_name = technology_protoype:getLocalisedName()
+            localised_name = technology_prototype:getLocalisedName()
+        elseif prototype.type == "tile" then
+            local tile_prototype = TilePrototype(prototype)
+            icon_type = "tile"
+            localised_name = tile_prototype:getLocalisedName()
         end
         local cell_header = GuiElement.add(itable, GuiFlowH("header", prototype.name, index))
         GuiElement.add(cell_header,
@@ -525,6 +533,8 @@ function PropertiesPanel:getPrototypeData(prototype)
             lua_prototype = RecipePrototype(prototype):native()
         elseif prototype.type == "technology" then
             lua_prototype = Technology(prototype):native()
+        elseif prototype.type == "tile" then
+            lua_prototype = TilePrototype(prototype):native()
         end
         if lua_prototype ~= nil then
             local properties = self:parseProperties(lua_prototype, 0)

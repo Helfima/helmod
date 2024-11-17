@@ -190,7 +190,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
         if block.by_limit == true and block.count > 1 then
           product.limit_count = product.count / block.count
         end
-        GuiElement.add(cell_products, GuiCellElementSm(self.classname, "pipette-item", recipe.id, "product", index):index(index):element(product):tooltip("controls.smart-pipette"):color(GuiElement.color_button_none):byLimit(block.by_limit):mask(is_done))
+        GuiElement.add(cell_products, GuiCellElementSm(self.classname, "pipette-item", recipe.id, "product", index):index(index):element(product):tooltip("tooltip.smart-pipette"):color(GuiElement.color_button_none):byLimit(block.by_limit):mask(is_done))
       end
     end
   end
@@ -198,7 +198,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
   if not(User.getSetting("pin_panel_column_hide_machine")) then
     ---col factory
     local factory = recipe.factory
-    GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "factory"):index(recipe.id):element(factory):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default):byLimit(block.by_limit):mask(is_done))
+    GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "factory"):index(recipe.id):element(factory):tooltip("tooltip.smart-pipette"):color(GuiElement.color_button_default):byLimit(block.by_limit):mask(is_done))
   end
 
   if not(User.getSetting("pin_panel_column_hide_product")) then
@@ -214,7 +214,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
         ingredient.count = ingredient_prototype:countIngredient(recipe)
 				ingredient.count_limit = ingredient_prototype:countLimitIngredient(recipe)
 				ingredient.count_deep = ingredient_prototype:countDeepIngredient(recipe)
-        GuiElement.add(cell_ingredients, GuiCellElementSm(self.classname, "pipette-item", recipe.id, "ingredient", index):index(index):element(ingredient):tooltip("controls.smart-pipette"):color(GuiElement.color_button_add):byLimit(block.by_limit):mask(is_done))
+        GuiElement.add(cell_ingredients, GuiCellElementSm(self.classname, "pipette-item", recipe.id, "ingredient", index):index(index):element(ingredient):tooltip("tooltip.smart-pipette"):color(GuiElement.color_button_add):byLimit(block.by_limit):mask(is_done))
       end
     end
   end
@@ -232,7 +232,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
         else
           beacon.limit_count = nil
         end
-        GuiElement.add(cell_beacons, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "beacons", index):index(index):element(beacon):tooltip("controls.smart-pipette"):color(GuiElement.color_button_default):byLimit(block.by_limit):mask(is_done))
+        GuiElement.add(cell_beacons, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "beacons", index):index(index):element(beacon):tooltip("tooltip.smart-pipette"):color(GuiElement.color_button_default):byLimit(block.by_limit):mask(is_done))
       end
     end
   end

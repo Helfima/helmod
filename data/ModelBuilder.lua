@@ -47,7 +47,7 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
         if recipe_type ~= "energy" then
             local default_factory = User.getDefaultFactory(ModelRecipe)
             if default_factory ~= nil then
-                Model.setFactory(ModelRecipe, default_factory.name, default_factory.fuel)
+                Model.setFactory(ModelRecipe, default_factory.name, default_factory.quality, default_factory.fuel)
                 ModelBuilder.setFactoryModulePriority(ModelRecipe, default_factory.module_priority)
             else
                 local default_factory_name = Model.getDefaultPrototypeFactory(recipe_prototype)
@@ -60,7 +60,7 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
             if default_beacons ~= nil then
                 ModelRecipe.beacons = {}
                 for _, default_beacon in pairs(default_beacons) do
-                    local beacon = Model.addBeacon(ModelRecipe, default_beacon.name, default_beacon.combo, default_beacon.per_factory, default_beacon.per_factory_constant)
+                    local beacon = Model.addBeacon(ModelRecipe, default_beacon.name, default_beacon.quality, default_beacon.combo, default_beacon.per_factory, default_beacon.per_factory_constant)
                     ModelBuilder.setBeaconModulePriority(beacon, ModelRecipe, default_beacon.module_priority)
                 end
             end
@@ -263,8 +263,8 @@ end
 
 -------------------------------------------------------------------------------
 ---Convert factory modules to a prority module
----@param factory table
----@return table
+---@param factory FactoryData
+---@return ModuleData
 function ModelBuilder.convertModuleToPriority(factory)
     local module_priority = {}
     for name, value in pairs(factory.modules or {}) do
@@ -275,12 +275,13 @@ end
 
 -------------------------------------------------------------------------------
 ---Add a module to prority module
----@param factory table
+---@param factory FactoryData
 ---@param module_name string
+---@param module_quality string
 ---@param module_max number
----@return table
-function ModelBuilder.addModulePriority(factory, module_name, module_max)
-    local module_priority = ModelBuilder.convertModuleToPriority(factory)
+---@return ModuleData
+function ModelBuilder.addModulePriority(factory, module_name, module_quality, module_max)
+    local module_priority = factory.modules
     local factory_prototype = EntityPrototype(factory)
     if Model.countModulesModel(factory) < factory_prototype:getModuleInventorySize() then
         local count = 1
@@ -290,13 +291,13 @@ function ModelBuilder.addModulePriority(factory, module_name, module_max)
         local success = false
         ---parcours la priorite
         for i, priority in pairs(module_priority) do
-            if priority.name == module_name then
-                priority.value = priority.value + count
+            if priority.name == module_name and priority.quality == module_quality then
+                priority.amount = priority.amount + count
                 success = true
             end
         end
         if success == false then
-            table.insert(module_priority, { name = module_name, value = count })
+            table.insert(module_priority, { name = module_name, quality = module_quality, amount = count })
         end
     end
     return module_priority
@@ -306,16 +307,17 @@ end
 ---Remove module priority
 ---@param factory table
 ---@param module_name string
+---@param module_quality string
 ---@param module_max number
 ---@return table
-function ModelBuilder.removeModulePriority(factory, module_name, module_max)
-    local module_priority = ModelBuilder.convertModuleToPriority(factory)
+function ModelBuilder.removeModulePriority(factory, module_name, module_quality, module_max)
+    local module_priority = factory.modules
     ---parcours la priorite
     local index = nil
     for i, priority in pairs(module_priority) do
-        if priority.name == module_name then
-            if priority.value > 1 and not (module_max) then
-                priority.value = priority.value - 1
+        if priority.name == module_name and priority.quality == module_quality then
+            if priority.amount > 1 and not (module_max) then
+                priority.amount = priority.amount - 1
             else
                 index = i
             end
@@ -331,12 +333,13 @@ end
 ---Add a module in factory
 ---@param recipe RecipeData
 ---@param module_name string
+---@param module_quality string
 ---@param module_max number
-function ModelBuilder.addFactoryModule(recipe, module_name, module_max)
+function ModelBuilder.addFactoryModule(recipe, module_name, module_quality, module_max)
     local module = ItemPrototype(module_name)
     if recipe ~= nil and module:native() ~= nil then
         if Player.checkFactoryLimitationModule(module:native(), recipe) == true then
-            local module_priority = ModelBuilder.addModulePriority(recipe.factory, module_name, module_max or false)
+            local module_priority = ModelBuilder.addModulePriority(recipe.factory, module_name, module_quality, module_max or false)
             ModelBuilder.setFactoryModulePriority(recipe, module_priority)
         end
     end
@@ -358,7 +361,7 @@ end
 -------------------------------------------------------------------------------
 ---Set a module priority
 ---@param element table
----@param module_priority table
+---@param module_priority ModuleData
 function ModelBuilder.setModulePriority(element, module_priority)
     if element ~= nil then
         for i, priority in pairs(module_priority) do
@@ -373,24 +376,34 @@ end
 
 -------------------------------------------------------------------------------
 ---Set a module priority in factory
+---@param module_priorities {[uint] : ModuleData}
+---@param module_quality string
+function ModelBuilder.setQualityModulePriority(module_priorities, module_quality)
+    for _, module_priority in pairs(module_priorities) do
+        module_priority.quality = module_quality
+    end
+end
+
+-------------------------------------------------------------------------------
+---Set a module priority in factory
 ---@param recipe RecipeData
----@param module_priority table
+---@param module_priority ModuleData
 function ModelBuilder.setFactoryModulePriority(recipe, module_priority)
     if recipe ~= nil then
         recipe.factory.modules = {}
         if module_priority == nil then
             recipe.factory.module_priority = nil
         else
-            recipe.factory.module_priority = table.clone(module_priority)
+            recipe.factory.module_priority = table.deepcopy(module_priority)
             local first = true
             for i, priority in pairs(module_priority) do
                 local module = ItemPrototype(priority.name)
                 if Player.checkFactoryLimitationModule(module:native(), recipe) == true then
                     if first then
-                        ModelBuilder.setModuleModel(recipe.factory, priority.name, priority.value)
+                        ModelBuilder.setModuleModel(recipe.factory, priority)
                         first = false
                     else
-                        ModelBuilder.appendModuleModel(recipe.factory, priority.name, priority.value)
+                        ModelBuilder.appendModuleModel(recipe.factory, priority)
                     end
                 end
             end
@@ -425,23 +438,23 @@ end
 ---Set a module priority in beacon
 ---@param beacon FactoryData
 ---@param recipe RecipeData
----@param module_priority {[uint] : ModulePriorityData}
-function ModelBuilder.setBeaconModulePriority(beacon, recipe, module_priority)
+---@param module_priorities {[uint] : ModulePriorityData}
+function ModelBuilder.setBeaconModulePriority(beacon, recipe, module_priorities)
     if beacon ~= nil then
         beacon.modules = {}
-        if module_priority == nil then
+        if module_priorities == nil then
             beacon.module_priority = nil
         else
-            beacon.module_priority = table.clone(module_priority)
+            beacon.module_priority = table.deepcopy(module_priorities)
             local first = true
-            for _, priority in pairs(module_priority) do
+            for _, priority in pairs(module_priorities) do
                 local module = ItemPrototype(priority.name)
                 if Player.checkBeaconLimitationModule(beacon, recipe, module:native()) == true then
                     if first then
-                        ModelBuilder.setModuleModel(beacon, priority.name, priority.value)
+                        ModelBuilder.setModuleModel(beacon, priority)
                         first = false
                     else
-                        ModelBuilder.appendModuleModel(beacon, priority.name, priority.value)
+                        ModelBuilder.appendModuleModel(beacon, priority)
                     end
                 end
             end
@@ -469,7 +482,7 @@ function ModelBuilder.setFactoryBlock(block, current_recipe)
                     if factory_ingredient_count < recipe_ingredient_count then
                         -- Skip
                     elseif (default_factory_mode ~= "category" and categories[prototype_recipe:getCategory()]) or prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
-                        Model.setFactory(recipe, current_recipe.factory.name, current_recipe.factory.fuel)
+                        Model.setFactory(recipe, current_recipe.factory.name, current_recipe.factory.quality, current_recipe.factory.fuel)
                         ModelBuilder.setFactoryModulePriority(recipe, current_recipe.factory.module_priority)
                     end
                 end
@@ -539,7 +552,7 @@ function ModelBuilder.setBeaconBlock(block, current_recipe)
                         recipe.beacons = {}
                         if current_recipe.beacons ~= nil then
                             for key, current_beacon in pairs(current_recipe.beacons) do
-                                local beacon = Model.addBeacon(recipe, current_beacon.name, current_beacon.combo,current_beacon.per_factory, current_beacon.per_factory_constant)
+                                local beacon = Model.addBeacon(recipe, current_beacon.name, current_beacon.quality, current_beacon.combo,current_beacon.per_factory, current_beacon.per_factory_constant)
                                 ModelBuilder.setBeaconModulePriority(beacon, current_recipe, current_beacon.module_priority)
                             end
                         end
@@ -602,11 +615,12 @@ end
 ---Remove a module from factory
 ---@param recipe RecipeData
 ---@param module_name string
+---@param module_quality string
 ---@param module_max number
-function ModelBuilder.removeFactoryModule(recipe, module_name, module_max)
+function ModelBuilder.removeFactoryModule(recipe, module_name, module_quality, module_max)
     local module = ItemPrototype(module_name)
     if recipe ~= nil and module:native() ~= nil then
-        local module_priority = ModelBuilder.removeModulePriority(recipe.factory, module_name, module_max or false)
+        local module_priority = ModelBuilder.removeModulePriority(recipe.factory, module_name, module_quality, module_max or false)
         ModelBuilder.setFactoryModulePriority(recipe, module_priority)
     end
 end
@@ -657,10 +671,6 @@ function ModelBuilder.copyBlock(into_model, into_block, from_block)
             if is_block then
                 local new_block = Model.newBlock(into_model, child)
                 new_block.index = child_index
-                new_block.unlinked = child.by_factory and true or false
-                new_block.by_factory = child.by_factory
-                new_block.by_product = child.by_product
-                new_block.by_limit = child.by_limit
                 into_model.blocks[new_block.id] = new_block
                 ModelBuilder.copyBlock(into_model, new_block, child)
                 into_block.children[new_block.id] = new_block
@@ -672,7 +682,9 @@ function ModelBuilder.copyBlock(into_model, into_block, from_block)
                     local recipe_model = Model.newRecipe(into_model, recipe.name, recipe_prototype:getType())
                     recipe_model.index = child_index
                     recipe_model.production = recipe.production or 1
-                    recipe_model.factory = ModelBuilder.copyFactory(recipe.factory)
+                    if recipe.factory ~= nil then
+                        recipe_model.factory = ModelBuilder.copyFactory(recipe.factory)
+                    end
                     if recipe.beacons ~= nil then
                         recipe_model.beacons = {}
                         for _, beacon in pairs(recipe.beacons) do
@@ -680,8 +692,8 @@ function ModelBuilder.copyBlock(into_model, into_block, from_block)
                         end
                     end
 
-                    if recipe.contraint ~= nil then
-                        recipe_model.contraint = table.deepcopy(recipe.contraint)
+                    if recipe.contraints ~= nil then
+                        recipe_model.contraints = table.deepcopy(recipe.contraints)
                     end
                     into_block.children[recipe_model.id] = recipe_model
                     child_index = child_index + 1
@@ -691,9 +703,25 @@ function ModelBuilder.copyBlock(into_model, into_block, from_block)
         end
         if into_block ~= nil then
             table.reindex_list(into_block.children)
+            into_block.unlinked = from_block.unlinked
+            into_block.by_factory = from_block.by_factory
+            into_block.by_product = from_block.by_product
+            into_block.by_limit = from_block.by_limit
+            into_block.solver = from_block.solver
+            into_block.consumer = from_block.consumer
+            if from_block.products ~= nil then
+                into_block.products = table.deepcopy(from_block.products)
+            end
+            if from_block.ingredients ~= nil then
+                into_block.ingredients = table.deepcopy(from_block.ingredients)
+            end
             if from_block.products_linked ~= nil then
                 into_block.products_linked = table.deepcopy(from_block.products_linked)
             end
+            if from_block.contraints ~= nil then
+                into_block.contraints = table.deepcopy(from_block.contraints)
+            end
+            
         end
     end
 end
@@ -719,7 +747,7 @@ function ModelBuilder.copyFactory(factory)
         end
     end
     if factory.module_priority ~= nil then
-        new_factory.module_priority = table.clone(factory.module_priority)
+        new_factory.module_priority = table.deepcopy(factory.module_priority)
     end
     return new_factory
 end
@@ -739,7 +767,7 @@ function ModelBuilder.copyBeacon(beacon)
         end
     end
     if beacon.module_priority ~= nil then
-        new_beacon.module_priority = table.clone(beacon.module_priority)
+        new_beacon.module_priority = table.deepcopy(beacon.module_priority)
     end
     return new_beacon
 end
@@ -747,40 +775,71 @@ end
 -------------------------------------------------------------------------------
 ---Set module model
 ---@param factory FactoryData
----@param module_name string
----@param module_value number
+---@param new_module ModuleData
 ---@return boolean
-function ModelBuilder.setModuleModel(factory, module_name, module_value)
+function ModelBuilder.setModuleModel(factory, new_module)
     local element_prototype = EntityPrototype(factory)
-    if factory.modules ~= nil and factory.modules[module_name] == module_value then return false end
-    factory.modules = {}
-    factory.modules[module_name] = 0
-    if module_value <= element_prototype:getModuleInventorySize() then
-        factory.modules[module_name] = module_value
-    else
-        factory.modules[module_name] = element_prototype:getModuleInventorySize()
+    -- check value is already ok
+    if factory.modules ~= nil then
+        for _, module in pairs(factory.modules) do
+            if Model.compareModules(module, new_module, true) then return false end
+        end
     end
+    factory.modules = {}
+    local clone_module = table.deepcopy(new_module)
+    if clone_module.amount > element_prototype:getModuleInventorySize() then
+        clone_module.amount = element_prototype:getModuleInventorySize()
+    end
+    table.insert(factory.modules, clone_module)
     return true
 end
 
 -------------------------------------------------------------------------------
 ---Append module model
 ---@param factory FactoryData
----@param module_name string
----@param module_value number
+---@param new_module ModuleData
 ---@return boolean
-function ModelBuilder.appendModuleModel(factory, module_name, module_value)
+function ModelBuilder.appendModuleModel(factory, new_module)
     local factory_prototype = EntityPrototype(factory)
-    if factory.modules ~= nil and factory.modules[module_name] == module_value then return false end
+    -- check value is already ok
+    if factory.modules ~= nil then
+        for _, module in pairs(factory.modules) do
+            if Model.compareModules(module, new_module, true) then return false end
+        end
+    end
     local count_modules = Model.countModulesModel(factory)
-    if count_modules >= factory_prototype:getModuleInventorySize() then
+    local module_inventory_size = factory_prototype:getModuleInventorySize()
+    if count_modules >= module_inventory_size then
+        -- full inventory
         return false
-    elseif (count_modules + module_value) <= factory_prototype:getModuleInventorySize() then
-        factory.modules[module_name] = module_value
+    elseif (count_modules + new_module.amount) <= module_inventory_size then
+        -- add module quantity
+        local found = false
+        for _, module in pairs(factory.modules) do
+            if Model.compareModules(module, new_module) then
+                module.amount = new_module.amount
+                found = true
+            end
+        end
+        if found == false then
+            local clone_module = table.deepcopy(new_module)
+            table.insert(factory.modules, clone_module)
+        end
     else
-        factory.modules[module_name] = 0
-        local delta = factory_prototype:getModuleInventorySize() - Model.countModulesModel(factory)
-        factory.modules[module_name] = delta
+        -- append module for full inventory
+        local delta = module_inventory_size - count_modules
+        local found = false
+        for _, module in pairs(factory.modules) do
+            if Model.compareModules(module, new_module) then
+                module.amount = module.amount + delta
+                found = true
+            end
+        end
+        if found == false then
+            local clone_module = table.deepcopy(new_module)
+            clone_module.amount = delta
+            table.insert(factory.modules, clone_module)
+        end
     end
     return true
 end
@@ -835,12 +894,13 @@ end
 ---@param beacon BeaconData
 ---@param recipe RecipeData
 ---@param module_name string
+---@param module_quality string
 ---@param module_max number
-function ModelBuilder.addBeaconModule(beacon, recipe, module_name, module_max)
+function ModelBuilder.addBeaconModule(beacon, recipe, module_name, module_quality, module_max)
     local module = ItemPrototype(module_name)
     if recipe ~= nil and module:native() ~= nil then
         if Player.checkFactoryLimitationModule(module:native(), recipe) == true then
-            local module_priority = ModelBuilder.addModulePriority(beacon, module_name, module_max or false)
+            local module_priority = ModelBuilder.addModulePriority(beacon, module_name, module_quality, module_max or false)
             ModelBuilder.setBeaconModulePriority(beacon, recipe, module_priority)
         end
     end
@@ -851,11 +911,12 @@ end
 ---@param beacon BeaconData
 ---@param recipe RecipeData
 ---@param module_name string
+---@param module_quality string
 ---@param module_max number
-function ModelBuilder.removeBeaconModule(beacon, recipe, module_name, module_max)
+function ModelBuilder.removeBeaconModule(beacon, recipe, module_name, module_quality, module_max)
     local module = ItemPrototype(module_name)
     if recipe ~= nil and module:native() ~= nil then
-        local module_priority = ModelBuilder.removeModulePriority(beacon, module_name, module_max or false)
+        local module_priority = ModelBuilder.removeModulePriority(beacon, module_name, module_quality, module_max or false)
         ModelBuilder.setBeaconModulePriority(beacon, recipe, module_priority)
     end
 end

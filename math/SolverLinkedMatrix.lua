@@ -467,7 +467,10 @@ function SolverLinkedMatrix:get_block_matrix(block, parameters)
                 child_info.type = recipe.type
                 child_info.tooltip = recipe.name .. "\nRecette"
                 child_info.recipe_energy = recipe_prototype:getEnergy(recipe.factory)
-                child_info.factory_count = recipe.factory.input or 0
+                child_info.factory_count = 0
+                if recipe.factory ~= nil then
+                    child_info.factory_count = recipe.factory.input or 0
+                end
                 child_info.consumer = recipe.consumer
 
                 recipe.base_time = block.time
@@ -478,7 +481,10 @@ function SolverLinkedMatrix:get_block_matrix(block, parameters)
                     ModelCompute.computeFactory(recipe)
                 end
                 
-                child_info.factory_speed = recipe.factory.speed or 0
+                child_info.factory_speed = 0
+                if recipe.factory ~= nil then
+                    child_info.factory_speed = recipe.factory.speed or 0
+                end
 
                 child_info.products = recipe_prototype:getProducts(recipe.factory)
                 child_info.ingredients = recipe_prototype:getIngredients(recipe.factory)

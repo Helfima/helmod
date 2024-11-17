@@ -1,4 +1,43 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.7
+Date: 2024-11-17
+  Features:
+    - Added quality selector for machine and module in recipe edition
+  Changes:
+    - Changed all button with sprite to implement quality
+    - Changed all tooltips to implement quality
+    - Changed default Amount affect one = 1, Beacon by factory = 1/8 and Constant beacon = 0 (new game)
+    - Model version modified at 2, migration to implement quality in the modules
+    - Updated RU locale
+  Bugfixes:
+    - Fix error on accumulator recipe
+    - Fix Downloading a Production Line with spoiling recipe attempts to index a null factory
+    - Fix Copy & paste functions reverting some production line settings
+---------------------------------------------------------------------------------------------------
+Version: 2.0.6
+Date: 2024-11-07
+  Changes:
+    - Added agricultural recipe for agricultural-tower
+    - Added spoil recipe
+---------------------------------------------------------------------------------------------------
+Version: 2.0.5
+Date: 2024-11-06
+  Changes:
+    - Reworked custom fluid recipe created by offshore-pump
+    - Implemented productivity bonus on recipe when technology researched (need refresh sheet)
+  Bugfixes:
+    - Fix error on accumulator recipe
+    - Fix search recipe in boiler recipes when click a ingredient or a product
+    - Fix limitation message when module is not usable (module priority)
+    - Fix copy block parameters (copy or download)
+---------------------------------------------------------------------------------------------------
+Version: 2.0.4
+Date: 2024-10-29
+  Changes:
+    - Updated locale DE
+  Bugfixes:
+    - Fix error on smart pipette
+---------------------------------------------------------------------------------------------------
 Version: 2.0.3
 Date: 2024-10-28
   Changes:

@@ -34,6 +34,7 @@ require "selector.RecipeSelector"
 require "selector.TechnologySelector"
 require "selector.ItemSelector"
 require "selector.FluidSelector"
+require "selector.TileSelector"
 
 require "model.Prototype"
 require "model.ElectricPrototype"
@@ -45,6 +46,7 @@ require "model.ItemPrototype"
 require "model.Product"
 require "model.RecipePrototype"
 require "model.Technology"
+require "model.TilePrototype"
 
 ModGui = require "mod-gui"
 Cache = require "data.Cache"
@@ -96,6 +98,7 @@ function Controller:prepare()
   table.insert(forms, TechnologySelector("HMTechnologySelector"))
   table.insert(forms, ItemSelector("HMItemSelector"))
   table.insert(forms, FluidSelector("HMFluidSelector"))
+  table.insert(forms, TileSelector("HMTileSelector"))
 
   table.insert(forms, LogisticEdition("HMLogisticEdition"))
   table.insert(forms, ModelEdition("HMModelEdition"))
@@ -131,6 +134,7 @@ function Controller:on_init()
   table.insert(forms, TechnologySelector("HMTechnologySelector"))
   table.insert(forms, ItemSelector("HMItemSelector"))
   table.insert(forms, FluidSelector("HMFluidSelector"))
+  table.insert(forms, TileSelector("HMTileSelector"))
   for _,form in pairs(forms) do
     form:prepare()
   end

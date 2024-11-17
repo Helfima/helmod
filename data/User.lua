@@ -172,11 +172,11 @@ function User.setDefaultFactory(recipe)
     local category = recipe_prototype:getCategory()
     local factory = recipe.factory
     if category ~= nil then
-        local default_category = { name = factory.name, fuel = factory.fuel }
+        local default_category = { name = factory.name, quality = factory.quality, fuel = factory.fuel }
         if factory.module_priority ~= nil then
             default_category.module_priority = {}
             for _, priority in pairs(factory.module_priority) do
-                table.insert(default_category.module_priority, { name = priority.name, value = priority.value })
+                table.insert(default_category.module_priority, table.deepcopy(priority))
             end
         end
         default_factory[category] = default_category
@@ -219,12 +219,12 @@ function User.setDefaultBeacons(recipe)
     local default_category = {}
     if category ~= nil then
         for _, beacon in pairs(beacons) do
-            local default_beacon = { name = beacon.name, combo = beacon.combo, per_factory = beacon.per_factory, per_factory_constant =
+            local default_beacon = { name = beacon.name, quality = beacon.quality, combo = beacon.combo, per_factory = beacon.per_factory, per_factory_constant =
             beacon.per_factory_constant }
             if beacon.module_priority ~= nil then
                 default_beacon.module_priority = {}
                 for _, priority in pairs(beacon.module_priority) do
-                    table.insert(default_beacon.module_priority, { name = priority.name, value = priority.value })
+                    table.insert(default_beacon.module_priority, table.deepcopy(priority))
                 end
             end
             table.insert(default_category, default_beacon)
@@ -437,7 +437,7 @@ end
 -------------------------------------------------------------------------------
 ---Get preference settings
 ---@param type string
----@param name string
+---@param name? string
 ---@return any
 function User.getPreferenceSetting(type, name)
     local preference_type = User.getPreference(type)

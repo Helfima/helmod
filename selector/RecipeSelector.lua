@@ -93,9 +93,9 @@ function RecipeSelector:updateGroups(list_products, list_ingredients, list_trans
       self:appendGroups(recipe, "recipe-burnt", list_products, list_ingredients, list_translate)
     end
   end
-  -- for key, recipe in pairs(Player.getFluidRecipes()) do
-  --   self:appendGroups(recipe, "fluid", list_products, list_ingredients, list_translate)
-  -- end
+  for key, recipe in pairs(Player.getFluidRecipes()) do
+    self:appendGroups(recipe, "fluid", list_products, list_ingredients, list_translate)
+  end
   for key, recipe in pairs(Player.getBoilerRecipes()) do
     self:appendGroups(recipe, "boiler", list_products, list_ingredients, list_translate)
   end
@@ -107,6 +107,12 @@ function RecipeSelector:updateGroups(list_products, list_ingredients, list_trans
   end
   for key, entity in pairs(Player.getEnergyMachines()) do
     self:appendGroups(entity, "energy", list_products, list_ingredients, list_translate)
+  end
+  for key, recipe in pairs(Player.getAgriculturalRecipes()) do
+    self:appendGroups(recipe, "agricultural", list_products, list_ingredients, list_translate)
+  end
+  for key, recipe in pairs(Player.getSpoilableRecipes()) do
+    self:appendGroups(recipe, "spoiling", list_products, list_ingredients, list_translate)
   end
 end
 
@@ -213,7 +219,7 @@ function RecipeSelector:buildPrototypeTooltip(prototype)
     if prototype.type == "boiler" then
       entities = Player.getBoilersForRecipe(recipe_prototype)
     elseif prototype.type == "fluid" then
-      entities = Player.getOffshorePumps(prototype.name)
+      entities = Player.getOffshorePumps()
     end
     if table.size(entities) > 0 then
       table.insert(tooltip, {"", "\n", helmod_tag.font.default_bold, helmod_tag.color.gold, {"helmod_common.made-in"}, ":", helmod_tag.color.close, helmod_tag.font.close})

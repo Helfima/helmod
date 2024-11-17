@@ -131,7 +131,7 @@ end
 ---@return number --default 0
 function ElectricSourcePrototype:getInputFlowLimit()
   if self.lua_prototype ~= nil then
-    return (self.lua_prototype.input_flow_limit or 0) * 60
+    return (self.lua_prototype.get_input_flow_limit() or 0) * 60
   end
   return 0
 end
@@ -141,7 +141,7 @@ end
 ---@return number --default 0
 function ElectricSourcePrototype:getOutputFlowLimit()
   if self.lua_prototype ~= nil then
-    return (self.lua_prototype.output_flow_limit or 0) * 60
+    return (self.lua_prototype.get_output_flow_limit() or 0) * 60
   end
   return 0
 end

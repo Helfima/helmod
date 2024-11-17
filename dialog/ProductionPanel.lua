@@ -10,7 +10,7 @@ end)
 -------------------------------------------------------------------------------
 ---On initialization
 function ProductionPanel:onInit()
-	self.panelCaption = string.format("%s %s %s", "Helmod", script.active_mods["helmod"], "Experimental (Quality not implemented)")
+	self.panelCaption = string.format("%s %s %s", "Helmod", script.active_mods["helmod"], "Experimental")
 end
 
 -------------------------------------------------------------------------------
@@ -1098,14 +1098,16 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 	---col factory
 	local factory = recipe.factory
 	local cell_factory = GuiElement.add(gui_table, GuiTable("factory", recipe.id):column(2):style("helmod_table_list"))
-	local gui_cell_factory = GuiCellFactory(self.classname, "factory-action", model.id, block.id, recipe.id):element(factory):tooltip("tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit):controlInfo( "crafting-add")
-	if block.by_limit == true then
-		gui_cell_factory:byLimitUri(self.classname, "update-factory-limit", model.id, block.id, recipe.id)
+	if factory ~= nil then
+		local gui_cell_factory = GuiCellFactory(self.classname, "factory-action", model.id, block.id, recipe.id):element(factory):tooltip("tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit):controlInfo( "crafting-add")
+		if block.by_limit == true then
+			gui_cell_factory:byLimitUri(self.classname, "update-factory-limit", model.id, block.id, recipe.id)
+		end
+		if block.by_factory == true then
+			gui_cell_factory:byFactory(self.classname, "update-factory-number", model.id, block.id, recipe.id)
+		end
+		GuiElement.add(cell_factory, gui_cell_factory)
 	end
-	if block.by_factory == true then
-		gui_cell_factory:byFactory(self.classname, "update-factory-number", model.id, block.id, recipe.id)
-	end
-	GuiElement.add(cell_factory, gui_cell_factory)
 
 	---col beacon
 	local beacons = recipe.beacons

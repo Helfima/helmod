@@ -272,7 +272,7 @@ end
 ---@param recipe table
 ---@return number
 function Product:getProductivityBonus(recipe)
-  if recipe.time == nil or recipe.isluaobject or recipe.factory == nil or recipe.factory.effects == nil then return 1 end
+  if recipe.time == nil or recipe.isluaobject or recipe.factory == nil or recipe.factory.effects == nil then return 0 end
   local productivity = recipe.factory.effects.productivity
   local capped_time = recipe.time / recipe.factory.speed
   local factory_speed = recipe.factory.speed_total or 1

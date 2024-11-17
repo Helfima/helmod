@@ -376,7 +376,7 @@ function PreferenceEdition:updatePriorityModule(event)
         for index, element in pairs(priority_modules[configuration_priority]) do
             local tooltip = GuiTooltipModule("tooltip.add-module"):element({ type = "item", name = element.name })
             GuiElement.add(priority_table_panel, GuiButtonSprite(self.classname, "do-nothing", index):sprite("entity", element.name):tooltip(tooltip))
-            GuiElement.add(priority_table_panel, GuiTextField(self.classname, "priority-module-update", index):text(element.value))
+            GuiElement.add(priority_table_panel, GuiTextField(self.classname, "priority-module-update", index):text(element.amount))
             GuiElement.add(priority_table_panel, GuiButtonSprite(self.classname, "priority-module-remove", index):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"):tooltip(tooltip))
         end
     end
@@ -687,12 +687,12 @@ function PreferenceEdition:onEvent(event)
         local configuration_priority = User.getParameter("configuration_priority") or 1
         local priority_modules = User.getParameter("priority_modules") or {}
         if table.size(priority_modules) == 0 then
-            table.insert(priority_modules, { { name = event.item1, value = 1 } })
+            table.insert(priority_modules, { { name = event.item1, amount = 1 } })
             User.setParameter("configuration_priority", 1)
             User.setParameter("priority_modules", priority_modules)
         else
             if priority_modules[configuration_priority] ~= nil then
-                table.insert(priority_modules[configuration_priority], { name = event.item1, value = 1 })
+                table.insert(priority_modules[configuration_priority], { name = event.item1, amount = 1 })
             end
         end
         self:updatePriorityModule(event)
@@ -705,7 +705,7 @@ function PreferenceEdition:onEvent(event)
         local priority_index = tonumber(event.item1)
         if priority_modules ~= nil and priority_modules[configuration_priority] ~= nil and priority_modules[configuration_priority][priority_index] ~= nil then
             local text = event.element.text
-            priority_modules[configuration_priority][priority_index].value = tonumber(text)
+            priority_modules[configuration_priority][priority_index].amount = tonumber(text)
         end
         self:updatePriorityModule(event)
         Controller:send("on_gui_priority_module", event)
