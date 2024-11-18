@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.10
+Date: 2024-11-18
+  Changes:
+    - Added quality with smart pipette
+    - Added ignored_by_productivity product amount in recipe products
+  Bugfixes:
+    - Fix error in smart pipette with module
+---------------------------------------------------------------------------------------------------
 Version: 2.0.9
 Date: 2024-11-18
   Bugfixes:

@@ -186,10 +186,12 @@ function Player.setSmartTool(recipe, type, index)
     local inventory_index = inventory_indexes[prototype_type] or 0
     local modules = {}
     local stack_index = 0
-    for name, value in pairs(machine.modules or {}) do
-        if modules[name] == nil then modules[name] = {id={name=name,quality=nil},items={in_inventory={}}} end
-        for i = 1, value, 1 do
-            table.insert(modules[name].items.in_inventory,{inventory=inventory_index, stack=stack_index})
+    for _, module in pairs(machine.modules or {}) do
+        local module_key = Model.getQualityElementKey(module)
+        local module_amount = module.amount or 0
+        if modules[module_key] == nil then modules[module_key] = {id={name=module.name,quality=module.quality},items={in_inventory={}}} end
+        for i = 1, module_amount, 1 do
+            table.insert(modules[module_key].items.in_inventory,{inventory=inventory_index, stack=stack_index})
             stack_index = stack_index + 1
         end
     end
@@ -200,6 +202,7 @@ function Player.setSmartTool(recipe, type, index)
     local entity = {
         entity_number = 1,
         name = machine.name,
+        quality = machine.quality,
         position = { 0, 0 },
         items = items
     }

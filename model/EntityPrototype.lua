@@ -99,8 +99,7 @@ end
 ---@return number --default 0
 function EntityPrototype:getMaxEnergyUsage()
   if self.lua_prototype ~= nil then
-    local qualities = prototypes.quality
-    local max_energy_usage = self.lua_prototype.get_max_energy_usage()
+    local max_energy_usage = self.lua_prototype.get_max_energy_usage(self.factory.quality)
     return max_energy_usage * 60 / self:getEffectivity()
   end
   return 0
