@@ -405,6 +405,9 @@ end
 ---@param element table
 ---@return string
 function Model.getQualityElementKey(element)
+  if element.quality == nil then
+    return element.name
+  end
   return string.format("%s-%s", element.name, element.quality)
 end
 

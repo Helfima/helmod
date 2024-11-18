@@ -69,7 +69,14 @@ if storage.users then
             end
             if user.parameter.default_factory then
                 for _, default_factory in pairs(user.parameter.default_factory) do
-                    migration_priority(default_factory.priority_module)
+                    migration_factory(default_factory)
+                end
+            end
+            if user.parameter.default_beacons then
+                for _, default_beacons in pairs(user.parameter.default_beacons) do
+                    for _, default_beacon in pairs(default_beacons) do
+                        migration_factory(default_beacon)
+                    end
                 end
             end
         end

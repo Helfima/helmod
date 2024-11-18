@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.9
+Date: 2024-11-18
+  Bugfixes:
+    - Fix failure in migration 2.0.7 (removed and move to 2.0.9)
+    - Fix block generator in Recipe Explorer panel
+    - Fix error in statistic panel
+---------------------------------------------------------------------------------------------------
 Version: 2.0.8
 Date: 2024-11-17
   Changes:

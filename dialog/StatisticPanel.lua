@@ -55,10 +55,10 @@ function StatisticPanel:updateInfo(event)
   local resultTable = GuiElement.add(info_panel, GuiTable("list-data"):column(column))
   --self:addProductionBlockHeader(resultTable)
   local elements = {}
+  local trains = game.train_manager.get_trains({})
+  table.insert(elements, {name = "locomotive", type = "entity", value = #trains})
   
-  table.insert(elements, {name = "locomotive", type = "entity", value = #Player.getForce().get_trains()})
-  
-  local entities = {"logistic-robot", "construction-robot", "straight-rail", "curved-rail", "electric-furnace",
+  local entities = {"logistic-robot", "construction-robot", "straight-rail", "electric-furnace",
                     "assembling-machine-3", "chemical-plant", "oil-refinery", "beacon", "lab", "electric-mining-drill",
                     "express-transport-belt", "express-underground-belt", "express-splitter"
                     , "medium-electric-pole", "big-electric-pole"}

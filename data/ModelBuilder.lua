@@ -778,6 +778,10 @@ end
 ---@param new_module ModuleData
 ---@return boolean
 function ModelBuilder.setModuleModel(factory, new_module)
+    if new_module.amount == nil then
+        -- fix if migration fail
+        new_module.amount = new_module.value or 1
+    end
     local element_prototype = EntityPrototype(factory)
     -- check value is already ok
     if factory.modules ~= nil then

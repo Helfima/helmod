@@ -87,7 +87,7 @@ function RecipeExplorer:onEvent(event)
     local parameter_name = string.format("%s_%s", "HMProductionPanel", "objects")
     local parameter_objects = User.getParameter(parameter_name)
     local model, _, _ = Model.getParameterObjects(parameter_objects)
-    local block = self:generateBlock(model, nil, recipe_explore)
+    local block = self:generateBlock(model, model.block_root, recipe_explore)
     ModelCompute.update(model)
     User.setParameter(parameter_name, {name=parameter_name, model=model.id, block=block.id})
     Controller:send("on_gui_update", event)
@@ -156,6 +156,7 @@ function RecipeExplorer:onEvent(event)
 end
 
 function RecipeExplorer:generateBlock(model, block, recipe)
+  if recipe == nil then return end
   block = ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe.name, recipe.type)
   if recipe.children then
     for _,child in pairs(recipe.children) do
