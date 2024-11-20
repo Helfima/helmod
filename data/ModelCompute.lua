@@ -196,7 +196,7 @@ end
 function ModelCompute.finalizeBlock(block, factor)
     local one_block_factor_enable = User.getPreferenceSetting("one_block_factor_enable")
     local one_block_factor = 1
-    if block.by_factory ~= true and one_block_factor_enable and block.has_input ~= true then
+    if one_block_factor_enable and block.has_input ~= true then
         one_block_factor = block.count
         block.count = 1
         block.count_limit = 1
@@ -246,17 +246,18 @@ function ModelCompute.finalizeBlock(block, factor)
                 for _, beacon in pairs(child.summary.beacons) do
                     ModelCompute.createSummaryFactory(block, beacon)
                 end
-                for module_name, module in pairs(child.summary.modules) do
-                    local summary_module = block.summary.modules[module_name]
+                for module_key, module in pairs(child.summary.modules) do
+                    local summary_module = block.summary.modules[module_key]
                     if summary_module == nil then
                         summary_module = {
-                            name = module_name,
+                            name = module.name,
+                            quality = module.quality,
                             type = "item",
                             count = 0,
                             count_limit = 0,
                             count_deep = 0
                         }
-                        block.summary.modules[module_name] = summary_module
+                        block.summary.modules[module_key] = summary_module
                     end
                     summary_module.count = summary_module.count + module.count
                     summary_module.count_limit = summary_module.count

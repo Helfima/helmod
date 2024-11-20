@@ -251,6 +251,17 @@ function Model.newBlock(model, child)
 end
 
 -------------------------------------------------------------------------------
+---Retrun true if is a unlinked block
+---@param block BlockData
+---@return boolean
+function Model.isUnlinkedBlock(block)
+  if block == nil or block.class ~= "Block" then
+    return false
+  end
+  return block.unlinked and true or false
+end
+
+-------------------------------------------------------------------------------
 ---Retrun true if is a block
 ---@param child RecipeData | BlockData
 ---@return boolean

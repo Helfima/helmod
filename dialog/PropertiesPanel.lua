@@ -410,8 +410,7 @@ function PropertiesPanel:updateHeader(event)
         switch_nil = "right"
     end
     GuiElement.add(options_table, GuiLabel("filter-nil-property"):caption("Hide nil values:"))
-    local filter_switch = GuiElement.add(options_table,
-        GuiSwitch(self.classname, "filter-nil-property-switch"):state(switch_nil):leftLabel("Off"):rightLabel("On"))
+    local filter_switch = GuiElement.add(options_table, GuiSwitch(self.classname, "filter-nil-property-switch"):state(switch_nil):leftLabel("Off"):rightLabel("On"))
     ---difference values
     local switch_nil = "left"
     if User.getParameter("filter-difference-property") == true then

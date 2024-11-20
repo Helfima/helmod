@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.11
+Date: 2024-11-18
+  Changes:
+    - Change allowed link/unlink a block when Computing by factory selected 
+  Bugfixes:
+    - Fix modules summary in the model compute
+---------------------------------------------------------------------------------------------------
 Version: 2.0.10
 Date: 2024-11-18
   Changes:

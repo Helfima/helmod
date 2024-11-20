@@ -538,7 +538,7 @@ function SolverLinkedMatrix:add_matrix_row(matrix, child, child_info, is_block, 
     if child_info.consumer == true then
         rowParameters.consumer = 1
     end
-    if child.unlinked == true then
+    if Model.isUnlinkedBlock(child) then
         rowParameters.unlinked = 1
     end
     rowParameters.by_product = 0

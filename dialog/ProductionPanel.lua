@@ -362,16 +362,11 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
 	GuiElement.add(group_tool, GuiButton("HMSummaryPanel", "OPEN", model.id, block_id):sprite("menu", defines.sprites.list_view.black, defines.sprites.list_view.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary" }))
 	if block ~= nil then
 		---unlinked button
-		local linked_button
-		local unlinked = block.unlinked and true or false
+		local unlinked = Model.isUnlinkedBlock(block)
 		if unlinked or block.index == 0 then
-			linked_button = GuiElement.add(group_tool, GuiButton(self.classname, "block-unlink", model.id, block.id):sprite("menu", defines.sprites.unplugged.black, defines.sprites.unplugged.black):style("helmod_button_menu"):tooltip({ "tooltip.unlink-element" }))
+			GuiElement.add(group_tool, GuiButton(self.classname, "block-unlink", model.id, block.id):sprite("menu", defines.sprites.unplugged.black, defines.sprites.unplugged.black):style("helmod_button_menu"):tooltip({ "tooltip.unlink-element" }))
 		else
-			linked_button = GuiElement.add(group_tool, GuiButton(self.classname, "block-unlink", model.id, block.id):sprite("menu", defines.sprites.plugged.white, defines.sprites.plugged.black):style("helmod_button_menu_selected"):tooltip({ "tooltip.unlink-element" }))
-		end
-		if block.by_factory == true then
-			linked_button.enabled = false
-			linked_button.tooltip = { "tooltip.block-cannot-link-by-factory" }
+			GuiElement.add(group_tool, GuiButton(self.classname, "block-unlink", model.id, block.id):sprite("menu", defines.sprites.plugged.white, defines.sprites.plugged.black):style("helmod_button_menu_selected"):tooltip({ "tooltip.unlink-element" }))
 		end
 
 		GuiElement.add(group_tool, GuiButton("HMPinPanel", "OPEN", model.id, block_id):sprite("menu", defines.sprites.push_pin.black, defines.sprites.push_pin.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-pin" }))
@@ -1200,7 +1195,7 @@ end
 ---@param block BlockData
 ---@return LuaGuiElement
 function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
-	local unlinked = block.unlinked and true or false
+	local unlinked = Model.isUnlinkedBlock(block)
 	local block_by_product = not (block ~= nil and block.by_product == false)
 	---col action
 	local cell_action = GuiElement.add(gui_table, GuiTable("action", block.id):column(3))
@@ -1226,15 +1221,10 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 
         local tree_up = GuiElement.add(cell_action, GuiButton(self.classname, "tree-block-up", model.id, parent.id, block.id):sprite("menu", defines.sprites.arrow_right.black, defines.sprites.arrow_right.black):style("helmod_button_menu_sm"):tooltip({ "tooltip.down-element-in-tree", User.getModSetting("row_move_step") }))
         GuiElement.add(cell_action, GuiButton(self.classname, uri_button_bottom, model.id, parent.id, block.id):sprite("menu", defines.sprites.arrow_bottom.black, defines.sprites.arrow_bottom.black):style("helmod_button_menu_sm"):tooltip({ "tooltip.down-element", User.getModSetting("row_move_step") }))
-        local linked_button
         if unlinked then
-            linked_button = GuiElement.add(cell_action, GuiButton(self.classname, "block-unlink", model.id, block.id):sprite("menu", defines.sprites.unplugged.black, defines.sprites.unplugged.black):style("helmod_button_menu_sm"):tooltip({"tooltip.unlink-element" }))
+            GuiElement.add(cell_action, GuiButton(self.classname, "block-unlink", model.id, block.id):sprite("menu", defines.sprites.unplugged.black, defines.sprites.unplugged.black):style("helmod_button_menu_sm"):tooltip({"tooltip.unlink-element" }))
         else
-            linked_button = GuiElement.add(cell_action, GuiButton(self.classname, "block-unlink", model.id, block.id):sprite("menu", defines.sprites.plugged.white, defines.sprites.plugged.black):style("helmod_button_menu_sm_selected"):tooltip({ "tooltip.unlink-element" }))
-        end
-        if block.by_factory == true then
-            linked_button.enabled = false
-            linked_button.tooltip = { "tooltip.block-cannot-link-by-factory" }
+            GuiElement.add(cell_action, GuiButton(self.classname, "block-unlink", model.id, block.id):sprite("menu", defines.sprites.plugged.white, defines.sprites.plugged.black):style("helmod_button_menu_sm_selected"):tooltip({ "tooltip.unlink-element" }))
         end
     end
     ---common cols
@@ -1292,7 +1282,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						product.count_limit = lua_product.amount * (block.count_limit or 0)
 						product.count_deep = lua_product.amount * (block.count_deep or 0)
 
-						if not (block_by_product) or not (block.unlinked) or block.by_factory == true then
+						if not (block_by_product) or not (Model.isUnlinkedBlock(block)) or block.by_factory == true then
 							button_action = "production-recipe-product-add"
 							button_tooltip = "tooltip.add-recipe"
 						else
@@ -1305,7 +1295,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						end
 						---color
 						if product.state == 1 then
-							if not (block.unlinked) or block.by_factory == true then
+							if not (Model.isUnlinkedBlock(block)) or block.by_factory == true then
 								product_color = User.getThumbnailColor(defines.thumbnail_color.names.product_default)
 							else
 								block_id = block.id
