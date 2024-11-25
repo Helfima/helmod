@@ -16,7 +16,6 @@ require "dialog.Download"
 require "dialog.Calculator"
 require "dialog.RecipeExplorer"
 require "dialog.ProductionPanel"
-require "dialog.PropertiesPanel"
 require "dialog.PrototypeFiltersPanel"
 require "dialog.UnitTestPanel"
 require "dialog.RichTextPanel"
@@ -88,7 +87,6 @@ function Controller:prepare()
   table.insert(forms, Calculator("HMCalculator"))
   table.insert(forms, RecipeExplorer("HMRecipeExplorer"))
   table.insert(forms, ProductionPanel("HMProductionPanel"))
-  table.insert(forms, PropertiesPanel("HMPropertiesPanel"))
   table.insert(forms, PrototypeFiltersPanel("HMPrototypeFiltersPanel"))
   table.insert(forms, UnitTestPanel("HMUnitTestPanel"))
   table.insert(forms, RichTextPanel("HMRichTextPanel"))
