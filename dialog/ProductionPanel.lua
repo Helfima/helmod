@@ -448,7 +448,7 @@ function ProductionPanel:updateSubMenuRightPanel(model, block)
 			local item_logistic = Player.getDefaultItemLogistic(type)
 			local style = "helmod_button_menu"
 			if logistic_row_item == type then style = "helmod_button_menu_selected" end
-			local button = GuiElement.add(logistic2, GuiButton(self.classname, "change-logistic-item", type):sprite("sprite", item_logistic):style(style):tooltip({ "tooltip.logistic-row-choose" }))
+			local button = GuiElement.add(logistic2, GuiButtonSprite(self.classname, "change-logistic-item", type):sprite_with_quality(item_logistic.type, item_logistic.name, item_logistic.quality):style(style):tooltip({ "tooltip.logistic-row-choose" }))
 			button.style.padding = { 0, 0, 0, 0 }
 		end
 
@@ -459,7 +459,7 @@ function ProductionPanel:updateSubMenuRightPanel(model, block)
 			local fluid_logistic = Player.getDefaultFluidLogistic(type)
 			local style = "helmod_button_menu"
 			if logistic_row_fluid == type then style = "helmod_button_menu_selected" end
-			local button = GuiElement.add(logistic3, GuiButton(self.classname, "change-logistic-fluid", type):sprite("sprite", fluid_logistic):style(style):tooltip({ "tooltip.logistic-row-choose" }))
+			local button = GuiElement.add(logistic3, GuiButton(self.classname, "change-logistic-fluid", type):sprite_with_quality(fluid_logistic.type, fluid_logistic.name, fluid_logistic.quality):style(style):tooltip({ "tooltip.logistic-row-choose" }))
 			button.style.padding = { 0, 0, 0, 0 }
 		end
 	end

@@ -5,6 +5,10 @@ Date: 2024-11-25
     - Removed Special Properties Panel, reworked and will move in new mod HelfimaUtils
   Changes:
     - Added extra_count_fraction product amount in recipe products
+    - Added quality in display logistic
+    - RU locale update
+  Bugfixes:
+    - Fix apply beacon on line when is not possible with a machine with 0 module slot
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.11
 Date: 2024-11-18

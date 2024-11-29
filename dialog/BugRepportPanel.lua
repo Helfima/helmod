@@ -30,7 +30,7 @@ end
 ---@param height_main number
 function BugReportPanel:onStyle(styles, width_main, height_main)
     styles.flow_panel = {
-        minimal_width = 322,
+        minimal_width = width_main * 0.3,
         maximal_height = height_main
     }
 end
@@ -47,33 +47,35 @@ end
 ---@param event LuaEvent
 function BugReportPanel:updateInfo(event)
     local info_panel = self:getFramePanel("info_panel")
+    info_panel.style.horizontally_stretchable = true
     info_panel.style.vertically_stretchable = true
     info_panel.clear()
 
     local last_error = Player.getLastError()
-        local repport = {}
+    local repport = {}
 
-        if last_error ~= nil then
-            table.insert(repport,"```")
-            table.insert(repport,"---- Error ----")
-            table.insert(repport,last_error)
-        else
-            GuiElement.add(info_panel, GuiLabel("no_error"):caption({"helmod_bug-repport-panel.no_error"}))
-        end
-        
-        table.insert(repport,"---- Feature Flags ----")
-        for feature_flag, value in pairs(script.feature_flags) do
-            table.insert(repport, feature_flag..":"..tostring(value))
-        end
-    
-        table.insert(repport,"---- Mods ----")
-        for name, version in pairs(script.active_mods) do
-            table.insert(repport, name..":"..tostring(version))
-        end
+    if last_error ~= nil then
         table.insert(repport,"```")
+        table.insert(repport,"---- Error ----")
+        table.insert(repport,last_error)
+    else
+        GuiElement.add(info_panel, GuiLabel("no_error"):caption({"helmod_bug-repport-panel.no_error"}))
+    end
     
-        local message = table.concat(repport,"\n")
-        local textbox = GuiElement.add(info_panel, GuiTextBox("bug_repport"):text(message))
+    table.insert(repport,"---- Feature Flags ----")
+    for feature_flag, value in pairs(script.feature_flags) do
+        table.insert(repport, feature_flag..":"..tostring(value))
+    end
+
+    table.insert(repport,"---- Mods ----")
+    for name, version in pairs(script.active_mods) do
+        table.insert(repport, name..":"..tostring(version))
+    end
+    table.insert(repport,"```")
+
+    local message = table.concat(repport,"\n")
+    local textbox = GuiElement.add(info_panel, GuiTextBox("bug_repport"):text(message))
+    textbox.style.width = 600
 end
 
 -------------------------------------------------------------------------------

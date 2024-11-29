@@ -26,11 +26,16 @@ function Player.getStorageDebug()
 end
 -------------------------------------------------------------------------------
 ---Repport error
-function Player.repportError(...)
-    Player.print(...)
-    log(...)
+---@param error string
+function Player.repportError(error)
+    Player.print(error)
+    log(error)
+    local error_message = {}
+    table.insert(error_message, error)
+    --table.insert(error_message, debug.traceback())
+    
     local storage_debug = Player.getStorageDebug()
-    storage_debug[Lua_player.index] = ...
+    storage_debug[Lua_player.index] = table.concat(error_message, "\n")
 end
 
 -------------------------------------------------------------------------------
@@ -1828,15 +1833,20 @@ end
 
 -------------------------------------------------------------------------------
 ---Return default item logistic
----@param type string --belt, container or transport
+---@param entity_type string --belt, container or transport
 ---@return table
-function Player.getDefaultItemLogistic(type)
-    local default = User.getParameter(string.format("items_logistic_%s", type))
+function Player.getDefaultItemLogistic(entity_type)
+    local default = User.getParameter(string.format("items_logistic_%s", entity_type))
+    if type(default) == "string" then
+        default = Model.newElement("entity", default)
+        User.setParameter(string.format("items_logistic_%s", entity_type), default)
+    end
     if default == nil then
-        local logistics = Player.getItemsLogistic(type)
+        local logistics = Player.getItemsLogistic(entity_type)
         if logistics ~= nil then
-            default = first(logistics).name
-            User.setParameter(string.format("items_logistic_%s", type), default)
+            local logistic = first(logistics)
+            default = Model.newElement("entity", logistic.name)
+            User.setParameter(string.format("items_logistic_%s", entity_type), default)
         end
     end
     return default
@@ -1860,15 +1870,19 @@ end
 
 -------------------------------------------------------------------------------
 ---Return default fluid logistic
----@param type string --pipe, container or transport
+---@param entity_type string --pipe, container or transport
 ---@return table
-function Player.getDefaultFluidLogistic(type)
-    local default = User.getParameter(string.format("fluids_logistic_%s", type))
+function Player.getDefaultFluidLogistic(entity_type)
+    local default = User.getParameter(string.format("fluids_logistic_%s", entity_type))
+    if type(default) == "string" then
+        default = Model.newElement("entity", default)
+        User.setParameter(string.format("fluids_logistic_%s", entity_type), default)
+    end
     if default == nil then
-        local logistics = Player.getFluidsLogistic(type)
+        local logistics = Player.getFluidsLogistic(entity_type)
         if logistics ~= nil then
             default = first(logistics).name
-            User.setParameter(string.format("fluids_logistic_%s", type), default)
+            User.setParameter(string.format("fluids_logistic_%s", entity_type), default)
         end
     end
     return default

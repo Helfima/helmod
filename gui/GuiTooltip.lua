@@ -326,9 +326,7 @@ function GuiTooltip.appendQuality(tooltip, element)
 			local localised_name = quality.localised_name
 			local color = quality.color
 			local color_tag = GuiElement.rgbColorTag(color)
-			table.insert(tooltip,
-				{ "", "\n", string.format("[%s=%s]", "quality", element.quality), " ", helmod_tag.font.default_bold,
-					color_tag, localised_name, helmod_tag.color.close, helmod_tag.font.close })
+			table.insert(tooltip, { "", "\n", string.format("[%s=%s]", "quality", element.quality), " ", helmod_tag.font.default_bold, color_tag, localised_name, helmod_tag.color.close, helmod_tag.font.close })
 		end
 	end
 end
@@ -352,19 +350,14 @@ function GuiTooltip:appendLogistic(tooltip, element)
 				local formated_total_value = Format.formatNumberElement(total_value)
 				local info = ""
 				if type == "inserter" then
-					info = { "", " (", { "helmod_common.capacity" }, string.format(":%s",
-						EntityPrototype(item_logistic):getInserterCapacity()), ")" }
+					info = { "", " (", { "helmod_common.capacity" }, string.format(":%s", EntityPrototype(item_logistic):getInserterCapacity()), ")" }
 				end
+				local element_sprite = GuiElement.getSpriteWithQuality("entity", item_logistic.name, item_logistic.quality)
 				if self.m_by_limit then
-					local limit_value = Format.formatNumberElement(item_prototype:countContainer(element.count_limit,
-						item_logistic, element.time))
-					table.insert(tooltip_section,
-						{ "", "\n", string.format("[%s=%s]", "entity", item_logistic), " ", helmod_tag.font.default_bold,
-							" x ", limit_value, "/", formated_total_value, helmod_tag.font.close, info })
+					local limit_value = Format.formatNumberElement(item_prototype:countContainer(element.count_limit, item_logistic, element.time))
+					table.insert(tooltip_section, { "", "\n", element_sprite, " ", helmod_tag.font.default_bold, " x ", limit_value, "/", formated_total_value, helmod_tag.font.close, info })
 				else
-					table.insert(tooltip_section,
-						{ "", "\n", string.format("[%s=%s]", "entity", item_logistic), " ", helmod_tag.font.default_bold,
-							" x ", formated_total_value, helmod_tag.font.close, info })
+					table.insert(tooltip_section, { "", "\n", element_sprite, " ", helmod_tag.font.default_bold, " x ", formated_total_value, helmod_tag.font.close, info })
 				end
 			end
 		end
@@ -377,18 +370,15 @@ function GuiTooltip:appendLogistic(tooltip, element)
 				if type == "pipe" then count = count / element.time end
 				local total_value = fluid_prototype:countContainer(count, fluid_logistic, element.time)
 				local formated_total_value = Format.formatNumberElement(total_value)
+				local element_sprite = GuiElement.getSpriteWithQuality("entity", fluid_logistic.name, fluid_logistic.quality)
 				if self.m_by_limit then
 					local limit_count = element.count_limit
 					if type == "pipe" then limit_count = limit_count / element.time end
 					local limit_value = Format.formatNumberElement(fluid_prototype:countContainer(limit_count,
 						fluid_logistic, element.time))
-					table.insert(tooltip_section,
-						{ "", "\n", string.format("[%s=%s]", "entity", fluid_logistic), " ", helmod_tag.font
-							.default_bold, " x ", limit_value, "/", formated_total_value, helmod_tag.font.close })
+					table.insert(tooltip_section, { "", "\n", element_sprite, " ", helmod_tag.font .default_bold, " x ", limit_value, "/", formated_total_value, helmod_tag.font.close })
 				else
-					table.insert(tooltip_section,
-						{ "", "\n", string.format("[%s=%s]", "entity", fluid_logistic), " ", helmod_tag.font
-							.default_bold, " x ", formated_total_value, helmod_tag.font.close })
+					table.insert(tooltip_section, { "", "\n", element_sprite, " ", helmod_tag.font .default_bold, " x ", formated_total_value, helmod_tag.font.close })
 				end
 			end
 		end
@@ -735,13 +725,10 @@ function GuiTooltipFactory.AppendFactory(tooltip, element)
 	if fuel ~= nil then
 		if fuel.temperature then
 			table.insert(tooltip,
-				{ "", "\n", string.format("[%s=%s] %s °C", fuel.type, fuel.name, fuel.temperature), " ", helmod_tag
-					.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close,
-					helmod_tag.color.close })
+				{ "", "\n", string.format("[%s=%s] %s °C", fuel.type, fuel.name, fuel.temperature), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close })
 		else
 			table.insert(tooltip,
-				{ "", "\n", string.format("[%s=%s]", fuel.type, fuel.name), " ", helmod_tag.color.gold, helmod_tag.font
-					.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close })
+				{ "", "\n", string.format("[%s=%s]", fuel.type, fuel.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close })
 		end
 	end
 	if element.module_priority then

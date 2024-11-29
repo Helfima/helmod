@@ -553,7 +553,8 @@ function ModelBuilder.setBeaconBlock(block, current_recipe)
                         if current_recipe.beacons ~= nil then
                             for key, current_beacon in pairs(current_recipe.beacons) do
                                 local beacon = Model.addBeacon(recipe, current_beacon.name, current_beacon.quality, current_beacon.combo,current_beacon.per_factory, current_beacon.per_factory_constant)
-                                ModelBuilder.setBeaconModulePriority(beacon, current_recipe, current_beacon.module_priority)
+                                -- ! apply on child recipe not the current recipe
+                                ModelBuilder.setBeaconModulePriority(beacon, recipe, current_beacon.module_priority)
                             end
                         end
                     end

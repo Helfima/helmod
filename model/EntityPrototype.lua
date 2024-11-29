@@ -916,7 +916,7 @@ end
 ---@return number --default 0
 function EntityPrototype:getInserterRotationSpeed()
   if self.lua_prototype ~= nil then
-    local rotation_speed = self.lua_prototype.get_inserter_rotation_speed()
+    local rotation_speed = self.lua_prototype.get_inserter_rotation_speed(self.factory.quality)
     return rotation_speed*60
   end
   return 0

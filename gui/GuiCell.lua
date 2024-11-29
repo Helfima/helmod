@@ -313,10 +313,10 @@ function GuiCell:add_row_logistic(parent, width, name, count, color, color_level
     local item_logistic = Player.getDefaultItemLogistic(type)
     local item_prototype = Product(element)
     
-    local logistic_cell = GuiElement.add(row, GuiFlowH("logistic-cell", item_logistic))
-    GuiElement.add(logistic_cell, GuiButtonSelectSpriteSm("HMLogisticEdition", "OPEN", "item", item_logistic):sprite("entity", item_logistic):color("flat"):tooltip(tooltip))
+    local logistic_cell = GuiElement.add(row, GuiFlowH("logistic-cell", item_logistic.name))
+    GuiElement.add(logistic_cell, GuiButtonSelectSpriteSm("HMLogisticEdition", "OPEN", "item", item_logistic.name):sprite_with_quality("entity", item_logistic.name, item_logistic.quality):color("flat"):tooltip(tooltip))
     local value = Format.formatNumberElement(item_prototype:countContainer(count, item_logistic, element.time))
-    GuiElement.add(logistic_cell, GuiLabel("label", item_logistic):caption({"", "x", value}):style("helmod_label_element"))
+    GuiElement.add(logistic_cell, GuiLabel("label", item_logistic.name):caption({"", "x", value}):style("helmod_label_element"))
   end
   ---fluid logistic
   if element.type == 1 or element.type == "fluid" then
@@ -326,10 +326,10 @@ function GuiCell:add_row_logistic(parent, width, name, count, color, color_level
     
     if type == "pipe" then count = count / element.time end
     
-    local logistic_cell = GuiElement.add(row, GuiFlowH("logistic-cell", fluid_logistic))
-    GuiElement.add(logistic_cell, GuiButtonSelectSpriteSm("HMLogisticEdition", "OPEN", "fluid", fluid_logistic):sprite("entity", fluid_logistic):color("flat"):tooltip(tooltip))
+    local logistic_cell = GuiElement.add(row, GuiFlowH("logistic-cell", fluid_logistic.name))
+    GuiElement.add(logistic_cell, GuiButtonSelectSpriteSm("HMLogisticEdition", "OPEN", "fluid", fluid_logistic.name):sprite_with_quality("entity", fluid_logistic.name, fluid_logistic.quality):color("flat"):tooltip(tooltip))
     local value = Format.formatNumberElement(fluid_prototype:countContainer(count, fluid_logistic, element.time))
-    GuiElement.add(logistic_cell, GuiLabel("label", fluid_logistic):caption({"", "x", value}):style("helmod_label_element"))
+    GuiElement.add(logistic_cell, GuiLabel("label", fluid_logistic.name):caption({"", "x", value}):style("helmod_label_element"))
   end
 end
 

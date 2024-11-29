@@ -305,6 +305,16 @@ function Model.setExpandBlock(block, value)
 end
 
 -------------------------------------------------------------------------------
+---Create model element
+---@param type string
+---@param name string
+---@param quality? string
+---@return table
+function Model.newElement(type, name, quality)
+  return {type=type, name=name, quality=quality or "normal"}
+end
+
+-------------------------------------------------------------------------------
 ---Create model Beacon
 ---@param name string
 ---@param amount number

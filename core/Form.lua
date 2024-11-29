@@ -582,7 +582,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Close dialog
----@param force boolean
+---@param force? boolean
 function Form:close(force)
   if not(self:isOpened()) and force ~= true then return end
   local flow_panel, content_panel, menu_panel = self:getPanel()
