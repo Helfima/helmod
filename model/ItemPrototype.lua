@@ -18,6 +18,14 @@ function ItemPrototype:getModuleEffects()
 end
 
 -------------------------------------------------------------------------------
+---Return module effect
+---@return number
+function ItemPrototype:getIngredientToWeightCoefficient()
+  if self.lua_prototype == nil then return 1 end
+  return self.lua_prototype.ingredient_to_weight_coefficient or 1
+end
+
+-------------------------------------------------------------------------------
 ---Return Category
 ---@return string
 function ItemPrototype:getCategory()

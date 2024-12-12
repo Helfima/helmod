@@ -655,12 +655,21 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
         end
     end
     if recipe.type == "resource" then
-        local bonus = Player.getForce().mining_drill_productivity_bonus
-        factory.effects.productivity = factory.effects.productivity + bonus
+        local mining_drill_productivity = Player.getForce().mining_drill_productivity_bonus
+        factory.effects.productivity = factory.effects.productivity + mining_drill_productivity
+
+        local quality = Player.getQualityPrototype(factory.quality)
+        local drain_modifier = quality.mining_drill_resource_drain_multiplier
+    	factory.drain_resource = factory_prototype:getResourceDrain() * drain_modifier
     end
     if recipe.type == "technology" then
-        local bonus = Player.getForce().laboratory_speed_modifier or 0
-        factory.effects.speed = factory.effects.speed + bonus * (1 + factory.effects.speed)
+        local laboratory_speed_modifier = Player.getForce().laboratory_speed_modifier or 0
+        factory.effects.speed = factory.effects.speed + laboratory_speed_modifier * (1 + factory.effects.speed)
+        local laboratory_productivity = Player.getForce().laboratory_productivity_bonus or 0
+        factory.effects.productivity = factory.effects.productivity + laboratory_productivity
+
+        local machine = ItemPrototype(factory)
+    	factory.drain_ingredient = machine:getIngredientToWeightCoefficient()
     end
     ---nuclear reactor
     if factory_prototype:getType() == "reactor" then

@@ -536,8 +536,7 @@ function RecipeEdition:onEvent(event)
         if event.action == "factory-quality-select" then
             recipe.factory.quality = event.item4
             ModelCompute.update(model)
-            self:updateFactoryInfoTool(event)
-            self:updateFactoryInfo(event)
+            self:update(event)
             Controller:send("on_gui_recipe_update", event)
         end
 
@@ -545,8 +544,7 @@ function RecipeEdition:onEvent(event)
             local beacon = ModelBuilder.getCurrentBeacon(recipe)
             beacon.quality = event.item4
             ModelCompute.update(model)
-            self:updateBeaconInfoTool(event)
-            self:updateBeaconInfo(event)
+            self:update(event)
             Controller:send("on_gui_recipe_update", event)
         end
 

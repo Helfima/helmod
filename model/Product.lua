@@ -202,11 +202,24 @@ function Product:countDeepProduct(recipe)
 end
 
 -------------------------------------------------------------------------------
+---Get amount of element
+---@param recipe RecipeData
+---@return number
+function Product:getDrainedAmount(recipe)
+  local amount = self:getElementAmount()
+  local drain = 1
+  if recipe.type == "technology" and recipe.factory ~= nil then
+    local machine = ItemPrototype(recipe.factory)
+    drain = machine:getIngredientToWeightCoefficient()
+  end
+  return amount * drain
+end
+-------------------------------------------------------------------------------
 ---Count ingredient
 ---@param recipe RecipeData
 ---@return number
 function Product:countIngredient(recipe)
-  local amount = self:getElementAmount()
+  local amount = self:getDrainedAmount(recipe)
   return amount * (recipe.count or 0)
 end
 
@@ -215,7 +228,7 @@ end
 ---@param recipe RecipeData
 ---@return number
 function Product:countLimitIngredient(recipe)
-  local amount = self:getElementAmount()
+  local amount = self:getDrainedAmount(recipe)
   return amount * (recipe.count_limit or 0)
 end
 

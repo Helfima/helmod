@@ -312,6 +312,14 @@ function GuiTooltip:appendEffectInfo(tooltip, element)
 		---pollution
 		local pollution = Format.formatNumberElement((element.pollution or 0) * 60)
 		GuiTooltip.appendLine(tooltip, nil, { "helmod_label.pollution" }, pollution)
+
+		---drain
+		if element.drain_ingredient ~= nil and element.drain_ingredient ~= 1 then
+			GuiTooltip.appendLine(tooltip, nil, { "description.science-pack-drain" }, Format.formatPercent(element.drain_ingredient) .. "%")
+		end
+		if element.drain_resource ~= nil and element.drain_resource ~= 1 then
+			GuiTooltip.appendLine(tooltip, nil, { "description.resource-drain" }, Format.formatPercent(element.drain_resource) .. "%")
+		end
 	end
 end
 

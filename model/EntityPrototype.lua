@@ -656,6 +656,14 @@ function EntityPrototype:getMiningSpeed()
 end
 
 -------------------------------------------------------------------------------
+---Return module effect
+---@return number
+function EntityPrototype:getResourceDrain()
+  if self.lua_prototype == nil then return 1 end
+  return (self.lua_prototype.resource_drain_rate_percent or 100) / 100
+end
+
+-------------------------------------------------------------------------------
 ---Return neighbour bonus
 ---@return number --default 0
 function EntityPrototype:getNeighbourBonus()
