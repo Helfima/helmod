@@ -32,7 +32,7 @@ function Player.repportError(error)
     log(error)
     local error_message = {}
     table.insert(error_message, error)
-    --table.insert(error_message, debug.traceback())
+    table.insert(error_message, debug.traceback())
     
     local storage_debug = Player.getStorageDebug()
     storage_debug[Lua_player.index] = table.concat(error_message, "\n")
@@ -1001,7 +1001,7 @@ function Player.getBoilersForRecipe(recipe_prototype)
         end
 
         ---Check input fluid
-        local input_fluid
+        local input_fluid = "water"
         local fluidbox = boiler.fluidbox_prototypes[1]
         if fluidbox.filter then
             input_fluid = fluidbox.filter.name
@@ -1011,7 +1011,7 @@ function Player.getBoilersForRecipe(recipe_prototype)
         end
 
         ---Check output fluid
-        local output_fluid
+        local output_fluid = "steam"
         for _, fluidbox in pairs(boiler.fluidbox_prototypes) do
             if fluidbox.filter and fluidbox.production_type == "output" then
                 output_fluid = fluidbox.filter.name
@@ -1388,8 +1388,8 @@ function Player.getBoilerRecipes()
     local boilers = Player.getBoilers()
 
     for boiler_name, boiler in pairs(boilers) do
-        local input_fluid
-        local output_fluid
+        local input_fluid = "water"
+        local output_fluid = "steam"
 
         local fluidbox = boiler.fluidbox_prototypes[1]
         if fluidbox.filter then

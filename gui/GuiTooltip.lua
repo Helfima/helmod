@@ -724,22 +724,31 @@ function GuiTooltipFactory.AppendFactory(tooltip, element)
 	local fuel = prototype:getFluel()
 	if fuel ~= nil then
 		if fuel.temperature then
-			table.insert(tooltip,
-				{ "", "\n", string.format("[%s=%s] %s °C", fuel.type, fuel.name, fuel.temperature), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close })
+			table.insert(tooltip,{ "", "\n", string.format("[%s=%s] %s °C", fuel.type, fuel.name, fuel.temperature), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close })
 		else
-			table.insert(tooltip,
-				{ "", "\n", string.format("[%s=%s]", fuel.type, fuel.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close })
+			table.insert(tooltip,{ "", "\n", string.format("[%s=%s]", fuel.type, fuel.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close })
 		end
 	end
 	if element.module_priority then
+		-- protect too many row
+		local tooltip_priority = {""}
+		local tooltip_priority_stage = {""}
+		table.insert(tooltip_priority,tooltip_priority_stage)
+		local index = 0
 		for _, module_priority in pairs(element.module_priority) do
 			local type = "item"
 			local module_prototype = ItemPrototype(module_priority.name)
 			local module_priority_label = module_prototype:getLocalisedName()
 			local amount = module_priority.amount or 0
 
-			GuiTooltip.appendLineSubQuantity(tooltip, type, module_priority.name, amount, module_priority_label, module_priority.quality)
+			GuiTooltip.appendLineSubQuantity(tooltip_priority_stage, type, module_priority.name, amount, module_priority_label, module_priority.quality)
+			index = index + 1
+			if index >= 18 then
+				tooltip_priority_stage = {""}
+				table.insert(tooltip_priority,tooltip_priority_stage)
+			end
 		end
+		table.insert(tooltip,tooltip_priority)
 	end
 end
 
@@ -978,6 +987,12 @@ end)
 function GuiTooltipPriority:create()
 	local tooltip = self._super.create(self)
 	if self.m_element then
+		-- protect too many row
+		local tooltip_priority = {""}
+		table.insert(tooltip,tooltip_priority)
+		local tooltip_priority_stage = {""}
+		table.insert(tooltip_priority,tooltip_priority_stage)
+		local index = 0
 		for i, priority in pairs(self.m_element) do
 			local type = "item"
 			local module_prototype = ItemPrototype(priority.name)
@@ -985,6 +1000,11 @@ function GuiTooltipPriority:create()
 			local amount = priority.amount or 0
 
 			GuiTooltip.appendLineQuantity(tooltip, type, priority.name, amount, module_priority_label, priority.quality)
+			index = index + 1
+			if index >= 18 then
+				tooltip_priority_stage = {""}
+				table.insert(tooltip_priority,tooltip_priority_stage)
+			end
 		end
 	end
 	return tooltip

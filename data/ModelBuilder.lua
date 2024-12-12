@@ -738,6 +738,7 @@ end
 ---@return FactoryData
 function ModelBuilder.copyFactory(factory)
     local new_factory = Model.newFactory(factory.name)
+    new_factory.quality = factory.quality
     new_factory.limit = factory.limit
     new_factory.fuel = factory.fuel
     new_factory.input = factory.input
@@ -758,6 +759,7 @@ end
 ---@return FactoryData
 function ModelBuilder.copyBeacon(beacon)
     local new_beacon = Model.newBeacon(beacon.name)
+    new_beacon.quality = new_beacon.quality
     new_beacon.combo = beacon.combo
     new_beacon.per_factory = beacon.per_factory
     new_beacon.per_factory_constant = beacon.per_factory_constant

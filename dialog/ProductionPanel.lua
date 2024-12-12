@@ -152,7 +152,7 @@ function ProductionPanel:getInfoPanel2()
 	local tooltip = GuiTooltipModel("tooltip.info-model"):element(model)
 
 	local info_panel = GuiElement.add(header_panel, GuiFlowV(info_name))
-	GuiElement.add(info_panel, GuiLabel("label-info"):caption({ "", self:getButtonCaption(), " [img=info]" }):style("heading_1_label"):tooltip(tooltip))
+	GuiElement.add(info_panel, GuiLabel("label-info"):caption({ "", self:getButtonCaption(), " [img=info]" }):style(defines.styles.label.frame_title):tooltip(tooltip))
 	local info_scroll = GuiElement.add(info_panel, GuiScroll(info_scroll_name):style("helmod_scroll_pane"))
 	info_scroll.style.width = 300
 

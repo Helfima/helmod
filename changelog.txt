@@ -1,4 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.13
+Date: 2024-12-03
+  Changes:
+    - Removed cap speed of 1 craft per tick 
+  Bugfixes:
+    - Fix error when module priority has too many row
+    - Fix boiler recipe when input or ouput fluid is not specified
+    - Fix quality of buildings not stored when exporting/importing production
+    - Fix misspelling of "report"
+---------------------------------------------------------------------------------------------------
 Version: 2.0.12
 Date: 2024-11-25
   Features:

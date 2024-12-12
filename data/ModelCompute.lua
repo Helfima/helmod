@@ -718,12 +718,6 @@ function ModelCompute.computeFactory(recipe)
         recipe.factory.speed_total = recipe.factory.speed_total * speed_penalty
     end
     recipe.factory.speed = recipe.factory.speed_total
-    ---cap speed creation maximum de 1 cycle par tick
-    ---seulement sur les recipes normaux
-    if recipe.type == "recipe" and recipe.time / recipe.factory.speed < 1 / 60 then
-        recipe.factory.speed = 60 * recipe.time
-        recipe.factory.cap.speed = bit32.bor(recipe.factory.cap.speed, ModelCompute.cap_reason.speed.cycle)
-    end
 
     ---effet consumption
     local energy_type = factory_prototype:getEnergyType()
