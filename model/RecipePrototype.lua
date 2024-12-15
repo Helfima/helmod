@@ -180,10 +180,14 @@ function RecipePrototype:getProducts(factory)
             end
         end
         if factory ~= nil and factory_prototype:getType() == "boiler" then
+            local fluid_name = "steam"
             local fluid_production = factory_prototype:getFluidProductionFilter()
-            local fluid_name = fluid_production.name or "steam"
+            if fluid_production ~= nil and fluid_production.name ~= nil then
+                fluid_name = fluid_production.name
+            end
             if lua_products[product_id] ~= nil and fluid_name == raw_product.name then
-                lua_products[product_id].amount = factory_prototype:getFluidProduction() * 10
+                local amount = factory_prototype:getFluidProductionOfBoiler()
+                lua_products[product_id].amount = amount
                 lua_products[product_id].temperature = factory_prototype:getTargetTemperature()
             end
         end
@@ -407,10 +411,13 @@ function RecipePrototype:getIngredients(factory)
         end
 
         if self.lua_type == "boiler" then
-            local name = factory_prototype:getFluidConsumptionFilter()
-            local fluid_name = name or "water"
+            local fluid_name = "water"
+            local fluid_consumption = factory_prototype:getFluidConsumptionFilter()
+            if fluid_consumption ~= nil and fluid_consumption.name ~= nil then
+                fluid_name = fluid_consumption.name
+            end
             if fluid_name ~= nil then
-                local amount = factory_prototype:getFluidProduction()
+                local amount = factory_prototype:getFluidConsumptionOfBoiler()
                 local ingredient = { name = fluid_name, type = "fluid", amount = amount }
                 raw_ingredients = {}
                 table.insert(raw_ingredients, ingredient)

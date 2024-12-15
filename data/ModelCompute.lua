@@ -504,6 +504,7 @@ function ModelCompute.prepareBlockElements(block)
             for _, lua_product in pairs(child_products) do
                 local product_key = Product(lua_product):getTableKey()
                 block_products[product_key] = {
+                    key = product_key,
                     name = lua_product.name,
                     type = lua_product.type,
                     amount = 0,
@@ -516,6 +517,7 @@ function ModelCompute.prepareBlockElements(block)
             for _, lua_ingredient in pairs(child_ingredients) do
                 local ingredient_key = Product(lua_ingredient):getTableKey()
                 block_ingredients[ingredient_key] = {
+                    key = ingredient_key,
                     name = lua_ingredient.name,
                     type = lua_ingredient.type,
                     amount = 0,
@@ -537,10 +539,26 @@ function ModelCompute.prepareBlockElements(block)
                 block_product.input = block.products[product_key].input
             end
             -- set state
-            if block_ingredients[product_key] == nil then
-                block_product.state = 1
+            if block_product.type == "fluid" then
+                local main_fluid = true;
+                for key, block_ingredient in pairs(block_ingredients) do
+                    if block_ingredient.type == "fluid" and block_ingredient.name == block_product.name then
+                        if ModelCompute.checkLinkedTemperatureFluid(block_product, block_ingredient, true) then
+                            main_fluid = false
+                        end
+                    end
+                end
+                if main_fluid then
+                    block_product.state = 1
+                else
+                    block_product.state = 0
+                end
             else
-                block_product.state = 0
+                if block_ingredients[product_key] == nil then
+                    block_product.state = 1
+                else
+                    block_product.state = 0
+                end
             end
         end
 
@@ -551,17 +569,77 @@ function ModelCompute.prepareBlockElements(block)
                 block_ingredient.input = block.ingredients[ingredient_key].input
             end
             -- set state
-            if block_products[ingredient_key] == nil then
-                block_ingredient.state = 1
+            if block_ingredient.type == "fluid" then
+                local main_fluid = true;
+                for key, block_product in pairs(block_products) do
+                    if block_product.type == "fluid" and block_product.name == block_ingredient.name then
+                        if ModelCompute.checkLinkedTemperatureFluid(block_ingredient, block_product, true) then
+                            main_fluid = false
+                        end
+                    end
+                end
+                if main_fluid then
+                    block_ingredient.state = 1
+                else
+                    block_ingredient.state = 0
+                end
             else
-                block_ingredient.state = 0
+                if block_products[ingredient_key] == nil then
+                    block_ingredient.state = 1
+                else
+                    block_ingredient.state = 0
+                end
             end
         end
         block.products = block_products
         block.ingredients = block_ingredients
     end
 end
+-------------------------------------------------------------------------------
+---Check Linked Temperature Fluid
+---@param item1 table
+---@param item2 table
+---@param by_product boolean
+---@return boolean
+function ModelCompute.checkLinkedTemperatureFluid(item1, item2, by_product)
+    local result = false
 
+    local product, ingredient
+    if by_product ~= false then
+        product = item1
+        ingredient = item2
+    else
+        product = item2
+        ingredient = item1
+    end
+
+    if product.key ~= ingredient.key then
+        local T = product.temperature
+        local T2 = ingredient.temperature
+        local T2min = ingredient.minimum_temperature
+        local T2max = ingredient.maximum_temperature
+        if T ~= nil or T2 ~= nil or T2min ~= nil or T2max ~= nil then
+            ---traitement seulement si une temperature
+            if T2min == nil and T2max == nil then
+                ---Temperature sans intervale
+                if T == nil or T2 == nil or T2 == T then
+                    result = true
+                end
+            else
+                ---Temperature avec intervale
+                ---securise les valeurs
+                T = T or 25
+                T2min = T2min or -defines.constant.max_float
+                T2max = T2max or defines.constant.max_float
+                if T >= T2min and T <= T2max then
+                    result = true
+                end
+            end
+        end
+    end
+
+    return result
+end
 -------------------------------------------------------------------------------
 ---Compute production block
 ---@param block table
@@ -659,8 +737,10 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
         factory.effects.productivity = factory.effects.productivity + mining_drill_productivity
 
         local quality = Player.getQualityPrototype(factory.quality)
-        local drain_modifier = quality.mining_drill_resource_drain_multiplier
-    	factory.drain_resource = factory_prototype:getResourceDrain() * drain_modifier
+        if quality ~= nil then
+            local drain_modifier = quality.mining_drill_resource_drain_multiplier
+            factory.drain_resource = factory_prototype:getResourceDrain() * drain_modifier
+        end
     end
     if recipe.type == "technology" then
         local laboratory_speed_modifier = Player.getForce().laboratory_speed_modifier or 0

@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.14
+Date: 2024-12-12
+  Bugfixes:
+    - Fix error for resource drain information when missing quality
+    - Fix compute with temperature fuild when input is empty
+    - Fix boiler production and consumption fluid
+---------------------------------------------------------------------------------------------------
 Version: 2.0.13
 Date: 2024-12-12
   Changes:
