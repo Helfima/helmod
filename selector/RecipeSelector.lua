@@ -55,30 +55,34 @@ function RecipeSelector:appendGroups(element, type, list_products, list_ingredie
 
   if prototype:getRawProducts() ~= nil then
     for key, raw_product in pairs(prototype:getRawProducts()) do
-      if list_products[raw_product.name] == nil then
-        list_products[raw_product.name] = {}
-      end
-      list_products[raw_product.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
-      
-      local product = Product(raw_product)
-      local localised_name = product:getLocalisedName()
-      if localised_name ~= nil and localised_name ~= "unknow" then
-        list_translate[raw_product.name] = localised_name
+      if raw_product.name ~= nil then
+        if list_products[raw_product.name] == nil then
+          list_products[raw_product.name] = {}
+        end
+        list_products[raw_product.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
+        
+        local product = Product(raw_product)
+        local localised_name = product:getLocalisedName()
+        if localised_name ~= nil and localised_name ~= "unknow" then
+          list_translate[raw_product.name] = localised_name
+        end
       end
     end
   end
 
   if prototype:getRawIngredients() ~= nil then
     for key, raw_ingredient in pairs(prototype:getRawIngredients()) do
-      if list_ingredients[raw_ingredient.name] == nil then
-        list_ingredients[raw_ingredient.name] = {}
-      end
-      list_ingredients[raw_ingredient.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
-      
-      local ingredient = Product(raw_ingredient)
-      local localised_name = ingredient:getLocalisedName()
-      if localised_name ~= nil and localised_name ~= "unknow" then
-        list_translate[raw_ingredient.name] = localised_name
+      if raw_ingredient.name ~= nil then
+        if list_ingredients[raw_ingredient.name] == nil then
+          list_ingredients[raw_ingredient.name] = {}
+        end
+        list_ingredients[raw_ingredient.name][prototype_name] = {name=lua_prototype.name, group=lua_prototype.group.name, subgroup=lua_prototype.subgroup.name, type=type, order=lua_prototype.order}
+        
+        local ingredient = Product(raw_ingredient)
+        local localised_name = ingredient:getLocalisedName()
+        if localised_name ~= nil and localised_name ~= "unknow" then
+          list_translate[raw_ingredient.name] = localised_name
+        end
       end
     end
   end

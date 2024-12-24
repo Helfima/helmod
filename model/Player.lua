@@ -1678,6 +1678,8 @@ function Player.getProductionsBeacon()
     table.insert(filters, { filter = "type", type = "beacon", mode = "or" })
     table.insert(filters, { filter = "hidden", invert = true, mode = "and" })
 
+    table.insert(filters, { filter = "type", type = "beacon", mode = "or" })
+    table.insert(filters, { filter = "name", name = "hidden-beacon-turd", mode = "and" })
     for _, item in pairs(prototypes.get_entity_filtered(filters)) do
         table.insert(items, item)
     end

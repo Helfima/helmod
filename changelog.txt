@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.15
+Date: 2024-12-24
+  Changes:
+    - Show the hiddden beacon turd for PY mod
+  Bugfixes:
+    - Fix minimal height for quality selector
+    - Fix product name can be nil in RecipeSelector
+---------------------------------------------------------------------------------------------------
 Version: 2.0.14
 Date: 2024-12-12
   Bugfixes:
