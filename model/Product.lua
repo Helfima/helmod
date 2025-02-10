@@ -103,24 +103,24 @@ function Product:getElementAmount()
   if element == nil then return 0 end
 
   local amount = element.amount
-  if element.extra_count_fraction ~= nil then
-    amount = element.extra_count_fraction
-  end
   if amount ~= nil then
     ---In 0.17, it seems probability can be used with just 'amount' and it
     ---doesn't need to use amount_min/amount_max
     if element.probability ~= nil then
-      return amount * element.probability
-    else
-      return amount
+      amount = amount * element.probability
+    end
+  else
+    if element.probability ~= nil and element.amount_min ~= nil and  element.amount_max ~= nil then
+      amount = ((element.amount_min + element.amount_max) * element.probability / 2)
     end
   end
 
-  if element.probability ~= nil and element.amount_min ~= nil and  element.amount_max ~= nil then
-    return ((element.amount_min + element.amount_max) * element.probability / 2)
+  if element.extra_count_fraction ~= nil then
+    local extra_count_fraction = element.extra_count_fraction or 0
+    amount = amount + extra_count_fraction
   end
 
-  return 0
+  return amount or 0
 end
 
 -------------------------------------------------------------------------------

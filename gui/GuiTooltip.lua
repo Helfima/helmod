@@ -773,10 +773,23 @@ end)
 function GuiTooltipBeacons:create()
 	local tooltip = self._super.create(self)
 	if self.m_element then
+		local index = 0
+		local beacons_tooltip = { "" }
+		table.insert(tooltip, beacons_tooltip)
 		for _, beacon in pairs(self.m_element) do
 			local beacon_tooltip = { "" }
-			table.insert(tooltip, beacon_tooltip)
+			table.insert(beacons_tooltip, beacon_tooltip)
 			GuiTooltipFactory.AppendFactory(beacon_tooltip, beacon)
+			index = index + 1
+			
+			if index % 18 == 0 then
+				beacons_tooltip = {""}
+				table.insert(tooltip, beacons_tooltip)
+			end
+			if index > 20 then
+				Player.print("Too many beacon, are you sure that you use 'Amount affect one' ?")
+				break
+			end
 		end
 	end
 	return tooltip
@@ -1009,9 +1022,13 @@ function GuiTooltipPriority:create()
 
 			GuiTooltip.appendLineQuantity(tooltip, type, priority.name, amount, module_priority_label, priority.quality)
 			index = index + 1
-			if index >= 18 then
+			if index % 18 == 0 then
 				tooltip_priority_stage = {""}
 				table.insert(tooltip_priority,tooltip_priority_stage)
+			end
+			if index > 100 then
+				Player.print("Too many module")
+				break
 			end
 		end
 	end
@@ -1031,8 +1048,21 @@ end)
 function GuiTooltipPriorities:create()
 	local tooltip = self._super.create(self)
 	if self.m_element then
+		local index = 0
+		local tooltip_priorities = {""}
+		table.insert(tooltip, tooltip_priorities)
+		
 		for i, factory in pairs(self.m_element) do
-			GuiTooltipPriorities.appendPriority(tooltip, factory)
+			GuiTooltipPriorities.appendPriority(tooltip_priorities, factory)
+			index = index + 1
+			if index % 18 == 0 then
+				tooltip_priorities = {""}
+				table.insert(tooltip, tooltip_priorities)
+			end
+			if index > 100 then
+				Player.print("Too many factory")
+				break
+			end
 		end
 	end
 	return tooltip

@@ -1160,7 +1160,8 @@ function RecipeEdition:updateBeaconInfoTool(event)
         end
         GuiElement.add(options_panel, GuiButton(self.classname, "beacon-tool", model.id, block.id, recipe.id, "category"):caption("A"):style(all_button_style):tooltip(tooltip))
 
-        local selection_panel = GuiElement.add(tool_action_panel, GuiFlowH("tool2"))
+        --local selection_panel = GuiElement.add(tool_action_panel, GuiFlowH("tool2"))
+        local selection_panel = GuiElement.add(tool_action_panel, GuiTable("tool2"):column(5))
         selection_panel.style.horizontal_spacing = tool_spacing
 
         local current_beacon_selection = User.getParameter("current_beacon_selection") or 1

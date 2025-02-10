@@ -1,4 +1,17 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.17
+Date: 2025-02-10
+  Bugfixes:
+    - Fix 'Too many parameters for localised string 21< 20 (limit)' when too many beacon added
+---------------------------------------------------------------------------------------------------
+Version: 2.0.16
+Date: 2025-01-03
+  Changes:
+    - Changed the minimal required factorio version for quality color
+  Bugfixes:
+    - Fix linked fluid with temperature
+    - Fix amount compute with amount and extra_count_fraction values (ex: spoilage recycling)
+---------------------------------------------------------------------------------------------------
 Version: 2.0.15
 Date: 2024-12-24
   Changes:

@@ -32,7 +32,6 @@ function Player.repportError(error)
     log(error)
     local error_message = {}
     table.insert(error_message, error)
-    table.insert(error_message, debug.traceback())
     
     local storage_debug = Player.getStorageDebug()
     storage_debug[Lua_player.index] = table.concat(error_message, "\n")
