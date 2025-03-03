@@ -292,6 +292,68 @@ function SolverMatrixInteriorPoint:adjust_for_feasibility(matrix)
 end
 
 -------------------------------------------------------------------------------
+---Precondition the matrix to improve numerical stability
+---@param matrix Matrix
+---@return Matrix
+function SolverMatrixInteriorPoint:precondition_matrix(matrix)
+    local rows = matrix.rows
+    local m = #rows - 1
+    local n = #matrix.columns
+    
+    -- Compute row scaling factors
+    local row_scale = {}
+    for i = 1, m do
+        local max_abs = 0
+        for j = 1, n do
+            max_abs = math.max(max_abs, math.abs(rows[i][j] or 0))
+        end
+        row_scale[i] = max_abs > 1e-10 and (1.0 / max_abs) or 1.0
+    end
+    
+    -- Apply row scaling
+    for i = 1, m do
+        for j = 1, n do
+            if rows[i][j] then
+                rows[i][j] = rows[i][j] * row_scale[i]
+            end
+        end
+    end
+    
+    -- Store scaling factors for later unscaling
+    matrix.row_scale = row_scale
+    
+    return matrix
+end
+
+-------------------------------------------------------------------------------
+---Unscale the matrix after solving
+---@param matrix Matrix
+---@return Matrix
+function SolverMatrixInteriorPoint:unscale_matrix(matrix)
+    if not matrix.row_scale then
+        return matrix
+    end
+    
+    local rows = matrix.rows
+    local m = #rows - 1
+    local n = #matrix.columns
+    
+    -- Unscale the rows
+    for i = 1, m do
+        for j = 1, n do
+            if rows[i][j] then
+                rows[i][j] = rows[i][j] / matrix.row_scale[i]
+            end
+        end
+    end
+    
+    -- Remove the scaling factors
+    matrix.row_scale = nil
+    
+    return matrix
+end
+
+-------------------------------------------------------------------------------
 ---Solve the matrix using interior point method
 ---@param matrix_base Matrix
 ---@param debug boolean
@@ -322,6 +384,11 @@ function SolverMatrixInteriorPoint:solve_matrix(matrix_base, debug, by_factory, 
         local matrix = self:prepare(matrix_base)
         self:log("Matrix prepared with %d rows and %d columns", #matrix.rows, #matrix.columns)
         self:add_runtime(debug, runtime, "Prepare", matrix)
+
+        -- Precondition the matrix for better numerical stability
+        self:log("Preconditioning matrix...")
+        matrix = self:precondition_matrix(matrix)
+        self:log("Matrix preconditioned")
 
         -- Compute initial point
         self:log("Computing initial point...")
@@ -382,6 +449,10 @@ function SolverMatrixInteriorPoint:solve_matrix(matrix_base, debug, by_factory, 
 
             self:add_runtime(debug, runtime, "Iteration " .. iter, matrix)
         end
+
+        -- Before extracting solution, unscale the matrix
+        self:log("Unscaling matrix...")
+        matrix = self:unscale_matrix(matrix)
 
         -- Extract solution and finalize
         self:log("Extracting solution...")
