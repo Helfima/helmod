@@ -20,6 +20,24 @@ function SolverMatrixInteriorPoint:prepare(matrix)
     return matrix_clone
 end
 
+function SolverMatrixInteriorPoint:prepare_z_and_objectives(matrix, reverse)
+    -- Call the parent method to set up the basic objective function
+    SolverMatrix.prepare_z_and_objectives(self, matrix, reverse)
+    
+    -- Add additional terms to penalize factory counts
+    local zrow = matrix.rows[#matrix.rows]
+    
+    -- Apply penalties to recipe/factory columns to minimize their count
+    for j = 1, #matrix.columns do
+        local column = matrix.columns[j]
+        if column.type == "recipe" or column.type == "factory" then
+            -- Add a small penalty to minimize the number of factories
+            -- Using a smaller penalty (0.1) to prioritize meeting demands over minimizing factories
+            zrow[j] = zrow[j] - 10.0
+        end
+    end
+end
+
 -------------------------------------------------------------------------------
 --- Logger function for the interior point solver
 ---@param message string
@@ -172,47 +190,19 @@ function SolverMatrixInteriorPoint:compute_initial_point(matrix)
     -- Initialize primal variables
     matrix.x_variables = {}
 
-    -- Start with larger values to help avoid infeasibility
+    -- Start with reasonable values for different variable types
     for i = 1, n do
-        matrix.x_variables[i] = 1.0  -- Start with 1.0 instead of 0.1
-    end
-
-    self:log("Initial primal variables set to 1.0")
-
-    -- Try multiple starting points if needed
-    local best_violation = math.huge
-    local best_x = {}
-    
-    -- Try different starting points
-    for attempt = 1, 5 do
-        -- Scale initial values for this attempt
-        local scale = attempt * 0.5
-        for i = 1, n do
-            matrix.x_variables[i] = scale
-        end
-        
-        -- Run more feasibility iterations
-        for iter = 1, 10 do
-            self:log("Feasibility adjustment iteration %d (attempt %d)", iter, attempt)
-            self:adjust_for_feasibility(matrix)
-        end
-        
-        -- Measure violation after adjustments
-        local violation = self:calculate_constraint_violation(matrix)
-        
-        if violation < best_violation then
-            -- Save this as the best point so far
-            best_violation = violation
-            best_x = {}
-            for i = 1, n do
-                best_x[i] = matrix.x_variables[i]
-            end
+        if columns[i].type == "recipe" or columns[i].type == "factory" then
+            matrix.x_variables[i] = 0.1  -- Start with moderate values for factories
+        else
+            matrix.x_variables[i] = 1.0  -- Other variables can be larger
         end
     end
     
-    -- Use the best starting point found
-    for i = 1, n do
-        matrix.x_variables[i] = best_x[i]
+    -- Run feasibility adjustments
+    for iter = 1, 5 do
+        self:log("Feasibility adjustment iteration %d", iter)
+        self:adjust_for_feasibility(matrix)
     end
 
     return matrix
@@ -741,19 +731,19 @@ function SolverMatrixInteriorPoint:update_barrier_parameter(matrix, dx, dy, dz)
     
     -- More aggressive reduction factor as iterations increase
     local reduction_factor
-    if matrix.current_iteration > 80 then
-        -- Very aggressive in final iterations
-        reduction_factor = 0.01
-    elseif matrix.current_iteration > 60 then
-        -- More aggressive in later iterations
-        reduction_factor = 0.05
-    elseif matrix.current_iteration > 40 then
-        -- Moderately aggressive in middle iterations
-        reduction_factor = 0.1
-    else
-        -- Conservative in early iterations
-        reduction_factor = 0.5
-    end
+if matrix.current_iteration > 80 then
+    -- Very aggressive in final iterations
+    reduction_factor = 0.001  -- More aggressive (0.01 -> 0.001)
+elseif matrix.current_iteration > 60 then
+    -- More aggressive in later iterations
+    reduction_factor = 0.01   -- More aggressive (0.05 -> 0.01)
+elseif matrix.current_iteration > 40 then
+    -- Moderately aggressive in middle iterations
+    reduction_factor = 0.05   -- More aggressive (0.1 -> 0.05)
+else
+    -- Conservative in early iterations
+    reduction_factor = 0.3    -- More aggressive (0.5 -> 0.3)
+end
     
     -- Calculate new mu, ensure it's positive
     local new_mu = math.max(gap * reduction_factor, 1e-10)
@@ -905,7 +895,17 @@ function SolverMatrixInteriorPoint:compute_merit_function(matrix)
     local constraint_weight = 100.0
     local barrier_weight = 1.0
     
-    return obj_val + constraint_weight * constraint_violation + barrier_weight * barrier
+    local merit = obj_val + constraint_weight * constraint_violation + barrier_weight * barrier
+
+    -- Add penalty for total factory count
+    local factory_count = 0
+    for j = 1, #matrix.columns do
+        if matrix.columns[j].type == "recipe" or matrix.columns[j].type == "factory" then
+            factory_count = factory_count + (matrix.x_variables[j] or 0)
+        end
+    end
+    
+    return merit + 20.0 * factory_count  -- Add weighted factory count
 end
 
 -------------------------------------------------------------------------------
@@ -1024,72 +1024,61 @@ function SolverMatrixInteriorPoint:extract_solution(matrix_base, matrix)
         end
     end
 
-    -- Set recipe counts based on x_variables with reasonable limits
-    local max_reasonable_count = 1000.0 -- Limit extreme values
-
+    -- Map the solution variables back to the original matrix
     for irow = 1, #result.headers do
         local parameters = result.parameters[irow]
         if parameters then
-            -- Find the corresponding variable in the solution
-            local var_index = irow -- Assuming simple 1:1 mapping
-
-            if var_index <= #x and x[var_index] then
-                -- Cap extreme values
-                local original_value = x[var_index]
-                local limited_value = math.min(max_reasonable_count, original_value)
-
-                if original_value > max_reasonable_count then
-                    self:log("WARNING: Capping extreme recipe count value from %g to %g for row %d",
-                        original_value, limited_value, irow)
+            -- In the interior point method, the variable index corresponds to the row index
+            local var_index = irow
+            
+            if var_index <= #x then
+                -- Apply a small threshold to avoid tiny values
+                if x[var_index] < 0.001 then
+                    parameters.recipe_count = 0
+                    parameters.recipe_production = 0
+                else
+                    parameters.recipe_count = x[var_index]
+                    
+                    -- Calculate efficiency based on the optimal solution
+                    -- If we need fewer factories than would be required at 100% efficiency,
+                    -- adjust the production efficiency accordingly
+                    local ideal_count = parameters.recipe_count / parameters.recipe_energy
+                    local actual_count = math.ceil(parameters.recipe_count)
+                    
+                    if actual_count > 0 then
+                        parameters.recipe_production = parameters.recipe_count / actual_count
+                    else
+                        parameters.recipe_production = 0
+                    end
+                    
+                    self:log("Row %d: count=%g, ideal=%g, actual=%g, efficiency=%g%%", 
+                        irow, parameters.recipe_count, ideal_count, actual_count, 
+                        parameters.recipe_production * 100)
                 end
-
-                parameters.recipe_count = limited_value
-                parameters.recipe_production = 1 -- Or compute based on the solution
-            else
-                parameters.recipe_count = 0
-                parameters.recipe_production = 0
             end
-
-            self:log("Recipe %d count set to: %g", irow, parameters.recipe_count)
         end
     end
 
-    -- Initialize Z row if not present
-    if not result.rows[#result.rows] then
-        result.rows[#result.rows] = {}
-        for i = 1, #result.columns do
-            result.rows[#result.rows][i] = 0
-        end
+    -- Compute the objective row values for the Z row
+    local zrow = {}
+    for j = 1, #result.columns do
+        zrow[j] = 0
     end
-
-    self:log("Computing objective values")
-
-    -- Compute the objective row values
-    for irow = 1, #result.rows - 1 do
+    
+    for irow = 1, #result.rows - 1 do  -- Skip the Z row
         local row = result.rows[irow]
         local parameters = result.parameters[irow]
-
-        if row and parameters then
-            -- Compute the effect of this recipe on the objective
+        
+        if row and parameters and parameters.recipe_count > 0 then
             for icol = 1, #result.columns do
                 local cell_value = row[icol] or 0
-                local recipe_count = parameters.recipe_count or 0
-
-                -- Update the Z row
-                if not result.rows[#result.rows][icol] then
-                    result.rows[#result.rows][icol] = 0
-                end
-
-                local increment = cell_value * recipe_count
-                result.rows[#result.rows][icol] = result.rows[#result.rows][icol] + increment
-
-                -- Log significant contributions
-                if math.abs(increment) > 1.0 then
-                    self:log("Added %g to Z row column %d from row %d", increment, icol, irow)
-                end
+                zrow[icol] = (zrow[icol] or 0) + cell_value * parameters.recipe_count
             end
         end
     end
+    
+    -- Set the computed Z row
+    result.rows[#result.rows] = zrow
 
     self:log("Solution extraction complete")
     return result
