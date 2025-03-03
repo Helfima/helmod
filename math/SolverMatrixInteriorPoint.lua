@@ -399,7 +399,7 @@ function SolverMatrixInteriorPoint:solve_matrix(matrix_base, debug, by_factory, 
 
         -- Parameters for the algorithm
         local mu = 0.1       -- Initial barrier parameter
-        local epsilon = 1e-6 -- Convergence tolerance
+        local epsilon = 1e-4 -- Convergence tolerance
         local max_iter = 100 -- Maximum iterations
 
         self:log("Algorithm parameters:")
@@ -409,6 +409,8 @@ function SolverMatrixInteriorPoint:solve_matrix(matrix_base, debug, by_factory, 
 
         -- Main loop
         for iter = 1, max_iter do
+            matrix.current_iteration = iter
+
             self:log("Starting iteration %d", iter)
 
             -- Compute search direction using Newton's method
@@ -626,23 +628,38 @@ function SolverMatrixInteriorPoint:update_barrier_parameter(matrix, dx, dy, dz)
         gap = gap / count
     end
     
-    -- Dynamic update strategy based on progress
-    local new_mu
+    -- Calculate progress measure based on step size and iterations
+    local iterations_remaining = 100 - matrix.current_iteration
+    if iterations_remaining < 1 then iterations_remaining = 1 end
     
-    -- If gap is very small, make a more aggressive step
-    if gap < 1e-4 then
-        new_mu = 0.01 * gap
-    -- If gap is moderate, use moderate reduction
-    elseif gap < 0.1 then
-        new_mu = 0.1 * gap
-    -- If gap is large, use conservative reduction
+    -- More aggressive reduction factor as iterations increase
+    local reduction_factor
+    if matrix.current_iteration > 80 then
+        -- Very aggressive in final iterations
+        reduction_factor = 0.01
+    elseif matrix.current_iteration > 60 then
+        -- More aggressive in later iterations
+        reduction_factor = 0.05
+    elseif matrix.current_iteration > 40 then
+        -- Moderately aggressive in middle iterations
+        reduction_factor = 0.1
     else
-        new_mu = 0.5 * gap
+        -- Conservative in early iterations
+        reduction_factor = 0.5
     end
     
-    -- Ensure mu doesn't decrease too rapidly or become too small
-    new_mu = math.max(new_mu, 1e-10)
-    new_mu = math.min(new_mu, 0.9 * gap)
+    -- Calculate new mu, ensure it's positive
+    local new_mu = math.max(gap * reduction_factor, 1e-10)
+    
+    -- Add extra tracking information
+    if not matrix.previous_gap then matrix.previous_gap = gap end
+    
+    -- If gap isn't decreasing fast enough, be more aggressive
+    if gap > 0.95 * matrix.previous_gap and matrix.current_iteration > 20 then
+        new_mu = new_mu * 0.5  -- Cut mu in half if progress is slow
+    end
+    
+    matrix.previous_gap = gap
     
     return new_mu
 end
