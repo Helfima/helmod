@@ -25,10 +25,12 @@ end
 ---@param message string
 ---@param ...
 function SolverMatrixInteriorPoint:log(message, ...)
-    local log_file = "helmod_interior_point.log"
-    local formatted_message = string.format(message, ...)
+    if true then
+        local log_file = "helmod_interior_point.log"
+        local formatted_message = string.format(message, ...)
 
-    helpers.write_file(log_file, formatted_message .. "\n", true)
+        helpers.write_file(log_file, formatted_message .. "\n", true)
+    end
 end
 
 -------------------------------------------------------------------------------
@@ -278,7 +280,7 @@ function SolverMatrixInteriorPoint:solve_matrix(matrix_base, debug, by_factory, 
         self:add_runtime(debug, runtime, "Initial Point", matrix)
 
         -- Parameters for the algorithm
-        local mu = 0.1       -- Barrier parameter
+        local mu = 0.1      -- Initial barrier parameter
         local epsilon = 1e-6 -- Convergence tolerance
         local max_iter = 100 -- Maximum iterations
 
@@ -302,7 +304,7 @@ function SolverMatrixInteriorPoint:solve_matrix(matrix_base, debug, by_factory, 
             end
 
             -- Check for convergence
-            local converged = self:check_convergence(dx, dy, dz, epsilon)
+            local converged = self:check_convergence(matrix, dx, dy, dz, epsilon)
             self:log("Convergence check: %s", converged and "CONVERGED" or "not converged")
 
             if converged then
@@ -320,8 +322,8 @@ function SolverMatrixInteriorPoint:solve_matrix(matrix_base, debug, by_factory, 
             self:log("Updating variables...")
             self:update_variables(matrix, dx, dy, dz, alpha)
 
-            -- Update barrier parameter
-            mu = mu * 0.9 -- Simple update rule
+            -- Update barrier parameter adaptively
+            mu = self:update_barrier_parameter(matrix, dx, dy, dz)
             self:log("Updated mu = %g", mu)
 
             -- Log state after update
@@ -476,7 +478,47 @@ function SolverMatrixInteriorPoint:compute_newton_direction(matrix, mu)
 end
 
 -------------------------------------------------------------------------------
----Compute the maximum step size that maintains primal and dual feasibility
+---Update barrier parameter adaptively
+---@param matrix Matrix
+---@param dx table
+---@param dy table
+---@param dz table
+---@return number
+function SolverMatrixInteriorPoint:update_barrier_parameter(matrix, dx, dy, dz)
+    local x = matrix.x_variables
+    local z = matrix.dual_bounds
+    local n = #matrix.columns
+    
+    -- Compute current duality gap
+    local gap = 0
+    local count = 0
+    for j = 1, n do
+        if x[j] and z[j] then
+            gap = gap + x[j] * z[j]
+            count = count + 1
+        end
+    end
+    
+    -- Average gap per variable
+    if count > 0 then
+        gap = gap / count
+    end
+    
+    -- Decrease mu more aggressively when gap is large
+    local sigma = 0.1
+    if gap > 1.0 then
+        sigma = 0.5
+    elseif gap > 0.1 then
+        sigma = 0.3
+    elseif gap > 0.01 then
+        sigma = 0.2
+    end
+    
+    return gap * sigma
+end
+
+-------------------------------------------------------------------------------
+---Compute the maximum step size with backtracking
 ---@param matrix Matrix
 ---@param dx table
 ---@param dy table
@@ -485,25 +527,37 @@ end
 function SolverMatrixInteriorPoint:compute_step_size(matrix, dx, dy, dz)
     local x = matrix.x_variables or {}
     local z = matrix.dual_bounds or {}
-
-    -- Compute the maximum step size for primal feasibility
-    local alpha_primal = 1.0
+    
+    -- Compute the maximum feasible step size
+    local alpha_max_primal = 1.0
     for j = 1, #x do
-        if dx[j] and dx[j] < 0 and x[j] and x[j] ~= 0 then
-            alpha_primal = math.min(alpha_primal, -0.9 * x[j] / dx[j])
+        if dx[j] and dx[j] < 0 and x[j] and x[j] > 0 then
+            alpha_max_primal = math.min(alpha_max_primal, -0.95 * x[j] / dx[j])
         end
     end
-
-    -- Compute the maximum step size for dual feasibility
-    local alpha_dual = 1.0
+    
+    local alpha_max_dual = 1.0
     for j = 1, #z do
-        if dz[j] and dz[j] < 0 and z[j] and z[j] ~= 0 then
-            alpha_dual = math.min(alpha_dual, -0.9 * z[j] / dz[j])
+        if dz[j] and dz[j] < 0 and z[j] and z[j] > 0 then
+            alpha_max_dual = math.min(alpha_max_dual, -0.95 * z[j] / dz[j])
         end
     end
-
-    -- Return the minimum of the two step sizes
-    return math.min(alpha_primal, alpha_dual)
+    
+    local alpha_max = math.min(alpha_max_primal, alpha_max_dual)
+    alpha_max = math.min(1.0, alpha_max)  -- Never exceed 1.0
+    
+    -- Use a safety factor to stay away from boundary
+    local alpha = 0.9 * alpha_max
+    
+    -- Backtracking line search could be added here
+    -- but for simplicity, we'll use this reduced step size
+    
+    -- If step size is too small, use a minimum step
+    if alpha < 1e-8 then
+        alpha = math.max(alpha, 1e-8)
+    end
+    
+    return alpha
 end
 
 -------------------------------------------------------------------------------
@@ -542,31 +596,61 @@ end
 
 -------------------------------------------------------------------------------
 ---Check for algorithm convergence
+---@param matrix Matrix
 ---@param dx table
 ---@param dy table
 ---@param dz table
 ---@param epsilon number
 ---@return boolean
-function SolverMatrixInteriorPoint:check_convergence(dx, dy, dz, epsilon)
-    local max_norm = 0
-
-    -- Check norm of dx
-    for _, value in pairs(dx) do
-        max_norm = math.max(max_norm, math.abs(value))
+function SolverMatrixInteriorPoint:check_convergence(matrix, dx, dy, dz, epsilon)
+    local x = matrix.x_variables
+    local z = matrix.dual_bounds
+    local n = #matrix.columns
+    
+    -- Compute step size norm
+    local step_norm = 0
+    for j = 1, n do
+        if dx[j] then
+            step_norm = math.max(step_norm, math.abs(dx[j]))
+        end
     end
-
-    -- Check norm of dy
-    for _, value in pairs(dy) do
-        max_norm = math.max(max_norm, math.abs(value))
+    
+    -- Compute duality gap
+    local gap = 0
+    local count = 0
+    for j = 1, n do
+        if x[j] and z[j] then
+            gap = gap + x[j] * z[j]
+            count = count + 1
+        end
     end
-
-    -- Check norm of dz
-    for _, value in pairs(dz) do
-        max_norm = math.max(max_norm, math.abs(value))
+    
+    if count > 0 then
+        gap = gap / count
     end
-
-    -- Return true if the maximum norm is less than epsilon
-    return max_norm < epsilon
+    
+    -- Compute primal and dual infeasibility
+    local primal_infeas = 0
+    local rows = matrix.rows
+    for i = 1, #rows - 1 do
+        local row_sum = 0
+        for j = 1, n do
+            row_sum = row_sum + (rows[i][j] or 0) * (x[j] or 0)
+        end
+        primal_infeas = math.max(primal_infeas, math.abs(row_sum))
+    end
+    
+    -- Convergence check based on all criteria
+    local converged = (step_norm < epsilon) and (gap < epsilon) and (primal_infeas < epsilon)
+    
+    -- Log convergence metrics
+    self:log("Convergence metrics:")
+    self:log("  Step norm: %g", step_norm)
+    self:log("  Duality gap: %g", gap)
+    self:log("  Primal infeasibility: %g", primal_infeas)
+    self:log("  Converged: %s", converged and "YES" or "NO")
+    
+    return converged
 end
 
 -------------------------------------------------------------------------------
