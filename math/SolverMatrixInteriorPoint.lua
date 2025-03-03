@@ -484,7 +484,7 @@ function SolverMatrixInteriorPoint:solve_matrix(matrix_base, debug, by_factory, 
 end
 
 -------------------------------------------------------------------------------
----Compute the Newton direction for the interior point method
+---Compute the Newton direction for the interior point method with Conjugate Gradient
 ---@param matrix Matrix
 ---@param mu number
 ---@return table, table, table
@@ -522,7 +522,7 @@ function SolverMatrixInteriorPoint:compute_newton_direction(matrix, mu)
         r_c[j] = mu - x_j * z_j
     end
 
-    -- Step 3: Solve the Schur complement system
+    -- Step 3: Solve the Schur complement system using Conjugate Gradient
     -- (A D^(-1) A') dy = r_p + A D^(-1) r_c
     local schur_rhs = {}
     for i = 1, m do
@@ -534,41 +534,112 @@ function SolverMatrixInteriorPoint:compute_newton_direction(matrix, mu)
         end
     end
 
-    -- Solve using a simple iterative method (Jacobi)
-    local dy = {}
-    for i = 1, m do dy[i] = 0 end
-
-    for iter = 1, 20 do -- Limited iterations for Jacobi
-        local dy_new = {}
-        for i = 1, m do
-            local sum = schur_rhs[i]
-            local diag = 0
-
-            -- Compute diagonal and off-diagonal contributions
-            for j = 1, n do
-                if D[j] > 0 then
-                    local a_ij = rows[i][j] or 0
-                    diag = diag + a_ij * a_ij / D[j]
-
-                    for k = 1, m do
-                        if i ~= k then
-                            local a_kj = rows[k][j] or 0
-                            sum = sum - (a_ij * a_kj / D[j]) * (dy[k] or 0)
-                        end
-                    end
-                end
-            end
-
-            -- Avoid division by zero
-            if diag > 1e-10 then
-                dy_new[i] = sum / diag
-            else
-                dy_new[i] = 0
+    -- Helper function to compute (A D^(-1) A') * v
+    local function apply_schur_matrix(v)
+        -- First compute A' * v
+        local A_transpose_v = {}
+        for j = 1, n do
+            A_transpose_v[j] = 0
+            for i = 1, m do
+                A_transpose_v[j] = A_transpose_v[j] + (rows[i][j] or 0) * (v[i] or 0)
             end
         end
+        
+        -- Then compute D^(-1) * (A' * v)
+        local D_inv_A_transpose_v = {}
+        for j = 1, n do
+            if D[j] > 0 then
+                D_inv_A_transpose_v[j] = A_transpose_v[j] / D[j]
+            else
+                D_inv_A_transpose_v[j] = 0
+            end
+        end
+        
+        -- Finally compute A * (D^(-1) * (A' * v))
+        local result = {}
+        for i = 1, m do
+            result[i] = 0
+            for j = 1, n do
+                result[i] = result[i] + (rows[i][j] or 0) * D_inv_A_transpose_v[j]
+            end
+        end
+        
+        return result
+    end
 
-        -- Update dy
-        dy = dy_new
+    -- Initialize Conjugate Gradient method
+    local dy = {}
+    for i = 1, m do dy[i] = 0 end -- Initial guess
+    
+    local r = {} -- Initial residual r = b - Ax
+    local schur_dy = apply_schur_matrix(dy)
+    for i = 1, m do
+        r[i] = schur_rhs[i] - (schur_dy[i] or 0)
+    end
+    
+    local p = {} -- Initial search direction = residual
+    for i = 1, m do p[i] = r[i] end
+    
+    local r_dot_r = 0
+    for i = 1, m do
+        r_dot_r = r_dot_r + (r[i] or 0) * (r[i] or 0)
+    end
+    
+    -- CG iteration parameters
+    local max_cg_iter = math.min(m, 50) -- Limited iterations or dimension
+    local cg_tol = 1e-8 -- Tolerance for convergence
+    
+    self:log("Starting Conjugate Gradient with r_dot_r = %g", r_dot_r)
+    
+    -- Main CG loop
+    for cg_iter = 1, max_cg_iter do
+        -- Check for early convergence
+        if r_dot_r < cg_tol then
+            self:log("CG converged in %d iterations, residual = %g", cg_iter-1, r_dot_r)
+            break
+        end
+        
+        -- Compute A*p
+        local Ap = apply_schur_matrix(p)
+        
+        -- Compute step size alpha = r'r / p'Ap
+        local p_dot_Ap = 0
+        for i = 1, m do
+            p_dot_Ap = p_dot_Ap + (p[i] or 0) * (Ap[i] or 0)
+        end
+        
+        -- Avoid division by zero
+        if math.abs(p_dot_Ap) < 1e-14 then
+            self:log("CG breakdown: p_dot_Ap ≈ 0 in iteration %d", cg_iter)
+            break
+        end
+        
+        local alpha = r_dot_r / p_dot_Ap
+        
+        -- Update solution: dy = dy + alpha*p
+        for i = 1, m do
+            dy[i] = (dy[i] or 0) + alpha * (p[i] or 0)
+        end
+        
+        -- Store old r'r for beta calculation
+        local r_dot_r_old = r_dot_r
+        
+        -- Update residual: r = r - alpha*Ap
+        r_dot_r = 0
+        for i = 1, m do
+            r[i] = (r[i] or 0) - alpha * (Ap[i] or 0)
+            r_dot_r = r_dot_r + (r[i] or 0) * (r[i] or 0)
+        end
+        
+        -- Compute beta = r_new'r_new / r_old'r_old
+        local beta = r_dot_r / r_dot_r_old
+        
+        -- Update search direction: p = r + beta*p
+        for i = 1, m do
+            p[i] = (r[i] or 0) + beta * (p[i] or 0)
+        end
+        
+        self:log("CG iteration %d: residual = %g", cg_iter, r_dot_r)
     end
 
     -- Step 4: Recover dx from dy
@@ -594,11 +665,47 @@ function SolverMatrixInteriorPoint:compute_newton_direction(matrix, mu)
     -- Limit extreme values
     for j = 1, n do
         dx[j] = math.max(-1.0, math.min(1.0, dx[j] or 0))
-        dy[j] = math.max(-1.0, math.min(1.0, dy[j] or 0))
+        if j <= m then -- Only apply limits to valid indices
+            dy[j] = math.max(-1.0, math.min(1.0, dy[j] or 0))
+        end
         dz[j] = math.max(-1.0, math.min(1.0, dz[j] or 0))
     end
 
     return dx, dy, dz
+end
+
+-------------------------------------------------------------------------------
+---Preconditioner for Conjugate Gradient method (Optional enhancement)
+---@param matrix Matrix
+---@return table
+function SolverMatrixInteriorPoint:compute_preconditioner(matrix)
+    local rows = matrix.rows
+    local n = #matrix.columns
+    local m = #rows - 1
+    local D = matrix.D or {} -- Diagonal scaling matrix
+    
+    -- Create a simple diagonal preconditioner based on the row norms
+    local M_inv = {}
+    
+    for i = 1, m do
+        local row_norm_squared = 0
+        
+        for j = 1, n do
+            local a_ij = rows[i][j] or 0
+            if a_ij ~= 0 and D[j] and D[j] > 0 then
+                row_norm_squared = row_norm_squared + (a_ij * a_ij / D[j])
+            end
+        end
+        
+        -- Avoid division by zero
+        if row_norm_squared > 1e-12 then
+            M_inv[i] = 1.0 / row_norm_squared
+        else
+            M_inv[i] = 1.0 -- Default if row is near zero
+        end
+    end
+    
+    return M_inv
 end
 
 -------------------------------------------------------------------------------
