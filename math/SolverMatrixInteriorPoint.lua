@@ -164,26 +164,77 @@ end
 function SolverMatrixInteriorPoint:compute_initial_point(matrix)
     local rows = matrix.rows
     local columns = matrix.columns
+    local m = #rows - 1
+    local n = #columns
 
-    self:log("Computing initial feasible point")
+    self:log("Computing initial point")
 
-    -- Initialize primal variables (stored in x_variables)
+    -- Initialize primal variables
     matrix.x_variables = {}
 
-    -- Initial values for all variables - use modest values
-    for i = 1, #columns do
-        matrix.x_variables[i] = 0.1 -- Start with small positive values
+    -- Start with larger values to help avoid infeasibility
+    for i = 1, n do
+        matrix.x_variables[i] = 1.0  -- Start with 1.0 instead of 0.1
     end
 
-    self:log("Initial primal variables set to 0.1")
+    self:log("Initial primal variables set to 1.0")
 
-    -- Ensure the initial point is strictly feasible
-    for iter = 1, 5 do -- Limit to just a few iterations
-        self:log("Feasibility adjustment iteration %d", iter)
-        self:adjust_for_feasibility(matrix)
+    -- Try multiple starting points if needed
+    local best_violation = math.huge
+    local best_x = {}
+    
+    -- Try different starting points
+    for attempt = 1, 5 do
+        -- Scale initial values for this attempt
+        local scale = attempt * 0.5
+        for i = 1, n do
+            matrix.x_variables[i] = scale
+        end
+        
+        -- Run more feasibility iterations
+        for iter = 1, 10 do
+            self:log("Feasibility adjustment iteration %d (attempt %d)", iter, attempt)
+            self:adjust_for_feasibility(matrix)
+        end
+        
+        -- Measure violation after adjustments
+        local violation = self:calculate_constraint_violation(matrix)
+        
+        if violation < best_violation then
+            -- Save this as the best point so far
+            best_violation = violation
+            best_x = {}
+            for i = 1, n do
+                best_x[i] = matrix.x_variables[i]
+            end
+        end
+    end
+    
+    -- Use the best starting point found
+    for i = 1, n do
+        matrix.x_variables[i] = best_x[i]
     end
 
     return matrix
+end
+
+function SolverMatrixInteriorPoint:calculate_constraint_violation(matrix)
+    local rows = matrix.rows
+    local x = matrix.x_variables
+    local m = #rows - 1
+    
+    local total_violation = 0
+    
+    for i = 1, m do
+        local constraint_value = 0
+        for j = 1, #matrix.columns do
+            constraint_value = constraint_value + (rows[i][j] or 0) * (x[j] or 0)
+        end
+        
+        total_violation = total_violation + math.abs(constraint_value)
+    end
+    
+    return total_violation
 end
 
 -------------------------------------------------------------------------------
@@ -280,7 +331,7 @@ function SolverMatrixInteriorPoint:solve_matrix(matrix_base, debug, by_factory, 
         self:add_runtime(debug, runtime, "Initial Point", matrix)
 
         -- Parameters for the algorithm
-        local mu = 0.1      -- Initial barrier parameter
+        local mu = 0.1       -- Initial barrier parameter
         local epsilon = 1e-6 -- Convergence tolerance
         local max_iter = 100 -- Maximum iterations
 
@@ -370,34 +421,34 @@ function SolverMatrixInteriorPoint:compute_newton_direction(matrix, mu)
     local y = matrix.dual_variables
     local z = matrix.dual_bounds
     local n = #matrix.columns
-    local m = #rows - 1  -- Exclude Z row
-    
+    local m = #rows - 1 -- Exclude Z row
+
     -- Step 1: Formulate the augmented system matrix
     -- [ 0   A ] [ dy ] = [ r_p ]
     -- [ A'  D ] [ dx ]   [ r_c ]
     -- where D = X^(-1)Z
-    
+
     local D = {}
     for j = 1, n do
         D[j] = (z[j] or 0.1) / math.max(x[j] or 0.1, 0.1)
     end
-    
+
     -- Step 2: Compute the residuals
-    local r_p = {}  -- Primal residual: Ax - b
+    local r_p = {} -- Primal residual: Ax - b
     for i = 1, m do
         r_p[i] = 0
         for j = 1, n do
             r_p[i] = r_p[i] + (rows[i][j] or 0) * (x[j] or 0)
         end
     end
-    
-    local r_c = {}  -- Complementarity residual: XZe - μe
+
+    local r_c = {} -- Complementarity residual: XZe - μe
     for j = 1, n do
         local x_j = math.max(x[j] or 0.1, 0.1)
         local z_j = math.max(z[j] or 0.1, 0.1)
         r_c[j] = mu - x_j * z_j
     end
-    
+
     -- Step 3: Solve the Schur complement system
     -- (A D^(-1) A') dy = r_p + A D^(-1) r_c
     local schur_rhs = {}
@@ -409,23 +460,23 @@ function SolverMatrixInteriorPoint:compute_newton_direction(matrix, mu)
             end
         end
     end
-    
+
     -- Solve using a simple iterative method (Jacobi)
     local dy = {}
     for i = 1, m do dy[i] = 0 end
-    
-    for iter = 1, 20 do  -- Limited iterations for Jacobi
+
+    for iter = 1, 20 do -- Limited iterations for Jacobi
         local dy_new = {}
         for i = 1, m do
             local sum = schur_rhs[i]
             local diag = 0
-            
+
             -- Compute diagonal and off-diagonal contributions
             for j = 1, n do
                 if D[j] > 0 then
                     local a_ij = rows[i][j] or 0
                     diag = diag + a_ij * a_ij / D[j]
-                    
+
                     for k = 1, m do
                         if i ~= k then
                             local a_kj = rows[k][j] or 0
@@ -434,7 +485,7 @@ function SolverMatrixInteriorPoint:compute_newton_direction(matrix, mu)
                     end
                 end
             end
-            
+
             -- Avoid division by zero
             if diag > 1e-10 then
                 dy_new[i] = sum / diag
@@ -442,11 +493,11 @@ function SolverMatrixInteriorPoint:compute_newton_direction(matrix, mu)
                 dy_new[i] = 0
             end
         end
-        
+
         -- Update dy
         dy = dy_new
     end
-    
+
     -- Step 4: Recover dx from dy
     local dx = {}
     for j = 1, n do
@@ -458,7 +509,7 @@ function SolverMatrixInteriorPoint:compute_newton_direction(matrix, mu)
             end
         end
     end
-    
+
     -- Step 5: Compute dz = X^(-1) (mu*e - Z*dx - X*Z*e)
     local dz = {}
     for j = 1, n do
@@ -466,14 +517,14 @@ function SolverMatrixInteriorPoint:compute_newton_direction(matrix, mu)
         local z_j = math.max(z[j] or 0.1, 0.1)
         dz[j] = (mu - z_j * dx[j] - x_j * z_j) / x_j
     end
-    
+
     -- Limit extreme values
     for j = 1, n do
         dx[j] = math.max(-1.0, math.min(1.0, dx[j] or 0))
-        dy[j] = math.max(-1.0, math.min(1.0, dy[j] or 0)) 
+        dy[j] = math.max(-1.0, math.min(1.0, dy[j] or 0))
         dz[j] = math.max(-1.0, math.min(1.0, dz[j] or 0))
     end
-    
+
     return dx, dy, dz
 end
 
@@ -493,7 +544,7 @@ function SolverMatrixInteriorPoint:update_barrier_parameter(matrix, dx, dy, dz)
     local gap = 0
     local count = 0
     for j = 1, n do
-        if x[j] and z[j] then
+        if x[j] and x[j] > 0 and z[j] and z[j] > 0 then
             gap = gap + x[j] * z[j]
             count = count + 1
         end
@@ -504,17 +555,25 @@ function SolverMatrixInteriorPoint:update_barrier_parameter(matrix, dx, dy, dz)
         gap = gap / count
     end
     
-    -- Decrease mu more aggressively when gap is large
-    local sigma = 0.1
-    if gap > 1.0 then
-        sigma = 0.5
-    elseif gap > 0.1 then
-        sigma = 0.3
-    elseif gap > 0.01 then
-        sigma = 0.2
+    -- Dynamic update strategy based on progress
+    local new_mu
+    
+    -- If gap is very small, make a more aggressive step
+    if gap < 1e-4 then
+        new_mu = 0.01 * gap
+    -- If gap is moderate, use moderate reduction
+    elseif gap < 0.1 then
+        new_mu = 0.1 * gap
+    -- If gap is large, use conservative reduction
+    else
+        new_mu = 0.5 * gap
     end
     
-    return gap * sigma
+    -- Ensure mu doesn't decrease too rapidly or become too small
+    new_mu = math.max(new_mu, 1e-10)
+    new_mu = math.min(new_mu, 0.9 * gap)
+    
+    return new_mu
 end
 
 -------------------------------------------------------------------------------
@@ -527,7 +586,7 @@ end
 function SolverMatrixInteriorPoint:compute_step_size(matrix, dx, dy, dz)
     local x = matrix.x_variables or {}
     local z = matrix.dual_bounds or {}
-    
+
     -- Compute the maximum feasible step size
     local alpha_max_primal = 1.0
     for j = 1, #x do
@@ -535,29 +594,123 @@ function SolverMatrixInteriorPoint:compute_step_size(matrix, dx, dy, dz)
             alpha_max_primal = math.min(alpha_max_primal, -0.95 * x[j] / dx[j])
         end
     end
-    
+
     local alpha_max_dual = 1.0
     for j = 1, #z do
         if dz[j] and dz[j] < 0 and z[j] and z[j] > 0 then
             alpha_max_dual = math.min(alpha_max_dual, -0.95 * z[j] / dz[j])
         end
     end
-    
+
     local alpha_max = math.min(alpha_max_primal, alpha_max_dual)
-    alpha_max = math.min(1.0, alpha_max)  -- Never exceed 1.0
-    
+    alpha_max = math.min(1.0, alpha_max) -- Never exceed 1.0
+
     -- Use a safety factor to stay away from boundary
     local alpha = 0.9 * alpha_max
+
+    -- Add a backtracking line search
+    local alpha = alpha_max
+    local beta = 0.8                -- Backtracking factor
+    local sufficient_decrease = 0.01 -- Armijo condition parameter
+
+    -- Compute current merit function value
+    local current_merit = self:compute_merit_function(matrix)
+
+    -- Try backtracking to find a better step size
+    for backtrack = 1, 10 do
+        -- Create a temporary copy of variables
+        local x_new = {}
+        local y_new = {}
+        local z_new = {}
+
+        for j = 1, #matrix.x_variables do
+            x_new[j] = (matrix.x_variables[j] or 0) + alpha * (dx[j] or 0)
+        end
+
+        for i = 1, #matrix.dual_variables do
+            y_new[i] = (matrix.dual_variables[i] or 0) + alpha * (dy[i] or 0)
+        end
+
+        for j = 1, #matrix.dual_bounds do
+            z_new[j] = (matrix.dual_bounds[j] or 0) + alpha * (dz[j] or 0)
+        end
+
+        -- Save original variables
+        local x_orig = matrix.x_variables
+        local y_orig = matrix.dual_variables
+        local z_orig = matrix.dual_bounds
+
+        -- Set new variables temporarily
+        matrix.x_variables = x_new
+        matrix.dual_variables = y_new
+        matrix.dual_bounds = z_new
+
+        -- Compute merit function with new variables
+        local new_merit = self:compute_merit_function(matrix)
+
+        -- Restore original variables
+        matrix.x_variables = x_orig
+        matrix.dual_variables = y_orig
+        matrix.dual_bounds = z_orig
+
+        -- Check if sufficient decrease condition is satisfied
+        if new_merit <= current_merit - sufficient_decrease * alpha then
+            break
+        end
+
+        -- Reduce step size
+        alpha = alpha * beta
+
+        -- Lower bound on step size
+        if alpha < 1e-6 then
+            alpha = 1e-6
+            break
+        end
+    end
+
+    return alpha
+end
+
+-- Merit function for line search
+function SolverMatrixInteriorPoint:compute_merit_function(matrix)
+    local x = matrix.x_variables
+    local y = matrix.dual_variables
+    local z = matrix.dual_bounds
+    local rows = matrix.rows
+    local n = #matrix.columns
+    local m = #rows - 1
     
-    -- Backtracking line search could be added here
-    -- but for simplicity, we'll use this reduced step size
-    
-    -- If step size is too small, use a minimum step
-    if alpha < 1e-8 then
-        alpha = math.max(alpha, 1e-8)
+    -- Compute objective value
+    local obj_val = 0
+    for j = 1, n do
+        if matrix.objective_values and matrix.objective_values[j] then
+            obj_val = obj_val + (matrix.objective_values[j] * (x[j] or 0))
+        end
     end
     
-    return alpha
+    -- Compute constraint violation
+    local constraint_violation = 0
+    for i = 1, m do
+        local row_sum = 0
+        for j = 1, n do
+            row_sum = row_sum + (rows[i][j] or 0) * (x[j] or 0)
+        end
+        constraint_violation = constraint_violation + math.abs(row_sum)
+    end
+    
+    -- Compute barrier term
+    local barrier = 0
+    for j = 1, n do
+        if x[j] and x[j] > 0 then
+            barrier = barrier - math.log(x[j])
+        end
+    end
+    
+    -- Weight parameters
+    local constraint_weight = 100.0
+    local barrier_weight = 1.0
+    
+    return obj_val + constraint_weight * constraint_violation + barrier_weight * barrier
 end
 
 -------------------------------------------------------------------------------
@@ -572,24 +725,28 @@ function SolverMatrixInteriorPoint:update_variables(matrix, dx, dy, dz, alpha)
     local y = matrix.dual_variables or {}
     local z = matrix.dual_bounds or {}
 
-    -- Update primal variables
+    -- Update primal variables with non-negativity constraint
     for j = 1, #x do
         if dx[j] then
             x[j] = (x[j] or 0) + alpha * dx[j]
+            -- Ensure primal variables stay positive
+            x[j] = math.max(x[j], 1e-6)
         end
     end
 
-    -- Update dual variables for constraints
+    -- Update dual variables
     for i = 1, #y do
         if dy[i] then
             y[i] = (y[i] or 0) + alpha * dy[i]
         end
     end
 
-    -- Update dual variables for bounds
+    -- Update dual bounds with non-negativity constraint
     for j = 1, #z do
         if dz[j] then
             z[j] = (z[j] or 0) + alpha * dz[j]
+            -- Ensure dual bound variables stay positive
+            z[j] = math.max(z[j], 1e-6)
         end
     end
 end
@@ -606,7 +763,7 @@ function SolverMatrixInteriorPoint:check_convergence(matrix, dx, dy, dz, epsilon
     local x = matrix.x_variables
     local z = matrix.dual_bounds
     local n = #matrix.columns
-    
+
     -- Compute step size norm
     local step_norm = 0
     for j = 1, n do
@@ -614,7 +771,7 @@ function SolverMatrixInteriorPoint:check_convergence(matrix, dx, dy, dz, epsilon
             step_norm = math.max(step_norm, math.abs(dx[j]))
         end
     end
-    
+
     -- Compute duality gap
     local gap = 0
     local count = 0
@@ -624,11 +781,11 @@ function SolverMatrixInteriorPoint:check_convergence(matrix, dx, dy, dz, epsilon
             count = count + 1
         end
     end
-    
+
     if count > 0 then
         gap = gap / count
     end
-    
+
     -- Compute primal and dual infeasibility
     local primal_infeas = 0
     local rows = matrix.rows
@@ -639,17 +796,17 @@ function SolverMatrixInteriorPoint:check_convergence(matrix, dx, dy, dz, epsilon
         end
         primal_infeas = math.max(primal_infeas, math.abs(row_sum))
     end
-    
+
     -- Convergence check based on all criteria
     local converged = (step_norm < epsilon) and (gap < epsilon) and (primal_infeas < epsilon)
-    
+
     -- Log convergence metrics
     self:log("Convergence metrics:")
     self:log("  Step norm: %g", step_norm)
     self:log("  Duality gap: %g", gap)
     self:log("  Primal infeasibility: %g", primal_infeas)
     self:log("  Converged: %s", converged and "YES" or "NO")
-    
+
     return converged
 end
 
