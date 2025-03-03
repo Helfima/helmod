@@ -25,7 +25,7 @@ end
 ---@param message string
 ---@param ...
 function SolverMatrixInteriorPoint:log(message, ...)
-    if true then
+    if false then
         local log_file = "helmod_interior_point.log"
         local formatted_message = string.format(message, ...)
 
