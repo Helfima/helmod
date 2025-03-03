@@ -2,6 +2,7 @@ require "math.Matrix"
 require "math.SolverMatrix"
 require "math.SolverMatrixAlgebra"
 require "math.SolverMatrixSimplex"
+require "math.SolverMatrixInteriorPoint"
 require "math.SolverLinkedMatrix"
 require "math.SolverLinkedMatrixAlgebra"
 require "math.SolverLinkedMatrixSimplex"
@@ -655,14 +656,25 @@ function ModelCompute.computeBlock(block, parameters)
         local my_solver
 
         local solvers = {}
-        solvers[defines.constant.solvers.matrix] = { algebra = SolverMatrixAlgebra, simplex = SolverMatrixSimplex }
-        solvers[defines.constant.solvers.default] = { algebra = SolverLinkedMatrixAlgebra, simplex = SolverLinkedMatrixSimplex }
-        local selected_solver = solvers[defines.constant.solvers.default]
+        solvers[defines.constant.solvers.matrix] = {
+            algebra = SolverMatrixAlgebra,
+            simplex = SolverMatrixSimplex,
+            interior_point = SolverMatrixInteriorPoint
+        }
+        solvers[defines.constant.solvers.default] = {
+            algebra = SolverLinkedMatrixAlgebra,
+            simplex = SolverLinkedMatrixSimplex
+        }
+        local selected_solver = solvers[defines.constant.solvers.matrix]
         if solvers[solver_selected] ~= nil then
             selected_solver = solvers[solver_selected]
         end
         if block.solver == true and block.by_factory ~= true then
-            my_solver = selected_solver.simplex()
+            if block.use_interior_point == true then
+                my_solver = selected_solver.interior_point()
+            else
+                my_solver = selected_solver.simplex()
+            end
         else
             my_solver = selected_solver.algebra()
         end

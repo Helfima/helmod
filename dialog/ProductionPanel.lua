@@ -410,7 +410,10 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
 		table.insert(items, { "helmod_label.compute-by-element" })
 		table.insert(items, { "helmod_label.compute-by-factory" })
 		table.insert(items, { "helmod_label.matrix-solver" })
-		if block.solver == true then
+		table.insert(items, { "helmod_label.matrix-solver-interior-point" })
+		if block.use_interior_point == true then
+			default_compunting = items[4]
+		elseif block.solver == true then
 			default_compunting = items[3]
 		elseif block.by_factory == true then
 			default_compunting = items[2]
@@ -1672,15 +1675,22 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 
 	if event.action == "change-computing" then
 		local index = event.element.selected_index
-		if index == 3 then
+		if index == 4 then
 			ModelBuilder.updateProductionBlockOption(block, "by_factory", false)
 			ModelBuilder.updateProductionBlockOption(block, "solver", true)
+			ModelBuilder.updateProductionBlockOption(block, "use_interior_point", true)
+		elseif index == 3 then
+			ModelBuilder.updateProductionBlockOption(block, "by_factory", false)
+			ModelBuilder.updateProductionBlockOption(block, "solver", true)
+			ModelBuilder.updateProductionBlockOption(block, "use_interior_point", false)
 		elseif index == 2 then
 			ModelBuilder.updateProductionBlockOption(block, "by_factory", true)
 			ModelBuilder.updateProductionBlockOption(block, "solver", false)
+			ModelBuilder.updateProductionBlockOption(block, "use_interior_point", false)
 		else
 			ModelBuilder.updateProductionBlockOption(block, "by_factory", false)
 			ModelBuilder.updateProductionBlockOption(block, "solver", false)
+			ModelBuilder.updateProductionBlockOption(block, "use_interior_point", false)
 		end
 		ModelCompute.update(model)
 		Controller:send("on_gui_update", event)
