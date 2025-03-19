@@ -1,8 +1,9 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.17
-Date: 2025-02-10
+Date: ???
   Bugfixes:
     - Fix 'Too many parameters for localised string 21< 20 (limit)' when too many beacon added
+    - Fix "'plant_prototype' (a nil value)" error on game creation / load with Muluna mod #600
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.16
 Date: 2025-01-03

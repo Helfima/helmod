@@ -1255,13 +1255,20 @@ end
 ---Return table of Seeds for Agricultural Towers
 ---@return table
 function Player.getSeeds()
+    local result = {}
     local plants_filters = Player.getPlantsFilter()
     local filters = {}
     table.insert(filters, { filter = "type", type = "item", mode = "or"})
-    table.insert(filters, { filter = "place-result", elem_filters=plants_filters, mode = "and"})
+    -- Temporarily disabled until "plant-result"  filter is added.
+    -- Requested https://forums.factorio.com/viewtopic.php?t=127598 19-03-2025
+    --table.insert(filters, { filter = "place-result", elem_filters = plants_filters, mode = "and"})
     table.insert(filters, { filter = "hidden", mode = "and", invert = true })
-    local prototypes = prototypes.get_item_filtered(filters)
-    return prototypes
+    for _, item in pairs(prototypes.get_item_filtered(filters)) do
+        if item.plant_result and (item.plant_result.type == "plant") and (not item.plant_result.hidden) then
+            table.insert(result, item)
+        end
+    end
+    return result
 end
 
 -------------------------------------------------------------------------------
