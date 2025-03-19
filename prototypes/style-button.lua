@@ -49,7 +49,6 @@ function monolithIcon(filename, size, scale, shift, position, border, stretch)
   return {
     filename = filename,
     priority = "extra-high-no-scale",
-    align = "center",
     size = size,
     scale = scale,
     shift = shift,
