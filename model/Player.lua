@@ -920,11 +920,11 @@ function Player.getProductionMachines()
     table.insert(filters, { filter = "hidden", mode = "and", invert = true })
     table.insert(filters, { filter = "type", type = "agricultural-tower", mode = "or" })
     table.insert(filters, { filter = "hidden", mode = "and", invert = true })
-    local prototypes = prototypes.get_entity_filtered(filters)
-    prototypes = Player.ExcludePlacedByHidden(prototypes)
+    local entities = prototypes.get_entity_filtered(filters)
+    entities = Player.ExcludePlacedByHidden(entities)
 
     local list_machines = {}
-    for prototype_name, lua_prototype in pairs(prototypes) do
+    for prototype_name, lua_prototype in pairs(entities) do
         local machine = { name = lua_prototype.name, group = (lua_prototype.group or {}).name, subgroup = (lua_prototype.subgroup or {})
         .name, type = lua_prototype.type, order = lua_prototype.order, crafting_categories = lua_prototype
         .crafting_categories, resource_categories = lua_prototype.resource_categories }
@@ -966,15 +966,15 @@ function Player.getBoilers(fluid_name)
     table.insert(filters, { filter = "hidden", mode = "and", invert = true })
     table.insert(filters, { filter = "type", type = "boiler", mode = "or" })
     table.insert(filters, { filter = "flag", flag = "player-creation", mode = "and" })
-    local prototypes = prototypes.get_entity_filtered(filters)
+    local entities = prototypes.get_entity_filtered(filters)
 
-    prototypes = Player.ExcludePlacedByHidden(prototypes)
+    entities = Player.ExcludePlacedByHidden(entities)
 
     if fluid_name == nil then
-        return prototypes
+        return entities
     else
         local boilers = {}
-        for boiler_name, boiler in pairs(prototypes) do
+        for boiler_name, boiler in pairs(entities) do
             for _, fluidbox in pairs(boiler.fluidbox_prototypes) do
                 if (fluidbox.production_type == "output") and fluidbox.filter and (fluidbox.filter.name == fluid_name) then
                     boilers[boiler_name] = boiler
@@ -1224,10 +1224,10 @@ function Player.getAgriculturalTowers()
     table.insert(filters, { filter = "hidden", mode = "and", invert = true })
     table.insert(filters, { filter = "type", type = "agricultural-tower", mode = "or" })
     table.insert(filters, { filter = "flag", flag = "player-creation", mode = "and" })
-    local prototypes = prototypes.get_entity_filtered(filters)
+    local entities = prototypes.get_entity_filtered(filters)
 
-    prototypes = Player.ExcludePlacedByHidden(prototypes)
-    return prototypes
+    entities = Player.ExcludePlacedByHidden(entities)
+    return entities
 end
 
 -------------------------------------------------------------------------------
@@ -1245,10 +1245,10 @@ end
 ---@return table
 function Player.getPlants()
     local filters = Player.getPlantsFilter()
-    local prototypes = prototypes.get_entity_filtered(filters)
+    local entities = prototypes.get_entity_filtered(filters)
 
-    prototypes = Player.ExcludePlacedByHidden(prototypes)
-    return prototypes
+    entities = Player.ExcludePlacedByHidden(entities)
+    return entities
 end
 
 -------------------------------------------------------------------------------
@@ -1259,16 +1259,10 @@ function Player.getSeeds()
     local plants_filters = Player.getPlantsFilter()
     local filters = {}
     table.insert(filters, { filter = "type", type = "item", mode = "or"})
-    -- Temporarily disabled until "plant-result"  filter is added.
-    -- Requested https://forums.factorio.com/viewtopic.php?t=127598 19-03-2025
-    --table.insert(filters, { filter = "place-result", elem_filters = plants_filters, mode = "and"})
+    table.insert(filters, { filter = "plant-result", elem_filters = plants_filters, mode = "and"})
     table.insert(filters, { filter = "hidden", mode = "and", invert = true })
-    for _, item in pairs(prototypes.get_item_filtered(filters)) do
-        if item.plant_result and (item.plant_result.type == "plant") and (not item.plant_result.hidden) then
-            table.insert(result, item)
-        end
-    end
-    return result
+    local items = prototypes.get_item_filtered(filters)
+    return items
 end
 
 -------------------------------------------------------------------------------
@@ -1322,13 +1316,12 @@ end
 ---Return table of spoilable items
 ---@return table
 function Player.getSpoilableItems()
-    local prototypes = {}
-    for _, prototype in pairs(Player.getItemPrototypes()) do
-        if prototype.get_spoil_ticks() > 0 then
-            table.insert(prototypes, prototype)
-        end
-    end
-    return prototypes
+    local filters = {}
+    table.insert(filters, { filter = "spoil-result", elem_filters = {{ filter = "hidden", mode = "and", invert = true }}, mode = "and"})
+    table.insert(filters, { filter = "hidden", mode = "and", invert = true })
+    local results = prototypes.get_item_filtered(filters)
+    
+    return results
 end
 
 -------------------------------------------------------------------------------
@@ -1935,9 +1928,9 @@ function Player.getFluidTemperaturePrototypes(fluid)
     ---Hidden fluids do need to be included unfortunately. Only real alternative would be to add a setting.
     ---table.insert(filters, {filter = "hidden", invert = true, mode = "and"})
     table.insert(filters, { filter = "has-product-fluid", elem_filters = { { filter = "name", name = fluid.name } }, mode = "and" })
-    local prototypes = prototypes.get_recipe_filtered(filters)
+    local recipes = prototypes.get_recipe_filtered(filters)
 
-    for recipe_name, recipe in pairs(prototypes) do
+    for recipe_name, recipe in pairs(recipes) do
         for product_name, product in pairs(recipe.products) do
             if product.name == fluid.name and product.temperature then
                 temperatures[product.temperature] = true
