@@ -497,7 +497,6 @@ function EntityPrototype:getFluidConsumption()
         else
           local heat_capacity = fluid_fuel:getHeatCapacity()
           local minimum_temperature = fluid_fuel:getMinimumTemperature()
-          local target_temperature = self:getTargetTemperature()
           
           local maximum_temperature = energy_prototype:getMaximumTemperature()
           if maximum_temperature > 0 then
