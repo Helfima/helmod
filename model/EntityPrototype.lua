@@ -505,14 +505,8 @@ function EntityPrototype:getFluidConsumption()
           else
             maximum_temperature = fluid_fuel.temperature
           end
-          
-          if target_temperature > 0 then
-            target_temperature = math.min(target_temperature, maximum_temperature)
-          else
-            target_temperature = maximum_temperature
-          end
 
-          local power_extract = self:getPowerExtract(minimum_temperature, target_temperature, heat_capacity)
+          local power_extract = self:getPowerExtract(minimum_temperature, maximum_temperature, heat_capacity)
 
           return energy_consumption / power_extract
         end
