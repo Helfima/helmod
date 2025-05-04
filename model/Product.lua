@@ -171,7 +171,12 @@ function Product:getAmount(recipe)
   if self.lua_prototype.ignored_by_productivity then
     ignored = self.lua_prototype.ignored_by_productivity or 0
   end
-  return amount  + (bonus_amount - ignored) * self:getProductivityBonus(recipe)
+  local amount_by_productivity = bonus_amount - ignored
+  -- value can not be negative
+  if amount_by_productivity > 0 then
+    return amount  + (bonus_amount - ignored) * self:getProductivityBonus(recipe)
+  end
+  return amount
 end
 
 -------------------------------------------------------------------------------

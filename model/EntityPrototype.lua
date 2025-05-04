@@ -106,6 +106,16 @@ function EntityPrototype:getMaxEnergyUsage()
 end
 
 -------------------------------------------------------------------------------
+---Return max energy usage per second
+---@return number --default 0
+function EntityPrototype:getMaxPowerOutput()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.get_max_power_output(self.factory.quality) or 0
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
 ---Return min energy usage per second
 ---@return number --default 0
 function EntityPrototype:getMinEnergyUsage()
@@ -155,7 +165,7 @@ function EntityPrototype:getEnergyConsumption()
       return 0
     end
     local fuel_value = fluid_fuel:getFuelValue()
-    local max_energy_production = (self.lua_prototype.max_power_output or 0) * 60
+    local max_energy_production = self:getMaxPowerOutput() * 60
 
     if self.lua_prototype.burns_fluid ~= true then
       ---Steam engine
@@ -183,7 +193,7 @@ function EntityPrototype:getEnergyProduction()
       if usage_priority == "managed-accumulator" then
         production = energy_prototype:getOutputFlowLimit()
       else
-        production = (self.lua_prototype.max_power_output or 0) * 60
+        production = self:getMaxPowerOutput() * 60
       end
       
       if self.lua_prototype.type == "generator" then
@@ -324,7 +334,7 @@ end
 ---@return number --default 0
 function EntityPrototype:getFluidUsagePerTick()
   if self.lua_prototype ~= nil then
-    return self.lua_prototype.fluid_usage_per_tick or 0
+    return self.lua_prototype.get_fluid_usage_per_tick(self.factory.quality) or 0
   end
   return 0
 end
@@ -449,7 +459,7 @@ function EntityPrototype:getFluidConsumption()
       end
 
       local max_fluid_usage = self:getFluidUsage()
-      local max_energy_production = (self.lua_prototype.max_power_output or 0) * 60
+      local max_energy_production = self:getMaxPowerOutput() * 60
 
       local fuel_value
       if self:getBurnsFluid() == true then

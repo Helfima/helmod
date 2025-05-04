@@ -209,7 +209,7 @@ function AdminPanel:updateGui()
   self:addCellHeader(table_panel, "mod", {"",helmod_tag.font.default_bold, {"helmod_common.mod"}, helmod_tag.font.close})
 
   local index = 0
-  for _,location in pairs({"top","left","center","screen","goal"}) do
+  for _,location in pairs({"top","left","center","screen","goal", "relative"}) do
     for _, element in pairs(Player.getGui(location).children) do
       if element.name == "mod_gui_button_flow" or element.name == "mod_gui_frame_flow" then
         for _, element in pairs(element.children) do

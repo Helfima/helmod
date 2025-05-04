@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.19
+Date: 2024-05-04
+  Changes:
+    - Changed LuaEntityPrototype.max_power_output by LuaEntityPrototype:get_max_energy_usage #594
+    - Changed LuaEntityPrototype.fluid_usage_per_tick  by LuaEntityPrototype:get_fluid_usage_per_tick #594
+  Bugfixes:
+    - Fixed wrong amount compute value with ignored_by_productivity
+    - Fixed wrong energy consumption calculation #601
+---------------------------------------------------------------------------------------------------
 Version: 2.0.18
 Date: 2024-04-13
   Bugfixes:

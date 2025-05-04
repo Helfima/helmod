@@ -825,14 +825,11 @@ function ModelCompute.computeFactory(recipe)
     if energy_type ~= "electric" then
         recipe.factory.energy_total = 0
     else
-        recipe.factory.energy_total = recipe.factory.amount * recipe.factory.energy
         local drain = factory_prototype:getMinEnergyUsage()
-        recipe.factory.energy_total = math.ceil(recipe.factory.energy_total + (math.ceil(recipe.factory.amount) * drain))
-        recipe.factory.energy = recipe.factory.energy + drain
+        recipe.factory.energy = math.ceil(recipe.factory.energy + drain)
+        recipe.factory.energy_total = recipe.factory.amount * recipe.factory.energy
     end
-    ---arrondi des valeurs
     recipe.factory.speed = recipe.factory.speed
-    recipe.factory.energy = math.ceil(recipe.factory.energy)
 
     local beacons_energy_total = 0
     if recipe.beacons ~= nil then
