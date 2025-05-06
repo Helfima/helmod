@@ -1,6 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.20
+Date: 2025-05-06
+  Bugfixes:
+    - Fixed module effect value, arround % value
+---------------------------------------------------------------------------------------------------
 Version: 2.0.19
-Date: 2024-05-04
+Date: 2025-05-04
   Changes:
     - Changed LuaEntityPrototype.max_power_output by LuaEntityPrototype:get_max_energy_usage #594
     - Changed LuaEntityPrototype.fluid_usage_per_tick  by LuaEntityPrototype:get_fluid_usage_per_tick #594
@@ -9,7 +14,7 @@ Date: 2024-05-04
     - Fixed wrong energy consumption calculation #601
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.18
-Date: 2024-04-13
+Date: 2025-04-13
   Bugfixes:
     - Fixed Accessing target_temperature error with Lignumis mod #602
 ---------------------------------------------------------------------------------------------------

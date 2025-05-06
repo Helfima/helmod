@@ -1058,17 +1058,21 @@ function Player.getModuleEffects(module)
     -- search module
     local module = Player.getItemPrototype(module.name)
     for effect_name, effect_value in pairs(module.module_effects) do
+        local final_value = effect_value
         if Player.checkPositiveEffect(effect_name, effect_value) then
             -- quality has positive effect
-            module_effects[effect_name] = effect_value * multiplier
+            final_value = effect_value * multiplier
         else
             -- quality has no effect
-            module_effects[effect_name] = effect_value
+            final_value = effect_value
         end
-        if effect_name == "quality" then
+        -- arround the % value
+        final_value = math.floor(final_value*100)/100
+        if effect_name == "quality" and final_value > 0 then
             -- fix quality value, in game is 10x
-            module_effects[effect_name] = module_effects[effect_name] / 10
+            final_value = final_value / 10
         end
+        module_effects[effect_name] = final_value
     end
     return module_effects
 end
