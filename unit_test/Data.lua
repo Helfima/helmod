@@ -233,4 +233,90 @@ data.energy["accumulator"] = {
     speed=1,
     recipe={type="recipe"}
 }
+data.modules = {}
+
+data.modules["speed-module"] = {}
+data.modules["speed-module"]["normal"] = { speed = 0.2, productivity = 0, consumption = 0.5, pollution = 0, quality = -0.1 }
+data.modules["speed-module"]["uncommon"] = { speed = 0.26, productivity = 0, consumption = 0.5, pollution = 0, quality = -0.1 }
+data.modules["speed-module"]["rare"] = { speed = 0.32, productivity = 0, consumption = 0.5, pollution = 0, quality = -0.1 }
+data.modules["speed-module"]["epic"] = { speed = 0.38, productivity = 0, consumption = 0.5, pollution = 0, quality = -0.1 }
+data.modules["speed-module"]["legendary"] = { speed = 0.5, productivity = 0, consumption = 0.5, pollution = 0, quality = -0.1 }
+
+data.modules["speed-module-2"] = {}
+data.modules["speed-module-2"]["normal"] = { speed = 0.3, productivity = 0, consumption = 0.6, pollution = 0, quality = -0.15 }
+data.modules["speed-module-2"]["uncommon"] = { speed = 0.39, productivity = 0, consumption = 0.6, pollution = 0, quality = -0.15 }
+data.modules["speed-module-2"]["rare"] = { speed = 0.48, productivity = 0, consumption = 0.6, pollution = 0, quality = -0.15 }
+data.modules["speed-module-2"]["epic"] = { speed = 0.57, productivity = 0, consumption = 0.6, pollution = 0, quality = -0.15 }
+data.modules["speed-module-2"]["legendary"] = { speed = 0.75, productivity = 0, consumption = 0.6, pollution = 0, quality = -0.15 }
+
+data.modules["speed-module-3"] = {}
+data.modules["speed-module-3"]["normal"] = { speed = 0.5, productivity = 0, consumption = 0.7, pollution = 0, quality = -0.25 }
+data.modules["speed-module-3"]["uncommon"] = { speed = 0.65, productivity = 0, consumption = 0.7, pollution = 0, quality = -0.25 }
+data.modules["speed-module-3"]["rare"] = { speed = 0.8, productivity = 0, consumption = 0.7, pollution = 0, quality = -0.25 }
+data.modules["speed-module-3"]["epic"] = { speed = 0.95, productivity = 0, consumption = 0.7, pollution = 0, quality = -0.25 }
+data.modules["speed-module-3"]["legendary"] = { speed = 1.25, productivity = 0, consumption = 0.7, pollution = 0, quality = -0.25 }
+
+data.modules["efficiency-module"] = {}
+data.modules["efficiency-module"]["normal"] = { speed = 0, productivity = 0, consumption = -0.3, pollution = 0, quality = 0 }
+data.modules["efficiency-module"]["uncommon"] = { speed = 0, productivity = 0, consumption = -0.39, pollution = 0, quality = 0 }
+data.modules["efficiency-module"]["rare"] = { speed = 0, productivity = 0, consumption = -0.48, pollution = 0, quality = 0 }
+data.modules["efficiency-module"]["epic"] = { speed = 0, productivity = 0, consumption = -0.57, pollution = 0, quality = 0 }
+data.modules["efficiency-module"]["legendary"] = { speed = 0, productivity = 0, consumption = -0.75, pollution = 0, quality = 0 }
+
+data.modules["efficiency-module-2"] = {}
+data.modules["efficiency-module-2"]["normal"] = { speed = 0, productivity = 0, consumption = -0.4, pollution = 0, quality = 0 }
+data.modules["efficiency-module-2"]["uncommon"] = { speed = 0, productivity = 0, consumption = -0.52, pollution = 0, quality = 0 }
+data.modules["efficiency-module-2"]["rare"] = { speed = 0, productivity = 0, consumption = -0.64, pollution = 0, quality = 0 }
+data.modules["efficiency-module-2"]["epic"] = { speed = 0, productivity = 0, consumption = -0.76, pollution = 0, quality = 0 }
+data.modules["efficiency-module-2"]["legendary"] = { speed = 0, productivity = 0, consumption = -1, pollution = 0, quality = 0 }
+
+data.modules["efficiency-module-3"] = {}
+data.modules["efficiency-module-3"]["normal"] = { speed = 0, productivity = 0, consumption = -0.5, pollution = 0, quality = 0 }
+data.modules["efficiency-module-3"]["uncommon"] = { speed = 0, productivity = 0, consumption = -0.65, pollution = 0, quality = 0 }
+data.modules["efficiency-module-3"]["rare"] = { speed = 0, productivity = 0, consumption = -0.8, pollution = 0, quality = 0 }
+data.modules["efficiency-module-3"]["epic"] = { speed = 0, productivity = 0, consumption = -0.95, pollution = 0, quality = 0 }
+data.modules["efficiency-module-3"]["legendary"] = { speed = 0, productivity = 0, consumption = -1.25, pollution = 0, quality = 0 }
+
+data.modules["productivity-module"] = {}
+data.modules["productivity-module"]["normal"] = { speed = -0.05, productivity = 0.04, consumption = 0.4, pollution = 0.05, quality = 0 }
+data.modules["productivity-module"]["uncommon"] = { speed = -0.05, productivity = 0.05, consumption = 0.4, pollution = 0.05, quality = 0 }
+data.modules["productivity-module"]["rare"] = { speed = -0.05, productivity = 0.06, consumption = 0.4, pollution = 0.05, quality = 0 }
+data.modules["productivity-module"]["epic"] = { speed = -0.05, productivity = 0.07, consumption = 0.4, pollution = 0.05, quality = 0 }
+data.modules["productivity-module"]["legendary"] = { speed = -0.05, productivity = 0.1, consumption = 0.4, pollution = 0.05, quality = 0 }
+
+data.modules["productivity-module-2"] = {}
+data.modules["productivity-module-2"]["normal"] = { speed = -0.1, productivity = 0.06, consumption = 0.6, pollution = 0.07, quality = 0 }
+data.modules["productivity-module-2"]["uncommon"] = { speed = -0.1, productivity = 0.07, consumption = 0.6, pollution = 0.07, quality = 0 }
+data.modules["productivity-module-2"]["rare"] = { speed = -0.1, productivity = 0.09, consumption = 0.6, pollution = 0.07, quality = 0 }
+data.modules["productivity-module-2"]["epic"] = { speed = -0.1, productivity = 0.11, consumption = 0.6, pollution = 0.07, quality = 0 }
+data.modules["productivity-module-2"]["legendary"] = { speed = -0.1, productivity = 0.15, consumption = 0.6, pollution = 0.07, quality = 0 }
+
+data.modules["productivity-module-3"] = {}
+data.modules["productivity-module-3"]["normal"] = { speed = -0.15, productivity = 0.1, consumption = 0.8, pollution = 0.1, quality = 0 }
+data.modules["productivity-module-3"]["uncommon"] = { speed = -0.15, productivity = 0.13, consumption = 0.8, pollution = 0.1, quality = 0 }
+data.modules["productivity-module-3"]["rare"] = { speed = -0.15, productivity = 0.16, consumption = 0.8, pollution = 0.1, quality = 0 }
+data.modules["productivity-module-3"]["epic"] = { speed = -0.15, productivity = 0.19, consumption = 0.8, pollution = 0.1, quality = 0 }
+data.modules["productivity-module-3"]["legendary"] = { speed = -0.15, productivity = 0.25, consumption = 0.8, pollution = 0.1, quality = 0 }
+
+data.modules["quality-module"] = {}
+data.modules["quality-module"]["normal"] = { speed = -0.05, productivity = 0, consumption = 0, pollution = 0, quality = 0.01 }
+data.modules["quality-module"]["uncommon"] = { speed = -0.05, productivity = 0, consumption = 0, pollution = 0, quality = 0.013 }
+data.modules["quality-module"]["rare"] = { speed = -0.05, productivity = 0, consumption = 0, pollution = 0, quality = 0.016 }
+data.modules["quality-module"]["epic"] = { speed = -0.05, productivity = 0, consumption = 0, pollution = 0, quality = 0.019 }
+data.modules["quality-module"]["legendary"] = { speed = -0.05, productivity = 0, consumption = 0, pollution = 0, quality = 0.025 }
+
+data.modules["quality-module-2"] = {}
+data.modules["quality-module-2"]["normal"] = { speed = -0.05, productivity = 0, consumption = 0, pollution = 0, quality = 0.02 }
+data.modules["quality-module-2"]["uncommon"] = { speed = -0.05, productivity = 0, consumption = 0, pollution = 0, quality = 0.026 }
+data.modules["quality-module-2"]["rare"] = { speed = -0.05, productivity = 0, consumption = 0, pollution = 0, quality = 0.032 }
+data.modules["quality-module-2"]["epic"] = { speed = -0.05, productivity = 0, consumption = 0, pollution = 0, quality = 0.038 }
+data.modules["quality-module-2"]["legendary"] = { speed = -0.05, productivity = 0, consumption = 0, pollution = 0, quality = 0.05 }
+
+data.modules["quality-module-3"] = {}
+data.modules["quality-module-3"]["normal"] = { speed = -0.05, productivity = 0, consumption = 0, pollution = 0, quality = 0.025 }
+data.modules["quality-module-3"]["uncommon"] = { speed = -0.05, productivity = 0, consumption = 0, pollution = 0, quality = 0.032 }
+data.modules["quality-module-3"]["rare"] = { speed = -0.05, productivity = 0, consumption = 0, pollution = 0, quality = 0.04 }
+data.modules["quality-module-3"]["epic"] = { speed = -0.05, productivity = 0, consumption = 0, pollution = 0, quality = 0.047 }
+data.modules["quality-module-3"]["legendary"] = { speed = -0.05, productivity = 0, consumption = 0, pollution = 0, quality = 0.062 }
+
 return data

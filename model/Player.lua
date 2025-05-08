@@ -1067,7 +1067,11 @@ function Player.getModuleEffects(module)
             final_value = effect_value
         end
         -- arround the % value
-        final_value = math.floor(final_value*100)/100
+        if final_value >= 0  then
+            final_value = math.floor(final_value*100 + 0.05)/100
+        else 
+            final_value = math.ceil(final_value*100 - 0.05)/100
+        end
         if effect_name == "quality" and final_value > 0 then
             -- fix quality value, in game is 10x
             final_value = final_value / 10

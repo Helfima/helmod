@@ -313,7 +313,7 @@ end
 ---Return traget temperature
 ---@return number --default 0
 function EntityPrototype:getTargetTemperature()
-  if self.lua_prototype ~= nil then
+  if self.lua_prototype ~= nil and (self:getType() == "boiler" or self:getType() == "fusion-reactor") then
     return self.lua_prototype.target_temperature or 0
   end
   return 0
