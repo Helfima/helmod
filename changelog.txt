@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.22
+Date: 2025-05-13
+  Bugfixes:
+    - Fixed Invalid name "quality": LuaGuiElement contains a property or method with the same name. (factorio version > 2.0.47)
+---------------------------------------------------------------------------------------------------
 Version: 2.0.21
 Date: 2025-05-07
   Bugfixes:

@@ -361,6 +361,7 @@ function Controller:onGuiAction(event)
     if views == nil then self:prepare() end
 
     event.classname, event.action, event.item1, event.item2, event.item3, event.item4, event.item5 = string.match(event.element.name,pattern)
+    event.item = GuiElement.getElementTags(event.element)
 
     if event.classname == self.classname and event.action == "CLOSE" then
       Controller:cleanController(Player.native())
