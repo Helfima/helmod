@@ -790,7 +790,7 @@ function RecipeEdition:updateFactoryInfo(event)
 
         local sign = ""
         if factory.effects.consumption > 0 then sign = "+" end
-        GuiElement.add(input_panel, GuiLabel("energy"):caption(Format.formatNumberKilo(factory.energy, "W") .. " (" .. sign .. Format.formatPercent(factory.effects.consumption) .. "%)"))
+        GuiElement.add(input_panel, GuiLabel("value-energy"):caption(Format.formatNumberKilo(factory.energy, "W") .. " (" .. sign .. Format.formatPercent(factory.effects.consumption) .. "%)"))
 
         ---burner
         local energy_type = factory_prototype:getEnergyTypeInput()
@@ -840,7 +840,7 @@ function RecipeEdition:updateFactoryInfo(event)
         local cell_speed = GuiElement.add(input_panel, GuiFlowH("label-speed"))
         GuiElement.add(cell_speed, GuiLabel("label-speed"):caption({ "helmod_label.speed" }))
         self:addAlert(cell_speed, factory, "speed")
-        GuiElement.add(input_panel, GuiLabel("speed"):caption(Format.formatNumber(factory.speed) .. " (" .. sign .. Format.formatPercent(factory.effects.speed) .. "%)"))
+        GuiElement.add(input_panel, GuiLabel("value-speed"):caption(Format.formatNumber(factory.speed) .. " (" .. sign .. Format.formatPercent(factory.effects.speed) .. "%)"))
 
         ---productivity
         local sign = ""
@@ -848,7 +848,7 @@ function RecipeEdition:updateFactoryInfo(event)
         local cell_productivity = GuiElement.add(input_panel, GuiFlowH("label-productivity"))
         GuiElement.add(cell_productivity, GuiLabel("label-productivity"):caption({ "helmod_label.productivity" }))
         self:addAlert(cell_productivity, factory, "productivity")
-        GuiElement.add(input_panel, GuiLabel("productivity"):caption(sign .. Format.formatPercent(factory.effects.productivity) .. "%"))
+        GuiElement.add(input_panel, GuiLabel("value-productivity"):caption(sign .. Format.formatPercent(factory.effects.productivity) .. "%"))
 
         if Player.hasFeatureQuality() then
             ---quality
@@ -857,14 +857,14 @@ function RecipeEdition:updateFactoryInfo(event)
             local cell_productivity = GuiElement.add(input_panel, GuiFlowH("label-quality"))
             GuiElement.add(cell_productivity, GuiLabel("label-quality"):caption({ "helmod_label.quality" }))
             self:addAlert(cell_productivity, factory, "quality")
-            GuiElement.add(input_panel, GuiLabel("quality"):caption(sign .. Format.formatPercent(factory.effects.quality) .. "%"))
+            GuiElement.add(input_panel, GuiLabel("value-quality"):caption(sign .. Format.formatPercent(factory.effects.quality) .. "%"))
         end
 
         ---pollution
         local cell_pollution = GuiElement.add(input_panel, GuiFlowH("label-pollution"))
         GuiElement.add(cell_pollution, GuiLabel("label-pollution"):caption({ "helmod_common.pollution" }))
         self:addAlert(cell_pollution, factory, "pollution")
-        GuiElement.add(input_panel, GuiLabel("pollution"):caption({ "helmod_si.per-minute", Format.formatNumberElement((factory.pollution or 0) * 60) }))
+        GuiElement.add(input_panel, GuiLabel("value-pollution"):caption({ "helmod_si.per-minute", Format.formatNumberElement((factory.pollution or 0) * 60) }))
     end
 end
 
@@ -1099,10 +1099,10 @@ function RecipeEdition:updateBeaconInfo(event)
         GuiElement.add(input_panel, GuiLabel("module-slots"):caption(beacon_prototype:getModuleInventorySize()))
 
         GuiElement.add(input_panel, GuiLabel("label-energy-nominal"):caption({ "helmod_label.energy" }))
-        GuiElement.add(input_panel, GuiLabel("energy"):caption(Format.formatNumberKilo(beacon_prototype:getEnergyUsage(), "W")))
+        GuiElement.add(input_panel, GuiLabel("value-energy"):caption(Format.formatNumberKilo(beacon_prototype:getEnergyUsage(), "W")))
 
         GuiElement.add(input_panel, GuiLabel("label-efficiency"):caption({ "helmod_label.efficiency" }))
-        GuiElement.add(input_panel, GuiLabel("efficiency"):caption(beacon_prototype:getDistributionEffectivity()))
+        GuiElement.add(input_panel, GuiLabel("value-efficiency"):caption(beacon_prototype:getDistributionEffectivity()))
 
         GuiElement.add(input_panel, GuiLabel("label-combo"):caption({ "helmod_label.beacon-on-factory" }):tooltip({ "tooltip.beacon-on-factory" }))
         GuiElement.add(input_panel, GuiTextField(self.classname, "beacon-update", model.id, block.id, recipe.id, "combo", "onqueue"):text(beacon.combo):style("helmod_textfield"):tooltip({ "tooltip.beacon-on-factory" }))
