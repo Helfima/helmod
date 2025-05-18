@@ -214,8 +214,9 @@ function Product:getDrainedAmount(recipe)
   local amount = self:getElementAmount()
   local drain = 1
   if recipe.type == "technology" and recipe.factory ~= nil then
-    local machine = ItemPrototype(recipe.factory)
-    drain = machine:getIngredientToWeightCoefficient()
+    local machine = EntityPrototype(recipe.factory)
+    -- science_pack_drain_rate_percent = percent value
+    drain = machine:getSciencePackDrainRatePercent() / 100
   end
   return amount * drain
 end

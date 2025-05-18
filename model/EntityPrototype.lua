@@ -116,6 +116,16 @@ function EntityPrototype:getMaxPowerOutput()
 end
 
 -------------------------------------------------------------------------------
+---Return max energy usage per second
+---@return number --default 0
+function EntityPrototype:getMaxEnergyProduction()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.get_max_energy_production(self.factory.quality) or 0
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
 ---Return min energy usage per second
 ---@return number --default 0
 function EntityPrototype:getMinEnergyUsage()
@@ -135,6 +145,14 @@ end
 function EntityPrototype:getEnergyConsumption()
   if self.lua_prototype == nil then
     return 0
+  end
+
+  if self.lua_prototype.type == "fusion-generator" then
+    return self:getMaxEnergyProduction()
+  end
+
+  if self.lua_prototype.type == "fusion-reactor" then
+    return self:getMaxEnergyUsage() * 10
   end
 
   local energy_prototype = self:getEnergySource()
@@ -569,6 +587,44 @@ end
 -------------------------------------------------------------------------------
 ---Return fluid consumption
 ---@return number --default 0
+function EntityPrototype:getFluidConsumptionFusionGenerator()
+  if self:getType() == "fusion-generator" then
+
+    local energy_prototype = self:getEnergySource()
+    local effectivity
+    if energy_prototype ~= nil then
+      effectivity = energy_prototype:getEffectivity()
+    else
+      effectivity = 1
+    end
+
+    local fluidboxes = self:getFluidboxPrototypes()
+    if fluidboxes ~= nil then
+      for _, fluidbox in pairs(fluidboxes) do
+        if fluidbox.production_type == "input-output" or fluidbox.production_type == "input" then
+
+          local fluid_name = fluidbox.filter or "fusion-plasma"
+
+          local fluid_prototype = FluidPrototype(fluid_name)
+          local heat_capacity = fluid_prototype:getHeatCapacity()
+          
+          local minimum_temperature = fluid_prototype:getMinimumTemperature()
+          local max_temperature = fluid_prototype:getMaximumTemperature()
+          local power_extract = self:getPowerExtract(0, minimum_temperature, heat_capacity)
+          local energy_production = self:getMaxEnergyProduction()
+
+          return (60 * energy_production * effectivity) / power_extract
+        end
+      end
+    end
+  end
+
+  return 0
+end
+
+-------------------------------------------------------------------------------
+---Return fluid consumption
+---@return number --default 0
 function EntityPrototype:getFluidConsumptionOfBoiler()
   if self:getType() == "boiler" then
 
@@ -596,6 +652,46 @@ function EntityPrototype:getFluidConsumptionOfBoiler()
           local energy_consumption = self:getEnergyConsumption()
 
           return (energy_consumption * effectivity) / power_extract
+        end
+      end
+    end
+  end
+
+  return 0
+end
+
+-------------------------------------------------------------------------------
+---Return fluid production
+---@return number --default 0
+function EntityPrototype:getFluidProductionFusionReactor()
+  if self:getType() == "fusion-reactor" then
+
+    local energy_prototype = self:getEnergySource()
+    local effectivity
+    if energy_prototype ~= nil then
+      effectivity = energy_prototype:getEffectivity()
+    else
+      effectivity = 1
+    end
+
+    local fluidboxes = self:getFluidboxPrototypes()
+    if fluidboxes ~= nil then
+      for _, fluidbox in pairs(fluidboxes) do
+        if fluidbox.production_type == "input-output" or fluidbox.production_type == "output" then
+
+          local fluid_name = fluidbox.filter or "fusion-plasma"
+
+          local fluid_prototype = FluidPrototype(fluid_name)
+          local heat_capacity = fluid_prototype:getHeatCapacity()
+          
+          local minimum_temperature = fluid_prototype:getMinimumTemperature()
+          local power_extract = self:getPowerExtract(0, minimum_temperature, heat_capacity)
+          local max_energy_production = self:getMaxEnergyProduction()
+          local max_energy_usage = self:getMaxEnergyUsage() * 10
+          local max_power_output = self:getMaxPowerOutput()
+          local fluid_usage = self:getFluidUsagePerTick()
+
+          return (max_energy_usage * effectivity) / power_extract
         end
       end
     end
@@ -1098,4 +1194,14 @@ function EntityPrototype:getBurnsFluid()
     end
   end
   return nil
+end
+
+-------------------------------------------------------------------------------
+---Return burns fluid
+---@return number
+function EntityPrototype:getSciencePackDrainRatePercent()
+  if self.lua_prototype ~= nil and self.lua_prototype.type == "lab" then
+    return self.lua_prototype.science_pack_drain_rate_percent or 100
+  end
+  return 100
 end

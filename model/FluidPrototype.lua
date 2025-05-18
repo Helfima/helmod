@@ -65,6 +65,14 @@ function FluidPrototype:getMinimumTemperature()
 end
 
 -------------------------------------------------------------------------------
+---Return minimum temperature
+---@return number
+function FluidPrototype:getMaximumTemperature()
+  if self.lua_prototype == nil then return 15 end
+  return self.lua_prototype.max_temperature
+end
+
+-------------------------------------------------------------------------------
 ---Return hidden of Prototype
 ---@return boolean
 function FluidPrototype:getHidden()

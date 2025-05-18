@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.23
+Date: 2025-05-18
+  Changes:
+    - Added fusion-reactor and fusion-generator recipe (partial because we can't compute max cosumption value for fusion-reactor)
+  Bugfixes:
+    - Fixed ingredient amounts for technology recipe and science drain (LuaEntityPrototype::science_pack_drain_rate_percent added factorio version 2.0.29) 
+---------------------------------------------------------------------------------------------------
 Version: 2.0.22
 Date: 2025-05-13
   Bugfixes:

@@ -466,6 +466,7 @@ function SolverLinkedMatrix:get_block_matrix(block, parameters)
                 child_info.name = recipe.name
                 child_info.type = recipe.type
                 child_info.tooltip = recipe.name .. "\nRecette"
+                child_info.factory = recipe.factory
                 child_info.recipe_energy = recipe_prototype:getEnergy(recipe.factory)
                 child_info.factory_count = 0
                 if recipe.factory ~= nil then
@@ -485,6 +486,7 @@ function SolverLinkedMatrix:get_block_matrix(block, parameters)
                 if recipe.factory ~= nil then
                     child_info.factory_speed = recipe.factory.speed or 0
                 end
+                child_info.is_technology = recipe.type == "technology"
 
                 child_info.products = recipe_prototype:getProducts(recipe.factory)
                 child_info.ingredients = recipe_prototype:getIngredients(recipe.factory)
@@ -573,6 +575,8 @@ function SolverLinkedMatrix:add_matrix_row(matrix, child, child_info, is_block, 
         local ingredient_amount = 0
         if is_block then
             ingredient_amount = lua_ingredient.amount or 0
+        elseif child.type == "technology" then
+            ingredient_amount = ingredient:getDrainedAmount(child)
         else
             ingredient_amount = ingredient:getAmount()
             ---si constant compte comme un produit (recipe rocket)

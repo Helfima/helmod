@@ -749,8 +749,8 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
         local laboratory_productivity = Player.getForce().laboratory_productivity_bonus or 0
         factory.effects.productivity = factory.effects.productivity + laboratory_productivity
 
-        local machine = ItemPrototype(factory)
-    	factory.drain_ingredient = machine:getIngredientToWeightCoefficient()
+        local machine = EntityPrototype(factory)
+    	factory.drain_ingredient = machine:getSciencePackDrainRatePercent() / 100
     end
     ---nuclear reactor
     if factory_prototype:getType() == "reactor" then
@@ -870,9 +870,6 @@ function ModelCompute.computeEnergyFactory(recipe)
     if recipe.type == "recipe" and recipe_energy / recipe.factory.speed < 1 / 60 then
         recipe.factory.speed = 60 * recipe_energy
     end
-
-    ---effet consumption
-    local energy_prototype = factory_prototype:getEnergySource()
 
     local energy_type = factory_prototype:getEnergyType()
     local gameDay = { day = 12500, dusk = 5000, night = 2500, dawn = 2500 }
