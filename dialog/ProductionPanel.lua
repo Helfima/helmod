@@ -1121,7 +1121,7 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 			---products
 			local display_product_cols = User.getPreferenceSetting("display_product_cols")
 			local cell_products = GuiElement.add(gui_table, GuiTable("products", recipe.id):column(display_product_cols):style("helmod_table_list"))
-			for index, lua_product in spairs(recipe_prototype:getProducts(recipe.factory), User.getProductSorter()) do
+			for index, lua_product in spairs(recipe_prototype:getQualityProducts(recipe.factory, recipe.quality), User.getProductSorter()) do
 				local contraint_type = nil
 				local is_pivot = false
 				local product_prototype = Product(lua_product)
@@ -1130,8 +1130,10 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				product.count = product_prototype:countProduct(recipe)
 				product.count_limit = product_prototype:countLimitProduct(recipe)
 				product.count_deep = product_prototype:countDeepProduct(recipe)
-				if block.by_product ~= false and recipe.contraints ~= nil and recipe.contraints[product.name] ~= nil then
-					contraint_type = recipe.contraints[product.name].type
+
+				local product_key = product_prototype:getTableKey()
+				if block.by_product ~= false and recipe.contraints ~= nil and recipe.contraints[product_key] ~= nil then
+					contraint_type = recipe.contraints[product_key].type
 				end
 				local control_info = "contraint"
 				if not (block.solver ~= true and block.by_product ~= false) then
@@ -1139,7 +1141,7 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				end
 				if recipe.pivot ~= nil  then
 					local pivot = recipe.pivot
-					if pivot.type == lua_product.type and pivot.name == lua_product.name then
+					if pivot.type == lua_product.type and pivot.name == lua_product.name and pivot.quality == lua_product.quality then
 						is_pivot = true
 					end
 				end
@@ -1151,7 +1153,7 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 			---ingredients
 			local display_ingredient_cols = User.getPreferenceSetting("display_ingredient_cols")
 			local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients_", recipe.id):column(display_ingredient_cols):style("helmod_table_list"))
-			for index, lua_ingredient in spairs(recipe_prototype:getIngredients(recipe.factory), User.getProductSorter()) do
+			for index, lua_ingredient in spairs(recipe_prototype:getQualityIngredients(recipe.factory, recipe.quality), User.getProductSorter()) do
 				local contraint_type = nil
 				local is_pivot = false
 				local ingredient_prototype = Product(lua_ingredient)
@@ -1173,7 +1175,7 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				end
 				if recipe.pivot ~= nil  then
 					local pivot = recipe.pivot
-					if pivot.type == lua_ingredient.type and pivot.name == lua_ingredient.name then
+					if pivot.type == lua_ingredient.type and pivot.name == lua_ingredient.name and pivot.quality == lua_ingredient.quality then
 						is_pivot = true
 					end
 				end
@@ -1751,6 +1753,7 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 				if #recipes == 1 then
 					local recipe = recipes[1]
 					local _, new_recipe = ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe.name, recipe.type, 0)
+					new_recipe.quality = event.item.quality
 					ModelCompute.update(model)
 					User.setParameter("scroll_element", new_recipe.id)
 					Controller:send("on_gui_update", event)
@@ -1763,14 +1766,14 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 				end
 			end
 		elseif block ~= nil and event.control == true and event.item3 ~= "none" then
-			local contraint = { type = "master", name = event.item4 }
+			local contraint = { type = "master", item = event.item }
 			local child = block.children[event.item3]
 			ModelBuilder.updateChildContraint(child, contraint)
 			ModelCompute.update(model)
 			User.setParameter("scroll_element", child.id)
 			Controller:send("on_gui_update", event)
 		elseif block ~= nil and event.shift == true and event.item3 ~= "none" then
-			local contraint = { type = "exclude", name = event.item4 }
+			local contraint = { type = "exclude", item = event.item }
 			local child = block.children[event.item3]
 			ModelBuilder.updateChildContraint(child, contraint)
 			ModelCompute.update(model)
@@ -1790,6 +1793,7 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 				if #recipes == 1 then
 					local recipe = recipes[1]
 					local _, new_recipe = ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe.name, recipe.type)
+					new_recipe.quality = event.item.quality
 					ModelCompute.update(model)
 					User.setParameter("scroll_element", new_recipe.id)
 					Controller:send("on_gui_update", event)
@@ -1800,14 +1804,14 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 				end
 			end
 		elseif block ~= nil and event.control == true and event.item4 ~= "none" then
-			local contraint = { type = "master", name = event.item4 }
+			local contraint = { type = "master", item = event.item }
 			local child = block.children[event.item3]
 			ModelBuilder.updateChildContraint(child, contraint)
 			ModelCompute.update(model)
 			User.setParameter("scroll_element", child.id)
 			Controller:send("on_gui_update", event)
 		elseif block ~= nil and event.shift == true and event.item4 ~= "none" then
-			local contraint = { type = "exclude", name = event.item4 }
+			local contraint = { type = "exclude", item = event.item }
 			local child = block.children[event.item3]
 			ModelBuilder.updateChildContraint(child, contraint)
 			ModelCompute.update(model)

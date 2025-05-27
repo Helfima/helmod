@@ -105,7 +105,7 @@ function ProductEdition:updateInfo(model, block)
     info_panel.clear()
 
     local table_panel = GuiElement.add(info_panel, GuiTable("input-table"):column(2))
-    GuiElement.add(table_panel, GuiButtonSprite("product"):sprite(product.type, product.name))
+    GuiElement.add(table_panel, GuiButtonSprite("product"):sprite_with_quality(product.type, product.name, product.quality))
     GuiElement.add(table_panel, GuiLabel("product-label"):caption(Player.getLocalisedName(product)))
 
     local caption = {"helmod_common.quantity"}

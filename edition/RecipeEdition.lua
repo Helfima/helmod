@@ -1016,7 +1016,7 @@ function RecipeEdition:updateFactoryModulesPriority(factory_module_panel)
                 color = GuiElement.color_button_rest
             end
             GuiElement.add(priority_table_panel, GuiButtonSelectSprite(self.classname, "factory-module-select", model.id, block.id, recipe.id):sprite_with_quality("entity", element.name, factory_module_quality):color(color):index(index):tooltip(tooltip))
-            GuiElement.add(priority_table_panel, GuiLabel("priority-value", index):caption({ "", "x", element.value }))
+            GuiElement.add(priority_table_panel, GuiLabel("priority-value", index):caption({ "", "x", element.amount }))
         end
     end
 end
@@ -1297,7 +1297,7 @@ function RecipeEdition:updateBeaconModulesPriority(beacon_module_panel)
                 color = GuiElement.color_button_rest
             end
             GuiElement.add(priority_table_panel, GuiButtonSelectSprite(self.classname, "beacon-module-select", model.id, block.id, recipe.id):sprite_with_quality("entity", element.name, beacon_module_quality):color(color):index(index):tooltip(tooltip))
-            GuiElement.add(priority_table_panel, GuiLabel("priority-value", index):caption({ "", "x", element.value }))
+            GuiElement.add(priority_table_panel, GuiLabel("priority-value", index):caption({ "", "x", element.amount }))
         end
     end
 end
@@ -1387,9 +1387,8 @@ function RecipeEdition:updateObjectInfo(event)
         GuiElement.add(cell_duration, GuiCellProduct(self.classname, "do_noting"):element(element_duration):tooltip("tooltip.product"):color("gray"))
 
         ---products
-        local cell_products = GuiElement.add(recipe_table,
-            GuiTable("products", recipe.id):column(3):style("helmod_table_element"))
-        local lua_products = recipe_prototype:getProducts(recipe.factory)
+        local cell_products = GuiElement.add(recipe_table, GuiTable("products", recipe.id):column(3):style("helmod_table_element"))
+        local lua_products = recipe_prototype:getQualityProducts(recipe.factory, recipe.quality)
         if lua_products ~= nil then
             for index, lua_product in pairs(lua_products) do
                 local product_prototype = Product(lua_product)
@@ -1402,7 +1401,7 @@ function RecipeEdition:updateObjectInfo(event)
         ---ingredients
         local cell_ingredients = GuiElement.add(recipe_table,
             GuiTable("ingredients", recipe.id):column(5):style("helmod_table_element"))
-        local lua_ingredients = recipe_prototype:getIngredients(recipe.factory)
+        local lua_ingredients = recipe_prototype:getQualityIngredients(recipe.factory, recipe.quality)
         if lua_ingredients ~= nil then
             for index, lua_ingredient in pairs(lua_ingredients) do
                 local ingredient_prototype = Product(lua_ingredient)
@@ -1413,14 +1412,18 @@ function RecipeEdition:updateObjectInfo(event)
         end
 
         local tablePanel = GuiElement.add(info_panel, GuiTable("table-input"):column(2))
-        -- if Player.hasFeatureQuality() then
-        --     GuiElement.add(tablePanel, GuiLabel("label-quality"):caption({ "helmod_label.quality" }))
-        --     local current_quality = recipe.quality or "normal"
-        --     GuiElement.addQualitySelector(tablePanel, current_quality, self.classname, "recipe-quality-select", model.id, block.id, recipe.id)
-        -- end
+        
+        if Player.hasFeatureQuality() then
+             GuiElement.add(tablePanel, GuiLabel("label-quality"):caption({ "helmod_label.quality" }))
+             local current_quality = recipe.quality or "normal"
+             GuiElement.addQualitySelector(tablePanel, current_quality, self.classname, "recipe-quality-select", model.id, block.id, recipe.id)
+        end
+
         GuiElement.add(tablePanel, GuiLabel("label-production"):caption({ "helmod_recipe-edition-panel.production" }))
         local production_value = (recipe.production or 1) * 100
         GuiElement.add(tablePanel, GuiTextField(self.classname, "recipe-update", model.id, block.id, recipe.id):text(production_value):style("helmod_textfield"))
+
+
     end
 end
 

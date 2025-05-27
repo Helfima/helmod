@@ -39,8 +39,8 @@ function SolverLinkedMatrixAlgebra:get_col(matrix, xrow, invert)
             local has_contraint = parameters.contraints ~= nil
             local is_master = false
             local is_exclude = false
-            if parameters.contraints ~= nil and column.product ~= nil and parameters.contraints[column.product.name] then
-                local contraint = parameters.contraints[column.product.name]
+            if parameters.contraints ~= nil and column.product ~= nil and parameters.contraints[column.key] then
+                local contraint = parameters.contraints[column.key]
                 if contraint.type == "master" then
                     is_master = true
                     has_master = true

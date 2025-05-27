@@ -234,8 +234,69 @@ function RecipePrototype:getProducts(factory)
             end
         end
     end
-
     return raw_products
+end
+
+function RecipePrototype:getNextQualityProducts(quality_products, raw_product, lua_quality, quality_effect)
+    local quality_product = Product(raw_product):clone()
+    quality_product.quality = lua_quality.name
+    quality_product.amount = quality_product.amount * quality_effect
+    table.insert(quality_products, quality_product)
+
+    local next_probability = lua_quality.next_probability
+    if next_probability > 0 and quality_effect > 0  then
+        self:getNextQualityProducts(quality_products, raw_product, lua_quality.next, quality_effect * next_probability)
+    end
+    return quality_products
+end
+
+-------------------------------------------------------------------------------
+---Return products array of Prototype
+---@param factory table
+---@param quality string
+---@return table
+function RecipePrototype:getQualityProducts(factory, quality)
+    local raw_products = self:getProducts(factory)
+    if quality == nil then
+        quality = "normal"
+    end
+    local quality_products = {}
+    local lua_quality = Player.getQualityPrototype(quality)
+    local quality_effect = 0 
+    if factory ~= nil and factory.effects ~= nil then
+        quality_effect = factory.effects.quality or 0
+    end
+    
+    local next_probability = lua_quality.next_probability
+    for _, raw_product in pairs(raw_products) do
+        if raw_product.type == "item" then
+            raw_product.quality = quality
+            if next_probability > 0 and quality_effect > 0  then
+                self:getNextQualityProducts(quality_products, raw_product, lua_quality.next, quality_effect)
+            end
+        end
+    end
+    if #quality_products > 0 then
+        for _, quality_product in pairs(quality_products) do
+            table.insert(raw_products, quality_product)
+        end
+    end
+    return raw_products
+end
+
+-------------------------------------------------------------------------------
+---Return ingredients array of Prototype
+---@param factory table
+---@param quality string
+---@return table
+function RecipePrototype:getQualityIngredients(factory, quality)
+    local raw_ingredients = self:getIngredients(factory)
+    for _, raw_ingredient in pairs(raw_ingredients) do
+        if raw_ingredient.type == "item" then
+            raw_ingredient.quality = quality
+        end
+    end
+    return raw_ingredients
 end
 
 -------------------------------------------------------------------------------

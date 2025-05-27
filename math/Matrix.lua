@@ -4,13 +4,15 @@
 ---@field key string
 ---@field type string
 ---@field name string
+---@field quality string
 ---@field sysname string
 ---@field tooltip string
 ---@field is_ingredient boolean
 ---@field product table
-MatrixHeader = newclass(function(base, type, name, tooltip)
+MatrixHeader = newclass(function(base, type, name, quality, tooltip)
   base.name = name
   base.type = type
+  base.quality = quality
   base.tooltip = tooltip
 end)
 
@@ -20,7 +22,7 @@ function MatrixHeader:get_column_key()
   if self.sysname ~= nil then
     return self.sysname
   end
-  return string.format("%s#%s", self.type, self.name)
+  return string.format("%s#%s#%s", self.type, self.name, self.quality)
 end
 
 -------------------------------------------------------------------------------
@@ -28,23 +30,25 @@ end
 ---@return boolean
 function MatrixHeader:equals(other)
   if other == nil then return false end
-  return self.name == other.name and self.type == other.type
+  return self.name == other.name and self.type == other.type and self.quality == other.quality
 end
 
 -------------------------------------------------------------------------------
 ---@class MatrixRow
 ---@field type string
 ---@field name string
+---@field quality string
 ---@field tooltip string
 ---@field header MatrixHeader
 ---@field columns {[integer] : MatrixHeader}
 ---@field values {[integer] : number}
 ---@field columnIndex {[string] : integer}
-MatrixRow = newclass(function(base, type, name, tooltip)
+MatrixRow = newclass(function(base, type, name, quality, tooltip)
   base.name = name
   base.type = type
+  base.quality = quality
   base.tooltip = tooltip
-  base.header = MatrixHeader(type, name, tooltip)
+  base.header = MatrixHeader(type, name, quality, tooltip)
   base.columns = {}
   base.values = {}
   base.columnIndex = {}

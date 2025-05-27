@@ -192,27 +192,27 @@ function ModelDebug:getCellHeader(matrix_table, frame, header, sum)
         local tooltip = { "", header.primary.name }
         table.insert(tooltip, { "", "\n", "sum: ", sum })
 
-        local button = GuiElement.add(cell, GuiButtonSprite("cell_primary"):sprite(header.primary.type, header.primary.name):tooltip(tooltip))
+        local button = GuiElement.add(cell, GuiButtonSprite("cell_primary"):sprite_with_quality(header.primary.type, header.primary.name, header.primary.quality):tooltip(tooltip))
         GuiElement.infoTemperature(button, header.primary, "helmod_label_overlay_m")
 
         local tooltip = { "", header.secondary.name }
         table.insert(tooltip, { "", "\n", "sum: ", sum })
-        local button = GuiElement.add(cell, GuiButtonSprite("cell_secondary"):sprite(header.secondary.type, header.secondary.name):tooltip(tooltip))
+        local button = GuiElement.add(cell, GuiButtonSprite("cell_secondary"):sprite_with_quality(header.secondary.type, header.secondary.name, header.secondary.quality):tooltip(tooltip))
         GuiElement.infoTemperature(button, header.secondary, "helmod_label_overlay_m")
     elseif header.product ~= nil then
         local tooltip = { "", header.product.name }
         table.insert(tooltip, { "", "\n", "sum: ", sum })
-        local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(header.product.type, header.product.name):tooltip(tooltip))
+        local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite_with_quality(header.product.type, header.product.name, header.product.quality):tooltip(tooltip))
         GuiElement.add(button, GuiLabel("label_index"):caption(header.index))
         GuiElement.infoTemperature(button, header.product, "helmod_label_overlay_m")
     elseif header.product_linked ~= nil then
         local tooltip = { "", header.name }
-        local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(header.type, header.name):tooltip(tooltip))
+        local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite_with_quality(header.type, header.name, header.quality):tooltip(tooltip))
         GuiElement.infoTemperature(button, header, "helmod_label_overlay_m")
-        GuiElement.add(button, GuiButtonSpriteSm("linked"):sprite(header.product_linked.type, header.product_linked.name))
+        GuiElement.add(button, GuiButtonSpriteSm("linked"):sprite_with_quality(header.product_linked.type, header.product_linked.name, header.product_linked.quality))
     else
         local tooltip = { "", header.name }
-        local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite(header.type, header.name):tooltip(tooltip))
+        local button = GuiElement.add(cell, GuiButtonSprite("cell_value"):sprite_with_quality(header.type, header.name, header.quality):tooltip(tooltip))
         GuiElement.infoTemperature(button, header, "helmod_label_overlay_m")
     end
 end

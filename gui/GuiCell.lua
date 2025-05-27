@@ -543,9 +543,10 @@ function GuiCellRecipe:create(parent)
   row1.style.bottom_padding=3
 
   local recipe_prototype = RecipePrototype(recipe)
+  local quality = recipe.quality
   local icon_name, icon_type = recipe_prototype:getIcon()
   local tooltip = GuiTooltipRecipe(self.options.tooltip):element(recipe)
-  local recipe_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(icon_type, icon_name):tooltip(tooltip))
+  local recipe_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite_with_quality(icon_type, icon_name, quality):tooltip(tooltip))
   
   self:add_overlay(recipe_icon)
   self:add_icon_info(recipe_icon)
@@ -614,7 +615,7 @@ function GuiCellProductSm:create(parent)
   if string.find(element.name, "helmod") then
     GuiElement.add(row1, GuiButton(unpack(self.name)):style(element.name):tooltip({element.localised_name}))
   else
-    GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):sprite(element.type, element.name):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip({self.options.tooltip, Player.getLocalisedName(element)}))
+    GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):sprite_with_quality(element.type, element.name, element.quality):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip({self.options.tooltip, Player.getLocalisedName(element)}))
   end
   GuiElement.infoTemperature(row1, element)
   
@@ -995,7 +996,9 @@ function GuiCellElement:create(parent)
   else
     tooltip = GuiTooltipElement(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
   end
-  local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite_with_quality(element.type or "entity", element.name, element.quality or "normal"):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
+  local button_index = Product(element):getTableKey()
+  local button_caption = "X"..Product(element):getElementAmount()
+  local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite_with_quality(element.type or "entity", element.name, element.quality or "normal"):index(button_index):caption(button_caption):tooltip(tooltip))
   GuiElement.infoTemperature(row1, element)
   
   if element.burnt then self:add_icon_info(button, "burnt") end
@@ -1060,8 +1063,9 @@ function GuiCellElementSm:create(parent)
   else
     tooltip = GuiTooltipElement(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo()
   end
-  local button = GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):sprite_with_quality(element.type or "entity", element.name, element.quality or "normal"):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
-  
+  local button_index = Product(element):getTableKey()
+  local button_caption = "X"..Product(element):getElementAmount()
+  local button = GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):sprite_with_quality(element.type or "entity", element.name, element.quality or "normal"):index(button_index):caption(button_caption):tooltip(tooltip))
   self:add_mask(button, color, 16)
 
   local display_count_deep = User.getParameter("display_count_deep")
@@ -1110,7 +1114,9 @@ function GuiCellElementM:create(parent)
   else
     tooltip = GuiTooltipElement(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
   end
-  local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite_with_quality(element.type or "entity", element.name, element.quality or "normal"):index(Product(element):getTableKey()):caption("X"..Product(element):getElementAmount()):tooltip(tooltip))
+  local button_index = Product(element):getTableKey()
+  local button_caption = "X"..Product(element):getElementAmount()
+  local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite_with_quality(element.type or "entity", element.name, element.quality or "normal"):index(button_index):caption(button_caption):tooltip(tooltip))
   GuiElement.infoTemperature(row1, element)
 
   self:add_icon_info(button)

@@ -159,8 +159,8 @@ function SolverLinkedMatrix:solve(block, parameters, debug)
                         -- check recipe doesn't exist
                         local recipe_prototype = RecipePrototype(recipe)
                         if recipe_prototype:native() == nil then return end
-                        child_products = recipe_prototype:getProducts(recipe.factory)
-                        child_ingredients = recipe_prototype:getIngredients(recipe.factory)
+                        child_products = recipe_prototype:getQualityProducts(recipe.factory, recipe.quality)
+                        child_ingredients = recipe_prototype:getQualityIngredients(recipe.factory, recipe.quality)
                     end
                     for i, lua_product in pairs(child_products) do
                         -- search the product with the name of linked product
@@ -249,7 +249,7 @@ function SolverLinkedMatrix:solve_block(block, parameters, debug)
                 local xcol = parameters.pivot
                 local colum_pivot = mC.columns[xcol]
                 if colum_pivot ~= nil  then
-                    child.pivot = {type=colum_pivot.product.type, name=colum_pivot.product.name}
+                    child.pivot = {type=colum_pivot.product.type, name=colum_pivot.product.name, quality=colum_pivot.product.quality}
                 else
                     child.pivot = nil       
                 end
@@ -347,7 +347,7 @@ function SolverLinkedMatrix:solve_block_finalize(block, matrix)
             local Z = math.abs(zrow[icol])
             local product_header = matrix.columns[icol]
             local product_key = product_header.key
-            local product = Product(product_header):clone()
+            local product = Product(product_header.product):clone()
             product.amount = Z
             if math.abs(product.amount) < 1e-10 then
                 product.amount = 0
@@ -465,6 +465,7 @@ function SolverLinkedMatrix:get_block_matrix(block, parameters)
 
                 child_info.name = recipe.name
                 child_info.type = recipe.type
+                child_info.quality = recipe.quality or "normal"
                 child_info.tooltip = recipe.name .. "\nRecette"
                 child_info.factory = recipe.factory
                 child_info.recipe_energy = recipe_prototype:getEnergy(recipe.factory)
@@ -488,8 +489,8 @@ function SolverLinkedMatrix:get_block_matrix(block, parameters)
                 end
                 child_info.is_technology = recipe.type == "technology"
 
-                child_info.products = recipe_prototype:getProducts(recipe.factory)
-                child_info.ingredients = recipe_prototype:getIngredients(recipe.factory)
+                child_info.products = recipe_prototype:getQualityProducts(recipe.factory, recipe.quality)
+                child_info.ingredients = recipe_prototype:getQualityIngredients(recipe.factory, recipe.quality)
                 self:add_matrix_row(matrix, child, child_info, is_block, col_index, block.by_product, production, factor)
             end
 
@@ -518,7 +519,7 @@ function SolverLinkedMatrix:add_matrix_row(matrix, child, child_info, is_block, 
 
     local row_valid = false
     local rowParameters = MatrixRowParameters()
-    local row = MatrixRow(child_info.type, child_info.name, child_info.tooltip)
+    local row = MatrixRow(child_info.type, child_info.name, child_info.quality, child_info.tooltip)
     row.header.child_id = child.id
     if child.product_linked then
         row.header.product_linked = child.product_linked
@@ -563,6 +564,7 @@ function SolverLinkedMatrix:add_matrix_row(matrix, child, child_info, is_block, 
         lua_products[product_key] = {
             name = lua_product.name,
             type = lua_product.type,
+            quality = lua_product.quality,
             amount = product_amount,
             temperature = lua_product.temperature,
             minimum_temperature = lua_product.minimum_temperature,
@@ -589,6 +591,7 @@ function SolverLinkedMatrix:add_matrix_row(matrix, child, child_info, is_block, 
             lua_ingredients[ingredient_key] = {
                 name = lua_ingredient.name,
                 type = lua_ingredient.type,
+                quality = lua_ingredient.quality,
                 amount = ingredient_amount,
                 temperature = lua_ingredient.temperature,
                 minimum_temperature = lua_ingredient.minimum_temperature,

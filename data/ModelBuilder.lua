@@ -1085,14 +1085,15 @@ end
 function ModelBuilder.updateChildContraint(child, contraint)
     if child ~= nil then
         if child.contraints == nil then child.contraints = {} end
-        if child.contraints[contraint.name] ~= nil then
-            if child.contraints[contraint.name].type == contraint.type then
-                child.contraints[contraint.name] = nil
+        local product_key = Product(contraint.item):getTableKey()
+        if child.contraints[product_key] ~= nil then
+            if child.contraints[product_key].type == contraint.type then
+                child.contraints[product_key] = nil
             else
-                child.contraints[contraint.name] = contraint
+                child.contraints[product_key] = contraint
             end
         else
-            child.contraints[contraint.name] = contraint
+            child.contraints[product_key] = contraint
         end
     end
 end

@@ -58,7 +58,10 @@ function Product:getTableKey()
         end
       end
     end
-    return self.lua_prototype.name
+    if self.lua_prototype.quality == nil or self.lua_prototype.quality == "normal" then
+      return self.lua_prototype.name
+    end
+    return string.format("%s#%s", self.lua_prototype.name,self.lua_prototype.quality or "normal")
   end
   return "unknow"
 end
@@ -83,6 +86,7 @@ function Product:clone()
   local prototype = {
     type = self.lua_prototype.type or "item",
     name = self.lua_prototype.name,
+    quality = self.lua_prototype.quality,
     amount = self:getElementAmount(),
     state = self.lua_prototype.state,
     temperature = self.lua_prototype.temperature,
@@ -308,4 +312,12 @@ function Product:getProductivityBonus(recipe)
   productivity = productivity * speed_adjustment
 
   return productivity
+end
+
+-------------------------------------------------------------------------------
+---@param other Product
+---@return boolean
+function Product:match(other)
+  if other == nil then return false end
+  return self.lua_prototype.name == other.name and self.lua_prototype.type == other.type and self.lua_prototype.quality == other.quality
 end

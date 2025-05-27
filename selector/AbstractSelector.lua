@@ -215,6 +215,10 @@ function AbstractSelector:onBeforeOpen(event)
   else
     User.setParameter("filter_prototype_product", true)
   end
+
+  if event.item ~= nil then
+    User.setParameter("selector_quality_prototype", event.item.quality)
+  end
 end
 
 -------------------------------------------------------------------------------
@@ -251,6 +255,10 @@ function AbstractSelector:onEvent(event)
         local index = nil
         if self:getProductFilter() == false then index = 0 end
         local new_block, new_recipe = ModelBuilder.addRecipeIntoProductionBlock(model, block, prototype_name, prototype_type, index)
+        local selector_quality_prototype = User.getParameter("selector_quality_prototype")
+        if selector_quality_prototype ~= nil then
+          new_recipe.quality = selector_quality_prototype
+        end
         ModelCompute.update(model)
         User.setParameter("scroll_element", new_recipe.id)
         User.setActiveForm("HMProductionPanel")

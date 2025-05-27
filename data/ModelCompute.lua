@@ -467,10 +467,10 @@ function ModelCompute.prepareBlockObjectives(block)
                 local child_elements = nil
                 local factor = 1
                 if block.by_product == false then
-                    child_elements = recipe_prototype:getIngredients(child.factory)
+                    child_elements = recipe_prototype:getQualityIngredients(child.factory, child.quality)
                     factor = 1
                 else
-                    child_elements = recipe_prototype:getProducts(child.factory)
+                    child_elements = recipe_prototype:getQualityProducts(child.factory, child.quality)
                 end
                 for _, lua_product in pairs(child_elements) do
                     local product = Product(lua_product)
@@ -512,8 +512,8 @@ function ModelCompute.prepareBlockElements(block)
                 child_ingredients = child.ingredients
             else
                 local recipe_prototype = RecipePrototype(child)
-                child_products = recipe_prototype:getProducts(child.factory)
-                child_ingredients = recipe_prototype:getIngredients(child.factory)
+                child_products = recipe_prototype:getQualityProducts(child.factory, child.quality)
+                child_ingredients = recipe_prototype:getQualityIngredients(child.factory, child.quality)
             end
             -- prepare products
             for _, lua_product in pairs(child_products) do
@@ -522,6 +522,7 @@ function ModelCompute.prepareBlockElements(block)
                     key = product_key,
                     name = lua_product.name,
                     type = lua_product.type,
+                    quality = lua_product.quality,
                     amount = 0,
                     temperature = lua_product.temperature,
                     minimum_temperature = lua_product.minimum_temperature,
@@ -535,6 +536,7 @@ function ModelCompute.prepareBlockElements(block)
                     key = ingredient_key,
                     name = lua_ingredient.name,
                     type = lua_ingredient.type,
+                    quality = lua_ingredient.quality,
                     amount = 0,
                     temperature = lua_ingredient.temperature,
                     minimum_temperature = lua_ingredient.minimum_temperature,
