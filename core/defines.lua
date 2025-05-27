@@ -357,6 +357,21 @@ defines.constant.preferences = {
     group = "general"
   },
   --ui-auto-close
+  close_after_selection = {
+    type = "bool-setting",
+    localised_name = {"helmod_pref_settings.ui-close-after-selection"},
+    localised_description = {"helmod_pref_settings.ui-close-after-selection-desc"},
+    default_value = false,
+    group = "ui",
+    items = {
+      HMEntitySelector = true,
+      HMRecipeSelector = true,
+      HMTechnologySelector = true,
+      HMItemSelector = true,
+      HMFluidSelector = true
+    }
+  },
+  --ui-auto-close
   ui_auto_close = {
     type = "bool-setting",
     localised_name = {"helmod_pref_settings.ui-auto-close"},

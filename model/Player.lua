@@ -223,7 +223,7 @@ end
 ---@param type string
 ---@param index number
 ---@return any
-function Player.setSmartToolConstantCombinator(recipe, type, index)
+function Player.setSmartToolRecipeConstantCombinator(recipe, type, index)
     if Lua_player == nil or recipe == nil then
         return nil
     end
@@ -266,6 +266,63 @@ function Player.setSmartToolConstantCombinator(recipe, type, index)
         }
     }
 
+    Player.getSmartTool({ entity })
+end
+
+-------------------------------------------------------------------------------
+---Set smart tool
+---@param block BlockData
+---@return any
+function Player.setSmartToolBuildingConstantCombinator(block)
+
+    if Lua_player == nil or block == nil then
+        return nil
+    end
+    local summary = block.summary
+    local by_limit = block.by_limit
+
+    local sections = {}
+    local items = {"factories", "beacons", "modules"}
+    local index = 1
+    for _, item in ipairs(items) do
+        local elements = summary[item];
+        if table_size(elements) > 0 then
+            local section = {
+                index = index,
+                filters = {}
+            }
+            local signal_index = 1
+            for _, element in pairs(elements) do
+                local count = element.count
+                if by_limit == true then
+                    count = element.count_limit
+                end
+                local filter = {
+                    name = element.name,
+                    count = math.ceil(count),
+                    quality = element.quality or "normal",
+                    comparator = "=",
+                    index = signal_index
+                }
+                table.insert(section.filters, filter)
+                signal_index = signal_index + 1
+            end
+            if #section.filters > 0 then
+                table.insert(sections, section)
+            end
+            index = index + 1
+        end
+    end
+    local entity = {
+        entity_number = 1,
+        name = "constant-combinator",
+        position = { 0, 0 },
+        control_behavior = {
+            sections = {
+                sections = sections
+            }
+        }
+    }
     Player.getSmartTool({ entity })
 end
 

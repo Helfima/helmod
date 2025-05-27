@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 ---Class to build pin dialog
----@class PinPanel
+---@class PinPanel : FormModel
 PinPanel = newclass(FormModel)
 
 local display_pin_level_min = 0
@@ -79,11 +79,17 @@ function PinPanel:updateHeader(event)
   GuiElement.add(group2, GuiButton(self.classname, "recipe-done-remove"):sprite("menu", defines.sprites.checkmark.black,defines.sprites.checkmark.black):style("helmod_button_menu_actived_red"):tooltip({"helmod_button.remove-done"}))
 
   local parameter_objects = User.getParameter(self.parameter_objects)
+  local model, block, _ = self:getParameterObjects()
+
   local group3 = GuiElement.add(action_panel, GuiFlowH("group3"))
-  GuiElement.add(group3, GuiButton("HMSummaryPanel", "OPEN", parameter_objects.model, parameter_objects.block):sprite("menu", defines.sprites.list_view.black, defines.sprites.list_view.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
+  group3.style.horizontal_spacing = 5
+  GuiElement.add(group3, GuiButton("HMSummaryPanel", "OPEN", model.id, block.id):sprite("menu", defines.sprites.list_view.black, defines.sprites.list_view.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-summary"}))
+  
+  local tooltip = GuiTooltipBuilding("tooltip.smart-pipette"):element(block):byLimit(block.by_limit)
+  GuiElement.add(group3, GuiButton(self.classname, "building-constant", model.id, block.id):sprite("menu", defines.sprites.factory.black, defines.sprites.factory.black):style("helmod_button_menu"):tooltip(tooltip))
 
   local group4 = GuiElement.add(action_panel, GuiFlowH("group4"))
-  GuiElement.add(group4, GuiButton("HMProductionPanel", "OPEN", parameter_objects.model, parameter_objects.block):sprite("menu", defines.sprites.hangar.black,defines.sprites.hangar.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-production-block"}))
+  GuiElement.add(group4, GuiButton("HMProductionPanel", "OPEN", model.id, block.id):sprite("menu", defines.sprites.hangar.black,defines.sprites.hangar.black):style("helmod_button_menu"):tooltip({"helmod_result-panel.tab-button-production-block"}))
 end
 
 -------------------------------------------------------------------------------
@@ -268,7 +274,7 @@ function PinPanel:onEvent(event)
     if event.control == true then
       index = -1
     end
-    Player.setSmartToolConstantCombinator(children[event.item1], event.item2, index)
+    Player.setSmartToolRecipeConstantCombinator(children[event.item1], event.item2, index)
   end
   
   if event.action == "recipe-done" then
@@ -284,4 +290,8 @@ function PinPanel:onEvent(event)
     end
     self:updateInfo(event)
   end
+
+  if event.action == "building-constant" then
+		Player.setSmartToolBuildingConstantCombinator(block)
+	end
 end

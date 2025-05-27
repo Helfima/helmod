@@ -534,7 +534,7 @@ function ProductionPanel:updateInfoBlock(model, block)
 			GuiElement.add(block_table, GuiCellPollution("block-pollution"):element(block):tooltip("tooltip.info-block"):color(GuiElement.color_button_default):color(default_color):index(3):byLimit(block.by_limit))
 		end
 		if User.getPreferenceSetting("display_building") then
-			GuiElement.add(block_table, GuiCellBuilding("block-building"):element(block):tooltip("tooltip.info-building"):color(GuiElement.color_button_default):color(default_color):index(4):byLimit(block.by_limit))
+			GuiElement.add(block_table, GuiCellBuilding(self.classname, "building-constant", model.id, block_id):element(block):tooltip("tooltip.smart-pipette"):color(GuiElement.color_button_default):color(default_color):index(4):byLimit(block.by_limit))
 		end
 	end
 end
@@ -1248,8 +1248,8 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 	end
 
 	---col building
+	local cell_building = GuiElement.add(gui_table, GuiTable(block.id, "building"):column(1):style("helmod_table_list"))
 	if User.getPreferenceSetting("display_building") then
-		local cell_building = GuiElement.add(gui_table, GuiTable(block.id, "building"):column(1):style("helmod_table_list"))
 		GuiElement.add(cell_building, GuiCellBuilding(self.classname, "row-change-block", model.id, block.id):element(block):tooltip("tooltip.info-building"):color(block_color))
 	end
 
@@ -1544,6 +1544,10 @@ function ProductionPanel:onEventAccessRead(event, model, block)
 			event.action = "OPEN"
 			Controller:send("on_gui_open", event, "HMRecipeEdition")
 		end
+	end
+
+	if event.action == "building-constant" then
+		Player.setSmartToolBuildingConstantCombinator(block)
 	end
 end
 

@@ -257,6 +257,12 @@ function AbstractSelector:onEvent(event)
         User.setParameterObjects("HMProductionPanel", model.id, new_block.id, new_recipe.id)
         User.setParameterObjects(self.classname, model.id, new_block.id)
         Controller:send("on_gui_refresh", event)
+
+        if User.getPreferenceSetting("close_after_selection") == true then
+          if User.getPreferenceSetting("close_after_selection", self.classname) == true then
+              self:close()
+          end
+      end
       end
       ---container selector
       if event.action == "element-select" and prototype_type == "container" then

@@ -140,12 +140,27 @@ function ModelCompute.updateBlock(model, block)
 end
 
 -------------------------------------------------------------------------------
----Finalize input block
+---Create factories summary
 ---@param block BlockData
 function ModelCompute.createSummaryFactory(block, factory)
+    ModelCompute.createSummaryMachine(block, "factories", factory)
+end
+
+-------------------------------------------------------------------------------
+---Create beacons summary
+---@param block BlockData
+function ModelCompute.createSummaryBeacon(block, beacon)
+    -- same section of factories
+    ModelCompute.createSummaryMachine(block, "factories", beacon)
+end
+
+-------------------------------------------------------------------------------
+---Finalize input block
+---@param block BlockData
+function ModelCompute.createSummaryMachine(block, section, factory)
     ---summary factory
     local factory_key = Model.getQualityElementKey(factory)
-    local summary_factory = block.summary.factories[factory_key]
+    local summary_factory = block.summary[section][factory_key]
     if summary_factory == nil then
         summary_factory = {
             name = factory.name,
@@ -155,7 +170,7 @@ function ModelCompute.createSummaryFactory(block, factory)
             count_limit = 0,
             count_deep = 0
         }
-        block.summary.factories[factory_key] = summary_factory
+        block.summary[section][factory_key] = summary_factory
     end
     
     local factory_ceil = math.ceil(factory.count)
@@ -244,7 +259,7 @@ function ModelCompute.finalizeBlock(block, factor)
                     ModelCompute.createSummaryFactory(block, factory)
                 end
                 for _, beacon in pairs(child.summary.beacons) do
-                    ModelCompute.createSummaryFactory(block, beacon)
+                    ModelCompute.createSummaryBeacon(block, beacon)
                 end
                 for module_key, module in pairs(child.summary.modules) do
                     local summary_module = block.summary.modules[module_key]
@@ -291,7 +306,7 @@ function ModelCompute.finalizeBlock(block, factor)
                         beacon.count_limit = beacon.count
                         beacon.count_deep = beacon.count * block.count_deep
 
-                        ModelCompute.createSummaryFactory(block, beacon)
+                        ModelCompute.createSummaryBeacon(block, beacon)
                     end
                 end
                 if recipe.energy_total == nil then recipe.energy_total = 0 end

@@ -115,11 +115,13 @@ function SummaryPanel:updateSummary(summary)
     end
 
     ---beacons
-    GuiElement.add(info_panel, GuiLabel("beacons_label"):caption({"helmod_common.beacons"}):style("helmod_label_title_frame"))
-    local result_table = GuiElement.add(info_panel, GuiTable("table-beacon"):column(4))
-    result_table.style.horizontally_stretchable = false
-    for _, element in pairs(summary.beacons) do
-      GuiElement.add(result_table, GuiCellElementM("HMBeacons=OPEN"):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
+    if table_size(summary.beacons) > 0 then
+      GuiElement.add(info_panel, GuiLabel("beacons_label"):caption({"helmod_common.beacons"}):style("helmod_label_title_frame"))
+      local result_table = GuiElement.add(info_panel, GuiTable("table-beacon"):column(4))
+      result_table.style.horizontally_stretchable = false
+      for _, element in pairs(summary.beacons) do
+        GuiElement.add(result_table, GuiCellElementM("HMBeacons=OPEN"):element(element):color(GuiElement.color_button_default):tooltip("tooltip.info-factory"))
+      end
     end
 
     ---modules
