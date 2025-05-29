@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.1.2
+Date: 2025-05-29
+  Changes:
+    - Added remove button for icon in Production Line Edition
+  Bugfixes:
+    - Fixed flip icon in Production Line Edition
+---------------------------------------------------------------------------------------------------
 Version: 2.1.1
 Date: 2025-05-29
   Changes:

@@ -61,13 +61,13 @@ function ModelEdition:updateInfo(event)
     text_group.style.width = 250
 
     GuiElement.add(block_table, GuiLabel("label-primary"):caption({ "helmod_panel.model-icon-primary" }))
-    local primary_icon = model_infos.primary_icon or {type=model.block_root.type, name=model.block_root.name, quality=model.block_root.quality}
+    local primary_icon = model_infos.primary_icon or {type="signal", name={type="recipe", name=model.block_root.name}, quality=model.block_root.quality}
     local primary_type = primary_icon.type or "signal"
     local primary_name = primary_icon.name
     local primary_quality = primary_icon.quality
     local primary_cell = GuiElement.add(block_table, GuiFlowH())
     primary_cell.style.horizontal_spacing = 5
-    GuiElement.add(primary_cell, GuiButtonSelectSprite(self.classname, "change-icon", "primary_icon"):choose_with_quality(primary_type, primary_name, primary_quality):color(color))
+    GuiElement.add(primary_cell, GuiButtonSelectSprite(self.classname, "change-icon", "primary_icon"):choose_with_quality(primary_type, primary_name, primary_quality))
     local flip_tooltip = {"helmod_button.flip-icons"}
     GuiElement.add(primary_cell, GuiButton(self.classname, "flip-icon"):sprite("menu", defines.sprites.arrow_bottom.black, defines.sprites.arrow_bottom.black):style("helmod_button_menu"):tooltip(flip_tooltip))
 
@@ -76,7 +76,11 @@ function ModelEdition:updateInfo(event)
     local secondary_type = secondary_icon.type or "signal"
     local secondary_name = secondary_icon.name
     local secondary_quality = secondary_icon.quality
-    GuiElement.add(block_table, GuiButtonSelectSprite(self.classname, "change-icon", "secondary_icon"):choose_with_quality(secondary_type, secondary_name, secondary_quality):color(color))
+    local secondary_cell = GuiElement.add(block_table, GuiFlowH())
+    secondary_cell.style.horizontal_spacing = 5
+    GuiElement.add(secondary_cell, GuiButtonSelectSprite(self.classname, "change-icon", "secondary_icon"):choose_with_quality(secondary_type, secondary_name, secondary_quality))
+    local flip_tooltip = {"helmod_button.remove"}
+    GuiElement.add(secondary_cell, GuiButton(self.classname, "remove-icon"):sprite("menu", defines.sprites.eraser.black, defines.sprites.eraser.black):style("helmod_button_menu"):tooltip(flip_tooltip))
 
     GuiElement.add(block_table, GuiLabel("label-owner"):caption({ "helmod_result-panel.owner" }))
     GuiElement.add(block_table, GuiLabel("value-owner"):caption(model.owner))
@@ -157,10 +161,16 @@ function ModelEdition:onEvent(event)
 
         if event.action == "flip-icon" then
             local model_infos = Model.getModelInfos(model)
-            local primary_icon = model_infos["primary_icon"] or {type=model.block_root.type, name=model.block_root.name, quality=model.block_root.quality} 
+            local primary_icon = model_infos["primary_icon"]
             local secondary_icon = model_infos["secondary_icon"]
             model_infos["primary_icon"] = secondary_icon
-            model_infos["secondary_icon"] = primary_icon
+            model_infos["secondary_icon"] = primary_icon or {type="signal", name={type="recipe", name=model.block_root.name}, quality=model.block_root.quality} 
+            Controller:send("on_gui_refresh", event)
+        end
+
+        if event.action == "remove-icon" then
+            local model_infos = Model.getModelInfos(model)
+            model_infos["secondary_icon"] = nil
             Controller:send("on_gui_refresh", event)
         end
 
