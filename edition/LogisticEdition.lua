@@ -7,6 +7,7 @@ LogisticEdition = newclass(Form)
 ---On initialization
 function LogisticEdition:onInit()
 	self.panelCaption = ({ "helmod_panel.logistic-edition" })
+	self.panel_close_before_main = true
 end
 
 -------------------------------------------------------------------------------

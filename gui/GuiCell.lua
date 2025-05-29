@@ -544,6 +544,9 @@ function GuiCellRecipe:create(parent)
 
   local recipe_prototype = RecipePrototype(recipe)
   local quality = recipe.quality
+  if recipe_prototype.is_support_quality == false then
+    quality = "normal"
+  end
   local icon_name, icon_type = recipe_prototype:getIcon()
   local tooltip = GuiTooltipRecipe(self.options.tooltip):element(recipe)
   local recipe_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite_with_quality(icon_type, icon_name, quality):tooltip(tooltip))

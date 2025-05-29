@@ -433,6 +433,14 @@ function Controller:onGuiHotkey(event)
       view:close()
     end
   end
+  if event.input_name == "helmod-create-or-where-used-open" then
+    local view = Controller:getView("HMCreatedOrWhereUsedPanel")
+    if not(view:isOpened()) then
+      self:send("on_gui_open", event, "HMCreatedOrWhereUsedPanel")
+    else
+      view:close()
+    end
+  end
 end
 
 
@@ -467,13 +475,20 @@ function Controller:onGuiSetting(event)
   end
 end
 
+Controller.panel_close_before_main = {}
 -------------------------------------------------------------------------------
 ---Prepare main display
 ---
 function Controller:openMainPanel()
   if self:isOpened() then
-    self:cleanController(Player.native())
-    game.tick_paused = false
+    if #Controller.panel_close_before_main == 0 then
+      self:cleanController(Player.native())
+      game.tick_paused = false
+    else
+      local last_form_name = Controller.panel_close_before_main[#Controller.panel_close_before_main]
+      local view = Controller:getView(last_form_name)
+      view:close()
+    end
   else
     local current_tab = "HMProductionPanel"
     local parameter_name = string.format("%s_%s", current_tab, "objects")

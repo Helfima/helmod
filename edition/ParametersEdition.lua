@@ -7,6 +7,7 @@ ParametersEdition = newclass(FormModel)
 ---On initialization
 function ParametersEdition:onInit()
     self.panelCaption = ({ "helmod_parameters_edition_panel.title" })
+    self.panel_close_before_main = true
 end
 
 -------------------------------------------------------------------------------

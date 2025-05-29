@@ -8,6 +8,7 @@ RuleEdition = newclass(Form)
 function RuleEdition:onInit()
   self.panelCaption = ({"helmod_rule-edition-panel.title"})
   self.parameterLast = string.format("%s_%s",self.classname,"last")
+  self.panel_close_before_main = true
 end
 
 -------------------------------------------------------------------------------

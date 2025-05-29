@@ -1,9 +1,10 @@
 ---
 ---Description of the module.
----@class RecipePrototype
+---@class RecipePrototype : Prototype
 RecipePrototype = newclass(Prototype, function(base, object, object_type)
     base.classname = "HMRecipePrototype"
     base.is_voider = nil
+    base.is_support_quality = false
     if object ~= nil then
         if type(object) == "string" then
             base.object_name = object
@@ -15,6 +16,13 @@ RecipePrototype = newclass(Prototype, function(base, object, object_type)
         if base.lua_type == nil or base.lua_type == "recipe" then
             Prototype.init(base, Player.getRecipe(base.object_name))
             base.lua_type = "recipe"
+            if Player.hasFeatureQuality() then
+                for _, ingredient in pairs(base.lua_prototype.ingredients) do
+                    if ingredient.type == "item" then
+                        base.is_support_quality = true
+                    end
+                end
+            end
         elseif base.lua_type == "recipe-burnt" then
             Prototype.init(base, Player.getBurntRecipe(base.object_name))
         elseif base.lua_type == "energy" then
@@ -257,6 +265,9 @@ end
 ---@return table
 function RecipePrototype:getQualityProducts(factory, quality)
     local raw_products = self:getProducts(factory)
+    if self.is_support_quality == false then
+        return raw_products
+    end
     if quality == nil then
         quality = "normal"
     end
@@ -291,6 +302,9 @@ end
 ---@return table
 function RecipePrototype:getQualityIngredients(factory, quality)
     local raw_ingredients = self:getIngredients(factory)
+    if self.is_support_quality == false then
+        return raw_ingredients
+    end
     for _, raw_ingredient in pairs(raw_ingredients) do
         if raw_ingredient.type == "item" then
             raw_ingredient.quality = quality

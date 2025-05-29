@@ -121,12 +121,17 @@ function GuiButton:choose_with_quality(element_type, element_name, element_quali
     self.options.tags = { type = element_type, name = element_name, quality = element_quality }
     if element_type == "signal" then
         self.options.elem_type = element_type
+        if element_name ~= nil then
+            self.post_action["apply_elem_value"] = { type = element_name.type, name = element_name.name, quality = element_quality or "normal" }
+            table.insert(self.name, element_name.type)
+            table.insert(self.name, element_name.name)
+        end
     else 
         self.options.elem_type = string.format("%s-with-quality", element_type)
-    end
-    self.post_action["apply_elem_value"] = { name = element_name, quality = element_quality or "normal" }
-    if element_name ~= nil then
-        table.insert(self.name, element_name)
+        if element_name ~= nil then
+            self.post_action["apply_elem_value"] = { name = element_name, quality = element_quality or "normal" }
+            table.insert(self.name, element_name)
+        end
     end
     return self
 end

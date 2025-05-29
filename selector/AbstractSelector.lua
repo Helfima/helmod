@@ -96,6 +96,7 @@ function AbstractSelector:onInit()
   self.sprite_type = "item-group"
   self:afterInit()
   self.parameterTarget = string.format("%s_%s",self.classname,"target")
+  self.panel_close_before_main = true
 end
 
 -------------------------------------------------------------------------------
@@ -219,6 +220,7 @@ function AbstractSelector:onBeforeOpen(event)
   if event.item ~= nil then
     User.setParameter("selector_quality_prototype", event.item.quality)
   end
+  quality_selector_cell = nil
 end
 
 -------------------------------------------------------------------------------
@@ -294,6 +296,11 @@ function AbstractSelector:onEvent(event)
 
   if event.action == "recipe-group" then
     User.setParameter("recipe_group_selected",event.item1)
+    Controller:send("on_gui_update", event, self.classname)
+  end
+
+  if event.action == "quality-select" then
+    User.setParameter("selector_quality_prototype",event.item1)
     Controller:send("on_gui_update", event, self.classname)
   end
 
@@ -480,6 +487,8 @@ function AbstractSelector:checkFilter(search)
   return true
 end
 
+local quality_selector_cell = nil
+
 -------------------------------------------------------------------------------
 ---Update filter
 ---@param event LuaEvent
@@ -576,6 +585,10 @@ function AbstractSelector:updateFilter(event)
       GuiElement.add(filter_table, GuiLabel("filter_show_lock_recipes"):caption({"helmod_recipe-edition-panel.filter-show-lock-recipes"}))
     end
 
+    if Player.hasFeatureQuality() and self.is_support_quality then
+      GuiElement.add(filter_table, GuiLabel("label-quality"):caption({ "helmod_label.quality" }))
+      quality_selector_cell = GuiElement.add(filter_table, GuiFlowH("selector-quality"))
+    end
     ---filter
     local filter_box_panel = GuiElement.add(panel, GuiFlowH("filter-box-panel"))
 
@@ -602,6 +615,15 @@ function AbstractSelector:updateFilter(event)
           panel["filter-box-panel"][self.classname.."=recipe-filter=filter-text"].text = filter_prototype
         end
       end
+  end
+  if Player.hasFeatureQuality() and self.is_support_quality and quality_selector_cell ~= nil then
+    quality_selector_cell.clear()
+    local current_quality = "normal"
+    local selector_quality_prototype = User.getParameter("selector_quality_prototype")
+    if selector_quality_prototype ~= nil then
+      current_quality = selector_quality_prototype
+    end
+    GuiElement.addQualitySelector(quality_selector_cell, current_quality, self.classname, "quality-select")
   end
 end
 

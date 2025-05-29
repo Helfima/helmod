@@ -7,6 +7,7 @@ PreferenceEdition = newclass(Form)
 ---On initialization
 function PreferenceEdition:onInit()
     self.panelCaption = ({ "helmod_preferences-edition-panel.title" })
+    self.panel_close_before_main = true
 end
 
 -------------------------------------------------------------------------------

@@ -1,4 +1,15 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.1.1
+Date: 2025-05-29
+  Changes:
+    - Added quality selector in recipe selector
+    - Added "CONTROL + U" hotkey for tool "Created or where used" #607
+    - Changed "U" hotkey close panel others before close main
+    - Added Selectable production line icon #568
+  Bugfixes:
+    - Fixed recipe not support quality
+    - Fixed missing quality ingredients in the pin panel
+---------------------------------------------------------------------------------------------------
 Version: 2.1.0
 Date: 2025-05-27
   Changes:

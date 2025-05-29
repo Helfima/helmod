@@ -30,6 +30,7 @@ end
 function RecipeEdition:onInit()
     self.panelCaption = ({ "helmod_recipe-edition-panel.title" })
     self.parameterLast = string.format("%s_%s", self.classname, "last")
+    self.panel_close_before_main = true
 end
 
 -------------------------------------------------------------------------------
@@ -1414,9 +1415,14 @@ function RecipeEdition:updateObjectInfo(event)
         local tablePanel = GuiElement.add(info_panel, GuiTable("table-input"):column(2))
         
         if Player.hasFeatureQuality() then
-             GuiElement.add(tablePanel, GuiLabel("label-quality"):caption({ "helmod_label.quality" }))
-             local current_quality = recipe.quality or "normal"
-             GuiElement.addQualitySelector(tablePanel, current_quality, self.classname, "recipe-quality-select", model.id, block.id, recipe.id)
+            if recipe_prototype.is_support_quality then 
+                local current_quality = recipe.quality or "normal"
+                GuiElement.add(tablePanel, GuiLabel("label-quality"):caption({ "helmod_label.quality" }))
+                GuiElement.addQualitySelector(tablePanel, current_quality, self.classname, "recipe-quality-select", model.id, block.id, recipe.id)
+            else
+                GuiElement.add(tablePanel, GuiLabel("label-quality"):caption({ "helmod_label.quality" }))
+                GuiElement.add(tablePanel, GuiLabel("support-quality"):caption({ "gui.recipe-with-no-item-ingredients-has-no-quality", recipe_prototype:getLocalisedName() }))
+            end
         end
 
         GuiElement.add(tablePanel, GuiLabel("label-production"):caption({ "helmod_recipe-edition-panel.production" }))

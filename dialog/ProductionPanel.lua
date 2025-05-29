@@ -268,28 +268,51 @@ function ProductionPanel:updateIndexPanel(model)
 			local is_first = true
 			table.reindex_list(models)
 			for _, imodel in spairs(models, sorter) do
+				local model_infos = Model.getModelInfos(imodel)
 				i = i + 1
                 local element = imodel.block_root
 				local button = nil
+				-- sprite definition
+				local icon_type = element.type
+				local icon_name = element.name
+				local icon_quality = element.quality
+				if model_infos.primary_icon ~= nil and model_infos.primary_icon.type ~= nil then
+					icon_type = model_infos.primary_icon.name.type or "item"
+					icon_name = model_infos.primary_icon.name.name
+					icon_quality = model_infos.primary_icon.quality
+				end
+
+				local button_style = "helmod_button_menu"
+				local button_sprite_style = nil
 				if imodel.id == model.id then
-					if element ~= nil and element.type ~= nil then
-						local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
-						button = GuiElement.add(table_index, GuiButtonSprite(self.classname, "change-model", imodel.id):sprite(element.type, element.name):style("helmod_button_menu_selected"):tooltip(tooltip))
-						button.style.width = 36
-						button.style.height = 36
-						button.style.padding = { -2, -2, -2, -2 }
-					else
-						button = GuiElement.add(table_index, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black):style("helmod_button_menu_selected"))
-						button.style.width = 36
-					end
+					button_style = "helmod_button_actived_icon_yellow"
+					button_sprite_style = "helmod_button_actived_icon_yellow"
+				end
+
+				if element ~= nil and element.type ~= nil then
+					local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
+					button = GuiElement.add(table_index, GuiButtonSelectSprite(self.classname, "change-model", imodel.id):sprite_with_quality(icon_type, icon_name, icon_quality):style(button_sprite_style):tooltip(tooltip))
 				else
-					if element ~= nil and element.type ~= nil then
-						local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
-						button = GuiElement.add(table_index, GuiButtonSelectSprite(self.classname, "change-model", imodel.id):sprite(element.type, element.name):tooltip(tooltip):color())
-					else
-						button = GuiElement.add(table_index, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", defines.sprites.status_help.black, defines.sprites.status_help.black):style("helmod_button_menu"))
-						button.style.width = 36
-					end
+					button = GuiElement.add(table_index, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black):style(button_style))
+				end
+				
+				if model_infos.secondary_icon ~= nil and model_infos.secondary_icon.type ~= nil then
+					local secondary_icon_type = model_infos.secondary_icon.name.type or "item"
+					local secondary_icon_name = model_infos.secondary_icon.name.name or "item"
+					local secondary_icon_quality = model_infos.secondary_icon.quality
+					local container_secondary = GuiElement.add(button, GuiFlow("secondary-info"))
+					local frame_secondary = GuiElement.add(container_secondary, GuiFrame("secondary-frame"):style("helmod_frame_element_w80", "gray", 4))
+					frame_secondary.style.width = 20
+					frame_secondary.style.margin = 0
+					frame_secondary.style.padding = 2
+					local mask_secondary = GuiElement.add(frame_secondary, GuiSprite("secondary-info"):sprite(secondary_icon_type, secondary_icon_name))
+					container_secondary.style.top_padding = 15
+    				container_secondary.style.left_padding = 15
+    				mask_secondary.style.width = 20
+    				mask_secondary.style.height = 20
+					mask_secondary.style.stretch_image_to_widget_size = true
+  					mask_secondary.ignored_by_interaction = true
+					GuiElement.maskQuality(mask_secondary, secondary_icon_quality, 10, 10)
 				end
 				if button ~= nil and is_first then
 					button.style.left_margin = 3

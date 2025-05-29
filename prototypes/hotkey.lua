@@ -41,6 +41,13 @@ data:extend(
       key_sequence = "CONTROL + T",
       consuming = "none"
 
+    },
+    {
+      type = "custom-input",
+      name = "helmod-create-or-where-used-open",
+      key_sequence = "CONTROL + U",
+      consuming = "none"
+
     }
   }
 )

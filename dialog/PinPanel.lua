@@ -184,7 +184,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
     ---products
     local cell_products = GuiElement.add(gui_table, GuiTable("products",recipe.id):column(3))
     cell_products.style.horizontally_stretchable = false
-    local lua_products = recipe_prototype:getProducts(recipe.factory)
+    local lua_products = recipe_prototype:getQualityProducts(recipe.factory, recipe.quality)
     if lua_products ~= nil then
       for index, lua_product in pairs(lua_products) do
         local product_prototype = Product(lua_product)
@@ -211,7 +211,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
     ---ingredients
     local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients", recipe.id):column(3))
     cell_ingredients.style.horizontally_stretchable = false
-    local lua_ingredients = recipe_prototype:getIngredients(recipe.factory)
+    local lua_ingredients = recipe_prototype:getQualityIngredients(recipe.factory, recipe.quality)
     if lua_ingredients ~= nil then
       for index, lua_ingredient in pairs(lua_ingredients) do
         local ingredient_prototype = Product(lua_ingredient)

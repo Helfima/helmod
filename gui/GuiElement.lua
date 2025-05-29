@@ -355,7 +355,8 @@ end
 ---@param parent LuaGuiElement
 ---@param quality string
 ---@param size number?
-function GuiElement.maskQuality(parent, quality, size)
+---@param top_padding number?
+function GuiElement.maskQuality(parent, quality, size, top_padding)
   if quality == nil or quality == "normal" then
     return
   end
@@ -364,15 +365,15 @@ function GuiElement.maskQuality(parent, quality, size)
   local style_name = parent.style.name
   local mask_frame = GuiElement.add(container, GuiSprite("quality-info"):sprite(sprite_name))
   if string.find(style_name, "_sm") then
-    container.style.top_padding = 8
+    container.style.top_padding = top_padding or 8
     mask_frame.style.width = size or 8
     mask_frame.style.height = size or 8
   elseif string.find(style_name, "_m") then
-    container.style.top_padding = 12
+    container.style.top_padding = top_padding or 12
     mask_frame.style.width = size or 10
     mask_frame.style.height = size or 10
   else
-    container.style.top_padding = 20
+    container.style.top_padding = top_padding or 20
     mask_frame.style.width = size or 12
     mask_frame.style.height = size or 12
   end
