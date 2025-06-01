@@ -82,6 +82,7 @@
 ---@field index uint
 ---@field name string
 ---@field type string
+---@field quality string
 ---@field count number
 ---@field count_limit number
 ---@field count_deep number

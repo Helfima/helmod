@@ -407,6 +407,18 @@ function GuiTooltip:appendProductInfo(tooltip, element)
 				local value = Format.formatNumberKilo(item_prototype:getFuelValue() or 0, "J")
 				GuiTooltip.appendLine(tooltip, nil, { "helmod_common.fuel-value" }, value)
 			end
+			if item_prototype:geRocketCapacity() > 0 then
+				local value = math.floor(item_prototype:geRocketCapacity())
+				if value < 1 then
+					value = {"description.too-heavy-for-rocket"}
+				end
+				GuiTooltip.appendLine(tooltip, nil, { "gui-selector.rocket-capacity" }, value)
+			end
+			if item_prototype:getSpoilTicks() > 0 then
+				local spoil_ticks = item_prototype:getSpoilTicks()
+				local spoil_time = Format.formatTimeTickLocalised(spoil_ticks)
+				GuiTooltip.appendLine(tooltip, nil, { "description.spoil-time" }, spoil_time)
+			end
 		end
 		---fluid logistic
 		if element.type == 1 or element.type == "fluid" then

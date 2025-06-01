@@ -302,6 +302,7 @@ function AdminPanel:updateCache()
   end
 end
 
+local rules_export_visible = false
 -------------------------------------------------------------------------------
 ---Update Rule Tab
 function AdminPanel:updateRule()
@@ -310,19 +311,26 @@ function AdminPanel:updateRule()
   scroll_panel.clear()
 
   local menu_group = GuiElement.add(scroll_panel,GuiFlowH("menu"))
-  GuiElement.add(menu_group, GuiButton("HMRuleEdition", "OPEN"):style("helmod_button_bold"):caption({"helmod_result-panel.add-button-rule"}))
-  GuiElement.add(menu_group, GuiButton(self.classname, "reset-rules"):style("helmod_button_bold"):caption({"helmod_result-panel.reset-button-rule"}))
+  menu_group.style.horizontal_spacing = 5
+  GuiElement.add(menu_group, GuiButton("HMRuleEdition", "OPEN"):style(defines.styles.button.default):caption({"helmod_result-panel.add-button-rule"}))
+  GuiElement.add(menu_group, GuiButton(self.classname, "rules-export"):style(defines.styles.button.default):caption({"helmod_result-panel.export-button-rule"}))
+  GuiElement.add(menu_group, GuiButton(self.classname, "rules-reset"):style(defines.styles.button.default):caption({"helmod_result-panel.reset-button-rule"}))
   local count_rule = #Model.getRules()
   if count_rule > 0 then
 
-    local result_table = GuiElement.add(scroll_panel, GuiTable("list-data"):column(8):style("helmod_table-rule-odd"))
+    if rules_export_visible == true then
+      local string_export = Model.getExportRules()
+      local rules_export = GuiElement.add(scroll_panel, GuiTextBox("rules-export"):text(string_export))
+      rules_export.style.width = 800
+    else
+      local result_table = GuiElement.add(scroll_panel, GuiTable("list-data"):column(8):style("helmod_table-rule-odd"))
 
-    self:addRuleListHeader(result_table)
+      self:addRuleListHeader(result_table)
 
-    for rule_id, element in spairs(Model.getRules(), function(t,a,b) return t[b].index > t[a].index end) do
-      self:addRuleListRow(result_table, element, rule_id)
+      for rule_id, element in spairs(Model.getRules(), function(t,a,b) return t[b].index > t[a].index end) do
+        self:addRuleListRow(result_table, element, rule_id)
+      end
     end
-
   end
 end
 
@@ -675,7 +683,13 @@ function AdminPanel:onEvent(event)
     end
     Controller:send("on_gui_update", event)
   end
-  if event.action == "reset-rules" then
+
+  if event.action == "rules-export" then
+    rules_export_visible = not(rules_export_visible)
+    Controller:send("on_gui_update", event)
+  end
+
+  if event.action == "rules-reset" then
     Model.resetRules()
     Controller:send("on_gui_update", event)
   end

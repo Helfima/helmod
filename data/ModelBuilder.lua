@@ -683,6 +683,7 @@ function ModelBuilder.copyBlock(into_model, into_block, from_block)
                     local recipe_model = Model.newRecipe(into_model, recipe.name, recipe_prototype:getType())
                     recipe_model.index = child_index
                     recipe_model.production = recipe.production or 1
+                    recipe_model.quality = recipe.quality
                     if recipe.factory ~= nil then
                         recipe_model.factory = ModelBuilder.copyFactory(recipe.factory)
                     end

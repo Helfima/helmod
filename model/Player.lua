@@ -849,7 +849,8 @@ function Player.getProductionsCrafting(category, lua_recipe)
             productions[lua_entity.name] = lua_entity
         end
     else
-        for key, lua_entity in pairs(Player.getProductionMachines()) do
+        local lua_entities = Player.getProductionMachines()
+        for key, lua_entity in pairs(lua_entities) do
             local check = false
             if category ~= nil then
                 if not (rules_included[category]) then
@@ -907,7 +908,7 @@ end
 ---@return table
 function Player.ExcludePlacedByHidden(entities)
     local results = {}
-
+    local rules_included, rules_excluded = Player.getRules("production-crafting")
     for entity_name, entity in pairs(entities) do
         local item_filters = {}
 
@@ -920,6 +921,9 @@ function Player.ExcludePlacedByHidden(entities)
         end
 
         local show = false
+
+        ---resolve rule excluded
+        show = Player.checkRules(show, rules_excluded, "exclude-placed-by-hidden", entity, true)
 
         if #item_filters == 0 then
             -- Has no items to place it. Probably placed by script.

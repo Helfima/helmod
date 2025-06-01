@@ -714,7 +714,10 @@ function RecipeEdition:updateFactoryInfo(event)
         detail_panel.clear()
 
         if Player.hasFeatureQuality() then
-            local current_quality = factory.quality or "normal"
+            local current_quality = "normal"
+            if factory ~= nil and factory.quality ~= nil then
+                current_quality = factory.quality
+            end
             local quality_panel = GuiElement.addQualitySelector(detail_panel, current_quality, self.classname, "factory-quality-select", model.id, block.id, recipe.id)
             quality_panel.style.bottom_margin = 5
         end

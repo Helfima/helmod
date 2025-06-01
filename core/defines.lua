@@ -631,6 +631,7 @@ helmod_rules["production-crafting"].categories["crafting-handonly"] = {"entity-n
 helmod_rules["production-crafting"].categories["extraction-machine"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
 helmod_rules["production-crafting"].categories["energy"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
 helmod_rules["production-crafting"].categories["technology"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
+helmod_rules["production-crafting"].categories["exclude-placed-by-hidden"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
 
 helmod_rules["module-limitation"] = {excluded_only=true ,categories={}}
 helmod_rules["module-limitation"].categories["standard"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}

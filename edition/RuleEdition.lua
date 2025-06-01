@@ -18,7 +18,7 @@ end
 ---@param height_main number
 function RuleEdition:onStyle(styles, width_main, height_main)
   styles.flow_panel = {
-    minimal_height = 500,
+    minimal_height = 200,
     maximal_height = height_main,
   }
 end
