@@ -33,7 +33,6 @@ end
 ---@return number
 function ItemPrototype:geRocketCapacity()
   if self.lua_prototype == nil then return 0 end
-  local stack_size = self:stackSize()
   local weight = self:getWeight()
   local capacity = 1000*1000
   local rocket_capacity = capacity / weight

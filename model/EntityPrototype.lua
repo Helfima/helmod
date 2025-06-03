@@ -365,6 +365,16 @@ function EntityPrototype:getFluidUsage()
 end
 
 -------------------------------------------------------------------------------
+---Return fluid usage
+---@return number --default 0
+function EntityPrototype:getValveFlowRate()
+  if self.lua_prototype.type == "pump" or self.lua_prototype.type == "offshore-pump" then
+    return self.lua_prototype.get_valve_flow_rate(self.factory.quality)
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
 ---Return fluid fuel prototype
 ---@return FluidPrototype
 function EntityPrototype:getFluidFuelPrototype()

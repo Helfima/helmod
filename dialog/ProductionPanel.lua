@@ -467,24 +467,44 @@ function ProductionPanel:updateSubMenuRightPanel(model, block)
 		local logistic_row_item = User.getParameter("logistic_row_item") or "belt"
 		local logistic2 = GuiElement.add(right_panel, GuiFlowH("logistic2"))
 		logistic2.style.horizontal_spacing = button_spacing
-		for _, type in pairs({ "inserter", "belt", "container", "transport" }) do
+		
+		local default_logistic_item = nil
+		local items = {}
+		local tooltip_item = nil
+		for _, type in pairs(defines.constant.logistic_list_for_item) do
 			local item_logistic = Player.getDefaultItemLogistic(type)
-			local style = "helmod_button_menu"
-			if logistic_row_item == type then style = "helmod_button_menu_selected" end
-			local button = GuiElement.add(logistic2, GuiButtonSprite(self.classname, "change-logistic-item", type):sprite_with_quality(item_logistic.type, item_logistic.name, item_logistic.quality):style(style):tooltip({ "tooltip.logistic-row-choose" }))
-			button.style.padding = { 0, 0, 0, 0 }
+			local item = string.format("[%s=%s,quality=%s]", item_logistic.type, item_logistic.name, item_logistic.quality)
+			if logistic_row_item == type then
+				default_logistic_item = item
+				tooltip_item = EntityPrototype(item_logistic):getLocalisedName()
+			end
+			table.insert(items, item)
 		end
+		local selector_logistic_item = GuiElement.add(logistic2, GuiDropDown(self.classname, "change-logistic-item"):items(items, default_logistic_item):tooltip(tooltip_item))
+		selector_logistic_item.style.font = "helmod_font_default"
+		selector_logistic_item.style.height = 32
+		selector_logistic_item.style.width = 64
 
 		local logistic_row_fluid = User.getParameter("logistic_row_fluid") or "pipe"
 		local logistic3 = GuiElement.add(right_panel, GuiFlowH("logistic3"))
 		logistic3.style.horizontal_spacing = button_spacing
-		for _, type in pairs({ "pipe", "container", "transport" }) do
+
+		local default_logistic_fluid = nil
+		local fluids = {}
+		local tooltip_fluid = nil
+		for _, type in pairs(defines.constant.logistic_list_for_fluid) do
 			local fluid_logistic = Player.getDefaultFluidLogistic(type)
-			local style = "helmod_button_menu"
-			if logistic_row_fluid == type then style = "helmod_button_menu_selected" end
-			local button = GuiElement.add(logistic3, GuiButton(self.classname, "change-logistic-fluid", type):sprite_with_quality(fluid_logistic.type, fluid_logistic.name, fluid_logistic.quality):style(style):tooltip({ "tooltip.logistic-row-choose" }))
-			button.style.padding = { 0, 0, 0, 0 }
+			local fluid = string.format("[%s=%s,quality=%s]", fluid_logistic.type, fluid_logistic.name, fluid_logistic.quality)
+			if logistic_row_fluid == type then 
+				default_logistic_fluid = fluid
+				tooltip_fluid = EntityPrototype(fluid_logistic):getLocalisedName()
+			end
+			table.insert(fluids, fluid)
 		end
+		local selector_logistic_fluid = GuiElement.add(logistic3, GuiDropDown(self.classname, "change-logistic-fluid"):items(fluids, default_logistic_fluid):tooltip(tooltip_fluid))
+		selector_logistic_fluid.style.font = "helmod_font_default"
+		selector_logistic_fluid.style.height = 32
+		selector_logistic_fluid.style.width = 64
 	end
 
 	local group_pref = GuiElement.add(right_panel, GuiFlowH("group_pref"))
@@ -1496,12 +1516,16 @@ function ProductionPanel:onEventAccessAll(event, model, block)
 	end
 
 	if event.action == "change-logistic-item" then
-		User.setParameter("logistic_row_item", event.item1)
+		local index = event.element.selected_index
+		local type = defines.constant.logistic_list_for_item[index]
+		User.setParameter("logistic_row_item", type)
 		Controller:send("on_gui_update", event)
 	end
 
 	if event.action == "change-logistic-fluid" then
-		User.setParameter("logistic_row_fluid", event.item1)
+		local index = event.element.selected_index
+		local type = defines.constant.logistic_list_for_fluid[index]
+		User.setParameter("logistic_row_fluid", type)
 		Controller:send("on_gui_update", event)
 	end
 

@@ -207,6 +207,10 @@ defines.constant.base_times = {
   { value = 3600*12, caption = "12h", tooltip={"helmod_si.hour",12}},
   { value = 3600*24, caption = "24h", tooltip={"helmod_si.hour",24}}
 }
+
+defines.constant.logistic_list_for_item = { "inserter", "belt", "container", "transport" }
+defines.constant.logistic_list_for_fluid = { "pipe", "container", "transport" }
+
 defines.constant.logistic_flow_default = 3000
 
 defines.constant.logistic_flow = {

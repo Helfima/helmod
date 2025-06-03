@@ -271,9 +271,6 @@ end
 ---@return table
 function RecipePrototype:getQualityProducts(factory, quality)
     local raw_products = self:getProducts(factory)
-    if self.is_support_quality == false then
-        return raw_products
-    end
     if quality == nil then
         quality = "normal"
     end

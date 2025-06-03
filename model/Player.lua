@@ -1896,7 +1896,7 @@ function Player.getItemsLogistic(type)
     elseif type == "container" then
         filters = { { filter = "type", mode = "or", invert = false, type = "container" }, { filter = "minable", mode = "and", invert = false }, { filter = "type", mode = "or", invert = false, type = "logistic-container" }, { filter = "minable", mode = "and", invert = false } }
     elseif type == "transport" then
-        filters = { { filter = "type", mode = "or", invert = false, type = "cargo-wagon" }, { filter = "type", mode = "or", invert = false, type = "logistic-robot" }, { filter = "type", mode = "or", invert = false, type = "car" } }
+        filters = { { filter = "type", mode = "or", invert = false, type = "cargo-wagon" },{ filter = "type", mode = "or", invert = false, type = "rocket-silo" }, { filter = "type", mode = "or", invert = false, type = "logistic-robot" }, { filter = "type", mode = "or", invert = false, type = "car" } }
     end
     return Player.getEntityPrototypes(filters)
 end
@@ -1930,6 +1930,8 @@ function Player.getFluidsLogistic(type)
     local filters = {}
     if type == "pipe" then
         filters = { { filter = "type", mode = "or", invert = false, type = "pipe" } }
+    elseif type == "pump" then
+        filters = { { filter = "type", mode = "or", invert = false, type = "pump" },{ filter = "type", mode = "or", invert = false, type = "offshore-pump" } }
     elseif type == "container" then
         filters = { { filter = "type", mode = "or", invert = false, type = "storage-tank" }, { filter = "minable", mode = "and", invert = false } }
     elseif type == "transport" then

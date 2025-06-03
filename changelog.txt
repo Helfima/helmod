@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.1.4
+Date: 2025-06-03
+  Changes:
+    - Changed RU locale update
+    - Changed logistic item list by a dropdown (more compact)
+    - Added rocket capacity in logistic item choose
+  Bugfixes:
+    - Fixed chance of quality item produced in recipe with no input item
+---------------------------------------------------------------------------------------------------
 Version: 2.1.3
 Date: 2025-06-01
   Changes:

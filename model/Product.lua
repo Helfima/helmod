@@ -271,6 +271,13 @@ function Product:countContainer(count, container, time)
       ---ratio = item_per_s / speed_belt (blue belt)
       local belt_speed = entity_prototype:getBeltSpeed()
       return count / (belt_speed * self.belt_ratio * (time or 1))
+    elseif entity_prototype:getType() == "rocket-silo" then
+      local item_prototype = ItemPrototype(self.lua_prototype.name)
+      local rocket_capacity = math.floor(item_prototype:geRocketCapacity())
+      if rocket_capacity < 1 then
+        return 0
+      end
+      return count / rocket_capacity
     elseif entity_prototype:getType() ~= "logistic-robot" then
       local cargo_wagon_size = entity_prototype:getInventorySize(1)
       if cargo_wagon_size == nil then return 0 end
@@ -287,7 +294,11 @@ function Product:countContainer(count, container, time)
   end
   if self.lua_prototype.type == 1 or self.lua_prototype.type == "fluid" then
     local entity_prototype = EntityPrototype(container)
-    if entity_prototype:getType() == "pipe" then
+    if entity_prototype:getType() == "pump" or entity_prototype:getType() == "offshore-pump"  then
+      local flow_rate = entity_prototype:getValveFlowRate()
+      if flow_rate == 0 then return 0 end
+      return count / flow_rate
+    elseif entity_prototype:getType() == "pipe" then
       local fluids_logistic_maximum_flow = User.getParameter("fluids_logistic_maximum_flow")
       return count / (fluids_logistic_maximum_flow or defines.constant.logistic_flow_default)
     else
