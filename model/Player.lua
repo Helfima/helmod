@@ -2052,4 +2052,30 @@ function Player.getQualityPrototype(name)
     return prototypes.quality[name]
 end
 
+-------------------------------------------------------------------------------
+---Return quality prototypes
+---@return LuaCustomTable<(uint)|(string), LuaSurface>
+function Player.getSurfaces()
+    return game.surfaces
+end
+
+-------------------------------------------------------------------------------
+---Return quality prototypes
+---@return LuaCustomTable<(uint)|(string), LuaSurfacePrototype>
+function Player.getSurfacePrototypes()
+    return prototypes.surface
+end
+
+-------------------------------------------------------------------------------
+---Return quality prototypes
+---@return LuaCustomTable<string, LuaSpaceLocationPrototype>
+function Player.getSpaceLocations()
+    return prototypes.space_location
+end
+
+---@return table
+function Player.getHMLocations()
+    return {}
+end
+
 return Player

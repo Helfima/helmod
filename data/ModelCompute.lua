@@ -698,8 +698,20 @@ end
 function ModelCompute.computeModuleEffects(recipe, parameters)
     if recipe.factory == nil then return end
     local factory = recipe.factory
+    local factory_prototype = EntityPrototype(factory)
+    --- apply base effect
+    local effect_receiver = factory_prototype:getEffectReveiver()
+    factory.effects = {
+        speed = effect_receiver.base_effect["speed"] or 0,
+        productivity = effect_receiver.base_effect["productivity"] or 0,
+        consumption = effect_receiver.base_effect["consumption"] or 0,
+        pollution = effect_receiver.base_effect["pollution"] or 0,
+        quality = effect_receiver.base_effect["quality"] or 0
+    }
+
     local recipe_productivity = Player.getRecipeProductivityBonus(recipe.name)
-    factory.effects = { speed = 0, productivity = recipe_productivity, consumption = 0, pollution = 0, quality = 0 }
+    factory.effects.productivity = factory.effects.productivity + recipe_productivity
+
     if parameters ~= nil then
         factory.effects.speed = factory.effects.speed + (parameters.effects.speed or 0)
         factory.effects.productivity = factory.effects.productivity + (parameters.effects.productivity or 0)
@@ -708,12 +720,9 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
         factory.effects.quality = factory.effects.quality + (parameters.effects.quality or 0)
     end
     factory.cap = { speed = 0, productivity = 0, consumption = 0, pollution = 0 }
-    local factory_prototype = EntityPrototype(factory)
-    local base_effect = factory_prototype:getBaseEffect()
-    local base_productivity = base_effect["productivity"] or 0
-    factory.effects.productivity = factory.effects.productivity + base_productivity
+    
     ---effet module factory
-    if factory.modules ~= nil then
+    if factory.modules ~= nil and effect_receiver.uses_module_effects then
         for _, module in pairs(factory.modules) do
             local module_effects = Player.getModuleEffects(module)
             local amount = module.amount
@@ -725,7 +734,7 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
         end
     end
     ---effet module beacon
-    if recipe.beacons ~= nil then
+    if recipe.beacons ~= nil and effect_receiver.uses_beacon_effects then
         local profile_count = 0
         for _, beacon in pairs(recipe.beacons) do
             if beacon.modules ~= nil then

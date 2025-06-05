@@ -128,7 +128,7 @@ end
 ---Return effects on a table
 ---@return ModuleEffectsData
 function Model.newEffects()
-  return { speed = 0, productivity = 0, consumption = 0, pollution = 0 }
+  return { speed = 0, productivity = 0, consumption = 0, pollution = 0, quality = 0 }
 end
 
 -------------------------------------------------------------------------------

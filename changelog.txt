@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.1.5
+Date: 2025-06-05
+  Changes:
+    - Added quality option in parameters edition
+    - Added limitation effect on machine from effect_receiver: uses_module_effects, uses_beacon_effects and uses_surface_effects
+  Bugfixes:
+    - Fixed missing base effects for machine, now all effects used 
+---------------------------------------------------------------------------------------------------
 Version: 2.1.4
 Date: 2025-06-03
   Changes:

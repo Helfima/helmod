@@ -461,6 +461,26 @@ function ProductionPanel:updateSubMenuRightPanel(model, block)
 	local block_id = "new"
 	if block ~= nil then block_id = block.id end
 
+	---space locations
+	local hm_locations = Player.getHMLocations()
+	if #hm_locations > 0 then
+		local group_locations = GuiElement.add(right_panel, GuiFlowH("group_locations"))
+		local locations = {}
+		local tooltip_location = nil
+		local default_surface = nil
+		for _, lua_surface in pairs(hm_locations) do
+			local space_location = string.format("[%s=%s]", "signal", lua_surface.name)
+			if space_location == type then 
+				default_surface = space_location
+				tooltip_location = lua_surface.localised_name
+			end
+			table.insert(locations, space_location)
+		end
+		local selector_logistic_fluid = GuiElement.add(group_locations, GuiDropDown(self.classname, "change-location"):items(locations, default_surface):tooltip(tooltip_location))
+		selector_logistic_fluid.style.font = "helmod_font_default"
+		selector_logistic_fluid.style.height = 32
+		selector_logistic_fluid.style.width = 64
+	end
 	---logistics
 	local display_logistic_row = User.getParameter("display_logistic_row")
 	if display_logistic_row == true then

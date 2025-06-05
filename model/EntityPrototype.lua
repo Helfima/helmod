@@ -247,6 +247,7 @@ function EntityPrototype:getEnergyProduction()
   return 0
 end
 
+---@type ModuleEffects
 local empty_effect ={
   consumption=0,
   speed=0,
@@ -256,12 +257,34 @@ local empty_effect ={
 }
 -------------------------------------------------------------------------------
 ---Return base effect
----@return table
+---@see https://lua-api.factorio.com/latest/types/EffectValue.html
+---@return ModuleEffects
 function EntityPrototype:getBaseEffect()
   if self.lua_prototype ~= nil and self.lua_prototype.effect_receiver ~= nil then
-    return self.lua_prototype.effect_receiver.base_effect or empty_effect
+    local base_effect = self.lua_prototype.effect_receiver.base_effect or empty_effect
+    base_effect.quality = (base_effect.quality or 0) / 10
+    return base_effect
   end
   return empty_effect
+end
+
+local empty_effect_receiver = {
+  base_effect = empty_effect,
+  uses_module_effects = true,
+  uses_beacon_effects = true,
+  uses_surface_effects = true
+}
+-------------------------------------------------------------------------------
+---Return base effect
+---@see https://lua-api.factorio.com/latest/types/EffectValue.html
+---@return EffectReceiver
+function EntityPrototype:getEffectReveiver()
+  if self.lua_prototype ~= nil then
+    local effect_receiver = self.lua_prototype.effect_receiver or empty_effect_receiver
+    effect_receiver.base_effect.quality = (effect_receiver.base_effect.quality or 0) / 10
+    return effect_receiver
+  end
+  return empty_effect_receiver
 end
 
 -------------------------------------------------------------------------------
