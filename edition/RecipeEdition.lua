@@ -816,25 +816,34 @@ function RecipeEdition:updateFactoryInfo(event)
             end
 
             if fuel_list ~= nil and factory_fuel ~= nil then
+                local function create_fuel_fluid(fuel_type, item)
+                    return {"", string.format("[%s=%s] %s °C", fuel_type, item:native().name, item.temperature), "  ", item:native().localised_name}
+                end
+                local function create_fuel_item(fuel_type, item)
+                    return {"", string.format("[%s=%s] %s", fuel_type, item:native().name, Format.formatNumberKilo(item:getFuelValue(), "J")), "  ", item:native().localised_name}
+                end
                 local items = {}
                 if (energy_type == "fluid") and (not factory_prototype:getBurnsFluid()) then
                     for _, item in pairs(fuel_list) do
-                        table.insert(items, string.format("[%s=%s] %s °C", fuel_type, item:native().name, item.temperature))
+                        local fuel = create_fuel_fluid(fuel_type, item)
+                        table.insert(items, fuel)
                     end
                 else
                     for _, item in pairs(fuel_list) do
-                        table.insert(items, string.format("[%s=%s] %s", fuel_type, item:native().name, Format.formatNumberKilo(item:getFuelValue(), "J")))
+                        local fuel = create_fuel_item(fuel_type, item)
+                        table.insert(items, fuel)
                     end
                 end
 
                 local default_fuel
                 if (energy_type == "fluid") and (not factory_prototype:getBurnsFluid()) then
-                    default_fuel = string.format("[%s=%s] %s °C", fuel_type, factory_fuel:native().name, factory_fuel.temperature)
+                    default_fuel = create_fuel_fluid(fuel_type, factory_fuel)
                 else
-                    default_fuel = string.format("[%s=%s] %s", fuel_type, factory_fuel:native().name, Format.formatNumberKilo(factory_fuel:getFuelValue(), "J"))
+                    default_fuel = create_fuel_item(fuel_type, factory_fuel)
                 end
                 GuiElement.add(input_panel, GuiLabel("label-burner"):caption({ "helmod_common.resource" }))
-                GuiElement.add(input_panel, GuiDropDown(self.classname, "factory-fuel-update", model.id, block.id, recipe.id, fuel_type):items(items, default_fuel):tooltip(factory_fuel:native().localised_name))
+                local drop_fuel = GuiElement.add(input_panel, GuiDropDown(self.classname, "factory-fuel-update", model.id, block.id, recipe.id, fuel_type):items(items, default_fuel):tooltip(factory_fuel:native().localised_name))
+                drop_fuel.style.width = 64
             end
         end
 

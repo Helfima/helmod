@@ -465,14 +465,15 @@ function ProductionPanel:updateSubMenuRightPanel(model, block)
 	local hm_locations = Player.getHMLocations()
 	if #hm_locations > 0 then
 		local group_locations = GuiElement.add(right_panel, GuiFlowH("group_locations"))
+		local current_location = model.location or {}
 		local locations = {}
 		local tooltip_location = nil
 		local default_surface = nil
-		for _, lua_surface in pairs(hm_locations) do
-			local space_location = string.format("[%s=%s]", "signal", lua_surface.name)
-			if space_location == type then 
+		for _, hm_location in pairs(hm_locations) do
+			local space_location = {"", string.format("[%s=%s]", hm_location.type, hm_location.name), "  ", hm_location.localised_name}
+			if hm_location.key == current_location.key then 
 				default_surface = space_location
-				tooltip_location = lua_surface.localised_name
+				tooltip_location = hm_location.localised_name
 			end
 			table.insert(locations, space_location)
 		end
@@ -1527,6 +1528,13 @@ function ProductionPanel:onEventAccessAll(event, model, block)
 	if event.action == "row-change-block" then
 		Controller:closeEditionOrSelector()
 		Controller:send("on_gui_open", event, self.classname)
+	end
+
+	if event.action == "change-location" then
+		local index = event.element.selected_index
+		local hm_locations = Player.getHMLocations()
+		model.location = hm_locations[index]
+		Controller:send("on_gui_update", event)
 	end
 
 	if event.action == "change-logistic" then

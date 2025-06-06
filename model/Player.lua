@@ -2069,13 +2069,50 @@ end
 -------------------------------------------------------------------------------
 ---Return quality prototypes
 ---@return LuaCustomTable<string, LuaSpaceLocationPrototype>
-function Player.getSpaceLocations()
+function Player.getSpaceLocationPrototypes()
     return prototypes.space_location
 end
 
 ---@return table
 function Player.getHMLocations()
-    return {}
+    local cache_locations = Cache.getData(Player.classname, "list_locations")
+    if cache_locations ~= nil then
+        return cache_locations
+    end
+
+    local cache_locations = {}
+    local space_locations = Player.getSpaceLocationPrototypes()
+    if #space_locations > 0 then
+        for key, space_location in pairs(space_locations) do
+            if space_location.hidden == false then
+                local location = {
+                    key = string.format("%s-%s", space_location.type, space_location.name),
+                    type = space_location.type,
+                    name = space_location.name,
+                    localised_name = space_location.localised_name,
+                    localised_description = space_location.localised_description
+                }
+                table.insert(cache_locations, location)
+            end
+        end
+    end
+
+    local suurfaces = Player.getSurfacePrototypes()
+    if #suurfaces > 0 then
+        for key, surface in pairs(suurfaces) do
+            local location = {
+                key = string.format("%s-%s", surface.type, surface.name),
+                type = surface.type,
+                name = surface.name,
+                localised_name = surface.localised_name,
+                localised_description = surface.localised_description
+            }
+            table.insert(cache_locations, location)
+        end
+    end
+
+    Cache.setData(Player.classname, "list_locations", cache_locations)
+    return cache_locations
 end
 
 return Player
