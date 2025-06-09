@@ -98,14 +98,6 @@ function LogisticEdition:onEvent(event)
 		Controller:send("on_gui_refresh", event)
 	end
 
-	if event.action == "fluids-logistic-flow" then
-		local index = event.element.selected_index
-		local fluids_logistic_maximum_flow = defines.constant.logistic_flow[index].flow
-		User.setParameter("fluids_logistic_maximum_flow", fluids_logistic_maximum_flow)
-		self:close()
-		Controller:send("on_gui_refresh", event)
-	end
-
 	if event.action == "quality-select" then
 		local logistic_quality = event.item2
 		if event.item1 == "item" then

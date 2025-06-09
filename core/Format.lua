@@ -110,6 +110,9 @@ end
 ---@param ticks number
 ---@return table
 function Format.formatTimeTickLocalised(ticks)
+  if ticks == nil or ticks == 0 then
+    return {"", {"helmod_si.seconde", 0}}
+  end
   local seconds = ticks / 60
   local minutes = math.floor((seconds)/60)
   local seconds = math.floor(seconds - 60*minutes)

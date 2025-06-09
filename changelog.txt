@@ -1,6 +1,18 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.1.7
+Date: 2025-06-09
+  Bugfixes:
+    - Fixed too many parameters for localised string on location tooltip #610
+---------------------------------------------------------------------------------------------------
 Version: 2.1.6
-Date: 2025-06-06
+Date: 2025-06-07
+  Changes:
+    - Added space location for production line
+    - Added pump and offshore-pump in pipe logitic choose
+    - Removed pipe from pipe logitic choose
+    - Changes some dropdown with tooltips (ex: for fuels) #487
+  Bugfixes:
+    - Fixed display of selected logitic choose in preference
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.5
 Date: 2025-06-05

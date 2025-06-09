@@ -211,30 +211,6 @@ defines.constant.base_times = {
 defines.constant.logistic_list_for_item = { "inserter", "belt", "container", "transport" }
 defines.constant.logistic_list_for_fluid = { "pipe", "container", "transport" }
 
-defines.constant.logistic_flow_default = 3000
-
-defines.constant.logistic_flow = {
-  {pipe=1, flow=6000},
-  {pipe=2, flow=3000},
-  {pipe=3, flow=2250},
-  {pipe=7, flow=1500},
-  {pipe=12, flow=1285},
-  {pipe=17, flow=1200},
-  {pipe=20, flow=1169},
-  {pipe=30, flow=1112},
-  {pipe=50, flow=1067},
-  {pipe=100, flow=1033},
-  {pipe=150, flow=1022},
-  {pipe=200, flow=1004},
-  {pipe=261, flow=800},
-  {pipe=300, flow=707},
-  {pipe=400, flow=546},
-  {pipe=500, flow=445},
-  {pipe=600, flow=375},
-  {pipe=800, flow=286},
-  {pipe=1000, flow=230}
-}
-
 defines.constant.beacon_combo = 1
 defines.constant.beacon_factory = 1/8
 defines.constant.beacon_constant = 0

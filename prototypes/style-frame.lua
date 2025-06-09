@@ -333,4 +333,3 @@ for _, style in pairs(style_branch_list) do
         vertically_stretchable   = "off"
     }
 end
-

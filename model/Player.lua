@@ -1575,8 +1575,6 @@ function Player.buildRocketRecipe(prototype)
     if prototype == nil then return nil end
     local products = prototype.rocket_launch_products
     local ingredients = {}
-    local item_prototype = ItemPrototype(prototype.name)
-    local stack_size = item_prototype:stackSize()
     table.insert(ingredients, { name = prototype.name, type = "item", amount = 1, constant = true })
     local recipe = {}
     recipe.category = Player.getRocketPartRecipe().category
@@ -1587,10 +1585,6 @@ function Player.buildRocketRecipe(prototype)
     recipe.subgroup = { name = "helmod-rocket", order = "eeee" }
     recipe.hidden = false
     recipe.ingredients = ingredients
-    for key, product in pairs(products) do
-        local product_prototype = ItemPrototype(product.name)
-        local i = 0
-    end
     recipe.products = products
     recipe.localised_description = prototype.localised_description
     recipe.localised_name = prototype.localised_name
@@ -1929,8 +1923,6 @@ end
 function Player.getFluidsLogistic(type)
     local filters = {}
     if type == "pipe" then
-        filters = { { filter = "type", mode = "or", invert = false, type = "pipe" } }
-    elseif type == "pump" then
         filters = { { filter = "type", mode = "or", invert = false, type = "pump" },{ filter = "type", mode = "or", invert = false, type = "offshore-pump" } }
     elseif type == "container" then
         filters = { { filter = "type", mode = "or", invert = false, type = "storage-tank" }, { filter = "minable", mode = "and", invert = false } }
@@ -1953,7 +1945,7 @@ function Player.getDefaultFluidLogistic(entity_type)
     if default == nil then
         local logistics = Player.getFluidsLogistic(entity_type)
         if logistics ~= nil then
-            default = first(logistics).name
+            default = Model.newElement("entity", first(logistics).name)
             User.setParameter(string.format("fluids_logistic_%s", entity_type), default)
         end
     end
@@ -2068,6 +2060,13 @@ end
 
 -------------------------------------------------------------------------------
 ---Return quality prototypes
+---@return LuaCustomTable<(uint)|(string), LuaSurfacePropertyPrototype>
+function Player.getSurfacePropertyPrototypes()
+    return prototypes.surface_property
+end
+
+-------------------------------------------------------------------------------
+---Return quality prototypes
 ---@return LuaCustomTable<string, LuaSpaceLocationPrototype>
 function Player.getSpaceLocationPrototypes()
     return prototypes.space_location
@@ -2080,6 +2079,41 @@ function Player.getHMLocations()
         return cache_locations
     end
 
+    local lua_surface_properties = Player.getSurfacePropertyPrototypes()
+    local function get_surface_properties(location)
+        local surface_properties = {}
+        if location.surface_properties ~= nil then
+            for name, lua_surface_property in pairs(lua_surface_properties) do
+                if lua_surface_property.hidden == false then
+                    local value = location.surface_properties[name]
+                    if location.type == "planet" or (value ~= nil and lua_surface_property.is_time == false) then
+                        local surface_property = {
+                            name = name,
+                            value = value or lua_surface_property.default_value,
+                            localised_name = lua_surface_property.localised_name,
+                            localised_description = lua_surface_property.localised_description,
+                            localised_unit_key = lua_surface_property.localised_unit_key,
+                            is_time = lua_surface_property.is_time
+                        }
+                        table.insert(surface_properties, surface_property)
+                    end
+                end
+            end
+        end
+        if location.type == "planet" or location.type == "space-location" then
+            local surface_property = {
+                name = "solar-power-in-space",
+                value = location.solar_power_in_space or 0,
+                localised_name = {"surface-property-name.solar-power-in-space"},
+                localised_description = "surface-property-name.solar-power-in-space"    ,
+                localised_unit_key = "surface-property-unit.solar-power-in-space",
+                is_time = false
+            }
+            table.insert(surface_properties, surface_property)
+        end
+        return surface_properties
+    end
+
     local cache_locations = {}
     local space_locations = Player.getSpaceLocationPrototypes()
     if #space_locations > 0 then
@@ -2087,10 +2121,11 @@ function Player.getHMLocations()
             if space_location.hidden == false then
                 local location = {
                     key = string.format("%s-%s", space_location.type, space_location.name),
-                    type = space_location.type,
+                    type = "space-location",
                     name = space_location.name,
                     localised_name = space_location.localised_name,
-                    localised_description = space_location.localised_description
+                    localised_description = space_location.localised_description,
+                    properties = get_surface_properties(space_location)
                 }
                 table.insert(cache_locations, location)
             end
@@ -2102,10 +2137,11 @@ function Player.getHMLocations()
         for key, surface in pairs(suurfaces) do
             local location = {
                 key = string.format("%s-%s", surface.type, surface.name),
-                type = surface.type,
+                type = "surface",
                 name = surface.name,
                 localised_name = surface.localised_name,
-                localised_description = surface.localised_description
+                localised_description = surface.localised_description,
+                properties = get_surface_properties(surface)
             }
             table.insert(cache_locations, location)
         end

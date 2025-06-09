@@ -313,6 +313,21 @@ function ProductionPanel:updateIndexPanel(model)
 					mask_secondary.style.stretch_image_to_widget_size = true
   					mask_secondary.ignored_by_interaction = true
 					GuiElement.maskQuality(mask_secondary, secondary_icon_quality, 10, 10)
+				elseif imodel.location ~= nil and imodel.location.name ~= "nauvis" then
+					local secondary_icon_type = imodel.location.type
+					local secondary_icon_name = imodel.location.name
+					local container_secondary = GuiElement.add(button, GuiFlow("secondary-info"))
+					local frame_secondary = GuiElement.add(container_secondary, GuiFrame("secondary-frame"):style("helmod_frame_element_w80", "gray", 4))
+					frame_secondary.style.width = 20
+					frame_secondary.style.margin = 0
+					frame_secondary.style.padding = 2
+					local mask_secondary = GuiElement.add(frame_secondary, GuiSprite("secondary-info"):sprite(secondary_icon_type, secondary_icon_name))
+					container_secondary.style.top_padding = 15
+    				container_secondary.style.left_padding = 15
+    				mask_secondary.style.width = 20
+    				mask_secondary.style.height = 20
+					mask_secondary.style.stretch_image_to_widget_size = true
+  					mask_secondary.ignored_by_interaction = true
 				end
 				if button ~= nil and is_first then
 					button.style.left_margin = 3
@@ -463,21 +478,20 @@ function ProductionPanel:updateSubMenuRightPanel(model, block)
 
 	---space locations
 	local hm_locations = Player.getHMLocations()
-	if #hm_locations > 0 then
+	if #hm_locations > 1 then
 		local group_locations = GuiElement.add(right_panel, GuiFlowH("group_locations"))
 		local current_location = model.location or {}
 		local locations = {}
-		local tooltip_location = nil
 		local default_surface = nil
 		for _, hm_location in pairs(hm_locations) do
-			local space_location = {"", string.format("[%s=%s]", hm_location.type, hm_location.name), "  ", hm_location.localised_name}
+			local space_location = GuiTooltipLocation(""):element(hm_location)
+			local item_location = space_location:create()
 			if hm_location.key == current_location.key then 
-				default_surface = space_location
-				tooltip_location = hm_location.localised_name
+				default_surface = item_location
 			end
-			table.insert(locations, space_location)
+			table.insert(locations, item_location)
 		end
-		local selector_logistic_fluid = GuiElement.add(group_locations, GuiDropDown(self.classname, "change-location"):items(locations, default_surface):tooltip(tooltip_location))
+		local selector_logistic_fluid = GuiElement.add(group_locations, GuiDropDown(self.classname, "change-location"):items(locations, default_surface):tooltip(default_surface))
 		selector_logistic_fluid.style.font = "helmod_font_default"
 		selector_logistic_fluid.style.height = 32
 		selector_logistic_fluid.style.width = 64

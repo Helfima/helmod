@@ -484,7 +484,9 @@ end
 ---@return table
 function GuiTooltip:create()
 	local tooltip = { "" }
-	if string.find(self.name[1], "edit[-]") then
+	if self.name == nil then
+		return tooltip
+	elseif string.find(self.name[1], "edit[-]") then
 		local sprite_name = GuiElement.getSprite(defines.sprite_tooltip.edit)
 		table.insert(tooltip,
 			{ "", string.format("[img=%s]", sprite_name), " ", helmod_tag.color.yellow, helmod_tag.font.default_bold,
@@ -1097,4 +1099,81 @@ function GuiTooltipPriorities.appendPriority(tooltip, element)
 			GuiTooltip.appendLineSubQuantity(tooltip, type, module_priority.name, amount, module_priority_label, module_priority.quality)
 		end
 	end
+end
+
+------------------------------------------------------------------------------
+---@class GuiTooltipLocation : GuiTooltip
+GuiTooltipLocation = newclass(GuiTooltip, function(base, ...)
+	GuiTooltip.init(base, ...)
+	base.classname = "HMGuiTooltip"
+end)
+
+-------------------------------------------------------------------------------
+---Create tooltip
+---@return table
+function GuiTooltipLocation:create()
+	local tooltip = {""}
+	if self.m_element then
+		local location = self.m_element
+		tooltip = {"", string.format("[img=%s/%s]", location.type, location.name), "  ", location.localised_name}
+
+		local index = 0
+		local sub_tooltip = {""}
+		table.insert(tooltip, sub_tooltip)
+		for i, property in pairs(location.properties) do
+			local value = property.value
+			
+			local tooltip_property = {"", "\n", "[img=helmod-tooltip-blank]", "  ", helmod_tag.color.gold, property.localised_name, ": ", helmod_tag.color.close}
+			if property.is_time then
+				table.insert(tooltip_property, Format.formatTimeTickLocalised(value))
+			else
+				table.insert(tooltip_property, {property.localised_unit_key, tostring(value)})
+			end
+			table.insert(sub_tooltip, tooltip_property)
+
+			index = index + 1
+			if index % 18 == 0 then
+				sub_tooltip = {""}
+				table.insert(tooltip, sub_tooltip)
+			end
+			if index > 100 then
+				Player.print("Too many factory")
+				break
+			end
+		end
+	end
+	return tooltip
+end
+
+------------------------------------------------------------------------------
+---@class GuiTooltipFuel : GuiTooltip
+GuiTooltipFuel = newclass(GuiTooltip, function(base, ...)
+	GuiTooltip.init(base, ...)
+	base.classname = "HMGuiTooltip"
+end)
+
+-------------------------------------------------------------------------------
+---Create tooltip
+---@return table
+function GuiTooltipFuel:create()
+	local tooltip = {""}
+	if self.m_element then
+		local prototype = self.m_element.prototype
+		local element_type = self.m_element.type
+		local element_name = prototype:native().name
+		local element_localised_name = prototype:getLocalisedName()
+		
+		tooltip = {"", string.format("[%s=%s]", element_type, element_name), "  ", element_localised_name}
+		
+		if element_type == "item" then
+			local value = Format.formatNumberKilo(prototype:getFuelValue(), "J")
+			local tooltip_property = {"", "\n", "[img=helmod-tooltip-blank]", "  ", helmod_tag.color.gold, {"description.fuel-value"}, ": ", helmod_tag.color.close, value}
+			table.insert(tooltip, tooltip_property)
+		else
+			local value = tostring(prototype.temperature)
+			local tooltip_property = {"", "\n", "[img=helmod-tooltip-blank]", "  ", helmod_tag.color.gold, {"description.temperature"}, ": ", helmod_tag.color.close, value, " °C"}
+			table.insert(tooltip, tooltip_property)
+		end
+	end
+	return tooltip
 end

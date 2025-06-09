@@ -294,13 +294,17 @@ function Product:countContainer(count, container, time)
   end
   if self.lua_prototype.type == 1 or self.lua_prototype.type == "fluid" then
     local entity_prototype = EntityPrototype(container)
-    if entity_prototype:getType() == "pump" or entity_prototype:getType() == "offshore-pump"  then
+    if entity_prototype:getType() == "valve"  then
       local flow_rate = entity_prototype:getValveFlowRate()
-      if flow_rate == 0 then return 0 end
+      if flow_rate == nil or flow_rate == 0 then return 0 end
+      return count / flow_rate
+    elseif entity_prototype:getType() == "pump" or entity_prototype:getType() == "offshore-pump"  then
+      local flow_rate = entity_prototype:getPumpingSpeed()
+      if flow_rate == nil or flow_rate == 0 then return 0 end
       return count / flow_rate
     elseif entity_prototype:getType() == "pipe" then
-      local fluids_logistic_maximum_flow = User.getParameter("fluids_logistic_maximum_flow")
-      return count / (fluids_logistic_maximum_flow or defines.constant.logistic_flow_default)
+      -- obsolete but that do no error for laster version, no need migration
+      return 0
     else
       local cargo_wagon_size = EntityPrototype(container):getFluidCapacity()
       if cargo_wagon_size == 0 then return 0 end
