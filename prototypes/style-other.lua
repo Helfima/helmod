@@ -348,3 +348,14 @@ default_gui["helmod_label_icon_sm"] = {
   bottom_padding = 1,
   left_padding = 0
 }
+
+default_gui["helmod_spoil_progressbar"] = {
+    type = "progressbar_style",
+    filled_font_color = {0, 0, 0},
+    horizontal_align = "right",
+    horizontally_stretchable = "off",
+    color = {179, 179, 179},
+    height = 8,
+    bar_width = 50,
+    embed_text_in_bar = true
+}

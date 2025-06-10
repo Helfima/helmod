@@ -69,6 +69,17 @@ function GuiButton:sprite_with_quality(element_type, element_name, element_quali
 end
 
 -------------------------------------------------------------------------------
+---Set spoil_percent
+---@param element ProductData
+---@return GuiButton
+function GuiButton:spoilage(element)
+    if element ~= nil then
+        self.post_action["mask_spoil"] = {spoil=element, size=0}
+    end
+    return self
+end
+
+-------------------------------------------------------------------------------
 ---Set option
 ---@param name string
 ---@param value any

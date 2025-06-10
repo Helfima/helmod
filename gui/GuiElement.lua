@@ -21,6 +21,15 @@ GuiElement.color_button_add = "yellow"
 GuiElement.color_button_rest = "red"
 
 -------------------------------------------------------------------------------
+---Add suffix on name
+---@param suffix string
+---@return GuiElement
+function GuiElement:suffix(suffix)
+    table.insert(self.name, suffix)
+    return self
+end
+
+-------------------------------------------------------------------------------
 ---Set style
 ---@return GuiElement
 function GuiElement:style(...)
@@ -181,6 +190,17 @@ function GuiElement.getElementQuality(element)
 end
 
 -------------------------------------------------------------------------------
+---Get name
+---@return string
+function GuiElement:getName()
+  if type(self.name) == "table" then
+    return table.concat(self.name,"=")
+  else
+    return self.name
+  end
+end
+
+-------------------------------------------------------------------------------
 ---Get options
 ---@return table
 function GuiElement:getOptions()
@@ -221,9 +241,9 @@ function GuiElement.add(parent, gui_element)
     end
   end)
   if not ok then
-    element = parent.add(gui_element:onErrorOptions())
-    element.tooltip = err
-    element.style.width = 80
+    local gui_error = GuiSprite(gui_element:getName()):suffix("error"):sprite("helmod-event-error-32"):tooltip(err)
+    element = parent.add(gui_error:getOptions())
+    Player.print(err)
     log(err)
     log(debug.traceback())
   end
@@ -239,6 +259,9 @@ function GuiElement.addPostAction(parent, gui_element)
   for action_name, action in pairs(gui_element.post_action) do
     if action_name == "mask_quality" then
       GuiElement.maskQuality(parent, action.quality, action.size)
+    end
+    if action_name == "mask_spoil" then
+      GuiElement.maskSpoil(parent, action.spoil, action.size)
     end
     if action_name == "apply_elem_value" then
       if action ~= nil and action.name ~= nil then
@@ -378,6 +401,48 @@ function GuiElement.maskQuality(parent, quality, size, top_padding)
     mask_frame.style.height = size or 12
   end
   mask_frame.style.stretch_image_to_widget_size = true
+  mask_frame.ignored_by_interaction = true
+end
+
+-------------------------------------------------------------------------------
+---Add quality mmask
+---@param parent LuaGuiElement
+---@param element ProductData
+function GuiElement.maskSpoil(parent, element)
+  if element == nil or element.spoil_percent == nil then
+    return
+  end
+  local spoil_percent = element.spoil_percent
+  local style_name = parent.style.name
+  local top_padding = 29
+  local left_padding = 2
+  local width_back = 30
+  local height_back = 6
+  if string.find(style_name, "_m") then
+    top_padding= 18
+    width_back = 20
+  elseif string.find(style_name, "_sm") then
+    top_padding = 8
+    width_back = 15
+  end
+  local height_front = height_back - 2
+  local width_front = width_back - 2
+  width_front = width_front * spoil_percent / 100
+
+  local container_back = GuiElement.add(parent, GuiFlow("spoil-info-back"))
+  container_back.style.top_padding = top_padding
+  container_back.style.left_padding = left_padding
+  local mask_frame = GuiElement.add(container_back, GuiFrameH("spoil-info-back"):style("helmod_frame_element_w30", "G20_5", 1))
+  mask_frame.style.width = width_back
+  mask_frame.style.height = height_back
+  mask_frame.ignored_by_interaction = true
+
+  local container_front = GuiElement.add(parent, GuiFlow("spoil-info-front"))
+  container_front.style.top_padding = top_padding + 1
+  container_front.style.left_padding = left_padding + 1
+  local mask_frame = GuiElement.add(container_front, GuiFrameH("spoil-info-front"):style("helmod_frame_element_w30", "G100_3", 1))
+  mask_frame.style.width = width_front
+  mask_frame.style.height = height_front
   mask_frame.ignored_by_interaction = true
 end
 
