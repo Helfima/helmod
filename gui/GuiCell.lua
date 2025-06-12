@@ -1,6 +1,7 @@
 -------------------------------------------------------------------------------
 ---Class to help to build GuiSlider
 ---@class GuiCell
+---@field options table
 GuiCell = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiCell"
@@ -164,7 +165,7 @@ end
 ---Add mask
 ---@param button LuaGuiElement
 ---@param color string
----@param size number
+---@param size? number
 function GuiCell:add_mask(button, color, size)
   if self.m_mask == true then
     local mask_frame = GuiElement.add(button, GuiFrameH("layer-mask"):style("helmod_frame_colored", color, 5))
@@ -338,7 +339,7 @@ end
 ---@param parent LuaGuiElement
 ---@param width int
 ---@param name string
----@param count number
+---@param count string|number|[number,string]
 ---@param color string
 ---@param color_level int
 ---@param tooltip any
@@ -348,9 +349,10 @@ function GuiCell:add_row_label(parent, width, name, count, color, color_level, t
   local row = GuiElement.add(parent, GuiFrameH(name):style("helmod_frame_element_w50", color, color_level))
   row.style.minimal_width=width
   row.style.height = 18
-  -- total deep count
   local caption = nil
-  if type(count) == "table" then
+  if type(count) == "string" then
+    caption = count
+  elseif type(count) == "table" then
     caption = Format.formatNumberKilo(count[1], count[2])
   elseif display_cell_mod == "by-kilo" then
     caption = Format.formatNumberKilo(count)
@@ -525,7 +527,7 @@ function GuiCellFactory:create(parent)
 end
 
 -------------------------------------------------------------------------------
----@class GuiCellRecipe
+---@class GuiCellRecipe: GuiCell
 GuiCellRecipe = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
@@ -561,8 +563,9 @@ function GuiCellRecipe:create(parent)
     row1.style = "helmod_frame_element_w50_red_1"
   end
 
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
-  GuiElement.add(row3, GuiLabel("label2", recipe.name):caption(Format.formatPercent(recipe.production or 1).."%"):style("helmod_label_element"):tooltip({"helmod_common.total"}))
+  local caption = Format.formatPercent(recipe.production or 1).."%"
+  self:add_row_label(cell, 50, "row3",  caption, color, 2, {"helmod_common.total"})
+
   return cell, recipe_icon
 end
 
@@ -943,7 +946,6 @@ function GuiCellBuilding:create(parent)
 
   local display_count_deep = User.getParameter("display_count_deep")
   if display_count_deep then
-    local count = math.ceil(building)
     self:add_row_label(cell, width, "row3",  math.ceil(building_deep), color, 3, {"helmod_common.total"})
   end
 

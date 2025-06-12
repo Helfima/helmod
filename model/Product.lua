@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 ---Description of the module.
----@class Product
+---@class Product : Prototype
 Product = newclass(Prototype,function(base, object)
   Prototype.init(base, object)
   base.classname = "HMProduct"
@@ -88,6 +88,7 @@ function Product:clone()
     name = self.lua_prototype.name,
     quality = self.lua_prototype.quality,
     amount = self:getElementAmount(),
+    spoil = self.lua_prototype.spoil,
     state = self.lua_prototype.state,
     temperature = self.lua_prototype.temperature,
     minimum_temperature  = self.lua_prototype.minimum_temperature,
@@ -95,6 +96,9 @@ function Product:clone()
     burnt = self.lua_prototype.burnt,
     constant = self.lua_prototype.constant
   }
+  if prototype.spoil ~= nil then
+    prototype.spoil_percent = prototype.spoil * 100
+  end
   return prototype
 end
 
@@ -335,4 +339,21 @@ end
 function Product:match(other)
   if other == nil then return false end
   return self.lua_prototype.name == other.name and self.lua_prototype.type == other.type and self.lua_prototype.quality == other.quality
+end
+
+-------------------------------------------------------------------------------
+---Return spoil
+---@return number|nil
+function Product:getSpoil()
+  if self.lua_prototype ~= nil then
+    if self.lua_prototype.spoil then
+      return self.lua_prototype.spoil
+    end
+    local item_prototype = ItemPrototype(self.lua_prototype)
+    if item_prototype:getSpoilTicks() > 0 then
+      self.lua_prototype.spoil = 1
+      return self.lua_prototype.spoil
+    end
+  end
+  return nil
 end

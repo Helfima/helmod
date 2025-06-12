@@ -274,6 +274,10 @@ function RecipePrototype:getQualityProducts(factory, quality)
     if quality == nil then
         quality = "normal"
     end
+    -- can't do use greater quality
+    if self.is_support_quality == false then
+        quality = "normal"
+    end
     local quality_products = {}
     local lua_quality = Player.getQualityPrototype(quality)
     local quality_effect = 0 

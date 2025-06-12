@@ -261,10 +261,19 @@ function RecipeEdition:onEvent(event)
             Controller:send("on_gui_recipe_update", event)
         end
 
-        if event.action == "recipe-update" then
+        if event.action == "recipe-update-production" then
             local text = event.element.text
             local production = (formula(text) or 100) / 100
             ModelBuilder.updateRecipeProduction(recipe, production)
+            ModelCompute.update(model)
+            self:updateObjectInfo(event)
+            Controller:send("on_gui_recipe_update", event)
+        end
+
+        if event.action == "recipe-update-spoilage" then
+            local text = event.element.text
+            local spoilage_factor = (formula(text) or 100) / 100
+            ModelBuilder.updateRecipeSpoilage(recipe, spoilage_factor)
             ModelCompute.update(model)
             self:updateObjectInfo(event)
             Controller:send("on_gui_recipe_update", event)
@@ -1436,7 +1445,13 @@ function RecipeEdition:updateObjectInfo(event)
 
         GuiElement.add(tablePanel, GuiLabel("label-production"):caption({ "helmod_recipe-edition-panel.production" }))
         local production_value = (recipe.production or 1) * 100
-        GuiElement.add(tablePanel, GuiTextField(self.classname, "recipe-update", model.id, block.id, recipe.id):text(production_value):style("helmod_textfield"))
+        GuiElement.add(tablePanel, GuiTextField(self.classname, "recipe-update-production", model.id, block.id, recipe.id):text(production_value):style("helmod_textfield"))
+
+        if recipe.spoilage ~= nil then
+            GuiElement.add(tablePanel, GuiLabel("label-spoilage"):caption({ "helmod_recipe-edition-panel.spoilage-factor" }))
+            local spoilage_value = (recipe.spoilage_factor or 1) * 100
+            GuiElement.add(tablePanel, GuiTextField(self.classname, "recipe-update-spoilage", model.id, block.id, recipe.id):text(spoilage_value):style("helmod_textfield"))
+        end
 
 
     end

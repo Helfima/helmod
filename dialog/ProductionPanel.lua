@@ -1203,13 +1203,21 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				local contraint_type = nil
 				local is_pivot = false
 				local product_prototype = Product(lua_product)
+				local product_key = product_prototype:getTableKey()
+				
+				if recipe.spoilage ~= nil and table.size(recipe.spoilage.products) then
+					local spoilage = recipe.spoilage.products[product_key]
+					if spoilage ~= nil then
+						lua_product.spoil = spoilage.spoil
+					end
+				end
+
 				local product = product_prototype:clone()
 				product.time = model.time
 				product.count = product_prototype:countProduct(recipe)
 				product.count_limit = product_prototype:countLimitProduct(recipe)
 				product.count_deep = product_prototype:countDeepProduct(recipe)
 
-				local product_key = product_prototype:getTableKey()
 				if block.by_product ~= false and recipe.contraints ~= nil and recipe.contraints[product_key] ~= nil then
 					contraint_type = recipe.contraints[product_key].type
 				end
@@ -1235,6 +1243,15 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				local contraint_type = nil
 				local is_pivot = false
 				local ingredient_prototype = Product(lua_ingredient)
+				local ingredient_key = ingredient_prototype:getTableKey()
+
+				if recipe.spoilage ~= nil and table.size(recipe.spoilage.ingredients) then
+					local spoilage = recipe.spoilage.ingredients[ingredient_key]
+					if spoilage ~= nil then
+						lua_ingredient.spoil = spoilage.spoil
+					end
+				end
+
 				local ingredient = ingredient_prototype:clone()
 				ingredient.time = model.time
 				ingredient.count = ingredient_prototype:countIngredient(recipe)

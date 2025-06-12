@@ -418,6 +418,9 @@ function GuiTooltip:appendProductInfo(tooltip, element)
 				local spoil_ticks = item_prototype:getSpoilTicks()
 				local spoil_time = Format.formatTimeTickLocalised(spoil_ticks)
 				GuiTooltip.appendLine(tooltip, nil, { "description.spoil-time" }, spoil_time)
+				local spoil = element.spoil
+				local spoil_percent = Format.formatPercent(spoil).."%"
+				GuiTooltip.appendLine(tooltip, nil, { "description.freshness" }, spoil_percent)
 			end
 		end
 		---fluid logistic

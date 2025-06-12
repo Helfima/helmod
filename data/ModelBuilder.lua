@@ -213,6 +213,16 @@ end
 
 -------------------------------------------------------------------------------
 ---Update recipe production
+---@param recipe table
+---@param spoilage number
+function ModelBuilder.updateRecipeSpoilage(recipe, spoilage)
+    if recipe ~= nil then
+        recipe.spoilage_factor = spoilage
+    end
+end
+
+-------------------------------------------------------------------------------
+---Update recipe production
 ---@param block BlockData
 ---@param production number
 function ModelBuilder.updateBlockChildrenProduction(block, production)

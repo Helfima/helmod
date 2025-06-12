@@ -206,10 +206,12 @@ function EntityPrototype:getEnergyProduction()
   if self.lua_prototype ~= nil then
     local energy_prototype = self:getElectricEnergySource()
     if energy_prototype ~= nil then
-      local usage_priority = energy_prototype:getUsagePriority()
+        local usage_priority = energy_prototype:getUsagePriority()
       local production
       if usage_priority == "managed-accumulator" then
         production = energy_prototype:getOutputFlowLimit()
+      elseif usage_priority == "solar" then
+        production = self:getMaxEnergyProduction() * 60
       else
         production = self:getMaxPowerOutput() * 60
       end

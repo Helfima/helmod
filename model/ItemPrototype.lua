@@ -104,7 +104,6 @@ end
 
 -------------------------------------------------------------------------------
 ---Return stack size
----@param quality number
 ---@return number
 function ItemPrototype:getSpoilTicks()
   if self.lua_prototype ~= nil then
