@@ -511,7 +511,7 @@ function GuiCellFactory:create(parent)
     if factory.input ~= nil then
       style = "helmod_textfield_element_red"
     end
-    local text_field = GuiElement.add(row3, GuiTextField(self.m_by_factory_uri):text(Format.formatNumberFactory(factory.input or factory.count or 0)):style(style):tooltip({"helmod_common.total"}))
+    local text_field = GuiElement.add(row3, GuiTextField(self.m_by_factory_uri):text(factory.input or factory.count or 0):style(style):tooltip({"helmod_common.total"}))
     text_field.style.height = 16
     text_field.style.width = 70
   else

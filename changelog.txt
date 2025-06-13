@@ -1,4 +1,18 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.1.10
+Date: 2025-06-13
+  Bugfixes:
+    - Fixed quality calculation now respect [1 - Q, Q * 9/10, Q * 9/100, Q * 9/1000, Q * 1/1000]
+    - Removed number format in the textbox when computing by factory actives
+---------------------------------------------------------------------------------------------------
+Version: 2.1.9
+Date: 2025-06-13
+  Changes:
+    - Added a preference to switch normal or compact for drop down fual, by default normal
+    - Added migration file to update all models for spoilage
+  Bugfixes:
+    - Fixed error Player.findRecipe was replaced by Player.findFirstRecipe
+---------------------------------------------------------------------------------------------------
 Version: 2.1.8
 Date: 2025-06-13
   Changes:

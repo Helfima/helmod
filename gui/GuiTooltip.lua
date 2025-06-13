@@ -418,9 +418,11 @@ function GuiTooltip:appendProductInfo(tooltip, element)
 				local spoil_ticks = item_prototype:getSpoilTicks()
 				local spoil_time = Format.formatTimeTickLocalised(spoil_ticks)
 				GuiTooltip.appendLine(tooltip, nil, { "description.spoil-time" }, spoil_time)
-				local spoil = element.spoil
-				local spoil_percent = Format.formatPercent(spoil).."%"
-				GuiTooltip.appendLine(tooltip, nil, { "description.freshness" }, spoil_percent)
+				if element.spoil ~= nil and element.spoil > 0 then
+					local spoil = element.spoil
+					local spoil_percent = Format.formatPercent(spoil).."%"
+					GuiTooltip.appendLine(tooltip, nil, { "description.freshness" }, spoil_percent)
+				end
 			end
 		end
 		---fluid logistic
@@ -470,15 +472,17 @@ end
 function GuiTooltip:appendDebug(tooltip, element)
 	---debug
 	if User.getModGlobalSetting("debug_solver") == true then
-		table.insert(tooltip, { "", "\n", "----------------------" })
-		GuiTooltip.appendLineDebug(tooltip, "Id", element.id)
-		GuiTooltip.appendLineDebug(tooltip, "Name", element.name)
-		GuiTooltip.appendLineDebug(tooltip, "Type", element.type)
-		GuiTooltip.appendLineDebug(tooltip, "State", element.state)
-		GuiTooltip.appendLineDebug(tooltip, "Amount", element.amount)
-		GuiTooltip.appendLineDebug(tooltip, "Count", element.count)
-		GuiTooltip.appendLineDebug(tooltip, "Count limit", element.count_limit)
-		GuiTooltip.appendLineDebug(tooltip, "Count deep", element.count_deep)
+		local tooltip_debug = { "", "\n", "----------------------" }
+		table.insert(tooltip, tooltip_debug)
+		GuiTooltip.appendLineDebug(tooltip_debug, "Name", element.name)
+		GuiTooltip.appendLineDebug(tooltip_debug, "Type", element.type)
+		GuiTooltip.appendLineDebug(tooltip_debug, "State", element.state)
+		GuiTooltip.appendLineDebug(tooltip_debug, "Amount", element.amount)
+		GuiTooltip.appendLineDebug(tooltip_debug, "Count", element.count)
+		GuiTooltip.appendLineDebug(tooltip_debug, "Count limit", element.count_limit)
+		GuiTooltip.appendLineDebug(tooltip_debug, "Count deep", element.count_deep)
+		GuiTooltip.appendLineDebug(tooltip_debug, "Quality", element.quality)
+		GuiTooltip.appendLineDebug(tooltip_debug, "QualityProbality", element.quality_probality)
 	end
 end
 
@@ -1156,6 +1160,15 @@ GuiTooltipFuel = newclass(GuiTooltip, function(base, ...)
 end)
 
 -------------------------------------------------------------------------------
+---Set by_limit information
+---@param compact boolean
+---@return GuiTooltip
+function GuiTooltipFuel:compact(compact)
+	self.m_compact = compact
+	return self
+end
+
+-------------------------------------------------------------------------------
 ---Create tooltip
 ---@return table
 function GuiTooltipFuel:create()
@@ -1166,16 +1179,26 @@ function GuiTooltipFuel:create()
 		local element_name = prototype:native().name
 		local element_localised_name = prototype:getLocalisedName()
 		
-		tooltip = {"", string.format("[%s=%s]", element_type, element_name), "  ", element_localised_name}
-		
-		if element_type == "item" then
-			local value = Format.formatNumberKilo(prototype:getFuelValue(), "J")
-			local tooltip_property = {"", "\n", "[img=helmod-tooltip-blank]", "  ", helmod_tag.color.gold, {"description.fuel-value"}, ": ", helmod_tag.color.close, value}
-			table.insert(tooltip, tooltip_property)
+		if self.m_compact == true then
+			tooltip = {"", string.format("[%s=%s]", element_type, element_name), "  ", element_localised_name}
+			
+			if element_type == "item" then
+				local value = Format.formatNumberKilo(prototype:getFuelValue(), "J")
+				local tooltip_property = {"", "\n", "[img=helmod-tooltip-blank]", "  ", helmod_tag.color.gold, {"description.fuel-value"}, ": ", helmod_tag.color.close, value}
+				table.insert(tooltip, tooltip_property)
+			else
+				local value = tostring(prototype.temperature)
+				local tooltip_property = {"", "\n", "[img=helmod-tooltip-blank]", "  ", helmod_tag.color.gold, {"description.temperature"}, ": ", helmod_tag.color.close, value, " °C"}
+				table.insert(tooltip, tooltip_property)
+			end
 		else
-			local value = tostring(prototype.temperature)
-			local tooltip_property = {"", "\n", "[img=helmod-tooltip-blank]", "  ", helmod_tag.color.gold, {"description.temperature"}, ": ", helmod_tag.color.close, value, " °C"}
-			table.insert(tooltip, tooltip_property)
+			if element_type == "item" then
+				local value = Format.formatNumberKilo(prototype:getFuelValue(), "J")
+				tooltip = {"", string.format("[%s=%s] %s", element_type, element_name, value), "  ", element_localised_name}
+			else
+				local value = tostring(prototype.temperature)
+				tooltip = {"", string.format("[%s=%s] %s °C", element_type, element_name, value), "  ", element_localised_name}
+			end
 		end
 	end
 	return tooltip

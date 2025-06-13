@@ -15,16 +15,18 @@ RecipePrototype = newclass(Prototype, function(base, object, object_type)
         end
         if base.lua_type == nil or base.lua_type == "recipe" then
             local recipe = Player.getRecipe(base.object_name)
-            if recipe == nil then
+            if recipe == nil and base.object_name ~= nil then
                 -- if recipe is null try find 
-                recipe = Player.findRecipe(base.object_name)
+                recipe = Player.findFirstRecipe(base.object_name)
             end
             Prototype.init(base, recipe)
             base.lua_type = "recipe"
             if Player.hasFeatureQuality() then
-                for _, ingredient in pairs(base.lua_prototype.ingredients) do
-                    if ingredient.type == "item" then
-                        base.is_support_quality = true
+                if base.lua_prototype ~= nil and base.lua_prototype.ingredients ~= nil then
+                    for _, ingredient in pairs(base.lua_prototype.ingredients) do
+                        if ingredient.type == "item" then
+                            base.is_support_quality = true
+                        end
                     end
                 end
             end
@@ -257,6 +259,26 @@ end
 ---@param quality_effect number
 ---@return number
 function RecipePrototype:getNextQualityProducts(quality_products, raw_product, lua_quality, quality_effect)
+    local previous_probality = 0
+    local next_probability = lua_quality.next_probability
+    if next_probability > 0 and quality_effect > 0  then
+        previous_probality = self:getNextQualityProducts(quality_products, raw_product, lua_quality.next, quality_effect * next_probability)
+    end
+
+    local quality_product = Product(raw_product):clone()
+    quality_product.quality = lua_quality.name
+    quality_product.quality_probality = quality_effect - previous_probality
+    table.insert(quality_products, 1, quality_product)
+    return quality_product.quality_probality + previous_probality
+end
+
+---Compute quality of products
+---@param quality_products table
+---@param raw_product ProductData
+---@param lua_quality LuaQualityPrototype
+---@param quality_effect number
+---@return number
+function RecipePrototype:getNextQualityProducts2(quality_products, raw_product, lua_quality, quality_effect)
     local quality_product = Product(raw_product):clone()
     quality_product.quality = lua_quality.name
     quality_product.amount = quality_product.amount * quality_effect
@@ -268,7 +290,6 @@ function RecipePrototype:getNextQualityProducts(quality_products, raw_product, l
         self:getNextQualityProducts(quality_products, raw_product, lua_quality.next, quality_effect * next_probability)
     end
 end
-
 -------------------------------------------------------------------------------
 ---Return products array of Prototype
 ---@param factory table
@@ -289,14 +310,16 @@ function RecipePrototype:getQualityProducts(factory, quality)
     if factory ~= nil and factory.effects ~= nil then
         quality_effect = factory.effects.quality or 0
     end
-    
     local next_probability = lua_quality.next_probability
     for _, raw_product in pairs(raw_products) do
         if raw_product.type == "item" then
+            local previous_probality = 0
             raw_product.quality = quality
+            raw_product.quality_probality = 1
             if next_probability > 0 and quality_effect > 0  then
-                self:getNextQualityProducts(quality_products, raw_product, lua_quality.next, quality_effect)
+                previous_probality = self:getNextQualityProducts(quality_products, raw_product, lua_quality.next, quality_effect)
             end
+            raw_product.quality_probality = raw_product.quality_probality - previous_probality
         end
     end
     if #quality_products > 0 then

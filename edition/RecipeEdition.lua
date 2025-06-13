@@ -825,11 +825,12 @@ function RecipeEdition:updateFactoryInfo(event)
             end
 
             if fuel_list ~= nil and factory_fuel ~= nil then
+                local compact = User.getPreferenceSetting("display_fuel_compact")
                 local items = {}
                 local default_fuel = nil
                 if (energy_type == "fluid") and (not factory_prototype:getBurnsFluid()) then
                     for _, item in pairs(fuel_list) do
-                        local fuel = GuiTooltipFuel(""):element({type=fuel_type, prototype=item})
+                        local fuel = GuiTooltipFuel(""):element({type=fuel_type, prototype=item}):compact(compact)
                         local item_fuel = fuel:create()
                         table.insert(items, item_fuel)
                         if factory_fuel ~= nil and factory_fuel:native().name == item:native().name and factory_fuel.temperature == item.temperature then
@@ -838,7 +839,7 @@ function RecipeEdition:updateFactoryInfo(event)
                     end
                 else
                     for _, item in pairs(fuel_list) do
-                        local fuel = GuiTooltipFuel(""):element({type=fuel_type, prototype=item})
+                        local fuel = GuiTooltipFuel(""):element({type=fuel_type, prototype=item}):compact(compact)
                         local item_fuel = fuel:create()
                         table.insert(items, item_fuel)
                         if factory_fuel ~= nil and factory_fuel:native().name == item:native().name then
@@ -849,7 +850,9 @@ function RecipeEdition:updateFactoryInfo(event)
 
                 GuiElement.add(input_panel, GuiLabel("label-burner"):caption({ "helmod_common.resource" }))
                 local drop_fuel = GuiElement.add(input_panel, GuiDropDown(self.classname, "factory-fuel-update", model.id, block.id, recipe.id, fuel_type):items(items, default_fuel):tooltip(default_fuel))
-                drop_fuel.style.width = 64
+                if compact == true then
+                    drop_fuel.style.width = 64
+                end
             end
         end
 
@@ -1447,13 +1450,11 @@ function RecipeEdition:updateObjectInfo(event)
         local production_value = (recipe.production or 1) * 100
         GuiElement.add(tablePanel, GuiTextField(self.classname, "recipe-update-production", model.id, block.id, recipe.id):text(production_value):style("helmod_textfield"))
 
-        if recipe.spoilage ~= nil and User.getPreferenceSetting("display_spoilage") then
+        if recipe.spoilage ~= nil and recipe.spoilage.has_spoil == true and User.getPreferenceSetting("display_spoilage") then
             GuiElement.add(tablePanel, GuiLabel("label-spoilage"):caption({ "helmod_recipe-edition-panel.spoilage-factor" }))
             local spoilage_value = (recipe.spoilage_factor or 1) * 100
             GuiElement.add(tablePanel, GuiTextField(self.classname, "recipe-update-spoilage", model.id, block.id, recipe.id):text(spoilage_value):style("helmod_textfield"))
         end
-
-
     end
 end
 

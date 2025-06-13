@@ -241,7 +241,8 @@ function GuiElement.add(parent, gui_element)
     end
   end)
   if not ok then
-    local gui_error = GuiSprite(gui_element:getName()):suffix("error"):sprite("helmod-event-error-32"):tooltip(err)
+    local error_index = #parent.children_names
+    local gui_error = GuiSprite(gui_element:getName()):suffix(error_index):sprite("helmod-event-error-32"):tooltip(err)
     element = parent.add(gui_error:getOptions())
     Player.print(err)
     log(err)

@@ -289,6 +289,14 @@ defines.constant.preferences = {
     group = "general"
   },
   --display-spoilage
+  display_fuel_compact = {
+    type = "bool-setting",
+    localised_name = {"helmod_pref_settings.display-fuel-compact"},
+    localised_description = {"helmod_pref_settings.display-fuel-compact-desc"},
+    default_value = false,
+    group = "general"
+  },
+  --display-spoilage
   display_spoilage = {
     type = "bool-setting",
     localised_name = {"helmod_pref_settings.display-spoilage"},

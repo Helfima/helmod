@@ -87,6 +87,7 @@ function Product:clone()
     type = self.lua_prototype.type or "item",
     name = self.lua_prototype.name,
     quality = self.lua_prototype.quality,
+    quality_probality = self.lua_prototype.quality_probality,
     amount = self:getElementAmount(),
     spoil = self.lua_prototype.spoil,
     state = self.lua_prototype.state,
@@ -169,7 +170,7 @@ end
 ---Get amount of element
 ---@param recipe RecipeData
 ---@return number
-function Product:getAmount(recipe)
+function Product:getBaseAmount(recipe)
   local amount = self:getElementAmount()
   local bonus_amount = self:getBonusAmount() ---if there are no catalyst amount = bonus_amount
   if recipe == nil then
@@ -185,6 +186,19 @@ function Product:getAmount(recipe)
     return amount  + (bonus_amount - ignored) * self:getProductivityBonus(recipe)
   end
   return amount
+end
+
+-------------------------------------------------------------------------------
+---Get amount of element
+---@param recipe RecipeData
+---@return number
+function Product:getAmount(recipe)
+  local amount = self:getBaseAmount(recipe)
+  local quality_probality = 1
+  if self.lua_prototype.quality_probality ~= nil then
+    quality_probality = self.lua_prototype.quality_probality
+  end
+  return amount * quality_probality
 end
 
 -------------------------------------------------------------------------------
