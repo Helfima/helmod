@@ -73,7 +73,7 @@ end
 ---@param element ProductData
 ---@return GuiButton
 function GuiButton:spoilage(element)
-    if element ~= nil then
+    if element ~= nil and User.getPreferenceSetting("display_spoilage") then
         self.post_action["mask_spoil"] = {spoil=element, size=0}
     end
     return self

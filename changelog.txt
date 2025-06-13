@@ -1,11 +1,12 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.8
-Date: 2025-06-11
+Date: 2025-06-13
   Changes:
     - Added spoilage support
   Bugfixes:
     - Fixed quality for recipe when not support quality, force quality = normal
     - Fixed solar power production
+    - Fixed recipe not found when recipe is not same name of item
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.7
 Date: 2025-06-09

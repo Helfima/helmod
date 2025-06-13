@@ -166,110 +166,6 @@ function PrototypeFiltersPanel:getContentPanel()
 end
 
 -------------------------------------------------------------------------------
----On event
----@param event LuaEvent
-function PrototypeFiltersPanel:onEvent(event)
-  local prototype_filter = User.getParameter("prototype_filter")
-  local prototype_filters = User.getParameter("prototype_filters") or {}
-
-  filter_types = PrototypeFilters.getTypes()
-  local prototype_filter_type = User.getParameter("prototype_filter_type") or filter_types[1]
-  local PrototypeFilter = PrototypeFilters.getFilterType(prototype_filter_type)
-
-  local index = tonumber(event.item1) or 0
-  if index > 0 then
-    prototype_filter = prototype_filters[index]
-  end
-  if event.action == "change-prototype-filter-type" then
-    local selected_index = event.element.selected_index
-    prototype_filter_type = filter_types[selected_index]
-    User.setParameter("prototype_filter_type", prototype_filter_type)
-
-    PrototypeFilter = PrototypeFilters.getFilterType(prototype_filter_type)
-    local filters = PrototypeFilter:getFilters()
-    prototype_filter.filter = filters[1]
-    local options = PrototypeFilter:getOptions(prototype_filter.filter)
-    prototype_filter.option = options[1] or nil
-
-    User.setParameter("prototype_filters", {})
-
-  end
-
-  if event.action == "change-prototype-filter" then
-    local selected_index = event.element.selected_index
-    prototype_filter.filter = PrototypeFilter:getFilters()[selected_index]
-    prototype_filter.option = PrototypeFilter:getOptions(prototype_filter.filter)[1] or nil
-  end
-
-  if event.action == "change-filter-option" then
-    local selected_index = event.element.selected_index
-    local options = PrototypeFilter:getOptions(prototype_filter.filter)
-    prototype_filter.option = options[selected_index] or nil
-  end
-
-  if event.action == "change-filter-invert" then
-    local selected_index = event.element.selected_index
-    prototype_filter.invert = inverts[selected_index]
-  end
-
-  if event.action == "change-filter-mode" then
-    local selected_index = event.element.selected_index
-    prototype_filter.mode = modes[selected_index]
-  end
-
-  if event.action == "change-filter-option-comparison" then
-    local selected_index = event.element.selected_index
-    if prototype_filter.option == nil then prototype_filter.option = {value=0} end
-    prototype_filter.option.comparison = comparisons[selected_index]
-  end
-
-  if event.action == "change-filter-option-value" then
-    local text = event.element.text
-    local value = tonumber(text)
-    if prototype_filter.option == nil then prototype_filter.option = {comparison="<"} end
-    prototype_filter.option.value = value
-  end
-
-  if event.action == "change-filter-option-collision-mask" then
-    local selected_index = event.element.selected_index
-    if prototype_filter.option == nil then prototype_filter.option = {mask_mode =collision_mask_mode[1]} end
-    prototype_filter.option.mask = collision_mask[selected_index]
-  end
-
-  if event.action == "change-filter-option-collision-mask-mode" then
-    local selected_index = event.element.selected_index
-    if prototype_filter.option == nil then prototype_filter.option = {mask=collision_mask[1]} end
-    prototype_filter.option.mask_mode = collision_mask_mode[selected_index]
-  end
-
-  if event.action == "add-prototype-filter" then
-    table.insert(prototype_filters, prototype_filter)
-    User.setParameter("prototype_filters", prototype_filters)
-    prototype_filter = nil
-    self:updateData()
-  end
-
-  if event.action == "remove-prototype-filter" then
-    if #prototype_filters == 1 then
-      prototype_filters = nil
-    else
-      table.remove(prototype_filters, index)
-    end
-    User.setParameter("prototype_filters", prototype_filters)
-    self:updateData()
-  end
-
-  if prototype_filters ~= nil and index > 0 then
-    prototype_filters[index] = prototype_filter
-    User.setParameter("prototype_filters", prototype_filters)
-    self:updateData()
-  else
-    User.setParameter("prototype_filter", prototype_filter)
-    self:updateData()
-  end
-end
-
--------------------------------------------------------------------------------
 ---On update
 ---@param event LuaEvent
 function PrototypeFiltersPanel:onUpdate(event)
@@ -358,7 +254,12 @@ function PrototypeFiltersPanel:addRowFilter(itable, prototype_filter, index)
   ---result col
   local filter_value = PrototypeFiltersPanel:convertFilter(prototype_filter)
   local string_value = PrototypeFiltersPanel:tableToString(filter_value)
-  local text_field = GuiElement.add(itable, GuiTextField(self.classname, "change-textfield", index):text(string_value))
+  local text_field = nil
+  if index == 0 then
+    text_field = GuiElement.add(itable, GuiTextField("change-textfield"):text(string_value))
+  else
+    text_field = GuiElement.add(itable, GuiTextField("change-textfield", index):text(string_value))
+  end
   text_field.style.width = 400
   if index == 0 then
     GuiElement.add(itable, GuiButton(self.classname, "add-prototype-filter", index):caption("+"):style("helmod_button_small_bold"))
@@ -510,8 +411,16 @@ function PrototypeFiltersPanel:onEvent(event)
   end
 
   if event.action == "add-prototype-filter" then
-    table.insert(prototype_filters, table.deepcopy(prototype_filter))
-    User.setParameter("prototype_filters", prototype_filters)
+    if prototype_filter_type == "custom" then
+      local parent = event.element.parent
+      local text = parent["change-textfield"].text
+      local ok,filter = serpent.load(text)
+      table.insert(prototype_filters, filter)
+      User.setParameter("prototype_filters", prototype_filters)
+    else
+      table.insert(prototype_filters, table.deepcopy(prototype_filter))
+      User.setParameter("prototype_filters", prototype_filters)
+    end
     self:onUpdate()
     return
   end

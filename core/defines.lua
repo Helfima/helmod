@@ -288,6 +288,14 @@ defines.constant.preferences = {
     allowed_values = {5,6,7,8,9,10},
     group = "general"
   },
+  --display-spoilage
+  display_spoilage = {
+    type = "bool-setting",
+    localised_name = {"helmod_pref_settings.display-spoilage"},
+    localised_description = {"helmod_pref_settings.display-spoilage-desc"},
+    default_value = true,
+    group = "general"
+  },
   --display-pollution
   display_pollution = {
     type = "bool-setting",

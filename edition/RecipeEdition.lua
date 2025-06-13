@@ -1447,7 +1447,7 @@ function RecipeEdition:updateObjectInfo(event)
         local production_value = (recipe.production or 1) * 100
         GuiElement.add(tablePanel, GuiTextField(self.classname, "recipe-update-production", model.id, block.id, recipe.id):text(production_value):style("helmod_textfield"))
 
-        if recipe.spoilage ~= nil then
+        if recipe.spoilage ~= nil and User.getPreferenceSetting("display_spoilage") then
             GuiElement.add(tablePanel, GuiLabel("label-spoilage"):caption({ "helmod_recipe-edition-panel.spoilage-factor" }))
             local spoilage_value = (recipe.spoilage_factor or 1) * 100
             GuiElement.add(tablePanel, GuiTextField(self.classname, "recipe-update-spoilage", model.id, block.id, recipe.id):text(spoilage_value):style("helmod_textfield"))

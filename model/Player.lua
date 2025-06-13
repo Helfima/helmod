@@ -1152,6 +1152,20 @@ function Player.getRecipe(name)
 end
 
 -------------------------------------------------------------------------------
+---Return recipe prototype
+---@param name string
+---@return LuaRecipe
+function Player.findFirstRecipe(name)
+    if name == nil then return nil end
+    local filters = {{filter = "has-product-item", elem_filters = {{filter = "name", name = name}}}}
+    local recipes = prototypes.get_recipe_filtered(filters)
+    for key, recipe in pairs(recipes) do
+        return recipe
+    end
+    return nil
+end
+
+-------------------------------------------------------------------------------
 ---Return recipe
 ---@param name string
 ---@return LuaRecipe

@@ -14,7 +14,12 @@ RecipePrototype = newclass(Prototype, function(base, object, object_type)
             base.lua_type = object_type or object.type
         end
         if base.lua_type == nil or base.lua_type == "recipe" then
-            Prototype.init(base, Player.getRecipe(base.object_name))
+            local recipe = Player.getRecipe(base.object_name)
+            if recipe == nil then
+                -- if recipe is null try find 
+                recipe = Player.findRecipe(base.object_name)
+            end
+            Prototype.init(base, recipe)
             base.lua_type = "recipe"
             if Player.hasFeatureQuality() then
                 for _, ingredient in pairs(base.lua_prototype.ingredients) do
