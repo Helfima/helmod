@@ -830,7 +830,7 @@ function RecipeEdition:updateFactoryInfo(event)
                 local default_fuel = nil
                 if (energy_type == "fluid") and (not factory_prototype:getBurnsFluid()) then
                     for _, item in pairs(fuel_list) do
-                        local fuel = GuiTooltipFuel(""):element({type=fuel_type, prototype=item}):compact(compact)
+                        local fuel = GuiTooltipFuel(""):element({mode="used", type=fuel_type, prototype=item}):compact(compact)
                         local item_fuel = fuel:create()
                         table.insert(items, item_fuel)
                         if factory_fuel ~= nil and factory_fuel:native().name == item:native().name and factory_fuel.temperature == item.temperature then
@@ -839,7 +839,7 @@ function RecipeEdition:updateFactoryInfo(event)
                     end
                 else
                     for _, item in pairs(fuel_list) do
-                        local fuel = GuiTooltipFuel(""):element({type=fuel_type, prototype=item}):compact(compact)
+                        local fuel = GuiTooltipFuel(""):element({mode="burned", type=fuel_type, prototype=item}):compact(compact)
                         local item_fuel = fuel:create()
                         table.insert(items, item_fuel)
                         if factory_fuel ~= nil and factory_fuel:native().name == item:native().name then
@@ -852,6 +852,8 @@ function RecipeEdition:updateFactoryInfo(event)
                 local drop_fuel = GuiElement.add(input_panel, GuiDropDown(self.classname, "factory-fuel-update", model.id, block.id, recipe.id, fuel_type):items(items, default_fuel):tooltip(default_fuel))
                 if compact == true then
                     drop_fuel.style.width = 64
+                else
+                    drop_fuel.style.width = 150
                 end
             end
         end

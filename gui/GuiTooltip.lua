@@ -1174,6 +1174,7 @@ end
 function GuiTooltipFuel:create()
 	local tooltip = {""}
 	if self.m_element then
+		local mode = self.m_element.mode
 		local prototype = self.m_element.prototype
 		local element_type = self.m_element.type
 		local element_name = prototype:native().name
@@ -1182,7 +1183,7 @@ function GuiTooltipFuel:create()
 		if self.m_compact == true then
 			tooltip = {"", string.format("[%s=%s]", element_type, element_name), "  ", element_localised_name}
 			
-			if element_type == "item" then
+			if mode == "burned" then
 				local value = Format.formatNumberKilo(prototype:getFuelValue(), "J")
 				local tooltip_property = {"", "\n", "[img=helmod-tooltip-blank]", "  ", helmod_tag.color.gold, {"description.fuel-value"}, ": ", helmod_tag.color.close, value}
 				table.insert(tooltip, tooltip_property)
@@ -1192,7 +1193,7 @@ function GuiTooltipFuel:create()
 				table.insert(tooltip, tooltip_property)
 			end
 		else
-			if element_type == "item" then
+			if mode == "burned" then
 				local value = Format.formatNumberKilo(prototype:getFuelValue(), "J")
 				tooltip = {"", string.format("[%s=%s] %s", element_type, element_name, value), "  ", element_localised_name}
 			else
