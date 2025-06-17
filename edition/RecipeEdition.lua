@@ -20,7 +20,7 @@ end
 ---@param height_main number
 function RecipeEdition:onStyle(styles, width_main, height_main)
     styles.flow_panel = {
-        minimal_height = 100,
+        minimal_height = 600,
         maximal_height = math.max(height_main, 800),
     }
 end
@@ -36,8 +36,21 @@ end
 -------------------------------------------------------------------------------
 ---Get or create recipe info panel
 ---@return LuaGuiElement
-function RecipeEdition:getObjectInfoPanel()
+function RecipeEdition:getScrollPanel()
     local flow_panel, content_panel, menu_panel = self:getPanel()
+    if content_panel["scroll"] ~= nil and content_panel["scroll"].valid then
+        return content_panel["scroll"]
+    end
+    local scroll_panel = GuiElement.add(content_panel, GuiScroll("scroll"):style("helmod_scroll_pane_no_spacing"):policy(true))
+    scroll_panel.style.horizontally_stretchable = false
+    scroll_panel.style.vertically_stretchable = false
+    return scroll_panel
+end
+-------------------------------------------------------------------------------
+---Get or create recipe info panel
+---@return LuaGuiElement
+function RecipeEdition:getObjectInfoPanel()
+    local content_panel = self:getScrollPanel()
     if content_panel["info"] ~= nil and content_panel["info"].valid then
         return content_panel["info"]
     end
@@ -59,7 +72,7 @@ end
 ---Get or create tab panel
 ---@return LuaGuiElement, LuaGuiElement
 function RecipeEdition:getTabPanel()
-    local flow_panel, content_panel, menu_panel = self:getPanel()
+    local content_panel = self:getScrollPanel()
     local factory_panel_name = "facory_panel"
     local beacon_panel_name = "beacon_panel"
 

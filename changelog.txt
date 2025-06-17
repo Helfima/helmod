@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.1.11
+Date: 2025-06-17
+  Bugfixes:
+    - Fixed GuiTooltipFuel, problem with display liquid fuel fuel values #612
+    - Fixed Recipe Edition panel border, added a scroll pane
+    - Fixed rounded value in factory input when computing by factory actives
+---------------------------------------------------------------------------------------------------
 Version: 2.1.10
 Date: 2025-06-13
   Bugfixes:
