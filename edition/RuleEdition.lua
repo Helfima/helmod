@@ -8,6 +8,7 @@ RuleEdition = newclass(Form)
 function RuleEdition:onInit()
   self.panelCaption = ({"helmod_rule-edition-panel.title"})
   self.parameterLast = string.format("%s_%s",self.classname,"last")
+  self.panel_close_before_main = true
 end
 
 -------------------------------------------------------------------------------
@@ -17,7 +18,7 @@ end
 ---@param height_main number
 function RuleEdition:onStyle(styles, width_main, height_main)
   styles.flow_panel = {
-    minimal_height = 500,
+    minimal_height = 200,
     maximal_height = height_main,
   }
 end

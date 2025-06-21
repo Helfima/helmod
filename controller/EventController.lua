@@ -44,6 +44,7 @@ function EventController.start()
   EventController.pcallEvent("helmod-production-line-open", EventController.onCustomInput)
   EventController.pcallEvent("helmod-recipe-explorer-open", EventController.onCustomInput)
   EventController.pcallEvent("helmod-richtext-open", EventController.onCustomInput)
+  EventController.pcallEvent("helmod-create-or-where-used-open", EventController.onCustomInput)
 end
 
 -------------------------------------------------------------------------------

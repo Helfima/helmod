@@ -1,6 +1,7 @@
 -------------------------------------------------------------------------------
 ---Class to help to build GuiSlider
 ---@class GuiCell
+---@field options table
 GuiCell = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiCell"
@@ -164,7 +165,7 @@ end
 ---Add mask
 ---@param button LuaGuiElement
 ---@param color string
----@param size number
+---@param size? number
 function GuiCell:add_mask(button, color, size)
   if self.m_mask == true then
     local mask_frame = GuiElement.add(button, GuiFrameH("layer-mask"):style("helmod_frame_colored", color, 5))
@@ -338,7 +339,7 @@ end
 ---@param parent LuaGuiElement
 ---@param width int
 ---@param name string
----@param count number
+---@param count string|number|[number,string]
 ---@param color string
 ---@param color_level int
 ---@param tooltip any
@@ -348,9 +349,10 @@ function GuiCell:add_row_label(parent, width, name, count, color, color_level, t
   local row = GuiElement.add(parent, GuiFrameH(name):style("helmod_frame_element_w50", color, color_level))
   row.style.minimal_width=width
   row.style.height = 18
-  -- total deep count
   local caption = nil
-  if type(count) == "table" then
+  if type(count) == "string" then
+    caption = count
+  elseif type(count) == "table" then
     caption = Format.formatNumberKilo(count[1], count[2])
   elseif display_cell_mod == "by-kilo" then
     caption = Format.formatNumberKilo(count)
@@ -509,7 +511,8 @@ function GuiCellFactory:create(parent)
     if factory.input ~= nil then
       style = "helmod_textfield_element_red"
     end
-    local text_field = GuiElement.add(row3, GuiTextField(self.m_by_factory_uri):text(Format.formatNumberFactory(factory.input or factory.count or 0)):style(style):tooltip({"helmod_common.total"}))
+    local caption = factory.input or factory.count or 0
+    local text_field = GuiElement.add(row3, GuiTextField(self.m_by_factory_uri):text(Format.formatNumberFactory(caption)):style(style):tooltip({"helmod_common.total"}))
     text_field.style.height = 16
     text_field.style.width = 70
   else
@@ -525,7 +528,7 @@ function GuiCellFactory:create(parent)
 end
 
 -------------------------------------------------------------------------------
----@class GuiCellRecipe
+---@class GuiCellRecipe: GuiCell
 GuiCellRecipe = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
@@ -544,6 +547,9 @@ function GuiCellRecipe:create(parent)
 
   local recipe_prototype = RecipePrototype(recipe)
   local quality = recipe.quality
+  if recipe_prototype.is_support_quality == false then
+    quality = "normal"
+  end
   local icon_name, icon_type = recipe_prototype:getIcon()
   local tooltip = GuiTooltipRecipe(self.options.tooltip):element(recipe)
   local recipe_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite_with_quality(icon_type, icon_name, quality):tooltip(tooltip))
@@ -558,8 +564,9 @@ function GuiCellRecipe:create(parent)
     row1.style = "helmod_frame_element_w50_red_1"
   end
 
-  local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
-  GuiElement.add(row3, GuiLabel("label2", recipe.name):caption(Format.formatPercent(recipe.production or 1).."%"):style("helmod_label_element"):tooltip({"helmod_common.total"}))
+  local caption = Format.formatPercent(recipe.production or 1).."%"
+  self:add_row_label(cell, 50, "row3",  caption, color, 2, {"helmod_common.total"})
+
   return cell, recipe_icon
 end
 
@@ -940,7 +947,6 @@ function GuiCellBuilding:create(parent)
 
   local display_count_deep = User.getParameter("display_count_deep")
   if display_count_deep then
-    local count = math.ceil(building)
     self:add_row_label(cell, width, "row3",  math.ceil(building_deep), color, 3, {"helmod_common.total"})
   end
 
@@ -998,7 +1004,7 @@ function GuiCellElement:create(parent)
   end
   local button_index = Product(element):getTableKey()
   local button_caption = "X"..Product(element):getElementAmount()
-  local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite_with_quality(element.type or "entity", element.name, element.quality or "normal"):index(button_index):caption(button_caption):tooltip(tooltip))
+  local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):spoilage(element):sprite_with_quality(element.type or "entity", element.name, element.quality or "normal"):index(button_index):caption(button_caption):tooltip(tooltip))
   GuiElement.infoTemperature(row1, element)
   
   if element.burnt then self:add_icon_info(button, "burnt") end
@@ -1065,7 +1071,7 @@ function GuiCellElementSm:create(parent)
   end
   local button_index = Product(element):getTableKey()
   local button_caption = "X"..Product(element):getElementAmount()
-  local button = GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):sprite_with_quality(element.type or "entity", element.name, element.quality or "normal"):index(button_index):caption(button_caption):tooltip(tooltip))
+  local button = GuiElement.add(row1, GuiButtonSpriteSm(unpack(self.name)):spoilage(element):sprite_with_quality(element.type or "entity", element.name, element.quality or "normal"):index(button_index):caption(button_caption):tooltip(tooltip))
   self:add_mask(button, color, 16)
 
   local display_count_deep = User.getParameter("display_count_deep")
@@ -1116,7 +1122,7 @@ function GuiCellElementM:create(parent)
   end
   local button_index = Product(element):getTableKey()
   local button_caption = "X"..Product(element):getElementAmount()
-  local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite_with_quality(element.type or "entity", element.name, element.quality or "normal"):index(button_index):caption(button_caption):tooltip(tooltip))
+  local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):spoilage(element):sprite_with_quality(element.type or "entity", element.name, element.quality or "normal"):index(button_index):caption(button_caption):tooltip(tooltip))
   GuiElement.infoTemperature(row1, element)
 
   self:add_icon_info(button)

@@ -81,6 +81,24 @@ function Model.getRules()
 end
 
 -------------------------------------------------------------------------------
+---Get export rules
+---@return string
+function Model.getExportRules()
+  local rules = Model.getRules()
+  if #rules > 0 then
+    local string_builder = {}
+    table.insert(string_builder, "local rules = {}")
+    for _, rule in pairs(rules) do
+      local string_rule = string.format("table.insert(rules, {index=%s, mod=\"%s\", name=\"%s\", category=\"%s\", type=\"%s\", value=\"%s\", excluded = %s})"
+          , tostring(rule.index), tostring(rule.mod), tostring(rule.name), tostring(rule.category), tostring(rule.type), tostring(rule.value), tostring(rule.excluded))
+      table.insert(string_builder, string_rule)
+    end
+    return table.concat(string_builder,"\n")
+  else
+    return ""
+  end
+end
+-------------------------------------------------------------------------------
 ---Reset rules
 function Model.resetRules()
   local rules = {}
@@ -102,6 +120,7 @@ function Model.resetRules()
   table.insert(rules, {index=15, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="supply-depot", excluded = true})
   table.insert(rules, {index=16, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="request-depot", excluded = true})
   table.insert(rules, {index=17, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="buffer-depot", excluded = true})
+  table.insert(rules, {index=18, mod="Cerys-Moon-of-Fulgora", name="production-crafting", category="exclude-placed-by-hidden", type="entity-name", value="cerys-fulgoran-cryogenic-plant", excluded = true})
   storage.rules = rules
 end
 
@@ -109,7 +128,7 @@ end
 ---Return effects on a table
 ---@return ModuleEffectsData
 function Model.newEffects()
-  return { speed = 0, productivity = 0, consumption = 0, pollution = 0 }
+  return { speed = 0, productivity = 0, consumption = 0, pollution = 0, quality = 0 }
 end
 
 -------------------------------------------------------------------------------

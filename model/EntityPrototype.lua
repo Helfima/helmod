@@ -206,10 +206,12 @@ function EntityPrototype:getEnergyProduction()
   if self.lua_prototype ~= nil then
     local energy_prototype = self:getElectricEnergySource()
     if energy_prototype ~= nil then
-      local usage_priority = energy_prototype:getUsagePriority()
+        local usage_priority = energy_prototype:getUsagePriority()
       local production
       if usage_priority == "managed-accumulator" then
         production = energy_prototype:getOutputFlowLimit()
+      elseif usage_priority == "solar" then
+        production = self:getMaxEnergyProduction() * 60
       else
         production = self:getMaxPowerOutput() * 60
       end
@@ -247,6 +249,7 @@ function EntityPrototype:getEnergyProduction()
   return 0
 end
 
+---@type ModuleEffects
 local empty_effect ={
   consumption=0,
   speed=0,
@@ -256,12 +259,34 @@ local empty_effect ={
 }
 -------------------------------------------------------------------------------
 ---Return base effect
----@return table
+---@see https://lua-api.factorio.com/latest/types/EffectValue.html
+---@return ModuleEffects
 function EntityPrototype:getBaseEffect()
   if self.lua_prototype ~= nil and self.lua_prototype.effect_receiver ~= nil then
-    return self.lua_prototype.effect_receiver.base_effect or empty_effect
+    local base_effect = self.lua_prototype.effect_receiver.base_effect or empty_effect
+    base_effect.quality = (base_effect.quality or 0) / 10
+    return base_effect
   end
   return empty_effect
+end
+
+local empty_effect_receiver = {
+  base_effect = empty_effect,
+  uses_module_effects = true,
+  uses_beacon_effects = true,
+  uses_surface_effects = true
+}
+-------------------------------------------------------------------------------
+---Return base effect
+---@see https://lua-api.factorio.com/latest/types/EffectValue.html
+---@return EffectReceiver
+function EntityPrototype:getEffectReveiver()
+  if self.lua_prototype ~= nil then
+    local effect_receiver = self.lua_prototype.effect_receiver or empty_effect_receiver
+    effect_receiver.base_effect.quality = (effect_receiver.base_effect.quality or 0) / 10
+    return effect_receiver
+  end
+  return empty_effect_receiver
 end
 
 -------------------------------------------------------------------------------
@@ -362,6 +387,16 @@ end
 ---@return number --default 0
 function EntityPrototype:getFluidUsage()
   return self:getFluidUsagePerTick() * 60
+end
+
+-------------------------------------------------------------------------------
+---Return fluid usage
+---@return number --default 0
+function EntityPrototype:getValveFlowRate()
+  if self.lua_prototype.type == "pump" or self.lua_prototype.type == "offshore-pump" then
+    return self.lua_prototype.get_valve_flow_rate(self.factory.quality)
+  end
+  return 0
 end
 
 -------------------------------------------------------------------------------
@@ -876,7 +911,7 @@ end
 ---@return number --default 0
 function EntityPrototype:getPumpingSpeed()
   if self.lua_prototype ~= nil then
-    return (self.lua_prototype.pumping_speed or 0)*60 
+    return (self.lua_prototype.get_pumping_speed(self.factory.quality) or 0)*60 
   end
   return 0
 end

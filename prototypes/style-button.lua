@@ -420,6 +420,25 @@ for _,style in pairs(style_list) do
   end
 end
 
+for _,style in pairs(style_list) do
+  if style.suffix == "_flat" then
+    default_gui["helmod_button_actived_icon"..style.suffix] = {
+      type = "button_style",
+      parent = "helmod_button_icon",
+      default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=0,y=150}, {top=0,right=0,bottom=0,left=0}, true),
+    }
+  else
+    default_gui["helmod_button_actived_icon"..style.suffix] = {
+      type = "button_style",
+      parent = "helmod_button_icon",
+      default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=style.offset}, {top=0,right=0,bottom=0,left=0}, true),
+      hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=148,y=style.offset}, {top=0,right=0,bottom=0,left=0}, true),
+      clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=184,y=style.offset}, {top=0,right=0,bottom=0,left=0}, true),
+      disabled_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=111,y=style.offset}, {top=0,right=0,bottom=0,left=0}, true)
+    }
+  end
+end
+
 default_gui["helmod_button_icon_xxl"] = {
   type = "button_style",
   parent = "helmod_button_icon_default",

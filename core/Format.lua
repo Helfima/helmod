@@ -104,4 +104,32 @@ function Format.formatNumberElement(number)
   local decimal = Format.decimalFromString(format_number)
   return Format.formatNumber(number, decimal)
 end
+
+-------------------------------------------------------------------------------
+---Format time from tick
+---@param ticks number
+---@return table
+function Format.formatTimeTickLocalised(ticks)
+  if ticks == nil or ticks == 0 then
+    return {"", {"helmod_si.seconde", 0}}
+  end
+  local seconds = ticks / 60
+  local minutes = math.floor((seconds)/60)
+  local seconds = math.floor(seconds - 60*minutes)
+  local heure = math.floor((minutes)/60)
+  local minutes = math.floor(minutes - 60*heure)
+  local duration = {""}
+  if heure > 0 then
+    table.insert(duration, {"helmod_si.hour", heure} )
+  end
+  if minutes > 0 then
+    table.insert(duration, {"helmod_si.minute", minutes} )
+  end
+  if seconds > 0 then
+    table.insert(duration, {"helmod_si.seconde", seconds} )
+  end
+  return duration
+end
+
+
 return Format

@@ -19,6 +19,7 @@ function RecipeSelector:afterInit()
   self.hidden_option = true
   self.product_option = true
   self.hidden_player_crafting = true
+  self.is_support_quality = true
 end
 
 -------------------------------------------------------------------------------

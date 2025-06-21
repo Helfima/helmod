@@ -6,6 +6,9 @@ ItemPrototype = newclass(Prototype,function(base, object)
   elseif object ~= nil and object.name ~= nil then
     Prototype.init(base, Player.getItemPrototype(object.name))
   end
+  if object ~= nil and type(object) == "table" then
+    base.quality = object.quality
+  end
   base.classname = "HMItemPrototype"
 end)
 
@@ -23,6 +26,17 @@ end
 function ItemPrototype:getIngredientToWeightCoefficient()
   if self.lua_prototype == nil then return 1 end
   return self.lua_prototype.ingredient_to_weight_coefficient or 1
+end
+
+-------------------------------------------------------------------------------
+---Return module effect
+---@return number
+function ItemPrototype:geRocketCapacity()
+  if self.lua_prototype == nil then return 0 end
+  local weight = self:getWeight()
+  local capacity = 1000*1000
+  local rocket_capacity = capacity / weight
+  return rocket_capacity
 end
 
 -------------------------------------------------------------------------------
@@ -69,6 +83,16 @@ function ItemPrototype:stackSize()
 end
 
 -------------------------------------------------------------------------------
+---Return weight
+---@return number
+function ItemPrototype:getWeight()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.weight or 0
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
 ---Return hidden of Prototype
 ---@return boolean
 function ItemPrototype:getHidden()
@@ -76,4 +100,14 @@ function ItemPrototype:getHidden()
     return self.lua_prototype.hidden
   end
   return false
+end
+
+-------------------------------------------------------------------------------
+---Return stack size
+---@return number
+function ItemPrototype:getSpoilTicks()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.get_spoil_ticks(self.quality)
+  end
+  return 0
 end

@@ -124,6 +124,8 @@ table.insert(spite_icons, {
 local list = {
   {name="alert1", size=16, scale=1},
   {name="tooltip-blank", size=24, scale=1},
+  {name="event-error-32", size=32, scale=1},
+  {name="event-error-64", size=64, scale=1},
 }
 for icon_row,icon in pairs(list) do
   table.insert(spite_icons, sprite_tooltip(icon.name, icon.size, icon.scale))

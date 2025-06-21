@@ -1,4 +1,102 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.1.12
+Date: 2025-06-21
+  Changes:
+    - Added a preference to change main menu on one or two lines, default is "auto"
+  Bugfixes:
+    - Fixed maximum productivity for a recipe, by default is 300%
+    - Fixed number of columns of products/ingredients for block row
+---------------------------------------------------------------------------------------------------
+Version: 2.1.11
+Date: 2025-06-17
+  Bugfixes:
+    - Fixed GuiTooltipFuel, problem with display liquid fuel fuel values #612
+    - Fixed Recipe Edition panel border, added a scroll pane
+    - Fixed rounded value in factory input when computing by factory actives
+---------------------------------------------------------------------------------------------------
+Version: 2.1.10
+Date: 2025-06-13
+  Bugfixes:
+    - Fixed quality calculation now respect [1 - Q, Q * 9/10, Q * 9/100, Q * 9/1000, Q * 1/1000]
+    - Removed number format in the textbox when computing by factory actives
+---------------------------------------------------------------------------------------------------
+Version: 2.1.9
+Date: 2025-06-13
+  Changes:
+    - Added a preference to switch normal or compact for drop down fual, by default normal
+    - Added migration file to update all models for spoilage
+  Bugfixes:
+    - Fixed error Player.findRecipe was replaced by Player.findFirstRecipe
+---------------------------------------------------------------------------------------------------
+Version: 2.1.8
+Date: 2025-06-13
+  Changes:
+    - Added spoilage support
+  Bugfixes:
+    - Fixed quality for recipe when not support quality, force quality = normal
+    - Fixed solar power production
+    - Fixed recipe not found when recipe is not same name of item
+---------------------------------------------------------------------------------------------------
+Version: 2.1.7
+Date: 2025-06-09
+  Bugfixes:
+    - Fixed too many parameters for localised string on location tooltip #610
+---------------------------------------------------------------------------------------------------
+Version: 2.1.6
+Date: 2025-06-07
+  Changes:
+    - Added space location for production line
+    - Added pump and offshore-pump in pipe logitic choose
+    - Removed pipe from pipe logitic choose
+    - Changes some dropdown with tooltips (ex: for fuels) #487
+  Bugfixes:
+    - Fixed display of selected logitic choose in preference
+---------------------------------------------------------------------------------------------------
+Version: 2.1.5
+Date: 2025-06-05
+  Changes:
+    - Added quality option in parameters edition
+    - Added limitation effect on machine from effect_receiver: uses_module_effects, uses_beacon_effects and uses_surface_effects
+  Bugfixes:
+    - Fixed missing base effects for machine, now all effects used 
+---------------------------------------------------------------------------------------------------
+Version: 2.1.4
+Date: 2025-06-03
+  Changes:
+    - Changed RU locale update
+    - Changed logistic item list by a dropdown (more compact)
+    - Added rocket capacity in logistic item choose
+  Bugfixes:
+    - Fixed chance of quality item produced in recipe with no input item
+---------------------------------------------------------------------------------------------------
+Version: 2.1.3
+Date: 2025-06-01
+  Changes:
+    - Added a new rule in admin panel to exclude production machine from the filter "placed-by-hidden" (ex: cerys-fulgoran-cryogenic-plant from Cerys mod)
+    - Added spoil time in item tooltip
+    - Added rocket capacity in item tooltip
+  Bugfixes:
+    - Fixed chance of quality item produced in recipe with quality effect
+    - Fixed quality recipe not copied (copy/past)
+---------------------------------------------------------------------------------------------------
+Version: 2.1.2
+Date: 2025-05-29
+  Changes:
+    - Added remove button for icon in Production Line Edition
+  Bugfixes:
+    - Fixed flip icon in Production Line Edition
+---------------------------------------------------------------------------------------------------
+Version: 2.1.1
+Date: 2025-05-29
+  Changes:
+    - Added quality selector in recipe selector
+    - Added "CONTROL + U" hotkey for tool "Created or where used" #607
+    - Changed "U" hotkey close panel others before close main
+    - Added Selectable production line icon #568
+  Bugfixes:
+    - Fixed recipe not support quality
+    - Fixed missing quality ingredients in the pin panel
+---------------------------------------------------------------------------------------------------
 Version: 2.1.0
 Date: 2025-05-27
   Changes:

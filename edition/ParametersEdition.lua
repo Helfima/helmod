@@ -7,6 +7,7 @@ ParametersEdition = newclass(FormModel)
 ---On initialization
 function ParametersEdition:onInit()
     self.panelCaption = ({ "helmod_parameters_edition_panel.title" })
+    self.panel_close_before_main = true
 end
 
 -------------------------------------------------------------------------------
@@ -51,16 +52,19 @@ function ParametersEdition:updateEffects(event)
 
     local effects = model.parameters.effects
     GuiElement.add(block_table, GuiLabel("label-consumption"):caption({ "description.consumption-bonus" }))
-    GuiElement.add(block_table, GuiTextField(self.classname, "change-effect", "consumption"):text(Format.formatNumberElement((effects.consumption or 1)*100)):style("helmod_textfield"))
+    GuiElement.add(block_table, GuiTextField(self.classname, "change-effect", "consumption"):text(Format.formatNumberElement((effects.consumption or 0)*100)):style("helmod_textfield"))
 
     GuiElement.add(block_table, GuiLabel("label-speed"):caption({ "description.speed-bonus" }))
-    GuiElement.add(block_table, GuiTextField(self.classname, "change-effect", "speed"):text(Format.formatNumberElement((effects.speed or 1)*100)):style("helmod_textfield"))
+    GuiElement.add(block_table, GuiTextField(self.classname, "change-effect", "speed"):text(Format.formatNumberElement((effects.speed or 0)*100)):style("helmod_textfield"))
 
     GuiElement.add(block_table, GuiLabel("label-productivity"):caption({ "description.productivity-bonus" }))
-    GuiElement.add(block_table, GuiTextField(self.classname, "change-effect", "productivity"):text(Format.formatNumberElement((effects.productivity or 1)*100)):style("helmod_textfield"))
+    GuiElement.add(block_table, GuiTextField(self.classname, "change-effect", "productivity"):text(Format.formatNumberElement((effects.productivity or 0)*100)):style("helmod_textfield"))
 
     GuiElement.add(block_table, GuiLabel("label-pollution"):caption({ "description.pollution-bonus" }))
-    GuiElement.add(block_table, GuiTextField(self.classname, "change-effect", "pollution"):text(Format.formatNumberElement((effects.pollution or 1)*100)):style("helmod_textfield"))
+    GuiElement.add(block_table, GuiTextField(self.classname, "change-effect", "pollution"):text(Format.formatNumberElement((effects.pollution or 0)*100)):style("helmod_textfield"))
+
+    GuiElement.add(block_table, GuiLabel("label-quality"):caption({ "description.quality-bonus" }))
+    GuiElement.add(block_table, GuiTextField(self.classname, "change-effect", "quality"):text(Format.formatNumberElement((effects.quality or 0)*100)):style("helmod_textfield"))
 
 end
 

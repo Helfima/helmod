@@ -849,7 +849,8 @@ function Player.getProductionsCrafting(category, lua_recipe)
             productions[lua_entity.name] = lua_entity
         end
     else
-        for key, lua_entity in pairs(Player.getProductionMachines()) do
+        local lua_entities = Player.getProductionMachines()
+        for key, lua_entity in pairs(lua_entities) do
             local check = false
             if category ~= nil then
                 if not (rules_included[category]) then
@@ -907,7 +908,7 @@ end
 ---@return table
 function Player.ExcludePlacedByHidden(entities)
     local results = {}
-
+    local rules_included, rules_excluded = Player.getRules("production-crafting")
     for entity_name, entity in pairs(entities) do
         local item_filters = {}
 
@@ -920,6 +921,9 @@ function Player.ExcludePlacedByHidden(entities)
         end
 
         local show = false
+
+        ---resolve rule excluded
+        show = Player.checkRules(show, rules_excluded, "exclude-placed-by-hidden", entity, true)
 
         if #item_filters == 0 then
             -- Has no items to place it. Probably placed by script.
@@ -1145,6 +1149,20 @@ end
 function Player.getRecipe(name)
     if name == nil then return nil end
     return prototypes.recipe[name]
+end
+
+-------------------------------------------------------------------------------
+---Return recipe prototype
+---@param name string
+---@return LuaRecipe
+function Player.findFirstRecipe(name)
+    if name == nil then return nil end
+    local filters = {{filter = "has-product-item", elem_filters = {{filter = "name", name = name}}}}
+    local recipes = prototypes.get_recipe_filtered(filters)
+    for key, recipe in pairs(recipes) do
+        return recipe
+    end
+    return nil
 end
 
 -------------------------------------------------------------------------------
@@ -1571,8 +1589,6 @@ function Player.buildRocketRecipe(prototype)
     if prototype == nil then return nil end
     local products = prototype.rocket_launch_products
     local ingredients = {}
-    local item_prototype = ItemPrototype(prototype.name)
-    local stack_size = item_prototype:stackSize()
     table.insert(ingredients, { name = prototype.name, type = "item", amount = 1, constant = true })
     local recipe = {}
     recipe.category = Player.getRocketPartRecipe().category
@@ -1583,10 +1599,6 @@ function Player.buildRocketRecipe(prototype)
     recipe.subgroup = { name = "helmod-rocket", order = "eeee" }
     recipe.hidden = false
     recipe.ingredients = ingredients
-    for key, product in pairs(products) do
-        local product_prototype = ItemPrototype(product.name)
-        local i = 0
-    end
     recipe.products = products
     recipe.localised_description = prototype.localised_description
     recipe.localised_name = prototype.localised_name
@@ -1892,7 +1904,7 @@ function Player.getItemsLogistic(type)
     elseif type == "container" then
         filters = { { filter = "type", mode = "or", invert = false, type = "container" }, { filter = "minable", mode = "and", invert = false }, { filter = "type", mode = "or", invert = false, type = "logistic-container" }, { filter = "minable", mode = "and", invert = false } }
     elseif type == "transport" then
-        filters = { { filter = "type", mode = "or", invert = false, type = "cargo-wagon" }, { filter = "type", mode = "or", invert = false, type = "logistic-robot" }, { filter = "type", mode = "or", invert = false, type = "car" } }
+        filters = { { filter = "type", mode = "or", invert = false, type = "cargo-wagon" },{ filter = "type", mode = "or", invert = false, type = "rocket-silo" }, { filter = "type", mode = "or", invert = false, type = "logistic-robot" }, { filter = "type", mode = "or", invert = false, type = "car" } }
     end
     return Player.getEntityPrototypes(filters)
 end
@@ -1925,7 +1937,7 @@ end
 function Player.getFluidsLogistic(type)
     local filters = {}
     if type == "pipe" then
-        filters = { { filter = "type", mode = "or", invert = false, type = "pipe" } }
+        filters = { { filter = "type", mode = "or", invert = false, type = "pump" },{ filter = "type", mode = "or", invert = false, type = "offshore-pump" } }
     elseif type == "container" then
         filters = { { filter = "type", mode = "or", invert = false, type = "storage-tank" }, { filter = "minable", mode = "and", invert = false } }
     elseif type == "transport" then
@@ -1947,7 +1959,7 @@ function Player.getDefaultFluidLogistic(entity_type)
     if default == nil then
         local logistics = Player.getFluidsLogistic(entity_type)
         if logistics ~= nil then
-            default = first(logistics).name
+            default = Model.newElement("entity", first(logistics).name)
             User.setParameter(string.format("fluids_logistic_%s", entity_type), default)
         end
     end
@@ -2044,6 +2056,113 @@ end
 function Player.getQualityPrototype(name)
     if name == nil then return nil end
     return prototypes.quality[name]
+end
+
+-------------------------------------------------------------------------------
+---Return quality prototypes
+---@return LuaCustomTable<(uint)|(string), LuaSurface>
+function Player.getSurfaces()
+    return game.surfaces
+end
+
+-------------------------------------------------------------------------------
+---Return quality prototypes
+---@return LuaCustomTable<(uint)|(string), LuaSurfacePrototype>
+function Player.getSurfacePrototypes()
+    return prototypes.surface
+end
+
+-------------------------------------------------------------------------------
+---Return quality prototypes
+---@return LuaCustomTable<(uint)|(string), LuaSurfacePropertyPrototype>
+function Player.getSurfacePropertyPrototypes()
+    return prototypes.surface_property
+end
+
+-------------------------------------------------------------------------------
+---Return quality prototypes
+---@return LuaCustomTable<string, LuaSpaceLocationPrototype>
+function Player.getSpaceLocationPrototypes()
+    return prototypes.space_location
+end
+
+---@return table
+function Player.getHMLocations()
+    local cache_locations = Cache.getData(Player.classname, "list_locations")
+    if cache_locations ~= nil then
+        return cache_locations
+    end
+
+    local lua_surface_properties = Player.getSurfacePropertyPrototypes()
+    local function get_surface_properties(location)
+        local surface_properties = {}
+        if location.surface_properties ~= nil then
+            for name, lua_surface_property in pairs(lua_surface_properties) do
+                if lua_surface_property.hidden == false then
+                    local value = location.surface_properties[name]
+                    if location.type == "planet" or (value ~= nil and lua_surface_property.is_time == false) then
+                        local surface_property = {
+                            name = name,
+                            value = value or lua_surface_property.default_value,
+                            localised_name = lua_surface_property.localised_name,
+                            localised_description = lua_surface_property.localised_description,
+                            localised_unit_key = lua_surface_property.localised_unit_key,
+                            is_time = lua_surface_property.is_time
+                        }
+                        table.insert(surface_properties, surface_property)
+                    end
+                end
+            end
+        end
+        if location.type == "planet" or location.type == "space-location" then
+            local surface_property = {
+                name = "solar-power-in-space",
+                value = location.solar_power_in_space or 0,
+                localised_name = {"surface-property-name.solar-power-in-space"},
+                localised_description = "surface-property-name.solar-power-in-space"    ,
+                localised_unit_key = "surface-property-unit.solar-power-in-space",
+                is_time = false
+            }
+            table.insert(surface_properties, surface_property)
+        end
+        return surface_properties
+    end
+
+    local cache_locations = {}
+    local space_locations = Player.getSpaceLocationPrototypes()
+    if #space_locations > 0 then
+        for key, space_location in pairs(space_locations) do
+            if space_location.hidden == false then
+                local location = {
+                    key = string.format("%s-%s", space_location.type, space_location.name),
+                    type = "space-location",
+                    name = space_location.name,
+                    localised_name = space_location.localised_name,
+                    localised_description = space_location.localised_description,
+                    properties = get_surface_properties(space_location)
+                }
+                table.insert(cache_locations, location)
+            end
+        end
+    end
+
+    local suurfaces = Player.getSurfacePrototypes()
+    if #suurfaces > 0 then
+        for key, surface in pairs(suurfaces) do
+            local location = {
+                key = string.format("%s-%s", surface.type, surface.name),
+                type = "surface",
+                name = surface.name,
+                localised_name = surface.localised_name,
+                localised_description = surface.localised_description,
+                properties = get_surface_properties(surface)
+            }
+            table.insert(cache_locations, location)
+        end
+    end
+
+    Cache.setData(Player.classname, "list_locations", cache_locations)
+    return cache_locations
 end
 
 return Player

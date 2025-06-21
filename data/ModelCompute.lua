@@ -23,7 +23,8 @@ local ModelCompute = {
             module_high = 4
         },
         productivity = {
-            module_low = 1
+            module_low = 1,
+            recipe_maximum = 2
         },
         consumption = {
             module_low = 1
@@ -234,6 +235,7 @@ function ModelCompute.finalizeBlock(block, factor)
     block.count_deep = block.count * factor
     local children = block.children
     if children ~= nil and table.size(children) > 0 then
+        local spoilage_recipes = {has_spoil = false, recipes={}, products={}, ingredients={}}
         local ratio_limit = -1
         local sorter = defines.sorters.block.sort
         if block.by_product == false then
@@ -277,6 +279,20 @@ function ModelCompute.finalizeBlock(block, factor)
                     summary_module.count = summary_module.count + module.count
                     summary_module.count_limit = summary_module.count
                     summary_module.count_deep = summary_module.count * block.count_deep
+                end
+                if child.products ~= nil then
+                    for key, lua_product in pairs(child.products) do
+                        if lua_product.spoil ~= nil and lua_product.amount > 0 then
+                            local spoil_product = {
+                                spoil=lua_product.spoil,
+                                spoil_out = lua_product.spoil,
+                                spoil_amount=lua_product.spoil * lua_product.amount,
+                                count=lua_product.amount}
+                            spoilage_recipes.products[key] = spoil_product
+                        end
+                        
+                    end
+                   
                 end
             else
                 ---@type RecipeData
@@ -332,9 +348,42 @@ function ModelCompute.finalizeBlock(block, factor)
                         ratio_limit = current_ratio
                     end
                 end
+                -- spoilage
+                if recipe.spoilage ~= nil then
+                    table.insert(spoilage_recipes.recipes, 1, recipe)
+                    spoilage_recipes.has_spoil = true
+                end
             end
         end
 
+        if spoilage_recipes.has_spoil then
+            for _, recipe in pairs(spoilage_recipes.recipes) do
+                local spoil_product = {spoil=1, spoil_amount=0, count=0}
+                for key, spoilage in pairs(recipe.spoilage.ingredients) do
+                    if spoilage_recipes.products[key] ~= nil then
+                        spoilage.spoil = spoilage_recipes.products[key].spoil_out
+                    end
+                    recipe.spoilage.ingredients[key] = spoilage
+                    spoil_product.spoil_amount = spoil_product.spoil_amount + spoilage.spoil * spoilage.amount
+                    spoil_product.count = spoil_product.count + spoilage.amount
+                    if spoil_product.count > 0 then
+                        spoil_product.spoil = spoil_product.spoil_amount / spoil_product.count
+                    end
+                end
+                for key, spoilage in pairs(recipe.spoilage.products) do
+                    if recipe.spoilage.ingredients[key] ~= nil then
+                        spoilage.spoil = 1   
+                    end
+                    -- percent_spoiled used in some recipe
+                    spoilage.spoil = spoil_product.spoil * (spoilage.percent_spoiled or 1)
+                    spoilage.spoil_out = spoil_product.spoil * (recipe.spoilage_factor or 1)
+                    spoilage_recipes.products[key] = spoilage
+                    if block.products[key] ~= nil then
+                        block.products[key].spoil = spoilage.spoil_out
+                    end
+                end
+            end
+        end
         if ratio_limit > 0 then
             block.count_ratio_limit = ratio_limit
             block.count_limit = ratio_limit
@@ -514,16 +563,25 @@ function ModelCompute.prepareBlockElements(block)
                 local recipe_prototype = RecipePrototype(child)
                 child_products = recipe_prototype:getQualityProducts(child.factory, child.quality)
                 child_ingredients = recipe_prototype:getQualityIngredients(child.factory, child.quality)
+                child.spoilage = {products={}, ingredients={}}
             end
             -- prepare products
             for _, lua_product in pairs(child_products) do
-                local product_key = Product(lua_product):getTableKey()
+                local product = Product(lua_product)
+                local product_key = product:getTableKey()
+
+                lua_product.spoil = product:getSpoil()
+                if child.spoilage ~= nil and lua_product.spoil ~= nil then
+                    child.spoilage.products[product_key] = {spoil = lua_product.spoil, percent_spoiled=lua_product.percent_spoiled, amount = product:getAmount()}
+                end
+
                 block_products[product_key] = {
                     key = product_key,
                     name = lua_product.name,
                     type = lua_product.type,
                     quality = lua_product.quality,
                     amount = 0,
+                    spoil = product.spoil,
                     temperature = lua_product.temperature,
                     minimum_temperature = lua_product.minimum_temperature,
                     maximum_temperature = lua_product.maximum_temperature
@@ -531,13 +589,21 @@ function ModelCompute.prepareBlockElements(block)
             end
             -- prepare ingredients
             for _, lua_ingredient in pairs(child_ingredients) do
-                local ingredient_key = Product(lua_ingredient):getTableKey()
+                local product = Product(lua_ingredient)
+                local ingredient_key = product:getTableKey()
+
+                lua_ingredient.spoil = product:getSpoil()
+                if child.spoilage ~= nil and lua_ingredient.spoil ~= nil then
+                    child.spoilage.ingredients[ingredient_key] = {spoil = lua_ingredient.spoil, amount = product:getAmount()}
+                end
+
                 block_ingredients[ingredient_key] = {
                     key = ingredient_key,
                     name = lua_ingredient.name,
                     type = lua_ingredient.type,
                     quality = lua_ingredient.quality,
                     amount = 0,
+                    spoil = lua_ingredient.spoil,
                     temperature = lua_ingredient.temperature,
                     minimum_temperature = lua_ingredient.minimum_temperature,
                     maximum_temperature = lua_ingredient.maximum_temperature
@@ -698,8 +764,21 @@ end
 function ModelCompute.computeModuleEffects(recipe, parameters)
     if recipe.factory == nil then return end
     local factory = recipe.factory
+    local factory_prototype = EntityPrototype(factory)
+    local recipe_prototype = RecipePrototype(recipe)
+    --- apply base effect
+    local effect_receiver = factory_prototype:getEffectReveiver()
+    factory.effects = {
+        speed = effect_receiver.base_effect["speed"] or 0,
+        productivity = effect_receiver.base_effect["productivity"] or 0,
+        consumption = effect_receiver.base_effect["consumption"] or 0,
+        pollution = effect_receiver.base_effect["pollution"] or 0,
+        quality = effect_receiver.base_effect["quality"] or 0
+    }
+
     local recipe_productivity = Player.getRecipeProductivityBonus(recipe.name)
-    factory.effects = { speed = 0, productivity = recipe_productivity, consumption = 0, pollution = 0, quality = 0 }
+    factory.effects.productivity = factory.effects.productivity + recipe_productivity
+
     if parameters ~= nil then
         factory.effects.speed = factory.effects.speed + (parameters.effects.speed or 0)
         factory.effects.productivity = factory.effects.productivity + (parameters.effects.productivity or 0)
@@ -708,12 +787,9 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
         factory.effects.quality = factory.effects.quality + (parameters.effects.quality or 0)
     end
     factory.cap = { speed = 0, productivity = 0, consumption = 0, pollution = 0 }
-    local factory_prototype = EntityPrototype(factory)
-    local base_effect = factory_prototype:getBaseEffect()
-    local base_productivity = base_effect["productivity"] or 0
-    factory.effects.productivity = factory.effects.productivity + base_productivity
+    
     ---effet module factory
-    if factory.modules ~= nil then
+    if factory.modules ~= nil and effect_receiver.uses_module_effects then
         for _, module in pairs(factory.modules) do
             local module_effects = Player.getModuleEffects(module)
             local amount = module.amount
@@ -725,7 +801,7 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
         end
     end
     ---effet module beacon
-    if recipe.beacons ~= nil then
+    if recipe.beacons ~= nil and effect_receiver.uses_beacon_effects then
         local profile_count = 0
         for _, beacon in pairs(recipe.beacons) do
             if beacon.modules ~= nil then
@@ -779,6 +855,13 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
     if factory.effects.productivity < 0 then
         factory.effects.productivity = 0
         factory.cap.productivity = bit32.bor(factory.cap.productivity, ModelCompute.cap_reason.productivity.module_low)
+    end
+    if recipe.type == "recipe" then
+        local maximum_productivity = recipe_prototype:getMaximumProductivity()
+        if factory.effects.productivity > maximum_productivity then
+            factory.effects.productivity = maximum_productivity
+            factory.cap.productivity = bit32.bor(factory.cap.productivity, ModelCompute.cap_reason.productivity.recipe_maximum)
+        end
     end
 
     ---cap la vitesse a self.capSpeed
@@ -889,12 +972,11 @@ function ModelCompute.computeEnergyFactory(recipe)
     end
 
     local energy_type = factory_prototype:getEnergyType()
-    local gameDay = { day = 12500, dusk = 5000, night = 2500, dawn = 2500 }
-    if factory_prototype:getType() == "accumulator" then
-        local dark_time = (gameDay.dusk / 2 + gameDay.night + gameDay.dawn / 2)
-        --recipe_energy = dark_time
+    if factory_prototype:getType() == "solar-panel" then
+        recipe.factory.energy = factory_prototype:getEnergyProduction() 
+    else
+        recipe.factory.energy = factory_prototype:getEnergyConsumption() * (1 + recipe.factory.effects.consumption)
     end
-    recipe.factory.energy = factory_prototype:getEnergyConsumption() * (1 + recipe.factory.effects.consumption)
 
     ---effet pollution
     recipe.factory.pollution_amount = factory_prototype:getPollution() * (1 + recipe.factory.effects.pollution)

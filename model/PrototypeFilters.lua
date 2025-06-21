@@ -100,6 +100,10 @@ end
 ---initialization
 function PrototypeFilters.initialization()
 
+  local PrototypeFiltercustom = PrototypeFilters.addFilterType("custom")
+  PrototypeFiltercustom:addMapping(nil)
+  PrototypeFiltercustom:addFilter("custom")
+ 
   -------------------------------------------------------------------------------
   -------------------------------------------------------------------------------
   local PrototypeFilterEntity = PrototypeFilters.addFilterType("entity")

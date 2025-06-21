@@ -7,6 +7,7 @@ LogisticEdition = newclass(Form)
 ---On initialization
 function LogisticEdition:onInit()
 	self.panelCaption = ({ "helmod_panel.logistic-edition" })
+	self.panel_close_before_main = true
 end
 
 -------------------------------------------------------------------------------
@@ -93,14 +94,6 @@ function LogisticEdition:onEvent(event)
 	if event.action == "fluids-logistic-select" then
 		local element = Model.newElement("entity", event.item2, logistic_quality)
 		User.setParameter(string.format("fluids_logistic_%s", event.item1), element)
-		self:close()
-		Controller:send("on_gui_refresh", event)
-	end
-
-	if event.action == "fluids-logistic-flow" then
-		local index = event.element.selected_index
-		local fluids_logistic_maximum_flow = defines.constant.logistic_flow[index].flow
-		User.setParameter("fluids_logistic_maximum_flow", fluids_logistic_maximum_flow)
 		self:close()
 		Controller:send("on_gui_refresh", event)
 	end

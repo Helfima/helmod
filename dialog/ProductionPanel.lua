@@ -176,13 +176,12 @@ function ProductionPanel:getLeftInfoPanel2()
 		return parent_panel[header_name][label_name], parent_panel[header_name][tool_name], parent_panel[panel_name]
 	end
 	local header_panel = GuiElement.add(parent_panel, GuiFlowH(header_name))
-	local label_panel = GuiElement.add(header_panel,
-		GuiLabel(label_name):caption({ "helmod_common.output" }):style("helmod_label_title_frame"))
+	local label_panel = GuiElement.add(header_panel, GuiLabel(label_name):caption({ "helmod_common.output" }):style("helmod_label_title_frame"))
 	local tool_panel = GuiElement.add(header_panel, GuiFlowH(tool_name))
 	--tool_panel.style.horizontally_stretchable = true
 	--tool_panel.style.horizontal_align = "right"
 	local scroll_panel = GuiElement.add(parent_panel, GuiScroll(panel_name):style("helmod_scroll_pane"))
-	scroll_panel.style.horizontally_stretchable = true
+	--scroll_panel.style.horizontally_stretchable = true
 
 	return label_panel, tool_panel, scroll_panel
 end
@@ -200,13 +199,12 @@ function ProductionPanel:getRightInfoPanel2()
 		return parent_panel[header_name][label_name], parent_panel[header_name][tool_name], parent_panel[panel_name]
 	end
 	local header_panel = GuiElement.add(parent_panel, GuiFlowH(header_name))
-	local label_panel = GuiElement.add(header_panel,
-		GuiLabel(label_name):caption({ "helmod_common.input" }):style("helmod_label_title_frame"))
+	local label_panel = GuiElement.add(header_panel, GuiLabel(label_name):caption({ "helmod_common.input" }):style("helmod_label_title_frame"))
 	local tool_panel = GuiElement.add(header_panel, GuiFlowH(tool_name))
 	--tool_panel.style.horizontally_stretchable = true
 	--tool_panel.style.horizontal_align = "right"
 	local scroll_panel = GuiElement.add(parent_panel, GuiScroll(panel_name):style("helmod_scroll_pane"))
-	scroll_panel.style.horizontally_stretchable = true
+	--scroll_panel.style.horizontally_stretchable = true
 
 	return label_panel, tool_panel, scroll_panel
 end
@@ -215,6 +213,21 @@ end
 ---Get the menu panel
 ---@return LuaGuiElement, LuaGuiElement
 function ProductionPanel:getSubMenuPanel()
+	local width = GuiElement.getWidthMainPanel()
+	local one_line = true
+	-- 1.25 1741 1.5 1451
+	if width < 1700 then
+		one_line = false
+	end
+
+	local ui_menu_lines = User.getPreferenceSetting("ui_menu_lines")
+	if ui_menu_lines == "one line" then
+		one_line = true
+	end
+	if ui_menu_lines == "two lines" then
+		one_line = false
+	end
+	
 	local menu_panel, header_panel, scroll_panel = self:getDataPanel()
 	local panel_name = "menu"
 	local left_name = "left_menu"
@@ -222,9 +235,18 @@ function ProductionPanel:getSubMenuPanel()
 	if menu_panel[panel_name] ~= nil and menu_panel[panel_name].valid then
 		return menu_panel[panel_name][left_name], menu_panel[panel_name][right_name]
 	end
-	local panel = GuiElement.add(menu_panel, GuiFrameH(panel_name):style("helmod_deep_frame"))
+	local panel_frame = GuiFrameH(panel_name):style("helmod_deep_frame")
+	if one_line == false then
+		panel_frame = GuiFrameV(panel_name):style("helmod_deep_frame")
+	end
+	local panel = GuiElement.add(menu_panel, panel_frame)
 	panel.style.horizontally_stretchable = true
-	panel.style.height = 38
+	if one_line == true then
+		panel.style.height = 38
+	else
+		panel.style.height = 70
+	end
+	
 
 	local left_panel = GuiElement.add(panel, GuiFlowH(left_name))
 	left_panel.style.horizontal_spacing = 10
@@ -232,8 +254,13 @@ function ProductionPanel:getSubMenuPanel()
 	local right_panel = GuiElement.add(panel, GuiFlowH(right_name))
 	right_panel.style.horizontal_spacing = 10
 	right_panel.style.horizontally_stretchable = true
-	right_panel.style.horizontal_align = "right"
+	if one_line == true then
+		right_panel.style.horizontal_align = "right"
+	else
+		right_panel.style.top_margin = 2
+	end
 	return left_panel, right_panel
+	
 end
 
 -------------------------------------------------------------------------------
@@ -268,28 +295,66 @@ function ProductionPanel:updateIndexPanel(model)
 			local is_first = true
 			table.reindex_list(models)
 			for _, imodel in spairs(models, sorter) do
+				local model_infos = Model.getModelInfos(imodel)
 				i = i + 1
                 local element = imodel.block_root
 				local button = nil
+				-- sprite definition
+				local icon_type = element.type
+				local icon_name = element.name
+				local icon_quality = element.quality
+				if model_infos.primary_icon ~= nil and model_infos.primary_icon.type ~= nil then
+					icon_type = model_infos.primary_icon.name.type or "item"
+					icon_name = model_infos.primary_icon.name.name
+					icon_quality = model_infos.primary_icon.quality
+				end
+
+				local button_style = "helmod_button_menu"
+				local button_sprite_style = nil
 				if imodel.id == model.id then
-					if element ~= nil and element.type ~= nil then
-						local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
-						button = GuiElement.add(table_index, GuiButtonSprite(self.classname, "change-model", imodel.id):sprite(element.type, element.name):style("helmod_button_menu_selected"):tooltip(tooltip))
-						button.style.width = 36
-						button.style.height = 36
-						button.style.padding = { -2, -2, -2, -2 }
-					else
-						button = GuiElement.add(table_index, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black):style("helmod_button_menu_selected"))
-						button.style.width = 36
-					end
+					button_style = "helmod_button_actived_icon_yellow"
+					button_sprite_style = "helmod_button_actived_icon_yellow"
+				end
+
+				if element ~= nil and element.type ~= nil then
+					local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
+					button = GuiElement.add(table_index, GuiButtonSelectSprite(self.classname, "change-model", imodel.id):sprite_with_quality(icon_type, icon_name, icon_quality):style(button_sprite_style):tooltip(tooltip))
 				else
-					if element ~= nil and element.type ~= nil then
-						local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
-						button = GuiElement.add(table_index, GuiButtonSelectSprite(self.classname, "change-model", imodel.id):sprite(element.type, element.name):tooltip(tooltip):color())
-					else
-						button = GuiElement.add(table_index, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", defines.sprites.status_help.black, defines.sprites.status_help.black):style("helmod_button_menu"))
-						button.style.width = 36
-					end
+					button = GuiElement.add(table_index, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black):style(button_style))
+				end
+				
+				if model_infos.secondary_icon ~= nil and model_infos.secondary_icon.type ~= nil then
+					local secondary_icon_type = model_infos.secondary_icon.name.type or "item"
+					local secondary_icon_name = model_infos.secondary_icon.name.name or "item"
+					local secondary_icon_quality = model_infos.secondary_icon.quality
+					local container_secondary = GuiElement.add(button, GuiFlow("secondary-info"))
+					local frame_secondary = GuiElement.add(container_secondary, GuiFrame("secondary-frame"):style("helmod_frame_element_w80", "gray", 4))
+					frame_secondary.style.width = 20
+					frame_secondary.style.margin = 0
+					frame_secondary.style.padding = 2
+					local mask_secondary = GuiElement.add(frame_secondary, GuiSprite("secondary-info"):sprite(secondary_icon_type, secondary_icon_name))
+					container_secondary.style.top_padding = 15
+    				container_secondary.style.left_padding = 15
+    				mask_secondary.style.width = 20
+    				mask_secondary.style.height = 20
+					mask_secondary.style.stretch_image_to_widget_size = true
+  					mask_secondary.ignored_by_interaction = true
+					GuiElement.maskQuality(mask_secondary, secondary_icon_quality, 10, 10)
+				elseif imodel.location ~= nil and imodel.location.name ~= "nauvis" then
+					local secondary_icon_type = imodel.location.type
+					local secondary_icon_name = imodel.location.name
+					local container_secondary = GuiElement.add(button, GuiFlow("secondary-info"))
+					local frame_secondary = GuiElement.add(container_secondary, GuiFrame("secondary-frame"):style("helmod_frame_element_w80", "gray", 4))
+					frame_secondary.style.width = 20
+					frame_secondary.style.margin = 0
+					frame_secondary.style.padding = 2
+					local mask_secondary = GuiElement.add(frame_secondary, GuiSprite("secondary-info"):sprite(secondary_icon_type, secondary_icon_name))
+					container_secondary.style.top_padding = 15
+    				container_secondary.style.left_padding = 15
+    				mask_secondary.style.width = 20
+    				mask_secondary.style.height = 20
+					mask_secondary.style.stretch_image_to_widget_size = true
+  					mask_secondary.ignored_by_interaction = true
 				end
 				if button ~= nil and is_first then
 					button.style.left_margin = 3
@@ -438,30 +503,70 @@ function ProductionPanel:updateSubMenuRightPanel(model, block)
 	local block_id = "new"
 	if block ~= nil then block_id = block.id end
 
+	---space locations
+	local hm_locations = Player.getHMLocations()
+	if #hm_locations > 1 then
+		local group_locations = GuiElement.add(right_panel, GuiFlowH("group_locations"))
+		local current_location = model.location or {}
+		local locations = {}
+		local default_surface = nil
+		for _, hm_location in pairs(hm_locations) do
+			local space_location = GuiTooltipLocation(""):element(hm_location)
+			local item_location = space_location:create()
+			if hm_location.key == current_location.key then 
+				default_surface = item_location
+			end
+			table.insert(locations, item_location)
+		end
+		local selector_logistic_fluid = GuiElement.add(group_locations, GuiDropDown(self.classname, "change-location"):items(locations, default_surface):tooltip(default_surface))
+		selector_logistic_fluid.style.font = "helmod_font_default"
+		selector_logistic_fluid.style.height = 32
+		selector_logistic_fluid.style.width = 64
+	end
 	---logistics
 	local display_logistic_row = User.getParameter("display_logistic_row")
 	if display_logistic_row == true then
 		local logistic_row_item = User.getParameter("logistic_row_item") or "belt"
 		local logistic2 = GuiElement.add(right_panel, GuiFlowH("logistic2"))
 		logistic2.style.horizontal_spacing = button_spacing
-		for _, type in pairs({ "inserter", "belt", "container", "transport" }) do
+		
+		local default_logistic_item = nil
+		local items = {}
+		local tooltip_item = nil
+		for _, type in pairs(defines.constant.logistic_list_for_item) do
 			local item_logistic = Player.getDefaultItemLogistic(type)
-			local style = "helmod_button_menu"
-			if logistic_row_item == type then style = "helmod_button_menu_selected" end
-			local button = GuiElement.add(logistic2, GuiButtonSprite(self.classname, "change-logistic-item", type):sprite_with_quality(item_logistic.type, item_logistic.name, item_logistic.quality):style(style):tooltip({ "tooltip.logistic-row-choose" }))
-			button.style.padding = { 0, 0, 0, 0 }
+			local item = string.format("[%s=%s,quality=%s]", item_logistic.type, item_logistic.name, item_logistic.quality)
+			if logistic_row_item == type then
+				default_logistic_item = item
+				tooltip_item = EntityPrototype(item_logistic):getLocalisedName()
+			end
+			table.insert(items, item)
 		end
+		local selector_logistic_item = GuiElement.add(logistic2, GuiDropDown(self.classname, "change-logistic-item"):items(items, default_logistic_item):tooltip(tooltip_item))
+		selector_logistic_item.style.font = "helmod_font_default"
+		selector_logistic_item.style.height = 32
+		selector_logistic_item.style.width = 64
 
 		local logistic_row_fluid = User.getParameter("logistic_row_fluid") or "pipe"
 		local logistic3 = GuiElement.add(right_panel, GuiFlowH("logistic3"))
 		logistic3.style.horizontal_spacing = button_spacing
-		for _, type in pairs({ "pipe", "container", "transport" }) do
+
+		local default_logistic_fluid = nil
+		local fluids = {}
+		local tooltip_fluid = nil
+		for _, type in pairs(defines.constant.logistic_list_for_fluid) do
 			local fluid_logistic = Player.getDefaultFluidLogistic(type)
-			local style = "helmod_button_menu"
-			if logistic_row_fluid == type then style = "helmod_button_menu_selected" end
-			local button = GuiElement.add(logistic3, GuiButton(self.classname, "change-logistic-fluid", type):sprite_with_quality(fluid_logistic.type, fluid_logistic.name, fluid_logistic.quality):style(style):tooltip({ "tooltip.logistic-row-choose" }))
-			button.style.padding = { 0, 0, 0, 0 }
+			local fluid = string.format("[%s=%s,quality=%s]", fluid_logistic.type, fluid_logistic.name, fluid_logistic.quality)
+			if logistic_row_fluid == type then 
+				default_logistic_fluid = fluid
+				tooltip_fluid = EntityPrototype(fluid_logistic):getLocalisedName()
+			end
+			table.insert(fluids, fluid)
 		end
+		local selector_logistic_fluid = GuiElement.add(logistic3, GuiDropDown(self.classname, "change-logistic-fluid"):items(fluids, default_logistic_fluid):tooltip(tooltip_fluid))
+		selector_logistic_fluid.style.font = "helmod_font_default"
+		selector_logistic_fluid.style.height = 32
+		selector_logistic_fluid.style.width = 64
 	end
 
 	local group_pref = GuiElement.add(right_panel, GuiFlowH("group_pref"))
@@ -576,9 +681,10 @@ function ProductionPanel:updateInputBlock(model, block)
 
 	---production block result
 	if block ~= nil and table.size(block.children) > 0 then
-		---input panel
-		local input_table = GuiElement.add(input_scroll,
-			GuiTable("input-table"):column(GuiElement.getElementColumnNumber(50) - 2):style("helmod_table_element"))
+		---input panel, 50 is the real width of icons
+		local column_count, columns_width = GuiElement.getElementColumnNumber(50)
+		input_tool.style.width = columns_width
+		local input_table = GuiElement.add(input_scroll, GuiTable("input-table"):column(column_count):style("helmod_table_element"))
 		if block.ingredients ~= nil then
 			for index, lua_ingredient in spairs(block.ingredients, User.getProductSorter()) do
 				if all_visible == true or ((lua_ingredient.state or 0) == 1 and not (block_by_product)) or (lua_ingredient.amount or 0) > ModelCompute.waste_value then
@@ -664,10 +770,13 @@ function ProductionPanel:updateOutputBlock(model, block)
 	output_label.caption = { "helmod_common.output" }
 	output_scroll.clear()
 
+	local scroll_width = output_scroll.width
 	---production block result
 	if block ~= nil and table.size(block.children) > 0 then
-		---ouput panel
-		local output_table = GuiElement.add(output_scroll, GuiTable("output-table"):column(GuiElement.getElementColumnNumber(50) - 2):style("helmod_table_element"))
+		---ouput panel, 50 is the real width of icons
+		local column_count, columns_width = GuiElement.getElementColumnNumber(50)
+		output_tool.style.width = columns_width
+		local output_table = GuiElement.add(output_scroll, GuiTable("output-table"):column(column_count):style("helmod_table_element"))
 		if block.products ~= nil then
 			for index, lua_product in spairs(block.products, User.getProductSorter()) do
 				if all_visible == true or ((lua_product.state or 0) == 1 and block_by_product) or (lua_product.amount or 0) > ModelCompute.waste_value then
@@ -1125,13 +1234,21 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				local contraint_type = nil
 				local is_pivot = false
 				local product_prototype = Product(lua_product)
+				local product_key = product_prototype:getTableKey()
+				
+				if recipe.spoilage ~= nil and table.size(recipe.spoilage.products) then
+					local spoilage = recipe.spoilage.products[product_key]
+					if spoilage ~= nil then
+						lua_product.spoil = spoilage.spoil
+					end
+				end
+
 				local product = product_prototype:clone()
 				product.time = model.time
 				product.count = product_prototype:countProduct(recipe)
 				product.count_limit = product_prototype:countLimitProduct(recipe)
 				product.count_deep = product_prototype:countDeepProduct(recipe)
 
-				local product_key = product_prototype:getTableKey()
 				if block.by_product ~= false and recipe.contraints ~= nil and recipe.contraints[product_key] ~= nil then
 					contraint_type = recipe.contraints[product_key].type
 				end
@@ -1157,6 +1274,15 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				local contraint_type = nil
 				local is_pivot = false
 				local ingredient_prototype = Product(lua_ingredient)
+				local ingredient_key = ingredient_prototype:getTableKey()
+
+				if recipe.spoilage ~= nil and table.size(recipe.spoilage.ingredients) then
+					local spoilage = recipe.spoilage.ingredients[ingredient_key]
+					if spoilage ~= nil then
+						lua_ingredient.spoil = spoilage.spoil
+					end
+				end
+
 				local ingredient = ingredient_prototype:clone()
 				ingredient.time = model.time
 				ingredient.count = ingredient_prototype:countIngredient(recipe)
@@ -1265,7 +1391,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 	for _, order in pairs(Model.getBlockOrder(parent)) do
 		if order == "products" then
 			---products
-			local display_product_cols = User.getPreferenceSetting("display_product_cols") + 1
+			local display_product_cols = User.getPreferenceSetting("display_product_cols")
 			local cell_products = GuiElement.add(gui_table, GuiTable("products", block.id):column(display_product_cols):style("helmod_table_list"))
 			cell_products.style.horizontally_stretchable = false
 			if block.products ~= nil then
@@ -1325,7 +1451,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 			end
 		else
 			---ingredients
-			local display_ingredient_cols = User.getPreferenceSetting("display_ingredient_cols") + 2
+			local display_ingredient_cols = User.getPreferenceSetting("display_ingredient_cols")
 			local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients", block.id):column(display_ingredient_cols))
 			cell_ingredients.style.horizontally_stretchable = false
 			if block.ingredients ~= nil then
@@ -1466,6 +1592,13 @@ function ProductionPanel:onEventAccessAll(event, model, block)
 		Controller:send("on_gui_open", event, self.classname)
 	end
 
+	if event.action == "change-location" then
+		local index = event.element.selected_index
+		local hm_locations = Player.getHMLocations()
+		model.location = hm_locations[index]
+		Controller:send("on_gui_update", event)
+	end
+
 	if event.action == "change-logistic" then
 		local display_logistic_row = User.getParameter("display_logistic_row")
 		User.setParameter("display_logistic_row", not (display_logistic_row))
@@ -1473,12 +1606,16 @@ function ProductionPanel:onEventAccessAll(event, model, block)
 	end
 
 	if event.action == "change-logistic-item" then
-		User.setParameter("logistic_row_item", event.item1)
+		local index = event.element.selected_index
+		local type = defines.constant.logistic_list_for_item[index]
+		User.setParameter("logistic_row_item", type)
 		Controller:send("on_gui_update", event)
 	end
 
 	if event.action == "change-logistic-fluid" then
-		User.setParameter("logistic_row_fluid", event.item1)
+		local index = event.element.selected_index
+		local type = defines.constant.logistic_list_for_fluid[index]
+		User.setParameter("logistic_row_fluid", type)
 		Controller:send("on_gui_update", event)
 	end
 

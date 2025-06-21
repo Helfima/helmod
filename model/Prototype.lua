@@ -1,12 +1,13 @@
 -------------------------------------------------------------------------------
 ---@class Prototype : Object
+---@field lua_prototype any
 Prototype = newclass(function(base, lua_prototype)
   base.lua_prototype = lua_prototype
 end)
 
 -------------------------------------------------------------------------------
 ---Return factorio player
----@return LuaPrototype
+---@return LuaPrototypeBase
 function Prototype:native()
   return self.lua_prototype
 end

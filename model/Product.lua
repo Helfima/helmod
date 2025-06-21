@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 ---Description of the module.
----@class Product
+---@class Product : Prototype
 Product = newclass(Prototype,function(base, object)
   Prototype.init(base, object)
   base.classname = "HMProduct"
@@ -87,7 +87,9 @@ function Product:clone()
     type = self.lua_prototype.type or "item",
     name = self.lua_prototype.name,
     quality = self.lua_prototype.quality,
+    quality_probality = self.lua_prototype.quality_probality,
     amount = self:getElementAmount(),
+    spoil = self.lua_prototype.spoil,
     state = self.lua_prototype.state,
     temperature = self.lua_prototype.temperature,
     minimum_temperature  = self.lua_prototype.minimum_temperature,
@@ -95,6 +97,9 @@ function Product:clone()
     burnt = self.lua_prototype.burnt,
     constant = self.lua_prototype.constant
   }
+  if prototype.spoil ~= nil then
+    prototype.spoil_percent = prototype.spoil * 100
+  end
   return prototype
 end
 
@@ -165,7 +170,7 @@ end
 ---Get amount of element
 ---@param recipe RecipeData
 ---@return number
-function Product:getAmount(recipe)
+function Product:getBaseAmount(recipe)
   local amount = self:getElementAmount()
   local bonus_amount = self:getBonusAmount() ---if there are no catalyst amount = bonus_amount
   if recipe == nil then
@@ -181,6 +186,19 @@ function Product:getAmount(recipe)
     return amount  + (bonus_amount - ignored) * self:getProductivityBonus(recipe)
   end
   return amount
+end
+
+-------------------------------------------------------------------------------
+---Get amount of element
+---@param recipe RecipeData
+---@return number
+function Product:getAmount(recipe)
+  local amount = self:getBaseAmount(recipe)
+  local quality_probality = 1
+  if self.lua_prototype.quality_probality ~= nil then
+    quality_probality = self.lua_prototype.quality_probality
+  end
+  return amount * quality_probality
 end
 
 -------------------------------------------------------------------------------
@@ -271,6 +289,13 @@ function Product:countContainer(count, container, time)
       ---ratio = item_per_s / speed_belt (blue belt)
       local belt_speed = entity_prototype:getBeltSpeed()
       return count / (belt_speed * self.belt_ratio * (time or 1))
+    elseif entity_prototype:getType() == "rocket-silo" then
+      local item_prototype = ItemPrototype(self.lua_prototype.name)
+      local rocket_capacity = math.floor(item_prototype:geRocketCapacity())
+      if rocket_capacity < 1 then
+        return 0
+      end
+      return count / rocket_capacity
     elseif entity_prototype:getType() ~= "logistic-robot" then
       local cargo_wagon_size = entity_prototype:getInventorySize(1)
       if cargo_wagon_size == nil then return 0 end
@@ -287,9 +312,17 @@ function Product:countContainer(count, container, time)
   end
   if self.lua_prototype.type == 1 or self.lua_prototype.type == "fluid" then
     local entity_prototype = EntityPrototype(container)
-    if entity_prototype:getType() == "pipe" then
-      local fluids_logistic_maximum_flow = User.getParameter("fluids_logistic_maximum_flow")
-      return count / (fluids_logistic_maximum_flow or defines.constant.logistic_flow_default)
+    if entity_prototype:getType() == "valve"  then
+      local flow_rate = entity_prototype:getValveFlowRate()
+      if flow_rate == nil or flow_rate == 0 then return 0 end
+      return count / flow_rate
+    elseif entity_prototype:getType() == "pump" or entity_prototype:getType() == "offshore-pump"  then
+      local flow_rate = entity_prototype:getPumpingSpeed()
+      if flow_rate == nil or flow_rate == 0 then return 0 end
+      return count / flow_rate
+    elseif entity_prototype:getType() == "pipe" then
+      -- obsolete but that do no error for laster version, no need migration
+      return 0
     else
       local cargo_wagon_size = EntityPrototype(container):getFluidCapacity()
       if cargo_wagon_size == 0 then return 0 end
@@ -320,4 +353,21 @@ end
 function Product:match(other)
   if other == nil then return false end
   return self.lua_prototype.name == other.name and self.lua_prototype.type == other.type and self.lua_prototype.quality == other.quality
+end
+
+-------------------------------------------------------------------------------
+---Return spoil
+---@return number|nil
+function Product:getSpoil()
+  if self.lua_prototype ~= nil then
+    if self.lua_prototype.spoil then
+      return self.lua_prototype.spoil
+    end
+    local item_prototype = ItemPrototype(self.lua_prototype)
+    if item_prototype:getSpoilTicks() > 0 then
+      self.lua_prototype.spoil = 1
+      return self.lua_prototype.spoil
+    end
+  end
+  return nil
 end

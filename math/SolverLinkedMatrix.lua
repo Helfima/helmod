@@ -34,8 +34,9 @@ function SolverLinkedMatrix:prepare_z_and_objectives(matrix, reverse)
     for _, column in pairs(matrix.columns) do
         local objective = matrix.objectives[column.key]
         local objective_value = 0
-        if objective ~= nil then
+        if objective ~= nil and objective.used ~= true then
             objective_value = objective.value
+            objective.used = true
         end
         if reverse then
             objective_value = -objective_value

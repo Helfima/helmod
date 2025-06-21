@@ -52,6 +52,22 @@ default_gui["helmod_scroll_pane"] = {
     extra_padding_when_activated = 0
 }
 
+default_gui["helmod_scroll_pane_no_spacing"] = {
+    type = "scroll_pane_style",
+    parent = "scroll_pane",
+    extra_padding_when_activated = 0,
+    vertical_flow_style =
+    {
+        type = "vertical_flow_style",
+        vertical_spacing = 0
+    },
+    horizontal_flow_style =
+    {
+        type = "horizontal_flow_style",
+        vertical_spacing = 0
+    }
+}
+
 default_gui["helmod_tabbed_frame"] = {
     type = "frame_style",
     parent = "inside_deep_frame",
@@ -333,4 +349,3 @@ for _, style in pairs(style_branch_list) do
         vertically_stretchable   = "off"
     }
 end
-

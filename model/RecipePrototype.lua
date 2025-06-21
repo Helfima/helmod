@@ -1,9 +1,10 @@
 ---
 ---Description of the module.
----@class RecipePrototype
+---@class RecipePrototype : Prototype
 RecipePrototype = newclass(Prototype, function(base, object, object_type)
     base.classname = "HMRecipePrototype"
     base.is_voider = nil
+    base.is_support_quality = false
     if object ~= nil then
         if type(object) == "string" then
             base.object_name = object
@@ -13,8 +14,22 @@ RecipePrototype = newclass(Prototype, function(base, object, object_type)
             base.lua_type = object_type or object.type
         end
         if base.lua_type == nil or base.lua_type == "recipe" then
-            Prototype.init(base, Player.getRecipe(base.object_name))
+            local recipe = Player.getRecipe(base.object_name)
+            if recipe == nil and base.object_name ~= nil then
+                -- if recipe is null try find 
+                recipe = Player.findFirstRecipe(base.object_name)
+            end
+            Prototype.init(base, recipe)
             base.lua_type = "recipe"
+            if Player.hasFeatureQuality() then
+                if base.lua_prototype ~= nil and base.lua_prototype.ingredients ~= nil then
+                    for _, ingredient in pairs(base.lua_prototype.ingredients) do
+                        if ingredient.type == "item" then
+                            base.is_support_quality = true
+                        end
+                    end
+                end
+            end
         elseif base.lua_type == "recipe-burnt" then
             Prototype.init(base, Player.getBurntRecipe(base.object_name))
         elseif base.lua_type == "energy" then
@@ -237,19 +252,44 @@ function RecipePrototype:getProducts(factory)
     return raw_products
 end
 
+---Compute quality of products
+---@param quality_products table
+---@param raw_product ProductData
+---@param lua_quality LuaQualityPrototype
+---@param quality_effect number
+---@return number
 function RecipePrototype:getNextQualityProducts(quality_products, raw_product, lua_quality, quality_effect)
+    local previous_probality = 0
+    local next_probability = lua_quality.next_probability
+    if next_probability > 0 and quality_effect > 0  then
+        previous_probality = self:getNextQualityProducts(quality_products, raw_product, lua_quality.next, quality_effect * next_probability)
+    end
+
+    local quality_product = Product(raw_product):clone()
+    quality_product.quality = lua_quality.name
+    quality_product.quality_probality = quality_effect - previous_probality
+    table.insert(quality_products, 1, quality_product)
+    return quality_product.quality_probality + previous_probality
+end
+
+---Compute quality of products
+---@param quality_products table
+---@param raw_product ProductData
+---@param lua_quality LuaQualityPrototype
+---@param quality_effect number
+---@return number
+function RecipePrototype:getNextQualityProducts2(quality_products, raw_product, lua_quality, quality_effect)
     local quality_product = Product(raw_product):clone()
     quality_product.quality = lua_quality.name
     quality_product.amount = quality_product.amount * quality_effect
+    raw_product.amount = raw_product.amount - quality_product.amount
     table.insert(quality_products, quality_product)
 
     local next_probability = lua_quality.next_probability
     if next_probability > 0 and quality_effect > 0  then
         self:getNextQualityProducts(quality_products, raw_product, lua_quality.next, quality_effect * next_probability)
     end
-    return quality_products
 end
-
 -------------------------------------------------------------------------------
 ---Return products array of Prototype
 ---@param factory table
@@ -260,20 +300,26 @@ function RecipePrototype:getQualityProducts(factory, quality)
     if quality == nil then
         quality = "normal"
     end
+    -- can't do use greater quality
+    if self.is_support_quality == false then
+        quality = "normal"
+    end
     local quality_products = {}
     local lua_quality = Player.getQualityPrototype(quality)
     local quality_effect = 0 
     if factory ~= nil and factory.effects ~= nil then
         quality_effect = factory.effects.quality or 0
     end
-    
     local next_probability = lua_quality.next_probability
     for _, raw_product in pairs(raw_products) do
         if raw_product.type == "item" then
+            local previous_probality = 0
             raw_product.quality = quality
+            raw_product.quality_probality = 1
             if next_probability > 0 and quality_effect > 0  then
-                self:getNextQualityProducts(quality_products, raw_product, lua_quality.next, quality_effect)
+                previous_probality = self:getNextQualityProducts(quality_products, raw_product, lua_quality.next, quality_effect)
             end
+            raw_product.quality_probality = raw_product.quality_probality - previous_probality
         end
     end
     if #quality_products > 0 then
@@ -291,6 +337,9 @@ end
 ---@return table
 function RecipePrototype:getQualityIngredients(factory, quality)
     local raw_ingredients = self:getIngredients(factory)
+    if self.is_support_quality == false then
+        return raw_ingredients
+    end
     for _, raw_ingredient in pairs(raw_ingredients) do
         if raw_ingredient.type == "item" then
             raw_ingredient.quality = quality
@@ -401,9 +450,7 @@ end
 ---@return table
 function RecipePrototype:getRawIngredients()
     if self.lua_prototype ~= nil then
-        if self.lua_type == "recipe" or self.lua_type == "recipe-burnt" or self.lua_type == "resource" or self.lua_type == "fluid" or self.lua_type == "rocket" or self.lua_type == "boiler" then
-            return self.lua_prototype.ingredients
-        elseif self.lua_type == "technology" then
+        if self.lua_type == "technology" then
             return self.lua_prototype.research_unit_ingredients
         elseif self.lua_type == "energy" then
             local ingredients = {}
@@ -628,6 +675,16 @@ function RecipePrototype:getEnergy(factory)
         end
     end
     return 0
+end
+
+-------------------------------------------------------------------------------
+---Return maximum_productivity of Prototype
+---@return number
+function RecipePrototype:getMaximumProductivity()
+    if self.lua_prototype ~= nil then
+        return self.lua_prototype.maximum_productivity or 3
+    end
+    return 3
 end
 
 -------------------------------------------------------------------------------

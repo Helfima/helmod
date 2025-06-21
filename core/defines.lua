@@ -207,29 +207,9 @@ defines.constant.base_times = {
   { value = 3600*12, caption = "12h", tooltip={"helmod_si.hour",12}},
   { value = 3600*24, caption = "24h", tooltip={"helmod_si.hour",24}}
 }
-defines.constant.logistic_flow_default = 3000
 
-defines.constant.logistic_flow = {
-  {pipe=1, flow=6000},
-  {pipe=2, flow=3000},
-  {pipe=3, flow=2250},
-  {pipe=7, flow=1500},
-  {pipe=12, flow=1285},
-  {pipe=17, flow=1200},
-  {pipe=20, flow=1169},
-  {pipe=30, flow=1112},
-  {pipe=50, flow=1067},
-  {pipe=100, flow=1033},
-  {pipe=150, flow=1022},
-  {pipe=200, flow=1004},
-  {pipe=261, flow=800},
-  {pipe=300, flow=707},
-  {pipe=400, flow=546},
-  {pipe=500, flow=445},
-  {pipe=600, flow=375},
-  {pipe=800, flow=286},
-  {pipe=1000, flow=230}
-}
+defines.constant.logistic_list_for_item = { "inserter", "belt", "container", "transport" }
+defines.constant.logistic_list_for_fluid = { "pipe", "container", "transport" }
 
 defines.constant.beacon_combo = 1
 defines.constant.beacon_factory = 1/8
@@ -308,6 +288,22 @@ defines.constant.preferences = {
     allowed_values = {5,6,7,8,9,10},
     group = "general"
   },
+  --display-spoilage
+  display_fuel_compact = {
+    type = "bool-setting",
+    localised_name = {"helmod_pref_settings.display-fuel-compact"},
+    localised_description = {"helmod_pref_settings.display-fuel-compact-desc"},
+    default_value = false,
+    group = "general"
+  },
+  --display-spoilage
+  display_spoilage = {
+    type = "bool-setting",
+    localised_name = {"helmod_pref_settings.display-spoilage"},
+    localised_description = {"helmod_pref_settings.display-spoilage-desc"},
+    default_value = true,
+    group = "general"
+  },
   --display-pollution
   display_pollution = {
     type = "bool-setting",
@@ -355,6 +351,15 @@ defines.constant.preferences = {
     localised_description = {"helmod_pref_settings.beacon-constant-desc"},
     default_value = defines.constant.beacon_constant,
     group = "general"
+  },
+  --ui-menu
+  ui_menu_lines = {
+    type = "string-setting",
+    localised_name = {"helmod_pref_settings.ui-menu-lines"},
+    localised_description = {"helmod_pref_settings.ui-menu-lines"},
+    default_value = "auto",
+    allowed_values = {"auto","one line","two lines"},
+    group = "ui"
   },
   --ui-auto-close
   close_after_selection = {
@@ -631,6 +636,7 @@ helmod_rules["production-crafting"].categories["crafting-handonly"] = {"entity-n
 helmod_rules["production-crafting"].categories["extraction-machine"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
 helmod_rules["production-crafting"].categories["energy"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
 helmod_rules["production-crafting"].categories["technology"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
+helmod_rules["production-crafting"].categories["exclude-placed-by-hidden"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
 
 helmod_rules["module-limitation"] = {excluded_only=true ,categories={}}
 helmod_rules["module-limitation"].categories["standard"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}

@@ -7,6 +7,7 @@ PreferenceEdition = newclass(Form)
 ---On initialization
 function PreferenceEdition:onInit()
     self.panelCaption = ({ "helmod_preferences-edition-panel.title" })
+    self.panel_close_before_main = true
 end
 
 -------------------------------------------------------------------------------
@@ -421,7 +422,7 @@ function PreferenceEdition:updateItemsLogistic(event)
         local item_logistic = Player.getDefaultItemLogistic(type)
         for key, entity in pairs(Player.getItemsLogistic(type)) do
             local color = nil
-            if entity.name == item_logistic then color = "green" end
+            if entity.name == item_logistic.name then color = "green" end
             local button = GuiElement.add(type_table_panel, GuiButtonSelectSprite(self.classname, "items-logistic-select", type):choose("entity", entity.name):color(color))
             button.locked = true
         end
@@ -444,20 +445,6 @@ function PreferenceEdition:updateFluidsLogistic(event)
     options_table.style.horizontal_spacing = 10
     options_table.style.vertical_spacing = 10
 
-    local type_label = GuiElement.add(options_table, GuiLabel("maximum-flow"):caption({ "helmod_preferences-edition-panel.fluids-logistic-maximum-flow" }))
-    type_label.style.width = 200
-    local fluids_logistic_maximum_flow = User.getParameter("fluids_logistic_maximum_flow")
-    local default_flow = nil
-    local items = {}
-    for _, element in pairs(defines.constant.logistic_flow) do
-        local flow = { "helmod_preferences-edition-panel.fluids-logistic-flow", element.pipe, element.flow }
-        table.insert(items, flow)
-        if fluids_logistic_maximum_flow ~= nil and fluids_logistic_maximum_flow == element.flow or element.flow == defines.constant.logistic_flow_default then
-            default_flow = flow
-        end
-    end
-    GuiElement.add(options_table, GuiDropDown(self.classname, "fluids-logistic-flow"):items(items, default_flow))
-
     for _, type in pairs({ "pipe", "container", "transport" }) do
         local type_label = GuiElement.add(options_table, GuiLabel(string.format("%s-label", type)):caption({string.format("helmod_preferences-edition-panel.fluids-logistic-%s", type) }))
         type_label.style.width = 200
@@ -470,7 +457,7 @@ function PreferenceEdition:updateFluidsLogistic(event)
         local fluid_logistic = Player.getDefaultFluidLogistic(type)
         for key, entity in pairs(Player.getFluidsLogistic(type)) do
             local color = nil
-            if entity.name == fluid_logistic then color = "green" end
+            if entity.name == fluid_logistic.name then color = "green" end
             local button = GuiElement.add(type_table_panel, GuiButtonSelectSprite(self.classname, "fluids-logistic-select", type):choose("entity", entity.name):color(color))
             button.locked = true
         end
@@ -731,13 +718,6 @@ function PreferenceEdition:onEvent(event)
     if event.action == "fluids-logistic-select" then
         User.setParameter(string.format("fluids_logistic_%s", event.item1), event.item2)
         self:updateFluidsLogistic(event)
-        Controller:send("on_gui_refresh", event)
-    end
-
-    if event.action == "fluids-logistic-flow" then
-        local index = event.element.selected_index
-        local fluids_logistic_maximum_flow = defines.constant.logistic_flow[index].flow
-        User.setParameter("fluids_logistic_maximum_flow", fluids_logistic_maximum_flow)
         Controller:send("on_gui_refresh", event)
     end
 end
