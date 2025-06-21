@@ -678,6 +678,16 @@ function RecipePrototype:getEnergy(factory)
 end
 
 -------------------------------------------------------------------------------
+---Return maximum_productivity of Prototype
+---@return number
+function RecipePrototype:getMaximumProductivity()
+    if self.lua_prototype ~= nil then
+        return self.lua_prototype.maximum_productivity or 3
+    end
+    return 3
+end
+
+-------------------------------------------------------------------------------
 ---Return enable of Prototype
 ---@return boolean
 function RecipePrototype:getEnabled()

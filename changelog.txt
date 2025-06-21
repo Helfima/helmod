@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.1.12
+Date: 2025-06-21
+  Changes:
+    - Added a preference to change main menu on one or two lines, default is "auto"
+  Bugfixes:
+    - Fixed maximum productivity for a recipe, by default is 300%
+    - Fixed number of columns of products/ingredients for block row
+---------------------------------------------------------------------------------------------------
 Version: 2.1.11
 Date: 2025-06-17
   Bugfixes:

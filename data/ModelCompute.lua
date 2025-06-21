@@ -23,7 +23,8 @@ local ModelCompute = {
             module_high = 4
         },
         productivity = {
-            module_low = 1
+            module_low = 1,
+            recipe_maximum = 2
         },
         consumption = {
             module_low = 1
@@ -764,6 +765,7 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
     if recipe.factory == nil then return end
     local factory = recipe.factory
     local factory_prototype = EntityPrototype(factory)
+    local recipe_prototype = RecipePrototype(recipe)
     --- apply base effect
     local effect_receiver = factory_prototype:getEffectReveiver()
     factory.effects = {
@@ -853,6 +855,13 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
     if factory.effects.productivity < 0 then
         factory.effects.productivity = 0
         factory.cap.productivity = bit32.bor(factory.cap.productivity, ModelCompute.cap_reason.productivity.module_low)
+    end
+    if recipe.type == "recipe" then
+        local maximum_productivity = recipe_prototype:getMaximumProductivity()
+        if factory.effects.productivity > maximum_productivity then
+            factory.effects.productivity = maximum_productivity
+            factory.cap.productivity = bit32.bor(factory.cap.productivity, ModelCompute.cap_reason.productivity.recipe_maximum)
+        end
     end
 
     ---cap la vitesse a self.capSpeed

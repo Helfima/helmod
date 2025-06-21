@@ -352,6 +352,15 @@ defines.constant.preferences = {
     default_value = defines.constant.beacon_constant,
     group = "general"
   },
+  --ui-menu
+  ui_menu_lines = {
+    type = "string-setting",
+    localised_name = {"helmod_pref_settings.ui-menu-lines"},
+    localised_description = {"helmod_pref_settings.ui-menu-lines"},
+    default_value = "auto",
+    allowed_values = {"auto","one line","two lines"},
+    group = "ui"
+  },
   --ui-auto-close
   close_after_selection = {
     type = "bool-setting",

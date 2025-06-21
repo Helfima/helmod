@@ -176,13 +176,12 @@ function ProductionPanel:getLeftInfoPanel2()
 		return parent_panel[header_name][label_name], parent_panel[header_name][tool_name], parent_panel[panel_name]
 	end
 	local header_panel = GuiElement.add(parent_panel, GuiFlowH(header_name))
-	local label_panel = GuiElement.add(header_panel,
-		GuiLabel(label_name):caption({ "helmod_common.output" }):style("helmod_label_title_frame"))
+	local label_panel = GuiElement.add(header_panel, GuiLabel(label_name):caption({ "helmod_common.output" }):style("helmod_label_title_frame"))
 	local tool_panel = GuiElement.add(header_panel, GuiFlowH(tool_name))
 	--tool_panel.style.horizontally_stretchable = true
 	--tool_panel.style.horizontal_align = "right"
 	local scroll_panel = GuiElement.add(parent_panel, GuiScroll(panel_name):style("helmod_scroll_pane"))
-	scroll_panel.style.horizontally_stretchable = true
+	--scroll_panel.style.horizontally_stretchable = true
 
 	return label_panel, tool_panel, scroll_panel
 end
@@ -200,13 +199,12 @@ function ProductionPanel:getRightInfoPanel2()
 		return parent_panel[header_name][label_name], parent_panel[header_name][tool_name], parent_panel[panel_name]
 	end
 	local header_panel = GuiElement.add(parent_panel, GuiFlowH(header_name))
-	local label_panel = GuiElement.add(header_panel,
-		GuiLabel(label_name):caption({ "helmod_common.input" }):style("helmod_label_title_frame"))
+	local label_panel = GuiElement.add(header_panel, GuiLabel(label_name):caption({ "helmod_common.input" }):style("helmod_label_title_frame"))
 	local tool_panel = GuiElement.add(header_panel, GuiFlowH(tool_name))
 	--tool_panel.style.horizontally_stretchable = true
 	--tool_panel.style.horizontal_align = "right"
 	local scroll_panel = GuiElement.add(parent_panel, GuiScroll(panel_name):style("helmod_scroll_pane"))
-	scroll_panel.style.horizontally_stretchable = true
+	--scroll_panel.style.horizontally_stretchable = true
 
 	return label_panel, tool_panel, scroll_panel
 end
@@ -215,6 +213,21 @@ end
 ---Get the menu panel
 ---@return LuaGuiElement, LuaGuiElement
 function ProductionPanel:getSubMenuPanel()
+	local width = GuiElement.getWidthMainPanel()
+	local one_line = true
+	-- 1.25 1741 1.5 1451
+	if width < 1700 then
+		one_line = false
+	end
+
+	local ui_menu_lines = User.getPreferenceSetting("ui_menu_lines")
+	if ui_menu_lines == "one line" then
+		one_line = true
+	end
+	if ui_menu_lines == "two lines" then
+		one_line = false
+	end
+	
 	local menu_panel, header_panel, scroll_panel = self:getDataPanel()
 	local panel_name = "menu"
 	local left_name = "left_menu"
@@ -222,9 +235,18 @@ function ProductionPanel:getSubMenuPanel()
 	if menu_panel[panel_name] ~= nil and menu_panel[panel_name].valid then
 		return menu_panel[panel_name][left_name], menu_panel[panel_name][right_name]
 	end
-	local panel = GuiElement.add(menu_panel, GuiFrameH(panel_name):style("helmod_deep_frame"))
+	local panel_frame = GuiFrameH(panel_name):style("helmod_deep_frame")
+	if one_line == false then
+		panel_frame = GuiFrameV(panel_name):style("helmod_deep_frame")
+	end
+	local panel = GuiElement.add(menu_panel, panel_frame)
 	panel.style.horizontally_stretchable = true
-	panel.style.height = 38
+	if one_line == true then
+		panel.style.height = 38
+	else
+		panel.style.height = 70
+	end
+	
 
 	local left_panel = GuiElement.add(panel, GuiFlowH(left_name))
 	left_panel.style.horizontal_spacing = 10
@@ -232,8 +254,13 @@ function ProductionPanel:getSubMenuPanel()
 	local right_panel = GuiElement.add(panel, GuiFlowH(right_name))
 	right_panel.style.horizontal_spacing = 10
 	right_panel.style.horizontally_stretchable = true
-	right_panel.style.horizontal_align = "right"
+	if one_line == true then
+		right_panel.style.horizontal_align = "right"
+	else
+		right_panel.style.top_margin = 2
+	end
 	return left_panel, right_panel
+	
 end
 
 -------------------------------------------------------------------------------
@@ -654,9 +681,10 @@ function ProductionPanel:updateInputBlock(model, block)
 
 	---production block result
 	if block ~= nil and table.size(block.children) > 0 then
-		---input panel
-		local input_table = GuiElement.add(input_scroll,
-			GuiTable("input-table"):column(GuiElement.getElementColumnNumber(50) - 2):style("helmod_table_element"))
+		---input panel, 50 is the real width of icons
+		local column_count, columns_width = GuiElement.getElementColumnNumber(50)
+		input_tool.style.width = columns_width
+		local input_table = GuiElement.add(input_scroll, GuiTable("input-table"):column(column_count):style("helmod_table_element"))
 		if block.ingredients ~= nil then
 			for index, lua_ingredient in spairs(block.ingredients, User.getProductSorter()) do
 				if all_visible == true or ((lua_ingredient.state or 0) == 1 and not (block_by_product)) or (lua_ingredient.amount or 0) > ModelCompute.waste_value then
@@ -742,10 +770,13 @@ function ProductionPanel:updateOutputBlock(model, block)
 	output_label.caption = { "helmod_common.output" }
 	output_scroll.clear()
 
+	local scroll_width = output_scroll.width
 	---production block result
 	if block ~= nil and table.size(block.children) > 0 then
-		---ouput panel
-		local output_table = GuiElement.add(output_scroll, GuiTable("output-table"):column(GuiElement.getElementColumnNumber(50) - 2):style("helmod_table_element"))
+		---ouput panel, 50 is the real width of icons
+		local column_count, columns_width = GuiElement.getElementColumnNumber(50)
+		output_tool.style.width = columns_width
+		local output_table = GuiElement.add(output_scroll, GuiTable("output-table"):column(column_count):style("helmod_table_element"))
 		if block.products ~= nil then
 			for index, lua_product in spairs(block.products, User.getProductSorter()) do
 				if all_visible == true or ((lua_product.state or 0) == 1 and block_by_product) or (lua_product.amount or 0) > ModelCompute.waste_value then
@@ -1360,7 +1391,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 	for _, order in pairs(Model.getBlockOrder(parent)) do
 		if order == "products" then
 			---products
-			local display_product_cols = User.getPreferenceSetting("display_product_cols") + 1
+			local display_product_cols = User.getPreferenceSetting("display_product_cols")
 			local cell_products = GuiElement.add(gui_table, GuiTable("products", block.id):column(display_product_cols):style("helmod_table_list"))
 			cell_products.style.horizontally_stretchable = false
 			if block.products ~= nil then
@@ -1420,7 +1451,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 			end
 		else
 			---ingredients
-			local display_ingredient_cols = User.getPreferenceSetting("display_ingredient_cols") + 2
+			local display_ingredient_cols = User.getPreferenceSetting("display_ingredient_cols")
 			local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients", block.id):column(display_ingredient_cols))
 			cell_ingredients.style.horizontally_stretchable = false
 			if block.ingredients ~= nil then

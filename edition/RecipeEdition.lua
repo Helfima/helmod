@@ -884,7 +884,8 @@ function RecipeEdition:updateFactoryInfo(event)
         if factory.effects.productivity > 0 then sign = "+" end
         local cell_productivity = GuiElement.add(input_panel, GuiFlowH("label-productivity"))
         GuiElement.add(cell_productivity, GuiLabel("label-productivity"):caption({ "helmod_label.productivity" }))
-        self:addAlert(cell_productivity, factory, "productivity")
+        local maximum_productivity = recipe_prototype:getMaximumProductivity()
+        self:addAlert(cell_productivity, factory, "productivity", maximum_productivity)
         GuiElement.add(input_panel, GuiLabel("value-productivity"):caption(sign .. Format.formatPercent(factory.effects.productivity) .. "%"))
 
         if Player.hasFeatureQuality() then
@@ -910,11 +911,16 @@ end
 ---@param cell LuaGuiElement
 ---@param factory table
 ---@param type string
-function RecipeEdition:addAlert(cell, factory, type)
+---@param value? number
+function RecipeEdition:addAlert(cell, factory, type, value)
     if factory.cap ~= nil and factory.cap[type] ~= nil and factory.cap[type] > 0 then
         local tooltip = { "" }
         if ModelCompute.cap_reason[type].cycle ~= nil and ModelCompute.cap_reason[type].cycle > 0 and bit32.band(factory.cap[type], ModelCompute.cap_reason[type].cycle) > 0 then
             table.insert(tooltip, { string.format("helmod_cap_reason.%s-cycle", type) })
+        end
+        if ModelCompute.cap_reason[type].recipe_maximum ~= nil and ModelCompute.cap_reason[type].recipe_maximum > 0 and bit32.band(factory.cap[type], ModelCompute.cap_reason[type].recipe_maximum) > 0 then
+            local caption = Format.formatPercent(value)
+            table.insert(tooltip, { string.format("helmod_cap_reason.%s-recipe-maximum", type), caption})
         end
         if ModelCompute.cap_reason[type].module_low ~= nil and ModelCompute.cap_reason[type].module_low > 0 and bit32.band(factory.cap[type], ModelCompute.cap_reason[type].module_low) > 0 then
             if #tooltip > 1 then

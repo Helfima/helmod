@@ -275,25 +275,35 @@ end
 -------------------------------------------------------------------------------
 ---Get Index column number
 ---@return number
-function GuiElement.getIndexColumnNumber()
-
+function GuiElement.getWidthMainPanel()
   local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
   local width , height, scale = Player.getDisplaySizes()
   local width_main = math.ceil(width*display_ratio_horizontal/scale)
+  return math.ceil(width_main)
+end
 
+-------------------------------------------------------------------------------
+---Get Index column number
+---@return number
+function GuiElement.getIndexColumnNumber()
+  local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
+  local width , height, scale = Player.getDisplaySizes()
+  local width_main = math.ceil(width*display_ratio_horizontal/scale)
   return math.ceil((width_main - 100)/36)
 end
 
 -------------------------------------------------------------------------------
----Get Element column number
+---Get Element column number and width
 ---@param size number
----@return number
+---@return number, number
 function GuiElement.getElementColumnNumber(size)
-
   local display_ratio_horizontal = User.getModSetting("display_ratio_horizontal")
   local width , height, scale = Player.getDisplaySizes()
   local width_main = math.ceil(width*display_ratio_horizontal/scale)
-  return math.max(5, math.floor((width_main-600)/(2*size)))
+  local width_cell = (width_main-550)/2
+  local item_count = math.floor(width_cell/size)
+  local count = math.max(5, item_count)
+  return count, count*size
 end
 
 -------------------------------------------------------------------------------
