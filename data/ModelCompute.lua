@@ -574,7 +574,8 @@ function ModelCompute.prepareBlockElements(block)
 
                 lua_product.spoil = product:getSpoil()
                 if child.spoilage ~= nil and lua_product.spoil ~= nil then
-                    child.spoilage.products[product_key] = {spoil = lua_product.spoil, percent_spoiled=lua_product.percent_spoiled, amount = product:getAmount()}
+                    local amount = product:getAmount()
+                    child.spoilage.products[product_key] = {spoil = lua_product.spoil, percent_spoiled=lua_product.percent_spoiled, amount = amount}
                 end
 
                 block_products[product_key] = {
@@ -596,7 +597,8 @@ function ModelCompute.prepareBlockElements(block)
 
                 lua_ingredient.spoil = product:getSpoil()
                 if child.spoilage ~= nil and lua_ingredient.spoil ~= nil then
-                    child.spoilage.ingredients[ingredient_key] = {spoil = lua_ingredient.spoil, amount = product:getAmount()}
+                    local amount = product:getAmount()
+                    child.spoilage.ingredients[ingredient_key] = {spoil = lua_ingredient.spoil, amount = amount}
                 end
 
                 block_ingredients[ingredient_key] = {

@@ -423,7 +423,7 @@ function GuiElement.maskSpoil(parent, element)
   if element == nil or element.spoil_percent == nil then
     return
   end
-  local spoil_percent = element.spoil_percent
+  local spoil_percent = element.spoil_percent or 1
   local style_name = parent.style.name
   local top_padding = 29
   local left_padding = 2
