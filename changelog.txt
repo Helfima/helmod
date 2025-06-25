@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.1.13
+Date: 2025-06-25
+  Changes:
+    - Added production machine from additional_categories of recipe 
+  Bugfixes:
+    - Fixed a error for spoiling recipe in the pin panel
+    - Fixed spoilage input in recipe edition, not visible
+---------------------------------------------------------------------------------------------------
 Version: 2.1.12
 Date: 2025-06-21
   Changes:

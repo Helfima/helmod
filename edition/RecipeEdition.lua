@@ -760,7 +760,7 @@ function RecipeEdition:updateFactoryInfo(event)
         elseif recipe.type == "agricultural" then
             factories = Player.getAgriculturalTowers()
         else
-            factories = Player.getProductionsCrafting(category, recipe)
+            factories = Player.getAllProductionsCrafting(recipe)
         end
 
         local factory_table_panel = GuiElement.add(scroll_panel, GuiTable("factory-table"):column(5))

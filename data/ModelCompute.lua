@@ -360,6 +360,7 @@ function ModelCompute.finalizeBlock(block, factor)
             for _, recipe in pairs(spoilage_recipes.recipes) do
                 local spoil_product = {spoil=1, spoil_amount=0, count=0}
                 for key, spoilage in pairs(recipe.spoilage.ingredients) do
+                    recipe.spoilage.has_spoil = true
                     if spoilage_recipes.products[key] ~= nil then
                         spoilage.spoil = spoilage_recipes.products[key].spoil_out
                     end
@@ -371,6 +372,7 @@ function ModelCompute.finalizeBlock(block, factor)
                     end
                 end
                 for key, spoilage in pairs(recipe.spoilage.products) do
+                    recipe.spoilage.has_spoil = true
                     if recipe.spoilage.ingredients[key] ~= nil then
                         spoilage.spoil = 1   
                     end
