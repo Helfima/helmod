@@ -203,8 +203,11 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
 
   if not(User.getSetting("pin_panel_column_hide_machine")) then
     ---col factory
+    local cell_factory = GuiElement.add(gui_table, GuiFlowH("factory", recipe.id))
     local factory = recipe.factory
-    GuiElement.add(gui_table, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "factory"):index(recipe.id):element(factory):tooltip("tooltip.smart-pipette"):color(GuiElement.color_button_default):byLimit(block.by_limit):mask(is_done))
+    if factory ~= nil then
+      GuiElement.add(cell_factory, GuiCellFactory(self.classname, "pipette-entity", recipe.id, "factory"):index(recipe.id):element(factory):tooltip("tooltip.smart-pipette"):color(GuiElement.color_button_default):byLimit(block.by_limit):mask(is_done))
+    end
   end
 
   if not(User.getSetting("pin_panel_column_hide_product")) then

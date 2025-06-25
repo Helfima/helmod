@@ -157,6 +157,29 @@ function RecipePrototype:getCategory()
 end
 
 -------------------------------------------------------------------------------
+---Return additonnal categories of Prototype
+---@return {[uint]:string}
+function RecipePrototype:getAdditionnalCategories()
+    if self.lua_prototype ~= nil then
+        return self.lua_prototype.additional_categories or {}
+    end
+    return {}
+end
+
+-------------------------------------------------------------------------------
+---Return additonnal categories of Prototype
+---@return {[uint]:string}
+function RecipePrototype:getAllCategories()
+    if self.lua_prototype ~= nil then
+        local categories = self:getAdditionnalCategories()
+        local category = self:getCategory()
+        table.insert(categories, 1, category)
+        return categories
+    end
+    return {}
+end
+
+-------------------------------------------------------------------------------
 ---Return products array of Prototype (duplicates are combined into one entry)
 ---@param factory table
 ---@return table

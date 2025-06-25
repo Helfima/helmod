@@ -836,6 +836,29 @@ end
 
 -------------------------------------------------------------------------------
 ---Return list of productions
+---@param lua_recipe table
+---@return table
+function Player.getAllProductionsCrafting(lua_recipe)
+    local all_productions = {}
+    local all_ready = {}
+    local recipe_prototype = RecipePrototype(lua_recipe)
+    local categories = recipe_prototype:getAllCategories()
+    for _, category in pairs(categories) do
+        local productions = Player.getProductionsCrafting(category, lua_recipe)
+        if productions ~= nil then
+            for _, production in pairs(productions) do
+                if all_ready[production.name] == nil  then
+                    table.insert(all_productions, production)
+                    all_ready[production.name] = true
+                end
+            end
+        end
+    end
+    return all_productions
+end
+
+-------------------------------------------------------------------------------
+---Return list of productions
 ---@param category string
 ---@param lua_recipe table
 ---@return table
