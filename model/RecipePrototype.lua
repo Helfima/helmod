@@ -626,30 +626,35 @@ function RecipePrototype:getIngredients(factory)
             end
         elseif self.lua_type ~= "energy" then
             local consumption_effect = 1
+            local factory_speed = 1
             if factory ~= nil then
                 if factory.effects ~= nil then
                     consumption_effect = 1 + (factory.effects.consumption or 0)
+                end
+                factory_speed = factory.speed or 1
+                if factory_speed == 0 then
+                    factory_speed = 1
                 end
             end
             ---recipe
             if energy_type == "burner" then
                 if energy_prototype ~= nil and energy_prototype:getFuelCount() ~= nil then
                     local fuel_count = energy_prototype:getFuelCount()
-                    local factor = self:getEnergy() * consumption_effect / factory.speed
+                    local factor = self:getEnergy() * consumption_effect / factory_speed
                     local burner_ingredient = { name = fuel_count.name, type = fuel_count.type,
                         amount = fuel_count.count * factor, burnt = true }
                     table.insert(raw_ingredients, burner_ingredient)
                 end
             elseif energy_type == "heat" then
                 local amount = factory_prototype:getEnergyConsumption()
-                local factor = self:getEnergy() * consumption_effect / factory.speed
+                local factor = self:getEnergy() * consumption_effect / factory_speed
                 local ingredient = { name = "steam-heat", type = "energy", amount = amount * factor }
                 table.insert(raw_ingredients, ingredient)
             elseif energy_type == "fluid" then
                 local fluid_fuel = factory_prototype:getFluidFuelPrototype()
                 if fluid_fuel ~= nil and fluid_fuel:native() ~= nil then
                     local amount = factory_prototype:getFluidConsumption()
-                    local factor = self:getEnergy() * consumption_effect / factory.speed
+                    local factor = self:getEnergy() * consumption_effect / factory_speed
                     local burner_ingredient = { name = fluid_fuel:native().name, type = "fluid", amount = amount * factor,
                         burnt = true, temperature = fluid_fuel.temperature }
                     table.insert(raw_ingredients, burner_ingredient)
