@@ -22,6 +22,7 @@ require "dialog.RichTextPanel"
 
 require "edition.LogisticEdition"
 require "edition.ModelEdition"
+require "edition.BlockEdition"
 require "edition.RecipeEdition"
 require "edition.ParametersEdition"
 require "edition.ProductEdition"
@@ -100,6 +101,7 @@ function Controller:prepare()
 
   table.insert(forms, LogisticEdition("HMLogisticEdition"))
   table.insert(forms, ModelEdition("HMModelEdition"))
+  table.insert(forms, BlockEdition("HMBlockEdition"))
   table.insert(forms, RecipeEdition("HMRecipeEdition"))
   table.insert(forms, ParametersEdition("HMParametersEdition"))
   table.insert(forms, ProductEdition("HMProductEdition"))
