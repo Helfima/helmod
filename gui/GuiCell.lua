@@ -734,7 +734,7 @@ function GuiCellBlockM:create(parent)
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
   row1.style.top_padding=2
   row1.style.bottom_padding=3
-  row1.style.width = 36
+  --row1.style.width = 36
 
   if block_infos.icon ~= nil then
     local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
