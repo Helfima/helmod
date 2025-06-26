@@ -581,6 +581,7 @@ function ProductionPanel:updateSubMenuRightPanel(model, block)
 	local group_models = GuiElement.add(right_panel, GuiFlowH("group_models"))
 	group_models.style.horizontal_spacing = button_spacing
 	GuiElement.add(group_models, GuiButton("HMModelEdition", "OPEN", model.id, block_id):sprite("menu", defines.sprites.edit_document.black, defines.sprites.edit_document.black):style("helmod_button_menu"):tooltip({ "helmod_panel.model-edition" }))
+	GuiElement.add(group_models, GuiButton("HMBlockEdition", "OPEN", model.id, block_id):sprite("menu", defines.sprites.edit_subdocument.black, defines.sprites.edit_document.black):style("helmod_button_menu"):tooltip({ "helmod_block_edition_panel.pane-title" }))
 	GuiElement.add(group_models, GuiButton("HMParametersEdition", "OPEN", model.id, block_id):sprite("menu", defines.sprites.parameter.black, defines.sprites.parameter.black):style("helmod_button_menu"):tooltip({"helmod_parameters_edition_panel.title" }))
 	local button_model_up = GuiElement.add(group_models, GuiButton(self.classname, "model-index-up", model.id, block_id):sprite("menu", defines.sprites.arrow_left.black, defines.sprites.arrow_left.black):style("helmod_button_menu"):tooltip({ "helmod_panel.model-index-up" }))
 	button_model_up.enabled = model.owner == Player.native().name
