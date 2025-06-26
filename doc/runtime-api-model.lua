@@ -151,6 +151,11 @@
 ---@field primary_icon ElementData
 ---@field secondary_icon ElementData
 
+---@class BlockInfosData
+---@field title string
+---@field icon ElementData
+---@field note string
+
 ---@class ModelData
 ---@field id string
 ---@field index_id number
