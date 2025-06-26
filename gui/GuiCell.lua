@@ -782,7 +782,10 @@ function GuiCellModel:create(parent)
   local model_infos = Model.getModelInfos(element)
 
   local first_block = element.block_root or Model.firstChild(element.blocks or {})
-  if false and model_infos.primary_icon ~= nil then
+  local block_infos = Model.getBlockInfos(first_block)
+  if block_infos.icon ~= nil then
+    local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(block_infos.icon.type, block_infos.icon.name.name):tooltip(tooltip))
+  elseif false and model_infos.primary_icon ~= nil then
     local primary_icon = model_infos.primary_icon
     local button = GuiElement.add(row1, GuiButtonSelectSprite(unpack(self.name)):choose(primary_icon.type, primary_icon.name):tooltip(tooltip):style(defines.styles.button.menu_flat))
     button.locked = true
