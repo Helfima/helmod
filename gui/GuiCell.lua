@@ -659,15 +659,28 @@ function GuiCellBlock:create(parent)
     time = element.time
   }
 
-  local first_recipe = Model.firstChild(element.children)
-  if first_recipe ~= nil then
+  local block_infos = Model.getBlockInfos(element)
+  if block_infos.icon ~= nil then
     local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
-    local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
-    
-    GuiElement.infoRecipe(button, first_recipe)
+    local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(block_infos.icon.type, block_infos.icon.name.name):tooltip(tooltip))
+    self:add_mask(button, color, 16)
   else
-    local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black))
-    button.style.width = 36
+    local first_recipe = Model.firstChild(element.children)
+    if first_recipe ~= nil then
+      local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
+      local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
+      
+      GuiElement.infoRecipe(button, first_recipe)
+      local recipe_prototype = RecipePrototype(element.name, first_recipe.type)
+      if recipe_prototype:native() == nil then
+        button.tooltip = "ERROR: Recipe ".. element.name .." not exist in game"
+        button.sprite = "utility/warning_icon"
+        row1.style = "helmod_frame_element_w30_red_1"
+      end
+    else
+      local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black))
+      button.style.width = 36
+    end
   end
 
   local width = 50
@@ -710,21 +723,28 @@ function GuiCellBlockM:create(parent)
     time = element.time
   }
 
-  local first_recipe = Model.firstChild(element.children)
-  if first_recipe ~= nil then
+  local block_infos = Model.getBlockInfos(element)
+  if block_infos.icon ~= nil then
     local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
-    local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
-    
-    GuiElement.infoRecipe(button, first_recipe)
-    local recipe_prototype = RecipePrototype(element.name, first_recipe.type)
-    if recipe_prototype:native() == nil then
-      button.tooltip = "ERROR: Recipe ".. element.name .." not exist in game"
-      button.sprite = "utility/warning_icon"
-      row1.style = "helmod_frame_element_w30_red_1"
-    end
+    local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(block_infos.icon.type, block_infos.icon.name.name):tooltip(tooltip))
+    self:add_mask(button, color, 16)
   else
-    local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black))
-    button.style.width = 36
+    local first_recipe = Model.firstChild(element.children)
+    if first_recipe ~= nil then
+      local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
+      local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
+      
+      GuiElement.infoRecipe(button, first_recipe)
+      local recipe_prototype = RecipePrototype(element.name, first_recipe.type)
+      if recipe_prototype:native() == nil then
+        button.tooltip = "ERROR: Recipe ".. element.name .." not exist in game"
+        button.sprite = "utility/warning_icon"
+        row1.style = "helmod_frame_element_w30_red_1"
+      end
+    else
+      local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black))
+      button.style.width = 36
+    end
   end
 
   local width = 36
