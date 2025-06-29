@@ -5,6 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "arg": [],
+            "name": "launch",
+            "program": "${workspaceFolder}/graphics/icon_svg_builder.lua",
+            "request": "launch",
+            "stopOnEntry": true,
+            "type": "lua"
+        },
+        {
             "type": "factoriomod",
             "request": "launch",
             "name": "Factorio Mod Debug"
