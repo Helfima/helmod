@@ -42,31 +42,52 @@ end
 ---@param event LuaEvent
 function BlockEdition:updateInfo(event)
     local model, block = self:getParameterObjects()
-    local info_panel = self:getFramePanel("information")
-    info_panel.clear()
-
-    GuiElement.add(info_panel, GuiLabel("label-info"):caption({ "helmod_common.information" }):style("helmod_label_title_frame"))
-
-    local block_table = GuiElement.add(info_panel, GuiTable("output-table"):column(2))
-
     local block_infos = Model.getBlockInfos(block)
-    local title_string = block_infos.title or ""
-    GuiElement.add(block_table, GuiLabel("label-title"):caption({ "helmod_panel.model-title" }))
-    local change_title = GuiElement.add(block_table, GuiTextField(self.classname, "change-title"):text(title_string))
-    change_title.style.width = 200
 
-    GuiElement.add(block_table, GuiLabel("label-primary"):caption({ "helmod_block_edition_panel.block-icon" }))
-    local icon = block_infos.icon or {}
-    local primary_type = icon.type or "signal"
-    local primary_name = icon.name
-    local primary_quality = icon.quality
-    local primary_cell = GuiElement.add(block_table, GuiFlowH())
-    primary_cell.style.horizontal_spacing = 5
-    GuiElement.add(primary_cell, GuiButtonSelectSprite(self.classname, "change-icon", "icon"):choose_with_quality(primary_type, primary_name, primary_quality))
+    -- The panel we're creating/using.
+    local info_panel = self:getFramePanel("information")
+    info_panel.clear() -- Obligatory
 
-    local flip_tooltip = {"helmod_button.remove"}
-    GuiElement.add(primary_cell, GuiButton(self.classname, "remove-icon"):sprite("menu", defines.sprites.eraser.black, defines.sprites.eraser.black):style("helmod_button_menu"):tooltip(flip_tooltip))
+    -- The title at the top of the panel.
+    local info_panel_title = GuiLabel("label-info")
+    info_panel_title:caption({ "helmod_common.information" })
+    info_panel_title:style("helmod_label_title_frame")
+    GuiElement.add(info_panel, info_panel_title)
 
+    -- The form where the user enters info such as title and icons.
+    local form = GuiElement.add(info_panel, GuiTable("output-table"):column(2))
+
+    -- Title input label
+    local title_label = GuiLabel("label-title")
+    title_label:caption({ "helmod_block_edition_panel.block-title" })
+    GuiElement.add(form, title_label)
+    -- Title input field
+    local title_text_entry_field = GuiTextField(self.classname, "change-title")
+    local prepopulated_title = block_infos.title or ""
+    title_text_entry_field:text(prepopulated_title)
+    GuiElement.add(form, title_text_entry_field).style.width = 200
+
+    -- Primary icon input label
+    local primary_icon_label = GuiLabel("label-primary-icon"):caption({ "helmod_block_edition_panel.block-icon-primary" })
+    GuiElement.add(form, primary_icon_label)
+    -- The container which holds the primary icon option buttons.
+    local primary_icon_options_container = GuiElement.add(form, GuiFlowH())
+    primary_icon_options_container.style.horizontal_spacing = 5
+    -- The primary icon picker button.
+    local prepopulated_primary_icon = block_infos.primary_icon or {}
+    local primary_icon_picker = GuiButtonSelectSprite(self.classname, "change-primary-icon", "icon")
+    primary_icon_picker:choose_with_quality(
+        prepopulated_primary_icon.type or "signal",
+        prepopulated_primary_icon.name,
+        prepopulated_primary_icon.quality
+    )
+    GuiElement.add(primary_icon_options_container, primary_icon_picker)
+    -- Remove primary icon button.
+    local remove_icon_button = GuiButton(self.classname, "remove-primary-icon")
+    remove_icon_button:sprite("menu", defines.sprites.eraser.black, defines.sprites.eraser.black)
+    remove_icon_button:style("helmod_button_menu")
+    remove_icon_button:tooltip({"helmod_button.remove"})
+    GuiElement.add(primary_icon_options_container, remove_icon_button)
 end
 
 -------------------------------------------------------------------------------
@@ -98,20 +119,19 @@ function BlockEdition:onEvent(event)
             Controller:send("on_gui_refresh", event)
         end
         
-        if event.action == "change-icon" then
+        if event.action == "change-primary-icon" then
             local element_type = event.element.elem_type
             local element_value = event.element.elem_value
             if element_value ~= nil then
-                local icon_name = event.item1
                 local block_infos = Model.getBlockInfos(block)
-                block_infos[icon_name] = {type=element_type, name=element_value, quality=element_value.quality}
+                block_infos.primary_icon = {type=element_type, name=element_value, quality=element_value.quality}
                 Controller:send("on_gui_recipe_update", event)
             end
         end
 
-        if event.action == "remove-icon" then
+        if event.action == "remove-primary-icon" then
             local block_infos = Model.getBlockInfos(block)
-            block_infos["icon"] = nil
+            block_infos.primary_icon = nil
             Controller:send("on_gui_refresh", event)
         end
 
