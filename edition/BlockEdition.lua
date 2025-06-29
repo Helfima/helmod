@@ -88,6 +88,13 @@ function BlockEdition:updateInfo(event)
     remove_icon_button:style("helmod_button_menu")
     remove_icon_button:tooltip({"helmod_button.remove"})
     GuiElement.add(primary_icon_options_container, remove_icon_button)
+    -- Switch icons button.
+    local switch_icons_button = GuiButton(self.classname, "switch-icons")
+    switch_icons_button:sprite("menu", defines.sprites.arrow_bottom.black, defines.sprites.arrow_bottom.black)
+    switch_icons_button:style("helmod_button_menu")
+    switch_icons_button:tooltip({"helmod_button.flip-icons"})
+    GuiElement.add(primary_icon_options_container, switch_icons_button)
+
 
     -- Secondary icon input label
     local secondary_icon_label = GuiLabel("label-secondary-icon"):caption({ "helmod_block_edition_panel.block-icon-secondary" })
@@ -154,6 +161,19 @@ function BlockEdition:onEvent(event)
         if event.action == "remove-primary-icon" then
             local block_infos = Model.getBlockInfos(block)
             block_infos.primary_icon = nil
+            Controller:send("on_gui_refresh", event)
+        end
+
+        if event.action == "switch-icons" then
+            local block_infos = Model.getBlockInfos(block)
+            -- Store the current primary and secondary icons in memory.
+            -- If we overwrite the icons without storing them first,
+            -- we lose the original icon before we can switch them.
+            local primary_icon = block_infos.primary_icon
+            local secondary_icon = block_infos.secondary_icon
+            -- Swap the primary and secondary icons.
+            block_infos.primary_icon = secondary_icon
+            block_infos.secondary_icon = primary_icon
             Controller:send("on_gui_refresh", event)
         end
 
