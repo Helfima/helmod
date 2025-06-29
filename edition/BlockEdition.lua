@@ -88,6 +88,28 @@ function BlockEdition:updateInfo(event)
     remove_icon_button:style("helmod_button_menu")
     remove_icon_button:tooltip({"helmod_button.remove"})
     GuiElement.add(primary_icon_options_container, remove_icon_button)
+
+    -- Secondary icon input label
+    local secondary_icon_label = GuiLabel("label-secondary-icon"):caption({ "helmod_block_edition_panel.block-icon-secondary" })
+    GuiElement.add(form, secondary_icon_label)
+    -- The container which holds the secondary icon option buttons.
+    local secondary_icon_options_container = GuiElement.add(form, GuiFlowH())
+    secondary_icon_options_container.style.horizontal_spacing = 5
+    -- The secondary icon picker button.
+    local prepopulated_secondary_icon = block_infos.secondary_icon or {}
+    local secondary_icon_picker = GuiButtonSelectSprite(self.classname, "change-secondary-icon", "icon")
+    secondary_icon_picker:choose_with_quality(
+        prepopulated_secondary_icon.type or "signal",
+        prepopulated_secondary_icon.name,
+        prepopulated_secondary_icon.quality
+    )
+    GuiElement.add(secondary_icon_options_container, secondary_icon_picker)
+    -- Remove secondary icon button.
+    local remove_icon_button = GuiButton(self.classname, "remove-secondary-icon")
+    remove_icon_button:sprite("menu", defines.sprites.eraser.black, defines.sprites.eraser.black)
+    remove_icon_button:style("helmod_button_menu")
+    remove_icon_button:tooltip({"helmod_button.remove"})
+    GuiElement.add(secondary_icon_options_container, remove_icon_button)
 end
 
 -------------------------------------------------------------------------------
@@ -132,6 +154,22 @@ function BlockEdition:onEvent(event)
         if event.action == "remove-primary-icon" then
             local block_infos = Model.getBlockInfos(block)
             block_infos.primary_icon = nil
+            Controller:send("on_gui_refresh", event)
+        end
+
+        if event.action == "change-secondary-icon" then
+            local element_type = event.element.elem_type
+            local element_value = event.element.elem_value
+            if element_value ~= nil then
+                local block_infos = Model.getBlockInfos(block)
+                block_infos.secondary_icon = {type=element_type, name=element_value, quality=element_value.quality}
+                Controller:send("on_gui_recipe_update", event)
+            end
+        end
+
+        if event.action == "remove-secondary-icon" then
+            local block_infos = Model.getBlockInfos(block)
+            block_infos.secondary_icon = nil
             Controller:send("on_gui_refresh", event)
         end
 
