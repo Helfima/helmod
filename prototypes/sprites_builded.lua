@@ -27,8 +27,6 @@ local mipmaps = {
 {name="download_document_white", size=64, count=4},
 {name="edit_document_black", size=64, count=4},
 {name="edit_document_white", size=64, count=4},
-{name="edit_subdocument_black", size=64, count=4},
-{name="edit_subdocument_white", size=64, count=4},
 {name="education_black", size=64, count=4},
 {name="education_white", size=64, count=4},
 {name="eraser_black", size=64, count=4},

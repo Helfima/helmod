@@ -249,7 +249,6 @@ function Model.newBlock(model, child)
   model.block_id = model.block_id + 1
 
   local blockModel = {}
-  blockModel.infos = {}
   blockModel.class = "Block"
   blockModel.id = "block_"..model.block_id
   blockModel.index = 0
@@ -439,17 +438,6 @@ function Model.getModelInfos(model)
     model.infos = {}
   end
   return model.infos
-end
-
--------------------------------------------------------------------------------
----Return quality element key
----@param model BlockData
----@return BlockInfosData
-function Model.getBlockInfos(block)
-  if block.infos == nil then
-    block.infos = {}
-  end
-  return block.infos
 end
 
 -------------------------------------------------------------------------------
