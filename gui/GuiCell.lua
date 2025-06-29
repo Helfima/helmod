@@ -736,15 +736,18 @@ function GuiCellBlockM:create(parent)
   row1.style.bottom_padding=3
   --row1.style.width = 36
 
+  -- Initialize the button variable for scoping purposes.
+  local button = nil
+  --Apply the icon if one exists, with fallbacks.
   if block_infos.primary_icon ~= nil then
     local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
-    local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(block_infos.primary_icon.type, block_infos.primary_icon.name.name):tooltip(tooltip))
+    button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(block_infos.primary_icon.type, block_infos.primary_icon.name.name):tooltip(tooltip))
     self:add_mask(button, color, 16)
   else
     local first_recipe = Model.firstChild(element.children)
     if first_recipe ~= nil then
       local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
-      local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
+      button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
       
       GuiElement.infoRecipe(button, first_recipe)
       local recipe_prototype = RecipePrototype(element.name, first_recipe.type)
@@ -754,10 +757,39 @@ function GuiCellBlockM:create(parent)
         row1.style = "helmod_frame_element_w30_red_1"
       end
     else
-      local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black))
-      button.style.width = 36
+      button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black))
     end
   end
+
+  -- Button formatting
+  local button_size = 36
+  button.style.width = button_size
+  button.style.height = button_size
+
+  -- Apply the secondary icon if one is set in the block data.
+  if block_infos.secondary_icon ~= nil then
+    local secondary_sprite = GuiSprite("secondary-icon")
+    -- name.type will always be nil, so we can assume "item"
+    --local secondary_icon_type = block_infos.secondary_icon.name.type or "item"
+    -- This causes signals and stuff to flip, TODO
+    local secondary_icon_name = block_infos.secondary_icon.name.name or "item"
+    secondary_sprite:sprite("item", secondary_icon_name)
+    -- Button SHOULD have already been initialized, so we're good to use it!
+    -- We're gonna use a container to align our content, as the button itself doesn't seem to like it.
+    local secondary_icon_container = GuiElement.add(button, GuiFlow("secondary-icon-container"))
+    -- Alignment formatting is applied to the parent, not the element...
+    secondary_icon_container.style.width = button_size
+    secondary_icon_container.style.height = button_size
+    secondary_icon_container.style.horizontal_align = "right"
+    secondary_icon_container.style.vertical_align = "bottom"
+    local secondary_icon_element_handle = GuiElement.add(secondary_icon_container, secondary_sprite)
+    local secondary_icon_size = 18
+    secondary_icon_element_handle.style.width = secondary_icon_size
+    secondary_icon_element_handle.style.height = secondary_icon_size
+    secondary_icon_element_handle.style.stretch_image_to_widget_size = true
+    secondary_icon_element_handle.ignored_by_interaction = true
+  end
+
 
   local width = 36
   if self.m_by_limit then
@@ -805,19 +837,50 @@ function GuiCellModel:create(parent)
   end
   
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
+  -- Initialize the button variable for scoping purposes.
+  local button = nil
   --Apply the icon if one exists, with fallbacks.
   if block_infos.primary_icon ~= nil then
-    local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(block_infos.primary_icon.type, block_infos.primary_icon.name.name):tooltip(tooltip))
+    button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(block_infos.primary_icon.type, block_infos.primary_icon.name.name):tooltip(tooltip))
   elseif false and model_infos.primary_icon ~= nil then
     local primary_icon = model_infos.primary_icon
-    local button = GuiElement.add(row1, GuiButtonSelectSprite(unpack(self.name)):choose(primary_icon.type, primary_icon.name):tooltip(tooltip):style(defines.styles.button.menu_flat))
+    button = GuiElement.add(row1, GuiButtonSelectSprite(unpack(self.name)):choose(primary_icon.type, primary_icon.name):tooltip(tooltip):style(defines.styles.button.menu_flat))
     button.locked = true
   elseif first_block ~= nil and first_block.name ~= "" then
-    local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_block.type, first_block.name):tooltip(tooltip))
+    button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_block.type, first_block.name):tooltip(tooltip))
   else
-    local button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black))
-    button.style.width = 36
+    button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black))
   end
+
+  -- Button formatting
+  local button_size = 36
+  button.style.width = button_size
+  button.style.height = button_size
+
+  -- Apply the secondary icon if one is set in the block data.
+  if block_infos.secondary_icon ~= nil then
+    local secondary_sprite = GuiSprite("secondary-icon")
+    -- name.type will always be nil, so we can assume "item"
+    --local secondary_icon_type = block_infos.secondary_icon.name.type or "item"
+    -- This causes signals and stuff to flip, TODO
+    local secondary_icon_name = block_infos.secondary_icon.name.name or "item"
+    secondary_sprite:sprite("item", secondary_icon_name)
+    -- Button SHOULD have already been initialized, so we're good to use it!
+    -- We're gonna use a container to align our content, as the button itself doesn't seem to like it.
+    local secondary_icon_container = GuiElement.add(button, GuiFlow("secondary-icon-container"))
+    -- Alignment formatting is applied to the parent, not the element...
+    secondary_icon_container.style.width = button_size
+    secondary_icon_container.style.height = button_size
+    secondary_icon_container.style.horizontal_align = "right"
+    secondary_icon_container.style.vertical_align = "bottom"
+    local secondary_icon_element_handle = GuiElement.add(secondary_icon_container, secondary_sprite)
+    local secondary_icon_size = 18
+    secondary_icon_element_handle.style.width = secondary_icon_size
+    secondary_icon_element_handle.style.height = secondary_icon_size
+    secondary_icon_element_handle.style.stretch_image_to_widget_size = true
+    secondary_icon_element_handle.ignored_by_interaction = true
+  end
+
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
   local count = 1
   local caption3 = Format.formatNumberFactory(count)
