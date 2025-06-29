@@ -153,7 +153,8 @@
 
 ---@class BlockInfosData
 ---@field title string
----@field icon ElementData
+---@field primary_icon ElementData
+---@field secondary_icon ElementData
 ---@field note string
 
 ---@class ModelData

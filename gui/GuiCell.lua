@@ -660,9 +660,9 @@ function GuiCellBlock:create(parent)
   }
 
   local block_infos = Model.getBlockInfos(element)
-  if block_infos.icon ~= nil then
+  if block_infos.primary_icon ~= nil then
     local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
-    local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(block_infos.icon.type, block_infos.icon.name.name):tooltip(tooltip))
+    local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(block_infos.primary_icon.type, block_infos.primary_icon.name.name):tooltip(tooltip))
     self:add_mask(button, color, 16)
   else
     local first_recipe = Model.firstChild(element.children)
@@ -736,9 +736,9 @@ function GuiCellBlockM:create(parent)
   row1.style.bottom_padding=3
   --row1.style.width = 36
 
-  if block_infos.icon ~= nil then
+  if block_infos.primary_icon ~= nil then
     local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
-    local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(block_infos.icon.type, block_infos.icon.name.name):tooltip(tooltip))
+    local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(block_infos.primary_icon.type, block_infos.primary_icon.name.name):tooltip(tooltip))
     self:add_mask(button, color, 16)
   else
     local first_recipe = Model.firstChild(element.children)
@@ -806,8 +806,8 @@ function GuiCellModel:create(parent)
   
   local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
   --Apply the icon if one exists, with fallbacks.
-  if block_infos.icon ~= nil then
-    local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(block_infos.icon.type, block_infos.icon.name.name):tooltip(tooltip))
+  if block_infos.primary_icon ~= nil then
+    local button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(block_infos.primary_icon.type, block_infos.primary_icon.name.name):tooltip(tooltip))
   elseif false and model_infos.primary_icon ~= nil then
     local primary_icon = model_infos.primary_icon
     local button = GuiElement.add(row1, GuiButtonSelectSprite(unpack(self.name)):choose(primary_icon.type, primary_icon.name):tooltip(tooltip):style(defines.styles.button.menu_flat))
