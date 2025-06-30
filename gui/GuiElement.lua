@@ -121,6 +121,7 @@ function GuiElement.getSprite(type, name, format)
   elseif type ~= nil and name ~= nil then
     if type == "resource" then type = "entity" end
     if type == "rocket" then type = "item" end
+    if type == "signal" or type == "virtual" then type = "virtual-signal" end
     if Player.is_valid_sprite_path(string.format("%s/%s", type, name)) then
       sprite = string.format(format, type, name)
     elseif Player.is_valid_sprite_path(string.format("%s/%s", "item", name)) then
@@ -455,6 +456,56 @@ function GuiElement.maskSpoil(parent, element)
   mask_frame.style.width = width_front
   mask_frame.style.height = height_front
   mask_frame.ignored_by_interaction = true
+end
+
+-------------------------------------------------------------------------------
+---Add secondary icon mmask
+---@param parent LuaGuiElement
+---@param block_infos BlockInfosData
+function GuiElement.maskSecondaryIcon(parent, block_infos)
+  if parent ~= nil and block_infos ~= nil and block_infos.secondary_icon ~= nil then
+    local secondary_icon_type = block_infos.secondary_icon.name.type or "item"
+    local secondary_icon_name = block_infos.secondary_icon.name.name or "item"
+    local secondary_icon_quality = block_infos.secondary_icon.quality
+    local container_secondary = GuiElement.add(parent, GuiFlow("secondary-info"))
+    local frame_secondary = GuiElement.add(container_secondary, GuiFrame("secondary-frame"):style("helmod_frame_element_w80", "gray", 6))
+    frame_secondary.style.width = 20
+    frame_secondary.style.margin = 0
+    frame_secondary.style.padding = 1
+    local mask_secondary = GuiElement.add(frame_secondary, GuiSprite("secondary-info"):sprite(secondary_icon_type, secondary_icon_name))
+    container_secondary.style.top_padding = 15
+    container_secondary.style.left_padding = 15
+    mask_secondary.style.width = 20
+    mask_secondary.style.height = 20
+    mask_secondary.style.stretch_image_to_widget_size = true
+    mask_secondary.ignored_by_interaction = true
+    GuiElement.maskQuality(mask_secondary, secondary_icon_quality, 10, 10)
+  end
+end
+
+-------------------------------------------------------------------------------
+---Add secondary icon mmask
+---@param parent LuaGuiElement
+---@param block_infos BlockInfosData
+function GuiElement.maskSecondaryIconM(parent, block_infos)
+  if parent ~= nil and block_infos ~= nil and block_infos.secondary_icon ~= nil then
+    local secondary_icon_type = block_infos.secondary_icon.name.type or "item"
+    local secondary_icon_name = block_infos.secondary_icon.name.name or "item"
+    local secondary_icon_quality = block_infos.secondary_icon.quality
+    local container_secondary = GuiElement.add(parent, GuiFlow("secondary-info"))
+    local frame_secondary = GuiElement.add(container_secondary, GuiFrame("secondary-frame"):style("helmod_frame_element_w80", "gray", 6))
+    frame_secondary.style.width = 14
+    frame_secondary.style.margin = 0
+    frame_secondary.style.padding = 1
+    local mask_secondary = GuiElement.add(frame_secondary, GuiSprite("secondary-info"):sprite(secondary_icon_type, secondary_icon_name))
+    container_secondary.style.top_padding = 12
+    container_secondary.style.left_padding = 12
+    mask_secondary.style.width = 14
+    mask_secondary.style.height = 14
+    mask_secondary.style.stretch_image_to_widget_size = true
+    mask_secondary.ignored_by_interaction = true
+    GuiElement.maskQuality(mask_secondary, secondary_icon_quality, 6, 6)
+  end
 end
 
 -------------------------------------------------------------------------------

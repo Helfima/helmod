@@ -1176,11 +1176,6 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 	local tree_up = GuiElement.add(cell_action, GuiButton(self.classname, "tree-recipe-up", model.id, block.id, recipe.id):sprite("menu", defines.sprites.arrow_right.black, defines.sprites.arrow_right.black):style("helmod_button_menu_sm"):tooltip({ "tooltip.up-element-in-tree", User.getModSetting("row_move_step") }))
 	GuiElement.add(cell_action, GuiButton(self.classname, uri_button_bottom, model.id, block.id, recipe.id):sprite("menu", defines.sprites.arrow_bottom.black, defines.sprites.arrow_bottom.black):style("helmod_button_menu_sm"):tooltip({ "tooltip.down-element", User.getModSetting("row_move_step") }))
 
-	---conversion block
-	if recipe.index > 0 then
-		--GuiElement.add(cell_action, GuiButton(self.classname, "conversion-recipe-block", model.id, block.id, recipe.id):sprite("menu", defines.sprites.hangar.black, defines.sprites.hangar.black):style("helmod_button_menu_sm"):tooltip({ "tooltip.conversion-recipe-block" }))
-	end
-
 	local recipe_color = User.getThumbnailColor(defines.thumbnail_color.names.recipe_default)
 	---common cols
 	self:addTableRowCommon(gui_table, recipe)

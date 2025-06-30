@@ -15,12 +15,10 @@ end)
 function GuiSprite:sprite(type, name)
   if type == "menu" then
     self.options.sprite = GuiElement.getSprite(name)
-  elseif type == "virtual" then
-    self.options.sprite = string.format("virtual-signal/%s", name)
   elseif name == nil then
     self.options.sprite = type
   else
-    self.options.sprite = string.format("%s/%s", type, name)
+    self.options.sprite = GuiElement.getSprite(type, name)
   end
   return self
 end
