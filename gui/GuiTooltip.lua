@@ -571,17 +571,18 @@ function GuiTooltipModel:create()
 		local element_label = Player.getLocalisedName({ type = type, name = first_block.name })
 		GuiTooltip.appendLineTitle(tooltip, type, first_block.name, element_label)
 		
-		local model_infos = Model.getModelInfos(element)
+		local first_block = element.block_root or Model.firstChild(element.blocks or {})
+		local block_infos = Model.getBlockInfos(first_block)
 
-		GuiTooltip.appendLine(tooltip, nil, { "helmod_panel.model-title" }, model_infos.title or "")
+		GuiTooltip.appendLine(tooltip, nil, { "helmod_panel.model-title" }, block_infos.title or "")
 		GuiTooltip.appendLine(tooltip, nil, { "helmod_result-panel.col-header-owner" }, element.owner)
 		GuiTooltip.appendLine(tooltip, nil, { "helmod_common.group" }, element.group or "")
 		
-		if element.note ~= nil and element.note ~= "" then
+		if block_infos.note ~= nil and block_infos.note ~= "" then
 			table.insert(tooltip, { "", "\n", "----------------------" })
 			table.insert(tooltip, { "", "\n", helmod_tag.font.default_bold, { "helmod_common.note" }, helmod_tag.font
 				.close })
-			table.insert(tooltip, { "", "\n", element.note or "" })
+			table.insert(tooltip, { "", "\n", block_infos.note or "" })
 		end
 		self:appendDebug(tooltip, element.block_root)
 	end

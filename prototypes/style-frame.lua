@@ -186,7 +186,7 @@ for key, position in pairs(panel_colors) do
 end
 
 local function frame_element(style_name, x, y, minimal_width, filename)
-    default_gui[style_name] = {
+    local new_style = {
         type                     = "frame_style",
         graphical_set            = {
             filename = filename,
@@ -197,10 +197,13 @@ local function frame_element(style_name, x, y, minimal_width, filename)
         right_padding            = 0,
         bottom_padding           = 2,
         left_padding             = 0,
-        minimal_width            = minimal_width,
         horizontally_stretchable = "on",
         vertically_stretchable   = "off"
     }
+    if minimal_width > 0 then
+       new_style["minimal_width"] = minimal_width
+    end
+    default_gui[style_name] = new_style
 end
 
 local style_element_suffixes = {

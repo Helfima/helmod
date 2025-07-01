@@ -458,55 +458,92 @@ function GuiElement.maskSpoil(parent, element)
   mask_frame.ignored_by_interaction = true
 end
 
--------------------------------------------------------------------------------
----Add secondary icon mmask
+---Add secondary icon mask
 ---@param parent LuaGuiElement
----@param block_infos BlockInfosData
-function GuiElement.maskSecondaryIcon(parent, block_infos)
-  if parent ~= nil and block_infos ~= nil and block_infos.secondary_icon ~= nil then
-    local secondary_icon_type = block_infos.secondary_icon.name.type or "item"
-    local secondary_icon_name = block_infos.secondary_icon.name.name or "item"
-    local secondary_icon_quality = block_infos.secondary_icon.quality
-    local container_secondary = GuiElement.add(parent, GuiFlow("secondary-info"))
-    local frame_secondary = GuiElement.add(container_secondary, GuiFrame("secondary-frame"):style("helmod_frame_element_w80", "gray", 6))
-    frame_secondary.style.width = 20
-    frame_secondary.style.margin = 0
-    frame_secondary.style.padding = 1
-    local mask_secondary = GuiElement.add(frame_secondary, GuiSprite("secondary-info"):sprite(secondary_icon_type, secondary_icon_name))
-    container_secondary.style.top_padding = 15
-    container_secondary.style.left_padding = 15
-    mask_secondary.style.width = 20
-    mask_secondary.style.height = 20
-    mask_secondary.style.stretch_image_to_widget_size = true
-    mask_secondary.ignored_by_interaction = true
-    GuiElement.maskQuality(mask_secondary, secondary_icon_quality, 10, 10)
+---@param icon_type string
+---@param icon_name string
+---@param icon_quality? string
+function GuiElement.maskSecondaryIcon(parent, icon_type, icon_name, icon_quality)
+  local container_secondary = GuiElement.add(parent, GuiFlow("secondary-info"))
+  local frame_secondary = GuiElement.add(container_secondary, GuiFrame("secondary-frame"):style("helmod_frame_element_w30", "gray", 6))
+  frame_secondary.style.width = 20
+  frame_secondary.style.margin = 0
+  frame_secondary.style.padding = 1
+  local mask_secondary = GuiElement.add(frame_secondary, GuiSprite("secondary-info"):sprite(icon_type, icon_name))
+  container_secondary.style.top_padding = 15
+  container_secondary.style.left_padding = 15
+  mask_secondary.style.width = 20
+  mask_secondary.style.height = 20
+  mask_secondary.style.stretch_image_to_widget_size = true
+  mask_secondary.ignored_by_interaction = true
+  if icon_quality ~= nil  then
+    GuiElement.maskQuality(mask_secondary, icon_quality, 10, 10)
   end
 end
 
 -------------------------------------------------------------------------------
----Add secondary icon mmask
+---Add secondary icon mask
 ---@param parent LuaGuiElement
 ---@param block_infos BlockInfosData
-function GuiElement.maskSecondaryIconM(parent, block_infos)
-  if parent ~= nil and block_infos ~= nil and block_infos.secondary_icon ~= nil then
-    local secondary_icon_type = block_infos.secondary_icon.name.type or "item"
-    local secondary_icon_name = block_infos.secondary_icon.name.name or "item"
-    local secondary_icon_quality = block_infos.secondary_icon.quality
-    local container_secondary = GuiElement.add(parent, GuiFlow("secondary-info"))
-    local frame_secondary = GuiElement.add(container_secondary, GuiFrame("secondary-frame"):style("helmod_frame_element_w80", "gray", 6))
-    frame_secondary.style.width = 14
-    frame_secondary.style.margin = 0
-    frame_secondary.style.padding = 1
-    local mask_secondary = GuiElement.add(frame_secondary, GuiSprite("secondary-info"):sprite(secondary_icon_type, secondary_icon_name))
-    container_secondary.style.top_padding = 12
-    container_secondary.style.left_padding = 12
-    mask_secondary.style.width = 14
-    mask_secondary.style.height = 14
-    mask_secondary.style.stretch_image_to_widget_size = true
-    mask_secondary.ignored_by_interaction = true
-    GuiElement.maskQuality(mask_secondary, secondary_icon_quality, 6, 6)
+function GuiElement.maskBlockSecondaryIcon(parent, block_infos)
+  if parent == nil or block_infos == nil then
+    return
+  end
+  if block_infos.secondary_icon ~= nil then
+    local icon_type = block_infos.secondary_icon.name.type or "item"
+    local icon_name = block_infos.secondary_icon.name.name or "item"
+    local icon_quality = block_infos.secondary_icon.quality
+    GuiElement.maskSecondaryIcon(parent, icon_type, icon_name, icon_quality)
+  elseif block_infos.location ~= nil and block_infos.location.name ~= "nauvis" then
+    local icon_type = block_infos.location.type or "item"
+    local icon_name = block_infos.location.name or "item"
+    GuiElement.maskSecondaryIcon(parent, icon_type, icon_name)
   end
 end
+
+---Add secondary medium icon mask
+---@param parent LuaGuiElement
+---@param icon_type string
+---@param icon_name string
+---@param icon_quality? string
+function GuiElement.maskSecondaryIconM(parent, icon_type, icon_name, icon_quality)
+  local container_secondary = GuiElement.add(parent, GuiFlow("secondary-info"))
+  local frame_secondary = GuiElement.add(container_secondary, GuiFrame("secondary-frame"):style("helmod_frame_element_w30", "gray", 6))
+  frame_secondary.style.width = 14
+  frame_secondary.style.margin = 0
+  frame_secondary.style.padding = 1
+  local mask_secondary = GuiElement.add(frame_secondary, GuiSprite("secondary-info"):sprite(icon_type, icon_name))
+  container_secondary.style.top_padding = 12
+  container_secondary.style.left_padding = 12
+  mask_secondary.style.width = 14
+  mask_secondary.style.height = 14
+  mask_secondary.style.stretch_image_to_widget_size = true
+  mask_secondary.ignored_by_interaction = true
+  if icon_quality ~= nil  then
+    GuiElement.maskQuality(mask_secondary, icon_quality, 6, 6)
+  end
+end
+
+-------------------------------------------------------------------------------
+---Add secondary medium icon mask
+---@param parent LuaGuiElement
+---@param block_infos BlockInfosData
+function GuiElement.maskBlockSecondaryIconM(parent, block_infos)
+  if parent == nil or block_infos == nil then
+    return
+  end
+  if block_infos.secondary_icon ~= nil then
+    local icon_type = block_infos.secondary_icon.name.type or "item"
+    local icon_name = block_infos.secondary_icon.name.name or "item"
+    local icon_quality = block_infos.secondary_icon.quality
+    GuiElement.maskSecondaryIconM(parent, icon_type, icon_name, icon_quality)
+  elseif block_infos.location ~= nil and block_infos.location.name ~= "nauvis" then
+    local icon_type = block_infos.location.type or "item"
+    local icon_name = block_infos.location.name or "item"
+    GuiElement.maskSecondaryIconM(parent, icon_type, icon_name)
+  end
+end
+
 
 -------------------------------------------------------------------------------
 ---Add quality selector

@@ -60,6 +60,14 @@ function GuiCell:withLogistic()
 end
 
 -------------------------------------------------------------------------------
+---Set width title information
+---@return GuiCell
+function GuiCell:withTitle()
+  self.m_with_title = true
+  return self
+end
+
+-------------------------------------------------------------------------------
 ---Set icon information
 ---@param type string
 ---@return GuiCell
@@ -644,13 +652,13 @@ end)
 ---@param parent LuaGuiElement --container for element
 ---@return LuaGuiElement
 function GuiCellBlock:create(parent)
+  local width = 50
+  
   local color = self.m_color or "silver"
   ---@type BlockData
   local element = self.m_element or {}
+  local block_infos = Model.getBlockInfos(element)
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
-  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
-  row1.style.top_padding=2
-  row1.style.bottom_padding=3
   
   local data = {
     count = element.count or 0,
@@ -659,12 +667,28 @@ function GuiCellBlock:create(parent)
     time = element.time
   }
 
+  local frame_style = "helmod_frame_element_w50"
+  -- Apply the title if one exists.
+  if self.m_with_title and block_infos.title ~= nil and block_infos.title ~= "" then
+    frame_style = "helmod_frame_element_w80"
+    local row0 = GuiElement.add(cell, GuiFrameH("row0"):style(frame_style, color, 3))
+    local label = GuiLabel("title", element.name):caption(block_infos.title):style("helmod_label_element")
+    label:caption(block_infos.title)
+    label:style("helmod_label_element")
+    label:tooltip(block_infos.title)
+    row0.style.padding = 0
+    local lua_label = GuiElement.add(row0, label)
+    lua_label.style.width = 75
+  end
+
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style(frame_style, color, 1))
+  row1.style.top_padding=2
+  row1.style.bottom_padding=3
+
   local button = nil
-  local block_infos = Model.getBlockInfos(element)
   if block_infos.primary_icon ~= nil then
     local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
     button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(block_infos.primary_icon.type, block_infos.primary_icon.name.name):tooltip(tooltip))
-    self:add_mask(button, color, 16)
   else
     local first_recipe = Model.firstChild(element.children)
     if first_recipe ~= nil then
@@ -685,9 +709,8 @@ function GuiCellBlock:create(parent)
   end
 
   -- Apply the secondary icon if one is set in the block data.
-  GuiElement.maskSecondaryIcon(button, block_infos)
+  GuiElement.maskBlockSecondaryIcon(button, block_infos)
 
-  local width = 50
   if self.m_by_limit then
     self:add_row_label(cell, width, "row2", data.count_limit, color, 2, {"helmod_common.quantity"})
   else
@@ -712,6 +735,7 @@ end)
 ---@param parent LuaGuiElement --container for element
 ---@return LuaGuiElement
 function GuiCellBlockM:create(parent)
+  local width = 30
   local color = self.m_color or "silver"
   local element = self.m_element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
@@ -724,21 +748,23 @@ function GuiCellBlockM:create(parent)
     time = element.time
   }
   
+  local frame_style = "helmod_frame_element_w30"
   -- Apply the title if one exists.
-  if block_infos.title ~= nil and block_infos.title ~= "" then
-    local row0 = GuiElement.add(cell, GuiFrameH("row0"):style("helmod_frame_element_w50", color, 3))
+  if self.m_with_title and block_infos.title ~= nil and block_infos.title ~= "" then
+    frame_style = "helmod_frame_element_w50"
+    local row0 = GuiElement.add(cell, GuiFrameH("row0"):style(frame_style, color, 3))
     local label = GuiLabel("title", element.name):caption(block_infos.title):style("helmod_label_element")
     label:caption(block_infos.title)
     label:style("helmod_label_element")
     label:tooltip(block_infos.title)
     row0.style.padding = 0
-    GuiElement.add(row0, label)
+    local lua_label = GuiElement.add(row0, label)
+    lua_label.style.width = 45
   end
   
-  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style(frame_style, color, 1))
   row1.style.top_padding=2
   row1.style.bottom_padding=3
-  --row1.style.width = 36
 
   -- Initialize the button variable for scoping purposes.
   local button = nil
@@ -746,7 +772,6 @@ function GuiCellBlockM:create(parent)
   if block_infos.primary_icon ~= nil then
     local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
     button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(block_infos.primary_icon.type, block_infos.primary_icon.name.name):tooltip(tooltip))
-    self:add_mask(button, color, 16)
   else
     local first_recipe = Model.firstChild(element.children)
     if first_recipe ~= nil then
@@ -766,9 +791,8 @@ function GuiCellBlockM:create(parent)
   end
 
   -- Apply the secondary icon if one is set in the block data.
-  GuiElement.maskSecondaryIconM(button, block_infos)
+  GuiElement.maskBlockSecondaryIconM(button, block_infos)
 
-  local width = 36
   if self.m_by_limit then
     self:add_row_label_m(cell, width, "row2", data.count_limit, color, 2, {"helmod_common.quantity"})
   else
@@ -784,7 +808,7 @@ function GuiCellBlockM:create(parent)
 end
 
 -------------------------------------------------------------------------------
----@class GuiCellModel
+---@class GuiCellModel: GuiCell
 GuiCellModel = newclass(GuiCell,function(base,...)
   GuiCell.init(base,...)
 end)
@@ -798,13 +822,14 @@ function GuiCellModel:create(parent)
   local element = self.m_element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
   local tooltip = GuiTooltipModel(self.options.tooltip):element(element)
-  local model_infos = Model.getModelInfos(element)
   local first_block = element.block_root or Model.firstChild(element.blocks or {})
   local block_infos = Model.getBlockInfos(first_block)
   
   -- Apply the title if one exists.
-  if block_infos.title ~= nil and block_infos.title ~= "" then
-    local row0 = GuiElement.add(cell, GuiFrameH("row0"):style("helmod_frame_element_w50", color, 3))
+  local frame_style = "helmod_frame_element_w50"
+  if self.m_with_title and block_infos.title ~= nil and block_infos.title ~= "" then
+    frame_style = "helmod_frame_element_w80"
+    local row0 = GuiElement.add(cell, GuiFrameH("row0"):style(frame_style, color, 3))
     local label = GuiLabel("title", element.name):caption(block_infos.title):style("helmod_label_element")
     label:caption(block_infos.title)
     label:style("helmod_label_element")
@@ -813,16 +838,12 @@ function GuiCellModel:create(parent)
     GuiElement.add(row0, label)
   end
   
-  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style("helmod_frame_element_w50", color, 1))
+  local row1 = GuiElement.add(cell, GuiFrameH("row1"):style(frame_style, color, 1))
   -- Initialize the button variable for scoping purposes.
   local button = nil
   --Apply the icon if one exists, with fallbacks.
   if block_infos.primary_icon ~= nil then
     button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(block_infos.primary_icon.type, block_infos.primary_icon.name.name):tooltip(tooltip))
-  elseif false and model_infos.primary_icon ~= nil then
-    local primary_icon = model_infos.primary_icon
-    button = GuiElement.add(row1, GuiButtonSelectSprite(unpack(self.name)):choose(primary_icon.type, primary_icon.name):tooltip(tooltip):style(defines.styles.button.menu_flat))
-    button.locked = true
   elseif first_block ~= nil and first_block.name ~= "" then
     button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_block.type, first_block.name):tooltip(tooltip))
   else
@@ -830,7 +851,7 @@ function GuiCellModel:create(parent)
   end
 
   -- Apply the secondary icon if one is set in the block data.
-  GuiElement.maskSecondaryIcon(button, block_infos)
+  GuiElement.maskBlockSecondaryIcon(button, block_infos)
 
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
   local count = 1

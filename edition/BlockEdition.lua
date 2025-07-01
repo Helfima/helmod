@@ -6,11 +6,23 @@ BlockEdition = newclass(FormModel)
 -------------------------------------------------------------------------------
 ---On initialization
 function BlockEdition:onInit()
-    print("BlockEdition:onInit()")
-    self.panelCaption = ({ "helmod_block_edition_panel.pane-title" })
     self.panel_close_before_main = true
 end
 
+local is_model = false
+-------------------------------------------------------------------------------
+---On before event
+---@param event LuaEvent
+function BlockEdition:onBeforeOpen(event)
+    FormModel.onBeforeOpen(self, event)
+    if event.item3 == "model" then
+        self.panelCaption = ({ "helmod_panel.model-edition" })
+        is_model = true
+    else
+        self.panelCaption = ({ "helmod_block_edition_panel.pane-title" })
+        is_model = false
+    end
+end
 -------------------------------------------------------------------------------
 ---On Style
 ---@param styles table
@@ -34,6 +46,9 @@ end
 ---@param event LuaEvent
 function BlockEdition:onUpdate(event)
     self:updateInfo(event)
+    if is_model then
+        self:updateShare(event)
+    end
     self:updateNote(event)
 end
 
@@ -57,15 +72,34 @@ function BlockEdition:updateInfo(event)
     -- The form where the user enters info such as title and icons.
     local form = GuiElement.add(info_panel, GuiTable("output-table"):column(2))
 
+    if is_model then
+        GuiElement.add(form, GuiLabel("label-owner"):caption({ "helmod_result-panel.owner" }))
+        GuiElement.add(form, GuiLabel("value-owner"):caption(model.owner))
+    end
+
     -- Title input label
     local title_label = GuiLabel("label-title")
     title_label:caption({ "helmod_block_edition_panel.block-title" })
     GuiElement.add(form, title_label)
+
     -- Title input field
     local title_text_entry_field = GuiTextField(self.classname, "change-title")
     local prepopulated_title = block_infos.title or ""
     title_text_entry_field:text(prepopulated_title)
     GuiElement.add(form, title_text_entry_field).style.width = 200
+
+    if is_model then
+        -- Group input label
+        local group_label = GuiLabel("label-group")
+        group_label:caption({ "helmod_common.group" })
+        GuiElement.add(form, group_label)
+
+        -- Group input field
+        local group_text_entry_field = GuiTextField(self.classname, "change-group")
+        local prepopulated_group = model.group or ""
+        group_text_entry_field:text(prepopulated_group)
+        GuiElement.add(form, group_text_entry_field).style.width = 200
+    end
 
     -- Primary icon input label
     local primary_icon_label = GuiLabel("label-primary-icon"):caption({ "helmod_block_edition_panel.block-icon-primary" })
@@ -120,6 +154,38 @@ function BlockEdition:updateInfo(event)
 end
 
 -------------------------------------------------------------------------------
+---Update share
+---@param event LuaEvent
+function BlockEdition:updateShare(event)
+    local model, block = self:getParameterObjects()
+    if block.parent_id ~= model.id then
+        return
+    end
+    local share_panel = self:getFramePanel("share")
+    share_panel.clear()
+
+    GuiElement.add(share_panel, GuiLabel("label-share"):caption({ "helmod_result-panel.share" }):style("helmod_label_title_frame"))
+
+    local block_table = GuiElement.add(share_panel, GuiTable("output-table"):column(2))
+
+    local tableAdminPanel = GuiElement.add(block_table, GuiTable("table"):column(2))
+    local model_read = false
+    if model.share ~= nil and bit32.band(model.share, 1) > 0 then model_read = true end
+    GuiElement.add(tableAdminPanel, GuiLabel(self.classname, "share-model-read"):caption({ "helmod_common.reading" }):tooltip({ "tooltip.share-mod", { "helmod_common.reading" } }))
+    GuiElement.add(tableAdminPanel, GuiCheckBox(self.classname, "share-model", model.id, "read"):state(model_read):tooltip({ "tooltip.share-mod", { "helmod_common.reading" } }))
+
+    local model_write = false
+    if model.share ~= nil and bit32.band(model.share, 2) > 0 then model_write = true end
+    GuiElement.add(tableAdminPanel, GuiLabel(self.classname, "share-model-write"):caption({ "helmod_common.writing" }):tooltip({ "tooltip.share-mod", { "helmod_common.writing" } }))
+    GuiElement.add(tableAdminPanel, GuiCheckBox(self.classname, "share-model", model.id, "write"):state(model_write):tooltip({ "tooltip.share-mod", { "helmod_common.writing" } }))
+
+    local model_delete = false
+    if model.share ~= nil and bit32.band(model.share, 4) > 0 then model_delete = true end
+    GuiElement.add(tableAdminPanel, GuiLabel(self.classname, "share-model-delete"):caption({ "helmod_common.removal" }):tooltip({ "tooltip.share-mod", { "helmod_common.removal" } }))
+    GuiElement.add(tableAdminPanel, GuiCheckBox(self.classname, "share-model", model.id, "delete"):state(model_delete):tooltip({ "tooltip.share-mod", { "helmod_common.removal" } }))
+end
+
+-------------------------------------------------------------------------------
 ---Update note
 ---@param event LuaEvent
 function BlockEdition:updateNote(event)
@@ -145,6 +211,12 @@ function BlockEdition:onEvent(event)
             local block_infos = Model.getBlockInfos(block)
             local block_title = event.element.text
             block_infos["title"] = block_title
+            Controller:send("on_gui_refresh", event)
+        end
+        
+        if event.action == "change-group" then
+            local block_group = event.element.text
+            model.group = block_group or ""
             Controller:send("on_gui_refresh", event)
         end
         
@@ -201,6 +273,34 @@ function BlockEdition:onEvent(event)
             end
             local block_infos = Model.getBlockInfos(block)
             block_infos["note"] = note_text
+            Controller:send("on_gui_refresh", event)
+        end
+
+        if event.action == "share-model" then
+            local access = event.item2
+            if model ~= nil then
+                if access == "read" then
+                    if model.share == nil or not (bit32.band(model.share, 1) > 0) then
+                        model.share = 1
+                    else
+                        model.share = 0
+                    end
+                end
+                if access == "write" then
+                    if model.share == nil or not (bit32.band(model.share, 2) > 0) then
+                        model.share = 3
+                    else
+                        model.share = 1
+                    end
+                end
+                if access == "delete" then
+                    if model.share == nil or not (bit32.band(model.share, 4) > 0) then
+                        model.share = 7
+                    else
+                        model.share = 3
+                    end
+                end
+            end
             Controller:send("on_gui_refresh", event)
         end
     end

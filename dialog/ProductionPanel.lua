@@ -295,7 +295,8 @@ function ProductionPanel:updateIndexPanel(model)
 			local is_first = true
 			table.reindex_list(models)
 			for _, imodel in spairs(models, sorter) do
-				local model_infos = Model.getModelInfos(imodel)
+				local first_block = imodel.block_root or Model.firstChild(imodel.blocks or {})
+  				local block_infos = Model.getBlockInfos(first_block)
 				i = i + 1
                 local element = imodel.block_root
 				local button = nil
@@ -303,10 +304,10 @@ function ProductionPanel:updateIndexPanel(model)
 				local icon_type = element.type
 				local icon_name = element.name
 				local icon_quality = element.quality
-				if model_infos.primary_icon ~= nil and model_infos.primary_icon.type ~= nil then
-					icon_type = model_infos.primary_icon.name.type or "item"
-					icon_name = model_infos.primary_icon.name.name
-					icon_quality = model_infos.primary_icon.quality
+				if block_infos.primary_icon ~= nil and block_infos.primary_icon.type ~= nil then
+					icon_type = block_infos.primary_icon.name.type or "item"
+					icon_name = block_infos.primary_icon.name.name
+					icon_quality = block_infos.primary_icon.quality
 				end
 
 				local button_style = "helmod_button_menu"
@@ -323,39 +324,8 @@ function ProductionPanel:updateIndexPanel(model)
 					button = GuiElement.add(table_index, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black):style(button_style))
 				end
 				
-				if model_infos.secondary_icon ~= nil and model_infos.secondary_icon.type ~= nil then
-					local secondary_icon_type = model_infos.secondary_icon.name.type or "item"
-					local secondary_icon_name = model_infos.secondary_icon.name.name or "item"
-					local secondary_icon_quality = model_infos.secondary_icon.quality
-					local container_secondary = GuiElement.add(button, GuiFlow("secondary-info"))
-					local frame_secondary = GuiElement.add(container_secondary, GuiFrame("secondary-frame"):style("helmod_frame_element_w80", "gray", 4))
-					frame_secondary.style.width = 20
-					frame_secondary.style.margin = 0
-					frame_secondary.style.padding = 2
-					local mask_secondary = GuiElement.add(frame_secondary, GuiSprite("secondary-info"):sprite(secondary_icon_type, secondary_icon_name))
-					container_secondary.style.top_padding = 15
-    				container_secondary.style.left_padding = 15
-    				mask_secondary.style.width = 20
-    				mask_secondary.style.height = 20
-					mask_secondary.style.stretch_image_to_widget_size = true
-  					mask_secondary.ignored_by_interaction = true
-					GuiElement.maskQuality(mask_secondary, secondary_icon_quality, 10, 10)
-				elseif imodel.location ~= nil and imodel.location.name ~= "nauvis" then
-					local secondary_icon_type = imodel.location.type
-					local secondary_icon_name = imodel.location.name
-					local container_secondary = GuiElement.add(button, GuiFlow("secondary-info"))
-					local frame_secondary = GuiElement.add(container_secondary, GuiFrame("secondary-frame"):style("helmod_frame_element_w80", "gray", 4))
-					frame_secondary.style.width = 20
-					frame_secondary.style.margin = 0
-					frame_secondary.style.padding = 2
-					local mask_secondary = GuiElement.add(frame_secondary, GuiSprite("secondary-info"):sprite(secondary_icon_type, secondary_icon_name))
-					container_secondary.style.top_padding = 15
-    				container_secondary.style.left_padding = 15
-    				mask_secondary.style.width = 20
-    				mask_secondary.style.height = 20
-					mask_secondary.style.stretch_image_to_widget_size = true
-  					mask_secondary.ignored_by_interaction = true
-				end
+				GuiElement.maskBlockSecondaryIcon(button, block_infos)
+
 				if button ~= nil and is_first then
 					button.style.left_margin = 3
 					is_first = false
@@ -580,8 +550,8 @@ function ProductionPanel:updateSubMenuRightPanel(model, block)
 
 	local group_models = GuiElement.add(right_panel, GuiFlowH("group_models"))
 	group_models.style.horizontal_spacing = button_spacing
-	GuiElement.add(group_models, GuiButton("HMModelEdition", "OPEN", model.id, block_id):sprite("menu", defines.sprites.edit_document.black, defines.sprites.edit_document.black):style("helmod_button_menu"):tooltip({ "helmod_panel.model-edition" }))
-	GuiElement.add(group_models, GuiButton("HMBlockEdition", "OPEN", model.id, block_id):sprite("menu", defines.sprites.edit_subdocument.black, defines.sprites.edit_document.black):style("helmod_button_menu"):tooltip({ "helmod_block_edition_panel.pane-title" }))
+	GuiElement.add(group_models, GuiButton("HMBlockEdition", "OPEN", model.id, block_id, "model"):sprite("menu", defines.sprites.edit_document.black, defines.sprites.edit_document.black):style("helmod_button_menu"):tooltip({ "helmod_panel.model-edition" }))
+	GuiElement.add(group_models, GuiButton("HMBlockEdition", "OPEN", model.id, block_id, "block"):sprite("menu", defines.sprites.edit_subdocument.black, defines.sprites.edit_document.black):style("helmod_button_menu"):tooltip({ "helmod_block_edition_panel.pane-title" }))
 	GuiElement.add(group_models, GuiButton("HMParametersEdition", "OPEN", model.id, block_id):sprite("menu", defines.sprites.parameter.black, defines.sprites.parameter.black):style("helmod_button_menu"):tooltip({"helmod_parameters_edition_panel.title" }))
 	local button_model_up = GuiElement.add(group_models, GuiButton(self.classname, "model-index-up", model.id, block_id):sprite("menu", defines.sprites.arrow_left.black, defines.sprites.arrow_left.black):style("helmod_button_menu"):tooltip({ "helmod_panel.model-index-up" }))
 	button_model_up.enabled = model.owner == Player.native().name
@@ -1051,7 +1021,7 @@ function ProductionPanel:bluidLeaf(tree_panel, model, block, current_block, leve
 		if block.name == nil then
 			local cell_block = GuiElement.add(cell_tree, GuiButton(self.classname, "HMProductionPanel", model.id, block.id):sprite("menu", defines.sprites.hangar.black, defines.sprites.hangar.black):style("helmod_button_menu"):tooltip("tooltip.edit-block"))
 		else
-			local cell_block = GuiElement.add(cell_tree, GuiCellBlockM(self.classname, "change-block", model.id, block.id):element(block):tooltip("tooltip.edit-block"):color(block_color))
+			local cell_block = GuiElement.add(cell_tree, GuiCellBlockM(self.classname, "change-block", model.id, block.id):element(block):withTitle():tooltip("tooltip.edit-block"):color(block_color))
 			cell_block.style.left_padding = 10 * level
 		end
 	end
@@ -1075,7 +1045,7 @@ function ProductionPanel:bluidRootLeaf(tree_panel, model, current_block, level)
 			block_color = User.getThumbnailColor(defines.thumbnail_color.names.block_selected)
 		end
 		if model ~= nil and model.block_root.type ~= nil then
-			local cell_block = GuiElement.add(cell_tree, GuiCellModel(self.classname, "change-block", model.id, model.block_root.id):element(model):tooltip("tooltip.info-model"):color(block_color))
+			local cell_block = GuiElement.add(cell_tree, GuiCellModel(self.classname, "change-block", model.id, model.block_root.id):element(model):withTitle():tooltip("tooltip.info-model"):color(block_color))
 			cell_block.style.left_padding = 10 * level
 		else
 			local cell_block = GuiElement.add(cell_tree, GuiButton(self.classname, "change-block", model.id, model.block_root.id):sprite("menu", defines.sprites.status_help.black, defines.sprites.status_help.black):style("helmod_button_menu_flat"))

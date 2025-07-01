@@ -160,6 +160,9 @@ end
 ---Return additonnal categories of Prototype
 ---@return {[uint]:string}
 function RecipePrototype:getAdditionnalCategories()
+    if self.lua_type == "technology" then
+        return {}
+    end
     if self.lua_prototype ~= nil then
         return self.lua_prototype.additional_categories or {}
     end
@@ -709,6 +712,9 @@ end
 ---Return maximum_productivity of Prototype
 ---@return number
 function RecipePrototype:getMaximumProductivity()
+    if self.lua_type == "technology" then
+        return 3
+    end
     if self.lua_prototype ~= nil then
         return self.lua_prototype.maximum_productivity or 3
     end

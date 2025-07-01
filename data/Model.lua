@@ -443,7 +443,7 @@ end
 
 -------------------------------------------------------------------------------
 ---Return quality element key
----@param model BlockData
+---@param block BlockData
 ---@return BlockInfosData
 function Model.getBlockInfos(block)
   if block.infos == nil then

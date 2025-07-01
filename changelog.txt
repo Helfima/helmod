@@ -1,8 +1,13 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.15
-Date: 2025-06-29
+Date: 2025-07-01
+  Changes:
+    - Added block edition to change informations (icons, title) #616
+    - Changed RU locale update
+    - Added UK locale update
   Bugfixes:
     - Fixed error when signal icon choosed for Model
+    - Fixed technology recipe for "additional_categories" and "maximum_productivity"
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.14
 Date: 2025-06-26
