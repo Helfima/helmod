@@ -151,6 +151,18 @@
 ---@field primary_icon ElementData
 ---@field secondary_icon ElementData
 
+---@class IconData
+---@field type string
+---@field name string | ElementData
+---@field quality string
+
+---@class BlockInfosData
+---@field title string
+---@field location ElementData
+---@field primary_icon IconData
+---@field secondary_icon IconData
+---@field note string
+
 ---@class ModelData
 ---@field id string
 ---@field index_id number

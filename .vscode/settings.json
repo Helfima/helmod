@@ -9,13 +9,11 @@
     "factorio.versions": [
         {
             "name": "v2.SA",
-            "factorioPath": "d:\\Perso\\Factorio_Test\\Factorio_2.0.7\\bin\\x64\\factorio.exe",
-            "active": true
+            "factorioPath": "d:\\Perso\\Factorio_Test\\Factorio_2.0.7\\bin\\x64\\factorio.exe"
         },
         {
             "name": "v2.base",
-            "factorioPath": "d:\\Perso\\Factorio_Test\\FactorioBase_2.0.7\\bin\\x64\\factorio.exe",
-            "active": false
+            "factorioPath": "d:\\Perso\\Factorio_Test\\FactorioBase_2.0.7\\bin\\x64\\factorio.exe"
         }
     ]
 }
