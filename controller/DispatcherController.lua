@@ -70,6 +70,6 @@ function DispatcherController:send(event_type, data, classname)
     end
   end)
   if not(ok) then
-    Player.repportError(err)
+    Player.repportError(err, Player.traceEvent(data))
   end
 end

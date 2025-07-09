@@ -285,6 +285,9 @@ end
 ---@param quality_effect number
 ---@return number
 function RecipePrototype:getNextQualityProducts(quality_products, raw_product, lua_quality, quality_effect)
+    if lua_quality == nil then
+        return 0
+    end
     local previous_probality = 0
     local next_probability = lua_quality.next_probability
     if next_probability > 0 and quality_effect > 0  then
@@ -298,24 +301,6 @@ function RecipePrototype:getNextQualityProducts(quality_products, raw_product, l
     return quality_product.quality_probality + previous_probality
 end
 
----Compute quality of products
----@param quality_products table
----@param raw_product ProductData
----@param lua_quality LuaQualityPrototype
----@param quality_effect number
----@return number
-function RecipePrototype:getNextQualityProducts2(quality_products, raw_product, lua_quality, quality_effect)
-    local quality_product = Product(raw_product):clone()
-    quality_product.quality = lua_quality.name
-    quality_product.amount = quality_product.amount * quality_effect
-    raw_product.amount = raw_product.amount - quality_product.amount
-    table.insert(quality_products, quality_product)
-
-    local next_probability = lua_quality.next_probability
-    if next_probability > 0 and quality_effect > 0  then
-        self:getNextQualityProducts(quality_products, raw_product, lua_quality.next, quality_effect * next_probability)
-    end
-end
 -------------------------------------------------------------------------------
 ---Return products array of Prototype
 ---@param factory table

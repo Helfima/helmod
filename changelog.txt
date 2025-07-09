@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.1.16
+Date: 2025-07-09
+  Bugfixes:
+    - Fixed error when next quality is nil in RecipePrototype
+    - Fixed Player.beginCrafting cause error when using table.size on userdata 
+---------------------------------------------------------------------------------------------------
 Version: 2.1.15
 Date: 2025-07-01
   Changes:

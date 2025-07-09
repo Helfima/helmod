@@ -108,6 +108,9 @@ end
 ---@return number
 function table.size(list)
   if list == nil then return 0 end
+  if type(list) == "userdata" then
+    return #list
+  end
   return table_size(list)
 end
 

@@ -17,6 +17,20 @@ function Player.print(...)
 end
 
 -------------------------------------------------------------------------------
+---Get Trace event
+---@param event LuaEvent
+function Player.traceEvent(event)
+    if event ~= nil then
+        local data = {}
+        table.insert(data, "Trace of event")
+        table.insert(data, string.format("classname:%s", event["classname"]))
+        table.insert(data, string.format("action:%s", event["action"]))
+        return table.concat(data, "\n")
+    end
+    return nil
+end
+
+-------------------------------------------------------------------------------
 ---Repport error
 function Player.getStorageDebug()
     if storage.debug == nil then
@@ -27,11 +41,14 @@ end
 -------------------------------------------------------------------------------
 ---Repport error
 ---@param error string
-function Player.repportError(error)
+---@param trace string
+function Player.repportError(error, trace)
     Player.print(error)
     log(error)
+    log(trace)
     local error_message = {}
     table.insert(error_message, error)
+    table.insert(error_message, trace)
     
     local storage_debug = Player.getStorageDebug()
     storage_debug[Lua_player.index] = table.concat(error_message, "\n")

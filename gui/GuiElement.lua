@@ -245,9 +245,7 @@ function GuiElement.add(parent, gui_element)
     local error_index = #parent.children_names
     local gui_error = GuiSprite(gui_element:getName()):suffix(error_index):sprite("helmod-event-error-32"):tooltip(err)
     element = parent.add(gui_error:getOptions())
-    Player.print(err)
-    log(err)
-    log(debug.traceback())
+    Player.repportError(err, debug.traceback())
   end
   return element
 end
