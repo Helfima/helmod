@@ -1,4 +1,18 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.1.18
+Date: 2025-07-15
+  Changes:
+    - Implemented quality_affects_module_slots
+    - Added global and local summary
+---------------------------------------------------------------------------------------------------
+Version: 2.1.17
+Date: 2025-07-15
+  Changes:
+    - Changed required factorio version by 2.0.56
+  Bugfixes:
+    - Fixed negative quality value, in game is divide by 10
+    - Fixed fusion-reactor energy recipe by factorio version 2.0.56
+---------------------------------------------------------------------------------------------------
 Version: 2.1.16
 Date: 2025-07-09
   Bugfixes:

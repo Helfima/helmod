@@ -458,14 +458,20 @@ end
 
 -------------------------------------------------------------------------------
 ---Return products array of Prototype (may contain duplicate products)
+---@param factory table
 ---@return table
-function RecipePrototype:getRawIngredients()
+function RecipePrototype:getRawIngredients(factory)
     if self.lua_prototype ~= nil then
         if self.lua_type == "technology" then
             return self.lua_prototype.research_unit_ingredients
         elseif self.lua_type == "energy" then
             local ingredients = {}
-            local prototype = EntityPrototype(self.lua_prototype.name)
+            local prototype
+            if factory ~= nil then
+                prototype = EntityPrototype(factory)
+            else
+                prototype = EntityPrototype(self.lua_prototype.name)
+            end
             local prototype_type = prototype:getType()
 
             if prototype_type == "accumulator" then
@@ -499,9 +505,6 @@ function RecipePrototype:getRawIngredients()
                 table.insert(ingredients, ingredient)
             end
 
-            local prototype = EntityPrototype(self.lua_prototype.name)
-            local prototype_type = prototype:getType()
-
             if prototype_type == "fusion-reactor" then
                 local fluid_name = "fluoroketone-cold"
                 local fluid_production = prototype:getFluidConsumptionFilter()
@@ -512,6 +515,11 @@ function RecipePrototype:getRawIngredients()
                     local amount = prototype:getFluidProductionFusionReactor()
                     local product = { name = fluid_name, type = "fluid", amount = amount }
                     table.insert(ingredients, product)
+                end
+                local amount = prototype:getEnergyConsumption()
+                if amount > 0 then
+                    local ingredient = { name = "energy", type = "energy", amount = amount }
+                    table.insert(ingredients, ingredient)
                 end
             end
 
@@ -579,7 +587,7 @@ end
 ---@param factory table
 ---@return table
 function RecipePrototype:getIngredients(factory)
-    local raw_ingredients = self:getRawIngredients()
+    local raw_ingredients = self:getRawIngredients(factory)
     if self.lua_prototype ~= nil then
         local factory_prototype = EntityPrototype(factory)
         local energy_prototype = factory_prototype:getEnergySource()

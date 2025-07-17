@@ -143,25 +143,42 @@ end
 -------------------------------------------------------------------------------
 ---Create factories summary
 ---@param block BlockData
-function ModelCompute.createSummaryFactory(block, factory)
-    ModelCompute.createSummaryMachine(block, "factories", factory)
+---@param factory table
+---@param from_child boolean
+function ModelCompute.createSummaryFactory(block, factory, from_child)
+    ModelCompute.createSummaryMachine(block, "summary_global", "factories", factory)
+    if from_child == false then
+        ModelCompute.createSummaryMachine(block, "summary", "factories", factory)
+    end
 end
 
 -------------------------------------------------------------------------------
 ---Create beacons summary
 ---@param block BlockData
-function ModelCompute.createSummaryBeacon(block, beacon)
+---@param beacon table
+---@param from_child boolean
+function ModelCompute.createSummaryBeacon(block, beacon, from_child)
     -- same section of factories
-    ModelCompute.createSummaryMachine(block, "factories", beacon)
+    ModelCompute.createSummaryMachine(block, "summary_global", "factories", beacon)
+    if from_child == false then
+        ModelCompute.createSummaryMachine(block, "summary", "factories", beacon)
+    end
 end
 
 -------------------------------------------------------------------------------
 ---Finalize input block
 ---@param block BlockData
-function ModelCompute.createSummaryMachine(block, section, factory)
+---@param summary_name string
+---@param section string
+---@param factory table
+function ModelCompute.createSummaryMachine(block, summary_name, section, factory)
     ---summary factory
     local factory_key = Model.getQualityElementKey(factory)
-    local summary_factory = block.summary[section][factory_key]
+    if block[summary_name] == nil then
+        block[summary_name] = {}
+    end
+    local summary = block[summary_name]
+    local summary_factory = summary[section][factory_key]
     if summary_factory == nil then
         summary_factory = {
             name = factory.name,
@@ -171,7 +188,7 @@ function ModelCompute.createSummaryMachine(block, section, factory)
             count_limit = 0,
             count_deep = 0
         }
-        block.summary[section][factory_key] = summary_factory
+        summary[section][factory_key] = summary_factory
     end
     
     local factory_ceil = math.ceil(factory.count)
@@ -180,14 +197,14 @@ function ModelCompute.createSummaryMachine(block, section, factory)
     summary_factory.count_limit = summary_factory.count
     summary_factory.count_deep = summary_factory.count * block.count_deep
 
-    block.summary.building = block.summary.building + factory_ceil
-    block.summary.building_limit = block.summary.building
-    block.summary.building_deep = block.summary.building * block.count_deep
+    summary.building = summary.building + factory_ceil
+    summary.building_limit = summary.building
+    summary.building_deep = summary.building * block.count_deep
     ---summary factory module
     if factory.modules ~= nil then
         for _, module in pairs(factory.modules) do
             local module_key = Model.getQualityElementKey(module)
-            local summary_module = block.summary.modules[module_key]
+            local summary_module = summary.modules[module_key]
             if summary_module == nil then
                 summary_module = {
                     name = module.name,
@@ -197,7 +214,7 @@ function ModelCompute.createSummaryMachine(block, section, factory)
                     count_limit = 0,
                     count_deep = 0
                 }
-                block.summary.modules[module_key] = summary_module
+                summary.modules[module_key] = summary_module
             end
             summary_module.count = summary_module.count + module.amount * factory_ceil
             summary_module.count_limit = summary_module.count
@@ -231,6 +248,7 @@ function ModelCompute.finalizeBlock(block, factor)
     block.pollution_limit = 0
     block.pollution_deep = 0
     block.summary = { building = 0, building_limit = 0, building_deep = 0, factories = {}, beacons = {}, modules = {} }
+    block.summary_global = { building = 0, building_limit = 0, building_deep = 0, factories = {}, beacons = {}, modules = {} }
     
     block.count_deep = block.count * factor
     local children = block.children
@@ -257,14 +275,14 @@ function ModelCompute.finalizeBlock(block, factor)
                 block.pollution_limit = block.pollution
                 block.pollution_deep = block.pollution_deep + child.pollution_deep
 
-                for _, factory in pairs(child.summary.factories) do
-                    ModelCompute.createSummaryFactory(block, factory)
+                for _, factory in pairs(child.summary_global.factories) do
+                    ModelCompute.createSummaryFactory(block, factory, true)
                 end
-                for _, beacon in pairs(child.summary.beacons) do
-                    ModelCompute.createSummaryBeacon(block, beacon)
+                for _, beacon in pairs(child.summary_global.beacons) do
+                    ModelCompute.createSummaryBeacon(block, beacon, true)
                 end
-                for module_key, module in pairs(child.summary.modules) do
-                    local summary_module = block.summary.modules[module_key]
+                for module_key, module in pairs(child.summary_global.modules) do
+                    local summary_module = block.summary_global.modules[module_key]
                     if summary_module == nil then
                         summary_module = {
                             name = module.name,
@@ -274,7 +292,7 @@ function ModelCompute.finalizeBlock(block, factor)
                             count_limit = 0,
                             count_deep = 0
                         }
-                        block.summary.modules[module_key] = summary_module
+                        block.summary_global.modules[module_key] = summary_module
                     end
                     summary_module.count = summary_module.count + module.count
                     summary_module.count_limit = summary_module.count
@@ -305,7 +323,7 @@ function ModelCompute.finalizeBlock(block, factor)
                     recipe.factory.count_limit = recipe.factory.count
                     recipe.factory.count_deep = recipe.factory.count * block.count_deep
 
-                    ModelCompute.createSummaryFactory(block, recipe.factory)
+                    ModelCompute.createSummaryFactory(block, recipe.factory, false)
                 end
 
                 if recipe.beacons ~= nil then
@@ -322,7 +340,7 @@ function ModelCompute.finalizeBlock(block, factor)
                         beacon.count_limit = beacon.count
                         beacon.count_deep = beacon.count * block.count_deep
 
-                        ModelCompute.createSummaryBeacon(block, beacon)
+                        ModelCompute.createSummaryBeacon(block, beacon, false)
                     end
                 end
                 if recipe.energy_total == nil then recipe.energy_total = 0 end
@@ -391,14 +409,14 @@ function ModelCompute.finalizeBlock(block, factor)
             block.count_limit = ratio_limit
             block.power_limit = block.power * ratio_limit
             block.pollution_limit = block.pollution * ratio_limit
-            block.summary.building_limit =  block.summary.building * ratio_limit
-            for _, factory in pairs(block.summary.factories) do
+            block.summary_global.building_limit =  block.summary_global.building * ratio_limit
+            for _, factory in pairs(block.summary_global.factories) do
                 factory.count_limit = factory.count * ratio_limit
             end
-            for _, beacon in pairs(block.summary.beacons) do
+            for _, beacon in pairs(block.summary_global.beacons) do
                 beacon.count_limit = beacon.count * ratio_limit
             end
-            for _, module in pairs(block.summary.modules) do
+            for _, module in pairs(block.summary_global.modules) do
                 module.count_limit = module.count * ratio_limit
             end
 

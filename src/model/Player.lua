@@ -295,7 +295,7 @@ function Player.setSmartToolBuildingConstantCombinator(block)
     if Lua_player == nil or block == nil then
         return nil
     end
-    local summary = block.summary
+    local summary = block.summary_global
     local by_limit = block.by_limit
 
     local sections = {}
@@ -1173,8 +1173,8 @@ function Player.getModuleEffects(module)
         else 
             final_value = math.ceil(final_value*100 - 0.05)/100
         end
-        if effect_name == "quality" and final_value > 0 then
-            -- fix quality value, in game is 10x
+        if effect_name == "quality" then
+            -- fix quality value, in game is divide by 10
             final_value = final_value / 10
         end
         module_effects[effect_name] = final_value

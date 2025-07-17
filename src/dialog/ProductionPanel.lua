@@ -813,8 +813,7 @@ function ProductionPanel:updateData(event)
 		local block_root = Model.newBlock(model, element_block)
 		block_root.power = 0
 		block_root.pollution = 0
-		--block_root.summary = {}
-        local index = 0
+		local index = 0
 		for key, block in pairs(model.blocks) do
 			block.index = index
 			block_root.children[block.id] = block

@@ -144,6 +144,7 @@
 ---@field runtimes {[uint] : Matrix}
 ---@field contraints {[string] : ContraintData}
 ---@field summary any
+---@field summary_global any
 ---@field consumer boolean
 
 ---@class ModelInfosData

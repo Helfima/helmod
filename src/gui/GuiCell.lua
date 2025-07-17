@@ -1014,10 +1014,10 @@ function GuiCellBuilding:create(parent)
   local building = 0
   local building_limit = 0
   local building_deep = 0
-  if element.summary ~= nil then
-    building = element.summary.building or 0
-    building_limit = element.summary.building_limit or 0
-    building_deep = element.summary.building_deep or 0
+  if element.summary_global ~= nil then
+    building = element.summary_global.building or 0
+    building_limit = element.summary_global.building_limit or 0
+    building_deep = element.summary_global.building_deep or 0
   end
   local width = 50
   if self.m_by_limit then

@@ -152,7 +152,7 @@ function EntityPrototype:getEnergyConsumption()
   end
 
   if self.lua_prototype.type == "fusion-reactor" then
-    return self:getMaxEnergyUsage() * 10
+    return self:getMaxEnergyUsage()
   end
 
   local energy_prototype = self:getEnergySource()
@@ -700,38 +700,9 @@ end
 ---@return number --default 0
 function EntityPrototype:getFluidProductionFusionReactor()
   if self:getType() == "fusion-reactor" then
-
-    local energy_prototype = self:getEnergySource()
-    local effectivity
-    if energy_prototype ~= nil then
-      effectivity = energy_prototype:getEffectivity()
-    else
-      effectivity = 1
-    end
-
-    local fluidboxes = self:getFluidboxPrototypes()
-    if fluidboxes ~= nil then
-      for _, fluidbox in pairs(fluidboxes) do
-        if fluidbox.production_type == "input-output" or fluidbox.production_type == "output" then
-
-          local fluid_name = fluidbox.filter or "fusion-plasma"
-
-          local fluid_prototype = FluidPrototype(fluid_name)
-          local heat_capacity = fluid_prototype:getHeatCapacity()
-          
-          local minimum_temperature = fluid_prototype:getMinimumTemperature()
-          local power_extract = self:getPowerExtract(0, minimum_temperature, heat_capacity)
-          local max_energy_production = self:getMaxEnergyProduction()
-          local max_energy_usage = self:getMaxEnergyUsage() * 10
-          local max_power_output = self:getMaxPowerOutput()
-          local fluid_usage = self:getFluidUsagePerTick()
-
-          return (max_energy_usage * effectivity) / power_extract
-        end
-      end
-    end
+    local fluid_usage = self:getFluidUsagePerTick()
+    return fluid_usage * 60
   end
-
   return 0
 end
 
@@ -823,7 +794,27 @@ end
 ---@return number --default 0
 function EntityPrototype:getModuleInventorySize()
   if self.lua_prototype ~= nil then
-    return self.lua_prototype.module_inventory_size or 0
+    local module_inventory_size = self.lua_prototype.module_inventory_size or 0
+    local slots_bonus = 0
+    if self.factory ~= nil and self.factory.quality ~= nil then
+      local is_quality_affect = self.lua_prototype.quality_affects_module_slots
+      if is_quality_affect == true then
+        local quality = Player.getQualityPrototype(self.factory.quality)
+        local factory_type = self:getType()
+        if quality ~= nil then
+          if factory_type == "lab" then
+            slots_bonus = quality.lab_module_slots_bonus or 0
+          elseif factory_type == "beacon" then
+            slots_bonus = quality.beacon_module_slots_bonus or 0
+          elseif factory_type == "mining-drill" then
+            slots_bonus = quality.mining_drill_module_slots_bonus or 0
+          else
+            slots_bonus = quality.crafting_machine_module_slots_bonus or 0
+          end
+        end
+      end
+    end
+    return module_inventory_size + slots_bonus
   end
   return 0
 end
