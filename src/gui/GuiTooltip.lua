@@ -886,9 +886,16 @@ function GuiTooltipBuilding:create()
 	if self.m_element then
 		local block = self.m_element
 		local overflow = false
-		if block.summary_global ~= nil then
+		
+		local ui_summary_mode = User.getPreferenceSetting("ui_summary_mode")
+		local summary = block.summary_global
+		if ui_summary_mode == "local" then
+			summary = block.summary
+		end
+
+		if summary ~= nil then
 			---factories
-			for _, element in pairs(block.summary_global.factories) do
+			for _, element in pairs(summary.factories) do
 				if #tooltip < 19 then
 					local amount = math.ceil(element.count)
 					if self.m_by_limit then
@@ -902,7 +909,7 @@ function GuiTooltipBuilding:create()
 			end
 
 			---beacons
-			for _, element in pairs(block.summary_global.beacons) do
+			for _, element in pairs(summary.beacons) do
 				if #tooltip < 19 then
 					local amount = math.ceil(element.count)
 					if self.m_by_limit then
@@ -915,7 +922,7 @@ function GuiTooltipBuilding:create()
 				end
 			end
 
-			for _, element in pairs(block.summary_global.modules) do
+			for _, element in pairs(summary.modules) do
 				if #tooltip < 19 then
 					local amount = math.ceil(element.count)
 					if self.m_by_limit then

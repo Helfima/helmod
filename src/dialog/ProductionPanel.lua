@@ -1343,7 +1343,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 	---col building
 	local cell_building = GuiElement.add(gui_table, GuiTable(block.id, "building"):column(1):style("helmod_table_list"))
 	if User.getPreferenceSetting("display_building") then
-		GuiElement.add(cell_building, GuiCellBuilding(self.classname, "row-change-block", model.id, block.id):element(block):tooltip("tooltip.info-building"):color(block_color))
+		GuiElement.add(cell_building, GuiCellBuilding(self.classname, "row-change-block", model.id, block.id):element(block):forceGlobal(true):tooltip("tooltip.info-building"):color(block_color))
 	end
 
 	---col beacon

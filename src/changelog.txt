@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.18
-Date: 2025-07-15
+Date: 2025-07-18
   Changes:
     - Implemented quality_affects_module_slots
     - Added global and local summary

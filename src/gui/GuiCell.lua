@@ -996,11 +996,19 @@ GuiCellBuilding = newclass(GuiCell,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
+---Set force_global information
+---@param force_global boolean
+---@return GuiCell
+function GuiCellBuilding:forceGlobal(force_global)
+  self.m_force_global = force_global
+  return self
+end
+
+-------------------------------------------------------------------------------
 ---Create cell
 ---@param parent LuaGuiElement --container for element
 ---@return LuaGuiElement
 function GuiCellBuilding:create(parent)
-  local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or "gray"
   local element = self.m_element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, "building", self.m_index))
@@ -1014,10 +1022,16 @@ function GuiCellBuilding:create(parent)
   local building = 0
   local building_limit = 0
   local building_deep = 0
-  if element.summary_global ~= nil then
-    building = element.summary_global.building or 0
-    building_limit = element.summary_global.building_limit or 0
-    building_deep = element.summary_global.building_deep or 0
+
+  local ui_summary_mode = User.getPreferenceSetting("ui_summary_mode")
+  local summary = element.summary_global
+  if ui_summary_mode == "local" and self.m_force_global ~= true then
+    summary = element.summary
+  end
+  if summary ~= nil then
+    building = summary.building or 0
+    building_limit = summary.building_limit or 0
+    building_deep = summary.building_deep or 0
   end
   local width = 50
   if self.m_by_limit then

@@ -296,6 +296,11 @@ function Player.setSmartToolBuildingConstantCombinator(block)
         return nil
     end
     local summary = block.summary_global
+    local ui_summary_mode = User.getPreferenceSetting("ui_summary_mode")
+    if ui_summary_mode == "local" then
+        summary = block.summary
+    end
+
     local by_limit = block.by_limit
 
     local sections = {}

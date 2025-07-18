@@ -361,6 +361,15 @@ defines.constant.preferences = {
     allowed_values = {"auto","one line","two lines"},
     group = "ui"
   },
+  --ui-menu
+  ui_summary_mode = {
+    type = "string-setting",
+    localised_name = {"helmod_pref_settings.ui-summary-mode"},
+    localised_description = {"helmod_pref_settings.ui-summary-mode"},
+    default_value = "global",
+    allowed_values = {"global","local"},
+    group = "ui"
+  },
   --ui-auto-close
   close_after_selection = {
     type = "bool-setting",
