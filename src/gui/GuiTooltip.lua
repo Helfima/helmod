@@ -1186,10 +1186,11 @@ function GuiTooltipFuel:create()
 		local prototype = self.m_element.prototype
 		local element_type = self.m_element.type
 		local element_name = prototype:native().name
+		local element_quality = self.m_element.quality or "normal"
 		local element_localised_name = prototype:getLocalisedName()
 		
 		if self.m_compact == true then
-			tooltip = {"", string.format("[%s=%s]", element_type, element_name), "  ", element_localised_name}
+			tooltip = {"", string.format("[%s=%s,quality=%s]", element_type, element_name, element_quality), "  ", element_localised_name}
 			
 			if mode == "burned" then
 				local value = Format.formatNumberKilo(prototype:getFuelValue(), "J")
@@ -1203,7 +1204,7 @@ function GuiTooltipFuel:create()
 		else
 			if mode == "burned" then
 				local value = Format.formatNumberKilo(prototype:getFuelValue(), "J")
-				tooltip = {"", string.format("[%s=%s] %s", element_type, element_name, value), "  ", element_localised_name}
+				tooltip = {"", string.format("[%s=%s,quality=%s] %s", element_type, element_name, element_quality, value), "  ", element_localised_name}
 			else
 				local value = tostring(prototype.temperature)
 				tooltip = {"", string.format("[%s=%s] %s °C", element_type, element_name, value), "  ", element_localised_name}

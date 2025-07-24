@@ -1,10 +1,14 @@
 ---
 ---Description of the module.
 ---@class RecipePrototype : Prototype
+---@field is_voider any
+---@field is_support_quality boolean
+---@field is_support_burned_quality boolean
 RecipePrototype = newclass(Prototype, function(base, object, object_type)
     base.classname = "HMRecipePrototype"
     base.is_voider = nil
     base.is_support_quality = false
+    base.is_support_fuel_quality = false
     if object ~= nil then
         if type(object) == "string" then
             base.object_name = object
@@ -53,6 +57,7 @@ RecipePrototype = newclass(Prototype, function(base, object, object_type)
             Prototype.init(base, Player.getAgriculturalRecipe(base.object_name))
         elseif base.lua_type == "spoiling" then
             Prototype.init(base, Player.getSpoilableRecipe(base.object_name))
+            base.is_support_quality = true
         end
         if base.lua_prototype == nil then
             Logging:error("HMRecipePrototype", "recipe not found", type(object), object)
@@ -353,7 +358,11 @@ function RecipePrototype:getQualityIngredients(factory, quality)
     end
     for _, raw_ingredient in pairs(raw_ingredients) do
         if raw_ingredient.type == "item" then
-            raw_ingredient.quality = quality
+            if raw_ingredient.burnt == true then
+                raw_ingredient.quality = factory.fuel_quality or "normal"
+            else
+                raw_ingredient.quality = quality
+            end
         end
     end
     return raw_ingredients
@@ -640,6 +649,9 @@ function RecipePrototype:getIngredients(factory)
                     local burner_ingredient = { name = fuel_count.name, type = fuel_count.type,
                         amount = fuel_count.count * factor, burnt = true }
                     table.insert(raw_ingredients, burner_ingredient)
+                    if fuel_count.type == "item" then
+                        self.is_support_fuel_quality = self.is_support_quality and true
+                    end
                 end
             elseif energy_type == "heat" then
                 local amount = factory_prototype:getEnergyConsumption()

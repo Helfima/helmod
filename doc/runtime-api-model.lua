@@ -45,6 +45,7 @@
 ---@field class string
 ---@field name string
 ---@field type string
+---@field quality string
 ---@field amount number
 ---@field count number
 ---@field count_limit number
@@ -52,6 +53,7 @@
 ---@field energy number
 ---@field speed number
 ---@field fuel string | FuelData
+---@field fuel_quality string
 ---@field limit number
 ---@field modules {[uint] : ModuleData}
 ---@field effects ModuleEffectsData

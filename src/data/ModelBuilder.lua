@@ -752,6 +752,7 @@ function ModelBuilder.copyFactory(factory)
     new_factory.quality = factory.quality
     new_factory.limit = factory.limit
     new_factory.fuel = factory.fuel
+    new_factory.fuel_quality = factory.fuel_quality
     new_factory.input = factory.input
     new_factory.modules = {}
     if factory.modules ~= nil then

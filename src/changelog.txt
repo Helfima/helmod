@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.1.19
+Date: 2025-07-24
+  Changes:
+    - Added fuel quality on factory using fuel, by default normal
+  Bugfixes:
+    - Fixed spoilage recipe can be spoil into legendary result
+    - Fixed summary error after change normal quality of machine
+---------------------------------------------------------------------------------------------------
 Version: 2.1.18
 Date: 2025-07-18
   Changes:

@@ -549,7 +549,7 @@ end
 ---@param quality string
 ---@return LuaGuiElement
 function GuiElement.addQualitySelector(parent, quality, ...)
-  local scroll_panel = GuiElement.add(parent, GuiScroll("quality-scroll"):policy(true))
+  local scroll_panel = GuiElement.add(parent, GuiScroll(...):policy(true))
   scroll_panel.style.minimal_height = 32
   scroll_panel.style.maximal_height = 64
   scroll_panel.style.bottom_margin = 5

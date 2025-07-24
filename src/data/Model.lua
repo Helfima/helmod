@@ -457,10 +457,11 @@ end
 ---@param element table
 ---@return string
 function Model.getQualityElementKey(element)
-  if element.quality == nil then
-    return element.name
+  local element_quality = "normal"
+  if element.quality ~= nil then
+    element_quality = element.quality
   end
-  return string.format("%s-%s", element.name, element.quality)
+  return string.format("%s-%s", element.name, element_quality)
 end
 
 -------------------------------------------------------------------------------

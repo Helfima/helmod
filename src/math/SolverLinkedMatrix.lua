@@ -780,7 +780,7 @@ function SolverLinkedMatrix:linkTemperatureFluid(matrix, by_product)
     for irow, row in pairs(matrix.rows) do
         local rowParameters = matrix.parameters[irow]
         local rowHeader = matrix.headers[irow]
-        local rowMatrix = MatrixRow(rowHeader.type, rowHeader.name, rowHeader.tooltip)
+        local rowMatrix = MatrixRow(rowHeader.type, rowHeader.name, rowHeader.quality, rowHeader.tooltip)
         rowMatrix.header.child_id = rowHeader.child_id
         rowMatrix.header.product_linked = rowHeader.product_linked
         rowMatrix.columns = matrix.columns

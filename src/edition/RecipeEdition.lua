@@ -20,7 +20,7 @@ end
 ---@param height_main number
 function RecipeEdition:onStyle(styles, width_main, height_main)
     styles.flow_panel = {
-        minimal_height = 600,
+        minimal_height = 100,
         maximal_height = math.max(height_main, 800),
     }
 end
@@ -514,7 +514,7 @@ function RecipeEdition:onEvent(event)
             ModelBuilder.applyBeaconModulePriority(recipe)
             ModelCompute.update(model)
             self:update(event)
-            Controller:send("on_gui_recipe_update",     event)
+            Controller:send("on_gui_recipe_update",event)
         end
 
         if event.action == "beacon-update" then
@@ -553,6 +553,14 @@ function RecipeEdition:onEvent(event)
             recipe.quality = event.item4
             ModelCompute.update(model)
             self:updateObjectInfo(event)
+            Controller:send("on_gui_recipe_update", event)
+        end
+
+        if event.action == "recipe-fuel-quality-select" then
+            recipe.factory.fuel_quality = event.item4
+            ModelCompute.update(model)
+            self:updateObjectInfo(event)
+            self:updateFactoryInfo(event)
             Controller:send("on_gui_recipe_update", event)
         end
 
@@ -851,8 +859,12 @@ function RecipeEdition:updateFactoryInfo(event)
                         end
                     end
                 else
+                    local current_fuel_quality = "normal"
+                    if recipe_prototype.is_support_quality then 
+                        current_fuel_quality = recipe.factory.fuel_quality or "normal"
+                    end
                     for _, item in pairs(fuel_list) do
-                        local fuel = GuiTooltipFuel(""):element({mode="burned", type=fuel_type, prototype=item}):compact(compact)
+                        local fuel = GuiTooltipFuel(""):element({mode="burned", type=fuel_type, quality=current_fuel_quality, prototype=item}):compact(compact)
                         local item_fuel = fuel:create()
                         table.insert(items, item_fuel)
                         if factory_fuel ~= nil and factory_fuel:native().name == item:native().name then
@@ -866,8 +878,14 @@ function RecipeEdition:updateFactoryInfo(event)
                 if compact == true then
                     drop_fuel.style.width = 64
                 else
-                    drop_fuel.style.width = 150
+                    drop_fuel.style.width = 145
                 end
+            end
+
+            if recipe_prototype.is_support_quality then 
+                local current_fuel_quality = recipe.factory.fuel_quality or "normal"
+                GuiElement.add(input_panel, GuiLabel("label-fuel-quality"):caption({ "helmod_label.quality" }))
+                GuiElement.addQualitySelector(input_panel, current_fuel_quality, self.classname, "recipe-fuel-quality-select", model.id, block.id, recipe.id)
             end
         end
 
@@ -1442,8 +1460,7 @@ function RecipeEdition:updateObjectInfo(event)
         end
 
         ---ingredients
-        local cell_ingredients = GuiElement.add(recipe_table,
-            GuiTable("ingredients", recipe.id):column(5):style("helmod_table_element"))
+        local cell_ingredients = GuiElement.add(recipe_table, GuiTable("ingredients", recipe.id):column(5):style("helmod_table_element"))
         local lua_ingredients = recipe_prototype:getQualityIngredients(recipe.factory, recipe.quality)
         if lua_ingredients ~= nil then
             for index, lua_ingredient in pairs(lua_ingredients) do
