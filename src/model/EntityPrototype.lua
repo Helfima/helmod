@@ -638,7 +638,10 @@ function EntityPrototype:getFluidConsumptionFusionGenerator()
       for _, fluidbox in pairs(fluidboxes) do
         if fluidbox.production_type == "input-output" or fluidbox.production_type == "input" then
 
-          local fluid_name = fluidbox.filter or "fusion-plasma"
+          local fluid_name = "fusion-plasma"
+          if fluidbox.filter ~= nil then
+            fluid_name = fluidbox.filter.name
+          end
 
           local fluid_prototype = FluidPrototype(fluid_name)
           local heat_capacity = fluid_prototype:getHeatCapacity()
@@ -756,7 +759,7 @@ end
 ---Return fluid consumption filter
 ---@return LuaFluidPrototype
 function EntityPrototype:getFluidConsumptionFilter()
-  if self.lua_prototype ~= nil and self.lua_prototype.type == "boiler" then
+  if self.lua_prototype ~= nil and (self.lua_prototype.type == "boiler" or self.lua_prototype.type == "fusion-generator") then
     local fluidbox = self:getFluidboxPrototype("input")
     if fluidbox == nil then
       fluidbox = self:getFluidboxPrototype("input-output")

@@ -363,6 +363,8 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
 	GuiElement.add(group_selector, GuiButton("HMRecipeSelector", "OPEN", model.id, block_id):sprite("menu", defines.sprites.script.black, defines.sprites.script.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-recipe" }))
 	GuiElement.add(group_selector, GuiButton("HMTechnologySelector", "OPEN", model.id, block_id):sprite("menu", defines.sprites.education.black, defines.sprites.education.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-technology" }))
 
+	--GuiElement.add(group_selector, GuiButton("HMArrangeModels", "OPEN", model.id, block_id):sprite("menu", defines.sprites.education.black, defines.sprites.education.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-technology" }))
+
 	---delete button
 	local group_delete = GuiElement.add(left_panel, GuiFlowH("group_delete"))
 	local block_remove_confirm = User.getParameter("block_remove_confirm")

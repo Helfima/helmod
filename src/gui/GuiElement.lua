@@ -354,17 +354,17 @@ function GuiElement.infoTemperature(parent, element, style)
       GuiElement.add(parent, GuiLabel("temperature"):caption(caption):style(style))
     end
     if Tmin ~= nil or Tmax ~= nil then
-      Tmin = Tmin or -1e300
-      Tmax = Tmax or 1e300
-      if Tmin > -1e300 and Tmax > 1e300 then
+      Tmin = Tmin or -1e38
+      Tmax = Tmax or 1e38
+      if Tmin > -1e38 and Tmax > 1e38 then
         local caption_min = {"",  "≥", Tmin, "°"}
         GuiElement.add(parent, GuiLabel("temperature_min"):caption(caption_min):style(style))
       end
-      if Tmin < -1e300 and Tmax < 1e300 then
+      if Tmin < -1e38 and Tmax < 1e38 then
         local caption_max = {"", "≤", Tmax, "°"}
         GuiElement.add(parent, GuiLabel("temperature_max"):caption(caption_max):style(style))
       end
-      if Tmin > -1e300 and Tmax < 1e300 then
+      if Tmin > -1e38 and Tmax < 1e38 then
         local panel = GuiElement.add(parent, GuiFlowV("temperature"))
         local caption_min = {"", "≥", Tmin, "°"}
         GuiElement.add(panel, GuiLabel("temperature_min"):caption(caption_min):style(style))

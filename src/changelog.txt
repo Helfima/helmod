@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.1.20
+Date: 2025-07-31
+  Bugfixes:
+    - Fixed consumption filter for "fusion-generator" prototype
+    - Fixed maximal temperature value for fluid (wrong infini limit)
+---------------------------------------------------------------------------------------------------
 Version: 2.1.19
 Date: 2025-07-24
   Changes:
