@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 -- Class to help to build GuiLabel
--- @class GuiLabel
+---@class GuiLabel : GuiElement
 GuiLabel = newclass(GuiElement,function(base,...)
   GuiElement.init(base,...)
   base.classname = "HMGuiLabel"
@@ -21,7 +21,19 @@ end
 ---@param color string
 ---@return GuiLabel
 function GuiLabel:color(color)
-  local color = helmod_tag.color[color] or helmod_tag.color.orange
-  self.m_caption = {"", helmod_tag.color.orange, self.m_caption, helmod_tag.color.close}
+  local color = defines.mod.tags.color[color] or defines.mod.tags.color.orange
+  self.m_caption = {"", color, self.m_caption, defines.mod.tags.color.close}
+  return self
+end
+
+-------------------------------------------------------------------------------
+---Set color
+---@param font_color table
+---@return GuiLabel
+function GuiLabel:font_color(font_color)
+  if self.post_action["apply_style"] == nil then
+    self.post_action["apply_style"] = {}
+  end
+  self.post_action["apply_style"].font_color = font_color
   return self
 end

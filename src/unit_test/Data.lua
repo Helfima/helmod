@@ -233,6 +233,51 @@ data.energy["accumulator"] = {
     speed=1,
     recipe={type="recipe"}
 }
+
+data.energy["fusion-reactor"] = {
+    energy_type="burner",
+    energy_type_input="fluid",
+    energy_usage_min=0,
+    energy_usage_max=10000000,
+    energy_usage_priority="none",
+    energy_consumption=10000000,
+    energy_type_output="none",
+    energy_production=100000000,
+    effectivity=1,
+    target_temperature=0,
+    maximum_temperature=0,
+    fluid_usage=0,
+    fluid_burns="none",
+    fluid_fuel = {name="none", capacity=0},
+    fluid_consumption=0,
+    fluid_production={name="none", amount=0},
+    pollution=0,
+    speed=1,
+    recipe={type="recipe"}
+}
+data.energy["fusion-generator"] = {
+    energy_type="electric",
+    energy_type_input="fluid",
+    energy_usage_min=0,
+    energy_usage_max=0,
+    energy_usage_priority="none",
+    energy_consumption=0,
+    energy_type_output="electric",
+    energy_production=40000000,
+    effectivity=1,
+    target_temperature=0,
+    maximum_temperature=0,
+    fluid_usage=0,
+    fluid_burns="none",
+    fluid_fuel = {name="none", capacity=0},
+    fluid_consumption=0,
+    fluid_production={name="none", amount=0},
+    pollution=0,
+    speed=1,
+    recipe={type="recipe"}
+}
+
+
 data.modules = {}
 
 data.modules["speed-module"] = {}

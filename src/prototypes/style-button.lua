@@ -705,3 +705,37 @@ default_gui["helmod_button_tab_selected"] = {
   disabled_graphical_set = compositionIcon("__helmod__/graphics/gui.png", corner_size, {8, 0}),
   pie_progress_color = {r=1, g=1, b=1}
 }
+
+gui_color =
+{
+    white = { 1, 1, 1 },
+    white_with_alpha = { 1, 1, 1, 0.5 },
+    grey = { 0.5, 0.5, 0.5 },
+    green = { 0, 1, 0 },
+    red = { 255, 142, 142 },
+    orange = { 0.98, 0.66, 0.22 },
+    light_orange = { 1, 0.74, 0.40 },
+    caption = { 255, 230, 192 },
+    achievement_green = { 210, 253, 145 },
+    achievement_tan = { 255, 230, 192 },
+    achievement_failed = { 176, 171, 171 },
+    achievement_failed_body = { 255, 136, 136 },
+    blue = { 128, 206, 240 }
+}
+
+default_gui["helmod_link"] = {
+  type = "button_style",
+  parent = "helmod_button_default",
+  horizontal_align = "left",
+  font = "default-bold",
+  minimal_width = 0,
+  height = 19,
+  padding = 1,
+  margin = 1,
+  default_font_color = gui_color.light_orange,
+  hovered_font_color = gui_color.grey,
+  default_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=0,y=150}, {top=0,right=0,bottom=0,left=0}, true),
+  hovered_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=0,y=150}, {top=0,right=0,bottom=0,left=0}, true),
+  clicked_graphical_set = monolithIcon("__core__/graphics/gui.png", monolith_size, monolith_scale, {0,0}, {x=0,y=150}, {top=0,right=0,bottom=0,left=0}, true),
+  
+}

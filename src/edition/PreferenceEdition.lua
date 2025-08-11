@@ -29,6 +29,7 @@ function PreferenceEdition:onBind()
     Dispatcher:bind("on_gui_preference", self, self.updateItemsLogistic)
     Dispatcher:bind("on_gui_preference", self, self.updatePriorityModule)
     Dispatcher:bind("on_gui_preference", self, self.updateUI)
+    Dispatcher:bind("on_gui_preference", self, self.updateDefault)
 end
 
 -------------------------------------------------------------------------------
@@ -210,6 +211,31 @@ function PreferenceEdition:getDebugTab()
 end
 
 -------------------------------------------------------------------------------
+---Get or create generic tab panel
+---@return LuaGuiElement
+function PreferenceEdition:getTab(name, caption)
+    local content_panel = self:getTabPane()
+    local panel_name = string.format("%s_tab_panel", name)
+    local scroll_name = string.format("%s_scroll", name)
+    if content_panel[panel_name] ~= nil and content_panel[panel_name].valid then
+        return content_panel[scroll_name]
+    end
+    local tab_panel = GuiElement.add(content_panel, GuiTab(panel_name):caption(caption))
+    local scroll_panel = GuiElement.add(content_panel, GuiScroll(scroll_name):style(defines.styles.frame.tab_scroll_pane))
+    content_panel.add_tab(tab_panel, scroll_panel)
+    scroll_panel.style.horizontally_stretchable = true
+    scroll_panel.style.vertically_stretchable = true
+    return scroll_panel
+end
+
+-------------------------------------------------------------------------------
+---Get or create UI tab panel
+---@return LuaGuiElement
+function PreferenceEdition:getDefaultTab()
+    return self:getTab("default", {"helmod_preferences-edition-panel.default-machine-title"})
+end
+
+-------------------------------------------------------------------------------
 ---On update
 ---@param event LuaEvent
 function PreferenceEdition:onUpdate(event)
@@ -219,6 +245,7 @@ function PreferenceEdition:onUpdate(event)
     self:updateItemsLogistic(event)
     self:updateFluidsLogistic(event)
     self:updateThumbnailColor(event)
+    self:updateDefault(event)
     if User.getModGlobalSetting("debug_solver") == true then
         self:updateDebug(event)
     end
@@ -227,6 +254,112 @@ function PreferenceEdition:onUpdate(event)
     end
 end
 
+-------------------------------------------------------------------------------
+---Update ui
+---@param event LuaEvent
+function PreferenceEdition:updateDefault(event)
+    local container_panel = self:getDefaultTab()
+    container_panel.clear()
+    container_panel.style.padding = 5
+
+    GuiElement.add(container_panel, GuiLabel("default-factories"):caption({"helmod_preferences-edition-panel.default-machine-factories"}):style("helmod_label_title_frame"))
+
+    local default_factories_table = GuiElement.add(container_panel, GuiTable("default-factories-table"):column(3))
+    default_factories_table.style.horizontal_spacing = 5
+
+    local default_factories = User.getParameter("default_factory")
+    if default_factories ~= nil then
+        for key, default_factory in pairs(default_factories) do
+            self:createMachineInfos(default_factories_table, key, default_factory)
+        end
+    end
+
+    GuiElement.add(container_panel, GuiLabel("default-becons"):caption({"helmod_preferences-edition-panel.default-machine-beacons"}):style("helmod_label_title_frame"))
+
+    local default_beacons_table = GuiElement.add(container_panel, GuiTable("default-beacons-table"):column(3))
+    default_beacons_table.style.horizontal_spacing = 5
+
+    local default_beacons = User.getParameter("default_beacons")
+    if default_factories ~= nil then
+        for key, default_beacon in pairs(default_beacons) do
+            self:createBeaconsInfos(default_beacons_table, key, default_beacon)
+        end
+    end
+
+end
+
+-------------------------------------------------------------------------------
+---Create machine infos
+---@param parent any
+---@param category any
+---@param default_factory any
+function PreferenceEdition:createMachineInfos(parent, category, default_factory)
+    -- actions
+    local cell_actions = GuiElement.add(parent, GuiFlowH())
+    GuiElement.add(cell_actions, GuiButton(self.classname, "default-factory-remove", category):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"))
+
+    -- category
+    GuiElement.add(parent, GuiLabel(self.classname, "default_factory", category):caption(category))
+    
+    -- factory
+    local cell_factory = GuiElement.add(parent, GuiFlowH())
+    local button = GuiElement.add(cell_factory, GuiButtonSelectSprite(self.classname, "factory", category):choose_with_quality("entity", default_factory.name, default_factory.quality))
+    button.locked = true
+
+    local col_size = math.ceil(table.size(default_factory.module_priority)/2)
+    if col_size < 2 then col_size = 1 end
+    local cell_factory_module = GuiElement.add(cell_factory, GuiTable("factory-modules", category):column(col_size):style("helmod_factory_modules"))
+
+    -- modules
+    if default_factory.module_priority ~= nil then
+        for key, module_priority in pairs(default_factory.module_priority) do
+            local cell = GuiElement.add(cell_factory_module, GuiFlowH())
+            cell.style.horizontal_spacing = 2
+            GuiElement.add(cell, GuiButtonSelectSpriteSm(self.classname, "module_priority", category):choose_with_quality("item", module_priority.name, module_priority.quality))
+            local caption = string.format("X%s", module_priority.amount)
+            GuiElement.add(cell, GuiLabel(self.classname, "label_priority", category):caption(caption))
+        end
+    end
+
+end
+
+-------------------------------------------------------------------------------
+---Create beacons infos
+---@param parent any
+---@param category any
+---@param default_beacons any
+function PreferenceEdition:createBeaconsInfos(parent, category, default_beacons)
+    -- actions
+    local cell_actions = GuiElement.add(parent, GuiFlowH())
+    GuiElement.add(cell_actions, GuiButton(self.classname, "default-beacon-remove", category):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"))
+
+    -- category
+    GuiElement.add(parent, GuiLabel(self.classname, "default_beacon", category):caption(category))
+    
+    -- factory
+    local cell_beacons = GuiElement.add(parent, GuiFlowH())
+    for key, default_beacon in pairs(default_beacons) do
+        local cell_factory = GuiElement.add(cell_beacons, GuiFlowH())
+        local button = GuiElement.add(cell_factory, GuiButtonSelectSprite(self.classname, "beacon", category):choose_with_quality("entity", default_beacon.name, default_beacon.quality))
+        button.locked = true
+
+        local col_size = math.ceil(table.size(default_beacon.module_priority)/2)
+        if col_size < 2 then col_size = 1 end
+        local cell_factory_module = GuiElement.add(cell_factory, GuiTable("beacon-modules", category):column(col_size):style("helmod_factory_modules"))
+
+        -- modules
+        if default_beacon.module_priority ~= nil then
+            for key, module_priority in pairs(default_beacon.module_priority) do
+                local cell = GuiElement.add(cell_factory_module, GuiFlowH())
+                cell.style.horizontal_spacing = 2
+                GuiElement.add(cell, GuiButtonSelectSpriteSm(self.classname, "module_priority", category):choose_with_quality("item", module_priority.name, module_priority.quality))
+                local caption = string.format("X%s", module_priority.amount)
+                GuiElement.add(cell, GuiLabel(self.classname, "label_priority", category):caption(caption))
+            end
+        end
+    end
+
+end
 -------------------------------------------------------------------------------
 ---Update ui
 ---@param event LuaEvent
@@ -297,7 +430,7 @@ function PreferenceEdition:updateUI(event)
                     if view ~= nil then
                         local localised_name = view.panelCaption
                         local default_preference_name = User.getPreferenceSetting(preference_type, preference_name)
-                        GuiElement.add(options_table, GuiLabel(self.classname, "label", preference_type, preference_name):caption({ "", "\t\t\t\t", helmod_tag.color.gold, localised_name, helmod_tag.color.close }))
+                        GuiElement.add(options_table, GuiLabel(self.classname, "label", preference_type, preference_name):caption({ "", "\t\t\t\t", defines.mod.tags.color.gold, localised_name, defines.mod.tags.color.close }))
                         local checkbox = GuiElement.add(options_table, GuiCheckBox(self.classname, "preference-setting", preference_type, preference_name):state( default_preference_name))
                         if default_preference_type ~= true then
                             checkbox.enabled = false
@@ -581,6 +714,22 @@ end
 ---On event
 ---@param event LuaEvent
 function PreferenceEdition:onEvent(event)
+    if event.action == "default-factory-remove" then
+        local category = event.item1
+        local default_factories = User.getParameter("default_factory")
+        default_factories[category] = nil
+        User.setParameter("default_factory", default_factories)
+        Controller:send("on_gui_preference", event)
+    end
+
+    if event.action == "default-beacon-remove" then
+        local category = event.item1
+        local default_beacons = User.getParameter("default_beacons")
+        default_beacons[category] = nil
+        User.setParameter("default_beacons", default_beacons)
+        Controller:send("on_gui_preference", event)
+    end
+
     if event.action == "thumbnail-default" then
         local thumbnails_color = User.getThumbnailsColor()
         if event.item1 == "all" then

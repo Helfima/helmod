@@ -1,5 +1,50 @@
 require "core.defines_builded"
 require "core.defines_builded2"
+require "core.defines_colors"
+
+defines.mod = defines.mod or {}
+defines.mod.events = defines.mod.events or {}
+defines.mod.events.on_gui_action = "on_gui_action"
+defines.mod.events.on_gui_queue = "on_gui_queue"
+defines.mod.events.on_gui_event = "on_gui_event"
+defines.mod.events.on_gui_open = "on_gui_open"
+defines.mod.events.on_gui_update = "on_gui_update"
+defines.mod.events.on_gui_close = "on_gui_close"
+defines.mod.events.on_gui_error = "on_gui_error"
+defines.mod.events.on_gui_message = "on_gui_message"
+defines.mod.events.on_gui_mod_menu = "on_gui_mod_menu"
+defines.mod.events.on_gui_reset = "on_gui_reset"
+defines.mod.events.on_before_delete_cache = "on_before_delete_cache"
+defines.mod.events.on_console_command = "on_console_command"
+
+defines.mod.events.pattern = "([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)"
+
+defines.mod.events.clickable_type = {}
+defines.mod.events.clickable_type["button"] = true
+defines.mod.events.clickable_type["sprite-button"] = true
+defines.mod.events.clickable_type["choose-elem-button"] = false
+
+defines.mod.tags = {}
+defines.mod.tags.color = {}
+defines.mod.tags.color.close = "[/color]"
+defines.mod.tags.color.white = "[color=255,255,255]"
+defines.mod.tags.color.gray = "[color=229,229,229]"
+defines.mod.tags.color.yellow = "[color=255,222,61]"
+defines.mod.tags.color.red = "[color=255,0,0]"
+defines.mod.tags.color.red_light = "[color=255,50,50]"
+defines.mod.tags.color.green = "[color=0,127,14]"
+defines.mod.tags.color.green_light = "[color=50,200,50]"
+defines.mod.tags.color.blue = "[color=66,141,255]"
+defines.mod.tags.color.blue_light = "[color=100,200,255]"
+defines.mod.tags.color.gold = "[color=255,230,192]"
+defines.mod.tags.color.orange = "[color=255,106,0]"
+defines.mod.tags.color.black = "[color=0,0,0]"
+
+defines.mod.tags.font = {}
+defines.mod.tags.font.close = "[/font]"
+defines.mod.tags.font.default_bold = "[font=default-bold]"
+defines.mod.tags.font.default_semibold = "[font=default-semibold]"
+defines.mod.tags.font.default_large_bold = "[font=default-large-bold]"
 
 defines.styles = {}
 defines.styles.mod_gui_button = "frame_button"
@@ -31,6 +76,7 @@ defines.styles.flow.horizontal = "helmod_flow_horizontal"
 defines.styles.flow.vertical = "helmod_flow_vertical"
 
 defines.styles.button = {}
+defines.styles.button.link = "helmod_link"
 defines.styles.button.menu_default = "helmod_button_menu_default"
 defines.styles.button.menu_sm_default = "helmod_button_menu_sm_default"
 defines.styles.button.menu_tool_default = "helmod_button_menu_tool_default"
@@ -606,28 +652,6 @@ helmod_flow_style = {
   horizontal = "helmod_flow_horizontal",
   vertical = "helmod_flow_vertical"
 }
-
-helmod_tag = {}
-helmod_tag.color = {}
-helmod_tag.color.close = "[/color]"
-helmod_tag.color.white = "[color=255,255,255]"
-helmod_tag.color.gray = "[color=229,229,229]"
-helmod_tag.color.yellow = "[color=255,222,61]"
-helmod_tag.color.red = "[color=255,0,0]"
-helmod_tag.color.red_light = "[color=255,50,50]"
-helmod_tag.color.green = "[color=0,127,14]"
-helmod_tag.color.green_light = "[color=50,200,50]"
-helmod_tag.color.blue = "[color=66,141,255]"
-helmod_tag.color.blue_light = "[color=100,200,255]"
-helmod_tag.color.gold = "[color=255,230,192]"
-helmod_tag.color.orange = "[color=255,106,0]"
-helmod_tag.color.black = "[color=0,0,0]"
-
-helmod_tag.font = {}
-helmod_tag.font.close = "[/font]"
-helmod_tag.font.default_bold = "[font=default-bold]"
-helmod_tag.font.default_semibold = "[font=default-semibold]"
-helmod_tag.font.default_large_bold = "[font=default-large-bold]"
 
 helmod_frame_style = {
   default = "helmod_frame_default",

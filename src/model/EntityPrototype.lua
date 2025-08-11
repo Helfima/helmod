@@ -647,8 +647,10 @@ function EntityPrototype:getFluidConsumptionFusionGenerator()
           local heat_capacity = fluid_prototype:getHeatCapacity()
           
           local minimum_temperature = fluid_prototype:getMinimumTemperature()
-          local max_temperature = fluid_prototype:getMaximumTemperature()
-          local power_extract = self:getPowerExtract(0, minimum_temperature, heat_capacity)
+          minimum_temperature = fluidbox.minimum_temperature or minimum_temperature
+          local max_temperature = fluidbox.maximum_temperature
+          local target_temperature = max_temperature or minimum_temperature
+          local power_extract = self:getPowerExtract(0, target_temperature, heat_capacity)
           local energy_production = self:getMaxEnergyProduction()
 
           return (60 * energy_production * effectivity) / power_extract

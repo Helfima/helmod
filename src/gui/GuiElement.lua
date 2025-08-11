@@ -268,6 +268,13 @@ function GuiElement.addPostAction(parent, gui_element)
         parent.elem_value = action
       end
     end
+    if action_name == "apply_style" then
+      if action ~= nil then
+        for key, value in pairs(action) do
+          parent.style[key] = value
+        end
+      end
+    end
   end
 end
 
@@ -614,4 +621,12 @@ function GuiElement.infoRecipe(parent, element)
     sprite.style.height = defines.sprite_size
     sprite.style.stretch_image_to_widget_size = true
   end
+end
+
+-------------------------------------------------------------------------------
+---Add tags
+---@param data table
+function GuiElement:tags(data)
+  self.options["tags"] = data
+  return self
 end

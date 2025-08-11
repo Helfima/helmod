@@ -4,10 +4,12 @@ require "core.Object"
 ---Class DispatcherController
 ---
 ---@class DispatcherController
----
+---@field handlers {[string]:{[string]:{class:Object, handlers:{[uint]:function}}}}
+---@field views table
 DispatcherController = newclass(Object,function(base,classname)
   Object.init(base,classname)
   base.handlers = {}
+  base.views = {}
 end)
 
 -------------------------------------------------------------------------------

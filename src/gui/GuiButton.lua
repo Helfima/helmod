@@ -1,6 +1,7 @@
 -------------------------------------------------------------------------------
 ---Class to help to build GuiButton
 ---@class GuiButton : GuiElement
+---@field post_action table
 GuiButton = newclass(GuiElement, function(base, ...)
     GuiElement.init(base, ...)
     base.classname = "HMGuiButton"
@@ -173,7 +174,7 @@ GuiButtonSprite = newclass(GuiButton, function(base, ...)
 end)
 
 -------------------------------------------------------------------------------
----@class GuiButtonSelectSprite
+---@class GuiButtonSelectSprite : GuiButton
 GuiButtonSelectSprite = newclass(GuiButton, function(base, ...)
     GuiButton.init(base, ...)
     base.options.style = "helmod_button_select_icon"
@@ -195,7 +196,7 @@ function GuiButtonSelectSprite:color(color)
 end
 
 -------------------------------------------------------------------------------
----@class GuiButtonSpriteM
+---@class GuiButtonSpriteM : GuiButton
 GuiButtonSpriteM = newclass(GuiButton, function(base, ...)
     GuiButton.init(base, ...)
     base.options.style = "helmod_button_icon_m"
@@ -203,7 +204,7 @@ GuiButtonSpriteM = newclass(GuiButton, function(base, ...)
 end)
 
 -------------------------------------------------------------------------------
----@class GuiButtonSelectSpriteM
+---@class GuiButtonSelectSpriteM : GuiButton
 GuiButtonSelectSpriteM = newclass(GuiButton, function(base, ...)
     GuiButton.init(base, ...)
     base.options.style = "helmod_button_select_icon_m"
@@ -233,7 +234,7 @@ GuiButtonSpriteSm = newclass(GuiButton, function(base, ...)
 end)
 
 -------------------------------------------------------------------------------
----@class GuiButtonSelectSpriteSm
+---@class GuiButtonSelectSpriteSm : GuiButton
 GuiButtonSelectSpriteSm = newclass(GuiButton, function(base, ...)
     GuiButton.init(base, ...)
     base.options.style = "helmod_button_select_icon_sm"
@@ -256,7 +257,7 @@ function GuiButtonSelectSpriteSm:color(color)
 end
 
 -------------------------------------------------------------------------------
----@class GuiButtonSpriteXxl
+---@class GuiButtonSpriteXxl : GuiButton
 GuiButtonSpriteXxl = newclass(GuiButton, function(base, ...)
     GuiButton.init(base, ...)
     base.options.style = "helmod_button_icon_xxl"
@@ -264,7 +265,7 @@ GuiButtonSpriteXxl = newclass(GuiButton, function(base, ...)
 end)
 
 -------------------------------------------------------------------------------
----@class GuiButtonSelectSpriteXxl
+---@class GuiButtonSelectSpriteXxl : GuiButton
 GuiButtonSelectSpriteXxl = newclass(GuiButton, function(base, ...)
     GuiButton.init(base, ...)
     base.options.style = "helmod_button_select_icon_xxl"
@@ -281,5 +282,30 @@ function GuiButtonSelectSpriteXxl:color(color)
     if color == "yellow" then style = "helmod_button_select_icon_xxl_yellow" end
     if color == "green" then style = "helmod_button_select_icon_xxl_green" end
     self.options.style = style
+    return self
+end
+
+-------------------------------------------------------------------------------
+---@class GuiLink : GuiButton
+GuiLink = newclass(GuiButton, function(base, ...)
+    GuiButton.init(base, ...)
+    base.options.style = defines.styles.button.link
+    local style = {
+        font_color = defines.color.orange.orange,
+        hovered_font_color = defines.color.gray.silver
+    }
+    base.post_action["apply_style"] = style
+end)
+
+-------------------------------------------------------------------------------
+---Set color
+---@param font_color table
+---@param hovered_font_color? table
+---@return GuiLink
+function GuiLink:font_color(font_color, hovered_font_color)
+    self.post_action["apply_style"].font_color = font_color
+    if hovered_font_color ~= nil then
+        self.post_action["apply_style"].hovered_font_color = hovered_font_color
+    end
     return self
 end

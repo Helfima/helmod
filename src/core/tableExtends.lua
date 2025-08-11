@@ -142,3 +142,22 @@ function table.data_info(list)
     return result
   end
 end
+
+-------------------------------------------------------------------------------
+---Convert info table with type for element
+---@param list table
+---@param index_start uint
+---@param index_end? uint
+---@return table
+table.slice = function(list, index_start, index_end)
+  local index_end = index_end or table.size(list)
+  local new_list = {}
+  local index = 1
+  for k, v in pairs(list) do
+    if index > index_start and index <= index_end then
+      new_list[k] = v
+    end
+    index= index + 1
+  end
+  return new_list
+end

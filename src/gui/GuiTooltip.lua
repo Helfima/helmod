@@ -82,19 +82,19 @@ function GuiTooltip.appendLineTitle(tooltip, element_type, element_name, element
 			local color = quality.color
 			local color_tag = GuiElement.rgbColorTag(color)
 			local element_sprite = GuiElement.getSpriteWithQuality(element_type, element_name, element_quality)
-			table.insert(tooltip, { "", "\n", element_sprite, " ", helmod_tag.font.default_bold
-				, helmod_tag.color.gold, element_label, helmod_tag.color.close
-				, color_tag, " (", localised_name, ")", helmod_tag.color.close
-				, helmod_tag.font.close
+			table.insert(tooltip, { "", "\n", element_sprite, " ", defines.mod.tags.font.default_bold
+				, defines.mod.tags.color.gold, element_label, defines.mod.tags.color.close
+				, color_tag, " (", localised_name, ")", defines.mod.tags.color.close
+				, defines.mod.tags.font.close
 			})
 			noQuality = false
 		end
 	end
 	if noQuality then
 		local element_sprite = GuiElement.getSprite(element_type, element_name, "[%s=%s]")
-		table.insert(tooltip, { "", "\n", element_sprite, " ", helmod_tag.font.default_bold
-			, helmod_tag.color.gold, element_label, helmod_tag.color.close
-			, helmod_tag.font.close
+		table.insert(tooltip, { "", "\n", element_sprite, " ", defines.mod.tags.font.default_bold
+			, defines.mod.tags.color.gold, element_label, defines.mod.tags.color.close
+			, defines.mod.tags.font.close
 		})
 	end
 end
@@ -117,11 +117,11 @@ function GuiTooltip.appendLineQuantity(tooltip, element_type, element_name, elem
 			local color_tag = GuiElement.rgbColorTag(color)
 			local element_sprite = GuiElement.getSpriteWithQuality(element_type, element_name, element_quality)
 			table.insert(tooltip, { "", "\n", element_sprite, " "
-				, helmod_tag.font.default_bold
-				, helmod_tag.color.white, element_amount, helmod_tag.color.close
-				, helmod_tag.font.close
-				, " x ", helmod_tag.color.gold, element_label, helmod_tag.color.close
-				, color_tag, " (", localised_name, ")", helmod_tag.color.close
+				, defines.mod.tags.font.default_bold
+				, defines.mod.tags.color.white, element_amount, defines.mod.tags.color.close
+				, defines.mod.tags.font.close
+				, " x ", defines.mod.tags.color.gold, element_label, defines.mod.tags.color.close
+				, color_tag, " (", localised_name, ")", defines.mod.tags.color.close
 			})
 			noQuality = false
 		end
@@ -129,10 +129,10 @@ function GuiTooltip.appendLineQuantity(tooltip, element_type, element_name, elem
 	if noQuality then
 		local element_sprite = GuiElement.getSprite(element_type, element_name, "[%s=%s]")
 		table.insert(tooltip, { "", "\n", element_sprite, " "
-			, helmod_tag.font.default_bold
-			, helmod_tag.color.white, element_amount, helmod_tag.color.close
-			, helmod_tag.font.close
-			, " x ", helmod_tag.color.gold, element_label, helmod_tag.color.close
+			, defines.mod.tags.font.default_bold
+			, defines.mod.tags.color.white, element_amount, defines.mod.tags.color.close
+			, defines.mod.tags.font.close
+			, " x ", defines.mod.tags.color.gold, element_label, defines.mod.tags.color.close
 		})
 	end
 end
@@ -156,11 +156,11 @@ function GuiTooltip.appendLineSubQuantity(tooltip, element_type, element_name, e
 			local element_sprite = GuiElement.getSpriteWithQuality(element_type, element_name, element_quality)
 			table.insert(tooltip, { "", "\n", "[img=helmod-tooltip-blank]", " "
 				, element_sprite
-				, helmod_tag.font.default_bold
-				, helmod_tag.color.white, " ", element_amount, helmod_tag.color.close
-				, helmod_tag.font.close
-				, " x ", helmod_tag.color.gold, element_label, helmod_tag.color.close
-				, color_tag, " (", localised_name, ")", helmod_tag.color.close
+				, defines.mod.tags.font.default_bold
+				, defines.mod.tags.color.white, " ", element_amount, defines.mod.tags.color.close
+				, defines.mod.tags.font.close
+				, " x ", defines.mod.tags.color.gold, element_label, defines.mod.tags.color.close
+				, color_tag, " (", localised_name, ")", defines.mod.tags.color.close
 			})
 			noQuality = false
 		end
@@ -169,10 +169,10 @@ function GuiTooltip.appendLineSubQuantity(tooltip, element_type, element_name, e
 		local element_sprite = GuiElement.getSprite(element_type, element_name, "[%s=%s]")
 		table.insert(tooltip, { "", "\n", "[img=helmod-tooltip-blank]", " "
 			, element_sprite
-			, helmod_tag.font.default_bold
-			, helmod_tag.color.white, " ", element_amount, helmod_tag.color.close
-			, helmod_tag.font.close
-			, " x ", helmod_tag.color.gold, element_label, helmod_tag.color.close
+			, defines.mod.tags.font.default_bold
+			, defines.mod.tags.color.white, " ", element_amount, defines.mod.tags.color.close
+			, defines.mod.tags.font.close
+			, " x ", defines.mod.tags.color.gold, element_label, defines.mod.tags.color.close
 		})
 	end
 end
@@ -189,13 +189,13 @@ function GuiTooltip.appendLine(tooltip, icon, label, value1, value2)
 	end
 	if value2 == nil then
 		table.insert(tooltip, { "", "\n", icon, " "
-			, helmod_tag.color.gold, label, ": ", helmod_tag.color.close
-			, helmod_tag.font.default_bold, value1 or 0, helmod_tag.font.close
+			, defines.mod.tags.color.gold, label, ": ", defines.mod.tags.color.close
+			, defines.mod.tags.font.default_bold, value1 or 0, defines.mod.tags.font.close
 		})
 	else
 		table.insert(tooltip, { "", "\n", icon, " "
-			, helmod_tag.color.gold, label, ": ", helmod_tag.color.close
-			, helmod_tag.font.default_bold, value1 or 0, "/", value2, helmod_tag.font.close
+			, defines.mod.tags.color.gold, label, ": ", defines.mod.tags.color.close
+			, defines.mod.tags.font.default_bold, value1 or 0, "/", value2, defines.mod.tags.font.close
 		})
 	end
 end
@@ -208,7 +208,7 @@ function GuiTooltip:appendControlInfo(tooltip, element)
 	if self.m_with_control_info ~= nil then
 		local tooltip_section = { "" }
 		table.insert(tooltip_section, { "", "\n", "----------------------" })
-		table.insert(tooltip_section, { "", "\n", helmod_tag.font.default_bold, { "tooltip.info-control" }, helmod_tag.font.close })
+		table.insert(tooltip_section, { "", "\n", defines.mod.tags.font.default_bold, { "tooltip.info-control" }, defines.mod.tags.font.close })
 		if self.m_with_control_info == "contraint" then
 			table.insert(tooltip_section, { "", "\n", "[img=helmod-tooltip-blank]", " ", { "controls.contraint-plus" } })
 			table.insert(tooltip_section, { "", "\n", "[img=helmod-tooltip-blank]", " ", { "controls.contraint-minus" } })
@@ -334,7 +334,7 @@ function GuiTooltip.appendQuality(tooltip, element)
 			local localised_name = quality.localised_name
 			local color = quality.color
 			local color_tag = GuiElement.rgbColorTag(color)
-			table.insert(tooltip, { "", "\n", string.format("[%s=%s]", "quality", element.quality), " ", helmod_tag.font.default_bold, color_tag, localised_name, helmod_tag.color.close, helmod_tag.font.close })
+			table.insert(tooltip, { "", "\n", string.format("[%s=%s]", "quality", element.quality), " ", defines.mod.tags.font.default_bold, color_tag, localised_name, defines.mod.tags.color.close, defines.mod.tags.font.close })
 		end
 	end
 end
@@ -348,7 +348,7 @@ function GuiTooltip:appendLogistic(tooltip, element)
 		local tooltip_section = { "" }
 		table.insert(tooltip_section, { "", "\n", "----------------------" })
 		table.insert(tooltip_section,
-			{ "", "\n", helmod_tag.font.default_bold, { "tooltip.info-logistic" }, helmod_tag.font.close })
+			{ "", "\n", defines.mod.tags.font.default_bold, { "tooltip.info-logistic" }, defines.mod.tags.font.close })
 		---solid logistic
 		if element.type == 0 or element.type == "item" then
 			for _, type in pairs({ "inserter", "belt", "container", "transport" }) do
@@ -363,9 +363,9 @@ function GuiTooltip:appendLogistic(tooltip, element)
 				local element_sprite = GuiElement.getSpriteWithQuality("entity", item_logistic.name, item_logistic.quality)
 				if self.m_by_limit then
 					local limit_value = Format.formatNumberElement(item_prototype:countContainer(element.count_limit, item_logistic, element.time))
-					table.insert(tooltip_section, { "", "\n", element_sprite, " ", helmod_tag.font.default_bold, " x ", limit_value, "/", formated_total_value, helmod_tag.font.close, info })
+					table.insert(tooltip_section, { "", "\n", element_sprite, " ", defines.mod.tags.font.default_bold, " x ", limit_value, "/", formated_total_value, defines.mod.tags.font.close, info })
 				else
-					table.insert(tooltip_section, { "", "\n", element_sprite, " ", helmod_tag.font.default_bold, " x ", formated_total_value, helmod_tag.font.close, info })
+					table.insert(tooltip_section, { "", "\n", element_sprite, " ", defines.mod.tags.font.default_bold, " x ", formated_total_value, defines.mod.tags.font.close, info })
 				end
 			end
 		end
@@ -384,9 +384,9 @@ function GuiTooltip:appendLogistic(tooltip, element)
 					if type == "pipe" then limit_count = limit_count / element.time end
 					local limit_value = Format.formatNumberElement(fluid_prototype:countContainer(limit_count,
 						fluid_logistic, element.time))
-					table.insert(tooltip_section, { "", "\n", element_sprite, " ", helmod_tag.font .default_bold, " x ", limit_value, "/", formated_total_value, helmod_tag.font.close })
+					table.insert(tooltip_section, { "", "\n", element_sprite, " ", defines.mod.tags.font .default_bold, " x ", limit_value, "/", formated_total_value, defines.mod.tags.font.close })
 				else
-					table.insert(tooltip_section, { "", "\n", element_sprite, " ", helmod_tag.font .default_bold, " x ", formated_total_value, helmod_tag.font.close })
+					table.insert(tooltip_section, { "", "\n", element_sprite, " ", defines.mod.tags.font .default_bold, " x ", formated_total_value, defines.mod.tags.font.close })
 				end
 			end
 		end
@@ -460,8 +460,8 @@ end
 function GuiTooltip.appendLineDebug(tooltip, label, value)
 	local icon = "[img=developer]"
 	table.insert(tooltip, { "", "\n", icon, " "
-		, helmod_tag.color.white, label, ": ", helmod_tag.color.close
-		, helmod_tag.font.default_bold, value or "nil", helmod_tag.font.close
+		, defines.mod.tags.color.white, label, ": ", defines.mod.tags.color.close
+		, defines.mod.tags.font.default_bold, value or "nil", defines.mod.tags.font.close
 	})
 end
 
@@ -496,53 +496,53 @@ function GuiTooltip:create()
 	elseif string.find(self.name[1], "edit[-]") then
 		local sprite_name = GuiElement.getSprite(defines.sprite_tooltip.edit)
 		table.insert(tooltip,
-			{ "", string.format("[img=%s]", sprite_name), " ", helmod_tag.color.yellow, helmod_tag.font.default_bold,
-				self.name, helmod_tag.font.close, helmod_tag.color.close })
+			{ "", string.format("[img=%s]", sprite_name), " ", defines.mod.tags.color.yellow, defines.mod.tags.font.default_bold,
+				self.name, defines.mod.tags.font.close, defines.mod.tags.color.close })
 	elseif string.find(self.name[1], "add[-]") then
 		local sprite_name = GuiElement.getSprite(defines.sprite_tooltip.add)
 		table.insert(tooltip,
-			{ "", string.format("[img=%s]", sprite_name), " ", helmod_tag.color.yellow, helmod_tag.font.default_bold,
-				self.name, helmod_tag.font.close, helmod_tag.color.close })
+			{ "", string.format("[img=%s]", sprite_name), " ", defines.mod.tags.color.yellow, defines.mod.tags.font.default_bold,
+				self.name, defines.mod.tags.font.close, defines.mod.tags.color.close })
 	elseif string.find(self.name[1], "remove[-]") then
 		local sprite_name = GuiElement.getSprite(defines.sprite_tooltip.remove)
 		table.insert(tooltip,
-			{ "", string.format("[img=%s]", sprite_name), " ", helmod_tag.color.yellow, helmod_tag.font.default_bold,
-				self.name, helmod_tag.font.close, helmod_tag.color.close })
+			{ "", string.format("[img=%s]", sprite_name), " ", defines.mod.tags.color.yellow, defines.mod.tags.font.default_bold,
+				self.name, defines.mod.tags.font.close, defines.mod.tags.color.close })
 	elseif string.find(self.name[1], "info[-]") then
 		local sprite_name = GuiElement.getSprite(defines.sprite_tooltip.info)
 		table.insert(tooltip,
-			{ "", string.format("[img=%s]", sprite_name), " ", helmod_tag.color.white, helmod_tag.font.default_bold, self
-				.name, helmod_tag.font.close, helmod_tag.color.close })
+			{ "", string.format("[img=%s]", sprite_name), " ", defines.mod.tags.color.white, defines.mod.tags.font.default_bold, self
+				.name, defines.mod.tags.font.close, defines.mod.tags.color.close })
 	elseif string.find(self.name[1], "set[-]default") then
 		local sprite_name = GuiElement.getSprite(defines.sprite_tooltip.favorite)
 		table.insert(tooltip,
-			{ "", string.format("[img=%s]", sprite_name), " ", helmod_tag.color.yellow, helmod_tag.font.default_bold,
-				self.name, helmod_tag.font.close, helmod_tag.color.close })
+			{ "", string.format("[img=%s]", sprite_name), " ", defines.mod.tags.color.yellow, defines.mod.tags.font.default_bold,
+				self.name, defines.mod.tags.font.close, defines.mod.tags.color.close })
 	elseif string.find(self.name[1], "apply[-]block") then
 		local sprite_name = GuiElement.getSprite(defines.sprite_tooltip.expand_right)
 		table.insert(self.name, { self.options.tooltip })
 		table.insert(tooltip,
-			{ "", string.format("[img=%s]", sprite_name), " ", helmod_tag.color.yellow, helmod_tag.font.default_bold,
-				self.name, helmod_tag.font.close, helmod_tag.color.close })
+			{ "", string.format("[img=%s]", sprite_name), " ", defines.mod.tags.color.yellow, defines.mod.tags.font.default_bold,
+				self.name, defines.mod.tags.font.close, defines.mod.tags.color.close })
 	elseif string.find(self.name[1], "apply[-]line") then
 		local sprite_name = GuiElement.getSprite(defines.sprite_tooltip.expand_right_group)
 		table.insert(self.name, { self.options.tooltip })
 		table.insert(tooltip,
-			{ "", string.format("[img=%s]", sprite_name), " ", helmod_tag.color.yellow, helmod_tag.font.default_bold,
-				self.name, helmod_tag.font.close, helmod_tag.color.close })
+			{ "", string.format("[img=%s]", sprite_name), " ", defines.mod.tags.color.yellow, defines.mod.tags.font.default_bold,
+				self.name, defines.mod.tags.font.close, defines.mod.tags.color.close })
 	elseif string.find(self.name[1], "module[-]clear") then
 		local sprite_name = GuiElement.getSprite(defines.sprite_tooltip.erase)
 		table.insert(tooltip,
-			{ "", string.format("[img=%s]", sprite_name), " ", helmod_tag.color.yellow, helmod_tag.font.default_bold,
-				self.name, helmod_tag.font.close, helmod_tag.color.close })
+			{ "", string.format("[img=%s]", sprite_name), " ", defines.mod.tags.color.yellow, defines.mod.tags.font.default_bold,
+				self.name, defines.mod.tags.font.close, defines.mod.tags.color.close })
 	elseif string.find(self.name[1], "pipette") then
 		local sprite_name = GuiElement.getSprite(defines.sprite_tooltip.pipette)
 		table.insert(tooltip,
-			{ "", string.format("[img=%s]", sprite_name), " ", helmod_tag.color.yellow, helmod_tag.font.default_bold,
-				self.name, helmod_tag.font.close, helmod_tag.color.close })
+			{ "", string.format("[img=%s]", sprite_name), " ", defines.mod.tags.color.yellow, defines.mod.tags.font.default_bold,
+				self.name, defines.mod.tags.font.close, defines.mod.tags.color.close })
 	else
 		table.insert(tooltip,
-			{ "", "[img=helmod-tooltip-blank]", " ", helmod_tag.font.default_bold, self.name, helmod_tag.font.close })
+			{ "", "[img=helmod-tooltip-blank]", " ", defines.mod.tags.font.default_bold, self.name, defines.mod.tags.font.close })
 	end
 	return tooltip
 end
@@ -580,7 +580,7 @@ function GuiTooltipModel:create()
 		
 		if block_infos.note ~= nil and block_infos.note ~= "" then
 			table.insert(tooltip, { "", "\n", "----------------------" })
-			table.insert(tooltip, { "", "\n", helmod_tag.font.default_bold, { "helmod_common.note" }, helmod_tag.font
+			table.insert(tooltip, { "", "\n", defines.mod.tags.font.default_bold, { "helmod_common.note" }, defines.mod.tags.font
 				.close })
 			table.insert(tooltip, { "", "\n", block_infos.note or "" })
 		end
@@ -696,8 +696,8 @@ function GuiTooltipEnergy:create()
 		end
 
 		table.insert(tooltip,
-			{ "", "\n", element_icon, " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName({ type =
-			type, name = element.name }), helmod_tag.font.close, helmod_tag.color.close })
+			{ "", "\n", element_icon, " ", defines.mod.tags.color.gold, defines.mod.tags.font.default_bold, Player.getLocalisedName({ type =
+			type, name = element.name }), defines.mod.tags.font.close, defines.mod.tags.color.close })
 		---quantity
 		local total_count = Format.formatNumberKilo(element.count, "J")
 		if self.m_by_limit then
@@ -754,9 +754,9 @@ function GuiTooltipFactory.AppendFactory(tooltip, element)
 	local fuel = prototype:getFluel()
 	if fuel ~= nil then
 		if fuel.temperature then
-			table.insert(tooltip,{ "", "\n", string.format("[%s=%s] %s °C", fuel.type, fuel.name, fuel.temperature), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close })
+			table.insert(tooltip,{ "", "\n", string.format("[%s=%s] %s °C", fuel.type, fuel.name, fuel.temperature), " ", defines.mod.tags.color.gold, defines.mod.tags.font.default_bold, Player.getLocalisedName(fuel), defines.mod.tags.font.close, defines.mod.tags.color.close })
 		else
-			table.insert(tooltip,{ "", "\n", string.format("[%s=%s]", fuel.type, fuel.name), " ", helmod_tag.color.gold, helmod_tag.font.default_bold, Player.getLocalisedName(fuel), helmod_tag.font.close, helmod_tag.color.close })
+			table.insert(tooltip,{ "", "\n", string.format("[%s=%s]", fuel.type, fuel.name), " ", defines.mod.tags.color.gold, defines.mod.tags.font.default_bold, Player.getLocalisedName(fuel), defines.mod.tags.font.close, defines.mod.tags.color.close })
 		end
 	end
 	if element.module_priority then
@@ -988,8 +988,8 @@ function GuiTooltip.appendLineBonus(tooltip, icon, label, bonus)
 	if bonus <= 0 then bonus_positive = "" end
 	if bonus ~= 0 then
 		table.insert(tooltip, { "", "\n", icon, " "
-			, helmod_tag.color.gold, label, ": ", helmod_tag.color.close
-			, helmod_tag.font.default_bold, bonus_positive, Format.formatPercent(bonus) or 0, "%", helmod_tag.font.close
+			, defines.mod.tags.color.gold, label, ": ", defines.mod.tags.color.close
+			, defines.mod.tags.font.default_bold, bonus_positive, Format.formatPercent(bonus) or 0, "%", defines.mod.tags.font.close
 		})
 	end
 end
@@ -1138,7 +1138,7 @@ function GuiTooltipLocation:create()
 		for i, property in pairs(location.properties) do
 			local value = property.value
 			
-			local tooltip_property = {"", "\n", "[img=helmod-tooltip-blank]", "  ", helmod_tag.color.gold, property.localised_name, ": ", helmod_tag.color.close}
+			local tooltip_property = {"", "\n", "[img=helmod-tooltip-blank]", "  ", defines.mod.tags.color.gold, property.localised_name, ": ", defines.mod.tags.color.close}
 			if property.is_time then
 				table.insert(tooltip_property, Format.formatTimeTickLocalised(value))
 			else
@@ -1194,11 +1194,11 @@ function GuiTooltipFuel:create()
 			
 			if mode == "burned" then
 				local value = Format.formatNumberKilo(prototype:getFuelValue(), "J")
-				local tooltip_property = {"", "\n", "[img=helmod-tooltip-blank]", "  ", helmod_tag.color.gold, {"description.fuel-value"}, ": ", helmod_tag.color.close, value}
+				local tooltip_property = {"", "\n", "[img=helmod-tooltip-blank]", "  ", defines.mod.tags.color.gold, {"description.fuel-value"}, ": ", defines.mod.tags.color.close, value}
 				table.insert(tooltip, tooltip_property)
 			else
 				local value = tostring(prototype.temperature)
-				local tooltip_property = {"", "\n", "[img=helmod-tooltip-blank]", "  ", helmod_tag.color.gold, {"description.temperature"}, ": ", helmod_tag.color.close, value, " °C"}
+				local tooltip_property = {"", "\n", "[img=helmod-tooltip-blank]", "  ", defines.mod.tags.color.gold, {"description.temperature"}, ": ", defines.mod.tags.color.close, value, " °C"}
 				table.insert(tooltip, tooltip_property)
 			end
 		else
