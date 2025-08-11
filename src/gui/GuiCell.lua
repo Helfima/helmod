@@ -1162,7 +1162,7 @@ function GuiCellElementSm:create(parent)
   if element.type == "energy" then
     tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo()
   else
-    tooltip = GuiTooltipElement(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo()
+    tooltip = GuiTooltipElement(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
   end
   local button_index = Product(element):getTableKey()
   local button_caption = "X"..Product(element):getElementAmount()

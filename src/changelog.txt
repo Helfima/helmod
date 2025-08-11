@@ -3,6 +3,10 @@ Version: 2.1.21
 Date: 2025-08-11
   Changes:
     - Added preference menu "Default of machines" to delete default
+    - Added new mode for smart pipette, can use display panel, see controls in tooltip
+  Bugfixes:
+    - Fixed quality item for smart pipette on constant combinator
+    - Fixed quality item number in recipe edition
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.20
 Date: 2025-07-31

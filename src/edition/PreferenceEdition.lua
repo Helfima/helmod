@@ -296,7 +296,7 @@ end
 function PreferenceEdition:createMachineInfos(parent, category, default_factory)
     -- actions
     local cell_actions = GuiElement.add(parent, GuiFlowH())
-    GuiElement.add(cell_actions, GuiButton(self.classname, "default-factory-remove", category):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"))
+    GuiElement.add(cell_actions, GuiButton(self.classname, "default-factory-remove", category):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"):tooltip({"helmod_preferences-edition-panel.default-machine-remove"}))
 
     -- category
     GuiElement.add(parent, GuiLabel(self.classname, "default_factory", category):caption(category))
@@ -331,7 +331,7 @@ end
 function PreferenceEdition:createBeaconsInfos(parent, category, default_beacons)
     -- actions
     local cell_actions = GuiElement.add(parent, GuiFlowH())
-    GuiElement.add(cell_actions, GuiButton(self.classname, "default-beacon-remove", category):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"))
+    GuiElement.add(cell_actions, GuiButton(self.classname, "default-beacon-remove", category):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"):tooltip({"helmod_preferences-edition-panel.default-machine-remove"}))
 
     -- category
     GuiElement.add(parent, GuiLabel(self.classname, "default_beacon", category):caption(category))

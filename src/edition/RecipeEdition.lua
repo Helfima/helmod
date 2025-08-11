@@ -1454,7 +1454,8 @@ function RecipeEdition:updateObjectInfo(event)
             for index, lua_product in pairs(lua_products) do
                 local product_prototype = Product(lua_product)
                 local product = product_prototype:clone()
-                product.count = product_prototype:getElementAmount()
+                local quality_probality = lua_product.quality_probality or 1
+                product.count = product_prototype:getElementAmount() * quality_probality
                 GuiElement.add(cell_products, GuiCellProductSm(self.classname, "do_noting"):element(product):tooltip("tooltip.product"):index(index):color(GuiElement.color_button_none))
             end
         end
@@ -1466,7 +1467,8 @@ function RecipeEdition:updateObjectInfo(event)
             for index, lua_ingredient in pairs(lua_ingredients) do
                 local ingredient_prototype = Product(lua_ingredient)
                 local ingredient = ingredient_prototype:clone()
-                ingredient.count = ingredient_prototype:getElementAmount()
+                local quality_probality = lua_ingredient.quality_probality or 1
+                ingredient.count = ingredient_prototype:getElementAmount() * quality_probality
                 GuiElement.add(cell_ingredients, GuiCellProductSm(self.classname, "do_noting"):element(ingredient):tooltip("tooltip.ingredient"):index(index):color(GuiElement.color_button_add))
             end
         end

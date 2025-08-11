@@ -247,26 +247,27 @@ function Player.setSmartToolRecipeConstantCombinator(recipe, type, index)
     local elements = nil
     local recipe_prototype = RecipePrototype(recipe)
     if type == "product" then
-        elements = recipe_prototype:getProducts(recipe.factory)
+        elements = recipe_prototype:getQualityProducts(recipe.factory, recipe.quality)
     else
-        elements = recipe_prototype:getIngredients(recipe.factory)
+        elements = recipe_prototype:getQualityIngredients(recipe.factory, recipe.quality)
     end
     if elements == nil then
         return nil
     end
     local filters = {}
-    for id, element in pairs(elements) do
+    for id, lua_product in pairs(elements) do
         if index == -1 or id == index then
             local signal_index = 1
             if index == -1 then
                 signal_index = id
             end
-            local product_prototype = Product(element)
+            local product_prototype = Product(lua_product)
             local count = product_prototype:countProduct(recipe)
             local filter = {
                 signal = {
-                    type = element.type,
-                    name = element.name
+                    type = lua_product.type,
+                    name = lua_product.name,
+                    quality = lua_product.quality
                 },
                 count = math.ceil(count),
                 index = signal_index
@@ -284,6 +285,67 @@ function Player.setSmartToolRecipeConstantCombinator(recipe, type, index)
     }
 
     Player.getSmartTool({ entity })
+end
+
+-------------------------------------------------------------------------------
+---Set smart tool
+---@param recipe table
+---@param type string
+---@param index number
+---@param always_show boolean
+---@return any
+function Player.setSmartToolRecipeDisplayPanel(recipe, type, index, always_show)
+    if Lua_player == nil or recipe == nil then
+        return nil
+    end
+    local elements = nil
+    local recipe_prototype = RecipePrototype(recipe)
+    if type == "product" then
+        elements = recipe_prototype:getQualityProducts(recipe.factory, recipe.quality)
+    else
+        elements = recipe_prototype:getQualityIngredients(recipe.factory, recipe.quality)
+    end
+    if elements == nil then
+        return nil
+    end
+    local format_number = User.getPreferenceSetting("format_number_element")
+    local decimal = Format.decimalFromString(format_number)
+    local entities = {}
+    local offset = 0
+    for id, lua_product in pairs(elements) do
+        if index == -1 or id == index then
+            local signal_index = 1
+            if index == -1 then
+                signal_index = id
+            end
+            local product_prototype = Product(lua_product)
+            local count = 0
+            if type == "product" then
+                count = product_prototype:countProduct(recipe)
+            else
+                count = product_prototype:countIngredient(recipe)
+            end
+
+            local entity = {
+                entity_number = signal_index,
+                name = "display-panel",
+                position = { offset, 0 },
+                icon = {
+                    type = lua_product.type,
+                    name = lua_product.name,
+                    quality = lua_product.quality
+                },
+                text = Format.formatNumber(count, decimal)
+            }
+            entity.always_show = always_show or false
+            entity.show_in_chart = false
+            table.insert(entities, entity)
+            offset = offset + 1
+        end
+    end
+    
+
+    Player.getSmartTool(entities)
 end
 
 -------------------------------------------------------------------------------

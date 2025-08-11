@@ -225,6 +225,12 @@ function GuiTooltip:appendControlInfo(tooltip, element)
 		if self.m_with_control_info == "crafting-add" then
 			table.insert(tooltip_section, { "", "\n", "[img=helmod-tooltip-blank]", " ", { "controls.crafting-add" } })
 		end
+		if self.m_with_control_info == "pipette-item" then
+			table.insert(tooltip_section, { "", "\n", "[img=helmod-tooltip-blank]", " ", { "controls.pipette-item-constant-all" } })
+			table.insert(tooltip_section, { "", "\n", "[img=helmod-tooltip-blank]", " ", { "controls.pipette-item-display-one" } })
+			table.insert(tooltip_section, { "", "\n", "[img=helmod-tooltip-blank]", " ", { "controls.pipette-item-display-all" } })
+			table.insert(tooltip_section, { "", "\n", "[img=helmod-tooltip-blank]", " ", { "controls.pipette-item-click-right" } })
+		end
 		table.insert(tooltip, tooltip_section)
 	end
 end
