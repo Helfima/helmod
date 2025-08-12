@@ -280,7 +280,7 @@ function PreferenceEdition:updateDefault(event)
     default_beacons_table.style.horizontal_spacing = 5
 
     local default_beacons = User.getParameter("default_beacons")
-    if default_factories ~= nil then
+    if default_beacons ~= nil then
         for key, default_beacon in pairs(default_beacons) do
             self:createBeaconsInfos(default_beacons_table, key, default_beacon)
         end

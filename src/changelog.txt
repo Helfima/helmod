@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.1.22
+Date: 2025-08-12
+  Changes:
+    - Added new button to copy recipe with quality same/up/down in a block 
+  Bugfixes:
+    - Fixed error in preference menu "Default of machines"
+    - Fixed fluid amount for energy recipe of "fusion-generator" prototype in a case
+---------------------------------------------------------------------------------------------------
 Version: 2.1.21
 Date: 2025-08-11
   Changes:

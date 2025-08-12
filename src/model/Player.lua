@@ -2166,6 +2166,33 @@ function Player.getQualityPrototype(name)
 end
 
 -------------------------------------------------------------------------------
+---Return quality prototype
+---@param name string
+---@return LuaQualityPrototype
+function Player.getNextQualityPrototype(name)
+    if name == nil then return nil end
+    local quality = Player.getQualityPrototype(name)
+    if quality.next ~= nil then
+        return quality.next
+    end
+    return nil
+end
+
+-------------------------------------------------------------------------------
+---Return quality prototype
+---@param name string
+---@return LuaQualityPrototype
+function Player.getPreviousQualityPrototype(name)
+    if name == nil then return nil end
+    for _, quality in pairs(prototypes.quality) do
+        if quality.next ~= nil and quality.next.name == name then
+            return quality
+        end
+    end
+    return nil
+end
+
+-------------------------------------------------------------------------------
 ---Return quality prototypes
 ---@return LuaCustomTable<(uint)|(string), LuaSurface>
 function Player.getSurfaces()

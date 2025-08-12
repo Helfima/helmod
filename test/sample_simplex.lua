@@ -1,40 +1,40 @@
--- Fonction pour trouver le pivot
-local function findPivot(tableau, numVars, numConstraints)
-    local pivotCol = 1
-    local minVal = tableau[1][1]
+-- Fonction pour trouver le pivot dans la colonne
+local function findPivotColumn(tableau, numVars)
+    local pivotColumn = 1
     for j = 2, numVars do
-        if tableau[1][j] < minVal then
-            minVal = tableau[1][j]
-            pivotCol = j
+        if tableau[1][j] < tableau[1][pivotColumn] then
+            pivotColumn = j
         end
     end
+    return pivotColumn
+end
 
+-- Fonction pour trouver le pivot dans la ligne
+local function findPivotRow(tableau, pivotColumn, numVars, numConstraints)
     local pivotRow = 2
-    local minRatio = tableau[pivotRow][numVars + numConstraints + 1] / tableau[pivotRow][pivotCol]
     for i = 3, numConstraints + 1 do
-        if tableau[i][pivotCol] > 0 then
-            local ratio = tableau[i][numVars + numConstraints + 1] / tableau[i][pivotCol]
-            if ratio < minRatio then
-                minRatio = ratio
+        if tableau[i][pivotColumn] > 0 then
+            local ratio = tableau[i][numVars + numConstraints + 2] / tableau[i][pivotColumn]
+            local pivotRatio = tableau[pivotRow][numVars + numConstraints + 2] / tableau[pivotRow][pivotColumn]
+            if ratio < pivotRatio then
                 pivotRow = i
             end
         end
     end
-
-    return pivotRow, pivotCol
+    return pivotRow
 end
 
 -- Fonction pour effectuer le pivot
-local function pivot(tableau, pivotRow, pivotCol, numVars, numConstraints)
-    local pivotVal = tableau[pivotRow][pivotCol]
-    for j = 1, numVars + numConstraints + 1 do
-        tableau[pivotRow][j] = tableau[pivotRow][j] / pivotVal
+local function pivot(tableau, pivotRow, pivotColumn, numVars, numConstraints)
+    local pivotElement = tableau[pivotRow][pivotColumn]
+    for j = 1, numVars + numConstraints + 2 do
+        tableau[pivotRow][j] = tableau[pivotRow][j] / pivotElement
     end
 
     for i = 1, numConstraints + 1 do
         if i ~= pivotRow then
-            local factor = tableau[i][pivotCol]
-            for j = 1, numVars + numConstraints + 1 do
+            local factor = tableau[i][pivotColumn]
+            for j = 1, numVars + numConstraints + 2 do
                 tableau[i][j] = tableau[i][j] - factor * tableau[pivotRow][j]
             end
         end
@@ -43,7 +43,7 @@ end
 
 -- Fonction pour vérifier si la solution est optimale
 local function isOptimal(tableau, numVars)
-    for j = 1, numVars do
+    for j = 2, numVars do
         if tableau[1][j] < 0 then
             return false
         end
@@ -52,50 +52,52 @@ local function isOptimal(tableau, numVars)
 end
 
 -- Fonction principale du simplexe
-local function simplex(c, A, b, numVars, numConstraints)
-    -- Construire le tableau initial
+local function simplexMaximize(c, A, b, numVars, numConstraints)
+    -- Initialiser le tableau
     local tableau = {}
     for i = 1, numConstraints + 1 do
         tableau[i] = {}
-        for j = 1, numVars + numConstraints + 1 do
+        for j = 1, numVars + numConstraints + 2 do
             tableau[i][j] = 0
         end
     end
 
-    -- Remplir le tableau avec les coefficients de la fonction objectif
+    -- Remplir la fonction objectif
     for j = 1, numVars do
-        tableau[1][j] = -c[j]
+        tableau[1][j + 1] = -c[j]
     end
 
-    -- Remplir le tableau avec les coefficients des contraintes
+    -- Remplir les contraintes
     for i = 1, numConstraints do
         for j = 1, numVars do
-            tableau[i + 1][j] = A[i][j]
+            tableau[i + 1][j + 1] = A[i][j]
         end
-        tableau[i + 1][numVars + i] = 1
-        tableau[i + 1][numVars + numConstraints + 1] = b[i]
+        tableau[i + 1][numVars + i + 1] = 1
+        tableau[i + 1][numVars + numConstraints + 2] = b[i]
     end
 
     -- Algorithme du simplexe
-    while not isOptimal(tableau, numVars) do
-        local pivotRow, pivotCol = findPivot(tableau, numVars, numConstraints)
-        pivot(tableau, pivotRow, pivotCol, numVars, numConstraints)
+    while not isOptimal(tableau, numVars + 1) do
+        local pivotColumn = findPivotColumn(tableau, numVars + numConstraints + 1)
+        local pivotRow = findPivotRow(tableau, pivotColumn, numVars, numConstraints)
+        pivot(tableau, pivotRow, pivotColumn, numVars, numConstraints)
     end
 
     -- Extraire la solution
     local solution = {}
     for j = 1, numVars do
+        local col = j + 1
         local isBasic = true
         for i = 2, numConstraints + 1 do
-            if tableau[i][j] ~= 0 then
+            if tableau[i][col] ~= 0 then
                 isBasic = false
                 break
             end
         end
         if isBasic then
             for i = 2, numConstraints + 1 do
-                if tableau[i][numVars + numConstraints + 1] ~= 0 and tableau[i][j] == 1 then
-                    solution[j] = tableau[i][numVars + numConstraints + 1]
+                if tableau[i][numVars + numConstraints + 2] ~= 0 and tableau[i][col] == 1 then
+                    solution[j] = tableau[i][numVars + numConstraints + 2]
                     break
                 end
             end
@@ -104,23 +106,26 @@ local function simplex(c, A, b, numVars, numConstraints)
         end
     end
 
-    -- Calculer la valeur optimale de la fonction objectif
-    local optimalValue = tableau[1][numVars + numConstraints + 1]
+    -- Calculer la valeur optimale
+    local optimalValue = tableau[1][numVars + numConstraints + 2]
 
     return solution, optimalValue
 end
 
 -- Exemple d'utilisation
-local c = {3, 2} -- Coefficients de la fonction objectif
-local A = {{2, 1}, {1, 2}} -- Coefficients des contraintes
-local b = {20, 20} -- Termes constants des contraintes
-local numVars = 2 -- Nombre de variables
-local numConstraints = 2 -- Nombre de contraintes
+local c = {0, 0.23, 0, 0, 0, 0} -- Coefficients de la fonction objectif
+local A = {
+    {0, 0.188-1,0.0558,0.00558,0.00063,0},
+    {0.75, 0.2232, 0.02233, 0.00224, 0.00025,-20}
+} -- Coefficients des contraintes
+local b = {0, 0} -- Termes constants des contraintes
+local numVars = 6
+local numConstraints = 2
 
-local solution, optimalValue = simplex(c, A, b, numVars, numConstraints)
+local solution, optimalValue = simplexMaximize(c, A, b, numVars, numConstraints)
 
 print("Solution optimale:")
-for i, v in ipairs(solution) do
-    print("x" .. i .. " = " .. v)
+for i, value in ipairs(solution) do
+    print("x" .. i .. " = " .. value)
 end
-print("Valeur optimale de la fonction objectif: " .. optimalValue)
+print("Valeur optimale: " .. optimalValue)

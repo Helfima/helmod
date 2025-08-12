@@ -619,6 +619,9 @@ function EntityPrototype:getFluidProduction()
   return 0
 end
 
+local fix_maximum_temperature = {
+  ["muluna-cycling-steam-turbine"] = 500
+}
 -------------------------------------------------------------------------------
 ---Return fluid consumption
 ---@return number --default 0
@@ -648,12 +651,16 @@ function EntityPrototype:getFluidConsumptionFusionGenerator()
           
           local minimum_temperature = fluid_prototype:getMinimumTemperature()
           minimum_temperature = fluidbox.minimum_temperature or minimum_temperature
-          local max_temperature = fluidbox.maximum_temperature
+          -- if another entity with this problem need a best solution
+          -- @see https://github.com/Helfima/helmod/issues/624
+          local maximum_temperature = fix_maximum_temperature[self.lua_prototype.name]
+          local max_temperature = maximum_temperature or fluidbox.maximum_temperature
           local target_temperature = max_temperature or minimum_temperature
           local power_extract = self:getPowerExtract(0, target_temperature, heat_capacity)
           local energy_production = self:getMaxEnergyProduction()
 
-          return (60 * energy_production * effectivity) / power_extract
+          local value = (60 * energy_production * effectivity) / power_extract
+          return value
         end
       end
     end

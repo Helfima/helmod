@@ -1140,12 +1140,21 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 		uri_button_remove = "block-child-remove"
 		uri_button_bottom = "block-child-up"
 	end
+	local uri_button_copy = "recipe-copy"
 	local tree_down = GuiElement.add(cell_action, GuiButton(self.classname, "tree-recipe-down", model.id, block.id, recipe.id):sprite("menu", defines.sprites.arrow_left.black, defines.sprites.arrow_left.black):style("helmod_button_menu_sm"):tooltip({ "tooltip.down-element-in-tree", User.getModSetting("row_move_step") }))
 	GuiElement.add(cell_action, GuiButton(self.classname, uri_button_top, model.id, block.id, recipe.id):sprite("menu", defines.sprites.arrow_top.black, defines.sprites.arrow_top.black):style("helmod_button_menu_sm"):tooltip({"tooltip.up-element", User.getModSetting("row_move_step") }))
 	GuiElement.add(cell_action, GuiButton(self.classname, uri_button_remove, model.id, block.id, recipe.id):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element" }))
 
 	local tree_up = GuiElement.add(cell_action, GuiButton(self.classname, "tree-recipe-up", model.id, block.id, recipe.id):sprite("menu", defines.sprites.arrow_right.black, defines.sprites.arrow_right.black):style("helmod_button_menu_sm"):tooltip({ "tooltip.up-element-in-tree", User.getModSetting("row_move_step") }))
 	GuiElement.add(cell_action, GuiButton(self.classname, uri_button_bottom, model.id, block.id, recipe.id):sprite("menu", defines.sprites.arrow_bottom.black, defines.sprites.arrow_bottom.black):style("helmod_button_menu_sm"):tooltip({ "tooltip.down-element", User.getModSetting("row_move_step") }))
+	local tooltip_copy = {"", {"tooltip.copy-element"}}
+	if Player.hasFeatureQuality() and recipe_prototype.is_support_quality then
+		table.insert(tooltip_copy, "\n")
+		table.insert(tooltip_copy, {"tooltip.copy-element-quality-up"})
+		table.insert(tooltip_copy, "\n")
+		table.insert(tooltip_copy, {"tooltip.copy-element-quality-down"})
+	end
+	GuiElement.add(cell_action, GuiButton(self.classname, uri_button_copy, model.id, block.id, recipe.id):sprite("menu", defines.sprites.copy.black, defines.sprites.copy.black):style("helmod_button_menu_sm"):tooltip(tooltip_copy))
 
 	local recipe_color = User.getThumbnailColor(defines.thumbnail_color.names.recipe_default)
 	---common cols
@@ -2003,6 +2012,19 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 
 	if event.action == "block-limit" then
 		ModelBuilder.updateProductionBlockOption(block, "by_limit", not (block.by_limit))
+		ModelCompute.update(model)
+		Controller:send("on_gui_update", event, self.classname)
+	end
+
+	if event.action == "recipe-copy" then
+		local child = block.children[event.item3]
+		local mode = 0
+		if event.control then
+			mode = 1
+		elseif event.shift then
+			mode = 2
+		end
+		ModelBuilder.addRecipeCopyIntoProductionBlock(model, block, child, mode)
 		ModelCompute.update(model)
 		Controller:send("on_gui_update", event, self.classname)
 	end

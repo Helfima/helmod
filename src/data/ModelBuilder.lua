@@ -8,12 +8,12 @@ local ModelBuilder = {
 
 -------------------------------------------------------------------------------
 ---Add a recipe into production block
----@param model table
----@param block table
+---@param model ModelData
+---@param block BlockData
 ---@param recipe_name string
 ---@param recipe_type string
----@param index number
----@return table, table
+---@param index? number
+---@return BlockData, RecipeData
 function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, recipe_type, index)
     local recipe_prototype = RecipePrototype(recipe_name, recipe_type)
     local lua_recipe = recipe_prototype:native()
@@ -74,6 +74,34 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
         block.children[ModelRecipe.id] = ModelRecipe
 
         return block, ModelRecipe
+    end
+end
+
+-------------------------------------------------------------------------------
+---Add a recipe into production block
+---@param model ModelData
+---@param block BlockData
+---@param recipe RecipeData
+---@param mode number
+---@param index? number
+function ModelBuilder.addRecipeCopyIntoProductionBlock(model, block, recipe, mode, index)
+    local new_recipe = ModelBuilder.copyRecipe(model, block, recipe)
+    local recipe_prototype = RecipePrototype(recipe)
+    if Player.hasFeatureQuality() and recipe_prototype.is_support_quality then
+        if mode == 1 then
+            -- quality up
+            local next_quality = Player.getNextQualityPrototype(recipe.quality)
+            if next_quality ~= nil then
+                new_recipe.quality = next_quality.name
+            end
+        end
+        if mode == 2 then
+            -- quality down
+            local previous_quality = Player.getPreviousQualityPrototype(recipe.quality)
+            if previous_quality ~= nil then
+                new_recipe.quality = previous_quality.name
+            end
+        end
     end
 end
 
@@ -688,30 +716,9 @@ function ModelBuilder.copyBlock(into_model, into_block, from_block)
                 child_index = child_index + 1
             else
                 local recipe = child
-                local recipe_prototype = RecipePrototype(recipe)
-                if recipe_prototype:native() ~= nil then
-                    local recipe_model = Model.newRecipe(into_model, recipe.name, recipe_prototype:getType())
-                    recipe_model.index = child_index
-                    recipe_model.production = recipe.production or 1
-                    recipe_model.quality = recipe.quality
-                    if recipe.factory ~= nil then
-                        recipe_model.factory = ModelBuilder.copyFactory(recipe.factory)
-                    end
-                    if recipe.beacons ~= nil then
-                        recipe_model.beacons = {}
-                        for _, beacon in pairs(recipe.beacons) do
-                            table.insert(recipe_model.beacons, ModelBuilder.copyBeacon(beacon))
-                        end
-                    end
-
-                    if recipe.contraints ~= nil then
-                        recipe_model.contraints = table.deepcopy(recipe.contraints)
-                    end
-                    into_block.children[recipe_model.id] = recipe_model
-                    child_index = child_index + 1
-                end
+                ModelBuilder.copyRecipe(into_model, into_block, recipe, child_index)
+                child_index = child_index + 1
             end
-            
         end
         if into_block ~= nil then
             table.reindex_list(into_block.children)
@@ -739,9 +746,38 @@ function ModelBuilder.copyBlock(into_model, into_block, from_block)
 end
 
 ---Copy recipe
+---@param model ModelData
+---@param block BlockData
 ---@param recipe RecipeData
 ---@return RecipeData
-function ModelBuilder.copyRecipe(recipe)
+function ModelBuilder.copyRecipe(model, block, recipe, child_index)
+    local recipe_prototype = RecipePrototype(recipe)
+    if recipe_prototype:native() ~= nil then
+        local recipe_model = Model.newRecipe(model, recipe.name, recipe_prototype:getType())
+        if child_index == nil then
+            child_index = table.size(block.children)
+        end
+        recipe_model.index = child_index
+        recipe_model.production = recipe.production or 1
+        recipe_model.quality = recipe.quality
+        if recipe.factory ~= nil then
+            recipe_model.factory = ModelBuilder.copyFactory(recipe.factory)
+        end
+        if recipe.beacons ~= nil then
+            recipe_model.beacons = {}
+            for _, beacon in pairs(recipe.beacons) do
+                table.insert(recipe_model.beacons, ModelBuilder.copyBeacon(beacon))
+            end
+        end
+
+        if recipe.contraints ~= nil then
+            recipe_model.contraints = table.deepcopy(recipe.contraints)
+        end
+        block.children[recipe_model.id] = recipe_model
+        table.reindex_list(block.children)
+        return recipe_model
+    end
+    return nil
 end
 
 ---Copy factory
