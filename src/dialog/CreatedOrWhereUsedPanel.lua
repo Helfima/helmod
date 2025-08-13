@@ -60,6 +60,8 @@ function CreatedOrWhereUsedPanel:updateInfo(event)
     --content_panel.style.vertically_stretchable = true
     content_panel.clear()
     local item = User.getParameter("CreatedOrWhereUsed_item")
+    -- to test missing item
+    -- item = {type="item", name="YARM-fake-stone"}
     if item ~= nil then
 
         local headers_table = GuiElement.add(content_panel, GuiTable("headers"):column(2))
@@ -67,15 +69,22 @@ function CreatedOrWhereUsedPanel:updateInfo(event)
         headers_table.style.cell_padding = 2
 
         local element_panel = GuiElement.add(headers_table, GuiFrameV("current-element"):caption({"helmod_created-or-where-used-panel.current-element"}):style(defines.styles.frame.bordered))
-        local element_icon = GuiElement.add(element_panel, GuiButtonSelectSprite("current-element"):choose(item.type, item.name, item.name):color("flat"))
-        element_icon.locked = true
+        if self:CheckExists(item) then
+            local element_icon = GuiElement.add(element_panel, GuiButtonSelectSprite("current-element"):choose(item.type, item.name, item.name):color("flat"))
+            element_icon.locked = true
+        else
+            local error = string.format("Unknown %s name: %s", item.type, item.name)
+            GuiElement.add(element_panel, GuiSprite(item.type, item.name):sprite("helmod-event-error-32"):tooltip(error))
+        end
 
         local element_panel = GuiElement.add(headers_table, GuiFrameV("recent-elements"):caption({"helmod_created-or-where-used-panel.recent-elements"}):style(defines.styles.frame.bordered))
         local recent_cell = GuiElement.add(element_panel, GuiFlowH())
         local recent_items = User.getParameter("CreatedOrWhereUsed_recent") or {}
         for index, recent_item in pairs(recent_items) do
-            local element_icon = GuiElement.add(recent_cell, GuiButtonSelectSprite(self.classname, "element-select", recent_item.type, recent_item.name, recent_item.id):choose(recent_item.type, recent_item.name, recent_item.name):color("flat"))
-            element_icon.locked = true
+            if self:CheckExists(recent_item) then
+                local element_icon = GuiElement.add(recent_cell, GuiButtonSelectSprite(self.classname, "element-select", recent_item.type, recent_item.name, recent_item.id):choose(recent_item.type, recent_item.name, recent_item.name):color("flat"))
+                element_icon.locked = true
+            end
         end
         
 
@@ -105,6 +114,14 @@ function CreatedOrWhereUsedPanel:updateInfo(event)
     end
 end
 
+function CreatedOrWhereUsedPanel:CheckExists(item)
+    if item.type == "fluid" then
+        return Player.getFluidPrototype(item.name) ~= nil
+    else
+        return Player.getItemPrototype(item.name) ~= nil
+    end
+end
+
 function CreatedOrWhereUsedPanel:AddTableRecipes(parent, recipes)
     local recipes_table = GuiElement.add(parent, GuiTable("product_recipes"):column(5))
     recipes_table.vertical_centering = false
@@ -118,53 +135,55 @@ function CreatedOrWhereUsedPanel:AddTableRecipes(parent, recipes)
     for _, recipe in pairs(recipes) do
         local color = nil
 
-        local recipe_prototype = RecipePrototype(recipe.name)
-        local icon_name, icon_type = recipe_prototype:getIcon()
+        local ok , err = pcall(function()
+            local recipe_prototype = RecipePrototype(recipe.name)
+            local icon_name, icon_type = recipe_prototype:getIcon()
 
-        -- recipe
-        local cell = GuiElement.add(recipes_table, GuiFlowH())
-        local button_prototype = GuiButtonSelectSprite("recipe.name", recipe.name):choose(icon_type, icon_name, recipe.name):color(color)
-        local button = GuiElement.add(cell, button_prototype)
-        button.enabled = false
-        
-        ---duration
-        local cell_duration = GuiElement.add(recipes_table, GuiFlowH())
-        cell_duration.style.horizontally_stretchable = false
-        local element_duration = {name = "helmod", hovered = defines.sprites.time.white, sprite = defines.sprites.time.white , count = recipe_prototype:getEnergy(),localised_name = "helmod_label.duration"}
-        local duration = GuiElement.add(cell_duration, GuiCellProduct("duration"):element(element_duration):tooltip("tooltip.product"))
-        duration.style.horizontally_stretchable = false
+            -- recipe
+            local cell = GuiElement.add(recipes_table, GuiFlowH())
+            local button_prototype = GuiButtonSelectSprite("recipe.name", recipe.name):choose(icon_type, icon_name, recipe.name):color(color)
+            local button = GuiElement.add(cell, button_prototype)
+            button.enabled = false
+            
+            ---duration
+            local cell_duration = GuiElement.add(recipes_table, GuiFlowH())
+            cell_duration.style.horizontally_stretchable = false
+            local element_duration = {name = "helmod", hovered = defines.sprites.time.white, sprite = defines.sprites.time.white , count = recipe_prototype:getEnergy(),localised_name = "helmod_label.duration"}
+            local duration = GuiElement.add(cell_duration, GuiCellProduct("duration"):element(element_duration):tooltip("tooltip.product"))
+            duration.style.horizontally_stretchable = false
 
-        local cell_products = GuiElement.add(recipes_table, GuiFlowH())
-        cell_products.style.horizontally_stretchable = false
-        cell_products.style.horizontal_spacing = 2
-        for index, lua_product in pairs(recipe_prototype:getProducts()) do
-            local product_prototype = Product(lua_product)
-            local product = product_prototype:clone()
-            product.count = product_prototype:getElementAmount()
-            GuiElement.add(cell_products, GuiCellProduct(self.classname,"element-select", product.type, product.name, index):element(product):color(GuiElement.color_button_none))
-        end
+            local cell_products = GuiElement.add(recipes_table, GuiFlowH())
+            cell_products.style.horizontally_stretchable = false
+            cell_products.style.horizontal_spacing = 2
+            for index, lua_product in pairs(recipe_prototype:getProducts()) do
+                local product_prototype = Product(lua_product)
+                local product = product_prototype:clone()
+                product.count = product_prototype:getElementAmount()
+                GuiElement.add(cell_products, GuiCellProduct(self.classname,"element-select", product.type, product.name, index):element(product):color(GuiElement.color_button_none))
+            end
 
-        local cell_ingredients = GuiElement.add(recipes_table, GuiFlowH())
-        cell_ingredients.style.horizontally_stretchable = false
-        cell_ingredients.style.horizontal_spacing = 2
-        for index, lua_ingredient in pairs(recipe_prototype:getIngredients()) do
-            local ingredient_prototype = Product(lua_ingredient)
-            local ingredient = ingredient_prototype:clone()
-            ingredient.count = ingredient_prototype:getElementAmount()
-            GuiElement.add(cell_ingredients, GuiCellProduct(self.classname, "element-select", ingredient.type, ingredient.name, index):element(ingredient):color(GuiElement.color_button_add))
-        end
+            local cell_ingredients = GuiElement.add(recipes_table, GuiFlowH())
+            cell_ingredients.style.horizontally_stretchable = false
+            cell_ingredients.style.horizontal_spacing = 2
+            for index, lua_ingredient in pairs(recipe_prototype:getIngredients()) do
+                local ingredient_prototype = Product(lua_ingredient)
+                local ingredient = ingredient_prototype:clone()
+                ingredient.count = ingredient_prototype:getElementAmount()
+                GuiElement.add(cell_ingredients, GuiCellProduct(self.classname, "element-select", ingredient.type, ingredient.name, index):element(ingredient):color(GuiElement.color_button_add))
+            end
 
-        local technologies = self:getTechnology(recipe)
+            local technologies = self:getTechnology(recipe)
 
-        local cell_technology = GuiElement.add(recipes_table, GuiFlowH())
-        cell_technology.style.horizontally_stretchable = false
-        cell_technology.style.horizontal_spacing = 2
+            local cell_technology = GuiElement.add(recipes_table, GuiFlowH())
+            cell_technology.style.horizontally_stretchable = false
+            cell_technology.style.horizontal_spacing = 2
 
-        for index, technology in pairs(technologies) do
-            local button_technology = GuiButtonSelectSprite("technology.name", technology.name):choose("technology", technology.name, technology.name):color(color)
-            local gui_technology = GuiElement.add(cell_technology, button_technology)
-            gui_technology.enabled = false
-        end
+            for index, technology in pairs(technologies) do
+                local button_technology = GuiButtonSelectSprite("technology.name", technology.name):choose("technology", technology.name, technology.name):color(color)
+                local gui_technology = GuiElement.add(cell_technology, button_technology)
+                gui_technology.enabled = false
+            end
+        end)
     end
 end
 -------------------------------------------------------------------------------
