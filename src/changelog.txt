@@ -1,8 +1,9 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.23
-Date: 2025-08-13
+Date: 2025-08-14
   Bugfixes:
     - Fixed error in CreatedOrWhereUsedPanel when item missing
+    - Fixed quality of recipe for smart pipette
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.22
 Date: 2025-08-12

@@ -549,6 +549,20 @@ function GuiElement.maskBlockSecondaryIconM(parent, block_infos)
   end
 end
 
+---Add secondary icon mask
+---@param parent LuaGuiElement
+---@param icon_type string
+---@param icon_name string
+---@param icon_quality? string
+function GuiElement.maskIcon(parent, icon_type, icon_name, icon_quality)
+  local container_secondary = GuiElement.add(parent, GuiFlow("mask-info"))
+  local mask_secondary = GuiElement.add(container_secondary, GuiSprite("secondary-info"):sprite(icon_type, icon_name))
+  mask_secondary.style.stretch_image_to_widget_size = true
+  mask_secondary.ignored_by_interaction = true
+  if icon_quality ~= nil  then
+    GuiElement.maskQuality(mask_secondary, icon_quality, 10, 10)
+  end
+end
 
 -------------------------------------------------------------------------------
 ---Add quality selector

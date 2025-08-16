@@ -191,11 +191,11 @@ function Player.setSmartTool(recipe, type, index)
     end
     local inventory_indexes = {}
     inventory_indexes["beacon"] = defines.inventory.beacon_modules
-    inventory_indexes["rocket-silo"] = defines.inventory.rocket_silo_modules
+    inventory_indexes["rocket-silo"] = defines.inventory.crafter_modules
     inventory_indexes["mining-drill"] = defines.inventory.mining_drill_modules
     inventory_indexes["lab"] = defines.inventory.lab_modules
-    inventory_indexes["assembling-machine"] = defines.inventory.assembling_machine_modules
-    inventory_indexes["furnace"] = defines.inventory.furnace_modules
+    inventory_indexes["assembling-machine"] = defines.inventory.crafter_modules
+    inventory_indexes["furnace"] = defines.inventory.crafter_modules
     local machine = nil
     if index ~= nil then
         machine = recipe[type][index]
@@ -229,6 +229,7 @@ function Player.setSmartTool(recipe, type, index)
     }
     if type == "factory" then
         entity.recipe = recipe.name
+        entity.recipe_quality = recipe.quality
     end
 
     Player.getSmartTool({ entity })
@@ -1769,6 +1770,33 @@ function Player.getBurntRecipe(name)
     recipe.hidden_from_player_crafting = recipe_prototype.hidden_from_player_crafting
 
     return recipe
+end
+
+-------------------------------------------------------------------------------
+---Return customized recipes
+---@return table
+function Player.getCustomizedRecipes()
+    if storage.customized_recipes == nil then
+        storage.customized_recipes = {}
+    end
+    return storage.customized_recipes
+end
+
+-------------------------------------------------------------------------------
+---Return customized recipe
+---@param name string
+---@return table
+function Player.getCustomizedRecipe(name)
+    local customized_recipes = Player.getCustomizedRecipes()
+    return customized_recipes[name]
+end
+
+-------------------------------------------------------------------------------
+---Return customized recipe
+---@param recipe table
+function Player.setCustomizedRecipe(recipe)
+    local customized_recipes = Player.getCustomizedRecipes()
+    customized_recipes[recipe.name] = recipe
 end
 
 -------------------------------------------------------------------------------

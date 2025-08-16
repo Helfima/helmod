@@ -24,6 +24,7 @@ require "edition.LogisticEdition"
 require "edition.ModelEdition"
 require "edition.BlockEdition"
 require "edition.RecipeEdition"
+require "edition.RecipeCustomization"
 require "edition.ParametersEdition"
 require "edition.ProductEdition"
 require "edition.RuleEdition"
@@ -103,6 +104,7 @@ function Controller:prepare()
   table.insert(forms, ModelEdition("HMModelEdition"))
   table.insert(forms, BlockEdition("HMBlockEdition"))
   table.insert(forms, RecipeEdition("HMRecipeEdition"))
+  table.insert(forms, RecipeCustomization("HMRecipeCustomization"))
   table.insert(forms, ParametersEdition("HMParametersEdition"))
   table.insert(forms, ProductEdition("HMProductEdition"))
   table.insert(forms, RuleEdition("HMRuleEdition"))

@@ -477,12 +477,13 @@ function Model.compareModules(module1, module2, with_amount)
     return module1.name == module2.name and module1.quality == module2.quality
   end
 end
+
 -------------------------------------------------------------------------------
 ---Create model Recipe
 ---@param model ModelData
 ---@param name string
 ---@param type string
----@return table
+---@return RecipeData
 function Model.newRecipe(model, name, type)
   if model.recipe_id == nil then model.recipe_id = 0 end
   model.recipe_id = model.recipe_id + 1
@@ -495,9 +496,7 @@ function Model.newRecipe(model, name, type)
   recipeModel.type = type or "recipe"
   recipeModel.count = 0
   recipeModel.production = 1
-  --recipeModel.factory = Model.newFactory()
   recipeModel.beacons = {}
-  --table.insert(recipeModel.beacons, Model.newBeacon())
 
   return recipeModel
 end

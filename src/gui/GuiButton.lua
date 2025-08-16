@@ -138,6 +138,9 @@ function GuiButton:choose_with_quality(element_type, element_name, element_quali
             table.insert(self.name, element_name.type)
             table.insert(self.name, element_name.name)
         end
+    elseif element_type == "fluid" then
+        self.options.elem_type = element_type
+        self.options.fluid = element_name
     else 
         self.options.elem_type = string.format("%s-with-quality", element_type)
         if element_name ~= nil then
