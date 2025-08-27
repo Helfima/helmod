@@ -501,6 +501,9 @@ function ModelCompute.prepareBlockObjectives(block)
     end
     local objectives_size = table.size(objectives_block)
     block.has_input = objectives_size > 0
+
+    local first_candidat_objective = nil
+    local has_objective = false
     -- if empty objectives create from the children
     if objectives_size == 0 then
         local children = block.children
@@ -522,12 +525,16 @@ function ModelCompute.prepareBlockObjectives(block)
                     if block_elements[element_key] ~= nil then
                         state = block_elements[element_key].state
                     end
+
+                    local count = lua_product.amount
+                    local objective = {}
+                    objective.key = element_key
+                    objective.value = count * factor
                     if state == 1 then
-                        local count = lua_product.amount
-                        local objective = {}
-                        objective.key = element_key
-                        objective.value = count * factor
                         objectives_block[element_key] = objective
+                        has_objective = true
+                    elseif first_candidat_objective == nil then
+                        first_candidat_objective = objective
                     end
                     break
                 end
@@ -548,18 +555,27 @@ function ModelCompute.prepareBlockObjectives(block)
                     if block_elements[element_key] ~= nil then
                         state = block_elements[element_key].state
                     end
+
+                    local count = product:getAmount()
+                    local objective = {}
+                    objective.key = element_key
+                    objective.value = count * factor
                     if state == 1 then
-                        local count = product:getAmount()
-                        local objective = {}
-                        objective.key = element_key
-                        objective.value = count * factor
                         objectives_block[element_key] = objective
+                        has_objective = true
+                    elseif first_candidat_objective == nil then
+                        first_candidat_objective = objective
                     end
                     break
                 end
             end
         end
     end
+
+    if has_objective == false and first_candidat_objective ~= nil then
+        objectives_block[first_candidat_objective.key] = first_candidat_objective
+    end
+
     block.objectives = objectives_block
 end
 

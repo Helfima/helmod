@@ -1,9 +1,12 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.23
-Date: 2025-08-14
+Date: 2025-08-26
+  Changes:
+    - Added first candidat objective if there are no objective for a block when there are no main product (loop in recipe or block)
   Bugfixes:
     - Fixed error in CreatedOrWhereUsedPanel when item missing
     - Fixed quality of recipe for smart pipette
+    - Fixed error when default of machine not exist #626
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.22
 Date: 2025-08-12

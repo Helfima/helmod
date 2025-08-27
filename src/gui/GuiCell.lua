@@ -228,6 +228,9 @@ function GuiCell:add_icon_info(button, info_icon)
     tooltip = "tooltip.burnt-product"
     sprite_name = GuiElement.getSprite(defines.sprite_info.burnt)    
   end
+  if type == "customized" then
+    sprite_name = GuiElement.getSprite(defines.sprite_info.customized)    
+  end
   if type == "block" then
     sprite_name = GuiElement.getSprite(defines.sprite_info.block)    
   end

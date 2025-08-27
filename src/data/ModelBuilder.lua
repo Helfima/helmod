@@ -1094,14 +1094,16 @@ function ModelBuilder.blockChildDown(block, recipe, step)
 end
 
 -------------------------------------------------------------------------------
----Down a production recipe
+---Update block icon
 ---@param block BlockData
 function ModelBuilder.blockUpdateIcon(block)
     if block ~= nil and block.children ~= nil then
         local first_recipe = Model.firstChild(block.children)
         if first_recipe ~= nil then
-            block.name = first_recipe.name
-            block.type = first_recipe.type
+            local prototype = RecipePrototype(first_recipe)
+            local icon_name, icon_type = prototype:getIcon()
+            block.name = icon_name
+            block.type = icon_type
         end
     end
 end

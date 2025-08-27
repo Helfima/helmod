@@ -158,7 +158,15 @@ function User.getDefaultFactory(recipe)
     local recipe_prototype = RecipePrototype(recipe)
     local category = recipe_prototype:getCategory()
     if category ~= nil and default_factory ~= nil and default_factory[category] ~= nil then
-        return default_factory[category]
+        local default_machine = default_factory[category]
+        local prototype = Player.getEntityPrototype(default_machine.name)
+        if prototype ~= nil then
+            return default_factory[category]
+        else
+            -- delete default
+            default_factory[category] = nil
+            User.setParameter("default_factory", default_factory)
+        end
     end
     return nil
 end

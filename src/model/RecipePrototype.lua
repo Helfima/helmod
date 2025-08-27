@@ -58,6 +58,8 @@ RecipePrototype = newclass(Prototype, function(base, object, object_type)
         elseif base.lua_type == defines.mod.recipes.spoiling.name then
             Prototype.init(base, Player.getSpoilableRecipe(base.object_name))
             base.is_support_quality = true
+        elseif base.lua_type == defines.mod.recipes.customized.name then
+            Prototype.init(base, Player.getCustomizedRecipe(base.object_name))
         end
         if base.lua_prototype == nil then
             Logging:error("HMRecipePrototype", "recipe not found", type(object), object)
@@ -846,6 +848,17 @@ function RecipePrototype:getIcon()
         icon_type = "item"
     elseif self.lua_type == defines.mod.recipes.spoiling.name then
         icon_type = "item"
+    elseif self.lua_type == defines.mod.recipes.customized.name then
+        
+        local _,product = next(self.lua_prototype.products)
+        local _,ingredient = next(self.lua_prototype.ingredients)
+        if product ~= nil then
+            icon_name = product.name
+            icon_type = product.type
+        elseif ingredient ~= nil  then
+            icon_name = ingredient.name
+            icon_type = ingredient.type
+        end
     end
 
     return icon_name, icon_type

@@ -392,6 +392,7 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
 		local selector = GuiElement.add(group_debug, GuiDropDown(self.classname, "solver_switch"):items(items, default_solver))
 		selector.style.font = "helmod_font_default"
 		selector.style.height = 32
+		selector.style.width = 64
 	end
 
 	---group tool
@@ -1162,43 +1163,58 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 	self:addTableRowCommon(gui_table, recipe)
 	---col recipe
 	local cell_recipe = GuiElement.add(gui_table, GuiTable("recipe", recipe.id):column(2):style("helmod_table_list"))
-	GuiElement.add(cell_recipe, GuiCellRecipe("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):infoIcon(recipe.type) :tooltip("tooltip.edit-recipe"):color(recipe_color):broken(recipe_prototype:native() == nil) :byLimit(block.by_limit))
+	local edition_panel = "HMRecipeEdition"
+	local has_machine = false
+	if recipe.type == defines.mod.recipes.customized.name then
+		edition_panel = "HMRecipeCustomization"
+	else
+		has_machine = true
+	end
+	GuiElement.add(cell_recipe, GuiCellRecipe(edition_panel, "OPEN", model.id, block.id, recipe.id):element(recipe):infoIcon(recipe.type) :tooltip("tooltip.edit-recipe"):color(recipe_color):broken(recipe_prototype:native() == nil) :byLimit(block.by_limit))
 	if recipe_prototype:native() == nil then
 		Player.print("ERROR: Recipe " .. recipe.name .. " not exist in game")
 	end
 	---col energy
 	local cell_energy = GuiElement.add(gui_table, GuiTable("energy", recipe.id):column(2):style("helmod_table_list"))
-	GuiElement.add(cell_energy, GuiCellEnergy("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):tooltip( "tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit))
+	if has_machine then
+		GuiElement.add(cell_energy, GuiCellEnergy(edition_panel, "OPEN", model.id, block.id, recipe.id):element(recipe):tooltip( "tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit))
+	end
 
 	---col pollution
 	if User.getPreferenceSetting("display_pollution") then
 		local cell_pollution = GuiElement.add(gui_table, GuiTable("pollution", recipe.id):column(2):style("helmod_table_list"))
-		GuiElement.add(cell_pollution, GuiCellPollution("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):tooltip( "tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit))
+		if has_machine then
+			GuiElement.add(cell_pollution, GuiCellPollution(edition_panel, "OPEN", model.id, block.id, recipe.id):element(recipe):tooltip( "tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit))
+		end
 	end
 
 	---col factory
-	local factory = recipe.factory
 	local cell_factory = GuiElement.add(gui_table, GuiTable("factory", recipe.id):column(2):style("helmod_table_list"))
-	if factory ~= nil then
-		local gui_cell_factory = GuiCellFactory(self.classname, "factory-action", model.id, block.id, recipe.id):element(factory):tooltip("tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit):controlInfo( "crafting-add")
-		if block.by_limit == true then
-			gui_cell_factory:byLimitUri(self.classname, "update-factory-limit", model.id, block.id, recipe.id)
+	if has_machine then
+		local factory = recipe.factory
+		if factory ~= nil then
+			local gui_cell_factory = GuiCellFactory(self.classname, "factory-action", model.id, block.id, recipe.id):element(factory):tooltip("tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit):controlInfo( "crafting-add")
+			if block.by_limit == true then
+				gui_cell_factory:byLimitUri(self.classname, "update-factory-limit", model.id, block.id, recipe.id)
+			end
+			if block.by_factory == true then
+				gui_cell_factory:byFactory(self.classname, "update-factory-number", model.id, block.id, recipe.id)
+			end
+			GuiElement.add(cell_factory, gui_cell_factory)
 		end
-		if block.by_factory == true then
-			gui_cell_factory:byFactory(self.classname, "update-factory-number", model.id, block.id, recipe.id)
-		end
-		GuiElement.add(cell_factory, gui_cell_factory)
 	end
 
 	---col beacon
-	local beacons = recipe.beacons
 	local cell_beacons = GuiElement.add(gui_table, GuiFlowH("beacon", recipe.id))
 	cell_beacons.style.horizontally_stretchable = false
 	cell_beacons.style.horizontal_spacing = 2
-	if beacons ~= nil then
-		for index, beacon in pairs(beacons) do
-			local gui_cell_beacon = GuiCellFactory(self.classname, "beacon-action", model.id, block.id, recipe.id, index):element(beacon):index(index):tooltip("tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit):controlInfo("crafting-add")
-			GuiElement.add(cell_beacons, gui_cell_beacon)
+	if has_machine then
+		local beacons = recipe.beacons
+		if beacons ~= nil then
+			for index, beacon in pairs(beacons) do
+				local gui_cell_beacon = GuiCellFactory(self.classname, "beacon-action", model.id, block.id, recipe.id, index):element(beacon):index(index):tooltip("tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit):controlInfo("crafting-add")
+				GuiElement.add(cell_beacons, gui_cell_beacon)
+			end
 		end
 	end
 

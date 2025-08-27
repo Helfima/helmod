@@ -37,6 +37,7 @@ function RecipeCustomization:onUpdate(event)
         local customized_recipes = Player.getCustomizedRecipes()
         local name = string.format("customized_%s", #customized_recipes)
         current_recipe = {
+            type = defines.mod.recipes.customized.name,
             name = name,
             energy = 1,
             products = {},
@@ -94,7 +95,7 @@ function RecipeCustomization:onCreateRecipe(event)
         local element_type = lua_product.type
         local element_name = lua_product.name
         local element_quality = lua_product.quality
-        local button = GuiElement.add(cell, GuiButtonSelectSprite(self.classname, "update-element", "products", key):choose_with_quality(element_type, element_name, element_quality))
+        local button = GuiElement.add(cell, GuiButtonSelectSprite(self.classname, "remove-element", "products", key):choose_with_quality(element_type, element_name, element_quality))
         button.locked = true
     end
     
@@ -112,11 +113,12 @@ function RecipeCustomization:onCreateRecipe(event)
         local element_type = lua_ingredient.type
         local element_name = lua_ingredient.name
         local element_quality = lua_ingredient.quality
-        local button = GuiElement.add(cell, GuiButtonSelectSprite(self.classname, "update-element", "ingredients", key):choose_with_quality(element_type, element_name, element_quality))
+        local button = GuiElement.add(cell, GuiButtonSelectSprite(self.classname, "remove-element", "ingredients", key):choose_with_quality(element_type, element_name, element_quality))
         button.locked = true
     end
 
     local button = GuiElement.add(info_panel, GuiButton(self.classname, "save-recipe"):caption("Save"))
+    local button = GuiElement.add(info_panel, GuiButton(self.classname, "add-recipe"):caption("Add"))
 end
 
 -------------------------------------------------------------------------------
@@ -142,8 +144,24 @@ function RecipeCustomization:onEvent(event)
         end
     end
 
+    if event.action == "remove-element" then
+        local table_name = event.item1
+        local index = tonumber(event.item2)
+        table.remove(current_recipe[table_name], index)
+        self:onCreateRecipe(event)
+    end
+
     if event.action == "save-recipe" then
         Player.setCustomizedRecipe(current_recipe)
+        Controller:send("on_gui_update", event)
+    end
+
+    if event.action == "add-recipe" then
+        local recipe_name = current_recipe.name
+        local recipe_type = current_recipe.type
+        ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, recipe_type, 0)
+        --ModelCompute.update(model)
+        Controller:send("on_gui_update", event)
     end
 end
 
