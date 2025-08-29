@@ -1,14 +1,20 @@
 ---
 ---Description of the module.
 ---@class RecipePrototype : Prototype
+---@field object_name string
+---@field lua_type string
 ---@field is_voider any
 ---@field is_support_quality boolean
 ---@field is_support_burned_quality boolean
+---@field is_support_factory boolean
+---@field is_customized boolean
 RecipePrototype = newclass(Prototype, function(base, object, object_type)
     base.classname = "HMRecipePrototype"
     base.is_voider = nil
     base.is_support_quality = false
     base.is_support_fuel_quality = false
+    base.is_support_factory = true
+    base.is_customized = RecipePrototype.isCustomized(object)
     if object ~= nil then
         if type(object) == "string" then
             base.object_name = object
@@ -18,10 +24,19 @@ RecipePrototype = newclass(Prototype, function(base, object, object_type)
             base.lua_type = object_type or object.type
         end
         if base.lua_type == nil or base.lua_type == defines.mod.recipes.recipe.name then
-            local recipe = Player.getRecipe(base.object_name)
+            local recipe = nil
+            if base.is_customized then
+                recipe = Player.getCustomizedRecipe(base.object_name)
+            else
+                recipe = Player.getRecipe(base.object_name)
+            end
             if recipe == nil and base.object_name ~= nil then
                 -- if recipe is null try find 
                 recipe = Player.findFirstRecipe(base.object_name)
+            end
+            if recipe == nil and base.object_name ~= nil then
+                recipe = Player.getCustomizedRecipe(base.object_name)
+                base.is_customized = true
             end
             Prototype.init(base, recipe)
             base.lua_type = defines.mod.recipes.recipe.name
@@ -57,9 +72,21 @@ RecipePrototype = newclass(Prototype, function(base, object, object_type)
             Prototype.init(base, Player.getAgriculturalRecipe(base.object_name))
         elseif base.lua_type == defines.mod.recipes.spoiling.name then
             Prototype.init(base, Player.getSpoilableRecipe(base.object_name))
-            base.is_support_quality = true
-        elseif base.lua_type == defines.mod.recipes.customized.name then
+            base.is_support_factory = false
+            if Player.hasFeatureQuality() then
+                base.is_support_quality = true
+            end
+        elseif base.lua_type == defines.mod.recipes.constant.name then
             Prototype.init(base, Player.getCustomizedRecipe(base.object_name))
+            base.is_support_quality = true
+            if base.lua_prototype ~= nil then
+                base.is_support_factory = base.lua_prototype.category ~= nil
+            else
+                base.is_support_factory = false
+            end
+        else
+            Prototype.init(base, Player.getCustomizedRecipe(base.object_name))
+            base.is_customized = true
         end
         if base.lua_prototype == nil then
             Logging:error("HMRecipePrototype", "recipe not found", type(object), object)
@@ -70,6 +97,14 @@ RecipePrototype = newclass(Prototype, function(base, object, object_type)
         end
     end
 end)
+
+-------------------------------------------------------------------------------
+---Check customized
+---@param object table --prototype
+---@return boolean
+function RecipePrototype.isCustomized(object)
+    return object.name ~= nil and string.find(object.name, defines.mod.recipe_customized_prefix, 0, true)
+end
 
 -------------------------------------------------------------------------------
 ---Try to find prototype
@@ -97,6 +132,13 @@ function RecipePrototype.find(object)
         lua_type = defines.mod.recipes.fluid.name
     end
     return RecipePrototype(lua_prototype, lua_type)
+end
+
+-------------------------------------------------------------------------------
+---Return support factory
+---@return boolean
+function RecipePrototype:isSupportFactory()
+    return self.is_support_factory
 end
 
 -------------------------------------------------------------------------------
@@ -827,14 +869,42 @@ function RecipePrototype:getHasBurntResult()
     return false
 end
 
+---@return any, string
+function RecipePrototype:getCustomizedIcon()
+    local icon_name = {type="virtual", name="signal-no-entry"}
+    local icon_type = "signal"
+    if self.lua_prototype ~= nil then
+        local _,product = next(self.lua_prototype.products)
+        local _,ingredient = next(self.lua_prototype.ingredients)
+        if product ~= nil then
+            icon_name = product.name
+            icon_type = product.type
+        elseif ingredient ~= nil  then
+            icon_name = ingredient.name
+            icon_type = ingredient.type
+        end
+    end
+    return icon_name, icon_type
+end
+
 ---@return string, string
 function RecipePrototype:getIcon()
     if self.lua_prototype == nil then return "utility","warning_icon" end
     local icon_name = self.lua_prototype.name
     local icon_type = self.lua_type
-
-    if self.lua_type == defines.mod.recipes.burnt.name then
-        icon_type = "recipe"
+    
+    if self.lua_type == defines.mod.recipes.recipe.name then
+        if self.is_customized then
+            icon_name, icon_type = self:getCustomizedIcon()
+        else
+            icon_type = "recipe"
+        end
+    elseif self.lua_type == defines.mod.recipes.burnt.name then
+        if self.is_customized then
+            icon_name, icon_type = self:getCustomizedIcon()
+        else
+            icon_type = "recipe"
+        end
     elseif self.lua_type == defines.mod.recipes.resource.name then
         icon_type = "entity"
     elseif self.lua_type == defines.mod.recipes.rocket.name then
@@ -848,17 +918,10 @@ function RecipePrototype:getIcon()
         icon_type = "item"
     elseif self.lua_type == defines.mod.recipes.spoiling.name then
         icon_type = "item"
-    elseif self.lua_type == defines.mod.recipes.customized.name then
-        
-        local _,product = next(self.lua_prototype.products)
-        local _,ingredient = next(self.lua_prototype.ingredients)
-        if product ~= nil then
-            icon_name = product.name
-            icon_type = product.type
-        elseif ingredient ~= nil  then
-            icon_name = ingredient.name
-            icon_type = ingredient.type
-        end
+    elseif self.lua_type == defines.mod.recipes.constant.name then
+        icon_name, icon_type = self:getCustomizedIcon()
+    elseif self.is_customized then
+        icon_name, icon_type = self:getCustomizedIcon()
     end
 
     return icon_name, icon_type

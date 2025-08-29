@@ -296,14 +296,20 @@ function ProductionPanel:updateIndexPanel(model)
 			table.reindex_list(models)
 			for _, imodel in spairs(models, sorter) do
 				local first_block = imodel.block_root or Model.firstChild(imodel.blocks or {})
-  				local block_infos = Model.getBlockInfos(first_block)
+				local first_recipe = Model.firstChild(first_block.children)
+  				
+				local block_infos = Model.getBlockInfos(first_block)
 				i = i + 1
-                local element = imodel.block_root
+                local element = first_block
 				local button = nil
 				-- sprite definition
 				local icon_type = element.type
 				local icon_name = element.name
 				local icon_quality = element.quality
+				if first_recipe ~= nil then
+					local recipe_prototype = RecipePrototype(first_recipe)
+					icon_name, icon_type = recipe_prototype:getIcon()
+				end
 				if block_infos.primary_icon ~= nil and block_infos.primary_icon.type ~= nil then
 					icon_type = block_infos.primary_icon.name.type or "item"
 					icon_name = block_infos.primary_icon.name.name
@@ -1164,33 +1170,28 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 	---col recipe
 	local cell_recipe = GuiElement.add(gui_table, GuiTable("recipe", recipe.id):column(2):style("helmod_table_list"))
 	local edition_panel = "HMRecipeEdition"
-	local has_machine = false
-	if recipe.type == defines.mod.recipes.customized.name then
-		edition_panel = "HMRecipeCustomization"
-	else
-		has_machine = true
-	end
+	local is_support_factory = recipe_prototype:isSupportFactory()
 	GuiElement.add(cell_recipe, GuiCellRecipe(edition_panel, "OPEN", model.id, block.id, recipe.id):element(recipe):infoIcon(recipe.type) :tooltip("tooltip.edit-recipe"):color(recipe_color):broken(recipe_prototype:native() == nil) :byLimit(block.by_limit))
 	if recipe_prototype:native() == nil then
 		Player.print("ERROR: Recipe " .. recipe.name .. " not exist in game")
 	end
 	---col energy
 	local cell_energy = GuiElement.add(gui_table, GuiTable("energy", recipe.id):column(2):style("helmod_table_list"))
-	if has_machine then
+	if is_support_factory then
 		GuiElement.add(cell_energy, GuiCellEnergy(edition_panel, "OPEN", model.id, block.id, recipe.id):element(recipe):tooltip( "tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit))
 	end
 
 	---col pollution
 	if User.getPreferenceSetting("display_pollution") then
 		local cell_pollution = GuiElement.add(gui_table, GuiTable("pollution", recipe.id):column(2):style("helmod_table_list"))
-		if has_machine then
+		if is_support_factory then
 			GuiElement.add(cell_pollution, GuiCellPollution(edition_panel, "OPEN", model.id, block.id, recipe.id):element(recipe):tooltip( "tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit))
 		end
 	end
 
 	---col factory
 	local cell_factory = GuiElement.add(gui_table, GuiTable("factory", recipe.id):column(2):style("helmod_table_list"))
-	if has_machine then
+	if is_support_factory then
 		local factory = recipe.factory
 		if factory ~= nil then
 			local gui_cell_factory = GuiCellFactory(self.classname, "factory-action", model.id, block.id, recipe.id):element(factory):tooltip("tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit):controlInfo( "crafting-add")

@@ -30,6 +30,12 @@ function GuiButton:sprite(element_type, element_name, hovered)
             self.options.hovered_sprite = GuiElement.getSprite(hovered)
         end
         table.insert(self.name, element_name)
+    elseif element_type == "signal" then
+        if type(element_name) == "table"  then
+            self.options.sprite = GuiElement.getSprite(element_name.type, element_name.name)
+        else
+            self.options.sprite = GuiElement.getSprite(element_type, element_name)
+        end
     else
         self.options.sprite = GuiElement.getSprite(element_type, element_name)
         if hovered then
@@ -56,13 +62,20 @@ function GuiButton:sprite_with_quality(element_type, element_name, element_quali
         if hovered then
             self.options.hovered_sprite = GuiElement.getSprite(hovered)
         end
+    elseif element_type == "signal" then
+        self.options.sprite = GuiElement.getSprite(element_name.type, element_name.name)
     else
         self.options.sprite = GuiElement.getSprite(element_type, element_name)
         if hovered then
             self.options.hovered_sprite = GuiElement.getSprite(element_type, hovered)
         end
     end
-    table.insert(self.name, element_name)
+    if element_type == "signal" then
+        table.insert(self.name, element_name.type)
+        table.insert(self.name, element_name.name)
+    else
+        table.insert(self.name, element_name)
+    end
     if element_quality ~= nil then
         self.post_action["mask_quality"] = {quality=element_quality, size=self.mask_quality_size}
     end

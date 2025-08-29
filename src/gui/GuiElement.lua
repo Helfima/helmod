@@ -621,11 +621,17 @@ function GuiElement.infoRecipe(parent, element)
   elseif element.type == "spoiling" then
     sprite_name = GuiElement.getSprite(defines.sprite_info.developer)
     tooltip = {"tooltip.resource-recipe"}
+  elseif element.type == "constant" then
+    sprite_name = GuiElement.getSprite(defines.sprite_info.customized)
   elseif element.type ~= "recipe" then
     sprite_name = GuiElement.getSprite(defines.sprite_info.mining)
     tooltip = {"tooltip.resource-recipe"}
   end
   
+  if RecipePrototype.isCustomized(element) then
+    sprite_name = GuiElement.getSprite(defines.sprite_info.customized)
+  end
+
   if sprite_name ~= nil then
     local container = GuiElement.add(parent, GuiFlow("recipe-info"))
     container.style.top_padding = -4

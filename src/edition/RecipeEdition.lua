@@ -622,7 +622,8 @@ function RecipeEdition:onUpdate(event)
     local model, block, recipe = self:getParameterObjects()
     ---header
     self:updateHeader(event)
-    if recipe ~= nil and recipe.type ~= "spoiling" then
+    local recipe_prototype = RecipePrototype(recipe)
+    if recipe ~= nil and recipe_prototype:isSupportFactory() then
         if recipe.type == "energy" then
             self:updateFactoryInfo(event)
         else
@@ -823,7 +824,7 @@ function RecipeEdition:updateFactoryInfo(event)
         self:addAlert(cell_energy, factory, "consumption")
 
         local sign = ""
-        if factory.effects.consumption > 0 then sign = "+" end
+        if factory.effects ~= nil and factory.effects.consumption > 0 then sign = "+" end
         GuiElement.add(input_panel, GuiLabel("value-energy"):caption(Format.formatNumberKilo(factory.energy, "W") .. " (" .. sign .. Format.formatPercent(factory.effects.consumption) .. "%)"))
 
         ---burner
@@ -891,7 +892,7 @@ function RecipeEdition:updateFactoryInfo(event)
 
         ---speed
         local sign = ""
-        if factory.effects.speed > 0 then sign = "+" end
+        if factory.effects ~= nil and factory.effects.speed > 0 then sign = "+" end
         local cell_speed = GuiElement.add(input_panel, GuiFlowH("label-speed"))
         GuiElement.add(cell_speed, GuiLabel("label-speed"):caption({ "helmod_label.speed" }))
         self:addAlert(cell_speed, factory, "speed")
@@ -899,7 +900,7 @@ function RecipeEdition:updateFactoryInfo(event)
 
         ---productivity
         local sign = ""
-        if factory.effects.productivity > 0 then sign = "+" end
+        if factory.effects ~= nil and factory.effects.productivity > 0 then sign = "+" end
         local cell_productivity = GuiElement.add(input_panel, GuiFlowH("label-productivity"))
         GuiElement.add(cell_productivity, GuiLabel("label-productivity"):caption({ "helmod_label.productivity" }))
         local maximum_productivity = recipe_prototype:getMaximumProductivity()
@@ -909,7 +910,7 @@ function RecipeEdition:updateFactoryInfo(event)
         if Player.hasFeatureQuality() then
             ---quality
             local sign = ""
-            if factory.effects.quality > 0 then sign = "+" end
+            if factory.effects ~= nil and factory.effects.quality > 0 then sign = "+" end
             local cell_productivity = GuiElement.add(input_panel, GuiFlowH("label-quality"))
             GuiElement.add(cell_productivity, GuiLabel("label-quality"):caption({ "helmod_label.quality" }))
             self:addAlert(cell_productivity, factory, "quality")

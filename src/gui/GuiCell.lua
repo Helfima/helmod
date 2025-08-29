@@ -228,12 +228,13 @@ function GuiCell:add_icon_info(button, info_icon)
     tooltip = "tooltip.burnt-product"
     sprite_name = GuiElement.getSprite(defines.sprite_info.burnt)    
   end
-  if type == "customized" then
+  if type == "constant" then
     sprite_name = GuiElement.getSprite(defines.sprite_info.customized)    
   end
   if type == "block" then
     sprite_name = GuiElement.getSprite(defines.sprite_info.block)    
   end
+
   if sprite_name ~= nil then
     local container = GuiElement.add(button, GuiFlow(type))
     if type == "block" then
@@ -564,9 +565,9 @@ function GuiCellRecipe:create(parent)
   local icon_name, icon_type = recipe_prototype:getIcon()
   local tooltip = GuiTooltipRecipe(self.options.tooltip):element(recipe)
   local recipe_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite_with_quality(icon_type, icon_name, quality):tooltip(tooltip))
-  
+  GuiElement.infoRecipe(recipe_icon, recipe)
+
   self:add_overlay(recipe_icon)
-  self:add_icon_info(recipe_icon)
   self:add_mask(recipe_icon, color)
     
   if self.m_broken == true then
@@ -696,10 +697,12 @@ function GuiCellBlock:create(parent)
     local first_recipe = Model.firstChild(element.children)
     if first_recipe ~= nil then
       local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
-      button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
+      
+      local recipe_prototype = RecipePrototype(first_recipe)
+      local icon_name, icon_type = recipe_prototype:getIcon()
+      button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(icon_type, icon_name):tooltip(tooltip))
       
       GuiElement.infoRecipe(button, first_recipe)
-      local recipe_prototype = RecipePrototype(element.name, first_recipe.type)
       if recipe_prototype:native() == nil then
         button.tooltip = "ERROR: Recipe ".. element.name .." not exist in game"
         button.sprite = "utility/warning_icon"
@@ -779,10 +782,12 @@ function GuiCellBlockM:create(parent)
     local first_recipe = Model.firstChild(element.children)
     if first_recipe ~= nil then
       local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
-      button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
+
+      local recipe_prototype = RecipePrototype(first_recipe)
+      local icon_name, icon_type = recipe_prototype:getIcon()
+      button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(icon_type, icon_name):tooltip(tooltip))
       
       GuiElement.infoRecipe(button, first_recipe)
-      local recipe_prototype = RecipePrototype(element.name, first_recipe.type)
       if recipe_prototype:native() == nil then
         button.tooltip = "ERROR: Recipe ".. element.name .." not exist in game"
         button.sprite = "utility/warning_icon"
@@ -848,7 +853,11 @@ function GuiCellModel:create(parent)
   if block_infos.primary_icon ~= nil then
     button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(block_infos.primary_icon.type, block_infos.primary_icon.name.name):tooltip(tooltip))
   elseif first_block ~= nil and first_block.name ~= "" then
-    button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_block.type, first_block.name):tooltip(tooltip))
+    local first_recipe = Model.firstChild(first_block.children)
+    local recipe_prototype = RecipePrototype(first_recipe)
+    local icon_name, icon_type = recipe_prototype:getIcon()
+    button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(icon_type, icon_name):tooltip(tooltip))
+    GuiElement.infoRecipe(button, first_recipe)
   else
     button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black))
   end

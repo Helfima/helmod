@@ -501,6 +501,23 @@ function Model.newRecipe(model, name, type)
   return recipeModel
 end
 
+
+-------------------------------------------------------------------------------
+---Create model Recipe
+function Model.newCustomizedRecipe()
+  local id = (storage.customized_recipe_id or 0) + 1
+  local name = string.format("%s_%s", defines.mod.recipe_customized_prefix, id)
+  current_recipe = {
+      type = defines.mod.recipes.recipe.name,
+      name = name,
+      energy = 1,
+      products = {},
+      ingredients = {},
+      owner = Player.getName()
+  }
+  return current_recipe
+end
+
 -------------------------------------------------------------------------------
 ---Create model Resource
 ---@param model ModelData

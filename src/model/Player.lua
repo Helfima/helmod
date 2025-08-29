@@ -580,6 +580,13 @@ function Player.getRecipes()
 end
 
 -------------------------------------------------------------------------------
+---Return recipe categories
+---@return table
+function Player.getRecipeCategories()
+    return prototypes.recipe_category
+end
+
+-------------------------------------------------------------------------------
 ---Return recipe productivity
 ---@return number
 function Player.getRecipeProductivityBonus(recipe_name)
@@ -1788,7 +1795,11 @@ end
 ---@return table
 function Player.getCustomizedRecipe(name)
     local customized_recipes = Player.getCustomizedRecipes()
-    return customized_recipes[name]
+    local recipe = customized_recipes[name]
+    if recipe ~= nil then
+        return table.deepcopy(recipe)
+    end
+    return nil
 end
 
 -------------------------------------------------------------------------------
@@ -1796,7 +1807,18 @@ end
 ---@param recipe table
 function Player.setCustomizedRecipe(recipe)
     local customized_recipes = Player.getCustomizedRecipes()
-    customized_recipes[recipe.name] = recipe
+    if customized_recipes[recipe.name] == nil then
+       storage.customized_recipe_id = (storage.customized_recipe_id or 0) + 1 
+    end
+    customized_recipes[recipe.name] = table.deepcopy(recipe)
+end
+
+-------------------------------------------------------------------------------
+---Return customized recipe
+---@param recipe table
+function Player.removeCustomizedRecipe(recipe)
+    local customized_recipes = Player.getCustomizedRecipes()
+    customized_recipes[recipe.name] = nil
 end
 
 -------------------------------------------------------------------------------

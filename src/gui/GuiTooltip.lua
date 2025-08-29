@@ -586,8 +586,7 @@ function GuiTooltipModel:create()
 		
 		if block_infos.note ~= nil and block_infos.note ~= "" then
 			table.insert(tooltip, { "", "\n", "----------------------" })
-			table.insert(tooltip, { "", "\n", defines.mod.tags.font.default_bold, { "helmod_common.note" }, defines.mod.tags.font
-				.close })
+			table.insert(tooltip, { "", "\n", defines.mod.tags.font.default_bold, { "helmod_common.note" }, defines.mod.tags.font.close })
 			table.insert(tooltip, { "", "\n", block_infos.note or "" })
 		end
 		self:appendDebug(tooltip, element.block_root)
@@ -612,9 +611,10 @@ function GuiTooltipRecipe:create()
 		local recipe_prototype = RecipePrototype(element)
 		local icon_name, icon_type = recipe_prototype:getIcon()
 
-		local element_label = Player.getLocalisedName({ type = icon_type, name = icon_name })
-		GuiTooltip.appendLineTitle(tooltip, icon_type, icon_name, element_label, self.m_element.quality)
-		
+		if icon_type ~= "signal" then
+			local element_label = Player.getLocalisedName({ type = icon_type, name = icon_name })
+			GuiTooltip.appendLineTitle(tooltip, icon_type, icon_name, element_label, self.m_element.quality)
+		end
 		---quantity
 		local total_count = Format.formatNumberElement(element.count)
 		if self.m_by_limit then

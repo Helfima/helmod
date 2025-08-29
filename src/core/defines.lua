@@ -46,8 +46,10 @@ defines.mod.tags.font.default_bold = "[font=default-bold]"
 defines.mod.tags.font.default_semibold = "[font=default-semibold]"
 defines.mod.tags.font.default_large_bold = "[font=default-large-bold]"
 
+defines.mod.recipe_customized_prefix = "helmod_customized"
+defines.mod.recipe_customized_category = "crafting"
 defines.mod.recipes = {}
-defines.mod.recipes.recipe = {name = "recipe"}
+defines.mod.recipes.recipe = {name = "recipe", is_customizable = true}
 defines.mod.recipes.burnt = {name = "recipe-burnt"}
 defines.mod.recipes.energy = {name = "energy"}
 defines.mod.recipes.resource = {name = "resource"}
@@ -57,7 +59,7 @@ defines.mod.recipes.technology = {name = "technology"}
 defines.mod.recipes.rocket = {name = "rocket"}
 defines.mod.recipes.agricultural = {name = "agricultural"}
 defines.mod.recipes.spoiling = {name = "spoiling"}
-defines.mod.recipes.customized = {name = "customized"}
+defines.mod.recipes.constant = {name = "constant", is_customizable = true}
 
 defines.styles = {}
 defines.styles.mod_gui_button = "frame_button"

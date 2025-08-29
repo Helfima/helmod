@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.23
-Date: 2025-08-26
+Date: 2025-08-29
+  Features:
+    - Added customized recipes
   Changes:
     - Added first candidat objective if there are no objective for a block when there are no main product (loop in recipe or block)
   Bugfixes:

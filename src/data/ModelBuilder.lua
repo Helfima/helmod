@@ -36,42 +36,43 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
             end
         end
         
-        if ModelRecipe.index == 0 then
-            ---change block name
-            block.name = icon_name
-            block.type = icon_type
-        end
-        
         ModelRecipe.count = 1
 
-        if recipe_type ~= "energy" then
-            local default_factory = User.getDefaultFactory(ModelRecipe)
-            if default_factory ~= nil then
-                Model.setFactory(ModelRecipe, default_factory.name, default_factory.quality, default_factory.fuel)
-                ModelBuilder.setFactoryModulePriority(ModelRecipe, default_factory.module_priority)
-            else
-                local default_factory_name = Model.getDefaultPrototypeFactory(recipe_prototype)
-                if default_factory_name ~= nil then
-                    Model.setFactory(ModelRecipe, default_factory_name)
+        if recipe_prototype:isSupportFactory() then
+            if recipe_type ~= "energy" then
+                local default_factory = User.getDefaultFactory(ModelRecipe)
+                if default_factory ~= nil then
+                    Model.setFactory(ModelRecipe, default_factory.name, default_factory.quality, default_factory.fuel)
+                    ModelBuilder.setFactoryModulePriority(ModelRecipe, default_factory.module_priority)
+                else
+                    local default_factory_name = Model.getDefaultPrototypeFactory(recipe_prototype)
+                    if default_factory_name ~= nil then
+                        Model.setFactory(ModelRecipe, default_factory_name)
+                    end
                 end
-            end
 
-            local default_beacons = User.getDefaultBeacons(ModelRecipe)
-            if default_beacons ~= nil then
-                ModelRecipe.beacons = {}
-                for _, default_beacon in pairs(default_beacons) do
-                    local beacon = Model.addBeacon(ModelRecipe, default_beacon.name, default_beacon.quality, default_beacon.combo, default_beacon.per_factory, default_beacon.per_factory_constant)
-                    ModelBuilder.setBeaconModulePriority(beacon, ModelRecipe, default_beacon.module_priority)
+                local default_beacons = User.getDefaultBeacons(ModelRecipe)
+                if default_beacons ~= nil then
+                    ModelRecipe.beacons = {}
+                    for _, default_beacon in pairs(default_beacons) do
+                        local beacon = Model.addBeacon(ModelRecipe, default_beacon.name, default_beacon.quality, default_beacon.combo, default_beacon.per_factory, default_beacon.per_factory_constant)
+                        ModelBuilder.setBeaconModulePriority(beacon, ModelRecipe, default_beacon.module_priority)
+                    end
                 end
+            else
+                Model.setFactory(ModelRecipe, recipe_name)
+                ModelRecipe.time = recipe_prototype:getEnergy(ModelRecipe.factory)
             end
-        else
-            Model.setFactory(ModelRecipe, recipe_name)
-            ModelRecipe.time = recipe_prototype:getEnergy(ModelRecipe.factory)
         end
+
 
         ModelCompute.prepareBlockElements(block)
         
         block.children[ModelRecipe.id] = ModelRecipe
+        
+        if ModelRecipe.index == 0 then
+            ModelBuilder.blockUpdateIcon(block)
+        end
 
         return block, ModelRecipe
     end
@@ -1100,10 +1101,9 @@ function ModelBuilder.blockUpdateIcon(block)
     if block ~= nil and block.children ~= nil then
         local first_recipe = Model.firstChild(block.children)
         if first_recipe ~= nil then
-            local prototype = RecipePrototype(first_recipe)
-            local icon_name, icon_type = prototype:getIcon()
-            block.name = icon_name
-            block.type = icon_type
+            block.name = first_recipe.name
+            block.type = first_recipe.type
+            block.quality = first_recipe.quality
         end
     end
 end
