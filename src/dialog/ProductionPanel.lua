@@ -1209,7 +1209,7 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 	local cell_beacons = GuiElement.add(gui_table, GuiFlowH("beacon", recipe.id))
 	cell_beacons.style.horizontally_stretchable = false
 	cell_beacons.style.horizontal_spacing = 2
-	if has_machine then
+	if is_support_factory then
 		local beacons = recipe.beacons
 		if beacons ~= nil then
 			for index, beacon in pairs(beacons) do

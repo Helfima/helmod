@@ -78,14 +78,11 @@ RecipePrototype = newclass(Prototype, function(base, object, object_type)
             end
         elseif base.lua_type == defines.mod.recipes.constant.name then
             Prototype.init(base, Player.getCustomizedRecipe(base.object_name))
-            base.is_support_quality = true
-            if base.lua_prototype ~= nil then
-                base.is_support_factory = base.lua_prototype.category ~= nil
-            else
-                base.is_support_factory = false
-            end
+            base.is_support_quality = false
+            base.is_support_factory = false
         else
             Prototype.init(base, Player.getCustomizedRecipe(base.object_name))
+            base.is_support_factory = false
             base.is_customized = true
         end
         if base.lua_prototype == nil then

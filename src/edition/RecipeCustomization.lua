@@ -233,6 +233,9 @@ function RecipeCustomization:onEvent(event)
         local index = event.element.selected_index
         local value = event.element.items[index]
         current_recipe.type = value
+        if current_recipe.type ~= defines.mod.recipes.recipe.name then
+            current_recipe.category = nil
+        end
         Player.setCustomizedRecipe(current_recipe)
         ModelCompute.update(model)
         Controller:send("on_gui_update", event)
