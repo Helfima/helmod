@@ -562,7 +562,7 @@ function GuiCellRecipe:create(parent)
   if recipe_prototype.is_support_quality == false then
     quality = "normal"
   end
-  local icon_name, icon_type = recipe_prototype:getIcon()
+  local icon_type, icon_name = recipe_prototype:getIcon()
   local tooltip = GuiTooltipRecipe(self.options.tooltip):element(recipe)
   local recipe_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite_with_quality(icon_type, icon_name, quality):tooltip(tooltip))
   GuiElement.infoRecipe(recipe_icon, recipe)
@@ -699,7 +699,7 @@ function GuiCellBlock:create(parent)
       local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
       
       local recipe_prototype = RecipePrototype(first_recipe)
-      local icon_name, icon_type = recipe_prototype:getIcon()
+      local icon_type, icon_name = recipe_prototype:getIcon()
       button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(icon_type, icon_name):tooltip(tooltip))
       
       GuiElement.infoRecipe(button, first_recipe)
@@ -784,7 +784,7 @@ function GuiCellBlockM:create(parent)
       local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
 
       local recipe_prototype = RecipePrototype(first_recipe)
-      local icon_name, icon_type = recipe_prototype:getIcon()
+      local icon_type, icon_name = recipe_prototype:getIcon()
       button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(icon_type, icon_name):tooltip(tooltip))
       
       GuiElement.infoRecipe(button, first_recipe)
@@ -830,7 +830,7 @@ function GuiCellModel:create(parent)
   local element = self.m_element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
   local tooltip = GuiTooltipModel(self.options.tooltip):element(element)
-  local first_block = element.block_root or Model.firstChild(element.blocks or {})
+  local first_block = Model.getRootBlock(element)
   local block_infos = Model.getBlockInfos(first_block)
   
   -- Apply the title if one exists.
@@ -850,20 +850,18 @@ function GuiCellModel:create(parent)
   -- Initialize the button variable for scoping purposes.
   local button = nil
   --Apply the icon if one exists, with fallbacks.
-  if block_infos.primary_icon ~= nil then
-    button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(block_infos.primary_icon.type, block_infos.primary_icon.name.name):tooltip(tooltip))
-  elseif first_block ~= nil and first_block.name ~= "" then
-    local first_recipe = Model.firstChild(first_block.children)
-    local recipe_prototype = RecipePrototype(first_recipe)
-    local icon_name, icon_type = recipe_prototype:getIcon()
-    button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(icon_type, icon_name):tooltip(tooltip))
-    GuiElement.infoRecipe(button, first_recipe)
+  local icons = GuiHelper.getModelIcons(element)
+  if icons.primary ~= nil then
+    button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite_with_quality(icons.primary.type, icons.primary.name, icons.primary.quality):tooltip(tooltip))
+    GuiElement.infoRecipe(button, icons.first_child)
   else
     button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black))
   end
 
   -- Apply the secondary icon if one is set in the block data.
-  GuiElement.maskBlockSecondaryIcon(button, block_infos)
+  if icons.secondary ~= nil then
+    GuiElement.maskSecondaryIcon(button, icons.secondary.type, icons.secondary.name, icons.secondary.quality)
+  end
 
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
   local count = 1

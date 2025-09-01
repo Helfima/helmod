@@ -295,26 +295,12 @@ function ProductionPanel:updateIndexPanel(model)
 			local is_first = true
 			table.reindex_list(models)
 			for _, imodel in spairs(models, sorter) do
-				local first_block = imodel.block_root or Model.firstChild(imodel.blocks or {})
-				local first_recipe = Model.firstChild(first_block.children)
-  				
-				local block_infos = Model.getBlockInfos(first_block)
+				local first_block = Model.getRootBlock(imodel)
 				i = i + 1
                 local element = first_block
 				local button = nil
 				-- sprite definition
-				local icon_type = element.type
-				local icon_name = element.name
-				local icon_quality = element.quality
-				if first_recipe ~= nil then
-					local recipe_prototype = RecipePrototype(first_recipe)
-					icon_name, icon_type = recipe_prototype:getIcon()
-				end
-				if block_infos.primary_icon ~= nil and block_infos.primary_icon.type ~= nil then
-					icon_type = block_infos.primary_icon.name.type or "item"
-					icon_name = block_infos.primary_icon.name.name
-					icon_quality = block_infos.primary_icon.quality
-				end
+				local icons = GuiHelper.getModelIcons(imodel)
 
 				local button_style = "helmod_button_menu"
 				local button_sprite_style = nil
@@ -325,12 +311,14 @@ function ProductionPanel:updateIndexPanel(model)
 
 				if element ~= nil and element.type ~= nil then
 					local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
-					button = GuiElement.add(table_index, GuiButtonSelectSprite(self.classname, "change-model", imodel.id):sprite_with_quality(icon_type, icon_name, icon_quality):style(button_sprite_style):tooltip(tooltip))
+					button = GuiElement.add(table_index, GuiButtonSelectSprite(self.classname, "change-model", imodel.id):sprite_with_quality(icons.primary.type, icons.primary.name, icons.primary.quality):style(button_sprite_style):tooltip(tooltip))
+					GuiElement.infoRecipe(button, icons.first_child)
 				else
 					button = GuiElement.add(table_index, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black):style(button_style))
 				end
-				
-				GuiElement.maskBlockSecondaryIcon(button, block_infos)
+				if icons.secondary ~= nil then
+					GuiElement.maskSecondaryIcon(button, icons.secondary.type, icons.secondary.name, icons.secondary.quality)
+				end
 
 				if button ~= nil and is_first then
 					button.style.left_margin = 3
@@ -560,7 +548,7 @@ function ProductionPanel:updateSubMenuRightPanel(model, block)
 
 	local group_models = GuiElement.add(right_panel, GuiFlowH("group_models"))
 	group_models.style.horizontal_spacing = button_spacing
-	GuiElement.add(group_models, GuiButton("HMBlockEdition", "OPEN", model.id, block_id, "model"):sprite("menu", defines.sprites.edit_document.black, defines.sprites.edit_document.black):style("helmod_button_menu"):tooltip({ "helmod_panel.model-edition" }))
+	GuiElement.add(group_models, GuiButton("HMBlockEdition", "OPEN", model.id, "none", "model"):sprite("menu", defines.sprites.edit_document.black, defines.sprites.edit_document.black):style("helmod_button_menu"):tooltip({ "helmod_panel.model-edition" }))
 	GuiElement.add(group_models, GuiButton("HMBlockEdition", "OPEN", model.id, block_id, "block"):sprite("menu", defines.sprites.edit_subdocument.black, defines.sprites.edit_document.black):style("helmod_button_menu"):tooltip({ "helmod_block_edition_panel.pane-title" }))
 	GuiElement.add(group_models, GuiButton("HMParametersEdition", "OPEN", model.id, block_id):sprite("menu", defines.sprites.parameter.black, defines.sprites.parameter.black):style("helmod_button_menu"):tooltip({"helmod_parameters_edition_panel.title" }))
 	local button_model_up = GuiElement.add(group_models, GuiButton(self.classname, "model-index-up", model.id, block_id):sprite("menu", defines.sprites.arrow_left.black, defines.sprites.arrow_left.black):style("helmod_button_menu"):tooltip({ "helmod_panel.model-index-up" }))

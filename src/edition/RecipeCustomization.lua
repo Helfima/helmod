@@ -50,7 +50,7 @@ function RecipeCustomization:updateSelector(event)
     if table.size(customized_recipes) > 0 then
         for key, customized_recipe in pairs(customized_recipes) do
             local recipe_prototype = RecipePrototype(customized_recipe)
-            local icon_name, icon_type = recipe_prototype:getIcon()
+            local icon_type, icon_name = recipe_prototype:getIcon()
             local button_prototype = nil
             if icon_name ~= nil then
                 button_prototype = GuiButtonSelectSprite(self.classname, "recipe-select", customized_recipe.name):choose(icon_type, icon_name, customized_recipe.name)
@@ -93,7 +93,7 @@ function RecipeCustomization:updateCreateRecipe(event)
     -- recipe localised_name
     GuiElement.add(create_table, GuiLabel("label-localized-name"):caption({ "helmod_recipe-customization-panel.recipe-localised-name" }))
     local recipe_localised_name = current_recipe.localised_name
-    local input_localised_name = GuiElement.add(create_table, GuiTextField(self.classname, "recipe-update", "localized-name", model.id, block.id):text(recipe_localised_name):style("helmod_textfield"))
+    local input_localised_name = GuiElement.add(create_table, GuiTextField(self.classname, "recipe-localized-name", model.id, block.id):text(recipe_localised_name):style("helmod_textfield"))
     input_localised_name.style.width = 250
     
     -- recipe type
@@ -134,7 +134,7 @@ function RecipeCustomization:updateCreateRecipe(event)
     -- recipe energy
     GuiElement.add(create_table, GuiLabel("label-energy"):caption({ "helmod_recipe-customization-panel.recipe-energy" }))
     local recipe_energy = current_recipe.energy
-    local input_energy = GuiElement.add(create_table, GuiTextField(self.classname, "recipe-update", "energy", model.id, block.id):text(recipe_energy):style("helmod_textfield"))
+    local input_energy = GuiElement.add(create_table, GuiTextField(self.classname, "recipe-energy", model.id, block.id):text(recipe_energy):style("helmod_textfield"))
 
     -- recipe products
     GuiElement.add(info_panel, GuiLabel("label-products"):caption({ "helmod_recipe-customization-panel.recipe-products" }))
@@ -238,6 +238,18 @@ function RecipeCustomization:onEvent(event)
         end
         Player.setCustomizedRecipe(current_recipe)
         ModelCompute.update(model)
+        Controller:send("on_gui_update", event)
+    end
+
+    if event.action == "recipe-localized-name" then
+        local value = event.element.text
+        current_recipe.localised_name = value
+        Controller:send("on_gui_update", event)
+    end
+
+    if event.action == "recipe-energy" then
+        local value = event.element.text
+        current_recipe.energy = tonumber(value)
         Controller:send("on_gui_update", event)
     end
 

@@ -609,7 +609,7 @@ function GuiTooltipRecipe:create()
 	local element = self.m_element
 	if element ~= nil then
 		local recipe_prototype = RecipePrototype(element)
-		local icon_name, icon_type = recipe_prototype:getIcon()
+		local icon_type, icon_name = recipe_prototype:getIcon()
 
 		if icon_type ~= "signal" then
 			local element_label = Player.getLocalisedName({ type = icon_type, name = icon_name })

@@ -596,6 +596,9 @@ end
 ---@param parent LuaGuiElement
 ---@param element table
 function GuiElement.infoRecipe(parent, element)
+  if element == nil then
+    return
+  end
   local sprite_name = nil
   local tooltip = nil
   if element.type == "recipe-burnt" then

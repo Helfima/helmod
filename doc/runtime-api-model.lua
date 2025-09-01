@@ -184,6 +184,7 @@
 ---@field summary any
 ---@field generators any
 ---@field parameters ParametersData
+---@field location LocationData
 
 ---@class ThumbnailsColorData
 ---@field default string
@@ -197,3 +198,10 @@
 ---@field ingredient_default string
 ---@field ingredient_driving string
 ---@field ingredient_overflow string
+
+---@class LocationData
+---@field name string
+---@field type string
+---@field localised_name string
+---@field localised_description string
+---@field properties table

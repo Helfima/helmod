@@ -442,7 +442,18 @@ function Model.getModelInfos(model)
 end
 
 -------------------------------------------------------------------------------
----Return quality element key
+---Return root block
+---@param model ModelData
+---@return BlockData
+function Model.getRootBlock(model)
+  if model ~= nil then
+    return model.block_root or Model.firstChild(model.blocks or {})
+  end
+  return {}
+end
+
+-------------------------------------------------------------------------------
+---Return block infos
 ---@param block BlockData
 ---@return BlockInfosData
 function Model.getBlockInfos(block)

@@ -1,3 +1,4 @@
+require "gui.GuiHelper"
 require "gui.GuiElement"
 require "gui.GuiEmptyWidget"
 require "gui.GuiButton"

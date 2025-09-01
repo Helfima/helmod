@@ -22,7 +22,6 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
         -- add recipe
         ---@type RecipeData
         local ModelRecipe = Model.newRecipe(model, lua_recipe.name, recipe_type)
-        local icon_name, icon_type = recipe_prototype:getIcon()
         
         if index == nil then
             local child_index = table.size(block.children)
@@ -689,6 +688,7 @@ function ModelBuilder.copyModel(into_model, from_model)
         end
         into_model.block_root.name = from_model.block_root.name
         into_model.block_root.type = from_model.block_root.type
+        into_model.group = from_model.group
         ModelBuilder.copyBlock(into_model, into_model.block_root, from_model.block_root)
     end
 end
@@ -704,8 +704,9 @@ function ModelBuilder.copyBlock(into_model, into_block, from_block)
         for child_id, child in spairs(from_block.children, defines.sorters.block.sort) do
             table.insert(from_child_ids, child_id)
         end
-        local child_index = #from_child_ids
+        local child_index = table.size(into_block.children)
         for _, child_id in ipairs(from_child_ids) do
+            child_index = child_index + 1
             local child = from_block.children[child_id]
             local is_block = Model.isBlock(child)
             if is_block then
@@ -714,15 +715,14 @@ function ModelBuilder.copyBlock(into_model, into_block, from_block)
                 into_model.blocks[new_block.id] = new_block
                 ModelBuilder.copyBlock(into_model, new_block, child)
                 into_block.children[new_block.id] = new_block
-                child_index = child_index + 1
             else
                 local recipe = child
                 ModelBuilder.copyRecipe(into_model, into_block, recipe, child_index)
-                child_index = child_index + 1
             end
         end
         if into_block ~= nil then
             table.reindex_list(into_block.children)
+            into_block.infos = table.deepcopy(from_block.infos)
             into_block.unlinked = from_block.unlinked
             into_block.by_factory = from_block.by_factory
             into_block.by_product = from_block.by_product

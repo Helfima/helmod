@@ -921,5 +921,5 @@ function RecipePrototype:getIcon()
         icon_name, icon_type = self:getCustomizedIcon()
     end
 
-    return icon_name, icon_type
+    return icon_type, icon_name
 end

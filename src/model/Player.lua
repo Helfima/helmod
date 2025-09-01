@@ -2330,9 +2330,9 @@ function Player.getHMLocations()
         end
     end
 
-    local suurfaces = Player.getSurfacePrototypes()
-    if #suurfaces > 0 then
-        for key, surface in pairs(suurfaces) do
+    local surfaces = Player.getSurfacePrototypes()
+    if #surfaces > 0 then
+        for key, surface in pairs(surfaces) do
             local location = {
                 key = string.format("%s-%s", surface.type, surface.name),
                 type = "surface",

@@ -137,7 +137,7 @@ function CreatedOrWhereUsedPanel:AddTableRecipes(parent, recipes)
 
         local ok , err = pcall(function()
             local recipe_prototype = RecipePrototype(recipe.name)
-            local icon_name, icon_type = recipe_prototype:getIcon()
+            local icon_type, icon_name = recipe_prototype:getIcon()
 
             -- recipe
             local cell = GuiElement.add(recipes_table, GuiFlowH())
