@@ -261,7 +261,7 @@ function RecipeSelector:buildPrototypeIcon(gui_element, prototype, tooltip)
     color = "red"
   end
 
-  local icon_name, icon_type = recipe_prototype:getIcon()
+  local icon_type, icon_name = recipe_prototype:getIcon()
   local button_prototype = GuiButtonSelectSprite(self.classname, "element-select", prototype.type):choose(icon_type, icon_name, prototype.name):color(color):tooltip(tooltip)
   local button = GuiElement.add(gui_element, button_prototype)
 

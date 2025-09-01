@@ -1,12 +1,15 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.25
 Date: 2025-09-01
+  Changes:
+    - Changed RU locale update
+    - Added belt stack size bonus in Logistic Edition
   Bugfixes:
     - Fixed update energy and lacalised name for Recipe customization
     - Fixed product line edition that doesn't edit the root block
     - Fixed copy model and block that doesn't copy last informations
     - Fixed children index when use copy/past
-    - Fixed model icons and now location is in secondary icon if there are not secondary
+    - Fixed model icons and now location is in secondary icon if there are no secondary icon (not if nauvis)
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.24
 Date: 2025-08-30

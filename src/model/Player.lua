@@ -461,6 +461,13 @@ function Player.getForce()
 end
 
 -------------------------------------------------------------------------------
+---Return belt stack size bonus
+---@return number
+function Player.getBeltStackSizeBonus()
+    return Lua_player.force.belt_stack_size_bonus
+end
+
+-------------------------------------------------------------------------------
 ---Sets the toggle state of the shotcut tool/icon
 ---@param state boolean
 function Player.setShortcutState(state)

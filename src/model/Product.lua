@@ -288,7 +288,8 @@ function Product:countContainer(count, container, time)
     elseif entity_prototype:getType() == "transport-belt" then
       ---ratio = item_per_s / speed_belt (blue belt)
       local belt_speed = entity_prototype:getBeltSpeed()
-      return count / (belt_speed * self.belt_ratio * (time or 1))
+      local belt_bonus = 1 + User.getBeltStackSizeBonus()
+      return count / (belt_speed * belt_bonus * self.belt_ratio * (time or 1))
     elseif entity_prototype:getType() == "rocket-silo" then
       local item_prototype = ItemPrototype(self.lua_prototype.name)
       local rocket_capacity = math.floor(item_prototype:geRocketCapacity())

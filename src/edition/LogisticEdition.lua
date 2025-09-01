@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 ---Class to build product edition dialog
 ---@class LogisticEdition : FormModel
-LogisticEdition = newclass(Form)
+LogisticEdition = newclass(FormModel)
 
 -------------------------------------------------------------------------------
 ---On initialization
@@ -39,21 +39,33 @@ end
 ---Update items logistic
 ---@param event LuaEvent
 function LogisticEdition:updateItemsLogistic(event)
-	local flow_panel, content_panel, menu_panel = self:getPanel()
-	content_panel.clear()
-
 	local logistic_quality = User.getParameter("logistic_quality") or "normal"
-
-	if Player.hasFeatureQuality() then
-		local quality_panel = GuiElement.addQualitySelector(content_panel, logistic_quality, self.classname, "quality-select", event.item1)
-		quality_panel.style.bottom_margin = 5
-	end
 
 	local number_column = User.getPreferenceSetting("preference_number_column")
 	local container_panel = self:getScrollPanel("information")
+	container_panel.clear()
+
+	if Player.hasFeatureQuality() then
+		local quality_panel = GuiElement.addQualitySelector(container_panel, logistic_quality, self.classname, "quality-select", event.item1)
+		quality_panel.style.bottom_margin = 5
+	end
 
 	if event.item1 == "item" then
 		local type = User.getParameter("logistic_row_item") or "belt"
+
+		if type == "belt" then
+			local cell_stack_bonus = GuiElement.add(container_panel, GuiFlowH())
+			cell_stack_bonus.style.horizontal_spacing = 5
+
+			local items = {0,1,2,3}
+			local default_belt_stack_size_bonus = User.getBeltStackSizeBonus()
+			local button = GuiElement.add(cell_stack_bonus, GuiDropDown(self.classname, "belt-stack-size-bonus"):items(items, default_belt_stack_size_bonus))
+			button.style.width = 64
+
+			local caption = {"gui-bonus.belt-stack-size-bonus"}
+			GuiElement.add(cell_stack_bonus, GuiLabel("stack-size-bonus"):caption(caption))
+		end
+
 		local type_table_panel = GuiElement.add(container_panel, GuiTable(string.format("%s-selector-table", type)):column(number_column))
 
 		local item_logistic = Player.getDefaultItemLogistic(type)
@@ -82,6 +94,7 @@ end
 ---On event
 ---@param event LuaEvent
 function LogisticEdition:onEvent(event)
+	local model, block, recipe = self:getParameterObjects()
 	local logistic_quality = User.getParameter("logistic_quality") or "normal"
 
 	if event.action == "items-logistic-select" then
@@ -115,5 +128,11 @@ function LogisticEdition:onEvent(event)
 		Controller:send("on_gui_refresh", event, "HMProductionPanel")
 		User.setParameter("logistic_quality", logistic_quality)
 		self:updateItemsLogistic(event)
+	end
+
+	if event.action == "belt-stack-size-bonus" then
+		local index = event.element.selected_index
+		User.setBeltStackSizeBonus(index - 1)
+		Controller:send("on_gui_refresh", event, "HMProductionPanel")
 	end
 end

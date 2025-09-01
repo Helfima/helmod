@@ -725,4 +725,21 @@ function User.setThumbnailsColor(thumbnails_color)
     User.setParameter("thumbnails_color", thumbnails_color)
 end
 
+-------------------------------------------------------------------------------
+---Return belt stack size bonus
+---@return number
+function User.getBeltStackSizeBonus()
+    local belt_stack_size_bonus = User.getParameter("belt_stack_size_bonus")
+    if belt_stack_size_bonus ~= nil then
+        return belt_stack_size_bonus
+    end
+    return Player.getBeltStackSizeBonus() or 0
+end
+
+-------------------------------------------------------------------------------
+---Set belt stack size bonus
+function User.setBeltStackSizeBonus(value)
+    User.setParameter("belt_stack_size_bonus", value)
+end
+
 return User
