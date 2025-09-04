@@ -940,7 +940,7 @@ function Player.getCategoriesMachines()
 
     local cache_machines = Cache.getData(Player.classname, "list_categories_machines")
     if cache_machines ~= nil then
-        --return cache_machines
+        return cache_machines
     end
 
     -- generate cache_machines

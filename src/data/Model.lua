@@ -672,19 +672,6 @@ function Model.getDefaultRecipe(key)
 end
 
 -------------------------------------------------------------------------------
----Get speed of the factory
----@param key string --factory name
----@return number
-function Model.getSpeedFactory(key)
-  local entity_prototype = EntityPrototype(key)
-  local crafting_speed = entity_prototype:getCraftingSpeed()
-  if crafting_speed ~= 0 then return crafting_speed end
-  local mining_speed = entity_prototype:getMiningSpeed()
-  if mining_speed ~= 0 then return mining_speed end
-  return 1
-end
-
--------------------------------------------------------------------------------
 ---Get the factory of prototype
 ---@param recipe_prototype table
 ---@return string
@@ -702,10 +689,12 @@ function Model.getDefaultPrototypeFactory(recipe_prototype)
     local level = 1
     local lua_factory = nil
     local last_factory = nil
-    for _, factory in spairs(factories, function(t,a,b) return Model.getSpeedFactory(t[b].name) > Model.getSpeedFactory(t[a].name) end) do
-      if level == factory_level then lua_factory = factory end
-      last_factory = factory
-      level = level + 1
+    for _, factory in spairs(factories, function(t,a,b) return Player.getProductionMachineSpeed(t[b]) > Player.getProductionMachineSpeed(t[a]) end) do
+      if factory.type ~= "character" then
+        if level == factory_level then lua_factory = factory end
+        last_factory = factory
+        level = level + 1
+      end
     end
     if lua_factory ~= nil then return lua_factory.name end
     if last_factory ~= nil then return last_factory.name end
