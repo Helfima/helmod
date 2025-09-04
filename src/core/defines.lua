@@ -50,14 +50,14 @@ defines.mod.recipe_customized_prefix = "helmod_customized"
 defines.mod.recipe_customized_category = "crafting"
 defines.mod.recipes = {}
 defines.mod.recipes.recipe = {name = "recipe", is_customizable = true}
-defines.mod.recipes.burnt = {name = "recipe-burnt"}
-defines.mod.recipes.energy = {name = "energy"}
-defines.mod.recipes.resource = {name = "resource"}
-defines.mod.recipes.fluid = {name = "fluid"}
+defines.mod.recipes.burnt = {name = "recipe-burnt", category="helmod-burnt"}
+defines.mod.recipes.energy = {name = "energy", category="helmod-energy"}
+defines.mod.recipes.resource = {name = "resource", category="helmod-mining"}
+defines.mod.recipes.fluid = {name = "fluid", category="helmod-pumping"}
 defines.mod.recipes.boiler = {name = "boiler"}
-defines.mod.recipes.technology = {name = "technology"}
-defines.mod.recipes.rocket = {name = "rocket"}
-defines.mod.recipes.agricultural = {name = "agricultural"}
+defines.mod.recipes.technology = {name = "technology", category="helmod-research"}
+defines.mod.recipes.rocket = {name = "rocket", category="helmod-rocket"}
+defines.mod.recipes.agricultural = {name = "agricultural", category="helmod-farming"}
 defines.mod.recipes.spoiling = {name = "spoiling"}
 defines.mod.recipes.constant = {name = "constant", is_customizable = true}
 
@@ -681,7 +681,6 @@ helmod_frame_style = {
 helmod_rules = {}
 helmod_rules["production-crafting"] = {excluded_only=false ,categories={}}
 helmod_rules["production-crafting"].categories["standard"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
-helmod_rules["production-crafting"].categories["crafting-handonly"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
 helmod_rules["production-crafting"].categories["extraction-machine"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
 helmod_rules["production-crafting"].categories["energy"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
 helmod_rules["production-crafting"].categories["technology"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}

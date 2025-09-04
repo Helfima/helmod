@@ -122,7 +122,9 @@ function RecipeCustomization:updateCreateRecipe(event)
 
         local empty_panel = GuiElement.add(create_table, GuiFlow())
         local crafting_table = GuiElement.add(create_table, GuiTable("crafting-table"):column(10))
-        local crafting_machines = Player.getProductionsCrafting(recipe_category, current_recipe)
+        
+        local recipe_prototype = RecipePrototype(current_recipe)
+        local crafting_machines = recipe_prototype:getAllowedMachines()
         for key, crafting_machine in pairs(crafting_machines) do
             local choose_type = "entity"
             local choose_name = crafting_machine.name

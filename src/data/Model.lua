@@ -102,21 +102,6 @@ end
 ---Reset rules
 function Model.resetRules()
   local rules = {}
-  table.insert(rules, {index=0, mod="base", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="extraction-machine", excluded = false})
-  table.insert(rules, {index=1, mod="base", name="production-crafting", category="extraction-machine", type="entity-type", value="mining-drill", excluded = false})
-  table.insert(rules, {index=2, mod="base", name="production-crafting", category="energy", type="entity-subgroup", value="energy", excluded = false})
-  table.insert(rules, {index=3, mod="base", name="production-crafting", category="technology", type="entity-type", value="lab", excluded = false})
-  table.insert(rules, {index=4, mod="base", name="module-limitation", category="extraction-machine", type="entity-type", value="mining-drill", excluded = true})
-  table.insert(rules, {index=5, mod="base", name="module-limitation", category="technology", type="entity-type", value="lab", excluded = true})
-  table.insert(rules, {index=6, mod="ShinyIcons", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="shinyminer1", excluded = false})
-  table.insert(rules, {index=7, mod="ShinyIcons", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="shinyminer2", excluded = false})
-  table.insert(rules, {index=8, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="dyworld-extraction-burner", excluded = false})
-  table.insert(rules, {index=9, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="dyworld-drills-electric", excluded = false})
-  table.insert(rules, {index=10, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="dyworld-drills-burner", excluded = false})
-  table.insert(rules, {index=11, mod="DyWorld", name="production-crafting", category="standard", type="entity-name", value="assembling-machine-1", excluded = true})
-  table.insert(rules, {index=12, mod="DyWorld", name="production-crafting", category="standard", type="entity-name", value="assembling-machine-2", excluded = true})
-  table.insert(rules, {index=13, mod="DyWorld", name="production-crafting", category="standard", type="entity-name", value="assembling-machine-3", excluded = true})
-  table.insert(rules, {index=14, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-group", value="production", excluded = true})
   table.insert(rules, {index=15, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="supply-depot", excluded = true})
   table.insert(rules, {index=16, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="request-depot", excluded = true})
   table.insert(rules, {index=17, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="buffer-depot", excluded = true})
@@ -706,16 +691,7 @@ end
 function Model.getDefaultPrototypeFactory(recipe_prototype)
   local category = recipe_prototype:getCategory()
   if category ~= nil then
-    local factories = {}
-    if recipe_prototype:getType() == "boiler" then
-      factories = Player.getBoilersForRecipe(recipe_prototype)
-    elseif recipe_prototype:getType() == "fluid" then
-      factories = Player.getProductionsCrafting("fluid", recipe_prototype:native())
-    elseif recipe_prototype:getType() == "agricultural" then
-      factories = Player.getAgriculturalTowers()
-    else
-      factories = Player.getProductionsCrafting(category, recipe_prototype:native())
-    end
+    local factories = recipe_prototype:getAllowedMachines()
     local default_factory_level = User.getPreferenceSetting("default_factory_level")
     local factory_level = 1
     if default_factory_level == "fast" then

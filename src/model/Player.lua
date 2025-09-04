@@ -934,9 +934,93 @@ function Player.getBeaconLimitationModuleMessage(beacon, lua_recipe, module)
 end
 
 -------------------------------------------------------------------------------
+---Return list of machines
+---@return table
+function Player.getCategoriesMachines()
+
+    local cache_machines = Cache.getData(Player.classname, "list_categories_machines")
+    if cache_machines ~= nil then
+        --return cache_machines
+    end
+
+    -- generate cache_machines
+    local cache_machines = {}
+    local function addInCache(crafting_category, prototype)
+        if cache_machines[crafting_category] == nil then
+            cache_machines[crafting_category] = {}
+        end
+        cache_machines[crafting_category][prototype.name] = prototype
+    end
+
+    local rules_included, rules_excluded = Player.getRules("production-crafting")
+
+    -- crafting for character
+    pcall(function()
+        local character = Player.getProductionMachine(prototypes.entity["character"])
+        for crafting_category, _ in pairs(character.crafting_categories) do
+            addInCache(crafting_category, character)
+        end
+        addInCache(defines.mod.recipes.resource.category, character)
+    end)
+
+    -- crafting for machines
+    local lua_prototypes = Player.getProductionMachines()
+    for _, lua_prototype in pairs(lua_prototypes) do
+        local check = true
+        ---resolve rule excluded
+        check = Player.checkRules(check, rules_excluded, "standard", lua_prototype, false)
+        if check == true then
+            if lua_prototype.crafting_categories ~= nil then
+                for crafting_category, _ in pairs(lua_prototype.crafting_categories) do
+                    addInCache(crafting_category, lua_prototype)
+                end
+            end
+        end
+    end
+
+    -- defines.mod.recipes.burnt.category => nothing
+    -- defines.mod.recipes.energy.category => nothing
+
+    -- crafting for resource
+    for _, lua_prototype in pairs(Player.getMiningMachines()) do
+        local prototype = Player.getProductionMachine(lua_prototype)
+        addInCache(defines.mod.recipes.resource.category, prototype)
+    end
+
+    -- crafting for fluid
+    for _, lua_prototype in pairs(Player.getOffshorePumps()) do
+        local prototype = Player.getProductionMachine(lua_prototype)
+        addInCache(defines.mod.recipes.fluid.category, prototype)
+    end
+
+    -- defines.mod.recipes.boiler.category => nothing
+    
+    -- crafting for research
+    for _, lua_prototype in pairs(Player.getLabMachines()) do
+        local prototype = Player.getProductionMachine(lua_prototype)
+        addInCache(defines.mod.recipes.technology.category, prototype)
+    end
+
+    -- crafting for research
+    for _, lua_prototype in pairs(Player.getRocketMachines()) do
+        local prototype = Player.getProductionMachine(lua_prototype)
+        addInCache(defines.mod.recipes.rocket.category, prototype)
+    end
+
+    -- Crafting for farming
+    for _, lua_prototype in pairs(Player.getAgriculturalTowers()) do
+        local prototype = Player.getProductionMachine(lua_prototype)
+        addInCache(defines.mod.recipes.agricultural.category, prototype)
+    end
+
+    Cache.setData(Player.classname, "list_categories_machines", cache_machines)
+    return cache_machines
+end
+-------------------------------------------------------------------------------
 ---Return list of productions
 ---@param lua_recipe table
 ---@return table
+---@deprecated replaced by RecipePrototype:getAllowedMachines()
 function Player.getAllProductionsCrafting(lua_recipe)
     local all_productions = {}
     local all_ready = {}
@@ -964,9 +1048,7 @@ end
 function Player.getProductionsCrafting(category, lua_recipe)
     local productions = {}
     local rules_included, rules_excluded = Player.getRules("production-crafting")
-    if category == "crafting-handonly" then
-        productions["character"] = prototypes.entity["character"]
-    elseif lua_recipe.name ~= nil and category == "fluid" then
+    if lua_recipe.name ~= nil and category == "fluid" then
         for key, lua_entity in pairs(Player.getOffshorePumps()) do
             productions[lua_entity.name] = lua_entity
         end
@@ -1083,6 +1165,53 @@ function Player.getModules()
     return items
 end
 
+---Get machine speed from entity
+---it used for orderer not real speed
+---must use EntityPrototype:speedFactory() for real speed
+---@param lua_prototype any
+---@return number
+function Player.getProductionMachineSpeed(lua_prototype)
+    if lua_prototype == nil then
+        return 0
+    end
+    --- already converted
+    if type(lua_prototype) == "table" then
+        return lua_prototype.crafting_speed
+    end
+    if lua_prototype.type == "character" then
+        return 99
+    elseif lua_prototype.type == "boiler" then
+        return 1
+    elseif lua_prototype.type == "mining-drill" then
+        return lua_prototype.mining_speed or 0
+    elseif lua_prototype.type == "pump" or lua_prototype.type == "offshore-pump" then
+        return lua_prototype.get_pumping_speed()
+    elseif lua_prototype.type == "lab" then
+        return lua_prototype.get_researching_speed()
+    elseif lua_prototype.type == "agricultural-tower" then
+        return 1
+    else
+        return lua_prototype.get_crafting_speed()
+    end
+end
+
+---Get machine from entity
+---@param lua_prototype any
+---@return table
+function Player.getProductionMachine(lua_prototype)
+    local machine = {
+        name = lua_prototype.name,
+        group = (lua_prototype.group or {}).name,
+        subgroup = (lua_prototype.subgroup or {}).name,
+        type = lua_prototype.type,
+        order = lua_prototype.order,
+        crafting_categories = lua_prototype.crafting_categories,
+        resource_categories = lua_prototype.resource_categories
+    }
+    machine.crafting_speed = Player.getProductionMachineSpeed(lua_prototype)
+    return machine
+end
+
 -------------------------------------------------------------------------------
 ---Return list of production machines
 ---@return table
@@ -1095,22 +1224,12 @@ function Player.getProductionMachines()
     local filters = {}
     table.insert(filters, { filter = "crafting-machine", mode = "or" })
     table.insert(filters, { filter = "hidden", mode = "and", invert = true })
-    table.insert(filters, { filter = "type", type = "lab", mode = "or" })
-    table.insert(filters, { filter = "hidden", mode = "and", invert = true })
-    table.insert(filters, { filter = "type", type = "mining-drill", mode = "or" })
-    table.insert(filters, { filter = "hidden", mode = "and", invert = true })
-    table.insert(filters, { filter = "type", type = "rocket-silo", mode = "or" })
-    table.insert(filters, { filter = "hidden", mode = "and", invert = true })
-    table.insert(filters, { filter = "type", type = "agricultural-tower", mode = "or" })
-    table.insert(filters, { filter = "hidden", mode = "and", invert = true })
     local entities = prototypes.get_entity_filtered(filters)
     entities = Player.ExcludePlacedByHidden(entities)
 
     local list_machines = {}
-    for prototype_name, lua_prototype in pairs(entities) do
-        local machine = { name = lua_prototype.name, group = (lua_prototype.group or {}).name, subgroup = (lua_prototype.subgroup or {})
-        .name, type = lua_prototype.type, order = lua_prototype.order, crafting_categories = lua_prototype
-        .crafting_categories, resource_categories = lua_prototype.resource_categories }
+    for _, lua_prototype in pairs(entities) do
+        local machine = Player.getProductionMachine(lua_prototype)
         table.insert(list_machines, machine)
     end
 
@@ -1421,6 +1540,45 @@ function Player.getFluidRecipe(name)
 end
 
 -------------------------------------------------------------------------------
+---Return table of lab machines
+---@return table
+function Player.getRocketMachines()
+    local filters = {}
+    table.insert(filters, { filter = "type", type = "rocket-silo", mode = "or" })
+    table.insert(filters, { filter = "hidden", mode = "and", invert = true })
+    local entities = prototypes.get_entity_filtered(filters)
+
+    entities = Player.ExcludePlacedByHidden(entities)
+    return entities
+end
+
+-------------------------------------------------------------------------------
+---Return table of lab machines
+---@return table
+function Player.getLabMachines()
+    local filters = {}
+    table.insert(filters, { filter = "type", type = "lab", mode = "or" })
+    table.insert(filters, { filter = "hidden", mode = "and", invert = true })
+    local entities = prototypes.get_entity_filtered(filters)
+
+    entities = Player.ExcludePlacedByHidden(entities)
+    return entities
+end
+
+-------------------------------------------------------------------------------
+---Return table of mining machines
+---@return table
+function Player.getMiningMachines()
+    local filters = {}
+    table.insert(filters, { filter = "type", type = "mining-drill", mode = "or" })
+    table.insert(filters, { filter = "hidden", mode = "and", invert = true })
+    local entities = prototypes.get_entity_filtered(filters)
+
+    entities = Player.ExcludePlacedByHidden(entities)
+    return entities
+end
+
+-------------------------------------------------------------------------------
 ---Return table of Agricultural Towers
 ---@return table
 function Player.getAgriculturalTowers()
@@ -1460,7 +1618,6 @@ end
 ---Return table of Seeds for Agricultural Towers
 ---@return table
 function Player.getSeeds()
-    local result = {}
     local plants_filters = Player.getPlantsFilter()
     local filters = {}
     table.insert(filters, { filter = "type", type = "item", mode = "or"})

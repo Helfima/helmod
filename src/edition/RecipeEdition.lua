@@ -758,19 +758,7 @@ function RecipeEdition:updateFactoryInfo(event)
         scroll_panel.style.minimal_height = 40
         scroll_panel.style.maximal_height = 118
         local recipe_prototype = RecipePrototype(recipe)
-        local category = recipe_prototype:getCategory()
-        local factories = {}
-        if recipe.type == "energy" then
-            factories[recipe.factory.name] = recipe.factory
-        elseif recipe.type == "fluid" then
-            factories = Player.getProductionsCrafting("fluid", recipe)
-        elseif recipe.type == "boiler" then
-            factories = Player.getBoilersForRecipe(recipe_prototype)
-        elseif recipe.type == "agricultural" then
-            factories = Player.getAgriculturalTowers()
-        else
-            factories = Player.getAllProductionsCrafting(recipe)
-        end
+        local factories = recipe_prototype:getAllowedMachines()
 
         local factory_table_panel = GuiElement.add(scroll_panel, GuiTable("factory-table"):column(5))
         for key, element in spairs(factories, function(t, a, b) return t[b].crafting_speed > t[a].crafting_speed end) do
@@ -778,10 +766,7 @@ function RecipeEdition:updateFactoryInfo(event)
             if factory.name == element.name then color = GuiElement.color_button_edit end
             local choose_type = "entity"
             local choose_name = element.name
-            local choose_quality = "normal"
-            if factory ~= nil then
-                choose_quality = factory.quality
-            end
+            local choose_quality = factory.quality or "normal"
             local button = GuiElement.add(factory_table_panel, GuiButtonSelectSprite(self.classname, "factory-select", model.id, block.id, recipe.id):choose_with_quality(choose_type, choose_name, choose_quality):color(color))
             button.locked = true
         end

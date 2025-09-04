@@ -287,12 +287,16 @@ function ProductionPanel:updateIndexPanel(model)
 	local index_panel = self:getFrameDeepPanel("model_index")
 	index_panel.style.padding = 2
 	index_panel.clear()
-	local table_index = GuiElement.add(index_panel, GuiTable("table_index"):column(GuiElement.getIndexColumnNumber()):style("helmod_table_list"))
-	GuiElement.add(table_index, GuiButton(self.classname, "new-model"):sprite("menu", defines.sprites.add_table.black, defines.sprites.add_table.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_button.add-production-line" }))
+	local scroll_table = GuiElement.add(index_panel, GuiScroll("scroll_table"))
+	scroll_table.style.maximal_height = 2*40
+	local table_index = GuiElement.add(scroll_table, GuiTable("table_index"):column(GuiElement.getIndexColumnNumber()):style("helmod_table_list"))
+	local button = GuiElement.add(table_index, GuiButton(self.classname, "new-model"):sprite("menu", defines.sprites.add_table.black, defines.sprites.add_table.black):style(defines.styles.button.menu_actived_green):tooltip({"helmod_button.add-production-line" }))
+	button.style.width = 36
+	button.style.height = 36
+
 	if table.size(models_by_owner) > 0 then
 		local i = 0
 		for _, models in pairs(models_by_owner) do
-			local is_first = true
 			table.reindex_list(models)
 			for _, imodel in spairs(models, sorter) do
 				local first_block = Model.getRootBlock(imodel)
@@ -302,7 +306,7 @@ function ProductionPanel:updateIndexPanel(model)
 				-- sprite definition
 				local icons = GuiHelper.getModelIcons(imodel)
 
-				local button_style = "helmod_button_menu"
+				local button_style = defines.styles.button.select_icon
 				local button_sprite_style = nil
 				if imodel.id == model.id then
 					button_style = "helmod_button_actived_icon_yellow"
@@ -318,11 +322,6 @@ function ProductionPanel:updateIndexPanel(model)
 				end
 				if icons.secondary ~= nil then
 					GuiElement.maskSecondaryIcon(button, icons.secondary.type, icons.secondary.name, icons.secondary.quality)
-				end
-
-				if button ~= nil and is_first then
-					button.style.left_margin = 3
-					is_first = false
 				end
 			end
 		end

@@ -95,6 +95,57 @@ RecipePrototype = newclass(Prototype, function(base, object, object_type)
     end
 end)
 
+--- Return allowed machines
+---@return table
+function RecipePrototype:getAllowedMachines()
+    local all_productions = {}
+    if self.lua_type == defines.mod.recipes.energy.name then
+        all_productions[self.lua_prototype.name] = self.lua_prototype
+    elseif self.lua_type == defines.mod.recipes.boiler.name then
+        all_productions = Player.getBoilersForRecipe(self)
+    else
+        local recipe_ingredient_count = self:getIngredientCount()
+        local all_ready = {}
+        local categories = self:getAllCategories()
+        local categories_machines = Player.getCategoriesMachines()
+        for _, category in pairs(categories) do
+            local productions = categories_machines[category]
+            if productions ~= nil then
+                for _, production in pairs(productions) do
+                    if all_ready[production.name] == nil  then
+                        local is_valid = false
+                        local factory_prototype = EntityPrototype(production)
+                        local factory_ingredient_count = factory_prototype:getIngredientCount()
+                        --- check ingredient limitation
+                        if factory_ingredient_count >= recipe_ingredient_count then
+                            is_valid = true
+                        end
+                        --- check mineable require
+                        if self.lua_prototype.name ~= nil and self.lua_type == defines.mod.recipes.resource.name then
+                            local lua_entity_filter = Player.getEntityPrototype(self.lua_prototype.name)
+                            if lua_entity_filter ~= nil then
+                                if production.resource_categories ~= nil and not (production.resource_categories[lua_entity_filter.resource_category]) then
+                                    is_valid = false
+                                elseif lua_entity_filter.mineable_properties and lua_entity_filter.mineable_properties.required_fluid then
+                                    local fluidboxes = factory_prototype:getFluidboxPrototypes()
+                                    if #fluidboxes == 0 then
+                                        is_valid = false
+                                    end
+                                end
+                            end
+                        end
+                        if is_valid == true then
+                            table.insert(all_productions, production)
+                            all_ready[production.name] = true
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return all_productions
+end
+
 -------------------------------------------------------------------------------
 ---Check customized
 ---@param object table --prototype
@@ -193,8 +244,8 @@ end
 ---Return category of Prototype
 ---@return string
 function RecipePrototype:getCategory()
-    if self.lua_type == defines.mod.recipes.technology.name then
-        return "technology"
+    if defines.mod.recipes[self.lua_type] ~= nil and defines.mod.recipes[self.lua_type].category ~= nil then
+        return defines.mod.recipes[self.lua_type].category
     end
     if self.lua_prototype ~= nil then
         return self.lua_prototype.category or "crafting"
@@ -747,6 +798,10 @@ function RecipePrototype:getEnergy(factory)
             return self.lua_prototype.research_unit_energy / 60
         elseif self.lua_type == defines.mod.recipes.rocket.name then
             return self:getRocketEnergy(factory)
+        elseif self.lua_type == defines.mod.recipes.resource.name then
+            local recipe_prototype = EntityPrototype(self.lua_prototype.name)
+            local mining_time = recipe_prototype:getMineableMiningTime()
+            return mining_time
         else
             return self.lua_prototype.energy
         end

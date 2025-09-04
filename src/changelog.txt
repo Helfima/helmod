@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.2.0
+Date: 2025-09-04
+  Changes:
+    - Reworked categories machines for recipe
+    - Added a scroll panel in production line selector
+---------------------------------------------------------------------------------------------------
 Version: 2.1.25
 Date: 2025-09-01
   Changes:

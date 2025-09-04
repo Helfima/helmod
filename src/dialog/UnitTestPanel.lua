@@ -324,7 +324,7 @@ function UnitTestPanel:addEnergyListRow(itable, entity, test_data)
         local tag_color, tooltip = self:valueEquals(pollution, test_data.pollution)
         GuiElement.add(itable,GuiLabel("pollution", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color, Format.formatNumber(pollution), defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
         ---col Speed
-        local speed = Format.round(prototype:speedFactory(test_data.recipe), -2)
+        local speed = Format.round(prototype:speedFactory(), -2)
         local tag_color, tooltip = self:valueEquals(speed, test_data.speed)
         GuiElement.add(itable,GuiLabel("speed", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color, Format.formatNumber(speed),defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
     end

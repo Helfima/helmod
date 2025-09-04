@@ -852,7 +852,6 @@ function EntityPrototype:getCraftingSpeed()
 
     local energy_prototype = self:getEnergySource()
     local speedModifier = energy_prototype:getSpeedModifier()
-
     return (self.lua_prototype.get_crafting_speed(self.factory.quality) or 1) * speedModifier
   end
   return 0
@@ -920,31 +919,32 @@ function EntityPrototype:getPumpingSpeed()
 end
 
 -------------------------------------------------------------------------------
----Return speed factory for recipe
+---Return speed factory
 ---@return number
-function EntityPrototype:speedFactory(recipe)
-  if self.lua_prototype and self.lua_prototype.type == "boiler" then
+function EntityPrototype:speedFactory()
+  if self.lua_prototype == nil then
+    return 0
+  end
+  if self.lua_prototype.type == "character" then
+    return Player.getCraftingSpeed()
+  elseif self.lua_prototype.type == "boiler" then
     ---@see https://wiki.factorio.com/Boiler
     ---info energy 1J=1W
     return 1
-  elseif recipe.type == "resource" then
+  elseif self.lua_prototype.type == "mining-drill" then
     ---(mining power - ore mining hardness) * mining speed
     ---@see https://wiki.factorio.com/Mining
     ---hardness removed
     ---@see https://www.factorio.com/blog/post/fff-266
-    local recipe_prototype = EntityPrototype(recipe.name)
     local mining_speed = self:getMiningSpeed()
-    local mining_time = recipe_prototype:getMineableMiningTime()
-    return mining_speed / mining_time
-  elseif recipe.type == "fluid" then
+    return mining_speed
+  elseif self.lua_prototype.type == "pump" or self.lua_prototype.type == "offshore-pump" then
     local pumping_speed = self:getPumpingSpeed()
     return pumping_speed
-  elseif recipe.type == "technology" then
+  elseif self.lua_prototype.type == "lab" then
     local researching_speed = self:getResearchingSpeed()
     return researching_speed
-  elseif recipe.type == "energy" then
-    return self:getSpeedModifier()
-  elseif recipe.type == "agricultural" then
+  elseif self.lua_prototype.type == "agricultural-tower" then
     local growth_grid_tile_size = self.lua_prototype.growth_grid_tile_size or 3
     local tile_width = self.lua_prototype.tile_width or 3
     local tile_height = self.lua_prototype.tile_height or 3

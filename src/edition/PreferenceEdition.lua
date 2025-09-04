@@ -262,6 +262,8 @@ function PreferenceEdition:updateDefault(event)
     container_panel.clear()
     container_panel.style.padding = 5
 
+    Player.getCategoriesMachines()
+    
     GuiElement.add(container_panel, GuiLabel("default-factories"):caption({"helmod_preferences-edition-panel.default-machine-factories"}):style("helmod_label_title_frame"))
 
     local default_factories_table = GuiElement.add(container_panel, GuiTable("default-factories-table"):column(3))

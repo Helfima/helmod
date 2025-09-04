@@ -141,7 +141,8 @@ function RecipeSelector:updateUnlockRecipesCache()
   end
   for _, recipe in pairs(Player.getRecipes()) do
     if recipe.enabled == true then
-      local factories = Player.getProductionsCrafting(recipe.category, recipe)
+      local recipe_prototype = RecipePrototype(recipe)
+      local factories = recipe_prototype:getAllowedMachines()
       if table.size(factories) > 0 then
         unlock_recipes[recipe.name] = true
       end
@@ -255,9 +256,7 @@ function RecipeSelector:buildPrototypeIcon(gui_element, prototype, tooltip)
   local model, block, recipe = self:getParameterObjects()
   local recipe_prototype = self:getPrototype(prototype)
   local color = nil
-  if recipe_prototype:getCategory() == "crafting-handonly" then
-    color = "yellow"
-  elseif recipe_prototype:getEnabled() == false then
+  if recipe_prototype:getEnabled() == false then
     color = "red"
   end
 
