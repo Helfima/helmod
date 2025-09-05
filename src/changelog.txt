@@ -1,9 +1,12 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.2.0
-Date: 2025-09-04
+Date: 2025-09-05
   Changes:
-    - Reworked categories machines for recipe
+    - Reworked categories machines for recipe (cache added)
     - Added a scroll panel in production line selector
+    - Removed experimental description in the name of panel ;)
+  Bugfixes:
+    - Fixed character doesn't appear in the list of machine (Recipe Edition)
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.25
 Date: 2025-09-01
