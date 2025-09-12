@@ -689,7 +689,7 @@ end
 ---@return table
 function RecipePrototype:getIngredients(factory)
     local raw_ingredients = self:getRawIngredients(factory)
-    if self.lua_prototype ~= nil then
+    if self.lua_prototype ~= nil and factory ~= nil then
         local factory_prototype = EntityPrototype(factory)
         local energy_prototype = factory_prototype:getEnergySource()
         local energy_type = factory_prototype:getEnergyTypeInput()
