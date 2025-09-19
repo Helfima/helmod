@@ -941,10 +941,10 @@ function ModelCompute.computeFactory(recipe)
 
     ---effet speed
     recipe.factory.speed_total = factory_prototype:speedFactory() * (1 + recipe.factory.effects.speed)
-    if recipe.type == "rocket" then
-        local speed_penalty = recipe_prototype:getRocketPenalty(recipe.factory)
-        recipe.factory.speed_total = recipe.factory.speed_total * speed_penalty
-    end
+    -- if recipe.type == "rocket" then
+    --     local speed_penalty = recipe_prototype:getRocketPenalty(recipe.factory)
+    --     recipe.factory.speed_total = recipe.factory.speed_total * speed_penalty
+    -- end
     recipe.factory.speed = recipe.factory.speed_total
 
     ---effet consumption

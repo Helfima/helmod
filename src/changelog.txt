@@ -1,6 +1,16 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.2.2
+Date: 2025-09-19
+  Changes:
+    - Removed rocket speed penalty because that build another rocket when waiting for the launch
+    - Changed quality calculation to accept quality > 100%
+  Bugfixes:
+    - Fixed error when product line is empty
+---------------------------------------------------------------------------------------------------
 Version: 2.2.1
-Date: 2025-09-10
+Date: 2025-09-16
+  Changes:
+    - Changed RU locale update
   Bugfixes:
     - Fixed rocket recipe, error when check default machine
 ---------------------------------------------------------------------------------------------------

@@ -851,7 +851,7 @@ function GuiCellModel:create(parent)
   local button = nil
   --Apply the icon if one exists, with fallbacks.
   local icons = GuiHelper.getModelIcons(element)
-  if icons.primary ~= nil then
+  if icons.primary ~= nil and icons.primary.type ~= nil then
     button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite_with_quality(icons.primary.type, icons.primary.name, icons.primary.quality):tooltip(tooltip))
     GuiElement.infoRecipe(button, icons.first_child)
   else

@@ -313,7 +313,7 @@ function ProductionPanel:updateIndexPanel(model)
 					button_sprite_style = "helmod_button_actived_icon_yellow"
 				end
 
-				if element ~= nil and element.type ~= nil then
+				if icons.primary ~= nil and icons.primary.type ~= nil then
 					local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
 					button = GuiElement.add(table_index, GuiButtonSelectSprite(self.classname, "change-model", imodel.id):sprite_with_quality(icons.primary.type, icons.primary.name, icons.primary.quality):style(button_sprite_style):tooltip(tooltip))
 					GuiElement.infoRecipe(button, icons.first_child)

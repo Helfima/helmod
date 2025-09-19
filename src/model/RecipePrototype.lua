@@ -393,7 +393,7 @@ function RecipePrototype:getNextQualityProducts(quality_products, raw_product, l
 
     local quality_product = Product(raw_product):clone()
     quality_product.quality = lua_quality.name
-    quality_product.quality_probality = quality_effect - previous_probality
+    quality_product.quality_probality = (1 - previous_probality) * math.min(1,quality_effect)
     table.insert(quality_products, 1, quality_product)
     return quality_product.quality_probality + previous_probality
 end
@@ -427,7 +427,7 @@ function RecipePrototype:getQualityProducts(factory, quality)
             if next_probability > 0 and quality_effect > 0  then
                 previous_probality = self:getNextQualityProducts(quality_products, raw_product, lua_quality.next, quality_effect)
             end
-            raw_product.quality_probality = raw_product.quality_probality - previous_probality
+            raw_product.quality_probality = 1 - previous_probality
         end
     end
     if #quality_products > 0 then
