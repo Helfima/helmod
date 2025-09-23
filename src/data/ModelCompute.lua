@@ -508,6 +508,10 @@ function ModelCompute.prepareBlockObjectives(block)
     if objectives_size == 0 then
         local children = block.children
         for _, child in spairs(children, defines.sorters.block.sort) do
+            if child.need_candidat_objective == false then
+                -- skip candidat objective because the child linked
+                goto continue
+            end
             local is_block = Model.isBlock(child)
             if is_block then
                 local child_elements = nil
@@ -533,7 +537,7 @@ function ModelCompute.prepareBlockObjectives(block)
                     if state == 1 then
                         objectives_block[element_key] = objective
                         has_objective = true
-                    elseif first_candidat_objective == nil then
+                    elseif child.need_first_candidat_objective ~= false and first_candidat_objective == nil then
                         first_candidat_objective = objective
                     end
                     break
@@ -563,12 +567,13 @@ function ModelCompute.prepareBlockObjectives(block)
                     if state == 1 then
                         objectives_block[element_key] = objective
                         has_objective = true
-                    elseif first_candidat_objective == nil then
+                    elseif child.need_first_candidat_objective ~= false and first_candidat_objective == nil then
                         first_candidat_objective = objective
                     end
                     break
                 end
             end
+            ::continue::
         end
     end
 
@@ -588,7 +593,11 @@ function ModelCompute.prepareBlockElements(block)
         local block_products = {}
         local block_ingredients = {}
         -- prepare
-        for _, child in spairs(children, defines.sorters.block.sort) do
+        local sorter = defines.sorters.block.sort
+        if block.by_product == false then
+            sorter = defines.sorters.block.reverse
+        end
+        for _, child in spairs(children, sorter) do
             local is_block = Model.isBlock(child)
             local child_products = nil
             local child_ingredients = nil
@@ -602,50 +611,74 @@ function ModelCompute.prepareBlockElements(block)
                 child.spoilage = {products={}, ingredients={}}
             end
             -- prepare products
-            for _, lua_product in pairs(child_products) do
-                local product = Product(lua_product)
-                local product_key = product:getTableKey()
+            function prepare_product()
+                for _, lua_product in pairs(child_products) do
+                    local product = Product(lua_product)
+                    local product_key = product:getTableKey()
 
-                lua_product.spoil = product:getSpoil()
-                if child.spoilage ~= nil and lua_product.spoil ~= nil then
-                    local amount = product:getAmount()
-                    child.spoilage.products[product_key] = {spoil = lua_product.spoil, percent_spoiled=lua_product.percent_spoiled, amount = amount}
+                    lua_product.spoil = product:getSpoil()
+                    if child.spoilage ~= nil and lua_product.spoil ~= nil then
+                        local amount = product:getAmount()
+                        child.spoilage.products[product_key] = {spoil = lua_product.spoil, percent_spoiled=lua_product.percent_spoiled, amount = amount}
+                    end
+
+                    block_products[product_key] = {
+                        key = product_key,
+                        name = lua_product.name,
+                        type = lua_product.type,
+                        quality = lua_product.quality,
+                        amount = 0,
+                        spoil = product.spoil,
+                        temperature = lua_product.temperature,
+                        minimum_temperature = lua_product.minimum_temperature,
+                        maximum_temperature = lua_product.maximum_temperature
+                    }
+                    if not(block.by_product == false) then
+                        -- check if is linked child
+                        if block_ingredients[product_key] then
+                            child.need_candidat_objective = false
+                        end
+                    end
                 end
-
-                block_products[product_key] = {
-                    key = product_key,
-                    name = lua_product.name,
-                    type = lua_product.type,
-                    quality = lua_product.quality,
-                    amount = 0,
-                    spoil = product.spoil,
-                    temperature = lua_product.temperature,
-                    minimum_temperature = lua_product.minimum_temperature,
-                    maximum_temperature = lua_product.maximum_temperature
-                }
             end
             -- prepare ingredients
-            for _, lua_ingredient in pairs(child_ingredients) do
-                local product = Product(lua_ingredient)
-                local ingredient_key = product:getTableKey()
+            function prepare_ingredients()
+                for _, lua_ingredient in pairs(child_ingredients) do
+                    local product = Product(lua_ingredient)
+                    local ingredient_key = product:getTableKey()
 
-                lua_ingredient.spoil = product:getSpoil()
-                if child.spoilage ~= nil and lua_ingredient.spoil ~= nil then
-                    local amount = product:getAmount()
-                    child.spoilage.ingredients[ingredient_key] = {spoil = lua_ingredient.spoil, amount = amount}
+                    lua_ingredient.spoil = product:getSpoil()
+                    if child.spoilage ~= nil and lua_ingredient.spoil ~= nil then
+                        local amount = product:getAmount()
+                        child.spoilage.ingredients[ingredient_key] = {spoil = lua_ingredient.spoil, amount = amount}
+                    end
+
+                    block_ingredients[ingredient_key] = {
+                        key = ingredient_key,
+                        name = lua_ingredient.name,
+                        type = lua_ingredient.type,
+                        quality = lua_ingredient.quality,
+                        amount = 0,
+                        spoil = lua_ingredient.spoil,
+                        temperature = lua_ingredient.temperature,
+                        minimum_temperature = lua_ingredient.minimum_temperature,
+                        maximum_temperature = lua_ingredient.maximum_temperature
+                    }
+                    if block.by_product == false then
+                        -- check if is linked child
+                        if block_products[ingredient_key] then
+                            child.need_candidat_objective = false
+                        end
+                    end
                 end
-
-                block_ingredients[ingredient_key] = {
-                    key = ingredient_key,
-                    name = lua_ingredient.name,
-                    type = lua_ingredient.type,
-                    quality = lua_ingredient.quality,
-                    amount = 0,
-                    spoil = lua_ingredient.spoil,
-                    temperature = lua_ingredient.temperature,
-                    minimum_temperature = lua_ingredient.minimum_temperature,
-                    maximum_temperature = lua_ingredient.maximum_temperature
-                }
+            end
+            -- change order of process
+            if block.by_product == false then
+                prepare_ingredients()
+                prepare_product()
+            else
+                prepare_product()
+                prepare_ingredients()
             end
         end
 

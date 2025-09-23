@@ -1,12 +1,14 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.2.2
-Date: 2025-09-19
+Date: 2025-09-23
   Features:
     - Added quality probability tool
   Changes:
     - Removed rocket speed penalty because that build another rocket when waiting for the launch
     - Changed quality calculation to accept quality > 100%
     - Added Production lines menu preference to change the visible lines
+    - Added scroll to element for the block navigation
+    - Changed ingores first candidat objective if the child linked
   Bugfixes:
     - Fixed error when product line is empty
 ---------------------------------------------------------------------------------------------------

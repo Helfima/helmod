@@ -894,16 +894,15 @@ end
 ---@param current_block table
 function ProductionPanel:bluidNavigator(model, current_block)
 	local scroll_panel = self:getNavigatorPanel()
-	local last_element = nil
 
 	---bluid tree
 	if model.blocks ~= nil then
 		self:bluidRootLeaf(scroll_panel, model, current_block, 0)
 		local root_branch = GuiElement.add(scroll_panel, GuiFlowV())
 		root_branch.style.vertically_stretchable = false
-		self:bluidTree(root_branch, model, model.block_root, current_block)
-		if last_element ~= nil then
-			scroll_panel.scroll_to_element(last_element)
+		local scroll_to_element = self:bluidTree(root_branch, model, model.block_root, current_block)
+		if scroll_to_element ~= nil then
+			scroll_panel.scroll_to_element(scroll_to_element)
 		end
 	end
 end
@@ -918,6 +917,7 @@ local bar_thickness = 2
 ---@param parent_block BlockData
 ---@param current_block BlockData
 function ProductionPanel:bluidTree(parent, model, parent_block, current_block)
+	local scroll_to_element = nil
 	if parent_block ~= nil and parent_block.children ~= nil then
 		local blocks = {}
 		local sorter = defines.sorters.block.sort
@@ -985,17 +985,23 @@ function ProductionPanel:bluidTree(parent, model, parent_block, current_block)
 			-- header
 			local header = GuiElement.add(content, GuiFlowH("header"))
 
-			self:bluidLeaf(header, model, block, current_block, 0)
-
+			local scroll_to_element_next = self:bluidLeaf(header, model, block, current_block, 0)
+			if scroll_to_element_next ~= nil then
+				scroll_to_element = scroll_to_element_next
+			end
 			-- next
 			local next = GuiElement.add(content, GuiFlowV("next"))
 
 			if is_expanded then
-				self:bluidTree(next, model, block, current_block)
+				local scroll_to_element_next = self:bluidTree(next, model, block, current_block)
+				if scroll_to_element_next ~= nil then
+					scroll_to_element = scroll_to_element_next
+				end
 			end
 			index = index + 1
 		end
 	end
+	return scroll_to_element
 end
 
 -------------------------------------------------------------------------------
@@ -1006,6 +1012,7 @@ end
 ---@param current_block BlockData
 ---@param level number
 function ProductionPanel:bluidLeaf(tree_panel, model, block, current_block, level)
+	local scroll_to_element = nil
 	if block ~= nil then
 		local block_color = User.getThumbnailColor(defines.thumbnail_color.names.block_default)
 		local background = GuiElement.add(tree_panel, GuiFrame("block", block.id):style("helmod_frame_element_w30", "gray", 1))
@@ -1013,7 +1020,7 @@ function ProductionPanel:bluidLeaf(tree_panel, model, block, current_block, leve
 		background.style.horizontally_stretchable = false
 		local cell_tree = GuiElement.add(background, GuiTable("block", block.id):column(1):style("helmod_table_list"))
 		if current_block ~= nil and current_block.id == block.id then
-			--last_element = cell_tree
+			scroll_to_element = cell_tree
 			block_color = User.getThumbnailColor(defines.thumbnail_color.names.block_selected)
 		end
 		if block.name == nil then
@@ -1023,6 +1030,7 @@ function ProductionPanel:bluidLeaf(tree_panel, model, block, current_block, leve
 			cell_block.style.left_padding = 10 * level
 		end
 	end
+	return scroll_to_element
 end
 
 -------------------------------------------------------------------------------
