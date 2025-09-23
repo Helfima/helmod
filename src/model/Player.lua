@@ -2371,6 +2371,20 @@ function Player.getQualityPrototypes()
 end
 
 -------------------------------------------------------------------------------
+---Return quality prototypes
+---@return LuaQualityPrototype
+function Player.getQualityPrototypesWithoutHidden()
+    local qualities = Player.getQualityPrototypes()
+    local lua_qualities = {}
+    for key, lua_quality in pairs(qualities) do
+        if lua_quality.hidden == false  then
+            lua_qualities[key] = lua_quality
+        end
+    end
+    return lua_qualities
+end
+
+-------------------------------------------------------------------------------
 ---Return quality prototype
 ---@param name string
 ---@return LuaQualityPrototype

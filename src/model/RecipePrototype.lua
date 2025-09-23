@@ -375,29 +375,6 @@ function RecipePrototype:getProducts(factory)
     return raw_products
 end
 
----Compute quality of products
----@param quality_products table
----@param raw_product ProductData
----@param lua_quality LuaQualityPrototype
----@param quality_effect number
----@return number
-function RecipePrototype:getNextQualityProducts(quality_products, raw_product, lua_quality, quality_effect)
-    if lua_quality == nil then
-        return 0
-    end
-    local previous_probality = 0
-    local next_probability = lua_quality.next_probability
-    if next_probability > 0 and quality_effect > 0  then
-        previous_probality = self:getNextQualityProducts(quality_products, raw_product, lua_quality.next, quality_effect * next_probability)
-    end
-
-    local quality_product = Product(raw_product):clone()
-    quality_product.quality = lua_quality.name
-    quality_product.quality_probality = (1 - previous_probality) * math.min(1,quality_effect)
-    table.insert(quality_products, 1, quality_product)
-    return quality_product.quality_probality + previous_probality
-end
-
 -------------------------------------------------------------------------------
 ---Return products array of Prototype
 ---@param factory table
@@ -412,27 +389,36 @@ function RecipePrototype:getQualityProducts(factory, quality)
     if self.is_support_quality == false then
         quality = "normal"
     end
-    local quality_products = {}
     local lua_quality = Player.getQualityPrototype(quality)
     local quality_effect = 0 
     if factory ~= nil and factory.effects ~= nil then
         quality_effect = factory.effects.quality or 0
     end
-    local next_probability = lua_quality.next_probability
-    for _, raw_product in pairs(raw_products) do
-        if raw_product.type == "item" then
-            local previous_probality = 0
-            raw_product.quality = quality
-            raw_product.quality_probality = 1
-            if next_probability > 0 and quality_effect > 0  then
-                previous_probality = self:getNextQualityProducts(quality_products, raw_product, lua_quality.next, quality_effect)
+
+    if quality_effect > 0 then
+        local quality_products = {}
+        local probability_results = ModelCompute.computeQualityProbability(lua_quality, quality_effect)
+        if probability_results ~= nil then
+            for _, raw_product in pairs(raw_products) do
+                if raw_product.type == "item" then
+                    for key, probability_result in pairs(probability_results) do
+                        if key == 0 then
+                            raw_product.quality = probability_result.name
+                            raw_product.quality_probality = probability_result.probability
+                        else
+                            local quality_product = Product(raw_product):clone()
+                            quality_product.quality = probability_result.name
+                            quality_product.quality_probality = probability_result.probability
+                            table.insert(quality_products, quality_product)
+                        end
+                    end
+                end
             end
-            raw_product.quality_probality = 1 - previous_probality
         end
-    end
-    if #quality_products > 0 then
-        for _, quality_product in pairs(quality_products) do
-            table.insert(raw_products, quality_product)
+        if #quality_products > 0 then
+            for _, quality_product in pairs(quality_products) do
+                table.insert(raw_products, quality_product)
+            end
         end
     end
     return raw_products

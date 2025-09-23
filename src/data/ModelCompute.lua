@@ -1102,4 +1102,60 @@ function ModelCompute.computeResources(model)
     model.resources = resources
 end
 
+-------------------------------------------------------------------------------
+---Compute quality probality
+---@param lua_quality LuaQualityPrototype
+---@param quality_effect number
+---@return table
+function ModelCompute.computeQualityProbability(lua_quality, quality_effect)
+    if lua_quality == nil then
+        return nil
+    end
+    local results = {}
+    local next_probability = lua_quality.next_probability
+    local current_probability = 1
+    if next_probability > 0 and quality_effect > 0  then
+        local next_result = ModelCompute.computeNextQualityProbability(lua_quality.next, quality_effect)
+        if next_result ~= nil then
+            results = next_result
+            current_probability = 1 - quality_effect
+        end
+    end
+    if current_probability < 0 then
+        current_probability = 0
+    end
+    local result = {name = lua_quality.name, probability = current_probability}
+    table.insert(results, 0, result)
+    return results
+end
+
+-------------------------------------------------------------------------------
+---Compute quality probality
+---@param lua_quality LuaQualityPrototype
+---@param quality_effect number
+---@return table
+function ModelCompute.computeNextQualityProbability(lua_quality, quality_effect)
+    if lua_quality == nil then
+        return nil
+    end
+    local results = {}
+    local previous_probability = 0
+    local next_probability = lua_quality.next_probability
+    if next_probability > 0 and quality_effect > 0  then
+        local next_result = ModelCompute.computeNextQualityProbability(lua_quality.next, quality_effect * next_probability)
+        if next_result ~= nil then
+            results = next_result
+            for _, result in pairs(results) do
+                previous_probability = previous_probability + result.probability
+            end
+        end
+    end
+    if quality_effect > 1 then
+        quality_effect = 1
+    end
+    local result = {name = lua_quality.name, probability = quality_effect - previous_probability}
+    table.insert(results, 0, result)
+    return results
+end
+
 return ModelCompute
