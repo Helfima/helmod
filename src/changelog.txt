@@ -1,9 +1,12 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.2.2
 Date: 2025-09-19
+  Features:
+    - Added quality probability tool
   Changes:
     - Removed rocket speed penalty because that build another rocket when waiting for the launch
     - Changed quality calculation to accept quality > 100%
+    - Added Production lines menu preference to change the visible lines
   Bugfixes:
     - Fixed error when product line is empty
 ---------------------------------------------------------------------------------------------------

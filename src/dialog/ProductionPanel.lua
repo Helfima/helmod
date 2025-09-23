@@ -288,7 +288,10 @@ function ProductionPanel:updateIndexPanel(model)
 	index_panel.style.padding = 2
 	index_panel.clear()
 	local scroll_table = GuiElement.add(index_panel, GuiScroll("scroll_table"))
-	scroll_table.style.maximal_height = 2*40
+	local top_lines = User.getPreferenceSetting("ui_production_lines_menu")
+	if top_lines > 0 then
+		scroll_table.style.maximal_height = top_lines * 40
+	end
 	local table_index = GuiElement.add(scroll_table, GuiTable("table_index"):column(GuiElement.getIndexColumnNumber()):style("helmod_table_list"))
 	local button = GuiElement.add(table_index, GuiButton(self.classname, "new-model"):sprite("menu", defines.sprites.add_table.black, defines.sprites.add_table.black):style(defines.styles.button.menu_actived_green):tooltip({"helmod_button.add-production-line" }))
 	button.style.width = 36
@@ -301,8 +304,7 @@ function ProductionPanel:updateIndexPanel(model)
 			for _, imodel in spairs(models, sorter) do
 				local first_block = Model.getRootBlock(imodel)
 				i = i + 1
-                local element = first_block
-				local button = nil
+                local button = nil
 				-- sprite definition
 				local icons = GuiHelper.getModelIcons(imodel)
 
