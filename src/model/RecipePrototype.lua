@@ -399,9 +399,9 @@ function RecipePrototype:getQualityProducts(factory, quality)
         local quality_products = {}
         local probability_results = ModelCompute.computeQualityProbability(lua_quality, quality_effect)
         if probability_results ~= nil then
-            for _, raw_product in pairs(raw_products) do
-                if raw_product.type == "item" then
-                    for key, probability_result in pairs(probability_results) do
+            for key, probability_result in pairs(probability_results) do
+                for _, raw_product in pairs(raw_products) do
+                    if raw_product.type == "item" then
                         if key == 0 then
                             raw_product.quality = probability_result.name
                             raw_product.quality_probality = probability_result.probability
@@ -418,6 +418,12 @@ function RecipePrototype:getQualityProducts(factory, quality)
         if #quality_products > 0 then
             for _, quality_product in pairs(quality_products) do
                 table.insert(raw_products, quality_product)
+            end
+        end
+    else
+        for _, raw_product in pairs(raw_products) do
+            if raw_product.type == "item" then
+                raw_product.quality = lua_quality.name
             end
         end
     end
