@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.2.4
+Date: 2025-09-30
+  Bugfixes:
+    - Fixed first candidat objective stay false and break block objective
+    - Fixed beacon quality lost with copy/paste
+---------------------------------------------------------------------------------------------------
 Version: 2.2.3
 Date: 2025-09-24
   Bugfixes:

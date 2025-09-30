@@ -537,7 +537,7 @@ function ModelCompute.prepareBlockObjectives(block)
                     if state == 1 then
                         objectives_block[element_key] = objective
                         has_objective = true
-                    elseif child.need_first_candidat_objective ~= false and first_candidat_objective == nil then
+                    elseif child.need_first_candidat_objective == true and first_candidat_objective == nil then
                         first_candidat_objective = objective
                     end
                     break
@@ -567,7 +567,7 @@ function ModelCompute.prepareBlockObjectives(block)
                     if state == 1 then
                         objectives_block[element_key] = objective
                         has_objective = true
-                    elseif child.need_first_candidat_objective ~= false and first_candidat_objective == nil then
+                    elseif child.need_first_candidat_objective == true and first_candidat_objective == nil then
                         first_candidat_objective = objective
                     end
                     break
@@ -598,6 +598,8 @@ function ModelCompute.prepareBlockElements(block)
             sorter = defines.sorters.block.reverse
         end
         for _, child in spairs(children, sorter) do
+            -- necessary otherwise need_candidat_objective remains false
+            child.need_candidat_objective = true
             local is_block = Model.isBlock(child)
             local child_products = nil
             local child_ingredients = nil
@@ -611,7 +613,7 @@ function ModelCompute.prepareBlockElements(block)
                 child.spoilage = {products={}, ingredients={}}
             end
             -- prepare products
-            function prepare_product()
+            local function prepare_product()
                 for _, lua_product in pairs(child_products) do
                     local product = Product(lua_product)
                     local product_key = product:getTableKey()
@@ -642,7 +644,7 @@ function ModelCompute.prepareBlockElements(block)
                 end
             end
             -- prepare ingredients
-            function prepare_ingredients()
+            local function prepare_ingredients()
                 for _, lua_ingredient in pairs(child_ingredients) do
                     local product = Product(lua_ingredient)
                     local ingredient_key = product:getTableKey()

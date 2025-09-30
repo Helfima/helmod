@@ -808,7 +808,7 @@ end
 ---@return FactoryData
 function ModelBuilder.copyBeacon(beacon)
     local new_beacon = Model.newBeacon(beacon.name)
-    new_beacon.quality = new_beacon.quality
+    new_beacon.quality = beacon.quality
     new_beacon.combo = beacon.combo
     new_beacon.per_factory = beacon.per_factory
     new_beacon.per_factory_constant = beacon.per_factory_constant
