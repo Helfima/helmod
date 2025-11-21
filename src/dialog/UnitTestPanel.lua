@@ -91,6 +91,13 @@ function UnitTestPanel:getModulesTab()
 end
 
 -------------------------------------------------------------------------------
+---Get or create remote API tab panel
+---@return LuaGuiElement
+function UnitTestPanel:getRemoteAPITab()
+    return self:getTab("remote-api-tab-panel", { "helmod_unittest.remote-api-title" })
+end
+
+-------------------------------------------------------------------------------
 ---On event
 ---@param event LuaEvent
 function UnitTestPanel:onEvent(event)
@@ -121,6 +128,43 @@ function UnitTestPanel:onUpdate(event)
     self:updateEnergy()
     self:updateSprite()
     self:updateModules()
+    self:updateRemoteAPI()
+end
+
+-------------------------------------------------------------------------------
+---Update menu
+function UnitTestPanel:updateRemoteAPI()
+    local remote_api_tab = self:getRemoteAPITab()
+    local data = self:dataRemoteAPI()
+    local root_branch = GuiElement.add(remote_api_tab, GuiFlowV())
+    root_branch.style.vertically_stretchable = false
+    local branch = GuiTree("expand-source"):caption("first model..."):source(data):font_color(defines.color.blue.deep_sky_blue):expanded(true)
+    local treeview = GuiElement.add(root_branch, branch)
+end
+
+function UnitTestPanel:dataRemoteAPI()
+    local data = remote.call("helmod_interface", "get_models")
+    local model = first(data)
+    self:loopDataRemoteAPI(model)
+    return model
+end
+
+---Traverse model to append products and ingredients on each recipe
+---@param data ModelData | BlokcData | RecipeData
+function UnitTestPanel:loopDataRemoteAPI(data)
+    if data.class == "Model" then
+        for _, child in pairs(data.block_root.children) do
+            self:loopDataRemoteAPI(child)
+        end
+    elseif data.class == "Block" then
+        for _, child in pairs(data.children) do
+            self:loopDataRemoteAPI(child)
+        end
+    elseif data.class == "Recipe" then
+        local recipe = remote.call("helmod_interface", "get_recipe", data)
+        data.products = recipe.products
+        data.ingredients = recipe.ingredients
+    end
 end
 
 -------------------------------------------------------------------------------

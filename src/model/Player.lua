@@ -1351,23 +1351,10 @@ end
 function Player.getModuleEffects(module)
     local module_effects = { speed = 0, productivity = 0, consumption = 0, pollution = 0, quality = 0 }
     if module == nil then return module_effects end
-    local multiplier = 1
-    -- search quality
-    local quality = Player.getQualityPrototype(module.quality)
-    if quality ~= nil then
-        multiplier = multiplier + (quality.level * 0.3)
-    end
     -- search module
-    local module = Player.getItemPrototype(module.name)
-    for effect_name, effect_value in pairs(module.module_effects) do
+    local module = ItemPrototype(module)
+    for effect_name, effect_value in pairs(module:getModuleEffects()) do
         local final_value = effect_value
-        if Player.checkPositiveEffect(effect_name, effect_value) then
-            -- quality has positive effect
-            final_value = effect_value * multiplier
-        else
-            -- quality has no effect
-            final_value = effect_value
-        end
         -- arround the % value
         if final_value >= 0  then
             final_value = math.floor(final_value*100 + 0.05)/100

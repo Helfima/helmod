@@ -255,7 +255,9 @@ function SolverLinkedMatrix:solve_block(block, parameters, debug)
                     child.pivot = nil       
                 end
             end
-            if parameters ~= nil and parameters.recipe_count > 0 then
+            if is_block and block.by_factory == true then
+                child.count = 1
+            elseif parameters ~= nil and parameters.recipe_count > 0 then
                 child.count = parameters.recipe_count
                 child.production = parameters.recipe_production
             else
@@ -435,6 +437,8 @@ function SolverLinkedMatrix:get_block_matrix(block, parameters)
                 child_info.type = child.type
                 child_info.tooltip = child.name .. "\nBlock"
 
+                child_info.factory_count = 1
+
                 child_info.products = child.products
                 child_info.ingredients = child.ingredients
                 child_info.consumer = child.consumer
@@ -449,7 +453,7 @@ function SolverLinkedMatrix:get_block_matrix(block, parameters)
                         child_linked_info.type = child.type
                         child_linked_info.tooltip = child.name .. "\nLinked Block"
                         child_linked_info.recipe_energy = 1
-                        child_linked_info.factory_count = 0
+                        child_linked_info.factory_count = 1
                         child_linked_info.factory_speed = 1
                         child_linked_info.consumer = child.consumer
 
@@ -530,6 +534,7 @@ function SolverLinkedMatrix:add_matrix_row(matrix, child, child_info, is_block, 
     if child.contraints ~= nil then
         rowParameters.contraints = table.deepcopy(child.contraints)
     end
+    rowParameters.name = child_info.name
     rowParameters.factory_count = child_info.factory_count
     rowParameters.factory_speed = child_info.factory_speed
     rowParameters.recipe_count = 0

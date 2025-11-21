@@ -384,9 +384,9 @@ function GuiElement.infoTemperature(parent, element, style)
 end
 
 function GuiElement.rgbColorTag(color)
-  local r = math.floor(color.r * 256)
-  local g = math.floor(color.g * 256)
-  local b = math.floor(color.b * 256)
+  local r = math.floor(color.r * 255)
+  local g = math.floor(color.g * 255)
+  local b = math.floor(color.b * 255)
   return string.format("[color=%s,%s,%s]", r, g, b)
 end
 

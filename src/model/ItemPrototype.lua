@@ -17,7 +17,8 @@ end)
 ---@return table
 function ItemPrototype:getModuleEffects()
   if self.lua_prototype == nil then return {} end
-  return self.lua_prototype.module_effects
+  local quality = self.quality or "normal"
+  return self.lua_prototype.get_module_effects(quality)
 end
 
 -------------------------------------------------------------------------------

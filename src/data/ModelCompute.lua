@@ -875,10 +875,12 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
     end
     ---effet module beacon
     if recipe.beacons ~= nil and effect_receiver.uses_beacon_effects then
-        local profile_count = 0
+        local profile_total_count = 0
+        local profile_type_count = {}
         for _, beacon in pairs(recipe.beacons) do
             if beacon.modules ~= nil then
-                profile_count = profile_count + beacon.combo
+                profile_total_count = profile_total_count + beacon.combo
+                profile_type_count[beacon.name] = (profile_type_count[beacon.name] or 0) + beacon.combo
             end
         end
         for _, beacon in pairs(recipe.beacons) do
@@ -888,7 +890,13 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
                     local amount = module.amount
                     local prototype_beacon = EntityPrototype(beacon);
                     local distribution_effectivity = prototype_beacon:getDistributionEffectivity()
-                    local profile_effectivity = prototype_beacon:getProfileEffectivity(profile_count)
+                    local profile_effectivity = 1
+                    if prototype_beacon:getProfileCount() == "same_type" then
+                        local beacon_count = profile_type_count[beacon.name] or profile_total_count
+                        profile_effectivity = prototype_beacon:getProfileEffectivity(beacon_count)
+                    else
+                       profile_effectivity = prototype_beacon:getProfileEffectivity(profile_total_count)
+                    end 
 
                     factory.effects.speed = factory.effects.speed + amount * module_effects.speed * distribution_effectivity * profile_effectivity * beacon.combo
                     factory.effects.productivity = factory.effects.productivity + amount * module_effects.productivity * distribution_effectivity * profile_effectivity * beacon.combo

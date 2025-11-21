@@ -907,6 +907,13 @@ function RecipeEdition:updateFactoryInfo(event)
         GuiElement.add(cell_pollution, GuiLabel("label-pollution"):caption({ "helmod_common.pollution" }))
         self:addAlert(cell_pollution, factory, "pollution")
         GuiElement.add(input_panel, GuiLabel("value-pollution"):caption({ "helmod_si.per-minute", Format.formatNumberElement((factory.pollution or 0) * 60) }))
+
+        -- if factory_prototype:getType() == "agricultural-tower" then
+        --     GuiElement.add(input_panel, GuiLabel("label-growable"):caption("growable"))
+        --     local growable_value = factory_prototype:getGrowableArea()
+        --     GuiElement.add(input_panel, GuiTextField(self.classname, "factory-update-growable", model.id, block.id, recipe.id):text(growable_value):style("helmod_textfield"))
+        -- end
+
     end
 end
 

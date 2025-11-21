@@ -1,4 +1,20 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.2.6
+Date: 2025-11-21
+  Features:
+    - Added remote API, helmod_interface : get_models, get_recipe(recipe)
+  Bugfixes:
+    - Fixed beacon counter used by effect receiver, "total" or "same_type" (beacon profile)
+---------------------------------------------------------------------------------------------------
+Version: 2.2.5
+Date: 2025-10-15
+  Changes:
+    - Changed required factorio version, base >= 2.0.67
+  Bugfixes:
+    - Fixed quality effect of modules
+    - Fixed color convertion to int > 255 (for tooltip)
+    - Fixed error amount of block if parent mod is "Computing by factory"
+---------------------------------------------------------------------------------------------------
 Version: 2.2.4
 Date: 2025-09-30
   Bugfixes:

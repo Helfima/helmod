@@ -112,7 +112,7 @@
 ---@field key string
 ---@field value number
 
----@class BlockData
+---@class BlokcData
 ---@field class string
 ---@field id string
 ---@field index number

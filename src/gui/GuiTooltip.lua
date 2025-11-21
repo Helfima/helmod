@@ -773,7 +773,7 @@ function GuiTooltipFactory.AppendFactory(tooltip, element)
 		local index = 0
 		for _, module_priority in pairs(element.module_priority) do
 			local type = "item"
-			local module_prototype = ItemPrototype(module_priority.name)
+			local module_prototype = ItemPrototype(module_priority)
 			local module_priority_label = module_prototype:getLocalisedName()
 			local amount = module_priority.amount or 0
 

@@ -329,6 +329,7 @@ function EntityPrototype:getDistributionEffectivityBonusPerQualityLevel()
     return self.lua_prototype.distribution_effectivity_bonus_per_quality_level or 0
   end
 end
+
 -------------------------------------------------------------------------------
 ---Return profile effectivity
 ---@return number --default 0
@@ -340,6 +341,16 @@ function EntityPrototype:getProfileEffectivity(profile_count)
     return self.lua_prototype.profile[profile_count] or 1
   end
   return 1
+end
+
+-------------------------------------------------------------------------------
+---Return profile count, "total" or "same_type"
+---@return string "total"
+function EntityPrototype:getProfileCount()
+  if self.lua_prototype ~= nil then
+    return self.lua_prototype.beacon_counter or "total"
+  end
+  return "total"
 end
 
 -------------------------------------------------------------------------------
@@ -919,6 +930,51 @@ function EntityPrototype:getPumpingSpeed()
 end
 
 -------------------------------------------------------------------------------
+---Return growth area
+---@return number --default 0
+function EntityPrototype:getGrowthArea()
+  if self.lua_prototype ~= nil and self.lua_prototype.type == "agricultural-tower" then
+    local growth_grid_tile_size = self.lua_prototype.growth_grid_tile_size or 3
+    local growth_area = growth_grid_tile_size * growth_grid_tile_size
+    return growth_area
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
+---Return growth size
+---@return number --default 0
+function EntityPrototype:getGrowthGridSize()
+  if self.lua_prototype ~= nil and self.lua_prototype.type == "agricultural-tower" then
+    local growth_grid_tile_size = self.lua_prototype.growth_grid_tile_size or 3
+    local growth_area = growth_grid_tile_size * growth_grid_tile_size
+    return growth_area
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
+---Return growing area
+---@return number --default 0
+function EntityPrototype:getGrowableArea()
+  if self.lua_prototype ~= nil and self.lua_prototype.type == "agricultural-tower" then
+    local growth_area = self:getGrowthArea()
+    if self.factory.growable_area ~= nil then
+      return self.factory.growable_area
+    end
+    local tile_width = self.lua_prototype.tile_width or 3
+    local tile_height = self.lua_prototype.tile_height or 3
+    local machine_area = tile_width*tile_height
+    local logistic_area = 9 -- area necessary for input/output and power
+    local max_grid_size = 7 * 7
+    local max_area = growth_area * max_grid_size
+    local growable_area = max_area - machine_area - logistic_area
+    return growable_area
+  end
+  return 0
+end
+
+-------------------------------------------------------------------------------
 ---Return speed factory
 ---@return number
 function EntityPrototype:speedFactory()
@@ -945,15 +1001,8 @@ function EntityPrototype:speedFactory()
     local researching_speed = self:getResearchingSpeed()
     return researching_speed
   elseif self.lua_prototype.type == "agricultural-tower" then
-    local growth_grid_tile_size = self.lua_prototype.growth_grid_tile_size or 3
-    local tile_width = self.lua_prototype.tile_width or 3
-    local tile_height = self.lua_prototype.tile_height or 3
-    local machine_area = tile_width*tile_height
-    local logistic_area = 9 -- area necessary for input/output and power
-    local max_grid_tile_size = 21
-    local max_area = max_grid_tile_size * max_grid_tile_size
-    local growing_area = growth_grid_tile_size * growth_grid_tile_size
-    local growable_area = max_area - machine_area - logistic_area
+    local growing_area = self:getGrowthArea()
+    local growable_area = self:getGrowableArea()
     local speed = growable_area/growing_area
     return speed
   else
