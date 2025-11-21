@@ -143,25 +143,42 @@ end
 -------------------------------------------------------------------------------
 ---Create factories summary
 ---@param block BlockData
-function ModelCompute.createSummaryFactory(block, factory)
-    ModelCompute.createSummaryMachine(block, "factories", factory)
+---@param factory table
+---@param from_child boolean
+function ModelCompute.createSummaryFactory(block, factory, from_child)
+    ModelCompute.createSummaryMachine(block, "summary_global", "factories", factory)
+    if from_child == false then
+        ModelCompute.createSummaryMachine(block, "summary", "factories", factory)
+    end
 end
 
 -------------------------------------------------------------------------------
 ---Create beacons summary
 ---@param block BlockData
-function ModelCompute.createSummaryBeacon(block, beacon)
+---@param beacon table
+---@param from_child boolean
+function ModelCompute.createSummaryBeacon(block, beacon, from_child)
     -- same section of factories
-    ModelCompute.createSummaryMachine(block, "factories", beacon)
+    ModelCompute.createSummaryMachine(block, "summary_global", "factories", beacon)
+    if from_child == false then
+        ModelCompute.createSummaryMachine(block, "summary", "factories", beacon)
+    end
 end
 
 -------------------------------------------------------------------------------
 ---Finalize input block
 ---@param block BlockData
-function ModelCompute.createSummaryMachine(block, section, factory)
+---@param summary_name string
+---@param section string
+---@param factory table
+function ModelCompute.createSummaryMachine(block, summary_name, section, factory)
     ---summary factory
     local factory_key = Model.getQualityElementKey(factory)
-    local summary_factory = block.summary[section][factory_key]
+    if block[summary_name] == nil then
+        block[summary_name] = {}
+    end
+    local summary = block[summary_name]
+    local summary_factory = summary[section][factory_key]
     if summary_factory == nil then
         summary_factory = {
             name = factory.name,
@@ -171,7 +188,7 @@ function ModelCompute.createSummaryMachine(block, section, factory)
             count_limit = 0,
             count_deep = 0
         }
-        block.summary[section][factory_key] = summary_factory
+        summary[section][factory_key] = summary_factory
     end
     
     local factory_ceil = math.ceil(factory.count)
@@ -180,14 +197,14 @@ function ModelCompute.createSummaryMachine(block, section, factory)
     summary_factory.count_limit = summary_factory.count
     summary_factory.count_deep = summary_factory.count * block.count_deep
 
-    block.summary.building = block.summary.building + factory_ceil
-    block.summary.building_limit = block.summary.building
-    block.summary.building_deep = block.summary.building * block.count_deep
+    summary.building = summary.building + factory_ceil
+    summary.building_limit = summary.building
+    summary.building_deep = summary.building * block.count_deep
     ---summary factory module
     if factory.modules ~= nil then
         for _, module in pairs(factory.modules) do
             local module_key = Model.getQualityElementKey(module)
-            local summary_module = block.summary.modules[module_key]
+            local summary_module = summary.modules[module_key]
             if summary_module == nil then
                 summary_module = {
                     name = module.name,
@@ -197,7 +214,7 @@ function ModelCompute.createSummaryMachine(block, section, factory)
                     count_limit = 0,
                     count_deep = 0
                 }
-                block.summary.modules[module_key] = summary_module
+                summary.modules[module_key] = summary_module
             end
             summary_module.count = summary_module.count + module.amount * factory_ceil
             summary_module.count_limit = summary_module.count
@@ -231,6 +248,7 @@ function ModelCompute.finalizeBlock(block, factor)
     block.pollution_limit = 0
     block.pollution_deep = 0
     block.summary = { building = 0, building_limit = 0, building_deep = 0, factories = {}, beacons = {}, modules = {} }
+    block.summary_global = { building = 0, building_limit = 0, building_deep = 0, factories = {}, beacons = {}, modules = {} }
     
     block.count_deep = block.count * factor
     local children = block.children
@@ -257,14 +275,14 @@ function ModelCompute.finalizeBlock(block, factor)
                 block.pollution_limit = block.pollution
                 block.pollution_deep = block.pollution_deep + child.pollution_deep
 
-                for _, factory in pairs(child.summary.factories) do
-                    ModelCompute.createSummaryFactory(block, factory)
+                for _, factory in pairs(child.summary_global.factories) do
+                    ModelCompute.createSummaryFactory(block, factory, true)
                 end
-                for _, beacon in pairs(child.summary.beacons) do
-                    ModelCompute.createSummaryBeacon(block, beacon)
+                for _, beacon in pairs(child.summary_global.beacons) do
+                    ModelCompute.createSummaryBeacon(block, beacon, true)
                 end
-                for module_key, module in pairs(child.summary.modules) do
-                    local summary_module = block.summary.modules[module_key]
+                for module_key, module in pairs(child.summary_global.modules) do
+                    local summary_module = block.summary_global.modules[module_key]
                     if summary_module == nil then
                         summary_module = {
                             name = module.name,
@@ -274,7 +292,7 @@ function ModelCompute.finalizeBlock(block, factor)
                             count_limit = 0,
                             count_deep = 0
                         }
-                        block.summary.modules[module_key] = summary_module
+                        block.summary_global.modules[module_key] = summary_module
                     end
                     summary_module.count = summary_module.count + module.count
                     summary_module.count_limit = summary_module.count
@@ -305,7 +323,7 @@ function ModelCompute.finalizeBlock(block, factor)
                     recipe.factory.count_limit = recipe.factory.count
                     recipe.factory.count_deep = recipe.factory.count * block.count_deep
 
-                    ModelCompute.createSummaryFactory(block, recipe.factory)
+                    ModelCompute.createSummaryFactory(block, recipe.factory, false)
                 end
 
                 if recipe.beacons ~= nil then
@@ -322,7 +340,7 @@ function ModelCompute.finalizeBlock(block, factor)
                         beacon.count_limit = beacon.count
                         beacon.count_deep = beacon.count * block.count_deep
 
-                        ModelCompute.createSummaryBeacon(block, beacon)
+                        ModelCompute.createSummaryBeacon(block, beacon, false)
                     end
                 end
                 if recipe.energy_total == nil then recipe.energy_total = 0 end
@@ -391,14 +409,14 @@ function ModelCompute.finalizeBlock(block, factor)
             block.count_limit = ratio_limit
             block.power_limit = block.power * ratio_limit
             block.pollution_limit = block.pollution * ratio_limit
-            block.summary.building_limit =  block.summary.building * ratio_limit
-            for _, factory in pairs(block.summary.factories) do
+            block.summary_global.building_limit =  block.summary_global.building * ratio_limit
+            for _, factory in pairs(block.summary_global.factories) do
                 factory.count_limit = factory.count * ratio_limit
             end
-            for _, beacon in pairs(block.summary.beacons) do
+            for _, beacon in pairs(block.summary_global.beacons) do
                 beacon.count_limit = beacon.count * ratio_limit
             end
-            for _, module in pairs(block.summary.modules) do
+            for _, module in pairs(block.summary_global.modules) do
                 module.count_limit = module.count * ratio_limit
             end
 
@@ -483,10 +501,17 @@ function ModelCompute.prepareBlockObjectives(block)
     end
     local objectives_size = table.size(objectives_block)
     block.has_input = objectives_size > 0
+
+    local first_candidat_objective = nil
+    local has_objective = false
     -- if empty objectives create from the children
     if objectives_size == 0 then
         local children = block.children
         for _, child in spairs(children, defines.sorters.block.sort) do
+            if child.need_candidat_objective == false then
+                -- skip candidat objective because the child linked
+                goto continue
+            end
             local is_block = Model.isBlock(child)
             if is_block then
                 local child_elements = nil
@@ -504,12 +529,16 @@ function ModelCompute.prepareBlockObjectives(block)
                     if block_elements[element_key] ~= nil then
                         state = block_elements[element_key].state
                     end
+
+                    local count = lua_product.amount
+                    local objective = {}
+                    objective.key = element_key
+                    objective.value = count * factor
                     if state == 1 then
-                        local count = lua_product.amount
-                        local objective = {}
-                        objective.key = element_key
-                        objective.value = count * factor
                         objectives_block[element_key] = objective
+                        has_objective = true
+                    elseif child.need_first_candidat_objective == true and first_candidat_objective == nil then
+                        first_candidat_objective = objective
                     end
                     break
                 end
@@ -530,18 +559,28 @@ function ModelCompute.prepareBlockObjectives(block)
                     if block_elements[element_key] ~= nil then
                         state = block_elements[element_key].state
                     end
+
+                    local count = product:getAmount()
+                    local objective = {}
+                    objective.key = element_key
+                    objective.value = count * factor
                     if state == 1 then
-                        local count = product:getAmount()
-                        local objective = {}
-                        objective.key = element_key
-                        objective.value = count * factor
                         objectives_block[element_key] = objective
+                        has_objective = true
+                    elseif child.need_first_candidat_objective == true and first_candidat_objective == nil then
+                        first_candidat_objective = objective
                     end
                     break
                 end
             end
+            ::continue::
         end
     end
+
+    if has_objective == false and first_candidat_objective ~= nil then
+        objectives_block[first_candidat_objective.key] = first_candidat_objective
+    end
+
     block.objectives = objectives_block
 end
 
@@ -554,7 +593,13 @@ function ModelCompute.prepareBlockElements(block)
         local block_products = {}
         local block_ingredients = {}
         -- prepare
-        for _, child in spairs(children, defines.sorters.block.sort) do
+        local sorter = defines.sorters.block.sort
+        if block.by_product == false then
+            sorter = defines.sorters.block.reverse
+        end
+        for _, child in spairs(children, sorter) do
+            -- necessary otherwise need_candidat_objective remains false
+            child.need_candidat_objective = true
             local is_block = Model.isBlock(child)
             local child_products = nil
             local child_ingredients = nil
@@ -568,50 +613,74 @@ function ModelCompute.prepareBlockElements(block)
                 child.spoilage = {products={}, ingredients={}}
             end
             -- prepare products
-            for _, lua_product in pairs(child_products) do
-                local product = Product(lua_product)
-                local product_key = product:getTableKey()
+            local function prepare_product()
+                for _, lua_product in pairs(child_products) do
+                    local product = Product(lua_product)
+                    local product_key = product:getTableKey()
 
-                lua_product.spoil = product:getSpoil()
-                if child.spoilage ~= nil and lua_product.spoil ~= nil then
-                    local amount = product:getAmount()
-                    child.spoilage.products[product_key] = {spoil = lua_product.spoil, percent_spoiled=lua_product.percent_spoiled, amount = amount}
+                    lua_product.spoil = product:getSpoil()
+                    if child.spoilage ~= nil and lua_product.spoil ~= nil then
+                        local amount = product:getAmount()
+                        child.spoilage.products[product_key] = {spoil = lua_product.spoil, percent_spoiled=lua_product.percent_spoiled, amount = amount}
+                    end
+
+                    block_products[product_key] = {
+                        key = product_key,
+                        name = lua_product.name,
+                        type = lua_product.type,
+                        quality = lua_product.quality,
+                        amount = 0,
+                        spoil = product.spoil,
+                        temperature = lua_product.temperature,
+                        minimum_temperature = lua_product.minimum_temperature,
+                        maximum_temperature = lua_product.maximum_temperature
+                    }
+                    if not(block.by_product == false) then
+                        -- check if is linked child
+                        if block_ingredients[product_key] then
+                            child.need_candidat_objective = false
+                        end
+                    end
                 end
-
-                block_products[product_key] = {
-                    key = product_key,
-                    name = lua_product.name,
-                    type = lua_product.type,
-                    quality = lua_product.quality,
-                    amount = 0,
-                    spoil = product.spoil,
-                    temperature = lua_product.temperature,
-                    minimum_temperature = lua_product.minimum_temperature,
-                    maximum_temperature = lua_product.maximum_temperature
-                }
             end
             -- prepare ingredients
-            for _, lua_ingredient in pairs(child_ingredients) do
-                local product = Product(lua_ingredient)
-                local ingredient_key = product:getTableKey()
+            local function prepare_ingredients()
+                for _, lua_ingredient in pairs(child_ingredients) do
+                    local product = Product(lua_ingredient)
+                    local ingredient_key = product:getTableKey()
 
-                lua_ingredient.spoil = product:getSpoil()
-                if child.spoilage ~= nil and lua_ingredient.spoil ~= nil then
-                    local amount = product:getAmount()
-                    child.spoilage.ingredients[ingredient_key] = {spoil = lua_ingredient.spoil, amount = amount}
+                    lua_ingredient.spoil = product:getSpoil()
+                    if child.spoilage ~= nil and lua_ingredient.spoil ~= nil then
+                        local amount = product:getAmount()
+                        child.spoilage.ingredients[ingredient_key] = {spoil = lua_ingredient.spoil, amount = amount}
+                    end
+
+                    block_ingredients[ingredient_key] = {
+                        key = ingredient_key,
+                        name = lua_ingredient.name,
+                        type = lua_ingredient.type,
+                        quality = lua_ingredient.quality,
+                        amount = 0,
+                        spoil = lua_ingredient.spoil,
+                        temperature = lua_ingredient.temperature,
+                        minimum_temperature = lua_ingredient.minimum_temperature,
+                        maximum_temperature = lua_ingredient.maximum_temperature
+                    }
+                    if block.by_product == false then
+                        -- check if is linked child
+                        if block_products[ingredient_key] then
+                            child.need_candidat_objective = false
+                        end
+                    end
                 end
-
-                block_ingredients[ingredient_key] = {
-                    key = ingredient_key,
-                    name = lua_ingredient.name,
-                    type = lua_ingredient.type,
-                    quality = lua_ingredient.quality,
-                    amount = 0,
-                    spoil = lua_ingredient.spoil,
-                    temperature = lua_ingredient.temperature,
-                    minimum_temperature = lua_ingredient.minimum_temperature,
-                    maximum_temperature = lua_ingredient.maximum_temperature
-                }
+            end
+            -- change order of process
+            if block.by_product == false then
+                prepare_ingredients()
+                prepare_product()
+            else
+                prepare_product()
+                prepare_ingredients()
             end
         end
 
@@ -806,10 +875,12 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
     end
     ---effet module beacon
     if recipe.beacons ~= nil and effect_receiver.uses_beacon_effects then
-        local profile_count = 0
+        local profile_total_count = 0
+        local profile_type_count = {}
         for _, beacon in pairs(recipe.beacons) do
             if beacon.modules ~= nil then
-                profile_count = profile_count + beacon.combo
+                profile_total_count = profile_total_count + beacon.combo
+                profile_type_count[beacon.name] = (profile_type_count[beacon.name] or 0) + beacon.combo
             end
         end
         for _, beacon in pairs(recipe.beacons) do
@@ -819,7 +890,13 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
                     local amount = module.amount
                     local prototype_beacon = EntityPrototype(beacon);
                     local distribution_effectivity = prototype_beacon:getDistributionEffectivity()
-                    local profile_effectivity = prototype_beacon:getProfileEffectivity(profile_count)
+                    local profile_effectivity = 1
+                    if prototype_beacon:getProfileCount() == "same_type" then
+                        local beacon_count = profile_type_count[beacon.name] or profile_total_count
+                        profile_effectivity = prototype_beacon:getProfileEffectivity(beacon_count)
+                    else
+                       profile_effectivity = prototype_beacon:getProfileEffectivity(profile_total_count)
+                    end 
 
                     factory.effects.speed = factory.effects.speed + amount * module_effects.speed * distribution_effectivity * profile_effectivity * beacon.combo
                     factory.effects.productivity = factory.effects.productivity + amount * module_effects.productivity * distribution_effectivity * profile_effectivity * beacon.combo
@@ -906,11 +983,11 @@ function ModelCompute.computeFactory(recipe)
     recipe.time = recipe_prototype:getEnergy(recipe.factory)
 
     ---effet speed
-    recipe.factory.speed_total = factory_prototype:speedFactory(recipe) * (1 + recipe.factory.effects.speed)
-    if recipe.type == "rocket" then
-        local speed_penalty = recipe_prototype:getRocketPenalty(recipe.factory)
-        recipe.factory.speed_total = recipe.factory.speed_total * speed_penalty
-    end
+    recipe.factory.speed_total = factory_prototype:speedFactory() * (1 + recipe.factory.effects.speed)
+    -- if recipe.type == "rocket" then
+    --     local speed_penalty = recipe_prototype:getRocketPenalty(recipe.factory)
+    --     recipe.factory.speed_total = recipe.factory.speed_total * speed_penalty
+    -- end
     recipe.factory.speed = recipe.factory.speed_total
 
     ---effet consumption
@@ -968,7 +1045,7 @@ function ModelCompute.computeEnergyFactory(recipe)
     local factory_prototype = EntityPrototype(recipe.factory)
     local recipe_energy = recipe_prototype:getEnergy(recipe.factory)
     ---effet speed
-    recipe.factory.speed = factory_prototype:speedFactory(recipe) * (1 + recipe.factory.effects.speed)
+    recipe.factory.speed = factory_prototype:getSpeedModifier() * (1 + recipe.factory.effects.speed)
     ---cap speed creation maximum de 1 cycle par tick
     ---seulement sur les recipes normaux
     if recipe.type == "recipe" and recipe_energy / recipe.factory.speed < 1 / 60 then
@@ -1066,6 +1143,62 @@ function ModelCompute.computeResources(model)
         end
     end
     model.resources = resources
+end
+
+-------------------------------------------------------------------------------
+---Compute quality probality
+---@param lua_quality LuaQualityPrototype
+---@param quality_effect number
+---@return table
+function ModelCompute.computeQualityProbability(lua_quality, quality_effect)
+    if lua_quality == nil then
+        return nil
+    end
+    local results = {}
+    local next_probability = lua_quality.next_probability
+    local current_probability = 1
+    if next_probability > 0 and quality_effect > 0  then
+        local next_result = ModelCompute.computeNextQualityProbability(lua_quality.next, quality_effect)
+        if next_result ~= nil then
+            results = next_result
+            current_probability = 1 - quality_effect
+        end
+    end
+    if current_probability < 0 then
+        current_probability = 0
+    end
+    local result = {name = lua_quality.name, probability = current_probability}
+    table.insert(results, 0, result)
+    return results
+end
+
+-------------------------------------------------------------------------------
+---Compute quality probality
+---@param lua_quality LuaQualityPrototype
+---@param quality_effect number
+---@return table
+function ModelCompute.computeNextQualityProbability(lua_quality, quality_effect)
+    if lua_quality == nil then
+        return nil
+    end
+    local results = {}
+    local previous_probability = 0
+    local next_probability = lua_quality.next_probability
+    if next_probability > 0 and quality_effect > 0  then
+        local next_result = ModelCompute.computeNextQualityProbability(lua_quality.next, quality_effect * next_probability)
+        if next_result ~= nil then
+            results = next_result
+            for _, result in pairs(results) do
+                previous_probability = previous_probability + result.probability
+            end
+        end
+    end
+    if quality_effect > 1 then
+        quality_effect = 1
+    end
+    local result = {name = lua_quality.name, probability = quality_effect - previous_probability}
+    table.insert(results, 0, result)
+    return results
 end
 
 return ModelCompute

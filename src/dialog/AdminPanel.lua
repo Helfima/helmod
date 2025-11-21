@@ -189,6 +189,7 @@ function AdminPanel:updateConversion()
 
   local tree_view = GuiElement.add(table_panel, GuiScroll("tree_view"))
   tree_view.style.height = 600
+  tree_view.style.width = 400
   local root_branch = GuiElement.add(tree_view, GuiFlowV("content"))
   root_branch.style.vertically_stretchable = false
 end
@@ -204,9 +205,9 @@ function AdminPanel:updateGui()
   table_panel.vertical_centering = false
   table_panel.style.horizontal_spacing = 5
 
-  self:addCellHeader(table_panel, "location", {"",helmod_tag.font.default_bold, {"helmod_common.location"}, helmod_tag.font.close})
-  self:addCellHeader(table_panel, "_name", {"",helmod_tag.font.default_bold, {"helmod_result-panel.col-header-name"}, helmod_tag.font.close})
-  self:addCellHeader(table_panel, "mod", {"",helmod_tag.font.default_bold, {"helmod_common.mod"}, helmod_tag.font.close})
+  self:addCellHeader(table_panel, "location", {"",defines.mod.tags.font.default_bold, {"helmod_common.location"}, defines.mod.tags.font.close})
+  self:addCellHeader(table_panel, "_name", {"",defines.mod.tags.font.default_bold, {"helmod_result-panel.col-header-name"}, defines.mod.tags.font.close})
+  self:addCellHeader(table_panel, "mod", {"",defines.mod.tags.font.default_bold, {"helmod_common.mod"}, defines.mod.tags.font.close})
 
   local index = 0
   for _,location in pairs({"top","left","center","screen","goal", "relative"}) do
@@ -239,8 +240,8 @@ function AdminPanel:updateMod()
   table_panel.vertical_centering = false
   table_panel.style.horizontal_spacing = 50
 
-  self:addCellHeader(table_panel, "_name", {"",helmod_tag.font.default_bold, {"helmod_result-panel.col-header-name"}, helmod_tag.font.close})
-  self:addCellHeader(table_panel, "version", {"",helmod_tag.font.default_bold, {"helmod_common.version"}, helmod_tag.font.close})
+  self:addCellHeader(table_panel, "_name", {"",defines.mod.tags.font.default_bold, {"helmod_result-panel.col-header-name"}, defines.mod.tags.font.close})
+  self:addCellHeader(table_panel, "version", {"",defines.mod.tags.font.default_bold, {"helmod_common.version"}, defines.mod.tags.font.close})
 
   for name, version in pairs(script.active_mods) do
     GuiElement.add(table_panel, GuiLabel("_name", name):caption(name))
@@ -255,7 +256,7 @@ function AdminPanel:updateCache()
   local scroll_panel = self:getCacheTab()
   scroll_panel.clear()
 
-  GuiElement.add(scroll_panel, GuiLabel("warning"):caption({"", helmod_tag.color.orange, helmod_tag.font.default_large_bold, "Do not use this panel, unless absolutely necessary", helmod_tag.font.close, helmod_tag.color.close}))
+  GuiElement.add(scroll_panel, GuiLabel("warning"):caption({"", defines.mod.tags.color.orange, defines.mod.tags.font.default_large_bold, "Do not use this panel, unless absolutely necessary", defines.mod.tags.font.close, defines.mod.tags.color.close}))
   GuiElement.add(scroll_panel, GuiButton(self.classname, "generate-cache"):sprite("menu", defines.sprites.process.black, defines.sprites.process.black):style("helmod_button_menu_sm_red"):tooltip("Generate missing cache"))
   
   local table_panel = GuiElement.add(scroll_panel, GuiTable("list-table"):column(2))
@@ -418,43 +419,43 @@ function AdminPanel:addCacheListRow(gui_table, class_name, key1, key2, key3, key
       GuiElement.add(cell_action, GuiButton(self.classname, "delete-cache", class_name, key1):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"):tooltip({"helmod_button.remove"}))
       GuiElement.add(cell_action, GuiButton(self.classname, "refresh-cache", class_name, key1):sprite("menu", defines.sprites.refresh.black, defines.sprites.refresh.black):style("helmod_button_menu_sm_red"):tooltip({"helmod_button.refresh"}))
       ---col class
-      GuiElement.add(gui_table, GuiLabel("class", key1):caption({"", helmod_tag.color.orange, helmod_tag.font.default_large_bold, string.format("%s", key1), "[/font]", helmod_tag.color.close}))
+      GuiElement.add(gui_table, GuiLabel("class", key1):caption({"", defines.mod.tags.color.orange, defines.mod.tags.font.default_large_bold, string.format("%s", key1), "[/font]", defines.mod.tags.color.close}))
     else
       ---col class
-      GuiElement.add(gui_table, GuiLabel("class", key1):caption({"", helmod_tag.color.blue, helmod_tag.font.default_large_bold, string.format("%s", key1), "[/font]", helmod_tag.color.close}))
+      GuiElement.add(gui_table, GuiLabel("class", key1):caption({"", defines.mod.tags.color.blue, defines.mod.tags.font.default_large_bold, string.format("%s", key1), "[/font]", defines.mod.tags.color.close}))
     end
   
     ---col count
-    GuiElement.add(gui_table, GuiLabel("total", key1):caption({"", helmod_tag.font.default_semibold, caption, "[/font]"}))
+    GuiElement.add(gui_table, GuiLabel("total", key1):caption({"", defines.mod.tags.font.default_semibold, caption, "[/font]"}))
   elseif key3 == nil and key4 == nil then
     if class_name == "users" and (key2 == "translated" or key2 == "cache") then
       GuiElement.add(cell_action, GuiButton(self.classname, "delete-cache", class_name, key1, key2):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
       ---col class
-      GuiElement.add(gui_table, GuiLabel("class", key1, key2):caption({"", helmod_tag.color.orange, helmod_tag.font.default_bold, "|-" , key2, "[/font]", helmod_tag.color.close}))
+      GuiElement.add(gui_table, GuiLabel("class", key1, key2):caption({"", defines.mod.tags.color.orange, defines.mod.tags.font.default_bold, "|-" , key2, "[/font]", defines.mod.tags.color.close}))
     else
       ---col class
-      GuiElement.add(gui_table, GuiLabel("class", key1, key2):caption({"", helmod_tag.font.default_bold, "|-" , key2, "[/font]"}))
+      GuiElement.add(gui_table, GuiLabel("class", key1, key2):caption({"", defines.mod.tags.font.default_bold, "|-" , key2, "[/font]"}))
     end
   
     ---col count
-    GuiElement.add(gui_table, GuiLabel("total", key1, key2):caption({"", helmod_tag.font.default_semibold, caption, "[/font]"}))
+    GuiElement.add(gui_table, GuiLabel("total", key1, key2):caption({"", defines.mod.tags.font.default_semibold, caption, "[/font]"}))
   elseif key4 == nil then
     if class_name == "users" then
       GuiElement.add(cell_action, GuiButton(self.classname, "delete-cache", class_name, key1, key2, key3):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element"}))
       ---col class
-      GuiElement.add(gui_table, GuiLabel("class", key1, key2, key3):caption({"", helmod_tag.color.orange, helmod_tag.font.default_bold, "|\t\t\t|-" , key3, "[/font]", helmod_tag.color.close}))
+      GuiElement.add(gui_table, GuiLabel("class", key1, key2, key3):caption({"", defines.mod.tags.color.orange, defines.mod.tags.font.default_bold, "|\t\t\t|-" , key3, "[/font]", defines.mod.tags.color.close}))
     else
       ---col class
-      GuiElement.add(gui_table, GuiLabel("class", key1, key2, key3):caption({"", helmod_tag.font.default_bold, "|-" , key3, "[/font]"}))
+      GuiElement.add(gui_table, GuiLabel("class", key1, key2, key3):caption({"", defines.mod.tags.font.default_bold, "|-" , key3, "[/font]"}))
     end
   
     ---col count
-    GuiElement.add(gui_table, GuiLabel("total", key1, key2, key3):caption({"", helmod_tag.font.default_semibold, caption, "[/font]"}))
+    GuiElement.add(gui_table, GuiLabel("total", key1, key2, key3):caption({"", defines.mod.tags.font.default_semibold, caption, "[/font]"}))
   else
-    GuiElement.add(gui_table, GuiLabel("class", key1, key2, key3, key4):caption({"", helmod_tag.font.default_bold, "|\t\t\t|\t\t\t|-" , key4, "[/font]"}))
+    GuiElement.add(gui_table, GuiLabel("class", key1, key2, key3, key4):caption({"", defines.mod.tags.font.default_bold, "|\t\t\t|\t\t\t|-" , key4, "[/font]"}))
   
     ---col count
-    GuiElement.add(gui_table, GuiLabel("total", key1, key2, key3, key4):caption({"", helmod_tag.font.default_semibold, caption, "[/font]"}))
+    GuiElement.add(gui_table, GuiLabel("total", key1, key2, key3, key4):caption({"", defines.mod.tags.font.default_semibold, caption, "[/font]"}))
   end
 
 end
@@ -567,7 +568,7 @@ function AdminPanel:updateGlobal()
   local scroll_panel = self:getGlobalTab()
   local root_branch = GuiElement.add(scroll_panel, GuiFlowV())
   root_branch.style.vertically_stretchable = false
-  self:createTree(root_branch, {storage=storage}, true)
+  self:createTree(root_branch, "storage...", storage, true)
 end
 
 -------------------------------------------------------------------------------
@@ -575,53 +576,9 @@ end
 ---@param parent LuaGuiElement
 ---@param list table
 ---@param expand boolean
-function AdminPanel:createTree(parent, list, expand)
-  local data_info = table.data_info(list)
-  local index = 1
-  local size = table.size(list)
-  for k,info in pairs(data_info) do
-    local tree_branch = GuiElement.add(parent, GuiFlowH())
-    -- vertical bar
-    local vbar = GuiElement.add(tree_branch, GuiFrameV("vbar"):style("helmod_frame_element_w50", color_name, color_index))
-    vbar.style.width = bar_thickness
-    vbar.style.left_margin=15
-    if index == size then
-      vbar.style.height = 12
-    else
-      vbar.style.vertically_stretchable = true
-      vbar.style.bottom_margin=0
-    end
-    -- content
-    local content = GuiElement.add(tree_branch, GuiFlowV("content"))
-    -- header
-    local header = GuiElement.add(content, GuiFlowH("header"))
-    local hbar = GuiElement.add(header, GuiFrameV("hbar"):style("helmod_frame_element_w50", color_name, color_index))
-    hbar.style.width = 5
-    hbar.style.height = bar_thickness
-    hbar.style.top_margin=10
-    hbar.style.right_margin=5
-    if info.type == "table" then
-      local caption = {"", helmod_tag.font.default_bold, helmod_tag.color.green_light, k, helmod_tag.color.close, helmod_tag.font.close, " (", info.type,")"}
-      if expand then
-        GuiElement.add(header, GuiLabel("global-end"):caption(caption))
-      else
-        local label = GuiElement.add(header, GuiLabel(self.classname, "global-update", "bypass"):caption(caption))
-        label.tags = info
-      end
-    else
-      local caption = {"", helmod_tag.font.default_bold, helmod_tag.color.gold, k, helmod_tag.color.close, helmod_tag.font.close, "=", helmod_tag.font.default_bold, info.value, helmod_tag.font.close, " (", info.type,")"}
-      local label = GuiElement.add(header, GuiLabel("global-end"):caption(caption))
-    end
-    -- next
-    local next = GuiElement.add(content, GuiFlowV("next"))
-
-    if expand then
-      self:createTree(next, info.value, false)
-    else
-      next.visible = false
-    end
-    index = index + 1
-  end
+function AdminPanel:createTree(parent, title, list, expand)
+  local branch = GuiTree("expand-source"):caption(title):source(list):font_color(defines.color.blue.deep_sky_blue):expanded(expand)
+  local treeview = GuiElement.add(parent, branch)
 end
 
 -------------------------------------------------------------------------------
@@ -706,7 +663,7 @@ function AdminPanel:onEvent(event)
     local tree_view = parent["tree_view"]["content"]
     local data = helpers.json_to_table(json)
     tree_view.clear()
-    self:createTree(tree_view, data)
+    self:createTree(tree_view, "content", data, true)
 
     local entities_view = parent["elements"]["entities"]
     local entities = Blueprint.get_entities(data)

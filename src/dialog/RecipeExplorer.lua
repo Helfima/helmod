@@ -251,15 +251,16 @@ function RecipeExplorer:addCell(parent, recipe, index)
       cell_table.style.horizontal_spacing=5
       ---products
       local cell_products = GuiElement.add(cell_table, GuiFlowV("cell-products"))
-      for index, lua_product in pairs(recipe_prototype:getProducts(recipe.factory)) do
+      local lua_products = recipe_prototype:getProducts(default_factory)
+      for index, lua_product in pairs(lua_products) do
         local product_prototype = Product(lua_product)
         local product = product_prototype:clone()
         product.count = product_prototype:getElementAmount()
         product.time = 1
-        GuiElement.add(cell_products, GuiCellElementSm(self.classname, "add-parent", product.type, product.name, recipe.id or 0):element(product):tooltip("tooltip.add-recipe"):index(index):color(GuiElement.color_button_none))
+        GuiElement.add(cell_products, GuiCellProductSm(self.classname, "add-parent", product.type, product.name, recipe.id or 0):element(product):tooltip("tooltip.add-recipe"):index(index):color(GuiElement.color_button_none))
       end
       ---recipe
-      local icon_name, icon_type = recipe_prototype:getIcon()
+      local icon_type, icon_name = recipe_prototype:getIcon()
       local button = GuiElement.add(cell_table, GuiButtonSprite(self.classname, "remove-child", recipe.type, recipe.name, recipe.id or 0):choose(icon_type, icon_name, recipe_prototype.name))
       button.locked = true
       if recipe.type ~= "recipe" then
@@ -268,12 +269,13 @@ function RecipeExplorer:addCell(parent, recipe, index)
       end
       ---ingredients
       local cell_ingredients = GuiElement.add(cell_table, GuiFlowV("cell-ingredients"))
-      for index, lua_ingredient in pairs(recipe_prototype:getIngredients(recipe.factory)) do
+      local lua_ingredients = recipe_prototype:getIngredients(default_factory)
+      for index, lua_ingredient in pairs(lua_ingredients) do
         local ingredient_prototype = Product(lua_ingredient)
         local ingredient = ingredient_prototype:clone()
         ingredient.count = ingredient_prototype:getElementAmount()
         ingredient.time = 1
-        GuiElement.add(cell_ingredients, GuiCellElementSm(self.classname, "add-child", ingredient.type, ingredient.name, recipe.id or 0):element(ingredient):tooltip("tooltip.add-recipe"):index(index):color(GuiElement.color_button_add))
+        GuiElement.add(cell_ingredients, GuiCellProductSm(self.classname, "add-child", ingredient.type, ingredient.name, recipe.id or 0):element(ingredient):tooltip("tooltip.add-recipe"):index(index):color(GuiElement.color_button_add))
       end
       local cell_children = GuiElement.add(cell, GuiFlowV("cell-children"))
       cell_children.style.vertical_spacing=10

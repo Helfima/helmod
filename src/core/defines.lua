@@ -1,5 +1,65 @@
 require "core.defines_builded"
 require "core.defines_builded2"
+require "core.defines_colors"
+
+defines.mod = defines.mod or {}
+defines.mod.events = defines.mod.events or {}
+defines.mod.events.on_gui_action = "on_gui_action"
+defines.mod.events.on_gui_queue = "on_gui_queue"
+defines.mod.events.on_gui_event = "on_gui_event"
+defines.mod.events.on_gui_open = "on_gui_open"
+defines.mod.events.on_gui_update = "on_gui_update"
+defines.mod.events.on_gui_close = "on_gui_close"
+defines.mod.events.on_gui_error = "on_gui_error"
+defines.mod.events.on_gui_message = "on_gui_message"
+defines.mod.events.on_gui_mod_menu = "on_gui_mod_menu"
+defines.mod.events.on_gui_reset = "on_gui_reset"
+defines.mod.events.on_before_delete_cache = "on_before_delete_cache"
+defines.mod.events.on_console_command = "on_console_command"
+
+defines.mod.events.pattern = "([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)=?([^=]*)"
+
+defines.mod.events.clickable_type = {}
+defines.mod.events.clickable_type["button"] = true
+defines.mod.events.clickable_type["sprite-button"] = true
+defines.mod.events.clickable_type["choose-elem-button"] = false
+
+defines.mod.tags = {}
+defines.mod.tags.color = {}
+defines.mod.tags.color.close = "[/color]"
+defines.mod.tags.color.white = "[color=255,255,255]"
+defines.mod.tags.color.gray = "[color=229,229,229]"
+defines.mod.tags.color.yellow = "[color=255,222,61]"
+defines.mod.tags.color.red = "[color=255,0,0]"
+defines.mod.tags.color.red_light = "[color=255,50,50]"
+defines.mod.tags.color.green = "[color=0,127,14]"
+defines.mod.tags.color.green_light = "[color=50,200,50]"
+defines.mod.tags.color.blue = "[color=66,141,255]"
+defines.mod.tags.color.blue_light = "[color=100,200,255]"
+defines.mod.tags.color.gold = "[color=255,230,192]"
+defines.mod.tags.color.orange = "[color=255,106,0]"
+defines.mod.tags.color.black = "[color=0,0,0]"
+
+defines.mod.tags.font = {}
+defines.mod.tags.font.close = "[/font]"
+defines.mod.tags.font.default_bold = "[font=default-bold]"
+defines.mod.tags.font.default_semibold = "[font=default-semibold]"
+defines.mod.tags.font.default_large_bold = "[font=default-large-bold]"
+
+defines.mod.recipe_customized_prefix = "helmod_customized"
+defines.mod.recipe_customized_category = "crafting"
+defines.mod.recipes = {}
+defines.mod.recipes.recipe = {name = "recipe", is_customizable = true}
+defines.mod.recipes.burnt = {name = "recipe-burnt", category="helmod-burnt"}
+defines.mod.recipes.energy = {name = "energy", category="helmod-energy"}
+defines.mod.recipes.resource = {name = "resource", category="helmod-mining"}
+defines.mod.recipes.fluid = {name = "fluid", category="helmod-pumping"}
+defines.mod.recipes.boiler = {name = "boiler"}
+defines.mod.recipes.technology = {name = "technology", category="helmod-research"}
+defines.mod.recipes.rocket = {name = "rocket", category="helmod-rocket"}
+defines.mod.recipes.agricultural = {name = "agricultural", category="helmod-farming"}
+defines.mod.recipes.spoiling = {name = "spoiling"}
+defines.mod.recipes.constant = {name = "constant", is_customizable = true}
 
 defines.styles = {}
 defines.styles.mod_gui_button = "frame_button"
@@ -31,6 +91,7 @@ defines.styles.flow.horizontal = "helmod_flow_horizontal"
 defines.styles.flow.vertical = "helmod_flow_vertical"
 
 defines.styles.button = {}
+defines.styles.button.link = "helmod_link"
 defines.styles.button.menu_default = "helmod_button_menu_default"
 defines.styles.button.menu_sm_default = "helmod_button_menu_sm_default"
 defines.styles.button.menu_tool_default = "helmod_button_menu_tool_default"
@@ -141,6 +202,7 @@ defines.sprite_info["block"] = defines.sprites.info_hangar.white
 defines.sprite_info["energy"] = defines.sprites.info_energy.blue
 defines.sprite_info["rocket"] = defines.sprites.rocket.blue
 defines.sprite_info["mining"] = defines.sprites.mining.blue
+defines.sprite_info["customized"] = defines.sprites.info_create.blue
 --- sprite contraint
 defines.sprite_info["linked"] = defines.sprites.info_arrow_top.red
 defines.sprite_info["master"] = defines.sprites.info_add.red
@@ -189,7 +251,7 @@ defines.thumbnail_color.values.ingredient_default = "T40_4"
 defines.thumbnail_color.values.ingredient_driving = "T125_5"
 defines.thumbnail_color.values.ingredient_overflow = "T10_4"
 
-defines.constant = {}
+defines.constant = defines.constant or {}
 defines.constant.solvers = {}
 defines.constant.solvers.default = "linked matrix"
 defines.constant.solvers.matrix = "matrix"
@@ -215,410 +277,13 @@ defines.constant.beacon_combo = 1
 defines.constant.beacon_factory = 1/8
 defines.constant.beacon_constant = 0
 
-defines.constant.preferences = {
-  -- factory level
-  default_factory_level = {
-    type = "string-setting",
-    localised_name = {"helmod_pref_settings.default-factory-level"},
-    localised_description = {"helmod_pref_settings.default-factory-level-desc"},
-    default_value = "1",
-    allowed_values = {"1","2","3","4","5","6","last"},
-    group = "general"
-  },
-  -- format number factory
-  format_number_factory = {
-    type = "string-setting",
-    localised_name = {"helmod_pref_settings.format-number-factory"},
-    localised_description = {"helmod_pref_settings.format-number-factory-desc"},
-    default_value = "0",
-    allowed_values = {"0","0.0","0.00","0.000","0.0000"},
-    group = "general"
-  },
-  -- format number element
-  format_number_element = {
-    type = "string-setting",
-    localised_name = {"helmod_pref_settings.format-number-element"},
-    localised_description = {"helmod_pref_settings.format-number-element-desc"},
-    default_value = "0.0",
-    allowed_values = {"0","0.0","0.00","0.000","0.0000"},
-    group = "general"
-  },
-  -- preference number line by scroll
-  preference_number_line = {
-    type = "int-setting",
-    localised_name = {"helmod_pref_settings.preference-number-line"},
-    localised_description = {"helmod_pref_settings.preference-number-line-desc"},
-    default_value = 3,
-    allowed_values = {2,3,4,5},
-    group = "general"
-  },
-  -- preference number column by scroll
-  preference_number_column = {
-    type = "int-setting",
-    localised_name = {"helmod_pref_settings.preference-number-column"},
-    localised_description = {"helmod_pref_settings.preference-number-column-desc"},
-    default_value = 6,
-    allowed_values = {6,7,8,9,10,11,12},
-    group = "general"
-  },
-  -- display product order
-  display_product_order = {
-    type = "string-setting",
-    localised_name = {"helmod_pref_settings.display-product-order"},
-    localised_description = {"helmod_pref_settings.display-product-order-desc"},
-    default_value = "natural",
-    allowed_values = {"natural","name","cost"},
-    group = "general"
-  },
-  --display product cols
-  display_product_cols = {
-    type = "int-setting",
-    localised_name = {"helmod_pref_settings.display-product-cols"},
-    localised_description = {"helmod_pref_settings.display-product-cols-desc"},
-    default_value = 5,
-    allowed_values = {5,6,7,8,9,10},
-    group = "general"
-  },
-  --display-ingredient-cols
-  display_ingredient_cols = {
-    type = "int-setting",
-    localised_name = {"helmod_pref_settings.display-ingredient-cols"},
-    localised_description = {"helmod_pref_settings.display-ingredient-cols-desc"},
-    default_value = 5,
-    allowed_values = {5,6,7,8,9,10},
-    group = "general"
-  },
-  --display-spoilage
-  display_fuel_compact = {
-    type = "bool-setting",
-    localised_name = {"helmod_pref_settings.display-fuel-compact"},
-    localised_description = {"helmod_pref_settings.display-fuel-compact-desc"},
-    default_value = false,
-    group = "general"
-  },
-  --display-spoilage
-  display_spoilage = {
-    type = "bool-setting",
-    localised_name = {"helmod_pref_settings.display-spoilage"},
-    localised_description = {"helmod_pref_settings.display-spoilage-desc"},
-    default_value = true,
-    group = "general"
-  },
-  --display-pollution
-  display_pollution = {
-    type = "bool-setting",
-    localised_name = {"helmod_pref_settings.display-pollution"},
-    localised_description = {"helmod_pref_settings.display-pollution-desc"},
-    default_value = true,
-    group = "general"
-  },
-  --display-building
-  display_building = {
-    type = "bool-setting",
-    localised_name = {"helmod_pref_settings.display-building"},
-    localised_description = {"helmod_pref_settings.display-building-desc"},
-    default_value = true,
-    group = "general"
-  },
-  --display-tips
-  display_tips = {
-    type = "bool-setting",
-    localised_name = {"helmod_pref_settings.display-tips"},
-    localised_description = {"helmod_pref_settings.display-tips-desc"},
-    default_value = true,
-    group = "general"
-  },
-  --beacon-affecting-one
-  beacon_affecting_one = {
-    type = "float-setting",
-    localised_name = {"helmod_pref_settings.beacon-affecting-one"},
-    localised_description = {"helmod_pref_settings.beacon-affecting-one-desc"},
-    default_value = defines.constant.beacon_combo,
-    group = "general"
-  },
-  --beacon-affecting-one
-  beacon_by_factory = {
-    type = "float-setting",
-    localised_name = {"helmod_pref_settings.beacon-by-factory"},
-    localised_description = {"helmod_pref_settings.beacon-by-factory-desc"},
-    default_value = defines.constant.beacon_factory,
-    group = "general"
-  },
-  --beacon-constant
-  beacon_constant = {
-    type = "float-setting",
-    localised_name = {"helmod_pref_settings.beacon-constant"},
-    localised_description = {"helmod_pref_settings.beacon-constant-desc"},
-    default_value = defines.constant.beacon_constant,
-    group = "general"
-  },
-  --ui-menu
-  ui_menu_lines = {
-    type = "string-setting",
-    localised_name = {"helmod_pref_settings.ui-menu-lines"},
-    localised_description = {"helmod_pref_settings.ui-menu-lines"},
-    default_value = "auto",
-    allowed_values = {"auto","one line","two lines"},
-    group = "ui"
-  },
-  --ui-auto-close
-  close_after_selection = {
-    type = "bool-setting",
-    localised_name = {"helmod_pref_settings.ui-close-after-selection"},
-    localised_description = {"helmod_pref_settings.ui-close-after-selection-desc"},
-    default_value = false,
-    group = "ui",
-    items = {
-      HMEntitySelector = true,
-      HMRecipeSelector = true,
-      HMTechnologySelector = true,
-      HMItemSelector = true,
-      HMFluidSelector = true
-    }
-  },
-  --ui-auto-close
-  ui_auto_close = {
-    type = "bool-setting",
-    localised_name = {"helmod_pref_settings.ui-auto-close"},
-    localised_description = {"helmod_pref_settings.ui-auto-close-desc"},
-    default_value = false,
-    group = "ui",
-    items = {
-      HMRecipeEdition = true,
-      HMProductEdition = false,
-      HMRuleEdition = false,
-      HMPreferenceEdition = false,
-  
-      HMEntitySelector = true,
-      HMRecipeSelector = true,
-      HMTechnologySelector = true,
-      HMItemSelector = true,
-      HMFluidSelector = true
-    }
-  },
-  --ui-glue
-  ui_glue = {
-    type = "bool-setting",
-    localised_name = {"helmod_pref_settings.ui-glue"},
-    localised_description = {"helmod_pref_settings.ui-glue-desc"},
-    default_value = false,
-    group = "ui",
-    items = {
-      HMRecipeEdition = true,
-      HMProductEdition = false,
-      HMRuleEdition = false,
-      HMPreferenceEdition = false,
-  
-      HMEntitySelector = true,
-      HMRecipeSelector = true,
-      HMTechnologySelector = true,
-      HMItemSelector = true,
-      HMFluidSelector = true
-    }
-  },
-  ui_glue_offset = {
-    type = "int-setting",
-    localised_name = {"helmod_pref_settings.ui-glue-offset"},
-    localised_description = {"helmod_pref_settings.ui-glue-offset-desc"},
-    default_value = 0,
-    minimum_value = -1,
-    maximum_value = 1,
-    group = "ui"
-  },
-  --one_block_factor_enable
-  one_block_factor_enable = {
-    type = "bool-setting",
-    localised_name = "one_block_factor_enable",
-    localised_description = "one_block_factor_enable",
-    default_value = true,
-    group = "debug"
-  },
-}
-
-defines.constant.settings_mod = {
-  -- display_ratio_horizontal
-  display_ratio_horizontal = {
-    type = "double-setting",
-    setting_type = "runtime-per-user",
-    localised_name = {"helmod_user_settings.display-ratio-horizontal"},
-    localised_description = {"helmod_user_settings.display-ratio-horizontal-desc"},
-    default_value = 0.85,
-    minimum_value = 0.1,
-    maximum_value = 2,
-    allow_blank = false,
-    order = "b0"
-  },
-  -- display_ratio_vertical
-  display_ratio_vertical = {
-    type = "double-setting",
-    setting_type = "runtime-per-user",
-    localised_name = {"helmod_user_settings.display-ratio-vertical"},
-    localised_description = {"helmod_user_settings.display-ratio-vertical-desc"},
-    default_value = 0.8,
-    minimum_value = 0.1,
-    maximum_value = 2,
-    allow_blank = false,
-    order = "b1"
-  },
-  -- display main icon
-  display_main_icon = {
-    type = "bool-setting",
-    setting_type = "runtime-per-user",
-    localised_name = {"helmod_user_settings.display-main-icon"},
-    localised_description = {"helmod_user_settings.display-main-icon-desc"},
-    default_value = true,
-    order = "b2"
-  },
-  --display-cell-mod
-  display_cell_mod = {
-    type = "string-setting",
-    setting_type = "runtime-per-user",
-    localised_name = {"helmod_user_settings.display-cell-mod"},
-    localised_description = {"helmod_user_settings.display-cell-mod-desc"},
-    default_value = "default",
-    allowed_values = {"default","small-text","small-icon","by-kilo"},
-    order = "b4"
-  },
-  --row_move_step
-  row_move_step = {
-    type = "int-setting",
-    setting_type = "runtime-per-user",
-    localised_name = {"helmod_user_settings.row-move-step"},
-    localised_description = {"helmod_user_settings.row-move-step-desc"},
-    default_value = 5,
-    minimum_value = 2,
-    maximum_value = 10,
-    order = "c0"
-  },
-  -- debug_solver
-  debug_solver = {
-    type = "bool-setting",
-    setting_type = "runtime-global",
-    localised_name = {"helmod_map_settings.debug-solver"},
-    localised_description = {"helmod_map_settings.debug-solver-desc"},
-    default_value = false,
-    order = "a2"
-  },
-  -- display_ratio_horizontal
-  user_cache_step = {
-    type = "int-setting",
-    setting_type = "runtime-global",
-    localised_name = {"helmod_map_settings.user-cache-step"},
-    localised_description = {"helmod_map_settings.user-cache-step-desc"},
-    default_value = 100,
-    allowed_values = {50,100,200,300,400,500},
-    order = "a3"
-  },
-  --display_all_sheet
-  display_all_sheet = {
-    type = "bool-setting",
-    setting_type = "runtime-global",
-    localised_name = {"helmod_map_settings.display-all-sheet"},
-    localised_description = {"helmod_map_settings.display-all-sheet-desc"},
-    default_value = false,
-    order = "c0"
-  },
-
-  filter_translated_string_active = {
-    type = "bool-setting",
-    setting_type = "runtime-global",
-    localised_name = {"helmod_map_settings.filter-translated-string-active"},
-    localised_description = {"helmod_map_settings.filter-translated-string-active-desc"},
-    default_value = true,
-    order = "d0"
-  },
-  filter_on_text_changed = {
-    type = "bool-setting",
-    setting_type = "runtime-global",
-    localised_name = {"helmod_map_settings.filter-on-text-changed"},
-    localised_description = {"helmod_map_settings.filter-on-text-changed-desc"},
-    default_value = false,
-    order = "d1"
-  },
-  --model-filter-factory
-  model_filter_factory = {
-    type = "bool-setting",
-    setting_type = "runtime-global",
-    localised_name = {"helmod_map_settings.model-filter-factory"},
-    localised_description = {"helmod_map_settings.model-filter-factory-desc"},
-    default_value = true,
-    order = "d2"
-  },
-  --model-filter-beacon
-  model_filter_beacon = {
-    type = "bool-setting",
-    setting_type = "runtime-global",
-    localised_name = {"helmod_map_settings.model-filter-beacon"},
-    localised_description = {"helmod_map_settings.model-filter-beacon-desc"},
-    default_value = true,
-    order = "d3"
-  },
-  --model-filter-factory-module
-  model_filter_factory_module = {
-    type = "bool-setting",
-    setting_type = "runtime-global",
-    localised_name = {"helmod_map_settings.model-filter-factory-module"},
-    localised_description = {"helmod_map_settings.model-filter-factory-module-desc"},
-    default_value = true,
-    order = "d5"
-  },
-  --model-filter-beacon-module
-  model_filter_beacon_module = {
-    type = "bool-setting",
-    setting_type = "runtime-global",
-    localised_name = {"helmod_map_settings.model-filter-beacon-module"},
-    localised_description = {"helmod_map_settings.model-filter-beacon-module-desc"},
-    default_value = true,
-    order = "d6"
-  },
-  --properties-panel
-  hidden_panels = {
-    type = "bool-setting",
-    setting_type = "runtime-global",
-    localised_name = {"helmod_map_settings.hidden_panels"},
-    localised_description = {"helmod_map_settings.hidden_panels-desc"},
-    default_value = false,
-    order = "e1"
-  },
-  --data-col-index
-  display_hidden_column = {
-    type = "string-setting",
-    setting_type = "runtime-global",
-    localised_name = {"helmod_map_settings.display-hidden-column"},
-    localised_description = {"helmod_map_settings.display-hidden-column-desc"},
-    default_value = "None",
-    allowed_values = {"None", "Index and Id", "Type and Name", "All"},
-    order = "f2"
-  }
-}
+require "core.defines_preferences"
 
 helmod_flow_style = {
   flow = "flow",
   horizontal = "helmod_flow_horizontal",
   vertical = "helmod_flow_vertical"
 }
-
-helmod_tag = {}
-helmod_tag.color = {}
-helmod_tag.color.close = "[/color]"
-helmod_tag.color.white = "[color=255,255,255]"
-helmod_tag.color.gray = "[color=229,229,229]"
-helmod_tag.color.yellow = "[color=255,222,61]"
-helmod_tag.color.red = "[color=255,0,0]"
-helmod_tag.color.red_light = "[color=255,50,50]"
-helmod_tag.color.green = "[color=0,127,14]"
-helmod_tag.color.green_light = "[color=50,200,50]"
-helmod_tag.color.blue = "[color=66,141,255]"
-helmod_tag.color.blue_light = "[color=100,200,255]"
-helmod_tag.color.gold = "[color=255,230,192]"
-helmod_tag.color.orange = "[color=255,106,0]"
-helmod_tag.color.black = "[color=0,0,0]"
-
-helmod_tag.font = {}
-helmod_tag.font.close = "[/font]"
-helmod_tag.font.default_bold = "[font=default-bold]"
-helmod_tag.font.default_semibold = "[font=default-semibold]"
-helmod_tag.font.default_large_bold = "[font=default-large-bold]"
 
 helmod_frame_style = {
   default = "helmod_frame_default",
@@ -632,7 +297,6 @@ helmod_frame_style = {
 helmod_rules = {}
 helmod_rules["production-crafting"] = {excluded_only=false ,categories={}}
 helmod_rules["production-crafting"].categories["standard"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
-helmod_rules["production-crafting"].categories["crafting-handonly"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
 helmod_rules["production-crafting"].categories["extraction-machine"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
 helmod_rules["production-crafting"].categories["energy"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
 helmod_rules["production-crafting"].categories["technology"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}

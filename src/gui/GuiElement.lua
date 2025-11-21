@@ -268,6 +268,13 @@ function GuiElement.addPostAction(parent, gui_element)
         parent.elem_value = action
       end
     end
+    if action_name == "apply_style" then
+      if action ~= nil then
+        for key, value in pairs(action) do
+          parent.style[key] = value
+        end
+      end
+    end
   end
 end
 
@@ -354,17 +361,17 @@ function GuiElement.infoTemperature(parent, element, style)
       GuiElement.add(parent, GuiLabel("temperature"):caption(caption):style(style))
     end
     if Tmin ~= nil or Tmax ~= nil then
-      Tmin = Tmin or -1e300
-      Tmax = Tmax or 1e300
-      if Tmin > -1e300 and Tmax > 1e300 then
+      Tmin = Tmin or -1e38
+      Tmax = Tmax or 1e38
+      if Tmin > -1e38 and Tmax > 1e38 then
         local caption_min = {"",  "≥", Tmin, "°"}
         GuiElement.add(parent, GuiLabel("temperature_min"):caption(caption_min):style(style))
       end
-      if Tmin < -1e300 and Tmax < 1e300 then
+      if Tmin < -1e38 and Tmax < 1e38 then
         local caption_max = {"", "≤", Tmax, "°"}
         GuiElement.add(parent, GuiLabel("temperature_max"):caption(caption_max):style(style))
       end
-      if Tmin > -1e300 and Tmax < 1e300 then
+      if Tmin > -1e38 and Tmax < 1e38 then
         local panel = GuiElement.add(parent, GuiFlowV("temperature"))
         local caption_min = {"", "≥", Tmin, "°"}
         GuiElement.add(panel, GuiLabel("temperature_min"):caption(caption_min):style(style))
@@ -377,9 +384,9 @@ function GuiElement.infoTemperature(parent, element, style)
 end
 
 function GuiElement.rgbColorTag(color)
-  local r = math.floor(color.r * 256)
-  local g = math.floor(color.g * 256)
-  local b = math.floor(color.b * 256)
+  local r = math.floor(color.r * 255)
+  local g = math.floor(color.g * 255)
+  local b = math.floor(color.b * 255)
   return string.format("[color=%s,%s,%s]", r, g, b)
 end
 
@@ -542,6 +549,20 @@ function GuiElement.maskBlockSecondaryIconM(parent, block_infos)
   end
 end
 
+---Add secondary icon mask
+---@param parent LuaGuiElement
+---@param icon_type string
+---@param icon_name string
+---@param icon_quality? string
+function GuiElement.maskIcon(parent, icon_type, icon_name, icon_quality)
+  local container_secondary = GuiElement.add(parent, GuiFlow("mask-info"))
+  local mask_secondary = GuiElement.add(container_secondary, GuiSprite("secondary-info"):sprite(icon_type, icon_name))
+  mask_secondary.style.stretch_image_to_widget_size = true
+  mask_secondary.ignored_by_interaction = true
+  if icon_quality ~= nil  then
+    GuiElement.maskQuality(mask_secondary, icon_quality, 10, 10)
+  end
+end
 
 -------------------------------------------------------------------------------
 ---Add quality selector
@@ -549,7 +570,7 @@ end
 ---@param quality string
 ---@return LuaGuiElement
 function GuiElement.addQualitySelector(parent, quality, ...)
-  local scroll_panel = GuiElement.add(parent, GuiScroll("quality-scroll"):policy(true))
+  local scroll_panel = GuiElement.add(parent, GuiScroll(...):policy(true))
   scroll_panel.style.minimal_height = 32
   scroll_panel.style.maximal_height = 64
   scroll_panel.style.bottom_margin = 5
@@ -575,6 +596,9 @@ end
 ---@param parent LuaGuiElement
 ---@param element table
 function GuiElement.infoRecipe(parent, element)
+  if element == nil then
+    return
+  end
   local sprite_name = nil
   local tooltip = nil
   if element.type == "recipe-burnt" then
@@ -600,11 +624,17 @@ function GuiElement.infoRecipe(parent, element)
   elseif element.type == "spoiling" then
     sprite_name = GuiElement.getSprite(defines.sprite_info.developer)
     tooltip = {"tooltip.resource-recipe"}
+  elseif element.type == "constant" then
+    sprite_name = GuiElement.getSprite(defines.sprite_info.customized)
   elseif element.type ~= "recipe" then
     sprite_name = GuiElement.getSprite(defines.sprite_info.mining)
     tooltip = {"tooltip.resource-recipe"}
   end
   
+  if RecipePrototype.isCustomized(element) then
+    sprite_name = GuiElement.getSprite(defines.sprite_info.customized)
+  end
+
   if sprite_name ~= nil then
     local container = GuiElement.add(parent, GuiFlow("recipe-info"))
     container.style.top_padding = -4
@@ -614,4 +644,12 @@ function GuiElement.infoRecipe(parent, element)
     sprite.style.height = defines.sprite_size
     sprite.style.stretch_image_to_widget_size = true
   end
+end
+
+-------------------------------------------------------------------------------
+---Add tags
+---@param data table
+function GuiElement:tags(data)
+  self.options["tags"] = data
+  return self
 end

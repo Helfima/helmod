@@ -1,4 +1,133 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.2.6
+Date: 2025-11-21
+  Features:
+    - Added remote API, helmod_interface : get_models, get_recipe(recipe)
+  Bugfixes:
+    - Fixed beacon counter used by effect receiver, "total" or "same_type" (beacon profile)
+---------------------------------------------------------------------------------------------------
+Version: 2.2.5
+Date: 2025-10-15
+  Changes:
+    - Changed required factorio version, base >= 2.0.67
+  Bugfixes:
+    - Fixed quality effect of modules
+    - Fixed color convertion to int > 255 (for tooltip)
+    - Fixed error amount of block if parent mod is "Computing by factory"
+---------------------------------------------------------------------------------------------------
+Version: 2.2.4
+Date: 2025-09-30
+  Bugfixes:
+    - Fixed first candidat objective stay false and break block objective
+    - Fixed beacon quality lost with copy/paste
+---------------------------------------------------------------------------------------------------
+Version: 2.2.3
+Date: 2025-09-24
+  Bugfixes:
+    - Fixed quality of products when recipe used without quality modules
+---------------------------------------------------------------------------------------------------
+Version: 2.2.2
+Date: 2025-09-23
+  Features:
+    - Added quality probability tool
+  Changes:
+    - Removed rocket speed penalty because that build another rocket when waiting for the launch
+    - Changed quality calculation to accept quality > 100%
+    - Added Production lines menu preference to change the visible lines
+    - Added scroll to element for the block navigation
+    - Changed ingores first candidat objective if the child linked
+  Bugfixes:
+    - Fixed error when product line is empty
+---------------------------------------------------------------------------------------------------
+Version: 2.2.1
+Date: 2025-09-16
+  Changes:
+    - Changed RU locale update
+  Bugfixes:
+    - Fixed rocket recipe, error when check default machine
+---------------------------------------------------------------------------------------------------
+Version: 2.2.0
+Date: 2025-09-05
+  Changes:
+    - Reworked categories machines for recipe (cache added)
+    - Added a scroll panel in production line selector
+    - Removed experimental description in the name of panel ;)
+  Bugfixes:
+    - Fixed character doesn't appear in the list of machine (Recipe Edition)
+---------------------------------------------------------------------------------------------------
+Version: 2.1.25
+Date: 2025-09-01
+  Changes:
+    - Changed RU locale update
+    - Added belt stack size bonus in Logistic Edition
+  Bugfixes:
+    - Fixed update energy and lacalised name for Recipe customization
+    - Fixed product line edition that doesn't edit the root block
+    - Fixed copy model and block that doesn't copy last informations
+    - Fixed children index when use copy/past
+    - Fixed model icons and now location is in secondary icon if there are no secondary icon (not if nauvis)
+---------------------------------------------------------------------------------------------------
+Version: 2.1.24
+Date: 2025-08-30
+  Bugfixes:
+    - Fixed error that is not display beacon column
+---------------------------------------------------------------------------------------------------
+Version: 2.1.23
+Date: 2025-08-29
+  Features:
+    - Added customized recipes
+  Changes:
+    - Added first candidat objective if there are no objective for a block when there are no main product (loop in recipe or block)
+  Bugfixes:
+    - Fixed error in CreatedOrWhereUsedPanel when item missing
+    - Fixed quality of recipe for smart pipette
+    - Fixed error when default of machine not exist #626
+---------------------------------------------------------------------------------------------------
+Version: 2.1.22
+Date: 2025-08-12
+  Changes:
+    - Added new button to copy recipe with quality same/up/down in a block 
+  Bugfixes:
+    - Fixed error in preference menu "Default of machines"
+    - Fixed fluid amount for energy recipe of "fusion-generator" prototype in a case
+---------------------------------------------------------------------------------------------------
+Version: 2.1.21
+Date: 2025-08-11
+  Changes:
+    - Added preference menu "Default of machines" to delete default
+    - Added new mode for smart pipette, can use display panel, see controls in tooltip
+  Bugfixes:
+    - Fixed quality item for smart pipette on constant combinator
+    - Fixed quality item number in recipe edition
+---------------------------------------------------------------------------------------------------
+Version: 2.1.20
+Date: 2025-07-31
+  Bugfixes:
+    - Fixed consumption filter for "fusion-generator" prototype
+    - Fixed maximal temperature value for fluid (wrong infini limit)
+---------------------------------------------------------------------------------------------------
+Version: 2.1.19
+Date: 2025-07-24
+  Changes:
+    - Added fuel quality on factory using fuel, by default normal
+  Bugfixes:
+    - Fixed spoilage recipe can be spoil into legendary result
+    - Fixed summary error after change normal quality of machine
+---------------------------------------------------------------------------------------------------
+Version: 2.1.18
+Date: 2025-07-18
+  Changes:
+    - Implemented quality_affects_module_slots
+    - Added global and local summary
+---------------------------------------------------------------------------------------------------
+Version: 2.1.17
+Date: 2025-07-15
+  Changes:
+    - Changed required factorio version by 2.0.56
+  Bugfixes:
+    - Fixed negative quality value, in game is divide by 10
+    - Fixed fusion-reactor energy recipe by factorio version 2.0.56
+---------------------------------------------------------------------------------------------------
 Version: 2.1.16
 Date: 2025-07-09
   Bugfixes:

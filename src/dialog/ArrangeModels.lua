@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 ---Class to build ArrangeModels panel
----@class Form
+---@class ArrangeModels : Form
 ArrangeModels = newclass(Form)
 
 -------------------------------------------------------------------------------
@@ -13,13 +13,6 @@ end
 ---On Bind Dispatcher
 function ArrangeModels:onBind()
   Dispatcher:bind("on_gui_location", self, self.updateLocation)
-end
-
--------------------------------------------------------------------------------
----On event
----@param event LuaEvent
-function ArrangeModels:onEvent(event)
-
 end
 
 local elements = nil
@@ -42,12 +35,12 @@ end
 ---On update
 ---@param event LuaEvent
 function ArrangeModels:onUpdate(event)
-  local parent_panel = self:getPanel()
+  local flow_panel, content_panel, menu_panel = self:getPanel()
   if elements == nil then
     elements = {}
     local models = Model.getModels()
     local index = 0
-    local table_index = GuiElement.add(parent_panel, GuiTable("table_index"):column(GuiElement.getIndexColumnNumber()):style("helmod_table_list"))
+    local table_index = GuiElement.add(content_panel, GuiTable("table_index"):column(GuiElement.getIndexColumnNumber()):style("helmod_table_list"))
     for _,model in pairs(models) do
         self:addModelButton(table_index, model, index)
         index = index + 1
@@ -60,10 +53,21 @@ end
 ---@param index number
 ---@param model table
 function ArrangeModels:addModelButton(parent_panel, model, index)
-  local element = Model.firstChild(model.blocks)
+  local element = model.block_root or Model.firstChild(model.blocks or {})
+  local block_infos = Model.getBlockInfos(element)
+
+  -- sprite definition
+  local icon_type = element.type
+  local icon_name = element.name
+  local icon_quality = element.quality
+  if block_infos.primary_icon ~= nil and block_infos.primary_icon.type ~= nil then
+    icon_type = block_infos.primary_icon.name.type or "item"
+    icon_name = block_infos.primary_icon.name.name
+    icon_quality = block_infos.primary_icon.quality
+  end
   local button
   if element ~= nil then
-    button = GuiElement.add(parent_panel, GuiButtonSelectSprite(self.classname, "move-item", model.id, index):sprite(element.type, element.name):tooltip(tooltip):color())
+    button = GuiElement.add(parent_panel, GuiButtonSelectSprite(self.classname, "move-item", model.id, index):sprite_with_quality(icon_type, icon_name, icon_quality):color())
   else
     button = GuiElement.add(parent_panel, GuiButton(self.classname, "move-item", model.id, index):sprite("menu", defines.sprites.status_help.black, defines.sprites.status_help.black):style("helmod_button_menu"))
     button.style.width = 36
@@ -78,7 +82,20 @@ end
 ---@param model table
 function ArrangeModels:addModelFrame(index, model)
   local parent_panel = self:getPanel()
-  local element = Model.firstChild(model.blocks)
+  local element = model.block_root or Model.firstChild(model.blocks or {})
+  local block_infos = Model.getBlockInfos(element)
+
+  -- sprite definition
+  local icon_type = element.type
+  local icon_name = element.name
+  local icon_quality = element.quality
+  if block_infos.primary_icon ~= nil and block_infos.primary_icon.type ~= nil then
+    icon_type = block_infos.primary_icon.name.type or "item"
+    icon_name = block_infos.primary_icon.name.name
+    icon_quality = block_infos.primary_icon.quality
+  end
+
+
   local screen = Player.getGui("screen")
   
   local flow = GuiElement.add(screen, GuiFrameV(self.classname, "flow", model.id):style("frame"))
@@ -96,11 +113,11 @@ function ArrangeModels:addModelFrame(index, model)
   local grip = GuiElement.add(flow, GuiEmptyWidget(self.classname, "grip", model.id):tooltip(tooltip))
   grip.drag_target = flow
   grip.style.size = 36
-  --button.drag_target = flow
+
 
   local button
-  if element ~= nil then
-    button = GuiElement.add(grip, GuiButtonSelectSprite(self.classname, "move-flow", model.id):sprite(element.type, element.name):tooltip(tooltip):color())
+  if element ~= nil and element.type ~= nil then
+    button = GuiElement.add(grip, GuiButtonSelectSprite(self.classname, "move-flow", model.id):sprite_with_quality(icon_type, icon_name, icon_quality):tooltip(tooltip):color())
   else
     button = GuiElement.add(grip, GuiButton(self.classname, "move-flow", model.id):sprite("menu", defines.sprites.status_help.black, defines.sprites.status_help.black):style("helmod_button_menu"))
     button.style.width = 36
@@ -108,6 +125,7 @@ function ArrangeModels:addModelFrame(index, model)
   end
   button.style.padding = 0
   button.ignored_by_interaction = true
+  --button.drag_target = flow
 end
 
 -------------------------------------------------------------------------------

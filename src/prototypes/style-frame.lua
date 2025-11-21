@@ -60,11 +60,6 @@ default_gui["helmod_scroll_pane_no_spacing"] = {
     {
         type = "vertical_flow_style",
         vertical_spacing = 0
-    },
-    horizontal_flow_style =
-    {
-        type = "horizontal_flow_style",
-        vertical_spacing = 0
     }
 }
 

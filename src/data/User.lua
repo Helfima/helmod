@@ -158,7 +158,15 @@ function User.getDefaultFactory(recipe)
     local recipe_prototype = RecipePrototype(recipe)
     local category = recipe_prototype:getCategory()
     if category ~= nil and default_factory ~= nil and default_factory[category] ~= nil then
-        return default_factory[category]
+        local default_machine = default_factory[category]
+        local prototype = Player.getEntityPrototype(default_machine.name)
+        if prototype ~= nil then
+            return default_factory[category]
+        else
+            -- delete default
+            default_factory[category] = nil
+            User.setParameter("default_factory", default_factory)
+        end
     end
     return nil
 end
@@ -715,6 +723,23 @@ end
 ---@param thumbnails_color ThumbnailsColorData
 function User.setThumbnailsColor(thumbnails_color)
     User.setParameter("thumbnails_color", thumbnails_color)
+end
+
+-------------------------------------------------------------------------------
+---Return belt stack size bonus
+---@return number
+function User.getBeltStackSizeBonus()
+    local belt_stack_size_bonus = User.getParameter("belt_stack_size_bonus")
+    if belt_stack_size_bonus ~= nil then
+        return belt_stack_size_bonus
+    end
+    return Player.getBeltStackSizeBonus() or 0
+end
+
+-------------------------------------------------------------------------------
+---Set belt stack size bonus
+function User.setBeltStackSizeBonus(value)
+    User.setParameter("belt_stack_size_bonus", value)
 end
 
 return User

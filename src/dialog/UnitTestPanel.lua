@@ -91,6 +91,13 @@ function UnitTestPanel:getModulesTab()
 end
 
 -------------------------------------------------------------------------------
+---Get or create remote API tab panel
+---@return LuaGuiElement
+function UnitTestPanel:getRemoteAPITab()
+    return self:getTab("remote-api-tab-panel", { "helmod_unittest.remote-api-title" })
+end
+
+-------------------------------------------------------------------------------
 ---On event
 ---@param event LuaEvent
 function UnitTestPanel:onEvent(event)
@@ -121,6 +128,43 @@ function UnitTestPanel:onUpdate(event)
     self:updateEnergy()
     self:updateSprite()
     self:updateModules()
+    self:updateRemoteAPI()
+end
+
+-------------------------------------------------------------------------------
+---Update menu
+function UnitTestPanel:updateRemoteAPI()
+    local remote_api_tab = self:getRemoteAPITab()
+    local data = self:dataRemoteAPI()
+    local root_branch = GuiElement.add(remote_api_tab, GuiFlowV())
+    root_branch.style.vertically_stretchable = false
+    local branch = GuiTree("expand-source"):caption("first model..."):source(data):font_color(defines.color.blue.deep_sky_blue):expanded(true)
+    local treeview = GuiElement.add(root_branch, branch)
+end
+
+function UnitTestPanel:dataRemoteAPI()
+    local data = remote.call("helmod_interface", "get_models")
+    local model = first(data)
+    self:loopDataRemoteAPI(model)
+    return model
+end
+
+---Traverse model to append products and ingredients on each recipe
+---@param data ModelData | BlokcData | RecipeData
+function UnitTestPanel:loopDataRemoteAPI(data)
+    if data.class == "Model" then
+        for _, child in pairs(data.block_root.children) do
+            self:loopDataRemoteAPI(child)
+        end
+    elseif data.class == "Block" then
+        for _, child in pairs(data.children) do
+            self:loopDataRemoteAPI(child)
+        end
+    elseif data.class == "Recipe" then
+        local recipe = remote.call("helmod_interface", "get_recipe", data)
+        data.products = recipe.products
+        data.ingredients = recipe.ingredients
+    end
 end
 
 -------------------------------------------------------------------------------
@@ -238,59 +282,59 @@ function UnitTestPanel:addEnergyListRow(itable, entity, test_data)
             energy_type = energy_source:getType()
         end
         local tag_color, tooltip = self:valueEquals(energy_type, test_data.energy_type, true)
-        GuiElement.add(itable,GuiLabel("energy-type", entity):caption({ "", helmod_tag.font.default_bold, tag_color, energy_type,helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip))
+        GuiElement.add(itable,GuiLabel("energy-type", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color, energy_type,defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
         ---col Energy Usage Min
         local energy_usage_min = math.floor(prototype:getMinEnergyUsage())
         local tag_color, tooltip = self:valueEquals(energy_usage_min, test_data.energy_usage_min, true)
-        GuiElement.add(itable,GuiLabel("energy-usage-min", entity):caption({ "", helmod_tag.font.default_bold, tag_color, Format.formatNumberKilo(energy_usage_min, "W"), helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip))
+        GuiElement.add(itable,GuiLabel("energy-usage-min", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color, Format.formatNumberKilo(energy_usage_min, "W"), defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
         ---col Energy Usage Max
         local energy_usage_max = math.floor(prototype:getMaxEnergyUsage())
         local tag_color, tooltip = self:valueEquals(energy_usage_max, test_data.energy_usage_max, true)
-        GuiElement.add(itable,GuiLabel("energy-usage-max", entity):caption({ "", helmod_tag.font.default_bold, tag_color, Format.formatNumberKilo(energy_usage_max, "W"), helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip))
+        GuiElement.add(itable,GuiLabel("energy-usage-max", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color, Format.formatNumberKilo(energy_usage_max, "W"), defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
         ---col Energy Usage Priority
         local energy_usage_priority = "none"
         if energy_source ~= nil then
             energy_usage_priority = energy_source:getUsagePriority()
         end
         local tag_color, tooltip = self:valueEquals(energy_usage_priority, test_data.energy_usage_priority, true)
-        GuiElement.add(itable,GuiLabel("energy-usage-priority", entity):caption({ "", helmod_tag.font.default_bold, tag_color,energy_usage_priority, helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip))
+        GuiElement.add(itable,GuiLabel("energy-usage-priority", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color,energy_usage_priority, defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
         ---col Fluid Usage /s
         local fluid_usage = math.floor(prototype:getFluidUsage())
         local tag_color, tooltip = self:valueEquals(fluid_usage, test_data.fluid_usage, true)
-        GuiElement.add(itable,GuiLabel("fluid-usage", entity):caption({ "", helmod_tag.font.default_bold, tag_color, fluid_usage,helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip))
+        GuiElement.add(itable,GuiLabel("fluid-usage", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color, fluid_usage,defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
         ---col Fluid Burns
         local fluid_burns = "none"
         if energy_source ~= nil and prototype:getEnergyTypeInput() == "fluid" then
             fluid_burns = prototype:getBurnsFluid()
         end
         local tag_color, tooltip = self:valueEquals(fluid_burns, test_data.fluid_burns, true)
-        GuiElement.add(itable,GuiLabel("fluid-burns", entity):caption({ "", helmod_tag.font.default_bold, tag_color, fluid_burns,helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip))
+        GuiElement.add(itable,GuiLabel("fluid-burns", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color, tostring(fluid_burns),defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
         ---col Effectivity
         local effectivity = prototype:getEffectivity()
         local tag_color, tooltip = self:valueEquals(effectivity, test_data.effectivity, true)
-        GuiElement.add(itable,GuiLabel("effectivity", entity):caption({ "", helmod_tag.font.default_bold, tag_color, effectivity,helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip))
+        GuiElement.add(itable,GuiLabel("effectivity", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color, effectivity,defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
         ---col Target Temperature
         local target_temperature = prototype:getTargetTemperature()
         local tag_color, tooltip = self:valueEquals(target_temperature, test_data.target_temperature, true)
-        GuiElement.add(itable,GuiLabel("target-temperature", entity):caption({ "", helmod_tag.font.default_bold, tag_color,target_temperature, helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip))
+        GuiElement.add(itable,GuiLabel("target-temperature", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color,target_temperature, defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
         ---col Maximum Temperature
         local maximum_temperature = prototype:getMaximumTemperature()
         local tag_color, tooltip = self:valueEquals(maximum_temperature, test_data.maximum_temperature, true)
-        GuiElement.add(itable,GuiLabel("maximum-temperature", entity):caption({ "", helmod_tag.font.default_bold, tag_color,maximum_temperature, helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip))
+        GuiElement.add(itable,GuiLabel("maximum-temperature", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color,maximum_temperature, defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
 
         ---**** Computed ***
         ---col Energy Type
         local energy_type_input = prototype:getEnergyTypeInput()
         local tag_color, tooltip = self:valueEquals(energy_type_input, test_data.energy_type_input)
-        GuiElement.add(itable,GuiLabel("energy-type-input", entity):caption({ "", helmod_tag.font.default_bold, tag_color,energy_type_input, helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip))
+        GuiElement.add(itable,GuiLabel("energy-type-input", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color,energy_type_input, defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
         ---col Energy Consumption
         local energy_consumption = math.floor(prototype:getEnergyConsumption() + prototype:getMinEnergyUsage())
         local tag_color, tooltip = self:valueEquals(energy_consumption, test_data.energy_consumption)
-        GuiElement.add(itable,GuiLabel("energy-consumption", entity):caption({ "", helmod_tag.font.default_bold, tag_color, Format.formatNumberKilo(energy_consumption, "W"), helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip))
+        GuiElement.add(itable,GuiLabel("energy-consumption", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color, Format.formatNumberKilo(energy_consumption, "W"), defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
         ---col Fluid Consumption /s
         local fluid_consumption = Format.round(prototype:getFluidConsumption(), -2)
         local tag_color, tooltip = self:valueEquals(fluid_consumption, test_data.fluid_consumption)
-        GuiElement.add(itable,GuiLabel("fluid-consumption", entity):caption({ "", helmod_tag.font.default_bold, tag_color,fluid_consumption, helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip))
+        GuiElement.add(itable,GuiLabel("fluid-consumption", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color,fluid_consumption, defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
         ---col Fluid Fuel
         local fuel_prototype = prototype:getFluidFuelPrototype()
         local fluid_fuel = { name = "none", capacity = 0 }
@@ -298,35 +342,35 @@ function UnitTestPanel:addEnergyListRow(itable, entity, test_data)
             fluid_fuel = { name = fuel_prototype:native().name, capacity = fuel_prototype:getHeatCapacity() }
         end
         local tag_color, tooltip = self:valueEquals(fluid_fuel.name, test_data.fluid_fuel.name)
-        GuiElement.add(itable,GuiLabel("fluid-fuel", entity):caption({ "", helmod_tag.font.default_bold, tag_color, fluid_fuel.name,helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip))
+        GuiElement.add(itable,GuiLabel("fluid-fuel", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color, fluid_fuel.name,defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
         ---col Fluid Capacity
         local tag_color, tooltip = self:valueEquals(fluid_fuel.capacity, test_data.fluid_fuel.capacity)
-        GuiElement.add(itable,GuiLabel("fluid-capacity", entity):caption({ "", helmod_tag.font.default_bold, tag_color, fluid_fuel.capacity, helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip))
+        GuiElement.add(itable,GuiLabel("fluid-capacity", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color, fluid_fuel.capacity, defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
         ---col Energy Type Output
         local energy_type_output = prototype:getEnergyTypeOutput()
         local tag_color, tooltip = self:valueEquals(energy_type_output, test_data.energy_type_output)
-        GuiElement.add(itable,GuiLabel("energy-type-output", entity):caption({ "", helmod_tag.font.default_bold, tag_color,energy_type_output, helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip))
+        GuiElement.add(itable,GuiLabel("energy-type-output", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color,energy_type_output, defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
         ---col Fluid Production /s
         local fluid_production = { name = "none", amount = math.floor(prototype:getFluidProduction()) }
         local fluid_production_filter = prototype:getFluidProductionFilter()
         if fluid_production_filter ~= nil then fluid_production.name = fluid_production_filter.name end
         local tag_color, tooltip = self:valueEquals(fluid_production.amount, test_data.fluid_production.amount)
-        GuiElement.add(itable,GuiLabel("fluid-production", entity):caption({ "", helmod_tag.font.default_bold, tag_color, fluid_production.amount, helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip))
+        GuiElement.add(itable,GuiLabel("fluid-production", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color, fluid_production.amount, defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
         ---col Fluid Production Prototype
         local tag_color, tooltip = self:valueEquals(fluid_production.name, test_data.fluid_production.name)
-        GuiElement.add(itable,GuiLabel("fluid-production-prototype", entity):caption({ "", helmod_tag.font.default_bold, tag_color,fluid_production.name, helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip))
+        GuiElement.add(itable,GuiLabel("fluid-production-prototype", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color,fluid_production.name, defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
         ---col Energy Production
         local energy_production = math.floor(prototype:getEnergyProduction())
         local tag_color, tooltip = self:valueEquals(energy_production, test_data.energy_production)
-        GuiElement.add(itable,GuiLabel("energy-production", entity):caption({ "", helmod_tag.font.default_bold, tag_color, Format.formatNumberKilo(energy_production, "W"), helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip))
+        GuiElement.add(itable,GuiLabel("energy-production", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color, Format.formatNumberKilo(energy_production, "W"), defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
         ---col Pollution
         local pollution = Format.round(prototype:getPollution() * 60, -2)
         local tag_color, tooltip = self:valueEquals(pollution, test_data.pollution)
-        GuiElement.add(itable,GuiLabel("pollution", entity):caption({ "", helmod_tag.font.default_bold, tag_color, Format.formatNumber(pollution), helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip))
+        GuiElement.add(itable,GuiLabel("pollution", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color, Format.formatNumber(pollution), defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
         ---col Speed
-        local speed = Format.round(prototype:speedFactory(test_data.recipe), -2)
+        local speed = Format.round(prototype:speedFactory(), -2)
         local tag_color, tooltip = self:valueEquals(speed, test_data.speed)
-        GuiElement.add(itable,GuiLabel("speed", entity):caption({ "", helmod_tag.font.default_bold, tag_color, Format.formatNumber(speed),helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip))
+        GuiElement.add(itable,GuiLabel("speed", entity):caption({ "", defines.mod.tags.font.default_bold, tag_color, Format.formatNumber(speed),defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip))
     end
 end
 
@@ -366,7 +410,7 @@ function UnitTestPanel:updateModules()
                             control_value = data.modules[module.name][quality.name][effect_name]
                         end 
                         local tag_color, tooltip = self:valueEquals(effect_value*100, control_value*100)
-                        local sprite = GuiLabel(effect_name, module.name, quality.name):caption({ "", helmod_tag.font.default_bold, tag_color, label_caption,helmod_tag.color.close, helmod_tag.font.close }):tooltip(tooltip)
+                        local sprite = GuiLabel(effect_name, module.name, quality.name):caption({ "", defines.mod.tags.font.default_bold, tag_color, label_caption,defines.mod.tags.color.close, defines.mod.tags.font.close }):tooltip(tooltip)
 
                         table.insert(gui_table[effect_name], sprite)
                     end
@@ -400,19 +444,19 @@ end
 
 function UnitTestPanel:valueEquals(current_value, target_value, attribute)
     if current_value == target_value then
-        local tag_color = helmod_tag.color.green_light
+        local tag_color = defines.mod.tags.color.green_light
         if attribute then
-            tag_color = helmod_tag.color.blue_light
+            tag_color = defines.mod.tags.color.blue_light
         end
         if current_value == "none" then
-            tag_color = helmod_tag.color.white
+            tag_color = defines.mod.tags.color.white
         end
         local tooltip = { "", "Success" }
         return tag_color, tooltip
     else
-        local tag_color = helmod_tag.color.red_light
+        local tag_color = defines.mod.tags.color.red_light
         if attribute then
-            tag_color = helmod_tag.color.orange
+            tag_color = defines.mod.tags.color.orange
         end
         local display_current = current_value
         if type(current_value) == "number" then

@@ -45,6 +45,7 @@
 ---@field class string
 ---@field name string
 ---@field type string
+---@field quality string
 ---@field amount number
 ---@field count number
 ---@field count_limit number
@@ -52,6 +53,7 @@
 ---@field energy number
 ---@field speed number
 ---@field fuel string | FuelData
+---@field fuel_quality string
 ---@field limit number
 ---@field modules {[uint] : ModuleData}
 ---@field effects ModuleEffectsData
@@ -110,7 +112,7 @@
 ---@field key string
 ---@field value number
 
----@class BlockData
+---@class BlokcData
 ---@field class string
 ---@field id string
 ---@field index number
@@ -144,6 +146,7 @@
 ---@field runtimes {[uint] : Matrix}
 ---@field contraints {[string] : ContraintData}
 ---@field summary any
+---@field summary_global any
 ---@field consumer boolean
 
 ---@class ModelInfosData
@@ -181,6 +184,7 @@
 ---@field summary any
 ---@field generators any
 ---@field parameters ParametersData
+---@field location LocationData
 
 ---@class ThumbnailsColorData
 ---@field default string
@@ -194,3 +198,10 @@
 ---@field ingredient_default string
 ---@field ingredient_driving string
 ---@field ingredient_overflow string
+
+---@class LocationData
+---@field name string
+---@field type string
+---@field localised_name string
+---@field localised_description string
+---@field properties table

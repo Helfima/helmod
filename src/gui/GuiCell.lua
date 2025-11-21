@@ -228,9 +228,13 @@ function GuiCell:add_icon_info(button, info_icon)
     tooltip = "tooltip.burnt-product"
     sprite_name = GuiElement.getSprite(defines.sprite_info.burnt)    
   end
+  if type == "constant" then
+    sprite_name = GuiElement.getSprite(defines.sprite_info.customized)    
+  end
   if type == "block" then
     sprite_name = GuiElement.getSprite(defines.sprite_info.block)    
   end
+
   if sprite_name ~= nil then
     local container = GuiElement.add(button, GuiFlow(type))
     if type == "block" then
@@ -558,12 +562,12 @@ function GuiCellRecipe:create(parent)
   if recipe_prototype.is_support_quality == false then
     quality = "normal"
   end
-  local icon_name, icon_type = recipe_prototype:getIcon()
+  local icon_type, icon_name = recipe_prototype:getIcon()
   local tooltip = GuiTooltipRecipe(self.options.tooltip):element(recipe)
   local recipe_icon = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite_with_quality(icon_type, icon_name, quality):tooltip(tooltip))
-  
+  GuiElement.infoRecipe(recipe_icon, recipe)
+
   self:add_overlay(recipe_icon)
-  self:add_icon_info(recipe_icon)
   self:add_mask(recipe_icon, color)
     
   if self.m_broken == true then
@@ -693,10 +697,12 @@ function GuiCellBlock:create(parent)
     local first_recipe = Model.firstChild(element.children)
     if first_recipe ~= nil then
       local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
-      button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
+      
+      local recipe_prototype = RecipePrototype(first_recipe)
+      local icon_type, icon_name = recipe_prototype:getIcon()
+      button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(icon_type, icon_name):tooltip(tooltip))
       
       GuiElement.infoRecipe(button, first_recipe)
-      local recipe_prototype = RecipePrototype(element.name, first_recipe.type)
       if recipe_prototype:native() == nil then
         button.tooltip = "ERROR: Recipe ".. element.name .." not exist in game"
         button.sprite = "utility/warning_icon"
@@ -776,10 +782,12 @@ function GuiCellBlockM:create(parent)
     local first_recipe = Model.firstChild(element.children)
     if first_recipe ~= nil then
       local tooltip = GuiTooltipElement(self.options.tooltip):element(element)
-      button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(first_recipe.type, element.name):tooltip(tooltip))
+
+      local recipe_prototype = RecipePrototype(first_recipe)
+      local icon_type, icon_name = recipe_prototype:getIcon()
+      button = GuiElement.add(row1, GuiButtonSpriteM(unpack(self.name)):sprite(icon_type, icon_name):tooltip(tooltip))
       
       GuiElement.infoRecipe(button, first_recipe)
-      local recipe_prototype = RecipePrototype(element.name, first_recipe.type)
       if recipe_prototype:native() == nil then
         button.tooltip = "ERROR: Recipe ".. element.name .." not exist in game"
         button.sprite = "utility/warning_icon"
@@ -822,7 +830,7 @@ function GuiCellModel:create(parent)
   local element = self.m_element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, self.m_index))
   local tooltip = GuiTooltipModel(self.options.tooltip):element(element)
-  local first_block = element.block_root or Model.firstChild(element.blocks or {})
+  local first_block = Model.getRootBlock(element)
   local block_infos = Model.getBlockInfos(first_block)
   
   -- Apply the title if one exists.
@@ -842,16 +850,18 @@ function GuiCellModel:create(parent)
   -- Initialize the button variable for scoping purposes.
   local button = nil
   --Apply the icon if one exists, with fallbacks.
-  if block_infos.primary_icon ~= nil then
-    button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(block_infos.primary_icon.type, block_infos.primary_icon.name.name):tooltip(tooltip))
-  elseif first_block ~= nil and first_block.name ~= "" then
-    button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite(first_block.type, first_block.name):tooltip(tooltip))
+  local icons = GuiHelper.getModelIcons(element)
+  if icons.primary ~= nil and icons.primary.type ~= nil then
+    button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite_with_quality(icons.primary.type, icons.primary.name, icons.primary.quality):tooltip(tooltip))
+    GuiElement.infoRecipe(button, icons.first_child)
   else
     button = GuiElement.add(row1, GuiButtonSprite(unpack(self.name)):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black))
   end
 
   -- Apply the secondary icon if one is set in the block data.
-  GuiElement.maskBlockSecondaryIcon(button, block_infos)
+  if icons.secondary ~= nil then
+    GuiElement.maskSecondaryIcon(button, icons.secondary.type, icons.secondary.name, icons.secondary.quality)
+  end
 
   local row3 = GuiElement.add(cell, GuiFrameH("row3"):style("helmod_frame_element_w50", color, 3))
   local count = 1
@@ -996,11 +1006,19 @@ GuiCellBuilding = newclass(GuiCell,function(base,...)
 end)
 
 -------------------------------------------------------------------------------
+---Set force_global information
+---@param force_global boolean
+---@return GuiCell
+function GuiCellBuilding:forceGlobal(force_global)
+  self.m_force_global = force_global
+  return self
+end
+
+-------------------------------------------------------------------------------
 ---Create cell
 ---@param parent LuaGuiElement --container for element
 ---@return LuaGuiElement
 function GuiCellBuilding:create(parent)
-  local display_cell_mod = User.getModSetting("display_cell_mod")
   local color = self.m_color or "gray"
   local element = self.m_element or {}
   local cell = GuiElement.add(parent, GuiFlowV(element.name, "building", self.m_index))
@@ -1014,10 +1032,16 @@ function GuiCellBuilding:create(parent)
   local building = 0
   local building_limit = 0
   local building_deep = 0
-  if element.summary ~= nil then
-    building = element.summary.building or 0
-    building_limit = element.summary.building_limit or 0
-    building_deep = element.summary.building_deep or 0
+
+  local ui_summary_mode = User.getPreferenceSetting("ui_summary_mode")
+  local summary = element.summary_global
+  if ui_summary_mode == "local" and self.m_force_global ~= true then
+    summary = element.summary
+  end
+  if summary ~= nil then
+    building = summary.building or 0
+    building_limit = summary.building_limit or 0
+    building_deep = summary.building_deep or 0
   end
   local width = 50
   if self.m_by_limit then
@@ -1148,7 +1172,7 @@ function GuiCellElementSm:create(parent)
   if element.type == "energy" then
     tooltip = GuiTooltipEnergy(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo()
   else
-    tooltip = GuiTooltipElement(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo()
+    tooltip = GuiTooltipElement(self.options.tooltip):element(element):byLimit(self.m_by_limit):withLogistic():withProductInfo():withControlInfo(self.m_with_control_info)
   end
   local button_index = Product(element):getTableKey()
   local button_caption = "X"..Product(element):getElementAmount()

@@ -6,8 +6,8 @@
     "configurations": [
         {
             "arg": [],
-            "name": "launch",
-            "program": "${workspaceFolder}/graphics/icon_svg_builder.lua",
+            "name": "launch file",
+            "program": "${file}",
             "request": "launch",
             "stopOnEntry": true,
             "type": "lua"

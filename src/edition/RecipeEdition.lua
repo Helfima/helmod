@@ -20,7 +20,7 @@ end
 ---@param height_main number
 function RecipeEdition:onStyle(styles, width_main, height_main)
     styles.flow_panel = {
-        minimal_height = 600,
+        minimal_height = 100,
         maximal_height = math.max(height_main, 800),
     }
 end
@@ -514,7 +514,7 @@ function RecipeEdition:onEvent(event)
             ModelBuilder.applyBeaconModulePriority(recipe)
             ModelCompute.update(model)
             self:update(event)
-            Controller:send("on_gui_recipe_update",     event)
+            Controller:send("on_gui_recipe_update",event)
         end
 
         if event.action == "beacon-update" then
@@ -553,6 +553,14 @@ function RecipeEdition:onEvent(event)
             recipe.quality = event.item4
             ModelCompute.update(model)
             self:updateObjectInfo(event)
+            Controller:send("on_gui_recipe_update", event)
+        end
+
+        if event.action == "recipe-fuel-quality-select" then
+            recipe.factory.fuel_quality = event.item4
+            ModelCompute.update(model)
+            self:updateObjectInfo(event)
+            self:updateFactoryInfo(event)
             Controller:send("on_gui_recipe_update", event)
         end
 
@@ -614,7 +622,8 @@ function RecipeEdition:onUpdate(event)
     local model, block, recipe = self:getParameterObjects()
     ---header
     self:updateHeader(event)
-    if recipe ~= nil and recipe.type ~= "spoiling" then
+    local recipe_prototype = RecipePrototype(recipe)
+    if recipe ~= nil and recipe_prototype:isSupportFactory() then
         if recipe.type == "energy" then
             self:updateFactoryInfo(event)
         else
@@ -749,19 +758,7 @@ function RecipeEdition:updateFactoryInfo(event)
         scroll_panel.style.minimal_height = 40
         scroll_panel.style.maximal_height = 118
         local recipe_prototype = RecipePrototype(recipe)
-        local category = recipe_prototype:getCategory()
-        local factories = {}
-        if recipe.type == "energy" then
-            factories[recipe.factory.name] = recipe.factory
-        elseif recipe.type == "fluid" then
-            factories = Player.getProductionsCrafting("fluid", recipe)
-        elseif recipe.type == "boiler" then
-            factories = Player.getBoilersForRecipe(recipe_prototype)
-        elseif recipe.type == "agricultural" then
-            factories = Player.getAgriculturalTowers()
-        else
-            factories = Player.getAllProductionsCrafting(recipe)
-        end
+        local factories = recipe_prototype:getAllowedMachines()
 
         local factory_table_panel = GuiElement.add(scroll_panel, GuiTable("factory-table"):column(5))
         for key, element in spairs(factories, function(t, a, b) return t[b].crafting_speed > t[a].crafting_speed end) do
@@ -769,10 +766,7 @@ function RecipeEdition:updateFactoryInfo(event)
             if factory.name == element.name then color = GuiElement.color_button_edit end
             local choose_type = "entity"
             local choose_name = element.name
-            local choose_quality = "normal"
-            if factory ~= nil then
-                choose_quality = factory.quality
-            end
+            local choose_quality = factory.quality or "normal"
             local button = GuiElement.add(factory_table_panel, GuiButtonSelectSprite(self.classname, "factory-select", model.id, block.id, recipe.id):choose_with_quality(choose_type, choose_name, choose_quality):color(color))
             button.locked = true
         end
@@ -815,7 +809,7 @@ function RecipeEdition:updateFactoryInfo(event)
         self:addAlert(cell_energy, factory, "consumption")
 
         local sign = ""
-        if factory.effects.consumption > 0 then sign = "+" end
+        if factory.effects ~= nil and factory.effects.consumption > 0 then sign = "+" end
         GuiElement.add(input_panel, GuiLabel("value-energy"):caption(Format.formatNumberKilo(factory.energy, "W") .. " (" .. sign .. Format.formatPercent(factory.effects.consumption) .. "%)"))
 
         ---burner
@@ -851,8 +845,12 @@ function RecipeEdition:updateFactoryInfo(event)
                         end
                     end
                 else
+                    local current_fuel_quality = "normal"
+                    if recipe_prototype.is_support_quality then 
+                        current_fuel_quality = recipe.factory.fuel_quality or "normal"
+                    end
                     for _, item in pairs(fuel_list) do
-                        local fuel = GuiTooltipFuel(""):element({mode="burned", type=fuel_type, prototype=item}):compact(compact)
+                        local fuel = GuiTooltipFuel(""):element({mode="burned", type=fuel_type, quality=current_fuel_quality, prototype=item}):compact(compact)
                         local item_fuel = fuel:create()
                         table.insert(items, item_fuel)
                         if factory_fuel ~= nil and factory_fuel:native().name == item:native().name then
@@ -866,14 +864,20 @@ function RecipeEdition:updateFactoryInfo(event)
                 if compact == true then
                     drop_fuel.style.width = 64
                 else
-                    drop_fuel.style.width = 150
+                    drop_fuel.style.width = 145
                 end
+            end
+
+            if recipe_prototype.is_support_quality then 
+                local current_fuel_quality = recipe.factory.fuel_quality or "normal"
+                GuiElement.add(input_panel, GuiLabel("label-fuel-quality"):caption({ "helmod_label.quality" }))
+                GuiElement.addQualitySelector(input_panel, current_fuel_quality, self.classname, "recipe-fuel-quality-select", model.id, block.id, recipe.id)
             end
         end
 
         ---speed
         local sign = ""
-        if factory.effects.speed > 0 then sign = "+" end
+        if factory.effects ~= nil and factory.effects.speed > 0 then sign = "+" end
         local cell_speed = GuiElement.add(input_panel, GuiFlowH("label-speed"))
         GuiElement.add(cell_speed, GuiLabel("label-speed"):caption({ "helmod_label.speed" }))
         self:addAlert(cell_speed, factory, "speed")
@@ -881,7 +885,7 @@ function RecipeEdition:updateFactoryInfo(event)
 
         ---productivity
         local sign = ""
-        if factory.effects.productivity > 0 then sign = "+" end
+        if factory.effects ~= nil and factory.effects.productivity > 0 then sign = "+" end
         local cell_productivity = GuiElement.add(input_panel, GuiFlowH("label-productivity"))
         GuiElement.add(cell_productivity, GuiLabel("label-productivity"):caption({ "helmod_label.productivity" }))
         local maximum_productivity = recipe_prototype:getMaximumProductivity()
@@ -891,7 +895,7 @@ function RecipeEdition:updateFactoryInfo(event)
         if Player.hasFeatureQuality() then
             ---quality
             local sign = ""
-            if factory.effects.quality > 0 then sign = "+" end
+            if factory.effects ~= nil and factory.effects.quality > 0 then sign = "+" end
             local cell_productivity = GuiElement.add(input_panel, GuiFlowH("label-quality"))
             GuiElement.add(cell_productivity, GuiLabel("label-quality"):caption({ "helmod_label.quality" }))
             self:addAlert(cell_productivity, factory, "quality")
@@ -903,6 +907,13 @@ function RecipeEdition:updateFactoryInfo(event)
         GuiElement.add(cell_pollution, GuiLabel("label-pollution"):caption({ "helmod_common.pollution" }))
         self:addAlert(cell_pollution, factory, "pollution")
         GuiElement.add(input_panel, GuiLabel("value-pollution"):caption({ "helmod_si.per-minute", Format.formatNumberElement((factory.pollution or 0) * 60) }))
+
+        -- if factory_prototype:getType() == "agricultural-tower" then
+        --     GuiElement.add(input_panel, GuiLabel("label-growable"):caption("growable"))
+        --     local growable_value = factory_prototype:getGrowableArea()
+        --     GuiElement.add(input_panel, GuiTextField(self.classname, "factory-update-growable", model.id, block.id, recipe.id):text(growable_value):style("helmod_textfield"))
+        -- end
+
     end
 end
 
@@ -1436,20 +1447,21 @@ function RecipeEdition:updateObjectInfo(event)
             for index, lua_product in pairs(lua_products) do
                 local product_prototype = Product(lua_product)
                 local product = product_prototype:clone()
-                product.count = product_prototype:getElementAmount()
+                local quality_probality = lua_product.quality_probality or 1
+                product.count = product_prototype:getElementAmount() * quality_probality
                 GuiElement.add(cell_products, GuiCellProductSm(self.classname, "do_noting"):element(product):tooltip("tooltip.product"):index(index):color(GuiElement.color_button_none))
             end
         end
 
         ---ingredients
-        local cell_ingredients = GuiElement.add(recipe_table,
-            GuiTable("ingredients", recipe.id):column(5):style("helmod_table_element"))
+        local cell_ingredients = GuiElement.add(recipe_table, GuiTable("ingredients", recipe.id):column(5):style("helmod_table_element"))
         local lua_ingredients = recipe_prototype:getQualityIngredients(recipe.factory, recipe.quality)
         if lua_ingredients ~= nil then
             for index, lua_ingredient in pairs(lua_ingredients) do
                 local ingredient_prototype = Product(lua_ingredient)
                 local ingredient = ingredient_prototype:clone()
-                ingredient.count = ingredient_prototype:getElementAmount()
+                local quality_probality = lua_ingredient.quality_probality or 1
+                ingredient.count = ingredient_prototype:getElementAmount() * quality_probality
                 GuiElement.add(cell_ingredients, GuiCellProductSm(self.classname, "do_noting"):element(ingredient):tooltip("tooltip.ingredient"):index(index):color(GuiElement.color_button_add))
             end
         end

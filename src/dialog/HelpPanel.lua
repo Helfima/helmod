@@ -339,7 +339,7 @@ end
 function HelpPanel:generateList()
   page_list = {}
   for key1,section in pairs(help_data) do
-    local caption_section = {"", helmod_tag.font.default_bold, helmod_tag.color.gold, {string.format("helmod_help.%s", section.name)}, helmod_tag.color.close, helmod_tag.font.close}
+    local caption_section = {"", defines.mod.tags.font.default_bold, defines.mod.tags.color.gold, {string.format("helmod_help.%s", section.name)}, defines.mod.tags.color.close, defines.mod.tags.font.close}
     table.insert(page_list, {section = key1, content = nil, caption = caption_section})
     for key2,content in pairs(section.content) do
       local caption_content = {"", "   ", {string.format("helmod_help.%s", content.localised_text)}}

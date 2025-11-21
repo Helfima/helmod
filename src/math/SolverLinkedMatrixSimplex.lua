@@ -79,7 +79,7 @@ function SolverLinkedMatrixSimplex:get_pivot(matrix)
 						-- calcul du ratio base / x
 						local c_value = parameters.coefficient
 						local bx_ratio = c_value / x_value
-						-- prend la premier valeur ou le plus grand ratio sinon la plus grande valeur
+						-- prend la première valeur ou le plus grand ratio sinon la plus grande valeur
 						if ratio_value == nil or bx_ratio > ratio_value or c_value > max_value then
 							ratio_value = bx_ratio
 							max_value = c_value

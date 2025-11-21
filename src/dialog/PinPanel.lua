@@ -196,7 +196,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
         if block.by_limit == true and block.count > 1 then
           product.limit_count = product.count / block.count
         end
-        GuiElement.add(cell_products, GuiCellElementSm(self.classname, "pipette-item", recipe.id, "product", index):index(index):element(product):tooltip("tooltip.smart-pipette"):color(GuiElement.color_button_none):byLimit(block.by_limit):mask(is_done))
+        GuiElement.add(cell_products, GuiCellElementSm(self.classname, "pipette-item", recipe.id, "product", index):index(index):element(product):tooltip("tooltip.smart-pipette"):color(GuiElement.color_button_none):byLimit(block.by_limit):mask(is_done):controlInfo("pipette-item"))
       end
     end
   end
@@ -223,7 +223,7 @@ function PinPanel:addProductionBlockRow(gui_table, model, block, recipe)
         ingredient.count = ingredient_prototype:countIngredient(recipe)
 				ingredient.count_limit = ingredient_prototype:countLimitIngredient(recipe)
 				ingredient.count_deep = ingredient_prototype:countDeepIngredient(recipe)
-        GuiElement.add(cell_ingredients, GuiCellElementSm(self.classname, "pipette-item", recipe.id, "ingredient", index):index(index):element(ingredient):tooltip("tooltip.smart-pipette"):color(GuiElement.color_button_add):byLimit(block.by_limit):mask(is_done))
+        GuiElement.add(cell_ingredients, GuiCellElementSm(self.classname, "pipette-item", recipe.id, "ingredient", index):index(index):element(ingredient):tooltip("tooltip.smart-pipette"):color(GuiElement.color_button_add):byLimit(block.by_limit):mask(is_done):controlInfo("pipette-item"))
       end
     end
   end
@@ -277,7 +277,12 @@ function PinPanel:onEvent(event)
     if event.control == true then
       index = -1
     end
-    Player.setSmartToolRecipeConstantCombinator(children[event.item1], event.item2, index)
+    if event.shift then
+      local always_show = event.button == 4
+      Player.setSmartToolRecipeDisplayPanel(children[event.item1], event.item2, index, always_show)
+    else
+      Player.setSmartToolRecipeConstantCombinator(children[event.item1], event.item2, index)
+    end
   end
   
   if event.action == "recipe-done" then

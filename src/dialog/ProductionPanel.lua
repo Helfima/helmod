@@ -10,7 +10,7 @@ end)
 -------------------------------------------------------------------------------
 ---On initialization
 function ProductionPanel:onInit()
-	self.panelCaption = string.format("%s %s %s", "Helmod", script.active_mods["helmod"], "Experimental")
+	self.panelCaption = string.format("%s %s", "Helmod", script.active_mods["helmod"])
 end
 
 -------------------------------------------------------------------------------
@@ -287,48 +287,43 @@ function ProductionPanel:updateIndexPanel(model)
 	local index_panel = self:getFrameDeepPanel("model_index")
 	index_panel.style.padding = 2
 	index_panel.clear()
-	local table_index = GuiElement.add(index_panel, GuiTable("table_index"):column(GuiElement.getIndexColumnNumber()):style("helmod_table_list"))
-	GuiElement.add(table_index, GuiButton(self.classname, "new-model"):sprite("menu", defines.sprites.add_table.black, defines.sprites.add_table.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_button.add-production-line" }))
+	local scroll_table = GuiElement.add(index_panel, GuiScroll("scroll_table"))
+	local top_lines = User.getPreferenceSetting("ui_production_lines_menu")
+	if top_lines > 0 then
+		scroll_table.style.maximal_height = top_lines * 40
+	end
+	local table_index = GuiElement.add(scroll_table, GuiTable("table_index"):column(GuiElement.getIndexColumnNumber()):style("helmod_table_list"))
+	local button = GuiElement.add(table_index, GuiButton(self.classname, "new-model"):sprite("menu", defines.sprites.add_table.black, defines.sprites.add_table.black):style(defines.styles.button.menu_actived_green):tooltip({"helmod_button.add-production-line" }))
+	button.style.width = 36
+	button.style.height = 36
+
 	if table.size(models_by_owner) > 0 then
 		local i = 0
 		for _, models in pairs(models_by_owner) do
-			local is_first = true
 			table.reindex_list(models)
 			for _, imodel in spairs(models, sorter) do
-				local first_block = imodel.block_root or Model.firstChild(imodel.blocks or {})
-  				local block_infos = Model.getBlockInfos(first_block)
+				local first_block = Model.getRootBlock(imodel)
 				i = i + 1
-                local element = imodel.block_root
-				local button = nil
+                local button = nil
 				-- sprite definition
-				local icon_type = element.type
-				local icon_name = element.name
-				local icon_quality = element.quality
-				if block_infos.primary_icon ~= nil and block_infos.primary_icon.type ~= nil then
-					icon_type = block_infos.primary_icon.name.type or "item"
-					icon_name = block_infos.primary_icon.name.name
-					icon_quality = block_infos.primary_icon.quality
-				end
+				local icons = GuiHelper.getModelIcons(imodel)
 
-				local button_style = "helmod_button_menu"
+				local button_style = defines.styles.button.select_icon
 				local button_sprite_style = nil
 				if imodel.id == model.id then
 					button_style = "helmod_button_actived_icon_yellow"
 					button_sprite_style = "helmod_button_actived_icon_yellow"
 				end
 
-				if element ~= nil and element.type ~= nil then
+				if icons.primary ~= nil and icons.primary.type ~= nil then
 					local tooltip = GuiTooltipModel("tooltip.info-model"):element(imodel)
-					button = GuiElement.add(table_index, GuiButtonSelectSprite(self.classname, "change-model", imodel.id):sprite_with_quality(icon_type, icon_name, icon_quality):style(button_sprite_style):tooltip(tooltip))
+					button = GuiElement.add(table_index, GuiButtonSelectSprite(self.classname, "change-model", imodel.id):sprite_with_quality(icons.primary.type, icons.primary.name, icons.primary.quality):style(button_sprite_style):tooltip(tooltip))
+					GuiElement.infoRecipe(button, icons.first_child)
 				else
 					button = GuiElement.add(table_index, GuiButton(self.classname, "change-model", imodel.id):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black):style(button_style))
 				end
-				
-				GuiElement.maskBlockSecondaryIcon(button, block_infos)
-
-				if button ~= nil and is_first then
-					button.style.left_margin = 3
-					is_first = false
+				if icons.secondary ~= nil then
+					GuiElement.maskSecondaryIcon(button, icons.secondary.type, icons.secondary.name, icons.secondary.quality)
 				end
 			end
 		end
@@ -362,6 +357,9 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
 	local block_id = block.id
 	GuiElement.add(group_selector, GuiButton("HMRecipeSelector", "OPEN", model.id, block_id):sprite("menu", defines.sprites.script.black, defines.sprites.script.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-recipe" }))
 	GuiElement.add(group_selector, GuiButton("HMTechnologySelector", "OPEN", model.id, block_id):sprite("menu", defines.sprites.education.black, defines.sprites.education.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-technology" }))
+	GuiElement.add(group_selector, GuiButton("HMRecipeCustomization", "OPEN", model.id, block_id):sprite("menu", defines.sprites.create.black, defines.sprites.create.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-customized-recipe" }))
+
+	--GuiElement.add(group_selector, GuiButton("HMArrangeModels", "OPEN", model.id, block_id):sprite("menu", defines.sprites.education.black, defines.sprites.education.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-technology" }))
 
 	---delete button
 	local group_delete = GuiElement.add(left_panel, GuiFlowH("group_delete"))
@@ -389,6 +387,7 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
 		local selector = GuiElement.add(group_debug, GuiDropDown(self.classname, "solver_switch"):items(items, default_solver))
 		selector.style.font = "helmod_font_default"
 		selector.style.height = 32
+		selector.style.width = 64
 	end
 
 	---group tool
@@ -550,7 +549,7 @@ function ProductionPanel:updateSubMenuRightPanel(model, block)
 
 	local group_models = GuiElement.add(right_panel, GuiFlowH("group_models"))
 	group_models.style.horizontal_spacing = button_spacing
-	GuiElement.add(group_models, GuiButton("HMBlockEdition", "OPEN", model.id, block_id, "model"):sprite("menu", defines.sprites.edit_document.black, defines.sprites.edit_document.black):style("helmod_button_menu"):tooltip({ "helmod_panel.model-edition" }))
+	GuiElement.add(group_models, GuiButton("HMBlockEdition", "OPEN", model.id, "none", "model"):sprite("menu", defines.sprites.edit_document.black, defines.sprites.edit_document.black):style("helmod_button_menu"):tooltip({ "helmod_panel.model-edition" }))
 	GuiElement.add(group_models, GuiButton("HMBlockEdition", "OPEN", model.id, block_id, "block"):sprite("menu", defines.sprites.edit_subdocument.black, defines.sprites.edit_document.black):style("helmod_button_menu"):tooltip({ "helmod_block_edition_panel.pane-title" }))
 	GuiElement.add(group_models, GuiButton("HMParametersEdition", "OPEN", model.id, block_id):sprite("menu", defines.sprites.parameter.black, defines.sprites.parameter.black):style("helmod_button_menu"):tooltip({"helmod_parameters_edition_panel.title" }))
 	local button_model_up = GuiElement.add(group_models, GuiButton(self.classname, "model-index-up", model.id, block_id):sprite("menu", defines.sprites.arrow_left.black, defines.sprites.arrow_left.black):style("helmod_button_menu"):tooltip({ "helmod_panel.model-index-up" }))
@@ -813,8 +812,7 @@ function ProductionPanel:updateData(event)
 		local block_root = Model.newBlock(model, element_block)
 		block_root.power = 0
 		block_root.pollution = 0
-		--block_root.summary = {}
-        local index = 0
+		local index = 0
 		for key, block in pairs(model.blocks) do
 			block.index = index
 			block_root.children[block.id] = block
@@ -896,16 +894,15 @@ end
 ---@param current_block table
 function ProductionPanel:bluidNavigator(model, current_block)
 	local scroll_panel = self:getNavigatorPanel()
-	local last_element = nil
 
 	---bluid tree
 	if model.blocks ~= nil then
 		self:bluidRootLeaf(scroll_panel, model, current_block, 0)
 		local root_branch = GuiElement.add(scroll_panel, GuiFlowV())
 		root_branch.style.vertically_stretchable = false
-		self:bluidTree(root_branch, model, model.block_root, current_block)
-		if last_element ~= nil then
-			scroll_panel.scroll_to_element(last_element)
+		local scroll_to_element = self:bluidTree(root_branch, model, model.block_root, current_block)
+		if scroll_to_element ~= nil then
+			scroll_panel.scroll_to_element(scroll_to_element)
 		end
 	end
 end
@@ -920,6 +917,7 @@ local bar_thickness = 2
 ---@param parent_block BlockData
 ---@param current_block BlockData
 function ProductionPanel:bluidTree(parent, model, parent_block, current_block)
+	local scroll_to_element = nil
 	if parent_block ~= nil and parent_block.children ~= nil then
 		local blocks = {}
 		local sorter = defines.sorters.block.sort
@@ -987,17 +985,23 @@ function ProductionPanel:bluidTree(parent, model, parent_block, current_block)
 			-- header
 			local header = GuiElement.add(content, GuiFlowH("header"))
 
-			self:bluidLeaf(header, model, block, current_block, 0)
-
+			local scroll_to_element_next = self:bluidLeaf(header, model, block, current_block, 0)
+			if scroll_to_element_next ~= nil then
+				scroll_to_element = scroll_to_element_next
+			end
 			-- next
 			local next = GuiElement.add(content, GuiFlowV("next"))
 
 			if is_expanded then
-				self:bluidTree(next, model, block, current_block)
+				local scroll_to_element_next = self:bluidTree(next, model, block, current_block)
+				if scroll_to_element_next ~= nil then
+					scroll_to_element = scroll_to_element_next
+				end
 			end
 			index = index + 1
 		end
 	end
+	return scroll_to_element
 end
 
 -------------------------------------------------------------------------------
@@ -1008,6 +1012,7 @@ end
 ---@param current_block BlockData
 ---@param level number
 function ProductionPanel:bluidLeaf(tree_panel, model, block, current_block, level)
+	local scroll_to_element = nil
 	if block ~= nil then
 		local block_color = User.getThumbnailColor(defines.thumbnail_color.names.block_default)
 		local background = GuiElement.add(tree_panel, GuiFrame("block", block.id):style("helmod_frame_element_w30", "gray", 1))
@@ -1015,7 +1020,7 @@ function ProductionPanel:bluidLeaf(tree_panel, model, block, current_block, leve
 		background.style.horizontally_stretchable = false
 		local cell_tree = GuiElement.add(background, GuiTable("block", block.id):column(1):style("helmod_table_list"))
 		if current_block ~= nil and current_block.id == block.id then
-			--last_element = cell_tree
+			scroll_to_element = cell_tree
 			block_color = User.getThumbnailColor(defines.thumbnail_color.names.block_selected)
 		end
 		if block.name == nil then
@@ -1025,6 +1030,7 @@ function ProductionPanel:bluidLeaf(tree_panel, model, block, current_block, leve
 			cell_block.style.left_padding = 10 * level
 		end
 	end
+	return scroll_to_element
 end
 
 -------------------------------------------------------------------------------
@@ -1139,55 +1145,74 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 		uri_button_remove = "block-child-remove"
 		uri_button_bottom = "block-child-up"
 	end
+	local uri_button_copy = "recipe-copy"
 	local tree_down = GuiElement.add(cell_action, GuiButton(self.classname, "tree-recipe-down", model.id, block.id, recipe.id):sprite("menu", defines.sprites.arrow_left.black, defines.sprites.arrow_left.black):style("helmod_button_menu_sm"):tooltip({ "tooltip.down-element-in-tree", User.getModSetting("row_move_step") }))
 	GuiElement.add(cell_action, GuiButton(self.classname, uri_button_top, model.id, block.id, recipe.id):sprite("menu", defines.sprites.arrow_top.black, defines.sprites.arrow_top.black):style("helmod_button_menu_sm"):tooltip({"tooltip.up-element", User.getModSetting("row_move_step") }))
 	GuiElement.add(cell_action, GuiButton(self.classname, uri_button_remove, model.id, block.id, recipe.id):sprite("menu", defines.sprites.close.black, defines.sprites.close.black):style("helmod_button_menu_sm_red"):tooltip({"tooltip.remove-element" }))
 
 	local tree_up = GuiElement.add(cell_action, GuiButton(self.classname, "tree-recipe-up", model.id, block.id, recipe.id):sprite("menu", defines.sprites.arrow_right.black, defines.sprites.arrow_right.black):style("helmod_button_menu_sm"):tooltip({ "tooltip.up-element-in-tree", User.getModSetting("row_move_step") }))
 	GuiElement.add(cell_action, GuiButton(self.classname, uri_button_bottom, model.id, block.id, recipe.id):sprite("menu", defines.sprites.arrow_bottom.black, defines.sprites.arrow_bottom.black):style("helmod_button_menu_sm"):tooltip({ "tooltip.down-element", User.getModSetting("row_move_step") }))
+	local tooltip_copy = {"", {"tooltip.copy-element"}}
+	if Player.hasFeatureQuality() and recipe_prototype.is_support_quality then
+		table.insert(tooltip_copy, "\n")
+		table.insert(tooltip_copy, {"tooltip.copy-element-quality-up"})
+		table.insert(tooltip_copy, "\n")
+		table.insert(tooltip_copy, {"tooltip.copy-element-quality-down"})
+	end
+	GuiElement.add(cell_action, GuiButton(self.classname, uri_button_copy, model.id, block.id, recipe.id):sprite("menu", defines.sprites.copy.black, defines.sprites.copy.black):style("helmod_button_menu_sm"):tooltip(tooltip_copy))
 
 	local recipe_color = User.getThumbnailColor(defines.thumbnail_color.names.recipe_default)
 	---common cols
 	self:addTableRowCommon(gui_table, recipe)
 	---col recipe
 	local cell_recipe = GuiElement.add(gui_table, GuiTable("recipe", recipe.id):column(2):style("helmod_table_list"))
-	GuiElement.add(cell_recipe, GuiCellRecipe("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):infoIcon(recipe.type) :tooltip("tooltip.edit-recipe"):color(recipe_color):broken(recipe_prototype:native() == nil) :byLimit(block.by_limit))
+	local edition_panel = "HMRecipeEdition"
+	local is_support_factory = recipe_prototype:isSupportFactory()
+	GuiElement.add(cell_recipe, GuiCellRecipe(edition_panel, "OPEN", model.id, block.id, recipe.id):element(recipe):infoIcon(recipe.type) :tooltip("tooltip.edit-recipe"):color(recipe_color):broken(recipe_prototype:native() == nil) :byLimit(block.by_limit))
 	if recipe_prototype:native() == nil then
 		Player.print("ERROR: Recipe " .. recipe.name .. " not exist in game")
 	end
 	---col energy
 	local cell_energy = GuiElement.add(gui_table, GuiTable("energy", recipe.id):column(2):style("helmod_table_list"))
-	GuiElement.add(cell_energy, GuiCellEnergy("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):tooltip( "tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit))
+	if is_support_factory then
+		GuiElement.add(cell_energy, GuiCellEnergy(edition_panel, "OPEN", model.id, block.id, recipe.id):element(recipe):tooltip( "tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit))
+	end
 
 	---col pollution
 	if User.getPreferenceSetting("display_pollution") then
 		local cell_pollution = GuiElement.add(gui_table, GuiTable("pollution", recipe.id):column(2):style("helmod_table_list"))
-		GuiElement.add(cell_pollution, GuiCellPollution("HMRecipeEdition", "OPEN", model.id, block.id, recipe.id):element(recipe):tooltip( "tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit))
+		if is_support_factory then
+			GuiElement.add(cell_pollution, GuiCellPollution(edition_panel, "OPEN", model.id, block.id, recipe.id):element(recipe):tooltip( "tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit))
+		end
 	end
 
 	---col factory
-	local factory = recipe.factory
 	local cell_factory = GuiElement.add(gui_table, GuiTable("factory", recipe.id):column(2):style("helmod_table_list"))
-	if factory ~= nil then
-		local gui_cell_factory = GuiCellFactory(self.classname, "factory-action", model.id, block.id, recipe.id):element(factory):tooltip("tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit):controlInfo( "crafting-add")
-		if block.by_limit == true then
-			gui_cell_factory:byLimitUri(self.classname, "update-factory-limit", model.id, block.id, recipe.id)
+	if is_support_factory then
+		local factory = recipe.factory
+		if factory ~= nil then
+			local gui_cell_factory = GuiCellFactory(self.classname, "factory-action", model.id, block.id, recipe.id):element(factory):tooltip("tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit):controlInfo( "crafting-add")
+			if block.by_limit == true then
+				gui_cell_factory:byLimitUri(self.classname, "update-factory-limit", model.id, block.id, recipe.id)
+			end
+			if block.by_factory == true then
+				gui_cell_factory:byFactory(self.classname, "update-factory-number", model.id, block.id, recipe.id)
+			end
+			GuiElement.add(cell_factory, gui_cell_factory)
 		end
-		if block.by_factory == true then
-			gui_cell_factory:byFactory(self.classname, "update-factory-number", model.id, block.id, recipe.id)
-		end
-		GuiElement.add(cell_factory, gui_cell_factory)
 	end
 
 	---col beacon
-	local beacons = recipe.beacons
 	local cell_beacons = GuiElement.add(gui_table, GuiFlowH("beacon", recipe.id))
 	cell_beacons.style.horizontally_stretchable = false
 	cell_beacons.style.horizontal_spacing = 2
-	if beacons ~= nil then
-		for index, beacon in pairs(beacons) do
-			local gui_cell_beacon = GuiCellFactory(self.classname, "beacon-action", model.id, block.id, recipe.id, index):element(beacon):index(index):tooltip("tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit):controlInfo("crafting-add")
-			GuiElement.add(cell_beacons, gui_cell_beacon)
+	if is_support_factory then
+		local beacons = recipe.beacons
+		if beacons ~= nil then
+			for index, beacon in pairs(beacons) do
+				local gui_cell_beacon = GuiCellFactory(self.classname, "beacon-action", model.id, block.id, recipe.id, index):element(beacon):index(index):tooltip("tooltip.edit-recipe"):color(recipe_color):byLimit(block.by_limit):controlInfo("crafting-add")
+				GuiElement.add(cell_beacons, gui_cell_beacon)
+			end
 		end
 	end
 
@@ -1344,7 +1369,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 	---col building
 	local cell_building = GuiElement.add(gui_table, GuiTable(block.id, "building"):column(1):style("helmod_table_list"))
 	if User.getPreferenceSetting("display_building") then
-		GuiElement.add(cell_building, GuiCellBuilding(self.classname, "row-change-block", model.id, block.id):element(block):tooltip("tooltip.info-building"):color(block_color))
+		GuiElement.add(cell_building, GuiCellBuilding(self.classname, "row-change-block", model.id, block.id):element(block):forceGlobal(true):tooltip("tooltip.info-building"):color(block_color))
 	end
 
 	---col beacon
@@ -2002,6 +2027,19 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 
 	if event.action == "block-limit" then
 		ModelBuilder.updateProductionBlockOption(block, "by_limit", not (block.by_limit))
+		ModelCompute.update(model)
+		Controller:send("on_gui_update", event, self.classname)
+	end
+
+	if event.action == "recipe-copy" then
+		local child = block.children[event.item3]
+		local mode = 0
+		if event.control then
+			mode = 1
+		elseif event.shift then
+			mode = 2
+		end
+		ModelBuilder.addRecipeCopyIntoProductionBlock(model, block, child, mode)
 		ModelCompute.update(model)
 		Controller:send("on_gui_update", event, self.classname)
 	end

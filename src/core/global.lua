@@ -84,3 +84,35 @@ function compare_priority(a,b)
   end
   return true
 end
+
+---Read property without error
+---@param object any
+---@param property any
+---@param default? any
+function readPropertySafe(object, property, default)
+  local value = default
+  if object ~= nil then
+    pcall(function()
+      value = object[property]
+    end)
+  end
+  return value
+end
+
+---Read property without error
+---@param object any
+---@param property any
+---@param default? any
+function readPropertySafeWithError(object, property, default)
+  local value = default
+  if object ~= nil then
+    local ok , err = pcall(function()
+      value = object[property]
+    end)
+    if not(ok) then
+      Player.print(object.name)
+      Player.repportError(err, Player.traceEvent(data))
+    end
+  end
+  return value
+end

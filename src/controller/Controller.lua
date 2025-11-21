@@ -17,6 +17,7 @@ require "dialog.Calculator"
 require "dialog.RecipeExplorer"
 require "dialog.ProductionPanel"
 require "dialog.PrototypeFiltersPanel"
+require "dialog.QualityPanel"
 require "dialog.UnitTestPanel"
 require "dialog.RichTextPanel"
 
@@ -24,6 +25,7 @@ require "edition.LogisticEdition"
 require "edition.ModelEdition"
 require "edition.BlockEdition"
 require "edition.RecipeEdition"
+require "edition.RecipeCustomization"
 require "edition.ParametersEdition"
 require "edition.ProductEdition"
 require "edition.RuleEdition"
@@ -89,6 +91,7 @@ function Controller:prepare()
   table.insert(forms, RecipeExplorer("HMRecipeExplorer"))
   table.insert(forms, ProductionPanel("HMProductionPanel"))
   table.insert(forms, PrototypeFiltersPanel("HMPrototypeFiltersPanel"))
+  table.insert(forms, QualityPanel("HMQualityPanel"))
   table.insert(forms, UnitTestPanel("HMUnitTestPanel"))
   table.insert(forms, RichTextPanel("HMRichTextPanel"))
 
@@ -103,6 +106,7 @@ function Controller:prepare()
   table.insert(forms, ModelEdition("HMModelEdition"))
   table.insert(forms, BlockEdition("HMBlockEdition"))
   table.insert(forms, RecipeEdition("HMRecipeEdition"))
+  table.insert(forms, RecipeCustomization("HMRecipeCustomization"))
   table.insert(forms, ParametersEdition("HMParametersEdition"))
   table.insert(forms, ProductEdition("HMProductEdition"))
   table.insert(forms, RuleEdition("HMRuleEdition"))

@@ -102,21 +102,6 @@ end
 ---Reset rules
 function Model.resetRules()
   local rules = {}
-  table.insert(rules, {index=0, mod="base", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="extraction-machine", excluded = false})
-  table.insert(rules, {index=1, mod="base", name="production-crafting", category="extraction-machine", type="entity-type", value="mining-drill", excluded = false})
-  table.insert(rules, {index=2, mod="base", name="production-crafting", category="energy", type="entity-subgroup", value="energy", excluded = false})
-  table.insert(rules, {index=3, mod="base", name="production-crafting", category="technology", type="entity-type", value="lab", excluded = false})
-  table.insert(rules, {index=4, mod="base", name="module-limitation", category="extraction-machine", type="entity-type", value="mining-drill", excluded = true})
-  table.insert(rules, {index=5, mod="base", name="module-limitation", category="technology", type="entity-type", value="lab", excluded = true})
-  table.insert(rules, {index=6, mod="ShinyIcons", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="shinyminer1", excluded = false})
-  table.insert(rules, {index=7, mod="ShinyIcons", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="shinyminer2", excluded = false})
-  table.insert(rules, {index=8, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="dyworld-extraction-burner", excluded = false})
-  table.insert(rules, {index=9, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="dyworld-drills-electric", excluded = false})
-  table.insert(rules, {index=10, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-subgroup", value="dyworld-drills-burner", excluded = false})
-  table.insert(rules, {index=11, mod="DyWorld", name="production-crafting", category="standard", type="entity-name", value="assembling-machine-1", excluded = true})
-  table.insert(rules, {index=12, mod="DyWorld", name="production-crafting", category="standard", type="entity-name", value="assembling-machine-2", excluded = true})
-  table.insert(rules, {index=13, mod="DyWorld", name="production-crafting", category="standard", type="entity-name", value="assembling-machine-3", excluded = true})
-  table.insert(rules, {index=14, mod="DyWorld", name="production-crafting", category="extraction-machine", type="entity-group", value="production", excluded = true})
   table.insert(rules, {index=15, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="supply-depot", excluded = true})
   table.insert(rules, {index=16, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="request-depot", excluded = true})
   table.insert(rules, {index=17, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="buffer-depot", excluded = true})
@@ -442,7 +427,18 @@ function Model.getModelInfos(model)
 end
 
 -------------------------------------------------------------------------------
----Return quality element key
+---Return root block
+---@param model ModelData
+---@return BlockData
+function Model.getRootBlock(model)
+  if model ~= nil then
+    return model.block_root or Model.firstChild(model.blocks or {})
+  end
+  return {}
+end
+
+-------------------------------------------------------------------------------
+---Return block infos
 ---@param block BlockData
 ---@return BlockInfosData
 function Model.getBlockInfos(block)
@@ -457,10 +453,11 @@ end
 ---@param element table
 ---@return string
 function Model.getQualityElementKey(element)
-  if element.quality == nil then
-    return element.name
+  local element_quality = "normal"
+  if element.quality ~= nil then
+    element_quality = element.quality
   end
-  return string.format("%s-%s", element.name, element.quality)
+  return string.format("%s-%s", element.name, element_quality)
 end
 
 -------------------------------------------------------------------------------
@@ -476,12 +473,13 @@ function Model.compareModules(module1, module2, with_amount)
     return module1.name == module2.name and module1.quality == module2.quality
   end
 end
+
 -------------------------------------------------------------------------------
 ---Create model Recipe
 ---@param model ModelData
 ---@param name string
 ---@param type string
----@return table
+---@return RecipeData
 function Model.newRecipe(model, name, type)
   if model.recipe_id == nil then model.recipe_id = 0 end
   model.recipe_id = model.recipe_id + 1
@@ -494,11 +492,26 @@ function Model.newRecipe(model, name, type)
   recipeModel.type = type or "recipe"
   recipeModel.count = 0
   recipeModel.production = 1
-  --recipeModel.factory = Model.newFactory()
   recipeModel.beacons = {}
-  --table.insert(recipeModel.beacons, Model.newBeacon())
 
   return recipeModel
+end
+
+
+-------------------------------------------------------------------------------
+---Create model Recipe
+function Model.newCustomizedRecipe()
+  local id = (storage.customized_recipe_id or 0) + 1
+  local name = string.format("%s_%s", defines.mod.recipe_customized_prefix, id)
+  current_recipe = {
+      type = defines.mod.recipes.recipe.name,
+      name = name,
+      energy = 1,
+      products = {},
+      ingredients = {},
+      owner = Player.getName()
+  }
+  return current_recipe
 end
 
 -------------------------------------------------------------------------------
@@ -659,35 +672,13 @@ function Model.getDefaultRecipe(key)
 end
 
 -------------------------------------------------------------------------------
----Get speed of the factory
----@param key string --factory name
----@return number
-function Model.getSpeedFactory(key)
-  local entity_prototype = EntityPrototype(key)
-  local crafting_speed = entity_prototype:getCraftingSpeed()
-  if crafting_speed ~= 0 then return crafting_speed end
-  local mining_speed = entity_prototype:getMiningSpeed()
-  if mining_speed ~= 0 then return mining_speed end
-  return 1
-end
-
--------------------------------------------------------------------------------
 ---Get the factory of prototype
 ---@param recipe_prototype table
 ---@return string
 function Model.getDefaultPrototypeFactory(recipe_prototype)
   local category = recipe_prototype:getCategory()
   if category ~= nil then
-    local factories = {}
-    if recipe_prototype:getType() == "boiler" then
-      factories = Player.getBoilersForRecipe(recipe_prototype)
-    elseif recipe_prototype:getType() == "fluid" then
-      factories = Player.getProductionsCrafting("fluid", recipe_prototype:native())
-    elseif recipe_prototype:getType() == "agricultural" then
-      factories = Player.getAgriculturalTowers()
-    else
-      factories = Player.getProductionsCrafting(category, recipe_prototype:native())
-    end
+    local factories = recipe_prototype:getAllowedMachines()
     local default_factory_level = User.getPreferenceSetting("default_factory_level")
     local factory_level = 1
     if default_factory_level == "fast" then
@@ -698,10 +689,12 @@ function Model.getDefaultPrototypeFactory(recipe_prototype)
     local level = 1
     local lua_factory = nil
     local last_factory = nil
-    for _, factory in spairs(factories, function(t,a,b) return Model.getSpeedFactory(t[b].name) > Model.getSpeedFactory(t[a].name) end) do
-      if level == factory_level then lua_factory = factory end
-      last_factory = factory
-      level = level + 1
+    for _, factory in spairs(factories, function(t,a,b) return Player.getProductionMachineSpeed(t[b]) > Player.getProductionMachineSpeed(t[a]) end) do
+      if factory.type ~= "character" then
+        if level == factory_level then lua_factory = factory end
+        last_factory = factory
+        level = level + 1
+      end
     end
     if lua_factory ~= nil then return lua_factory.name end
     if last_factory ~= nil then return last_factory.name end
