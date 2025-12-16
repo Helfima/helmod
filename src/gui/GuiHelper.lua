@@ -21,12 +21,14 @@ function GuiHelper.getBlockIcons(block, location)
     local primary_name = nil
     local primary_quality = nil
 
-    local first_child = Model.firstChild(block.children)
-    icons.first_child = first_child
-    if first_child ~= nil then
-        local recipe_prototype = RecipePrototype(first_child)
-        primary_type, primary_name = recipe_prototype:getIcon()
-        primary_quality = first_child.quality
+    if block.children ~= nil then
+        local first_child = Model.firstChild(block.children)
+        icons.first_child = first_child
+        if first_child ~= nil then
+            local recipe_prototype = RecipePrototype(first_child)
+            primary_type, primary_name = recipe_prototype:getIcon()
+            primary_quality = first_child.quality
+        end
     end
 
     local block_infos = Model.getBlockInfos(block)

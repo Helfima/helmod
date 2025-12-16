@@ -180,7 +180,7 @@ function User.setDefaultFactory(recipe)
     local category = recipe_prototype:getCategory()
     local factory = recipe.factory
     if category ~= nil then
-        local default_category = { name = factory.name, quality = factory.quality, fuel = factory.fuel }
+        local default_category = { name = factory.name, quality = factory.quality, fuel = factory.fuel, fuel_quality = factory.fuel_quality }
         if factory.module_priority ~= nil then
             default_category.module_priority = {}
             for _, priority in pairs(factory.module_priority) do

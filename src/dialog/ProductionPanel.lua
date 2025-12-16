@@ -302,7 +302,6 @@ function ProductionPanel:updateIndexPanel(model)
 		for _, models in pairs(models_by_owner) do
 			table.reindex_list(models)
 			for _, imodel in spairs(models, sorter) do
-				local first_block = Model.getRootBlock(imodel)
 				i = i + 1
                 local button = nil
 				-- sprite definition

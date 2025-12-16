@@ -437,14 +437,11 @@ end
 ---@return table
 function RecipePrototype:getQualityIngredients(factory, quality)
     local raw_ingredients = self:getIngredients(factory)
-    if self.is_support_quality == false then
-        return raw_ingredients
-    end
     for _, raw_ingredient in pairs(raw_ingredients) do
         if raw_ingredient.type == "item" then
-            if raw_ingredient.burnt == true then
+            if self.is_support_fuel_quality == true and raw_ingredient.burnt == true then
                 raw_ingredient.quality = factory.fuel_quality or "normal"
-            else
+            elseif self.is_support_quality == true then
                 raw_ingredient.quality = quality
             end
         end
@@ -734,7 +731,7 @@ function RecipePrototype:getIngredients(factory)
                         amount = fuel_count.count * factor, burnt = true }
                     table.insert(raw_ingredients, burner_ingredient)
                     if fuel_count.type == "item" then
-                        self.is_support_fuel_quality = self.is_support_quality and true
+                        self.is_support_fuel_quality = true
                     end
                 end
             elseif energy_type == "heat" then

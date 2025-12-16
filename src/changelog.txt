@@ -3,6 +3,9 @@ Version: 2.2.7
 Date: 2025-12-16
   Bugfixes:
     - Fixed quality selector for the fuel-based crafting machine
+    - Fixed apply default machine with quality
+    - Fixed check factory default don't match with quality #625
+    - Fixed open old data from old save, restored file migrations\helmod_1.0.0.lua
 ---------------------------------------------------------------------------------------------------
 Version: 2.2.6
 Date: 2025-11-21

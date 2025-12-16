@@ -559,8 +559,7 @@ function RecipeEdition:onEvent(event)
         if event.action == "recipe-fuel-quality-select" then
             recipe.factory.fuel_quality = event.item4
             ModelCompute.update(model)
-            self:updateObjectInfo(event)
-            self:updateFactoryInfo(event)
+            self:update(event)
             Controller:send("on_gui_recipe_update", event)
         end
 
@@ -706,7 +705,7 @@ function RecipeEdition:updateFactoryInfoTool(event)
 
         local default_factory = User.getDefaultFactory(recipe)
         local record_style = "helmod_button_menu_sm_default"
-        if Model.compareFactory(default_factory, factory, Model.factoryHasModule(factory)) then record_style = "helmod_button_menu_sm_selected" end
+        if Model.compareFactory(default_factory, factory, default_factory.module_priority ~= nil or Model.factoryHasModule(factory)) then record_style = "helmod_button_menu_sm_selected" end
         
         local tooltip_default = GuiTooltipFactory("helmod_recipe-edition-panel.set-default"):element(default_factory)
         GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool", model.id, block.id, recipe.id, "default"):sprite("menu", defines.sprites.favorite.black, defines.sprites.favorite.black):style(record_style):tooltip(tooltip_default))
@@ -758,6 +757,8 @@ function RecipeEdition:updateFactoryInfo(event)
         scroll_panel.style.minimal_height = 40
         scroll_panel.style.maximal_height = 118
         local recipe_prototype = RecipePrototype(recipe)
+        --needed to affect recipe_prototype.is_support_fuel_quality
+        local lua_ingredients = recipe_prototype:getQualityIngredients(recipe.factory, recipe.quality)
         local factories = recipe_prototype:getAllowedMachines()
 
         local factory_table_panel = GuiElement.add(scroll_panel, GuiTable("factory-table"):column(5))
@@ -846,7 +847,7 @@ function RecipeEdition:updateFactoryInfo(event)
                     end
                 else
                     local current_fuel_quality = "normal"
-                    if Player.hasFeatureQuality() then
+                    if recipe_prototype.is_support_fuel_quality then
                         current_fuel_quality = recipe.factory.fuel_quality or "normal"
                     end
                     for _, item in pairs(fuel_list) do
@@ -868,7 +869,7 @@ function RecipeEdition:updateFactoryInfo(event)
                 end
             end
 
-            if Player.hasFeatureQuality() then
+            if recipe_prototype.is_support_fuel_quality then
                 local current_fuel_quality = recipe.factory.fuel_quality or "normal"
                 GuiElement.add(input_panel, GuiLabel("label-fuel-quality"):caption({ "helmod_label.quality" }))
                 GuiElement.addQualitySelector(input_panel, current_fuel_quality, self.classname, "recipe-fuel-quality-select", model.id, block.id, recipe.id)

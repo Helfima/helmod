@@ -41,7 +41,7 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
             if recipe_type ~= "energy" then
                 local default_factory = User.getDefaultFactory(ModelRecipe)
                 if default_factory ~= nil then
-                    Model.setFactory(ModelRecipe, default_factory.name, default_factory.quality, default_factory.fuel)
+                    Model.setFactory(ModelRecipe, default_factory.name, default_factory.quality, default_factory.fuel, default_factory.fuel_quality)
                     ModelBuilder.setFactoryModulePriority(ModelRecipe, default_factory.module_priority)
                 else
                     local default_factory_name = Model.getDefaultPrototypeFactory(recipe_prototype)

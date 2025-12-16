@@ -601,8 +601,9 @@ end
 ---@param recipe RecipeData
 ---@param factory_name string
 ---@param factory_quality? string
----@param factory_fuel? string | FuelData
-function Model.setFactory(recipe, factory_name, factory_quality, factory_fuel)
+---@param factory_fuel? string
+---@param factory_fuel_quality? string
+function Model.setFactory(recipe, factory_name, factory_quality, factory_fuel, factory_fuel_quality)
   if recipe ~= nil then
     if factory_quality == "" then
       factory_quality = nil
@@ -619,6 +620,7 @@ function Model.setFactory(recipe, factory_name, factory_quality, factory_fuel)
       recipe.factory.name = factory_name
       recipe.factory.quality = factory_quality
       recipe.factory.fuel = factory_fuel
+      recipe.factory.fuel_quality = factory_fuel_quality
       if Model.countModulesModel(recipe.factory) >= factory_prototype:getModuleInventorySize() then
         recipe.factory.modules = {}
       end
@@ -728,15 +730,16 @@ end
 ---@param module_priorities1 {[uint] : ModulePriorityData}
 ---@param module_priorities2 {[uint] : ModulePriorityData}
 function Model.compareModulePriorities(module_priorities1, module_priorities2)
-  if module_priorities1 == nil or module_priorities2 == nil then return false end
-  if #module_priorities1 ~= #module_priorities2 then return false end
+    if module_priorities1 == nil or module_priorities2 == nil then return false end
+    if #module_priorities1 ~= #module_priorities2 then return false end
     for i = 1, #module_priorities1, 1 do
       local module_priority1 = module_priorities1[i]
       local module_priority2 = module_priorities2[i]
       if module_priority1.name ~= module_priority2.name then return false end
-      if module_priority1.value ~= module_priority2.value then return false end
+      if module_priority1.quality ~= module_priority2.quality then return false end
+      if module_priority1.amount ~= module_priority2.amount then return false end
     end
-  return true
+    return true
 end
 
 ---Compare 2 factories
@@ -747,7 +750,9 @@ end
 function Model.compareFactory(factory1, factory2, with_priority)
   if factory1 == nil or factory2 == nil then return false end
   if factory1.name ~= factory2.name then return false end
+  if factory1.name == factory2.name and factory1.quality ~= factory2.quality then return false end
   if factory1.fuel ~= factory2.fuel then return false end
+  if factory1.fuel_quality ~= factory2.fuel_quality then return false end
   if with_priority and Model.compareModulePriorities(factory1.module_priority, factory2.module_priority) == false then return false end
   return true
 end
@@ -760,7 +765,9 @@ end
 function Model.compareBeacon(beacon1, beacon2, with_priority)
   if beacon1 == nil or beacon2 == nil then return false end
   if beacon1.name ~= beacon2.name then return false end
+  if beacon1.name == beacon2.name and beacon1.quality ~= beacon2.quality then return false end
   if beacon1.fuel ~= beacon2.fuel then return false end
+  if beacon1.fuel_quality ~= beacon2.fuel_quality then return false end
   if beacon1.combo ~= beacon2.combo then return false end
   if beacon1.per_factory ~= beacon2.per_factory then return false end
   if beacon1.per_factory_constant ~= beacon2.per_factory_constant then return false end
@@ -778,7 +785,7 @@ function Model.compareBeacons(beacons1, beacons2)
   for i = 1, #beacons1, 1 do
     local beacon1 = beacons1[i]
     local beacon2 = beacons2[i]
-    local with_priority = Model.factoryHasModule(beacon1) or Model.factoryHasModule(beacon2)
+    local with_priority = beacon1.module_priority or Model.factoryHasModule(beacon2)
     if Model.compareBeacon(beacon1, beacon2, with_priority) == false then return false end
   end
   return true

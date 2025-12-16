@@ -762,7 +762,7 @@ function GuiTooltipFactory.AppendFactory(tooltip, element)
 		if fuel.temperature then
 			table.insert(tooltip,{ "", "\n", string.format("[%s=%s] %s °C", fuel.type, fuel.name, fuel.temperature), " ", defines.mod.tags.color.gold, defines.mod.tags.font.default_bold, Player.getLocalisedName(fuel), defines.mod.tags.font.close, defines.mod.tags.color.close })
 		else
-			table.insert(tooltip,{ "", "\n", string.format("[%s=%s]", fuel.type, fuel.name), " ", defines.mod.tags.color.gold, defines.mod.tags.font.default_bold, Player.getLocalisedName(fuel), defines.mod.tags.font.close, defines.mod.tags.color.close })
+			GuiTooltip.appendLineTitle(tooltip, fuel.type, fuel.name, Player.getLocalisedName(fuel), element.fuel_quality)
 		end
 	end
 	if element.module_priority then

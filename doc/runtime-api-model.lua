@@ -24,10 +24,12 @@
 
 ---@class ModulePriorityData
 ---@field name string
----@field value uint
+---@field quality string
+---@field amount uint
 
 ---@class FuelData
 ---@field name string
+---@field quality string
 ---@field temperature number
 
 ---@class ContraintData
@@ -52,7 +54,7 @@
 ---@field count_deep number
 ---@field energy number
 ---@field speed number
----@field fuel string | FuelData
+---@field fuel string
 ---@field fuel_quality string
 ---@field limit number
 ---@field modules {[uint] : ModuleData}
@@ -61,7 +63,7 @@
 ---@field energy_total number
 ---@field polution_total number
 ---@field speed_total number
----@field module_priorities {[uint] : ModuleData}
+---@field module_priority {[uint] : ModuleData}
 
 ---@class BeaconData : FactoryData
 ---@field combo number
