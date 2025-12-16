@@ -2,7 +2,7 @@
 
 This a mod for Factorio: [Mod Page](https://mods.factorio.com/mod/helmod)
 
-Data model [here](doc\runtime-api-model.lua)
+Data model [here](doc/runtime-api-model.lua)
 
 To see the data in the game, open Helmod, click on Admin icon, choose Global tab
 

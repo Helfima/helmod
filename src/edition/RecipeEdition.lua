@@ -846,7 +846,7 @@ function RecipeEdition:updateFactoryInfo(event)
                     end
                 else
                     local current_fuel_quality = "normal"
-                    if recipe_prototype.is_support_quality then 
+                    if Player.hasFeatureQuality() then
                         current_fuel_quality = recipe.factory.fuel_quality or "normal"
                     end
                     for _, item in pairs(fuel_list) do
@@ -868,7 +868,7 @@ function RecipeEdition:updateFactoryInfo(event)
                 end
             end
 
-            if recipe_prototype.is_support_quality then 
+            if Player.hasFeatureQuality() then
                 local current_fuel_quality = recipe.factory.fuel_quality or "normal"
                 GuiElement.add(input_panel, GuiLabel("label-fuel-quality"):caption({ "helmod_label.quality" }))
                 GuiElement.addQualitySelector(input_panel, current_fuel_quality, self.classname, "recipe-fuel-quality-select", model.id, block.id, recipe.id)

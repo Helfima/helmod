@@ -897,12 +897,12 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
                     else
                        profile_effectivity = prototype_beacon:getProfileEffectivity(profile_total_count)
                     end 
-
-                    factory.effects.speed = factory.effects.speed + amount * module_effects.speed * distribution_effectivity * profile_effectivity * beacon.combo
-                    factory.effects.productivity = factory.effects.productivity + amount * module_effects.productivity * distribution_effectivity * profile_effectivity * beacon.combo
-                    factory.effects.consumption = factory.effects.consumption + amount * module_effects.consumption * distribution_effectivity * profile_effectivity * beacon.combo
-                    factory.effects.pollution = factory.effects.pollution + amount * module_effects.pollution * distribution_effectivity * profile_effectivity * beacon.combo
-                    factory.effects.quality = factory.effects.quality + amount * module_effects.quality * distribution_effectivity * profile_effectivity * beacon.combo
+                    local final_effectivity = distribution_effectivity * profile_effectivity * beacon.combo
+                    factory.effects.speed = factory.effects.speed + amount * module_effects.speed * final_effectivity
+                    factory.effects.productivity = factory.effects.productivity + amount * module_effects.productivity * final_effectivity
+                    factory.effects.consumption = factory.effects.consumption + amount * module_effects.consumption * final_effectivity
+                    factory.effects.pollution = factory.effects.pollution + amount * module_effects.pollution * final_effectivity
+                    factory.effects.quality = factory.effects.quality + amount * module_effects.quality * final_effectivity
                 end
             end
         end
