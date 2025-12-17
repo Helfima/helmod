@@ -955,7 +955,7 @@ end
 function ModelBuilder.addBeaconModule(beacon, recipe, module_name, module_quality, module_max)
     local module = ItemPrototype(module_name)
     if recipe ~= nil and module:native() ~= nil then
-        if Player.checkFactoryLimitationModule(module:native(), recipe) == true then
+        if Player.checkBeaconLimitationModule(beacon, recipe, module:native()) == true then
             local module_priority = ModelBuilder.addModulePriority(beacon, module_name, module_quality, module_max or false)
             ModelBuilder.setBeaconModulePriority(beacon, recipe, module_priority)
         end

@@ -704,8 +704,9 @@ function RecipeEdition:updateFactoryInfoTool(event)
         tool_panel1.style.horizontal_spacing = tool_spacing
 
         local default_factory = User.getDefaultFactory(recipe)
+        local has_default_factory_module_priority = default_factory ~= nil and default_factory.module_priority ~= nil
         local record_style = "helmod_button_menu_sm_default"
-        if Model.compareFactory(default_factory, factory, default_factory.module_priority ~= nil or Model.factoryHasModule(factory)) then record_style = "helmod_button_menu_sm_selected" end
+        if Model.compareFactory(default_factory, factory, has_default_factory_module_priority or Model.factoryHasModule(factory)) then record_style = "helmod_button_menu_sm_selected" end
         
         local tooltip_default = GuiTooltipFactory("helmod_recipe-edition-panel.set-default"):element(default_factory)
         GuiElement.add(tool_panel1, GuiButton(self.classname, "factory-tool", model.id, block.id, recipe.id, "default"):sprite("menu", defines.sprites.favorite.black, defines.sprites.favorite.black):style(record_style):tooltip(tooltip_default))

@@ -6,6 +6,7 @@ Date: 2025-12-16
     - Fixed apply default machine with quality
     - Fixed check factory default don't match with quality #625
     - Fixed open old data from old save, restored file migrations\helmod_1.0.0.lua
+    - Fixed buildings with 0 modules slots don't properly allow beacon
 ---------------------------------------------------------------------------------------------------
 Version: 2.2.6
 Date: 2025-11-21

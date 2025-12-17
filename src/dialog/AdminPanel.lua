@@ -344,8 +344,8 @@ function AdminPanel:updateSheet()
 
   if table.size(storage.models) > 0 then
 
-    local result_table = GuiElement.add(scroll_panel, GuiTable("list-data"):column(3):style("helmod_table-odd"))
-
+    local result_table = GuiElement.add(scroll_panel, GuiTable("list-data"):column(4):style("helmod_table_border"))
+    result_table.style.cell_padding = 3
     self:addSheetListHeader(result_table)
 
     local i = 0
@@ -513,11 +513,13 @@ end
 ---Add Sheet List header
 ---@param itable LuaGuiElement
 function AdminPanel:addSheetListHeader(itable)
-  ---col action
-  self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
+  self:addCellHeader(itable, "element", {"helmod_result-panel.col-header-sheet"})
   ---data owner
   self:addCellHeader(itable, "owner", {"helmod_result-panel.col-header-owner"})
-  self:addCellHeader(itable, "element", {"helmod_result-panel.col-header-sheet"})
+  ---col share
+  self:addCellHeader(itable, "share", { "helmod_result-panel.share" })
+  ---col action
+  self:addCellHeader(itable, "action", {"helmod_result-panel.col-header-action"})
 end
 
 -------------------------------------------------------------------------------
@@ -525,37 +527,51 @@ end
 ---@param gui_table LuaGuiElement
 ---@param model table
 function AdminPanel:addSheetListRow(gui_table, model)
-  ---col action
-  local cell_action = GuiElement.add(gui_table, GuiTable("action", model.id):column(4))
-  if model.share ~= nil and bit32.band(model.share, 1) > 0 then
-    GuiElement.add(cell_action, GuiButton(self.classname, "share-model", model.id, "read"):style("helmod_button_selected"):caption("R"):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
+  ---col element
+  local cell_element = GuiElement.add(gui_table, GuiFlowH("element", model.id))
+  -- sprite definition
+  local icons = GuiHelper.getModelIcons(model)
+  if icons.primary ~= nil and icons.primary.type ~= nil then
+    local button = GuiElement.add(cell_element, GuiButtonSelectSprite(self.classname, "donothing", model.id):sprite_with_quality(icons.primary.type, icons.primary.name, icons.primary.quality):style(nil))
+    if icons.secondary ~= nil then
+      --GuiElement.maskSecondaryIcon(button, icons.secondary.type, icons.secondary.name, icons.secondary.quality)
+    end
   else
-    GuiElement.add(cell_action, GuiButton(self.classname, "share-model", model.id, "read"):style("helmod_button_default"):caption("R"):tooltip({"tooltip.share-mod", {"helmod_common.reading"}}))
-  end
-  if model.share ~= nil and bit32.band(model.share, 2) > 0 then
-    GuiElement.add(cell_action, GuiButton(self.classname, "share-model", model.id, "write"):style("helmod_button_selected"):caption("W"):tooltip({"tooltip.share-mod", {"helmod_common.writing"}}))
-  else
-    GuiElement.add(cell_action, GuiButton(self.classname, "share-model", model.id, "write"):style("helmod_button_default"):caption("W"):tooltip({"tooltip.share-mod", {"helmod_common.writing"}}))
-  end
-  if model.share ~= nil and bit32.band(model.share, 4) > 0 then
-    GuiElement.add(cell_action, GuiButton(self.classname, "share-model", model.id, "delete"):style("helmod_button_selected"):caption("X"):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
-  else
-    GuiElement.add(cell_action, GuiButton(self.classname, "share-model", model.id, "delete"):style("helmod_button_default"):caption("X"):tooltip({"tooltip.share-mod", {"helmod_common.removal"}}))
+    GuiElement.add(cell_element, GuiButton(self.classname, "donothing", model.id):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black):style("helmod_button_menu_selected"))
   end
 
   ---col owner
   local cell_owner = GuiElement.add(gui_table, GuiFrameH("owner", model.id):style(helmod_frame_style.hidden))
   GuiElement.add(cell_owner, GuiLabel(model.id):caption(model.owner or "empty"):style("helmod_label_right_70"))
 
-  ---col element
-  local cell_element = GuiElement.add(gui_table, GuiFrameH("element", model.id):style(helmod_frame_style.hidden))
-  local element = Model.firstChild(model.blocks)
-  if element ~= nil then
-    GuiElement.add(cell_element, GuiButtonSprite(self.classname, "donothing", model.id):sprite("recipe", element.name):tooltip(RecipePrototype(element):getLocalisedName()))
-  else
-    GuiElement.add(cell_element, GuiButton(self.classname, "donothing", model.id):sprite("menu", defines.sprites.status_help.white, defines.sprites.status_help.black):style("helmod_button_menu_selected"))
-  end
+  ---col action
+  local cell_share = GuiElement.add(gui_table, GuiTable("action", model.id):column(6))
+  cell_share.style.cell_padding = 3
+  local model_read = false
+  if model.share ~= nil and bit32.band(model.share, 1) > 0 then model_read = true end
+  GuiElement.add(cell_share, GuiLabel(self.classname, "share-model-read"):caption({ "helmod_common.reading" }):tooltip({ "tooltip.share-mod", { "helmod_common.reading" } }))
+  GuiElement.add(cell_share, GuiCheckBox(self.classname, "share-model", model.id, "read"):state(model_read):tooltip({ "tooltip.share-mod", { "helmod_common.reading" } }))
 
+  local model_write = false
+  if model.share ~= nil and bit32.band(model.share, 2) > 0 then model_write = true end
+  GuiElement.add(cell_share, GuiLabel(self.classname, "share-model-write"):caption({ "helmod_common.writing" }):tooltip({ "tooltip.share-mod", { "helmod_common.writing" } }))
+  GuiElement.add(cell_share, GuiCheckBox(self.classname, "share-model", model.id, "write"):state(model_write):tooltip({ "tooltip.share-mod", { "helmod_common.writing" } }))
+
+  local model_delete = false
+  if model.share ~= nil and bit32.band(model.share, 4) > 0 then model_delete = true end
+  GuiElement.add(cell_share, GuiLabel(self.classname, "share-model-delete"):caption({ "helmod_common.removal" }):tooltip({ "tooltip.share-mod", { "helmod_common.removal" } }))
+  GuiElement.add(cell_share, GuiCheckBox(self.classname, "share-model", model.id, "delete"):state(model_delete):tooltip({ "tooltip.share-mod", { "helmod_common.removal" } }))
+
+
+  ---col element
+  local cell_action = GuiElement.add(gui_table, GuiFlowH())
+  GuiElement.add(cell_action, GuiLabel("model-change-owner"):caption({"helmod_result-panel.change-owner"}))
+  local default_owner = model.owner
+  local items = {}
+  for _, player in pairs(game.players) do
+    table.insert(items, player.name)
+  end
+  GuiElement.add(cell_action, GuiDropDown(self.classname, "model-change-owner", model.id):items(items, default_owner))
 end
 
 local color_name = "blue"
@@ -615,7 +631,17 @@ function AdminPanel:onEvent(event)
   end
   
   if not(User.isAdmin()) then return end
-
+  
+  if event.action == "model-change-owner" then
+    local model = storage.models[event.item1]
+    if model ~= nil then
+      local index = event.element.selected_index
+      local items = event.element.items
+      model.owner = items[index]
+      Controller:send("on_gui_update", event)
+    end
+  end
+  
   if event.action == "global-update" then
     local element = event.element
     local content = element.parent.parent

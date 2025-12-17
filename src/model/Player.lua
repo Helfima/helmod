@@ -702,6 +702,10 @@ end
 function Player.checkFactoryLimitationModule(module, lua_recipe)
     local factory = lua_recipe.factory
     local factory_prototype = EntityPrototype(factory)
+    local factory_effect_receiver= factory_prototype:getEffectReveiver()
+    if factory_effect_receiver.uses_beacon_effects ~= true then
+        return false
+    end
     local factory_module_slots= factory_prototype:getModuleInventorySize()
     if factory_module_slots == 0 then
         return false
@@ -759,6 +763,10 @@ end
 function Player.getFactoryLimitationModuleMessage(module, lua_recipe)
     local factory = lua_recipe.factory
     local factory_prototype = EntityPrototype(factory)
+    local factory_effect_receiver= factory_prototype:getEffectReveiver()
+    if factory_effect_receiver.uses_module_effects ~= true then
+        return {"helmod_limitation.not-allowed-effect-module"}
+    end
     local factory_module_slots= factory_prototype:getModuleInventorySize()
     if factory_module_slots == 0 then
         return {"helmod_limitation.no-module-slot"}
@@ -824,8 +832,8 @@ end
 function Player.checkBeaconLimitationModule(beacon, lua_recipe, module)
     local factory = lua_recipe.factory
     local factory_prototype = EntityPrototype(factory)
-    local factory_module_slots= factory_prototype:getModuleInventorySize()
-    if factory_module_slots == 0 then
+    local factory_effect_receiver= factory_prototype:getEffectReveiver()
+    if factory_effect_receiver.uses_beacon_effects ~= true then
         return false
     end
     local model_filter_beacon_module = User.getModGlobalSetting("model_filter_beacon_module")
@@ -883,9 +891,9 @@ end
 function Player.getBeaconLimitationModuleMessage(beacon, lua_recipe, module)
     local factory = lua_recipe.factory
     local factory_prototype = EntityPrototype(factory)
-    local factory_module_slots= factory_prototype:getModuleInventorySize()
-    if factory_module_slots == 0 then
-        return {"helmod_limitation.no-module-slot"}
+    local factory_effect_receiver= factory_prototype:getEffectReveiver()
+    if factory_effect_receiver.uses_module_effects ~= true then
+        return {"helmod_limitation.not-allowed-effect-module"}
     end
     local model_filter_beacon_module = User.getModGlobalSetting("model_filter_beacon_module")
     if model_filter_beacon_module == false then
