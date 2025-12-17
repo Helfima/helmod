@@ -367,10 +367,14 @@ function Player.setSmartToolBuildingConstantCombinator(block)
     local by_limit = block.by_limit
 
     local sections = {}
-    local items = {"factories", "beacons", "modules"}
+    local items = {}
+    local groups = {}
+    table.insert(groups, {name="factories",type="entity"})
+    table.insert(groups, {name="beacons",type="entity"})
+    table.insert(groups, {name="modules",type="item"})
     local index = 1
-    for _, item in ipairs(items) do
-        local elements = summary[item];
+    for _, group in ipairs(groups) do
+        local elements = summary[group.name];
         if table_size(elements) > 0 then
             local section = {
                 index = index,
@@ -378,19 +382,38 @@ function Player.setSmartToolBuildingConstantCombinator(block)
             }
             local signal_index = 1
             for _, element in pairs(elements) do
-                local count = element.count
-                if by_limit == true then
-                    count = element.count_limit
+                local item_name = element.name
+                if group.type == "entity" then
+                    local entity = Player.getEntityPrototype(item_name)
+                    if entity ~= nil then
+                        local item_stacks = entity.items_to_place_this
+                        if item_stacks ~= nil then
+                            item_name = item_stacks[1].name
+                        end
+                    end
                 end
-                local filter = {
-                    name = element.name,
-                    count = math.ceil(count),
-                    quality = element.quality or "normal",
-                    comparator = "=",
-                    index = signal_index
-                }
-                table.insert(section.filters, filter)
-                signal_index = signal_index + 1
+                if Player.getItemPrototype(item_name) ~= nil then
+                    local count = element.count
+                    if by_limit == true then
+                        count = element.count_limit
+                    end
+                    if items[item_name] ~= nil then
+                        items[item_name].count = items[item_name].count + math.ceil(count)
+                    else
+                        local filter = {
+                            name = item_name,
+                            count = math.ceil(count),
+                            quality = element.quality or "normal",
+                            comparator = "=",
+                            index = signal_index
+                        }
+                        table.insert(section.filters, filter)
+                        items[item_name] = filter
+                        signal_index = signal_index + 1
+                    end
+                else
+                    Player.print(string.format("Item '%s' not exist",item_name))
+                end
             end
             if #section.filters > 0 then
                 table.insert(sections, section)
