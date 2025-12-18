@@ -3,23 +3,22 @@
 -- @class Command
 --
 local Command = {
-  -- single-line comment
-  classname = "HMCommand"
+    -- single-line comment
+    classname = "HMCommand"
 }
 
 -------------------------------------------------------------------------------
 -- Start
 --
 function Command.start()
-  commands.add_command("helmod","helmod commands", Command.run)
+    commands.add_command("helmod", "helmod commands", Command.run)
 end
-
 
 -------------------------------------------------------------------------------
 -- Run
 --
 function Command.run(event)
--- do nothing
+    -- do nothing
 end
 
 -------------------------------------------------------------------------------
@@ -28,54 +27,61 @@ end
 -- @param event table
 --
 function Command.parse(event)
-  if event.command == "helmod" then
-    if string.lower(event.parameters) == "close" then
-      for _,location in pairs({"top","left","center","screen","goal"}) do
-        for _, element in pairs(Player.getGui(location).children) do
-          if element.get_mod() == "helmod" then
-            element.destroy()
-          end
+    local commands = Command.initialize()
+    if event.parameters == "" then
+        local names = {}
+        for _, cmd in pairs(commands) do
+            table.insert(names, cmd.name)
         end
-      end
-    elseif string.lower(event.parameters) == "resetuserui" then
-      User.reset()
-      Player.print("User UI are reseted!")
-    elseif string.lower(event.parameters) == "resetuserexplorer" then
-      User.setParameter("explore_recipe", nil)
-      User.setParameter("explore_recipe_id", nil)
-      Player.print("User Explorer are reseted!")
-    elseif string.lower(event.parameters) == "resetuserallui" then
-      User.resetAll()
-      Player.print("All User UIs are reseted!")
-    elseif string.lower(event.parameters) == "resetcaches" then
-      Player.print("Command removed! please use Administration panel!")
-    elseif string.lower(event.parameters) == "resettranslate" then
-      User.resetTranslate()
-      Player.print("User translate are reseted!")
-    elseif string.lower(event.parameters) == "exportdata" then
-      Logging.limit = 10
-      game.write_file("helmod\\data.json", Logging:objectToString(global), false)
-      Player.print("Data exported!")
-    elseif string.lower(event.parameters) == "exportmodel" then
-      Logging.limit = 10
-      game.write_file("helmod\\model.json", Logging:objectToString(Model.getModel()), false)
-      Player.print("Model exported!")
-    elseif string.lower(event.parameters) == "exporttranslate" then
-      Logging.limit = 10
-      game.write_file("helmod\\translate.json", Logging:objectToString(User.get("translated")), false)
-      Player.print("Translate exported!")
-    elseif string.lower(event.parameters) == "exportdatauser" then
-      Logging.limit = 10
-      game.write_file("helmod\\data_user.json", Logging:objectToString(User.get()), false)
-      Player.print("Data UI exported!")
-    elseif string.lower(event.parameters) == "exportcache" then
-      Logging.limit = 10
-      game.write_file("helmod\\cache.json", Logging:objectToString(Cache.getData()), false)
-      Player.print("Cache exported!")
+        Player.print(string.format("Valid arguments: %s", table.concat(names, " | ")))
     else
-      Player.print("Valid arguments: close | ExportData | ExportModel | ExportTranslate | ExportDataUser | ResetCaches | ResetUserUI | ResetTranslate")
+        local cmd = commands[string.lower(event.parameters)]
+        cmd.action();
     end
-  end
+end
+
+function Command.initialize()
+    local commands = {}
+    commands["close"] = {
+        name = "CloseUI",
+        description = "Close all panels",
+        action = function()
+            for _, location in pairs({ "top", "left", "center", "screen", "goal" }) do
+                for _, element in pairs(Player.getGui(location).children) do
+                    if element.get_mod() == "helmod" then
+                        element.destroy()
+                    end
+                end
+            end
+            Player.print("Close all panels executed!")
+        end
+    }
+    commands["resetuserall"] = {
+        name = "ResetUserAll",
+        description = "Reset all parameters for all users",
+        action = function()
+            User.resetAll()
+            Player.print("All Users are reseted!")
+        end
+    }
+    commands["resetuser"] = {
+        name = "ResetUser",
+        description = "Reset all user parameters",
+        action = function()
+            User.reset()
+            Player.print("User parameters are reseted!")
+        end
+    }
+    commands["resetuserexplorer"] = {
+        name = "ResetUserExplorer",
+        description = "Reset user explorer parameters",
+        action = function()
+            User.setParameter("explore_recipe", nil)
+            User.setParameter("explore_recipe_id", nil)
+            Player.print("User explorer parameter are reseted!")
+        end
+    }
+    return commands
 end
 
 return Command

@@ -6,9 +6,9 @@ RuleEdition = newclass(Form)
 -------------------------------------------------------------------------------
 ---On initialization
 function RuleEdition:onInit()
-  self.panelCaption = ({"helmod_rule-edition-panel.title"})
-  self.parameterLast = string.format("%s_%s",self.classname,"last")
-  self.panel_close_before_main = true
+    self.panelCaption = ({ "helmod_rule-edition-panel.title" })
+    self.parameterLast = string.format("%s_%s", self.classname, "last")
+    self.panel_close_before_main = true
 end
 
 -------------------------------------------------------------------------------
@@ -17,132 +17,172 @@ end
 ---@param width_main number
 ---@param height_main number
 function RuleEdition:onStyle(styles, width_main, height_main)
-  styles.flow_panel = {
-    minimal_height = 200,
-    maximal_height = height_main,
-  }
+    styles.flow_panel = {
+        minimal_height = 200,
+        maximal_height = height_main,
+    }
 end
 
 -------------------------------------------------------------------------------
 ---On update
 ---@param event LuaEvent
 function RuleEdition:onUpdate(event)
-  self:updateRule(event)
-  self:updateAction(event)
+    self:updateRule(event)
+    self:updateAction(event)
 end
 
 local rule_mod = nil
 local rule_name = nil
 local rule_category = nil
+local helmod_rule_types = nil
 local rule_type = nil
+local element_name = nil
+local rule_value = nil
 -------------------------------------------------------------------------------
 ---Update rule
 ---@param event LuaEvent
 function RuleEdition:updateRule(event)
-  local rule_panel = self:getFramePanel("rule_panel")
-  rule_panel.clear()
-  local rule_table = GuiElement.add(rule_panel, GuiTable("list-data"):column(2):style("helmod_table_rule"))
+    local rule_panel = self:getFramePanel("rule_panel")
+    rule_panel.clear()
+    local rule_table = GuiElement.add(rule_panel, GuiTable("list-data"):column(2):style("helmod_table_rule"))
 
-  ---mod
-  local mod_list = {}
-  for name, version in pairs(script.active_mods) do
-    table.insert(mod_list, name)
-  end
-  if rule_mod == nil then rule_mod = mod_list[1] end
-  GuiElement.add(rule_table, GuiLabel("label-mod"):caption({"helmod_rule-edition-panel.mod"}))
-  GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown", "mod"):items(mod_list, rule_mod))
+    ---mod
+    local mod_list = {}
+    for name, version in pairs(script.active_mods) do
+        table.insert(mod_list, name)
+    end
+    if rule_mod == nil then rule_mod = mod_list[1] end
+    GuiElement.add(rule_table, GuiLabel("label-mod"):caption({ "helmod_rule-edition-panel.mod" }))
+    GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown", "mod"):items(mod_list, rule_mod))
 
-  ---name
-  local helmod_rule_manes = {}
-  for name,rule in pairs(helmod_rules) do
-    table.insert(helmod_rule_manes,name)
-  end
-  if rule_name == nil then rule_name = helmod_rule_manes[1] end
-  GuiElement.add(rule_table, GuiLabel("label-name"):caption({"helmod_rule-edition-panel.name"}))
-  GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown", "name"):items(helmod_rule_manes, rule_name))
+    ---name
+    local helmod_rule_manes = {}
+    for name, rule in pairs(helmod_rules) do
+        table.insert(helmod_rule_manes, name)
+    end
+    if rule_name == nil then rule_name = helmod_rule_manes[1] end
+    GuiElement.add(rule_table, GuiLabel("label-name"):caption({ "helmod_rule-edition-panel.name" }))
+    GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown", "name"):items(helmod_rule_manes, rule_name))
 
-  ---category
-  local helmod_rule_categories = {}
-  for name,rule in pairs(helmod_rules[rule_name].categories) do
-    table.insert(helmod_rule_categories,name)
-  end
-  if rule_category == nil then rule_category = helmod_rule_categories[1] end
-  GuiElement.add(rule_table, GuiLabel("label-category"):caption({"helmod_rule-edition-panel.category"}))
-  GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown", "category"):items(helmod_rule_categories, rule_category))
+    ---category
+    local helmod_rule_categories = {}
+    for name, rule in pairs(helmod_rules[rule_name].categories) do
+        table.insert(helmod_rule_categories, name)
+    end
+    if rule_category == nil then rule_category = helmod_rules[rule_name].default_category end
+    GuiElement.add(rule_table, GuiLabel("label-category"):caption({ "helmod_rule-edition-panel.category" }))
+    GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown", "category"):items(helmod_rule_categories, rule_category))
 
-  ---type
-  local helmod_rule_types = helmod_rules[rule_name].categories[rule_category]
-  if rule_type == nil then rule_type = helmod_rule_types[1] end
-  GuiElement.add(rule_table, GuiLabel("label-type"):caption({"helmod_rule-edition-panel.type"}))
-  GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown", "type"):items(helmod_rule_types, rule_type))
+    ---type
+    helmod_rule_types = helmod_rules[rule_name].categories[rule_category]
+    if rule_type == nil then rule_type = helmod_rule_types.list[1] end
+    GuiElement.add(rule_table, GuiLabel("label-type"):caption({ "helmod_rule-edition-panel.type" }))
+    GuiElement.add(rule_table, GuiDropDown(self.classname, "dropdown", "type"):items(helmod_rule_types.list, rule_type))
 
-  GuiElement.add(rule_table, GuiLabel("label-value"):caption({"helmod_rule-edition-panel.value"}))
-  GuiElement.add(rule_table, GuiButton("choose", "value"):choose("entity"))
+    local element_type = helmod_rule_types.type
+    GuiElement.add(rule_table, GuiLabel("label-value"):caption({ "helmod_rule-edition-panel.value" }))
+    local cell_choose = GuiElement.add(rule_table, GuiFlowH())
+    cell_choose.style.horizontal_spacing = 3
+    GuiElement.add(cell_choose, GuiButtonSelectSprite(self.classname, "rule-choose", "value"):choose(element_type, element_name))
+    local text_field = GuiElement.add(cell_choose, GuiTextField(self.classname, "rule-edit", "onchange"):text(rule_value))
+    text_field.style.width = 150
 
-  GuiElement.add(rule_table, GuiLabel("label-excluded"):caption({"helmod_rule-edition-panel.excluded"}))
-  local checkbox = GuiElement.add(rule_table, GuiCheckBox("excluded"):state(false))
-  if helmod_rules[rule_name].excluded_only then
-    checkbox.state=true
-    checkbox.enabled=false
-  end
+    GuiElement.add(rule_table, GuiLabel("label-excluded"):caption({ "helmod_rule-edition-panel.excluded" }))
+    local checkbox = GuiElement.add(rule_table, GuiCheckBox("excluded"):state(false))
+    if helmod_rules[rule_name].excluded_only then
+        checkbox.state = true
+        checkbox.enabled = false
+    end
 end
 
 -------------------------------------------------------------------------------
 ---Update action
 ---@param event LuaEvent
 function RuleEdition:updateAction(event)
-  local action_panel = self:getFramePanel("action_panel")
-  action_panel.clear()
-  local action_panel = GuiElement.add(action_panel, GuiTable("table_action"):column(2))
-  GuiElement.add(action_panel, GuiButton(self.classname, "save"):caption({"helmod_button.save"}))
+    local action_panel = self:getFramePanel("action_panel")
+    action_panel.clear()
+    local action_panel = GuiElement.add(action_panel, GuiTable("table_action"):column(2))
+    GuiElement.add(action_panel, GuiButton(self.classname, "save"):caption({ "helmod_button.save" }))
 end
 
+function RuleEdition:analyseRuleValue(element_name)
+    rule_value = element_name
+    local prototype = nil
+    if helmod_rule_types.type == "entity" then
+        prototype = EntityPrototype(rule_value)
+    elseif helmod_rule_types.type == "recipe" then
+        prototype = RecipePrototype(rule_value)
+    end
+    if rule_value ~= nil then
+        if rule_type == "entity-type" then
+            rule_value = prototype:getType()
+        end
+        if rule_type == "entity-group" then
+            rule_value = prototype:native().group.name
+        end
+        if rule_type == "entity-subgroup" then
+            rule_value = prototype:native().subgroup.name
+        end
+        if rule_type == "entity-category" then
+            rule_value = prototype:native().category
+        end
+    else
+        rule_value = "all"
+    end
+end
 -------------------------------------------------------------------------------
 ---On event
 ---@param event LuaEvent
 function RuleEdition:onEvent(event)
-  if User.isAdmin() then
-    if event.action == "dropdown" then
-      if event.item1 == "mod" then
-        rule_mod = GuiElement.getDropdownSelection(event.element)
-      end
-      if event.item1 == "name" then
-        rule_name = GuiElement.getDropdownSelection(event.element)
-      end
-      if event.item1 == "category" then
-        rule_category = GuiElement.getDropdownSelection(event.element)
-      end
-      if event.item1 == "type" then
-        rule_type = GuiElement.getDropdownSelection(event.element)
-      end
-      self:updateRule(event)
+    if User.isAdmin() then
+        if event.action == "dropdown" then
+            if event.item1 == "mod" then
+                rule_mod = GuiElement.getDropdownSelection(event.element)
+            end
+            if event.item1 == "name" then
+                rule_name = GuiElement.getDropdownSelection(event.element)
+                rule_category = nil
+                rule_type = nil
+                rule_value = nil
+                element_name = nil
+            end
+            if event.item1 == "category" then
+                rule_category = GuiElement.getDropdownSelection(event.element)
+                rule_type = nil
+                rule_value = nil
+                element_name = nil
+            end
+            if event.item1 == "type" then
+                rule_type = GuiElement.getDropdownSelection(event.element)
+                self:analyseRuleValue(element_name)
+            end
+            self:updateRule(event)
+        end
+
+        if event.action == "rule-choose" then
+            local value = event.element.elem_value
+            if value ~= nil and value ~= element_name then
+                element_name = value
+                self:analyseRuleValue(element_name)
+                self:updateRule(event)
+            end 
+        end
+
+        if event.action == "rule-edit" then
+            rule_value = event.element.text
+        end
+
+        if event.action == "save" then
+            local rule_panel = self:getFramePanel("rule_panel")
+            local rule_table = rule_panel["list-data"]
+
+            local rule_excluded = rule_table["excluded"].state
+
+            local rule = Model.newRule(rule_mod, rule_name, rule_category, rule_type, rule_value, rule_excluded, #Model.getRules())
+            local rules = Model.getRules()
+            table.insert(rules, rule)
+            self:close()
+            Controller:send("on_gui_refresh", event)
+        end
     end
-
-    if event.action == "save" then
-      local rule_panel = self:getFramePanel("rule_panel")
-      local rule_table = rule_panel["list-data"]
-
-      local rule_value = rule_table["choose=value"].elem_value
-      local rule_excluded = rule_table["excluded"].state
-
-      if rule_value ~= nil then
-        if rule_type == "entity-type" then
-          rule_value = EntityPrototype(rule_value):getType()
-        end
-        if rule_type == "entity-group" then
-          rule_value = EntityPrototype(rule_value):native().group.name
-        end
-        if rule_type == "entity-subgroup" then
-          rule_value = EntityPrototype(rule_value):native().subgroup.name
-        end
-      else
-        rule_value = "all"
-      end
-      local rule = Model.newRule(rule_mod, rule_name, rule_category, rule_type, rule_value, rule_excluded, #Model.getRules())
-      local rules = Model.getRules()
-      table.insert(rules, rule)
-      self:close()
-      Controller:send("on_gui_refresh", event)
-    end
-  end
 end

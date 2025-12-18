@@ -102,6 +102,8 @@ end
 -------------------------------------------------------------------------------
 ---After initialization
 function AbstractSelector:afterInit()
+  self.rules_filter = false
+  self.unlock_recipe = false
   self.disable_option = false
   self.hidden_option = false
   self.product_option = false
@@ -585,6 +587,12 @@ function AbstractSelector:updateFilter(event)
       GuiElement.add(filter_table, GuiLabel("filter_show_lock_recipes"):caption({"helmod_recipe-edition-panel.filter-show-lock-recipes"}))
     end
 
+    if self.rules_filter then
+      local filter_show_excludes_by_rules = User.getSetting("filter_show_excludes_by_rules")
+      GuiElement.add(filter_table, GuiCheckBox(self.classname, "change-boolean-settings", "filter_show_excludes_by_rules"):state(filter_show_excludes_by_rules))
+      GuiElement.add(filter_table, GuiLabel("filter_show_excludes_by_rules"):caption({"helmod_recipe-edition-panel.filter-show-excludes-by-rules"}))
+    end
+
     if Player.hasFeatureQuality() and self.is_support_quality then
       GuiElement.add(filter_table, GuiLabel("label-quality"):caption({ "helmod_label.quality" }))
       quality_selector_cell = GuiElement.add(filter_table, GuiFlowH("selector-quality"))
@@ -627,6 +635,14 @@ function AbstractSelector:updateFilter(event)
   end
 end
 
+function AbstractSelector:rulesFilter(prototype)
+  local rules_included, rules_excluded = Player.getRules("selector-filter")
+  local show = true
+  ---resolve rule excluded
+  show = Player.checkRules(show, rules_excluded, self.rule_category, prototype, false)
+  return show
+end
+
 -------------------------------------------------------------------------------
 ---Create element lists
 ---@param event LuaEvent
@@ -662,6 +678,7 @@ function AbstractSelector:createElementLists(event)
       local filter_show_disable = User.getSetting("filter_show_disable")
       local filter_show_hidden = User.getSetting("filter_show_hidden")
       local filter_show_hidden_player_crafting = User.getSetting("filter_show_hidden_player_crafting")
+      local filter_show_excludes_by_rules = User.getSetting("filter_show_excludes_by_rules")
       local query_list = table.remove(event.table_element)
       if query_list ~= nil then
         self:updateWaitMessage(string.format("Wait list build: %s", query_list.index or 0))
@@ -671,10 +688,11 @@ function AbstractSelector:createElementLists(event)
           if self:checkFilter(key) then
             for element_name, element in pairs(element) do
               local prototype = self:getPrototype(element)
-              if (not(self.unlock_recipe) or (prototype:getUnlock() == true or filter_show_lock_recipes == true)) and 
-                (not(self.disable_option) or (prototype:getEnabled() == true or filter_show_disable == true)) and 
-                (not(self.hidden_option) or (prototype:getHidden() == false or filter_show_hidden == true)) and
-                (not(self.hidden_player_crafting) or (prototype:getHiddenPlayerCrafting() == false or filter_show_hidden_player_crafting == true)) then
+              if (not(self.rules_filter) or (filter_show_excludes_by_rules == true or self:rulesFilter(prototype:native()) == true)) and
+                (not(self.unlock_recipe) or (filter_show_lock_recipes == true or prototype:getUnlock() == true)) and 
+                (not(self.disable_option) or (filter_show_disable == true or prototype:getEnabled() == true)) and 
+                (not(self.hidden_option) or (filter_show_hidden == true or prototype:getHidden() == false)) and
+                (not(self.hidden_player_crafting) or (filter_show_hidden_player_crafting == true or prototype:getHiddenPlayerCrafting() == false)) then
 
                 if list_group_elements[element.group] == nil then list_group_elements[element.group] = {} end
                 if list_group_elements[element.group][element.subgroup] == nil then list_group_elements[element.group][element.subgroup] = {} end

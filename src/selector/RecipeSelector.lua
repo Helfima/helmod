@@ -20,6 +20,8 @@ function RecipeSelector:afterInit()
   self.product_option = true
   self.hidden_player_crafting = true
   self.is_support_quality = true
+  self.rules_filter = true
+  self.rule_category = "recipe"
 end
 
 -------------------------------------------------------------------------------

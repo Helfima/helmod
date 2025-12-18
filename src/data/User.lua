@@ -102,7 +102,8 @@ function User.getDefaultSettings()
         filter_show_disable = true,
         filter_show_hidden = false,
         filter_show_hidden_player_crafting = true,
-        filter_show_lock_recipes = false
+        filter_show_lock_recipes = false,
+        filter_show_excludes_by_rules = false
     }
 end
 

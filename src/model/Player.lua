@@ -712,6 +712,8 @@ function Player.checkRules(check, rules, category, lua_entity, included)
             check = included
         elseif rules[category]["entity-subgroup"] and (rules[category]["entity-subgroup"]["all"] or rules[category]["entity-subgroup"][lua_entity.subgroup.name]) then
             check = included
+        elseif rules[category]["entity-category"] and (rules[category]["entity-category"]["all"] or rules[category]["entity-category"][lua_entity.category]) then
+            check = included
         end
     end
     return check

@@ -295,14 +295,17 @@ helmod_frame_style = {
 }
 
 helmod_rules = {}
-helmod_rules["production-crafting"] = {excluded_only=false ,categories={}}
-helmod_rules["production-crafting"].categories["standard"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
-helmod_rules["production-crafting"].categories["extraction-machine"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
-helmod_rules["production-crafting"].categories["energy"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
-helmod_rules["production-crafting"].categories["technology"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
-helmod_rules["production-crafting"].categories["exclude-placed-by-hidden"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
+helmod_rules["production-crafting"] = {excluded_only=false, default_category="standard" ,categories={}}
+helmod_rules["production-crafting"].categories["standard"] = {type="entity",list= {"entity-name", "entity-type", "entity-group", "entity-subgroup"}}
+helmod_rules["production-crafting"].categories["extraction-machine"] = {type="entity",list= {"entity-name", "entity-type", "entity-group", "entity-subgroup"}}
+helmod_rules["production-crafting"].categories["energy"] = {type="entity",list= {"entity-name", "entity-type", "entity-group", "entity-subgroup"}}
+helmod_rules["production-crafting"].categories["technology"] = {type="entity",list= {"entity-name", "entity-type", "entity-group", "entity-subgroup"}}
+helmod_rules["production-crafting"].categories["exclude-placed-by-hidden"] = {type="entity",list= {"entity-name", "entity-type", "entity-group", "entity-subgroup"}}
 
-helmod_rules["module-limitation"] = {excluded_only=true ,categories={}}
-helmod_rules["module-limitation"].categories["standard"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
-helmod_rules["module-limitation"].categories["extraction-machine"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
-helmod_rules["module-limitation"].categories["technology"] = {"entity-name", "entity-type", "entity-group", "entity-subgroup"}
+helmod_rules["module-limitation"] = {excluded_only=true, default_category="standard" ,categories={}}
+helmod_rules["module-limitation"].categories["standard"] = {type="entity",list= {"entity-name", "entity-type", "entity-group", "entity-subgroup"}}
+helmod_rules["module-limitation"].categories["extraction-machine"] = {type="entity",list= {"entity-name", "entity-type", "entity-group", "entity-subgroup"}}
+helmod_rules["module-limitation"].categories["technology"] = {type="entity",list= {"entity-name", "entity-type", "entity-group", "entity-subgroup"}}
+
+helmod_rules["selector-filter"] = {excluded_only=true, default_category="recipe" ,categories={}}
+helmod_rules["selector-filter"].categories["recipe"] = {type="recipe",list= {"entity-name", "entity-type", "entity-group", "entity-subgroup", "entity-category"}}

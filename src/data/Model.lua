@@ -102,10 +102,11 @@ end
 ---Reset rules
 function Model.resetRules()
   local rules = {}
-  table.insert(rules, {index=15, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="supply-depot", excluded = true})
-  table.insert(rules, {index=16, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="request-depot", excluded = true})
-  table.insert(rules, {index=17, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="buffer-depot", excluded = true})
-  table.insert(rules, {index=18, mod="Cerys-Moon-of-Fulgora", name="production-crafting", category="exclude-placed-by-hidden", type="entity-name", value="cerys-fulgoran-cryogenic-plant", excluded = true})
+  table.insert(rules, {index=0, mod="base", name="selector-filter", category="recipe", type="entity-category", value="recycling", excluded = true})
+  table.insert(rules, {index=1, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="supply-depot", excluded = true})
+  table.insert(rules, {index=2, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="request-depot", excluded = true})
+  table.insert(rules, {index=3, mod="Transport_Drones", name="production-crafting", category="standard", type="entity-name", value="buffer-depot", excluded = true})
+  table.insert(rules, {index=4, mod="Cerys-Moon-of-Fulgora", name="production-crafting", category="exclude-placed-by-hidden", type="entity-name", value="cerys-fulgoran-cryogenic-plant", excluded = true})
   storage.rules = rules
 end
 

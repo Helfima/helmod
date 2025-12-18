@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.2.7
 Date: 2025-12-16
+  Changes:
+    - Added a new rule to exclude recipes
   Bugfixes:
     - Fixed quality selector for the fuel-based crafting machine
     - Fixed apply default machine with quality
