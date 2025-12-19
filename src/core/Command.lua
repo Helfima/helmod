@@ -27,16 +27,31 @@ end
 -- @param event table
 --
 function Command.parse(event)
-    local commands = Command.initialize()
-    if event.parameters == "" then
-        local names = {}
-        for _, cmd in pairs(commands) do
-            table.insert(names, cmd.name)
+    if event.command == "helmod" then
+        if event.parameters == "" then
+            Command.help()
+        else
+            Command.execute(event.parameters)
         end
-        Player.print(string.format("Valid arguments: %s", table.concat(names, " | ")))
-    else
-        local cmd = commands[string.lower(event.parameters)]
+    end
+end
+
+function Command.help()
+    local commands = Command.initialize()
+    local names = {}
+    for _, cmd in pairs(commands) do
+        table.insert(names, cmd.name)
+    end
+    Player.print(string.format("Valid arguments: %s", table.concat(names, " | ")))
+end
+
+function Command.execute(parameters)
+    local commands = Command.initialize()
+    local cmd = commands[string.lower(parameters)]
+    if cmd ~= nil then
         cmd.action();
+    else
+        Command.help()
     end
 end
 
