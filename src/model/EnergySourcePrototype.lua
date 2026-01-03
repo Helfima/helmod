@@ -175,7 +175,8 @@ end
 function BurnerPrototype:getFuelPrototypes()
   local filters = {}
   for fuel_category,_ in pairs(self:getFuelCategories()) do
-    table.insert(filters, {filter = "fuel-value",    mode = "or",  invert = false, comparison = ">", value = 0})
+    table.insert(filters, {filter = "hidden",        mode = "and", invert = true})
+    table.insert(filters, {filter = "fuel-value",    mode = "and", invert = false, comparison = ">", value = 0})
     table.insert(filters, {filter = "fuel-category", mode = "and", invert = false, ["fuel-category"] = fuel_category})
   end
   

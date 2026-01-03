@@ -6,6 +6,7 @@ Date: 2026-01-03
     - Added logistic row in the pinned panel
   Bugfixes:
     - Fixed update pinned panel when model changes
+    - Fixed edit recipe showing hidden fuels #641
 ---------------------------------------------------------------------------------------------------
 Version: 2.2.8
 Date: 2025-12-19
