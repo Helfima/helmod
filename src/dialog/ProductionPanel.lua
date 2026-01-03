@@ -1136,6 +1136,8 @@ function ProductionPanel:addTableHeader(itable, block)
 	end
 end
 
+local maximal_height = 93*3/1.25 + 4 -- for scale 125%
+
 -------------------------------------------------------------------------------
 ---Add table row
 ---@param gui_table LuaGuiElement
@@ -1258,7 +1260,10 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 			local skip_hidden_products = show_hidden_recipe_products == recipe.id
 
 			local display_product_cols = User.getPreferenceSetting("display_product_cols")
-			local cell_products = GuiElement.add(gui_table, GuiTable("products", recipe.id):column(display_product_cols):style("helmod_table_list"))
+			local cell_scroll = GuiElement.add(gui_table, GuiScroll("products", recipe.id))
+			cell_scroll.style.maximal_height = maximal_height
+			cell_scroll.horizontal_scroll_policy = "never"
+			local cell_products = GuiElement.add(cell_scroll, GuiTable("products", recipe.id):column(display_product_cols):style("helmod_table_list"))
 			local product_color = User.getThumbnailColor(defines.thumbnail_color.names.product_default)
 			for index, lua_product in spairs(recipe_prototype:getQualityProducts(recipe.factory, recipe.quality), User.getProductSorter()) do
 				local contraint_type = nil
@@ -1310,7 +1315,10 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 			local skip_hidden_products = show_hidden_recipe_ingredients == recipe.id
 
 			local display_ingredient_cols = User.getPreferenceSetting("display_ingredient_cols")
-			local cell_ingredients = GuiElement.add(gui_table, GuiTable("ingredients_", recipe.id):column(display_ingredient_cols):style("helmod_table_list"))
+			local cell_scroll = GuiElement.add(gui_table, GuiScroll("ingredients", recipe.id))
+			cell_scroll.style.maximal_height = maximal_height
+			cell_scroll.horizontal_scroll_policy = "never"
+			local cell_ingredients = GuiElement.add(cell_scroll, GuiTable("ingredients", recipe.id):column(display_ingredient_cols):style("helmod_table_list"))
 			local ingredient_color = User.getThumbnailColor(defines.thumbnail_color.names.ingredient_default)
 			for index, lua_ingredient in spairs(recipe_prototype:getQualityIngredients(recipe.factory, recipe.quality), User.getProductSorter()) do
 				local contraint_type = nil
@@ -1437,7 +1445,6 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 
 	local product_sorter = User.getProductSorter()
 
-	local maximal_height = 93*3 * 1.25 + 4 -- for scale 125%
 	local display_hidden_products = User.getPreferenceSetting("display_hidden_products")
 	for _, order in pairs(Model.getBlockOrder(parent)) do
 		if order == "products" then
