@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.2.9
+Date: 2026-01-03
+  Changes:
+    - Added products filters to hide when his count are lower than preference
+    - Added logistic row in the pinned panel
+  Bugfixes:
+    - Fixed update pinned panel when model changes
+---------------------------------------------------------------------------------------------------
 Version: 2.2.8
 Date: 2025-12-19
   Bugfixes:

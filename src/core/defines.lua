@@ -148,6 +148,7 @@ defines.styles.button.menu_sm_selected_yellow = "helmod_button_menu_sm_selected_
 defines.styles.button.menu_tool_selected_yellow = "helmod_button_menu_tool_selected_yellow"
 defines.styles.button.menu_flat2 = "helmod_button_menu_flat2"
 defines.styles.button.menu_flat = "helmod_button_menu_flat"
+defines.styles.button.menu_m_flat = "helmod_button_menu_m_flat"
 defines.styles.button.menu_sm_flat = "helmod_button_menu_sm_flat"
 
 defines.styles.button.default = "helmod_button_default"

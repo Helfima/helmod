@@ -55,6 +55,15 @@ defines.constant.preferences = {
     allowed_values = {"natural","name","cost"},
     group = "general"
   },
+  --display hidden products
+  display_hidden_products = {
+    type = "int-setting",
+    localised_name = {"helmod_pref_settings.display-hidden-products"},
+    localised_description = {"helmod_pref_settings.display-hidden-products-desc"},
+    default_value = 0.01,
+    allowed_values = {0,0.1,0.01,0.001,0.0001},
+    group = "general"
+  },
   --display product cols
   display_product_cols = {
     type = "int-setting",

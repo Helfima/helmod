@@ -109,6 +109,7 @@ end
 ---@param element_quality? string
 function GuiTooltip.appendLineQuantity(tooltip, element_type, element_name, element_amount, element_label, element_quality)
 	local noQuality = true
+	local total_count = Format.formatNumberElement(element_amount)
 	if Player.hasFeatureQuality() and element_quality ~= nil then
 		local quality = Player.getQualityPrototype(element_quality)
 		if quality ~= nil and quality.level > 0 then
@@ -118,7 +119,7 @@ function GuiTooltip.appendLineQuantity(tooltip, element_type, element_name, elem
 			local element_sprite = GuiElement.getSpriteWithQuality(element_type, element_name, element_quality)
 			table.insert(tooltip, { "", "\n", element_sprite, " "
 				, defines.mod.tags.font.default_bold
-				, defines.mod.tags.color.white, element_amount, defines.mod.tags.color.close
+				, defines.mod.tags.color.white, total_count, defines.mod.tags.color.close
 				, defines.mod.tags.font.close
 				, " x ", defines.mod.tags.color.gold, element_label, defines.mod.tags.color.close
 				, color_tag, " (", localised_name, ")", defines.mod.tags.color.close
@@ -130,7 +131,7 @@ function GuiTooltip.appendLineQuantity(tooltip, element_type, element_name, elem
 		local element_sprite = GuiElement.getSprite(element_type, element_name, "[%s=%s]")
 		table.insert(tooltip, { "", "\n", element_sprite, " "
 			, defines.mod.tags.font.default_bold
-			, defines.mod.tags.color.white, element_amount, defines.mod.tags.color.close
+			, defines.mod.tags.color.white, total_count, defines.mod.tags.color.close
 			, defines.mod.tags.font.close
 			, " x ", defines.mod.tags.color.gold, element_label, defines.mod.tags.color.close
 		})
@@ -147,6 +148,7 @@ end
 ---@param element_quality? string
 function GuiTooltip.appendLineSubQuantity(tooltip, element_type, element_name, element_amount, element_label, element_quality)
 	local noQuality = true
+	local total_count = Format.formatNumberElement(element_amount)
 	if Player.hasFeatureQuality() and element_quality ~= nil then
 		local quality = Player.getQualityPrototype(element_quality)
 		if quality ~= nil and quality.level > 0 then
@@ -157,7 +159,7 @@ function GuiTooltip.appendLineSubQuantity(tooltip, element_type, element_name, e
 			table.insert(tooltip, { "", "\n", "[img=helmod-tooltip-blank]", " "
 				, element_sprite
 				, defines.mod.tags.font.default_bold
-				, defines.mod.tags.color.white, " ", element_amount, defines.mod.tags.color.close
+				, defines.mod.tags.color.white, " ", total_count, defines.mod.tags.color.close
 				, defines.mod.tags.font.close
 				, " x ", defines.mod.tags.color.gold, element_label, defines.mod.tags.color.close
 				, color_tag, " (", localised_name, ")", defines.mod.tags.color.close
@@ -170,7 +172,7 @@ function GuiTooltip.appendLineSubQuantity(tooltip, element_type, element_name, e
 		table.insert(tooltip, { "", "\n", "[img=helmod-tooltip-blank]", " "
 			, element_sprite
 			, defines.mod.tags.font.default_bold
-			, defines.mod.tags.color.white, " ", element_amount, defines.mod.tags.color.close
+			, defines.mod.tags.color.white, " ", total_count, defines.mod.tags.color.close
 			, defines.mod.tags.font.close
 			, " x ", defines.mod.tags.color.gold, element_label, defines.mod.tags.color.close
 		})
