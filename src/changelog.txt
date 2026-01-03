@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.2.10
+Date: 2026-01-03
+  Bugfixes:
+    - Fixed error caused by a wrong filter mode on fuel
+    - Fixed error caused by products filters, wrong code position
+---------------------------------------------------------------------------------------------------
 Version: 2.2.9
 Date: 2026-01-03
   Changes:

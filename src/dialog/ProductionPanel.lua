@@ -1361,10 +1361,10 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				else
 					table.insert(hidden_products, ingredient)
 				end
-				if #hidden_products > 0 then
-					GuiElement.add(cell_ingredients, GuiCellHiddenElement(self.classname, "show-hidden-recipe-ingredients", model.id, block.id, recipe.id):element(hidden_products):tooltip("tooltip.add-recipe")
-						:color(ingredient_color))
-				end
+			end
+			if #hidden_products > 0 then
+				GuiElement.add(cell_ingredients, GuiCellHiddenElement(self.classname, "show-hidden-recipe-ingredients", model.id, block.id, recipe.id):element(hidden_products):tooltip("tooltip.add-recipe")
+					:color(ingredient_color))
 			end
 		end
 	end

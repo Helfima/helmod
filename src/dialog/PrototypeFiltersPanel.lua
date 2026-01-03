@@ -62,7 +62,8 @@ end
 table.insert(samples, sample)
 
 sample = {name="list of fuels", type="item", value={}}
-table.insert(sample.value, { mode="or", filter="fuel-value", invert="false", option={value=0,comparison=">"}})
+table.insert(sample.value, {filter = "hidden",        mode = "and", invert = "true"})
+table.insert(sample.value, { mode="and", filter="fuel-value", invert="false", option={value=0,comparison=">"}})
 table.insert(samples, sample)
 
 sample = {name="Item logistic list of inserters", type="entity", value={}}
