@@ -658,6 +658,7 @@ function ProductionPanel:updateInputBlock(model, block)
 		if block.ingredients ~= nil then
 			local hidden_products = {}
 			local show_hidden_input_products = User.getParameter("show_hidden_input_products")
+			local skip_hidden_products = table.size(block.ingredients) < 2*column_count
 
 			for index, lua_ingredient in spairs(block.ingredients, User.getProductSorter()) do
 				if all_visible == true or ((lua_ingredient.state or 0) == 1 and not (block_by_product)) or (lua_ingredient.amount or 0) > ModelCompute.waste_value then
@@ -701,7 +702,7 @@ function ProductionPanel:updateInputBlock(model, block)
 					else
 						ingredient_color = User.getThumbnailColor(defines.thumbnail_color.names.ingredient_default)
 					end
-					if show_hidden_input_products or display_hidden_products == 0 or ingredient.count > display_hidden_products then
+					if skip_hidden_products == true or all_visible == true or show_hidden_input_products or display_hidden_products == 0 or ingredient.count > display_hidden_products then
 						GuiElement.add(input_table, GuiCellElementM(self.classname, button_action, model.id, block.id, "none"):element(ingredient):tooltip(button_tooltip):index(index):color(ingredient_color):byLimit(block.by_limit):contraintIcon(contraint_type):hasInput(has_input):controlInfo(control_info))
 					else
 						table.insert(hidden_products, ingredient)
@@ -763,7 +764,8 @@ function ProductionPanel:updateOutputBlock(model, block)
 		if block.products ~= nil then
 			local hidden_products = {}
 			local show_hidden_output_products = User.getParameter("show_hidden_output_products")
-
+			local skip_hidden_products = table.size(block.products) < 2*column_count
+			
 			for index, lua_product in spairs(block.products, User.getProductSorter()) do
 				if all_visible == true or ((lua_product.state or 0) == 1 and block_by_product) or (lua_product.amount or 0) > ModelCompute.waste_value then
 					local contraint_type = nil
@@ -808,7 +810,7 @@ function ProductionPanel:updateOutputBlock(model, block)
 					else
 						product_color = User.getThumbnailColor(defines.thumbnail_color.names.product_default)
 					end
-					if show_hidden_output_products or display_hidden_products == 0 or product.count > display_hidden_products then
+					if skip_hidden_products == true or all_visible == true or show_hidden_output_products or display_hidden_products == 0 or product.count > display_hidden_products then
 						GuiElement.add(output_table, GuiCellElementM(self.classname, button_action, model.id, block.id, "none"):element(product):tooltip(button_tooltip):index(index):color(product_color):byLimit(block.by_limit):contraintIcon(contraint_type):hasInput(has_input):controlInfo(control_info))
 					else
 						table.insert(hidden_products, product)
@@ -1265,7 +1267,11 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 			cell_scroll.horizontal_scroll_policy = "never"
 			local cell_products = GuiElement.add(cell_scroll, GuiTable("products", recipe.id):column(display_product_cols):style("helmod_table_list"))
 			local product_color = User.getThumbnailColor(defines.thumbnail_color.names.product_default)
-			for index, lua_product in spairs(recipe_prototype:getQualityProducts(recipe.factory, recipe.quality), User.getProductSorter()) do
+			local lua_products = recipe_prototype:getQualityProducts(recipe.factory, recipe.quality)
+			if #lua_products <= 2*display_product_cols then
+				skip_hidden_products = true
+			end
+			for index, lua_product in spairs(lua_products, User.getProductSorter()) do
 				local contraint_type = nil
 				local is_pivot = false
 				local product_prototype = Product(lua_product)
@@ -1297,7 +1303,7 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 						is_pivot = true
 					end
 				end
-				if skip_hidden_products or display_hidden_products == 0 or product.count > display_hidden_products then
+				if (recipe.count or 0) == 0 or skip_hidden_products == true or display_hidden_products == 0 or product.count > display_hidden_products then
 					GuiElement.add(cell_products, GuiCellElement(self.classname, "production-recipe-product-add", model.id, block.id, recipe.id):element(product):tooltip("tooltip.add-recipe")
 					:color(product_color):index(index):byLimit(block.by_limit):contraintIcon(contraint_type):isPivot(is_pivot):controlInfo(control_info))
 				else
@@ -1320,6 +1326,10 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 			cell_scroll.horizontal_scroll_policy = "never"
 			local cell_ingredients = GuiElement.add(cell_scroll, GuiTable("ingredients", recipe.id):column(display_ingredient_cols):style("helmod_table_list"))
 			local ingredient_color = User.getThumbnailColor(defines.thumbnail_color.names.ingredient_default)
+			local lua_ingredients = recipe_prototype:getQualityIngredients(recipe.factory, recipe.quality)
+			if #lua_ingredients <= 2*display_ingredient_cols then
+				skip_hidden_products = true
+			end
 			for index, lua_ingredient in spairs(recipe_prototype:getQualityIngredients(recipe.factory, recipe.quality), User.getProductSorter()) do
 				local contraint_type = nil
 				local is_pivot = false
@@ -1355,7 +1365,7 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 						is_pivot = true
 					end
 				end
-				if skip_hidden_products or display_hidden_products == 0 or ingredient.count > display_hidden_products then
+				if (recipe.count or 0) == 0 or skip_hidden_products == true or display_hidden_products == 0 or ingredient.count > display_hidden_products then
 					GuiElement.add(cell_ingredients, GuiCellElement(self.classname, "production-recipe-ingredient-add", model.id, block.id, recipe.id):element(ingredient):tooltip("tooltip.add-recipe")
 					:color(ingredient_color):index(index):byLimit(block.by_limit):contraintIcon(contraint_type):isPivot(is_pivot):controlInfo(control_info))
 				else
@@ -1446,6 +1456,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 	local product_sorter = User.getProductSorter()
 
 	local display_hidden_products = User.getPreferenceSetting("display_hidden_products")
+	
 	for _, order in pairs(Model.getBlockOrder(parent)) do
 		if order == "products" then
 			---products
@@ -1459,6 +1470,9 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 				local show_hidden_block_products = User.getParameter("show_hidden_block_products")
 				local skip_hidden_products = show_hidden_block_products == block.id
 				local hidden_products = {}
+				if table.size(block.products) <= 2*display_product_cols then
+					skip_hidden_products = true
+				end
 				for index, lua_product in spairs(block.products, product_sorter) do
 					if ((lua_product.state or 0) == 1 and block_by_product) or (lua_product.amount or 0) > ModelCompute.waste_value then
 						local parent_id = parent.id
@@ -1508,7 +1522,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						if not (parent.solver ~= true and parent.by_product ~= false) then
 							control_info = nil
 						end
-						if skip_hidden_products or display_hidden_products == 0 or product.count > display_hidden_products then
+						if (block.count or 0) == 0 or skip_hidden_products == true or display_hidden_products == 0 or product.count > display_hidden_products then
 							GuiElement.add(cell_products, GuiCellElement(self.classname, button_action, model.id, parent_id, block.id):element(product)
 							:tooltip(button_tooltip):color(product_color):index(index):contraintIcon(contraint_type):isPivot(is_pivot):controlInfo(control_info))
 						else
@@ -1533,6 +1547,9 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 			if block.ingredients ~= nil then
 				local show_hidden_block_ingredients = User.getParameter("show_hidden_block_ingredients")
 				local skip_hidden_products = show_hidden_block_ingredients == block.id
+				if table.size(block.ingredients) <= 2*display_ingredient_cols then
+					skip_hidden_products = true
+				end
 				local hidden_products = {}
 				for index, lua_ingredient in spairs(block.ingredients, product_sorter) do
 					if ((lua_ingredient.state or 0) == 1 and not (block_by_product)) or (lua_ingredient.amount or 0) > ModelCompute.waste_value then
@@ -1578,7 +1595,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						if not (parent.solver ~= true and parent.by_product == false) then
 							control_info = nil
 						end
-						if skip_hidden_products or display_hidden_products == 0 or ingredient.count > display_hidden_products then
+						if (block.count or 0) == 0 or skip_hidden_products == true or display_hidden_products == 0 or ingredient.count > display_hidden_products then
 							GuiElement.add(cell_ingredients, GuiCellElement(self.classname, button_action, model.id, parent_id, block.id, ingredient.name):element(ingredient)
 							:tooltip(button_tooltip):color(ingredient_color):index(index):isPivot(is_pivot):controlInfo(control_info))
 						else
