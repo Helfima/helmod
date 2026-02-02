@@ -169,9 +169,15 @@ function SolverLinkedMatrix:solve(block, parameters, debug)
                             local factor = 1
                             local product = Product(lua_product)
                             local element_key = product:getTableKey()
+                            local product_amount = 0
+                            if is_block then
+                                product_amount = lua_product.amount or 0
+                            else
+                                product_amount = product:getAmount(child)
+                            end
                             local objective = {}
                             objective.key = element_key
-                            objective.value = lua_product.amount * factor
+                            objective.value = product_amount * factor
                             linked_block.objectives[element_key] = objective
                             exit_for = true
                             linked_block.product_linked=lua_product

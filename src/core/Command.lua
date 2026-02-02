@@ -63,7 +63,7 @@ function Command.initialize()
         action = function()
             for _, location in pairs({ "top", "left", "center", "screen", "goal" }) do
                 for _, element in pairs(Player.getGui(location).children) do
-                    if element.get_mod() == "helmod" then
+                    if element.get_mod() == "helmod" and element.name ~= "mod_gui_top_frame" then
                         element.destroy()
                     end
                 end

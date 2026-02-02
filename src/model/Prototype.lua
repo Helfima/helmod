@@ -1,6 +1,9 @@
 -------------------------------------------------------------------------------
 ---@class Prototype : Object
 ---@field lua_prototype any
+---@field type string
+---@field name string
+---@field quality string
 Prototype = newclass(function(base, lua_prototype)
   base.lua_prototype = lua_prototype
 end)

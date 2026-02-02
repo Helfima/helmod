@@ -353,7 +353,7 @@ end
 ---@return boolean
 function Product:match(other)
   if other == nil then return false end
-  return self.lua_prototype.name == other.name and self.lua_prototype.type == other.type and self.lua_prototype.quality == other.quality
+  return self.lua_prototype.name == other.name and self.lua_prototype.type == other.type and (self.lua_prototype.quality or "normal") == (other.quality or "normal")
 end
 
 -------------------------------------------------------------------------------

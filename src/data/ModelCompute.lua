@@ -423,9 +423,9 @@ function ModelCompute.finalizeBlock(block, factor)
             for _, child in spairs(children, defines.sorters.block.sort) do
                 local is_block = Model.isBlock(child)
                 if is_block then
-                    --child.count_limit = child.count * ratio_limit
-                    --child.power_limit = child.power * ratio_limit
-                    --child.pollution_limit = child.pollution * ratio_limit
+                    child.count_limit = child.count * ratio_limit
+                    child.power_limit = child.power * ratio_limit
+                    child.pollution_limit = child.pollution * ratio_limit
                 else
                     local recipe = child
                     recipe.count_limit = recipe.count * ratio_limit

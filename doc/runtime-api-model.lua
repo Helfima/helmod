@@ -106,6 +106,7 @@
 ---@field base_time uint
 ---@field contraints {[string] : ContraintData}
 ---@field consumer boolean
+---@field pivot Product
 
 ---@class ParametersData
 ---@field effects ModuleEffectsData
@@ -114,7 +115,7 @@
 ---@field key string
 ---@field value number
 
----@class BlokcData
+---@class BlockData
 ---@field class string
 ---@field id string
 ---@field index number

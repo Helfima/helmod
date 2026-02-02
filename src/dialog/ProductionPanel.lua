@@ -1297,9 +1297,9 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				if not (block.solver ~= true and block.by_product ~= false) then
 					control_info = nil
 				end
-				if recipe.pivot ~= nil  then
+				if recipe.pivot ~= nil and not(block.by_product == false) then
 					local pivot = recipe.pivot
-					if pivot.type == lua_product.type and pivot.name == lua_product.name and pivot.quality == lua_product.quality then
+					if product_prototype:match(pivot) then
 						is_pivot = true
 					end
 				end
@@ -1359,9 +1359,9 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				if not (block.solver ~= true and block.by_product == false) then
 					control_info = nil
 				end
-				if recipe.pivot ~= nil  then
+				if recipe.pivot ~= nil and block.by_product == false then
 					local pivot = recipe.pivot
-					if pivot.type == lua_ingredient.type and pivot.name == lua_ingredient.name and pivot.quality == lua_ingredient.quality then
+					if ingredient_prototype:match(pivot) then
 						is_pivot = true
 					end
 				end
@@ -1390,6 +1390,7 @@ end
 ---@param block BlockData
 ---@return LuaGuiElement
 function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
+	local by_limit = false -- parent.by_limit
 	local unlinked = Model.isUnlinkedBlock(block)
 	local block_by_product = not (block ~= nil and block.by_product == false)
 	---col action
@@ -1430,22 +1431,22 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 
 	local block_color = User.getThumbnailColor(defines.thumbnail_color.names.block_default)
 	if not (block_by_product) then block_color = User.getThumbnailColor(defines.thumbnail_color.names.block_reverted) end
-	GuiElement.add(cell_recipe, GuiCellBlock(self.classname, "row-change-block", model.id, block.id):element(block):infoIcon(block.type):tooltip("tooltip.edit-block"):color(block_color))
+	GuiElement.add(cell_recipe, GuiCellBlock(self.classname, "row-change-block", model.id, block.id):element(block):infoIcon(block.type):tooltip("tooltip.edit-block"):color(block_color):byLimit(by_limit))
 
 	---col energy
 	local cell_energy = GuiElement.add(gui_table, GuiTable(block.id, "energy"):column(1):style("helmod_table_list"))
-	GuiElement.add(cell_energy, GuiCellEnergy(self.classname, "row-change-block", model.id, block.id):element(block):tooltip("tooltip.edit-block"):color(block_color))
+	GuiElement.add(cell_energy, GuiCellEnergy(self.classname, "row-change-block", model.id, block.id):element(block):tooltip("tooltip.edit-block"):color(block_color):byLimit(by_limit))
 
 	---col pollution
 	if User.getPreferenceSetting("display_pollution") then
 		local cell_pollution = GuiElement.add(gui_table, GuiTable(block.id, "pollution"):column(1):style("helmod_table_list"))
-		GuiElement.add(cell_pollution, GuiCellPollution(self.classname, "row-change-block", model.id, block.id):element(block):tooltip("tooltip.edit-block"):color(block_color))
+		GuiElement.add(cell_pollution, GuiCellPollution(self.classname, "row-change-block", model.id, block.id):element(block):tooltip("tooltip.edit-block"):color(block_color):byLimit(by_limit))
 	end
 
 	---col building
 	local cell_building = GuiElement.add(gui_table, GuiTable(block.id, "building"):column(1):style("helmod_table_list"))
 	if User.getPreferenceSetting("display_building") then
-		GuiElement.add(cell_building, GuiCellBuilding(self.classname, "row-change-block", model.id, block.id):element(block):forceGlobal(true):tooltip("tooltip.info-building"):color(block_color))
+		GuiElement.add(cell_building, GuiCellBuilding(self.classname, "row-change-block", model.id, block.id):element(block):forceGlobal(true):tooltip("tooltip.info-building"):color(block_color):byLimit(by_limit))
 	end
 
 	---col beacon
@@ -1514,7 +1515,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						end
 						if parent.by_product ~= false and block.pivot ~= nil  then
 							local pivot = block.pivot
-							if pivot.type == lua_product.type and pivot.name == lua_product.name then
+							if product_prototype:match(pivot) then
 								is_pivot = true
 							end
 						end
@@ -1523,7 +1524,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 							control_info = nil
 						end
 						if (block.count or 0) == 0 or skip_hidden_products == true or display_hidden_products == 0 or product.count > display_hidden_products then
-							GuiElement.add(cell_products, GuiCellElement(self.classname, button_action, model.id, parent_id, block.id):element(product)
+							GuiElement.add(cell_products, GuiCellElement(self.classname, button_action, model.id, parent_id, block.id):element(product):byLimit(by_limit)
 							:tooltip(button_tooltip):color(product_color):index(index):contraintIcon(contraint_type):isPivot(is_pivot):controlInfo(control_info))
 						else
 							table.insert(hidden_products, product)
@@ -1587,7 +1588,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						end
 						if not(block_by_product) and block.pivot ~= nil  then
 							local pivot = block.pivot
-							if pivot.type == ingredient.type and pivot.name == ingredient.name then
+							if ingredient_prototype:match(pivot) then
 								is_pivot = true
 							end
 						end
@@ -1596,7 +1597,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 							control_info = nil
 						end
 						if (block.count or 0) == 0 or skip_hidden_products == true or display_hidden_products == 0 or ingredient.count > display_hidden_products then
-							GuiElement.add(cell_ingredients, GuiCellElement(self.classname, button_action, model.id, parent_id, block.id, ingredient.name):element(ingredient)
+							GuiElement.add(cell_ingredients, GuiCellElement(self.classname, button_action, model.id, parent_id, block.id, ingredient.name):element(ingredient):byLimit(by_limit)
 							:tooltip(button_tooltip):color(ingredient_color):index(index):isPivot(is_pivot):controlInfo(control_info))
 						else
 							table.insert(hidden_products, ingredient)

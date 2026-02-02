@@ -3,7 +3,8 @@
         "d:\\Perso\\Factorio_Test\\Factorio_1.1.x\\data"
     ],
     "Lua.workspace.userThirdParty": [
-        "c:\\Users\\Helfima\\AppData\\Roaming\\Code\\User\\workspaceStorage\\9227b2889b7b66a476ad6a7c6b052c18\\justarandomgeek.factoriomod-debug\\sumneko-3rd"
+        "c:\\Users\\Helfima\\AppData\\Roaming\\Code\\User\\workspaceStorage\\9227b2889b7b66a476ad6a7c6b052c18\\justarandomgeek.factoriomod-debug\\sumneko-3rd",
+        "D:\\Workspaces\\helmod\\doc\\runtime-api-model.lua"
     ],
     "Lua.workspace.checkThirdParty": "ApplyInMemory",
     "factorio.versions": [
