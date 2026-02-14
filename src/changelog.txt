@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.2.12
-Date: 2026-02-02
+Date: 2026-02-14
+  Changes:
+    - Add a scroll on list of products and ingredients in the Recipe Edition
   Bugfixes:
     - Fixed delete mod_gui_top_frame frame if helmod is owner with command '/helmod close'
     - Fixed error product amount in objective when product use probability

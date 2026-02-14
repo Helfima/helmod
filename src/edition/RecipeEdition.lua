@@ -1443,7 +1443,9 @@ function RecipeEdition:updateObjectInfo(event)
         GuiElement.add(cell_duration, GuiCellProduct(self.classname, "do_noting"):element(element_duration):tooltip("tooltip.product"):color("gray"))
 
         ---products
-        local cell_products = GuiElement.add(recipe_table, GuiTable("products", recipe.id):column(3):style("helmod_table_element"))
+        local cell_scroll_products = GuiElement.add(recipe_table, GuiScroll("products", recipe.id))
+        cell_scroll_products.style.maximal_height = 80
+        local cell_products = GuiElement.add(cell_scroll_products, GuiTable("products", recipe.id):column(3):style("helmod_table_element"))
         local lua_products = recipe_prototype:getQualityProducts(recipe.factory, recipe.quality)
         if lua_products ~= nil then
             for index, lua_product in pairs(lua_products) do
@@ -1456,7 +1458,9 @@ function RecipeEdition:updateObjectInfo(event)
         end
 
         ---ingredients
-        local cell_ingredients = GuiElement.add(recipe_table, GuiTable("ingredients", recipe.id):column(5):style("helmod_table_element"))
+        local cell_scroll_ingredients = GuiElement.add(recipe_table, GuiScroll("ingredients", recipe.id))
+        cell_scroll_ingredients.style.maximal_height = 80
+        local cell_ingredients = GuiElement.add(cell_scroll_ingredients, GuiTable("ingredients", recipe.id):column(5):style("helmod_table_element"))
         local lua_ingredients = recipe_prototype:getQualityIngredients(recipe.factory, recipe.quality)
         if lua_ingredients ~= nil then
             for index, lua_ingredient in pairs(lua_ingredients) do
