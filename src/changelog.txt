@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.2.13
+Date: 2026-03-10
+  Changes:
+    - Added display hidden products mode preference, to use absolute or relative value for display hidden products
+  Bugfixes:
+    - Fixed move rows into new block to preserve the order of the children
+---------------------------------------------------------------------------------------------------
 Version: 2.2.12
 Date: 2026-02-14
   Changes:

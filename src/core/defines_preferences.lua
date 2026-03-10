@@ -56,6 +56,15 @@ defines.constant.preferences = {
     group = "general"
   },
   --display hidden products
+  display_hidden_products_mode = {
+    type = "string-setting",
+    localised_name = {"helmod_pref_settings.display-hidden-products-mode"},
+    localised_description = {"helmod_pref_settings.display-hidden-products-mode-desc"},
+    default_value = "relative",
+    allowed_values = {"absolute","relative"},
+    group = "general"
+  },
+  --display hidden products
   display_hidden_products = {
     type = "int-setting",
     localised_name = {"helmod_pref_settings.display-hidden-products"},

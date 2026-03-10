@@ -210,8 +210,6 @@ function ModelBuilder.updateTreeChildUp(model, block, child, with_below)
             if with_below ~= true then
                 break
             end
-            -- update index
-            block_child.index = table.size(new_block.children)
             -- clean block
             block.children[block_child.id] = nil
             -- add child
@@ -222,7 +220,6 @@ function ModelBuilder.updateTreeChildUp(model, block, child, with_below)
             block.children[block_child.id] = nil
             -- update index
             new_block.index = block_child.index
-            block_child.index = table.size(new_block.children)
             -- add block
             block.children[new_block.id] = new_block
             new_block.parent_id = block.id
@@ -230,6 +227,8 @@ function ModelBuilder.updateTreeChildUp(model, block, child, with_below)
             started = true
         end
     end
+    -- update index
+    table.reindex_list(new_block.children)
 
     ModelCompute.prepareBlockElements(new_block)
     ---check si le block est independant
