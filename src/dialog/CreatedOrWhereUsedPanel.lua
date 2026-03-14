@@ -43,6 +43,19 @@ function CreatedOrWhereUsedPanel:onStyle(styles, width_main, height_main)
         maximal_height = height_main
         }
 end
+
+-------------------------------------------------------------------------------
+---On before open
+---@return boolean
+function CreatedOrWhereUsedPanel:onBeforeOpen(event)
+    if event.item1 == "from-alt" then
+        local new_item = {type = event.item.type, name = event.item.name, id=game.tick }
+        self:addRecent(new_item)
+        User.setParameter("CreatedOrWhereUsed_item", new_item)
+    end
+    return true
+end
+
 -------------------------------------------------------------------------------
 ---On update
 ---@param event LuaEvent

@@ -370,7 +370,12 @@ function Controller:onGuiAction(event)
     event.item = GuiElement.getElementTags(event.element)
 
     if event.item ~= nil and event.alt == true then
-      Player.open_factoriopedia_gui(event.item)
+      if event.shift == true then
+        local new_event = {item=event.item, action="OPEN", classname="HMCreatedOrWhereUsedPanel", item1="from-alt"}
+        Controller:onGuiEvent(new_event)
+      else
+        Player.open_factoriopedia_gui(event.item)
+      end
       return
     end
     if event.classname == self.classname and event.action == "CLOSE" then
