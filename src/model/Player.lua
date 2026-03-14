@@ -8,6 +8,13 @@ local Player = {
 
 local Lua_player = nil
 
+function Player.open_factoriopedia_gui(element)
+    if Lua_player ~= nil and element ~= nil then
+        local prototype = prototypes[element.type][element.name]
+        Lua_player.open_factoriopedia_gui(prototype)
+    end
+end
+
 -------------------------------------------------------------------------------
 ---Print message
 function Player.print(...)
