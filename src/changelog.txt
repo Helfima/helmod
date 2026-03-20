@@ -1,10 +1,11 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.2.13
-Date: 2026-03-10
+Date: 2026-03-15
   Changes:
     - Added display hidden products mode preference, to use absolute or relative value for display hidden products
     - Added open factoriopedia on alt + click on element icon
     - Added open CreatedOrWhereUsed on alt + shift + click on element icon
+    - Changed block tree navigator more natural
   Bugfixes:
     - Fixed move rows into new block to preserve the order of the children
 ---------------------------------------------------------------------------------------------------

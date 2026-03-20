@@ -963,139 +963,81 @@ function ProductionPanel:bluidNavigator(model, current_block)
 	---bluid tree
 	if model.blocks ~= nil then
 		self:bluidRootLeaf(scroll_panel, model, current_block, 0)
-		local root_branch = GuiElement.add(scroll_panel, GuiFlowV())
-		root_branch.style.vertically_stretchable = false
-		local scroll_to_element = self:bluidTree(root_branch, model, model.block_root, current_block)
-		if scroll_to_element ~= nil then
-			scroll_panel.scroll_to_element(scroll_to_element)
+		Model.setExpandBlock(model.block_root, true)
+		local root_node = self:bluidTreeNodes(model.block_root)
+		local tree_view = GuiElement.add(scroll_panel, GuiTreeView():source(root_node):class_decorator(self)
+			:item_decorator(ProductionPanel.item_decorator):item_changed(ProductionPanel.on_item_changed))
+		if root_node.scroll_to_element ~= nil then
+			scroll_panel.scroll_to_element(root_node.scroll_to_element)
 		end
 	end
 end
 
-local color_name = "blue"
-local color_index = 1
-local bar_thickness = 2
 -------------------------------------------------------------------------------
----Build Tree
----@param parent LuaGuiElement
----@param model ModelData
----@param parent_block BlockData
----@param current_block BlockData
-function ProductionPanel:bluidTree(parent, model, parent_block, current_block)
-	local scroll_to_element = nil
-	if parent_block ~= nil and parent_block.children ~= nil then
-		local blocks = {}
-		local sorter = defines.sorters.block.sort
-		for _, child in spairs(parent_block.children, sorter) do
-			local is_block = Model.isBlock(child)
-			if is_block then
-				table.insert(blocks, child)
-				local has_sub_block = false
-				for _, sub_child in spairs(child.children, sorter) do
-					local is_sub_blocks = string.find(sub_child.id, "block")
-					has_sub_block = has_sub_block or is_sub_blocks
-				end
-				child.has_sub_block = has_sub_block
-			end
-		end
-		local index = 1
-		local size = table.size(blocks)
-
-		for _, block in pairs(blocks) do
-			local tree_branch = GuiElement.add(parent, GuiFlowH())
-			
-			local tree_control = GuiElement.add(tree_branch, GuiFlowV("control"))
-			tree_control.style.width = 16
-			tree_control.style.margin = 0
-			tree_control.style.padding = 0
-
-			local tree_action = GuiElement.add(tree_control, GuiSprite("previous"):sprite("menu", defines.sprites.branch_next.blue))
-			tree_action.resize_to_sprite = false
-			tree_action.style.width = 16
-			tree_action.style.height = 16
-
-			local is_expanded = Model.isExpandBlock(block)
-			if block.has_sub_block then
-				if is_expanded then
-					GuiElement.add(tree_control, GuiButtonSpriteSm(self.classname, "block-expand-or-collapse", model.id, block.id):sprite("menu", defines.sprites.collapse.gray, defines.sprites.collapse.black))
-				else
-					GuiElement.add(tree_control, GuiButtonSpriteSm(self.classname, "block-expand-or-collapse", model.id, block.id):sprite("menu", defines.sprites.expand.gray, defines.sprites.expand.black))
-				end
-				if index ~= size then
-					local tree_action = GuiElement.add(tree_control, GuiSprite("next"):sprite("menu", defines.sprites.branch_next.blue))
-					tree_action.resize_to_sprite = false
-					tree_action.style.width = 16
-					tree_action.style.vertically_stretchable = true
-				end
-			else
-				if index == size then
-					local tree_action = GuiElement.add(tree_control, GuiSprite("action"):sprite("menu", defines.sprites.branch_end.blue))
-					tree_action.resize_to_sprite = false
-					tree_action.style.width = 16
-					tree_action.style.height = 16
-				else
-					local tree_action = GuiElement.add(tree_control, GuiSprite("action"):sprite("menu", defines.sprites.branch.blue))
-					tree_action.resize_to_sprite = false
-					tree_action.style.width = 16
-					tree_action.style.height = 16
-					local tree_action = GuiElement.add(tree_control, GuiSprite("next"):sprite("menu", defines.sprites.branch_next.blue))
-					tree_action.resize_to_sprite = false
-					tree_action.style.width = 16
-					tree_action.style.vertically_stretchable = true
-				end
-			end
-			-- content
-			local content = GuiElement.add(tree_branch, GuiFlowV("content"))
-			content.style.margin = 2
-			-- header
-			local header = GuiElement.add(content, GuiFlowH("header"))
-
-			local scroll_to_element_next = self:bluidLeaf(header, model, block, current_block, 0)
-			if scroll_to_element_next ~= nil then
-				scroll_to_element = scroll_to_element_next
-			end
-			-- next
-			local next = GuiElement.add(content, GuiFlowV("next"))
-
-			if is_expanded then
-				local scroll_to_element_next = self:bluidTree(next, model, block, current_block)
-				if scroll_to_element_next ~= nil then
-					scroll_to_element = scroll_to_element_next
-				end
-			end
-			index = index + 1
-		end
+---On item changed
+---@param tree_node table
+function ProductionPanel.on_item_changed(self, tree_node)
+	local model, current_block, recipe = self:getParameterObjects()
+	local block_node = model.blocks[tree_node.id]
+	if block_node ~= nil then
+		Model.setExpandBlock(block_node, tree_node.expanded)
 	end
-	return scroll_to_element
 end
 
 -------------------------------------------------------------------------------
----Build Tree
----@param tree_panel LuaGuiElement
----@param model ModelData
----@param block BlockData
----@param current_block BlockData
----@param level number
-function ProductionPanel:bluidLeaf(tree_panel, model, block, current_block, level)
-	local scroll_to_element = nil
-	if block ~= nil then
+---Item decorator
+---@param parent LuaGuiElement --container for element
+---@param root_node table
+---@param tree_node table
+function ProductionPanel.item_decorator(self, parent, root_node, tree_node)
+	local model, current_block, recipe = self:getParameterObjects()
+	local block_node = model.blocks[tree_node.id]
+	if block_node ~= nil then
 		local block_color = User.getThumbnailColor(defines.thumbnail_color.names.block_default)
-		local background = GuiElement.add(tree_panel, GuiFrame("block", block.id):style("helmod_frame_element_w30", "gray", 1))
+		local background = GuiElement.add(parent, GuiFrame("block", block_node.id):style("helmod_frame_element_w30", "gray", 1))
 		background.style.padding = 1
 		background.style.horizontally_stretchable = false
-		local cell_tree = GuiElement.add(background, GuiTable("block", block.id):column(1):style("helmod_table_list"))
-		if current_block ~= nil and current_block.id == block.id then
-			scroll_to_element = cell_tree
+
+		local cell_tree = GuiElement.add(background, GuiTable("block", block_node.id):column(1):style("helmod_table_list"))
+		if current_block ~= nil and current_block.id == block_node.id then
+			root_node.scroll_to_element = cell_tree
 			block_color = User.getThumbnailColor(defines.thumbnail_color.names.block_selected)
 		end
-		if block.name == nil then
-			local cell_block = GuiElement.add(cell_tree, GuiButton(self.classname, "HMProductionPanel", model.id, block.id):sprite("menu", defines.sprites.hangar.black, defines.sprites.hangar.black):style("helmod_button_menu"):tooltip("tooltip.edit-block"))
+		if block_node.name == nil then
+			local cell_block = GuiElement.add(cell_tree, GuiButton("HMProductionPanel", "HMProductionPanel", model.id, block_node.id):sprite("menu", defines.sprites.hangar.black, defines.sprites.hangar.black):style("helmod_button_menu"):tooltip("tooltip.edit-block"))
 		else
-			local cell_block = GuiElement.add(cell_tree, GuiCellBlockM(self.classname, "change-block", model.id, block.id):element(block):withTitle():tooltip("tooltip.edit-block"):color(block_color))
-			cell_block.style.left_padding = 10 * level
+			local cell_block = GuiElement.add(cell_tree, GuiCellBlockM("HMProductionPanel", "change-block", model.id, block_node.id):element(block_node):withTitle():tooltip("tooltip.edit-block"):color(block_color))
 		end
 	end
-	return scroll_to_element
+end
+
+-------------------------------------------------------------------------------
+---Build Navigator
+---@param block BlockData
+function ProductionPanel:bluidTreeNodes(block)
+	if block == nil then
+		return nil
+	end
+	local is_expanded = Model.isExpandBlock(block)
+	local tree_node = {}
+	tree_node.id = block.id
+	tree_node.infos = block.infos
+	tree_node.name = block.name
+	tree_node.type = block.type
+	tree_node.expanded = is_expanded
+	
+	if block.children ~= nil then
+		tree_node.children = {}
+		local sorter = defines.sorters.block.sort
+		for _, child in spairs(block.children, sorter) do
+			local is_block = Model.isBlock(child)
+			if is_block then
+				local child_node = self:bluidTreeNodes(child)
+				table.insert(tree_node.children, child_node)
+			end
+		end
+	end
+	return tree_node
 end
 
 -------------------------------------------------------------------------------
