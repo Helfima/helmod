@@ -1221,3 +1221,38 @@ function GuiTooltipFuel:create()
 	end
 	return tooltip
 end
+
+-------------------------------------------------------------------------------
+---@class GuiTooltipBlockPipette : GuiTooltip
+GuiTooltipBlockPipette = newclass(GuiTooltip, function(base, ...)
+	GuiTooltip.init(base, ...)
+	base.classname = "HMGuiTooltip"
+end)
+
+-------------------------------------------------------------------------------
+---Create tooltip
+---@return table
+function GuiTooltipBlockPipette:create()
+	local tooltip = self._super.create(self)
+	if self.m_element then
+		local tooltip_items = {""}
+		local overflow = false
+		for _, lua_product in pairs(self.m_element) do
+			if lua_product.type == "item" or lua_product.type == "fluid" then
+				if #tooltip_items < 19 then
+					local element_label = Player.getLocalisedName({ type = lua_product.type, name = lua_product.name })
+					GuiTooltip.appendLineQuantity(tooltip_items, lua_product.type, lua_product.name, lua_product.count, element_label, lua_product.quality)
+				else
+					overflow = true
+				end
+			end
+		end
+		if overflow then
+			table.insert(tooltip_items, { "", "\n", "..." })
+		end
+		if #tooltip_items > 1 then
+			table.insert(tooltip, tooltip_items)
+		end
+	end
+	return tooltip
+end

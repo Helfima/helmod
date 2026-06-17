@@ -178,6 +178,7 @@ function ProductionPanel:getLeftInfoPanel2()
 	local header_panel = GuiElement.add(parent_panel, GuiFlowH(header_name))
 	local label_panel = GuiElement.add(header_panel, GuiLabel(label_name):caption({ "helmod_common.output" }):style("helmod_label_title_frame"))
 	local tool_panel = GuiElement.add(header_panel, GuiFlowH(tool_name))
+	tool_panel.style.horizontal_spacing = 3
 	--tool_panel.style.horizontally_stretchable = true
 	--tool_panel.style.horizontal_align = "right"
 	local scroll_panel = GuiElement.add(parent_panel, GuiScroll(panel_name):style("helmod_scroll_pane"))
@@ -201,6 +202,7 @@ function ProductionPanel:getRightInfoPanel2()
 	local header_panel = GuiElement.add(parent_panel, GuiFlowH(header_name))
 	local label_panel = GuiElement.add(header_panel, GuiLabel(label_name):caption({ "helmod_common.input" }):style("helmod_label_title_frame"))
 	local tool_panel = GuiElement.add(header_panel, GuiFlowH(tool_name))
+	tool_panel.style.horizontal_spacing = 3
 	--tool_panel.style.horizontally_stretchable = true
 	--tool_panel.style.horizontal_align = "right"
 	local scroll_panel = GuiElement.add(parent_panel, GuiScroll(panel_name):style("helmod_scroll_pane"))
@@ -640,6 +642,9 @@ function ProductionPanel:updateInputBlock(model, block)
 	else
 		GuiElement.add(input_tool, GuiButton(self.classname, "block-all-ingredient-visible", model.id, block.id):sprite("menu", defines.sprites.filter.black, defines.sprites.filter.black):style("helmod_button_menu_sm"):tooltip({"helmod_button.all-product-visible" }))
 	end
+	local items = ProductionPanel.get_elements(block, "ingredients")
+	local pipette_tooltip = GuiTooltipBlockPipette("tooltip.smart-pipette"):element(items)
+	GuiElement.add(input_tool, GuiButton(self.classname, "block-pipette", model.id, block.id, "ingredients"):sprite("menu", defines.sprites.pipette.black, defines.sprites.pipette.black):style("helmod_button_menu_sm"):tooltip(pipette_tooltip))
 	if block_by_product == false then
 		GuiElement.add(input_tool, GuiButton(self.classname, "block-reset-input", model.id, block.id):sprite("menu", defines.sprites.eraser.black, defines.sprites.eraser.black):style("helmod_button_menu_sm"):tooltip({"helmod_button.clear" }))
 	end
@@ -761,6 +766,9 @@ function ProductionPanel:updateOutputBlock(model, block)
 	else
 		GuiElement.add(output_tool, GuiButton(self.classname, "block-all-product-visible", model.id, block.id):sprite("menu", defines.sprites.filter.black, defines.sprites.filter.black):style("helmod_button_menu_sm"):tooltip({"helmod_button.all-product-visible" }))
 	end
+	local items = ProductionPanel.get_elements(block, "products")
+	local pipette_tooltip = GuiTooltipBlockPipette("tooltip.smart-pipette"):element(items)
+	GuiElement.add(output_tool, GuiButton(self.classname, "block-pipette", model.id, block.id, "products"):sprite("menu", defines.sprites.pipette.black, defines.sprites.pipette.black):style("helmod_button_menu_sm"):tooltip(pipette_tooltip))
 	if block_by_product ~= false then
 		GuiElement.add(output_tool, GuiButton(self.classname, "block-reset-input", model.id, block.id):sprite("menu", defines.sprites.eraser.black, defines.sprites.eraser.black):style("helmod_button_menu_sm"):tooltip({"helmod_button.clear" }))
 	end
@@ -1322,7 +1330,7 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 			end
 
 			local max_count = 0
-			for index, lua_ingredient in spairs(recipe_prototype:getQualityIngredients(recipe.factory, recipe.quality), User.getProductSorter()) do
+			for index, lua_ingredient in spairs(lua_ingredients, User.getProductSorter()) do
 				local ingredient_prototype = Product(lua_ingredient)
 				local ingredient_key = ingredient_prototype:getTableKey()
 
@@ -1868,8 +1876,33 @@ function ProductionPanel:onEventAccessRead(event, model, block)
 		Controller:send("on_gui_update", event, self.classname)
 	end
 	
+	if event.action == "block-pipette" then
+		local items = ProductionPanel.get_elements(block, event.item3)
+		Player.setSmartToolItemListConstantCombinator(items)
+		Controller:send("on_gui_close", event, self.classname)
+	end
 end
 
+function ProductionPanel.get_elements(block, type)
+	local elements = nil
+	if type == "products" then
+		elements = block.products
+	else
+		elements = block.ingredients
+	end
+	local items = {}
+	for index, lua_product in spairs(elements, User.getProductSorter()) do
+		if (lua_product.amount or 0) > ModelCompute.waste_value then
+			local product = Product(lua_product):clone()
+			product.count = lua_product.amount
+			if block.m_by_limit then
+				amount = lua_product.amount * (block.count_limit or 0)
+			end
+			table.insert(items, product)
+		end
+	end
+	return items
+end
 -------------------------------------------------------------------------------
 ---On event
 ---@param event LuaEvent

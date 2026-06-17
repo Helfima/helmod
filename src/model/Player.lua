@@ -244,6 +244,50 @@ end
 
 -------------------------------------------------------------------------------
 ---Set smart tool
+---@param products table
+function Player.setSmartToolItemListConstantCombinator(products)
+    if Lua_player == nil or products == nil then
+        return nil
+    end
+    local item_filters = {}
+    local fluid_filters = {}
+    for _, lua_product in pairs(products) do
+        local filter = {
+                type = lua_product.type,
+                name = lua_product.name,
+                quality = lua_product.quality or "normal",
+                comparator = "=",
+                count = math.ceil(lua_product.count)
+            }
+        if lua_product.type == "item" then
+            filter.index = #item_filters + 1
+            table.insert(item_filters, filter)
+        elseif lua_product.type == "fluid" then
+            filter.index = #fluid_filters + 1
+            table.insert(fluid_filters, filter)
+        end
+    end
+    local sections = {}
+    if #item_filters > 0 then
+        table.insert(sections, {index = #sections + 1, filters = item_filters})
+    end
+    if #fluid_filters > 0 then
+        table.insert(sections, {index = #sections + 1, filters = fluid_filters})
+    end
+    local entity = {
+        entity_number = 1,
+        name = "constant-combinator",
+        position = { 0, 0 },
+        control_behavior = {
+            sections = {
+                sections = sections
+            }
+        }
+    }
+    Player.getSmartTool({ entity })
+end
+-------------------------------------------------------------------------------
+---Set smart tool
 ---@param recipe table
 ---@param type string
 ---@param index number
@@ -735,7 +779,7 @@ function Player.checkFactoryLimitationModule(module, lua_recipe)
     local factory = lua_recipe.factory
     local factory_prototype = EntityPrototype(factory)
     local factory_effect_receiver= factory_prototype:getEffectReveiver()
-    if factory_effect_receiver.uses_beacon_effects ~= true then
+    if factory_effect_receiver.uses_module_effects ~= true then
         return false
     end
     local factory_module_slots= factory_prototype:getModuleInventorySize()
@@ -924,7 +968,7 @@ function Player.getBeaconLimitationModuleMessage(beacon, lua_recipe, module)
     local factory = lua_recipe.factory
     local factory_prototype = EntityPrototype(factory)
     local factory_effect_receiver= factory_prototype:getEffectReveiver()
-    if factory_effect_receiver.uses_module_effects ~= true then
+    if factory_effect_receiver.uses_beacon_effects ~= true then
         return {"helmod_limitation.not-allowed-effect-module"}
     end
     local model_filter_beacon_module = User.getModGlobalSetting("model_filter_beacon_module")
