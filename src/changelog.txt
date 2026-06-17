@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.2.14
+Date: 2026-06-08
+  Bugfixes:
+    - Fixed rocket recipe that added twice time the rocket parts
+    - Fixed module limitation in Recipe Edition
+---------------------------------------------------------------------------------------------------
 Version: 2.2.13
 Date: 2026-03-20
   Changes:

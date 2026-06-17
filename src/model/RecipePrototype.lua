@@ -702,14 +702,19 @@ function RecipePrototype:getIngredients(factory)
         end
 
         if self.lua_type == defines.mod.recipes.rocket.name then
-            local rocket_prototype = factory_prototype:native()
-            local recipe_part_name = rocket_prototype.fixed_recipe
-            local rocket_part_prototype = RecipePrototype(recipe_part_name):native()
-            local ingredients = rocket_part_prototype.ingredients
-            for _, ingredient in pairs(ingredients) do
-                ingredient.amount = ingredient.amount * rocket_prototype.rocket_parts_required
-                table.insert(raw_ingredients, ingredient)
+            -- if allready added, skip
+            if self.is_appended == nil then
+                local rocket_prototype = factory_prototype:native()
+                local recipe_part_name = rocket_prototype.fixed_recipe
+                --local rocket_part_prototype = RecipePrototype(recipe_part_name):native()
+                local rocket_part_prototype = Player.getRecipe(recipe_part_name)
+                local ingredients = rocket_part_prototype.ingredients
+                for _, ingredient in pairs(ingredients) do
+                    ingredient.amount = ingredient.amount * rocket_prototype.rocket_parts_required
+                    table.insert(raw_ingredients, ingredient)
+                end
             end
+            self.is_appended = true
         elseif self.lua_type ~= defines.mod.recipes.energy.name then
             local consumption_effect = 1
             local factory_speed = 1
