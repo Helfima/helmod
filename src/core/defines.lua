@@ -238,6 +238,7 @@ defines.thumbnail_color.names.product_overflow = "product_overflow"
 defines.thumbnail_color.names.ingredient_default = "ingredient_default"
 defines.thumbnail_color.names.ingredient_driving = "ingredient_driving"
 defines.thumbnail_color.names.ingredient_overflow = "ingredient_overflow"
+defines.thumbnail_color.names.combinator_pick = "combinator_pick"
 
 defines.thumbnail_color.values = {}
 defines.thumbnail_color.values.default = "gray"
@@ -251,6 +252,7 @@ defines.thumbnail_color.values.product_overflow = "T10_4"
 defines.thumbnail_color.values.ingredient_default = "T40_4"
 defines.thumbnail_color.values.ingredient_driving = "T125_5"
 defines.thumbnail_color.values.ingredient_overflow = "T10_4"
+defines.thumbnail_color.values.combinator_pick = "gray"
 
 defines.constant = defines.constant or {}
 defines.constant.solvers = {}

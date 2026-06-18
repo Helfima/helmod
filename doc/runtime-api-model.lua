@@ -201,6 +201,7 @@
 ---@field ingredient_default string
 ---@field ingredient_driving string
 ---@field ingredient_overflow string
+---@field combinator_pick string
 
 ---@class LocationData
 ---@field name string

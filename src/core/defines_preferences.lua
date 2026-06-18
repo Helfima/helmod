@@ -259,8 +259,8 @@ defines.constant.preferences = {
     type = "string-setting",
     localised_name = {"helmod_pref_settings.combinator-item-quantity-mode"},
     localised_description = {"helmod_pref_settings.combinator-item-quantity-mode-desc"},
-    default_value = "stacks",
-    allowed_values = {"stacks","amount"},
+    default_value = "amount",
+    allowed_values = {"amount","stacks"},
     group = "general"
   },
   -- constant combinator: value applied to each solid item (negative = request)
@@ -273,13 +273,32 @@ defines.constant.preferences = {
     maximum_value = 1000000,
     group = "general"
   },
+  -- constant combinator: how the count for a fluid is computed
+  combinator_fluid_quantity_mode = {
+    type = "string-setting",
+    localised_name = {"helmod_pref_settings.combinator-fluid-quantity-mode"},
+    localised_description = {"helmod_pref_settings.combinator-fluid-quantity-mode-desc"},
+    default_value = "amount",
+    allowed_values = {"amount","stacks"},
+    group = "general"
+  },
   -- constant combinator: flat count applied to each fluid (negative = request)
-  combinator_default_fluid_amount = {
+  combinator_default_fluid_value = {
     type = "int-setting",
-    localised_name = {"helmod_pref_settings.combinator-default-fluid-amount"},
-    localised_description = {"helmod_pref_settings.combinator-default-fluid-amount-desc"},
-    default_value = -30000,
+    localised_name = {"helmod_pref_settings.combinator-default-fluid-value"},
+    localised_description = {"helmod_pref_settings.combinator-default-fluid-value-desc"},
+    default_value = -1,
     minimum_value = -1000000,
+    maximum_value = 1000000,
+    group = "general"
+  },
+  -- constant combinator: flat count applied to each fluid (negative = request)
+  combinator_default_fluid_stack = {
+    type = "int-setting",
+    localised_name = {"helmod_pref_settings.combinator-default-fluid-stack"},
+    localised_description = {"helmod_pref_settings.combinator-default-fluid-stack-desc"},
+    default_value = 30000,
+    minimum_value = 1,
     maximum_value = 1000000,
     group = "general"
   },

@@ -1230,6 +1230,15 @@ GuiTooltipBlockPipette = newclass(GuiTooltip, function(base, ...)
 end)
 
 -------------------------------------------------------------------------------
+---Set element
+---@param information string
+---@return GuiTooltip
+function GuiTooltipBlockPipette:append_information(information)
+	self.m_information = information
+	return self
+end
+
+-------------------------------------------------------------------------------
 ---Create tooltip
 ---@return table
 function GuiTooltipBlockPipette:create()
@@ -1253,6 +1262,10 @@ function GuiTooltipBlockPipette:create()
 		if #tooltip_items > 1 then
 			table.insert(tooltip, tooltip_items)
 		end
+	end
+	if self.m_information then
+		table.insert(tooltip, { "", "\n", "----------------------" })
+		table.insert(tooltip, { "", "\n", self.m_information})
 	end
 	return tooltip
 end

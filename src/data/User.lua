@@ -717,6 +717,7 @@ function User.getThumbnailsColor()
     thumbnails_color.ingredient_default = thumbnails_color.ingredient_default or defines.thumbnail_color.values.ingredient_default
     thumbnails_color.ingredient_driving = thumbnails_color.ingredient_driving or defines.thumbnail_color.values.ingredient_driving
     thumbnails_color.ingredient_overflow = thumbnails_color.ingredient_overflow or defines.thumbnail_color.values.ingredient_overflow
+    thumbnails_color.combinator_pick = thumbnails_color.combinator_pick or defines.thumbnail_color.values.combinator_pick
     return thumbnails_color
 end
 

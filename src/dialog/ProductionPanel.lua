@@ -7,11 +7,6 @@ ProductionPanel = newclass(FormModel, function(base, classname)
 	base.has_tips = true
 end)
 
--- stable key for a selected input (used by the constant-combinator selection mode)
-local function combinator_key(item)
-	return (item.type or "item") .. "|" .. (item.name or "") .. "|" .. (item.quality or "normal")
-end
-
 -------------------------------------------------------------------------------
 ---On initialization
 function ProductionPanel:onInit()
@@ -621,47 +616,29 @@ function ProductionPanel:updateInfoBlock(model, block)
 end
 
 -------------------------------------------------------------------------------
----Collect the block inputs of a given type for combinator generation
----(honors the "see all products" toggle and the waste threshold).
----@param block table
----@param filter_type string "item" or "fluid"
----@return table list of {type, name, quality, amount}
-function ProductionPanel:getCombinatorInputs(block, filter_type)
-	local items = {}
-	if block == nil or block.ingredients == nil then return items end
-	local block_by_product = not (block ~= nil and block.by_product == false)
-	local all_visible = User.getParameter("block_all_ingredient_visible")
-	for _, lua_ingredient in pairs(block.ingredients) do
-		if all_visible == true or ((lua_ingredient.state or 0) == 1 and not (block_by_product)) or (lua_ingredient.amount or 0) > ModelCompute.waste_value then
-			if (lua_ingredient.type or "item") == filter_type then
-				table.insert(items, { type = lua_ingredient.type, name = lua_ingredient.name, quality = lua_ingredient.quality, amount = lua_ingredient.amount })
-			end
-		end
-	end
-	return items
-end
-
--------------------------------------------------------------------------------
 ---Toggle an input in the combinator selection set (selection mode).
 ---@param block table
+---@param type string
 ---@param item table {type, name, quality}
-function ProductionPanel:toggleCombinatorSelection(block, item)
+function ProductionPanel:toggleCombinatorSelection(block, type, item)
 	if item == nil or item.name == nil then return end
 	local selection = User.getParameter("combinator_selection") or {}
-	local key = combinator_key(item)
+	local key = Product(item):getTableKey()
 	if selection[key] ~= nil then
 		selection[key] = nil
 	else
-		local amount = 0
-		if block ~= nil and block.ingredients ~= nil then
-			for _, lua_ingredient in pairs(block.ingredients) do
-				if combinator_key(lua_ingredient) == key then
-					amount = lua_ingredient.amount or 0
-					break
-				end
+		local elements = nil
+		if type == "products" then
+			elements = block.products
+		else
+			elements = block.ingredients
+		end
+		for index, lua_product in spairs(elements, User.getProductSorter()) do
+			if key == Product(lua_product):getTableKey() then
+				local product = ProductionPanel.get_element(block, lua_product)
+				selection[key] = product
 			end
 		end
-		selection[key] = { type = item.type, name = item.name, quality = item.quality, amount = amount }
 	end
 	User.setParameter("combinator_selection", selection)
 end
@@ -671,6 +648,7 @@ end
 ---@param model table
 ---@param block table
 function ProductionPanel:updateInputBlock(model, block)
+	local combinator_select_mode = User.getParameter("combinator_select_mode") == "ingredients"
 	---data
 	local block_by_product = not (block ~= nil and block.by_product == false)
 
@@ -693,20 +671,22 @@ function ProductionPanel:updateInputBlock(model, block)
 	else
 		GuiElement.add(input_tool, GuiButton(self.classname, "block-all-ingredient-visible", model.id, block.id):sprite("menu", defines.sprites.filter.black, defines.sprites.filter.black):style("helmod_button_menu_sm"):tooltip({"helmod_button.all-product-visible" }))
 	end
-	local items = ProductionPanel.get_elements(block, "ingredients")
-	local pipette_tooltip = GuiTooltipBlockPipette("tooltip.smart-pipette"):element(items)
-	GuiElement.add(input_tool, GuiButton(self.classname, "block-pipette", model.id, block.id, "ingredients"):sprite("menu", defines.sprites.pipette.black, defines.sprites.pipette.black):style("helmod_button_menu_sm"):tooltip(pipette_tooltip))
 	if block_by_product == false then
 		GuiElement.add(input_tool, GuiButton(self.classname, "block-reset-input", model.id, block.id):sprite("menu", defines.sprites.eraser.black, defines.sprites.eraser.black):style("helmod_button_menu_sm"):tooltip({"helmod_button.clear" }))
 	end
 
 	---generate a constant combinator from the input list (item/fluid request lists)
-	GuiElement.add(input_tool, GuiButton(self.classname, "block-combinator-solids", model.id, block.id):sprite("menu", defines.sprites.transport.black, defines.sprites.transport.black):style("helmod_button_menu_sm"):tooltip({ "helmod_button.combinator-solids" }))
-	GuiElement.add(input_tool, GuiButton(self.classname, "block-combinator-fluids", model.id, block.id):sprite("menu", defines.sprites.steam_heat.black, defines.sprites.steam_heat.black):style("helmod_button_menu_sm"):tooltip({ "helmod_button.combinator-fluids" }))
-	if User.getParameter("combinator_select_mode") == true then
-		GuiElement.add(input_tool, GuiButton(self.classname, "block-combinator-select", model.id, block.id):sprite("menu", defines.sprites.checkmark.white, defines.sprites.checkmark.black):style("helmod_button_menu_sm_selected"):tooltip({ "helmod_button.combinator-select" }))
+	local solid_items = ProductionPanel.get_elements(block, "ingredients", "item")
+	local solid_pipette_tooltip = GuiTooltipBlockPipette("tooltip.smart-pipette"):element(solid_items):append_information({ "helmod_button.combinator-solids" })
+	GuiElement.add(input_tool, GuiButton(self.classname, "block-combinator-solids", model.id, block.id, "ingredients"):sprite("menu", defines.sprites.item.black, defines.sprites.item.black):style("helmod_button_menu_sm"):tooltip(solid_pipette_tooltip))
+	local fluid_items = ProductionPanel.get_elements(block, "ingredients", "fluid")
+	local fluid_pipette_tooltip = GuiTooltipBlockPipette("tooltip.smart-pipette"):element(fluid_items):append_information({ "helmod_button.combinator-fluids" })
+	GuiElement.add(input_tool, GuiButton(self.classname, "block-combinator-fluids", model.id, block.id, "ingredients"):sprite("menu", defines.sprites.fluid.black, defines.sprites.fluid.black):style("helmod_button_menu_sm"):tooltip(fluid_pipette_tooltip))
+	local custom_pipette_tooltip = GuiTooltipBlockPipette("tooltip.smart-pipette"):append_information({ "helmod_button.combinator-select" })
+	if combinator_select_mode then
+		GuiElement.add(input_tool, GuiButton(self.classname, "block-combinator-select", model.id, block.id, "ingredients"):sprite("menu", defines.sprites.pipette.white, defines.sprites.pipette.black):style("helmod_button_menu_sm_selected"):tooltip(custom_pipette_tooltip))
 	else
-		GuiElement.add(input_tool, GuiButton(self.classname, "block-combinator-select", model.id, block.id):sprite("menu", defines.sprites.checkmark.black, defines.sprites.checkmark.black):style("helmod_button_menu_sm"):tooltip({ "helmod_button.combinator-select" }))
+		GuiElement.add(input_tool, GuiButton(self.classname, "block-combinator-select", model.id, block.id, "ingredients"):sprite("menu", defines.sprites.pipette.black, defines.sprites.pipette.black):style("helmod_button_menu_sm"):tooltip(custom_pipette_tooltip))
 	end
 
 	---input panel
@@ -732,6 +712,7 @@ function ProductionPanel:updateInputBlock(model, block)
 			for index, lua_ingredient in spairs(block.ingredients, User.getProductSorter()) do
 				if all_visible == true or ((lua_ingredient.state or 0) == 1 and not (block_by_product)) or (lua_ingredient.amount or 0) > ModelCompute.waste_value then
 					local ingredient = Product(lua_ingredient):clone()
+					ingredient.key = Product(lua_ingredient):getTableKey()
 					ingredient.time = model.time
 					ingredient.count = lua_ingredient.amount
 					ingredient.count_limit = lua_ingredient.amount * (block.count_limit or 0)
@@ -749,13 +730,16 @@ function ProductionPanel:updateInputBlock(model, block)
 						if not (block.unlinked or true) or block.by_factory == true then
 							ingredient.button_action = "product-info"
 							ingredient.button_tooltip = "tooltip.info-product"
-							if block.products_linked ~= nil and block.products_linked[Product(lua_ingredient):getTableKey()] then
+							if block.products_linked ~= nil and block.products_linked[ingredient.key] then
 								ingredient.contraint_type = "linked"
 							end
 						else
 							ingredient.button_action = "product-edition"
 							ingredient.button_tooltip = "tooltip.edit-product"
 						end
+					end
+					if combinator_select_mode then
+						ingredient.button_action = "block-combinator-pick"
 					end
 					---color
 					ingredient.ingredient_color = User.getThumbnailColor(defines.thumbnail_color.names.ingredient_default)
@@ -777,16 +761,15 @@ function ProductionPanel:updateInputBlock(model, block)
 			end
 
 			---constant-combinator selection mode: expand all inputs so any can be picked
-			local combinator_select_mode = User.getParameter("combinator_select_mode") == true
 			local combinator_selection = combinator_select_mode and (User.getParameter("combinator_selection") or {}) or {}
 			for index, ingredient in pairs(all_ingredients) do
 				local is_visible = ingredient.count > display_hidden_products
 				if display_hidden_products_mode == "relative" then
 					is_visible = ingredient.count > max_count*display_hidden_products
 				end
-				local combinator_selected = combinator_select_mode and combinator_selection[combinator_key(ingredient)] ~= nil
+				local combinator_selected = combinator_select_mode and combinator_selection[ingredient.key] ~= nil
 				if combinator_selected then
-					ingredient.ingredient_color = "green"
+					ingredient.ingredient_color = User.getThumbnailColor(defines.thumbnail_color.names.combinator_pick)
 				end
 				if combinator_select_mode or skip_hidden_products == true or all_visible == true or show_hidden_input_products or display_hidden_products == 0 or is_visible then
 					local input_cell = GuiCellElementM(self.classname, ingredient.button_action, model.id, block.id, "none"):element(ingredient)
@@ -815,6 +798,8 @@ end
 ---@param model table
 ---@param block table
 function ProductionPanel:updateOutputBlock(model, block)
+	local combinator_select_mode = User.getParameter("combinator_select_mode") == "products"
+			
 	---data
 	local block_by_product = not (block ~= nil and block.by_product == false)
 
@@ -837,11 +822,22 @@ function ProductionPanel:updateOutputBlock(model, block)
 	else
 		GuiElement.add(output_tool, GuiButton(self.classname, "block-all-product-visible", model.id, block.id):sprite("menu", defines.sprites.filter.black, defines.sprites.filter.black):style("helmod_button_menu_sm"):tooltip({"helmod_button.all-product-visible" }))
 	end
-	local items = ProductionPanel.get_elements(block, "products")
-	local pipette_tooltip = GuiTooltipBlockPipette("tooltip.smart-pipette"):element(items)
-	GuiElement.add(output_tool, GuiButton(self.classname, "block-pipette", model.id, block.id, "products"):sprite("menu", defines.sprites.pipette.black, defines.sprites.pipette.black):style("helmod_button_menu_sm"):tooltip(pipette_tooltip))
 	if block_by_product ~= false then
 		GuiElement.add(output_tool, GuiButton(self.classname, "block-reset-input", model.id, block.id):sprite("menu", defines.sprites.eraser.black, defines.sprites.eraser.black):style("helmod_button_menu_sm"):tooltip({"helmod_button.clear" }))
+	end
+
+	---generate a constant combinator from the input list (item/fluid request lists)
+	local solid_items = ProductionPanel.get_elements(block, "products", "item")
+	local solid_pipette_tooltip = GuiTooltipBlockPipette("tooltip.smart-pipette"):element(solid_items):append_information({ "helmod_button.combinator-solids" })
+	GuiElement.add(output_tool, GuiButton(self.classname, "block-combinator-solids", model.id, block.id, "products"):sprite("menu", defines.sprites.item.black, defines.sprites.item.black):style("helmod_button_menu_sm"):tooltip(solid_pipette_tooltip))
+	local fluid_items = ProductionPanel.get_elements(block, "products", "fluid")
+	local fluid_pipette_tooltip = GuiTooltipBlockPipette("tooltip.smart-pipette"):element(fluid_items):append_information({ "helmod_button.combinator-fluids" })
+	GuiElement.add(output_tool, GuiButton(self.classname, "block-combinator-fluids", model.id, block.id, "products"):sprite("menu", defines.sprites.fluid.black, defines.sprites.fluid.black):style("helmod_button_menu_sm"):tooltip(fluid_pipette_tooltip))
+	local custom_pipette_tooltip = GuiTooltipBlockPipette("tooltip.smart-pipette"):append_information({ "helmod_button.combinator-select" })
+	if combinator_select_mode == true then
+		GuiElement.add(output_tool, GuiButton(self.classname, "block-combinator-select", model.id, block.id, "products"):sprite("menu", defines.sprites.pipette.white, defines.sprites.pipette.black):style("helmod_button_menu_sm_selected"):tooltip(custom_pipette_tooltip))
+	else
+		GuiElement.add(output_tool, GuiButton(self.classname, "block-combinator-select", model.id, block.id, "products"):sprite("menu", defines.sprites.pipette.black, defines.sprites.pipette.black):style("helmod_button_menu_sm"):tooltip(custom_pipette_tooltip))
 	end
 
 	---ouput panel
@@ -867,6 +863,7 @@ function ProductionPanel:updateOutputBlock(model, block)
 			for index, lua_product in spairs(block.products, User.getProductSorter()) do
 				if all_visible == true or ((lua_product.state or 0) == 1 and block_by_product) or (lua_product.amount or 0) > ModelCompute.waste_value then
 					local product = Product(lua_product):clone()
+					product.key = Product(lua_product):getTableKey()
 					product.time = model.time
 					product.count = lua_product.amount
 					product.count_limit = lua_product.amount * (block.count_limit or 0)
@@ -885,15 +882,18 @@ function ProductionPanel:updateOutputBlock(model, block)
 						-- TODO disable solver can't do that
 						product.button_action = "product-info"
 						product.button_tooltip = "tooltip.info-product"
-						if block.products_linked ~= nil and block.products_linked[Product(lua_product):getTableKey()] then
+						if block.products_linked ~= nil and block.products_linked[product.key] then
 							product.contraint_type = "linked"
 						end
 					else
 						product.button_action = "product-edition"
 						product.button_tooltip = "tooltip.edit-product"
-						if block.products_linked ~= nil and block.products_linked[Product(lua_product):getTableKey()] then
+						if block.products_linked ~= nil and block.products_linked[product.key] then
 							product.contraint_type = "linked"
 						end
+					end
+					if combinator_select_mode then
+						product.button_action = "block-combinator-pick"
 					end
 					---color
 					if lua_product.state == 1 then
@@ -912,15 +912,24 @@ function ProductionPanel:updateOutputBlock(model, block)
 				end
 			end
 
+			local combinator_selection = combinator_select_mode and (User.getParameter("combinator_selection") or {}) or {}
 			for index, product in pairs(all_products) do
 				local is_visible = product.count > display_hidden_products
 				if display_hidden_products_mode == "relative" then
 					is_visible = product.count > max_count*display_hidden_products
 				end
-				if skip_hidden_products == true or all_visible == true or show_hidden_output_products or display_hidden_products == 0 or is_visible then
-					GuiElement.add(output_table, GuiCellElementM(self.classname, product.button_action, model.id, block.id, "none"):element(product)
+				local combinator_selected = combinator_select_mode and combinator_selection[product.key] ~= nil
+				if combinator_selected then
+					product.product_color = User.getThumbnailColor(defines.thumbnail_color.names.combinator_pick)
+				end
+				if combinator_select_mode or skip_hidden_products == true or all_visible == true or show_hidden_output_products or display_hidden_products == 0 or is_visible then
+					local input_cell = GuiCellElementM(self.classname, product.button_action, model.id, block.id, "none"):element(product)
 					:tooltip(product.button_tooltip):index(index):color(product.product_color):byLimit(block.by_limit):contraintIcon(product.contraint_type)
-					:hasInput(product.has_input):controlInfo(product.control_info))
+					:hasInput(product.has_input):controlInfo(product.control_info)
+					if combinator_selected then
+						input_cell:mask(true)
+					end
+					GuiElement.add(output_table, input_cell)
 				else
 					table.insert(hidden_products, product)
 				end
@@ -1854,28 +1863,45 @@ function ProductionPanel:onEventAccessAll(event, model, block)
 	end
 
 	if event.action == "block-combinator-solids" then
-		Player.setSmartToolInputsConstantCombinator(self:getCombinatorInputs(block, "item"))
+		local items = ProductionPanel.get_elements(block, event.item3, "item")
+		if #items > 0 then
+			Player.setSmartToolItemListConstantCombinator(items)
+			Controller:send("on_gui_close", event, self.classname)
+		end
 	end
 
 	if event.action == "block-combinator-fluids" then
-		Player.setSmartToolInputsConstantCombinator(self:getCombinatorInputs(block, "fluid"))
+		local items = ProductionPanel.get_elements(block, event.item3, "fluid")
+		if #items > 0 then
+			Player.setSmartToolItemListConstantCombinator(items)
+			Controller:send("on_gui_close", event, self.classname)
+		end
+	end
+
+	if event.action == "block-combinator-pick" then
+		local combinator_select_mode = User.getParameter("combinator_select_mode")
+		if  combinator_select_mode ~= nil then
+			self:toggleCombinatorSelection(block, combinator_select_mode, event.item)
+			Controller:send("on_gui_update", event, self.classname)
+		end
 	end
 
 	if event.action == "block-combinator-select" then
-		if User.getParameter("combinator_select_mode") == true then
+		if User.getParameter("combinator_select_mode") ~= nil then
 			---turning off: generate from the current selection (skip if nothing picked)
 			local items = {}
 			for _, item in pairs(User.getParameter("combinator_selection") or {}) do
 				table.insert(items, item)
 			end
-			User.setParameter("combinator_select_mode", false)
+			User.setParameter("combinator_select_mode", nil)
 			User.setParameter("combinator_selection", {})
 			if #items > 0 then
-				Player.setSmartToolInputsConstantCombinator(items)
+				Player.setSmartToolItemListConstantCombinator(items)
+				Controller:send("on_gui_close", event, self.classname)
 			end
 		else
 			User.setParameter("combinator_selection", {})
-			User.setParameter("combinator_select_mode", true)
+			User.setParameter("combinator_select_mode", event.item3)
 		end
 		Controller:send("on_gui_update", event, self.classname)
 	end
@@ -1981,7 +2007,8 @@ function ProductionPanel:onEventAccessRead(event, model, block)
 	end
 end
 
-function ProductionPanel.get_elements(block, type)
+function ProductionPanel.get_elements(block, type, filter)
+	
 	local elements = nil
 	if type == "products" then
 		elements = block.products
@@ -1990,16 +2017,40 @@ function ProductionPanel.get_elements(block, type)
 	end
 	local items = {}
 	for index, lua_product in spairs(elements, User.getProductSorter()) do
-		if (lua_product.amount or 0) > ModelCompute.waste_value then
-			local product = Product(lua_product):clone()
-			product.count = lua_product.amount
-			if block.m_by_limit then
-				amount = lua_product.amount * (block.count_limit or 0)
-			end
+		if (lua_product.amount or 0) > ModelCompute.waste_value and (filter == nil or lua_product.type == filter) then
+			local product = ProductionPanel.get_element(block, lua_product)
 			table.insert(items, product)
 		end
 	end
 	return items
+end
+
+function ProductionPanel.get_element(block, lua_product)
+	local item_mode = User.getPreferenceSetting("combinator_item_quantity_mode")
+    local fluid_mode = User.getPreferenceSetting("combinator_fluid_quantity_mode")
+    local item_value = User.getPreferenceSetting("combinator_default_item_value")
+    local fluid_value = User.getPreferenceSetting("combinator_default_fluid_value")
+    local fluid_stack = User.getPreferenceSetting("combinator_default_fluid_stack")
+	local product = Product(lua_product):clone()
+	product.count = math.ceil(product.amount)
+	if block.m_by_limit then
+		amount = lua_product.amount * (block.count_limit or 0)
+	end
+	if product.type == "item" then
+		if item_mode == "amount" then
+			product.count = item_value * product.count
+		else
+			local stack_size = ItemPrototype(product.name):stackSize()
+			product.count = item_value * (stack_size or 0)
+		end
+	else
+		if fluid_mode == "amount" then
+			product.count = fluid_value * product.count
+		else
+			product.count = fluid_value * (fluid_stack or 0)
+		end
+	end
+	return product
 end
 -------------------------------------------------------------------------------
 ---On event
@@ -2231,12 +2282,6 @@ function ProductionPanel:onEventAccessWrite(event, model, block)
 	end
 
 	if event.action == "production-recipe-ingredient-add" then
-		---in constant-combinator selection mode, a click toggles selection instead of opening the recipe selector
-		if User.getParameter("combinator_select_mode") == true then
-			self:toggleCombinatorSelection(block, event.item)
-			Controller:send("on_gui_update", event, self.classname)
-			return
-		end
 		if event.control == false and event.shift == false then
 			if event.button == defines.mouse_button_type.right then
 				-- Set Parameter Target for the selector return

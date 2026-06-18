@@ -681,16 +681,16 @@ function PreferenceEdition:updateThumbnailColor(event)
     local blocks_stack = GuiElement.add(blocks_panel, GuiFlowH("stack"))
     local fake_block = { name = "block1", sprite1 = defines.sprites.hangar.white, sprite2 = defines.sprites.hangar.white }
 
-    self:updateThumbnailCell(blocks_stack, "default", "block_default", fake_block)
-    self:updateThumbnailCell(blocks_stack, "selected", "block_selected", fake_block)
-    self:updateThumbnailCell(blocks_stack, "reverted", "block_reverted", fake_block)
+    self:updateThumbnailCell(blocks_stack, "default", defines.thumbnail_color.names.block_default, fake_block)
+    self:updateThumbnailCell(blocks_stack, "selected", defines.thumbnail_color.names.block_selected, fake_block)
+    self:updateThumbnailCell(blocks_stack, "reverted", defines.thumbnail_color.names.block_reverted, fake_block)
     
     local recipes_panel = GuiElement.add(container_panel, GuiFrameV("recipes"):caption({"helmod_common.recipes"}):style(defines.styles.frame.bordered))
     recipes_panel.style.horizontally_stretchable = true
     local recipes_stack = GuiElement.add(recipes_panel, GuiFlowH("stack"))
     local fake_recipe = { name = "recipe1", sprite1 = defines.sprites.script.white, sprite2 = defines.sprites.script.white }
 
-    self:updateThumbnailCell(recipes_stack, "default", "recipe_default", fake_recipe)
+    self:updateThumbnailCell(recipes_stack, "default", defines.thumbnail_color.names.recipe_default, fake_recipe)
 
 
     local products_panel = GuiElement.add(container_panel, GuiFrameV("products"):caption({"helmod_common.products"}):style(defines.styles.frame.bordered))
@@ -698,18 +698,25 @@ function PreferenceEdition:updateThumbnailColor(event)
     local products_stack = GuiElement.add(products_panel, GuiFlowH("stack"))
     local fake_product = { name = "product1", sprite1 = defines.sprites.jewel.white, sprite2 = defines.sprites.jewel.white }
 
-    self:updateThumbnailCell(products_stack, "default", "product_default", fake_product)
-    self:updateThumbnailCell(products_stack, "driving", "product_driving", fake_product)
-    self:updateThumbnailCell(products_stack, "overflow", "product_overflow", fake_product)
+    self:updateThumbnailCell(products_stack, "default", defines.thumbnail_color.names.product_default, fake_product)
+    self:updateThumbnailCell(products_stack, "driving", defines.thumbnail_color.names.product_driving, fake_product)
+    self:updateThumbnailCell(products_stack, "overflow", defines.thumbnail_color.names.product_overflow, fake_product)
 
     local ingredients_panel = GuiElement.add(container_panel, GuiFrameV("ingredients"):caption({"helmod_common.ingredients"}):style(defines.styles.frame.bordered))
     ingredients_panel.style.horizontally_stretchable = true
     local ingredients_stack = GuiElement.add(ingredients_panel, GuiFlowH("stack"))
     local fake_ingredient = { name = "ingredient1", sprite1 = defines.sprites.jewel.white, sprite2 = defines.sprites.jewel.white }
 
-    self:updateThumbnailCell(ingredients_stack, "default", "ingredient_default", fake_ingredient)
-    self:updateThumbnailCell(ingredients_stack, "driving", "ingredient_driving", fake_ingredient)
-    self:updateThumbnailCell(ingredients_stack, "overflow", "ingredient_overflow", fake_ingredient)
+    self:updateThumbnailCell(ingredients_stack, "default", defines.thumbnail_color.names.ingredient_default, fake_ingredient)
+    self:updateThumbnailCell(ingredients_stack, "driving", defines.thumbnail_color.names.ingredient_driving, fake_ingredient)
+    self:updateThumbnailCell(ingredients_stack, "overflow", defines.thumbnail_color.names.ingredient_overflow, fake_ingredient)
+
+    local combinator_panel = GuiElement.add(container_panel, GuiFrameV("combinator"):caption({"entity-name.constant-combinator"}):style(defines.styles.frame.bordered))
+    combinator_panel.style.horizontally_stretchable = true
+    local combinator_stack = GuiElement.add(combinator_panel, GuiFlowH("stack"))
+    local fake_combinator = { name = "combinator1", sprite1 = defines.sprites.jewel.white, sprite2 = defines.sprites.jewel.white }
+
+    self:updateThumbnailCell(combinator_stack, "pick", defines.thumbnail_color.names.combinator_pick, fake_combinator)
 end
 
 -------------------------------------------------------------------------------

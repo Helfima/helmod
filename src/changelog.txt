@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.2.14
-Date: 2026-06-08
+Date: 2026-06-18
+  Features:
+    - Added pipette tool to create combinator from input or ouput items
   Bugfixes:
     - Fixed rocket recipe that added twice time the rocket parts
     - Fixed module limitation in Recipe Edition
