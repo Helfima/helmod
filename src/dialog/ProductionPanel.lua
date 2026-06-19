@@ -2032,10 +2032,11 @@ function ProductionPanel.get_element(block, lua_product)
     local fluid_value = User.getPreferenceSetting("combinator_default_fluid_value")
     local fluid_stack = User.getPreferenceSetting("combinator_default_fluid_stack")
 	local product = Product(lua_product):clone()
-	product.count = math.ceil(product.amount)
-	if block.m_by_limit then
-		amount = lua_product.amount * (block.count_limit or 0)
+	product.count = product.amount
+	if block.by_limit then
+		product.count = lua_product.amount * (block.count_limit or 0)
 	end
+	product.count = math.ceil(product.count)
 	if product.type == "item" then
 		if item_mode == "amount" then
 			product.count = item_value * product.count
