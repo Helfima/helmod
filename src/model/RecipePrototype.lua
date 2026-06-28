@@ -242,13 +242,16 @@ end
 
 -------------------------------------------------------------------------------
 ---Return category of Prototype
----@return string
+---@return string | nil
 function RecipePrototype:getCategory()
     if defines.mod.recipes[self.lua_type] ~= nil and defines.mod.recipes[self.lua_type].category ~= nil then
         return defines.mod.recipes[self.lua_type].category
     end
     if self.lua_prototype ~= nil then
-        return self.lua_prototype.category or "crafting"
+        local categories = self.lua_prototype.categories
+        if table.size(categories) == 0 then return "crafting" end
+        local category = next(categories, nil)
+        return category
     end
     return nil
 end
@@ -256,25 +259,9 @@ end
 -------------------------------------------------------------------------------
 ---Return additonnal categories of Prototype
 ---@return {[uint]:string}
-function RecipePrototype:getAdditionnalCategories()
-    if self.lua_type == defines.mod.recipes.technology.name then
-        return {}
-    end
-    if self.lua_prototype ~= nil then
-        return self.lua_prototype.additional_categories or {}
-    end
-    return {}
-end
-
--------------------------------------------------------------------------------
----Return additonnal categories of Prototype
----@return {[uint]:string}
 function RecipePrototype:getAllCategories()
     if self.lua_prototype ~= nil then
-        local categories = self:getAdditionnalCategories()
-        local category = self:getCategory()
-        table.insert(categories, 1, category)
-        return categories
+        return self.lua_prototype.categories
     end
     return {}
 end

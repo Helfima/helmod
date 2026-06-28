@@ -1995,7 +1995,7 @@ end
 function Player.getBurntRecipe(name)
     local recipe_prototype = Player.getRecipe(name)
     local recipe = {}
-    recipe.category = recipe_prototype.category
+    recipe.categories = recipe_prototype.categories
     recipe.enabled = true
     recipe.energy = recipe_prototype.energy
     recipe.force = {}

@@ -4,21 +4,21 @@
     // Pour plus d'informations, visitez : https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        
         {
             "arg": [],
             "name": "launch file",
             "program": "${file}",
             "request": "launch",
-            "stopOnEntry": true,
             "type": "lua"
         },
         {
-            "type": "factoriomod",
+            "type": "factorio",
             "request": "launch",
             "name": "Factorio Mod Debug"
         },
         {
-            "type": "factoriomod",
+            "type": "factorio",
             "request": "launch",
             "name": "Factorio Mod Debug (Settings & Data)",
             "hookSettings": true,
@@ -26,10 +26,17 @@
             
         },
         {
-            "type": "factoriomod",
+            "type": "factorio",
             "request": "launch",
             "name": "Factorio Mod Debug (Profile)",
             "hookMode": "profile"
+        },
+        {
+            "arg": ["--dap"],
+            "name": "Factorio Debug",
+            "program": "d:\\Perso\\Factorio_Test\\Factorio_2.1.7\\bin\\x64\\factorio.exe",
+            "request": "launch",
+            "type": "lua"
         }
     ]
 }

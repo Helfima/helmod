@@ -8,6 +8,20 @@ require "selector.AbstractSelector"
 
 RecipeSelector = newclass(AbstractSelector)
 
+function RecipeSelector:rulesFilter(prototype)
+  local rules_included, rules_excluded = Player.getRules("selector-filter")
+  local show = true
+  local current_prototype = {
+    name = prototype.name,
+    type = prototype.type,
+    group = prototype.group,
+    subgroup = prototype.subgroup,
+    category = RecipePrototype(prototype.name, prototype.type):getCategory()
+  }
+  ---resolve rule excluded
+  show = Player.checkRules(show, rules_excluded, self.rule_category, current_prototype, false)
+  return show
+end
 -------------------------------------------------------------------------------
 ---After initialization
 --
@@ -186,6 +200,13 @@ end
 ---@param prototype table
 ---@return table
 function RecipeSelector:buildPrototypeTooltip(prototype)
+  return nil
+end
+-------------------------------------------------------------------------------
+---Build prototype tooltip
+---@param prototype table
+---@return table
+function RecipeSelector:buildPrototypeTooltip2(prototype)
   ---initalize tooltip
   local tooltip = ""
 
