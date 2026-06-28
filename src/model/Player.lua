@@ -1438,16 +1438,16 @@ function Player.getModuleEffects(module)
     -- search module
     local module = ItemPrototype(module)
     for effect_name, effect_value in pairs(module:getModuleEffects()) do
+        local factor = 100
+        if effect_name == "quality" then
+            factor = 1000
+        end
         local final_value = effect_value
         -- arround the % value
         if final_value >= 0  then
-            final_value = math.floor(final_value*100 + 0.05)/100
+            final_value = math.floor(final_value*factor + 0.05)/factor
         else 
-            final_value = math.ceil(final_value*100 - 0.05)/100
-        end
-        if effect_name == "quality" then
-            -- fix quality value, in game is divide by 10
-            final_value = final_value / 10
+            final_value = math.ceil(final_value*factor - 0.05)/factor
         end
         module_effects[effect_name] = final_value
     end

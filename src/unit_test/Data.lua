@@ -281,25 +281,25 @@ data.energy["fusion-generator"] = {
 data.modules = {}
 
 data.modules["speed-module"] = {}
-data.modules["speed-module"]["normal"] = { speed = 0.2, productivity = 0, consumption = 0.5, pollution = 0, quality = -0.1 }
-data.modules["speed-module"]["uncommon"] = { speed = 0.26, productivity = 0, consumption = 0.5, pollution = 0, quality = -0.1 }
-data.modules["speed-module"]["rare"] = { speed = 0.32, productivity = 0, consumption = 0.5, pollution = 0, quality = -0.1 }
-data.modules["speed-module"]["epic"] = { speed = 0.38, productivity = 0, consumption = 0.5, pollution = 0, quality = -0.1 }
-data.modules["speed-module"]["legendary"] = { speed = 0.5, productivity = 0, consumption = 0.5, pollution = 0, quality = -0.1 }
+data.modules["speed-module"]["normal"] = { speed = 0.2, productivity = 0, consumption = 0.5, pollution = 0, quality = -0.01 }
+data.modules["speed-module"]["uncommon"] = { speed = 0.26, productivity = 0, consumption = 0.5, pollution = 0, quality = -0.01 }
+data.modules["speed-module"]["rare"] = { speed = 0.32, productivity = 0, consumption = 0.5, pollution = 0, quality = -0.01 }
+data.modules["speed-module"]["epic"] = { speed = 0.38, productivity = 0, consumption = 0.5, pollution = 0, quality = -0.01 }
+data.modules["speed-module"]["legendary"] = { speed = 0.5, productivity = 0, consumption = 0.5, pollution = 0, quality = -0.01 }
 
 data.modules["speed-module-2"] = {}
-data.modules["speed-module-2"]["normal"] = { speed = 0.3, productivity = 0, consumption = 0.6, pollution = 0, quality = -0.15 }
-data.modules["speed-module-2"]["uncommon"] = { speed = 0.39, productivity = 0, consumption = 0.6, pollution = 0, quality = -0.15 }
-data.modules["speed-module-2"]["rare"] = { speed = 0.48, productivity = 0, consumption = 0.6, pollution = 0, quality = -0.15 }
-data.modules["speed-module-2"]["epic"] = { speed = 0.57, productivity = 0, consumption = 0.6, pollution = 0, quality = -0.15 }
-data.modules["speed-module-2"]["legendary"] = { speed = 0.75, productivity = 0, consumption = 0.6, pollution = 0, quality = -0.15 }
+data.modules["speed-module-2"]["normal"] = { speed = 0.3, productivity = 0, consumption = 0.6, pollution = 0, quality = -0.015 }
+data.modules["speed-module-2"]["uncommon"] = { speed = 0.39, productivity = 0, consumption = 0.6, pollution = 0, quality = -0.015 }
+data.modules["speed-module-2"]["rare"] = { speed = 0.48, productivity = 0, consumption = 0.6, pollution = 0, quality = -0.015 }
+data.modules["speed-module-2"]["epic"] = { speed = 0.57, productivity = 0, consumption = 0.6, pollution = 0, quality = -0.015 }
+data.modules["speed-module-2"]["legendary"] = { speed = 0.75, productivity = 0, consumption = 0.6, pollution = 0, quality = -0.015 }
 
 data.modules["speed-module-3"] = {}
-data.modules["speed-module-3"]["normal"] = { speed = 0.5, productivity = 0, consumption = 0.7, pollution = 0, quality = -0.25 }
-data.modules["speed-module-3"]["uncommon"] = { speed = 0.65, productivity = 0, consumption = 0.7, pollution = 0, quality = -0.25 }
-data.modules["speed-module-3"]["rare"] = { speed = 0.8, productivity = 0, consumption = 0.7, pollution = 0, quality = -0.25 }
-data.modules["speed-module-3"]["epic"] = { speed = 0.95, productivity = 0, consumption = 0.7, pollution = 0, quality = -0.25 }
-data.modules["speed-module-3"]["legendary"] = { speed = 1.25, productivity = 0, consumption = 0.7, pollution = 0, quality = -0.25 }
+data.modules["speed-module-3"]["normal"] = { speed = 0.5, productivity = 0, consumption = 0.7, pollution = 0, quality = -0.025 }
+data.modules["speed-module-3"]["uncommon"] = { speed = 0.65, productivity = 0, consumption = 0.7, pollution = 0, quality = -0.025 }
+data.modules["speed-module-3"]["rare"] = { speed = 0.8, productivity = 0, consumption = 0.7, pollution = 0, quality = -0.025 }
+data.modules["speed-module-3"]["epic"] = { speed = 0.95, productivity = 0, consumption = 0.7, pollution = 0, quality = -0.025 }
+data.modules["speed-module-3"]["legendary"] = { speed = 1.25, productivity = 0, consumption = 0.7, pollution = 0, quality = -0.025 }
 
 data.modules["efficiency-module"] = {}
 data.modules["efficiency-module"]["normal"] = { speed = 0, productivity = 0, consumption = -0.3, pollution = 0, quality = 0 }
