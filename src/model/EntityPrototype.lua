@@ -425,7 +425,7 @@ function EntityPrototype:getFluidFuelPrototype()
       fuel = FluidPrototype(fuel_name)
     else
       fuel = FluidPrototype(fuel_name.name)
-      fuel:setTemperature(fuel_name.temperature)
+      fuel:setTemperature(fuel_name.temperature or fuel_name.default_temperature)
     end
     return fuel
   end
@@ -574,9 +574,9 @@ function EntityPrototype:getFluidConsumption()
           
           local maximum_temperature = energy_prototype:getMaximumTemperature()
           if maximum_temperature > 0 then
-            maximum_temperature = math.min(maximum_temperature, fluid_fuel.temperature)
+            maximum_temperature = math.min(maximum_temperature, fluid_fuel:getTemperature())
           else
-            maximum_temperature = fluid_fuel.temperature
+            maximum_temperature = fluid_fuel:getTemperature()
           end
 
           local power_extract = self:getPowerExtract(minimum_temperature, maximum_temperature, heat_capacity)

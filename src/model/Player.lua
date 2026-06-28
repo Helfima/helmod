@@ -52,6 +52,7 @@ end
 function Player.repportError(error, trace)
     Player.print(error)
     log(error)
+    
     log(trace)
     local error_message = {}
     table.insert(error_message, error)

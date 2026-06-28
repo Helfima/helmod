@@ -1196,7 +1196,8 @@ function GuiTooltipFuel:create()
 		local element_name = prototype:native().name
 		local element_quality = self.m_element.quality or "normal"
 		local element_localised_name = prototype:getLocalisedName()
-		
+		local temperature = prototype:getTemperature()
+
 		if self.m_compact == true then
 			tooltip = {"", string.format("[%s=%s,quality=%s]", element_type, element_name, element_quality), "  ", element_localised_name}
 			
@@ -1205,7 +1206,7 @@ function GuiTooltipFuel:create()
 				local tooltip_property = {"", "\n", "[img=helmod-tooltip-blank]", "  ", defines.mod.tags.color.gold, {"description.fuel-value"}, ": ", defines.mod.tags.color.close, value}
 				table.insert(tooltip, tooltip_property)
 			else
-				local value = tostring(prototype.temperature)
+				local value = tostring(temperature)
 				local tooltip_property = {"", "\n", "[img=helmod-tooltip-blank]", "  ", defines.mod.tags.color.gold, {"description.temperature"}, ": ", defines.mod.tags.color.close, value, " °C"}
 				table.insert(tooltip, tooltip_property)
 			end
@@ -1214,7 +1215,7 @@ function GuiTooltipFuel:create()
 				local value = Format.formatNumberKilo(prototype:getFuelValue(), "J")
 				tooltip = {"", string.format("[%s=%s,quality=%s] %s", element_type, element_name, element_quality, value), "  ", element_localised_name}
 			else
-				local value = tostring(prototype.temperature)
+				local value = tostring(temperature)
 				tooltip = {"", string.format("[%s=%s] %s °C", element_type, element_name, value), "  ", element_localised_name}
 			end
 		end

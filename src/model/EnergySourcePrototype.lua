@@ -332,7 +332,7 @@ function FluidSourcePrototype:getFuelPrototype()
     fuel = FluidPrototype(fuel_name)
   else
     fuel = FluidPrototype(fuel_name.name)
-    fuel:setTemperature(fuel_name.temperature)
+    fuel:setTemperature(fuel_name.temperature or fuel_name.default_temperature)
   end
   return fuel
 end

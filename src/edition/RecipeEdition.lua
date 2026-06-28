@@ -842,7 +842,7 @@ function RecipeEdition:updateFactoryInfo(event)
                         local fuel = GuiTooltipFuel(""):element({mode="used", type=fuel_type, prototype=item}):compact(compact)
                         local item_fuel = fuel:create()
                         table.insert(items, item_fuel)
-                        if factory_fuel ~= nil and factory_fuel:native().name == item:native().name and factory_fuel.temperature == item.temperature then
+                        if factory_fuel ~= nil and factory_fuel:native().name == item:native().name and factory_fuel:getTemperature() == item.temperature then
                             default_fuel = item_fuel
                         end
                     end
