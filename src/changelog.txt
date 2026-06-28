@@ -1,8 +1,15 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.3.2
+Date: 2026-06-30
+  Bugfixes:
+    - Fixed error in tooltip of fuel when open recipe edition
+    - Fixed quality calculation chain
+---------------------------------------------------------------------------------------------------
 Version: 2.3.1
-Date: 2026-06-26
+Date: 2026-06-28
   Bugfixes:
     - Fixed quality effect value from modules
+    - Fixed category of recipe for helmod's recipe (ex: mining recipe)
 ---------------------------------------------------------------------------------------------------
 Version: 2.3.0
 Date: 2026-06-26

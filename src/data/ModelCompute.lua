@@ -1155,7 +1155,7 @@ function ModelCompute.computeQualityProbability(lua_quality, quality_effect)
         return nil
     end
     local results = {}
-    local next_probability = lua_quality.next_probability
+    local next_probability = lua_quality.chain_probability
     local current_probability = 1
     if next_probability > 0 and quality_effect > 0  then
         local next_result = ModelCompute.computeNextQualityProbability(lua_quality.next, quality_effect)
@@ -1183,7 +1183,7 @@ function ModelCompute.computeNextQualityProbability(lua_quality, quality_effect)
     end
     local results = {}
     local previous_probability = 0
-    local next_probability = lua_quality.next_probability
+    local next_probability = lua_quality.chain_probability
     if next_probability > 0 and quality_effect > 0  then
         local next_result = ModelCompute.computeNextQualityProbability(lua_quality.next, quality_effect * next_probability)
         if next_result ~= nil then

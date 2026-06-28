@@ -244,14 +244,11 @@ end
 ---Return category of Prototype
 ---@return string | nil
 function RecipePrototype:getCategory()
-    if defines.mod.recipes[self.lua_type] ~= nil and defines.mod.recipes[self.lua_type].category ~= nil then
-        return defines.mod.recipes[self.lua_type].category
-    end
     if self.lua_prototype ~= nil then
-        local categories = self.lua_prototype.categories
+        local categories = self:getAllCategories()
         if table.size(categories) == 0 then return "crafting" end
-        local category = next(categories, nil)
-        return category
+        local index = next(categories, nil)
+        return categories[index]
     end
     return nil
 end
@@ -261,7 +258,14 @@ end
 ---@return {[uint]:string}
 function RecipePrototype:getAllCategories()
     if self.lua_prototype ~= nil then
-        return self.lua_prototype.categories
+        if self.lua_prototype.type == "recipe" then
+            return self.lua_prototype.categories
+        else
+            if defines.mod.recipes[self.lua_type] ~= nil and defines.mod.recipes[self.lua_type].category ~= nil then
+                return {defines.mod.recipes[self.lua_type].category}
+            end
+            return {self.lua_prototype.category}
+        end
     end
     return {}
 end

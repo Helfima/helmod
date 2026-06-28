@@ -332,7 +332,7 @@ function FluidSourcePrototype:getFuelPrototype()
     fuel = FluidPrototype(fuel_name)
   else
     fuel = FluidPrototype(fuel_name.name)
-    fuel:setTemperature(fuel_name.temperature)
+    fuel:setTemperature(fuel_name.temperature or fuel_name.default_temperature)
   end
   return fuel
 end
@@ -429,6 +429,9 @@ function FluidSourcePrototype:getSpeedModifier()
       local minimum_temperature = fluid_fuel:getMinimumTemperature()
       maximum_temperature = maximum_temperature - minimum_temperature
       local fuel_temperature = fluid_fuel:getTemperature() - minimum_temperature
+      if fuel_temperature == 0 then
+        fuel_temperature = minimum_temperature
+      end
       local effectivity = self:getEffectivity()
 
       return math.min(1, fuel_temperature / maximum_temperature * effectivity)

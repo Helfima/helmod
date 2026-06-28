@@ -46,14 +46,17 @@ end
 ---Return temperature
 ---@return number
 function FluidPrototype:getTemperature()
-  return self.temperature
+  if self.lua_prototype ~= nil then
+    return self.temperature or self.lua_prototype.default_temperature or 0
+  end
+  return self.temperature or 0
 end
 
 -------------------------------------------------------------------------------
 ---Return fluid temperature
 ---@return number or nil
 function FluidPrototype:setTemperature(value)
-  self.temperature = value
+  self.temperature = value or 0
 end
 
 -------------------------------------------------------------------------------
