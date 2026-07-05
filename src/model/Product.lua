@@ -111,18 +111,16 @@ function Product:getElementAmount()
   local element = self.lua_prototype
   if element == nil then return 0 end
 
-  local amount = element.amount
-  if amount ~= nil then
-    ---In 0.17, it seems probability can be used with just 'amount' and it
-    ---doesn't need to use amount_min/amount_max
-    if element.probability ~= nil then
-      amount = amount * element.probability
-    end
-  else
-    if element.probability ~= nil and element.amount_min ~= nil and  element.amount_max ~= nil then
-      amount = ((element.amount_min + element.amount_max) * element.probability / 2)
-    end
+  local amount = element.amount or 0
+
+  if element.amount_min ~= nil and  element.amount_max ~= nil then
+    amount = ((element.amount_min + element.amount_max) / 2)
   end
+  
+  local shared_probability = element.shared_probability or {min = 0, max = 1}
+  local independent_probability = element.independent_probability or 1
+  local probability = independent_probability * (shared_probability.max - shared_probability.min)
+  amount = amount * probability
 
   if element.extra_count_fraction ~= nil then
     local extra_count_fraction = element.extra_count_fraction or 0
@@ -140,18 +138,22 @@ function Product:getBonusAmount()
   if element == nil then return 0 end
 
   local catalyst_amount = element.catalyst_amount or 0
-  local probability = element.probability or 1
+    
   local amount = 0
   ---If amount not specified, amount_min, amount_max and probability must all be specified.
   ---Minimal amount of the item or fluid to give. Has no effect when amount is specified.
   ---Maximum amount of the item or fluid to give. Has no effect when amount is specified.
-  if element.probability ~= nil and element.amount_min ~= nil and  element.amount_max ~= nil then
+  if element.amount_min ~= nil and  element.amount_max ~= nil then
     amount = (element.amount_min + element.amount_max) / 2
   end
 
   if element.amount ~= nil then
-    amount = element.amount
+    amount = element.amount or 0
   end
+
+  local shared_probability = element.shared_probability or {min = 0, max = 1}
+  local independent_probability = element.independent_probability or 1
+  local probability = independent_probability * (shared_probability.max - shared_probability.min)
   if amount >= catalyst_amount then
     return (amount - catalyst_amount) * probability
   end
