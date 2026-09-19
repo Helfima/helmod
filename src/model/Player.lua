@@ -1690,7 +1690,8 @@ end
 ---Return table of Seeds for Agricultural Towers
 ---@return table
 function Player.getSeeds()
-    local plants_filters = Player.getPlantsFilter()
+    -- A visible seed can grow a hidden plant, such as Maraxsis fish food.
+    local plants_filters = {{filter = "type", type = "plant"}}
     local filters = {}
     table.insert(filters, { filter = "type", type = "item", mode = "or"})
     table.insert(filters, { filter = "plant-result", elem_filters = plants_filters, mode = "and"})
