@@ -264,7 +264,6 @@ local empty_effect ={
 function EntityPrototype:getBaseEffect()
   if self.lua_prototype ~= nil and self.lua_prototype.effect_receiver ~= nil then
     local base_effect = self.lua_prototype.effect_receiver.base_effect or empty_effect
-    base_effect.quality = (base_effect.quality or 0) / 10
     return base_effect
   end
   return empty_effect
@@ -283,7 +282,6 @@ local empty_effect_receiver = {
 function EntityPrototype:getEffectReveiver()
   if self.lua_prototype ~= nil then
     local effect_receiver = self.lua_prototype.effect_receiver or empty_effect_receiver
-    effect_receiver.base_effect.quality = (effect_receiver.base_effect.quality or 0) / 10
     return effect_receiver
   end
   return empty_effect_receiver

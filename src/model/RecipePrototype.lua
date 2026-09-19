@@ -41,7 +41,9 @@ RecipePrototype = newclass(Prototype, function(base, object, object_type)
             Prototype.init(base, recipe)
             base.lua_type = defines.mod.recipes.recipe.name
             if Player.hasFeatureQuality() then
-                if base.lua_prototype ~= nil and base.lua_prototype.ingredients ~= nil then
+                if base.lua_prototype ~= nil and not base.is_customized then
+                    base.is_support_quality = base.lua_prototype.can_set_quality
+                elseif base.lua_prototype ~= nil and base.lua_prototype.ingredients ~= nil then
                     for _, ingredient in pairs(base.lua_prototype.ingredients) do
                         if ingredient.type == "item" then
                             base.is_support_quality = true
@@ -271,10 +273,11 @@ function RecipePrototype:getAllCategories()
 end
 
 -------------------------------------------------------------------------------
----Return products array of Prototype (duplicates are combined into one entry)
+---Return products array of Prototype (duplicates combined unless original indices are requested)
 ---@param factory table
+---@param preserve_recipe_products boolean|nil Keep original product indices for quality resolution
 ---@return table
-function RecipePrototype:getProducts(factory)
+function RecipePrototype:getProducts(factory, preserve_recipe_products)
     local raw_products = self:getRawProducts(factory)
     ---if recipe is a voider
     if #raw_products == 1 and Product(raw_products[1]):getElementAmount() == 0 then
@@ -289,6 +292,12 @@ function RecipePrototype:getProducts(factory)
         local product_id = raw_product.type .. "/" .. raw_product.name
         if raw_product.temperature then
             product_id = product_id .. "#" .. raw_product.temperature
+        end
+        if preserve_recipe_products then
+            -- Quality controls belong to each prototype entry, even for identical items.
+            raw_product = table.deepcopy(raw_product)
+            raw_product.recipe_product_index = r
+            product_id = r
         end
         if lua_products[product_id] ~= nil then
             ---make a new product table for the combined result
@@ -372,53 +381,79 @@ end
 ---@param quality string
 ---@return table
 function RecipePrototype:getQualityProducts(factory, quality)
-    local raw_products = self:getProducts(factory)
-    if quality == nil then
-        quality = "normal"
-    end
-    -- can't do use greater quality
+    local native_recipe = self.lua_type == defines.mod.recipes.recipe.name and not self.is_customized
+    local raw_products = self:getProducts(factory, native_recipe)
+    quality = quality or "normal"
     if self.is_support_quality == false then
         quality = "normal"
     end
     local lua_quality = Player.getQualityPrototype(quality)
-    local quality_effect = 0 
+    local quality_effect = 0
     if factory ~= nil and factory.effects ~= nil then
         quality_effect = factory.effects.quality or 0
     end
-
+    local probability_results = {{name = quality, probability = 1}}
     if quality_effect > 0 then
-        local quality_products = {}
-        local probability_results = ModelCompute.computeQualityProbability(lua_quality, quality_effect)
-        if probability_results ~= nil then
-            for key, probability_result in pairs(probability_results) do
-                for _, raw_product in pairs(raw_products) do
-                    if raw_product.type == "item" then
-                        if key == 0 then
-                            raw_product.quality = probability_result.name
-                            raw_product.quality_probality = probability_result.probability
-                        else
-                            local quality_product = Product(raw_product):clone()
-                            quality_product.quality = probability_result.name
-                            quality_product.quality_probality = probability_result.probability
-                            table.insert(quality_products, quality_product)
-                        end
+        probability_results = ModelCompute.computeQualityProbability(lua_quality, quality_effect) or probability_results
+    end
+
+    local products = {}
+    local products_by_key = {}
+    local function add_product(product)
+        local key = product.type .. "/" .. Product(product):getTableKey()
+        local previous = products_by_key[key]
+        if previous == nil then
+            products_by_key[key] = product
+            table.insert(products, product)
+        else
+            -- Several rolls or prototype entries can resolve to the same quality.
+            -- Combine expected amounts AND productive amounts, so catalysts and
+            -- ignored_by_productivity are not lost or applied a second time.
+            local function amounts(entry)
+                local prototype = Product(entry)
+                local probability = entry.quality_probality or 1
+                return prototype:getElementAmount() * probability,
+                    math.max(0, prototype:getBonusAmount() - (entry.ignored_by_productivity or 0)) * probability
+            end
+            local amount_a, bonus_a = amounts(previous)
+            local amount_b, bonus_b = amounts(product)
+            previous.amount = amount_a + amount_b
+            previous.catalyst_amount = previous.amount - bonus_a - bonus_b
+            previous.amount_min = nil
+            previous.amount_max = nil
+            previous.independent_probability = nil
+            previous.shared_probability = nil
+            previous.extra_count_fraction = nil
+            previous.ignored_by_productivity = nil
+            previous.quality_probality = nil
+        end
+    end
+
+    for _, raw_product in pairs(raw_products) do
+        if raw_product.type ~= "item" then
+            add_product(table.deepcopy(raw_product))
+        else
+            local rolls = probability_results
+            if raw_product.affected_by_quality == false then
+                rolls = {{name = quality, probability = 1}}
+            end
+            for _, roll in pairs(rolls) do
+                if roll.probability > 0 then
+                    local product = table.deepcopy(raw_product)
+                    product.quality = roll.name
+                    if native_recipe and raw_product.recipe_product_index ~= nil then
+                        product.quality = self.lua_prototype.get_product_quality(raw_product.recipe_product_index, roll.name).name
+                    elseif self.lua_type == defines.mod.recipes.spoiling.name then
+                        product.quality = ItemPrototype({name = self.lua_prototype.name, quality = roll.name}):getSpoilQuality()
                     end
+                    product.recipe_product_index = nil
+                    product.quality_probality = roll.probability
+                    add_product(product)
                 end
             end
         end
-        if #quality_products > 0 then
-            for _, quality_product in pairs(quality_products) do
-                table.insert(raw_products, quality_product)
-            end
-        end
-    else
-        for _, raw_product in pairs(raw_products) do
-            if raw_product.type == "item" then
-                raw_product.quality = lua_quality.name
-            end
-        end
     end
-    return raw_products
+    return products
 end
 
 -------------------------------------------------------------------------------
@@ -427,11 +462,18 @@ end
 ---@param quality string
 ---@return table
 function RecipePrototype:getQualityIngredients(factory, quality)
-    local raw_ingredients = self:getIngredients(factory)
-    for _, raw_ingredient in pairs(raw_ingredients) do
+    local raw_ingredients = table.deepcopy(self:getIngredients(factory))
+    local native_recipe = self.lua_type == defines.mod.recipes.recipe.name and not self.is_customized
+    quality = quality or "normal"
+    if not self.is_support_quality then
+        quality = "normal"
+    end
+    for index, raw_ingredient in pairs(raw_ingredients) do
         if raw_ingredient.type == "item" then
             if self.is_support_fuel_quality == true and raw_ingredient.burnt == true then
                 raw_ingredient.quality = factory.fuel_quality or "normal"
+            elseif native_recipe and not raw_ingredient.burnt then
+                raw_ingredient.quality = self.lua_prototype.get_ingredient_quality(index, quality).name
             elseif self.is_support_quality == true then
                 raw_ingredient.quality = quality
             end
