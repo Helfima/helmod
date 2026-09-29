@@ -436,11 +436,18 @@ function RecipePrototype:getQualityProducts(factory, quality)
                         quality_product.quality_probality = probability_result.probability
                         table.insert(quality_products, quality_product)
                     end
+                else
+                    -- It's must be never go here
+                    raw_product.quality = lua_quality.name
+                    table.insert(quality_products, raw_product)
                 end
             else
+                -- Insert minal quality product
                 raw_product.quality = lua_quality.name
+                table.insert(quality_products, raw_product)
             end
         else
+            -- Insert product without quality
             table.insert(quality_products, raw_product)
         end
     end
