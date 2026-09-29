@@ -146,6 +146,19 @@ function RecipePrototype:getAllowedMachines()
                                 end
                             end
                         end
+                        --- check agricultural seed limitation
+                        if is_valid and self.lua_type == defines.mod.recipes.agricultural.name then
+                            local accepted_seeds = factory_prototype:native().accepted_seeds
+                            if accepted_seeds ~= nil then
+                                is_valid = false
+                                for _, seed_name in pairs(accepted_seeds) do
+                                    if seed_name == self.lua_prototype.name then
+                                        is_valid = true
+                                        break
+                                    end
+                                end
+                            end
+                        end
                         if is_valid == true then
                             table.insert(all_productions, production)
                             all_ready[production.name] = true
