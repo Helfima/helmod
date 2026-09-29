@@ -8,12 +8,15 @@
 ---@field is_support_burned_quality boolean
 ---@field is_support_factory boolean
 ---@field is_customized boolean
+---@field has_quality_limit boolean
+---@field quality_min LuaQualityPrototype
 RecipePrototype = newclass(Prototype, function(base, object, object_type)
     base.classname = "HMRecipePrototype"
     base.is_voider = nil
     base.is_support_quality = false
     base.is_support_fuel_quality = false
     base.is_support_factory = true
+    base.has_quality_limit = false
     base.is_customized = RecipePrototype.isCustomized(object)
     if object ~= nil then
         if type(object) == "string" then
@@ -42,11 +45,20 @@ RecipePrototype = newclass(Prototype, function(base, object, object_type)
             base.lua_type = defines.mod.recipes.recipe.name
             if Player.hasFeatureQuality() then
                 if base.lua_prototype ~= nil and base.lua_prototype.ingredients ~= nil then
-                    for _, ingredient in pairs(base.lua_prototype.ingredients) do
+                    base.is_support_quality = base.lua_prototype.can_set_quality
+                    local quality_min = nil
+                    for index, ingredient in pairs(base.lua_prototype.ingredients) do
                         if ingredient.type == "item" then
-                            base.is_support_quality = true
+                            local current_quality = base.lua_prototype.get_ingredient_quality(index)
+                            if quality_min == nil or current_quality.level < quality_min.level then
+                                quality_min = current_quality
+                            end
+                            if ingredient.quality_min ~= nil or ingredient.quality_max then
+                                base.has_quality_limit = true
+                            end
                         end
                     end
+                    base.quality_min = quality_min
                 end
             end
         elseif base.lua_type == defines.mod.recipes.burnt.name then
@@ -285,7 +297,7 @@ function RecipePrototype:getProducts(factory)
     end
     local factory_prototype = EntityPrototype(factory)
     local lua_products = {}
-    for r, raw_product in pairs(raw_products) do
+    for index, raw_product in pairs(raw_products) do
         local product_id = raw_product.type .. "/" .. raw_product.name
         if raw_product.temperature then
             product_id = product_id .. "#" .. raw_product.temperature
@@ -320,6 +332,7 @@ function RecipePrototype:getProducts(factory)
                 lua_products[product_id].temperature = factory_prototype:getTargetTemperature()
             end
         end
+        lua_products[product_id].index = index
     end
 
     ---convert map to array
@@ -380,45 +393,45 @@ function RecipePrototype:getQualityProducts(factory, quality)
     if self.is_support_quality == false then
         quality = "normal"
     end
-    local lua_quality = Player.getQualityPrototype(quality)
+
     local quality_effect = 0 
     if factory ~= nil and factory.effects ~= nil then
         quality_effect = factory.effects.quality or 0
     end
 
-    if quality_effect > 0 then
-        local quality_products = {}
-        local probability_results = ModelCompute.computeQualityProbability(lua_quality, quality_effect)
-        if probability_results ~= nil then
-            for key, probability_result in pairs(probability_results) do
-                for _, raw_product in pairs(raw_products) do
-                    if raw_product.type == "item" then
-                        if key == 0 then
-                            raw_product.quality = probability_result.name
-                            raw_product.quality_probality = probability_result.probability
+    -- insert all in quality_products to group item with their quality chain
+    local quality_products = {}
+    for _, raw_product in pairs(raw_products) do
+        if raw_product.type == "item" then 
+            -- Quality from recipe
+            local lua_quality = Player.getQualityPrototype(quality)
+            if self.lua_type == defines.mod.recipes.recipe.name then
+                -- Min quality of product
+                lua_quality = self.lua_prototype.get_product_quality(raw_product.index, quality)
+            end
+            if quality_effect > 0 then
+                -- Compute quality chain
+                local probability_results = ModelCompute.computeQualityProbability(lua_quality, quality_effect)
+                if probability_results ~= nil then
+                    for key, probability_result in spairs(probability_results, function(t, a, b) return t[b]["level"] > t[a]["level"] end) do
+                        local quality_product = Product(raw_product):clone()
+                        if self.lua_type == defines.mod.recipes.spoiling.name then
+                            quality_product.quality = ItemPrototype({name = self.lua_prototype.name, quality = probability_result.name}):getSpoilQuality()
                         else
-                            local quality_product = Product(raw_product):clone()
                             quality_product.quality = probability_result.name
-                            quality_product.quality_probality = probability_result.probability
-                            table.insert(quality_products, quality_product)
                         end
+                        quality_product.quality_probality = probability_result.probability
+                        table.insert(quality_products, quality_product)
                     end
                 end
-            end
-        end
-        if #quality_products > 0 then
-            for _, quality_product in pairs(quality_products) do
-                table.insert(raw_products, quality_product)
-            end
-        end
-    else
-        for _, raw_product in pairs(raw_products) do
-            if raw_product.type == "item" then
+            else
                 raw_product.quality = lua_quality.name
             end
+        else
+            table.insert(quality_products, raw_product)
         end
     end
-    return raw_products
+    return quality_products
 end
 
 -------------------------------------------------------------------------------
@@ -432,6 +445,8 @@ function RecipePrototype:getQualityIngredients(factory, quality)
         if raw_ingredient.type == "item" then
             if self.is_support_fuel_quality == true and raw_ingredient.burnt == true then
                 raw_ingredient.quality = factory.fuel_quality or "normal"
+            elseif self.lua_type == defines.mod.recipes.recipe.name then
+                raw_ingredient.quality = self.lua_prototype.get_ingredient_quality(raw_ingredient.index, quality).name
             elseif self.is_support_quality == true then
                 raw_ingredient.quality = quality
             end
@@ -767,6 +782,9 @@ function RecipePrototype:getIngredients(factory)
                 end
             end
         end
+    end
+    for index, raw_ingredient in pairs(raw_ingredients) do
+        raw_ingredient.index = index
     end
     return raw_ingredients
 end

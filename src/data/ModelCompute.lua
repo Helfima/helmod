@@ -1167,7 +1167,7 @@ function ModelCompute.computeQualityProbability(lua_quality, quality_effect)
     if current_probability < 0 then
         current_probability = 0
     end
-    local result = {name = lua_quality.name, probability = current_probability}
+    local result = {name = lua_quality.name, level = lua_quality.level, probability = current_probability}
     table.insert(results, 0, result)
     return results
 end
@@ -1196,7 +1196,7 @@ function ModelCompute.computeNextQualityProbability(lua_quality, quality_effect)
     if quality_effect > 1 then
         quality_effect = 1
     end
-    local result = {name = lua_quality.name, probability = quality_effect - previous_probability}
+    local result = {name = lua_quality.name, level = lua_quality.level, probability = quality_effect - previous_probability}
     table.insert(results, 0, result)
     return results
 end

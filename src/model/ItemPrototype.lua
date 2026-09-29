@@ -112,3 +112,32 @@ function ItemPrototype:getSpoilTicks()
   end
   return 0
 end
+
+-------------------------------------------------------------------------------
+---Return spoil result quality
+---@return string
+function ItemPrototype:getSpoilQuality()
+  local quality = Player.getQualityPrototype(self.quality or "normal")
+  if self.lua_prototype ~= nil then
+    local change = self.lua_prototype.spoil_quality_change
+    for _ = 1, math.abs(change) do
+      local next_quality
+      if change > 0 then
+        next_quality = quality.next
+      else
+        next_quality = quality.previous
+      end
+      if next_quality == nil then break end
+      quality = next_quality
+    end
+    local minimum = self.lua_prototype.spoil_quality_min
+    local maximum = self.lua_prototype.spoil_quality_max
+    if minimum ~= nil and quality.level < minimum.level then
+      quality = minimum
+    end
+    if maximum ~= nil and quality.level > maximum.level then
+      quality = maximum
+    end
+  end
+  return quality.name
+end

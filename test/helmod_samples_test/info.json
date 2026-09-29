@@ -1,0 +1,11 @@
+{
+  "name": "helmod_samples_test",
+  "version": "2.3.3",
+  "title": "Helmod Samples Test",
+  "author": "Helfima",
+  "contact": "Helfima",
+  "homepage": "https://github.com/Helfima/helmod",
+  "description": "Mod os samples for test Helmod",
+  "dependencies": ["base >= 2.1.7"],
+  "factorio_version": "2.1"
+}
