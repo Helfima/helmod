@@ -537,7 +537,7 @@ function ModelCompute.prepareBlockObjectives(block)
                     if state == 1 then
                         objectives_block[element_key] = objective
                         has_objective = true
-                    elseif child.need_first_candidat_objective == true and first_candidat_objective == nil then
+                    elseif child.need_candidat_objective == true and first_candidat_objective == nil then
                         first_candidat_objective = objective
                     end
                     break
@@ -567,7 +567,7 @@ function ModelCompute.prepareBlockObjectives(block)
                     if state == 1 then
                         objectives_block[element_key] = objective
                         has_objective = true
-                    elseif child.need_first_candidat_objective == true and first_candidat_objective == nil then
+                    elseif child.need_candidat_objective == true and first_candidat_objective == nil then
                         first_candidat_objective = objective
                     end
                     break
