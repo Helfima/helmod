@@ -3,6 +3,7 @@ Version: 2.3.3
 Date: 2026-07-05
   Bugfixes:
     - Fixed probability of product that replaced by shared_probability and independent_probability
+    - Fixed rocket recipes (LuaEntityPrototype::fixed_recipe to return a LuaRecipePrototype instead of a string)
 ---------------------------------------------------------------------------------------------------
 Version: 2.3.2
 Date: 2026-06-30

@@ -1926,7 +1926,7 @@ function Player.getRocketPartRecipe(factory)
     local rocket_part_recipes = {}
     for _, silo_prototype in pairs(silos) do
         if silo_prototype.fixed_recipe then
-            table.insert(rocket_part_recipes, prototypes.recipe[silo_prototype.fixed_recipe])
+            table.insert(rocket_part_recipes, silo_prototype.fixed_recipe)
         end
     end
 
@@ -1941,9 +1941,10 @@ function Player.buildRocketRecipe(prototype)
     if prototype == nil then return nil end
     local products = prototype.rocket_launch_products
     local ingredients = {}
+    -- insert satellite or item
     table.insert(ingredients, { name = prototype.name, type = "item", amount = 1, constant = true })
     local recipe = {}
-    recipe.category = Player.getRocketPartRecipe().category
+    recipe.category = "rocket"
     recipe.enabled = true
     recipe.energy = 1
     recipe.force = {}

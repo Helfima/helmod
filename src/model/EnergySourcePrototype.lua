@@ -382,6 +382,7 @@ function FluidSourcePrototype:getFuelCount()
   local energy_consumption = factory_prototype:getEnergyConsumption()
   local factory_fuel = self:getFuelPrototype()
   if factory_fuel == nil then return nil end
+  -- fluid_usage_per_tick from EnergySourcePrototype
   if factory_prototype:getType() ~= "assembling-machine" and self.lua_prototype.fluid_usage_per_tick ~= nil and self.lua_prototype.fluid_usage_per_tick ~= 0 then
     local fluid_usage = self:getFluidUsagePerTick()*60
     local burner_count = fluid_usage
