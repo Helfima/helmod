@@ -1149,8 +1149,9 @@ end
 ---Compute quality probality
 ---@param lua_quality LuaQualityPrototype
 ---@param quality_effect number
----@return table
-function ModelCompute.computeQualityProbability(lua_quality, quality_effect)
+---@param quality_max LuaQualityPrototype | nil
+---@return table | nil
+function ModelCompute.computeQualityProbability(lua_quality, quality_effect, quality_max)
     if lua_quality == nil then
         return nil
     end
@@ -1158,7 +1159,7 @@ function ModelCompute.computeQualityProbability(lua_quality, quality_effect)
     local next_probability = lua_quality.chain_probability
     local current_probability = 1
     if next_probability > 0 and quality_effect > 0  then
-        local next_result = ModelCompute.computeNextQualityProbability(lua_quality.next, quality_effect)
+        local next_result = ModelCompute.computeNextQualityProbability(lua_quality.next, quality_effect, quality_max)
         if next_result ~= nil then
             results = next_result
             current_probability = 1 - quality_effect
@@ -1176,16 +1177,22 @@ end
 ---Compute quality probality
 ---@param lua_quality LuaQualityPrototype
 ---@param quality_effect number
----@return table
-function ModelCompute.computeNextQualityProbability(lua_quality, quality_effect)
+---@param quality_max LuaQualityPrototype | nil
+---@return table | nil
+function ModelCompute.computeNextQualityProbability(lua_quality, quality_effect, quality_max)
     if lua_quality == nil then
         return nil
+    end
+    if quality_max ~= nil then
+        if lua_quality.level > quality_max.level then
+            return nil
+        end
     end
     local results = {}
     local previous_probability = 0
     local next_probability = lua_quality.chain_probability
     if next_probability > 0 and quality_effect > 0  then
-        local next_result = ModelCompute.computeNextQualityProbability(lua_quality.next, quality_effect * next_probability)
+        local next_result = ModelCompute.computeNextQualityProbability(lua_quality.next, quality_effect * next_probability, quality_max)
         if next_result ~= nil then
             results = next_result
             for _, result in pairs(results) do

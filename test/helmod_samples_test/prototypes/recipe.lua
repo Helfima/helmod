@@ -17,7 +17,7 @@ data:extend(
     },
     results =
     {
-      {type = "item", name = "plastic-bar", amount = 2, shared_probability = { min = 0.4, max = 0.8 }, quality_min="rare", quality_max="epic", ignored_by_productivity = 1}
+      {type = "item", name = "plastic-bar", amount = 2, shared_probability = { min = 0.4, max = 0.8 }, quality_min="rare", ignored_by_productivity = 1}
     },
     allow_productivity = true,
     icons =
@@ -110,7 +110,7 @@ data:extend(
     },
     results =
     {
-      {type = "item", name = "plastic-bar", amount = 2, shared_probability = { min = 0.4, max = 0.8 }, quality_min="rare", quality_max="epic", ignored_by_productivity = 1}
+      {type = "item", name = "plastic-bar", amount = 2, shared_probability = { min = 0.4, max = 0.8 }, quality_min="rare", ignored_by_productivity = 1}
     },
     allow_productivity = true,
     icons =

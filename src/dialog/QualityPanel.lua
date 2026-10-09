@@ -51,12 +51,15 @@ function QualityPanel:updateQualityModules(event)
     local modules_panel = self:getFramePanel("modules-panel")
     modules_panel.clear()
 
-    local analyze_module_quality = User.getParameter("analyze_module_quality") or "normal"
-    local quality_panel = GuiElement.addQualitySelector(modules_panel, analyze_module_quality, self.classname, "module-quality-select")
-    quality_panel.style.bottom_margin = 5
+    local table_input = GuiElement.add(modules_panel, GuiTable("table-input"):column(2))
 
+    GuiElement.add(table_input, GuiLabel("label-module-quality"):caption({"helmod_quality-panel.module-quality"}))
+    local analyze_module_quality = User.getParameter("analyze_module_quality") or "normal"
+    GuiElement.addQualitySelector(table_input, analyze_module_quality, self.classname, "module-quality-select")
+
+    GuiElement.add(table_input, GuiLabel("label-modules"):caption({"helmod_quality-panel.modules"}))
     local analyze_module_name = User.getParameter("analyze_module_name")
-    local table_panel = GuiElement.add(modules_panel, GuiTable("table_panel"):column(10))
+    local table_panel = GuiElement.add(table_input, GuiTable("table_panel"):column(10))
     for k, lua_module in pairs(Player.getModules()) do
         local module = { name = lua_module.name, quality = module_quality, module_effects = lua_module.module_effects }
         local effects = Player.getModuleEffects(module)
@@ -70,7 +73,6 @@ function QualityPanel:updateQualityModules(event)
         end
     end
 
-    local table_input = GuiElement.add(modules_panel, GuiTable("table-input"):column(2))
     
     local analyze_module_amount = User.getParameter("analyze_module_amount") or 4
     GuiElement.add(table_input, GuiLabel("label-module-amount"):caption({"helmod_quality-panel.module-amount"}))
@@ -79,6 +81,11 @@ function QualityPanel:updateQualityModules(event)
     local analyze_bonus_probability = User.getParameter("analyze_bonus_probability") or 0
     GuiElement.add(table_input, GuiLabel("label-bonus-probability"):caption({"helmod_quality-panel.bonus-probability"}))
     GuiElement.add(table_input, GuiTextField(self.classname, "change-bonus-probability"):text(analyze_bonus_probability):style("helmod_textfield"))
+
+    GuiElement.add(table_input, GuiLabel("label-quality-max"):caption({"helmod_quality-panel.quality-max"}))
+    local analyze_quality_max = User.getParameter("analyze_quality_max")
+    GuiElement.addQualitySelector(table_input, analyze_quality_max, self.classname, "quality-max-select")
+
 end
 
 -------------------------------------------------------------------------------
@@ -102,6 +109,9 @@ function QualityPanel:updateQualityCalculation(event)
 
     local style = defines.styles.button.select_icon_flat
 
+    local analyze_quality_max = User.getParameter("analyze_quality_max")
+    local quality_max = Player.getQualityPrototype(analyze_quality_max)
+
     local qualities = Player.getQualityPrototypesWithoutHidden()
     local analyze_module_quality = User.getParameter("analyze_module_quality") or "normal"
     local analyze_module_name = User.getParameter("analyze_module_name") or default_module_name
@@ -121,7 +131,7 @@ function QualityPanel:updateQualityCalculation(event)
     for row_key, lua_quality in pairs(qualities) do
         GuiElement.add(table_percent, GuiButton("row", lua_quality.name):sprite("quality", lua_quality.name):style(style):tooltip(lua_quality.localised_name))
 
-        local results = ModelCompute.computeQualityProbability(lua_quality, quality_effect)
+        local results = ModelCompute.computeQualityProbability(lua_quality, quality_effect, quality_max)
         local quality_map = {}
         local total = 0
         for _, result in pairs(results) do
@@ -167,6 +177,12 @@ function QualityPanel:onEvent(event)
         local text = event.element.text
         local analyze_bonus_probability = formula(text)
         User.setParameter("analyze_bonus_probability", analyze_bonus_probability)
+        self:onUpdate(event)
+    end
+
+    if event.action == "quality-max-select" then
+        local analyze_quality_max = event.item1
+        User.setParameter("analyze_quality_max", analyze_quality_max)
         self:onUpdate(event)
     end
 end

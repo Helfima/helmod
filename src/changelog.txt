@@ -1,9 +1,19 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.3.4
+Date: 2026-10-09
+  Bugfixes:
+    - Fixed quality effect for entity
+    - Fixed Maraxsis fishing tower recipe discovery
+    - Fixed wrong code using need_candidat_objective
+    - Fixed rocket recipes (LuaEntityPrototype::fixed_recipe to return a LuaRecipePrototype instead of a string)
+  Changes:
+    - Changed quality calculation for recipe item with quality min or max
+    - Added quality max in Quality panel
+---------------------------------------------------------------------------------------------------
 Version: 2.3.3
 Date: 2026-07-05
   Bugfixes:
     - Fixed probability of product that replaced by shared_probability and independent_probability
-    - Fixed rocket recipes (LuaEntityPrototype::fixed_recipe to return a LuaRecipePrototype instead of a string)
 ---------------------------------------------------------------------------------------------------
 Version: 2.3.2
 Date: 2026-06-30

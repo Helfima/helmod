@@ -418,13 +418,14 @@ function RecipePrototype:getQualityProducts(factory, quality)
         if raw_product.type == "item" then 
             -- Quality from recipe
             local lua_quality = Player.getQualityPrototype(quality)
+            local quality_max = Player.getQualityPrototype(raw_product.quality_max)
             if self.lua_type == defines.mod.recipes.recipe.name then
                 -- Min quality of product
                 lua_quality = self.lua_prototype.get_product_quality(raw_product.index, quality)
             end
             if quality_effect > 0 then
                 -- Compute quality chain
-                local probability_results = ModelCompute.computeQualityProbability(lua_quality, quality_effect)
+                local probability_results = ModelCompute.computeQualityProbability(lua_quality, quality_effect, quality_max)
                 if probability_results ~= nil then
                     for key, probability_result in spairs(probability_results, function(t, a, b) return t[b]["level"] > t[a]["level"] end) do
                         local quality_product = Product(raw_product):clone()
