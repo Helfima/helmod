@@ -58,8 +58,6 @@ function FluidboxPrototype:toData()
   else
     data.filter = {name=filter.name, type="fluid"}
   end
-  data.minimum_temperature = self.lua_prototype.minimum_temperature
-  data.maximum_temperature = self.lua_prototype.maximum_temperature
   data.secondary_draw_orders = self.lua_prototype.secondary_draw_orders
   data.render_layer = self.lua_prototype.render_layer
   data.valid = self.lua_prototype.valid

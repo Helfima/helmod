@@ -1441,14 +1441,14 @@ function Player.getModuleEffects(module)
     for effect_name, effect_value in pairs(module:getModuleEffects()) do
         local factor = 100
         if effect_name == "quality" then
-            factor = 1000
+            factor = 10000
         end
         local final_value = effect_value
         -- arround the % value
         if final_value >= 0  then
-            final_value = math.floor(final_value*factor + 0.05)/factor
+            final_value = math.floor(final_value*factor + 0.005)/factor
         else 
-            final_value = math.ceil(final_value*factor - 0.05)/factor
+            final_value = math.ceil(final_value*factor - 0.005)/factor
         end
         module_effects[effect_name] = final_value
     end

@@ -1,4 +1,15 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.3.6
+Date: 2026-10-15
+  Bugfixes:
+    - Fixed error because : Factorio 2.1.22 Removed FluidBox::minimum_temperature and maximum_temperature.
+---------------------------------------------------------------------------------------------------
+Version: 2.3.5
+Date: 2026-10-12
+  Bugfixes:
+    - Fixed the retrieve waste item quality when a recipe used in burning machine
+    - Fixed error on the rounding of the quality effects
+---------------------------------------------------------------------------------------------------
 Version: 2.3.4
 Date: 2026-10-09
   Bugfixes:

@@ -664,12 +664,12 @@ function EntityPrototype:getFluidConsumptionFusionGenerator()
           local heat_capacity = fluid_prototype:getHeatCapacity()
           
           local minimum_temperature = fluid_prototype:getMinimumTemperature()
-          minimum_temperature = fluidbox.minimum_temperature or minimum_temperature
+          local maximum_temperature = fluid_prototype:getMaximumTemperature()
           -- if another entity with this problem need a best solution
           -- @see https://github.com/Helfima/helmod/issues/624
-          local maximum_temperature = fix_maximum_temperature[self.lua_prototype.name]
-          local max_temperature = maximum_temperature or fluidbox.maximum_temperature
-          local target_temperature = max_temperature or minimum_temperature
+          maximum_temperature = maximum_temperature or fix_maximum_temperature[self.lua_prototype.name]
+
+          local target_temperature = minimum_temperature or maximum_temperature
           local power_extract = self:getPowerExtract(0, target_temperature, heat_capacity)
           local energy_production = self:getMaxEnergyProduction()
 
@@ -904,6 +904,8 @@ function EntityPrototype:getNeighbourBonus()
         return 2*bonus
       elseif self.factory.neighbour_bonus == 8 then
         return (2+3)*bonus/2
+      elseif self.factory.neighbour_bonus == "∞" then
+        return 3*bonus
       else
         return 0
       end

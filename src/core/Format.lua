@@ -73,8 +73,8 @@ end
 ---@param num number
 ---@return number
 function Format.formatPercent(num)
-  local mult = 10^3
-  return math.floor(num * mult + 0.5) / 10
+  local mult = 10^4
+  return math.floor(num * mult + 0.5) / 100
 end
 
 -------------------------------------------------------------------------------

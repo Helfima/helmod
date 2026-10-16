@@ -267,7 +267,7 @@ function RecipeEdition:onEvent(event)
 
         if event.action == "neighbour-bonus-update" then
             local index = event.element.selected_index
-            local items = { 1, 2, 4, 8 }
+            local items = { 1, 2, 4, 8, "∞" }
             ModelBuilder.updateRecipeNeighbourBonus(recipe, items[index])
             ModelCompute.update(model)
             self:update(event)
@@ -791,7 +791,7 @@ function RecipeEdition:updateFactoryInfo(event)
             local items = {}
             local default_neighbour = nil
             local item = nil
-            for _, value in pairs({ 1, 2, 4, 8 }) do
+            for _, value in pairs({ 1, 2, 4, 8, "∞"}) do
                 item = { "", value, " ", { "entity-name.nuclear-reactor" } }
                 table.insert(items, item)
                 if default_neighbour == nil then

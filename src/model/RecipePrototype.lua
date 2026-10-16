@@ -384,7 +384,7 @@ function RecipePrototype:getProducts(factory)
                     end
                     table.insert(raw_products,
                         { type = burnt_result.type, name = burnt_result.name, amount = fuel_count.count * factor,
-                            catalyst_amount = fuel_count.count * factor })
+                            catalyst_amount = fuel_count.count * factor, burnt = true })
                 end
             end
         end
@@ -419,11 +419,15 @@ function RecipePrototype:getQualityProducts(factory, quality)
             -- Quality from recipe
             local lua_quality = Player.getQualityPrototype(quality)
             local quality_max = Player.getQualityPrototype(raw_product.quality_max)
-            if self.lua_type == defines.mod.recipes.recipe.name then
+            if raw_product.burnt == true then
+                -- fuel burnt
+                lua_quality = Player.getQualityPrototype(factory.fuel_quality or "normal")
+            elseif self.lua_type == defines.mod.recipes.recipe.name and raw_product.index ~= nil then
                 -- Min quality of product
                 lua_quality = self.lua_prototype.get_product_quality(raw_product.index, quality)
             end
-            if quality_effect > 0 then
+            -- not chain probability for fuel
+            if quality_effect > 0 and raw_product.burnt ~= true then
                 -- Compute quality chain
                 local probability_results = ModelCompute.computeQualityProbability(lua_quality, quality_effect, quality_max)
                 if probability_results ~= nil then
