@@ -3,16 +3,25 @@ local Orbit = {}
 
 function Orbit.capacity(item_name, silo)
     local item = prototypes.item[item_name]
-    if not item or item.weight <= 0 or not silo or not silo.launch_to_space_platforms then return 0 end
+    if script.feature_flags.space_travel == false then
+        return 0
+    end
+    if item == nil or item.weight <= 0 or silo == nil or silo.launch_to_space_platforms == false then
+        return 0
+    end
     return math.floor(silo.lift_weight / item.weight)
 end
 
 function Orbit.machines(item_name)
     local machines = {}
+    if script.feature_flags.space_travel == false then
+        return machines
+    end
     for name, silo in pairs(prototypes.get_entity_filtered{{filter="type", type="rocket-silo"}}) do
-        if not silo.hidden and not silo.has_flag("not-in-made-in") and silo.launch_to_space_platforms and silo.fixed_recipe
-            and (not item_name or Orbit.capacity(item_name, silo) > 0)
-            and RocketTiming.getLaunchTicks(silo, "normal") then
+        if silo.hidden == false and silo.has_flag("not-in-made-in") == false
+            and silo.launch_to_space_platforms == true and silo.fixed_recipe ~= nil
+            and (item_name == nil or Orbit.capacity(item_name, silo) > 0)
+            and RocketTiming.getLaunchTicks(silo, "normal") ~= nil then
             machines[name] = silo
         end
     end
@@ -20,7 +29,7 @@ function Orbit.machines(item_name)
 end
 
 function Orbit.silo(factory, item_name)
-    if factory then
+    if factory ~= nil then
         return prototypes.entity[factory.name]
     end
     local _, silo = next(Orbit.machines(item_name))
@@ -29,10 +38,17 @@ end
 
 function Orbit.recipe(name, factory)
     local item = prototypes.item[name]
-    if not item then return nil end
+    if item == nil then
+        return nil
+    end
     local silo = Orbit.silo(factory, name)
-    local part_recipe = silo and silo.fixed_recipe
-    if not part_recipe or Orbit.capacity(name, silo) == 0 or not RocketTiming.getLaunchTicks(silo, "normal") then return nil end
+    if Orbit.capacity(name, silo) == 0 then
+        return nil
+    end
+    local part_recipe = silo.fixed_recipe
+    if part_recipe == nil or RocketTiming.getLaunchTicks(silo, "normal") == nil then
+        return nil
+    end
     local allowed_effects = table.deepcopy(part_recipe.allowed_effects or {})
     allowed_effects.quality = false
     return {name=name, category="helmod-orbit", valid=true, enabled=true, hidden=false,
@@ -49,8 +65,13 @@ function Orbit.ingredients(name, factory, quality)
     local ingredients = {{name=name, type="item", amount=1, quality=quality or "normal"}}
     local silo = Orbit.silo(factory, name)
     local capacity = Orbit.capacity(name, silo)
-    if capacity == 0 or not silo.fixed_recipe then return ingredients end
-    local productivity = factory and factory.effects and factory.effects.productivity or 0
+    if capacity == 0 or silo.fixed_recipe == nil then
+        return ingredients
+    end
+    local productivity = 0
+    if factory ~= nil and factory.effects ~= nil then
+        productivity = factory.effects.productivity or 0
+    end
     local crafts = silo.rocket_parts_required / capacity / (1 + productivity)
     for index, ingredient in pairs(silo.fixed_recipe.ingredients) do
         local copy = table.deepcopy(ingredient)
@@ -66,8 +87,13 @@ end
 function Orbit.energy(name, factory)
     local silo = Orbit.silo(factory, name)
     local capacity = Orbit.capacity(name, silo)
-    if capacity == 0 or not silo.fixed_recipe then return 1 end
-    local productivity = factory and factory.effects and factory.effects.productivity or 0
+    if capacity == 0 or silo.fixed_recipe == nil then
+        return 1
+    end
+    local productivity = 0
+    if factory ~= nil and factory.effects ~= nil then
+        productivity = factory.effects.productivity or 0
+    end
     return silo.fixed_recipe.energy * silo.rocket_parts_required / capacity / (1 + productivity)
 end
 

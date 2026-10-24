@@ -614,7 +614,12 @@ function GuiTooltipRecipe:create()
 		local icon_type, icon_name = recipe_prototype:getIcon()
 
 		if icon_type ~= "signal" then
-			local element_label = element.type == "orbit" and recipe_prototype:getLocalisedName() or Player.getLocalisedName({ type = icon_type, name = icon_name })
+			local element_label
+			if element.type == "orbit" then
+				element_label = recipe_prototype:getLocalisedName()
+			else
+				element_label = Player.getLocalisedName({ type = icon_type, name = icon_name })
+			end
 			GuiTooltip.appendLineTitle(tooltip, icon_type, icon_name, element_label, self.m_element.quality)
 		end
 		---quantity
@@ -626,7 +631,7 @@ function GuiTooltipRecipe:create()
 			GuiTooltip.appendLine(tooltip, nil, { "helmod_common.quantity" }, total_count)
 		end
 
-        if element.type == "orbit" and element.orbit then
+        if element.type == "orbit" and element.orbit ~= nil then
             local orbit = element.orbit
             local launches = (element.count or 0) / (element.base_time or 1) / orbit.capacity
             for _, detail in ipairs({

@@ -66,10 +66,14 @@ Capacity, rocket recipes, part counts, buffers and animation properties come fro
 
 ## Orbit tests
 
-`python3 test/run_factorio.py /path/to/factorio --data /path/to/factorio/data` runs the orbit calculations through Helmod’s solvers inside Factorio, using temporary mod and save directories. `--base-only` checks existing planning without Space Age; `--timing` runs actual silos for 40,000 ticks.
+Run `lua test/run_orbit.lua /path/to/factorio --data /path/to/factorio/data` to check orbit calculations through Helmod's solvers inside Factorio. The launcher uses Lua 5.1+ or LuaJIT without Lua packages, plus Linux coreutils or Windows PowerShell for file and process operations. On Windows, quote paths containing spaces.
 
-`--ui` uses a graphical Factorio client to exercise the selector and recipe editor. Screenshots are written to `/tmp/helmod-orbit-screenshots`, or the directory selected with `--output`.
+The launcher creates isolated mod and save directories. Successful runs remove them; failed runs keep the files and print their location for inspection.
 
-`python3 test/run_compatibility.py /path/to/factorio --data /path/to/factorio/data --mods /path/to/mod-set` checks a separately prepared mod set, including each silo, cargo demand recalculation and available qualities. The directory supplies mod archives, `mod-list.json` (with Helmod enabled), and optional `mod-settings.dat`.
+* `--base-only` checks existing planning without Space Age.
+* `--timing` measures 18 silo configurations over 40,000 ticks.
+* `--ui` uses a graphical Factorio client to exercise the selector and recipe editor, then closes that test client after 45 seconds. Screenshots go to `orbit-screenshots` in the current directory, or the directory selected with `--output`.
+* `--mods /path/to/mod-set` checks a separately prepared mod set, including compatible silos, cargo demand recalculation and available qualities. The directory supplies mod archives, `mod-list.json` with Helmod enabled, and optional `mod-settings.dat`.
+* `--mods /path/to/mod-set --launches` also measures normal and legendary silo launch intervals using continuously supplied rocket parts. This requires platform-capable silos and the Space Age test platform prototypes.
 
-With Space Age enabled, `--launches` also measures normal and legendary silo launch intervals against the timing model using continuously supplied rocket parts.
+Use `lua test/run_orbit.lua --help` for the command options. The test suites in `test/test_orbit*.lua` run inside Factorio; the launcher only prepares files and starts the engine.

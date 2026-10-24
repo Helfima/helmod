@@ -80,7 +80,11 @@ RecipePrototype = newclass(Prototype, function(base, object, object_type)
         elseif base.lua_type == defines.mod.recipes.technology.name then
             Prototype.init(base, Player.getTechnology(base.object_name))
         elseif base.lua_type == defines.mod.recipes.orbit.name then
-            Prototype.init(base, Orbit.recipe(base.object_name, type(object) == "table" and object.factory or nil))
+            local factory
+            if type(object) == "table" then
+                factory = object.factory
+            end
+            Prototype.init(base, Orbit.recipe(base.object_name, factory))
             base.is_support_quality = Player.hasFeatureQuality()
         elseif base.lua_type == defines.mod.recipes.rocket.name then
             local recipe = Player.getRocketRecipe(base.object_name)
@@ -115,7 +119,9 @@ end)
 --- Return allowed machines
 ---@return table
 function RecipePrototype:getAllowedMachines()
-    if self.lua_type == "orbit" then return Orbit.machines(self.object_name) end
+    if self.lua_type == "orbit" then
+        return Orbit.machines(self.object_name)
+    end
     local all_productions = {}
     if self.lua_type == defines.mod.recipes.energy.name then
         all_productions[self.lua_prototype.name] = self.lua_prototype
@@ -405,10 +411,16 @@ end
 ---@return table
 function RecipePrototype:getQualityProducts(factory, quality)
     if self.lua_type == "orbit" then
-        if not self.lua_prototype then return {} end
+        if self.lua_prototype == nil then
+            return {}
+        end
         local products = self:getProducts(factory)
         for _, product in pairs(products) do
-            product.quality = product.burnt and (factory.fuel_quality or "normal") or (quality or "normal")
+            if product.burnt == true then
+                product.quality = factory.fuel_quality or "normal"
+            else
+                product.quality = quality or "normal"
+            end
         end
         return products
     end
@@ -481,9 +493,13 @@ end
 function RecipePrototype:getQualityIngredients(factory, quality)
     if self.lua_type == "orbit" then
         local ingredients = self:getIngredients(factory)
-        if ingredients[1] then ingredients[1].quality = quality or "normal" end
+        if ingredients[1] ~= nil then
+            ingredients[1].quality = quality or "normal"
+        end
         for _, ingredient in pairs(ingredients) do
-            if ingredient.burnt and ingredient.type == "item" then ingredient.quality = factory.fuel_quality or "normal" end
+            if ingredient.burnt == true and ingredient.type == "item" then
+                ingredient.quality = factory.fuel_quality or "normal"
+            end
         end
         return ingredients
     end
@@ -604,7 +620,12 @@ end
 ---@param factory table
 ---@return table
 function RecipePrototype:getRawIngredients(factory)
-    if self.lua_type == "orbit" then return self.lua_prototype and Orbit.ingredients(self.object_name, factory) or {} end
+    if self.lua_type == "orbit" then
+        if self.lua_prototype == nil then
+            return {}
+        end
+        return Orbit.ingredients(self.object_name, factory)
+    end
     if self.lua_prototype ~= nil then
         if self.lua_type == defines.mod.recipes.technology.name then
             return self.lua_prototype.research_unit_ingredients

@@ -1,13 +1,24 @@
 -- Store silo animation fields that the runtime API does not expose.
 -- This mod-data prototype contains planner metadata only.
 local function animation_parameters(animation)
-  if not animation then return 0, 0, 0, 1 end
-  if animation.layers then return animation_parameters(animation.layers[1]) end
-  local frames = animation.frame_sequence and #animation.frame_sequence or animation.frame_count or 1
+  if animation == nil then
+    return 0, 0, 0, 1
+  end
+  if animation.layers ~= nil then
+    return animation_parameters(animation.layers[1])
+  end
+  local frames = animation.frame_count or 1
+  if animation.frame_sequence ~= nil then
+    frames = #animation.frame_sequence
+  end
   frames = frames * (animation.repeat_count or 1)
-  if animation.run_mode == "forward-then-backward" then frames = math.max(1, 2 * frames - 2) end
+  if animation.run_mode == "forward-then-backward" then
+    frames = math.max(1, 2 * frames - 2)
+  end
   local speed = animation.animation_speed or 1
-  if speed <= 0 then return nil, nil end
+  if speed <= 0 then
+    return nil, nil
+  end
   return frames / speed, math.max(0, frames - 1) / speed, frames, speed
 end
 

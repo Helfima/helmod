@@ -4,6 +4,7 @@ local function near(actual, expected, label)
 end
 
 script.on_init(function()
+    assert(script.feature_flags.space_travel == true, "orbit feature flag")
     EventController.onInit()
     -- Map creation has no player, so supply the player context used by Helmod.
     Player.set{name="OrbitTester", index=1, force=game.forces.player, mod_settings=settings.global, admin=true, print=function(message) error(message) end}

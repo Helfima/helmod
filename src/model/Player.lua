@@ -575,7 +575,11 @@ end
 function Player.getLocalisedName(element)
     if element.type == "orbit" then
         local item = Player.getItemPrototype(element.name)
-        return {"helmod_orbit.sent", item and item.localised_name or element.name}
+        local localised_name = element.name
+        if item ~= nil then
+            localised_name = item.localised_name
+        end
+        return {"helmod_orbit.sent", localised_name}
     end
     local localisedName = element.name
     if element.type ~= nil then

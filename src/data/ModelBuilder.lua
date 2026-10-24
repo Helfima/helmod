@@ -51,7 +51,7 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
                             break
                         end
                     end
-                    if recipe_type == "orbit" and recipe_prototype:getAllowedMachines()[default_factory.name] then
+                    if recipe_type == "orbit" and recipe_prototype:getAllowedMachines()[default_factory.name] ~= nil then
                         is_match = true
                     end
                     if is_match == true then

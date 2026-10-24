@@ -345,7 +345,9 @@ end
 ---@param recipe table
 ---@return number
 function Product:getProductivityBonus(recipe)
-  if recipe.type == "orbit" then return 0 end
+  if recipe.type == "orbit" then
+    return 0
+  end
   if recipe.time == nil or recipe.isluaobject or recipe.factory == nil or recipe.factory.effects == nil then return 0 end
   local productivity = recipe.factory.effects.productivity
   local capped_time = recipe.time / recipe.factory.speed
@@ -369,7 +371,9 @@ end
 ---Return spoil
 ---@return number|nil
 function Product:getSpoil()
-  if self.lua_prototype and self.lua_prototype.type == "orbit" then return nil end
+  if self.lua_prototype ~= nil and self.lua_prototype.type == "orbit" then
+    return nil
+  end
   if self.lua_prototype ~= nil then
     if self.lua_prototype.spoil then
       return self.lua_prototype.spoil

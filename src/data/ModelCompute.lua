@@ -851,7 +851,7 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
     }
 
     local productivity_recipe = recipe.name
-    if recipe.type == "orbit" and factory_prototype:native() and factory_prototype:native().fixed_recipe then
+    if recipe.type == "orbit" and factory_prototype:native() ~= nil and factory_prototype:native().fixed_recipe ~= nil then
         productivity_recipe = factory_prototype:native().fixed_recipe.name
     end
     local recipe_productivity = Player.getRecipeProductivityBonus(productivity_recipe)
@@ -996,7 +996,7 @@ function ModelCompute.computeFactory(recipe)
     recipe.factory.speed = recipe.factory.speed_total
     if recipe.type == "orbit" then
         recipe.orbit = nil
-        if recipe_prototype:native() then
+        if recipe_prototype:native() ~= nil then
             recipe.orbit = Orbit.details(recipe)
             recipe.time = recipe.orbit.cycle_time / recipe.orbit.capacity * recipe.factory.speed
         end
