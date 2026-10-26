@@ -51,6 +51,9 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
                             break
                         end
                     end
+                    if recipe_type == "orbit" and recipe_prototype:getAllowedMachines()[default_factory.name] ~= nil then
+                        is_match = true
+                    end
                     if is_match == true then
                         Model.setFactory(ModelRecipe, default_factory.name, default_factory.quality, default_factory.fuel, default_factory.fuel_quality)
                         ModelBuilder.setFactoryModulePriority(ModelRecipe, default_factory.module_priority)

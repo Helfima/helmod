@@ -129,6 +129,7 @@ end
 function GuiButton:choose(element_type, element_name, key)
     self.options.type = "choose-elem-button"
     self.options.tags = { type = element_type, name = element_name}
+    if element_type == "orbit" then element_type = "item" end
     self.options.elem_type = element_type
     self.options[element_type] = element_name
     table.insert(self.name, key or element_name)
@@ -144,6 +145,7 @@ end
 function GuiButton:choose_with_quality(element_type, element_name, element_quality)
     self.options.type = "choose-elem-button"
     self.options.tags = { type = element_type, name = element_name, quality = element_quality }
+    if element_type == "orbit" then element_type = "item" end
     if element_type == "signal" then
         self.options.elem_type = element_type
         if element_name ~= nil then

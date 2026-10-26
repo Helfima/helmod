@@ -13,6 +13,9 @@ Product.classname = "HMProduct"
 ---Return localised name of Prototype
 ---@return string
 function Product:getLocalisedName()
+  if self.lua_prototype ~= nil and self.lua_prototype.type == "orbit" then
+    return Player.getLocalisedName(self.lua_prototype)
+  end
   if self.lua_prototype ~= nil then
     local localisedName = self.lua_prototype.name
     if self.lua_prototype.type == 0 or self.lua_prototype.type == "item" then
@@ -36,6 +39,9 @@ end
 ---Return table key
 ---@return string
 function Product:getTableKey()
+  if self.lua_prototype ~= nil and self.lua_prototype.type == "orbit" then
+    return "orbit/" .. self.lua_prototype.name .. "#" .. (self.lua_prototype.quality or "normal")
+  end
   if self.lua_prototype ~= nil then
     if self.lua_prototype.type == 1 or self.lua_prototype.type == "fluid" then
       local T = self.lua_prototype.temperature
@@ -339,6 +345,9 @@ end
 ---@param recipe table
 ---@return number
 function Product:getProductivityBonus(recipe)
+  if recipe.type == "orbit" then
+    return 0
+  end
   if recipe.time == nil or recipe.isluaobject or recipe.factory == nil or recipe.factory.effects == nil then return 0 end
   local productivity = recipe.factory.effects.productivity
   local capped_time = recipe.time / recipe.factory.speed
@@ -362,6 +371,9 @@ end
 ---Return spoil
 ---@return number|nil
 function Product:getSpoil()
+  if self.lua_prototype ~= nil and self.lua_prototype.type == "orbit" then
+    return nil
+  end
   if self.lua_prototype ~= nil then
     if self.lua_prototype.spoil then
       return self.lua_prototype.spoil

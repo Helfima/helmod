@@ -573,6 +573,14 @@ end
 ---@param element LuaPrototype
 ---@return string|table
 function Player.getLocalisedName(element)
+    if element.type == "orbit" then
+        local item = Player.getItemPrototype(element.name)
+        local localised_name = element.name
+        if item ~= nil then
+            localised_name = item.localised_name
+        end
+        return {"helmod_orbit.sent", localised_name}
+    end
     local localisedName = element.name
     if element.type ~= nil then
         if element.type == "recipe" or element.type == "recipe-burnt" then

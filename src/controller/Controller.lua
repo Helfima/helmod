@@ -34,6 +34,7 @@ require "edition.PreferenceEdition"
 require "selector.EntitySelector"
 require "selector.RecipeSelector"
 require "selector.TechnologySelector"
+require "selector.OrbitSelector"
 require "selector.ItemSelector"
 require "selector.FluidSelector"
 require "selector.TileSelector"
@@ -98,6 +99,7 @@ function Controller:prepare()
   table.insert(forms, EntitySelector("HMEntitySelector"))
   table.insert(forms, RecipeSelector("HMRecipeSelector"))
   table.insert(forms, TechnologySelector("HMTechnologySelector"))
+  table.insert(forms, OrbitSelector("HMOrbitSelector"))
   table.insert(forms, ItemSelector("HMItemSelector"))
   table.insert(forms, FluidSelector("HMFluidSelector"))
   table.insert(forms, TileSelector("HMTileSelector"))
@@ -136,6 +138,7 @@ function Controller:on_init()
   table.insert(forms, EntitySelector("HMEntitySelector"))
   table.insert(forms, RecipeSelector("HMRecipeSelector"))
   table.insert(forms, TechnologySelector("HMTechnologySelector"))
+  table.insert(forms, OrbitSelector("HMOrbitSelector"))
   table.insert(forms, ItemSelector("HMItemSelector"))
   table.insert(forms, FluidSelector("HMFluidSelector"))
   table.insert(forms, TileSelector("HMTileSelector"))

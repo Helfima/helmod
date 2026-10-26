@@ -56,6 +56,7 @@ defines.mod.recipes.resource = {name = "resource", category="helmod-mining"}
 defines.mod.recipes.fluid = {name = "fluid", category="helmod-pumping"}
 defines.mod.recipes.boiler = {name = "boiler"}
 defines.mod.recipes.technology = {name = "technology", category="helmod-research"}
+defines.mod.recipes.orbit = {name = "orbit", category="helmod-orbit"}
 defines.mod.recipes.rocket = {name = "rocket", category="helmod-rocket"}
 defines.mod.recipes.agricultural = {name = "agricultural", category="helmod-farming"}
 defines.mod.recipes.spoiling = {name = "spoiling"}

@@ -1,3 +1,4 @@
+local Orbit = require "model.Orbit"
 require "math.Matrix"
 require "math.SolverMatrix"
 require "math.SolverMatrixAlgebra"
@@ -849,7 +850,11 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
         quality = effect_receiver.base_effect["quality"] or 0
     }
 
-    local recipe_productivity = Player.getRecipeProductivityBonus(recipe.name)
+    local productivity_recipe = recipe.name
+    if recipe.type == "orbit" and factory_prototype:native() ~= nil and factory_prototype:native().fixed_recipe ~= nil then
+        productivity_recipe = factory_prototype:native().fixed_recipe.name
+    end
+    local recipe_productivity = Player.getRecipeProductivityBonus(productivity_recipe)
     factory.effects.productivity = factory.effects.productivity + recipe_productivity
 
     if parameters ~= nil then
@@ -937,7 +942,7 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
         factory.effects.productivity = 0
         factory.cap.productivity = bit32.bor(factory.cap.productivity, ModelCompute.cap_reason.productivity.module_low)
     end
-    if recipe.type == "recipe" then
+    if recipe.type == "recipe" or recipe.type == "orbit" then
         local maximum_productivity = recipe_prototype:getMaximumProductivity()
         if factory.effects.productivity > maximum_productivity then
             factory.effects.productivity = maximum_productivity
@@ -989,6 +994,13 @@ function ModelCompute.computeFactory(recipe)
     --     recipe.factory.speed_total = recipe.factory.speed_total * speed_penalty
     -- end
     recipe.factory.speed = recipe.factory.speed_total
+    if recipe.type == "orbit" then
+        recipe.orbit = nil
+        if recipe_prototype:native() ~= nil then
+            recipe.orbit = Orbit.details(recipe)
+            recipe.time = recipe.orbit.cycle_time / recipe.orbit.capacity * recipe.factory.speed
+        end
+    end
 
     ---effet consumption
     local energy_type = factory_prototype:getEnergyType()
