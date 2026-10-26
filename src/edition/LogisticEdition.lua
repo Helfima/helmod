@@ -57,7 +57,12 @@ function LogisticEdition:updateItemsLogistic(event)
 			local cell_stack_bonus = GuiElement.add(container_panel, GuiFlowH())
 			cell_stack_bonus.style.horizontal_spacing = 5
 
-			local items = {0,1,2,3}
+			local items = {}
+			local limit_stack = (Player.getBeltStackSizeBonus() or 0)
+			limit_stack = math.max(limit_stack, 3)
+			for i = 0, limit_stack, 1 do
+				table.insert(items, i)
+			end
 			local default_belt_stack_size_bonus = User.getBeltStackSizeBonus()
 			local button = GuiElement.add(cell_stack_bonus, GuiDropDown(self.classname, "belt-stack-size-bonus"):items(items, default_belt_stack_size_bonus))
 			button.style.width = 64
