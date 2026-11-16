@@ -120,7 +120,7 @@ function GuiElement.getSprite(type, name, format)
     sprite = string.format("helmod-%s", type)
   elseif type ~= nil and name ~= nil then
     if type == "resource" then type = "entity" end
-    if type == "rocket" then type = "item" end
+    if type == "rocket" or type == "orbit" then type = "item" end
     if type == "signal" or type == "virtual" then type = "virtual-signal" end
     if Player.is_valid_sprite_path(string.format("%s/%s", type, name)) then
       sprite = string.format(format, type, name)
@@ -156,7 +156,7 @@ end
 function GuiElement.getSpriteWithQuality(type, name, quality)
   local sprite = ""
   if type == "resource" then type = "entity" end
-  if type == "rocket" then type = "item" end
+  if type == "rocket" or type == "orbit" then type = "item" end
   if Player.is_valid_sprite_path(string.format("%s/%s", type, name)) then
     if quality == nil then
       sprite = string.format("[%s=%s]", type, name)
@@ -604,6 +604,9 @@ function GuiElement.infoRecipe(parent, element)
   if element.type == "recipe-burnt" then
     sprite_name = GuiElement.getSprite(defines.sprite_info.burnt)
     tooltip = {"tooltip.burnt-recipe"}
+  elseif element.type == "orbit" then
+    sprite_name = GuiElement.getSprite(defines.sprite_info.rocket)
+    tooltip = {"helmod_orbit.add"}
   elseif element.type == "rocket" then
     sprite_name = GuiElement.getSprite(defines.sprite_info.rocket)
     tooltip = {"tooltip.rocket-recipe"}

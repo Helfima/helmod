@@ -1,3 +1,4 @@
+local Orbit = require "model.Orbit"
 -------------------------------------------------------------------------------
 ---Class to build production panel
 ---@class ProductionPanel : FormModel
@@ -357,6 +358,9 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
 	group_selector.style.horizontal_spacing = button_spacing
 	local block_id = block.id
 	GuiElement.add(group_selector, GuiButton("HMRecipeSelector", "OPEN", model.id, block_id):sprite("menu", defines.sprites.script.black, defines.sprites.script.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-recipe" }))
+	if next(Orbit.machines()) ~= nil then
+		GuiElement.add(group_selector, GuiButton("HMOrbitSelector", "OPEN", model.id, block_id):sprite("menu", defines.sprites.rocket.blue):style("helmod_button_menu_actived_green"):tooltip({"helmod_orbit.add"}))
+	end
 	GuiElement.add(group_selector, GuiButton("HMTechnologySelector", "OPEN", model.id, block_id):sprite("menu", defines.sprites.education.black, defines.sprites.education.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-technology" }))
 	GuiElement.add(group_selector, GuiButton("HMRecipeCustomization", "OPEN", model.id, block_id):sprite("menu", defines.sprites.create.black, defines.sprites.create.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-customized-recipe" }))
 

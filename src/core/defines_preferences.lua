@@ -193,6 +193,7 @@ defines.constant.preferences = {
       HMEntitySelector = true,
       HMRecipeSelector = true,
       HMTechnologySelector = true,
+      HMOrbitSelector = true,
       HMItemSelector = true,
       HMFluidSelector = true
     }
@@ -213,6 +214,7 @@ defines.constant.preferences = {
       HMEntitySelector = true,
       HMRecipeSelector = true,
       HMTechnologySelector = true,
+      HMOrbitSelector = true,
       HMItemSelector = true,
       HMFluidSelector = true
     }
@@ -233,6 +235,7 @@ defines.constant.preferences = {
       HMEntitySelector = true,
       HMRecipeSelector = true,
       HMTechnologySelector = true,
+      HMOrbitSelector = true,
       HMItemSelector = true,
       HMFluidSelector = true
     }
