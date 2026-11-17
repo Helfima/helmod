@@ -259,9 +259,11 @@ end
 ---Add icon on button
 ---@param button LuaGuiElement
 ---@param sprite_name string
-function GuiCell:add_icon_button(button, sprite_name)
+---@param mask_name nil | string
+---@param left_margin nil | number
+function GuiCell:add_icon_button(button, sprite_name, mask_name, left_margin)
     if sprite_name == nil then return end
-    local mask_name = "mask_infos"
+    local mask_name = mask_name or "mask_infos"
     local mask_frame = button[mask_name]
     if mask_frame == nil then
         mask_frame = GuiElement.add(button, GuiFlowH(mask_name))
@@ -272,6 +274,9 @@ function GuiCell:add_icon_button(button, sprite_name)
     sprite.style.height = defines.sprite_size
     sprite.style.stretch_image_to_widget_size = true
     sprite.ignored_by_interaction = true
+    if left_margin ~= nil then
+        sprite.style.left_margin = left_margin
+    end
 end
 
 -------------------------------------------------------------------------------
@@ -279,17 +284,18 @@ end
 ---@param button LuaGuiElement
 function GuiCell:add_icon_contraint(button)
     if self.m_contraint_icon == nil then return end
-    local sprite_name = nil
     if self.m_contraint_icon == "linked" then
-        sprite_name = GuiElement.getSprite(defines.sprite_info.linked)
+        local sprite_name = GuiElement.getSprite(defines.sprite_info.linked)
+        self:add_icon_button(button, sprite_name, "mask_contrain", 10)
     end
     if self.m_contraint_icon == "master" then
-        sprite_name = GuiElement.getSprite(defines.sprite_info.master)
+        local sprite_name = GuiElement.getSprite(defines.sprite_info.master)
+        self:add_icon_button(button, sprite_name, "mask_contrain", 10)
     end
     if self.m_contraint_icon == "exclude" then
-        sprite_name = GuiElement.getSprite(defines.sprite_info.exclude)
+        local sprite_name = GuiElement.getSprite(defines.sprite_info.exclude)
+        self:add_icon_button(button, sprite_name, "mask_contrain", 10)
     end
-    self:add_icon_button(button, sprite_name)
 end
 
 -------------------------------------------------------------------------------
@@ -298,7 +304,7 @@ end
 function GuiCell:add_icon_input(button)
     if self.m_has_input ~= true then return end
     local sprite_name = GuiElement.getSprite(defines.sprites.asterisk.red)
-    self:add_icon_button(button, sprite_name)
+    self:add_icon_button(button, sprite_name, "mask_asterisk", 20)
 end
 
 -------------------------------------------------------------------------------
@@ -307,7 +313,7 @@ end
 function GuiCell:add_icon_pivot(button)
     if self.m_is_pivot ~= true then return end
     local sprite_name = GuiElement.getSprite(defines.sprites.pick_cursor.red)
-    self:add_icon_button(button, sprite_name)
+    self:add_icon_button(button, sprite_name, "mask_pivot", 20)
 end
 
 -------------------------------------------------------------------------------
@@ -1258,6 +1264,7 @@ function GuiCellElement:create(parent)
     GuiElement.infoTemperature(row1, element)
 
     if element.burnt then self:add_icon_info(button, "burnt") end
+    if element.type == "orbit" then self:add_icon_info(button, "rocket") end
     self:add_icon_info(button)
     self:add_icon_pivot(button)
     self:add_icon_contraint(button)
@@ -1393,6 +1400,7 @@ function GuiCellElementM:create(parent)
             element.quality or "normal"):index(button_index):caption(button_caption):tooltip(tooltip))
     GuiElement.infoTemperature(row1, element)
 
+    if element.type == "orbit" then self:add_icon_info(button, "rocket") end
     self:add_icon_info(button)
     self:add_icon_contraint(button)
     self:add_icon_input(button)

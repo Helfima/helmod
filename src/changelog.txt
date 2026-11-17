@@ -1,8 +1,12 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.3.7
-Date: 2026-10-26
+Date: 2026-11-17
+  Features:
+    - Added otbit logitic recipes (contributor Szer)
   Changes:
     - Changed limitation BeltStackSizeBonus in LogisticEdition
+  Bugfixes:
+    - Fix contraints and pivot display, only valid for the computing by element
 ---------------------------------------------------------------------------------------------------
 Version: 2.3.6
 Date: 2026-10-15

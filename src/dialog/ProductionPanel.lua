@@ -359,7 +359,7 @@ function ProductionPanel:updateSubMenuLeftPanel(model, block)
 	local block_id = block.id
 	GuiElement.add(group_selector, GuiButton("HMRecipeSelector", "OPEN", model.id, block_id):sprite("menu", defines.sprites.script.black, defines.sprites.script.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-recipe" }))
 	if next(Orbit.machines()) ~= nil then
-		GuiElement.add(group_selector, GuiButton("HMOrbitSelector", "OPEN", model.id, block_id):sprite("menu", defines.sprites.rocket.blue):style("helmod_button_menu_actived_green"):tooltip({"helmod_orbit.add"}))
+		GuiElement.add(group_selector, GuiButton("HMOrbitSelector", "OPEN", model.id, block_id):sprite("menu", defines.sprites.rocket_orbit.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_orbit.add"}))
 	end
 	GuiElement.add(group_selector, GuiButton("HMTechnologySelector", "OPEN", model.id, block_id):sprite("menu", defines.sprites.education.black, defines.sprites.education.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-technology" }))
 	GuiElement.add(group_selector, GuiButton("HMRecipeCustomization", "OPEN", model.id, block_id):sprite("menu", defines.sprites.create.black, defines.sprites.create.black):style("helmod_button_menu_actived_green"):tooltip({"helmod_result-panel.add-button-customized-recipe" }))
@@ -1357,23 +1357,25 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				product.count_deep = product_prototype:countDeepProduct(recipe)
 				
 				product.contraint_type = nil
-				if block.by_product ~= false and recipe.contraints ~= nil and recipe.contraints[product_key] ~= nil then
+				if recipe.contraints ~= nil and recipe.contraints[product_key] ~= nil then
 					product.contraint_type = recipe.contraints[product_key].type
 				end
 				
 				product.control_info = "contraint"
-				if not (block.solver ~= true and block.by_product ~= false) then
-					product.control_info = nil
-				end
 				
 				product.is_pivot = false
-				if recipe.pivot ~= nil and not(block.by_product == false) then
+				if recipe.pivot ~= nil then
 					local pivot = recipe.pivot
 					if product_prototype:match(pivot) then
 						product.is_pivot = true
 					end
 				end
 
+				if block.solver == true or block.by_product == false or block.by_factory == true then
+					product.contraint_type = nil
+					product.control_info = nil
+					product.is_pivot = false
+				end
 				table.insert(all_products, product)
 				max_count = math.max(max_count, product.count)
 			end
@@ -1436,21 +1438,24 @@ function ProductionPanel:addTableRowRecipe(gui_table, model, block, recipe)
 				end
 				
 				ingredient.contraint_type = nil
-				if block.by_product ~= false and recipe.contraints ~= nil and recipe.contraints[ingredient_key] ~= nil then
+				if recipe.contraints ~= nil and recipe.contraints[ingredient_key] ~= nil then
 					ingredient.contraint_type = recipe.contraints[ingredient_key].type
 				end
 
 				ingredient.control_info = "contraint"
-				if not (block.solver ~= true and block.by_product == false) then
-					ingredient.control_info = nil
-				end
 
 				ingredient.is_pivot = false
-				if recipe.pivot ~= nil and block.by_product == false then
+				if recipe.pivot ~= nil then
 					local pivot = recipe.pivot
 					if ingredient_prototype:match(pivot) then
 						ingredient.is_pivot = true
 					end
+				end
+
+				if block.solver == true or not(block.by_product == false) or block.by_factory == true then
+					ingredient.contraint_type = nil
+					ingredient.control_info = nil
+					ingredient.is_pivot = false
 				end
 
 				table.insert(all_ingredients, ingredient)
@@ -1599,7 +1604,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						end
 
 						product.contraint_type = nil
-						if parent.by_product ~= false and block.contraints ~= nil and block.contraints[product.name] ~= nil then
+						if block.contraints ~= nil and block.contraints[product.name] ~= nil then
 							product.contraint_type = block.contraints[product.name].type
 						end
 						---color
@@ -1618,7 +1623,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						end
 
 						product.is_pivot = false
-						if parent.by_product ~= false and block.pivot ~= nil  then
+						if block.pivot ~= nil  then
 							local pivot = block.pivot
 							if product_prototype:match(pivot) then
 								product.is_pivot = true
@@ -1626,12 +1631,17 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						end
 						
 						product.control_info = "contraint"
-						if not (parent.solver ~= true and parent.by_product ~= false) then
+						if parent.solver == true or parent.by_product == false or parent.by_factory == true then
+							product.contraint_type = nil
 							product.control_info = nil
+							product.is_pivot = false
 						end
-
 						table.insert(all_products, product)
 						max_count = math.max(max_count, product.count)
+					else
+						if block.contraints ~= nil and block.contraints[lua_product.name] ~= nil then
+							block.contraints[lua_product.name] = nil
+						end
 					end
 				end
 
@@ -1709,7 +1719,7 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						end
 						
 						ingredient.is_pivot = false
-						if not(block_by_product) and block.pivot ~= nil  then
+						if block.pivot ~= nil  then
 							local pivot = block.pivot
 							if ingredient_prototype:match(pivot) then
 								ingredient.is_pivot = true
@@ -1717,8 +1727,11 @@ function ProductionPanel:addTableRowBlock(gui_table, model, parent, block)
 						end
 
 						ingredient.control_info = "contraint"
-						if not (parent.solver ~= true and parent.by_product == false) then
+						
+						if block.solver == true or not(block.by_product == false) or block.by_factory == true then
+							ingredient.contraint_type = nil
 							ingredient.control_info = nil
+							ingredient.is_pivot = false
 						end
 
 						table.insert(all_ingredients, ingredient)

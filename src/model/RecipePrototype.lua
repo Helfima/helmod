@@ -1032,7 +1032,7 @@ function RecipePrototype:getIcon()
         end
     elseif self.lua_type == defines.mod.recipes.resource.name then
         icon_type = "entity"
-    elseif self.lua_type == defines.mod.recipes.rocket.name or self.lua_type == "orbit" then
+    elseif self.lua_type == defines.mod.recipes.rocket.name or self.lua_type == defines.mod.recipes.orbit.name then
         icon_type = "item"
     elseif self.lua_type == defines.mod.recipes.energy.name then
         icon_type = "entity"

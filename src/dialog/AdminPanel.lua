@@ -179,6 +179,7 @@ function AdminPanel:updateConversion()
   
   local decoded_textbox = GuiElement.add(table_panel, GuiTextBox("decoded-text"))
   decoded_textbox.style.height = 600
+  decoded_textbox.style.width = 600
 
   local elements_panel = GuiElement.add(table_panel, GuiFlowV("elements"))
   GuiElement.add(elements_panel, GuiLabel("label-entities"):caption("Entities"))
