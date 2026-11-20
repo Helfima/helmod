@@ -188,6 +188,7 @@ end
 ---@param object table --prototype
 ---@return boolean
 function RecipePrototype.isCustomized(object)
+    if object == nil then return false end
     return object.name ~= nil and string.find(object.name, defines.mod.recipe_customized_prefix, 0, true)
 end
 
@@ -728,10 +729,9 @@ end
 function RecipePrototype:getRocketPenalty(factory)
     local factory_prototype = EntityPrototype(factory)
     local rocket_prototype = factory_prototype:native()
-    local recipe_part_name = rocket_prototype.fixed_recipe
-    local rocket_part_prototype = RecipePrototype(recipe_part_name):native()
+    local energy = RecipePrototype:getRocketRecipeEnergy(rocket_prototype.fixed_recipe)
     local factory_speed = factory.speed_total
-    local cycles_time = rocket_part_prototype.energy * rocket_prototype.rocket_parts_required / factory_speed
+    local cycles_time = energy * rocket_prototype.rocket_parts_required / factory_speed
     cycles_time = cycles_time / (1 + factory.effects.productivity)
     local total_time = defines.constant.rocket_deploy_delay + cycles_time 
     local factor = cycles_time / total_time
@@ -741,12 +741,18 @@ end
 function RecipePrototype:getRocketEnergy(factory)
     local factory_prototype = EntityPrototype(factory)
     local rocket_prototype = factory_prototype:native()
-    local recipe_part_name = rocket_prototype.fixed_recipe
-    local rocket_part_prototype = RecipePrototype(recipe_part_name):native()
-    local rocket_energy = rocket_part_prototype.energy * rocket_prototype.rocket_parts_required
+    local energy = RecipePrototype:getRocketRecipeEnergy(rocket_prototype.fixed_recipe)
+    local rocket_energy = energy * rocket_prototype.rocket_parts_required
     return rocket_energy
 end
-
+function RecipePrototype:getRocketRecipeEnergy(recipe)
+    local energy = 1
+    if recipe ~= nil then
+        local rocket_part_prototype = RecipePrototype(recipe):native()
+        energy = rocket_part_prototype.energy
+    end
+    return energy
+end
 -------------------------------------------------------------------------------
 ---Return ingredients array of Prototype
 ---@param factory table
@@ -781,11 +787,13 @@ function RecipePrototype:getIngredients(factory)
             if self.is_appended == nil then
                 local rocket_prototype = factory_prototype:native()
                 -- fixed_recipe is a recipe not the name
-                local rocket_part_prototype = rocket_prototype.fixed_recipe
-                local ingredients = rocket_part_prototype.ingredients
-                for _, ingredient in pairs(ingredients) do
-                    ingredient.amount = ingredient.amount * rocket_prototype.rocket_parts_required
-                    table.insert(raw_ingredients, ingredient)
+                if rocket_prototype.fixed_recipe then
+                    local rocket_part_prototype = rocket_prototype.fixed_recipe
+                    local ingredients = rocket_part_prototype.ingredients
+                    for _, ingredient in pairs(ingredients) do
+                        ingredient.amount = ingredient.amount * rocket_prototype.rocket_parts_required
+                        table.insert(raw_ingredients, ingredient)
+                    end
                 end
             end
             self.is_appended = true
