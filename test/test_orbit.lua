@@ -1,3 +1,4 @@
+local checkSelectableSilo = require "test_selectable_silo"
 local Orbit = require "model.Orbit"
 local function near(actual, expected, label)
     assert(math.abs(actual - expected) < 1e-8, label .. ": expected " .. expected .. ", got " .. tostring(actual))
@@ -129,5 +130,6 @@ script.on_init(function()
     local defaults=Model.newModel()
     local _,dr=ModelBuilder.addRecipeIntoProductionBlock(defaults,defaults.block_root,"transport-belt","orbit")
     assert(dr.factory.quality=="legendary","saved silo quality default")
+    checkSelectableSilo()
     log("ORBIT TESTS PASSED")
 end)

@@ -56,6 +56,7 @@ function ModelBuilder.addRecipeIntoProductionBlock(model, block, recipe_name, re
                     end
                     if is_match == true then
                         Model.setFactory(ModelRecipe, default_factory.name, default_factory.quality, default_factory.fuel, default_factory.fuel_quality)
+                        ModelRecipe.factory.rocket_part_recipe = default_factory.rocket_part_recipe
                         ModelBuilder.setFactoryModulePriority(ModelRecipe, default_factory.module_priority)
                     end
                 end
@@ -534,7 +535,13 @@ function ModelBuilder.setFactoryBlock(block, current_recipe)
                     local recipe_categories = prototype_recipe:getAllCategories()
                     local recipe_ingredient_count = prototype_recipe:getIngredientCount()
                     --- check ingredient limitation
-                    if factory_ingredient_count < recipe_ingredient_count then
+                    if recipe.type == "orbit" then
+                        if current_recipe.type == "orbit" and prototype_recipe:getAllowedMachines()[current_recipe.factory.name] ~= nil then
+                            Model.setFactory(recipe, current_recipe.factory.name, current_recipe.factory.quality, current_recipe.factory.fuel, current_recipe.factory.fuel_quality)
+                            recipe.factory.rocket_part_recipe = current_recipe.factory.rocket_part_recipe
+                            ModelBuilder.setFactoryModulePriority(recipe, current_recipe.factory.module_priority)
+                        end
+                    elseif factory_ingredient_count < recipe_ingredient_count then
                         -- Skip
                     elseif default_factory_mode ~= "category" or prototype_recipe:getCategory() == RecipePrototype(current_recipe):getCategory() then
                         local is_match = false
@@ -814,6 +821,7 @@ function ModelBuilder.copyFactory(factory)
     local new_factory = Model.newFactory(factory.name)
     new_factory.quality = factory.quality
     new_factory.limit = factory.limit
+    new_factory.rocket_part_recipe = factory.rocket_part_recipe
     new_factory.fuel = factory.fuel
     new_factory.fuel_quality = factory.fuel_quality
     new_factory.input = factory.input

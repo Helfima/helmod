@@ -44,6 +44,7 @@
 ---@field quality number
 
 ---@class FactoryData
+---@field rocket_part_recipe? string Selected construction recipe for a rocket silo
 ---@field class string
 ---@field name string
 ---@field type string

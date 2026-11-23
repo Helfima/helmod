@@ -140,6 +140,8 @@ function UnitTestPanel:onUpdate(event)
 end
 
 -------------------------------------------------------------------------------
+local Orbit = require "model.Orbit"
+local SiloRecipes = require "model.SiloRecipes"
 local RocketTiming = require "model.RocketTiming"
 function UnitTestPanel:updateOrbit()
     local orbit_tab = self:getOrbitTab()
@@ -147,23 +149,23 @@ function UnitTestPanel:updateOrbit()
     GuiElement.add(orbit_table, GuiLabel("is_valid"):caption("Valid"))
     GuiElement.add(orbit_table, GuiLabel("rocket-name"):caption("Name"))
     GuiElement.add(orbit_table, GuiLabel("rocket"):caption("Rocket"))
-    GuiElement.add(orbit_table, GuiLabel("recipe"):caption("Fixed recipe"))
+    GuiElement.add(orbit_table, GuiLabel("recipe"):caption({"helmod_orbit.part-recipe"}))
     GuiElement.add(orbit_table, GuiLabel("hidden"):caption("hidden"))
     GuiElement.add(orbit_table, GuiLabel("not-in-made-in"):caption("not-in-made-in"))
     GuiElement.add(orbit_table, GuiLabel("launch_to_space_platforms"):caption("launch_to_space_platforms"))
     GuiElement.add(orbit_table, GuiLabel("RocketTiming"):caption("RocketTiming"))
 
+    local machines = Orbit.machines()
     for name, silo in pairs(prototypes.get_entity_filtered{{filter="type", type="rocket-silo"}}) do
-        local valid = silo.hidden == false and silo.has_flag("not-in-made-in") == false
-            and silo.launch_to_space_platforms == true and silo.fixed_recipe ~= nil
-            and RocketTiming.getLaunchTicks(silo, "normal") ~= nil
+        local valid = machines[name] ~= nil
+        local part = SiloRecipes.resolve(silo)
         GuiElement.add(orbit_table, GuiLabel(self.classname, "valid", silo.name):caption(UnitTestPanel:formatValueEquals(valid, true)))
         GuiElement.add(orbit_table, GuiLabel(self.classname, "name", silo.name):caption(name))
         GuiElement.add(orbit_table, GuiButtonSelectSprite(self.classname, "rocket-select", silo.name):choose("entity", silo.name))
-        if silo.fixed_recipe == nil then
+        if part == nil then
             GuiElement.add(orbit_table, GuiLabel(self.classname, "recipe-select", silo.name):caption(UnitTestPanel:formatValueEquals("nil",true)))
         else
-            GuiElement.add(orbit_table, GuiButtonSelectSprite(self.classname, "recipe-select", silo.name):choose("recipe", silo.fixed_recipe.name))
+            GuiElement.add(orbit_table, GuiButtonSelectSprite(self.classname, "recipe-select", silo.name):choose("recipe", part.name))
         end
         GuiElement.add(orbit_table, GuiLabel(self.classname, "hidden", silo.name):caption(UnitTestPanel:formatValueEquals(silo.hidden, false)))
         GuiElement.add(orbit_table, GuiLabel(self.classname, "not-in-made-in", silo.name):caption(UnitTestPanel:formatValueEquals(silo.has_flag("not-in-made-in"),false)))

@@ -73,6 +73,13 @@ local success, message = xpcall(function()
         end
         Runner.write(work .. "/mods/mod-list.json", '{"mods":[' .. table.concat(mods, ",") .. ']}')
         local suites = {integration="test_orbit", ["base-only"]="test_orbit_base", timing="test_orbit_timing", ui="test_orbit_ui"}
+        if mode == "integration" or mode == "ui" then
+            local mod = work .. "/mods/helmod"
+            Runner.copy(root .. "/test/test_selectable_silo.lua", mod .. "/test_selectable_silo.lua")
+            Runner.copy(root .. "/test/selectable-silo-prototypes.lua", mod .. "/selectable-silo-prototypes.lua")
+            local capture = mod .. "/data-final-fixes.lua"
+            Runner.write(capture, 'require "selectable-silo-prototypes"\n' .. Runner.read(capture))
+        end
         Runner.suite(root, work, suites[mode])
         if mode == "integration" or mode == "timing" then
             local fixture = "orbit-prototypes"

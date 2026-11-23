@@ -1,3 +1,4 @@
+local SiloRecipes = require "model.SiloRecipes"
 local Orbit = require "model.Orbit"
 require "math.Matrix"
 require "math.SolverMatrix"
@@ -851,8 +852,9 @@ function ModelCompute.computeModuleEffects(recipe, parameters)
     }
 
     local productivity_recipe = recipe.name
-    if recipe.type == "orbit" and factory_prototype:native() ~= nil and factory_prototype:native().fixed_recipe ~= nil then
-        productivity_recipe = factory_prototype:native().fixed_recipe.name
+    if recipe.type == "orbit" then
+        local part = SiloRecipes.resolve(factory_prototype:native(), factory.rocket_part_recipe)
+        if part ~= nil then productivity_recipe = part.name end
     end
     local recipe_productivity = Player.getRecipeProductivityBonus(productivity_recipe)
     factory.effects.productivity = factory.effects.productivity + recipe_productivity
@@ -998,7 +1000,9 @@ function ModelCompute.computeFactory(recipe)
         recipe.orbit = nil
         if recipe_prototype:native() ~= nil then
             recipe.orbit = Orbit.details(recipe)
-            recipe.time = recipe.orbit.cycle_time / recipe.orbit.capacity * recipe.factory.speed
+            if recipe.orbit ~= nil then
+                recipe.time = recipe.orbit.cycle_time / recipe.orbit.capacity * recipe.factory.speed
+            end
         end
     end
 
