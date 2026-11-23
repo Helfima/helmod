@@ -98,6 +98,13 @@ function UnitTestPanel:getRemoteAPITab()
 end
 
 -------------------------------------------------------------------------------
+---Get or create remote API tab panel
+---@return LuaGuiElement
+function UnitTestPanel:getOrbitTab()
+    return self:getTab("orbit-tab-panel", { "helmod_orbit.title" })
+end
+
+-------------------------------------------------------------------------------
 ---On event
 ---@param event LuaEvent
 function UnitTestPanel:onEvent(event)
@@ -129,10 +136,42 @@ function UnitTestPanel:onUpdate(event)
     self:updateSprite()
     self:updateModules()
     self:updateRemoteAPI()
+    self:updateOrbit()
 end
 
 -------------------------------------------------------------------------------
----Update menu
+local RocketTiming = require "model.RocketTiming"
+function UnitTestPanel:updateOrbit()
+    local orbit_tab = self:getOrbitTab()
+    local orbit_table = GuiElement.add(orbit_tab, GuiTable("rockets"):column(8):style("helmod_table_border"))
+    GuiElement.add(orbit_table, GuiLabel("is_valid"):caption("Valid"))
+    GuiElement.add(orbit_table, GuiLabel("rocket-name"):caption("Name"))
+    GuiElement.add(orbit_table, GuiLabel("rocket"):caption("Rocket"))
+    GuiElement.add(orbit_table, GuiLabel("recipe"):caption("Fixed recipe"))
+    GuiElement.add(orbit_table, GuiLabel("hidden"):caption("hidden"))
+    GuiElement.add(orbit_table, GuiLabel("not-in-made-in"):caption("not-in-made-in"))
+    GuiElement.add(orbit_table, GuiLabel("launch_to_space_platforms"):caption("launch_to_space_platforms"))
+    GuiElement.add(orbit_table, GuiLabel("RocketTiming"):caption("RocketTiming"))
+
+    for name, silo in pairs(prototypes.get_entity_filtered{{filter="type", type="rocket-silo"}}) do
+        local valid = silo.hidden == false and silo.has_flag("not-in-made-in") == false
+            and silo.launch_to_space_platforms == true and silo.fixed_recipe ~= nil
+            and RocketTiming.getLaunchTicks(silo, "normal") ~= nil
+        GuiElement.add(orbit_table, GuiLabel(self.classname, "valid", silo.name):caption(UnitTestPanel:formatValueEquals(valid, true)))
+        GuiElement.add(orbit_table, GuiLabel(self.classname, "name", silo.name):caption(name))
+        GuiElement.add(orbit_table, GuiButtonSelectSprite(self.classname, "rocket-select", silo.name):choose("entity", silo.name))
+        if silo.fixed_recipe == nil then
+            GuiElement.add(orbit_table, GuiLabel(self.classname, "recipe-select", silo.name):caption(UnitTestPanel:formatValueEquals("nil",true)))
+        else
+            GuiElement.add(orbit_table, GuiButtonSelectSprite(self.classname, "recipe-select", silo.name):choose("recipe", silo.fixed_recipe.name))
+        end
+        GuiElement.add(orbit_table, GuiLabel(self.classname, "hidden", silo.name):caption(UnitTestPanel:formatValueEquals(silo.hidden, false)))
+        GuiElement.add(orbit_table, GuiLabel(self.classname, "not-in-made-in", silo.name):caption(UnitTestPanel:formatValueEquals(silo.has_flag("not-in-made-in"),false)))
+        GuiElement.add(orbit_table, GuiLabel(self.classname, "launch_to_space_platforms", silo.name):caption(UnitTestPanel:formatValueEquals(silo.launch_to_space_platforms,true)))
+        GuiElement.add(orbit_table, GuiLabel(self.classname, "RocketTiming", silo.name):caption(UnitTestPanel:formatValueEquals(RocketTiming.getLaunchTicks(silo, "normal") ~= nil,true)))
+    end
+end
+
 function UnitTestPanel:updateRemoteAPI()
     local remote_api_tab = self:getRemoteAPITab()
     local data = self:dataRemoteAPI()
@@ -441,7 +480,9 @@ function UnitTestPanel:updateModules()
         end
     end
 end
-
+function UnitTestPanel:formatValueEquals(current_value, target_value)
+    return {"",UnitTestPanel:valueEquals(current_value, target_value),current_value,defines.mod.tags.color.close}
+end
 function UnitTestPanel:valueEquals(current_value, target_value, attribute)
     if current_value == target_value then
         local tag_color = defines.mod.tags.color.green_light

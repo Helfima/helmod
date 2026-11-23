@@ -1,8 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.4.1
+Date: 2026-11-20
+  Changes:
+    - Added unitest for "Send items to orbit"
+---------------------------------------------------------------------------------------------------
 Version: 2.4.0
 Date: 2026-11-20
   Features:
-    - Added otbit logitic recipes
+    - Added orbit logitic recipes
   Changes:
     - Changed limitation BeltStackSizeBonus in LogisticEdition
     - Changed conversion tab of admin panel to replace string
