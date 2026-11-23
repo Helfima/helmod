@@ -618,6 +618,7 @@ function Model.setFactory(recipe, factory_name, factory_quality, factory_fuel, f
           table.insert(recipe.beacons, Model.newBeacon())
         end
       end
+      if recipe.factory.name ~= factory_name then recipe.factory.rocket_part_recipe = nil end
       recipe.factory.name = factory_name
       recipe.factory.quality = factory_quality
       recipe.factory.fuel = factory_fuel
@@ -752,6 +753,7 @@ function Model.compareFactory(factory1, factory2, with_priority)
   if factory1 == nil or factory2 == nil then return false end
   if factory1.name ~= factory2.name then return false end
   if factory1.name == factory2.name and factory1.quality ~= factory2.quality then return false end
+  if factory1.rocket_part_recipe ~= factory2.rocket_part_recipe then return false end
   if factory1.fuel ~= factory2.fuel then return false end
   if factory1.fuel_quality ~= factory2.fuel_quality then return false end
   if with_priority and Model.compareModulePriorities(factory1.module_priority, factory2.module_priority) == false then return false end

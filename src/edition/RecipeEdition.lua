@@ -1,3 +1,4 @@
+local SiloRecipes = require "model.SiloRecipes"
 -------------------------------------------------------------------------------
 ---Class to build recipe edition dialog
 ---@class RecipeEdition : FormModel
@@ -289,6 +290,20 @@ function RecipeEdition:onEvent(event)
             ModelBuilder.updateRecipeSpoilage(recipe, spoilage_factor)
             ModelCompute.update(model)
             self:updateObjectInfo(event)
+            Controller:send("on_gui_recipe_update", event)
+        end
+
+        if event.action == "silo-part-recipe-select" then
+            if event.item1 ~= model.id or event.item2 ~= block.id or event.item3 ~= recipe.id
+                or recipe.type ~= "orbit" or event.item4 ~= recipe.factory.name then return end
+            local silo = prototypes.entity[recipe.factory.name]
+            local name = event.element.tags.recipes[event.element.selected_index]
+            if silo == nil or silo.fixed_recipe ~= nil or SiloRecipes.options(silo).byName[name] == nil then return end
+            recipe.factory.rocket_part_recipe = name
+            ModelBuilder.applyFactoryModulePriority(recipe)
+            ModelBuilder.applyBeaconModulePriority(recipe)
+            ModelCompute.update(model)
+            self:update(event)
             Controller:send("on_gui_recipe_update", event)
         end
 
@@ -785,6 +800,24 @@ function RecipeEdition:updateFactoryInfo(event)
 
         GuiElement.add(input_panel, GuiLabel("label-module-slots"):caption({ "helmod_label.module-slots" }))
         GuiElement.add(input_panel, GuiLabel("module-slots"):caption(factory_prototype:getModuleInventorySize()))
+
+        if recipe.type == defines.mod.recipes.orbit.name and factory_prototype:getType() == "rocket-silo" then
+            local silo = factory_prototype:native()
+            if not silo.fixed_recipe then
+                local part = SiloRecipes.resolve(silo, factory.rocket_part_recipe)
+                if part then
+                    local items, names, selected = {}, {}, nil
+                    for index, option in ipairs(SiloRecipes.options(silo).recipes) do
+                        items[index] = {"", "[recipe=" .. option.name .. "] ", option.localised_name}
+                        names[index] = option.name
+                        if option.name == part.name then selected = items[index] end
+                    end
+                    GuiElement.add(input_panel, GuiLabel("label-part-recipe"):caption({"helmod_orbit.part-recipe"}))
+                    local dropdown = GuiElement.add(input_panel, GuiDropDown(self.classname, "silo-part-recipe-select", model.id, block.id, recipe.id, silo.name):items(items, selected))
+                    dropdown.tags = {recipes=names}
+                end
+            end
+        end
 
         ---neighbour
         if factory_prototype:getType() == "reactor" then
