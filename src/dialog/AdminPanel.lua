@@ -656,6 +656,11 @@ function AdminPanel:updateGlobal()
     local root_branch = GuiElement.add(scroll_panel, GuiFlowV())
     root_branch.style.vertically_stretchable = false
     self:createTree(root_branch, "storage...", storage, true)
+    local mod_data = {}
+    for key, value in pairs(prototypes.mod_data) do
+        mod_data[key] = table.deepcopy(value.data)
+    end
+    self:createTree(root_branch, "mod_data...", mod_data, true)
 end
 
 -------------------------------------------------------------------------------

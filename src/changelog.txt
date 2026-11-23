@@ -1,8 +1,11 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.1
-Date: 2026-11-20
+Date: 2026-11-23
   Changes:
     - Added unitest for "Send items to orbit"
+    - Added tree of mod_data in global tab of admin panel
+  Bugfixes:
+    - Fixed orbit logitic recipes, now accept rocket without fixed recipe
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.0
 Date: 2026-11-20
